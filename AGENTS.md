@@ -14,3 +14,13 @@ Objective: build the highest-quality **playable browser-based 3D sci-fi explorat
 10. Do not modify CI/security workflows, credentials, billing, or repository access policy during a gameplay task.
 11. Avoid speculative polish until the requested behavior works and has been exercised.
 12. Summarize changes, validation, caveats, and next prioritized step.
+
+## Automated GPT + Claude Code collaboration
+
+The workflow `.github/workflows/ai-collaboration.yml` (run by `scripts/ai_bridge.py`) connects two agents through the APIs:
+
+- **GPT** (OpenAI API) is the planner and reviewer: one plan, one review per run.
+- **Claude Code** (Anthropic API, headless CLI) is the implementer: one implementation pass, plus one correction pass only if GPT's review says `VERDICT: CHANGES_REQUESTED`.
+- The agents never push, merge, or open PRs themselves. The workflow commits their work to an `ai/run-<id>` branch and opens a pull request for a human.
+- `.github/`, `scripts/ai_bridge.py`, `AGENTS.md`, and `agent-runs/` are off-limits to the agents; edits there are reverted automatically.
+- Every run's full exchange is saved in `agent-runs/<date>-run-<id>/transcript.md` (plus `run.json`).
