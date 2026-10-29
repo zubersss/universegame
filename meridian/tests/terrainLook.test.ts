@@ -18,7 +18,10 @@ describe('terrain look data', () => {
   });
 
   it('a body without its own look falls back to the defaults, and its own fields win', () => {
-    const plain = { ...BODIES.ilex, id: 'unknown' as never };
+    // Strip `look`: every real body defines one now, so copying Ilex would
+    // carry its values and defeat the fallback this test is about.
+    const { look: _ignored, ...rest } = BODIES.ilex;
+    const plain = { ...rest, id: 'unknown' as never };
     expect(terrainLook(plain)).toEqual(DEFAULT_LOOK);
     const own = { ...plain, look: { strata: 0.9, sediment: 0x123456 } };
     const look = terrainLook(own);

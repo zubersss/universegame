@@ -83,6 +83,11 @@ On a machine with a hardware GPU: run `npm run build && npm run preview`, play a
 Each section below is edited only by its owner. Director: integration log, decisions, interfaces.
 
 ## Studio: Director — decisions and integration log
+- Merge 3 (2026-10-29): all five branches merged again after the usage-limit pause — GAUGE `f2d91e6` (handoff + travel-gate record), ECHO `5c6e844` (handoff to BIOME), ATLAS `a632d61` (Orrin palette, LUMEN look values), BIOME `00da52c` (journal per-world progress, three appended props, the Vesper dune sledge), LUMEN `ad21feb` (baseline photos at Low, Balanced, High). Director verification: typecheck clean; **173/173 unit tests in 14 files**; both builds; `dist/` free of test-hook strings; quick journey 1.1 min.
+- Integration caught one cross-session break: `tests/terrainLook.test.ts` built its "body with no look" fixture by spreading `BODIES.ilex`, which passed on LUMEN's branch (no body had `look` then) and failed once ATLAS filled in every body's `look`. The game was right; the fixture was stale, so it now strips `look` before spreading.
+- Director fix (styles.css, now a Director-owned file): the fifth navigation row was clipped at 640×360 with five bodies. The compact media block now tightens sheet padding, heading margin, tab spacing and row padding. Verified in the browser: all five rows and the sheet are inside the 360 px viewport (`evidence/studio/director/nav-panel-640.png`).
+- GAUGE's core travel gate (recorded before stand-down, build of `9ef2749`, Low): PASS in 31.3 min — 9 legs, 165–194 s simulated each; 19 cruise engagements, exits 9 approach / 1 brake / 9 toggle / 0 safety; 0 safety stops; identical return-visit fingerprints; resources flat (geometries 194–236, colliders 9–17, cache 20–28 MB, heap 33–54 MB); 0 console errors. This covers Ilex/Vesper/Cairn only; the five-body extended gate has not been run.
+- ECHO's soak (recorded before stand-down, M1 audio code): 19.6 min simulated, flat — 36 persistent nodes, 16,079 voice nodes created / 16,076 disconnected, 0 stolen, heap 13–29 MB with no trend, 0 console errors. The planned longer soak on the M2 audio build was **not completed** (stopped at 38 s).
 - Decision D-004 (2026-10-29, owner's instruction): the studio is cut from five specialist sessions to **three** to reduce concurrent usage. ATLAS (worlds and travel), LUMEN (graphics) and BIOME (life, discovery **and sound**) continue. ECHO stands down and hands `src/audio/**` to BIOME. GAUGE stands down and hands QA, performance and release to the Director. Both wrote a handoff block into their PROGRESS sections before stopping. Revised ownership: Director owns the hot shared files (`Game.ts`, `boot.ts`, `config.ts`, `settings.ts`, `index.html`, `src/ui/*`), plus `e2e/**`, `src/debug/**`, `playwright.config.ts` and `BUGS.md`; specialists send a REQUEST with an exact snippet instead of a CLAIM.
 - Cause of the pause: all five sessions' turns failed on the account's 5-hour usage limit (16:20–18:08 UTC), which is what prompted D-004.
 - Merge 2 (`550ced5`, 2026-10-29): every studio branch merged into integration — ATLAS `824b14a`, GAUGE `73ef0d7`, ECHO `7d138c4`, BIOME `3f62a35`, LUMEN `bf3b95f`. Director verification on the merged tree: typecheck clean; **168/168 unit tests in 14 files**; `npm run build` and `build:test` both succeed; `dist/` free of test-hook strings; quick journey passed (1.1 min); saves specs 4/4. Conflicts resolved: PROGRESS.md interface sections (kept every entry once); `Journal.ts`/`Expedition.ts` now use `src/fauna/catalog.ts` (`catalogFor`/`catalogById`/`CATALOG`) instead of `speciesFor`/`speciesById`, keeping ATLAS's core/extended imports.
@@ -123,6 +128,14 @@ _Not started._
 - **N-body plumbing:** navigation rows and keys 1…N (`Digit1–9` handler), nav status "Extended survey" for the new worlds, survey tab grouped core / Extended Survey, journal sections for every body ("No specimens catalogued yet" until BIOME adds species), inventory, objective, T prompt, title-menu save summary, sample looks (`MissionObjects` data). Proxies, handoff, cruise, gravity, autopilot already iterate `BODY_IDS`.
 - **Spec changes (honest):** `tests/expedition.test.ts` "transmits once, only after all three relays" iterated `BODY_IDS`; it now activates the extended relays first (they must not enable the core transmission) and then the core ones; after the core transmission the objective is now the Extended Survey instead of "Survey transmitted". The save test fixture gained the two inventory keys and the extended flag.
 - **Tests:** new `tests/worlds.test.ts` (layout, separation, line clearance, cruise legs, honest height bounds and finite data over 20,000 directions, both biomes present, day-side walkable sites off seams, original seeds/heights/sites bit-identical to the three-body release); save tests for valid v2, v1 → v2, invalid and corrupt records, export/import across schemas, store rotation with schema-1 records; expedition tests for the Extended Survey.
+
+### M1 evidence (2026-10-29, this environment: headless Chromium, SwiftShader)
+- `npm run typecheck` clean; `npm test` 125/125 in 10 files (after merging `studio/integration` @ 21c2138); `npm run build` and `npm run build:test` succeed; `dist/` has no test-hook strings.
+- Browser journey (scratch spec, not committed; testhooks build of `b2d03ad`, Low, pointer lock stubbed, autopilot drives inputs only): Ilex → Orrin: leg 230 s simulated, landed on the site via the landing assist, slope 0.0°, cruise exit by approach; exit, walk to the relay, walk back, board. Orrin → Saro: leg 199 s, slope 0.0°, approach exit. Totals: 0 safety exits, 0 recoveries, 0 console errors; 16.6 min. Navigation panel lists 5 rows. Screenshots: `evidence/studio/atlas/{orrin,saro}-{approach,landed,relay}-{1280,640}.png`, `nav-panel-{1280,640}.png`.
+- GAUGE quick journey (`e2e/journey/quick.spec.ts`) on the current code: passed in 1.1 min.
+- `perf` hook, Ilex landed at start (one 10-frame sample, adaptive off, 1280×720; NOT the full profile route): Low 82 draw calls / 157k triangles / ≈65 MB GPU / 32 MB heap; Balanced 94 / 170k / ≈96 MB / 33 MB; High 91 / 164k / ≈96 MB / 38 MB; 5 of 5 proxies ready. All within A4. GAUGE's per-preset profile route is the authoritative check.
+- Seen in screenshots: Saro reads clearly (pink crust, turquoise pans from orbit, pale sky). Orrin's moss ground renders almost black (palette too dark; M2 with LUMEN). At 640×360 the fifth navigation row is clipped at the panel's bottom edge (styles.css fix claimed, pending).
+- `look` values from LUMEN set for all five bodies (the material reads them merged over its defaults; no visual change intended for the original three).
 
 ### Known limits / for other roles
 - Terrain material, audio and motes still pick per-body constants with `id === 'cairn' / 'vesper'` ternaries, so Orrin and Saro currently get Ilex's defaults there (LUMEN: `terrainMaterial.ts`, `Game.ts` mote colour; ECHO: `GameAudio.ts`). The title screen text in `index.html` still names three worlds (Director's file).
@@ -242,7 +255,82 @@ Budget plan (agreed values to confirm with GAUGE/LUMEN): ≤ 48 LOD0 + 160 LOD1 
 
 Tests (`tests/audio.test.ts`, mock AudioContext in `tests/audioMock.ts`): bus routing to the destination, layer/cue bus assignment, group volumes, cap never exceeded (200 voices → 32 active, 168 stolen, 0 dropped), stealing order (quietest, then oldest), steal fade (no hard cut), every voice node disconnected after a mixed burst, sweep fallback, 0 automation events on long-lived params across 20,000 varied frames, pause fade → suspend → resume, no voices while suspended, suit mode on/off, context failure, dispose, settings sanitization.
 
-Browser soak: running, results not yet recorded (not verified).
+Browser soak 1 (2026-10-29, scratch script driving the testhooks build of the M1 audio code (commit a42ea74, before the M2 additions), Low, 640×360, pointer lock stubbed, `setRenderEvery(60)`, inputs only via keys and the test autopilot): **1,178 s simulated (19.6 min; 21 min wall)**, just short of the 20-minute target, so a second, longer soak on the current build follows. Route: real Play click → Ilex on foot 7 min (29 walk loops with sprint, jumps, hold-F scans, a pause/resume every second loop) → flight 4 × 45 s at varied throttle/boost → autopilot travel to Cairn (cruise) → Cairn on foot 7 min (suit mode on). Sampled after every loop (`game.audio.stats()`, `meter()`, CDP `Performance.getMetrics`, `resources()`):
+
+| Segment | Sim (s) | Audio nodes live (persistent 36) | Voices active | Mix peak / RMS (linear) | JS heap (MB) |
+| --- | --- | --- | --- | --- | --- |
+| Ilex on foot | 10–430 | 36–41 | 0–2 | 0.028–0.049 / 0.010–0.018 | 12.9–28.2 |
+| Flight | 478–614 | 36–40 | 0–2 | 0.067–0.131 / 0.028–0.058 | 15.9–28.8 |
+| Cairn on foot (suit) | 762–1,178 | 36–47 | 0–4 | 0.003–0.044 / 0.001–0.016 | 13.3–25.0 |
+
+Totals: 6,127 voices, 16,079 voice nodes created and 16,076 disconnected (the 3 left belonged to the one voice still sounding at the last sample), 0 stolen, 0 dropped; the persistent node count never changed; heap oscillated with GC and did not trend up; 0 console errors. Peaks stay far below clipping (−18 dBFS at the loudest, in flight); the mix is deliberately quiet. Silence where expected: on Cairn the mix fell to RMS ≈ 0.002 between breaths and steps (no wind). Evidence: `evidence/studio/echo/soak1-cairn-1280.png`, `soak1-cairn-640.png` (end of the run, on foot on Cairn). Loudness in LUFS was not measured (no offline renderer here); the peak/RMS readings are the only level evidence.
+
+Browser checks on the current build: `e2e/journey/saves.spec.ts` "settings persist across a reload" (extended for the two sliders) passed in 15.8 s; `e2e/journey/quick.spec.ts` passed in 1.1 min; production `dist/` has none of the test-hook strings. Settings panel: `evidence/studio/echo/settings-1280.png`, `settings-640.png`, `settings-640-scrolled.png`. At 640×360 the panel scrolls (content 448 px in a 322 px sheet); it already scrolled before the two 34 px rows were added (≈380 px), and Back is reachable by scrolling.
+
+### Handoff (ECHO → BIOME), 2026-10-29
+Sound moves to BIOME. Everything below is on `studio/echo`.
+
+**Architecture.** `Mixer.ts` builds the graph once. Each of the six buses (ambience, ship, creatures, effects, ui, music) is three gains: `input`, then level × group volume, then a cue duck. They feed master (user volume), then a pause fade, a glue compressor (−14 dB, 3:1), a limiter (−2 dB, 20:1) and the destination. Long-lived layers are created once in `GameAudio.init()` (`keep()` registers them for `dispose()`): engine (2 saws, lowpass, hiss), wind, suit hush, buffeting and cruise drone. Every one-shot sound is a `VoicePool` voice: an envelope gain plus nodes registered with `pool.node()` and `pool.source()`.
+
+**Invariants (do not break):**
+- Never call `setTargetAtTime` or any ramp per frame (A8.1). Continuous layers glide by direct `.value` assignment in `update()`. Bus, master, pause and duck gains change only through `rampTo()` or `Mixer.duck()` on events; both cancel first, so a param holds at most a few events.
+- Voice cap 32. At the cap, the quietest voice (oldest on a tie) is stolen with a 15 ms fade. A voice in its attack counts as full level.
+- Every node of a voice is disconnected when its last source ends (`onended`). A 0.5 s sweep catches voices whose `onended` never fired.
+- Envelopes start and end at 1e-4 with a minimum 3 ms attack; the mix fades in on start (0.3 s).
+- Pause, panel or hidden tab: 80 ms fade, then `suspend()` after 120 ms. `resume()` cancels a pending suspend and fades in over 150 ms.
+- No voices are created unless the context is running, and a failed AudioContext means silent play plus `console.warn`.
+- Schedule delayed notes in audio time (`delay` argument), not with `setTimeout`.
+- Creature voices carry `tag = 'creature'`, with a sub-cap of 12 inside the global cap.
+
+**Public API (`GameAudio`):**
+- `start(volume 0..1)`: call from a user gesture; safe to repeat. `setVolume(master 0..1)`. `setMix(music 0..1, effects 0..1)`: effects scales the ambience, ship, creatures, effects and ui buses.
+- `suspend()` / `resume()`: the game calls these from `setState`.
+- `update(dt s, AudioFrame)`. AudioFrame fields: `thrust` 0..1, `boost`, `airspeed` m/s, `density` 0..1, `shipDistance` m, `shipActive`, `onFoot`, `body`, plus two optional fields:
+  - `mode` (`'PILOTING' | 'CRUISING' | 'LANDED' | 'ON_FOOT'`): changes play the take-off spool, the cruise chirps and drone, and the hatch hiss.
+  - `gear` (0 up, 1 down): changes play the gear motor and lock clunk.
+  - One voice per change; the unit test "plays mode and gear cues once per change, never per frame" guards it.
+- `footstep(body, sprint)`. `thump(strength ≈ 0..1.3)`. `touchdown(impact)`: impact is vertical impact speed in m/s, positive downward (abs is used), and maps to thump strength `min(1.3, 0.45 + |v|/5)` plus a gear creak.
+- `scanTick(progress 0..1)` each scanning frame. `scanDone()`, `collect()`, `relay()` (ducks ambience), `complete()` (core transmission), `completeExtended()` (Extended Survey), `ui()`.
+- `creature(ev 'call'|'alarm'|'step', speciesId, pos, intensity 0..1 = 1)`:
+  - `pos` is in camera space, in metres (x right, y up, −z forward): `_v.copy(c.p).add(bodyCenterLocal).applyMatrix4(camera.matrixWorldInverse)`.
+  - Ignored beyond 120 m. Each layer gets an equal-power panner, inverse distance, ref 6 m.
+  - Recipes are in `creatures.ts` (`ilex-trine` plus a default).
+- `discovery('scanStart'|'logged'|'firstSpecies'|'worldComplete')`. `logged` is skipped if `scanDone()` chimed within 0.4 s. The swells use the world's tonic and scale on the music bus.
+- `stats()` / `meter()`: test-only; they return null unless `__TEST_HOOKS__`. GAUGE has the types for an `audio()` test hook.
+- `suitMode` (read-only), `ready`, `dispose()`.
+- Unit tests: `tests/audio.test.ts` with `tests/audioMock.ts` (21 audio tests plus a settings test).
+
+**Wiring status:**
+- The Director wires `mode` and `gear` into the frame, `touchdown(v)` in `land()` (replacing `thump(1)`) and `completeExtended()`.
+- BIOME wires `creature()` and `discovery()`.
+- Until then, these are implemented and unit-tested but silent in the game: take-off spool, cruise chirps and drone, hatch hiss, gear motor, touchdown scaling, the Extended Survey cue, creatures and discovery swells.
+- Buffeting needs no wiring.
+
+**Ambience per body.** `ambienceFor(id)` in `profiles.ts` uses `BODIES[id].ambience` (ATLAS's `AmbienceDef`, on `studio/atlas` @ 9e5a95f) when present, else the local table, else the default. It uses `wind`, `windTone`, `tonic`, `scale`, `timbre`, `toneGap` and `ground`; `windAltitude` is not used yet, because altitude enters only through air density.
+
+**Airless path.** It applies when the body has `atmosphere === null` and the player is on foot. There are no body-id branches. The suit sounds:
+- No wind.
+- A helmet hush (lowpassed noise, about 0.012), louder with exertion.
+- Breaths every 3.6–4.4 s, faster after sprinting: an inhale (bandpass 1150 Hz), then an exhale (650 Hz).
+- Footfalls are a 260 Hz lowpass thud plus a 55–63 Hz sine.
+- A servo whirr on about one step in eight.
+- The engine drops to 18 % with no hiss.
+
+**Soak.** Soak 1 is reported above: 19.6 min simulated, flat. Soak 2 (≥ 25 min simulated on the M2 build) was restarted after the session limit and stopped at the stand-down after 38 s simulated: **not completed**. Before it stopped it showed 42 persistent nodes (the M2 buffet and drone layers add 6) and 484 voice nodes created, all 484 disconnected.
+
+**Finished before the limit:**
+- `saves.spec` "settings persist" passed (15.8 s) and `quick.spec` passed (1.1 min) on the M2 build.
+- Settings screenshots at 1280×720 and 640×360 are in `evidence/studio/echo/`.
+- Cairn on-foot screenshots from soak 1 are in `evidence/studio/echo/`.
+
+**Remaining, in priority order:**
+1. After the wiring merges: a ≥ 20 min soak on integration (node counts flat, voice nodes created = disconnected), and a check that the take-off, cruise and gear cues play once per change in the browser.
+2. Footsteps per surface under the player, keyed by biome or material at the foot. The `GroundKind` timbres soil, sand, rock, ice, salt and moss already exist in `STEPS`.
+3. Creature recipes for the new fauna. Accent beat 0 of the trine's three-beat step at intensity ≈ 1.0, the others ≈ 0.6.
+4. Sparse music: arrival swell on the first landing on each world, using `swell()`.
+5. Use `windAltitude`, or remove it.
+6. Delete the local profile table once `BodyDef.ambience` is on integration.
+7. LUFS or offline loudness check: not done; only peak and RMS from `meter()` exist.
 
 ### Sound map (event → sound → bus → visual cue)
 | Event | Sound | Bus | Visual cue |
@@ -250,11 +338,11 @@ Browser soak: running, results not yet recorded (not verified).
 | Piloting / thrust / boost | two detuned saws through a lowpass that opens with thrust, thrust hiss | ship | HUD throttle and speed, exhaust plume |
 | Flight through air | band-passed wind, louder and brighter with airspeed × density | ambience | speed readout, motes, sky |
 | High speed in thick air | low buffeting rumble (dynamic pressure), none in vacuum | ship | speed readout, atmosphere |
-| Cruise engaged / ended | rising / falling two-note chirp; cruise drone with slow beating while cruising | ui / ship | "Cruise engaged" notice, HUD mode |
-| Take-off | engine spool-up | ship | HUD mode changes to flight |
-| Gear up / down | motor whine, lock clunk | ship | gear state in the HUD / ship model |
-| Touchdown | low sine thump + gear creak, scaled by impact speed | effects / ship | HUD "Landed" |
-| Exit / board | hatch pressure hiss | effects | mode change, camera to/from player |
+| Cruise engaged / ended | rising / falling two-note chirp; cruise drone with slow beating while cruising (not yet wired: needs `mode`) | ui / ship | "Cruise engaged" notice, HUD mode |
+| Take-off | engine spool-up (not yet wired: needs `mode`) | ship | HUD mode changes to flight |
+| Gear up / down | motor whine, lock clunk (not yet wired: needs `gear`) | ship | gear state in the HUD / ship model |
+| Touchdown | low sine thump (today: fixed strength via `thump(1)`); gear creak and impact scaling once `touchdown(v)` is wired | effects / ship | HUD "Landed" |
+| Exit / board | hatch pressure hiss (not yet wired: needs `mode`) | effects | mode change, camera to/from player |
 | Footstep | filtered noise per ground (soil, sand, rock; ice, salt, moss ready) | effects | walking motion |
 | Footstep, airless | low thump + dull noise through the boots; occasional servo | effects | walking motion |
 | Jump landing | small thump | effects | camera settles |
@@ -264,16 +352,19 @@ Browser soak: running, results not yet recorded (not verified).
 | Sample collected | bright two-tone | effects | "… collected" notice, inventory |
 | Relay activated | four-note arpeggio, ambience ducked | effects | "relay active" notice, relay visuals |
 | Survey transmitted | five-note chord, ambience ducked | effects | "Survey transmitted" notice |
-| Extended Survey transmitted | slower six-note cue with high shimmer, ambience ducked (needs Game.ts wiring) | effects | "Extended Survey transmitted" notice |
+| Extended Survey transmitted | slower six-note cue with high shimmer, ambience ducked (not yet wired) | effects | "Extended Survey transmitted" notice |
+| Creature call / alarm / step | species recipe, spatialized (not yet wired: BIOME) | creatures | the creature itself, its flee animation |
+| First species / world complete | music swell on the world's scale (not yet wired: BIOME) | music | journal notice |
 | Ambient tones | sparse notes on the world's scale and tonic | music | none needed (decorative, carries no information) |
 | Pause / panel / hidden | mix fades out, context suspended | master | pause menu / panel |
 
 ### TODO
-1. Director wiring (requested): `mode` + `gear` in the audio frame, `touchdown(impact)`, `completeExtended()`.
-2. Footsteps per surface under the player (needs biome/material at the foot position).
-3. Creature calls with BIOME's event names; spatialized panner pool.
-4. Discovery cues and sparse generative music (arrival, first discovery, transmissions).
-5. Switch profiles.ts to `BodyDef.ambience` once ATLAS lands it.
+1. Director wiring at merge: `mode` + `gear` in the audio frame, `touchdown(impact)`, `completeExtended()`; BIOME wires `creature()` / `discovery()`.
+2. Soak 2 on the current build, ≥ 25 min simulated.
+3. Footsteps per surface under the player (needs biome/material at the foot position).
+4. More creature recipes as BIOME adds species (API done).
+5. Sparse generative music: arrival swells (discovery swells done).
+6. `BodyDef.ambience` is read when present (done); remove the local table once ATLAS's field is on integration.
 
 ## Studio: GAUGE (QA, performance, release)
 
@@ -304,6 +395,42 @@ Testhooks build, Low, 640×360, `setRenderEvery(60)`, pointer lock stubbed. Real
 ### N-body readiness of the test layer
 - `src/debug/autopilot.ts`: route planning extracted into exported `travelRoute(from, to)` (same waypoints as before); `setGoal` rejects a `travel` goal whose `to` is not in `BODY_IDS`.
 - `src/debug/testHooks.ts`: new `bodies()` hook; `fingerprint(body?)`; fingerprint documented as static `PropSystem` props only (it already read only `PropSystem`; creatures must never be added there, see Interfaces).
-- `e2e/journey/travel.spec.ts`: the route is built from `bodies()` (every other body, then back to the start; identical to Ilex → Vesper → Cairn → Ilex today), airless checks apply to every airless body, counter and resource checks scale with the number of legs. New bodies therefore lengthen the gate automatically (≈ 7 min per leg at today's pace, so ≈ 20 min per added body over three rounds). Verification run of the edited spec: in progress at the time of this commit (result recorded when it finishes).
+- `e2e/journey/travel.spec.ts`: the route is built from `bodies()` (every other body, then back to the start; identical to Ilex → Vesper → Cairn → Ilex today), airless checks apply to every airless body, counter and resource checks scale with the number of legs. New bodies therefore lengthen the gate automatically (≈ 7 min per leg at today's pace, so ≈ 20 min per added body over three rounds). Verification run of the edited spec (testhooks build of `9ef2749`, Low, pointer lock stubbed, setsid nohup): **passed in 31.3 min**: 9 legs Ilex → Vesper → Cairn → Ilex × 3, 165–194 s simulated each; 19 cruise engagements, exits 9 approach / 1 brake / 9 toggle / 0 safety; 10 activations, 9 releases (all at root LOD); return-visit fingerprints (generator heights, every prop ID + position, collision heights) identical; geometries 194–236, textures 12, rigid bodies 6–14, colliders 9–17, chunk cache 20–28 MB, JS heap 33–54 MB, flat across rounds; 0 console errors. Faster than the Phase 6 run (60.0 min) on an idle machine; same assertions. Evidence screenshots it rewrote were restored (not re-committed).
 - New `tests/autopilot.test.ts`: the travel route between every ordered pair in `BODY_IDS` stays outside every safety envelope until the final radial leg, which ends inside the destination's envelope (6 cases today). `npm test` 69/69 in 9 files.
 - Bugs: `BUGS.md` created; B-001 (`isBodyId` hard-codes the ids, ATLAS) filed.
+### Handoff (GAUGE → Director), 2026-10-29
+**Pushed and verified (`studio/gauge`):**
+- `9ef2749`: baseline, `BUGS.md`, quick journey, N-body test hooks.
+  - Baseline at `26538d0`: typecheck clean; 63/63 unit tests; both builds ok; no test-hook strings in `dist/`; prod project 2/2 (smoke 55.7 s, no-WebGL 1.5 s).
+  - After the change: 69/69 unit tests; quick journey passed in 52.1 s and 1.1 min.
+- `6d7ca2a`: `TRAVEL_BODIES` option for the travel gate. Typecheck only; not yet run with the option set.
+- `73ef0d7`: removed the duplicate airless render wait; B-001 status updated.
+- `564e181`: travel gate result recorded. The core travel gate verification run had **finished before the limit hit: passed in 31.3 min** (numbers above). Nothing was in flight at handoff.
+
+**Commands** (in `meridian/`; run `npm run build && npm run build:test` first; one heavy browser job at a time; use `setsid nohup` for anything near the 2-hour background cap):
+- Quick journey (per merge, about 1 min): `npx playwright test --project=journey e2e/journey/quick.spec.ts`
+- Core travel gate (about 31–60 min): `TRAVEL_BODIES=ilex,vesper,cairn npx playwright test --project=journey e2e/journey/travel.spec.ts`. Without `TRAVEL_BODIES` it covers every body in `BODY_IDS` (the extended gate; with orrin/saro, budget well over an hour).
+- Saves specs (about 8 min): `npx playwright test --project=journey e2e/journey/saves.spec.ts`
+- Prod project (smoke + no-WebGL, about 1 min): `npx playwright test --project=prod`
+- Profile route: `npx playwright test --project=journey e2e/journey/profile.spec.ts` (about 37 min in SwiftShader; `PW_GPU=1` on a real GPU).
+- Memory soak: **no soak spec exists yet** (not written). Suggested shape: quick-journey loop or a walk/fly loop for 30 min, sampling `__meridian.resources()` plus renderer RSS from `ps` every minute, and asserting the last third stays within about 25% of the first third.
+- Set `PW_OUTPUT=<scratch dir>` so `test-results/` never lands in the repo. Journeys rewrite `evidence/*.png`: restore them with `git checkout` unless new evidence is intended.
+
+**Hooks** (`window.__meridian`, dev + `dist-test/` only):
+- `bodies()`: every body in `BODY_IDS` with id, name, kind, radius, airless and landing direction. Build spec routes and lists from it; never hard-code ids.
+- `fingerprint(body?)`: static PropSystem props, heights and collision heights around the landing site. Returns null unless that body is shown, so wait on `fingerprint(id)` after landing. Compare `heights` and `props` exactly; compare `contact` wherever both visits are non-null. Creatures must never be added to PropSystem.
+- `travelRoute(from, to)` (exported from `src/debug/autopilot.ts`): the waypoints the `travel` goal flies. It is pure, so it is unit-tested in `tests/autopilot.test.ts` for every ordered body pair. The `travel` goal throws on an id not in `BODY_IDS`.
+- `resources()`: leak counters (geometries, textures, rigid bodies, colliders, chunk cache, heap, prop cells/instances). Sample per leg or per minute; expect flat across rounds.
+- `perf(lastFrames?)`: frame stats, GPU estimate, draw calls/triangles, terrain/prop counts, heap, timings, GL renderer string. Call `resetFrames()`, then draw every frame (`setRenderEvery(1)`) for the measurement window.
+
+**BUGS.md:**
+- B-001 (sev 4, ATLAS, `isBodyId` hard-codes ids): marked fixed on `studio/atlas`. ATLAS's `824b14a` is now on integration, so it is ready to verify. Check that `isBodyId` uses `BODY_IDS` and that the save tests accept orrin/saro, then mark it verified. No other bugs filed.
+
+**Next, in priority order (not done):**
+1. Verify B-001 on integration.
+2. Run the extended travel gate (all five bodies) once orrin/saro have sites and landing works.
+3. Add the `audio()` hook and an `audioNodes` count in `resources()` once ECHO's GameAudio `stats()`/`meter()` lands. ECHO sent the types: live node total = `AudioStats.liveNodes`.
+4. Saves: v1 → v2 import and new-body inventory cases.
+5. Write the 30-min memory soak.
+6. Per-preset profile route against A4 budgets after the visual merges.
+7. Creature hooks (nearest creature, scan a moving target) once BIOME's fauna API exists.
