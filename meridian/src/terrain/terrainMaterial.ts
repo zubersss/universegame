@@ -1,6 +1,6 @@
 import { Color, MeshStandardMaterial, Vector4, type Texture } from 'three';
 import { patchAerial } from '../render/Atmosphere';
-import type { BodyDef, BodyId, TerrainLook } from '../world/bodies';
+import type { BodyDef, TerrainLook } from '../world/bodies';
 
 export type { TerrainLook };
 
@@ -26,27 +26,14 @@ export interface TerrainUniforms {
   uLook2: { value: Vector4 };
 }
 
-/** Fallback for any `TerrainLook` field a body leaves out. */
+/** Fallback for any `TerrainLook` field a body leaves out (each world's own look lives in bodies.ts). */
 export const DEFAULT_LOOK: TerrainLook = {
   specialRough: 0.8, specialSheen: 0, bump: 1, strata: 0.3, strataSpacing: 9, macro: 0.5,
   sediment: 0x8a7a60, sedimentAmount: 0.35, peakRock: 0.25, rockSlope: [0.16, 0.34],
 };
 
-/**
- * Looks for the original bodies until their `BodyDef.look` values reach this
- * branch (ATLAS holds the same numbers); a body's own `look` always wins.
- */
-const BODY_LOOKS: Partial<Record<BodyId, Partial<TerrainLook>>> = {
-  // Chalk ridges: fine pale bedding, ochre silt in the hollows.
-  ilex: { specialRough: 0.95, specialSheen: 0, bump: 1, strata: 0.45, strataSpacing: 6, macro: 0.55, sediment: 0x9c8a5c, sedimentAmount: 0.35, peakRock: 0.3 },
-  // Rust mesas: strong terrace banding, pale dust settling in the lows.
-  vesper: { specialRough: 0.35, specialSheen: 0.6, bump: 0.7, strata: 0.75, strataSpacing: 14, macro: 0.6, sediment: 0xc9ae88, sedimentAmount: 0.45, peakRock: 0.2 },
-  // Airless regolith: faint layering, darker fines in crater floors.
-  cairn: { specialRough: 0.22, specialSheen: 1, bump: 1, strata: 0.2, strataSpacing: 11, macro: 0.45, sediment: 0x6c7076, sedimentAmount: 0.4, peakRock: 0.35 },
-};
-
 export function terrainLook(def: BodyDef): TerrainLook {
-  return { ...DEFAULT_LOOK, ...BODY_LOOKS[def.id], ...def.look };
+  return { ...DEFAULT_LOOK, ...def.look };
 }
 
 export function makeTerrainUniforms(detail: Texture): TerrainUniforms {
