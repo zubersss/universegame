@@ -262,16 +262,16 @@ export const BODIES: Record<BodyId, BodyDef> = {
       { altitude: 6200, thickness: 350, coverage: 0.35, scale: 11000, speed: 0.000016, tint: [0.96, 0.95, 1.0], opacity: 0.45, streak: 0.95 },
     ],
     palette: {
-      a1: 0x3e3c46, a2: 0x2a2930, a3: 0x5c5468, // basalt column highlands: dark basalt, column faces, weathered lilac
-      b1: 0x5e4a78, b2: 0x4a4256, b3: 0x8a6ea4, // violet moss lowlands: moss, damp stone, bright moss
-      special: 0x2f3c40, // wet valley floors
+      a1: 0x6a6674, a2: 0x4a4752, a3: 0x8a8296, // basalt column highlands: dark basalt, column faces, weathered lilac
+      b1: 0x8e74b0, b2: 0x8a8098, b3: 0xb49ad0, // violet moss lowlands: moss, damp stone, bright moss
+      special: 0x3f4f5a, // wet valley floors
       proxyNight: 0x0c0a14,
     },
     biomeNames: ['Basalt Column Highlands', 'Violet Moss Lowlands'],
     description: 'A humid world of violet moss plains below stepped basalt highlands, its valleys full of slow fog.',
     survey: 'extended',
     ambience: { wind: 1.3, windTone: 220, windAltitude: 2500, tonic: 174.6, scale: [0, 3, 5, 7, 10, 12, 15], timbre: 'triangle', toneGap: 20, ground: 'moss' },
-    look: { specialRough: 0.45, specialSheen: 0.5, bump: 1.1, strata: 0.3, strataSpacing: 3, macro: 0.5, sediment: 0x3a3446, sedimentAmount: 0.6, peakRock: 0.35, rockSlope: [0.12, 0.28] },
+    look: { specialRough: 0.45, specialSheen: 0.5, bump: 1.1, strata: 0.3, strataSpacing: 3, macro: 0.5, sediment: 0x6a5a80, sedimentAmount: 0.6, peakRock: 0.35, rockSlope: [0.12, 0.28] },
   },
   saro: {
     id: 'saro',
