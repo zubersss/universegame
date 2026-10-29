@@ -1,0 +1,58 @@
+name: GPT + Claude Game Builder
+
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "Specific game development task (max 4000 characters)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ai-game-builder
+  cancel-in-progress: false
+
+jobs:
+  collaborate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      OPENAI_MODEL: gpt-5.2
+      GAME_TASK: ${{ inputs.task }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Check credentials
+        run: |
+          test -n "$OPENAI_API_KEY" || { echo "Missing OPENAI_API_KEY repository secret"; exit 1; }
+          test -n "$ANTHROPIC_API_KEY" || { echo "Missing ANTHROPIC_API_KEY repository secret"; exit 1; }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+      - name: Create isolated work branch
+        run: |
+          git config user.name "ai-game-builder[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "ai/game-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+      - name: GPT plans, Claude implements, GPT reviews, Claude repairs
+        run: python scripts/ai_bridge.py
+      - name: Create review pull request
+        run: |
+          git push --set-upstream origin HEAD
+          gh pr create --base main --head "$(git branch --show-current)" \
+            --title "AI collaboration: game development run #${GITHUB_RUN_NUMBER}" \
+            --body "GPT plan and review: see \`agent-reports/\`. Claude Code implemented the requested game task. **Review and test before merging.**"
