@@ -87,13 +87,37 @@ Each section below is edited only by its owner. Director: integration log, decis
 - Decision D-001: the core survey (Ilex, Vesper, Cairn relays → transmit) stays unchanged; new worlds form an Extended Survey (ATLAS proposal pending).
 
 ## Studio: Interfaces (agreed APIs between roles)
-_None yet._
+- **ATLAS → all: bodies (M1).** `BodyId = 'ilex' | 'vesper' | 'cairn' | 'orrin' | 'saro'`; `BODY_IDS` in that order (navigation keys 1…5; append-only, never reorder). `CORE_BODY_IDS` = ilex, vesper, cairn; `EXTENDED_BODY_IDS` = orrin, saro. New `BodyDef` field `survey: 'core' | 'extended'`; otherwise `BodyDef` is unchanged, so look/ambience keys off the existing `palette`, `atmosphere`, `clouds`, `biomeNames`, `kind` data. `isBodyId` accepts every id in `BODY_IDS`.
+  | Body | Kind | Centre (m) | Radius | Atmosphere | g | maxHeight | Biome A (0) / B (1) | `special` / `rockiness` |
+  |---|---|---|---|---|---|---|---|---|
+  | Orrin | planet | (−720000, 240000, 600000) | 52 km | 9 km, dense, humid low haze | 9 | 650 | Basalt Column Highlands / Violet Moss Lowlands | valley floors (fog, wet) / basalt |
+  | Saro | planet | (300000, −150000, −950000) | 38 km | 4 km, thin, bright | 5 | 200 | Rose Salt Flats / Brine Pan Shallows | open brine / salt domes |
+- **ATLAS → all: expedition and saves (M1).** Save schema 2; `ExpeditionState.extendedTransmitted: boolean`; `inventory` is `Record<BodyId, number>` over all bodies. Object ids stay `${body}:…`, species ids `${body}-name`. `Expedition.transmit()` / `canTransmit` = core survey (unchanged rules); `Expedition.transmitExtended()` / `canTransmitExtended` = Extended Survey (core transmitted + every extended relay); `relaysActive('core' | 'extended')`. Game notices: "Survey transmitted", "Extended Survey transmitted".
 
 ## Studio: LUMEN (graphics)
 _Not started._
 
 ## Studio: ATLAS (worlds and travel)
-_Not started._
+
+### M1 body skeleton (2026-10-29)
+- **Two new landable planets**, Orrin and Saro (table in Interfaces). Placement validated against every body: all centre separations ≥ 554 km, safety spheres ≥ 448 km apart, every straight body-to-body line clears third bodies' safety spheres (smallest: Vesper–Orrin passes Ilex's sphere by ~47 km; this is why Orrin moved from the proposed (−700, 80, 650) km, whose Vesper–Orrin line cut Ilex's sphere by 12 km). Cruise legs from Ilex (unit-simulated with the real `CruiseController`) are within 0.8–1.25× of Ilex → Vesper. Sites: Orrin on the moss lowlands, sun elevation 23°; Saro on the salt flats at a brine-pan edge, sun 30°; both facing the approach from Ilex.
+- **Generators** (`surface.ts`, first recipes, character comes in M2): Orrin = warped lowland swells cut by sinuous valleys, stepped basalt highlands broken into 30 m polygonal column cells (each raised by its own hash). Saro = an almost flat crust with shallow brine-pan basins (6 m deep), scattered low salt domes and 2 m polygonal pressure ridges along 3D Voronoi cell edges (260 m cells). Existing generators untouched (only new `case`s; per-cell salt is a new field).
+- **Seams:** new bodies' landing, relay and sample sites are nudged ≥ 2 m off contact-tile seams (`seamDistance`, `avoidSeams` site preference). The original three bodies keep their released sites exactly (Vesper's known seam site included) because moving them would change their worlds.
+- **Expedition (D-001):** core survey unchanged (Ilex, Vesper, Cairn → T). Extended Survey: Orrin and Saro relays, then a second T aboard ("Extended Survey transmitted"), only after the core survey. Objectives guide to the new worlds after the core transmission; the course is set automatically. Idempotent like every other step.
+- **Saves:** schema 2 with migration from schema 1 on load/import (inventory zero-filled for the new bodies, `extendedTransmitted: false`, all other progress kept). A schema-1 record that mentions a new body is rejected (it cannot be genuine). A valid schema-1 latest record still rotates into the backup slot on the next write.
+- **N-body plumbing:** navigation rows and keys 1…N (`Digit1–9` handler), nav status "Extended survey" for the new worlds, survey tab grouped core / Extended Survey, journal sections for every body ("No specimens catalogued yet" until BIOME adds species), inventory, objective, T prompt, title-menu save summary, sample looks (`MissionObjects` data). Proxies, handoff, cruise, gravity, autopilot already iterate `BODY_IDS`.
+- **Spec changes (honest):** `tests/expedition.test.ts` "transmits once, only after all three relays" iterated `BODY_IDS`; it now activates the extended relays first (they must not enable the core transmission) and then the core ones; after the core transmission the objective is now the Extended Survey instead of "Survey transmitted". The save test fixture gained the two inventory keys and the extended flag.
+- **Tests:** new `tests/worlds.test.ts` (layout, separation, line clearance, cruise legs, honest height bounds and finite data over 20,000 directions, both biomes present, day-side walkable sites off seams, original seeds/heights/sites bit-identical to the three-body release); save tests for valid v2, v1 → v2, invalid and corrupt records, export/import across schemas, store rotation with schema-1 records; expedition tests for the Extended Survey.
+
+### Known limits / for other roles
+- Terrain material, audio and motes still pick per-body constants with `id === 'cairn' / 'vesper'` ternaries, so Orrin and Saro currently get Ilex's defaults there (LUMEN: `terrainMaterial.ts`, `Game.ts` mote colour; ECHO: `GameAudio.ts`). The title screen text in `index.html` still names three worlds (Director's file).
+- Palettes and atmosphere numbers are first-pass placeholders for LUMEN to tune.
+
+### TODO (M2, highest impact first)
+1. Orrin and Saro terrain character (organ-pipe columns at readable scale, fog valleys data, crack polygons, brine pans), with LUMEN.
+2. Atmosphere/cloud data with LUMEN; distinct skies.
+3. Navigation polish (arrival notice, compact layout check with five rows).
+4. Optional backdrop giant (with LUMEN).
 
 ## Studio: BIOME (life and discovery)
 _Not started._

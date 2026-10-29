@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Expedition } from '../src/game/Expedition';
-import { BODIES, BODY_IDS } from '../src/world/bodies';
+import { BODIES, BODY_IDS, CORE_BODY_IDS, EXTENDED_BODY_IDS } from '../src/world/bodies';
 import { computeSites } from '../src/world/sites';
 
 describe('expedition rules', () => {
@@ -31,7 +31,13 @@ describe('expedition rules', () => {
   it('transmits once, only after all three relays', () => {
     const e = new Expedition();
     expect(e.transmit()).toBe(false);
-    for (const b of BODY_IDS) {
+    // The new worlds' relays play no part in the core survey.
+    for (const b of EXTENDED_BODY_IDS) {
+      e.collect(`${b}:sample:0`);
+      expect(e.activateRelay(b)).toBe(true);
+      expect(e.canTransmit).toBe(false);
+    }
+    for (const b of CORE_BODY_IDS) {
       e.collect(`${b}:sample:0`);
       expect(e.canTransmit).toBe(false);
       expect(e.activateRelay(b)).toBe(true);
@@ -39,7 +45,58 @@ describe('expedition rules', () => {
     expect(e.canTransmit).toBe(true);
     expect(e.transmit()).toBe(true);
     expect(e.transmit()).toBe(false);
-    expect(e.objective(null).title).toBe('Survey transmitted');
+    // Core survey done; with both extended relays already live the Extended Survey is ready.
+    expect(e.objective(null).title).toBe('Transmit the Extended Survey');
+  });
+
+  it('transmits the Extended Survey once, only after the core survey and both extended relays', () => {
+    const e = new Expedition();
+    for (const b of EXTENDED_BODY_IDS) {
+      e.collect(`${b}:sample:1`);
+      e.activateRelay(b);
+    }
+    expect(e.canTransmitExtended).toBe(false); // core survey not sent yet
+    expect(e.transmitExtended()).toBe(false);
+    for (const b of CORE_BODY_IDS) {
+      e.collect(`${b}:sample:1`);
+      e.activateRelay(b);
+    }
+    expect(e.transmitExtended()).toBe(false);
+    expect(e.transmit()).toBe(true);
+    expect(e.relaysActive('core')).toBe(3);
+    expect(e.relaysActive('extended')).toBe(2);
+    e.dirty = false;
+    expect(e.transmitExtended()).toBe(true);
+    expect(e.dirty).toBe(true);
+    e.dirty = false;
+    expect(e.transmitExtended()).toBe(false); // idempotent
+    expect(e.transmit()).toBe(false);
+    expect(e.dirty).toBe(false);
+    expect(e.state.extendedTransmitted).toBe(true);
+    expect(e.objective('saro')).toEqual({ title: 'Extended Survey transmitted', detail: expect.any(String), body: null });
+  });
+
+  it('guides the player to the new worlds after the core survey', () => {
+    const e = new Expedition();
+    for (const b of CORE_BODY_IDS) {
+      e.collect(`${b}:sample:0`);
+      e.activateRelay(b);
+    }
+    expect(e.objective('cairn').title).toBe('Transmit the survey');
+    e.transmit();
+    const a = e.objective('cairn');
+    expect(a.body).toBe('orrin');
+    expect(a.title).toBe('Extended Survey · Survey Orrin');
+    expect(a.detail).toMatch(/Set course for Orrin/);
+    // Being on a pending world makes it the objective.
+    expect(e.objective('saro').body).toBe('saro');
+    e.collect('saro:sample:2');
+    expect(e.objective('saro').title).toBe('Extended Survey · Activate the Saro relay');
+    e.activateRelay('saro');
+    expect(e.objective('saro').body).toBe('orrin');
+    e.collect('orrin:sample:0');
+    e.collect('ilex:sample:1');
+    expect(e.samplesCarried).toBe(2);
   });
 
   it('records scans as stable journal entries', () => {
@@ -64,8 +121,9 @@ describe('expedition rules', () => {
     // Collect everything everywhere first, then activate in any order.
     for (const b of BODY_IDS) for (const s of computeSites(BODIES[b]).samples) e.collect(s.id);
     for (const b of [...BODY_IDS].reverse()) expect(e.activateRelay(b)).toBe(true);
-    expect(e.state.inventory).toEqual({ ilex: 2, vesper: 2, cairn: 2 });
+    expect(e.state.inventory).toEqual({ ilex: 2, vesper: 2, cairn: 2, orrin: 2, saro: 2 });
     expect(e.transmit()).toBe(true);
+    expect(e.transmitExtended()).toBe(true);
   });
 
   it('guides the next objective', () => {
