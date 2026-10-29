@@ -23,7 +23,7 @@ jobs:
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-      OPENAI_MODEL: gpt-5.2
+      OPENAI_MODEL: gpt-6.1-sol
       GAME_TASK: ${{ inputs.task }}
       GH_TOKEN: ${{ github.token }}
     steps:
