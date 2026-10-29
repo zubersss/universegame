@@ -26,6 +26,7 @@ function sample(overrides: Partial<SaveData> = {}): SaveData {
       collected: ['ilex:sample:0', 'ilex:sample:2', 'vesper:sample:1'],
       relays: ['ilex', 'vesper'],
       species: ['ilex-lantern', 'vesper-glass'],
+      discovered: {},
       scanned: ['ilex:ilex-lantern:5/10/2/3:4', 'vesper:relay'],
       transmitted: false,
       extendedTransmitted: false,
@@ -37,7 +38,7 @@ function sample(overrides: Partial<SaveData> = {}): SaveData {
 /** A schema-1 record exactly as the three-body release wrote it. */
 function v1(overrides: Record<string, unknown> = {}, expedition: Record<string, unknown> = {}): Record<string, unknown> {
   const d = sample();
-  const { extendedTransmitted: _x, ...exp } = d.expedition;
+  const { extendedTransmitted: _x, discovered: _d, ...exp } = d.expedition;
   return {
     ...d,
     schema: 1,
@@ -58,6 +59,7 @@ function complete(): SaveData {
       collected: [...bodies.map((b) => `${b}:sample:0`), 'orrin:sample:2'],
       relays: [...bodies],
       species: ['ilex-lantern', 'orrin-moss'],
+      discovered: { 'ilex-lantern': 40.5, 'orrin-moss': 1290 },
       scanned: ['orrin:relay', 'saro:saro-salt:7/1/2/3:4'],
       transmitted: true,
       extendedTransmitted: true,
@@ -118,6 +120,10 @@ describe('save validation', () => {
     ['extended flag not boolean', { ...sample(), expedition: { ...sample().expedition, extendedTransmitted: 1 } }],
     ['extended survey before the core survey', { ...complete(), expedition: { ...complete().expedition, transmitted: false } }],
     ['extended survey without its relays', { ...complete(), expedition: { ...complete().expedition, relays: ['ilex', 'vesper', 'cairn', 'orrin'] } }],
+    ['discovery time for an unlogged species', { ...complete(), expedition: { ...complete().expedition, discovered: { 'saro-salt': 5 } } }],
+    ['negative discovery time', { ...complete(), expedition: { ...complete().expedition, discovered: { 'orrin-moss': -1 } } }],
+    ['discovery times not an object', { ...complete(), expedition: { ...complete().expedition, discovered: [1] } }],
+    ['too many species', { ...sample(), expedition: { ...sample().expedition, species: Array.from({ length: 97 }, (_, i) => `ilex-s${String.fromCharCode(97 + (i % 26))}${String.fromCharCode(97 + Math.floor(i / 26))}`) } }],
     ['future schema', { ...sample(), schema: 3 }],
     ['schema 1 naming a new body', v1({ body: 'orrin' })],
     ['schema 1 with a new body in its inventory', v1({}, { inventory: { ilex: 1, vesper: 0, cairn: 0, orrin: 0 } })],
@@ -167,6 +173,15 @@ describe('save validation', () => {
       expect(r2.data.expedition.relays).toEqual(['ilex', 'vesper', 'cairn']);
       expect(r2.data.expedition.inventory.cairn).toBe(1);
     }
+  });
+
+  it('accepts up to 96 species and schema-2 records without discovery times', () => {
+    const many = Array.from({ length: 96 }, (_, i) => `ilex-s${String.fromCharCode(97 + (i % 26))}${String.fromCharCode(97 + Math.floor(i / 26))}`);
+    expect(validateSave(sample({ expedition: { ...sample().expedition, species: many } })).ok).toBe(true);
+    const { discovered: _d, ...exp } = complete().expedition;
+    const r = validateSave({ ...complete(), expedition: exp });
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.data.expedition.discovered).toEqual({});
   });
 
   it('exports and imports across schemas', () => {

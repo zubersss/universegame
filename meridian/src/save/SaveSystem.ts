@@ -77,6 +77,8 @@ function idPatterns(bodies: readonly BodyId[]) {
     species: new RegExp(`^(${alt})-[a-z]+$`),
   };
 }
+/** Species list cap (flora, minerals and fauna across every body, with headroom). */
+const MAX_SPECIES = 96;
 const PATTERNS = { 1: idPatterns(SCHEMA1_BODIES), 2: idPatterns(BODY_IDS) };
 
 function validateExpedition(x: unknown, schema: 1 | 2): ExpeditionState | string {
@@ -96,8 +98,20 @@ function validateExpedition(x: unknown, schema: 1 | 2): ExpeditionState | string
   if (!collected) return 'bad collected list';
   const relays = stringList(x.relays, (s) => (bodies as readonly string[]).includes(s), bodies.length);
   if (!relays) return 'bad relay list';
-  const species = stringList(x.species, (s) => re.species.test(s), 64);
+  const species = stringList(x.species, (s) => re.species.test(s), MAX_SPECIES);
   if (!species) return 'bad species list';
+  // Discovery times: optional (absent in schema 1 and early schema-2 records), keyed by logged species.
+  const discovered: Record<string, number> = {};
+  if (x.discovered !== undefined) {
+    if (!isObj(x.discovered)) return 'bad discovery times';
+    const keys = Object.keys(x.discovered);
+    if (keys.length > MAX_SPECIES) return 'bad discovery times';
+    for (const k of keys) {
+      const t = x.discovered[k];
+      if (!species.includes(k) || !isNum(t) || t < 0 || t > 1e8) return 'bad discovery time';
+      discovered[k] = t;
+    }
+  }
   const scanned = stringList(x.scanned, (s) => re.object.test(s), 8000);
   if (!scanned) return 'bad scan list';
   if (typeof x.transmitted !== 'boolean') return 'bad transmission flag';
@@ -112,7 +126,7 @@ function validateExpedition(x: unknown, schema: 1 | 2): ExpeditionState | string
   }
   if (x.transmitted && !CORE_BODY_IDS.every((b) => relays.includes(b))) return 'transmission without three relays';
   if (extended && !(x.transmitted && EXTENDED_BODY_IDS.every((b) => relays.includes(b)))) return 'extended transmission without its relays';
-  return { inventory, collected, relays: relays as BodyId[], species, scanned, transmitted: x.transmitted, extendedTransmitted: extended };
+  return { inventory, collected, relays: relays as BodyId[], species, discovered, scanned, transmitted: x.transmitted, extendedTransmitted: extended };
 }
 
 /**

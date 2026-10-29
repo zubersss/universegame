@@ -14,6 +14,8 @@ export interface ExpeditionState {
   relays: BodyId[];
   /** Species IDs with journal entries. */
   species: string[];
+  /** Simulated time (s) of each species' first discovery, by species ID (filled by the scanner). */
+  discovered: Record<string, number>;
   /** Stable object IDs that have been scanned (props, samples, relays). */
   scanned: string[];
   /** The core survey (Ilex, Vesper, Cairn relays) has been transmitted. */
@@ -29,7 +31,7 @@ export function emptyInventory(): Record<BodyId, number> {
 }
 
 export function newExpedition(): ExpeditionState {
-  return { inventory: emptyInventory(), collected: [], relays: [], species: [], scanned: [], transmitted: false, extendedTransmitted: false };
+  return { inventory: emptyInventory(), collected: [], relays: [], species: [], discovered: {}, scanned: [], transmitted: false, extendedTransmitted: false };
 }
 
 /** Body that a sample/relay ID belongs to (IDs are `${body}:...`). */
