@@ -1,0 +1,271 @@
+{
+ "preset": "balanced",
+ "env": {
+  "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+  "dpr": 1,
+  "cores": 4
+ },
+ "samples": [
+  {
+   "label": "landed",
+   "mode": "LANDED",
+   "clearance": 2.8499994212777437,
+   "simTime": 2.8999999999999946,
+   "frames": {
+    "frames": 30,
+    "medianMs": 2633.199951171875,
+    "p95Ms": 4166.5,
+    "p99Ms": 5116.5,
+    "maxMs": 5116.5,
+    "stalls100": 30
+   },
+   "gpu": {
+    "geometryMB": 19.542755126953125,
+    "texturesMB": 8.528128814697267,
+    "targetsMB": 75.5660400390625,
+    "totalMB": 103.6369239807129,
+    "geometries": 224,
+    "textures": 7
+   },
+   "draw": {
+    "calls": 169,
+    "triangles": 392182,
+    "geometries": 142,
+    "textures": 25,
+    "w": 1280,
+    "h": 720
+   },
+   "terrain": {
+    "rendered": 180,
+    "leaves": 180,
+    "colliders": 6
+   },
+   "props": {
+    "drawn": 1025,
+    "triangles": 78708,
+    "colliders": 0
+   },
+   "physics": {
+    "bodies": 8,
+    "colliders": 11,
+    "refreshes": 6
+   },
+   "heapMB": 28.03802490234375,
+   "quality": {
+    "preset": "balanced",
+    "adaptive": false,
+    "level": 0,
+    "medianMs": 0,
+    "resolutionScale": 1
+   },
+   "timings": {
+    "sim": 1.904436079301768,
+    "terrain": 17.830753013704026,
+    "render": 24.431402431751962,
+    "frame": 46.062010648207064
+   },
+   "chunks": {
+    "cacheMB": 20.67107391357422,
+    "genMsAvg": 16.601967213082997,
+    "genMsMax": 80.60000000149012
+   },
+   "gl": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+  },
+  {
+   "label": "walking",
+   "mode": "ON_FOOT",
+   "clearance": 2.8499994212777437,
+   "simTime": 6.499999999999982,
+   "frames": {
+    "frames": 30,
+    "medianMs": 3499.800048828125,
+    "p95Ms": 6499.7998046875,
+    "p99Ms": 6516.39990234375,
+    "maxMs": 6516.39990234375,
+    "stalls100": 29
+   },
+   "gpu": {
+    "geometryMB": 23.305572509765625,
+    "texturesMB": 8.528128814697267,
+    "targetsMB": 75.5660400390625,
+    "totalMB": 107.3997413635254,
+    "geometries": 272,
+    "textures": 7
+   },
+   "draw": {
+    "calls": 167,
+    "triangles": 495862,
+    "geometries": 163,
+    "textures": 25,
+    "w": 1280,
+    "h": 720
+   },
+   "terrain": {
+    "rendered": 228,
+    "leaves": 228,
+    "colliders": 8
+   },
+   "props": {
+    "drawn": 2204,
+    "triangles": 171020,
+    "colliders": 0
+   },
+   "physics": {
+    "bodies": 11,
+    "colliders": 14,
+    "refreshes": 10
+   },
+   "heapMB": 28.03802490234375,
+   "quality": {
+    "preset": "balanced",
+    "adaptive": false,
+    "level": 0,
+    "medianMs": 0,
+    "resolutionScale": 1
+   },
+   "timings": {
+    "sim": 8.89040988044779,
+    "terrain": 11.155828858842023,
+    "render": 15.187676493796907,
+    "frame": 36.389718192195645
+   },
+   "chunks": {
+    "cacheMB": 26.670249938964844,
+    "genMsAvg": 16.24659949618976,
+    "genMsMax": 108.5
+   },
+   "gl": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+  },
+  {
+   "label": "low-flight",
+   "mode": "PILOTING",
+   "clearance": 133.21384767994303,
+   "simTime": 20.13333333333347,
+   "frames": {
+    "frames": 30,
+    "medianMs": 3249.89990234375,
+    "p95Ms": 5916.39990234375,
+    "p99Ms": 5966.5,
+    "maxMs": 5966.5,
+    "stalls100": 30
+   },
+   "gpu": {
+    "geometryMB": 23.070396423339844,
+    "texturesMB": 8.528128814697267,
+    "targetsMB": 75.5660400390625,
+    "totalMB": 107.16456527709961,
+    "geometries": 269,
+    "textures": 7
+   },
+   "draw": {
+    "calls": 140,
+    "triangles": 434398,
+    "geometries": 209,
+    "textures": 25,
+    "w": 1280,
+    "h": 720
+   },
+   "terrain": {
+    "rendered": 225,
+    "leaves": 225,
+    "colliders": 12
+   },
+   "props": {
+    "drawn": 1959,
+    "triangles": 148116,
+    "colliders": 0
+   },
+   "physics": {
+    "bodies": 14,
+    "colliders": 17,
+    "refreshes": 44
+   },
+   "heapMB": 28.03802490234375,
+   "quality": {
+    "preset": "balanced",
+    "adaptive": false,
+    "level": 0,
+    "medianMs": 0,
+    "resolutionScale": 1
+   },
+   "timings": {
+    "sim": 4.705252899941479,
+    "terrain": 15.281852096105363,
+    "render": 13.745786071886933,
+    "frame": 34.942943472937785
+   },
+   "chunks": {
+    "cacheMB": 29.669837951660156,
+    "genMsAvg": 16.075620767502766,
+    "genMsMax": 108.5
+   },
+   "gl": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+  },
+  {
+   "label": "atmosphere-edge",
+   "mode": "PILOTING",
+   "clearance": 7935.04593295978,
+   "simTime": 52.96666666666494,
+   "frames": {
+    "frames": 30,
+    "medianMs": 1399.9000244140625,
+    "p95Ms": 7999.60009765625,
+    "p99Ms": 9699.599609375,
+    "maxMs": 9699.599609375,
+    "stalls100": 27
+   },
+   "gpu": {
+    "geometryMB": 13.193000793457031,
+    "texturesMB": 8.528128814697267,
+    "targetsMB": 75.5660400390625,
+    "totalMB": 97.2871696472168,
+    "geometries": 143,
+    "textures": 7
+   },
+   "draw": {
+    "calls": 41,
+    "triangles": 71110,
+    "geometries": 101,
+    "textures": 25,
+    "w": 1280,
+    "h": 720
+   },
+   "terrain": {
+    "rendered": 99,
+    "leaves": 99,
+    "colliders": 0
+   },
+   "props": {
+    "drawn": 0,
+    "triangles": 0,
+    "colliders": 0
+   },
+   "physics": {
+    "bodies": 2,
+    "colliders": 5,
+    "refreshes": 78
+   },
+   "heapMB": 28.03802490234375,
+   "quality": {
+    "preset": "balanced",
+    "adaptive": false,
+    "level": 0,
+    "medianMs": 0,
+    "resolutionScale": 1
+   },
+   "timings": {
+    "sim": 1.3893398895093096,
+    "terrain": 9.865484533377526,
+    "render": 7.259270512461373,
+    "frame": 20.1705005337293
+   },
+   "chunks": {
+    "cacheMB": 33.973594665527344,
+    "genMsAvg": 16.12377210217574,
+    "genMsMax": 108.5
+   },
+   "gl": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+  }
+ ],
+ "errors": []
+}
