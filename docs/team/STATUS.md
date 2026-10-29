@@ -7,11 +7,11 @@ Charter: `docs/team/CHARTER.md` (binding). Handoffs: `docs/team/handoffs/`. Rela
 
 | Session | Claude Code version | OS / environment | Model (`/model`) | Effort (`/effort status`) | Ultracode | Permission mode | `/list-agents` sees | Worktree / branch |
 |---|---|---|---|---|---|---|---|---|
-| LEAD | | | | | off | | | main checkout / `lead/*` |
+| LEAD | 2.1.312 | claude.ai cloud container: Linux 6.18 x86_64, 4 vCPU Xeon 2.1 GHz, 15 GB RAM, no GPU, Node 22.22.0 | `claude-opus-5-5` (served `claude-opus-5-5`) | session effort `ultracode` (charter: `xhigh`) | **on** (must be off: owner action) | auto | no other sessions (this session: `universegame-e4`; inbound messaging available) | cloud checkout / `overhaul/integration`, `lead/*` |
 | WORLDS | | | | | off | | | `../universegame-worlds` / `worlds/*` |
 | PLAYER | | | | | off | | | `../universegame-player` / `player/*` |
 
-Reference device: CPU · GPU (`chrome://gpu`) · RAM 8 GB · resolution · Chrome version · Node version.
+Reference device: CPU · GPU (`chrome://gpu`) · RAM 8 GB · resolution · Chrome version · Node version — not measured yet (owner's laptop). The LEAD session runs in a cloud container without a GPU (headless Chromium 1243 on SwiftShader), so its browser checks prove behaviour, not frame rate.
 
 ## Decided (settled questions; do not re-research)
 
@@ -22,28 +22,33 @@ Reference device: CPU · GPU (`chrome://gpu`) · RAM 8 GB · resolution · Chrom
 | 3 | Scale: radius ÷ 40 (12–200 km), positions at `EPOCH` ÷ one factor, cruise = max(15 km/s, hop ÷ 45 s), interstellar jump | Charter section H | 2026-10-29 |
 | 4 | Character built in code (SkinnedMesh + bones); CC0 glTF only if verified in M1 | Charter section K | 2026-10-29 |
 | 5 | Coordination: three local sessions + cross-session messaging; ultracode off; no agent teams on the primary path | Charter section G | 2026-10-29 |
+| 6 | The `studio/*` branches are a content source, not a base: nothing merges wholesale; ports go through the file owner with tests | Handoff reconciliation (`docs/team/handoffs/studio-round.md`) | 2026-10-29 |
+| 7 | Studio save schema 2 and its position migration are not ported; the charter's schema 2 stands, older records are kept read-only under `save-legacy` | Charter section I; L5 | 2026-10-29 |
 
 ## Integration base
 
 | Branch | Commit | Checks last run | Checkpoint tag |
 |---|---|---|---|
-| `overhaul/integration` | | | |
+| `overhaul/integration` | 30ccf78 (= `main`) | 2026-10-29: `npm ci`, typecheck, `npm test` 63/63, build, build:test, prod smoke 2/2; journeys running | — (`overhaul-m1` at the M1 gate) |
 
 ## Handoff reconciliation (M1, L4)
 
 | Handoff | Verified here | Contradicted by this code | Still disputed | Unique work preserved as |
 |---|---|---|---|---|
-| | | | | |
+| Old-bot exports (`EXPORT-for-old-bots.md`) | none received yet | — | — | — |
+| `studio/integration` notes (`PROGRESS.md`, `BUGS.md`) | studio schema 2 migrates positions; B-001, Vesper seam and missing shader pre-warm apply to `main`; 848579b fixes studio-only code | none found | every pass count, soak, travel gate and perf number (not re-run) | branch @ 9eaf7ec, untouched; summary `docs/team/handoffs/studio-round.md` |
+| `studio/atlas`, `studio/biome`, `studio/lumen` | their extra commits are studio-only (Orrin/Saro terrain, five-world fauna, photo sets) | none found | B-003, B-005, B-006 causes | branches @ 586dc69, aa94660, 87706d1, untouched |
+| `studio/echo`, `studio/gauge` | fully contained in `studio/integration`; audio caps and test hooks read in code | none found | soaks, 3-body travel gate | branches @ 5c6e844, f2d91e6, untouched |
 
 ## Task table
 
 | ID | Owner | Player-visible outcome | Depends on | Base | Owned files | Contract / acceptance check | Result (commit · checks run · remaining issues · next handoff) |
 |---|---|---|---|---|---|---|---|
-| L1 | LEAD | Baseline runs on the reference device | — | main | — | `npm ci`, `typecheck`, `test`, `build`, `preview`; plays in Chrome | |
-| L2 | LEAD | Charter, status, settings committed | L1 | | `docs/team/*`, `.claude/settings.json` | files present on `overhaul/integration` | |
-| L3 | LEAD | Messaging round-trip | L2 | | — | packet to and from WORLDS and PLAYER | |
-| L4 | LEAD | Handoffs reconciled | L2 | | `docs/team/handoffs/*` | table above filled; unique work preserved | |
-| L5 | LEAD | Contract foundations | L4 | | `src/game/*`, `src/save/*`, `src/ui/Hud.ts` | tests for Mode hooks, HUD slot API, schema-2 plan | |
+| L1 | LEAD | Baseline runs on the reference device | — | main | — | `npm ci`, `typecheck`, `test`, `build`, `preview`; plays in Chrome | Cloud container, `main` 30ccf78: `npm ci`, typecheck, 63/63 tests, build (main chunk 5,144.6 kB, 1,892 kB gzip), build:test, prod smoke 2/2 (boots, takes off, nav, pause, resize; no errors or hotlinks). Journeys running. Reference-device run outstanding (owner). |
+| L2 | LEAD | Charter, status, settings committed | L1 | | `docs/team/*`, `.claude/settings.json` | files present on `overhaul/integration` | Charter and status in 30ccf78; settings proposal awaiting the owner's one approval (see Blockers). |
+| L3 | LEAD | Messaging round-trip | L2 | | — | packet to and from WORLDS and PLAYER | Blocked: no WORLDS or PLAYER session exists. Packets in relay mode: `docs/team/packets/LEAD.md`. |
+| L4 | LEAD | Handoffs reconciled | L2 | | `docs/team/handoffs/*` | table above filled; unique work preserved | Studio branches reconciled read-only, nothing deleted; DECISION packet sent; old-bot exports still to collect (owner). |
+| L5 | LEAD | Contract foundations | L4 | | `src/game/*`, `src/save/*`, `src/ui/Hud.ts` | tests for Mode hooks, HUD slot API, schema-2 plan | `lead/L5-contracts` 566d144: `setMode` + ON_FOOT hooks, `hud.setAbility`/`hud.setWarning`, `save-legacy` policy; typecheck, 72/72 tests. Browser checks before merge. IFACE packets to WORLDS (BodyDef fields) and PLAYER (hooks). |
 | W1 | WORLDS | Solar-system catalog with sources | — | | `src/data/sol.json` | fields tagged measured/estimated/fictional; source + epoch recorded | |
 | W2 | WORLDS | `scale.ts` and catalog-driven `BodyDef` | W1, L5 | | `src/world/*` | Ilex, Vesper, Cairn still play | |
 | W3 | WORLDS | Earth dataset converted and licensed | — | | `src/data/**`, `scripts/data/*`, `ASSET_LICENSES.md` | sampling test (Everest high, Challenger Deep low, land ≈ 29%) | |
@@ -56,7 +61,10 @@ Reference device: CPU · GPU (`chrome://gpu`) · RAM 8 GB · resolution · Chrom
 
 | Since | Session | What | What unblocks | Owner action needed |
 |---|---|---|---|---|
-| | | | | |
+| 2026-10-29 | LEAD | Ultracode is on and effort is not `xhigh` in the LEAD session (charter G) | `/effort ultracode off`, then `/effort xhigh` | yes |
+| 2026-10-29 | all | No WORLDS or PLAYER session exists, so L3 and every W/P task wait | start both sessions with `docs/team/prompts/WORLDS.md` and `PLAYER.md` | yes |
+| 2026-10-29 | LEAD | Project settings need one approval (L2) | owner approves the proposal | yes |
+| 2026-10-29 | LEAD | No reference-device numbers (M1 gate) | owner runs the baseline and `PW_GPU=1` profile on the laptop | yes |
 
 ## Milestone gate results
 
