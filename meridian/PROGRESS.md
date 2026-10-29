@@ -85,9 +85,15 @@ Each section below is edited only by its owner. Director: integration log, decis
 ## Studio: Director — decisions and integration log
 - 2026-10-29: studio started from `main` @ `0cf5a22`. Integration branch `studio/integration`; role branches `studio/lumen`, `studio/atlas`, `studio/biome`, `studio/echo`, `studio/gauge`.
 - Decision D-001: the core survey (Ilex, Vesper, Cairn relays → transmit) stays unchanged; new worlds form an Extended Survey (ATLAS proposal pending).
+- Roster: LUMEN `session_01R5BrhzG9dye6xqRLrRSEkn`, ATLAS `session_01R5Bri2WGFr4gjv7TfXEPvf`, BIOME `session_01R5Bri4PYFhAo9iBZssWxCF`, ECHO `session_01R5BrhzyPMmwJkDeXRj3MPK`, GAUGE `session_01R5Bri3TS7s5DeeiUDPAdFQ`; Director `session_01R5Bri1vhfDV4bpYkM3ayeh`.
+- Decision D-002: only the Director merges into `studio/integration`; roles merge integration into their branch after each announcement.
+- Decision D-003: hot shared files need CLAIM/RELEASE; no acknowledgement within ~20 min → work on something else.
+- M1 assignments sent: GAUGE baseline + BUGS.md + quick journey + N-body test layer; ATLAS body skeleton (Orrin, Saro) + N-body plumbing + save schema 2 + Extended Survey scaffold; BIOME fauna system + first Ilex creature + species plan; ECHO mix buses + voice pool + soak + ambience profile + airless suit mode; LUMEN baseline photo set + terrain surface quality.
+- Merge 1 (`93da7c8`): `studio/gauge` @ `9ef2749`: BUGS.md, quick journey, N-body test hooks (`bodies()`, `fingerprint(body)`), `travelRoute()`. Director verification on the merged tree: typecheck clean; 69/69 unit tests; both builds; `dist/` free of test strings; quick journey passed in 1.1 min. GAUGE's generalised travel spec is still under its own 60-min verification run.
 
 ## Studio: Interfaces (agreed APIs between roles)
-_None yet._
+- **GAUGE → all: test hooks and determinism (2026-10-29).** `window.__meridian` (dev + `build:test` only) works for any body in `BODY_IDS`: `bodies()` lists every body (id, name, kind, radius, airless, landing-site direction) so specs never hard-code the list; the autopilot `travel` goal accepts any `BodyId` and throws on an unknown id; `fingerprint(body?)` returns null unless that body is shown. Request new hooks or autopilot goals from GAUGE with a `REQUEST` (what to read or drive, which spec needs it).
+- **Rule: moving things (creatures, anything animated in position) must never be added to `PropSystem`.** `PropSystem` is the deterministic, static placement that the travel gate fingerprints (every instance's ID and position within 250 m of a landing site, to the mm, identical on every visit), and `nearbyScannables()` reads it too. Creatures live in their own system (`src/fauna/`, BIOME); GAUGE adds separate hooks for them (e.g. nearest creature) when BIOME's API exists.
 
 ## Studio: LUMEN (graphics)
 _Not started._
@@ -102,4 +108,34 @@ _Not started._
 _Not started._
 
 ## Studio: GAUGE (QA, performance, release)
-_Not started._
+
+### TODO (highest impact first)
+1. Per-merge checks on every Director merge to `studio/integration` (typecheck, unit, both builds, `dist/` string check, prod project, quick journey, `perf` counts) → `REVIEW`.
+2. Hooks/goals for the new bodies and creatures as ATLAS/BIOME APIs land (nearest creature, scan a creature, travel to each new body).
+3. Extended travel gate (new worlds) and full expedition with the Extended Survey at M4; 30-min soak; per-preset profile route.
+
+### Studio baseline (2026-10-29, `studio/gauge` = `studio/integration` @ `26538d0`, Node 22.22, 4 cores)
+| Check | Result | Time |
+| --- | --- | --- |
+| `npm ci` | ok | — |
+| `npm run typecheck` | clean | 5.0 s |
+| `npm test` | 63/63 in 8 files | 26.8 s |
+| `npm run build` | ok (main chunk 5,144.6 kB, gzip 1,892.3 kB) | 6.0 s |
+| `npm run build:test` | ok | 2.1 s |
+| `dist/` test-hook strings (`__meridian`, `autopilot`, `setRenderEvery`, `installTestHooks`) | none found (grep exit 1); present in `dist-test/` as expected | — |
+| `npx playwright test --project=prod` | 2/2: no-WebGL message 1.5 s, production smoke 55.7 s | 1.1 min |
+
+Draw calls, triangles, GPU estimate and JS heap: the studio baseline is the 2026-10-29 profile table above ("Measured performance"); same code, not rerun.
+
+### Per-merge quick journey (`e2e/journey/quick.spec.ts`)
+Testhooks build, Low, 640×360, `setRenderEvery(60)`, pointer lock stubbed. Real Play click → take off (Space) → 8 s sim of autopilot flight → assisted landing on a surveyed flat site 250–700 m away (next candidate if the assist refuses) → exit (E) → walk ~17 m → walk to the nearest scannable, aim, hold F until logged → walk to the ladder, board (E) → take off (Space). Asserts landing slope ≤ 12°, species in the journal, counters (≥ 1 landing/exit/boarding, ≥ 2 take-offs, 0 recoveries), 0 console errors. Body-agnostic (uses the starting body).
+- Run 1: passed, 52.1 s (landed slope 5.1°, scanned `ilex-fan`).
+- Run 2 (after the N-body hook changes, rebuilt): passed, 1.1 min (slope 0.0°, `ilex-fan`). Landing sites differ between runs because flight duration is polled in wall time against sim time; the assertions do not depend on the site.
+- Run with: `npx playwright test --project=journey e2e/journey/quick.spec.ts` (after `npm run build:test`).
+
+### N-body readiness of the test layer
+- `src/debug/autopilot.ts`: route planning extracted into exported `travelRoute(from, to)` (same waypoints as before); `setGoal` rejects a `travel` goal whose `to` is not in `BODY_IDS`.
+- `src/debug/testHooks.ts`: new `bodies()` hook; `fingerprint(body?)`; fingerprint documented as static `PropSystem` props only (it already read only `PropSystem`; creatures must never be added there, see Interfaces).
+- `e2e/journey/travel.spec.ts`: the route is built from `bodies()` (every other body, then back to the start; identical to Ilex → Vesper → Cairn → Ilex today), airless checks apply to every airless body, counter and resource checks scale with the number of legs. New bodies therefore lengthen the gate automatically (≈ 7 min per leg at today's pace, so ≈ 20 min per added body over three rounds). Verification run of the edited spec: in progress at the time of this commit (result recorded when it finishes).
+- New `tests/autopilot.test.ts`: the travel route between every ordered pair in `BODY_IDS` stays outside every safety envelope until the final radial leg, which ends inside the destination's envelope (6 cases today). `npm test` 69/69 in 9 files.
+- Bugs: `BUGS.md` created; B-001 (`isBodyId` hard-codes the ids, ATLAS) filed.

@@ -9,6 +9,7 @@ import { CRUISE, FLIGHT } from '../game/config';
 import { segmentSphereEnter } from '../core/mathx';
 import { safetyRadius } from '../ship/Cruise';
 import { BODIES, BODY_IDS, type BodyId } from '../world/bodies';
+import { computeSites } from '../world/sites';
 
 type V3 = [number, number, number];
 
@@ -44,7 +45,10 @@ export interface WalkGoal {
 
 export interface TravelGoal {
   kind: 'travel';
-  /** Destination body: climb out, cruise via waypoints, descend, then land at its landing site. */
+  /**
+   * Destination body (any id in BODY_IDS): climb out, cruise via waypoints,
+   * descend, then land at its landing site. Nothing here is specific to a body.
+   */
   to: BodyId;
   /** Hold the brake once this fraction of the first cruise leg is covered (exercises brake cancel). */
   brakeAt?: number;
@@ -58,7 +62,8 @@ export interface AimGoal {
 
 export type AutopilotGoal = FlyGoal | LandGoal | WalkGoal | TravelGoal | AimGoal;
 
-const PLAN_INFLATE = 8000;
+/** Margin (m) the route planner adds to every safety envelope. */
+export const PLAN_INFLATE = 8000;
 
 function bodyCenter(id: BodyId, out = new Vector3()): Vector3 {
   const c = BODIES[id].center;
@@ -74,7 +79,7 @@ function blockedBy(a: Vector3, b: Vector3): BodyId | null {
 }
 
 /** Waypoints (system coordinates) from a to b that stay clear of every envelope. */
-function planPath(a: Vector3, b: Vector3, depth = 0): Vector3[] {
+export function planPath(a: Vector3, b: Vector3, depth = 0): Vector3[] {
   const id = blockedBy(a, b);
   if (!id || depth > 5) return [b.clone()];
   const c = bodyCenter(id);
@@ -84,6 +89,20 @@ function planPath(a: Vector3, b: Vector3, depth = 0): Vector3[] {
   if (m.lengthSq() < 1e-6) m.set(-u.y, u.x, 0.3).cross(u);
   const detour = c.add(m.normalize().multiplyScalar(safetyRadius(BODIES[id]) + 40000));
   return [...planPath(a, detour, depth + 1), ...planPath(detour, b, depth + 1)];
+}
+
+/**
+ * Cruise route (system coordinates) from `from` to body `to`: detours around
+ * every body in the way, a gate well above the landing site, then a radial leg
+ * that ends inside the envelope so cruise performs its automatic approach exit.
+ */
+export function travelRoute(from: Vector3, to: BodyId): Vector3[] {
+  const n = new Vector3(...computeSites(BODIES[to]).landing.dir);
+  const c = bodyCenter(to);
+  const S = safetyRadius(BODIES[to]);
+  const gate = c.clone().addScaledVector(n, S + 60000);
+  const final = c.clone().addScaledVector(n, S - 5000);
+  return [...planPath(from, gate), final];
 }
 
 const _qi = new Quaternion();
@@ -115,6 +134,7 @@ export class Autopilot {
   constructor(private readonly game: Game) {}
 
   setGoal(g: AutopilotGoal | null): void {
+    if (g?.kind === 'travel' && !BODY_IDS.includes(g.to)) throw new Error(`autopilot: unknown body "${g.to}" (known: ${BODY_IDS.join(', ')})`);
     this.release();
     this.goal = g;
     this.phase = 'start';
@@ -165,16 +185,7 @@ export class Autopilot {
   }
 
   private planRoute(to: BodyId): void {
-    const def = BODIES[to];
-    const sites = this.game.landingSiteOf(to);
-    const n = new Vector3(...sites);
-    const c = bodyCenter(to);
-    const S = safetyRadius(def);
-    // A gate well above the landing site, then a radial leg that ends inside the
-    // envelope so cruise performs its automatic approach exit on the way in.
-    const gate = c.clone().addScaledVector(n, S + 60000);
-    const final = c.clone().addScaledVector(n, S - 5000);
-    this.route = [...planPath(this.shipSystem(new Vector3()), gate), final];
+    this.route = travelRoute(this.shipSystem(new Vector3()), to);
     this.wp = 0;
   }
 
