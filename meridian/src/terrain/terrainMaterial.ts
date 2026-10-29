@@ -1,6 +1,6 @@
-import { Color, MeshStandardMaterial, type Texture } from 'three';
+import { Color, MeshStandardMaterial, Vector4, type Texture } from 'three';
 import { patchAerial } from '../render/Atmosphere';
-import type { BodyDef } from '../world/bodies';
+import type { BodyDef, BodyId } from '../world/bodies';
 
 /** Number of quantized morph variants (materials share one program). */
 export const MORPH_LEVELS = 8;
@@ -17,6 +17,62 @@ export interface TerrainUniforms {
   uSpecialSheen: { value: number };
   uDetail: { value: Texture | null };
   uBump: { value: number };
+  uSediment: { value: Color };
+  /** x = strata amount, y = strata spacing (m), z = macro variation, w = sediment amount. */
+  uLook: { value: Vector4 };
+  /** x = rock on peaks, y = max terrain height (m), z/w = slope rock start/end (1 - cos). */
+  uLook2: { value: Vector4 };
+}
+
+/**
+ * Per-body surface look (data, not code paths): how rock, strata, sediment
+ * and km-scale colour variation are blended. New bodies get identity by
+ * filling these in; anything left out falls back to DEFAULT_LOOK.
+ */
+export interface TerrainLook {
+  /** Roughness of the special material (ice, glass, loam). */
+  specialRough: number;
+  /** 0..1: how much smoother (less bumpy) the special material is. */
+  specialSheen: number;
+  /** Detail bump strength multiplier. */
+  bump: number;
+  /** 0..1 horizontal banding on exposed rock (height-mapped, so cliffs never stretch). */
+  strata: number;
+  /** Strata band spacing in meters. */
+  strataSpacing: number;
+  /** 0..1 strength of km-scale colour variation that breaks tiling. */
+  macro: number;
+  /** Colour of fine sediment collecting in low, flat ground (sRGB hex). */
+  sediment: number;
+  /** 0..1 how much sediment covers basin floors. */
+  sedimentAmount: number;
+  /** 0..1 extra bare rock exposed on the highest ground. */
+  peakRock: number;
+  /** Slope (1 - cos of the incline) where rock starts and fully takes over. */
+  rockSlope: [number, number];
+}
+
+export const DEFAULT_LOOK: TerrainLook = {
+  specialRough: 0.8, specialSheen: 0, bump: 1, strata: 0.3, strataSpacing: 9, macro: 0.5,
+  sediment: 0x8a7a60, sedimentAmount: 0.35, peakRock: 0.25, rockSlope: [0.16, 0.34],
+};
+
+/**
+ * Looks for the current bodies until `BodyDef` carries its own (requested
+ * from ATLAS). Keyed data, merged over DEFAULT_LOOK.
+ */
+const BODY_LOOKS: Partial<Record<BodyId, Partial<TerrainLook>>> = {
+  // Chalk ridges: fine pale bedding, ochre silt in the hollows.
+  ilex: { specialRough: 0.95, specialSheen: 0, bump: 1, strata: 0.45, strataSpacing: 6, macro: 0.55, sediment: 0x9c8a5c, sedimentAmount: 0.35, peakRock: 0.3 },
+  // Rust mesas: strong terrace banding, pale dust settling in the lows.
+  vesper: { specialRough: 0.35, specialSheen: 0.6, bump: 0.7, strata: 0.75, strataSpacing: 14, macro: 0.6, sediment: 0xc9ae88, sedimentAmount: 0.45, peakRock: 0.2 },
+  // Airless regolith: faint layering, darker fines in crater floors.
+  cairn: { specialRough: 0.22, specialSheen: 1, bump: 1, strata: 0.2, strataSpacing: 11, macro: 0.45, sediment: 0x6c7076, sedimentAmount: 0.4, peakRock: 0.35 },
+};
+
+export function terrainLook(def: BodyDef): TerrainLook {
+  const own = (def as BodyDef & { look?: Partial<TerrainLook> }).look;
+  return { ...DEFAULT_LOOK, ...BODY_LOOKS[def.id], ...own };
 }
 
 export function makeTerrainUniforms(detail: Texture): TerrainUniforms {
@@ -32,6 +88,9 @@ export function makeTerrainUniforms(detail: Texture): TerrainUniforms {
     uSpecialSheen: { value: 0 },
     uDetail: { value: detail },
     uBump: { value: 1 },
+    uSediment: { value: new Color() },
+    uLook: { value: new Vector4(0, 10, 0, 0) },
+    uLook2: { value: new Vector4(0, 1000, 0.16, 0.34) },
   };
 }
 
@@ -45,9 +104,13 @@ export function setTerrainPalette(u: TerrainUniforms, def: BodyDef): void {
   u.uB2.value.setHex(p.b2).convertSRGBToLinear();
   u.uB3.value.setHex(p.b3).convertSRGBToLinear();
   u.uSpecial.value.setHex(p.special).convertSRGBToLinear();
-  u.uSpecialRough.value = def.id === 'cairn' ? 0.22 : def.id === 'vesper' ? 0.35 : 0.95;
-  u.uSpecialSheen.value = def.id === 'cairn' ? 1 : def.id === 'vesper' ? 0.6 : 0;
-  u.uBump.value = def.id === 'vesper' ? 0.7 : 1;
+  const look = terrainLook(def);
+  u.uSpecialRough.value = look.specialRough;
+  u.uSpecialSheen.value = look.specialSheen;
+  u.uBump.value = look.bump;
+  u.uSediment.value.setHex(look.sediment).convertSRGBToLinear();
+  u.uLook.value.set(look.strata, Math.max(1, look.strataSpacing), look.macro, look.sedimentAmount);
+  u.uLook2.value.set(look.peakRock, Math.max(1, def.maxHeight), look.rockSlope[0], look.rockSlope[1]);
 }
 
 const VERT_PARS = /* glsl */ `
@@ -94,6 +157,8 @@ vec3 terrainAlbedo(vec4 surf, vec4 dF, vec4 dM, vec4 dL, out float rockMask, out
 const FRAG_PARS = /* glsl */ `
 ${TERRAIN_ALBEDO_GLSL}
 uniform float uSpecialRough, uSpecialSheen, uBump;
+uniform vec3 uSediment;
+uniform vec4 uLook, uLook2;
 uniform sampler2D uDetail;
 varying vec3 vTile;
 varying vec4 vSurf;
@@ -108,6 +173,16 @@ vec4 triSample(vec3 p, vec3 w) {
   #else
     return texture2D(uDetail, p.yz) * w.x + texture2D(uDetail, p.zx) * w.y + texture2D(uDetail, p.xy) * w.z;
   #endif
+}
+
+// Km-scale variation in planet coordinates (not the 1,024 m tile frame), at two
+// incommensurate scales so no repeat is visible from any height. Low: one scale.
+float terrainMacro(vec3 pRel, vec3 w) {
+  float m = triSample(pRel * (1.0 / 2300.0), w).r;
+  #ifndef TERRAIN_LOW
+    m = m * 0.55 + triSample(pRel.zxy * (1.0 / 8900.0) + 0.37, w).b * 0.45;
+  #endif
+  return m;
 }
 
 vec3 terrainPerturb(vec3 surf_pos, vec3 surf_norm, vec2 dHdxy, float faceDirection) {
@@ -159,7 +234,7 @@ export function createTerrainMaterials(u: TerrainUniforms, aerialSteps: number, 
             '#include <map_fragment>',
             `#include <map_fragment>
             vec3 tN = normalize(vTerrainN);
-            vec3 tw = pow(abs(tN), vec3(4.0));
+            vec3 tw = pow(abs(tN), vec3(6.0));
             tw /= (tw.x + tw.y + tw.z);
             float viewDist = length(vViewPosition);
             float fineW = 1.0 - smoothstep(35.0, 140.0, viewDist);
@@ -171,19 +246,51 @@ export function createTerrainMaterials(u: TerrainUniforms, aerialSteps: number, 
               vec4 dM = triSample(vTile * 0.0625, tw);                    // 16 m tiles
               vec4 dL = triSample(vTile * 0.0078125, tw);                 // 128 m tiles
             #endif
+            // Planet frame: local up, slope and height for material zones.
+            vec3 pRel = vAtmoWorld - uPlanetCenter;
+            float pR = length(pRel);
+            vec3 pUp = pRel / pR;
+            float hN = clamp((pR - uPlanetRadius) / uLook2.y, 0.0, 1.0);
+            float slope = 1.0 - dot(tN, pUp);
+            vec3 uw = pow(abs(pUp), vec3(8.0));
+            uw /= (uw.x + uw.y + uw.z);
+            // Macro variation fades out where the distant proxies (no macro) take over.
+            float macro = (terrainMacro(pRel, uw) - 0.5) * uLook.z * (1.0 - smoothstep(25000.0, 90000.0, viewDist));
+            vec4 tS = vSurf;
+            tS.z = clamp(tS.z + macro * 0.9, 0.0, 1.0);
+            float slopeRock = smoothstep(uLook2.z, uLook2.w, slope + (dM.r - 0.5) * 0.08);
+            float peak = smoothstep(0.55, 0.95, hN + (dL.r - 0.5) * 0.25) * uLook2.x;
+            tS.y = max(tS.y, max(slopeRock, peak));
             float rockMask, specMask;
-            vec3 albedo = terrainAlbedo(vSurf, dF, dM, dL, rockMask, specMask);
+            vec3 albedo = terrainAlbedo(tS, dF, dM, dL, rockMask, specMask);
+            // Strata in height space: horizontal bands on every cliff, antialiased away.
+            float sPh = (pR - uPlanetRadius) / uLook.y + (dM.g - 0.5) * 0.6 + macro * 3.0;
+            float sAA = 1.0 - smoothstep(0.25, 0.7, fwidth(sPh));
+            float band = sin(sPh * 6.2831853) * 0.65 + sin(sPh * 15.71 + 1.3) * 0.35;
+            float strata = band * uLook.x * rockMask * sAA;
+            albedo *= 1.0 + 0.22 * strata;
+            // Sediment collects on low, flat ground (and fills the flattest hollows).
+            float flat = 1.0 - smoothstep(0.015, 0.09, slope);
+            float low = 1.0 - smoothstep(0.08, 0.45, hN + (dL.g - 0.5) * 0.2 + macro * 0.3);
+            float sed = clamp(flat * low * uLook.w * (0.75 + 0.5 * dM.b), 0.0, 1.0) * (1.0 - rockMask) * (1.0 - specMask);
+            albedo = mix(albedo, uSediment * (0.86 + 0.28 * dF.r) * (0.9 + 0.2 * dL.r), sed);
+            // Broad tonal drift on everything (sun-bleached vs. shadowed ground at km scale).
+            albedo *= 1.0 + macro * 0.35;
             diffuseColor.rgb = albedo;`,
           )
           .replace(
             '#include <roughnessmap_fragment>',
-            `float roughnessFactor = mix(mix(0.92, 0.78, rockMask), uSpecialRough, specMask);`,
+            `float roughnessFactor = mix(mix(mix(0.92, 0.78, rockMask), 0.97, sed), uSpecialRough, specMask);`,
           )
           .replace(
             '#include <normal_fragment_maps>',
             `#include <normal_fragment_maps>
             {
-              float bh = (dF.a - 0.5) * 0.05 * uBump * (1.0 - specMask * uSpecialSheen * 0.8) + (dM.a - 0.5) * 0.16 * uBump;
+              // Detail normals: fine bump near only, medium bump fades with distance;
+              // rock is rougher, sediment smoother, strata step the cliff faces.
+              float midW = 1.0 - smoothstep(300.0, 1500.0, viewDist);
+              float relief = uBump * (1.0 + 0.6 * rockMask) * (1.0 - 0.6 * sed);
+              float bh = (dF.a - 0.5) * 0.05 * relief * (1.0 - specMask * uSpecialSheen * 0.8) + (dM.a - 0.5) * 0.16 * relief * midW + strata * 0.05;
               vec2 dH = vec2(dFdx(bh), dFdy(bh));
               normal = terrainPerturb(-vViewPosition, normal, dH, faceDirection);
             }`,
