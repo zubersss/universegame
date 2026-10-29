@@ -1,0 +1,108 @@
+import { readFileSync } from 'node:fs';
+import { describe, expect, it } from 'vitest';
+import { OnFootHost, onFootEdge, type OnFootHooks } from '../src/game/onFoot';
+import type { Mode } from '../src/game/Game';
+import { abilityView, pickWarning } from '../src/ui/Hud';
+
+const MODES: Mode[] = ['PILOTING', 'CRUISING', 'LANDED', 'ON_FOOT'];
+
+/** Hooks that record every call; step returns `owns`. */
+function recorder(owns = false): OnFootHooks & { log: string[] } {
+  const log: string[] = [];
+  return {
+    log,
+    enter: (ctx) => log.push(`enter:${ctx.body}`),
+    step: (dt) => {
+      log.push(`step:${dt}`);
+      return owns;
+    },
+    exit: (reason) => log.push(`exit:${reason}`),
+  };
+}
+
+describe('ON_FOOT hook points (Mode unchanged)', () => {
+  it('fires enter/exit exactly on the ON_FOOT boundary', () => {
+    for (const a of MODES) {
+      for (const b of MODES) {
+        const want = a === b ? null : b === 'ON_FOOT' ? 'enter' : a === 'ON_FOOT' ? 'exit' : null;
+        expect(onFootEdge(a, b), `${a} -> ${b}`).toBe(want);
+      }
+    }
+  });
+
+  it('pairs enter and exit and steps only in between', () => {
+    const host = new OnFootHost();
+    const h = recorder();
+    host.install(h);
+    expect(host.step(1 / 60)).toBe(false); // not on foot: no step
+    host.transition('LANDED', 'ON_FOOT', { body: 'ilex' }, 'relocate');
+    expect(host.active).toBe(true);
+    host.step(1 / 60);
+    host.step(1 / 60);
+    host.transition('ON_FOOT', 'LANDED', null, 'board');
+    host.step(1 / 60);
+    host.transition('LANDED', 'PILOTING', null, 'relocate');
+    expect(h.log).toEqual(['enter:ilex', `step:${1 / 60}`, `step:${1 / 60}`, 'exit:board']);
+    expect(host.active).toBe(false);
+  });
+
+  it('lets an ability own the character only when its step says so', () => {
+    const host = new OnFootHost();
+    host.transition('LANDED', 'ON_FOOT', { body: 'cairn' }, 'relocate');
+    expect(host.step(1 / 60)).toBe(false); // no hooks installed: the walk controller runs
+    host.install(recorder(true));
+    expect(host.step(1 / 60)).toBe(true);
+    host.install(recorder(false));
+    expect(host.step(1 / 60)).toBe(false);
+  });
+
+  it('keeps ordering when hooks are swapped or the character is re-placed', () => {
+    const host = new OnFootHost();
+    const a = recorder();
+    const b = recorder();
+    host.transition('LANDED', 'ON_FOOT', { body: 'vesper' }, 'relocate');
+    host.install(a); // installed while on foot: enters immediately
+    host.install(b); // replaced: the old hooks exit, the new ones enter
+    host.transition('ON_FOOT', 'LANDED', null, 'restore');
+    expect(a.log).toEqual(['enter:vesper', 'exit:replaced']);
+    expect(b.log).toEqual(['enter:vesper', 'exit:restore']);
+    expect(() => host.transition('LANDED', 'ON_FOOT', null, 'relocate')).toThrow();
+  });
+
+  it('routes every Game mode change through setMode', () => {
+    const src = readFileSync(new URL('../src/game/Game.ts', import.meta.url), 'utf8');
+    const assigns = src.match(/this\.mode\s*=[^=]/g) ?? [];
+    expect(assigns).toHaveLength(1);
+    expect(src).toMatch(/private setMode\(next: Mode[^)]*\): void \{\s*const prev = this\.mode;\s*if \(prev === next\) return;\s*this\.mode = next;/);
+    // Boarding reports the exit before the character is removed.
+    expect(src).toMatch(/this\.setMode\('LANDED', 'board'\);\s*this\.player\.dispose\(\);/);
+  });
+});
+
+describe('HUD slot API', () => {
+  it('sanitizes ability readouts', () => {
+    const base = { name: 'Lunar Step', state: 'blink', charge: 1, cooldown: 0, hint: 'Q commit' };
+    expect(abilityView(base)).toEqual({ name: 'Lunar Step', state: 'blink', chargePct: 100, cooldownText: '', hint: 'Q commit', ready: true });
+    expect(abilityView({ ...base, charge: NaN }).chargePct).toBe(0);
+    expect(abilityView({ ...base, charge: 1.7 }).chargePct).toBe(100);
+    expect(abilityView({ ...base, charge: 0.333 }).chargePct).toBe(33);
+    expect(abilityView({ ...base, cooldown: 1.24 })).toMatchObject({ cooldownText: '1.2 s', ready: false });
+    expect(abilityView({ ...base, cooldown: 12.6 }).cooldownText).toBe('13 s');
+    expect(abilityView({ ...base, cooldown: -3 })).toMatchObject({ cooldownText: '', ready: true });
+    expect(abilityView({ ...base, cooldown: Infinity })).toMatchObject({ cooldownText: '', ready: true });
+    expect(abilityView({ ...base, charge: 0 }).ready).toBe(false);
+  });
+
+  it('shows the more severe warning, the game winning ties', () => {
+    const game = { text: 'Slowing: Vesper ahead', severity: 'caution' as const };
+    expect(pickWarning(null, null)).toBeNull();
+    expect(pickWarning(game, null)).toBe(game);
+    const heat = { text: 'Heat 80%', severity: 'danger' as const };
+    expect(pickWarning(null, heat)).toBe(heat);
+    expect(pickWarning(game, heat)).toBe(heat);
+    expect(pickWarning(game, { text: 'Zone edge', severity: 'caution' })).toBe(game);
+    expect(pickWarning(game, { text: 'Thermal', severity: 'info' })).toBe(game);
+    const danger = { text: 'Too fast to land', severity: 'danger' as const };
+    expect(pickWarning(danger, heat)).toBe(danger);
+  });
+});

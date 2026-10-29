@@ -5,6 +5,9 @@ import type { KvStore } from './db';
 
 // Save format (schema 1): only the seed, versions, poses/velocities, mode,
 // settings and progress. Terrain, meshes and physics are regenerated.
+// Schema 2 (charter section I) adds catalog body ids, the system, ability state
+// and unlocks; a record from an older schema is kept read-only under
+// LEGACY_KEY and never migrated (positions do not carry across scales).
 
 export type V3 = [number, number, number];
 export type V4 = [number, number, number, number];
@@ -31,6 +34,7 @@ export interface SaveData {
 export const SAVE_KEY = 'save';
 export const PREV_KEY = 'save-prev';
 export const CORRUPT_KEY = 'save-corrupt';
+export const LEGACY_KEY = 'save-legacy';
 
 /** Largest plausible distance from the system origin (m). */
 const MAX_COORD = 5e6;
@@ -171,6 +175,27 @@ export function validateSave(raw: unknown): Result {
   };
 }
 
+/** Read-only history shown for a save from an older schema. */
+export interface LegacySave {
+  schema: number;
+  savedAt: string | null;
+  playTime: number | null;
+  body: string | null;
+}
+
+/** Summary of a record written by an older save schema, or null for anything else. */
+export function legacySummary(raw: unknown): LegacySave | null {
+  if (!isObj(raw) || !Number.isInteger(raw.schema)) return null;
+  const schema = raw.schema as number;
+  if (schema < 0 || schema >= SAVE_SCHEMA_VERSION) return null;
+  return {
+    schema,
+    savedAt: typeof raw.savedAt === 'string' && raw.savedAt.length <= 40 ? raw.savedAt : null,
+    playTime: isNum(raw.playTime) && raw.playTime >= 0 ? raw.playTime : null,
+    body: typeof raw.body === 'string' && raw.body.length <= 40 ? raw.body : null,
+  };
+}
+
 export type SlotState = { data: SaveData | null; error: string | null; present: boolean };
 
 /**
@@ -182,6 +207,8 @@ export type SlotState = { data: SaveData | null; error: string | null; present: 
 export class SaveStore {
   latest: SlotState = { data: null, error: null, present: false };
   previous: SlotState = { data: null, error: null, present: false };
+  /** A save from an older schema, kept read-only (null when there is none). */
+  legacy: LegacySave | null = null;
   /** Why persistence is not working (null when saves work). */
   failure: string | null = null;
 
@@ -194,7 +221,7 @@ export class SaveStore {
   }
 
   private static slot(raw: unknown): SlotState {
-    if (raw === undefined) return { data: null, error: null, present: false };
+    if (raw === undefined || legacySummary(raw)) return { data: null, error: null, present: false };
     const r = validateSave(raw);
     return r.ok ? { data: r.data, error: null, present: true } : { data: null, error: r.error, present: true };
   }
@@ -202,8 +229,12 @@ export class SaveStore {
   async read(): Promise<void> {
     if (!this.kv) return;
     try {
-      this.latest = SaveStore.slot(await this.kv.get(SAVE_KEY));
+      const raw = await this.kv.get(SAVE_KEY);
+      // An older schema moves to its own key before anything can overwrite it.
+      if (legacySummary(raw) && (await this.kv.get(LEGACY_KEY)) === undefined) await this.kv.put(LEGACY_KEY, raw);
+      this.latest = SaveStore.slot(raw);
       this.previous = SaveStore.slot(await this.kv.get(PREV_KEY));
+      this.legacy = legacySummary(await this.kv.get(LEGACY_KEY));
     } catch (e) {
       this.failure = `Could not read saves: ${(e as Error).message}`;
     }
