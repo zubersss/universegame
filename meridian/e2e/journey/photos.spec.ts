@@ -8,7 +8,9 @@ import { computeSites } from '../../src/world/sites';
 import { quatFromForwardUp } from '../../src/core/mathx';
 import { GEAR_PAD_BOTTOM_Y } from '../../src/ship/ShipModel';
 
-// LUMEN photo set: fixed, scripted camera poses per body, view and preset, so
+// LUMEN photo set (photography only, NOT travel acceptance: bodies are reached
+// by importing a crafted save, never by flying there).
+// Fixed, scripted camera poses per body, view and preset, so
 // every visual change is judged against the same frames. Each body is reached
 // by importing a backup parked on its landing site (Import Backup is a player
 // action; no state hooks), then the test photo camera is placed in the
