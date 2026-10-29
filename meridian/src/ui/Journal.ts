@@ -1,5 +1,5 @@
 import { BODIES, BODY_IDS, CORE_BODY_IDS, EXTENDED_BODY_IDS } from '../world/bodies';
-import { speciesFor } from '../props/species';
+import { catalogFor, CATALOG } from '../fauna/catalog';
 import { sampleName } from '../world/MissionObjects';
 import type { Expedition, ExpeditionState } from '../game/Expedition';
 
@@ -15,18 +15,19 @@ function el(tag: string, cls: string, text?: string): HTMLElement {
 /** Species entries per body: discovered ones with their notes, the rest as unknown. */
 export function renderJournal(root: HTMLElement, s: ExpeditionState): void {
   const out: HTMLElement[] = [];
-  const total = BODY_IDS.reduce((n, b) => n + speciesFor(b).filter((sp) => sp.scannable).length, 0);
+  const total = CATALOG.length;
   out.push(el('div', 'empty', `${s.species.length} of ${total} species logged · ${s.scanned.length} objects scanned. Hold F on foot to scan.`));
   for (const b of BODY_IDS) {
     const def = BODIES[b];
     out.push(el('h3', '', `${def.name} — ${def.biomeNames.join(' · ')}`));
-    if (!speciesFor(b).some((sp) => sp.scannable)) out.push(el('div', 'entry unknown', 'No specimens catalogued yet.'));
-    for (const sp of speciesFor(b)) {
-      if (!sp.scannable) continue;
+    const entries = catalogFor(b);
+    if (entries.length === 0) out.push(el('div', 'entry unknown', 'No specimens catalogued yet.'));
+    for (const sp of entries) {
       const known = s.species.includes(sp.id);
       const entry = el('div', known ? 'entry' : 'entry unknown');
       const head = el('div', 'eh');
-      head.append(el('span', 'en', known ? sp.name : 'Unidentified specimen'), el('span', 'eb', known ? 'Logged' : ''));
+      const kind = sp.kind === 'fauna' ? 'Fauna' : sp.kind === 'mineral' ? 'Mineral' : 'Flora';
+      head.append(el('span', 'en', known ? sp.name : sp.kind === 'fauna' ? 'Unidentified creature' : 'Unidentified specimen'), el('span', 'eb', known ? `${kind} · logged` : kind));
       entry.append(head);
       if (known) entry.append(el('div', 'ed', sp.description));
       out.push(entry);

@@ -27,7 +27,9 @@ import { ActiveBody } from '../world/ActiveBody';
 import { computeSites } from '../world/sites';
 import { MissionObjects, sampleName } from '../world/MissionObjects';
 import { Expedition } from './Expedition';
-import { rayCapsule } from './scan';
+import { rayCapsule, newScanTrack, stepScanTrack, type ScanPhase } from './scan';
+import { FaunaSystem, type Creature, type FaunaContext } from '../fauna/FaunaSystem';
+import { faunaById } from '../fauna/faunaSpecies';
 import type { Species } from '../props/species';
 import type { PropInstance } from '../props/PropSystem';
 import type { SaveData } from '../save/SaveSystem';
@@ -62,6 +64,8 @@ const EXIT_SPOTS: readonly Vector3[] = [
 export interface ScanTarget {
   id: string;
   species: Species | null;
+  /** Fauna species ID when the target is a creature. */
+  fauna?: string;
   label: string;
   /** Distance along the view ray (m). */
   distance: number;
@@ -148,7 +152,17 @@ export class Game {
   /** Relay and sample deposits of the shown body. */
   mission: MissionObjects | null = null;
   scanTarget: ScanTarget | null = null;
-  private scanState = { id: '', progress: 0, done: false };
+  private scanState = newScanTrack();
+  private scanPhase: ScanPhase = 'idle';
+  /** Label of the target being scanned (shown while it is briefly lost). */
+  private scanTrackLabel = '';
+  /** Aimed-at object that cannot be scanned from here (HUD feedback). */
+  scanBlocked: { label: string; why: 'range' | 'obstructed' } | null = null;
+  /** Creatures of the shown body. */
+  fauna: FaunaSystem | null = null;
+  private readonly faunaCtx: FaunaContext = { view: new Vector3(), planetLocal: new Vector3(), player: null, ship: new Vector3(), shipLoud: false };
+  private readonly faunaPlayer = new Vector3();
+  private readonly faunaNear: Creature[] = [];
   /** Persistence hook: called after important interactions and periodically when dirty. */
   onAutosave: ((reason: string) => void) | null = null;
   private autosaveTimer = 0;
@@ -599,7 +613,8 @@ export class Game {
   }
 
   private land(): void {
-    this.audio.thump(1);
+    // Touchdown scales with the vertical impact speed (m/s, positive downward).
+    this.audio.touchdown(-this.ship.vel.dot(this.env.update(this.ship.currPos).up));
     this.parkShip();
     this.mode = 'LANDED';
     this.assist.disengage();
@@ -653,7 +668,7 @@ export class Game {
     if (e.state.transmitted) {
       if (e.transmitExtended()) {
         this.counters.transmissions++;
-        this.audio.complete();
+        this.audio.completeExtended();
         this.onNotice?.('Extended Survey transmitted', `${EXTENDED_NAMES} are charted with the rest of the system. Explore freely.`, true);
         this.autosave('transmit');
       } else if (e.state.extendedTransmitted) {
@@ -850,16 +865,19 @@ export class Game {
     const eye = p.eye(1, _v1);
     const dir = _v2.copy(p.heading).multiplyScalar(Math.cos(p.pitch)).addScaledVector(p.up, Math.sin(p.pitch)).normalize();
     let best: ScanTarget | null = null;
+    this.scanBlocked = null;
     const a = new Vector3();
     const c = new Vector3();
-    const consider = (id: string, species: Species | null, label: string, base: Vector3, top: Vector3, radius: number) => {
-      const hit = rayCapsule(eye, dir, SCAN.range, base, top);
-      if (!hit || hit.dist > radius || hit.t > SCAN.range) return;
+    // Objects somewhat beyond scan range are still found, to explain why they cannot be scanned.
+    const reach = SCAN.range * 1.5;
+    const consider = (id: string, species: Species | null, label: string, base: Vector3, top: Vector3, radius: number, fauna?: string) => {
+      const hit = rayCapsule(eye, dir, reach, base, top);
+      if (!hit || hit.dist > radius || hit.t >= reach) return;
       if (best && hit.t >= best.distance) return;
-      best = { id, species, label, distance: hit.t };
+      best = { id, species, label, distance: hit.t, fauna };
     };
     _v3.copy(eye).sub(this.bodyCenterLocal);
-    const near: PropInstance[] = b.props.nearby(_v3, SCAN.range + 15);
+    const near: PropInstance[] = b.props.nearby(_v3, reach + 15);
     for (const inst of near) {
       const sp = inst.species;
       if (!sp.scannable) continue;
@@ -868,6 +886,17 @@ export class Game {
       const r = Math.max(0.45, inst.h * sp.scanRadius);
       const known = this.expedition.state.species.includes(sp.id);
       consider(inst.id, sp, known ? sp.name : 'Unidentified specimen', a, c, r);
+    }
+    if (this.fauna) {
+      // Moving targets: the one being scanned gets a wider cone so it can be tracked.
+      for (const cr of this.fauna.nearby(_v3, reach + 10, this.faunaNear)) {
+        const sp = cr.species;
+        a.copy(cr.p).add(this.bodyCenterLocal);
+        c.copy(a).addScaledVector(cr.up, cr.h);
+        const r = Math.max(0.45, cr.h * sp.scanRadius) * (cr.id === this.scanState.id ? 1.6 : 1);
+        const known = this.expedition.state.species.includes(sp.id);
+        consider(cr.id, null, known ? sp.name : 'Unidentified creature', a, c, r, sp.id);
+      }
     }
     if (this.mission) {
       for (const t of this.mission.targets) {
@@ -879,9 +908,16 @@ export class Game {
     }
     const found = best as ScanTarget | null;
     if (!found) return null;
+    if (found.distance > SCAN.range) {
+      this.scanBlocked = { label: found.label, why: 'range' };
+      return null;
+    }
     // Line of sight: terrain must not lie between the eye and the target.
     const hit = this.physics.castRay(eye.x, eye.y, eye.z, dir.x, dir.y, dir.z, found.distance, GROUPS.queryTerrain);
-    if (hit && hit.toi < found.distance - 0.3) return null;
+    if (hit && hit.toi < found.distance - 0.3) {
+      this.scanBlocked = { label: found.label, why: 'obstructed' };
+      return null;
+    }
     return found;
   }
 
@@ -890,23 +926,14 @@ export class Game {
     this.scanTarget = target;
     const st = this.scanState;
     const holding = this.state === 'playing' && this.input.isDown('KeyF');
-    if (!holding || !target) {
-      st.progress = 0;
-      if (!holding) st.done = false;
-      return;
-    }
-    if (st.id !== target.id) {
-      st.id = target.id;
-      st.progress = 0;
-      st.done = false;
-    }
-    if (st.done) return;
-    st.progress += dt;
-    this.audio.scanTick(Math.min(1, st.progress / SCAN.holdTime));
-    if (st.progress < SCAN.holdTime) return;
-    st.done = true;
+    // A target that slips out of the cone pauses the scan briefly instead of resetting it.
+    const phase = stepScanTrack(st, holding, target ? target.id : null, dt, SCAN.holdTime);
+    this.scanPhase = phase;
+    if (target && target.id === st.id) this.scanTrackLabel = target.label;
+    if (phase === 'scanning') this.audio.scanTick(Math.min(1, st.progress / SCAN.holdTime));
+    if (phase !== 'complete' || !target) return;
     this.counters.scans++;
-    const sp = target.species;
+    const sp = target.species ?? (target.fauna ? faunaById(target.fauna) ?? null : null);
     const r = this.expedition.scan(target.id, sp ? sp.id : null);
     this.audio.scanDone();
     if (sp && r.newSpecies) {
@@ -1024,6 +1051,8 @@ export class Game {
     this.render.scene.add(this.mission.group);
     this.mission.update(0, this.bodyCenterLocal);
     this.mission.installCollider(this.bodyCenterLocal);
+    this.fauna = new FaunaSystem(def, b.gen, b.sites, this.render.spec.aerialSamples);
+    this.render.scene.add(this.fauna.group);
     if (this.navTarget === def.id && this.state === 'playing') {
       this.onNotice?.(`Approaching ${def.name}`, 'The landing site is marked.', true);
     }
@@ -1038,6 +1067,10 @@ export class Game {
       this.render.scene.remove(this.mission.group);
       this.mission.dispose();
       this.mission = null;
+    }
+    if (this.fauna) {
+      this.fauna.dispose();
+      this.fauna = null;
     }
     b.dispose();
     this.body = null;
@@ -1239,6 +1272,16 @@ export class Game {
       b.props.setQuality(r.spec.propDensity * (lvl ? lvl.propScale : 1), r.spec.propRange);
       const nearGround = this.mode === 'LANDED' || this.mode === 'ON_FOOT' || (this.mode === 'PILOTING' && this.env.update(ship.currPos).clearance < 150);
       b.update(dt, r.camera, this.bodyCenterLocal, focus, r.size.y, nearGround);
+      if (this.fauna) {
+        const fc = this.faunaCtx;
+        fc.view.copy(r.camera.position).sub(this.bodyCenterLocal);
+        fc.planetLocal.copy(this.bodyCenterLocal);
+        fc.player = this.mode === 'ON_FOOT' && this.player ? this.faunaPlayer.copy(this.player.pos).sub(this.bodyCenterLocal) : null;
+        fc.ship.copy(ship.currPos).sub(this.bodyCenterLocal);
+        fc.shipLoud = this.mode === 'PILOTING' && nearGround;
+        this.fauna.setQuality(r.spec.propRange);
+        this.fauna.update(this.state === 'playing' ? dt : 0, fc);
+      }
     }
     this.mission?.update(dt, this.bodyCenterLocal);
     this.tTerrain = performance.now() - tt;
@@ -1323,6 +1366,8 @@ export class Game {
         shipActive: this.mode === 'PILOTING' || cruising,
         onFoot,
         body: def.id,
+        mode: this.mode,
+        gear: this.ship.gearTarget,
       });
     }
   }
@@ -1390,12 +1435,19 @@ export class Game {
         prompts.push(blocker ? { text: blocker, dim: true } : { key: 'E', text: 'Activate relay' });
       } else if (it?.kind === 'ship') prompts.push({ key: 'E', text: 'Board ship' });
       const st = this.scanTarget;
-      if (st) {
+      if (this.scanPhase === 'paused') {
+        hud.scan(Math.min(1, this.scanState.progress / SCAN.holdTime), `${this.scanTrackLabel} · signal lost`);
+        prompts.push({ text: 'Keep the target in the scan cone', dim: true });
+      } else if (st) {
         const scanning = this.input.isDown('KeyF') && this.scanState.id === st.id;
         const known = st.species ? exp.state.species.includes(st.species.id) : exp.state.scanned.includes(st.id);
         if (!scanning) prompts.push({ key: 'F', text: `Hold to scan · ${st.label}${known ? ' (logged)' : ''}` });
         hud.scan(scanning ? Math.min(1, this.scanState.progress / SCAN.holdTime) : null, st.label);
-      } else hud.scan(null, '');
+      } else {
+        hud.scan(null, '');
+        const sb = this.scanBlocked;
+        if (sb) prompts.push({ text: `${sb.label} · ${sb.why === 'range' ? 'out of scan range' : 'line of sight blocked'}`, dim: true });
+      }
       hud.crosshairTarget(st !== null);
       // Beside the ship the boarding prompt is enough; the marker is for finding it.
       if (bd > WALK.boardDistance + 5) markers.push({ id: 'ship', label: 'Ship', pos: this.boardingPoint(_v2).clone(), kind: 'ship', distance: bd });
@@ -1745,10 +1797,11 @@ export class Game {
         ? { ...b.terrain.stats, coarseReady: b.terrain.coarseReady, atRoots: b.terrain.atRoots, colliders: b.collision.count, focusReady: b.collision.focusReady }
         : null,
       props: b ? { ...b.props.stats, triangles: b.props.triangleEstimate } : null,
+      fauna: this.fauna ? { ...this.fauna.stats, triangles: this.fauna.triangleEstimate } : null,
       proxies: { ready: this.proxies.readyCount },
       quality: { preset: this.render.preset, adaptive: this.settings.adaptive, level: this.adaptive.level, medianMs: this.adaptive.lastMedianMs, resolutionScale: this.render.resolutionScale },
       expedition: JSON.parse(JSON.stringify(this.expedition.state)),
-      scan: { target: this.scanTarget ? this.scanTarget.id : null, label: this.scanTarget?.label ?? null, progress: this.scanState.progress, done: this.scanState.done },
+      scan: { target: this.scanTarget ? this.scanTarget.id : null, label: this.scanTarget?.label ?? null, progress: this.scanState.progress, done: this.scanState.done, phase: this.scanPhase, blocked: this.scanBlocked },
       interaction: this.interactionTarget(),
       mission: this.mission ? { relayCollider: this.mission.hasCollider, targets: this.mission.targets.map((t) => ({ id: t.id, kind: t.kind, local: t.pos.clone().add(this.bodyCenterLocal).toArray() })) } : null,
       heapMB: mem ? mem.usedJSHeapSize / 1048576 : null,

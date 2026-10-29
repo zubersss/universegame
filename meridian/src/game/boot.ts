@@ -33,6 +33,7 @@ export async function boot(): Promise<void> {
   /** Start (or continue) play from a user gesture: audio and pointer lock need one. */
   const startPlay = (g: Game) => {
     g.audio.start(settings.volume);
+    g.audio.setMix(settings.music, settings.effects);
     g.input.requestLock();
   };
 
@@ -148,6 +149,7 @@ export async function boot(): Promise<void> {
         if (game) {
           game.settings = s;
           game.audio.setVolume(s.volume);
+          game.audio.setMix(s.music, s.effects);
           if (presetChanged) {
             game.applyPreset(s.preset);
             menus.setSettingsNote('Preset applied. Sky and terrain shader detail and the antialiasing mode switch fully after a reload.');

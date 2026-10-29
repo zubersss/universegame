@@ -1,5 +1,5 @@
 import { BODIES, BODY_IDS, CORE_BODY_IDS, EXTENDED_BODY_IDS, isBodyId, type BodyId } from '../world/bodies';
-import { speciesById } from '../props/species';
+import { catalogById } from '../fauna/catalog';
 
 // Expedition progress: discoveries, samples, relays and the final transmission.
 // Pure data plus rules, so it can be saved, validated and unit-tested. Every
@@ -123,7 +123,7 @@ export class Expedition {
     const newObject = !this.state.scanned.includes(objectId);
     if (newObject) this.state.scanned.push(objectId);
     let newSpecies = false;
-    if (speciesId && speciesById(speciesId) && !this.state.species.includes(speciesId)) {
+    if (speciesId && catalogById(speciesId) && !this.state.species.includes(speciesId)) {
       this.state.species.push(speciesId);
       newSpecies = true;
     }
