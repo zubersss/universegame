@@ -170,6 +170,13 @@ button:disabled { opacity: 0.4; cursor: default; }
   #notices { top: 10px; right: 10px; max-width: 280px; }
   .notice { padding: 6px 10px; font-size: 12px; }
   #save-indicator { bottom: 52px; right: 50%; transform: translateX(50%); margin: 0; }
+  /* Panels: tighter so all five navigation rows fit at 640x360. */
+  .sheet { padding: 14px 18px; max-height: 94vh; }
+  .sheet h2 { margin: 0 0 10px; }
+  .tabs { padding-bottom: 8px; margin-bottom: 10px; }
+  .navrow { padding: 5px 10px; margin-bottom: 4px; }
+  .navrow .name { font-size: 13px; }
+  #nav-list .empty, #panel-nav .empty { font-size: 11px; padding: 4px 0; }
 }
 
 @media (max-width: 720px) {
