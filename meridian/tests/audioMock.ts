@@ -125,6 +125,20 @@ export class MockBufferSource extends MockSource {
   }
 }
 
+export class MockPanner extends MockNode {
+  panningModel = 'HRTF';
+  distanceModel = 'inverse';
+  refDistance = 1;
+  rolloffFactor = 1;
+  maxDistance = 10000;
+  positionX = new MockParam(0);
+  positionY = new MockParam(0);
+  positionZ = new MockParam(0);
+  constructor(ctx: MockContext) {
+    super(ctx, 'panner');
+  }
+}
+
 export class MockAnalyser extends MockNode {
   fftSize = 2048;
   constructor(ctx: MockContext) {
@@ -158,6 +172,9 @@ export class MockContext {
   }
   createBufferSource(): MockBufferSource {
     return new MockBufferSource(this);
+  }
+  createPanner(): MockPanner {
+    return new MockPanner(this);
   }
   createAnalyser(): MockAnalyser {
     return new MockAnalyser(this);

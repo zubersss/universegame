@@ -336,3 +336,54 @@ describe('ship layers', () => {
     expect(pool.snapshot().liveNodes).toBe(0);
   });
 });
+
+describe('creatures and discovery', () => {
+  it('spatializes fauna events through equal-power panners on the creatures bus and frees them', () => {
+    const { ctx, audio } = setup();
+    const mix = inner(audio).mix;
+    const persistent = new Set(ctx.nodes);
+    audio.creature('call', 'ilex-trine', { x: 10, y: 0, z: -5 }, 0.6);
+    const panners = ctx.nodes.filter((n) => n.kind === 'panner') as unknown as { panningModel: string; positionX: { value: number }; outputs: Set<MockNode> }[];
+    expect(panners.length).toBeGreaterThan(0);
+    for (const p of panners) {
+      expect(p.panningModel).toBe('equalpower');
+      expect(p.positionX.value).toBe(10);
+      expect([...p.outputs]).toEqual([mix.buses.creatures.input]);
+    }
+    ctx.advance(10);
+    expect(ctx.nodes.filter((n) => !persistent.has(n)).every((n) => n.disconnected)).toBe(true);
+  });
+
+  it('keeps fauna under their sub-cap, ignores far creatures and unknown species fall back', () => {
+    const { audio } = setup();
+    const pool = (audio as unknown as { pool: VoicePool }).pool;
+    for (let i = 0; i < 40; i++) audio.creature('alarm', 'ilex-trine', { x: 1, y: 0, z: -3 }, 1);
+    expect(pool.count('creature')).toBeLessThanOrEqual(12 + 5);
+    expect(pool.snapshot().active).toBeLessThanOrEqual(32);
+    const before = pool.snapshot().started;
+    audio.creature('call', 'ilex-trine', { x: 0, y: 0, z: -500 }, 1);
+    expect(pool.snapshot().started).toBe(before);
+    const { audio: a2 } = setup();
+    a2.creature('step', 'no-such-species', { x: 0, y: 0, z: -2 }, 0.5);
+    expect((a2 as unknown as { pool: VoicePool }).pool.snapshot().started).toBe(1);
+  });
+
+  it('does not double the logged chime after scanDone and plays swells on the music bus', () => {
+    const { ctx, audio } = setup();
+    const pool = (audio as unknown as { pool: VoicePool }).pool;
+    audio.scanDone();
+    const n = pool.snapshot().started;
+    audio.discovery('logged');
+    expect(pool.snapshot().started).toBe(n);
+    ctx.advance(1);
+    audio.discovery('logged');
+    expect(pool.snapshot().started).toBe(n + 2);
+    audio.discovery('firstSpecies');
+    const mix = inner(audio).mix;
+    expect(ctx.reaches(pool.active.at(-1)!.out as unknown as MockNode, mix.buses.music.input as unknown as MockNode)).toBe(true);
+    audio.discovery('worldComplete');
+    audio.discovery('scanStart');
+    ctx.advance(30);
+    expect(pool.snapshot().liveNodes).toBe(0);
+  });
+});

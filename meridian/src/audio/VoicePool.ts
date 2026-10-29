@@ -23,6 +23,8 @@ export interface Voice {
   end: number;
   ended: number;
   stolen: boolean;
+  /** Optional group label (sub-caps such as creature voices). */
+  tag: string | null;
 }
 
 export interface VoiceStats {
@@ -70,12 +72,19 @@ export class VoicePool {
     out.connect(dest);
     const v: Voice = {
       id: this.nextId++, out, nodes: [out], sources: [], start, attack, decay, peak,
-      end: start + attack + decay + 0.05, ended: 0, stolen: false,
+      end: start + attack + decay + 0.05, ended: 0, stolen: false, tag: null,
     };
     this.active.push(v);
     this.stats.started++;
     this.stats.nodesCreated++;
     return v;
+  }
+
+  /** Number of active voices carrying `tag`. */
+  count(tag: string): number {
+    let n = 0;
+    for (const v of this.active) if (v.tag === tag) n++;
+    return n;
   }
 
   /** Register an intermediate node (filter, gain) so it is disconnected with the voice. */

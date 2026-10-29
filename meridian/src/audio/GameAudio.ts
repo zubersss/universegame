@@ -7,6 +7,9 @@ import type { BodyId } from '../world/bodies';
 import { Mixer, type BusName } from './Mixer';
 import { VoicePool, type Voice, type VoiceStats } from './VoicePool';
 import { STEPS, ambienceFor, isAirless } from './profiles';
+import { CREATURE_RANGE, CREATURE_VOICE_CAP, creatureVoice, type CreatureEvent, type CreatureLayer } from './creatures';
+
+export type DiscoveryKind = 'scanStart' | 'logged' | 'firstSpecies' | 'worldComplete';
 
 export interface AudioFrame {
   /** Engine thrust 0..1 (0 when parked or on foot). */
@@ -51,6 +54,8 @@ export class GameAudio {
   private drone!: { a: OscillatorNode; b: OscillatorNode; g: GainNode };
   private lastMode: AudioFrame['mode'] | null = null;
   private lastGear = -1;
+  private body: BodyId = 'ilex';
+  private lastChime = -10;
   private persistent: AudioNode[] = [];
   private loops: AudioScheduledSourceNode[] = [];
   private analyser: AnalyserNode | null = null;
@@ -252,6 +257,7 @@ export class GameAudio {
   update(dt: number, f: AudioFrame): void {
     if (!this.running) return;
     this.pool.sweep(dt);
+    this.body = f.body;
     const prof = ambienceFor(f.body);
     const airless = isAirless(f.body);
     this.suitMode = f.onFoot && airless;
@@ -453,6 +459,8 @@ export class GameAudio {
   }
 
   scanDone(): void {
+    if (!this.running) return;
+    this.lastChime = this.ctx!.currentTime;
     this.tone(659.3, 'sine', 0.08, 0.01, 0.35);
     this.tone(987.8, 'sine', 0.07, 0.01, 0.6, 'effects', 0.11);
   }
@@ -477,6 +485,96 @@ export class GameAudio {
     this.mix.duck('ambience', 0.4, 4);
     const chord = [196, 293.7, 392, 493.9, 587.3];
     chord.forEach((f, i) => this.tone(f, 'sine', 0.06, 0.6, 4.5, 'effects', i * 0.18));
+  }
+
+  /**
+   * A fauna sound event. `pos` is the creature relative to the camera in
+   * camera space (x right, y up, −z forward; metres), e.g.
+   * `world.applyMatrix4(camera.matrixWorldInverse)`. `intensity` 0..1.
+   */
+  creature(ev: CreatureEvent, speciesId: string, pos: { x: number; y: number; z: number }, intensity = 1): void {
+    if (!this.running) return;
+    const d = Math.hypot(pos.x, pos.y, pos.z);
+    if (d > CREATURE_RANGE || intensity <= 0) return;
+    const layers = creatureVoice(speciesId)[ev];
+    // Fauna stay inside their own sub-cap so a herd never crowds out cues.
+    if (this.pool.count('creature') >= CREATURE_VOICE_CAP) return;
+    const k = Math.min(1, intensity) * (0.85 + Math.random() * 0.3);
+    const detune = 0.94 + Math.random() * 0.12;
+    for (const l of layers) {
+      const n = l.repeat ?? 1;
+      for (let i = 0; i < n; i++) this.creatureLayer(l, pos, k, detune, (l.delay ?? 0) + i * (l.every ?? 0));
+    }
+  }
+
+  private creatureLayer(l: CreatureLayer, pos: { x: number; y: number; z: number }, k: number, detune: number, delay: number): void {
+    const ctx = this.ctx!;
+    const p = ctx.createPanner();
+    p.panningModel = 'equalpower';
+    p.distanceModel = 'inverse';
+    p.refDistance = 6;
+    p.rolloffFactor = 1;
+    p.maxDistance = CREATURE_RANGE;
+    p.positionX.value = pos.x;
+    p.positionY.value = pos.y;
+    p.positionZ.value = pos.z;
+    p.connect(this.mix.bus('creatures'));
+    const v = this.pool.voice(p, l.peak * k, l.attack, l.decay, ctx.currentTime + delay);
+    if (!v) {
+      p.disconnect();
+      return;
+    }
+    v.tag = 'creature';
+    this.pool.node(v, p);
+    const f0 = l.freq * detune;
+    if (l.src === 'noise') {
+      const s = this.noiseSource(false);
+      const fl = this.pool.node(v, ctx.createBiquadFilter());
+      fl.type = l.filter ?? 'bandpass';
+      fl.frequency.value = f0;
+      fl.Q.value = l.q ?? 1;
+      if (l.glide) {
+        fl.frequency.setValueAtTime(f0, v.start);
+        fl.frequency.exponentialRampToValueAtTime(l.glide * detune, v.start + l.attack + l.decay);
+      }
+      s.connect(fl);
+      fl.connect(v.out);
+      this.pool.source(v, s, Math.random() * 1.5);
+    } else {
+      const o = ctx.createOscillator();
+      o.type = l.src;
+      o.frequency.value = f0;
+      if (l.glide) {
+        o.frequency.setValueAtTime(f0, v.start);
+        o.frequency.exponentialRampToValueAtTime(l.glide * detune, v.start + l.attack + l.decay);
+      }
+      o.connect(v.out);
+      this.pool.source(v, o);
+    }
+  }
+
+  /** Discovery moments. 'logged' is skipped if scanDone() already chimed. */
+  discovery(kind: DiscoveryKind): void {
+    if (!this.running) return;
+    const t = this.ctx!.currentTime;
+    if (kind === 'scanStart') this.tone(440, 'sine', 0.02, 0.04, 0.18);
+    else if (kind === 'logged') {
+      if (t - this.lastChime > 0.4) this.scanDone();
+    } else if (kind === 'firstSpecies') this.swell(3, 0.022, 3.5, 2);
+    else this.swell(5, 0.03, 6, 4);
+  }
+
+  /** Music swell on the current world's scale: `notes` rising, ambience ducked. */
+  private swell(notes: number, peak: number, decay: number, hold: number): void {
+    const p = ambienceFor(this.body);
+    this.mix.duck('ambience', 0.6, hold);
+    const start = Math.floor(Math.random() * 2);
+    for (let i = 0; i < notes; i++) {
+      const step = p.scale[Math.min(p.scale.length - 1, start + i * 2)];
+      const f = p.tonic * 2 ** (step / 12);
+      this.tone(f, p.timbre, peak, 0.8, decay, 'music', i * 0.4);
+      this.tone(f * 2, 'sine', peak * 0.3, 1.2, decay, 'music', i * 0.4 + 0.2);
+    }
   }
 
   /** Extended Survey transmitted: a slower, wider cue than the core transmission. */
