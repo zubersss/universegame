@@ -1,5 +1,5 @@
-import { BODY_IDS, isBodyId, type BodyId } from '../world/bodies';
-import { speciesById } from '../props/species';
+import { BODIES, BODY_IDS, CORE_BODY_IDS, EXTENDED_BODY_IDS, isBodyId, type BodyId } from '../world/bodies';
+import { catalogById } from '../fauna/catalog';
 
 // Expedition progress: discoveries, samples, relays and the final transmission.
 // Pure data plus rules, so it can be saved, validated and unit-tested. Every
@@ -14,13 +14,24 @@ export interface ExpeditionState {
   relays: BodyId[];
   /** Species IDs with journal entries. */
   species: string[];
+  /** Simulated time (s) of each species' first discovery, by species ID (filled by the scanner). */
+  discovered: Record<string, number>;
   /** Stable object IDs that have been scanned (props, samples, relays). */
   scanned: string[];
+  /** The core survey (Ilex, Vesper, Cairn relays) has been transmitted. */
   transmitted: boolean;
+  /** The Extended Survey (the new worlds' relays) has been transmitted, after the core survey. */
+  extendedTransmitted: boolean;
+}
+
+export function emptyInventory(): Record<BodyId, number> {
+  const inv = {} as Record<BodyId, number>;
+  for (const b of BODY_IDS) inv[b] = 0;
+  return inv;
 }
 
 export function newExpedition(): ExpeditionState {
-  return { inventory: { ilex: 0, vesper: 0, cairn: 0 }, collected: [], relays: [], species: [], scanned: [], transmitted: false };
+  return { inventory: emptyInventory(), collected: [], relays: [], species: [], discovered: {}, scanned: [], transmitted: false, extendedTransmitted: false };
 }
 
 /** Body that a sample/relay ID belongs to (IDs are `${body}:...`). */
@@ -74,15 +85,34 @@ export class Expedition {
   }
 
   get canTransmit(): boolean {
-    return !this.state.transmitted && BODY_IDS.every((b) => this.relayActive(b));
+    return !this.state.transmitted && CORE_BODY_IDS.every((b) => this.relayActive(b));
   }
 
-  /** Transmit the three-relay survey once. */
+  /** Transmit the three-relay (core) survey once. */
   transmit(): boolean {
     if (!this.canTransmit) return false;
     this.state.transmitted = true;
     this.dirty = true;
     return true;
+  }
+
+  /** The Extended Survey can be sent once, after the core survey, with every extended relay active. */
+  get canTransmitExtended(): boolean {
+    const s = this.state;
+    return s.transmitted && !s.extendedTransmitted && EXTENDED_BODY_IDS.every((b) => this.relayActive(b));
+  }
+
+  /** Transmit the Extended Survey once. */
+  transmitExtended(): boolean {
+    if (!this.canTransmitExtended) return false;
+    this.state.extendedTransmitted = true;
+    this.dirty = true;
+    return true;
+  }
+
+  /** Active relays of one survey. */
+  relaysActive(survey: 'core' | 'extended'): number {
+    return (survey === 'core' ? CORE_BODY_IDS : EXTENDED_BODY_IDS).filter((b) => this.relayActive(b)).length;
   }
 
   /**
@@ -93,7 +123,7 @@ export class Expedition {
     const newObject = !this.state.scanned.includes(objectId);
     if (newObject) this.state.scanned.push(objectId);
     let newSpecies = false;
-    if (speciesId && speciesById(speciesId) && !this.state.species.includes(speciesId)) {
+    if (speciesId && catalogById(speciesId) && !this.state.species.includes(speciesId)) {
       this.state.species.push(speciesId);
       newSpecies = true;
     }
@@ -103,23 +133,29 @@ export class Expedition {
 
   get samplesCarried(): number {
     const inv = this.state.inventory;
-    return inv.ilex + inv.vesper + inv.cairn;
+    let n = 0;
+    for (const b of BODY_IDS) n += inv[b];
+    return n;
   }
 
   /** The next step of the survey, for the objective panel. */
   objective(currentBody: BodyId | null): { title: string; detail: string; body: BodyId | null } {
     const s = this.state;
-    if (s.transmitted) return { title: 'Survey transmitted', detail: 'The expedition is complete. The system is yours to explore.', body: null };
+    if (s.extendedTransmitted) return { title: 'Extended Survey transmitted', detail: 'Every world is charted. The system is yours to explore.', body: null };
+    if (this.canTransmitExtended) return { title: 'Transmit the Extended Survey', detail: 'Both outer relays are live. Press T aboard the ship to transmit.', body: null };
     if (this.canTransmit) return { title: 'Transmit the survey', detail: 'All three relays are live. Press T aboard the ship to transmit.', body: null };
-    const pending = BODY_IDS.filter((b) => !this.relayActive(b));
+    // The core survey first; after its transmission the Extended Survey guides the player on.
+    const ids = s.transmitted ? EXTENDED_BODY_IDS : CORE_BODY_IDS;
+    const pending = ids.filter((b) => !this.relayActive(b));
     const here = currentBody && pending.includes(currentBody) ? currentBody : null;
     const body = here ?? pending[0];
-    const name = body.charAt(0).toUpperCase() + body.slice(1);
+    const name = BODIES[body].name;
+    const prefix = s.transmitted ? 'Extended Survey · ' : '';
     if (s.inventory[body] > 0) {
-      return { title: `Activate the ${name} relay`, detail: 'Bring the sample to the relay mast and press E.', body };
+      return { title: `${prefix}Activate the ${name} relay`, detail: 'Bring the sample to the relay mast and press E.', body };
     }
     return {
-      title: `Survey ${name}`,
+      title: `${prefix}Survey ${name}`,
       detail: here ? 'Collect a sample near the relay (E), then activate the relay.' : `Set course for ${name} (Tab) and land at the marked site.`,
       body,
     };

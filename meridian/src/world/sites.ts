@@ -4,7 +4,7 @@
 // context (main thread, worker, other browsers) picks the same site.
 
 import { BODIES, SUN_DIR, type BodyDef, type BodyId } from './bodies';
-import { faceDir } from './cube';
+import { dirToFace, faceDir } from './cube';
 import { SurfaceGenerator, type Clearing, type SurfaceInfo } from './surface';
 import { hashCombine } from '../core/rng';
 
@@ -76,6 +76,11 @@ interface Prefs {
   faceMin: number;
   biomeLo: number;
   biomeHi: number;
+  /**
+   * Nudge sites off contact-tile seams. Off for the original three bodies so
+   * their released sites (and worlds) stay exactly as they were.
+   */
+  avoidSeams?: boolean;
 }
 
 function dirTo(a: BodyDef, b: BodyDef): V3 {
@@ -89,9 +94,27 @@ function prefsFor(def: BodyDef): Prefs {
       return { sunLo: 0.31, sunHi: 0.53, face: dirTo(B.ilex, B.vesper), faceMin: 0.05, biomeLo: 0.55, biomeHi: 0.88 };
     case 'vesper': // dunes against mesa country; facing the approach from Ilex
       return { sunLo: 0.34, sunHi: 0.57, face: dirTo(B.vesper, B.ilex), faceMin: 0.15, biomeLo: 0.3, biomeHi: 0.72 };
+    case 'orrin': // moss lowlands below the basalt steps; facing the approach from Ilex
+      return { sunLo: 0.3, sunHi: 0.55, face: dirTo(B.orrin, B.ilex), faceMin: 0.05, biomeLo: 0.7, biomeHi: 1.01, avoidSeams: true };
+    case 'saro': // salt flats at the edge of the brine pans; facing the approach from Ilex
+      return { sunLo: 0.36, sunHi: 0.62, face: dirTo(B.saro, B.ilex), faceMin: 0.05, biomeLo: 0.05, biomeHi: 0.4, avoidSeams: true };
     default: // rime basin near the terminator; facing the approach from Vesper
       return { sunLo: 0.17, sunHi: 0.41, face: dirTo(B.cairn, B.vesper), faceMin: -0.1, biomeLo: 0.55, biomeHi: 1.01 };
   }
+}
+
+/**
+ * Approximate surface distance (m) from a direction to the nearest boundary of
+ * the finest (contact) tiles. Rays exactly on a boundary can slip between two
+ * colliders, so mission sites should keep clear of them.
+ */
+export function seamDistance(def: BodyDef, dir: readonly number[]): number {
+  const { u, v } = dirToFace(dir[0], dir[1], dir[2]);
+  const n = 2 ** def.maxLevel;
+  const fu = ((u + 1) / 2) * n;
+  const fv = ((v + 1) / 2) * n;
+  const d = Math.min(Math.abs(fu - Math.round(fu)), Math.abs(fv - Math.round(fv)));
+  return d * ((Math.PI / 2) * def.radius) / n;
 }
 
 const info: SurfaceInfo = { height: 0, biome: 0, variation: 0, special: 0, rockiness: 0 };
@@ -113,6 +136,21 @@ function flatness(gen: SurfaceGenerator, n: V3, r: number): { mean: number; roug
   let v = 0;
   for (const h of hs) v += (h - mean) * (h - mean);
   return { mean, rough: Math.sqrt(v / hs.length) };
+}
+
+const SEAM_CLEARANCE = 2;
+
+/** The nearest of a few small fixed offsets of `n` that lies at least SEAM_CLEARANCE m from a tile seam. */
+function offSeam(def: BodyDef, n: V3): V3 {
+  if (seamDistance(def, n) >= SEAM_CLEARANCE) return n;
+  const basis = tangentBasis(n);
+  for (const dist of [3, 6, 9]) {
+    for (const [c, s] of BEARINGS) {
+      const cand = offsetDir(n, basis, c, s, dist, def.radius);
+      if (seamDistance(def, cand) >= SEAM_CLEARANCE) return cand;
+    }
+  }
+  return n;
 }
 
 const cache = new Map<BodyId, MissionSites>();
@@ -163,6 +201,10 @@ export function computeSites(def: BodyDef): MissionSites {
       }
     }
   }
+  if (p.avoidSeams) {
+    landing = offSeam(def, landing);
+    lf = flatness(gen, landing, 120);
+  }
   // 3) Relay pad ~190 m away on the flattest bearing.
   const lb = tangentBasis(landing);
   let relay: V3 = offsetDir(landing, lb, 1, 0, RELAY_DISTANCE, gen.R);
@@ -178,6 +220,10 @@ export function computeSites(def: BodyDef): MissionSites {
       relayMean = f.mean;
     }
   }
+  if (p.avoidSeams) {
+    relay = offSeam(def, relay);
+    relayMean = flatness(gen, relay, 25).mean;
+  }
   const clearings: Clearing[] = [
     { dir: landing, height: lf.mean, r0: LANDING_R0, r1: LANDING_R1 },
     { dir: relay, height: relayMean, r0: RELAY_R0, r1: RELAY_R1 },
@@ -189,7 +235,8 @@ export function computeSites(def: BodyDef): MissionSites {
   const dists = [26, 40, 54];
   for (let i = 0; i < 3; i++) {
     const [c, s] = BEARINGS[(rot + i * 3) % 8];
-    samples.push({ id: `${def.id}:sample:${i}`, dir: offsetDir(relay, rb, c, s, dists[i], gen.R) });
+    const dir = offsetDir(relay, rb, c, s, dists[i], gen.R);
+    samples.push({ id: `${def.id}:sample:${i}`, dir: p.avoidSeams ? offSeam(def, dir) : dir });
   }
   const sites: MissionSites = {
     bodyId: def.id,

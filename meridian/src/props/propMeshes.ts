@@ -293,3 +293,81 @@ export function pebbles(): SpeciesGeometry {
   colorize(g, (p, n, c) => c.copy(b).lerp(a, 0.4 + 0.5 * Math.max(0, n.y)));
   return { lod0: g, lod1: null };
 }
+
+// ------------------------------------------------- appended species (studio)
+
+/** Loam vesicle (Ilex): a low cluster of translucent teal bladders on the grove floor. Height ~1. */
+export function loamVesicle(): SpeciesGeometry {
+  const deep = lin(0x1f4a44);
+  const pale = lin(0x9fd8c4);
+  const stalk = lin(0x4a3d30);
+  const make = (detail: boolean) => {
+    const rnd = mulberry32(81);
+    const parts: BufferGeometry[] = [];
+    for (let i = 0; i < 6; i++) {
+      const r = 0.16 + rnd() * 0.16;
+      const a = rnd() * Math.PI * 2;
+      const d = i === 0 ? 0 : 0.18 + rnd() * 0.25;
+      const s = new SphereGeometry(r, detail ? 8 : 5, detail ? 6 : 3);
+      s.scale(1, 1.25, 1);
+      s.translate(Math.cos(a) * d, r * 1.1 + (i === 0 ? 0.35 : rnd() * 0.15), Math.sin(a) * d);
+      parts.push(colorize(s, (p, n, c) => c.copy(deep).lerp(pale, Math.min(1, 0.25 + Math.max(0, n.y) * 0.6 + p.y * 0.3))));
+      if (detail) {
+        const st = new CylinderGeometry(0.012, 0.02, r * 1.2, 3, 1, true);
+        st.translate(Math.cos(a) * d, r * 0.6, Math.sin(a) * d);
+        parts.push(colorize(st, (_p, _n, c) => c.copy(stalk)));
+      }
+    }
+    return merge(parts);
+  };
+  return { lod0: make(true), lod1: make(false) };
+}
+
+/** Fulgurite tube (Vesper): branching hollow glass tubes fused from sand. Height ~1. */
+export function fulgurite(): SpeciesGeometry {
+  const sand = lin(0xc2a57d);
+  const glass = lin(0x5a5048);
+  const make = (sides: number, branches: number) => {
+    const rnd = mulberry32(91);
+    const parts: BufferGeometry[] = [];
+    const trunk = new CylinderGeometry(0.05, 0.08, 1, sides, 3, true);
+    trunk.translate(0, 0.5, 0);
+    trunk.rotateZ(0.12);
+    parts.push(trunk);
+    for (let i = 0; i < branches; i++) {
+      const l = 0.3 + rnd() * 0.35;
+      const b = new CylinderGeometry(0.02, 0.045, l, sides, 1, true);
+      b.translate(0, l / 2, 0);
+      b.rotateZ((rnd() - 0.5) * 1.6);
+      b.rotateY(rnd() * Math.PI * 2);
+      b.translate(0, 0.15 + rnd() * 0.5, 0);
+      parts.push(b);
+    }
+    const g = merge(parts);
+    return colorize(g, (p, n, c) => c.copy(glass).lerp(sand, Math.min(1, 0.4 + 0.5 * Math.abs(n.y) + 0.2 * Math.sin(p.y * 30))));
+  };
+  return { lod0: make(6, 5), lod1: make(3, 2) };
+}
+
+/** Frost bloom (Cairn): feathered hoar plates fanning out from a rock face. Height ~1. */
+export function frostBloom(): SpeciesGeometry {
+  const deep = lin(0x8fb6dd);
+  const pale = lin(0xf0f7ff);
+  const make = (count: number) => {
+    const rnd = mulberry32(101);
+    const parts: BufferGeometry[] = [];
+    for (let i = 0; i < count; i++) {
+      // A thin fan blade: a flattened cone, tilted outward.
+      const h = 0.5 + rnd() * 0.5;
+      const f = new ConeGeometry(0.22 + rnd() * 0.1, h, 4, 1);
+      f.scale(1, 1, 0.12);
+      f.translate(0, h / 2, 0);
+      f.rotateX((rnd() - 0.5) * 1.1);
+      f.rotateY(rnd() * Math.PI * 2);
+      parts.push(f);
+    }
+    const g = merge(parts);
+    return colorize(g, (p, n, c) => c.copy(deep).lerp(pale, Math.min(1, 0.3 + p.y * 0.7 + Math.abs(n.y) * 0.2)));
+  };
+  return { lod0: make(9), lod1: make(4) };
+}

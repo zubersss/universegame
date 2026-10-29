@@ -81,7 +81,7 @@ test('a corrupt latest save offers the previous save and is kept aside', async (
   await pauseAndSave(page);
   expect(await idbGet(page, 'save-corrupt')).toEqual({ schema: 1, ship: 'garbage' });
   const latest = (await idbGet(page, 'save')) as Record<string, unknown>;
-  expect(latest.schema).toBe(1);
+  expect(latest.schema).toBe(2); // current save schema (schema 2 since the Orrin/Saro round)
   expect(latest.mode).toBe('LANDED');
   expect(errors).toEqual([]);
 });
@@ -113,7 +113,7 @@ test('denied storage keeps the game playable; export and import still work', asy
   const file = info.outputPath('backup.json');
   await (await dl).saveAs(file);
   const backup = JSON.parse(readFileSync(file, 'utf8'));
-  expect(backup.schema).toBe(1);
+  expect(backup.schema).toBe(2); // current save schema
   expect(backup.mode).toBe('PILOTING');
   // Re-import the backup (restores the flight state).
   await page.setInputFiles('#file-import', file);
@@ -180,6 +180,8 @@ test('settings persist across a reload', async ({ page }) => {
   await page.locator('#set-reduced').check();
   await page.locator('#set-sens').fill('1.6');
   await page.locator('#set-volume').fill('0.35');
+  await page.locator('#set-music').fill('0.2');
+  await page.locator('#set-effects').fill('0.65');
   await page.click('#btn-settings-back');
   // Settings are written asynchronously; wait for the record to land.
   await page.waitForFunction(async () => {
@@ -193,7 +195,7 @@ test('settings persist across a reload', async ({ page }) => {
       r.onsuccess = () => res(r.result);
     });
     db.close();
-    return v && v.invertY === true && Math.abs(v.sensitivity - 1.6) < 1e-6;
+    return v && v.invertY === true && Math.abs(v.sensitivity - 1.6) < 1e-6 && Math.abs(v.effects - 0.65) < 1e-6;
   }, null, { timeout: 30_000 });
   await page.reload();
   await page.waitForFunction(() => (window as any).__meridianBooted === true, null, { timeout: 180_000 });
@@ -201,10 +203,14 @@ test('settings persist across a reload', async ({ page }) => {
   await expect(page.locator('#set-invert')).toBeChecked();
   await expect(page.locator('#set-reduced')).toBeChecked();
   await expect(page.locator('#set-sens')).toHaveValue('1.6');
+  await expect(page.locator('#set-music')).toHaveValue('0.2');
+  await expect(page.locator('#set-effects')).toHaveValue('0.65');
   await expect(page.locator('#set-volume')).toHaveValue('0.35');
   expect((await snap(page)).state).toBe('title');
   const live = await page.evaluate(() => (window as any).__meridian.game.settings);
   expect(live.invertY).toBe(true);
   expect(live.sensitivity).toBeCloseTo(1.6, 6);
+  expect(live.music).toBeCloseTo(0.2, 6);
+  expect(live.effects).toBeCloseTo(0.65, 6);
   expect(errors).toEqual([]);
 });

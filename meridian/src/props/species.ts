@@ -1,7 +1,7 @@
 import type { BodyId } from '../world/bodies';
 import type { SurfaceInfo } from '../world/surface';
 import {
-  blackGlass, chalkSpire, duneBristle, fanShrub, lanternTree, pebbles, rimeShard, rustPillar, silverBoulder,
+  blackGlass, chalkSpire, duneBristle, fanShrub, frostBloom, fulgurite, lanternTree, loamVesicle, pebbles, rimeShard, rustPillar, silverBoulder,
   type SpeciesGeometry,
 } from './propMeshes';
 
@@ -126,6 +126,33 @@ export const SPECIES: Species[] = [
     density: (_s, slope) => 0.35 * (slope < 0.5 ? 1 : 0),
     maxSlope: 0.5, sink: 0.02, tiltToNormal: 1, lod0: 110, range: 110, wind: 0, castShadow: false,
     collider: null, scannable: false, scanRadius: 0.5,
+  },
+  // ------------------------------------------- appended (studio round)
+  // Appended per body so existing species keep their per-body index (the
+  // placement hash) and every existing prop keeps its ID and position.
+  {
+    id: 'ilex-vesicle', body: 'ilex', name: 'Loam vesicle',
+    description: 'Clusters of thin-walled teal bladders rising from the loam in the deepest grove shade. They swell slowly through the day and slacken at dusk. Pressed, they yield a faint, sweet-smelling gas.',
+    make: loamVesicle, roughness: 0.35, metalness: 0, emissive: 0x04110f, hMin: 0.25, hMax: 0.55, candidates: 6,
+    density: (s, slope) => ss(0.55, 0.85, s.special) * ss(0.35, 0.7, s.biome) * 0.5 * (slope < 0.25 ? 1 : 0),
+    maxSlope: 0.25, sink: 0.05, tiltToNormal: 0.8, lod0: 60, range: 120, wind: 0, castShadow: false,
+    collider: null, scannable: true, scanRadius: 1.2,
+  },
+  {
+    id: 'vesper-fulgurite', body: 'vesper', name: 'Fulgurite tube',
+    description: 'Hollow, branching tubes of fused sand where lightning once struck the dunes. Their inner walls are glassy and smooth; the outer surface keeps the grain of the sand that formed them.',
+    make: fulgurite, roughness: 0.45, metalness: 0.1, hMin: 0.5, hMax: 1.5, candidates: 2,
+    density: (s, slope) => 0.05 * s.biome * (slope < 0.3 ? 1 : 0),
+    maxSlope: 0.3, sink: 0.1, tiltToNormal: 0.3, lod0: 90, range: 260, wind: 0, castShadow: true,
+    collider: null, scannable: true, scanRadius: 0.5,
+  },
+  {
+    id: 'cairn-bloom', body: 'cairn', name: 'Frost bloom',
+    description: 'Feathered hoar crystals that grow on rock faces the sun never reaches. Brought into light they sublimate within minutes; returned to shadow, they rebuild in the same shapes.',
+    make: frostBloom, roughness: 0.2, metalness: 0, emissive: 0x08121e, hMin: 0.3, hMax: 1.0, candidates: 3,
+    density: (s, slope) => (ss(0.15, 0.55, s.special) * 0.8 + 0.08) * ss(0.05, 0.22, slope),
+    maxSlope: 0.6, sink: 0.05, tiltToNormal: 0.9, lod0: 90, range: 280, wind: 0, castShadow: false,
+    collider: null, scannable: true, scanRadius: 0.6,
   },
 ];
 

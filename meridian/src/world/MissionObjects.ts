@@ -42,6 +42,9 @@ const SAMPLE_LOOK: Record<BodyId, { core: number; glow: number; base: number; na
   ilex: { core: 0xe9e3cf, glow: 0x5fd0b4, base: 0x8a7a58, name: 'Chalk nodule' },
   vesper: { core: 0xb04a2a, glow: 0xffa060, base: 0x2a2224, name: 'Oxide geode' },
   cairn: { core: 0xcfe6ff, glow: 0x7fc4ff, base: 0x6d7178, name: 'Rime core' },
+  // First-pass looks for the Extended Survey worlds (shapes reuse the nodule/shard forms).
+  orrin: { core: 0x8a6ea4, glow: 0xc9a8ff, base: 0x2e2c34, name: 'Basalt moss-core' },
+  saro: { core: 0xf3e1da, glow: 0x7fe0d6, base: 0xcf9fa0, name: 'Brine crystal' },
 };
 
 export function sampleName(body: BodyId): string {
@@ -100,7 +103,7 @@ function sampleGeometry(body: BodyId): { core: BufferGeometry; base: BufferGeome
   const base = mergeGeometries(stones.map((g) => (g.index ? g.toNonIndexed() : g)), false)!;
   base.computeVertexNormals();
   let core: BufferGeometry;
-  if (body === 'vesper') {
+  if (body === 'vesper' || body === 'saro') {
     const shards = [0, 1, 2, 3].map((i) => {
       const o = new OctahedronGeometry(0.2, 0);
       o.scale(0.6, 1.8, 0.6);

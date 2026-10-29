@@ -19,12 +19,12 @@ async function until(page: Page, src: string, timeoutMs: number): Promise<Record
 }
 
 /** Fingerprint once prop cells near the site have finished generating. */
-async function fingerprint(page: Page): Promise<any> {
-  await page.waitForFunction(() => {
-    const f = (window as any).__meridian.fingerprint();
+async function fingerprint(page: Page, body: string): Promise<any> {
+  await page.waitForFunction((b) => {
+    const f = (window as any).__meridian.fingerprint(b);
     return f && f.pendingCells === 0 && f.props.length > 0 && !f.contact.includes('miss') && f.contact.filter((c: string | null) => c !== null).length >= 2;
-  }, null, { timeout: 600_000, polling: 1000 });
-  const f = await api(page, 'fingerprint');
+  }, body, { timeout: 600_000, polling: 1000 });
+  const f = await api(page, 'fingerprint', body);
   delete f.pendingCells;
   return f;
 }
@@ -43,22 +43,33 @@ test('three continuous Ilex → Vesper → Cairn → Ilex routes with landings',
   await page.click('#btn-new');
   let s = await until(page, 's.state === "playing"', 600_000);
   expect(s.mode).toBe('LANDED');
+  // Route over every body in BODY_IDS, back to the start: Ilex → Vesper → Cairn → Ilex
+  // with the core bodies; new bodies extend each round automatically (budget the
+  // time). TRAVEL_BODIES=ilex,vesper,cairn restricts the gate to the listed bodies.
+  const only = process.env.TRAVEL_BODIES?.split(',').map((x) => x.trim()).filter(Boolean);
+  const all = (await api(page, 'bodies')) as { id: string; airless: boolean }[];
+  const bodies = only ? all.filter((b) => only.includes(b.id)) : all;
+  if (only) expect(bodies.map((b) => b.id).sort()).toEqual([...only].sort());
+  const start = s.body as string;
+  const route = [...bodies.map((b) => b.id).filter((id) => id !== start), start];
+  const airless = new Set(bodies.filter((b) => b.airless).map((b) => b.id));
+  const legs = route.length;
   const prints: Record<string, any> = {};
   const resources: Record<string, any>[] = [];
   const log: string[] = [];
-  prints.ilex = await fingerprint(page);
-  expect(prints.ilex.props.length).toBeGreaterThan(0);
+  prints[start] = await fingerprint(page, start);
+  expect(prints[start].props.length).toBeGreaterThan(0);
 
   for (let round = 0; round < 3; round++) {
-    for (const to of ['vesper', 'cairn', 'ilex']) {
+    for (const to of route) {
       const t0 = (await snap(page)).simTime as number;
-      await api(page, 'autopilot', { kind: 'travel', to, brakeAt: round === 0 && to === 'vesper' ? 0.35 : undefined });
+      await api(page, 'autopilot', { kind: 'travel', to, brakeAt: round === 0 && to === route[0] ? 0.35 : undefined });
       await apPhase(page, ['landed'], 3 * 60 * 60 * 1000);
       s = await until(page, `s.mode === "LANDED" && s.body === "${to}" && s.bodyShown`, 120_000);
       await api(page, 'autopilot', null);
       expect(s.probe.slope).toBeLessThanOrEqual(12);
       // Same geography and placement as the first visit.
-      const fp = await fingerprint(page);
+      const fp = await fingerprint(page, to);
       if (!prints[to]) prints[to] = fp;
       else {
         // Generator heights and every prop's ID and position must match exactly;
@@ -81,7 +92,7 @@ test('three continuous Ilex → Vesper → Cairn → Ilex routes with landings',
       const line = `round ${round + 1} → ${to}: leg ${(s.simTime - t0).toFixed(0)} s sim · cruise engages ${c.cruiseEngages}, exits approach ${c.cruiseExitApproach} / brake ${c.cruiseExitBrake} / toggle ${c.cruiseExitToggle} / safety ${c.cruiseExitSafety} · activations ${c.activations} releases ${c.releases} (not coarse ${c.releasesNotCoarse}) · geometries ${r.geometries} textures ${r.textures} bodies ${r.bodies} colliders ${r.colliders} cache ${Number(r.cacheMB).toFixed(1)} MB heap ${r.heapMB === null ? 'n/a' : Number(r.heapMB).toFixed(0) + ' MB'}`;
       console.log(line);
       log.push(line);
-      if (round === 0 && to === 'cairn') {
+      if (round === 0 && airless.has(to)) {
         // Airless: no sky scattering, no clouds, stars visible.
         const sky = await page.evaluate(() => {
           const g = (window as any).__meridian.game;
@@ -90,15 +101,11 @@ test('three continuous Ilex → Vesper → Cairn → Ilex routes with landings',
         expect(sky.atmo).toBe(false);
         expect(sky.clouds).toBe(0);
         expect(Math.max(...sky.sky)).toBeLessThan(0.05);
-        await api(page, 'setRenderEvery', 1);
-        await page.waitForTimeout(3000);
-        await page.screenshot({ path: 'evidence/phase6-cairn-landed.png', timeout: 180_000 });
-        await api(page, 'setRenderEvery', 120);
       }
-      if (round === 0 && to === 'vesper') {
+      if (round === 0 && to !== start) {
         await api(page, 'setRenderEvery', 1);
         await page.waitForTimeout(3000);
-        await page.screenshot({ path: 'evidence/phase6-vesper-landed.png', timeout: 180_000 });
+        await page.screenshot({ path: `evidence/phase6-${to}-landed.png`, timeout: 180_000 });
         await api(page, 'setRenderEvery', 120);
       }
     }
@@ -108,16 +115,16 @@ test('three continuous Ilex → Vesper → Cairn → Ilex routes with landings',
   const c = s.counters;
   expect(c.cruiseExitSafety).toBe(0);
   expect(s.cruise.safetyStops).toBe(0);
-  expect(c.cruiseExitApproach).toBeGreaterThanOrEqual(9);
+  expect(c.cruiseExitApproach).toBeGreaterThanOrEqual(3 * legs);
   expect(c.cruiseExitBrake).toBeGreaterThanOrEqual(1);
   expect(c.cruiseExitToggle).toBeGreaterThanOrEqual(1);
-  expect(c.landings).toBeGreaterThanOrEqual(9);
+  expect(c.landings).toBeGreaterThanOrEqual(3 * legs);
   expect(c.recoveries).toBe(0);
   // Bounded resources: the last round's counts stay close to the first round's.
   for (const key of ['geometries', 'textures', 'bodies', 'colliders', 'cacheCount']) {
-    const first = resources.slice(0, 3).map((r) => Number(r[key]));
-    const last = resources.slice(6, 9).map((r) => Number(r[key]));
-    for (let i = 0; i < 3; i++) expect(last[i]).toBeLessThanOrEqual(Math.max(first[i] * 1.25, first[i] + 20));
+    const first = resources.slice(0, legs).map((r) => Number(r[key]));
+    const last = resources.slice(2 * legs, 3 * legs).map((r) => Number(r[key]));
+    for (let i = 0; i < legs; i++) expect(last[i]).toBeLessThanOrEqual(Math.max(first[i] * 1.25, first[i] + 20));
   }
   expect(errors).toEqual([]);
 });

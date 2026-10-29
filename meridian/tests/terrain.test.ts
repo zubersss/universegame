@@ -106,8 +106,8 @@ describe('surface generator', () => {
   });
 });
 
-describe('chunk generation', () => {
-  const def = ilex;
+// The original body plus the generators added in the studio round (Orrin, Saro).
+for (const def of [ilex, BODIES.orrin, BODIES.saro]) describe(`chunk generation (${def.name})`, () => {
   const gen = getSurface(def, computeSites(def).clearings);
 
   it('produces identical data regardless of job order or revisits', () => {
