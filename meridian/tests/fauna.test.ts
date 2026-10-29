@@ -205,7 +205,7 @@ describe('journal catalog', () => {
       const e = catalogById(sp.id);
       expect(e?.kind).toBe('fauna');
       expect(sp.description.length).toBeGreaterThan(80);
-      expect(sp.id).toMatch(/^(ilex|vesper|cairn)-[a-z]+$/);
+      expect(sp.id).toMatch(/^(ilex|vesper|cairn|orrin|saro)-[a-z]+$/); // schema-2 species pattern
     }
     expect(catalogById('cairn-pebbles')).toBeUndefined(); // not scannable
   });
@@ -308,7 +308,14 @@ describe('journal progress and species order', () => {
     for (const [b, ids] of Object.entries(original)) {
       expect(speciesFor(b as 'ilex').slice(0, ids.length).map((s) => s.id)).toEqual(ids);
     }
-    for (const b of ['ilex', 'vesper'] as const) expect(CATALOG.filter((e) => e.body === b && e.kind !== 'fauna').length).toBeGreaterThanOrEqual(4);
+    // Content targets (C3): every body ≥ 4 flora/minerals; worlds with an atmosphere ≥ 3 fauna; airless worlds none.
+    const { BODY_IDS } = await import('../src/world/bodies');
+    for (const b of BODY_IDS) {
+      expect(CATALOG.filter((e) => e.body === b && e.kind !== 'fauna').length, b).toBeGreaterThanOrEqual(4);
+      const fauna = CATALOG.filter((e) => e.body === b && e.kind === 'fauna').length;
+      if (BODIES[b].atmosphere) expect(fauna, b).toBeGreaterThanOrEqual(3);
+      else expect(fauna, b).toBe(0);
+    }
   });
 });
 
@@ -348,9 +355,9 @@ describe('curious species and Vesper herds', () => {
     const c = chunkAt(f.face, f.u, f.v, L);
     const all: Spawn[] = [];
     for (let j = -3; j <= 3; j++) for (let i = -3; i <= 3; i++) all.push(...spawnCell(vesper, g, vs, faunaFor('vesper'), f.face, c.x + i, c.y + j));
-    expect(all.length).toBeGreaterThan(0);
-    expect(all.every((s) => s.species.id === 'vesper-sledge')).toBe(true);
-    const near = Math.min(...all.map((s) => Math.hypot(s.home[0] - vs.landing.dir[0], s.home[1] - vs.landing.dir[1], s.home[2] - vs.landing.dir[2]) * vesper.radius));
+    const sledges = all.filter((s) => s.species.id === 'vesper-sledge');
+    expect(sledges.length).toBeGreaterThan(0);
+    const near = Math.min(...sledges.map((s) => Math.hypot(s.home[0] - vs.landing.dir[0], s.home[1] - vs.landing.dir[1], s.home[2] - vs.landing.dir[2]) * vesper.radius));
     expect(near).toBeLessThan(1500);
   });
 
@@ -392,5 +399,44 @@ describe('fauna sound intensity', () => {
     expect(faunaSoundIntensity('alarm', c)).toBe(1);
     expect(faunaSoundIntensity('call', c)).toBeLessThan(1);
     for (const ev of ['step', 'call', 'alarm'] as const) expect(faunaSoundIntensity(ev, c)).toBeLessThanOrEqual(1);
+  });
+});
+
+describe('fliers and burrowers', () => {
+  const gen = getSurface(ilex, sites.clearings);
+  const [a1, a2] = tangentBasis([...sites.landing.dir] as [number, number, number]);
+  const home = [...sites.landing.dir] as [number, number, number];
+  const mk = (id: string) => new Creature({ id: 'ilex:fauna:test:1', species: FAUNA.find((f) => f.id === id)!, home, t1: a1, t2: a2, x: 120, z: 0, yaw: 0, h: 0.6, seed: 7 });
+
+  it('a flier holds its cruise height above the ground (within its bob)', () => {
+    const f = new FaunaSystem(ilex, gen, sites, 3);
+    const c = mk('ilex-skein');
+    const hv = c.species.hover!;
+    for (let i = 0; i < 50; i++) {
+      f.update(0.2, { view: new Vector3(), planetLocal: new Vector3(), player: null, ship: new Vector3(), shipLoud: false });
+      f.place(c);
+      const ground = ilex.radius + gen.height(c.up.x, c.up.y, c.up.z);
+      const above = c.p.length() - ground;
+      expect(above).toBeGreaterThan(hv.height - hv.bob - 0.1);
+      expect(above).toBeLessThan(hv.height + hv.bob + 0.1);
+    }
+    f.dispose();
+  });
+
+  it('a burrower sinks out of sight (and out of scan reach) when a player comes near, then resurfaces', () => {
+    const f = new FaunaSystem(ilex, gen, sites, 3);
+    const c = mk('ilex-sounder');
+    f.place(c);
+    const sim = (f as unknown as { simulate(c: Creature, dt: number, ctx: FaunaContext): void }).simulate.bind(f);
+    const player = c.p.clone().addScaledVector(new Vector3(...a1), 10);
+    const ctx: FaunaContext = { view: player.clone(), planetLocal: new Vector3(), player, ship: new Vector3(), shipLoud: false };
+    for (let i = 0; i < 30; i++) sim(c, 0.1, ctx);
+    expect(c.hidden).toBe(true);
+    expect(c.species.burrows).toBe(true);
+    ctx.player = null;
+    for (let i = 0; i < 300; i++) sim(c, 0.1, ctx);
+    expect(c.hidden).toBe(false);
+    expect(c.sink).toBeLessThan(0.5);
+    f.dispose();
   });
 });

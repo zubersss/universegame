@@ -371,3 +371,213 @@ export function frostBloom(): SpeciesGeometry {
   };
   return { lod0: make(9), lod1: make(4) };
 }
+
+// ----------------------------------------------------------------- Orrin
+
+/** Violet cushion-moss: a low mound of soft lobes. Height ~1 (scaled small). */
+export function cushionMoss(): SpeciesGeometry {
+  const deep = lin(0x4a3a60);
+  const bright = lin(0x8a6ea4);
+  const make = (detail: boolean) => {
+    const rnd = mulberry32(111);
+    const parts: BufferGeometry[] = [];
+    for (let i = 0; i < 5; i++) {
+      const r = 0.35 + rnd() * 0.3;
+      const s = new SphereGeometry(r, detail ? 9 : 5, detail ? 5 : 3, 0, Math.PI * 2, 0, Math.PI / 2);
+      s.scale(1, 1.4, 1);
+      s.translate((rnd() - 0.5) * 0.9, 0, (rnd() - 0.5) * 0.9);
+      parts.push(s);
+    }
+    return colorize(merge(parts), (p, n, c) => c.copy(deep).lerp(bright, Math.min(1, Math.max(0, n.y) * 0.7 + p.y * 0.4)));
+  };
+  return { lod0: make(true), lod1: make(false) };
+}
+
+/** Basalt organ: a cluster of hexagonal columns of different heights. Height 1. */
+export function basaltOrgan(): SpeciesGeometry {
+  const dark = lin(0x2a2930);
+  const face = lin(0x3e3c46);
+  const top = lin(0x5c5468);
+  const make = (count: number) => {
+    const rnd = mulberry32(121);
+    const parts: BufferGeometry[] = [];
+    for (let i = 0; i < count; i++) {
+      const h = 0.45 + rnd() * 0.55;
+      const c = new CylinderGeometry(0.11, 0.11, h, 6, 1);
+      c.translate((i % 3 - 1) * 0.2 + (Math.floor(i / 3) % 2) * 0.1, h / 2, (Math.floor(i / 3) - 1) * 0.18);
+      parts.push(c);
+    }
+    return colorize(merge(parts), (p, n, c) => (n.y > 0.9 ? c.copy(top) : c.copy(dark).lerp(face, 0.5 + 0.5 * Math.sin(p.y * 20))));
+  };
+  return { lod0: make(9), lod1: make(5) };
+}
+
+/** Fog reed: tall, hollow, slightly bent stems with pale seed heads. Height ~1. */
+export function fogReed(): SpeciesGeometry {
+  const stem = lin(0x5e6a68);
+  const head = lin(0xc8ccd0);
+  const make = (count: number, sides: number) => {
+    const rnd = mulberry32(131);
+    const parts: BufferGeometry[] = [];
+    for (let i = 0; i < count; i++) {
+      const h = 0.7 + rnd() * 0.3;
+      const c = new CylinderGeometry(0.008, 0.016, h, sides, 2, true);
+      c.translate(0, h / 2, 0);
+      c.rotateZ((rnd() - 0.5) * 0.25);
+      c.translate((rnd() - 0.5) * 0.3, 0, (rnd() - 0.5) * 0.3);
+      parts.push(c);
+      const s = new SphereGeometry(0.03, sides + 1, 3);
+      s.scale(1, 2.5, 1);
+      s.translate((rnd() - 0.5) * 0.05, h, 0);
+      parts.push(s);
+    }
+    return colorize(merge(parts), (p, _n, c) => c.copy(stem).lerp(head, Math.max(0, p.y - 0.65) * 3));
+  };
+  return { lod0: make(9, 4), lod1: make(5, 3) };
+}
+
+/** Lamp cap: a few stalked caps with dim violet glowing undersides. Height ~1. */
+export function lampCap(): SpeciesGeometry {
+  const stalk = lin(0xb8b0c4);
+  const cap = lin(0x4a3a60);
+  const glow = lin(0xc7a6ff);
+  const make = (detail: boolean) => {
+    const rnd = mulberry32(141);
+    const parts: BufferGeometry[] = [];
+    for (let i = 0; i < 4; i++) {
+      const h = 0.4 + rnd() * 0.5;
+      const x = (rnd() - 0.5) * 0.5;
+      const z = (rnd() - 0.5) * 0.5;
+      const st = new CylinderGeometry(0.03, 0.045, h, detail ? 6 : 3, 1);
+      st.translate(x, h / 2, z);
+      parts.push(st);
+      const r = 0.12 + rnd() * 0.1;
+      const c = new SphereGeometry(r, detail ? 10 : 5, detail ? 5 : 3, 0, Math.PI * 2, 0, Math.PI / 2);
+      c.scale(1, 0.5, 1);
+      c.translate(x, h, z);
+      parts.push(c);
+    }
+    return colorize(merge(parts), (p, n, c) => {
+      if (n.y < -0.3) c.copy(glow);
+      else if (p.y > 0.35 && n.y > 0.2) c.copy(cap);
+      else c.copy(stalk);
+    });
+  };
+  return { lod0: make(true), lod1: make(false) };
+}
+
+// ------------------------------------------------------------------ Saro
+
+/** Halite rosette: a cluster of pink cubic salt crystals. Height ~1. */
+export function haliteRosette(): SpeciesGeometry {
+  const pink = lin(0xe6c3c0);
+  const pale = lin(0xfaf0ec);
+  const make = (count: number) => {
+    const rnd = mulberry32(151);
+    const parts: BufferGeometry[] = [];
+    for (let i = 0; i < count; i++) {
+      const s = 0.18 + rnd() * 0.3;
+      const b = new CylinderGeometry(s * 0.7, s * 0.7, s, 4, 1);
+      b.rotateY(Math.PI / 4 + rnd());
+      b.rotateX((rnd() - 0.5) * 0.8);
+      b.translate((rnd() - 0.5) * 0.6, s * 0.4 + rnd() * 0.2, (rnd() - 0.5) * 0.6);
+      parts.push(b);
+    }
+    return colorize(merge(parts), (_p, n, c) => c.copy(pink).lerp(pale, Math.max(0, n.y) * 0.8));
+  };
+  return { lod0: make(8), lod1: make(4) };
+}
+
+/** Salt chimney: a hollow, tapering brine-fed tube ringed with crust. Height 1. */
+export function saltChimney(): SpeciesGeometry {
+  const crust = lin(0xf3e1da);
+  const ring = lin(0xcf9fa0);
+  const wet = lin(0x5cc4bc);
+  const make = (radial: number) => {
+    const c = new CylinderGeometry(0.09, 0.22, 1, radial, 6, true);
+    const p = c.attributes.position;
+    for (let i = 0; i < p.count; i++) {
+      const y = p.getY(i) + 0.5;
+      const k = 1 + 0.12 * Math.sin(y * 28);
+      p.setX(i, p.getX(i) * k);
+      p.setZ(i, p.getZ(i) * k);
+    }
+    c.translate(0, 0.5, 0);
+    const lip = new CylinderGeometry(0.1, 0.07, 0.04, radial, 1, true);
+    lip.translate(0, 1, 0);
+    return colorize(merge([c, lip]), (q, _n, col) => (q.y > 0.97 ? col.copy(wet) : col.copy(crust).lerp(ring, 0.5 + 0.5 * Math.sin(q.y * 28))));
+  };
+  return { lod0: make(10), lod1: make(5) };
+}
+
+/** Brine mat: a flat, layered microbial mat in the shallows (orange to crimson rings). Height ~1 = width. */
+export function brineMat(): SpeciesGeometry {
+  const outer = lin(0xd8743a);
+  const inner = lin(0x8a2030);
+  const make = (segments: number) => {
+    const rnd = mulberry32(161);
+    const parts: BufferGeometry[] = [];
+    for (let i = 0; i < 3; i++) {
+      const r = 0.5 - i * 0.14;
+      const d = new CylinderGeometry(r, r * 1.05, 0.02, segments, 1);
+      d.translate((rnd() - 0.5) * 0.1, 0.01 + i * 0.012, (rnd() - 0.5) * 0.1);
+      parts.push(d);
+    }
+    return colorize(merge(parts), (p, _n, c) => c.copy(outer).lerp(inner, Math.min(1, p.y * 30)));
+  };
+  return { lod0: make(16), lod1: make(7) };
+}
+
+/** Crust thorn: sparse pale halophyte spikes along the crack lines. Height ~1. */
+export function crustThorn(): SpeciesGeometry {
+  const base = lin(0xa88a8a);
+  const tip = lin(0xf3e1da);
+  const rnd = mulberry32(171);
+  const parts: BufferGeometry[] = [];
+  for (let i = 0; i < 6; i++) {
+    const h = 0.6 + rnd() * 0.4;
+    const c = new ConeGeometry(0.03, h, 4, 1);
+    c.translate(0, h / 2, 0);
+    c.rotateZ((rnd() - 0.5) * 0.7);
+    c.rotateX((rnd() - 0.5) * 0.7);
+    c.translate((rnd() - 0.5) * 0.2, 0, (rnd() - 0.5) * 0.2);
+    parts.push(c);
+  }
+  const g = merge(parts);
+  colorize(g, (p, _n, c) => c.copy(base).lerp(tip, Math.min(1, p.y)));
+  return { lod0: g, lod1: null };
+}
+
+/** Sublimation vent (Cairn): a dark fissure in the crater floor inside a ring of fresh frost. Height ~1 = width. */
+export function sublimationVent(): SpeciesGeometry {
+  const frost = lin(0xe6f2ff);
+  const rock = lin(0x4b4d52);
+  const dark = lin(0x15161a);
+  const make = (segments: number) => {
+    const rnd = mulberry32(181);
+    const ring = new CylinderGeometry(0.5, 0.56, 0.05, segments, 1);
+    const rp = ring.attributes.position;
+    for (let i = 0; i < rp.count; i++) {
+      const k = 1 + (rnd() - 0.5) * 0.25;
+      rp.setX(i, rp.getX(i) * k);
+      rp.setZ(i, rp.getZ(i) * k);
+    }
+    ring.translate(0, 0.02, 0);
+    const lips: BufferGeometry[] = [];
+    for (const sx of [1, -1]) {
+      const l = new CylinderGeometry(0.05, 0.08, 0.7, 4, 1);
+      l.rotateZ(Math.PI / 2);
+      l.scale(1, 0.6, 1);
+      l.translate(0, 0.07, sx * 0.07);
+      lips.push(l);
+    }
+    const g = merge([ring, ...lips]);
+    return colorize(g, (p, _n, c) => {
+      const r = Math.hypot(p.x, p.z);
+      if (Math.abs(p.z) < 0.04 && Math.abs(p.x) < 0.35) c.copy(dark);
+      else if (p.y > 0.06) c.copy(rock);
+      else c.copy(rock).lerp(frost, Math.min(1, 1.6 - r * 2.2));
+    });
+  };
+  return { lod0: make(14), lod1: make(6) };
+}

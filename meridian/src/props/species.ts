@@ -1,7 +1,8 @@
 import type { BodyId } from '../world/bodies';
 import type { SurfaceInfo } from '../world/surface';
 import {
-  blackGlass, chalkSpire, duneBristle, fanShrub, frostBloom, fulgurite, lanternTree, loamVesicle, pebbles, rimeShard, rustPillar, silverBoulder,
+  basaltOrgan, blackGlass, brineMat, chalkSpire, crustThorn, cushionMoss, duneBristle, fanShrub, fogReed, frostBloom, fulgurite, haliteRosette,
+  lampCap, lanternTree, loamVesicle, pebbles, rimeShard, rustPillar, saltChimney, silverBoulder, sublimationVent,
   type SpeciesGeometry,
 } from './propMeshes';
 
@@ -153,6 +154,80 @@ export const SPECIES: Species[] = [
     density: (s, slope) => (ss(0.15, 0.55, s.special) * 0.8 + 0.08) * ss(0.05, 0.22, slope),
     maxSlope: 0.6, sink: 0.05, tiltToNormal: 0.9, lod0: 90, range: 280, wind: 0, castShadow: false,
     collider: null, scannable: true, scanRadius: 0.6,
+  },
+  {
+    id: 'cairn-vent', body: 'cairn', name: 'Sublimation vent',
+    description: 'A fissure in the crater floor that releases a silent column of ice vapour each time the ice beneath it is warmed. The plume rises straight, without wind to bend it, and falls back as fine frost around the vent.',
+    make: sublimationVent, roughness: 0.5, metalness: 0, hMin: 1.5, hMax: 3.5, candidates: 1,
+    density: (s, slope) => 0.1 * ss(0.3, 0.7, s.special) * (slope < 0.15 ? 1 : 0),
+    maxSlope: 0.15, sink: 0.01, tiltToNormal: 1, lod0: 150, range: 400, wind: 0, castShadow: false,
+    collider: null, scannable: true, scanRadius: 0.4,
+  },
+  // ------------------------------------------------------------ Orrin
+  {
+    id: 'orrin-moss', body: 'orrin', name: 'Violet cushion-moss',
+    description: 'Dense mounds of violet moss that carpet the lowlands, each cushion built from thousands of tightly packed shoots. The surface holds water like a sponge and gives slightly underfoot.',
+    make: cushionMoss, roughness: 0.95, metalness: 0, hMin: 0.25, hMax: 0.6, candidates: 10,
+    density: (s, slope) => 0.45 * ss(0.4, 0.8, s.biome) * (slope < 0.35 ? 1 : 0),
+    maxSlope: 0.35, sink: 0.2, tiltToNormal: 0.9, lod0: 90, range: 160, wind: 0, castShadow: false,
+    collider: null, scannable: true, scanRadius: 1.2,
+  },
+  {
+    id: 'orrin-column', body: 'orrin', name: 'Basalt organ',
+    description: 'Clusters of hexagonal basalt columns, split as an ancient lava sheet cooled and contracted. Wind crossing their tops produces a faint, steady tone.',
+    make: basaltOrgan, roughness: 0.85, metalness: 0.05, hMin: 3, hMax: 10, candidates: 2,
+    density: (s, slope) => (0.03 + 0.25 * s.rockiness) * (slope < 0.4 ? 1 : 0.3),
+    maxSlope: 0.6, sink: 0.08, tiltToNormal: 0.2, lod0: 300, range: 1200, wind: 0, castShadow: true,
+    collider: { type: 'capsule', radius: 0.3, halfHeight: 0.25, y: 0.5 }, scannable: true, scanRadius: 0.3,
+  },
+  {
+    id: 'orrin-reed', body: 'orrin', name: 'Fog reed',
+    description: 'Tall, hollow reeds that crowd the valley floors where the fog settles. Droplets condense along their stems and run down to the roots. In wind the stands give off a low hum.',
+    make: fogReed, roughness: 0.8, metalness: 0, hMin: 2, hMax: 4, candidates: 8,
+    density: (s, slope) => 0.5 * ss(0.3, 0.7, s.special) * (slope < 0.3 ? 1 : 0),
+    maxSlope: 0.3, sink: 0.02, tiltToNormal: 0.3, lod0: 120, range: 300, wind: 0.05, castShadow: false,
+    collider: null, scannable: true, scanRadius: 0.35,
+  },
+  {
+    id: 'orrin-lampcap', body: 'orrin', name: 'Lamp cap',
+    description: 'Stalked caps with a faint violet glow on their undersides, growing where the moss meets bare basalt. The glow is strongest in the fog and fades in clear air.',
+    make: lampCap, roughness: 0.6, metalness: 0, emissive: 0x150a24, hMin: 0.4, hMax: 0.9, candidates: 3,
+    density: (s, slope) => 0.35 * ss(0.2, 0.5, s.rockiness) * ss(0.2, 0.6, s.biome) * (slope < 0.35 ? 1 : 0) + 0.01,
+    maxSlope: 0.35, sink: 0.03, tiltToNormal: 0.5, lod0: 80, range: 200, wind: 0, castShadow: false,
+    collider: null, scannable: true, scanRadius: 0.8,
+  },
+  // ------------------------------------------------------------- Saro
+  {
+    id: 'saro-rosette', body: 'saro', name: 'Halite rosette',
+    description: 'Clusters of pink cubic salt crystals grown where brine wicked up through the crust and evaporated. The colour comes from microbes trapped as the crystals formed.',
+    make: haliteRosette, roughness: 0.3, metalness: 0, hMin: 0.2, hMax: 0.7, candidates: 6,
+    density: (s, slope) => 0.25 * (1 - s.biome) * (slope < 0.4 ? 1 : 0),
+    maxSlope: 0.4, sink: 0.1, tiltToNormal: 0.8, lod0: 90, range: 200, wind: 0, castShadow: false,
+    collider: null, scannable: true, scanRadius: 0.8,
+  },
+  {
+    id: 'saro-chimney', body: 'saro', name: 'Salt chimney',
+    description: 'Hollow salt tubes that grow upward around brine seeps at the pan margins, ring by ring as the brine evaporates at the rim. Their lips stay wet and turquoise.',
+    make: saltChimney, roughness: 0.6, metalness: 0, hMin: 1, hMax: 4, candidates: 2,
+    density: (s, slope) => 0.3 * ss(0.2, 0.5, s.biome) * (1 - ss(0.6, 0.9, s.biome)) * (slope < 0.3 ? 1 : 0),
+    maxSlope: 0.3, sink: 0.05, tiltToNormal: 0.1, lod0: 200, range: 700, wind: 0, castShadow: true,
+    collider: { type: 'capsule', radius: 0.2, halfHeight: 0.3, y: 0.5 }, scannable: true, scanRadius: 0.3,
+  },
+  {
+    id: 'saro-mat', body: 'saro', name: 'Brine mat',
+    description: 'Flat, layered mats of microbes in the shallow brine, banded orange at the rim and crimson toward the centre. Each band is a different community living at a different salt concentration.',
+    make: brineMat, roughness: 0.7, metalness: 0, hMin: 1, hMax: 3, candidates: 5,
+    density: (s, slope) => 0.4 * ss(0.5, 0.9, s.biome) * (slope < 0.2 ? 1 : 0),
+    maxSlope: 0.2, sink: 0, tiltToNormal: 1, lod0: 120, range: 260, wind: 0, castShadow: false,
+    collider: null, scannable: true, scanRadius: 0.6,
+  },
+  {
+    id: 'saro-thorn', body: 'saro', name: 'Crust thorn',
+    description: 'Sparse, pale spikes that grow only along the cracks in the salt crust, where a little fresh water collects after dew. They excrete salt through their tips.',
+    make: crustThorn, roughness: 0.8, metalness: 0, hMin: 0.3, hMax: 1, candidates: 8,
+    density: (s, slope) => 0.15 * (1 - s.biome) * (slope < 0.35 ? 1 : 0),
+    maxSlope: 0.35, sink: 0.05, tiltToNormal: 0.6, lod0: 110, range: 150, wind: 0.04, castShadow: false,
+    collider: null, scannable: true, scanRadius: 0.7,
   },
 ];
 

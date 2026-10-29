@@ -16,7 +16,7 @@ export interface CatalogEntry {
 }
 
 /** Prop species that are minerals rather than plants. */
-const MINERALS = new Set(['ilex-chalk', 'vesper-glass', 'vesper-pillar', 'cairn-rime', 'cairn-boulder', 'cairn-pebbles', 'vesper-fulgurite', 'cairn-bloom']);
+const MINERALS = new Set(['ilex-chalk', 'vesper-glass', 'vesper-pillar', 'cairn-rime', 'cairn-boulder', 'cairn-pebbles', 'vesper-fulgurite', 'cairn-bloom', 'orrin-column', 'saro-rosette', 'saro-chimney', 'cairn-vent']);
 
 export const CATALOG: CatalogEntry[] = [
   ...SPECIES.filter((s) => s.scannable).map((s) => ({

@@ -47,6 +47,12 @@ export class Creature {
   dist = Infinity;
   /** Footfall index within the gait cycle at the last 'step' event (0 = first beat). */
   beat = 0;
+  /** Burrowers: how far below ground (fraction of height, 0 = surfaced, 1 = hidden). */
+  sink = 0;
+  /** Hidden underground: not drawn and not scannable. */
+  get hidden(): boolean {
+    return this.sink > 0.85;
+  }
   constructor(readonly spawn: Spawn) {
     this.state = newCreatureState(spawn.x, spawn.z, spawn.yaw, (spawn.seed % 1000) / 200);
     this.rnd = mulberry32(spawn.seed);
@@ -131,6 +137,8 @@ export class FaunaSystem {
   private readonly level: number;
   private readonly cellSize: number;
   private frame = 0;
+  /** Seconds simulated (hover bob). */
+  private clock = 0;
   private readonly counts0: Int32Array;
   private readonly counts1: Int32Array;
   rangeScale = 1;
@@ -242,7 +250,9 @@ export class FaunaSystem {
   place(c: Creature): void {
     const s = c.spawn;
     offsetDir(s.home, s.t1, s.t2, c.state.x, c.state.z, this.def.radius, _dir);
-    const r = this.def.radius + this.gen.height(_dir[0], _dir[1], _dir[2]) - 0.03 * c.h;
+    const sp = s.species;
+    let r = this.def.radius + this.gen.height(_dir[0], _dir[1], _dir[2]) - 0.03 * c.h - c.sink * 1.05 * c.h;
+    if (sp.hover) r += sp.hover.height + sp.hover.bob * Math.sin(this.clock * 0.6 + (s.seed % 628) / 100);
     c.up.set(_dir[0], _dir[1], _dir[2]);
     c.p.set(_dir[0] * r, _dir[1] * r, _dir[2] * r);
   }
@@ -282,6 +292,12 @@ export class FaunaSystem {
       c.phase += (c.state.speed * h * Math.PI * 2) / strideLen;
       if (c.phase > 1e4) c.phase -= Math.PI * 2 * 1000;
       const after = Math.floor(c.phase / sp.gait.legStep);
+      if (sp.burrows) {
+        // Sink quickly when disturbed, resurface slowly once calm.
+        const hide = c.state.mode === 'alert' || c.state.mode === 'flee';
+        c.sink = hide ? Math.min(1, c.sink + h * 0.9) : Math.max(0, c.sink - h * 0.12);
+        if (c.sink > 0.2) c.state.speed = 0;
+      }
       if (this.onEvent) {
         if (ev) this.onEvent(ev, c);
         if (after !== before && c.dist < FAUNA_RATES.near) {
@@ -295,6 +311,7 @@ export class FaunaSystem {
 
   update(dt: number, ctx: FaunaContext): void {
     faunaUniforms.uTime.value += dt;
+    this.clock += dt;
     this.frame++;
     if (ctx.view.distanceTo(this.lastEnum) > this.cellSize * 0.25) {
       this.lastEnum.copy(ctx.view);
@@ -340,7 +357,7 @@ export class FaunaSystem {
     for (const list of this.cells.values()) {
       for (const c of list) {
         const sp = c.species;
-        if (c.dist > sp.range * this.rangeScale) continue;
+        if (c.dist > sp.range * this.rangeScale || c.sink >= 1) continue;
         const si = this.species.indexOf(sp);
         const near = c.dist < sp.lod0 * this.rangeScale;
         const mesh = near ? this.lod0[si] : this.lod1[si];
@@ -377,7 +394,7 @@ export class FaunaSystem {
   nearby(focus: Vector3, radius: number, out: Creature[] = []): Creature[] {
     out.length = 0;
     for (const list of this.cells.values()) {
-      for (const c of list) if (c.p.distanceTo(focus) < radius) out.push(c);
+      for (const c of list) if (!c.hidden && c.p.distanceTo(focus) < radius) out.push(c);
     }
     return out;
   }
