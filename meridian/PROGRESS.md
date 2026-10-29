@@ -149,11 +149,12 @@ _Not started._
 
 ## Studio: BIOME (life and discovery)
 
-### TODO (highest impact first)
-1. M1 wiring merged + browser evidence (this section, below).
-2. M2: fauna on Vesper/Orrin/Saro, Cairn phenomena, 4th flora/mineral per body (plan below; Orrin/Saro after ATLAS's merge).
-3. M2: journal per-world sections with silhouettes ("??? · 1 of 4 flora found"), discovery dates (needs a save field from ATLAS), per-world completion.
-4. M3: first-discovery notice + ECHO `audio.discovery(...)` + LUMEN effect hooks; fauna sound events wired to ECHO's `audio.creature(...)`.
+### TODO (highest impact first; on HOLD until the Director's GO)
+1. Audio soak ≥ 25 min on the current build (before more sound content).
+2. Browser checks still missing: dune sledge curious stop + scan; fliers (skein, kite, drifter, veil); burrower (sounder); swarms (tick, skater).
+3. Readability of small species at distance (larger scan aid or slightly larger sizes).
+4. Journal discovery dates (`discovered` field in schema 2, `Expedition.scan(..., simTime)`).
+5. Sparse music cues; Sublimation vent plume effect (LUMEN).
 
 ### M1 — fauna system skeleton (2026-10-29)
 - **Module `src/fauna/`** (separate from `PropSystem`; creatures are not in the prop list, so the travel fingerprint is unaffected):
@@ -173,6 +174,20 @@ _Not started._
 - Budgets (perf hook, Balanced, aimed at the herd): 154 draw calls, 514k triangles, GPU estimate 98.6 MB, JS heap 35.6 MB — within A4 (≤ 300 / 800k / 220 MB / 100 MB). Fauna share: 6 creatures loaded, 2 drawn, 788 triangles, ≤ 2 draw calls (+1 shadow). Low and High not re-measured for this change (fauna range scales with the preset's prop range).
 - Evidence: `evidence/studio/biome/biome-m1-trine-balanced-1280.png`, `-640.png` (two trines at ~30 m with the scan prompt), `biome-m1-journal-balanced-1280.png`, `-640.png`.
 - Known limits: the shadow pass uses the default depth material, so leg shadows don't animate; no shader pre-warm (same as props today) — first sight of a creature compiles one program; creatures stand radial-up (legs don't conform to slope); a rebase walk in the browser and the `resources` hook across body switches were not exercised (rebase covered by a unit test; dispose frees geometry incl. `aAnim`, materials and meshes); fauna sound events are emitted but not yet wired to ECHO's `audio.creature` (waiting for studio/echo in integration).
+
+### M2 — content per world, journal progress, sound content (2026-10-29, held at the Director's HOLD)
+- **Content targets met in code** (unit test pins them): every body ≥ 4 scannable flora/minerals; Ilex, Vesper, Orrin, Saro 3 fauna each; Cairn 0 fauna + the Sublimation vent phenomenon. New props are appended per body (a test pins the original per-body order, so existing placement hashes, IDs and positions are unchanged). Densities were probed around every landing site (nearest of each new species 25–435 m; rare species — ochre sounder, column drifter, salt veil — 0.9–1.6 km).
+- **Fauna system additions:** per-species gait uniforms (leg phase step, lift, swing, bob); optional curious behaviour (approach to a set distance, leashed at 2.5× home radius); fliers/floaters (`hover` height + slow bob); burrowers (sink when alert/fleeing, hidden ones are neither drawn nor scannable, resurface when calm); `step` events carry the beat index; `faunaSoundIntensity()` (alarm 1, call 0.6, steps by pace with the first beat accented).
+- **Journal:** per-world line "n of m logged · Flora x of y · Minerals … · Fauna …" (+ "survey of life complete"); undiscovered entries "??? · <Kind> · not found" (text, not colour only).
+- **Sound (inherited from ECHO, `src/audio/**`):** `groundAt(body, surfaceInfo)` per-body rule table → footstep material under the foot (`footstep(body, sprint, surface?)`, default unchanged until Game.ts passes it); voice recipes for all 12 fauna (fliers have no footfalls). Game.ts wiring for fauna sounds, `scanStart`/`firstSpecies`/`worldComplete` and surface footsteps is a queued REQUEST (Director applies after GO).
+- **Checks:** typecheck clean; `npm test` **179/179** on the tree merged with `studio/integration` @ `f3766ea`; both builds OK, no hook strings in `dist/`; quick journey passed (1.0 min).
+- **Browser (testhooks, Balanced, 0 console errors in every run):**
+  - Ilex start, journal layout at Low/Balanced/High (1280×720 + 640×360): Low 106 calls / 226k tris / 60 MB GPU / 26 MB heap; Balanced 92 / 158k / 96 MB / 36 MB; High 92 / 174k / 96 MB / 36 MB (taken a few seconds after start, terrain may still have been streaming — not a worst case).
+  - Vesper (travel autopilot from Ilex): 63 creatures loaded, sledge herds from 230 m; perf 153 calls / 338k tris / 99.5 MB / 35.6 MB (fauna 14 drawn, 3.4k tris). **Not verified:** the sledge's curious approach and a sledge scan — my walk stopped at 36–47 m, outside its 32 m alert radius, so it kept wandering and the scan never started.
+  - Orrin (travel from Ilex): scanned **Violet cushion-moss** and a moving **Moss creeper** → journal; perf 161 / 353k / 100 MB / 45 MB (fauna 7 drawn, 1.2k tris).
+  - Saro (travel from Orrin): scanned **Halite rosette** and **Crust tilter** → journal with the first-discovery notice; perf 159 / 333k / 88 MB / 45 MB at a 768×432 canvas (adaptive resolution had dropped; lighter than full 1280×720).
+- Evidence: `evidence/studio/biome/biome-m2-journal-{low,balanced,high}-{1280,640}.png`, `biome-m2-{orrin,saro}-fauna-{1280,640}.png`, `biome-m2-sledge-balanced-{1280,640}.png` (sledges at ~45 m, not the curious stop).
+- **Known limits:** small species (moss creeper 0.2–0.3 m, glass tick, salt veil) read as specks beyond ~40 m; no browser check yet of fliers, burrowers, Ilex skein/sounder, Vesper kite/tick, Orrin wader/drifter, Saro skater/veil; fauna/discovery sounds and surface footsteps are silent in play until the Game.ts wiring lands; the ≥ 25-minute audio soak on the M2 build has **not** been run (deferred by the HOLD).
 
 ### Species plan (all five bodies)
 IDs follow `${body}-name` (save schema). Existing species keep their IDs and placement hashes. "Sound" = hooks for ECHO (events `call`, `alarm`, `step` from fauna; phenomena use `call` for their periodic event).
