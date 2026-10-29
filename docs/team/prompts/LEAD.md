@@ -4,7 +4,7 @@ READ FIRST, in this order, before changing anything:
 
 1. docs/team/CHARTER.md — the binding agreement (roles, contracts, milestones, definition of done).
 2. docs/team/STATUS.md — current state; you own this file.
-3. meridian/AGENTS.md, meridian/README.md, meridian/PROGRESS.md.
+3. AGENTS.md (repository root), meridian/README.md, meridian/PROGRESS.md.
 4. docs/team/handoffs/*.md — legacy exports, if present. Every claim there is REPORTED until you verify it against this code. Do not merge or concatenate anything from them blindly.
 
 YOU OWN (charter section D): src/game, src/core, src/physics, src/ship, src/save, RenderSystem/Lighting/CameraRig/Adaptive, Menus/Hud/Panel/Markers/styles, GameAudio.ts, src/debug, main.ts, index.html, package.json and lockfile, configs, e2e/prod and the flight/travel/saves/expedition/profile journeys, READMEs, PROGRESS.md, play/, docs/team/. You are the single owner of: the Mode type and mode routing, the save schema, dependencies, the entry point, renderer configuration, the HUD slot API, the objective data format. You also own the integration branch overhaul/integration and all merges into it.

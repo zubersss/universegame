@@ -8,8 +8,8 @@ Charter: `docs/team/CHARTER.md` (binding). Handoffs: `docs/team/handoffs/`. Rela
 | Session | Claude Code version | OS / environment | Model (`/model`) | Effort (`/effort status`) | Ultracode | Permission mode | `/list-agents` sees | Worktree / branch |
 |---|---|---|---|---|---|---|---|---|
 | LEAD | 2.1.312 | claude.ai cloud container: Linux 6.18 x86_64, 4 vCPU Xeon 2.1 GHz, 15 GB RAM, no GPU, Node 22.22.0 | `claude-opus-5-5` (served `claude-opus-5-5`) | session effort `ultracode` (charter: `xhigh`) | **on** (must be off: owner action) | auto | no other sessions (this session: `universegame-e4`; inbound messaging available) | cloud checkout / `overhaul/integration`, `lead/*` |
-| WORLDS | | | | | off | | | `../universegame-worlds` / `worlds/*` |
-| PLAYER | | | | | off | | | `../universegame-player` / `player/*` |
+| WORLDS | 2.1.312 | claude.ai cloud container (Linux 6.18, no GPU) | `claude-opus-5-5` (served `claude-opus-5-5`) | unverified (slash command; owner reads it) | unverified (owner) | auto | LEAD, PLAYER by `send_message` (session `session_01R5Bri4MB7rpCVatQcDYx2k`) | cloud checkout / `worlds/m1` |
+| PLAYER | 2.1.312 | claude.ai cloud container (Linux 6.18, no GPU) | `claude-opus-5-5` (served `claude-opus-5-5`) | unverified (slash command; owner reads it) | unverified (owner) | auto | LEAD, WORLDS by `send_message` (session `session_01R5Bri2t2x9zuUq1hBHotXu`) | cloud checkout / `player/m1` |
 
 Reference device: CPU · GPU (`chrome://gpu`) · RAM 8 GB · resolution · Chrome version · Node version — not measured yet (owner's laptop). The LEAD session runs in a cloud container without a GPU (headless Chromium 1243 on SwiftShader), so its browser checks prove behaviour, not frame rate.
 
@@ -47,7 +47,7 @@ Reference device: CPU · GPU (`chrome://gpu`) · RAM 8 GB · resolution · Chrom
 |---|---|---|---|---|---|---|---|
 | L1 | LEAD | Baseline runs on the reference device | — | main | — | `npm ci`, `typecheck`, `test`, `build`, `preview`; plays in Chrome | Cloud container, `main` 30ccf78: `npm ci`, typecheck, 63/63 tests, build (main chunk 5,144.6 kB, 1,892 kB gzip), build:test, prod smoke 2/2 (boots, takes off, nav, pause, resize; no errors or hotlinks). Journeys running. Reference-device run outstanding (owner). |
 | L2 | LEAD | Charter, status, settings committed | L1 | | `docs/team/*`, `.claude/settings.json` | files present on `overhaul/integration` | Charter and status in 30ccf78. Owner approved repo-root `.claude/settings.json` (allow npm/npx/git/node); `crossSessionInbound` stays a per-user setting because a repo file may only tighten it. |
-| L3 | LEAD | Messaging round-trip | L2 | | — | packet to and from WORLDS and PLAYER | Blocked: no WORLDS or PLAYER session exists. Packets in relay mode: `docs/team/packets/LEAD.md`. |
+| L3 | LEAD | Messaging round-trip | L2 | | — | packet to and from WORLDS and PLAYER | Done: LEAD → WORLDS and PLAYER delivered; READY packets back from both; PLAYER → WORLDS delivered. Cloud sessions talk by `send_message`; `docs/team/packets/` stays the fallback. |
 | L4 | LEAD | Handoffs reconciled | L2 | | `docs/team/handoffs/*` | table above filled; unique work preserved | Studio branches reconciled read-only, nothing deleted; DECISION packet sent; old-bot exports still to collect (owner). |
 | L5 | LEAD | Contract foundations | L4 | | `src/game/*`, `src/save/*`, `src/ui/Hud.ts` | tests for Mode hooks, HUD slot API, schema-2 plan | `lead/L5-contracts` 566d144: `setMode` + ON_FOOT hooks, `hud.setAbility`/`hud.setWarning`, `save-legacy` policy; typecheck, 72/72 tests. Browser checks before merge. IFACE packets to WORLDS (BodyDef fields) and PLAYER (hooks). |
 | W1 | WORLDS | Solar-system catalog with sources | — | | `src/data/sol.json` | fields tagged measured/estimated/fictional; source + epoch recorded | |
@@ -63,7 +63,7 @@ Reference device: CPU · GPU (`chrome://gpu`) · RAM 8 GB · resolution · Chrom
 | Since | Session | What | What unblocks | Owner action needed |
 |---|---|---|---|---|
 | 2026-10-29 | LEAD | Ultracode is on and effort is not `xhigh` in the LEAD session (charter G) | `/effort ultracode off`, then `/effort xhigh` | yes |
-| 2026-10-29 | all | No WORLDS or PLAYER session existed; owner chose cloud sessions created by LEAD | LEAD creates both on `overhaul/integration` | no (in progress) |
+| 2026-10-29 | WORLDS, PLAYER | Effort and ultracode cannot be read from inside a session | owner checks `/effort status` in both sessions | yes |
 | 2026-10-29 | LEAD | No reference-device numbers (M1 gate) | owner runs the baseline and `PW_GPU=1` profile on the laptop | yes |
 
 ## Milestone gate results
