@@ -11,6 +11,7 @@ import { tangentBasis } from '../world/sites';
 import { Raycaster, Vector3 } from 'three';
 import { GROUPS } from '../physics/Physics';
 import { frameStats, gpuEstimate } from './perf';
+import { BODIES, BODY_IDS, type BodyId } from '../world/bodies';
 
 export interface MeridianTestApi {
   game: Game;
@@ -40,12 +41,18 @@ export interface MeridianTestApi {
   saveState(): Record<string, unknown>;
   /** Mission objects of the shown body (relay and sample positions in local coordinates). */
   missionTargets(): { id: string; kind: string; dir: [number, number, number] }[];
+  /** Every body in BODY_IDS (system order) with its landing-site direction, so specs never hard-code the list. */
+  bodies(): { id: BodyId; name: string; kind: string; radius: number; airless: boolean; landing: [number, number, number] }[];
   /**
-   * Geography/placement fingerprint around the ship on the shown body:
-   * collision heights near the ship (physics raycasts), generator heights
-   * farther out, and every prop instance within 250 m (ID + position, mm).
+   * Geography/placement fingerprint around the shown body's landing site:
+   * collision heights (physics raycasts), generator heights farther out, and
+   * every static PropSystem instance within 250 m (ID + position, mm).
+   * Only PropSystem's deterministic, static props are included; moving
+   * things (creatures) must never live in PropSystem (see PROGRESS.md,
+   * Studio: Interfaces), so they can never enter this fingerprint.
+   * `expect` (optional) makes the call return null unless that body is shown.
    */
-  fingerprint(): { body: string; contact: (string | null)[]; heights: string[]; props: string[]; pendingCells: number } | null;
+  fingerprint(expect?: BodyId): { body: string; contact: (string | null)[]; heights: string[]; props: string[]; pendingCells: number } | null;
   /** Resource counters for leak checks. */
   resources(): Record<string, number | null>;
   /** Frame-interval statistics, GPU allocation estimate and render/terrain counts. */
@@ -183,9 +190,16 @@ export function installTestHooks(game: Game, extras?: TestHookExtras): void {
       for (const smp of b.sites.samples) out.push({ id: smp.id, kind: 'sample', dir: smp.dir });
       return out;
     },
-    fingerprint() {
+    bodies() {
+      return BODY_IDS.map((id) => {
+        const d = BODIES[id];
+        return { id, name: d.name, kind: d.kind, radius: d.radius, airless: d.atmosphere === null, landing: game.landingSiteOf(id) };
+      });
+    },
+    fingerprint(expect) {
       const b = game.body;
       if (!b || !game.bodyShown) return null;
+      if (expect !== undefined && b.def.id !== expect) return null;
       // Centered on the body's fixed landing site (not the ship, which lands a few meters off).
       const n = new Vector3(...b.sites.landing.dir);
       const ship = n.clone().multiplyScalar(b.def.radius + b.gen.height(n.x, n.y, n.z));
@@ -213,6 +227,7 @@ export function installTestHooks(game: Game, extras?: TestHookExtras): void {
         const d = at(dx, dy);
         heights.push(b.gen.height(d.x, d.y, d.z).toFixed(4));
       }
+      // Static props only: PropSystem holds nothing that moves (creatures live elsewhere).
       const props = b.props
         .nearby(ship, 250)
         .map((i) => `${i.id}@${i.p.x.toFixed(3)},${i.p.y.toFixed(3)},${i.p.z.toFixed(3)}`)
