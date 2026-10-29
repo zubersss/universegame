@@ -9,7 +9,7 @@ import urllib.request
 from pathlib import Path
 
 TASK = os.environ["GAME_TASK"].strip()
-MODEL = os.getenv("OPENAI_MODEL", "gpt-5.2")
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6.1-sol")
 if not TASK or len(TASK) > 4000:
     sys.exit("GAME_TASK must contain 1–4000 characters")
 
