@@ -44,8 +44,12 @@ test('three continuous Ilex → Vesper → Cairn → Ilex routes with landings',
   let s = await until(page, 's.state === "playing"', 600_000);
   expect(s.mode).toBe('LANDED');
   // Route over every body in BODY_IDS, back to the start: Ilex → Vesper → Cairn → Ilex
-  // today; new bodies extend each round automatically (budget the time).
-  const bodies = (await api(page, 'bodies')) as { id: string; airless: boolean }[];
+  // with the core bodies; new bodies extend each round automatically (budget the
+  // time). TRAVEL_BODIES=ilex,vesper,cairn restricts the gate to the listed bodies.
+  const only = process.env.TRAVEL_BODIES?.split(',').map((x) => x.trim()).filter(Boolean);
+  const all = (await api(page, 'bodies')) as { id: string; airless: boolean }[];
+  const bodies = only ? all.filter((b) => only.includes(b.id)) : all;
+  if (only) expect(bodies.map((b) => b.id).sort()).toEqual([...only].sort());
   const start = s.body as string;
   const route = [...bodies.map((b) => b.id).filter((id) => id !== start), start];
   const airless = new Set(bodies.filter((b) => b.airless).map((b) => b.id));
