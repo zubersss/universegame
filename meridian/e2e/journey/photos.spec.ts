@@ -36,7 +36,7 @@ function views(id: BodyId): Record<string, Pose> {
     ground: { eye: [-28, 1.8, -24], target: [30, 3, 160] },
     'low-flight': { eye: [-260, 140, -380], target: [60, 0, 500] },
     'high-flight': { eye: [-2500, 3200, -5200], target: [0, 0, 3000] },
-    orbit: { eye: [-0.9 * R, 1.6 * R, -1.3 * R], target: [0, 0, 0] },
+    orbit: { eye: [-0.3 * R, 2.0 * R, -0.45 * R], target: [0, 0, 0] },
   };
 }
 
