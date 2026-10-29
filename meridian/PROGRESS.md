@@ -129,7 +129,89 @@ _Not started._
 4. Optional backdrop giant (with LUMEN).
 
 ## Studio: BIOME (life and discovery)
-_Not started._
+
+### TODO (highest impact first)
+1. M1 wiring merged + browser evidence (this section, below).
+2. M2: fauna on Vesper/Orrin/Saro, Cairn phenomena, 4th flora/mineral per body (plan below; Orrin/Saro after ATLAS's merge).
+3. M2: journal per-world sections with silhouettes ("??? · 1 of 4 flora found"), discovery dates (needs a save field from ATLAS), per-world completion.
+4. M3: first-discovery notice + ECHO `audio.discovery(...)` + LUMEN effect hooks; fauna sound events wired to ECHO's `audio.creature(...)`.
+
+### M1 — fauna system skeleton (2026-10-29)
+- **Module `src/fauna/`** (separate from `PropSystem`; creatures are not in the prop list, so the travel fingerprint is unaffected):
+  - `spawn.ts`: herds per spawn cell = cube chunk at `maxLevel − 3` (≈736 m on Ilex). Candidate hash = (body seed, `'fauna'`, **species id**, face, x, y, k), so appending species never moves existing herds (unit-tested). Homes avoid the landing clearing and relay pad.
+  - `behaviour.ts`: pure state machine in each herd's home tangent plane: `idle → wander` (target inside the home radius) `→ idle`; `alert` (player within alertRadius: stop and face it); `flee` (player within fleeRadius, or ship thrusting low within shipFleeRadius; emits one `alarm`); back to `wander` after a calm period. Sub-stepped at ≤ 0.1 s.
+  - `FaunaSystem.ts`: API `new FaunaSystem(def, gen, sites, aerialSteps)`, `update(dt, ctx)`, `setQuality(rangeScale)`, `nearby(point, r)`, `place(c)`, `onEvent(ev, creature)`, `dispose()`, `stats`, `triangleEstimate`. Two instanced LODs per species (caps 48 / 160 instances), procedural gait in the vertex shader from per-vertex `aLeg` (leg index, hip→foot) and per-instance `aAnim` (gait phase, walk amplitude, sway). Ground snap on the clearing-aware surface generator (the same one terrain and colliders use). Update rates: every frame < 70 m, every 4th < 200 m, every 15th to range, frozen and not drawn beyond range (380 m × preset prop range: Low 266, Balanced 380, High 494 m). No per-frame allocations in `update`/`fill`.
+  - `catalog.ts`: one journal catalog (scannable flora + minerals + fauna with `kind`), used by `Journal.ts` and `Expedition.scan()`.
+- **Scanning moving targets** (`src/game/scan.ts`, `stepScanTrack`): the tracked creature gets a 1.6× wider aim radius; when it slips out of the cone (or another object crosses it) progress **pauses for up to 1.5 s** instead of resetting, then resets; releasing F resets; one completion per hold. Feedback prompt: "· out of scan range" (target up to 1.5× scan range) / "· line of sight blocked", and "signal lost" with the paused bar.
+- **Game.ts wiring** (claimed/acknowledged): fauna created in `showBody`, disposed in `releaseBody`, updated after the active body each frame (dt = 0 when not playing), scan target search includes `fauna.nearby()`, telemetry `fauna` stats and `scan.phase/blocked`.
+- **First species: Grove trine (`ilex-trine`)** — see the plan table.
+
+### Species plan (all five bodies)
+IDs follow `${body}-name` (save schema). Existing species keep their IDs and placement hashes. "Sound" = hooks for ECHO (events `call`, `alarm`, `step` from fauna; phenomena use `call` for their periodic event).
+
+**Ilex** — chalk ridges, ochre ground, dark-teal lantern groves
+| ID | Name | Kind | Habitat | Size | Rarity | Behaviour | Sound hooks |
+|---|---|---|---|---|---|---|---|
+| ilex-lantern | Lantern-tree | flora | groves (existing) | 7–14 m | common | — | wind creak |
+| ilex-chalk | Chalk spire | mineral | highland ridges (existing) | 2–7 m | common | — | — |
+| ilex-fan | Ochre fan-shrub | flora | open ochre ground (existing) | 0.6–1.7 m | common | — | dry rustle |
+| ilex-vesicle | Loam vesicle | flora | deep grove shade (special > 0.6) | 0.2–0.5 m | uncommon | bladders inflate slowly | faint wet tick |
+| **ilex-trine** | **Grove trine** (M1) | fauna | grove margins, lowlands, slope < 0.25 | 1.9–2.7 m | common, herds 2–5 | grazer: wander 22 m, watch < 26 m, flee < 9 m or ship < 140 m | call: hollow chalky knock (~1/50 s idle); alarm: dry clack; step: three-beat footfalls |
+| ilex-skein | Chalk skein | fauna | above highland ridges, 5–40 m up | 0.4 m span | uncommon, flocks 6–14 | flier: loose flocking along ridge updrafts, scatters upward | call: papery flutter + faint whistle; alarm: sharp flutter burst |
+| ilex-sounder | Ochre sounder | fauna | open ochre flats (biome mid, low rockiness) | 0.8 m wide, flat | rare, solitary | burrower: surfaces with a ring of tendrils, sinks when footsteps come near | call: muffled thump; alarm: sand hiss on sinking |
+
+Field notes (fauna): *Grove trine* — in the game (see `faunaSpecies.ts`). *Chalk skein* — "Thin, pale gliders no heavier than paper, riding the updrafts that rise along the chalk ridges. They move as a loose sheet, each keeping a fixed distance from its neighbours. When disturbed the sheet tears upward and reforms some way off." *Ochre sounder* — "A flattened burrower that lies just under the ochre crust, surfacing only to raise a ring of fine tendrils into the wind. It senses footsteps through the ground long before it can see anything. Most observations end with a soft collapse of sand and an empty ring."
+
+**Vesper** — rust mesas, pale dunes, black glass outcrops
+| ID | Name | Kind | Habitat | Size | Rarity | Behaviour | Sound hooks |
+|---|---|---|---|---|---|---|---|
+| vesper-glass | Black glass outcrop | mineral | existing | 1–3.6 m | common | — | faint ring in wind |
+| vesper-pillar | Rust hoodoo | mineral | existing | 4–11 m | common | — | — |
+| vesper-bristle | Dune bristle | flora | existing | 0.4–1 m | common | — | wiry hiss |
+| vesper-fulgurite | Fulgurite tube | mineral | dune crests | 0.5–1.5 m | uncommon | — | — |
+| vesper-sledge | Dune sledge | fauna | dune sea (biome B), lee slopes | 1.2 × 3 m, low | common, herds 3–6 | grazer: drags itself over crests on paired forelimbs; curious, approaches to ~15 m then stops; flees from the ship | call: low grinding bellow; alarm: sand-spray huff; step: long drag |
+| vesper-kite | Mesa kite | fauna | above mesa edges, 20–80 m up; perches on hoodoos | 2.5 m span | uncommon, solitary | flier: circles on thermals, lands on hoodoo caps | call: thin descending whistle |
+| vesper-tick | Glass tick | fauna | around black glass outcrops | 5 cm, swarms of 30–60 | common near glass | swarm: clusters on glass, ripples outward when approached, re-gathers | call: clicking like cooling glass; alarm: rising click burst |
+
+Field notes: *Fulgurite tube* — "Hollow, branching tubes of fused sand where lightning once struck the dunes. Their inner walls are glassy and smooth; the outer surface keeps the grain of the sand that formed it." *Dune sledge* — "A broad, low grazer armoured in overlapping oxide-red plates, hauling itself over the dune crests on two heavy forelimbs. It leaves a ribbed track that the wind erases within the hour. It approaches observers to a fixed distance and waits." *Mesa kite* — "A long-winged glider that circles the mesa rims on rising heat for most of the day, descending only to rest on the caps of hoodoos. It has never been seen on the dunes." *Glass tick* — "Small crawlers with black, glassy shells, gathered in hundreds on the faces of the black glass outcrops. Disturbed, the colony spreads outward in a single ripple and slowly draws back together. Their shells are nearly indistinguishable from the mineral they live on."
+
+**Cairn** (airless) — craters, silver rock, blue ice: no animals; phenomena instead
+| ID | Name | Kind | Habitat | Size | Rarity | Behaviour | Sound hooks |
+|---|---|---|---|---|---|---|---|
+| cairn-rime | Rime shard | mineral | existing | 0.8–2.6 m | common | — | — |
+| cairn-boulder | Silver breccia | mineral | existing | 0.8–4.2 m | common | — | — |
+| cairn-bloom | Frost bloom | mineral | shaded crater walls (rime basins, steep) | 0.3–1 m | uncommon | feathery hoar that re-grows after sunlight | none (airless); suit-contact crackle when close |
+| cairn-vent | Sublimation vent | phenomenon | sunlit crater floors with ice (special) | plume 3–12 m | rare | periodic silent plume of ice vapour (every 20–40 s), scannable while venting | `call` at plume start → felt as a low ground rumble through the suit (no air sound) |
+
+Field notes: *Frost bloom* — "Feathered hoar crystals that grow on rock faces the sun never reaches. Brought into light they sublimate within minutes; returned to shadow, they rebuild in the same shapes." *Sublimation vent* — "A fissure in the crater floor that releases a silent column of ice vapour each time the ice beneath it is warmed. The plume rises straight, without wind to bend it, and falls back as fine frost around the vent."
+
+**Orrin** (proposed; ATLAS ids `orrin`) — violet moss plains, basalt organ-pipe columns, valley fog
+| ID | Name | Kind | Habitat | Size | Rarity | Behaviour | Sound hooks |
+|---|---|---|---|---|---|---|---|
+| orrin-moss | Violet cushion-moss | flora | moss lowlands (biome B) | 0.2–0.6 m mounds | common | — | soft damp muffling (footsteps) |
+| orrin-column | Basalt organ | mineral | column highlands (rockiness) | 3–12 m clusters | common | — | wind tones across column tops |
+| orrin-reed | Fog reed | flora | valley floors (special) | 2–4 m | common | sways; droplets condense | low hum in wind |
+| orrin-lampcap | Lamp cap | flora | moss edges near columns | 0.3–0.8 m | uncommon | dim violet glow | — |
+| orrin-wader | Fog wader | fauna | valley-floor shallows, in fog | 2.5–3.2 m, slender biped | common, loose groups 2–4 | grazer: slow, head held low in the fog; flees in long strides | call: long falling hoot; step: wet, slow footfalls; alarm: double hoot |
+| orrin-drifter | Column drifter | fauna | between basalt columns, 10–30 m up | 1.5 m body + 6 m filaments | rare, solitary | floater: drifts on the air, ignores the player, rises from the ship | call: very low breathing drone |
+| orrin-creeper | Moss creeper | fauna | moss plains | 0.3 m, many-legged | common, lines of 5–12 | swarm-grazer: moves in single file, freezes when approached | step: soft rustling patter; alarm: brief chitter |
+
+Field notes: *Fog wader* — "A tall, narrow biped that feeds in the valley shallows with its head held low inside the fog layer. In clear air it appears to stand headless. It leaves in long, unhurried strides when approached and calls once before it goes." *Column drifter* — "A gas-filled body trailing long fine filaments, drifting between the basalt columns well above the ground. It shows no response to observers. Its filaments draw faint lines through the fog where they touch it." *Moss creeper* — "Small, many-legged grazers that cross the moss in single file, each following the scent of the one ahead. When one stops, the whole line stops."
+
+**Saro** (proposed; ATLAS ids `saro`) — rose salt flats, polygon cracks, turquoise brine pans
+| ID | Name | Kind | Habitat | Size | Rarity | Behaviour | Sound hooks |
+|---|---|---|---|---|---|---|---|
+| saro-rosette | Halite rosette | mineral | salt flats (biome A) | 0.2–0.8 m | common | — | crunch underfoot (footsteps) |
+| saro-chimney | Salt chimney | mineral | brine pan margins | 1–4 m | uncommon | — | — |
+| saro-mat | Brine mat | flora | brine shallows (biome B) | flat patches 1–3 m | common | — | — |
+| saro-thorn | Crust thorn | flora | crack lines on the flats | 0.3–1 m | common | — | — |
+| saro-skater | Brine skater | fauna | open brine (special) | 0.5 m, flat, many legs | common, groups 6–15 | skims the surface film, scatters fast | step: tiny ticking skitter; alarm: rapid skitter burst |
+| saro-tilter | Crust tilter | fauna | salt flats near domes | 1.5 m, plate-backed | rare, solitary | stands for long periods angling a reflective plate to the sun; walks off slowly | call: faint metallic creak as the plate turns |
+| saro-veil | Salt veil | fauna | warm brine pans, 2–15 m up | 1 cm each, columns of hundreds | uncommon | swarm: a shimmering column that leans away from the player | call: very high, faint shimmer |
+
+Field notes: *Brine skater* — "A flat, many-legged animal that skims the surface film of the brine pans without breaking it. Groups move together and scatter in all directions at once." *Crust tilter* — "A solitary animal that stands motionless for hours, turning a broad, mirror-bright dorsal plate to follow the sun. The plate appears to regulate its temperature. It walks away when approached, slowly and without looking back." *Salt veil* — "Columns of minute translucent fliers that rise above the warm brine at midday. From a distance the column reads as a heat shimmer; only close up do individual animals resolve."
+
+Budget plan (agreed values to confirm with GAUGE/LUMEN): ≤ 48 LOD0 + 160 LOD1 instances per species, 2 draw calls per species (+1 shadow on LOD0), ≤ 3 fauna species visible per world → ≤ 9 draw calls and a few thousand triangles for fauna in the worst case.
 
 ## Studio: ECHO (sound)
 
