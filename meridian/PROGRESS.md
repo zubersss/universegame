@@ -295,6 +295,42 @@ Testhooks build, Low, 640×360, `setRenderEvery(60)`, pointer lock stubbed. Real
 ### N-body readiness of the test layer
 - `src/debug/autopilot.ts`: route planning extracted into exported `travelRoute(from, to)` (same waypoints as before); `setGoal` rejects a `travel` goal whose `to` is not in `BODY_IDS`.
 - `src/debug/testHooks.ts`: new `bodies()` hook; `fingerprint(body?)`; fingerprint documented as static `PropSystem` props only (it already read only `PropSystem`; creatures must never be added there, see Interfaces).
-- `e2e/journey/travel.spec.ts`: the route is built from `bodies()` (every other body, then back to the start; identical to Ilex → Vesper → Cairn → Ilex today), airless checks apply to every airless body, counter and resource checks scale with the number of legs. New bodies therefore lengthen the gate automatically (≈ 7 min per leg at today's pace, so ≈ 20 min per added body over three rounds). Verification run of the edited spec: in progress at the time of this commit (result recorded when it finishes).
+- `e2e/journey/travel.spec.ts`: the route is built from `bodies()` (every other body, then back to the start; identical to Ilex → Vesper → Cairn → Ilex today), airless checks apply to every airless body, counter and resource checks scale with the number of legs. New bodies therefore lengthen the gate automatically (≈ 7 min per leg at today's pace, so ≈ 20 min per added body over three rounds). Verification run of the edited spec (testhooks build of `9ef2749`, Low, pointer lock stubbed, setsid nohup): **passed in 31.3 min**: 9 legs Ilex → Vesper → Cairn → Ilex × 3, 165–194 s simulated each; 19 cruise engagements, exits 9 approach / 1 brake / 9 toggle / 0 safety; 10 activations, 9 releases (all at root LOD); return-visit fingerprints (generator heights, every prop ID + position, collision heights) identical; geometries 194–236, textures 12, rigid bodies 6–14, colliders 9–17, chunk cache 20–28 MB, JS heap 33–54 MB, flat across rounds; 0 console errors. Faster than the Phase 6 run (60.0 min) on an idle machine; same assertions. Evidence screenshots it rewrote were restored (not re-committed).
 - New `tests/autopilot.test.ts`: the travel route between every ordered pair in `BODY_IDS` stays outside every safety envelope until the final radial leg, which ends inside the destination's envelope (6 cases today). `npm test` 69/69 in 9 files.
 - Bugs: `BUGS.md` created; B-001 (`isBodyId` hard-codes the ids, ATLAS) filed.
+### Handoff (GAUGE → Director), 2026-10-29
+**Pushed and verified (`studio/gauge`):**
+- `9ef2749`: baseline, `BUGS.md`, quick journey, N-body test hooks.
+  - Baseline at `26538d0`: typecheck clean; 63/63 unit tests; both builds ok; no test-hook strings in `dist/`; prod project 2/2 (smoke 55.7 s, no-WebGL 1.5 s).
+  - After the change: 69/69 unit tests; quick journey passed in 52.1 s and 1.1 min.
+- `6d7ca2a`: `TRAVEL_BODIES` option for the travel gate. Typecheck only; not yet run with the option set.
+- `73ef0d7`: removed the duplicate airless render wait; B-001 status updated.
+- `564e181`: travel gate result recorded. The core travel gate verification run had **finished before the limit hit: passed in 31.3 min** (numbers above). Nothing was in flight at handoff.
+
+**Commands** (in `meridian/`; run `npm run build && npm run build:test` first; one heavy browser job at a time; use `setsid nohup` for anything near the 2-hour background cap):
+- Quick journey (per merge, about 1 min): `npx playwright test --project=journey e2e/journey/quick.spec.ts`
+- Core travel gate (about 31–60 min): `TRAVEL_BODIES=ilex,vesper,cairn npx playwright test --project=journey e2e/journey/travel.spec.ts`. Without `TRAVEL_BODIES` it covers every body in `BODY_IDS` (the extended gate; with orrin/saro, budget well over an hour).
+- Saves specs (about 8 min): `npx playwright test --project=journey e2e/journey/saves.spec.ts`
+- Prod project (smoke + no-WebGL, about 1 min): `npx playwright test --project=prod`
+- Profile route: `npx playwright test --project=journey e2e/journey/profile.spec.ts` (about 37 min in SwiftShader; `PW_GPU=1` on a real GPU).
+- Memory soak: **no soak spec exists yet** (not written). Suggested shape: quick-journey loop or a walk/fly loop for 30 min, sampling `__meridian.resources()` plus renderer RSS from `ps` every minute, and asserting the last third stays within about 25% of the first third.
+- Set `PW_OUTPUT=<scratch dir>` so `test-results/` never lands in the repo. Journeys rewrite `evidence/*.png`: restore them with `git checkout` unless new evidence is intended.
+
+**Hooks** (`window.__meridian`, dev + `dist-test/` only):
+- `bodies()`: every body in `BODY_IDS` with id, name, kind, radius, airless and landing direction. Build spec routes and lists from it; never hard-code ids.
+- `fingerprint(body?)`: static PropSystem props, heights and collision heights around the landing site. Returns null unless that body is shown, so wait on `fingerprint(id)` after landing. Compare `heights` and `props` exactly; compare `contact` wherever both visits are non-null. Creatures must never be added to PropSystem.
+- `travelRoute(from, to)` (exported from `src/debug/autopilot.ts`): the waypoints the `travel` goal flies. It is pure, so it is unit-tested in `tests/autopilot.test.ts` for every ordered body pair. The `travel` goal throws on an id not in `BODY_IDS`.
+- `resources()`: leak counters (geometries, textures, rigid bodies, colliders, chunk cache, heap, prop cells/instances). Sample per leg or per minute; expect flat across rounds.
+- `perf(lastFrames?)`: frame stats, GPU estimate, draw calls/triangles, terrain/prop counts, heap, timings, GL renderer string. Call `resetFrames()`, then draw every frame (`setRenderEvery(1)`) for the measurement window.
+
+**BUGS.md:**
+- B-001 (sev 4, ATLAS, `isBodyId` hard-codes ids): marked fixed on `studio/atlas`. ATLAS's `824b14a` is now on integration, so it is ready to verify. Check that `isBodyId` uses `BODY_IDS` and that the save tests accept orrin/saro, then mark it verified. No other bugs filed.
+
+**Next, in priority order (not done):**
+1. Verify B-001 on integration.
+2. Run the extended travel gate (all five bodies) once orrin/saro have sites and landing works.
+3. Add the `audio()` hook and an `audioNodes` count in `resources()` once ECHO's GameAudio `stats()`/`meter()` lands. ECHO sent the types: live node total = `AudioStats.liveNodes`.
+4. Saves: v1 → v2 import and new-body inventory cases.
+5. Write the 30-min memory soak.
+6. Per-preset profile route against A4 budgets after the visual merges.
+7. Creature hooks (nearest creature, scan a moving target) once BIOME's fauna API exists.
