@@ -613,7 +613,8 @@ export class Game {
   }
 
   private land(): void {
-    this.audio.thump(1);
+    // Touchdown scales with the vertical impact speed (m/s, positive downward).
+    this.audio.touchdown(-this.ship.vel.dot(this.env.update(this.ship.currPos).up));
     this.parkShip();
     this.mode = 'LANDED';
     this.assist.disengage();
@@ -667,7 +668,7 @@ export class Game {
     if (e.state.transmitted) {
       if (e.transmitExtended()) {
         this.counters.transmissions++;
-        this.audio.complete();
+        this.audio.completeExtended();
         this.onNotice?.('Extended Survey transmitted', `${EXTENDED_NAMES} are charted with the rest of the system. Explore freely.`, true);
         this.autosave('transmit');
       } else if (e.state.extendedTransmitted) {
@@ -1365,6 +1366,8 @@ export class Game {
         shipActive: this.mode === 'PILOTING' || cruising,
         onFoot,
         body: def.id,
+        mode: this.mode,
+        gear: this.ship.gearTarget,
       });
     }
   }
