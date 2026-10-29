@@ -28,6 +28,11 @@ export interface BehaviourParams {
   idleMax: number;
   /** Calls per second while idle (Poisson rate). */
   callRate: number;
+  /**
+   * Curious species walk toward an observer while alert and stop this far
+   * from it (m); 0 = stand still. They never stray beyond 2.5× the home radius.
+   */
+  curiousDistance?: number;
 }
 
 export interface CreatureState {
@@ -125,8 +130,11 @@ export function stepBehaviour(s: CreatureState, p: BehaviourParams, t: Threats, 
       break;
     }
     case 'alert': {
-      // Stand still and face the observer.
-      s.speed = approach(s.speed, 0, p.walkSpeed * 2, dt);
+      // Face the observer; curious species close in to a fixed distance first.
+      const cd = p.curiousDistance ?? 0;
+      const leashed = s.x * s.x + s.z * s.z > (p.homeRadius * 2.5) ** 2;
+      const closing = t.player && cd > 0 && pd > cd + 0.5 && !leashed;
+      s.speed = approach(s.speed, closing ? p.walkSpeed * 0.6 : 0, p.walkSpeed * 2, dt);
       if (t.player) turnToward(s, -pdx, -pdz, p.turnRate * 0.6, dt);
       if (pd > p.alertRadius * 1.3) {
         s.timer -= dt;

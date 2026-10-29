@@ -6,6 +6,7 @@ import {
   Matrix4,
   MeshStandardMaterial,
   Vector3,
+  Vector4,
 } from 'three';
 import type { BodyDef } from '../world/bodies';
 import type { SurfaceGenerator } from '../world/surface';
@@ -44,6 +45,8 @@ export class Creature {
   acc = 0;
   /** Distance to the camera at the last frame (m). */
   dist = Infinity;
+  /** Footfall index within the gait cycle at the last 'step' event (0 = first beat). */
+  beat = 0;
   constructor(readonly spawn: Spawn) {
     this.state = newCreatureState(spawn.x, spawn.z, spawn.yaw, (spawn.seed % 1000) / 200);
     this.rnd = mulberry32(spawn.seed);
@@ -88,13 +91,13 @@ const GAIT_GLSL = /* glsl */ `
   {
     float fPh = aAnim.x;
     float fAmp = aAnim.y;
-    float fBob = fAmp * 0.022 * sin(fPh * 3.0);
+    float fBob = fAmp * uGait.w * sin(fPh * 3.0);
     if (aLeg.x > -0.5) {
       // Legs: the foot (t = 1) lifts and swings, the hip (t = 0) rides the body.
-      float lp = fPh + aLeg.x * 2.0944;
+      float lp = fPh + aLeg.x * uGait.x;
       float lt = aLeg.y;
-      transformed.y += max(0.0, sin(lp)) * fAmp * 0.09 * lt + fBob * (1.0 - lt);
-      transformed.z += cos(lp) * fAmp * 0.13 * lt;
+      transformed.y += max(0.0, sin(lp)) * fAmp * uGait.y * lt + fBob * (1.0 - lt);
+      transformed.z += cos(lp) * fAmp * uGait.z * lt;
     } else {
       transformed.y += fBob;
       if (aLeg.x < -1.5) {
@@ -151,13 +154,14 @@ export class FaunaSystem {
       const g = sp.make();
       this.geos.push(g);
       const mat = new MeshStandardMaterial({ vertexColors: true, roughness: sp.roughness, metalness: 0 });
+      const gait = { value: new Vector4(sp.gait.legStep, sp.gait.lift, sp.gait.swing, sp.gait.bob) };
       patchAerial(
         mat,
         aerialSteps,
         (shader) => {
-          Object.assign(shader.uniforms, faunaUniforms);
+          Object.assign(shader.uniforms, faunaUniforms, { uGait: gait });
           shader.vertexShader = shader.vertexShader
-            .replace('#include <common>', '#include <common>\nuniform float uTime;\nattribute vec2 aLeg;\nattribute vec3 aAnim;')
+            .replace('#include <common>', '#include <common>\nuniform float uTime;\nuniform vec4 uGait;\nattribute vec2 aLeg;\nattribute vec3 aAnim;')
             .replace('#include <begin_vertex>', `#include <begin_vertex>\n${GAIT_GLSL}`);
         },
         'fauna',
@@ -274,13 +278,16 @@ export class FaunaSystem {
       const h = Math.min(dt, FAUNA_RATES.maxStep);
       dt -= h;
       const ev = stepBehaviour(c.state, sp.behaviour, t, h, c.rnd);
-      const before = Math.floor((c.phase * 3) / (Math.PI * 2));
+      const before = Math.floor(c.phase / sp.gait.legStep);
       c.phase += (c.state.speed * h * Math.PI * 2) / strideLen;
       if (c.phase > 1e4) c.phase -= Math.PI * 2 * 1000;
-      const after = Math.floor((c.phase * 3) / (Math.PI * 2));
+      const after = Math.floor(c.phase / sp.gait.legStep);
       if (this.onEvent) {
         if (ev) this.onEvent(ev, c);
-        if (after !== before && c.dist < FAUNA_RATES.near) this.onEvent('step', c);
+        if (after !== before && c.dist < FAUNA_RATES.near) {
+          c.beat = after % Math.round((Math.PI * 2) / sp.gait.legStep);
+          this.onEvent('step', c);
+        }
       }
     }
     this.place(c);

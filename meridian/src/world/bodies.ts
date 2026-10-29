@@ -169,6 +169,7 @@ export const BODIES: Record<BodyId, BodyDef> = {
     description: 'A temperate world of chalk ridges and ochre plains, threaded with dark teal groves.',
     survey: 'core',
     ambience: { wind: 1, windTone: 300, windAltitude: 1500, tonic: 220, scale: PENTA, timbre: 'triangle', toneGap: 16, ground: 'soil' },
+    look: { specialRough: 0.95, specialSheen: 0, bump: 1, strata: 0.45, strataSpacing: 6, macro: 0.55, sediment: 0x9c8a5c, sedimentAmount: 0.35, peakRock: 0.3 },
   },
   vesper: {
     id: 'vesper',
@@ -204,6 +205,7 @@ export const BODIES: Record<BodyId, BodyDef> = {
     description: 'A dry, dust-hazed world of terraced rust mesas and pale dune seas.',
     survey: 'core',
     ambience: { wind: 1, windTone: 300, windAltitude: 1200, tonic: 196, scale: PENTA, timbre: 'triangle', toneGap: 16, ground: 'sand' },
+    look: { specialRough: 0.35, specialSheen: 0.6, bump: 0.7, strata: 0.75, strataSpacing: 14, macro: 0.6, sediment: 0xc9ae88, sedimentAmount: 0.45, peakRock: 0.2 },
   },
   cairn: {
     id: 'cairn',
@@ -229,6 +231,7 @@ export const BODIES: Record<BodyId, BodyDef> = {
     description: 'An airless moon of overlapping craters, silver rock, and blue-shadowed ice.',
     survey: 'core',
     ambience: { wind: 0, windTone: 300, windAltitude: 0, tonic: 261.6, scale: PENTA, timbre: 'sine', toneGap: 16, ground: 'rock' },
+    look: { specialRough: 0.22, specialSheen: 1, bump: 1, strata: 0.2, strataSpacing: 11, macro: 0.45, sediment: 0x6c7076, sedimentAmount: 0.4, peakRock: 0.35 },
   },
   orrin: {
     id: 'orrin',
@@ -259,15 +262,16 @@ export const BODIES: Record<BodyId, BodyDef> = {
       { altitude: 6200, thickness: 350, coverage: 0.35, scale: 11000, speed: 0.000016, tint: [0.96, 0.95, 1.0], opacity: 0.45, streak: 0.95 },
     ],
     palette: {
-      a1: 0x3e3c46, a2: 0x2a2930, a3: 0x5c5468, // basalt column highlands: dark basalt, column faces, weathered lilac
-      b1: 0x5e4a78, b2: 0x4a4256, b3: 0x8a6ea4, // violet moss lowlands: moss, damp stone, bright moss
-      special: 0x2f3c40, // wet valley floors
+      a1: 0x6a6674, a2: 0x4a4752, a3: 0x8a8296, // basalt column highlands: dark basalt, column faces, weathered lilac
+      b1: 0x8e74b0, b2: 0x8a8098, b3: 0xb49ad0, // violet moss lowlands: moss, damp stone, bright moss
+      special: 0x3f4f5a, // wet valley floors
       proxyNight: 0x0c0a14,
     },
     biomeNames: ['Basalt Column Highlands', 'Violet Moss Lowlands'],
     description: 'A humid world of violet moss plains below stepped basalt highlands, its valleys full of slow fog.',
     survey: 'extended',
     ambience: { wind: 1.3, windTone: 220, windAltitude: 2500, tonic: 174.6, scale: [0, 3, 5, 7, 10, 12, 15], timbre: 'triangle', toneGap: 20, ground: 'moss' },
+    look: { specialRough: 0.45, specialSheen: 0.5, bump: 1.1, strata: 0.3, strataSpacing: 3, macro: 0.5, sediment: 0x6a5a80, sedimentAmount: 0.6, peakRock: 0.35, rockSlope: [0.12, 0.28] },
   },
   saro: {
     id: 'saro',
@@ -304,6 +308,7 @@ export const BODIES: Record<BodyId, BodyDef> = {
     description: 'A bright, thin-aired salt desert: pink crust split into polygons around shallow turquoise brine pans.',
     survey: 'extended',
     ambience: { wind: 0.7, windTone: 520, windAltitude: 800, tonic: 293.7, scale: [0, 2, 5, 7, 9, 12, 14], timbre: 'sine', toneGap: 22, ground: 'salt' },
+    look: { specialRough: 0.08, specialSheen: 1, bump: 0.6, strata: 0.25, strataSpacing: 2, macro: 0.35, sediment: 0xd8b8b2, sedimentAmount: 0.5, peakRock: 0.15, rockSlope: [0.2, 0.4] },
   },
 };
 
