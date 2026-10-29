@@ -16,7 +16,7 @@ export interface CatalogEntry {
 }
 
 /** Prop species that are minerals rather than plants. */
-const MINERALS = new Set(['ilex-chalk', 'vesper-glass', 'vesper-pillar', 'cairn-rime', 'cairn-boulder', 'cairn-pebbles']);
+const MINERALS = new Set(['ilex-chalk', 'vesper-glass', 'vesper-pillar', 'cairn-rime', 'cairn-boulder', 'cairn-pebbles', 'vesper-fulgurite', 'cairn-bloom']);
 
 export const CATALOG: CatalogEntry[] = [
   ...SPECIES.filter((s) => s.scannable).map((s) => ({
@@ -31,4 +31,36 @@ export function catalogFor(body: BodyId): CatalogEntry[] {
 
 export function catalogById(id: string): CatalogEntry | undefined {
   return CATALOG.find((e) => e.id === id);
+}
+
+export interface WorldProgress {
+  found: number;
+  total: number;
+  byKind: Record<LifeKind, { found: number; total: number }>;
+}
+
+/** Journal completion for one body from the logged species IDs (unknown IDs ignored). */
+export function worldProgress(body: BodyId, logged: readonly string[]): WorldProgress {
+  const byKind: WorldProgress['byKind'] = { flora: { found: 0, total: 0 }, mineral: { found: 0, total: 0 }, fauna: { found: 0, total: 0 } };
+  let found = 0;
+  let total = 0;
+  for (const e of CATALOG) {
+    if (e.body !== body) continue;
+    const k = byKind[e.kind];
+    k.total++;
+    total++;
+    if (logged.includes(e.id)) {
+      k.found++;
+      found++;
+    }
+  }
+  return { found, total, byKind };
+}
+
+/** "Flora 1 of 3 · Minerals 0 of 1 · Fauna 0 of 1" (kinds without species omitted). */
+export function progressLine(p: WorldProgress): string {
+  const parts: string[] = [];
+  const names: [LifeKind, string][] = [['flora', 'Flora'], ['mineral', 'Minerals'], ['fauna', 'Fauna']];
+  for (const [k, n] of names) if (p.byKind[k].total > 0) parts.push(`${n} ${p.byKind[k].found} of ${p.byKind[k].total}`);
+  return parts.join(' · ');
 }
