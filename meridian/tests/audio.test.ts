@@ -387,3 +387,45 @@ describe('creatures and discovery', () => {
     expect(pool.snapshot().liveNodes).toBe(0);
   });
 });
+
+describe('surface footsteps and fauna voices', () => {
+  it('maps the surface under foot to a ground kind per body, falling back to the body default', async () => {
+    const { groundAt, ambienceFor } = await import('../src/audio/profiles');
+    const info = (o: Partial<{ biome: number; special: number; rockiness: number }>) => ({ height: 0, biome: 0, variation: 0.5, special: 0, rockiness: 0, ...o });
+    expect(groundAt('ilex', info({ rockiness: 0.8 }))).toBe('rock');
+    expect(groundAt('ilex', info({ special: 0.9 }))).toBe('moss');
+    expect(groundAt('ilex', info({}))).toBe(ambienceFor('ilex').ground);
+    expect(groundAt('vesper', info({ biome: 0.9 }))).toBe('sand');
+    expect(groundAt('vesper', info({ biome: 0.1 }))).toBe('rock');
+    expect(groundAt('cairn', info({ special: 0.8 }))).toBe('ice');
+    expect(groundAt('cairn', info({}))).toBe('rock');
+    expect(groundAt('orrin', info({ biome: 1 }))).toBe(ambienceFor('orrin').ground);
+    expect(groundAt('saro', info({}))).toBe(ambienceFor('saro').ground);
+  });
+
+  it('plays a footstep for an explicit surface and frees its nodes', () => {
+    const { ctx, audio } = setup();
+    const pool = (audio as unknown as { pool: VoicePool }).pool;
+    const n = pool.snapshot().started;
+    audio.footstep('ilex', false, 'rock');
+    audio.footstep('saro', true, 'salt');
+    expect(pool.snapshot().started).toBeGreaterThan(n);
+    ctx.advance(5);
+    expect(pool.snapshot().liveNodes).toBe(0);
+  });
+
+  it('every fauna species has its own voice; fliers and floaters have no footfalls', async () => {
+    const { FAUNA } = await import('../src/fauna/faunaSpecies');
+    const { creatureVoice, DEFAULT_CREATURE } = await import('../src/audio/creatures');
+    for (const sp of FAUNA) {
+      const v = creatureVoice(sp.id);
+      expect(v, sp.id).not.toBe(DEFAULT_CREATURE);
+      expect(v.call.length + v.alarm.length, sp.id).toBeGreaterThan(0);
+      if (sp.hover) expect(v.step, sp.id).toHaveLength(0);
+      for (const l of [...v.call, ...v.alarm, ...v.step]) {
+        expect(l.peak, sp.id).toBeLessThanOrEqual(0.08);
+        expect(l.attack + l.decay + (l.delay ?? 0) + (l.repeat ?? 1) * (l.every ?? 0), sp.id).toBeLessThan(6);
+      }
+    }
+  });
+});

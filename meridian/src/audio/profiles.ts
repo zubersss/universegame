@@ -3,6 +3,7 @@
 // bodies without an entry still sound reasonable.
 
 import { BODIES, type BodyId } from '../world/bodies';
+import type { SurfaceInfo } from '../world/surface';
 
 export type GroundKind = 'soil' | 'sand' | 'rock' | 'ice' | 'salt' | 'moss';
 
@@ -62,3 +63,34 @@ export const STEPS: Readonly<Record<GroundKind, StepTimbre>> = {
   salt: { filter: 'highpass', cutoff: 2400, decay: 0.08, level: 0.9 },
   moss: { filter: 'lowpass', cutoff: 420, decay: 0.09, level: 0.8 },
 };
+
+/**
+ * How the surface under the player changes the footstep, per body (data, not
+ * branches): exposed rock above a rockiness threshold, a material where the
+ * special mask is strong (ice, brine-wet salt, grove loam, valley mud), and a
+ * material for biome B. Anything else uses the body's default ground.
+ */
+interface GroundRules {
+  rock?: number;
+  special?: { at: number; kind: GroundKind };
+  biomeB?: { at: number; kind: GroundKind };
+}
+
+const GROUND_RULES: Partial<Record<BodyId, GroundRules>> = {
+  ilex: { rock: 0.45, special: { at: 0.55, kind: 'moss' } },
+  vesper: { biomeB: { at: 0.5, kind: 'sand' }, special: { at: 0.6, kind: 'rock' } },
+  cairn: { special: { at: 0.4, kind: 'ice' } },
+  orrin: { rock: 0.4, special: { at: 0.6, kind: 'soil' } },
+  saro: { rock: 0.35, special: { at: 0.5, kind: 'ice' } },
+};
+
+/** Ground kind under foot from the surface info at the player's position. */
+export function groundAt(id: BodyId, s: SurfaceInfo): GroundKind {
+  const r = GROUND_RULES[id];
+  const base = ambienceFor(id).ground;
+  if (!r) return base;
+  if (r.special && s.special >= r.special.at) return r.special.kind;
+  if (r.rock !== undefined && s.rockiness >= r.rock) return 'rock';
+  if (r.biomeB) return s.biome >= r.biomeB.at ? r.biomeB.kind : 'rock';
+  return base;
+}

@@ -6,7 +6,7 @@
 import type { BodyId } from '../world/bodies';
 import { Mixer, type BusName } from './Mixer';
 import { VoicePool, type Voice, type VoiceStats } from './VoicePool';
-import { STEPS, ambienceFor, isAirless } from './profiles';
+import { STEPS, ambienceFor, isAirless, type GroundKind } from './profiles';
 import { CREATURE_RANGE, CREATURE_VOICE_CAP, creatureVoice, type CreatureEvent, type CreatureLayer } from './creatures';
 
 export type DiscoveryKind = 'scanStart' | 'logged' | 'firstSpecies' | 'worldComplete';
@@ -378,11 +378,12 @@ export class GameAudio {
     bp.connect(v.out);
   }
 
-  footstep(body: BodyId, sprint: boolean): void {
+  /** A footfall; `surface` is the ground under the foot (see `groundAt`), else the body's default. */
+  footstep(body: BodyId, sprint: boolean, surface?: GroundKind): void {
     if (!this.running) return;
     this.stepCount++;
     if (sprint) this.exertion = Math.min(1, this.exertion + 0.05);
-    const ground = STEPS[ambienceFor(body).ground];
+    const ground = STEPS[surface ?? ambienceFor(body).ground];
     if (isAirless(body)) {
       // No air to carry it: the step arrives through the boots, low and dull.
       this.noise('lowpass', 260, 0.7, (sprint ? 0.1 : 0.07) * ground.level, 0.005, 0.12, 'effects');
