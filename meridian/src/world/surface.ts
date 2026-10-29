@@ -99,12 +99,15 @@ export class SurfaceGenerator {
   clearings: Clearing[] = [];
   private readonly craterScales: CraterScale[] = [];
   private readonly windAxis: [number, number, number] = [0.83, 0.18, 0.53];
+  /** Hash salt for per-cell features (basalt columns, salt polygons). */
+  private readonly cellSalt: number;
 
   constructor(readonly def: BodyDef) {
     this.R = def.radius;
     this.maxHeight = def.maxHeight;
     const names = ['w1', 'w2', 'w3', 'c', 'm', 'r', 'h', 'd', 'v', 'g', 'rg', 'rg2', 'ms', 'du', 'da', 'db', 'o', 'b', 'b2', 'ba'];
     for (const k of names) this.n[k] = makeNoise(def.seed, k);
+    this.cellSalt = hashCombine(def.seed, 'cells') | 0;
     if (def.id === 'cairn') {
       const s = def.seed;
       // Radial projection moves a crater center by up to cell/2, so a crater from
@@ -125,6 +128,10 @@ export class SurfaceGenerator {
         return this.ilex(nx, ny, nz, out);
       case 'vesper':
         return this.vesper(nx, ny, nz, out);
+      case 'orrin':
+        return this.orrin(nx, ny, nz, out);
+      case 'saro':
+        return this.saro(nx, ny, nz, out);
       default:
         return this.cairn(nx, ny, nz, out);
     }
@@ -283,6 +290,98 @@ export class SurfaceGenerator {
     out.variation = 0.5 + 0.5 * n.v(px / 2200, py / 2200, pz / 2200);
     out.special = sat(basin * 1.3) * sstep(0.08, 0.5, floorness + 0.25 * basin);
     out.rockiness = (1 - basin) * 0.35;
+    return out;
+  }
+
+  // --------------------------------------------------------------- Orrin
+
+  private orrin(nx: number, ny: number, nz: number, out: SurfaceInfo): SurfaceInfo {
+    const n = this.n;
+    const R = this.R;
+    const px = nx * R;
+    const py = ny * R;
+    const pz = nz * R;
+    const fw = 1 / 5500;
+    const qx = px + 500 * n.w1(px * fw, py * fw, pz * fw);
+    const qy = py + 500 * n.w2(px * fw, py * fw, pz * fw);
+    const qz = pz + 500 * n.w3(px * fw, py * fw, pz * fw);
+    const region = fbm(n.c, qx / 15000, qy / 15000, qz / 15000, 3) + 0.4 * n.m(px / 7000, py / 7000, pz / 7000);
+    const plateau = sstep(0.08, 0.32, region);
+    // Lowlands: broad mossy swells cut by sinuous valleys (where the channel noise crosses zero).
+    const swell = fbm(n.h, qx / 2200, qy / 2200, qz / 2200, 3);
+    const ch = 1 - Math.abs(n.r(qx / 3800, qy / 3800, qz / 3800));
+    const valley = sstep(0.8, 0.97, ch) * (1 - plateau);
+    const lowH = 110 + 35 * swell - 55 * valley;
+    // Highlands: a few stepped basalt treads with steep risers ...
+    const m = 0.5 + 0.5 * fbm(n.ms, qx / 5200, qy / 5200, qz / 5200, 2);
+    const tv = m * 4;
+    const fl = Math.floor(tv);
+    const terr = fl + sstep(0.85, 0.97, tv - fl);
+    const highH = 190 + terr * 90;
+    // ... broken into polygonal columns: 3D cells cut by the sphere, each raised by its own hash.
+    const S = 30;
+    const col = h3(Math.floor(px / S), Math.floor(py / S), Math.floor(pz / S), this.cellSalt) - 0.5;
+    const colW = sstep(0.35, 0.8, plateau);
+    const detail = fbm(n.d, px / 140, py / 140, pz / 140, 3);
+    out.height = lowH + (highH - lowH) * plateau + col * 7 * colW + detail * (2 + 2 * plateau);
+    out.biome = 1 - plateau;
+    out.variation = 0.5 + 0.5 * n.v(px / 2800, py / 2800, pz / 2800);
+    out.special = valley;
+    out.rockiness = plateau * 0.8;
+    return out;
+  }
+
+  // ---------------------------------------------------------------- Saro
+
+  private saro(nx: number, ny: number, nz: number, out: SurfaceInfo): SurfaceInfo {
+    const n = this.n;
+    const R = this.R;
+    const px = nx * R;
+    const py = ny * R;
+    const pz = nz * R;
+    const fw = 1 / 4000;
+    const qx = px + 300 * n.w1(px * fw, py * fw, pz * fw);
+    const qy = py + 300 * n.w2(px * fw, py * fw, pz * fw);
+    const qz = pz + 300 * n.w3(px * fw, py * fw, pz * fw);
+    // Shallow brine pans in broad basins of an almost flat crust.
+    const pan = sstep(0.15, 0.45, fbm(n.ba, qx / 9000, qy / 9000, qz / 9000, 3));
+    const flats = 45 + 10 * fbm(n.b, qx / 6000, qy / 6000, qz / 6000, 2);
+    // Scattered low salt domes.
+    const domeW = sstep(0.3, 0.6, n.rg(px / 12000, py / 12000, pz / 12000));
+    const dr = ridged(n.r, qx / 2400, qy / 2400, qz / 2400, 2);
+    const domes = 70 * dr * dr * dr * domeW;
+    // Polygonal pressure ridges along the edges of 3D Voronoi cells (F2 - F1 small).
+    const S = 260;
+    const cx = Math.floor(px / S);
+    const cy = Math.floor(py / S);
+    const cz = Math.floor(pz / S);
+    let f1 = Infinity;
+    let f2 = Infinity;
+    for (let dz = -1; dz <= 1; dz++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          const ix = cx + dx;
+          const iy = cy + dy;
+          const iz = cz + dz;
+          const ex = px - (ix + h3(ix, iy, iz, this.cellSalt + 1)) * S;
+          const ey = py - (iy + h3(ix, iy, iz, this.cellSalt + 2)) * S;
+          const ez = pz - (iz + h3(ix, iy, iz, this.cellSalt + 3)) * S;
+          const d = ex * ex + ey * ey + ez * ez;
+          if (d < f1) {
+            f2 = f1;
+            f1 = d;
+          } else if (d < f2) f2 = d;
+        }
+      }
+    }
+    const edge = Math.sqrt(f2) - Math.sqrt(f1);
+    const ridge = 1 - sstep(0, 22, edge);
+    const detail = fbm(n.d, px / 140, py / 140, pz / 140, 2);
+    out.height = flats + domes - 6 * pan + ridge * 2.2 * (1 - pan) + detail * 0.6;
+    out.biome = pan;
+    out.variation = 0.5 + 0.5 * n.v(px / 2400, py / 2400, pz / 2400);
+    out.special = sstep(0.55, 0.85, pan);
+    out.rockiness = domeW * dr * 0.5;
     return out;
   }
 }

@@ -92,6 +92,14 @@ Each section below is edited only by its owner. Director: integration log, decis
 - Merge 1 (`93da7c8`): `studio/gauge` @ `9ef2749`: BUGS.md, quick journey, N-body test hooks (`bodies()`, `fingerprint(body)`), `travelRoute()`. Director verification on the merged tree: typecheck clean; 69/69 unit tests; both builds; `dist/` free of test strings; quick journey passed in 1.1 min. GAUGE's generalised travel spec is still under its own 60-min verification run.
 
 ## Studio: Interfaces (agreed APIs between roles)
+- **ATLAS → all: bodies (M1).** `BodyId = 'ilex' | 'vesper' | 'cairn' | 'orrin' | 'saro'`; `BODY_IDS` in that order (navigation keys 1…5; append-only, never reorder). `CORE_BODY_IDS` = ilex, vesper, cairn; `EXTENDED_BODY_IDS` = orrin, saro. New `BodyDef` field `survey: 'core' | 'extended'`; otherwise `BodyDef` is unchanged, so look/ambience keys off the existing `palette`, `atmosphere`, `clouds`, `biomeNames`, `kind` data. `isBodyId` accepts every id in `BODY_IDS`.
+  | Body | Kind | Centre (m) | Radius | Atmosphere | g | maxHeight | Biome A (0) / B (1) | `special` / `rockiness` |
+  |---|---|---|---|---|---|---|---|---|
+  | Orrin | planet | (−720000, 240000, 600000) | 52 km | 9 km, dense, humid low haze | 9 | 650 | Basalt Column Highlands / Violet Moss Lowlands | valley floors (fog, wet) / basalt |
+  | Saro | planet | (300000, −150000, −950000) | 38 km | 4 km, thin, bright | 5 | 200 | Rose Salt Flats / Brine Pan Shallows | open brine / salt domes |
+- **ATLAS → all: expedition and saves (M1).** Save schema 2; `ExpeditionState.extendedTransmitted: boolean`; `inventory` is `Record<BodyId, number>` over all bodies. Object ids stay `${body}:…`, species ids `${body}-name`. `Expedition.transmit()` / `canTransmit` = core survey (unchanged rules); `Expedition.transmitExtended()` / `canTransmitExtended` = Extended Survey (core transmitted + every extended relay); `relaysActive('core' | 'extended')`. Game notices: "Survey transmitted", "Extended Survey transmitted". `ExpeditionState.discovered: Record<speciesId, simTime s>` (BIOME fills it; optional on load, keys must be logged species); species list cap 96; species and object ids are validated by pattern only (no known-list check), so fauna ids in the `${body}-name` form validate.
+- **ATLAS → LUMEN: `BodyDef.look?: Partial<TerrainLook>`** (exported from `bodies.ts`): specialRough, specialSheen, bump, strata, strataSpacing (m), macro, sediment (sRGB hex), sedimentAmount, peakRock, rockSlope [start, end] as 1−cos. Unset on every body until LUMEN proposes values. **Concavity:** `chunkGen.ts` writes the signed height Laplacian ÷ grid spacing (×508, clamped ±127; + = hollow) into `morphNormal.w`; geometry unchanged (hash-locked in `tests/worlds.test.ts`).
+- **ATLAS → ECHO: `BodyDef.ambience?: AmbienceDef`** (exported from `bodies.ts`): wind, windTone (Hz), windAltitude (m), tonic (Hz), scale (semitones), timbre, toneGap (s), ground. Filled for all five bodies with ECHO's values.
 - **GAUGE → all: test hooks and determinism (2026-10-29).** `window.__meridian` (dev + `build:test` only) works for any body in `BODY_IDS`: `bodies()` lists every body (id, name, kind, radius, airless, landing-site direction) so specs never hard-code the list; the autopilot `travel` goal accepts any `BodyId` and throws on an unknown id; `fingerprint(body?)` returns null unless that body is shown. Request new hooks or autopilot goals from GAUGE with a `REQUEST` (what to read or drive, which spec needs it).
 - **Rule: moving things (creatures, anything animated in position) must never be added to `PropSystem`.** `PropSystem` is the deterministic, static placement that the travel gate fingerprints (every instance's ID and position within 250 m of a landing site, to the mm, identical on every visit), and `nearbyScannables()` reads it too. Creatures live in their own system (`src/fauna/`, BIOME); GAUGE adds separate hooks for them (e.g. nearest creature) when BIOME's API exists.
 
@@ -99,7 +107,26 @@ Each section below is edited only by its owner. Director: integration log, decis
 _Not started._
 
 ## Studio: ATLAS (worlds and travel)
-_Not started._
+
+### M1 body skeleton (2026-10-29)
+- **Two new landable planets**, Orrin and Saro (table in Interfaces). Placement validated against every body: all centre separations ≥ 554 km, safety spheres ≥ 448 km apart, every straight body-to-body line clears third bodies' safety spheres (smallest: Vesper–Orrin passes Ilex's sphere by ~47 km; this is why Orrin moved from the proposed (−700, 80, 650) km, whose Vesper–Orrin line cut Ilex's sphere by 12 km). Cruise legs from Ilex (unit-simulated with the real `CruiseController`) are within 0.8–1.25× of Ilex → Vesper. Sites: Orrin on the moss lowlands, sun elevation 23°; Saro on the salt flats at a brine-pan edge, sun 30°; both facing the approach from Ilex.
+- **Generators** (`surface.ts`, first recipes, character comes in M2): Orrin = warped lowland swells cut by sinuous valleys, stepped basalt highlands broken into 30 m polygonal column cells (each raised by its own hash). Saro = an almost flat crust with shallow brine-pan basins (6 m deep), scattered low salt domes and 2 m polygonal pressure ridges along 3D Voronoi cell edges (260 m cells). Existing generators untouched (only new `case`s; per-cell salt is a new field).
+- **Seams:** new bodies' landing, relay and sample sites are nudged ≥ 2 m off contact-tile seams (`seamDistance`, `avoidSeams` site preference). The original three bodies keep their released sites exactly (Vesper's known seam site included) because moving them would change their worlds.
+- **Expedition (D-001):** core survey unchanged (Ilex, Vesper, Cairn → T). Extended Survey: Orrin and Saro relays, then a second T aboard ("Extended Survey transmitted"), only after the core survey. Objectives guide to the new worlds after the core transmission; the course is set automatically. Idempotent like every other step.
+- **Saves:** schema 2 with migration from schema 1 on load/import (inventory zero-filled for the new bodies, `extendedTransmitted: false`, all other progress kept). A schema-1 record that mentions a new body is rejected (it cannot be genuine). A valid schema-1 latest record still rotates into the backup slot on the next write.
+- **N-body plumbing:** navigation rows and keys 1…N (`Digit1–9` handler), nav status "Extended survey" for the new worlds, survey tab grouped core / Extended Survey, journal sections for every body ("No specimens catalogued yet" until BIOME adds species), inventory, objective, T prompt, title-menu save summary, sample looks (`MissionObjects` data). Proxies, handoff, cruise, gravity, autopilot already iterate `BODY_IDS`.
+- **Spec changes (honest):** `tests/expedition.test.ts` "transmits once, only after all three relays" iterated `BODY_IDS`; it now activates the extended relays first (they must not enable the core transmission) and then the core ones; after the core transmission the objective is now the Extended Survey instead of "Survey transmitted". The save test fixture gained the two inventory keys and the extended flag.
+- **Tests:** new `tests/worlds.test.ts` (layout, separation, line clearance, cruise legs, honest height bounds and finite data over 20,000 directions, both biomes present, day-side walkable sites off seams, original seeds/heights/sites bit-identical to the three-body release); save tests for valid v2, v1 → v2, invalid and corrupt records, export/import across schemas, store rotation with schema-1 records; expedition tests for the Extended Survey.
+
+### Known limits / for other roles
+- Terrain material, audio and motes still pick per-body constants with `id === 'cairn' / 'vesper'` ternaries, so Orrin and Saro currently get Ilex's defaults there (LUMEN: `terrainMaterial.ts`, `Game.ts` mote colour; ECHO: `GameAudio.ts`). The title screen text in `index.html` still names three worlds (Director's file).
+- Palettes and atmosphere numbers are first-pass placeholders for LUMEN to tune.
+
+### TODO (M2, highest impact first)
+1. Orrin and Saro terrain character (organ-pipe columns at readable scale, fog valleys data, crack polygons, brine pans), with LUMEN.
+2. Atmosphere/cloud data with LUMEN; distinct skies.
+3. Navigation polish (arrival notice, compact layout check with five rows).
+4. Optional backdrop giant (with LUMEN).
 
 ## Studio: BIOME (life and discovery)
 
@@ -196,7 +223,51 @@ Field notes: *Brine skater* — "A flat, many-legged animal that skims the surfa
 Budget plan (agreed values to confirm with GAUGE/LUMEN): ≤ 48 LOD0 + 160 LOD1 instances per species, 2 draw calls per species (+1 shadow on LOD0), ≤ 3 fauna species visible per world → ≤ 9 draw calls and a few thousand triangles for fauna in the worst case.
 
 ## Studio: ECHO (sound)
-_Not started._
+
+### M1 — mix architecture (2026-10-29)
+- `src/audio/Mixer.ts`: buses ambience, ship, creatures, effects, ui, music (each input → level × group volume → cue duck) → master (user volume) → pause fade → glue compressor (−14 dB, 3:1) → limiter (−2 dB, 20:1, 2 ms attack) → destination. Gains change only by scheduled ramps on events (`rampTo` cancels and replaces, so a param never holds more than a couple of events); continuous layers still glide by direct assignment (A8.1).
+- `src/audio/VoicePool.ts`: pooled one-shot voices, hard cap 32. At the cap the quietest voice by estimated envelope level is stolen (oldest on ties; voices still in their attack count as full level so a burst of new notes does not cannibalise itself), faded over 15 ms. Every node of a finished or stolen voice is disconnected on `onended`; a twice-a-second sweep releases voices whose `onended` never fired. Delayed cue notes (relay arpeggio, transmission chord, logged chime) are scheduled in audio time instead of `setTimeout`.
+- Pause/panel/hidden tab: 80 ms fade, then `suspend()`; resume fades in over 150 ms (a resume within the fade cancels the pending suspend). First start fades in over 0.3 s. A failing AudioContext logs a console warning and the game plays silently.
+- Airless suit mode (any body with `atmosphere === null`, i.e. Cairn): on foot there is no wind; a helmet hush, breathing (inhale/exhale every ~3.6–4.4 s, faster and louder after sprinting), servo whirrs on some steps, footfalls as low dull thumps through the boots, and the ship's engine reduced to a muffled trace.
+- `src/audio/profiles.ts`: per-world ambience data (wind scale, wind tone, tonic, scale, timbre, tone gap, ground). Proposed as `BodyDef.ambience` to ATLAS (values for all five bodies sent); bodies without an entry use a neutral default.
+- Volume settings: `music` and `effects` (0..1, defaults 0.8 / 1) beside master `volume`; old settings and save records without them sanitize to defaults. Sliders in the settings panel.
+- `stats()` / `meter()` (node and voice counters; peak/RMS from an analyser on the limiter) return null unless `__TEST_HOOKS__`.
+- Public API used by the game is unchanged (`start`, `update`, `footstep`, `thump`, `scanTick`, `scanDone`, `collect`, `relay`, `ui`, `complete`, `suspend`, `resume`, `setVolume`), plus `setMix`.
+
+Tests (`tests/audio.test.ts`, mock AudioContext in `tests/audioMock.ts`): bus routing to the destination, layer/cue bus assignment, group volumes, cap never exceeded (200 voices → 32 active, 168 stolen, 0 dropped), stealing order (quietest, then oldest), steal fade (no hard cut), every voice node disconnected after a mixed burst, sweep fallback, 0 automation events on long-lived params across 20,000 varied frames, pause fade → suspend → resume, no voices while suspended, suit mode on/off, context failure, dispose, settings sanitization.
+
+Browser soak: running, results not yet recorded (not verified).
+
+### Sound map (event → sound → bus → visual cue)
+| Event | Sound | Bus | Visual cue |
+| --- | --- | --- | --- |
+| Piloting / thrust / boost | two detuned saws through a lowpass that opens with thrust, thrust hiss | ship | HUD throttle and speed, exhaust plume |
+| Flight through air | band-passed wind, louder and brighter with airspeed × density | ambience | speed readout, motes, sky |
+| High speed in thick air | low buffeting rumble (dynamic pressure), none in vacuum | ship | speed readout, atmosphere |
+| Cruise engaged / ended | rising / falling two-note chirp; cruise drone with slow beating while cruising | ui / ship | "Cruise engaged" notice, HUD mode |
+| Take-off | engine spool-up | ship | HUD mode changes to flight |
+| Gear up / down | motor whine, lock clunk | ship | gear state in the HUD / ship model |
+| Touchdown | low sine thump + gear creak, scaled by impact speed | effects / ship | HUD "Landed" |
+| Exit / board | hatch pressure hiss | effects | mode change, camera to/from player |
+| Footstep | filtered noise per ground (soil, sand, rock; ice, salt, moss ready) | effects | walking motion |
+| Footstep, airless | low thump + dull noise through the boots; occasional servo | effects | walking motion |
+| Jump landing | small thump | effects | camera settles |
+| Airless, on foot | helmet hush, breathing following exertion | ambience | black sky, airless world, HUD location |
+| Scan in progress | soft blips rising in pitch with progress | effects | scan progress in the HUD |
+| Scan logged | two-note chime | effects | "Journal: …" notice |
+| Sample collected | bright two-tone | effects | "… collected" notice, inventory |
+| Relay activated | four-note arpeggio, ambience ducked | effects | "relay active" notice, relay visuals |
+| Survey transmitted | five-note chord, ambience ducked | effects | "Survey transmitted" notice |
+| Extended Survey transmitted | slower six-note cue with high shimmer, ambience ducked (needs Game.ts wiring) | effects | "Extended Survey transmitted" notice |
+| Ambient tones | sparse notes on the world's scale and tonic | music | none needed (decorative, carries no information) |
+| Pause / panel / hidden | mix fades out, context suspended | master | pause menu / panel |
+
+### TODO
+1. Director wiring (requested): `mode` + `gear` in the audio frame, `touchdown(impact)`, `completeExtended()`.
+2. Footsteps per surface under the player (needs biome/material at the foot position).
+3. Creature calls with BIOME's event names; spatialized panner pool.
+4. Discovery cues and sparse generative music (arrival, first discovery, transmissions).
+5. Switch profiles.ts to `BodyDef.ambience` once ATLAS lands it.
 
 ## Studio: GAUGE (QA, performance, release)
 

@@ -287,6 +287,16 @@ export function generateChunk(
         morphNormal[g * 4 + 1] = Math.round(normals[g * 3 + 1] * 127);
         morphNormal[g * 4 + 2] = Math.round(normals[g * 3 + 2] * 127);
       }
+      // Concavity for the terrain material (+ = hollow): height Laplacian over the grid spacing.
+      // The apron guarantees the four neighbours exist; |lap| of a quarter spacing saturates.
+      const pl = pi(i - 1, j), pr = pi(i + 1, j), pd = pi(i, j - 1), pu = pi(i, j + 1);
+      const lap =
+        Math.sqrt(P[pl] * P[pl] + P[pl + 1] * P[pl + 1] + P[pl + 2] * P[pl + 2]) +
+        Math.sqrt(P[pr] * P[pr] + P[pr + 1] * P[pr + 1] + P[pr + 2] * P[pr + 2]) +
+        Math.sqrt(P[pd] * P[pd] + P[pd + 1] * P[pd + 1] + P[pd + 2] * P[pd + 2]) +
+        Math.sqrt(P[pu] * P[pu] + P[pu + 1] * P[pu + 1] + P[pu + 2] * P[pu + 2]) -
+        4 * Math.sqrt(P[p] * P[p] + P[p + 1] * P[p + 1] + P[p + 2] * P[p + 2]);
+      morphNormal[g * 4 + 3] = Math.max(-127, Math.min(127, Math.round((lap / eps) * 508)));
       const mdx = tx - P[p], mdy = ty - P[p + 1], mdz = tz - P[p + 2];
       morphDelta[g * 3] = mdx;
       morphDelta[g * 3 + 1] = mdy;

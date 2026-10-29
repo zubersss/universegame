@@ -1,4 +1,4 @@
-import { BODIES, BODY_IDS } from '../world/bodies';
+import { BODIES, BODY_IDS, CORE_BODY_IDS, EXTENDED_BODY_IDS } from '../world/bodies';
 import { catalogFor, CATALOG, progressLine, worldProgress } from '../fauna/catalog';
 import { sampleName } from '../world/MissionObjects';
 import type { Expedition, ExpeditionState } from '../game/Expedition';
@@ -21,8 +21,10 @@ export function renderJournal(root: HTMLElement, s: ExpeditionState): void {
     const def = BODIES[b];
     const wp = worldProgress(b, s.species);
     out.push(el('h3', '', `${def.name} — ${def.biomeNames.join(' · ')}`));
-    out.push(el('div', 'empty', `${wp.found} of ${wp.total} logged${wp.found === wp.total && wp.total > 0 ? ' · survey of life complete' : ''} · ${progressLine(wp)}`));
-    for (const sp of catalogFor(b)) {
+    const entries = catalogFor(b);
+    if (entries.length === 0) out.push(el('div', 'entry unknown', 'No specimens catalogued yet.'));
+    else out.push(el('div', 'empty', `${wp.found} of ${wp.total} logged${wp.found === wp.total ? ' · survey of life complete' : ''} · ${progressLine(wp)}`));
+    for (const sp of entries) {
       const known = s.species.includes(sp.id);
       const entry = el('div', known ? 'entry' : 'entry unknown');
       const head = el('div', 'eh');
@@ -36,17 +38,19 @@ export function renderJournal(root: HTMLElement, s: ExpeditionState): void {
   root.replaceChildren(...out);
 }
 
-/** Relay and sample status per body, and the transmission. */
+/** Relay and sample status per body, and the transmissions (core survey, then the Extended Survey). */
 export function renderSurvey(root: HTMLElement, e: Expedition): void {
   const s = e.state;
   const out: HTMLElement[] = [];
+  const core = CORE_BODY_IDS.length;
+  const ext = EXTENDED_BODY_IDS.length;
   const status = s.transmitted
     ? 'Survey transmitted. The expedition is complete; explore freely.'
     : e.canTransmit
       ? 'All three relays are active. Transmit the survey from the ship (T).'
-      : `${s.relays.length} of 3 relays active. Each relay needs one sample from its own world.`;
+      : `${e.relaysActive('core')} of ${core} relays active. Each relay needs one sample from its own world.`;
   out.push(el('div', 'empty', status));
-  for (const b of BODY_IDS) {
+  const relay = (b: (typeof BODY_IDS)[number]) => {
     const def = BODIES[b];
     const got = s.collected.filter((id) => id.startsWith(`${b}:`)).length;
     const entry = el('div', 'entry');
@@ -55,6 +59,14 @@ export function renderSurvey(root: HTMLElement, e: Expedition): void {
     entry.append(head);
     entry.append(el('div', 'ed', `${sampleName(b)}s collected: ${got} of 3 · carried: ${s.inventory[b]}`));
     out.push(entry);
-  }
+  };
+  for (const b of CORE_BODY_IDS) relay(b);
+  out.push(el('h3', '', 'Extended Survey'));
+  out.push(el('div', 'empty', s.extendedTransmitted
+    ? 'Extended Survey transmitted.'
+    : e.canTransmitExtended
+      ? 'Both outer relays are active. Transmit the Extended Survey from the ship (T).'
+      : `${e.relaysActive('extended')} of ${ext} relays active.${s.transmitted ? '' : ' Transmitted after the core survey.'}`));
+  for (const b of EXTENDED_BODY_IDS) relay(b);
   root.replaceChildren(...out);
 }

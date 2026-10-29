@@ -41,7 +41,9 @@ import { Markers, type MarkerSpec } from '../ui/Markers';
 import { BODY_HANDOFF, CRUISE, FLIGHT, LANDING, MAX_FRAME_GAP, MAX_STEPS_PER_FRAME, SCAN, SIM_DT, WALK, BUDGETS, PRESETS, type QualityPreset } from './config';
 import { GENERATOR_VERSION, SAVE_SCHEMA_VERSION, WORLD_SEED } from '../world/bodies';
 import type { Settings } from './settings';
-import { BODIES, BODY_IDS, type BodyDef, type BodyId } from '../world/bodies';
+import { BODIES, BODY_IDS, EXTENDED_BODY_IDS, type BodyDef, type BodyId } from '../world/bodies';
+
+const EXTENDED_NAMES = EXTENDED_BODY_IDS.map((b) => BODIES[b].name).join(' and ');
 
 export type AppState = 'title' | 'loading' | 'playing' | 'paused' | 'panel';
 export type Mode = 'PILOTING' | 'CRUISING' | 'LANDED' | 'ON_FOOT';
@@ -611,7 +613,8 @@ export class Game {
   }
 
   private land(): void {
-    this.audio.thump(1);
+    // Touchdown scales with the vertical impact speed (m/s, positive downward).
+    this.audio.touchdown(-this.ship.vel.dot(this.env.update(this.ship.currPos).up));
     this.parkShip();
     this.mode = 'LANDED';
     this.assist.disengage();
@@ -659,20 +662,31 @@ export class Game {
     else if (inp.consume('KeyT')) this.transmit();
   }
 
-  /** Transmit the three-relay survey from the ship. */
+  /** Transmit the three-relay survey from the ship, then (later) the Extended Survey. */
   private transmit(): void {
     const e = this.expedition;
     if (e.state.transmitted) {
-      this.onNotice?.('Survey transmitted', 'The survey has already been sent. Explore freely.', true);
+      if (e.transmitExtended()) {
+        this.counters.transmissions++;
+        this.audio.completeExtended();
+        this.onNotice?.('Extended Survey transmitted', `${EXTENDED_NAMES} are charted with the rest of the system. Explore freely.`, true);
+        this.autosave('transmit');
+      } else if (e.state.extendedTransmitted) {
+        this.onNotice?.('Extended Survey transmitted', 'Both surveys have been sent. Explore freely.', true);
+      } else {
+        this.onNotice?.('Survey transmitted', `The core survey has been sent. Extended Survey relays: ${e.relaysActive('extended')}/${EXTENDED_BODY_IDS.length}.`, true);
+      }
       return;
     }
     if (!e.transmit()) {
-      this.onNotice?.('Transmission unavailable', `All three relays must be active (${e.state.relays.length}/3).`);
+      this.onNotice?.('Transmission unavailable', `All three relays must be active (${e.relaysActive('core')}/3).`);
       return;
     }
     this.counters.transmissions++;
     this.audio.complete();
-    this.onNotice?.('Survey transmitted', 'Ilex, Vesper and Cairn are charted. The system remains open for exploration.', true);
+    this.onNotice?.('Survey transmitted', `Ilex, Vesper and Cairn are charted. The Extended Survey awaits on ${EXTENDED_NAMES}.`, true);
+    const next = e.objective(null);
+    if (next.body) this.setNavTarget(next.body);
     this.autosave('transmit');
   }
 
@@ -835,7 +849,9 @@ export class Game {
     if (next.body && next.body !== body.id) this.setNavTarget(next.body);
     this.onNotice?.(
       `${body.name} relay active`,
-      e.canTransmit ? 'All relays are live: transmit the survey from the ship (T).' : next.body ? `Course set for ${BODIES[next.body].name}.` : next.detail,
+      e.canTransmit || e.canTransmitExtended
+        ? `All relays are live: transmit the ${e.canTransmit ? 'survey' : 'Extended Survey'} from the ship (T).`
+        : next.body ? `Course set for ${BODIES[next.body].name}.` : next.detail,
       true,
     );
     this.autosave('relay');
@@ -1350,6 +1366,8 @@ export class Game {
         shipActive: this.mode === 'PILOTING' || cruising,
         onFoot,
         body: def.id,
+        mode: this.mode,
+        gear: this.ship.gearTarget,
       });
     }
   }
@@ -1454,6 +1472,7 @@ export class Game {
       });
       hud.stick(this.stick.x, this.stick.y);
       if (exp.canTransmit) prompts.push({ key: 'T', text: 'Transmit survey' });
+      else if (exp.canTransmitExtended) prompts.push({ key: 'T', text: 'Transmit Extended Survey' });
       if (this.mode === 'LANDED') {
         prompts.push({ key: 'E', text: 'Exit ship' }, { key: 'Space', text: 'Take off' });
         hud.warning(null);
@@ -1482,7 +1501,7 @@ export class Game {
     const here = this.bodyShown && this.body ? this.body.def.id : null;
     const obj = exp.objective(here);
     let detail = obj.detail;
-    if (!exp.state.transmitted && obj.body && obj.body !== here) {
+    if (obj.body && obj.body !== here) {
       detail = this.navTarget === obj.body
         ? 'Follow the marker · G cruises between worlds once clear of the atmosphere.'
         : `Open navigation (Tab) and set course for ${BODIES[obj.body].name}.`;

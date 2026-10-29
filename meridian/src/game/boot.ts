@@ -7,7 +7,7 @@ import { SaveStore, exportJson, importJson, type SaveData } from '../save/SaveSy
 import { Game } from './Game';
 import { Panel } from '../ui/Panel';
 import { renderJournal, renderSurvey } from '../ui/Journal';
-import { BODIES, BODY_IDS } from '../world/bodies';
+import { BODIES, BODY_IDS, CORE_BODY_IDS, EXTENDED_BODY_IDS } from '../world/bodies';
 
 function when(iso: string): string {
   const d = new Date(iso);
@@ -16,8 +16,10 @@ function when(iso: string): string {
 
 function summary(d: SaveData): string {
   const e = d.expedition;
-  if (e.transmitted) return 'survey transmitted';
-  return `${e.relays.length}/3 relays · ${e.species.length} species logged`;
+  if (e.extendedTransmitted) return 'both surveys transmitted';
+  const ext = e.relays.filter((b) => BODIES[b].survey === 'extended').length;
+  if (e.transmitted) return `survey transmitted · extended ${ext}/${EXTENDED_BODY_IDS.length} relays`;
+  return `${e.relays.length - ext}/${CORE_BODY_IDS.length} relays · ${e.species.length} species logged`;
 }
 
 /** Application entry: compatibility checks, async init, and wiring of menus to the game. */
@@ -31,6 +33,7 @@ export async function boot(): Promise<void> {
   /** Start (or continue) play from a user gesture: audio and pointer lock need one. */
   const startPlay = (g: Game) => {
     g.audio.start(settings.volume);
+    g.audio.setMix(settings.music, settings.effects);
     g.input.requestLock();
   };
 
@@ -146,6 +149,7 @@ export async function boot(): Promise<void> {
         if (game) {
           game.settings = s;
           game.audio.setVolume(s.volume);
+          game.audio.setMix(s.music, s.effects);
           if (presetChanged) {
             game.applyPreset(s.preset);
             menus.setSettingsNote('Preset applied. Sky and terrain shader detail and the antialiasing mode switch fully after a reload.');
@@ -252,7 +256,8 @@ export async function boot(): Promise<void> {
       rows: BODY_IDS.map((id) => {
         const def = BODIES[id];
         const d = Math.hypot(sys.x - def.center[0], sys.y - def.center[1], sys.z - def.center[2]) - def.radius;
-        return { id, distance: d, status: e.relayActive(id) ? 'Relay active' : 'Survey pending' };
+        const pending = def.survey === 'extended' ? 'Extended survey' : 'Survey pending';
+        return { id, distance: d, status: e.relayActive(id) ? 'Relay active' : pending };
       }),
     };
   };
