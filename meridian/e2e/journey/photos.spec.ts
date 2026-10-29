@@ -7,6 +7,7 @@ import { BODIES, BODY_IDS, GENERATOR_VERSION, SAVE_SCHEMA_VERSION, WORLD_SEED, t
 import { computeSites } from '../../src/world/sites';
 import { quatFromForwardUp } from '../../src/core/mathx';
 import { GEAR_PAD_BOTTOM_Y } from '../../src/ship/ShipModel';
+import { newExpedition } from '../../src/game/Expedition';
 
 // LUMEN photo set (photography only, NOT travel acceptance: bodies are reached
 // by importing a crafted save, never by flying there).
@@ -56,7 +57,7 @@ function landedSave(id: BodyId): string {
     savedAt: '2026-10-29T00:00:00.000Z', playTime: 60, mode: 'LANDED', body: id,
     ship: { sys: [def.center[0] + pos.x, def.center[1] + pos.y, def.center[2] + pos.z], quat: [q.x, q.y, q.z, q.w], vel: [0, 0, 0], gear: 1, throttle: 0 },
     player: null, cruise: null, lastSafeLanding: null, navTarget: null, settings: {},
-    expedition: { inventory: { ilex: 0, vesper: 0, cairn: 0 }, collected: [], relays: [], species: [], scanned: [], transmitted: false },
+    expedition: newExpedition(),
   });
 }
 
