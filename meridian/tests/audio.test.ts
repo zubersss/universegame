@@ -19,6 +19,9 @@ function frame(over: Partial<AudioFrame> = {}): AudioFrame {
 type Inner = { mix: Mixer; eng: { o1: MockNode; hg: MockNode }; wind: { g: MockNode }; suit: { g: { gain: { value: number } } } };
 const inner = (a: GameAudio) => a as unknown as Inner;
 
+// stats() is compiled out of unit tests (__TEST_HOOKS__ is false); read the pool directly.
+const voiceStats = (a: GameAudio) => (a as unknown as { pool: VoicePool }).pool.snapshot();
+
 afterEach(() => {
   vi.useRealTimers();
 });
@@ -139,11 +142,11 @@ describe('voice pool', () => {
     const voiceNodes = ctx.nodes.filter((n) => !persistent.has(n));
     expect(voiceNodes.length).toBeGreaterThan(100);
     expect(voiceNodes.every((n) => n.disconnected && n.outputs.size === 0)).toBe(true);
-    const st = audio.stats()!;
-    expect(st.voices.active).toBe(0);
-    expect(st.voices.releasing).toBe(0);
-    expect(st.voices.liveNodes).toBe(0);
-    expect(st.liveNodes).toBe(st.persistentNodes);
+    const st = voiceStats(audio);
+    expect(st.active).toBe(0);
+    expect(st.releasing).toBe(0);
+    expect(st.liveNodes).toBe(0);
+    expect(st.nodesDisconnected).toBe(st.nodesCreated);
   });
 
   it('releases voices whose end event never fired (sweep)', () => {
@@ -222,7 +225,7 @@ describe('pause, suit mode and failure', () => {
       audio.update(1 / 60, frame({ body: 'cairn', density: 0 }));
       ctx.advance(1 / 60);
     }
-    expect(audio.stats()!.suit).toBe(true);
+    expect(audio.suitMode).toBe(true);
     expect(inner(audio).suit.g.gain.value).toBeGreaterThan(0.005);
     expect((inner(audio).wind.g as unknown as { gain: { value: number } }).gain.value).toBeLessThan(1e-6);
     expect(pool.snapshot().started).toBeGreaterThanOrEqual(2);
@@ -230,7 +233,7 @@ describe('pause, suit mode and failure', () => {
       audio.update(1 / 60, frame({ body: 'ilex', density: 1 }));
       ctx.advance(1 / 60);
     }
-    expect(audio.stats()!.suit).toBe(false);
+    expect(audio.suitMode).toBe(false);
     expect(inner(audio).suit.g.gain.value).toBeLessThan(0.001);
     expect((inner(audio).wind.g as unknown as { gain: { value: number } }).gain.value).toBeGreaterThan(0.01);
   });
@@ -257,9 +260,79 @@ describe('pause, suit mode and failure', () => {
   it('disposes every node', () => {
     const { ctx, audio } = setup();
     audio.collect();
-    audio.meter();
     audio.dispose();
     expect(ctx.nodes.filter((n) => n !== ctx.destination).every((n) => n.disconnected)).toBe(true);
     expect(ctx.state).toBe('closed');
+  });
+});
+
+describe('volume settings', () => {
+  it('defaults music and effects for old settings records and clamps new ones', async () => {
+    const { sanitizeSettings, DEFAULT_SETTINGS } = await import('../src/game/settings');
+    const old = sanitizeSettings({ preset: 'low', volume: 0.5 });
+    expect(old.music).toBe(DEFAULT_SETTINGS.music);
+    expect(old.effects).toBe(DEFAULT_SETTINGS.effects);
+    expect(old.volume).toBe(0.5);
+    const s = sanitizeSettings({ music: 2, effects: -1 });
+    expect(s.music).toBe(1);
+    expect(s.effects).toBe(0);
+    expect(sanitizeSettings({ music: 'loud', effects: NaN }).music).toBe(DEFAULT_SETTINGS.music);
+  });
+});
+
+describe('ship layers', () => {
+  it('plays mode and gear cues once per change, never per frame', () => {
+    const { ctx, audio } = setup();
+    const pool = (audio as unknown as { pool: VoicePool }).pool;
+    const run = (n: number, over: Partial<AudioFrame>) => {
+      for (let i = 0; i < n; i++) {
+        audio.update(1 / 60, frame({ onFoot: false, shipActive: true, ...over }));
+        ctx.advance(1 / 60);
+      }
+    };
+    (audio as unknown as { ambientTimer: number }).ambientTimer = 1e9;
+    run(60, { mode: 'LANDED', gear: 1 });
+    expect(pool.snapshot().started).toBe(0);
+    run(120, { mode: 'PILOTING', gear: 1 });
+    const takeoff = pool.snapshot().started;
+    expect(takeoff).toBe(1);
+    run(120, { mode: 'PILOTING', gear: 0 });
+    expect(pool.snapshot().started).toBe(takeoff + 2);
+    run(120, { mode: 'CRUISING', gear: 0 });
+    expect(pool.snapshot().started).toBe(takeoff + 4);
+    run(600, { mode: 'CRUISING', gear: 0 });
+    expect(pool.snapshot().started).toBe(takeoff + 4);
+    const drone = (audio as unknown as { drone: { g: { gain: { value: number } } } }).drone;
+    expect(drone.g.gain.value).toBeGreaterThan(0.015);
+    run(600, { mode: 'PILOTING', gear: 0 });
+    expect(drone.g.gain.value).toBeLessThan(0.001);
+  });
+
+  it('buffets in thick air at speed and not in vacuum', () => {
+    const { ctx, audio } = setup();
+    const buffet = (audio as unknown as { buffet: { g: { gain: { value: number } } } }).buffet;
+    for (let i = 0; i < 300; i++) {
+      audio.update(1 / 60, frame({ onFoot: false, shipActive: true, airspeed: 400, density: 1, mode: 'PILOTING' }));
+      ctx.advance(1 / 60);
+    }
+    expect(buffet.g.gain.value).toBeGreaterThan(0.05);
+    for (let i = 0; i < 300; i++) {
+      audio.update(1 / 60, frame({ onFoot: false, shipActive: true, airspeed: 400, density: 0, mode: 'PILOTING' }));
+      ctx.advance(1 / 60);
+    }
+    expect(buffet.g.gain.value).toBeLessThan(0.001);
+  });
+
+  it('scales touchdown with impact speed and disconnects every cue node', () => {
+    const { ctx, audio } = setup();
+    const pool = (audio as unknown as { pool: VoicePool }).pool;
+    audio.touchdown(0.5);
+    const soft = pool.active[0].peak;
+    audio.touchdown(4);
+    const hard = pool.active[2].peak;
+    expect(hard).toBeGreaterThan(soft);
+    audio.completeExtended();
+    ctx.advance(20);
+    expect(pool.snapshot().liveNodes).toBe(0);
   });
 });

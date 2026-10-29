@@ -6,6 +6,10 @@ export interface Settings {
   sensitivity: number;
   invertY: boolean;
   volume: number;
+  /** Music bus volume (0..1), under the master volume. */
+  music: number;
+  /** Effects, ship, ambience, creature and UI volume (0..1), under the master volume. */
+  effects: number;
   reducedMotion: boolean;
 }
 
@@ -15,6 +19,8 @@ export const DEFAULT_SETTINGS: Settings = {
   sensitivity: 1,
   invertY: false,
   volume: 0.8,
+  music: 0.8,
+  effects: 1,
   reducedMotion: false,
 };
 
@@ -31,6 +37,8 @@ export function sanitizeSettings(raw: unknown): Settings {
     sensitivity: finite(s.sensitivity, 0.2, 3, DEFAULT_SETTINGS.sensitivity),
     invertY: typeof s.invertY === 'boolean' ? s.invertY : DEFAULT_SETTINGS.invertY,
     volume: finite(s.volume, 0, 1, DEFAULT_SETTINGS.volume),
+    music: finite(s.music, 0, 1, DEFAULT_SETTINGS.music),
+    effects: finite(s.effects, 0, 1, DEFAULT_SETTINGS.effects),
     reducedMotion: typeof s.reducedMotion === 'boolean' ? s.reducedMotion : DEFAULT_SETTINGS.reducedMotion,
   };
 }

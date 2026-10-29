@@ -21,6 +21,10 @@ export interface AudioFrame {
   shipActive: boolean;
   onFoot: boolean;
   body: BodyId;
+  /** Game mode; changes trigger cockpit chirps and the cruise drone. */
+  mode?: 'PILOTING' | 'CRUISING' | 'LANDED' | 'ON_FOOT';
+  /** Landing gear target (0 up, 1 down); changes run the gear motor. */
+  gear?: number;
 }
 
 export interface AudioStats {
@@ -43,6 +47,10 @@ export class GameAudio {
   private eng!: { o1: OscillatorNode; o2: OscillatorNode; lp: BiquadFilterNode; g: GainNode; hiss: BiquadFilterNode; hg: GainNode };
   private wind!: { bp: BiquadFilterNode; g: GainNode };
   private suit!: { lp: BiquadFilterNode; g: GainNode };
+  private buffet!: { lp: BiquadFilterNode; g: GainNode };
+  private drone!: { a: OscillatorNode; b: OscillatorNode; g: GainNode };
+  private lastMode: AudioFrame['mode'] | null = null;
+  private lastGear = -1;
   private persistent: AudioNode[] = [];
   private loops: AudioScheduledSourceNode[] = [];
   private analyser: AnalyserNode | null = null;
@@ -50,7 +58,8 @@ export class GameAudio {
   private ambientTimer = 6;
   private breathTimer = 1;
   private exertion = 0;
-  private suitMode = false;
+  /** True while the on-foot mix is in airless suit mode. */
+  suitMode = false;
   private stepCount = 0;
   private gust = 0;
   private pauseToken = 0;
@@ -151,7 +160,32 @@ export class GameAudio {
     slp.connect(sg);
     sg.connect(amb);
     this.suit = { lp: slp, g: sg };
-    for (const s of [o1, o2, hissSrc, wsrc, ssrc]) {
+    // Buffeting: low rumble of thick air against the hull at speed (none in vacuum).
+    const bsrc = this.keep(this.noiseSource(true));
+    const blp = this.keep(ctx.createBiquadFilter());
+    blp.type = 'lowpass';
+    blp.frequency.value = 120;
+    blp.Q.value = 1.2;
+    const bg = this.keep(ctx.createGain());
+    bg.gain.value = 0;
+    bsrc.connect(blp);
+    blp.connect(bg);
+    bg.connect(ship);
+    this.buffet = { lp: blp, g: bg };
+    // Cruise drone: two near-unison sines a twelfth apart; the slow beat is the shimmer.
+    const da = this.keep(ctx.createOscillator());
+    const db = this.keep(ctx.createOscillator());
+    da.type = 'sine';
+    db.type = 'sine';
+    da.frequency.value = 73.4;
+    db.frequency.value = 220.5;
+    const dg = this.keep(ctx.createGain());
+    dg.gain.value = 0;
+    da.connect(dg);
+    db.connect(dg);
+    dg.connect(ship);
+    this.drone = { a: da, b: db, g: dg };
+    for (const s of [o1, o2, hissSrc, wsrc, ssrc, bsrc, da, db]) {
       s.start();
       this.loops.push(s);
     }
@@ -240,6 +274,22 @@ export class GameAudio {
     const wv = f.density * prof.wind * (f.onFoot ? 0.06 : 0.02 + 0.2 * flow * flow);
     this.glide(this.wind.g.gain, Math.max(0, wv), 0.25, dt);
     this.glide(this.wind.bp.frequency, prof.windTone + flow * 1500, 0.3, dt);
+    // Buffeting grows with dynamic pressure; it fades out with the air.
+    const q = f.onFoot || !f.shipActive ? 0 : f.density * Math.min(1, Math.max(0, (f.airspeed - 90) / 320)) ** 2;
+    this.glide(this.buffet.g.gain, q * (0.16 + this.gust * 0.15), 0.18, dt);
+    this.glide(this.buffet.lp.frequency, 90 + q * 160 + this.gust * 40, 0.25, dt);
+    const cruising = f.mode === 'CRUISING';
+    this.glide(this.drone.g.gain, cruising ? 0.022 : 0, cruising ? 1.5 : 0.6, dt);
+    this.glide(this.drone.b.frequency, 220.5 + this.gust * 0.6, 0.5, dt);
+    if (f.mode && f.mode !== this.lastMode) {
+      if (this.lastMode) this.modeCue(this.lastMode, f.mode);
+      this.lastMode = f.mode;
+    }
+    if (f.gear !== undefined) {
+      const g = f.gear > 0.5 ? 1 : 0;
+      if (this.lastGear >= 0 && g !== this.lastGear) this.gearMotor(g === 1);
+      this.lastGear = g;
+    }
     // Suit: helmet hush and breathing that follows exertion.
     this.exertion = Math.max(0, this.exertion - dt / 14);
     this.glide(this.suit.g.gain, this.suitMode ? 0.012 + this.exertion * 0.006 : 0, 0.4, dt);
@@ -337,6 +387,58 @@ export class GameAudio {
     this.noise(ground.filter, ground.cutoff, 1, (sprint ? 0.12 : 0.08) * ground.level, 0.005, ground.decay, 'effects');
   }
 
+  /** Cockpit chirps on mode changes (the HUD mode line is the visual cue). */
+  private modeCue(from: NonNullable<AudioFrame['mode']>, to: NonNullable<AudioFrame['mode']>): void {
+    if (to === 'CRUISING') {
+      this.tone(660, 'sine', 0.035, 0.01, 0.18, 'ui');
+      this.tone(990, 'sine', 0.03, 0.01, 0.3, 'ui', 0.09);
+    } else if (from === 'CRUISING') {
+      this.tone(990, 'sine', 0.03, 0.01, 0.18, 'ui');
+      this.tone(660, 'sine', 0.03, 0.01, 0.3, 'ui', 0.09);
+    } else if (from === 'LANDED' && to === 'PILOTING') {
+      // Engine spool-up on take-off.
+      const v = this.tone(90, 'sawtooth', 0.05, 0.25, 0.9, 'ship');
+      if (v) {
+        const o = v.sources[0] as OscillatorNode;
+        o.frequency.setValueAtTime(70, v.start);
+        o.frequency.exponentialRampToValueAtTime(150, v.start + 0.8);
+        this.lowpass(v, o, 600);
+      }
+    } else if (to === 'ON_FOOT' || from === 'ON_FOOT') {
+      // Hatch seal: a short pressure hiss.
+      this.noise('bandpass', 2400, 0.7, 0.03, 0.02, 0.35, 'effects');
+    }
+  }
+
+  /** Gear motor whine, then a clunk as it locks. */
+  private gearMotor(down: boolean): void {
+    const v = this.tone(down ? 180 : 220, 'sawtooth', 0.018, 0.08, 0.75, 'ship');
+    if (v) {
+      const o = v.sources[0] as OscillatorNode;
+      o.frequency.setValueAtTime(o.frequency.value, v.start);
+      o.frequency.linearRampToValueAtTime(down ? 140 : 260, v.start + 0.8);
+      this.lowpass(v, o, 1100);
+    }
+    this.noise('lowpass', 500, 1, 0.07, 0.004, 0.12, 'ship', 0.85);
+  }
+
+  /** Reroute a voice's oscillator through a lowpass. */
+  private lowpass(v: Voice, o: AudioNode, cutoff: number): void {
+    const lp = this.pool.node(v, this.ctx!.createBiquadFilter());
+    lp.type = 'lowpass';
+    lp.frequency.value = cutoff;
+    o.disconnect();
+    o.connect(lp);
+    lp.connect(v.out);
+  }
+
+  /** Ship touchdown: thump and gear creak scaled by vertical impact speed (m/s). */
+  touchdown(impact: number): void {
+    const k = Math.min(1.3, 0.45 + Math.abs(impact) / 5);
+    this.thump(k);
+    this.noise('bandpass', 700, 2, 0.03 * k, 0.03, 0.4, 'ship', 0.05);
+  }
+
   thump(strength = 1): void {
     const v = this.tone(70, 'sine', 0.35 * strength, 0.01, 0.45, 'effects');
     if (!v) return;
@@ -377,17 +479,29 @@ export class GameAudio {
     chord.forEach((f, i) => this.tone(f, 'sine', 0.06, 0.6, 4.5, 'effects', i * 0.18));
   }
 
-  /** Node and voice counters for leak checks. */
+  /** Extended Survey transmitted: a slower, wider cue than the core transmission. */
+  completeExtended(): void {
+    if (!this.running) return;
+    this.mix.duck('ambience', 0.4, 6);
+    const notes = [146.8, 220, 329.6, 440, 554.4, 659.3];
+    notes.forEach((f, i) => {
+      this.tone(f, 'sine', 0.05, 0.9, 6, 'effects', i * 0.32);
+      if (i % 2 === 1) this.tone(f * 2, 'triangle', 0.012, 1.2, 5, 'effects', i * 0.32 + 0.15);
+    });
+    this.noise('bandpass', 5200, 0.5, 0.01, 1.5, 4, 'effects', 0.4);
+  }
+
+  /** Node and voice counters for leak checks (dev and testhooks builds only). */
   stats(): AudioStats | null {
-    if (!this.ctx) return null;
+    if (!__TEST_HOOKS__ || !this.ctx) return null;
     const voices = this.pool.snapshot();
     const persistentNodes = this.mix.nodeCount + this.persistent.length + (this.analyser ? 1 : 0);
     return { state: this.ctx.state, voices, persistentNodes, liveNodes: persistentNodes + voices.liveNodes, suit: this.suitMode };
   }
 
-  /** Peak and RMS of the final mix right now (lazily taps an analyser). */
+  /** Peak and RMS of the final mix right now (lazily taps an analyser; dev and testhooks builds only). */
   meter(): { peak: number; rms: number } | null {
-    if (!this.ctx) return null;
+    if (!__TEST_HOOKS__ || !this.ctx) return null;
     if (!this.analyser) {
       this.analyser = this.ctx.createAnalyser();
       this.analyser.fftSize = 2048;
