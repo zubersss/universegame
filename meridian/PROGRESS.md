@@ -118,7 +118,17 @@ _Not started._
 
 Tests (`tests/audio.test.ts`, mock AudioContext in `tests/audioMock.ts`): bus routing to the destination, layer/cue bus assignment, group volumes, cap never exceeded (200 voices → 32 active, 168 stolen, 0 dropped), stealing order (quietest, then oldest), steal fade (no hard cut), every voice node disconnected after a mixed burst, sweep fallback, 0 automation events on long-lived params across 20,000 varied frames, pause fade → suspend → resume, no voices while suspended, suit mode on/off, context failure, dispose, settings sanitization.
 
-Browser soak: running, results not yet recorded (not verified).
+Browser soak 1 (2026-10-29, scratch script driving the testhooks build of the M1 audio code (commit a42ea74, before the M2 additions), Low, 640×360, pointer lock stubbed, `setRenderEvery(60)`, inputs only via keys and the test autopilot): **1,178 s simulated (19.6 min; 21 min wall)**, just short of the 20-minute target, so a second, longer soak on the current build follows. Route: real Play click → Ilex on foot 7 min (29 walk loops with sprint, jumps, hold-F scans, a pause/resume every second loop) → flight 4 × 45 s at varied throttle/boost → autopilot travel to Cairn (cruise) → Cairn on foot 7 min (suit mode on). Sampled after every loop (`game.audio.stats()`, `meter()`, CDP `Performance.getMetrics`, `resources()`):
+
+| Segment | Sim (s) | Audio nodes live (persistent 36) | Voices active | Mix peak / RMS (linear) | JS heap (MB) |
+| --- | --- | --- | --- | --- | --- |
+| Ilex on foot | 10–430 | 36–41 | 0–2 | 0.028–0.049 / 0.010–0.018 | 12.9–28.2 |
+| Flight | 478–614 | 36–40 | 0–2 | 0.067–0.131 / 0.028–0.058 | 15.9–28.8 |
+| Cairn on foot (suit) | 762–1,178 | 36–47 | 0–4 | 0.003–0.044 / 0.001–0.016 | 13.3–25.0 |
+
+Totals: 6,127 voices, 16,079 voice nodes created and 16,076 disconnected (the 3 left belonged to the one voice still sounding at the last sample), 0 stolen, 0 dropped; the persistent node count never changed; heap oscillated with GC and did not trend up; 0 console errors. Peaks stay far below clipping (−18 dBFS at the loudest, in flight); the mix is deliberately quiet. Silence where expected: on Cairn the mix fell to RMS ≈ 0.002 between breaths and steps (no wind). Evidence: `evidence/studio/echo/soak1-cairn-1280.png`, `soak1-cairn-640.png` (end of the run, on foot on Cairn). Loudness in LUFS was not measured (no offline renderer here); the peak/RMS readings are the only level evidence.
+
+Browser checks on the current build: `e2e/journey/saves.spec.ts` "settings persist across a reload" (extended for the two sliders) passed in 15.8 s; `e2e/journey/quick.spec.ts` passed in 1.1 min; production `dist/` has none of the test-hook strings. Settings panel: `evidence/studio/echo/settings-1280.png`, `settings-640.png`, `settings-640-scrolled.png`. At 640×360 the panel scrolls (content 448 px in a 322 px sheet); it already scrolled before the two 34 px rows were added (≈380 px), and Back is reachable by scrolling.
 
 ### Sound map (event → sound → bus → visual cue)
 | Event | Sound | Bus | Visual cue |
@@ -145,11 +155,12 @@ Browser soak: running, results not yet recorded (not verified).
 | Pause / panel / hidden | mix fades out, context suspended | master | pause menu / panel |
 
 ### TODO
-1. Director wiring (requested): `mode` + `gear` in the audio frame, `touchdown(impact)`, `completeExtended()`.
-2. Footsteps per surface under the player (needs biome/material at the foot position).
-3. Creature calls with BIOME's event names; spatialized panner pool.
-4. Discovery cues and sparse generative music (arrival, first discovery, transmissions).
-5. Switch profiles.ts to `BodyDef.ambience` once ATLAS lands it.
+1. Director wiring at merge: `mode` + `gear` in the audio frame, `touchdown(impact)`, `completeExtended()`; BIOME wires `creature()` / `discovery()`.
+2. Soak 2 on the current build, ≥ 25 min simulated.
+3. Footsteps per surface under the player (needs biome/material at the foot position).
+4. More creature recipes as BIOME adds species (API done).
+5. Sparse generative music: arrival swells (discovery swells done).
+6. `BodyDef.ambience` is read when present (done); remove the local table once ATLAS's field is on integration.
 
 ## Studio: GAUGE (QA, performance, release)
 
