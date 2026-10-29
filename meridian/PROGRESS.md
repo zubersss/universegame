@@ -115,7 +115,17 @@ Each section below is edited only by its owner. Director: integration log, decis
 - **Rule: moving things (creatures, anything animated in position) must never be added to `PropSystem`.** `PropSystem` is the deterministic, static placement that the travel gate fingerprints (every instance's ID and position within 250 m of a landing site, to the mm, identical on every visit), and `nearbyScannables()` reads it too. Creatures live in their own system (`src/fauna/`, BIOME); GAUGE adds separate hooks for them (e.g. nearest creature) when BIOME's API exists.
 
 ## Studio: LUMEN (graphics)
-_Not started._
+### M1 (2026-10-29)
+- **Photo set** `e2e/journey/photos.spec.ts` (photography only, not travel acceptance): each body is reached by importing a crafted LANDED save at its landing site through Import Backup, then the test photo camera takes fixed poses in the landing-site frame (ground, low flight, high flight, orbit). Every frame is drawn only while capturing, and the HUD is hidden. 1280×720 per preset, plus 640×360 at Balanced. `PHOTO_SET`, `PHOTO_PRESETS` and `PHOTO_BODIES` select output folder and scope. Per-photo counts (draw calls, triangles, GPU estimate, `renderer.info.programs`, heap) go to `perf-<preset>.json`.
+- **Baseline** (original build, before the terrain pass): `evidence/studio/lumen/baseline/`, Ilex/Vesper/Cairn × Low/Balanced/High, 0 console errors in all three runs (Low 14.4 min, Balanced 18.5 min, High 17.2 min). Programs: Low 26–28, Balanced 37–38, High 38–39. Ground poses: Low 104–180 calls / 211k–385k tris; Balanced 169–216 / 350k–530k; High 204–216 / 465k–665k. High-flight/orbit poses over the landed ship exceed the Low budget (B-002, Director to confirm on the profile route).
+- **Terrain surface pass** (`src/terrain/terrainMaterial.ts`): km-scale macro variation in planet coordinates at two incommensurate scales (one on Low), faded out where the proxies take over (25–90 km) so the handoff matches; rock from per-pixel slope and high ground; height-mapped strata on rock (antialiased with `fwidth`, so cliffs never stretch); sediment on low flat ground and in hollows (concavity byte `morphNormal.w` from chunkGen), paler crests; detail bump fades with distance (fine < 140 m, medium 300–1500 m), stronger on rock, softer on sediment; triplanar weights sharpened. All per-body values come from `BodyDef.look` (`TerrainLook` in bodies.ts) merged over `DEFAULT_LOOK`; the old body-name branches are gone. No new material variants (Low/non-Low as before). Unit tests: `tests/terrainLook.test.ts`.
+- **Verified:** typecheck, 173/173 unit tests, `build` + `build:test`, no test-hook strings in `dist/`, quick journey passed (1.1 min). The new shader compiled and rendered in the browser (Ilex ground at Balanced, `evidence/studio/lumen/check/`, not committed). The change is subtle on the flat landing clearing.
+- **Not verified:** the full after-set at the baseline poses, per-preset counts and program count after the change, and any view of Orrin/Saro with the pass. The studio was put on hold before that run.
+
+#### TODO (when GO arrives)
+1. After-set at the same poses for all 5 bodies × 3 presets; compare counts and programs to the baseline; re-photograph Orrin for B-003.
+2. Tune look values from the pairs (strength of macro/strata if too subtle).
+3. C1 next: lighting and atmosphere (stars visible in daytime skies on Ilex/Orrin; sun disc), then clouds/sky, then shadows.
 
 ## Studio: ATLAS (worlds and travel)
 
