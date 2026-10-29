@@ -2,6 +2,10 @@
 
 Shared repository for a browser-based 3D sci-fi exploration game, built with an automated **GPT + Claude Code** collaboration workflow.
 
+## Games in this repository
+
+- [`meridian/`](meridian/): **MERIDIAN — The Quiet System**. Fly a survey ship between two planets and a moon, land, walk, scan, activate three relays and transmit the survey. Play locally: `cd meridian && npm ci && npm run build && npm run preview`, then open http://localhost:4173/. Details in [`meridian/README.md`](meridian/README.md); verification record in [`meridian/PROGRESS.md`](meridian/PROGRESS.md).
+
 ## How the collaboration works
 
 One manual trigger runs one bounded cycle in GitHub Actions — no copying messages between chats:

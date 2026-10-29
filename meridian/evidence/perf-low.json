@@ -1,0 +1,271 @@
+{
+ "preset": "low",
+ "env": {
+  "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+  "dpr": 1,
+  "cores": 4
+ },
+ "samples": [
+  {
+   "label": "landed",
+   "mode": "LANDED",
+   "clearance": 2.8499994212777437,
+   "simTime": 3.133333333333327,
+   "frames": {
+    "frames": 30,
+    "medianMs": 1299.9000244140625,
+    "p95Ms": 2550,
+    "p99Ms": 3116.5,
+    "maxMs": 3116.5,
+    "stalls100": 30
+   },
+   "gpu": {
+    "geometryMB": 19.554489135742188,
+    "texturesMB": 8.528128814697267,
+    "targetsMB": 45.125,
+    "totalMB": 73.20761795043946,
+    "geometries": 228,
+    "textures": 7
+   },
+   "draw": {
+    "calls": 149,
+    "triangles": 327385,
+    "geometries": 130,
+    "textures": 12,
+    "w": 1280,
+    "h": 720
+   },
+   "terrain": {
+    "rendered": 186,
+    "leaves": 186,
+    "colliders": 6
+   },
+   "props": {
+    "drawn": 461,
+    "triangles": 35382,
+    "colliders": 0
+   },
+   "physics": {
+    "bodies": 8,
+    "colliders": 11,
+    "refreshes": 6
+   },
+   "heapMB": 26.3214111328125,
+   "quality": {
+    "preset": "low",
+    "adaptive": false,
+    "level": 0,
+    "medianMs": 0,
+    "resolutionScale": 1
+   },
+   "timings": {
+    "sim": 1.5738820288536846,
+    "terrain": 14.667150390604096,
+    "render": 16.334076879662433,
+    "frame": 35.67280117815223
+   },
+   "chunks": {
+    "cacheMB": 18.127944946289062,
+    "genMsAvg": 16.063157894725638,
+    "genMsMax": 111.39999999850988
+   },
+   "gl": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+  },
+  {
+   "label": "walking",
+   "mode": "ON_FOOT",
+   "clearance": 2.8499994212777437,
+   "simTime": 6.866666666666648,
+   "frames": {
+    "frames": 30,
+    "medianMs": 2666.60009765625,
+    "p95Ms": 4516.60009765625,
+    "p99Ms": 4733.2001953125,
+    "maxMs": 4733.2001953125,
+    "stalls100": 30
+   },
+   "gpu": {
+    "geometryMB": 22.846954345703125,
+    "texturesMB": 8.528128814697267,
+    "targetsMB": 45.125,
+    "totalMB": 76.5000831604004,
+    "geometries": 270,
+    "textures": 7
+   },
+   "draw": {
+    "calls": 149,
+    "triangles": 340907,
+    "geometries": 161,
+    "textures": 12,
+    "w": 1280,
+    "h": 720
+   },
+   "terrain": {
+    "rendered": 228,
+    "leaves": 228,
+    "colliders": 8
+   },
+   "props": {
+    "drawn": 434,
+    "triangles": 32928,
+    "colliders": 0
+   },
+   "physics": {
+    "bodies": 11,
+    "colliders": 14,
+    "refreshes": 11
+   },
+   "heapMB": 26.3214111328125,
+   "quality": {
+    "preset": "low",
+    "adaptive": false,
+    "level": 0,
+    "medianMs": 0,
+    "resolutionScale": 1
+   },
+   "timings": {
+    "sim": 6.850089442736761,
+    "terrain": 3.5024104559451716,
+    "render": 7.716150097729087,
+    "frame": 19.525912456965507
+   },
+   "chunks": {
+    "cacheMB": 23.083786010742188,
+    "genMsAvg": 15.563157894654058,
+    "genMsMax": 111.39999999850988
+   },
+   "gl": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+  },
+  {
+   "label": "low-flight",
+   "mode": "PILOTING",
+   "clearance": 132.80086701198735,
+   "simTime": 21.783333333333378,
+   "frames": {
+    "frames": 30,
+    "medianMs": 2533.199951171875,
+    "p95Ms": 5283.10009765625,
+    "p99Ms": 6066.39990234375,
+    "maxMs": 6066.39990234375,
+    "stalls100": 29
+   },
+   "gpu": {
+    "geometryMB": 22.630088806152344,
+    "texturesMB": 8.528128814697267,
+    "targetsMB": 45.125,
+    "totalMB": 76.28321762084961,
+    "geometries": 267,
+    "textures": 7
+   },
+   "draw": {
+    "calls": 121,
+    "triangles": 292819,
+    "geometries": 210,
+    "textures": 12,
+    "w": 1280,
+    "h": 720
+   },
+   "terrain": {
+    "rendered": 225,
+    "leaves": 225,
+    "colliders": 12
+   },
+   "props": {
+    "drawn": 309,
+    "triangles": 23580,
+    "colliders": 0
+   },
+   "physics": {
+    "bodies": 14,
+    "colliders": 17,
+    "refreshes": 42
+   },
+   "heapMB": 26.3214111328125,
+   "quality": {
+    "preset": "low",
+    "adaptive": false,
+    "level": 0,
+    "medianMs": 0,
+    "resolutionScale": 1
+   },
+   "timings": {
+    "sim": 1.956736236264422,
+    "terrain": 7.070447427935151,
+    "render": 9.890462869780173,
+    "frame": 22.06659264107217
+   },
+   "chunks": {
+    "cacheMB": 25.56170654296875,
+    "genMsAvg": 15.367894736775442,
+    "genMsMax": 111.39999999850988
+   },
+   "gl": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+  },
+  {
+   "label": "atmosphere-edge",
+   "mode": "PILOTING",
+   "clearance": 7829.532288800215,
+   "simTime": 54.41666666666486,
+   "frames": {
+    "frames": 30,
+    "medianMs": 866.5999755859375,
+    "p95Ms": 5849.7001953125,
+    "p99Ms": 6649.7001953125,
+    "maxMs": 6649.7001953125,
+    "stalls100": 26
+   },
+   "gpu": {
+    "geometryMB": 11.576812744140625,
+    "texturesMB": 8.528128814697267,
+    "targetsMB": 45.125,
+    "totalMB": 65.2299415588379,
+    "geometries": 126,
+    "textures": 7
+   },
+   "draw": {
+    "calls": 25,
+    "triangles": 54967,
+    "geometries": 84,
+    "textures": 12,
+    "w": 1280,
+    "h": 720
+   },
+   "terrain": {
+    "rendered": 84,
+    "leaves": 84,
+    "colliders": 0
+   },
+   "props": {
+    "drawn": 0,
+    "triangles": 0,
+    "colliders": 0
+   },
+   "physics": {
+    "bodies": 2,
+    "colliders": 5,
+    "refreshes": 76
+   },
+   "heapMB": 26.3214111328125,
+   "quality": {
+    "preset": "low",
+    "adaptive": false,
+    "level": 0,
+    "medianMs": 0,
+    "resolutionScale": 1
+   },
+   "timings": {
+    "sim": 2.7791053343330776,
+    "terrain": 5.235836596334666,
+    "render": 6.951159259798689,
+    "frame": 15.641547844835426
+   },
+   "chunks": {
+    "cacheMB": 28.235252380371094,
+    "genMsAvg": 15.368883610408833,
+    "genMsMax": 111.39999999850988
+   },
+   "gl": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+  }
+ ],
+ "errors": []
+}
