@@ -1,10 +1,14 @@
-name: GPT + Claude Game Builder
+name: AI Collaboration (GPT + Claude Code)
 
+# One manual trigger = one bounded run:
+#   GPT plans -> Claude Code implements -> GPT reviews -> Claude Code fixes (only if needed)
+#   -> transcript committed to agent-runs/ -> pull request for a human to review.
+# Never merges, never runs on a schedule, never triggers itself.
 on:
   workflow_dispatch:
     inputs:
       task:
-        description: "Specific game development task (max 4000 characters)"
+        description: "What should GPT and Claude Code do? Be specific (max 6000 characters)."
         required: true
         type: string
 
@@ -13,46 +17,83 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: ai-game-builder
+  group: ai-collaboration
   cancel-in-progress: false
 
 jobs:
   collaborate:
     runs-on: ubuntu-latest
     timeout-minutes: 90
-    env:
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-      OPENAI_MODEL: gpt-6.1-sol
-      GAME_TASK: ${{ inputs.task }}
-      GH_TOKEN: ${{ github.token }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out the selected branch
+        uses: actions/checkout@v6
         with:
-          fetch-depth: 0
-          persist-credentials: true
-      - name: Check credentials
+          persist-credentials: false  # agents get no GitHub credentials
+
+      - name: Check that the API key secrets exist
+        env:
+          HAS_OPENAI: ${{ secrets.OPENAI_API_KEY != '' }}
+          HAS_ANTHROPIC: ${{ secrets.ANTHROPIC_API_KEY != '' }}
         run: |
-          test -n "$OPENAI_API_KEY" || { echo "Missing OPENAI_API_KEY repository secret"; exit 1; }
-          test -n "$ANTHROPIC_API_KEY" || { echo "Missing ANTHROPIC_API_KEY repository secret"; exit 1; }
-      - uses: actions/setup-node@v4
+          missing=""
+          [ "$HAS_OPENAI" = "true" ] || missing="$missing OPENAI_API_KEY"
+          [ "$HAS_ANTHROPIC" = "true" ] || missing="$missing ANTHROPIC_API_KEY"
+          if [ -n "$missing" ]; then
+            echo "::error title=Missing secrets::Add these repository secrets under Settings > Secrets and variables > Actions:$missing"
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v6
         with:
-          node-version: '22'
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
+          node-version: "22"
+
       - name: Install Claude Code CLI
-        run: npm install -g @anthropic-ai/claude-code
-      - name: Create isolated work branch
         run: |
-          git config user.name "ai-game-builder[bot]"
+          npm install -g @anthropic-ai/claude-code@latest
+          claude --version
+
+      - name: Create work branch
+        run: |
+          git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -b "ai/game-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-      - name: GPT plans, Claude implements, GPT reviews, Claude repairs
-        run: python scripts/ai_bridge.py
-      - name: Create review pull request
+          git switch -c "ai/run-${GITHUB_RUN_ID}"
+
+      - name: GPT plans, Claude Code implements, GPT reviews, Claude Code fixes
+        id: bridge
+        env:
+          AI_TASK: ${{ inputs.task }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          AGENT_WORK_DIR: ${{ runner.temp }}/agent-run
+          # Optional overrides: Settings > Secrets and variables > Actions > Variables
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-6.1-sol' }}
+          OPENAI_REASONING_EFFORT: ${{ vars.OPENAI_REASONING_EFFORT || 'medium' }}
+          CLAUDE_MODEL: ${{ vars.CLAUDE_MODEL }}
+          CLAUDE_MAX_BUDGET_USD: ${{ vars.CLAUDE_MAX_BUDGET_USD || '3' }}
+          CLAUDE_MAX_TURNS: ${{ vars.CLAUDE_MAX_TURNS || '40' }}
+        run: python3 scripts/ai_bridge.py
+
+      - name: Open pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_BRANCH: ${{ github.ref_name }}
+          WORK_DIR: ${{ runner.temp }}/agent-run
         run: |
-          git push --set-upstream origin HEAD
-          gh pr create --base main --head "$(git branch --show-current)" \
-            --title "AI collaboration: game development run #${GITHUB_RUN_NUMBER}" \
-            --body "GPT plan and review: see \`agent-reports/\`. Claude Code implemented the requested game task. **Review and test before merging.**"
+          gh auth setup-git
+          git push origin "HEAD:refs/heads/ai/run-${GITHUB_RUN_ID}"
+          if ! url=$(gh pr create --base "$BASE_BRANCH" --head "ai/run-${GITHUB_RUN_ID}" \
+                --title "$(cat "$WORK_DIR/pr-title.txt")" --body-file "$WORK_DIR/pr-body.md" 2>&1); then
+            echo "$url"
+            echo "::error title=Pull request not created::The branch ai/run-${GITHUB_RUN_ID} was pushed, but GitHub refused to open the PR. Enable Settings > Actions > General > 'Allow GitHub Actions to create and approve pull requests', or open the PR manually from that branch."
+            exit 1
+          fi
+          echo "Pull request: $url"
+          echo "### Pull request: $url" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the agents' transcript
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: agent-run
+          path: ${{ runner.temp }}/agent-run
+          if-no-files-found: ignore
