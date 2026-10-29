@@ -1,5 +1,5 @@
-// Per-world ambience data. Proposed to move into `BodyDef.ambience` (owned by
-// ATLAS); until then it lives here, keyed by body, with a neutral default so
+// Per-world ambience data. Read from `BodyDef.ambience` (owned by ATLAS) when
+// a body defines it; this table and a neutral default are the fallback so
 // bodies without an entry still sound reasonable.
 
 import { BODIES, type BodyId } from '../world/bodies';
@@ -35,8 +35,10 @@ const PROFILES: Partial<Record<BodyId, AmbienceProfile>> = {
   cairn: { wind: 0, windTone: 300, tonic: 261.6, scale: PENTA, timbre: 'sine', toneGap: 16, ground: 'rock' },
 };
 
+/** `BodyDef.ambience` (ATLAS) when present, else the local table, else the default. */
 export function ambienceFor(id: BodyId): AmbienceProfile {
-  return PROFILES[id] ?? DEFAULT_AMBIENCE;
+  const def = (BODIES[id] as { ambience?: AmbienceProfile } | undefined)?.ambience;
+  return def ?? PROFILES[id] ?? DEFAULT_AMBIENCE;
 }
 
 /** Airless bodies switch the on-foot mix to suit sounds. */
