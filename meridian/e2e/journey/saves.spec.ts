@@ -81,7 +81,7 @@ test('a corrupt latest save offers the previous save and is kept aside', async (
   await pauseAndSave(page);
   expect(await idbGet(page, 'save-corrupt')).toEqual({ schema: 1, ship: 'garbage' });
   const latest = (await idbGet(page, 'save')) as Record<string, unknown>;
-  expect(latest.schema).toBe(1);
+  expect(latest.schema).toBe(2); // current save schema (schema 2 since the Orrin/Saro round)
   expect(latest.mode).toBe('LANDED');
   expect(errors).toEqual([]);
 });
@@ -113,7 +113,7 @@ test('denied storage keeps the game playable; export and import still work', asy
   const file = info.outputPath('backup.json');
   await (await dl).saveAs(file);
   const backup = JSON.parse(readFileSync(file, 'utf8'));
-  expect(backup.schema).toBe(1);
+  expect(backup.schema).toBe(2); // current save schema
   expect(backup.mode).toBe('PILOTING');
   // Re-import the backup (restores the flight state).
   await page.setInputFiles('#file-import', file);
