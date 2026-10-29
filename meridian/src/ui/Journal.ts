@@ -1,5 +1,5 @@
 import { BODIES, BODY_IDS, CORE_BODY_IDS, EXTENDED_BODY_IDS } from '../world/bodies';
-import { catalogFor, CATALOG } from '../fauna/catalog';
+import { catalogFor, CATALOG, progressLine, worldProgress } from '../fauna/catalog';
 import { sampleName } from '../world/MissionObjects';
 import type { Expedition, ExpeditionState } from '../game/Expedition';
 
@@ -19,15 +19,17 @@ export function renderJournal(root: HTMLElement, s: ExpeditionState): void {
   out.push(el('div', 'empty', `${s.species.length} of ${total} species logged · ${s.scanned.length} objects scanned. Hold F on foot to scan.`));
   for (const b of BODY_IDS) {
     const def = BODIES[b];
+    const wp = worldProgress(b, s.species);
     out.push(el('h3', '', `${def.name} — ${def.biomeNames.join(' · ')}`));
     const entries = catalogFor(b);
     if (entries.length === 0) out.push(el('div', 'entry unknown', 'No specimens catalogued yet.'));
+    else out.push(el('div', 'empty', `${wp.found} of ${wp.total} logged${wp.found === wp.total ? ' · survey of life complete' : ''} · ${progressLine(wp)}`));
     for (const sp of entries) {
       const known = s.species.includes(sp.id);
       const entry = el('div', known ? 'entry' : 'entry unknown');
       const head = el('div', 'eh');
       const kind = sp.kind === 'fauna' ? 'Fauna' : sp.kind === 'mineral' ? 'Mineral' : 'Flora';
-      head.append(el('span', 'en', known ? sp.name : sp.kind === 'fauna' ? 'Unidentified creature' : 'Unidentified specimen'), el('span', 'eb', known ? `${kind} · logged` : kind));
+      head.append(el('span', 'en', known ? sp.name : '???'), el('span', 'eb', known ? `${kind} · logged` : `${kind} · not found`));
       entry.append(head);
       if (known) entry.append(el('div', 'ed', sp.description));
       out.push(entry);

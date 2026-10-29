@@ -130,3 +130,62 @@ export function groveTrine(): FaunaGeometry {
   };
   return { lod0: make(true), lod1: make(false) };
 }
+
+/**
+ * Dune sledge (Vesper): a broad, low grazer under overlapping oxide-red
+ * plates that hauls itself over the dunes on two heavy forelimbs; the
+ * tapered rear drags. Height ~1, length ~2.4 (+Z forward).
+ */
+export function duneSledge(): FaunaGeometry {
+  const plateA = lin(0x8e4126);
+  const plateB = lin(0xb46a40);
+  const belly = lin(0xd9c4a0);
+  const limb = lin(0x5a2c1c);
+  const make = (detail: boolean) => {
+    const parts: BufferGeometry[] = [];
+    // Body: a long, flattened shell, higher at the shoulders, tapering to the drag.
+    const body = new SphereGeometry(1, detail ? 16 : 8, detail ? 9 : 5);
+    body.scale(0.48, 0.34, 1.15);
+    const bp = body.attributes.position;
+    for (let i = 0; i < bp.count; i++) {
+      const z = bp.getZ(i);
+      const t = (z + 1.15) / 2.3; // 0 rear → 1 front
+      bp.setY(i, bp.getY(i) * (0.55 + 0.6 * t));
+      bp.setX(i, bp.getX(i) * (0.6 + 0.5 * t));
+    }
+    body.translate(0, 0.38, -0.2);
+    parts.push(part(body, (p, n, c) => {
+      // Overlapping plate bands across the back; pale underside.
+      const band = Math.floor((p.z + 1.4) * 6) % 2;
+      c.copy(band ? plateA : plateB);
+      if (n.y < -0.2) c.copy(belly);
+      c.multiplyScalar(0.85 + 0.15 * Math.max(0, n.y));
+    }, () => [-1, 0]));
+    // Head: low and blunt, set into the front of the shell.
+    const head = new SphereGeometry(0.2, detail ? 10 : 6, detail ? 6 : 4);
+    head.scale(1.2, 0.8, 1);
+    head.translate(0, 0.42, 0.98);
+    parts.push(part(head, (_p, n, c) => c.copy(plateA).lerp(belly, Math.max(0, -n.y)), () => [-1, 0]));
+    // Two forelimbs: shoulder → elbow (raised, out) → broad hand planted forward.
+    for (let k = 0; k < 2; k++) {
+      const sx = k === 0 ? 1 : -1;
+      const shoulder = new Vector3(sx * 0.32, 0.5, 0.55);
+      const elbow = new Vector3(sx * 0.72, 0.7, 0.72);
+      const hand = new Vector3(sx * 0.66, 0.02, 1.12);
+      const radial = detail ? 6 : 3;
+      const along = (a0: Vector3, b0: Vector3, t0: number) => {
+        const ab = b0.clone().sub(a0);
+        const l2 = ab.lengthSq();
+        return (p: Vector3): [number, number] => [k, t0 + 0.5 * Math.max(0, Math.min(1, p.clone().sub(a0).dot(ab) / l2))];
+      };
+      parts.push(part(segment(shoulder, elbow, 0.09, 0.07, radial), (_p, _n, c) => c.copy(limb), along(shoulder, elbow, 0)));
+      parts.push(part(segment(elbow, hand, 0.07, 0.05, radial), (_p, _n, c) => c.copy(limb), along(elbow, hand, 0.5)));
+      const pad = new SphereGeometry(0.11, detail ? 6 : 4, 3);
+      pad.scale(1.3, 0.4, 1.5);
+      pad.translate(hand.x, 0.03, hand.z);
+      parts.push(part(pad, (_p, _n, c) => c.copy(limb).multiplyScalar(0.8), () => [k, 1]));
+    }
+    return merge(parts);
+  };
+  return { lod0: make(true), lod1: make(false) };
+}
