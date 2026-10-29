@@ -403,3 +403,15 @@ export class FaunaSystem {
     this.group.removeFromParent();
   }
 }
+
+/**
+ * Loudness (0..1) of a fauna sound event for the audio mixer: alarms full,
+ * calls softer, footfalls scaled by gait speed with the first beat of each
+ * cycle accented so the species' rhythm is audible.
+ */
+export function faunaSoundIntensity(ev: FaunaEvent, c: Creature): number {
+  if (ev === 'alarm') return 1;
+  if (ev === 'call') return 0.6;
+  const pace = Math.min(1, 0.4 + c.state.speed / c.species.behaviour.fleeSpeed);
+  return (c.beat === 0 ? 1 : 0.6) * pace;
+}

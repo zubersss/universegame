@@ -375,3 +375,22 @@ describe('curious species and Vesper herds', () => {
     f.dispose();
   });
 });
+
+describe('fauna sound intensity', () => {
+  it('accents the first footfall, scales with pace, and keeps alarms loudest', async () => {
+    const { faunaSoundIntensity } = await import('../src/fauna/FaunaSystem');
+    const spawn = { id: 'ilex:fauna:t:0', species: FAUNA[0], home: [0, 1, 0] as [number, number, number], t1: [1, 0, 0] as [number, number, number], t2: [0, 0, 1] as [number, number, number], x: 0, z: 0, yaw: 0, h: 2, seed: 1 };
+    const c = new Creature(spawn);
+    c.state.speed = FAUNA[0].behaviour.walkSpeed;
+    c.beat = 0;
+    const accent = faunaSoundIntensity('step', c);
+    c.beat = 1;
+    const plain = faunaSoundIntensity('step', c);
+    expect(accent).toBeGreaterThan(plain);
+    c.state.speed = FAUNA[0].behaviour.fleeSpeed;
+    expect(faunaSoundIntensity('step', c)).toBeGreaterThan(plain);
+    expect(faunaSoundIntensity('alarm', c)).toBe(1);
+    expect(faunaSoundIntensity('call', c)).toBeLessThan(1);
+    for (const ev of ['step', 'call', 'alarm'] as const) expect(faunaSoundIntensity(ev, c)).toBeLessThanOrEqual(1);
+  });
+});
