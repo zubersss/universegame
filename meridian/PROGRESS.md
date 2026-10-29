@@ -233,7 +233,82 @@ Budget plan (agreed values to confirm with GAUGE/LUMEN): ≤ 48 LOD0 + 160 LOD1 
 
 Tests (`tests/audio.test.ts`, mock AudioContext in `tests/audioMock.ts`): bus routing to the destination, layer/cue bus assignment, group volumes, cap never exceeded (200 voices → 32 active, 168 stolen, 0 dropped), stealing order (quietest, then oldest), steal fade (no hard cut), every voice node disconnected after a mixed burst, sweep fallback, 0 automation events on long-lived params across 20,000 varied frames, pause fade → suspend → resume, no voices while suspended, suit mode on/off, context failure, dispose, settings sanitization.
 
-Browser soak: running, results not yet recorded (not verified).
+Browser soak 1 (2026-10-29, scratch script driving the testhooks build of the M1 audio code (commit a42ea74, before the M2 additions), Low, 640×360, pointer lock stubbed, `setRenderEvery(60)`, inputs only via keys and the test autopilot): **1,178 s simulated (19.6 min; 21 min wall)**, just short of the 20-minute target, so a second, longer soak on the current build follows. Route: real Play click → Ilex on foot 7 min (29 walk loops with sprint, jumps, hold-F scans, a pause/resume every second loop) → flight 4 × 45 s at varied throttle/boost → autopilot travel to Cairn (cruise) → Cairn on foot 7 min (suit mode on). Sampled after every loop (`game.audio.stats()`, `meter()`, CDP `Performance.getMetrics`, `resources()`):
+
+| Segment | Sim (s) | Audio nodes live (persistent 36) | Voices active | Mix peak / RMS (linear) | JS heap (MB) |
+| --- | --- | --- | --- | --- | --- |
+| Ilex on foot | 10–430 | 36–41 | 0–2 | 0.028–0.049 / 0.010–0.018 | 12.9–28.2 |
+| Flight | 478–614 | 36–40 | 0–2 | 0.067–0.131 / 0.028–0.058 | 15.9–28.8 |
+| Cairn on foot (suit) | 762–1,178 | 36–47 | 0–4 | 0.003–0.044 / 0.001–0.016 | 13.3–25.0 |
+
+Totals: 6,127 voices, 16,079 voice nodes created and 16,076 disconnected (the 3 left belonged to the one voice still sounding at the last sample), 0 stolen, 0 dropped; the persistent node count never changed; heap oscillated with GC and did not trend up; 0 console errors. Peaks stay far below clipping (−18 dBFS at the loudest, in flight); the mix is deliberately quiet. Silence where expected: on Cairn the mix fell to RMS ≈ 0.002 between breaths and steps (no wind). Evidence: `evidence/studio/echo/soak1-cairn-1280.png`, `soak1-cairn-640.png` (end of the run, on foot on Cairn). Loudness in LUFS was not measured (no offline renderer here); the peak/RMS readings are the only level evidence.
+
+Browser checks on the current build: `e2e/journey/saves.spec.ts` "settings persist across a reload" (extended for the two sliders) passed in 15.8 s; `e2e/journey/quick.spec.ts` passed in 1.1 min; production `dist/` has none of the test-hook strings. Settings panel: `evidence/studio/echo/settings-1280.png`, `settings-640.png`, `settings-640-scrolled.png`. At 640×360 the panel scrolls (content 448 px in a 322 px sheet); it already scrolled before the two 34 px rows were added (≈380 px), and Back is reachable by scrolling.
+
+### Handoff (ECHO → BIOME), 2026-10-29
+Sound moves to BIOME. Everything below is on `studio/echo`.
+
+**Architecture.** `Mixer.ts` builds the graph once. Each of the six buses (ambience, ship, creatures, effects, ui, music) is three gains: `input`, then level × group volume, then a cue duck. They feed master (user volume), then a pause fade, a glue compressor (−14 dB, 3:1), a limiter (−2 dB, 20:1) and the destination. Long-lived layers are created once in `GameAudio.init()` (`keep()` registers them for `dispose()`): engine (2 saws, lowpass, hiss), wind, suit hush, buffeting and cruise drone. Every one-shot sound is a `VoicePool` voice: an envelope gain plus nodes registered with `pool.node()` and `pool.source()`.
+
+**Invariants (do not break):**
+- Never call `setTargetAtTime` or any ramp per frame (A8.1). Continuous layers glide by direct `.value` assignment in `update()`. Bus, master, pause and duck gains change only through `rampTo()` or `Mixer.duck()` on events; both cancel first, so a param holds at most a few events.
+- Voice cap 32. At the cap, the quietest voice (oldest on a tie) is stolen with a 15 ms fade. A voice in its attack counts as full level.
+- Every node of a voice is disconnected when its last source ends (`onended`). A 0.5 s sweep catches voices whose `onended` never fired.
+- Envelopes start and end at 1e-4 with a minimum 3 ms attack; the mix fades in on start (0.3 s).
+- Pause, panel or hidden tab: 80 ms fade, then `suspend()` after 120 ms. `resume()` cancels a pending suspend and fades in over 150 ms.
+- No voices are created unless the context is running, and a failed AudioContext means silent play plus `console.warn`.
+- Schedule delayed notes in audio time (`delay` argument), not with `setTimeout`.
+- Creature voices carry `tag = 'creature'`, with a sub-cap of 12 inside the global cap.
+
+**Public API (`GameAudio`):**
+- `start(volume 0..1)`: call from a user gesture; safe to repeat. `setVolume(master 0..1)`. `setMix(music 0..1, effects 0..1)`: effects scales the ambience, ship, creatures, effects and ui buses.
+- `suspend()` / `resume()`: the game calls these from `setState`.
+- `update(dt s, AudioFrame)`. AudioFrame fields: `thrust` 0..1, `boost`, `airspeed` m/s, `density` 0..1, `shipDistance` m, `shipActive`, `onFoot`, `body`, plus two optional fields:
+  - `mode` (`'PILOTING' | 'CRUISING' | 'LANDED' | 'ON_FOOT'`): changes play the take-off spool, the cruise chirps and drone, and the hatch hiss.
+  - `gear` (0 up, 1 down): changes play the gear motor and lock clunk.
+  - One voice per change; the unit test "plays mode and gear cues once per change, never per frame" guards it.
+- `footstep(body, sprint)`. `thump(strength ≈ 0..1.3)`. `touchdown(impact)`: impact is vertical impact speed in m/s, positive downward (abs is used), and maps to thump strength `min(1.3, 0.45 + |v|/5)` plus a gear creak.
+- `scanTick(progress 0..1)` each scanning frame. `scanDone()`, `collect()`, `relay()` (ducks ambience), `complete()` (core transmission), `completeExtended()` (Extended Survey), `ui()`.
+- `creature(ev 'call'|'alarm'|'step', speciesId, pos, intensity 0..1 = 1)`:
+  - `pos` is in camera space, in metres (x right, y up, −z forward): `_v.copy(c.p).add(bodyCenterLocal).applyMatrix4(camera.matrixWorldInverse)`.
+  - Ignored beyond 120 m. Each layer gets an equal-power panner, inverse distance, ref 6 m.
+  - Recipes are in `creatures.ts` (`ilex-trine` plus a default).
+- `discovery('scanStart'|'logged'|'firstSpecies'|'worldComplete')`. `logged` is skipped if `scanDone()` chimed within 0.4 s. The swells use the world's tonic and scale on the music bus.
+- `stats()` / `meter()`: test-only; they return null unless `__TEST_HOOKS__`. GAUGE has the types for an `audio()` test hook.
+- `suitMode` (read-only), `ready`, `dispose()`.
+- Unit tests: `tests/audio.test.ts` with `tests/audioMock.ts` (21 audio tests plus a settings test).
+
+**Wiring status:**
+- The Director wires `mode` and `gear` into the frame, `touchdown(v)` in `land()` (replacing `thump(1)`) and `completeExtended()`.
+- BIOME wires `creature()` and `discovery()`.
+- Until then, these are implemented and unit-tested but silent in the game: take-off spool, cruise chirps and drone, hatch hiss, gear motor, touchdown scaling, the Extended Survey cue, creatures and discovery swells.
+- Buffeting needs no wiring.
+
+**Ambience per body.** `ambienceFor(id)` in `profiles.ts` uses `BODIES[id].ambience` (ATLAS's `AmbienceDef`, on `studio/atlas` @ 9e5a95f) when present, else the local table, else the default. It uses `wind`, `windTone`, `tonic`, `scale`, `timbre`, `toneGap` and `ground`; `windAltitude` is not used yet, because altitude enters only through air density.
+
+**Airless path.** It applies when the body has `atmosphere === null` and the player is on foot. There are no body-id branches. The suit sounds:
+- No wind.
+- A helmet hush (lowpassed noise, about 0.012), louder with exertion.
+- Breaths every 3.6–4.4 s, faster after sprinting: an inhale (bandpass 1150 Hz), then an exhale (650 Hz).
+- Footfalls are a 260 Hz lowpass thud plus a 55–63 Hz sine.
+- A servo whirr on about one step in eight.
+- The engine drops to 18 % with no hiss.
+
+**Soak.** Soak 1 is reported above: 19.6 min simulated, flat. Soak 2 (≥ 25 min simulated on the M2 build) was restarted after the session limit and stopped at the stand-down after 38 s simulated: **not completed**. Before it stopped it showed 42 persistent nodes (the M2 buffet and drone layers add 6) and 484 voice nodes created, all 484 disconnected.
+
+**Finished before the limit:**
+- `saves.spec` "settings persist" passed (15.8 s) and `quick.spec` passed (1.1 min) on the M2 build.
+- Settings screenshots at 1280×720 and 640×360 are in `evidence/studio/echo/`.
+- Cairn on-foot screenshots from soak 1 are in `evidence/studio/echo/`.
+
+**Remaining, in priority order:**
+1. After the wiring merges: a ≥ 20 min soak on integration (node counts flat, voice nodes created = disconnected), and a check that the take-off, cruise and gear cues play once per change in the browser.
+2. Footsteps per surface under the player, keyed by biome or material at the foot. The `GroundKind` timbres soil, sand, rock, ice, salt and moss already exist in `STEPS`.
+3. Creature recipes for the new fauna. Accent beat 0 of the trine's three-beat step at intensity ≈ 1.0, the others ≈ 0.6.
+4. Sparse music: arrival swell on the first landing on each world, using `swell()`.
+5. Use `windAltitude`, or remove it.
+6. Delete the local profile table once `BodyDef.ambience` is on integration.
+7. LUFS or offline loudness check: not done; only peak and RMS from `meter()` exist.
 
 ### Sound map (event → sound → bus → visual cue)
 | Event | Sound | Bus | Visual cue |
@@ -241,11 +316,11 @@ Browser soak: running, results not yet recorded (not verified).
 | Piloting / thrust / boost | two detuned saws through a lowpass that opens with thrust, thrust hiss | ship | HUD throttle and speed, exhaust plume |
 | Flight through air | band-passed wind, louder and brighter with airspeed × density | ambience | speed readout, motes, sky |
 | High speed in thick air | low buffeting rumble (dynamic pressure), none in vacuum | ship | speed readout, atmosphere |
-| Cruise engaged / ended | rising / falling two-note chirp; cruise drone with slow beating while cruising | ui / ship | "Cruise engaged" notice, HUD mode |
-| Take-off | engine spool-up | ship | HUD mode changes to flight |
-| Gear up / down | motor whine, lock clunk | ship | gear state in the HUD / ship model |
-| Touchdown | low sine thump + gear creak, scaled by impact speed | effects / ship | HUD "Landed" |
-| Exit / board | hatch pressure hiss | effects | mode change, camera to/from player |
+| Cruise engaged / ended | rising / falling two-note chirp; cruise drone with slow beating while cruising (not yet wired: needs `mode`) | ui / ship | "Cruise engaged" notice, HUD mode |
+| Take-off | engine spool-up (not yet wired: needs `mode`) | ship | HUD mode changes to flight |
+| Gear up / down | motor whine, lock clunk (not yet wired: needs `gear`) | ship | gear state in the HUD / ship model |
+| Touchdown | low sine thump (today: fixed strength via `thump(1)`); gear creak and impact scaling once `touchdown(v)` is wired | effects / ship | HUD "Landed" |
+| Exit / board | hatch pressure hiss (not yet wired: needs `mode`) | effects | mode change, camera to/from player |
 | Footstep | filtered noise per ground (soil, sand, rock; ice, salt, moss ready) | effects | walking motion |
 | Footstep, airless | low thump + dull noise through the boots; occasional servo | effects | walking motion |
 | Jump landing | small thump | effects | camera settles |
@@ -255,16 +330,19 @@ Browser soak: running, results not yet recorded (not verified).
 | Sample collected | bright two-tone | effects | "… collected" notice, inventory |
 | Relay activated | four-note arpeggio, ambience ducked | effects | "relay active" notice, relay visuals |
 | Survey transmitted | five-note chord, ambience ducked | effects | "Survey transmitted" notice |
-| Extended Survey transmitted | slower six-note cue with high shimmer, ambience ducked (needs Game.ts wiring) | effects | "Extended Survey transmitted" notice |
+| Extended Survey transmitted | slower six-note cue with high shimmer, ambience ducked (not yet wired) | effects | "Extended Survey transmitted" notice |
+| Creature call / alarm / step | species recipe, spatialized (not yet wired: BIOME) | creatures | the creature itself, its flee animation |
+| First species / world complete | music swell on the world's scale (not yet wired: BIOME) | music | journal notice |
 | Ambient tones | sparse notes on the world's scale and tonic | music | none needed (decorative, carries no information) |
 | Pause / panel / hidden | mix fades out, context suspended | master | pause menu / panel |
 
 ### TODO
-1. Director wiring (requested): `mode` + `gear` in the audio frame, `touchdown(impact)`, `completeExtended()`.
-2. Footsteps per surface under the player (needs biome/material at the foot position).
-3. Creature calls with BIOME's event names; spatialized panner pool.
-4. Discovery cues and sparse generative music (arrival, first discovery, transmissions).
-5. Switch profiles.ts to `BodyDef.ambience` once ATLAS lands it.
+1. Director wiring at merge: `mode` + `gear` in the audio frame, `touchdown(impact)`, `completeExtended()`; BIOME wires `creature()` / `discovery()`.
+2. Soak 2 on the current build, ≥ 25 min simulated.
+3. Footsteps per surface under the player (needs biome/material at the foot position).
+4. More creature recipes as BIOME adds species (API done).
+5. Sparse generative music: arrival swells (discovery swells done).
+6. `BodyDef.ambience` is read when present (done); remove the local table once ATLAS's field is on integration.
 
 ## Studio: GAUGE (QA, performance, release)
 
