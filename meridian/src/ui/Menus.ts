@@ -135,6 +135,8 @@ export class Menus {
     const sens = $<HTMLInputElement>('set-sens');
     const inv = $<HTMLInputElement>('set-invert');
     const vol = $<HTMLInputElement>('set-volume');
+    const mus = $<HTMLInputElement>('set-music');
+    const fx = $<HTMLInputElement>('set-effects');
     const red = $<HTMLInputElement>('set-reduced');
     const emit = () => {
       this.settings = {
@@ -143,13 +145,15 @@ export class Menus {
         sensitivity: parseFloat(sens.value),
         invertY: inv.checked,
         volume: parseFloat(vol.value),
+        music: parseFloat(mus.value),
+        effects: parseFloat(fx.value),
         reducedMotion: red.checked,
       };
       this.renderSettings();
       this.h.onSettingsChanged({ ...this.settings });
     };
     for (const el of [preset, auto, inv, red]) el.addEventListener('change', emit);
-    for (const el of [sens, vol]) el.addEventListener('input', emit);
+    for (const el of [sens, vol, mus, fx]) el.addEventListener('input', emit);
   }
 
   setSettings(s: Settings): void {
@@ -170,6 +174,10 @@ export class Menus {
     $<HTMLInputElement>('set-invert').checked = s.invertY;
     $<HTMLInputElement>('set-volume').value = String(s.volume);
     $('set-volume-v').textContent = `${Math.round(s.volume * 100)}%`;
+    $<HTMLInputElement>('set-music').value = String(s.music);
+    $('set-music-v').textContent = `${Math.round(s.music * 100)}%`;
+    $<HTMLInputElement>('set-effects').value = String(s.effects);
+    $('set-effects-v').textContent = `${Math.round(s.effects * 100)}%`;
     $<HTMLInputElement>('set-reduced').checked = s.reducedMotion;
   }
 }
