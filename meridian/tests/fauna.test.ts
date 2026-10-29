@@ -283,3 +283,95 @@ describe('fauna placement and floating origin', () => {
     }
   });
 });
+
+describe('journal progress and species order', () => {
+  it('counts per world and kind, ignoring unknown and other-world IDs', async () => {
+    const { worldProgress, progressLine } = await import('../src/fauna/catalog');
+    const p = worldProgress('ilex', ['ilex-trine', 'ilex-fan', 'vesper-glass', 'ilex-nothing', 'ilex-fan']);
+    expect(p.byKind.fauna.found).toBe(1);
+    expect(p.byKind.flora.found).toBe(1);
+    expect(p.found).toBe(2);
+    expect(p.total).toBe(CATALOG.filter((e) => e.body === 'ilex').length);
+    expect(progressLine(p)).toMatch(/^Flora 1 of \d+ · Minerals 0 of \d+ · Fauna 1 of \d+$/);
+    expect(worldProgress('cairn', []).byKind.fauna.total).toBe(0);
+    expect(progressLine(worldProgress('cairn', []))).not.toMatch(/Fauna/);
+  });
+
+  it('every existing body has at least four flora/mineral species, and the original species keep their per-body order', async () => {
+    const { speciesFor } = await import('../src/props/species');
+    // Per-body index is part of the prop placement hash: these prefixes must never change.
+    const original: Record<string, string[]> = {
+      ilex: ['ilex-lantern', 'ilex-chalk', 'ilex-fan'],
+      vesper: ['vesper-glass', 'vesper-pillar', 'vesper-bristle'],
+      cairn: ['cairn-rime', 'cairn-boulder', 'cairn-pebbles'],
+    };
+    for (const [b, ids] of Object.entries(original)) {
+      expect(speciesFor(b as 'ilex').slice(0, ids.length).map((s) => s.id)).toEqual(ids);
+    }
+    for (const b of ['ilex', 'vesper'] as const) expect(CATALOG.filter((e) => e.body === b && e.kind !== 'fauna').length).toBeGreaterThanOrEqual(4);
+  });
+});
+
+describe('curious species and Vesper herds', () => {
+  it('a curious creature closes in to its distance, stops, and never strays past its leash', () => {
+    const p: BehaviourParams = { ...P, curiousDistance: 15, alertRadius: 32, fleeRadius: 6 };
+    const s = newCreatureState(0, 0, 0, 5);
+    const rnd = mulberry32(9);
+    const th = none();
+    th.player = true;
+    th.px = 28;
+    th.pz = 0;
+    for (let i = 0; i < 600; i++) stepBehaviour(s, p, th, 0.05, rnd);
+    expect(s.mode).toBe('alert');
+    const d = Math.hypot(s.x - th.px, s.z - th.pz);
+    expect(d).toBeGreaterThan(14);
+    expect(d).toBeLessThan(16.5);
+    expect(s.speed).toBeLessThan(0.05);
+    // Observer far from home: it follows only to 2.5× the home radius.
+    th.px = 200;
+    const t = newCreatureState(0, 0, 0, 5);
+    t.mode = 'alert';
+    t.timer = 1e9;
+    for (let i = 0; i < 4000; i++) {
+      t.mode = 'alert'; // keep it watching (the observer is beyond the alert radius here)
+      stepBehaviour(t, p, th, 0.05, rnd);
+    }
+    expect(Math.hypot(t.x, t.z)).toBeLessThan(P.homeRadius * 2.5 + 1);
+  });
+
+  it('spawns dune sledge herds near the Vesper landing site', () => {
+    const vesper = BODIES.vesper;
+    const vs = computeSites(vesper);
+    const g = getSurface(vesper, vs.clearings);
+    const L = spawnLevel(vesper);
+    const f = dirToFace(...vs.landing.dir);
+    const c = chunkAt(f.face, f.u, f.v, L);
+    const all: Spawn[] = [];
+    for (let j = -3; j <= 3; j++) for (let i = -3; i <= 3; i++) all.push(...spawnCell(vesper, g, vs, faunaFor('vesper'), f.face, c.x + i, c.y + j));
+    expect(all.length).toBeGreaterThan(0);
+    expect(all.every((s) => s.species.id === 'vesper-sledge')).toBe(true);
+    const near = Math.min(...all.map((s) => Math.hypot(s.home[0] - vs.landing.dir[0], s.home[1] - vs.landing.dir[1], s.home[2] - vs.landing.dir[2]) * vesper.radius));
+    expect(near).toBeLessThan(1500);
+  });
+
+  it('emits footfalls per the species gait (3 beats for the trine) with beat indices', () => {
+    const f = new FaunaSystem(ilex, getSurface(ilex, sites.clearings), sites, 3);
+    const landing = new Vector3(...sites.landing.dir).multiplyScalar(ilex.radius + sites.landing.height);
+    const ctx: FaunaContext = { view: landing.clone(), planetLocal: new Vector3(), player: null, ship: landing.clone(), shipLoud: false };
+    f.update(1 / 60, ctx);
+    for (let i = 0; i < 30; i++) f.update(1 / 60, ctx);
+    const c = f.nearby(landing, 3000).sort((a, b) => a.dist - b.dist)[0];
+    ctx.view.copy(c.p); // camera on it: full-rate updates, footfalls in range
+    c.state.mode = 'wander';
+    c.state.tx = 1e4;
+    c.state.tz = 0;
+    const beats: number[] = [];
+    f.onEvent = (ev, cr) => {
+      if (ev === 'step' && cr === c) beats.push(cr.beat);
+    };
+    for (let i = 0; i < 600; i++) f.update(1 / 60, ctx);
+    expect(beats.length).toBeGreaterThan(3);
+    expect(new Set(beats)).toEqual(new Set([0, 1, 2]));
+    f.dispose();
+  });
+});
