@@ -1,6 +1,8 @@
 import { Color, MeshStandardMaterial, Vector4, type Texture } from 'three';
 import { patchAerial } from '../render/Atmosphere';
-import type { BodyDef, BodyId } from '../world/bodies';
+import type { BodyDef, BodyId, TerrainLook } from '../world/bodies';
+
+export type { TerrainLook };
 
 /** Number of quantized morph variants (materials share one program). */
 export const MORPH_LEVELS = 8;
@@ -24,42 +26,15 @@ export interface TerrainUniforms {
   uLook2: { value: Vector4 };
 }
 
-/**
- * Per-body surface look (data, not code paths): how rock, strata, sediment
- * and km-scale colour variation are blended. New bodies get identity by
- * filling these in; anything left out falls back to DEFAULT_LOOK.
- */
-export interface TerrainLook {
-  /** Roughness of the special material (ice, glass, loam). */
-  specialRough: number;
-  /** 0..1: how much smoother (less bumpy) the special material is. */
-  specialSheen: number;
-  /** Detail bump strength multiplier. */
-  bump: number;
-  /** 0..1 horizontal banding on exposed rock (height-mapped, so cliffs never stretch). */
-  strata: number;
-  /** Strata band spacing in meters. */
-  strataSpacing: number;
-  /** 0..1 strength of km-scale colour variation that breaks tiling. */
-  macro: number;
-  /** Colour of fine sediment collecting in low, flat ground (sRGB hex). */
-  sediment: number;
-  /** 0..1 how much sediment covers basin floors. */
-  sedimentAmount: number;
-  /** 0..1 extra bare rock exposed on the highest ground. */
-  peakRock: number;
-  /** Slope (1 - cos of the incline) where rock starts and fully takes over. */
-  rockSlope: [number, number];
-}
-
+/** Fallback for any `TerrainLook` field a body leaves out. */
 export const DEFAULT_LOOK: TerrainLook = {
   specialRough: 0.8, specialSheen: 0, bump: 1, strata: 0.3, strataSpacing: 9, macro: 0.5,
   sediment: 0x8a7a60, sedimentAmount: 0.35, peakRock: 0.25, rockSlope: [0.16, 0.34],
 };
 
 /**
- * Looks for the current bodies until `BodyDef` carries its own (requested
- * from ATLAS). Keyed data, merged over DEFAULT_LOOK.
+ * Looks for the original bodies until their `BodyDef.look` values reach this
+ * branch (ATLAS holds the same numbers); a body's own `look` always wins.
  */
 const BODY_LOOKS: Partial<Record<BodyId, Partial<TerrainLook>>> = {
   // Chalk ridges: fine pale bedding, ochre silt in the hollows.
@@ -71,8 +46,7 @@ const BODY_LOOKS: Partial<Record<BodyId, Partial<TerrainLook>>> = {
 };
 
 export function terrainLook(def: BodyDef): TerrainLook {
-  const own = (def as BodyDef & { look?: Partial<TerrainLook> }).look;
-  return { ...DEFAULT_LOOK, ...BODY_LOOKS[def.id], ...own };
+  return { ...DEFAULT_LOOK, ...BODY_LOOKS[def.id], ...def.look };
 }
 
 export function makeTerrainUniforms(detail: Texture): TerrainUniforms {
