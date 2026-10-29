@@ -270,9 +270,9 @@ export function createTerrainMaterials(u: TerrainUniforms, aerialSteps: number, 
             float strata = band * uLook.x * rockMask * sAA;
             albedo *= 1.0 + 0.22 * strata;
             // Sediment collects on low, flat ground (and fills the flattest hollows).
-            float flat = 1.0 - smoothstep(0.015, 0.09, slope);
+            float flatW = 1.0 - smoothstep(0.015, 0.09, slope);
             float low = 1.0 - smoothstep(0.08, 0.45, hN + (dL.g - 0.5) * 0.2 + macro * 0.3);
-            float sed = clamp(flat * low * uLook.w * (0.75 + 0.5 * dM.b), 0.0, 1.0) * (1.0 - rockMask) * (1.0 - specMask);
+            float sed = clamp(flatW * low * uLook.w * (0.75 + 0.5 * dM.b), 0.0, 1.0) * (1.0 - rockMask) * (1.0 - specMask);
             albedo = mix(albedo, uSediment * (0.86 + 0.28 * dF.r) * (0.9 + 0.2 * dL.r), sed);
             // Broad tonal drift on everything (sun-bleached vs. shadowed ground at km scale).
             albedo *= 1.0 + macro * 0.35;
