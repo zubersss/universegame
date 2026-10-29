@@ -101,8 +101,6 @@ test('three continuous Ilex → Vesper → Cairn → Ilex routes with landings',
         expect(sky.atmo).toBe(false);
         expect(sky.clouds).toBe(0);
         expect(Math.max(...sky.sky)).toBeLessThan(0.05);
-        await api(page, 'setRenderEvery', 1);
-        await page.waitForTimeout(3000);
       }
       if (round === 0 && to !== start) {
         await api(page, 'setRenderEvery', 1);
