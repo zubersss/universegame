@@ -18,7 +18,7 @@ describe('terrain look data', () => {
   });
 
   it('a body without its own look falls back to the defaults, and its own fields win', () => {
-    const plain = { ...BODIES.ilex, id: 'unknown' as never };
+    const plain = { ...BODIES.ilex, id: 'unknown' as never, look: undefined };
     expect(terrainLook(plain)).toEqual(DEFAULT_LOOK);
     const own = { ...plain, look: { strata: 0.9, sediment: 0x123456 } };
     const look = terrainLook(own);
