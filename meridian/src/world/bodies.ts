@@ -53,6 +53,48 @@ export interface BodyPalette {
   proxyNight: number;
 }
 
+/**
+ * Optional per-body terrain material parameters (read by the terrain material;
+ * pure data here so world definitions never import render code). Absent
+ * fields fall back to the material's defaults.
+ */
+export interface TerrainLook {
+  specialRough: number;
+  specialSheen: number;
+  bump: number;
+  /** Horizontal rock banding 0..1 and its spacing (m). */
+  strata: number;
+  strataSpacing: number;
+  /** Large-scale colour variation 0..1. */
+  macro: number;
+  /** Sediment colour in hollows (sRGB hex) and its amount 0..1. */
+  sediment: number;
+  sedimentAmount: number;
+  /** Bare rock on high ground 0..1. */
+  peakRock: number;
+  /** Slope range [start, end] (as 1 - cos of the slope angle) over which rock replaces ground. */
+  rockSlope: [number, number];
+}
+
+/** Per-body ambience profile for the audio (pure data). */
+export interface AmbienceDef {
+  /** Wind loudness scale, 0 = still air. */
+  wind: number;
+  /** Wind band centre in still air (Hz). */
+  windTone: number;
+  /** Height above the datum (m) where surface wind fades to half. */
+  windAltitude: number;
+  /** Tonal centre of ambient tones and music (Hz). */
+  tonic: number;
+  /** Scale degrees in semitones. */
+  scale: number[];
+  timbre: 'sine' | 'triangle';
+  /** Mean seconds between ambient tones. */
+  toneGap: number;
+  /** Default footstep surface. */
+  ground: 'soil' | 'sand' | 'rock' | 'ice' | 'salt' | 'moss';
+}
+
 export interface BodyDef {
   id: BodyId;
   index: number;
@@ -76,7 +118,11 @@ export interface BodyDef {
    * ending, transmitted with T) or the Extended Survey sent after it.
    */
   survey: 'core' | 'extended';
+  look?: Partial<TerrainLook>;
+  ambience?: AmbienceDef;
 }
+
+const PENTA = [0, 2, 4, 7, 9, 12, 14];
 
 function maxLevelFor(radius: number): number {
   return Math.ceil(Math.log2((2 * radius) / 128));
@@ -122,6 +168,7 @@ export const BODIES: Record<BodyId, BodyDef> = {
     biomeNames: ['Chalk Highlands', 'Teal Grove Lowlands'],
     description: 'A temperate world of chalk ridges and ochre plains, threaded with dark teal groves.',
     survey: 'core',
+    ambience: { wind: 1, windTone: 300, windAltitude: 1500, tonic: 220, scale: PENTA, timbre: 'triangle', toneGap: 16, ground: 'soil' },
   },
   vesper: {
     id: 'vesper',
@@ -156,6 +203,7 @@ export const BODIES: Record<BodyId, BodyDef> = {
     biomeNames: ['Rust Mesa Country', 'Pale Dune Sea'],
     description: 'A dry, dust-hazed world of terraced rust mesas and pale dune seas.',
     survey: 'core',
+    ambience: { wind: 1, windTone: 300, windAltitude: 1200, tonic: 196, scale: PENTA, timbre: 'triangle', toneGap: 16, ground: 'sand' },
   },
   cairn: {
     id: 'cairn',
@@ -180,6 +228,7 @@ export const BODIES: Record<BodyId, BodyDef> = {
     biomeNames: ['Silver Crater Highlands', 'Rime Basins'],
     description: 'An airless moon of overlapping craters, silver rock, and blue-shadowed ice.',
     survey: 'core',
+    ambience: { wind: 0, windTone: 300, windAltitude: 0, tonic: 261.6, scale: PENTA, timbre: 'sine', toneGap: 16, ground: 'rock' },
   },
   orrin: {
     id: 'orrin',
@@ -218,6 +267,7 @@ export const BODIES: Record<BodyId, BodyDef> = {
     biomeNames: ['Basalt Column Highlands', 'Violet Moss Lowlands'],
     description: 'A humid world of violet moss plains below stepped basalt highlands, its valleys full of slow fog.',
     survey: 'extended',
+    ambience: { wind: 1.3, windTone: 220, windAltitude: 2500, tonic: 174.6, scale: [0, 3, 5, 7, 10, 12, 15], timbre: 'triangle', toneGap: 20, ground: 'moss' },
   },
   saro: {
     id: 'saro',
@@ -253,6 +303,7 @@ export const BODIES: Record<BodyId, BodyDef> = {
     biomeNames: ['Rose Salt Flats', 'Brine Pan Shallows'],
     description: 'A bright, thin-aired salt desert: pink crust split into polygons around shallow turquoise brine pans.',
     survey: 'extended',
+    ambience: { wind: 0.7, windTone: 520, windAltitude: 800, tonic: 293.7, scale: [0, 2, 5, 7, 9, 12, 14], timbre: 'sine', toneGap: 22, ground: 'salt' },
   },
 };
 

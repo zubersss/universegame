@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { createHash } from 'node:crypto';
 import { Vector3 } from 'three';
+import { generateChunk } from '../src/terrain/chunkGen';
 import { BODIES, BODY_IDS, CORE_BODY_IDS, EXTENDED_BODY_IDS, SUN_DIR, isBodyId, type BodyId } from '../src/world/bodies';
 import { getSurface, SurfaceGenerator, type SurfaceInfo } from '../src/world/surface';
 import { computeSites, seamDistance, tangentBasis, offsetDir } from '../src/world/sites';
@@ -193,5 +195,39 @@ describe('original worlds are unchanged', () => {
         expect(gen.height(d[0] / l, d[1] / l, d[2] / l)).toBe(g.h[i]);
       });
     }
+  });
+
+  // Hashes of chunk positions, normals, morph deltas, morph normals (xyz), tiling and
+  // material attributes from the three-body release. The concavity byte (morphNormal.w)
+  // is new data for the material and is excluded.
+  const CHUNKS: Record<string, string> = {"ilex:2/5/11/7":"0aecc1fc650304fb074f69d4","ilex:0/0/0/0":"29c348bc057177140fc024f1","ilex:4/10/300/410":"2403a4efc221afedcc8be39e","vesper:2/5/11/7":"2b5f1b0bf76af7fc5d0def56","vesper:0/0/0/0":"34d874c8f09a7824f72decee","vesper:4/10/300/410":"97da3d80cef1e8eff99c5231","cairn:2/5/11/7":"fff920b0ad7dd3a9858431a5","cairn:0/0/0/0":"bc59132a90d0b147e46ac91d","cairn:4/9/300/410":"4de99fd347a4dd8de9dd6d95"};
+  it('keeps chunk geometry and attributes identical (concavity byte aside)', () => {
+    for (const id of ['ilex', 'vesper', 'cairn'] as const) {
+      const def = BODIES[id];
+      const gen = getSurface(def, computeSites(def).clearings);
+      for (const [f, l, x, y] of [[2, 5, 11, 7], [0, 0, 0, 0], [4, def.maxLevel, 300, 410]]) {
+        const c = generateChunk(def, gen, f, l, x, y, 1);
+        const xyz = c.morphNormal.filter((_, i) => i % 4 !== 3);
+        const h = createHash('sha256');
+        for (const a of [c.positions, c.normals, c.morphDelta, xyz, c.tile, c.attrs]) h.update(Buffer.from(a.buffer, a.byteOffset, a.byteLength));
+        expect(h.digest('hex').slice(0, 24), `${id}:${c.key}`).toBe(CHUNKS[`${id}:${c.key}`]);
+      }
+    }
+  });
+
+  it('writes a bounded, signed concavity byte that marks hollows and crests', () => {
+    const def = BODIES.cairn; // craters: clear hollows and rims
+    const gen = getSurface(def, computeSites(def).clearings);
+    const c = generateChunk(def, gen, 2, 6, 20, 30, 1);
+    let pos = 0;
+    let neg = 0;
+    for (let i = 3; i < c.morphNormal.length; i += 4) {
+      const w = c.morphNormal[i];
+      expect(Math.abs(w)).toBeLessThanOrEqual(127);
+      if (w > 4) pos++;
+      if (w < -4) neg++;
+    }
+    expect(pos).toBeGreaterThan(0);
+    expect(neg).toBeGreaterThan(0);
   });
 });
