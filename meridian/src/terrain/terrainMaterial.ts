@@ -122,6 +122,7 @@ uniform float uMorph;
 varying vec3 vTile;
 varying vec4 vSurf;
 varying vec3 vTerrainN;
+varying float vConcave;
 `;
 
 /**
@@ -163,6 +164,7 @@ uniform sampler2D uDetail;
 varying vec3 vTile;
 varying vec4 vSurf;
 varying vec3 vTerrainN;
+varying float vConcave;
 
 vec4 triSample(vec3 p, vec3 w) {
   #ifdef TERRAIN_LOW
@@ -226,7 +228,8 @@ export function createTerrainMaterials(u: TerrainUniforms, aerialSteps: number, 
             `vec3 transformed = position + morphDelta * uMorph;
             vTile = tileCoord + morphDelta * uMorph;
             vSurf = surf;
-            vTerrainN = objectNormal;`,
+            vTerrainN = objectNormal;
+            vConcave = morphNormal.w; // + = hollow, - = crest (0 from generators that don't write it)`,
           );
         shader.fragmentShader = shader.fragmentShader
           .replace('#include <common>', `#include <common>\n${FRAG_PARS}`)
@@ -269,10 +272,13 @@ export function createTerrainMaterials(u: TerrainUniforms, aerialSteps: number, 
             float band = sin(sPh * 6.2831853) * 0.65 + sin(sPh * 15.71 + 1.3) * 0.35;
             float strata = band * uLook.x * rockMask * sAA;
             albedo *= 1.0 + 0.22 * strata;
+            // Wind-scoured crests read a touch paler.
+            albedo *= 1.0 + 0.12 * smoothstep(0.04, 0.4, -vConcave) * (1.0 - specMask);
             // Sediment collects on low, flat ground (and fills the flattest hollows).
             float flatW = 1.0 - smoothstep(0.015, 0.09, slope);
             float low = 1.0 - smoothstep(0.08, 0.45, hN + (dL.g - 0.5) * 0.2 + macro * 0.3);
-            float sed = clamp(flatW * low * uLook.w * (0.75 + 0.5 * dM.b), 0.0, 1.0) * (1.0 - rockMask) * (1.0 - specMask);
+            float hollow = smoothstep(0.04, 0.4, vConcave + (dM.r - 0.5) * 0.08);
+            float sed = clamp(max(flatW * low, hollow * (1.0 - smoothstep(0.06, 0.2, slope))) * uLook.w * (0.75 + 0.5 * dM.b), 0.0, 1.0) * (1.0 - rockMask) * (1.0 - specMask);
             albedo = mix(albedo, uSediment * (0.86 + 0.28 * dF.r) * (0.9 + 0.2 * dL.r), sed);
             // Broad tonal drift on everything (sun-bleached vs. shadowed ground at km scale).
             albedo *= 1.0 + macro * 0.35;
