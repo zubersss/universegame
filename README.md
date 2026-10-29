@@ -7,7 +7,7 @@ Shared browser-game development repository with an opt-in GPT + Claude Code coll
 2. In **Settings → Actions → General → Workflow permissions**, set **Read and write permissions**, and enable **Allow GitHub Actions to create and approve pull requests** if available.
 3. Open **Actions → GPT + Claude Game Builder → Run workflow**; enter a concrete task.
 
-The workflow executes once per manual trigger: GPT plans → Claude Code edits → GPT reviews → Claude Code repairs → GitHub pull request for your review. No auto-merge, no automatic recurring runs. Both model APIs may charge usage separately from ChatGPT/Claude subscriptions. Workflow uses GPT via OpenAI API (default model `gpt-5.2`, configurable in YAML) and Anthropic's Claude Code CLI (account default model). To use a different supported model, edit the workflow.
+The workflow executes once per manual trigger: GPT plans → Claude Code edits → GPT reviews → Claude Code repairs → GitHub pull request for your review. No auto-merge, no automatic recurring runs. Both model APIs may charge usage separately from ChatGPT/Claude subscriptions. Workflow uses GPT via OpenAI API (default model `gpt-6.1-sol`, configurable in YAML) and Anthropic's Claude Code CLI (account default model). To use a different supported model, edit the workflow.
 
 This is *API-based coordination*, not a direct connection to this ChatGPT conversation. Never paste credentials into issues or commit them.
 
