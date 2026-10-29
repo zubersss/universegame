@@ -55,7 +55,7 @@ export class Panel {
     // Tab (open/close) is handled by the game input; digits pick a destination.
     document.addEventListener('keydown', (e) => {
       if (!this.open) return;
-      if (this.tab === 'nav' && /^Digit[1-3]$/.test(e.code)) {
+      if (this.tab === 'nav' && /^Digit[1-9]$/.test(e.code)) {
         const id = BODY_IDS[Number(e.code.slice(5)) - 1];
         if (id) this.setCourse(id);
       }
@@ -99,7 +99,7 @@ export class Panel {
     if (!v) return;
     const intro = document.createElement('div');
     intro.className = 'empty';
-    intro.textContent = `Select a destination (1–3). The marker leads to it; once local it marks the landing site.`;
+    intro.textContent = `Select a destination (1–${BODY_IDS.length}). The marker leads to it; once local it marks the landing site.`;
     const rows = v.rows.map((r, i) => {
       const def = BODIES[r.id];
       const b = document.createElement('button');

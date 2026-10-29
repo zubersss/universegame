@@ -4,13 +4,14 @@
 
 import { hashCombine } from '../core/rng';
 
-export type BodyId = 'ilex' | 'vesper' | 'cairn';
-export const BODY_IDS: readonly BodyId[] = ['ilex', 'vesper', 'cairn'];
+export type BodyId = 'ilex' | 'vesper' | 'cairn' | 'orrin' | 'saro';
+/** Every body, in navigation order (keys 1…N). Append new bodies; never reorder. */
+export const BODY_IDS: readonly BodyId[] = ['ilex', 'vesper', 'cairn', 'orrin', 'saro'];
 
 export const WORLD_SEED = 0x6d657231;
 /** Bump when the surface generator changes in a way that alters geography. */
 export const GENERATOR_VERSION = 1;
-export const SAVE_SCHEMA_VERSION = 1;
+export const SAVE_SCHEMA_VERSION = 2;
 
 /** Direction toward the (infinitely distant) sun, normalized. Fixed for the release. */
 export const SUN_DIR: readonly [number, number, number] = (() => {
@@ -70,6 +71,11 @@ export interface BodyDef {
   palette: BodyPalette;
   biomeNames: [string, string];
   description: string;
+  /**
+   * Which survey the body's relay belongs to: the core survey (the game's
+   * ending, transmitted with T) or the Extended Survey sent after it.
+   */
+  survey: 'core' | 'extended';
 }
 
 function maxLevelFor(radius: number): number {
@@ -115,6 +121,7 @@ export const BODIES: Record<BodyId, BodyDef> = {
     },
     biomeNames: ['Chalk Highlands', 'Teal Grove Lowlands'],
     description: 'A temperate world of chalk ridges and ochre plains, threaded with dark teal groves.',
+    survey: 'core',
   },
   vesper: {
     id: 'vesper',
@@ -148,6 +155,7 @@ export const BODIES: Record<BodyId, BodyDef> = {
     },
     biomeNames: ['Rust Mesa Country', 'Pale Dune Sea'],
     description: 'A dry, dust-hazed world of terraced rust mesas and pale dune seas.',
+    survey: 'core',
   },
   cairn: {
     id: 'cairn',
@@ -171,13 +179,92 @@ export const BODIES: Record<BodyId, BodyDef> = {
     },
     biomeNames: ['Silver Crater Highlands', 'Rime Basins'],
     description: 'An airless moon of overlapping craters, silver rock, and blue-shadowed ice.',
+    survey: 'core',
+  },
+  orrin: {
+    id: 'orrin',
+    index: 3,
+    name: 'Orrin',
+    kind: 'planet',
+    // Moved from the first proposal (-700, 80, 650 km) so the straight
+    // Vesper–Orrin line clears Ilex's safety envelope (by ~47 km).
+    center: [-720000, 240000, 600000],
+    radius: 52000,
+    atmosphereHeight: 9000,
+    gravity: 9,
+    maxHeight: 650,
+    maxLevel: maxLevelFor(52000),
+    seed: seedFor('orrin'),
+    atmosphere: {
+      // Dense and humid: strong, low-lying haze over a lilac-grey sky.
+      rayleigh: [5.0e-5, 7.4e-5, 1.25e-4],
+      rayleighH: 1900,
+      mie: [6.5e-5, 6.5e-5, 7.0e-5],
+      mieH: 520,
+      mieG: 0.74,
+      sunIntensity: 20,
+      airglow: [0.004, 0.0035, 0.007],
+    },
+    clouds: [
+      { altitude: 1900, thickness: 600, coverage: 0.55, scale: 6500, speed: 0.000009, tint: [0.92, 0.9, 0.96], opacity: 0.8, streak: 0.9 },
+      { altitude: 6200, thickness: 350, coverage: 0.35, scale: 11000, speed: 0.000016, tint: [0.96, 0.95, 1.0], opacity: 0.45, streak: 0.95 },
+    ],
+    palette: {
+      a1: 0x3e3c46, a2: 0x2a2930, a3: 0x5c5468, // basalt column highlands: dark basalt, column faces, weathered lilac
+      b1: 0x5e4a78, b2: 0x4a4256, b3: 0x8a6ea4, // violet moss lowlands: moss, damp stone, bright moss
+      special: 0x2f3c40, // wet valley floors
+      proxyNight: 0x0c0a14,
+    },
+    biomeNames: ['Basalt Column Highlands', 'Violet Moss Lowlands'],
+    description: 'A humid world of violet moss plains below stepped basalt highlands, its valleys full of slow fog.',
+    survey: 'extended',
+  },
+  saro: {
+    id: 'saro',
+    index: 4,
+    name: 'Saro',
+    kind: 'planet',
+    center: [300000, -150000, -950000],
+    radius: 38000,
+    atmosphereHeight: 4000,
+    gravity: 5,
+    maxHeight: 200,
+    maxLevel: maxLevelFor(38000),
+    seed: seedFor('saro'),
+    atmosphere: {
+      // Thin and bright: pale sky, little haze.
+      rayleigh: [2.6e-5, 5.2e-5, 9.0e-5],
+      rayleighH: 850,
+      mie: [1.2e-5, 1.2e-5, 1.2e-5],
+      mieH: 400,
+      mieG: 0.8,
+      sunIntensity: 26,
+      airglow: [0.004, 0.002, 0.003],
+    },
+    clouds: [
+      { altitude: 3000, thickness: 200, coverage: 0.12, scale: 9000, speed: 0.000014, tint: [1.0, 0.97, 0.97], opacity: 0.35, streak: 1.0 },
+    ],
+    palette: {
+      a1: 0xe6c3c0, a2: 0xcf9fa0, a3: 0xf3e1da, // rose salt flats: pink crust, ridge faces, bright crust
+      b1: 0x9ec9c0, b2: 0xc89a9c, b3: 0x5cc4bc, // brine pans: damp salt, rims, turquoise
+      special: 0x3fb4ac, // open brine
+      proxyNight: 0x140c10,
+    },
+    biomeNames: ['Rose Salt Flats', 'Brine Pan Shallows'],
+    description: 'A bright, thin-aired salt desert: pink crust split into polygons around shallow turquoise brine pans.',
+    survey: 'extended',
   },
 };
+
+/** Bodies of the core survey (its transmission ends the main expedition). */
+export const CORE_BODY_IDS: readonly BodyId[] = BODY_IDS.filter((id) => BODIES[id].survey === 'core');
+/** Bodies of the Extended Survey (transmitted separately after the core survey). */
+export const EXTENDED_BODY_IDS: readonly BodyId[] = BODY_IDS.filter((id) => BODIES[id].survey === 'extended');
 
 export function bodyById(id: BodyId): BodyDef {
   return BODIES[id];
 }
 
 export function isBodyId(x: unknown): x is BodyId {
-  return x === 'ilex' || x === 'vesper' || x === 'cairn';
+  return typeof x === 'string' && (BODY_IDS as readonly string[]).includes(x);
 }

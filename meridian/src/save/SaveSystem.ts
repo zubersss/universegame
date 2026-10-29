@@ -1,10 +1,12 @@
-import { BODY_IDS, GENERATOR_VERSION, SAVE_SCHEMA_VERSION, WORLD_SEED, isBodyId, type BodyId } from '../world/bodies';
+import { BODY_IDS, CORE_BODY_IDS, EXTENDED_BODY_IDS, GENERATOR_VERSION, SAVE_SCHEMA_VERSION, WORLD_SEED, isBodyId, type BodyId } from '../world/bodies';
 import { sanitizeSettings, type Settings } from '../game/settings';
 import { newExpedition, type ExpeditionState } from '../game/Expedition';
 import type { KvStore } from './db';
 
-// Save format (schema 1): only the seed, versions, poses/velocities, mode,
+// Save format (schema 2): only the seed, versions, poses/velocities, mode,
 // settings and progress. Terrain, meshes and physics are regenerated.
+// Schema 2 adds the Orrin and Saro bodies and the Extended Survey flag; schema
+// 1 records (three bodies) are migrated on load, keeping all progress.
 
 export type V3 = [number, number, number];
 export type V4 = [number, number, number, number];
@@ -64,50 +66,72 @@ function stringList(x: unknown, valid: (s: string) => boolean, max: number): str
   return x as string[];
 }
 
-const SAMPLE_RE = /^(ilex|vesper|cairn):sample:[0-2]$/;
-const OBJECT_RE = /^(ilex|vesper|cairn):[a-z0-9:/_-]+$/;
-const SPECIES_RE = /^(ilex|vesper|cairn)-[a-z]+$/;
+/** Bodies that existed in schema 1 (a schema-1 record may reference only these). */
+const SCHEMA1_BODIES: readonly BodyId[] = ['ilex', 'vesper', 'cairn'];
 
-function validateExpedition(x: unknown): ExpeditionState | string {
+function idPatterns(bodies: readonly BodyId[]) {
+  const alt = bodies.join('|');
+  return {
+    sample: new RegExp(`^(${alt}):sample:[0-2]$`),
+    object: new RegExp(`^(${alt}):[a-z0-9:/_-]+$`),
+    species: new RegExp(`^(${alt})-[a-z]+$`),
+  };
+}
+const PATTERNS = { 1: idPatterns(SCHEMA1_BODIES), 2: idPatterns(BODY_IDS) };
+
+function validateExpedition(x: unknown, schema: 1 | 2): ExpeditionState | string {
   if (!isObj(x)) return 'progress missing';
+  const re = PATTERNS[schema];
+  const bodies = schema === 1 ? SCHEMA1_BODIES : BODY_IDS;
   const inv = x.inventory;
   if (!isObj(inv)) return 'inventory missing';
   const inventory = newExpedition().inventory;
-  for (const b of BODY_IDS) {
+  for (const k of Object.keys(inv)) if (!(bodies as readonly string[]).includes(k)) return `unknown inventory body ${k.slice(0, 20)}`;
+  for (const b of bodies) {
     const n = inv[b];
     if (!Number.isInteger(n) || (n as number) < 0 || (n as number) > 3) return `bad inventory count for ${b}`;
     inventory[b] = n as number;
   }
-  const collected = stringList(x.collected, (s) => SAMPLE_RE.test(s), 9);
+  const collected = stringList(x.collected, (s) => re.sample.test(s), 3 * bodies.length);
   if (!collected) return 'bad collected list';
-  const relays = stringList(x.relays, isBodyId, 3);
+  const relays = stringList(x.relays, (s) => (bodies as readonly string[]).includes(s), bodies.length);
   if (!relays) return 'bad relay list';
-  const species = stringList(x.species, (s) => SPECIES_RE.test(s), 32);
+  const species = stringList(x.species, (s) => re.species.test(s), 64);
   if (!species) return 'bad species list';
-  const scanned = stringList(x.scanned, (s) => OBJECT_RE.test(s), 5000);
+  const scanned = stringList(x.scanned, (s) => re.object.test(s), 8000);
   if (!scanned) return 'bad scan list';
   if (typeof x.transmitted !== 'boolean') return 'bad transmission flag';
+  // Schema 1 had no Extended Survey; it migrates as not transmitted.
+  const extended = schema === 1 ? false : x.extendedTransmitted;
+  if (typeof extended !== 'boolean') return 'bad extended transmission flag';
   // Consistency: carried + spent samples per body never exceed what was collected there.
-  for (const b of BODY_IDS) {
+  for (const b of bodies) {
     const got = collected.filter((s) => s.startsWith(`${b}:`)).length;
     const spent = relays.includes(b) ? 1 : 0;
     if (inventory[b] + spent > got) return `inconsistent samples for ${b}`;
   }
-  if (x.transmitted && relays.length !== 3) return 'transmission without three relays';
-  return { inventory, collected, relays: relays as BodyId[], species, scanned, transmitted: x.transmitted };
+  if (x.transmitted && !CORE_BODY_IDS.every((b) => relays.includes(b))) return 'transmission without three relays';
+  if (extended && !(x.transmitted && EXTENDED_BODY_IDS.every((b) => relays.includes(b)))) return 'extended transmission without its relays';
+  return { inventory, collected, relays: relays as BodyId[], species, scanned, transmitted: x.transmitted, extendedTransmitted: extended };
 }
 
-/** Validate an untrusted save object (types, bounds, versions, finite numbers). */
+/**
+ * Validate an untrusted save object (types, bounds, versions, finite numbers).
+ * Schema-1 records are validated against the three-body rules and returned
+ * migrated to the current schema.
+ */
 export function validateSave(raw: unknown): Result {
   if (!isObj(raw)) return { ok: false, error: 'Not a save object.' };
-  if (raw.schema !== SAVE_SCHEMA_VERSION) return { ok: false, error: `Unsupported save schema ${String(raw.schema)}.` };
+  if (raw.schema !== SAVE_SCHEMA_VERSION && raw.schema !== 1) return { ok: false, error: `Unsupported save schema ${String(raw.schema).slice(0, 20)}.` };
+  const schema = raw.schema as 1 | 2;
+  const bodyOk = schema === 1 ? (x: unknown): x is BodyId => isBodyId(x) && SCHEMA1_BODIES.includes(x) : isBodyId;
   if (raw.generator !== GENERATOR_VERSION) return { ok: false, error: 'Save is from a different world generator version.' };
   if (raw.seed !== WORLD_SEED) return { ok: false, error: 'Save is for a different world seed.' };
   if (typeof raw.savedAt !== 'string' || raw.savedAt.length > 40) return { ok: false, error: 'Bad timestamp.' };
   if (!isNum(raw.playTime) || raw.playTime < 0 || raw.playTime > 1e8) return { ok: false, error: 'Bad play time.' };
   const mode = raw.mode;
   if (mode !== 'PILOTING' && mode !== 'CRUISING' && mode !== 'LANDED' && mode !== 'ON_FOOT') return { ok: false, error: 'Bad mode.' };
-  const body = raw.body === null ? null : isBodyId(raw.body) ? raw.body : undefined;
+  const body = raw.body === null ? null : bodyOk(raw.body) ? raw.body : undefined;
   if (body === undefined) return { ok: false, error: 'Bad body.' };
   if ((mode === 'LANDED' || mode === 'ON_FOOT') && !body) return { ok: false, error: 'Surface mode without a body.' };
   const s = raw.ship;
@@ -140,15 +164,15 @@ export function validateSave(raw: unknown): Result {
   let lastSafeLanding: SaveData['lastSafeLanding'] = null;
   if (raw.lastSafeLanding !== null) {
     const l = raw.lastSafeLanding;
-    if (!isObj(l) || !isBodyId(l.body)) return { ok: false, error: 'Bad last landing.' };
+    if (!isObj(l) || !bodyOk(l.body)) return { ok: false, error: 'Bad last landing.' };
     const pp = vec(l.posPlanet, 3, 200000);
     const lq = unitQuat(l.quat);
     if (!pp || !lq) return { ok: false, error: 'Bad last landing pose.' };
     lastSafeLanding = { body: l.body, posPlanet: pp as V3, quat: lq };
   }
-  const navTarget = raw.navTarget === null ? null : isBodyId(raw.navTarget) ? raw.navTarget : undefined;
+  const navTarget = raw.navTarget === null ? null : bodyOk(raw.navTarget) ? raw.navTarget : undefined;
   if (navTarget === undefined) return { ok: false, error: 'Bad navigation target.' };
-  const exp = validateExpedition(raw.expedition);
+  const exp = validateExpedition(raw.expedition, schema);
   if (typeof exp === 'string') return { ok: false, error: `Bad progress: ${exp}.` };
   return {
     ok: true,
