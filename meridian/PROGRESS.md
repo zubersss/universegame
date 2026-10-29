@@ -75,3 +75,31 @@ In this container the game runs at well under 1 frame per second at 720p, so the
 
 ## Next action
 On a machine with a hardware GPU: run `npm run build && npm run preview`, play at each preset, and record real frame times (the profile spec works there too: `PW_GPU=1 npx playwright test --project=journey e2e/journey/profile.spec.ts` drops the SwiftShader flags; headless Chromium may still need its own GPU flags on some systems).
+
+---
+
+# Studio round (multi-session, see `STUDIO_PROMPT.md`)
+
+Each section below is edited only by its owner. Director: integration log, decisions, interfaces.
+
+## Studio: Director — decisions and integration log
+- 2026-10-29: studio started from `main` @ `0cf5a22`. Integration branch `studio/integration`; role branches `studio/lumen`, `studio/atlas`, `studio/biome`, `studio/echo`, `studio/gauge`.
+- Decision D-001: the core survey (Ilex, Vesper, Cairn relays → transmit) stays unchanged; new worlds form an Extended Survey (ATLAS proposal pending).
+
+## Studio: Interfaces (agreed APIs between roles)
+_None yet._
+
+## Studio: LUMEN (graphics)
+_Not started._
+
+## Studio: ATLAS (worlds and travel)
+_Not started._
+
+## Studio: BIOME (life and discovery)
+_Not started._
+
+## Studio: ECHO (sound)
+_Not started._
+
+## Studio: GAUGE (QA, performance, release)
+_Not started._
