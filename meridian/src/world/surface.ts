@@ -293,6 +293,48 @@ export class SurfaceGenerator {
     return out;
   }
 
+  // ------------------------------------------------------ Voronoi cells
+
+  /** Nearest and second-nearest distances (m) and the nearest cell's hash, from `cells()`. */
+  private vF1 = 0;
+  private vF2 = 0;
+  private vId = 0;
+
+  /**
+   * 3D Voronoi cells of size S (one jittered point per cube cell) evaluated at
+   * a planet point; cut by the sphere they form irregular polygons, continuous
+   * across cube faces. Writes vF1, vF2 and vId.
+   */
+  private cells(px: number, py: number, pz: number, S: number, salt: number): void {
+    const cx = Math.floor(px / S);
+    const cy = Math.floor(py / S);
+    const cz = Math.floor(pz / S);
+    let f1 = Infinity;
+    let f2 = Infinity;
+    let id = 0;
+    for (let dz = -1; dz <= 1; dz++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          const ix = cx + dx;
+          const iy = cy + dy;
+          const iz = cz + dz;
+          const ex = px - (ix + h3(ix, iy, iz, salt + 1)) * S;
+          const ey = py - (iy + h3(ix, iy, iz, salt + 2)) * S;
+          const ez = pz - (iz + h3(ix, iy, iz, salt + 3)) * S;
+          const d = ex * ex + ey * ey + ez * ez;
+          if (d < f1) {
+            f2 = f1;
+            f1 = d;
+            id = h3(ix, iy, iz, salt + 4);
+          } else if (d < f2) f2 = d;
+        }
+      }
+    }
+    this.vF1 = Math.sqrt(f1);
+    this.vF2 = Math.sqrt(f2);
+    this.vId = id;
+  }
+
   // --------------------------------------------------------------- Orrin
 
   private orrin(nx: number, ny: number, nz: number, out: SurfaceInfo): SurfaceInfo {
@@ -307,26 +349,31 @@ export class SurfaceGenerator {
     const qz = pz + 500 * n.w3(px * fw, py * fw, pz * fw);
     const region = fbm(n.c, qx / 15000, qy / 15000, qz / 15000, 3) + 0.4 * n.m(px / 7000, py / 7000, pz / 7000);
     const plateau = sstep(0.08, 0.32, region);
-    // Lowlands: broad mossy swells cut by sinuous valleys (where the channel noise crosses zero).
+    // Lowlands: broad mossy swells cut by wide, flat-floored valleys where fog can pool.
     const swell = fbm(n.h, qx / 2200, qy / 2200, qz / 2200, 3);
     const ch = 1 - Math.abs(n.r(qx / 3800, qy / 3800, qz / 3800));
-    const valley = sstep(0.8, 0.97, ch) * (1 - plateau);
-    const lowH = 110 + 35 * swell - 55 * valley;
-    // Highlands: a few stepped basalt treads with steep risers ...
+    const valley = sstep(0.7, 0.84, ch) * (1 - plateau);
+    const lowH = 125 + 35 * swell * (1 - 0.7 * valley) - 75 * valley;
+    // Highlands: stepped basalt treads with steep risers.
     const m = 0.5 + 0.5 * fbm(n.ms, qx / 5200, qy / 5200, qz / 5200, 2);
     const tv = m * 4;
     const fl = Math.floor(tv);
-    const terr = fl + sstep(0.85, 0.97, tv - fl);
-    const highH = 190 + terr * 90;
-    // ... broken into polygonal columns: 3D cells cut by the sphere, each raised by its own hash.
-    const S = 30;
-    const col = h3(Math.floor(px / S), Math.floor(py / S), Math.floor(pz / S), this.cellSalt) - 0.5;
-    const colW = sstep(0.35, 0.8, plateau);
+    const t = sstep(0.85, 0.97, tv - fl);
+    const highH = 190 + (fl + t) * 90;
+    // Columnar jointing: ~11 m polygonal columns, each at its own height. Low and
+    // walkable on the treads; tall organ-pipe steps on risers and plateau edges.
+    let cols = 0;
+    const colW = sstep(0.3, 0.75, plateau);
+    if (colW > 0) {
+      const cliff = Math.max(4 * t * (1 - t), 4 * plateau * (1 - plateau));
+      this.cells(px, py, pz, 11, this.cellSalt);
+      cols = (this.vId - 0.5) * colW * (1.2 + 10 * cliff);
+    }
     const detail = fbm(n.d, px / 140, py / 140, pz / 140, 3);
-    out.height = lowH + (highH - lowH) * plateau + col * 7 * colW + detail * (2 + 2 * plateau);
+    out.height = lowH + (highH - lowH) * plateau + cols + detail * (2 + 2 * plateau) * (1 - 0.7 * valley);
     out.biome = 1 - plateau;
     out.variation = 0.5 + 0.5 * n.v(px / 2800, py / 2800, pz / 2800);
-    out.special = valley;
+    out.special = sstep(0.55, 0.95, valley);
     out.rockiness = plateau * 0.8;
     return out;
   }
@@ -343,41 +390,28 @@ export class SurfaceGenerator {
     const qx = px + 300 * n.w1(px * fw, py * fw, pz * fw);
     const qy = py + 300 * n.w2(px * fw, py * fw, pz * fw);
     const qz = pz + 300 * n.w3(px * fw, py * fw, pz * fw);
-    // Shallow brine pans in broad basins of an almost flat crust.
+    // Brine pans: shallow basins whose floors are a level brine surface, edged by
+    // a low, walkable crust rim.
     const pan = sstep(0.15, 0.45, fbm(n.ba, qx / 9000, qy / 9000, qz / 9000, 3));
     const flats = 45 + 10 * fbm(n.b, qx / 6000, qy / 6000, qz / 6000, 2);
+    const rim = sstep(0, 0.25, pan) * (1 - sstep(0.25, 0.55, pan));
+    const dry = 1 - pan;
     // Scattered low salt domes.
     const domeW = sstep(0.3, 0.6, n.rg(px / 12000, py / 12000, pz / 12000));
     const dr = ridged(n.r, qx / 2400, qy / 2400, qz / 2400, 2);
     const domes = 70 * dr * dr * dr * domeW;
-    // Polygonal pressure ridges along the edges of 3D Voronoi cells (F2 - F1 small).
-    const S = 260;
-    const cx = Math.floor(px / S);
-    const cy = Math.floor(py / S);
-    const cz = Math.floor(pz / S);
-    let f1 = Infinity;
-    let f2 = Infinity;
-    for (let dz = -1; dz <= 1; dz++) {
-      for (let dy = -1; dy <= 1; dy++) {
-        for (let dx = -1; dx <= 1; dx++) {
-          const ix = cx + dx;
-          const iy = cy + dy;
-          const iz = cz + dz;
-          const ex = px - (ix + h3(ix, iy, iz, this.cellSalt + 1)) * S;
-          const ey = py - (iy + h3(ix, iy, iz, this.cellSalt + 2)) * S;
-          const ez = pz - (iz + h3(ix, iy, iz, this.cellSalt + 3)) * S;
-          const d = ex * ex + ey * ey + ez * ez;
-          if (d < f1) {
-            f2 = f1;
-            f1 = d;
-          } else if (d < f2) f2 = d;
-        }
-      }
+    // Crust on dry ground: large pressure ridges along 260 m cell edges, and ~22 m
+    // salt polygons with raised edges and slightly tilted plates.
+    let crust = 0;
+    if (dry > 0) {
+      this.cells(px, py, pz, 260, this.cellSalt);
+      const ridge = 1 - sstep(0, 22, this.vF2 - this.vF1);
+      this.cells(px, py, pz, 22, this.cellSalt + 16);
+      const edge = 1 - sstep(0, 2.5, this.vF2 - this.vF1);
+      crust = dry * (ridge * 2.2 + edge * 0.35 + (this.vId - 0.5) * 0.25);
     }
-    const edge = Math.sqrt(f2) - Math.sqrt(f1);
-    const ridge = 1 - sstep(0, 22, edge);
     const detail = fbm(n.d, px / 140, py / 140, pz / 140, 2);
-    out.height = flats + domes - 6 * pan + ridge * 2.2 * (1 - pan) + detail * 0.6;
+    out.height = flats + domes - 5 * pan + 1.4 * rim + crust + detail * 0.6 * dry;
     out.biome = pan;
     out.variation = 0.5 + 0.5 * n.v(px / 2400, py / 2400, pz / 2400);
     out.special = sstep(0.55, 0.85, pan);

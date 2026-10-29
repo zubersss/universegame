@@ -177,6 +177,79 @@ describe('new worlds', () => {
   });
 });
 
+describe('new world character', () => {
+  const info: SurfaceInfo = { height: 0, biome: 0, variation: 0, special: 0, rockiness: 0 };
+  /** Deterministic directions where `pick(info)` holds. */
+  function find(gen: SurfaceGenerator, pick: (i: SurfaceInfo) => boolean, count: number): [number, number, number][] {
+    const out: [number, number, number][] = [];
+    let s = 777;
+    const rnd = () => ((s = (Math.imul(s, 1103515245) + 12345) >>> 0) / 4294967296) * 2 - 1;
+    for (let k = 0; k < 200000 && out.length < count; k++) {
+      const x = rnd(), y = rnd(), z = rnd();
+      const l = Math.hypot(x, y, z);
+      if (l < 1e-3) continue;
+      const d: [number, number, number] = [x / l, y / l, z / l];
+      if (pick(gen.baseInfo(d[0], d[1], d[2], info))) out.push(d);
+    }
+    return out;
+  }
+  /** Base heights along a straight 1 m-step transect from d. */
+  function transect(gen: SurfaceGenerator, d: [number, number, number], len: number): number[] {
+    const b = tangentBasis(d);
+    const hs: number[] = [];
+    for (let m = 0; m <= len; m++) {
+      const p = offsetDir(d, b, 1, 0, m, gen.R);
+      hs.push(gen.baseInfo(p[0], p[1], p[2], info).height);
+    }
+    return hs;
+  }
+
+  it('Orrin: basalt highlands break into polygonal columns; lowland valleys have flat, wet floors', () => {
+    const gen = new SurfaceGenerator(BODIES.orrin);
+    const high = find(gen, (i) => i.biome < 0.05, 12);
+    expect(high.length).toBe(12);
+    for (const d of high) {
+      const hs = transect(gen, d, 120);
+      let steps = 0;
+      for (let i = 1; i < hs.length; i++) if (Math.abs(hs[i] - hs[i - 1]) > 0.4) steps++;
+      // Column edges every ~11 m: several distinct steps along 120 m.
+      expect(steps).toBeGreaterThanOrEqual(4);
+    }
+    const floors = find(gen, (i) => i.special > 0.9 && i.biome > 0.95, 12);
+    expect(floors.length).toBe(12);
+    const ranges: number[] = [];
+    for (const d of floors) {
+      const hs = transect(gen, d, 40);
+      ranges.push(Math.max(...hs) - Math.min(...hs));
+      // Walkable on the floor and up the valley wall (< 35° per metre; the walk limit is 45°).
+      for (let i = 1; i < hs.length; i++) expect(Math.abs(hs[i] - hs[i - 1])).toBeLessThan(0.7);
+    }
+    // Most floors are near level over 40 m (fog pools there).
+    ranges.sort((a, b) => a - b);
+    expect(ranges[Math.floor(ranges.length / 2)]).toBeLessThan(1.5);
+  });
+
+  it('Saro: brine pans are level, their rims walkable, and the dry crust is polygonal', () => {
+    const gen = new SurfaceGenerator(BODIES.saro);
+    for (const d of find(gen, (i) => i.biome > 0.99, 12)) {
+      const hs = transect(gen, d, 40);
+      expect(Math.max(...hs) - Math.min(...hs)).toBeLessThan(0.6);
+    }
+    for (const d of find(gen, (i) => i.biome > 0.1 && i.biome < 0.4, 12)) {
+      const hs = transect(gen, d, 20);
+      for (let i = 1; i < hs.length; i++) expect(Math.abs(hs[i] - hs[i - 1])).toBeLessThan(0.35); // < 20° per metre
+    }
+    const dry = find(gen, (i) => i.biome < 0.01 && i.rockiness < 0.01, 12);
+    expect(dry.length).toBe(12);
+    for (const d of dry) {
+      const hs = transect(gen, d, 150);
+      let peaks = 0;
+      for (let i = 1; i < hs.length - 1; i++) if (hs[i] > hs[i - 1] && hs[i] >= hs[i + 1]) peaks++;
+      expect(peaks).toBeGreaterThanOrEqual(3); // raised polygon edges
+    }
+  });
+});
+
 describe('original worlds are unchanged', () => {
   const GOLDEN = {"ilex":{"seed":1817459381,"h":[266.61320609924763,143.97461422060906,92.2422721932703,258.6580145649501,214.0121690159732],"landing":{"dir":[0.23527764119475578,-0.23495304853366245,-0.9431020605101923],"height":184.9331622887605},"relay":[0.23545655281206423,-0.23187386466473153,-0.94381922136779]},"vesper":{"seed":2616949894,"h":[92.45723519472672,283.87653353513065,95.40452012565736,115.10389795908523,120.59150562576492],"landing":{"dir":[-0.3810714436110077,-0.9192481395765141,0.09883022184200745],"height":124.19660340491352},"relay":[-0.38382831050133204,-0.9177896206501627,0.10167615396209354]},"cairn":{"seed":3839947091,"h":[298.75281484329497,212.8654883242649,261.66611077758853,215.46108768042285,216.6087160742163],"landing":{"dir":[0.21432724425155084,-0.8395918824604391,-0.4991485783592618],"height":136.91139443283632},"relay":[0.22364568140180746,-0.8354908133981876,-0.5019339696788372]}} as Record<'ilex' | 'vesper' | 'cairn', { seed: number; h: number[]; landing: { dir: number[]; height: number }; relay: number[] }>;
   const DIRS = [[0.3, 0.8, -0.52], [-0.9, 0.1, 0.42], [0.05, -0.99, 0.1], [0.6, 0.6, 0.53], [-0.2, -0.4, -0.89]];
