@@ -4,7 +4,7 @@ Updated: 2026-10-30 · Session: 1
 B-011 rework (Mars rendered 3D) + B-010 re-export — 2026-10-30. Both use blender/scripts/gen_backdrop3d.py. B-010 exported once (6c6541d); a ground-grid fix since then (square cells: stretched cells streaked the near ground) needs one more Earth export. Mars previews pass (period error 0.18–0.24). Both full exports waiting on heavy_unity.lock. Then B-019, B-023; B-012 after.
 B-012 FX: dust, escape_band, heat_shimmer exported (11828e9). thruster (padding fix) and dig_sparks (bigger, brighter burst) re-export waits for the lock (light, ~250 MB).
 B-019 (D-025 option b) sources committed (660ce64): build_pilgrim.py adds render sets `pilgrim_retracted` (side, gear folded away) and `pilgrim_deployed` (side_legs, today's skids); `pilgrim` unchanged for top. Needs: rebuild pilgrim.blend, render side + side_legs (1536×512, heavy), confirm top re-renders byte-identical.
-Pending jobs, in run order once the lock is free and memory allows: (1) fx/thruster + fx/dig_sparks (~250 MB); (2) B-019 rebuild + side + side_legs (~1.6 GB); (3) Mars + Earth 3D backgrounds (~2.1 GB each). 2026-10-30 ~14:10: free memory 284 MB with UNITY's Editor + PlayMode run → nothing launched.
+Done in LEAD's scheduled window (want_blender.lock, 14:11): (1) fx/thruster + fx/dig_sparks → e450ab9, B-012 complete; (2) B-019 side (retracted) + side_legs (deployed) → f1eb426. Left: (3) Mars + Earth 3D backgrounds, blocked on memory (see Blockers). 2026-10-30 ~14:10: free memory 284 MB with UNITY's Editor + PlayMode run → nothing launched.
 Memory plan: the 3D background renders peak 1.9–2.1 GB; with ~1.87 GB free that leaves no §11.2 headroom, so I run them only when free memory ≥ 3 GB (peak + 1 GB) and no lock is held.
 Note (2026-10-30): the system ran critically low on memory while UNITY's job held the lock; my lock-watcher was stopped by Claude Code. No BLENDER heavy job is running or queued; I will not start the exports until the lock is gone and memory has recovered (≥ 1 GB free, Bible §11.2).
 ## Last completed
@@ -35,6 +35,7 @@ B-011 rework, B-019, B-023 (then B-012, B-013, B-014, B-015, B-017, B-018, B-020
 → UNITY: frame sheets have 4 px gutters *between* frames and no outer margin; `<variant>.json` carries `"gutter": 4`, and clips use `start`/`length` in sheet-frame indices.
 → UNITY: planets/*/glow: the planet disc edge is at radius 200 px of the 512 px sprite, so draw the glow at world width = 2.56 × R behind the disc. planets/*/clouds: RGB white, alpha = cloud cover; surface: equirect, longitude −180° at the left edge, wraps in x.
 ## Blockers
+B-010 re-export + B-011 export blocked by memory → LEAD decision requested. The 3D background renders peak ≈ 1.75 GB at full size (after cutting EEVEE's shadow pool 512 → 128 MB, −220 MB). With Unity closed the machine had 1.97 GB free at 14:2x, so a run would leave ≈ 0.2 GB, not the 1 GB §11.2 asks for. Options: (a) USER_ACTIONS: close other apps (browser, Unity Hub) for a ~5 min window, then I run all six layers back to back (~3 min); (b) LEAD approves one run at reduced headroom (no Unity, no other heavy job, nothing else started); (c) I render each layer in two halves (camera shift) to cut the frame-buffer part of the peak (~0.3 GB), at the cost of a stitch check. I recommend (a). Earth is already exported once (6c6541d); the pending re-export only fixes the near-ground streaks.
 (B-019 conflict resolved: option b approved, D-025.) Previous note kept for the record:
 B-019 blocked by a contract conflict → LEAD decision requested. `side_legs` must keep `side`'s canvas (1536×512) and pivot (CoM, image centre). In `side` the skids already touch the ground 1.8 m (230 px) below the pivot, so the frame bottom minus the 8 px margin leaves 0.14 m (≈ 17 px) under the skids; legs "extended below the skids" can't fit or read at camera size 9, and contract §4 caps ship side sprites at 512 px tall. Options: (a) LEAD raises the side cap to 1536×640 for ships; I re-export `side` and `side_legs` with the same pivot in world terms (UNITY re-reads the manifest pivot); (b) keep 512 and redefine: `side` = gear retracted (skids folded into the pods), `side_legs` = skids deployed (today's look), same canvas and pivot; (c) legs as a separate sprite `ships/pilgrim/legs` drawn under the hull by UNITY. I recommend (b): no contract change, and the swap UNITY wants still has a zero pivot diff. Doing B-012 meanwhile.
 ## Incident (self-reported)
@@ -50,6 +51,6 @@ B-019 blocked by a contract conflict → LEAD decision requested. `side_legs` mu
 - `git pull` is denied by permissions for this session; fine while all roles share one working tree.
 (Settled by D-017: mask via material override; Earth topo+bathy variant.)
 ## For USER_ACTIONS
-(none)
+- (if LEAD picks option a) For ~5 minutes: close the browser and Unity Hub/Editor so BLENDER can render the Earth and Mars backgrounds (needs ≈ 3 GB free RAM).
 ## HeavyJobLock
 none

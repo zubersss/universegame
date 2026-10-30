@@ -423,6 +423,11 @@ def new_scene(P, W, preview, tilt_deg=0.0, target=None):
     scene.eevee.taa_render_samples = 8 if preview else 48
     if hasattr(scene.eevee, "use_shadows"):
         scene.eevee.use_shadows = True
+    if hasattr(scene.eevee, "shadow_pool_size"):
+        # Default pool reserves 512 MB; one sun on static scenery fits a smaller one (8 GB rule).
+        items = [e.identifier for e in scene.eevee.bl_rna.properties["shadow_pool_size"].enum_items]
+        if "128" in items:
+            scene.eevee.shadow_pool_size = "128"
     # No EEVEE overscan: it rescales the projection slightly, so x = 0 and x = W no longer land
     # one period apart (measured: period error 3.1 -> 0.1 without it). MARGIN covers the borders.
     scene.display_settings.display_device = "sRGB"
