@@ -146,7 +146,7 @@ export class FlightPower implements Power {
       },
       this.fill(w),
     );
-    pl.moveFree(dt, this.flight.vel, w.center);
+    pl.moveFree(dt, this.flight.vel, w.center, 0, true);
     // What actually happened: collisions take the blocked part of the velocity.
     this.flight.vel.copy(pl.vel).addScaledVector(pl.up, pl.vVert);
     if (r === 'landed') this.flying = false;

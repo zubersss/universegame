@@ -174,4 +174,54 @@ describe('powered movement through the character controller', () => {
     expect(Math.abs(player.vel.z)).toBeLessThan(1);
     player.dispose();
   });
+
+  it('rides up a hillside steeper than the walking limit instead of stopping dead, never inside it', () => {
+    // Flat ground, and a 60 degree slope rising ahead from z = -30 (normal n).
+    const s60 = Math.sin(Math.PI / 3);
+    const c60 = Math.cos(Math.PI / 3);
+    const n = new Vector3(0, c60, s60);
+    const p0 = new Vector3(0, 0, -30);
+    const fly = (anySlope: boolean) => {
+      const physics = new Physics();
+      const ground = physics.world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(0, -1, 0));
+      physics.world.createCollider(RAPIER.ColliderDesc.cuboid(100, 1, 100).setCollisionGroups(GROUPS.terrain), ground);
+      const up = new Vector3(0, s60, -c60); // up the slope
+      const face = p0.clone().addScaledVector(up, 30);
+      const c = face.addScaledVector(n, -1);
+      const ramp = physics.world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(c.x, c.y, c.z).setRotation({ x: Math.sin(Math.PI / 6), y: 0, z: 0, w: Math.cos(Math.PI / 6) }));
+      physics.world.createCollider(RAPIER.ColliderDesc.cuboid(40, 1, 30).setCollisionGroups(GROUPS.terrain), ramp);
+      physics.refreshQueries();
+      // Skimming the ground (Ctrl held: in contact with it) at 100 m/s.
+      const player = new Player(physics, new Vector3(0, WALK.skin + 0.02 + FOOT_OFFSET, 0), UP, FWD);
+      const center = new Vector3(0, -1e7, 0);
+      const f = new Flight(P);
+      f.start(new Vector3(0, 0, -100), sense());
+      f.vel.set(0, -1, -100);
+      f.speed = 100;
+      let rise = 0;
+      let minGap = Infinity;
+      for (let i = 0; i < 90; i++) {
+        const g = player.groundAt(player.feet(new Vector3()), 0.5, 200);
+        f.step(SIM_DT, { ...NONE, descend: true }, sense({ height: g ? -g.h : 200, grounded: player.grounded }));
+        player.moveFree(SIM_DT, f.vel, center, 0, anySlope);
+        physics.step();
+        // As FlightPower does: the velocity flown is what the controller allowed.
+        f.vel.copy(player.vel).addScaledVector(UP, player.vVert);
+        rise = Math.max(rise, player.pos.y - FOOT_OFFSET);
+        if (player.pos.z < -30) minGap = Math.min(minGap, player.pos.clone().sub(p0).dot(n));
+      }
+      const speed = f.vel.length();
+      player.dispose();
+      return { rise, minGap, speed };
+    };
+    // With the walking limit (45 degrees) a grounded skim meets the slope as a wall: stopped dead.
+    const walkLimit = fly(false);
+    expect(walkLimit.speed).toBeLessThan(5);
+    // Flying, it rides up the slope and keeps going.
+    const free = fly(true);
+    expect(free.rise).toBeGreaterThan(15);
+    expect(free.speed).toBeGreaterThan(20);
+    // The capsule (radius plus skin) never went into the slope.
+    expect(free.minGap).toBeGreaterThan(WALK.radius - 0.05);
+  });
 });
