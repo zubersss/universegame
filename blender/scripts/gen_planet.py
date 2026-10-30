@@ -45,9 +45,83 @@ def _wrap_blend(rgb, cols=4):
 
 
 def surface(entry, ctx, w, h):
+    if entry.get("procedural") == "bands":
+        return bands(entry, w, h)
     px = _load_resampled(os.path.join(ctx["blender_dir"], entry["input"]), w, h)
     rgb = _wrap_blend(px[..., :3].copy())
+    if entry.get("tint"):                              # e.g. grey Mercury basemap -> §9 palette
+        rgb = np.clip(rgb * (np.array(entry["tint"], np.float32) / 255.0), 0, 1)
     return {"color": _u8(np.dstack([rgb, np.ones((h, w), np.float32)]))}
+
+
+def bands(entry, w, h):
+    """Procedural banded atmosphere (giants, Venus cloud tops): colour picked by latitude from
+    `palette` (list of sRGB stops), with latitude warped by periodic turbulence so the bands
+    meander and swirl; optional oval storms `storms` [[lon01, lat01, w01, h01, sRGB], ...].
+    Periodic in x by construction (FFT noise over the full width)."""
+    from meridian.noise import fft_noise
+    rng = np.random.default_rng(int(entry.get("seed", 1)))
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    lat = (yy + 0.5) / h                                               # 0 north .. 1 south
+    warp = float(entry.get("warp", 0.02))
+    turb = (fft_noise(rng, h, w, 40 * w / 2048, 600 * w / 2048, 1.2) * warp
+            + fft_noise(rng, h, w, 6 * w / 2048, 60 * w / 2048, 0.6) * warp * 0.25)
+    # Zonal shear: turbulence is stretched along x, like real jet streams.
+    turb = 0.5 * (turb + np.roll(turb, int(w * 0.01), axis=1))
+    t = np.clip(lat + turb, 0, 1)
+    pal = np.array(entry["palette"], np.float32) / 255.0
+    pos = np.linspace(0, 1, len(pal))
+    rgb = np.stack([np.interp(t, pos, pal[:, c]) for c in range(3)], axis=-1)
+    detail = fft_noise(rng, h, w, 2 * w / 2048, 20 * w / 2048, 0.4)
+    rgb = rgb * (1 + float(entry.get("detail", 0.03)) * detail[..., None])
+    for lon, la, ew, eh, col in entry.get("storms", []):
+        dx = ((xx / w - lon + 0.5) % 1.0 - 0.5) / ew                   # wraps in longitude
+        d = np.sqrt(dx ** 2 + ((lat - la) / eh) ** 2)
+        k = np.clip(1.2 - d, 0, 1) ** 1.5
+        rgb = rgb * (1 - k[..., None]) + (np.array(col, np.float32) / 255.0) * k[..., None]
+    return {"color": _u8(np.dstack([np.clip(rgb, 0, 1), np.ones((h, w), np.float32)]))}
+
+
+# Saturn's rings, radii in units of Saturn's equatorial radius (60,268 km), inner -> outer,
+# with optical-depth-like opacity and brightness. A-ring outer edge 2.269 R matches Bible §3
+# (radius 96 units, rings to 220).
+RINGS = [  # (r_in, r_out, opacity, brightness)
+    (1.239, 1.527, 0.18, 0.62),   # C ring: faint, greyish
+    (1.527, 1.951, 0.90, 1.00),   # B ring: dense, brightest
+    (1.951, 2.027, 0.06, 0.55),   # Cassini Division
+    (2.027, 2.214, 0.62, 0.86),   # A ring (inner part)
+    (2.214, 2.220, 0.04, 0.5),    # Encke Gap
+    (2.220, 2.269, 0.55, 0.84),   # A ring (outer part)
+]
+
+
+def rings(entry, ctx, w, h):
+    """Face-on ring system as a transparent annulus. The A-ring outer edge sits at
+    `ring_outer` px from the centre (default: half the size minus 12 px of margin), so the
+    planet radius R in px = ring_outer / 2.269."""
+    from meridian.noise import fft_noise_1d
+    rng = np.random.default_rng(int(entry.get("seed", 1)))
+    s = w / 1024.0
+    outer = float(entry.get("ring_outer", w / 2 - 12 * s))
+    R = outer / RINGS[-1][1]
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    r = np.hypot(xx + 0.5 - w / 2, yy + 0.5 - h / 2) / R               # in Saturn radii
+    a = np.zeros((h, w), np.float32)
+    b = np.zeros((h, w), np.float32)
+    for r0, r1, op, br in RINGS:
+        edge = 0.004
+        m = np.clip((r - r0) / edge + 0.5, 0, 1) * np.clip((r1 - r) / edge + 0.5, 0, 1)
+        a = np.maximum(a, m * op)
+        b = np.where(m > 0.5, br, b)
+    # Fine ringlets: radial-only 1D noise (rings are circularly symmetric).
+    n = 2048
+    fine = fft_noise_1d(rng, n, 3, 60, 0.6)
+    idx = np.clip((r / RINGS[-1][1] * (n - 1)).astype(int), 0, n - 1)
+    a = np.clip(a * (1 + 0.18 * fine[idx]), 0, 1)
+    b = np.clip(b * (1 + 0.06 * fine[idx]), 0, 1.2)
+    col = np.array(entry.get("ring_color", [214, 196, 160]), np.float32) / 255.0
+    rgb = np.clip(col[None, None, :] * b[..., None], 0, 1)
+    return {"color": _u8(np.dstack([rgb, a]))}
 
 
 def clouds(entry, ctx, w, h):
@@ -85,7 +159,7 @@ def generate(entry, ctx):
     if ctx["preview"]:
         w, h = w // 4, h // 4
     variant = entry["key"].split("/")[2]
-    fn = {"surface": surface, "clouds": clouds, "glow": glow}.get(variant)
+    fn = {"surface": surface, "clouds": clouds, "glow": glow, "rings": rings}.get(variant)
     if fn is None:
         raise ValueError(f"gen_planet: no generator for variant '{variant}'")
     return fn(entry, ctx, w, h)
