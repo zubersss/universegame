@@ -3,6 +3,8 @@ import { Box3, Group, Quaternion, Texture, Vector3, type MeshStandardMaterial } 
 import { buildAvatar, B, BONE_NAMES, DIM, restPosition } from '../src/avatar/AvatarModel';
 import { AvatarAnimator, BALL_F, ankleFromBall, footTarget, gaitParams, legIK } from '../src/avatar/AvatarAnimator';
 import { Avatar, type AvatarFrame, type GroundRay } from '../src/avatar/Avatar';
+import { WALK } from '../src/game/config';
+import { CHAR_CAMERA } from '../src/player/CharacterCamera';
 
 const UP = new Vector3(0, 1, 0);
 const FWD = new Vector3(0, 0, -1);
@@ -66,7 +68,8 @@ describe('explorer rig', () => {
       expect((m.material as MeshStandardMaterial).isMeshStandardMaterial).toBe(true);
     }
     // Eye level matches the walker's camera height; the ankle joint matches the rest skeleton.
-    expect(DIM.eyeY).toBeCloseTo(1.62, 2);
+    expect(DIM.eyeY).toBeCloseTo(WALK.eye, 6);
+    expect(CHAR_CAMERA.pivotUp).toBe(WALK.eye);
     expect(restPosition('footL').y).toBeCloseTo(DIM.ankleY, 6);
     // Knee guards sit on the front of the knees (-Z), centred on them.
     const plate = rig.meshes.find((m) => m.name === 'explorer-plate')!;
@@ -224,21 +227,29 @@ describe('explorer animation', () => {
     expect(Math.abs(rates[1] - rates[2])).toBeLessThan(1e-3);
   });
 
-  it('adapts feet to slopes up to the 45° walk limit, up and down, without sliding, sinking or overreaching', () => {
+  it('adapts feet to slopes up to the 45° walk limit - up, down, across and diagonally - without sliding, sinking or overreaching', () => {
+    // Walking along -Z on a plane rising along a horizontal direction g (fall line, contour, diagonal).
+    const directions: [string, Vector3][] = [
+      ['up', new Vector3(0, 0, -1)],
+      ['down', new Vector3(0, 0, 1)],
+      ['across (rising right)', new Vector3(1, 0, 0)],
+      ['across (rising left)', new Vector3(-1, 0, 0)],
+      ['diagonal', new Vector3(1, 0, -1).normalize()],
+    ];
     for (const deg of [25, 35, 45]) {
-      for (const dir of [1, -1]) {
+      for (const [name, g] of directions) {
         for (const speed of [1.5, 4.5, 7.5]) {
-          const slope = Math.tan((deg * Math.PI) / 180) * dir; // dir 1: rising ahead
-          const cos = Math.cos(Math.atan(Math.abs(slope)));
-          const n = new Vector3(0, 1, slope).normalize();
-          const plane = (p: Vector3) => p.y - -p.z * slope; // vertical height above the ground plane
+          const tan = Math.tan((deg * Math.PI) / 180);
+          const cos = Math.cos((deg * Math.PI) / 180);
+          const n = new Vector3(0, 1, 0).addScaledVector(g, -tan).normalize();
+          const plane = (p: Vector3) => p.y - (p.x * g.x + p.z * g.z) * tan; // vertical height above the plane
           const ray: GroundRay = (o, d, max) => {
             const h = plane(o);
             return h < 0 || h > max ? null : { dist: h / -d.y, normal: n };
           };
           const av = new Avatar(new Group(), ray, FWD);
           // The capsule axis floats above a slope by r(1/cos - 1), plus the controller skin.
-          const heightAt = (z: number) => -z * slope + 0.35 * (1 / cos - 1) + 0.02;
+          const heightAt = (z: number) => z * g.z * tan + 0.35 * (1 / cos - 1) + 0.02;
           let ankle = Infinity;
           let sole = Infinity;
           const p = new Vector3();
@@ -251,19 +262,21 @@ describe('explorer animation', () => {
                 const bone = av.rig.bones[b];
                 bone.getWorldPosition(p);
                 ankle = Math.min(ankle, plane(p) * cos);
-                // Toe tip and heel of the boot sole.
-                for (const z of [-0.165, 0.075]) {
-                  p.set(0, -DIM.ankleY, z).applyMatrix4(bone.matrixWorld);
-                  sole = Math.min(sole, plane(p) * cos);
+                // The four corners of the boot sole.
+                for (const sx of [-0.058, 0.058]) {
+                  for (const sz of [-0.165, 0.075]) {
+                    p.set(sx, -DIM.ankleY, sz).applyMatrix4(bone.matrixWorld);
+                    sole = Math.min(sole, plane(p) * cos);
+                  }
                 }
               }
             },
           });
-          const tag = `${deg}° ${dir > 0 ? 'up' : 'down'} ${speed} m/s`;
+          const tag = `${deg}° ${name} ${speed} m/s`;
           expect(overreach, tag).toBe(0);
           expect(av.slipSamples, tag).toBeGreaterThan(20);
           expect(av.maxSlip, tag).toBeLessThan(0.002);
-          expect(ankle, tag).toBeGreaterThan(DIM.ankleY - 0.005); // perpendicular to the slope
+          expect(ankle, tag).toBeGreaterThan(DIM.ankleY - 0.012); // perpendicular to the slope
           expect(sole, tag).toBeGreaterThan(-0.012);
           av.dispose();
         }

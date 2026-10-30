@@ -74,7 +74,7 @@ describe('character camera (spring arm)', () => {
     for (let i = 0; i < 60; i++) cc.update(dt, cam, new Vector3(), UP, FWD, 0, 0, cast, null, false);
     let prev = cc.arm;
     let worst = 0;
-    // The wall slides from beyond the cast range to well inside it and back out, 1 cm per frame.
+    // The wall slides from beyond the cast range to well inside it, 1 cm per frame.
     for (let i = 0; i < 160; i++) {
       wall = CHAR_CAMERA.arm + CHAR_CAMERA.margin + 0.6 - i * 0.01;
       cc.update(dt, cam, new Vector3(), UP, FWD, 0, 0, cast, null, false);
@@ -84,6 +84,19 @@ describe('character camera (spring arm)', () => {
       prev = cc.arm;
     }
     expect(worst).toBeLessThan(0.0101); // follows the wall at its own 1 cm per frame, no jumps
+    // ... and back out past the edge of the cast range: eased, never a jump.
+    worst = 0;
+    for (let i = 159; i >= -100; i--) {
+      wall = CHAR_CAMERA.arm + CHAR_CAMERA.margin + 0.6 - i * 0.01;
+      cc.update(dt, cam, new Vector3(), UP, FWD, 0, 0, cast, null, false);
+      worst = Math.max(worst, Math.abs(cc.arm - prev));
+      expect(cc.arm).toBeLessThanOrEqual(CHAR_CAMERA.arm + 1e-9);
+      expect(cc.arm).toBeLessThanOrEqual(Math.max(0, wall - CHAR_CAMERA.margin) + 1e-9);
+      prev = cc.arm;
+    }
+    expect(worst).toBeLessThan(0.0101);
+    for (let i = 0; i < 120; i++) cc.update(dt, cam, new Vector3(), UP, FWD, 0, 0, cast, null, false);
+    expect(cc.arm).toBeCloseTo(CHAR_CAMERA.arm, 3);
   });
 
   it('eases (no pop) when the speed pull-back ends', () => {
@@ -201,6 +214,17 @@ describe('player with the explorer and camera on real colliders', () => {
     expect(Math.abs(o.z - player.eye(1, new Vector3()).z)).toBeLessThan(0.05);
     player.dispose();
     expect(scene.children.length).toBe(0);
+  });
+
+  it('looking up swings the arm down onto the ground: the terrain collider stops it', () => {
+    const { player, rig } = world();
+    player.look(0, 1.2);
+    for (let i = 0; i < 60; i++) player.renderView(dt, 1, rig, false);
+    // The arm points down behind the character into the terrain slab (top at y = 0).
+    expect(player.view.pushedFrames).toBeGreaterThan(0);
+    expect(player.view.arm).toBeLessThan(CHAR_CAMERA.arm);
+    expect(rig.camera.position.y).toBeGreaterThan(CHAR_CAMERA.probe + CHAR_CAMERA.margin - 0.05);
+    player.dispose();
   });
 
   it('keeps the third-person view under a ceiling just above the helmet', () => {

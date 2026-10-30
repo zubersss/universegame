@@ -5,6 +5,7 @@
 import { Vector3 } from 'three';
 import type { Game } from '../game/Game';
 import { playerRuntime } from '../player/install';
+import { GROUPS } from '../physics/Physics';
 
 const _v = new Vector3();
 
@@ -31,6 +32,12 @@ export function playerTestHooks(game: Game): PlayerTestApi & Record<string, unkn
       const r = toCam.length();
       const cameraAltitude = r - (game.ref.radius + game.terrainHeightAt(toCam.divideScalar(r)));
       const eye = p.eye(1, _v);
+      // Camera height above the collision geometry (terrain, props, ship) below it, by ray.
+      const up = toCam.copy(cam).sub(game.bodyCenterLocal).normalize();
+      const from = new Vector3().copy(cam).addScaledVector(up, 50);
+      const hit = game.physics.castRay(from.x, from.y, from.z, -up.x, -up.y, -up.z, 100, GROUPS.queryWalk);
+      // The ray starts 50 m above the camera: the ground lies (toi - 50) m below it.
+      const groundGap = hit ? hit.toi - 50 : null;
       return {
         avatar: a
           ? {
@@ -42,6 +49,7 @@ export function playerTestHooks(game: Game): PlayerTestApi & Record<string, unkn
               speed: a.anim.speed,
               maxSlip: a.maxSlip,
               slipSamples: a.slipSamples,
+              slipSamplesMoving: a.slipSamplesMoving,
               settleSteps: a.anim.settleSteps,
               overreach: a.anim.overreach,
               hipsDrop: a.anim.hipsDrop,
@@ -58,6 +66,7 @@ export function playerTestHooks(game: Game): PlayerTestApi & Record<string, unkn
           pushedFrames: v.pushedFrames,
           distanceToEye: cam.distanceTo(eye),
           altitude: cameraAltitude,
+          groundGap,
         },
         ability: rt
           ? { state: rt.abilities.state, power: rt.abilities.power?.id ?? null, body: rt.abilities.bodyId, unlocked: [...rt.abilities.unlocked], lastRefusal: rt.abilities.lastRefusal }
@@ -72,6 +81,7 @@ export function playerTestHooks(game: Game): PlayerTestApi & Record<string, unkn
       if (a) {
         a.maxSlip = 0;
         a.slipSamples = 0;
+        a.slipSamplesMoving = 0;
       }
     },
   };

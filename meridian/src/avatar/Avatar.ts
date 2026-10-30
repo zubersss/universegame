@@ -54,6 +54,8 @@ export class Avatar {
   maxSlip = 0;
   /** Planted-foot samples measured (for tests: proves the metric ran). */
   slipSamples = 0;
+  /** Of those, samples taken while the body was moving (> 0.5 m/s). */
+  slipSamplesMoving = 0;
   private readonly root = new Vector3();
   private readonly prevRoot = new Vector3();
   private hasPrev = false;
@@ -201,9 +203,13 @@ export class Avatar {
     const n = hit.normal;
     const nu = n.dot(up);
     if (nu < 0.5) return null; // wall or steep face: keep the flat target
-    // Slope along the foot's own axis (it may be twisted from the body).
+    // The sole matches the ground by rolling across the foot, then pitching
+    // along it: n = (cos p sin r, cos p cos r, sin p) in the foot's (right,
+    // up, back) frame, so r = atan2(n.right, n.up) and p = asin(n.back).
     _t.copy(this.facing).multiplyScalar(Math.cos(yaw)).addScaledVector(this.right, -Math.sin(yaw));
-    return { h: 0.6 - hit.dist, pitch: Math.atan2(-n.dot(_t), nu) };
+    const pitch = Math.asin(Math.max(-1, Math.min(1, -n.dot(_t) / n.length())));
+    _t.copy(this.right).multiplyScalar(Math.cos(yaw)).addScaledVector(this.facing, Math.sin(yaw));
+    return { h: 0.6 - hit.dist, pitch, roll: Math.atan2(n.dot(_t), nu) };
   }
 
   /** Track how far the ball of a planted foot drifts in the tangent plane. */
@@ -225,6 +231,7 @@ export class Avatar {
       _a.addScaledVector(this.up, -_a.dot(this.up));
       this.maxSlip = Math.max(this.maxSlip, _a.length());
       this.slipSamples++;
+      if (this.anim.speed > 0.5) this.slipSamplesMoving++;
     }
   }
 

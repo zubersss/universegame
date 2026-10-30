@@ -20,8 +20,10 @@ export type AnimState = 'idle' | 'walk' | 'run' | 'jump' | 'fall' | 'land' | 'cl
 export interface FootGround {
   /** Ground height along up relative to the root (m; negative = below the feet point). */
   h: number;
-  /** Ground slope along the facing direction (rad; positive = rising ahead). */
+  /** Ground slope along the foot (rad; positive = rising ahead). */
   pitch: number;
+  /** Ground tilt across the foot (rad; positive = its normal leans to the foot's right, i.e. rising to the left). */
+  roll: number;
 }
 
 /** Ground query: side 0 = left, 1 = right; forward and lateral offsets from the root (m); the foot's yaw (rad, left > 0) for the slope along it. */
@@ -194,6 +196,7 @@ const _qb = new Quaternion();
 const _e = new Euler();
 const _ax = new Vector3(1, 0, 0);
 const _ay = new Vector3(0, 1, 0);
+const _az = new Vector3(0, 0, 1);
 
 const LAND_TIME = (amount: number) => 0.32 + 0.12 * amount;
 /** Settle step: duration (s) and lift (m). */
@@ -252,6 +255,8 @@ interface FootPose {
   /** Ground under the ball of a planted foot. */
   gh: number;
   gp: number;
+  /** Ground roll under the foot (see FootGround.roll). */
+  gr: number;
 }
 
 export class AvatarAnimator {
@@ -378,7 +383,7 @@ export class AvatarAnimator {
       plan.f *= amp;
       plan.y *= amp;
       plan.pitch *= amp;
-      const fp: FootPose = { f: plan.f, x: x0, y: plan.y, pitch: plan.pitch, planted: false, strike: 0, stanceU: 0, yaw: 0, gh: 0, gp: 0 };
+      const fp: FootPose = { f: plan.f, x: x0, y: plan.y, pitch: plan.pitch, planted: false, strike: 0, stanceU: 0, yaw: 0, gh: 0, gp: 0, gr: 0 };
       if (this.air > 0.5) {
         // Airborne: no ground contact; the air pose takes over the legs.
         L.locked = false;
@@ -473,6 +478,7 @@ export class AvatarAnimator {
       if (gq) {
         fp.gh = clampN(gq.h, -0.8, 0.8);
         fp.gp = clampN(gq.pitch, -0.85, 0.85);
+        fp.gr = clampN(gq.roll, -0.85, 0.85);
         slopeSum += fp.gp;
         slopeN++;
       }
@@ -514,18 +520,41 @@ export class AvatarAnimator {
     const place = (ft: FootPose, psi: number, heel: boolean) => {
       const cy = Math.cos(ft.yaw);
       const sy = Math.sin(ft.yaw);
-      // Ball of the foot in the body frame (forward, right); the foot axis points (cy, -sy).
+      // Ball of the foot in the body frame (forward, right); the foot axis
+      // points (cy, -sy) and the foot's right (sy, cy).
       const bf = ft.f + BALL_F * cy;
       const bx = ft.x - BALL_F * sy;
+      // The foot bone turns by yaw, then rolls with the ground across the
+      // foot, then pitches by psi about its (tilted) ball line, so the ball
+      // line stays on the ground and the ankle leans sideways with the roll.
+      const sp = Math.sin(psi);
+      const cp = Math.cos(psi);
+      const sr = Math.sin(ft.gr);
+      const cr = Math.cos(ft.gr);
+      let along: number;
+      let up: number;
+      // Pivot point relative to the ball: (along the foot, to its right, up).
+      let pf = 0;
+      let px = 0;
+      let py = 0;
       if (heel) {
-        // The heel lies on the ground a foot-length back along the slope.
-        const back = BALL_F + HEEL_B;
-        const hb = back * Math.cos(ft.gp);
-        const a = ankleFromHeel(0, ft.gh - back * Math.sin(ft.gp), psi);
-        return { f: bf - hb * cy + a.f * cy, x: bx + hb * sy - a.f * sy, y: a.y };
+        // Pivot on the heel, which lies on the ground a foot-length back along the
+        // sole's ground direction (cos p, sin p sin r, sin p cos r).
+        const len = BALL_F + HEEL_B;
+        const sg = Math.sin(ft.gp);
+        pf = -len * Math.cos(ft.gp);
+        px = -len * sg * sr;
+        py = -len * sg * cr;
+        along = HEEL_B * cp - DIM.ankleY * sp;
+        up = DIM.ankleY * cp + HEEL_B * sp;
+      } else {
+        // Pivot on the ball.
+        along = -(DIM.ankleY * sp + BALL_F * cp);
+        up = DIM.ankleY * cp - BALL_F * sp;
       }
-      const a = ankleFromBall(0, ft.gh, psi);
-      return { f: bf + a.f * cy, x: bx - a.f * sy, y: a.y };
+      const a = pf + along;
+      const lat = px + up * sr;
+      return { f: bf + a * cy + lat * sy, x: bx - a * sy + lat * cy, y: ft.gh + py + up * cr - DIM.ankleY };
     };
     // Lower the hips only where a planted foot cannot be reached otherwise
     // (it may first roll onto its ball, by up to MAX_ROLL). Swing feet are in
@@ -606,6 +635,10 @@ export class AvatarAnimator {
       _qa.multiply(_qb).invert();
       _qb.setFromAxisAngle(_ay, ft.yaw * ground);
       _qa.multiply(_qb);
+      // Roll with the ground about the foot's forward axis (-Z; the sole's normal leans to its right for positive roll) ...
+      _qb.setFromAxisAngle(_az, -ft.gr * ground);
+      _qa.multiply(_qb);
+      // ... then pitch about the tilted ball line.
       _qb.setFromAxisAngle(_ax, ft.pitch);
       _e.setFromQuaternion(_qa.multiply(_qb), 'XYZ');
       set(fb, _e.x * ground, _e.y * ground, _e.z * ground);

@@ -3,7 +3,8 @@ import { bootToTitle, collectErrors, snap, stubPointerLock } from '../helpers';
 
 // P3/P4: the explorer on foot, driven only through player inputs (real key
 // events and the test autopilot's injected keys and mouse look). Exit the
-// ship (down the ladder), walk ~25 m with a jump, toggle the camera, sprint
+// ship (down the ladder), walk 25+ m with a jump, look up (camera onto the
+// ground), toggle the camera, sprint
 // back, board (up the ladder), and exit and board twice more; the
 // character's animation states, planted-foot slip, camera clearance and
 // resources are read through the test API (read-only).
@@ -24,9 +25,22 @@ async function untilPlayer(page: Page, src: string, timeoutMs = 600_000): Promis
   return (await player(page))!;
 }
 
-async function arrive(page: Page, timeoutMs = 600_000): Promise<void> {
-  await page.waitForFunction(() => (window as any).__meridian.autopilotState().phase === 'arrived', null, { timeout: timeoutMs, polling: 300 });
+/**
+ * Wait for the autopilot to arrive; returns the explorer's state read in the
+ * same poll that first saw the arrival (before the body has slowed down).
+ */
+async function arrive(page: Page, timeoutMs = 600_000): Promise<Record<string, any>> {
+  const h = await page.waitForFunction(
+    () => {
+      const m = (window as any).__meridian;
+      return m.autopilotState().phase === 'arrived' ? { ...m.player.state(), snap: m.snapshot() } : null;
+    },
+    null,
+    { timeout: timeoutMs, polling: 100 },
+  );
+  const at = (await h.jsonValue()) as Record<string, any>;
   await api(page, 'autopilot', null);
+  return at;
 }
 
 /** Simulation seconds since the test started (for logs). */
@@ -38,7 +52,8 @@ test('explorer: exit, walk 25 m with a jump, camera toggle, sprint back, board, 
   test.setTimeout(40 * 60 * 1000);
   const errors = collectErrors(page);
   await stubPointerLock(page);
-  await bootToTitle(page, '?preset=low');
+  // system=quiet: Ilex stays the start once Sol becomes the default (LEAD step 10).
+  await bootToTitle(page, '?preset=low&system=quiet');
   await page.click('#btn-new');
   let s = await until(page, 's.state === "playing"');
   expect(s.mode).toBe('LANDED');
@@ -59,13 +74,18 @@ test('explorer: exit, walk 25 m with a jump, camera toggle, sprint back, board, 
   expect(await page.evaluate(() => (window as any).__meridian.game.render.scene.children.length)).toBe(scene0 + 1);
   await page.screenshot({ path: 'evidence/p1-explorer-exit.png', timeout: 180_000 });
 
-  // Walk out ~25 m (ladder side) with a jump on the way; inputs only.
+  // Walk out 25 m or more (ladder side) with a jump on the way; inputs only.
   await api(page, 'setRenderEvery', 8);
   await page.evaluate(() => (window as any).__meridian.player.resetSlip());
-  const out = await api(page, 'dirNearShip', -22, -12);
+  const start = s.player.system as number[];
+  const out = await api(page, 'dirNearShip', -26, -15);
   await api(page, 'autopilot', { kind: 'walk', target: out, arrive: 2, jumpAt: 12 });
   await untilPlayer(page, 'p && p.avatar.state === "walk"', 300_000);
-  await arrive(page);
+  const atArrival = await arrive(page);
+  const end = atArrival.snap.player.system as number[];
+  const distance = Math.hypot(end[0] - start[0], end[1] - start[1], end[2] - start[2]);
+  console.log(`walked ${distance.toFixed(1)} m`);
+  expect(distance).toBeGreaterThanOrEqual(25);
   s = await until(page, 's.player && s.player.grounded && s.player.speed < 0.01', 120_000);
   p = await untilPlayer(page, 'p && p.avatar.state === "idle"', 120_000);
   const walked = p;
@@ -75,21 +95,32 @@ test('explorer: exit, walk 25 m with a jump, camera toggle, sprint back, board, 
   expect(walked.avatar.entries.jump + walked.avatar.entries.fall).toBeGreaterThanOrEqual(1);
   expect(walked.avatar.entries.land).toBeGreaterThanOrEqual(1);
   expect(walked.avatar.entries.idle).toBeGreaterThanOrEqual(1);
-  // Planted feet never slide (terrain-adapted, measured at the ball of the foot).
-  expect(walked.avatar.slipSamples).toBeGreaterThan(20);
+  // Planted feet never slide (terrain-adapted, measured at the ball of the foot), sampled while walking.
+  expect(atArrival.avatar.slipSamplesMoving).toBeGreaterThan(20);
   expect(walked.avatar.maxSlip).toBeLessThan(0.01);
-  // Stopping takes at most one settle step per foot; standing still afterwards: no shuffling.
+  // Stopping takes at most one settle step per foot (counted from the moment
+  // of arrival, while still moving); standing still afterwards: no shuffling.
   let t0 = await simTime(page);
   await until(page, `s.simTime > ${t0 + 1.5}`, 120_000);
   const settled = (await player(page))!.avatar.settleSteps;
-  expect(settled - walked.avatar.settleSteps).toBeLessThanOrEqual(2);
+  expect(settled - atArrival.avatar.settleSteps).toBeLessThanOrEqual(2);
   t0 = await simTime(page);
   await until(page, `s.simTime > ${t0 + 3}`, 120_000);
   expect((await player(page))!.avatar.settleSteps).toBe(settled);
-  // The camera stayed above the ground the whole way (measured after every
-  // placement), and is above it now by an independent measure.
+  // The camera stayed above the ground the whole way (measured after every placement).
   expect(walked.camera.minTerrainClearance).toBeGreaterThanOrEqual(0.4);
-  expect(walked.camera.altitude).toBeGreaterThan(0.4);
+  // Looking up swings the arm down behind the explorer onto the ground: the
+  // camera stops above the colliders (ray) and the analytic surface.
+  await api(page, 'mouse', 0, -600);
+  t0 = await simTime(page);
+  await until(page, `s.simTime > ${t0 + 1}`, 120_000);
+  const lookUp = (await player(page))!;
+  console.log(`looking up: ${JSON.stringify(lookUp.camera)}`);
+  expect(lookUp.camera.groundGap).toBeGreaterThan(0.15);
+  expect(lookUp.camera.altitude).toBeGreaterThan(0.15);
+  // The ground did constrain it: the arm was shortened by the colliders or lifted by the analytic clearance.
+  expect(lookUp.camera.arm < 4.2 || lookUp.camera.minTerrainClearance < 1.6).toBe(true);
+  await api(page, 'mouse', 0, 600);
   await api(page, 'setRenderEvery', 1);
   await page.waitForTimeout(3000);
   await page.screenshot({ path: 'evidence/p1-explorer-out.png', timeout: 180_000 });
@@ -103,12 +134,13 @@ test('explorer: exit, walk 25 m with a jump, camera toggle, sprint back, board, 
 
   // Sprint back to the ladder: the run cycle.
   await api(page, 'setRenderEvery', 8);
+  await page.evaluate(() => (window as any).__meridian.player.resetSlip());
   await api(page, 'autopilot', { kind: 'walk', target: 'ship', arrive: 2.5, sprint: true });
   await untilPlayer(page, 'p && p.avatar.state === "run"', 300_000);
-  await arrive(page);
-  p = (await player(page))!;
+  p = await arrive(page);
   console.log(`sprint back done at t=${(await simTime(page)).toFixed(1)}: ${JSON.stringify(p.avatar)}`);
   expect(p.avatar.entries.run).toBeGreaterThanOrEqual(1);
+  expect(p.avatar.slipSamplesMoving).toBeGreaterThan(20);
   expect(p.avatar.maxSlip).toBeLessThan(0.01);
 
   // Board with a real key event: the explorer climbs the ladder (P4), then leaves the scene.

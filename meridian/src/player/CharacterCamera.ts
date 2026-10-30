@@ -1,4 +1,5 @@
 import { Vector3, type PerspectiveCamera } from 'three';
+import { WALK } from '../game/config';
 
 // Third-person camera for the explorer: a spring arm behind and slightly
 // right of the head, looking exactly along the aim direction (heading and
@@ -20,8 +21,8 @@ export type ArmCast = (from: Vector3, dir: Vector3, maxDist: number, radius: num
 export type TerrainDeficit = (p: Vector3, up: Vector3) => number | null;
 
 export const CHAR_CAMERA = {
-  /** Pivot height above the feet (eye level). */
-  pivotUp: 1.62,
+  /** Pivot height above the feet: the walker's eye level. */
+  pivotUp: WALK.eye,
   /** Extra height of the arm's anchor above the pivot. */
   raise: 0.28,
   /** Shoulder offset to the right (m). */
