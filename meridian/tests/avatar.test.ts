@@ -150,36 +150,51 @@ describe('explorer animation', () => {
     expect(Math.abs(rates[1] - rates[2])).toBeLessThan(1e-3);
   });
 
-  it('adapts feet to a 25° slope without sinking or overreaching', () => {
-    const slope = Math.tan((25 * Math.PI) / 180);
-    const heightAt = (z: number) => -z * slope + 0.35 * (1 / Math.cos(Math.atan(slope)) - 1); // capsule axis floats above a slope
-    const plane = (p: Vector3) => p.y - -p.z * slope; // height of a point above the ground plane
-    const ray: GroundRay = (o, d, max) => {
-      // Ray along -Y against the plane y = -z * slope.
-      const h = plane(o);
-      if (h < 0 || h > max) return null;
-      const n = new Vector3(0, 1, slope).normalize();
-      return { dist: h / -d.y, normal: n };
-    };
-    const av = new Avatar(new Group(), ray, FWD);
-    // Ankles stay above the slope: never lower than the rest ankle height minus 2 cm.
-    let lowest = Infinity;
-    const p = new Vector3();
-    const cos = Math.cos(Math.atan(slope));
-    const { overreach } = walk(av, 3, 5, {
-      heightAt,
-      onFrame: () => {
-        for (const b of [B.footL, B.footR]) {
-          av.rig.bones[b].getWorldPosition(p);
-          lowest = Math.min(lowest, plane(p) * cos);
+  it('adapts feet to slopes up to the 45° walk limit, up and down, without sliding, sinking or overreaching', () => {
+    for (const deg of [25, 35, 45]) {
+      for (const dir of [1, -1]) {
+        for (const speed of [1.5, 4.5, 7.5]) {
+          const slope = Math.tan((deg * Math.PI) / 180) * dir; // dir 1: rising ahead
+          const cos = Math.cos(Math.atan(Math.abs(slope)));
+          const n = new Vector3(0, 1, slope).normalize();
+          const plane = (p: Vector3) => p.y - -p.z * slope; // vertical height above the ground plane
+          const ray: GroundRay = (o, d, max) => {
+            const h = plane(o);
+            return h < 0 || h > max ? null : { dist: h / -d.y, normal: n };
+          };
+          const av = new Avatar(new Group(), ray, FWD);
+          // The capsule axis floats above a slope by r(1/cos - 1), plus the controller skin.
+          const heightAt = (z: number) => -z * slope + 0.35 * (1 / cos - 1) + 0.02;
+          let ankle = Infinity;
+          let sole = Infinity;
+          const p = new Vector3();
+          let frame = 0;
+          const { overreach } = walk(av, speed, 5, {
+            heightAt,
+            onFrame: () => {
+              if (++frame < 60) return;
+              for (const b of [B.footL, B.footR]) {
+                const bone = av.rig.bones[b];
+                bone.getWorldPosition(p);
+                ankle = Math.min(ankle, plane(p) * cos);
+                // Toe tip and heel of the boot sole.
+                for (const z of [-0.165, 0.075]) {
+                  p.set(0, -DIM.ankleY, z).applyMatrix4(bone.matrixWorld);
+                  sole = Math.min(sole, plane(p) * cos);
+                }
+              }
+            },
+          });
+          const tag = `${deg}° ${dir > 0 ? 'up' : 'down'} ${speed} m/s`;
+          expect(overreach, tag).toBe(0);
+          expect(av.slipSamples, tag).toBeGreaterThan(20);
+          expect(av.maxSlip, tag).toBeLessThan(0.002);
+          expect(ankle, tag).toBeGreaterThan(DIM.ankleY - 0.005); // perpendicular to the slope
+          expect(sole, tag).toBeGreaterThan(-0.012);
+          av.dispose();
         }
-      },
-    });
-    expect(overreach).toBe(0);
-    expect(av.slipSamples).toBeGreaterThan(30);
-    expect(av.maxSlip).toBeLessThan(0.015);
-    expect(lowest).toBeGreaterThan(DIM.ankleY - 0.02);
-    av.dispose();
+      }
+    }
   });
 
   it('runs the idle → walk → run → jump → fall → land → idle sequence', () => {

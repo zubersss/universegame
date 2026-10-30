@@ -53,8 +53,8 @@ const REACH = LEG * 0.995;
 const HIP_ABOVE_ANKLE = DIM.hipY - 0.02 - DIM.ankleY;
 /** Lateral offset of each foot from the root (m). */
 const FOOT_X = DIM.hipX + 0.015;
-/** Ball of the foot relative to the ankle (forward, down) when flat (m). */
-export const BALL_F = 0.13;
+/** Ground pivot of the forefoot (ball to toe) ahead of the ankle when flat (m); the boot toe ends 1 cm beyond. */
+export const BALL_F = 0.155;
 const BALL_TO_ANKLE_LEN = Math.hypot(BALL_F, DIM.ankleY);
 const BALL_TO_ANKLE_ANG = Math.atan2(DIM.ankleY, -BALL_F);
 /** Most the heel can lift by rolling over the ball (rad). */
@@ -230,7 +230,7 @@ const MAX_FOOT_YAW = 0.6;
 interface FootPose {
   f: number;
   x: number;
-  /** Ankle height above its rest height (m). */
+  /** Ankle height above its rest height (m); before posing, a swing foot's lift above the ground. */
   y: number;
   /** Foot rotation (rad, toes up > 0). */
   pitch: number;
@@ -438,17 +438,15 @@ export class AvatarAnimator {
       L.cf = fp.f;
       L.cx = fp.x;
       L.cyaw = fp.yaw;
-      // Ground: under the ball for a planted foot, under the ankle otherwise.
-      const gq = inp.ground ? inp.ground(i as 0 | 1, fp.planted ? fp.f + BALL_F : fp.f, fp.x) : null;
+      // Ground under the ball of the foot (along its own axis). Every foot is
+      // posed about that point (see place() in pose()), so a swing foot
+      // touches down exactly where its planted pose begins.
+      const gq = inp.ground ? inp.ground(i as 0 | 1, fp.f + BALL_F * Math.cos(fp.yaw), fp.x - BALL_F * Math.sin(fp.yaw)) : null;
       if (gq) {
-        fp.gh = clampN(gq.h, -0.5, 0.5);
-        fp.gp = clampN(gq.pitch, -0.7, 0.7);
+        fp.gh = clampN(gq.h, -0.8, 0.8);
+        fp.gp = clampN(gq.pitch, -0.85, 0.85);
         slopeSum += fp.gp;
         slopeN++;
-      }
-      if (!fp.planted) {
-        fp.y += fp.gh;
-        fp.pitch += fp.gp;
       }
       out.push(fp);
     }
@@ -540,6 +538,16 @@ export class AvatarAnimator {
       ft.f = a.f;
       ft.x = a.x;
       ft.y = a.y;
+      ft.pitch = psi;
+    }
+    // Swing and settle feet: the same geometry, lifted (y holds the lift so far).
+    for (const ft of feet) {
+      if (ft.planted) continue;
+      const psi = ft.gp + ft.pitch;
+      const a = place(ft, psi, false);
+      ft.f = a.f;
+      ft.x = a.x;
+      ft.y = a.y + ft.y;
       ft.pitch = psi;
     }
     const xr = [feet[0].x - hipXOf(0), feet[1].x - hipXOf(1)];
