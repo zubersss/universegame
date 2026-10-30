@@ -2,7 +2,8 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { Group, Mesh, PerspectiveCamera, Quaternion, Vector3 } from 'three';
 import { AbilityController } from '../src/abilities/AbilityController';
 import { BlinkPower, type PowerWorld } from '../src/abilities/powers';
-import { ABILITIES } from '../src/abilities/catalog';
+import { ABILITIES, bodyPower } from '../src/abilities/catalog';
+import { BODIES, isBodyId } from '../src/world/bodies';
 import { PowerVfx, rushStrength, trailStrength, type VfxFrame } from '../src/abilities/vfx';
 import type { FlightParams } from '../src/abilities/types';
 import { initPhysics, Physics, RAPIER, GROUPS } from '../src/physics/Physics';
@@ -18,6 +19,8 @@ import { CAMERA, SIM_DT, WALK } from '../src/game/config';
 // camera and the effects with the long frame time. The outcome must match
 // 60 fps and the rendered side must stay sane.
 
+/** Each body's own power, as PlayerRuntime gives the controller (a power works only there). */
+const ownPower = (id: string) => (isBodyId(id) ? bodyPower(BODIES[id]) : 'walk');
 const UP = new Vector3(0, 1, 0);
 const FWD = new Vector3(0, 0, -1);
 const CENTER = new Vector3(0, -1e7, 0);
@@ -70,7 +73,7 @@ function play(body: string, power: string, gravity: number, fps: number, seconds
   player.attachVisual(scene);
   const rig = new CameraRig(new PerspectiveCamera(CAMERA.fov, 16 / 9, 0.05, 5000));
   let simTime = 0;
-  const ctl = new AbilityController({ setAbility: () => {}, setWarning: () => {} }, () => 'walk', () => simTime);
+  const ctl = new AbilityController({ setAbility: () => {}, setWarning: () => {} }, ownPower, () => simTime);
   ctl.enter({ body, power: power as never });
   const vfx = new PowerVfx(scene, '#c8b6ff');
   const streakMeshes: Mesh[] = [];

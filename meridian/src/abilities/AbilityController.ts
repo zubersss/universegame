@@ -81,13 +81,18 @@ export class AbilityController {
     private readonly clock: () => number = () => 0,
   ) {}
 
-  /** ON_FOOT entered: the character exists and is placed. Activates exactly the given power (else the body's). */
+  /**
+   * ON_FOOT entered: the character exists and is placed. Activates exactly
+   * the power Game passes, and only on its own body: none when it is absent
+   * or another body's (fail closed; charter J: a power works only on its own
+   * body). Game passes a power only once its destination unlocked it.
+   */
   enter(ctx: AbilityEnterContext): void {
     this.bodyId = ctx.body;
-    this.power = abilityFor(ctx.power !== undefined ? ctx.power : this.powerOf(ctx.body));
+    const id = ctx.power ?? null;
+    this.power = id !== null && id === this.powerOf(ctx.body) ? abilityFor(id) : null;
     const saved = ctx.restored ? this.restore(ctx.restored) : 'walk';
-    // Game passes a power only once its destination unlocked it.
-    if (ctx.power !== undefined && this.power) this.unlocked.add(this.power.id);
+    if (this.power) this.unlocked.add(this.power.id);
     this.runtime = this.power ? createPower(this.power) : null;
     this.state = 'walk';
     this.resumePending = false;

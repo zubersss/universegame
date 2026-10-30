@@ -5,6 +5,7 @@ import { ABILITY_STATES, PRIMITIVES, SPEED_EXIT_MAX, transitionBlocked, type Abi
 import { AbilityController, type AbilityHud } from '../src/abilities/AbilityController';
 import { readAbilitySave, validateAbilityFields } from '../src/abilities/save';
 import { OnFootHost } from '../src/game/onFoot';
+import { BODIES, isBodyId } from '../src/world/bodies';
 import type { AbilitySlot } from '../src/ui/Hud';
 
 function fakeHud() {
@@ -108,10 +109,13 @@ describe('transition rules (charter J)', () => {
   });
 });
 
-describe('ability controller (walk only in M1)', () => {
-  it('walks where there is no power; a built power needs unlocking and shows in the slot once unlocked', () => {
+/** Each body's own power, as PlayerRuntime gives the controller (a power works only there). */
+const ownPower = (id: string) => (isBodyId(id) ? bodyPower(BODIES[id]) : 'walk');
+
+describe('ability controller', () => {
+  it('activates only the power Game passes, and only on its own body: none when absent (fail closed); the slot shows it', () => {
     const hud = fakeHud();
-    const c = new AbilityController(hud, (id) => (id === 'ilex' ? 'walk' : 'redline'));
+    const c = new AbilityController(hud, ownPower);
     c.enter({ body: 'ilex' });
     expect(c.state).toBe('walk');
     expect(c.power).toBeNull();
@@ -119,23 +123,30 @@ describe('ability controller (walk only in M1)', () => {
     expect(hud.calls.at(-1)).toBeNull();
     expect(c.step(1 / 60)).toBe(false);
     c.exit('board');
+    // Mars has Redline, but Game passes it only once unlocked: absent, nothing activates.
     c.enter({ body: 'mars' });
-    expect(c.power?.id).toBe('redline');
-    expect(c.runtime?.primitive).toBe('speed');
-    // Locked: the slot stays hidden and the rules refuse.
+    expect(c.power).toBeNull();
+    expect(c.runtime).toBeNull();
     expect(c.usable).toBe(false);
     expect(hud.calls.at(-1)).toBeNull();
-    expect(c.request('speed', { ...CTX, primitivesHere: ['speed'], unlocked: false })).toBe(false);
-    expect(c.lastRefusal).toMatch(/unlocked/);
-    c.unlock('redline');
+    c.exit('board');
+    // Another body's power is refused here.
+    c.enter({ body: 'moon', power: 'redline' });
+    expect(c.power).toBeNull();
+    expect(c.usable).toBe(false);
+    c.exit('board');
+    // Passed for its own body: unlocked, usable, shown in the slot.
+    c.enter({ body: 'mars', power: 'redline' });
+    expect(c.power?.id).toBe('redline');
+    expect(c.runtime?.primitive).toBe('speed');
+    expect(c.unlocked.has('redline')).toBe(true);
     expect(c.usable).toBe(true);
     expect(hud.calls.at(-1)).toMatchObject({ name: 'Redline' });
-    // Game passing the power means its destination unlocked it.
-    const d = new AbilityController(fakeHud(), () => 'walk');
-    d.enter({ body: 'moon', power: 'lunar-step' });
-    expect(d.usable).toBe(true);
+    // The transition rules still refuse a power that is not unlocked.
+    expect(c.request('speed', { ...CTX, primitivesHere: ['speed'], unlocked: false })).toBe(false);
+    expect(c.lastRefusal).toMatch(/unlocked/);
     // Drift is not built yet: no placeholder (charter B.7).
-    const e = new AbilityController(fakeHud(), () => 'storm-lift');
+    const e = new AbilityController(fakeHud(), ownPower);
     e.enter({ body: 'jupiter', power: 'storm-lift' });
     expect(e.runtime).toBeNull();
     expect(e.usable).toBe(false);
@@ -145,7 +156,7 @@ describe('ability controller (walk only in M1)', () => {
 
   it('pairs with the ON_FOOT host: enter, steps, exit on boarding', () => {
     const hud = fakeHud();
-    const c = new AbilityController(hud, () => 'walk');
+    const c = new AbilityController(hud, ownPower);
     const host = new OnFootHost();
     host.install({ enter: (ctx) => c.enter(ctx), step: (dt) => c.step(dt), exit: (r) => c.exit(r) });
     host.transition('LANDED', 'ON_FOOT', { body: 'cairn' }, 'relocate');
@@ -194,7 +205,7 @@ describe('save module and LEAD hook points (L8/L9)', () => {
   it('activates exactly the power Game passes, restores unlocks, logs state changes with time', () => {
     let t = 0;
     const hud = fakeHud();
-    const c = new AbilityController(hud, () => 'walk', () => t);
+    const c = new AbilityController(hud, ownPower, () => t);
     c.enter({ body: 'mars', power: 'redline', restored: { abilityState: 'speed', unlocked: ['redline'] } });
     expect(c.power?.id).toBe('redline');
     expect([...c.unlocked]).toEqual(['redline']);
@@ -224,7 +235,7 @@ describe('save module and LEAD hook points (L8/L9)', () => {
       ['jupiter', 'storm-lift', 'drift', ['storm-lift'], 'walk'], // drift is not built yet
     ];
     for (const [body, power, saved, unlocked, expected] of cases) {
-      const c = new AbilityController(fakeHud(), () => 'walk');
+      const c = new AbilityController(fakeHud(), ownPower);
       c.enter({ body, power: power as never, restored: { abilityState: saved, unlocked: unlocked as never } });
       expect(c.state, `${body} ${saved}`).toBe(expected);
       expect(c.snapshot().abilityState).toBe(expected); // saving again before the first step keeps it
@@ -232,12 +243,12 @@ describe('save module and LEAD hook points (L8/L9)', () => {
       c.exit('board');
       expect(c.state).toBe('walk');
     }
-    // A power the save does not list as unlocked never resumes (no ctx.power: the body's own, locked).
-    const locked = new AbilityController(fakeHud(), () => 'skyborne-flight');
+    // Without ctx.power nothing activates (Game passes it only once unlocked), so a saved flight never resumes.
+    const locked = new AbilityController(fakeHud(), ownPower);
     locked.enter({ body: 'earth', restored: { abilityState: 'flight', unlocked: [] } });
     expect(locked.state).toBe('walk');
     // Without a world (headless), a resumed power holds the character in place (step returns true).
-    const held = new AbilityController(fakeHud(), () => 'walk');
+    const held = new AbilityController(fakeHud(), ownPower);
     held.enter({ body: 'earth', power: 'skyborne-flight', restored: { abilityState: 'flight', unlocked: ['skyborne-flight'] } });
     expect(held.step(1 / 60, null)).toBe(true);
   });

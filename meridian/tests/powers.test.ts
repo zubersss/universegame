@@ -2,7 +2,8 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { Vector3 } from 'three';
 import { AbilityController, type AbilityHud } from '../src/abilities/AbilityController';
 import type { PowerWorld } from '../src/abilities/powers';
-import { ABILITIES } from '../src/abilities/catalog';
+import { ABILITIES, bodyPower } from '../src/abilities/catalog';
+import { BODIES, isBodyId } from '../src/world/bodies';
 import { SPEED_EXIT_MAX, type BlinkParams, type FlightParams, type SpeedParams } from '../src/abilities/types';
 import { initPhysics, Physics, RAPIER, GROUPS } from '../src/physics/Physics';
 import { Player, FOOT_OFFSET, type WalkInput } from '../src/player/Player';
@@ -10,6 +11,8 @@ import { SIM_DT, WALK } from '../src/game/config';
 import type { AbilitySlot } from '../src/ui/Hud';
 import type { AbilitySave } from '../src/abilities/save';
 
+/** Each body's own power, as PlayerRuntime gives the controller (a power works only there). */
+const ownPower = (id: string) => (isBodyId(id) ? bodyPower(BODIES[id]) : 'walk');
 const UP = new Vector3(0, 1, 0);
 const FWD = new Vector3(0, 0, -1);
 const CENTER = new Vector3(0, -1e7, 0);
@@ -39,7 +42,7 @@ function rig(body: string, power: string, gravity: number, opts: { at?: Vector3;
   const slots: (AbilitySlot | null)[] = [];
   const warnings: (string | null)[] = [];
   const hud: AbilityHud = { setAbility: (s) => slots.push(s), setWarning: (t) => warnings.push(t) };
-  const ctl = new AbilityController(hud, () => 'walk', () => 0);
+  const ctl = new AbilityController(hud, ownPower, () => 0);
   ctl.enter({ body, power: power as never, restored: opts.restored ?? null });
   const heldKeys = new Set<string>();
   const presses = new Set<string>();
@@ -313,7 +316,7 @@ describe('superspeed on a slope', () => {
     physics.refreshQueries();
     // Standing on the ramp 5 m up it (its surface rises tan 20 deg per metre).
     const player = new Player(physics, new Vector3(0, 5 * Math.tan(ang) + FOOT_OFFSET + WALK.skin + 0.05, -5), UP, FWD);
-    const ctl = new AbilityController({ setAbility: () => {}, setWarning: () => {} }, () => 'walk', () => 0);
+    const ctl = new AbilityController({ setAbility: () => {}, setWarning: () => {} }, ownPower, () => 0);
     ctl.enter({ body: 'mars', power: 'redline' });
     const held = new Set(['KeyQ']);
     const idle: WalkInput = { forward: 0, right: 0, sprint: false, jump: false, yaw: 0, pitch: 0 };
@@ -455,7 +458,7 @@ describe('review fixes: placements, controls and the log', () => {
 
   it('an exit after a load rewound the clock is logged at the last step\'s time, so the log stays in time order', () => {
     let t = 1000;
-    const c = new AbilityController({ setAbility: () => {}, setWarning: () => {} }, () => 'walk', () => t);
+    const c = new AbilityController({ setAbility: () => {}, setWarning: () => {} }, ownPower, () => t);
     c.enter({ body: 'earth', power: 'skyborne-flight', restored: { abilityState: 'flight', unlocked: ['skyborne-flight'] } });
     expect(c.state).toBe('flight');
     const physics = new Physics();
