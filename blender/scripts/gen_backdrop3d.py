@@ -1,0 +1,639 @@
+"""Rendered parallax backgrounds (B-010 rework, Bible §9): each layer is a real Blender scene,
+lit by a sun from the upper-right and rendered with EEVEE, called by render.py as a generator.
+
+  layer0 far : painted sky (gen_backdrop.sky_rgb) + a rendered 3D mountain heightfield
+  layer1 mid : rendered forested hills (instanced tree prototypes), valley fog, transparent sky
+  layer2 near: rendered forest edge: full trees, shrubs and grass tufts on a heightfield
+
+Trees are built from scratch: broadleaf = branching skeleton through a Skin modifier (organic
+trunk and limbs) carrying noise-displaced leaf clusters, each cluster tinted by Object Info
+Random; conifer = trunk with stacked drooping, displaced whorls. Self-shadowing gives leaf
+masses internal light and shadow; displacement breaks their edges.
+
+Tiling: every scene repeats with period W along x. The ground mesh spans three periods and
+every instance is placed at x, x - W and x + W, so the camera's [0, W] window is one exact
+period. Haze: aerial perspective in every material (mix toward the haze colour by view depth,
+plus low-lying fog on the mid layer). A volume box would also fill the transparent sky of
+layers 1 and 2, so the haze lives in the shaders instead; the look is the same.
+Deterministic: all randomness comes from the manifest seed.
+"""
+import math
+import os
+import random
+
+import bpy
+import numpy as np
+from mathutils import Vector
+
+import gen_backdrop as GB
+from build_pilgrim import lin
+from meridian import pngio, post
+from meridian.noise import fft_noise
+
+PX_W, PX_H = 2048, 1024
+# Rendered beyond the period on both sides, then cropped: the render's own border columns
+# (filter / screen-space falloff) never reach the tile edge, so the crop is one exact period.
+MARGIN = 32
+
+
+# ---------------------------------------------------------------- presets (Bible §7.1, §9)
+
+PRESETS = {
+    "earth": dict(
+        sun=dict(dir=(-0.75, 0.45, -0.55), strength=4.5, color=(1.0, 0.95, 0.86), angle=1.5),
+        ambient=((0.50, 0.60, 0.76), 0.35),
+        haze=(184, 202, 214),
+        far=dict(W=9000.0, level=0.42, peak=0.82, rock=[(112, 108, 104), (138, 132, 124)], snow=(236, 240, 246),
+                 snowline=0.74, haze=(0.40, 0.00004), tilt=6.0),
+        mid=dict(W=700.0, level=0.42, amp=0.10, ground=[(64, 92, 48), (82, 104, 56)], trees=520, protos=8,
+                 tree_h=(14, 26), conifer=0.6, depth=(20, 140), haze=(0.20, 0.0012), fog=(0.25, 0.22),
+                 tilt=12.0, frame_up=-0.08),
+        near=dict(W=64.0, level=0.28, amp=0.05, ground=[(70, 96, 44), (98, 118, 56), (86, 74, 50)], trees=16,
+                  protos=6, tree_h=(11, 19), conifer=0.45, depth=(3, 14), haze=(0.06, 0.004),
+                  tufts=3800, shrubs=140, tilt=18.0, frame_up=0.12),   # 6000 tufts peaked at 2.2 GB
+        leaf=[(46, 78, 34), (62, 96, 40), (84, 112, 46), (54, 88, 50)],
+        needle=[(30, 58, 38), (40, 70, 44), (52, 80, 46)],
+        bark=(82, 68, 56),
+    ),
+}
+
+
+# ---------------------------------------------------------------- materials
+
+def _haze(mat, haze_rgb, base, per_m, fog=None, front=0.0):
+    """Mix the material's shader toward a flat haze colour: fac = base + per_m * (view depth
+    - front), front = camera distance to the scene's front plane (+ fog that pools below a
+    world height). Keeps alpha (no volume)."""
+    base = base - per_m * front
+    nt = mat.node_tree
+    N, L = nt.nodes, nt.links
+    out = next(n for n in N if n.bl_idname == "ShaderNodeOutputMaterial")
+    src = out.inputs["Surface"].links[0].from_socket
+    cam = N.new("ShaderNodeCameraData")
+    d = N.new("ShaderNodeMath"); d.operation = "MULTIPLY_ADD"
+    d.inputs[1].default_value = per_m
+    d.inputs[2].default_value = base
+    L.new(cam.outputs["View Z Depth"], d.inputs[0])
+    fac = d.outputs[0]
+    if fog:
+        amount, z_top, z_bottom = fog                 # 0 at z_top, `amount` at z_bottom
+        geo = N.new("ShaderNodeNewGeometry")
+        sep = N.new("ShaderNodeSeparateXYZ")
+        L.new(geo.outputs["Position"], sep.inputs[0])
+        mr = N.new("ShaderNodeMapRange")
+        mr.inputs["From Min"].default_value = z_top
+        mr.inputs["From Max"].default_value = z_bottom
+        mr.inputs["To Max"].default_value = amount
+        L.new(sep.outputs["Z"], mr.inputs["Value"])
+        add = N.new("ShaderNodeMath"); add.operation = "ADD"; add.use_clamp = True
+        L.new(fac, add.inputs[0]); L.new(mr.outputs["Result"], add.inputs[1])
+        fac = add.outputs[0]
+    clamp = N.new("ShaderNodeClamp")
+    L.new(fac, clamp.inputs["Value"])
+    em = N.new("ShaderNodeEmission")
+    em.inputs["Color"].default_value = lin(haze_rgb)
+    mix = N.new("ShaderNodeMixShader")
+    L.new(clamp.outputs[0], mix.inputs["Fac"])
+    L.new(src, mix.inputs[1])
+    L.new(em.outputs[0], mix.inputs[2])
+    L.new(mix.outputs[0], out.inputs["Surface"])
+
+
+def _wrapped(nt, vec_socket, W):
+    """(x mod W, y, z): periodic in x with the scene, continuous inside the [0, W) frame."""
+    N, L = nt.nodes, nt.links
+    sep = N.new("ShaderNodeSeparateXYZ")
+    L.new(vec_socket, sep.inputs[0])
+    md = N.new("ShaderNodeMath"); md.operation = "FLOORED_MODULO"; md.inputs[1].default_value = W
+    L.new(sep.outputs["X"], md.inputs[0])
+    cmb = N.new("ShaderNodeCombineXYZ")
+    L.new(md.outputs[0], cmb.inputs["X"])
+    L.new(sep.outputs["Y"], cmb.inputs["Y"])
+    L.new(sep.outputs["Z"], cmb.inputs["Z"])
+    return cmb.outputs[0]
+
+
+def mat_varied(name, cols, rough=0.85, noise_scale=0.0, bump=0.0, W=None, world_noise=False):
+    """Principled with base colour picked per object through a ramp of `cols`, plus optional
+    noise variation and bump. The per-object pick is a white-noise hash of the object's
+    location with x wrapped by W (Object Info Random differs between an instance and its
+    x +/- W copy, which would break tiling). world_noise samples the noise at the wrapped
+    world position (for ground spanning several periods); otherwise object space."""
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    N, L = nt.nodes, nt.links
+    pr = N["Principled BSDF"]
+    pr.inputs["Roughness"].default_value = rough
+    info = N.new("ShaderNodeObjectInfo")
+    wn = N.new("ShaderNodeTexWhiteNoise")
+    wn.noise_dimensions = "3D"
+    L.new(_wrapped(nt, info.outputs["Location"], W) if W else info.outputs["Location"], wn.inputs["Vector"])
+    ramp = N.new("ShaderNodeValToRGB")
+    cr = ramp.color_ramp
+    cr.interpolation = "CONSTANT" if len(cols) > 2 else "LINEAR"
+    els = cr.elements
+    els[0].position, els[0].color = 0.0, lin(cols[0])
+    els[1].position, els[1].color = 1.0, lin(cols[-1])
+    for i, c in enumerate(cols[1:-1], start=1):     # new() returns the element; set it directly
+        els.new(i / len(cols)).color = lin(c)
+    if len(cols) > 2:                                # CONSTANT: last band starts at its slot
+        els[len(els) - 1].position = (len(cols) - 1) / len(cols)
+    L.new(wn.outputs["Value"], ramp.inputs["Fac"])
+    col = ramp.outputs["Color"]
+    if noise_scale:
+        nz = N.new("ShaderNodeTexNoise")
+        nz.inputs["Scale"].default_value = noise_scale
+        nz.inputs["Detail"].default_value = 6.0
+        if world_noise:
+            geo = N.new("ShaderNodeNewGeometry")
+            L.new(_wrapped(nt, geo.outputs["Position"], W), nz.inputs["Vector"])
+        else:
+            tc = N.new("ShaderNodeTexCoord")
+            L.new(tc.outputs["Object"], nz.inputs["Vector"])
+        mr = N.new("ShaderNodeMapRange")
+        mr.inputs["From Min"].default_value = 0.3
+        mr.inputs["From Max"].default_value = 0.7
+        mr.inputs["To Min"].default_value = 0.75
+        mr.inputs["To Max"].default_value = 1.2
+        L.new(nz.outputs["Fac"], mr.inputs["Value"])
+        mul = N.new("ShaderNodeMix"); mul.data_type = "RGBA"; mul.blend_type = "MULTIPLY"
+        mul.inputs[0].default_value = 1.0
+        L.new(col, mul.inputs[6])
+        cm = N.new("ShaderNodeCombineColor")
+        for k in range(3):
+            L.new(mr.outputs["Result"], cm.inputs[k])
+        L.new(cm.outputs[0], mul.inputs[7])
+        col = mul.outputs[2]
+        if bump:
+            b = N.new("ShaderNodeBump")
+            b.inputs["Strength"].default_value = bump
+            L.new(nz.outputs["Fac"], b.inputs["Height"])
+            L.new(b.outputs["Normal"], pr.inputs["Normal"])
+    L.new(col, pr.inputs["Base Color"])
+    return m
+
+
+# ---------------------------------------------------------------- geometry helpers
+
+def mesh_obj(name, verts, faces, coll, mat=None, smooth=True):
+    me = bpy.data.meshes.new(name)
+    me.from_pydata(verts, [], faces)
+    me.update()
+    if smooth:
+        for p in me.polygons:
+            p.use_smooth = True
+    ob = bpy.data.objects.new(name, me)
+    coll.objects.link(ob)
+    if mat:
+        me.materials.append(mat)
+    return ob
+
+
+def apply_modifiers(ob):
+    dg = bpy.context.evaluated_depsgraph_get()
+    ev = ob.evaluated_get(dg)
+    me = bpy.data.meshes.new_from_object(ev)
+    old = ob.data
+    ob.modifiers.clear()
+    ob.data = me
+    bpy.data.meshes.remove(old)
+
+
+def _bake_mesh(ob, tex_scale, strength, seed):
+    """Apply a noise Displace to a temporary object in the scene collection (excluded
+    collections are not evaluated) and return just the mesh, with one empty material slot."""
+    tex = bpy.data.textures.new(ob.name + "_tex", "CLOUDS")
+    tex.noise_scale = tex_scale
+    tex.noise_depth = 3
+    mod = ob.modifiers.new("disp", "DISPLACE")
+    mod.texture = tex
+    mod.strength = strength
+    mod.mid_level = 0.5
+    mod.texture_coords = "GLOBAL"
+    ob.location = (seed * 7.31, seed * 3.7, 0)      # different noise sample per variant
+    bpy.context.view_layer.update()
+    apply_modifiers(ob)
+    me = ob.data
+    for p in me.polygons:
+        p.use_smooth = True
+    me.materials.append(None)
+    bpy.data.objects.remove(ob)
+    return me
+
+
+def blob_mesh(name, coll, seed, subdiv=3, strength=0.45, scale=0.9):
+    """A leaf-cluster / shrub mesh: icosphere with displacement applied (broken edges)."""
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=subdiv, radius=1.0)
+    ob = bpy.context.active_object
+    ob.name = name
+    return _bake_mesh(ob, scale, strength, seed)
+
+
+def skin_tree_skeleton(rnd, h):
+    """Broadleaf skeleton: trunk with a slight curve, 4-6 limbs with 2-3 segments each.
+    Returns (verts, edges, radii, tips)."""
+    verts, edges, radii = [(0.0, 0.0, 0.0)], [], [0.045 * h]
+    lean = rnd.uniform(-0.06, 0.06)
+    trunk_h = h * rnd.uniform(0.38, 0.5)
+    for i in range(1, 4):
+        t = i / 3
+        verts.append((lean * h * t * t, 0.0, trunk_h * t))
+        edges.append((i - 1, i))
+        radii.append(0.045 * h * (1 - 0.35 * t))
+    top = len(verts) - 1
+    tips = []
+    for b in range(rnd.randint(4, 6)):
+        ang = rnd.uniform(0, 2 * math.pi)
+        up = rnd.uniform(0.35, 0.8)
+        prev, p = top, Vector(verts[top])
+        r = radii[top] * 0.7
+        seg = h * rnd.uniform(0.13, 0.2)
+        for s in range(rnd.randint(2, 3)):
+            d = Vector((math.cos(ang), math.sin(ang) * 0.6, up + 0.2 * s)).normalized()
+            p = p + d * seg
+            verts.append(tuple(p))
+            edges.append((prev, len(verts) - 1))
+            r *= 0.62
+            radii.append(max(r, 0.01 * h))
+            prev = len(verts) - 1
+            ang += rnd.uniform(-0.4, 0.4)
+        tips.append((Vector(verts[prev]), Vector(verts[top])))
+    return verts, edges, radii, tips
+
+
+def build_broadleaf(coll, rnd, h, bark, leaf, blobs):
+    verts, edges, radii, tips = skin_tree_skeleton(rnd, h)
+    me = bpy.data.meshes.new("trunk")
+    me.from_pydata(verts, edges, [])
+    ob = bpy.data.objects.new("trunk", me)
+    coll.objects.link(ob)
+    skin = ob.modifiers.new("skin", "SKIN")
+    for sv, r in zip(me.skin_vertices[0].data, radii):
+        sv.radius = (r, r)
+    ob.modifiers.new("sub", "SUBSURF").levels = 1
+    me.materials.append(bark)
+    # Leaf clusters along each limb's outer half and around the crown.
+    for tip, base in tips:
+        for k in range(rnd.randint(7, 10)):
+            t = rnd.uniform(0.4, 1.1)
+            c = base.lerp(tip, t) + Vector((rnd.uniform(-1, 1), rnd.uniform(-1, 1), rnd.uniform(-0.5, 0.9))) * h * 0.08
+            cl = bpy.data.objects.new("leaf", blobs[rnd.randrange(len(blobs))])
+            coll.objects.link(cl)
+            s = h * rnd.uniform(0.045, 0.08)
+            cl.scale = (s * rnd.uniform(1.0, 1.4), s * rnd.uniform(0.9, 1.2), s * rnd.uniform(0.75, 1.0))
+            cl.rotation_euler = (rnd.uniform(0, 6.3), rnd.uniform(0, 6.3), rnd.uniform(0, 6.3))
+            cl.location = c
+            cl.material_slots[0].link = "OBJECT"
+            cl.material_slots[0].material = leaf
+
+
+def build_conifer(coll, rnd, h, bark, needle, whorls):
+    trunk_r = 0.025 * h
+    bpy.ops.mesh.primitive_cylinder_add(vertices=10, radius=trunk_r, depth=h * 0.95, location=(0, 0, h * 0.475))
+    tr = bpy.context.active_object
+    for c in list(tr.users_collection):
+        c.objects.unlink(tr)
+    coll.objects.link(tr)
+    tr.data.materials.append(bark)
+    n = rnd.randint(9, 13)
+    base_z = h * rnd.uniform(0.12, 0.2)
+    for i in range(n):
+        t = i / (n - 1)
+        z = base_z + (h - base_z) * t ** 0.95
+        r = h * 0.22 * (1 - t) ** 0.9 + h * 0.02
+        w = bpy.data.objects.new("whorl", whorls[rnd.randrange(len(whorls))])
+        coll.objects.link(w)
+        w.scale = (r, r * rnd.uniform(0.85, 1.0), h * 0.12 * (0.6 + 0.4 * (1 - t)))
+        w.rotation_euler = (rnd.uniform(-0.08, 0.08), rnd.uniform(-0.08, 0.08), rnd.uniform(0, 6.3))
+        w.location = (0, 0, z)
+        w.material_slots[0].link = "OBJECT"
+        w.material_slots[0].material = needle
+
+
+def whorl_mesh(name, coll, seed):
+    """A drooping skirt of branches: a cone (apex up, unit radius/height) displaced by noise."""
+    bpy.ops.mesh.primitive_cone_add(vertices=96, radius1=1.0, radius2=0.08, depth=1.0, end_fill_type="NOTHING")
+    ob = bpy.context.active_object
+    ob.name = name
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.subdivide(number_cuts=8)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    me = _bake_mesh(ob, 0.09, 0.2, seed + 11)
+    rnd = random.Random(seed)
+    phases = [rnd.uniform(0, 6.3) for _ in range(3)]
+    for v in me.vertices:
+        rr = math.hypot(v.co.x, v.co.y)
+        a = math.atan2(v.co.y, v.co.x)
+        # Ragged rim: branch tips stick out at irregular angles, more toward the skirt edge.
+        spikes = (0.5 * math.sin(23 * a + phases[0]) + 0.3 * math.sin(37 * a + phases[1])
+                  + 0.2 * math.sin(61 * a + phases[2]))
+        k = 1 + 0.22 * spikes * rr ** 2
+        v.co.x *= k
+        v.co.y *= k
+        v.co.z -= 0.25 * rr * rr + 0.06 * max(spikes, 0) * rr   # droop, tips sag a bit more
+    return me
+
+
+def tuft_mesh(name, coll, rnd):
+    """A grass tuft: 14 curved, tapered blades (unit height)."""
+    verts, faces = [], []
+    for b in range(14):
+        a = rnd.uniform(0, 2 * math.pi)
+        lean = rnd.uniform(0.15, 0.55)
+        hgt = rnd.uniform(0.6, 1.0)
+        w = 0.035
+        dx, dy = math.cos(a), math.sin(a)
+        base = len(verts)
+        for s in range(4):
+            t = s / 3
+            cx, cy = dx * lean * t * t * hgt, dy * lean * t * t * hgt
+            ww = w * (1 - t) + 0.004
+            verts += [(cx - dy * ww, cy + dx * ww, hgt * t), (cx + dy * ww, cy - dx * ww, hgt * t)]
+        for s in range(3):
+            i = base + 2 * s
+            faces.append((i, i + 1, i + 3, i + 2))
+    me = bpy.data.meshes.new(name)
+    me.from_pydata(verts, [], faces)
+    me.update()
+    return me
+
+
+def heightfield(name, coll, W, depth_m, nx, ny, zfun, mat, y0=0.0):
+    """Ground over x in [-W, 2W] (three periods), y in [y0, depth_m]; zfun(ix, iy) on the
+    one-period grid (periodic in ix)."""
+    xs = np.linspace(-W, 2 * W, 3 * nx + 1)
+    ys = np.linspace(y0, depth_m, ny + 1)
+    verts = []
+    for j, y in enumerate(ys):
+        for i, x in enumerate(xs):
+            verts.append((float(x), float(y), float(zfun(i % nx, j))))
+    row = len(xs)
+    faces = [(j * row + i, j * row + i + 1, (j + 1) * row + i + 1, (j + 1) * row + i)
+             for j in range(ny) for i in range(len(xs) - 1)]
+    return mesh_obj(name, verts, faces, coll, mat)
+
+
+def instance(coll_target, proto, loc, scale, rotz, W):
+    for dx in (-W, 0.0, W):
+        e = bpy.data.objects.new("inst", None)
+        e.instance_type = "COLLECTION"
+        e.instance_collection = proto
+        e.location = (loc[0] + dx, loc[1], loc[2])
+        e.scale = (scale, scale, scale)
+        e.rotation_euler = (0, 0, rotz)
+        coll_target.objects.link(e)
+
+
+# ---------------------------------------------------------------- scene / render
+
+def new_scene(P, W, preview, tilt_deg=0.0, target=None):
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    scene = bpy.context.scene
+    r = scene.render
+    items = [e.identifier for e in bpy.types.RenderSettings.bl_rna.properties["engine"].enum_items]
+    r.engine = "BLENDER_EEVEE_NEXT" if "BLENDER_EEVEE_NEXT" in items else "BLENDER_EEVEE"
+    r.resolution_x, r.resolution_y = PX_W + 2 * MARGIN, PX_H
+    r.resolution_percentage = 25 if preview else 100
+    r.film_transparent = True
+    r.dither_intensity = 0.0
+    r.image_settings.file_format = "PNG"
+    r.image_settings.color_mode = "RGBA"
+    scene.eevee.taa_render_samples = 8 if preview else 48
+    if hasattr(scene.eevee, "use_shadows"):
+        scene.eevee.use_shadows = True
+    # No EEVEE overscan: it rescales the projection slightly, so x = 0 and x = W no longer land
+    # one period apart (measured: period error 3.1 -> 0.1 without it). MARGIN covers the borders.
+    scene.display_settings.display_device = "sRGB"
+    scene.view_settings.view_transform = "Standard"
+    scene.view_settings.look = "None"
+    world = bpy.data.worlds.new("w")
+    if world.node_tree is None:
+        world.use_nodes = True
+    bg = world.node_tree.nodes["Background"]
+    col, s = P["ambient"]
+    bg.inputs["Color"].default_value = (*col, 1.0)
+    bg.inputs["Strength"].default_value = s
+    scene.world = world
+    sd = bpy.data.lights.new("sun", "SUN")
+    sd.energy = P["sun"]["strength"]
+    sd.color = P["sun"]["color"]
+    sd.angle = math.radians(P["sun"]["angle"])
+    sun = bpy.data.objects.new("sun", sd)
+    scene.collection.objects.link(sun)
+    sun.rotation_euler = Vector(P["sun"]["dir"]).to_track_quat("-Z", "Y").to_euler()
+    cd =bpy.data.cameras.new("cam")
+    cd.type = "ORTHO"
+    cd.ortho_scale = W * (PX_W + 2 * MARGIN) / PX_W     # width incl. margins; height stays W/2
+    cd.sensor_fit = "HORIZONTAL"
+    cd.clip_start, cd.clip_end = 0.1, W * 10
+    cam = bpy.data.objects.new("cam", cd)
+    scene.collection.objects.link(cam)
+    # Looks along +Y tilted down by tilt_deg (a rotation about X keeps the x period intact);
+    # the frame centre is `target`, the frame spans exactly x in [0, W].
+    t = math.radians(tilt_deg)
+    d = Vector((0.0, math.cos(t), -math.sin(t)))
+    tgt = Vector(target if target is not None else (W / 2, 0.0, W / 4))
+    cam.location = tgt - d * W
+    cam.rotation_euler = (math.pi / 2 - t, 0, 0)
+    scene.camera = cam
+    return scene
+
+
+def render(scene, work, tag):
+    os.makedirs(work, exist_ok=True)
+    path = os.path.join(work, f"backdrop3d_{tag}.png")
+    scene.render.filepath = path
+    bpy.ops.render.render(write_still=True)
+    px = pngio.read_png(path)
+    m = MARGIN * scene.render.resolution_percentage // 100
+    w = px.shape[1] - 2 * m
+    # Direct periodicity proof: column x = 0 and column x = W of the wider render must match.
+    pm = px[..., :3] * px[..., 3:4]
+    period_err = float(np.abs(pm[:, m] - pm[:, m + w]).mean() * 255)
+    step = float(np.abs(np.diff(pm[:, m:m + w], axis=1)).mean() * 255)
+    print(f"MERIDIAN period check {tag}: |col(0) - col(W)| = {period_err:.2f} (mean neighbour step {step:.2f})")
+    return px[:, m:m + w].copy()
+
+
+def proto_collection(name, scene):
+    c = bpy.data.collections.new(name)
+    scene.collection.children.link(c)
+    bpy.context.view_layer.layer_collection.children[name].exclude = True
+    return c
+
+
+def build_protos(P, scene, rnd, spec, mats):
+    lib = proto_collection("lib", scene)
+    blobs = [blob_mesh(f"blob{i}", lib, i, subdiv=4, strength=0.85, scale=0.2) for i in range(4)]
+    whorls = [whorl_mesh(f"whorl{i}", lib, i) for i in range(3)]
+    protos = []
+    for k in range(spec["protos"]):
+        c = proto_collection(f"tree{k}", scene)
+        h = 1.0                                       # unit tree; instances scale it
+        if rnd.random() < spec["conifer"]:
+            build_conifer(c, rnd, h, mats["bark"], mats["needle"], whorls)
+        else:
+            build_broadleaf(c, rnd, h, mats["bark"], mats["leaf"], blobs)
+        protos.append(c)
+    return protos, blobs
+
+
+def forest_layer(P, spec, seed, preview, work, near):
+    W = spec["W"]
+    top0 = W / 2
+    d0, d1 = spec["depth"]
+    scene = new_scene(P, W, preview, spec["tilt"],
+                      (W / 2, (d0 + d1) / 2, top0 * spec["level"] + top0 * spec["frame_up"]))
+    rnd = random.Random(seed)
+    rng = np.random.default_rng(seed)
+    hz = P["haze"]
+    mats = {
+        "bark": mat_varied("bark", [P["bark"], tuple(int(c * 0.8) for c in P["bark"])], 0.9, 2.0, 0.3, W=W),
+        "leaf": mat_varied("leaf", P["leaf"], 0.8, 1.5, 0.4, W=W),
+        "needle": mat_varied("needle", P["needle"], 0.85, 2.5, 0.4, W=W),
+        "ground": mat_varied("ground", spec["ground"][:2], 0.95, spec.get("ground_noise", 0.6), 0.5,
+                             W=W, world_noise=True),
+        "tuft": mat_varied("tuft", [(74, 108, 44), (96, 126, 52), (118, 132, 58)], 0.7, W=W),
+    }
+    top = W / 2
+    base = top * spec["level"]
+    amp = top * spec["amp"]
+    fog = spec.get("fog")
+    for m in mats.values():
+        _haze(m, hz, spec["haze"][0], spec["haze"][1],
+              (fog[0], base + amp * fog[1], base - amp) if fog else None, front=W)
+    protos, blobs = build_protos(P, scene, rnd, spec, mats)
+    nx, ny = 512, 64                                  # square-ish faces: thin slivers shade as stripes
+    prof = GB.ridge(rng, 0.5, 1.0, 40, 512, 1.2, 0.1)                  # periodic, in px of a 2048 width
+    prof = (prof - prof.mean()) / (np.abs(prof - prof.mean()).max() + 1e-6)
+    prof = np.interp(np.arange(nx) / nx * PX_W, np.arange(PX_W), prof)
+    bumps = fft_noise(rng, ny + 1, nx, 3, 60, 0.8)
+    # Ground runs from well in front of the camera's view (fills the frame bottom) to behind
+    # the last trees; the tilted camera sees its surface, not its edge. The hill profile only
+    # rises toward the back (it forms the silhouette); an extruded profile shades as stripes.
+    y_front, y_back = -top, d1 + 4
+    def zf(i, j):
+        y = y_front + (y_back - y_front) * j / ny
+        w = min(1.0, max(0.0, (y - d0 * 0.5) / max(y_back - d0 * 0.5, 1e-3)))
+        w = w * w * (3 - 2 * w)
+        return base - amp * prof[i] * w + amp * 0.06 * bumps[j % (ny + 1), i]
+    heightfield("ground", scene.collection, W, y_back, nx, ny, zf, mats["ground"], y0=y_front)
+    def ground_z(x, y):
+        w = min(1.0, max(0.0, (y - d0 * 0.5) / max(y_back - d0 * 0.5, 1e-3)))
+        w = w * w * (3 - 2 * w)
+        return base - amp * w * float(np.interp((x % W) / W * nx, np.arange(nx + 1), np.r_[prof, prof[0]]))
+    lo, hi = spec["tree_h"]
+    for t in range(spec["trees"]):
+        x = rnd.uniform(0, W)
+        y = rnd.uniform(d0, d1)
+        h = rnd.uniform(lo, hi)
+        instance(scene.collection, protos[rnd.randrange(len(protos))], (x, y, ground_z(x, y) - 0.3), h,
+                 rnd.uniform(0, 6.3), W)
+    if near:
+        lib = bpy.data.collections["lib"]
+        tufts = [tuft_mesh(f"tuft{i}", lib, rnd) for i in range(4)]
+        for k, me in enumerate(tufts):
+            c = proto_collection(f"tuftp{k}", scene)
+            ob = bpy.data.objects.new("tuft", me)
+            c.objects.link(ob)
+            me.materials.append(mats["tuft"])
+            tufts[k] = c
+        y_vis = -top * 0.45                           # nearest ground the tilted frame shows
+        for t in range(spec["tufts"]):
+            # Denser toward the front, where the ground is largest on screen.
+            x, y = rnd.uniform(0, W), y_vis + (d1 - y_vis) * rnd.random() ** 1.8
+            instance(scene.collection, tufts[rnd.randrange(4)], (x, y, ground_z(x, y) - 0.05),
+                     rnd.uniform(0.35, 0.8), rnd.uniform(0, 6.3), W)
+        shrubs = []
+        for k in range(3):
+            c = proto_collection(f"shrub{k}", scene)
+            for j in range(rnd.randint(3, 5)):
+                ob = bpy.data.objects.new("sb", blobs[rnd.randrange(len(blobs))])
+                c.objects.link(ob)
+                ob.location = (rnd.uniform(-0.5, 0.5), rnd.uniform(-0.3, 0.3), rnd.uniform(0.2, 0.6))
+                ob.scale = (rnd.uniform(0.4, 0.6),) * 3
+                ob.material_slots[0].link = "OBJECT"
+                ob.material_slots[0].material = mats["leaf"]
+            shrubs.append(c)
+        for t in range(spec["shrubs"]):
+            x, y = rnd.uniform(0, W), rnd.uniform(y_vis, d1)
+            instance(scene.collection, shrubs[rnd.randrange(3)], (x, y, ground_z(x, y) - 0.2),
+                     rnd.uniform(0.7, 1.6), rnd.uniform(0, 6.3), W)
+    return render(scene, work, ("near" if near else "mid") + str(seed))
+
+
+def far_layer(P, spec, seed, preview, work):
+    W = spec["W"]
+    scene = new_scene(P, W, preview, spec.get("tilt", 0.0))
+    rng = np.random.default_rng(seed)
+    nx, ny = 640, 48
+    top = W / 2
+    ridge = fft_noise(rng, ny + 1, nx, 30, 640, 1.6)
+    ridge = (ridge - ridge.min()) / (ridge.max() - ridge.min())
+    rough = fft_noise(rng, ny + 1, nx, 3, 40, 0.6)
+    depth_m = W * 0.5
+    def zf(i, j):
+        y = j / ny
+        bell = math.sin(math.pi * min(1.0, y * 1.3)) ** 1.2
+        return top * spec["level"] + top * (spec["peak"] - spec["level"]) * bell * ridge[j, i] + top * 0.012 * rough[j, i] - top * 0.15 * (1 - bell)
+    m = bpy.data.materials.new("rock")
+    m.use_nodes = True
+    nt = m.node_tree
+    pr = nt.nodes["Principled BSDF"]
+    geo = nt.nodes.new("ShaderNodeNewGeometry")
+    sep = nt.nodes.new("ShaderNodeSeparateXYZ")
+    nt.links.new(geo.outputs["Position"], sep.inputs[0])
+    nsep = nt.nodes.new("ShaderNodeSeparateXYZ")
+    nt.links.new(geo.outputs["Normal"], nsep.inputs[0])
+    # Snow where high and not too steep.
+    hmr = nt.nodes.new("ShaderNodeMapRange")
+    hmr.inputs["From Min"].default_value = top * spec["snowline"] * 0.92
+    hmr.inputs["From Max"].default_value = top * spec["snowline"]
+    nt.links.new(sep.outputs["Z"], hmr.inputs["Value"])
+    smr = nt.nodes.new("ShaderNodeMapRange")
+    smr.inputs["From Min"].default_value = 0.45
+    smr.inputs["From Max"].default_value = 0.7
+    nt.links.new(nsep.outputs["Z"], smr.inputs["Value"])
+    mul = nt.nodes.new("ShaderNodeMath"); mul.operation = "MULTIPLY"
+    nt.links.new(hmr.outputs["Result"], mul.inputs[0]); nt.links.new(smr.outputs["Result"], mul.inputs[1])
+    nz = nt.nodes.new("ShaderNodeTexNoise"); nz.inputs["Scale"].default_value = 0.004
+    nt.links.new(_wrapped(nt, geo.outputs["Position"], W), nz.inputs["Vector"])
+    rock = nt.nodes.new("ShaderNodeMix"); rock.data_type = "RGBA"
+    nt.links.new(nz.outputs["Fac"], rock.inputs[0])
+    rock.inputs[6].default_value = lin(spec["rock"][0]); rock.inputs[7].default_value = lin(spec["rock"][1])
+    snow = nt.nodes.new("ShaderNodeMix"); snow.data_type = "RGBA"
+    nt.links.new(mul.outputs[0], snow.inputs[0])
+    nt.links.new(rock.outputs[2], snow.inputs[6])
+    snow.inputs[7].default_value = lin(spec["snow"])
+    nt.links.new(snow.outputs[2], pr.inputs["Base Color"])
+    pr.inputs["Roughness"].default_value = 0.9
+    _haze(m, P["haze"], spec["haze"][0], spec["haze"][1], front=W)
+    heightfield("range", scene.collection, W, depth_m, nx, ny, zf, m)
+    return render(scene, work, "far" + str(seed))
+
+
+# ---------------------------------------------------------------- entry
+
+def _finish_transparent(px):
+    a = px[..., 3]
+    rgb, _ = post.dilate(px[..., :3], a >= 0.5, 10)
+    return np.dstack([pngio.to_u8(rgb), pngio.to_u8(a)])
+
+
+def generate(entry, ctx):
+    _, planet, layer = entry["key"].split("/")
+    P = PRESETS[entry.get("preset", planet)]
+    seed = int(entry.get("seed", 1))
+    preview, work = ctx["preview"], ctx["work"]
+    if layer == "layer0":
+        sky = GB.sky_rgb(GB.PRESETS[planet], np.random.default_rng(seed))
+        if preview:
+            sky = sky[::4, ::4]
+        rng_px = far_layer(P, P["far"], seed, preview, work)
+        a = rng_px[..., 3:4]
+        rgb = sky * (1 - a) + rng_px[..., :3] * a
+        return {"color": np.dstack([pngio.to_u8(rgb), np.full(rgb.shape[:2], 255, np.uint8)])}
+    spec = P["mid"] if layer == "layer1" else P["near"]
+    px = forest_layer(P, spec, seed, preview, work, near=(layer == "layer2"))
+    return {"color": _finish_transparent(px)}

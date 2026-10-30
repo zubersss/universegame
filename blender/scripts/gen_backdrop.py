@@ -143,6 +143,12 @@ def stamp(canvas_rgb, canvas_a, patch_a, col, x0, y_base, light_top=0.12, rng=No
 # ---------------------------------------------------------------- layers
 
 def layer0(P, rng):
+    rgb = sky_rgb(P, rng)
+    return _layer0_range(P, rng, rgb)
+
+
+def sky_rgb(P, rng):
+    """Painted sky: vertical gradient plus a soft cumulus band (none when clouds ~ 0)."""
     rows = (np.arange(H_, dtype=np.float32) / H_)[:, None]
     t = np.clip(rows / 0.72, 0, 1) ** 1.3
     sky = shade_mix(np.broadcast_to(C(P["sky_top"]), (H_, W_, 3)), C(P["sky_horizon"]),
@@ -154,7 +160,10 @@ def layer0(P, rng):
     cov = x * x * (3 - 2 * x) if P["clouds"] > 0.05 else np.zeros_like(x)   # Mars: none
     under = np.clip(np.roll(cov, -10, axis=0) - cov + 0.3, 0, 1)        # darker toward bases
     cloud = shade_mix(np.broadcast_to(C(P["cloud"]), (H_, W_, 3)), C(P["cloud_shade"]), under)
-    rgb = shade_mix(sky, cloud, cov * 0.92)
+    return shade_mix(sky, cloud, cov * 0.92)
+
+
+def _layer0_range(P, rng, rgb):
     f = P["far"]
     if f.get("terrace"):
         line = terrace(ridge(rng, f["level"], f["amp"], 220, 1024, 1.6, 0.0), f["terrace"], f["amp"])

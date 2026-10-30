@@ -165,9 +165,9 @@
         ]
       }
     },
-    {"key": "backgrounds/earth/layer0", "generator": "scripts/gen_backdrop.py", "size": [2048, 1024], "maps": ["color"], "seed": 5001, "tileable": "x"},
-    {"key": "backgrounds/earth/layer1", "generator": "scripts/gen_backdrop.py", "size": [2048, 1024], "maps": ["color"], "seed": 5002, "tileable": "x"},
-    {"key": "backgrounds/earth/layer2", "generator": "scripts/gen_backdrop.py", "size": [2048, 1024], "maps": ["color"], "seed": 5003, "tileable": "x"},
+    {"key": "backgrounds/earth/layer0", "generator": "scripts/gen_backdrop3d.py", "size": [2048, 1024], "maps": ["color"], "seed": 5001, "tileable": "x"},
+    {"key": "backgrounds/earth/layer1", "generator": "scripts/gen_backdrop3d.py", "size": [2048, 1024], "maps": ["color"], "seed": 5002, "tileable": "x"},
+    {"key": "backgrounds/earth/layer2", "generator": "scripts/gen_backdrop3d.py", "size": [2048, 1024], "maps": ["color"], "seed": 5003, "tileable": "x"},
     {"key": "backgrounds/mars/layer0", "generator": "scripts/gen_backdrop.py", "size": [2048, 1024], "maps": ["color"], "seed": 5101, "tileable": "x"},
     {"key": "backgrounds/mars/layer1", "generator": "scripts/gen_backdrop.py", "size": [2048, 1024], "maps": ["color"], "seed": 5102, "tileable": "x"},
     {"key": "backgrounds/mars/layer2", "generator": "scripts/gen_backdrop.py", "size": [2048, 1024], "maps": ["color"], "seed": 5103, "tileable": "x"},

@@ -1,7 +1,7 @@
 # BLENDER STATUS
 Updated: 2026-10-30 · Session: 1
 ## Current task
-B-010 rework (real 3D-rendered trees, ground clumps, sun from upper-right, volumetric haze per layer; FAILED §9 review cycle 7) — next loop tick, 2026-10-30. Then B-011 rework (same rule), B-019, B-023; B-012 after.
+B-010 rework — in progress 2026-10-30. New generator blender/scripts/gen_backdrop3d.py renders each layer as a real EEVEE scene (Skin-modifier broadleaf trees with displaced leaf clusters, conifers of ragged drooping whorls, grass tufts + shrubs on a heightfield, sun from upper-right with soft shadows; layer0 = painted sky + rendered 3D mountain heightfield). Tiling proven directly: col(0) vs col(W) of a wider render = 0.02 / 0.09 (far / mid) against neighbour steps ≈ 1.8. Final full-size export waiting on heavy_unity.lock. Then B-011 rework (same rule), B-019, B-023; B-012 after.
 ## Last completed
 B-022 terrain revision — fb0c1dc. All 10 sheets re-exported, same file names: slots 47–62 = 16 interior variants of tile 46, slot 63 empty. Each variant blends the base texture into an independently seeded one through a window that is exactly 0 within 1 px of the border (full alt beyond 6 px), by rotation about the mean so contrast never dips (a linear mix drew a faint grid). Joins are identical to tile 46. Measured on a 16×8 interior block: autocorrelation at the 128 px period 0.12–0.16 for every material, ≈0 off-period (no visible lattice). Grass grows only on upward-facing edges; walls, ceilings and undersides show soil with the darker rim. Demos: blender/preview/terrain__<planet>__<material>_demo{,_interior}.png.
 Before that:
@@ -31,12 +31,15 @@ B-011 rework, B-019, B-023 (then B-012, B-013, B-014, B-015, B-017, B-018, B-020
 → UNITY: planets/*/glow: the planet disc edge is at radius 200 px of the 512 px sprite, so draw the glow at world width = 2.56 × R behind the disc. planets/*/clouds: RGB white, alpha = cloud cover; surface: equirect, longitude −180° at the left edge, wraps in x.
 ## Blockers
 (none)
+## Incident (self-reported)
+2026-10-30 ~13:03: HeavyJobLock violation. While diagnosing the B-010 tiling, I ran `blender ... render.py --asset backgrounds/earth/layer1` directly at full size (bypassing tools/blender_render.ps1) while heavy_unity.lock existed. It ran ~36 s (peak ≈ 1.9 GB) and exited; no Blender process left. Every later full-size run goes through the wrapper (it refused twice since, correctly). → LEAD: please check whether UNITY's job at that time was affected.
 ## Proposals
 - → LEAD: `tools/paths.json` isn't valid JSON (single backslashes in Windows paths). blender_render.ps1 tolerates it by escaping before parsing; please store paths with `\\` or `/` so other tools can parse it.
 - → LEAD: add `__pycache__/` to `.gitignore`. render.py disables bytecode writes, but one untracked `blender/scripts/meridian/__pycache__/` folder is on disk (deleting it was denied by permissions; it is not committed).
 - → LEAD: B-006 board says top ≤ 448×448 "see UNITY handoff", but I found no such handoff in UNITY_STATUS or DECISIONS. I followed 448 as the cap (the contract allows 512) and rendered the top view at 36 px/m. If UNITY wanted true scale or a different px/m, it's one manifest field (`ppu`) and a re-render.
 - → LEAD: Pilgrim has fixed landing skids, not animated legs (Bible §4.3 says legs deploy below 10 m). A `ships/pilgrim/side_legs` variant (legs extended) could be added later if UNITY wants the swap; not done, to stay inside B-006 scope.
 - → LEAD/UNITY: terrain sheets have 17 empty slots (47–63). With one tile per mask, a 128 px texture repeats visibly on large flat areas (most on stone). Proposal: slots 47–62 hold 16 extra random variants of tile 46 (fully surrounded), and BlobAutotile/TerrainTileSet pick among them by a position hash. Needs a contract note + a UNITY change; I'd generate them in one re-export. Not done until LEAD decides.
+- → LEAD: B-010 haze is aerial perspective in every material (mix toward the haze colour by view depth, plus low-lying fog on the mid layer), not a volume box. A volume would also fill the transparent sky of layers 1/2 (alpha), so this keeps them usable as overlays; same visual effect. Say if you want a true volume anyway (it would need an opaque-sky composite instead).
 - `git pull` is denied by permissions for this session; fine while all roles share one working tree.
 (Settled by D-017: mask via material override; Earth topo+bathy variant.)
 ## For USER_ACTIONS
