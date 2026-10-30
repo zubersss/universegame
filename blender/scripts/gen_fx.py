@@ -59,12 +59,12 @@ def thruster(rng, w, h, n):
         vv = np.clip(v, 0, 1)
         width = 0.5 * (0.35 + 0.65 * (1 - vv) ** 0.6) * (1 + 0.12 * nz)
         I = np.exp(-2.2 * (u / np.maximum(width, 1e-3)) ** 2) * (1 - vv) ** 1.3 * (0.85 + 0.3 * nz)
-        I *= (v > 0) & (v < 1)
-        core = np.exp(-(u / (0.35 * width)) ** 2) * np.exp(-vv * 5.0)
+        I *= ((v > 0) & (v < 1)) * _inside(h, w)
+        core =np.exp(-(u / (0.35 * width)) ** 2) * np.exp(-vv * 5.0)
         heat = np.clip(0.75 * I + 0.6 * core, 0, 1)
         col = _ramp(heat, [(0.0, C((150, 40, 16))), (0.35, C((235, 110, 36))), (0.7, C((255, 196, 110))),
                            (1.0, C((228, 238, 255)))])
-        frames.append(_frame(col, I * 1.5, glow=np.clip(I * 1.3 + core, 0, 1)))
+        frames.append(_frame(col, I * 1.5, glow=np.clip(I * 1.3 + core * _inside(h, w), 0, 1)))
     return frames
 
 
@@ -89,7 +89,7 @@ def dig_sparks(rng, w, h, n):
     yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
     k = 46
     ang = rng.uniform(-np.pi * 0.95, -np.pi * 0.05, k)    # mostly upward (image y down)
-    spd = rng.uniform(0.35, 1.0, k) * (w / 2 - PAD - 4)
+    spd = rng.uniform(0.55, 1.15, k) * (w / 2 - PAD - 4)
     life = rng.uniform(0.55, 1.0, k)
     frames = []
     for i in range(n):
@@ -102,7 +102,7 @@ def dig_sparks(rng, w, h, n):
             p0 = np.array([w / 2 + np.cos(a0) * s * max(t - 0.12, 0), h / 2 + np.sin(a0) * s * max(t - 0.12, 0)
                            + 30 * max(t - 0.12, 0) ** 2 * h / 128])
             d = _seg_dist(xx, yy, p0, p1)
-            I = np.maximum(I, np.exp(-(d / 0.9) ** 2) * (1 - t / L) ** 1.2)
+            I = np.maximum(I, np.exp(-(d / 1.4) ** 2) * (1 - (t / L) ** 2.5))   # bright until late
         I *= _inside(h, w)
         col = _ramp(I, [(0.0, C((220, 90, 30))), (0.5, C((255, 170, 70))), (1.0, C((255, 240, 200)))])
         frames.append(_frame(col, I * 1.4, glow=I))
