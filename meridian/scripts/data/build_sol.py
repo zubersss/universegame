@@ -86,7 +86,7 @@ def main():
             'gravity': f(g, pt, 'm/s^2'),
             'massKg': f(m, pt, 'kg'),
             'rotationHours': f(rot, pt, 'h'),
-            'hasAtmosphere': f(atm, M),
+            'hasAtmosphere': f(atm, pt),
             'source': src if phys_verified else 'pending (reference: ' + src + ')',
             'verified': phys_verified,
         }
@@ -95,7 +95,9 @@ def main():
         if bid == 'earth':
             b['orientation'] = earth_orientation(EPOCH_JD)
         if bid == 'sun':
+            # Exact by definition: the frame is heliocentric (origin at the Sun's centre).
             b['positionKm'] = f([0.0, 0.0, 0.0], M, 'km')
+            b['positionKm']['note'] = 'frame origin by definition (heliocentric frame)'
             b['luminosityW'] = f(3.828e26, pt, 'W')
             b['effectiveTempK'] = f(5772, pt, 'K')
         elif bid in vec:
@@ -135,13 +137,20 @@ def main():
                 'license': 'US Government work (NASA), public domain in the US',
             },
             'positions': POS[src_kind],
+            'belts': {
+                'url': None, 'accessed': None,
+                'note': 'PENDING: conventional belt extents and typical inclinations entered without a fetched source; tagged estimated.',
+                'license': 'facts (no licensed material)',
+            },
         },
         'bodies': bodies,
         'belts': [
             {'id': 'asteroid-belt', 'name': 'Main asteroid belt', 'innerAu': f(2.1, E, 'au'), 'outerAu': f(3.3, E, 'au'),
-             'note': 'Conventional extent of the main belt (between the 4:1 and 2:1 Kirkwood gaps).'},
+             'halfThicknessAu': f(0.45, E, 'au'),
+             'note': 'Conventional extent of the main belt (between the 4:1 and 2:1 Kirkwood gaps); half-thickness from a typical ~10 deg inclination at 2.7 AU.'},
             {'id': 'kuiper-belt', 'name': 'Kuiper belt', 'innerAu': f(30.0, E, 'au'), 'outerAu': f(50.0, E, 'au'),
-             'note': 'Conventional extent from Neptune\'s orbit to the 1:2 resonance edge.'},
+             'halfThicknessAu': f(7.0, E, 'au'),
+             'note': 'Conventional extent from Neptune\'s orbit to the 1:2 resonance edge; half-thickness from a typical ~10 deg inclination at 40 AU.'},
         ],
     }
     print(json.dumps(doc, indent=1))

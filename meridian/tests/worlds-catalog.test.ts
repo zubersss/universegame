@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import sol from '../src/data/sol.json';
-import { BODIES, BODY_IDS, GENERATOR_VERSION, SOL_TRAVEL_ORDER, SYSTEM_BODY_IDS, SYSTEM_EXTENT, WORLD_SEED, isBodyId, sunDirFor } from '../src/world/bodies';
+import { BODIES, BODY_IDS, GENERATOR_VERSION, PLAY_SYSTEM, SOL_M2_BODIES, SOL_TRAVEL_ORDER, SYSTEM_BODY_IDS, SYSTEM_EXTENT, WORLD_SEED, isBodyId, setPlaySystem, sunDirFor } from '../src/world/bodies';
 import { BELTS } from '../src/world/catalog';
-import { AU_KM, EPOCH, POSITION_DIVISOR, gameRadius, moonOffset, systemPosition } from '../src/world/scale';
+import { AU_KM, EPOCH, POSITION_DIVISOR, gameRadius, moonDistance, moonOffset, systemPosition } from '../src/world/scale';
 import { hashCombine } from '../src/core/rng';
 import { computeSites } from '../src/world/sites';
 
@@ -21,9 +21,17 @@ describe('sol.json (W1)', () => {
         expect(['measured', 'estimated', 'fictional'], `${b.id}.${k}`).toContain(b[k].tag);
       }
       // Unverified physical constants are never presented as measured.
-      if (!b.verified) expect(b.radiusKm.tag).not.toBe('measured');
+      if (!b.verified) {
+        const physical = b as unknown as Record<string, { tag: string } | undefined>;
+        for (const k of ['radiusKm', 'gravity', 'massKg', 'rotationHours', 'hasAtmosphere', 'semiMajorAxisKm', 'luminosityW', 'effectiveTempK']) {
+          if (physical[k]) expect(physical[k]!.tag, `${b.id}.${k}`).not.toBe('measured');
+        }
+      }
     }
     expect(sol.belts.map((b) => b.id)).toEqual(['asteroid-belt', 'kuiper-belt']);
+    // Belts carry a source record (pending) and a tagged half-thickness.
+    expect(sol.sources.belts.note).toMatch(/PENDING/);
+    for (const b of sol.belts) expect(b.halfThicknessAu.tag).toBe('estimated');
   });
 
   it('has plausible heliocentric distances at the epoch (AU)', () => {
@@ -142,12 +150,52 @@ describe('catalog BodyDef (W2)', () => {
     expect(indices).toEqual(indices.map((_, i) => i));
   });
 
+  it('labels moon placement by the rule actually applied and marks invented directions', () => {
+    const rule = (moon: string) => {
+      const m = BODIES[moon];
+      const p = BODIES[m.parent!];
+      const km = Math.hypot(...[0, 1, 2].map((i) => m.real!.positionKm[i] - p.real!.positionKm[i]));
+      return moonDistance(km, p.real!.radiusKm, p.radius, m.radius).rule;
+    };
+    expect(rule('moon')).toBe('sqrt');
+    expect(rule('europa')).toBe('minimum');
+    expect(rule('titan')).toBe('minimum');
+    expect(BODIES.moon.fiction.join(' ')).toMatch(/square-root rule/);
+    for (const id of ['europa', 'titan']) {
+      const f = BODIES[id].fiction.join(' ');
+      expect(f).toMatch(/minimum separation/);
+      expect(f).not.toMatch(/square-root/);
+      expect(f).toMatch(/direction from its parent invented/);
+      expect(BODIES[id].real!.positionSource).toMatch(/^fictional/);
+    }
+    expect(BODIES.moon.real!.positionSource).not.toMatch(/fictional/);
+  });
+
+  it('switches the played body set with setPlaySystem', () => {
+    expect(PLAY_SYSTEM).toBe('quiet');
+    expect(BODY_IDS).toEqual(['ilex', 'vesper', 'cairn']);
+    expect(() => setPlaySystem([])).toThrow();
+    expect(() => setPlaySystem(['earth', 'pluto'])).toThrow(/unknown/);
+    expect(() => setPlaySystem(['earth', 'ilex'])).toThrow(/several systems/);
+    expect(() => setPlaySystem(['earth', 'earth'])).toThrow(/duplicate/);
+    expect(SOL_M2_BODIES.every((id) => BODIES[id].system === 'sol')).toBe(true);
+    setPlaySystem(SOL_M2_BODIES);
+    expect(PLAY_SYSTEM).toBe('sol');
+    expect(BODY_IDS).toEqual(SOL_M2_BODIES);
+    expect(Object.isFrozen(BODY_IDS)).toBe(true);
+    setPlaySystem(SYSTEM_BODY_IDS.quiet);
+    expect(PLAY_SYSTEM).toBe('quiet');
+    expect(BODY_IDS).toEqual(['ilex', 'vesper', 'cairn']);
+  });
+
   it('exports travel order, belts and the system extent', () => {
     const order = SOL_TRAVEL_ORDER.map((x) => ('body' in x ? x.body : x.belt));
     for (const id of SYSTEM_BODY_IDS.sol) expect(order).toContain(id);
     for (const b of BELTS) {
       expect(order).toContain(b.id);
       expect(b.outer).toBeGreaterThan(b.inner);
+      expect(b.halfThickness).toBeGreaterThan(0);
+      expect(b.real.source).toMatch(/PENDING/);
     }
     expect(BELTS[0].inner).toBeCloseTo(2.1 * 3_000_000, 3);
     expect(SYSTEM_EXTENT).toBeGreaterThan(50 * 3_000_000);

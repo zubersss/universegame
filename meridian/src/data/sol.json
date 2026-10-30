@@ -23,6 +23,12 @@
    "accessed": "2026-10-29",
    "note": "INTERIM until Horizons is reachable: JPL DE421 read locally with jplephem (scripts/data/sol_positions_de421.py); outer planets are system barycenters; cross-checked against IAU SOFA plan94/moon98 (agreement 0.0-14 arcsec). Europa and Titan directions are fictional (not in DE421).",
    "license": "Ephemeris data: JPL (US Government work); packaging MIT"
+  },
+  "belts": {
+   "url": null,
+   "accessed": null,
+   "note": "PENDING: conventional belt extents and typical inclinations entered without a fetched source; tagged estimated.",
+   "license": "facts (no licensed material)"
   }
  },
  "bodies": [
@@ -53,7 +59,7 @@
    },
    "hasAtmosphere": {
     "value": true,
-    "tag": "measured"
+    "tag": "estimated"
    },
    "source": "pending (reference: IAU 2015 Resolution B3 (nominal solar values); https://nssdc.gsfc.nasa.gov/planetary/factsheet/sunfact.html)",
    "verified": false,
@@ -64,7 +70,8 @@
      0.0
     ],
     "tag": "measured",
-    "unit": "km"
+    "unit": "km",
+    "note": "frame origin by definition (heliocentric frame)"
    },
    "luminosityW": {
     "value": 3.828e+26,
@@ -104,7 +111,7 @@
    },
    "hasAtmosphere": {
     "value": false,
-    "tag": "measured"
+    "tag": "estimated"
    },
    "source": "pending (reference: https://nssdc.gsfc.nasa.gov/planetary/factsheet/mercuryfact.html)",
    "verified": false,
@@ -145,7 +152,7 @@
    },
    "hasAtmosphere": {
     "value": true,
-    "tag": "measured"
+    "tag": "estimated"
    },
    "source": "pending (reference: https://nssdc.gsfc.nasa.gov/planetary/factsheet/venusfact.html)",
    "verified": false,
@@ -186,7 +193,7 @@
    },
    "hasAtmosphere": {
     "value": true,
-    "tag": "measured"
+    "tag": "estimated"
    },
    "source": "pending (reference: https://nssdc.gsfc.nasa.gov/planetary/factsheet/earthfact.html)",
    "verified": false,
@@ -241,7 +248,7 @@
    },
    "hasAtmosphere": {
     "value": false,
-    "tag": "measured"
+    "tag": "estimated"
    },
    "source": "pending (reference: https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html)",
    "verified": false,
@@ -287,7 +294,7 @@
    },
    "hasAtmosphere": {
     "value": true,
-    "tag": "measured"
+    "tag": "estimated"
    },
    "source": "pending (reference: https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html)",
    "verified": false,
@@ -328,7 +335,7 @@
    },
    "hasAtmosphere": {
     "value": true,
-    "tag": "measured"
+    "tag": "estimated"
    },
    "source": "pending (reference: https://nssdc.gsfc.nasa.gov/planetary/factsheet/jupiterfact.html)",
    "verified": false,
@@ -369,7 +376,7 @@
    },
    "hasAtmosphere": {
     "value": false,
-    "tag": "measured"
+    "tag": "estimated"
    },
    "source": "pending (reference: https://ssd.jpl.nasa.gov/sats/phys_par/ ; https://nssdc.gsfc.nasa.gov/planetary/factsheet/joviansatfact.html)",
    "verified": false,
@@ -415,7 +422,7 @@
    },
    "hasAtmosphere": {
     "value": true,
-    "tag": "measured"
+    "tag": "estimated"
    },
    "source": "pending (reference: https://nssdc.gsfc.nasa.gov/planetary/factsheet/saturnfact.html)",
    "verified": false,
@@ -456,7 +463,7 @@
    },
    "hasAtmosphere": {
     "value": true,
-    "tag": "measured"
+    "tag": "estimated"
    },
    "source": "pending (reference: https://ssd.jpl.nasa.gov/sats/phys_par/ ; https://nssdc.gsfc.nasa.gov/planetary/factsheet/saturniansatfact.html)",
    "verified": false,
@@ -502,7 +509,7 @@
    },
    "hasAtmosphere": {
     "value": true,
-    "tag": "measured"
+    "tag": "estimated"
    },
    "source": "pending (reference: https://nssdc.gsfc.nasa.gov/planetary/factsheet/uranusfact.html)",
    "verified": false,
@@ -543,7 +550,7 @@
    },
    "hasAtmosphere": {
     "value": true,
-    "tag": "measured"
+    "tag": "estimated"
    },
    "source": "pending (reference: https://nssdc.gsfc.nasa.gov/planetary/factsheet/neptunefact.html)",
    "verified": false,
@@ -572,7 +579,12 @@
     "tag": "estimated",
     "unit": "au"
    },
-   "note": "Conventional extent of the main belt (between the 4:1 and 2:1 Kirkwood gaps)."
+   "halfThicknessAu": {
+    "value": 0.45,
+    "tag": "estimated",
+    "unit": "au"
+   },
+   "note": "Conventional extent of the main belt (between the 4:1 and 2:1 Kirkwood gaps); half-thickness from a typical ~10 deg inclination at 2.7 AU."
   },
   {
    "id": "kuiper-belt",
@@ -587,7 +599,12 @@
     "tag": "estimated",
     "unit": "au"
    },
-   "note": "Conventional extent from Neptune's orbit to the 1:2 resonance edge."
+   "halfThicknessAu": {
+    "value": 7.0,
+    "tag": "estimated",
+    "unit": "au"
+   },
+   "note": "Conventional extent from Neptune's orbit to the 1:2 resonance edge; half-thickness from a typical ~10 deg inclination at 40 AU."
   }
  ]
 }

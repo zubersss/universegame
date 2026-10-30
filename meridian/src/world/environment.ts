@@ -45,7 +45,7 @@ export function airDensity(def: BodyDef, altitude: number): number {
 
 /** The body whose center is nearest relative to its radius (the dominant body). */
 export function dominantBody(p: Vector3): { id: BodyId; distance: number; radii: number } {
-  let best: BodyId = 'ilex';
+  let best: BodyId = BODY_IDS[0];
   let bestRadii = Infinity;
   let bestDist = 0;
   for (const id of BODY_IDS) {

@@ -89,16 +89,25 @@ async function defaultFetch(_layer: LayerName, url: string): Promise<ArrayBuffer
 
 let rasters: EarthRasters | null = null;
 let pending: Promise<EarthRasters> | null = null;
+/** Consecutive failed loads and the earliest time (ms) of the next attempt: failures back off 2 s, 4 s, ... 60 s. */
+let failures = 0;
+let retryAt = 0;
 
 /** Decoded rasters if loaded in this thread, else null. */
 export function earthData(): EarthRasters | null {
   return rasters;
 }
 
-/** Load (once per thread) and decode all Earth layers; resolves to the shared rasters. */
+/**
+ * Load (once per thread) and decode all Earth layers; resolves to the shared
+ * rasters. After a failure, calls inside the back-off window reject at once
+ * without fetching, so a lost connection never turns into a download loop.
+ */
 export function loadEarthData(fetchBytes: FetchBytes = defaultFetch): Promise<EarthRasters> {
   if (rasters) return Promise.resolve(rasters);
   if (!pending) {
+    const wait = retryAt - Date.now();
+    if (wait > 0) return Promise.reject(new Error(`Earth data unavailable (next attempt in ${Math.ceil(wait / 1000)} s)`));
     const layers = Object.keys(LAYER_URLS) as LayerName[];
     pending = Promise.all(
       layers.map(async (name) => {
@@ -111,10 +120,13 @@ export function loadEarthData(fetchBytes: FetchBytes = defaultFetch): Promise<Ea
     ).then(
       (entries) => {
         rasters = Object.fromEntries(entries) as EarthRasters;
+        failures = 0;
         return rasters;
       },
       (err) => {
-        pending = null; // allow a retry after a network failure
+        pending = null; // allow a retry after the back-off
+        failures++;
+        retryAt = Date.now() + Math.min(60_000, 2000 * 2 ** (failures - 1));
         throw err;
       },
     );

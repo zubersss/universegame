@@ -12,6 +12,7 @@ import { computeSites } from '../src/world/sites';
 import { chunkAt, dirToFace, gridDir, gridResolution } from '../src/world/cube';
 import { generateChunk } from '../src/terrain/chunkGen';
 import { mulberry32 } from '../src/core/rng';
+import { EARTH_INFILL_MAX_M, dirToGeo, earthElevationM, geoToDir, subsolarPoint } from '../src/world/geo';
 
 const earth = BODIES.earth;
 const sea = earth.seaLevel!;
@@ -421,5 +422,34 @@ describe('Earth surface generator (W4)', () => {
       }
     }
     expect(worst).toBeLessThan(40); // real metres (measured 16 m)
+  });
+
+  it('exposes latitude/longitude helpers, the subsolar point and the data elevation', () => {
+    for (const [lat, lon] of [[27.99, 86.93], [-43.6, 170.14], [0, -179.5], [-89.9, 12]]) {
+      const d = geoToDir(earth, lat, lon);
+      const g = dirToGeo(earth, d[0] * 3, d[1] * 3, d[2] * 3);
+      expect(g.lat).toBeCloseTo(lat, 9);
+      expect(g.lon).toBeCloseTo(lon, 9);
+    }
+    const s = subsolarPoint(earth);
+    expect(s.lat).toBeCloseTo(-23.02, 1);
+    expect(s.lon).toBeCloseTo(-178.87, 1);
+    expect(earthElevationM(27.99, 86.93)!).toBeGreaterThan(5000);
+    expect(earthElevationM(11.35, 142.2)!).toBeLessThan(-8000);
+    // The infill bound holds over random points.
+    const g = new SurfaceGenerator(earth);
+    const info = newSurfaceInfo();
+    const rnd = mulberry32(77);
+    const ll = { lat: 0, lon: 0 };
+    const cs = { v: 0, dLon: 0, dLat: 0 };
+    for (let i = 0; i < 3000; i++) {
+      const d = randomDir(rnd);
+      latLonOf(d[0], d[1], d[2], earth.frame.north, earth.frame.meridian, earth.frame.east, ll);
+      if (Math.abs(sampleCubic(E.coast, ll.lat, ll.lon, cs).v) < 30) continue; // shore shaping applies there
+      g.info(d[0], d[1], d[2], info);
+      if (info.liquidLevel != null) continue;
+      const real = (info.height - sea) * 5;
+      expect(Math.abs(real - sampleCubic(E.elevation, ll.lat, ll.lon, cs).v)).toBeLessThan(EARTH_INFILL_MAX_M + 1);
+    }
   });
 });

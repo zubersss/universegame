@@ -391,6 +391,12 @@ export class BodyProxies {
   };
   onRoot: ((d: ChunkData) => void) | null = null;
   private pending = 0;
+  private disposed = false;
+
+  /** Release the root worker once no job is outstanding (all roots built, or retries exhausted). */
+  private finishRoots(): void {
+    if (this.pending === 0 && this.backend) this.backend.dispose();
+  }
 
   constructor(
     scene: Scene,
@@ -410,18 +416,31 @@ export class BodyProxies {
     if (backend) {
       const reqs: { id: BodyId; face: number }[] = [];
       for (const id of ids) for (let f = 0; f < 6; f++) reqs.push({ id, face: f });
+      const attempts = new Map<number, number>();
+      const post = (i: number) => {
+        const r = reqs[i - 1];
+        backend.post(i, { key: chunkKey(r.face, 0, 0, 0), bodyId: r.id, face: r.face, level: 0, x: 0, y: 0, priority: 0 }, 0);
+      };
       backend.onResult = (jobId, data, err) => {
         this.pending--;
         if (!data) {
-          console.error('Proxy root generation failed', err);
+          // Retry with back-off (e.g. a dataset that failed to download): a body
+          // must not lose its proxy for the session over one transient failure.
+          const n = (attempts.get(jobId) ?? 0) + 1;
+          attempts.set(jobId, n);
+          if (n === 1 || n === 6) console.error('Proxy root generation failed', err);
+          if (n < 6 && !this.disposed) {
+            this.pending++;
+            setTimeout(() => (this.disposed ? (this.pending--, this.finishRoots()) : post(jobId)), 2000 * 2 ** (n - 1));
+          }
         } else {
           this.addRoot(data);
         }
-        if (this.pending === 0) backend.dispose();
+        this.finishRoots();
       };
-      reqs.forEach((r, i) => {
+      reqs.forEach((_, i) => {
         this.pending++;
-        backend.post(i + 1, { key: chunkKey(r.face, 0, 0, 0), bodyId: r.id, face: r.face, level: 0, x: 0, y: 0, priority: 0 }, 0);
+        post(i + 1);
       });
     }
   }
@@ -454,6 +473,7 @@ export class BodyProxies {
   }
 
   dispose(): void {
+    this.disposed = true;
     for (const p of this.proxies.values()) p.dispose();
     this.backend?.dispose();
   }
