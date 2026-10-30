@@ -60,10 +60,11 @@ def _pebbles(rng, scale, thresh):
 def mat_soil(rng, p):
     base = fft_noise(rng, T, T, 6, 60, 0.9)
     fine = fft_noise(rng, T, T, 1.5, 5, 0.2)
-    peb = _pebbles(rng, 7, 1.6)
+    peb = _pebbles(rng, p.get("pebble_size", 7), p.get("pebble_thresh", 1.6))
     peb_col = rng.random((T, T)) > 0.5
     col = _mix3(srgb(p.get("dark", (78, 58, 42))), srgb(p.get("light", (138, 104, 74))), 0.5 + 0.22 * base + 0.08 * fine)
-    col = np.where(peb[..., None] > 0, _mix3(col, np.where(peb_col[..., None], srgb((150, 138, 120)), srgb((70, 62, 55))), peb * 0.9), col)
+    pl, pd = srgb(p.get("pebble_light", (150, 138, 120))), srgb(p.get("pebble_dark", (70, 62, 55)))
+    col = np.where(peb[..., None] > 0, _mix3(col, np.where(peb_col[..., None], pl, pd), peb * 0.9), col)
     h = 1.2 * base + 0.5 * fine + 2.5 * peb
     return col, h
 
@@ -74,8 +75,13 @@ def mat_stone(rng, p):
     ridge = 1 - np.abs(fft_noise(rng, T, T, 10, 60, 0.6))      # cracks where the noise crosses 0
     crack = np.clip((ridge - 0.86) / 0.1, 0, 1)
     col = _mix3(srgb(p.get("dark", (92, 90, 88))), srgb(p.get("light", (152, 149, 143))), 0.5 + 0.2 * base + 0.07 * fine)
-    col = _mix3(col, srgb((60, 58, 56)), crack * 0.45)
+    col = _mix3(col, srgb(p.get("crack_col", (60, 58, 56))), crack * p.get("crack_k", 0.45))
     h = 2.0 * base + 0.4 * fine - 1.5 * crack
+    if p.get("pits"):
+        # Vesicles (gas-bubble pits in basalt): small dark depressions.
+        pit = _pebbles(rng, 4, 2.0)
+        col = _mix3(col, srgb((30, 27, 26)), pit * 0.8)
+        h = h - 2.0 * pit
     return col, h
 
 
@@ -107,6 +113,8 @@ def mat_water(rng, p):
 
 RECIPES = {"soil": mat_soil, "grass": mat_soil, "stone": mat_stone, "sand": mat_sand,
            "snow": mat_snow, "water": mat_water}
+# Other planets' materials pick a recipe and an edge style in the manifest
+# ("recipe": "stone", "edge": "snow", colors and recipe parameters alongside).
 
 # Edge style per material: inset base/amplitude (px), contour wavelength range, bevel depth and
 # width (px), rim tint, top-band (grass/frost/foam).
@@ -118,7 +126,7 @@ EDGE = {
     "sand":  dict(inset=3, amp=1.2, lo=12, hi=64, depth=3, rim=10, rim_col=(176, 148, 100), rim_k=0.3),
     "snow":  dict(inset=3, amp=1.6, lo=10, hi=64, depth=7, rim=14, rim_col=(196, 210, 228), rim_k=0.4),
     "water": dict(inset=1, amp=0.0, lo=8, hi=64, depth=1, rim=4, rim_col=(30, 80, 110), rim_k=0.0,
-                  band=(3, 0), band_dark=(150, 196, 214), band_light=(196, 228, 238), alpha=0.8, top_only_band=True),
+                  band=(7, 1), band_dark=(150, 196, 214), band_light=(196, 228, 238), alpha=0.8, top_only_band=True),
 }
 
 
@@ -196,8 +204,9 @@ def finish_tile(color, normal, alpha):
 
 def build_material(name, seed, overrides):
     rng = np.random.default_rng(seed)
-    recipe = RECIPES[overrides.get("recipe", name)]
-    st = dict(EDGE[overrides.get("edge", overrides.get("recipe", name))])
+    rname = overrides.get("recipe", name)
+    recipe = RECIPES[rname]
+    st = dict(EDGE[overrides.get("edge", rname)])
     st.update(overrides.get("edge_overrides", {}))
     col, h = recipe(rng, overrides)
     ins = {}

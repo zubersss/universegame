@@ -142,6 +142,17 @@
     {"key": "terrain/earth/stone", "generator": "scripts/gen_terrain.py", "size": [1024, 1024], "maps": ["color", "normal"], "seed": 3003, "tileable": "xy", "tile_index": 46, "tile_size": 128},
     {"key": "terrain/earth/sand",  "generator": "scripts/gen_terrain.py", "size": [1024, 1024], "maps": ["color", "normal"], "seed": 3004, "tileable": "xy", "tile_index": 46, "tile_size": 128},
     {"key": "terrain/earth/snow",  "generator": "scripts/gen_terrain.py", "size": [1024, 1024], "maps": ["color", "normal"], "seed": 3005, "tileable": "xy", "tile_index": 46, "tile_size": 128},
-    {"key": "terrain/earth/water", "generator": "scripts/gen_terrain.py", "size": [1024, 1024], "maps": ["color", "normal"], "seed": 3006, "tileable": "xy", "tile_index": 46, "tile_size": 128, "normal_strength": 0.25}
+    {"key": "terrain/earth/water", "generator": "scripts/gen_terrain.py", "size": [1024, 1024], "maps": ["color", "normal"], "seed": 3006, "tileable": "xy", "tile_index": 46, "tile_size": 128, "normal_strength": 0.25},
+    {"key": "terrain/mars/regolith", "generator": "scripts/gen_terrain.py", "size": [1024, 1024], "maps": ["color", "normal"], "seed": 4001, "tileable": "xy", "tile_index": 46, "tile_size": 128,
+     "recipe": "soil", "dark": [128, 66, 42], "light": [190, 112, 76], "pebble_light": [176, 128, 98], "pebble_dark": [62, 50, 46], "pebble_thresh": 1.9,
+     "edge_overrides": {"rim_col": [110, 56, 36]}},
+    {"key": "terrain/mars/basalt", "generator": "scripts/gen_terrain.py", "size": [1024, 1024], "maps": ["color", "normal"], "seed": 4002, "tileable": "xy", "tile_index": 46, "tile_size": 128,
+     "recipe": "stone", "dark": [52, 46, 44], "light": [96, 84, 78], "crack_col": [34, 30, 29], "crack_k": 0.5, "pits": true,
+     "edge_overrides": {"rim_col": [120, 76, 56], "rim_k": 0.35}},
+    {"key": "terrain/mars/hematite", "generator": "scripts/gen_terrain.py", "size": [1024, 1024], "maps": ["color", "normal"], "seed": 4003, "tileable": "xy", "tile_index": 46, "tile_size": 128,
+     "recipe": "soil", "edge": "stone", "dark": [84, 44, 38], "light": [132, 70, 56], "pebble_light": [150, 140, 142], "pebble_dark": [46, 40, 42], "pebble_size": 4, "pebble_thresh": 1.4},
+    {"key": "terrain/mars/ice", "generator": "scripts/gen_terrain.py", "size": [1024, 1024], "maps": ["color", "normal"], "seed": 4004, "tileable": "xy", "tile_index": 46, "tile_size": 128,
+     "recipe": "stone", "edge": "snow", "dark": [196, 212, 226], "light": [238, 243, 248], "crack_col": [150, 180, 205], "crack_k": 0.6,
+     "edge_overrides": {"rim_col": [214, 190, 176], "rim_k": 0.3}}
   ]
 }
