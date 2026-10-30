@@ -1,0 +1,638 @@
+{
+ "catalog": "sol",
+ "description": "Scientific values for the Sol system. Gameplay values derive from these through src/world/scale.ts.",
+ "epoch": {
+  "iso": "2026-01-01T00:00:00 TDB",
+  "jdTdb": 2461041.5
+ },
+ "frame": "Heliocentric (Sun center), J2000 mean ecliptic and equinox; x toward the vernal equinox, z toward the north ecliptic pole; km",
+ "tags": {
+  "measured": "published measurement or ephemeris value",
+  "estimated": "computed, conventional or not yet verified against a fetched source",
+  "fictional": "invented for gameplay"
+ },
+ "sources": {
+  "physical": {
+   "url": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/",
+   "accessed": null,
+   "note": "PENDING: reference values entered without a live fetch (nasa.gov unreachable from the build environment, 2026-10-29); tagged estimated until verified.",
+   "license": "US Government work (NASA), public domain in the US"
+  },
+  "positions": {
+   "url": "https://pypi.org/project/de421/ (JPL DE421, Folkner, Williams & Boggs 2009, IPN Progress Report 42-178)",
+   "accessed": "2026-10-29",
+   "note": "INTERIM until Horizons is reachable: JPL DE421 read locally with jplephem (scripts/data/sol_positions_de421.py); outer planets are system barycenters; cross-checked against IAU SOFA plan94/moon98 (agreement 0.0-14 arcsec). Europa and Titan directions are fictional (not in DE421).",
+   "license": "Ephemeris data: JPL (US Government work); packaging MIT"
+  },
+  "belts": {
+   "url": null,
+   "accessed": null,
+   "note": "PENDING: conventional belt extents and typical inclinations entered without a fetched source; tagged estimated.",
+   "license": "facts (no licensed material)"
+  }
+ },
+ "bodies": [
+  {
+   "id": "sun",
+   "name": "Sun",
+   "kind": "star",
+   "parent": null,
+   "radiusKm": {
+    "value": 695700,
+    "tag": "estimated",
+    "unit": "km"
+   },
+   "gravity": {
+    "value": 274.0,
+    "tag": "estimated",
+    "unit": "m/s^2"
+   },
+   "massKg": {
+    "value": 1.9885e+30,
+    "tag": "estimated",
+    "unit": "kg"
+   },
+   "rotationHours": {
+    "value": 609.12,
+    "tag": "estimated",
+    "unit": "h"
+   },
+   "hasAtmosphere": {
+    "value": true,
+    "tag": "estimated"
+   },
+   "source": "pending (reference: IAU 2015 Resolution B3 (nominal solar values); https://nssdc.gsfc.nasa.gov/planetary/factsheet/sunfact.html)",
+   "verified": false,
+   "positionKm": {
+    "value": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "tag": "measured",
+    "unit": "km",
+    "note": "frame origin by definition (heliocentric frame)"
+   },
+   "luminosityW": {
+    "value": 3.828e+26,
+    "tag": "estimated",
+    "unit": "W"
+   },
+   "effectiveTempK": {
+    "value": 5772,
+    "tag": "estimated",
+    "unit": "K"
+   }
+  },
+  {
+   "id": "mercury",
+   "name": "Mercury",
+   "kind": "planet",
+   "parent": "sun",
+   "radiusKm": {
+    "value": 2439.7,
+    "tag": "estimated",
+    "unit": "km"
+   },
+   "gravity": {
+    "value": 3.7,
+    "tag": "estimated",
+    "unit": "m/s^2"
+   },
+   "massKg": {
+    "value": 3.3011e+23,
+    "tag": "estimated",
+    "unit": "kg"
+   },
+   "rotationHours": {
+    "value": 1407.6,
+    "tag": "estimated",
+    "unit": "h"
+   },
+   "hasAtmosphere": {
+    "value": false,
+    "tag": "estimated"
+   },
+   "source": "pending (reference: https://nssdc.gsfc.nasa.gov/planetary/factsheet/mercuryfact.html)",
+   "verified": false,
+   "positionKm": {
+    "value": [
+     -32193657.0,
+     -61216587.8,
+     -2049981.8
+    ],
+    "tag": "measured",
+    "unit": "km"
+   }
+  },
+  {
+   "id": "venus",
+   "name": "Venus",
+   "kind": "planet",
+   "parent": "sun",
+   "radiusKm": {
+    "value": 6051.8,
+    "tag": "estimated",
+    "unit": "km"
+   },
+   "gravity": {
+    "value": 8.87,
+    "tag": "estimated",
+    "unit": "m/s^2"
+   },
+   "massKg": {
+    "value": 4.8675e+24,
+    "tag": "estimated",
+    "unit": "kg"
+   },
+   "rotationHours": {
+    "value": -5832.6,
+    "tag": "estimated",
+    "unit": "h"
+   },
+   "hasAtmosphere": {
+    "value": true,
+    "tag": "estimated"
+   },
+   "source": "pending (reference: https://nssdc.gsfc.nasa.gov/planetary/factsheet/venusfact.html)",
+   "verified": false,
+   "positionKm": {
+    "value": [
+     13295847.3,
+     -107974115.6,
+     -2250558.8
+    ],
+    "tag": "measured",
+    "unit": "km"
+   }
+  },
+  {
+   "id": "earth",
+   "name": "Earth",
+   "kind": "planet",
+   "parent": "sun",
+   "radiusKm": {
+    "value": 6371.0,
+    "tag": "estimated",
+    "unit": "km"
+   },
+   "gravity": {
+    "value": 9.8,
+    "tag": "estimated",
+    "unit": "m/s^2"
+   },
+   "massKg": {
+    "value": 5.9722e+24,
+    "tag": "estimated",
+    "unit": "kg"
+   },
+   "rotationHours": {
+    "value": 23.9345,
+    "tag": "estimated",
+    "unit": "h"
+   },
+   "hasAtmosphere": {
+    "value": true,
+    "tag": "estimated"
+   },
+   "source": "pending (reference: https://nssdc.gsfc.nasa.gov/planetary/factsheet/earthfact.html)",
+   "verified": false,
+   "orientation": {
+    "north": [
+     0.002536756826,
+     0.397804898002,
+     0.917466526905
+    ],
+    "primeMeridian": [
+     -0.174310934323,
+     0.903599440984,
+     -0.391310296861
+    ],
+    "tag": "measured",
+    "source": "IAU 2006/2000A precession-nutation and Earth rotation angle (SOFA/ERFA c2t06a), polar motion neglected"
+   },
+   "positionKm": {
+    "value": [
+     -26072138.4,
+     144774673.8,
+     -8892.9
+    ],
+    "tag": "measured",
+    "unit": "km"
+   }
+  },
+  {
+   "id": "moon",
+   "name": "Moon",
+   "kind": "moon",
+   "parent": "earth",
+   "radiusKm": {
+    "value": 1737.4,
+    "tag": "estimated",
+    "unit": "km"
+   },
+   "gravity": {
+    "value": 1.62,
+    "tag": "estimated",
+    "unit": "m/s^2"
+   },
+   "massKg": {
+    "value": 7.346e+22,
+    "tag": "estimated",
+    "unit": "kg"
+   },
+   "rotationHours": {
+    "value": 655.72,
+    "tag": "estimated",
+    "unit": "h"
+   },
+   "hasAtmosphere": {
+    "value": false,
+    "tag": "estimated"
+   },
+   "source": "pending (reference: https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html)",
+   "verified": false,
+   "semiMajorAxisKm": {
+    "value": 384400,
+    "tag": "estimated",
+    "unit": "km"
+   },
+   "orientation": {
+    "north": [
+     -2.983294e-05,
+     -0.00031640777,
+     0.999999949498
+    ],
+    "primeMeridian": [
+     -0.401312654824,
+     -0.915941079986,
+     -0.000301783226
+    ],
+    "tag": "estimated",
+    "source": "IAU mean lunar pole; prime meridian toward Earth at the epoch (librations ignored)"
+   },
+   "positionKm": {
+    "value": [
+     -25927812.7,
+     145104069.7,
+     22860.1
+    ],
+    "tag": "measured",
+    "unit": "km"
+   }
+  },
+  {
+   "id": "mars",
+   "name": "Mars",
+   "kind": "planet",
+   "parent": "sun",
+   "radiusKm": {
+    "value": 3389.5,
+    "tag": "estimated",
+    "unit": "km"
+   },
+   "gravity": {
+    "value": 3.71,
+    "tag": "estimated",
+    "unit": "m/s^2"
+   },
+   "massKg": {
+    "value": 6.4171e+23,
+    "tag": "estimated",
+    "unit": "kg"
+   },
+   "rotationHours": {
+    "value": 24.6229,
+    "tag": "estimated",
+    "unit": "h"
+   },
+   "hasAtmosphere": {
+    "value": true,
+    "tag": "estimated"
+   },
+   "source": "pending (reference: https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html)",
+   "verified": false,
+   "orientation": {
+    "north": [
+     0.446125946807,
+     -0.055911168921,
+     0.893222022106
+    ],
+    "primeMeridian": [
+     0.49420447315,
+     -0.816691491508,
+     -0.297954604625
+    ],
+    "tag": "estimated",
+    "source": "IAU WGCCRE 2009 rotation model for Mars (reference values entered without a fetched source; periodic terms omitted)"
+   },
+   "positionKm": {
+    "value": [
+     50949993.9,
+     -207492548.5,
+     -5597537.3
+    ],
+    "tag": "measured",
+    "unit": "km"
+   }
+  },
+  {
+   "id": "jupiter",
+   "name": "Jupiter",
+   "kind": "planet",
+   "parent": "sun",
+   "radiusKm": {
+    "value": 69911,
+    "tag": "estimated",
+    "unit": "km"
+   },
+   "gravity": {
+    "value": 24.79,
+    "tag": "estimated",
+    "unit": "m/s^2"
+   },
+   "massKg": {
+    "value": 1.89819e+27,
+    "tag": "estimated",
+    "unit": "kg"
+   },
+   "rotationHours": {
+    "value": 9.925,
+    "tag": "estimated",
+    "unit": "h"
+   },
+   "hasAtmosphere": {
+    "value": true,
+    "tag": "estimated"
+   },
+   "source": "pending (reference: https://nssdc.gsfc.nasa.gov/planetary/factsheet/jupiterfact.html)",
+   "verified": false,
+   "positionKm": {
+    "value": [
+     -253419243.7,
+     737350360.3,
+     2606883.4
+    ],
+    "tag": "measured",
+    "unit": "km"
+   }
+  },
+  {
+   "id": "europa",
+   "name": "Europa",
+   "kind": "moon",
+   "parent": "jupiter",
+   "radiusKm": {
+    "value": 1560.8,
+    "tag": "estimated",
+    "unit": "km"
+   },
+   "gravity": {
+    "value": 1.315,
+    "tag": "estimated",
+    "unit": "m/s^2"
+   },
+   "massKg": {
+    "value": 4.7998e+22,
+    "tag": "estimated",
+    "unit": "kg"
+   },
+   "rotationHours": {
+    "value": 85.228,
+    "tag": "estimated",
+    "unit": "h"
+   },
+   "hasAtmosphere": {
+    "value": false,
+    "tag": "estimated"
+   },
+   "source": "pending (reference: https://ssd.jpl.nasa.gov/sats/phys_par/ ; https://nssdc.gsfc.nasa.gov/planetary/factsheet/joviansatfact.html)",
+   "verified": false,
+   "semiMajorAxisKm": {
+    "value": 671034,
+    "tag": "estimated",
+    "unit": "km"
+   },
+   "positionKm": {
+    "value": [
+     -254053843.5,
+     737132255.3,
+     2606883.4
+    ],
+    "tag": "fictional",
+    "unit": "km"
+   }
+  },
+  {
+   "id": "saturn",
+   "name": "Saturn",
+   "kind": "planet",
+   "parent": "sun",
+   "radiusKm": {
+    "value": 58232,
+    "tag": "estimated",
+    "unit": "km"
+   },
+   "gravity": {
+    "value": 10.44,
+    "tag": "estimated",
+    "unit": "m/s^2"
+   },
+   "massKg": {
+    "value": 5.6834e+26,
+    "tag": "estimated",
+    "unit": "kg"
+   },
+   "rotationHours": {
+    "value": 10.656,
+    "tag": "estimated",
+    "unit": "h"
+   },
+   "hasAtmosphere": {
+    "value": true,
+    "tag": "estimated"
+   },
+   "source": "pending (reference: https://nssdc.gsfc.nasa.gov/planetary/factsheet/saturnfact.html)",
+   "verified": false,
+   "positionKm": {
+    "value": [
+     1422278323.5,
+     38557123.1,
+     -57286341.8
+    ],
+    "tag": "measured",
+    "unit": "km"
+   }
+  },
+  {
+   "id": "titan",
+   "name": "Titan",
+   "kind": "moon",
+   "parent": "saturn",
+   "radiusKm": {
+    "value": 2574.7,
+    "tag": "estimated",
+    "unit": "km"
+   },
+   "gravity": {
+    "value": 1.352,
+    "tag": "estimated",
+    "unit": "m/s^2"
+   },
+   "massKg": {
+    "value": 1.3452e+23,
+    "tag": "estimated",
+    "unit": "kg"
+   },
+   "rotationHours": {
+    "value": 382.69,
+    "tag": "estimated",
+    "unit": "h"
+   },
+   "hasAtmosphere": {
+    "value": true,
+    "tag": "estimated"
+   },
+   "source": "pending (reference: https://ssd.jpl.nasa.gov/sats/phys_par/ ; https://nssdc.gsfc.nasa.gov/planetary/factsheet/saturniansatfact.html)",
+   "verified": false,
+   "semiMajorAxisKm": {
+    "value": 1221870,
+    "tag": "estimated",
+    "unit": "km"
+   },
+   "positionKm": {
+    "value": [
+     1422245211.5,
+     39778544.3,
+     -57286341.8
+    ],
+    "tag": "fictional",
+    "unit": "km"
+   }
+  },
+  {
+   "id": "uranus",
+   "name": "Uranus",
+   "kind": "planet",
+   "parent": "sun",
+   "radiusKm": {
+    "value": 25362,
+    "tag": "estimated",
+    "unit": "km"
+   },
+   "gravity": {
+    "value": 8.87,
+    "tag": "estimated",
+    "unit": "m/s^2"
+   },
+   "massKg": {
+    "value": 8.6813e+25,
+    "tag": "estimated",
+    "unit": "kg"
+   },
+   "rotationHours": {
+    "value": -17.24,
+    "tag": "estimated",
+    "unit": "h"
+   },
+   "hasAtmosphere": {
+    "value": true,
+    "tag": "estimated"
+   },
+   "source": "pending (reference: https://nssdc.gsfc.nasa.gov/planetary/factsheet/uranusfact.html)",
+   "verified": false,
+   "positionKm": {
+    "value": [
+     1478073119.9,
+     2513246446.9,
+     -9832185.4
+    ],
+    "tag": "measured",
+    "unit": "km"
+   }
+  },
+  {
+   "id": "neptune",
+   "name": "Neptune",
+   "kind": "planet",
+   "parent": "sun",
+   "radiusKm": {
+    "value": 24622,
+    "tag": "estimated",
+    "unit": "km"
+   },
+   "gravity": {
+    "value": 11.15,
+    "tag": "estimated",
+    "unit": "m/s^2"
+   },
+   "massKg": {
+    "value": 1.02413e+26,
+    "tag": "estimated",
+    "unit": "kg"
+   },
+   "rotationHours": {
+    "value": 16.11,
+    "tag": "estimated",
+    "unit": "h"
+   },
+   "hasAtmosphere": {
+    "value": true,
+    "tag": "estimated"
+   },
+   "source": "pending (reference: https://nssdc.gsfc.nasa.gov/planetary/factsheet/neptunefact.html)",
+   "verified": false,
+   "positionKm": {
+    "value": [
+     4468806955.8,
+     77631303.4,
+     -104578521.2
+    ],
+    "tag": "measured",
+    "unit": "km"
+   }
+  }
+ ],
+ "belts": [
+  {
+   "id": "asteroid-belt",
+   "name": "Main asteroid belt",
+   "innerAu": {
+    "value": 2.1,
+    "tag": "estimated",
+    "unit": "au"
+   },
+   "outerAu": {
+    "value": 3.3,
+    "tag": "estimated",
+    "unit": "au"
+   },
+   "halfThicknessAu": {
+    "value": 0.45,
+    "tag": "estimated",
+    "unit": "au"
+   },
+   "note": "Conventional extent of the main belt (between the 4:1 and 2:1 Kirkwood gaps); half-thickness from a typical ~10 deg inclination at 2.7 AU."
+  },
+  {
+   "id": "kuiper-belt",
+   "name": "Kuiper belt",
+   "innerAu": {
+    "value": 30.0,
+    "tag": "estimated",
+    "unit": "au"
+   },
+   "outerAu": {
+    "value": 50.0,
+    "tag": "estimated",
+    "unit": "au"
+   },
+   "halfThicknessAu": {
+    "value": 7.0,
+    "tag": "estimated",
+    "unit": "au"
+   },
+   "note": "Conventional extent from Neptune's orbit to the 1:2 resonance edge; half-thickness from a typical ~10 deg inclination at 40 AU."
+  }
+ ]
+}

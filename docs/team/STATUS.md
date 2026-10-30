@@ -7,11 +7,11 @@ Charter: `docs/team/CHARTER.md` (binding). Handoffs: `docs/team/handoffs/`. Rela
 
 | Session | Claude Code version | OS / environment | Model (`/model`) | Effort (`/effort status`) | Ultracode | Permission mode | `/list-agents` sees | Worktree / branch |
 |---|---|---|---|---|---|---|---|---|
-| LEAD | | | | | off | | | main checkout / `lead/*` |
-| WORLDS | | | | | off | | | `../universegame-worlds` / `worlds/*` |
-| PLAYER | | | | | off | | | `../universegame-player` / `player/*` |
+| LEAD | 2.1.314 | claude.ai cloud container: Linux 6.18 x86_64, 4 vCPU Xeon 2.1 GHz, 15 GB RAM, no GPU, Node 22.22.0 | `claude-opus-5-5` (served `claude-opus-5-5`) | session effort `ultracode` | on | auto | no other sessions (this session: `universegame-e4`; inbound messaging available) | cloud checkout / `overhaul/integration`, `lead/*` |
+| WORLDS | 2.1.314 | claude.ai cloud container (Linux 6.18, no GPU) | `claude-opus-5-5` (served `claude-opus-5-5`) | `max` (session record, read by LEAD) | on (session record) | auto | LEAD, PLAYER by `send_message` (session `session_01R5Bri4MB7rpCVatQcDYx2k`) | cloud checkout / `worlds/m1` |
+| PLAYER | 2.1.314 | claude.ai cloud container (Linux 6.18, no GPU) | `claude-opus-5-5` (served `claude-opus-5-5`) | `max` (session record, read by LEAD) | on (session record) | auto | LEAD, WORLDS by `send_message` (session `session_01R5Bri2t2x9zuUq1hBHotXu`) | cloud checkout / `player/m1` |
 
-Reference device: CPU · GPU (`chrome://gpu`) · RAM 8 GB · resolution · Chrome version · Node version.
+Reference device: CPU · GPU (`chrome://gpu`) · RAM 8 GB · resolution · Chrome version · Node version — not measured yet (owner's laptop). The LEAD session runs in a cloud container without a GPU (headless Chromium 1243 on SwiftShader), so its browser checks prove behaviour, not frame rate.
 
 ## Decided (settled questions; do not re-research)
 
@@ -19,50 +19,66 @@ Reference device: CPU · GPU (`chrome://gpu`) · RAM 8 GB · resolution · Chrom
 |---|---|---|---|
 | 1 | Engine baseline = MERIDIAN in `meridian/`; Lightspeed artifact is a content source | Charter section C; MERIDIAN passes the engineering contracts with recorded tests | 2026-10-29 |
 | 2 | Player-facing title "Lightspeed"; directory stays `meridian/` | Owner's name for the game; avoids path churn | 2026-10-29 |
-| 3 | Scale: radius ÷ 40 (12–200 km), positions at `EPOCH` ÷ one factor, cruise = max(15 km/s, hop ÷ 45 s), interstellar jump | Charter section H | 2026-10-29 |
+| 3 | Scale: radius ÷ 40 (12–200 km), positions at `EPOCH` ÷ one factor (moons: Decided #10), cruise = max(15 km/s, hop ÷ 45 s), interstellar jump | Charter section H | 2026-10-29 |
 | 4 | Character built in code (SkinnedMesh + bones); CC0 glTF only if verified in M1 | Charter section K | 2026-10-29 |
-| 5 | Coordination: three local sessions + cross-session messaging; ultracode off; no agent teams on the primary path | Charter section G | 2026-10-29 |
+| 5 | Coordination: three cloud sessions + cross-session messaging (`send_message`; `docs/team/packets/` as fallback); no agent teams on the primary path | Charter sections E, G | 2026-10-29 |
+| 6 | The `studio/*` branches are a content source, not a base: nothing merges wholesale; ports go through the file owner with tests | Handoff reconciliation (`docs/team/handoffs/studio-round.md`) | 2026-10-29 |
+| 7 | Studio save schema 2 and its position migration are not ported; the charter's schema 2 stands, older records are kept read-only under `save-legacy` | Charter section I; L5 | 2026-10-29 |
+| 8 | Project settings live at the repo root (`.claude/settings.json`), where sessions start; `crossSessionInbound` is set per user | Owner approval (L2); a repo file may only tighten that setting | 2026-10-29 |
+| 9 | Ultracode may stay on in every session (effort `xhigh` or `ultracode`); the ultracode-off rule and the keyword-only workflow limit are removed; workflow agents edit only their session's owned files (charter version 2, B.3, G) | Owner instruction | 2026-10-29 |
+| 10 | A moon sits in its real direction from its parent at parent gameplay radius × √(real parent–moon distance at EPOCH ÷ real parent radius), at least 4.5 × the sum of the two gameplay radii (Europa and Titan otherwise sit inside their giants' 4R envelopes); planets and the Sun keep the single factor (charter version 2, H) | WORLDS DECISION: the single factor puts the Moon 7.7 km from Earth's center | 2026-10-29 |
+| 11 | LEAD works autonomously: it merges milestone pull requests into `main` after a passing gate, takes over tasks whose owner session is not running, runs a missing consumer's checks itself, and gates M1–M4 on its own environment; reference-device numbers are recorded when the owner runs them (charter version 2, B, E, F, L, M, N, O) | Owner instruction | 2026-10-29 |
+| 12 | PLAYER works autonomously on foot: ON_FOOT hooks gain frame() for camera and pose, boot calls PLAYER's src/player/install.ts, PLAYER owns src/debug/playerHooks.ts; READY needs typecheck, unit tests, build, smoke and the covering specs, while journeys over 10 minutes run once per milestone at LEAD's gate (charter version 2, B.11, D) | PLAYER's autonomy request; owner instruction to continue | 2026-10-30 |
 
 ## Integration base
 
 | Branch | Commit | Checks last run | Checkpoint tag |
 |---|---|---|---|
-| `overhaul/integration` | | | |
+| `overhaul/integration` | M1 gate build: 9721ae3 (L5–L5c, L6a, L7a, L8, `worlds/m1` W1–W4 with W5/W7 groundwork, `player/m1` P1–P4 with P5–P7 groundwork) plus this record | 2026-10-30: typecheck, `npm test` 245/245 (23 files), build, build:test; prod 2/2; all nine journeys (see M1 gate) | `overhaul-m1` → 4bd6407 (local tag; the session's git proxy refuses tag pushes with HTTP 403, so branch `lead/it-m1-gate` holds the checkpoint) |
 
 ## Handoff reconciliation (M1, L4)
 
 | Handoff | Verified here | Contradicted by this code | Still disputed | Unique work preserved as |
 |---|---|---|---|---|
-| | | | | |
+| Old-bot exports (`EXPORT-for-old-bots.md`) | none received yet | — | — | — |
+| `studio/integration` notes (`PROGRESS.md`, `BUGS.md`) | studio schema 2 migrates positions; B-001, Vesper seam and missing shader pre-warm apply to `main`; 848579b fixes studio-only code | none found | every pass count, soak, travel gate and perf number (not re-run) | branch @ 9eaf7ec, untouched; summary `docs/team/handoffs/studio-round.md` |
+| `studio/atlas`, `studio/biome`, `studio/lumen` | their extra commits are studio-only (Orrin/Saro terrain, five-world fauna, photo sets) | none found | B-003, B-005, B-006 causes | branches @ 586dc69, aa94660, 87706d1, untouched |
+| `studio/echo`, `studio/gauge` | fully contained in `studio/integration`; audio caps and test hooks read in code | none found | soaks, 3-body travel gate | branches @ 5c6e844, f2d91e6, untouched |
 
 ## Task table
 
 | ID | Owner | Player-visible outcome | Depends on | Base | Owned files | Contract / acceptance check | Result (commit · checks run · remaining issues · next handoff) |
 |---|---|---|---|---|---|---|---|
-| L1 | LEAD | Baseline runs on the reference device | — | main | — | `npm ci`, `typecheck`, `test`, `build`, `preview`; plays in Chrome | |
-| L2 | LEAD | Charter, status, settings committed | L1 | | `docs/team/*`, `.claude/settings.json` | files present on `overhaul/integration` | |
-| L3 | LEAD | Messaging round-trip | L2 | | — | packet to and from WORLDS and PLAYER | |
-| L4 | LEAD | Handoffs reconciled | L2 | | `docs/team/handoffs/*` | table above filled; unique work preserved | |
-| L5 | LEAD | Contract foundations | L4 | | `src/game/*`, `src/save/*`, `src/ui/Hud.ts` | tests for Mode hooks, HUD slot API, schema-2 plan | |
-| W1 | WORLDS | Solar-system catalog with sources | — | | `src/data/sol.json` | fields tagged measured/estimated/fictional; source + epoch recorded | |
-| W2 | WORLDS | `scale.ts` and catalog-driven `BodyDef` | W1, L5 | | `src/world/*` | Ilex, Vesper, Cairn still play | |
-| W3 | WORLDS | Earth dataset converted and licensed | — | | `src/data/**`, `scripts/data/*`, `ASSET_LICENSES.md` | sampling test (Everest high, Challenger Deep low, land ≈ 29%) | |
-| W4 | WORLDS | Data-backed Earth surface spike | W3 | | `src/world/surface.ts` | region renders; proxy ↔ surface continuity test | |
-| P1 | PLAYER | Rigged character walks on Ilex in third person | — | | `src/avatar/**`, `src/player/*` | screenshots; no foot sliding; camera avoids terrain | |
-| P2 | PLAYER | Ability skeleton and IFACE to LEAD | — | | `src/abilities/**` | types compile; hook points requested | |
-| P3 | PLAYER | Avatar journey scaffold | P1 | | `e2e/journey/avatar-walk.spec.ts` | spec runs on `dist-test/` | |
+| L1 | LEAD | Baseline runs in LEAD's environment (reference device when available) | — | main | — | `npm ci`, `typecheck`, `test`, `build`, `preview`; plays in Chromium | Cloud container, `main` 30ccf78: `npm ci`, typecheck, 63/63 tests, build (main chunk 5,144.6 kB, 1,892 kB gzip), build:test, prod smoke 2/2 (boots, takes off, nav, pause, resize; no errors or hotlinks). Journeys: expedition, flight, landing (10 cycles) passed; planet, saves, travel not run (run stopped by the owner). Reference-device run recorded when the owner runs it; not blocking. |
+| L2 | LEAD | Charter, status, settings committed | L1 | | `docs/team/*`, `.claude/settings.json` | files present on `overhaul/integration` | Charter and status in 30ccf78. Owner approved repo-root `.claude/settings.json` (allow npm/npx/git/node); `crossSessionInbound` stays a per-user setting because a repo file may only tighten it. |
+| L3 | LEAD | Messaging round-trip | L2 | | — | packet to and from WORLDS and PLAYER | Done: LEAD → WORLDS and PLAYER delivered; READY packets back from both; PLAYER → WORLDS delivered. Cloud sessions talk by `send_message`; `docs/team/packets/` stays the fallback. |
+| L4 | LEAD | Handoffs reconciled | L2 | | `docs/team/handoffs/*` | table above filled; unique work preserved | Studio branches reconciled read-only, nothing deleted; DECISION packet sent; old-bot exports are reconciled when the owner supplies them; their absence does not block L4 or the M1 gate. |
+| L5 | LEAD | Contract foundations | L4 | | `src/game/*`, `src/save/*`, `src/ui/Hud.ts` | tests for Mode hooks, HUD slot API, schema-2 plan | Done: L5 566d144 + L5b 49f48bb (frame hook, `installPlayer`, PLAYER test hooks), merged in 0373660; typecheck, unit tests, prod smoke, expedition, flight, landing, saves green on the integrated build. |
+| W1 | WORLDS | Solar-system catalog with sources | — | | `src/data/sol.json` | fields tagged measured/estimated/fictional; source + epoch recorded | Interim: `sol.json` with JPL DE421 positions (via PyPI); physical constants tagged estimated/unverified until NASA hosts are allowed; integrated in ce556b2. Minor labeling DEFECT sent. |
+| W2 | WORLDS | `scale.ts` and catalog-driven `BodyDef` | W1, L5 | | `src/world/*` | Ilex, Vesper, Cairn still play | Done: `scale.ts`, catalog-driven string-keyed `BodyDef` (15 bodies, `BODY_IDS` still the Quiet System), moons per charter H; Quiet System byte-identical (review); integrated in ce556b2 with LEAD's save fix 0c22cf6. |
+| W3 | WORLDS | Earth dataset converted and licensed | — | | `src/data/**`, `scripts/data/*`, `ASSET_LICENSES.md` | sampling test (Everest high, Challenger Deep low, land ≈ 29%) | Interim, cf8c058: ETOPO1 10′ grid (Fatiando a Terra, CC BY 4.0), Natural Earth coastlines and lakes (public domain), ESA WorldCover 2021 biome shares (CC BY 4.0); terms and credits in `ASSET_LICENSES.md` and the in-game credits. `worlds-earth-data.test.ts` passes (Everest region > 5 km, Challenger Deep < −8 km, land 27–31%). ETOPO 2022 60″ replaces the interim grid once `www.ncei.noaa.gov` is allowed (blocker below). |
+| W4 | WORLDS | Data-backed Earth surface spike | W3 | | `src/world/surface.ts` | region renders; proxy ↔ surface continuity test | Done, cf8c058 and 8b36edc (with W5 liquid surfaces and the W7 proxy hand-off match): `worlds-earth-surface`/`-load` unit tests and `worlds-earth.spec.ts` (orbit proxy, orbit terrain, Southern Alps) at the M1 gate. |
+| P1 | PLAYER | Rigged character walks on Ilex in third person | — | | `src/avatar/**`, `src/player/*` | screenshots; no foot sliding; camera avoids terrain | Done, b0b721e…9d650d2: code-built explorer with locked-foot IK, feet on slopes to 45°, third-person camera with terrain clearance and a low-ceiling guard; evidence `p1-explorer-*.png`. |
+| P2 | PLAYER | Ability skeleton and IFACE to LEAD | — | | `src/abilities/**` | types compile; hook points requested | Done, 4ff1502…abf4cd8: ability contracts, power catalog, walk-only controller, Three-free save module; IFACE asks landed as L5b/L5c. P5–P7 primitives landed as groundwork. |
+| P3 | PLAYER | Avatar journey scaffold | P1 | | `e2e/journey/avatar-walk.spec.ts` | spec runs on `dist-test/` | Done, a7374b2: exit, walk 25 m with a jump, camera toggle, sprint back, board, exit again; passes at the M1 gate (2.0 min). |
+| L6a | LEAD | Sun lights every body from its real direction | L5 | | `src/render/Lighting.ts`, `src/game/config.ts` | per-body light tests; Quiet goldens unchanged | Done, d161e0e + review d3abfa8, 150ef31; in the M1 gate build. |
+| L7a | LEAD | Cruise reaches any M2 body within 60 s | L5 | | `src/ship/Cruise.ts`, `src/game/config.ts` | hop cap max(15 km/s, hop ÷ 45 s), 5R star standoff, system edge | Done, 8e72012 + review d406998; in the M1 gate build. |
+| L8 | LEAD | Saves carry Sol positions; older saves kept read-only | L5 | | `src/save/*` | schema 2, `save-legacy`, history line on the title | Done, ef51699 + review 185ef1e; in the M1 gate build; `saves.spec.ts` 5/5 at the gate. |
+| L7b | LEAD | Sol boot behind `?system=sol`: Earth start, activation policy, ten nav keys | L7a, W2 | | `src/game/*`, `src/ui/Panel.ts`, `src/ship/Cruise.ts` | `sol-boot.test.ts`; Sol Earth → Moon journey | b0e2292 on `lead/L7b-sol-boot` (265 unit tests); review and browser run next. |
+| L9a | LEAD | First Light state, unlock-gated powers, ability saves, audio bus | L8, P2 | | `src/game/Expedition.ts`, `src/save/*`, `src/audio/GameAudio.ts` | expedition, contracts and save tests | 9745f1e + review fixes 53457ff on `lead/L9a-first-light`; integration next. |
 
 ## Blockers
 
 | Since | Session | What | What unblocks | Owner action needed |
 |---|---|---|---|---|
-| | | | | |
+| 2026-10-29 | WORLDS | Network policy denies `ssd.jpl.nasa.gov`, `www.ncei.noaa.gov` and `nssdc.gsfc.nasa.gov` (W1 Horizons vectors, W3 ETOPO, NASA fact-sheet radii and masses); W2 continues on labeled interim values | owner adds the three hosts under Allowed domains | yes |
+| 2026-10-29 | LEAD | No reference-device numbers (needed for M5 performance evidence; does not block M1–M4) | owner runs the baseline and `PW_GPU=1` profile on the laptop | optional; recorded when run; blocks no gate |
 
 ## Milestone gate results
 
 | Milestone | Date | Gate checks (charter section M) | Evidence | Tag / PR |
 |---|---|---|---|---|
-| M1 | | | | |
+| M1 | 2026-10-30 | All checks green in LEAD's cloud container, headless Chromium 1243 on SwiftShader (no GPU), commit 9721ae3: typecheck; `npm test` 245/245; build and build:test; prod `nowebgl` and `smoke` 2/2; journeys avatar-walk (2.0 min), expedition with reloads (11.7 min), flight (6.6 min), landing 10 cycles + steep-site rejection (14.4 min), planet face crossing and atmosphere (7.5 min), saves 5/5 (incl. schema-1 kept read-only), travel 3 × Ilex → Vesper → Cairn → Ilex with landings (26.8 min, 0 safety stops), worlds-earth (2.3 min). Earth sampling test passes. Chromium play confirmed. L3 round-trip recorded (task L3). STATUS complete. Flight failed once only when it ran beside workflow agents (CPU contention, 25-minute timeout); its solo re-run passed, so gate journeys now run with no agents alongside. `profile.spec.ts` is a profiling route, not a pass/fail check, and was not run. Reference-device numbers are not recorded (blocks no gate). | Logs in LEAD's scratchpad (`gateA`/`gateB`/`gateC`/`gateF`); evidence screenshots from these runs are not committed | checkpoint 4bd6407 (`lead/it-m1-gate`; tag `overhaul-m1` local only, see Integration base); PR #3 `overhaul/integration` → `main` |
 | M2 | | | | |
 | M3 | | | | |
 | M4 | | | | |

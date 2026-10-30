@@ -27,17 +27,18 @@ import { ActiveBody } from '../world/ActiveBody';
 import { computeSites } from '../world/sites';
 import { MissionObjects, sampleName } from '../world/MissionObjects';
 import { Expedition } from './Expedition';
+import { OnFootHost, type OnFootExitReason } from './onFoot';
 import { rayCapsule } from './scan';
 import type { Species } from '../props/species';
 import type { PropInstance } from '../props/PropSystem';
-import type { SaveData } from '../save/SaveSystem';
+import { SAVE_SCHEMA, type SaveData } from '../save/SaveSystem';
 import { bodyGravity, dominantBody } from '../world/environment';
 import { ChunkStore, WorkerBackend } from '../terrain/ChunkStore';
 import { createTerrainMaterials, makeTerrainUniforms, setTerrainPalette, type TerrainUniforms } from '../terrain/terrainMaterial';
 import { Hud, type Prompt } from '../ui/Hud';
 import { Markers, type MarkerSpec } from '../ui/Markers';
 import { BODY_HANDOFF, CRUISE, FLIGHT, LANDING, MAX_FRAME_GAP, MAX_STEPS_PER_FRAME, SCAN, SIM_DT, WALK, BUDGETS, PRESETS, type QualityPreset } from './config';
-import { GENERATOR_VERSION, SAVE_SCHEMA_VERSION, WORLD_SEED } from '../world/bodies';
+import { GENERATOR_VERSION, WORLD_SEED } from '../world/bodies';
 import type { Settings } from './settings';
 import { BODIES, BODY_IDS, type BodyDef, type BodyId } from '../world/bodies';
 
@@ -107,7 +108,10 @@ export class Game {
   /** Reference body for up/altitude/lighting: the active body, else the dominant one. */
   ref: BodyDef = BODIES.ilex;
   state: AppState = 'title';
+  /** Change only through setMode() so the ON_FOOT hooks see every transition. */
   mode: Mode = 'LANDED';
+  /** Ability hook points around ON_FOOT (installed by the ability system). */
+  readonly onFoot = new OnFootHost();
   settings: Settings;
   /** Floating origin: system-coordinate position of the local origin (double precision). */
   readonly floating = new FloatingOrigin();
@@ -407,6 +411,16 @@ export class Game {
     b.terrain.extraDemand = this.mode === 'CRUISING' ? [] : b.collision.computeWanted(_v1, vel, onFoot ? 0 : env.clearance, decel);
   }
 
+  /** The single place the gameplay mode changes. */
+  private setMode(next: Mode, reason: OnFootExitReason = 'relocate'): void {
+    const prev = this.mode;
+    if (prev === next) return;
+    this.mode = next;
+    const ctx = next === 'ON_FOOT' && this.body ? { body: this.body.def.id } : null;
+    this.onFoot.transition(prev, next, ctx, reason);
+    if (prev === 'ON_FOOT') this.hud.setAbility(null);
+  }
+
   private fixedUpdate(dt: number): void {
     this.simTime += dt;
     this.stepCount++;
@@ -527,7 +541,7 @@ export class Game {
     b.setLinvel({ x: 0, y: 0, z: 0 }, false);
     b.setAngvel({ x: 0, y: 0, z: 0 }, false);
     b.setBodyType(RAPIER.RigidBodyType.KinematicPositionBased, true);
-    this.mode = 'CRUISING';
+    this.setMode('CRUISING');
     this.counters.cruiseEngages++;
     this.onNotice?.('Cruise engaged', 'W/S set cruise speed · G or X returns to normal flight.', true);
   }
@@ -565,7 +579,7 @@ export class Game {
     ship.syncFromBody();
     ship.flight.reset();
     ship.flight.throttle = clamp(this.cruise.speed / FLIGHT.capSpace, 0, 1);
-    this.mode = 'PILOTING';
+    this.setMode('PILOTING');
     if (reason === 'approach') this.counters.cruiseExitApproach++;
     else if (reason === 'brake') this.counters.cruiseExitBrake++;
     else if (reason === 'toggle') this.counters.cruiseExitToggle++;
@@ -599,7 +613,7 @@ export class Game {
   private land(): void {
     this.audio.thump(1);
     this.parkShip();
-    this.mode = 'LANDED';
+    this.setMode('LANDED');
     this.assist.disengage();
     this.ship.flight.reset();
     this.counters.landings++;
@@ -609,9 +623,19 @@ export class Game {
       posPlanet: this.ship.currPos.clone().sub(this.bodyCenterLocal),
       quat: this.ship.currQuat.clone(),
     };
+    this.noteArrival(def);
     this.onNotice?.('Landed', `${def.name} — E to exit, Space to take off.`, true);
     this.input.clearAll(); // no held flight keys carry into the next takeoff
     this.autosave('landed');
+  }
+
+  /**
+   * Record an arrival at a body (discovery plus its power, once). Called where
+   * the ship comes to rest on a body (landing, placement, restore), never from
+   * setMode, so mode changes stay free of progress side effects.
+   */
+  private noteArrival(def: BodyDef): void {
+    this.expedition.arrive(def.id);
   }
 
   /** Park the ship at its current pose (no position snap). */
@@ -628,7 +652,7 @@ export class Game {
     const b = this.ship.body;
     b.setBodyType(RAPIER.RigidBodyType.Dynamic, true);
     b.setLinvel({ x: 0, y: 0, z: 0 }, true);
-    this.mode = 'PILOTING';
+    this.setMode('PILOTING');
     this.takeoffTimer = 1.4;
     this.ship.flight.reset();
     this.counters.takeoffs++;
@@ -700,7 +724,7 @@ export class Game {
     const heading = this.ship.forward(new Vector3());
     if (this.player) this.player.dispose();
     this.player = new Player(this.physics, spot, up, heading);
-    this.mode = 'ON_FOOT';
+    this.setMode('ON_FOOT');
     this.counters.exits++;
     this.physics.refreshQueries();
     this.input.clearAll();
@@ -720,9 +744,9 @@ export class Game {
 
   private boardShip(): void {
     if (!this.player) return;
+    this.setMode('LANDED', 'board');
     this.player.dispose();
     this.player = null;
-    this.mode = 'LANDED';
     this.counters.boardings++;
     this.autosave('boarded');
     this.cameraRig.reset();
@@ -737,6 +761,12 @@ export class Game {
     if (!p || !body) return;
     const inp = this.input;
     const w = this.state === 'playing' ? this.readWalk() : { forward: 0, right: 0, sprint: false, jump: false, yaw: 0, pitch: 0 };
+    if (this.onFoot.step(dt, w)) {
+      // An active ability moved the character this step; the walk controller stays idle.
+      this.updateScan(dt);
+      if (inp.consume('KeyE')) this.interact();
+      return;
+    }
     // Never walk into missing collision data.
     _v1.copy(p.pos).sub(this.bodyCenterLocal);
     if (!body.collision.readyAt(_v1)) {
@@ -794,7 +824,8 @@ export class Game {
     const e = this.expedition;
     const body = this.body!.def;
     if (t.kind === 'ship') {
-      this.boardShip();
+      // Never board in mid-air (charter J: flight never ends mid-air).
+      if (this.player?.grounded) this.boardShip();
       return;
     }
     if (t.kind === 'sample') {
@@ -832,8 +863,10 @@ export class Game {
     const p = this.player;
     const b = this.body;
     if (!p || !b) return null;
-    const eye = p.eye(1, _v1);
-    const dir = _v2.copy(p.heading).multiplyScalar(Math.cos(p.pitch)).addScaledVector(p.up, Math.sin(p.pitch)).normalize();
+    // The crosshair ray: from the character camera when it is on, else the eye (PLAYER's Player.aim).
+    const eye = _v1;
+    const dir = _v2;
+    p.aim(eye, dir);
     let best: ScanTarget | null = null;
     const a = new Vector3();
     const c = new Vector3();
@@ -953,9 +986,11 @@ export class Game {
     this.ship.gear = 1;
     this.ship.gearTarget = 1;
     this.parkShip();
-    this.mode = 'LANDED';
+    this.setMode('LANDED');
+    this.noteArrival(def);
     this.assist.disengage();
     this.cameraRig.reset();
+    this.lighting.snap();
     this.physics.refreshQueries();
     this.updateCollisionDemand();
   }
@@ -1184,9 +1219,12 @@ export class Game {
     const radialUp = _v1.copy(shipPos).sub(this.bodyCenterLocal).normalize();
     const playing = this.state === 'playing' || this.state === 'paused' || this.state === 'loading' || this.state === 'panel';
 
+    // True when the ON_FOOT hooks placed the camera (they also own its field of view).
+    let hookCamera = false;
     if (playing && this.mode === 'ON_FOOT' && this.player) {
       const p = this.player;
-      this.cameraRig.firstPerson(p.eye(alpha, _v3), p.up, p.heading, p.pitch);
+      hookCamera = this.onFoot.frame(dt, alpha);
+      if (!hookCamera) this.cameraRig.firstPerson(p.eye(alpha, _v3), p.up, p.heading, p.pitch);
     } else if (playing && (this.mode === 'PILOTING' || this.mode === 'CRUISING')) {
       this.cameraRig.chase(dt, shipPos, shipQuat, ship.speed, radialUp, this.mode === 'CRUISING');
     } else {
@@ -1194,7 +1232,7 @@ export class Game {
       this.cameraRig.orbit(dt, shipPos, radialUp, fwd, this.orbitMouse.x, this.orbitMouse.y, this.state === 'title');
       this.orbitMouse.set(0, 0);
     }
-    this.cameraRig.updateFov(dt, ship.flight.boostActive && this.mode === 'PILOTING', this.settings.reducedMotion);
+    if (!hookCamera) this.cameraRig.updateFov(dt, ship.flight.boostActive && this.mode === 'PILOTING', this.settings.reducedMotion);
     ship.root.visible = true;
     if (this.photoCamera) this.applyPhotoCamera();
 
@@ -1231,7 +1269,7 @@ export class Game {
     const focusPos = this.mode === 'ON_FOOT' && this.player ? this.player.pos : shipPos;
     // The environment map is GPU work outside the frame's render: only rebuild it on drawn frames.
     const drawn = this.renderEvery <= 1 || this.frameCount % this.renderEvery === 0;
-    this.lighting.update(dt, focusPos, this.ref, this.bodyCenterLocal, this.groundAlbedo, drawn);
+    this.lighting.update(dt, focusPos, this.ref, this.bodyCenterLocal, this.groundAlbedo, this.body !== null, drawn);
 
     r.bgCamera.quaternion.copy(r.camera.quaternion);
     r.bgCamera.fov = r.camera.fov;
@@ -1504,17 +1542,19 @@ export class Game {
     let player: SaveData['player'] = null;
     if (this.mode === 'ON_FOOT' && p) {
       const f = p.feet(new Vector3()).add(this.origin);
-      player = { sys: [f.x, f.y, f.z], heading: [p.heading.x, p.heading.y, p.heading.z], pitch: p.pitch };
+      player = { sys: [f.x, f.y, f.z], heading: [p.heading.x, p.heading.y, p.heading.z], pitch: p.pitch, abilityState: null };
     }
     const l = this.lastSafeLanding;
+    const e = this.expedition;
     return {
-      schema: SAVE_SCHEMA_VERSION,
+      schema: SAVE_SCHEMA,
       generator: GENERATOR_VERSION,
       seed: WORLD_SEED,
       savedAt: new Date().toISOString(),
       playTime: this.simTime,
+      system: this.ref.system,
       mode: this.mode,
-      body: this.body && this.bodyShown ? this.body.def.id : null,
+      bodyId: this.body && this.bodyShown ? this.body.def.id : null,
       ship: {
         sys: [sys.x, sys.y, sys.z],
         quat: [q.x, q.y, q.z, q.w],
@@ -1524,10 +1564,12 @@ export class Game {
       },
       player,
       cruise: cruising ? { speed: this.cruise.speed, throttle: this.cruiseThrottle } : null,
-      lastSafeLanding: l ? { body: l.bodyId, posPlanet: [l.posPlanet.x, l.posPlanet.y, l.posPlanet.z], quat: [l.quat.x, l.quat.y, l.quat.z, l.quat.w] } : null,
+      lastSafeLanding: l ? { bodyId: l.bodyId, posPlanet: [l.posPlanet.x, l.posPlanet.y, l.posPlanet.z], quat: [l.quat.x, l.quat.y, l.quat.z, l.quat.w] } : null,
       navTarget: this.navTarget,
+      discoveries: [...e.discoveries],
+      unlocked: [...e.unlocked],
       settings: { ...this.settings },
-      expedition: JSON.parse(JSON.stringify(this.expedition.state)),
+      expedition: JSON.parse(JSON.stringify(e.state)),
     };
   }
 
@@ -1538,12 +1580,12 @@ export class Game {
    */
   restore(data: SaveData): void {
     this.counters.restores++;
-    this.expedition.reset(JSON.parse(JSON.stringify(data.expedition)));
+    this.expedition.reset(JSON.parse(JSON.stringify(data.expedition)), [...data.discoveries], [...data.unlocked]);
     this.navTarget = data.navTarget;
     this.arrivedAt = null;
     this.simTime = data.playTime;
     const l = data.lastSafeLanding;
-    this.lastSafeLanding = l ? { bodyId: l.body, posPlanet: new Vector3(...l.posPlanet), quat: new Quaternion(...l.quat).normalize() } : null;
+    this.lastSafeLanding = l ? { bodyId: l.bodyId, posPlanet: new Vector3(...l.posPlanet), quat: new Quaternion(...l.quat).normalize() } : null;
     const ship = this.ship;
     if (this.mode === 'CRUISING') this.pendingCruiseExit = null;
     if (this.player) {
@@ -1555,7 +1597,7 @@ export class Game {
     const quat = new Quaternion(...data.ship.quat).normalize();
     this.floating.rebaseTo(FloatingOrigin.rounded(sys), (d) => this.applyRebase(d));
     // The saved body, or any body whose activation range contains the ship.
-    let bodyId = data.body;
+    let bodyId = data.bodyId;
     if (!bodyId) {
       for (const id of BODY_IDS) {
         const def = BODIES[id];
@@ -1576,7 +1618,7 @@ export class Game {
       ship.gear = 1;
       ship.gearTarget = 1;
       this.parkShip();
-      this.mode = 'LANDED';
+      this.setMode('LANDED', 'restore');
       if (data.mode === 'ON_FOOT' && data.player) {
         const pl = data.player;
         const feet = new Vector3(...pl.sys).sub(this.origin);
@@ -1590,7 +1632,7 @@ export class Game {
       ship.gearTarget = data.ship.gear;
       ship.flight.reset();
       ship.flight.throttle = data.ship.throttle;
-      this.mode = 'PILOTING';
+      this.setMode('PILOTING', 'restore');
       if (data.mode === 'CRUISING' && data.cruise) {
         // Cruise resumes only if its clearance is still safe at the saved speed.
         const fwd = new Vector3(0, 0, -1).applyQuaternion(quat);
@@ -1601,7 +1643,7 @@ export class Game {
           this.cruiseThrottle = data.cruise.throttle;
           ship.body.setBodyType(RAPIER.RigidBodyType.KinematicPositionBased, true);
           ship.setPose(local, quat);
-          this.mode = 'CRUISING';
+          this.setMode('CRUISING');
         } else {
           const v = vel.length();
           if (v > CRUISE.exitSpeed) ship.setPose(local, quat, vel.multiplyScalar(CRUISE.exitSpeed / v));
@@ -1611,9 +1653,13 @@ export class Game {
     }
     ship.syncFromBody(true);
     this.cameraRig.reset();
+    this.lighting.snap();
     this.stick.set(0, 0);
     this.physics.refreshQueries();
     this.markSaved(data);
+    // A surface save is an arrival there (a no-op for records this build wrote;
+    // after markSaved so an imported record missing it is saved again).
+    if (data.mode === 'LANDED' || data.mode === 'ON_FOOT') this.noteArrival(this.body!.def);
     this.updateCollisionDemand();
     this.setState('loading');
   }
@@ -1646,7 +1692,7 @@ export class Game {
     const h = heading.addScaledVector(up, -heading.dot(up)).normalize();
     this.player = new Player(this.physics, center, up, h);
     this.player.pitch = pitch;
-    this.mode = 'ON_FOOT';
+    this.setMode('ON_FOOT');
     this.physics.refreshQueries();
     return true;
   }
@@ -1688,10 +1734,13 @@ export class Game {
     return {
       state: this.state,
       mode: this.mode,
+      system: this.ref.system,
       body: b ? b.def.id : null,
       bodyShown: this.bodyShown,
       ref: this.ref.id,
       navTarget: this.navTarget,
+      discoveries: [...this.expedition.discoveries],
+      unlocked: [...this.expedition.unlocked],
       simTime: this.simTime,
       frame: this.frameCount,
       frameDt: this.lastFrameDt,

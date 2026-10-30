@@ -11,9 +11,12 @@ import { tangentBasis } from '../world/sites';
 import { Raycaster, Vector3 } from 'three';
 import { GROUPS } from '../physics/Physics';
 import { frameStats, gpuEstimate } from './perf';
+import { playerTestHooks } from './playerHooks';
 
 export interface MeridianTestApi {
   game: Game;
+  /** PLAYER-owned hooks (src/debug/playerHooks.ts): on-foot and power inputs and state. */
+  player: Record<string, unknown>;
   snapshot(): Record<string, unknown>;
   hold(code: string, down: boolean): void;
   press(code: string): void;
@@ -173,8 +176,11 @@ export function installTestHooks(game: Game, extras?: TestHookExtras): void {
     saveState() {
       const st = extras?.saves();
       if (!st) return { available: false };
-      const slot = (x: typeof st.latest) => ({ present: x.present, valid: !!x.data, error: x.error, savedAt: x.data?.savedAt ?? null, mode: x.data?.mode ?? null, body: x.data?.body ?? null, relays: x.data?.expedition.relays ?? null });
-      return { available: st.available, failure: st.failure, latest: slot(st.latest), previous: slot(st.previous) };
+      const slot = (x: typeof st.latest) => ({
+        present: x.present, valid: !!x.data, error: x.error, savedAt: x.data?.savedAt ?? null, mode: x.data?.mode ?? null,
+        system: x.data?.system ?? null, body: x.data?.bodyId ?? null, relays: x.data?.expedition.relays ?? null,
+      });
+      return { available: st.available, failure: st.failure, latest: slot(st.latest), previous: slot(st.previous), legacy: st.legacy };
     },
     missionTargets() {
       const b = game.body;
@@ -309,6 +315,7 @@ export function installTestHooks(game: Game, extras?: TestHookExtras): void {
     releaseAll() {
       game.input.injected.clear();
     },
+    player: playerTestHooks(game),
   };
   (window as unknown as { __meridian: MeridianTestApi }).__meridian = api;
 }

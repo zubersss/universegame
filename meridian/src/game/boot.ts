@@ -3,11 +3,12 @@ import { initPhysics } from '../physics/Physics';
 import { Menus } from '../ui/Menus';
 import { DEFAULT_SETTINGS, sanitizeSettings, type Settings } from './settings';
 import { KvStore } from '../save/db';
-import { SaveStore, exportJson, importJson, type SaveData } from '../save/SaveSystem';
+import { SaveStore, exportJson, importJson, type LegacySave, type SaveData } from '../save/SaveSystem';
 import { Game } from './Game';
 import { Panel } from '../ui/Panel';
 import { renderJournal, renderSurvey } from '../ui/Journal';
-import { BODIES, BODY_IDS } from '../world/bodies';
+import { BODIES, BODY_IDS, isBodyId } from '../world/bodies';
+import { installPlayer } from '../player/install';
 
 function when(iso: string): string {
   const d = new Date(iso);
@@ -18,6 +19,20 @@ function summary(d: SaveData): string {
   const e = d.expedition;
   if (e.transmitted) return 'survey transmitted';
   return `${e.relays.length}/3 relays · ${e.species.length} species logged`;
+}
+
+/** Title line for a save from an earlier version: shown as history, never continued. */
+function legacyText(l: LegacySave): string {
+  const parts: string[] = [];
+  if (l.body) parts.push(isBodyId(l.body) ? BODIES[l.body].name : l.body);
+  if (l.playTime !== null) {
+    const min = Math.floor(l.playTime / 60);
+    parts.push(`${min >= 60 ? `${Math.floor(min / 60)} h ${min % 60} min` : `${min} min`} played`);
+  }
+  if (l.transmitted) parts.push('survey transmitted');
+  else if (l.relays !== null) parts.push(`${l.relays}/3 relays`);
+  if (l.savedAt) parts.push(`saved ${when(l.savedAt)}`);
+  return `Earlier-version save kept as read-only history${parts.length ? `: ${parts.join(' · ')}` : ''}. It cannot be continued in this version.`;
 }
 
 /** Application entry: compatibility checks, async init, and wiring of menus to the game. */
@@ -161,10 +176,11 @@ export async function boot(): Promise<void> {
     settings,
   );
 
-  /** Title-screen save state: continue, previous save, or an honest storage note. */
+  /** Title-screen save state: continue, previous save, or an honest storage note; plus any earlier-version history. */
   const refreshTitle = () => {
     const l = saves.latest;
     const p = saves.previous;
+    menus.setLegacy(saves.legacy ? legacyText(saves.legacy) : null);
     if (!saves.available) {
       menus.setContinueAvailable(false, 'Browser storage is unavailable — progress cannot be saved this session. Backup export and import still work.', true);
       menus.setPreviousAvailable(false);
@@ -234,6 +250,7 @@ export async function boot(): Promise<void> {
   }
 
   game = new Game(render, settings);
+  installPlayer(game);
   const panel = new Panel();
   const closePanel = () => {
     if (!game || game.state !== 'panel') return;

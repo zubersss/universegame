@@ -25,6 +25,60 @@ export interface Prompt {
   dim?: boolean;
 }
 
+// HUD slot API (charter section I): PLAYER and WORLDS report through these
+// two calls instead of touching HUD elements.
+
+export type WarningSeverity = 'info' | 'caution' | 'danger';
+
+export interface WarningLine {
+  text: string;
+  severity: WarningSeverity;
+}
+
+/** One ability readout for hud.setAbility(). */
+export interface AbilitySlot {
+  name: string;
+  /** AbilityState shown beside the name (e.g. 'flight'). */
+  state: string;
+  /** Available charge 0..1 (1 when the power is not charge-based). */
+  charge: number;
+  /** Seconds until the power can be used again (0 = ready). */
+  cooldown: number;
+  /** Short control hint, e.g. 'Q dash'. */
+  hint: string;
+}
+
+export interface AbilityView {
+  name: string;
+  state: string;
+  chargePct: number;
+  cooldownText: string;
+  hint: string;
+  ready: boolean;
+}
+
+/** Sanitized display values for an ability slot (bad numbers never reach the DOM). */
+export function abilityView(s: AbilitySlot): AbilityView {
+  const charge = Number.isFinite(s.charge) ? Math.min(1, Math.max(0, s.charge)) : 0;
+  const cooldown = Number.isFinite(s.cooldown) ? Math.max(0, s.cooldown) : 0;
+  return {
+    name: s.name,
+    state: s.state,
+    chargePct: Math.round(charge * 100),
+    cooldownText: cooldown > 0 ? `${cooldown.toFixed(cooldown < 10 ? 1 : 0)} s` : '',
+    hint: s.hint,
+    ready: cooldown === 0 && charge > 0,
+  };
+}
+
+const SEVERITY: Record<WarningSeverity, number> = { info: 0, caution: 1, danger: 2 };
+
+/** The more severe line is shown; on a tie the game's own (flight-safety) warning wins. */
+export function pickWarning(game: WarningLine | null, slot: WarningLine | null): WarningLine | null {
+  if (!game || !slot) return game ?? slot;
+  return SEVERITY[slot.severity] > SEVERITY[game.severity] ? slot : game;
+}
+
 export class Hud {
   private readonly cache = new Map<HTMLElement, string>();
   private readonly els = {
@@ -58,9 +112,17 @@ export class Hud {
     scanProgress: $('scan-progress'),
     scanLabel: $('scan-label'),
     inventory: $('inventory-mini'),
+    ability: $('ability-slot'),
+    aName: $('a-name'),
+    aState: $('a-state'),
+    aCharge: $('a-charge-bar'),
+    aCooldown: $('a-cooldown'),
+    aHint: $('a-hint'),
   };
   private promptKey = '';
   private saveTimer = 0;
+  private gameWarning: WarningLine | null = null;
+  private slotWarning: WarningLine | null = null;
 
   private set(el: HTMLElement, text: string): void {
     if (this.cache.get(el) !== text) {
@@ -153,15 +215,46 @@ export class Hud {
     );
   }
 
+  /** The game's own per-frame warning (flight and terrain safety). */
   warning(text: string | null, danger = false): void {
+    this.gameWarning = text ? { text, severity: danger ? 'danger' : 'caution' } : null;
+    this.showWarning();
+  }
+
+  /** Slot API: a warning from abilities or zones; null clears it. */
+  setWarning(text: string | null, severity: WarningSeverity = 'caution'): void {
+    this.slotWarning = text ? { text, severity } : null;
+    this.showWarning();
+  }
+
+  private showWarning(): void {
     const el = this.els.warning;
-    if (!text) {
+    const w = pickWarning(this.gameWarning, this.slotWarning);
+    if (!w) {
       el.classList.add('hidden');
       return;
     }
     el.classList.remove('hidden');
-    el.classList.toggle('danger', danger);
-    this.set(el, text);
+    el.classList.toggle('danger', w.severity === 'danger');
+    el.classList.toggle('info', w.severity === 'info');
+    this.set(el, w.text);
+  }
+
+  /** Slot API: the active power's readout; null hides the slot. */
+  setAbility(slot: AbilitySlot | null): void {
+    const el = this.els.ability;
+    if (!slot) {
+      el.classList.add('hidden');
+      return;
+    }
+    const v = abilityView(slot);
+    el.classList.remove('hidden');
+    el.classList.toggle('ready', v.ready);
+    this.set(this.els.aName, v.name);
+    this.set(this.els.aState, v.state);
+    this.setStyle(this.els.aCharge, 'width', `${v.chargePct}%`);
+    this.set(this.els.aCooldown, v.cooldownText);
+    this.set(this.els.aHint, v.hint);
   }
 
   crosshairTarget(on: boolean): void {

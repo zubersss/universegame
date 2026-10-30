@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Expedition } from '../src/game/Expedition';
+import { Expedition, SURVEY_BODIES, powerFor } from '../src/game/Expedition';
 import { BODIES, BODY_IDS } from '../src/world/bodies';
 import { computeSites } from '../src/world/sites';
 
@@ -11,6 +11,7 @@ describe('expedition rules', () => {
     expect(e.state.inventory.ilex).toBe(1);
     expect(e.state.collected).toEqual(['ilex:sample:0']);
     expect(e.collect('nowhere:sample:0')).toBe(false);
+    expect(e.collect('earth:sample:0')).toBe(false); // catalog body not in play yet
   });
 
   it('activates a relay only with a local sample, consuming exactly one, once', () => {
@@ -66,6 +67,43 @@ describe('expedition rules', () => {
     for (const b of [...BODY_IDS].reverse()) expect(e.activateRelay(b)).toBe(true);
     expect(e.state.inventory).toEqual({ ilex: 2, vesper: 2, cairn: 2 });
     expect(e.transmit()).toBe(true);
+  });
+
+  it('names the power each arrival unlocks (never the base walk)', () => {
+    expect(powerFor('earth')).toBe('skyborne-flight');
+    expect(powerFor('moon')).toBe('lunar-step');
+    expect(powerFor('mars')).toBe('redline');
+    expect(powerFor('sun')).toBeNull();
+    expect(powerFor('ilex')).toBeNull();
+    expect(powerFor('pluto')).toBeNull();
+    expect(powerFor('constructor')).toBeNull();
+  });
+
+  it('records each arrival once, with its power, idempotently', () => {
+    const e = new Expedition();
+    expect(e.arrive('ilex')).toBe(true);
+    expect(e.dirty).toBe(true);
+    expect(e.unlocked).toEqual([]);
+    e.dirty = false;
+    expect(e.arrive('ilex')).toBe(false); // repeat: nothing new, nothing to save
+    expect(e.dirty).toBe(false);
+    expect(e.arrive('earth')).toBe(true);
+    expect(e.arrive('moon')).toBe(true);
+    expect(e.arrive('earth')).toBe(false);
+    expect(e.arrive('pluto')).toBe(false);
+    expect(e.discoveries).toEqual(['ilex', 'earth', 'moon']);
+    expect(e.unlocked).toEqual(['skyborne-flight', 'lunar-step']);
+    // A restored record missing an unlock gains it on the next arrival there.
+    e.reset(undefined, ['earth'], []);
+    expect(e.arrive('earth')).toBe(true);
+    expect([e.discoveries, e.unlocked]).toEqual([['earth'], ['skyborne-flight']]);
+    e.reset();
+    expect([e.discoveries, e.unlocked, e.dirty]).toEqual([[], [], false]);
+  });
+
+  it('keeps the relay survey on the Quiet System bodies', () => {
+    expect(SURVEY_BODIES).toEqual(['ilex', 'vesper', 'cairn']);
+    expect(Object.keys(new Expedition().state.inventory)).toEqual([...SURVEY_BODIES]);
   });
 
   it('guides the next objective', () => {

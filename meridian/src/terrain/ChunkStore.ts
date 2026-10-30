@@ -57,6 +57,9 @@ export class ChunkStore {
   private readonly inFlight = new Map<number, { req: ChunkRequest; token: number }>();
   private readonly inFlightKeys = new Set<string>();
   private nextId = 1;
+  /** Keys whose generation failed: not requested again before `at` (ms); `n` consecutive failures. */
+  private readonly failed = new Map<string, { at: number; n: number }>();
+  private lastErrorLog = -Infinity;
   token = 1;
   bodyId: BodyId;
   maxInFlight: number = BUDGETS.maxInFlightJobs;
@@ -109,8 +112,11 @@ export class ChunkStore {
    */
   setDemand(reqs: ChunkRequest[]): void {
     const fresh: ChunkRequest[] = [];
+    const now = Date.now();
     for (const r of reqs) {
       if (this.has(r.key) || this.inFlightKeys.has(`${this.bodyId}:${r.key}`)) continue;
+      const f = this.failed.get(`${this.bodyId}:${r.key}`);
+      if (f && f.at > now) continue; // failed recently: back off instead of re-requesting every tick
       fresh.push(r);
     }
     fresh.sort((a, b) => a.priority - b.priority);
@@ -151,7 +157,15 @@ export class ChunkStore {
     this.inFlightKeys.delete(`${job.req.bodyId}:${job.req.key}`);
     if (!data) {
       this.errors++;
-      if (err) console.error('Chunk generation failed', job.req.key, err);
+      const k = `${job.req.bodyId}:${job.req.key}`;
+      const n = (this.failed.get(k)?.n ?? 0) + 1;
+      this.failed.set(k, { at: Date.now() + Math.min(30_000, 1000 * 2 ** (n - 1)), n });
+      // One log line per 10 s at most: a missing dataset fails every chunk of a body.
+      const now = Date.now();
+      if (err && now - this.lastErrorLog > 10_000) {
+        this.lastErrorLog = now;
+        console.error('Chunk generation failed', job.req.key, err);
+      }
     } else if (data.token !== this.token || data.bodyId !== this.bodyId) {
       // Stale (body switched since the request): discard.
       this.discarded++;
@@ -164,6 +178,7 @@ export class ChunkStore {
 
   insert(data: ChunkData): void {
     const k = `${data.bodyId}:${data.key}`;
+    this.failed.delete(k);
     const old = this.cache.get(k);
     if (old) this.bytes -= chunkBytes(old);
     this.cache.delete(k);

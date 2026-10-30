@@ -9,7 +9,7 @@ import {
   Vector3,
 } from 'three';
 import type { BodyDef } from '../world/bodies';
-import type { SurfaceGenerator, SurfaceInfo } from '../world/surface';
+import { newSurfaceInfo, type SurfaceGenerator, type SurfaceInfo } from '../world/surface';
 import { chunkAt, chunkBounds, chunkKey, dirToFace, faceDir } from '../world/cube';
 import { levelSpacing } from '../terrain/chunkGen';
 import { tangentBasis, LANDING_R0, RELAY_R1, type MissionSites, type V3 } from '../world/sites';
@@ -71,7 +71,7 @@ export class PropSystem {
   density = 1;
   rangeScale = 1;
   readonly stats = { cells: 0, instances: 0, drawn: 0, colliders: 0, genMs: 0, pending: 0 };
-  private readonly info: SurfaceInfo = { height: 0, biome: 0, variation: 0, special: 0, rockiness: 0 };
+  private readonly info: SurfaceInfo = newSurfaceInfo();
   private readonly exclusions: { dir: V3; r: number }[] = [];
 
   constructor(

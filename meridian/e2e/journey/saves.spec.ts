@@ -3,9 +3,13 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { bootToTitle, collectErrors, snap } from '../helpers';
 
 // Save robustness through the real UI: corrupt latest record, storage denied,
-// backup export and import (valid and invalid files).
+// backup export and import (valid and invalid files), and a save from an
+// earlier version kept as read-only history.
 
 test.use({ viewport: { width: 640, height: 360 } });
+
+/** A schema-1 record as the published build wrote it (shared with tests/save.test.ts). */
+const SCHEMA1_FILE = 'tests/fixtures/save-schema1.json';
 
 const api = (page: Page, fn: string, ...args: unknown[]) =>
   page.evaluate(([f, a]) => (window as any).__meridian[f as string](...(a as unknown[])), [fn, args] as const);
@@ -32,6 +36,23 @@ async function idbGet(page: Page, key: string): Promise<unknown> {
   }, key);
 }
 
+async function idbPut(page: Page, key: string, value: unknown): Promise<void> {
+  await page.evaluate(async ([k, v]) => {
+    const db: IDBDatabase = await new Promise((res, rej) => {
+      const r = indexedDB.open('meridian', 1);
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+    await new Promise((res, rej) => {
+      const tx = db.transaction('kv', 'readwrite');
+      tx.objectStore('kv').put(v, k as string);
+      tx.oncomplete = res;
+      tx.onerror = rej;
+    });
+    db.close();
+  }, [key, value] as const);
+}
+
 async function pauseAndSave(page: Page): Promise<void> {
   await page.keyboard.press('Escape');
   await until(page, 's.state === "paused"', 30_000);
@@ -56,20 +77,7 @@ test('a corrupt latest save offers the previous save and is kept aside', async (
   await pauseAndSave(page);
   expect(await idbGet(page, 'save-prev')).toBeTruthy();
   // Damage the latest record.
-  await page.evaluate(async () => {
-    const db: IDBDatabase = await new Promise((res, rej) => {
-      const r = indexedDB.open('meridian', 1);
-      r.onsuccess = () => res(r.result);
-      r.onerror = () => rej(r.error);
-    });
-    await new Promise((res, rej) => {
-      const tx = db.transaction('kv', 'readwrite');
-      tx.objectStore('kv').put({ schema: 1, ship: 'garbage' }, 'save');
-      tx.oncomplete = res;
-      tx.onerror = rej;
-    });
-    db.close();
-  });
+  await idbPut(page, 'save', { schema: 2, ship: 'garbage' });
   await page.reload();
   await page.waitForFunction(() => (window as any).__meridianBooted === true, null, { timeout: 180_000 });
   await expect(page.locator('#btn-continue')).toBeHidden();
@@ -79,9 +87,9 @@ test('a corrupt latest save offers the previous save and is kept aside', async (
   await page.click('#btn-continue-prev');
   await until(page, 's.state === "playing"');
   await pauseAndSave(page);
-  expect(await idbGet(page, 'save-corrupt')).toEqual({ schema: 1, ship: 'garbage' });
+  expect(await idbGet(page, 'save-corrupt')).toEqual({ schema: 2, ship: 'garbage' });
   const latest = (await idbGet(page, 'save')) as Record<string, unknown>;
-  expect(latest.schema).toBe(1);
+  expect(latest.schema).toBe(2);
   expect(latest.mode).toBe('LANDED');
   expect(errors).toEqual([]);
 });
@@ -113,7 +121,7 @@ test('denied storage keeps the game playable; export and import still work', asy
   const file = info.outputPath('backup.json');
   await (await dl).saveAs(file);
   const backup = JSON.parse(readFileSync(file, 'utf8'));
-  expect(backup.schema).toBe(1);
+  expect(backup.schema).toBe(2);
   expect(backup.mode).toBe('PILOTING');
   // Re-import the backup (restores the flight state).
   await page.setInputFiles('#file-import', file);
@@ -153,7 +161,7 @@ test('a backup carries progress into a fresh profile; invalid files are rejected
   await expect(fresh.locator('#btn-continue')).toBeHidden();
   // Invalid file first: rejected with a message, nothing restored.
   const bad = info.outputPath('bad.json');
-  writeFileSync(bad, JSON.stringify({ schema: 1, hello: 'world' }));
+  writeFileSync(bad, JSON.stringify({ schema: 2, hello: 'world' }));
   await fresh.setInputFiles('#file-import', bad);
   await expect(fresh.locator('#title-save-note')).toContainText('Import failed');
   expect((await snap(fresh)).state).toBe('title');
@@ -168,6 +176,44 @@ test('a backup carries progress into a fresh profile; invalid files are rejected
   await fresh.waitForFunction(() => (window as any).__meridian.saveState().latest.valid, null, { timeout: 30_000 });
   expect(errors).toEqual([]);
   await ctx.close();
+});
+
+test('an earlier-version save is kept as read-only history', async ({ page }) => {
+  test.setTimeout(20 * 60 * 1000);
+  const errors = collectErrors(page);
+  const old = JSON.parse(readFileSync(SCHEMA1_FILE, 'utf8'));
+  await bootToTitle(page, '?preset=low');
+  // A player of the published build: their schema-1 record is the latest save.
+  await idbPut(page, 'save', old);
+  await page.reload();
+  await page.waitForFunction(() => (window as any).__meridianBooted === true, null, { timeout: 180_000 });
+  await expect(page.locator('#btn-continue')).toBeHidden();
+  await expect(page.locator('#btn-continue-prev')).toBeHidden();
+  const history = page.locator('#title-legacy');
+  await expect(history).toBeVisible();
+  await expect(history).toContainText('read-only history');
+  await expect(history).toContainText('Vesper');
+  expect(await idbGet(page, 'save-legacy')).toEqual(old);
+  // The same record as a backup file is refused with a reason, not restored.
+  await page.setInputFiles('#file-import', SCHEMA1_FILE);
+  await expect(page.locator('#title-save-note')).toContainText('earlier version');
+  expect((await snap(page)).state).toBe('title');
+  // A new expedition plays and saves beside the history.
+  await api(page, 'setRenderEvery', 30);
+  await page.click('#btn-new');
+  const s = await until(page, 's.state === "playing"');
+  expect(s.discoveries).toEqual(['ilex']);
+  await pauseAndSave(page);
+  await page.reload();
+  await page.waitForFunction(() => (window as any).__meridianBooted === true, null, { timeout: 180_000 });
+  await expect(page.locator('#btn-continue')).toBeVisible();
+  await expect(history).toContainText('read-only history');
+  const st = await api(page, 'saveState');
+  expect(st.latest.valid).toBe(true);
+  expect(st.latest.system).toBe('quiet');
+  expect(st.legacy.schema).toBe(1);
+  expect(await idbGet(page, 'save-legacy')).toEqual(old);
+  expect(errors).toEqual([]);
 });
 
 test('settings persist across a reload', async ({ page }) => {

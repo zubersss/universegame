@@ -1,11 +1,25 @@
 // Celestial body definitions. Pure data: this module is shared by the main
 // thread and the terrain worker, so it must not import Three.js.
 // All distances are meters in system coordinates (right-handed).
+// The catalog holds every system's bodies (Sol from src/data/sol.json via
+// catalog.ts, the fictional Quiet System below); `BODY_IDS` is the set the
+// game currently plays and iterates (travel, gravity, proxies), switched with
+// setPlaySystem.
 
 import { hashCombine } from '../core/rng';
+import { BELTS, DEFAULT_FRAME, buildSolBodies } from './catalog';
 
-export type BodyId = 'ilex' | 'vesper' | 'cairn';
-export const BODY_IDS: readonly BodyId[] = ['ilex', 'vesper', 'cairn'];
+export { DEFAULT_FRAME };
+import { maxLevelFor } from './scale';
+import type { ZoneDef } from './zones';
+
+/** Catalog key, e.g. 'earth', 'ilex'. Validate untrusted input with isBodyId. */
+export type BodyId = string;
+export type SystemId = 'sol' | 'proxima' | 'quiet';
+export type BodyKind = 'star' | 'planet' | 'moon';
+export type Explore = 'surface' | 'zone' | 'none';
+export type DataTag = 'measured' | 'estimated' | 'fictional';
+
 
 export const WORLD_SEED = 0x6d657231;
 /** Bump when the surface generator changes in a way that alters geography. */
@@ -52,12 +66,53 @@ export interface BodyPalette {
   proxyNight: number;
 }
 
+/**
+ * Body-fixed axes in the system frame (unit vectors): north pole, prime
+ * meridian (latitude 0, longitude 0) and east = north × meridian. Bodies do
+ * not rotate in play; the frame is their orientation at EPOCH where known.
+ */
+export interface BodyFrame {
+  north: [number, number, number];
+  meridian: [number, number, number];
+  east: [number, number, number];
+  tag: DataTag;
+}
+
+/** Scientific values (never gameplay-scaled); `tags` labels each field. */
+export interface RealData {
+  radiusKm: number;
+  /** Surface gravity [m/s²]. */
+  gravity: number;
+  massKg: number;
+  /** Sidereal rotation [h], negative = retrograde. Informational: bodies do not rotate in play. */
+  rotationHours: number;
+  /** Heliocentric J2000-ecliptic position at EPOCH [km]. */
+  positionKm: [number, number, number];
+  /** Stars only. */
+  luminosityW?: number;
+  effectiveTempK?: number;
+  tags: Record<string, DataTag>;
+  /** Source of the physical values ('pending (...)' until verified). */
+  source: string;
+  positionSource: string;
+  verified: boolean;
+}
+
 export interface BodyDef {
   id: BodyId;
   index: number;
   name: string;
-  kind: 'planet' | 'moon';
+  system: SystemId;
+  kind: BodyKind;
+  /** Parent body for moons, else null (or the star). */
+  parent: BodyId | null;
+  explore: Explore;
+  /** Scientific values; null for fictional bodies. */
+  real: RealData | null;
+  /** Gameplay center [m, system frame]. */
   center: [number, number, number];
+  /** Body-fixed orientation (latitude/longitude axes) in the system frame. */
+  frame: BodyFrame;
   radius: number;
   atmosphereHeight: number;
   gravity: number;
@@ -65,6 +120,16 @@ export interface BodyDef {
   /** Contact/max-detail quadtree level: ceil(log2(2R/128)). */
   maxLevel: number;
   seed: number;
+  /** Height above the datum [m] of the ocean surface, or null for bodies without an ocean. */
+  seaLevel: number | null;
+  /** 'data' bodies sample a dataset for the large-scale layer and use the seed only for infill. */
+  surface: 'procedural' | 'data';
+  dataset?: string;
+  zone?: ZoneDef;
+  /** Ability id active while exploring this body (PLAYER's AbilityId), null where nobody leaves the ship. */
+  power: string | null;
+  /** Which aspects of this body are invented for gameplay. */
+  fiction: string[];
   atmosphere: AtmosphereDef | null;
   clouds: CloudLayerDef[];
   palette: BodyPalette;
@@ -72,16 +137,26 @@ export interface BodyDef {
   description: string;
 }
 
-function maxLevelFor(radius: number): number {
-  return Math.ceil(Math.log2((2 * radius) / 128));
-}
-
 function seedFor(id: BodyId): number {
   return hashCombine(WORLD_SEED, GENERATOR_VERSION, id);
 }
 
-export const BODIES: Record<BodyId, BodyDef> = {
+const QUIET = {
+  system: 'quiet',
+  parent: null,
+  frame: DEFAULT_FRAME,
+  seaLevel: null,
+  explore: 'surface',
+  real: null,
+  surface: 'procedural',
+  power: 'walk',
+  fiction: ['the whole Quiet System is fictional'],
+} as const satisfies Partial<BodyDef>;
+
+const QUIET_BODIES: Record<string, BodyDef> = {
   ilex: {
+    ...QUIET,
+    fiction: [...QUIET.fiction],
     id: 'ilex',
     index: 0,
     name: 'Ilex',
@@ -117,6 +192,8 @@ export const BODIES: Record<BodyId, BodyDef> = {
     description: 'A temperate world of chalk ridges and ochre plains, threaded with dark teal groves.',
   },
   vesper: {
+    ...QUIET,
+    fiction: [...QUIET.fiction],
     id: 'vesper',
     index: 1,
     name: 'Vesper',
@@ -150,6 +227,8 @@ export const BODIES: Record<BodyId, BodyDef> = {
     description: 'A dry, dust-hazed world of terraced rust mesas and pale dune seas.',
   },
   cairn: {
+    ...QUIET,
+    fiction: [...QUIET.fiction],
     id: 'cairn',
     index: 2,
     name: 'Cairn',
@@ -174,10 +253,74 @@ export const BODIES: Record<BodyId, BodyDef> = {
   },
 };
 
-export function bodyById(id: BodyId): BodyDef {
-  return BODIES[id];
+const SOL_BODIES = buildSolBodies(seedFor, Object.keys(QUIET_BODIES).length);
+
+/** Every catalog body by id (all systems). */
+export const BODIES: Record<BodyId, BodyDef> = { ...QUIET_BODIES, ...Object.fromEntries(SOL_BODIES.map((b) => [b.id, b])) };
+
+/** Catalog ids per system, in catalog order. */
+export const SYSTEM_BODY_IDS: Record<SystemId, readonly BodyId[]> = {
+  quiet: Object.keys(QUIET_BODIES),
+  sol: SOL_BODIES.map((b) => b.id),
+  proxima: [],
+};
+
+/** The system the game plays now (ES-module live binding: importers see setPlaySystem's changes). */
+export let PLAY_SYSTEM: SystemId = 'quiet';
+/** The bodies the game plays now: travel, gravity, proxies and survey iterate these. */
+export let BODY_IDS: readonly BodyId[] = SYSTEM_BODY_IDS.quiet;
+
+/**
+ * Switch the played body set (all ids must be catalog ids of one system, at
+ * least one). Main thread only; workers look bodies up by id and need no switch.
+ */
+export function setPlaySystem(ids: readonly BodyId[]): void {
+  if (ids.length === 0) throw new Error('setPlaySystem: no bodies');
+  const unknown = ids.filter((id) => !isBodyId(id));
+  if (unknown.length) throw new Error(`setPlaySystem: unknown bodies ${unknown.join(', ')}`);
+  const systems = new Set(ids.map((id) => BODIES[id].system));
+  if (systems.size !== 1) throw new Error(`setPlaySystem: bodies from several systems (${[...systems].join(', ')})`);
+  if (new Set(ids).size !== ids.length) throw new Error('setPlaySystem: duplicate bodies');
+  PLAY_SYSTEM = BODIES[ids[0]].system;
+  BODY_IDS = Object.freeze([...ids]);
 }
 
+/** Sol bodies played in M2 (the charter's Sun, eight planets and Moon), in travel order; Europa and Titan join with W9. */
+export const SOL_M2_BODIES: readonly BodyId[] = ['sun', 'mercury', 'venus', 'earth', 'moon', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'];
+
+/** Sol travel order outward from the Sun, with belt bands (from catalog.BELTS) between the bodies. */
+export const SOL_TRAVEL_ORDER: readonly ({ body: BodyId } | { belt: string })[] = [
+  { body: 'sun' }, { body: 'mercury' }, { body: 'venus' }, { body: 'earth' }, { body: 'moon' }, { body: 'mars' },
+  { belt: 'asteroid-belt' }, { body: 'jupiter' }, { body: 'europa' }, { body: 'saturn' }, { body: 'titan' },
+  { body: 'uranus' }, { body: 'neptune' }, { belt: 'kuiper-belt' },
+];
+
+/**
+ * Largest gameplay distance from the system origin that play can reach [m]:
+ * the outer edge of the outermost belt (or the farthest body) plus 10%.
+ */
+export const SYSTEM_EXTENT: number = (() => {
+  let m = 0;
+  for (const b of Object.values(BODIES)) m = Math.max(m, Math.hypot(...b.center) + b.radius + b.atmosphereHeight);
+  for (const b of BELTS) m = Math.max(m, b.outer);
+  return m * 1.1;
+})();
+
+export function bodyById(id: BodyId): BodyDef {
+  const d = BODIES[id];
+  if (!d) throw new Error(`Unknown body ${id}`);
+  return d;
+}
+
+/** True for any catalog id (checks the catalog, not a literal list). */
 export function isBodyId(x: unknown): x is BodyId {
-  return x === 'ilex' || x === 'vesper' || x === 'cairn';
+  return typeof x === 'string' && Object.prototype.hasOwnProperty.call(BODIES, x);
+}
+
+/** Unit direction from a body's center toward its star (light direction). Quiet System: the fixed SUN_DIR. */
+export function sunDirFor(def: BodyDef): [number, number, number] {
+  if (def.system === 'quiet') return [SUN_DIR[0], SUN_DIR[1], SUN_DIR[2]];
+  const c = def.center;
+  const l = Math.hypot(c[0], c[1], c[2]);
+  return l > 0 ? [-c[0] / l, -c[1] / l, -c[2] / l] : [SUN_DIR[0], SUN_DIR[1], SUN_DIR[2]];
 }
