@@ -1,49 +1,40 @@
 import type { OnFootContext, OnFootExitReason } from '../game/onFoot';
 import type { AbilitySlot, WarningSeverity } from '../ui/Hud';
-import { abilityFor, isAbilityId } from './catalog';
-import { isAbilityState, transitionBlocked, type AbilityConfig, type AbilityId, type AbilityState, type BodyPower, type Primitive, type TransitionContext } from './types';
+import { abilityFor } from './catalog';
+import { readAbilitySave, type AbilitySave } from './save';
+import { transitionBlocked, type AbilityConfig, type AbilityId, type AbilityState, type BodyPower, type Primitive, type TransitionContext } from './types';
+
+/**
+ * What enter() receives: Game's ON_FOOT context, optionally with the power
+ * to activate (BodyDef.power of the body or zone) and a restored ability
+ * save (LEAD L8/L9 plan; both optional until Game passes them).
+ */
+export type AbilityEnterContext = OnFootContext & { power?: AbilityId | 'walk' | null; restored?: AbilitySave | null };
+
+/** One logged state change (simulation time, from, to). */
+export interface AbilityLogEntry {
+  t: number;
+  from: AbilityState;
+  to: AbilityState;
+}
+
+/** The ability readout for tests and diagnostics. */
+export interface AbilityView {
+  id: AbilityId | null;
+  state: AbilityState;
+  active: boolean;
+  charge: number;
+  cooldown: number;
+  preview: { ok: boolean; reason: string | null } | null;
+}
+
+/** How many state changes the log keeps. */
+const LOG_MAX = 64;
 
 /** The two HUD slot calls the controller makes (LEAD's HUD slot API). */
 export interface AbilityHud {
   setAbility(slot: AbilitySlot | null): void;
   setWarning(text: string | null, severity?: WarningSeverity): void;
-}
-
-/** Ability fields of the schema-2 save (player.abilityState and unlocked). */
-export interface AbilitySave {
-  abilityState: AbilityState;
-  unlocked: AbilityId[];
-}
-
-/** Most powers there are (cap for the unlocked list). */
-const MAX_UNLOCKED = 12;
-
-/**
- * Strict validator for the schema-2 ability fields (player.abilityState,
- * null when not on foot, and the top-level unlocked list), for SaveSystem's
- * validateSave: returns the fields, or an error string for a malformed
- * record (which then never rotates over the previous good backup).
- */
-export function validateAbilityFields(abilityState: unknown, unlocked: unknown): AbilitySave | string {
-  if (abilityState !== null && abilityState !== undefined && !isAbilityState(abilityState)) return 'player.abilityState is not an ability state';
-  if (!Array.isArray(unlocked)) return 'unlocked is not a list';
-  if (unlocked.length > MAX_UNLOCKED) return 'unlocked is too long';
-  for (const id of unlocked) if (!isAbilityId(id)) return `unlocked has an unknown power: ${String(id).slice(0, 40)}`;
-  if (new Set(unlocked).size !== unlocked.length) return 'unlocked has duplicates';
-  return { abilityState: (abilityState ?? 'walk') as AbilityState, unlocked: [...(unlocked as AbilityId[])] };
-}
-
-/**
- * Lenient reader for ability fields that were already validated (or come
- * from an older record): unknown power ids are dropped; a missing or invalid
- * state reads as walking. A save never resumes a power mid-use: a character
- * restored in flight is restored walking at the saved (ground-snapped) spot,
- * which is the safe reading of "flight never ends mid-air" for a reload.
- */
-export function readAbilitySave(raw: unknown): AbilitySave {
-  const r = (raw ?? {}) as { abilityState?: unknown; unlocked?: unknown };
-  const unlocked = Array.isArray(r.unlocked) ? [...new Set(r.unlocked.filter(isAbilityId))] : [];
-  return { abilityState: isAbilityState(r.abilityState) ? r.abilityState : 'walk', unlocked };
 }
 
 /**
@@ -61,20 +52,22 @@ export class AbilityController {
   readonly unlocked = new Set<AbilityId>();
   /** Why the last transition request was refused (HUD feedback, tests). */
   lastRefusal: string | null = null;
-  /** Transitions taken, for diagnostics: "from>to". */
-  readonly log: string[] = [];
+  /** The last state changes, oldest first (bounded). */
+  readonly log: AbilityLogEntry[] = [];
   /** Primitives that have a working implementation. */
   private readonly built = new Set<Primitive>();
 
   constructor(
     private readonly hud: AbilityHud,
     private readonly powerOf: (bodyId: string) => BodyPower,
+    private readonly clock: () => number = () => 0,
   ) {}
 
-  /** ON_FOOT entered: the character exists and is placed. */
-  enter(ctx: OnFootContext): void {
+  /** ON_FOOT entered: the character exists and is placed. Activates exactly the given power (else the body's). */
+  enter(ctx: AbilityEnterContext): void {
     this.bodyId = ctx.body;
-    this.power = abilityFor(this.powerOf(ctx.body));
+    this.power = abilityFor(ctx.power !== undefined ? ctx.power : this.powerOf(ctx.body));
+    if (ctx.restored) this.restore(ctx.restored);
     this.state = 'walk';
     this.lastRefusal = null;
     this.showHud();
@@ -95,7 +88,7 @@ export class AbilityController {
       this.lastRefusal = why;
       return false;
     }
-    if (to !== this.state) this.log.push(`${this.state}>${to}`);
+    if (to !== this.state) this.note(this.state, to);
     this.state = to;
     this.lastRefusal = null;
     this.showHud();
@@ -104,7 +97,7 @@ export class AbilityController {
 
   /** ON_FOOT is ending: powers deactivate (boarding) or the character is re-placed. */
   exit(_reason: OnFootExitReason): void {
-    if (this.state !== 'walk') this.log.push(`${this.state}>walk`);
+    if (this.state !== 'walk') this.note(this.state, 'walk');
     this.state = 'walk';
     this.power = null;
     this.bodyId = null;
@@ -118,6 +111,16 @@ export class AbilityController {
 
   snapshot(): AbilitySave {
     return { abilityState: this.state, unlocked: [...this.unlocked].sort() };
+  }
+
+  /** The readout for tests (LEAD's M2 journeys) and diagnostics. */
+  view(): AbilityView {
+    return { id: this.power?.id ?? null, state: this.state, active: this.state !== 'walk', charge: 1, cooldown: 0, preview: null };
+  }
+
+  private note(from: AbilityState, to: AbilityState): void {
+    this.log.push({ t: this.clock(), from, to });
+    if (this.log.length > LOG_MAX) this.log.splice(0, this.log.length - LOG_MAX);
   }
 
   restore(raw: unknown): void {

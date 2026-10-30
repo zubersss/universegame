@@ -1,7 +1,9 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { ABILITIES, abilityFor, bodyPower, isAbilityId, primitivesOf } from '../src/abilities/catalog';
 import { ABILITY_STATES, PRIMITIVES, SPEED_EXIT_MAX, transitionBlocked, type AbilityState, type Primitive, type TransitionContext } from '../src/abilities/types';
-import { AbilityController, readAbilitySave, validateAbilityFields, type AbilityHud } from '../src/abilities/AbilityController';
+import { AbilityController, type AbilityHud } from '../src/abilities/AbilityController';
+import { readAbilitySave, validateAbilityFields } from '../src/abilities/save';
 import { OnFootHost } from '../src/game/onFoot';
 import type { AbilitySlot } from '../src/ui/Hud';
 
@@ -158,5 +160,38 @@ describe('ability controller (walk only in M1)', () => {
     }
     const states: AbilityState[] = ['walk', 'flight', 'speed', 'blink', 'drift'];
     for (const s of states) expect(readAbilitySave({ abilityState: s }).abilityState).toBe(s);
+  });
+});
+
+describe('save module and LEAD hook points (L8/L9)', () => {
+  it('keeps the save shape, ids and validator free of Three.js (SaveSystem imports them in Node)', () => {
+    for (const f of ['src/abilities/save.ts', 'src/abilities/catalog.ts', 'src/abilities/types.ts']) {
+      const src = readFileSync(f, 'utf8');
+      expect(src, f).not.toMatch(/from 'three'/);
+      // Only these three modules in the chain.
+      for (const m of src.matchAll(/from '([^']+)'/g)) expect(['./catalog', './types'], `${f} imports ${m[1]}`).toContain(m[1]);
+    }
+  });
+
+  it('activates exactly the power Game passes, restores unlocks, logs state changes with time', () => {
+    let t = 0;
+    const hud = fakeHud();
+    const c = new AbilityController(hud, () => 'walk', () => t);
+    c.enter({ body: 'mars', power: 'redline', restored: { abilityState: 'speed', unlocked: ['redline'] } });
+    expect(c.power?.id).toBe('redline');
+    expect([...c.unlocked]).toEqual(['redline']);
+    expect(c.state).toBe('walk'); // never resumed mid-use
+    expect(c.view()).toEqual({ id: 'redline', state: 'walk', active: false, charge: 1, cooldown: 0, preview: null });
+    // power: null means none here, whatever the body says.
+    c.enter({ body: 'mars', power: null });
+    expect(c.power).toBeNull();
+    // The log is bounded and time-stamped.
+    for (let i = 0; i < 100; i++) {
+      t = i;
+      (c as unknown as { note(f: string, to: string): void }).note('walk', 'speed');
+    }
+    expect(c.log.length).toBe(64);
+    expect(c.log[0].t).toBe(36);
+    expect(c.log.at(-1)).toEqual({ t: 99, from: 'walk', to: 'speed' });
   });
 });

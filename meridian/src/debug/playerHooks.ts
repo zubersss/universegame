@@ -6,6 +6,7 @@ import { Vector3 } from 'three';
 import type { Game } from '../game/Game';
 import { playerRuntime } from '../player/install';
 import { GROUPS } from '../physics/Physics';
+import type { AbilityLogEntry, AbilityView } from '../abilities/AbilityController';
 
 const _v = new Vector3();
 
@@ -16,6 +17,10 @@ export interface PlayerTestApi {
   pressView(): void;
   /** Start a fresh planted-foot slip measurement (diagnostic counters only). */
   resetSlip(): void;
+  /** The active ability: {id, state, active, charge, cooldown, preview} (null when not on foot). */
+  ability(): AbilityView | null;
+  /** The last ability state changes {t, from, to} (bounded), oldest first. */
+  abilityLog(): AbilityLogEntry[];
 }
 
 export function playerTestHooks(game: Game): PlayerTestApi & Record<string, unknown> {
@@ -75,6 +80,14 @@ export function playerTestHooks(game: Game): PlayerTestApi & Record<string, unkn
     },
     pressView() {
       game.input.press('KeyC');
+    },
+    ability() {
+      const rt = playerRuntime(game);
+      return rt && game.player ? rt.abilities.view() : null;
+    },
+    abilityLog() {
+      const rt = playerRuntime(game);
+      return rt ? rt.abilities.log.map((e) => ({ ...e })) : [];
     },
     resetSlip() {
       const a = game.player?.avatar;

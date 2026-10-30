@@ -3,10 +3,11 @@
 // game.onFoot.install(...) (contract: src/game/onFoot.ts).
 
 import type { Game } from '../game/Game';
-import type { OnFootContext, OnFootExitReason, OnFootHooks } from '../game/onFoot';
+import type { OnFootExitReason, OnFootHooks } from '../game/onFoot';
 import type { WalkInput } from './Player';
 import { BODIES, isBodyId } from '../world/bodies';
-import { AbilityController } from '../abilities/AbilityController';
+import { AbilityController, type AbilityEnterContext } from '../abilities/AbilityController';
+import type { AbilitySave } from '../abilities/save';
 import { bodyPower } from '../abilities/catalog';
 import { SIM_DT } from '../game/config';
 import { GROUPS } from '../physics/Physics';
@@ -30,7 +31,7 @@ export class PlayerRuntime implements OnFootHooks {
   private readonly world: TransitionWorld;
 
   constructor(private readonly game: Game) {
-    this.abilities = new AbilityController(game.hud, (id) => (isBodyId(id) ? bodyPower(BODIES[id]) : 'walk'));
+    this.abilities = new AbilityController(game.hud, (id) => (isBodyId(id) ? bodyPower(BODIES[id]) : 'walk'), () => game.simTime);
     this.exitsSeen = game.counters.exits;
     this.world = {
       shipToLocal: (v, out) => game.ship.localToWorld(v, out),
@@ -42,7 +43,7 @@ export class PlayerRuntime implements OnFootHooks {
     };
   }
 
-  enter(ctx: OnFootContext): void {
+  enter(ctx: AbilityEnterContext): void {
     this.game.player?.attachVisual(this.game.render.scene, () => this.game.lighting.envMap);
     this.lastVisTime = null;
     this.transition = null;
@@ -112,6 +113,11 @@ export class PlayerRuntime implements OnFootHooks {
   exit(reason: OnFootExitReason): void {
     this.transition = null;
     this.abilities.exit(reason);
+  }
+
+  /** The ability fields for a save snapshot (schema 2: player.abilityState and unlocked). */
+  saveState(): AbilitySave {
+    return this.abilities.snapshot();
   }
 }
 
