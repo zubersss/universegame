@@ -363,6 +363,17 @@ def build(out_path=DEFAULT_OUT):
     sphere("nav_starboard", (0.2, -1.53, 2.55), 0.06, coll, green)
     sphere("nav_nose", (5.47, 0, 1.47), 0.05, coll, white)
 
+    # Render sets (D-025): `pilgrim` keeps everything (top view, unchanged); `pilgrim_deployed`
+    # = everything (side_legs); `pilgrim_retracted` = everything but the landing gear, which
+    # folds into the pods in flight (side). Objects are linked, not copied.
+    gear = {o for o in coll.objects if o.name.startswith(("skid_", "strut_"))}
+    for name, members in (("pilgrim_deployed", list(coll.objects)),
+                          ("pilgrim_retracted", [o for o in coll.objects if o not in gear])):
+        c = bpy.data.collections.new(name)
+        scene.collection.children.link(c)
+        for o in members:
+            c.objects.link(o)
+
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     bpy.ops.wm.save_as_mainfile(filepath=out_path, compress=True)
     print("MERIDIAN built", out_path)
