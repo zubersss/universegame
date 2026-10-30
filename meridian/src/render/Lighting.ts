@@ -14,23 +14,108 @@ import {
   type WebGLRenderer,
   type WebGLRenderTarget,
 } from 'three';
-import { SUN_DIR, type BodyDef } from '../world/bodies';
-import { cpuScatter, sunTransCPU } from './Atmosphere';
+import { LIGHT } from '../game/config';
+import { BODIES, SUN_DIR, SYSTEM_BODY_IDS, sunDirFor, type BodyDef } from '../world/bodies';
+import { AU_KM, POSITION_DIVISOR } from '../world/scale';
+import { atmoUniforms, cpuScatter, sunTransCPU } from './Atmosphere';
 
-const _sun = new Vector3(SUN_DIR[0], SUN_DIR[1], SUN_DIR[2]);
 const _m = new Matrix4();
 const _mi = new Matrix4();
 const _p = new Vector3();
 const _up = new Vector3();
 const _c = new Color();
 const _ro = new Vector3();
+const _rel = new Vector3();
+const _toStar = new Vector3();
 
-/** Sun + ambient + environment reflections, all derived from the active body's atmosphere. */
+/** Flux is relative to the Sun's luminosity at 1 AU. */
+const L_SUN = BODIES.sun.real!.luminosityW!;
+/** A reference change that swings the light further than this snaps instead of slewing (rad). */
+const SNAP_ANGLE = Math.PI / 4;
+/** Below this the slewed direction takes the target exactly (rad). */
+const SETTLED_ANGLE = 1e-5;
+
+/** Where the light comes from at the focus (system frame; also the local frame, which is only translated). */
+export interface StarLight {
+  /** Unit direction toward the star. */
+  readonly dir: Vector3;
+  /** Focus to star center [m]; Infinity for the Quiet System's fixed, infinitely distant sun. */
+  distance: number;
+  /** Angular radius of the star's disc seen from the focus [rad]; null without a catalog star. */
+  angularRadius: number | null;
+  /** Irradiance relative to 1 AU from the Sun. */
+  flux: number;
+}
+
+/** The star of a body's system (its kind-'star' catalog body), or null (the Quiet System has none). */
+export function starOf(def: BodyDef): BodyDef | null {
+  for (const id of SYSTEM_BODY_IDS[def.system]) {
+    if (BODIES[id].kind === 'star') return BODIES[id];
+  }
+  return null;
+}
+
+/**
+ * The light at a focus point `focusRel` (focus − ref center, m), written into `out`.
+ * Without a star (Quiet System, or no reference) it is SUN_DIR at flux 1.
+ * `perBody` (an active body): every point on the body shares sunDirFor(ref), so
+ * local terrain, sky, proxy and landing sites agree. In open space, or with the
+ * star itself as the reference, it is the true direction from the focus to the
+ * star. Flux follows the inverse square of the real distance (the reference
+ * body's heliocentric distance; the scaled-up focus distance near the star).
+ */
+export function starLight(ref: BodyDef | null, focusRel: Vector3, perBody: boolean, out: StarLight): StarLight {
+  const star = ref ? starOf(ref) : null;
+  if (!ref || !star) {
+    out.dir.set(SUN_DIR[0], SUN_DIR[1], SUN_DIR[2]);
+    out.distance = Infinity;
+    out.angularRadius = null;
+    out.flux = 1;
+    return out;
+  }
+  const s = star.center;
+  const c = ref.center;
+  _toStar.set(s[0] - c[0], s[1] - c[1], s[2] - c[2]).sub(focusRel);
+  const d = _toStar.length();
+  out.distance = d;
+  out.angularRadius = Math.asin(Math.min(1, star.radius / d));
+  if (d > 0 && (ref === star || !perBody)) {
+    out.dir.copy(_toStar).divideScalar(d);
+  } else {
+    const v = sunDirFor(ref);
+    out.dir.set(v[0], v[1], v[2]);
+  }
+  let km = (d * POSITION_DIVISOR) / 1000;
+  if (ref !== star && ref.real && star.real) {
+    const a = ref.real.positionKm;
+    const b = star.real.positionKm;
+    km = Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+  }
+  out.flux = ((star.real?.luminosityW ?? L_SUN) / L_SUN) * (AU_KM / km) ** 2;
+  return out;
+}
+
+/** Display brightness for a relative flux: a soft power, clamped (adaptation, not physics). */
+export function lightScale(flux: number): number {
+  return Math.min(LIGHT.maxScale, Math.max(LIGHT.minScale, flux ** LIGHT.fluxGamma));
+}
+
+/**
+ * Sun + ambient + environment reflections: direction and brightness from the
+ * reference body's star (starLight), color and sky from its atmosphere.
+ */
 export class Lighting {
   readonly sun: DirectionalLight;
   readonly hemi: HemisphereLight;
   readonly sunColor = new Color(1, 1, 1);
   readonly skyColor = new Color();
+  /** Unit direction toward the light; slews toward `star.dir` (LIGHT.slewTau). */
+  readonly sunDir = new Vector3(SUN_DIR[0], SUN_DIR[1], SUN_DIR[2]);
+  /** The target light at the focus from the last update. */
+  readonly star: StarLight = { dir: new Vector3(SUN_DIR[0], SUN_DIR[1], SUN_DIR[2]), distance: Infinity, angularRadius: null, flux: 1 };
+  /** Brightness scale (lightScale of the flux), slewed with the direction. */
+  fluxScale = 1;
+  private snapNext = true;
   extent = 70;
   private pmrem: PMREMGenerator;
   private envTarget: WebGLRenderTarget | null = null;
@@ -65,7 +150,7 @@ export class Lighting {
     this.envMat = new ShaderMaterial({
       uniforms: {
         uUp: { value: new Vector3(0, 1, 0) },
-        uSun: { value: _sun.clone() },
+        uSun: { value: this.sunDir.clone() },
         uZenith: { value: new Color() },
         uHorizon: { value: new Color() },
         uGround: { value: new Color() },
@@ -99,11 +184,39 @@ export class Lighting {
     }
   }
 
+  /** Take the target light on the next update instead of slewing to it (teleports, restores). */
+  snap(): void {
+    this.snapNext = true;
+  }
+
   /**
    * @param focus local position the shadow box follows
-   * @param planetCenter local position of the active body's center (or null in deep space)
+   * @param ref the reference body (active, else dominant), or null in deep space
+   * @param refCenter local position of the reference body's center (or null in deep space)
+   * @param perBody true while a body is active: light the whole body from sunDirFor(ref)
    */
-  update(dt: number, focus: Vector3, def: BodyDef | null, planetCenter: Vector3 | null, groundAlbedo: Color, allowEnvRebuild = true): void {
+  update(
+    dt: number,
+    focus: Vector3,
+    ref: BodyDef | null,
+    refCenter: Vector3 | null,
+    groundAlbedo: Color,
+    perBody: boolean,
+    allowEnvRebuild = true,
+  ): void {
+    // Direction and flux from the reference body's star. Lighting is the single
+    // writer of the shared sun direction (sky, aerial perspective, clouds).
+    if (refCenter) _rel.copy(focus).sub(refCenter);
+    else _rel.set(0, 0, 0);
+    starLight(ref, _rel, perBody, this.star);
+    this.slew(dt);
+    const sunDir = this.sunDir;
+    atmoUniforms.uSunDir.value.copy(sunDir);
+
+    // A star is lit like open space: no transmittance, no planetary shadow.
+    const def = ref && ref.kind !== 'star' ? ref : null;
+    const planetCenter = def ? refCenter : null;
+
     // Sun color/intensity from atmospheric transmittance at the focus.
     let altitude = 1e9;
     let mu = 1;
@@ -112,7 +225,7 @@ export class Lighting {
       const r = _up.length();
       _up.divideScalar(r);
       altitude = r - def.radius;
-      mu = _up.dot(_sun);
+      mu = _up.dot(sunDir);
     } else {
       _up.set(0, 1, 0);
     }
@@ -134,18 +247,18 @@ export class Lighting {
       this.sunColor.setRGB(1, 1, 1);
     }
     this.sun.color.setRGB(1.0, 0.96, 0.9).multiply(this.sunColor);
-    this.sun.intensity = 5.2;
+    this.sun.intensity = LIGHT.sunIntensity * this.fluxScale;
 
     // Shadow box follows the focus; snap to shadow texels in light space.
     const texel = (2 * this.extent) / this.sun.shadow.mapSize.x;
-    _m.lookAt(_p.set(0, 0, 0), _sun.clone().negate(), _up);
+    _m.lookAt(_p.set(0, 0, 0), sunDir.clone().negate(), _up);
     _mi.copy(_m).invert();
     _p.copy(focus).applyMatrix4(_mi);
     _p.x = Math.round(_p.x / texel) * texel;
     _p.y = Math.round(_p.y / texel) * texel;
     _p.applyMatrix4(_m);
     this.sun.target.position.copy(_p);
-    this.sun.position.copy(_p).addScaledVector(_sun, 700);
+    this.sun.position.copy(_p).addScaledVector(sunDir, 700);
     const cam = this.sun.shadow.camera;
     if (cam.right !== this.extent) {
       cam.left = -this.extent;
@@ -188,6 +301,7 @@ export class Lighting {
         Math.round(Math.min(altitude, 20000) / 2500),
         Math.round(mu * 8),
         Math.round(_up.x * 6), Math.round(_up.y * 6), Math.round(_up.z * 6),
+        Math.round(sunDir.x * 6), Math.round(sunDir.y * 6), Math.round(sunDir.z * 6),
       ].join(',');
       if (key !== this.envKey) {
         this.envKey = key;
@@ -196,9 +310,22 @@ export class Lighting {
     }
   }
 
+  /** Slew the light direction and brightness toward the target (snap on request or for large swings). */
+  private slew(dt: number): void {
+    const target = this.star.dir;
+    const angle = this.sunDir.angleTo(target);
+    const k = this.snapNext || angle > SNAP_ANGLE ? 1 : 1 - Math.exp(-dt / LIGHT.slewTau);
+    this.snapNext = false;
+    if (k === 1 || angle < SETTLED_ANGLE) this.sunDir.copy(target);
+    else this.sunDir.lerp(target, k).normalize();
+    const scale = lightScale(this.star.flux);
+    this.fluxScale = k === 1 ? scale : this.fluxScale + (scale - this.fluxScale) * k;
+  }
+
   private rebuildEnv(up: Vector3, ground: Color): void {
     const u = this.envMat.uniforms;
     u.uUp.value.copy(up);
+    u.uSun.value.copy(this.sunDir);
     const zen = this.hemi.color.clone();
     u.uZenith.value.copy(zen);
     u.uHorizon.value.copy(zen).lerp(this.sunColor, 0.25).multiplyScalar(1.3);

@@ -977,6 +977,7 @@ export class Game {
     this.setMode('LANDED');
     this.assist.disengage();
     this.cameraRig.reset();
+    this.lighting.snap();
     this.physics.refreshQueries();
     this.updateCollisionDemand();
   }
@@ -1255,7 +1256,7 @@ export class Game {
     const focusPos = this.mode === 'ON_FOOT' && this.player ? this.player.pos : shipPos;
     // The environment map is GPU work outside the frame's render: only rebuild it on drawn frames.
     const drawn = this.renderEvery <= 1 || this.frameCount % this.renderEvery === 0;
-    this.lighting.update(dt, focusPos, this.ref, this.bodyCenterLocal, this.groundAlbedo, drawn);
+    this.lighting.update(dt, focusPos, this.ref, this.bodyCenterLocal, this.groundAlbedo, this.body !== null, drawn);
 
     r.bgCamera.quaternion.copy(r.camera.quaternion);
     r.bgCamera.fov = r.camera.fov;
@@ -1635,6 +1636,7 @@ export class Game {
     }
     ship.syncFromBody(true);
     this.cameraRig.reset();
+    this.lighting.snap();
     this.stick.set(0, 0);
     this.physics.refreshQueries();
     this.markSaved(data);

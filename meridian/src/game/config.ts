@@ -107,6 +107,20 @@ export const BODY_HANDOFF = {
   releaseRadii: 4,
 } as const;
 
+/**
+ * Sunlight. The brightness scale is display adaptation, not physics: relative
+ * flux (1 at 1 AU) raised to fluxGamma and clamped, so the inner planets read
+ * brighter and the giants dimmer without blowing out or going black.
+ */
+export const LIGHT = {
+  sunIntensity: 5.2,
+  fluxGamma: 0.15,
+  minScale: 0.3,
+  maxScale: 1.5,
+  /** Light direction/brightness slew time constant when the reference changes (s). */
+  slewTau: 0.4,
+} as const;
+
 export type QualityPreset = 'low' | 'balanced' | 'high';
 
 export interface PresetSpec {
