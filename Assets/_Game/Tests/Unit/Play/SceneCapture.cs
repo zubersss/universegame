@@ -38,7 +38,14 @@ namespace Meridian.Tests
                 yield return null;
             Assert.IsTrue(director.PlanetSide.terrain.IsSettled, "terrain settled");
 
+            // Give the player time to be released onto the loaded ground and come to rest.
+            for (int i = 0; i < 60; i++) yield return new WaitForFixedUpdate();
+            var player = director.PlanetSide.player;
+            if (player != null)
+                TestContext.Out.WriteLine($"[MERIDIAN] player grounded {player.Grounded} at {player.Body.position}, health {player.Vitals?.health}");
             var cam = director.PlanetSide.sideCamera;
+            var follow = cam.GetComponent<Meridian.Player.CameraFollow>();
+            if (follow != null) follow.enabled = false;
             Assert.AreEqual(9f, cam.orthographicSize, "default ortho size (Bible §5.1)");
             // Look a little below the surface so the shot shows surface, soil and stone seams.
             cam.transform.position += new Vector3(0f, -5f, 0f);

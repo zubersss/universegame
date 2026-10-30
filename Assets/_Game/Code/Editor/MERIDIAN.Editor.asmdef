@@ -3,6 +3,7 @@
     "rootNamespace": "Meridian.EditorTools",
     "references": [
         "MERIDIAN.Runtime",
+        "Unity.InputSystem",
         "Unity.Addressables",
         "Unity.Addressables.Editor",
         "Unity.ResourceManager",

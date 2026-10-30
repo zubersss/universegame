@@ -58,6 +58,32 @@ namespace Meridian.EditorTools
             sideComp.rig = rigGo.AddComponent<Meridian.Rig.RigTools>();
             sideComp.rig.terrain = sideComp.terrain;
             sideComp.rig.drops = rigGo.AddComponent<Meridian.Rig.ItemDrops>();
+
+            // Player: body + view + Rig input; the camera follows it.
+            if (!System.IO.File.Exists(InputAuthoring.AssetPath)) InputAuthoring.Run();
+            var input = AssetDatabase.LoadAssetAtPath<UnityEngine.InputSystem.InputActionAsset>(InputAuthoring.AssetPath);
+            var playerGo = new GameObject("Player");
+            playerGo.transform.SetParent(sideRoot.transform, false);
+            playerGo.AddComponent<Rigidbody2D>();
+            playerGo.AddComponent<CapsuleCollider2D>();
+            playerGo.AddComponent<Meridian.Player.PlayerVitals>();
+            var pc = playerGo.AddComponent<Meridian.Player.PlayerController>();
+            pc.actions = input;
+            sideComp.player = pc;
+            var viewGo = new GameObject("View");
+            viewGo.transform.SetParent(playerGo.transform, false);
+            var pv = playerGo.AddComponent<Meridian.Player.PlayerView>();
+            pv.controller = pc;
+            pv.view = viewGo.AddComponent<SpriteRenderer>();
+            pv.view.sortingOrder = 10;
+            var ri = playerGo.AddComponent<Meridian.Player.PlayerRigInput>();
+            ri.controller = pc;
+            ri.rig = sideComp.rig;
+            ri.view = sideComp.sideCamera;
+            sideComp.rig.owner = playerGo.transform;
+            var follow = sideComp.sideCamera.gameObject.AddComponent<Meridian.Player.CameraFollow>();
+            follow.target = playerGo.transform;
+
             AddGlobalLight(sideRoot.transform);
             EditorSceneManager.SaveScene(side, PlanetSidePath);
 

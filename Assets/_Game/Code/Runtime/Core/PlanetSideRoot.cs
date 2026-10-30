@@ -1,4 +1,6 @@
+using System.Collections;
 using Meridian.Planets;
+using Meridian.Player;
 using Meridian.Terrain;
 using UnityEngine;
 
@@ -10,6 +12,7 @@ namespace Meridian.Core
         public TerrainStreamer terrain;
         public Meridian.Rig.RigTools rig;
         public Camera sideCamera;
+        public PlayerController player;
         [Tooltip("Spawn column (tiles) when no save or transition gives one.")]
         public int spawnX = 64;
 
@@ -25,11 +28,31 @@ namespace Meridian.Core
             int seed = state != null ? state.worldSeed : 1969;
             var follow = sideCamera != null ? sideCamera.transform : transform;
             terrain.Begin(config, seed, follow, state != null ? state.EditsFor(config.id) : null);
+            float surface = terrain.Generator.SurfaceHeight(spawnX) + 1f;
+
+            if (player != null)
+            {
+                player.ConfigureFor(config);
+                player.Body.position = new Vector2(spawnX + 0.5f, surface + 0.05f);
+                player.transform.position = player.Body.position;
+                player.Body.linearVelocity = Vector2.zero;
+                StopAllCoroutines();
+                StartCoroutine(HoldUntilGroundLoads());
+            }
             if (sideCamera != null)
             {
-                float y = terrain.Generator.SurfaceHeight(spawnX) + 4f;
-                sideCamera.transform.position = new Vector3(spawnX + 0.5f, y, -10f);
+                sideCamera.transform.position = new Vector3(spawnX + 0.5f, surface + 3f, -10f);
+                var cf = sideCamera.GetComponent<CameraFollow>();
+                if (cf != null) cf.SnapToTarget();
             }
+        }
+
+        // The body waits frozen until the chunks around it exist, so it never falls through unloaded ground.
+        IEnumerator HoldUntilGroundLoads()
+        {
+            player.Body.simulated = false;
+            while (!terrain.IsSettled) yield return null;
+            player.Body.simulated = true;
         }
     }
 }
