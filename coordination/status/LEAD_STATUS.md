@@ -1,7 +1,7 @@
 # LEAD STATUS
-Updated: 2026-10-30 11:15 · Session: 1 · Review cycle: 5
+Updated: 2026-10-30 11:45 · Session: 1 · Review cycle: 6
 ## Current task
-Review cycle every 30 min (session loop). Workers on U-001 and B-001, no commits yet.
+L-007 LeadQA smoke test written; waiting on U-021 to run it. Review cycle every 30 min.
 ## Last completed
 L-005 (versions pinned, `tools/paths.json`), L-006 (READY FOR WORKERS).
 ## Next up

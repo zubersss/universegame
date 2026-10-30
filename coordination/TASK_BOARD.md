@@ -60,12 +60,12 @@ Files: coordination/USER_ACTIONS.md
 Depends: L-002…L-005
 Lead notes: Done (cycle 2). Queues: U-001 and B-001 unblocked; the rest unlock along each worker's own chain.
 
-### L-007 · LEAD · Ready · M0
+### L-007 · LEAD · In Progress · M0
 Goal: LeadQA test assembly and smoke test.
 Accept: `Assets/_Game/Tests/LeadQA/MERIDIAN.Tests.LeadQA.asmdef`; `SmokeTests.cs` loads `Core.unity`, asserts `LogAssert.NoUnexpectedReceived()`; passes via `tools/unity_test.ps1 PlayMode`.
 Files: Assets/_Game/Tests/LeadQA/
 Depends: U-004
-Lead notes: —
+Lead notes: In Progress (cycle 6): asmdef + SmokeTests.cs written; run waits on U-021 (test script only runs MERIDIAN.Tests.Play) and a clear HeavyJobLock.
 
 ### L-008 · LEAD · Ready · M0
 Goal: M0 exit review and report.
@@ -127,21 +127,28 @@ Files: Assets/_Game/Code/Editor/ArtImporter.cs, Assets/_Game/Code/Runtime/Art/Ar
 Depends: U-001
 Lead notes: Done bb0d201 (cycle 5): EditMode 45/45 incl. 17 importer tests; calibration imports clean and retires its placeholder (handshake import side OK).
 
-### U-006 · UNITY · In Progress · M0
+### U-006 · UNITY · Done · M0
 Goal: Lit art preview tool.
 Accept: `tools/unity_art_preview.ps1 <key>` renders the sprite under a global light plus one upper-right point light to `logs/preview_<key>.png` in batch mode.
 Files: tools/unity_art_preview.ps1, Assets/_Game/Code/Editor/ArtPreview.cs, Assets/_Game/Scenes/ArtPreview.unity
 Depends: U-005
-Lead notes: PRIORITY: do this before more U-007 work; it gates closing B-002…B-006. Approach (after your 3 strikes): Light2D builds its mesh/bounds in the player loop, so drive the render from a PlayMode test run via unity_test.ps1 with a test filter. Load a preview scene, set the sprite to Sprite-Lit-Default, put the point light upper-right with Target Sorting Layers = All, `yield return null` 3 frames, then camera.targetTexture = RT, camera.Render(), ReadPixels, EncodeToPNG → logs/preview_<key>.png. Keep -batchmode but never -nographics. unity_art_preview.ps1 just wraps that call with the key as an env var or command-line arg.
+Lead notes: Done 5a75d90 (cycle 6): PlayMode capture works; calibration lit upper-right; previews in reports/unity/previews_2026-10-30.md.
 
-### U-007 · UNITY · In Progress · M1
+### U-021 · UNITY · Ready · M0
+Goal: `tools/unity_test.ps1 PlayMode` also runs `MERIDIAN.Tests.LeadQA` (and EditMode runs it if it ever has EditMode tests).
+Accept: `-assemblyNames "MERIDIAN.Tests.Play;MERIDIAN.Tests.LeadQA"` (or an `-Assembly` parameter defaulting to both); the report lists LeadQA results; commit the generated `Assets/_Game/Tests/LeadQA.meta` (folder meta in your Tests/ folder).
+Files: tools/unity_test.ps1, Assets/_Game/Tests/LeadQA.meta
+Depends: —
+Lead notes: PRIORITY: small, gates L-007 and the M0 exit (L-008). LEAD added `Assets/_Game/Tests/LeadQA/` (asmdef + SmokeTests.cs) in cycle 6.
+
+### U-007 · UNITY · Review · M1
 Goal: Terrain v1: 32×32 chunks, `IWorldGenerator`, `SolidWorldGenerator` (Earth, Mars), streaming, pooling, RuleTiles with normal maps, per-chunk collision.
 Accept: Earth world streams at ≤ 12 ms frame on the dev laptop; chunk apply ≤ 2 ms per frame; only chunks within 2 of the camera resident (PlayMode test); seams invisible at ortho size 9.
 Files: Assets/_Game/Code/Runtime/Terrain/, Assets/_Game/Prefabs/Terrain/
 Depends: U-004, U-005
-Lead notes: Bible §10.4.
+Lead notes: Review (cycle 6). Tests pass (EditMode 57/57, PlayMode 3/3 ×2) under D-019. One check left: capture the streamed Earth surface at ortho size 9 with ArtPreviewCapture to logs/preview_terrain_earth_ortho9.png (a 2×1 chunk window with a cave) and list it in your status so LEAD can verify seams.
 
-### U-008 · UNITY · Ready · M1
+### U-008 · UNITY · In Progress · M1
 Goal: Dig and place with diffs.
 Accept: Beam removes a tile and spawns its item; Builder places a tile; diffs recorded per chunk; PlayMode test: dig → save → load → tile still absent.
 Files: Assets/_Game/Code/Runtime/Terrain/TerrainEdits.cs, Code/Runtime/Rig/
@@ -219,6 +226,20 @@ Depends: U-010, B-019 (build against the placeholder until B-019 is Done)
 Lead notes: —
 
 
+### U-019 · UNITY · Ready · M1
+Goal: `Sprite_LitEmissive` Shader Graph material (Bible §10.5): Sprite-Lit with `_NormalMap` and an additive `_EmissionMap` (+ intensity), used by ArtImporter for any asset with an `_emission` map.
+Accept: lit preview of `props/common/calibration` shows the stripe at its emission color under zero point light; `ships/pilgrim/side` portholes and engine glow; `planets/sun/surface` self-lit; ArtImporter assigns the material automatically (EditMode test).
+Files: Assets/_Game/Code/Runtime/Rendering/, Assets/_Game/Settings/Rendering/, Code/Editor/ArtImporter.cs, Tests/
+Depends: U-005, U-006
+Lead notes: PRIORITY: next after the current U-008 step. Your P-08, promoted in cycle 6.
+
+### U-020 · UNITY · Ready · M1
+Goal: Terrain variants: when a sheet has tiles in slots 47–62, tile 46 picks one of them by a stable hash of (x, y) (D-020).
+Accept: same world → same variants after save/load; no variant chosen for sheets without slots 47–62; chunk apply budget unchanged (D-019); EditMode test for hash stability.
+Files: Assets/_Game/Code/Runtime/Terrain/
+Depends: U-007, B-022
+Lead notes: Build against the current sheets (fall back to tile 46) until B-022 lands.
+
 ---
 
 ## BLENDER
@@ -230,56 +251,56 @@ Files: blender/render.py, blender/manifest.json, blender/scripts/, tools/blender
 Depends: L-005
 Lead notes: Done 4dd7922/5d630d4 (cycle 4): unknown key → FAIL line + non-zero; 11 assets logged one line each. Empty-manifest run not retained in logs; accepted on the populated-manifest runs.
 
-### B-002 · BLENDER · Review · M0
+### B-002 · BLENDER · Done · M0
 Goal: Calibration asset `props/common/calibration`.
 Accept: 1 m sphere on a 1 m cube with known flat colors; color, normal, emission, mask exported per contract §2; contact sheet shows the upper-right of the sphere lit when the light is upper-right; 8 px dilation visible; sizes logged.
 Files: blender/sources/props/calibration.blend, Assets/_Game/Art/props/common/calibration_*.png
 Depends: B-001
-Lead notes: Review (cycle 5). Blender-side and import-side (U-005) pass. Only the lit preview remains, blocked on U-006. Dependents may proceed.
+Lead notes: Done ead95f6 (cycle 6): calibration handshake complete (import clean, placeholder retired, lit preview upper-right). Emission display tracked in U-019.
 
-### B-003 · BLENDER · Review · M2
+### B-003 · BLENDER · Done · M2
 Goal: Earth top-down: `planets/earth/surface` (2048×1024), `clouds` (1024×512), `glow` (512).
 Accept: contract §4 sizes; public-domain source imagery logged in `docs/credits/blender.md`; preview wraps without a seam.
 Files: blender/sources/planets/earth.blend, Assets/_Game/Art/planets/earth/
 Depends: B-002
-Lead notes: Review (cycle 4). Contract sizes, LFS, credits, and wrap all pass on the contact sheets. Waiting on the in-Unity lit check after U-005 and the art preview tool; no BLENDER action needed.
+Lead notes: Done (cycle 6): contact sheets, contract sizes, LFS, credits OK; lit previews OK (U-006). Glow display depends on U-019, not on this art.
 
-### B-004 · BLENDER · Review · M2
+### B-004 · BLENDER · Done · M2
 Goal: Mars top-down: `planets/mars/surface`, `glow`.
 Accept: as B-003.
 Files: Assets/_Game/Art/planets/mars/
 Depends: B-002
-Lead notes: Review (cycle 4). Contract sizes, LFS, credits, and wrap all pass on the contact sheets. Waiting on the in-Unity lit check after U-005 and the art preview tool; no BLENDER action needed.
+Lead notes: Done (cycle 6): contact sheets, contract sizes, LFS, credits OK; lit previews OK (U-006). Glow display depends on U-019, not on this art.
 
-### B-005 · BLENDER · Review · M2
+### B-005 · BLENDER · Done · M2
 Goal: Sun and space backgrounds: `planets/sun/surface` + `glow` (emission), `backgrounds/space/layer0..2`.
 Accept: Sun emission map present; three 2048×1024 star layers tileable in x, with a Milky Way band on layer0.
 Files: Assets/_Game/Art/planets/sun/, Assets/_Game/Art/backgrounds/space/
 Depends: B-002
-Lead notes: Review (cycle 4). Contract sizes, LFS, credits, and wrap all pass on the contact sheets. Waiting on the in-Unity lit check after U-005 and the art preview tool; no BLENDER action needed.
+Lead notes: Done (cycle 6): contact sheets, contract sizes, LFS, credits OK; lit previews OK (U-006). Glow display depends on U-019, not on this art.
 
-### B-006 · BLENDER · Review · M2
+### B-006 · BLENDER · Done · M2
 Goal: Starter ship **Pilgrim**: `ships/pilgrim/top` and `side`.
 Accept: top ≤ 448×448 (see UNITY handoff), side ≤ 1536×512; color, normal, emission; thrusters and windows glow; industrial-worn look per Bible §9.
 Files: blender/sources/ships/pilgrim.blend, Assets/_Game/Art/ships/pilgrim/
 Depends: B-002
-Lead notes: Review (cycle 5). Contact sheet OK (worn industrial hull, glowing ports, engine, vents); 6 PNGs in LFS; top 448 px at 36 px/m accepted (contract allows 512; the board's "UNITY handoff" never existed). Waiting on the in-Unity lit check (U-006).
+Lead notes: Done (cycle 6): contact sheets, contract sizes, LFS, credits OK; lit previews OK (U-006). Glow display depends on U-019, not on this art.
 
-### B-007 · BLENDER · In Progress · M2
+### B-007 · BLENDER · Done · M2
 Goal: Earth terrain sets: `terrain/earth/{soil,grass,stone,sand,snow,water}`.
 Accept: six 47-tile RuleTile sets, 128 px tiles, 8 columns, color + normal, 2× tile check passes.
 Files: blender/sources/terrain/earth.blend, Assets/_Game/Art/terrain/earth/
 Depends: B-002
-Lead notes: Water as a tile set for M1/M2; a fluid system may replace it later (D-010).
+Lead notes: Done (cycle 6): 47-blob sheets join seamlessly in the demos; LFS OK. Follow-ups (variants, grass on upward edges only) are B-022, not a reopen.
 
-### B-008 · BLENDER · Ready · M2
+### B-008 · BLENDER · Done · M2
 Goal: Mars terrain sets: `terrain/mars/{regolith,basalt,hematite,ice}`.
 Accept: as B-007.
 Files: Assets/_Game/Art/terrain/mars/
 Depends: B-007
-Lead notes: —
+Lead notes: Done (cycle 6): 47-blob sheets join seamlessly in the demos; LFS OK. Follow-ups (variants, grass on upward edges only) are B-022, not a reopen.
 
-### B-009 · BLENDER · Ready · M2
+### B-009 · BLENDER · In Progress · M2
 Goal: Player character `characters/surveyor` frame sheet.
 Accept: 256 px frames, standard character set ≤ 48 frames, color + normal + emission (visor, lamp), `.json` manifest, bottom-center pivot, right-facing.
 Files: blender/sources/characters/surveyor.blend, Assets/_Game/Art/characters/surveyor/
@@ -341,6 +362,13 @@ Accept: top-down, color + normal, six distinct silhouettes 1–6 m, sizes within
 Files: Assets/_Game/Art/props/space/, Assets/_Game/Art/planets/luna/
 Depends: B-002
 Lead notes: —
+
+### B-022 · BLENDER · Ready · M2
+Goal: Terrain sheet revision for all 10 materials: fill slots 47–62 with 16 variants of tile 46; grass rim only on upward-facing exposed edges (sides/underside show soil with a darker rim) (D-020).
+Accept: contact sheets + demo patches show no visible 128 px repetition on a 16×8 interior block; grass demo shows no grass on cave ceilings or vertical walls; tiles 0–46 still join seamlessly; same file names, so no Unity change is needed beyond U-020.
+Files: blender/scripts/gen_terrain.py, Assets/_Game/Art/terrain/
+Depends: B-007, B-008
+Lead notes: Your variant proposal approved (D-020). Do this before B-009 if the character sheet isn't already rendering. It affects every planet's look in M1.
 
 ### B-018 · BLENDER · Ready · M2
 Goal: Outer and inner planet discs for the space map: `planets/{mercury,venus,jupiter,saturn,uranus,neptune}/surface` (+ `glow` where an atmosphere exists: venus, jupiter, saturn, uranus, neptune) and `planets/saturn/rings` (top-down ring texture, transparent).

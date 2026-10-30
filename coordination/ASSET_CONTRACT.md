@@ -1,4 +1,4 @@
-# MERIDIAN — Asset Contract v1.1
+# MERIDIAN — Asset Contract v1.2
 
 Owner: LEAD (edits and version bumps, logged in `DECISIONS.md`). BLENDER produces to it;
 UNITY's `ArtImporter` enforces it. If an asset can't meet a rule, BLENDER proposes a
@@ -61,7 +61,7 @@ wraps `blender --background --python blender/render.py -- --asset <key>` (or `--
 | Category (`category/…`)  | Variant(s)                        | Maps                     | Size                                        | Pivot (sprite)      | Mesh       | Mips | Atlas          |
 |--------------------------|-----------------------------------|--------------------------|---------------------------------------------|---------------------|------------|------|----------------|
 | `planets/<planet>/`      | `surface` (equirect), `clouds`, `glow` | color (+emission for glow) | 2048×1024 · 1024×512 · 512×512            | center              | Full rect  | yes  | none (shader textures) |
-| `terrain/<planet>/<material>` | one 47-tile RuleTile set per material, tiles 128 px, packed 8 columns | color, normal (+mask optional) | 1024×1024 (holds 64 tiles)            | center              | Full rect  | yes  | `planet_<planet>` |
+| `terrain/<planet>/<material>` | one 47-blob tile set per material (slot order = `BlobAutotile.cs`; slots 47–62 = 16 variants of tile 46, picked by position hash; slot 63 empty; D-020), tiles 128 px, packed 8 columns | color, normal (+mask optional) | 1024×1024 (holds 64 tiles)            | center              | Full rect  | yes  | `planet_<planet>` |
 | `backgrounds/<planet>/`  | `layer0` (far), `layer1`, `layer2` (near); `backgrounds/space/layer0..2` | color only | 2048×1024, tileable in x            | center              | Full rect  | yes  | none           |
 | `ships/<name>/`          | `top`, `side`, optional `damaged` | color, normal, emission  | top ≤ 512×512 (large ships 768); side ≤ 1536×512 | center of mass (manifest) | Tight | yes | `common`      |
 | `characters/<name>/`     | frame sheet (see §5)              | color, normal, emission  | 256 px frames, sheet ≤ 2048×2048            | bottom-center       | Tight      | yes  | `common`       |

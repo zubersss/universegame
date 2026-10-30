@@ -56,3 +56,11 @@ Decided: D-018 (Addressables path/groups, atlases, ship top size). B-002 handsha
 Signals: U-006 three strikes (point Light2D not rendering in batch). Response: concrete approach in U-006 Lead notes (render via PlayMode test after 3 frames, no -nographics) and priority raised above U-007, since it gates closing B-002…B-006.
 User: none.
 Queue: added B-018 (six planet discs + Saturn rings), B-019 (Pilgrim landing legs), B-020/B-021 (Earth/Mars POI props), U-018 (legs swap). Ready: UNITY 11, BLENDER 14. Answered BLENDER proposals: paths.json fixed and __pycache__ ignored (cycle 4); legs → B-019.
+
+## Cycle 6 · 2026-10-30 11:45
+Checked: git log 11:13–11:32 (U-006, U-007, D-016 metas, B-007, B-008); UNITY_STATUS, BLENDER_STATUS; reports/unity/previews_2026-10-30.md; logs/preview_props_common_calibration.png and preview_ships_pilgrim_side.png (lit upper-right, OK); blender/preview/terrain__earth__grass_demo.png and terrain__mars__regolith_demo.png; tests_2026-10-30.md (EditMode 57/57; PlayMode 3/3 ×2 after two 2.3 ms / 20.4 ms failures under Blender load); tools/unity_test.ps1.
+Moved: U-006 → Done (5a75d90); B-002 → Done (handshake complete); B-003…B-006 → Done; B-007, B-008 → Done; U-007 → Review (ortho-9 seam capture outstanding); U-008, B-009 → In Progress; L-007 → In Progress.
+Decided: D-019 (chunk-apply measurement; UNITY had loosened its own test, now ratified with conditions); D-020 (blob index over RuleTile; 16 tile-46 variants; grass rim only on upward edges). Contract → v1.2.
+Signals: worker changed an acceptance threshold without LEAD approval (U-007 test). Response: ratified as D-019 with a no-load condition; reminder that acceptance criteria change only through LEAD.
+User: none.
+Queue: added U-019 (Sprite_LitEmissive, P-08), U-020 (terrain variants), U-021 (test script runs LeadQA), B-022 (terrain revision). Ready: UNITY 13, BLENDER 13. Heavy lock held by BLENDER since 11:39 (fresh).
