@@ -261,6 +261,8 @@ Data: Earth elevation, coastlines and land cover (src/data/earth/)
 ----------------------------------------------------------------
 Topography: ETOPO1 (NOAA NGDC, public domain), 10' grid by Fatiando a Terra
   (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/)
+Regional topography (Southern Alps): SRTM and GMTED2010 courtesy of the U.S.
+  Geological Survey, ETOPO1 (NOAA), via AWS Terrain Tiles (public domain)
 Coastlines and lakes: Natural Earth (public domain)
 Land cover: © ESA WorldCover project 2021 / Contains modified Copernicus
   Sentinel data (2021) processed by ESA WorldCover consortium

@@ -9,7 +9,7 @@ import { BODIES, GENERATOR_VERSION, SOL_M2_BODIES, SYSTEM_BODY_IDS, SYSTEM_EXTEN
 import { DEFAULT_SETTINGS } from '../src/game/settings';
 import { FIRST_LIGHT, newExpedition } from '../src/game/Expedition';
 import { computeSites } from '../src/world/sites';
-import { EARTH_META, installEarthData, loadEarthData, type LayerName } from '../src/world/earthData';
+import { installEarthData, loadEarthData } from '../src/world/earthData';
 import { isAbilityId, type AbilityId } from '../src/abilities/save';
 // A schema-1 record exactly as the published MERIDIAN build wrote it. Frozen:
 // never edit it (it stands for real players' saves; e2e/journey/saves.spec.ts uses it too).
@@ -391,8 +391,7 @@ describe('on-foot saves along First Light', () => {
   beforeAll(async () => {
     // Earth's landing site is searched on WORLDS' dataset (as in worlds-survey.test).
     const dir = fileURLToPath(new URL('../src/data/earth/', import.meta.url));
-    const layers = EARTH_META.layers as Record<LayerName, { file: string }>;
-    installEarthData(await loadEarthData(async (name) => readFileSync(dir + layers[name].file)));
+    installEarthData(await loadEarthData(async (_name, _url, file) => readFileSync(dir + file)));
     setPlaySystem(SOL_M2_BODIES);
   });
   afterAll(() => setPlaySystem(SYSTEM_BODY_IDS.quiet));

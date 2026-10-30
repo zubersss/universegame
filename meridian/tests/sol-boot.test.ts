@@ -12,7 +12,7 @@ import {
   setPlaySystem, sunDirFor, type BodyId,
 } from '../src/world/bodies';
 import { BELTS } from '../src/world/catalog';
-import { EARTH_META, installEarthData, loadEarthData, type LayerName } from '../src/world/earthData';
+import { installEarthData, loadEarthData } from '../src/world/earthData';
 import { bodyDataReady, getSurface } from '../src/world/surface';
 import { computeSites, tangentBasis } from '../src/world/sites';
 import { generateChunk } from '../src/terrain/chunkGen';
@@ -33,8 +33,7 @@ const center = (id: BodyId) => new Vector3(...BODIES[id].center);
 beforeAll(async () => {
   // Earth is a data body: its sites need the rasters in this thread (boot awaits ensureBodyData).
   const dir = fileURLToPath(new URL('../src/data/earth/', import.meta.url));
-  const layers = EARTH_META.layers as Record<LayerName, { file: string }>;
-  installEarthData(await loadEarthData(async (name) => readFileSync(dir + layers[name].file)));
+  installEarthData(await loadEarthData(async (_name, _url, file) => readFileSync(dir + file)));
 });
 
 // Every test starts and ends in the default Quiet System.
