@@ -13,6 +13,7 @@ The contract (`coordination/ASSET_CONTRACT.md`) is authoritative; this file docu
 | `collection` | collection whose objects are rendered; everything else is hidden |
 | `camera`     | `side` (looks +Y; right +X, up +Z) or `top` (looks −Z; right +X, up +Y); orthographic, PPU 128 |
 | `size`       | `[w, h]` px of the file (or of one frame for sheets), including the 8 px padding |
+| `ppu`        | pixels per metre, default 128. Only for variants whose contract cap is below real scale (e.g. `ships/*/top`) |
 | `origin`     | world point treated as the asset origin (default `[0,0,0]`) |
 | `pivot`      | normalized image position of `origin`, from the bottom-left (Unity convention). The camera is placed so the origin lands exactly there. "Bottom-center" sprites use `[0.5, 8/h]` so feet sit on the padding line |
 | `maps`       | subset of `color, normal, emission, mask`; `color` required, `normal` required for lit categories |

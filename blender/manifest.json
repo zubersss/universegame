@@ -111,6 +111,31 @@
       "star_size": 1.1,
       "star_gain": 1.6,
       "tileable": "xy"
+    },
+    {
+      "key": "ships/pilgrim/side",
+      "source": "sources/ships/pilgrim.blend",
+      "build": "scripts/build_pilgrim.py",
+      "collection": "pilgrim",
+      "camera": "side",
+      "size": [1536, 512],
+      "origin": [0, 0, 1.8],
+      "pivot": [0.5, 0.5],
+      "maps": ["color", "normal", "emission"],
+      "samples": 32
+    },
+    {
+      "key": "ships/pilgrim/top",
+      "source": "sources/ships/pilgrim.blend",
+      "build": "scripts/build_pilgrim.py",
+      "collection": "pilgrim",
+      "camera": "top",
+      "size": [448, 176],
+      "ppu": 36,
+      "origin": [0, 0, 1.8],
+      "pivot": [0.5, 0.5],
+      "maps": ["color", "normal", "emission"],
+      "samples": 32
     }
   ]
 }

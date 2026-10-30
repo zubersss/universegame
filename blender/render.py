@@ -214,7 +214,8 @@ def make_camera(scene, entry, w, h):
     preset = cam_cfg if isinstance(cam_cfg, str) else cam_cfg.get("preset", "side")
     origin = Vector(entry.get("origin", [0, 0, 0]))
     px, py = entry.get("pivot", [0.5, 0.5])
-    wm, hm = w / C.PPU, h / C.PPU
+    ppu = float(entry.get("ppu", C.PPU))   # override only where the contract caps size below real scale
+    wm, hm = w / ppu, h / ppu
     dx, dy = (0.5 - px) * wm, (0.5 - py) * hm
     cd = bpy.data.cameras.new("meridian_cam")
     cd.type = "ORTHO"
