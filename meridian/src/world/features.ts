@@ -8,7 +8,7 @@ import type { BodyDef, DataTag } from './bodies';
 import { sincosd } from './earthData';
 import { geoToDir } from './geo';
 
-export type FeatureKind = 'crater' | 'basin' | 'mare' | 'shield' | 'bulge' | 'canyon' | 'fissures';
+export type FeatureKind = 'crater' | 'basin' | 'mare' | 'albedo' | 'shield' | 'bulge' | 'canyon' | 'fissures';
 
 export interface FeatureSpec {
   kind: FeatureKind;
@@ -18,7 +18,7 @@ export interface FeatureSpec {
   lon: number;
   /** Radius in real km (canyon/fissures: half-width of the trough or field). */
   radiusKm: number;
-  /** Real metres: depth for crater/basin/mare/canyon/fissures, height for shield/bulge. */
+  /** Real metres: depth for crater/basin/mare/canyon/fissures, height for shield/bulge; albedo: darkness 0..1. */
   amount: number;
   /** Canyon/fissures centre line as [lat, lon] points. */
   path?: [number, number][];
@@ -52,6 +52,19 @@ export const MARS_FEATURES: readonly FeatureSpec[] = [
     kind: 'canyon', name: "Ma'adim Vallis", lat: -21, lon: 177.5, radiusKm: 10, amount: 2000, tag: 'estimated',
     path: [[-28.5, 181.6], [-26.0, 180.6], [-23.5, 179.0], [-21.0, 177.5], [-18.8, 176.8], [-16.4, 176.1]],
   },
+  // Classical dark albedo regions (dust-poor basaltic ground), darkness only; outlines approximate.
+  { kind: 'albedo', name: 'Syrtis Major', lat: 9, lon: 69, radiusKm: 650, amount: 0.95, tag: 'estimated' },
+  { kind: 'albedo', name: 'Sinus Sabaeus', lat: -8, lon: 20, radiusKm: 600, amount: 0.8, tag: 'estimated' },
+  { kind: 'albedo', name: 'Sinus Sabaeus (east)', lat: -9, lon: 48, radiusKm: 450, amount: 0.75, tag: 'estimated' },
+  { kind: 'albedo', name: 'Sinus Meridiani', lat: -3, lon: 0, radiusKm: 330, amount: 0.8, tag: 'estimated' },
+  { kind: 'albedo', name: 'Mare Erythraeum', lat: -24, lon: 318, radiusKm: 750, amount: 0.75, tag: 'estimated' },
+  { kind: 'albedo', name: 'Mare Acidalium', lat: 46, lon: 330, radiusKm: 650, amount: 0.85, tag: 'estimated' },
+  { kind: 'albedo', name: 'Mare Tyrrhenum', lat: -16, lon: 103, radiusKm: 600, amount: 0.75, tag: 'estimated' },
+  { kind: 'albedo', name: 'Mare Cimmerium', lat: -24, lon: 145, radiusKm: 700, amount: 0.8, tag: 'estimated' },
+  { kind: 'albedo', name: 'Mare Sirenum', lat: -32, lon: 205, radiusKm: 650, amount: 0.75, tag: 'estimated' },
+  { kind: 'albedo', name: 'Solis Lacus', lat: -26, lon: 272, radiusKm: 300, amount: 0.7, tag: 'estimated' },
+  { kind: 'albedo', name: 'Utopia', lat: 46, lon: 115, radiusKm: 700, amount: 0.45, tag: 'estimated' },
+  { kind: 'albedo', name: 'Mare Australe', lat: -60, lon: 20, radiusKm: 700, amount: 0.55, tag: 'estimated' },
 ];
 
 // Moon: selenographic, east longitude. Mare depths are the mean lowering of the
@@ -103,7 +116,27 @@ interface Compiled {
   path: [number, number, number][];
   /** Fissure spacing and width as fractions of the half-width chord. */
   spacing: number;
+  /** Maria and albedo regions: tangent basis at the centre and shoreline lobes (cos/sin 2θ, 3θ). */
+  t1: [number, number, number];
+  t2: [number, number, number];
+  lobes: [number, number, number, number];
 }
+
+/** Deterministic lobe amplitudes in [-a, a] from a feature name (FNV-1a). */
+function lobesOf(name: string, a: number): [number, number, number, number] {
+  let h = 2166136261;
+  for (let i = 0; i < name.length; i++) h = Math.imul(h ^ name.charCodeAt(i), 16777619) >>> 0;
+  const out: number[] = [];
+  for (let k = 0; k < 4; k++) {
+    h = Math.imul(h ^ (h >>> 15), 2246822507) >>> 0;
+    out.push(((h & 0xffff) / 0xffff * 2 - 1) * a * (k < 2 ? 1 : 0.7));
+  }
+  return out as [number, number, number, number];
+}
+
+/** Largest shoreline swell a lobe set can produce (reach must cover it). */
+const LOBE_A = 0.12;
+const LOBE_MAX = 1 + 2 * LOBE_A + 2 * LOBE_A * 0.7;
 
 const sat = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x);
 const sstep = (e0: number, e1: number, x: number) => {
@@ -127,17 +160,28 @@ export class FeatureField {
     const rKm = def.real ? def.real.radiusKm : def.radius / 1000;
     this.items = specs.map((f) => {
       const chord = chordOf(f.radiusKm, rKm);
-      const reachMul = f.kind === 'crater' ? 2.2 : f.kind === 'basin' ? 1.45 : f.kind === 'mare' ? 1.1 : 1.05;
+      const lobed = f.kind === 'mare' || f.kind === 'albedo';
+      const reachMul = f.kind === 'crater' ? 2.2 : f.kind === 'basin' ? 1.45 : lobed ? 1.1 * LOBE_MAX : 1.05;
       const path = (f.path ?? []).map(([la, lo]) => geoToDir(def, la, lo));
+      const c = geoToDir(def, f.lat, f.lon);
+      // Tangent basis at the centre (any orthonormal pair; the lobes are seeded per feature).
+      const ref = Math.abs(c[1]) < 0.9 ? [0, 1, 0] : [1, 0, 0];
+      let t1: [number, number, number] = [ref[1] * c[2] - ref[2] * c[1], ref[2] * c[0] - ref[0] * c[2], ref[0] * c[1] - ref[1] * c[0]];
+      const l1 = Math.sqrt(t1[0] * t1[0] + t1[1] * t1[1] + t1[2] * t1[2]);
+      t1 = [t1[0] / l1, t1[1] / l1, t1[2] / l1];
+      const t2: [number, number, number] = [c[1] * t1[2] - c[2] * t1[1], c[2] * t1[0] - c[0] * t1[2], c[0] * t1[1] - c[1] * t1[0]];
       return {
         kind: f.kind,
-        c: geoToDir(def, f.lat, f.lon),
+        c,
         chord,
         inv: 1 / chord,
         reach: f.kind === 'canyon' || f.kind === 'fissures' ? chord * 1.3 : chord * reachMul,
         amount: f.amount,
         path,
         spacing: (f.spacingKm ?? f.radiusKm * 0.3) / f.radiusKm,
+        t1,
+        t2,
+        lobes: lobed ? lobesOf(f.name, LOBE_A) : [0, 0, 0, 0],
       };
     });
   }
@@ -223,11 +267,24 @@ export class FeatureField {
           h += -f.amount * (1 - sstep(0.55, 1.0, x)) + 0.1 * f.amount * bump((x - 1.05) / 0.3);
           break;
         }
-        case 'mare': {
-          // Lowered basalt plain with soft edges; dark.
-          const w = 1 - sstep(0.7, 1.05, x);
-          h += -f.amount * w;
-          mare = Math.max(mare, 1 - sstep(0.8, 1.02, x));
+        case 'mare':
+        case 'albedo': {
+          // Irregular shoreline: low-order azimuthal lobes, cos/sin of 2θ and 3θ from the
+          // tangent components (arithmetic only).
+          const r = Math.sqrt(d2);
+          const ca = r > 0 ? (dx * f.t1[0] + dy * f.t1[1] + dz * f.t1[2]) / r : 0;
+          const sa = r > 0 ? (dx * f.t2[0] + dy * f.t2[1] + dz * f.t2[2]) / r : 0;
+          const L = f.lobes;
+          const lobe = 1 + L[0] * (ca * ca - sa * sa) + L[1] * 2 * ca * sa + L[2] * ca * (4 * ca * ca - 3) + L[3] * sa * (3 - 4 * sa * sa);
+          const xm = x / lobe;
+          if (f.kind === 'mare') {
+            // Lowered basalt plain with soft edges; dark.
+            h += -f.amount * (1 - sstep(0.7, 1.05, xm));
+            mare = Math.max(mare, 1 - sstep(0.8, 1.02, xm));
+          } else {
+            // Darker ground only (no relief), with a broad soft edge.
+            mare = Math.max(mare, f.amount * (1 - sstep(0.55, 1.0, xm)));
+          }
           break;
         }
         case 'shield': {

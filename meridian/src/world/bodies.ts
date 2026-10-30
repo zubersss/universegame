@@ -50,7 +50,7 @@ export interface AtmosphereDef {
 export interface CloudLayerDef {
   altitude: number;
   thickness: number;
-  coverage: number;
+  coverage: number; // 0..1 typical; above ~1.5 the deck closes (no gaps)
   scale: number; // feature wavelength in meters
   speed: number; // angular drift rad/s
   tint: [number, number, number];

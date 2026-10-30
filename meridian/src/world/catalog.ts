@@ -98,7 +98,8 @@ const LOOKS: Record<string, Look> = {
       mie: [1.9e-4, 1.6e-4, 8.0e-5], mieH: 2200, mieG: 0.72,
       sunIntensity: 20, airglow: [0.006, 0.004, 0.001],
     },
-    clouds: [{ altitude: 9000, thickness: 1800, coverage: 0.92, scale: 14000, speed: 0.00004, tint: [1.0, 0.93, 0.74], opacity: 0.9, streak: 0.9 }],
+    // Closed sulphuric-acid deck (coverage above ~1.5 leaves no gaps): pale yellow, faint streaks.
+    clouds: [{ altitude: 9000, thickness: 1800, coverage: 1.6, scale: 14000, speed: 0.00004, tint: [0.84, 0.72, 0.5], opacity: 1.0, streak: 0.6 }],
     palette: { a1: 0xa8865a, a2: 0x7d5e3c, a3: 0xc7a674, b1: 0x8c6a44, b2: 0x5e4630, b3: 0xb89466, special: 0x3a2a1c, proxyNight: 0x1a0e06 },
     biomeNames: ['Tessera Highlands', 'Volcanic Plains'],
     description: 'A runaway-greenhouse world under permanent sulfuric cloud, with crushing pressure at the ground.',
@@ -123,7 +124,7 @@ const LOOKS: Record<string, Look> = {
     fiction: [...SCALE_FICTION, 'relief exaggerated 8× relative to the radius', 'detail below the data resolution is procedural'],
   },
   moon: airless(
-    { a1: 0x9a9893, a2: 0x7d7b77, a3: 0xb5b3ad, b1: 0x5d5c5a, b2: 0x6e6c69, b3: 0x8b8a86, special: 0xc8c6c0, proxyNight: 0x060606 },
+    { a1: 0x9a9893, a2: 0x7d7b77, a3: 0xb5b3ad, b1: 0x868480, b2: 0x7c7a76, b3: 0x8b8a86, special: 0xc8c6c0, proxyNight: 0x060606 },
     {
       // Real relief about -11 to +3 km (South Pole-Aitken floor to rims): gameplay /5 above a datum 2.4 km down.
       explore: 'surface', surface: 'procedural', power: 'lunar-step', maxHeight: 3200, reliefZero: 2400,
@@ -141,7 +142,8 @@ const LOOKS: Record<string, Look> = {
       sunIntensity: 18, airglow: [0.004, 0.002, 0.001],
     },
     clouds: [{ altitude: 3600, thickness: 300, coverage: 0.12, scale: 9000, speed: 0.00001, tint: [1.0, 0.92, 0.84], opacity: 0.35, streak: 0.8 }],
-    palette: { a1: 0xb5643a, a2: 0x7e3f25, a3: 0xd08a5a, b1: 0xa0522d, b2: 0x5e4a3d, b3: 0xc9a07a, special: 0xe8e4dc, proxyNight: 0x120806 },
+    // A: bright dusty ground (butterscotch), rock, pale dust; B: dark basaltic sand and rock.
+    palette: { a1: 0xb8774a, a2: 0x8a553a, a3: 0xcf9a68, b1: 0x6f5544, b2: 0x5a463b, b3: 0x8a6c55, special: 0xe8e4dc, proxyNight: 0x120806 },
     biomeNames: ['Southern Highlands', 'Northern Lowlands'],
     description: 'A cold desert world of rust plains, giant volcanoes and canyon systems under a thin dusty sky.',
     fiction: [...SCALE_FICTION, 'surface terrain is procedural', 'sky density tuned for play'],

@@ -210,6 +210,10 @@ export function generateChunk(
 
   // Normals: central differences inside, continuous-surface normals on borders.
   const eps = levelSpacing(def, level);
+  // Procedural variation noise (2.2-3 km wavelength) aliases into blotches where vertices are
+  // more than about half a wavelength apart: fade it to neutral on coarse levels (data-driven
+  // variation, as on Earth, is kept).
+  const varKeep = def.surface === 'data' ? 1 : sstep(1400, 700, eps);
   const nrm = [0, 0, 0];
   const nAt = new Float64Array(GRID_VERTS * 3);
   for (let j = 0; j < V; j++) {
@@ -330,7 +334,7 @@ export function generateChunk(
       const rock = Math.max(rocky[g], sstep(0.09, 0.3, slope));
       attrs[g * 4] = Math.round(biome[g] * 255);
       attrs[g * 4 + 1] = Math.round(Math.min(1, rock) * 255);
-      attrs[g * 4 + 2] = Math.round(variation[g] * 255);
+      attrs[g * 4 + 2] = Math.round((0.5 + (variation[g] - 0.5) * varKeep) * 255);
       attrs[g * 4 + 3] = Math.round(special[g] * 255);
     }
   }

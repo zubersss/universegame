@@ -435,8 +435,9 @@ export class SurfaceGenerator {
         out.rockiness = sat(0.15 + 0.6 * scar);
         break;
       case 'mars': {
-        // Darker basaltic plains (B) in the lowlands and basins, rust highlands (A); polar ice caps.
-        out.biome = sstep(-1500, -3500, realH) * 0.85 + 0.1 * v;
+        // Dark basaltic albedo regions (B; Syrtis Major, Acidalium, ...) and slightly darker
+        // lowland plains over bright dusty ground (A); polar ice caps.
+        out.biome = sat(Math.max(mare, 0.3 * sstep(-1500, -3500, realH)) + 0.12 * (v - 0.5));
         out.variation = v;
         out.special = Math.max(sstep(0.955, 0.975, sinLat), sstep(-0.985, -0.995, sinLat));
         out.rockiness = sat(0.1 + 0.7 * scar + 0.3 * this.crat.floor);

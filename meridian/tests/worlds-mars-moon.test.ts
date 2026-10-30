@@ -7,6 +7,8 @@ import { geoToDir } from '../src/world/geo';
 import { SurfaceGenerator, newSurfaceInfo } from '../src/world/surface';
 import { computeSites } from '../src/world/sites';
 import { mulberry32 } from '../src/core/rng';
+import { generateChunk, GRID_VERTS, levelSpacing } from '../src/terrain/chunkGen';
+import { dirToFace, chunkAt } from '../src/world/cube';
 
 const mars = BODIES.mars;
 const moon = BODIES.moon;
@@ -66,6 +68,35 @@ describe('Sol procedural surfaces (W6)', () => {
     // Polar caps.
     expect(at(mars, g, 85, 0).special).toBeGreaterThan(0.9);
     expect(at(mars, g, 0, 0).special).toBe(0);
+    // Classical dark albedo regions over bright dusty ground.
+    expect(at(mars, g, 9, 69).biome).toBeGreaterThan(0.75); // Syrtis Major
+    expect(at(mars, g, 46, 330).biome).toBeGreaterThan(0.7); // Mare Acidalium
+    expect(at(mars, g, 20, 15).biome).toBeLessThan(0.4); // Arabia Terra
+    expect(at(mars, g, 0, 255).biome).toBeLessThan(0.4); // Tharsis
+  });
+
+  it('fades procedural variation noise on levels too coarse to resolve it', () => {
+    for (const def of [mars, moon]) {
+      const g = new SurfaceGenerator(def);
+      const d = geoToDir(def, 10, 20);
+      const f = dirToFace(d[0], d[1], d[2]);
+      const spread = (level: number) => {
+        const c = chunkAt(f.face, f.u, f.v, level);
+        const ch = generateChunk(def, g, f.face, level, c.x, c.y, 1);
+        let lo = 255;
+        let hi = 0;
+        for (let i = 0; i < GRID_VERTS; i++) {
+          lo = Math.min(lo, ch.attrs[i * 4 + 2]);
+          hi = Math.max(hi, ch.attrs[i * 4 + 2]);
+        }
+        return hi - lo;
+      };
+      expect(spread(0), def.id).toBe(0); // neutral: no aliased blotches on the proxy
+      // Full noise once vertices resolve it (spacing <= 700 m; the chunk then spans several wavelengths).
+      let level = 0;
+      while (levelSpacing(def, level) > 700) level++;
+      expect(spread(level), def.id).toBeGreaterThan(80);
+    }
   });
 
   it('puts the lunar maria, craters and the Ariadaeus crevasses where they belong', () => {
