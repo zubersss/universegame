@@ -32,6 +32,7 @@ import { rayCapsule } from './scan';
 import type { Species } from '../props/species';
 import type { PropInstance } from '../props/PropSystem';
 import { SAVE_SCHEMA, type SaveData } from '../save/SaveSystem';
+import type { AbilitySave } from '../abilities/save';
 import { bodyGravity, dominantBody } from '../world/environment';
 import { ChunkStore, WorkerBackend } from '../terrain/ChunkStore';
 import { createTerrainMaterials, makeTerrainUniforms, setTerrainPalette, type TerrainUniforms } from '../terrain/terrainMaterial';
@@ -411,12 +412,17 @@ export class Game {
     b.terrain.extraDemand = this.mode === 'CRUISING' ? [] : b.collision.computeWanted(_v1, vel, onFoot ? 0 : env.clearance, decel);
   }
 
-  /** The single place the gameplay mode changes. */
-  private setMode(next: Mode, reason: OnFootExitReason = 'relocate'): void {
+  /**
+   * The single place the gameplay mode changes. Entering ON_FOOT hands the
+   * hooks the body's power only once an arrival unlocked it (charter K), and
+   * the saved ability fields when the character is being restored.
+   */
+  private setMode(next: Mode, reason: OnFootExitReason = 'relocate', restored: AbilitySave | null = null): void {
     const prev = this.mode;
     if (prev === next) return;
     this.mode = next;
-    const ctx = next === 'ON_FOOT' && this.body ? { body: this.body.def.id } : null;
+    const id = this.body?.def.id;
+    const ctx = next === 'ON_FOOT' && id ? { body: id, power: this.expedition.activePower(id), restored } : null;
     this.onFoot.transition(prev, next, ctx, reason);
     if (prev === 'ON_FOOT') this.hud.setAbility(null);
   }
@@ -1542,7 +1548,9 @@ export class Game {
     let player: SaveData['player'] = null;
     if (this.mode === 'ON_FOOT' && p) {
       const f = p.feet(new Vector3()).add(this.origin);
-      player = { sys: [f.x, f.y, f.z], heading: [p.heading.x, p.heading.y, p.heading.z], pitch: p.pitch, abilityState: null };
+      // The ability state is the hooks' (PLAYER); walking when none are installed.
+      const abilityState = this.onFoot.saveState()?.abilityState ?? 'walk';
+      player = { sys: [f.x, f.y, f.z], heading: [p.heading.x, p.heading.y, p.heading.z], pitch: p.pitch, abilityState };
     }
     const l = this.lastSafeLanding;
     const e = this.expedition;
@@ -1623,7 +1631,9 @@ export class Game {
         const pl = data.player;
         const feet = new Vector3(...pl.sys).sub(this.origin);
         this.focusOverride = feet.clone();
-        this.pendingRecovery = () => this.placeRestoredPlayer(feet, new Vector3(...pl.heading), pl.pitch);
+        // The hooks get the saved ability state and the unlocks as of placement (after this restore's arrival).
+        this.pendingRecovery = () =>
+          this.placeRestoredPlayer(feet, new Vector3(...pl.heading), pl.pitch, { abilityState: pl.abilityState, unlocked: [...this.expedition.unlocked] });
       }
     } else {
       ship.body.setBodyType(RAPIER.RigidBodyType.Dynamic, true);
@@ -1665,7 +1675,7 @@ export class Game {
   }
 
   /** Place a restored on-foot player once collision is ready; falls back to beside the ship. */
-  private placeRestoredPlayer(feet: Vector3, heading: Vector3, pitch: number): boolean {
+  private placeRestoredPlayer(feet: Vector3, heading: Vector3, pitch: number, restored: AbilitySave): boolean {
     const b = this.body;
     if (!b) return true;
     _v1.copy(feet).sub(this.bodyCenterLocal);
@@ -1692,7 +1702,7 @@ export class Game {
     const h = heading.addScaledVector(up, -heading.dot(up)).normalize();
     this.player = new Player(this.physics, center, up, h);
     this.player.pitch = pitch;
-    this.setMode('ON_FOOT');
+    this.setMode('ON_FOOT', 'relocate', restored);
     this.physics.refreshQueries();
     return true;
   }
@@ -1741,6 +1751,7 @@ export class Game {
       navTarget: this.navTarget,
       discoveries: [...this.expedition.discoveries],
       unlocked: [...this.expedition.unlocked],
+      objective: this.expedition.objective(this.bodyShown && b ? b.def.id : null),
       simTime: this.simTime,
       frame: this.frameCount,
       frameDt: this.lastFrameDt,

@@ -5,6 +5,7 @@ import {
 import type { KvStore } from '../src/save/db';
 import { BODIES, GENERATOR_VERSION, SYSTEM_EXTENT, WORLD_SEED } from '../src/world/bodies';
 import { DEFAULT_SETTINGS } from '../src/game/settings';
+import { isAbilityId, type AbilityId } from '../src/abilities/save';
 // A schema-1 record exactly as the published MERIDIAN build wrote it. Frozen:
 // never edit it (it stands for real players' saves; e2e/journey/saves.spec.ts uses it too).
 import SCHEMA1 from './fixtures/save-schema1.json';
@@ -36,6 +37,7 @@ function sample(overrides: Partial<SaveData> = {}): SaveData {
       species: ['ilex-lantern', 'vesper-glass'],
       scanned: ['ilex:ilex-lantern:5/10/2/3:4', 'vesper:relay'],
       transmitted: false,
+      route: [],
     },
     ...overrides,
   };
@@ -45,7 +47,7 @@ function sample(overrides: Partial<SaveData> = {}): SaveData {
 function onFootAt(id: string, shipR: number, playerR: number): SaveData {
   const d = BODIES[id];
   const at = (k: number): V3 => [d.center[0] + k * d.radius, d.center[1], d.center[2]];
-  return sample({ mode: 'ON_FOOT', bodyId: id, ship: { ...sample().ship, sys: at(shipR) }, player: { sys: at(playerR), heading: [0, 0, 1], pitch: 0, abilityState: null } });
+  return sample({ mode: 'ON_FOOT', bodyId: id, ship: { ...sample().ship, sys: at(shipR) }, player: { sys: at(playerR), heading: [0, 0, 1], pitch: 0, abilityState: 'walk' } });
 }
 
 /** Cruising in open space at `sys`, flying −z at `speed`. */
@@ -87,7 +89,7 @@ describe('save validation', () => {
   });
 
   it('accepts on-foot and cruising snapshots with their extra state', () => {
-    expect(validateSave(sample({ mode: 'ON_FOOT', player: { sys: [790010, -41000, -598000], heading: [1, 0, 0], pitch: 0.2, abilityState: null } })).ok).toBe(true);
+    expect(validateSave(sample({ mode: 'ON_FOOT', player: { sys: [790010, -41000, -598000], heading: [1, 0, 0], pitch: 0.2, abilityState: 'walk' } })).ok).toBe(true);
     expect(validateSave(sample({ mode: 'CRUISING', bodyId: null, cruise: { speed: 12000, throttle: 1 } })).ok).toBe(true);
   });
 
@@ -109,6 +111,46 @@ describe('save validation', () => {
     const r = validateSave(d);
     expect(r.ok).toBe(true);
     if (r.ok) expect([r.data.discoveries, r.data.unlocked]).toEqual([d.discoveries, d.unlocked]);
+  });
+
+  it('accepts PLAYER ability states on foot (PLAYER validator); a pre-P2 null state reads as walking', () => {
+    for (const s of ['walk', 'flight', 'speed', 'blink', 'drift'] as const) {
+      const d = onFootAt('cairn', 1, 1.01);
+      d.player!.abilityState = s;
+      const r = importJson(exportJson(d));
+      expect(r.ok, s).toBe(true);
+      if (r.ok) expect(r.data).toEqual(d);
+    }
+    const old = onFootAt('cairn', 1, 1.01) as unknown as { player: { abilityState: unknown } };
+    old.player.abilityState = null; // as schema-2 records were written before P2
+    const r = validateSave(old);
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.data.player?.abilityState).toBe('walk');
+  });
+
+  it('keeps First Light progress: waypoints reached and scan targets scanned', () => {
+    const d = sample({
+      discoveries: ['ilex', 'vesper', 'earth'],
+      unlocked: ['skyborne-flight'],
+      expedition: { ...sample().expedition, route: ['earth:route:0', 'earth:route:1', 'mars:route:0'], scanned: ['vesper:relay', 'earth:poi:2', 'moon:poi:0'] },
+    });
+    const r = importJson(exportJson(d));
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.data).toEqual(d);
+    // A schema-2 record from before First Light has no route list: nothing reached yet.
+    const r2 = validateSave({ ...sample(), expedition: omit(sample().expedition, 'route') });
+    expect(r2.ok).toBe(true);
+    if (r2.ok) expect(r2.data.expedition.route).toEqual([]);
+  });
+
+  it('accepts only PLAYER AbilityIds that a catalog body unlocks', () => {
+    // Terminator Step is a PLAYER power, but Proxima b (M4) is not in the catalog yet.
+    expect(isAbilityId('terminator-step')).toBe(true);
+    expect(Object.values(BODIES).some((b) => b.power === 'terminator-step')).toBe(false);
+    expect(validateSave(sample({ unlocked: ['terminator-step'] })).ok).toBe(false);
+    for (const def of Object.values(BODIES)) {
+      if (def.power && def.power !== 'walk') expect(validateSave(sample({ unlocked: [def.power as AbilityId] })).ok, def.power).toBe(true);
+    }
   });
 
   const ON_FOOT = onFootAt('cairn', 1, 1.01);
@@ -144,8 +186,9 @@ describe('save validation', () => {
     ['navigation to a body not in play', { ...sample(), navTarget: 'neptune' }],
     ['surface mode without body', sample({ bodyId: null })],
     ['on foot without player', sample({ mode: 'ON_FOOT' })],
-    ['player while landed', sample({ player: { sys: [0, 0, 0], heading: [1, 0, 0], pitch: 0, abilityState: null } })],
-    ['an ability state before PLAYER defines one', { ...ON_FOOT, player: { ...ON_FOOT.player!, abilityState: 'flight' } }],
+    ['player while landed', sample({ player: { sys: [0, 0, 0], heading: [1, 0, 0], pitch: 0, abilityState: 'walk' } })],
+    ['an unknown ability state', { ...ON_FOOT, player: { ...ON_FOOT.player!, abilityState: 'teleport' } }],
+    ['a non-string ability state', { ...ON_FOOT, player: { ...ON_FOOT.player!, abilityState: { state: 'flight' } } }],
     ['on foot without the ability state field', { ...ON_FOOT, player: omit(ON_FOOT.player!, 'abilityState') }],
     ['cruise state while landed', sample({ cruise: { speed: 100, throttle: 1 } })],
     ['missing discoveries', omit(sample(), 'discoveries')],
@@ -153,9 +196,17 @@ describe('save validation', () => {
     ['discovery of a body not in the catalog', sample({ discoveries: ['ilex', 'pluto'] })],
     ['duplicate discovery', sample({ discoveries: ['ilex', 'ilex'] })],
     ['missing unlocked list', omit(sample(), 'unlocked')],
-    ['unknown power', sample({ unlocked: ['teleport'] })],
-    ['walk as an unlock', sample({ unlocked: ['walk'] })],
+    ['unlocked not a list', { ...sample(), unlocked: 'redline' }],
+    ['unknown power', { ...sample(), unlocked: ['teleport'] }],
+    ['walk as an unlock', { ...sample(), unlocked: ['walk'] }],
     ['duplicate power', sample({ unlocked: ['redline', 'redline'] })],
+    ['route waypoint past the last', sample({ expedition: { ...sample().expedition, route: ['earth:route:3'] } })],
+    ['route on a body outside the catalog', sample({ expedition: { ...sample().expedition, route: ['pluto:route:0'] } })],
+    ['route on a body without First Light', sample({ expedition: { ...sample().expedition, route: ['ilex:route:0'] } })],
+    ['scan target in the route list', sample({ expedition: { ...sample().expedition, route: ['earth:poi:0'] } })],
+    ['duplicate waypoint', sample({ expedition: { ...sample().expedition, route: ['moon:route:0', 'moon:route:0'] } })],
+    ['route not a list', { ...sample(), expedition: { ...sample().expedition, route: 'earth:route:0' } }],
+    ['unknown scan target', sample({ expedition: { ...sample().expedition, scanned: ['earth:poi:3'] } })],
     ['inventory not backed by collection', sample({ expedition: { ...sample().expedition, inventory: { ilex: 3, vesper: 0, cairn: 0 } } })],
     ['duplicate collected ID', sample({ expedition: { ...sample().expedition, collected: ['ilex:sample:0', 'ilex:sample:0'] } })],
     ['unknown sample ID', sample({ expedition: { ...sample().expedition, collected: ['ilex:sample:7'] } })],

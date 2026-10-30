@@ -5,6 +5,8 @@ import type { Mode } from '../src/game/Game';
 import { abilityView, pickWarning } from '../src/ui/Hud';
 import { Input } from '../src/core/input';
 import type { WalkInput } from '../src/player/Player';
+import { Expedition } from '../src/game/Expedition';
+import type { AbilitySave } from '../src/abilities/save';
 
 const IDLE: WalkInput = { forward: 0, right: 0, sprint: false, jump: false, yaw: 0, pitch: 0 };
 
@@ -141,6 +143,54 @@ describe('ON_FOOT hook points (Mode unchanged)', () => {
     expect(src).toMatch(/private setMode\(next: Mode[^)]*\): void \{\s*const prev = this\.mode;\s*if \(prev === next\) return;\s*this\.mode = next;/);
     // Boarding reports the exit before the character is removed.
     expect(src).toMatch(/this\.setMode\('LANDED', 'board'\);\s*this\.player\.dispose\(\);/);
+  });
+
+  it('enters with the body power only once unlocked, and with the restored ability fields', () => {
+    const exp = new Expedition();
+    const host = new OnFootHost();
+    const log: string[] = [];
+    host.install({
+      enter: (ctx) => log.push(`enter:${ctx.body}:${ctx.power}:${ctx.restored ? ctx.restored.abilityState : '-'}`),
+      step: () => false,
+      exit: (reason) => log.push(`exit:${reason}`),
+    });
+    // The context exactly as Game.setMode builds it (checked against its source below).
+    const ctx = (body: string, restored: AbilitySave | null = null) => ({ body, power: exp.activePower(body), restored });
+    host.transition('LANDED', 'ON_FOOT', ctx('moon'), 'relocate'); // not arrived: walking only
+    host.transition('ON_FOOT', 'LANDED', null, 'board');
+    exp.arrive('earth');
+    host.transition('LANDED', 'ON_FOOT', ctx('moon'), 'relocate'); // Earth's unlock is not the Moon's power
+    host.transition('ON_FOOT', 'LANDED', null, 'board');
+    exp.arrive('moon');
+    host.transition('LANDED', 'ON_FOOT', ctx('moon', { abilityState: 'blink', unlocked: [...exp.unlocked] }), 'relocate');
+    expect(log).toEqual(['enter:moon:null:-', 'exit:board', 'enter:moon:null:-', 'exit:board', 'enter:moon:lunar-step:blink']);
+    const ilex = new Expedition();
+    ilex.arrive('ilex');
+    expect(ilex.activePower('ilex')).toBeNull(); // Quiet bodies: walking only, as before
+
+    const src = readFileSync(new URL('../src/game/Game.ts', import.meta.url), 'utf8');
+    const setMode = src.slice(src.indexOf('private setMode('), src.indexOf('private fixedUpdate('));
+    expect(setMode).toMatch(/const ctx = next === 'ON_FOOT' && id \? \{ body: id, power: this\.expedition\.activePower\(id\), restored \} : null;\s*this\.onFoot\.transition\(prev, next, ctx, reason\);/);
+    // Only the restored placement passes saved ability fields.
+    expect(src.match(/this\.setMode\('ON_FOOT'[^)]*\)/g)).toEqual(["this.setMode('ON_FOOT')", "this.setMode('ON_FOOT', 'relocate', restored)"]);
+    expect(src).toMatch(/placeRestoredPlayer\(feet, new Vector3\(\.\.\.pl\.heading\), pl\.pitch, \{ abilityState: pl\.abilityState, unlocked: \[\.\.\.this\.expedition\.unlocked\] \}\)/);
+  });
+
+  it('asks the hooks for the ability state of a save only while on foot', () => {
+    const host = new OnFootHost();
+    const state: AbilitySave = { abilityState: 'flight', unlocked: ['skyborne-flight'] };
+    host.install({ ...recorder(), saveState: () => state });
+    expect(host.saveState()).toBeNull(); // not on foot
+    host.transition('LANDED', 'ON_FOOT', { body: 'earth', power: 'skyborne-flight' }, 'relocate');
+    expect(host.saveState()).toBe(state);
+    host.install(recorder()); // hooks without saveState
+    expect(host.saveState()).toBeNull();
+    host.transition('ON_FOOT', 'LANDED', null, 'board');
+    expect(host.saveState()).toBeNull();
+    const src = readFileSync(new URL('../src/game/Game.ts', import.meta.url), 'utf8');
+    const snapshot = src.slice(src.indexOf('  snapshot(): SaveData {'), src.indexOf('  restore(data: SaveData): void {'));
+    expect(snapshot).toMatch(/const abilityState = this\.onFoot\.saveState\(\)\?\.abilityState \?\? 'walk';\s*player = \{[^}]*abilityState \};/);
+    expect(snapshot).toMatch(/unlocked: \[\.\.\.e\.unlocked\],/);
   });
 
   it('records arrivals where the ship comes to rest, never inside setMode', () => {
