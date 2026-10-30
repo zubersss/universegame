@@ -6,9 +6,9 @@ import { collectErrors } from '../helpers';
 // W4 browser check: the data-backed Earth renders through the game's own
 // terrain, proxy, atmosphere and sky modules (worlds-lab.html on a Vite dev
 // server started here, because Earth is not yet on the travel route). Views:
-// ground level over New Zealand's Southern Alps (Tasman coast to Aoraki), the
-// coarse terrain from 2.2 radii, and the distant proxy from 4.5 radii.
-// Screenshots go to evidence/worlds-earth-*.png.
+// ground level over New Zealand's Southern Alps (Tasman coast to Aoraki, from
+// the regional 10" grid), the coarse terrain from 2.2 radii, and the distant
+// proxy from 4.5 radii. Screenshots go to evidence/worlds-earth-*.png.
 
 test.use({ viewport: { width: 960, height: 540 } });
 
@@ -33,7 +33,7 @@ interface Lab {
   frames: number;
   errors: string[];
   stats: Record<string, number>;
-  pixels: { mean: number; std: number; blue: number; land: number } | null;
+  pixels: { mean: number; std: number; blue: number; land: number; surface: number } | null;
 }
 
 async function view(page: Page, query: string, shot: string, settleMs = 900_000): Promise<Lab> {
@@ -59,7 +59,7 @@ test('Earth: ground, coarse terrain and proxy views render from the data', async
   expect(ground.stats.maxLevel).toBeGreaterThanOrEqual(8); // ~1 km chunks at 1.2 km altitude
   expect(ground.stats.errors).toBe(0);
   expect(ground.pixels!.std).toBeGreaterThan(8); // not a flat fill
-  expect(ground.pixels!.land).toBeGreaterThan(0.05); // terrain on screen
+  expect(ground.pixels!.surface).toBeGreaterThan(0.25); // terrain covers the lower part of the frame
 
   // 2. Coarse terrain from 2.2 radii over the Tasman Sea (Australia and New Zealand in daylight).
   const coarse = await view(page, 'body=earth&lat=-35&lon=160&orbit=2.2&fov=50', 'worlds-earth-orbit-terrain.png');
@@ -67,12 +67,14 @@ test('Earth: ground, coarse terrain and proxy views render from the data', async
   expect(coarse.stats.rendered).toBeGreaterThan(5);
   expect(coarse.pixels!.blue).toBeGreaterThan(0.02); // ocean visible
   expect(coarse.pixels!.land).toBeGreaterThan(0.005); // continents visible
+  expect(coarse.pixels!.surface).toBeGreaterThan(0.3); // the globe is local terrain at 2.2 radii
 
   // 3. Distant proxy from 4.5 radii (terrain released, proxy only).
   const proxy = await view(page, 'body=earth&lat=-35&lon=160&orbit=4.5&fov=50', 'worlds-earth-orbit-proxy.png');
   expect(proxy.errors).toEqual([]);
   expect(proxy.stats.proxies).toBe(1);
   expect(proxy.pixels!.mean).toBeGreaterThan(3);
+  expect(proxy.pixels!.surface).toBe(0); // terrain released: only the proxy draws the planet
 
   expect(errors).toEqual([]);
 });

@@ -13,6 +13,7 @@ import {
   Frustum,
   HemisphereLight,
   Matrix4,
+  MeshBasicMaterial,
   PerspectiveCamera,
   Quaternion,
   Scene,
@@ -39,9 +40,13 @@ interface LabState {
   frames: number;
   errors: string[];
   stats: Record<string, number>;
-  /** Set true to read back the next frame: mean/std of luminance and the share of sea-blue and land pixels. */
+  /**
+   * Set true to read back the next frame: mean/std of luminance, the share of
+   * sea-blue and land-coloured pixels, and `surface`, the share of the frame
+   * covered by the local terrain and liquid meshes (a flat-colour pass).
+   */
   requestPixels: boolean;
-  pixels: { mean: number; std: number; blue: number; land: number } | null;
+  pixels: { mean: number; std: number; blue: number; land: number; surface: number } | null;
 }
 
 const lab: LabState = { ready: false, settled: false, frames: 0, errors: [], stats: {}, requestPixels: false, pixels: null };
@@ -150,6 +155,7 @@ async function main(): Promise<void> {
   scene.add(terrain.root);
   const space = new Space();
   bgScene.add(space.group);
+  const coverageMaterial = new MeshBasicMaterial({ color: 0xffffff });
   const sunDef = def.system === 'sol' ? BODIES.sun : null;
   const clouds = new Clouds();
   clouds.setBody(def, 1);
@@ -207,14 +213,17 @@ async function main(): Promise<void> {
     clouds.update(now / 1000, planetLocal, new Color(0.3, 0.4, 0.5));
     updateSkyMesh(sky, camera);
     renderer.autoClear = false;
-    renderer.setClearColor(0x000000, 1);
-    renderer.clear(true, true, false);
-    if (layers.includes('bg')) renderer.render(bgScene, bgCamera);
-    renderer.clearDepth();
-    if (layers.includes('sky')) renderer.render(skyScene, skyCamera);
-    renderer.clearDepth();
-    clouds.group.visible = layers.includes('clouds');
-    if (layers.includes('scene')) renderer.render(scene, camera);
+    const draw = () => {
+      renderer.setClearColor(0x000000, 1);
+      renderer.clear(true, true, false);
+      if (layers.includes('bg')) renderer.render(bgScene, bgCamera);
+      renderer.clearDepth();
+      if (layers.includes('sky')) renderer.render(skyScene, skyCamera);
+      renderer.clearDepth();
+      clouds.group.visible = layers.includes('clouds');
+      if (layers.includes('scene')) renderer.render(scene, camera);
+    };
+    draw();
     if (lab.requestPixels) {
       // Read back in the same task as the draw (the buffer is not preserved afterwards).
       const gl = renderer.getContext();
@@ -222,6 +231,17 @@ async function main(): Promise<void> {
       const h = gl.drawingBufferHeight;
       const px = new Uint8Array(w * h * 4);
       gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, px);
+      // Surface coverage: the local scene alone, flat white on black (clouds hidden), then the real frame again.
+      const cov = new Uint8Array(w * h * 4);
+      renderer.setClearColor(0x000000, 1);
+      renderer.clear(true, true, false);
+      clouds.group.visible = false;
+      scene.overrideMaterial = coverageMaterial;
+      renderer.render(scene, camera);
+      scene.overrideMaterial = null;
+      gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, cov);
+      draw();
+      let covered = 0;
       let sum = 0;
       let sum2 = 0;
       let blue = 0;
@@ -234,9 +254,10 @@ async function main(): Promise<void> {
         sum2 += y * y;
         if (b > r + 12 && b > g) blue++;
         else if (y > 25 && (g >= b || r >= b)) land++;
+        if (cov[i * 4] > 127) covered++;
       }
       const mean = sum / n;
-      lab.pixels = { mean, std: Math.sqrt(Math.max(0, sum2 / n - mean * mean)), blue: blue / n, land: land / n };
+      lab.pixels = { mean, std: Math.sqrt(Math.max(0, sum2 / n - mean * mean)), blue: blue / n, land: land / n, surface: covered / n };
       lab.requestPixels = false;
     }
     lab.frames++;
