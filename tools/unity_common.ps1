@@ -97,6 +97,7 @@ function Invoke-UnityBatch([string[]]$UnityArgs, [string]$LogName, [switch]$Grap
     if (-not $Graphics) { $all += '-nographics' }
     $all += @('-projectPath', $RepoRoot, '-logFile', $log) + $UnityArgs
     $p = Start-Process -FilePath $exe -ArgumentList $all -PassThru -NoNewWindow
+    $null = $p.Handle # cache the handle, or ExitCode reads back empty after WaitForExit
     # D-026: one heavy job holds the lock at most 20 min.
     if (-not $p.WaitForExit($MaxJobMinutes * 60 * 1000)) {
         Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
