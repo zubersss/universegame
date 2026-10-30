@@ -11,9 +11,12 @@ import { tangentBasis } from '../world/sites';
 import { Raycaster, Vector3 } from 'three';
 import { GROUPS } from '../physics/Physics';
 import { frameStats, gpuEstimate } from './perf';
+import { playerTestHooks } from './playerHooks';
 
 export interface MeridianTestApi {
   game: Game;
+  /** PLAYER-owned hooks (src/debug/playerHooks.ts): on-foot and power inputs and state. */
+  player: Record<string, unknown>;
   snapshot(): Record<string, unknown>;
   hold(code: string, down: boolean): void;
   press(code: string): void;
@@ -309,6 +312,7 @@ export function installTestHooks(game: Game, extras?: TestHookExtras): void {
     releaseAll() {
       game.input.injected.clear();
     },
+    player: playerTestHooks(game),
   };
   (window as unknown as { __meridian: MeridianTestApi }).__meridian = api;
 }

@@ -1206,7 +1206,7 @@ export class Game {
 
     if (playing && this.mode === 'ON_FOOT' && this.player) {
       const p = this.player;
-      this.cameraRig.firstPerson(p.eye(alpha, _v3), p.up, p.heading, p.pitch);
+      if (!this.onFoot.frame(dt, alpha)) this.cameraRig.firstPerson(p.eye(alpha, _v3), p.up, p.heading, p.pitch);
     } else if (playing && (this.mode === 'PILOTING' || this.mode === 'CRUISING')) {
       this.cameraRig.chase(dt, shipPos, shipQuat, ship.speed, radialUp, this.mode === 'CRUISING');
     } else {

@@ -69,6 +69,27 @@ describe('ON_FOOT hook points (Mode unchanged)', () => {
     expect(() => host.transition('LANDED', 'ON_FOOT', null, 'relocate')).toThrow();
   });
 
+  it('forwards frames only on foot and lets the hooks take the camera', () => {
+    const host = new OnFootHost();
+    let frames = 0;
+    host.install({ ...recorder(), frame: () => (frames++, true) });
+    expect(host.frame(1 / 60, 0.5)).toBe(false); // not on foot
+    host.transition('LANDED', 'ON_FOOT', { body: 'ilex' }, 'relocate');
+    expect(host.frame(1 / 60, 0.5)).toBe(true);
+    host.install(recorder()); // hooks without frame(): Game keeps its camera
+    expect(host.frame(1 / 60, 0.5)).toBe(false);
+    host.transition('ON_FOOT', 'LANDED', null, 'board');
+    expect(host.frame(1 / 60, 0.5)).toBe(false);
+    expect(frames).toBe(1);
+  });
+
+  it('gives PLAYER its extension point and test hooks', () => {
+    const src = (f: string) => readFileSync(new URL(`../src/${f}`, import.meta.url), 'utf8');
+    expect(src('game/boot.ts')).toMatch(/game = new Game\(render, settings\);\s*installPlayer\(game\);/);
+    expect(src('game/Game.ts')).toMatch(/if \(!this\.onFoot\.frame\(dt, alpha\)\) this\.cameraRig\.firstPerson\(/);
+    expect(src('debug/testHooks.ts')).toMatch(/player: playerTestHooks\(game\),/);
+  });
+
   it('routes every Game mode change through setMode', () => {
     const src = readFileSync(new URL('../src/game/Game.ts', import.meta.url), 'utf8');
     const assigns = src.match(/this\.mode\s*=[^=]/g) ?? [];

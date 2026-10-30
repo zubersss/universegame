@@ -1,7 +1,8 @@
 // ON_FOOT hook points for the ability system (charter section I: AbilityState
 // lives inside ON_FOOT). PLAYER implements OnFootHooks and installs it with
-// game.onFoot.install(); Game routes every mode change through setMode(), so
-// enter/exit always pair and step only runs in between. Mode stays unchanged.
+// game.onFoot.install() from src/player/install.ts; Game routes every mode
+// change through setMode(), so enter/exit always pair and step/frame only run
+// in between. Mode stays unchanged.
 
 import type { BodyId } from '../world/bodies';
 import type { Mode } from './Game';
@@ -24,6 +25,12 @@ export interface OnFootHooks {
   step(dt: number): boolean;
   /** The character is leaving ON_FOOT. */
   exit(reason: OnFootExitReason): void;
+  /**
+   * Once per rendered frame while on foot (also paused or loading), with the
+   * interpolation alpha. Return true when the hooks placed the camera (character
+   * camera); otherwise Game keeps its first-person camera.
+   */
+  frame?(dt: number, alpha: number): boolean;
 }
 
 /** 'enter' / 'exit' when a mode change crosses the ON_FOOT boundary, else null. */
@@ -69,5 +76,11 @@ export class OnFootHost {
   step(dt: number): boolean {
     if (!this.ctx || !this.hooks) return false;
     return this.hooks.step(dt) === true;
+  }
+
+  /** Per rendered frame while on foot; true when the hooks placed the camera. */
+  frame(dt: number, alpha: number): boolean {
+    if (!this.ctx || !this.hooks?.frame) return false;
+    return this.hooks.frame(dt, alpha) === true;
   }
 }
