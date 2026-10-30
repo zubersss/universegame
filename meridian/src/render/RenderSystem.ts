@@ -16,6 +16,16 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { FXAAPass } from 'three/addons/postprocessing/FXAAPass.js';
 import { PRESETS, type PresetSpec, type QualityPreset } from '../game/config';
+import { SYSTEM_EXTENT } from '../world/bodies';
+import { BG_SCALE } from './BodyProxies';
+
+/**
+ * Far plane of the background camera [bg units]: the width of the charted
+ * system (2 × SYSTEM_EXTENT at BG_SCALE, about 33,000), so no body proxy is
+ * clipped from anywhere in it (Neptune is about 9,000 units from Earth).
+ * Logarithmic depth keeps the precision.
+ */
+export const BG_FAR = Math.max(4000, 2 * SYSTEM_EXTENT * BG_SCALE);
 
 /**
  * Draws the three world layers into the current target:
@@ -122,7 +132,7 @@ export class RenderSystem {
       r.extensions.has('EXT_color_buffer_half_float') || r.extensions.has('EXT_color_buffer_float');
 
     this.camera = new PerspectiveCamera(70, 1, 0.1, 50000);
-    this.bgCamera = new PerspectiveCamera(70, 1, 0.5, 4000);
+    this.bgCamera = new PerspectiveCamera(70, 1, 0.5, BG_FAR);
     this.skyCamera = new PerspectiveCamera(70, 1, 0.1, 10);
     this.layers = new WorldLayers(this.bgScene, this.bgCamera, this.skyScene, this.skyCamera, this.scene, this.camera);
     this.applyPreset(preset);

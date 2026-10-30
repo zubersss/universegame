@@ -57,7 +57,8 @@ export interface AimGoal {
 
 export type AutopilotGoal = FlyGoal | LandGoal | WalkGoal | TravelGoal | AimGoal;
 
-const PLAN_INFLATE = 8000;
+/** The game's route inflation, so the autopilot flies the route a cruise hop is capped for. */
+const PLAN_INFLATE = CRUISE.routeInflate;
 
 function bodyCenter(id: BodyId, out = new Vector3()): Vector3 {
   const c = BODIES[id].center;
