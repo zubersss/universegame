@@ -18,11 +18,22 @@ beforeAll(async () => {
   await initPhysics();
 });
 
+/**
+ * Flat ground (top at y = 0) from z = +400 to -4400 in 400 m tiles: a single
+ * box kilometres across lets Rapier's character controller sink the capsule
+ * about 0.18 m into it, which real terrain tiles do not.
+ */
+function groundTiles(physics: Physics): void {
+  for (let k = 0; k < 12; k++) {
+    const b = physics.world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(0, -1, 200 - 400 * k));
+    physics.world.createCollider(RAPIER.ColliderDesc.cuboid(200, 1, 200).setCollisionGroups(GROUPS.terrain), b);
+  }
+}
+
 /** A flat world, a walker and the controller, stepped the way Game steps ON_FOOT. */
 function rig(body: string, power: string, gravity: number, opts: { at?: Vector3; restored?: AbilitySave } = {}) {
   const physics = new Physics();
-  const ground = physics.world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(0, -1, -500));
-  physics.world.createCollider(RAPIER.ColliderDesc.cuboid(800, 1, 800).setCollisionGroups(GROUPS.terrain), ground);
+  groundTiles(physics);
   physics.refreshQueries();
   const player = new Player(physics, opts.at ?? new Vector3(0, FOOT_OFFSET + WALK.skin + 0.01, 0), UP, FWD);
   const slots: (AbilitySlot | null)[] = [];
@@ -58,12 +69,25 @@ describe('powers driven through the ability controller (charter K controls)', ()
   it('Skyborne Flight: hold Space to take off, fly, and land only when low and slow', () => {
     const r = rig('earth', 'skyborne-flight', 9.81);
     const P = (ABILITIES['skyborne-flight'] as { params: FlightParams }).params;
-    // Press and hold Space: the first press jumps (walking), holding on takes off.
+    // Press and hold Space: the first press jumps (walking), holding on takes
+    // off mid-jump at the hold time, without coming down first.
+    for (let i = 0; i < 10; i++) r.step();
+    expect(r.player.grounded).toBe(true);
+    expect(r.height()).toBeCloseTo(WALK.skin, 2); // standing on the ground, not sunk into it
     r.heldKeys.add('Space');
     r.step({ jump: true });
-    for (let i = 0; i < 60; i++) r.step();
+    let tookOff = -1;
+    let lowest = Infinity;
+    for (let i = 1; i <= 60; i++) {
+      r.step();
+      if (tookOff < 0 && r.ctl.state === 'flight') tookOff = i;
+      if (i > 5) lowest = Math.min(lowest, r.height());
+    }
     expect(r.ctl.state).toBe('flight');
     expect(r.ctl.log.at(-1)).toMatchObject({ from: 'walk', to: 'flight' });
+    expect(tookOff * SIM_DT).toBeGreaterThan(P.takeoffHold - 2 * SIM_DT);
+    expect(tookOff * SIM_DT).toBeLessThan(P.takeoffHold + 2 * SIM_DT);
+    expect(lowest).toBeGreaterThan(0.3); // never back on the ground between the jump and the take-off
     // Climb for 3 s, then cruise forward.
     for (let i = 0; i < 180; i++) r.step();
     expect(r.height()).toBeGreaterThan(40);

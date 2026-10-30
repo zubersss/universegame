@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest';
-import { Group, Mesh, PerspectiveCamera, Vector3 } from 'three';
+import { Group, Mesh, PerspectiveCamera, Quaternion, Vector3 } from 'three';
 import { AbilityController } from '../src/abilities/AbilityController';
 import { BlinkPower, type PowerWorld } from '../src/abilities/powers';
 import { ABILITIES } from '../src/abilities/catalog';
@@ -41,14 +41,23 @@ interface FrameSample {
   streaks: number;
   trails: number;
   marker: boolean;
+  /** Each bone's rotation relative to the explorer's root (body turns and leans excluded). */
+  bones: Quaternion[];
+  /** Camera position relative to the walker. */
+  offset: Vector3;
+  /** Walker displacement this frame (m). */
+  moved: number;
 }
 
 /** A fresh script per run (scripts may keep one-shot presses in a closure). */
 function play(body: string, power: string, gravity: number, fps: number, seconds: number, makeScript: () => Script) {
   const script = makeScript();
   const physics = new Physics();
-  const ground = physics.world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(0, -1, -700));
-  physics.world.createCollider(RAPIER.ColliderDesc.cuboid(900, 1, 900).setCollisionGroups(GROUPS.terrain), ground);
+  // Flat ground in 400 m tiles (one huge box lets the capsule sink into it).
+  for (let k = 0; k < 12; k++) {
+    const b = physics.world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(0, -1, 200 - 400 * k));
+    physics.world.createCollider(RAPIER.ColliderDesc.cuboid(200, 1, 200).setCollisionGroups(GROUPS.terrain), b);
+  }
   physics.refreshQueries();
   const player = new Player(physics, new Vector3(0, FOOT_OFFSET + WALK.skin + 0.01, 0), UP, FWD);
   const scene = new Group();
@@ -74,6 +83,7 @@ function play(body: string, power: string, gravity: number, fps: number, seconds
   const steps: { t: number; state: string; pos: Vector3; speed: number }[] = [];
   const frames: FrameSample[] = [];
   let blinks = 0;
+  let lastPos: Vector3 | null = null;
   const tips = [new Vector3(), new Vector3()] as const;
   for (let f = 0; f < Math.round(seconds * fps); f++) {
     // Sampled just past the frame start: simTime sums float steps, and a
@@ -120,7 +130,14 @@ function play(body: string, power: string, gravity: number, fps: number, seconds
       }
     }
     vfx.update(dt, { up: UP, camera: rig.camera.position, aim, rush, trails }, false);
+    const bones = player.avatar!.rig.bones;
+    const rootInv = bones[0].getWorldQuaternion(new Quaternion()).invert();
+    const moved = lastPos ? lastPos.distanceTo(player.pos) : 0;
+    lastPos = player.pos.clone();
     frames.push({
+      bones: bones.map((b) => rootInv.clone().multiply(b.getWorldQuaternion(new Quaternion()))),
+      offset: rig.camera.position.clone().sub(player.pos),
+      moved,
       t: simTime,
       state: ctl.state,
       avatar: player.avatar!.state,
@@ -148,7 +165,60 @@ function expectSaneFrames(frames: FrameSample[]): void {
   }
 }
 
+/**
+ * Pops: a bone turning more than 8 degrees in one frame and more than 2.5
+ * times as much as in both neighbouring frames (fast limbs in a sprint turn
+ * steadily, a pop does not), and the camera's offset from the walker moving
+ * more than 0.1 m in one frame (placements of more than 3 m excepted).
+ */
+function pops(frames: FrameSample[]): string[] {
+  const out: string[] = [];
+  const turn = (i: number, b: number) => (frames[i].bones[b].angleTo(frames[i - 1].bones[b]) * 180) / Math.PI;
+  for (let i = 2; i < frames.length - 1; i++) {
+    for (let b = 0; b < frames[i].bones.length; b++) {
+      const d = turn(i, b);
+      if (d > 8 && d > 2.5 * Math.max(turn(i - 1, b), turn(i + 1, b))) out.push(`bone ${b} turns ${d.toFixed(1)} deg at t=${frames[i].t.toFixed(3)} (${frames[i].avatar})`);
+    }
+    const jump = frames[i].offset.distanceTo(frames[i - 1].offset);
+    if (jump > 0.1 && frames[i].moved < 3) out.push(`camera jumps ${jump.toFixed(3)} m at t=${frames[i].t.toFixed(3)}`);
+  }
+  return out;
+}
+
 const firstTime = (steps: { t: number; state: string }[], state: string, after = 0) => steps.find((s) => s.t > after && s.state === state)?.t ?? -1;
+
+describe('continuity through power transitions (60 fps)', () => {
+  it('flight taken off mid-jump and landed, superspeed started and stopped, and a plain jump: no bone snaps, no camera jumps', () => {
+    const P = (ABILITIES['skyborne-flight'] as { params: FlightParams }).params;
+    // Flight: Space pressed at 0.5 s (a jump) and held: take-off mid-jump, climb, cruise, boost, hover, descend, land.
+    const flight = play('earth', 'skyborne-flight', 9.81, 60, 22, () => (t) => {
+      if (t < 0.5) return {};
+      if (t < 3) return { held: ['Space'], jump: t < 0.51 };
+      if (t < 6) return { held: ['KeyW'] };
+      if (t < 9) return { held: ['KeyW', 'ShiftLeft'] };
+      if (t < 13.5) return { held: ['KeyX'] };
+      return { held: ['ControlLeft'] };
+    });
+    const takeoff = firstTime(flight.steps, 'flight');
+    expect(takeoff).toBeCloseTo(0.5 + P.takeoffHold, 1);
+    // Mid-jump: off the ground since the press, never back down before taking off.
+    const before = flight.steps.filter((s) => s.t > 0.6 && s.t < takeoff);
+    expect(before.length).toBeGreaterThan(10);
+    expect(before.every((s) => s.pos.y - FOOT_OFFSET > 0.2)).toBe(true);
+    expect(flight.log.map((e) => `${e.from}>${e.to}`)).toEqual(['walk>flight', 'flight>walk']);
+    expect(pops(flight.frames)).toEqual([]);
+    // Superspeed from standing, braking back to walking.
+    const speed = play('mars', 'redline', 3.71, 60, 8, () => (t) => (t > 0.5 && t < 3.5 ? { held: ['KeyQ'] } : {}));
+    expect(speed.log.map((e) => `${e.from}>${e.to}`)).toEqual(['walk>speed', 'speed>walk']);
+    expect(pops(speed.frames)).toEqual([]);
+    // A plain jump (Space tapped, no take-off): the landing does not snap the arms.
+    const jump = play('earth', 'skyborne-flight', 9.81, 60, 2.5, () => (t) => (t > 0.5 && t < 0.52 ? { held: ['Space'], jump: true } : {}));
+    expect(jump.log).toEqual([]);
+    expect(Math.max(...jump.steps.map((s) => s.pos.y - FOOT_OFFSET))).toBeGreaterThan(0.5);
+    expect(jump.frames.some((f) => f.avatar === 'land')).toBe(true);
+    expect(pops(jump.frames)).toEqual([]);
+  });
+});
 
 describe('powers at low frame rates (fixed steps, one render per frame)', () => {
   it('Skyborne Flight: same take-off, cruise, boost, hover and landing at 60, 30, 20 and 15 fps', () => {

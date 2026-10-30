@@ -43,6 +43,8 @@ export const CHAR_CAMERA = {
   converge: 25,
   /** Seconds to ease back out after being pushed in. */
   easeOut: 0.3,
+  /** Time constant of the rest length following the wanted arm (s). */
+  restEase: 0.35,
   /** Minimum camera height above the analytic terrain (m). */
   minGround: 0.45,
   /** Below this arm length the body would fill the view: hide it. */
@@ -87,6 +89,8 @@ export class CharacterCamera {
   fov: number = CAMERA.fov;
   /** Frames where geometry pulled the arm in (diagnostics). */
   pushedFrames = 0;
+  /** Rest length of the arm, eased toward the wanted one so a power's longer arm comes in without a jolt. */
+  restArm: number = CHAR_CAMERA.arm;
 
   toggle(): void {
     this.mode = this.mode === 'third' ? 'first' : 'third';
@@ -150,10 +154,14 @@ export class CharacterCamera {
     let wanted: number = CHAR_CAMERA.arm + (reducedMotion ? 0 : Math.min(CHAR_CAMERA.armMaxExtra, speed * CHAR_CAMERA.armSpeedGain));
     if (power?.mode === 'flight') wanted = CHAR_CAMERA.flightArm + (reducedMotion ? 0 : Math.min(CHAR_CAMERA.flightArmMaxExtra, power.speed * CHAR_CAMERA.flightArmPerSpeed));
     else if (power?.mode === 'dash') wanted = CHAR_CAMERA.arm + (reducedMotion ? 0 : Math.min(CHAR_CAMERA.dashArmMaxExtra, power.speed * CHAR_CAMERA.dashArmPerSpeed));
+    // The rest length eases toward the wanted one and the arm eases toward
+    // the rest length: an S-curve, so a power starting or ending (1.5 m more
+    // arm at once) never sets the camera off at speed in a single frame.
+    if (dt > 0) this.restArm += (wanted - this.restArm) * (1 - Math.exp(-dt / CHAR_CAMERA.restEase));
     _dir.copy(_look).negate();
-    const room = free(_anchor, _dir, wanted);
+    const room = free(_anchor, _dir, this.restArm);
     if (room < this.arm) this.pushedFrames++;
-    this.arm = follow(this.arm, wanted, room);
+    this.arm = follow(this.arm, this.restArm, room);
     this.position.copy(_anchor).addScaledVector(_dir, this.arm);
     // Analytic terrain clearance (colliders may not be loaded around the camera).
     if (terrain) {

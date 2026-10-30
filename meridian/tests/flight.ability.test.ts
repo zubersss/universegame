@@ -109,7 +109,7 @@ describe('powered movement through the character controller', () => {
   it('flies into a wall at boost speed without passing through it', () => {
     const physics = new Physics();
     const ground = physics.world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(0, -1, 0));
-    physics.world.createCollider(RAPIER.ColliderDesc.cuboid(500, 1, 500).setCollisionGroups(GROUPS.terrain), ground);
+    physics.world.createCollider(RAPIER.ColliderDesc.cuboid(200, 1, 200).setCollisionGroups(GROUPS.terrain), ground);
     // A 2 m thick wall 40 m ahead, from the ground up to 60 m.
     const wall = physics.world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(0, 30, -41));
     physics.world.createCollider(RAPIER.ColliderDesc.cuboid(50, 30, 1).setCollisionGroups(GROUPS.terrain), wall);

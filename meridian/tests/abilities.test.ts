@@ -86,6 +86,9 @@ describe('transition rules (charter J)', () => {
     expect(transitionBlocked('walk', 'flight', here('speed'))).toMatch(/not available/);
     expect(transitionBlocked('walk', 'flight', { ...here('flight'), unlocked: false })).toMatch(/unlocked/);
     expect(transitionBlocked('speed', 'flight', here('flight'))).toMatch(/one power/);
+    // Flight may start in the air (a held Space jumps first); superspeed needs the ground.
+    expect(transitionBlocked('walk', 'flight', { ...here('flight'), grounded: false })).toBeNull();
+    expect(transitionBlocked('walk', 'speed', { ...here('speed'), grounded: false })).toMatch(/ground/);
     expect(transitionBlocked('walk', 'speed', here('speed', { grounded: false }))).toMatch(/ground/);
     expect(transitionBlocked('walk', 'drift', here('drift'))).toMatch(/zone/);
     expect(transitionBlocked('walk', 'drift', here('drift', { inZone: true }))).toBeNull();

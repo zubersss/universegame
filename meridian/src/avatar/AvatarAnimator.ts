@@ -280,6 +280,8 @@ export class AvatarAnimator {
   /** Landing dip 0..1 and its remaining time (s). */
   landAmount = 0;
   landTimer = 0;
+  /** Air pose: 0 rising (jump) .. 1 falling. */
+  fallMix = 0;
   /** Entries per state since creation (tests and diagnostics). */
   readonly entries: Record<AnimState, number> = { idle: 0, walk: 0, run: 0, jump: 0, fall: 0, land: 0, climb: 0, fly: 0, dash: 0 };
   /** Blend into the flight and dash poses (0..1) and the dash's own stride phase. */
@@ -331,24 +333,39 @@ export class AvatarAnimator {
     g.span *= k;
     g.front *= k;
 
-    // Airborne bookkeeping and landing detection.
-    if (!inp.grounded) {
-      this.airTime += dt;
-      this.minVVert = Math.min(this.minVVert, inp.vVert);
-    }
-    if (inp.grounded && !this.wasGrounded && this.airTime > 0.25) {
-      this.landAmount = clampN(0.35 + Math.abs(this.minVVert) / 9, 0.35, 1);
-      this.landTimer = LAND_TIME(this.landAmount);
-    }
-    if (inp.grounded) {
+    // Airborne bookkeeping and landing detection. Not under a power: its
+    // neutral ground input is no landing (flight starts mid-jump), and the air
+    // pose fades slowly under the power pose instead of snapping to a stance.
+    let inAir = false;
+    if (pw) {
       this.airTime = 0;
       this.minVVert = 0;
+      this.wasGrounded = true;
+      this.landTimer = 0;
+      this.air = approach(this.air, 0, dt, 0.3);
+    } else {
+      if (!inp.grounded) {
+        this.airTime += dt;
+        this.minVVert = Math.min(this.minVVert, inp.vVert);
+      }
+      if (inp.grounded && !this.wasGrounded && this.airTime > 0.25) {
+        this.landAmount = clampN(0.35 + Math.abs(this.minVVert) / 9, 0.35, 1);
+        this.landTimer = LAND_TIME(this.landAmount);
+      }
+      if (inp.grounded) {
+        this.airTime = 0;
+        this.minVVert = 0;
+      }
+      this.wasGrounded = inp.grounded;
+      this.landTimer = Math.max(0, this.landTimer - dt);
+      // Short ungrounded moments (stepping off a ledge, a bump) keep the gait.
+      inAir = !inp.grounded && (this.airTime > 0.12 || inp.vVert > 0.5);
+      this.air = approach(this.air, inAir ? 1 : 0, dt, inAir ? 0.08 : 0.05);
+      // Jump/fall mix of the air pose: follows the vertical speed in the air
+      // and holds on touchdown, so the air pose fades out as it was (the speed
+      // drops to zero at once on landing).
+      if (inAir) this.fallMix = approach(this.fallMix, smooth(1.5, -3, inp.vVert), dt, 0.06);
     }
-    this.wasGrounded = inp.grounded;
-    this.landTimer = Math.max(0, this.landTimer - dt);
-    // Short ungrounded moments (stepping off a ledge, a bump) keep the gait.
-    const inAir = !inp.grounded && (this.airTime > 0.12 || inp.vVert > 0.5);
-    this.air = approach(this.air, inAir ? 1 : 0, dt, inAir ? 0.08 : 0.05);
 
     // Standing with both feet under the body: line the gait up so that the
     // first step starts from where the feet actually are.
@@ -694,7 +711,7 @@ export class AvatarAnimator {
     // ---- Air pose: tucked jump while rising, open fall pose while descending.
     const w = this.air;
     if (w > 1e-4) {
-      const fall = smooth(1.5, -3, inp.vVert);
+      const fall = this.fallMix;
       const j = (1 - fall) * w;
       const f = fall * w;
       add(B.upperLegL, 0.85, 0, -0.04, j);
