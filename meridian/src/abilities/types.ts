@@ -112,6 +112,8 @@ interface ConfigBase {
   id: AbilityId;
   /** Player-facing name. */
   name: string;
+  /** Further primitives the power offers besides its own (Terminator Step: blink as well as flight). */
+  also?: Primitive[];
   /** Bodies or zones where the power is active (charter K: never elsewhere). */
   bodyIds: string[];
   controls: ControlLine[];
@@ -132,8 +134,8 @@ export interface TransitionContext {
   grounded: boolean;
   /** Horizontal speed (m/s). */
   speed: number;
-  /** The primitive of the power available here (null = none here). */
-  primitiveHere: Primitive | null;
+  /** The primitives the power available here offers (empty = none here). */
+  primitivesHere: readonly Primitive[];
   /** That power has been unlocked. */
   unlocked: boolean;
   /** Inside the destination's zone (drift). */
@@ -144,18 +146,20 @@ export interface TransitionContext {
 export const SPEED_EXIT_MAX = 7.5;
 
 /**
- * Charter J transition rules. Powers start only from walking, only where
- * their primitive is the local power and only once unlocked. Flight ends
- * only on the ground (never mid-air); superspeed ends only after braking to
- * sprint speed; a blink resolves to walking on arrival; drift hands back
- * only on solid footing or on leaving the zone. Boarding deactivates powers
- * (it only happens on the ground). Returns null when allowed, else the reason.
+ * Charter J transition rules. Powers start only from walking, only where the
+ * local power offers that primitive and only once unlocked. Flight ends only
+ * on the ground (never mid-air); superspeed ends only after braking to sprint
+ * speed; a blink resolves to walking on arrival; drift hands back only on
+ * solid footing (a zone's boundary pushes back and recalls to the ship, which
+ * ends powers through boarding). Blinking while flying (Terminator Step) is
+ * an action within flight, not a state change. Returns null when allowed,
+ * else the reason.
  */
 export function transitionBlocked(from: AbilityState, to: AbilityState, c: TransitionContext): string | null {
   if (from === to) return null;
   if (to !== 'walk') {
     if (from !== 'walk') return 'one power at a time';
-    if (c.primitiveHere !== to) return 'not available here';
+    if (!c.primitivesHere.includes(to)) return 'not available here';
     if (!c.unlocked) return 'not unlocked yet';
     if (to === 'speed' && !c.grounded) return 'needs ground';
     if (to === 'flight' && !c.grounded) return 'take off from the ground';
@@ -168,7 +172,7 @@ export function transitionBlocked(from: AbilityState, to: AbilityState, c: Trans
     case 'speed':
       return c.speed <= SPEED_EXIT_MAX + 1e-6 ? null : 'brake first';
     case 'drift':
-      return c.grounded || !c.inZone ? null : 'still drifting';
+      return c.grounded ? null : 'still drifting';
     case 'blink':
       return null;
     default:

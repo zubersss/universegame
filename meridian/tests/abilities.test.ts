@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { ABILITIES, abilityFor, bodyPower, isAbilityId } from '../src/abilities/catalog';
-import { ABILITY_STATES, PRIMITIVES, SPEED_EXIT_MAX, transitionBlocked, type AbilityState, type TransitionContext } from '../src/abilities/types';
-import { AbilityController, readAbilitySave, type AbilityHud } from '../src/abilities/AbilityController';
+import { ABILITIES, abilityFor, bodyPower, isAbilityId, primitivesOf } from '../src/abilities/catalog';
+import { ABILITY_STATES, PRIMITIVES, SPEED_EXIT_MAX, transitionBlocked, type AbilityState, type Primitive, type TransitionContext } from '../src/abilities/types';
+import { AbilityController, readAbilitySave, validateAbilityFields, type AbilityHud } from '../src/abilities/AbilityController';
 import { OnFootHost } from '../src/game/onFoot';
 import type { AbilitySlot } from '../src/ui/Hud';
 
@@ -15,7 +15,7 @@ function fakeHud() {
   return hud;
 }
 
-const CTX: TransitionContext = { grounded: true, speed: 0, primitiveHere: null, unlocked: false, inZone: false };
+const CTX: TransitionContext = { grounded: true, speed: 0, primitivesHere: [], unlocked: false, inZone: false };
 
 describe('ability contracts', () => {
   it('has exactly walk plus the four primitives', () => {
@@ -50,6 +50,21 @@ describe('ability contracts', () => {
     expect(b.bodyIds).toEqual(['moon']);
   });
 
+  it('lists every control a flight variant uses, and offers Terminator Step as flight plus blink', () => {
+    for (const a of Object.values(ABILITIES)) {
+      if (a.primitive !== 'flight') continue;
+      const keys = a.controls.map((c) => c.keys).join(' | ');
+      if (a.params.boost > a.params.cruise && a.params.flapImpulse === undefined) expect(keys, a.id).toMatch(/Shift/);
+      if (a.params.flapImpulse === undefined) expect(keys, a.id).toMatch(/X/);
+    }
+    const t = ABILITIES['terminator-step'];
+    expect(primitivesOf(t)).toEqual(['flight', 'blink']);
+    const ctx: TransitionContext = { ...CTX, primitivesHere: primitivesOf(t), unlocked: true };
+    expect(transitionBlocked('walk', 'blink', ctx)).toBeNull();
+    expect(transitionBlocked('walk', 'flight', ctx)).toBeNull();
+    expect(primitivesOf(null)).toEqual([]);
+  });
+
   it('reads BodyDef.power when present and falls back to walking', () => {
     expect(bodyPower({ id: 'mars', power: 'redline' })).toBe('redline');
     expect(bodyPower({ id: 'sun', power: null })).toBeNull();
@@ -62,7 +77,7 @@ describe('ability contracts', () => {
 });
 
 describe('transition rules (charter J)', () => {
-  const here = (p: TransitionContext['primitiveHere'], extra: Partial<TransitionContext> = {}): TransitionContext => ({ ...CTX, primitiveHere: p, unlocked: true, ...extra });
+  const here = (p: Primitive, extra: Partial<TransitionContext> = {}): TransitionContext => ({ ...CTX, primitivesHere: [p], unlocked: true, ...extra });
 
   it('starts a power only from walking, only where it lives, only once unlocked', () => {
     expect(transitionBlocked('walk', 'flight', here('flight'))).toBeNull();
@@ -81,7 +96,9 @@ describe('transition rules (charter J)', () => {
     expect(transitionBlocked('speed', 'walk', { ...CTX, speed: SPEED_EXIT_MAX })).toBeNull();
     expect(transitionBlocked('blink', 'walk', { ...CTX, grounded: false })).toBeNull();
     expect(transitionBlocked('drift', 'walk', { ...CTX, grounded: false, inZone: true })).toMatch(/drifting/);
-    expect(transitionBlocked('drift', 'walk', { ...CTX, grounded: false, inZone: false })).toBeNull();
+    // Leaving the zone in the air does not end drift: the boundary pushes back and recalls to the ship.
+    expect(transitionBlocked('drift', 'walk', { ...CTX, grounded: false, inZone: false })).toMatch(/drifting/);
+    expect(transitionBlocked('drift', 'walk', { ...CTX, grounded: true, inZone: true })).toBeNull();
     for (const s of ABILITY_STATES) expect(transitionBlocked(s, s, CTX)).toBeNull();
   });
 });
@@ -101,7 +118,7 @@ describe('ability controller (walk only in M1)', () => {
     c.unlock('redline');
     // No placeholder: the slot stays hidden and the power cannot start until speed is built.
     expect(hud.calls.at(-1)).toBeNull();
-    expect(c.request('speed', { ...CTX, primitiveHere: 'speed', unlocked: true })).toBe(false);
+    expect(c.request('speed', { ...CTX, primitivesHere: ['speed'], unlocked: true })).toBe(false);
     expect(c.lastRefusal).toMatch(/not built/);
     expect(c.state).toBe('walk');
     expect(c.step(1 / 60)).toBe(false);
@@ -133,6 +150,12 @@ describe('ability controller (walk only in M1)', () => {
     // Junk is dropped, not trusted.
     expect(readAbilitySave({ abilityState: 'teleport', unlocked: ['redline', 'redline', 'x', 7, null] })).toEqual({ abilityState: 'walk', unlocked: ['redline'] });
     expect(readAbilitySave(null)).toEqual({ abilityState: 'walk', unlocked: [] });
+    // The strict validator for saves rejects malformed fields instead of coercing them.
+    expect(validateAbilityFields('flight', ['redline'])).toEqual({ abilityState: 'flight', unlocked: ['redline'] });
+    expect(validateAbilityFields(null, [])).toEqual({ abilityState: 'walk', unlocked: [] });
+    for (const [st, un] of [['teleport', []], ['walk', {}], ['walk', 'redline'], ['walk', ['redline', 'redline']], ['walk', ['x']], ['walk', Array(13).fill('redline')], ['walk', undefined]] as [unknown, unknown][]) {
+      expect(typeof validateAbilityFields(st, un)).toBe('string');
+    }
     const states: AbilityState[] = ['walk', 'flight', 'speed', 'blink', 'drift'];
     for (const s of states) expect(readAbilitySave({ abilityState: s }).abilityState).toBe(s);
   });

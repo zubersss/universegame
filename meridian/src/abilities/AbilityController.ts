@@ -15,12 +15,30 @@ export interface AbilitySave {
   unlocked: AbilityId[];
 }
 
+/** Most powers there are (cap for the unlocked list). */
+const MAX_UNLOCKED = 12;
+
 /**
- * Validate the ability fields of a save record. Unknown power ids are
- * dropped; a missing or invalid state reads as walking. A save never resumes
- * a power mid-use: a character restored in flight is restored walking at the
- * saved (ground-snapped) spot, which is the safe reading of "flight never
- * ends mid-air" for a reload.
+ * Strict validator for the schema-2 ability fields (player.abilityState,
+ * null when not on foot, and the top-level unlocked list), for SaveSystem's
+ * validateSave: returns the fields, or an error string for a malformed
+ * record (which then never rotates over the previous good backup).
+ */
+export function validateAbilityFields(abilityState: unknown, unlocked: unknown): AbilitySave | string {
+  if (abilityState !== null && abilityState !== undefined && !isAbilityState(abilityState)) return 'player.abilityState is not an ability state';
+  if (!Array.isArray(unlocked)) return 'unlocked is not a list';
+  if (unlocked.length > MAX_UNLOCKED) return 'unlocked is too long';
+  for (const id of unlocked) if (!isAbilityId(id)) return `unlocked has an unknown power: ${String(id).slice(0, 40)}`;
+  if (new Set(unlocked).size !== unlocked.length) return 'unlocked has duplicates';
+  return { abilityState: (abilityState ?? 'walk') as AbilityState, unlocked: [...(unlocked as AbilityId[])] };
+}
+
+/**
+ * Lenient reader for ability fields that were already validated (or come
+ * from an older record): unknown power ids are dropped; a missing or invalid
+ * state reads as walking. A save never resumes a power mid-use: a character
+ * restored in flight is restored walking at the saved (ground-snapped) spot,
+ * which is the safe reading of "flight never ends mid-air" for a reload.
  */
 export function readAbilitySave(raw: unknown): AbilitySave {
   const r = (raw ?? {}) as { abilityState?: unknown; unlocked?: unknown };

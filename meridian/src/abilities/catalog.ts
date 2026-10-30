@@ -1,4 +1,4 @@
-import type { AbilityConfig, AbilityId, BodyPower, FlightParams } from './types';
+import type { AbilityConfig, AbilityId, BodyPower, FlightParams, Primitive } from './types';
 
 // Every power as data: primitive, where it is active, controls, starting
 // tunables (charter section K; changes are recorded in the commit that makes
@@ -87,8 +87,11 @@ export const ABILITIES: Readonly<Record<AbilityId, AbilityConfig>> = {
     milestone: 'M3',
     controls: [
       { keys: 'Hold Space', action: 'take off' },
+      { keys: 'Space / Ctrl', action: 'climb (below 250 m above ground) / descend' },
       { keys: 'W / S', action: 'speed up / slow down' },
-      { keys: 'Ctrl', action: 'descend' },
+      { keys: 'Shift', action: 'boost' },
+      { keys: 'X', action: 'brake to a hover' },
+      { keys: 'Descend slowly', action: 'land' },
     ],
     params: { ...FLIGHT, accel: 12, cruise: 45, boost: 70, climb: 8, brake: 40, turn: 1.2, ceiling: 600, glideRatio: 8, poweredClimbMax: 250, thermalClimb: 8 },
     feedback: { hint: 'Hold Space to glide', color: '#ffb36b', sound: 'glide', vfx: 'pressure wake' },
@@ -160,11 +163,17 @@ export const ABILITIES: Readonly<Record<AbilityId, AbilityConfig>> = {
     id: 'terminator-step',
     name: 'Terminator Step',
     primitive: 'flight',
+    also: ['blink'],
     bodyIds: ['proxima-b'],
     milestone: 'M4',
     controls: [
       { keys: 'Hold Space', action: 'take off' },
-      { keys: 'Right mouse, Q', action: 'blink, also in flight' },
+      { keys: 'Space / Ctrl', action: 'climb / descend' },
+      { keys: 'W / S', action: 'speed up / slow down' },
+      { keys: 'Shift', action: 'boost' },
+      { keys: 'X', action: 'brake to a hover' },
+      { keys: 'Hold right mouse, Q', action: 'aim and blink, on foot or in flight' },
+      { keys: 'Descend slowly', action: 'land' },
     ],
     params: FLIGHT,
     blinkInFlight: { range: 60, cooldown: 1.2, groundWithin: 2, airborneWithin: 3 },
@@ -187,4 +196,9 @@ export function bodyPower(def: { id: string; power?: unknown }): BodyPower {
 /** The power config active on a body, or null (walking only, or no exploration). */
 export function abilityFor(power: BodyPower): AbilityConfig | null {
   return power && power !== 'walk' ? ABILITIES[power] : null;
+}
+
+/** The primitives a power offers (its own plus any `also`). */
+export function primitivesOf(a: AbilityConfig | null): Primitive[] {
+  return a ? [a.primitive, ...(a.also ?? [])] : [];
 }
