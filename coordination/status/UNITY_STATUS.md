@@ -1,8 +1,9 @@
 # UNITY STATUS
-Updated: 2026-10-30 13:30 · Session: 1
+Updated: 2026-10-30 13:45 · Session: 1
 ## Current task
-U-012 Transitions (launch / entry) — next; then U-020, U-013.
+U-013 Save/load — next; then U-020, U-014.
 ## Last completed
+U-012 Transitions — 5fecaeb — EditMode 103/103, PlayMode 25/25 (+3 tool skips), twice. Launch: Escape Line crossed going up → input locked, side camera eases out (0.3 s), white fade (0.5 s), PlanetSide hidden then unloaded async, ship placed on Earth's Atmosphere Ring at longitude (x / width × 360°) + Earth's current rotation, exactly 20 u/s outward, 1 s invulnerable; total 1.05 s (≤ 1.5); hull 87 / fuel 64.5 / cargo 12 items carried in GameState. Entry: inward ring crossing (or F held 0.5 s inside a ring) → push-in + warm-to-white fade (0.8 s), PlanetSide loads Mars at column = (angle − rotation) / 360 × width, ship at Escape Line + 20 m (y 590) descending 15 m/s, Mars gravity, fuel unchanged, surveyor aboard; 1.10 s (planet load ≤ 4 s). AudioDirector re-hooks after every PlanetSide load. Saturn jump test now uses Bible v1.4's 2.3 m (D-024).
 U-010 Side-view ship — 98091e0 — EditMode 96/96, PlayMode 23/23 (+3 tool skips) three runs in a row. Launch from rest on Earth: fuel 100 → 83.000 after exactly 3 s of thrust, 83 after 2 s more (flight free after the burn), half a burn = 8.5; EscapeLineCrossed raised once going up, not on the way down; touchdowns 5 / 10.5 / 20 m/s → hull 100 / 65 / 30; Mk1 can't leave Jupiter's ground and the HUD warns (thrust < g). Pilgrim.prefab (Prefabs/Ship/), lands 10 tiles right of the spawn; F boards (camera follows the ship), F exits when landed; Escape Line band (fx/escape_band/base, scrolling "ESCAPE" label) and ship HUD (altitude, V/S, fuel, T/W, altitude bar with Escape Line marker).
 U-007 fix — 3707e5a — intermittent: the player could sink ~5 m into fresh ground (seen once in 3 PlayMode runs) because the chunk composite was rebuilt before TilemapCollider2D processed its new tiles. FinishCollision now calls ProcessTilemapChanges first, and bodies are released one physics step after the terrain settles. Regression check in CoreBootTests (player grounded on the surface, ship landed, hull 100). Streaming still green: p99 1.18 ms, 0/400 over 2 ms (Blender running).
 U-019 Sprite_LitEmissive — 42988db — EditMode 96/96, PlayMode 18/18 (+3 tool skips). Hand-written HLSL (D-023) based on URP 17.6 Sprite-Lit-Default: lit + normal map, plus additive _EmissionMap × intensity in the lit and unlit passes. ArtImporter keeps Settings/Resources/ArtMaterials.asset: every key whose addressed color file has an _emission sibling draws with Sprite_LitEmissive (EditMode tests on a sandbox registry and on the real one); AddressableSprite, PlayerView and the preview tool use it. Previews with the point light OFF (reports/unity/preview_*_nopoint_2026-10-30.png): calibration stripe brightest pixel 255,169,62 (emission 255,160,40 + albedo under the 0.25 global light); Pilgrim portholes, engine ring, lift vents and nav lights glow on a dim hull; Sun surface fully self-lit.
@@ -13,12 +14,10 @@ U-009 Player controller — 089657b — EditMode 75/75, PlayMode 13/13 (+2 skips
 U-007 seam fix — 562f0ff — capture at a fractional camera position showed thin lines between tile rows (bilinear sampling read the neighbor sheet cell). Fix: importer slices terrain cells 1 texel inset (126 px), each Tile scales back to 1 m. Lines gone; streaming unchanged (avg 0.30 ms, p99 0.92 ms, 0/400 frames over 2 ms, worst 2.08 ms, D-019 load "none"). A first try with runtime Sprite.Create sprites caused 100–186 ms hitches and was replaced.
 U-008 Dig and place — f15f617. U-006 Lit preview — 5a75d90.
 ## Next up
-U-012, U-020, U-013
+U-013, U-020, U-014
 ## Ready for review
-U-016 (37f9ed9), U-022 (4fded11), U-019 (42988db), U-010 (98091e0)
+U-010 (98091e0), U-012 (see Last completed)
 ## Handoffs
-→ LEAD: Bible §3/§4.4 conflict: Mercury orbits at 1,150, inside the Sun's well (1,200). The Sun pulls 30.4 u/s² there, more than Mk1 thrust (30), so a Mk1 ship near Mercury can't climb away from the Sun; "a Mk1 ship always escapes any well from outside 1.6R" holds for planets, not the Sun. Needs a numbers decision before M3 (Mercury).
-→ LEAD: Bible §4.2 jump table lists Saturn 2.4 m, but its formula v₀²/2g with g 10.44 gives 2.35 m (rounds to 2.3). Code follows the formula; my table test uses 2.35 with a comment. Please correct the table.
 → BLENDER: terrain sheets are sampled 1 texel inside each 128 px cell (the outer texel ring of every cell is never shown). Keep nothing important in that ring.
 → BLENDER: keys are always 3 segments; single-variant assets use `base`. Character sheets at 256 px with 4 px gutters fit 2048 only up to 7 columns.
 ## Blockers
