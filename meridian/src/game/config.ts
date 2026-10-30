@@ -1,5 +1,7 @@
 // All tunable gameplay/engine constants live here.
 
+import { CRUISE_MIN_MAX_SPEED } from '../world/scale';
+
 export const SIM_HZ = 60;
 export const SIM_DT = 1 / SIM_HZ;
 export const MAX_STEPS_PER_FRAME = 4;
@@ -46,10 +48,15 @@ export const FLIGHT = {
 } as const;
 
 export const CRUISE = {
-  maxSpeed: 15000,
+  /** Speed cap for a hop of 0 (the charter H floor); longer hops raise it (scale.cruiseMaxSpeed). */
+  maxSpeed: CRUISE_MIN_MAX_SPEED,
+  /** Acceleration floor; a raised cap scales it so the ramp still takes rampSeconds. */
   accel: 5000,
+  rampSeconds: 3,
   turnRate: 0.15,
   envelopeMargin: 10000,
+  /** A star's envelope is this many radii (outside its 2R–4R gravity taper). */
+  starStandoffRadii: 5,
   exitSpeed: 900,
   safetyMargin: 1500,
 } as const;
@@ -105,6 +112,20 @@ export const SCAN = {
 export const BODY_HANDOFF = {
   activateRadii: 3,
   releaseRadii: 4,
+} as const;
+
+/**
+ * Sunlight. The brightness scale is display adaptation, not physics: relative
+ * flux (1 at 1 AU) raised to fluxGamma and clamped, so the inner planets read
+ * brighter and the giants dimmer without blowing out or going black.
+ */
+export const LIGHT = {
+  sunIntensity: 5.2,
+  fluxGamma: 0.15,
+  minScale: 0.3,
+  maxScale: 1.5,
+  /** Light direction/brightness slew time constant when the reference changes (s). */
+  slewTau: 0.4,
 } as const;
 
 export type QualityPreset = 'low' | 'balanced' | 'high';
