@@ -1,6 +1,6 @@
 import { Vector3 } from 'three';
 import type { Player, WalkInput } from '../player/Player';
-import { FOOT_OFFSET } from '../player/Player';
+import { FOOT_OFFSET, WALKABLE_COS } from '../player/Player';
 import { WALK } from '../game/config';
 import { Flight, type FlightSense } from './flight';
 import { Speed, type SpeedSense } from './speed';
@@ -69,8 +69,6 @@ const held = (w: PowerWorld, ...codes: string[]) => codes.some((c) => w.held(c))
 /** Distances probed for loaded collision along a flight path (m): boost needs about 430 m loaded. */
 const LOAD_PROBES = [0, 30, 60, 120, 240, 480, 960];
 
-/** Cosine of the walking slope limit: ground at least this level is walkable. */
-export const WALKABLE_COS = Math.cos((WALK.maxSlopeDeg * Math.PI) / 180);
 /** Feet this close above walkable ground are touching it (m): where flight hands back. */
 export const TOUCH = 0.15;
 
@@ -208,9 +206,9 @@ export class SpeedPower implements Power {
       heading: pl.heading,
       grounded: pl.grounded,
       normal: under ? this.normal : null,
-      clear: (dir, dist) => pl.sweepCapsule(dir, dist, 0.4),
-      groundAhead: (dir, d) => {
-        const g = pl.groundAt(pl.feet(_feet).addScaledVector(dir, d), 40, 80);
+      clear: (dir, dist, normal) => pl.sweepCapsule(dir, dist, 0.4, normal),
+      ground: (dir, d, top, bottom) => {
+        const g = pl.groundAt(pl.feet(_feet).addScaledVector(dir, d), top, -bottom, true);
         if (!g) return null;
         return { h: g.h, slopeDeg: (Math.acos(Math.max(-1, Math.min(1, g.normal.dot(pl.up)))) * 180) / Math.PI };
       },
@@ -234,11 +232,11 @@ export class SpeedPower implements Power {
     const pl = w.player;
     pl.look(w.walk.yaw, w.walk.pitch);
     const r = this.speed.step(dt, { run: held(w, 'KeyQ'), brake: held(w, 'KeyX') }, this.fill(w));
-    pl.moveFree(dt, this.speed.vel, w.center, 0.6);
-    // A collision that the probes did not foresee takes the speed it blocked
-    // (full 3D speed: on a slope the horizontal part alone is lower).
-    const actual = Math.hypot(pl.vel.length(), pl.vVert);
-    if (actual < this.speed.speed - 1) this.speed.speed = actual;
+    pl.moveFree(dt, this.speed.vel, w.center, this.speed.snap(dt));
+    // A wall that the probes did not foresee takes the speed it blocked (full
+    // 3D speed: on a slope the horizontal part alone is lower). The ground met
+    // at a dip or at the foot of a rise is no wall: the run goes on.
+    if (pl.hitWall) this.speed.blocked(Math.hypot(pl.vel.length(), pl.vVert));
     if (r === 'done') this.running = false;
     return r === 'done' ? 'done' : 'active';
   }

@@ -31,6 +31,9 @@ const _feet = new Vector3();
 const _n = new Vector3();
 const _rot = { x: 0, y: 0, z: 0, w: 1 };
 const _g = new Vector3();
+const _m = new Vector3();
+/** Cosine of the walking slope limit: ground at least this level is walkable. */
+export const WALKABLE_COS = Math.cos((WALK.maxSlopeDeg * Math.PI) / 180);
 /** A camera stand-in for lookAt (cameras look down -Z, unlike other objects). */
 const _camObj = new PerspectiveCamera();
 
@@ -62,6 +65,8 @@ export class Player {
   /** Seconds airborne (for jump/land sounds). */
   airTime = 0;
   justLanded = false;
+  /** The last powered move (moveFree) ran into something steeper than walkable: a wall, not the ground it moves over. */
+  hitWall = false;
   stepDistance = 0;
   /** Visible explorer (null until attachVisual; never in headless tests). */
   avatar: Avatar | null = null;
@@ -69,6 +74,7 @@ export class Player {
   readonly view = new CharacterCamera();
   private readonly balls = new Map<number, RAPIER.Ball>();
   private readonly sweepShape = playerShape();
+  private readonly collision = new RAPIER.CharacterCollision();
 
 
   constructor(private readonly physics: Physics, center: Vector3, up: Vector3, heading: Vector3) {
@@ -169,15 +175,24 @@ export class Player {
     this.cc.computeColliderMovement(this.collider, { x: _desired.x, y: _desired.y, z: _desired.z }, RAPIER.QueryFilterFlags.EXCLUDE_SENSORS, GROUPS.player);
     if (!autostep) this.cc.enableAutostep(WALK.step, 0.2, false);
     const m = this.cc.computedMovement();
+    _m.set(m.x, m.y, m.z);
+    this.hitWall = false;
+    for (let i = 0, n = this.cc.numComputedCollisions(); i < n && !this.hitWall; i++) {
+      // normal1: the obstacle's outward normal.
+      const c = this.cc.computedCollision(i, this.collision);
+      if (c && c.normal1.x * this.up.x + c.normal1.y * this.up.y + c.normal1.z * this.up.z < WALKABLE_COS) this.hitWall = true;
+    }
     const wasGrounded = this.grounded;
     this.grounded = this.cc.computedGrounded();
+    // The controller snaps only a move that goes down, so a run along the
+    // ground would fly off a crest (the top of a descent, the brow of a
+    // rise): snapped here instead, onto walkable ground within `snap` below.
+    if (snap > 0 && wasGrounded && !this.grounded) this.snapDown(_m, snap);
     this.justLanded = this.grounded && !wasGrounded && this.airTime > 0.25;
     this.airTime = this.grounded ? 0 : this.airTime + dt;
-    this.pos.x += m.x;
-    this.pos.y += m.y;
-    this.pos.z += m.z;
+    this.pos.add(_m);
     if (dt > 0) {
-      _v.set(m.x, m.y, m.z).divideScalar(dt);
+      _v.copy(_m).divideScalar(dt);
       this.vVert = _v.dot(this.up);
       this.vel.copy(_v).addScaledVector(this.up, -this.vVert);
     }
@@ -362,23 +377,38 @@ export class Player {
    * starting `lift` metres above its position (clears small steps the
    * controller climbs anyway); Infinity when clear for `dist`.
    */
-  sweepCapsule(dir: Vector3, dist: number, lift: number): number {
+  sweepCapsule(dir: Vector3, dist: number, lift: number, normal?: Vector3): number {
     _n.copy(this.pos).addScaledVector(this.up, lift);
     const hit = this.physics.world.castShape(
       { x: _n.x, y: _n.y, z: _n.z }, { x: this.quat.x, y: this.quat.y, z: this.quat.z, w: this.quat.w },
       { x: dir.x, y: dir.y, z: dir.z }, this.sweepShape, 0, dist, true, undefined, GROUPS.queryWalk,
     );
+    // normal1: the hit surface's outward normal, facing the capsule.
+    if (hit && normal) normal.set(hit.normal1.x, hit.normal1.y, hit.normal1.z);
     return hit ? hit.time_of_impact : Infinity;
+  }
+
+  /** Extend a computed move `m` down onto walkable ground within `dist` below its end (the capsule swept straight down); grounds the walker when it does. */
+  private snapDown(m: Vector3, dist: number): void {
+    _n.copy(this.pos).add(m);
+    const hit = this.physics.world.castShape(
+      { x: _n.x, y: _n.y, z: _n.z }, { x: this.quat.x, y: this.quat.y, z: this.quat.z, w: this.quat.w },
+      { x: -this.up.x, y: -this.up.y, z: -this.up.z }, this.sweepShape, WALK.skin, dist, true, undefined, GROUPS.queryWalk,
+    );
+    if (!hit || hit.normal1.x * this.up.x + hit.normal1.y * this.up.y + hit.normal1.z * this.up.z < WALKABLE_COS) return;
+    m.addScaledVector(this.up, -hit.time_of_impact);
+    this.grounded = true;
   }
 
   /**
    * Ground under a point (searched from `rise` metres above it down to
    * `depth` below): its height above the walker's feet along up, and its
-   * normal; null when there is none in that span.
+   * normal; null when there is none in that span. By default anything the
+   * walker stands on counts; `terrainOnly` reads the shape of the land alone.
    */
-  groundAt(point: Vector3, rise: number, depth: number): { h: number; normal: Vector3 } | null {
+  groundAt(point: Vector3, rise: number, depth: number, terrainOnly = false): { h: number; normal: Vector3 } | null {
     _n.copy(point).addScaledVector(this.up, rise);
-    const hit = this.physics.castRay(_n.x, _n.y, _n.z, -this.up.x, -this.up.y, -this.up.z, rise + depth, GROUPS.queryWalk);
+    const hit = this.physics.castRay(_n.x, _n.y, _n.z, -this.up.x, -this.up.y, -this.up.z, rise + depth, terrainOnly ? GROUPS.queryTerrain : GROUPS.queryWalk);
     if (!hit) return null;
     const feet = this.feet(_v);
     _n.addScaledVector(this.up, -hit.toi).sub(feet);

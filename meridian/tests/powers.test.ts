@@ -311,7 +311,8 @@ describe('superspeed on a slope', () => {
     );
     physics.world.createCollider(RAPIER.ColliderDesc.cuboid(60, 1, half).setCollisionGroups(GROUPS.terrain), b);
     physics.refreshQueries();
-    const player = new Player(physics, new Vector3(0, FOOT_OFFSET + WALK.skin + 0.4, -5), UP, FWD);
+    // Standing on the ramp 5 m up it (its surface rises tan 20 deg per metre).
+    const player = new Player(physics, new Vector3(0, 5 * Math.tan(ang) + FOOT_OFFSET + WALK.skin + 0.05, -5), UP, FWD);
     const ctl = new AbilityController({ setAbility: () => {}, setWarning: () => {} }, () => 'walk', () => 0);
     ctl.enter({ body: 'mars', power: 'redline' });
     const held = new Set(['KeyQ']);
