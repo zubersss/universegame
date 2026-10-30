@@ -1,5 +1,7 @@
 // All tunable gameplay/engine constants live here.
 
+import { CRUISE_MIN_MAX_SPEED } from '../world/scale';
+
 export const SIM_HZ = 60;
 export const SIM_DT = 1 / SIM_HZ;
 export const MAX_STEPS_PER_FRAME = 4;
@@ -46,10 +48,15 @@ export const FLIGHT = {
 } as const;
 
 export const CRUISE = {
-  maxSpeed: 15000,
+  /** Speed cap for a hop of 0 (the charter H floor); longer hops raise it (scale.cruiseMaxSpeed). */
+  maxSpeed: CRUISE_MIN_MAX_SPEED,
+  /** Acceleration floor; a raised cap scales it so the ramp still takes rampSeconds. */
   accel: 5000,
+  rampSeconds: 3,
   turnRate: 0.15,
   envelopeMargin: 10000,
+  /** A star's envelope is this many radii (outside its 2R–4R gravity taper). */
+  starStandoffRadii: 5,
   exitSpeed: 900,
   safetyMargin: 1500,
 } as const;

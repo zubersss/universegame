@@ -1,7 +1,8 @@
 import { Quaternion, Vector3 } from 'three';
 import { CRUISE } from '../game/config';
-import { raySphere, segmentSphereEnter } from '../core/mathx';
-import { BODIES, BODY_IDS, type BodyDef, type BodyId } from '../world/bodies';
+import { raySphere, segmentSphereEnter, segmentSphereExit } from '../core/mathx';
+import { BODIES, BODY_IDS, SYSTEM_EXTENT, type BodyDef, type BodyId } from '../world/bodies';
+import { cruiseMaxSpeed } from '../world/scale';
 
 // Interplanetary cruise: an explicit assisted travel mode. While cruising the
 // cruise controller is the only owner of the ship transform; it integrates the
@@ -9,17 +10,44 @@ import { BODIES, BODY_IDS, type BodyDef, type BodyId } from '../world/bodies';
 // advance the ship). Every step sweeps the travel segment against all bodies'
 // expanded safety spheres with an exact segment/sphere test, and the speed is
 // limited so the ship can always stop before the nearest envelope ahead.
+// The system edge (a sphere of radius SYSTEM_EXTENT around the system origin)
+// is an inside-out envelope: cruise stops before it like before a body
+// (reported with body null), so it never carries a ship past what saves accept.
+// The speed cap follows the hop (charter H): max(15 km/s, hop ÷ 45 s), with the
+// acceleration scaled so the ramp to the cap always takes CRUISE.rampSeconds.
+// `ids` parameters default to the bodies in play (BODY_IDS).
 
-/** Safety-envelope radius of a body: surface + atmosphere + fixed margin. */
+/** Safety-envelope radius of a body: surface + atmosphere + fixed margin; a star keeps a 5R standoff. */
 export function safetyRadius(def: BodyDef): number {
-  return def.radius + def.atmosphereHeight + CRUISE.envelopeMargin;
+  const r = def.radius + def.atmosphereHeight + CRUISE.envelopeMargin;
+  return def.kind === 'star' ? Math.max(r, CRUISE.starStandoffRadii * def.radius) : r;
 }
 
-/** Distance along a unit direction to the first safety envelope it enters (Infinity if none). */
-export function freeDistance(pos: Vector3, dir: Vector3): { distance: number; body: BodyId | null } {
-  let best = Infinity;
+/** Hop length (m) from `pos` to a body: the straight-line distance to its safety envelope (0 inside it). */
+export function hopDistance(pos: Vector3, id: BodyId): number {
+  const c = BODIES[id].center;
+  return Math.max(0, Math.hypot(pos.x - c[0], pos.y - c[1], pos.z - c[2]) - safetyRadius(BODIES[id]));
+}
+
+/** Distance along a unit direction to the system edge (0 at or beyond it). */
+function edgeDistance(pos: Vector3, dir: Vector3): number {
+  const hit = raySphere(pos.x, pos.y, pos.z, dir.x, dir.y, dir.z, 0, 0, 0, SYSTEM_EXTENT);
+  return hit && hit[0] < 0 ? Math.max(hit[1], 0) : 0;
+}
+
+/** Whether `pos` is at or beyond the system edge. */
+export function beyondEdge(pos: Vector3): boolean {
+  return pos.lengthSq() >= SYSTEM_EXTENT * SYSTEM_EXTENT;
+}
+
+/**
+ * Distance along a unit direction to the first safety envelope it enters, or
+ * to the system edge (body null) when no envelope is nearer.
+ */
+export function freeDistance(pos: Vector3, dir: Vector3, ids: readonly BodyId[] = BODY_IDS): { distance: number; body: BodyId | null } {
+  let best = edgeDistance(pos, dir);
   let body: BodyId | null = null;
-  for (const id of BODY_IDS) {
+  for (const id of ids) {
     const b = BODIES[id];
     const hit = raySphere(pos.x, pos.y, pos.z, dir.x, dir.y, dir.z, b.center[0], b.center[1], b.center[2], safetyRadius(b));
     if (!hit) continue;
@@ -35,13 +63,47 @@ export function freeDistance(pos: Vector3, dir: Vector3): { distance: number; bo
 }
 
 /** The body whose envelope contains `pos`, or null when outside every envelope. */
-export function insideEnvelope(pos: Vector3): BodyId | null {
-  for (const id of BODY_IDS) {
+export function insideEnvelope(pos: Vector3, ids: readonly BodyId[] = BODY_IDS): BodyId | null {
+  for (const id of ids) {
     const b = BODIES[id];
     const dx = pos.x - b.center[0], dy = pos.y - b.center[1], dz = pos.z - b.center[2];
     if (dx * dx + dy * dy + dz * dz < safetyRadius(b) ** 2) return id;
   }
   return null;
+}
+
+/** First body whose safety envelope, inflated by `inflate` (m), the segment a->b enters, if any. */
+export function blockedBy(a: Vector3, b: Vector3, inflate: number, ids: readonly BodyId[] = BODY_IDS): BodyId | null {
+  for (const id of ids) {
+    const c = BODIES[id].center;
+    if (segmentSphereEnter(a, b, _c.set(c[0], c[1], c[2]), safetyRadius(BODIES[id]) + inflate) >= 0) return id;
+  }
+  return null;
+}
+
+/** Detour points sit this far outside the blocker's inflated envelope. */
+const DETOUR_CLEARANCE = 32000;
+
+/**
+ * Waypoints (system coordinates) from a to b, ending at b, whose segments stay
+ * clear of every safety envelope inflated by `inflate`: a blocked segment is
+ * split at a detour point outside the blocker, on the bisector of the
+ * directions from its center to the segment ends (at most 5 levels deep).
+ */
+export function planPath(a: Vector3, b: Vector3, inflate: number, ids: readonly BodyId[] = BODY_IDS): Vector3[] {
+  const split = (p: Vector3, q: Vector3, depth: number): Vector3[] => {
+    const id = blockedBy(p, q, inflate, ids);
+    if (!id || depth > 5) return [q.clone()];
+    const cc = BODIES[id].center;
+    const c = new Vector3(cc[0], cc[1], cc[2]);
+    const u = p.clone().sub(c).normalize();
+    const w = q.clone().sub(c).normalize();
+    const m = u.clone().add(w);
+    if (m.lengthSq() < 1e-6) m.set(-u.y, u.x, 0.3).cross(u);
+    const detour = c.add(m.normalize().multiplyScalar(safetyRadius(BODIES[id]) + inflate + DETOUR_CLEARANCE));
+    return [...split(p, detour, depth + 1), ...split(detour, q, depth + 1)];
+  };
+  return split(a, b, 0);
 }
 
 export type CruiseExitReason = 'approach' | 'brake' | 'toggle' | 'safety';
@@ -66,6 +128,7 @@ export interface CruiseStepResult {
 const _fwd = new Vector3();
 const _p1 = new Vector3();
 const _c = new Vector3();
+const _o = new Vector3(); // system origin (never written)
 const _q = new Quaternion();
 const _axis = new Vector3();
 const _cand = new Quaternion();
@@ -80,6 +143,9 @@ export class CruiseController {
   readonly pos = new Vector3();
   readonly quat = new Quaternion();
   speed = 0;
+  /** Speed cap (m/s) and acceleration (m/s²) for the current hop (set by begin/retarget). */
+  maxSpeed: number = CRUISE.maxSpeed;
+  accel: number = CRUISE.accel;
   /** Leaving cruise: decelerating toward the exit speed. */
   exiting: CruiseExitReason | null = null;
   /** Free distance ahead (m) and the body it belongs to, from the last step. */
@@ -92,30 +158,65 @@ export class CruiseController {
   /** Steps in which the exact segment test had to stop the ship (must stay 0). */
   safetyStops = 0;
 
-  /** Whether cruise may begin here: outside all envelopes with clear stopping distance ahead. */
-  static canEngage(pos: Vector3, quat: Quaternion, speed: number): { ok: boolean; reason: string | null } {
-    const inside = insideEnvelope(pos);
+  /** `ids`: the bodies this controller avoids (default: the bodies in play, read at each use). */
+  constructor(private readonly ids?: readonly BodyId[]) {}
+
+  /**
+   * Whether cruise may begin here: outside all envelopes and inside the system
+   * edge, with clear stopping distance ahead (at the floor acceleration, which
+   * never exceeds the acceleration begin() sets).
+   */
+  static canEngage(pos: Vector3, quat: Quaternion, speed: number, ids: readonly BodyId[] = BODY_IDS): { ok: boolean; reason: string | null } {
+    const inside = insideEnvelope(pos, ids);
     if (inside) {
       const b = BODIES[inside];
       const need = safetyRadius(b) - b.radius;
       return { ok: false, reason: `Too close to ${b.name}: climb above ${(need / 1000).toFixed(0)} km altitude.` };
     }
+    if (beyondEdge(pos)) return { ok: false, reason: 'Beyond the edge of the charted system.' };
     _fwd.set(0, 0, -1).applyQuaternion(quat);
-    const { distance, body } = freeDistance(pos, _fwd);
+    const { distance, body } = freeDistance(pos, _fwd, ids);
     const need = (speed * speed) / (2 * CRUISE.accel) + CRUISE.safetyMargin + 5000;
     if (distance < need) {
-      return { ok: false, reason: `${BODIES[body!].name} is directly ahead: turn away to engage cruise.` };
+      const what = body ? BODIES[body].name : 'The edge of the charted system';
+      return { ok: false, reason: `${what} is directly ahead: turn away to engage cruise.` };
     }
     return { ok: true, reason: null };
   }
 
-  begin(pos: Vector3, quat: Quaternion, velocity: Vector3): void {
+  /** Start cruising; `hop` (m) is the distance to the destination's envelope (0 = the 15 km/s floor). */
+  begin(pos: Vector3, quat: Quaternion, velocity: Vector3, hop = 0): void {
     this.pos.copy(pos);
     this.quat.copy(quat).normalize();
     _fwd.set(0, 0, -1).applyQuaternion(this.quat);
     this.speed = Math.max(0, velocity.dot(_fwd));
+    this.setHop(hop);
     this.exiting = null;
     this.limited = false;
+  }
+
+  /**
+   * New destination while cruising: the cap follows the new hop. The
+   * acceleration only drops when stopping short of the envelope ahead at the
+   * lower value would still take at most half the room left; otherwise the
+   * current (higher) value is kept so a braking ship stays safe.
+   */
+  retarget(hop: number): void {
+    const prev = this.accel;
+    this.setHop(hop);
+    if (this.accel >= prev) return;
+    _fwd.set(0, 0, -1).applyQuaternion(this.quat);
+    const room = freeDistance(this.pos, _fwd, this.ids).distance - CRUISE.safetyMargin;
+    if (this.speed * this.speed > this.accel * room) this.accel = prev;
+  }
+
+  /**
+   * Cap = max(15 km/s, hop ÷ 45 s), the hop clamped to [0, 2·SYSTEM_EXTENT];
+   * the acceleration reaches the cap (or sheds the current speed) in rampSeconds.
+   */
+  private setHop(hop: number): void {
+    this.maxSpeed = cruiseMaxSpeed(hop > 0 ? Math.min(hop, 2 * SYSTEM_EXTENT) : 0);
+    this.accel = Math.max(CRUISE.accel, Math.max(this.maxSpeed, this.speed) / CRUISE.rampSeconds);
   }
 
   /** Current velocity vector (system frame). */
@@ -124,9 +225,9 @@ export class CruiseController {
   }
 
   /** Allowed speed so that the ship can stop `margin` short of the envelope `d` ahead. */
-  private static allowed(d: number): number {
+  private allowed(d: number): number {
     const room = d - CRUISE.safetyMargin;
-    return room > 0 ? Math.sqrt(2 * CRUISE.accel * room) : 0;
+    return room > 0 ? Math.sqrt(2 * this.accel * room) : 0;
   }
 
   step(dt: number, input: CruiseInput): CruiseStepResult {
@@ -149,26 +250,26 @@ export class CruiseController {
       _q.setFromAxisAngle(_axis, w * dt);
       _cand.copy(this.quat).multiply(_q).normalize();
       _cf.set(0, 0, -1).applyQuaternion(_cand);
-      const before = freeDistance(this.pos, _fwd.set(0, 0, -1).applyQuaternion(this.quat)).distance;
-      const after = freeDistance(this.pos, _cf).distance;
-      const need = (this.speed * this.speed) / (2 * CRUISE.accel) + CRUISE.safetyMargin + this.speed * dt;
+      const before = freeDistance(this.pos, _fwd.set(0, 0, -1).applyQuaternion(this.quat), this.ids).distance;
+      const after = freeDistance(this.pos, _cf, this.ids).distance;
+      const need = (this.speed * this.speed) / (2 * this.accel) + CRUISE.safetyMargin + this.speed * dt;
       if (after < need && after < before) this.refusedTurns++;
       else this.quat.copy(_cand);
     }
 
     _fwd.set(0, 0, -1).applyQuaternion(this.quat);
-    const fd = freeDistance(this.pos, _fwd);
+    const fd = freeDistance(this.pos, _fwd, this.ids);
     this.ahead = fd.distance;
     this.aheadBody = fd.body;
-    let target = this.exiting ? CRUISE.exitSpeed : Math.max(0, Math.min(1, input.throttle)) * CRUISE.maxSpeed;
-    const allow = CruiseController.allowed(fd.distance - this.speed * dt);
+    let target = this.exiting ? CRUISE.exitSpeed : Math.max(0, Math.min(1, input.throttle)) * this.maxSpeed;
+    const allow = this.allowed(fd.distance - this.speed * dt);
     this.limited = allow < target;
     if (this.limited) target = allow;
-    const dv = CRUISE.accel * dt;
+    const dv = this.accel * dt;
     this.speed = this.speed < target ? Math.min(target, this.speed + dv) : Math.max(target, this.speed - dv);
 
-    // Hand back to normal flight once slow enough near an envelope, or when an exit was requested.
-    const nearEnvelope = fd.distance - CRUISE.safetyMargin < (CRUISE.exitSpeed * CRUISE.exitSpeed) / (2 * CRUISE.accel) + CRUISE.exitSpeed * 2;
+    // Hand back to normal flight once slow enough near an envelope (or the edge), or when an exit was requested.
+    const nearEnvelope = fd.distance - CRUISE.safetyMargin < (CRUISE.exitSpeed * CRUISE.exitSpeed) / (2 * this.accel) + CRUISE.exitSpeed * 2;
     let exit: CruiseExitReason | null = null;
     if (this.speed <= CRUISE.exitSpeed + 1e-6) {
       if (this.exiting) exit = this.exiting;
@@ -177,7 +278,7 @@ export class CruiseController {
 
     // Integrate the system position with an exact segment/sphere sweep.
     _p1.copy(this.pos).addScaledVector(_fwd, this.speed * dt);
-    for (const id of BODY_IDS) {
+    for (const id of this.ids ?? BODY_IDS) {
       const b = BODIES[id];
       _c.set(b.center[0], b.center[1], b.center[2]);
       const t = segmentSphereEnter(this.pos, _p1, _c, safetyRadius(b));
@@ -188,6 +289,14 @@ export class CruiseController {
         this.safetyStops++;
         exit = 'safety';
       }
+    }
+    // Nor the system edge (the origin is fixed at zero).
+    const te = segmentSphereExit(this.pos, _p1, _o, SYSTEM_EXTENT);
+    if (te >= 0) {
+      _p1.lerpVectors(this.pos, _p1, Math.max(0, te - 1e-6));
+      this.speed = Math.min(this.speed, CRUISE.exitSpeed);
+      this.safetyStops++;
+      exit = 'safety';
     }
     this.pos.copy(_p1);
     if (exit) this.exiting = null;
