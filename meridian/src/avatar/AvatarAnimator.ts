@@ -14,7 +14,7 @@ import { B, BONE_NAMES, DIM } from './AvatarModel';
 // landing poses blend in on top. Everything is a pure function of the inputs
 // and the animation clock.
 
-export type AnimState = 'idle' | 'walk' | 'run' | 'jump' | 'fall' | 'land';
+export type AnimState = 'idle' | 'walk' | 'run' | 'jump' | 'fall' | 'land' | 'climb';
 
 /** Ground under a point, relative to the character's root plane. */
 export interface FootGround {
@@ -44,6 +44,8 @@ export interface AnimInput {
   /** Where the camera looks relative to the body: yaw (rad, left > 0) and pitch (rad, up > 0). */
   lookYaw?: number;
   lookPitch?: number;
+  /** Ladder climbing: blend 0..1 into the climb pose, phase in climb cycles (one cycle = two rungs). */
+  climb?: { blend: number; phase: number } | null;
 }
 
 const N = BONE_NAMES.length;
@@ -259,7 +261,7 @@ export class AvatarAnimator {
   landAmount = 0;
   landTimer = 0;
   /** Entries per state since creation (tests and diagnostics). */
-  readonly entries: Record<AnimState, number> = { idle: 0, walk: 0, run: 0, jump: 0, fall: 0, land: 0 };
+  readonly entries: Record<AnimState, number> = { idle: 0, walk: 0, run: 0, jump: 0, fall: 0, land: 0, climb: 0 };
   /** Which feet are planted this frame (ball on its locked ground point). */
   readonly planted: [boolean, boolean] = [false, false];
   /** Legs that could not reach their target this frame (0 on walkable ground). */
@@ -327,7 +329,8 @@ export class AvatarAnimator {
     this.headPitch = approach(this.headPitch, clampN(inp.lookPitch ?? 0, -0.6, 0.5), dt, 0.12);
 
     let st: AnimState;
-    if (inAir) st = inp.vVert > 0 ? 'jump' : 'fall';
+    if (inp.climb && inp.climb.blend > 0.5) st = 'climb';
+    else if (inAir) st = inp.vVert > 0 ? 'jump' : 'fall';
     else if (this.landTimer > 0) st = 'land';
     else if (this.speed < 0.25) st = 'idle';
     else if (this.speed < 5.8) st = 'walk';
@@ -630,6 +633,43 @@ export class AvatarAnimator {
       add(B.upperArmL, 0, 0, 0.06 * Math.sin(t * 7), f);
       add(B.upperArmR, 0, 0, -0.06 * Math.sin(t * 7 + 1), f);
     }
+
+    // ---- Ladder climb: hand over hand, knees lifting in turn, leaning in.
+    const cb = inp.climb ? clampN(inp.climb.blend, 0, 1) : 0;
+    if (cb > 1e-4) {
+      const ph = 2 * Math.PI * (inp.climb!.phase % 1);
+      const l = 0.5 + 0.5 * Math.sin(ph);
+      const rr = 1 - l;
+      const climbPose: [number, number, number, number][] = [
+        [B.spine, -0.14, 0, 0],
+        [B.chest, -0.06, 0, 0],
+        [B.head, 0.25, 0, 0],
+        [B.upperArmL, 2.25 + 0.45 * l, 0, -0.18],
+        [B.upperArmR, 2.25 + 0.45 * rr, 0, 0.18],
+        [B.lowerArmL, 1.05 - 0.5 * l, 0, 0],
+        [B.lowerArmR, 1.05 - 0.5 * rr, 0, 0],
+        [B.handL, 0, 0.3, 0],
+        [B.handR, 0, -0.3, 0],
+        [B.upperLegL, 0.3 + 0.75 * rr, 0, -0.05],
+        [B.upperLegR, 0.3 + 0.75 * l, 0, 0.05],
+        [B.lowerLegL, -0.45 - 1.05 * rr, 0, 0],
+        [B.lowerLegR, -0.45 - 1.05 * l, 0, 0],
+        [B.footL, 0.15 + 0.3 * rr, 0, 0],
+        [B.footR, 0.15 + 0.3 * l, 0, 0],
+      ];
+      for (let i = 0; i < r.length; i++) r[i] *= 1 - cb;
+      for (const [b, x, y, z] of climbPose) add(b, x, y, z, cb);
+      this.hipsDrop *= 1 - cb;
+      // Hands and feet are on the ladder, not planted on the ground.
+      this.planted[0] = this.planted[1] = false;
+    }
+  }
+
+  /** Re-plant both feet at rest under the body (after a scripted move such as a ladder climb). */
+  resetFeet(): void {
+    this.locks[0] = newLock(-FOOT_X);
+    this.locks[1] = newLock(FOOT_X);
+    this.speed = 0;
   }
 
   /** Write the current pose to the rig's bones (rest positions are kept). */

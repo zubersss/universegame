@@ -1,10 +1,11 @@
-import { Quaternion, Vector3, type Object3D, type Texture } from 'three';
+import { PerspectiveCamera, Quaternion, Vector3, type Object3D, type Texture } from 'three';
 import { RAPIER, GROUPS, type Physics } from '../physics/Physics';
 import { WALK } from '../game/config';
 import { alignUp } from '../core/mathx';
 import { Avatar } from '../avatar/Avatar';
 import { CharacterCamera } from './CharacterCamera';
 import type { CameraRig } from '../render/CameraRig';
+import type { ScriptedPose } from './Transitions';
 
 const HALF = (WALK.height - 2 * WALK.radius) / 2; // capsule cylinder half-height
 /** Distance from the capsule center to the bottom of the feet. */
@@ -28,6 +29,8 @@ const _v = new Vector3();
 const _feet = new Vector3();
 const _n = new Vector3();
 const _rot = { x: 0, y: 0, z: 0, w: 1 };
+/** A camera stand-in for lookAt (cameras look down -Z, unlike other objects). */
+const _camObj = new PerspectiveCamera();
 
 /**
  * Walker: a kinematic capsule driven by Rapier's character controller. "Up"
@@ -62,6 +65,7 @@ export class Player {
   /** Third/first-person camera. */
   readonly view = new CharacterCamera();
   private readonly balls = new Map<number, RAPIER.Ball>();
+
 
   constructor(private readonly physics: Physics, center: Vector3, up: Vector3, heading: Vector3) {
     const world = physics.world;
@@ -237,14 +241,39 @@ export class Player {
    * Per rendered frame: place the camera (third person by default) and pose
    * the explorer. dt = 0 freezes the animation (pause, loading).
    */
-  renderView(dt: number, alpha: number, rig: CameraRig, envMap: Texture | null, reducedMotion: boolean): void {
-    const feet = _feet.lerpVectors(this.prevPos, this.pos, alpha).addScaledVector(this.up, -FOOT_OFFSET);
-    this.view.update(dt, rig.camera, feet, this.up, this.heading, this.pitch, this.speed, (f, d, m, r) => this.armCast(f, d, m, r), rig.terrainClearance, reducedMotion);
+  renderView(dt: number, alpha: number, rig: CameraRig, envMap: Texture | null, reducedMotion: boolean, scripted: ScriptedPose | null = null): void {
+    // A scripted transition (ladder) moves only the visible body; the camera
+    // follows it from behind its direction of travel (clear of the hull),
+    // swinging there at a limited rate and back to the aim afterwards.
+    const feet = scripted ? _feet.copy(scripted.feet) : _feet.lerpVectors(this.prevPos, this.pos, alpha).addScaledVector(this.up, -FOOT_OFFSET);
+    this.view.update(dt, rig.camera, feet, this.up, this.heading, this.pitch, scripted ? 0 : this.speed, (f, d, m, r) => this.armCast(f, d, m, r), rig.terrainClearance, reducedMotion);
+    if (scripted && scripted.cameraWeight > 0) {
+      // Blend toward the transition's cinematic camera (the climber's head may be inside the hull).
+      const cam = rig.camera;
+      _camObj.position.copy(scripted.cameraEye);
+      _camObj.up.copy(this.up);
+      _camObj.lookAt(scripted.cameraTarget);
+      cam.position.lerp(scripted.cameraEye, scripted.cameraWeight);
+      cam.quaternion.slerp(_camObj.quaternion, scripted.cameraWeight);
+      cam.updateMatrixWorld();
+    }
+    const showBody = this.view.bodyVisible || (!!scripted && scripted.cameraWeight > 0.5);
     const a = this.avatar;
     if (!a) return;
     a.setEnvMap(envMap);
-    a.setVisible(this.view.bodyVisible);
-    a.update({ dt, feet, up: this.up, grounded: this.grounded, vVert: this.vVert, moveVel: this.vel, lookHeading: this.heading, lookPitch: this.pitch });
+    a.setVisible(showBody);
+    a.update({
+      dt,
+      feet,
+      up: this.up,
+      grounded: scripted ? true : this.grounded,
+      vVert: scripted ? 0 : this.vVert,
+      moveVel: scripted ? scripted.moveVel : this.vel,
+      lookHeading: this.heading,
+      lookPitch: this.pitch,
+      faceDir: scripted ? scripted.faceDir : null,
+      climb: scripted ? scripted.climb : null,
+    });
   }
 
   /**

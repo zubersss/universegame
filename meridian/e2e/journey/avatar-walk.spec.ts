@@ -1,11 +1,12 @@
 import { expect, test, type Page } from '@playwright/test';
 import { bootToTitle, collectErrors, snap, stubPointerLock } from '../helpers';
 
-// P3: the explorer on foot, driven only through player inputs (real key
+// P3/P4: the explorer on foot, driven only through player inputs (real key
 // events and the test autopilot's injected keys and mouse look). Exit the
-// ship, walk ~25 m with a jump, toggle the camera, sprint back, board, and
-// exit once more; the character's animation states, planted-foot slip,
-// camera clearance and resources are read through the test API (read-only).
+// ship (down the ladder), walk ~25 m with a jump, toggle the camera, sprint
+// back, board (up the ladder), and exit and board twice more; the
+// character's animation states, planted-foot slip, camera clearance and
+// resources are read through the test API (read-only).
 
 test.use({ viewport: { width: 640, height: 360 } });
 
@@ -47,7 +48,9 @@ test('explorer: exit, walk 25 m with a jump, camera toggle, sprint back, board, 
   // Exit with a real key event: the explorer appears in third person.
   await page.keyboard.press('KeyE');
   s = await until(page, 's.mode === "ON_FOOT" && s.player && s.player.grounded', 120_000);
-  let p = await untilPlayer(page, 'p && p.avatar && p.avatar.attached && p.camera.arm > 1', 120_000);
+  // The explorer climbs down the ladder first (P4), then stands where the walker is.
+  let p = await untilPlayer(page, 'p && p.avatar && p.avatar.entries.climb >= 1', 120_000);
+  p = await untilPlayer(page, 'p && p.avatar && p.avatar.attached && p.avatar.state !== "climb" && p.camera.arm > 1', 120_000);
   expect(p.avatar.visible).toBe(true);
   expect(p.camera.mode).toBe('third');
   expect(p.camera.bodyVisible).toBe(true);
@@ -108,8 +111,9 @@ test('explorer: exit, walk 25 m with a jump, camera toggle, sprint back, board, 
   expect(p.avatar.entries.run).toBeGreaterThanOrEqual(1);
   expect(p.avatar.maxSlip).toBeLessThan(0.01);
 
-  // Board with a real key event: the explorer leaves the scene.
+  // Board with a real key event: the explorer climbs the ladder (P4), then leaves the scene.
   await page.keyboard.press('KeyE');
+  await untilPlayer(page, 'p && p.avatar.state === "climb"', 60_000);
   s = await until(page, 's.mode === "LANDED"', 60_000);
   expect(await player(page)).toBeNull();
   expect(await page.evaluate(() => (window as any).__meridian.game.render.scene.children.length)).toBe(scene0);

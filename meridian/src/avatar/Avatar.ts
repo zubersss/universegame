@@ -20,6 +20,10 @@ export interface AvatarFrame {
   /** Camera heading (tangent plane) and pitch: the head looks there. */
   lookHeading: Vector3;
   lookPitch: number;
+  /** Scripted facing (ladder, end of a transition): the body turns toward it instead of toward moveVel. */
+  faceDir?: Vector3 | null;
+  /** Ladder climbing pose (blend 0..1, phase in climb cycles). */
+  climb?: { blend: number; phase: number } | null;
 }
 
 const TURN_RATE = 10; // rad/s the body turns toward the movement direction
@@ -63,6 +67,7 @@ export class Avatar {
   private readonly target = new Vector3();
   private readonly from = new Vector3();
   private readonly motion = new Vector3();
+  private wasClimbing = false;
   private readonly groundFn: GroundFn;
 
   constructor(parent: Object3D, private readonly ray: GroundRay | null, heading: Vector3) {
@@ -121,15 +126,20 @@ export class Avatar {
     this.facing.addScaledVector(up, -this.facing.dot(up));
     if (this.facing.lengthSq() < 1e-8) this.facing.copy(f.lookHeading).addScaledVector(up, -f.lookHeading.dot(up));
     this.facing.normalize();
-    // Turn toward the intended movement direction (kept in the tangent plane).
-    _t.copy(f.moveVel).addScaledVector(up, -f.moveVel.dot(up));
+    // Turn toward the scripted facing, else the intended movement direction (tangent plane).
+    const toward = f.faceDir ?? f.moveVel;
+    _t.copy(toward).addScaledVector(up, -toward.dot(up));
     let turn = 0;
-    if (f.dt > 0 && _t.lengthSq() > 0.16) {
+    if (f.dt > 0 && _t.lengthSq() > (f.faceDir ? 1e-6 : 0.16)) {
       _t.normalize();
       const ang = Math.atan2(_a.crossVectors(this.facing, _t).dot(up), this.facing.dot(_t));
       turn = Math.max(-TURN_RATE * f.dt, Math.min(TURN_RATE * f.dt, ang));
     }
 
+    // Off the ladder again: re-plant the feet under the body.
+    const climbing = !!f.climb && f.climb.blend > 0;
+    if (this.wasClimbing && !climbing) this.anim.resetFeet();
+    this.wasClimbing = climbing;
     const n = f.dt > 0 ? Math.min(8, Math.max(1, Math.ceil(f.dt * 60 - 1e-6))) : 1;
     const sub = f.dt / n;
     const lookPitch = f.lookPitch * 0.6;
@@ -153,7 +163,8 @@ export class Avatar {
         turn: turn / n,
         grounded: f.grounded,
         vVert: f.vVert,
-        ground: f.grounded && this.ray ? this.groundFn : null,
+        ground: f.grounded && this.ray && !climbing ? this.groundFn : null,
+        climb: f.climb ?? null,
         lookYaw: Math.abs(lookYaw) < 1.9 ? lookYaw : 0,
         lookPitch,
       });
