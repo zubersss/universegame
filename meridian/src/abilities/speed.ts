@@ -83,6 +83,12 @@ export class Speed {
     this.airTime = 0;
   }
 
+  /** Resume after a reload: braking from rest along the heading (a save keeps no speed); Q held resumes the run as in any braking. */
+  resume(s: SpeedSense): void {
+    this.start(_move.set(0, 0, 0), s);
+    this.braking = true;
+  }
+
   /** Stopping distance from a speed at the braking rate (m). */
   stopDistance(v = this.speed): number {
     return (v * v) / (2 * this.p.brake);

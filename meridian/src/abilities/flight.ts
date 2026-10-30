@@ -71,6 +71,15 @@ export class Flight {
     this.time = 0;
   }
 
+  /** Resume after a reload: hovering in place along the heading (a save keeps no velocity); no take-off climb, so landing is allowed at once. */
+  resume(sense: FlightSense): void {
+    const up = sense.up;
+    this.course.copy(sense.heading).addScaledVector(up, -sense.heading.dot(up)).normalize();
+    this.vel.set(0, 0, 0);
+    this.speed = 0;
+    this.time = 1;
+  }
+
   /** One fixed step: returns the new velocity in `this.vel` and whether flight continues. */
   step(dt: number, inp: FlightInput, s: FlightSense): FlightResult {
     const p = this.p;

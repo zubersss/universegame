@@ -63,6 +63,8 @@ export class AbilityController {
   private readonly built = new Set<Primitive>(['flight', 'speed', 'blink']);
   /** The power's runtime on this body (null: walking only). */
   runtime: Power | null = null;
+  /** A reloaded power waits for the first step with a world to resume. */
+  private resumePending = false;
   private shownRefusal: string | null = null;
 
   constructor(
@@ -75,11 +77,19 @@ export class AbilityController {
   enter(ctx: AbilityEnterContext): void {
     this.bodyId = ctx.body;
     this.power = abilityFor(ctx.power !== undefined ? ctx.power : this.powerOf(ctx.body));
-    if (ctx.restored) this.restore(ctx.restored);
+    const saved = ctx.restored ? this.restore(ctx.restored) : 'walk';
     // Game passes a power only once its destination unlocked it.
     if (ctx.power !== undefined && this.power) this.unlocked.add(this.power.id);
     this.runtime = this.power ? createPower(this.power) : null;
     this.state = 'walk';
+    this.resumePending = false;
+    // A reload resumes the saved power where it has a rule for it (LEAD M2
+    // plan C): flight hovers where it was saved (it never ends mid-air),
+    // superspeed resumes braking. The first step with a world starts it.
+    if (saved !== 'walk' && this.usable && this.runtime!.primitive === saved && this.runtime!.resume) {
+      this.state = saved;
+      this.resumePending = true;
+    }
     this.lastRefusal = null;
     this.showHud();
   }
@@ -98,6 +108,10 @@ export class AbilityController {
   step(dt: number, w: PowerWorld | null = null): boolean {
     const rt = this.runtime;
     if (!rt || !w) return this.state !== 'walk';
+    if (this.resumePending) {
+      this.resumePending = false;
+      rt.resume!(w);
+    }
     rt.tick(dt, this.usable ? w : null);
     if (this.state === 'walk') {
       if (!this.usable || !rt.wants(dt, w)) {
@@ -145,6 +159,7 @@ export class AbilityController {
   exit(_reason: OnFootExitReason): void {
     if (this.state !== 'walk') this.note(this.state, 'walk');
     this.state = 'walk';
+    this.resumePending = false;
     this.power = null;
     this.runtime = null;
     this.bodyId = null;
@@ -196,12 +211,14 @@ export class AbilityController {
     if (this.log.length > LOG_MAX) this.log.splice(0, this.log.length - LOG_MAX);
   }
 
-  restore(raw: unknown): void {
+  /** Restore the unlocked powers; returns the saved state, which enter() resumes where a rule allows (the character walks until then). */
+  restore(raw: unknown): AbilityState {
     const s = readAbilitySave(raw);
     this.unlocked.clear();
     for (const id of s.unlocked) this.unlocked.add(id);
-    // Powers are never resumed mid-use (see readAbilitySave).
     this.state = 'walk';
+    this.resumePending = false;
+    return s.abilityState;
   }
 
   /** Ability slot: shown only where a power exists, is built and unlocked; refusals as a caution line. */

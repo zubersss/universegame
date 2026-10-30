@@ -44,6 +44,8 @@ export interface Power {
   /** While walking: the controls ask to start now. */
   wants(dt: number, w: PowerWorld): boolean;
   start(w: PowerWorld): void;
+  /** After a reload into this power's state (LEAD M2 plan C): flight hovers in place, speed resumes braking. Powers without it reload walking. */
+  resume?(w: PowerWorld): void;
   /** One step while active: 'active', or 'done' (hand back to walking). */
   step(dt: number, w: PowerWorld): 'active' | 'done';
   /** Every step, active or not (cooldowns, previews). */
@@ -105,6 +107,11 @@ export class FlightPower implements Power {
     const pl = w.player;
     this.hold = 0;
     this.flight.start(_p.copy(pl.vel).addScaledVector(pl.up, pl.vVert), this.fill(w));
+  }
+
+  resume(w: PowerWorld): void {
+    this.hold = 0;
+    this.flight.resume(this.fill(w));
   }
 
   step(dt: number, w: PowerWorld): 'active' | 'done' {
@@ -176,6 +183,10 @@ export class SpeedPower implements Power {
 
   start(w: PowerWorld): void {
     this.speed.start(w.player.vel, this.fill(w));
+  }
+
+  resume(w: PowerWorld): void {
+    this.speed.resume(this.fill(w));
   }
 
   step(dt: number, w: PowerWorld): 'active' | 'done' {

@@ -153,14 +153,15 @@ describe('ability controller (walk only in M1)', () => {
     expect(c.state).toBe('walk');
   });
 
-  it('saves and restores unlocked powers; never resumes a power mid-use', () => {
+  it('saves and restores unlocked powers; restoring alone keeps walking; junk is dropped', () => {
     const c = new AbilityController(fakeHud(), () => 'walk');
     c.unlock('lunar-step');
     c.unlock('redline');
     const snap = c.snapshot();
     expect(snap).toEqual({ abilityState: 'walk', unlocked: ['lunar-step', 'redline'] });
     const d = new AbilityController(fakeHud(), () => 'walk');
-    d.restore(JSON.parse(JSON.stringify({ ...snap, abilityState: 'flight' })));
+    // The saved state is returned for enter() to resume; nothing resumes without a body and power.
+    expect(d.restore(JSON.parse(JSON.stringify({ ...snap, abilityState: 'flight' })))).toBe('flight');
     expect(d.state).toBe('walk');
     expect([...d.unlocked].sort()).toEqual(['lunar-step', 'redline']);
     // Junk is dropped, not trusted.
@@ -194,8 +195,9 @@ describe('save module and LEAD hook points (L8/L9)', () => {
     c.enter({ body: 'mars', power: 'redline', restored: { abilityState: 'speed', unlocked: ['redline'] } });
     expect(c.power?.id).toBe('redline');
     expect([...c.unlocked]).toEqual(['redline']);
-    expect(c.state).toBe('walk'); // never resumed mid-use
-    expect(c.view()).toEqual({ id: 'redline', state: 'walk', active: false, charge: 1, cooldown: 0, preview: null });
+    expect(c.state).toBe('speed'); // resumes braking (powers.test steps it)
+    expect(c.view()).toEqual({ id: 'redline', state: 'speed', active: true, charge: 1, cooldown: 0, preview: null });
+    expect(c.log).toEqual([]); // a reload is not a state change
     // power: null means none here, whatever the body says.
     c.enter({ body: 'mars', power: null });
     expect(c.power).toBeNull();
@@ -207,5 +209,33 @@ describe('save module and LEAD hook points (L8/L9)', () => {
     expect(c.log.length).toBe(64);
     expect(c.log[0].t).toBe(36);
     expect(c.log.at(-1)).toEqual({ t: 99, from: 'walk', to: 'speed' });
+  });
+
+  it('resumes a reloaded power only where it has a rule and is usable here (LEAD plan C)', () => {
+    const cases: [string, string | null, AbilityState, string[], AbilityState][] = [
+      ['earth', 'skyborne-flight', 'flight', ['skyborne-flight'], 'flight'], // hovers where saved
+      ['mars', 'redline', 'speed', ['redline'], 'speed'], // resumes braking
+      ['moon', 'lunar-step', 'blink', ['lunar-step'], 'walk'], // a blink is instant: nothing to resume
+      ['earth', 'skyborne-flight', 'speed', ['skyborne-flight'], 'walk'], // not this body's primitive
+      ['mars', null, 'speed', ['redline'], 'walk'], // no power here
+      ['jupiter', 'storm-lift', 'drift', ['storm-lift'], 'walk'], // drift is not built yet
+    ];
+    for (const [body, power, saved, unlocked, expected] of cases) {
+      const c = new AbilityController(fakeHud(), () => 'walk');
+      c.enter({ body, power: power as never, restored: { abilityState: saved, unlocked: unlocked as never } });
+      expect(c.state, `${body} ${saved}`).toBe(expected);
+      expect(c.snapshot().abilityState).toBe(expected); // saving again before the first step keeps it
+      // Boarding (or any exit) drops a pending resume.
+      c.exit('board');
+      expect(c.state).toBe('walk');
+    }
+    // A power the save does not list as unlocked never resumes (no ctx.power: the body's own, locked).
+    const locked = new AbilityController(fakeHud(), () => 'skyborne-flight');
+    locked.enter({ body: 'earth', restored: { abilityState: 'flight', unlocked: [] } });
+    expect(locked.state).toBe('walk');
+    // Without a world (headless), a resumed power holds the character in place (step returns true).
+    const held = new AbilityController(fakeHud(), () => 'walk');
+    held.enter({ body: 'earth', power: 'skyborne-flight', restored: { abilityState: 'flight', unlocked: ['skyborne-flight'] } });
+    expect(held.step(1 / 60, null)).toBe(true);
   });
 });

@@ -8,6 +8,7 @@ import { initPhysics, Physics, RAPIER, GROUPS } from '../src/physics/Physics';
 import { Player, FOOT_OFFSET, type WalkInput } from '../src/player/Player';
 import { SIM_DT, WALK } from '../src/game/config';
 import type { AbilitySlot } from '../src/ui/Hud';
+import type { AbilitySave } from '../src/abilities/save';
 
 const UP = new Vector3(0, 1, 0);
 const FWD = new Vector3(0, 0, -1);
@@ -18,17 +19,17 @@ beforeAll(async () => {
 });
 
 /** A flat world, a walker and the controller, stepped the way Game steps ON_FOOT. */
-function rig(body: string, power: string, gravity: number) {
+function rig(body: string, power: string, gravity: number, opts: { at?: Vector3; restored?: AbilitySave } = {}) {
   const physics = new Physics();
   const ground = physics.world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(0, -1, -500));
   physics.world.createCollider(RAPIER.ColliderDesc.cuboid(800, 1, 800).setCollisionGroups(GROUPS.terrain), ground);
   physics.refreshQueries();
-  const player = new Player(physics, new Vector3(0, FOOT_OFFSET + WALK.skin + 0.01, 0), UP, FWD);
+  const player = new Player(physics, opts.at ?? new Vector3(0, FOOT_OFFSET + WALK.skin + 0.01, 0), UP, FWD);
   const slots: (AbilitySlot | null)[] = [];
   const warnings: (string | null)[] = [];
   const hud: AbilityHud = { setAbility: (s) => slots.push(s), setWarning: (t) => warnings.push(t) };
   const ctl = new AbilityController(hud, () => 'walk', () => 0);
-  ctl.enter({ body, power: power as never });
+  ctl.enter({ body, power: power as never, restored: opts.restored ?? null });
   const heldKeys = new Set<string>();
   const presses = new Set<string>();
   const idle: WalkInput = { forward: 0, right: 0, sprint: false, jump: false, yaw: 0, pitch: 0 };
@@ -143,6 +144,80 @@ describe('powers driven through the ability controller (charter K controls)', ()
     expect(r.warnings.at(-1)).toMatch(/no target/);
     expect(r.ctl.view()).toMatchObject({ id: 'lunar-step', cooldown: 0 });
     r.player.dispose();
+  });
+});
+
+describe('save and reload during a power (LEAD M2 plan C)', () => {
+  it('a reload mid-flight hovers where it was saved, never falls, and lands only by descending', () => {
+    const r = rig('earth', 'skyborne-flight', 9.81);
+    const P = (ABILITIES['skyborne-flight'] as { params: FlightParams }).params;
+    r.heldKeys.add('Space');
+    r.step({ jump: true });
+    for (let i = 0; i < 240; i++) r.step();
+    r.heldKeys.clear();
+    r.heldKeys.add('KeyW');
+    for (let i = 0; i < 120; i++) r.step();
+    expect(r.ctl.state).toBe('flight');
+    const save = JSON.parse(JSON.stringify(r.ctl.snapshot())) as AbilitySave;
+    expect(save.abilityState).toBe('flight');
+    // Game saves the feet and re-creates the walker there (no velocity is saved).
+    const at = r.player.pos.clone();
+    const h0 = r.height();
+    expect(h0).toBeGreaterThan(40);
+    r.player.dispose();
+    const q = rig('earth', 'skyborne-flight', 9.81, { at, restored: save });
+    expect(q.ctl.state).toBe('flight');
+    for (let i = 0; i < 180; i++) q.step();
+    expect(q.ctl.state).toBe('flight');
+    expect(Math.abs(q.height() - h0)).toBeLessThan(0.05);
+    expect(q.player.vel.length() + Math.abs(q.player.vVert)).toBeLessThan(0.01);
+    // A reload is not a take-off: no state change logged until it lands.
+    expect(q.ctl.log).toEqual([]);
+    q.heldKeys.add('ControlLeft');
+    let landedAt = -1;
+    for (let i = 0; i < 1200 && landedAt < 0; i++) {
+      const h = q.height();
+      q.step();
+      if (q.ctl.state === 'walk') landedAt = h;
+    }
+    expect(landedAt).toBeGreaterThanOrEqual(0);
+    expect(landedAt).toBeLessThan(P.landHeight + 0.2);
+    expect(q.ctl.log.map((e) => `${e.from}>${e.to}`)).toEqual(['flight>walk']);
+    q.player.dispose();
+  });
+
+  it('a reload during superspeed resumes braking and hands back to walking at once, never above sprint speed', () => {
+    const r = rig('mars', 'redline', 3.71);
+    r.heldKeys.add('KeyQ');
+    for (let i = 0; i < 240; i++) r.step();
+    expect(r.ctl.state).toBe('speed');
+    const save = JSON.parse(JSON.stringify(r.ctl.snapshot())) as AbilitySave;
+    expect(save.abilityState).toBe('speed');
+    const at = r.player.pos.clone();
+    r.player.dispose();
+    const q = rig('mars', 'redline', 3.71, { at, restored: save });
+    expect(q.ctl.state).toBe('speed');
+    let top = 0;
+    for (let i = 0; i < 30; i++) {
+      q.step();
+      top = Math.max(top, q.player.vel.length());
+    }
+    expect(q.ctl.state).toBe('walk');
+    // Braking from rest ends as soon as the re-created walker has found the ground.
+    expect(q.states.indexOf('walk')).toBeGreaterThanOrEqual(0);
+    expect(q.states.indexOf('walk')).toBeLessThan(3);
+    expect(top).toBeLessThanOrEqual(SPEED_EXIT_MAX);
+    expect(q.ctl.log.map((e) => `${e.from}>${e.to}`)).toEqual(['speed>walk']);
+    q.player.dispose();
+  });
+
+  it('a reload with Q still held resumes the run, as releasing and pressing Q again does while braking', () => {
+    const q = rig('mars', 'redline', 3.71, { restored: { abilityState: 'speed', unlocked: ['redline'] } });
+    q.heldKeys.add('KeyQ');
+    for (let i = 0; i < 120; i++) q.step();
+    expect(q.ctl.state).toBe('speed');
+    expect(q.player.vel.length()).toBeGreaterThan(50);
+    q.player.dispose();
   });
 });
 
