@@ -119,7 +119,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &256609328
+--- !u!1 &447565310
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -127,9 +127,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 256609331}
-  - component: {fileID: 256609330}
-  - component: {fileID: 256609329}
+  - component: {fileID: 447565313}
+  - component: {fileID: 447565312}
+  - component: {fileID: 447565311}
   m_Layer: 0
   m_Name: AudioDirector
   m_TagString: Untagged
@@ -137,27 +137,27 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!81 &256609329
+--- !u!81 &447565311
 AudioListener:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 256609328}
+  m_GameObject: {fileID: 447565310}
   m_Enabled: 1
---- !u!114 &256609330
+--- !u!114 &447565312
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 256609328}
+  m_GameObject: {fileID: 447565310}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d1130390950f8764fadd3d0ff62c5508, type: 3}
   m_Name: 
   m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.Audio.AudioDirector
-  scenes: {fileID: 1749014760}
+  scenes: {fileID: 959189368}
   jump: {fileID: 8300000, guid: 6f686ef27a4c0e24cabdb2014f6bdb21, type: 3}
   land: {fileID: 8300000, guid: 581d22fb5a90699498bd1c899e10f4e8, type: 3}
   dig: {fileID: 8300000, guid: 975f38ec6326dbe408045eb98cdffd49, type: 3}
@@ -167,13 +167,13 @@ MonoBehaviour:
   ambient: {fileID: 8300000, guid: 063a84b200c35b744ab571bdfbbe5411, type: 3}
   sfxVolume: 0.8
   ambientVolume: 0.35
---- !u!4 &256609331
+--- !u!4 &447565313
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 256609328}
+  m_GameObject: {fileID: 447565310}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -182,7 +182,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1749014759
+--- !u!1 &959189367
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -190,15 +190,15 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1749014768}
-  - component: {fileID: 1749014761}
-  - component: {fileID: 1749014767}
-  - component: {fileID: 1749014760}
-  - component: {fileID: 1749014766}
-  - component: {fileID: 1749014765}
-  - component: {fileID: 1749014764}
-  - component: {fileID: 1749014763}
-  - component: {fileID: 1749014762}
+  - component: {fileID: 959189376}
+  - component: {fileID: 959189369}
+  - component: {fileID: 959189375}
+  - component: {fileID: 959189368}
+  - component: {fileID: 959189374}
+  - component: {fileID: 959189373}
+  - component: {fileID: 959189372}
+  - component: {fileID: 959189371}
+  - component: {fileID: 959189370}
   m_Layer: 0
   m_Name: Core
   m_TagString: Untagged
@@ -206,26 +206,26 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1749014760
+--- !u!114 &959189368
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1749014759}
+  m_GameObject: {fileID: 959189367}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ed568adffd7bd944a9cdbaaad2356133, type: 3}
   m_Name: 
   m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.Core.SceneDirector
-  gameState: {fileID: 1749014761}
---- !u!114 &1749014761
+  gameState: {fileID: 959189369}
+--- !u!114 &959189369
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1749014759}
+  m_GameObject: {fileID: 959189367}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bdbcc759f0189134991fb5f447af1feb, type: 3}
@@ -239,84 +239,84 @@ MonoBehaviour:
   fuel: 100
   tankCapacity: 100
   cargo: []
---- !u!114 &1749014762
+--- !u!114 &959189370
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1749014759}
+  m_GameObject: {fileID: 959189367}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8f8d429ed5d4a7644b8b1f98d40c112b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.UI.MenuController
   actions: {fileID: -944628639613478452, guid: bbad781bb50b9034babec636ba6582db, type: 3}
-  save: {fileID: 1749014765}
---- !u!114 &1749014763
+  save: {fileID: 959189373}
+--- !u!114 &959189371
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1749014759}
+  m_GameObject: {fileID: 959189367}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: af2f086e9a678db43b365ba9e465d2ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.Core.BuildSmoke
-  scenes: {fileID: 1749014760}
---- !u!114 &1749014764
+  scenes: {fileID: 959189368}
+--- !u!114 &959189372
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1749014759}
+  m_GameObject: {fileID: 959189367}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c8a4b67a72765b6499d76a444c05360c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.Perf.BudgetMonitor
---- !u!114 &1749014765
+--- !u!114 &959189373
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1749014759}
+  m_GameObject: {fileID: 959189367}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dc973781e8d315841a6f3b813629a00e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.Save.SaveSystem
-  scenes: {fileID: 1749014760}
-  time: {fileID: 1749014767}
-  transitions: {fileID: 1749014766}
+  scenes: {fileID: 959189368}
+  time: {fileID: 959189375}
+  transitions: {fileID: 959189374}
   slot: 0
   autosaveInterval: 300
---- !u!114 &1749014766
+--- !u!114 &959189374
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1749014759}
+  m_GameObject: {fileID: 959189367}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4061d63650fbc3440853785282c738f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.Transitions.TransitionDirector
-  scenes: {fileID: 1749014760}
-  time: {fileID: 1749014767}
+  scenes: {fileID: 959189368}
+  time: {fileID: 959189375}
   actions: {fileID: -944628639613478452, guid: bbad781bb50b9034babec636ba6582db, type: 3}
---- !u!114 &1749014767
+--- !u!114 &959189375
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1749014759}
+  m_GameObject: {fileID: 959189367}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c53eeaea95e1006498cfe52c151e14ec, type: 3}
@@ -324,13 +324,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.Core.TimeSystem
   gameSeconds: 0
   paused: 0
---- !u!4 &1749014768
+--- !u!4 &959189376
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1749014759}
+  m_GameObject: {fileID: 959189367}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -343,5 +343,5 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 1749014768}
-  - {fileID: 256609331}
+  - {fileID: 959189376}
+  - {fileID: 447565313}

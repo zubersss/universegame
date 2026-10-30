@@ -1,27 +1,32 @@
-// Side-view background layer (U-024, Bible §9 Atmosphere). The quad covers the camera view.
-// Horizontally the layer scrolls at _Factor of the world's speed (0 = fixed on screen, 1 = moves with
-// the terrain) and repeats (tileable sheets). Vertically it is framed on the camera: sheet row v sits at
-// cameraY + _BaseOffset + v × height, so the content base stays just under the player's feet on any
-// terrain height. Below the sheet: the far layer clamps its ground row, the near layer mirrors its ground,
-// the middle layer ends. Haze tints far
-// layers toward the sky; _Alpha fades the whole layer underground.
+// Side-view backdrop (U-024, Bible §9 Atmosphere): the sky plus three parallax layers composited in ONE
+// opaque full-screen pass (three blended full-screen quads pushed Earth p99 from 5.8 to 15.2 ms at 1080p
+// on Intel UHD; U-025 BudgetGate).
+// Per layer i: _Pi = (tile width, tile height, parallax factor, sheet bottom relative to the camera),
+// _Qi = (haze amount, below-sheet mode 0 end / 1 clamp / 2 mirror, loaded 0/1, unused).
+// Horizontally a layer scrolls at its factor of the world's speed and repeats; vertically it is framed on
+// the camera so its ground stays under the player's feet. _Alpha fades the layers to the sky underground;
+// _Tint is the day/night multiplier (U-025).
 Shader "MERIDIAN/SideParallax"
 {
     Properties
     {
-        _MainTex ("Layer (tileable in x)", 2D) = "black" {}
-        _TileSize ("Tile size (world units)", Vector) = (64, 32, 0, 0)
-        _Factor ("Horizontal parallax factor", Float) = 0.2
-        _BaseOffset ("Sheet bottom relative to the camera (world units)", Float) = -8
-        _HazeColor ("Haze color", Color) = (0.7, 0.8, 0.9, 1)
-        _HazeAmount ("Haze amount", Float) = 0.3
-        _ExtendBelow ("Below the sheet: 0 end, 1 clamp bottom row, 2 mirror", Float) = 0
-        _Alpha ("Layer alpha", Float) = 1
+        _Layer0 ("Layer 0 (far)", 2D) = "black" {}
+        _Layer1 ("Layer 1 (mid)", 2D) = "black" {}
+        _Layer2 ("Layer 2 (near)", 2D) = "black" {}
+        _P0 ("Layer 0 tile/factor/base", Vector) = (56, 28, 0.06, -10)
+        _P1 ("Layer 1 tile/factor/base", Vector) = (44, 22, 0.22, -10)
+        _P2 ("Layer 2 tile/factor/base", Vector) = (32, 16, 0.45, -4)
+        _Q0 ("Layer 0 haze/mode/loaded", Vector) = (0.35, 1, 0, 0)
+        _Q1 ("Layer 1 haze/mode/loaded", Vector) = (0.2, 0, 0, 0)
+        _Q2 ("Layer 2 haze/mode/loaded", Vector) = (0.08, 2, 0, 0)
+        _SkyColor ("Sky color", Color) = (0.45, 0.62, 0.85, 1)
+        _Tint ("Day/night tint", Color) = (1, 1, 1, 1)
+        _Alpha ("Layers alpha", Float) = 1
     }
     SubShader
     {
-        Tags { "RenderType"="Transparent" "Queue"="Transparent" "RenderPipeline"="UniversalPipeline" }
-        Blend SrcAlpha OneMinusSrcAlpha
+        Tags { "RenderType"="Opaque" "Queue"="Transparent" "RenderPipeline"="UniversalPipeline" }
+        Blend Off
         ZWrite Off
         Cull Off
 
@@ -32,15 +37,14 @@ Shader "MERIDIAN/SideParallax"
             #pragma fragment frag
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
-            TEXTURE2D(_MainTex); SAMPLER(sampler_MainTex);
+            TEXTURE2D(_Layer0); SAMPLER(sampler_Layer0);
+            TEXTURE2D(_Layer1); SAMPLER(sampler_Layer1);
+            TEXTURE2D(_Layer2); SAMPLER(sampler_Layer2);
             CBUFFER_START(UnityPerMaterial)
-                float4 _MainTex_ST;
-                float4 _TileSize;
-                float _Factor;
-                float _BaseOffset;
-                float4 _HazeColor;
-                float _HazeAmount;
-                float _ExtendBelow;
+                float4 _P0, _P1, _P2;
+                float4 _Q0, _Q1, _Q2;
+                float4 _SkyColor;
+                float4 _Tint;
                 float _Alpha;
             CBUFFER_END
 
@@ -56,22 +60,38 @@ Shader "MERIDIAN/SideParallax"
                 return o;
             }
 
+            // False where the layer shows nothing; its uv otherwise.
+            bool LayerUV(float2 world, float2 cam, float4 p, float4 q, out float2 uv)
+            {
+                uv = float2((world.x - cam.x * (1.0 - p.z)) / p.x, (world.y - cam.y - p.w) / p.y);
+                if (q.z < 0.5) return false;
+                if (uv.y < 0.0)
+                {
+                    if (q.y < 0.5) return false;   // middle layer: ends
+                    if (q.y > 1.5) uv.y = -uv.y;   // near layer: mirrored ground, no streaks
+                }
+                // Keep v off the very edge rows so clamping never picks up a filtered border.
+                uv.y = clamp(uv.y, 0.5 / 1024.0, 1.0 - 0.5 / 1024.0);
+                return true;
+            }
+
+            half3 Over(half3 col, half4 s, float haze, half3 sky)
+            {
+                s.rgb = lerp(s.rgb, sky, haze);
+                return lerp(col, s.rgb, s.a);
+            }
+
             half4 frag(Varyings i) : SV_Target
             {
                 float2 cam = _WorldSpaceCameraPos.xy;
-                float u = (i.worldXY.x - cam.x * (1.0 - _Factor)) / _TileSize.x;
-                float vRaw = (i.worldXY.y - cam.y - _BaseOffset) / _TileSize.y;
-                if (vRaw < 0.0)
-                {
-                    if (_ExtendBelow < 0.5) return half4(0, 0, 0, 0); // middle layer: ends
-                    if (_ExtendBelow > 1.5) vRaw = -vRaw;              // near layer: mirrored ground, no streaks
-                }
-                // Keep v off the very edge rows so clamping never picks up a filtered border.
-                float v = clamp(vRaw, 0.5 / 1024.0, 1.0 - 0.5 / 1024.0);
-                half4 c = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, float2(u, v));
-                c.rgb = lerp(c.rgb, _HazeColor.rgb, _HazeAmount);
-                c.a *= _Alpha;
-                return c;
+                half3 sky = _SkyColor.rgb;
+                half3 col = sky;
+                float2 uv;
+                if (LayerUV(i.worldXY, cam, _P0, _Q0, uv)) col = Over(col, SAMPLE_TEXTURE2D(_Layer0, sampler_Layer0, uv), _Q0.x, sky);
+                if (LayerUV(i.worldXY, cam, _P1, _Q1, uv)) col = Over(col, SAMPLE_TEXTURE2D(_Layer1, sampler_Layer1, uv), _Q1.x, sky);
+                if (LayerUV(i.worldXY, cam, _P2, _Q2, uv)) col = Over(col, SAMPLE_TEXTURE2D(_Layer2, sampler_Layer2, uv), _Q2.x, sky);
+                col = lerp(sky, col, _Alpha);
+                return half4(col * _Tint.rgb, 1);
             }
             ENDHLSL
         }

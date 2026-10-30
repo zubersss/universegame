@@ -190,7 +190,13 @@ namespace Meridian.EditorTools
             planetBackdrop.layerMaterial = EnsureMaterial("Assets/_Game/Settings/Materials/SideParallax.mat", "MERIDIAN/SideParallax");
             sideComp.backdrop = planetBackdrop;
 
-            AddGlobalLight(sideRoot.transform);
+            var sideAmbient = AddGlobalLight(sideRoot.transform);
+            var dayNight = sideRoot.AddComponent<Meridian.Planet.Lighting.DayNightLighting>();
+            dayNight.ambient = sideAmbient;
+            dayNight.sun = AddSunLight(sideRoot.transform);
+            dayNight.view = sideComp.sideCamera;
+            dayNight.backdrop = planetBackdrop;
+            sideComp.dayNight = dayNight;
             EditorSceneManager.SaveScene(side, PlanetSidePath);
 
             EditorBuildSettings.scenes = new[]
@@ -274,13 +280,37 @@ namespace Meridian.EditorTools
             return mat;
         }
 
-        static void AddGlobalLight(Transform parent)
+        static Light2D AddGlobalLight(Transform parent)
         {
             var go = new GameObject("GlobalLight2D");
             go.transform.SetParent(parent, false);
             var light = go.AddComponent<Light2D>();
             light.lightType = Light2D.LightType.Global;
             light.intensity = 1f;
+            return light;
+        }
+
+        /// <summary>U-025: the Sun as a far point light (Bible §10.5). Radius covers the view from SunDistance; no falloff; normal maps on.</summary>
+        static Light2D AddSunLight(Transform parent)
+        {
+            var go = new GameObject("SunLight2D");
+            go.transform.SetParent(parent, false);
+            var light = go.AddComponent<Light2D>();
+            light.lightType = Light2D.LightType.Point;
+            float r = Meridian.Planet.Lighting.DayNightLighting.SunDistance + 40f;
+            light.pointLightInnerRadius = r;
+            light.pointLightOuterRadius = r;
+            light.falloffIntensity = 0f;
+            light.shadowsEnabled = false;
+            light.volumetricEnabled = false;
+            // Normal-map quality and distance have no runtime setters: set the serialized fields.
+            var so = new SerializedObject(light);
+            so.FindProperty("m_NormalMapQuality").intValue = (int)Light2D.NormalMapQuality.Fast; // Accurate cost ~+1 ms p99 on Intel UHD (BudgetGate red)
+            so.FindProperty("m_NormalMapDistance").floatValue = 30f;
+            var useNormal = so.FindProperty("m_UseNormalMap");
+            if (useNormal != null) useNormal.boolValue = true;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            return light;
         }
     }
 }

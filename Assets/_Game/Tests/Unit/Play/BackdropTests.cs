@@ -30,7 +30,7 @@ namespace Meridian.Tests
             yield return WaitLayers(backdrop);
             Assert.AreEqual(PlanetId.Earth, backdrop.Planet);
             Assert.AreEqual(3, backdrop.LayersLoaded, "Earth layer0..2");
-            Assert.AreEqual(PlanetBackdrop.SkyColor(PlanetId.Earth), director.PlanetSide.sideCamera.backgroundColor);
+            Assert.AreEqual(PlanetBackdrop.Tinted(PlanetBackdrop.SkyColor(PlanetId.Earth), backdrop.Tint), director.PlanetSide.sideCamera.backgroundColor, "sky color × day/night tint");
             AssertLayersTileInX(backdrop);
 
             var mars = GameState.Instance.catalog.Get(PlanetId.Mars);
@@ -38,7 +38,7 @@ namespace Meridian.Tests
             yield return WaitLayers(backdrop);
             Assert.AreEqual(PlanetId.Mars, backdrop.Planet);
             Assert.AreEqual(3, backdrop.LayersLoaded, "Mars layer0..2");
-            Assert.AreEqual(PlanetBackdrop.SkyColor(PlanetId.Mars), director.PlanetSide.sideCamera.backgroundColor);
+            Assert.AreEqual(PlanetBackdrop.Tinted(PlanetBackdrop.SkyColor(PlanetId.Mars), backdrop.Tint), director.PlanetSide.sideCamera.backgroundColor, "sky color × day/night tint");
             AssertLayersTileInX(backdrop);
             LogAssert.NoUnexpectedReceived();
         }
@@ -60,13 +60,12 @@ namespace Meridian.Tests
 
         static void AssertLayersTileInX(PlanetBackdrop b)
         {
-            var block = new MaterialPropertyBlock();
-            foreach (var mr in b.GetComponentsInChildren<MeshRenderer>())
+            Assert.AreEqual(1, b.GetComponentsInChildren<MeshRenderer>().Length, "one quad, one pass for sky + 3 layers");
+            for (int i = 0; i < 3; i++)
             {
-                mr.GetPropertyBlock(block);
-                var tex = block.GetTexture("_MainTex");
-                Assert.NotNull(tex, mr.name);
-                Assert.AreEqual(TextureWrapMode.Repeat, tex.wrapModeU, $"{mr.name} wraps in x (no seam)");
+                var tex = b.LayerTexture(i);
+                Assert.NotNull(tex, $"layer{i}");
+                Assert.AreEqual(TextureWrapMode.Repeat, tex.wrapModeU, $"layer{i} wraps in x (no seam)");
             }
         }
     }

@@ -97,6 +97,38 @@ namespace Meridian.Tests
             }
         }
 
+        /// <summary>U-025 evidence: Earth at dawn, noon, dusk and night (local time pinned).</summary>
+        [UnityTest]
+        public IEnumerator CaptureDayNight()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while (!director.IsReady || !director.PlanetSide.terrain.IsSettled) { if (Time.realtimeSinceStartup > timeout) break; yield return null; }
+            var side = director.PlanetSide;
+            float until = Time.realtimeSinceStartup + 10f;
+            while (side.backdrop.LayersLoaded < 3 && Time.realtimeSinceStartup < until) yield return null;
+            for (int i = 0; i < 60; i++) yield return new WaitForFixedUpdate(); // player settles
+            var cam = side.sideCamera;
+            cam.GetComponent<Meridian.Player.CameraFollow>().enabled = false;
+            var times = new[] { ("dawn", 0.27f), ("noon", 0.5f), ("dusk", 0.73f), ("night", 0.02f) };
+            foreach (var (label, t) in times)
+            {
+                side.dayNight.Override = t;
+                for (int i = 0; i < 3; i++) yield return null;
+                TestContext.Out.WriteLine($"[MERIDIAN] {label}: t {t:F2} sun {side.dayNight.sun.intensity:F2} ambient {side.dayNight.ambient.intensity:F2}");
+                yield return Save(cam, $"{name}_{label}");
+            }
+            side.dayNight.Override = null;
+        }
+
         static IEnumerator Save(Camera cam, string name)
         {
             var rt = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);

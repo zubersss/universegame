@@ -9,9 +9,9 @@ namespace Meridian.Planet
 {
     /// <summary>
     /// Side-view atmosphere (U-024, Bible §9): `backgrounds/&lt;planet&gt;/layer0..2` as three parallax
-    /// layers behind the terrain (layer0 far and slowest, layer2 near), hazed toward the planet's sky,
-    /// and the camera clearing to that sky color. Three draw calls. Planets without layer art keep
-    /// only the sky color.
+    /// layers behind the terrain (layer0 far and slowest, layer2 near), hazed toward the planet's sky.
+    /// One quad, one opaque pass that composites sky + 3 layers (U-025 perf: three blended quads were too
+    /// costly at 1080p on integrated graphics). Planets without layer art show only the sky color.
     /// </summary>
     public sealed class PlanetBackdrop : MonoBehaviour
     {
@@ -39,36 +39,34 @@ namespace Meridian.Planet
         public Meridian.Terrain.TerrainStreamer terrain;
         public float Alpha { get; private set; } = 1f;
 
-        static readonly int MainTex = Shader.PropertyToID("_MainTex");
-        static readonly int TileSize = Shader.PropertyToID("_TileSize");
-        static readonly int Factor = Shader.PropertyToID("_Factor");
-        static readonly int BaseOffsetId = Shader.PropertyToID("_BaseOffset");
+        static readonly int[] LayerTex = { Shader.PropertyToID("_Layer0"), Shader.PropertyToID("_Layer1"), Shader.PropertyToID("_Layer2") };
+        static readonly int[] LayerP = { Shader.PropertyToID("_P0"), Shader.PropertyToID("_P1"), Shader.PropertyToID("_P2") };
+        static readonly int[] LayerQ = { Shader.PropertyToID("_Q0"), Shader.PropertyToID("_Q1"), Shader.PropertyToID("_Q2") };
+        static readonly int SkyColorId = Shader.PropertyToID("_SkyColor");
         static readonly int AlphaId = Shader.PropertyToID("_Alpha");
-        static readonly int HazeColor = Shader.PropertyToID("_HazeColor");
-        static readonly int HazeAmount = Shader.PropertyToID("_HazeAmount");
-        static readonly int ExtendBelow = Shader.PropertyToID("_ExtendBelow");
+        static readonly int TintId = Shader.PropertyToID("_Tint");
 
-        readonly MeshRenderer[] layers = new MeshRenderer[3];
+        MeshRenderer quad;
+        readonly Texture2D[] textures = new Texture2D[3];
         readonly AsyncOperationHandle<Texture2D>[] handles = new AsyncOperationHandle<Texture2D>[3];
         MaterialPropertyBlock block;
         public PlanetId? Planet { get; private set; }
         public int LayersLoaded { get; private set; }
 
+        /// <summary>Layer i's loaded texture (null until loaded or when the planet has no art for it).</summary>
+        public Texture2D LayerTexture(int i) => textures[i];
+
         void Awake()
         {
             block = new MaterialPropertyBlock();
-            for (int i = 0; i < layers.Length; i++)
-            {
-                var go = new GameObject("BackdropLayer" + i);
-                go.transform.SetParent(view.transform, false);
-                go.transform.localPosition = new Vector3(0f, 0f, 20f - i);
-                go.AddComponent<MeshFilter>().sharedMesh = SpaceWorld.Quad();
-                var mr = go.AddComponent<MeshRenderer>();
-                mr.sharedMaterial = layerMaterial;
-                mr.sortingOrder = -200 + i; // behind terrain (0) and everything else
-                mr.enabled = false;
-                layers[i] = mr;
-            }
+            var go = new GameObject("Backdrop");
+            go.transform.SetParent(view.transform, false);
+            go.transform.localPosition = new Vector3(0f, 0f, 20f);
+            go.AddComponent<MeshFilter>().sharedMesh = SpaceWorld.Quad();
+            quad = go.AddComponent<MeshRenderer>();
+            quad.sharedMaterial = layerMaterial;
+            quad.sortingOrder = -200; // behind terrain (0) and everything else
+            quad.enabled = false;
         }
 
         public static Color SkyColor(PlanetId id) => id switch
@@ -89,42 +87,57 @@ namespace Meridian.Planet
             Planet = planet.id;
             LayersLoaded = 0;
             var sky = SkyColor(planet.id);
-            view.backgroundColor = sky;
-            string name = planet.id.ToString().ToLowerInvariant();
-            for (int i = 0; i < layers.Length; i++)
+            view.backgroundColor = Tinted(sky, Tint);
+            block.Clear();
+            block.SetColor(SkyColorId, sky);
+            block.SetColor(TintId, Tint);
+            block.SetFloat(AlphaId, Alpha);
+            for (int i = 0; i < 3; i++)
             {
-                var mr = layers[i];
-                mr.enabled = false;
-                block.Clear();
-                block.SetVector(TileSize, new Vector4(TileHeights[i] * 2f, TileHeights[i], 0f, 0f)); // 2048×1024 sheets
-                block.SetFloat(Factor, Factors[i]);
-                block.SetFloat(BaseOffsetId, BaseOffset(i));
-                block.SetFloat(AlphaId, 1f);
-                block.SetFloat(ExtendBelow, i == 0 ? 1f : i == 2 ? 2f : 0f); // far: clamp, near: mirror, middle: end
-                block.SetColor(HazeColor, sky);
-                block.SetFloat(HazeAmount, Haze[i]);
-                mr.SetPropertyBlock(block);
-                LoadLayer(i, ArtKeys.Backgrounds.Layer(name, i));
+                textures[i] = null;
+                block.SetTexture(LayerTex[i], Texture2D.blackTexture);
+                block.SetVector(LayerP[i], new Vector4(TileHeights[i] * 2f, TileHeights[i], Factors[i], BaseOffset(i))); // 2048×1024 sheets
+                block.SetVector(LayerQ[i], new Vector4(Haze[i], i == 0 ? 1f : i == 2 ? 2f : 0f, 0f, 0f)); // far: clamp, near: mirror, middle: end
             }
+            quad.SetPropertyBlock(block);
+            quad.enabled = true;
+            string name = planet.id.ToString().ToLowerInvariant();
+            for (int i = 0; i < 3; i++) LoadLayer(i, ArtKeys.Backgrounds.Layer(name, i));
         }
+
+        /// <summary>Day/night multiplier (U-025) on the sky color and every layer; 1 = full day.</summary>
+        public Color Tint { get; private set; } = Color.white;
+
+        public void SetTint(Color tint)
+        {
+            if (Mathf.Abs(tint.r - Tint.r) + Mathf.Abs(tint.g - Tint.g) + Mathf.Abs(tint.b - Tint.b) < 0.002f) return;
+            Tint = tint;
+            if (Planet.HasValue && view != null) view.backgroundColor = Tinted(SkyColor(Planet.Value), tint);
+            if (quad == null) return;
+            quad.GetPropertyBlock(block);
+            block.SetColor(TintId, tint);
+            quad.SetPropertyBlock(block);
+        }
+
+        public static Color Tinted(Color sky, Color tint) => new Color(sky.r * tint.r, sky.g * tint.g, sky.b * tint.b, 1f);
 
         void LoadLayer(int i, string key)
         {
-            var mr = layers[i];
             var locations = Addressables.LoadResourceLocationsAsync(key);
             locations.Completed += loc =>
             {
                 bool exists = loc.Status == AsyncOperationStatus.Succeeded && loc.Result != null && loc.Result.Count > 0;
                 Addressables.Release(loc);
-                if (!exists || mr == null) return;
+                if (!exists || quad == null) return;
                 handles[i] = Addressables.LoadAssetAsync<Texture2D>(key);
                 handles[i].Completed += op =>
                 {
-                    if (mr == null || op.Status != AsyncOperationStatus.Succeeded) return;
-                    mr.GetPropertyBlock(block);
-                    block.SetTexture(MainTex, op.Result);
-                    mr.SetPropertyBlock(block);
-                    mr.enabled = true;
+                    if (quad == null || op.Status != AsyncOperationStatus.Succeeded) return;
+                    textures[i] = op.Result;
+                    quad.GetPropertyBlock(block);
+                    block.SetTexture(LayerTex[i], op.Result);
+                    block.SetVector(LayerQ[i], new Vector4(Haze[i], i == 0 ? 1f : i == 2 ? 2f : 0f, 1f, 0f));
+                    quad.SetPropertyBlock(block);
                     LayersLoaded++;
                 };
             };
@@ -132,10 +145,10 @@ namespace Meridian.Planet
 
         void LateUpdate()
         {
-            if (view == null) return;
+            if (view == null || quad == null) return;
             // Generous width: the quad must cover the view at any aspect (captures switch to 16:9 targets).
             float h = view.orthographicSize * 2f, w = h * Mathf.Max(view.aspect, 2.5f);
-            for (int i = 0; i < layers.Length; i++) layers[i].transform.localScale = new Vector3(w, h, 1f);
+            quad.transform.localScale = new Vector3(w, h, 1f);
 
             // Underground the sky backdrop fades out (caves show the sky color only, M2 cave art later).
             float alpha = 1f;
@@ -149,12 +162,9 @@ namespace Meridian.Planet
             if (!Mathf.Approximately(alpha, Alpha))
             {
                 Alpha = alpha;
-                for (int i = 0; i < layers.Length; i++)
-                {
-                    layers[i].GetPropertyBlock(block);
-                    block.SetFloat(AlphaId, alpha);
-                    layers[i].SetPropertyBlock(block);
-                }
+                quad.GetPropertyBlock(block);
+                block.SetFloat(AlphaId, alpha);
+                quad.SetPropertyBlock(block);
             }
         }
 

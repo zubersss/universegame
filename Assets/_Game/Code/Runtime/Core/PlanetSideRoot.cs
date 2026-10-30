@@ -19,6 +19,7 @@ namespace Meridian.Core
         public ShipHud shipHud;
         public Meridian.UI.SideHud sideHud;
         public Meridian.Planet.PlanetBackdrop backdrop;
+        public Meridian.Planet.Lighting.DayNightLighting dayNight;
         [Tooltip("Spawn column (tiles) when no save or transition gives one.")]
         public int spawnX = 64;
         [Tooltip("The landed ship sits this many tiles right of the spawn column.")]
@@ -90,6 +91,7 @@ namespace Meridian.Core
             if (escapeBand != null) escapeBand.ConfigureFor(config);
             if (sideHud != null) sideHud.ConfigureFor(config);
             if (backdrop != null) backdrop.ConfigureFor(config);
+            if (dayNight != null) dayNight.ConfigureFor(config);
             if (sideCamera != null)
             {
                 sideCamera.transform.position = new Vector3(spawnX + 0.5f, surface + 3f, -10f);
