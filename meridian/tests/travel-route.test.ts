@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Quaternion, Vector3 } from 'three';
 import {
-  CruiseController, blockedBy, freeDistance, hopDistance, planPath, routeHop, safetyRadius,
+  CruiseController, blockedBy, freeDistance, hopDistance, navWaypoint, planPath, routeHop, safetyRadius,
   type CruiseExitReason, type CruiseInput,
 } from '../src/ship/Cruise';
 import { BODIES, BODY_IDS, SYSTEM_BODY_IDS, SYSTEM_EXTENT, type BodyId } from '../src/world/bodies';
@@ -246,6 +246,123 @@ describe('M2 travel legs (First Light)', () => {
     expect(cruiseMaxSpeed(hop)).toBeGreaterThan(cruiseMaxSpeed(hopDistance(start, 'mars')));
     // Inside the destination's envelope the hop is 0 (the 15 km/s floor).
     expect(routeHop(center('mars'), 'mars', PLAN_INFLATE, SOL)).toBe(0);
+  });
+});
+
+describe('nav marker bypass (navWaypoint)', () => {
+  it('Earth -> Mars: the marker reads "bypass Sun", and following it reaches Mars on a path under 1.6x the direct line, clear of the Sun', () => {
+    const e = center('earth');
+    const mars = center('mars');
+    const start = e.clone().addScaledVector(mars.clone().sub(e).normalize(), safetyRadius(BODIES.earth) + 12000);
+    const first = navWaypoint(start, 'mars', SOL);
+    expect(first.bypass).toBe('sun');
+    expect(first.point.distanceTo(mars)).toBeGreaterThan(1000);
+    // Walk toward the marker in 5 km steps, reading it again after each, until inside Mars's envelope.
+    const sun = center('sun');
+    const S = safetyRadius(BODIES.mars);
+    const p = start.clone();
+    const seen: (BodyId | null)[] = [];
+    let length = 0;
+    let sunMin = Infinity;
+    for (let i = 0; i < 5000 && p.distanceTo(mars) > S; i++) {
+      const w = navWaypoint(p, 'mars', SOL);
+      if (seen[seen.length - 1] !== w.bypass) seen.push(w.bypass);
+      const d = w.point.sub(p);
+      const step = Math.min(5000, d.length());
+      const q = p.clone().addScaledVector(d.normalize(), step);
+      sunMin = Math.min(sunMin, segmentDistance(p, q, sun));
+      length += step;
+      p.copy(q);
+    }
+    expect(p.distanceTo(mars)).toBeLessThanOrEqual(S);
+    // "bypass Sun" until the line clears, then the marker is Mars itself.
+    expect(seen).toEqual(['sun', null]);
+    expect(sunMin).toBeGreaterThanOrEqual(safetyRadius(BODIES.sun) + PLAN_INFLATE);
+    expect(length + S).toBeLessThan(1.6 * start.distanceTo(mars));
+    console.log(`marker walk earth->mars: ${(length / 1000).toFixed(0)} km to the envelope vs ${(start.distanceTo(mars) / 1000).toFixed(0)} km direct, Sun >= ${(sunMin / BODIES.sun.radius).toFixed(2)}R`);
+  });
+
+  it('after an approach exit at the Sun, a far-side target reads "bypass Sun" and its marker climbs out clear of the envelope', () => {
+    // Cruising straight at Mars from Earth, no steering: the Sun's envelope ends the leg just outside it.
+    const e = center('earth');
+    const mars = center('mars');
+    const sun = center('sun');
+    const S = safetyRadius(BODIES.sun);
+    const start = e.clone().addScaledVector(mars.clone().sub(e).normalize(), safetyRadius(BODIES.earth) + 12000);
+    const c = new CruiseController(SOL);
+    c.begin(start, facing(start, mars), new Vector3(), routeHop(start, 'mars', PLAN_INFLATE, SOL));
+    let exit: CruiseExitReason | null = null;
+    for (let t = 0; !exit && t < 300; t += SIM_DT) exit = c.step(SIM_DT, IDLE).exit;
+    expect(exit).toBe('approach');
+    expect(c.aheadBody).toBe('sun');
+    const gap = c.pos.distanceTo(sun) - S;
+    expect(gap).toBeGreaterThan(0);
+    expect(gap).toBeLessThan(CRUISE.routeInflate); // inside the inflated band
+    // There, and on the Earth side at S + 1.5, 2 and 7 km: the far-side targets
+    // are bypassed with a marker whose line stays outside the envelope and that
+    // cruise can engage facing; a target the line leaves the Sun toward is not.
+    const eside = e.clone().sub(sun).normalize();
+    const spots = [c.pos.clone(), ...[1500, 2000, 7000].map((k) => sun.clone().addScaledVector(eside, S + k))];
+    for (const p of spots) {
+      for (const to of ['mars', 'venus'] as BodyId[]) {
+        const w = navWaypoint(p, to, SOL);
+        expect(w.bypass).toBe('sun');
+        expect(segmentDistance(p, w.point, sun)).toBeGreaterThanOrEqual(S);
+        expect(CruiseController.canEngage(p, facing(p, w.point), 0, SOL)).toEqual({ ok: true, reason: null });
+      }
+    }
+    expect(navWaypoint(spots[1], 'earth', SOL)).toEqual({ point: e, bypass: null });
+    // Following the marker from the exit point: one cruise to Mars, no safety stop, the Sun at 5R or more.
+    const p = c.pos.clone();
+    const f = new CruiseController(SOL);
+    f.begin(p, facing(p, navWaypoint(p, 'mars', SOL).point), new Vector3(), routeHop(p, 'mars', PLAN_INFLATE, SOL));
+    const steer = (angle: number) => Math.max(-1, Math.min(1, angle * STEER_GAIN));
+    const inv = new Quaternion();
+    const d = new Vector3();
+    const prev = new Vector3();
+    const seen: (BodyId | null)[] = [];
+    let sunMin = Infinity;
+    let time = 0;
+    let fexit: CruiseExitReason | null = null;
+    while (!fexit && time < 300) {
+      const w = navWaypoint(f.pos, 'mars', SOL);
+      if (seen[seen.length - 1] !== w.bypass) seen.push(w.bypass);
+      d.copy(w.point).sub(f.pos).applyQuaternion(inv.copy(f.quat).invert());
+      prev.copy(f.pos);
+      fexit = f.step(SIM_DT, { ...IDLE, pitch: steer(Math.atan2(d.y, -d.z)), yaw: steer(Math.atan2(d.x, -d.z)) }).exit;
+      time += SIM_DT;
+      sunMin = Math.min(sunMin, segmentDistance(prev, f.pos, sun));
+    }
+    expect(fexit).toBe('approach');
+    expect(f.aheadBody).toBe('mars');
+    expect(f.safetyStops).toBe(0);
+    expect(time).toBeLessThanOrEqual(60);
+    expect(seen).toEqual(['sun', null]);
+    expect(sunMin).toBeGreaterThanOrEqual(CRUISE.starStandoffRadii * BODIES.sun.radius);
+  });
+
+  it('a clear line points at the target; a body the ship is inside, or whose envelope the line leaves, and the Quiet System are not bypassed', () => {
+    const e = center('earth');
+    const moon = center('moon');
+    const toMoon = moon.clone().sub(e).normalize();
+    const clear = navWaypoint(e.clone().addScaledVector(toMoon, safetyRadius(BODIES.earth) + 12000), 'moon', SOL);
+    expect(clear.bypass).toBeNull();
+    expect(clear.point.toArray()).toEqual(moon.toArray());
+    // Above Earth's far side, outside its inflated envelope, Earth blocks the line: route around it.
+    const far = e.clone().addScaledVector(toMoon, -(safetyRadius(BODIES.earth) + 30000));
+    expect(navWaypoint(far, 'moon', SOL).bypass).toBe('earth');
+    // Parked on the far side (inside Earth's envelope): climbing out clears it, so no bypass.
+    const parked = e.clone().addScaledVector(toMoon, -(BODIES.earth.radius + 100));
+    expect(navWaypoint(parked, 'moon', SOL).bypass).toBeNull();
+    // The Quiet System keeps its direct marker even when a body is in the way.
+    const q = SYSTEM_BODY_IDS.quiet;
+    const ilex = center('ilex');
+    const vesper = center('vesper');
+    const behind = ilex.clone().addScaledVector(vesper.clone().sub(ilex).normalize(), -(safetyRadius(BODIES.ilex) + 30000));
+    expect(blockedBy(behind, vesper, PLAN_INFLATE, q.filter((id) => id !== 'vesper'))).toBe('ilex');
+    const quiet = navWaypoint(behind, 'vesper', q);
+    expect(quiet.bypass).toBeNull();
+    expect(quiet.point.toArray()).toEqual(vesper.toArray());
   });
 });
 

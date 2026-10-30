@@ -16,7 +16,9 @@ import { cruiseMaxSpeed } from '../world/scale';
 // The speed cap follows the hop (charter H): max(15 km/s, hop ÷ 45 s), with the
 // acceleration scaled so the ramp to the cap always takes CRUISE.rampSeconds.
 // The hop is the planned route length (routeHop), so a leg that bypasses the
-// Sun is still one cruise of about 45 s along the nav marker's waypoints.
+// Sun is still one cruise of about 45 s along the nav marker's waypoints. A
+// cruise restored from a save gets back its leg's cap from the saved speed and
+// throttle (resumeCap), once that speed had settled at throttle x cap.
 // `ids` parameters default to the bodies in play (BODY_IDS).
 
 /** Safety-envelope radius of a body: surface + atmosphere + fixed margin; a star keeps a 5R standoff. */
@@ -127,6 +129,34 @@ export function routeHop(pos: Vector3, id: BodyId, inflate: number, ids: readonl
 }
 
 /**
+ * Where the nav marker points for a target (system coordinates): the target's
+ * center while the direct line from `pos` is clear, else planPath()[0], the
+ * first waypoint of the route around the body blocking it (`bypass`), at the
+ * inflation the cruise hop is planned with. A body whose inflated envelope
+ * holds `pos` (the one being left) is not bypassed while the direct line
+ * leaves it without entering its envelope, or while `pos` is inside that
+ * envelope (climbing out clears it). Otherwise, as after an approach exit at
+ * the Sun toward a far-side target, it stays a blocker and the first waypoint
+ * is a climb-out point around it. The Quiet System keeps its direct marker.
+ */
+export function navWaypoint(pos: Vector3, target: BodyId, ids: readonly BodyId[] = BODY_IDS): { point: Vector3; bypass: BodyId | null } {
+  const c = BODIES[target].center;
+  const goal = new Vector3(c[0], c[1], c[2]);
+  if (BODIES[target].system === 'quiet') return { point: goal, bypass: null };
+  const inflate = CRUISE.routeInflate;
+  const others = ids.filter((id) => {
+    if (id === target) return false;
+    const b = BODIES[id].center;
+    const s = safetyRadius(BODIES[id]);
+    const d = Math.hypot(pos.x - b[0], pos.y - b[1], pos.z - b[2]);
+    if (d > s + inflate) return true;
+    return d >= s && segmentSphereEnter(pos, goal, _c.set(b[0], b[1], b[2]), s) >= 0;
+  });
+  const bypass = blockedBy(pos, goal, inflate, others);
+  return { point: bypass ? planPath(pos, goal, inflate, others)[0] : goal, bypass };
+}
+
+/**
  * The hop (m) a cruise toward the nav target is capped for (begin/retarget):
  * its routeHop at CRUISE.routeInflate. 0 (the 15 km/s floor) without a target,
  * and always in the Quiet System, whose cruise keeps its fixed 15 km/s cap.
@@ -136,20 +166,41 @@ export function cruiseHop(pos: Vector3, target: BodyId | null): number {
   return routeHop(pos, target, CRUISE.routeInflate);
 }
 
+/**
+ * The cap floor (begin's minCap) for a cruise restored from a save. The save
+ * keeps no leg start (schema 2), so the leg's own hop is not recoverable; but
+ * a cruise holds throttle x cap, so the floor is speed ÷ throttle (the saved
+ * speed itself at zero throttle), never above the highest cap the hop rule
+ * gives any leg toward that target (the 15 km/s floor without a target or in
+ * the Quiet System, as cruiseHop; else the longest hop's). This is the leg's
+ * cap once the speed has settled; within the ramp (rampSeconds) after an
+ * engage or a throttle change it is not: a save taken while the speed was
+ * still climbing gives a lower floor, and one taken while it was still falling
+ * to a lowered throttle a higher one, so that restored cruise holds its saved
+ * speed instead of slowing on.
+ */
+export function resumeCap(target: BodyId | null, speed: number, throttle: number): number {
+  const top = !target || BODIES[target].system === 'quiet' ? CRUISE.maxSpeed : cruiseMaxSpeed(2 * SYSTEM_EXTENT);
+  const v = Math.max(0, speed);
+  return Math.min(throttle > 0 ? v / throttle : v, top);
+}
+
 export type CruiseExitReason = 'approach' | 'brake' | 'toggle' | 'safety';
 
 /**
  * What one cruise leg (begin() to the hand-back) planned and reached, for the
- * cruise log. cap = cruiseMaxSpeed(hop) for the leg's longest planned hop, so a
- * retarget to a nearer body (which lowers the live cap) never hides a faster
- * part of the leg. peak <= max(cap, entry): a leg engaged from flight enters
- * below the 15 km/s floor, so its peak never passes its cap; only a restored
- * cruise can enter faster than its remaining route's cap (it then slows to it).
+ * cruise log. cap = the highest speed cap the leg had: cruiseMaxSpeed(hop) for
+ * its longest planned hop, or for a cruise restored from a save at least its
+ * saved (entry) speed, so a retarget to a nearer body (which lowers the live
+ * cap) never hides a faster part of the leg. peak <= cap: a leg engaged from
+ * flight enters below the 15 km/s floor, and a restored cruise keeps a cap of
+ * at least its entry speed (begin's minCap), except one saved while it was
+ * still slowing after its course was cleared (it restores to 15 km/s).
  */
 export interface CruiseLegStats {
-  /** Longest hop (m) planned during the leg (at begin or a retarget), as capped (≤ 2·SYSTEM_EXTENT). */
+  /** Hop (m) planned when the leg had that cap (at begin or a retarget), as capped (≤ 2·SYSTEM_EXTENT). */
   hop: number;
-  /** Its speed cap (m/s). */
+  /** The leg's highest speed cap (m/s). */
   cap: number;
   /** Speed at begin (m/s). */
   entry: number;
@@ -239,15 +290,20 @@ export class CruiseController {
     return { ok: true, reason: null };
   }
 
-  /** Start cruising; `hop` (m) is the route length to the destination's envelope (routeHop; 0 = the 15 km/s floor). */
-  begin(pos: Vector3, quat: Quaternion, velocity: Vector3, hop = 0): void {
+  /**
+   * Start cruising; `hop` (m) is the route length to the destination's envelope
+   * (routeHop; 0 = the 15 km/s floor). `minCap` (m/s) is a floor under the cap
+   * for this hop (resumeCap for a cruise restored from a save, so it keeps its
+   * leg's cap instead of slowing to the remaining route's); a retarget drops it.
+   */
+  begin(pos: Vector3, quat: Quaternion, velocity: Vector3, hop = 0, minCap = 0): void {
     this.pos.copy(pos);
     this.quat.copy(quat).normalize();
     _fwd.set(0, 0, -1).applyQuaternion(this.quat);
     this.speed = Math.max(0, velocity.dot(_fwd));
     this.entry = this.peak = this.speed;
     this.topCap = 0;
-    this.setHop(hop);
+    this.setHop(hop, minCap);
     this.exiting = null;
     this.limited = false;
   }
@@ -275,12 +331,12 @@ export class CruiseController {
   }
 
   /**
-   * Cap = max(15 km/s, hop ÷ 45 s), the hop clamped to [0, 2·SYSTEM_EXTENT];
+   * Cap = max(15 km/s, hop ÷ 45 s, minCap), the hop clamped to [0, 2·SYSTEM_EXTENT];
    * the acceleration reaches the cap (or sheds the current speed) in rampSeconds.
    */
-  private setHop(hop: number): void {
+  private setHop(hop: number, minCap = 0): void {
     this.hop = hop > 0 ? Math.min(hop, 2 * SYSTEM_EXTENT) : 0;
-    this.maxSpeed = cruiseMaxSpeed(this.hop);
+    this.maxSpeed = Math.max(cruiseMaxSpeed(this.hop), minCap);
     if (this.maxSpeed > this.topCap) {
       this.topCap = this.maxSpeed;
       this.topHop = this.hop;
