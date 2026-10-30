@@ -1,81 +1,71 @@
 using Meridian.Core;
+using Meridian.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace Meridian.Space
 {
     /// <summary>
-    /// Minimal top-down HUD (speed, fuel, well indicator); the designed HUD comes with U-015.
-    /// All readouts come from precomputed strings, so updating allocates nothing.
+    /// Top-down HUD (U-011, styled in U-015): speed, fuel, and the Gravity Well indicator (which
+    /// body pulls hardest, and how hard). Precomputed strings: updates allocate nothing.
     /// </summary>
     public sealed class SpaceHud : MonoBehaviour
     {
         public SpaceShip ship;
-        Text speed, fuel, well;
-        static string[] numbers;      // "0".."400"
-        static string[] tenths;       // "0.0".."99.9"
+
+        public Text Speed { get; private set; }
+        public Text Fuel { get; private set; }
+        public Text Well { get; private set; }
+        public Text WellName { get; private set; }
+
+        static UiKit.NumberStrings numbers, tenths;
         int lastSpeed = -1, lastFuel = -1, lastPull = -1;
-        string lastWellName;
+        string lastWellName = "";
 
         void Awake()
         {
-            if (numbers == null)
-            {
-                numbers = new string[401];
-                for (int i = 0; i < numbers.Length; i++) numbers[i] = i.ToString();
-                tenths = new string[1000];
-                for (int i = 0; i < tenths.Length; i++) tenths[i] = (i / 10f).ToString("0.0");
-            }
-            var canvasGo = new GameObject("HudCanvas");
-            canvasGo.transform.SetParent(transform, false);
-            var canvas = canvasGo.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvasGo.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            Label(canvasGo.transform, "SPEED u/s", 0, font);
-            speed = Value(canvasGo.transform, 0, font);
-            Label(canvasGo.transform, "FUEL", 1, font);
-            fuel = Value(canvasGo.transform, 1, font);
-            Label(canvasGo.transform, "WELL u/s²", 2, font);
-            well = Value(canvasGo.transform, 2, font);
+            numbers ??= new UiKit.NumberStrings(0, 400);
+            tenths ??= new UiKit.NumberStrings(0, 999, "0.0", 10f);
+            var theme = UiTheme.Active;
+            var canvas = UiKit.Canvas(transform, "SpaceHudCanvas", 100);
+            var root = canvas.transform;
+            var tl = new Vector2(0f, 1f);
+            UiKit.Panel(root, "Accent", tl, new Vector2(24f, -20f), new Vector2(560f, 2f), UiTheme.Accent(null));
+            Label(root, "SPEED u/s", 0);
+            Speed = Value(root, 0);
+            Label(root, "FUEL", 1);
+            Fuel = Value(root, 1);
+            Label(root, "WELL u/s²", 2);
+            Well = Value(root, 2);
+            WellName = UiKit.Text(root, "WellName", tl, new Vector2(24f + 2 * 200f, -98f), new Vector2(180f, 20f), 14, false, TextAnchor.MiddleLeft, theme.label);
         }
 
-        static Text Make(Transform parent, int column, Font font, float y, int size)
-        {
-            var go = new GameObject("Text");
-            go.transform.SetParent(parent, false);
-            var t = go.AddComponent<Text>();
-            t.font = font;
-            t.fontSize = size;
-            t.color = new Color(0.85f, 0.92f, 1f, 0.9f);
-            var rt = t.rectTransform;
-            rt.anchorMin = rt.anchorMax = new Vector2(0f, 1f);
-            rt.pivot = new Vector2(0f, 1f);
-            rt.anchoredPosition = new Vector2(24f + column * 220f, y);
-            rt.sizeDelta = new Vector2(210f, 40f);
-            return t;
-        }
+        static void Label(Transform root, string text, int column) =>
+            UiKit.Text(root, text, new Vector2(0f, 1f), new Vector2(24f + column * 200f, -36f), new Vector2(180f, 18f), 13,
+                false, TextAnchor.MiddleLeft, UiTheme.Active.label).text = text;
 
-        static void Label(Transform p, string text, int column, Font font) => Make(p, column, font, -16f, 14).text = text;
-        static Text Value(Transform p, int column, Font font) => Make(p, column, font, -34f, 26);
+        static Text Value(Transform root, int column) =>
+            UiKit.Text(root, "Value", new Vector2(0f, 1f), new Vector2(24f + column * 200f, -66f), new Vector2(180f, 34f), 28);
 
         void LateUpdate()
         {
             if (ship == null) return;
-            int s = Mathf.Clamp(Mathf.RoundToInt(ship.Velocity.magnitude), 0, 400);
-            if (s != lastSpeed) { lastSpeed = s; speed.text = numbers[s]; }
+            int s = Mathf.RoundToInt(ship.Velocity.magnitude);
+            if (s != lastSpeed) { lastSpeed = s; Speed.text = numbers[s]; }
 
             var state = GameState.Instance;
-            int f = state != null ? Mathf.Clamp(Mathf.CeilToInt(state.fuel), 0, 400) : 0;
-            if (f != lastFuel) { lastFuel = f; fuel.text = numbers[f]; }
+            int f = state != null ? Mathf.CeilToInt(state.fuel) : 0;
+            if (f != lastFuel) { lastFuel = f; Fuel.text = numbers[f]; }
 
-            int p = Mathf.Clamp(Mathf.RoundToInt(ship.LastPull.magnitude * 10f), 0, 999);
-            string name = ship.InWellOf;
+            int p = Mathf.RoundToInt(ship.LastPull.magnitude * 10f);
+            string name = ship.InWellOf ?? "";
             if (p != lastPull || !ReferenceEquals(name, lastWellName))
             {
                 lastPull = p; lastWellName = name;
-                well.text = p == 0 ? "—" : tenths[p];
-                well.color = p == 0 ? new Color(0.85f, 0.92f, 1f, 0.5f) : new Color(1f, 0.8f, 0.45f, 1f);
+                bool inWell = p > 0;
+                Well.text = inWell ? tenths[p] : "—";
+                Well.color = inWell ? UiTheme.Active.warning : UiTheme.Active.label;
+                WellName.text = name; // body names are interned constants: no allocation
             }
         }
     }

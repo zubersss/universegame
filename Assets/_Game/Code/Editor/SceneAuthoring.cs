@@ -51,6 +51,10 @@ namespace Meridian.EditorTools
             save.time = coreGo.GetComponent<TimeSystem>();
             save.transitions = transitions;
             coreGo.AddComponent<Meridian.Perf.BudgetMonitor>();
+            EnsureUiTheme();
+            var menu = coreGo.AddComponent<Meridian.UI.MenuController>();
+            menu.actions = transitions.actions;
+            menu.save = save;
             EditorSceneManager.SaveScene(core, CorePath);
 
             // Space (kept loaded but inactive by SceneDirector)
@@ -157,7 +161,7 @@ namespace Meridian.EditorTools
             labelGo.transform.SetParent(bandGo.transform, false);
             band.label = labelGo.AddComponent<TextMesh>();
             band.label.text = "ESCAPE";
-            band.label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            band.label.font = AssetDatabase.LoadAssetAtPath<Font>("Assets/_Game/UI/Fonts/JetBrainsMono-Regular.ttf");
             labelGo.GetComponent<MeshRenderer>().sharedMaterial = band.label.font.material;
             labelGo.GetComponent<MeshRenderer>().sortingOrder = 31;
             band.label.fontSize = 48;
@@ -172,6 +176,13 @@ namespace Meridian.EditorTools
             shipHud.ship = sideComp.ship;
             shipHud.boarding = boarding;
             sideComp.shipHud = shipHud;
+            var sideHudGo = new GameObject("SideHud");
+            sideHudGo.transform.SetParent(sideRoot.transform, false);
+            var sideHud = sideHudGo.AddComponent<Meridian.UI.SideHud>();
+            sideHud.player = pc;
+            sideHud.ship = sideComp.ship;
+            sideHud.boarding = boarding;
+            sideComp.sideHud = sideHud;
 
             AddGlobalLight(sideRoot.transform);
             EditorSceneManager.SaveScene(side, PlanetSidePath);
@@ -200,6 +211,24 @@ namespace Meridian.EditorTools
             go.tag = "MainCamera";
             if (listener) go.AddComponent<AudioListener>();
             return cam;
+        }
+
+        public const string UiThemePath = "Assets/_Game/UI/Resources/UiTheme.asset";
+
+        /// <summary>UI theme with the OFL JetBrains Mono fonts (Bible §9).</summary>
+        static void EnsureUiTheme()
+        {
+            var theme = AssetDatabase.LoadAssetAtPath<Meridian.UI.UiTheme>(UiThemePath);
+            if (theme == null)
+            {
+                System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(UiThemePath));
+                theme = ScriptableObject.CreateInstance<Meridian.UI.UiTheme>();
+                AssetDatabase.CreateAsset(theme, UiThemePath);
+            }
+            theme.regular = AssetDatabase.LoadAssetAtPath<Font>("Assets/_Game/UI/Fonts/JetBrainsMono-Regular.ttf");
+            theme.bold = AssetDatabase.LoadAssetAtPath<Font>("Assets/_Game/UI/Fonts/JetBrainsMono-Bold.ttf");
+            EditorUtility.SetDirty(theme);
+            AssetDatabase.SaveAssets();
         }
 
         public const string PilgrimPrefabPath = "Assets/_Game/Prefabs/Ship/Pilgrim.prefab";

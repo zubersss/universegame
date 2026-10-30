@@ -24,7 +24,9 @@ domain under **CC0 1.0** (https://creativecommons.org/publicdomain/zero/1.0/).
 
 | File | Use | Source | License |
 |------|-----|--------|---------|
-| Unity built-in `LegacyRuntime.ttf` | placeholder top-down HUD (U-011) | ships with the Unity Editor | Unity Editor license; replaced by an OFL font in U-015 |
+| `Assets/_Game/UI/Fonts/JetBrainsMono-Regular.ttf` | all HUD and menu text, monospace numerals (Bible §9) | JetBrains Mono, https://github.com/JetBrains/JetBrainsMono (master, fonts/ttf, fetched 2026-10-30), © 2020 The JetBrains Mono Project Authors | SIL Open Font License 1.1 (OFL); license text shipped beside it as `JetBrainsMono-OFL.txt` |
+| `Assets/_Game/UI/Fonts/JetBrainsMono-Bold.ttf` | titles, buttons, warnings | same source | SIL Open Font License 1.1 (OFL) |
+| Unity built-in `LegacyRuntime.ttf` | fallback only, if the UI theme asset is missing | ships with the Unity Editor | Unity Editor license |
 
 ## Code and packages
 
