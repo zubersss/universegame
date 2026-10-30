@@ -25,6 +25,7 @@ import { computeSites } from '../../src/world/sites';
 import { ChunkStore, WorkerBackend } from '../../src/terrain/ChunkStore';
 import { TerrainManager, type TerrainView } from '../../src/terrain/TerrainManager';
 import { createTerrainMaterials, makeTerrainUniforms, setTerrainPalette } from '../../src/terrain/terrainMaterial';
+import { createWaterMaterial, SEA_WATER } from '../../src/terrain/waterMaterial';
 import { makeTerrainDetailTexture } from '../../src/render/terrainTextures';
 import { atmoUniforms, createSkyMesh, setAtmosphereBody, updateSkyMesh } from '../../src/render/Atmosphere';
 import { BodyProxies } from '../../src/render/BodyProxies';
@@ -134,7 +135,11 @@ async function main(): Promise<void> {
   proxies.light.sunColor.setRGB(1.0, 0.96, 0.9).multiplyScalar(5.2);
   const uniforms = makeTerrainUniforms(makeTerrainDetailTexture(256));
   setTerrainPalette(uniforms, def);
-  const terrain = new TerrainManager(def, store, createTerrainMaterials(uniforms, 8, false));
+  const terrainMaterials = createTerrainMaterials(uniforms, 8, false);
+  if (q.get('debug') === 'wire') for (const m of terrainMaterials) m.wireframe = true;
+  const terrain = new TerrainManager(def, store, terrainMaterials);
+  const water = def.seaLevel != null ? createWaterMaterial(SEA_WATER, 8, false) : null;
+  terrain.waterMaterial = water?.material ?? null;
   terrain.maxChunks = 260;
   terrain.splitPx = 4;
   store.onData = (d) => { if (d.level === 0) proxies.addRoot(d); };
@@ -142,7 +147,14 @@ async function main(): Promise<void> {
   const clouds = new Clouds();
   clouds.setBody(def, 1);
   scene.add(clouds.group);
-  const showTerrain = orbit === 0 || orbit < 3;
+  // The game swaps proxy and terrain at 3 radii; force=proxy|terrain compares both at one distance.
+  const force = q.get('force');
+  const showTerrain = force === 'proxy' ? false : force === 'terrain' ? true : orbit === 0 || orbit < 3;
+  if (!showTerrain) {
+    // As in the game: a body not shown locally has no local sky or cloud shells (its proxy draws them).
+    setAtmosphereBody(null);
+    clouds.setBody(null, 0);
+  }
 
   const frustum = new Frustum();
   const view: TerrainView = {
@@ -165,6 +177,7 @@ async function main(): Promise<void> {
     if (showTerrain) {
       terrain.update(view);
       terrain.updateMorphs(dt);
+      if (water) water.uniforms.uWaterTime.value += dt;
       terrain.cullMeshes(view);
     }
     terrain.root.visible = showTerrain;
@@ -172,6 +185,9 @@ async function main(): Promise<void> {
     bgCamera.updateMatrixWorld();
     const camSys = new Vector3(...def.center).add(camPlanet);
     proxies.update(camSys, showTerrain ? def.id : null, now / 1000);
+    if (q.get('debug') === 'nowater') for (const p of proxies.proxies.values()) if (p.water) p.water.visible = false;
+    if (q.get('debug') === 'noclouds') for (const p of proxies.proxies.values()) p.clouds.group.visible = false;
+    if (q.get('debug') === 'noshell') for (const p of proxies.proxies.values()) if (p.shell) p.shell.visible = false;
     clouds.update(now / 1000, planetLocal, new Color(0.3, 0.4, 0.5));
     updateSkyMesh(sky, camera);
     renderer.autoClear = false;

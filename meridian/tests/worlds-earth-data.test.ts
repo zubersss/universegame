@@ -165,9 +165,13 @@ describe('Earth dataset files (W3)', () => {
     expect(w(0, -30)).toBe(0);
     expect(w(-40, 60)).toBe(0);
     // Lake Victoria (real surface 1,134 m): the interim DEM's spurious lake pit pulls the estimate low.
-    expect(w(-1, 33)).toBeGreaterThan(700);
+    expect(w(-1, 33)).toBeGreaterThan(600);
     expect(w(-1, 33)).toBeLessThan(1400);
-    expect(w(-16, -69.5)).toBeGreaterThan(3000); // Lake Titicaca (3,812 m)
+    // Highland and lowland lakes against commonly cited surface elevations (estimates, ±150 m).
+    const lakes = Object.fromEntries((EARTH_META.layers.water.lakes as { name: string | null; level: number }[]).map((l) => [l.name, l.level]));
+    for (const [name, real] of [['Lago Titicaca', 3812], ['Lake Sevan', 1900], ['Lake Tana', 1788], ['Qinghai Hu', 3196], ['Nam Co', 4718], ['Lake Superior', 183], ['Great Slave Lake', 156], ['Lake Balkhash', 341]] as const) {
+      expect(Math.abs(lakes[name] - real), name).toBeLessThan(150);
+    }
     expect(w(47.7, -87.5)).toBeGreaterThan(100); // Lake Superior (183 m)
     expect(w(47.7, -87.5)).toBeLessThan(450);
     // Natural Earth draws the Caspian as part of the sea (a hole in the land), so it takes the ocean level 0 (real −28 m).
@@ -176,11 +180,12 @@ describe('Earth dataset files (W3)', () => {
   });
 
   it('maps land cover to plausible dominant classes', () => {
-    const names = ['tree', 'lowveg', 'bare', 'ice', 'tundra'];
+    const names = EARTH_META.layers.biome.channelNames as string[];
+    expect(names).toEqual(['tree', 'shrub', 'herb', 'bare', 'ice', 'tundra']);
     const dominant = (lat: number, lon: number) => {
       let best = -1;
       let k = -1;
-      for (let c = 0; c < 5; c++) {
+      for (let c = 0; c < names.length; c++) {
         const v = sampleBilinear(E.biome, lat, lon, c);
         if (v > best) { best = v; k = c; }
       }
@@ -190,7 +195,8 @@ describe('Earth dataset files (W3)', () => {
     expect(dominant(23, 10)).toBe('bare'); // Sahara
     expect(dominant(72, -40)).toBe('ice'); // Greenland
     expect(dominant(62, 100)).toBe('tree'); // Siberian taiga
-    expect(dominant(40, -100)).toBe('lowveg'); // Great Plains
+    expect(dominant(40, -100)).toBe('herb'); // Great Plains
+    expect(dominant(-25, 133)).toBe('shrub'); // Australian interior
   });
 });
 

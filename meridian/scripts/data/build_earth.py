@@ -5,7 +5,7 @@ Layers (all NODE-registered, see earth_grid.py):
   coast      int8 signed distance to the coastline, 0.5 km steps, + on land, 5' grid
   water      int16 metres, surface level of the nearest water body (ocean 0, lakes
              their estimated level), 10' grid
-  biome      uint8 x 5 land-cover fractions (tree, lowveg, bare, ice, tundra), 0.25 deg grid
+  biome      uint8 x 6 land-cover fractions (tree, shrub, herb, bare, ice, tundra), 0.25 deg grid
 Pole rows are constant (their mean) in every layer, so a pole has one value.
 
 Elevation sources (one of):
@@ -230,67 +230,76 @@ def constant_poles(a):
     return a
 
 
-def wrap_edt_indices(water):
-    """Nearest water node (row, col) for every node of a 5' grid, wrapping in longitude."""
-    from scipy import ndimage
-    core = water[:, :-1]
-    pad = 256
-    wrapped = np.concatenate([core[:, -pad:], core, core[:, :pad]], axis=1)
-    _, idx = ndimage.distance_transform_edt(~wrapped, return_indices=True)
-    rows = idx[0][:, pad:-pad]
-    cols = (idx[1][:, pad:-pad] - pad) % core.shape[1]
-    rows = np.concatenate([rows, rows[:, :1]], axis=1)
-    cols = np.concatenate([cols, cols[:, :1]], axis=1)
-    return rows, cols
+def lake_levels(elev, sdf, lake_id):
+    """Estimated surface level per lake: one level per connected lake (touching
+    lake polygons such as Great Slave Lake and McLeod Bay share it), the 10th
+    percentile of the DEM on land within one 5' node (<= ~13 km) of the lake,
+    at least +1 m.
 
-
-def lake_levels(elev, sdf, lake_id, lakes_meta):
-    """Estimated surface level per lake: 5th percentile of the DEM on land within 1-6 nodes (5-30 km at 5') of the lake, at least +1 m.
-
-    Chosen over wider/higher-percentile rings by comparison with commonly cited
-    surface elevations of 18 large lakes (median error 7 m; worst +194 m for
-    rift lakes in narrow valleys, -318 m for Lake Victoria, where the interim
-    DEM has a spurious depression). Erring low is benign: the shore then slopes
-    down to the water instead of being lifted to it."""
+    Chosen by comparison with commonly cited surface elevations of 38 lakes:
+    median error 12 m, 90th percentile 107 m, worst +233 m (Lake Geneva) and
+    -482 m (Lake Victoria, where the interim DEM has a spurious depression).
+    Wider rings reach down escarpments and under-estimate highland lakes."""
     from scipy import ndimage
     h5, w5 = sdf.shape
-    # DEM (10' nodes) at every 5' node by bilinear interpolation.
     rr, cc = np.meshgrid(np.arange(h5) / 2.0, np.arange(w5) / 2.0, indexing='ij')
     dem5 = ndimage.map_coordinates(elev.astype(np.float64), [rr, cc], order=1, mode='nearest')
     land = sdf > 0
-    levels = {}
-    objs = ndimage.find_objects(lake_id)
+    comp, ncomp = ndimage.label(lake_id > 0, structure=np.ones((3, 3), bool))
     st = ndimage.generate_binary_structure(2, 2)
-    for k, sl in enumerate(objs, start=1):
+    levels = {}
+    weight = {}
+    for c, sl in enumerate(ndimage.find_objects(comp), start=1):
         if sl is None:
             continue
-        r0, r1 = max(sl[0].start - 8, 0), min(sl[0].stop + 8, h5)
-        c0, c1 = max(sl[1].start - 8, 0), min(sl[1].stop + 8, w5)
-        m = lake_id[r0:r1, c0:c1] == k
-        far = ndimage.binary_dilation(m, st, iterations=6)
-        vals = dem5[r0:r1, c0:c1][far & ~m & land[r0:r1, c0:c1]]
+        r0, r1 = max(sl[0].start - 2, 0), min(sl[0].stop + 2, h5)
+        c0, c1 = max(sl[1].start - 2, 0), min(sl[1].stop + 2, w5)
+        m = comp[r0:r1, c0:c1] == c
+        ring = ndimage.binary_dilation(m, st, iterations=1) & ~m & land[r0:r1, c0:c1]
+        vals = dem5[r0:r1, c0:c1][ring]
         if vals.size == 0:
             continue
-        levels[k] = max(1.0, float(np.percentile(vals, 5)))
+        level = max(1.0, float(np.percentile(vals, 10)))
+        ids, counts = np.unique(lake_id[r0:r1, c0:c1][m], return_counts=True)
+        # A lake split into several node groups keeps the level of its largest group.
+        for k, n in zip(ids.tolist(), counts.tolist()):
+            if n > weight.get(k, 0):
+                levels[k] = level
+                weight[k] = n
     return levels
 
 
-def build_water(elev, sdf, lake_id, lakes_meta):
-    water = sdf <= 0
-    levels = lake_levels(elev, sdf, lake_id, lakes_meta)
-    level_at = np.zeros(sdf.shape)
+def build_water(elev, sdf, lake_id, water_id, lakes_meta):
+    """Surface level of the water body every node is in or nearest to (water_id
+    from coast_sdf.py, found on the same 1.25' grid as the coastline distance):
+    0 m for the sea, the lake's estimated level for lakes. Lakes too small for a
+    5' node take the level of the land around them (DEM 10th percentile within
+    ~13 km of the nodes nearest to them), so their shores are not pulled down to
+    a distant body's level."""
+    levels = lake_levels(elev, sdf, lake_id)
+    small = sorted(set(int(k) for k in np.unique(water_id)) - set(levels) - {0})
+    if small:
+        from scipy import ndimage
+        h5, w5 = sdf.shape
+        rr, cc = np.meshgrid(np.arange(h5) / 2.0, np.arange(w5) / 2.0, indexing='ij')
+        dem5 = ndimage.map_coordinates(elev.astype(np.float64), [rr, cc], order=1, mode='nearest')
+        objs = ndimage.find_objects(water_id)
+        for k in small:
+            sl = objs[k - 1]
+            vals = dem5[sl][(water_id[sl] == k) & (sdf[sl] > 0)][:400]
+            if vals.size:
+                levels[k] = max(1.0, float(np.percentile(vals, 10)))
+    lut = np.zeros(int(water_id.max()) + 1)
     for k, v in levels.items():
-        level_at[lake_id == k] = v
-    level_at[~water] = 0
-    rows, cols = wrap_edt_indices(water)
-    nearest = level_at[rows, cols]
-    nearest[water] = level_at[water]
+        if k < lut.size:
+            lut[k] = v
+    nearest = lut[water_id]
     w10 = nearest[::2, ::2]
     assert w10.shape == earth_grid.grid_shape(ELEV_RES)
     w10 = earth_grid.enforce_seam(constant_poles(w10))
     table = []
     for k, v in sorted(levels.items()):
-        info = lakes_meta.get(str(k), {}) if isinstance(lakes_meta, dict) else {}
+        info = lakes_meta.get(str(k), {})
         table.append({'id': k, 'name': info.get('name'), 'level': round(v, 1), 'nodes5m': int((lake_id == k).sum())})
     return np.clip(np.rint(w10), -32767, 32767).astype(np.int16), table
 
@@ -347,12 +356,13 @@ def main():
         lakes_meta = json.load(fh)
     lake_list = lakes_meta['lakes'] if isinstance(lakes_meta, dict) else lakes_meta
     lakes_meta = {str(x.get('id', x.get('index', i + 1))): x for i, x in enumerate(lake_list)}
-    water, lake_table = build_water(elev, sdf, lake_id, lakes_meta)
+    water_id = np.load(os.path.join(args.build, 'water_id_5m.npy'))
+    water, lake_table = build_water(elev, sdf, lake_id, water_id, lakes_meta)
     m = write_layer(args.out, 'water', water, 'int16')
     layers['water'] = {
         **m, 'dtype': 'int16', 'width': water.shape[1], 'height': water.shape[0], 'channels': 1, 'res': ELEV_RES,
         'scale': 1, 'offset': 0, 'units': 'm',
-        'meaning': 'surface level of the nearest water body: 0 for the ocean, an estimated level for lakes (5th percentile of the DEM on land within 5-30 km of the shore, at least +1 m)',
+        'meaning': 'surface level of the water body each node is in or nearest to (found on the coastline layer\'s 1.25\' grid): 0 for the sea, an estimated level for lakes (10th percentile of the DEM on land within one 5\' node, <= ~13 km, of the connected lake; at least +1 m)',
         'tag': 'estimated', 'lakes': [t for t in lake_table if t['nodes5m'] >= 20],
         'notes': ['The Caspian Sea is part of the sea in Natural Earth (a hole in the land polygons), so it takes the ocean level 0 m (real -28 m).',
                   'Lakes below sea level (Dead Sea) are raised to +1 m so no land or lake sits below the ocean surface.'],
@@ -361,26 +371,28 @@ def main():
     frac = np.load(os.path.join(args.build, 'biome_frac_15m.npy'))
     with open(os.path.join(args.build, 'biome_frac_15m.json')) as fh:
         biome_meta = json.load(fh)
-    assert frac.shape == (5,) + earth_grid.grid_shape(BIOME_RES), frac.shape
-    # WorldCover does not cover Antarctica: land cells south of 60 S without
-    # WorldCover land pixels (land per the coastline layer) become snow/ice (estimated).
+    channel_names = biome_meta['channels']
+    assert frac.shape == (len(channel_names),) + earth_grid.grid_shape(BIOME_RES), frac.shape
+    # WorldCover covers 60 S to 82.75 N only: land cells outside that band
+    # without WorldCover land pixels (land per the coastline layer: Antarctica,
+    # the northern tips of Greenland and Ellesmere) become snow/ice (estimated).
     step = int(round(BIOME_RES / COAST_RES))
     land_b = sdf[::step, ::step] > 0
     lat_b = earth_grid.node_lats(BIOME_RES)[:, None]
     empty = frac.sum(axis=0) == 0
-    fill = empty & land_b & (lat_b < -60)
+    fill = empty & land_b & ((lat_b < -60) | (lat_b > 82.5))
     frac = frac.copy()
     frac[:, fill] = 0
-    frac[3, fill] = 255
+    frac[channel_names.index('ice'), fill] = 255
     filled_ice = int(fill.sum())
     frac = np.clip(np.rint(constant_poles(frac)), 0, 255).astype(np.uint8)
     earth_grid.enforce_seam(frac)
     m = write_layer(args.out, 'biome', frac, 'uint8')
     layers['biome'] = {
-        **m, 'dtype': 'uint8', 'width': frac.shape[2], 'height': frac.shape[1], 'channels': 5, 'res': BIOME_RES,
-        'scale': 1 / 255, 'offset': 0, 'channelNames': ['tree', 'lowveg', 'bare', 'ice', 'tundra'],
+        **m, 'dtype': 'uint8', 'width': frac.shape[2], 'height': frac.shape[1], 'channels': len(channel_names), 'res': BIOME_RES,
+        'scale': 1 / 255, 'offset': 0, 'channelNames': channel_names,
         'meaning': 'fraction of land-cover pixels per class in the node cell (0 where the cell has no land pixels)',
-        'antarcticIceFill': {'cells': filled_ice, 'tag': 'estimated', 'note': 'WorldCover has no Antarctic tiles; land cells south of 60 S (per the coastline layer) are set to snow/ice'},
+        'polarIceFill': {'cells': filled_ice, 'tag': 'estimated', 'note': 'WorldCover covers 60 S to 82.75 N; land cells (per the coastline layer) south of 60 S or north of 82.5 N without WorldCover pixels are set to snow/ice'},
         'source': {k: biome_meta[k] for k in ('source', 'overview', 'class_mapping', 'excluded_from_land') if k in biome_meta},
         'tiles': {k: biome_meta.get('tiles', {}).get(k) for k in ('listed', 'read', 'failed')},
     }

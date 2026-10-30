@@ -41,6 +41,26 @@ export interface ChunkData {
   ownError: number;
   skirt: number;
   genMs: number;
+  /** Liquid surface over the wet part of the chunk (null where the chunk is dry). */
+  water: WaterData | null;
+}
+
+/**
+ * Liquid surface for one chunk on the same 33x33 grid directions: wet vertices
+ * sit at their liquid level, dry vertices next to wet ones repeat a wet
+ * neighbour's level (they lie under the shore, so the terrain hides them and
+ * the visible shoreline is the exact terrain/water intersection); other
+ * vertices are not drawn.
+ */
+export interface WaterData {
+  /** Grid vertex positions relative to the chunk center (unused vertices too). */
+  positions: Float32Array;
+  /** Radial (flat-liquid) normals per grid vertex. */
+  normals: Float32Array;
+  /** Liquid level minus terrain height per grid vertex (m; negative under the shore). */
+  depth: Float32Array;
+  /** Triangles whose three vertices are drawn. */
+  index: Uint16Array;
 }
 
 /** Shared index buffer: grid triangles first (collision uses only these), then skirts. */
@@ -138,6 +158,9 @@ export function generateChunk(
   const variation = new Float32Array(GRID_VERTS);
   const special = new Float32Array(GRID_VERTS);
   const rocky = new Float32Array(GRID_VERTS);
+  const liquid = new Float32Array(GRID_VERTS);
+  const ground = new Float32Array(GRID_VERTS);
+  let wet = 0;
   const dir = [0, 0, 0];
   let minH = Infinity;
   let maxH = -Infinity;
@@ -159,6 +182,12 @@ export function generateChunk(
         variation[g] = info.variation;
         special[g] = info.special;
         rocky[g] = info.rockiness;
+        ground[g] = info.height;
+        const lq = info.liquidLevel;
+        if (lq != null && lq > info.height) {
+          liquid[g] = lq;
+          wet++;
+        } else liquid[g] = NaN;
         if (info.height < minH) minH = info.height;
         if (info.height > maxH) maxH = info.height;
       }
@@ -353,6 +382,8 @@ export function generateChunk(
     }
   }
 
+  const water = wet > 0 ? buildWater(liquid, ground, D, pi, R, cx, cy, cz) : null;
+
   return {
     key: `${face}/${level}/${x}/${y}`,
     bodyId: def.id,
@@ -374,15 +405,86 @@ export function generateChunk(
     ownError,
     skirt,
     genMs: (typeof performance !== 'undefined' ? performance.now() : 0) - t0,
+    water,
   };
+}
+
+function buildWater(
+  liquid: Float32Array,
+  ground: Float32Array,
+  D: Float64Array,
+  pi: (i: number, j: number) => number,
+  R: number,
+  cx: number,
+  cy: number,
+  cz: number,
+): WaterData {
+  const V = CHUNK_VERTS;
+  const level = new Float32Array(GRID_VERTS);
+  const drawn = new Uint8Array(GRID_VERTS);
+  for (let j = 0; j < V; j++) {
+    for (let i = 0; i < V; i++) {
+      const g = j * V + i;
+      let lv = liquid[g];
+      if (lv !== lv) {
+        // Dry: borrow the highest wet neighbour's level (it lies under the shore).
+        for (let dj = -1; dj <= 1; dj++) {
+          for (let di = -1; di <= 1; di++) {
+            const ii = i + di;
+            const jj = j + dj;
+            if (ii < 0 || jj < 0 || ii >= V || jj >= V) continue;
+            const n = liquid[jj * V + ii];
+            if (n === n && (lv !== lv || n > lv)) lv = n;
+          }
+        }
+      }
+      if (lv === lv) {
+        level[g] = lv;
+        drawn[g] = 1;
+      }
+    }
+  }
+  const positions = new Float32Array(GRID_VERTS * 3);
+  const normals = new Float32Array(GRID_VERTS * 3);
+  const depth = new Float32Array(GRID_VERTS);
+  for (let j = 0; j < V; j++) {
+    for (let i = 0; i < V; i++) {
+      const g = j * V + i;
+      const d = pi(i, j);
+      const r = R + (drawn[g] ? level[g] : ground[g]);
+      positions[g * 3] = D[d] * r - cx;
+      positions[g * 3 + 1] = D[d + 1] * r - cy;
+      positions[g * 3 + 2] = D[d + 2] * r - cz;
+      normals[g * 3] = D[d];
+      normals[g * 3 + 1] = D[d + 1];
+      normals[g * 3 + 2] = D[d + 2];
+      depth[g] = drawn[g] ? level[g] - ground[g] : -1;
+    }
+  }
+  const idx: number[] = [];
+  for (let j = 0; j < CHUNK_GRID; j++) {
+    for (let i = 0; i < CHUNK_GRID; i++) {
+      const a = j * V + i;
+      const b = a + 1;
+      const c = a + V + 1;
+      const e = a + V;
+      // Same fixed diagonal as the terrain grid.
+      if (drawn[a] && drawn[b] && drawn[c]) idx.push(a, b, c);
+      if (drawn[a] && drawn[c] && drawn[e]) idx.push(a, c, e);
+    }
+  }
+  return { positions, normals, depth, index: new Uint16Array(idx) };
 }
 
 /** Transferable buffers of a chunk (for postMessage). */
 export function chunkTransfers(c: ChunkData): ArrayBuffer[] {
-  return [c.positions, c.normals, c.morphDelta, c.morphNormal, c.tile, c.attrs].map((a) => a.buffer as ArrayBuffer);
+  const arrays: ArrayBufferView[] = [c.positions, c.normals, c.morphDelta, c.morphNormal, c.tile, c.attrs];
+  if (c.water) arrays.push(c.water.positions, c.water.normals, c.water.depth, c.water.index);
+  return arrays.map((a) => a.buffer as ArrayBuffer);
 }
 
 /** Approximate byte size of a chunk's arrays. */
 export function chunkBytes(c: ChunkData): number {
-  return c.positions.byteLength + c.normals.byteLength + c.morphDelta.byteLength + c.morphNormal.byteLength + c.tile.byteLength + c.attrs.byteLength;
+  const w = c.water ? c.water.positions.byteLength + c.water.normals.byteLength + c.water.depth.byteLength + c.water.index.byteLength : 0;
+  return c.positions.byteLength + c.normals.byteLength + c.morphDelta.byteLength + c.morphNormal.byteLength + c.tile.byteLength + c.attrs.byteLength + w;
 }

@@ -156,6 +156,66 @@ export function sampleBilinear(r: Raster, lat: number, lon: number, ch = 0): num
   return (top + (bot - top) * ty) * r.scale + r.offset;
 }
 
+/** Result of sampleCubic: value and its gradient in layer units per degree (east, north). */
+export interface CubicSample {
+  v: number;
+  dLon: number;
+  dLat: number;
+}
+
+/**
+ * Uniform cubic B-spline sample of channel `ch` (C2 continuous, so terrain
+ * shading shows no crease lines along raster cells), with its analytic
+ * gradient. Longitude wraps with period width - 1 (the duplicated seam
+ * column), rows clamp at the poles (constant pole rows keep it single-valued).
+ * The spline smooths slightly: a node's value becomes (a + 4b + c) / 6 of its
+ * neighbourhood in each direction.
+ */
+export function sampleCubic(r: Raster, lat: number, lon: number, out: CubicSample, ch = 0): CubicSample {
+  const W = r.width;
+  const H = r.height;
+  const P = W - 1;
+  let x = (lon + 180) / r.res;
+  let y = (90 - lat) / r.res;
+  x = x < 0 ? 0 : x > P ? P : x;
+  y = y < 0 ? 0 : y > H - 1 ? H - 1 : y;
+  let i = Math.floor(x);
+  let j = Math.floor(y);
+  if (i > P - 1) i = P - 1;
+  if (j > H - 2) j = H - 2;
+  const tx = x - i;
+  const ty = y - j;
+  const ux = 1 - tx;
+  const uy = 1 - ty;
+  const wx0 = (ux * ux * ux) / 6, wx1 = (3 * tx * tx * tx - 6 * tx * tx + 4) / 6, wx2 = (-3 * tx * tx * tx + 3 * tx * tx + 3 * tx + 1) / 6, wx3 = (tx * tx * tx) / 6;
+  const dx0 = -(ux * ux) / 2, dx1 = (3 * tx * tx - 4 * tx) / 2, dx2 = (-3 * tx * tx + 2 * tx + 1) / 2, dx3 = (tx * tx) / 2;
+  const wy0 = (uy * uy * uy) / 6, wy1 = (3 * ty * ty * ty - 6 * ty * ty + 4) / 6, wy2 = (-3 * ty * ty * ty + 3 * ty * ty + 3 * ty + 1) / 6, wy3 = (ty * ty * ty) / 6;
+  const dy0 = -(uy * uy) / 2, dy1 = (3 * ty * ty - 4 * ty) / 2, dy2 = (-3 * ty * ty + 2 * ty + 1) / 2, dy3 = (ty * ty) / 2;
+  const c0 = (i - 1 + P) % P, c1 = i % P, c2 = (i + 1) % P, c3 = (i + 2) % P;
+  const d = r.data;
+  const base = ch * W * H;
+  let v = 0;
+  let gx = 0;
+  let gy = 0;
+  for (let k = 0; k < 4; k++) {
+    let row = j - 1 + k;
+    row = row < 0 ? 0 : row > H - 1 ? H - 1 : row;
+    const o = base + row * W;
+    const a0 = d[o + c0], a1 = d[o + c1], a2 = d[o + c2], a3 = d[o + c3];
+    const rv = a0 * wx0 + a1 * wx1 + a2 * wx2 + a3 * wx3;
+    const rd = a0 * dx0 + a1 * dx1 + a2 * dx2 + a3 * dx3;
+    const wy = k === 0 ? wy0 : k === 1 ? wy1 : k === 2 ? wy2 : wy3;
+    const dy = k === 0 ? dy0 : k === 1 ? dy1 : k === 2 ? dy2 : dy3;
+    v += rv * wy;
+    gx += rd * wy;
+    gy += rv * dy;
+  }
+  out.v = v * r.scale + r.offset;
+  out.dLon = (gx * r.scale) / r.res;
+  out.dLat = (-gy * r.scale) / r.res; // rows run north to south
+  return out;
+}
+
 // ---------------------------------------------------------------------------
 // Deterministic angles. Only + − × ÷ and Math.sqrt (IEEE correctly rounded), so
 // every thread and browser maps a direction to the same raster position.

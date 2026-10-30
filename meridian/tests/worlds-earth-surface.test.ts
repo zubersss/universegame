@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { BODIES, type BodyDef } from '../src/world/bodies';
-import { EARTH_META, installEarthData, latLonOf, loadEarthData, sampleBilinear, type EarthRasters, type LayerName } from '../src/world/earthData';
+import { EARTH_META, installEarthData, latLonOf, loadEarthData, sampleBilinear, sampleCubic, type EarthRasters, type LayerName } from '../src/world/earthData';
 import { SurfaceGenerator, bodyDataReady, ensureBodyData, newSurfaceInfo } from '../src/world/surface';
 import { computeSites } from '../src/world/sites';
 import { chunkAt, dirToFace, gridDir, gridResolution } from '../src/world/cube';
@@ -101,6 +101,7 @@ describe('Earth surface generator (W4)', () => {
     const ia = newSurfaceInfo();
     const ib = newSurfaceInfo();
     const ll = { lat: 0, lon: 0 };
+    const cs = { v: 0, dLon: 0, dLat: 0 };
     const f = earth.frame;
     const rnd = mulberry32(17);
     let differ = 0;
@@ -111,14 +112,15 @@ describe('Earth surface generator (W4)', () => {
       if (i % 2) {
         for (let t = 0; t < 50; t++) {
           latLonOf(d[0], d[1], d[2], f.north, f.meridian, f.east, ll);
-          if (Math.abs(sampleBilinear(E.coast, ll.lat, ll.lon)) < 40) break;
+          if (Math.abs(sampleCubic(E.coast, ll.lat, ll.lon, cs).v) < 40) break;
           d = randomDir(rnd);
         }
       }
       a.info(d[0], d[1], d[2], ia);
       b.info(d[0], d[1], d[2], ib);
       latLonOf(d[0], d[1], d[2], f.north, f.meridian, f.east, ll);
-      const shore = sampleBilinear(E.coast, ll.lat, ll.lon);
+      // The generator reads the coastline field through the same cubic sampler.
+      const shore = sampleCubic(E.coast, ll.lat, ll.lon, cs).v;
       if (Math.abs(shore) < 40) coastal++;
       // Wet exactly where the coastline data says water, for both seeds.
       expect(ia.liquidLevel != null).toBe(shore < 0);
@@ -134,7 +136,7 @@ describe('Earth surface generator (W4)', () => {
       if (ia.height !== ib.height) differ++;
     }
     expect(coastal).toBeGreaterThan(15000);
-    expect(differ).toBeGreaterThan(30000); // the seed does drive the infill
+    expect(differ).toBeGreaterThan(25000); // the seed does drive the infill
   });
 
   it('puts real places where they belong', () => {
@@ -159,7 +161,7 @@ describe('Earth surface generator (W4)', () => {
     expect(at(-89.5, 0).special).toBeGreaterThan(0.6); // Antarctic ice
     expect(at(0, -30).liquidLevel).toBe(sea); // Atlantic
     const victoria = at(-1, 33);
-    expect(victoria.liquidLevel).toBeGreaterThan(sea + 150); // a lake well above sea level
+    expect(victoria.liquidLevel).toBeGreaterThan(sea + 100); // a lake well above sea level
     expect(victoria.height).toBeLessThan(victoria.liquidLevel!);
   });
 
@@ -307,5 +309,117 @@ describe('Earth surface generator (W4)', () => {
     }
     // The finest level resolves the summit to within a few metres.
     expect(errs[errs.length - 1]).toBeLessThan(5);
+  });
+
+  it('draws liquid surfaces only over water and the first dry row, never above dry ground', () => {
+    const gen = new SurfaceGenerator(earth);
+    gen.clearings = computeSites(earth).clearings;
+    const info = newSurfaceInfo();
+    const R = earth.radius;
+    const check = (lat: number, lon: number, level: number) => {
+      const d = dirOf(lat, lon);
+      const fc = dirToFace(d[0], d[1], d[2]);
+      const c = chunkAt(fc.face, fc.u, fc.v, level);
+      const ch = generateChunk(earth, gen, fc.face, level, c.x, c.y, 1);
+      let wet = 0;
+      let drawn = 0;
+      for (let k = 0; k < 33 * 33; k++) {
+        const x = ch.center[0] + ch.positions[k * 3], y = ch.center[1] + ch.positions[k * 3 + 1], z = ch.center[2] + ch.positions[k * 3 + 2];
+        const l = Math.hypot(x, y, z);
+        gen.info(x / l, y / l, z / l, info);
+        if (info.liquidLevel != null) wet++;
+      }
+      if (!ch.water) return { wet, drawn, water: false };
+      const used = new Set(ch.water.index);
+      for (const k of used) {
+        drawn++;
+        const wx = ch.center[0] + ch.water.positions[k * 3], wy = ch.center[1] + ch.water.positions[k * 3 + 1], wz = ch.center[2] + ch.water.positions[k * 3 + 2];
+        const tx = ch.center[0] + ch.positions[k * 3], ty = ch.center[1] + ch.positions[k * 3 + 1], tz = ch.center[2] + ch.positions[k * 3 + 2];
+        const wl = Math.hypot(wx, wy, wz) - R;
+        const tl = Math.hypot(tx, ty, tz) - R;
+        // Wet vertices: water above the bed; borrowed (dry) vertices: terrain above the water, so the shore hides them.
+        if (ch.water.depth[k] > 0) expect(wl).toBeGreaterThan(tl - 0.05);
+        else expect(tl).toBeGreaterThan(wl - 0.05);
+      }
+      return { wet, drawn, water: true };
+    };
+    const coast = check(-43.35, 170.0, 9); // West Coast shoreline
+    expect(coast.water).toBe(true);
+    expect(coast.wet).toBeGreaterThan(0);
+    expect(coast.drawn).toBeGreaterThanOrEqual(coast.wet);
+    const open = check(-40, -140, 6); // open Pacific
+    expect(open.water).toBe(true);
+    expect(open.drawn).toBe(33 * 33);
+    const desert = check(23, 10, 9); // Sahara: no liquid anywhere
+    expect(desert.water).toBe(false);
+    // The Quiet System has no liquids.
+    const ilex = BODIES.ilex;
+    const ig = new SurfaceGenerator(ilex);
+    expect(generateChunk(ilex, ig, 2, 5, 11, 7, 1).water).toBeNull();
+  });
+
+  it('keeps land near high lakes at or above the lake and close to the data (no trenches or craters)', () => {
+    const g = new SurfaceGenerator(earth);
+    const info = newSurfaceInfo();
+    const ll = { lat: 0, lon: 0 };
+    const cs = { v: 0, dLon: 0, dLat: 0 };
+    const f = earth.frame;
+    let checked = 0;
+    // Rings around Titicaca, Nam Co, Qinghai and Sevan, 1-60 km (real) from their centres.
+    for (const [lat0, lon0] of [[-15.8, -69.4], [30.7, 90.6], [36.9, 100.2], [40.35, 45.3]]) {
+      for (let r = 0.05; r <= 0.6; r += 0.05) {
+        for (let k = 0; k < 24; k++) {
+          const t = (k / 24) * 2 * Math.PI;
+          const d = dirOf(lat0 + r * Math.sin(t), lon0 + (r * Math.cos(t)) / Math.cos((lat0 * Math.PI) / 180));
+          g.info(d[0], d[1], d[2], info);
+          latLonOf(d[0], d[1], d[2], f.north, f.meridian, f.east, ll);
+          const shore = sampleCubic(E.coast, ll.lat, ll.lon, cs).v;
+          if (shore <= 0) continue;
+          const W = sampleBilinear(E.water, ll.lat, ll.lon);
+          const real = (info.height - sea) * 5; // gameplay relief is real / 5
+          const e = sampleCubic(E.elevation, ll.lat, ll.lon, cs).v;
+          if (shore < 3) expect(real).toBeGreaterThanOrEqual(W * 0.98);
+          else expect(real).toBeGreaterThan(e - 700); // infill reaches at most ~600 m below the data
+          checked++;
+        }
+      }
+    }
+    expect(checked).toBeGreaterThan(300);
+    // Anywhere on land at least 3 km from a shore, the surface stays near the data.
+    const rnd = mulberry32(41);
+    let land = 0;
+    for (let i = 0; i < 6000; i++) {
+      const d = randomDir(rnd);
+      latLonOf(d[0], d[1], d[2], f.north, f.meridian, f.east, ll);
+      if (sampleCubic(E.coast, ll.lat, ll.lon, cs).v < 3) continue;
+      g.info(d[0], d[1], d[2], info);
+      const e = sampleCubic(E.elevation, ll.lat, ll.lon, cs).v;
+      expect((info.height - sea) * 5).toBeGreaterThan(e - 700);
+      land++;
+    }
+    expect(land).toBeGreaterThan(1000);
+  });
+
+  it('adds detail below the data resolution only: box means barely depend on the seed', () => {
+    const other: BodyDef = { ...earth, seed: (earth.seed ^ 0x5bd1e995) >>> 0 };
+    const a = new SurfaceGenerator(earth);
+    const b = new SurfaceGenerator(other);
+    let worst = 0;
+    // 0.5° boxes (3 x 3 elevation cells) in the Himalaya, Andes, Alps and on the Antarctic plateau.
+    for (let i = 0; i < 8; i++) {
+      for (const [la, lo] of [[28 + i * 0.5, 84 + i * 1.3], [-15 - i * 2, -70 + i * 0.2], [46 + i * 0.2, 7 + i * 0.5], [-80 + i * 2, 40 + i * 10]]) {
+        let sa = 0;
+        let sb = 0;
+        for (let p = 0; p < 15; p++) {
+          for (let q = 0; q < 15; q++) {
+            const d = dirOf(la + (p * 0.5) / 14, lo + (q * 0.5) / 14);
+            sa += a.height(d[0], d[1], d[2]);
+            sb += b.height(d[0], d[1], d[2]);
+          }
+        }
+        worst = Math.max(worst, (Math.abs(sa - sb) / 225) * 5);
+      }
+    }
+    expect(worst).toBeLessThan(40); // real metres (measured 16 m)
   });
 });

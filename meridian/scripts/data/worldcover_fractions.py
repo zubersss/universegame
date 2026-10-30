@@ -14,8 +14,8 @@ of earth_grid.py (res 0.25 deg, H 721, W 1441):
 then column 0 is copied into column 1440 (enforce_seam).
 
 Outputs in <out_dir>:
-  biome_frac_15m.npy     uint8 (5, H, W): share of land-class pixels per channel
-                         (tree, lowveg, bare, ice, tundra), 0..255; all 0 = no land
+  biome_frac_15m.npy     uint8 (6, H, W): share of land-class pixels per channel
+                         (tree, shrub, herb, bare, ice, tundra), 0..255; all 0 = no land
   biome_land_px_15m.npy  float32 (H, W): land-class overview pixels per cell
   biome_water_15m.npy    uint8 (H, W): class-80 pixels / valid (non-nodata)
                          pixels, 0..255; 0 where the cell has no valid pixel
@@ -89,19 +89,22 @@ NSLOT = OTHER + 1
 LUT = np.full(256, OTHER, np.uint8)
 for _c, _s in SLOT.items():
     LUT[_c] = _s
-CHANNELS = (('tree', (10, 95)), ('lowveg', (20, 30, 40, 50, 90)), ('bare', (60,)),
+# Shrubland is kept apart from grass/crops: much of it is semi-arid and reads
+# dry from orbit (Australian interior, Sahel), while herbaceous cover is green.
+CHANNELS = (('tree', (10, 95)), ('shrub', (20,)), ('herb', (30, 40, 50, 90)), ('bare', (60,)),
             ('ice', (70,)), ('tundra', (100,)))
+NCH = len(CHANNELS)
 WATER, NODATA = 80, 0
 
-PREVIEW_RGB = {'tree': (22, 88, 36), 'lowveg': (150, 200, 92), 'bare': (214, 188, 140),
+PREVIEW_RGB = {'tree': (22, 88, 36), 'shrub': (170, 150, 90), 'herb': (150, 200, 92), 'bare': (214, 188, 140),
                'ice': (246, 247, 251), 'tundra': (140, 124, 104)}
 WATER_RGB = (40, 96, 176)          # valid pixels, all class 80
 NO_DATA_RGB = (14, 30, 72)         # no valid WorldCover pixel in the cell
 
 SAMPLES = (('amazon', -3, -60, 'tree'), ('sahara', 23, 10, 'bare'),
            ('greenland_interior', 72, -40, 'ice'), ('siberian_taiga', 62, 100, 'tree'),
-           ('great_plains', 40, -100, 'lowveg'), ('arctic_canada', 68, -100, 'tundra|lowveg|bare'),
-           ('australia_interior', -25, 133, 'bare|lowveg'))
+           ('great_plains', 40, -100, 'herb'), ('arctic_canada', 68, -100, 'tundra|herb|shrub|bare'),
+           ('australia_interior', -25, 133, 'bare|shrub|herb'))
 EARTH_RADIUS_KM = 6371.0088        # IUGG mean radius, for the approximate areas
 
 
@@ -336,7 +339,7 @@ def main():
     frac_u8 = with_seam(scale255(chan, land[None]))
     water_u8 = with_seam(scale255(water, valid))
     land_px = with_seam(land.astype(np.float32))
-    assert frac_u8.shape == (5, H, W) and water_u8.shape == (H, W) and land_px.shape == (H, W)
+    assert frac_u8.shape == (NCH, H, W) and water_u8.shape == (H, W) and land_px.shape == (H, W)
 
     out = {'biome_frac_15m.npy': frac_u8, 'biome_land_px_15m.npy': land_px, 'biome_water_15m.npy': water_u8}
     files = {}
@@ -380,10 +383,10 @@ def main():
         nb_dom = CHANNELS[int(np.argmax(nb))][0] if nb.sum() else None
         samples[nm] = {'lat': la, 'lon': lo, 'node': [i, j], 'land_px': int(land[i, j]),
                        'water': round(int(water_u8[i, j]) / 255.0, 3),
-                       'frac': {CHANNELS[k][0]: round(fr[k] / 255.0, 3) for k in range(5)},
+                       'frac': {CHANNELS[k][0]: round(fr[k] / 255.0, 3) for k in range(NCH)},
                        'dominant': dom, 'expected': expect, 'ok': dom in expect.split('|'),
                        'nbhd_5x5_frac': {CHANNELS[k][0]: round(float(nb[k]) / max(int(nb.sum()), 1), 3)
-                                         for k in range(5)},
+                                         for k in range(NCH)},
                        'nbhd_5x5_dominant': nb_dom}
     land_rows = np.where(land.any(axis=1))[0]
     sw_lats = [tile_origin(t[0])[1] - TILE_DEG for t in tiles]

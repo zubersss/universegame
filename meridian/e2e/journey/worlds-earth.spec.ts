@@ -17,7 +17,8 @@ let server: ViteDevServer;
 let base = '';
 
 test.beforeAll(async () => {
-  server = await createServer({ root, configFile: `${root}vite.config.ts`, logLevel: 'error', server: { port: 5181, strictPort: false, host: '127.0.0.1' } });
+  // No HMR: a source edit during a run must not reload the page under the test.
+  server = await createServer({ root, configFile: `${root}vite.config.ts`, logLevel: 'error', server: { port: 5181, strictPort: false, host: '127.0.0.1', hmr: false } });
   await server.listen();
   base = server.resolvedUrls!.local[0];
 });
@@ -38,9 +39,9 @@ interface Lab {
 async function view(page: Page, query: string, shot: string, settleMs = 900_000): Promise<Lab> {
   await page.goto(`${base}e2e/journey/worlds-lab.html?${query}`);
   await page.waitForFunction(() => (window as any).__lab?.ready === true || (window as any).__lab?.errors.length > 0, null, { timeout: 300_000 });
-  await page.waitForFunction(() => (window as any).__lab.settled === true || (window as any).__lab.errors.length > 0, null, { timeout: settleMs, polling: 500 });
+  await page.waitForFunction(() => (window as any).__lab?.settled === true || (window as any).__lab?.errors.length > 0, null, { timeout: settleMs, polling: 500 });
   await page.evaluate(() => { (window as any).__lab.requestPixels = true; });
-  await page.waitForFunction(() => (window as any).__lab.pixels !== null, null, { timeout: 120_000 });
+  await page.waitForFunction(() => (window as any).__lab?.pixels != null, null, { timeout: 120_000 });
   const lab = (await page.evaluate(() => (window as any).__lab)) as Lab;
   await page.screenshot({ path: `${root}evidence/${shot}` });
   console.log(shot, JSON.stringify({ stats: lab.stats, pixels: lab.pixels, frames: lab.frames }));

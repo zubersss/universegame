@@ -10,6 +10,8 @@ Outputs in <output_dir> (node-registered grids, see earth_grid.py):
   coast_sdf_5m.npy  float32 (2161, 4321) signed distance to the coastline in km,
                     > 0 on land (incl. ice shelves, islands), < 0 on ocean and lakes
   lake_id_5m.npy    uint16 (2161, 4321) 1-based ne_10m_lakes feature index (0 = none)
+  water_id_5m.npy   uint16 (2161, 4321) nearest water body (lake id, 0 = sea), at 1.25'
+
   lakes.json, coast_sdf_5m.json (provenance, stats), coast_preview[_med].png
 
 Run (from meridian/):
@@ -192,9 +194,13 @@ def seam_or(a):
     a[:, -1] = a[:, 0]
 
 
-def signed_distance_px(land):
+def signed_distance_px(land, lake):
     """Signed distance (super-grid pixels) to the land/water boundary at every
-    STEP-th node, > 0 on land: edt_land - 0.5 on land, -(edt_water - 0.5) on water.
+    STEP-th node, > 0 on land: edt_land - 0.5 on land, -(edt_water - 0.5) on water,
+    and the water body each node belongs to or is nearest to: the lake id of the
+    nearest water super-pixel (0 = sea, including water that is a hole in the land
+    polygons such as the Caspian). Measuring both on the same super-grid keeps the
+    distance and the water body consistent, so a small lake is its own shore.
     The EDT runs on TILES longitude tiles, each wrap-padded by `pad` columns per
     side. The padding doubles until every distance is < pad, which guarantees no
     nearer feature lay outside a tile's window, i.e. the result equals one EDT of
@@ -204,25 +210,34 @@ def signed_distance_px(land):
     tw = n // TILES
     assert n % TILES == 0 and tw % STEP == 0 and (h - 1) % STEP == 0
     out = np.empty(((h - 1) // STEP + 1, n // STEP + 1), np.float32)
+    wid = np.empty(out.shape, np.uint16)
     pick = np.s_[::STEP, ::STEP]
     pad = PAD0
     while True:
         dmax = 0.0
         for c0 in range(0, n, tw):
-            sub = land[:, np.arange(c0 - pad, c0 + tw + pad) % n]
+            cols = np.arange(c0 - pad, c0 + tw + pad) % n
+            sub = land[:, cols]
             core = np.s_[:, pad:pad + tw]
-            d_land = ndimage.distance_transform_edt(sub)[core]
+            # For land pixels: distance to, and position of, the nearest water pixel.
+            d_land, (ir, ic) = ndimage.distance_transform_edt(sub, return_indices=True)
+            d_land = d_land[core]
             d_water = ndimage.distance_transform_edt(~sub)[core]
             dmax = max(dmax, float(d_land.max()), float(d_water.max()))
             out[:, c0 // STEP:(c0 + tw) // STEP] = np.where(
                 sub[core][pick], d_land[pick].astype(np.float32) - 0.5,
                 0.5 - d_water[pick].astype(np.float32))
-            del sub, d_land, d_water
+            # Water nodes keep their own id (the EDT index of a zero pixel is itself).
+            nr = ir[core][pick]
+            nc = cols[ic[core][pick]]
+            wid[:, c0 // STEP:(c0 + tw) // STEP] = lake[nr, nc]
+            del sub, d_land, d_water, ir, ic
         if dmax < pad or pad >= n // 2:
             break
         pad = min(2 * pad, n // 2)
     out[:, -1] = out[:, 0]
-    return out, pad, dmax
+    wid[:, -1] = wid[:, 0]
+    return out, wid, pad, dmax
 
 
 def node_index(lat, lon, res):
@@ -335,18 +350,18 @@ def main():
     land_frac_super = eg.area_fraction(land, res)
     lake_nodes_super = int(np.count_nonzero(lake[:, :-1]))
     lake5 = eg.enforce_seam(lake[::STEP, ::STEP].copy())   # every 4th node = 5' grid
-    del lake
     timing['rasterize_s'] = time.perf_counter() - t
 
-    # 2. signed distance on the super-grid, 3. kept at every 4th node (5' grid)
+    # 2. signed distance and nearest water body on the super-grid, 3. kept at every 4th node (5' grid)
     t = time.perf_counter()
-    sdf_px, pad, dmax = signed_distance_px(land)
-    del land
+    sdf_px, water5, pad, dmax = signed_distance_px(land, lake)
+    del land, lake
     sdf = eg.enforce_seam((sdf_px.astype(np.float64) * KM_PER_PX).astype(np.float32))
     timing['distance_transform_s'] = time.perf_counter() - t
     assert sdf.shape == lake5.shape == eg.grid_shape(res_out)
     np.save(os.path.join(out_dir, 'coast_sdf_5m.npy'), sdf)
     np.save(os.path.join(out_dir, 'lake_id_5m.npy'), lake5)
+    np.save(os.path.join(out_dir, 'water_id_5m.npy'), eg.enforce_seam(water5))
 
     node_counts = np.bincount(lake5[:, :-1].ravel(), minlength=len(lake_feats) + 1)
     lakes_meta = []
@@ -387,7 +402,9 @@ def main():
             'coast_sdf_5m.npy': 'float32 (2161, 4321) signed distance to the coastline in km; '
                                 '> 0 land (incl. ice shelves, islands), < 0 ocean and lakes',
             'lake_id_5m.npy': 'uint16 (2161, 4321) 1-based ne_10m_lakes feature index, 0 = not a lake '
-                              '(see lakes.json)'},
+                              '(see lakes.json)',
+            'water_id_5m.npy': "uint16 (2161, 4321) water body each node is in or nearest to, found on the "
+                               "1.25' super-grid: lake id, 0 = sea (incl. holes in the land polygons)"},
         'grid': {'registration': 'node', 'res_deg': res_out, 'shape': list(sdf.shape),
                  'row_i_lat': '90 - i/12', 'col_j_lon': '-180 + j/12',
                  'seam': 'column 4320 (lon +180) duplicates column 0'},

@@ -7,7 +7,7 @@
 import { createNoise3D, type NoiseFunction3D } from 'simplex-noise';
 import { hashCombine, mulberry32 } from '../core/rng';
 import type { BodyDef } from './bodies';
-import { earthData, latLonOf, loadEarthData, sampleBilinear, type EarthRasters } from './earthData';
+import { earthData, latLonOf, loadEarthData, sampleBilinear, sampleCubic, type CubicSample, type EarthRasters } from './earthData';
 import { ELEVATION_DIVISOR } from './scale';
 
 export interface SurfaceInfo {
@@ -191,6 +191,7 @@ export class SurfaceGenerator {
   // Work is in real metres, converted to gameplay height at the end.
 
   private readonly ll = { lat: 0, lon: 0 };
+  private readonly cs: CubicSample = { v: 0, dLon: 0, dLat: 0 };
 
   private earth(nx: number, ny: number, nz: number, out: SurfaceInfo): SurfaceInfo {
     const ed = this.earthRasters!;
@@ -200,51 +201,59 @@ export class SurfaceGenerator {
     const ll = latLonOf(nx, ny, nz, f.north, f.meridian, f.east, this.ll);
     const lat = ll.lat;
     const lon = ll.lon;
-    const e = sampleBilinear(ed.elevation, lat, lon); // m above mean sea level
-    const d = sampleBilinear(ed.coast, lat, lon); // km to the nearest shore, + on land
-    const W = sampleBilinear(ed.water, lat, lon); // m, surface level of the nearest water body (ocean 0)
-
-    // Data relief: central differences over one elevation cell (continuous in position).
-    const res = ed.elevation.res;
+    // Smooth (C2) fields for shape, so shading never shows raster cells.
+    const cs = sampleCubic(ed.elevation, lat, lon, this.cs);
+    const e = cs.v; // m above mean sea level
     const sinLat = nx * f.north[0] + ny * f.north[1] + nz * f.north[2];
     const cosLat = Math.max(Math.sqrt(Math.max(0, 1 - sinLat * sinLat)), 0.05);
-    let lonE = lon + res;
-    if (lonE > 180) lonE -= 360;
-    let lonW = lon - res;
-    if (lonW < -180) lonW += 360;
-    const gx = (sampleBilinear(ed.elevation, lat, lonE) - sampleBilinear(ed.elevation, lat, lonW)) / (2 * res * 111.2 * cosLat);
-    const gy = (sampleBilinear(ed.elevation, Math.min(90, lat + res), lon) - sampleBilinear(ed.elevation, Math.max(-90, lat - res), lon)) / (2 * res * 111.2);
-    const slope = Math.sqrt(gx * gx + gy * gy); // m per km
+    const gx = cs.dLon / (111.2 * cosLat);
+    const gy = cs.dLat / 111.2;
+    // Data relief (m per km), faded to zero at the poles where its direction is undefined.
+    const absLat = lat < 0 ? -lat : lat;
+    const slope = Math.sqrt(gx * gx + gy * gy) * sstep(89.97, 89.6, absLat);
+    const d = sampleCubic(ed.coast, lat, lon, this.cs).v; // km to the nearest shore, + on land
+    const W = sampleBilinear(ed.water, lat, lon); // m, surface level of the nearest water body (ocean 0)
 
-    // Infill below the data resolution (noise in planet metres, gameplay scale).
+    // Infill below the data resolution (one elevation cell is 463 m of gameplay
+    // surface): every seeded wavelength is at most a cell, so the seed adds
+    // detail but does not reshape relief the data resolves. Noise runs in
+    // planet metres (gameplay scale); amplitudes are real metres.
     const px = nx * R;
     const py = ny * R;
     const pz = nz * R;
-    const fw = 1 / 6000;
-    const qx = px + 500 * n.w1(px * fw, py * fw, pz * fw);
-    const qy = py + 500 * n.w2(px * fw, py * fw, pz * fw);
-    const qz = pz + 500 * n.w3(px * fw, py * fw, pz * fw);
+    const fw = 1 / 1500;
+    const qx = px + 120 * n.w1(px * fw, py * fw, pz * fw);
+    const qy = py + 120 * n.w2(px * fw, py * fw, pz * fw);
+    const qz = pz + 120 * n.w3(px * fw, py * fw, pz * fw);
     const mount = sstep(12, 60, slope);
-    const amp = Math.min(30 + 6 * slope + 0.12 * Math.max(e - W, 0), 2200);
-    const rid = ridged(n.r, qx / 2600, qy / 2600, qz / 2600, 3);
-    const hil = fbm(n.h, qx / 1700, qy / 1700, qz / 1700, 2);
+    const amp = Math.min(25 + 4 * slope + 0.08 * Math.max(e - W, 0), 900);
+    const rid = ridged(n.r, qx / 460, qy / 460, qz / 460, 3);
+    const hil = fbm(n.h, qx / 330, qy / 330, qz / 330, 2);
     const det = fbm(n.d, px / 140, py / 140, pz / 140, 3);
-    let h = e + amp * (mount * (rid - 0.4) * 1.6 + (1 - mount) * hil * 0.5) + det * (4 + 30 * mount);
+    let h = e + amp * (mount * (rid - 0.4) * 1.6 + (1 - mount) * hil * 0.5) + det * (4 + 24 * mount);
 
-    // Shore shaping: land rises from the water level W, water sinks below it;
-    // the bounds meet at the shoreline (d = 0), so h - W has the sign of d.
+    // Shore shaping: land rises from the water level W, water sinks below it,
+    // so h - W has the sign of d near every shore for any seed. Each side has a
+    // floor and a ceiling that meet at the shoreline (d = 0) and open up with
+    // distance (70 m of freedom at 1 km, 550 m at 5 km); smooth min/max blends
+    // leave the data untouched wherever it is well inside the bounds.
     const a = d < 0 ? -d : d;
     const ramp = 4 * (a / 0.6) / (1 + a / 0.6); // 0 at the shore, 4 m inland / below
-    const a8 = (a / 8) * (a / 8);
-    const lift = W / (1 + a8 * a8); // nearest water level, fading beyond ~10 km
-    const room = 10 * a * a; // freedom away from the shore (m)
-    const k = Math.min(20, 6 * a, 2 * ramp); // blend width: keeps h - W strictly signed near the shore
+    const room = 60 * a + 10 * a * a;
+    const k = Math.min(20, 6 * a, 2 * ramp);
     if (d >= 0) {
-      const lo = lift + ramp;
-      h = smin(-smin(-h, -lo, k), lo + room, k);
+      // Floor: the water level, fading beyond ~5 km (far from a shore the data
+      // alone shapes the land). Ceiling: the full water level plus the freedom.
+      const a3 = (a / 3) * (a / 3);
+      const lo = W / (1 + a3 * a3) + ramp;
+      const hi = W + ramp + room;
+      h = smin(-smin(-h, -lo, k), hi, Math.min(40, 0.25 * (hi - lo)));
     } else {
-      const hi = W - ramp;
-      h = smin(-smin(-h, -(hi - room), k), hi, k);
+      // The bed drops 40 m per km from the shore, about as steeply as land rises,
+      // so the shoreline crosses mesh triangles mid-edge instead of snapping to
+      // the vertex grid (a film of water over a flat bed reads as a sawtooth).
+      const hi = W - ramp - 40 * a;
+      h = -smin(-smin(h, hi, k), -(hi - room), Math.min(40, 0.25 * room));
       // Deep water compressed (rational, so deterministic): at most ~1.5 km below the surface.
       const top = W - 200;
       if (h < top) {
@@ -258,24 +267,43 @@ export class SurfaceGenerator {
     out.liquidLevel = d < 0 ? sea + W / ELEVATION_DIVISOR : null;
 
     // Land cover (normalized fractions; coastal cells mix in empty ocean cells).
-    const b = ed.biome;
+    const b = ed.biome; // tree, shrub, herb, bare, ice, tundra
     const tree = sampleBilinear(b, lat, lon, 0);
-    const low = sampleBilinear(b, lat, lon, 1);
-    const bare = sampleBilinear(b, lat, lon, 2);
-    const ice = sampleBilinear(b, lat, lon, 3);
-    const tun = sampleBilinear(b, lat, lon, 4);
-    const sum = tree + low + bare + ice + tun;
-    const inv = sum > 0.05 ? 1 / sum : 0;
-    const veg = (tree + low) * inv;
-    const treeShare = tree * inv;
-    const iceShare = ice * inv;
+    const shrub = sampleBilinear(b, lat, lon, 1);
+    const herb = sampleBilinear(b, lat, lon, 2);
+    const bare = sampleBilinear(b, lat, lon, 3);
+    const ice = sampleBilinear(b, lat, lon, 4);
+    const tun = sampleBilinear(b, lat, lon, 5);
+    const sum = tree + shrub + herb + bare + ice + tun;
+    // Shares of the mapped classes, faded continuously toward neutral where a
+    // cell holds little or no land-cover data (coastal cells, the high Arctic).
+    const cover = sstep(0.02, 0.15, sum);
+    const inv = sum > 1e-6 ? 1 / sum : 0;
+    // Aridity proxy: grass and crops in shrub/bare country read dry, not green.
+    const arid = (shrub + bare) * inv;
+    const green = tree + herb * (1 - arid);
+    const veg = 0.3 + (green * inv - 0.3) * cover;
+    const treeShare = tree * inv * cover;
+    const iceShare = ice * inv * cover;
+    const sandShare = (bare + 0.5 * shrub + 0.4 * herb * arid) * inv * cover;
+    const dryShare = (bare + tun * 0.5) * inv * cover;
     // Snow above a latitude-dependent line (real metres), on top of mapped ice.
     const snowLine = 5200 - 5600 * (lat / 75) * (lat / 75);
     const snow = sstep(snowLine - 300, snowLine + 500, h);
-    out.biome = d < 0 ? 0 : sum > 0.05 ? veg : 0.3;
-    out.variation = sat(0.3 + 0.55 * treeShare + 0.2 * n.v(px / 3000, py / 3000, pz / 3000));
-    out.special = d < 0 ? 0 : Math.max(iceShare, snow);
-    out.rockiness = d < 0 ? 0.1 : sat(mount * (0.35 + 0.6 * (bare + tun * 0.5) * inv) + 0.25 * (1 - veg) * mount);
+    const vn = n.v(px / 3000, py / 3000, pz / 3000);
+    if (d < 0) {
+      // Under water: sand and silt, independent of the land cover.
+      out.biome = 0;
+      out.variation = sat(0.45 + 0.25 * vn);
+      out.special = 0;
+      out.rockiness = 0.1;
+    } else {
+      out.biome = veg;
+      // High variation: dark forest in the vegetated palette, bright sand in the dry one.
+      out.variation = sat(0.3 + 0.55 * Math.max(treeShare, sandShare) + 0.2 * vn);
+      out.special = Math.max(iceShare, snow);
+      out.rockiness = sat(mount * (0.35 + 0.6 * dryShare) + 0.25 * (1 - veg) * mount);
+    }
     return out;
   }
 
