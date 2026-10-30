@@ -795,6 +795,21 @@ export class Game {
     return this.player.feet(_v2).distanceTo(_v1);
   }
 
+  /**
+   * Quit to the title. The character leaves ON_FOOT first, so the hooks exit and
+   * clear their effects instead of freezing behind the title (Continue restores
+   * from the save).
+   */
+  quitToTitle(): void {
+    if (this.mode === 'ON_FOOT') {
+      this.setMode('LANDED', 'relocate');
+      this.player?.dispose();
+      this.player = null;
+      this.updateCollisionDemand();
+    }
+    this.setState('title');
+  }
+
   private boardShip(): void {
     if (!this.player) return;
     this.setMode('LANDED', 'board');
