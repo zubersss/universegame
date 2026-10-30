@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Quaternion, Vector3 } from 'three';
 import {
-  CruiseController, blockedBy, freeDistance, hopDistance, planPath, safetyRadius,
+  CruiseController, blockedBy, freeDistance, hopDistance, planPath, routeHop, safetyRadius,
   type CruiseExitReason, type CruiseInput,
 } from '../src/ship/Cruise';
 import { BODIES, BODY_IDS, SYSTEM_BODY_IDS, SYSTEM_EXTENT, type BodyId } from '../src/world/bodies';
@@ -41,20 +41,24 @@ function segmentDistance(p0: Vector3, p1: Vector3, c: Vector3): number {
   return p0.clone().addScaledVector(d, t).distanceTo(c);
 }
 
-interface Hop {
+/** Pursuit gain of the test pilot: full stick beyond about 19° of heading error. */
+const STEER_GAIN = 3;
+
+interface Leg {
+  /** The route planned at engage (bypass waypoints, then `to`'s center). */
+  route: Vector3[];
+  start: Vector3;
+  /** routeHop at engage: the hop passed to begin(), kept for the whole leg. */
+  hop: number;
   exit: CruiseExitReason | null;
   aheadBody: BodyId | null;
+  /** Simulated seconds from engaging at rest to the exit. */
   time: number;
   cap: number;
   peak: number;
   stops: number;
+  refusedTurns: number;
   exitSpeed: number;
-}
-
-interface Leg {
-  route: Vector3[];
-  start: Vector3;
-  hops: Hop[];
   /** Closest approach to the Sun's center over the whole flight, in Sun radii. */
   sunRadii: number;
   /** Closest approach to any body other than the two ends, in its radii, and which one. */
@@ -63,52 +67,49 @@ interface Leg {
 }
 
 /**
- * Fly from just outside `from`'s envelope (on the side facing `to`) to `to`:
- * one cruise hop at a time toward the first planPath waypoint around every
- * other body, re-planned from wherever the previous hop ended (as a nav marker
- * would), leaving cruise (G, with the autopilot's timing) near an intermediate
- * waypoint and ending with an approach exit at `to`. Each hop begins at rest
- * with hop = the straight-line distance to `to`'s envelope (what the nav
- * target gives the game).
+ * Fly one leg as a pilot following the nav marker would: engage cruise at rest
+ * just outside `from`'s envelope (on the side facing `to`) with hop = routeHop
+ * (the planned route length), then steer every step, at the cruise turn rate,
+ * toward planPath()[0] from the current position (the marker: the next bypass
+ * waypoint while the direct line is blocked, else `to`) until cruise exits.
+ * The whole leg is one cruise: nothing leaves and re-engages at a waypoint.
  */
 function flyLeg(from: BodyId, to: BodyId): Leg {
   const dir = center(to).sub(center(from)).normalize();
   const start = center(from).addScaledVector(dir, safetyRadius(BODIES[from]) + 12000);
   const others = SOL.filter((id) => id !== to);
   const route = planPath(start, center(to), PLAN_INFLATE, others);
-  const leg: Leg = { route, start, hops: [], sunRadii: Infinity, otherRadii: Infinity, other: null };
-  const pos = start.clone();
+  const hop = routeHop(start, to, PLAN_INFLATE, SOL);
+  const c = new CruiseController(SOL);
+  c.begin(start, facing(start, route[0]), new Vector3(), hop);
+  const leg: Leg = {
+    route, start, hop, exit: null, aheadBody: null, time: 0, cap: c.maxSpeed, peak: 0, stops: 0, refusedTurns: 0, exitSpeed: 0,
+    sunRadii: Infinity, otherRadii: Infinity, other: null,
+  };
+  const steer = (angle: number) => Math.max(-1, Math.min(1, angle * STEER_GAIN));
+  const inv = new Quaternion();
+  const d = new Vector3();
   const prev = new Vector3();
-  for (let n = 0; n < 12; n++) {
-    const next = planPath(pos, center(to), PLAN_INFLATE, others);
-    const wp = next[0];
-    const last = next.length === 1;
-    const c = new CruiseController(SOL);
-    c.begin(pos, facing(pos, wp), new Vector3(), hopDistance(pos, to));
-    const hop: Hop = { exit: null, aheadBody: null, time: 0, cap: c.maxSpeed, peak: 0, stops: 0, exitSpeed: 0 };
-    while (!hop.exit && hop.time < 300) {
-      const d = c.pos.distanceTo(wp);
-      const toggleOff = !last && d < (c.speed * c.speed) / (2 * c.accel) + c.speed * 0.5 + 4000;
-      prev.copy(c.pos);
-      hop.exit = c.step(SIM_DT, { ...IDLE, toggleOff }).exit;
-      hop.time += SIM_DT;
-      hop.peak = Math.max(hop.peak, c.speed);
-      for (const id of SOL) {
-        const r = segmentDistance(prev, c.pos, center(id)) / BODIES[id].radius;
-        if (id === 'sun') leg.sunRadii = Math.min(leg.sunRadii, r);
-        else if (id !== from && id !== to && r < leg.otherRadii) {
-          leg.otherRadii = r;
-          leg.other = id;
-        }
+  while (!leg.exit && leg.time < 300) {
+    // The marker's direction in the ship frame (forward -Z): pitch up toward +Y, yaw right toward +X.
+    d.copy(planPath(c.pos, center(to), PLAN_INFLATE, others)[0]).sub(c.pos).applyQuaternion(inv.copy(c.quat).invert());
+    prev.copy(c.pos);
+    leg.exit = c.step(SIM_DT, { ...IDLE, pitch: steer(Math.atan2(d.y, -d.z)), yaw: steer(Math.atan2(d.x, -d.z)) }).exit;
+    leg.time += SIM_DT;
+    leg.peak = Math.max(leg.peak, c.speed);
+    for (const id of SOL) {
+      const r = segmentDistance(prev, c.pos, center(id)) / BODIES[id].radius;
+      if (id === 'sun') leg.sunRadii = Math.min(leg.sunRadii, r);
+      else if (id !== from && id !== to && r < leg.otherRadii) {
+        leg.otherRadii = r;
+        leg.other = id;
       }
     }
-    hop.aheadBody = c.aheadBody;
-    hop.stops = c.safetyStops;
-    hop.exitSpeed = c.speed;
-    leg.hops.push(hop);
-    pos.copy(c.pos);
-    if (last) break;
   }
+  leg.aheadBody = c.aheadBody;
+  leg.stops = c.safetyStops;
+  leg.refusedTurns = c.refusedTurns;
+  leg.exitSpeed = c.speed;
   return leg;
 }
 
@@ -149,16 +150,17 @@ describe('cruise envelope and hop cap', () => {
 
   it('the Earth -> Moon cap is about 21 km/s and the hop takes about 48 s', () => {
     const leg = flyLeg('earth', 'moon');
+    // The direct line is clear, so the route hop is the straight-line hop.
     expect(leg.route.length).toBe(1);
-    const [hop] = leg.hops;
-    expect(hop.cap).toBeGreaterThan(20500);
-    expect(hop.cap).toBeLessThan(22000);
-    expect(hop.peak).toBeCloseTo(hop.cap, 6);
-    expect(hop.exit).toBe('approach');
-    expect(hop.aheadBody).toBe('moon');
-    expect(hop.time).toBeGreaterThan(45);
-    expect(hop.time).toBeLessThan(52);
-    console.log(`earth->moon: hop ${(hopDistance(leg.start, 'moon') / 1000).toFixed(0)} km, cap ${(hop.cap / 1000).toFixed(2)} km/s, ${hop.time.toFixed(1)} s`);
+    expect(leg.hop).toBeCloseTo(hopDistance(leg.start, 'moon'), 3);
+    expect(leg.cap).toBeGreaterThan(20500);
+    expect(leg.cap).toBeLessThan(22000);
+    expect(leg.peak).toBeCloseTo(leg.cap, 6);
+    expect(leg.exit).toBe('approach');
+    expect(leg.aheadBody).toBe('moon');
+    expect(leg.time).toBeGreaterThan(45);
+    expect(leg.time).toBeLessThan(52);
+    console.log(`earth->moon: hop ${(leg.hop / 1000).toFixed(0)} km, cap ${(leg.cap / 1000).toFixed(2)} km/s, ${leg.time.toFixed(1)} s`);
   });
 
   it('retargeting changes the cap without endangering a braking ship', () => {
@@ -203,9 +205,10 @@ describe('cruise envelope and hop cap', () => {
 describe('M2 travel legs (First Light)', () => {
   const legs: [BodyId, BodyId][] = [['earth', 'moon'], ['moon', 'mars'], ['earth', 'mars']];
   for (const [from, to] of legs) {
-    it(`${from} -> ${to}: Sun at 5R or more, other bodies beyond ${ACTIVATE_RADII}R, hops within 60 s, no safety stops`, () => {
+    it(`${from} -> ${to}: one cruise of at most 60 s with no safety stops, Sun at 5R or more, other bodies beyond ${ACTIVATE_RADII}R`, () => {
       const leg = flyLeg(from, to);
-      // The planned route is clear of every envelope and not much longer than the direct line.
+      // The planned route is clear of every envelope, not much longer than the
+      // direct line, and its length (less the destination envelope) is the hop.
       const pts = [leg.start, ...leg.route];
       let length = 0;
       for (let i = 1; i < pts.length; i++) {
@@ -213,32 +216,36 @@ describe('M2 travel legs (First Light)', () => {
         length += pts[i].distanceTo(pts[i - 1]);
       }
       expect(length).toBeLessThan(1.6 * leg.start.distanceTo(center(to)));
+      expect(leg.hop).toBeCloseTo(length - safetyRadius(BODIES[to]), 3);
+      expect(leg.cap).toBe(cruiseMaxSpeed(leg.hop));
 
-      expect(leg.hops.length).toBeLessThanOrEqual(6);
-      leg.hops.forEach((hop, i) => {
-        const last = i === leg.hops.length - 1;
-        expect(hop.exit).toBe(last ? 'approach' : 'toggle');
-        if (last) expect(hop.aheadBody).toBe(to);
-        expect(hop.stops).toBe(0);
-        expect(hop.time).toBeLessThanOrEqual(60);
-        expect(hop.exitSpeed).toBeLessThanOrEqual(CRUISE.exitSpeed + 1e-6);
-      });
+      // The whole leg, from engaging at rest to the approach exit (LEAD-M2 step 1: at most 60 s simulated).
+      expect(leg.exit).toBe('approach');
+      expect(leg.aheadBody).toBe(to);
+      expect(leg.time).toBeLessThanOrEqual(60);
+      expect(leg.stops).toBe(0);
+      expect(leg.exitSpeed).toBeLessThanOrEqual(CRUISE.exitSpeed + 1e-6);
       expect(leg.sunRadii).toBeGreaterThanOrEqual(CRUISE.starStandoffRadii);
       expect(leg.otherRadii).toBeGreaterThan(ACTIVATE_RADII);
-      const total = leg.hops.reduce((s, h) => s + h.time, 0);
       console.log(
-        `${from}->${to}: ${leg.hops.length} hop(s) ${leg.hops.map((h) => `${h.time.toFixed(1)} s @ ${(h.cap / 1000).toFixed(0)} km/s`).join(', ')}; ` +
-        `cruise ${total.toFixed(1)} s, route ${(length / 1000).toFixed(0)} km, Sun ≥ ${leg.sunRadii.toFixed(2)}R, nearest other ${leg.other ?? '-'} ${leg.otherRadii.toFixed(2)}R`,
+        `${from}->${to}: ${leg.route.length - 1} bypass waypoint(s), route ${(length / 1000).toFixed(0)} km, cap ${(leg.cap / 1000).toFixed(1)} km/s; ` +
+        `leg ${leg.time.toFixed(1)} s, ${leg.refusedTurns} refused turn steps, Sun ≥ ${leg.sunRadii.toFixed(2)}R, nearest other ${leg.other ?? '-'} ${leg.otherRadii.toFixed(2)}R`,
       );
     });
   }
 
-  it('the direct Earth -> Mars line is blocked by the Sun, so the route bypasses it', () => {
+  it('the direct Earth -> Mars line is blocked by the Sun, so the route and its hop go around it', () => {
     const e = center('earth');
     const start = e.clone().addScaledVector(center('mars').sub(e).normalize(), safetyRadius(BODIES.earth) + 12000);
     const others = SOL.filter((id) => id !== 'mars');
     expect(blockedBy(start, center('mars'), PLAN_INFLATE, others)).toBe('sun');
     expect(planPath(start, center('mars'), PLAN_INFLATE, others).length).toBeGreaterThan(1);
+    // The bypass hop is longer than the straight-line hop, so the cap rises with it.
+    const hop = routeHop(start, 'mars', PLAN_INFLATE, SOL);
+    expect(hop).toBeGreaterThan(hopDistance(start, 'mars') + 100000);
+    expect(cruiseMaxSpeed(hop)).toBeGreaterThan(cruiseMaxSpeed(hopDistance(start, 'mars')));
+    // Inside the destination's envelope the hop is 0 (the 15 km/s floor).
+    expect(routeHop(center('mars'), 'mars', PLAN_INFLATE, SOL)).toBe(0);
   });
 });
 

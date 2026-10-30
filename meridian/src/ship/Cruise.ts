@@ -15,6 +15,8 @@ import { cruiseMaxSpeed } from '../world/scale';
 // (reported with body null), so it never carries a ship past what saves accept.
 // The speed cap follows the hop (charter H): max(15 km/s, hop ÷ 45 s), with the
 // acceleration scaled so the ramp to the cap always takes CRUISE.rampSeconds.
+// The hop is the planned route length (routeHop), so a leg that bypasses the
+// Sun is still one cruise of about 45 s along the nav marker's waypoints.
 // `ids` parameters default to the bodies in play (BODY_IDS).
 
 /** Safety-envelope radius of a body: surface + atmosphere + fixed margin; a star keeps a 5R standoff. */
@@ -106,6 +108,24 @@ export function planPath(a: Vector3, b: Vector3, inflate: number, ids: readonly 
   return split(a, b, 0);
 }
 
+/**
+ * Hop length (m) for a cruise from `pos` to a body: the length of the planPath
+ * route around every other body's envelope (inflated by `inflate`), less the
+ * destination's envelope (0 inside it). Equals hopDistance while the direct
+ * line is clear; a bypass lengthens it, and with it the cap, for the whole leg.
+ */
+export function routeHop(pos: Vector3, id: BodyId, inflate: number, ids: readonly BodyId[] = BODY_IDS): number {
+  const c = BODIES[id].center;
+  const route = planPath(pos, new Vector3(c[0], c[1], c[2]), inflate, ids.filter((b) => b !== id));
+  let length = 0;
+  let p = pos;
+  for (const q of route) {
+    length += p.distanceTo(q);
+    p = q;
+  }
+  return Math.max(0, length - safetyRadius(BODIES[id]));
+}
+
 export type CruiseExitReason = 'approach' | 'brake' | 'toggle' | 'safety';
 
 export interface CruiseInput {
@@ -184,7 +204,7 @@ export class CruiseController {
     return { ok: true, reason: null };
   }
 
-  /** Start cruising; `hop` (m) is the distance to the destination's envelope (0 = the 15 km/s floor). */
+  /** Start cruising; `hop` (m) is the route length to the destination's envelope (routeHop; 0 = the 15 km/s floor). */
   begin(pos: Vector3, quat: Quaternion, velocity: Vector3, hop = 0): void {
     this.pos.copy(pos);
     this.quat.copy(quat).normalize();
