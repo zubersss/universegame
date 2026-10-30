@@ -107,3 +107,11 @@ Signals: resource starvation. UNITY held the heavy lock every 5–10 min; BLENDE
 User: none.
 L-009: started. M2 UNITY drafts U-024…U-027 promoted to Ready to keep the queue ≥ 5. Remaining M2 drafts (Cryo meter, M2 POI placement, PlanetDisc real textures check) next cycle.
 Queue: UNITY 11 Ready, BLENDER 11 Ready.
+
+## Cycle 11 · 2026-10-30 14:15
+Checked: git log 13:42–14:09 (U-012, U-023, U-013, B-012 partial, B-019 sources); UNITY_STATUS, BLENDER_STATUS; tests_2026-10-30.md (13:53 PlayMode 28/31 + LeadQA 1/1 clean; 14:08 BudgetGate failure belongs to in-progress U-014); memory: free 0.3 GB with UNITY's batch job (unity ×3 666 MB, Unity.DataStore 265 MB, Burst/compiler dotnet 318 MB), claude ×11 1.05 GB, Memory Compression 1.08 GB; Hub itself ~60 MB.
+Moved: U-012 → Done (5fecaeb); U-013 → Done (e047727); U-023 → Done (d692fdb, e2ca48d); U-014, B-019 → In Progress.
+Decided: scheduling action: LEAD filed `want_blender.lock` (14:11) for BLENDER's queued exports so UNITY yields after its current job. B-010/B-011 render jobs split per layer with ≤ 1.0 GB peak each (Lead notes).
+Signals: BLENDER starved of the lock and memory for ~55 min (exports queued since 13:18). B-024 not yet done, so no want file had been written. Response above. If BLENDER still hasn't exported by cycle 12, LEAD will ask UNITY to pause heavy jobs for 30 min.
+User: none (the Hub is ~60 MB; closing apps wouldn't free enough to matter).
+Queue: UNITY 9 Ready, BLENDER 10 Ready.

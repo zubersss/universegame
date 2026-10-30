@@ -141,12 +141,12 @@ Files: tools/unity_test.ps1, Assets/_Game/Tests/LeadQA.meta
 Depends: —
 Lead notes: Done d185084 (cycle 7): PlayMode runs MERIDIAN.Tests.LeadQA by default with a per-assembly report; LeadQA.meta committed.
 
-### U-023 · UNITY · Ready · M1
+### U-023 · UNITY · Done · M1
 Goal: HeavyJobLock fairness + memory gate in `tools/unity_common.ps1` (D-026).
 Accept: Enter-HeavyJobLock writes `want_unity.lock` while waiting and deletes it on acquire; refuses to acquire if another role's `want_*.lock` < 30 min old exists and UNITY held the lock within the last 2 min; refuses below 1.5 GB free RAM (prints the number); Exit removes the lock. Run the full check set once per task hand-off, not after each edit.
 Files: tools/unity_common.ps1
 Depends: —
-Lead notes: PRIORITY: do this next (cycle 10). BLENDER's exports have waited > 25 min and free RAM dropped to 0.8 GB.
+Lead notes: Done d692fdb + e2ca48d (cycle 11): want file, 2-min yield, 1.5 GB gate, 20-min cap; self-test 11/11.
 
 ### U-022 · UNITY · Done · M1
 Goal: Top-down follow-ups from the U-011 review: apply the Sun's k_sun = 0.80 (D-022); draw `backgrounds/space/layer0..2` as parallax behind the system (layer0 slowest) and `planets/sun/glow` + `planets/*/glow` behind discs (B-003/B-005 handoffs: glow world width 2.56 × R planets, 3.2 × R Sun).
@@ -190,21 +190,21 @@ Files: Assets/_Game/Code/Runtime/Space/, Assets/_Game/Shaders/PlanetDisc.shaderg
 Depends: U-004
 Lead notes: Done d6831d4 (cycle 8): layout §3, wells (Earth edge 1.00, Earth ring 11.1, Jupiter ring 28.1 u/s²), cruise/boost, Earth→Mars 8.0 s, 16 draw calls; EditMode 88/88, PlayMode 15/15. Mercury/Sun conflict resolved by D-022; background + glows + k_sun follow up in U-022.
 
-### U-012 · UNITY · In Progress · M1
+### U-012 · UNITY · Done · M1
 Goal: Both transitions per Bible §5.2–5.3.
 Accept: launch ≤ 1.5 s total with state carried (hull, fuel, cargo), ship on the Atmosphere Ring at the longitude angle with 20 u/s outward; entry on inward ring crossing or F: ship at Escape Line + 20 m descending 15 m/s with planet gravity; PlayMode tests for both.
 Files: Assets/_Game/Code/Runtime/Core/SceneDirector.cs, Code/Runtime/Transitions/
 Depends: U-010, U-011
-Lead notes: —
+Lead notes: Done 5fecaeb (cycle 11): launch 1.05 s to Earth ring at longitude+rotation, 20 u/s out, state carried; entry at Escape Line + 20 m descending 15 m/s in 1.10 s; TransitionTests + TransitionMathTests; PlayMode clean 13:53.
 
-### U-013 · UNITY · Ready · M1
+### U-013 · UNITY · Done · M1
 Goal: Save/load per Bible §10.7.
 Accept: `state.json` + `terrain_<planet>.bin`; autosave on transitions and every 5 min; 3 rotating backups; version field; PlayMode test: save → load → identical state and terrain.
 Files: Assets/_Game/Code/Runtime/Save/
 Depends: U-008, U-012
-Lead notes: Company name for the save path: use "Zubers" unless D-011 says otherwise.
+Lead notes: Done e047727 (cycle 11): LocalLow/Zubers/MERIDIAN/saves/slotN, 3 rotating backups, atomic writes, version + migrations, autosave on transitions + 5 min; SaveLoadTests save → load identical; EditMode 108/108, PlayMode 28/28 at 13:53.
 
-### U-014 · UNITY · Ready · M1
+### U-014 · UNITY · In Progress · M1
 Goal: BudgetGate v1, `BudgetMonitor`, profiling script.
 Accept: tests for frame time, GC per 300 frames, light and particle caps, memory on Earth, Mars, Space; `tools/unity_profile.ps1` writes `coordination/reports/unity/perf_<date>.md` with every Bible §11.1 row.
 Files: Assets/_Game/Tests/Unit/BudgetGateTests.cs, Code/Runtime/Perf/BudgetMonitor.cs, tools/unity_profile.ps1
@@ -354,7 +354,7 @@ Goal: Earth parallax `backgrounds/earth/layer0..2` (temperate biome).
 Accept: three 2048×1024 layers tileable in x; haze gradient readable; palette per Bible §9.
 Files: Assets/_Game/Art/backgrounds/earth/
 Depends: B-002
-Lead notes: FAILED review (cycle 7): §9 Forbidden "anything that reads as a cartoon". layer2 (and layer1) trees are flat-filled lollipop/cone silhouettes with a uniform green ground fill. Fix: build real 3D trees in Blender (geometry nodes: curved trunk + branch curves, instanced leaf-cluster meshes with noise displacement and per-cluster hue/value variation; conifers as stacked drooping whorls) and a ground of instanced grass/shrub clumps, lit by a sun from upper-right, rendered with EEVEE + volumetric haze per layer. Leaf masses must show internal light/shadow and broken edges; no flat fills. Keep tiling, sizes, seeds. layer0 can keep its sky/range if it passes the same rule. Redo before B-011 uses the same approach for Mars.
+Lead notes: Rework in progress (cycle 7 §9 fail). Memory plan (cycle 11): a 2.1 GB peak can't fit, since with UNITY idle the laptop frees only ~1.9 GB. Render each layer in its own Blender process, and cap each job at ≤ 1.0 GB peak (e.g. EEVEE shadow pool 256 MB, volumetric tile 16, texture limit 1024 for far layers, render at final size, no 2× oversample). Start a job when Unity is not running and free RAM ≥ peak + 1 GB (§11.2). LEAD filed want_blender.lock at 14:11, so UNITY yields after its current job.
 
 ### B-024 · BLENDER · Ready · M2
 Goal: HeavyJobLock fairness + memory gate in `tools/blender_render.ps1` (D-026), mirroring U-023.
@@ -368,7 +368,7 @@ Goal: Mars parallax `backgrounds/mars/layer0..2`.
 Accept: as B-010 with the Mars palette and butterscotch sky.
 Files: Assets/_Game/Art/backgrounds/mars/
 Depends: B-010
-Lead notes: — (Cycle 7) Same §9 rule as the B-010 rework: real rendered rocks/dunes with internal shading, no flat-filled silhouettes.
+Lead notes: Rework in progress (cycle 7 §9 fail). Memory plan (cycle 11): a 2.1 GB peak can't fit, since with UNITY idle the laptop frees only ~1.9 GB. Render each layer in its own Blender process, and cap each job at ≤ 1.0 GB peak (e.g. EEVEE shadow pool 256 MB, volumetric tile 16, texture limit 1024 for far layers, render at final size, no 2× oversample). Start a job when Unity is not running and free RAM ≥ peak + 1 GB (§11.2). LEAD filed want_blender.lock at 14:11, so UNITY yields after its current job.
 
 ### B-022 · BLENDER · Done · M2
 Goal: Terrain sheet revision for all 10 materials: fill slots 47–62 with 16 variants of tile 46; grass rim only on upward-facing exposed edges (sides/underside show soil with a darker rim) (D-020).
@@ -377,7 +377,7 @@ Files: blender/scripts/gen_terrain.py, Assets/_Game/Art/terrain/
 Depends: B-007, B-008
 Lead notes: Done fb0c1dc (cycle 8): grass rim only on upward edges; 16 interior variants per sheet; joins seamless in demos.
 
-### B-019 · BLENDER · Ready · M2
+### B-019 · BLENDER · In Progress · M2
 Goal: Pilgrim landing legs: `ships/pilgrim/side_legs` (same framing, pivot, and size as `side`, with legs extended below the skids).
 Accept: identical canvas and pivot to `side` so UNITY can swap without offset (diff of the two pivots = 0); legs read clearly at camera size 9; color, normal, emission.
 Files: Assets/_Game/Art/ships/pilgrim/, blender/scripts/
