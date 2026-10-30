@@ -40,6 +40,8 @@ namespace Meridian.EditorTools
             public string key;
             public int frame_width, frame_height, columns, frames, fps = 12;
             public int gutter = 4;
+            /// <summary>Texels trimmed from every side of each frame rect (terrain: 1, see TerrainTileSet.FitToCell).</summary>
+            public int inset;
             public float[] pivot;
             public string facing = "right";
         }
@@ -173,7 +175,7 @@ namespace Meridian.EditorTools
             return new SheetManifest
             {
                 key = key, frame_width = 128, frame_height = 128, columns = 8, frames = 47,
-                gutter = 0, pivot = new[] { 0.5f, 0.5f },
+                gutter = 0, inset = 1, pivot = new[] { 0.5f, 0.5f },
             };
         }
 
@@ -228,7 +230,8 @@ namespace Meridian.EditorTools
                 int col = i % m.columns, row = i / m.columns;
                 float x = col * (m.frame_width + m.gutter);
                 float yTop = row * (m.frame_height + m.gutter);
-                rects.Add(new Rect(x, textureHeight - yTop - m.frame_height, m.frame_width, m.frame_height));
+                rects.Add(new Rect(x + m.inset, textureHeight - yTop - m.frame_height + m.inset,
+                    m.frame_width - 2 * m.inset, m.frame_height - 2 * m.inset));
             }
             return rects;
         }

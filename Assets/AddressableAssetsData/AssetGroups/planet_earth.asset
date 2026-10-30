@@ -20,8 +20,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 1a1c1750fbed0a445a8b8063b4120dac
-    m_Address: backgrounds/earth/layer0
+  - m_GUID: 20bffdceb64fdfc47ad00b563096600f
+    m_Address: backgrounds/earth/layer2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -35,18 +35,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 987469fb8aa6275478e9445fd197e447
-    m_Address: backgrounds/earth/layer1
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a4fa5dacf391d85438f5aa6ce49b74d2
-    m_Address: backgrounds/earth/layer2
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cd6cc1d67cd22e847a0085bf204414ac
     m_Address: terrain/earth/sand
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d2b9ab6548001084ebfb84ab91b80045
+    m_Address: backgrounds/earth/layer1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -57,6 +52,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f28d79f8716ccb74cb0df6fa44a37173
     m_Address: terrain/earth/grass
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f6a5a279e5d677940978741e39495c16
+    m_Address: backgrounds/earth/layer0
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

@@ -54,14 +54,21 @@ namespace Meridian.Tests
             var t = side.terrain;
             Assert.NotNull(t, "TerrainStreamer on PlanetSide");
             yield return WaitSettled(t, 20f);
+            // Planet-load work (player art upload) finishes before the streaming measurement starts.
+            var pv = side.player != null ? side.player.GetComponent<Meridian.Player.PlayerView>() : null;
+            float artTimeout = Time.realtimeSinceStartup + 10f;
+            while (pv != null && pv.view.sprite == null && Time.realtimeSinceStartup < artTimeout) yield return null;
+            for (int i = 0; i < 10; i++) yield return null;
 
             Assert.AreEqual(25, t.ResidentCount, "5×5 chunks around the camera");
             Assert.IsTrue(t.AllResidentWithinRadius(out int worst), $"worst distance {worst}");
 
             // Fly right at 30 m/s-equivalent steps (0.5 m per frame) for 400 frames, crossing ~6 chunks.
             var cam = side.sideCamera.transform;
+            side.sideCamera.GetComponent<Meridian.Player.CameraFollow>().enabled = false; // this test flies the camera itself
             t.ResetStats();
             float total = 0f, worstFrame = 0f;
+            int worstIndex = -1;
             const int frames = 400;
             var applyMs = new double[frames];
             for (int i = 0; i < frames; i++)
@@ -69,7 +76,7 @@ namespace Meridian.Tests
                 cam.position += new Vector3(0.5f, 0f, 0f);
                 yield return null;
                 total += Time.unscaledDeltaTime;
-                worstFrame = Mathf.Max(worstFrame, Time.unscaledDeltaTime);
+                if (Time.unscaledDeltaTime > worstFrame) { worstFrame = Time.unscaledDeltaTime; worstIndex = i; }
                 applyMs[i] = t.LastApplyMs;
                 Assert.IsTrue(t.AllResidentWithinRadius(out worst), $"frame {i}: resident chunk {worst} away");
             }
@@ -80,7 +87,7 @@ namespace Meridian.Tests
             int over = 0;
             foreach (var a in applyMs) if (a > 2.0) over++;
             TestContext.Out.WriteLine($"[MERIDIAN] Terrain apply per frame: p50 {sorted[frames / 2]:F2} ms, p95 {sorted[frames * 95 / 100]:F2}, p99 {sorted[frames * 99 / 100]:F2}, frames over 2 ms: {over}/{frames}");
-            TestContext.Out.WriteLine($"[MERIDIAN] Terrain streaming: avg {avgMs:F2} ms, worst frame {worstFrame * 1000f:F2} ms, max apply {t.MaxApplyMs:F2} ms, max band {t.MaxBandMs:F2} ms");
+            TestContext.Out.WriteLine($"[MERIDIAN] Terrain streaming: avg {avgMs:F2} ms, worst frame {worstFrame * 1000f:F2} ms (frame {worstIndex}), max apply {t.MaxApplyMs:F2} ms, max band {t.MaxBandMs:F2} ms");
             Assert.LessOrEqual(avgMs, 12f, "average frame ≤ 12 ms while streaming");
             // Bible §11.1: chunk apply ≤ 2 ms per frame, no hitch > 33 ms during streaming. Asserted as p99 + hitch
             // because single OS stalls on the shared 8 GB laptop (one 20 ms band seen) are outside the code's control (P-06).

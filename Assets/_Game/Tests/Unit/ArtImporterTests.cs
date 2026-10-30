@@ -233,9 +233,10 @@ namespace Meridian.Tests
             Import(c);
             var sprites = AssetDatabase.LoadAllAssetsAtPath(c).OfType<Sprite>().ToArray();
             Assert.AreEqual(47, sprites.Length);
-            Assert.AreEqual(new Rect(0, 896, 128, 128), sprites.First(s => s.name == "soil_0").rect, "cell 0 top-left");
+            // Cells are cut 1 texel inside the 128 px grid (no neighbor bleed); tiles scale them back to 1 m.
+            Assert.AreEqual(new Rect(1, 897, 126, 126), sprites.First(s => s.name == "soil_0").rect, "cell 0 top-left");
             // Cell 46 = row 5, column 6.
-            Assert.AreEqual(new Rect(768, 256, 128, 128), sprites.First(s => s.name == "soil_46").rect);
+            Assert.AreEqual(new Rect(769, 257, 126, 126), sprites.First(s => s.name == "soil_46").rect);
             Assert.AreEqual(128f, sprites[0].pixelsPerUnit);
         }
 

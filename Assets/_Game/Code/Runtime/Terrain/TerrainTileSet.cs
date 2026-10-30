@@ -52,6 +52,7 @@ namespace Meridian.Terrain
                 if (index < 0 || index >= result.Length) continue;
                 var t = ScriptableObject.CreateInstance<Tile>();
                 t.sprite = s;
+                FitToCell(t, s);
                 t.colliderType = TileId.IsSolid(id) ? Tile.ColliderType.Grid : Tile.ColliderType.None;
                 result[index] = t;
             }
@@ -65,6 +66,19 @@ namespace Meridian.Terrain
             }
             for (int i = 0; i < result.Length; i++) result[i] ??= result[0];
             return result;
+        }
+
+        /// <summary>
+        /// The importer cuts terrain cells 1 texel inside the 128 px grid so bilinear and mip
+        /// sampling never read the neighboring cell (those reads drew thin lines between rows).
+        /// The tile scales the 126 px sprite back to exactly one 1 m cell.
+        /// </summary>
+        static void FitToCell(Tile t, Sprite s)
+        {
+            float size = s.rect.width / s.pixelsPerUnit;
+            if (size <= 0f || Mathf.Approximately(size, 1f)) return;
+            t.transform = Matrix4x4.Scale(new Vector3(1f / size, 1f / size, 1f));
+            t.flags = TileFlags.LockTransform;
         }
 
         public TileBase Get(byte id, byte variant)

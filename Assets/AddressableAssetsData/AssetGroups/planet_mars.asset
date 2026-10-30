@@ -20,8 +20,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 5268eb2b54fd1264eaf744e55d241ff1
+  - m_GUID: 41ff9a871f5e992438f1ec8b52c9b50a
     m_Address: backgrounds/mars/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 549abe15775854d4eaaf6def71b92111
+    m_Address: backgrounds/mars/layer0
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -35,13 +40,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 7c7187ad0f47e944dad59f67913d00d9
+  - m_GUID: 728ab7917ea11b34cb9b40931ab20842
     m_Address: backgrounds/mars/layer2
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 93f83a04b93f8764cbf4a798afe132e0
-    m_Address: backgrounds/mars/layer0
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
