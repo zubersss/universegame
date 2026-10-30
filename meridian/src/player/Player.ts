@@ -371,6 +371,15 @@ export class Player {
     return { h: _n.dot(this.up), normal: _g.set(hit.nx, hit.ny, hit.nz) };
   }
 
+  /** The walker's capsule fits with its feet at this point (nothing it collides with intersects it). */
+  fitsAt(feet: Vector3): boolean {
+    _n.copy(feet).addScaledVector(this.up, FOOT_OFFSET + WALK.skin);
+    const blocked = this.physics.world.intersectionWithShape(
+      { x: _n.x, y: _n.y, z: _n.z }, { x: this.quat.x, y: this.quat.y, z: this.quat.z, w: this.quat.w }, this.sweepShape, undefined, GROUPS.queryWalk,
+    );
+    return !blocked;
+  }
+
   /** Walkable ground below a point (terrain, props, ship; never the walker itself). */
   private groundRay(o: Vector3, d: Vector3, max: number): { dist: number; normal: Vector3 } | null {
     const hit = this.physics.castRay(o.x, o.y, o.z, d.x, d.y, d.z, max, GROUPS.queryWalk);
