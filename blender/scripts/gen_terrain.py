@@ -1,7 +1,7 @@
 """Terrain tile-set generator (contract §4 `terrain/<planet>/<material>`), called by render.py.
 
 One 1024x1024 sheet per material: the 47 "blob" autotile variants, 128 px each, 8 columns,
-no gutters, slots 47..63 empty. Variant order matches UNITY's BlobAutotile.cs exactly:
+no gutters; slots 47..62 hold 16 interior variants of tile 46 (D-020), slot 63 is empty. Variant order matches UNITY's BlobAutotile.cs exactly:
 neighbour bits N=1 NE=2 E=4 SE=8 S=16 SW=32 W=64 NW=128 (N = the tile above), a corner only
 counts when both adjacent edges connect, and the 47 reduced masks sorted ascending give the
 sheet index (0 = isolated block, 46 = fully surrounded).
@@ -120,8 +120,10 @@ RECIPES = {"soil": mat_soil, "grass": mat_soil, "stone": mat_stone, "sand": mat_
 # width (px), rim tint, top-band (grass/frost/foam).
 EDGE = {
     "soil":  dict(inset=4, amp=2.2, lo=6, hi=40, depth=6, rim=10, rim_col=(64, 46, 32), rim_k=0.35),
-    "grass": dict(inset=4, amp=2.2, lo=6, hi=40, depth=6, rim=10, rim_col=(64, 46, 32), rim_k=0.25,
-                  band=(22, 6), band_dark=(52, 92, 34), band_light=(112, 152, 58), blades=True),
+    # Grass grows only on upward-facing exposed edges (D-020); sides/underside show soil + rim.
+    "grass": dict(inset=4, amp=2.2, lo=6, hi=40, depth=6, rim=10, rim_col=(64, 46, 32), rim_k=0.35,
+                  band=(22, 6), band_dark=(52, 92, 34), band_light=(112, 152, 58), blades=True,
+                  top_only_band=True),
     "stone": dict(inset=3, amp=2.0, lo=10, hi=60, depth=9, rim=12, rim_col=(70, 68, 66), rim_k=0.3),
     "sand":  dict(inset=3, amp=1.2, lo=12, hi=64, depth=3, rim=10, rim_col=(176, 148, 100), rim_k=0.3),
     "snow":  dict(inset=3, amp=1.6, lo=10, hi=64, depth=7, rim=14, rim_col=(196, 210, 228), rim_k=0.4),
@@ -218,12 +220,38 @@ def build_material(name, seed, overrides):
         ins["N"] = np.maximum(ins["N"] + 2.0 * np.abs(fft_noise_1d(rng, T, 2, 6, 0.0)) - 1.0, 0.5)
     ins["band"] = fft_noise_1d(rng, T, 8, 48, 0.8).astype(np.float32)
     ins["band_tex"] = fft_noise(rng, T, T, 1.5, 8, 0.3).astype(np.float32)
+    strength = overrides.get("normal_strength", 0.35)
     tiles = []
     for m in MASKS:
         c, he, a = make_tile(m, col, ins, st)
-        n = normals_from_height(h, he, overrides.get("normal_strength", 0.35))
-        tiles.append(finish_tile(c, n, a))
+        tiles.append(finish_tile(c, normals_from_height(h, he, strength), a))
+    # Slots 47..62: interior variants of tile 46 (D-020). Each blends the base texture toward an
+    # independently seeded texture of the same recipe through a window that is exactly 0 at
+    # the tile border, so every variant joins every neighbour exactly like tile 46 does.
+    # A linear 50/50 mix of two independent textures loses contrast (a faint grid at every tile
+    # border), so blend by rotation about the mean: variance stays constant across the window.
+    theta = interior_window() * (np.pi / 2)
+    ca, sa = np.cos(theta), np.sin(theta)
+    for v in range(VARIANTS):
+        alt_col, alt_h = recipe(np.random.default_rng([seed, 1000 + v]), overrides)
+        mc = 0.5 * (col.mean(axis=(0, 1)) + alt_col.mean(axis=(0, 1)))
+        mh = 0.5 * (h.mean() + alt_h.mean())
+        vc = mc + (col - mc) * ca[..., None] + (alt_col - mc) * sa[..., None]
+        vh = mh + (h - mh) * ca + (alt_h - mh) * sa
+        c, he, a = make_tile(255, vc, ins, st)
+        tiles.append(finish_tile(c, normals_from_height(vh, he, strength), a))
     return tiles
+
+
+VARIANTS = 16
+
+
+def interior_window(lo=1.0, hi=6.0):
+    """0 within `lo` px of the tile border, 1 beyond `hi` px, smooth in between."""
+    yy, xx = np.mgrid[0:T, 0:T].astype(np.float32) + 0.5
+    d = np.minimum(np.minimum(xx, T - xx), np.minimum(yy, T - yy))
+    x = np.clip((d - lo) / (hi - lo), 0, 1)
+    return x * x * (3 - 2 * x)
 
 
 def pack(tiles, idx):
@@ -252,10 +280,26 @@ DEMO = [
 ]
 
 
-def demo_patch(tiles, path):
-    """Assemble the demo map with the blob rule and save color-over-sky + a relit view."""
-    rows, cols = len(DEMO), len(DEMO[0])
-    solid = lambda r, c: 0 <= c < cols and (r >= rows or (r >= 0 and DEMO[r][c] == "#"))
+DEMO_INTERIOR = ["#" * 16] * 8
+
+
+def tile_for(m, r, c):
+    """Sheet index for a cell: the blob variant, and for fully surrounded cells one of tile 46
+    or the 16 interior variants (47..62) picked by a position hash (as U-020 does)."""
+    i = INDEX[reduce_mask(m)]
+    if i != 46:
+        return i
+    k = ((r * 73856093) ^ (c * 19349663)) % (VARIANTS + 1)
+    return 46 if k == 0 else 46 + k
+
+
+def demo_patch(tiles, path, grid=DEMO, outside_solid=False):
+    """Assemble a demo map with the blob rule and save color-over-sky + a relit view."""
+    rows, cols = len(grid), len(grid[0])
+    if outside_solid:
+        solid = lambda r, c: not (0 <= r < rows and 0 <= c < cols) or grid[r][c] == "#"
+    else:
+        solid = lambda r, c: 0 <= c < cols and (r >= rows or (r >= 0 and grid[r][c] == "#"))
     img_c = np.zeros((rows * T, cols * T, 4), np.uint8)
     img_n = np.zeros((rows * T, cols * T, 4), np.uint8)
     img_n[..., :] = (128, 128, 255, 255)
@@ -267,7 +311,7 @@ def demo_patch(tiles, path):
             for bit, dr, dc in ((N_, -1, 0), (NE, -1, 1), (E_, 0, 1), (SE, 1, 1), (S_, 1, 0), (SW, 1, -1), (W_, 0, -1), (NW, -1, -1)):
                 if solid(r + dr, c + dc):
                     m |= bit
-            ci, ni = tiles[INDEX[reduce_mask(m)]]
+            ci, ni = tiles[tile_for(m, r, c)]
             img_c[r * T:(r + 1) * T, c * T:(c + 1) * T] = ci
             img_n[r * T:(r + 1) * T, c * T:(c + 1) * T] = ni
     sky = np.array((0.55, 0.70, 0.86), np.float32)
@@ -284,7 +328,9 @@ def generate(entry, ctx):
     name = entry["key"].split("/")[2]
     tiles = build_material(name, int(entry.get("seed", 1)), entry)
     os.makedirs(os.path.join(ctx["blender_dir"], "preview"), exist_ok=True)
-    demo_patch(tiles, os.path.join(ctx["blender_dir"], "preview", entry["key"].replace("/", "__") + "_demo.png"))
+    stem = os.path.join(ctx["blender_dir"], "preview", entry["key"].replace("/", "__"))
+    demo_patch(tiles, stem + "_demo.png")
+    demo_patch(tiles, stem + "_demo_interior.png", DEMO_INTERIOR, outside_solid=True)
     maps = {"color": pack(tiles, 0), "normal": pack(tiles, 1)}
     if ctx["preview"]:
         maps = {k: v[::4, ::4].copy() for k, v in maps.items()}
