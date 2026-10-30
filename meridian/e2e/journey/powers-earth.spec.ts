@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { bootToTitle, collectErrors, snap, stubPointerLock } from '../helpers';
-import { api, exitShip, holdFor, power, transitions, until, untilPower } from '../fixtures/powers';
+import { api, exitShip, holdFor, holdUntil, power, transitions, until, untilPower } from '../fixtures/powers';
 import { ABILITIES } from '../../src/abilities/catalog';
 import type { FlightParams } from '../../src/abilities/types';
 
@@ -73,15 +73,17 @@ test('Skyborne Flight on Earth: E refused in the air, boarding after landing, bo
   expect(top.setpoint).toBeGreaterThan(P.boost * 0.95);
   expect(top.speed).toBeGreaterThan(Math.min(P.boost, top.limit ?? Infinity) * 0.85);
 
-  // Dive at the ground at full speed (Ctrl descends): the flier comes down to
-  // skim it and follows it; it never passes through (ray and analytic
-  // surface) and does not land at speed.
-  const dive = await holdFor(page, ['KeyW', 'ShiftLeft', 'ControlLeft'], 14, 0.1);
+  // Dive at the ground at full speed (Ctrl descends), however high the boost
+  // left the flier, then skim it for 4 s: the flier comes down to skim it and
+  // follows it; it never passes through (ray and analytic surface) and does
+  // not land at speed.
+  const isLow = (w: Record<string, any>) => w.height !== null && w.height < 3;
+  const dive = await holdUntil(page, ['KeyW', 'ShiftLeft', 'ControlLeft'], (rows) => rows.filter(isLow).length >= 40, 120, 0.1);
   const minRay = Math.min(...dive.map((w) => (w.height === null ? Infinity : w.height)));
   const minSurface = Math.min(...dive.map((w) => w.terrainClearance));
-  const low = dive.filter((w) => w.height !== null && w.height < 3);
-  console.log(`dive: ${dive.length} samples, ${low.length} within 3 m of the ground at ${Math.max(...low.map((w) => w.speed)).toFixed(0)} m/s; min ray height ${minRay.toFixed(2)} m, min clearance above the analytic surface ${minSurface.toFixed(2)} m`);
-  expect(low.length).toBeGreaterThan(5);
+  const low = dive.filter(isLow);
+  console.log(`dive: ${dive.length} samples, ${low.length} within 3 m of the ground at up to ${Math.max(...low.map((w) => w.speed)).toFixed(0)} m/s; min ray height ${minRay.toFixed(2)} m, min clearance above the analytic surface ${minSurface.toFixed(2)} m`);
+  expect(low.length).toBeGreaterThanOrEqual(40);
   expect(Math.max(...low.map((w) => w.speed))).toBeGreaterThan(60);
   expect(minRay).toBeGreaterThan(0);
   expect(minSurface).toBeGreaterThan(-0.5);

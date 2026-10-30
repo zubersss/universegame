@@ -35,18 +35,26 @@ export async function untilPower(page: Page, src: string, timeoutMs = 600_000): 
   return (await h.jsonValue()) as Row;
 }
 
-/** Hold keys (or mouse buttons) for `seconds` of simulation time, sampling the power every `every` s. */
-export async function holdFor(page: Page, keys: string[], seconds: number, every = 0.2): Promise<Row[]> {
+/**
+ * Hold keys (or mouse buttons), sampling the power every `every` s of
+ * simulation time, until `stop` holds for the samples so far or `maxSeconds`
+ * have passed; returns the samples.
+ */
+export async function holdUntil(page: Page, keys: string[], stop: (rows: Row[]) => boolean, maxSeconds: number, every = 0.2): Promise<Row[]> {
   for (const k of keys) await api(page, 'hold', k, true);
   const t0 = (await snap(page)).simTime as number;
   const out: Row[] = [];
-  for (let t = t0 + every; t <= t0 + seconds + 1e-9; t += every) {
+  for (let t = t0 + every; t <= t0 + maxSeconds + 1e-9; t += every) {
     await page.waitForFunction((tt) => (window as any).__meridian.snapshot().simTime >= tt, t, { timeout: 600_000, polling: 50 });
     out.push(await power(page));
+    if (stop(out)) break;
   }
   for (const k of keys) await api(page, 'hold', k, false);
   return out;
 }
+
+/** Hold keys (or mouse buttons) for `seconds` of simulation time, sampling the power every `every` s. */
+export const holdFor = (page: Page, keys: string[], seconds: number, every = 0.2): Promise<Row[]> => holdUntil(page, keys, () => false, seconds, every);
 
 /** The ability state changes so far, as 'from>to'. */
 export const transitions = async (page: Page): Promise<string[]> => ((await hook(page, 'abilityLog')) as { from: string; to: string }[]).map((e) => `${e.from}>${e.to}`);
