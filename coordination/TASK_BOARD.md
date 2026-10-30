@@ -275,6 +275,20 @@ Files: Assets/_Game/Code/Runtime/Planet/, Scenes/PlanetSide.unity
 Depends: U-007
 Lead notes: M2 draft promoted early (cycle 10) to keep the queue ≥ 5; M1 tasks still come first.
 
+### U-032 · UNITY · Ready · M2
+Goal: Surveyor animation: drive the `characters/surveyor/base` frame-sheet clips (idle, walk, run, jump, fall, land, dig, aim, hurt, death) from the player controller; face the aim direction.
+Accept: PlayMode test steps the controller through walk → run → jump → fall → land → dig and asserts the clip at each state; capture strip of 6 states; ≤ 0.05 ms per frame; uses base.json clip ranges (no hard-coded indices).
+Files: Assets/_Game/Code/Runtime/Player/
+Depends: U-009
+Lead notes: Cycle 16. B-009/B-023 art has been Done since cycle 7/15 and isn't animated yet.
+
+### U-033 · UNITY · Ready · M2
+Goal: FX hookup: `fx/thruster` on the Pilgrim (side: main engine + belly pods while thrusting; top-down: engine), `fx/dig_sparks` on Beam hits, `fx/dust` on hard landings and ship touchdown, `fx/escape_band` on the Escape Line, `fx/heat_shimmer` during entry.
+Accept: captures for each effect; particles alive ≤ 600 at peak in BudgetGate; pooled, 0 B GC per frame; effects respect the emissive material.
+Files: Assets/_Game/Code/Runtime/FX/
+Depends: U-010, U-012
+Lead notes: Cycle 16. B-012 art Done.
+
 ### U-025 · UNITY · Ready · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.
 Accept: EditMode test: Earth noon/midnight intensities match §9; captures at dawn/noon/dusk/night on Earth; 0 B GC per frame.
