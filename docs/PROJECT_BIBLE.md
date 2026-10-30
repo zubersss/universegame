@@ -1,7 +1,7 @@
 # MERIDIAN — Project Bible (single source of truth)
 
 Owner: LEAD. Workers read; only LEAD edits. Changes are logged in `coordination/DECISIONS.md`.
-Version: 1.3 (Sun well k_sun, cycle 8). The Lead bumps the version on every edit.
+Version: 1.4 (Saturn jump height 2.3 m, cycle 9). The Lead bumps the version on every edit.
 
 Sections: 1 Vision · 2 Setting and story · 3 The solar system in game · 4 Physics and
 numbers · 5 Views and transitions · 6 Controls · 7 The eight planets · 8 Systems →
@@ -137,7 +137,7 @@ Jump impulse is fixed; gravity is real; upgrades scale the impulse, never gravit
 |----------------------------------------|-------------------------------------------------|
 | Walk / sprint speed                    | 4.0 / 6.5 m/s on every planet                   |
 | Jump take-off speed v₀                 | 7.00 m/s (Earth jump height 2.5 m)              |
-| Jump height h                          | v₀² / 2g → Mercury 6.6 m, Venus 2.8, Earth 2.5, Mars 6.6, Jupiter 1.0, Saturn 2.4, Uranus 2.8, Neptune 2.2 |
+| Jump height h                          | v₀² / 2g → Mercury 6.6 m, Venus 2.8, Earth 2.5, Mars 6.6, Jupiter 1.0, Saturn 2.3, Uranus 2.8, Neptune 2.2 |
 | Servo upgrades (Envirosuit)            | Mk1 +15% v₀, Mk2 +30%, Mk3 +45% (Jupiter: Mk2 clears a 1 m step reliably) |
 | Fall damage                            | None below 12 m/s impact; lethal at 24 m/s (unupgraded). Safe drop = 72/g m: Earth 7.3 m, Mars 19.4, Jupiter 2.9 |
 | Terminal velocity (m/s, play layer)    | Mercury 60 (no air; design cap), Venus 20, Earth 50, Mars 55, Jupiter 45, Saturn 48, Uranus 50, Neptune 50 |

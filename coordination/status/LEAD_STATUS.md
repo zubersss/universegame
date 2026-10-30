@@ -1,7 +1,7 @@
 # LEAD STATUS
-Updated: 2026-10-30 12:45 · Session: 1 · Review cycle: 8
+Updated: 2026-10-30 13:15 · Session: 1 · Review cycle: 9
 ## Current task
-L-007 LeadQA smoke test written; waiting on U-021 to run it. Review cycle every 30 min.
+M0 closed (cycle 9). Now L-009: groom M1, draft M2 backlog. Review cycle every 30 min.
 ## Last completed
 L-005 (versions pinned, `tools/paths.json`), L-006 (READY FOR WORKERS).
 ## Next up

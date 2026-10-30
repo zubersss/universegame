@@ -82,3 +82,19 @@ Signals: watch the "no audio listeners" PlayMode failures. If they persist in U-
 User: none.
 L-007: not run; heavy_unity.lock active at 12:40. Retry next cycle.
 Queue: added U-022 (k_sun, space background + glows). Ready: UNITY 10, BLENDER 11.
+
+## Cycle 9 · 2026-10-30 13:15 · M0 exit review (L-008)
+Checked: git log 12:44–13:04 (U-016, U-022, U-019); tests_2026-10-30.md (PlayMode 18/21 + 3 tool skips, LeadQA 1/1 ×4; EditMode 96/96); preview_ships_pilgrim_side_nopoint and calibration/sun nopoint previews (emission visible); capture_space_2026-10-30.png (stars, Milky Way, Earth glow).
+Moved: U-016 → Done (37f9ed9); U-019 → Done (42988db); U-022 → Done (4fded11); L-007 → Done; L-008 → Done; U-010, L-009 → In Progress. USER-07 → Done.
+M0 exit criteria (Bible §12), each with evidence:
+- Repo verified, old build archived: `archive/meridian-v1` + tag `meridian-v1-final` pushed (cycle 1, D-009).
+- Versions pinned: Bible §12 (L-005, D-013, D-014; Cinemachine cycle 4).
+- Unity URP-2D project at root compiles clean: logs/unity_compile_20261030_130842.log 0 `error CS`, 0 warnings ≤ baseline 0; MERIDIAN_URP uses MERIDIAN_Renderer2D (cycle 4).
+- render.py renders the calibration asset: B-002 (ead95f6), byte-identical re-render (renders_2026-10-30.md).
+- ArtImporter imports it: U-005 (bb0d201), placeholder retired; lit preview OK (U-006, cycle 6).
+- .claude/settings.json verified: L-004 (cycle 1).
+- ≥ 5 Ready tasks per worker: UNITY 9, BLENDER 11 (this cycle).
+- USER_ACTIONS complete: USER-01…07 Done; USER-08 optional.
+Decided: D-024 (M0 closed; Saturn jump 2.3 m, Bible v1.4).
+Signals: BLENDER has no commit since 12:39 on the B-010 rework while In Progress (31 min, under the 90-min threshold; Blender is rendering).
+User: none. M0_REPORT.md written (no playtest for M0).

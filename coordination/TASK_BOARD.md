@@ -60,21 +60,21 @@ Files: coordination/USER_ACTIONS.md
 Depends: L-002…L-005
 Lead notes: Done (cycle 2). Queues: U-001 and B-001 unblocked; the rest unlock along each worker's own chain.
 
-### L-007 · LEAD · In Progress · M0
+### L-007 · LEAD · Done · M0
 Goal: LeadQA test assembly and smoke test.
 Accept: `Assets/_Game/Tests/LeadQA/MERIDIAN.Tests.LeadQA.asmdef`; `SmokeTests.cs` loads `Core.unity`, asserts `LogAssert.NoUnexpectedReceived()`; passes via `tools/unity_test.ps1 PlayMode`.
 Files: Assets/_Game/Tests/LeadQA/
 Depends: U-004
-Lead notes: In Progress (cycle 6): asmdef + SmokeTests.cs written; run waits on U-021 (test script only runs MERIDIAN.Tests.Play) and a clear HeavyJobLock.
+Lead notes: Done (cycle 9): SmokeTests.cs passes via unity_test.ps1 PlayMode (LeadQA 1/1 at 12:42, 12:48, 12:55).
 
-### L-008 · LEAD · Ready · M0
+### L-008 · LEAD · Done · M0
 Goal: M0 exit review and report.
 Accept: every M0 exit criterion (Bible §12) checked with evidence in REVIEW_LOG; `coordination/reviews/M0_REPORT.md` under 200 words; `warnings_baseline.txt` created.
 Files: coordination/REVIEW_LOG.md, coordination/reviews/
 Depends: U-005, B-002, L-007
-Lead notes: —
+Lead notes: Done (cycle 9): M0 exit evidence in REVIEW_LOG cycle 9; coordination/reviews/M0_REPORT.md; warnings_baseline.txt = 0.
 
-### L-009 · LEAD · Ready · M1
+### L-009 · LEAD · In Progress · M1
 Goal: Groom M1; draft M2 tasks in `## Backlog`.
 Accept: ≥ 5 Ready per worker at all times during M1; M2 drafts cover every Bible §12 M2 item.
 Files: coordination/TASK_BOARD.md
@@ -141,12 +141,12 @@ Files: tools/unity_test.ps1, Assets/_Game/Tests/LeadQA.meta
 Depends: —
 Lead notes: Done d185084 (cycle 7): PlayMode runs MERIDIAN.Tests.LeadQA by default with a per-assembly report; LeadQA.meta committed.
 
-### U-022 · UNITY · Ready · M1
+### U-022 · UNITY · Done · M1
 Goal: Top-down follow-ups from the U-011 review: apply the Sun's k_sun = 0.80 (D-022); draw `backgrounds/space/layer0..2` as parallax behind the system (layer0 slowest) and `planets/sun/glow` + `planets/*/glow` behind discs (B-003/B-005 handoffs: glow world width 2.56 × R planets, 3.2 × R Sun).
 Accept: EditMode test: Sun pull at r = 1150 is 14.9 ± 0.1 u/s² and equals Mk1 thrust at r ≈ 810; PlayMode test: a Mk1 ship parked at Mercury's ring escapes to r > 1,300 with full thrust outward; capture_space shows stars + Milky Way band and planet glows; draw calls stay within §11.1.
 Files: Assets/_Game/Code/Runtime/Space/, Assets/_Game/Scenes/Space.unity, Tests/
 Depends: U-011
-Lead notes: Cycle 8. The space capture showed a pure-black background although B-005's layers have been Done since cycle 6.
+Lead notes: Done 4fded11 (cycle 9): k_sun 14.9 u/s² at 1150, Mk1 escapes Mercury ring in 4.0 s; capture_space shows stars, Milky Way, Earth glow; 24 draw calls.
 
 ### U-007 · UNITY · Done · M1
 Goal: Terrain v1: 32×32 chunks, `IWorldGenerator`, `SolidWorldGenerator` (Earth, Mars), streaming, pooling, RuleTiles with normal maps, per-chunk collision.
@@ -169,7 +169,7 @@ Files: Assets/_Game/Code/Runtime/Player/, Assets/_Game/Settings/Input/, Tests/Un
 Depends: U-004
 Lead notes: Done 089657b (cycle 8): jump heights Earth 2.497 / Mars 6.586 / Jupiter 0.988 m, walk/sprint, terminal, fall damage, Jetpack Mk1; EditMode 75/75, PlayMode 13/13; capture_earth_player OK. Jetpack input per D-023.
 
-### U-010 · UNITY · Ready · M1
+### U-010 · UNITY · In Progress · M1
 Goal: Side-view ship: board/exit, Mk1 thrust, launch fuel burn, landing rules, Escape Line band + HUD marker.
 Accept: Launch from Earth costs 17 fuel over the first 3 s of thrust from rest; crossing the Escape Line with v_y > 0 raises `EscapeLineCrossed`; touchdown ≤ 6 m/s no damage, 6–15 proportional, > 15 crash to 30% hull; PlayMode test for each.
 Files: Assets/_Game/Code/Runtime/Ship/, Prefabs/Ship/Pilgrim.prefab, Tests/Unit/ShipSideTests.cs
@@ -211,12 +211,12 @@ Files: Assets/_Game/UI/, Code/Runtime/UI/
 Depends: U-010, U-011
 Lead notes: —
 
-### U-016 · UNITY · In Progress · M1
+### U-016 · UNITY · Done · M1
 Goal: Placeholder audio set and `AudioDirector`.
 Accept: CC0 SFX for jump, land, dig, place, thrust, UI click; one ambient loop; every file's source and license in `docs/credits/unity.md`; Vorbis; ≤ 10 MB total.
 Files: Assets/_Game/Audio/, Code/Runtime/Audio/, docs/credits/unity.md
 Depends: U-004
-Lead notes: —
+Lead notes: Done 37f9ed9 (cycle 9): 7 synthesized CC0 clips (1.9 MB), AudioDirector with one listener; PlayMode clean incl. LeadQA; credits logged.
 
 ### U-017 · UNITY · Ready · M1
 Goal: M1 integration and build.
@@ -233,12 +233,12 @@ Depends: U-010, B-019 (build against the placeholder until B-019 is Done)
 Lead notes: —
 
 
-### U-019 · UNITY · Ready · M1
+### U-019 · UNITY · Done · M1
 Goal: `Sprite_LitEmissive` Shader Graph material (Bible §10.5): Sprite-Lit with `_NormalMap` and an additive `_EmissionMap` (+ intensity), used by ArtImporter for any asset with an `_emission` map.
 Accept: lit preview of `props/common/calibration` shows the stripe at its emission color under zero point light; `ships/pilgrim/side` portholes and engine glow; `planets/sun/surface` self-lit; ArtImporter assigns the material automatically (EditMode test).
 Files: Assets/_Game/Code/Runtime/Rendering/, Assets/_Game/Settings/Rendering/, Code/Editor/ArtImporter.cs, Tests/
 Depends: U-005, U-006
-Lead notes: PRIORITY: next after the current U-008 step. Your P-08, promoted in cycle 6. (Cycle 8) Write it as hand-written HLSL in Assets/_Game/Shaders/ like PlanetDisc (D-023).
+Lead notes: Done 42988db (cycle 9): HLSL Sprite_LitEmissive; no-point-light previews show calibration stripe, Pilgrim ports/engine/vents, self-lit Sun; ArtMaterials registry auto-filled; EditMode 96/96.
 
 ### U-020 · UNITY · Ready · M1
 Goal: Terrain variants: when a sheet has tiles in slots 47–62, tile 46 picks one of them by a stable hash of (x, y) (D-020).

@@ -6,11 +6,6 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-07 — Start the worker sessions (after the Lead writes READY FOR WORKERS below)
-1. Open two more PowerShell windows. In each: `cd C:\dev\universegame` then `claude`.
-2. Paste the UNITY kickoff into one and the BLENDER kickoff into the other
-   (`coordination/KICKOFF_MESSAGES.md`).
-
 ### USER-08 — Optional: let the team run PowerShell commands without prompts (2 min)
 On Windows, Claude Code runs commands through PowerShell as well as Bash, and the
 `Bash(...)` allow rules in `.claude/settings.json` don't cover PowerShell. The Lead added
@@ -25,6 +20,7 @@ allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
   verified by the Lead.
 - 2026-10-30 · USER-03 (Unity 6000.6.5f1 + Hub 3.22.3) and USER-04 (Blender 5.2.2 LTS) —
   found on disk by the Lead. The IL2CPP module isn't needed (D-014).
+- 2026-10-30 · USER-07 (UNITY and BLENDER sessions started; first commits 10:23).
 
 ## Status
 READY FOR WORKERS · 2026-10-30 · Start the two worker sessions now (USER-07).
