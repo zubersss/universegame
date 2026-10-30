@@ -14,6 +14,7 @@ namespace Meridian.Terrain
         public Tilemap liquid;
         public int cx, cy;
         CompositeCollider2D composite;
+        TilemapCollider2D tileCollider;
 
         // Allocating the full 32×32 up front keeps SetTilesBlock from growing bounds mid-stream.
         static void FixBounds(Tilemap map)
@@ -24,7 +25,13 @@ namespace Meridian.Terrain
         }
 
         /// <summary>Rebuilds merged collision after the last band; the only collider work per chunk.</summary>
-        public void FinishCollision() => composite.GenerateGeometry();
+        public void FinishCollision()
+        {
+            // The tilemap collider applies tile changes lazily; flush them first or the merged
+            // collider is built from stale shapes and bodies can fall through fresh ground.
+            tileCollider.ProcessTilemapChanges();
+            composite.GenerateGeometry();
+        }
 
         public static TerrainChunk Create(Transform parent)
         {
@@ -39,6 +46,7 @@ namespace Meridian.Terrain
             body.bodyType = RigidbodyType2D.Static;
             var tc = go.AddComponent<TilemapCollider2D>();
             tc.compositeOperation = Collider2D.CompositeOperation.Merge;
+            chunk.tileCollider = tc;
             var composite = go.AddComponent<CompositeCollider2D>();
             composite.geometryType = CompositeCollider2D.GeometryType.Polygons;
             composite.generationType = CompositeCollider2D.GenerationType.Manual; // built once per chunk (FinishCollision)
@@ -97,7 +105,7 @@ namespace Meridian.Terrain
             liquid.ClearAllTiles();
             FixBounds(solid);
             FixBounds(liquid);
-            composite.GenerateGeometry();
+            FinishCollision();
             // Stays active: re-enabling colliders and renderers costs more than the 2 ms apply budget allows.
         }
     }
