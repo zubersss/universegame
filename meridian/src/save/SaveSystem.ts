@@ -106,8 +106,14 @@ function stringList(x: unknown, valid: (s: string) => boolean, max: number): str
 }
 
 const SAMPLE_RE = /^(ilex|vesper|cairn):sample:[0-2]$/;
-const OBJECT_RE = /^(ilex|vesper|cairn):[a-z0-9:/_-]+$/;
-const SPECIES_RE = /^(ilex|vesper|cairn)-[a-z]+$/;
+// Scanned objects and species name their body first, any catalog body (Sol props
+// scan too). First Light ids ('<body>:poi:<i>', '<body>:route:<i>') are checked
+// against the mission lists instead, so they never pass as generic objects.
+const OBJECT_RE = /^([a-z-]+):(?!poi:|route:)[a-z0-9:/_-]+$/;
+const SPECIES_RE = /^([a-z-]+)-[a-z]+$/;
+const onBody = (re: RegExp) => (s: string): boolean => isBodyId(re.exec(s)?.[1]);
+const isObjectId = onBody(OBJECT_RE);
+const isSpeciesId = onBody(SPECIES_RE);
 
 /**
  * The survey (inventory, samples, relays) is the Quiet System's, whatever
@@ -128,9 +134,9 @@ function validateExpedition(x: unknown): ExpeditionState | string {
   if (!collected) return 'bad collected list';
   const relays = stringList(x.relays, (s) => SURVEY_BODIES.includes(s), 3);
   if (!relays) return 'bad relay list';
-  const species = stringList(x.species, (s) => SPECIES_RE.test(s), 32);
+  const species = stringList(x.species, isSpeciesId, 64);
   if (!species) return 'bad species list';
-  const scanned = stringList(x.scanned, (s) => OBJECT_RE.test(s) || isPoiId(s), 5000);
+  const scanned = stringList(x.scanned, (s) => isObjectId(s) || isPoiId(s), 5000);
   if (!scanned) return 'bad scan list';
   if (typeof x.transmitted !== 'boolean') return 'bad transmission flag';
   // Absent from schema-2 records written before First Light: no waypoint reached.

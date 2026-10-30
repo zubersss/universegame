@@ -140,6 +140,19 @@ describe('save validation', () => {
     if (r.ok) expect(r.data.player?.abilityState).toBe('walk');
   });
 
+  it('keeps scans and species from any catalog body', () => {
+    const d = sample({
+      expedition: {
+        ...sample().expedition,
+        species: ['ilex-lantern', 'moon-boulder', 'mars-basalt'],
+        scanned: ['moon:moon-boulder:2/3/4:1', 'mars:mars-basalt:0/12/7:0', 'earth:poi:0'],
+      },
+    });
+    const r = importJson(exportJson(d));
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.data.expedition.species).toEqual(['ilex-lantern', 'moon-boulder', 'mars-basalt']);
+  });
+
   it('keeps First Light progress: waypoints reached and scan targets scanned', () => {
     const d = sample({
       discoveries: ['ilex', 'vesper', 'earth'],
@@ -220,6 +233,9 @@ describe('save validation', () => {
     ['duplicate waypoint', sample({ expedition: { ...sample().expedition, route: ['moon:route:0', 'moon:route:0'] } })],
     ['route not a list', { ...sample(), expedition: { ...sample().expedition, route: 'earth:route:0' } }],
     ['unknown scan target', sample({ expedition: { ...sample().expedition, scanned: ['earth:poi:3'] } })],
+    ['waypoint in the scan list', sample({ expedition: { ...sample().expedition, scanned: ['earth:route:0'] } })],
+    ['scan on a body outside the catalog', sample({ expedition: { ...sample().expedition, scanned: ['pluto:pluto-rock:1/2/3:0'] } })],
+    ['species on a body outside the catalog', sample({ expedition: { ...sample().expedition, species: ['pluto-rock'] } })],
     ['inventory not backed by collection', sample({ expedition: { ...sample().expedition, inventory: { ilex: 3, vesper: 0, cairn: 0 } } })],
     ['duplicate collected ID', sample({ expedition: { ...sample().expedition, collected: ['ilex:sample:0', 'ilex:sample:0'] } })],
     ['unknown sample ID', sample({ expedition: { ...sample().expedition, collected: ['ilex:sample:7'] } })],
