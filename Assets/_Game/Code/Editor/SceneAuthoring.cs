@@ -46,6 +46,10 @@ namespace Meridian.EditorTools
             transitions.scenes = director;
             transitions.time = coreGo.GetComponent<TimeSystem>();
             transitions.actions = AssetDatabase.LoadAssetAtPath<UnityEngine.InputSystem.InputActionAsset>(InputAuthoring.AssetPath);
+            var save = coreGo.AddComponent<Meridian.Save.SaveSystem>();
+            save.scenes = director;
+            save.time = coreGo.GetComponent<TimeSystem>();
+            save.transitions = transitions;
             EditorSceneManager.SaveScene(core, CorePath);
 
             // Space (kept loaded but inactive by SceneDirector)

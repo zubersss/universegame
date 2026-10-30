@@ -32,6 +32,8 @@ namespace Meridian.Transitions
         public InputActionAsset actions;
 
         public bool Busy { get; private set; }
+        /// <summary>Raised when a launch or entry finishes (SaveSystem autosaves here, Bible §10.7).</summary>
+        public event System.Action Completed;
         public float LastLaunchSeconds { get; private set; }
         public float LastEntrySeconds { get; private set; }
         public float LastLaunchAngle { get; private set; }
@@ -152,6 +154,7 @@ namespace Meridian.Transitions
             yield return Fade(1f, 0f, LaunchReveal);
             LastLaunchSeconds = Time.realtimeSinceStartup - t0;
             Busy = false;
+            Completed?.Invoke();
         }
 
         // ---------- entry (§5.3) ----------
@@ -222,6 +225,7 @@ namespace Meridian.Transitions
             yield return Fade(1f, 0f, EntryReveal);
             LastEntrySeconds = Time.realtimeSinceStartup - t0;
             Busy = false;
+            Completed?.Invoke();
         }
 
         // ---------- helpers ----------

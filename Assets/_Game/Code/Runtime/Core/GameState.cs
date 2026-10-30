@@ -30,6 +30,12 @@ namespace Meridian.Core
         readonly System.Collections.Generic.Dictionary<PlanetId, Meridian.Terrain.TerrainEdits> terrainEdits =
             new System.Collections.Generic.Dictionary<PlanetId, Meridian.Terrain.TerrainEdits>();
 
+        /// <summary>Every planet that has a diff store this session (save writes one file each).</summary>
+        public System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<PlanetId, Meridian.Terrain.TerrainEdits>> AllEdits => terrainEdits;
+
+        /// <summary>Empties every planet's diffs in place (load replaces them from disk).</summary>
+        public void ClearAllEdits() { foreach (var e in terrainEdits.Values) e.Clear(); }
+
         /// <summary>Player terrain diffs for a planet; created empty on first visit, kept for the session.</summary>
         public Meridian.Terrain.TerrainEdits EditsFor(PlanetId id)
         {

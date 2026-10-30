@@ -15,6 +15,22 @@ namespace Meridian.Tests
     public class TransitionTests
     {
         const string CorePath = "Assets/_Game/Scenes/Core.unity";
+        string saveRoot;
+
+        // Transitions autosave (U-013): keep those writes out of the real save folder.
+        [SetUp]
+        public void SetUp()
+        {
+            saveRoot = System.IO.Path.Combine(Application.temporaryCachePath, "meridian_saves_tr_" + System.Guid.NewGuid().ToString("N").Substring(0, 6));
+            Meridian.Save.SaveSystem.RootOverride = saveRoot;
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            Meridian.Save.SaveSystem.RootOverride = null;
+            if (System.IO.Directory.Exists(saveRoot)) System.IO.Directory.Delete(saveRoot, true);
+        }
 
         static IEnumerator Boot(System.Action<SceneDirector> done)
         {
