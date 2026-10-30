@@ -348,7 +348,8 @@ def check(entry, maps, clips, wh, preview):
             fw, fh = (int(w * (0.25 if preview else 1)), int(h * (0.25 if preview else 1)))
         else:
             fw, fh = maps["color"].shape[1], maps["color"].shape[0]
-        pad = max(1, int(C.PADDING * (0.25 if preview else 1)))
+        # At 25% a margin edge lands mid-pixel, so previews allow 1 px of rounding.
+        pad = max(1, int(C.PADDING * 0.25) - 1) if preview else C.PADDING
         tiles = []
         col = maps["color"]
         if clips:
@@ -360,11 +361,9 @@ def check(entry, maps, clips, wh, preview):
                 tiles.append(col[y:y + fh, x:x + fw])
         else:
             tiles = [col]
-        for i, t in enumerate(tiles):
-            ok, msg = post.check_padding(t, pad)
-            if not ok:
-                problems.append(f"padding (frame {i}): {msg}")
-                break
+        bad = [i for i, t in enumerate(tiles) if not post.check_padding(t, pad)[0]]
+        if bad:
+            problems.append(f"padding: frames {bad} reach into the {pad} px margin")
     tile = entry.get("tileable")
     seam = ""
     if tile:
@@ -433,6 +432,8 @@ def do_asset(entry, preview):
     maps, clips, wh, _ = produce(entry, preview)
     problems, seam = check(entry, maps, clips, wh, preview)
     if problems:
+        if preview:  # previews are for diagnosis: write them anyway, still fail
+            write_outputs(entry, maps, clips, wh, preview)
         raise AssetError(f"{entry['key']}: " + "; ".join(problems))
     sizes = write_outputs(entry, maps, clips, wh, preview)
     mode = "PREVIEW" if preview else "OK"

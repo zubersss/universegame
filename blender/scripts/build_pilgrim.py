@@ -75,8 +75,9 @@ def _noise(nt, vec, scale, detail=4.0, lo=0.4, hi=0.6):
     return mr.outputs["Result"]
 
 
-def paint_material(name, paint, dirty, hazard=False, seams=True):
-    """Worn industrial paint: wear mottling, belly grime, scratches to bare metal, panel seams."""
+def paint_material(name, paint, dirty, hazard=False, seams=True, grime=True, scratches=True):
+    """Worn industrial paint: wear mottling, belly grime, scratches to bare metal, panel seams.
+    grime/scratches off for small parts (the grime ramp is in object-space metres)."""
     m = bpy.data.materials.new(name)
     m.use_nodes = True
     nt = m.node_tree
@@ -90,6 +91,8 @@ def paint_material(name, paint, dirty, hazard=False, seams=True):
 
     wear = _noise(nt, obj, 0.7, 6.0, 0.35, 0.75)
     col = _mix(nt, wear, lin(paint), lin(dirty))
+    if not grime:
+        return _finish_paint(nt, pr, sep, obj, col, hazard, seams, scratches, m)
 
     # Grime toward the belly (object z below 1.6 m), broken up by noise.
     gz = N.new("ShaderNodeMapRange")
@@ -102,7 +105,11 @@ def paint_material(name, paint, dirty, hazard=False, seams=True):
     g7 = N.new("ShaderNodeMath"); g7.operation = "MULTIPLY"; g7.inputs[1].default_value = 0.7
     L.new(gm.outputs[0], g7.inputs[0])
     col = _mix(nt, g7.outputs[0], col, lin((72, 62, 52)))
+    return _finish_paint(nt, pr, sep, obj, col, hazard, seams, scratches, m)
 
+
+def _finish_paint(nt, pr, sep, obj, col, hazard, seams, scratches, m):
+    N, L = nt.nodes, nt.links
     if hazard:
         # Yellow/black chevron band around the hull just aft of the cockpit (x 2.45..2.85 m).
         inb_lo = N.new("ShaderNodeMath"); inb_lo.operation = "GREATER_THAN"; inb_lo.inputs[1].default_value = 2.45
@@ -122,9 +129,10 @@ def paint_material(name, paint, dirty, hazard=False, seams=True):
         col = _mix(nt, inb.outputs[0], col, stripe)
 
     # Scratches / chipped paint: high-frequency noise exposes bare metal (also metallic).
-    sc = _noise(nt, obj, 14.0, 10.0, 0.66, 0.72)
-    col = _mix(nt, sc, col, lin((150, 150, 154)))
-    L.new(sc, pr.inputs["Metallic"])
+    if scratches:
+        sc = _noise(nt, obj, 14.0, 10.0, 0.66, 0.72)
+        col = _mix(nt, sc, col, lin((150, 150, 154)))
+        L.new(sc, pr.inputs["Metallic"])
 
     if seams:
         sx = _seam(nt, sep.outputs["X"], 1.15)

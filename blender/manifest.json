@@ -137,6 +137,34 @@
       "maps": ["color", "normal", "emission"],
       "samples": 32
     },
+    {
+      "key": "characters/surveyor/base",
+      "source": "sources/characters/surveyor.blend",
+      "build": "scripts/build_surveyor.py",
+      "collection": "surveyor",
+      "camera": "side",
+      "size": [256, 256],
+      "origin": [0, 0, 0],
+      "pivot": [0.5, 0.0390625],
+      "maps": ["color", "normal", "emission"],
+      "samples": 24,
+      "animations": {
+        "columns": 7, "fps": 12, "facing": "right",
+        "hitbox": {"x": 0.375, "y": 0.0390625, "w": 0.25, "h": 0.88},
+        "clips": [
+          {"name": "idle",  "frame_start": 1,  "length": 6, "loop": true},
+          {"name": "walk",  "frame_start": 11, "length": 8, "loop": true},
+          {"name": "run",   "frame_start": 23, "length": 8, "loop": true},
+          {"name": "jump",  "frame_start": 35, "length": 3, "loop": false},
+          {"name": "fall",  "frame_start": 42, "length": 2, "loop": true},
+          {"name": "land",  "frame_start": 48, "length": 3, "loop": false},
+          {"name": "dig",   "frame_start": 55, "length": 6, "loop": true},
+          {"name": "aim",   "frame_start": 65, "length": 2, "loop": true},
+          {"name": "hurt",  "frame_start": 71, "length": 2, "loop": false},
+          {"name": "death", "frame_start": 77, "length": 6, "loop": false}
+        ]
+      }
+    },
     {"key": "terrain/earth/soil",  "generator": "scripts/gen_terrain.py", "size": [1024, 1024], "maps": ["color", "normal"], "seed": 3001, "tileable": "xy", "tile_index": 46, "tile_size": 128},
     {"key": "terrain/earth/grass", "generator": "scripts/gen_terrain.py", "size": [1024, 1024], "maps": ["color", "normal"], "seed": 3001, "tileable": "xy", "tile_index": 46, "tile_size": 128},
     {"key": "terrain/earth/stone", "generator": "scripts/gen_terrain.py", "size": [1024, 1024], "maps": ["color", "normal"], "seed": 3003, "tileable": "xy", "tile_index": 46, "tile_size": 128},

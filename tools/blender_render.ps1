@@ -42,7 +42,10 @@ if ($Preview) { $pyArgs += '--preview' }
 $heavy = $false
 if (-not $Preview) {
     if ($chosen.Count -gt 1) { $heavy = $true }
-    foreach ($a in $chosen) { if ($a.size -and (($a.size | Measure-Object -Maximum).Maximum -gt 512)) { $heavy = $true } }
+    foreach ($a in $chosen) {
+        if ($a.size -and (($a.size | Measure-Object -Maximum).Maximum -gt 512)) { $heavy = $true }
+        if ($a.animations) { $heavy = $true }   # a frame sheet is a batch of renders
+    }
 }
 
 $lock = Join-Path $Root 'coordination/locks/heavy_blender.lock'
