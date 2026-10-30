@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { readFileSync, writeFileSync } from 'node:fs';
-import { bootToTitle, collectErrors, snap } from '../helpers';
+import { bootToTitle, collectErrors, idbGet, idbPut, snap } from '../helpers';
 
 // Save robustness through the real UI: corrupt latest record, storage denied,
 // backup export and import (valid and invalid files), and a save from an
@@ -17,40 +17,6 @@ const api = (page: Page, fn: string, ...args: unknown[]) =>
 async function until(page: Page, src: string, timeoutMs = 600_000): Promise<Record<string, any>> {
   await page.waitForFunction((s) => new Function('s', `return (${s});`)((window as any).__meridian.snapshot()), src, { timeout: timeoutMs, polling: 300 });
   return snap(page);
-}
-
-async function idbGet(page: Page, key: string): Promise<unknown> {
-  return page.evaluate(async (k) => {
-    const db: IDBDatabase = await new Promise((res, rej) => {
-      const r = indexedDB.open('meridian', 1);
-      r.onsuccess = () => res(r.result);
-      r.onerror = () => rej(r.error);
-    });
-    const v = await new Promise((res, rej) => {
-      const r = db.transaction('kv', 'readonly').objectStore('kv').get(k);
-      r.onsuccess = () => res(r.result);
-      r.onerror = () => rej(r.error);
-    });
-    db.close();
-    return v;
-  }, key);
-}
-
-async function idbPut(page: Page, key: string, value: unknown): Promise<void> {
-  await page.evaluate(async ([k, v]) => {
-    const db: IDBDatabase = await new Promise((res, rej) => {
-      const r = indexedDB.open('meridian', 1);
-      r.onsuccess = () => res(r.result);
-      r.onerror = () => rej(r.error);
-    });
-    await new Promise((res, rej) => {
-      const tx = db.transaction('kv', 'readwrite');
-      tx.objectStore('kv').put(v, k as string);
-      tx.oncomplete = res;
-      tx.onerror = rej;
-    });
-    db.close();
-  }, [key, value] as const);
 }
 
 async function pauseAndSave(page: Page): Promise<void> {

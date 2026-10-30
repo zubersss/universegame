@@ -79,3 +79,39 @@ export function quatAngle(a: number[], b: number[]): number {
   const d = Math.abs(a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3]);
   return 2 * Math.acos(Math.min(1, d));
 }
+
+/** Read one key of the game's IndexedDB store (as the save system wrote it). */
+export async function idbGet(page: Page, key: string): Promise<unknown> {
+  return page.evaluate(async (k) => {
+    const db: IDBDatabase = await new Promise((res, rej) => {
+      const r = indexedDB.open('meridian', 1);
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+    const v = await new Promise((res, rej) => {
+      const r = db.transaction('kv', 'readonly').objectStore('kv').get(k);
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+    db.close();
+    return v;
+  }, key);
+}
+
+/** Write one key of the game's IndexedDB store (e.g. a crafted save). */
+export async function idbPut(page: Page, key: string, value: unknown): Promise<void> {
+  await page.evaluate(async ([k, v]) => {
+    const db: IDBDatabase = await new Promise((res, rej) => {
+      const r = indexedDB.open('meridian', 1);
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+    await new Promise((res, rej) => {
+      const tx = db.transaction('kv', 'readwrite');
+      tx.objectStore('kv').put(v, k as string);
+      tx.oncomplete = res;
+      tx.onerror = rej;
+    });
+    db.close();
+  }, [key, value] as const);
+}

@@ -12,6 +12,8 @@ import { Raycaster, Vector3 } from 'three';
 import { GROUPS } from '../physics/Physics';
 import { frameStats, gpuEstimate } from './perf';
 import { playerTestHooks } from './playerHooks';
+import { BODIES, isBodyId } from '../world/bodies';
+import { safetyRadius } from '../ship/Cruise';
 
 export interface MeridianTestApi {
   game: Game;
@@ -41,6 +43,8 @@ export interface MeridianTestApi {
   photo(eye: [number, number, number] | null, target?: [number, number, number]): void;
   /** Persistence status (read-only). */
   saveState(): Record<string, unknown>;
+  /** Catalog geometry of a body (system frame, m) and its cruise safety radius; null for an unknown id. */
+  body(id: string): { center: [number, number, number]; radius: number; atmosphereHeight: number; safetyRadius: number } | null;
   /** Mission objects of the shown body (relay and sample positions in local coordinates). */
   missionTargets(): { id: string; kind: string; dir: [number, number, number] }[];
   /**
@@ -181,6 +185,11 @@ export function installTestHooks(game: Game, extras?: TestHookExtras): void {
         system: x.data?.system ?? null, body: x.data?.bodyId ?? null, relays: x.data?.expedition.relays ?? null,
       });
       return { available: st.available, failure: st.failure, latest: slot(st.latest), previous: slot(st.previous), legacy: st.legacy };
+    },
+    body(id) {
+      if (!isBodyId(id)) return null;
+      const d = BODIES[id];
+      return { center: [d.center[0], d.center[1], d.center[2]], radius: d.radius, atmosphereHeight: d.atmosphereHeight, safetyRadius: safetyRadius(d) };
     },
     missionTargets() {
       const b = game.body;

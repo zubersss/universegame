@@ -1,5 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
-import { bootToTitle, collectErrors, snap, stubPointerLock } from '../helpers';
+import { Vector3 } from 'three';
+import { bootToTitle, collectErrors, idbGet, idbPut, snap, stubPointerLock } from '../helpers';
+import { quatFromForwardUp } from '../../src/core/mathx';
+import { KEEP_OUT, SUN_HEAT } from '../../src/game/config';
 import { CRUISE_MIN_MAX_SPEED, cruiseMaxSpeed } from '../../src/world/scale';
 
 // Phase 6 gate: continuous travel Ilex → Vesper → Cairn → Ilex at production
@@ -216,5 +219,83 @@ test('Sol: Earth -> Moon hop', async ({ page }) => {
   await api(page, 'setRenderEvery', 1);
   await page.waitForTimeout(3000);
   await page.screenshot({ path: 'evidence/l7b-moon-landed.png', timeout: 180_000 });
+  expect(errors).toEqual([]);
+});
+
+type BodyGeo = { center: [number, number, number]; radius: number; atmosphereHeight: number; safetyRadius: number };
+
+/** A position `dist` (m) from a body's center along `dir` (system frame), with the local up and a unit tangent. */
+function placeNear(def: BodyGeo, dir: Vector3, dist: number): { sys: number[]; up: Vector3; tangent: Vector3 } {
+  const up = dir.clone().normalize();
+  const sys = new Vector3(...def.center).addScaledVector(up, dist);
+  const tangent = new Vector3(0, 0, 1).cross(up).normalize();
+  return { sys: sys.toArray(), up, tangent };
+}
+
+/** Write the latest save as a PILOTING record at `sys` and continue it from the title. */
+async function continueFrom(page: Page, base: Record<string, any>, ship: Record<string, unknown>, navTarget: string): Promise<Record<string, any>> {
+  await idbPut(page, 'save', { ...base, mode: 'PILOTING', bodyId: null, player: null, cruise: null, navTarget, ship: { ...base.ship, ...ship } });
+  await bootToTitle(page, '?preset=low&system=sol');
+  await api(page, 'setRenderEvery', 120);
+  await page.click('#btn-continue');
+  return until(page, 's.state === "playing" && s.mode === "PILOTING"', 600_000);
+}
+
+test('Sol: Sun heat recall, bypass marker and a giant keep-out wall', async ({ page }) => {
+  test.setTimeout(40 * 60 * 1000);
+  const errors = collectErrors(page);
+  await stubPointerLock(page);
+  await bootToTitle(page, '?preset=low&system=sol');
+  await api(page, 'setRenderEvery', 120);
+  await page.click('#btn-new');
+  await until(page, 's.state === "playing"', 600_000);
+  // A real Sol record to edit: save from the pause menu.
+  await page.keyboard.press('Escape');
+  await until(page, 's.state === "paused"', 30_000);
+  await page.click('#btn-save');
+  await page.waitForFunction(() => (window as any).__meridian.saveState().latest.valid, null, { timeout: 30_000 });
+  const base = (await idbGet(page, 'save')) as Record<string, any>;
+  expect(base.system).toBe('sol');
+
+  // Heat: a ship at rest at 1.9 R on the Earth side of the Sun is in the danger zone.
+  // The countdown starts afresh on load (no timer is saved) and ends in a recall
+  // (or an immediate one if the Sun's gravity pulls it inside the hard radius).
+  const sun = (await api(page, 'body', 'sun')) as BodyGeo;
+  const earth = (await api(page, 'body', 'earth')) as BodyGeo;
+  const toEarth = new Vector3(...earth.center).sub(new Vector3(...sun.center)).normalize();
+  const hot = placeNear(sun, toEarth, 1.9 * sun.radius);
+  const q = quatFromForwardUp(hot.tangent, hot.up);
+  let s = await continueFrom(page, base, { sys: hot.sys, vel: [0, 0, 0], quat: [q.x, q.y, q.z, q.w], throttle: 0 }, 'mars');
+  expect(['danger', 'recall']).toContain(s.heat.zone);
+  if (s.heat.zone === 'danger') {
+    expect(s.heat.remaining).toBeGreaterThan(SUN_HEAT.recallSeconds - 3);
+    await expect(page.locator('#warning')).toContainText('emergency recall');
+  }
+  s = await until(page, 's.counters.heatRecalls === 1', 600_000);
+  const fromSun = new Vector3(...s.shipSystem).distanceTo(new Vector3(...sun.center));
+  expect(fromSun).toBeGreaterThan(sun.safetyRadius);
+  expect(s.heat.zone).toBe('none');
+  // Mars is behind the Sun from here: the marker leads around it.
+  s = await until(page, 's.navBypass === "sun"', 120_000);
+  expect(s.navTarget).toBe('mars');
+
+  // Keep-out: thrusting at Jupiter from just outside its wall stops at the wall.
+  const jup = (await api(page, 'body', 'jupiter')) as BodyGeo;
+  const toSun = new Vector3(...sun.center).sub(new Vector3(...jup.center)).normalize();
+  const wall = jup.radius + jup.atmosphereHeight + KEEP_OUT.margin;
+  const near = placeNear(jup, toSun, wall + 3000);
+  const inward = near.up.clone().negate();
+  const qj = quatFromForwardUp(inward, near.tangent);
+  s = await continueFrom(page, base, { sys: near.sys, vel: inward.clone().multiplyScalar(300).toArray(), quat: [qj.x, qj.y, qj.z, qj.w], throttle: 0 }, 'jupiter');
+  const t0 = s.simTime;
+  await api(page, 'hold', 'KeyW', true);
+  s = await until(page, `s.simTime > ${t0 + 10}`, 600_000);
+  await api(page, 'hold', 'KeyW', false);
+  expect(s.keepOut.body).toBe('jupiter');
+  expect(s.keepOut.gap).toBeGreaterThan(-50);
+  expect(s.counters.keepOutSteps).toBeGreaterThan(0);
+  expect(new Vector3(...s.shipSystem).distanceTo(new Vector3(...jup.center))).toBeGreaterThan(wall - 50);
+  await expect(page.locator('#warning')).toContainText('Approach limit');
+
   expect(errors).toEqual([]);
 });
