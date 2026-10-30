@@ -28,6 +28,8 @@ namespace Meridian.UI
         public bool MainMenuOpen => mainPanel != null && mainPanel.activeSelf;
         public bool PauseOpen => pausePanel != null && pausePanel.activeSelf;
         public bool Blocking => MainMenuOpen || PauseOpen;
+        /// <summary>HUDs hide while the main menu or pause menu is open (U-031: nothing draws through the menu).</summary>
+        public static bool HudHidden => Instance != null && Instance.Blocking;
         public Button NewButton { get; private set; }
         public Button ContinueButton { get; private set; }
         public Button QuitButton { get; private set; }

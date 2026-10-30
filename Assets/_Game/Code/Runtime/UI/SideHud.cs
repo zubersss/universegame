@@ -40,6 +40,7 @@ namespace Meridian.UI
             numbers ??= new UiKit.NumberStrings(-2000, 4000);
             var theme = UiTheme.Active;
             var canvas = UiKit.Canvas(transform, "SideHudCanvas", 100);
+            hudCanvas = canvas;
             var root = canvas.transform;
             var tl = new Vector2(0f, 1f);
 
@@ -80,8 +81,12 @@ namespace Meridian.UI
             EscapeMarker.anchoredPosition = new Vector2(0f, (float)p.EscapeLineY / p.worldHeight * BarHeight);
         }
 
+        Canvas hudCanvas;
+
         void LateUpdate()
         {
+            bool hidden = MenuController.HudHidden;
+            if (hudCanvas != null && hudCanvas.enabled == hidden) hudCanvas.enabled = !hidden;
             var state = GameState.Instance;
             if (vitals == null && player != null) vitals = player.GetComponent<PlayerVitals>();
             if (vitals != null)

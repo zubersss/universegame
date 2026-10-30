@@ -61,15 +61,23 @@ namespace Meridian.Tests
             var actions = director.PlanetSide.player.actions;
             Assert.IsFalse(actions.FindActionMap(MeridianInput.OnFoot).enabled, "gameplay input off");
             Assert.IsFalse(menu.ContinueButton.interactable, "no save yet: Continue disabled");
+            // U-031: nothing of the HUD draws through the menu.
+            var hudCanvas = director.PlanetSide.sideHud.GetComponentInChildren<Canvas>(true);
+            yield return null;
+            Assert.IsFalse(hudCanvas.enabled, "side HUD hidden behind the main menu");
 
             menu.NewButton.onClick.Invoke();
             Assert.IsFalse(menu.MainMenuOpen);
             Assert.AreEqual(1f, Time.timeScale);
             Assert.IsTrue(actions.FindActionMap(MeridianInput.OnFoot).enabled, "gameplay input back");
+            yield return null;
+            Assert.IsTrue(hudCanvas.enabled, "side HUD back in play");
 
             menu.OpenPause();
             Assert.IsTrue(menu.PauseOpen);
             Assert.AreEqual(0f, Time.timeScale, "paused");
+            yield return null;
+            Assert.IsFalse(hudCanvas.enabled, "side HUD hidden behind the pause menu");
             menu.SaveButton.onClick.Invoke();
             Assert.IsTrue(SaveSystem.Instance.HasSave, "Save from the pause menu writes the slot");
             menu.ResumeButton.onClick.Invoke();

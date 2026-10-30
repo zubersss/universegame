@@ -28,6 +28,7 @@ namespace Meridian.Space
             tenths ??= new UiKit.NumberStrings(0, 999, "0.0", 10f);
             var theme = UiTheme.Active;
             var canvas = UiKit.Canvas(transform, "SpaceHudCanvas", 100);
+            hudCanvas = canvas;
             var root = canvas.transform;
             var tl = new Vector2(0f, 1f);
             UiKit.Panel(root, "Accent", tl, new Vector2(24f, -20f), new Vector2(560f, 2f), UiTheme.Accent(null));
@@ -47,8 +48,12 @@ namespace Meridian.Space
         static Text Value(Transform root, int column) =>
             UiKit.Text(root, "Value", new Vector2(0f, 1f), new Vector2(24f + column * 200f, -66f), new Vector2(180f, 34f), 28);
 
+        Canvas hudCanvas;
+
         void LateUpdate()
         {
+            bool hidden = MenuController.HudHidden;
+            if (hudCanvas != null && hudCanvas.enabled == hidden) hudCanvas.enabled = !hidden;
             if (ship == null) return;
             int s = Mathf.RoundToInt(ship.Velocity.magnitude);
             if (s != lastSpeed) { lastSpeed = s; Speed.text = numbers[s]; }

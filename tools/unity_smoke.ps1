@@ -1,9 +1,14 @@
 # Smoke-runs the built player (U-017): screenshots menu / Earth HUD / ship HUD / space, then checks
 # the player log for errors. Output: logs/smoke/*.png + coordination/reports/unity/smoke_<date>/. Owner: UNITY.
-# Usage: tools/unity_smoke.ps1 [-Version 0.1.0]
-param([string]$Version = '0.1.0')
+# Usage: tools/unity_smoke.ps1 [-Version 0.1.1]  (default: GameInfo.Version, the build unity_build.ps1 makes)
+param([string]$Version = '')
 . (Join-Path $PSScriptRoot 'unity_common.ps1')
 
+if (-not $Version) {
+    $info = Get-Content (Join-Path $RepoRoot 'Assets\_Game\Code\Runtime\GameInfo.cs') -Raw
+    if ($info -match 'Version = "([^"]+)"') { $Version = $Matches[1] } else { Write-Host 'SMOKE FAILED: no Version in GameInfo.cs'; exit 1 }
+}
+Write-Host "Smoke: build $Version"
 $exe = Join-Path $RepoRoot "Build\MERIDIAN_$Version\MERIDIAN.exe"
 if (-not (Test-Path $exe)) { Write-Host "SMOKE FAILED: no build at $exe (run tools/unity_build.ps1)"; exit 1 }
 $out = Join-Path $LogDir 'smoke'

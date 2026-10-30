@@ -40,7 +40,7 @@ namespace Meridian.Ship
 
         void LateUpdate()
         {
-            bool show = ship != null && (boarding == null || boarding.Aboard);
+            bool show = ship != null && (boarding == null || boarding.Aboard) && !MenuController.HudHidden;
             if (root.activeSelf != show) root.SetActive(show);
             if (!show) return;
             int v = Mathf.RoundToInt(ship.Body.linearVelocity.y);
