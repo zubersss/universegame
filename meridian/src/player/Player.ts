@@ -29,6 +29,7 @@ const _v = new Vector3();
 const _feet = new Vector3();
 const _n = new Vector3();
 const _rot = { x: 0, y: 0, z: 0, w: 1 };
+const _g = new Vector3();
 /** A camera stand-in for lookAt (cameras look down -Z, unlike other objects). */
 const _camObj = new PerspectiveCamera();
 
@@ -55,7 +56,8 @@ export class Player {
   /** Camera pitch (rad). */
   pitch = 0;
   readonly up = new Vector3(0, 1, 0);
-  private snapOn = true;
+  /** Current ground snapping distance (the controller starts with WALK.snap). */
+  private snapDist: number = WALK.snap;
   /** Seconds airborne (for jump/land sounds). */
   airTime = 0;
   justLanded = false;
@@ -65,6 +67,7 @@ export class Player {
   /** Third/first-person camera. */
   readonly view = new CharacterCamera();
   private readonly balls = new Map<number, RAPIER.Ball>();
+  private readonly sweepShape = playerShape();
 
 
   constructor(private readonly physics: Physics, center: Vector3, up: Vector3, heading: Vector3) {
@@ -126,6 +129,14 @@ export class Player {
     }
   }
 
+  /** Ground snapping distance for the character controller (0 = off). */
+  private setSnap(d: number): void {
+    if (d === this.snapDist) return;
+    if (d > 0) this.cc.enableSnapToGround(d);
+    else this.cc.disableSnapToGround();
+    this.snapDist = d;
+  }
+
   /** Mouse look: yaw about up, pitch clamped (radians). */
   look(yaw: number, pitch: number): void {
     if (yaw !== 0) {
@@ -138,17 +149,17 @@ export class Player {
 
   /**
    * Powered movement (abilities): move by velocity * dt through the character
-   * controller, without ground snapping or gravity; collisions slide and
-   * remove the blocked part of the velocity. Updates vel (horizontal), vVert
-   * and grounded like a walking step.
+   * controller, without gravity (the ability supplies any vertical motion)
+   * and, unless `snap` (m) is given, without ground snapping; collisions
+   * slide and remove the blocked part of the velocity. Updates vel
+   * (horizontal), vVert and grounded like a walking step. Walking re-enables
+   * its own snapping on its next step.
    */
-  moveFree(dt: number, velocity: Vector3, planetCenter: Vector3): void {
+  moveFree(dt: number, velocity: Vector3, planetCenter: Vector3, snap = 0): void {
     this.prevPos.copy(this.pos);
     this.realign(planetCenter);
-    if (this.snapOn) {
-      this.cc.disableSnapToGround();
-      this.snapOn = false;
-    }
+    // Optional ground snapping (running at speed over bumps); off for flight.
+    this.setSnap(snap);
     this.cc.setUp({ x: this.up.x, y: this.up.y, z: this.up.z });
     _desired.copy(velocity).multiplyScalar(dt);
     this.cc.computeColliderMovement(this.collider, { x: _desired.x, y: _desired.y, z: _desired.z }, RAPIER.QueryFilterFlags.EXCLUDE_SENSORS, GROUPS.player);
@@ -210,12 +221,7 @@ export class Player {
       return;
     }
     // Snap to ground only when not moving upward.
-    const wantSnap = this.vVert <= 0.1;
-    if (wantSnap !== this.snapOn) {
-      if (wantSnap) this.cc.enableSnapToGround(WALK.snap);
-      else this.cc.disableSnapToGround();
-      this.snapOn = wantSnap;
-    }
+    this.setSnap(this.vVert <= 0.1 ? WALK.snap : 0);
     // 5) Resolve translation with the character controller.
     this.cc.setUp({ x: this.up.x, y: this.up.y, z: this.up.z });
     _desired.copy(this.vel).addScaledVector(this.up, this.vVert).multiplyScalar(dt);
@@ -335,6 +341,34 @@ export class Player {
     dir.copy(this.view.view);
     const along = Math.max(0, _n.copy(eye).sub(this.view.position).dot(dir));
     origin.copy(this.view.position).addScaledVector(dir, along);
+  }
+
+  /**
+   * Free distance for the walker's capsule moved along a unit direction,
+   * starting `lift` metres above its position (clears small steps the
+   * controller climbs anyway); Infinity when clear for `dist`.
+   */
+  sweepCapsule(dir: Vector3, dist: number, lift: number): number {
+    _n.copy(this.pos).addScaledVector(this.up, lift);
+    const hit = this.physics.world.castShape(
+      { x: _n.x, y: _n.y, z: _n.z }, { x: this.quat.x, y: this.quat.y, z: this.quat.z, w: this.quat.w },
+      { x: dir.x, y: dir.y, z: dir.z }, this.sweepShape, 0, dist, true, undefined, GROUPS.queryWalk,
+    );
+    return hit ? hit.time_of_impact : Infinity;
+  }
+
+  /**
+   * Ground under a point (searched from `rise` metres above it down to
+   * `depth` below): its height above the walker's feet along up, and its
+   * normal; null when there is none in that span.
+   */
+  groundAt(point: Vector3, rise: number, depth: number): { h: number; normal: Vector3 } | null {
+    _n.copy(point).addScaledVector(this.up, rise);
+    const hit = this.physics.castRay(_n.x, _n.y, _n.z, -this.up.x, -this.up.y, -this.up.z, rise + depth, GROUPS.queryWalk);
+    if (!hit) return null;
+    const feet = this.feet(_v);
+    _n.addScaledVector(this.up, -hit.toi).sub(feet);
+    return { h: _n.dot(this.up), normal: _g.set(hit.nx, hit.ny, hit.nz) };
   }
 
   /** Walkable ground below a point (terrain, props, ship; never the walker itself). */
