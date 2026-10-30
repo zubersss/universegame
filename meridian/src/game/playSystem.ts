@@ -1,6 +1,6 @@
 import { Vector3 } from 'three';
 import { BODIES, BODY_IDS, SOL_M2_BODIES, SYSTEM_BODY_IDS, type BodyDef, type BodyId, type SystemId } from '../world/bodies';
-import { computeSites, tangentBasis } from '../world/sites';
+import { computeSites, tangentBasis, type MissionSites } from '../world/sites';
 import { START_BODY, SURFACE_READY } from './config';
 
 // The star system in play and the rules that follow from it: the ?system=
@@ -56,16 +56,25 @@ export function proxyBodies(ids: readonly BodyId[] = BODY_IDS): BodyId[] {
 }
 
 /**
- * The opening site on a body (its sites must be computable: a data body needs
- * ensureBodyData first): the landing clearing and a forward tangent toward the
- * Quiet survey relay, or on a First Light body toward its first route waypoint.
+ * The tangent frame at a body's landing site (its sites must be computable: a
+ * data body needs ensureBodyData first): up is the site normal, forward points
+ * toward the Quiet survey relay, or on a First Light body toward its first
+ * route waypoint, and right = forward x up. startSite and the photo test
+ * camera share it, so neither collapses where the relay sits on the site.
  */
-export function startSite(def: BodyDef): { dir: Vector3; height: number; forward: Vector3 } {
-  const sites = computeSites(def);
-  const n = new Vector3(...sites.landing.dir);
+export function siteFrame(def: BodyDef, sites: MissionSites = computeSites(def)): { up: Vector3; forward: Vector3; right: Vector3 } {
+  const up = new Vector3(...sites.landing.dir);
   const toward = new Vector3(...(def.system !== 'quiet' && sites.route.length ? sites.route[0].dir : sites.relay.dir));
-  const forward = toward.sub(n.clone().multiplyScalar(toward.dot(n)));
+  const forward = toward.sub(up.clone().multiplyScalar(toward.dot(up)));
   // Outside the Quiet survey the relay sits on the landing site: any tangent will do.
   if (forward.lengthSq() < 1e-12) forward.set(...tangentBasis(sites.landing.dir)[0]);
-  return { dir: n, height: sites.landing.height, forward: forward.normalize() };
+  forward.normalize();
+  return { up, forward, right: new Vector3().crossVectors(forward, up).normalize() };
+}
+
+/** The opening site on a body: the landing clearing, facing siteFrame's forward tangent. */
+export function startSite(def: BodyDef): { dir: Vector3; height: number; forward: Vector3 } {
+  const sites = computeSites(def);
+  const { up, forward } = siteFrame(def, sites);
+  return { dir: up, height: sites.landing.height, forward };
 }

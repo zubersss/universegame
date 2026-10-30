@@ -3,7 +3,7 @@ import { initPhysics } from '../physics/Physics';
 import { Menus } from '../ui/Menus';
 import { DEFAULT_SETTINGS, sanitizeSettings, type Settings } from './settings';
 import { KvStore } from '../save/db';
-import { SaveStore, exportJson, importJson, type LegacySave, type SaveData } from '../save/SaveSystem';
+import { SaveStore, exportJson, importJson, unloadableNote, type LegacySave, type SaveData } from '../save/SaveSystem';
 import { Game } from './Game';
 import type { Expedition } from './Expedition';
 import { playBodies, surfaceReady, systemFromQuery } from './playSystem';
@@ -206,11 +206,8 @@ export async function boot(): Promise<void> {
       menus.setContinueAvailable(true, `Last saved ${when(l.data.savedAt)} · ${summary(l.data)}`);
       menus.setPreviousAvailable(false);
     } else if (l.present) {
-      menus.setContinueAvailable(
-        false,
-        `The latest save could not be loaded (${l.error}). It is kept aside unchanged. ${p.data ? 'Load the previous save or start' : 'Start'} a new expedition.`,
-        true,
-      );
+      // What saving now does to it: kept aside, or (a save from another star system) replaced.
+      menus.setContinueAvailable(false, unloadableNote(saves), true);
       menus.setPreviousAvailable(!!p.data);
     } else {
       menus.setContinueAvailable(false, saves.failure ?? '');
