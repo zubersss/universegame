@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: common
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: common
+  m_GUID: 2c4d4d7494187df4f87e340b88461f4b
+  m_SerializeEntries:
+  - m_GUID: 0de857e7bde6a764aa98bd3e1940e098
+    m_Address: fx/dust/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1c868be6593f13c49b73137f5a8e3a9d
+    m_Address: characters/surveyor/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 225ad1c4a802a6f4ea4eb8a0d2980d6e
+    m_Address: fx/heat_shimmer/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8082048fcff2da7458b19ef021f2fbcf
+    m_Address: fx/dig_sparks/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8087ff34da55ffb4f85cd54c30b9cbbe
+    m_Address: ships/pilgrim/top
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d1767b1e6a0a5c24ebab1b8fab43931b
+    m_Address: ships/pilgrim/side
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e4b939a850055944ebffc13bdea29be2
+    m_Address: fx/thruster/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f114f31ae58332f4398d677146073051
+    m_Address: props/common/calibration
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f9e6619d1185c4d458c5f667bfd132c3
+    m_Address: fx/escape_band/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 5e678677f61a5c947b35d7db08518675, type: 2}
+    - {fileID: 11400000, guid: 81ab60808a634554b80ba308dd19f6ac, type: 2}

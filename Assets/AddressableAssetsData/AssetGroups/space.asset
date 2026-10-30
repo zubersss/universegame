@@ -1,0 +1,103 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: space
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: space
+  m_GUID: a46c1d73ef167f14abbca83f8d458cb1
+  m_SerializeEntries:
+  - m_GUID: 3a9529481300d854f9fef32cc94c67c3
+    m_Address: backgrounds/space/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 493d9293daef98e49ab7612ba3345a9c
+    m_Address: planets/earth/surface
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4cf09f904c6da4c419d963f2cfb5d3bb
+    m_Address: planets/sun/surface
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 725f72da42ae26748a0deb679457c002
+    m_Address: planets/jupiter/surface
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9441d7f69961df24aa5f3fcd3e75ae53
+    m_Address: backgrounds/space/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 98aca7176e0fc8845ab9847dbdd541f3
+    m_Address: planets/earth/glow
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a04f02ab80b32814baad5c647f2131cc
+    m_Address: planets/mercury/surface
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a888c05e9e0f51d4a8522fca32281a53
+    m_Address: backgrounds/space/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a94df06f3e11bc644a42d1cad1c7c85a
+    m_Address: planets/saturn/surface
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b4c9fc15726a3014babccabe7f5d35ab
+    m_Address: planets/venus/surface
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b7773c867c9b25a4a9795769eb7e844a
+    m_Address: planets/mars/surface
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d2b837b1eb5cbfc43ac95464b3025eca
+    m_Address: planets/earth/clouds
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e1ad9d6409069ae4ebde862e70dc2d94
+    m_Address: planets/uranus/surface
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e2d667a789f571f418ef3ad50835a133
+    m_Address: planets/mars/glow
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f28ca8f147dd3ef4386dc6a912a1091f
+    m_Address: planets/sun/glow
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f83db585a8e54bf478dea34d9ea199c6
+    m_Address: planets/neptune/surface
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 8410c866e3065ba4eb3d8eca7c85c68b, type: 2}
+    - {fileID: 11400000, guid: 9d0ddbe41705fd44b9c14d29d11c32ce, type: 2}
