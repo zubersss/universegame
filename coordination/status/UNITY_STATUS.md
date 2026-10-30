@@ -1,7 +1,10 @@
 # UNITY STATUS
-Updated: 2026-10-30 16:10 · Session: 1
+Updated: 2026-10-30 16:45 · Session: 1
 ## Current task
-U-024 — next (M2 queue: U-024…U-027, U-029, U-030).
+U-024 PlanetSide parallax — code complete, committed as WIP (92bd0d7); hand-off check interrupted.
+- PlanetBackdrop (Runtime/Planet/) on the side camera + SideParallax shader: backgrounds/<planet>/layer0..2 as 3 camera quads (3 draw calls), horizontal factors 0.06 / 0.22 / 0.45 (layer0 slowest), sheets repeat in x (tileable, Repeat wrap asserted); vertically framed on the camera so each layer's ground base sits just under the player's feet; haze toward a per-planet sky color (camera background); fades out 4–10 m underground. World wrap is modulo on tile columns (no camera jump), so the only seam is the sheet repeat.
+- Evidence so far: EditMode 116/116 (twice); BackdropTests 2/2 (Earth and Mars each load 3 layers + sky; layers wrap; factor order); logs/capture_backdrop_{earth,mars}_{a,b}.png (12 m pan: layers shift at different rates). BackdropTests ran before the last layout tweak (shader framing + capture height); full PlayMode not yet re-run.
+- Pending: full PlayMode + profile (draw calls ≤ +3) + surveyor preview for B-023. The batch was stopped by Claude Code for low system memory (not a test failure) at 16:23 during PlayMode; my stale heavy_unity.lock removed. Re-run when memory allows, copy captures to reports/unity, then mark Ready.
 ## Last completed
 U-018 Pilgrim gear — 6aea64d — ShipLegsView loads ships/pilgrim/side (gear retracted) and side_legs (skids deployed, D-025) and swaps on SideShip.LegsDeployed (≤ 10 m above ground); emissive material from the registry for each. PlayMode: descending through 10 m shows the legs, climbing back shows them retracted; both sheets 1536×512 with pivots within 1 px; hull drawn at the same place (±1 px, sprite space). ShipSideTests 7/7; full run 35/35 own + LeadQA 2/2 (LEAD's L-010 M1LoopTests passes). Pilgrim.prefab now uses ShipLegsView. Surveyor v2 metas committed (D-016).
 U-017 M1 integration + build — 72db6b1 — M1IntegrationTests (real physics, no teleports): Earth dig → board → launch burn from rest (exactly 17 fuel) → Escape Line → top-down autopilot to Mars → entry → powered descent → touchdown 2.05 m/s in 22 s (no hull damage) → exit → Mars dig → save → fresh boot → load: Mars, fuel, hull, both planets' diffs and the player position identical. Passed twice (Run1 + Run2, identical numbers) with clean consoles; PlayMode 35/35 (+3 tool skips), EditMode 116/116, LeadQA 1/1. Build/MERIDIAN_0.1.0/MERIDIAN.exe (201 MB dev build, bundleVersion 0.1.0). tools/unity_smoke.ps1 ran the build: exit 0, 0 error lines in the player log, 4 screenshots in coordination/reports/unity/smoke_2026-10-30/ (menu, Earth HUD, ship HUD, top-down HUD). The first smoke caught a U-015 bug the tests couldn't: large text (menu title, ship V/S + T/W values, top HUD values) was silently dropped (JetBrains Mono line height > box, vertical truncation); fixed in UiKit, rebuilt, re-smoked: all visible. Perf report green (perf_2026-10-30.md, U-028 run). ShipBoarding.TryExit now steps out onto the actual ground beside the hull. Ready for LEAD's M1 QA (L-010) and the user playtest.
@@ -22,7 +25,7 @@ U-009 Player controller — 089657b — EditMode 75/75, PlayMode 13/13 (+2 skips
 U-007 seam fix — 562f0ff — capture at a fractional camera position showed thin lines between tile rows (bilinear sampling read the neighbor sheet cell). Fix: importer slices terrain cells 1 texel inset (126 px), each Tile scales back to 1 m. Lines gone; streaming unchanged (avg 0.30 ms, p99 0.92 ms, 0/400 frames over 2 ms, worst 2.08 ms, D-019 load "none"). A first try with runtime Sprite.Create sprites caused 100–186 ms hitches and was replaced.
 U-008 Dig and place — f15f617. U-006 Lit preview — 5a75d90.
 ## Next up
-U-024, U-025, U-026, U-027
+U-024 hand-off check, U-025, U-026, U-027
 ## Ready for review
 U-012 (5fecaeb), U-023 (d692fdb + e2ca48d), U-013 (e047727), U-014 (a289721), U-015 (458709a), U-020 (d455251), U-028 (58b1375), U-017 (72db6b1), U-018 (6aea64d)
 ## Handoffs
