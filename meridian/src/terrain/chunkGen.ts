@@ -96,7 +96,7 @@ export function levelSpacing(def: BodyDef, level: number): number {
 const info: SurfaceInfo = newSurfaceInfo();
 
 /** Normal from the continuous surface around `dir` using a canonical tangent frame. */
-function surfaceNormal(gen: SurfaceGenerator, dir: V3, eps: number, out: number[]): void {
+export function surfaceNormal(gen: SurfaceGenerator, dir: V3, eps: number, out: number[]): void {
   const R = gen.R;
   const [t1, t2] = tangentBasis(dir);
   const k = eps / R;

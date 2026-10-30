@@ -34,6 +34,14 @@ export class TerrainCollision {
   private readonly chunkSize: number;
   /** Max-level keys around the focus (must be present to walk/land). */
   focusKeys: string[] = [];
+  /**
+   * Extra radius [m] of max-level tiles kept around the focus near the ground,
+   * after the 3x3 block and the path corridor (e.g. an on-foot blink range so
+   * targets are loaded before they are chosen); 0 keeps just the block. Up to
+   * ~150 m fits the collider budget with room for the corridor.
+   */
+  reach = 0;
+  private reachCache: { key: string; keys: string[] } = { key: '', keys: [] };
 
   constructor(
     private readonly physics: Physics,
@@ -95,13 +103,15 @@ export class TerrainCollision {
         }
       }
     }
-    // Corridor along the predicted path: stopping distance plus margin.
+    // Corridor along the predicted path (charter: speed x 2 s + braking
+    // distance + 50 m ahead, and never less than the stop + 250 m margin).
     this.pathSamples = [];
     const speed = vel.length();
     if (speed > 2) {
       const stop = (speed * speed) / (2 * decel);
-      if (clearance < stop + 250) {
-        const len = Math.min(stop + 250, 4000);
+      const ahead = Math.max(stop + 250, speed * 2 + stop + 50);
+      if (clearance < ahead) {
+        const len = Math.min(ahead, 4000);
         const stepLen = this.chunkSize * 0.5;
         for (let s = stepLen; s <= len; s += stepLen) {
           _p.copy(focusPlanet).addScaledVector(vel, s / speed);
@@ -112,6 +122,7 @@ export class TerrainCollision {
         }
       }
     }
+    if (near && this.reach > 0) for (const k of this.reachKeys(dir, basis)) add(k);
     this.wanted = keys.slice(0, BUDGETS.maxTerrainColliders);
     const reqs: ChunkRequest[] = [];
     this.wanted.forEach((k, i) => {
@@ -120,6 +131,43 @@ export class TerrainCollision {
       reqs.push({ key: k, bodyId: this.def.id, face, level, x, y, priority: i });
     });
     return reqs;
+  }
+
+  /**
+   * Tiles under the reach disc, nearest first: rings a half tile apart out to
+   * half a tile beyond the reach, samples a quarter tile apart, so tile
+   * corners at the edge of the range are not missed. Cached per focus tile.
+   */
+  private reachKeys(dir: V3, basis: [V3, V3]): string[] {
+    const cacheKey = `${this.keyForDir(dir[0], dir[1], dir[2])}:${this.reach}`;
+    if (cacheKey === this.reachCache.key) return this.reachCache.keys;
+    const keys: string[] = [];
+    const seen = new Set<string>();
+    const R = this.def.radius;
+    const s = this.chunkSize * 0.5;
+    const outer = this.reach + s;
+    for (let i = 1; ; i++) {
+      const rr = Math.min(i * s, outer);
+      const n = Math.max(8, Math.ceil((2 * Math.PI * rr) / (s * 0.5)));
+      const k = rr / R;
+      for (let j = 0; j < n; j++) {
+        const a = (2 * Math.PI * j) / n;
+        const c = Math.cos(a) * k;
+        const sn = Math.sin(a) * k;
+        const key = this.keyForDir(
+          dir[0] + c * basis[0][0] + sn * basis[1][0],
+          dir[1] + c * basis[0][1] + sn * basis[1][1],
+          dir[2] + c * basis[0][2] + sn * basis[1][2],
+        );
+        if (!seen.has(key)) {
+          seen.add(key);
+          keys.push(key);
+        }
+      }
+      if (rr >= outer) break;
+    }
+    this.reachCache = { key: cacheKey, keys };
+    return keys;
   }
 
   /** Install/remove colliders within the per-frame budget. */
