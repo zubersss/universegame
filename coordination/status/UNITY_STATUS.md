@@ -1,8 +1,9 @@
 # UNITY STATUS
-Updated: 2026-10-30 14:35 · Session: 1
+Updated: 2026-10-30 14:45 · Session: 1
 ## Current task
-U-015 HUD and menus v1 — next; then U-020, U-017.
+U-020 Terrain variants — next; then U-017 (M1 integration + build), U-024…U-027.
 ## Last completed
+U-015 HUD and menus v1 — 458709a — EditMode 111/111, PlayMode 33/33 (+3 tool skips), LeadQA 1/1. Main menu on boot (New, Continue only when a save exists, Quit) and Esc pause (Resume, Save, Main Menu); both stop time and switch off the gameplay input maps (also maps that load later behind the menu). Batch runs skip the boot menu (tests/tools unaffected); a test forces it on. Side HUD (PlanetSide): health, O2 placeholder (full until the Envirosuit, M3), ship fuel, altitude bar with the Escape Line marker and a you-marker, planet accent tint. Ship block while aboard: V/S, T/W, thrust < g warning (the altitude bar moved from ShipHud to SideHud). Top HUD restyled: speed, fuel, well pull + body name. Font: JetBrains Mono Regular/Bold (OFL 1.1, official repo) with the OFL text beside it, credited in docs/credits/unity.md; the in-world ESCAPE label uses it too. All readouts use precomputed strings (no per-update allocation). Visual check pending: overlay canvases aren't in my camera captures; needs an Editor look (or a build screenshot in U-017).
 U-014 BudgetGate v1 — a289721 — BudgetMonitor in Core (300-frame rings, no per-frame allocation; ProfilerRecorders for draw calls, memory, textures, audio). BudgetGateTests flies Earth (idle + 200 m streaming) → launch → Space → Mars entry → Mars. tools/unity_profile.ps1 ran it with graphics (Intel UHD, 1920×1080 renders): all §11.1 rows green → coordination/reports/unity/perf_2026-10-30.md. Frame avg 5.1 / 1.8 / 3.5 ms (Earth / Space / Mars), p99 7.8 / 3.1 / 5.3; draw calls 8 / 9 / 4; lights 1; particles 0; GC 0 B; Editor-process memory 563–649 MB, textures 322–342 MB, audio 3 MB; streaming p99 0.90 ms, 0/400 over 2 ms; launch 1.05 s; Mars load/entry 1.11 s; textures/atlases/audio import rules all on-spec. Headless PlayMode runs the same gate (draw-call rows skipped). Note: the first rendered frames of a scene stall once (Earth 800 ms, Mars 215 ms: shader warm-up); outside p99, but a real first-frame hitch → proposal P-17.
 U-013 Save/load — e047727 — one batched check (D-026): EditMode 108/108, PlayMode 28/28 (+3 tool skips), LeadQA 1/1. Slot folder %USERPROFILE%/AppData/LocalLow/Zubers/MERIDIAN/saves/slot0/ (Application.persistentDataPath; D-011): state.json (version 1; player, ship, cargo, story, catalogue, bases, timers) + terrain_<planet>.bin per planet with edits. Atomic writes (tmp + replace). 3 rotating backups in slot0/backups/1..3 (5 saves → current = 5th, backups = 4th/3rd/2nd, no 4th). Migrations on load (v0 → v1); newer versions refused. Autosave after every launch/entry (TransitionDirector.Completed) and every 5 min. PlayMode: dig 2 + place 1, hull 73 / fuel 41.5 / cargo 12 / clock 12345 → save → dig another, wreck state → load → identical state, same diffs, post-save dig undone, terrain drawn from the loaded diffs, player back at its position. Tests write to a temp root (SaveSystem.RootOverride), never the real saves.
 U-023 HeavyJobLock fairness — d692fdb — want_unity.lock while waiting, deleted on acquire; yields for 2 min after a release when another role's want file (< 30 min) exists; refuses below 1.5 GB free RAM and prints the number; 20-min job cap (stops Unity, exit 124); tools/unity_lock_selftest.ps1 11/11 against a temp lock folder. Follow-up fix: process handle cached so exit codes survive the watchdog wait.
@@ -17,9 +18,9 @@ U-009 Player controller — 089657b — EditMode 75/75, PlayMode 13/13 (+2 skips
 U-007 seam fix — 562f0ff — capture at a fractional camera position showed thin lines between tile rows (bilinear sampling read the neighbor sheet cell). Fix: importer slices terrain cells 1 texel inset (126 px), each Tile scales back to 1 m. Lines gone; streaming unchanged (avg 0.30 ms, p99 0.92 ms, 0/400 frames over 2 ms, worst 2.08 ms, D-019 load "none"). A first try with runtime Sprite.Create sprites caused 100–186 ms hitches and was replaced.
 U-008 Dig and place — f15f617. U-006 Lit preview — 5a75d90.
 ## Next up
-U-015, U-020, U-017
+U-020, U-017, U-024
 ## Ready for review
-U-012 (5fecaeb), U-023 (d692fdb + e2ca48d), U-013 (e047727), U-014 (a289721)
+U-012 (5fecaeb), U-023 (d692fdb + e2ca48d), U-013 (e047727), U-014 (a289721), U-015 (458709a)
 ## Handoffs
 → BLENDER: terrain sheets are sampled 1 texel inside each 128 px cell (the outer texel ring of every cell is never shown). Keep nothing important in that ring.
 → BLENDER: keys are always 3 segments; single-variant assets use `base`. Character sheets at 256 px with 4 px gutters fit 2048 only up to 7 columns.
