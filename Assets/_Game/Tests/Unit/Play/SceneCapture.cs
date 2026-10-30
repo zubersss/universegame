@@ -60,6 +60,43 @@ namespace Meridian.Tests
             yield return Save(cam, name);
         }
 
+        /// <summary>U-024 evidence: Earth and Mars backdrops, each before and after a 12 m pan.</summary>
+        [UnityTest]
+        public IEnumerator CaptureBackdrop()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
+            foreach (var planet in new[] { Meridian.Planets.PlanetId.Earth, Meridian.Planets.PlanetId.Mars })
+            {
+                if (director.PlanetSide.Config.id != planet)
+                    yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(planet));
+                var side = director.PlanetSide;
+                var cam = side.sideCamera;
+                cam.GetComponent<Meridian.Player.CameraFollow>().enabled = false;
+                float until = Time.realtimeSinceStartup + 10f;
+                while ((side.backdrop.LayersLoaded < 3 || !side.terrain.IsSettled) && Time.realtimeSinceStartup < until) yield return null;
+                var start = cam.transform.position;
+                // Where a player sees it: a few metres above the local surface.
+                float surface = side.terrain.Generator.SurfaceHeight(side.terrain.WrapX(Mathf.FloorToInt(start.x)));
+                cam.transform.position = new Vector3(start.x, surface + 6f, start.z);
+                for (int i = 0; i < 5; i++) yield return null;
+                string p = planet.ToString().ToLowerInvariant();
+                yield return Save(cam, $"{name}_{p}_a");
+                cam.transform.position += new Vector3(12f, 0f, 0f);
+                for (int i = 0; i < 5; i++) yield return null;
+                yield return Save(cam, $"{name}_{p}_b");
+            }
+        }
+
         static IEnumerator Save(Camera cam, string name)
         {
             var rt = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);

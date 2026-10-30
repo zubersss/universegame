@@ -1,12 +1,12 @@
 # Captures the side view on Earth at 1920x1080 to logs/capture_<name>.png. Owner: UNITY.
-# Usage: tools/unity_capture.ps1 [-Name earth_surface] [-Test CaptureEarthSurface|CaptureSpace]
-param([string]$Name = 'earth_surface', [ValidateSet('CaptureEarthSurface', 'CaptureSpace')][string]$Test = 'CaptureEarthSurface')
+# Usage: tools/unity_capture.ps1 [-Name earth_surface] [-Test CaptureEarthSurface|CaptureSpace|CaptureBackdrop]
+param([string]$Name = 'earth_surface', [ValidateSet('CaptureEarthSurface', 'CaptureSpace', 'CaptureBackdrop')][string]$Test = 'CaptureEarthSurface')
 . (Join-Path $PSScriptRoot 'unity_common.ps1')
 
 $stamp = Get-Date -Format 'yyyyMMdd_HHmmss'
 $xml = Join-Path $LogDir "capture_$stamp.xml"
 $png = Join-Path $LogDir "capture_$Name.png"
-Remove-Item $png -Force -ErrorAction SilentlyContinue
+Get-ChildItem $LogDir -Filter "capture_$Name*.png" | Remove-Item -Force -ErrorAction SilentlyContinue
 
 try { Enter-HeavyJobLock "unity_capture $Name" } catch { Write-Host "BLOCKED: $_"; exit 2 }
 try {
@@ -20,7 +20,7 @@ try {
 }
 
 Write-Host "Log: $($r.Log)"
-if ((Test-Path $xml) -and (Test-Path $png) -and ([xml](Get-Content $xml -Raw)).'test-run'.passed -eq '1') {
+if ((Test-Path $xml) -and (@(Get-ChildItem $LogDir -Filter "capture_$Name*.png").Count -gt 0) -and ([xml](Get-Content $xml -Raw)).'test-run'.passed -eq '1') {
     Write-Host "CAPTURE OK: $png"; exit 0
 }
 Write-Host 'CAPTURE FAILED'

@@ -184,6 +184,11 @@ namespace Meridian.EditorTools
             sideHud.ship = sideComp.ship;
             sideHud.boarding = boarding;
             sideComp.sideHud = sideHud;
+            var planetBackdrop = sideComp.sideCamera.gameObject.AddComponent<Meridian.Planet.PlanetBackdrop>();
+            planetBackdrop.view = sideComp.sideCamera;
+            planetBackdrop.terrain = sideComp.terrain;
+            planetBackdrop.layerMaterial = EnsureMaterial("Assets/_Game/Settings/Materials/SideParallax.mat", "MERIDIAN/SideParallax");
+            sideComp.backdrop = planetBackdrop;
 
             AddGlobalLight(sideRoot.transform);
             EditorSceneManager.SaveScene(side, PlanetSidePath);
