@@ -193,6 +193,26 @@ describe('powers driven through the ability controller (charter K controls)', ()
   });
 });
 
+describe('take-off away from the origin', () => {
+  it('starts flight with the walker\'s own velocity, wherever the walker is (no scratch-vector aliasing)', () => {
+    // Floating origin: the walker can be hundreds of metres from (0, 0, 0).
+    const at = new Vector3(300, FOOT_OFFSET + WALK.skin + 0.01, -250);
+    const r = rig('earth', 'skyborne-flight', 9.81, { at });
+    for (let i = 0; i < 10; i++) r.step();
+    r.heldKeys.add('Space');
+    r.step({ jump: true });
+    let first: Vector3 | null = null;
+    for (let i = 0; i < 60 && !first; i++) {
+      r.step();
+      if (r.ctl.state === 'flight') first = r.player.vel.clone();
+    }
+    expect(first).not.toBeNull();
+    // Horizontally at rest (it was standing), not flung along its position vector.
+    expect(first!.length()).toBeLessThan(1);
+    r.player.dispose();
+  });
+});
+
 describe('save and reload during a power (LEAD M2 plan C)', () => {
   it('a reload mid-flight hovers where it was saved, never falls, and lands only by descending', () => {
     const r = rig('earth', 'skyborne-flight', 9.81);

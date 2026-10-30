@@ -62,6 +62,9 @@ const _n = new Vector3();
 
 const held = (w: PowerWorld, ...codes: string[]) => codes.some((c) => w.held(c));
 
+/** Distances probed for loaded collision along a flight path (m): boost needs about 430 m loaded. */
+const LOAD_PROBES = [0, 30, 60, 120, 240, 480, 960];
+
 /** Height of the feet above the ground below (m), null beyond `reach` or where nothing is loaded. */
 function heightAboveGround(player: Player, reach: number): number | null {
   const g = player.groundAt(player.feet(_feet), 0.5, reach);
@@ -75,7 +78,8 @@ export class FlightPower implements Power {
   readonly flight: Flight;
   private hold = 0;
   refusal: string | null = null;
-  private sense: FlightSense = { up: new Vector3(), heading: new Vector3(), height: null, grounded: false, ready: true };
+  private sense: FlightSense = { up: new Vector3(), heading: new Vector3(), height: null, grounded: false, loaded: Infinity };
+  private readonly v0 = new Vector3();
 
   constructor(readonly p: FlightParams) {
     this.flight = new Flight(p);
@@ -94,19 +98,28 @@ export class FlightPower implements Power {
     s.heading.copy(pl.heading);
     s.height = heightAboveGround(pl, this.p.ceiling + 600);
     s.grounded = pl.grounded;
-    // Collision loaded along the path ahead (charter J: speed x 2 s + braking + 50 m).
-    const v = this.flight.vel.length();
-    const ahead = v * 2 + (v * v) / (2 * this.p.brake) + 50;
-    _dir.copy(this.flight.vel);
-    if (_dir.lengthSq() > 1e-6) _dir.normalize();
-    s.ready = w.ready(_p.copy(pl.pos).addScaledVector(_dir, Math.min(ahead, 1500)));
+    // How far along the path collision is loaded (charter J): probe outward
+    // until a tile is missing. The game loads speed x 2 s + braking + 50 m
+    // ahead; flight only needs its stopping distance inside what is loaded.
+    _dir.copy(this.flight.vel.lengthSq() > 1 ? this.flight.vel : this.flight.course).normalize();
+    s.loaded = Infinity;
+    let prev = 0;
+    for (const d of LOAD_PROBES) {
+      if (!w.ready(_p.copy(pl.pos).addScaledVector(_dir, d))) {
+        s.loaded = prev;
+        break;
+      }
+      prev = d;
+    }
     return s;
   }
 
   start(w: PowerWorld): void {
     const pl = w.player;
     this.hold = 0;
-    this.flight.start(_p.copy(pl.vel).addScaledVector(pl.up, pl.vVert), this.fill(w));
+    // The sense first: fill() reuses the module scratch vectors.
+    const sense = this.fill(w);
+    this.flight.start(this.v0.copy(pl.vel).addScaledVector(pl.up, pl.vVert), sense);
   }
 
   resume(w: PowerWorld): void {

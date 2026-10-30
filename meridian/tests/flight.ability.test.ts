@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { Vector3 } from 'three';
-import { Flight, FLIGHT_TAKEOFF_CLIMB, FLIGHT_UNREADY_SPEED, type FlightInput, type FlightSense } from '../src/abilities/flight';
+import { Flight, FLIGHT_LOAD_MARGIN, FLIGHT_TAKEOFF_CLIMB, FLIGHT_UNREADY_SPEED, type FlightInput, type FlightSense } from '../src/abilities/flight';
 import { ABILITIES } from '../src/abilities/catalog';
 import type { FlightParams } from '../src/abilities/types';
 import { initPhysics, Physics, RAPIER, GROUPS } from '../src/physics/Physics';
@@ -11,7 +11,7 @@ const P = (ABILITIES['skyborne-flight'] as { params: FlightParams }).params;
 const UP = new Vector3(0, 1, 0);
 const FWD = new Vector3(0, 0, -1);
 const NONE: FlightInput = { climb: false, descend: false, faster: false, slower: false, boost: false, brake: false };
-const sense = (over: Partial<FlightSense> = {}): FlightSense => ({ up: UP, heading: FWD, height: 50, grounded: false, ready: true, ...over });
+const sense = (over: Partial<FlightSense> = {}): FlightSense => ({ up: UP, heading: FWD, height: 50, grounded: false, loaded: Infinity, ...over });
 
 function run(f: Flight, seconds: number, inp: Partial<FlightInput>, s: Partial<FlightSense> = {}): 'flying' | 'landed' {
   let r: 'flying' | 'landed' = 'flying';
@@ -95,10 +95,35 @@ describe('flight primitive (Skyborne Flight tunables)', () => {
     f.start(new Vector3(), sense());
     run(f, 3, { climb: true }, { height: P.ceiling + 60 });
     expect(f.vel.y).toBeLessThan(-1);
+    // Nothing loaded ahead: limited to the unready speed, never stalled.
     const g = new Flight(P);
     g.start(new Vector3(), sense());
-    run(g, 8, { faster: true, boost: true }, { ready: false });
-    expect(g.speed).toBeLessThanOrEqual(FLIGHT_UNREADY_SPEED);
+    run(g, 8, { faster: true, boost: true }, { loaded: 0 });
+    expect(g.vel.length()).toBeLessThanOrEqual(FLIGHT_UNREADY_SPEED + 1e-6);
+    expect(g.vel.length()).toBeGreaterThan(FLIGHT_UNREADY_SPEED - 1);
+  });
+
+  it('flies no faster than it can stop inside the loaded collision, and resumes the chosen speed when loading catches up', () => {
+    const f = new Flight(P);
+    f.start(new Vector3(), sense());
+    run(f, 10, { faster: true, boost: true });
+    expect(f.vel.length()).toBeGreaterThan(P.boost - 1);
+    // Loading lags: 300 m loaded ahead. The speed eases down (at most the brake
+    // rate per step, no snap to the unready speed) to what stops inside it.
+    const vmax = Math.sqrt(2 * P.brake * (300 - FLIGHT_LOAD_MARGIN));
+    let prev = f.vel.length();
+    for (let i = 0; i < 240; i++) {
+      f.step(SIM_DT, { ...NONE, boost: true }, sense({ loaded: 300 }));
+      const v = f.vel.length();
+      expect(prev - v).toBeLessThanOrEqual(P.brake * SIM_DT + 1e-6);
+      prev = v;
+    }
+    expect(f.vel.length()).toBeCloseTo(vmax, 1);
+    expect(f.limit).toBeCloseTo(vmax, 6);
+    // The chosen speed is kept: once loading catches up, boost speed returns without holding W.
+    expect(f.speed).toBeCloseTo(P.boost, 6);
+    run(f, 8, { boost: true });
+    expect(f.vel.length()).toBeGreaterThan(P.boost - 1);
   });
 
   it('lands only near the ground, slowly and not climbing: never in mid-air', () => {

@@ -31,14 +31,20 @@ export interface FlightSense {
   height: number | null;
   /** Whether the character controller reports ground contact. */
   grounded: boolean;
-  /** Collision is loaded along the path ahead (charter J readiness); false limits the speed. */
-  ready: boolean;
+  /**
+   * How far along the path collision is loaded (m; Infinity: as far as was
+   * probed). Charter J readiness: never faster than what can brake to a stop
+   * inside it, and never slower than FLIGHT_UNREADY_SPEED (limited, not stalled).
+   */
+  loaded: number;
 }
 
 export type FlightResult = 'flying' | 'landed';
 
 /** Speed allowed while collision ahead is not loaded (m/s). */
 export const FLIGHT_UNREADY_SPEED = 25;
+/** Distance kept between a stop and the end of loaded collision (m). */
+export const FLIGHT_LOAD_MARGIN = 30;
 /** Upward speed at take-off (m/s). */
 export const FLIGHT_TAKEOFF_CLIMB = 6;
 
@@ -56,6 +62,8 @@ export class Flight {
   readonly vel = new Vector3();
   /** Seconds since take-off (landing is ignored briefly after take-off). */
   time = 0;
+  /** Speed allowed by the loaded collision ahead this step (m/s; Infinity: no limit). */
+  limit = Infinity;
 
   constructor(readonly p: FlightParams) {}
 
@@ -111,14 +119,17 @@ export class Flight {
       else if (this.speed > cap) this.speed = Math.max(cap, this.speed - p.accel * dt);
       this.speed = Math.max(0, this.speed);
     }
-    if (!s.ready) this.speed = Math.min(this.speed, FLIGHT_UNREADY_SPEED);
+    // Readiness governs the speed flown, not the chosen setpoint: when loading
+    // catches up the flier returns to the speed the player chose.
+    this.limit = Number.isFinite(s.loaded) ? Math.max(FLIGHT_UNREADY_SPEED, Math.sqrt(2 * p.brake * Math.max(0, s.loaded - FLIGHT_LOAD_MARGIN))) : Infinity;
+    const forward = Math.min(this.speed, this.limit);
     // Vertical target: climb / descend / hold (hover), braked by X, capped near the ceiling.
     let vz = inp.brake ? 0 : inp.climb ? p.climb : inp.descend ? -p.climb : 0;
     if (s.height !== null && s.height > p.ceiling) vz = Math.min(vz, -Math.min(p.climb, s.height - p.ceiling));
     // Landing flare: the descent slows near the ground so it arrives slowly enough to land.
     if (s.height !== null && vz < 0) vz = Math.max(vz, -(0.6 * p.landSpeed + 1.2 * s.height));
     // Velocity toward the target within the acceleration (brake rate when braking).
-    _target.copy(this.course).multiplyScalar(this.speed).addScaledVector(up, vz);
+    _target.copy(this.course).multiplyScalar(forward).addScaledVector(up, vz);
     _t.copy(_target).sub(this.vel);
     const maxDv = (inp.brake ? p.brake : Math.max(p.accel, p.climb * 2)) * dt;
     const dv = _t.length();
