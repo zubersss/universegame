@@ -1,7 +1,7 @@
 # LEAD STATUS
-Updated: 2026-10-30 16:45 · Session: 1 · Review cycle: 16
+Updated: 2026-10-30 17:15 · Session: 1 · Review cycle: 17
 ## Current task
-L-010: M1LoopTests passed twice; M1_REPORT drafted; posting playtest after U-031. Review cycle every 30 min.
+M1 waiting on the USER-09 playtest; then turn feedback into tasks and close M1. Review cycle every 30 min.
 ## Last completed
 L-005 (versions pinned, `tools/paths.json`), L-006 (READY FOR WORKERS).
 ## Next up
@@ -9,7 +9,7 @@ Proof-check U-001 and B-001; then B-002/U-005 calibration handshake; L-007 after
 ## Pending decisions
 (none)
 ## Waiting on the user
-USER-07 start the UNITY and BLENDER sessions; USER-08 optional.
+USER-09 M1 playtest; USER-08 optional.
 ## Loop / stall watch
 (none — workers not yet started)
 ## HeavyJobLock

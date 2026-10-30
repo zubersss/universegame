@@ -158,3 +158,12 @@ Signals: low memory again stopped a UNITY PlayMode batch (16:23). Free RAM swing
 L-010: M1LoopTests second pass 16:42 (LEAD ran it in a free window): touchdown 2.00 m/s, 55 s, clean console. Two passes now. M1_REPORT.md drafted (controls, what to try).
 User: playtest request (USER-09) goes out after U-031's smoke check.
 Queue: UNITY 5 Ready, BLENDER 9 Ready.
+
+## Cycle 17 · 2026-10-30 17:15 · M1 exit (pending playtest)
+Checked: git log 16:41–16:50 (U-031 + U-024 evidence, B-013); smoke_2026-10-30/smoke_1_menu.png, smoke_2_earth.png (16:40, build 0.1.1); icons_batch1_montage.png; free RAM 0.2 GB with UNITY's job.
+Moved: U-024 → Done; U-031 → Done; L-010 → Done; B-013 → Done; U-025, B-014 → In Progress.
+M1 exit criteria (Bible §12): loop playable start to finish twice without console errors: M1IntegrationTests ×2 (U-017) and M1LoopTests ×2 (L-010). All tests green: EditMode 116/116, PlayMode clean. BudgetGate green: perf_2026-10-30.md. User playtest: posted as USER-09 (build 0.1.1). M1 closes on the user's feedback.
+Decided: none.
+Signals: memory stays the bottleneck (free 0.2–1.8 GB). Both workers keep progressing between gates.
+User: USER-09 playtest posted.
+Queue: UNITY 6 Ready, BLENDER 8 Ready.

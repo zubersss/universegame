@@ -81,12 +81,12 @@ Files: coordination/TASK_BOARD.md
 Depends: L-008
 Lead notes: —
 
-### L-010 · LEAD · In Progress · M1
+### L-010 · LEAD · Done · M1
 Goal: M1 QA scenario and report.
 Accept: LeadQA PlayMode test drives Earth → launch → Mars well → entry → landing → save → load; passes twice; `M1_REPORT.md` written; `Build/MERIDIAN_0.1.0/` plays.
 Files: Assets/_Game/Tests/LeadQA/M1LoopTests.cs, coordination/reviews/M1_REPORT.md
 Depends: U-017
-Lead notes: In Progress (cycle 16): M1LoopTests passed twice (15:55; 16:42 touchdown 2.00 m/s, 55 s). M1_REPORT.md drafted. Waiting on U-031 (0.1.1 smoke) before posting the playtest (USER-09).
+Lead notes: Done (cycle 17): M1LoopTests passed twice (15:55, 16:42; touchdown 2.00 m/s); M1_REPORT.md; Build/MERIDIAN_0.1.1 plays (U-031 smoke). User playtest posted as USER-09.
 
 ---
 
@@ -261,19 +261,19 @@ Files: Assets/_Game/Code/Runtime/Terrain/
 Depends: U-007, B-022
 Lead notes: Done d455251 (cycle 14): slots 47–62 sliced, stable wrapped (x, y) hash; EditMode 116/116, PlayMode clean 15:36.
 
-### U-031 · UNITY · In Progress · M1
+### U-031 · UNITY · Done · M1
 Goal: Rebuild the M1 playtest build after U-018 as `Build/MERIDIAN_0.1.1/` and redo the build smoke screenshots.
 Accept: on the ground the Pilgrim shows deployed skids touching the terrain (no floating hull, as seen in smoke_2_earth.png of 0.1.0, built before U-018); the menu hides the HUD behind it; smoke run clean; the 0.1.0 folder may stay.
 Files: Build/ (ignored), coordination/reports/unity/smoke_<date>/
 Depends: U-017, U-018
-Lead notes: PRIORITY: next, before more M2 work (cycle 15). This is the build the user will playtest.
+Lead notes: Done b327325 (cycle 17): Build/MERIDIAN_0.1.1; Pilgrim on deployed skids touching the ground; HUD hidden behind menus; smoke clean. This is the USER-09 playtest build.
 
-### U-024 · UNITY · In Progress · M2
+### U-024 · UNITY · Done · M2
 Goal: PlanetSide parallax: `backgrounds/<planet>/layer0..2` behind the terrain (layer0 slowest), plus a haze gradient per planet (Bible §9 Atmosphere).
 Accept: capture at Earth and Mars shows three layers moving at different rates when the camera pans; no seams when wrapping; ≤ 3 extra draw calls; uses the B-010/B-011 rework files when present, placeholders otherwise.
 Files: Assets/_Game/Code/Runtime/Planet/, Scenes/PlanetSide.unity
 Depends: U-007
-Lead notes: M2 draft promoted early (cycle 10) to keep the queue ≥ 5; M1 tasks still come first.
+Lead notes: Done 92bd0d7 + b327325 (cycle 17): 3-layer parallax with haze, cave fade; BackdropTests; captures; smoke_2_earth shows the forest backdrop behind terrain.
 
 ### U-032 · UNITY · Ready · M2
 Goal: Surveyor animation: drive the `characters/surveyor/base` frame-sheet clips (idle, walk, run, jump, fall, land, dig, aim, hurt, death) from the player controller; face the aim direction.
@@ -289,7 +289,7 @@ Files: Assets/_Game/Code/Runtime/FX/
 Depends: U-010, U-012
 Lead notes: Cycle 16. B-012 art Done.
 
-### U-025 · UNITY · Ready · M2
+### U-025 · UNITY · In Progress · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.
 Accept: EditMode test: Earth noon/midnight intensities match §9; captures at dawn/noon/dusk/night on Earth; 0 B GC per frame.
 Files: Assets/_Game/Code/Runtime/Planet/Lighting/
@@ -447,14 +447,14 @@ Files: Assets/_Game/Art/fx/
 Depends: B-002
 Lead notes: Done 11828e9 + e450ab9 (cycle 12): five FX sheets; thruster contact sheet reads well (color/emission/alpha).
 
-### B-013 · BLENDER · In Progress · M2
+### B-013 · BLENDER · Done · M2
 Goal: Icons batch 1 (16): iron, copper, carbon, silica, water_ice, oxygen, launch_fuel, hematite, perchlorate, clay, aluminium, living_seed, wood, stone, sand, nickel.
 Accept: `icons/<item>/base` 128×128, consistent lighting angle, readable at 32 px.
 Files: Assets/_Game/Art/icons/
 Depends: B-002
-Lead notes: —
+Lead notes: Done 8ca8ba4 (cycle 17): 16 lit icons readable at 32 px (montage).
 
-### B-014 · BLENDER · Ready · M2
+### B-014 · BLENDER · In Progress · M2
 Goal: Props batch 1: `props/common/{landing_pad,shelter_wall,shelter_door,smelter,storage_crate,lamp}`.
 Accept: ≤ 512², color + normal (+ emission for lamp and smelter), bottom-center pivots, mask R rim for interactables.
 Files: Assets/_Game/Art/props/common/
