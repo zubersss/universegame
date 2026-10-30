@@ -3,6 +3,10 @@ import { describe, expect, it } from 'vitest';
 import { OnFootHost, onFootEdge, type OnFootHooks } from '../src/game/onFoot';
 import type { Mode } from '../src/game/Game';
 import { abilityView, pickWarning } from '../src/ui/Hud';
+import { Input } from '../src/core/input';
+import type { WalkInput } from '../src/player/Player';
+
+const IDLE: WalkInput = { forward: 0, right: 0, sprint: false, jump: false, yaw: 0, pitch: 0 };
 
 const MODES: Mode[] = ['PILOTING', 'CRUISING', 'LANDED', 'ON_FOOT'];
 
@@ -34,26 +38,36 @@ describe('ON_FOOT hook points (Mode unchanged)', () => {
     const host = new OnFootHost();
     const h = recorder();
     host.install(h);
-    expect(host.step(1 / 60)).toBe(false); // not on foot: no step
+    expect(host.step(1 / 60, IDLE)).toBe(false); // not on foot: no step
     host.transition('LANDED', 'ON_FOOT', { body: 'ilex' }, 'relocate');
     expect(host.active).toBe(true);
-    host.step(1 / 60);
-    host.step(1 / 60);
+    host.step(1 / 60, IDLE);
+    host.step(1 / 60, IDLE);
     host.transition('ON_FOOT', 'LANDED', null, 'board');
-    host.step(1 / 60);
+    host.step(1 / 60, IDLE);
     host.transition('LANDED', 'PILOTING', null, 'relocate');
     expect(h.log).toEqual(['enter:ilex', `step:${1 / 60}`, `step:${1 / 60}`, 'exit:board']);
     expect(host.active).toBe(false);
   });
 
+  it('hands the step the walk input', () => {
+    const host = new OnFootHost();
+    const seen: WalkInput[] = [];
+    host.install({ ...recorder(), step: (_dt, input) => (seen.push(input), false) });
+    host.transition('LANDED', 'ON_FOOT', { body: 'ilex' }, 'relocate');
+    const w = { ...IDLE, forward: 1, yaw: 0.2, jump: true };
+    host.step(1 / 60, w);
+    expect(seen).toEqual([w]);
+  });
+
   it('lets an ability own the character only when its step says so', () => {
     const host = new OnFootHost();
     host.transition('LANDED', 'ON_FOOT', { body: 'cairn' }, 'relocate');
-    expect(host.step(1 / 60)).toBe(false); // no hooks installed: the walk controller runs
+    expect(host.step(1 / 60, IDLE)).toBe(false); // no hooks installed: the walk controller runs
     host.install(recorder(true));
-    expect(host.step(1 / 60)).toBe(true);
+    expect(host.step(1 / 60, IDLE)).toBe(true);
     host.install(recorder(false));
-    expect(host.step(1 / 60)).toBe(false);
+    expect(host.step(1 / 60, IDLE)).toBe(false);
   });
 
   it('keeps ordering when hooks are swapped or the character is re-placed', () => {
@@ -83,10 +97,40 @@ describe('ON_FOOT hook points (Mode unchanged)', () => {
     expect(frames).toBe(1);
   });
 
+  it('reads input before the hooks, never boards mid-air, and leaves the FOV to a hook camera', () => {
+    const src = readFileSync(new URL('../src/game/Game.ts', import.meta.url), 'utf8');
+    expect(src).toMatch(/const w = this\.state === 'playing' \? this\.readWalk\(\) : [^\n]+\n\s*if \(this\.onFoot\.step\(dt, w\)\)/);
+    expect(src).toMatch(/if \(t\.kind === 'ship'\) \{[^}]*if \(this\.player\?\.grounded\) this\.boardShip\(\);/);
+    expect(src).toMatch(/if \(!hookCamera\) this\.cameraRig\.updateFov\(/);
+  });
+
+  it('tracks C and mouse buttons as input codes while the pointer is locked', () => {
+    // Node has no DOM: the key handler only needs HTMLElement for its text-field check.
+    const g = globalThis as unknown as { HTMLElement?: unknown };
+    g.HTMLElement ??= class {};
+    const inp = new Input();
+    // The DOM handlers are private; drive them directly with minimal event objects.
+    const h = inp as unknown as Record<'onMouseDown' | 'onMouseUp' | 'onKeyDown', (e: unknown) => void>;
+    inp.active = true;
+    const ev = (button: number) => ({ button, preventDefault() {} });
+    h.onMouseDown(ev(2)); // not locked: the click only requests the lock
+    expect(inp.isDown('MouseRight')).toBe(false);
+    inp.pointerLocked = true;
+    h.onMouseDown(ev(2));
+    h.onMouseDown(ev(0));
+    expect(inp.isDown('MouseRight')).toBe(true);
+    expect(inp.consume('MouseLeft')).toBe(true);
+    expect(inp.consume('MouseLeft')).toBe(false);
+    h.onMouseUp(ev(2));
+    expect(inp.isDown('MouseRight')).toBe(false);
+    h.onKeyDown({ code: 'KeyC', repeat: false, target: null, preventDefault() {} });
+    expect(inp.consume('KeyC')).toBe(true);
+  });
+
   it('gives PLAYER its extension point and test hooks', () => {
     const src = (f: string) => readFileSync(new URL(`../src/${f}`, import.meta.url), 'utf8');
     expect(src('game/boot.ts')).toMatch(/game = new Game\(render, settings\);\s*installPlayer\(game\);/);
-    expect(src('game/Game.ts')).toMatch(/if \(!this\.onFoot\.frame\(dt, alpha\)\) this\.cameraRig\.firstPerson\(/);
+    expect(src('game/Game.ts')).toMatch(/hookCamera = this\.onFoot\.frame\(dt, alpha\);\s*if \(!hookCamera\) this\.cameraRig\.firstPerson\(/);
     expect(src('debug/testHooks.ts')).toMatch(/player: playerTestHooks\(game\),/);
   });
 

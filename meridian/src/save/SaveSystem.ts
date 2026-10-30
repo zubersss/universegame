@@ -1,4 +1,4 @@
-import { BODY_IDS, GENERATOR_VERSION, SAVE_SCHEMA_VERSION, WORLD_SEED, isBodyId, type BodyId } from '../world/bodies';
+import { BODY_IDS, GENERATOR_VERSION, SAVE_SCHEMA_VERSION, WORLD_SEED, type BodyId } from '../world/bodies';
 import { sanitizeSettings, type Settings } from '../game/settings';
 import { newExpedition, type ExpeditionState } from '../game/Expedition';
 import type { KvStore } from './db';
@@ -44,6 +44,8 @@ type Result = { ok: true; data: SaveData } | { ok: false; error: string };
 
 const isObj = (x: unknown): x is Record<string, unknown> => typeof x === 'object' && x !== null && !Array.isArray(x);
 const isNum = (x: unknown): x is number => typeof x === 'number' && Number.isFinite(x);
+/** Schema 1 knows only the bodies in play (BODY_IDS), not every catalog body; schema 2 (L8) widens this. */
+const isPlayed = (x: unknown): x is BodyId => typeof x === 'string' && (BODY_IDS as readonly string[]).includes(x);
 
 function vec(x: unknown, n: number, bound: number): number[] | null {
   if (!Array.isArray(x) || x.length !== n) return null;
@@ -84,7 +86,7 @@ function validateExpedition(x: unknown): ExpeditionState | string {
   }
   const collected = stringList(x.collected, (s) => SAMPLE_RE.test(s), 9);
   if (!collected) return 'bad collected list';
-  const relays = stringList(x.relays, isBodyId, 3);
+  const relays = stringList(x.relays, isPlayed, 3);
   if (!relays) return 'bad relay list';
   const species = stringList(x.species, (s) => SPECIES_RE.test(s), 32);
   if (!species) return 'bad species list';
@@ -111,7 +113,7 @@ export function validateSave(raw: unknown): Result {
   if (!isNum(raw.playTime) || raw.playTime < 0 || raw.playTime > 1e8) return { ok: false, error: 'Bad play time.' };
   const mode = raw.mode;
   if (mode !== 'PILOTING' && mode !== 'CRUISING' && mode !== 'LANDED' && mode !== 'ON_FOOT') return { ok: false, error: 'Bad mode.' };
-  const body = raw.body === null ? null : isBodyId(raw.body) ? raw.body : undefined;
+  const body = raw.body === null ? null : isPlayed(raw.body) ? raw.body : undefined;
   if (body === undefined) return { ok: false, error: 'Bad body.' };
   if ((mode === 'LANDED' || mode === 'ON_FOOT') && !body) return { ok: false, error: 'Surface mode without a body.' };
   const s = raw.ship;
@@ -144,13 +146,13 @@ export function validateSave(raw: unknown): Result {
   let lastSafeLanding: SaveData['lastSafeLanding'] = null;
   if (raw.lastSafeLanding !== null) {
     const l = raw.lastSafeLanding;
-    if (!isObj(l) || !isBodyId(l.body)) return { ok: false, error: 'Bad last landing.' };
+    if (!isObj(l) || !isPlayed(l.body)) return { ok: false, error: 'Bad last landing.' };
     const pp = vec(l.posPlanet, 3, 200000);
     const lq = unitQuat(l.quat);
     if (!pp || !lq) return { ok: false, error: 'Bad last landing pose.' };
     lastSafeLanding = { body: l.body, posPlanet: pp as V3, quat: lq };
   }
-  const navTarget = raw.navTarget === null ? null : isBodyId(raw.navTarget) ? raw.navTarget : undefined;
+  const navTarget = raw.navTarget === null ? null : isPlayed(raw.navTarget) ? raw.navTarget : undefined;
   if (navTarget === undefined) return { ok: false, error: 'Bad navigation target.' };
   const exp = validateExpedition(raw.expedition);
   if (typeof exp === 'string') return { ok: false, error: `Bad progress: ${exp}.` };

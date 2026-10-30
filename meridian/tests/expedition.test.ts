@@ -11,6 +11,7 @@ describe('expedition rules', () => {
     expect(e.state.inventory.ilex).toBe(1);
     expect(e.state.collected).toEqual(['ilex:sample:0']);
     expect(e.collect('nowhere:sample:0')).toBe(false);
+    expect(e.collect('earth:sample:0')).toBe(false); // catalog body not in play yet
   });
 
   it('activates a relay only with a local sample, consuming exactly one, once', () => {

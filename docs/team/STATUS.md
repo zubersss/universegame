@@ -34,7 +34,7 @@ Reference device: CPU · GPU (`chrome://gpu`) · RAM 8 GB · resolution · Chrom
 
 | Branch | Commit | Checks last run | Checkpoint tag |
 |---|---|---|---|
-| `overhaul/integration` | 30ccf78 (= `main`) | 2026-10-29: `npm ci`, typecheck, `npm test` 63/63, build, build:test, prod smoke 2/2; journeys running | — (`overhaul-m1` at the M1 gate) |
+| `overhaul/integration` | 0c22cf6 (L5/L5b + W1/W2 + save fix) | 2026-10-30: typecheck, `npm test` 83/83, build, build:test; prod 2/2; expedition, flight, landing, saves 4/4 | — (`overhaul-m1` at the M1 gate) |
 
 ## Handoff reconciliation (M1, L4)
 
@@ -53,9 +53,9 @@ Reference device: CPU · GPU (`chrome://gpu`) · RAM 8 GB · resolution · Chrom
 | L2 | LEAD | Charter, status, settings committed | L1 | | `docs/team/*`, `.claude/settings.json` | files present on `overhaul/integration` | Charter and status in 30ccf78. Owner approved repo-root `.claude/settings.json` (allow npm/npx/git/node); `crossSessionInbound` stays a per-user setting because a repo file may only tighten it. |
 | L3 | LEAD | Messaging round-trip | L2 | | — | packet to and from WORLDS and PLAYER | Done: LEAD → WORLDS and PLAYER delivered; READY packets back from both; PLAYER → WORLDS delivered. Cloud sessions talk by `send_message`; `docs/team/packets/` stays the fallback. |
 | L4 | LEAD | Handoffs reconciled | L2 | | `docs/team/handoffs/*` | table above filled; unique work preserved | Studio branches reconciled read-only, nothing deleted; DECISION packet sent; old-bot exports are reconciled when the owner supplies them; their absence does not block L4 or the M1 gate. |
-| L5 | LEAD | Contract foundations | L4 | | `src/game/*`, `src/save/*`, `src/ui/Hud.ts` | tests for Mode hooks, HUD slot API, schema-2 plan | `lead/L5-contracts` 566d144: `setMode` + ON_FOOT hooks, `hud.setAbility`/`hud.setWarning`, `save-legacy` policy; typecheck, 72/72 tests. Browser checks before merge. IFACE packets to WORLDS (BodyDef fields) and PLAYER (hooks). |
-| W1 | WORLDS | Solar-system catalog with sources | — | | `src/data/sol.json` | fields tagged measured/estimated/fictional; source + epoch recorded | |
-| W2 | WORLDS | `scale.ts` and catalog-driven `BodyDef` | W1, L5 | | `src/world/*` | Ilex, Vesper, Cairn still play | |
+| L5 | LEAD | Contract foundations | L4 | | `src/game/*`, `src/save/*`, `src/ui/Hud.ts` | tests for Mode hooks, HUD slot API, schema-2 plan | Done: L5 566d144 + L5b 49f48bb (frame hook, `installPlayer`, PLAYER test hooks), merged in 0373660; typecheck, unit tests, prod smoke, expedition, flight, landing, saves green on the integrated build. |
+| W1 | WORLDS | Solar-system catalog with sources | — | | `src/data/sol.json` | fields tagged measured/estimated/fictional; source + epoch recorded | Interim: `sol.json` with JPL DE421 positions (via PyPI); physical constants tagged estimated/unverified until NASA hosts are allowed; integrated in ce556b2. Minor labeling DEFECT sent. |
+| W2 | WORLDS | `scale.ts` and catalog-driven `BodyDef` | W1, L5 | | `src/world/*` | Ilex, Vesper, Cairn still play | Done: `scale.ts`, catalog-driven string-keyed `BodyDef` (15 bodies, `BODY_IDS` still the Quiet System), moons per charter H; Quiet System byte-identical (review); integrated in ce556b2 with LEAD's save fix 0c22cf6. |
 | W3 | WORLDS | Earth dataset converted and licensed | — | | `src/data/**`, `scripts/data/*`, `ASSET_LICENSES.md` | sampling test (Everest high, Challenger Deep low, land ≈ 29%) | |
 | W4 | WORLDS | Data-backed Earth surface spike | W3 | | `src/world/surface.ts` | region renders; proxy ↔ surface continuity test | |
 | P1 | PLAYER | Rigged character walks on Ilex in third person | — | | `src/avatar/**`, `src/player/*` | screenshots; no foot sliding; camera avoids terrain | |
