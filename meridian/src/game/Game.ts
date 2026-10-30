@@ -20,7 +20,7 @@ import { Exhaust } from '../ship/Exhaust';
 import { BOARDING_POINT, GEAR_PAD_BOTTOM_Y } from '../ship/ShipModel';
 import { NO_CONTROLS, type FlightOutput, type FlightOverride, type ShipControls } from '../ship/FlightModel';
 import { LandingAssist, emptyProbe, probeFootprint, type FootprintProbe } from '../ship/LandingAssist';
-import { CruiseController, cruiseHop, freeDistance, insideEnvelope, type CruiseExitReason } from '../ship/Cruise';
+import { CruiseController, cruiseHop, freeDistance, insideEnvelope, type CruiseExitReason, type CruiseLegStats } from '../ship/Cruise';
 import { Player, FOOT_OFFSET, playerShape, type WalkInput } from '../player/Player';
 import { FlightEnvProvider } from '../world/FlightEnvProvider';
 import { ActiveBody } from '../world/ActiveBody';
@@ -83,16 +83,17 @@ export interface HandoffEvent {
   body: BodyId;
 }
 
-/** A finished cruise leg (diagnostics and tests). */
-export interface CruiseLeg {
-  /** Simulation times (s) of the engage and of the hand-back to normal flight. */
+/**
+ * A finished cruise leg (diagnostics and tests): hop, cap, entry and peak as
+ * CruiseController.legStats gives them (cap = cruiseMaxSpeed(hop); peak <= cap
+ * for a leg engaged from flight).
+ */
+export interface CruiseLeg extends CruiseLegStats {
+  /** Simulation times (s) of the engage (or the restore) and of the hand-back to normal flight. */
   start: number;
   end: number;
-  /** Nav target at the hand-back (the hop the cap followed), or null. */
+  /** Nav target at the hand-back, or null (a retarget mid-leg changes it; hop and cap stay the leg's longest). */
   target: BodyId | null;
-  /** Speed cap and highest speed reached (m/s). */
-  cap: number;
-  peak: number;
   exit: CruiseExitReason;
 }
 
@@ -624,8 +625,7 @@ export class Game {
     ship.flight.reset();
     ship.flight.throttle = clamp(this.cruise.speed / FLIGHT.capSpace, 0, 1);
     this.setMode('PILOTING');
-    const c = this.cruise;
-    pushBounded(this.cruiseLog, { start: this.cruiseStart, end: this.simTime, target: this.navTarget, cap: c.maxSpeed, peak: c.peak, exit: reason });
+    pushBounded(this.cruiseLog, { start: this.cruiseStart, end: this.simTime, target: this.navTarget, ...this.cruise.legStats(), exit: reason });
     if (reason === 'approach') this.counters.cruiseExitApproach++;
     else if (reason === 'brake') this.counters.cruiseExitBrake++;
     else if (reason === 'toggle') this.counters.cruiseExitToggle++;
@@ -1844,7 +1844,7 @@ export class Game {
         speed: c.speed, throttle: this.cruiseThrottle, ahead: Number.isFinite(c.ahead) ? c.ahead : -1, aheadBody: c.aheadBody,
         limited: c.limited, exiting: c.exiting, safetyStops: c.safetyStops, refusedTurns: c.refusedTurns,
         available: this.mode === 'PILOTING' && this.cruiseAvailable(),
-        maxSpeed: c.maxSpeed, accel: c.accel, peak: c.peak,
+        hop: c.hop, maxSpeed: c.maxSpeed, accel: c.accel, peak: c.peak,
       },
       cruiseLog: this.cruiseLog.map((l) => ({ ...l })),
       handoffLog: this.handoffLog.map((e) => ({ ...e })),

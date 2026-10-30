@@ -138,6 +138,25 @@ export function cruiseHop(pos: Vector3, target: BodyId | null): number {
 
 export type CruiseExitReason = 'approach' | 'brake' | 'toggle' | 'safety';
 
+/**
+ * What one cruise leg (begin() to the hand-back) planned and reached, for the
+ * cruise log. cap = cruiseMaxSpeed(hop) for the leg's longest planned hop, so a
+ * retarget to a nearer body (which lowers the live cap) never hides a faster
+ * part of the leg. peak <= max(cap, entry): a leg engaged from flight enters
+ * below the 15 km/s floor, so its peak never passes its cap; only a restored
+ * cruise can enter faster than its remaining route's cap (it then slows to it).
+ */
+export interface CruiseLegStats {
+  /** Longest hop (m) planned during the leg (at begin or a retarget), as capped (≤ 2·SYSTEM_EXTENT). */
+  hop: number;
+  /** Its speed cap (m/s). */
+  cap: number;
+  /** Speed at begin (m/s). */
+  entry: number;
+  /** Highest speed reached (m/s). */
+  peak: number;
+}
+
 export interface CruiseInput {
   /** Turn commands -1..1 (scaled to the cruise turn rate). */
   pitch: number;
@@ -173,7 +192,8 @@ export class CruiseController {
   readonly pos = new Vector3();
   readonly quat = new Quaternion();
   speed = 0;
-  /** Speed cap (m/s) and acceleration (m/s²) for the current hop (set by begin/retarget). */
+  /** The hop (m) the cap follows now, its speed cap (m/s) and the acceleration (m/s²) (set by begin/retarget). */
+  hop = 0;
   maxSpeed: number = CRUISE.maxSpeed;
   accel: number = CRUISE.accel;
   /** Leaving cruise: decelerating toward the exit speed. */
@@ -187,8 +207,11 @@ export class CruiseController {
   refusedTurns = 0;
   /** Steps in which the exact segment test had to stop the ship (must stay 0). */
   safetyStops = 0;
-  /** Highest speed since begin() (m/s); checked against the cap. */
+  /** Speed at begin() and highest speed since (m/s), and the longest hop planned since with its cap (legStats). */
+  entry = 0;
   peak = 0;
+  private topHop = 0;
+  private topCap = 0;
 
   /** `ids`: the bodies this controller avoids (default: the bodies in play, read at each use). */
   constructor(private readonly ids?: readonly BodyId[]) {}
@@ -222,17 +245,20 @@ export class CruiseController {
     this.quat.copy(quat).normalize();
     _fwd.set(0, 0, -1).applyQuaternion(this.quat);
     this.speed = Math.max(0, velocity.dot(_fwd));
-    this.peak = this.speed;
+    this.entry = this.peak = this.speed;
+    this.topCap = 0;
     this.setHop(hop);
     this.exiting = null;
     this.limited = false;
   }
 
   /**
-   * New destination while cruising: the cap follows the new hop. The
-   * acceleration only drops when stopping short of the envelope ahead at the
-   * lower value would still take at most half the room left; otherwise the
-   * current (higher) value is kept so a braking ship stays safe.
+   * New destination while cruising: the cap follows the new hop (legStats
+   * keeps the leg's longest hop and its cap, so a lower cap never hides the
+   * speed reached before). The acceleration only drops when stopping short of
+   * the envelope ahead at the lower value would still take at most half the
+   * room left; otherwise the current (higher) value is kept so a braking ship
+   * stays safe.
    */
   retarget(hop: number): void {
     const prev = this.accel;
@@ -243,12 +269,22 @@ export class CruiseController {
     if (this.speed * this.speed > this.accel * room) this.accel = prev;
   }
 
+  /** The leg so far (the cruise log entry at the hand-back). */
+  legStats(): CruiseLegStats {
+    return { hop: this.topHop, cap: this.topCap, entry: this.entry, peak: this.peak };
+  }
+
   /**
    * Cap = max(15 km/s, hop ÷ 45 s), the hop clamped to [0, 2·SYSTEM_EXTENT];
    * the acceleration reaches the cap (or sheds the current speed) in rampSeconds.
    */
   private setHop(hop: number): void {
-    this.maxSpeed = cruiseMaxSpeed(hop > 0 ? Math.min(hop, 2 * SYSTEM_EXTENT) : 0);
+    this.hop = hop > 0 ? Math.min(hop, 2 * SYSTEM_EXTENT) : 0;
+    this.maxSpeed = cruiseMaxSpeed(this.hop);
+    if (this.maxSpeed > this.topCap) {
+      this.topCap = this.maxSpeed;
+      this.topHop = this.hop;
+    }
     this.accel = Math.max(CRUISE.accel, Math.max(this.maxSpeed, this.speed) / CRUISE.rampSeconds);
   }
 

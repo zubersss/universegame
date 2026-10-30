@@ -1,8 +1,9 @@
 // L7b/L6b: Sol behind ?system=sol. The system switch made at boot, the start
 // pose, the handoff (activation) policy, the cruise hop, saves on landable
 // bodies, the navigation panel's digit keys and the background far plane, in
-// Node. The browser journey is e2e/journey/travel.spec.ts ("Sol: Earth -> Moon hop").
-import { readFileSync } from 'node:fs';
+// Node; boot's order and Game's use of the policy and the hop are checked in
+// their source. The browser journey is e2e/journey/travel.spec.ts ("Sol: Earth -> Moon hop").
+import { readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { Vector3 } from 'three';
@@ -13,11 +14,11 @@ import {
 import { BELTS } from '../src/world/catalog';
 import { EARTH_META, installEarthData, loadEarthData, type LayerName } from '../src/world/earthData';
 import { bodyDataReady, getSurface } from '../src/world/surface';
-import { computeSites } from '../src/world/sites';
+import { computeSites, tangentBasis } from '../src/world/sites';
 import { generateChunk } from '../src/terrain/chunkGen';
 import { canActivate, playBodies, proxyBodies, startBodyOf, startSite, surfaceReady, systemFromQuery } from '../src/game/playSystem';
 import { CRUISE, SIM_DT, SURFACE_READY } from '../src/game/config';
-import { CruiseController, cruiseHop, routeHop, safetyRadius } from '../src/ship/Cruise';
+import { CruiseController, blockedBy, cruiseHop, hopDistance, planPath, routeHop, safetyRadius } from '../src/ship/Cruise';
 import { cruiseMaxSpeed } from '../src/world/scale';
 import { quatFromForwardUp } from '../src/core/mathx';
 import { SAVE_SCHEMA, validateSave, type SaveData } from '../src/save/SaveSystem';
@@ -99,7 +100,26 @@ describe('play system switch (?system=)', () => {
     expect(sol.some((id) => BELTS.some((b) => b.id === id))).toBe(false);
   });
 
-  it('boot switches before saves are read: validation follows the system in play', () => {
+  it('boot sets the system once, before it reads saves, loads surface data or builds the game', () => {
+    // Save validation reads BODY_IDS at call time and the Game constructor builds
+    // the proxies, the start pose and the cruise from it, so the order is the contract.
+    const src = readFileSync(new URL('../src/game/boot.ts', import.meta.url), 'utf8');
+    const set = src.indexOf("setPlaySystem(playBodies(systemFromQuery(params.get('system'))));");
+    expect(set).toBeGreaterThan(src.indexOf('export async function boot('));
+    expect(src.match(/setPlaySystem\(/g)).toHaveLength(1);
+    for (const later of ['new SaveStore(kv)', 'await saves.read()', 'ensureBodyData(d)', 'game = new Game(']) {
+      expect(src.indexOf(later)).toBeGreaterThan(set);
+    }
+    expect(src.indexOf('ensureBodyData(d)')).toBeLessThan(src.indexOf('game = new Game('));
+    // Nothing else in the game switches the system (bodies.ts defines it).
+    const root = fileURLToPath(new URL('../src/', import.meta.url));
+    const callers = readdirSync(root, { recursive: true, encoding: 'utf8' })
+      .filter((f) => f.endsWith('.ts') && readFileSync(root + f, 'utf8').includes('setPlaySystem('))
+      .map((f) => f.replaceAll('\\', '/'));
+    expect(callers.sort()).toEqual(['game/boot.ts', 'world/bodies.ts']);
+  });
+
+  it('save validation follows the system in play (BODY_IDS is read at call time)', () => {
     expect(PLAY_SYSTEM).toBe('quiet');
     expect(validateSave(quietSave()).ok).toBe(true);
     expect(validateSave(solSave()).ok).toBe(false);
@@ -215,6 +235,34 @@ describe('activation policy', () => {
     }
   });
 
+  it('the game applies the policy in its handoff and on restore', () => {
+    const src = readFileSync(new URL('../src/game/Game.ts', import.meta.url), 'utf8');
+    const method = (start: string, next: string) => src.slice(src.indexOf(start), src.indexOf(next, src.indexOf(start)));
+    // The handoff's activation scan skips what canActivate refuses (mode and nav
+    // target read live) and a data body whose surface data is not loaded.
+    const handoff = method('private updateHandoff(', 'private setRef(');
+    expect(handoff).toMatch(
+      /const cruising = this\.mode === 'CRUISING';\s*for \(const id of BODY_IDS\) \{\s*const def = BODIES\[id\];\s*if \(!canActivate\(def, cruising, this\.navTarget\) \|\| !bodyDataReady\(def\)\) continue;\s*if \(distTo\(sys, def\.center\) < \(BODY_HANDOFF\.activateRadii \+ 0\.3\) \* def\.radius\) \{\s*this\.activateBody\(def\);/,
+    );
+    expect(handoff.match(/this\.activateBody\(/g)).toHaveLength(1);
+    // Restore activates the saved body only if it is surface-ready, else scans with
+    // canActivate for the saved mode and nav target; it activates nothing else.
+    const restore = method('  restore(data: SaveData): void {', 'private placeRestoredPlayer(');
+    expect(restore).toMatch(/let bodyId = data\.bodyId && surfaceReady\(BODIES\[data\.bodyId\]\) \? data\.bodyId : null;/);
+    expect(restore).toMatch(/for \(const id of BODY_IDS\) \{\s*const def = BODIES\[id\];\s*if \(!canActivate\(def, data\.mode === 'CRUISING', data\.navTarget\)\) continue;/);
+    expect(restore.match(/this\.activateBody\(/g)).toEqual(['this.activateBody(']);
+    expect(restore).toMatch(/if \(bodyId && !this\.body\) this\.activateBody\(BODIES\[bodyId\]\);/);
+    // The only other activations park the ship on a landing: the start body (the
+    // constructor and New Expedition) or Recover's last safe landing (which saves
+    // and landings keep surface-ready).
+    expect(src.match(/this\.activateBody\(/g)).toHaveLength(4);
+    expect(src).toMatch(/const def = this\.startBody;\s*this\.activateBody\(def\);/);
+    expect(src.match(/this\.placeShipLanded\([^)]*\)/g)).toEqual([
+      'this.placeShipLanded(pose.bodyId, pose.posPlanet, pose.quat)',
+      'this.placeShipLanded(this.startBody.id, start.posPlanet, start.quat)',
+    ]);
+  });
+
   it('every activatable Sol body has its First Light sites and no Quiet survey objects', () => {
     for (const id of SURFACE_READY) {
       const s = computeSites(BODIES[id]);
@@ -245,6 +293,7 @@ describe('activation policy', () => {
 
 describe('cruise hop', () => {
   const facing = (from: Vector3, to: Vector3) => quatFromForwardUp(to.clone().sub(from).normalize(), new Vector3(0, 1, 0));
+  const FULL = { pitch: 0, yaw: 0, roll: 0, throttle: 1, brake: false, toggleOff: false };
 
   it('the Quiet System keeps its fixed 15 km/s cruise, as does a cruise without a target', () => {
     const p = new Vector3(300000, 400000, 0);
@@ -258,11 +307,14 @@ describe('cruise hop', () => {
     expect(c.accel).toBe(5000);
   });
 
-  it('in Sol the cap follows the route to the nav target: Earth -> Moon at about 21 km/s', () => {
+  it("in Sol the cap follows the route to the nav target: the shortest Earth -> Moon hop (from Earth's Moon-facing side) is about 21 km/s", () => {
     setPlaySystem(playBodies('sol'));
+    // The plan's 21 km/s figure: the direct line is clear only from this side of Earth.
     const start = center('earth').addScaledVector(center('moon').sub(center('earth')).normalize(), safetyRadius(BODIES.earth) + 12000);
+    expect(blockedBy(start, center('moon'), CRUISE.routeInflate, SOL_M2_BODIES.filter((id) => id !== 'moon'))).toBeNull();
     const hop = cruiseHop(start, 'moon');
     expect(hop).toBe(routeHop(start, 'moon', CRUISE.routeInflate));
+    expect(hop).toBeCloseTo(hopDistance(start, 'moon'), 6);
     expect(cruiseMaxSpeed(hop)).toBeGreaterThan(20500);
     expect(cruiseMaxSpeed(hop)).toBeLessThan(22000);
     expect(cruiseHop(start, null)).toBe(0);
@@ -272,10 +324,11 @@ describe('cruise hop', () => {
     c.begin(start, facing(start, center('moon')), new Vector3(), hop);
     const cap = c.maxSpeed;
     let exit = null;
-    for (let i = 0; i < 60 * 70 && !exit; i++) exit = c.step(SIM_DT, { pitch: 0, yaw: 0, roll: 0, throttle: 1, brake: false, toggleOff: false }).exit;
+    for (let i = 0; i < 60 * 70 && !exit; i++) exit = c.step(SIM_DT, FULL).exit;
     expect(exit).toBe('approach');
     expect(c.aheadBody).toBe('moon');
     expect(c.safetyStops).toBe(0);
+    expect(c.legStats()).toEqual({ hop, cap, entry: 0, peak: c.peak });
     expect(c.peak).toBeLessThanOrEqual(cap);
     expect(c.peak).toBeCloseTo(cap, 6);
     c.begin(c.pos, c.quat, new Vector3(), cruiseHop(c.pos, 'neptune'));
@@ -283,6 +336,146 @@ describe('cruise hop', () => {
     expect(c.maxSpeed).toBeGreaterThan(cap);
     c.retarget(cruiseHop(c.pos, null));
     expect(c.maxSpeed).toBe(CRUISE.maxSpeed);
+  });
+
+  it("from the opening pose, on Earth's far side, the route to the Moon bypasses Earth: about 30.9 km/s", () => {
+    setPlaySystem(playBodies('sol'));
+    const earth = BODIES.earth;
+    const moon = BODIES.moon;
+    const site = startSite(earth);
+    const toMoon = center('moon').sub(center('earth')).normalize();
+    // About 152° from the Moon (if Earth's First Light site moves, this case and
+    // the e2e journey's first-leg band move with it).
+    expect(site.dir.dot(toMoon)).toBeLessThan(-0.85);
+    // Where cruise first engages: above the start site, as clear of Earth's
+    // envelope as the autopilot climbs (the route inflation plus 2 km).
+    const engage = center('earth').addScaledVector(site.dir, safetyRadius(earth) + CRUISE.routeInflate + 2000);
+    const others = SOL_M2_BODIES.filter((id) => id !== 'moon');
+    expect(blockedBy(engage, center('moon'), CRUISE.routeInflate, others)).toBe('earth');
+    // The hop is the length of the planned bypass, not the straight line.
+    const path = planPath(engage, center('moon'), CRUISE.routeInflate, others);
+    expect(path.length).toBeGreaterThan(1);
+    let length = 0;
+    for (let i = 0; i < path.length; i++) length += (i ? path[i - 1] : engage).distanceTo(path[i]);
+    const hop = cruiseHop(engage, 'moon');
+    expect(hop).toBeCloseTo(length - safetyRadius(moon), 3);
+    expect(hop).toBeGreaterThan(hopDistance(engage, 'moon') + 50000);
+    expect(cruiseMaxSpeed(hop)).toBeGreaterThan(30500);
+    expect(cruiseMaxSpeed(hop)).toBeLessThan(31300);
+    // Wherever the climb ends (within 15° of the site, 10-60 km outside the
+    // envelope) the first leg's cap stays in the band the e2e journey asserts.
+    const t = new Vector3(...tangentBasis(site.dir.toArray())[0]);
+    const b = site.dir.clone().cross(t);
+    for (const tilt of [0, 5, 10, 15]) {
+      for (let k = 0; k < 12; k++) {
+        const a = (k / 12) * 2 * Math.PI;
+        const r = (tilt * Math.PI) / 180;
+        const dir = site.dir.clone().multiplyScalar(Math.cos(r)).addScaledVector(t, Math.sin(r) * Math.cos(a)).addScaledVector(b, Math.sin(r) * Math.sin(a));
+        for (const out of [10000, 35000, 60000]) {
+          const cap = cruiseMaxSpeed(cruiseHop(center('earth').addScaledVector(dir, safetyRadius(earth) + out), 'moon'));
+          expect(cap).toBeGreaterThan(29000);
+          expect(cap).toBeLessThan(33500);
+        }
+      }
+    }
+
+    // Fly the travel autopilot's route (planPath to a gate above the Moon's
+    // landing site, then a radial leg into its envelope), re-engaging at each
+    // waypoint as the autopilot does: every leg is capped by its own hop, ends
+    // within 60 s and needs no safety stop; the last ends at the Moon.
+    const n = new Vector3(...computeSites(moon).landing.dir);
+    const gate = center('moon').addScaledVector(n, safetyRadius(moon) + 60000);
+    const route = [...planPath(engage, gate, CRUISE.routeInflate), center('moon').addScaledVector(n, safetyRadius(moon) - 5000)];
+    expect(route.length).toBeGreaterThanOrEqual(3);
+    const pos = engage.clone();
+    const legs: { exit: string | null; time: number; hop: number; cap: number; peak: number }[] = [];
+    for (const [i, wp] of route.entries()) {
+      const c = new CruiseController();
+      const hopHere = cruiseHop(pos, 'moon');
+      c.begin(pos, facing(pos, wp), wp.clone().sub(pos).setLength(CRUISE.exitSpeed), hopHere);
+      let exit = null;
+      let time = 0;
+      while (!exit && time < 120) {
+        // The autopilot leaves cruise near an intermediate waypoint (its 'leaving' rule).
+        const v = c.speed;
+        const leave = i < route.length - 1 && c.pos.distanceTo(wp) < (v * v) / (2 * CRUISE.accel) + v * 0.5 + 4000;
+        exit = c.step(SIM_DT, { ...FULL, toggleOff: leave }).exit;
+        time += SIM_DT;
+      }
+      const s = c.legStats();
+      expect(s.hop).toBe(hopHere);
+      expect(s.cap).toBe(cruiseMaxSpeed(hopHere));
+      expect(s.entry).toBeCloseTo(CRUISE.exitSpeed, 6);
+      expect(s.peak).toBeLessThanOrEqual(s.cap);
+      expect(c.safetyStops).toBe(0);
+      legs.push({ exit, time, ...s });
+      pos.copy(c.pos);
+    }
+    expect(legs[0].cap).toBe(cruiseMaxSpeed(hop));
+    expect(legs.map((l) => l.exit)).toEqual([...route.slice(1).map(() => 'toggle'), 'approach']);
+    for (const l of legs) expect(l.time).toBeLessThanOrEqual(60);
+    expect(hopDistance(pos, 'moon')).toBeLessThan(10000);
+  });
+
+  it("a retarget mid-leg never hides the leg's faster part: the log keeps its longest hop and cap", () => {
+    setPlaySystem(playBodies('sol'));
+    const start = center('earth').addScaledVector(center('neptune').sub(center('earth')).normalize(), safetyRadius(BODIES.earth) + 12000);
+    const c = new CruiseController();
+    const far = cruiseHop(start, 'neptune');
+    c.begin(start, facing(start, center('neptune')), new Vector3(), far);
+    for (let i = 0; i < 60 * 10; i++) c.step(SIM_DT, FULL);
+    const farCap = cruiseMaxSpeed(far);
+    expect(c.peak).toBeCloseTo(farCap, 6);
+    // Tab + another digit while cruising: a nearer destination lowers the live cap below the speed reached.
+    const near = cruiseHop(c.pos, 'mars');
+    c.retarget(near);
+    expect(c.hop).toBe(near);
+    expect(c.maxSpeed).toBe(cruiseMaxSpeed(near));
+    expect(c.maxSpeed).toBeLessThan(c.peak);
+    expect(c.legStats()).toEqual({ hop: far, cap: farCap, entry: 0, peak: c.peak });
+    // The ship sheds the excess; the leg's peak stays within the leg's cap.
+    for (let i = 0; i < 60 * 5; i++) c.step(SIM_DT, FULL);
+    expect(c.speed).toBeLessThanOrEqual(c.maxSpeed);
+    expect(c.legStats().peak).toBeLessThanOrEqual(c.legStats().cap);
+    expect(c.safetyStops).toBe(0);
+
+    // A retarget to a farther body raises the leg's cap with it.
+    const m = new CruiseController();
+    const moonHop = cruiseHop(start, 'moon');
+    m.begin(start, facing(start, center('neptune')), new Vector3(), moonHop);
+    expect(m.legStats().cap).toBe(cruiseMaxSpeed(moonHop));
+    m.retarget(far);
+    expect(m.legStats()).toMatchObject({ hop: far, cap: farCap });
+    for (let i = 0; i < 60 * 5; i++) m.step(SIM_DT, FULL);
+    expect(m.peak).toBeGreaterThan(cruiseMaxSpeed(moonHop));
+    expect(m.peak).toBeLessThanOrEqual(m.legStats().cap);
+    // Nor does a later lower retarget lower the leg's record.
+    m.retarget(moonHop);
+    expect(m.legStats().cap).toBe(farCap);
+
+    // A cruise resumed from a save enters at its saved speed, which can be above
+    // its remaining route's cap: entry records it (peak <= max(cap, entry)).
+    const r = new CruiseController();
+    r.begin(start, facing(start, center('neptune')), center('neptune').sub(start).setLength(farCap), moonHop);
+    const rs = r.legStats();
+    expect(rs).toMatchObject({ hop: moonHop, cap: cruiseMaxSpeed(moonHop), peak: rs.entry });
+    expect(rs.entry).toBeCloseTo(farCap, 3);
+    expect(rs.entry).toBeGreaterThan(rs.cap);
+    for (let i = 0; i < 60 * 5; i++) r.step(SIM_DT, FULL);
+    expect(r.speed).toBeLessThanOrEqual(r.maxSpeed);
+    expect(r.peak).toBeLessThanOrEqual(Math.max(r.legStats().cap, r.legStats().entry));
+  });
+
+  it("the game caps every engage, restore and retarget by the nav target's hop and logs each leg from the controller", () => {
+    const src = readFileSync(new URL('../src/game/Game.ts', import.meta.url), 'utf8');
+    expect(src.match(/this\.cruise\.begin\([^;]*;/g)).toEqual([
+      'this.cruise.begin(_v4, ship.currQuat, ship.vel, cruiseHop(_v4, this.navTarget));',
+      'this.cruise.begin(sys, quat, fwd.clone().multiplyScalar(data.cruise.speed), cruiseHop(sys, data.navTarget));',
+    ]);
+    expect(src).toMatch(/pushBounded\(this\.cruiseLog, \{ start: this\.cruiseStart, end: this\.simTime, target: this\.navTarget, \.\.\.this\.cruise\.legStats\(\), exit: reason \}\);/);
+    expect(src.match(/pushBounded\(this\.cruiseLog,/g)).toHaveLength(1);
+    // Mid-cruise retargets go through the controller (the log keeps the leg's longest hop).
+    expect(src).toMatch(/if \(this\.mode === 'CRUISING'\) this\.cruise\.retarget\(cruiseHop\(this\.cruise\.pos, id\)\);/);
   });
 });
 

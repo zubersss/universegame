@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { bootToTitle, collectErrors, snap, stubPointerLock } from '../helpers';
+import { CRUISE_MIN_MAX_SPEED, cruiseMaxSpeed } from '../../src/world/scale';
 
 // Phase 6 gate: continuous travel Ilex → Vesper → Cairn → Ilex at production
 // distances, landing on each body, three times. Flight, cruise and landing are
@@ -131,7 +132,8 @@ test('three continuous Ilex → Vesper → Cairn → Ilex routes with landings',
 // L7b/L6b: Sol behind ?system=sol (about 10-15 min on software rendering).
 // New Expedition starts landed on Earth; Tab + 5 sets course for the Moon
 // through the navigation panel; the autopilot flies there through player
-// inputs only and lands. Checks: no cruise leg passes its hop cap, the handoff
+// inputs only and lands. Checks: every cruise leg is capped by the route it
+// planned (the bypass around Earth first) and never passes that cap, the handoff
 // releases Earth before it activates the Moon (and nothing else ever
 // activates), the landing is level, the light follows each body's sun
 // direction, and the console stays clean.
@@ -175,15 +177,25 @@ test('Sol: Earth -> Moon hop', async ({ page }) => {
   await api(page, 'autopilot', null);
   console.log(`legs: ${JSON.stringify(s.cruiseLog)}\nhandoffs: ${JSON.stringify(s.handoffLog)}`);
 
-  // Cruise: the first leg is capped for the Earth -> Moon hop (about 21 km/s);
-  // no leg passes its cap, and nothing needed a safety stop.
-  const legs = s.cruiseLog as { start: number; end: number; target: string | null; cap: number; peak: number; exit: string }[];
-  expect(legs.length).toBeGreaterThanOrEqual(1);
-  expect(legs[0].target).toBe('moon');
-  expect(legs[0].cap).toBeGreaterThan(20000);
-  expect(legs[0].cap).toBeLessThan(22500);
-  expect(legs[0].end - legs[0].start).toBeLessThanOrEqual(60);
-  for (const l of legs) expect(l.peak).toBeLessThanOrEqual(l.cap);
+  // Cruise: the opening site is on Earth's far side from the Moon, so the route
+  // bypasses Earth (a detour waypoint, then the gate above the Moon's landing
+  // site, then the radial leg in) and the first leg is capped for that longer
+  // hop: about 30.9 km/s above the site, 29-33.5 km/s wherever the climb can end
+  // (within 15° of the site, 10-60 km outside Earth's envelope; checked in
+  // tests/sol-boot.test.ts), not the 21 km/s of a start facing the Moon. Every
+  // leg is capped by the hop it planned, enters from flight below the 15 km/s
+  // floor, never passes its cap and lasts at most 60 s; no safety stop.
+  const legs = s.cruiseLog as { start: number; end: number; target: string | null; hop: number; cap: number; entry: number; peak: number; exit: string }[];
+  expect(legs.length).toBeGreaterThanOrEqual(3);
+  expect(legs[0].cap).toBeGreaterThan(29000);
+  expect(legs[0].cap).toBeLessThan(33500);
+  for (const l of legs) {
+    expect(l.target).toBe('moon');
+    expect(l.cap).toBe(cruiseMaxSpeed(l.hop));
+    expect(l.entry).toBeLessThan(CRUISE_MIN_MAX_SPEED);
+    expect(l.peak).toBeLessThanOrEqual(l.cap);
+    expect(l.end - l.start).toBeLessThanOrEqual(60);
+  }
   expect(legs.some((l) => l.exit === 'approach')).toBe(true);
   expect(s.counters.cruiseExitSafety).toBe(0);
   expect(s.cruise.safetyStops).toBe(0);
