@@ -303,3 +303,38 @@ describe('superspeed on a slope', () => {
     player.dispose();
   });
 });
+
+describe('collision reach for a blink (WORLDS W8 TerrainCollision.reach)', () => {
+  it('keeps collision loaded out past the blink range while on foot on a blink body, and only there', async () => {
+    const { PlayerRuntime } = await import('../src/player/install');
+    const { Group } = await import('three');
+    const collision = { reach: 0, readyAt: () => true };
+    const game = {
+      hud: { setAbility: () => {}, setWarning: () => {} },
+      simTime: 0,
+      counters: { exits: 0 },
+      body: { collision },
+      bodyCenterLocal: new Vector3(),
+      render: { scene: new Group() },
+      player: null,
+      audio: {},
+    };
+    const rt = new PlayerRuntime(game as never);
+    const P = (ABILITIES['lunar-step'] as { params: BlinkParams }).params;
+    rt.enter({ body: 'moon', power: 'lunar-step' });
+    expect(collision.reach).toBeGreaterThan(P.range);
+    expect(collision.reach).toBeLessThan(P.range + 20);
+    rt.exit('board');
+    expect(collision.reach).toBe(0);
+    // Flight and superspeed bodies keep WORLDS' default block.
+    rt.enter({ body: 'earth', power: 'skyborne-flight' });
+    expect(collision.reach).toBe(0);
+    rt.exit('board');
+    // A collision without the field (before W8) is left untouched.
+    const old = { readyAt: () => true } as { readyAt(): boolean; reach?: number };
+    const rt2 = new PlayerRuntime({ ...game, body: { collision: old } } as never);
+    rt2.enter({ body: 'mars', power: 'redline' });
+    rt2.exit('board');
+    expect(old.reach).toBeUndefined();
+  });
+});

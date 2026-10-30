@@ -65,8 +65,11 @@ export class PlayerRuntime implements OnFootHooks {
     this.lastVisTime = null;
     this.transition = null;
     this.abilities.enter(ctx);
-    this.vfx?.dispose();
+    // A blink needs collision loaded out to its range before a target is
+    // chosen (WORLDS W8: TerrainCollision.reach keeps tiles around the walker).
     const power = this.abilities.power;
+    this.setReach(power && power.primitive === 'blink' ? Math.max(power.params.range, power.params.anchorRange ?? 0) + REACH_MARGIN : 0);
+    this.vfx?.dispose();
     this.vfx = power && this.abilities.runtime ? new PowerVfx(this.game.render.scene, power.feedback.color) : null;
     this.blinksSeen = this.blinkCount();
   }
@@ -216,10 +219,17 @@ export class PlayerRuntime implements OnFootHooks {
 
   exit(reason: OnFootExitReason): void {
     this.transition = null;
+    this.setReach(0);
     this.abilities.exit(reason);
     this.vfx?.dispose();
     this.vfx = null;
     this.sounds.dispose();
+  }
+
+  /** Collision reach around the walker (m; 0 = WORLDS' default block), where the body's collision has it. */
+  private setReach(m: number): void {
+    const c = this.game.body?.collision as { reach?: number } | undefined;
+    if (c && (m > 0 || c.reach !== undefined)) c.reach = m;
   }
 
   /** The ability fields for a save snapshot (schema 2: player.abilityState and unlocked). */
@@ -249,6 +259,9 @@ export function visualClock(simTime: number, alpha: number, last: number | null)
 const _v = new Vector3();
 const _g = new Vector3();
 const _r = new Vector3();
+/** Collision loaded this far beyond a blink's range (m): a target at the edge needs its ground and clearance checks. */
+const REACH_MARGIN = 10;
+
 const _fx = new Vector3();
 const _fd = new Vector3();
 const _tipL = new Vector3();
