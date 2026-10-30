@@ -21,6 +21,7 @@ import { TERRAIN_ALBEDO_GLSL } from '../terrain/terrainMaterial';
 import { GRID_INDEX_COUNT, GRID_VERTS, makeChunkIndex, type ChunkData } from '../terrain/chunkGen';
 import type { ChunkBackend } from '../terrain/ChunkStore';
 import { chunkKey } from '../world/cube';
+import { SEA_WATER } from '../terrain/waterMaterial';
 
 /** Scene units per meter in the scaled background scene. */
 export const BG_SCALE = 1e-4;
@@ -123,17 +124,82 @@ function surfaceMaterial(def: BodyDef, atmo: AtmoSet, aerialSteps: number, light
         vec3 N = normalize(vN);
         vec3 irr = uSunCol * max(dot(N, uSunDir), 0.0) + mix(uHemiGround, uHemiSky, dot(N, uHemiUp) * 0.5 + 0.5);
         vec3 col = albedo * RECIPROCAL_PI * irr;
+        gl_FragColor = vec4(col, 1.0);
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
+        // Aerial perspective after tone mapping, exactly where the local terrain
+        // applies it (patchAerial replaces the fog chunk), so the 3R swap matches.
         if (uAtmoOn > 0.5) {
           vec3 ro = (cameraPosition - uPlanetCenter) * uUnit;
           vec3 d = (vWorld - cameraPosition) * uUnit;
           float dist = length(d);
           vec3 T;
           vec3 S = atmoScatter(ro, d / dist, dist * uAerialScale, ${aerialSteps}, T);
-          col = col * T + S;
+          gl_FragColor.rgb = gl_FragColor.rgb * T + S;
         }
+      }`,
+  });
+}
+
+/** Proxy liquid surface: depth-tinted, sun glint, same lighting and aerial perspective as the proxy surface. */
+function proxyWaterMaterial(atmo: AtmoSet, aerialSteps: number, light: ProxyLighting): ShaderMaterial {
+  return new ShaderMaterial({
+    uniforms: {
+      ...atmo,
+      uShallow: { value: lin(SEA_WATER.shallow) },
+      uDeep: { value: lin(SEA_WATER.deep) },
+      uDepthScale: { value: SEA_WATER.depthScale },
+      uSunCol: { value: light.sunColor },
+      uHemiSky: { value: light.hemiSky },
+      uHemiGround: { value: light.hemiGround },
+      uHemiUp: { value: light.hemiUp },
+    },
+    vertexShader: /* glsl */ `
+      attribute float depth;
+      varying vec3 vN;
+      varying vec3 vWorld;
+      varying float vDepth;
+      #include <common>
+      #include <logdepthbuf_pars_vertex>
+      void main() {
+        vN = normalize(mat3(modelMatrix) * normal);
+        vDepth = depth;
+        vec4 w = modelMatrix * vec4(position, 1.0);
+        vWorld = w.xyz;
+        gl_Position = projectionMatrix * viewMatrix * w;
+        #include <logdepthbuf_vertex>
+      }`,
+    fragmentShader: /* glsl */ `
+      varying vec3 vN;
+      varying vec3 vWorld;
+      varying float vDepth;
+      uniform vec3 uSunCol, uHemiSky, uHemiGround, uHemiUp, uShallow, uDeep;
+      uniform float uUnit, uDepthScale;
+      ${ATMO_GLSL}
+      #include <common>
+      #include <logdepthbuf_pars_fragment>
+      void main() {
+        #include <logdepthbuf_fragment>
+        vec3 N = normalize(vN);
+        vec3 V = normalize(cameraPosition - vWorld);
+        vec3 albedo = mix(uShallow, uDeep, 1.0 - exp(-max(vDepth, 0.0) / uDepthScale));
+        float nl = max(dot(N, uSunDir), 0.0);
+        vec3 irr = uSunCol * nl + mix(uHemiGround, uHemiSky, dot(N, uHemiUp) * 0.5 + 0.5);
+        vec3 H = normalize(V + uSunDir);
+        float spec = pow(max(dot(N, H), 0.0), 180.0) * 2.5 * nl;
+        float fres = 0.02 + 0.98 * pow(1.0 - max(dot(N, V), 0.0), 5.0);
+        vec3 col = albedo * RECIPROCAL_PI * irr + uSunCol * spec * 0.08 + uHemiSky * fres * 0.25;
         gl_FragColor = vec4(col, 1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
+        if (uAtmoOn > 0.5) {
+          vec3 ro = (cameraPosition - uPlanetCenter) * uUnit;
+          vec3 d = (vWorld - cameraPosition) * uUnit;
+          float dist = length(d);
+          vec3 T;
+          vec3 S = atmoScatter(ro, d / dist, dist * uAerialScale, ${aerialSteps}, T);
+          gl_FragColor.rgb = gl_FragColor.rgb * T + S;
+        }
       }`,
   });
 }
@@ -186,6 +252,7 @@ export class BodyProxy {
   readonly group = new Group();
   readonly atmo: AtmoSet;
   surface: Mesh | null = null;
+  water: Mesh | null = null;
   shell: Mesh | null = null;
   readonly clouds: Clouds;
   readonly roots = new Map<string, ChunkData>();
@@ -239,12 +306,48 @@ export class BodyProxy {
     g.computeBoundingSphere();
     this.surface = new Mesh(g, surfaceMaterial(this.def, this.atmo, aerialSteps, light));
     this.group.add(this.surface);
+    this.buildWater(roots, aerialSteps, light);
     if (this.def.atmosphere) {
       const sg = new SphereGeometry(this.def.radius + this.def.atmosphereHeight, 96, 48);
       this.shell = new Mesh(sg, shellMaterial(this.atmo, skySteps));
       this.shell.renderOrder = 1;
       this.group.add(this.shell);
     }
+  }
+
+  /** Liquid surface over the roots' wet areas (the same sheets the local terrain's level 0 draws). */
+  private buildWater(roots: ChunkData[], aerialSteps: number, light: ProxyLighting): void {
+    const wet = roots.filter((d) => d.water && d.water.index.length > 0);
+    if (wet.length === 0) return;
+    const pos = new Float32Array(wet.length * GRID_VERTS * 3);
+    const nrm = new Float32Array(wet.length * GRID_VERTS * 3);
+    const depth = new Float32Array(wet.length * GRID_VERTS);
+    const count = wet.reduce((n, d) => n + d.water!.index.length, 0);
+    const index = new Uint32Array(count);
+    let k = 0;
+    wet.forEach((d, f) => {
+      const w = d.water!;
+      const [cx, cy, cz] = d.center;
+      for (let i = 0; i < GRID_VERTS; i++) {
+        const o = (f * GRID_VERTS + i) * 3;
+        pos[o] = w.positions[i * 3] + cx;
+        pos[o + 1] = w.positions[i * 3 + 1] + cy;
+        pos[o + 2] = w.positions[i * 3 + 2] + cz;
+        nrm[o] = w.normals[i * 3];
+        nrm[o + 1] = w.normals[i * 3 + 1];
+        nrm[o + 2] = w.normals[i * 3 + 2];
+      }
+      depth.set(w.depth, f * GRID_VERTS);
+      for (let i = 0; i < w.index.length; i++) index[k++] = w.index[i] + f * GRID_VERTS;
+    });
+    const g = new BufferGeometry();
+    g.setAttribute('position', new BufferAttribute(pos, 3));
+    g.setAttribute('normal', new BufferAttribute(nrm, 3));
+    g.setAttribute('depth', new BufferAttribute(depth, 1));
+    g.setIndex(new BufferAttribute(index, 1));
+    g.computeBoundingSphere();
+    this.water = new Mesh(g, proxyWaterMaterial(this.atmo, aerialSteps, light));
+    this.group.add(this.water);
   }
 
   /** Place the proxy for a camera at system position `camSys` (double precision). */
@@ -259,7 +362,7 @@ export class BodyProxy {
   }
 
   dispose(): void {
-    for (const m of [this.surface, this.shell]) {
+    for (const m of [this.surface, this.water, this.shell]) {
       if (!m) continue;
       m.geometry.dispose();
       (m.material as ShaderMaterial).dispose();
@@ -288,6 +391,12 @@ export class BodyProxies {
   };
   onRoot: ((d: ChunkData) => void) | null = null;
   private pending = 0;
+  private disposed = false;
+
+  /** Release the root worker once no job is outstanding (all roots built, or retries exhausted). */
+  private finishRoots(): void {
+    if (this.pending === 0 && this.backend) this.backend.dispose();
+  }
 
   constructor(
     scene: Scene,
@@ -295,28 +404,43 @@ export class BodyProxies {
     private readonly aerialSteps: number,
     private readonly skySteps: number,
     cloudQuality: number,
+    /** Bodies to show (default: the bodies the game plays). */
+    ids: readonly BodyId[] = BODY_IDS,
   ) {
     scene.add(this.group);
-    for (const id of BODY_IDS) {
+    for (const id of ids) {
       const p = new BodyProxy(BODIES[id], cloudQuality);
       this.proxies.set(id, p);
       this.group.add(p.group);
     }
     if (backend) {
       const reqs: { id: BodyId; face: number }[] = [];
-      for (const id of BODY_IDS) for (let f = 0; f < 6; f++) reqs.push({ id, face: f });
+      for (const id of ids) for (let f = 0; f < 6; f++) reqs.push({ id, face: f });
+      const attempts = new Map<number, number>();
+      const post = (i: number) => {
+        const r = reqs[i - 1];
+        backend.post(i, { key: chunkKey(r.face, 0, 0, 0), bodyId: r.id, face: r.face, level: 0, x: 0, y: 0, priority: 0 }, 0);
+      };
       backend.onResult = (jobId, data, err) => {
         this.pending--;
         if (!data) {
-          console.error('Proxy root generation failed', err);
+          // Retry with back-off (e.g. a dataset that failed to download): a body
+          // must not lose its proxy for the session over one transient failure.
+          const n = (attempts.get(jobId) ?? 0) + 1;
+          attempts.set(jobId, n);
+          if (n === 1 || n === 6) console.error('Proxy root generation failed', err);
+          if (n < 6 && !this.disposed) {
+            this.pending++;
+            setTimeout(() => (this.disposed ? (this.pending--, this.finishRoots()) : post(jobId)), 2000 * 2 ** (n - 1));
+          }
         } else {
           this.addRoot(data);
         }
-        if (this.pending === 0) backend.dispose();
+        this.finishRoots();
       };
-      reqs.forEach((r, i) => {
+      reqs.forEach((_, i) => {
         this.pending++;
-        backend.post(i + 1, { key: chunkKey(r.face, 0, 0, 0), bodyId: r.id, face: r.face, level: 0, x: 0, y: 0, priority: 0 }, 0);
+        post(i + 1);
       });
     }
   }
@@ -349,6 +473,7 @@ export class BodyProxies {
   }
 
   dispose(): void {
+    this.disposed = true;
     for (const p of this.proxies.values()) p.dispose();
     this.backend?.dispose();
   }

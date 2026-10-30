@@ -532,7 +532,8 @@ export function buildShipModel(): ShipVisual {
   // Ladder at the boarding point (visible when landed).
   const ladderParts: BufferGeometry[] = [];
   for (let k = 0; k < 5; k++) {
-    ladderParts.push(new BoxGeometry(0.5, 0.04, 0.04).translate(BOARDING_POINT.x, BOARDING_POINT.y + 0.35 + k * 0.42, BOARDING_POINT.z).toNonIndexed());
+    // Rungs span the rails, which stand 0.5 m apart along z.
+    ladderParts.push(new BoxGeometry(0.04, 0.04, 0.5).translate(BOARDING_POINT.x, BOARDING_POINT.y + 0.35 + k * 0.42, BOARDING_POINT.z).toNonIndexed());
   }
   for (const dz of [-0.25, 0.25]) {
     ladderParts.push(new BoxGeometry(0.05, 2.2, 0.05).translate(BOARDING_POINT.x, BOARDING_POINT.y + 1.1, BOARDING_POINT.z + dz).toNonIndexed());

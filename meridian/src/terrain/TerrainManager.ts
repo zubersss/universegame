@@ -6,11 +6,12 @@ import {
   Mesh,
   Sphere,
   Vector3,
+  type Material,
   type MeshStandardMaterial,
 } from 'three';
 import type { BodyDef } from '../world/bodies';
 import { chunkBounds, chunkKey, dirToFace, faceCubePoint, faceDir } from '../world/cube';
-import { levelSpacing, makeChunkIndex, type ChunkData } from './chunkGen';
+import { GRID_VERTS, levelSpacing, makeChunkIndex, type ChunkData } from './chunkGen';
 import type { ChunkRequest, ChunkStore } from './ChunkStore';
 import { MORPH_LEVELS } from './terrainMaterial';
 
@@ -107,6 +108,8 @@ export class TerrainManager {
    * toward the level-0 roots (the mesh the body's distant proxy shows).
    */
   holdCoarse = false;
+  /** Material for liquid surfaces (chunks with water data get a child mesh); null = no water drawn. */
+  waterMaterial: Material | null = null;
 
   constructor(
     readonly def: BodyDef,
@@ -260,6 +263,22 @@ export class TerrainManager {
     m.receiveShadow = true;
     m.castShadow = n.level >= this.def.maxLevel - 3;
     m.name = n.key;
+    if (d.water && d.water.index.length > 0 && this.waterMaterial) {
+      // Liquid surface as a child: same transform, visibility and lifetime as its chunk.
+      const wg = new BufferGeometry();
+      wg.setAttribute('position', new BufferAttribute(d.water.positions, 3));
+      wg.setAttribute('normal', new BufferAttribute(d.water.normals, 3));
+      wg.setAttribute('depth', new BufferAttribute(d.water.depth, 1));
+      wg.setAttribute('tileCoord', new BufferAttribute(d.tile.subarray(0, GRID_VERTS * 3), 3));
+      wg.setIndex(new BufferAttribute(d.water.index, 1));
+      wg.boundingSphere = g.boundingSphere.clone();
+      const wm = new Mesh(wg, this.waterMaterial);
+      wm.matrixAutoUpdate = false;
+      wm.renderOrder = 1;
+      wm.receiveShadow = true;
+      wm.name = `${n.key}:water`;
+      m.add(wm);
+    }
     this.root.add(m);
     n.mesh = m;
     this.meshNodes.add(n);
@@ -269,6 +288,7 @@ export class TerrainManager {
   private disposeMesh(n: TNode): void {
     if (!n.mesh) return;
     this.root.remove(n.mesh);
+    for (const c of n.mesh.children) (c as Mesh).geometry.dispose();
     const g = n.mesh.geometry;
     g.setIndex(null); // keep the shared index buffer alive
     g.dispose();

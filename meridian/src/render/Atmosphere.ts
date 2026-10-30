@@ -259,7 +259,9 @@ export function createSkyMesh(steps: number): Mesh {
       uniform mat4 uCamRot;
       varying vec3 vDir;
       void main() {
-        vec4 v = uInvProj * vec4(position.xy, 1.0, 1.0);
+        // View ray through the near plane: at the far plane w underflows in float32
+        // when far/near is large (orbit far planes), turning every ray into NaN.
+        vec4 v = uInvProj * vec4(position.xy, -1.0, 1.0);
         vDir = (uCamRot * vec4(v.xyz / v.w, 0.0)).xyz;
         gl_Position = vec4(position.xy, 1.0, 1.0);
       }`,

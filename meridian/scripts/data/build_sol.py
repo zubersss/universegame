@@ -23,6 +23,66 @@ E = 'estimated'
 F = 'fictional'
 
 
+def earth_orientation(jd_tdb):
+    """Earth's north pole and prime-meridian directions at the epoch, J2000 ecliptic unit vectors.
+
+    IAU 2006/2000A celestial-to-terrestrial matrix (erfa.c2t06a), polar motion 0,
+    UT1 = TT - 69.2 s (TAI-UTC 37 s, UT1-UTC ~ 0)."""
+    import erfa
+    eps = math.radians(84381.448 / 3600.0)
+    c, s = math.cos(eps), math.sin(eps)
+    m = erfa.c2t06a(jd_tdb, 0.0, jd_tdb, -69.2 / 86400.0, 0.0, 0.0)
+
+    def ecl(v):
+        return [round(float(v[0]), 12), round(float(c * v[1] + s * v[2]), 12), round(float(-s * v[1] + c * v[2]), 12)]
+
+    return {
+        'north': ecl(m[2]), 'primeMeridian': ecl(m[0]), 'tag': 'measured',
+        'source': 'IAU 2006/2000A precession-nutation and Earth rotation angle (SOFA/ERFA c2t06a), polar motion neglected',
+    }
+
+
+def iau_orientation(alpha0_deg, delta0_deg, w_deg):
+    """North pole and prime meridian (J2000 ecliptic unit vectors) from an IAU
+    rotation model: pole right ascension/declination and prime-meridian angle W
+    measured from the ascending node of the body equator on the ICRF equator."""
+    eps = math.radians(84381.448 / 3600.0)
+    c, s = math.cos(eps), math.sin(eps)
+    a, d, w = (math.radians(x) for x in (alpha0_deg, delta0_deg, w_deg))
+    pole = (math.cos(d) * math.cos(a), math.cos(d) * math.sin(a), math.sin(d))
+    node = (-math.sin(a), math.cos(a), 0.0)
+    q = (pole[1] * node[2] - pole[2] * node[1], pole[2] * node[0] - pole[0] * node[2], pole[0] * node[1] - pole[1] * node[0])
+    x = tuple(node[i] * math.cos(w) + q[i] * math.sin(w) for i in range(3))
+
+    def ecl(v):
+        return [round(v[0], 12), round(c * v[1] + s * v[2], 12), round(-s * v[1] + c * v[2], 12)]
+
+    return ecl(pole), ecl(x)
+
+
+def mars_orientation(jd_tdb):
+    """IAU WGCCRE 2009 Mars model without periodic terms (planetocentric, east-positive)."""
+    d = jd_tdb - 2451545.0
+    t = d / 36525.0
+    north, x = iau_orientation(317.68143 - 0.1061 * t, 52.88650 - 0.0609 * t, (176.630 + 350.89198226 * d) % 360.0)
+    return {'north': north, 'primeMeridian': x, 'tag': 'estimated',
+            'source': 'IAU WGCCRE 2009 rotation model for Mars (reference values entered without a fetched source; periodic terms omitted)'}
+
+
+def moon_orientation(jd_tdb, moon_km, earth_km):
+    """Moon: IAU mean pole; prime meridian toward Earth at the epoch (the mean
+    sub-Earth meridian, librations of up to ~7 deg ignored)."""
+    d = jd_tdb - 2451545.0
+    t = d / 36525.0
+    north, _ = iau_orientation(269.9949 + 0.0031 * t, 66.5392 + 0.0130 * t, 0.0)
+    to_e = [earth_km[i] - moon_km[i] for i in range(3)]
+    k = sum(to_e[i] * north[i] for i in range(3))
+    x = [to_e[i] - k * north[i] for i in range(3)]
+    l = math.sqrt(sum(v * v for v in x))
+    return {'north': north, 'primeMeridian': [round(v / l, 12) for v in x], 'tag': 'estimated',
+            'source': 'IAU mean lunar pole; prime meridian toward Earth at the epoch (librations ignored)'}
+
+
 def f(v, tag=M, unit=None):
     d = {'value': v, 'tag': tag}
     if unit:
@@ -67,14 +127,22 @@ def main():
             'gravity': f(g, pt, 'm/s^2'),
             'massKg': f(m, pt, 'kg'),
             'rotationHours': f(rot, pt, 'h'),
-            'hasAtmosphere': f(atm, M),
+            'hasAtmosphere': f(atm, pt),
             'source': src if phys_verified else 'pending (reference: ' + src + ')',
             'verified': phys_verified,
         }
         if a is not None:
             b['semiMajorAxisKm'] = f(a, pt, 'km')
+        if bid == 'earth':
+            b['orientation'] = earth_orientation(EPOCH_JD)
+        elif bid == 'mars':
+            b['orientation'] = mars_orientation(EPOCH_JD)
+        elif bid == 'moon' and 'moon' in vec and 'earth' in vec:
+            b['orientation'] = moon_orientation(EPOCH_JD, vec['moon'], vec['earth'])
         if bid == 'sun':
+            # Exact by definition: the frame is heliocentric (origin at the Sun's centre).
             b['positionKm'] = f([0.0, 0.0, 0.0], M, 'km')
+            b['positionKm']['note'] = 'frame origin by definition (heliocentric frame)'
             b['luminosityW'] = f(3.828e26, pt, 'W')
             b['effectiveTempK'] = f(5772, pt, 'K')
         elif bid in vec:
@@ -114,13 +182,20 @@ def main():
                 'license': 'US Government work (NASA), public domain in the US',
             },
             'positions': POS[src_kind],
+            'belts': {
+                'url': None, 'accessed': None,
+                'note': 'PENDING: conventional belt extents and typical inclinations entered without a fetched source; tagged estimated.',
+                'license': 'facts (no licensed material)',
+            },
         },
         'bodies': bodies,
         'belts': [
             {'id': 'asteroid-belt', 'name': 'Main asteroid belt', 'innerAu': f(2.1, E, 'au'), 'outerAu': f(3.3, E, 'au'),
-             'note': 'Conventional extent of the main belt (between the 4:1 and 2:1 Kirkwood gaps).'},
+             'halfThicknessAu': f(0.45, E, 'au'),
+             'note': 'Conventional extent of the main belt (between the 4:1 and 2:1 Kirkwood gaps); half-thickness from a typical ~10 deg inclination at 2.7 AU.'},
             {'id': 'kuiper-belt', 'name': 'Kuiper belt', 'innerAu': f(30.0, E, 'au'), 'outerAu': f(50.0, E, 'au'),
-             'note': 'Conventional extent from Neptune\'s orbit to the 1:2 resonance edge.'},
+             'halfThicknessAu': f(7.0, E, 'au'),
+             'note': 'Conventional extent from Neptune\'s orbit to the 1:2 resonance edge; half-thickness from a typical ~10 deg inclination at 40 AU.'},
         ],
     }
     print(json.dumps(doc, indent=1))

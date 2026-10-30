@@ -3,10 +3,13 @@
 // All distances are meters in system coordinates (right-handed).
 // The catalog holds every system's bodies (Sol from src/data/sol.json via
 // catalog.ts, the fictional Quiet System below); `BODY_IDS` is the set the
-// game currently plays and iterates (travel, gravity, proxies).
+// game currently plays and iterates (travel, gravity, proxies), switched with
+// setPlaySystem.
 
 import { hashCombine } from '../core/rng';
-import { BELTS, buildSolBodies } from './catalog';
+import { BELTS, DEFAULT_FRAME, buildSolBodies } from './catalog';
+
+export { DEFAULT_FRAME };
 import { maxLevelFor } from './scale';
 import type { ZoneDef } from './zones';
 
@@ -17,8 +20,6 @@ export type BodyKind = 'star' | 'planet' | 'moon';
 export type Explore = 'surface' | 'zone' | 'none';
 export type DataTag = 'measured' | 'estimated' | 'fictional';
 
-/** The bodies the game plays now (the Quiet System until LEAD switches travel to Sol in L7). */
-export const BODY_IDS: readonly BodyId[] = ['ilex', 'vesper', 'cairn'];
 
 export const WORLD_SEED = 0x6d657231;
 /** Bump when the surface generator changes in a way that alters geography. */
@@ -65,6 +66,18 @@ export interface BodyPalette {
   proxyNight: number;
 }
 
+/**
+ * Body-fixed axes in the system frame (unit vectors): north pole, prime
+ * meridian (latitude 0, longitude 0) and east = north × meridian. Bodies do
+ * not rotate in play; the frame is their orientation at EPOCH where known.
+ */
+export interface BodyFrame {
+  north: [number, number, number];
+  meridian: [number, number, number];
+  east: [number, number, number];
+  tag: DataTag;
+}
+
 /** Scientific values (never gameplay-scaled); `tags` labels each field. */
 export interface RealData {
   radiusKm: number;
@@ -98,6 +111,8 @@ export interface BodyDef {
   real: RealData | null;
   /** Gameplay center [m, system frame]. */
   center: [number, number, number];
+  /** Body-fixed orientation (latitude/longitude axes) in the system frame. */
+  frame: BodyFrame;
   radius: number;
   atmosphereHeight: number;
   gravity: number;
@@ -105,6 +120,8 @@ export interface BodyDef {
   /** Contact/max-detail quadtree level: ceil(log2(2R/128)). */
   maxLevel: number;
   seed: number;
+  /** Height above the datum [m] of the ocean surface, or null for bodies without an ocean. */
+  seaLevel: number | null;
   /** 'data' bodies sample a dataset for the large-scale layer and use the seed only for infill. */
   surface: 'procedural' | 'data';
   dataset?: string;
@@ -127,6 +144,8 @@ function seedFor(id: BodyId): number {
 const QUIET = {
   system: 'quiet',
   parent: null,
+  frame: DEFAULT_FRAME,
+  seaLevel: null,
   explore: 'surface',
   real: null,
   surface: 'procedural',
@@ -245,6 +264,29 @@ export const SYSTEM_BODY_IDS: Record<SystemId, readonly BodyId[]> = {
   sol: SOL_BODIES.map((b) => b.id),
   proxima: [],
 };
+
+/** The system the game plays now (ES-module live binding: importers see setPlaySystem's changes). */
+export let PLAY_SYSTEM: SystemId = 'quiet';
+/** The bodies the game plays now: travel, gravity, proxies and survey iterate these. */
+export let BODY_IDS: readonly BodyId[] = SYSTEM_BODY_IDS.quiet;
+
+/**
+ * Switch the played body set (all ids must be catalog ids of one system, at
+ * least one). Main thread only; workers look bodies up by id and need no switch.
+ */
+export function setPlaySystem(ids: readonly BodyId[]): void {
+  if (ids.length === 0) throw new Error('setPlaySystem: no bodies');
+  const unknown = ids.filter((id) => !isBodyId(id));
+  if (unknown.length) throw new Error(`setPlaySystem: unknown bodies ${unknown.join(', ')}`);
+  const systems = new Set(ids.map((id) => BODIES[id].system));
+  if (systems.size !== 1) throw new Error(`setPlaySystem: bodies from several systems (${[...systems].join(', ')})`);
+  if (new Set(ids).size !== ids.length) throw new Error('setPlaySystem: duplicate bodies');
+  PLAY_SYSTEM = BODIES[ids[0]].system;
+  BODY_IDS = Object.freeze([...ids]);
+}
+
+/** Sol bodies played in M2 (the charter's Sun, eight planets and Moon), in travel order; Europa and Titan join with W9. */
+export const SOL_M2_BODIES: readonly BodyId[] = ['sun', 'mercury', 'venus', 'earth', 'moon', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'];
 
 /** Sol travel order outward from the Sun, with belt bands (from catalog.BELTS) between the bodies. */
 export const SOL_TRAVEL_ORDER: readonly ({ body: BodyId } | { belt: string })[] = [
