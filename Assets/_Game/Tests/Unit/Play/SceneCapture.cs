@@ -129,6 +129,40 @@ namespace Meridian.Tests
             side.dayNight.Override = null;
         }
 
+        /// <summary>U-026 evidence: Mars at noon, clear and in a full dust storm.</summary>
+        [UnityTest]
+        public IEnumerator CaptureDustStorm()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
+            yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(Meridian.Planets.PlanetId.Mars));
+            var side = director.PlanetSide;
+            float until = Time.realtimeSinceStartup + 10f;
+            while ((side.backdrop.LayersLoaded < 3 || !side.terrain.IsSettled || !side.dustStorm.PuffsLoaded) && Time.realtimeSinceStartup < until) yield return null;
+            for (int i = 0; i < 60; i++) yield return new WaitForFixedUpdate();
+            side.dayNight.Override = 0.5f;
+            var cam = side.sideCamera;
+            cam.GetComponent<Meridian.Player.CameraFollow>().enabled = false;
+            for (int i = 0; i < 3; i++) yield return null;
+            yield return Save(cam, $"{name}_clear");
+            var time = UnityEngine.Object.FindAnyObjectByType<TimeSystem>();
+            side.dustStorm.Force(0.5f, 300f);
+            time.Advance(0.5f + Meridian.Planet.Weather.DustStorm.RampRealSeconds + 1f);
+            for (int i = 0; i < 10; i++) yield return null;
+            TestContext.Out.WriteLine($"[MERIDIAN] storm: intensity {side.dustStorm.Intensity:F2} visibility {side.dustStorm.Visibility:F1} m");
+            yield return Save(cam, $"{name}_storm");
+            side.dayNight.Override = null;
+        }
+
         static IEnumerator Save(Camera cam, string name)
         {
             var rt = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);

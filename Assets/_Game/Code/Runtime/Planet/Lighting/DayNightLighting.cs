@@ -1,3 +1,4 @@
+using System;
 using Meridian.Core;
 using Meridian.Planets;
 using UnityEngine;
@@ -29,6 +30,13 @@ namespace Meridian.Planet.Lighting
         /// <summary>Tests and captures: pin the local time (null = follow the clock).</summary>
         public float? Override;
 
+        /// <summary>Weather (U-026): 0..1 dims the Sun and warms the ambient toward dust; Flash adds a static-discharge burst.</summary>
+        [NonSerialized] public float StormDim, Flash;
+        /// <summary>The current sky/backdrop multiplier (used by weather to darken its dust at night).</summary>
+        public Color SkyTint { get; private set; } = Color.white;
+
+        static readonly Color StormAmbient = new Color(0.95f, 0.72f, 0.52f);
+
         public void ConfigureFor(PlanetConfig planet)
         {
             Planet = planet;
@@ -47,12 +55,12 @@ namespace Meridian.Planet.Lighting
 
             if (ambient != null)
             {
-                ambient.intensity = DayNightMath.AmbientIntensity(id, t);
-                ambient.color = DayNightMath.AmbientColor(id, t);
+                ambient.intensity = DayNightMath.AmbientIntensity(id, t) * (1f + 0.4f * StormDim) + 1.5f * Flash;
+                ambient.color = Color.Lerp(DayNightMath.AmbientColor(id, t), StormAmbient, 0.6f * StormDim);
             }
             if (sun != null)
             {
-                float k = DayNightMath.SunIntensity(id, t);
+                float k = DayNightMath.SunIntensity(id, t) * (1f - 0.75f * StormDim); // dust blots out the direct Sun
                 sun.intensity = k; // stays enabled at 0 by night: its shaders stay warm (U-028), no dawn hitch
                 sun.color = DayNightMath.SunColor(id, t);
                 if (view != null)
@@ -62,7 +70,8 @@ namespace Meridian.Planet.Lighting
                     sun.transform.position = new Vector3(c.x + d.x, c.y + d.y, 0f);
                 }
             }
-            if (backdrop != null) backdrop.SetTint(DayNightMath.SkyTint(id, t));
+            SkyTint = DayNightMath.SkyTint(id, t);
+            if (backdrop != null) backdrop.SetTint(SkyTint);
         }
     }
 }

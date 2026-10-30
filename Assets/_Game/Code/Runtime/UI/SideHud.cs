@@ -19,6 +19,7 @@ namespace Meridian.UI
         public PlayerController player;
         public SideShip ship;
         public ShipBoarding boarding;
+        public Meridian.Planet.Weather.DustStorm storm;
 
         public Image HealthFill { get; private set; }
         public Image OxygenFill { get; private set; }
@@ -28,12 +29,17 @@ namespace Meridian.UI
         public Text HealthText { get; private set; }
         public Text FuelText { get; private set; }
         public Text AltText { get; private set; }
+        /// <summary>U-026: "DUST STORM IN 45 s" during the warning, "DUST STORM" while it blows; empty otherwise.</summary>
+        public Text StormText { get; private set; }
 
         PlanetConfig planet;
         PlayerVitals vitals;
         Image accentLine;
         static UiKit.NumberStrings numbers;
         int lastHealth = -1, lastFuel = -1, lastAlt = int.MinValue;
+        int lastStorm = -2;
+        static string[] stormWarnings;
+        const string StormNow = "DUST STORM";
 
         void Awake()
         {
@@ -67,6 +73,28 @@ namespace Meridian.UI
             YouMarker = UiKit.Panel(bar, "You", new Vector2(0.5f, 0f), Vector2.zero, new Vector2(14f, 6f), theme.text).rectTransform;
             AltText = UiKit.Text(root, "AltValue", right, new Vector2(-64f, -BarHeight * 0.5f - 22f), new Vector2(160f, 24f), 18, false, TextAnchor.MiddleRight);
             AltText.rectTransform.pivot = new Vector2(1f, 0.5f);
+
+            if (stormWarnings == null)
+            {
+                stormWarnings = new string[61];
+                for (int i = 0; i <= 60; i++) stormWarnings[i] = "DUST STORM IN " + i + " s";
+            }
+            StormText = UiKit.Text(root, "Storm", new Vector2(0.5f, 1f), new Vector2(0f, -40f), new Vector2(600f, 28f), 20, true, TextAnchor.MiddleCenter, new Color(1f, 0.72f, 0.45f, 1f));
+            StormText.text = "";
+        }
+
+        void UpdateStorm()
+        {
+            int code = -1; // -1 none, 0..60 warning seconds, 61 storm
+            if (storm != null && storm.OnMars)
+            {
+                if (storm.Phase == Meridian.Planet.Weather.StormPhase.Storm) code = 61;
+                else if (storm.Phase == Meridian.Planet.Weather.StormPhase.Warning && storm.time != null)
+                    code = Mathf.Clamp(Mathf.CeilToInt((float)((storm.Current.start - storm.time.GameSeconds) / TimeSystem.GameSecondsPerRealSecond)), 0, 60);
+            }
+            if (code == lastStorm) return;
+            lastStorm = code;
+            StormText.text = code < 0 ? "" : code == 61 ? StormNow : stormWarnings[code];
         }
 
         void Label(Transform root, string text, float y) =>
@@ -99,6 +127,7 @@ namespace Meridian.UI
                 int f = Mathf.CeilToInt(state.fuel);
                 if (f != lastFuel) { lastFuel = f; FuelText.text = numbers[f]; FuelFill.fillAmount = state.fuel / Mathf.Max(1f, state.tankCapacity); }
             }
+            UpdateStorm();
             if (planet == null) return;
             bool aboard = boarding != null && boarding.Aboard;
             var body = aboard && ship != null ? ship.Body : player != null && player.isActiveAndEnabled ? player.Body : null;

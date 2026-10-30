@@ -197,6 +197,13 @@ namespace Meridian.EditorTools
             dayNight.view = sideComp.sideCamera;
             dayNight.backdrop = planetBackdrop;
             sideComp.dayNight = dayNight;
+            var dustStorm = sideRoot.AddComponent<Meridian.Planet.Weather.DustStorm>();
+            dustStorm.view = sideComp.sideCamera;
+            dustStorm.focus = pc.transform;
+            dustStorm.dayNight = dayNight;
+            dustStorm.fogMaterial = EnsureMaterial("Assets/_Game/Settings/Materials/DustFog.mat", "MERIDIAN/DustFog");
+            sideComp.dustStorm = dustStorm;
+            sideHud.storm = dustStorm;
             EditorSceneManager.SaveScene(side, PlanetSidePath);
 
             EditorBuildSettings.scenes = new[]

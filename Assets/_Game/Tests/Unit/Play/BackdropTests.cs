@@ -60,7 +60,9 @@ namespace Meridian.Tests
 
         static void AssertLayersTileInX(PlanetBackdrop b)
         {
-            Assert.AreEqual(1, b.GetComponentsInChildren<MeshRenderer>().Length, "one quad, one pass for sky + 3 layers");
+            int quads = 0;
+            foreach (var mr in b.GetComponentsInChildren<MeshRenderer>(true)) if (mr.name.StartsWith("Backdrop")) quads++;
+            Assert.AreEqual(1, quads, "one quad, one pass for sky + 3 layers");
             for (int i = 0; i < 3; i++)
             {
                 var tex = b.LayerTexture(i);
