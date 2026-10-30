@@ -20,10 +20,19 @@ MonoBehaviour:
   - fx/escape_band/base
   - fx/thruster/base
   - planets/earth/glow
+  - planets/jupiter/glow
   - planets/mars/glow
+  - planets/neptune/glow
+  - planets/saturn/glow
   - planets/sun/glow
   - planets/sun/surface
+  - planets/uranus/glow
+  - planets/venus/glow
   - props/common/calibration
+  - props/common/lamp
+  - props/common/landing_pad
+  - props/common/shelter_door
+  - props/common/smelter
   - ships/pilgrim/side
   - ships/pilgrim/side_legs
   - ships/pilgrim/top

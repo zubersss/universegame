@@ -1,0 +1,103 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: icons
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: icons
+  m_GUID: 2b9ee71490380d1489a3b9317ca715f4
+  m_SerializeEntries:
+  - m_GUID: 10b85a935de85c344ac2489eb9147fed
+    m_Address: icons/copper/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1b918b7c3bcb4b846a43c7958ba61108
+    m_Address: icons/sand/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2afe688dc08662943975af3a1c4cd4de
+    m_Address: icons/iron/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2e0a7cf91e20a0d4fa7aa8bd9a488c2a
+    m_Address: icons/nickel/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 32e62b433acbfa54d846fddf9a43d97c
+    m_Address: icons/silica/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3425c2eb0e42a6f4287b9f1b29f0afc3
+    m_Address: icons/stone/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5f99a95a3fa6f0248a196ffc4f976ac8
+    m_Address: icons/carbon/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 62176737a27305147bf80275647ce5f4
+    m_Address: icons/hematite/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 70ded1c061e0867439cc0b94ac088929
+    m_Address: icons/perchlorate/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9cd7db039a01aad48b330d041b166754
+    m_Address: icons/aluminium/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a2a2e10700666d94aa4cf4a0c68af7eb
+    m_Address: icons/wood/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c10600238fcbfde4cbd07512a8e1acdc
+    m_Address: icons/water_ice/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: df7e6f1106efa8f42a4d931a69f789ee
+    m_Address: icons/clay/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f0869b06b3b4a0147999e20b0c02591f
+    m_Address: icons/oxygen/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f1430af326136694281b1645a70b53a3
+    m_Address: icons/living_seed/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f7fcba5861ddac743baf209bdbadad16
+    m_Address: icons/launch_fuel/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: ff1a292d8f028634a91e87d0af878286, type: 2}
+    - {fileID: 11400000, guid: 66adc79f7016df2429b3c1a1e6f2dfa8, type: 2}
