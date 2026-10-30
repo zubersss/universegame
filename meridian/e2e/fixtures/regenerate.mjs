@@ -45,7 +45,14 @@ for (const [body, key] of [['moon', 'Digit5'], ['mars', 'Digit6']]) {
   await page.keyboard.press('Tab');
   await until(`s.state === "playing" && s.navTarget === "${body}"`, 60_000);
   await page.evaluate((to) => window.__meridian.autopilot({ kind: 'travel', to }), body);
-  await page.waitForFunction(() => window.__meridian.autopilotState().phase === 'landed', null, { timeout: 3 * 60 * 60 * 1000, polling: 1000 });
+  // Progress every 30 s (wall time) until the autopilot has landed.
+  for (let polls = 0; ; polls++) {
+    const st = await page.evaluate(() => ({ ap: window.__meridian.autopilotState(), s: window.__meridian.snapshot() }));
+    if (st.ap.phase === 'landed') break;
+    if (polls > 3 * 720) throw new Error(`no landing on ${body} after 3 h: ${JSON.stringify(st.ap)}`);
+    if (polls % 6 === 0) console.log(`${body}: sim ${st.s.simTime.toFixed(0)} s, ${st.s.mode} at ${st.s.body}, autopilot ${st.ap.phase} (wp ${st.ap.wp}, ${(st.ap.distance / 1000).toFixed(1)} km)`);
+    await page.waitForTimeout(5000);
+  }
   await page.evaluate(() => window.__meridian.autopilot(null));
   await until(`s.mode === "LANDED" && s.body === "${body}" && s.bodyShown`, 300_000);
   // Settle on the pad, then export from the pause menu.
