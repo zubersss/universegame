@@ -368,10 +368,23 @@ def check(entry, maps, clips, wh, preview):
     tile = entry.get("tileable")
     seam = ""
     if tile:
-        ok, seam = post.check_tileable(maps["color"], tile, float(entry.get("seam_limit", 2.0)))
+        ok, seam = post.check_tileable(tile_image(entry, maps["color"]), tile, float(entry.get("seam_limit", 2.0)))
         if not ok:
             problems.append(f"tile check failed: {seam}")
     return problems, seam
+
+
+def tile_image(entry, color):
+    """What the 2x tile check looks at: the whole image, or for tile sets (`tile_index` +
+    `tile_size`) the one cell that must tile with itself (the fully surrounded block)."""
+    idx = entry.get("tile_index")
+    if idx is None:
+        return color
+    full = entry["size"][0]
+    ts = int(entry.get("tile_size", 128) * color.shape[1] / full)
+    cols = color.shape[1] // ts
+    r, c = divmod(int(idx), cols)
+    return color[r * ts:(r + 1) * ts, c * ts:(c + 1) * ts]
 
 
 def write_outputs(entry, maps, clips, wh, preview):
@@ -409,7 +422,7 @@ def write_outputs(entry, maps, clips, wh, preview):
             json.dump(meta, f, indent=2)
             f.write("\n")
         sizes.append("json")
-    sheet = post.contact_sheet(maps, entry.get("tileable"))
+    sheet = post.contact_sheet(maps, entry.get("tileable"), tile_img=tile_image(entry, maps["color"]))
     os.makedirs(PREVIEW, exist_ok=True)
     pngio.write_png(os.path.join(PREVIEW, f"{key.replace('/', '__')}_contact.png"), sheet)
     return sizes

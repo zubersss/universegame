@@ -162,7 +162,7 @@ def _fit(rgb, max_h):
     return rgb[::step, ::step]
 
 
-def contact_sheet(maps, tile_mode=None, max_h=512, gap=8):
+def contact_sheet(maps, tile_mode=None, max_h=512, gap=8, tile_img=None):
     """maps: dict name -> uint8 RGBA. Panels left to right: color (over checker), color RGB
     with alpha ignored (shows the dilation), normal, relit (upper-right light), emission, mask;
     second row: 2x tile of the color if tileable."""
@@ -180,7 +180,7 @@ def contact_sheet(maps, tile_mode=None, max_h=512, gap=8):
     rows = [panels]
     if tile_mode:
         reps = (2 if "y" in tile_mode else 1, 2 if "x" in tile_mode else 1, 1)
-        tiled = _over_checker(np.tile(col, reps))
+        tiled = _over_checker(np.tile(col if tile_img is None else tile_img, reps))
         rows.append([_fit(tiled, max_h)])
     lines = []
     for row in rows:
