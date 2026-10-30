@@ -6,6 +6,7 @@
 import { Quaternion, Vector3 } from 'three';
 import type { Game } from '../game/Game';
 import { CRUISE, FLIGHT } from '../game/config';
+import { surfaceReady } from '../game/playSystem';
 import { planPath, safetyRadius } from '../ship/Cruise';
 import { BODIES, BODY_IDS, type BodyId } from '../world/bodies';
 
@@ -43,7 +44,11 @@ export interface WalkGoal {
 
 export interface TravelGoal {
   kind: 'travel';
-  /** Destination body: climb out, cruise via waypoints, descend, then land at its landing site. */
+  /**
+   * Destination body: climb out, cruise via waypoints, descend, then land at its
+   * landing site; at a body with no surface in play (approach only) it ends
+   * in phase 'arrived', stopped at the approach exit.
+   */
   to: BodyId;
   /** Hold the brake once this fraction of the first cruise leg is covered (exercises brake cancel). */
   brakeAt?: number;
@@ -110,7 +115,7 @@ export class Autopilot {
   }
 
   release(): void {
-    for (const k of ['KeyW', 'KeyS', 'Space', 'ControlLeft', 'ShiftLeft', 'KeyA', 'KeyD', 'KeyX']) this.hold(k, false);
+    for (const k of ['KeyW', 'KeyS', 'Space', 'ControlLeft', 'ShiftLeft', 'KeyA', 'KeyD', 'KeyX', 'KeyQ', 'MouseRight', 'KeyC']) this.hold(k, false);
   }
 
   /** Drive the virtual stick toward yaw/pitch commands (-1..1) through injected mouse motion. */
@@ -145,12 +150,12 @@ export class Autopilot {
 
   private planRoute(to: BodyId): void {
     const def = BODIES[to];
-    const sites = this.game.landingSiteOf(to);
-    const n = new Vector3(...sites);
     const c = bodyCenter(to);
     const S = safetyRadius(def);
-    // A gate well above the landing site, then a radial leg that ends inside the
-    // envelope so cruise performs its automatic approach exit on the way in.
+    // A gate well above the landing site (an approach-only body: on the side
+    // facing the ship), then a radial leg that ends inside the envelope so
+    // cruise performs its automatic approach exit on the way in.
+    const n = surfaceReady(def) ? new Vector3(...this.game.landingSiteOf(to)) : this.shipSystem(new Vector3()).sub(c).normalize();
     const gate = c.clone().addScaledVector(n, S + 60000);
     const final = c.clone().addScaledVector(n, S - 5000);
     this.route = [...planPath(this.shipSystem(new Vector3()), gate, PLAN_INFLATE), final];
@@ -219,7 +224,7 @@ export class Autopilot {
       if (game.mode !== 'CRUISING') {
         // Automatic approach exit (or a brake/toggle exit we requested).
         this.release();
-        if (this.wp === this.route.length - 1) this.setPhase('descend');
+        if (this.wp === this.route.length - 1) this.setPhase(surfaceReady(BODIES[g.to]) ? 'descend' : 'arrived');
         else this.setPhase('align');
         return;
       }
@@ -233,7 +238,7 @@ export class Autopilot {
       }
       if (this.wp < this.route.length - 1) {
         const v = ship.speed;
-        if (this.distance < (v * v) / (2 * CRUISE.accel) + v * 0.5 + 4000) {
+        if (this.distance < (v * v) / (2 * game.cruise.accel) + v * 0.5 + 4000) {
           game.input.press('KeyG');
           this.setPhase('leaving');
         }
@@ -257,6 +262,11 @@ export class Autopilot {
       }
       return;
     }
+    if (this.phase === 'arrived') {
+      // Approach only: stop off the body (its keep-out wall holds the ship there).
+      this.hold('KeyX', ship.speed > 5);
+      return;
+    }
     if (this.phase === 'descend') {
       // Head for a point 1.5 km above the landing site, then hand over to the landing goal.
       if (!game.body || !game.bodyShown || game.body.def.id !== g.to) return;
@@ -267,10 +277,17 @@ export class Autopilot {
       _p.copy(aim).sub(ship.currPos);
       const env = game.env.update(ship.currPos);
       const horiz = _f.copy(_p).addScaledVector(env.up, -_p.dot(env.up)).length();
+      if (env.clearance < 3000) {
+        // Low: follow the terrain at 1.5 km toward the site instead of diving at the aim point.
+        this.stepFly(dt, { kind: 'fly', dir, clearance: 1500, throttle: 0.95 });
+      } else {
+        this.steerDir(dt, _p);
+        this.hold('KeyW', ship.flight.throttle < 0.95);
+        this.hold('KeyS', false);
+        this.hold('Space', false);
+        this.hold('ControlLeft', false);
+      }
       this.distance = horiz;
-      this.steerDir(dt, _p);
-      this.hold('KeyW', ship.flight.throttle < 0.95);
-      this.hold('KeyS', false);
       if (horiz < 3000 && env.clearance < 3500) {
         this.release();
         this.goal = { kind: 'land', dir, approachClearance: 70 };
