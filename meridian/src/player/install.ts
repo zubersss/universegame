@@ -7,6 +7,7 @@ import type { OnFootExitReason, OnFootHooks } from '../game/onFoot';
 import type { Player, WalkInput } from './Player';
 import { BlinkPower, type PowerWorld } from '../abilities/powers';
 import { PowerVfx, type VfxFrame } from '../abilities/vfx';
+import { AbilitySounds, type AudioBus } from '../audio/abilitySounds';
 import { bodyGravity } from '../world/environment';
 import { BODIES, isBodyId } from '../world/bodies';
 import { AbilityController, type AbilityEnterContext } from '../abilities/AbilityController';
@@ -73,6 +74,13 @@ export class PlayerRuntime implements OnFootHooks {
   /** Power effects (blink marker and flashes, superspeed streaks); null without a power. */
   private vfx: PowerVfx | null = null;
   private blinksSeen = 0;
+  /** Power sounds through the game's effects bus (silent until GameAudio exposes bus()). */
+  private readonly sounds = new AbilitySounds(() => {
+    const audio = this.game.audio as unknown as { bus?: () => AudioBus | null };
+    return typeof audio.bus === 'function' ? audio.bus() : null;
+  });
+  private logSeen = 0;
+  private refusalSeen: string | null = null;
 
   private blinkCount(): number {
     const rt = this.abilities.runtime;
@@ -96,6 +104,24 @@ export class PlayerRuntime implements OnFootHooks {
     const motion = this.abilities.motion();
     const dash = motion && motion.mode === 'dash' && p.vel.lengthSq() > 1 ? { center: p.pos, dir: _fd.copy(p.vel).normalize(), speed: motion.speed } : null;
     v.update(dt, { up: p.up, camera: this.game.render.camera.position, aim, dash }, this.game.settings.reducedMotion);
+  }
+
+  /** Sounds for one rendered frame: the rush by speed, cues on take-off, blinks and refusals. */
+  private updateSounds(dt: number): void {
+    const s = this.sounds;
+    s.update(dt, this.abilities.motion());
+    const log = this.abilities.log;
+    const changes = this.abilities.changes;
+    if (changes !== this.logSeen) {
+      // Only the newest change can be new this frame (one power step per fixed step at most a few).
+      const last = log[log.length - 1];
+      if (last && last.to === 'flight') s.takeoff();
+      if (last && (last.to === 'blink' || last.from === 'blink')) s.blink();
+      this.logSeen = changes;
+    }
+    const refusal = this.abilities.runtime?.refusal ?? null;
+    if (refusal && refusal !== this.refusalSeen) s.refuse();
+    this.refusalSeen = refusal;
   }
 
   /**
@@ -171,6 +197,7 @@ export class PlayerRuntime implements OnFootHooks {
     const scripted = this.transition ? this.transition.sample(this.transitionTime + (a - 1) * SIM_DT, this.pose) : null;
     p.renderView(dt, a, g.cameraRig, g.settings.reducedMotion, scripted, this.abilities.motion());
     this.updateVfx(dt, p);
+    this.updateSounds(dt);
     return true;
   }
 
@@ -179,6 +206,7 @@ export class PlayerRuntime implements OnFootHooks {
     this.abilities.exit(reason);
     this.vfx?.dispose();
     this.vfx = null;
+    this.sounds.dispose();
   }
 
   /** The ability fields for a save snapshot (schema 2: player.abilityState and unlocked). */

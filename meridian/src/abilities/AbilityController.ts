@@ -187,7 +187,11 @@ export class AbilityController {
     };
   }
 
+  /** State changes so far (the log is bounded; this counts all). */
+  changes = 0;
+
   private note(from: AbilityState, to: AbilityState): void {
+    this.changes++;
     this.log.push({ t: this.clock(), from, to });
     if (this.log.length > LOG_MAX) this.log.splice(0, this.log.length - LOG_MAX);
   }
