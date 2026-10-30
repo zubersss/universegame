@@ -55,6 +55,21 @@ PRESETS = {
         needle=[(30, 58, 38), (40, 70, 44), (52, 80, 46)],
         bark=(82, 68, 56),
     ),
+    # Bible §7.2: butterscotch sky, long shadows, rust/umber/salmon, thin haze.
+    "mars": dict(
+        sun=dict(dir=(-0.85, 0.35, -0.38), strength=3.6, color=(1.0, 0.9, 0.78), angle=0.8),
+        ambient=((0.66, 0.50, 0.38), 0.42),
+        haze=(214, 170, 128),
+        far=dict(W=9000.0, level=0.40, peak=0.70, rock=[(150, 92, 64), (184, 120, 84)], snow=(0, 0, 0),
+                 snowline=9.0, haze=(0.42, 0.00004), tilt=6.0, terrace=3),
+        mid=dict(W=700.0, level=0.40, amp=0.16, terrace=3, depth=(20, 140), haze=(0.22, 0.0012),
+                 ground=[(150, 84, 54), (178, 108, 72)], strata=(6.0, (198, 132, 92), 0.35),
+                 rocks=260, rock_h=(3, 10), tilt=12.0, frame_up=-0.08, fog=(0.18, 0.1)),
+        near=dict(W=64.0, level=0.26, amp=0.04, depth=(3, 14), haze=(0.05, 0.003),
+                  ground=[(146, 80, 50), (176, 108, 72)], dunes=True,
+                  rocks=170, rock_h=(0.3, 2.4), pebbles=1400, tilt=18.0, frame_up=0.12),
+        rock=[(64, 50, 46), (84, 62, 52), (54, 44, 42), (104, 70, 54)],
+    ),
 }
 
 
@@ -571,6 +586,8 @@ def far_layer(P, spec, seed, preview, work):
     top = W / 2
     ridge = fft_noise(rng, ny + 1, nx, 30, 640, 1.6)
     ridge = (ridge - ridge.min()) / (ridge.max() - ridge.min())
+    if spec.get("terrace"):
+        ridge = terrace01(ridge, spec["terrace"])
     rough = fft_noise(rng, ny + 1, nx, 3, 40, 0.6)
     depth_m = W * 0.5
     def zf(i, j):
@@ -613,6 +630,116 @@ def far_layer(P, spec, seed, preview, work):
     return render(scene, work, "far" + str(seed))
 
 
+def terrace01(a, levels, cliff=0.3):
+    """Mesa profile for values in [0, 1]: flat steps joined by steep (not vertical) cliffs."""
+    t = a * levels
+    k = np.floor(t)
+    f = np.clip((t - k - (1 - cliff)) / cliff, 0, 1)
+    return (k + f * f * (3 - 2 * f)) / levels
+
+
+def mat_strata(name, cols, W, strata):
+    """Ground/cliff rock: wrapped world-space noise variation plus horizontal strata bands
+    (period m, band colour, strength), warped by noise so they don't read as ruled lines."""
+    m = mat_varied(name, cols, 0.95, 0.35, 0.6, W=W, world_noise=True)
+    if not strata:
+        return m
+    period, band_col, k = strata
+    nt = m.node_tree
+    N, L = nt.nodes, nt.links
+    pr = N["Principled BSDF"]
+    src = pr.inputs["Base Color"].links[0].from_socket
+    geo = N.new("ShaderNodeNewGeometry")
+    sep = N.new("ShaderNodeSeparateXYZ")
+    L.new(geo.outputs["Position"], sep.inputs[0])
+    warp = N.new("ShaderNodeTexNoise"); warp.inputs["Scale"].default_value = 0.05
+    L.new(_wrapped(nt, geo.outputs["Position"], W), warp.inputs["Vector"])
+    wz = N.new("ShaderNodeMath"); wz.operation = "MULTIPLY_ADD"; wz.inputs[1].default_value = period * 0.8
+    L.new(warp.outputs["Fac"], wz.inputs[0]); L.new(sep.outputs["Z"], wz.inputs[2])
+    ph = N.new("ShaderNodeMath"); ph.operation = "MULTIPLY"; ph.inputs[1].default_value = 2 * math.pi / period
+    L.new(wz.outputs[0], ph.inputs[0])
+    sn = N.new("ShaderNodeMath"); sn.operation = "SINE"
+    L.new(ph.outputs[0], sn.inputs[0])
+    mr = N.new("ShaderNodeMapRange")
+    mr.inputs["From Min"].default_value, mr.inputs["From Max"].default_value = -1.0, 1.0
+    mr.inputs["To Min"].default_value, mr.inputs["To Max"].default_value = 0.0, k
+    L.new(sn.outputs[0], mr.inputs["Value"])
+    mx = N.new("ShaderNodeMix"); mx.data_type = "RGBA"
+    L.new(mr.outputs["Result"], mx.inputs[0])
+    L.new(src, mx.inputs[6])
+    mx.inputs[7].default_value = lin(band_col)
+    L.new(mx.outputs[2], pr.inputs["Base Color"])
+    return m
+
+
+def rock_layer(P, spec, seed, preview, work, near):
+    """Mars-style layer: terraced or dune heightfield, strata, instanced basalt boulders
+    (+ pebbles on the near layer). Same tiling, haze and margin rules as forest_layer."""
+    W = spec["W"]
+    top = W / 2
+    d0, d1 = spec["depth"]
+    scene = new_scene(P, W, preview, spec["tilt"], (W / 2, (d0 + d1) / 2, top * spec["level"] + top * spec["frame_up"]))
+    rnd = random.Random(seed)
+    rng = np.random.default_rng(seed)
+    base, amp = top * spec["level"], top * spec["amp"]
+    ground = mat_strata("ground", spec["ground"], W, spec.get("strata"))
+    rockm = mat_varied("rock", P["rock"], 0.9, 1.2, 0.6, W=W)
+    fog = spec.get("fog")
+    for m in (ground, rockm):
+        _haze(m, P["haze"], spec["haze"][0], spec["haze"][1],
+              (fog[0], base + amp * fog[1], base - amp) if fog else None, front=W)
+    nx, ny = 512, 64
+    terr = spec.get("terrace")
+    prof = GB.ridge(rng, 0.5, 1.0, 80 if terr else 40, 512, 1.4, 0.0 if terr else 0.1)
+    prof = (prof - prof.mean()) / (np.abs(prof - prof.mean()).max() + 1e-6)          # -1..1, + = lower
+    prof = np.interp(np.arange(nx) / nx * PX_W, np.arange(PX_W), prof)
+    if terr:
+        prof = 1 - 2 * terrace01((1 - prof) / 2, terr)                                  # plateaus up top
+    bumps = fft_noise(rng, ny + 1, nx, 3, 60, 0.8)
+    xs = np.arange(nx) / nx
+    dune = (0.18 * np.sin(2 * np.pi * (10 * xs + 0.25 * np.sin(2 * np.pi * 2 * xs)))) if spec.get("dunes") else np.zeros(nx)
+    y_front, y_back = -top, d1 + 4
+
+    def wy(y):
+        w = min(1.0, max(0.0, (y - d0 * 0.5) / max(y_back - d0 * 0.5, 1e-3)))
+        return w * w * (3 - 2 * w)
+
+    def zf(i, j):
+        y = y_front + (y_back - y_front) * j / ny
+        return base - amp * prof[i] * wy(y) + dune[i] + amp * 0.06 * bumps[j % (ny + 1), i]
+    heightfield("ground", scene.collection, W, y_back, nx, ny, zf, ground, y0=y_front)
+
+    def ground_z(x, y):
+        fi = (x % W) / W * nx
+        return (base - amp * wy(y) * float(np.interp(fi, np.arange(nx + 1), np.r_[prof, prof[0]]))
+                + float(np.interp(fi, np.arange(nx + 1), np.r_[dune, dune[0]])))
+
+    rocks = []
+    for k in range(4):
+        c = proto_collection(f"rock{k}", scene)
+        me = blob_mesh(f"rockmesh{k}", None, 40 + k, subdiv=3, strength=0.55, scale=0.7)
+        ob = bpy.data.objects.new("rock", me)
+        c.objects.link(ob)
+        ob.scale = (1.0, rnd.uniform(0.75, 0.95), rnd.uniform(0.45, 0.7))
+        ob.material_slots[0].link = "OBJECT"
+        ob.material_slots[0].material = rockm
+        rocks.append(c)
+    y_vis = -top * 0.45 if near else d0
+    lo, hi = spec["rock_h"]
+
+    def scatter(n, size_lo, size_hi, skew):
+        for _ in range(n):
+            x = rnd.uniform(0, W)
+            y = y_vis + (d1 - y_vis) * rnd.random() ** (1.6 if near else 1.0)
+            s = size_lo + (size_hi - size_lo) * rnd.random() ** skew
+            instance(scene.collection, rocks[rnd.randrange(4)], (x, y, ground_z(x, y) - 0.2 * s), s,
+                     rnd.uniform(0, 6.3), W)
+    scatter(spec["rocks"], lo, hi, 2.4)
+    if spec.get("pebbles"):
+        scatter(spec["pebbles"], 0.05, 0.22, 1.5)
+    return render(scene, work, ("near" if near else "mid") + str(seed))
+
+
 # ---------------------------------------------------------------- entry
 
 def _finish_transparent(px):
@@ -635,5 +762,6 @@ def generate(entry, ctx):
         rgb = sky * (1 - a) + rng_px[..., :3] * a
         return {"color": np.dstack([pngio.to_u8(rgb), np.full(rgb.shape[:2], 255, np.uint8)])}
     spec = P["mid"] if layer == "layer1" else P["near"]
-    px = forest_layer(P, spec, seed, preview, work, near=(layer == "layer2"))
+    build = forest_layer if "trees" in spec else rock_layer
+    px = build(P, spec, seed, preview, work, near=(layer == "layer2"))
     return {"color": _finish_transparent(px)}
