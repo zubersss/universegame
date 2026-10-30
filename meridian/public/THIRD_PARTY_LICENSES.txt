@@ -255,3 +255,15 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+----------------------------------------------------------------
+Data: Earth elevation, coastlines and land cover (src/data/earth/)
+----------------------------------------------------------------
+Topography: ETOPO1 (NOAA NGDC, public domain), 10' grid by Fatiando a Terra
+  (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/)
+Coastlines and lakes: Natural Earth (public domain)
+Land cover: © ESA WorldCover project 2021 / Contains modified Copernicus
+  Sentinel data (2021) processed by ESA WorldCover consortium
+  (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/)
+The data were resampled and converted for the game (scripts/data/build_earth.py);
+see ASSET_LICENSES.md for provenance.

@@ -863,8 +863,10 @@ export class Game {
     const p = this.player;
     const b = this.body;
     if (!p || !b) return null;
-    const eye = p.eye(1, _v1);
-    const dir = _v2.copy(p.heading).multiplyScalar(Math.cos(p.pitch)).addScaledVector(p.up, Math.sin(p.pitch)).normalize();
+    // The crosshair ray: from the character camera when it is on, else the eye (PLAYER's Player.aim).
+    const eye = _v1;
+    const dir = _v2;
+    p.aim(eye, dir);
     let best: ScanTarget | null = null;
     const a = new Vector3();
     const c = new Vector3();
