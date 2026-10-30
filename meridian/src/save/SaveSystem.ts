@@ -1,4 +1,4 @@
-import { BODIES, BODY_IDS, GENERATOR_VERSION, SYSTEM_BODY_IDS, SYSTEM_EXTENT, WORLD_SEED, type BodyId, type SystemId } from '../world/bodies';
+import { BODIES, BODY_IDS, GENERATOR_VERSION, SYSTEM_BODY_IDS, SYSTEM_EXTENT, WORLD_SEED, isBodyId, type BodyId, type SystemId } from '../world/bodies';
 import { cruiseMaxSpeed } from '../world/scale';
 import { sanitizeSettings, type Settings } from '../game/settings';
 import { BODY_HANDOFF } from '../game/config';
@@ -77,10 +77,14 @@ function vec(x: unknown, n: number, bound: number): number[] | null {
 
 const len = (v: readonly number[]): number => Math.hypot(v[0], v[1], v[2]);
 
-/** Within the body's release radius (BODY_HANDOFF.releaseRadii × R) of its center. */
+/** Never deeper than half the radius: no surface pose lies near a body's core. */
+const MIN_SURFACE_RADII = 0.5;
+
+/** Within the body's release radius (BODY_HANDOFF.releaseRadii × R) of its center, and not near its core. */
 function nearBody(p: readonly number[], id: BodyId): boolean {
   const d = BODIES[id];
-  return Math.hypot(p[0] - d.center[0], p[1] - d.center[1], p[2] - d.center[2]) <= BODY_HANDOFF.releaseRadii * d.radius;
+  const r = Math.hypot(p[0] - d.center[0], p[1] - d.center[1], p[2] - d.center[2]);
+  return r >= MIN_SURFACE_RADII * d.radius && r <= BODY_HANDOFF.releaseRadii * d.radius;
 }
 
 function unitQuat(x: unknown): V4 | null {
@@ -192,12 +196,14 @@ export function validateSave(raw: unknown): Result {
     // posPlanet is body-relative: within the body's release radius of its center.
     const pp = vec(l.posPlanet, 3, MAX_COORD);
     const lq = unitQuat(l.quat);
-    if (!pp || !lq || len(pp) > BODY_HANDOFF.releaseRadii * BODIES[l.bodyId].radius) return { ok: false, error: 'Bad last landing pose.' };
+    const R = BODIES[l.bodyId].radius;
+    if (!pp || !lq || len(pp) > BODY_HANDOFF.releaseRadii * R || len(pp) < MIN_SURFACE_RADII * R) return { ok: false, error: 'Bad last landing pose.' };
     lastSafeLanding = { bodyId: l.bodyId, posPlanet: pp as V3, quat: lq };
   }
   const navTarget = raw.navTarget === null ? null : isPlayed(raw.navTarget) ? raw.navTarget : undefined;
   if (navTarget === undefined) return { ok: false, error: 'Bad navigation target.' };
-  const discoveries = stringList(raw.discoveries, isPlayed, BODY_IDS.length);
+  // Discoveries are history without positions: any catalog body (a Sol save stays valid in Quiet play).
+  const discoveries = stringList(raw.discoveries, isBodyId, Object.keys(BODIES).length);
   if (!discoveries) return { ok: false, error: 'Bad discoveries.' };
   const unlocked = stringList(raw.unlocked, (p) => POWERS.has(p), POWERS.size);
   if (!unlocked) return { ok: false, error: 'Bad unlocked powers.' };

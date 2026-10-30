@@ -127,6 +127,8 @@ describe('save validation', () => {
     ['cruising beyond the system extent', cruising([0, 0, -1.01 * SYSTEM_EXTENT], 2e6)],
     ['cruising beyond the system extent diagonally', cruising([0.8 * SYSTEM_EXTENT, 0, -0.8 * SYSTEM_EXTENT], 2e6)],
     ['piloting at 1e5 m/s', sample({ mode: 'PILOTING', ship: { ...sample().ship, vel: [1e5, 0, 0] } })],
+    ['landed at the body core', sample({ ship: { ...sample().ship, sys: [...BODIES.vesper.center] as V3 } })],
+    ['last landing near the body core', sample({ lastSafeLanding: { ...sample().lastSafeLanding!, posPlanet: [0, 0, 0] } })],
     ['piloting above 20 km/s across axes', sample({ mode: 'PILOTING', ship: { ...sample().ship, vel: [15000, 15000, 0] } })],
     ['cruise above the longest hop cap', cruising([0, 0, -1e8], 1e7)],
     ['non-unit quaternion', sample({ ship: { ...sample().ship, quat: [0, 0, 0, 0.5] } })],
@@ -148,7 +150,7 @@ describe('save validation', () => {
     ['cruise state while landed', sample({ cruise: { speed: 100, throttle: 1 } })],
     ['missing discoveries', omit(sample(), 'discoveries')],
     ['unknown discovery', sample({ discoveries: ['pluto'] })],
-    ['discovery of a body not in play', sample({ discoveries: ['ilex', 'earth'] })],
+    ['discovery of a body not in the catalog', sample({ discoveries: ['ilex', 'pluto'] })],
     ['duplicate discovery', sample({ discoveries: ['ilex', 'ilex'] })],
     ['missing unlocked list', omit(sample(), 'unlocked')],
     ['unknown power', sample({ unlocked: ['teleport'] })],
@@ -176,6 +178,14 @@ describe('save validation', () => {
   it('rejects malformed files', () => {
     expect(importJson('{not json').ok).toBe(false);
     expect(importJson('x'.repeat(2_000_001)).ok).toBe(false);
+  });
+});
+
+describe('schema-2 acceptance', () => {
+  it('accepts ordinary flight near a body and catalog discoveries', () => {
+    expect(validateSave(sample({ mode: 'PILOTING', ship: { ...sample().ship, vel: [180, -12, 40], gear: 0, throttle: 0.6 } })).ok).toBe(true);
+    expect(validateSave(sample({ discoveries: ['ilex', 'earth', 'moon'] })).ok).toBe(true);
+    expect(validateSave(sample({ discoveries: ['ilex', 'pluto'] })).ok).toBe(false);
   });
 });
 
