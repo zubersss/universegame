@@ -18,33 +18,33 @@ Lead notes: …
 
 ## LEAD
 
-### L-001 · LEAD · Ready · M0
+### L-001 · LEAD · Done · M0
 Goal: Save every architect file at its exact path; add the "Clone the repo" step to the README.
 Accept: `git log` shows `[lead] L-001 architect docs`; all paths from the architect output exist.
 Files: all architect files
 Depends: —
-Lead notes: —
+Lead notes: Done 4c10618.
 
-### L-002 · LEAD · Ready · M0
+### L-002 · LEAD · Done · M0
 Goal: Audit `zubersss/universegame`; archive the old MERIDIAN build.
 Accept: branch `archive/meridian-v1` and tag `meridian-v1-final` pushed; D-009 filled in with what the old build contained; old build files removed from `main` with `git rm -r`; nothing deleted from history.
 Files: DECISIONS.md, repo root
 Depends: L-001
-Lead notes: Never `git checkout`/`git switch`; create the branch with `git branch archive/meridian-v1 main`.
+Lead notes: Never `git checkout`/`git switch`; create the branch with `git branch archive/meridian-v1 main`. Done 21d0584; branch + tag at 4c10618; play/meridian/ and the old GPT automation kept by user choice (D-012).
 
-### L-003 · LEAD · Ready · M0
+### L-003 · LEAD · Done · M0
 Goal: `.gitignore`, `.gitattributes` (LFS), `git lfs install`, tracked empty folders.
 Accept: `git lfs track` lists png/blend/fbx/wav/ogg/mp3/exr/hdr/psd; `logs/`, `Build/`, `blender/preview/`, `coordination/locks/`, `Library/` ignored; `coordination/reports/unity/`, `coordination/reports/blender/` exist.
 Files: .gitignore, .gitattributes, coordination/reports/*/.gitkeep
 Depends: L-001
-Lead notes: —
+Lead notes: Done 4396dfa; `git lfs install --local` (repo hooks only).
 
-### L-004 · LEAD · Ready · M0
+### L-004 · LEAD · Done · M0
 Goal: Verify `.claude/settings.json` against the current Claude Code docs.
 Accept: file parses; every deny entry kept; `defaultMode` confirmed valid; a one-line note in REVIEW_LOG.
 Files: .claude/settings.json
 Depends: L-001
-Lead notes: —
+Lead notes: Done (see REVIEW_LOG cycle 1). PowerShell deny rules added; PowerShell allow rules await the user (USER-08).
 
 ### L-005 · LEAD · Ready · M0
 Goal: Pin exact versions (Unity, Blender, URP, Addressables, Claude Code) in Bible §12; write `tools/paths.json`.
