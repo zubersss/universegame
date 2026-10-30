@@ -31,14 +31,14 @@ import { OnFootHost, type OnFootExitReason } from './onFoot';
 import { rayCapsule } from './scan';
 import type { Species } from '../props/species';
 import type { PropInstance } from '../props/PropSystem';
-import type { SaveData } from '../save/SaveSystem';
+import { SAVE_SCHEMA, type SaveData } from '../save/SaveSystem';
 import { bodyGravity, dominantBody } from '../world/environment';
 import { ChunkStore, WorkerBackend } from '../terrain/ChunkStore';
 import { createTerrainMaterials, makeTerrainUniforms, setTerrainPalette, type TerrainUniforms } from '../terrain/terrainMaterial';
 import { Hud, type Prompt } from '../ui/Hud';
 import { Markers, type MarkerSpec } from '../ui/Markers';
 import { BODY_HANDOFF, CRUISE, FLIGHT, LANDING, MAX_FRAME_GAP, MAX_STEPS_PER_FRAME, SCAN, SIM_DT, WALK, BUDGETS, PRESETS, type QualityPreset } from './config';
-import { GENERATOR_VERSION, SAVE_SCHEMA_VERSION, WORLD_SEED } from '../world/bodies';
+import { GENERATOR_VERSION, WORLD_SEED } from '../world/bodies';
 import type { Settings } from './settings';
 import { BODIES, BODY_IDS, type BodyDef, type BodyId } from '../world/bodies';
 
@@ -623,9 +623,19 @@ export class Game {
       posPlanet: this.ship.currPos.clone().sub(this.bodyCenterLocal),
       quat: this.ship.currQuat.clone(),
     };
+    this.noteArrival(def);
     this.onNotice?.('Landed', `${def.name} — E to exit, Space to take off.`, true);
     this.input.clearAll(); // no held flight keys carry into the next takeoff
     this.autosave('landed');
+  }
+
+  /**
+   * Record an arrival at a body (discovery plus its power, once). Called where
+   * the ship comes to rest on a body (landing, placement, restore), never from
+   * setMode, so mode changes stay free of progress side effects.
+   */
+  private noteArrival(def: BodyDef): void {
+    this.expedition.arrive(def.id);
   }
 
   /** Park the ship at its current pose (no position snap). */
@@ -975,6 +985,7 @@ export class Game {
     this.ship.gearTarget = 1;
     this.parkShip();
     this.setMode('LANDED');
+    this.noteArrival(def);
     this.assist.disengage();
     this.cameraRig.reset();
     this.physics.refreshQueries();
@@ -1528,17 +1539,19 @@ export class Game {
     let player: SaveData['player'] = null;
     if (this.mode === 'ON_FOOT' && p) {
       const f = p.feet(new Vector3()).add(this.origin);
-      player = { sys: [f.x, f.y, f.z], heading: [p.heading.x, p.heading.y, p.heading.z], pitch: p.pitch };
+      player = { sys: [f.x, f.y, f.z], heading: [p.heading.x, p.heading.y, p.heading.z], pitch: p.pitch, abilityState: null };
     }
     const l = this.lastSafeLanding;
+    const e = this.expedition;
     return {
-      schema: SAVE_SCHEMA_VERSION,
+      schema: SAVE_SCHEMA,
       generator: GENERATOR_VERSION,
       seed: WORLD_SEED,
       savedAt: new Date().toISOString(),
       playTime: this.simTime,
+      system: this.ref.system,
       mode: this.mode,
-      body: this.body && this.bodyShown ? this.body.def.id : null,
+      bodyId: this.body && this.bodyShown ? this.body.def.id : null,
       ship: {
         sys: [sys.x, sys.y, sys.z],
         quat: [q.x, q.y, q.z, q.w],
@@ -1548,10 +1561,12 @@ export class Game {
       },
       player,
       cruise: cruising ? { speed: this.cruise.speed, throttle: this.cruiseThrottle } : null,
-      lastSafeLanding: l ? { body: l.bodyId, posPlanet: [l.posPlanet.x, l.posPlanet.y, l.posPlanet.z], quat: [l.quat.x, l.quat.y, l.quat.z, l.quat.w] } : null,
+      lastSafeLanding: l ? { bodyId: l.bodyId, posPlanet: [l.posPlanet.x, l.posPlanet.y, l.posPlanet.z], quat: [l.quat.x, l.quat.y, l.quat.z, l.quat.w] } : null,
       navTarget: this.navTarget,
+      discoveries: [...e.discoveries],
+      unlocked: [...e.unlocked],
       settings: { ...this.settings },
-      expedition: JSON.parse(JSON.stringify(this.expedition.state)),
+      expedition: JSON.parse(JSON.stringify(e.state)),
     };
   }
 
@@ -1562,12 +1577,12 @@ export class Game {
    */
   restore(data: SaveData): void {
     this.counters.restores++;
-    this.expedition.reset(JSON.parse(JSON.stringify(data.expedition)));
+    this.expedition.reset(JSON.parse(JSON.stringify(data.expedition)), [...data.discoveries], [...data.unlocked]);
     this.navTarget = data.navTarget;
     this.arrivedAt = null;
     this.simTime = data.playTime;
     const l = data.lastSafeLanding;
-    this.lastSafeLanding = l ? { bodyId: l.body, posPlanet: new Vector3(...l.posPlanet), quat: new Quaternion(...l.quat).normalize() } : null;
+    this.lastSafeLanding = l ? { bodyId: l.bodyId, posPlanet: new Vector3(...l.posPlanet), quat: new Quaternion(...l.quat).normalize() } : null;
     const ship = this.ship;
     if (this.mode === 'CRUISING') this.pendingCruiseExit = null;
     if (this.player) {
@@ -1579,7 +1594,7 @@ export class Game {
     const quat = new Quaternion(...data.ship.quat).normalize();
     this.floating.rebaseTo(FloatingOrigin.rounded(sys), (d) => this.applyRebase(d));
     // The saved body, or any body whose activation range contains the ship.
-    let bodyId = data.body;
+    let bodyId = data.bodyId;
     if (!bodyId) {
       for (const id of BODY_IDS) {
         const def = BODIES[id];
@@ -1638,6 +1653,9 @@ export class Game {
     this.stick.set(0, 0);
     this.physics.refreshQueries();
     this.markSaved(data);
+    // A surface save is an arrival there (a no-op for records this build wrote;
+    // after markSaved so an imported record missing it is saved again).
+    if (data.mode === 'LANDED' || data.mode === 'ON_FOOT') this.noteArrival(this.body!.def);
     this.updateCollisionDemand();
     this.setState('loading');
   }
@@ -1712,10 +1730,13 @@ export class Game {
     return {
       state: this.state,
       mode: this.mode,
+      system: this.ref.system,
       body: b ? b.def.id : null,
       bodyShown: this.bodyShown,
       ref: this.ref.id,
       navTarget: this.navTarget,
+      discoveries: [...this.expedition.discoveries],
+      unlocked: [...this.expedition.unlocked],
       simTime: this.simTime,
       frame: this.frameCount,
       frameDt: this.lastFrameDt,
