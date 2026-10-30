@@ -47,6 +47,8 @@ def _wrap_blend(rgb, cols=4):
 def surface(entry, ctx, w, h):
     if entry.get("procedural") == "bands":
         return bands(entry, w, h)
+    if entry.get("procedural") == "moon":
+        return moon(entry, w, h)
     px = _load_resampled(os.path.join(ctx["blender_dir"], entry["input"]), w, h)
     rgb = _wrap_blend(px[..., :3].copy())
     if entry.get("tint"):                              # e.g. grey Mercury basemap -> §9 palette
@@ -79,6 +81,31 @@ def bands(entry, w, h):
         d = np.sqrt(dx ** 2 + ((lat - la) / eh) ** 2)
         k = np.clip(1.2 - d, 0, 1) ** 1.5
         rgb = rgb * (1 - k[..., None]) + (np.array(col, np.float32) / 255.0) * k[..., None]
+    return {"color": _u8(np.dstack([np.clip(rgb, 0, 1), np.ones((h, w), np.float32)]))}
+
+
+def moon(entry, w, h):
+    """Procedural airless moon (Luna): grey highlands, dark maria from thresholded low-frequency
+    noise, and craters with dark floors and bright rims/rays. Equirect, periodic in x
+    (craters wrap in longitude). Original work, no external input."""
+    from meridian.noise import fft_noise
+    rng = np.random.default_rng(int(entry.get("seed", 1)))
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    hi = np.array(entry.get("highland", [168, 166, 160]), np.float32) / 255.0
+    ma = np.array(entry.get("mare", [92, 92, 94]), np.float32) / 255.0
+    n = fft_noise(rng, h, w, 40 * w / 512, 300 * w / 512, 1.4)
+    mare = np.clip((n - 0.5) * 1.6, 0, 1)
+    mare *= np.clip(1.4 - 2.2 * np.abs((yy + 0.5) / h - 0.5), 0, 1)       # maria favour low latitudes
+    tex = 1 + 0.06 * fft_noise(rng, h, w, 2, 30 * w / 512, 0.4)
+    rgb = (hi * (1 - mare[..., None]) + ma * mare[..., None]) * tex[..., None]
+    for _ in range(int(entry.get("craters", 140))):
+        cx, cy = rng.random() * w, (0.08 + 0.84 * rng.random()) * h
+        r = (1.5 + 14 * rng.random() ** 3) * w / 512
+        dx = (xx - cx + w / 2) % w - w / 2
+        d = np.hypot(dx * np.cos(np.pi * (cy / h - 0.5)), yy - cy) / r   # less stretched at the poles
+        floor = np.clip(1 - d, 0, 1) * 0.12
+        rim = np.exp(-((d - 1) / 0.18) ** 2) * 0.16
+        rgb = rgb * (1 - floor[..., None]) + rim[..., None] * 0.9
     return {"color": _u8(np.dstack([np.clip(rgb, 0, 1), np.ones((h, w), np.float32)]))}
 
 
