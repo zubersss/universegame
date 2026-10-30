@@ -66,6 +66,13 @@ export class AbilityController {
   /** A reloaded power waits for the first step with a world to resume. */
   private resumePending = false;
   private shownRefusal: string | null = null;
+  /** The walker's placement count at the last step (-1: not seen yet). */
+  private placementsSeen = -1;
+  /** A short caution line of the controller's own ('land first'), and how long it stays (s). */
+  private notice: string | null = null;
+  private noticeTime = 0;
+  /** Simulation time of the last step (exit entries are stamped with it: a load may rewind the clock first). */
+  private lastStep = 0;
 
   constructor(
     private readonly hud: AbilityHud,
@@ -83,6 +90,9 @@ export class AbilityController {
     this.runtime = this.power ? createPower(this.power) : null;
     this.state = 'walk';
     this.resumePending = false;
+    this.placementsSeen = -1;
+    this.notice = null;
+    this.lastStep = this.clock();
     // A reload resumes the saved power where it has a rule for it (LEAD M2
     // plan C): flight hovers where it was saved (it never ends mid-air),
     // superspeed resumes braking. The first step with a world starts it.
@@ -108,10 +118,19 @@ export class AbilityController {
   step(dt: number, w: PowerWorld | null = null): boolean {
     const rt = this.runtime;
     if (!rt || !w) return this.state !== 'walk';
+    this.lastStep = this.clock();
+    this.tickNotice(dt);
     if (this.resumePending) {
       this.resumePending = false;
       rt.resume!(w);
     }
+    // The walker was re-placed (Recover, a placement by Game): a power moving
+    // it resumes from rest there, as after a reload, instead of carrying on.
+    const placed = this.placementsSeen >= 0 && w.player.placements !== this.placementsSeen;
+    this.placementsSeen = w.player.placements;
+    if (placed && this.state !== 'walk' && rt.resume) rt.resume(w);
+    // Controls that are not live do not keep presses for later (Input latches them).
+    if (!this.usable) rt.drop?.(w);
     rt.tick(dt, this.usable ? w : null);
     if (this.state === 'walk') {
       if (!this.usable || !rt.wants(dt, w)) {
@@ -155,9 +174,34 @@ export class AbilityController {
     return true;
   }
 
+  /**
+   * A scripted move (ladder) holds the walker: the power's controls are not
+   * live (an aim preview ends, a refusal line runs out) and the slot stays current.
+   */
+  hold(dt: number): void {
+    this.tickNotice(dt);
+    this.runtime?.tick(dt, null);
+    this.showHud();
+  }
+
+  /** A caution line of the controller's own in the slot's power name (e.g. 'land first' at the ladder). */
+  refuse(reason: string, seconds = 1.5): void {
+    this.notice = reason;
+    this.noticeTime = seconds;
+    this.lastRefusal = reason;
+    this.showHud();
+  }
+
+  private tickNotice(dt: number): void {
+    if (this.notice === null) return;
+    this.noticeTime -= dt;
+    if (this.noticeTime <= 0) this.notice = null;
+  }
+
   /** ON_FOOT is ending: powers deactivate (boarding) or the character is re-placed. */
   exit(_reason: OnFootExitReason): void {
-    if (this.state !== 'walk') this.note(this.state, 'walk');
+    if (this.state !== 'walk') this.note(this.state, 'walk', this.lastStep);
+    this.notice = null;
     this.state = 'walk';
     this.resumePending = false;
     this.power = null;
@@ -205,9 +249,9 @@ export class AbilityController {
   /** State changes so far (the log is bounded; this counts all). */
   changes = 0;
 
-  private note(from: AbilityState, to: AbilityState): void {
+  private note(from: AbilityState, to: AbilityState, t = this.clock()): void {
     this.changes++;
-    this.log.push({ t: this.clock(), from, to });
+    this.log.push({ t, from, to });
     if (this.log.length > LOG_MAX) this.log.splice(0, this.log.length - LOG_MAX);
   }
 
@@ -230,7 +274,7 @@ export class AbilityController {
     }
     const r = this.runtime!.readout();
     this.hud.setAbility({ name: p.name, state: this.state === 'walk' ? r.status : `${this.state} · ${r.status}`, charge: r.charge, cooldown: r.cooldown, hint: r.hint });
-    const refusal = this.runtime!.refusal;
+    const refusal = this.runtime!.refusal ?? this.notice;
     if (refusal !== this.shownRefusal) {
       this.hud.setWarning(refusal ? `${p.name}: ${refusal}` : null, 'caution');
       this.shownRefusal = refusal;

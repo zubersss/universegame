@@ -274,7 +274,13 @@ export class Player {
   }
 
   /** Place the capsule (spawn/recovery); clears motion. */
+  /** Re-placements so far (Recover, a reload, a blink): powers and the explorer treat them as placements, not motion. */
+  placements = 0;
+  /** Called after a floating-origin rebase has shifted the walker (local positions others keep move by `d`). */
+  onRebaseHook: ((d: Vector3) => void) | null = null;
+
   place(center: Vector3, up: Vector3): void {
+    this.placements++;
     this.up.copy(up).normalize();
     alignUp(this.quat, this.up, this.quat);
     this.pos.copy(center);
@@ -294,6 +300,7 @@ export class Player {
     this.prevPos.add(d);
     this.view.onRebase(d);
     this.avatar?.onRebase(d);
+    this.onRebaseHook?.(d);
   }
 
   /** Add the visible explorer to the scene (once). */
@@ -338,6 +345,7 @@ export class Player {
       faceDir: scripted ? scripted.faceDir : null,
       climb: scripted ? scripted.climb : null,
       power,
+      placements: this.placements,
     });
   }
 

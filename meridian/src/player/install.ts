@@ -61,7 +61,9 @@ export class PlayerRuntime implements OnFootHooks {
   }
 
   enter(ctx: AbilityEnterContext): void {
-    this.game.player?.attachVisual(this.game.render.scene, () => this.game.lighting.envMap);
+    const pl = this.game.player;
+    pl?.attachVisual(this.game.render.scene, () => this.game.lighting.envMap);
+    if (pl) pl.onRebaseHook = (d) => this.onRebase(d);
     this.lastVisTime = null;
     this.transition = null;
     this.abilities.enter(ctx);
@@ -97,7 +99,7 @@ export class PlayerRuntime implements OnFootHooks {
     const rt = this.abilities.runtime;
     let aim: VfxFrame['aim'] = null;
     if (rt instanceof BlinkPower) {
-      if (rt.aiming && this.abilities.usable) aim = { feet: rt.target.feet, ok: rt.target.ok };
+      if (rt.aiming && this.abilities.usable && !this.transition) aim = { feet: rt.target.feet, ok: rt.target.ok };
       if (rt.lastJump.count !== this.blinksSeen) {
         this.blinksSeen = rt.lastJump.count;
         v.flash(_fx.copy(rt.lastJump.from).addScaledVector(p.up, 1));
@@ -157,7 +159,14 @@ export class PlayerRuntime implements OnFootHooks {
     this.checkExit();
     if (this.transition) {
       this.transitionTime += dt;
-      if (this.transitionTime < this.transition.duration) return true; // hold the walker
+      if (this.transitionTime < this.transition.duration) {
+        // Hold the walker. Presses made on the ladder are not kept for later
+        // (Input latches them): no blink fires when the climb ends, and E
+        // neither boards early nor interacts mid-climb (the end presses E).
+        for (const code of LADDER_DROPS) g.input.consume(code);
+        this.abilities.hold(dt);
+        return true;
+      }
       const boarding = this.transition.kind === 'board';
       this.transition = null;
       if (boarding) {
@@ -166,11 +175,16 @@ export class PlayerRuntime implements OnFootHooks {
         return false;
       }
     }
-    // E at the ship: climb the ladder first, then board.
-    if (p && p.grounded && g.interactionTarget()?.kind === 'ship' && g.input.consume('KeyE')) {
-      this.start('board');
-      if (this.transition) return true;
-      g.input.press('KeyE');
+    // E at the ship: climb the ladder first, then board; only while walking
+    // on the ground. Under a power (or in the air) E is used up here, so Game
+    // cannot board straight out of flight or superspeed either.
+    if (p && g.interactionTarget()?.kind === 'ship' && g.input.consume('KeyE')) {
+      if (this.abilities.state !== 'walk') this.abilities.refuse(this.abilities.state === 'flight' ? 'land first' : 'brake first');
+      else if (p.grounded) {
+        this.start('board');
+        if (this.transition) return true;
+        g.input.press('KeyE');
+      }
     }
     if (p && g.input.consume('KeyC')) p.view.toggle();
     return this.abilities.step(dt, p && g.body ? this.powerWorld(p, input) : null);
@@ -211,7 +225,7 @@ export class PlayerRuntime implements OnFootHooks {
     const { t, alpha: a, dt } = visualClock(g.simTime, alpha, this.lastVisTime);
     this.lastVisTime = t;
     const scripted = this.transition ? this.transition.sample(this.transitionTime + (a - 1) * SIM_DT, this.pose) : null;
-    p.renderView(dt, a, g.cameraRig, g.settings.reducedMotion, scripted, this.abilities.motion());
+    p.renderView(dt, a, g.cameraRig, g.settings.reducedMotion, scripted, scripted ? null : this.abilities.motion());
     this.updateVfx(dt, p);
     this.updateSounds(dt);
     return true;
@@ -219,6 +233,7 @@ export class PlayerRuntime implements OnFootHooks {
 
   exit(reason: OnFootExitReason): void {
     this.transition = null;
+    if (this.game.player) this.game.player.onRebaseHook = null;
     this.setReach(0);
     this.abilities.exit(reason);
     this.vfx?.dispose();
@@ -230,6 +245,12 @@ export class PlayerRuntime implements OnFootHooks {
   private setReach(m: number): void {
     const c = this.game.body?.collision as { reach?: number } | undefined;
     if (c && (m > 0 || c.reach !== undefined)) c.reach = m;
+  }
+
+  /** A floating-origin rebase shifted the walker: positions the power and its effects keep move with it. */
+  private onRebase(d: Vector3): void {
+    this.abilities.runtime?.onRebase?.(d);
+    this.vfx?.shift(d);
   }
 
   /** The ability fields for a save snapshot (schema 2: player.abilityState and unlocked). */
@@ -259,6 +280,9 @@ export function visualClock(simTime: number, alpha: number, last: number | null)
 const _v = new Vector3();
 const _g = new Vector3();
 const _r = new Vector3();
+/** Presses dropped while the ladder holds the walker: powers, interaction and the camera toggle. */
+const LADDER_DROPS = ['KeyQ', 'MouseLeft', 'KeyE', 'KeyC'];
+
 /** Collision loaded this far beyond a blink's range (m): a target at the edge needs its ground and clearance checks. */
 const REACH_MARGIN = 10;
 

@@ -26,6 +26,8 @@ export interface AvatarFrame {
   climb?: { blend: number; phase: number } | null;
   /** A power moving the body (flight leans the whole body into the direction of travel). */
   power?: PowerMotion | null;
+  /** The walker's placement count: a change is a placement (any distance), not motion. */
+  placements?: number;
 }
 
 /** Body pitch in flight at cruise speed and above (rad, forward). */
@@ -74,6 +76,8 @@ export class Avatar {
   private readonly right = new Vector3(1, 0, 0);
   private readonly anchors = [new Vector3(), new Vector3()];
   private readonly anchored = [false, false];
+  /** The walker's placement count last frame (null before the first frame). */
+  private placementsSeen: number | null = null;
   private readonly hipsRestY: number;
   /** This frame's target root and the previous frame's (sub-step interpolation). */
   private readonly target = new Vector3();
@@ -131,7 +135,9 @@ export class Avatar {
     const target = this.target.copy(f.feet).addScaledVector(up, -SKIN);
     if (!this.hasPrev) this.prevRoot.copy(target);
     const dTan = this.motion.copy(target).sub(this.prevRoot);
-    if (dTan.length() > TELEPORT) {
+    const placed = f.placements !== undefined && this.placementsSeen !== null && f.placements !== this.placementsSeen;
+    if (f.placements !== undefined) this.placementsSeen = f.placements;
+    if (placed || dTan.length() > TELEPORT) {
       // A placement (recovery, restore), not motion: no landing, feet under the body.
       this.prevRoot.copy(target);
       dTan.set(0, 0, 0);

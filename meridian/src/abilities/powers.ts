@@ -50,6 +50,10 @@ export interface Power {
   step(dt: number, w: PowerWorld): 'active' | 'done';
   /** Every step, active or not (cooldowns, previews). */
   tick(dt: number, w: PowerWorld | null): void;
+  /** Its controls are not live (not usable here yet): discard presses it would read later. */
+  drop?(w: PowerWorld): void;
+  /** Positions it keeps in local coordinates move with a floating-origin rebase. */
+  onRebase?(d: Vector3): void;
   readout(): PowerReadout;
   /** Refusal to show (red feedback), cleared after a moment. */
   readonly refusal: string | null;
@@ -177,7 +181,8 @@ export class SpeedPower implements Power {
   }
 
   wants(_dt: number, w: PowerWorld): boolean {
-    return held(w, 'KeyQ') && w.player.grounded;
+    // Not while X is held: Q and X together brake out once, then walking takes over.
+    return held(w, 'KeyQ') && !held(w, 'KeyX') && w.player.grounded;
   }
 
   private fill(w: PowerWorld): SpeedSense {
@@ -313,9 +318,22 @@ export class BlinkPower implements Power {
     pl.place(_p.copy(t.feet).addScaledVector(pl.up, FOOT_OFFSET + WALK.skin), pl.up);
   }
 
-  step(): 'active' | 'done' {
-    // The step itself happened in start(): back to walking at once.
+  step(_dt: number, w: PowerWorld): 'active' | 'done' {
+    // The step itself happened in start(): back to walking at once. This
+    // step's mouse look still applies (the walk controller does not run).
+    w.player.look(w.walk.yaw, w.walk.pitch);
     return 'done';
+  }
+
+  drop(w: PowerWorld): void {
+    w.pressed('KeyQ');
+    w.pressed('MouseLeft');
+  }
+
+  onRebase(d: Vector3): void {
+    this.lastJump.from.add(d);
+    this.lastJump.to.add(d);
+    this.target.feet.add(d);
   }
 
   readout(): PowerReadout {

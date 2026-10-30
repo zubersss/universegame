@@ -362,3 +362,78 @@ describe('collision reach for a blink (WORLDS W8 TerrainCollision.reach)', () =>
     expect(old.reach).toBeUndefined();
   });
 });
+
+describe('review fixes: placements, controls and the log', () => {
+  it('a re-placement mid-flight (Recover) resumes from rest there instead of relaunching at the old speed', () => {
+    const r = rig('earth', 'skyborne-flight', 9.81);
+    for (let i = 0; i < 10; i++) r.step();
+    r.heldKeys.add('Space');
+    r.step({ jump: true });
+    for (let i = 0; i < 120; i++) r.step();
+    r.heldKeys.clear();
+    r.heldKeys.add('KeyW');
+    for (let i = 0; i < 240; i++) r.step();
+    expect(r.player.vel.length()).toBeGreaterThan(80);
+    r.heldKeys.clear();
+    // Game's Recover: placed beside the ship, standing on the ground.
+    const spot = new Vector3(5, FOOT_OFFSET + WALK.skin + 0.01, 5);
+    r.player.place(spot, UP);
+    for (let i = 0; i < 60; i++) r.step();
+    expect(r.player.pos.distanceTo(spot)).toBeLessThan(1); // not flung 90 m away
+    expect(r.ctl.state).toBe('walk'); // hovering on the ground: landed at once
+    r.player.dispose();
+  });
+
+  it('Q and X held together brake out once; then walking takes over (W moves the walker)', () => {
+    const r = rig('mars', 'redline', 3.71);
+    for (let i = 0; i < 10; i++) r.step();
+    r.heldKeys.add('KeyQ');
+    for (let i = 0; i < 90; i++) r.step();
+    expect(r.ctl.state).toBe('speed');
+    r.heldKeys.add('KeyX');
+    for (let i = 0; i < 240; i++) r.step();
+    expect(r.ctl.state).toBe('walk');
+    const changes = r.ctl.log.length;
+    expect(changes).toBe(2); // walk>speed, speed>walk: no flip-flop while both are held
+    const z0 = r.player.pos.z;
+    for (let i = 0; i < 60; i++) r.step({ forward: 1 });
+    expect(r.ctl.log.length).toBe(changes);
+    expect(z0 - r.player.pos.z).toBeGreaterThan(2); // the walk controller ran
+    r.player.dispose();
+  });
+
+  it('a blink step keeps that step\'s mouse look', () => {
+    const r = rig('moon', 'lunar-step', 1.62);
+    for (let i = 0; i < 10; i++) r.step();
+    r.player.look(0, -0.07);
+    const h0 = r.player.heading.clone();
+    r.presses.add('KeyQ');
+    r.step({ yaw: 0.2, pitch: 0.05 });
+    expect(r.ctl.log.map((e) => e.to)).toContain('blink');
+    expect(h0.angleTo(r.player.heading)).toBeCloseTo(0.2, 6);
+    expect(r.player.pitch).toBeCloseTo(-0.07 + 0.05, 6);
+    r.player.dispose();
+  });
+
+  it('an exit after a load rewound the clock is logged at the last step\'s time, so the log stays in time order', () => {
+    let t = 1000;
+    const c = new AbilityController({ setAbility: () => {}, setWarning: () => {} }, () => 'walk', () => t);
+    c.enter({ body: 'earth', power: 'skyborne-flight', restored: { abilityState: 'flight', unlocked: ['skyborne-flight'] } });
+    expect(c.state).toBe('flight');
+    const physics = new Physics();
+    groundTiles(physics);
+    physics.refreshQueries();
+    const player = new Player(physics, new Vector3(0, 50 + FOOT_OFFSET, 0), UP, FWD);
+    const idle: WalkInput = { forward: 0, right: 0, sprint: false, jump: false, yaw: 0, pitch: 0 };
+    for (let i = 0; i < 10; i++) {
+      t += SIM_DT;
+      c.step(SIM_DT, { player, held: () => false, pressed: () => false, walk: idle, center: CENTER, gravity: 9.81, ready: () => true });
+      physics.step();
+    }
+    t = 400; // Game.restore sets simTime from the save, then changes mode
+    c.exit('restore');
+    expect(c.log.at(-1)).toMatchObject({ from: 'flight', to: 'walk' });
+    expect(c.log.at(-1)!.t).toBeGreaterThan(1000);
+    player.dispose();
+  });
+});

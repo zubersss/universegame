@@ -162,6 +162,12 @@ export class PowerVfx {
     parent.add(this.root);
   }
 
+  /** A floating-origin rebase moved everything by `d`: the flashes and marker placed earlier move too. */
+  shift(d: Vector3): void {
+    for (const f of this.flashes) f.mesh.position.add(d);
+    this.marker.position.add(d);
+  }
+
   /** A short flash (blink departure or arrival) at a point. */
   flash(at: Vector3): void {
     const f = this.flashes[0].t >= this.flashes[1].t ? this.flashes[0] : this.flashes[1];
