@@ -98,3 +98,12 @@ M0 exit criteria (Bible §12), each with evidence:
 Decided: D-024 (M0 closed; Saturn jump 2.3 m, Bible v1.4).
 Signals: BLENDER has no commit since 12:39 on the B-010 rework while In Progress (31 min, under the 90-min threshold; Blender is rendering).
 User: none. M0_REPORT.md written (no playtest for M0).
+
+## Cycle 10 · 2026-10-30 13:45
+Checked: git log 13:11–13:31 (B-010/B-011 rework sources and first exports, B-012 generator, U-010, U-007 collider fix); UNITY_STATUS, BLENDER_STATUS; ShipSideTests.cs (6 tests + 1 rule test); tests_2026-10-30.md (EditMode 103/103, PlayMode 25/28 + 3 tool skips, LeadQA 1/1); free RAM 0.8 / 7.6 GB with two Unity processes (643 + 509 MB); 18 unity_compile logs since 10:35.
+Moved: U-010 → Done (98091e0, 3707e5a); U-012, B-012 → In Progress.
+Decided: D-025 (Pilgrim gear option b); D-026 (lock fairness + 1.5 GB memory gate; CLAUDE.md rule 6); D-027 (P-14/P-15).
+Signals: resource starvation. UNITY held the heavy lock every 5–10 min; BLENDER's full exports deferred > 25 min; low-memory incident killed BLENDER's lock-watcher. Response: D-026, priority tasks U-023 and B-024.
+User: none.
+L-009: started. M2 UNITY drafts U-024…U-027 promoted to Ready to keep the queue ≥ 5. Remaining M2 drafts (Cryo meter, M2 POI placement, PlanetDisc real textures check) next cycle.
+Queue: UNITY 11 Ready, BLENDER 11 Ready.

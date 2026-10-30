@@ -54,6 +54,13 @@ ever overwritten.
    service); a plain `tasklist` name match always hits it (D-015). Clear → write
    `coordination/locks/heavy_<role>.lock` (ISO time + job), run, delete it. Not clear → do
    light work and re-check later. Only LEAD deletes another role's lock, and logs it.
+   **Fair turns and memory (D-026).** Not clear → write `coordination/locks/want_<role>.lock`
+   (ISO time + job); delete it when you get the lock. When you release the lock, don't take
+   it again while another role's `want_*.lock` younger than 30 min exists; they go next.
+   Don't start a heavy job with less than 1.5 GB free physical memory
+   (`(Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1MB`). One heavy job
+   holds the lock ≤ 20 min. UNITY batches checks: one compile + EditMode + PlayMode run
+   per task hand-off, not after every edit.
 7. **Accepted work stays accepted.** Don't re-polish Done tasks unless LEAD reopens them.
 8. **Stay inside the repo.** No system installs, no registry/settings changes; list those
    in your status file for USER_ACTIONS.

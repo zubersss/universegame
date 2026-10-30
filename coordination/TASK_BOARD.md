@@ -141,6 +141,13 @@ Files: tools/unity_test.ps1, Assets/_Game/Tests/LeadQA.meta
 Depends: —
 Lead notes: Done d185084 (cycle 7): PlayMode runs MERIDIAN.Tests.LeadQA by default with a per-assembly report; LeadQA.meta committed.
 
+### U-023 · UNITY · Ready · M1
+Goal: HeavyJobLock fairness + memory gate in `tools/unity_common.ps1` (D-026).
+Accept: Enter-HeavyJobLock writes `want_unity.lock` while waiting and deletes it on acquire; refuses to acquire if another role's `want_*.lock` < 30 min old exists and UNITY held the lock within the last 2 min; refuses below 1.5 GB free RAM (prints the number); Exit removes the lock. Run the full check set once per task hand-off, not after each edit.
+Files: tools/unity_common.ps1
+Depends: —
+Lead notes: PRIORITY: do this next (cycle 10). BLENDER's exports have waited > 25 min and free RAM dropped to 0.8 GB.
+
 ### U-022 · UNITY · Done · M1
 Goal: Top-down follow-ups from the U-011 review: apply the Sun's k_sun = 0.80 (D-022); draw `backgrounds/space/layer0..2` as parallax behind the system (layer0 slowest) and `planets/sun/glow` + `planets/*/glow` behind discs (B-003/B-005 handoffs: glow world width 2.56 × R planets, 3.2 × R Sun).
 Accept: EditMode test: Sun pull at r = 1150 is 14.9 ± 0.1 u/s² and equals Mk1 thrust at r ≈ 810; PlayMode test: a Mk1 ship parked at Mercury's ring escapes to r > 1,300 with full thrust outward; capture_space shows stars + Milky Way band and planet glows; draw calls stay within §11.1.
@@ -169,12 +176,12 @@ Files: Assets/_Game/Code/Runtime/Player/, Assets/_Game/Settings/Input/, Tests/Un
 Depends: U-004
 Lead notes: Done 089657b (cycle 8): jump heights Earth 2.497 / Mars 6.586 / Jupiter 0.988 m, walk/sprint, terminal, fall damage, Jetpack Mk1; EditMode 75/75, PlayMode 13/13; capture_earth_player OK. Jetpack input per D-023.
 
-### U-010 · UNITY · In Progress · M1
+### U-010 · UNITY · Done · M1
 Goal: Side-view ship: board/exit, Mk1 thrust, launch fuel burn, landing rules, Escape Line band + HUD marker.
 Accept: Launch from Earth costs 17 fuel over the first 3 s of thrust from rest; crossing the Escape Line with v_y > 0 raises `EscapeLineCrossed`; touchdown ≤ 6 m/s no damage, 6–15 proportional, > 15 crash to 30% hull; PlayMode test for each.
 Files: Assets/_Game/Code/Runtime/Ship/, Prefabs/Ship/Pilgrim.prefab, Tests/Unit/ShipSideTests.cs
 Depends: U-009
-Lead notes: —
+Lead notes: Done 98091e0 + 3707e5a (cycle 10): ShipSideTests cover 17-fuel launch, half burn, EscapeLineCrossed once, clean/proportional/crash touchdown, Mk1 can't lift on Jupiter; PlayMode 25/28 + LeadQA 1/1; landing floor per D-027.
 
 ### U-011 · UNITY · Done · M1
 Goal: Top-down space: Sun, 8 planet discs (placeholder `PlanetDisc`), moons, belt, Gravity Wells, Atmosphere Rings, cruise/boost ship, HUD, camera.
@@ -183,7 +190,7 @@ Files: Assets/_Game/Code/Runtime/Space/, Assets/_Game/Shaders/PlanetDisc.shaderg
 Depends: U-004
 Lead notes: Done d6831d4 (cycle 8): layout §3, wells (Earth edge 1.00, Earth ring 11.1, Jupiter ring 28.1 u/s²), cruise/boost, Earth→Mars 8.0 s, 16 draw calls; EditMode 88/88, PlayMode 15/15. Mercury/Sun conflict resolved by D-022; background + glows + k_sun follow up in U-022.
 
-### U-012 · UNITY · Ready · M1
+### U-012 · UNITY · In Progress · M1
 Goal: Both transitions per Bible §5.2–5.3.
 Accept: launch ≤ 1.5 s total with state carried (hull, fuel, cargo), ship on the Atmosphere Ring at the longitude angle with 20 u/s outward; entry on inward ring crossing or F: ship at Escape Line + 20 m descending 15 m/s with planet gravity; PlayMode tests for both.
 Files: Assets/_Game/Code/Runtime/Core/SceneDirector.cs, Code/Runtime/Transitions/
@@ -246,6 +253,34 @@ Accept: same world → same variants after save/load; no variant chosen for shee
 Files: Assets/_Game/Code/Runtime/Terrain/
 Depends: U-007, B-022
 Lead notes: Build against the current sheets (fall back to tile 46) until B-022 lands.
+
+### U-024 · UNITY · Ready · M2
+Goal: PlanetSide parallax: `backgrounds/<planet>/layer0..2` behind the terrain (layer0 slowest), plus a haze gradient per planet (Bible §9 Atmosphere).
+Accept: capture at Earth and Mars shows three layers moving at different rates when the camera pans; no seams when wrapping; ≤ 3 extra draw calls; uses the B-010/B-011 rework files when present, placeholders otherwise.
+Files: Assets/_Game/Code/Runtime/Planet/, Scenes/PlanetSide.unity
+Depends: U-007
+Lead notes: M2 draft promoted early (cycle 10) to keep the queue ≥ 5; M1 tasks still come first.
+
+### U-025 · UNITY · Ready · M2
+Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.
+Accept: EditMode test: Earth noon/midnight intensities match §9; captures at dawn/noon/dusk/night on Earth; 0 B GC per frame.
+Files: Assets/_Game/Code/Runtime/Planet/Lighting/
+Depends: U-004
+Lead notes: M2 draft (cycle 10).
+
+### U-026 · UNITY · Ready · M2
+Goal: Mars dust storm (Bible §7.2): 60 s warning, 2–6 min storm every 4–7 game days, visibility 15 m, Cryo +1, static discharges.
+Accept: PlayMode test forces a storm: warning event 60 s before; fog shrinks visibility to 15 m; Cryo level rises by 1; storm ends inside 2–6 min; uses fx/dust when present.
+Files: Assets/_Game/Code/Runtime/Planet/Weather/
+Depends: U-025
+Lead notes: M2 draft (cycle 10).
+
+### U-027 · UNITY · Ready · M2
+Goal: Creature AI v1: grazer (stag: wander, flee), pack hunter (wolf: night, chase), scavenger (dustskater), canyon hunter (scree stalker); spawns by biome and time; real gravity on bodies.
+Accept: PlayMode tests: stag flees within 8 m, wolf packs spawn only at night, creatures never fall through streamed chunks; ≤ 0.5 ms AI per frame with 20 creatures; placeholders until B-015/B-016.
+Files: Assets/_Game/Code/Runtime/Creatures/
+Depends: U-009
+Lead notes: M2 draft (cycle 10).
 
 ---
 
@@ -321,6 +356,13 @@ Files: Assets/_Game/Art/backgrounds/earth/
 Depends: B-002
 Lead notes: FAILED review (cycle 7): §9 Forbidden "anything that reads as a cartoon". layer2 (and layer1) trees are flat-filled lollipop/cone silhouettes with a uniform green ground fill. Fix: build real 3D trees in Blender (geometry nodes: curved trunk + branch curves, instanced leaf-cluster meshes with noise displacement and per-cluster hue/value variation; conifers as stacked drooping whorls) and a ground of instanced grass/shrub clumps, lit by a sun from upper-right, rendered with EEVEE + volumetric haze per layer. Leaf masses must show internal light/shadow and broken edges; no flat fills. Keep tiling, sizes, seeds. layer0 can keep its sky/range if it passes the same rule. Redo before B-011 uses the same approach for Mars.
 
+### B-024 · BLENDER · Ready · M2
+Goal: HeavyJobLock fairness + memory gate in `tools/blender_render.ps1` (D-026), mirroring U-023.
+Accept: writes `want_blender.lock` while waiting, deletes it on acquire; yields to a fresh `want_unity.lock` after its own job; refuses below 1.5 GB free RAM; one job ≤ 20 min (split `all` exports by category).
+Files: tools/blender_render.ps1
+Depends: —
+Lead notes: PRIORITY: do this before the next full export (cycle 10).
+
 ### B-011 · BLENDER · In Progress · M2
 Goal: Mars parallax `backgrounds/mars/layer0..2`.
 Accept: as B-010 with the Mars palette and butterscotch sky.
@@ -340,7 +382,7 @@ Goal: Pilgrim landing legs: `ships/pilgrim/side_legs` (same framing, pivot, and 
 Accept: identical canvas and pivot to `side` so UNITY can swap without offset (diff of the two pivots = 0); legs read clearly at camera size 9; color, normal, emission.
 Files: Assets/_Game/Art/ships/pilgrim/, blender/scripts/
 Depends: B-006
-Lead notes: Bible §4.3: legs deploy below 10 m altitude. Your cycle-5 proposal, promoted.
+Lead notes: Option (b) approved (D-025): re-export `side` with gear retracted into the pods and add `side_legs` = today's deployed skids; same canvas and pivot.
 
 ### B-023 · BLENDER · Ready · M2
 Goal: Surveyor v2 polish: replace primitive suit parts with a sculpted soft suit (fabric folds at joints, seams, chest unit, backpack straps), visor with reflection and emission readouts; fix the death end pose (legs grounded).
@@ -349,7 +391,7 @@ Files: blender/scripts/build_surveyor.py, blender/sources/characters/surveyor.bl
 Depends: B-009
 Lead notes: Scheduled polish for the M2 exit (cycle 7), not a reopen of B-009. Do it after B-022, B-010 rework, B-011, B-019.
 
-### B-012 · BLENDER · Ready · M2
+### B-012 · BLENDER · In Progress · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
 Accept: frames ≤ 256, sheets ≤ 1024², `.json` per sheet, emission where glowing.
 Files: Assets/_Game/Art/fx/
