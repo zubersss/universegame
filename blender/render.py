@@ -436,6 +436,8 @@ def write_outputs(entry, maps, clips, wh, preview):
         }
         if "hitbox" in anim:
             meta["hitbox"] = anim["hitbox"]
+        if "ppu" in entry:      # frames drawn below PPU 128 (creatures that don't fit their class frame)
+            meta["ppu"] = entry["ppu"]
         with open(os.path.join(dest, f"{variant}.json"), "w", encoding="utf-8", newline="\n") as f:
             json.dump(meta, f, indent=2)
             f.write("\n")
