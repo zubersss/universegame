@@ -750,13 +750,13 @@ export class Game {
     const body = this.body;
     if (!p || !body) return;
     const inp = this.input;
-    if (this.onFoot.step(dt)) {
+    const w = this.state === 'playing' ? this.readWalk() : { forward: 0, right: 0, sprint: false, jump: false, yaw: 0, pitch: 0 };
+    if (this.onFoot.step(dt, w)) {
       // An active ability moved the character this step; the walk controller stays idle.
       this.updateScan(dt);
       if (inp.consume('KeyE')) this.interact();
       return;
     }
-    const w = this.state === 'playing' ? this.readWalk() : { forward: 0, right: 0, sprint: false, jump: false, yaw: 0, pitch: 0 };
     // Never walk into missing collision data.
     _v1.copy(p.pos).sub(this.bodyCenterLocal);
     if (!body.collision.readyAt(_v1)) {
@@ -814,7 +814,8 @@ export class Game {
     const e = this.expedition;
     const body = this.body!.def;
     if (t.kind === 'ship') {
-      this.boardShip();
+      // Never board in mid-air (charter J: flight never ends mid-air).
+      if (this.player?.grounded) this.boardShip();
       return;
     }
     if (t.kind === 'sample') {
@@ -1204,9 +1205,12 @@ export class Game {
     const radialUp = _v1.copy(shipPos).sub(this.bodyCenterLocal).normalize();
     const playing = this.state === 'playing' || this.state === 'paused' || this.state === 'loading' || this.state === 'panel';
 
+    // True when the ON_FOOT hooks placed the camera (they also own its field of view).
+    let hookCamera = false;
     if (playing && this.mode === 'ON_FOOT' && this.player) {
       const p = this.player;
-      if (!this.onFoot.frame(dt, alpha)) this.cameraRig.firstPerson(p.eye(alpha, _v3), p.up, p.heading, p.pitch);
+      hookCamera = this.onFoot.frame(dt, alpha);
+      if (!hookCamera) this.cameraRig.firstPerson(p.eye(alpha, _v3), p.up, p.heading, p.pitch);
     } else if (playing && (this.mode === 'PILOTING' || this.mode === 'CRUISING')) {
       this.cameraRig.chase(dt, shipPos, shipQuat, ship.speed, radialUp, this.mode === 'CRUISING');
     } else {
@@ -1214,7 +1218,7 @@ export class Game {
       this.cameraRig.orbit(dt, shipPos, radialUp, fwd, this.orbitMouse.x, this.orbitMouse.y, this.state === 'title');
       this.orbitMouse.set(0, 0);
     }
-    this.cameraRig.updateFov(dt, ship.flight.boostActive && this.mode === 'PILOTING', this.settings.reducedMotion);
+    if (!hookCamera) this.cameraRig.updateFov(dt, ship.flight.boostActive && this.mode === 'PILOTING', this.settings.reducedMotion);
     ship.root.visible = true;
     if (this.photoCamera) this.applyPhotoCamera();
 
