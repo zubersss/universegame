@@ -80,6 +80,8 @@ export class FlightPower implements Power {
   refusal: string | null = null;
   private sense: FlightSense = { up: new Vector3(), heading: new Vector3(), height: null, grounded: false, loaded: Infinity };
   private readonly v0 = new Vector3();
+  /** In the air under this power (the readout shows the speed only then). */
+  private flying = false;
 
   constructor(readonly p: FlightParams) {
     this.flight = new Flight(p);
@@ -120,11 +122,13 @@ export class FlightPower implements Power {
     // The sense first: fill() reuses the module scratch vectors.
     const sense = this.fill(w);
     this.flight.start(this.v0.copy(pl.vel).addScaledVector(pl.up, pl.vVert), sense);
+    this.flying = true;
   }
 
   resume(w: PowerWorld): void {
     this.hold = 0;
     this.flight.resume(this.fill(w));
+    this.flying = true;
   }
 
   step(dt: number, w: PowerWorld): 'active' | 'done' {
@@ -145,6 +149,7 @@ export class FlightPower implements Power {
     pl.moveFree(dt, this.flight.vel, w.center);
     // What actually happened: collisions take the blocked part of the velocity.
     this.flight.vel.copy(pl.vel).addScaledVector(pl.up, pl.vVert);
+    if (r === 'landed') this.flying = false;
     return r === 'landed' ? 'done' : 'active';
   }
 
@@ -152,7 +157,7 @@ export class FlightPower implements Power {
 
   readout(): PowerReadout {
     const f = this.flight;
-    return { charge: 1, cooldown: 0, hint: 'Space/Ctrl climb · W/S speed · Shift boost · X hover', status: `${Math.round(f.vel.length())} m/s` };
+    return { charge: 1, cooldown: 0, hint: 'Space/Ctrl climb · W/S speed · Shift boost · X hover', status: this.flying ? `${Math.round(f.vel.length())} m/s` : 'ready' };
   }
 }
 
@@ -164,6 +169,8 @@ export class SpeedPower implements Power {
   refusal: string | null = null;
   private readonly normal = new Vector3();
   private sense!: SpeedSense;
+  /** Running or braking under this power (the readout shows it only then). */
+  private running = false;
 
   constructor(readonly p: SpeedParams) {
     this.speed = new Speed(p);
@@ -196,10 +203,12 @@ export class SpeedPower implements Power {
 
   start(w: PowerWorld): void {
     this.speed.start(w.player.vel, this.fill(w));
+    this.running = true;
   }
 
   resume(w: PowerWorld): void {
     this.speed.resume(this.fill(w));
+    this.running = true;
   }
 
   step(dt: number, w: PowerWorld): 'active' | 'done' {
@@ -211,6 +220,7 @@ export class SpeedPower implements Power {
     // (full 3D speed: on a slope the horizontal part alone is lower).
     const actual = Math.hypot(pl.vel.length(), pl.vVert);
     if (actual < this.speed.speed - 1) this.speed.speed = actual;
+    if (r === 'done') this.running = false;
     return r === 'done' ? 'done' : 'active';
   }
 
@@ -218,7 +228,7 @@ export class SpeedPower implements Power {
 
   readout(): PowerReadout {
     const s = this.speed;
-    return { charge: 1, cooldown: 0, hint: 'Hold Q to run · mouse steers · X brakes', status: s.braking ? 'braking' : `${Math.round(s.speed)} m/s` };
+    return { charge: 1, cooldown: 0, hint: 'Hold Q to run · mouse steers · X brakes', status: !this.running ? 'ready' : s.braking ? 'braking' : `${Math.round(s.speed)} m/s` };
   }
 }
 

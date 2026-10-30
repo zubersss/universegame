@@ -117,8 +117,9 @@ describe('powers driven through the ability controller (charter K controls)', ()
     r.heldKeys.clear();
     for (let i = 0; i < 60; i++) r.step();
     expect(r.player.grounded).toBe(true);
-    // The HUD slot showed the power while it was usable.
-    expect(r.slots.some((s) => s?.name === 'Skyborne Flight')).toBe(true);
+    // The HUD slot showed the power while it was usable: its speed in the air, 'ready' after landing.
+    expect(r.slots.some((s) => s?.name === 'Skyborne Flight' && /^flight · \d+ m\/s$/.test(s.state))).toBe(true);
+    expect(r.slots.at(-1)).toMatchObject({ name: 'Skyborne Flight', state: 'ready' });
     r.player.dispose();
   });
 
@@ -138,6 +139,9 @@ describe('powers driven through the ability controller (charter K controls)', ()
     // Braking 110 -> 7.5 m/s at 50 m/s^2 takes about 2 s.
     expect(walkAt * SIM_DT).toBeGreaterThan(1.9);
     expect(r.player.vel.length()).toBeLessThanOrEqual(SPEED_EXIT_MAX + 0.5);
+    // The slot read 'speed · braking' on the way down and reads 'ready' once walking.
+    expect(r.slots.some((s) => s?.state === 'speed · braking')).toBe(true);
+    expect(r.slots.at(-1)).toMatchObject({ name: 'Redline', state: 'ready' });
     r.player.dispose();
   });
 
