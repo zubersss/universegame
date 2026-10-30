@@ -8,6 +8,7 @@ import { Game } from './Game';
 import { Panel } from '../ui/Panel';
 import { renderJournal, renderSurvey } from '../ui/Journal';
 import { BODIES, BODY_IDS } from '../world/bodies';
+import { installPlayer } from '../player/install';
 
 function when(iso: string): string {
   const d = new Date(iso);
@@ -234,6 +235,7 @@ export async function boot(): Promise<void> {
   }
 
   game = new Game(render, settings);
+  installPlayer(game);
   const panel = new Panel();
   const closePanel = () => {
     if (!game || game.state !== 'panel') return;

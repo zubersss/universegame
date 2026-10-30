@@ -102,6 +102,12 @@ button:disabled { opacity: 0.4; cursor: default; }
 .prompt.dim { color: var(--ink-dim); }
 #warning { position: absolute; left: 50%; top: 22%; transform: translateX(-50%); color: var(--amber); font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; background: var(--panel); padding: 6px 14px; border: 1px solid rgba(227, 165, 90, 0.5); }
 #warning.danger { color: var(--danger); border-color: rgba(231, 130, 106, 0.6); }
+#warning.info { color: var(--teal); border-color: rgba(116, 198, 184, 0.5); }
+#ability-slot { position: absolute; left: 16px; bottom: 112px; min-width: 230px; }
+#ability-slot .v.small { text-align: left; }
+#ability-slot .hint { font-size: 11px; color: var(--ink-dim); margin-top: 4px; }
+#ability-slot.ready #a-name { color: var(--teal); }
+#a-charge-bar { position: absolute; left: 0; top: 0; bottom: 0; background: var(--teal); width: 0%; }
 #markers { position: absolute; inset: 0; }
 .marker { position: absolute; left: 0; top: 0; display: flex; flex-direction: column; align-items: center; gap: 3px; white-space: nowrap; }
 .marker .glyph { width: 14px; height: 14px; border: 1.5px solid var(--amber); transform: rotate(45deg); }
@@ -160,6 +166,7 @@ button:disabled { opacity: 0.4; cursor: default; }
   #hud-top { display: none; }
   .panel-loc { display: block; }
   #flight-panel, #walk-panel { left: 10px; bottom: 10px; min-width: 178px; }
+  #ability-slot { left: 10px; bottom: 76px; min-width: 178px; }
   .instrument .row { grid-template-columns: 34px 1fr 30px; gap: 6px; padding: 1px 0; }
   .instrument .v { font-size: 15px; }
   .tags { margin-top: 4px; gap: 4px; }
