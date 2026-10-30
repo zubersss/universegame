@@ -11,8 +11,6 @@ import type { PowerMotion } from '../avatar/AvatarAnimator';
 const HALF = (WALK.height - 2 * WALK.radius) / 2; // capsule cylinder half-height
 /** Distance from the capsule center to the bottom of the feet. */
 export const FOOT_OFFSET = HALF + WALK.radius;
-/** Steepest slope a flier rides up instead of stopping against (rad). */
-const FLY_SLOPE = (80 * Math.PI) / 180;
 
 export interface WalkInput {
   forward: number; // -1..1
@@ -158,24 +156,18 @@ export class Player {
    * (horizontal), vVert and grounded like a walking step. Walking re-enables
    * its own snapping on its next step.
    */
-  moveFree(dt: number, velocity: Vector3, planetCenter: Vector3, snap = 0, anySlope = false): void {
+  moveFree(dt: number, velocity: Vector3, planetCenter: Vector3, snap = 0, autostep = true): void {
     this.prevPos.copy(this.pos);
     this.realign(planetCenter);
     // Optional ground snapping (running at speed over bumps); off for flight.
     this.setSnap(snap);
     this.cc.setUp({ x: this.up.x, y: this.up.y, z: this.up.z });
     _desired.copy(velocity).multiplyScalar(dt);
-    // A flier rides up steep hillsides: the walking slope limit would turn
-    // them into walls that stop it dead. Sheer faces still stop it.
-    if (anySlope) {
-      this.cc.setMaxSlopeClimbAngle(FLY_SLOPE);
-      this.cc.setMinSlopeSlideAngle(Math.PI / 2);
-    }
+    // A flier does not step: pushed against a steep face, autostep would
+    // climb it 0.3 m at a time instead of letting it slide along.
+    if (!autostep) this.cc.disableAutostep();
     this.cc.computeColliderMovement(this.collider, { x: _desired.x, y: _desired.y, z: _desired.z }, RAPIER.QueryFilterFlags.EXCLUDE_SENSORS, GROUPS.player);
-    if (anySlope) {
-      this.cc.setMaxSlopeClimbAngle((WALK.maxSlopeDeg * Math.PI) / 180);
-      this.cc.setMinSlopeSlideAngle(((WALK.maxSlopeDeg + 5) * Math.PI) / 180);
-    }
+    if (!autostep) this.cc.enableAutostep(WALK.step, 0.2, false);
     const m = this.cc.computedMovement();
     const wasGrounded = this.grounded;
     this.grounded = this.cc.computedGrounded();

@@ -199,7 +199,7 @@ export class Avatar {
     this.root.copy(target);
     // Flight: the whole body leans forward with speed (smoothed).
     const pw = f.power;
-    const lean = pw && pw.mode === 'flight' ? FLIGHT_LEAN * Math.min(1, pw.speed / 60) : 0;
+    const lean = pw && pw.mode === 'flight' ? FLIGHT_LEAN * Math.min(1, (pw.forward ?? pw.speed) / 60) : 0;
     if (f.dt > 0) this.bodyPitch += (lean - this.bodyPitch) * (1 - Math.exp(-f.dt / 0.3));
 
     // Basis: forward = -Z, up = +Y, right = +X.

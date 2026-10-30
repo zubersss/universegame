@@ -69,11 +69,10 @@ const held = (w: PowerWorld, ...codes: string[]) => codes.some((c) => w.held(c))
 /** Distances probed for loaded collision along a flight path (m): boost needs about 430 m loaded. */
 const LOAD_PROBES = [0, 30, 60, 120, 240, 480, 960];
 
-/** Height of the feet above the ground below (m), null beyond `reach` or where nothing is loaded. */
-function heightAboveGround(player: Player, reach: number): number | null {
-  const g = player.groundAt(player.feet(_feet), 0.5, reach);
-  return g ? Math.max(0, -g.h) : null;
-}
+/** Cosine of the walking slope limit: ground at least this level is walkable. */
+export const WALKABLE_COS = Math.cos((WALK.maxSlopeDeg * Math.PI) / 180);
+/** Feet this close above walkable ground are touching it (m): where flight hands back. */
+export const TOUCH = 0.15;
 
 // ------------------------------------------------------------------ flight
 
@@ -82,7 +81,7 @@ export class FlightPower implements Power {
   readonly flight: Flight;
   private hold = 0;
   refusal: string | null = null;
-  private sense: FlightSense = { up: new Vector3(), heading: new Vector3(), height: null, grounded: false, loaded: Infinity };
+  private sense: FlightSense = { up: new Vector3(), heading: new Vector3(), height: null, grounded: false, walkable: false, loaded: Infinity };
   private readonly v0 = new Vector3();
   /** In the air under this power (the readout shows the speed only then). */
   private flying = false;
@@ -102,8 +101,13 @@ export class FlightPower implements Power {
     const s = this.sense;
     s.up.copy(pl.up);
     s.heading.copy(pl.heading);
-    s.height = heightAboveGround(pl, this.p.ceiling + 600);
-    s.grounded = pl.grounded;
+    // Ground below the feet (null beyond reach or where nothing is loaded) and
+    // whether it is walkable. Touching means walkable ground right under the
+    // feet: the controller's own contact flag also counts steep faces.
+    const g = pl.groundAt(pl.feet(_feet), 0.5, this.p.ceiling + 600);
+    s.height = g ? Math.max(0, -g.h) : null;
+    s.walkable = !!g && g.normal.dot(pl.up) >= WALKABLE_COS;
+    s.grounded = s.walkable && s.height !== null && s.height <= TOUCH;
     // How far along the path collision is loaded (charter J): probe outward
     // until a tile is missing. The game loads speed x 2 s + braking + 50 m
     // ahead; flight only needs its stopping distance inside what is loaded.
@@ -150,7 +154,11 @@ export class FlightPower implements Power {
       },
       this.fill(w),
     );
-    pl.moveFree(dt, this.flight.vel, w.center, 0, true);
+    pl.moveFree(dt, this.flight.vel, w.center, 0, false);
+    // Powered flight is no fall: touching down from it (or skimming the
+    // ground) does not count as landing from a drop (Game's landing thump).
+    pl.airTime = 0;
+    pl.justLanded = false;
     // What actually happened: collisions take the blocked part of the velocity.
     this.flight.vel.copy(pl.vel).addScaledVector(pl.up, pl.vVert);
     if (r === 'landed') this.flying = false;
@@ -158,6 +166,12 @@ export class FlightPower implements Power {
   }
 
   tick(): void {}
+
+  /** Speed across the ground (m/s): the body leans into it, not into a straight climb or descent. */
+  forwardSpeed(): number {
+    const v = this.flight.vel;
+    return _p.copy(v).addScaledVector(this.sense.up, -v.dot(this.sense.up)).length();
+  }
 
   readout(): PowerReadout {
     const f = this.flight;

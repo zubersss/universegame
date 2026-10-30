@@ -2,7 +2,7 @@ import { Vector3 } from 'three';
 import type { OnFootContext, OnFootExitReason } from '../game/onFoot';
 import type { AbilitySlot, WarningSeverity } from '../ui/Hud';
 import { abilityFor, primitivesOf } from './catalog';
-import { createPower, FlightPower, SpeedPower, type Power, type PowerWorld } from './powers';
+import { createPower, FlightPower, SpeedPower, TOUCH, WALKABLE_COS, type Power, type PowerWorld } from './powers';
 import type { PowerMotion } from '../avatar/AvatarAnimator';
 import { readAbilitySave, type AbilitySave } from './save';
 import { transitionBlocked, type AbilityConfig, type AbilityId, type AbilityState, type BodyPower, type Primitive, type TransitionContext } from './types';
@@ -153,9 +153,11 @@ export class AbilityController {
     const pl = w.player;
     const p = this.power;
     let grounded = pl.grounded;
-    if (!grounded && this.state === 'flight' && p && p.primitive === 'flight') {
-      const g = pl.groundAt(pl.feet(_feet), 0.5, p.params.landHeight + 0.5);
-      grounded = !!g && -g.h <= p.params.landHeight + 0.1;
+    if (this.state === 'flight') {
+      // Flight hands back only touching walkable ground (charter J: never
+      // mid-air; a cliff face the controller calls ground is not a landing).
+      const g = pl.groundAt(pl.feet(_feet), 0.5, 0.6);
+      grounded = !!g && -g.h <= TOUCH && g.normal.dot(pl.up) >= WALKABLE_COS;
     }
     return { grounded, speed: pl.vel.length(), primitivesHere: primitivesOf(p), unlocked: !!p && this.unlocked.has(p.id), inZone: false };
   }
@@ -227,7 +229,7 @@ export class AbilityController {
   motion(): PowerMotion | null {
     const rt = this.runtime;
     if (!rt || this.state === 'walk') return null;
-    if (rt instanceof FlightPower) return { mode: 'flight', speed: rt.flight.vel.length() };
+    if (rt instanceof FlightPower) return { mode: 'flight', speed: rt.flight.vel.length(), forward: rt.forwardSpeed() };
     if (rt instanceof SpeedPower) return { mode: 'dash', speed: rt.speed.speed };
     return null;
   }

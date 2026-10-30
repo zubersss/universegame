@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { Vector3 } from 'three';
-import { Flight, FLIGHT_LOAD_MARGIN, FLIGHT_TAKEOFF_CLIMB, FLIGHT_UNREADY_SPEED, type FlightInput, type FlightSense } from '../src/abilities/flight';
+import { Flight, FLIGHT_LOAD_MARGIN, FLIGHT_SKIM, FLIGHT_TAKEOFF_CLIMB, FLIGHT_UNREADY_SPEED, type FlightInput, type FlightSense } from '../src/abilities/flight';
 import { ABILITIES } from '../src/abilities/catalog';
 import type { FlightParams } from '../src/abilities/types';
 import { initPhysics, Physics, RAPIER, GROUPS } from '../src/physics/Physics';
@@ -11,7 +11,7 @@ const P = (ABILITIES['skyborne-flight'] as { params: FlightParams }).params;
 const UP = new Vector3(0, 1, 0);
 const FWD = new Vector3(0, 0, -1);
 const NONE: FlightInput = { climb: false, descend: false, faster: false, slower: false, boost: false, brake: false };
-const sense = (over: Partial<FlightSense> = {}): FlightSense => ({ up: UP, heading: FWD, height: 50, grounded: false, loaded: Infinity, ...over });
+const sense = (over: Partial<FlightSense> = {}): FlightSense => ({ up: UP, heading: FWD, height: 50, grounded: false, walkable: true, loaded: Infinity, ...over });
 
 function run(f: Flight, seconds: number, inp: Partial<FlightInput>, s: Partial<FlightSense> = {}): 'flying' | 'landed' {
   let r: 'flying' | 'landed' = 'flying';
@@ -136,9 +136,18 @@ describe('flight primitive (Skyborne Flight tunables)', () => {
     g.start(new Vector3(0, 0, -30), sense({ height: 1 }));
     g.speed = 30;
     expect(run(g, 1, {}, { height: 1 })).toBe('flying');
-    // Low, slow, descending: lands.
-    expect(run(f, 3, { descend: true }, { height: 1.2 })).toBe('landed');
-    // Touching the ground while slow also lands; climbing never does.
+    // Low and slow but not yet touching: it settles down (charter K: below
+    // 1.5 m at under 4 m/s lands) and keeps flying until the touchdown.
+    expect(run(f, 3, {}, { height: 1.2 })).toBe('flying');
+    expect(f.vel.y).toBeLessThan(-1);
+    // Touching walkable ground while slow lands.
+    expect(run(f, 1, {}, { height: 0.02, grounded: true })).toBe('landed');
+    // Touching a cliff face (the controller calls it ground, but it is not walkable): never lands.
+    const c = new Flight(P);
+    c.start(new Vector3(), sense());
+    run(c, 1, {});
+    expect(run(c, 3, {}, { height: 0.02, grounded: true, walkable: false })).toBe('flying');
+    // Climbing never lands.
     const h = new Flight(P);
     h.start(new Vector3(), sense());
     run(h, 1, {});
@@ -175,53 +184,49 @@ describe('powered movement through the character controller', () => {
     player.dispose();
   });
 
-  it('rides up a hillside steeper than the walking limit instead of stopping dead, never inside it', () => {
+  it('skimming the ground at speed with Ctrl held, it follows the terrain and rides up a 60 degree rise instead of stopping dead', () => {
     // Flat ground, and a 60 degree slope rising ahead from z = -30 (normal n).
     const s60 = Math.sin(Math.PI / 3);
     const c60 = Math.cos(Math.PI / 3);
     const n = new Vector3(0, c60, s60);
     const p0 = new Vector3(0, 0, -30);
-    const fly = (anySlope: boolean) => {
-      const physics = new Physics();
-      const ground = physics.world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(0, -1, 0));
-      physics.world.createCollider(RAPIER.ColliderDesc.cuboid(100, 1, 100).setCollisionGroups(GROUPS.terrain), ground);
-      const up = new Vector3(0, s60, -c60); // up the slope
-      const face = p0.clone().addScaledVector(up, 30);
-      const c = face.addScaledVector(n, -1);
-      const ramp = physics.world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(c.x, c.y, c.z).setRotation({ x: Math.sin(Math.PI / 6), y: 0, z: 0, w: Math.cos(Math.PI / 6) }));
-      physics.world.createCollider(RAPIER.ColliderDesc.cuboid(40, 1, 30).setCollisionGroups(GROUPS.terrain), ramp);
-      physics.refreshQueries();
-      // Skimming the ground (Ctrl held: in contact with it) at 100 m/s.
-      const player = new Player(physics, new Vector3(0, WALK.skin + 0.02 + FOOT_OFFSET, 0), UP, FWD);
-      const center = new Vector3(0, -1e7, 0);
-      const f = new Flight(P);
-      f.start(new Vector3(0, 0, -100), sense());
-      f.vel.set(0, -1, -100);
-      f.speed = 100;
-      let rise = 0;
-      let minGap = Infinity;
-      for (let i = 0; i < 90; i++) {
-        const g = player.groundAt(player.feet(new Vector3()), 0.5, 200);
-        f.step(SIM_DT, { ...NONE, descend: true }, sense({ height: g ? -g.h : 200, grounded: player.grounded }));
-        player.moveFree(SIM_DT, f.vel, center, 0, anySlope);
-        physics.step();
-        // As FlightPower does: the velocity flown is what the controller allowed.
-        f.vel.copy(player.vel).addScaledVector(UP, player.vVert);
-        rise = Math.max(rise, player.pos.y - FOOT_OFFSET);
-        if (player.pos.z < -30) minGap = Math.min(minGap, player.pos.clone().sub(p0).dot(n));
-      }
-      const speed = f.vel.length();
-      player.dispose();
-      return { rise, minGap, speed };
-    };
-    // With the walking limit (45 degrees) a grounded skim meets the slope as a wall: stopped dead.
-    const walkLimit = fly(false);
-    expect(walkLimit.speed).toBeLessThan(5);
-    // Flying, it rides up the slope and keeps going.
-    const free = fly(true);
-    expect(free.rise).toBeGreaterThan(15);
-    expect(free.speed).toBeGreaterThan(20);
+    const physics = new Physics();
+    const ground = physics.world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(0, -1, 0));
+    physics.world.createCollider(RAPIER.ColliderDesc.cuboid(100, 1, 100).setCollisionGroups(GROUPS.terrain), ground);
+    const upSlope = new Vector3(0, s60, -c60);
+    const c = p0.clone().addScaledVector(upSlope, 30).addScaledVector(n, -1);
+    const ramp = physics.world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(c.x, c.y, c.z).setRotation({ x: Math.sin(Math.PI / 6), y: 0, z: 0, w: Math.cos(Math.PI / 6) }));
+    physics.world.createCollider(RAPIER.ColliderDesc.cuboid(40, 1, 30).setCollisionGroups(GROUPS.terrain), ramp);
+    physics.refreshQueries();
+    // Skimming at its height with Ctrl held, 100 m/s ahead.
+    const player = new Player(physics, new Vector3(0, FLIGHT_SKIM + FOOT_OFFSET, 30), UP, FWD);
+    const center = new Vector3(0, -1e7, 0);
+    const f = new Flight(P);
+    f.start(new Vector3(0, 0, -100), sense({ height: FLIGHT_SKIM }));
+    f.vel.set(0, 0, -100);
+    f.speed = 100;
+    let rise = 0;
+    let minGap = Infinity;
+    let skim = 0;
+    for (let i = 0; i < 120; i++) {
+      const g = player.groundAt(player.feet(new Vector3()), 0.5, 200);
+      const h = g ? -g.h : 200;
+      f.step(SIM_DT, { ...NONE, descend: true }, sense({ height: h, grounded: h <= 0.15, walkable: !!g && g.normal.y > 0.7 }));
+      player.moveFree(SIM_DT, f.vel, center);
+      physics.step();
+      // As FlightPower does: the velocity flown is what the controller allowed.
+      f.vel.copy(player.vel).addScaledVector(UP, player.vVert);
+      rise = Math.max(rise, player.pos.y - FOOT_OFFSET);
+      if (player.pos.z > -25) skim = Math.max(skim, Math.abs(player.pos.y - FOOT_OFFSET - FLIGHT_SKIM));
+      if (player.pos.z < -30) minGap = Math.min(minGap, player.pos.clone().sub(p0).dot(n));
+    }
+    // Over the flat it held the skim height (not scraping), then rode up the rise and kept going.
+    expect(skim).toBeLessThan(0.1);
+    expect(rise).toBeGreaterThan(15);
+    // Still moving (Ctrl is still held, pressing it onto a slope too steep to skim): never stopped dead.
+    expect(f.vel.length()).toBeGreaterThan(5);
     // The capsule (radius plus skin) never went into the slope.
-    expect(free.minGap).toBeGreaterThan(WALK.radius - 0.05);
+    expect(minGap).toBeGreaterThan(WALK.radius - 0.05);
+    player.dispose();
   });
 });

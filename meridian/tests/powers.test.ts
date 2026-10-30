@@ -113,9 +113,14 @@ describe('powers driven through the ability controller (charter K controls)', ()
       if (r.ctl.state === 'walk') landedAt = h;
     }
     expect(landedAt).toBeGreaterThanOrEqual(0);
-    expect(landedAt).toBeLessThan(P.landHeight + 0.2); // never ends higher than the landing flare
+    expect(landedAt).toBeLessThan(0.2); // on touchdown, never in the air above it
+    // No drop after the hand-back: the walker stays on the ground, no landing thump.
     r.heldKeys.clear();
-    for (let i = 0; i < 60; i++) r.step();
+    for (let i = 0; i < 60; i++) {
+      r.step();
+      expect(r.height()).toBeLessThan(0.2);
+      expect(r.player.justLanded).toBe(false);
+    }
     expect(r.player.grounded).toBe(true);
     // The HUD slot showed the power while it was usable: its speed in the air, 'ready' after landing.
     expect(r.slots.some((s) => s?.name === 'Skyborne Flight' && /^flight · \d+ m\/s$/.test(s.state))).toBe(true);
@@ -329,7 +334,7 @@ describe('superspeed on a slope', () => {
 });
 
 describe('collision reach for a blink (WORLDS W8 TerrainCollision.reach)', () => {
-  it('keeps collision loaded out past the blink range while on foot on a blink body, and only there', async () => {
+  it('keeps collision loaded out to the blink range while on foot on a blink body, and only there', async () => {
     const { PlayerRuntime } = await import('../src/player/install');
     const { Group } = await import('three');
     const collision = { reach: 0, readyAt: () => true };
@@ -346,8 +351,7 @@ describe('collision reach for a blink (WORLDS W8 TerrainCollision.reach)', () =>
     const rt = new PlayerRuntime(game as never);
     const P = (ABILITIES['lunar-step'] as { params: BlinkParams }).params;
     rt.enter({ body: 'moon', power: 'lunar-step' });
-    expect(collision.reach).toBeGreaterThan(P.range);
-    expect(collision.reach).toBeLessThan(P.range + 20);
+    expect(collision.reach).toBe(P.range);
     rt.exit('board');
     expect(collision.reach).toBe(0);
     // Flight and superspeed bodies keep WORLDS' default block.
@@ -360,6 +364,39 @@ describe('collision reach for a blink (WORLDS W8 TerrainCollision.reach)', () =>
     rt2.enter({ body: 'mars', power: 'redline' });
     rt2.exit('board');
     expect(old.reach).toBeUndefined();
+  });
+});
+
+describe('flight lands only on walkable ground', () => {
+  it('pressed against an 80 degree cliff face it keeps flying; descending along it, it lands at the foot', () => {
+    const r = rig('earth', 'skyborne-flight', 9.81);
+    // A cliff 80 degrees steep, its face 12 m ahead (normal 10 degrees above horizontal, toward the flier).
+    const a = (-10 * Math.PI) / 180;
+    const cliff = r.physics.world.createRigidBody(
+      RAPIER.RigidBodyDesc.fixed().setTranslation(0, 50, -13).setRotation({ x: Math.sin(a / 2), y: 0, z: 0, w: Math.cos(a / 2) }),
+    );
+    r.physics.world.createCollider(RAPIER.ColliderDesc.cuboid(30, 60, 1).setCollisionGroups(GROUPS.terrain), cliff);
+    r.physics.refreshQueries();
+    for (let i = 0; i < 10; i++) r.step();
+    r.heldKeys.add('Space');
+    r.step({ jump: true });
+    for (let i = 0; i < 140; i++) r.step();
+    r.heldKeys.clear();
+    expect(r.height()).toBeGreaterThan(30);
+    // Drift slowly into the face and stay against it.
+    r.heldKeys.add('KeyW');
+    for (let i = 0; i < 20; i++) r.step();
+    r.heldKeys.clear();
+    for (let i = 0; i < 300; i++) r.step();
+    expect(r.player.pos.z).toBeLessThan(-8); // against the face
+    expect(r.ctl.state).toBe('flight'); // a face is no landing
+    expect(r.height()).toBeGreaterThan(25);
+    // Descend along it: lands on the flat ground at its foot.
+    r.heldKeys.add('ControlLeft');
+    for (let i = 0; i < 1200 && r.ctl.state === 'flight'; i++) r.step();
+    expect(r.ctl.state).toBe('walk');
+    expect(r.height()).toBeLessThan(0.2);
+    r.player.dispose();
   });
 });
 

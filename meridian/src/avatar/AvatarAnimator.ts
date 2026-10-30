@@ -19,7 +19,10 @@ export type AnimState = 'idle' | 'walk' | 'run' | 'jump' | 'fall' | 'land' | 'cl
 /** A power moving the body: flight (hover to cruise) or superspeed (dash), with its speed (m/s). */
 export interface PowerMotion {
   mode: 'flight' | 'dash';
+  /** Speed of travel (m/s). */
   speed: number;
+  /** Speed across the ground (m/s; flight): the pose leans into it. Defaults to `speed`. */
+  forward?: number;
 }
 
 /** Ground under a point, relative to the character's root plane. */
@@ -319,7 +322,7 @@ export class AvatarAnimator {
     const pw = input.power ?? null;
     this.fly = approach(this.fly, pw && pw.mode === 'flight' ? 1 : 0, dt, 0.15);
     this.dash = approach(this.dash, pw && pw.mode === 'dash' ? 1 : 0, dt, 0.1);
-    if (pw) this.powerSpeed = approach(this.powerSpeed, pw.speed, dt, 0.2);
+    if (pw) this.powerSpeed = approach(this.powerSpeed, pw.forward ?? pw.speed, dt, 0.2);
     if (pw && pw.mode === 'dash') this.dashPhase = (this.dashPhase + dt * Math.min(3.4, 1.2 + pw.speed / 30)) % 1;
     if (this.poweredLast && !pw) this.resetFeet();
     this.poweredLast = !!pw;

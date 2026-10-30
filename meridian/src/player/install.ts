@@ -68,9 +68,10 @@ export class PlayerRuntime implements OnFootHooks {
     this.transition = null;
     this.abilities.enter(ctx);
     // A blink needs collision loaded out to its range before a target is
-    // chosen (WORLDS W8: TerrainCollision.reach keeps tiles around the walker).
+    // chosen (WORLDS W8: TerrainCollision.reach keeps tiles around the walker,
+    // sampled half a tile beyond it, so the range itself is enough).
     const power = this.abilities.power;
-    this.setReach(power && power.primitive === 'blink' ? Math.max(power.params.range, power.params.anchorRange ?? 0) + REACH_MARGIN : 0);
+    this.setReach(power && power.primitive === 'blink' ? Math.max(power.params.range, power.params.anchorRange ?? 0) : 0);
     this.vfx?.dispose();
     this.vfx = power && this.abilities.runtime ? new PowerVfx(this.game.render.scene, power.feedback.color) : null;
     this.blinksSeen = this.blinkCount();
@@ -282,9 +283,6 @@ const _g = new Vector3();
 const _r = new Vector3();
 /** Presses dropped while the ladder holds the walker: powers, interaction and the camera toggle. */
 const LADDER_DROPS = ['KeyQ', 'MouseLeft', 'KeyE', 'KeyC'];
-
-/** Collision loaded this far beyond a blink's range (m): a target at the edge needs its ground and clearance checks. */
-const REACH_MARGIN = 10;
 
 const _fx = new Vector3();
 const _fd = new Vector3();
