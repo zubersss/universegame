@@ -140,3 +140,12 @@ Signals: none. BLENDER self-rejected its first B-023 render (bandage-like wrinkl
 User: none.
 L-010: M1LoopTests.cs written (no teleports after boot). Run deferred: UNITY holds the lock for U-017 and free RAM is 0.5 GB.
 Queue: UNITY 7 Ready, BLENDER 10 Ready.
+
+## Cycle 15 · 2026-10-30 16:15
+Checked: git log 15:47–16:02 (U-017 M1 integration + build, U-018, B-023, surveyor metas); UNITY_STATUS (U-017 details), BLENDER_STATUS; tests_2026-10-30.md (15:55 PlayMode LeadQA 2/2 = SmokeTests + M1LoopTests first pass; 16:00 ShipSideTests 7/7 after a ±0.01 pivot fix); Build/MERIDIAN_0.1.0 contents; smoke_2026-10-30 screenshots (menu, Earth, ship, space); blender/preview/surveyor_v2_frames.png.
+Moved: U-017 → Done; U-018 → Done; B-023 → Done; U-024, B-013 → In Progress.
+Decided: B-023 accepted as v2 (no further polish without playtest evidence).
+Signals: Build 0.1.0 predates U-018: on the ground the ship shows retracted gear and appears to float. Response: U-031 rebuild 0.1.1, priority.
+User: none yet. M1 playtest request goes out after U-031 and the second M1LoopTests pass.
+L-010: M1LoopTests 1 pass (15:55). Second run at 16:12 refused ("Unity Editor is running"). Retry next cycle.
+Queue: UNITY 6 Ready, BLENDER 9 Ready.

@@ -232,19 +232,19 @@ Files: Assets/_Game/Code/Runtime/Core/, Assets/_Game/Settings/Rendering/
 Depends: U-014
 Lead notes: Done 58b1375 (cycle 14): first visible frame Earth 7.5 / Space 2.4 / Mars 1.5 ms (was 215–800); BudgetGate green.
 
-### U-017 · UNITY · In Progress · M1
+### U-017 · UNITY · Done · M1
 Goal: M1 integration and build.
 Accept: PlayMode integration test Earth → launch → Mars → land → save → load passes twice with a clean console; `Build/MERIDIAN_0.1.0/` built by `tools/unity_build.ps1`; perf report green.
 Files: Assets/_Game/Tests/Unit/M1IntegrationTests.cs, Build/
 Depends: U-005…U-016
-Lead notes: —
+Lead notes: Done 72db6b1 + 7bc9e0d (cycle 15): M1IntegrationTests own-controls loop passed twice with clean consoles (touchdown 2.05 m/s); Build/MERIDIAN_0.1.0 + smoke screenshots. Gear look fixed in the rebuild (U-031).
 
-### U-018 · UNITY · Ready · M2
+### U-018 · UNITY · Done · M2
 Goal: Swap Pilgrim's side sprite to `ships/pilgrim/side_legs` below 10 m altitude (Bible §4.3), back above it.
 Accept: PlayMode test: descending through 10 m switches the sprite; climbing back through 10 m switches back; no pivot jump (same world position of the hull ±1 px).
 Files: Assets/_Game/Code/Runtime/Ship/
 Depends: U-010, B-019 (build against the placeholder until B-019 is Done)
-Lead notes: —
+Lead notes: Done 6aea64d (cycle 15): side_legs ≤ 10 m, side above; pivots within 1 px; ShipSideTests 7/7 at 16:00.
 
 
 ### U-019 · UNITY · Done · M1
@@ -261,7 +261,14 @@ Files: Assets/_Game/Code/Runtime/Terrain/
 Depends: U-007, B-022
 Lead notes: Done d455251 (cycle 14): slots 47–62 sliced, stable wrapped (x, y) hash; EditMode 116/116, PlayMode clean 15:36.
 
-### U-024 · UNITY · Ready · M2
+### U-031 · UNITY · Ready · M1
+Goal: Rebuild the M1 playtest build after U-018 as `Build/MERIDIAN_0.1.1/` and redo the build smoke screenshots.
+Accept: on the ground the Pilgrim shows deployed skids touching the terrain (no floating hull, as seen in smoke_2_earth.png of 0.1.0, built before U-018); the menu hides the HUD behind it; smoke run clean; the 0.1.0 folder may stay.
+Files: Build/ (ignored), coordination/reports/unity/smoke_<date>/
+Depends: U-017, U-018
+Lead notes: PRIORITY: next, before more M2 work (cycle 15). This is the build the user will playtest.
+
+### U-024 · UNITY · In Progress · M2
 Goal: PlanetSide parallax: `backgrounds/<planet>/layer0..2` behind the terrain (layer0 slowest), plus a haze gradient per planet (Bible §9 Atmosphere).
 Accept: capture at Earth and Mars shows three layers moving at different rates when the camera pans; no seams when wrapping; ≤ 3 extra draw calls; uses the B-010/B-011 rework files when present, placeholders otherwise.
 Files: Assets/_Game/Code/Runtime/Planet/, Scenes/PlanetSide.unity
@@ -405,12 +412,12 @@ Files: Assets/_Game/Art/ships/pilgrim/, blender/scripts/
 Depends: B-006
 Lead notes: Done f1eb426 (cycle 12): side = gear retracted into the pods, side_legs = skids deployed, identical canvas and pivot (D-025).
 
-### B-023 · BLENDER · In Progress · M2
+### B-023 · BLENDER · Done · M2
 Goal: Surveyor v2 polish: replace primitive suit parts with a sculpted soft suit (fabric folds at joints, seams, chest unit, backpack straps), visor with reflection and emission readouts; fix the death end pose (legs grounded).
 Accept: same key, sheet layout, frame count, clips, and pivot as v1 (UNITY needs no change); contact sheet reads as a real suited person at 60 px/m, not a mannequin (§9); lit preview via tools/unity_art_preview.ps1.
 Files: blender/scripts/build_surveyor.py, blender/sources/characters/surveyor.blend, Assets/_Game/Art/characters/surveyor/
 Depends: B-009
-Lead notes: Scheduled polish for the M2 exit (cycle 7), not a reopen of B-009. Do it after B-022, B-010 rework, B-011, B-019.
+Lead notes: Done f095302 (cycle 15): soft suit, chest unit, harness, hard helmet, visor emission, mask map, flat death pose; same layout. Accepted as v2; no further polish unless the playtest asks.
 
 ### B-025 · BLENDER · Ready · M2
 Goal: Parallax polish from the cycle-13 review of the 3D backgrounds.
@@ -426,7 +433,7 @@ Files: Assets/_Game/Art/fx/
 Depends: B-002
 Lead notes: Done 11828e9 + e450ab9 (cycle 12): five FX sheets; thruster contact sheet reads well (color/emission/alpha).
 
-### B-013 · BLENDER · Ready · M2
+### B-013 · BLENDER · In Progress · M2
 Goal: Icons batch 1 (16): iron, copper, carbon, silica, water_ice, oxygen, launch_fuel, hematite, perchlorate, clay, aluminium, living_seed, wood, stone, sand, nickel.
 Accept: `icons/<item>/base` 128×128, consistent lighting angle, readable at 32 px.
 Files: Assets/_Game/Art/icons/
