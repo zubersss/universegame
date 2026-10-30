@@ -4,12 +4,11 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { EARTH_META, earthData, loadEarthData, type LayerName } from '../src/world/earthData';
+import { EARTH_META, earthData, loadEarthData } from '../src/world/earthData';
 import { ChunkStore, type ChunkBackend, type ChunkRequest } from '../src/terrain/ChunkStore';
 import type { ChunkData } from '../src/terrain/chunkGen';
 
 const dir = fileURLToPath(new URL('../src/data/earth/', import.meta.url));
-const layers = EARTH_META.layers as Record<LayerName, { file: string }>;
 
 afterEach(() => {
   vi.useRealTimers();
@@ -41,14 +40,14 @@ describe('Earth data loading', () => {
     // Then a working fetch succeeds and is not repeated.
     vi.setSystemTime(1_007_000);
     let ok = 0;
-    const real = async (name: LayerName) => {
+    const real = async (_name: string, _url: string, file: string) => {
       ok++;
-      return readFileSync(dir + layers[name].file);
+      return readFileSync(dir + file);
     };
     await loadEarthData(real);
     expect(earthData()).not.toBeNull();
     await loadEarthData(real);
-    expect(ok).toBe(4);
+    expect(ok).toBe(4 + EARTH_META.regions.length); // four global layers and the regional grids
   });
 });
 

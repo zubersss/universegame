@@ -7,7 +7,7 @@
 import { createNoise3D, type NoiseFunction3D } from 'simplex-noise';
 import { hashCombine, mulberry32 } from '../core/rng';
 import type { BodyDef } from './bodies';
-import { earthData, latLonOf, loadEarthData, sampleBilinear, sampleCubic, type CubicSample, type EarthRasters } from './earthData';
+import { earthData, latLonOf, loadEarthData, sampleBilinear, sampleCubic, sampleElevation, type ElevationSample, type EarthRasters } from './earthData';
 import { ELEVATION_DIVISOR } from './scale';
 import { BODY_FEATURES, FeatureField } from './features';
 
@@ -41,6 +41,14 @@ export interface Clearing {
 }
 
 const sat = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x);
+
+/**
+ * Share of a regional elevation grid's relief (above or below the global 10'
+ * grid) kept on the gameplay surface. Heights are real / 5 over distances of
+ * real / 40, so real alpine slopes would stand 8x steeper (needles); this keeps
+ * the shapes (peaks, valleys, ridgelines) at climbable steepness (gameplay).
+ */
+export const EARTH_REGION_RELIEF = 0.35;
 const sstep = (e0: number, e1: number, x: number) => {
   const t = sat((x - e0) / (e1 - e0));
   return t * t * (3 - 2 * t);
@@ -217,7 +225,7 @@ export class SurfaceGenerator {
   // Work is in real metres, converted to gameplay height at the end.
 
   private readonly ll = { lat: 0, lon: 0 };
-  private readonly cs: CubicSample = { v: 0, dLon: 0, dLat: 0 };
+  private readonly cs: ElevationSample = { v: 0, dLon: 0, dLat: 0, region: 0 };
 
   private earth(nx: number, ny: number, nz: number, out: SurfaceInfo): SurfaceInfo {
     const ed = this.earthRasters!;
@@ -227,9 +235,12 @@ export class SurfaceGenerator {
     const ll = latLonOf(nx, ny, nz, f.north, f.meridian, f.east, this.ll);
     const lat = ll.lat;
     const lon = ll.lon;
-    // Smooth (C2) fields for shape, so shading never shows raster cells.
-    const cs = sampleCubic(ed.elevation, lat, lon, this.cs);
+    // Smooth (C2) fields for shape, so shading never shows raster cells; regional
+    // high-resolution grids (the First Light Southern Alps) override the global one.
+    const cs = sampleElevation(ed, lat, lon, this.cs, EARTH_REGION_RELIEF);
     const e = cs.v; // m above mean sea level
+    const local = 1 - cs.region; // share of the coarse global grid
+    const eData = cs.data ?? e; // regional relief uncompressed (for snow and ice)
     const sinLat = nx * f.north[0] + ny * f.north[1] + nz * f.north[2];
     const cosLat = Math.max(Math.sqrt(Math.max(0, 1 - sinLat * sinLat)), 0.05);
     const gx = cs.dLon / (111.2 * cosLat);
@@ -243,7 +254,8 @@ export class SurfaceGenerator {
     // Infill below the data resolution (one elevation cell is 463 m of gameplay
     // surface): every seeded wavelength is at most a cell, so the seed adds
     // detail but does not reshape relief the data resolves. Noise runs in
-    // planet metres (gameplay scale); amplitudes are real metres.
+    // planet metres (gameplay scale); amplitudes are real metres. Regional grids
+    // resolve 8 m of gameplay surface, so there the infill shrinks to fine texture.
     const px = nx * R;
     const py = ny * R;
     const pz = nz * R;
@@ -252,11 +264,11 @@ export class SurfaceGenerator {
     const qy = py + 120 * n.w2(px * fw, py * fw, pz * fw);
     const qz = pz + 120 * n.w3(px * fw, py * fw, pz * fw);
     const mount = sstep(12, 60, slope);
-    const amp = Math.min(25 + 4 * slope + 0.08 * Math.max(e - W, 0), 900);
+    const amp = Math.min(25 + 4 * slope + 0.08 * Math.max(e - W, 0), 900) * local;
     const rid = ridged(n.r, qx / 460, qy / 460, qz / 460, 3);
     const hil = fbm(n.h, qx / 330, qy / 330, qz / 330, 2);
     const det = fbm(n.d, px / 140, py / 140, pz / 140, 3);
-    let h = e + amp * (mount * (rid - 0.4) * 1.6 + (1 - mount) * hil * 0.5) + det * (4 + 24 * mount);
+    let h = e + amp * (mount * (rid - 0.4) * 1.6 + (1 - mount) * hil * 0.5) + det * (4 + 24 * mount) * (0.2 + 0.8 * local);
 
     // Shore shaping: land rises from the water level W, water sinks below it,
     // so h - W has the sign of d near every shore for any seed. Each side has a
@@ -313,9 +325,14 @@ export class SurfaceGenerator {
     const iceShare = ice * inv * cover;
     const sandShare = (bare + 0.5 * shrub + 0.4 * herb * arid) * inv * cover;
     const dryShare = (bare + tun * 0.5) * inv * cover;
-    // Snow above a latitude-dependent line (real metres), on top of mapped ice.
-    const snowLine = 5200 - 5600 * (lat / 75) * (lat / 75);
-    const snow = sstep(snowLine - 300, snowLine + 500, h);
+    // Snow above a latitude-dependent line (real metres), lowered by up to 1.4 km
+    // in cells with mapped glaciers; the land-cover grid is too coarse to place
+    // the ice, so it goes on the high ground, down to ~1 km below the line.
+    // Heights here are the data's (regional relief uncompressed) plus the infill.
+    const hd = h + (eData - e);
+    const snowLine = 5200 - 5600 * (lat / 75) * (lat / 75) - 1400 * sstep(0.01, 0.12, iceShare);
+    const snow = sstep(snowLine - 300, snowLine + 500, hd);
+    const glacier = iceShare * sstep(snowLine - 1300, snowLine - 300, hd);
     const vn = n.v(px / 3000, py / 3000, pz / 3000);
     if (d < 0) {
       // Under water: sand and silt, independent of the land cover.
@@ -327,7 +344,7 @@ export class SurfaceGenerator {
       out.biome = veg;
       // High variation: dark forest in the vegetated palette, bright sand in the dry one.
       out.variation = sat(0.3 + 0.55 * Math.max(treeShare, sandShare) + 0.2 * vn);
-      out.special = Math.max(iceShare, snow);
+      out.special = Math.max(glacier, snow);
       out.rockiness = sat(mount * (0.35 + 0.6 * dryShare) + 0.25 * (1 - veg) * mount);
     }
     return out;

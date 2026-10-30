@@ -121,7 +121,12 @@ const LOOKS: Record<string, Look> = {
     palette: { a1: 0x8a7a58, a2: 0x7a746a, a3: 0xb9a578, b1: 0x55703a, b2: 0x6a5f4c, b3: 0x8f9a58, special: 0xf4f7fa, proxyNight: 0x05080c },
     biomeNames: ['Uplands', 'Lowlands'],
     description: 'Home: oceans over 71% of the surface, continents shaped from real elevation data.',
-    fiction: [...SCALE_FICTION, 'relief exaggerated 8× relative to the radius', 'detail below the data resolution is procedural'],
+    fiction: [
+      ...SCALE_FICTION,
+      'relief exaggerated 8× relative to the radius',
+      'detail below the data resolution is procedural',
+      'Southern Alps: relief above the global grid kept at 35% so slopes stay climbable',
+    ],
   },
   moon: airless(
     { a1: 0x9a9893, a2: 0x7d7b77, a3: 0xb5b3ad, b1: 0x868480, b2: 0x7c7a76, b3: 0x8b8a86, special: 0xc8c6c0, proxyNight: 0x060606 },

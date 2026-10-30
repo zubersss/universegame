@@ -2,7 +2,7 @@
 // orientation at EPOCH). Pure: no Three.js, usable in workers.
 
 import { sunDirFor, type BodyDef } from './bodies';
-import { earthData, latLonOf, sampleCubic, sincosd, type CubicSample } from './earthData';
+import { earthData, latLonOf, sampleElevation, sincosd, type ElevationSample } from './earthData';
 
 const RAD = 3.141592653589793 / 180;
 const _la = { s: 0, c: 0 };
@@ -38,12 +38,12 @@ export function subsolarPoint(def: BodyDef): { lat: number; lon: number } {
   return dirToGeo(def, s[0], s[1], s[2]);
 }
 
-const cs: CubicSample = { v: 0, dLon: 0, dLat: 0 };
+const cs: ElevationSample = { v: 0, dLon: 0, dLat: 0, region: 0 };
 
 /** Earth's data elevation (real metres above mean sea level, before infill and shore shaping); null until the data is loaded. */
 export function earthElevationM(latDeg: number, lonDeg: number): number | null {
   const ed = earthData();
-  return ed ? sampleCubic(ed.elevation, latDeg, lonDeg, cs).v : null;
+  return ed ? sampleElevation(ed, latDeg, lonDeg, cs).v : null;
 }
 
 /**

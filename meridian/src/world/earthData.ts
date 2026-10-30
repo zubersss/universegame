@@ -18,9 +18,22 @@ export interface Raster {
   scale: number;
   offset: number;
   data: Int16Array | Int8Array | Uint8Array;
+  /** Regional grids: latitude of row 0 and longitude of column 0, no longitude wrap (global grids: 90, -180, wrap). */
+  north?: number;
+  west?: number;
+  wrap?: boolean;
 }
 
-export type EarthRasters = Record<LayerName, Raster>;
+/** A regional elevation grid that overrides the global one inside its bounds (degrees). */
+export interface RegionRaster extends Raster {
+  name: string;
+  north: number;
+  south: number;
+  west: number;
+  east: number;
+}
+
+export type EarthRasters = Record<LayerName, Raster> & { regions: RegionRaster[] };
 
 export const EARTH_META = meta;
 
@@ -71,6 +84,7 @@ export async function decodeLsr(input: ArrayBuffer | Uint8Array): Promise<{ widt
 }
 
 type LayerMeta = { file: string; width: number; height: number; channels: number; res: number; scale: number; offset: number };
+type RegionMeta = LayerMeta & { name: string; north: number; south: number; west: number; east: number };
 
 const LAYER_URLS: Record<LayerName, string> = {
   elevation: new URL('../data/earth/earth-elevation.bin', import.meta.url).href,
@@ -79,9 +93,15 @@ const LAYER_URLS: Record<LayerName, string> = {
   biome: new URL('../data/earth/earth-biome.bin', import.meta.url).href,
 };
 
-export type FetchBytes = (layer: LayerName, url: string) => Promise<ArrayBuffer | Uint8Array>;
+/** Regional elevation grids (earth.json "regions"), each a static URL so the bundler emits the file. */
+const REGION_URLS: Record<string, string> = {
+  'southern-alps': new URL('../data/earth/earth-region-southern-alps.bin', import.meta.url).href,
+};
 
-async function defaultFetch(_layer: LayerName, url: string): Promise<ArrayBuffer> {
+/** Fetches one packaged file: `name` is a layer or `region:<name>`, `file` its name in src/data/earth/. */
+export type FetchBytes = (name: string, url: string, file: string) => Promise<ArrayBuffer | Uint8Array>;
+
+async function defaultFetch(_name: string, url: string): Promise<ArrayBuffer> {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Earth data ${url}: HTTP ${res.status}`);
   return res.arrayBuffer();
@@ -109,17 +129,25 @@ export function loadEarthData(fetchBytes: FetchBytes = defaultFetch): Promise<Ea
     const wait = retryAt - Date.now();
     if (wait > 0) return Promise.reject(new Error(`Earth data unavailable (next attempt in ${Math.ceil(wait / 1000)} s)`));
     const layers = Object.keys(LAYER_URLS) as LayerName[];
-    pending = Promise.all(
-      layers.map(async (name) => {
-        const m = (meta.layers as Record<LayerName, LayerMeta>)[name];
-        const d = await decodeLsr(await fetchBytes(name, LAYER_URLS[name]));
-        if (d.width !== m.width || d.height !== m.height || d.channels !== m.channels) throw new Error(`Earth layer ${name}: shape mismatch`);
-        const r: Raster = { width: d.width, height: d.height, channels: d.channels, res: m.res, scale: m.scale, offset: m.offset, data: d.data };
-        return [name, r] as const;
-      }),
-    ).then(
-      (entries) => {
-        rasters = Object.fromEntries(entries) as EarthRasters;
+    const regionMeta = (meta as unknown as { regions?: RegionMeta[] }).regions ?? [];
+    const load = async (name: string, url: string, m: LayerMeta): Promise<Raster> => {
+      const d = await decodeLsr(await fetchBytes(name, url, m.file));
+      if (d.width !== m.width || d.height !== m.height || d.channels !== m.channels) throw new Error(`Earth ${name}: shape mismatch`);
+      return { width: d.width, height: d.height, channels: d.channels, res: m.res, scale: m.scale, offset: m.offset, data: d.data };
+    };
+    pending = Promise.all([
+      Promise.all(layers.map(async (name) => [name, await load(name, LAYER_URLS[name], (meta.layers as Record<LayerName, LayerMeta>)[name])] as const)),
+      Promise.all(
+        regionMeta.map(async (m): Promise<RegionRaster> => {
+          const url = REGION_URLS[m.name];
+          if (!url) throw new Error(`Earth region ${m.name}: no packaged file`);
+          const r = await load(`region:${m.name}`, url, m);
+          return { ...r, name: m.name, north: m.north, south: m.south, west: m.west, east: m.east, wrap: false };
+        }),
+      ),
+    ]).then(
+      ([entries, regions]) => {
+        rasters = { ...(Object.fromEntries(entries) as Record<LayerName, Raster>), regions };
         failures = 0;
         return rasters;
       },
@@ -147,8 +175,8 @@ export function installEarthData(r: EarthRasters): void {
 export function sampleBilinear(r: Raster, lat: number, lon: number, ch = 0): number {
   const W = r.width;
   const H = r.height;
-  let x = (lon + 180) / r.res;
-  let y = (90 - lat) / r.res;
+  let x = (lon - (r.west ?? -180)) / r.res;
+  let y = ((r.north ?? 90) - lat) / r.res;
   x = x < 0 ? 0 : x > W - 1 ? W - 1 : x;
   y = y < 0 ? 0 : y > H - 1 ? H - 1 : y;
   let i = Math.floor(x);
@@ -187,8 +215,9 @@ export function sampleCubic(r: Raster, lat: number, lon: number, out: CubicSampl
   const W = r.width;
   const H = r.height;
   const P = W - 1;
-  let x = (lon + 180) / r.res;
-  let y = (90 - lat) / r.res;
+  const wrap = r.wrap !== false;
+  let x = (lon - (r.west ?? -180)) / r.res;
+  let y = ((r.north ?? 90) - lat) / r.res;
   x = x < 0 ? 0 : x > P ? P : x;
   y = y < 0 ? 0 : y > H - 1 ? H - 1 : y;
   let i = Math.floor(x);
@@ -203,7 +232,11 @@ export function sampleCubic(r: Raster, lat: number, lon: number, out: CubicSampl
   const dx0 = -(ux * ux) / 2, dx1 = (3 * tx * tx - 4 * tx) / 2, dx2 = (-3 * tx * tx + 2 * tx + 1) / 2, dx3 = (tx * tx) / 2;
   const wy0 = (uy * uy * uy) / 6, wy1 = (3 * ty * ty * ty - 6 * ty * ty + 4) / 6, wy2 = (-3 * ty * ty * ty + 3 * ty * ty + 3 * ty + 1) / 6, wy3 = (ty * ty * ty) / 6;
   const dy0 = -(uy * uy) / 2, dy1 = (3 * ty * ty - 4 * ty) / 2, dy2 = (-3 * ty * ty + 2 * ty + 1) / 2, dy3 = (ty * ty) / 2;
-  const c0 = (i - 1 + P) % P, c1 = i % P, c2 = (i + 1) % P, c3 = (i + 2) % P;
+  // Global grids wrap in longitude (period W - 1); regional grids clamp at their edges.
+  const c0 = wrap ? (i - 1 + P) % P : Math.max(i - 1, 0);
+  const c1 = wrap ? i % P : i;
+  const c2 = wrap ? (i + 1) % P : i + 1;
+  const c3 = wrap ? (i + 2) % P : Math.min(i + 2, P);
   const d = r.data;
   const base = ch * W * H;
   let v = 0;
@@ -225,6 +258,54 @@ export function sampleCubic(r: Raster, lat: number, lon: number, out: CubicSampl
   out.v = v * r.scale + r.offset;
   out.dLon = (gx * r.scale) / r.res;
   out.dLat = (-gy * r.scale) / r.res; // rows run north to south
+  return out;
+}
+
+/** Elevation sample: value (m) and gradient (m per degree), plus the weight of the regional grid used. */
+export interface ElevationSample extends CubicSample {
+  /** 0 = global grid only, 1 = regional grid only. */
+  region: number;
+  /** The data elevation (m) whatever the gain: regional relief at full strength. */
+  data?: number;
+}
+
+/** Regional grids fade in over this band inside their edges (degrees; starts a few nodes in, so the stencil stays inside). */
+const REGION_FADE0 = 0.03;
+const REGION_FADE1 = 0.25;
+const _rs: CubicSample = { v: 0, dLon: 0, dLat: 0 };
+
+/**
+ * Elevation (m above mean sea level) with its gradient: the global grid,
+ * overridden by a regional grid inside its bounds with a smooth fade (C1,
+ * gradient included) over its outer band. `gain` scales the regional relief
+ * relative to the global grid (1 = the data). Longitudes in [-180, 180];
+ * regions do not straddle the antimeridian.
+ */
+export function sampleElevation(E: EarthRasters, lat: number, lon: number, out: ElevationSample, gain = 1): ElevationSample {
+  sampleCubic(E.elevation, lat, lon, out);
+  out.region = 0;
+  out.data = out.v;
+  for (const g of E.regions) {
+    const dS = lat - g.south, dN = g.north - lat, dW = lon - g.west, dE = g.east - lon;
+    let m = dS;
+    let gLat = 1;
+    let gLon = 0;
+    if (dN < m) { m = dN; gLat = -1; gLon = 0; }
+    if (dW < m) { m = dW; gLat = 0; gLon = 1; }
+    if (dE < m) { m = dE; gLat = 0; gLon = -1; }
+    if (m <= REGION_FADE0) continue;
+    sampleCubic(g, lat, lon, _rs);
+    const t = m >= REGION_FADE1 ? 1 : (m - REGION_FADE0) / (REGION_FADE1 - REGION_FADE0);
+    const w = t * t * (3 - 2 * t) * gain;
+    const dw = m >= REGION_FADE1 ? 0 : ((6 * t * (1 - t)) / (REGION_FADE1 - REGION_FADE0)) * gain;
+    const dv = _rs.v - out.v;
+    out.region = t * t * (3 - 2 * t);
+    out.data = out.v + out.region * dv;
+    out.dLon += w * (_rs.dLon - out.dLon) + dv * dw * gLon;
+    out.dLat += w * (_rs.dLat - out.dLat) + dv * dw * gLat;
+    out.v += w * dv;
+    break; // regions do not overlap
+  }
   return out;
 }
 
