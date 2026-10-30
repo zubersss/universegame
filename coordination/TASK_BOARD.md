@@ -46,19 +46,19 @@ Files: .claude/settings.json
 Depends: L-001
 Lead notes: Done (see REVIEW_LOG cycle 1). PowerShell deny rules added; PowerShell allow rules await the user (USER-08).
 
-### L-005 · LEAD · Ready · M0
+### L-005 · LEAD · Done · M0
 Goal: Pin exact versions (Unity, Blender, URP, Addressables, Claude Code) in Bible §12; write `tools/paths.json`.
 Accept: §12 has no blanks; `tools/paths.json` has `unityExe` and `blenderExe` that exist on disk.
 Files: docs/PROJECT_BIBLE.md, tools/paths.json
 Depends: USER-01…04
-Lead notes: —
+Lead notes: Done (cycle 2). Unity 6000.6.5f1, Blender 5.2.2 LTS found on disk; D-013, D-014.
 
-### L-006 · LEAD · Ready · M0
+### L-006 · LEAD · Done · M0
 Goal: Confirm USER-01…06, then release the workers.
 Accept: "READY FOR WORKERS" appended to USER_ACTIONS.md with the date; both worker queues have ≥ 5 Ready tasks.
 Files: coordination/USER_ACTIONS.md
 Depends: L-002…L-005
-Lead notes: —
+Lead notes: Done (cycle 2). Queues: U-001 and B-001 unblocked; the rest unlock along each worker's own chain.
 
 ### L-007 · LEAD · Ready · M0
 Goal: LeadQA test assembly and smoke test.
@@ -97,7 +97,7 @@ Goal: Unity 6 project at repo root with URP 2D Renderer, Input System, Addressab
 Accept: `tools/unity_compile.ps1` exits 0 with zero `error CS`; asmdefs `MERIDIAN.Runtime`, `MERIDIAN.Editor`, `MERIDIAN.Tests.Unit`; packages pinned in `Packages/manifest.json`; URP asset uses the 2D Renderer.
 Files: Assets/_Game/**, Packages/, ProjectSettings/, tools/unity_compile.ps1
 Depends: L-005
-Lead notes: Reads `tools/paths.json` for the Unity path; HeavyJobLock applies.
+Lead notes: Reads `tools/paths.json` for the Unity path; HeavyJobLock applies. Editor is 6000.6.5f1 (D-013); pin the Bible §12 versions in `manifest.json` (URP 17.6.0, Addressables 2.11.2, Input System 1.20.0, Test Framework 1.8.0). In Unity 6, TextMeshPro ships inside `com.unity.ugui`, so don't add a separate TMP package. Cinemachine isn't bundled; pin the 3.x version the registry resolves and log it in your status. Scripting backend: Mono (D-014). No IL2CPP module is installed.
 
 ### U-002 · UNITY · Ready · M0
 Goal: `PlanetConfig` ScriptableObjects for all 8 planets with Bible §4.1 and §5.1 values; tests.
@@ -220,7 +220,7 @@ Goal: Pipeline skeleton: `blender/` tree, `manifest.json` schema, `render.py` CL
 Accept: `tools/blender_render.ps1 all` on an empty manifest exits 0; an unknown key exits non-zero with a one-line reason; a line per asset in `logs/blender_<date>.log`.
 Files: blender/render.py, blender/manifest.json, blender/scripts/, tools/blender_render.ps1
 Depends: L-005
-Lead notes: Reads `tools/paths.json` for `blenderExe`.
+Lead notes: Reads `tools/paths.json` for `blenderExe` (Blender 5.2.2 LTS). The Python API changed across 4.x→5.x (e.g. EEVEE engine identifiers). Read valid enum values at runtime (`bpy.types.RenderSettings.bl_rna.properties['engine'].enum_items`) rather than hard-coding 4.x names.
 
 ### B-002 · BLENDER · Ready · M0
 Goal: Calibration asset `props/common/calibration`.

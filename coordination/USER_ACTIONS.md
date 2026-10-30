@@ -6,19 +6,6 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-03 — Install Unity Hub and Unity 6 LTS (40 min, mostly download)
-1. Open https://unity.com/download and install Unity Hub. Open it and sign in (create a free
-   Personal account if asked).
-2. In Unity Hub click "Installs" → "Install Editor" → pick the newest version labelled
-   **LTS** that starts with **6000** → tick **Windows Build Support (IL2CPP)** → Install.
-3. When it finishes, tell the Lead the exact version number shown in Hub (for example
-   6000.0.58f1).
-
-### USER-04 — Install Blender LTS (10 min)
-1. Open https://www.blender.org/download/lts/ and download the newest **LTS** installer for
-   Windows. Run it with defaults.
-2. Tell the Lead the version number (shown on the download page, for example 4.5.x LTS).
-
 ### USER-07 — Start the worker sessions (after the Lead writes READY FOR WORKERS below)
 1. Open two more PowerShell windows. In each: `cd C:\dev\universegame` then `claude`.
 2. Paste the UNITY kickoff into one and the BLENDER kickoff into the other
@@ -36,6 +23,8 @@ allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
   `git lfs install --local`), USER-02 (repo already at `C:\dev\universegame`),
   USER-05 (Claude Code 2.1.314 already running), USER-06 (89 GB free, 7.6 GB RAM) —
   verified by the Lead.
+- 2026-10-30 · USER-03 (Unity 6000.6.5f1 + Hub 3.22.3) and USER-04 (Blender 5.2.2 LTS) —
+  found on disk by the Lead. The IL2CPP module isn't needed (D-014).
 
 ## Status
-(the Lead writes READY FOR WORKERS here when USER-01…06 are confirmed)
+READY FOR WORKERS · 2026-10-30 · Start the two worker sessions now (USER-07).
