@@ -5,6 +5,7 @@
 // in between. Mode stays unchanged.
 
 import type { BodyId } from '../world/bodies';
+import type { WalkInput } from '../player/Player';
 import type { Mode } from './Game';
 
 /** Why the character left ON_FOOT. Powers deactivate on 'board'; the others re-place the character. */
@@ -18,11 +19,12 @@ export interface OnFootHooks {
   /** The character has just been placed outside the ship (or restored on foot). */
   enter(ctx: OnFootContext): void;
   /**
-   * One fixed step (SIM_DT) while ON_FOOT and playing, before the walk controller.
+   * One fixed step (SIM_DT) while ON_FOOT, before the walk controller, with this
+   * step's walk input (look, move, jump, sprint; all idle unless playing).
    * Return true when an active ability moved the character this step: the walk
    * controller is then skipped, so the character has exactly one position owner.
    */
-  step(dt: number): boolean;
+  step(dt: number, input: WalkInput): boolean;
   /** The character is leaving ON_FOOT. */
   exit(reason: OnFootExitReason): void;
   /**
@@ -73,9 +75,9 @@ export class OnFootHost {
   }
 
   /** Per fixed step while on foot; true when an ability owned the character's motion. */
-  step(dt: number): boolean {
+  step(dt: number, input: WalkInput): boolean {
     if (!this.ctx || !this.hooks) return false;
-    return this.hooks.step(dt) === true;
+    return this.hooks.step(dt, input) === true;
   }
 
   /** Per rendered frame while on foot; true when the hooks placed the camera. */

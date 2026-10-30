@@ -3,10 +3,13 @@
 // simulation step consumes them; held keys are cleared on blur/pause/mode change.
 
 const GAME_KEYS = new Set([
-  'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyQ', 'KeyE', 'KeyX', 'KeyL', 'KeyG', 'KeyF', 'KeyT', 'KeyR',
+  'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyQ', 'KeyE', 'KeyX', 'KeyL', 'KeyG', 'KeyF', 'KeyT', 'KeyR', 'KeyC',
   'Space', 'ControlLeft', 'ControlRight', 'ShiftLeft', 'ShiftRight', 'Tab',
   'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
 ]);
+
+/** Mouse buttons as input codes (event.button 0, 1, 2); tracked only while the pointer is locked. */
+const MOUSE_CODES = ['MouseLeft', 'MouseMiddle', 'MouseRight'];
 
 export class Input {
   readonly held = new Set<string>();
@@ -83,6 +86,11 @@ export class Input {
 
   private onMouseDown = (e: MouseEvent): void => {
     if (!this.active) return;
+    const code = this.pointerLocked ? MOUSE_CODES[e.button] : undefined;
+    if (code) {
+      if (!this.held.has(code)) this.pressed.add(code);
+      this.held.add(code);
+    }
     if (!this.pointerLocked) {
       if (this.pointerLockSupported) this.requestLock();
       // Drag-look fallback works while the button is held.
@@ -91,8 +99,10 @@ export class Input {
     }
   };
 
-  private onMouseUp = (): void => {
+  private onMouseUp = (e: MouseEvent): void => {
     this.dragging = false;
+    const code = MOUSE_CODES[e.button];
+    if (code) this.held.delete(code);
   };
 
   private lockedAt = 0;
