@@ -1,0 +1,22 @@
+{
+  "key": "fx/dig_sparks/base",
+  "frame_width": 128,
+  "frame_height": 128,
+  "columns": 6,
+  "gutter": 4,
+  "frames": 6,
+  "fps": 15,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "animations": [
+    {
+      "name": "burst",
+      "start": 0,
+      "length": 6,
+      "loop": false
+    }
+  ]
+}
