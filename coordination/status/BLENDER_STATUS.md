@@ -1,15 +1,17 @@
 # BLENDER STATUS
 Updated: 2026-10-30 · Session: 1
 ## Current task
-B-004 Mars top-down (planets/mars/surface, glow) — started 2026-10-30. Source: USGS Viking MDIM 2.1 colorized mosaic (public domain); the 232 m TIFF is 12 GB, so I'm looking for a smaller public-domain copy (1 km version) before falling back to anything else.
+B-005 Sun + space backgrounds (planets/sun/surface + glow, backgrounds/space/layer0..2) — started 2026-10-30
 ## Last completed
-B-003 Earth top-down — 3e281e0 (sources) + e775226 (exports). surface 2048×1024 (2.9 MB, seam_x 0.32), clouds 1024×512 (white RGB, alpha = cover, seam_x 0.00), glow 512×512 color + emission. Peak 639 MB. Contact sheets: blender/preview/planets__earth__{surface,clouds,glow}_contact.png (2× tile row for surface and clouds).
+B-004 Mars top-down — 3fd3c9d. surface 2048×1024 (3.7 MB, under the 4 MB cap; seam_x 0.26) from the Viking MDIM 2.1 colorized 1 km mosaic (Wikimedia's 3840 px rendition; the 21k px original would need ~3.6 GB RAM to load). glow 512×512 butterscotch, thinner than Earth's. Peak 663 MB.
+Before that: B-003 Earth top-down — 3e281e0 (sources) + e775226 (exports). surface 2048×1024 (2.9 MB, seam_x 0.32), clouds 1024×512 (white RGB, alpha = cover, seam_x 0.00), glow 512×512 color + emission. Peak 639 MB. Contact sheets: blender/preview/planets__earth__{surface,clouds,glow}_contact.png (2× tile row for surface and clouds).
 ## Next up
-B-005, B-006, B-007
+B-006, B-007, B-009
 ## Ready for review
 - B-001 (4dd7922, 5d630d4): blender/render.py, blender/scripts/meridian/, blender/manifest.json, blender/README.md (manifest field reference), tools/blender_render.ps1.
 - B-002 (ead95f6): blender/scripts/build_calibration.py, blender/sources/props/calibration.blend, Assets/_Game/Art/props/common/calibration_{color,normal,emission,mask}.png. Handshake with U-005.
 - B-003 (3e281e0, e775226): blender/scripts/gen_planet.py, blender/sources/planets/earth/*.jpg (NASA inputs, logged in docs/credits/blender.md), Assets/_Game/Art/planets/earth/{surface_color,clouds_color,glow_color,glow_emission}.png.
+- B-004 (3fd3c9d): blender/sources/planets/mars/*.jpg (logged in docs/credits/blender.md), Assets/_Game/Art/planets/mars/{surface_color,glow_color,glow_emission}.png.
 ## Handoffs
 → UNITY: sprite pivots come from `blender/manifest.json` `pivot` (normalized, bottom-left origin, Unity convention), and include the 8 px margin. calibration = [0.5, 0.0555556] (16 px of 288). "Bottom-center" props/characters = [0.5, margin/h].
 → UNITY: `_normal`, `_emission`, `_mask` PNGs have alpha 255 everywhere. Emission RGB is premultiplied by coverage (black outside the sprite). Normal is OpenGL camera-space (+Z toward camera), verified on the calibration sphere.
