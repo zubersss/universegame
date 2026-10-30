@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { EARTH_META, asind, atan2d, decodeLsr, installEarthData, loadEarthData, sampleBilinear, type EarthRasters, type LayerName, type Raster } from '../src/world/earthData';
+import { EARTH_META, asind, atan2d, decodeLsr, installEarthData, loadEarthData, sampleBilinear, sincosd, type EarthRasters, type LayerName, type Raster } from '../src/world/earthData';
 
 const dir = fileURLToPath(new URL('../src/data/earth/', import.meta.url));
 const layers = EARTH_META.layers as Record<LayerName, { file: string; sha256Decoded: string; width: number; height: number; channels: number; res: number; bytes: number }>;
@@ -227,6 +227,14 @@ describe('raster sampling and deterministic angles', () => {
       worst = Math.max(worst, Math.abs(asind(z) - Math.asin(z)));
     }
     expect(worst).toBeLessThan(1e-13);
+    const sc = { s: 0, c: 0 };
+    let worstSc = 0;
+    for (let k = 0; k < 20000; k++) {
+      const a = rnd() * 20;
+      sincosd(a, sc);
+      worstSc = Math.max(worstSc, Math.abs(sc.s - Math.sin(a)), Math.abs(sc.c - Math.cos(a)));
+    }
+    expect(worstSc).toBeLessThan(1e-14);
     expect(atan2d(0, -1)).toBeCloseTo(Math.PI, 15);
     expect(atan2d(1, 0)).toBeCloseTo(Math.PI / 2, 15);
     expect(asind(1)).toBeCloseTo(Math.PI / 2, 15);

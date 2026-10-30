@@ -257,6 +257,20 @@
     "tag": "estimated",
     "unit": "km"
    },
+   "orientation": {
+    "north": [
+     -2.983294e-05,
+     -0.00031640777,
+     0.999999949498
+    ],
+    "primeMeridian": [
+     -0.401312654824,
+     -0.915941079986,
+     -0.000301783226
+    ],
+    "tag": "estimated",
+    "source": "IAU mean lunar pole; prime meridian toward Earth at the epoch (librations ignored)"
+   },
    "positionKm": {
     "value": [
      -25927812.7,
@@ -298,6 +312,20 @@
    },
    "source": "pending (reference: https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html)",
    "verified": false,
+   "orientation": {
+    "north": [
+     0.446125946807,
+     -0.055911168921,
+     0.893222022106
+    ],
+    "primeMeridian": [
+     0.49420447315,
+     -0.816691491508,
+     -0.297954604625
+    ],
+    "tag": "estimated",
+    "source": "IAU WGCCRE 2009 rotation model for Mars (reference values entered without a fetched source; periodic terms omitted)"
+   },
    "positionKm": {
     "value": [
      50949993.9,

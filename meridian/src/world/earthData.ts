@@ -262,6 +262,20 @@ export function asind(z: number): number {
 
 const RAD = 180 / PI;
 
+/** Deterministic sin and cos (arithmetic only): quadrant reduction, then Taylor series on |x| <= pi/4. */
+export function sincosd(angle: number, out: { s: number; c: number }): { s: number; c: number } {
+  const q = Math.floor(angle / HALF_PI + 0.5);
+  const x = angle - q * HALF_PI; // |x| <= pi/4 (plus rounding)
+  const x2 = x * x;
+  // Terms to x^17 / x^16: error below 1e-17 on |x| <= pi/4.
+  const s = x * (1 - (x2 / 6) * (1 - (x2 / 20) * (1 - (x2 / 42) * (1 - (x2 / 72) * (1 - (x2 / 110) * (1 - (x2 / 156) * (1 - (x2 / 210) * (1 - x2 / 272))))))));
+  const c = 1 - (x2 / 2) * (1 - (x2 / 12) * (1 - (x2 / 30) * (1 - (x2 / 56) * (1 - (x2 / 90) * (1 - (x2 / 132) * (1 - (x2 / 182) * (1 - x2 / 240)))))));
+  const m = ((q % 4) + 4) % 4;
+  out.s = m === 0 ? s : m === 1 ? c : m === 2 ? -s : -c;
+  out.c = m === 0 ? c : m === 1 ? -s : m === 2 ? -c : s;
+  return out;
+}
+
 /** Latitude/longitude in degrees of unit direction n in a body frame given by unit north and prime-meridian axes. */
 export function latLonOf(
   nx: number, ny: number, nz: number,

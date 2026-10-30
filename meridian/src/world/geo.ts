@@ -2,19 +2,25 @@
 // orientation at EPOCH). Pure: no Three.js, usable in workers.
 
 import { sunDirFor, type BodyDef } from './bodies';
-import { earthData, latLonOf, sampleCubic, type CubicSample } from './earthData';
+import { earthData, latLonOf, sampleCubic, sincosd, type CubicSample } from './earthData';
 
-const RAD = Math.PI / 180;
+const RAD = 3.141592653589793 / 180;
+const _la = { s: 0, c: 0 };
+const _lo = { s: 0, c: 0 };
 
-/** Unit direction (system axes) of a latitude/longitude in degrees on `def`. */
+/**
+ * Unit direction (system axes) of a latitude/longitude in degrees on `def`.
+ * Arithmetic only (deterministic sin/cos), so site selection that starts from
+ * geographic coordinates picks the same place in every thread and browser.
+ */
 export function geoToDir(def: BodyDef, latDeg: number, lonDeg: number): [number, number, number] {
   const f = def.frame;
-  const a = latDeg * RAD;
-  const o = lonDeg * RAD;
-  const c = Math.cos(a);
-  const x = c * Math.cos(o) * f.meridian[0] + c * Math.sin(o) * f.east[0] + Math.sin(a) * f.north[0];
-  const y = c * Math.cos(o) * f.meridian[1] + c * Math.sin(o) * f.east[1] + Math.sin(a) * f.north[1];
-  const z = c * Math.cos(o) * f.meridian[2] + c * Math.sin(o) * f.east[2] + Math.sin(a) * f.north[2];
+  sincosd(latDeg * RAD, _la);
+  sincosd(lonDeg * RAD, _lo);
+  const c = _la.c;
+  const x = c * _lo.c * f.meridian[0] + c * _lo.s * f.east[0] + _la.s * f.north[0];
+  const y = c * _lo.c * f.meridian[1] + c * _lo.s * f.east[1] + _la.s * f.north[1];
+  const z = c * _lo.c * f.meridian[2] + c * _lo.s * f.east[2] + _la.s * f.north[2];
   const l = Math.sqrt(x * x + y * y + z * z);
   return [x / l, y / l, z / l];
 }

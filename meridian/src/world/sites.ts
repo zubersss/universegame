@@ -3,10 +3,13 @@
 // candidates using arithmetic only (no transcendental functions), so every
 // context (main thread, worker, other browsers) picks the same site.
 
-import { BODIES, sunDirFor, type BodyDef, type BodyId } from './bodies';
+import { BODIES, sunDirFor, type BodyDef, type BodyId, type DataTag } from './bodies';
 import { faceDir } from './cube';
 import { SurfaceGenerator, newSurfaceInfo, type Clearing } from './surface';
 import { hashCombine } from '../core/rng';
+import { geoToDir } from './geo';
+import { sincosd } from './earthData';
+import { FIRST_LIGHT, type SurveySpec } from './survey';
 
 export type V3 = [number, number, number];
 
@@ -15,12 +18,36 @@ export interface SampleSite {
   dir: V3;
 }
 
+/** A First Light route waypoint (`${body}:route:${i}`). */
+export interface RoutePoint {
+  id: string;
+  dir: V3;
+  /** Arrival radius [m]. */
+  radius: number;
+  label: string;
+}
+
+/** A First Light scan target (`${body}:poi:${i}`). */
+export interface ScanTarget {
+  id: string;
+  dir: V3;
+  label: string;
+  note: string;
+  tag: DataTag;
+}
+
 export interface MissionSites {
   bodyId: BodyId;
   landing: { dir: V3; height: number };
+  /** Quiet System survey relay; elsewhere it sits on the landing site and is not built. */
   relay: { id: string; dir: V3; height: number };
+  /** Quiet System samples only (empty elsewhere). */
   samples: SampleSite[];
   clearings: Clearing[];
+  /** First Light route: exactly three waypoints on survey bodies (Earth, Moon, Mars), else empty. */
+  route: RoutePoint[];
+  /** First Light scan targets: exactly three on survey bodies, else empty. */
+  scans: ScanTarget[];
 }
 
 export const LANDING_R0 = 55;
@@ -93,8 +120,10 @@ function prefsFor(def: BodyDef): Prefs {
       return { sunLo: 0.34, sunHi: 0.57, face: dirTo(B.vesper, B.ilex), faceMin: 0.15, biomeLo: 0.3, biomeHi: 0.72, minHeight: -Infinity };
     case 'cairn': // rime basin near the terminator; facing the approach from Vesper
       return { sunLo: 0.17, sunHi: 0.41, face: dirTo(B.cairn, B.vesper), faceMin: -0.1, biomeLo: 0.55, biomeHi: 1.01, minHeight: -Infinity };
-    default: // daylit dry ground (vegetated where the body has biomes); approach direction set with the route
-      return { sunLo: 0.4, sunHi: 0.8, face: null, faceMin: -1, biomeLo: def.surface === 'data' ? 0.3 : 0, biomeHi: 1.01, minHeight: (def.seaLevel ?? -Infinity) + 3 };
+    default: // daylit dry ground (vegetated where the body has biomes); survey bodies search near their route
+      return FIRST_LIGHT[def.id]
+        ? { sunLo: 0.26, sunHi: 1.01, face: null, faceMin: -1, biomeLo: 0, biomeHi: 1.01, minHeight: (def.seaLevel ?? -Infinity) + 3 }
+        : { sunLo: 0.4, sunHi: 0.8, face: null, faceMin: -1, biomeLo: def.surface === 'data' ? 0.3 : 0, biomeHi: 1.01, minHeight: (def.seaLevel ?? -Infinity) + 3 };
   }
 }
 
@@ -121,17 +150,54 @@ function flatness(gen: SurfaceGenerator, n: V3, r: number): { mean: number; roug
 
 const cache = new Map<BodyId, MissionSites>();
 
+/** Score a candidate: flat around it (wider rings for airless survey bodies), sun near the middle of the band, not rocky. */
+function siteScore(gen: SurfaceGenerator, n: V3, p: Prefs, sd: number, wide: boolean, rockiness: number): number {
+  const f = flatness(gen, n, 120);
+  let score = -f.rough - Math.abs(sd - (p.sunLo + p.sunHi) / 2) * 30 - rockiness * 20;
+  if (wide) score -= 0.5 * flatness(gen, n, 450).rough + 0.25 * flatness(gen, n, 1000).rough;
+  return score;
+}
+
+/** Landing site near a survey body's route start: sunlit, dry, flat, within maxKm (real) of landingNear. */
+function surveyLanding(def: BodyDef, gen: SurfaceGenerator, spec: SurveySpec, p: Prefs, sun: number[]): V3 {
+  const near = spec.landingNear;
+  const realR = def.real ? def.real.radiusKm : def.radius / 1000;
+  const dLat = (near.maxKm / realR) * (180 / Math.PI);
+  const sc = sincosd((near.lat * Math.PI) / 180, { s: 0, c: 0 });
+  const dLon = dLat / Math.max(sc.c, 0.05);
+  const wide = def.atmosphere === null;
+  let best: { n: V3; score: number } | null = null;
+  const G = 16;
+  for (let j = -G; j <= G; j++) {
+    for (let i = -G; i <= G; i++) {
+      if (i * i + j * j > G * G) continue;
+      const n = geoToDir(def, near.lat + (dLat * j) / G, near.lon + (dLon * i) / G);
+      const sd = dot(n, sun);
+      if (sd < p.sunLo || sd > p.sunHi) continue;
+      gen.baseInfo(n[0], n[1], n[2], info);
+      if (info.biome < p.biomeLo || info.biome > p.biomeHi) continue;
+      if (info.height < p.minHeight || info.liquidLevel != null) continue;
+      const score = siteScore(gen, n, p, sd, wide, info.rockiness);
+      if (!best || score > best.score) best = { n, score };
+    }
+  }
+  if (!best) throw new Error(`No landing site near the ${def.id} survey route`);
+  return best.n;
+}
+
 export function computeSites(def: BodyDef): MissionSites {
   const hit = cache.get(def.id);
   if (hit) return hit;
+  if (def.explore === 'none') throw new Error(`${def.name} has no surface to land on`);
   const gen = new SurfaceGenerator(def); // base heights only (no clearings)
   const p = prefsFor(def);
   const sun = sunDirFor(def);
-  // 1) Coarse candidates on a cube grid (arithmetic only).
+  const survey = FIRST_LIGHT[def.id];
+  // 1) Coarse candidates on a cube grid (arithmetic only), or around the survey route start.
   const G = 22;
-  let best: { n: V3; score: number } | null = null;
+  let best: { n: V3; score: number } | null = survey ? { n: surveyLanding(def, gen, survey, p, sun), score: 0 } : null;
   const d: number[] = [0, 0, 0];
-  for (let face = 0; face < 6; face++) {
+  for (let face = 0; face < 6 && !survey; face++) {
     for (let j = 0; j < G; j++) {
       for (let i = 0; i < G; i++) {
         faceDir(face, -1 + (2 * (i + 0.5)) / G, -1 + (2 * (j + 0.5)) / G, d);
@@ -184,25 +250,35 @@ export function computeSites(def: BodyDef): MissionSites {
       relayMean = f.mean;
     }
   }
-  const clearings: Clearing[] = [
-    { dir: landing, height: lf.mean, r0: LANDING_R0, r1: LANDING_R1 },
-    { dir: relay, height: relayMean, r0: RELAY_R0, r1: RELAY_R1 },
-  ];
-  // 4) Three sample sites around the relay pad.
-  const rb = tangentBasis(relay);
-  const rot = hashCombine(def.seed, 'samples') % 8;
+  const quiet = def.system === 'quiet';
+  const clearings: Clearing[] = [{ dir: landing, height: lf.mean, r0: LANDING_R0, r1: LANDING_R1 }];
+  if (quiet) clearings.push({ dir: relay, height: relayMean, r0: RELAY_R0, r1: RELAY_R1 });
+  // 4) Three sample sites around the relay pad (Quiet System survey only).
   const samples: SampleSite[] = [];
-  const dists = [26, 40, 54];
-  for (let i = 0; i < 3; i++) {
-    const [c, s] = BEARINGS[(rot + i * 3) % 8];
-    samples.push({ id: `${def.id}:sample:${i}`, dir: offsetDir(relay, rb, c, s, dists[i], gen.R) });
+  if (quiet) {
+    const rb = tangentBasis(relay);
+    const rot = hashCombine(def.seed, 'samples') % 8;
+    const dists = [26, 40, 54];
+    for (let i = 0; i < 3; i++) {
+      const [c, s] = BEARINGS[(rot + i * 3) % 8];
+      samples.push({ id: `${def.id}:sample:${i}`, dir: offsetDir(relay, rb, c, s, dists[i], gen.R) });
+    }
   }
+  // 5) First Light route and scan targets at their geographic coordinates.
+  const route: RoutePoint[] = survey
+    ? survey.route.map((r, i) => ({ id: `${def.id}:route:${i}`, dir: geoToDir(def, r.lat, r.lon), radius: r.radius, label: r.label }))
+    : [];
+  const scans: ScanTarget[] = survey
+    ? survey.scans.map((t, i) => ({ id: `${def.id}:poi:${i}`, dir: geoToDir(def, t.lat, t.lon), label: t.label, note: t.note, tag: t.tag }))
+    : [];
   const sites: MissionSites = {
     bodyId: def.id,
     landing: { dir: landing, height: lf.mean },
-    relay: { id: `${def.id}:relay`, dir: relay, height: relayMean },
+    relay: quiet ? { id: `${def.id}:relay`, dir: relay, height: relayMean } : { id: `${def.id}:relay`, dir: landing, height: lf.mean },
     samples,
     clearings,
+    route,
+    scans,
   };
   cache.set(def.id, sites);
   return sites;

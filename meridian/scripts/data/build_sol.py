@@ -42,6 +42,47 @@ def earth_orientation(jd_tdb):
     }
 
 
+def iau_orientation(alpha0_deg, delta0_deg, w_deg):
+    """North pole and prime meridian (J2000 ecliptic unit vectors) from an IAU
+    rotation model: pole right ascension/declination and prime-meridian angle W
+    measured from the ascending node of the body equator on the ICRF equator."""
+    eps = math.radians(84381.448 / 3600.0)
+    c, s = math.cos(eps), math.sin(eps)
+    a, d, w = (math.radians(x) for x in (alpha0_deg, delta0_deg, w_deg))
+    pole = (math.cos(d) * math.cos(a), math.cos(d) * math.sin(a), math.sin(d))
+    node = (-math.sin(a), math.cos(a), 0.0)
+    q = (pole[1] * node[2] - pole[2] * node[1], pole[2] * node[0] - pole[0] * node[2], pole[0] * node[1] - pole[1] * node[0])
+    x = tuple(node[i] * math.cos(w) + q[i] * math.sin(w) for i in range(3))
+
+    def ecl(v):
+        return [round(v[0], 12), round(c * v[1] + s * v[2], 12), round(-s * v[1] + c * v[2], 12)]
+
+    return ecl(pole), ecl(x)
+
+
+def mars_orientation(jd_tdb):
+    """IAU WGCCRE 2009 Mars model without periodic terms (planetocentric, east-positive)."""
+    d = jd_tdb - 2451545.0
+    t = d / 36525.0
+    north, x = iau_orientation(317.68143 - 0.1061 * t, 52.88650 - 0.0609 * t, (176.630 + 350.89198226 * d) % 360.0)
+    return {'north': north, 'primeMeridian': x, 'tag': 'estimated',
+            'source': 'IAU WGCCRE 2009 rotation model for Mars (reference values entered without a fetched source; periodic terms omitted)'}
+
+
+def moon_orientation(jd_tdb, moon_km, earth_km):
+    """Moon: IAU mean pole; prime meridian toward Earth at the epoch (the mean
+    sub-Earth meridian, librations of up to ~7 deg ignored)."""
+    d = jd_tdb - 2451545.0
+    t = d / 36525.0
+    north, _ = iau_orientation(269.9949 + 0.0031 * t, 66.5392 + 0.0130 * t, 0.0)
+    to_e = [earth_km[i] - moon_km[i] for i in range(3)]
+    k = sum(to_e[i] * north[i] for i in range(3))
+    x = [to_e[i] - k * north[i] for i in range(3)]
+    l = math.sqrt(sum(v * v for v in x))
+    return {'north': north, 'primeMeridian': [round(v / l, 12) for v in x], 'tag': 'estimated',
+            'source': 'IAU mean lunar pole; prime meridian toward Earth at the epoch (librations ignored)'}
+
+
 def f(v, tag=M, unit=None):
     d = {'value': v, 'tag': tag}
     if unit:
@@ -94,6 +135,10 @@ def main():
             b['semiMajorAxisKm'] = f(a, pt, 'km')
         if bid == 'earth':
             b['orientation'] = earth_orientation(EPOCH_JD)
+        elif bid == 'mars':
+            b['orientation'] = mars_orientation(EPOCH_JD)
+        elif bid == 'moon' and 'moon' in vec and 'earth' in vec:
+            b['orientation'] = moon_orientation(EPOCH_JD, vec['moon'], vec['earth'])
         if bid == 'sun':
             # Exact by definition: the frame is heliocentric (origin at the Sun's centre).
             b['positionKm'] = f([0.0, 0.0, 0.0], M, 'km')
