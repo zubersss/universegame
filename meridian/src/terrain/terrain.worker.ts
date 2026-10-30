@@ -3,7 +3,7 @@
 
 import { BODIES, type BodyId } from '../world/bodies';
 import { computeSites } from '../world/sites';
-import { getSurface } from '../world/surface';
+import { ensureBodyData, getSurface } from '../world/surface';
 import { chunkTransfers, generateChunk } from './chunkGen';
 
 export interface GenRequest {
@@ -31,10 +31,12 @@ function surfaceFor(bodyId: BodyId) {
   return { def, gen: getSurface(def, computeSites(def).clearings) };
 }
 
-scope.onmessage = (e) => {
+scope.onmessage = async (e) => {
   const msg = e.data;
   if (msg.type === 'gen') {
     try {
+      // Data-backed bodies load their dataset once per worker; later jobs find it ready.
+      await ensureBodyData(BODIES[msg.bodyId]);
       const { def, gen } = surfaceFor(msg.bodyId);
       const data = generateChunk(def, gen, msg.face, msg.level, msg.x, msg.y, msg.token);
       scope.postMessage({ type: 'chunk', id: msg.id, data }, chunkTransfers(data));

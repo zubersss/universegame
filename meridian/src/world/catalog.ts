@@ -4,8 +4,8 @@
 // on a BodyDef is a gameplay value. Pure data: no Three.js (worker-safe).
 
 import sol from '../data/sol.json';
-import type { AtmosphereDef, BodyDef, BodyKind, BodyPalette, CloudLayerDef, DataTag, Explore, RealData } from './bodies';
-import { auToGame, gameRadius, maxLevelFor, moonOffset, systemPosition } from './scale';
+import type { AtmosphereDef, BodyDef, BodyFrame, BodyKind, BodyPalette, CloudLayerDef, DataTag, Explore, RealData } from './bodies';
+import { auToGame, eclipticToSystem, gameRadius, maxLevelFor, moonDistance, moonOffset, systemPosition } from './scale';
 
 interface Tagged<T> {
   value: T;
@@ -27,6 +27,8 @@ interface SolBody {
   semiMajorAxisKm?: Tagged<number>;
   luminosityW?: Tagged<number>;
   effectiveTempK?: Tagged<number>;
+  /** J2000-ecliptic unit vectors of the north pole and prime meridian at EPOCH. */
+  orientation?: { north: number[]; primeMeridian: number[]; tag: DataTag; source: string };
   source: string;
   verified: boolean;
 }
@@ -36,6 +38,7 @@ interface SolBelt {
   name: string;
   innerAu: Tagged<number>;
   outerAu: Tagged<number>;
+  halfThicknessAu: Tagged<number>;
   note: string;
 }
 
@@ -47,6 +50,8 @@ interface Look {
   power: string | null;
   atmosphereHeight: number;
   maxHeight: number;
+  /** Ocean surface height above the datum [m] (gameplay), null without an ocean. */
+  seaLevel?: number;
   atmosphere: AtmosphereDef | null;
   clouds: CloudLayerDef[];
   palette: BodyPalette;
@@ -98,7 +103,8 @@ const LOOKS: Record<string, Look> = {
     fiction: [...SCALE_FICTION, 'surface terrain is procedural', 'suit pressure/heat shield', 'sky brightness tuned for play'],
   },
   earth: {
-    explore: 'surface', surface: 'data', dataset: 'earth-etopo2022', power: 'skyborne-flight', atmosphereHeight: 8000, maxHeight: 4000,
+    // Datum 320 m below sea level: the gameplay sea floor bottoms out near -300 m (scale.ts relief ÷ 5, deep ocean compressed).
+    explore: 'surface', surface: 'data', dataset: 'earth', power: 'skyborne-flight', atmosphereHeight: 8000, maxHeight: 2600, seaLevel: 320,
     atmosphere: {
       rayleigh: [2.7e-5, 6.3e-5, 1.56e-4], rayleighH: 1700,
       mie: [2.0e-5, 2.0e-5, 2.0e-5], mieH: 600, mieG: 0.76,
@@ -108,7 +114,8 @@ const LOOKS: Record<string, Look> = {
       { altitude: 2200, thickness: 500, coverage: 0.45, scale: 6000, speed: 0.000012, tint: [1.0, 1.0, 1.0], opacity: 0.85, streak: 0.2 },
       { altitude: 5600, thickness: 300, coverage: 0.3, scale: 11000, speed: 0.00002, tint: [0.98, 0.99, 1.0], opacity: 0.5, streak: 0.85 },
     ],
-    palette: { a1: 0x6f6248, a2: 0x7f7a72, a3: 0xeef2f6, b1: 0x4c6a33, b2: 0x6a5a40, b3: 0xcdbb8c, special: 0xf2f6fa, proxyNight: 0x05080c },
+    // A: dry ground (earth, dry grass/sand accent, rock); B: vegetation (green, darker under forest, rock); special: snow and ice.
+    palette: { a1: 0x8a7a58, a2: 0x7a746a, a3: 0xb9a578, b1: 0x55703a, b2: 0x6a5f4c, b3: 0x8f9a58, special: 0xf4f7fa, proxyNight: 0x05080c },
     biomeNames: ['Uplands', 'Lowlands'],
     description: 'Home: oceans over 71% of the surface, continents shaped from real elevation data.',
     fiction: [...SCALE_FICTION, 'relief exaggerated 8× relative to the radius', 'detail below the data resolution is procedural'],
@@ -119,7 +126,7 @@ const LOOKS: Record<string, Look> = {
       explore: 'surface', surface: 'procedural', power: 'lunar-step', maxHeight: 4000,
       biomeNames: ['Highlands', 'Maria'],
       description: "Earth's moon: bright cratered highlands and dark basaltic maria.",
-      fiction: [...SCALE_FICTION, 'distance from Earth compressed (sqrt rule)', 'surface terrain is procedural'],
+      fiction: [...SCALE_FICTION, 'surface terrain is procedural'],
     },
   ),
   mars: {
@@ -154,7 +161,7 @@ const LOOKS: Record<string, Look> = {
       explore: 'surface', surface: 'procedural', power: 'anchor-blink', maxHeight: 400,
       biomeNames: ['Ridged Plains', 'Chaos Terrain'],
       description: "Jupiter's ice moon: a cracked water-ice shell over a subsurface ocean.",
-      fiction: [...SCALE_FICTION, 'distance from Jupiter compressed (sqrt rule)', 'surface terrain is procedural'],
+      fiction: [...SCALE_FICTION, 'surface terrain is procedural'],
     },
   ),
   saturn: {
@@ -181,7 +188,7 @@ const LOOKS: Record<string, Look> = {
     palette: { a1: 0x9a7a4a, a2: 0x6b4a2a, a3: 0xb89a66, b1: 0x5a3e22, b2: 0x4a3420, b3: 0x8a6a40, special: 0x1a1410, proxyNight: 0x0c0804 },
     biomeNames: ['Bright Uplands', 'Dark Dune Fields'],
     description: "Saturn's largest moon: a dense orange nitrogen haze over dunes and methane lakes.",
-    fiction: [...SCALE_FICTION, 'distance from Saturn compressed (sqrt rule)', 'surface terrain is procedural'],
+    fiction: [...SCALE_FICTION, 'surface terrain is procedural'],
   },
   uranus: {
     explore: 'zone', surface: 'procedural', power: 'cold-drift', atmosphereHeight: 20000, maxHeight: 50,
@@ -228,6 +235,30 @@ function tagsOf(b: SolBody): Record<string, DataTag> {
 const solBodies = sol.bodies as SolBody[];
 const solById = new Map(solBodies.map((b) => [b.id, b]));
 
+/** Default frame (system +Y north, +X prime meridian), used where no orientation is known. */
+export const DEFAULT_FRAME: BodyFrame = { north: [0, 1, 0], meridian: [1, 0, 0], east: [0, 0, -1], tag: 'fictional' };
+
+/** Body frame in the game's system axes from the catalog orientation (ecliptic unit vectors). */
+function frameOf(b: SolBody): BodyFrame {
+  const o = b.orientation;
+  if (!o) return DEFAULT_FRAME;
+  // Gram-Schmidt: the catalog vectors are rounded to 12 decimals.
+  const nr = eclipticToSystem(o.north, 1);
+  const nl = Math.hypot(nr[0], nr[1], nr[2]);
+  const north: [number, number, number] = [nr[0] / nl, nr[1] / nl, nr[2] / nl];
+  const mr = eclipticToSystem(o.primeMeridian, 1);
+  const md = mr[0] * north[0] + mr[1] * north[1] + mr[2] * north[2];
+  const mo = [mr[0] - md * north[0], mr[1] - md * north[1], mr[2] - md * north[2]];
+  const ml = Math.hypot(mo[0], mo[1], mo[2]);
+  const meridian: [number, number, number] = [mo[0] / ml, mo[1] / ml, mo[2] / ml];
+  const east: [number, number, number] = [
+    north[1] * meridian[2] - north[2] * meridian[1],
+    north[2] * meridian[0] - north[0] * meridian[2],
+    north[0] * meridian[1] - north[1] * meridian[0],
+  ];
+  return { north, meridian, east, tag: o.tag };
+}
+
 function centerOf(b: SolBody): [number, number, number] {
   if (!b.parent || b.kind !== 'moon') return systemPosition(b.positionKm.value);
   const p = solById.get(b.parent)!;
@@ -243,6 +274,20 @@ export function buildSolBodies(seedFor: (id: string) => number, firstIndex: numb
     const look = LOOKS[b.id];
     if (!look) throw new Error(`No gameplay look for catalog body ${b.id}`);
     const radius = gameRadius(b.radiusKm.value);
+    const fiction = [...look.fiction];
+    let positionSource: string = sol.sources.positions.url;
+    if (b.kind === 'moon' && b.parent) {
+      const p = solById.get(b.parent)!;
+      const rel = [0, 1, 2].map((i) => b.positionKm.value[i] - p.positionKm.value[i]);
+      const { rule } = moonDistance(Math.hypot(rel[0], rel[1], rel[2]), p.radiusKm.value, gameRadius(p.radiusKm.value), radius);
+      fiction.push(rule === 'sqrt'
+        ? `distance from ${p.name} compressed (square-root rule)`
+        : `distance from ${p.name} set by the minimum separation (4.5 x the sum of the gameplay radii)`);
+    }
+    if (b.positionKm.tag === 'fictional') {
+      fiction.push('direction from its parent invented (no ephemeris yet)');
+      positionSource = 'fictional: direction invented until an ephemeris is available';
+    }
     const real: RealData = {
       radiusKm: b.radiusKm.value,
       gravity: b.gravity.value,
@@ -253,7 +298,7 @@ export function buildSolBodies(seedFor: (id: string) => number, firstIndex: numb
       effectiveTempK: b.effectiveTempK?.value,
       tags: tagsOf(b),
       source: b.source,
-      positionSource: sol.sources.positions.url,
+      positionSource,
       verified: b.verified,
     };
     const kind: BodyKind = b.kind;
@@ -267,16 +312,18 @@ export function buildSolBodies(seedFor: (id: string) => number, firstIndex: numb
       explore: look.explore,
       real,
       center: centerOf(b),
+      frame: frameOf(b),
       radius,
       atmosphereHeight: look.atmosphereHeight,
       gravity: b.gravity.value,
       maxHeight: look.maxHeight,
       maxLevel: maxLevelFor(radius),
       seed: seedFor(b.id),
+      seaLevel: look.seaLevel ?? null,
       surface: look.surface,
       dataset: look.dataset,
       power: look.power,
-      fiction: look.fiction,
+      fiction,
       atmosphere: look.atmosphere,
       clouds: look.clouds,
       palette: look.palette,
@@ -292,7 +339,9 @@ export interface BeltDef {
   /** Gameplay radii from the Sun in the ecliptic plane [m]. */
   inner: number;
   outer: number;
-  real: { innerAu: number; outerAu: number; tag: DataTag; note: string };
+  /** Gameplay half-thickness above and below the ecliptic plane [m]. */
+  halfThickness: number;
+  real: { innerAu: number; outerAu: number; halfThicknessAu: number; tag: DataTag; note: string; source: string };
 }
 
 export const BELTS: readonly BeltDef[] = (sol.belts as SolBelt[]).map((b) => ({
@@ -300,7 +349,15 @@ export const BELTS: readonly BeltDef[] = (sol.belts as SolBelt[]).map((b) => ({
   name: b.name,
   inner: auToGame(b.innerAu.value),
   outer: auToGame(b.outerAu.value),
-  real: { innerAu: b.innerAu.value, outerAu: b.outerAu.value, tag: b.innerAu.tag, note: b.note },
+  halfThickness: auToGame(b.halfThicknessAu.value),
+  real: {
+    innerAu: b.innerAu.value,
+    outerAu: b.outerAu.value,
+    halfThicknessAu: b.halfThicknessAu.value,
+    tag: b.innerAu.tag,
+    note: b.note,
+    source: sol.sources.belts.note,
+  },
 }));
 
 /** Data provenance for the journal and tests. */

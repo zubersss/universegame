@@ -67,6 +67,18 @@ export function systemPosition(realKm: readonly number[]): [number, number, numb
  */
 export const MOON_MIN_SEPARATION = 4.5;
 
+/** Gameplay parent-moon distance [m] and which rule set it ('sqrt' compression or the 'minimum' separation). */
+export function moonDistance(
+  realDistanceKm: number,
+  parentRealRadiusKm: number,
+  parentGameRadiusM: number,
+  moonGameRadiusM: number,
+): { distance: number; rule: 'sqrt' | 'minimum' } {
+  const sqrtRule = parentGameRadiusM * Math.sqrt(realDistanceKm / parentRealRadiusKm);
+  const minimum = MOON_MIN_SEPARATION * (parentGameRadiusM + moonGameRadiusM);
+  return sqrtRule >= minimum ? { distance: sqrtRule, rule: 'sqrt' } : { distance: minimum, rule: 'minimum' };
+}
+
 export function moonOffset(
   realOffsetKm: readonly number[],
   parentRealRadiusKm: number,
@@ -74,7 +86,7 @@ export function moonOffset(
   moonGameRadiusM: number,
 ): [number, number, number] {
   const len = Math.hypot(realOffsetKm[0], realOffsetKm[1], realOffsetKm[2]);
-  const d = Math.max(parentGameRadiusM * Math.sqrt(len / parentRealRadiusKm), MOON_MIN_SEPARATION * (parentGameRadiusM + moonGameRadiusM));
+  const d = moonDistance(len, parentRealRadiusKm, parentGameRadiusM, moonGameRadiusM).distance;
   return eclipticToSystem(realOffsetKm, d / len);
 }
 

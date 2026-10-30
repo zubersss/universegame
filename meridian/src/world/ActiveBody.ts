@@ -1,12 +1,13 @@
 import { Frustum, Matrix4, Vector3, type MeshStandardMaterial, type PerspectiveCamera } from 'three';
 import type { BodyDef } from './bodies';
 import { computeSites, type MissionSites } from './sites';
-import { getSurface, type SurfaceGenerator, type SurfaceInfo } from './surface';
+import { getSurface, newSurfaceInfo, type SurfaceGenerator, type SurfaceInfo } from './surface';
 import { TerrainManager, type TerrainView } from '../terrain/TerrainManager';
 import { TerrainCollision } from '../terrain/TerrainCollision';
 import type { ChunkStore } from '../terrain/ChunkStore';
 import type { Physics } from '../physics/Physics';
 import { PropSystem } from '../props/PropSystem';
+import { createWaterMaterial, SEA_WATER, type WaterUniforms } from '../terrain/waterMaterial';
 
 const _m = new Matrix4();
 
@@ -20,7 +21,9 @@ export class ActiveBody {
   private readonly frustum = new Frustum();
   readonly view: TerrainView;
   private lodTimer = 0;
-  private readonly info: SurfaceInfo = { height: 0, biome: 0, variation: 0, special: 0, rockiness: 0 };
+  /** Liquid-surface material (bodies with an ocean or lakes), disposed with the body. */
+  private readonly water: { material: MeshStandardMaterial; uniforms: WaterUniforms } | null;
+  private readonly info: SurfaceInfo = newSurfaceInfo();
 
   constructor(
     readonly def: BodyDef,
@@ -33,6 +36,8 @@ export class ActiveBody {
     this.gen = getSurface(def, this.sites.clearings);
     store.setBody(def.id);
     this.terrain = new TerrainManager(def, store, materials);
+    this.water = def.seaLevel != null ? createWaterMaterial(SEA_WATER, aerialSteps, false) : null;
+    this.terrain.waterMaterial = this.water?.material ?? null;
     this.collision = new TerrainCollision(physics, def, store);
     this.props = new PropSystem(def, this.gen, this.sites, physics, aerialSteps);
     this.view = {
@@ -76,6 +81,7 @@ export class ActiveBody {
       this.terrain.update(v);
     }
     this.terrain.updateMorphs(dt);
+    if (this.water) this.water.uniforms.uWaterTime.value += dt;
     this.terrain.cullMeshes(v);
     this.collision.update(planetLocal);
     this.props.update(dt, v.focusPlanet, v.camPlanet, planetLocal, nearGround);
@@ -85,5 +91,6 @@ export class ActiveBody {
     this.props.dispose();
     this.terrain.dispose();
     this.collision.clear();
+    this.water?.material.dispose();
   }
 }
