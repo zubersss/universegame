@@ -5,6 +5,7 @@
 // in between. Mode stays unchanged.
 
 import type { BodyId } from '../world/bodies';
+import type { AbilityId, AbilitySave } from '../abilities/save';
 import type { WalkInput } from '../player/Player';
 import type { Mode } from './Game';
 
@@ -13,6 +14,18 @@ export type OnFootExitReason = 'board' | 'restore' | 'relocate' | 'replaced';
 
 export interface OnFootContext {
   body: BodyId;
+  /**
+   * The power active while exploring this body: its own, once an arrival
+   * unlocked it (charter K), else null (walking only). Game always sets it;
+   * the hooks activate exactly this power and nothing else. OnFootHost hands
+   * the hooks null when a context leaves it out, so a missing power fails
+   * closed and never becomes the body's catalog power. Optional in the type
+   * only until PLAYER's tests stop building `{ body }` contexts (IFACE); then
+   * required.
+   */
+  power?: AbilityId | null;
+  /** The ability fields of the save being restored, on the enter that follows a restore only. */
+  restored?: AbilitySave | null;
 }
 
 export interface OnFootHooks {
@@ -33,6 +46,8 @@ export interface OnFootHooks {
    * camera); otherwise Game keeps its first-person camera.
    */
   frame?(dt: number, alpha: number): boolean;
+  /** The ability fields for a save snapshot while on foot (schema 2: player.abilityState). */
+  saveState?(): AbilitySave | null;
 }
 
 /** 'enter' / 'exit' when a mode change crosses the ON_FOOT boundary, else null. */
@@ -66,8 +81,9 @@ export class OnFootHost {
     if (edge === 'enter') {
       if (!ctx) throw new Error('Entering ON_FOOT needs a context');
       if (this.ctx) this.hooks?.exit('relocate');
-      this.ctx = ctx;
-      this.hooks?.enter(ctx);
+      // The hooks always see a decided power: none given means none (fail closed).
+      this.ctx = { ...ctx, power: ctx.power ?? null, restored: ctx.restored ?? null };
+      this.hooks?.enter(this.ctx);
     } else if (edge === 'exit' && this.ctx) {
       this.ctx = null;
       this.hooks?.exit(reason);
@@ -84,5 +100,11 @@ export class OnFootHost {
   frame(dt: number, alpha: number): boolean {
     if (!this.ctx || !this.hooks?.frame) return false;
     return this.hooks.frame(dt, alpha) === true;
+  }
+
+  /** The hooks' ability fields for a save while on foot; null otherwise or when they keep none. */
+  saveState(): AbilitySave | null {
+    if (!this.ctx || !this.hooks?.saveState) return null;
+    return this.hooks.saveState() ?? null;
   }
 }

@@ -5,9 +5,12 @@ import { DEFAULT_SETTINGS, sanitizeSettings, type Settings } from './settings';
 import { KvStore } from '../save/db';
 import { SaveStore, exportJson, importJson, type LegacySave, type SaveData } from '../save/SaveSystem';
 import { Game } from './Game';
+import type { Expedition } from './Expedition';
+import { playBodies, surfaceReady, systemFromQuery } from './playSystem';
 import { Panel } from '../ui/Panel';
 import { renderJournal, renderSurvey } from '../ui/Journal';
-import { BODIES, BODY_IDS, isBodyId } from '../world/bodies';
+import { BODIES, BODY_IDS, PLAY_SYSTEM, isBodyId, setPlaySystem, type BodyDef } from '../world/bodies';
+import { ensureBodyData } from '../world/surface';
 import { installPlayer } from '../player/install';
 
 function when(iso: string): string {
@@ -16,9 +19,22 @@ function when(iso: string): string {
 }
 
 function summary(d: SaveData): string {
+  if (d.system !== 'quiet') {
+    // No relay survey outside the Quiet System: where the ship is and the worlds landed on.
+    const where = d.bodyId ? BODIES[d.bodyId].name : d.mode === 'CRUISING' ? 'cruising' : 'in flight';
+    const n = d.discoveries.length;
+    return `${where} · ${n} ${n === 1 ? 'world' : 'worlds'} landed on`;
+  }
   const e = d.expedition;
   if (e.transmitted) return 'survey transmitted';
   return `${e.relays.length}/3 relays · ${e.species.length} species logged`;
+}
+
+/** Navigation row status: the relay survey in the Quiet System, elsewhere whether the body can be landed on. */
+function navStatus(def: BodyDef, e: Expedition): string {
+  if (def.system === 'quiet') return e.relayActive(def.id) ? 'Relay active' : 'Survey pending';
+  if (surfaceReady(def)) return 'Landing site';
+  return def.kind === 'star' ? 'Keep your distance' : 'Approach only';
 }
 
 /** Title line for a save from an earlier version: shown as history, never continued. */
@@ -79,7 +95,9 @@ export async function boot(): Promise<void> {
       if (manual) menus.setPauseStatus(`Saved ${when(data.savedAt)}.`);
     } else {
       g.hud.saveStatus(`Save failed — ${saves.failure ?? 'unknown error'}`, true);
-      menus.setPauseStatus(`${saves.failure ?? 'Saving failed.'} Your previous save is unchanged. Use Export Backup to keep progress.`, true);
+      // A refused snapshot would not import from a backup either.
+      const backup = saves.refused ? '' : ' Use Export Backup to keep progress.';
+      menus.setPauseStatus(`${saves.failure ?? 'Saving failed.'} Your previous save is unchanged.${backup}`, true);
     }
     if (again) {
       again = false;
@@ -203,6 +221,11 @@ export async function boot(): Promise<void> {
   menus.show('title');
   menus.setTitleStatus('Initializing renderer…', false);
 
+  // The star system in play (?system=quiet|sol, default the Quiet System) is
+  // set before anything reads BODY_IDS: save validation, the game and its proxies.
+  const params = new URLSearchParams(location.search);
+  setPlaySystem(playBodies(systemFromQuery(params.get('system'))));
+
   try {
     kv = await KvStore.open();
     settings = sanitizeSettings(await kv.get('settings'));
@@ -216,7 +239,6 @@ export async function boot(): Promise<void> {
 
   // Safe-mode overrides, e.g. ?preset=low when a heavier preset is too slow to
   // reach the menu, or ?adaptive=0 to pin the preset's full resolution.
-  const params = new URLSearchParams(location.search);
   const forced = params.get('preset');
   if (forced === 'low' || forced === 'balanced' || forced === 'high') {
     settings = { ...settings, preset: forced };
@@ -249,6 +271,20 @@ export async function boot(): Promise<void> {
     return;
   }
 
+  // Bodies built from datasets (Earth) need their data in this thread before
+  // the game computes their sites or activates them.
+  const dataBodies = BODY_IDS.map((id) => BODIES[id]).filter((d) => d.surface === 'data');
+  if (dataBodies.length) {
+    const names = dataBodies.map((d) => d.name).join(', ');
+    menus.setTitleStatus(`Loading ${names} surface data…`, false);
+    try {
+      await Promise.all(dataBodies.map((d) => ensureBodyData(d)));
+    } catch (e) {
+      menus.showError('Surface data failed to load', `The ${names} surface data could not be loaded: ${(e as Error).message}. Check the connection, then retry.`);
+      return;
+    }
+  }
+
   game = new Game(render, settings);
   installPlayer(game);
   const panel = new Panel();
@@ -266,15 +302,27 @@ export async function boot(): Promise<void> {
     return {
       target: g.navTarget,
       here: g.ref.id,
+      // The bodies in play (belts are regions, not targets); digits 1–0 pick the first ten.
       rows: BODY_IDS.map((id) => {
         const def = BODIES[id];
         const d = Math.hypot(sys.x - def.center[0], sys.y - def.center[1], sys.z - def.center[2]) - def.radius;
-        return { id, distance: d, status: e.relayActive(id) ? 'Relay active' : 'Survey pending' };
+        return { id, distance: d, status: navStatus(def, e) };
       }),
     };
   };
   panel.renderJournal = (el) => renderJournal(el, game!.expedition.state);
-  panel.renderSurvey = (el) => renderSurvey(el, game!.expedition);
+  panel.renderSurvey = (el) => {
+    if (PLAY_SYSTEM === 'quiet') {
+      renderSurvey(el, game!.expedition);
+      return;
+    }
+    // The relay survey is the Quiet System's; elsewhere the tab lists the worlds landed on.
+    const note = document.createElement('div');
+    note.className = 'empty';
+    const landed = game!.expedition.discoveries.map((id) => BODIES[id].name);
+    note.textContent = `Worlds landed on: ${landed.length ? landed.join(', ') : 'none yet'}. The relay survey belongs to the Quiet System.`;
+    el.replaceChildren(note);
+  };
   // Tab opens the panel in play and closes it again; elsewhere it keeps its
   // normal focus behaviour.
   game.input.onTab = (repeat) => {
