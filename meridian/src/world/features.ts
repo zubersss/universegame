@@ -241,8 +241,10 @@ export class FeatureField {
           const x = sx < 0 ? -sx : sx;
           const u = (sx + 0.06 * w1) / f.spacing + 0.18 * w2;
           const ph = u - Math.floor(u) - 0.5; // -0.5..0.5 across each crack period
+          // Walls over 0.12 of the spacing (~6.6 m in play, three mesh cells at maxLevel): steep, but
+          // wide enough that a crack running diagonally to the mesh does not stair-step into teeth.
           const half = 0.11 + 0.05 * w1;
-          const crack = 1 - sstep(half - 0.06, half, ph < 0 ? -ph : ph);
+          const crack = 1 - sstep(half - 0.06, half + 0.06, ph < 0 ? -ph : ph);
           const segment = sstep(-0.55, -0.25, w2 + 0.4 * w1); // gaps where the noise is low
           const field = (1 - sstep(0.8, 1.0, x)) * segment;
           h += -f.amount * crack * field;
