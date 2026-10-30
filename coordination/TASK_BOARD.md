@@ -97,7 +97,7 @@ Goal: Unity 6 project at repo root with URP 2D Renderer, Input System, Addressab
 Accept: `tools/unity_compile.ps1` exits 0 with zero `error CS`; asmdefs `MERIDIAN.Runtime`, `MERIDIAN.Editor`, `MERIDIAN.Tests.Unit`; packages pinned in `Packages/manifest.json`; URP asset uses the 2D Renderer.
 Files: Assets/_Game/**, Packages/, ProjectSettings/, tools/unity_compile.ps1
 Depends: L-005
-Lead notes: Reads `tools/paths.json` for the Unity path; HeavyJobLock applies. Editor is 6000.6.5f1 (D-013); pin the Bible §12 versions in `manifest.json` (URP 17.6.0, Addressables 2.11.2, Input System 1.20.0, Test Framework 1.8.0). In Unity 6, TextMeshPro ships inside `com.unity.ugui`, so don't add a separate TMP package. Cinemachine isn't bundled; pin the 3.x version the registry resolves and log it in your status. Scripting backend: Mono (D-014). No IL2CPP module is installed. HeavyJobLock: the always-running `Unity HubesourcesNity.exe serve` is NOT the Editor; detect by path per CLAUDE.md rule 6 (D-015).
+Lead notes: Reads `tools/paths.json` for the Unity path; HeavyJobLock applies. Editor is 6000.6.5f1 (D-013); pin the Bible §12 versions in `manifest.json` (URP 17.6.0, Addressables 2.11.2, Input System 1.20.0, Test Framework 1.8.0). In Unity 6, TextMeshPro ships inside `com.unity.ugui`, so don't add a separate TMP package. Cinemachine isn't bundled; pin the 3.x version the registry resolves and log it in your status. Scripting backend: Mono (D-014). No IL2CPP module is installed. HeavyJobLock: the always-running the Unity Hub background service (`unity.exe serve`) is NOT the Editor; detect by path per CLAUDE.md rule 6 (D-015).
 
 ### U-002 · UNITY · Ready · M0
 Goal: `PlanetConfig` ScriptableObjects for all 8 planets with Bible §4.1 and §5.1 values; tests.
@@ -220,7 +220,7 @@ Goal: Pipeline skeleton: `blender/` tree, `manifest.json` schema, `render.py` CL
 Accept: `tools/blender_render.ps1 all` on an empty manifest exits 0; an unknown key exits non-zero with a one-line reason; a line per asset in `logs/blender_<date>.log`.
 Files: blender/render.py, blender/manifest.json, blender/scripts/, tools/blender_render.ps1
 Depends: L-005
-Lead notes: Reads `tools/paths.json` for `blenderExe` (Blender 5.2.2 LTS). The Python API changed across 4.x→5.x (e.g. EEVEE engine identifiers). Read valid enum values at runtime (`bpy.types.RenderSettings.bl_rna.properties['engine'].enum_items`) rather than hard-coding 4.x names. HeavyJobLock: the always-running `Unity HubesourcesNity.exe serve` is NOT the Editor; detect by path per CLAUDE.md rule 6 (D-015).
+Lead notes: Reads `tools/paths.json` for `blenderExe` (Blender 5.2.2 LTS). The Python API changed across 4.x→5.x (e.g. EEVEE engine identifiers). Read valid enum values at runtime (`bpy.types.RenderSettings.bl_rna.properties['engine'].enum_items`) rather than hard-coding 4.x names. HeavyJobLock: the always-running the Unity Hub background service (`unity.exe serve`) is NOT the Editor; detect by path per CLAUDE.md rule 6 (D-015).
 
 ### B-002 · BLENDER · Ready · M0
 Goal: Calibration asset `props/common/calibration`.
