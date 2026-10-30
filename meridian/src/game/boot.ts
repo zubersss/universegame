@@ -79,7 +79,9 @@ export async function boot(): Promise<void> {
       if (manual) menus.setPauseStatus(`Saved ${when(data.savedAt)}.`);
     } else {
       g.hud.saveStatus(`Save failed — ${saves.failure ?? 'unknown error'}`, true);
-      menus.setPauseStatus(`${saves.failure ?? 'Saving failed.'} Your previous save is unchanged. Use Export Backup to keep progress.`, true);
+      // A refused snapshot would not import from a backup either.
+      const backup = saves.refused ? '' : ' Use Export Backup to keep progress.';
+      menus.setPauseStatus(`${saves.failure ?? 'Saving failed.'} Your previous save is unchanged.${backup}`, true);
     }
     if (again) {
       again = false;

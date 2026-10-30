@@ -1,10 +1,15 @@
-import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   CORRUPT_KEY, LEGACY_KEY, PREV_KEY, SAVE_KEY, SAVE_SCHEMA, SaveStore, exportJson, importJson, legacySummary, validateSave, type SaveData, type V3,
 } from '../src/save/SaveSystem';
 import type { KvStore } from '../src/save/db';
-import { BODIES, GENERATOR_VERSION, SYSTEM_EXTENT, WORLD_SEED } from '../src/world/bodies';
+import { BODIES, GENERATOR_VERSION, SOL_M2_BODIES, SYSTEM_BODY_IDS, SYSTEM_EXTENT, WORLD_SEED, setPlaySystem } from '../src/world/bodies';
 import { DEFAULT_SETTINGS } from '../src/game/settings';
+import { FIRST_LIGHT, newExpedition } from '../src/game/Expedition';
+import { computeSites } from '../src/world/sites';
+import { EARTH_META, installEarthData, loadEarthData, type LayerName } from '../src/world/earthData';
 import { isAbilityId, type AbilityId } from '../src/abilities/save';
 // A schema-1 record exactly as the published MERIDIAN build wrote it. Frozen:
 // never edit it (it stands for real players' saves; e2e/journey/saves.spec.ts uses it too).
@@ -106,6 +111,13 @@ describe('save validation', () => {
     expect(validateSave(onFootAt('cairn', 3.9, 3.95)).ok).toBe(true);
   });
 
+  it('accepts an on-foot player anywhere on the ship\'s body: powers carry them far from the ship', () => {
+    // The far side of Cairn, a body diameter from the ship (once refused beyond 20 km).
+    const d = onFootAt('cairn', 1, -1);
+    expect(2 * BODIES.cairn.radius).toBeGreaterThan(20000);
+    expect(validateSave(d).ok).toBe(true);
+  });
+
   it('accepts arrivals as discoveries and catalog powers as unlocks', () => {
     const d = sample({ discoveries: ['ilex', 'vesper', 'cairn'], unlocked: ['skyborne-flight', 'lunar-step', 'redline'] });
     const r = validateSave(d);
@@ -180,6 +192,7 @@ describe('save validation', () => {
     ['the schema-1 body field', omit({ ...sample(), body: 'vesper' }, 'bodyId')],
     ['landed 10 R from its body', sample({ ship: { ...sample().ship, sys: [BODIES.vesper.center[0] + 10 * BODIES.vesper.radius, 0, BODIES.vesper.center[2]] } })],
     ['on foot beyond 4 R', onFootAt('cairn', 3.9, 4.05)],
+    ['on foot on another body than the ship', { ...ON_FOOT, player: { ...ON_FOOT.player!, sys: [BODIES.vesper.center[0] + BODIES.vesper.radius, BODIES.vesper.center[1], BODIES.vesper.center[2]] } }],
     ['relays on bodies not in play', sample({ expedition: { ...sample().expedition, relays: ['earth', 'mars', 'moon'], transmitted: true } })],
     ['last landing on a body not in play', sample({ lastSafeLanding: { ...sample().lastSafeLanding!, bodyId: 'sun' } })],
     ['last landing pose beyond 4 R', sample({ lastSafeLanding: { ...sample().lastSafeLanding!, posPlanet: [0, 4.1 * BODIES.vesper.radius, 0] } })],
@@ -335,5 +348,74 @@ describe('save store', () => {
     expect(st.available).toBe(false);
     expect(await st.write(sample())).toBe(false);
     expect(st.failure).toMatch(/unavailable/);
+  });
+
+  it('never writes a snapshot the loader would refuse; the latest and previous saves stay', async () => {
+    const kv = new FakeKv();
+    const st = new SaveStore(kv as unknown as KvStore);
+    expect(await st.write(sample({ playTime: 1 }))).toBe(true);
+    expect(await st.write(sample({ playTime: 2 }))).toBe(true);
+    const before = new Map(kv.data);
+    // On foot beyond its body's release radius: the next start would show it as corrupt.
+    const bad = onFootAt('cairn', 1, 4.05);
+    expect(validateSave(bad).ok).toBe(false);
+    expect(await st.write(bad)).toBe(false);
+    expect(st.refused).toBe(true);
+    expect(st.failure).toBe('The current state cannot be saved: Player too far from the body.');
+    expect(kv.data).toEqual(before);
+    expect([st.latest.data?.playTime, st.previous.data?.playTime]).toEqual([2, 1]);
+    // The next good snapshot saves normally and clears the refusal.
+    expect(await st.write(sample({ playTime: 3 }))).toBe(true);
+    expect([st.refused, st.failure]).toEqual([false, null]);
+    expect((kv.data.get(PREV_KEY) as SaveData).playTime).toBe(2);
+  });
+});
+
+describe('on-foot saves along First Light', () => {
+  beforeAll(async () => {
+    // Earth's landing site is searched on WORLDS' dataset (as in worlds-survey.test).
+    const dir = fileURLToPath(new URL('../src/data/earth/', import.meta.url));
+    const layers = EARTH_META.layers as Record<LayerName, { file: string }>;
+    installEarthData(await loadEarthData(async (name) => readFileSync(dir + layers[name].file)));
+    setPlaySystem(SOL_M2_BODIES);
+  });
+  afterAll(() => setPlaySystem(SYSTEM_BODY_IDS.quiet));
+
+  it('saves and reloads the player at every waypoint and scan target, the ship at the landing site', async () => {
+    expect(FIRST_LIGHT.map((c) => c.body)).toEqual(['earth', 'moon', 'mars']);
+    for (const c of FIRST_LIGHT) {
+      const def = BODIES[c.body];
+      const sites = computeSites(def);
+      const targets = [...sites.route, ...sites.scans];
+      // WORLDS' sites carry exactly the chapter's target ids.
+      expect(targets.map((t) => t.id)).toEqual([...c.route, ...c.scans].map((t) => t.id));
+      const r = def.radius + sites.landing.height;
+      const local = (n: readonly number[]): V3 => [n[0] * r, n[1] * r, n[2] * r];
+      const sys = (n: readonly number[]): V3 => local(n).map((v, i) => v + def.center[i]) as V3;
+      const ship = sys(sites.landing.dir);
+      for (const t of targets) {
+        const d = sample({
+          system: 'sol',
+          mode: 'ON_FOOT',
+          bodyId: c.body,
+          ship: { ...sample().ship, sys: ship },
+          player: { sys: sys(t.dir), heading: [0, 0, 1], pitch: 0, abilityState: 'walk' },
+          lastSafeLanding: { bodyId: c.body, posPlanet: local(sites.landing.dir), quat: [0, 0, 0, 1] },
+          navTarget: null,
+          discoveries: [c.body],
+          unlocked: [c.power],
+          expedition: { ...newExpedition(), route: c.route.map((w) => w.id), scanned: t.id.includes(':poi:') ? [t.id] : [] },
+        });
+        const v = validateSave(d);
+        expect(v.ok, `${t.id} ${t.label}: ${v.ok ? '' : v.error}`).toBe(true);
+        // The autosave path: written, then offered as the latest save on the next start.
+        const kv = new FakeKv();
+        expect(await new SaveStore(kv as unknown as KvStore).write(d), t.id).toBe(true);
+        const next = new SaveStore(kv as unknown as KvStore);
+        await next.read();
+        expect(next.latest.error, t.id).toBeNull();
+        expect(next.latest.data?.player?.sys, t.id).toEqual(d.player!.sys);
+      }
+    }
   });
 });

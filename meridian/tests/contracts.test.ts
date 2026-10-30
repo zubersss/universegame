@@ -1,12 +1,15 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { OnFootHost, onFootEdge, type OnFootHooks } from '../src/game/onFoot';
+import { OnFootHost, onFootEdge, type OnFootContext, type OnFootHooks } from '../src/game/onFoot';
 import type { Mode } from '../src/game/Game';
 import { abilityView, pickWarning } from '../src/ui/Hud';
 import { Input } from '../src/core/input';
 import type { WalkInput } from '../src/player/Player';
 import { Expedition } from '../src/game/Expedition';
 import type { AbilitySave } from '../src/abilities/save';
+import { AbilityController } from '../src/abilities/AbilityController';
+import { bodyPower } from '../src/abilities/catalog';
+import { BODIES } from '../src/world/bodies';
 
 const IDLE: WalkInput = { forward: 0, right: 0, sprint: false, jump: false, yaw: 0, pitch: 0 };
 
@@ -174,6 +177,32 @@ describe('ON_FOOT hook points (Mode unchanged)', () => {
     // Only the restored placement passes saved ability fields.
     expect(src.match(/this\.setMode\('ON_FOOT'[^)]*\)/g)).toEqual(["this.setMode('ON_FOOT')", "this.setMode('ON_FOOT', 'relocate', restored)"]);
     expect(src).toMatch(/placeRestoredPlayer\(feet, new Vector3\(\.\.\.pl\.heading\), pl\.pitch, \{ abilityState: pl\.abilityState, unlocked: \[\.\.\.this\.expedition\.unlocked\] \}\)/);
+  });
+
+  it('fails closed: a context without a power reaches the hooks as null, never as the body\'s catalog power', () => {
+    const host = new OnFootHost();
+    const seen: OnFootContext[] = [];
+    host.install({ ...recorder(), enter: (ctx) => seen.push(ctx) });
+    host.transition('LANDED', 'ON_FOOT', { body: 'earth' }, 'relocate');
+    expect(seen).toEqual([{ body: 'earth', power: null, restored: null }]);
+    // PLAYER's controller reads an absent power as the body's own (IFACE pending);
+    // through the host it gets null and stays walking until an arrival unlocks the power.
+    expect(bodyPower(BODIES.earth)).toBe('skyborne-flight');
+    const c = new AbilityController({ setAbility() {}, setWarning() {} }, (id) => bodyPower(BODIES[id]));
+    host.install(c); // installed while on foot: enters with the host's context
+    expect(c.power).toBeNull();
+    host.transition('ON_FOOT', 'LANDED', null, 'board');
+    host.transition('LANDED', 'ON_FOOT', { body: 'earth' }, 'relocate');
+    expect(c.power).toBeNull();
+    host.transition('ON_FOOT', 'LANDED', null, 'board');
+    // The context Game builds activates exactly the unlocked power.
+    const exp = new Expedition();
+    host.transition('LANDED', 'ON_FOOT', { body: 'earth', power: exp.activePower('earth') }, 'relocate');
+    expect(c.power).toBeNull();
+    host.transition('ON_FOOT', 'LANDED', null, 'board');
+    exp.arrive('earth');
+    host.transition('LANDED', 'ON_FOOT', { body: 'earth', power: exp.activePower('earth') }, 'relocate');
+    expect(c.power?.id).toBe('skyborne-flight');
   });
 
   it('asks the hooks for the ability state of a save only while on foot', () => {

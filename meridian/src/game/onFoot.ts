@@ -17,8 +17,11 @@ export interface OnFootContext {
   /**
    * The power active while exploring this body: its own, once an arrival
    * unlocked it (charter K), else null (walking only). Game always sets it;
-   * the hooks activate exactly this power and nothing else. Optional in the
-   * type only so contexts built without a power (tests) still type-check.
+   * the hooks activate exactly this power and nothing else. OnFootHost hands
+   * the hooks null when a context leaves it out, so a missing power fails
+   * closed and never becomes the body's catalog power. Optional in the type
+   * only until PLAYER's tests stop building `{ body }` contexts (IFACE); then
+   * required.
    */
   power?: AbilityId | null;
   /** The ability fields of the save being restored, on the enter that follows a restore only. */
@@ -78,8 +81,9 @@ export class OnFootHost {
     if (edge === 'enter') {
       if (!ctx) throw new Error('Entering ON_FOOT needs a context');
       if (this.ctx) this.hooks?.exit('relocate');
-      this.ctx = ctx;
-      this.hooks?.enter(ctx);
+      // The hooks always see a decided power: none given means none (fail closed).
+      this.ctx = { ...ctx, power: ctx.power ?? null, restored: ctx.restored ?? null };
+      this.hooks?.enter(this.ctx);
     } else if (edge === 'exit' && this.ctx) {
       this.ctx = null;
       this.hooks?.exit(reason);

@@ -188,8 +188,9 @@ export function validateSave(raw: unknown): Result {
     const heading = vec(p.heading, 3, 1.01);
     if (!psys || !heading || !isNum(p.pitch) || Math.abs(p.pitch) > 1.6) return { ok: false, error: 'Bad player pose.' };
     if (Math.abs(Math.hypot(heading[0], heading[1], heading[2]) - 1) > 1e-3) return { ok: false, error: 'Bad player heading.' };
-    // The player must be near the ship (they walked out of it) and on its body.
-    if (Math.hypot(psys[0] - sys[0], psys[1] - sys[1], psys[2] - sys[2]) > 20000) return { ok: false, error: 'Player too far from the ship.' };
+    // The player must be on the ship's body (the ship was checked above). No
+    // distance to the ship is imposed: powers carry the player anywhere on the
+    // body, and First Light targets lie tens of kilometres from the landing site.
     if (!nearBody(psys, bodyId!)) return { ok: false, error: 'Player too far from the body.' };
     // The field is required; its value was validated above.
     if (!('abilityState' in p)) return { ok: false, error: 'Bad ability state.' };
@@ -285,8 +286,10 @@ export class SaveStore {
   previous: SlotState = { data: null, error: null, present: false };
   /** A save from an older schema, kept read-only (null when there is none). */
   legacy: LegacySave | null = null;
-  /** Why persistence is not working (null when saves work). */
+  /** Why persistence is not working, or why the last snapshot was not written (null when saves work). */
   failure: string | null = null;
+  /** The last write was refused because its snapshot would not load (storage itself works). */
+  refused = false;
 
   constructor(private readonly kv: KvStore | null) {
     if (!kv) this.failure = 'Browser storage is unavailable.';
@@ -319,6 +322,14 @@ export class SaveStore {
   /** Write a snapshot; resolves true only after the transaction completed. */
   async write(data: SaveData): Promise<boolean> {
     if (!this.kv) return false;
+    // A snapshot the loader would refuse never replaces the latest save: it
+    // would read back as corrupt and cost the progress since the last good one.
+    const check = validateSave(data);
+    this.refused = !check.ok;
+    if (!check.ok) {
+      this.failure = `The current state cannot be saved: ${check.error}`;
+      return false;
+    }
     try {
       if (this.latest.present && !this.latest.data) {
         // Preserve a corrupt latest record before replacing it.
