@@ -4,7 +4,8 @@
 
 import type { Game } from '../game/Game';
 import type { OnFootContext, OnFootExitReason, OnFootHooks } from '../game/onFoot';
-import { BODIES, type BodyId } from '../world/bodies';
+import type { WalkInput } from './Player';
+import { BODIES, isBodyId } from '../world/bodies';
 import { AbilityController } from '../abilities/AbilityController';
 import { bodyPower } from '../abilities/catalog';
 import { SIM_DT } from '../game/config';
@@ -29,10 +30,7 @@ export class PlayerRuntime implements OnFootHooks {
   private readonly world: TransitionWorld;
 
   constructor(private readonly game: Game) {
-    this.abilities = new AbilityController(game.hud, (id) => {
-      const def = (BODIES as Record<string, (typeof BODIES)[BodyId] | undefined>)[id];
-      return def ? bodyPower(def) : 'walk';
-    });
+    this.abilities = new AbilityController(game.hud, (id) => (isBodyId(id) ? bodyPower(BODIES[id]) : 'walk'));
     this.exitsSeen = game.counters.exits;
     this.world = {
       shipToLocal: (v, out) => game.ship.localToWorld(v, out),
@@ -62,7 +60,7 @@ export class PlayerRuntime implements OnFootHooks {
     this.start('exit');
   }
 
-  step(dt: number): boolean {
+  step(dt: number, _input: WalkInput): boolean {
     const g = this.game;
     const p = g.player;
     this.checkExit();
@@ -137,21 +135,10 @@ export function visualClock(simTime: number, alpha: number, last: number | null)
 
 const runtimes = new WeakMap<Game, PlayerRuntime>();
 
-/** On-foot keys outside Game's own key set, latched into its input as edge presses. */
-const EXTRA_KEYS = new Set(['KeyC']);
-
 export function installPlayer(game: Game): void {
   const r = new PlayerRuntime(game);
   runtimes.set(game, r);
   game.onFoot.install(r);
-  if (typeof window !== 'undefined') {
-    window.addEventListener('keydown', (e) => {
-      if (!EXTRA_KEYS.has(e.code) || e.repeat || !game.input.active) return;
-      const t = e.target;
-      if (t instanceof HTMLElement && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
-      game.input.press(e.code);
-    });
-  }
 }
 
 /** The runtime installed for a game (test hooks, diagnostics). */

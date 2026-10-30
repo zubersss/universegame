@@ -131,7 +131,7 @@ describe('ability controller (walk only in M1)', () => {
     host.install(c);
     host.transition('LANDED', 'ON_FOOT', { body: 'cairn' }, 'relocate');
     expect(c.bodyId).toBe('cairn');
-    expect(host.step(1 / 60)).toBe(false); // walking: Game's walk controller keeps the character
+    expect(host.step(1 / 60, { forward: 0, right: 0, sprint: false, jump: false, yaw: 0, pitch: 0 })).toBe(false); // walking: Game's walk controller keeps the character
     host.transition('ON_FOOT', 'LANDED', null, 'board');
     expect(c.bodyId).toBeNull();
     expect(c.state).toBe('walk');
