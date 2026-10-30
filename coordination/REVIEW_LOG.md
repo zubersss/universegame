@@ -73,3 +73,12 @@ Signals: none. BLENDER queue reordered: B-022 (terrain revision), B-019 (legs) a
 User: none.
 L-007: tests written; run attempted 12:12, blocked by heavy_blender.lock (backgrounds/mars) — retry next cycle. Note: unity_test.ps1 takes the lock itself; LEAD must not pre-create heavy_lead.lock before calling it.
 Queue: UNITY 12 Ready; BLENDER 13 Ready.
+
+## Cycle 8 · 2026-10-30 12:45
+Checked: git log 12:12–12:39 (U-007 seam fix, U-009, U-011, B-011 v1, B-022); UNITY_STATUS, BLENDER_STATUS; reports/unity/capture_space_2026-10-30.png, capture_earth_player_2026-10-30.png; blender/preview/terrain__earth__grass_demo.png (grass on upward edges only); tests_2026-10-30.md (EditMode 93/93; latest PlayMode run fails 5 tests on "no audio listeners" log from in-progress U-016, not from accepted commits).
+Moved: U-009 → Done (089657b); U-011 → Done (d6831d4); B-022 → Done (fb0c1dc); U-016 → In Progress. B-011 v1 (flat silhouettes) stays in rework with B-010.
+Decided: D-022 (Sun k_sun = 0.80; Mercury reachable with Mk1; Bible §4.4 → v1.3); D-023 (P-10…P-13: jetpack input, boost burn, HLSL shaders, fixed angles).
+Signals: watch the "no audio listeners" PlayMode failures. If they persist in U-016's ready-for-review commit, it fails the console-clean check.
+User: none.
+L-007: not run; heavy_unity.lock active at 12:40. Retry next cycle.
+Queue: added U-022 (k_sun, space background + glows). Ready: UNITY 10, BLENDER 11.

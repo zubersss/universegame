@@ -1,7 +1,7 @@
 # MERIDIAN — Project Bible (single source of truth)
 
 Owner: LEAD. Workers read; only LEAD edits. Changes are logged in `coordination/DECISIONS.md`.
-Version: 1.2 (Cinemachine pinned, cycle 4). The Lead bumps the version on every edit.
+Version: 1.3 (Sun well k_sun, cycle 8). The Lead bumps the version on every edit.
 
 Sections: 1 Vision · 2 Setting and story · 3 The solar system in game · 4 Physics and
 numbers · 5 Views and transitions · 6 Controls · 7 The eight planets · 8 Systems →
@@ -171,8 +171,8 @@ usable only below the Datum where the air is dense enough.
 Inside a planet's Gravity Well (r ≤ 4R) the ship is pulled toward the center with
 `a(r) = k_well × g_planet × (R / r)²`, `k_well = 1.63` (chosen so Earth pulls 1.0 u/s² at its
 well edge). At the Atmosphere Ring Earth pulls 11.1 u/s², Jupiter 28.1 u/s². Top-down
-thrust: Mk1 30 u/s², Mk2 45, Mk3 70; a Mk1 ship always escapes any well from outside 1.6R.
-The Sun's well pulls with g = 274 m/s² in the same formula and kills the ship inside 1.2R.
+thrust: Mk1 30 u/s², Mk2 45, Mk3 70; a Mk1 ship always escapes any planet's well from outside 1.6R and the Sun's from outside r ≈ 810 (≈ 2.7 R☉).
+The Sun's well pulls with g = 274 m/s² but uses its own k_sun = 0.80 instead of k_well (D-022): 14.9 u/s² at Mercury's orbit (half of Mk1 thrust), 30 u/s² at r ≈ 810, 152 u/s² at 1.2R; it kills the ship inside 1.2R (360).
 
 ---
 

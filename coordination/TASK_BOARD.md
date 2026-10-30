@@ -141,6 +141,13 @@ Files: tools/unity_test.ps1, Assets/_Game/Tests/LeadQA.meta
 Depends: —
 Lead notes: Done d185084 (cycle 7): PlayMode runs MERIDIAN.Tests.LeadQA by default with a per-assembly report; LeadQA.meta committed.
 
+### U-022 · UNITY · Ready · M1
+Goal: Top-down follow-ups from the U-011 review: apply the Sun's k_sun = 0.80 (D-022); draw `backgrounds/space/layer0..2` as parallax behind the system (layer0 slowest) and `planets/sun/glow` + `planets/*/glow` behind discs (B-003/B-005 handoffs: glow world width 2.56 × R planets, 3.2 × R Sun).
+Accept: EditMode test: Sun pull at r = 1150 is 14.9 ± 0.1 u/s² and equals Mk1 thrust at r ≈ 810; PlayMode test: a Mk1 ship parked at Mercury's ring escapes to r > 1,300 with full thrust outward; capture_space shows stars + Milky Way band and planet glows; draw calls stay within §11.1.
+Files: Assets/_Game/Code/Runtime/Space/, Assets/_Game/Scenes/Space.unity, Tests/
+Depends: U-011
+Lead notes: Cycle 8. The space capture showed a pure-black background although B-005's layers have been Done since cycle 6.
+
 ### U-007 · UNITY · Done · M1
 Goal: Terrain v1: 32×32 chunks, `IWorldGenerator`, `SolidWorldGenerator` (Earth, Mars), streaming, pooling, RuleTiles with normal maps, per-chunk collision.
 Accept: Earth world streams at ≤ 12 ms frame on the dev laptop; chunk apply ≤ 2 ms per frame; only chunks within 2 of the camera resident (PlayMode test); seams invisible at ortho size 9.
@@ -155,12 +162,12 @@ Files: Assets/_Game/Code/Runtime/Terrain/TerrainEdits.cs, Code/Runtime/Rig/
 Depends: U-007
 Lead notes: Done f15f617 (cycle 7): EditMode 57/57, PlayMode 4/4; dig/place diffs survive save → load. Rig reach 5 m and no inventory check until M3 accepted (D-021).
 
-### U-009 · UNITY · In Progress · M1
+### U-009 · UNITY · Done · M1
 Goal: Player controller with real gravity.
 Accept: walk 4.0 / sprint 6.5 m/s; v₀ 7.00 m/s; jump height within ±3% of Bible §4.2 on Earth, Mars, Jupiter (test scenes with each `PlanetConfig`); fall damage 12/24 m/s thresholds; terminal velocity per planet; coyote 0.10 s, buffer 0.12 s; Jetpack Mk1 14 m/s² for 3 s; Input System map per Bible §6.
 Files: Assets/_Game/Code/Runtime/Player/, Assets/_Game/Settings/Input/, Tests/Unit/PlayerPhysicsTests.cs
 Depends: U-004
-Lead notes: —
+Lead notes: Done 089657b (cycle 8): jump heights Earth 2.497 / Mars 6.586 / Jupiter 0.988 m, walk/sprint, terminal, fall damage, Jetpack Mk1; EditMode 75/75, PlayMode 13/13; capture_earth_player OK. Jetpack input per D-023.
 
 ### U-010 · UNITY · Ready · M1
 Goal: Side-view ship: board/exit, Mk1 thrust, launch fuel burn, landing rules, Escape Line band + HUD marker.
@@ -169,12 +176,12 @@ Files: Assets/_Game/Code/Runtime/Ship/, Prefabs/Ship/Pilgrim.prefab, Tests/Unit/
 Depends: U-009
 Lead notes: —
 
-### U-011 · UNITY · Ready · M1
+### U-011 · UNITY · Done · M1
 Goal: Top-down space: Sun, 8 planet discs (placeholder `PlanetDisc`), moons, belt, Gravity Wells, Atmosphere Rings, cruise/boost ship, HUD, camera.
 Accept: positions and radii per Bible §3; well pull at Earth's 4R edge = 1.00 u/s² ±1% (EditMode test on the formula); cruise 80 / boost 160 u/s; Earth → Mars flight works; ≤ 80 draw calls.
 Files: Assets/_Game/Code/Runtime/Space/, Assets/_Game/Shaders/PlanetDisc.shadergraph, Scenes/Space.unity
 Depends: U-004
-Lead notes: —
+Lead notes: Done d6831d4 (cycle 8): layout §3, wells (Earth edge 1.00, Earth ring 11.1, Jupiter ring 28.1 u/s²), cruise/boost, Earth→Mars 8.0 s, 16 draw calls; EditMode 88/88, PlayMode 15/15. Mercury/Sun conflict resolved by D-022; background + glows + k_sun follow up in U-022.
 
 ### U-012 · UNITY · Ready · M1
 Goal: Both transitions per Bible §5.2–5.3.
@@ -204,7 +211,7 @@ Files: Assets/_Game/UI/, Code/Runtime/UI/
 Depends: U-010, U-011
 Lead notes: —
 
-### U-016 · UNITY · Ready · M1
+### U-016 · UNITY · In Progress · M1
 Goal: Placeholder audio set and `AudioDirector`.
 Accept: CC0 SFX for jump, land, dig, place, thrust, UI click; one ambient loop; every file's source and license in `docs/credits/unity.md`; Vorbis; ≤ 10 MB total.
 Files: Assets/_Game/Audio/, Code/Runtime/Audio/, docs/credits/unity.md
@@ -231,7 +238,7 @@ Goal: `Sprite_LitEmissive` Shader Graph material (Bible §10.5): Sprite-Lit with
 Accept: lit preview of `props/common/calibration` shows the stripe at its emission color under zero point light; `ships/pilgrim/side` portholes and engine glow; `planets/sun/surface` self-lit; ArtImporter assigns the material automatically (EditMode test).
 Files: Assets/_Game/Code/Runtime/Rendering/, Assets/_Game/Settings/Rendering/, Code/Editor/ArtImporter.cs, Tests/
 Depends: U-005, U-006
-Lead notes: PRIORITY: next after the current U-008 step. Your P-08, promoted in cycle 6.
+Lead notes: PRIORITY: next after the current U-008 step. Your P-08, promoted in cycle 6. (Cycle 8) Write it as hand-written HLSL in Assets/_Game/Shaders/ like PlanetDisc (D-023).
 
 ### U-020 · UNITY · Ready · M1
 Goal: Terrain variants: when a sheet has tiles in slots 47–62, tile 46 picks one of them by a stable hash of (x, y) (D-020).
@@ -321,12 +328,12 @@ Files: Assets/_Game/Art/backgrounds/mars/
 Depends: B-010
 Lead notes: — (Cycle 7) Same §9 rule as the B-010 rework: real rendered rocks/dunes with internal shading, no flat-filled silhouettes.
 
-### B-022 · BLENDER · Ready · M2
+### B-022 · BLENDER · Done · M2
 Goal: Terrain sheet revision for all 10 materials: fill slots 47–62 with 16 variants of tile 46; grass rim only on upward-facing exposed edges (sides/underside show soil with a darker rim) (D-020).
 Accept: contact sheets + demo patches show no visible 128 px repetition on a 16×8 interior block; grass demo shows no grass on cave ceilings or vertical walls; tiles 0–46 still join seamlessly; same file names, so no Unity change is needed beyond U-020.
 Files: blender/scripts/gen_terrain.py, Assets/_Game/Art/terrain/
 Depends: B-007, B-008
-Lead notes: Your variant proposal approved (D-020). Do this before B-009 if the character sheet isn't already rendering. It affects every planet's look in M1.
+Lead notes: Done fb0c1dc (cycle 8): grass rim only on upward edges; 16 interior variants per sheet; joins seamless in demos.
 
 ### B-019 · BLENDER · Ready · M2
 Goal: Pilgrim landing legs: `ships/pilgrim/side_legs` (same framing, pivot, and size as `side`, with legs extended below the skids).
