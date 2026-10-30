@@ -134,28 +134,28 @@ Files: tools/unity_art_preview.ps1, Assets/_Game/Code/Editor/ArtPreview.cs, Asse
 Depends: U-005
 Lead notes: Done 5a75d90 (cycle 6): PlayMode capture works; calibration lit upper-right; previews in reports/unity/previews_2026-10-30.md.
 
-### U-021 · UNITY · Ready · M0
+### U-021 · UNITY · Done · M0
 Goal: `tools/unity_test.ps1 PlayMode` also runs `MERIDIAN.Tests.LeadQA` (and EditMode runs it if it ever has EditMode tests).
 Accept: `-assemblyNames "MERIDIAN.Tests.Play;MERIDIAN.Tests.LeadQA"` (or an `-Assembly` parameter defaulting to both); the report lists LeadQA results; commit the generated `Assets/_Game/Tests/LeadQA.meta` (folder meta in your Tests/ folder).
 Files: tools/unity_test.ps1, Assets/_Game/Tests/LeadQA.meta
 Depends: —
-Lead notes: PRIORITY: small, gates L-007 and the M0 exit (L-008). LEAD added `Assets/_Game/Tests/LeadQA/` (asmdef + SmokeTests.cs) in cycle 6.
+Lead notes: Done d185084 (cycle 7): PlayMode runs MERIDIAN.Tests.LeadQA by default with a per-assembly report; LeadQA.meta committed.
 
-### U-007 · UNITY · Review · M1
+### U-007 · UNITY · Done · M1
 Goal: Terrain v1: 32×32 chunks, `IWorldGenerator`, `SolidWorldGenerator` (Earth, Mars), streaming, pooling, RuleTiles with normal maps, per-chunk collision.
 Accept: Earth world streams at ≤ 12 ms frame on the dev laptop; chunk apply ≤ 2 ms per frame; only chunks within 2 of the camera resident (PlayMode test); seams invisible at ortho size 9.
 Files: Assets/_Game/Code/Runtime/Terrain/, Assets/_Game/Prefabs/Terrain/
 Depends: U-004, U-005
-Lead notes: Review (cycle 6). Tests pass (EditMode 57/57, PlayMode 3/3 ×2) under D-019. One check left: capture the streamed Earth surface at ortho size 9 with ArtPreviewCapture to logs/preview_terrain_earth_ortho9.png (a 2×1 chunk window with a cave) and list it in your status so LEAD can verify seams.
+Lead notes: Done 2007876 + 015407a + 328c616 (cycle 7): tests per D-019; ortho-9 capture (reports/unity/capture_earth_surface_2026-10-30.png) shows no seams.
 
-### U-008 · UNITY · In Progress · M1
+### U-008 · UNITY · Done · M1
 Goal: Dig and place with diffs.
 Accept: Beam removes a tile and spawns its item; Builder places a tile; diffs recorded per chunk; PlayMode test: dig → save → load → tile still absent.
 Files: Assets/_Game/Code/Runtime/Terrain/TerrainEdits.cs, Code/Runtime/Rig/
 Depends: U-007
-Lead notes: —
+Lead notes: Done f15f617 (cycle 7): EditMode 57/57, PlayMode 4/4; dig/place diffs survive save → load. Rig reach 5 m and no inventory check until M3 accepted (D-021).
 
-### U-009 · UNITY · Ready · M1
+### U-009 · UNITY · In Progress · M1
 Goal: Player controller with real gravity.
 Accept: walk 4.0 / sprint 6.5 m/s; v₀ 7.00 m/s; jump height within ±3% of Bible §4.2 on Earth, Mars, Jupiter (test scenes with each `PlanetConfig`); fall damage 12/24 m/s thresholds; terminal velocity per planet; coyote 0.10 s, buffer 0.12 s; Jetpack Mk1 14 m/s² for 3 s; Input System map per Bible §6.
 Files: Assets/_Game/Code/Runtime/Player/, Assets/_Game/Settings/Input/, Tests/Unit/PlayerPhysicsTests.cs
@@ -300,26 +300,47 @@ Files: Assets/_Game/Art/terrain/mars/
 Depends: B-007
 Lead notes: Done (cycle 6): 47-blob sheets join seamlessly in the demos; LFS OK. Follow-ups (variants, grass on upward edges only) are B-022, not a reopen.
 
-### B-009 · BLENDER · In Progress · M2
+### B-009 · BLENDER · Done · M2
 Goal: Player character `characters/surveyor` frame sheet.
 Accept: 256 px frames, standard character set ≤ 48 frames, color + normal + emission (visor, lamp), `.json` manifest, bottom-center pivot, right-facing.
 Files: blender/sources/characters/surveyor.blend, Assets/_Game/Art/characters/surveyor/
 Depends: B-002
-Lead notes: —
+Lead notes: Done 489a964 (cycle 7): key, 7-column sheet within 2048, 46 frames / 10 clips, color+normal+emission, LFS. Polish scheduled as B-023.
 
-### B-010 · BLENDER · Ready · M2
+### B-010 · BLENDER · In Progress · M2
 Goal: Earth parallax `backgrounds/earth/layer0..2` (temperate biome).
 Accept: three 2048×1024 layers tileable in x; haze gradient readable; palette per Bible §9.
 Files: Assets/_Game/Art/backgrounds/earth/
 Depends: B-002
-Lead notes: —
+Lead notes: FAILED review (cycle 7): §9 Forbidden "anything that reads as a cartoon". layer2 (and layer1) trees are flat-filled lollipop/cone silhouettes with a uniform green ground fill. Fix: build real 3D trees in Blender (geometry nodes: curved trunk + branch curves, instanced leaf-cluster meshes with noise displacement and per-cluster hue/value variation; conifers as stacked drooping whorls) and a ground of instanced grass/shrub clumps, lit by a sun from upper-right, rendered with EEVEE + volumetric haze per layer. Leaf masses must show internal light/shadow and broken edges; no flat fills. Keep tiling, sizes, seeds. layer0 can keep its sky/range if it passes the same rule. Redo before B-011 uses the same approach for Mars.
 
-### B-011 · BLENDER · Ready · M2
+### B-011 · BLENDER · In Progress · M2
 Goal: Mars parallax `backgrounds/mars/layer0..2`.
 Accept: as B-010 with the Mars palette and butterscotch sky.
 Files: Assets/_Game/Art/backgrounds/mars/
 Depends: B-010
-Lead notes: —
+Lead notes: — (Cycle 7) Same §9 rule as the B-010 rework: real rendered rocks/dunes with internal shading, no flat-filled silhouettes.
+
+### B-022 · BLENDER · Ready · M2
+Goal: Terrain sheet revision for all 10 materials: fill slots 47–62 with 16 variants of tile 46; grass rim only on upward-facing exposed edges (sides/underside show soil with a darker rim) (D-020).
+Accept: contact sheets + demo patches show no visible 128 px repetition on a 16×8 interior block; grass demo shows no grass on cave ceilings or vertical walls; tiles 0–46 still join seamlessly; same file names, so no Unity change is needed beyond U-020.
+Files: blender/scripts/gen_terrain.py, Assets/_Game/Art/terrain/
+Depends: B-007, B-008
+Lead notes: Your variant proposal approved (D-020). Do this before B-009 if the character sheet isn't already rendering. It affects every planet's look in M1.
+
+### B-019 · BLENDER · Ready · M2
+Goal: Pilgrim landing legs: `ships/pilgrim/side_legs` (same framing, pivot, and size as `side`, with legs extended below the skids).
+Accept: identical canvas and pivot to `side` so UNITY can swap without offset (diff of the two pivots = 0); legs read clearly at camera size 9; color, normal, emission.
+Files: Assets/_Game/Art/ships/pilgrim/, blender/scripts/
+Depends: B-006
+Lead notes: Bible §4.3: legs deploy below 10 m altitude. Your cycle-5 proposal, promoted.
+
+### B-023 · BLENDER · Ready · M2
+Goal: Surveyor v2 polish: replace primitive suit parts with a sculpted soft suit (fabric folds at joints, seams, chest unit, backpack straps), visor with reflection and emission readouts; fix the death end pose (legs grounded).
+Accept: same key, sheet layout, frame count, clips, and pivot as v1 (UNITY needs no change); contact sheet reads as a real suited person at 60 px/m, not a mannequin (§9); lit preview via tools/unity_art_preview.ps1.
+Files: blender/scripts/build_surveyor.py, blender/sources/characters/surveyor.blend, Assets/_Game/Art/characters/surveyor/
+Depends: B-009
+Lead notes: Scheduled polish for the M2 exit (cycle 7), not a reopen of B-009. Do it after B-022, B-010 rework, B-011, B-019.
 
 ### B-012 · BLENDER · Ready · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
@@ -363,26 +384,12 @@ Files: Assets/_Game/Art/props/space/, Assets/_Game/Art/planets/luna/
 Depends: B-002
 Lead notes: —
 
-### B-022 · BLENDER · Ready · M2
-Goal: Terrain sheet revision for all 10 materials: fill slots 47–62 with 16 variants of tile 46; grass rim only on upward-facing exposed edges (sides/underside show soil with a darker rim) (D-020).
-Accept: contact sheets + demo patches show no visible 128 px repetition on a 16×8 interior block; grass demo shows no grass on cave ceilings or vertical walls; tiles 0–46 still join seamlessly; same file names, so no Unity change is needed beyond U-020.
-Files: blender/scripts/gen_terrain.py, Assets/_Game/Art/terrain/
-Depends: B-007, B-008
-Lead notes: Your variant proposal approved (D-020). Do this before B-009 if the character sheet isn't already rendering. It affects every planet's look in M1.
-
 ### B-018 · BLENDER · Ready · M2
 Goal: Outer and inner planet discs for the space map: `planets/{mercury,venus,jupiter,saturn,uranus,neptune}/surface` (+ `glow` where an atmosphere exists: venus, jupiter, saturn, uranus, neptune) and `planets/saturn/rings` (top-down ring texture, transparent).
 Accept: contract §4 sizes (surface 2048×1024 equirect, wraps in x; glow 512×512 with disc edge at r = 200 px as for Earth); public-domain sources (NASA/JPL/USGS global mosaics) logged in `docs/credits/blender.md`, or procedural bands where no mosaic exists; Venus shows the cloud tops, not the radar surface; contact sheets with a 2× wrap row.
 Files: Assets/_Game/Art/planets/<planet>/, blender/sources/planets/<planet>/
 Depends: B-002
 Lead notes: Replaces UNITY's placeholders for the six remaining planets (U-005 list). Rings: propose the size and ring-inner/outer radii in px in your status; UNITY draws them at Saturn's ring radius 220 units (Bible §3).
-
-### B-019 · BLENDER · Ready · M2
-Goal: Pilgrim landing legs: `ships/pilgrim/side_legs` (same framing, pivot, and size as `side`, with legs extended below the skids).
-Accept: identical canvas and pivot to `side` so UNITY can swap without offset (diff of the two pivots = 0); legs read clearly at camera size 9; color, normal, emission.
-Files: Assets/_Game/Art/ships/pilgrim/, blender/scripts/
-Depends: B-006
-Lead notes: Bible §4.3: legs deploy below 10 m altitude. Your cycle-5 proposal, promoted.
 
 ### B-020 · BLENDER · Ready · M2
 Goal: Earth POI props: `props/earth/{launch_gantry,launch_tower_ruin,archive_door,archive_terminal,beacon}` for the abandoned coastal launch complex and the Survey Archive (Bible §7.1).

@@ -64,3 +64,12 @@ Decided: D-019 (chunk-apply measurement; UNITY had loosened its own test, now ra
 Signals: worker changed an acceptance threshold without LEAD approval (U-007 test). Response: ratified as D-019 with a no-load condition; reminder that acceptance criteria change only through LEAD.
 User: none.
 Queue: added U-019 (Sprite_LitEmissive, P-08), U-020 (terrain variants), U-021 (test script runs LeadQA), B-022 (terrain revision). Ready: UNITY 13, BLENDER 13. Heavy lock held by BLENDER since 11:39 (fresh).
+
+## Cycle 7 · 2026-10-30 12:15
+Checked: git log 11:43–11:56 (U-007 evidence, U-008, U-021, B-009, B-010); UNITY_STATUS, BLENDER_STATUS; reports/unity/capture_earth_surface_2026-10-30.png (no seams at ortho 9); blender/preview/surveyor_frames.png; backgrounds__earth__layer2_contact.png; Bible §9.
+Moved: U-007 → Done; U-008 → Done (f15f617); U-021 → Done (d185084); B-009 → Done (489a964); B-010 → In Progress (FAILED: cartoon-like flat tree silhouettes, §9 Forbidden; concrete 3D-tree approach in Lead notes); U-009, B-011 → In Progress.
+Decided: D-021 (rig reach 5 m, no inventory check until M3, 64 pooled drops).
+Signals: none. BLENDER queue reordered: B-022 (terrain revision), B-019 (legs) ahead of icons/props; B-023 (surveyor polish) added.
+User: none.
+L-007: tests written; run attempted 12:12, blocked by heavy_blender.lock (backgrounds/mars) — retry next cycle. Note: unity_test.ps1 takes the lock itself; LEAD must not pre-create heavy_lead.lock before calling it.
+Queue: UNITY 12 Ready; BLENDER 13 Ready.
