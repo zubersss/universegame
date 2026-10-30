@@ -99,8 +99,9 @@ DEATH = [dict(torso=-10, head=-10, hip_n=10, kn_n=26, hip_f=6, kn_f=24, sh_n=-20
          dict(rot=-32, torso=-8, head=-10, hip_n=40, kn_n=60, hip_f=36, kn_f=58, sh_n=20, el_n=40, sh_f=40, el_f=30, x=0.02),
          dict(rot=-60, torso=-4, head=-6, hip_n=55, kn_n=70, hip_f=50, kn_f=66, sh_n=40, el_n=40, sh_f=50, el_f=30, x=-0.03),
          # v2 (B-023): end lying flat on the back, legs on the ground (not raised); x auto-centred.
-         dict(rot=-80, torso=0, head=-4, hip_n=22, kn_n=34, hip_f=16, kn_f=30, sh_n=30, el_n=30, sh_f=40, el_f=30, center=True),
-         dict(rot=-89, torso=0, head=-8, hip_n=8, kn_n=14, hip_f=4, kn_f=10, sh_n=18, el_n=20, sh_f=26, el_f=22, center=True)]
+         dict(rot=-80, torso=0, head=-4, hip_n=22, kn_n=34, hip_f=16, kn_f=30, sh_n=8, el_n=10, sh_f=12, el_f=10, center=True),
+         dict(rot=-89, torso=0, head=-8, hip_n=8, kn_n=14, hip_f=4, kn_f=10, sh_n=-4, el_n=4, sh_f=2, el_f=4, center=True)]
+#        (arms lie along the body in the end pose: "forward" points up when lying on the back)
 
 
 def clip_pose(name, i):
@@ -219,7 +220,7 @@ def soft_limb(name, top, bottom, radii, mat):
     return ob
 
 
-def fabric_material(name, base, dark, folds=0.35, k=1.0):
+def fabric_material(name, base, dark, folds=0.2, k=1.0):
     """Suit fabric: weave mottling, seam lines and horizontal wrinkle bands (bump only, so the
     colour stays unlit albedo). Object space; limbs are built upright, so bands wrap them."""
     base = tuple(int(c * k) for c in base)
@@ -240,12 +241,14 @@ def fabric_material(name, base, dark, folds=0.35, k=1.0):
     mix.inputs[6].default_value = lin(base); mix.inputs[7].default_value = lin(dark)
     col = mix.outputs[2]
     # Wrinkles: Z bands, distorted by noise; seams: the sharp crest of a sparser Z wave.
+    # Blender's wave period is ~2*pi / (20 * scale) m: scale 3.5 -> ~9 cm wrinkles, 0.35 -> ~0.9 m
+    # seams (about one per limb). Denser bands read as bandage wrap.
     wr = N.new("ShaderNodeTexWave"); wr.wave_type = "BANDS"; wr.bands_direction = "Z"
-    wr.inputs["Scale"].default_value = 14.0; wr.inputs["Distortion"].default_value = 6.0
+    wr.inputs["Scale"].default_value = 3.5; wr.inputs["Distortion"].default_value = 10.0
     wr.inputs["Detail"].default_value = 2.0
     L.new(tc.outputs["Object"], wr.inputs["Vector"])
     sm = N.new("ShaderNodeTexWave"); sm.wave_type = "BANDS"; sm.bands_direction = "Z"
-    sm.inputs["Scale"].default_value = 3.0
+    sm.inputs["Scale"].default_value = 0.35
     L.new(tc.outputs["Object"], sm.inputs["Vector"])
     seam = N.new("ShaderNodeMapRange")
     seam.inputs["From Min"].default_value = 0.93; seam.inputs["From Max"].default_value = 0.99
@@ -343,7 +346,8 @@ def build(out_path=DEFAULT_OUT):
 
     head = empty("head", (0, 0, HIP_Z + NECK_Z), torso, coll)
     hz = HIP_Z + NECK_Z + 0.13
-    attach(ball("helmet", 0.15, (0, 0, hz), M["suit_n"]), head, coll)
+    shell = suit("helmet_shell", (214, 210, 200), (186, 180, 168))      # hard shell, not fabric
+    attach(ball("helmet", 0.15, (0, 0, hz), shell), head, coll)
     attach(ball("visor", 0.142, (0.035, 0, hz - 0.005), visor, scale=(1.0, 0.86, 0.72)), head, coll)
     for j, (dz, w) in enumerate(((0.035, 0.05), (0.015, 0.035), (-0.005, 0.045))):   # HUD readouts
         attach(rbox(f"hud_{j}", (0.004, w, 0.008), (0.174, -0.035, hz + dz), hud, 0.0015), head, coll)

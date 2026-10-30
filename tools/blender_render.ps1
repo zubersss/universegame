@@ -6,7 +6,8 @@
   A key has three parts (props/common/calibration); one or two parts is a category prefix.
   Full renders above 512 px or of more than one asset are heavy jobs: they honor
   HeavyJobLock (CLAUDE.md rule 6) and refuse to start while Unity's Editor or another
-  Blender runs. Exit codes: 0 ok, 1 render/contract failure, 2 bad usage, 3 HeavyJobLock busy.
+  Blender runs, or below 1.5 GB free RAM (D-026). Exit codes: 0 ok, 1 render/contract
+  failure, 2 bad usage, 3 HeavyJobLock busy (lock, process or memory gate).
 #>
 param(
     [Parameter(Mandatory = $true, Position = 0)][string]$Target,
@@ -57,6 +58,9 @@ if ($heavy) {
     $procs = Get-Process unity, blender -ErrorAction SilentlyContinue |
         Where-Object { $_.Path -like '*\Hub\Editor\*' -or $_.Path -like '*Blender Foundation*' }
     if ($procs) { Fail 3 "HeavyJobLock busy: running $(($procs | ForEach-Object { $_.ProcessName }) -join ', ')" }
+    # D-026 memory gate: no heavy job below 1.5 GB free RAM.
+    $freeMB = [int]((Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1024)
+    if ($freeMB -lt 1500) { Fail 3 "HeavyJobLock memory gate: $freeMB MB free (< 1500, D-026)" }
     Set-Content -Path $lock -Value "$((Get-Date).ToString('s')) blender_render $Target" -Encoding utf8
 }
 
