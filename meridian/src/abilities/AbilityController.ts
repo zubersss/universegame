@@ -2,7 +2,8 @@ import { Vector3 } from 'three';
 import type { OnFootContext, OnFootExitReason } from '../game/onFoot';
 import type { AbilitySlot, WarningSeverity } from '../ui/Hud';
 import { abilityFor, primitivesOf } from './catalog';
-import { createPower, type Power, type PowerWorld } from './powers';
+import { createPower, FlightPower, SpeedPower, type Power, type PowerWorld } from './powers';
+import type { PowerMotion } from '../avatar/AvatarAnimator';
 import { readAbilitySave, type AbilitySave } from './save';
 import { transitionBlocked, type AbilityConfig, type AbilityId, type AbilityState, type BodyPower, type Primitive, type TransitionContext } from './types';
 
@@ -161,6 +162,15 @@ export class AbilityController {
 
   snapshot(): AbilitySave {
     return { abilityState: this.state, unlocked: [...this.unlocked].sort() };
+  }
+
+  /** How a power is moving the body (avatar pose, camera), or null when walking. */
+  motion(): PowerMotion | null {
+    const rt = this.runtime;
+    if (!rt || this.state === 'walk') return null;
+    if (rt instanceof FlightPower) return { mode: 'flight', speed: rt.flight.vel.length() };
+    if (rt instanceof SpeedPower) return { mode: 'dash', speed: rt.speed.speed };
+    return null;
   }
 
   /** The readout for tests (LEAD's M2 journeys) and diagnostics. */

@@ -6,6 +6,7 @@ import { Avatar } from '../avatar/Avatar';
 import { CharacterCamera } from './CharacterCamera';
 import type { CameraRig } from '../render/CameraRig';
 import type { ScriptedPose } from './Transitions';
+import type { PowerMotion } from '../avatar/AvatarAnimator';
 
 const HALF = (WALK.height - 2 * WALK.radius) / 2; // capsule cylinder half-height
 /** Distance from the capsule center to the bottom of the feet. */
@@ -293,12 +294,12 @@ export class Player {
    * Per rendered frame: place the camera (third person by default) and pose
    * the explorer. dt = 0 freezes the animation (pause, loading).
    */
-  renderView(dt: number, alpha: number, rig: CameraRig, reducedMotion: boolean, scripted: ScriptedPose | null = null): void {
+  renderView(dt: number, alpha: number, rig: CameraRig, reducedMotion: boolean, scripted: ScriptedPose | null = null, power: PowerMotion | null = null): void {
     // A scripted transition (ladder) moves only the visible body; the camera
     // follows it from behind its direction of travel (clear of the hull),
     // swinging there at a limited rate and back to the aim afterwards.
     const feet = scripted ? _feet.copy(scripted.feet) : _feet.lerpVectors(this.prevPos, this.pos, alpha).addScaledVector(this.up, -FOOT_OFFSET);
-    this.view.update(dt, rig.camera, feet, this.up, this.heading, this.pitch, scripted ? 0 : this.speed, (f, d, m, r) => this.armCast(f, d, m, r), rig.terrainClearance, reducedMotion);
+    this.view.update(dt, rig.camera, feet, this.up, this.heading, this.pitch, scripted ? 0 : this.speed, (f, d, m, r) => this.armCast(f, d, m, r), rig.terrainClearance, reducedMotion, power);
     if (scripted && scripted.cameraWeight > 0) {
       // Blend toward the transition's cinematic camera (the climber's head may be inside the hull).
       const cam = rig.camera;
@@ -324,6 +325,7 @@ export class Player {
       lookPitch: this.pitch,
       faceDir: scripted ? scripted.faceDir : null,
       climb: scripted ? scripted.climb : null,
+      power,
     });
   }
 

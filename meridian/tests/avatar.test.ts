@@ -432,3 +432,50 @@ describe('explorer on curves', () => {
     }
   });
 });
+
+describe('explorer under a power', () => {
+  it('flies: hover stance at low speed, leaning forward about its middle at cruise, gait paused, feet re-planted after', () => {
+    const av = new Avatar(new Group(), null, FWD);
+    const dt = 1 / 60;
+    const feet = new Vector3(0, 30, 0);
+    const vel = new Vector3(0, 0, -90);
+    for (let i = 0; i < 180; i++) {
+      feet.addScaledVector(vel, dt);
+      av.update({ dt, feet: feet.clone(), up: UP, grounded: false, vVert: 0, moveVel: vel, lookHeading: FWD, lookPitch: 0, power: { mode: 'flight', speed: 90 } });
+    }
+    expect(av.anim.state).toBe('fly');
+    expect(av.bodyPitch).toBeCloseTo(1.2, 2);
+    // The body pitched about its middle: the hips stay near the capsule's centre.
+    const hips = av.rig.bones[B.hips].getWorldPosition(new Vector3());
+    expect(hips.distanceTo(feet.clone().add(new Vector3(0, 0.9, 0)))).toBeLessThan(0.35);
+    for (const v of av.anim.rot) expect(Number.isFinite(v)).toBe(true);
+    expect(av.anim.planted).toEqual([false, false]);
+    // Landing: the power ends, the body straightens and the feet are under it.
+    for (let i = 0; i < 90; i++) av.update({ dt, feet: feet.clone().setY(0), up: UP, grounded: true, vVert: 0, moveVel: new Vector3(), lookHeading: FWD, lookPitch: 0, power: null });
+    expect(av.bodyPitch).toBeLessThan(0.01);
+    expect(av.anim.state).not.toBe('fly');
+    av.dispose();
+  });
+
+  it('dashes at superspeed: stylised stride at a capped cadence, nothing counted as planted', () => {
+    const av = new Avatar(new Group(), null, FWD);
+    const dt = 1 / 60;
+    const feet = new Vector3();
+    const vel = new Vector3(0, 0, -110);
+    const before = av.slipSamples;
+    let maxStep = 0;
+    let last = av.anim.dashPhase;
+    for (let i = 0; i < 120; i++) {
+      feet.addScaledVector(vel, dt);
+      av.update({ dt, feet: feet.clone(), up: UP, grounded: true, vVert: 0, moveVel: vel, lookHeading: FWD, lookPitch: 0, power: { mode: 'dash', speed: 110 } });
+      const d = (av.anim.dashPhase - last + 1) % 1;
+      maxStep = Math.max(maxStep, d);
+      last = av.anim.dashPhase;
+    }
+    expect(av.anim.state).toBe('dash');
+    expect(maxStep).toBeLessThan(3.5 / 60 + 1e-9); // at most 3.4 strides a second
+    expect(av.slipSamples).toBe(before);
+    expect(av.anim.settleSteps).toBe(0);
+    av.dispose();
+  });
+});

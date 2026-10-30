@@ -14,7 +14,13 @@ import { B, BONE_NAMES, DIM } from './AvatarModel';
 // landing poses blend in on top. Everything is a pure function of the inputs
 // and the animation clock.
 
-export type AnimState = 'idle' | 'walk' | 'run' | 'jump' | 'fall' | 'land' | 'climb';
+export type AnimState = 'idle' | 'walk' | 'run' | 'jump' | 'fall' | 'land' | 'climb' | 'fly' | 'dash';
+
+/** A power moving the body: flight (hover to cruise) or superspeed (dash), with its speed (m/s). */
+export interface PowerMotion {
+  mode: 'flight' | 'dash';
+  speed: number;
+}
 
 /** Ground under a point, relative to the character's root plane. */
 export interface FootGround {
@@ -48,6 +54,8 @@ export interface AnimInput {
   lookPitch?: number;
   /** Ladder climbing: blend 0..1 into the climb pose, phase in climb cycles (one cycle = two rungs). */
   climb?: { blend: number; phase: number } | null;
+  /** A power moving the body (the ground gait pauses; feet re-plant afterwards). */
+  power?: PowerMotion | null;
 }
 
 const N = BONE_NAMES.length;
@@ -273,7 +281,13 @@ export class AvatarAnimator {
   landAmount = 0;
   landTimer = 0;
   /** Entries per state since creation (tests and diagnostics). */
-  readonly entries: Record<AnimState, number> = { idle: 0, walk: 0, run: 0, jump: 0, fall: 0, land: 0, climb: 0 };
+  readonly entries: Record<AnimState, number> = { idle: 0, walk: 0, run: 0, jump: 0, fall: 0, land: 0, climb: 0, fly: 0, dash: 0 };
+  /** Blend into the flight and dash poses (0..1) and the dash's own stride phase. */
+  fly = 0;
+  dash = 0;
+  dashPhase = 0;
+  /** Speed of the power moving the body (m/s), smoothed. */
+  powerSpeed = 0;
   /** Which feet are planted this frame (ball on its locked ground point). */
   readonly planted: [boolean, boolean] = [false, false];
   /** Legs that could not reach their target this frame (0 on walkable ground). */
@@ -290,13 +304,24 @@ export class AvatarAnimator {
   private wasGrounded = true;
   private headYaw = 0;
   private headPitch = 0;
+  private poweredLast = false;
   private readonly locks: [FootLock, FootLock] = [newLock(-FOOT_X), newLock(FOOT_X)];
 
   /** Advance the animation and compute the pose (write it with applyTo). */
-  update(inp: AnimInput): void {
-    const dt = inp.dt;
+  update(input: AnimInput): void {
+    const dt = input.dt;
     if (!(dt > 0)) return;
     this.time += dt;
+    // A power moving the body: blend its pose in, pause the ground gait (the
+    // feet do not follow a 100 m/s body) and re-plant the feet when it ends.
+    const pw = input.power ?? null;
+    this.fly = approach(this.fly, pw && pw.mode === 'flight' ? 1 : 0, dt, 0.15);
+    this.dash = approach(this.dash, pw && pw.mode === 'dash' ? 1 : 0, dt, 0.1);
+    if (pw) this.powerSpeed = approach(this.powerSpeed, pw.speed, dt, 0.2);
+    if (pw && pw.mode === 'dash') this.dashPhase = (this.dashPhase + dt * Math.min(3.4, 1.2 + pw.speed / 30)) % 1;
+    if (this.poweredLast && !pw) this.resetFeet();
+    this.poweredLast = !!pw;
+    const inp: AnimInput = pw ? { ...input, forwardDist: 0, lateralDist: 0, turn: 0, grounded: true, vVert: 0 } : input;
     const instSpeed = Math.abs(inp.forwardDist) / dt;
     if (inp.grounded) this.speed = approach(this.speed, instSpeed, dt, 0.12);
     const g = gaitParams(this.speed);
@@ -341,7 +366,8 @@ export class AvatarAnimator {
     this.headPitch = approach(this.headPitch, clampN(inp.lookPitch ?? 0, -0.6, 0.5), dt, 0.12);
 
     let st: AnimState;
-    if (inp.climb && inp.climb.blend > 0.5) st = 'climb';
+    if (pw) st = pw.mode === 'flight' ? 'fly' : 'dash';
+    else if (inp.climb && inp.climb.blend > 0.5) st = 'climb';
     else if (inAir) st = inp.vVert > 0 ? 'jump' : 'fall';
     else if (this.landTimer > 0) st = 'land';
     else if (this.speed < 0.25) st = 'idle';
@@ -727,6 +753,71 @@ export class AvatarAnimator {
       this.hipsDrop *= 1 - cb;
       // Hands and feet are on the ladder, not planted on the ground.
       this.planted[0] = this.planted[1] = false;
+    }
+
+    // ---- Powers: flight (hover stance blending into a streamlined cruise)
+    // and superspeed (a stylised dash at a capped cadence, leaning in).
+    const fw = this.fly;
+    const dw = this.dash;
+    if (fw > 1e-4 || dw > 1e-4) {
+      const keep = 1 - Math.max(fw, dw);
+      for (let i = 0; i < r.length; i++) r[i] *= keep;
+      this.hipsDrop *= keep;
+      this.planted[0] = this.planted[1] = false;
+    }
+    if (fw > 1e-4) {
+      const c = smooth(5, 60, this.powerSpeed); // 0 hover .. 1 cruise
+      const h = (1 - c) * fw;
+      const k = c * fw;
+      const sway = Math.sin(t * 1.3);
+      // Hover: knees soft, toes down, arms out for balance.
+      add(B.upperLegL, 0.18 + 0.03 * sway, 0, -0.05, h);
+      add(B.upperLegR, 0.05 - 0.03 * sway, 0, 0.05, h);
+      add(B.lowerLegL, -0.45, 0, 0, h);
+      add(B.lowerLegR, -0.25, 0, 0, h);
+      add(B.footL, -0.35, 0, 0, h);
+      add(B.footR, -0.3, 0, 0, h);
+      add(B.upperArmL, 0.2, 0, -0.5 - 0.05 * sway, h);
+      add(B.upperArmR, 0.2, 0, 0.5 + 0.05 * sway, h);
+      add(B.lowerArmL, 0.35, 0, 0, h);
+      add(B.lowerArmR, 0.35, 0, 0, h);
+      // Cruise (the body itself is pitched forward by the Avatar): legs
+      // together and pointed, arms swept back, head up to see ahead.
+      add(B.upperLegL, -0.04, 0, 0.03, k);
+      add(B.upperLegR, -0.04, 0, -0.03, k);
+      add(B.lowerLegL, -0.12, 0, 0, k);
+      add(B.lowerLegR, -0.08, 0, 0, k);
+      add(B.footL, -0.65, 0, 0, k);
+      add(B.footR, -0.65, 0, 0, k);
+      add(B.upperArmL, -0.35, 0, -0.16, k);
+      add(B.upperArmR, -0.35, 0, 0.16, k);
+      add(B.lowerArmL, 0.12, 0, 0, k);
+      add(B.lowerArmR, 0.12, 0, 0, k);
+      add(B.head, 0.75, 0, 0, k);
+      add(B.spine, 0.05, 0, 0, k);
+    }
+    if (dw > 1e-4) {
+      // A sprinter's stride, legs and arms driving hard, leaning into the run.
+      const ph = 2 * Math.PI * this.dashPhase;
+      const sL = Math.sin(ph);
+      const sR = Math.sin(ph + Math.PI);
+      const leg = (s1: number) => [0.25 + 0.75 * s1, -1.0 - 0.7 * Math.max(0, -s1) - 0.4 * Math.max(0, s1), 0.3 * s1];
+      const [hl, kl, fl] = leg(sL);
+      const [hr, kr, fr] = leg(sR);
+      add(B.upperLegL, hl, 0, -0.03, dw);
+      add(B.upperLegR, hr, 0, 0.03, dw);
+      add(B.lowerLegL, kl, 0, 0, dw);
+      add(B.lowerLegR, kr, 0, 0, dw);
+      add(B.footL, fl, 0, 0, dw);
+      add(B.footR, fr, 0, 0, dw);
+      add(B.upperArmL, -0.9 * sL, 0, -0.12, dw);
+      add(B.upperArmR, -0.9 * sR, 0, 0.12, dw);
+      add(B.lowerArmL, 1.35, 0, 0, dw);
+      add(B.lowerArmR, 1.35, 0, 0, dw);
+      add(B.spine, -0.3, 0, 0, dw);
+      add(B.chest, -0.2, -0.12 * sL, 0, dw);
+      add(B.head, 0.42, 0, 0, dw);
+      this.hipsDrop -= 0.08 * dw;
     }
   }
 

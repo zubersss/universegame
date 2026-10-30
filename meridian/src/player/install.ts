@@ -136,7 +136,7 @@ export class PlayerRuntime implements OnFootHooks {
     const { t, alpha: a, dt } = visualClock(g.simTime, alpha, this.lastVisTime);
     this.lastVisTime = t;
     const scripted = this.transition ? this.transition.sample(this.transitionTime + (a - 1) * SIM_DT, this.pose) : null;
-    p.renderView(dt, a, g.cameraRig, g.settings.reducedMotion, scripted);
+    p.renderView(dt, a, g.cameraRig, g.settings.reducedMotion, scripted, this.abilities.motion());
     return true;
   }
 
