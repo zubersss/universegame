@@ -21,6 +21,8 @@ B-011 rework, B-019, B-023 (then B-012, B-013, B-014, B-015, B-017, B-018, B-020
 ## Ready for review
 (B-001…B-009 Done per board, cycle 7. B-010/B-011 flat-silhouette versions failed review; rework in progress.)
 - B-022 (fb0c1dc): blender/scripts/gen_terrain.py, all Assets/_Game/Art/terrain/*/*_{color,normal}.png.
+- B-012 (11828e9, e450ab9): blender/scripts/gen_fx.py; Assets/_Game/Art/fx/{thruster,dust,dig_sparks,escape_band,heat_shimmer}/base_color.png (+ base_emission.png for thruster, dig_sparks, escape_band) + base.json each. Sheets ≤ 1024², frames ≤ 256.
+- B-019 (660ce64, f1eb426): ships/pilgrim/side (gear retracted) and side_legs (skids deployed), identical canvas 1536×512 and pivot [0.5, 0.5]; top unchanged.
 - B-010 (2bc8fc5): blender/scripts/gen_backdrop.py, Assets/_Game/Art/backgrounds/earth/layer{0,1,2}_color.png.
 - B-011 (4c3b39a): Assets/_Game/Art/backgrounds/mars/layer{0,1,2}_color.png (Mars preset in gen_backdrop.py; Earth output unchanged).
 - B-009 (489a964): blender/scripts/build_surveyor.py, blender/sources/characters/surveyor.blend, Assets/_Game/Art/characters/surveyor/base_{color,normal,emission}.png + base.json. Known weak spots for review: still a little mannequin-like (primitive suit parts), and the death end pose has the legs raised awkwardly. Fixable in a polish pass if LEAD wants one.
