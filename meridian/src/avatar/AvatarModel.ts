@@ -212,11 +212,12 @@ export function buildAvatar(): AvatarRig {
   add('seal', skin(place(new TorusGeometry(0.155, 0.022, 6, 22).rotateX(Math.PI / 2).scale(1, 1, 0.74), 0, hipY + 0.07, 0), B.hips));
   // Chest: wide, slightly deeper at the front.
   add('fabric', skin(lathe([[0.16, hipY + 0.29], [0.19, hipY + 0.38], [0.205, hipY + 0.47], [0.19, hipY + 0.54], [0.12, hipY + 0.58], [0.06, hipY + 0.6]], 18, 0.66), B.chest, B.spine, hipY + 0.3, hipY + 0.36));
-  // Chest plate (front) with an amber edge strip and a teal status light.
-  add('plate', skin(place(rot(lathe([[0.04, -0.13], [0.16, -0.1], [0.18, 0.0], [0.15, 0.09], [0.04, 0.11]], 16, 0.35), 0, 0, 0), 0, hipY + 0.45, -0.06), B.chest));
+  // Chest plate: a shell over the front of the chest, an amber edge strip
+  // below it and two teal status lights on it.
+  add('plate', skin(place(new SphereGeometry(0.205, 20, 8, Math.PI * 1.2, Math.PI * 0.6, Math.PI * 0.34, Math.PI * 0.3).scale(1, 1, 0.7), 0, hipY + 0.45, 0), B.chest));
   add('accent', skin(place(new BoxGeometry(0.2, 0.022, 0.03), 0, hipY + 0.345, -0.118), B.chest));
-  add('light', skin(place(new BoxGeometry(0.05, 0.018, 0.012), 0.07, hipY + 0.48, -0.127), B.chest));
-  add('light', skin(place(new BoxGeometry(0.05, 0.018, 0.012), 0.07, hipY + 0.455, -0.126), B.chest));
+  add('light', skin(place(new BoxGeometry(0.05, 0.018, 0.012), 0.07, hipY + 0.475, -0.139), B.chest));
+  add('light', skin(place(new BoxGeometry(0.05, 0.018, 0.012), 0.07, hipY + 0.45, -0.14), B.chest));
   // Collar ring (seal) where the helmet meets the suit.
   add('seal', skin(place(new TorusGeometry(0.105, 0.03, 8, 22).rotateX(Math.PI / 2), 0, DIM.neckY + 0.02, 0.0), B.chest));
 
@@ -228,14 +229,17 @@ export function buildAvatar(): AvatarRig {
   add('accent', skin(place(new BoxGeometry(0.03, 0.36, 0.012), 0.12, hipY + 0.39, 0.29), B.chest));
   for (let i = 0; i < 3; i++) add('light', skin(place(new BoxGeometry(0.035, 0.035, 0.01), -0.04 + i * 0.04, hipY + 0.52, 0.289), B.chest));
 
-  // --- Helmet: plate shell, gold visor, seal rim, amber crest.
+  // --- Helmet: plate shell, dark visor surround, gold visor facing forward
+  // (-Z; SphereGeometry's phi = 1.5 pi points there), amber crest, temple lamp.
   const headC = new Vector3(0, DIM.eyeY + 0.02, 0);
-  add('plate', skin(place(new SphereGeometry(0.155, 22, 16).scale(0.96, 1.05, 1.02), headC.x, headC.y, headC.z), B.head));
-  // Visor: front cap of a slightly larger sphere.
-  add('visor', skin(place(new SphereGeometry(0.162, 22, 12, Math.PI * 0.62, Math.PI * 0.76, Math.PI * 0.26, Math.PI * 0.4).scale(0.96, 1.0, 1.04), headC.x, headC.y - 0.005, headC.z), B.head));
-  add('seal', skin(place(new TorusGeometry(0.152, 0.012, 6, 28, Math.PI * 0.9).rotateY(Math.PI * 0.55).rotateZ(0), headC.x, headC.y - 0.06, headC.z), B.head));
-  add('accent', skin(place(new BoxGeometry(0.03, 0.025, 0.24), 0, headC.y + 0.155, 0.02), B.head));
-  add('light', skin(place(new BoxGeometry(0.02, 0.02, 0.03), -0.14, headC.y + 0.02, -0.04), B.head));
+  const shellScale: [number, number, number] = [0.96, 1.05, 1.02];
+  const helmetPart = (r: number, phiW: number, theta0: number, theta1: number) =>
+    new SphereGeometry(r, 26, 12, Math.PI * (1.5 - phiW / 2), Math.PI * phiW, Math.PI * theta0, Math.PI * (theta1 - theta0)).scale(...shellScale);
+  add('plate', skin(place(new SphereGeometry(0.155, 26, 18).scale(...shellScale), headC.x, headC.y, headC.z), B.head));
+  add('seal', skin(place(helmetPart(0.1575, 0.86, 0.25, 0.7), headC.x, headC.y, headC.z), B.head));
+  add('visor', skin(place(helmetPart(0.159, 0.78, 0.28, 0.66), headC.x, headC.y, headC.z), B.head));
+  add('accent', skin(place(new BoxGeometry(0.03, 0.025, 0.24), 0, headC.y + 0.158, 0.03), B.head));
+  add('light', skin(place(new BoxGeometry(0.02, 0.022, 0.035), -0.146, headC.y + 0.035, -0.035), B.head));
 
   // --- Arms.
   for (const side of [-1, 1] as const) {
@@ -256,7 +260,7 @@ export function buildAvatar(): AvatarRig {
     add('light', skin(place(new BoxGeometry(0.012, 0.03, 0.03), e.x - side * 0.05, e.y - 0.15, e.z - 0.01), la));
     // Glove (seal): palm block with a thumb.
     add('seal', skin(place(taper(0.045, 0.035, 0.06, 10), w.x, w.y + 0.005, w.z), hd, la, w.y - 0.01, w.y + 0.02));
-    add('seal', skin(place(new BoxGeometry(0.035, 0.09, 0.075), w.x, w.y - 0.075, w.z), hd));
+    add('seal', skin(place(taper(0.04, 0.034, 0.085, 10).scale(0.78, 1, 1.15), w.x, w.y - 0.035, w.z), hd));
     add('seal', skin(place(new BoxGeometry(0.02, 0.05, 0.022).rotateZ(side * 0.3), w.x - side * 0.022, w.y - 0.05, w.z - 0.04), hd));
   }
 
@@ -270,7 +274,7 @@ export function buildAvatar(): AvatarRig {
     const a = P(side < 0 ? 'footL' : 'footR');
     add('fabric', skin(place(taper(0.092, 0.066, DIM.thigh, 14), h.x, h.y, h.z), ul, B.hips, h.y - 0.09, h.y + 0.03));
     // Thigh pocket (accent).
-    add('accent', skin(place(new BoxGeometry(0.02, 0.1, 0.08), h.x + side * 0.09, h.y - 0.2, h.z), ul));
+    add('accent', skin(place(new BoxGeometry(0.02, 0.1, 0.08), h.x + side * 0.082, h.y - 0.2, h.z), ul));
     // Knee guard (plate) and knee seal.
     add('seal', skin(place(new SphereGeometry(0.066, 12, 8), k.x, k.y, k.z), ll, ul, k.y - 0.03, k.y + 0.04));
     add('plate', skin(place(new SphereGeometry(0.062, 12, 8, Math.PI * 0.55, Math.PI * 0.9).scale(1, 1.25, 1), k.x, k.y + 0.005, k.z - 0.012), ll));
