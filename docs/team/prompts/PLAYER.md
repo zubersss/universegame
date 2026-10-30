@@ -6,13 +6,13 @@ YOU OWN (charter section D): src/player/* (including new CharacterCamera.ts), ne
 
 YOU SEND: [LS] packets READY (with checks run), BLOCKED, IFACE (before and after changing AbilityConfig or AbilityState), DEFECT, DECISION requests to LEAD. Send only on real events. Work on branch player/<task-id> in this worktree; rebase onto overhaul/integration daily; never switch branches in another worktree.
 
-YOU TEST: npm run typecheck, npm test and npm run build before every READY; the landing journey plus your avatar-*.spec.ts and powers-*.spec.ts covering collisions at the fastest speed, transitions (ship↔foot, walk↔power, zone boundary), save and reload during a power, and a 30 fps frame-rate run; and the game in Chrome with a mouse and keyboard.
+YOU TEST: npm run typecheck, npm test and npm run build before every READY; the landing journey plus your avatar-*.spec.ts and powers-*.spec.ts covering collisions at the fastest speed, transitions (ship↔foot, walk↔power, zone boundary), save and reload during a power, and a 30 fps frame-rate run; and the game in Chromium (headless Playwright with synthesized mouse and keyboard in a cloud container; the owner's manual Chrome play is recorded when available) with a mouse and keyboard.
 
-CONFIGURATION: Ultracode must be off (run /effort status; /effort ultracode off if needed). Do not change model, permissions or billing. A dynamic workflow is allowed only for a bounded fan-out inside your owned files, started by typing the keyword ultracode in that one prompt.
+CONFIGURATION: Do not change model, permissions or billing.
 
 DO FIRST (milestone M1, tasks P1–P3):
 
-1. Report /status, /model, /effort status and /list-agents to LEAD in your first READY packet, and confirm you can reach WORLDS.
+1. Report the configuration you can read in-session to LEAD in your first READY packet (mark slash-command values "not readable in-session"), and confirm you can reach WORLDS.
 2. P1: build the explorer character in code: a Three.js SkinnedMesh with a bone hierarchy (hips, spine, chest, head, upper and lower arms, hands, upper and lower legs, feet), an original suit design with readable silhouette and PBR materials, 1.8 m tall, scaled to the existing capsule. Add state-blended procedural animation for idle, walk, run (stride tied to ground speed; no foot sliding), jump, fall, land. Render it on the existing Player capsule on Ilex with a third-person CharacterCamera (spring arm, terrain-avoiding, reduced-motion aware; C toggles first person if it costs nothing). Do not load any external asset unless it is CC0, under 2 MB, verified and recorded in ASSET_LICENSES.md; generated images are not a rigged character.
 3. P2: create src/abilities/ with the AbilityConfig and AbilityState types from charter section I and a controller skeleton where only walk exists; send an IFACE packet to LEAD with the hook points you need in Game.ts (enter/exit ON_FOOT, per-step update, save fields) and the HUD slot calls you will make.
 4. P3: scaffold e2e/journey/avatar-walk.spec.ts using the existing autopilot (inputs only, never state): exit, walk 25 m with a jump, return, board, with animation state assertions through the test API.
