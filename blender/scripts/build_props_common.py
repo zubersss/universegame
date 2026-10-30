@@ -104,6 +104,9 @@ def lamp(c, M):
     box("head", (0.14, 0, 2.03), (0.26, 0.2, 0.12), c, M["dark"], bevel=0.02)
     box("lens", (0.14, 0, 1.965), (0.22, 0.16, 0.012), c, M["lamp"], bevel=0.004)
     box("lens_front", (0.272, 0, 2.02), (0.012, 0.16, 0.06), c, M["lamp"], bevel=0.003)
+    # The side camera looks along +Y: give it glowing surfaces it can see (bulb + side lens).
+    sphere("bulb", (0.14, 0, 1.93), 0.055, c, M["lamp"])
+    box("lens_side", (0.14, -0.102, 2.02), (0.2, 0.008, 0.06), c, M["lamp"], bevel=0.003)
 
 
 PROPS = {"landing_pad": landing_pad, "shelter_wall": shelter_wall, "shelter_door": shelter_door,
