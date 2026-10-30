@@ -248,17 +248,17 @@ export class Player {
   }
 
   /**
-   * Aim ray matching the screen center: the camera's look direction, starting
+   * Aim ray matching the screen centre: the camera's view direction, starting
    * where that ray passes the eye (so ranges are measured from the body).
    */
   aim(origin: Vector3, dir: Vector3): void {
     const eye = this.eye(1, _v);
-    dir.copy(this.view.look);
     if (this.view.mode === 'first' || this.view.position.lengthSq() === 0) {
       origin.copy(eye);
       dir.copy(this.heading).multiplyScalar(Math.cos(this.pitch)).addScaledVector(this.up, Math.sin(this.pitch)).normalize();
       return;
     }
+    dir.copy(this.view.view);
     const along = Math.max(0, _n.copy(eye).sub(this.view.position).dot(dir));
     origin.copy(this.view.position).addScaledVector(dir, along);
   }

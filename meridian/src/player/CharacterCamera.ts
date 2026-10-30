@@ -30,9 +30,15 @@ export const CHAR_CAMERA = {
   arm: 4.2,
   armSpeedGain: 0.06,
   armMaxExtra: 1.2,
-  /** Sphere radius of the arm cast and the margin kept from what it hits. */
-  probe: 0.22,
+  /**
+   * Sphere radius of the casts and the margin kept from what they hit: 0.2 m
+   * in all covers the near plane's corners (~0.16 m at 70 deg on 16:9) while
+   * still fitting the gap between the helmet and a low ceiling.
+   */
+  probe: 0.12,
   margin: 0.08,
+  /** The camera's centre ray crosses the eye's aim ray this far ahead (m): small parallax over the scan range. */
+  converge: 25,
   /** Seconds to ease back out after being pushed in. */
   easeOut: 0.3,
   /** Minimum camera height above the analytic terrain (m). */
@@ -58,7 +64,10 @@ export class CharacterCamera {
   raise: number = CHAR_CAMERA.raise;
   /** Camera position and look direction of the last update (local coordinates). */
   readonly position = new Vector3();
+  /** The aim direction (heading and pitch) of the last update. */
   readonly look = new Vector3(0, 0, -1);
+  /** The camera's actual view direction of the last update (crosshair ray). */
+  readonly view = new Vector3(0, 0, -1);
   /** Whether the body should be drawn this frame. */
   bodyVisible = true;
   /** Closest the camera came to the analytic terrain while in third person (diagnostics; m). */
@@ -97,7 +106,7 @@ export class CharacterCamera {
     if (this.mode === 'first') {
       this.position.copy(_pivot);
       this.bodyVisible = false;
-      this.aimAt(camera, up);
+      this.aimAt(camera, up, _target.copy(_pivot).add(_look));
       return;
     }
     _right.crossVectors(heading, up).normalize();
@@ -140,13 +149,15 @@ export class CharacterCamera {
       this.minTerrainClearance = Math.min(this.minTerrainClearance, after === null ? 1.6 : 1.6 - after);
     }
     this.bodyVisible = this.arm >= CHAR_CAMERA.hideBelow;
-    this.aimAt(camera, up);
+    // Look at the point the eye aims at, `converge` metres out.
+    this.aimAt(camera, up, _target.copy(_pivot).addScaledVector(_look, CHAR_CAMERA.converge));
   }
 
-  /** Orient the camera along the aim direction with radial up. */
-  private aimAt(camera: PerspectiveCamera, up: Vector3): void {
+  /** Place and orient the camera (radial up) toward a target point. */
+  private aimAt(camera: PerspectiveCamera, up: Vector3, target: Vector3): void {
     camera.position.copy(this.position);
     camera.up.copy(up);
-    camera.lookAt(_target.copy(this.position).add(this.look));
+    camera.lookAt(target);
+    this.view.copy(target).sub(this.position).normalize();
   }
 }

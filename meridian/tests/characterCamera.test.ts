@@ -20,13 +20,20 @@ function look(cam: PerspectiveCamera): Vector3 {
 }
 
 describe('character camera (spring arm)', () => {
-  it('sits behind and above the shoulder and looks exactly along the aim', () => {
+  it('sits behind and above the shoulder, its centre ray crossing the eye\'s aim ray ahead', () => {
     const cc = new CharacterCamera();
     const cam = new PerspectiveCamera();
     const feet = new Vector3(0, 0, 0);
     cc.update(dt, cam, feet, UP, FWD, -0.2, 0, null, null, false);
     const aim = FWD.clone().multiplyScalar(Math.cos(-0.2)).addScaledVector(UP, Math.sin(-0.2));
-    expect(look(cam).distanceTo(aim)).toBeLessThan(1e-6);
+    // The point the eye aims at, `converge` metres out, is on the screen centre.
+    const eye = new Vector3(0, CHAR_CAMERA.pivotUp, 0);
+    const p = eye.clone().addScaledVector(aim, CHAR_CAMERA.converge);
+    const d = look(cam);
+    const t = p.clone().sub(cam.position).dot(d);
+    expect(cam.position.clone().addScaledVector(d, t).distanceTo(p)).toBeLessThan(1e-6);
+    expect(d.angleTo(aim)).toBeLessThan((2 * Math.PI) / 180);
+    expect(cc.view.distanceTo(d)).toBeLessThan(1e-6);
     // Behind (+Z), to the right (+X), above the eye.
     expect(cam.position.z).toBeGreaterThan(3.5);
     expect(cam.position.x).toBeCloseTo(CHAR_CAMERA.shoulder, 5);
@@ -176,6 +183,20 @@ describe('player with the explorer and camera on real colliders', () => {
     expect(Math.abs(o.z - player.eye(1, new Vector3()).z)).toBeLessThan(0.05);
     player.dispose();
     expect(scene.children.length).toBe(0);
+  });
+
+  it('keeps the third-person view under a ceiling just above the helmet', () => {
+    const { physics, player, rig } = world();
+    // Ceiling slab 0.25 m above the eye (0.07 m above the helmet).
+    const eyeY = player.eye(1, new Vector3()).y;
+    const roof = physics.world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(0, eyeY + 0.25 + 0.1, 0));
+    physics.world.createCollider(RAPIER.ColliderDesc.cuboid(20, 0.1, 20).setCollisionGroups(GROUPS.props), roof);
+    physics.refreshQueries();
+    for (let i = 0; i < 60; i++) player.renderView(dt, 1, rig, null, false);
+    expect(player.view.arm).toBeGreaterThan(3);
+    expect(player.view.bodyVisible).toBe(true);
+    expect(rig.camera.position.y).toBeLessThan(eyeY + 0.25 - CHAR_CAMERA.probe + 1e-3);
+    player.dispose();
   });
 
   it('the view toggle (C) switches to first person with the body hidden', () => {
