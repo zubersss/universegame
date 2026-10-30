@@ -1,7 +1,7 @@
 # UNITY STATUS
-Updated: 2026-10-30 14:45 · Session: 1
+Updated: 2026-10-30 14:58 · Session: 1
 ## Current task
-U-020 Terrain variants — next; then U-017 (M1 integration + build), U-024…U-027.
+U-028 shader warm-up + U-020 terrain variants — code written, batch verification queued behind BLENDER's D-028 render window (no Unity process until heavy_blender.lock and blender.exe are gone for 5 min). Then U-017.
 ## Last completed
 U-015 HUD and menus v1 — 458709a — EditMode 111/111, PlayMode 33/33 (+3 tool skips), LeadQA 1/1. Main menu on boot (New, Continue only when a save exists, Quit) and Esc pause (Resume, Save, Main Menu); both stop time and switch off the gameplay input maps (also maps that load later behind the menu). Batch runs skip the boot menu (tests/tools unaffected); a test forces it on. Side HUD (PlanetSide): health, O2 placeholder (full until the Envirosuit, M3), ship fuel, altitude bar with the Escape Line marker and a you-marker, planet accent tint. Ship block while aboard: V/S, T/W, thrust < g warning (the altitude bar moved from ShipHud to SideHud). Top HUD restyled: speed, fuel, well pull + body name. Font: JetBrains Mono Regular/Bold (OFL 1.1, official repo) with the OFL text beside it, credited in docs/credits/unity.md; the in-world ESCAPE label uses it too. All readouts use precomputed strings (no per-update allocation). Visual check pending: overlay canvases aren't in my camera captures; needs an Editor look (or a build screenshot in U-017).
 U-014 BudgetGate v1 — a289721 — BudgetMonitor in Core (300-frame rings, no per-frame allocation; ProfilerRecorders for draw calls, memory, textures, audio). BudgetGateTests flies Earth (idle + 200 m streaming) → launch → Space → Mars entry → Mars. tools/unity_profile.ps1 ran it with graphics (Intel UHD, 1920×1080 renders): all §11.1 rows green → coordination/reports/unity/perf_2026-10-30.md. Frame avg 5.1 / 1.8 / 3.5 ms (Earth / Space / Mars), p99 7.8 / 3.1 / 5.3; draw calls 8 / 9 / 4; lights 1; particles 0; GC 0 B; Editor-process memory 563–649 MB, textures 322–342 MB, audio 3 MB; streaming p99 0.90 ms, 0/400 over 2 ms; launch 1.05 s; Mars load/entry 1.11 s; textures/atlases/audio import rules all on-spec. Headless PlayMode runs the same gate (draw-call rows skipped). Note: the first rendered frames of a scene stall once (Earth 800 ms, Mars 215 ms: shader warm-up); outside p99, but a real first-frame hitch → proposal P-17.
@@ -18,7 +18,7 @@ U-009 Player controller — 089657b — EditMode 75/75, PlayMode 13/13 (+2 skips
 U-007 seam fix — 562f0ff — capture at a fractional camera position showed thin lines between tile rows (bilinear sampling read the neighbor sheet cell). Fix: importer slices terrain cells 1 texel inset (126 px), each Tile scales back to 1 m. Lines gone; streaming unchanged (avg 0.30 ms, p99 0.92 ms, 0/400 frames over 2 ms, worst 2.08 ms, D-019 load "none"). A first try with runtime Sprite.Create sprites caused 100–186 ms hitches and was replaced.
 U-008 Dig and place — f15f617. U-006 Lit preview — 5a75d90.
 ## Next up
-U-020, U-017, U-024
+U-017, U-018, U-024
 ## Ready for review
 U-012 (5fecaeb), U-023 (d692fdb + e2ca48d), U-013 (e047727), U-014 (a289721), U-015 (458709a)
 ## Handoffs
