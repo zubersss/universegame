@@ -125,6 +125,45 @@ namespace Meridian.Tests
             LogAssert.NoUnexpectedReceived();
         }
 
+        [UnityTest]
+        public IEnumerator LegsDeployBelowTenMetresAndRetractAbove()
+        {
+            var s = Spawn(0f, 25f, -5f); // gravity off: constant 5 m/s descent
+            var viewGo = new GameObject("View");
+            viewGo.transform.SetParent(s.transform, false);
+            var view = s.gameObject.AddComponent<ShipLegsView>();
+            view.ship = s;
+            view.target = viewGo.AddComponent<SpriteRenderer>();
+            float timeout = Time.realtimeSinceStartup + 10f;
+            while ((view.Retracted == null || view.Deployed == null) && Time.realtimeSinceStartup < timeout) yield return null;
+            Assert.NotNull(view.Retracted, "ships/pilgrim/side loaded");
+            Assert.NotNull(view.Deployed, "ships/pilgrim/side_legs loaded");
+
+            // Same canvas and pivot (D-025): the hull can't jump when the sprite swaps.
+            Assert.AreEqual(view.Retracted.rect.size, view.Deployed.rect.size, "same canvas");
+            Assert.That(Vector2.Distance(view.Retracted.pivot, view.Deployed.pivot), Is.LessThanOrEqualTo(1f), "pivot within 1 px");
+
+            yield return new WaitForFixedUpdate(); yield return null;
+            Assert.Greater(s.AltitudeAboveGround, 10f);
+            Assert.AreSame(view.Retracted, view.target.sprite, "gear retracted above 10 m");
+            // Where the hull is drawn relative to its own transform (the body interpolates, so compare in sprite space).
+            var drawn = (Vector2)(view.target.bounds.center - view.target.transform.position);
+
+            for (int i = 0; i < 400 && s.AltitudeAboveGround > 10f; i++) yield return new WaitForFixedUpdate();
+            yield return null; // LateUpdate applies the swap
+            Assert.LessOrEqual(s.AltitudeAboveGround, 10f);
+            Assert.AreSame(view.Deployed, view.target.sprite, "legs out at or below 10 m");
+            var drawnAfter = (Vector2)(view.target.bounds.center - view.target.transform.position);
+            Assert.That(Vector2.Distance(drawn, drawnAfter), Is.LessThanOrEqualTo(1f / 128f), "hull drawn at the same place (±1 px)");
+
+            s.Body.linearVelocity = new Vector2(0f, 5f);
+            for (int i = 0; i < 400 && s.AltitudeAboveGround <= 10f; i++) yield return new WaitForFixedUpdate();
+            yield return null;
+            Assert.Greater(s.AltitudeAboveGround, 10f);
+            Assert.AreSame(view.Retracted, view.target.sprite, "legs back in above 10 m");
+            LogAssert.NoUnexpectedReceived();
+        }
+
         [Test]
         public void TouchdownRuleBoundaries()
         {

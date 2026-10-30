@@ -23,6 +23,8 @@ namespace Meridian.Art
         {
             public const string PilgrimTop = "ships/pilgrim/top";
             public const string PilgrimSide = "ships/pilgrim/side";
+            /// <summary>Skids deployed (below 10 m, Bible §4.3; D-025). `PilgrimSide` is gear retracted.</summary>
+            public const string PilgrimSideLegs = "ships/pilgrim/side_legs";
         }
 
         public static class Terrain

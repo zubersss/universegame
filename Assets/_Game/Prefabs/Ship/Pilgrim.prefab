@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3796688211031740475}
   - component: {fileID: 4892946870345430379}
   - component: {fileID: 2275001359560704623}
-  - component: {fileID: 2761447229737271059}
+  - component: {fileID: 1026395142164559307}
   m_Layer: 0
   m_Name: Pilgrim
   m_TagString: Untagged
@@ -129,7 +129,7 @@ MonoBehaviour:
   localHull: 100
   localFuel: 100
   localTank: 100
---- !u!114 &2761447229737271059
+--- !u!114 &1026395142164559307
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -138,12 +138,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1176721208827533603}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9151e95a50fcf9348be2c68e988b0f5d, type: 3}
+  m_Script: {fileID: 11500000, guid: 447aaf4815fba68438e0c3f4f40412fc, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.Art.AddressableSprite
-  key: ships/pilgrim/side
+  m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.Ship.ShipLegsView
+  ship: {fileID: 2275001359560704623}
   target: {fileID: 3944804675878360327}
-  worldWidth: 0
 --- !u!1 &7388719165526036651
 GameObject:
   m_ObjectHideFlags: 0

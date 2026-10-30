@@ -247,9 +247,9 @@ namespace Meridian.EditorTools
             view.transform.SetParent(root.transform, false);
             var sr = view.AddComponent<SpriteRenderer>();
             sr.sortingOrder = 8;
-            var art = root.AddComponent<Meridian.Art.AddressableSprite>();
-            art.key = Meridian.Art.ArtKeys.Ships.PilgrimSide;
-            art.target = sr;
+            var legsView = root.AddComponent<Meridian.Ship.ShipLegsView>();
+            legsView.ship = ship;
+            legsView.target = sr;
             var prefab = PrefabUtility.SaveAsPrefabAsset(root, PilgrimPrefabPath);
             Object.DestroyImmediate(root);
             return prefab;
