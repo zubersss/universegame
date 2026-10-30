@@ -143,8 +143,9 @@ const LOOKS: Record<string, Look> = {
     explore: 'surface', surface: 'procedural', power: 'redline', atmosphereHeight: 6000, maxHeight: 7200, reliefZero: 1900,
     atmosphere: {
       rayleigh: [2.0e-6, 4.0e-6, 8.0e-6], rayleighH: 1300,
-      mie: [6.0e-5, 4.0e-5, 2.5e-5], mieH: 1100, mieG: 0.74,
-      sunIntensity: 18, airglow: [0.004, 0.002, 0.001],
+      // Suspended dust (vertical optical depth ~0.3 red, ~0.1 blue; real Mars 0.3-0.9) gives the butterscotch sky.
+      mie: [2.6e-4, 1.6e-4, 9.0e-5], mieH: 1100, mieG: 0.74,
+      sunIntensity: 24, airglow: [0.004, 0.002, 0.001],
     },
     clouds: [{ altitude: 3600, thickness: 300, coverage: 0.12, scale: 9000, speed: 0.00001, tint: [1.0, 0.92, 0.84], opacity: 0.35, streak: 0.8 }],
     // A: bright dusty ground (butterscotch), rock, pale dust; B: dark basaltic sand and rock.
