@@ -70,10 +70,13 @@ export async function importFixture(page: Page, name: string, body: string): Pro
   }
 }
 
-/** Exit the ship down the ladder; returns when the climb is over and the explorer stands at its foot. */
+/**
+ * Exit the ship down the ladder; returns once the climb is over (the walker is
+ * released: powers take input again) and the explorer stands at its foot.
+ */
 export async function exitShip(page: Page): Promise<Row> {
   await page.keyboard.press('KeyE');
   await until(page, 's.mode === "ON_FOOT"', 120_000);
-  await untilPower(page, 'p && p.avatar && p.avatar.state === "climb"', 120_000);
-  return untilPower(page, 'p && p.avatar && p.avatar.state !== "climb" && w', 180_000);
+  await untilPower(page, 'p && p.transition === "exit"', 120_000);
+  return untilPower(page, 'p && p.transition === null && p.avatar && p.avatar.state !== "climb" && w', 180_000);
 }

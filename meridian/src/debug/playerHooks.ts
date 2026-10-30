@@ -86,6 +86,8 @@ export function playerTestHooks(game: Game): PlayerTestApi & Record<string, unkn
         ability: rt
           ? { state: rt.abilities.state, power: rt.abilities.power?.id ?? null, body: rt.abilities.bodyId, unlocked: [...rt.abilities.unlocked], lastRefusal: rt.abilities.lastRefusal }
           : null,
+        // The ladder climb in progress ('exit' / 'board'): the walker is held and powers wait until it ends.
+        transition: rt?.transition?.kind ?? null,
       };
     },
     pressView() {
