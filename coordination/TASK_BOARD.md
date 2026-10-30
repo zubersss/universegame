@@ -106,35 +106,35 @@ Files: Assets/_Game/Code/Runtime/Planets/PlanetConfig.cs, Assets/_Game/Settings/
 Depends: U-001
 Lead notes: Done 886065c (cycle 4): PlanetConfigTests cover all 8 planets, ratios ±0.5%, fuel, §5.1 dimensions; EditMode 27/27.
 
-### U-003 · UNITY · In Progress · M0
+### U-003 · UNITY · Done · M0
 Goal: Batch test and build scripts.
 Accept: `tools/unity_test.ps1 [EditMode|PlayMode]` writes `logs/tests_<date>.xml` and `coordination/reports/unity/tests_<date>.md` (pass/fail counts, failed names); `tools/unity_build.ps1` produces a dev build in `Build/`; both honor HeavyJobLock and exit non-zero on failure.
 Files: tools/unity_test.ps1, tools/unity_build.ps1, Assets/_Game/Code/Editor/BuildTools.cs
 Depends: U-001
-Lead notes: —
+Lead notes: Done b6aae59 (cycle 5): test reports written for both modes; Build/MERIDIAN_0.0.1/MERIDIAN.exe built; HeavyJobLock retry wrapper.
 
-### U-004 · UNITY · In Progress · M0
+### U-004 · UNITY · Done · M0
 Goal: `Core.unity` with `GameState`, `SceneDirector`, `TimeSystem` (72×), bootstrap; `Space.unity` and `PlanetSide.unity` stubs loaded additively.
 Accept: Play from Core loads Space (inactive) and PlanetSide (Earth config); smoke test with `LogAssert.NoUnexpectedReceived()` passes.
 Files: Assets/_Game/Scenes/, Assets/_Game/Code/Runtime/Core/
 Depends: U-002
-Lead notes: —
+Lead notes: Done c5ba83a (cycle 5): PlayMode boot test 1/1 with LogAssert.NoUnexpectedReceived; Earth g = −9.81.
 
-### U-005 · UNITY · In Progress · M0
+### U-005 · UNITY · Done · M0
 Goal: `ArtImporter` + `ArtKeys` + M1 placeholder set.
 Accept: Every rule in contract §6 implemented and covered by an EditMode test; placeholders exist for: characters/surveyor, ships/pilgrim/top+side, terrain/earth/{soil,grass,stone,sand,snow,water}, terrain/mars/{regolith,basalt,hematite,ice}, backgrounds/{earth,mars,space}/layer0..2, planets/{sun,mercury,venus,earth,mars,jupiter,saturn,uranus,neptune}/surface, planets/earth/clouds, fx/{thruster,dust,dig_sparks,escape_band,heat_shimmer}, props/common/calibration; importing B-002's calibration asset retires its placeholder with no manual step.
 Files: Assets/_Game/Code/Editor/ArtImporter.cs, Assets/_Game/Code/Runtime/Art/ArtKeys.cs, Assets/_Game/Placeholders/**, Assets/_Game/Tests/Unit/ArtImporterTests.cs
 Depends: U-001
-Lead notes: This is the M0 calibration handshake with B-002. (Cycle 4) Calibration handshake: when ArtImporter works, run tools/unity_art_preview.ps1 props/common/calibration and record the preview path in your status so LEAD can close B-002. Commit the Art .meta files (D-016).
+Lead notes: Done bb0d201 (cycle 5): EditMode 45/45 incl. 17 importer tests; calibration imports clean and retires its placeholder (handshake import side OK).
 
-### U-006 · UNITY · Ready · M0
+### U-006 · UNITY · In Progress · M0
 Goal: Lit art preview tool.
 Accept: `tools/unity_art_preview.ps1 <key>` renders the sprite under a global light plus one upper-right point light to `logs/preview_<key>.png` in batch mode.
 Files: tools/unity_art_preview.ps1, Assets/_Game/Code/Editor/ArtPreview.cs, Assets/_Game/Scenes/ArtPreview.unity
 Depends: U-005
-Lead notes: —
+Lead notes: PRIORITY: do this before more U-007 work; it gates closing B-002…B-006. Approach (after your 3 strikes): Light2D builds its mesh/bounds in the player loop, so drive the render from a PlayMode test run via unity_test.ps1 with a test filter. Load a preview scene, set the sprite to Sprite-Lit-Default, put the point light upper-right with Target Sorting Layers = All, `yield return null` 3 frames, then camera.targetTexture = RT, camera.Render(), ReadPixels, EncodeToPNG → logs/preview_<key>.png. Keep -batchmode but never -nographics. unity_art_preview.ps1 just wraps that call with the key as an env var or command-line arg.
 
-### U-007 · UNITY · Ready · M1
+### U-007 · UNITY · In Progress · M1
 Goal: Terrain v1: 32×32 chunks, `IWorldGenerator`, `SolidWorldGenerator` (Earth, Mars), streaming, pooling, RuleTiles with normal maps, per-chunk collision.
 Accept: Earth world streams at ≤ 12 ms frame on the dev laptop; chunk apply ≤ 2 ms per frame; only chunks within 2 of the camera resident (PlayMode test); seams invisible at ortho size 9.
 Files: Assets/_Game/Code/Runtime/Terrain/, Assets/_Game/Prefabs/Terrain/
@@ -211,6 +211,14 @@ Files: Assets/_Game/Tests/Unit/M1IntegrationTests.cs, Build/
 Depends: U-005…U-016
 Lead notes: —
 
+### U-018 · UNITY · Ready · M2
+Goal: Swap Pilgrim's side sprite to `ships/pilgrim/side_legs` below 10 m altitude (Bible §4.3), back above it.
+Accept: PlayMode test: descending through 10 m switches the sprite; climbing back through 10 m switches back; no pivot jump (same world position of the hull ±1 px).
+Files: Assets/_Game/Code/Runtime/Ship/
+Depends: U-010, B-019 (build against the placeholder until B-019 is Done)
+Lead notes: —
+
+
 ---
 
 ## BLENDER
@@ -227,7 +235,7 @@ Goal: Calibration asset `props/common/calibration`.
 Accept: 1 m sphere on a 1 m cube with known flat colors; color, normal, emission, mask exported per contract §2; contact sheet shows the upper-right of the sphere lit when the light is upper-right; 8 px dilation visible; sizes logged.
 Files: blender/sources/props/calibration.blend, Assets/_Game/Art/props/common/calibration_*.png
 Depends: B-001
-Lead notes: Review (cycle 4). Blender-side checks pass (contact sheet: sphere lit upper-right, OpenGL normals, 8 px dilation, exact flat colors). Waiting only on the U-005 lit preview via unity_art_preview.ps1. Dependents (B-003+) may proceed.
+Lead notes: Review (cycle 5). Blender-side and import-side (U-005) pass. Only the lit preview remains, blocked on U-006. Dependents may proceed.
 
 ### B-003 · BLENDER · Review · M2
 Goal: Earth top-down: `planets/earth/surface` (2048×1024), `clouds` (1024×512), `glow` (512).
@@ -250,14 +258,14 @@ Files: Assets/_Game/Art/planets/sun/, Assets/_Game/Art/backgrounds/space/
 Depends: B-002
 Lead notes: Review (cycle 4). Contract sizes, LFS, credits, and wrap all pass on the contact sheets. Waiting on the in-Unity lit check after U-005 and the art preview tool; no BLENDER action needed.
 
-### B-006 · BLENDER · In Progress · M2
+### B-006 · BLENDER · Review · M2
 Goal: Starter ship **Pilgrim**: `ships/pilgrim/top` and `side`.
 Accept: top ≤ 448×448 (see UNITY handoff), side ≤ 1536×512; color, normal, emission; thrusters and windows glow; industrial-worn look per Bible §9.
 Files: blender/sources/ships/pilgrim.blend, Assets/_Game/Art/ships/pilgrim/
 Depends: B-002
-Lead notes: —
+Lead notes: Review (cycle 5). Contact sheet OK (worn industrial hull, glowing ports, engine, vents); 6 PNGs in LFS; top 448 px at 36 px/m accepted (contract allows 512; the board's "UNITY handoff" never existed). Waiting on the in-Unity lit check (U-006).
 
-### B-007 · BLENDER · Ready · M2
+### B-007 · BLENDER · In Progress · M2
 Goal: Earth terrain sets: `terrain/earth/{soil,grass,stone,sand,snow,water}`.
 Accept: six 47-tile RuleTile sets, 128 px tiles, 8 columns, color + normal, 2× tile check passes.
 Files: blender/sources/terrain/earth.blend, Assets/_Game/Art/terrain/earth/
@@ -334,8 +342,36 @@ Files: Assets/_Game/Art/props/space/, Assets/_Game/Art/planets/luna/
 Depends: B-002
 Lead notes: —
 
+### B-018 · BLENDER · Ready · M2
+Goal: Outer and inner planet discs for the space map: `planets/{mercury,venus,jupiter,saturn,uranus,neptune}/surface` (+ `glow` where an atmosphere exists: venus, jupiter, saturn, uranus, neptune) and `planets/saturn/rings` (top-down ring texture, transparent).
+Accept: contract §4 sizes (surface 2048×1024 equirect, wraps in x; glow 512×512 with disc edge at r = 200 px as for Earth); public-domain sources (NASA/JPL/USGS global mosaics) logged in `docs/credits/blender.md`, or procedural bands where no mosaic exists; Venus shows the cloud tops, not the radar surface; contact sheets with a 2× wrap row.
+Files: Assets/_Game/Art/planets/<planet>/, blender/sources/planets/<planet>/
+Depends: B-002
+Lead notes: Replaces UNITY's placeholders for the six remaining planets (U-005 list). Rings: propose the size and ring-inner/outer radii in px in your status; UNITY draws them at Saturn's ring radius 220 units (Bible §3).
+
+### B-019 · BLENDER · Ready · M2
+Goal: Pilgrim landing legs: `ships/pilgrim/side_legs` (same framing, pivot, and size as `side`, with legs extended below the skids).
+Accept: identical canvas and pivot to `side` so UNITY can swap without offset (diff of the two pivots = 0); legs read clearly at camera size 9; color, normal, emission.
+Files: Assets/_Game/Art/ships/pilgrim/, blender/scripts/
+Depends: B-006
+Lead notes: Bible §4.3: legs deploy below 10 m altitude. Your cycle-5 proposal, promoted.
+
+### B-020 · BLENDER · Ready · M2
+Goal: Earth POI props: `props/earth/{launch_gantry,launch_tower_ruin,archive_door,archive_terminal,beacon}` for the abandoned coastal launch complex and the Survey Archive (Bible §7.1).
+Accept: contract §4 prop rules (≤ 512×512, bottom-center pivot, color + normal, emission where lit); weathered, documentary-naturalistic per §9; `beacon` has an emission pulse-ready map.
+Files: Assets/_Game/Art/props/earth/
+Depends: B-002
+Lead notes: Promoted from Backlog ("2 Earth and 2 Mars POI prop sets").
+
+### B-021 · BLENDER · Ready · M2
+Goal: Mars POI props: `props/mars/{hauler_hull_a,hauler_hull_b,hauler_cargo,warden_pylon,meridian_beacon}` for the crashed Halcyon hauler and the Warden outpost (Bible §7.2).
+Accept: contract §4 prop rules; rust-dusted per Mars §9 palette; `warden_pylon` and `meridian_beacon` carry emission.
+Files: Assets/_Game/Art/props/mars/
+Depends: B-002
+Lead notes: Promoted from Backlog.
+
 ---
 
 ## Backlog (not yet Ready; LEAD promotes)
 M2: Earth/Mars POIs, day/night lighting pass (U), Mars dust storm (U), creature AI v1 (U),
-Cryo meter (U), `PlanetDisc` shader with real textures (U), 2 Earth and 2 Mars POI prop sets (B).
+Cryo meter (U), `PlanetDisc` shader with real textures (U). (POI prop sets promoted to B-020, B-021 in cycle 5.)

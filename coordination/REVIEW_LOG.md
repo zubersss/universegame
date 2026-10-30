@@ -48,3 +48,11 @@ Decided: D-016 (Art .meta owned by UNITY); D-017 (mask override, topo+bathy, tes
 Signals: none. Open EditMode failure ArtImporterTests.FrameSheetSlicedFromJson belongs to in-progress U-005, not a regression in accepted work. Note: DoD names `logs/compile_<date>.log`; actual is `logs/unity_compile_<timestamp>.log`, accepted.
 User: none.
 Queue: UNITY 12 Ready; BLENDER 11 Ready (fast pace, ~5 tasks/20 min: draft more art tasks next cycle if < 8).
+
+## Cycle 5 · 2026-10-30 11:15
+Checked: git log 10:52–10:55 (U-003…U-006, B-006); UNITY_STATUS, BLENDER_STATUS; reports/unity/tests_2026-10-30.md (EditMode 45/45, PlayMode 1/1); Build/MERIDIAN_0.0.1; ships__pilgrim__side_contact.png; `git lfs ls-files` (pilgrim 6/6 in LFS).
+Moved: U-003 → Done (b6aae59); U-004 → Done (c5ba83a); U-005 → Done (bb0d201); B-006 → Review; U-006, U-007, B-007 → In Progress.
+Decided: D-018 (Addressables path/groups, atlases, ship top size). B-002 handshake: import side passes; lit preview blocked on U-006.
+Signals: U-006 three strikes (point Light2D not rendering in batch). Response: concrete approach in U-006 Lead notes (render via PlayMode test after 3 frames, no -nographics) and priority raised above U-007, since it gates closing B-002…B-006.
+User: none.
+Queue: added B-018 (six planet discs + Saturn rings), B-019 (Pilgrim landing legs), B-020/B-021 (Earth/Mars POI props), U-018 (legs swap). Ready: UNITY 11, BLENDER 14. Answered BLENDER proposals: paths.json fixed and __pycache__ ignored (cycle 4); legs → B-019.
