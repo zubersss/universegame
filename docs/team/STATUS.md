@@ -28,6 +28,7 @@ Reference device: CPU · GPU (`chrome://gpu`) · RAM 8 GB · resolution · Chrom
 | 9 | Ultracode may stay on in every session (effort `xhigh` or `ultracode`); the ultracode-off rule and the keyword-only workflow limit are removed; workflow agents edit only their session's owned files (charter version 2, B.3, G) | Owner instruction | 2026-10-29 |
 | 10 | A moon sits in its real direction from its parent at parent gameplay radius × √(real parent–moon distance at EPOCH ÷ real parent radius), at least 4.5 × the sum of the two gameplay radii (Europa and Titan otherwise sit inside their giants' 4R envelopes); planets and the Sun keep the single factor (charter version 2, H) | WORLDS DECISION: the single factor puts the Moon 7.7 km from Earth's center | 2026-10-29 |
 | 11 | LEAD works autonomously: it merges milestone pull requests into `main` after a passing gate, takes over tasks whose owner session is not running, runs a missing consumer's checks itself, and gates M1–M4 on its own environment; reference-device numbers are recorded when the owner runs them (charter version 2, B, E, F, L, M, N, O) | Owner instruction | 2026-10-29 |
+| 12 | PLAYER works autonomously on foot: ON_FOOT hooks gain frame() for camera and pose, boot calls PLAYER's src/player/install.ts, PLAYER owns src/debug/playerHooks.ts; READY needs typecheck, unit tests, build, smoke and the covering specs, while journeys over 10 minutes run once per milestone at LEAD's gate (charter version 2, B.11, D) | PLAYER's autonomy request; owner instruction to continue | 2026-10-30 |
 
 ## Integration base
 

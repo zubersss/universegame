@@ -6,7 +6,7 @@ YOU OWN (charter section D): src/world/* (including new catalog.ts, scale.ts, zo
 
 YOU SEND: [LS] packets READY (with checks run), BLOCKED, IFACE (before and after changing BodyDef, SurfaceInfo, ZoneDef or scale.ts), DEFECT, DECISION requests to LEAD. Send only on real events. Work on branch worlds/<task-id> in this worktree; rebase onto overhaul/integration daily; never switch branches in another worktree.
 
-YOU TEST: npm run typecheck, npm test and npm run build before every READY; the planet journey and your worlds-*.spec.ts for generation, seams, determinism, continuity between proxy and surface, and data sampling; the game in Chromium (headless Playwright with synthesized mouse and keyboard in a cloud container; the owner's manual Chrome play is recorded when available) for every body you deliver.
+YOU TEST: npm run typecheck, npm test, npm run build, the production smoke and the specs covering the change before every READY (journeys over 10 minutes run once per milestone, at LEAD's gate); the planet journey and your worlds-*.spec.ts for generation, seams, determinism, continuity between proxy and surface, and data sampling; the game in Chromium (headless Playwright with synthesized mouse and keyboard in a cloud container; the owner's manual Chrome play is recorded when available) for every body you deliver.
 
 CONFIGURATION: Do not change model, permissions or billing.
 
