@@ -33,6 +33,9 @@ namespace Meridian.Player
         public float LastImpactSpeed { get; private set; }
         public Jetpack Jetpack { get; private set; }
         public int Facing { get; private set; } = 1;
+        public event System.Action Jumped;
+        /// <summary>Raised on touchdown with the impact speed (m/s).</summary>
+        public event System.Action<float> Landed;
 
         readonly JumpTimer jumpTimer = new JumpTimer();
         readonly ContactPoint2D[] contacts = new ContactPoint2D[8];
@@ -104,6 +107,7 @@ namespace Meridian.Player
                 v.y = PlayerTuning.JumpSpeed + 0.5f * g * dt;
                 Grounded = false;
                 airTimeSinceJump = 0f;
+                Jumped?.Invoke();
             }
             else airTimeSinceJump += dt;
 
@@ -119,6 +123,7 @@ namespace Meridian.Player
         void Land(float impactSpeed)
         {
             LastImpactSpeed = impactSpeed;
+            Landed?.Invoke(impactSpeed);
             if (Vitals == null) Vitals = GetComponent<PlayerVitals>();
             if (Vitals != null) Vitals.TakeFallImpact(impactSpeed);
         }

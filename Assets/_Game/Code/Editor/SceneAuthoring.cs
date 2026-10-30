@@ -34,6 +34,13 @@ namespace Meridian.EditorTools
             coreGo.AddComponent<TimeSystem>();
             var director = coreGo.AddComponent<SceneDirector>();
             director.gameState = state;
+            if (!System.IO.File.Exists(AudioSynth.PathOf("jump"))) AudioSynth.Run();
+            var audioGo = new GameObject("AudioDirector");
+            var audio = audioGo.AddComponent<Meridian.Audio.AudioDirector>();
+            audioGo.AddComponent<AudioListener>(); // the one listener, in Core, alive through every load and view
+            audio.scenes = director;
+            audio.jump = Clip("jump"); audio.land = Clip("land"); audio.dig = Clip("dig"); audio.place = Clip("place");
+            audio.uiClick = Clip("ui_click"); audio.thrust = Clip("thrust"); audio.ambient = Clip(AudioSynth.Ambient);
             EditorSceneManager.SaveScene(core, CorePath);
 
             // Space (kept loaded but inactive by SceneDirector)
@@ -76,7 +83,7 @@ namespace Meridian.EditorTools
             var side = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             var sideRoot = new GameObject("PlanetSideRoot");
             var sideComp = sideRoot.AddComponent<PlanetSideRoot>();
-            sideComp.sideCamera = AddCamera(sideRoot.transform, "SideCamera", 9f, new Color(0.45f, 0.62f, 0.85f), true);
+            sideComp.sideCamera = AddCamera(sideRoot.transform, "SideCamera", 9f, new Color(0.45f, 0.62f, 0.85f), false);
             var terrainGo = new GameObject("Terrain");
             terrainGo.transform.SetParent(sideRoot.transform, false);
             terrainGo.AddComponent<Grid>();
@@ -140,6 +147,8 @@ namespace Meridian.EditorTools
             if (listener) go.AddComponent<AudioListener>();
             return cam;
         }
+
+        static AudioClip Clip(string name) => AssetDatabase.LoadAssetAtPath<AudioClip>(AudioSynth.PathOf(name));
 
         public const string PlanetDiscMaterialPath = "Assets/_Game/Settings/Materials/PlanetDisc.mat";
 
