@@ -38,7 +38,8 @@ namespace Meridian.Tests
             Assert.Greater(audio.PlayCount, count);
 
             int x = side.spawnX + 2, y = side.terrain.Generator.SurfaceHeight(x);
-            Assert.IsTrue(side.rig.Dig(new Vector2(x + 0.5f, y + 0.5f)), "dig");
+            bool dug = side.rig.Dig(new Vector2(x + 0.5f, y + 0.5f));
+            Assert.IsTrue(dug, $"dig: tile {side.terrain.GetTile(x, y)} at ({x},{y}), player at {side.player.Body.position}, active {side.player.gameObject.activeInHierarchy}");
             Assert.AreEqual(Sfx.Dig, audio.LastPlayed, "dig sound");
             // Open air above the hole (the dug item now lies in the hole and blocks the Builder).
             Assert.IsTrue(side.rig.Place(new Vector2(x + 0.5f, y + 3.5f), TileId.Stone), "place");

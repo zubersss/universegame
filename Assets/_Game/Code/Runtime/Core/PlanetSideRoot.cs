@@ -1,6 +1,7 @@
 using System.Collections;
 using Meridian.Planets;
 using Meridian.Player;
+using Meridian.Ship;
 using Meridian.Terrain;
 using UnityEngine;
 
@@ -13,8 +14,13 @@ namespace Meridian.Core
         public Meridian.Rig.RigTools rig;
         public Camera sideCamera;
         public PlayerController player;
+        public SideShip ship;
+        public EscapeLineBand escapeBand;
+        public ShipHud shipHud;
         [Tooltip("Spawn column (tiles) when no save or transition gives one.")]
         public int spawnX = 64;
+        [Tooltip("The landed ship sits this many tiles right of the spawn column.")]
+        public int shipOffsetX = 10;
 
         public PlanetConfig Config { get; private set; }
 
@@ -29,6 +35,7 @@ namespace Meridian.Core
             var follow = sideCamera != null ? sideCamera.transform : transform;
             terrain.Begin(config, seed, follow, state != null ? state.EditsFor(config.id) : null);
             float surface = terrain.Generator.SurfaceHeight(spawnX) + 1f;
+            StopAllCoroutines();
 
             if (player != null)
             {
@@ -36,9 +43,18 @@ namespace Meridian.Core
                 player.Body.position = new Vector2(spawnX + 0.5f, surface + 0.05f);
                 player.transform.position = player.Body.position;
                 player.Body.linearVelocity = Vector2.zero;
-                StopAllCoroutines();
-                StartCoroutine(HoldUntilGroundLoads());
+                StartCoroutine(HoldUntilGroundLoads(player.Body));
             }
+            if (ship != null)
+            {
+                ship.ConfigureFor(config);
+                ship.Body.position = LandedShipPosition(spawnX + shipOffsetX);
+                ship.transform.position = ship.Body.position;
+                ship.Body.linearVelocity = Vector2.zero;
+                StartCoroutine(HoldUntilGroundLoads(ship.Body));
+            }
+            if (escapeBand != null) escapeBand.ConfigureFor(config);
+            if (shipHud != null) shipHud.ConfigureFor(config);
             if (sideCamera != null)
             {
                 sideCamera.transform.position = new Vector3(spawnX + 0.5f, surface + 3f, -10f);
@@ -47,12 +63,23 @@ namespace Meridian.Core
             }
         }
 
-        // The body waits frozen until the chunks around it exist, so it never falls through unloaded ground.
-        IEnumerator HoldUntilGroundLoads()
+        /// <summary>Skids on the highest ground under the hull's footprint.</summary>
+        Vector2 LandedShipPosition(int centerX)
         {
-            player.Body.simulated = false;
+            int half = Mathf.CeilToInt(SideShip.HullLength * 0.5f);
+            int top = int.MinValue;
+            for (int x = centerX - half; x <= centerX + half; x++)
+                top = Mathf.Max(top, terrain.Generator.SurfaceHeight(terrain.WrapX(x)));
+            return new Vector2(centerX + 0.5f, top + 1f + SideShip.SkidDrop + 0.05f);
+        }
+
+        // Bodies wait frozen until the chunks around them exist, so nothing falls through unloaded ground.
+        IEnumerator HoldUntilGroundLoads(Rigidbody2D body)
+        {
+            body.simulated = false;
             while (!terrain.IsSettled) yield return null;
-            player.Body.simulated = true;
+            yield return new WaitForFixedUpdate(); // let the new chunk colliders reach the physics world
+            body.simulated = true;
         }
     }
 }

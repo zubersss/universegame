@@ -39,6 +39,17 @@ namespace Meridian.Tests
             Assert.AreEqual(-9.81f, Physics2D.gravity.y, 1e-4f, "Earth gravity applied");
 
             Assert.NotNull(Object.FindAnyObjectByType<TimeSystem>(), "TimeSystem in Core");
+
+            // Player and ship are released onto loaded ground and stay on the surface (regression:
+            // a stale chunk collider once let the player sink 5 m into the terrain).
+            var side = director.PlanetSide;
+            while (!side.terrain.IsSettled && Time.realtimeSinceStartup < timeout + 20f) yield return null;
+            for (int i = 0; i < 90; i++) yield return new WaitForFixedUpdate();
+            float surface = side.terrain.Generator.SurfaceHeight(side.spawnX) + 1f;
+            Assert.IsTrue(side.player.Grounded, "player grounded");
+            Assert.AreEqual(surface, side.player.Body.position.y, 0.1f, "player on the surface");
+            Assert.IsTrue(side.ship.Grounded, "ship landed");
+            Assert.AreEqual(100f, GameState.Instance.hull, 1e-4f, "spawn landing is clean");
             yield return null;
             LogAssert.NoUnexpectedReceived();
         }

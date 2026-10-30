@@ -122,6 +122,49 @@ namespace Meridian.EditorTools
             var follow = sideComp.sideCamera.gameObject.AddComponent<Meridian.Player.CameraFollow>();
             follow.target = playerGo.transform;
 
+            // Pilgrim (prefab) + boarding, Escape Line band, ship HUD (U-010).
+            var shipPrefab = EnsurePilgrimPrefab(input);
+            var pilgrimGo = (GameObject)PrefabUtility.InstantiatePrefab(shipPrefab, side);
+            pilgrimGo.transform.SetParent(sideRoot.transform, false);
+            sideComp.ship = pilgrimGo.GetComponent<Meridian.Ship.SideShip>();
+            var boarding = pilgrimGo.AddComponent<Meridian.Ship.ShipBoarding>();
+            boarding.ship = sideComp.ship;
+            boarding.player = pc;
+            boarding.cameraFollow = follow;
+
+            var bandGo = new GameObject("EscapeLine");
+            bandGo.transform.SetParent(sideRoot.transform, false);
+            var band = bandGo.AddComponent<Meridian.Ship.EscapeLineBand>();
+            band.view = sideComp.sideCamera;
+            var bandView = new GameObject("Band");
+            bandView.transform.SetParent(bandGo.transform, false);
+            band.band = bandView.AddComponent<SpriteRenderer>();
+            band.band.drawMode = SpriteDrawMode.Tiled;
+            band.band.color = new Color(0.6f, 0.85f, 1f, 0.25f);
+            band.band.sortingOrder = 30;
+            var bandArt = bandGo.AddComponent<Meridian.Art.AddressableSprite>();
+            bandArt.key = Meridian.Art.ArtKeys.Fx.EscapeBand;
+            bandArt.target = band.band;
+            var labelGo = new GameObject("Label");
+            labelGo.transform.SetParent(bandGo.transform, false);
+            band.label = labelGo.AddComponent<TextMesh>();
+            band.label.text = "ESCAPE";
+            band.label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            labelGo.GetComponent<MeshRenderer>().sharedMaterial = band.label.font.material;
+            labelGo.GetComponent<MeshRenderer>().sortingOrder = 31;
+            band.label.fontSize = 48;
+            band.label.characterSize = 0.08f;
+            band.label.anchor = TextAnchor.MiddleCenter;
+            band.label.color = new Color(0.7f, 0.9f, 1f, 0.6f);
+            sideComp.escapeBand = band;
+
+            var shipHudGo = new GameObject("ShipHud");
+            shipHudGo.transform.SetParent(sideRoot.transform, false);
+            var shipHud = shipHudGo.AddComponent<Meridian.Ship.ShipHud>();
+            shipHud.ship = sideComp.ship;
+            shipHud.boarding = boarding;
+            sideComp.shipHud = shipHud;
+
             AddGlobalLight(sideRoot.transform);
             EditorSceneManager.SaveScene(side, PlanetSidePath);
 
@@ -149,6 +192,29 @@ namespace Meridian.EditorTools
             go.tag = "MainCamera";
             if (listener) go.AddComponent<AudioListener>();
             return cam;
+        }
+
+        public const string PilgrimPrefabPath = "Assets/_Game/Prefabs/Ship/Pilgrim.prefab";
+
+        /// <summary>Pilgrim side-view prefab: body, collider, SideShip, sprite view by asset key. Rebuilt each run.</summary>
+        static GameObject EnsurePilgrimPrefab(UnityEngine.InputSystem.InputActionAsset input)
+        {
+            System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(PilgrimPrefabPath));
+            var root = new GameObject("Pilgrim");
+            root.AddComponent<Rigidbody2D>();
+            root.AddComponent<BoxCollider2D>();
+            var ship = root.AddComponent<Meridian.Ship.SideShip>();
+            ship.actions = input;
+            var view = new GameObject("View");
+            view.transform.SetParent(root.transform, false);
+            var sr = view.AddComponent<SpriteRenderer>();
+            sr.sortingOrder = 8;
+            var art = root.AddComponent<Meridian.Art.AddressableSprite>();
+            art.key = Meridian.Art.ArtKeys.Ships.PilgrimSide;
+            art.target = sr;
+            var prefab = PrefabUtility.SaveAsPrefabAsset(root, PilgrimPrefabPath);
+            Object.DestroyImmediate(root);
+            return prefab;
         }
 
         static AudioClip Clip(string name) => AssetDatabase.LoadAssetAtPath<AudioClip>(AudioSynth.PathOf(name));
