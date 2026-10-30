@@ -34,7 +34,7 @@ Reference device: CPU · GPU (`chrome://gpu`) · RAM 8 GB · resolution · Chrom
 
 | Branch | Commit | Checks last run | Checkpoint tag |
 |---|---|---|---|
-| `overhaul/integration` | M1 gate build: 9721ae3 (L5–L5c, L6a, L7a, L8, `worlds/m1` W1–W4 with W5/W7 groundwork, `player/m1` P1–P4 with P5–P7 groundwork) plus this record | 2026-10-30: typecheck, `npm test` 245/245 (23 files), build, build:test; prod 2/2; all nine journeys (see M1 gate) | `overhaul-m1` |
+| `overhaul/integration` | M1 gate build: 9721ae3 (L5–L5c, L6a, L7a, L8, `worlds/m1` W1–W4 with W5/W7 groundwork, `player/m1` P1–P4 with P5–P7 groundwork) plus this record | 2026-10-30: typecheck, `npm test` 245/245 (23 files), build, build:test; prod 2/2; all nine journeys (see M1 gate) | `overhaul-m1` → 4bd6407 (local tag; the session's git proxy refuses tag pushes with HTTP 403, so branch `lead/it-m1-gate` holds the checkpoint) |
 
 ## Handoff reconciliation (M1, L4)
 
@@ -78,7 +78,7 @@ Reference device: CPU · GPU (`chrome://gpu`) · RAM 8 GB · resolution · Chrom
 
 | Milestone | Date | Gate checks (charter section M) | Evidence | Tag / PR |
 |---|---|---|---|---|
-| M1 | 2026-10-30 | All checks green in LEAD's cloud container, headless Chromium 1243 on SwiftShader (no GPU), commit 9721ae3: typecheck; `npm test` 245/245; build and build:test; prod `nowebgl` and `smoke` 2/2; journeys avatar-walk (2.0 min), expedition with reloads (11.7 min), flight (6.6 min), landing 10 cycles + steep-site rejection (14.4 min), planet face crossing and atmosphere (7.5 min), saves 5/5 (incl. schema-1 kept read-only), travel 3 × Ilex → Vesper → Cairn → Ilex with landings (26.8 min, 0 safety stops), worlds-earth (2.3 min). Earth sampling test passes. Chromium play confirmed. L3 round-trip recorded (task L3). STATUS complete. Flight failed once only when it ran beside workflow agents (CPU contention, 25-minute timeout); its solo re-run passed, so gate journeys now run with no agents alongside. `profile.spec.ts` is a profiling route, not a pass/fail check, and was not run. Reference-device numbers are not recorded (blocks no gate). | Logs in LEAD's scratchpad (`gateA`/`gateB`/`gateC`/`gateF`); evidence screenshots from these runs are not committed | tag `overhaul-m1`; PR `overhaul/integration` → `main` |
+| M1 | 2026-10-30 | All checks green in LEAD's cloud container, headless Chromium 1243 on SwiftShader (no GPU), commit 9721ae3: typecheck; `npm test` 245/245; build and build:test; prod `nowebgl` and `smoke` 2/2; journeys avatar-walk (2.0 min), expedition with reloads (11.7 min), flight (6.6 min), landing 10 cycles + steep-site rejection (14.4 min), planet face crossing and atmosphere (7.5 min), saves 5/5 (incl. schema-1 kept read-only), travel 3 × Ilex → Vesper → Cairn → Ilex with landings (26.8 min, 0 safety stops), worlds-earth (2.3 min). Earth sampling test passes. Chromium play confirmed. L3 round-trip recorded (task L3). STATUS complete. Flight failed once only when it ran beside workflow agents (CPU contention, 25-minute timeout); its solo re-run passed, so gate journeys now run with no agents alongside. `profile.spec.ts` is a profiling route, not a pass/fail check, and was not run. Reference-device numbers are not recorded (blocks no gate). | Logs in LEAD's scratchpad (`gateA`/`gateB`/`gateC`/`gateF`); evidence screenshots from these runs are not committed | checkpoint 4bd6407 (`lead/it-m1-gate`; tag `overhaul-m1` local only, see Integration base); PR #3 `overhaul/integration` → `main` |
 | M2 | | | | |
 | M3 | | | | |
 | M4 | | | | |
