@@ -63,12 +63,12 @@ PRESETS = {
         far=dict(W=9000.0, level=0.40, peak=0.70, rock=[(150, 92, 64), (184, 120, 84)], snow=(0, 0, 0),
                  snowline=9.0, haze=(0.42, 0.00004), tilt=6.0, terrace=3),
         mid=dict(W=700.0, level=0.40, amp=0.16, terrace=3, depth=(20, 140), haze=(0.22, 0.0012),
-                 ground=[(150, 84, 54), (178, 108, 72)], strata=(6.0, (198, 132, 92), 0.35),
+                 ground=[(150, 84, 54), (178, 108, 72)], strata=(10.0, (206, 142, 100), 0.65),
                  rocks=260, rock_h=(3, 10), tilt=12.0, frame_up=-0.08, fog=(0.18, 0.1)),
         near=dict(W=64.0, level=0.26, amp=0.04, depth=(3, 14), haze=(0.05, 0.003),
                   ground=[(146, 80, 50), (176, 108, 72)], dunes=True,
                   rocks=170, rock_h=(0.3, 2.4), pebbles=1400, tilt=18.0, frame_up=0.12),
-        rock=[(64, 50, 46), (84, 62, 52), (54, 44, 42), (104, 70, 54)],
+        rock=[(96, 70, 58), (120, 86, 66), (80, 60, 52), (140, 96, 72)],   # basalt under rust dust
     ),
 }
 
@@ -389,6 +389,12 @@ def heightfield(name, coll, W, depth_m, nx, ny, zfun, mat, y0=0.0):
     return mesh_obj(name, verts, faces, coll, mat)
 
 
+def grid_rows(W, nx, y_front, y_back, cap=420):
+    """Depth rows so ground cells are about square: noise on stretched cells reads as
+    front-to-back streaks (vertical stripes on screen)."""
+    return int(min(cap, max(64, round((y_back - y_front) / (W / nx)))))
+
+
 def instance(coll_target, proto, loc, scale, rotz, W):
     for dx in (-W, 0.0, W):
         e = bpy.data.objects.new("inst", None)
@@ -519,15 +525,16 @@ def forest_layer(P, spec, seed, preview, work, near):
         _haze(m, hz, spec["haze"][0], spec["haze"][1],
               (fog[0], base + amp * fog[1], base - amp) if fog else None, front=W)
     protos, blobs = build_protos(P, scene, rnd, spec, mats)
-    nx, ny = 512, 64                                  # square-ish faces: thin slivers shade as stripes
-    prof = GB.ridge(rng, 0.5, 1.0, 40, 512, 1.2, 0.1)                  # periodic, in px of a 2048 width
-    prof = (prof - prof.mean()) / (np.abs(prof - prof.mean()).max() + 1e-6)
-    prof = np.interp(np.arange(nx) / nx * PX_W, np.arange(PX_W), prof)
-    bumps = fft_noise(rng, ny + 1, nx, 3, 60, 0.8)
     # Ground runs from well in front of the camera's view (fills the frame bottom) to behind
     # the last trees; the tilted camera sees its surface, not its edge. The hill profile only
     # rises toward the back (it forms the silhouette); an extruded profile shades as stripes.
     y_front, y_back = -top, d1 + 4
+    nx = 512
+    ny = grid_rows(W, nx, y_front, y_back)
+    prof = GB.ridge(rng, 0.5, 1.0, 40, 512, 1.2, 0.1)                  # periodic, in px of a 2048 width
+    prof = (prof - prof.mean()) / (np.abs(prof - prof.mean()).max() + 1e-6)
+    prof = np.interp(np.arange(nx) / nx * PX_W, np.arange(PX_W), prof)
+    bumps = fft_noise(rng, ny + 1, nx, 3, 60, 0.8)
     def zf(i, j):
         y = y_front + (y_back - y_front) * j / ny
         w = min(1.0, max(0.0, (y - d0 * 0.5) / max(y_back - d0 * 0.5, 1e-3)))
@@ -688,17 +695,19 @@ def rock_layer(P, spec, seed, preview, work, near):
     for m in (ground, rockm):
         _haze(m, P["haze"], spec["haze"][0], spec["haze"][1],
               (fog[0], base + amp * fog[1], base - amp) if fog else None, front=W)
-    nx, ny = 512, 64
+    y_front, y_back = -top, d1 + 4
+    nx = 512
+    ny = grid_rows(W, nx, y_front, y_back)
     terr = spec.get("terrace")
-    prof = GB.ridge(rng, 0.5, 1.0, 80 if terr else 40, 512, 1.4, 0.0 if terr else 0.1)
+    prof = GB.ridge(rng, 0.5, 1.0, 160 if terr else 40, 1024, 1.6, 0.0 if terr else 0.1)
     prof = (prof - prof.mean()) / (np.abs(prof - prof.mean()).max() + 1e-6)          # -1..1, + = lower
     prof = np.interp(np.arange(nx) / nx * PX_W, np.arange(PX_W), prof)
     if terr:
         prof = 1 - 2 * terrace01((1 - prof) / 2, terr)                                  # plateaus up top
     bumps = fft_noise(rng, ny + 1, nx, 3, 60, 0.8)
-    xs = np.arange(nx) / nx
-    dune = (0.18 * np.sin(2 * np.pi * (10 * xs + 0.25 * np.sin(2 * np.pi * 2 * xs)))) if spec.get("dunes") else np.zeros(nx)
-    y_front, y_back = -top, d1 + 4
+    # Dunes: isotropic 2D undulation on the (now ~square) grid, not an x-only wave.
+    dunes = 0.35 * fft_noise(rng, ny + 1, nx, 20, 90, 1.0) if spec.get("dunes") else np.zeros((ny + 1, nx))
+    dune = dunes[min(ny, int(ny * (0 - y_front) / (y_back - y_front)))]               # row at y = 0 for placement
 
     def wy(y):
         w = min(1.0, max(0.0, (y - d0 * 0.5) / max(y_back - d0 * 0.5, 1e-3)))
@@ -706,13 +715,14 @@ def rock_layer(P, spec, seed, preview, work, near):
 
     def zf(i, j):
         y = y_front + (y_back - y_front) * j / ny
-        return base - amp * prof[i] * wy(y) + dune[i] + amp * 0.06 * bumps[j % (ny + 1), i]
+        return base - amp * prof[i] * wy(y) + dunes[j, i] + amp * 0.06 * bumps[j % (ny + 1), i]
     heightfield("ground", scene.collection, W, y_back, nx, ny, zf, ground, y0=y_front)
 
     def ground_z(x, y):
         fi = (x % W) / W * nx
+        row = dunes[min(ny, max(0, int(round(ny * (y - y_front) / (y_back - y_front)))))]
         return (base - amp * wy(y) * float(np.interp(fi, np.arange(nx + 1), np.r_[prof, prof[0]]))
-                + float(np.interp(fi, np.arange(nx + 1), np.r_[dune, dune[0]])))
+                + float(np.interp(fi, np.arange(nx + 1), np.r_[row, row[0]])))
 
     rocks = []
     for k in range(4):
@@ -720,7 +730,7 @@ def rock_layer(P, spec, seed, preview, work, near):
         me = blob_mesh(f"rockmesh{k}", None, 40 + k, subdiv=3, strength=0.55, scale=0.7)
         ob = bpy.data.objects.new("rock", me)
         c.objects.link(ob)
-        ob.scale = (1.0, rnd.uniform(0.75, 0.95), rnd.uniform(0.45, 0.7))
+        ob.scale = (1.0, rnd.uniform(0.75, 0.95), rnd.uniform(0.6, 0.85))
         ob.material_slots[0].link = "OBJECT"
         ob.material_slots[0].material = rockm
         rocks.append(c)
