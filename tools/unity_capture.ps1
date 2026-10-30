@@ -1,6 +1,6 @@
 # Captures the side view on Earth at 1920x1080 to logs/capture_<name>.png. Owner: UNITY.
-# Usage: tools/unity_capture.ps1 [-Name earth_surface]
-param([string]$Name = 'earth_surface')
+# Usage: tools/unity_capture.ps1 [-Name earth_surface] [-Test CaptureEarthSurface|CaptureSpace]
+param([string]$Name = 'earth_surface', [ValidateSet('CaptureEarthSurface', 'CaptureSpace')][string]$Test = 'CaptureEarthSurface')
 . (Join-Path $PSScriptRoot 'unity_common.ps1')
 
 $stamp = Get-Date -Format 'yyyyMMdd_HHmmss'
@@ -12,7 +12,7 @@ try { Enter-HeavyJobLock "unity_capture $Name" } catch { Write-Host "BLOCKED: $_
 try {
     $env:MERIDIAN_CAPTURE = $Name
     $unityArgs = @('-runTests', '-testPlatform', 'PlayMode', '-assemblyNames', 'MERIDIAN.Tests.Play',
-        '-testFilter', 'Meridian.Tests.SceneCapture.CaptureEarthSurface', '-testResults', $xml)
+        '-testFilter', "Meridian.Tests.SceneCapture.$Test", '-testResults', $xml)
     $r = Invoke-UnityBatch $unityArgs "unity_capture_$stamp.log" -Graphics
 } finally {
     Remove-Item Env:\MERIDIAN_CAPTURE -ErrorAction SilentlyContinue

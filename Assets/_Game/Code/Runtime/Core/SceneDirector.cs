@@ -55,6 +55,23 @@ namespace Meridian.Core
             }
         }
 
+        /// <summary>Shows one view and hides the other (the full transitions arrive with U-012).</summary>
+        public void SetView(ViewMode view)
+        {
+            gameState.view = view;
+            // Hide the outgoing view first: each view has a global 2D light and URP rejects two at once.
+            if (view == ViewMode.Space)
+            {
+                if (PlanetSide != null) PlanetSide.gameObject.SetActive(false);
+                if (Space != null) Space.gameObject.SetActive(true);
+            }
+            else
+            {
+                if (Space != null) Space.gameObject.SetActive(false);
+                if (PlanetSide != null) PlanetSide.gameObject.SetActive(true);
+            }
+        }
+
         static T FindRoot<T>(string sceneName) where T : Component
         {
             var scene = SceneManager.GetSceneByName(sceneName);

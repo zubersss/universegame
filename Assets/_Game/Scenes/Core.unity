@@ -119,7 +119,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &1758746786
+--- !u!1 &1058914557
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -127,10 +127,10 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1758746790}
-  - component: {fileID: 1758746789}
-  - component: {fileID: 1758746788}
-  - component: {fileID: 1758746787}
+  - component: {fileID: 1058914561}
+  - component: {fileID: 1058914560}
+  - component: {fileID: 1058914559}
+  - component: {fileID: 1058914558}
   m_Layer: 0
   m_Name: Core
   m_TagString: Untagged
@@ -138,26 +138,26 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1758746787
+--- !u!114 &1058914558
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1758746786}
+  m_GameObject: {fileID: 1058914557}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ed568adffd7bd944a9cdbaaad2356133, type: 3}
   m_Name: 
   m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.Core.SceneDirector
-  gameState: {fileID: 1758746789}
---- !u!114 &1758746788
+  gameState: {fileID: 1058914560}
+--- !u!114 &1058914559
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1758746786}
+  m_GameObject: {fileID: 1058914557}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c53eeaea95e1006498cfe52c151e14ec, type: 3}
@@ -165,13 +165,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.Core.TimeSystem
   gameSeconds: 0
   paused: 0
---- !u!114 &1758746789
+--- !u!114 &1058914560
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1758746786}
+  m_GameObject: {fileID: 1058914557}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bdbcc759f0189134991fb5f447af1feb, type: 3}
@@ -184,13 +184,13 @@ MonoBehaviour:
   hull: 100
   fuel: 100
   tankCapacity: 100
---- !u!4 &1758746790
+--- !u!4 &1058914561
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1758746786}
+  m_GameObject: {fileID: 1058914557}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -203,4 +203,4 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 1758746790}
+  - {fileID: 1058914561}
