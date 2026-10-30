@@ -1,7 +1,10 @@
-import { Quaternion, Vector3 } from 'three';
+import { Quaternion, Vector3, type Object3D, type Texture } from 'three';
 import { RAPIER, GROUPS, type Physics } from '../physics/Physics';
 import { WALK } from '../game/config';
 import { alignUp } from '../core/mathx';
+import { Avatar } from '../avatar/Avatar';
+import { CharacterCamera } from './CharacterCamera';
+import type { CameraRig } from '../render/CameraRig';
 
 const HALF = (WALK.height - 2 * WALK.radius) / 2; // capsule cylinder half-height
 /** Distance from the capsule center to the bottom of the feet. */
@@ -15,6 +18,8 @@ export interface WalkInput {
   /** Mouse look deltas (radians) this step. */
   yaw: number;
   pitch: number;
+  /** C pressed this step: toggle first/third person. */
+  view?: boolean;
 }
 
 const _up = new Vector3();
@@ -22,11 +27,15 @@ const _right = new Vector3();
 const _desired = new Vector3();
 const _q = new Quaternion();
 const _v = new Vector3();
+const _feet = new Vector3();
+const _n = new Vector3();
+const _rot = { x: 0, y: 0, z: 0, w: 1 };
 
 /**
- * First-person walker: a kinematic capsule driven by Rapier's character
- * controller. "Up" is radial; the capsule is re-aligned separately each step
- * around its feet (the controller resolves translation only).
+ * Walker: a kinematic capsule driven by Rapier's character controller. "Up"
+ * is radial; the capsule is re-aligned separately each step around its feet
+ * (the controller resolves translation only). Optionally carries the visible
+ * explorer (attachVisual) and owns the on-foot camera (renderView).
  */
 export class Player {
   readonly body: RAPIER.RigidBody;
@@ -50,6 +59,11 @@ export class Player {
   airTime = 0;
   justLanded = false;
   stepDistance = 0;
+  /** Visible explorer (null until attachVisual; never in headless tests). */
+  avatar: Avatar | null = null;
+  /** Third/first-person camera. */
+  readonly view = new CharacterCamera();
+  private readonly balls = new Map<number, RAPIER.Ball>();
 
   constructor(private readonly physics: Physics, center: Vector3, up: Vector3, heading: Vector3) {
     const world = physics.world;
@@ -116,6 +130,7 @@ export class Player {
       this.setHeading(this.heading);
     }
     this.pitch = Math.max(-1.45, Math.min(1.45, this.pitch + input.pitch));
+    if (input.view) this.view.toggle();
     // 3) Tangent-plane velocity with acceleration limits.
     _right.crossVectors(this.heading, this.up).normalize();
     const speed = input.sprint ? WALK.sprint : WALK.walk;
@@ -211,6 +226,63 @@ export class Player {
   onRebase(d: Vector3): void {
     this.pos.add(d);
     this.prevPos.add(d);
+    this.view.onRebase(d);
+    this.avatar?.onRebase(d);
+  }
+
+  /** Add the visible explorer to the scene (once). */
+  attachVisual(parent: Object3D): void {
+    if (this.avatar) return;
+    this.avatar = new Avatar(parent, (o, d, max) => this.groundRay(o, d, max), this.heading);
+  }
+
+  /**
+   * Per rendered frame: place the camera (third person by default) and pose
+   * the explorer. dt = 0 freezes the animation (pause, loading).
+   */
+  renderView(dt: number, alpha: number, rig: CameraRig, envMap: Texture | null, reducedMotion: boolean): void {
+    const feet = _feet.lerpVectors(this.prevPos, this.pos, alpha).addScaledVector(this.up, -FOOT_OFFSET);
+    this.view.update(dt, rig.camera, feet, this.up, this.heading, this.pitch, this.speed, (f, d, m, r) => this.armCast(f, d, m, r), rig.terrainClearance, reducedMotion);
+    const a = this.avatar;
+    if (!a) return;
+    a.setEnvMap(envMap);
+    a.setVisible(this.view.bodyVisible);
+    a.update({ dt, feet, up: this.up, grounded: this.grounded, vVert: this.vVert, moveVel: this.vel, lookHeading: this.heading, lookPitch: this.pitch });
+  }
+
+  /**
+   * Aim ray matching the screen center: the camera's look direction, starting
+   * where that ray passes the eye (so ranges are measured from the body).
+   */
+  aim(origin: Vector3, dir: Vector3): void {
+    const eye = this.eye(1, _v);
+    dir.copy(this.view.look);
+    if (this.view.mode === 'first' || this.view.position.lengthSq() === 0) {
+      origin.copy(eye);
+      dir.copy(this.heading).multiplyScalar(Math.cos(this.pitch)).addScaledVector(this.up, Math.sin(this.pitch)).normalize();
+      return;
+    }
+    const along = Math.max(0, _n.copy(eye).sub(this.view.position).dot(dir));
+    origin.copy(this.view.position).addScaledVector(dir, along);
+  }
+
+  /** Walkable ground below a point (terrain, props, ship; never the walker itself). */
+  private groundRay(o: Vector3, d: Vector3, max: number): { dist: number; normal: Vector3 } | null {
+    const hit = this.physics.castRay(o.x, o.y, o.z, d.x, d.y, d.z, max, GROUPS.queryWalk);
+    return hit ? { dist: hit.toi, normal: _n.set(hit.nx, hit.ny, hit.nz) } : null;
+  }
+
+  /** Sphere cast for the camera arm against terrain, props and the ship. */
+  private armCast(from: Vector3, dir: Vector3, max: number, radius: number): number | null {
+    let ball = this.balls.get(radius);
+    if (!ball) {
+      ball = new RAPIER.Ball(radius);
+      this.balls.set(radius, ball);
+    }
+    const hit = this.physics.world.castShape(
+      { x: from.x, y: from.y, z: from.z }, _rot, { x: dir.x, y: dir.y, z: dir.z }, ball, 0, max, true, undefined, GROUPS.queryWalk,
+    );
+    return hit ? hit.time_of_impact : null;
   }
 
   /** Re-read the capsule position after an external shift (physics.shiftAll moved the body). */
@@ -219,6 +291,8 @@ export class Player {
   }
 
   dispose(): void {
+    this.avatar?.dispose();
+    this.avatar = null;
     this.physics.world.removeCharacterController(this.cc);
     this.physics.world.removeRigidBody(this.body);
   }
