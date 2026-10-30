@@ -79,9 +79,11 @@ vec3 terrainAlbedo(vec4 surf, vec4 dF, vec4 dM, vec4 dL, out float rockMask, out
   vec3 groundB = mix(uB1, uB1 * 0.82, smoothstep(0.35, 0.8, macro));
   vec3 ground = mix(groundA, groundB, tBiome);
   float crack = mix(0.5, dM.g, 0.8) * 0.6 + dF.g * 0.4;
-  vec3 rockC = mix(uA2, uB2, tBiome) * (0.78 + 0.32 * crack) * (0.92 + 0.16 * dL.g);
+  vec3 rockC = mix(uA2, uB2, tBiome) * (0.78 + 0.32 * crack);
   rockMask = smoothstep(0.4, 0.62, tRock + (dM.r - 0.5) * 0.3 + (dF.g - 0.5) * 0.12);
-  vec3 albedo = ground * (0.8 + 0.4 * dM.r) * (0.84 + 0.32 * dF.r) * (0.9 + 0.2 * dF.b) * (0.9 + 0.2 * dL.b);
+  // The large scale contributes only its smooth noise (r): its pebble and crack channels
+  // would tile into a dotted lattice at range.
+  vec3 albedo = ground * (0.8 + 0.4 * dM.r) * (0.84 + 0.32 * dF.r) * (0.9 + 0.2 * dF.b);
   albedo = mix(albedo, rockC, rockMask);
   specMask = smoothstep(0.22, 0.6, tSpec + (dM.r - 0.5) * 0.35) * (1.0 - rockMask * 0.7);
   vec3 specC = uSpecial * (0.85 + 0.3 * dM.r);
@@ -162,14 +164,17 @@ export function createTerrainMaterials(u: TerrainUniforms, aerialSteps: number, 
             vec3 tw = pow(abs(tN), vec3(4.0));
             tw /= (tw.x + tw.y + tw.z);
             float viewDist = length(vViewPosition);
+            // Each detail scale fades out before its tiles shrink to a few pixels, where the
+            // repetition would read as a lattice (vertex attributes carry the far variation).
             float fineW = 1.0 - smoothstep(35.0, 140.0, viewDist);
+            float medW = 1.0 - smoothstep(250.0, 900.0, viewDist);
             vec4 dF = mix(vec4(0.5), triSample(vTile * 0.25, tw), fineW); // 4 m tiles, near only
+            vec4 dM = mix(vec4(0.5), triSample(vTile * 0.0625, tw), medW); // 16 m tiles
             #ifdef TERRAIN_LOW
-              vec4 dM = triSample(vTile * 0.0625, tw);                    // 16 m tiles
               vec4 dL = vec4(0.5);
             #else
-              vec4 dM = triSample(vTile * 0.0625, tw);                    // 16 m tiles
-              vec4 dL = triSample(vTile * 0.0078125, tw);                 // 128 m tiles
+              float largeW = 1.0 - smoothstep(700.0, 2000.0, viewDist);
+              vec4 dL = mix(vec4(0.5), triSample(vTile * 0.0078125, tw), largeW); // 128 m tiles
             #endif
             float rockMask, specMask;
             vec3 albedo = terrainAlbedo(vSurf, dF, dM, dL, rockMask, specMask);
