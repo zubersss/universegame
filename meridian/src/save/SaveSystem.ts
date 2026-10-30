@@ -1,32 +1,44 @@
-import { BODY_IDS, GENERATOR_VERSION, SAVE_SCHEMA_VERSION, WORLD_SEED, type BodyId } from '../world/bodies';
+import { BODIES, BODY_IDS, GENERATOR_VERSION, SYSTEM_BODY_IDS, SYSTEM_EXTENT, WORLD_SEED, isBodyId, type BodyId, type SystemId } from '../world/bodies';
+import { cruiseMaxSpeed } from '../world/scale';
 import { sanitizeSettings, type Settings } from '../game/settings';
-import { newExpedition, type ExpeditionState } from '../game/Expedition';
+import { BODY_HANDOFF } from '../game/config';
+import { SURVEY_BODIES, newExpedition, powerFor, type ExpeditionState } from '../game/Expedition';
 import type { KvStore } from './db';
 
-// Save format (schema 1): only the seed, versions, poses/velocities, mode,
-// settings and progress. Terrain, meshes and physics are regenerated.
-// Schema 2 (charter section I) adds catalog body ids, the system, ability state
-// and unlocks; a record from an older schema is kept read-only under
-// LEGACY_KEY and never migrated (positions do not carry across scales).
+// Save format (schema 2, charter section I): only the seed, versions, the
+// system, poses/velocities, mode, settings and progress (arrivals, unlocks,
+// survey). Terrain, meshes and physics are regenerated. A record from an
+// older schema is kept read-only under LEGACY_KEY and never migrated
+// (positions do not carry across scales).
+
+/** The schema this build writes. LEAD's constant; bodies.ts SAVE_SCHEMA_VERSION is no longer read. */
+export const SAVE_SCHEMA = 2;
 
 export type V3 = [number, number, number];
 export type V4 = [number, number, number, number];
 export type SaveMode = 'PILOTING' | 'CRUISING' | 'LANDED' | 'ON_FOOT';
 
 export interface SaveData {
-  schema: number;
+  schema: typeof SAVE_SCHEMA;
   generator: number;
   seed: number;
   savedAt: string;
   playTime: number;
+  /** The star system every body id in the record belongs to (the one in play). */
+  system: SystemId;
   mode: SaveMode;
   /** Active body for LANDED/ON_FOOT (and flight near a body); null in open space. */
-  body: BodyId | null;
+  bodyId: BodyId | null;
   ship: { sys: V3; quat: V4; vel: V3; gear: number; throttle: number };
-  player: { sys: V3; heading: V3; pitch: number } | null;
+  /** abilityState stays null until PLAYER's serialized ability state exists (P2). */
+  player: { sys: V3; heading: V3; pitch: number; abilityState: null } | null;
   cruise: { speed: number; throttle: number } | null;
-  lastSafeLanding: { body: BodyId; posPlanet: V3; quat: V4 } | null;
+  lastSafeLanding: { bodyId: BodyId; posPlanet: V3; quat: V4 } | null;
   navTarget: BodyId | null;
+  /** Bodies arrived at (landed on), in arrival order. */
+  discoveries: BodyId[];
+  /** Powers those arrivals unlocked: catalog BodyDef.power strings (PLAYER's AbilityId after P2), never 'walk'. */
+  unlocked: string[];
   settings: Settings;
   expedition: ExpeditionState;
 }
@@ -37,20 +49,42 @@ export const CORRUPT_KEY = 'save-corrupt';
 export const LEGACY_KEY = 'save-legacy';
 
 /** Largest plausible distance from the system origin (m). */
-const MAX_COORD = 5e6;
-const MAX_SPEED = 20000;
+const MAX_COORD = SYSTEM_EXTENT;
+/** Ship speed outside cruise (m/s). */
+const MAX_FLIGHT_SPEED = 20000;
+/** Cruise speed: the cap of the longest possible hop (m/s). */
+const MAX_CRUISE_SPEED = cruiseMaxSpeed(2 * SYSTEM_EXTENT);
+/** Every power an arrival can unlock (catalog powers except the base 'walk'). */
+const POWERS: ReadonlySet<string> = new Set(Object.keys(BODIES).map((id) => powerFor(id)).filter((p): p is string => p !== null));
 
 type Result = { ok: true; data: SaveData } | { ok: false; error: string };
 
 const isObj = (x: unknown): x is Record<string, unknown> => typeof x === 'object' && x !== null && !Array.isArray(x);
 const isNum = (x: unknown): x is number => typeof x === 'number' && Number.isFinite(x);
-/** Schema 1 knows only the bodies in play (BODY_IDS), not every catalog body; schema 2 (L8) widens this. */
+const isSystem = (x: unknown): x is SystemId => typeof x === 'string' && Object.prototype.hasOwnProperty.call(SYSTEM_BODY_IDS, x);
+/** Saves name only the bodies in play (BODY_IDS), not every catalog body; saves across systems (L15) widen this. */
 const isPlayed = (x: unknown): x is BodyId => typeof x === 'string' && (BODY_IDS as readonly string[]).includes(x);
+/** The system in play (BODY_IDS is one system's bodies; read at call time). */
+const playedSystem = (): SystemId => BODIES[BODY_IDS[0]].system;
+/** A played body the ship can set down on or enter. */
+const isLandable = (x: unknown): x is BodyId => isPlayed(x) && BODIES[x].explore !== 'none';
 
 function vec(x: unknown, n: number, bound: number): number[] | null {
   if (!Array.isArray(x) || x.length !== n) return null;
   for (const v of x) if (!isNum(v) || Math.abs(v) > bound) return null;
   return x as number[];
+}
+
+const len = (v: readonly number[]): number => Math.hypot(v[0], v[1], v[2]);
+
+/** Never deeper than half the radius: no surface pose lies near a body's core. */
+const MIN_SURFACE_RADII = 0.5;
+
+/** Within the body's release radius (BODY_HANDOFF.releaseRadii × R) of its center, and not near its core. */
+function nearBody(p: readonly number[], id: BodyId): boolean {
+  const d = BODIES[id];
+  const r = Math.hypot(p[0] - d.center[0], p[1] - d.center[1], p[2] - d.center[2]);
+  return r >= MIN_SURFACE_RADII * d.radius && r <= BODY_HANDOFF.releaseRadii * d.radius;
 }
 
 function unitQuat(x: unknown): V4 | null {
@@ -74,19 +108,20 @@ const SAMPLE_RE = /^(ilex|vesper|cairn):sample:[0-2]$/;
 const OBJECT_RE = /^(ilex|vesper|cairn):[a-z0-9:/_-]+$/;
 const SPECIES_RE = /^(ilex|vesper|cairn)-[a-z]+$/;
 
+/** The survey (inventory, samples, relays) is the Quiet System's, whatever system is in play. */
 function validateExpedition(x: unknown): ExpeditionState | string {
   if (!isObj(x)) return 'progress missing';
   const inv = x.inventory;
   if (!isObj(inv)) return 'inventory missing';
   const inventory = newExpedition().inventory;
-  for (const b of BODY_IDS) {
+  for (const b of SURVEY_BODIES) {
     const n = inv[b];
     if (!Number.isInteger(n) || (n as number) < 0 || (n as number) > 3) return `bad inventory count for ${b}`;
     inventory[b] = n as number;
   }
   const collected = stringList(x.collected, (s) => SAMPLE_RE.test(s), 9);
   if (!collected) return 'bad collected list';
-  const relays = stringList(x.relays, isPlayed, 3);
+  const relays = stringList(x.relays, (s) => SURVEY_BODIES.includes(s), 3);
   if (!relays) return 'bad relay list';
   const species = stringList(x.species, (s) => SPECIES_RE.test(s), 32);
   if (!species) return 'bad species list';
@@ -94,7 +129,7 @@ function validateExpedition(x: unknown): ExpeditionState | string {
   if (!scanned) return 'bad scan list';
   if (typeof x.transmitted !== 'boolean') return 'bad transmission flag';
   // Consistency: carried + spent samples per body never exceed what was collected there.
-  for (const b of BODY_IDS) {
+  for (const b of SURVEY_BODIES) {
     const got = collected.filter((s) => s.startsWith(`${b}:`)).length;
     const spent = relays.includes(b) ? 1 : 0;
     if (inventory[b] + spent > got) return `inconsistent samples for ${b}`;
@@ -106,22 +141,30 @@ function validateExpedition(x: unknown): ExpeditionState | string {
 /** Validate an untrusted save object (types, bounds, versions, finite numbers). */
 export function validateSave(raw: unknown): Result {
   if (!isObj(raw)) return { ok: false, error: 'Not a save object.' };
-  if (raw.schema !== SAVE_SCHEMA_VERSION) return { ok: false, error: `Unsupported save schema ${String(raw.schema)}.` };
+  if (legacySummary(raw)) return { ok: false, error: 'This save is from an earlier version of the game and cannot be continued in this version.' };
+  if (raw.schema !== SAVE_SCHEMA) return { ok: false, error: `Unsupported save schema ${String(raw.schema)}.` };
   if (raw.generator !== GENERATOR_VERSION) return { ok: false, error: 'Save is from a different world generator version.' };
   if (raw.seed !== WORLD_SEED) return { ok: false, error: 'Save is for a different world seed.' };
   if (typeof raw.savedAt !== 'string' || raw.savedAt.length > 40) return { ok: false, error: 'Bad timestamp.' };
   if (!isNum(raw.playTime) || raw.playTime < 0 || raw.playTime > 1e8) return { ok: false, error: 'Bad play time.' };
+  const system = raw.system;
+  if (!isSystem(system)) return { ok: false, error: 'Bad system.' };
+  if (system !== playedSystem()) return { ok: false, error: `Save is for another star system (${system}).` };
   const mode = raw.mode;
   if (mode !== 'PILOTING' && mode !== 'CRUISING' && mode !== 'LANDED' && mode !== 'ON_FOOT') return { ok: false, error: 'Bad mode.' };
-  const body = raw.body === null ? null : isPlayed(raw.body) ? raw.body : undefined;
-  if (body === undefined) return { ok: false, error: 'Bad body.' };
-  if ((mode === 'LANDED' || mode === 'ON_FOOT') && !body) return { ok: false, error: 'Surface mode without a body.' };
+  const bodyId = raw.bodyId === null ? null : isPlayed(raw.bodyId) ? raw.bodyId : undefined;
+  if (bodyId === undefined) return { ok: false, error: 'Bad body.' };
+  const surface = mode === 'LANDED' || mode === 'ON_FOOT';
+  if (surface && !isLandable(bodyId)) return { ok: false, error: 'Surface mode without a body.' };
   const s = raw.ship;
   if (!isObj(s)) return { ok: false, error: 'Ship state missing.' };
+  // Velocity: flight speeds, or a cruise up to the longest hop's cap while cruising.
+  const maxSpeed = mode === 'CRUISING' ? MAX_CRUISE_SPEED : MAX_FLIGHT_SPEED;
   const sys = vec(s.sys, 3, MAX_COORD);
   const quat = unitQuat(s.quat);
-  const vel = vec(s.vel, 3, MAX_SPEED);
-  if (!sys || !quat || !vel) return { ok: false, error: 'Bad ship pose.' };
+  const vel = vec(s.vel, 3, maxSpeed);
+  if (!sys || !quat || !vel || len(sys) > MAX_COORD || len(vel) > maxSpeed) return { ok: false, error: 'Bad ship pose.' };
+  if (surface && !nearBody(sys, bodyId!)) return { ok: false, error: 'Ship too far from its body.' };
   if (!isNum(s.gear) || s.gear < 0 || s.gear > 1 || !isNum(s.throttle) || s.throttle < 0 || s.throttle > 1) return { ok: false, error: 'Bad ship controls.' };
   let player: SaveData['player'] = null;
   if (mode === 'ON_FOOT') {
@@ -131,14 +174,17 @@ export function validateSave(raw: unknown): Result {
     const heading = vec(p.heading, 3, 1.01);
     if (!psys || !heading || !isNum(p.pitch) || Math.abs(p.pitch) > 1.6) return { ok: false, error: 'Bad player pose.' };
     if (Math.abs(Math.hypot(heading[0], heading[1], heading[2]) - 1) > 1e-3) return { ok: false, error: 'Bad player heading.' };
-    // The player must be near the ship (they walked out of it).
+    // The player must be near the ship (they walked out of it) and on its body.
     if (Math.hypot(psys[0] - sys[0], psys[1] - sys[1], psys[2] - sys[2]) > 20000) return { ok: false, error: 'Player too far from the ship.' };
-    player = { sys: psys as V3, heading: heading as V3, pitch: p.pitch };
+    if (!nearBody(psys, bodyId!)) return { ok: false, error: 'Player too far from the body.' };
+    // Null until PLAYER's ability-state validator lands (P2); widening it needs no new schema.
+    if (p.abilityState !== null) return { ok: false, error: 'Bad ability state.' };
+    player = { sys: psys as V3, heading: heading as V3, pitch: p.pitch, abilityState: null };
   } else if (raw.player !== null) return { ok: false, error: 'Unexpected player state.' };
   let cruise: SaveData['cruise'] = null;
   if (mode === 'CRUISING') {
     const c = raw.cruise;
-    if (!isObj(c) || !isNum(c.speed) || c.speed < 0 || c.speed > MAX_SPEED || !isNum(c.throttle) || c.throttle < 0 || c.throttle > 1) {
+    if (!isObj(c) || !isNum(c.speed) || c.speed < 0 || c.speed > MAX_CRUISE_SPEED || !isNum(c.throttle) || c.throttle < 0 || c.throttle > 1) {
       return { ok: false, error: 'Bad cruise state.' };
     }
     cruise = { speed: c.speed, throttle: c.throttle };
@@ -146,31 +192,41 @@ export function validateSave(raw: unknown): Result {
   let lastSafeLanding: SaveData['lastSafeLanding'] = null;
   if (raw.lastSafeLanding !== null) {
     const l = raw.lastSafeLanding;
-    if (!isObj(l) || !isPlayed(l.body)) return { ok: false, error: 'Bad last landing.' };
-    const pp = vec(l.posPlanet, 3, 200000);
+    if (!isObj(l) || !isLandable(l.bodyId)) return { ok: false, error: 'Bad last landing.' };
+    // posPlanet is body-relative: within the body's release radius of its center.
+    const pp = vec(l.posPlanet, 3, MAX_COORD);
     const lq = unitQuat(l.quat);
-    if (!pp || !lq) return { ok: false, error: 'Bad last landing pose.' };
-    lastSafeLanding = { body: l.body, posPlanet: pp as V3, quat: lq };
+    const R = BODIES[l.bodyId].radius;
+    if (!pp || !lq || len(pp) > BODY_HANDOFF.releaseRadii * R || len(pp) < MIN_SURFACE_RADII * R) return { ok: false, error: 'Bad last landing pose.' };
+    lastSafeLanding = { bodyId: l.bodyId, posPlanet: pp as V3, quat: lq };
   }
   const navTarget = raw.navTarget === null ? null : isPlayed(raw.navTarget) ? raw.navTarget : undefined;
   if (navTarget === undefined) return { ok: false, error: 'Bad navigation target.' };
+  // Discoveries are history without positions: any catalog body (a Sol save stays valid in Quiet play).
+  const discoveries = stringList(raw.discoveries, isBodyId, Object.keys(BODIES).length);
+  if (!discoveries) return { ok: false, error: 'Bad discoveries.' };
+  const unlocked = stringList(raw.unlocked, (p) => POWERS.has(p), POWERS.size);
+  if (!unlocked) return { ok: false, error: 'Bad unlocked powers.' };
   const exp = validateExpedition(raw.expedition);
   if (typeof exp === 'string') return { ok: false, error: `Bad progress: ${exp}.` };
   return {
     ok: true,
     data: {
-      schema: SAVE_SCHEMA_VERSION,
+      schema: SAVE_SCHEMA,
       generator: GENERATOR_VERSION,
       seed: WORLD_SEED,
       savedAt: raw.savedAt,
       playTime: raw.playTime,
+      system,
       mode,
-      body,
+      bodyId,
       ship: { sys: sys as V3, quat, vel: vel as V3, gear: s.gear, throttle: s.throttle },
       player,
       cruise,
       lastSafeLanding,
       navTarget,
+      discoveries,
+      unlocked,
       settings: sanitizeSettings(raw.settings),
       expedition: exp,
     },
@@ -183,18 +239,24 @@ export interface LegacySave {
   savedAt: string | null;
   playTime: number | null;
   body: string | null;
+  /** Active survey relays (0–3) and whether the survey was transmitted. */
+  relays: number | null;
+  transmitted: boolean | null;
 }
 
 /** Summary of a record written by an older save schema, or null for anything else. */
 export function legacySummary(raw: unknown): LegacySave | null {
   if (!isObj(raw) || !Number.isInteger(raw.schema)) return null;
   const schema = raw.schema as number;
-  if (schema < 0 || schema >= SAVE_SCHEMA_VERSION) return null;
+  if (schema < 0 || schema >= SAVE_SCHEMA) return null;
+  const e = isObj(raw.expedition) ? raw.expedition : {};
   return {
     schema,
     savedAt: typeof raw.savedAt === 'string' && raw.savedAt.length <= 40 ? raw.savedAt : null,
     playTime: isNum(raw.playTime) && raw.playTime >= 0 ? raw.playTime : null,
     body: typeof raw.body === 'string' && raw.body.length <= 40 ? raw.body : null,
+    relays: Array.isArray(e.relays) && e.relays.length <= 3 ? e.relays.length : null,
+    transmitted: typeof e.transmitted === 'boolean' ? e.transmitted : null,
   };
 }
 

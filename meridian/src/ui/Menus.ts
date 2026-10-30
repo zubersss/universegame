@@ -112,6 +112,13 @@ export class Menus {
     el.classList.toggle('error', isError);
   }
 
+  /** Read-only history line for a save from an earlier version (null hides it). */
+  setLegacy(text: string | null): void {
+    const el = $('title-legacy');
+    el.textContent = text ?? '';
+    el.classList.toggle('hidden', !text);
+  }
+
   setPauseStatus(text: string, isError = false): void {
     const el = $('pause-status');
     el.textContent = text;

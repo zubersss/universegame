@@ -142,6 +142,15 @@ describe('ON_FOOT hook points (Mode unchanged)', () => {
     // Boarding reports the exit before the character is removed.
     expect(src).toMatch(/this\.setMode\('LANDED', 'board'\);\s*this\.player\.dispose\(\);/);
   });
+
+  it('records arrivals where the ship comes to rest, never inside setMode', () => {
+    const src = readFileSync(new URL('../src/game/Game.ts', import.meta.url), 'utf8');
+    const setMode = src.slice(src.indexOf('private setMode('), src.indexOf('private fixedUpdate('));
+    expect(setMode).not.toMatch(/noteArrival|arrive\(/);
+    expect(src).toMatch(/this\.counters\.landings\+\+;[^]*?this\.noteArrival\(def\);\s*this\.onNotice\?\.\('Landed'/);
+    expect(src).toMatch(/placeShipLanded\(bodyId[^]*?this\.setMode\('LANDED'\);\s*this\.noteArrival\(def\);/);
+    expect(src).toMatch(/this\.markSaved\(data\);[^]*?this\.noteArrival\(this\.body!\.def\);[^]*?this\.setState\('loading'\);/);
+  });
 });
 
 describe('HUD slot API', () => {
