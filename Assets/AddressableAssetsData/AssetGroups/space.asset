@@ -15,8 +15,23 @@ MonoBehaviour:
   m_GroupName: space
   m_GUID: a46c1d73ef167f14abbca83f8d458cb1
   m_SerializeEntries:
+  - m_GUID: 19d8e29726953b24f881f44b967191df
+    m_Address: planets/luna/surface
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3a9529481300d854f9fef32cc94c67c3
     m_Address: backgrounds/space/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3af0bb8929c4f26428a1d95ea7b2d0f5
+    m_Address: planets/neptune/glow
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 466ff57b4f57acd4c877d4b56407b0f7
+    m_Address: planets/mercury/surface
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -30,8 +45,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 725f72da42ae26748a0deb679457c002
+  - m_GUID: 57dbd7c65ac387e4ea52c1d1946cd97e
     m_Address: planets/jupiter/surface
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7146ace7945dfe147a82c9bde97de6d3
+    m_Address: planets/jupiter/glow
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 723950ac9ac93254bb4fafd3be583764
+    m_Address: planets/neptune/surface
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -45,8 +70,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a04f02ab80b32814baad5c647f2131cc
-    m_Address: planets/mercury/surface
+  - m_GUID: 9c72bc141aeaed04ea417a03e5c2a1a3
+    m_Address: planets/venus/surface
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a3f695d9a534594488db0f10d5fed395
+    m_Address: planets/saturn/surface
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a8256b85e213d9c49be1e6157b2ee0f6
+    m_Address: planets/uranus/glow
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -55,13 +90,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a94df06f3e11bc644a42d1cad1c7c85a
-    m_Address: planets/saturn/surface
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b4c9fc15726a3014babccabe7f5d35ab
-    m_Address: planets/venus/surface
+  - m_GUID: ae5041d9c0005c04da4bd3d52f7d6c18
+    m_Address: planets/venus/glow
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -70,13 +100,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bd327462cd2b0674cbf69083b6125c26
+    m_Address: planets/uranus/surface
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c8338c9077ae2f54090605ee3fb2f916
+    m_Address: planets/saturn/glow
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d2b837b1eb5cbfc43ac95464b3025eca
     m_Address: planets/earth/clouds
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e1ad9d6409069ae4ebde862e70dc2d94
-    m_Address: planets/uranus/surface
+  - m_GUID: d718043f4d348af48997a4efef3acb53
+    m_Address: planets/saturn/rings
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -87,11 +127,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f28ca8f147dd3ef4386dc6a912a1091f
     m_Address: planets/sun/glow
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f83db585a8e54bf478dea34d9ea199c6
-    m_Address: planets/neptune/surface
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
