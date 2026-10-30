@@ -5,7 +5,8 @@
 import type { Game } from '../game/Game';
 import type { OnFootExitReason, OnFootHooks } from '../game/onFoot';
 import type { Player, WalkInput } from './Player';
-import type { PowerWorld } from '../abilities/powers';
+import { BlinkPower, type PowerWorld } from '../abilities/powers';
+import { PowerVfx, type VfxFrame } from '../abilities/vfx';
 import { bodyGravity } from '../world/environment';
 import { BODIES, isBodyId } from '../world/bodies';
 import { AbilityController, type AbilityEnterContext } from '../abilities/AbilityController';
@@ -63,6 +64,38 @@ export class PlayerRuntime implements OnFootHooks {
     this.lastVisTime = null;
     this.transition = null;
     this.abilities.enter(ctx);
+    this.vfx?.dispose();
+    const power = this.abilities.power;
+    this.vfx = power && this.abilities.runtime ? new PowerVfx(this.game.render.scene, power.feedback.color) : null;
+    this.blinksSeen = this.blinkCount();
+  }
+
+  /** Power effects (blink marker and flashes, superspeed streaks); null without a power. */
+  private vfx: PowerVfx | null = null;
+  private blinksSeen = 0;
+
+  private blinkCount(): number {
+    const rt = this.abilities.runtime;
+    return rt instanceof BlinkPower ? rt.lastJump.count : 0;
+  }
+
+  /** Effects for one rendered frame. */
+  private updateVfx(dt: number, p: Player): void {
+    const v = this.vfx;
+    if (!v) return;
+    const rt = this.abilities.runtime;
+    let aim: VfxFrame['aim'] = null;
+    if (rt instanceof BlinkPower) {
+      if (rt.aiming && this.abilities.usable) aim = { feet: rt.target.feet, ok: rt.target.ok };
+      if (rt.lastJump.count !== this.blinksSeen) {
+        this.blinksSeen = rt.lastJump.count;
+        v.flash(_fx.copy(rt.lastJump.from).addScaledVector(p.up, 1));
+        v.flash(_fx.copy(rt.lastJump.to).addScaledVector(p.up, 1));
+      }
+    }
+    const motion = this.abilities.motion();
+    const dash = motion && motion.mode === 'dash' && p.vel.lengthSq() > 1 ? { center: p.pos, dir: _fd.copy(p.vel).normalize(), speed: motion.speed } : null;
+    v.update(dt, { up: p.up, camera: this.game.render.camera.position, aim, dash }, this.game.settings.reducedMotion);
   }
 
   /**
@@ -137,12 +170,15 @@ export class PlayerRuntime implements OnFootHooks {
     this.lastVisTime = t;
     const scripted = this.transition ? this.transition.sample(this.transitionTime + (a - 1) * SIM_DT, this.pose) : null;
     p.renderView(dt, a, g.cameraRig, g.settings.reducedMotion, scripted, this.abilities.motion());
+    this.updateVfx(dt, p);
     return true;
   }
 
   exit(reason: OnFootExitReason): void {
     this.transition = null;
     this.abilities.exit(reason);
+    this.vfx?.dispose();
+    this.vfx = null;
   }
 
   /** The ability fields for a save snapshot (schema 2: player.abilityState and unlocked). */
@@ -172,6 +208,8 @@ export function visualClock(simTime: number, alpha: number, last: number | null)
 const _v = new Vector3();
 const _g = new Vector3();
 const _r = new Vector3();
+const _fx = new Vector3();
+const _fd = new Vector3();
 
 const runtimes = new WeakMap<Game, PlayerRuntime>();
 

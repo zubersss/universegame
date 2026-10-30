@@ -207,6 +207,8 @@ export class BlinkPower implements Power {
   readonly target: BlinkTarget = { ok: false, feet: new Vector3(), distance: 0, reason: null };
   /** Right mouse held: show the preview marker. */
   aiming = false;
+  /** The last blink's departure and arrival feet points (effects). */
+  readonly lastJump = { from: new Vector3(), to: new Vector3(), count: 0 };
   refusal: string | null = null;
   private refusalTime = 0;
   private pending: BlinkTarget | null = null;
@@ -267,6 +269,9 @@ export class BlinkPower implements Power {
     this.pending = null;
     if (!t || !this.blink.commit(t)) return;
     const pl = w.player;
+    pl.feet(this.lastJump.from);
+    this.lastJump.to.copy(t.feet);
+    this.lastJump.count++;
     // Arrive at rest (charter K: arrival velocity 0), standing where the target is.
     pl.place(_p.copy(t.feet).addScaledVector(pl.up, FOOT_OFFSET + WALK.skin), pl.up);
   }
