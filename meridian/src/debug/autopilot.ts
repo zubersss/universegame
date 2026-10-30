@@ -6,8 +6,7 @@
 import { Quaternion, Vector3 } from 'three';
 import type { Game } from '../game/Game';
 import { CRUISE, FLIGHT } from '../game/config';
-import { segmentSphereEnter } from '../core/mathx';
-import { safetyRadius } from '../ship/Cruise';
+import { planPath, safetyRadius } from '../ship/Cruise';
 import { BODIES, BODY_IDS, type BodyId } from '../world/bodies';
 
 type V3 = [number, number, number];
@@ -63,27 +62,6 @@ const PLAN_INFLATE = 8000;
 function bodyCenter(id: BodyId, out = new Vector3()): Vector3 {
   const c = BODIES[id].center;
   return out.set(c[0], c[1], c[2]);
-}
-
-/** First body whose (inflated) safety envelope the segment a->b enters, if any. */
-function blockedBy(a: Vector3, b: Vector3): BodyId | null {
-  for (const id of BODY_IDS) {
-    if (segmentSphereEnter(a, b, bodyCenter(id), safetyRadius(BODIES[id]) + PLAN_INFLATE) >= 0) return id;
-  }
-  return null;
-}
-
-/** Waypoints (system coordinates) from a to b that stay clear of every envelope. */
-function planPath(a: Vector3, b: Vector3, depth = 0): Vector3[] {
-  const id = blockedBy(a, b);
-  if (!id || depth > 5) return [b.clone()];
-  const c = bodyCenter(id);
-  const u = a.clone().sub(c).normalize();
-  const w = b.clone().sub(c).normalize();
-  const m = u.clone().add(w);
-  if (m.lengthSq() < 1e-6) m.set(-u.y, u.x, 0.3).cross(u);
-  const detour = c.add(m.normalize().multiplyScalar(safetyRadius(BODIES[id]) + 40000));
-  return [...planPath(a, detour, depth + 1), ...planPath(detour, b, depth + 1)];
 }
 
 const _qi = new Quaternion();
@@ -174,7 +152,7 @@ export class Autopilot {
     // envelope so cruise performs its automatic approach exit on the way in.
     const gate = c.clone().addScaledVector(n, S + 60000);
     const final = c.clone().addScaledVector(n, S - 5000);
-    this.route = [...planPath(this.shipSystem(new Vector3()), gate), final];
+    this.route = [...planPath(this.shipSystem(new Vector3()), gate, PLAN_INFLATE), final];
     this.wp = 0;
   }
 

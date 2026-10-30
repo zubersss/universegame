@@ -80,6 +80,24 @@ export function segmentSphereEnter(p0: Vector3, p1: Vector3, c: Vector3, r: numb
   return t >= 0 && t <= 1 ? t : -1;
 }
 
+/**
+ * Exact segment/sphere exit test (the inside-out counterpart of
+ * segmentSphereEnter). Returns the fraction t in [0,1] at which the segment
+ * p0->p1 leaves the sphere, 0 if p0 is already outside, or -1 if p1 stays inside.
+ */
+export function segmentSphereExit(p0: Vector3, p1: Vector3, c: Vector3, r: number): number {
+  const fx = p0.x - c.x, fy = p0.y - c.y, fz = p0.z - c.z;
+  const cc = fx * fx + fy * fy + fz * fz - r * r;
+  if (cc >= 0) return 0;
+  const gx = p1.x - c.x, gy = p1.y - c.y, gz = p1.z - c.z;
+  if (gx * gx + gy * gy + gz * gz <= r * r) return -1;
+  const dx = p1.x - p0.x, dy = p1.y - p0.y, dz = p1.z - p0.z;
+  const a = dx * dx + dy * dy + dz * dz;
+  const b = fx * dx + fy * dy + fz * dz;
+  // cc < 0, so the discriminant is positive and the larger root is in (0, 1].
+  return Math.min(1, (-b + Math.sqrt(b * b - a * cc)) / a);
+}
+
 /** Quaternion for a frame whose forward (-Z) is `fwd` and up (+Y) is close to `up`. */
 export function quatFromForwardUp(fwd: Vector3, up: Vector3, out = new Quaternion()): Quaternion {
   const z = _z.copy(fwd).negate().normalize();
