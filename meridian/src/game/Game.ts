@@ -20,13 +20,14 @@ import { Exhaust } from '../ship/Exhaust';
 import { BOARDING_POINT, GEAR_PAD_BOTTOM_Y } from '../ship/ShipModel';
 import { NO_CONTROLS, type FlightOutput, type FlightOverride, type ShipControls } from '../ship/FlightModel';
 import { LandingAssist, emptyProbe, probeFootprint, type FootprintProbe } from '../ship/LandingAssist';
-import { CruiseController, freeDistance, insideEnvelope, type CruiseExitReason } from '../ship/Cruise';
+import { CruiseController, cruiseHop, freeDistance, insideEnvelope, type CruiseExitReason } from '../ship/Cruise';
 import { Player, FOOT_OFFSET, playerShape, type WalkInput } from '../player/Player';
 import { FlightEnvProvider } from '../world/FlightEnvProvider';
 import { ActiveBody } from '../world/ActiveBody';
 import { computeSites } from '../world/sites';
 import { MissionObjects, sampleName } from '../world/MissionObjects';
-import { Expedition } from './Expedition';
+import { Expedition, SURVEY_BODIES } from './Expedition';
+import { canActivate, proxyBodies, startBodyOf, startSite, surfaceReady } from './playSystem';
 import { OnFootHost, type OnFootExitReason } from './onFoot';
 import { rayCapsule } from './scan';
 import type { Species } from '../props/species';
@@ -34,13 +35,14 @@ import type { PropInstance } from '../props/PropSystem';
 import { SAVE_SCHEMA, type SaveData } from '../save/SaveSystem';
 import { bodyGravity, dominantBody } from '../world/environment';
 import { ChunkStore, WorkerBackend } from '../terrain/ChunkStore';
+import { bodyDataReady } from '../world/surface';
 import { createTerrainMaterials, makeTerrainUniforms, setTerrainPalette, type TerrainUniforms } from '../terrain/terrainMaterial';
 import { Hud, type Prompt } from '../ui/Hud';
 import { Markers, type MarkerSpec } from '../ui/Markers';
-import { BODY_HANDOFF, CRUISE, FLIGHT, LANDING, MAX_FRAME_GAP, MAX_STEPS_PER_FRAME, SCAN, SIM_DT, WALK, BUDGETS, PRESETS, type QualityPreset } from './config';
+import { BODY_HANDOFF, CRUISE, FLIGHT, LANDING, MAX_FRAME_GAP, MAX_STEPS_PER_FRAME, SCAN, SIM_DT, SURFACE_READY, WALK, BUDGETS, PRESETS, type QualityPreset } from './config';
 import { GENERATOR_VERSION, WORLD_SEED } from '../world/bodies';
 import type { Settings } from './settings';
-import { BODIES, BODY_IDS, type BodyDef, type BodyId } from '../world/bodies';
+import { BODIES, BODY_IDS, PLAY_SYSTEM, sunDirFor, type BodyDef, type BodyId } from '../world/bodies';
 
 export type AppState = 'title' | 'loading' | 'playing' | 'paused' | 'panel';
 export type Mode = 'PILOTING' | 'CRUISING' | 'LANDED' | 'ON_FOOT';
@@ -71,6 +73,35 @@ export interface LandedPose {
   /** Ship origin relative to the body center (double precision). */
   posPlanet: Vector3;
   quat: Quaternion;
+}
+
+/** A body handoff step (diagnostics and tests): detailed terrain built, swapped in for the proxy, or freed. */
+export interface HandoffEvent {
+  /** Simulation time (s). */
+  t: number;
+  event: 'activate' | 'show' | 'release';
+  body: BodyId;
+}
+
+/** A finished cruise leg (diagnostics and tests). */
+export interface CruiseLeg {
+  /** Simulation times (s) of the engage and of the hand-back to normal flight. */
+  start: number;
+  end: number;
+  /** Nav target at the hand-back (the hop the cap followed), or null. */
+  target: BodyId | null;
+  /** Speed cap and highest speed reached (m/s). */
+  cap: number;
+  peak: number;
+  exit: CruiseExitReason;
+}
+
+/** Entries kept in each diagnostics log (the oldest drops first). */
+const LOG_LIMIT = 32;
+
+function pushBounded<T>(log: T[], entry: T): void {
+  log.push(entry);
+  if (log.length > LOG_LIMIT) log.shift();
 }
 
 function distTo(p: Vector3, c: readonly number[]): number {
@@ -105,8 +136,10 @@ export class Game {
   body: ActiveBody | null = null;
   /** The active body's local terrain is shown and its distant proxy hidden. */
   bodyShown = false;
+  /** Where a new expedition starts: the play system's start body (fixed for the game's lifetime). */
+  readonly startBody: BodyDef = startBodyOf(PLAY_SYSTEM);
   /** Reference body for up/altitude/lighting: the active body, else the dominant one. */
-  ref: BodyDef = BODIES.ilex;
+  ref: BodyDef = this.startBody;
   state: AppState = 'title';
   /** Change only through setMode() so the ON_FOOT hooks see every transition. */
   mode: Mode = 'LANDED';
@@ -141,6 +174,11 @@ export class Game {
   /** Cruise speed setting 0..1 (W/S while cruising). */
   cruiseThrottle = 1;
   private pendingCruiseExit: CruiseExitReason | null = null;
+  private cruiseStart = 0;
+  /** Recent finished cruise legs, oldest first (bounded). */
+  readonly cruiseLog: CruiseLeg[] = [];
+  /** Recent body handoff steps, oldest first (bounded). */
+  readonly handoffLog: HandoffEvent[] = [];
   /** Navigation destination (Tab panel). */
   navTarget: BodyId | null = null;
   /** Sustained-frame-time quality steps (resolution, then props, then distant LOD). */
@@ -203,8 +241,8 @@ export class Game {
     this.motes = new Motes(render.preset === 'low' ? 160 : 420);
     render.scene.add(this.clouds.group, this.motes.points);
 
-    this.store = new ChunkStore(new WorkerBackend(), 'ilex');
-    this.proxies = new BodyProxies(render.bgScene, new WorkerBackend('proxy'), render.spec.aerialSamples, render.spec.skySamples, render.spec.cloudQuality);
+    this.store = new ChunkStore(new WorkerBackend(), this.startBody.id);
+    this.proxies = new BodyProxies(render.bgScene, new WorkerBackend('proxy'), render.spec.aerialSamples, render.spec.skySamples, render.spec.cloudQuality, proxyBodies());
     // Level-0 roots are shared: proxies and the local coarse planet use the same chunks.
     this.proxies.onRoot = (d) => this.store.seed(d);
     this.store.onData = (d) => {
@@ -212,10 +250,10 @@ export class Game {
     };
     this.terrainUniforms = makeTerrainUniforms(makeTerrainDetailTexture(256));
     this.terrainMaterials = createTerrainMaterials(this.terrainUniforms, render.spec.aerialSamples, render.preset === 'low');
-    this.env = new FlightEnvProvider(BODIES.ilex, this.bodyCenterLocal, this.origin, (d) => this.terrainHeightAt(d));
+    this.env = new FlightEnvProvider(this.startBody, this.bodyCenterLocal, this.origin, (d) => this.terrainHeightAt(d));
 
-    // Start landed on the deterministic Ilex landing clearing, facing the relay.
-    const def = BODIES.ilex;
+    // Start landed on the start body's deterministic landing clearing (startPose).
+    const def = this.startBody;
     this.activateBody(def);
     this.showBody();
     const start = this.startPose();
@@ -455,11 +493,15 @@ export class Game {
     this.maybeRebase(this.controlledPos());
   }
 
-  /** Speed limit from terrain readiness: collision coverage, or no terrain shown yet near a body. */
+  /**
+   * Speed limit from terrain readiness: collision coverage, or no terrain shown
+   * yet near a body that gets terrain (never near the Sun or a giant).
+   */
   private readinessSpeedLimit(): number {
     if (this.body && this.bodyShown) return this.body.collision.speedLimit;
     _v4.copy(this.ship.currPos).add(this.origin);
-    return dominantBody(_v4).radii < 2.5 ? 200 : Infinity;
+    const dom = dominantBody(_v4);
+    return dom.radii < 2.5 && surfaceReady(BODIES[dom.id]) ? 200 : Infinity;
   }
 
   private stepPiloting(dt: number): void {
@@ -532,7 +574,9 @@ export class Game {
       return;
     }
     if (this.assist.active) this.assist.disengage();
-    this.cruise.begin(_v4, ship.currQuat, ship.vel);
+    // The cap follows the route to the nav target (charter H); the Quiet System keeps 15 km/s.
+    this.cruise.begin(_v4, ship.currQuat, ship.vel, cruiseHop(_v4, this.navTarget));
+    this.cruiseStart = this.simTime;
     this.cruiseThrottle = 1;
     this.pendingCruiseExit = null;
     ship.gearTarget = 0;
@@ -580,6 +624,8 @@ export class Game {
     ship.flight.reset();
     ship.flight.throttle = clamp(this.cruise.speed / FLIGHT.capSpace, 0, 1);
     this.setMode('PILOTING');
+    const c = this.cruise;
+    pushBounded(this.cruiseLog, { start: this.cruiseStart, end: this.simTime, target: this.navTarget, cap: c.maxSpeed, peak: c.peak, exit: reason });
     if (reason === 'approach') this.counters.cruiseExitApproach++;
     else if (reason === 'brake') this.counters.cruiseExitBrake++;
     else if (reason === 'toggle') this.counters.cruiseExitToggle++;
@@ -669,8 +715,9 @@ export class Game {
     else if (inp.consume('KeyT')) this.transmit();
   }
 
-  /** Transmit the three-relay survey from the ship. */
+  /** Transmit the three-relay survey from the ship (the Quiet System's survey only). */
   private transmit(): void {
+    if (PLAY_SYSTEM !== 'quiet') return;
     const e = this.expedition;
     if (e.state.transmitted) {
       this.onNotice?.('Survey transmitted', 'The survey has already been sent. Explore freely.', true);
@@ -1026,7 +1073,12 @@ export class Game {
     this.store.releaseOtherBodies();
     this.bodyShown = false;
     this.counters.activations++;
+    this.logHandoff('activate', def.id);
     this.setRef(def);
+  }
+
+  private logHandoff(event: HandoffEvent['event'], body: BodyId): void {
+    pushBounded(this.handoffLog, { t: this.simTime, event, body });
   }
 
   /** Swap the distant proxy for the local terrain (identical at level 0), then refine. */
@@ -1039,11 +1091,16 @@ export class Game {
     setTerrainPalette(this.terrainUniforms, def);
     b.terrain.holdCoarse = false;
     this.bodyShown = true;
-    this.mission = new MissionObjects(def, b.sites, b.gen, this.physics, this.render.spec.aerialSamples);
-    this.mission.sync((id) => this.expedition.isCollected(id), this.expedition.relayActive(def.id));
-    this.render.scene.add(this.mission.group);
-    this.mission.update(0, this.bodyCenterLocal);
-    this.mission.installCollider(this.bodyCenterLocal);
+    this.logHandoff('show', def.id);
+    // Relay and sample deposits belong to the Quiet System survey only.
+    if (SURVEY_BODIES.includes(def.id)) {
+      const m = new MissionObjects(def, b.sites, b.gen, this.physics, this.render.spec.aerialSamples);
+      m.sync((id) => this.expedition.isCollected(id), this.expedition.relayActive(def.id));
+      this.render.scene.add(m.group);
+      m.update(0, this.bodyCenterLocal);
+      m.installCollider(this.bodyCenterLocal);
+      this.mission = m;
+    }
     if (this.navTarget === def.id && this.state === 'playing') {
       this.onNotice?.(`Approaching ${def.name}`, 'The landing site is marked.', true);
     }
@@ -1062,6 +1119,7 @@ export class Game {
     b.dispose();
     this.body = null;
     this.bodyShown = false;
+    this.logHandoff('release', b.def.id);
     setAtmosphereBody(null);
     this.clouds.setBody(null, 0);
     this.physics.refreshQueries();
@@ -1071,7 +1129,8 @@ export class Game {
   /**
    * Activate within 3.3 radii (the coarse roots are already resident), show
    * at 3 radii, coarsen beyond 3.5 radii while departing and release beyond
-   * 4 radii (hysteresis prevents thrashing).
+   * 4 radii (hysteresis prevents thrashing). Only a body canActivate allows
+   * (surface-ready; while cruising, the nav target) with its surface data loaded.
    */
   private updateHandoff(): void {
     const sys = _v4.copy(this.controlledPos()).add(this.origin);
@@ -1090,8 +1149,10 @@ export class Game {
       }
     }
     if (!this.body) {
+      const cruising = this.mode === 'CRUISING';
       for (const id of BODY_IDS) {
         const def = BODIES[id];
+        if (!canActivate(def, cruising, this.navTarget) || !bodyDataReady(def)) continue;
         if (distTo(sys, def.center) < (BODY_HANDOFF.activateRadii + 0.3) * def.radius) {
           this.activateBody(def);
           break;
@@ -1127,29 +1188,33 @@ export class Game {
     if (this.body) this.body.terrain.root.position.copy(this.bodyCenterLocal);
   }
 
-  /** The opening pose: parked on the Ilex landing clearing, facing the relay. */
+  /**
+   * The opening pose: parked on the start body's landing clearing (startSite),
+   * facing the Quiet survey relay or the first First Light route waypoint.
+   */
   startPose(): { posPlanet: Vector3; quat: Quaternion } {
-    const def = BODIES.ilex;
-    const sites = computeSites(def);
+    const def = this.startBody;
+    const site = startSite(def);
     const gen = this.body && this.body.def === def ? this.body.gen : null;
-    const n = new Vector3(...sites.landing.dir);
-    const h = gen ? gen.height(n.x, n.y, n.z) : sites.landing.height;
+    const n = site.dir;
+    const h = gen ? gen.height(n.x, n.y, n.z) : site.height;
     const posPlanet = n.clone().multiplyScalar(def.radius + h - GEAR_PAD_BOTTOM_Y);
-    const relay = new Vector3(...sites.relay.dir);
-    const fwd = relay.sub(n.clone().multiplyScalar(relay.dot(n))).normalize();
-    return { posPlanet, quat: quatFromForwardUp(fwd, n) };
+    return { posPlanet, quat: quatFromForwardUp(site.forward, n) };
   }
 
-  /** Reset progress and return to the opening pose (title → New Expedition). */
+  /**
+   * Reset progress and return to the opening pose (title → New Expedition).
+   * The opening pose is the first safe landing, so Recover always has a target.
+   */
   newExpedition(): void {
     this.expedition.reset();
     this.expedition.dirty = true;
     this.navTarget = null;
     this.arrivedAt = null;
     this.simTime = 0;
-    this.lastSafeLanding = null;
     const start = this.startPose();
-    this.placeShipLanded('ilex', start.posPlanet, start.quat);
+    this.lastSafeLanding = { bodyId: this.startBody.id, posPlanet: start.posPlanet.clone(), quat: start.quat.clone() };
+    this.placeShipLanded(this.startBody.id, start.posPlanet, start.quat);
     this.mission?.sync((id) => this.expedition.isCollected(id), false);
     this.cameraRig.orbitYaw = 2.5;
     this.cameraRig.orbitPitch = 0.12;
@@ -1185,6 +1250,8 @@ export class Game {
   setNavTarget(id: BodyId | null): void {
     this.navTarget = id;
     this.arrivedAt = null;
+    // Mid-cruise the cap follows the new destination's hop.
+    if (this.mode === 'CRUISING') this.cruise.retarget(cruiseHop(this.cruise.pos, id));
   }
 
   private cameraTerrainDeficit(p: Vector3): number | null {
@@ -1432,7 +1499,7 @@ export class Game {
       hud.flight({
         speed: ship.speed,
         throttle: cruising ? this.cruiseThrottle : ship.flight.throttle,
-        speedFraction: cruising ? ship.speed / CRUISE.maxSpeed : ship.flight.speedCap > 0 ? ship.speed / Math.max(ship.flight.speedCap, 1) : 0,
+        speedFraction: cruising ? ship.speed / this.cruise.maxSpeed : ship.flight.speedCap > 0 ? ship.speed / Math.max(ship.flight.speedCap, 1) : 0,
         altitude: inSpace ? env.altitude : this.mode === 'LANDED' ? 0 : env.clearance,
         altitudeApprox: inSpace,
         verticalSpeed: this.mode === 'LANDED' ? 0 : ship.vel.dot(env.up),
@@ -1449,7 +1516,7 @@ export class Game {
       } else if (cruising) {
         const c = this.cruise;
         prompts.push({ key: 'G', text: 'Leave cruise' }, { key: 'X', text: 'Brake' }, { key: 'W/S', text: 'Cruise speed' });
-        hud.warning(c.exiting ? 'Leaving cruise…' : c.limited && c.aheadBody ? `Slowing: ${BODIES[c.aheadBody].name} ahead` : null);
+        hud.warning(c.exiting ? 'Leaving cruise…' : c.limited ? `Slowing: ${c.aheadBody ? `${BODIES[c.aheadBody].name} ahead` : 'edge of the charted system'}` : null);
       } else {
         if (this.assist.active) {
           const phase = this.assist.phase === 'descending' ? 'Descending' : this.assist.phase === 'braking' ? 'Braking' : 'Holding';
@@ -1468,17 +1535,27 @@ export class Game {
     this.navMarker(markers);
     hud.prompts(prompts);
     this.markers.update(this.render.camera, markers, window.innerWidth, window.innerHeight);
-    const here = this.bodyShown && this.body ? this.body.def.id : null;
-    const obj = exp.objective(here);
-    let detail = obj.detail;
-    if (!exp.state.transmitted && obj.body && obj.body !== here) {
-      detail = this.navTarget === obj.body
-        ? 'Follow the marker · G cruises between worlds once clear of the atmosphere.'
-        : `Open navigation (Tab) and set course for ${BODIES[obj.body].name}.`;
+    if (PLAY_SYSTEM === 'quiet') {
+      const here = this.bodyShown && this.body ? this.body.def.id : null;
+      const obj = exp.objective(here);
+      let detail = obj.detail;
+      if (!exp.state.transmitted && obj.body && obj.body !== here) {
+        detail = this.navTarget === obj.body
+          ? 'Follow the marker · G cruises between worlds once clear of the atmosphere.'
+          : `Open navigation (Tab) and set course for ${BODIES[obj.body].name}.`;
+      }
+      hud.setObjective(obj.title, detail);
+    } else {
+      // The relay survey is the Quiet System's; Sol is free travel until its First Light objectives.
+      hud.setObjective(
+        'Explore the Solar System',
+        this.navTarget
+          ? 'Follow the marker · G cruises between worlds once clear of the atmosphere.'
+          : `Open navigation (Tab) and set a course. Landing sites: ${SURFACE_READY.map((id) => BODIES[id].name).join(', ')}.`,
+      );
     }
-    hud.setObjective(obj.title, detail);
     const inv = exp.state.inventory;
-    hud.inventory(BODY_IDS.filter((b) => inv[b] > 0).map((b) => ({ name: sampleName(b), count: inv[b] })));
+    hud.inventory(SURVEY_BODIES.filter((b) => inv[b] > 0).map((b) => ({ name: sampleName(b), count: inv[b] })));
   }
 
   /** Relay and sample markers on the shown body while they are still needed. */
@@ -1596,11 +1673,12 @@ export class Game {
     const sys = new Vector3(...data.ship.sys);
     const quat = new Quaternion(...data.ship.quat).normalize();
     this.floating.rebaseTo(FloatingOrigin.rounded(sys), (d) => this.applyRebase(d));
-    // The saved body, or any body whose activation range contains the ship.
-    let bodyId = data.bodyId;
+    // The saved body, or any body the handoff could activate whose range contains the ship.
+    let bodyId = data.bodyId && surfaceReady(BODIES[data.bodyId]) ? data.bodyId : null;
     if (!bodyId) {
       for (const id of BODY_IDS) {
         const def = BODIES[id];
+        if (!canActivate(def, data.mode === 'CRUISING', data.navTarget)) continue;
         if (distTo(sys, def.center) < BODY_HANDOFF.activateRadii * def.radius) bodyId = id;
       }
     }
@@ -1634,12 +1712,14 @@ export class Game {
       ship.flight.throttle = data.ship.throttle;
       this.setMode('PILOTING', 'restore');
       if (data.mode === 'CRUISING' && data.cruise) {
-        // Cruise resumes only if its clearance is still safe at the saved speed.
+        // Cruise resumes only if its clearance is still safe at the saved speed,
+        // braking at the acceleration the saved hop gives (begin sets it).
         const fwd = new Vector3(0, 0, -1).applyQuaternion(quat);
-        const need = (data.cruise.speed * data.cruise.speed) / (2 * CRUISE.accel) + CRUISE.safetyMargin;
+        this.cruise.begin(sys, quat, fwd.clone().multiplyScalar(data.cruise.speed), cruiseHop(sys, data.navTarget));
+        const need = (data.cruise.speed * data.cruise.speed) / (2 * this.cruise.accel) + CRUISE.safetyMargin;
         if (!insideEnvelope(sys) && freeDistance(sys, fwd).distance > need) {
-          this.cruise.begin(sys, quat, fwd.multiplyScalar(data.cruise.speed));
           this.cruise.speed = data.cruise.speed;
+          this.cruiseStart = this.simTime;
           this.cruiseThrottle = data.cruise.throttle;
           ship.body.setBodyType(RAPIER.RigidBodyType.KinematicPositionBased, true);
           ship.setPose(local, quat);
@@ -1731,6 +1811,7 @@ export class Game {
     }
     const mem = (performance as unknown as { memory?: { usedJSHeapSize: number } }).memory;
     const c = this.cruise;
+    const lt = this.lighting;
     return {
       state: this.state,
       mode: this.mode,
@@ -1763,6 +1844,15 @@ export class Game {
         speed: c.speed, throttle: this.cruiseThrottle, ahead: Number.isFinite(c.ahead) ? c.ahead : -1, aheadBody: c.aheadBody,
         limited: c.limited, exiting: c.exiting, safetyStops: c.safetyStops, refusedTurns: c.refusedTurns,
         available: this.mode === 'PILOTING' && this.cruiseAvailable(),
+        maxSpeed: c.maxSpeed, accel: c.accel, peak: c.peak,
+      },
+      cruiseLog: this.cruiseLog.map((l) => ({ ...l })),
+      handoffLog: this.handoffLog.map((e) => ({ ...e })),
+      // The light now (slewed), its target, and the reference body's catalog sun direction.
+      light: {
+        dir: lt.sunDir.toArray(), target: lt.star.dir.toArray(), bodySunDir: sunDirFor(this.ref),
+        flux: lt.star.flux, scale: lt.fluxScale, angularRadius: lt.star.angularRadius,
+        distance: Number.isFinite(lt.star.distance) ? lt.star.distance : -1,
       },
       assist: { active: this.assist.active, phase: this.assist.phase, reason: this.assist.reason, stable: this.assist.stable },
       probe: { hits: this.probe.hits, gaps: [...this.probe.gaps], slope: this.probe.slopeDeg, reason: this.probe.reason },

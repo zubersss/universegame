@@ -3,6 +3,7 @@ import { cruiseMaxSpeed } from '../world/scale';
 import { sanitizeSettings, type Settings } from '../game/settings';
 import { BODY_HANDOFF } from '../game/config';
 import { SURVEY_BODIES, newExpedition, powerFor, type ExpeditionState } from '../game/Expedition';
+import { surfaceReady } from '../game/playSystem';
 import type { KvStore } from './db';
 
 // Save format (schema 2, charter section I): only the seed, versions, the
@@ -66,8 +67,8 @@ const isSystem = (x: unknown): x is SystemId => typeof x === 'string' && Object.
 const isPlayed = (x: unknown): x is BodyId => typeof x === 'string' && (BODY_IDS as readonly string[]).includes(x);
 /** The system in play (BODY_IDS is one system's bodies; read at call time). */
 const playedSystem = (): SystemId => BODIES[BODY_IDS[0]].system;
-/** A played body the ship can set down on or enter. */
-const isLandable = (x: unknown): x is BodyId => isPlayed(x) && BODIES[x].explore !== 'none';
+/** A played body the ship can set down on in this build (surface-ready: the handoff never activates any other). */
+const isLandable = (x: unknown): x is BodyId => isPlayed(x) && surfaceReady(BODIES[x]);
 
 function vec(x: unknown, n: number, bound: number): number[] | null {
   if (!Array.isArray(x) || x.length !== n) return null;

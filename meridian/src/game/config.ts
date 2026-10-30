@@ -1,6 +1,7 @@
 // All tunable gameplay/engine constants live here.
 
 import { CRUISE_MIN_MAX_SPEED } from '../world/scale';
+import type { BodyId, SystemId } from '../world/bodies';
 
 export const SIM_HZ = 60;
 export const SIM_DT = 1 / SIM_HZ;
@@ -57,9 +58,22 @@ export const CRUISE = {
   envelopeMargin: 10000,
   /** A star's envelope is this many radii (outside its 2R–4R gravity taper). */
   starStandoffRadii: 5,
+  /** Envelopes are inflated by this much when a route (and its hop) is planned; the test autopilot plans with it too. */
+  routeInflate: 8000,
   exitSpeed: 900,
   safetyMargin: 1500,
 } as const;
+
+/**
+ * Sol bodies whose surface this build lands on (detailed terrain, collision,
+ * on foot). Mercury and Venus stay approach-only until their surfaces land
+ * (W9); the Sun and the giants never take the surface handoff. Every Quiet
+ * System body is surface-ready.
+ */
+export const SURFACE_READY: readonly BodyId[] = ['earth', 'moon', 'mars'];
+
+/** Where a new expedition starts in each playable system: parked at that body's landing site. */
+export const START_BODY: Readonly<Partial<Record<SystemId, BodyId>>> = { quiet: 'ilex', sol: 'earth' };
 
 export const LANDING = {
   engageAltitude: 50,

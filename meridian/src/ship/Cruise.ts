@@ -126,6 +126,16 @@ export function routeHop(pos: Vector3, id: BodyId, inflate: number, ids: readonl
   return Math.max(0, length - safetyRadius(BODIES[id]));
 }
 
+/**
+ * The hop (m) a cruise toward the nav target is capped for (begin/retarget):
+ * its routeHop at CRUISE.routeInflate. 0 (the 15 km/s floor) without a target,
+ * and always in the Quiet System, whose cruise keeps its fixed 15 km/s cap.
+ */
+export function cruiseHop(pos: Vector3, target: BodyId | null): number {
+  if (!target || BODIES[target].system === 'quiet') return 0;
+  return routeHop(pos, target, CRUISE.routeInflate);
+}
+
 export type CruiseExitReason = 'approach' | 'brake' | 'toggle' | 'safety';
 
 export interface CruiseInput {
@@ -177,6 +187,8 @@ export class CruiseController {
   refusedTurns = 0;
   /** Steps in which the exact segment test had to stop the ship (must stay 0). */
   safetyStops = 0;
+  /** Highest speed since begin() (m/s); checked against the cap. */
+  peak = 0;
 
   /** `ids`: the bodies this controller avoids (default: the bodies in play, read at each use). */
   constructor(private readonly ids?: readonly BodyId[]) {}
@@ -210,6 +222,7 @@ export class CruiseController {
     this.quat.copy(quat).normalize();
     _fwd.set(0, 0, -1).applyQuaternion(this.quat);
     this.speed = Math.max(0, velocity.dot(_fwd));
+    this.peak = this.speed;
     this.setHop(hop);
     this.exiting = null;
     this.limited = false;
@@ -287,6 +300,7 @@ export class CruiseController {
     if (this.limited) target = allow;
     const dv = this.accel * dt;
     this.speed = this.speed < target ? Math.min(target, this.speed + dv) : Math.max(target, this.speed - dv);
+    if (this.speed > this.peak) this.peak = this.speed;
 
     // Hand back to normal flight once slow enough near an envelope (or the edge), or when an exit was requested.
     const nearEnvelope = fd.distance - CRUISE.safetyMargin < (CRUISE.exitSpeed * CRUISE.exitSpeed) / (2 * this.accel) + CRUISE.exitSpeed * 2;

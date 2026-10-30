@@ -1,7 +1,8 @@
-import { BODIES, BODY_IDS, type BodyId } from '../world/bodies';
+import { BODIES, type BodyDef, type BodyId } from '../world/bodies';
 
 // Navigation / journal / survey panel (Tab). The simulation is paused while it
-// is open; buttons are ordinary focusable DOM buttons.
+// is open; buttons are ordinary focusable DOM buttons. Digits 1–9 and 0 pick
+// the first ten navigation rows (the bodies in play; belts are not targets).
 
 export type PanelTab = 'nav' | 'journal' | 'inventory';
 
@@ -25,6 +26,24 @@ const $ = (id: string): HTMLElement => {
   if (!el) throw new Error(`Missing element #${id}`);
   return el;
 };
+
+/** Navigation row picked by a key code: Digit1–Digit9 are rows 0–8, Digit0 is row 9; null for any other key. */
+export function navKeyIndex(code: string): number | null {
+  const m = /^Digit([0-9])$/.exec(code);
+  if (!m) return null;
+  const d = Number(m[1]);
+  return d === 0 ? 9 : d - 1;
+}
+
+/** The digit that picks navigation row `i` ('1'–'9', then '0'), or null past the tenth row. */
+export function navKeyLabel(i: number): string | null {
+  return i >= 0 && i < 9 ? String(i + 1) : i === 9 ? '0' : null;
+}
+
+/** Row kind label: Star, Planet or Moon. */
+export function kindLabel(def: BodyDef): string {
+  return def.kind === 'star' ? 'Star' : def.kind === 'moon' ? 'Moon' : 'Planet';
+}
 
 function fmt(d: number): string {
   if (d >= 100000) return `${(d / 1000).toFixed(0)} km`;
@@ -52,13 +71,12 @@ export class Panel {
       });
     }
     $('btn-panel-close').addEventListener('click', () => this.onClose?.());
-    // Tab (open/close) is handled by the game input; digits pick a destination.
+    // Tab (open/close) is handled by the game input; digits pick a destination row.
     document.addEventListener('keydown', (e) => {
-      if (!this.open) return;
-      if (this.tab === 'nav' && /^Digit[1-3]$/.test(e.code)) {
-        const id = BODY_IDS[Number(e.code.slice(5)) - 1];
-        if (id) this.setCourse(id);
-      }
+      if (!this.open || this.tab !== 'nav') return;
+      const i = navKeyIndex(e.code);
+      const row = i === null ? undefined : this.view?.().rows[i];
+      if (row) this.setCourse(row.id);
     });
   }
 
@@ -99,7 +117,8 @@ export class Panel {
     if (!v) return;
     const intro = document.createElement('div');
     intro.className = 'empty';
-    intro.textContent = `Select a destination (1–3). The marker leads to it; once local it marks the landing site.`;
+    const last = navKeyLabel(Math.min(v.rows.length, 10) - 1);
+    intro.textContent = `Select a destination (1–${last}). The marker leads to it; once local it marks the landing site.`;
     const rows = v.rows.map((r, i) => {
       const def = BODIES[r.id];
       const b = document.createElement('button');
@@ -107,10 +126,11 @@ export class Panel {
       b.setAttribute('aria-pressed', String(v.target === r.id));
       const name = document.createElement('span');
       name.className = 'name';
-      name.textContent = `${i + 1}  ${def.name}${r.id === v.here ? ' · here' : ''}`;
+      const key = navKeyLabel(i);
+      name.textContent = `${key === null ? '' : `${key}  `}${def.name}${r.id === v.here ? ' · here' : ''}`;
       const meta = document.createElement('span');
       meta.className = 'meta';
-      meta.textContent = `${def.kind === 'moon' ? 'Moon' : 'Planet'} · ${r.status}`;
+      meta.textContent = `${kindLabel(def)} · ${r.status}`;
       const d = document.createElement('span');
       d.className = 'd';
       d.textContent = v.target === r.id ? `● ${fmt(r.distance)}` : fmt(r.distance);

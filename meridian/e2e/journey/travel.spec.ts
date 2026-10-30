@@ -34,6 +34,12 @@ async function apPhase(page: Page, phases: string[], timeoutMs: number): Promise
   return (await api(page, 'autopilotState')).phase;
 }
 
+/** Angle (degrees) between two unit vectors. */
+function angleDeg(a: number[], b: number[]): number {
+  const d = a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  return (Math.acos(Math.max(-1, Math.min(1, d))) * 180) / Math.PI;
+}
+
 test('three continuous Ilex → Vesper → Cairn → Ilex routes with landings', async ({ page }) => {
   test.setTimeout(8 * 60 * 60 * 1000);
   const errors = collectErrors(page);
@@ -119,5 +125,84 @@ test('three continuous Ilex → Vesper → Cairn → Ilex routes with landings',
     const last = resources.slice(6, 9).map((r) => Number(r[key]));
     for (let i = 0; i < 3; i++) expect(last[i]).toBeLessThanOrEqual(Math.max(first[i] * 1.25, first[i] + 20));
   }
+  expect(errors).toEqual([]);
+});
+
+// L7b/L6b: Sol behind ?system=sol (about 10-15 min on software rendering).
+// New Expedition starts landed on Earth; Tab + 5 sets course for the Moon
+// through the navigation panel; the autopilot flies there through player
+// inputs only and lands. Checks: no cruise leg passes its hop cap, the handoff
+// releases Earth before it activates the Moon (and nothing else ever
+// activates), the landing is level, the light follows each body's sun
+// direction, and the console stays clean.
+test('Sol: Earth -> Moon hop', async ({ page }) => {
+  test.setTimeout(60 * 60 * 1000);
+  const errors = collectErrors(page);
+  await stubPointerLock(page);
+  await bootToTitle(page, '?preset=low&system=sol');
+  await api(page, 'setRenderEvery', 120);
+  await page.click('#btn-new');
+  let s = await until(page, 's.state === "playing"', 600_000);
+  expect(s.system).toBe('sol');
+  expect(s.mode).toBe('LANDED');
+  expect(s.body).toBe('earth');
+  expect(s.bodyShown).toBe(true);
+  // The opening pose is the first safe landing (Recover has a target from the start).
+  expect(await page.evaluate(() => (window as any).__meridian.game.lastSafeLanding?.bodyId ?? null)).toBe('earth');
+  // On a body the light comes from that body's sun direction (snapped at placement).
+  expect(angleDeg(s.light.dir, s.light.bodySunDir)).toBeLessThanOrEqual(0.5);
+
+  // Navigation: the ten bodies in play with keys 1-0; 5 is the Moon.
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#panel-nav')).toBeVisible();
+  const rows = page.locator('#nav-list .navrow');
+  await expect(rows).toHaveCount(10);
+  await expect(rows.nth(0).locator('.meta')).toHaveText(/^Star · /);
+  await expect(rows.nth(3).locator('.name')).toHaveText(/^4\s+Earth · here/);
+  await expect(rows.nth(4).locator('.name')).toHaveText(/^5\s+Moon/);
+  await expect(rows.nth(4).locator('.meta')).toHaveText(/^Moon · Landing site/);
+  await expect(rows.nth(9).locator('.name')).toHaveText(/^0\s+Neptune/);
+  await page.keyboard.press('Digit5');
+  await expect(page.locator('#nav-list .navrow.selected .name')).toHaveText(/Moon/);
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#panel-nav')).toBeHidden();
+  s = await until(page, 's.state === "playing"', 60_000);
+  expect(s.navTarget).toBe('moon');
+
+  await api(page, 'autopilot', { kind: 'travel', to: 'moon' });
+  await apPhase(page, ['landed'], 50 * 60 * 1000);
+  s = await until(page, 's.mode === "LANDED" && s.body === "moon" && s.bodyShown', 120_000);
+  await api(page, 'autopilot', null);
+  console.log(`legs: ${JSON.stringify(s.cruiseLog)}\nhandoffs: ${JSON.stringify(s.handoffLog)}`);
+
+  // Cruise: the first leg is capped for the Earth -> Moon hop (about 21 km/s);
+  // no leg passes its cap, and nothing needed a safety stop.
+  const legs = s.cruiseLog as { start: number; end: number; target: string | null; cap: number; peak: number; exit: string }[];
+  expect(legs.length).toBeGreaterThanOrEqual(1);
+  expect(legs[0].target).toBe('moon');
+  expect(legs[0].cap).toBeGreaterThan(20000);
+  expect(legs[0].cap).toBeLessThan(22500);
+  expect(legs[0].end - legs[0].start).toBeLessThanOrEqual(60);
+  for (const l of legs) expect(l.peak).toBeLessThanOrEqual(l.cap);
+  expect(legs.some((l) => l.exit === 'approach')).toBe(true);
+  expect(s.counters.cruiseExitSafety).toBe(0);
+  expect(s.cruise.safetyStops).toBe(0);
+
+  // Handoff: Earth is released before the Moon activates; only those two ever activate.
+  const events = (s.handoffLog as { event: string; body: string }[]).map((e) => `${e.event} ${e.body}`);
+  const released = events.indexOf('release earth');
+  expect(released).toBeGreaterThanOrEqual(0);
+  expect(events.indexOf('activate moon')).toBeGreaterThan(released);
+  expect(events.filter((e) => e.startsWith('activate'))).toEqual(['activate earth', 'activate moon']);
+
+  // Landed level, in the Moon's light, with the arrival recorded.
+  expect(s.probe.slope).toBeLessThanOrEqual(12);
+  expect(angleDeg(s.light.dir, s.light.bodySunDir)).toBeLessThanOrEqual(0.5);
+  expect(s.discoveries).toEqual(['earth', 'moon']);
+  expect(await page.evaluate(() => (window as any).__meridian.game.lastSafeLanding?.bodyId ?? null)).toBe('moon');
+
+  await api(page, 'setRenderEvery', 1);
+  await page.waitForTimeout(3000);
+  await page.screenshot({ path: 'evidence/l7b-moon-landed.png', timeout: 180_000 });
   expect(errors).toEqual([]);
 });

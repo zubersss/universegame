@@ -33,6 +33,12 @@ from disk is not supported.
 
 If the menu is slow to appear on a weak machine, open `/?preset=low`.
 
+`/?system=sol` plays the Solar System in development instead of the Quiet
+System: New Expedition starts landed on Earth, Tab lists the Sun, the eight
+planets and the Moon (keys 1–0), and Earth, the Moon and Mars can be landed
+on. Both systems share one save slot: saving in one replaces the other
+system's save, which can then no longer be continued.
+
 ## Controls
 
 | Context | Keys |
