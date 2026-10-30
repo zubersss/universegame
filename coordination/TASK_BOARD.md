@@ -455,6 +455,20 @@ Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/{earth,ma
 Depends: B-010, B-011
 Lead notes: M2 exit polish, not a reopen. Schedule after B-023.
 
+### B-026 · BLENDER · Ready · M2
+Goal: Earth biome parallax variants: `backgrounds/earth_desert/layer0..2`, `backgrounds/earth_taiga/layer0..2`, `backgrounds/earth_coast/layer0..2` (Bible §7.1 biomes), same rendered-3D approach as B-010 rework.
+Accept: same sizes/tiling as backgrounds/earth; §9 (no flat fills, haze by distance); split-half renders within D-028 memory; stacked preview per biome.
+Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/earth_*/
+Depends: B-010
+Lead notes: Cycle 19. UNITY will switch backdrops by longitude biome later (M2/M3). Use the B-025 foliage lessons if B-025 is done first.
+
+### B-027 · BLENDER · Ready · M3
+Goal: Mercury terrain sets `terrain/mercury/{regolith,basalt,sulfide,ice}` (47-blob + 16 variants, D-020) and parallax `backgrounds/mercury/layer0..2` (black sky, huge Sun glow, crater rims, violet twilight per §7.3).
+Accept: contract §4 sizes; terrain joins seamlessly (demo patches); backdrop per §9 and Mercury palette (white/black/violet); split-half renders.
+Files: blender/scripts/gen_terrain.py, gen_backdrop3d.py, Assets/_Game/Art/terrain/mercury/, backgrounds/mercury/
+Depends: B-022
+Lead notes: Cycle 19. M3 lookahead so the art pipeline stays ahead of UNITY.
+
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
 Accept: frames ≤ 256, sheets ≤ 1024², `.json` per sheet, emission where glowing.
