@@ -50,6 +50,7 @@ namespace Meridian.EditorTools
             save.scenes = director;
             save.time = coreGo.GetComponent<TimeSystem>();
             save.transitions = transitions;
+            coreGo.AddComponent<Meridian.Perf.BudgetMonitor>();
             EditorSceneManager.SaveScene(core, CorePath);
 
             // Space (kept loaded but inactive by SceneDirector)
