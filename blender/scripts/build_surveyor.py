@@ -18,6 +18,7 @@ import os
 import sys
 
 import bpy
+from mathutils import Vector
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -97,8 +98,9 @@ DEATH = [dict(torso=-10, head=-10, hip_n=10, kn_n=26, hip_f=6, kn_f=24, sh_n=-20
          dict(rot=-6, torso=-14, head=-12, hip_n=30, kn_n=52, hip_f=26, kn_f=50, sh_n=-10, el_n=40, sh_f=30, el_f=30, x=0.02),
          dict(rot=-32, torso=-8, head=-10, hip_n=40, kn_n=60, hip_f=36, kn_f=58, sh_n=20, el_n=40, sh_f=40, el_f=30, x=0.02),
          dict(rot=-60, torso=-4, head=-6, hip_n=55, kn_n=70, hip_f=50, kn_f=66, sh_n=40, el_n=40, sh_f=50, el_f=30, x=-0.03),
-         dict(rot=-84, torso=0, head=-4, hip_n=66, kn_n=82, hip_f=60, kn_f=80, sh_n=30, el_n=30, sh_f=40, el_f=30, x=0.04),
-         dict(rot=-88, torso=0, head=-10, hip_n=64, kn_n=84, hip_f=58, kn_f=82, sh_n=24, el_n=24, sh_f=36, el_f=26, x=0.04)]
+         # v2 (B-023): end lying flat on the back, legs on the ground (not raised); x auto-centred.
+         dict(rot=-80, torso=0, head=-4, hip_n=22, kn_n=34, hip_f=16, kn_f=30, sh_n=30, el_n=30, sh_f=40, el_f=30, center=True),
+         dict(rot=-89, torso=0, head=-8, hip_n=8, kn_n=14, hip_f=4, kn_f=10, sh_n=18, el_n=20, sh_f=26, el_f=22, center=True)]
 
 
 def clip_pose(name, i):
@@ -124,6 +126,12 @@ def _rot(v, a):
 
 def lowest_point(p):
     """Lowest z (relative to the hip) of the body's hull samples for pose p."""
+    return body_extent(p)[2]
+
+
+def body_extent(p):
+    """(min x, max x, min z) of the body's hull samples (each sample padded by its radius),
+    relative to the hip, for pose p."""
     r = math.radians(p.get("rot", 0))
     pts = []
     # Downward limbs measure "forward" from straight down; a body lean (top toward +x) swings
@@ -139,22 +147,22 @@ def lowest_point(p):
         fa = r - math.radians(p.get(f"an_{side}", 0))
         for dx in (-0.09, 0.21):
             fx, fz = _rot((dx, -ANKLE_H), fa)
-            pts.append((ankle[0] + fx, ankle[1] + fz))
-        pts.append((knee[0], knee[1] - 0.09))
+            pts.append((ankle[0] + fx, ankle[1] + fz, 0.0))     # soles sit exactly on the pivot line
+        pts.append((knee[0], knee[1], 0.09))
     # Torso, head and pack, rotated with the body and the torso lean.
     t = r + math.radians(p.get("torso", 0))
     for v, rad in (((0.0, 0.0), 0.15), ((0.0, 0.5), 0.16), ((-0.24, 0.12), 0.08), ((-0.24, 0.48), 0.08),
                    ((-0.36, 0.12), 0.06), ((-0.36, 0.48), 0.06), ((0.02, NECK_Z + 0.13), 0.16)):
         x, z = _rot(v, t)
-        pts.append((x, z - rad))
+        pts.append((x, z, rad))
     for side in ("n", "f"):
         sx, sz = _rot((0.0, SHOULDER_Z), t)
         a1 = math.radians(p.get(f"sh_{side}", 0)) - t
         el = (sx + UPPER * math.sin(a1), sz - UPPER * math.cos(a1))
         a2 = a1 + math.radians(p.get(f"el_{side}", 0))
         wr = (el[0] + FORE * math.sin(a2), el[1] - FORE * math.cos(a2))
-        pts += [(el[0], el[1] - 0.07), (wr[0], wr[1] - 0.12)]
-    return min(z for _, z in pts)
+        pts += [(el[0], el[1], 0.07), (wr[0], wr[1], 0.12)]
+    return (min(x - rd for x, _, rd in pts), max(x + rd for x, _, rd in pts), min(z - rd for _, z, rd in pts))
 
 
 # ---------------------------------------------------------------- build
@@ -191,6 +199,69 @@ def tube(name, radius, depth, center, mat, rot=(0, 0, 0), verts=24):
     bpy.ops.object.shade_smooth()
     ob.data.materials.append(mat)
     return ob
+
+
+def soft_limb(name, top, bottom, radii, mat):
+    """A soft fabric limb (B-023): a 3-vertex skeleton through the Skin modifier, subdivided,
+    so the sleeve tapers and rounds like padded fabric, not a box. radii = (top, mid, bottom)."""
+    top, bottom = Vector(top), Vector(bottom)
+    verts = [top, top.lerp(bottom, 0.5), bottom]
+    me = bpy.data.meshes.new(name)
+    me.from_pydata([tuple(v) for v in verts], [(0, 1), (1, 2)], [])
+    ob = bpy.data.objects.new(name, me)
+    bpy.context.scene.collection.objects.link(ob)
+    ob.modifiers.new("skin", "SKIN")
+    for sv, r in zip(me.skin_vertices[0].data, radii):
+        sv.radius = (r, r * 0.94)
+    sub = ob.modifiers.new("sub", "SUBSURF")
+    sub.levels = sub.render_levels = 2
+    me.materials.append(mat)
+    return ob
+
+
+def fabric_material(name, base, dark, folds=0.35, k=1.0):
+    """Suit fabric: weave mottling, seam lines and horizontal wrinkle bands (bump only, so the
+    colour stays unlit albedo). Object space; limbs are built upright, so bands wrap them."""
+    base = tuple(int(c * k) for c in base)
+    dark = tuple(int(c * k) for c in dark)
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    N, L = nt.nodes, nt.links
+    pr = N["Principled BSDF"]
+    pr.inputs["Roughness"].default_value = 0.88
+    tc = N.new("ShaderNodeTexCoord")
+    nz = N.new("ShaderNodeTexNoise"); nz.inputs["Scale"].default_value = 9.0; nz.inputs["Detail"].default_value = 8.0
+    L.new(tc.outputs["Object"], nz.inputs["Vector"])
+    mr = N.new("ShaderNodeMapRange"); mr.inputs["From Min"].default_value = 0.3; mr.inputs["From Max"].default_value = 0.75
+    L.new(nz.outputs["Fac"], mr.inputs["Value"])
+    mix = N.new("ShaderNodeMix"); mix.data_type = "RGBA"
+    L.new(mr.outputs["Result"], mix.inputs[0])
+    mix.inputs[6].default_value = lin(base); mix.inputs[7].default_value = lin(dark)
+    col = mix.outputs[2]
+    # Wrinkles: Z bands, distorted by noise; seams: the sharp crest of a sparser Z wave.
+    wr = N.new("ShaderNodeTexWave"); wr.wave_type = "BANDS"; wr.bands_direction = "Z"
+    wr.inputs["Scale"].default_value = 14.0; wr.inputs["Distortion"].default_value = 6.0
+    wr.inputs["Detail"].default_value = 2.0
+    L.new(tc.outputs["Object"], wr.inputs["Vector"])
+    sm = N.new("ShaderNodeTexWave"); sm.wave_type = "BANDS"; sm.bands_direction = "Z"
+    sm.inputs["Scale"].default_value = 3.0
+    L.new(tc.outputs["Object"], sm.inputs["Vector"])
+    seam = N.new("ShaderNodeMapRange")
+    seam.inputs["From Min"].default_value = 0.93; seam.inputs["From Max"].default_value = 0.99
+    L.new(sm.outputs["Fac"], seam.inputs["Value"])
+    smix = N.new("ShaderNodeMix"); smix.data_type = "RGBA"
+    L.new(seam.outputs["Result"], smix.inputs[0])
+    L.new(col, smix.inputs[6]); smix.inputs[7].default_value = lin(tuple(int(c * 0.62) for c in base))
+    L.new(smix.outputs[2], pr.inputs["Base Color"])
+    h = N.new("ShaderNodeMath"); h.operation = "SUBTRACT"
+    L.new(wr.outputs["Fac"], h.inputs[0]); L.new(seam.outputs["Result"], h.inputs[1])
+    bump = N.new("ShaderNodeBump")
+    bump.inputs["Strength"].default_value = folds
+    bump.inputs["Distance"].default_value = 0.01
+    L.new(h.outputs[0], bump.inputs["Height"])
+    L.new(bump.outputs["Normal"], pr.inputs["Normal"])
+    return m
 
 
 def empty(name, loc, parent, coll):
@@ -231,7 +302,7 @@ def build(out_path=DEFAULT_OUT):
 
     M = {}
     for side, k in (("n", 1.0), ("f", 0.85)):
-        M["suit_" + side] = suit("suit_" + side, (206, 201, 188), (168, 160, 146), k)
+        M["suit_" + side] = fabric_material("suit_" + side, (206, 201, 188), (176, 168, 154), k=k)
         M["orange_" + side] = suit("orange_" + side, (206, 104, 38), (160, 78, 32), k)
         M["joint_" + side] = flat_material("joint_" + side, tuple(int(c * k) for c in (64, 66, 70)), metallic=0.3, rough=0.6)
         M["boot_" + side] = suit("boot_" + side, (74, 70, 64), (54, 50, 46), k)
@@ -241,12 +312,30 @@ def build(out_path=DEFAULT_OUT):
     lamp = flat_material("chest_lamp", (220, 220, 210), emit=(255, 232, 186), strength=1.0)
     tool_m = flat_material("beam_tool", (62, 64, 70), metallic=1.0, rough=0.35)
     tip = flat_material("beam_tip", (40, 70, 80), emit=(110, 230, 255), strength=1.0)
+    webbing = flat_material("webbing", (58, 58, 54), rough=0.9)
+    unit = flat_material("chest_unit", (72, 76, 80), metallic=0.4, rough=0.45)
+    led_g = flat_material("led_green", (30, 80, 40), emit=(90, 255, 120), strength=1.0)
+    led_a = flat_material("led_amber", (90, 60, 20), emit=(255, 180, 60), strength=1.0)
+    hud = flat_material("visor_hud", (20, 40, 50), emit=(120, 230, 255), strength=0.9)
+
+    def soften(ob):                                  # padded fabric: round the box after its bevel
+        s = ob.modifiers.new("soft", "SUBSURF")
+        s.levels = s.render_levels = 1
+        return ob
 
     root = empty("root", (0, 0, HIP_Z), None, coll)
-    attach(rbox("pelvis", (0.28, 0.36, 0.2), (0, 0, HIP_Z + 0.02), M["suit_n"]), root, coll)
+    attach(soften(rbox("pelvis", (0.28, 0.36, 0.2), (0, 0, HIP_Z + 0.02), M["suit_n"], 0.06)), root, coll)
+    attach(rbox("belt", (0.30, 0.38, 0.05), (0, 0, HIP_Z + 0.1), webbing, 0.02), root, coll)
     torso = empty("torso", (0, 0, HIP_Z), root, coll)
-    attach(rbox("chest", (0.30, 0.40, 0.46), (0, 0, HIP_Z + 0.27), M["suit_n"], 0.08), torso, coll)
+    attach(soften(rbox("chest", (0.30, 0.40, 0.46), (0, 0, HIP_Z + 0.27), M["suit_n"], 0.1)), torso, coll)
     attach(rbox("chest_plate", (0.05, 0.30, 0.18), (0.14, 0, HIP_Z + 0.33), M["orange_n"], 0.02), torso, coll)
+    # Chest control unit with status LEDs and harness straps over the shoulders.
+    attach(rbox("chest_unit", (0.05, 0.16, 0.1), (0.175, 0.04, HIP_Z + 0.22), unit, 0.015), torso, coll)
+    for j, (m_, dy) in enumerate(((led_g, 0.0), (led_a, 0.04), (led_g, 0.08))):
+        attach(rbox(f"led_{j}", (0.012, 0.018, 0.018), (0.202, dy, HIP_Z + 0.24), m_, 0.004), torso, coll)
+    for sy in (-1, 1):
+        attach(rbox(f"strap_{sy}", (0.33, 0.05, 0.035), (-0.05, sy * 0.12, HIP_Z + 0.5), webbing, 0.012), torso, coll)
+        attach(rbox(f"strap_front_{sy}", (0.025, 0.05, 0.3), (0.155, sy * 0.12, HIP_Z + 0.34), webbing, 0.01), torso, coll)
     attach(tube("lamp", 0.045, 0.04, (0.17, -0.08, HIP_Z + 0.38), lamp, rot=(0, math.pi / 2, 0)), torso, coll)
     attach(rbox("pack", (0.20, 0.34, 0.44), (-0.25, 0, HIP_Z + 0.30), pack, 0.05), torso, coll)
     attach(tube("pack_tank", 0.05, 0.40, (-0.36, 0.1, HIP_Z + 0.30), M["joint_n"]), torso, coll)
@@ -256,16 +345,21 @@ def build(out_path=DEFAULT_OUT):
     hz = HIP_Z + NECK_Z + 0.13
     attach(ball("helmet", 0.15, (0, 0, hz), M["suit_n"]), head, coll)
     attach(ball("visor", 0.142, (0.035, 0, hz - 0.005), visor, scale=(1.0, 0.86, 0.72)), head, coll)
+    for j, (dz, w) in enumerate(((0.035, 0.05), (0.015, 0.035), (-0.005, 0.045))):   # HUD readouts
+        attach(rbox(f"hud_{j}", (0.004, w, 0.008), (0.174, -0.035, hz + dz), hud, 0.0015), head, coll)
     attach(tube("helmet_light", 0.02, 0.06, (0.02, -0.15, hz + 0.08), M["joint_n"], rot=(math.pi / 2, 0, 0)), head, coll)
 
     joints = {}
     for side, sy in (("n", -1), ("f", 1)):
         sh = empty(f"sh_{side}", (0, sy * SHOULDER_Y, HIP_Z + SHOULDER_Z), torso, coll)
         attach(ball(f"shoulder_pad_{side}", 0.1, (0, sy * SHOULDER_Y, HIP_Z + SHOULDER_Z), M["orange_" + side], (1, 0.9, 0.85)), sh, coll)
-        attach(rbox(f"upper_arm_{side}", (0.12, 0.12, UPPER), (0, sy * SHOULDER_Y, HIP_Z + SHOULDER_Z - UPPER / 2 + 0.01), M["suit_" + side], 0.05), sh, coll)
+        sz_ = HIP_Z + SHOULDER_Z
+        attach(soft_limb(f"upper_arm_{side}", (0, sy * SHOULDER_Y, sz_ + 0.02), (0, sy * SHOULDER_Y, sz_ - UPPER),
+                         (0.068, 0.062, 0.055), M["suit_" + side]), sh, coll)
         el = empty(f"el_{side}", (0, sy * SHOULDER_Y, HIP_Z + SHOULDER_Z - UPPER), sh, coll)
         attach(ball(f"elbow_{side}", 0.065, (0, sy * SHOULDER_Y, HIP_Z + SHOULDER_Z - UPPER), M["joint_" + side]), el, coll)
-        attach(rbox(f"forearm_{side}", (0.11, 0.11, FORE), (0, sy * SHOULDER_Y, HIP_Z + SHOULDER_Z - UPPER - FORE / 2), M["suit_" + side], 0.045), el, coll)
+        attach(soft_limb(f"forearm_{side}", (0, sy * SHOULDER_Y, sz_ - UPPER), (0, sy * SHOULDER_Y, sz_ - UPPER - FORE),
+                         (0.058, 0.055, 0.047), M["suit_" + side]), el, coll)
         wz = HIP_Z + SHOULDER_Z - UPPER - FORE
         attach(rbox(f"glove_{side}", (0.10, 0.09, 0.11), (0.01, sy * SHOULDER_Y, wz - 0.05), M["glove_" + side], 0.03), el, coll)
         if side == "n":
@@ -273,11 +367,13 @@ def build(out_path=DEFAULT_OUT):
             attach(ball("beam_tip", 0.032, (0.02, sy * (SHOULDER_Y + 0.02), wz - 0.29), tip), el, coll)
 
         hp = empty(f"hip_{side}", (0, sy * HIP_Y, HIP_Z), root, coll)
-        attach(rbox(f"thigh_{side}", (0.17, 0.17, THIGH + 0.02), (0, sy * HIP_Y, HIP_Z - THIGH / 2), M["suit_" + side], 0.06), hp, coll)
+        attach(soft_limb(f"thigh_{side}", (0, sy * HIP_Y, HIP_Z + 0.02), (0, sy * HIP_Y, HIP_Z - THIGH),
+                         (0.092, 0.085, 0.07), M["suit_" + side]), hp, coll)
         attach(rbox(f"thigh_band_{side}", (0.18, 0.18, 0.06), (0, sy * HIP_Y, HIP_Z - 0.16), M["orange_" + side], 0.02), hp, coll)
         kn = empty(f"kn_{side}", (0, sy * HIP_Y, HIP_Z - THIGH), hp, coll)
         attach(ball(f"knee_{side}", 0.085, (0.02, sy * HIP_Y, HIP_Z - THIGH), M["joint_" + side]), kn, coll)
-        attach(rbox(f"shin_{side}", (0.14, 0.14, SHIN), (0, sy * HIP_Y, HIP_Z - THIGH - SHIN / 2 + 0.02), M["suit_" + side], 0.05), kn, coll)
+        attach(soft_limb(f"shin_{side}", (0, sy * HIP_Y, HIP_Z - THIGH), (0, sy * HIP_Y, HIP_Z - THIGH - SHIN + 0.04),
+                         (0.072, 0.066, 0.06), M["suit_" + side]), kn, coll)
         az = HIP_Z - THIGH - SHIN
         an = empty(f"an_{side}", (0, sy * HIP_Y, az), kn, coll)
         attach(rbox(f"boot_{side}", (0.29, 0.14, ANKLE_H + 0.04), (0.06, sy * HIP_Y, az - ANKLE_H / 2 + 0.02), M["boot_" + side], 0.035), an, coll)
@@ -305,8 +401,10 @@ def animate(root, torso, head, J):
         for i in range(CLIP_LEN[name]):
             p = clip_pose(name, i)
             f = CLIP_START[name] + i
-            ground = -lowest_point(p)                       # hip height that puts the body on z = 0
-            key(root, f, rot_y=p.get("rot", 0), loc=(p.get("x", 0.0), 0.0, ground + p.get("lift", 0.0)))
+            x0, x1, zmin = body_extent(p)
+            ground = -zmin                                  # hip height that puts the body on z = 0
+            x = -(x0 + x1) / 2 if p.get("center") else p.get("x", 0.0)   # lying poses: centre in frame
+            key(root, f, rot_y=p.get("rot", 0), loc=(x, 0.0, ground + p.get("lift", 0.0)))
             key(torso, f, rot_y=p.get("torso", 0))
             key(head, f, rot_y=p.get("head", 0))
             for s in ("n", "f"):

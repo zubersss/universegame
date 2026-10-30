@@ -158,7 +158,7 @@
       "size": [256, 256],
       "origin": [0, 0, 0],
       "pivot": [0.5, 0.0390625],
-      "maps": ["color", "normal", "emission"],
+      "maps": ["color", "normal", "emission", "mask"],
       "samples": 24,
       "animations": {
         "columns": 7, "fps": 12, "facing": "right",
