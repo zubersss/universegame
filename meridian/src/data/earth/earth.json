@@ -1,0 +1,1396 @@
+{
+ "dataset": "earth",
+ "format": "LSR1 (see scripts/data/build_earth.py)",
+ "grid": "node-registered latitude/longitude: row 0 = 90N, last row = 90S, column 0 = 180W, last column = 180E (duplicate of column 0)",
+ "built": "2026-10-30",
+ "tool": "scripts/data/build_earth.py",
+ "totalBytes": 3499290,
+ "credits": [
+  "Topography: ETOPO1 (NOAA NGDC, public domain), 10' grid by Fatiando a Terra (CC BY 4.0)",
+  "Coastlines and lakes: Natural Earth (public domain)",
+  "Land cover: \u00a9 ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium (CC BY 4.0)"
+ ],
+ "layers": {
+  "elevation": {
+   "file": "earth-elevation.bin",
+   "bytes": 1981825,
+   "sha256Decoded": "8c77913fcc318b9a84bc1ee614a2485f3693781810cc4201f91816448459a83c",
+   "dtype": "int16",
+   "width": 2161,
+   "height": 1081,
+   "channels": 1,
+   "res": 0.16666666666666666,
+   "scale": 1,
+   "offset": 0,
+   "units": "m",
+   "datum": "mean sea level",
+   "nodata": null,
+   "nodataFilled": 0,
+   "min": -10023,
+   "max": 6082,
+   "source": {
+    "name": "ETOPO1 Ice Surface (NOAA NGDC, Amante & Eakins 2009) at 10 arc-minutes, as distributed by Fatiando a Terra",
+    "url": "https://github.com/fatiando-data/earth-topography-10arcmin/releases/download/v1/earth-topography-10arcmin.nc",
+    "doi": [
+     "https://doi.org/10.7289/V5C8276M",
+     "https://doi.org/10.5281/zenodo.5882203"
+    ],
+    "license": "ETOPO1: public domain (US Government work); this 10' grid: CC BY 4.0 (Fatiando a Terra)",
+    "note": "INTERIM: evaluated from the ETOPO1 spherical-harmonic model (degree 720, taper 540-720) by the ICGEM service, so relief is smoothed (Everest region about 5.9 km). Replace with ETOPO 2022 60s (--elevation-etopo2022) when www.ncei.noaa.gov is reachable.",
+    "accessed": "2026-10-30",
+    "sha256": "e45628a3f559ec600a4003587a2b575402d22986651ee48806930aa909af4cf6"
+   }
+  },
+  "coast": {
+   "file": "earth-coast.bin",
+   "bytes": 822618,
+   "sha256Decoded": "6b47e5c4b6e37edd6a5e7cb23387ffcde3559e4883c80fe5647dfc69769eaab1",
+   "dtype": "int8",
+   "width": 4321,
+   "height": 2161,
+   "channels": 1,
+   "res": 0.08333333333333333,
+   "scale": 0.5,
+   "offset": 0,
+   "units": "km",
+   "meaning": "signed distance to the coastline, positive on land (incl. ice shelves), negative on ocean and lakes, clamped to +-63.5 km",
+   "landFraction": 0.2884469451908126,
+   "source": {
+    "source": {
+     "name": "Natural Earth 1:10m physical vectors (GeoJSON)",
+     "repository": "https://github.com/nvkelso/natural-earth-vector (master)",
+     "version": "5.2.0-pre",
+     "license": "public domain (https://www.naturalearthdata.com/about/terms-of-use/)",
+     "accessed": "2026-10-30",
+     "files": [
+      {
+       "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_land.geojson",
+       "file": "ne_10m_land.geojson",
+       "bytes": 10157965,
+       "sha256": "1ac90796408bc6ad6911d69448485d3c4dbf2190370080368a09976e1c9f7416"
+      },
+      {
+       "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_minor_islands.geojson",
+       "file": "ne_10m_minor_islands.geojson",
+       "bytes": 1320514,
+       "sha256": "8c933ca7a4760256bdc46408355706e39764b0fa01c160c28888b90b4faec29f"
+      },
+      {
+       "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_antarctic_ice_shelves_polys.geojson",
+       "file": "ne_10m_antarctic_ice_shelves_polys.geojson",
+       "bytes": 561580,
+       "sha256": "8f9bf62368695f5664b5fcd9bc0e2baea66da295aea014ce0e9cf510f209898d"
+      },
+      {
+       "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_lakes.geojson",
+       "file": "ne_10m_lakes.geojson",
+       "bytes": 5043554,
+       "sha256": "2d036f53dedec578001c5c30c2959ee7d4eebc1306900fa4367c49929ec8f2d9"
+      },
+      {
+       "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/VERSION",
+       "file": "VERSION",
+       "bytes": 10,
+       "sha256": "fa43123c5e3a802287a821ea65b4daeeb20ed63cfdc82a67c3dfa4aad0173280"
+      }
+     ],
+     "polygon_parts": {
+      "ne_10m_land": 6836,
+      "ne_10m_minor_islands": 2795,
+      "ne_10m_antarctic_ice_shelves_polys": 164,
+      "ne_10m_lakes": 1366
+     },
+     "excluded_features": {
+      "ne_10m_land": [
+       {
+        "index": 10,
+        "featurecla": "Null island"
+       }
+      ]
+     }
+    },
+    "method": [
+     "Super-grid 1/48 deg (1.25'), node-registered, H=8641 W=17281.",
+     "Land = ne_10m_land OR ne_10m_minor_islands OR ne_10m_antarctic_ice_shelves_polys, then AND-NOT ne_10m_lakes (holes of lake polygons stay land). Each polygon part is drawn with Pillow ImageDraw.polygon on its own bounding-box canvas (exterior ring = 1, then its holes = 0) and ORed (lakes: AND-NOT) into the global layer.",
+     "Pixel transform: u = (lon+180)*48, v = (90-lat)*48 (node units); canvas x_px = 4*(u-j0)+0.5, y_px = 4*(v-i0)+0.5, sampled at every 4th pixel, so canvas pixel (4*a, 4*b) is centred on node (i0+a, j0+b). Pillow truncates vertices to int and fills closed spans; the 4x canvas confines that to nodes within ~1/4 node of an edge (self_test).",
+     "Seam: column 0 and column W-1 := column 0 OR column W-1 (lake ids: first non-zero).",
+     "Lake ids: same rasterization; lowest feature index wins where lake polygons overlap (mostly Great Lakes bay features such as Georgian Bay inside Lake Huron, which thus keep few or no nodes).",
+     "SDF: land raster wrap-padded by 1536 columns per side (in 4 longitude tiles; padding grown until every distance < pad, so the wrap is exact), scipy.ndimage.distance_transform_edt on land and on water, sdf_px = edt_land - 0.5 on land, -(edt_water - 0.5) on water, cropped, times 2.316561 km (meridional 1/48 deg, R = 6371.0 km).",
+     "5' grid: every 4th super-grid node (exact node correspondence), enforce_seam."
+    ],
+    "approximations": [
+     "Distances are measured in the lat/lon pixel grid: east-west distances are overestimated by 1/cos(latitude) (no wrap over the poles).",
+     "Quantised to the 1.25' super-grid: the coastline sits midway between land and water nodes, so |sdf| >= 0.5 super-pixel (1.16 km) and errors up to about one super-pixel.",
+     "Vertices snap to 1/4 super-node and spans are closed, so nodes within ~1/4 super-node (~0.6 km) of an edge may differ from an exact point-in-polygon test; boundary nodes on lat -90 and lon +-180 edges count as inside.",
+     "Features narrower than the 5' node spacing can be missed by the node sampling.",
+     "The Caspian Sea is a hole of the ne_10m_land polygon, not an ne_10m_lakes feature, so it is water with lake_id 0.",
+     "ne_10m_land feature 'Null island' (fictitious 0.009 deg square at 0N 0E) excluded."
+    ]
+   }
+  },
+  "water": {
+   "file": "earth-water.bin",
+   "bytes": 66777,
+   "sha256Decoded": "08d67e2122c689082f8366bcc0b10b19db10373d863bf0e1fa42d408ced435b5",
+   "dtype": "int16",
+   "width": 2161,
+   "height": 1081,
+   "channels": 1,
+   "res": 0.16666666666666666,
+   "scale": 1,
+   "offset": 0,
+   "units": "m",
+   "meaning": "surface level of the nearest water body: 0 for the ocean, an estimated level for lakes (5th percentile of the DEM on land within 5-30 km of the shore, at least +1 m)",
+   "tag": "estimated",
+   "lakes": [
+    {
+     "id": 4,
+     "name": "P\u00e4\u00e4j\u00e4rvi",
+     "level": 112.0,
+     "nodes5m": 33
+    },
+    {
+     "id": 6,
+     "name": "Great Bear Lake",
+     "level": 174.0,
+     "nodes5m": 879
+    },
+    {
+     "id": 7,
+     "name": "Great Slave Lake",
+     "level": 158.0,
+     "nodes5m": 637
+    },
+    {
+     "id": 8,
+     "name": "McLeod Bay",
+     "level": 218.9,
+     "nodes5m": 57
+    },
+    {
+     "id": 9,
+     "name": "Lake Winnipeg",
+     "level": 215.0,
+     "nodes5m": 472
+    },
+    {
+     "id": 10,
+     "name": "Lake Erie",
+     "level": 170.5,
+     "nodes5m": 407
+    },
+    {
+     "id": 11,
+     "name": "Lake Ontario",
+     "level": 82.6,
+     "nodes5m": 316
+    },
+    {
+     "id": 12,
+     "name": "Lake Saint Clair",
+     "level": 175.0,
+     "nodes5m": 21
+    },
+    {
+     "id": 13,
+     "name": "Lake Okeechobee",
+     "level": 1.0,
+     "nodes5m": 22
+    },
+    {
+     "id": 14,
+     "name": "Lago de Nicaragua",
+     "level": 16.0,
+     "nodes5m": 95
+    },
+    {
+     "id": 15,
+     "name": null,
+     "level": 249.9,
+     "nodes5m": 35
+    },
+    {
+     "id": 16,
+     "name": "Wollaston Lake",
+     "level": 376.6,
+     "nodes5m": 51
+    },
+    {
+     "id": 17,
+     "name": "Reindeer Lake",
+     "level": 353.2,
+     "nodes5m": 151
+    },
+    {
+     "id": 18,
+     "name": "Lake of the Woods",
+     "level": 325.8,
+     "nodes5m": 79
+    },
+    {
+     "id": 19,
+     "name": "Lake Nipigon",
+     "level": 279.0,
+     "nodes5m": 79
+    },
+    {
+     "id": 20,
+     "name": "Lake Manitoba",
+     "level": 242.0,
+     "nodes5m": 91
+    },
+    {
+     "id": 21,
+     "name": "Lake Winnipegosis",
+     "level": 247.0,
+     "nodes5m": 106
+    },
+    {
+     "id": 22,
+     "name": "Lake Athabasca",
+     "level": 216.0,
+     "nodes5m": 179
+    },
+    {
+     "id": 23,
+     "name": "Lake Mistassini",
+     "level": 361.9,
+     "nodes5m": 58
+    },
+    {
+     "id": 25,
+     "name": "Iliamna Lake",
+     "level": 53.1,
+     "nodes5m": 59
+    },
+    {
+     "id": 26,
+     "name": null,
+     "level": 13.7,
+     "nodes5m": 26
+    },
+    {
+     "id": 29,
+     "name": "Nettilling Lake",
+     "level": 36.6,
+     "nodes5m": 157
+    },
+    {
+     "id": 30,
+     "name": "Dubawnt Lake",
+     "level": 171.6,
+     "nodes5m": 99
+    },
+    {
+     "id": 31,
+     "name": "Baker Lake",
+     "level": 6.6,
+     "nodes5m": 43
+    },
+    {
+     "id": 32,
+     "name": "Lake Champlain",
+     "level": 30.1,
+     "nodes5m": 23
+    },
+    {
+     "id": 33,
+     "name": "Churchill Lake",
+     "level": 424.8,
+     "nodes5m": 54
+    },
+    {
+     "id": 34,
+     "name": "Lac la Martre",
+     "level": 219.5,
+     "nodes5m": 46
+    },
+    {
+     "id": 38,
+     "name": "Cree Lake",
+     "level": 419.4,
+     "nodes5m": 34
+    },
+    {
+     "id": 40,
+     "name": "Kasba Lake",
+     "level": 321.0,
+     "nodes5m": 38
+    },
+    {
+     "id": 42,
+     "name": "Lac-\u00e0-l'Eau-Claire",
+     "level": 252.1,
+     "nodes5m": 30
+    },
+    {
+     "id": 43,
+     "name": "Lake Nipissing",
+     "level": 197.0,
+     "nodes5m": 20
+    },
+    {
+     "id": 51,
+     "name": null,
+     "level": 285.5,
+     "nodes5m": 24
+    },
+    {
+     "id": 56,
+     "name": "Teshekpuk Lake",
+     "level": 1.0,
+     "nodes5m": 31
+    },
+    {
+     "id": 58,
+     "name": "Lake Claire",
+     "level": 202.9,
+     "nodes5m": 34
+    },
+    {
+     "id": 62,
+     "name": "Rainy Lake",
+     "level": 345.0,
+     "nodes5m": 24
+    },
+    {
+     "id": 65,
+     "name": "Amadjuak Lake",
+     "level": 84.2,
+     "nodes5m": 86
+    },
+    {
+     "id": 67,
+     "name": "Lake Bienville",
+     "level": 354.0,
+     "nodes5m": 29
+    },
+    {
+     "id": 87,
+     "name": "Hottah Lake",
+     "level": 212.1,
+     "nodes5m": 25
+    },
+    {
+     "id": 90,
+     "name": "Island Lake",
+     "level": 205.0,
+     "nodes5m": 21
+    },
+    {
+     "id": 92,
+     "name": "Lac la Ronge",
+     "level": 375.1,
+     "nodes5m": 31
+    },
+    {
+     "id": 98,
+     "name": "Gods Lake",
+     "level": 169.0,
+     "nodes5m": 21
+    },
+    {
+     "id": 99,
+     "name": "Yathkyed Lake",
+     "level": 121.5,
+     "nodes5m": 37
+    },
+    {
+     "id": 109,
+     "name": "Aylmer Lake",
+     "level": 363.0,
+     "nodes5m": 29
+    },
+    {
+     "id": 110,
+     "name": "Clinton-Colden Lake",
+     "level": 352.4,
+     "nodes5m": 25
+    },
+    {
+     "id": 112,
+     "name": "Wholdaia Lake",
+     "level": 338.6,
+     "nodes5m": 34
+    },
+    {
+     "id": 116,
+     "name": "Point Lake",
+     "level": 331.9,
+     "nodes5m": 22
+    },
+    {
+     "id": 177,
+     "name": null,
+     "level": 257.6,
+     "nodes5m": 25
+    },
+    {
+     "id": 190,
+     "name": "Napaktulik",
+     "level": 361.0,
+     "nodes5m": 31
+    },
+    {
+     "id": 227,
+     "name": null,
+     "level": 413.4,
+     "nodes5m": 22
+    },
+    {
+     "id": 229,
+     "name": null,
+     "level": 403.2,
+     "nodes5m": 35
+    },
+    {
+     "id": 236,
+     "name": null,
+     "level": 122.0,
+     "nodes5m": 21
+    },
+    {
+     "id": 237,
+     "name": "Nonacho Lake",
+     "level": 288.5,
+     "nodes5m": 23
+    },
+    {
+     "id": 239,
+     "name": null,
+     "level": 316.5,
+     "nodes5m": 22
+    },
+    {
+     "id": 247,
+     "name": "Aberdeen Lake",
+     "level": 94.2,
+     "nodes5m": 57
+    },
+    {
+     "id": 284,
+     "name": "Contwoyto Lake",
+     "level": 423.6,
+     "nodes5m": 50
+    },
+    {
+     "id": 291,
+     "name": "Nueltin Lake",
+     "level": 267.3,
+     "nodes5m": 53
+    },
+    {
+     "id": 299,
+     "name": "Lesser Slave Lake",
+     "level": 612.5,
+     "nodes5m": 28
+    },
+    {
+     "id": 303,
+     "name": "Lac Minto",
+     "level": 196.8,
+     "nodes5m": 22
+    },
+    {
+     "id": 307,
+     "name": "Garry Lake",
+     "level": 138.0,
+     "nodes5m": 37
+    },
+    {
+     "id": 466,
+     "name": "Lake Superior",
+     "level": 191.6,
+     "nodes5m": 1413
+    },
+    {
+     "id": 467,
+     "name": "Lake Michigan",
+     "level": 178.0,
+     "nodes5m": 930
+    },
+    {
+     "id": 468,
+     "name": "Lake Huron",
+     "level": 178.0,
+     "nodes5m": 989
+    },
+    {
+     "id": 473,
+     "name": "Lake Ladoga",
+     "level": 12.0,
+     "nodes5m": 419
+    },
+    {
+     "id": 474,
+     "name": "Lake Balkhash",
+     "level": 340.7,
+     "nodes5m": 299
+    },
+    {
+     "id": 475,
+     "name": "Lake Baikal",
+     "level": 564.1,
+     "nodes5m": 621
+    },
+    {
+     "id": 476,
+     "name": "Lake Albert",
+     "level": 699.2,
+     "nodes5m": 62
+    },
+    {
+     "id": 477,
+     "name": "Lake Malawi",
+     "level": 557.8,
+     "nodes5m": 343
+    },
+    {
+     "id": 478,
+     "name": "Lake Tanganyika",
+     "level": 955.8,
+     "nodes5m": 392
+    },
+    {
+     "id": 479,
+     "name": "Lake Victoria",
+     "level": 816.1,
+     "nodes5m": 779
+    },
+    {
+     "id": 481,
+     "name": "V\u00e4nern",
+     "level": 57.5,
+     "nodes5m": 129
+    },
+    {
+     "id": 482,
+     "name": "Lake Onega",
+     "level": 39.8,
+     "nodes5m": 249
+    },
+    {
+     "id": 483,
+     "name": "Lake Tana",
+     "level": 1017.8,
+     "nodes5m": 39
+    },
+    {
+     "id": 484,
+     "name": "Lago Titicaca",
+     "level": 3186.9,
+     "nodes5m": 100
+    },
+    {
+     "id": 485,
+     "name": "Lake Saimaa",
+     "level": 31.0,
+     "nodes5m": 242
+    },
+    {
+     "id": 487,
+     "name": "Lago Buenos Aires",
+     "level": 543.5,
+     "nodes5m": 32
+    },
+    {
+     "id": 489,
+     "name": "Hongze Hu",
+     "level": 3.0,
+     "nodes5m": 35
+    },
+    {
+     "id": 490,
+     "name": "Kh\u00f6vsg\u00f6l Nuur",
+     "level": 1656.7,
+     "nodes5m": 52
+    },
+    {
+     "id": 491,
+     "name": "P\u00e4ij\u00e4nne",
+     "level": 53.3,
+     "nodes5m": 104
+    },
+    {
+     "id": 492,
+     "name": "Lac Moeru",
+     "level": 921.5,
+     "nodes5m": 60
+    },
+    {
+     "id": 493,
+     "name": "Lake Khanka",
+     "level": 56.6,
+     "nodes5m": 65
+    },
+    {
+     "id": 494,
+     "name": "Tonl\u00e9 Sap",
+     "level": 1.0,
+     "nodes5m": 29
+    },
+    {
+     "id": 497,
+     "name": "Lake Srednye Kuyto",
+     "level": 112.0,
+     "nodes5m": 20
+    },
+    {
+     "id": 498,
+     "name": "Lake Chany",
+     "level": 100.0,
+     "nodes5m": 44
+    },
+    {
+     "id": 499,
+     "name": "Hulun Nuur",
+     "level": 550.5,
+     "nodes5m": 43
+    },
+    {
+     "id": 500,
+     "name": "Lake Bangweulu",
+     "level": 1152.9,
+     "nodes5m": 26
+    },
+    {
+     "id": 501,
+     "name": "Inarijrvi",
+     "level": 130.1,
+     "nodes5m": 55
+    },
+    {
+     "id": 502,
+     "name": "Lake Peipus",
+     "level": 23.4,
+     "nodes5m": 65
+    },
+    {
+     "id": 503,
+     "name": "Lake Kivu",
+     "level": 1219.0,
+     "nodes5m": 28
+    },
+    {
+     "id": 504,
+     "name": "Lake Edward",
+     "level": 885.4,
+     "nodes5m": 28
+    },
+    {
+     "id": 505,
+     "name": "Tai Hu",
+     "level": 1.0,
+     "nodes5m": 35
+    },
+    {
+     "id": 506,
+     "name": "Lago Argentino",
+     "level": 313.5,
+     "nodes5m": 26
+    },
+    {
+     "id": 507,
+     "name": "Nam Co",
+     "level": 4708.0,
+     "nodes5m": 25
+    },
+    {
+     "id": 519,
+     "name": "Lake Vygozero",
+     "level": 44.5,
+     "nodes5m": 31
+    },
+    {
+     "id": 521,
+     "name": "Lake Segozerskoye",
+     "level": 87.0,
+     "nodes5m": 20
+    },
+    {
+     "id": 522,
+     "name": "Pielinen",
+     "level": 100.3,
+     "nodes5m": 31
+    },
+    {
+     "id": 523,
+     "name": "Lake Topozero",
+     "level": 91.0,
+     "nodes5m": 32
+    },
+    {
+     "id": 530,
+     "name": "Poyang Hu",
+     "level": 3.0,
+     "nodes5m": 27
+    },
+    {
+     "id": 534,
+     "name": "Siling Co",
+     "level": 4559.3,
+     "nodes5m": 21
+    },
+    {
+     "id": 535,
+     "name": "Har Us Nuur",
+     "level": 1119.0,
+     "nodes5m": 27
+    },
+    {
+     "id": 538,
+     "name": "V\u00e4ttern",
+     "level": 78.5,
+     "nodes5m": 44
+    },
+    {
+     "id": 539,
+     "name": "Lake Taymyr",
+     "level": 48.0,
+     "nodes5m": 206
+    },
+    {
+     "id": 544,
+     "name": "Lake Kyoga",
+     "level": 1034.0,
+     "nodes5m": 22
+    },
+    {
+     "id": 545,
+     "name": "Lake Rukwa",
+     "level": 778.1,
+     "nodes5m": 23
+    },
+    {
+     "id": 548,
+     "name": "Ozero Pyasino",
+     "level": 23.5,
+     "nodes5m": 34
+    },
+    {
+     "id": 553,
+     "name": "Pyh\u00e4j\u00e4rvi",
+     "level": 100.0,
+     "nodes5m": 24
+    },
+    {
+     "id": 560,
+     "name": "Lake Beloye",
+     "level": 124.1,
+     "nodes5m": 30
+    },
+    {
+     "id": 564,
+     "name": "Lago Viedma",
+     "level": 370.5,
+     "nodes5m": 21
+    },
+    {
+     "id": 589,
+     "name": "Lake Sevan",
+     "level": 691.1,
+     "nodes5m": 23
+    },
+    {
+     "id": 598,
+     "name": "Ozero Khantayskoye",
+     "level": 85.5,
+     "nodes5m": 42
+    },
+    {
+     "id": 600,
+     "name": "Ozero Lama",
+     "level": 107.9,
+     "nodes5m": 25
+    },
+    {
+     "id": 664,
+     "name": "Lago San Mart\u00edn",
+     "level": 561.0,
+     "nodes5m": 21
+    },
+    {
+     "id": 700,
+     "name": "Lac Mai-Ndombe",
+     "level": 304.0,
+     "nodes5m": 25
+    },
+    {
+     "id": 720,
+     "name": "Ozero Labaz",
+     "level": 43.0,
+     "nodes5m": 22
+    },
+    {
+     "id": 1037,
+     "name": "M\u00e4laren",
+     "level": 21.0,
+     "nodes5m": 44
+    },
+    {
+     "id": 1047,
+     "name": "Novosibirsk Reservoir",
+     "level": 121.7,
+     "nodes5m": 22
+    },
+    {
+     "id": 1048,
+     "name": "Lake Zaysan",
+     "level": 388.0,
+     "nodes5m": 71
+    },
+    {
+     "id": 1050,
+     "name": "Buhayrat ath Tharthar",
+     "level": 49.0,
+     "nodes5m": 24
+    },
+    {
+     "id": 1054,
+     "name": "Lake Kovdozero",
+     "level": 33.8,
+     "nodes5m": 41
+    },
+    {
+     "id": 1055,
+     "name": "Lake Imandra",
+     "level": 128.0,
+     "nodes5m": 27
+    },
+    {
+     "id": 1059,
+     "name": "Lake Il'Men'",
+     "level": 25.5,
+     "nodes5m": 20
+    },
+    {
+     "id": 1060,
+     "name": "Cheboksary Reservoir",
+     "level": 85.0,
+     "nodes5m": 28
+    },
+    {
+     "id": 1061,
+     "name": "Ouluj\u00e4rvi",
+     "level": 106.9,
+     "nodes5m": 34
+    },
+    {
+     "id": 1066,
+     "name": "Lokan Tekojarvi",
+     "level": 204.0,
+     "nodes5m": 21
+    },
+    {
+     "id": 1081,
+     "name": "Southern Indian Lake",
+     "level": 266.5,
+     "nodes5m": 51
+    },
+    {
+     "id": 1083,
+     "name": "Cedar Lake",
+     "level": 236.8,
+     "nodes5m": 62
+    },
+    {
+     "id": 1088,
+     "name": "Lac Seul",
+     "level": 367.2,
+     "nodes5m": 25
+    },
+    {
+     "id": 1095,
+     "name": "R\u00e9servoir de La Grande 2",
+     "level": 142.6,
+     "nodes5m": 58
+    },
+    {
+     "id": 1096,
+     "name": "Saratov Reservoir",
+     "level": 30.0,
+     "nodes5m": 23
+    },
+    {
+     "id": 1100,
+     "name": "R\u00e9servoir Manicouagan",
+     "level": 443.8,
+     "nodes5m": 48
+    },
+    {
+     "id": 1101,
+     "name": "R\u00e9servoir de La Grande 3",
+     "level": 199.0,
+     "nodes5m": 44
+    },
+    {
+     "id": 1104,
+     "name": "Williston Lake",
+     "level": 801.0,
+     "nodes5m": 41
+    },
+    {
+     "id": 1105,
+     "name": "Fort Peck Lake",
+     "level": 688.1,
+     "nodes5m": 21
+    },
+    {
+     "id": 1106,
+     "name": "Lake Sakakawea",
+     "level": 566.0,
+     "nodes5m": 26
+    },
+    {
+     "id": 1107,
+     "name": "Lake Oahe",
+     "level": 530.9,
+     "nodes5m": 37
+    },
+    {
+     "id": 1108,
+     "name": "R\u00e9servoir Gouin",
+     "level": 399.5,
+     "nodes5m": 33
+    },
+    {
+     "id": 1117,
+     "name": "R\u00e9servoir de Caniapiscau",
+     "level": 531.5,
+     "nodes5m": 20
+    },
+    {
+     "id": 1172,
+     "name": "Rybinsk Reservoir",
+     "level": 106.5,
+     "nodes5m": 100
+    },
+    {
+     "id": 1174,
+     "name": "Kakhovka Reservoir",
+     "level": 23.5,
+     "nodes5m": 34
+    },
+    {
+     "id": 1175,
+     "name": "Kremenchuk Reservoir",
+     "level": 85.0,
+     "nodes5m": 34
+    },
+    {
+     "id": 1176,
+     "name": "Samara Reservoir",
+     "level": 60.1,
+     "nodes5m": 117
+    },
+    {
+     "id": 1177,
+     "name": "Represa de Sobradinho",
+     "level": 391.5,
+     "nodes5m": 104
+    },
+    {
+     "id": 1179,
+     "name": "Lake Kariba",
+     "level": 510.0,
+     "nodes5m": 64
+    },
+    {
+     "id": 1181,
+     "name": "Lake Argyle",
+     "level": 91.5,
+     "nodes5m": 23
+    },
+    {
+     "id": 1182,
+     "name": "Lake Nasser",
+     "level": 180.5,
+     "nodes5m": 43
+    },
+    {
+     "id": 1184,
+     "name": "Professor Doctor Ingenieur W. J. Van Blommestein Meer",
+     "level": 34.0,
+     "nodes5m": 22
+    },
+    {
+     "id": 1185,
+     "name": "Represa Itaipu",
+     "level": 224.1,
+     "nodes5m": 32
+    },
+    {
+     "id": 1186,
+     "name": "Lake Volta",
+     "level": 73.0,
+     "nodes5m": 88
+    },
+    {
+     "id": 1187,
+     "name": "Bratsk Reservoir",
+     "level": 429.5,
+     "nodes5m": 86
+    },
+    {
+     "id": 1188,
+     "name": "Represa de Tucuru\u00ed",
+     "level": 77.5,
+     "nodes5m": 42
+    },
+    {
+     "id": 1190,
+     "name": "Repressa de Jupia",
+     "level": 331.9,
+     "nodes5m": 20
+    },
+    {
+     "id": 1192,
+     "name": "Vilyuy Reservoir",
+     "level": 295.2,
+     "nodes5m": 111
+    },
+    {
+     "id": 1193,
+     "name": "Krasnoyarsk Reservoir",
+     "level": 309.4,
+     "nodes5m": 32
+    },
+    {
+     "id": 1198,
+     "name": "Lago de Cahora Bassa",
+     "level": 344.0,
+     "nodes5m": 20
+    },
+    {
+     "id": 1200,
+     "name": "Votkinsk Reservoir",
+     "level": 121.0,
+     "nodes5m": 26
+    },
+    {
+     "id": 1201,
+     "name": "Kama Reservoir",
+     "level": 135.1,
+     "nodes5m": 48
+    },
+    {
+     "id": 1204,
+     "name": "Volgograd Reservoir",
+     "level": 22.4,
+     "nodes5m": 29
+    },
+    {
+     "id": 1205,
+     "name": "Gorky Reservoir",
+     "level": 91.0,
+     "nodes5m": 27
+    },
+    {
+     "id": 1206,
+     "name": "Ust-Ilimsk Reservoir",
+     "level": 306.2,
+     "nodes5m": 26
+    },
+    {
+     "id": 1217,
+     "name": "Lac de Kossou",
+     "level": 178.1,
+     "nodes5m": 31
+    },
+    {
+     "id": 1218,
+     "name": "Zeya Reservoir",
+     "level": 273.0,
+     "nodes5m": 69
+    },
+    {
+     "id": 1231,
+     "name": "Lago Rinc\u00f3n del Bonete",
+     "level": 74.0,
+     "nodes5m": 23
+    },
+    {
+     "id": 1233,
+     "name": "Tsimlyansk Reservoir",
+     "level": 45.0,
+     "nodes5m": 51
+    },
+    {
+     "id": 1246,
+     "name": "Represa Furnas",
+     "level": 742.5,
+     "nodes5m": 27
+    },
+    {
+     "id": 1252,
+     "name": "Khantayskoye Reservoir",
+     "level": 42.9,
+     "nodes5m": 50
+    },
+    {
+     "id": 1255,
+     "name": "Lake Eyre North",
+     "level": 1.0,
+     "nodes5m": 113
+    },
+    {
+     "id": 1257,
+     "name": "Lake Mackay",
+     "level": 364.1,
+     "nodes5m": 45
+    },
+    {
+     "id": 1258,
+     "name": "Lake Gairdner",
+     "level": 115.0,
+     "nodes5m": 62
+    },
+    {
+     "id": 1259,
+     "name": "Lake Torrens",
+     "level": 48.2,
+     "nodes5m": 74
+    },
+    {
+     "id": 1260,
+     "name": "Lake Frome",
+     "level": 9.4,
+     "nodes5m": 37
+    },
+    {
+     "id": 1261,
+     "name": "Lake Barlee",
+     "level": 415.0,
+     "nodes5m": 27
+    },
+    {
+     "id": 1269,
+     "name": "Lake Everard",
+     "level": 115.0,
+     "nodes5m": 22
+    },
+    {
+     "id": 1279,
+     "name": "Great Salt Lake",
+     "level": 1311.9,
+     "nodes5m": 61
+    },
+    {
+     "id": 1280,
+     "name": "Laguna Madre",
+     "level": 1.0,
+     "nodes5m": 24
+    },
+    {
+     "id": 1288,
+     "name": "Lagoa Mirim",
+     "level": 1.0,
+     "nodes5m": 54
+    },
+    {
+     "id": 1289,
+     "name": "IJsselmeer",
+     "level": 1.0,
+     "nodes5m": 40
+    },
+    {
+     "id": 1290,
+     "name": "Syvash",
+     "level": 1.0,
+     "nodes5m": 40
+    },
+    {
+     "id": 1291,
+     "name": "Issyk-Kul",
+     "level": 1801.1,
+     "nodes5m": 96
+    },
+    {
+     "id": 1292,
+     "name": "Lake Turkana",
+     "level": 390.0,
+     "nodes5m": 91
+    },
+    {
+     "id": 1295,
+     "name": "Uvs Nuur",
+     "level": 734.1,
+     "nodes5m": 58
+    },
+    {
+     "id": 1296,
+     "name": "Qinghai Hu",
+     "level": 2988.0,
+     "nodes5m": 66
+    },
+    {
+     "id": 1299,
+     "name": "Lake Urmia",
+     "level": 1242.5,
+     "nodes5m": 65
+    },
+    {
+     "id": 1300,
+     "name": "Sarygamysh K\u00f6li",
+     "level": 28.1,
+     "nodes5m": 64
+    },
+    {
+     "id": 1301,
+     "name": "Alakol",
+     "level": 339.2,
+     "nodes5m": 48
+    },
+    {
+     "id": 1302,
+     "name": "Mar Chiquita",
+     "level": 65.3,
+     "nodes5m": 30
+    },
+    {
+     "id": 1303,
+     "name": "Lake Tuz",
+     "level": 903.8,
+     "nodes5m": 25
+    },
+    {
+     "id": 1304,
+     "name": "Lake Van",
+     "level": 1516.7,
+     "nodes5m": 52
+    },
+    {
+     "id": 1308,
+     "name": "Khyargas Nuur",
+     "level": 1060.9,
+     "nodes5m": 23
+    },
+    {
+     "id": 1310,
+     "name": "Tengiz K\u00f6li",
+     "level": 306.5,
+     "nodes5m": 28
+    },
+    {
+     "id": 1319,
+     "name": "Aydar Ko\u2018l",
+     "level": 229.3,
+     "nodes5m": 37
+    },
+    {
+     "id": 1347,
+     "name": "South Aral Sea",
+     "level": 21.9,
+     "nodes5m": 57
+    },
+    {
+     "id": 1349,
+     "name": "North Aral Sea",
+     "level": 35.2,
+     "nodes5m": 61
+    },
+    {
+     "id": 1353,
+     "name": "Smallwood Reservoir",
+     "level": 445.4,
+     "nodes5m": 149
+    }
+   ],
+   "notes": [
+    "The Caspian Sea is part of the sea in Natural Earth (a hole in the land polygons), so it takes the ocean level 0 m (real -28 m).",
+    "Lakes below sea level (Dead Sea) are raised to +1 m so no land or lake sits below the ocean surface."
+   ]
+  },
+  "biome": {
+   "file": "earth-biome.bin",
+   "bytes": 628070,
+   "sha256Decoded": "8b9f4ee114da577ada53b1569e0b03d35eed6e577b21ae7a84052c96582ff9b3",
+   "dtype": "uint8",
+   "width": 1441,
+   "height": 721,
+   "channels": 5,
+   "res": 0.25,
+   "scale": 0.00392156862745098,
+   "offset": 0,
+   "channelNames": [
+    "tree",
+    "lowveg",
+    "bare",
+    "ice",
+    "tundra"
+   ],
+   "meaning": "fraction of land-cover pixels per class in the node cell (0 where the cell has no land pixels)",
+   "antarcticIceFill": {
+    "cells": 107229,
+    "tag": "estimated",
+    "note": "WorldCover has no Antarctic tiles; land cells south of 60 S (per the coastline layer) are set to snow/ice"
+   },
+   "source": {
+    "source": {
+     "product": "ESA WorldCover 10 m 2021 v200",
+     "product_version_tags": [
+      "V2.0.0"
+     ],
+     "bucket_url": "https://esa-worldcover.s3.eu-central-1.amazonaws.com/",
+     "prefix": "v200/2021/map/",
+     "listing": "S3 ListObjectsV2",
+     "access_date": "2026-10-30",
+     "license": "CC BY 4.0",
+     "license_url": "https://creativecommons.org/licenses/by/4.0/",
+     "attribution": "\u00a9 ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium",
+     "citation": "Zanaga, D. et al. (2022). ESA WorldCover 10 m 2021 v200. Zenodo. https://doi.org/10.5281/zenodo.7254221"
+    },
+    "overview": {
+     "factor": 64,
+     "tile_overview_shapes": [
+      [
+       562,
+       562
+      ]
+     ],
+     "base_sizes": [
+      "36000x36000"
+     ],
+     "pixel_deg": [
+      [
+       0.005338078291815,
+       0.005338078291815
+      ]
+     ],
+     "resampling_note": "The overviews behave like majority (mode) resampling: on test tile N48E009, 97% of factor-64 pixels equal the mode of their 64x64 source block. Fractions are therefore shares of ~590 m majority-class pixels, not true 10 m area shares. Against the factor-8 overview on tiles N48E009, S03W060, N39W102 and N60E099, per-cell channel fractions differed by 0.6-2.5 percentage points on average, the locally dominant class being inflated and rare classes (scattered built-up, narrow rivers, small lakes) under-represented."
+    },
+    "class_mapping": {
+     "tree": {
+      "10": "tree cover",
+      "95": "mangroves"
+     },
+     "lowveg": {
+      "20": "shrubland",
+      "30": "grassland",
+      "40": "cropland",
+      "50": "built-up",
+      "90": "herbaceous wetland"
+     },
+     "bare": {
+      "60": "bare / sparse vegetation"
+     },
+     "ice": {
+      "70": "snow and ice"
+     },
+     "tundra": {
+      "100": "moss and lichen"
+     }
+    },
+    "excluded_from_land": {
+     "80": "permanent water bodies (counted in biome_water_15m)",
+     "0": "no data"
+    }
+   },
+   "tiles": {
+    "listed": 2651,
+    "read": 2651,
+    "failed": 0
+   }
+  }
+ }
+}

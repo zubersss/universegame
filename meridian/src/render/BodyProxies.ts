@@ -295,16 +295,18 @@ export class BodyProxies {
     private readonly aerialSteps: number,
     private readonly skySteps: number,
     cloudQuality: number,
+    /** Bodies to show (default: the bodies the game plays). */
+    ids: readonly BodyId[] = BODY_IDS,
   ) {
     scene.add(this.group);
-    for (const id of BODY_IDS) {
+    for (const id of ids) {
       const p = new BodyProxy(BODIES[id], cloudQuality);
       this.proxies.set(id, p);
       this.group.add(p.group);
     }
     if (backend) {
       const reqs: { id: BodyId; face: number }[] = [];
-      for (const id of BODY_IDS) for (let f = 0; f < 6; f++) reqs.push({ id, face: f });
+      for (const id of ids) for (let f = 0; f < 6; f++) reqs.push({ id, face: f });
       backend.onResult = (jobId, data, err) => {
         this.pending--;
         if (!data) {

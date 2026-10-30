@@ -1,0 +1,311 @@
+// W4: the data-backed Earth surface generator — determinism, seed independence
+// of the coastline, continuity (raster cells, ±180° seam, poles, cube faces),
+// worker-order independence, and proxy (level-0 roots) to surface continuity
+// on one region (New Zealand's Southern Alps, Tasman coast to Aoraki).
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { beforeAll, describe, expect, it } from 'vitest';
+import { BODIES, type BodyDef } from '../src/world/bodies';
+import { EARTH_META, installEarthData, latLonOf, loadEarthData, sampleBilinear, type EarthRasters, type LayerName } from '../src/world/earthData';
+import { SurfaceGenerator, bodyDataReady, ensureBodyData, newSurfaceInfo } from '../src/world/surface';
+import { computeSites } from '../src/world/sites';
+import { chunkAt, dirToFace, gridDir, gridResolution } from '../src/world/cube';
+import { generateChunk } from '../src/terrain/chunkGen';
+import { mulberry32 } from '../src/core/rng';
+
+const earth = BODIES.earth;
+const sea = earth.seaLevel!;
+let E: EarthRasters;
+
+beforeAll(async () => {
+  const dir = fileURLToPath(new URL('../src/data/earth/', import.meta.url));
+  const layers = EARTH_META.layers as Record<LayerName, { file: string }>;
+  E = await loadEarthData(async (name) => readFileSync(dir + layers[name].file));
+  installEarthData(E);
+});
+
+/** Unit direction (system frame) of a latitude/longitude in Earth's body frame. */
+function dirOf(lat: number, lon: number): [number, number, number] {
+  const f = earth.frame;
+  const a = (lat * Math.PI) / 180;
+  const o = (lon * Math.PI) / 180;
+  const c = Math.cos(a);
+  const v = [0, 1, 2].map((k) => c * Math.cos(o) * f.meridian[k] + c * Math.sin(o) * f.east[k] + Math.sin(a) * f.north[k]);
+  const l = Math.hypot(v[0], v[1], v[2]);
+  return [v[0] / l, v[1] / l, v[2] / l];
+}
+
+function randomDir(rnd: () => number): [number, number, number] {
+  for (;;) {
+    const x = rnd() * 2 - 1;
+    const y = rnd() * 2 - 1;
+    const z = rnd() * 2 - 1;
+    const l = Math.hypot(x, y, z);
+    if (l > 0.1 && l <= 1) return [x / l, y / l, z / l];
+  }
+}
+
+describe('Earth frame and data readiness', () => {
+  it('maps directions to latitude/longitude consistently with the body frame', async () => {
+    await ensureBodyData(earth);
+    expect(bodyDataReady(earth)).toBe(true);
+    expect(bodyDataReady(BODIES.ilex)).toBe(true);
+    const f = earth.frame;
+    expect(f.tag).toBe('measured');
+    expect(Math.hypot(...f.north)).toBeCloseTo(1, 12);
+    expect(f.north[0] * f.meridian[0] + f.north[1] * f.meridian[1] + f.north[2] * f.meridian[2]).toBeCloseTo(0, 12);
+    // Obliquity: Earth's pole is 23.44° from the ecliptic pole (system +Y).
+    expect((Math.acos(f.north[1]) * 180) / Math.PI).toBeCloseTo(23.44, 1);
+    const ll = { lat: 0, lon: 0 };
+    for (const [lat, lon] of [[27.99, 86.93], [-43.6, 170.14], [0, 179.999], [0, -179.999], [89.9, 10], [-89.9, -120], [51.5, -0.1]]) {
+      const d = dirOf(lat, lon);
+      latLonOf(d[0], d[1], d[2], f.north, f.meridian, f.east, ll);
+      expect(ll.lat).toBeCloseTo(lat, 9);
+      expect(ll.lon).toBeCloseTo(lon, 9);
+    }
+    // At EPOCH (1 January, 00:00 TDB) the Sun stands over the South Pacific near the date line.
+    const s = [-earth.center[0], -earth.center[1], -earth.center[2]];
+    const sl = Math.hypot(s[0], s[1], s[2]);
+    latLonOf(s[0] / sl, s[1] / sl, s[2] / sl, f.north, f.meridian, f.east, ll);
+    expect(ll.lat).toBeCloseTo(-23.0, 0);
+    expect(Math.abs(ll.lon)).toBeGreaterThan(177);
+  });
+});
+
+describe('Earth surface generator (W4)', () => {
+  it('is deterministic and bounded', () => {
+    const a = new SurfaceGenerator(earth);
+    const b = new SurfaceGenerator(earth);
+    const ia = newSurfaceInfo();
+    const ib = newSurfaceInfo();
+    const rnd = mulberry32(5);
+    for (let i = 0; i < 4000; i++) {
+      const d = randomDir(rnd);
+      a.info(d[0], d[1], d[2], ia);
+      b.info(d[0], d[1], d[2], ib);
+      expect(ia).toEqual(ib);
+      expect(ia.height).toBeGreaterThanOrEqual(0);
+      expect(ia.height).toBeLessThanOrEqual(earth.maxHeight);
+      expect(ia.hazard).toBe(0);
+      for (const k of ['biome', 'variation', 'special', 'rockiness'] as const) {
+        expect(ia[k]).toBeGreaterThanOrEqual(0);
+        expect(ia[k]).toBeLessThanOrEqual(1);
+      }
+    }
+  });
+
+  it('never moves a coastline when the seed changes', () => {
+    const other: BodyDef = { ...earth, seed: (earth.seed ^ 0x5bd1e995) >>> 0 };
+    const a = new SurfaceGenerator(earth);
+    const b = new SurfaceGenerator(other);
+    const ia = newSurfaceInfo();
+    const ib = newSurfaceInfo();
+    const ll = { lat: 0, lon: 0 };
+    const f = earth.frame;
+    const rnd = mulberry32(17);
+    let differ = 0;
+    let coastal = 0;
+    for (let i = 0; i < 40000; i++) {
+      // Half the samples within ~40 km (real) of a shore, where infill would matter.
+      let d = randomDir(rnd);
+      if (i % 2) {
+        for (let t = 0; t < 50; t++) {
+          latLonOf(d[0], d[1], d[2], f.north, f.meridian, f.east, ll);
+          if (Math.abs(sampleBilinear(E.coast, ll.lat, ll.lon)) < 40) break;
+          d = randomDir(rnd);
+        }
+      }
+      a.info(d[0], d[1], d[2], ia);
+      b.info(d[0], d[1], d[2], ib);
+      latLonOf(d[0], d[1], d[2], f.north, f.meridian, f.east, ll);
+      const shore = sampleBilinear(E.coast, ll.lat, ll.lon);
+      if (Math.abs(shore) < 40) coastal++;
+      // Wet exactly where the coastline data says water, for both seeds.
+      expect(ia.liquidLevel != null).toBe(shore < 0);
+      expect(ib.liquidLevel != null).toBe(shore < 0);
+      if (ia.liquidLevel != null) {
+        expect(ia.height).toBeLessThan(ia.liquidLevel);
+        expect(ib.height).toBeLessThan(ib.liquidLevel!);
+      } else if (sampleBilinear(E.water, ll.lat, ll.lon) === 0) {
+        // Dry ground next to the ocean is never below sea level.
+        expect(ia.height).toBeGreaterThanOrEqual(sea);
+        expect(ib.height).toBeGreaterThanOrEqual(sea);
+      }
+      if (ia.height !== ib.height) differ++;
+    }
+    expect(coastal).toBeGreaterThan(15000);
+    expect(differ).toBeGreaterThan(30000); // the seed does drive the infill
+  });
+
+  it('puts real places where they belong', () => {
+    const g = new SurfaceGenerator(earth);
+    const info = newSurfaceInfo();
+    const at = (lat: number, lon: number) => {
+      const d = dirOf(lat, lon);
+      return { ...g.info(d[0], d[1], d[2], info) };
+    };
+    expect(at(27.99, 86.93).height).toBeGreaterThan(sea + 700); // Everest region
+    expect(at(32, 88).height).toBeGreaterThan(sea + 600); // Tibetan Plateau
+    const ch = at(11.35, 142.2); // Challenger Deep: deep (compressed) ocean
+    expect(ch.liquidLevel).toBe(sea);
+    expect(ch.height).toBeLessThan(sea - 250);
+    const amazon = at(-3, -60);
+    expect(amazon.liquidLevel).toBeNull();
+    expect(amazon.height).toBeGreaterThan(sea);
+    expect(amazon.height).toBeLessThan(sea + 120);
+    expect(amazon.biome).toBeGreaterThan(0.8); // vegetated
+    expect(at(23, 10).biome).toBeLessThan(0.3); // Sahara: bare
+    expect(at(75, -40).special).toBeGreaterThan(0.6); // Greenland ice
+    expect(at(-89.5, 0).special).toBeGreaterThan(0.6); // Antarctic ice
+    expect(at(0, -30).liquidLevel).toBe(sea); // Atlantic
+    const victoria = at(-1, 33);
+    expect(victoria.liquidLevel).toBeGreaterThan(sea + 150); // a lake well above sea level
+    expect(victoria.height).toBeLessThan(victoria.liquidLevel!);
+  });
+
+  it('is continuous in space, across the ±180° seam and around the poles', () => {
+    const g = new SurfaceGenerator(earth);
+    const R = earth.radius;
+    const rnd = mulberry32(23);
+    const walk = (start: [number, number, number], heading: [number, number, number], steps: number, stepM: number) => {
+      // March along the great circle through `start` toward `heading`, 1 m steps (gameplay metres).
+      let worst = 0;
+      let prev = g.height(start[0], start[1], start[2]);
+      for (let k = 1; k <= steps; k++) {
+        const t = (k * stepM) / R;
+        const c = Math.cos(t);
+        const s = Math.sin(t);
+        const x = start[0] * c + heading[0] * s;
+        const y = start[1] * c + heading[1] * s;
+        const z = start[2] * c + heading[2] * s;
+        const h = g.height(x, y, z);
+        worst = Math.max(worst, Math.abs(h - prev));
+        prev = h;
+      }
+      return worst;
+    };
+    const tangent = (d: [number, number, number], toward: [number, number, number]): [number, number, number] => {
+      const k = toward[0] * d[0] + toward[1] * d[1] + toward[2] * d[2];
+      const v = [toward[0] - k * d[0], toward[1] - k * d[1], toward[2] - k * d[2]];
+      const l = Math.hypot(v[0], v[1], v[2]);
+      return [v[0] / l, v[1] / l, v[2] / l];
+    };
+    // Random paths, plus paths crossing the date line (Fiji, Chukotka, Ross Ice Shelf) and both poles.
+    let worst = 0;
+    for (let i = 0; i < 40; i++) {
+      const start = randomDir(rnd);
+      worst = Math.max(worst, walk(start, tangent(start, randomDir(rnd)), 400, 1));
+    }
+    for (const [lat, lon] of [[-17, 179.9], [66, 179.9], [-80, 179.9], [89.999, 30], [-89.999, 30]]) {
+      const d = dirOf(lat, lon);
+      const east = tangent(d, dirOf(lat, lon > 0 ? -179.9 : 179.9));
+      const toPole = tangent(d, dirOf(lat > 0 ? 90 : -90, 0));
+      worst = Math.max(worst, walk(d, Math.abs(lat) > 89 ? toPole : east, 600, 1));
+    }
+    // Slopes up to ~70° give at most ~3 m per metre; anything larger is a step.
+    expect(worst).toBeLessThan(3);
+  });
+
+  it('generates identical chunks regardless of job order and agrees across a cube-face edge', () => {
+    const sites = computeSites(earth);
+    const gen = new SurfaceGenerator(earth);
+    gen.clearings = sites.clearings;
+    const level = earth.maxLevel - 3;
+    const M = gridResolution(earth.maxLevel);
+    const d = [0, 0, 0];
+    gridDir(0, 0, M / 2 + 777, M, d); // on the +X / +Z edge
+    const fa = dirToFace(d[0] + 1e-9, d[1], d[2] - 1e-9);
+    const fb = dirToFace(d[0] - 1e-9, d[1], d[2] + 1e-9);
+    const ca = chunkAt(fa.face, fa.u, fa.v, level);
+    const cb = chunkAt(fb.face, fb.u, fb.v, level);
+    const A = generateChunk(earth, gen, fa.face, level, ca.x, ca.y, 1);
+    generateChunk(earth, gen, 3, 4, 2, 9, 1); // unrelated work in between
+    const fresh = new SurfaceGenerator(earth);
+    fresh.clearings = sites.clearings;
+    const A2 = generateChunk(earth, fresh, fa.face, level, ca.x, ca.y, 1);
+    expect(Array.from(A2.positions)).toEqual(Array.from(A.positions));
+    expect(Array.from(A2.attrs)).toEqual(Array.from(A.attrs));
+    const B = generateChunk(earth, gen, fb.face, level, cb.x, cb.y, 1);
+    // Border vertices of both chunks at the same world point coincide.
+    const pts = (c: typeof A) => {
+      const out: number[][] = [];
+      for (let k = 0; k < 33 * 33; k++) out.push([c.center[0] + c.positions[k * 3], c.center[1] + c.positions[k * 3 + 1], c.center[2] + c.positions[k * 3 + 2]]);
+      return out;
+    };
+    const pa = pts(A);
+    const pb = pts(B);
+    let shared = 0;
+    for (const p of pa) {
+      for (const q of pb) {
+        if (Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]) < 0.05) {
+          shared++;
+          break;
+        }
+      }
+    }
+    expect(shared).toBe(33);
+  });
+
+  it('keeps proxy roots and surface continuous over the Southern Alps (orbit to ground)', () => {
+    const gen = new SurfaceGenerator(earth);
+    gen.clearings = computeSites(earth).clearings;
+    // Transect: Tasman Sea -> West Coast -> Aoraki / Mount Cook.
+    const from = dirOf(-43.25, 169.75);
+    const to = dirOf(-43.6, 170.14);
+    const info = newSurfaceInfo();
+    gen.info(from[0], from[1], from[2], info);
+    expect(info.liquidLevel).toBe(sea);
+    gen.info(to[0], to[1], to[2], info);
+    expect(info.liquidLevel).toBeNull();
+    expect(info.height).toBeGreaterThan(sea + 150);
+    // The proxy is built from the level-0 roots; the terrain refines them. Every
+    // level's vertex that lies on a coarser level's vertex has the same position,
+    // and each level's mesh converges to the generator surface at the summit.
+    const fc = dirToFace(to[0], to[1], to[2]);
+    const R = earth.radius;
+    const trueH = gen.height(to[0], to[1], to[2]);
+    const errs: number[] = [];
+    let parent: ReturnType<typeof generateChunk> | null = null;
+    for (const level of [0, 1, 2, 4, 6, 8, earth.maxLevel]) {
+      const c = chunkAt(fc.face, fc.u, fc.v, level);
+      const ch = generateChunk(earth, gen, fc.face, level, c.x, c.y, 1);
+      // Nearest vertex to the summit direction: its radial height vs the true surface there.
+      let best = Infinity;
+      let bestK = 0;
+      for (let k = 0; k < 33 * 33; k++) {
+        const x = ch.center[0] + ch.positions[k * 3];
+        const y = ch.center[1] + ch.positions[k * 3 + 1];
+        const z = ch.center[2] + ch.positions[k * 3 + 2];
+        const l = Math.hypot(x, y, z);
+        const dd = Math.hypot(x / l - to[0], y / l - to[1], z / l - to[2]);
+        if (dd < best) { best = dd; bestK = k; }
+      }
+      const vx = ch.center[0] + ch.positions[bestK * 3];
+      const vy = ch.center[1] + ch.positions[bestK * 3 + 1];
+      const vz = ch.center[2] + ch.positions[bestK * 3 + 2];
+      const vl = Math.hypot(vx, vy, vz);
+      // Mesh vertices lie exactly on the generator surface (float32 positions, ~cm).
+      expect(Math.abs(vl - (R + gen.height(vx / vl, vy / vl, vz / vl)))).toBeLessThan(0.05);
+      errs.push(Math.abs(vl - R - trueH)); // height mismatch at the nearest vertex
+      if (parent && level === 1) {
+        // Level-1 vertices with even grid indices coincide with level-0 vertices.
+        const ox = (c.x % 2) * 16;
+        const oy = (c.y % 2) * 16;
+        for (let j = 0; j <= 32; j += 2) {
+          for (let i = 0; i <= 32; i += 2) {
+            const k1 = j * 33 + i;
+            const k0 = (oy + j / 2) * 33 + (ox + i / 2);
+            for (let a = 0; a < 3; a++) {
+              const p1 = ch.center[a] + ch.positions[k1 * 3 + a];
+              const p0 = parent.center[a] + parent.positions[k0 * 3 + a];
+              expect(Math.abs(p1 - p0)).toBeLessThan(0.05);
+            }
+          }
+        }
+      }
+      parent = ch;
+    }
+    // The finest level resolves the summit to within a few metres.
+    expect(errs[errs.length - 1]).toBeLessThan(5);
+  });
+});

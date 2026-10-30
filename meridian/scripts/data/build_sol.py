@@ -23,6 +23,25 @@ E = 'estimated'
 F = 'fictional'
 
 
+def earth_orientation(jd_tdb):
+    """Earth's north pole and prime-meridian directions at the epoch, J2000 ecliptic unit vectors.
+
+    IAU 2006/2000A celestial-to-terrestrial matrix (erfa.c2t06a), polar motion 0,
+    UT1 = TT - 69.2 s (TAI-UTC 37 s, UT1-UTC ~ 0)."""
+    import erfa
+    eps = math.radians(84381.448 / 3600.0)
+    c, s = math.cos(eps), math.sin(eps)
+    m = erfa.c2t06a(jd_tdb, 0.0, jd_tdb, -69.2 / 86400.0, 0.0, 0.0)
+
+    def ecl(v):
+        return [round(float(v[0]), 12), round(float(c * v[1] + s * v[2]), 12), round(float(-s * v[1] + c * v[2]), 12)]
+
+    return {
+        'north': ecl(m[2]), 'primeMeridian': ecl(m[0]), 'tag': 'measured',
+        'source': 'IAU 2006/2000A precession-nutation and Earth rotation angle (SOFA/ERFA c2t06a), polar motion neglected',
+    }
+
+
 def f(v, tag=M, unit=None):
     d = {'value': v, 'tag': tag}
     if unit:
@@ -73,6 +92,8 @@ def main():
         }
         if a is not None:
             b['semiMajorAxisKm'] = f(a, pt, 'km')
+        if bid == 'earth':
+            b['orientation'] = earth_orientation(EPOCH_JD)
         if bid == 'sun':
             b['positionKm'] = f([0.0, 0.0, 0.0], M, 'km')
             b['luminosityW'] = f(3.828e26, pt, 'W')

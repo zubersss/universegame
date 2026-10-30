@@ -5,7 +5,7 @@
 
 import { BODIES, sunDirFor, type BodyDef, type BodyId } from './bodies';
 import { faceDir } from './cube';
-import { SurfaceGenerator, type Clearing, type SurfaceInfo } from './surface';
+import { SurfaceGenerator, newSurfaceInfo, type Clearing } from './surface';
 import { hashCombine } from '../core/rng';
 
 export type V3 = [number, number, number];
@@ -76,6 +76,8 @@ interface Prefs {
   faceMin: number;
   biomeLo: number;
   biomeHi: number;
+  /** Minimum base height above the datum (keeps sites out of oceans). */
+  minHeight: number;
 }
 
 function dirTo(a: BodyDef, b: BodyDef): V3 {
@@ -86,15 +88,17 @@ function prefsFor(def: BodyDef): Prefs {
   const B = BODIES;
   switch (def.id) {
     case 'ilex': // groves near chalk ridges; Vesper above the horizon
-      return { sunLo: 0.31, sunHi: 0.53, face: dirTo(B.ilex, B.vesper), faceMin: 0.05, biomeLo: 0.55, biomeHi: 0.88 };
+      return { sunLo: 0.31, sunHi: 0.53, face: dirTo(B.ilex, B.vesper), faceMin: 0.05, biomeLo: 0.55, biomeHi: 0.88, minHeight: -Infinity };
     case 'vesper': // dunes against mesa country; facing the approach from Ilex
-      return { sunLo: 0.34, sunHi: 0.57, face: dirTo(B.vesper, B.ilex), faceMin: 0.15, biomeLo: 0.3, biomeHi: 0.72 };
-    default: // rime basin near the terminator; facing the approach from Vesper
-      return { sunLo: 0.17, sunHi: 0.41, face: dirTo(B.cairn, B.vesper), faceMin: -0.1, biomeLo: 0.55, biomeHi: 1.01 };
+      return { sunLo: 0.34, sunHi: 0.57, face: dirTo(B.vesper, B.ilex), faceMin: 0.15, biomeLo: 0.3, biomeHi: 0.72, minHeight: -Infinity };
+    case 'cairn': // rime basin near the terminator; facing the approach from Vesper
+      return { sunLo: 0.17, sunHi: 0.41, face: dirTo(B.cairn, B.vesper), faceMin: -0.1, biomeLo: 0.55, biomeHi: 1.01, minHeight: -Infinity };
+    default: // daylit dry ground (vegetated where the body has biomes); approach direction set with the route
+      return { sunLo: 0.4, sunHi: 0.8, face: null, faceMin: -1, biomeLo: def.surface === 'data' ? 0.3 : 0, biomeHi: 1.01, minHeight: (def.seaLevel ?? -Infinity) + 3 };
   }
 }
 
-const info: SurfaceInfo = { height: 0, biome: 0, variation: 0, special: 0, rockiness: 0 };
+const info = newSurfaceInfo();
 
 /** Mean and roughness of base heights over a ring of radius r around n. */
 function flatness(gen: SurfaceGenerator, n: V3, r: number): { mean: number; rough: number } {
@@ -137,6 +141,7 @@ export function computeSites(def: BodyDef): MissionSites {
         if (p.face && dot(n, p.face) < p.faceMin) continue;
         gen.baseInfo(n[0], n[1], n[2], info);
         if (info.biome < p.biomeLo || info.biome > p.biomeHi) continue;
+        if (info.height < p.minHeight || info.liquidLevel != null) continue;
         const f = flatness(gen, n, 120);
         const sunMid = (p.sunLo + p.sunHi) / 2;
         const score = -f.rough - Math.abs(sd - sunMid) * 30 - info.rockiness * 20;
@@ -156,6 +161,7 @@ export function computeSites(def: BodyDef): MissionSites {
       if (sd < p.sunLo || sd > p.sunHi) continue;
       gen.baseInfo(cand[0], cand[1], cand[2], info);
       if (info.biome < p.biomeLo || info.biome > p.biomeHi) continue;
+      if (info.height < p.minHeight || info.liquidLevel != null) continue;
       const f = flatness(gen, cand, 120);
       if (f.rough < lf.rough * 0.9) {
         landing = cand;

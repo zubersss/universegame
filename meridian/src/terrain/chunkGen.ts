@@ -4,7 +4,7 @@
 
 import type { BodyDef, BodyId } from '../world/bodies';
 import { CHUNK_GRID, CHUNK_VERTS, gridDir, gridResolution } from '../world/cube';
-import type { SurfaceGenerator, SurfaceInfo } from '../world/surface';
+import { newSurfaceInfo, type SurfaceGenerator, type SurfaceInfo } from '../world/surface';
 import { tangentBasis, type V3 } from '../world/sites';
 
 export const GRID_VERTS = CHUNK_VERTS * CHUNK_VERTS; // 1089
@@ -73,7 +73,7 @@ export function levelSpacing(def: BodyDef, level: number): number {
   return ((Math.PI / 2) * def.radius) / (CHUNK_GRID * 2 ** level);
 }
 
-const info: SurfaceInfo = { height: 0, biome: 0, variation: 0, special: 0, rockiness: 0 };
+const info: SurfaceInfo = newSurfaceInfo();
 
 /** Normal from the continuous surface around `dir` using a canonical tangent frame. */
 function surfaceNormal(gen: SurfaceGenerator, dir: V3, eps: number, out: number[]): void {

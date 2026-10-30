@@ -7,6 +7,8 @@
 import { createNoise3D, type NoiseFunction3D } from 'simplex-noise';
 import { hashCombine, mulberry32 } from '../core/rng';
 import type { BodyDef } from './bodies';
+import { earthData, latLonOf, loadEarthData, sampleBilinear, type EarthRasters } from './earthData';
+import { ELEVATION_DIVISOR } from './scale';
 
 export interface SurfaceInfo {
   height: number;
@@ -18,6 +20,15 @@ export interface SurfaceInfo {
   special: number;
   /** Tendency to expose bare rock independent of slope 0..1. */
   rockiness: number;
+  /** Environmental hazard 0..1 (heat, cold, pressure, liquid). Always written by the generators. */
+  hazard?: number;
+  /** Height above the datum [m] of the liquid surface covering this point, null where dry. Always written by the generators. */
+  liquidLevel?: number | null;
+}
+
+/** A SurfaceInfo with every field set (use for scratch objects). */
+export function newSurfaceInfo(): SurfaceInfo {
+  return { height: 0, biome: 0, variation: 0, special: 0, rockiness: 0, hazard: 0, liquidLevel: null };
 }
 
 /** A flattened clearing blended into the height field (landing sites, relay pads). */
@@ -73,6 +84,13 @@ function ridged(n: NoiseFunction3D, x: number, y: number, z: number, oct: number
   return sum / norm;
 }
 
+/** Polynomial smooth minimum (C1), k > 0 is the blend width; smin(a, b, k) <= min(a, b). */
+function smin(a: number, b: number, k: number): number {
+  if (k <= 0) return a < b ? a : b;
+  const h = Math.max(k - Math.abs(a - b), 0) / k;
+  return Math.min(a, b) - h * h * k * 0.25;
+}
+
 /** Fast deterministic hash of three integers + salt to [0, 1). */
 function h3(x: number, y: number, z: number, salt: number): number {
   let h = Math.imul(x | 0, 0x8da6b343) ^ Math.imul(y | 0, 0xd8163841) ^ Math.imul(z | 0, 0xcb1ab31f) ^ salt;
@@ -99,10 +117,16 @@ export class SurfaceGenerator {
   clearings: Clearing[] = [];
   private readonly craterScales: CraterScale[] = [];
   private readonly windAxis: [number, number, number] = [0.83, 0.18, 0.53];
+  private readonly earthRasters: EarthRasters | null = null;
 
   constructor(readonly def: BodyDef) {
     this.R = def.radius;
     this.maxHeight = def.maxHeight;
+    if (def.surface === 'data') {
+      if (def.dataset !== 'earth') throw new Error(`Unknown dataset ${def.dataset} for ${def.id}`);
+      this.earthRasters = earthData();
+      if (!this.earthRasters) throw new Error(`${def.id}: surface data not loaded (await ensureBodyData(def) first)`);
+    }
     const names = ['w1', 'w2', 'w3', 'c', 'm', 'r', 'h', 'd', 'v', 'g', 'rg', 'rg2', 'ms', 'du', 'da', 'db', 'o', 'b', 'b2', 'ba'];
     for (const k of names) this.n[k] = makeNoise(def.seed, k);
     if (def.id === 'cairn') {
@@ -120,6 +144,9 @@ export class SurfaceGenerator {
 
   /** Height without mission clearings (used for site selection). */
   baseInfo(nx: number, ny: number, nz: number, out: SurfaceInfo): SurfaceInfo {
+    out.hazard = 0;
+    out.liquidLevel = null;
+    if (this.earthRasters) return this.earth(nx, ny, nz, out);
     switch (this.def.id) {
       case 'ilex':
         return this.ilex(nx, ny, nz, out);
@@ -149,11 +176,107 @@ export class SurfaceGenerator {
     return out;
   }
 
-  private readonly scratch: SurfaceInfo = { height: 0, biome: 0, variation: 0, special: 0, rockiness: 0 };
+  private readonly scratch: SurfaceInfo = newSurfaceInfo();
 
   /** Final height (with clearings). */
   height(nx: number, ny: number, nz: number): number {
     return this.info(nx, ny, nz, this.scratch).height;
+  }
+
+  // --------------------------------------------------------------- Earth
+  // Real data (elevation, coastline distance, water level, land cover) sampled
+  // bilinearly in the body's latitude/longitude frame; procedural infill below
+  // the data resolution is keyed by the seed. Shaping keeps every point's
+  // land/water sign equal to the coastline data, so no seed moves a coast.
+  // Work is in real metres, converted to gameplay height at the end.
+
+  private readonly ll = { lat: 0, lon: 0 };
+
+  private earth(nx: number, ny: number, nz: number, out: SurfaceInfo): SurfaceInfo {
+    const ed = this.earthRasters!;
+    const f = this.def.frame;
+    const n = this.n;
+    const R = this.R;
+    const ll = latLonOf(nx, ny, nz, f.north, f.meridian, f.east, this.ll);
+    const lat = ll.lat;
+    const lon = ll.lon;
+    const e = sampleBilinear(ed.elevation, lat, lon); // m above mean sea level
+    const d = sampleBilinear(ed.coast, lat, lon); // km to the nearest shore, + on land
+    const W = sampleBilinear(ed.water, lat, lon); // m, surface level of the nearest water body (ocean 0)
+
+    // Data relief: central differences over one elevation cell (continuous in position).
+    const res = ed.elevation.res;
+    const sinLat = nx * f.north[0] + ny * f.north[1] + nz * f.north[2];
+    const cosLat = Math.max(Math.sqrt(Math.max(0, 1 - sinLat * sinLat)), 0.05);
+    let lonE = lon + res;
+    if (lonE > 180) lonE -= 360;
+    let lonW = lon - res;
+    if (lonW < -180) lonW += 360;
+    const gx = (sampleBilinear(ed.elevation, lat, lonE) - sampleBilinear(ed.elevation, lat, lonW)) / (2 * res * 111.2 * cosLat);
+    const gy = (sampleBilinear(ed.elevation, Math.min(90, lat + res), lon) - sampleBilinear(ed.elevation, Math.max(-90, lat - res), lon)) / (2 * res * 111.2);
+    const slope = Math.sqrt(gx * gx + gy * gy); // m per km
+
+    // Infill below the data resolution (noise in planet metres, gameplay scale).
+    const px = nx * R;
+    const py = ny * R;
+    const pz = nz * R;
+    const fw = 1 / 6000;
+    const qx = px + 500 * n.w1(px * fw, py * fw, pz * fw);
+    const qy = py + 500 * n.w2(px * fw, py * fw, pz * fw);
+    const qz = pz + 500 * n.w3(px * fw, py * fw, pz * fw);
+    const mount = sstep(12, 60, slope);
+    const amp = Math.min(30 + 6 * slope + 0.12 * Math.max(e - W, 0), 2200);
+    const rid = ridged(n.r, qx / 2600, qy / 2600, qz / 2600, 3);
+    const hil = fbm(n.h, qx / 1700, qy / 1700, qz / 1700, 2);
+    const det = fbm(n.d, px / 140, py / 140, pz / 140, 3);
+    let h = e + amp * (mount * (rid - 0.4) * 1.6 + (1 - mount) * hil * 0.5) + det * (4 + 30 * mount);
+
+    // Shore shaping: land rises from the water level W, water sinks below it;
+    // the bounds meet at the shoreline (d = 0), so h - W has the sign of d.
+    const a = d < 0 ? -d : d;
+    const ramp = 4 * (a / 0.6) / (1 + a / 0.6); // 0 at the shore, 4 m inland / below
+    const a8 = (a / 8) * (a / 8);
+    const lift = W / (1 + a8 * a8); // nearest water level, fading beyond ~10 km
+    const room = 10 * a * a; // freedom away from the shore (m)
+    const k = Math.min(20, 6 * a, 2 * ramp); // blend width: keeps h - W strictly signed near the shore
+    if (d >= 0) {
+      const lo = lift + ramp;
+      h = smin(-smin(-h, -lo, k), lo + room, k);
+    } else {
+      const hi = W - ramp;
+      h = smin(-smin(-h, -(hi - room), k), hi, k);
+      // Deep water compressed (rational, so deterministic): at most ~1.5 km below the surface.
+      const top = W - 200;
+      if (h < top) {
+        const u = (top - h) / 1300;
+        h = top - (1300 * u) / (1 + u);
+      }
+    }
+
+    const sea = this.def.seaLevel ?? 0;
+    out.height = sea + h / ELEVATION_DIVISOR;
+    out.liquidLevel = d < 0 ? sea + W / ELEVATION_DIVISOR : null;
+
+    // Land cover (normalized fractions; coastal cells mix in empty ocean cells).
+    const b = ed.biome;
+    const tree = sampleBilinear(b, lat, lon, 0);
+    const low = sampleBilinear(b, lat, lon, 1);
+    const bare = sampleBilinear(b, lat, lon, 2);
+    const ice = sampleBilinear(b, lat, lon, 3);
+    const tun = sampleBilinear(b, lat, lon, 4);
+    const sum = tree + low + bare + ice + tun;
+    const inv = sum > 0.05 ? 1 / sum : 0;
+    const veg = (tree + low) * inv;
+    const treeShare = tree * inv;
+    const iceShare = ice * inv;
+    // Snow above a latitude-dependent line (real metres), on top of mapped ice.
+    const snowLine = 5200 - 5600 * (lat / 75) * (lat / 75);
+    const snow = sstep(snowLine - 300, snowLine + 500, h);
+    out.biome = d < 0 ? 0 : sum > 0.05 ? veg : 0.3;
+    out.variation = sat(0.3 + 0.55 * treeShare + 0.2 * n.v(px / 3000, py / 3000, pz / 3000));
+    out.special = d < 0 ? 0 : Math.max(iceShare, snow);
+    out.rockiness = d < 0 ? 0.1 : sat(mount * (0.35 + 0.6 * (bare + tun * 0.5) * inv) + 0.25 * (1 - veg) * mount);
+    return out;
   }
 
   // ---------------------------------------------------------------- Ilex
@@ -285,6 +408,21 @@ export class SurfaceGenerator {
     out.rockiness = (1 - basin) * 0.35;
     return out;
   }
+}
+
+/** True when a body's surface can be generated in this thread (its dataset, if any, is loaded). */
+export function bodyDataReady(def: BodyDef): boolean {
+  return def.surface !== 'data' || earthData() !== null;
+}
+
+/**
+ * Load a body's surface dataset in this thread (no-op for procedural bodies).
+ * Await it before constructing a SurfaceGenerator, computeSites or an
+ * ActiveBody for a 'data' body; the terrain worker does this by itself.
+ */
+export function ensureBodyData(def: BodyDef): Promise<void> {
+  if (def.surface !== 'data') return Promise.resolve();
+  return loadEarthData().then(() => undefined);
 }
 
 const generators = new Map<string, SurfaceGenerator>();

@@ -190,6 +190,20 @@
    },
    "source": "pending (reference: https://nssdc.gsfc.nasa.gov/planetary/factsheet/earthfact.html)",
    "verified": false,
+   "orientation": {
+    "north": [
+     0.002536756826,
+     0.397804898002,
+     0.917466526905
+    ],
+    "primeMeridian": [
+     -0.174310934323,
+     0.903599440984,
+     -0.391310296861
+    ],
+    "tag": "measured",
+    "source": "IAU 2006/2000A precession-nutation and Earth rotation angle (SOFA/ERFA c2t06a), polar motion neglected"
+   },
    "positionKm": {
     "value": [
      -26072138.4,

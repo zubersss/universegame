@@ -6,7 +6,9 @@
 // game currently plays and iterates (travel, gravity, proxies).
 
 import { hashCombine } from '../core/rng';
-import { BELTS, buildSolBodies } from './catalog';
+import { BELTS, DEFAULT_FRAME, buildSolBodies } from './catalog';
+
+export { DEFAULT_FRAME };
 import { maxLevelFor } from './scale';
 import type { ZoneDef } from './zones';
 
@@ -65,6 +67,18 @@ export interface BodyPalette {
   proxyNight: number;
 }
 
+/**
+ * Body-fixed axes in the system frame (unit vectors): north pole, prime
+ * meridian (latitude 0, longitude 0) and east = north × meridian. Bodies do
+ * not rotate in play; the frame is their orientation at EPOCH where known.
+ */
+export interface BodyFrame {
+  north: [number, number, number];
+  meridian: [number, number, number];
+  east: [number, number, number];
+  tag: DataTag;
+}
+
 /** Scientific values (never gameplay-scaled); `tags` labels each field. */
 export interface RealData {
   radiusKm: number;
@@ -98,6 +112,8 @@ export interface BodyDef {
   real: RealData | null;
   /** Gameplay center [m, system frame]. */
   center: [number, number, number];
+  /** Body-fixed orientation (latitude/longitude axes) in the system frame. */
+  frame: BodyFrame;
   radius: number;
   atmosphereHeight: number;
   gravity: number;
@@ -105,6 +121,8 @@ export interface BodyDef {
   /** Contact/max-detail quadtree level: ceil(log2(2R/128)). */
   maxLevel: number;
   seed: number;
+  /** Height above the datum [m] of the ocean surface, or null for bodies without an ocean. */
+  seaLevel: number | null;
   /** 'data' bodies sample a dataset for the large-scale layer and use the seed only for infill. */
   surface: 'procedural' | 'data';
   dataset?: string;
@@ -127,6 +145,8 @@ function seedFor(id: BodyId): number {
 const QUIET = {
   system: 'quiet',
   parent: null,
+  frame: DEFAULT_FRAME,
+  seaLevel: null,
   explore: 'surface',
   real: null,
   surface: 'procedural',

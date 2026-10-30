@@ -1,7 +1,7 @@
 import { Frustum, Matrix4, Vector3, type MeshStandardMaterial, type PerspectiveCamera } from 'three';
 import type { BodyDef } from './bodies';
 import { computeSites, type MissionSites } from './sites';
-import { getSurface, type SurfaceGenerator, type SurfaceInfo } from './surface';
+import { getSurface, newSurfaceInfo, type SurfaceGenerator, type SurfaceInfo } from './surface';
 import { TerrainManager, type TerrainView } from '../terrain/TerrainManager';
 import { TerrainCollision } from '../terrain/TerrainCollision';
 import type { ChunkStore } from '../terrain/ChunkStore';
@@ -20,7 +20,7 @@ export class ActiveBody {
   private readonly frustum = new Frustum();
   readonly view: TerrainView;
   private lodTimer = 0;
-  private readonly info: SurfaceInfo = { height: 0, biome: 0, variation: 0, special: 0, rockiness: 0 };
+  private readonly info: SurfaceInfo = newSurfaceInfo();
 
   constructor(
     readonly def: BodyDef,
