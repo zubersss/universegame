@@ -273,6 +273,7 @@ describe('Lighting', () => {
 
   it('slews toward a new direction, and snaps on request or for large swings', () => {
     const lt = make();
+    const env = stubEnv(lt);
     const earth = BODIES.earth;
     // 3.2 R from Earth's center, beside the Sun line: activation swings the light about 10°.
     const rel = new Vector3(0, 1, 0).cross(new Vector3(...sunDirFor(earth))).normalize().multiplyScalar(3.2 * earth.radius);
@@ -280,14 +281,17 @@ describe('Lighting', () => {
     lt.update(1 / 60, new Vector3(), earth, c, ground, false, false);
     const before = lt.sunDir.clone();
     expect(before.equals(lt.star.dir)).toBe(true); // the first update snaps
-    lt.update(LIGHT.slewTau, new Vector3(), earth, c, ground, true, false);
+    lt.update(LIGHT.slewTau, new Vector3(), earth, c, ground, true, true);
     const target = lt.star.dir.clone();
     const a0 = before.angleTo(target);
     expect(a0 / DEG).toBeGreaterThan(8);
     expect(lt.sunDir.angleTo(target) / a0).toBeCloseTo(Math.exp(-1), 1);
     expect(atmoUniforms.uSunDir.value.equals(lt.sunDir)).toBe(true);
-    // The shadow-casting light follows the slewed direction, not the target.
+    // The shadow-casting light and an environment rebuilt mid-slew follow the
+    // slewed direction (what the sky shows), not the target.
     expect(aim(lt).angleTo(lt.sunDir)).toBeLessThan(1e-6);
+    expect(env.rebuilds).toBe(1);
+    expect(new Vector3().fromArray(env.u.uSun.value.toArray()).distanceTo(lt.sunDir)).toBeLessThan(1e-12);
     for (let i = 0; i < 600; i++) lt.update(1 / 60, new Vector3(), earth, c, ground, true, false);
     expect(lt.sunDir.equals(target)).toBe(true);
 
@@ -315,15 +319,23 @@ describe('Lighting', () => {
   it('rebuilds the environment from the current light and aims the shadow light along it', () => {
     const lt = make();
     const env = stubEnv(lt);
+    const texel = (2 * lt.extent) / lt.sun.shadow.mapSize.x;
     const uSun = () => new Vector3().fromArray(env.u.uSun.value.toArray());
     const check = (dir: Vector3, label: string) => {
       expect(lt.sunDir.distanceTo(dir), label).toBeLessThan(1e-12);
       expect(uSun().distanceTo(dir), label).toBeLessThan(1e-12);
       expect(aim(lt).angleTo(dir), label).toBeLessThan(1e-6);
+      // The shadow box snaps to texels in light space: across the light only,
+      // by at most half a texel diagonal (the focus is off the texel grid).
+      const snap = lt.sun.target.position.clone().sub(FOCUS);
+      expect(snap.length(), label).toBeGreaterThan(1e-3);
+      expect(snap.length(), label).toBeLessThanOrEqual(texel * Math.SQRT1_2 + 1e-9);
+      expect(Math.abs(snap.dot(dir)), label).toBeLessThan(1e-9);
     };
     const earth = BODIES.earth;
     const mars = BODIES.mars;
-    lt.update(1 / 60, new Vector3(), earth, new Vector3(0, -earth.radius - 100, 0), ground, true, true);
+    const below = (r: number) => FOCUS.clone().add(new Vector3(0, -r, 0));
+    lt.update(1 / 60, FOCUS.clone(), earth, below(earth.radius + 100), ground, true, true);
     expect(env.rebuilds).toBe(1);
     check(new Vector3(...sunDirFor(earth)), 'earth');
     // 100 m up (radial up +Y), the transmittance uses Earth's own light: mu = up · sunDirFor(earth).
@@ -332,7 +344,7 @@ describe('Lighting', () => {
 
     // A hop to Mars: the next rebuild (env timer 1.5 s) takes Mars's light.
     lt.snap();
-    for (let i = 0; i < 200; i++) lt.update(1 / 60, new Vector3(), mars, new Vector3(0, -mars.radius - 100, 0), ground, true, true);
+    for (let i = 0; i < 200; i++) lt.update(1 / 60, FOCUS.clone(), mars, below(mars.radius + 100), ground, true, true);
     expect(env.rebuilds).toBe(2);
     check(new Vector3(...sunDirFor(mars)), 'mars');
 
@@ -340,7 +352,7 @@ describe('Lighting', () => {
     // moving to another side of the Sun must still rebuild with the new direction.
     for (const p of [new Vector3(3e5, 0, 0), new Vector3(0, 3e5, 3e5)]) {
       lt.snap();
-      for (let i = 0; i < 120; i++) lt.update(1 / 60, new Vector3(), BODIES.sun, p.clone().negate(), ground, false, true);
+      for (let i = 0; i < 120; i++) lt.update(1 / 60, FOCUS.clone(), BODIES.sun, FOCUS.clone().sub(p), ground, false, true);
       check(p.clone().negate().normalize(), `sun ${p.toArray()}`);
     }
     expect(env.rebuilds).toBe(4);
