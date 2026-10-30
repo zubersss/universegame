@@ -47,7 +47,9 @@ namespace Meridian.Tests
             cam.backgroundColor = new Color(0.12f, 0.12f, 0.14f, 1f);
 
             var target = new GameObject("Target").AddComponent<SpriteRenderer>();
-            target.sprite = sprite; // URP 2D default sprite material is Sprite-Lit-Default
+            target.sprite = sprite;
+            var mat = Meridian.Rendering.ArtMaterials.MaterialFor(key); // Sprite_LitEmissive for keys with emission
+            if (mat != null) target.sharedMaterial = mat;
             var b = sprite.bounds;
             float scale = FrameHalf / Mathf.Max(b.extents.x, b.extents.y);
             target.transform.localScale = Vector3.one * scale;
@@ -70,6 +72,34 @@ namespace Meridian.Tests
 
             for (int i = 0; i < 3; i++) yield return null;
 
+            Directory.CreateDirectory("logs");
+            var lit = Render(cam);
+            var output = $"logs/preview_{key.Replace('/', '_')}.png";
+            File.WriteAllBytes(output, lit.EncodeToPNG());
+            TestContext.Out.WriteLine($"[MERIDIAN] PREVIEW OK: {output} (material {target.sharedMaterial.shader.name})");
+
+            // Second shot with the point light off: only the 0.25 global light and emission remain (U-019).
+            point.intensity = 0f;
+            for (int i = 0; i < 2; i++) yield return null;
+            var dark = Render(cam);
+            File.WriteAllBytes($"logs/preview_{key.Replace('/', '_')}_nopoint.png", dark.EncodeToPNG());
+            Color32 hottest = default;
+            int best = -1;
+            foreach (var px in dark.GetPixels32())
+            {
+                int s = px.r + px.g + px.b;
+                if (s > best) { best = s; hottest = px; }
+            }
+            TestContext.Out.WriteLine($"[MERIDIAN] PREVIEW no point light: brightest pixel {hottest.r},{hottest.g},{hottest.b}");
+
+            UnityEngine.Object.Destroy(lit);
+            UnityEngine.Object.Destroy(dark);
+            Addressables.Release(handle);
+            yield return SceneManager.UnloadSceneAsync(scene);
+        }
+
+        static Texture2D Render(Camera cam)
+        {
             var rt = new RenderTexture(Size, Size, 24, RenderTextureFormat.ARGB32);
             cam.targetTexture = rt;
             cam.Render();
@@ -80,16 +110,8 @@ namespace Meridian.Tests
             tex.Apply();
             RenderTexture.active = prev;
             cam.targetTexture = null;
-
-            Directory.CreateDirectory("logs");
-            var output = $"logs/preview_{key.Replace('/', '_')}.png";
-            File.WriteAllBytes(output, tex.EncodeToPNG());
-            TestContext.Out.WriteLine($"[MERIDIAN] PREVIEW OK: {output}");
-
-            UnityEngine.Object.Destroy(tex);
             rt.Release();
-            Addressables.Release(handle);
-            yield return SceneManager.UnloadSceneAsync(scene);
+            return tex;
         }
 
         static int FrameIndex(string name)

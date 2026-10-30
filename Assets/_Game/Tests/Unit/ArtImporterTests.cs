@@ -31,6 +31,7 @@ namespace Meridian.Tests
                 atlasFolder = Sandbox + "/Atlases/",
                 groupPrefix = "test_",
                 blenderManifest = Sandbox + "/manifest.json",
+                materialRegistry = Sandbox + "/ArtMaterials.asset",
             };
             Directory.CreateDirectory(Sandbox);
         }
@@ -38,11 +39,12 @@ namespace Meridian.Tests
         [TearDown]
         public void TearDown()
         {
+            // Real roots first: deleting the sandbox must not run the importer against sandbox roots.
+            ArtImporter.Active = saved;
             AssetDatabase.DeleteAsset(Sandbox);
             var settings = ArtImporter.Settings;
             foreach (var g in settings.groups.Where(g => g != null && g.Name.StartsWith("test_")).ToList())
                 settings.RemoveGroup(g);
-            ArtImporter.Active = saved;
             AssetDatabase.Refresh();
         }
 
@@ -285,6 +287,44 @@ namespace Meridian.Tests
             Assert.IsNull(ArtRules.AtlasFor("backgrounds/earth/layer1"));
             Assert.AreEqual("planet_earth", ArtRules.AtlasFor("creatures/earth/stag"));
             Assert.AreEqual("common", ArtRules.AtlasFor("fx/dust/base"));
+        }
+
+        // ---------- U-019 material assignment ----------
+
+        [Test]
+        public void KeyWithEmissionMapGetsSpriteLitEmissive()
+        {
+            var e = Png(Art("ships/pilgrim/side_emission.png"), 64, 32, new Color32(255, 160, 40, 255));
+            var c = Png(Art("ships/pilgrim/side_color.png"), 64, 32);
+            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+            Import(c);
+            var reg = ArtImporter.Registry();
+            Assert.IsTrue(reg.IsEmissive("ships/pilgrim/side"), "registered as emissive");
+            Assert.NotNull(reg.litEmissive);
+            Assert.AreEqual("MERIDIAN/Sprite_LitEmissive", reg.litEmissive.shader.name);
+
+            var plain = Png(Art("ships/pilgrim/top_color.png"), 64, 64);
+            Import(plain);
+            Assert.IsFalse(reg.IsEmissive("ships/pilgrim/top"), "no emission map → plain lit");
+
+            AssetDatabase.DeleteAsset(e);
+            Assert.IsFalse(ArtImporter.Registry().IsEmissive("ships/pilgrim/side"), "emission removed → back to plain lit");
+        }
+
+        [Test]
+        public void RealRegistryMarksEveryKeyWithAnEmissionMap()
+        {
+            ArtImporter.Active = saved;
+            var reg = AssetDatabase.LoadAssetAtPath<Meridian.Rendering.ArtMaterials>(saved.materialRegistry);
+            Assert.NotNull(reg, "Settings/Resources/ArtMaterials.asset");
+            foreach (var key in new[] { "props/common/calibration", "ships/pilgrim/side", "planets/sun/surface" })
+                Assert.IsTrue(reg.IsEmissive(key), key);
+            foreach (var file in Directory.GetFiles(saved.art.TrimEnd('/'), "*_emission.png", SearchOption.AllDirectories))
+            {
+                var rel = file.Replace('\\', '/').Substring(saved.art.Length);
+                Assert.IsTrue(ArtRules.TryParse(rel, out var key, out _));
+                Assert.IsTrue(reg.IsEmissive(key), $"{key} has an emission map");
+            }
         }
 
         // ---------- placeholder retirement ----------

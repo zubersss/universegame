@@ -23,6 +23,8 @@ namespace Meridian.Art
                 Sprite pick = op.Result[0];
                 foreach (var s in op.Result) if (s.name.EndsWith("_0")) pick = s;
                 target.sprite = pick;
+                var mat = Meridian.Rendering.ArtMaterials.MaterialFor(key);
+                if (mat != null) target.sharedMaterial = mat;
                 if (worldWidth > 0f && pick.bounds.size.x > 0f)
                     target.transform.localScale = Vector3.one * (worldWidth / pick.bounds.size.x);
             };

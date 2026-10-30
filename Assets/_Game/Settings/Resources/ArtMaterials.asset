@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ec31bf8a5b85a545a7bbf022496db76, type: 3}
+  m_Name: ArtMaterials
+  m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.Rendering.ArtMaterials
+  lit: {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  litEmissive: {fileID: 2100000, guid: 26b4dc6b5aec4aa48aa60247cfe73d86, type: 2}
+  emissiveKeys:
+  - characters/surveyor/base
+  - planets/earth/glow
+  - planets/mars/glow
+  - planets/sun/glow
+  - planets/sun/surface
+  - props/common/calibration
+  - ships/pilgrim/side
+  - ships/pilgrim/top

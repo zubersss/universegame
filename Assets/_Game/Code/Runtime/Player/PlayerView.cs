@@ -25,6 +25,8 @@ namespace Meridian.Player
                 Sprite first = op.Result[0];
                 foreach (var s in op.Result) if (s.name.EndsWith("_0")) first = s;
                 view.sprite = first;
+                var mat = Meridian.Rendering.ArtMaterials.MaterialFor(ArtKeys.Characters.Surveyor);
+                if (mat != null) view.sharedMaterial = mat;
             };
         }
 

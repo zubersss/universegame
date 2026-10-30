@@ -28,6 +28,7 @@ namespace Meridian.EditorTools
             public string atlasFolder = "Assets/_Game/Settings/Atlases/";
             public string groupPrefix = "";
             public string blenderManifest = "blender/manifest.json";
+            public string materialRegistry = "Assets/_Game/Settings/Resources/ArtMaterials.asset";
         }
 
         public static Roots Active = new Roots();
@@ -306,11 +307,13 @@ namespace Meridian.EditorTools
                 if (File.Exists(colorPath)) colors.Add(colorPath);
             }
 
+            var materialKeys = new HashSet<string>();
             foreach (var raw in deleted.Concat(movedFrom))
             {
                 var kind = Classify(raw, out var rel);
-                if (kind == RootKind.Art && ArtRules.TryParse(rel, out var key, out var map) && map == ArtMap.Color)
-                    restoreKeys.Add(key);
+                if (kind == RootKind.None || !ArtRules.TryParse(rel, out var key, out var map)) continue;
+                if (kind == RootKind.Art && map == ArtMap.Color) restoreKeys.Add(key);
+                materialKeys.Add(key);
             }
 
             foreach (var colorPath in colors)
@@ -320,6 +323,7 @@ namespace Meridian.EditorTools
                 if (!PassesValidation(colorPath)) continue;
                 SliceIfNeeded(colorPath, key);
                 LinkSecondaries(colorPath, key);
+                materialKeys.Add(key);
                 bool isArt = colorPath.StartsWith(Active.art, StringComparison.Ordinal);
                 if (isArt)
                 {
@@ -338,6 +342,55 @@ namespace Meridian.EditorTools
                 var ph = PlaceholderColorPath(key);
                 if (File.Exists(ph) && !File.Exists(ArtColorPath(key))) Register(ph, key);
             }
+            if (materialKeys.Count > 0) UpdateMaterialRegistry(materialKeys);
+        }
+
+        // ---------- material registry (U-019) ----------
+
+        public const string LitEmissiveMaterialPath = "Assets/_Game/Settings/Materials/Sprite_LitEmissive.mat";
+        const string LitDefaultMaterialPath = "Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Lit-Default.mat";
+
+        /// <summary>The ArtMaterials registry for the active roots, created on first use.</summary>
+        public static Meridian.Rendering.ArtMaterials Registry()
+        {
+            var path = Active.materialRegistry;
+            var reg = AssetDatabase.LoadAssetAtPath<Meridian.Rendering.ArtMaterials>(path);
+            if (reg != null) return reg;
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            reg = ScriptableObject.CreateInstance<Meridian.Rendering.ArtMaterials>();
+            reg.lit = AssetDatabase.LoadAssetAtPath<Material>(LitDefaultMaterialPath);
+            reg.litEmissive = AssetDatabase.LoadAssetAtPath<Material>(LitEmissiveMaterialPath);
+            if (reg.litEmissive == null)
+            {
+                var shader = Shader.Find("MERIDIAN/Sprite_LitEmissive");
+                if (shader != null)
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(LitEmissiveMaterialPath));
+                    reg.litEmissive = new Material(shader) { name = "Sprite_LitEmissive" };
+                    AssetDatabase.CreateAsset(reg.litEmissive, LitEmissiveMaterialPath);
+                }
+            }
+            AssetDatabase.CreateAsset(reg, path);
+            return reg;
+        }
+
+        static bool IsEmissiveNow(string key)
+        {
+            var color = File.Exists(ArtColorPath(key)) ? ArtColorPath(key) : PlaceholderColorPath(key);
+            return File.Exists(color) && File.Exists(ArtRules.SiblingPath(color, ArtMap.Emission));
+        }
+
+        /// <summary>A key draws with Sprite_LitEmissive when its addressed color file has an _emission sibling.</summary>
+        static void UpdateMaterialRegistry(IEnumerable<string> keys)
+        {
+            // Don't create a registry just to record "not emissive".
+            if (!File.Exists(Active.materialRegistry) && !keys.Any(IsEmissiveNow)) return;
+            var reg = Registry();
+            bool changed = false;
+            foreach (var key in keys) changed |= reg.SetEmissive(key, IsEmissiveNow(key));
+            if (!changed) return;
+            EditorUtility.SetDirty(reg);
+            AssetDatabase.SaveAssetIfDirty(reg);
         }
 
         static bool PassesValidation(string colorPath)
