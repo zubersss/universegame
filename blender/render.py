@@ -155,6 +155,10 @@ def open_source(entry, preview):
     if coll is None:
         raise AssetError(f"collection '{coll_name}' not in {entry['source']}")
     objs = set(coll.all_objects)
+    for extra in entry.get("keep", []):          # e.g. a shared light rig for beauty renders
+        if bpy.data.collections.get(extra) is None:
+            raise AssetError(f"keep collection '{extra}' not in {entry['source']}")
+        objs |= set(bpy.data.collections[extra].all_objects)
     for ob in scene.objects:
         ob.hide_render = ob not in objs or ob.hide_render
     return scene, [o for o in objs if not o.hide_render]
@@ -193,6 +197,9 @@ def setup_render(scene, entry, w, h, preview):
             cy.tile_size = 256
     else:
         scene.eevee.taa_render_samples = samples
+    make_camera(scene, entry, w, h)
+    if entry.get("beauty"):
+        return   # lit UI art (icons): keep the source's own world and lights
     # Flat black world so nothing but the override emission reaches the film.
     world = bpy.data.worlds.new("meridian_world")
     if world.node_tree is None:
@@ -202,7 +209,6 @@ def setup_render(scene, entry, w, h, preview):
         bg.inputs["Color"].default_value = (0, 0, 0, 1)
         bg.inputs["Strength"].default_value = 0.0
     scene.world = world
-    make_camera(scene, entry, w, h)
 
 
 def make_camera(scene, entry, w, h):
@@ -230,6 +236,10 @@ def make_camera(scene, entry, w, h):
     elif preset == "top":     # looks -Z; image right = +X, up = +Y
         cam.location = origin + Vector((dx, dy, 100.0))
         cam.rotation_euler = Euler((0, 0, 0))
+    elif preset == "icon":    # 3/4 view from front-right, above; frame centred on the origin
+        view = Vector((-0.55, 0.75, -0.5)).normalized()          # direction the camera looks
+        cam.rotation_euler = view.to_track_quat("-Z", "Y").to_euler()
+        cam.location = origin - view * 100.0
     else:
         raise AssetError(f"unknown camera preset '{preset}'")
     scene.camera = cam
@@ -245,7 +255,8 @@ def render_pass(entry, pass_name, w, h, preview, frames):
     scene, objs = open_source(entry, preview)
     setup_render(scene, entry, w, h, preview)
     set_view(scene, "Standard" if pass_name in ("color", "emission") else "Raw")
-    passes.apply(objs, pass_name)
+    if not (entry.get("beauty") and pass_name == "color"):
+        passes.apply(objs, pass_name)
     os.makedirs(WORK, exist_ok=True)
     out = []
     for i, fr in enumerate(frames):
