@@ -289,14 +289,14 @@ Files: Assets/_Game/Code/Runtime/FX/
 Depends: U-010, U-012
 Lead notes: Cycle 16. B-012 art Done.
 
-### U-025 · UNITY · In Progress · M2
+### U-025 · UNITY · Review · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.
 Accept: EditMode test: Earth noon/midnight intensities match §9; captures at dawn/noon/dusk/night on Earth; 0 B GC per frame.
 Files: Assets/_Game/Code/Runtime/Planet/Lighting/
 Depends: U-004
-Lead notes: M2 draft (cycle 10).
+Lead notes: Not yet accepted (cycle 18): DayNightTests + c56a516 look good, but Accept requires dawn/noon/dusk/night captures on Earth, and none are in coordination/reports/unity/. Add them (SceneCapture at clock 0.25/0.5/0.75/0.0) and list them in your status. Day/night numbers accepted as D-030.
 
-### U-026 · UNITY · Ready · M2
+### U-026 · UNITY · In Progress · M2
 Goal: Mars dust storm (Bible §7.2): 60 s warning, 2–6 min storm every 4–7 game days, visibility 15 m, Cryo +1, static discharges.
 Accept: PlayMode test forces a storm: warning event 60 s before; fog shrinks visibility to 15 m; Cryo level rises by 1; storm ends inside 2–6 min; uses fx/dust when present.
 Files: Assets/_Game/Code/Runtime/Planet/Weather/
@@ -327,6 +327,14 @@ Lead notes: M2 draft (cycle 13). The Archive is the story start (Bible §2). Put
 ---
 
 ## BLENDER
+
+### B-024 · BLENDER · Ready · M2
+Goal: HeavyJobLock fairness + memory gate in `tools/blender_render.ps1` (D-026), mirroring U-023.
+Accept: writes `want_blender.lock` while waiting, deletes it on acquire; yields to a fresh `want_unity.lock` after its own job; refuses below 1.5 GB free RAM; one job ≤ 20 min (split `all` exports by category).
+Files: tools/blender_render.ps1
+Depends: —
+Lead notes: BLOCKING (cycle 18): Ready since cycle 10 and skipped. Do it at the start of your next tick. It is light work (no lock needed), and without it UNITY can't see that you are waiting, so your exports stall (B-014/B-017/B-018 queued ~50 min). LEAD filed want_blender.lock 17:41 as a stopgap.
+
 
 ### B-001 · BLENDER · Done · M0
 Goal: Pipeline skeleton: `blender/` tree, `manifest.json` schema, `render.py` CLI (`--asset`, `--category`, `--all`, `--preview`), `tools/blender_render.ps1`, logging, memory settings per contract §3.
@@ -397,13 +405,6 @@ Accept: three 2048×1024 layers tileable in x; haze gradient readable; palette p
 Files: Assets/_Game/Art/backgrounds/earth/
 Depends: B-002
 Lead notes: Done 6c6541d + 8efa54f (cycle 13): rendered 3D trees, ground clumps, sun-lit; passes the §9 cartoon rule. Polish items → B-025.
-
-### B-024 · BLENDER · Ready · M2
-Goal: HeavyJobLock fairness + memory gate in `tools/blender_render.ps1` (D-026), mirroring U-023.
-Accept: writes `want_blender.lock` while waiting, deletes it on acquire; yields to a fresh `want_unity.lock` after its own job; refuses below 1.5 GB free RAM; one job ≤ 20 min (split `all` exports by category).
-Files: tools/blender_render.ps1
-Depends: —
-Lead notes: PRIORITY: do this before the next full export (cycle 10).
 
 ### B-011 · BLENDER · Done · M2
 Goal: Mars parallax `backgrounds/mars/layer0..2`.

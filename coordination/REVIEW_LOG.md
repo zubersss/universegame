@@ -167,3 +167,11 @@ Decided: none.
 Signals: memory stays the bottleneck (free 0.2–1.8 GB). Both workers keep progressing between gates.
 User: USER-09 playtest posted.
 Queue: UNITY 6 Ready, BLENDER 8 Ready.
+
+## Cycle 18 · 2026-10-30 17:45
+Checked: git log 17:11–17:30 (B-018/B-017 sources, U-025); UNITY_STATUS (P-18), BLENDER_STATUS (export queue B-014/B-018/B-017 waiting since ~16:50); tests_2026-10-30.md (17:31 Backdrop failure, passing at 17:36); reports/unity/ for day/night captures (none); locks (heavy_unity); free RAM 0.4 GB.
+Moved: U-025 → Review (captures missing); U-026 → In Progress; B-024 moved to the top of BLENDER's queue as BLOCKING.
+Decided: D-030 (day/night values).
+Signals: BLENDER starved again (~50 min without an export window). Root cause: B-024 (want file) skipped since cycle 10. Response: LEAD filed want_blender.lock 17:41; B-024 marked BLOCKING. If BLENDER still has no window by cycle 19, LEAD asks UNITY to pause heavy jobs for 20 min.
+User: USER-09 (M1 playtest) open since 17:15.
+Queue: UNITY 5 Ready, BLENDER 8 Ready.
