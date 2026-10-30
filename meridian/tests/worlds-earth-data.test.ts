@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { EARTH_META, asind, atan2d, decodeLsr, installEarthData, loadEarthData, sampleBilinear, sincosd, type EarthRasters, type LayerName, type Raster } from '../src/world/earthData';
+import { EARTH_META, asind, atan2d, decodeLsr, installEarthData, loadEarthData, sampleBilinear, sampleCubic, sampleElevation, sincosd, type EarthRasters, type LayerName, type Raster } from '../src/world/earthData';
 
 const dir = fileURLToPath(new URL('../src/data/earth/', import.meta.url));
 const layers = EARTH_META.layers as Record<LayerName, { file: string; sha256Decoded: string; width: number; height: number; channels: number; res: number; bytes: number }>;
@@ -14,7 +14,7 @@ let E: EarthRasters;
 const readLayer = (name: LayerName) => readFileSync(dir + layers[name].file);
 
 beforeAll(async () => {
-  E = await loadEarthData(async (name) => readLayer(name));
+  E = await loadEarthData(async (_name, _url, file) => readFileSync(dir + file));
   installEarthData(E);
 });
 
@@ -72,9 +72,66 @@ describe('Earth dataset files (W3)', () => {
   });
 
   it('stays within the 8 MB lazy data budget', () => {
-    const total = Object.values(layers).reduce((n, l) => n + l.bytes, 0);
+    const total = Object.values(layers).reduce((n, l) => n + l.bytes, 0) + EARTH_META.regions.reduce((n, r) => n + r.bytes, 0);
     expect(total).toBe(EARTH_META.totalBytes);
     expect(total).toBeLessThan(8 * 1024 * 1024);
+  });
+
+  it('ships the Southern Alps regional grid intact, from public-domain sources only', async () => {
+    expect(EARTH_META.regions.map((r) => r.name)).toEqual(['southern-alps']);
+    const m = EARTH_META.regions[0];
+    const bytes = readFileSync(dir + m.file);
+    expect(bytes.length).toBe(m.bytes);
+    const d = await decodeLsr(bytes);
+    expect([d.width, d.height, d.channels]).toEqual([m.width, m.height, 1]);
+    const raw = Buffer.from(d.data.buffer, d.data.byteOffset, d.data.byteLength);
+    expect(createHash('sha256').update(raw).digest('hex')).toBe(m.sha256Decoded);
+    expect(m.width).toBe(Math.round((m.east - m.west) / m.res) + 1);
+    expect(m.height).toBe(Math.round((m.north - m.south) / m.res) + 1);
+    // The route lies well inside (the grid fades in over its outer 0.25 deg).
+    for (const [lat, lon] of [[-42.72, 170.95], [-43.39, 170.18], [-43.595, 170.142], [-43.05, 170.62]]) {
+      expect(lat).toBeLessThan(m.north - 0.25);
+      expect(lat).toBeGreaterThan(m.south + 0.25);
+      expect(lon).toBeGreaterThan(m.west + 0.25);
+      expect(lon).toBeLessThan(m.east - 0.25);
+    }
+    expect(m.source.imagerySources.every((x: string) => ['srtm', 'gmted', 'etopo1'].includes(x))).toBe(true);
+    expect(m.source.tiles.length).toBe(25);
+    expect(EARTH_META.credits.some((c: string) => /Southern Alps/.test(c) && /U\.S\. Geological Survey/.test(c))).toBe(true);
+  });
+
+  it('resolves the Southern Alps where the global grid only has a plateau', () => {
+    const cs = { v: 0, dLon: 0, dLat: 0, region: 0 };
+    const at = (lat: number, lon: number) => ({ ...sampleElevation(E, lat, lon, cs) });
+    const aoraki = at(-43.595, 170.142);
+    expect(aoraki.region).toBe(1);
+    expect(aoraki.v).toBeGreaterThan(3200); // real summit 3,724 m; ~225 m source pixels
+    expect(sampleBilinear(E.elevation, -43.595, 170.142)).toBeLessThan(2600); // the 10' grid
+    expect(at(-42.717, 170.967).v).toBeLessThan(80); // Hokitika, on the coastal plain
+    expect(at(-42.6, 170.5).v).toBeLessThan(-100); // Tasman Sea (ETOPO1 bathymetry)
+    expect(at(-43.47, 170.18).v).toBeGreaterThan(at(-43.39, 170.18).v); // glacier rises toward the divide
+    // Outside the region nothing changes.
+    expect(at(-40, 175).v).toBe(sampleCubic(E.elevation, -40, 175, { v: 0, dLon: 0, dLat: 0 }).v);
+    expect(at(-40, 175).region).toBe(0);
+  });
+
+  it('fades the regional grid in smoothly (value and gradient continuous across its edge band)', () => {
+    const cs = { v: 0, dLon: 0, dLat: 0, region: 0 };
+    // Walk east across the west edge band and north across the south edge band in 0.0005 deg steps.
+    for (const [lat0, lon0, dLat, dLon] of [[-43.2, 169.1, 0, 1], [-44.3, 170.5, 1, 0]]) {
+      let prev = sampleElevation(E, lat0, lon0, cs).v;
+      let worst = 0;
+      for (let k = 1; k <= 1000; k++) {
+        const lat = lat0 + dLat * k * 0.0005;
+        const lon = lon0 + dLon * k * 0.0005;
+        const s0 = { ...sampleElevation(E, lat, lon, cs) };
+        // The analytic gradient predicts the step (C1 blend), to within the curvature of the fields.
+        const pred = prev + ((dLat ? s0.dLat : s0.dLon) * 0.0005);
+        worst = Math.max(worst, Math.abs(s0.v - pred));
+        prev = s0.v;
+      }
+      expect(worst, `${lat0},${lon0}`).toBeLessThan(15); // metres per 55 m step: no jump
+    }
   });
 
   it('repeats column 0 as the last column (seam) and has constant pole rows', () => {

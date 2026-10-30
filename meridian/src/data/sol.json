@@ -367,6 +367,20 @@
    },
    "source": "pending (reference: https://nssdc.gsfc.nasa.gov/planetary/factsheet/jupiterfact.html)",
    "verified": false,
+   "orientation": {
+    "north": [
+     -0.014599255989,
+     -0.035818473179,
+     0.999251669352
+    ],
+    "primeMeridian": [
+     0.999425051798,
+     -0.031107456805,
+     0.013486733101
+    ],
+    "tag": "estimated",
+    "source": "IAU WGCCRE 2009 pole (reference values entered without a fetched source); prime meridian arbitrary (banded atmosphere)"
+   },
    "positionKm": {
     "value": [
      -253419243.7,
@@ -454,6 +468,20 @@
    },
    "source": "pending (reference: https://nssdc.gsfc.nasa.gov/planetary/factsheet/saturnfact.html)",
    "verified": false,
+   "orientation": {
+    "north": [
+     0.085478831861,
+     0.462441677591,
+     0.882519724499
+    ],
+    "primeMeridian": [
+     -0.650628435647,
+     0.6967324218,
+     -0.302070473797
+    ],
+    "tag": "estimated",
+    "source": "IAU WGCCRE 2009 pole (reference values entered without a fetched source); prime meridian arbitrary (banded atmosphere)"
+   },
    "positionKm": {
     "value": [
      1422278323.5,
@@ -541,6 +569,20 @@
    },
    "source": "pending (reference: https://nssdc.gsfc.nasa.gov/planetary/factsheet/uranusfact.html)",
    "verified": false,
+   "orientation": {
+    "north": [
+     -0.211999581538,
+     -0.96798900188,
+     0.134363200569
+    ],
+    "primeMeridian": [
+     0.975576733408,
+     -0.201533110722,
+     0.087375296938
+    ],
+    "tag": "estimated",
+    "source": "IAU WGCCRE 2009 pole (reference values entered without a fetched source); prime meridian arbitrary (banded atmosphere)"
+   },
    "positionKm": {
     "value": [
      1478073119.9,
@@ -582,6 +624,20 @@
    },
    "source": "pending (reference: https://nssdc.gsfc.nasa.gov/planetary/factsheet/neptunefact.html)",
    "verified": false,
+   "orientation": {
+    "north": [
+     0.355883256859,
+     -0.306810304641,
+     0.882731297992
+    ],
+    "primeMeridian": [
+     0.871556314255,
+     0.449837245675,
+     -0.195028314574
+    ],
+    "tag": "estimated",
+    "source": "IAU WGCCRE 2009 pole (reference values entered without a fetched source); prime meridian arbitrary (banded atmosphere)"
+   },
    "positionKm": {
     "value": [
      4468806955.8,

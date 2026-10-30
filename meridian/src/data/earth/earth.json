@@ -4,11 +4,12 @@
  "grid": "node-registered latitude/longitude: row 0 = 90N, last row = 90S, column 0 = 180W, last column = 180E (duplicate of column 0)",
  "built": "2026-10-30",
  "tool": "scripts/data/build_earth.py",
- "totalBytes": 3592218,
+ "totalBytes": 4007640,
  "credits": [
   "Topography: ETOPO1 (NOAA NGDC, public domain), 10' grid by Fatiando a Terra (CC BY 4.0)",
   "Coastlines and lakes: Natural Earth (public domain)",
-  "Land cover: \u00a9 ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium (CC BY 4.0)"
+  "Land cover: \u00a9 ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium (CC BY 4.0)",
+  "Regional topography (Southern Alps): SRTM and GMTED2010 courtesy of the U.S. Geological Survey, ETOPO1 (NOAA), via AWS Terrain Tiles (public domain)"
  ],
  "layers": {
   "elevation": {
@@ -1395,5 +1396,286 @@
     "failed": 0
    }
   }
- }
+ },
+ "regions": [
+  {
+   "name": "southern-alps",
+   "file": "earth-region-southern-alps.bin",
+   "bytes": 415422,
+   "sha256Decoded": "b176062dae8fa0af19205d263a328e7e4588671af989469c9fb3873d05da7cf3",
+   "dtype": "int16",
+   "width": 937,
+   "height": 721,
+   "channels": 1,
+   "res": 0.002777777777777778,
+   "scale": 1,
+   "offset": 0,
+   "north": -42.2,
+   "south": -44.2,
+   "west": 169.2,
+   "east": 171.8,
+   "units": "m",
+   "datum": "mean sea level",
+   "min": -1332,
+   "max": 3590,
+   "tag": "measured",
+   "grid": "node-registered latitude/longitude: row 0 = north edge, column 0 = west edge (no wrap)",
+   "source": {
+    "name": "AWS Terrain Tiles (Mapzen/Tilezen joerd), terrarium encoding",
+    "url": "https://elevation-tiles-prod.s3.amazonaws.com/terrarium/9/{x}/{y}.png",
+    "zoom": 9,
+    "accessed": "2026-10-30",
+    "composition": "zooms 7-9: SRTM and GMTED2010 on land (U.S. Geological Survey), ETOPO1 in the ocean (NOAA)",
+    "imagerySources": [
+     "etopo1",
+     "gmted",
+     "srtm"
+    ],
+    "license": "public domain (U.S. Government works: SRTM, GMTED2010, ETOPO1)",
+    "credit": "SRTM and GMTED2010 data courtesy of the U.S. Geological Survey; ETOPO1: NOAA National Centers for Environmental Information",
+    "docs": [
+     "https://github.com/tilezen/joerd/blob/master/docs/data-sources.md",
+     "https://github.com/tilezen/joerd/blob/master/docs/attribution.md"
+    ],
+    "tiles": [
+     {
+      "tile": "9/496/322",
+      "sha256": "f564d6544b5ab5e4e5cc048aca5d9ec6ebd4884ba135b362b189fa3f0a821778",
+      "imagerySources": [
+       "etopo1/ETOPO1_Bed_g.tif"
+      ]
+     },
+     {
+      "tile": "9/497/322",
+      "sha256": "5a0e7d9f6dd431a643f7382b2505bada3703b0f81c8110f0492612c62bdd293f",
+      "imagerySources": [
+       "gmted/50S150E_20101117_gmted_mea075.tif",
+       "etopo1/ETOPO1_Bed_g.tif"
+      ]
+     },
+     {
+      "tile": "9/498/322",
+      "sha256": "d6d84dc1f0ad18e7815be2fe9fa16fb4e0ac9595a1f8717e9354df91b9f1b350",
+      "imagerySources": [
+       "gmted/50S150E_20101117_gmted_mea075.tif",
+       "etopo1/ETOPO1_Bed_g.tif"
+      ]
+     },
+     {
+      "tile": "9/499/322",
+      "sha256": "706d887428fcf5543901a6838ffcdbf9bcf0966b9af7b92cc50c003997c1e71d",
+      "imagerySources": [
+       "srtm/S43E171.tif",
+       "gmted/50S150E_20101117_gmted_mea075.tif",
+       "etopo1/ETOPO1_Bed_g.tif"
+      ]
+     },
+     {
+      "tile": "9/500/322",
+      "sha256": "60e7192df75f1d2fbf04fef0adacb01cfd64d29c52f6d6e9c1e362cd0df0359d",
+      "imagerySources": [
+       "srtm/S43E171.tif",
+       "srtm/S43E172.tif",
+       "gmted/50S150E_20101117_gmted_mea075.tif"
+      ]
+     },
+     {
+      "tile": "9/496/323",
+      "sha256": "77a609d75eed0ac4a27b4c783fbb3744e32a661761e6aed49a30285bd82d4c19",
+      "imagerySources": [
+       "gmted/50S150E_20101117_gmted_mea075.tif",
+       "etopo1/ETOPO1_Bed_g.tif"
+      ]
+     },
+     {
+      "tile": "9/497/323",
+      "sha256": "955689c9e9fab81c30adb173f87c44e8d1dfb4799061aba1d6b9bb19b5b4a292",
+      "imagerySources": [
+       "gmted/50S150E_20101117_gmted_mea075.tif",
+       "etopo1/ETOPO1_Bed_g.tif"
+      ]
+     },
+     {
+      "tile": "9/498/323",
+      "sha256": "e433909af5b1aedf87e1c4056fc6fbcec23b2209db7c538c1a03345e5c02f44f",
+      "imagerySources": [
+       "srtm/S43E170.tif",
+       "srtm/S44E170.tif",
+       "gmted/50S150E_20101117_gmted_mea075.tif",
+       "etopo1/ETOPO1_Bed_g.tif"
+      ]
+     },
+     {
+      "tile": "9/499/323",
+      "sha256": "c3e000d1696a222b7c454d025da1fa993495b71488109518952d40eec921253a",
+      "imagerySources": [
+       "srtm/S43E170.tif",
+       "srtm/S43E171.tif",
+       "srtm/S44E171.tif",
+       "srtm/S44E170.tif",
+       "gmted/50S150E_20101117_gmted_mea075.tif",
+       "etopo1/ETOPO1_Bed_g.tif"
+      ]
+     },
+     {
+      "tile": "9/500/323",
+      "sha256": "dad17c9ec854aaab450fd76282e4cc00fdfbb116d9b5be0d07cd5fbc8bdbaa4a",
+      "imagerySources": [
+       "srtm/S43E171.tif",
+       "srtm/S43E172.tif",
+       "srtm/S44E171.tif",
+       "srtm/S44E172.tif",
+       "gmted/50S150E_20101117_gmted_mea075.tif"
+      ]
+     },
+     {
+      "tile": "9/496/324",
+      "sha256": "2851457b5ff22628e172b771bd1e586932feb7ec77c18553f174d7dde4ca99d3",
+      "imagerySources": [
+       "gmted/50S150E_20101117_gmted_mea075.tif",
+       "etopo1/ETOPO1_Bed_g.tif"
+      ]
+     },
+     {
+      "tile": "9/497/324",
+      "sha256": "d6faecda8539f4034687251bbe73e39cbe0f6cfbd0df2ab7aba8da26d1cddb2e",
+      "imagerySources": [
+       "srtm/S44E169.tif",
+       "srtm/S44E170.tif",
+       "gmted/50S150E_20101117_gmted_mea075.tif",
+       "etopo1/ETOPO1_Bed_g.tif"
+      ]
+     },
+     {
+      "tile": "9/498/324",
+      "sha256": "35f27b43e028521ebfa89aa3c87dcad93a75bcb775a0fbd5b48f4bd6e0098d74",
+      "imagerySources": [
+       "srtm/S44E170.tif",
+       "gmted/50S150E_20101117_gmted_mea075.tif",
+       "etopo1/ETOPO1_Bed_g.tif"
+      ]
+     },
+     {
+      "tile": "9/499/324",
+      "sha256": "8bd5c86266ea96406945e977c583a83f83160b742b122e968b4b733cb02c3c3e",
+      "imagerySources": [
+       "srtm/S44E171.tif",
+       "srtm/S44E170.tif",
+       "gmted/50S150E_20101117_gmted_mea075.tif"
+      ]
+     },
+     {
+      "tile": "9/500/324",
+      "sha256": "ce88dd394d918f1cb5e44b73fa4bca5c193f2561ef4885ebfc8b1de01aa9e318",
+      "imagerySources": [
+       "srtm/S44E171.tif",
+       "srtm/S44E172.tif",
+       "gmted/50S150E_20101117_gmted_mea075.tif"
+      ]
+     },
+     {
+      "tile": "9/496/325",
+      "sha256": "22be373b56acec316eef25c148fe3285d1e218227354da0bff74a2d1aee83b77",
+      "imagerySources": [
+       "srtm/S44E168.tif",
+       "srtm/S44E169.tif",
+       "srtm/S45E169.tif",
+       "srtm/S45E168.tif",
+       "gmted/50S150E_20101117_gmted_mea075.tif",
+       "etopo1/ETOPO1_Bed_g.tif"
+      ]
+     },
+     {
+      "tile": "9/497/325",
+      "sha256": "e8cb12ab3c2aae44f1e7bc9c460bc578eda3448568c6b4652342f2ede44c58d6",
+      "imagerySources": [
+       "srtm/S44E169.tif",
+       "srtm/S45E169.tif",
+       "srtm/S44E170.tif",
+       "srtm/S45E170.tif",
+       "gmted/50S150E_20101117_gmted_mea075.tif",
+       "etopo1/ETOPO1_Bed_g.tif"
+      ]
+     },
+     {
+      "tile": "9/498/325",
+      "sha256": "b3b33ee267f19afee4ce350c647e085fb1ac5cbed3a45061a3de30cdc85ebcf1",
+      "imagerySources": [
+       "srtm/S44E170.tif",
+       "srtm/S45E170.tif",
+       "gmted/50S150E_20101117_gmted_mea075.tif"
+      ]
+     },
+     {
+      "tile": "9/499/325",
+      "sha256": "b04670fa6e22f6d936cc07f1e4fbb0dd50d66d46c103024539f69f5e20b68d9f",
+      "imagerySources": [
+       "srtm/S44E171.tif",
+       "srtm/S45E171.tif",
+       "srtm/S44E170.tif",
+       "srtm/S45E170.tif",
+       "gmted/50S150E_20101117_gmted_mea075.tif"
+      ]
+     },
+     {
+      "tile": "9/500/325",
+      "sha256": "2e0e6d4d018ce32c0ecfa4a57c4853c9e4adfdc5529eb4d75ef45a967517a7ee",
+      "imagerySources": [
+       "srtm/S44E171.tif",
+       "srtm/S44E172.tif",
+       "srtm/S45E171.tif",
+       "gmted/50S150E_20101117_gmted_mea075.tif",
+       "etopo1/ETOPO1_Bed_g.tif"
+      ]
+     },
+     {
+      "tile": "9/496/326",
+      "sha256": "04af817d58b7d94b48317620460b5c39f518070342a3840a3853c21a53875f7c",
+      "imagerySources": [
+       "srtm/S45E169.tif",
+       "srtm/S45E168.tif",
+       "gmted/50S150E_20101117_gmted_mea075.tif"
+      ]
+     },
+     {
+      "tile": "9/497/326",
+      "sha256": "f5d186f1a67f1f115660bf20fa39cd95ccba0be0bed825d8dc20a8c86242f5e9",
+      "imagerySources": [
+       "srtm/S45E169.tif",
+       "srtm/S45E170.tif",
+       "gmted/50S150E_20101117_gmted_mea075.tif"
+      ]
+     },
+     {
+      "tile": "9/498/326",
+      "sha256": "0fb3e5ca3d6d071de9e2436f3aad29e82bab66c44561b6170d901425e1b1dd72",
+      "imagerySources": [
+       "srtm/S45E170.tif",
+       "gmted/50S150E_20101117_gmted_mea075.tif"
+      ]
+     },
+     {
+      "tile": "9/499/326",
+      "sha256": "befef59c0f2c57a4a96bfdab53555b0b382b21161bc58770d91c6fef2553007f",
+      "imagerySources": [
+       "srtm/S45E171.tif",
+       "srtm/S45E170.tif",
+       "gmted/50S150E_20101117_gmted_mea075.tif",
+       "etopo1/ETOPO1_Bed_g.tif"
+      ]
+     },
+     {
+      "tile": "9/500/326",
+      "sha256": "c110026aaeae4af7512479dbf71d96bd514bf6fde59170134a8287d2e4ebd429",
+      "imagerySources": [
+       "srtm/S45E171.tif",
+       "gmted/50S150E_20101117_gmted_mea075.tif",
+       "etopo1/ETOPO1_Bed_g.tif"
+      ]
+     }
+    ]
+   },
+   "method": "Web Mercator mosaic of the zoom tiles, sampled bilinearly at each node (pixel centres), rounded to whole metres."
+  }
+ ]
 }

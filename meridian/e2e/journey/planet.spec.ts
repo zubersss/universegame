@@ -49,7 +49,7 @@ async function monitor(page: Page, w: Watch, until: string, timeoutMs: number, l
 test('continuous planet: face crossing, atmosphere exit and return', async ({ page }) => {
   test.setTimeout(75 * 60 * 1000);
   const errors = collectErrors(page);
-  await bootToTitle(page, '?preset=low');
+  await bootToTitle(page, '?preset=low&system=quiet'); // pinned: this gate is about the Quiet System planet
   // Software rendering: draw every 16th frame so simulation runs near real time.
   await page.evaluate(() => (window as any).__meridian.setRenderEvery(16));
   await page.click('#btn-new');

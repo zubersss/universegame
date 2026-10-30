@@ -50,7 +50,7 @@ export interface AtmosphereDef {
 export interface CloudLayerDef {
   altitude: number;
   thickness: number;
-  coverage: number;
+  coverage: number; // 0..1 typical; above ~1.5 the deck closes (no gaps)
   scale: number; // feature wavelength in meters
   speed: number; // angular drift rad/s
   tint: [number, number, number];
@@ -122,6 +122,8 @@ export interface BodyDef {
   seed: number;
   /** Height above the datum [m] of the ocean surface, or null for bodies without an ocean. */
   seaLevel: number | null;
+  /** Height above the datum [m] of the body's zero elevation (deep basins stay above the datum); default 0. */
+  reliefZero?: number;
   /** 'data' bodies sample a dataset for the large-scale layer and use the seed only for infill. */
   surface: 'procedural' | 'data';
   dataset?: string;

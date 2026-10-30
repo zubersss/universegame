@@ -132,7 +132,10 @@ export class Clouds {
             float c = dot(V, uSunDir);
             float g = 0.6;
             float phase = 0.0795775 * (1.0 - g * g) / pow(max(1.0 + g * g - 2.0 * g * c, 1e-3), 1.5);
-            vec3 col = uTint * (sunT * (light * 0.62 + phase * (1.2 - d) * 1.6) * 3.2 + uAmbient * 1.4);
+            // Sunlit deck dims toward the terminator (softer than Lambert: thick clouds scatter many times).
+            float onset = smoothstep(-0.06, 0.12, mu);
+            float diffuse = onset * (0.35 + 0.65 * max(mu, 0.0));
+            vec3 col = uTint * (sunT * (light * 0.62 * diffuse + phase * (1.2 - d) * 1.6 * onset) * 3.2 + uAmbient * 1.4);
             float dist = length(vWorld - cameraPosition) * uUnit;
             // Soft when the camera is inside or near the layer.
             float fade = smoothstep(uThickness * 0.15, uThickness * 1.2, dist);

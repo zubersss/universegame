@@ -9,7 +9,7 @@ import { SurfaceGenerator, newSurfaceInfo, type Clearing } from './surface';
 import { hashCombine } from '../core/rng';
 import { geoToDir } from './geo';
 import { sincosd } from './earthData';
-import { FIRST_LIGHT, type SurveySpec } from './survey';
+import { FIRST_LIGHT, routeId, scanId, type SurveySpec } from './survey';
 
 export type V3 = [number, number, number];
 
@@ -266,10 +266,10 @@ export function computeSites(def: BodyDef): MissionSites {
   }
   // 5) First Light route and scan targets at their geographic coordinates.
   const route: RoutePoint[] = survey
-    ? survey.route.map((r, i) => ({ id: `${def.id}:route:${i}`, dir: geoToDir(def, r.lat, r.lon), radius: r.radius, label: r.label }))
+    ? survey.route.map((r, i) => ({ id: routeId(def.id, i), dir: geoToDir(def, r.lat, r.lon), radius: r.radius, label: r.label }))
     : [];
   const scans: ScanTarget[] = survey
-    ? survey.scans.map((t, i) => ({ id: `${def.id}:poi:${i}`, dir: geoToDir(def, t.lat, t.lon), label: t.label, note: t.note, tag: t.tag }))
+    ? survey.scans.map((t, i) => ({ id: scanId(def.id, i), dir: geoToDir(def, t.lat, t.lon), label: t.label, note: t.note, tag: t.tag }))
     : [];
   const sites: MissionSites = {
     bodyId: def.id,
