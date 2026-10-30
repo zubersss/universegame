@@ -1,8 +1,10 @@
 # UNITY STATUS
-Updated: 2026-10-30 13:45 · Session: 1
+Updated: 2026-10-30 14:00 · Session: 1
 ## Current task
-U-013 Save/load — next; then U-020, U-014.
+U-014 BudgetGate v1 — next; then U-020, U-015.
 ## Last completed
+U-013 Save/load — e047727 — one batched check (D-026): EditMode 108/108, PlayMode 28/28 (+3 tool skips), LeadQA 1/1. Slot folder %USERPROFILE%/AppData/LocalLow/Zubers/MERIDIAN/saves/slot0/ (Application.persistentDataPath; D-011): state.json (version 1; player, ship, cargo, story, catalogue, bases, timers) + terrain_<planet>.bin per planet with edits. Atomic writes (tmp + replace). 3 rotating backups in slot0/backups/1..3 (5 saves → current = 5th, backups = 4th/3rd/2nd, no 4th). Migrations on load (v0 → v1); newer versions refused. Autosave after every launch/entry (TransitionDirector.Completed) and every 5 min. PlayMode: dig 2 + place 1, hull 73 / fuel 41.5 / cargo 12 / clock 12345 → save → dig another, wreck state → load → identical state, same diffs, post-save dig undone, terrain drawn from the loaded diffs, player back at its position. Tests write to a temp root (SaveSystem.RootOverride), never the real saves.
+U-023 HeavyJobLock fairness — d692fdb — want_unity.lock while waiting, deleted on acquire; yields for 2 min after a release when another role's want file (< 30 min) exists; refuses below 1.5 GB free RAM and prints the number; 20-min job cap (stops Unity, exit 124); tools/unity_lock_selftest.ps1 11/11 against a temp lock folder. Follow-up fix: process handle cached so exit codes survive the watchdog wait.
 U-012 Transitions — 5fecaeb — EditMode 103/103, PlayMode 25/25 (+3 tool skips), twice. Launch: Escape Line crossed going up → input locked, side camera eases out (0.3 s), white fade (0.5 s), PlanetSide hidden then unloaded async, ship placed on Earth's Atmosphere Ring at longitude (x / width × 360°) + Earth's current rotation, exactly 20 u/s outward, 1 s invulnerable; total 1.05 s (≤ 1.5); hull 87 / fuel 64.5 / cargo 12 items carried in GameState. Entry: inward ring crossing (or F held 0.5 s inside a ring) → push-in + warm-to-white fade (0.8 s), PlanetSide loads Mars at column = (angle − rotation) / 360 × width, ship at Escape Line + 20 m (y 590) descending 15 m/s, Mars gravity, fuel unchanged, surveyor aboard; 1.10 s (planet load ≤ 4 s). AudioDirector re-hooks after every PlanetSide load. Saturn jump test now uses Bible v1.4's 2.3 m (D-024).
 U-010 Side-view ship — 98091e0 — EditMode 96/96, PlayMode 23/23 (+3 tool skips) three runs in a row. Launch from rest on Earth: fuel 100 → 83.000 after exactly 3 s of thrust, 83 after 2 s more (flight free after the burn), half a burn = 8.5; EscapeLineCrossed raised once going up, not on the way down; touchdowns 5 / 10.5 / 20 m/s → hull 100 / 65 / 30; Mk1 can't leave Jupiter's ground and the HUD warns (thrust < g). Pilgrim.prefab (Prefabs/Ship/), lands 10 tiles right of the spawn; F boards (camera follows the ship), F exits when landed; Escape Line band (fx/escape_band/base, scrolling "ESCAPE" label) and ship HUD (altitude, V/S, fuel, T/W, altitude bar with Escape Line marker).
 U-007 fix — 3707e5a — intermittent: the player could sink ~5 m into fresh ground (seen once in 3 PlayMode runs) because the chunk composite was rebuilt before TilemapCollider2D processed its new tiles. FinishCollision now calls ProcessTilemapChanges first, and bodies are released one physics step after the terrain settles. Regression check in CoreBootTests (player grounded on the surface, ship landed, hull 100). Streaming still green: p99 1.18 ms, 0/400 over 2 ms (Blender running).
@@ -14,9 +16,9 @@ U-009 Player controller — 089657b — EditMode 75/75, PlayMode 13/13 (+2 skips
 U-007 seam fix — 562f0ff — capture at a fractional camera position showed thin lines between tile rows (bilinear sampling read the neighbor sheet cell). Fix: importer slices terrain cells 1 texel inset (126 px), each Tile scales back to 1 m. Lines gone; streaming unchanged (avg 0.30 ms, p99 0.92 ms, 0/400 frames over 2 ms, worst 2.08 ms, D-019 load "none"). A first try with runtime Sprite.Create sprites caused 100–186 ms hitches and was replaced.
 U-008 Dig and place — f15f617. U-006 Lit preview — 5a75d90.
 ## Next up
-U-013, U-020, U-014
+U-014, U-020, U-015
 ## Ready for review
-U-010 (98091e0), U-012 (see Last completed)
+U-012 (5fecaeb), U-023 (d692fdb + handle fix), U-013 (e047727)
 ## Handoffs
 → BLENDER: terrain sheets are sampled 1 texel inside each 128 px cell (the outer texel ring of every cell is never shown). Keep nothing important in that ring.
 → BLENDER: keys are always 3 segments; single-variant assets use `base`. Character sheets at 256 px with 4 px gutters fit 2048 only up to 7 columns.
