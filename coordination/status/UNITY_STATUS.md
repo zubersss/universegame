@@ -1,8 +1,10 @@
 # UNITY STATUS
-Updated: 2026-10-30 13:10 · Session: 1
+Updated: 2026-10-30 13:30 · Session: 1
 ## Current task
-U-010 Side-view ship — next (U-009 is Done).
+U-012 Transitions (launch / entry) — next; then U-020, U-013.
 ## Last completed
+U-010 Side-view ship — 98091e0 — EditMode 96/96, PlayMode 23/23 (+3 tool skips) three runs in a row. Launch from rest on Earth: fuel 100 → 83.000 after exactly 3 s of thrust, 83 after 2 s more (flight free after the burn), half a burn = 8.5; EscapeLineCrossed raised once going up, not on the way down; touchdowns 5 / 10.5 / 20 m/s → hull 100 / 65 / 30; Mk1 can't leave Jupiter's ground and the HUD warns (thrust < g). Pilgrim.prefab (Prefabs/Ship/), lands 10 tiles right of the spawn; F boards (camera follows the ship), F exits when landed; Escape Line band (fx/escape_band/base, scrolling "ESCAPE" label) and ship HUD (altitude, V/S, fuel, T/W, altitude bar with Escape Line marker).
+U-007 fix — 3707e5a — intermittent: the player could sink ~5 m into fresh ground (seen once in 3 PlayMode runs) because the chunk composite was rebuilt before TilemapCollider2D processed its new tiles. FinishCollision now calls ProcessTilemapChanges first, and bodies are released one physics step after the terrain settles. Regression check in CoreBootTests (player grounded on the surface, ship landed, hull 100). Streaming still green: p99 1.18 ms, 0/400 over 2 ms (Blender running).
 U-019 Sprite_LitEmissive — 42988db — EditMode 96/96, PlayMode 18/18 (+3 tool skips). Hand-written HLSL (D-023) based on URP 17.6 Sprite-Lit-Default: lit + normal map, plus additive _EmissionMap × intensity in the lit and unlit passes. ArtImporter keeps Settings/Resources/ArtMaterials.asset: every key whose addressed color file has an _emission sibling draws with Sprite_LitEmissive (EditMode tests on a sandbox registry and on the real one); AddressableSprite, PlayerView and the preview tool use it. Previews with the point light OFF (reports/unity/preview_*_nopoint_2026-10-30.png): calibration stripe brightest pixel 255,169,62 (emission 255,160,40 + albedo under the 0.25 global light); Pilgrim portholes, engine ring, lift vents and nav lights glow on a dim hull; Sun surface fully self-lit.
 U-022 Top-down follow-ups — 4fded11 — Sun k_sun 0.80 (D-022): 14.9 u/s² at r 1150, 30 at r 810 (EditMode); Mk1 ship at Mercury's ring thrusting outward reaches r 1300 in 4.04 s (PlayMode); backgrounds/space/layer0..2 as parallax quads + planets/*/glow behind discs (2.56 R, Sun 3.2 R, only where art exists); 24 draw calls; capture_space_2026-10-30.png shows stars, Milky Way band and Earth's glow.
 U-016 Placeholder audio — 37f9ed9 — EditMode 93/93, PlayMode 17/17 (+3 tool skips), LeadQA 1/1. Seven clips synthesized by AudioSynth.cs (original work, CC0 1.0, no downloads): jump, land, dig, place, thrust loop, ui_click, 20 s wind ambient loop; Vorbis, SFX compressed in memory, ambient streamed; 1.9 MB total; seamless loops. AudioDirector in Core: 8 pooled voices; plays jump/land (≥ 2 m/s)/dig/place from gameplay events, thrust loop while the top-down ship thrusts, ambient from boot. One AudioListener lives in Core (view cameras have none), which fixed a "no audio listeners" log during loading. Credits: docs/credits/unity.md.
@@ -11,9 +13,9 @@ U-009 Player controller — 089657b — EditMode 75/75, PlayMode 13/13 (+2 skips
 U-007 seam fix — 562f0ff — capture at a fractional camera position showed thin lines between tile rows (bilinear sampling read the neighbor sheet cell). Fix: importer slices terrain cells 1 texel inset (126 px), each Tile scales back to 1 m. Lines gone; streaming unchanged (avg 0.30 ms, p99 0.92 ms, 0/400 frames over 2 ms, worst 2.08 ms, D-019 load "none"). A first try with runtime Sprite.Create sprites caused 100–186 ms hitches and was replaced.
 U-008 Dig and place — f15f617. U-006 Lit preview — 5a75d90.
 ## Next up
-U-010, U-020, U-012
+U-012, U-020, U-013
 ## Ready for review
-U-016 (37f9ed9), U-022 (4fded11), U-019 (42988db)
+U-016 (37f9ed9), U-022 (4fded11), U-019 (42988db), U-010 (98091e0)
 ## Handoffs
 → LEAD: Bible §3/§4.4 conflict: Mercury orbits at 1,150, inside the Sun's well (1,200). The Sun pulls 30.4 u/s² there, more than Mk1 thrust (30), so a Mk1 ship near Mercury can't climb away from the Sun; "a Mk1 ship always escapes any well from outside 1.6R" holds for planets, not the Sun. Needs a numbers decision before M3 (Mercury).
 → LEAD: Bible §4.2 jump table lists Saturn 2.4 m, but its formula v₀²/2g with g 10.44 gives 2.35 m (rounds to 2.3). Code follows the formula; my table test uses 2.35 with a comment. Please correct the table.
@@ -26,6 +28,8 @@ P-10: Jetpack engages when jump is held 0.25 s into the air or pressed again whi
 P-11: Boost burns 0.5 main-fuel units per second (Bible: "uses main fuel", no rate). Speed caps clamp total velocity, so wells can't push a ship past 80/160 u/s in M1.
 P-12: PlanetDisc is a hand-written HLSL shader (Assets/_Game/Shaders/PlanetDisc.shader), not a .shadergraph: Shader Graph files can't be authored reliably as text by a session. Same features (equirect→sphere, rotation, terminator, rim, self-lit Sun).
 P-13: Top-down positions: Earth and Mars share angle 0° so Earth → Mars matches the Bible's ≈ 7 s; other angles fixed in SpaceLayout.cs. Moon g = real surface g.
+P-14: Landing never takes the hull below 30% (a > 15 m/s crash sets it to 30%; 6–15 m/s removes up to 70% of max hull in proportion but stops at 30%). Bible §4.3 says "ship survives"; this keeps every landing survivable.
+P-15: Launch burn re-arms only while the ship sits at rest with the throttle released, so a ship that can't lift (thrust < g) pays the launch cost once, not every step.
 ## For USER_ACTIONS
 (none)
 ## HeavyJobLock
