@@ -145,6 +145,28 @@ describe('powers driven through the ability controller (charter K controls)', ()
     expect(r.ctl.view()).toMatchObject({ id: 'lunar-step', cooldown: 0 });
     r.player.dispose();
   });
+
+  it('Lunar Step: a click made while not aiming is not kept for later (aiming never steps by itself)', () => {
+    const r = rig('moon', 'lunar-step', 1.62);
+    for (let i = 0; i < 10; i++) r.step();
+    r.player.look(0, -0.07);
+    // A stray click (Input latches presses until a step consumes them).
+    r.presses.add('MouseLeft');
+    for (let i = 0; i < 30; i++) r.step();
+    const z0 = r.player.pos.z;
+    // Hold right mouse to aim for a second: a preview only, no step.
+    r.heldKeys.add('MouseRight');
+    for (let i = 0; i < 60; i++) r.step();
+    expect(r.player.pos.z).toBeCloseTo(z0, 3);
+    expect(r.ctl.view().preview).toMatchObject({ ok: true });
+    expect(r.ctl.log).toEqual([]);
+    // A fresh click while aiming steps.
+    r.presses.add('MouseLeft');
+    r.step();
+    expect(r.player.pos.z).toBeLessThan(z0 - 15);
+    expect(r.ctl.log.map((e) => `${e.from}>${e.to}`)).toEqual(['walk>blink', 'blink>walk']);
+    r.player.dispose();
+  });
 });
 
 describe('save and reload during a power (LEAD M2 plan C)', () => {

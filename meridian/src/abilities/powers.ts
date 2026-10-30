@@ -260,6 +260,9 @@ export class BlinkPower implements Power {
     }
     this.aiming = !!w && held(w, 'MouseRight');
     if (w && this.aiming) this.blink.target(this.sense(w), this.target);
+    // Presses stay latched until consumed: a click made while not aiming is
+    // dropped here, or holding right mouse later would step at once.
+    else if (w) w.pressed('MouseLeft');
   }
 
   wants(_dt: number, w: PowerWorld): boolean {
