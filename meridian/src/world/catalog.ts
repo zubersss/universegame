@@ -52,6 +52,8 @@ interface Look {
   maxHeight: number;
   /** Ocean surface height above the datum [m] (gameplay), null without an ocean. */
   seaLevel?: number;
+  /** Height above the datum of the zero elevation [m] (gameplay). */
+  reliefZero?: number;
   atmosphere: AtmosphereDef | null;
   clouds: CloudLayerDef[];
   palette: BodyPalette;
@@ -83,14 +85,14 @@ const LOOKS: Record<string, Look> = {
   mercury: airless(
     { a1: 0x8f8579, a2: 0x6d655c, a3: 0xb0a698, b1: 0x7a736b, b2: 0x5c5650, b3: 0x9c9388, special: 0xd6d0c4, proxyNight: 0x060606 },
     {
-      explore: 'surface', surface: 'procedural', power: 'sunline-dash', maxHeight: 2000,
+      explore: 'surface', surface: 'procedural', power: 'sunline-dash', maxHeight: 2000, reliefZero: 500,
       biomeNames: ['Cratered Highlands', 'Smooth Plains'],
       description: 'The innermost planet: airless, cratered, scorched by day and frozen by night.',
       fiction: [...SCALE_FICTION, 'surface terrain is procedural', 'suit heat/cold shield'],
     },
   ),
   venus: {
-    explore: 'surface', surface: 'procedural', power: 'pressure-glide', atmosphereHeight: 14000, maxHeight: 2600,
+    explore: 'surface', surface: 'procedural', power: 'pressure-glide', atmosphereHeight: 14000, maxHeight: 2600, reliefZero: 500,
     atmosphere: {
       rayleigh: [2.6e-5, 2.4e-5, 1.4e-5], rayleighH: 2600,
       mie: [1.9e-4, 1.6e-4, 8.0e-5], mieH: 2200, mieG: 0.72,
@@ -123,14 +125,16 @@ const LOOKS: Record<string, Look> = {
   moon: airless(
     { a1: 0x9a9893, a2: 0x7d7b77, a3: 0xb5b3ad, b1: 0x5d5c5a, b2: 0x6e6c69, b3: 0x8b8a86, special: 0xc8c6c0, proxyNight: 0x060606 },
     {
-      explore: 'surface', surface: 'procedural', power: 'lunar-step', maxHeight: 4000,
+      // Real relief about -11 to +3 km (South Pole-Aitken floor to rims): gameplay /5 above a datum 2.4 km down.
+      explore: 'surface', surface: 'procedural', power: 'lunar-step', maxHeight: 3200, reliefZero: 2400,
       biomeNames: ['Highlands', 'Maria'],
       description: "Earth's moon: bright cratered highlands and dark basaltic maria.",
       fiction: [...SCALE_FICTION, 'surface terrain is procedural'],
     },
   ),
   mars: {
-    explore: 'surface', surface: 'procedural', power: 'redline', atmosphereHeight: 6000, maxHeight: 6000,
+    // Real relief about -9 to +25 km (Hellas floor to Olympus Mons over Tharsis): gameplay /5 above a datum 1.9 km down.
+    explore: 'surface', surface: 'procedural', power: 'redline', atmosphereHeight: 6000, maxHeight: 7200, reliefZero: 1900,
     atmosphere: {
       rayleigh: [2.0e-6, 4.0e-6, 8.0e-6], rayleighH: 1300,
       mie: [6.0e-5, 4.0e-5, 2.5e-5], mieH: 1100, mieG: 0.74,
@@ -158,7 +162,7 @@ const LOOKS: Record<string, Look> = {
   europa: airless(
     { a1: 0xd8d2c4, a2: 0xbfb6a4, a3: 0xeee8dc, b1: 0xc4b49a, b2: 0x8a5a3a, b3: 0xe0d6c4, special: 0xa0623e, proxyNight: 0x070708 },
     {
-      explore: 'surface', surface: 'procedural', power: 'anchor-blink', maxHeight: 400,
+      explore: 'surface', surface: 'procedural', power: 'anchor-blink', maxHeight: 1000, reliefZero: 450,
       biomeNames: ['Ridged Plains', 'Chaos Terrain'],
       description: "Jupiter's ice moon: a cracked water-ice shell over a subsurface ocean.",
       fiction: [...SCALE_FICTION, 'surface terrain is procedural'],
@@ -178,7 +182,7 @@ const LOOKS: Record<string, Look> = {
     fiction: [...SCALE_FICTION, 'ring-plane platform zone is invented'],
   },
   titan: {
-    explore: 'surface', surface: 'procedural', power: 'wing-glide', atmosphereHeight: 14000, maxHeight: 400,
+    explore: 'surface', surface: 'procedural', power: 'wing-glide', atmosphereHeight: 14000, maxHeight: 1000, reliefZero: 450,
     atmosphere: {
       rayleigh: [5.0e-6, 6.0e-6, 8.0e-6], rayleighH: 2500,
       mie: [1.2e-4, 6.0e-5, 1.5e-5], mieH: 2400, mieG: 0.68,
@@ -320,6 +324,7 @@ export function buildSolBodies(seedFor: (id: string) => number, firstIndex: numb
       maxLevel: maxLevelFor(radius),
       seed: seedFor(b.id),
       seaLevel: look.seaLevel ?? null,
+      reliefZero: look.reliefZero,
       surface: look.surface,
       dataset: look.dataset,
       power: look.power,

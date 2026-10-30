@@ -122,6 +122,8 @@ export interface BodyDef {
   seed: number;
   /** Height above the datum [m] of the ocean surface, or null for bodies without an ocean. */
   seaLevel: number | null;
+  /** Height above the datum [m] of the body's zero elevation (deep basins stay above the datum); default 0. */
+  reliefZero?: number;
   /** 'data' bodies sample a dataset for the large-scale layer and use the seed only for infill. */
   surface: 'procedural' | 'data';
   dataset?: string;

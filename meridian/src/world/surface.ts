@@ -9,6 +9,7 @@ import { hashCombine, mulberry32 } from '../core/rng';
 import type { BodyDef } from './bodies';
 import { earthData, latLonOf, loadEarthData, sampleBilinear, sampleCubic, type CubicSample, type EarthRasters } from './earthData';
 import { ELEVATION_DIVISOR } from './scale';
+import { BODY_FEATURES, FeatureField } from './features';
 
 export interface SurfaceInfo {
   height: number;
@@ -110,6 +111,16 @@ interface CraterScale {
   salt: number;
 }
 
+/** Crater probabilities per cell for the three size classes (large, medium, small), Sol bodies. */
+const CRATER_DENSITY: Readonly<Record<string, [number, number, number]>> = {
+  moon: [0.5, 0.55, 0.5],
+  mercury: [0.55, 0.55, 0.5],
+  mars: [0.3, 0.35, 0.35],
+  venus: [0.04, 0.04, 0.02],
+  europa: [0.05, 0.08, 0.08],
+  titan: [0.03, 0.03, 0.02],
+};
+
 export class SurfaceGenerator {
   readonly R: number;
   readonly maxHeight: number;
@@ -118,10 +129,14 @@ export class SurfaceGenerator {
   private readonly craterScales: CraterScale[] = [];
   private readonly windAxis: [number, number, number] = [0.83, 0.18, 0.53];
   private readonly earthRasters: EarthRasters | null = null;
+  /** Large real features (Mars, Moon) for the Sol procedural surfaces. */
+  private readonly features: FeatureField | null = null;
 
   constructor(readonly def: BodyDef) {
     this.R = def.radius;
     this.maxHeight = def.maxHeight;
+    const feats = BODY_FEATURES[def.id];
+    if (feats) this.features = new FeatureField(def, feats);
     if (def.surface === 'data') {
       if (def.dataset !== 'earth') throw new Error(`Unknown dataset ${def.dataset} for ${def.id}`);
       this.earthRasters = earthData();
@@ -129,6 +144,16 @@ export class SurfaceGenerator {
     }
     const names = ['w1', 'w2', 'w3', 'c', 'm', 'r', 'h', 'd', 'v', 'g', 'rg', 'rg2', 'ms', 'du', 'da', 'db', 'o', 'b', 'b2', 'ba'];
     for (const k of names) this.n[k] = makeNoise(def.seed, k);
+    const density = def.system === 'quiet' ? null : CRATER_DENSITY[def.id] ?? [0, 0, 0];
+    if (density) {
+      // Sol bodies: seeded crater infill below the data scale (sizes in gameplay metres), as on Cairn.
+      const s = def.seed;
+      this.craterScales.push(
+        { cell: 3200, rMin: 380, rMax: 1050, prob: density[0], depth: 0.15, depthCap: 150, salt: hashCombine(s, 'cr1') | 0 },
+        { cell: 900, rMin: 90, rMax: 300, prob: density[1], depth: 0.19, depthCap: 60, salt: hashCombine(s, 'cr2') | 0 },
+        { cell: 260, rMin: 18, rMax: 85, prob: density[2], depth: 0.2, depthCap: 16, salt: hashCombine(s, 'cr3') | 0 },
+      );
+    }
     if (def.id === 'cairn') {
       const s = def.seed;
       // Radial projection moves a crater center by up to cell/2, so a crater from
@@ -147,6 +172,7 @@ export class SurfaceGenerator {
     out.hazard = 0;
     out.liquidLevel = null;
     if (this.earthRasters) return this.earth(nx, ny, nz, out);
+    if (this.def.system !== 'quiet') return this.featured(nx, ny, nz, out);
     switch (this.def.id) {
       case 'ilex':
         return this.ilex(nx, ny, nz, out);
@@ -370,6 +396,112 @@ export class SurfaceGenerator {
     out.special = sstep(0.5, 0.78, n.o(px / 420, py / 420, pz / 420));
     out.rockiness = mesaW * 0.55;
     return out;
+  }
+
+  // ------------------------------------------------------- Sol surfaces
+  // Procedural surfaces for the other Sol bodies: broad seeded undulations,
+  // large real features at their coordinates (features.ts, Mars and Moon),
+  // seeded craters and detail as infill. Relief in real metres, gameplay / 5.
+
+  private readonly fs = { h: 0, mare: 0, scar: 0 };
+  private readonly crat = { h: 0, floor: 0 };
+
+  private featured(nx: number, ny: number, nz: number, out: SurfaceInfo): SurfaceInfo {
+    const n = this.n;
+    const R = this.R;
+    const px = nx * R;
+    const py = ny * R;
+    const pz = nz * R;
+    const zone = this.def.explore === 'zone';
+    const reliefM = zone ? 0 : 1;
+    const base = reliefM * (700 * fbm(n.b, px / 12000, py / 12000, pz / 12000, 3) + 160 * fbm(n.b2, px / 2600, py / 2600, pz / 2600, 2));
+    const f = this.features
+      ? this.features.sample(nx, ny, nz, this.fs, n.w1(px / 1200, py / 1200, pz / 1200), n.w2(px / 260, py / 260, pz / 260))
+      : null;
+    const realH = base + (f ? f.h : 0);
+    this.craterField(px, py, pz, this.crat);
+    const detail = fbm(n.d, px / 140, py / 140, pz / 140, 3);
+    out.height = (this.def.reliefZero ?? 0) + realH / ELEVATION_DIVISOR + this.crat.h + detail * (zone ? 0.3 : 2.2);
+    const sinLat = nx * this.def.frame.north[0] + ny * this.def.frame.north[1] + nz * this.def.frame.north[2];
+    const v = 0.5 + 0.5 * n.v(px / 2600, py / 2600, pz / 2600);
+    const mare = f ? f.mare : 0;
+    const scar = f ? f.scar : 0;
+    switch (this.def.id) {
+      case 'moon':
+        // Dark maria (biome B), bright highlands (A); fresh crater floors and walls read brighter.
+        out.biome = mare;
+        out.variation = v;
+        out.special = sat(0.6 * scar + 0.4 * this.crat.floor) * (1 - 0.6 * mare);
+        out.rockiness = sat(0.15 + 0.6 * scar);
+        break;
+      case 'mars': {
+        // Darker basaltic plains (B) in the lowlands and basins, rust highlands (A); polar ice caps.
+        out.biome = sstep(-1500, -3500, realH) * 0.85 + 0.1 * v;
+        out.variation = v;
+        out.special = Math.max(sstep(0.955, 0.975, sinLat), sstep(-0.985, -0.995, sinLat));
+        out.rockiness = sat(0.1 + 0.7 * scar + 0.3 * this.crat.floor);
+        break;
+      }
+      default:
+        out.biome = sstep(0.35, 0.65, v);
+        out.variation = v;
+        out.special = 0;
+        out.rockiness = sat(0.15 + 0.5 * scar + 0.3 * this.crat.floor);
+    }
+    return out;
+  }
+
+  /** Seeded crater field (gameplay metres) from the body's crater scales; out.floor is the crater-floor weight. */
+  private craterField(px: number, py: number, pz: number, out: { h: number; floor: number }): void {
+    const R = this.R;
+    let h = 0;
+    let floorness = 0;
+    for (let si = 0; si < this.craterScales.length; si++) {
+      const sc = this.craterScales[si];
+      if (sc.prob <= 0) continue;
+      const S = sc.cell;
+      const cx = Math.floor(px / S);
+      const cy = Math.floor(py / S);
+      const cz = Math.floor(pz / S);
+      for (let dz = -1; dz <= 1; dz++) {
+        for (let dy = -1; dy <= 1; dy++) {
+          for (let dx = -1; dx <= 1; dx++) {
+            const ix = cx + dx;
+            const iy = cy + dy;
+            const iz = cz + dz;
+            if (h3(ix, iy, iz, sc.salt) >= sc.prob) continue;
+            const jx = (ix + h3(ix, iy, iz, sc.salt + 1)) * S;
+            const jy = (iy + h3(ix, iy, iz, sc.salt + 2)) * S;
+            const jz = (iz + h3(ix, iy, iz, sc.salt + 3)) * S;
+            const jl = Math.sqrt(jx * jx + jy * jy + jz * jz);
+            if (Math.abs(jl - R) > S * 0.5) continue;
+            const k = R / jl;
+            const ex = px - jx * k;
+            const ey = py - jy * k;
+            const ez = pz - jz * k;
+            const d = Math.sqrt(ex * ex + ey * ey + ez * ez);
+            const r = sc.rMin + (sc.rMax - sc.rMin) * h3(ix, iy, iz, sc.salt + 4);
+            const x = d / r;
+            if (x >= 1.45) continue;
+            const depth = Math.min(r * sc.depth, sc.depthCap);
+            let c = 0;
+            if (x < 1) {
+              c = Math.max((x * x - 1) * depth, -depth * 0.82);
+              const fl = 1 - x;
+              if (fl > floorness) floorness = fl;
+            }
+            const t = (x - 1) / 0.42;
+            if (t > -1 && t < 1) {
+              const b = 1 - t * t;
+              c += depth * 0.24 * b * b;
+            }
+            h += c;
+          }
+        }
+      }
+    }
+    out.h = h;
+    out.floor = floorness;
   }
 
   // --------------------------------------------------------------- Cairn
