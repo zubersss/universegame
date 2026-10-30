@@ -83,8 +83,10 @@ test('explorer: exit, walk 25 m with a jump, camera toggle, sprint back, board, 
   t0 = await simTime(page);
   await until(page, `s.simTime > ${t0 + 3}`, 120_000);
   expect((await player(page))!.avatar.settleSteps).toBe(settled);
-  // The camera stayed above the ground the whole way.
+  // The camera stayed above the ground the whole way (measured after every
+  // placement), and is above it now by an independent measure.
   expect(walked.camera.minTerrainClearance).toBeGreaterThanOrEqual(0.4);
+  expect(walked.camera.altitude).toBeGreaterThan(0.4);
   await api(page, 'setRenderEvery', 1);
   await page.waitForTimeout(3000);
   await page.screenshot({ path: 'evidence/p1-explorer-out.png', timeout: 180_000 });

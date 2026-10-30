@@ -47,7 +47,6 @@ const _pivot = new Vector3();
 const _anchor = new Vector3();
 const _dir = new Vector3();
 const _target = new Vector3();
-const _side = new Vector3();
 
 export class CharacterCamera {
   mode: ViewMode = 'third';
@@ -55,6 +54,8 @@ export class CharacterCamera {
   arm: number = CHAR_CAMERA.arm;
   /** Current shoulder offset (m), reduced near walls. */
   shoulder: number = CHAR_CAMERA.shoulder;
+  /** Current anchor height above the eye (m), reduced under overhangs. */
+  raise: number = CHAR_CAMERA.raise;
   /** Camera position and look direction of the last update (local coordinates). */
   readonly position = new Vector3();
   readonly look = new Vector3(0, 0, -1);
@@ -62,7 +63,7 @@ export class CharacterCamera {
   bodyVisible = true;
   /** Closest the camera came to the analytic terrain while in third person (diagnostics; m). */
   minTerrainClearance = Infinity;
-  /** Frames where the arm cast shortened the arm (diagnostics). */
+  /** Frames where geometry pulled the arm in (diagnostics). */
   pushedFrames = 0;
 
   toggle(): void {
@@ -100,38 +101,33 @@ export class CharacterCamera {
       return;
     }
     _right.crossVectors(heading, up).normalize();
-    // Shoulder: shift the anchor sideways unless a wall is right there.
-    let shoulder: number = CHAR_CAMERA.shoulder;
-    // Anchor above the head, lowered under a low overhang.
-    let raise: number = CHAR_CAMERA.raise;
-    if (cast) {
-      const hu = cast(_pivot, up, raise + CHAR_CAMERA.probe, CHAR_CAMERA.probe);
-      if (hu !== null) raise = Math.max(0, hu - CHAR_CAMERA.probe - CHAR_CAMERA.margin);
-    }
-    _anchor.copy(_pivot).addScaledVector(up, raise);
-    if (cast) {
-      _side.copy(_right);
-      const hs = cast(_anchor, _side, shoulder + CHAR_CAMERA.probe, CHAR_CAMERA.probe);
-      if (hs !== null) shoulder = Math.max(0, hs - CHAR_CAMERA.probe - CHAR_CAMERA.margin);
-    }
-    this.shoulder = shoulder;
-    _anchor.addScaledVector(_right, shoulder);
-    // Arm: wanted length (longer when moving fast, unless reduced motion), cast backward.
+    const margin = CHAR_CAMERA.margin;
+    const ease = dt > 0 ? 1 - Math.exp(-dt / (CHAR_CAMERA.easeOut / 3)) : 0;
+    // Free length along a direction: a sphere cast's hit is how far its centre
+    // travels before touching, so keep `margin` short of it (Infinity = clear).
+    const free = (from: Vector3, dir: Vector3, range: number) => {
+      if (!cast) return Infinity;
+      const h = cast(from, dir, range + margin, CHAR_CAMERA.probe);
+      return h === null ? Infinity : Math.max(0, h - margin);
+    };
+    // Geometry pulls an offset in at once; otherwise it eases toward its rest
+    // length (both ways), never past what is free. Continuous at the cast range.
+    const follow = (cur: number, rest: number, room: number) => {
+      if (room < cur) return room;
+      const target = Math.min(rest, room);
+      return Math.min(room, cur + (target - cur) * ease);
+    };
+    // Anchor above the head (lowered under an overhang), then shifted to the shoulder.
+    this.raise = follow(this.raise, CHAR_CAMERA.raise, free(_pivot, up, CHAR_CAMERA.raise));
+    _anchor.copy(_pivot).addScaledVector(up, this.raise);
+    this.shoulder = follow(this.shoulder, CHAR_CAMERA.shoulder, free(_anchor, _right, CHAR_CAMERA.shoulder));
+    _anchor.addScaledVector(_right, this.shoulder);
+    // Arm: rest length (longer when moving fast, unless reduced motion), cast backward.
     const wanted = CHAR_CAMERA.arm + (reducedMotion ? 0 : Math.min(CHAR_CAMERA.armMaxExtra, speed * CHAR_CAMERA.armSpeedGain));
     _dir.copy(_look).negate();
-    let allowed = wanted;
-    if (cast) {
-      const hit = cast(_anchor, _dir, wanted + CHAR_CAMERA.probe, CHAR_CAMERA.probe);
-      if (hit !== null) allowed = Math.max(0, hit - CHAR_CAMERA.margin);
-    }
-    if (allowed < this.arm) {
-      // Never through geometry: pull in at once.
-      this.arm = allowed;
-      if (allowed < wanted - 1e-3) this.pushedFrames++;
-    } else if (dt > 0) {
-      this.arm += (allowed - this.arm) * (1 - Math.exp(-dt / (CHAR_CAMERA.easeOut / 3)));
-      this.arm = Math.min(this.arm, allowed);
-    }
+    const room = free(_anchor, _dir, wanted);
+    if (room < this.arm) this.pushedFrames++;
+    this.arm = follow(this.arm, wanted, room);
     this.position.copy(_anchor).addScaledVector(_dir, this.arm);
     // Analytic terrain clearance (colliders may not be loaded around the camera).
     if (terrain) {
@@ -139,8 +135,9 @@ export class CharacterCamera {
       // deficit is relative to 1.6 m clearance; keep at least minGround instead.
       const push = deficit === null ? 0 : deficit - (1.6 - CHAR_CAMERA.minGround);
       if (push > 0) this.position.addScaledVector(up, push);
-      const clearance = deficit === null ? 1.6 : 1.6 - deficit + Math.max(0, push);
-      this.minTerrainClearance = Math.min(this.minTerrainClearance, clearance);
+      // Measured where the camera ends up (capped at 1.6 m by the contract).
+      const after = terrain(this.position, up);
+      this.minTerrainClearance = Math.min(this.minTerrainClearance, after === null ? 1.6 : 1.6 - after);
     }
     this.bodyVisible = this.arm >= CHAR_CAMERA.hideBelow;
     this.aimAt(camera, up);

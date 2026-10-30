@@ -25,8 +25,12 @@ export function playerTestHooks(game: Game): PlayerTestApi & Record<string, unkn
       if (!p) return null;
       const a = p.avatar;
       const v = p.view;
-      const eye = p.eye(1, _v);
       const cam = game.render.camera.position;
+      // Camera height above the analytic terrain, measured independently of the camera code.
+      const toCam = new Vector3().copy(cam).sub(game.bodyCenterLocal);
+      const r = toCam.length();
+      const cameraAltitude = r - (game.ref.radius + game.terrainHeightAt(toCam.divideScalar(r)));
+      const eye = p.eye(1, _v);
       return {
         avatar: a
           ? {
@@ -53,6 +57,7 @@ export function playerTestHooks(game: Game): PlayerTestApi & Record<string, unkn
           minTerrainClearance: v.minTerrainClearance,
           pushedFrames: v.pushedFrames,
           distanceToEye: cam.distanceTo(eye),
+          altitude: cameraAltitude,
         },
         ability: rt
           ? { state: rt.abilities.state, power: rt.abilities.power?.id ?? null, body: rt.abilities.bodyId, unlocked: [...rt.abilities.unlocked], lastRefusal: rt.abilities.lastRefusal }

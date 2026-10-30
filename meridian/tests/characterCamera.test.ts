@@ -58,6 +58,36 @@ describe('character camera (spring arm)', () => {
     expect(arms[arms.length - 1]).toBeGreaterThan(CHAR_CAMERA.arm - 0.01);
   });
 
+  it('changes continuously when an obstacle crosses the edge of the cast range, and never exceeds the rest length', () => {
+    const cc = new CharacterCamera();
+    const cam = new PerspectiveCamera();
+    let wall = 10; // distance along the arm at which the probe sphere would touch
+    const cast: ArmCast = (_from, dir, max) => (dir.z > 0.5 && wall <= max ? wall : null);
+    for (let i = 0; i < 60; i++) cc.update(dt, cam, new Vector3(), UP, FWD, 0, 0, cast, null, false);
+    let prev = cc.arm;
+    let worst = 0;
+    // The wall slides from beyond the cast range to well inside it and back out, 1 cm per frame.
+    for (let i = 0; i < 160; i++) {
+      wall = CHAR_CAMERA.arm + CHAR_CAMERA.margin + 0.6 - i * 0.01;
+      cc.update(dt, cam, new Vector3(), UP, FWD, 0, 0, cast, null, false);
+      worst = Math.max(worst, Math.abs(cc.arm - prev));
+      expect(cc.arm).toBeLessThanOrEqual(CHAR_CAMERA.arm + 1e-9);
+      expect(cc.arm).toBeLessThanOrEqual(Math.max(0, wall - CHAR_CAMERA.margin) + 1e-9);
+      prev = cc.arm;
+    }
+    expect(worst).toBeLessThan(0.0101); // follows the wall at its own 1 cm per frame, no jumps
+  });
+
+  it('eases (no pop) when the speed pull-back ends', () => {
+    const cc = new CharacterCamera();
+    const cam = new PerspectiveCamera();
+    for (let i = 0; i < 200; i++) cc.update(dt, cam, new Vector3(), UP, FWD, 0, 7.5, null, null, false);
+    const fast = cc.arm;
+    cc.update(dt, cam, new Vector3(), UP, FWD, 0, 0, null, null, false);
+    expect(fast - cc.arm).toBeLessThan(0.1);
+    expect(cc.arm).toBeLessThan(fast);
+  });
+
   it('keeps the minimum height above the analytic terrain where no collider is loaded', () => {
     const cc = new CharacterCamera();
     const cam = new PerspectiveCamera();
