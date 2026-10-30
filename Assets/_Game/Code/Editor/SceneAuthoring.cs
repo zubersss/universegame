@@ -53,6 +53,11 @@ namespace Meridian.EditorTools
             terrainGo.transform.SetParent(sideRoot.transform, false);
             terrainGo.AddComponent<Grid>();
             sideComp.terrain = terrainGo.AddComponent<Meridian.Terrain.TerrainStreamer>();
+            var rigGo = new GameObject("Rig");
+            rigGo.transform.SetParent(sideRoot.transform, false);
+            sideComp.rig = rigGo.AddComponent<Meridian.Rig.RigTools>();
+            sideComp.rig.terrain = sideComp.terrain;
+            sideComp.rig.drops = rigGo.AddComponent<Meridian.Rig.ItemDrops>();
             AddGlobalLight(sideRoot.transform);
             EditorSceneManager.SaveScene(side, PlanetSidePath);
 

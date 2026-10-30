@@ -67,6 +67,6 @@ namespace Meridian.Terrain
         }
 
         // Solids merge with any solid; liquids merge with liquid and solids.
-        static bool Connects(byte n, bool liquid) => liquid ? n != TileId.Air : TileId.IsSolid(n);
+        internal static bool Connects(byte n, bool liquid) => liquid ? n != TileId.Air : TileId.IsSolid(n);
     }
 }

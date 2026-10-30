@@ -25,6 +25,16 @@ namespace Meridian.Core
 
         public PlanetConfig CurrentPlanetConfig => catalog != null ? catalog.Get(currentPlanet) : null;
 
+        readonly System.Collections.Generic.Dictionary<PlanetId, Meridian.Terrain.TerrainEdits> terrainEdits =
+            new System.Collections.Generic.Dictionary<PlanetId, Meridian.Terrain.TerrainEdits>();
+
+        /// <summary>Player terrain diffs for a planet; created empty on first visit, kept for the session.</summary>
+        public Meridian.Terrain.TerrainEdits EditsFor(PlanetId id)
+        {
+            if (!terrainEdits.TryGetValue(id, out var e)) terrainEdits[id] = e = new Meridian.Terrain.TerrainEdits();
+            return e;
+        }
+
         void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }

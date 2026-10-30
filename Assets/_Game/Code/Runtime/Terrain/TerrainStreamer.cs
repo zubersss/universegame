@@ -21,6 +21,11 @@ namespace Meridian.Terrain
         public Transform follow;
 
         public IWorldGenerator Generator { get; private set; }
+        public IWorldGenerator BaseGenerator { get; private set; }
+        public TerrainEdits Edits { get; private set; }
+        public TerrainTileSet TileSet => tileSet;
+        /// <summary>(x, y, old id, new id) after a tile changes through SetTile.</summary>
+        public event System.Action<int, int, byte, byte> TileChanged;
         public PlanetConfig Config { get; private set; }
         public int ResidentCount => resident.Count;
         public int PendingCount => pending.Count;
@@ -31,6 +36,8 @@ namespace Meridian.Terrain
 
         readonly Dictionary<long, TerrainChunk> resident = new Dictionary<long, TerrainChunk>(32);
         readonly HashSet<long> pending = new HashSet<long>();
+        readonly HashSet<long> stale = new HashSet<long>();
+        readonly List<TerrainChunk> touched = new List<TerrainChunk>(4);
         readonly Stack<TerrainChunk> pool = new Stack<TerrainChunk>(32);
         readonly List<long> scratchKeys = new List<long>(32);
         readonly TileBase[] solidScratch = new TileBase[TerrainChunk.RowsPerStep * C];
@@ -48,12 +55,15 @@ namespace Meridian.Terrain
         int chunksY, lastCx = int.MinValue, lastCy = int.MinValue;
         bool started;
 
-        public void Begin(PlanetConfig config, int seed, Transform target)
+        public void Begin(PlanetConfig config, int seed, Transform target, TerrainEdits edits = null)
         {
             Stop();
             Config = config;
             follow = target;
-            Generator = new SolidWorldGenerator(config, seed);
+            BaseGenerator = new SolidWorldGenerator(config, seed);
+            Edits = edits ?? new TerrainEdits();
+            Generator = new EditedWorld(BaseGenerator, Edits);
+            stale.Clear();
             chunksY = config.worldHeight / C;
             tileSet = new TerrainTileSet();
             tileSet.Load(MaterialsFor(config.id));
@@ -174,6 +184,12 @@ namespace Meridian.Terrain
             while (ready.TryDequeue(out var b))
             {
                 long key = ChunkBuffer.Key(b.cx, b.cy);
+                if (stale.Remove(key) && Wanted(b.cx, b.cy))
+                {
+                    // Edited after the worker read it: generate again with the new diff.
+                    inbox.Add(b);
+                    continue;
+                }
                 pending.Remove(key);
                 if (!Wanted(b.cx, b.cy) || resident.ContainsKey(key)) { ChunkBuffer.Return(b); continue; }
                 inProgressChunk = pool.Count > 0 ? pool.Pop() : TerrainChunk.Create(transform);
@@ -184,6 +200,90 @@ namespace Meridian.Terrain
                 return true;
             }
             return false;
+        }
+
+        // ---------- edits (U-008) ----------
+
+        public int WrapX(int x)
+        {
+            int w = Config.worldWidth;
+            return ((x % w) + w) % w;
+        }
+
+        /// <summary>Current tile at world tile (x, y), edits included. x may be unwrapped.</summary>
+        public byte GetTile(int x, int y) =>
+            y < 0 || y >= Config.worldHeight ? TileId.Air : Generator.TileAt(WrapX(x), y);
+
+        /// <summary>
+        /// Changes one tile, records the diff, and refreshes the tile and its 8 neighbors in the
+        /// resident chunks; only the touched chunks rebuild collision. Main thread only.
+        /// </summary>
+        public bool SetTile(int x, int y, byte id)
+        {
+            if (!started || y < 0 || y >= Config.worldHeight) return false;
+            int wx = WrapX(x);
+            byte old = Generator.TileAt(wx, y);
+            if (old == id) return false;
+            Edits.Set(wx, y, id, BaseGenerator.TileAt(wx, y));
+            RefreshAround(x, y);
+            TileChanged?.Invoke(x, y, old, id);
+            return true;
+        }
+
+        void RefreshAround(int x, int y)
+        {
+            touched.Clear();
+            for (int dy = -1; dy <= 1; dy++)
+            for (int dx = -1; dx <= 1; dx++)
+            {
+                int tx = x + dx, ty = y + dy;
+                if (ty < 0 || ty >= Config.worldHeight) continue;
+                int cx = WorldNoise.FloorDiv(tx, C), cy = WorldNoise.FloorDiv(ty, C);
+                long key = ChunkBuffer.Key(cx, cy);
+                if (pending.Contains(key)) stale.Add(key);
+                if (!resident.TryGetValue(key, out var chunk)) continue;
+                if (chunk == inProgressChunk && inProgress != null)
+                {
+                    // Half-written from an old buffer: drop it and generate again.
+                    resident.Remove(key);
+                    chunk.Clear();
+                    pool.Push(chunk);
+                    ChunkBuffer.Return(inProgress);
+                    inProgress = null;
+                    pending.Add(key);
+                    inbox.Add(ChunkBuffer.Rent(cx, cy));
+                    continue;
+                }
+                byte t = GetTile(tx, ty);
+                var tile = t == TileId.Air ? null : tileSet.Get(t, BlobAutotile.Index(MaskAt(tx, ty, t)));
+                chunk.SetTileLocal(tx - cx * C, ty - cy * C, t, tile);
+                if (!touched.Contains(chunk)) touched.Add(chunk);
+            }
+            foreach (var c in touched) c.FinishCollision();
+        }
+
+        int MaskAt(int x, int y, byte id)
+        {
+            bool liquid = TileId.IsLiquid(id);
+            int m = 0;
+            if (ChunkBuffer.Connects(GetTile(x, y + 1), liquid)) m |= BlobAutotile.N;
+            if (ChunkBuffer.Connects(GetTile(x + 1, y + 1), liquid)) m |= BlobAutotile.NE;
+            if (ChunkBuffer.Connects(GetTile(x + 1, y), liquid)) m |= BlobAutotile.E;
+            if (ChunkBuffer.Connects(GetTile(x + 1, y - 1), liquid)) m |= BlobAutotile.SE;
+            if (ChunkBuffer.Connects(GetTile(x, y - 1), liquid)) m |= BlobAutotile.S;
+            if (ChunkBuffer.Connects(GetTile(x - 1, y - 1), liquid)) m |= BlobAutotile.SW;
+            if (ChunkBuffer.Connects(GetTile(x - 1, y), liquid)) m |= BlobAutotile.W;
+            if (ChunkBuffer.Connects(GetTile(x - 1, y + 1), liquid)) m |= BlobAutotile.NW;
+            return m;
+        }
+
+        /// <summary>The tile currently drawn in the resident chunk at (x, y), for tests; null if not resident.</summary>
+        public TileBase RenderedTile(int x, int y)
+        {
+            int cx = WorldNoise.FloorDiv(x, C), cy = WorldNoise.FloorDiv(y, C);
+            if (!resident.TryGetValue(ChunkBuffer.Key(cx, cy), out var chunk)) return null;
+            var p = new Vector3Int(x - cx * C, y - cy * C, 0);
+            return chunk.solid.GetTile(p) ?? chunk.liquid.GetTile(p);
         }
 
         /// <summary>True when every resident chunk is within the resident radius of the camera chunk.</summary>

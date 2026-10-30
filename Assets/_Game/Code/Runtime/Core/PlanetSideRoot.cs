@@ -8,6 +8,7 @@ namespace Meridian.Core
     public sealed class PlanetSideRoot : MonoBehaviour
     {
         public TerrainStreamer terrain;
+        public Meridian.Rig.RigTools rig;
         public Camera sideCamera;
         [Tooltip("Spawn column (tiles) when no save or transition gives one.")]
         public int spawnX = 64;
@@ -20,9 +21,10 @@ namespace Meridian.Core
             Physics2D.gravity = config.GravityVector;
             if (terrain == null) return;
 
-            int seed = GameState.Instance != null ? GameState.Instance.worldSeed : 1969;
+            var state = GameState.Instance;
+            int seed = state != null ? state.worldSeed : 1969;
             var follow = sideCamera != null ? sideCamera.transform : transform;
-            terrain.Begin(config, seed, follow);
+            terrain.Begin(config, seed, follow, state != null ? state.EditsFor(config.id) : null);
             if (sideCamera != null)
             {
                 float y = terrain.Generator.SurfaceHeight(spawnX) + 4f;

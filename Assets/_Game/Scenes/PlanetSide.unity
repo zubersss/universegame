@@ -119,7 +119,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &136656762
+--- !u!1 &33019278
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -127,8 +127,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 136656763}
-  - component: {fileID: 136656764}
+  - component: {fileID: 33019279}
+  - component: {fileID: 33019280}
   m_Layer: 0
   m_Name: GlobalLight2D
   m_TagString: Untagged
@@ -136,28 +136,28 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &136656763
+--- !u!4 &33019279
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 136656762}
+  m_GameObject: {fileID: 33019278}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 366242988}
+  m_Father: {fileID: 1461704893}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &136656764
+--- !u!114 &33019280
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 136656762}
+  m_GameObject: {fileID: 33019278}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 073797afb82c5a1438f328866b10b3f0, type: 3}
@@ -169,7 +169,7 @@ MonoBehaviour:
   m_Light2DProvider:
     rid: -2
   m_SelectionSources:
-    rid: 5375726348192710657
+    rid: 5375726348617121793
   m_FalloffIntensity: 0.5
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 1
@@ -215,7 +215,7 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 5375726348192710657
+    - rid: 5375726348617121793
       type: {class: Light2DProviderSources, ns: UnityEngine.Rendering.Universal, asm: Unity.RenderPipelines.Universal.2D.Runtime}
       data:
         m_SelectedHashCode: 4
@@ -223,7 +223,7 @@ MonoBehaviour:
           rid: -2
         m_Provider2DCache:
           rid: -2
---- !u!1 &366242986
+--- !u!1 &679741989
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -231,8 +231,66 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 366242988}
-  - component: {fileID: 366242987}
+  - component: {fileID: 679741992}
+  - component: {fileID: 679741991}
+  - component: {fileID: 679741990}
+  m_Layer: 0
+  m_Name: Terrain
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &679741990
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 679741989}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a02854d89ac5aab4caf8c7368c6bc85c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.Terrain.TerrainStreamer
+  follow: {fileID: 0}
+--- !u!156049354 &679741991
+Grid:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 679741989}
+  m_Enabled: 1
+  m_CellSize: {x: 1, y: 1, z: 1}
+  m_CellGap: {x: 0, y: 0, z: 0}
+  m_CellLayout: 0
+  m_CellSwizzle: 0
+--- !u!4 &679741992
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 679741989}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1461704893}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1461704891
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1461704893}
+  - component: {fileID: 1461704892}
   m_Layer: 0
   m_Name: PlanetSideRoot
   m_TagString: Untagged
@@ -240,40 +298,42 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &366242987
+--- !u!114 &1461704892
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 366242986}
+  m_GameObject: {fileID: 1461704891}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b1dc44c868578147abe9ec85fa4ad37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.Core.PlanetSideRoot
-  terrain: {fileID: 1748563615}
-  sideCamera: {fileID: 1300224524}
+  terrain: {fileID: 679741990}
+  rig: {fileID: 2108560425}
+  sideCamera: {fileID: 2073776131}
   spawnX: 64
---- !u!4 &366242988
+--- !u!4 &1461704893
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 366242986}
+  m_GameObject: {fileID: 1461704891}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1300224526}
-  - {fileID: 1748563617}
-  - {fileID: 136656763}
+  - {fileID: 2073776133}
+  - {fileID: 679741992}
+  - {fileID: 2108560427}
+  - {fileID: 33019279}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1300224523
+--- !u!1 &2073776130
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -281,9 +341,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1300224526}
-  - component: {fileID: 1300224524}
-  - component: {fileID: 1300224525}
+  - component: {fileID: 2073776133}
+  - component: {fileID: 2073776131}
+  - component: {fileID: 2073776132}
   m_Layer: 0
   m_Name: SideCamera
   m_TagString: MainCamera
@@ -291,13 +351,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!20 &1300224524
+--- !u!20 &2073776131
 Camera:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1300224523}
+  m_GameObject: {fileID: 2073776130}
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
@@ -342,30 +402,30 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!81 &1300224525
+--- !u!81 &2073776132
 AudioListener:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1300224523}
+  m_GameObject: {fileID: 2073776130}
   m_Enabled: 1
---- !u!4 &1300224526
+--- !u!4 &2073776133
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1300224523}
+  m_GameObject: {fileID: 2073776130}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 366242988}
+  m_Father: {fileID: 1461704893}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1748563614
+--- !u!1 &2108560424
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -373,58 +433,61 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1748563617}
-  - component: {fileID: 1748563616}
-  - component: {fileID: 1748563615}
+  - component: {fileID: 2108560427}
+  - component: {fileID: 2108560425}
+  - component: {fileID: 2108560426}
   m_Layer: 0
-  m_Name: Terrain
+  m_Name: Rig
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1748563615
+--- !u!114 &2108560425
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1748563614}
+  m_GameObject: {fileID: 2108560424}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a02854d89ac5aab4caf8c7368c6bc85c, type: 3}
+  m_Script: {fileID: 11500000, guid: c983fc8744ea54440928fed7746e0d8d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.Terrain.TerrainStreamer
-  follow: {fileID: 0}
---- !u!156049354 &1748563616
-Grid:
+  m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.Rig.RigTools
+  terrain: {fileID: 679741990}
+  drops: {fileID: 2108560426}
+  owner: {fileID: 0}
+  builderTile: 1
+--- !u!114 &2108560426
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1748563614}
+  m_GameObject: {fileID: 2108560424}
   m_Enabled: 1
-  m_CellSize: {x: 1, y: 1, z: 1}
-  m_CellGap: {x: 0, y: 0, z: 0}
-  m_CellLayout: 0
-  m_CellSwizzle: 0
---- !u!4 &1748563617
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f85c0a6d770a1c4ea9dbeed9f1955e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.Rig.ItemDrops
+--- !u!4 &2108560427
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1748563614}
+  m_GameObject: {fileID: 2108560424}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 366242988}
+  m_Father: {fileID: 1461704893}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 366242988}
+  - {fileID: 1461704893}

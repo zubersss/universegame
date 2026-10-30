@@ -82,6 +82,15 @@ namespace Meridian.Terrain
             liquid.SetTilesBlock(band, liquidScratch);
         }
 
+        /// <summary>Sets one tile in chunk-local coordinates (edits). Caller rebuilds collision.</summary>
+        public void SetTileLocal(int lx, int ly, byte id, TileBase tile)
+        {
+            var p = new Vector3Int(lx, ly, 0);
+            bool isLiquid = TileId.IsLiquid(id);
+            solid.SetTile(p, isLiquid ? null : tile);
+            liquid.SetTile(p, isLiquid ? tile : null);
+        }
+
         public void Clear()
         {
             solid.ClearAllTiles();
