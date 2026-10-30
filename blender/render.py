@@ -20,6 +20,7 @@ import sys
 import time
 import traceback
 
+sys.dont_write_bytecode = True  # no __pycache__ in the repo (.gitignore is LEAD's)
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, os.path.join(HERE, "scripts"))
