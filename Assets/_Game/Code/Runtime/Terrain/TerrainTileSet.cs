@@ -14,6 +14,7 @@ namespace Meridian.Terrain
     public sealed class TerrainTileSet : IDisposable
     {
         readonly Tile[][] tiles = new Tile[TileId.Count][];
+        readonly Tile[][] interior = new Tile[TileId.Count][];
         readonly List<AsyncOperationHandle<IList<Sprite>>> handles = new List<AsyncOperationHandle<IList<Sprite>>>();
         int pending;
 
@@ -37,25 +38,39 @@ namespace Meridian.Terrain
                         Debug.LogError($"[Terrain] Could not load tile sheet '{key}'.");
                         return;
                     }
-                    tiles[captured] = BuildTiles(op.Result, captured);
+                    LoadFromSprites(captured, op.Result);
                 };
             }
         }
 
-        static Tile[] BuildTiles(IList<Sprite> sprites, byte id)
+        /// <summary>Builds a material's tiles from its sliced sprites (named         /// <summary>Sheet cells 47–62 hold variants of the fully surrounded tile 46 (D-020).</summary>lt;material        /// <summary>Sheet cells 47–62 hold variants of the fully surrounded tile 46 (D-020).</summary>gt;_        /// <summary>Sheet cells 47–62 hold variants of the fully surrounded tile 46 (D-020).</summary>lt;cell        /// <summary>Sheet cells 47–62 hold variants of the fully surrounded tile 46 (D-020).</summary>gt;). Tests call it directly.</summary>
+        public void LoadFromSprites(byte id, IList<Sprite> sprites) => tiles[id] = BuildTiles(sprites, id);
+
+        /// <summary>Sheet cells 47–62 hold variants of the fully surrounded tile 46 (D-020).</summary>
+        public const int FirstInteriorVariant = BlobAutotile.VariantCount, MaxInteriorVariants = 16;
+
+        Tile[] BuildTiles(IList<Sprite> sprites, byte id)
         {
             var result = new Tile[BlobAutotile.VariantCount];
+            var variants = new List<Tile>();
+            var sorted = new List<(int index, Sprite sprite)>();
             foreach (var s in sprites)
             {
                 int us = s.name.LastIndexOf('_');
                 if (us < 0 || !int.TryParse(s.name.Substring(us + 1), out int index)) continue;
-                if (index < 0 || index >= result.Length) continue;
+                if (index >= 0 && index < FirstInteriorVariant + MaxInteriorVariants) sorted.Add((index, s));
+            }
+            sorted.Sort((a, b) => a.index.CompareTo(b.index));
+            foreach (var (index, s) in sorted)
+            {
                 var t = ScriptableObject.CreateInstance<Tile>();
                 t.sprite = s;
                 FitToCell(t, s);
                 t.colliderType = TileId.IsSolid(id) ? Tile.ColliderType.Grid : Tile.ColliderType.None;
-                result[index] = t;
+                if (index < FirstInteriorVariant) result[index] = t;
+                else variants.Add(t);
             }
+            interior[id] = variants.ToArray();
             // A sheet with a single sprite (unsliced) still renders: reuse it for every variant.
             if (result[0] == null && sprites.Count > 0)
             {
@@ -87,8 +102,38 @@ namespace Meridian.Terrain
             return set == null ? null : set[variant];
         }
 
+        /// <summary>Number of interior variants loaded for a material (0 = the sheet has none).</summary>
+        public int InteriorVariants(byte id) => id < interior.Length && interior[id] != null ? interior[id].Length : 0;
+
+        /// <summary>
+        /// The tile to draw at world (wrappedX, y). Interior tiles (blob 46) pick tile 46 or one of its
+        /// variants by a stable hash of the position, so the same world always looks the same (D-020).
+        /// </summary>
+        public TileBase Get(byte id, byte blob, int wrappedX, int y)
+        {
+            int n = blob == BlobAutotile.VariantCount - 1 ? InteriorVariants(id) : 0;
+            if (n == 0) return Get(id, blob);
+            int pick = VariantPick(wrappedX, y, n + 1);
+            return pick == 0 ? Get(id, blob) : interior[id][pick - 1];
+        }
+
+        /// <summary>Stable choice in [0, options) from a tile position (integer hash; no allocation, no seed).</summary>
+        public static int VariantPick(int wrappedX, int y, int options)
+        {
+            unchecked
+            {
+                uint h = (uint)wrappedX * 0x8DA6B343u ^ (uint)y * 0xD8163841u;
+                h ^= h >> 15; h *= 0x2C1B3C6Du; h ^= h >> 12; h *= 0x297A2D39u; h ^= h >> 15;
+                return (int)(h % (uint)options);
+            }
+        }
+
         public void Dispose()
         {
+            foreach (var set in interior)
+                if (set != null)
+                    foreach (var t in set)
+                        if (t != null) UnityEngine.Object.Destroy(t);
             foreach (var set in tiles)
                 if (set != null)
                     foreach (var t in set)

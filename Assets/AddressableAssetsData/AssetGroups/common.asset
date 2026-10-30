@@ -15,13 +15,13 @@ MonoBehaviour:
   m_GroupName: common
   m_GUID: 2c4d4d7494187df4f87e340b88461f4b
   m_SerializeEntries:
-  - m_GUID: 0de857e7bde6a764aa98bd3e1940e098
-    m_Address: fx/dust/base
+  - m_GUID: 1b4963630e3b0a54b9c021156dcb8f8d
+    m_Address: fx/dig_sparks/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 225ad1c4a802a6f4ea4eb8a0d2980d6e
-    m_Address: fx/heat_shimmer/base
+  - m_GUID: 2882b8f74e9126f4a9e1db7032dae691
+    m_Address: fx/dust/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -40,13 +40,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8082048fcff2da7458b19ef021f2fbcf
-    m_Address: fx/dig_sparks/base
+  - m_GUID: 9da3de328834b8e48b05707df2377bc5
+    m_Address: fx/escape_band/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e4b939a850055944ebffc13bdea29be2
-    m_Address: fx/thruster/base
+  - m_GUID: e2f5cb7dbd1351c4b92beb9a61f459eb
+    m_Address: fx/heat_shimmer/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -55,8 +55,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f9e6619d1185c4d458c5f667bfd132c3
-    m_Address: fx/escape_band/base
+  - m_GUID: f64438931b57dc44d9da0f5976a4d4c4
+    m_Address: ships/pilgrim/side_legs
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fcd6ad61e94814f4a9e435967bb79e96
+    m_Address: fx/thruster/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

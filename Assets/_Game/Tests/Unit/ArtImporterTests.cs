@@ -231,7 +231,7 @@ namespace Meridian.Tests
         [Test]
         public void TerrainSheetSlicedInto47TileGridWithoutJson()
         {
-            var c = Png(Art("terrain/earth/soil_color.png"), 1024, 1024);
+            var c = TerrainSheet(Art("terrain/earth/soil_color.png"), 47);
             Import(c);
             var sprites = AssetDatabase.LoadAllAssetsAtPath(c).OfType<Sprite>().ToArray();
             Assert.AreEqual(47, sprites.Length);
@@ -240,6 +240,37 @@ namespace Meridian.Tests
             // Cell 46 = row 5, column 6.
             Assert.AreEqual(new Rect(769, 257, 126, 126), sprites.First(s => s.name == "soil_46").rect);
             Assert.AreEqual(128f, sprites[0].pixelsPerUnit);
+        }
+
+        [Test]
+        public void TerrainVariantCellsAreSlicedOnlyWhenTheyHoldArt()
+        {
+            var full = TerrainSheet(Art("terrain/mars/basalt_color.png"), 63);
+            var partial = TerrainSheet(Art("terrain/mars/ice_color.png"), 47 + 5);
+            Import(full, partial);
+            Assert.AreEqual(63, AssetDatabase.LoadAllAssetsAtPath(full).OfType<Sprite>().Count(), "16 variants of tile 46 (D-020)");
+            Assert.AreEqual(52, AssetDatabase.LoadAllAssetsAtPath(partial).OfType<Sprite>().Count(), "only the filled variant cells");
+            Assert.AreEqual(new Rect(769, 1, 126, 126),
+                AssetDatabase.LoadAllAssetsAtPath(full).OfType<Sprite>().First(s => s.name == "basalt_62").rect, "cell 62 = row 7 (bottom row), column 6");
+        }
+
+        /// <summary>A 1024² terrain sheet with cells [0, filled) opaque and the rest transparent.</summary>
+        static string TerrainSheet(string path, int filled)
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            var px = new Color32[1024 * 1024];
+            for (int cell = 0; cell < filled; cell++)
+            {
+                int x0 = cell % 8 * 128, yTop = 1024 - cell / 8 * 128;
+                for (int y = yTop - 128; y < yTop; y++)
+                for (int x = x0; x < x0 + 128; x++)
+                    px[y * 1024 + x] = new Color32(120, 90, 60, 255);
+            }
+            var tex = new Texture2D(1024, 1024, TextureFormat.RGBA32, false);
+            tex.SetPixels32(px);
+            File.WriteAllBytes(path, tex.EncodeToPNG());
+            Object.DestroyImmediate(tex);
+            return path;
         }
 
         [Test]

@@ -175,9 +175,36 @@ namespace Meridian.EditorTools
             if (json != null || ArtKeys.Category(key) != "terrain") return json;
             return new SheetManifest
             {
-                key = key, frame_width = 128, frame_height = 128, columns = 8, frames = 47,
+                key = key, frame_width = 128, frame_height = 128, columns = 8,
+                frames = 47 + TerrainVariantCells(colorPath),
                 gutter = 0, inset = 1, pivot = new[] { 0.5f, 0.5f },
             };
+        }
+
+        /// <summary>
+        /// D-020: cells 47–62 may hold variants of tile 46. Counts the consecutive cells from 47 that
+        /// contain art (alpha at a few points inside the cell), reading the source PNG.
+        /// </summary>
+        public static int TerrainVariantCells(string colorPath)
+        {
+            if (!File.Exists(colorPath)) return 0;
+            var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+            try
+            {
+                if (!tex.LoadImage(File.ReadAllBytes(colorPath)) || tex.width < 1024 || tex.height < 1024) return 0;
+                int n = 0;
+                for (int cell = 47; cell < 63; cell++, n++)
+                {
+                    int col = cell % 8, row = cell / 8;
+                    int x0 = col * 128, yTop = tex.height - row * 128;
+                    bool filled = false;
+                    foreach (var (fx, fy) in new[] { (0.5f, 0.5f), (0.25f, 0.25f), (0.75f, 0.25f), (0.25f, 0.75f), (0.75f, 0.75f) })
+                        filled |= tex.GetPixel(x0 + (int)(fx * 128), yTop - (int)(fy * 128) - 1).a > 0.5f;
+                    if (!filled) break;
+                }
+                return n;
+            }
+            finally { UnityEngine.Object.DestroyImmediate(tex); }
         }
 
         public static SheetManifest LoadSheet(string jsonPath)

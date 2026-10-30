@@ -73,14 +73,15 @@ namespace Meridian.Terrain
         }
 
         /// <summary>Writes rows [row, row + RowsPerStep) into the tilemaps. Scratch arrays (RowsPerStep × 32) are the caller's.</summary>
-        public void ApplyRows(ChunkBuffer data, TerrainTileSet set, int row, TileBase[] solidScratch, TileBase[] liquidScratch)
+        public void ApplyRows(ChunkBuffer data, TerrainTileSet set, int row, TileBase[] solidScratch, TileBase[] liquidScratch, int worldWidth)
         {
             const int C = TerrainConstants.ChunkSize;
             int start = row * C;
             for (int i = 0; i < RowsPerStep * C; i++)
             {
                 byte id = data.ids[start + i];
-                var tile = id == TileId.Air ? null : set.Get(id, data.blob[start + i]);
+                int wx = ((data.cx * C + i % C) % worldWidth + worldWidth) % worldWidth;
+                var tile = id == TileId.Air ? null : set.Get(id, data.blob[start + i], wx, data.cy * C + row + i / C);
                 bool isLiquid = TileId.IsLiquid(id);
                 solidScratch[i] = isLiquid ? null : tile;
                 liquidScratch[i] = isLiquid ? tile : null;

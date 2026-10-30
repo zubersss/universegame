@@ -162,7 +162,7 @@ namespace Meridian.Terrain
                     continue;
                 }
                 double before = watch.Elapsed.TotalMilliseconds;
-                if (nextRow < C) inProgressChunk.ApplyRows(inProgress, tileSet, nextRow, solidScratch, liquidScratch);
+                if (nextRow < C) inProgressChunk.ApplyRows(inProgress, tileSet, nextRow, solidScratch, liquidScratch, Config.worldWidth);
                 else inProgressChunk.FinishCollision(); // one extra step after the last band
                 double cost = watch.Elapsed.TotalMilliseconds - before;
                 step = System.Math.Max(step, cost);
@@ -255,7 +255,7 @@ namespace Meridian.Terrain
                     continue;
                 }
                 byte t = GetTile(tx, ty);
-                var tile = t == TileId.Air ? null : tileSet.Get(t, BlobAutotile.Index(MaskAt(tx, ty, t)));
+                var tile = t == TileId.Air ? null : tileSet.Get(t, BlobAutotile.Index(MaskAt(tx, ty, t)), WrapX(tx), ty);
                 chunk.SetTileLocal(tx - cx * C, ty - cy * C, t, tile);
                 if (!touched.Contains(chunk)) touched.Add(chunk);
             }
