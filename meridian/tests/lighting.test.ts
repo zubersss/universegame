@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { Color, Scene, Vector3, type WebGLRenderer } from 'three';
+import { Color, Scene, Texture, Vector3, type WebGLRenderer } from 'three';
 import { Lighting, lightScale, starLight, starOf, type StarLight } from '../src/render/Lighting';
-import { atmoUniforms } from '../src/render/Atmosphere';
+import { atmoUniforms, sunTransCPU } from '../src/render/Atmosphere';
 import { BODIES, SUN_DIR, SYSTEM_BODY_IDS, sunDirFor, type BodyId } from '../src/world/bodies';
 import { LIGHT } from '../src/game/config';
 
@@ -106,8 +106,103 @@ describe('starLight', () => {
   });
 });
 
+type Uniforms = Record<string, { value: { toArray(): number[] } }>;
+const ENV_UNIFORMS = ['uUp', 'uSun', 'uZenith', 'uHorizon', 'uGround', 'uSunCol'] as const;
+
+/** Replace the PMREM generator (GPU work) with a stub; count the environment rebuilds. */
+function stubEnv(lt: Lighting): { rebuilds: number; u: Uniforms } {
+  const priv = lt as unknown as { pmrem: unknown; envMat: { uniforms: Uniforms } };
+  priv.pmrem = { fromScene: () => ({ texture: new Texture(), dispose() {} }), dispose() {} };
+  const env = { rebuilds: 0, u: priv.envMat.uniforms };
+  lt.onEnvChange = () => env.rebuilds++;
+  return env;
+}
+
+/** Where the shadow-casting light actually comes from. */
+const aim = (lt: Lighting) => lt.sun.position.clone().sub(lt.sun.target.position).normalize();
+/** Weighted component sum, for tour digests. */
+const wsum = (v: { toArray(): number[] }) => v.toArray().reduce((s, x, i) => s + x * (i + 1), 0);
+/** Golden values are recorded to 12 significant digits. */
+function expectGolden(actual: number[], golden: readonly number[], label: string): void {
+  expect(actual.length, label).toBe(golden.length);
+  actual.forEach((a, i) => expect(Math.abs(a - golden[i]), `${label}[${i}]`).toBeLessThanOrEqual(1e-11 * Math.max(1, Math.abs(golden[i]))));
+}
+
+// Quiet poses: the focus sits off the local origin (texel snapping), the body
+// center where the pose puts it, the ground albedo as Game.setRef sets it.
+const SUN = new Vector3(...SUN_DIR);
+const E1 = SUN.clone().cross(new Vector3(0, 1, 0)).normalize();
+const E2 = E1.clone().cross(SUN);
+const FOCUS = new Vector3(37.25, -12.5, 5.75);
+/** Unit direction from a body's center at cos(angle to SUN_DIR) = mu and azimuth az about it. */
+function around(mu: number, az: number): Vector3 {
+  const s = Math.sqrt(1 - mu * mu);
+  return SUN.clone().multiplyScalar(mu).addScaledVector(E1, s * Math.cos(az)).addScaledVector(E2, s * Math.sin(az));
+}
+const albedo = (id: BodyId) => new Color().setHex(BODIES[id].palette.b1).convertSRGBToLinear();
+const QUIET_POSES = {
+  // Late afternoon 120 m above Ilex: reddened by the atmosphere.
+  ilex: { mu: 0.2, az: 0.7, alt: 120, perBody: true },
+  // Open space on Vesper's night side, beyond its activation radius (no active body).
+  vesper: { mu: -0.3, az: 2.1, alt: 3.5 * BODIES.vesper.radius, perBody: false },
+  // 300 m above airless Cairn, inside the penumbra past the geometric terminator.
+  cairn: { mu: -Math.sqrt(1 - (BODIES.cairn.radius / (BODIES.cairn.radius + 300)) ** 2) + 0.002, az: -1.3, alt: 300, perBody: true },
+} as const;
+
+/** Recorded from the base Lighting (70f8217) at QUIET_POSES: the Quiet System lights exactly as before L6a. */
+const QUIET_GOLDEN = {
+  ilex: {
+    sunColor: [0.731823529412, 0.472696470588, 0.337464705882],
+    position: [-515.492429476, -162.948442206, -396.544759494],
+    target: [37.2450825323, -12.5198788112, 5.76418911982],
+    hemi: [0.2554067491, 0.511271031505, 0.61500066811],
+    hemiGround: [0.0269881572114, 0.0119987480965, 0.00219816506024],
+    env: {
+      uUp: [0.173402359078, 0.573475179034, -0.800660877587],
+      uSun: [-0.789625017154, -0.214897947707, -0.574727069448],
+      uZenith: [0.2554067491, 0.511271031505, 0.61500066811],
+      uHorizon: [0.486864227431, 0.658516706698, 0.72148790631],
+      uGround: [0.0365774571185, 0.0158977537708, 0.0028574717932],
+      uSunCol: [0.731823529412, 0.492392156863, 0.374960784314],
+    },
+  },
+  vesper: {
+    sunColor: [1, 0.96, 0.9],
+    position: [-515.528697763, -162.918894454, -396.50597831],
+    target: [37.2088142449, -12.4903310599, 5.80297030332],
+    hemi: [0.064, 0.0704, 0.096],
+    hemiGround: [0.0101041508959, 0.00610371671945, 0.00233211970075],
+    env: {
+      uUp: [-0.189590870784, 0.86867998953, 0.457657489292],
+      uSun: [-0.789625017154, -0.214897947707, -0.574727069448],
+      uZenith: [0.064, 0.0704, 0.096],
+      uHorizon: [0.3874, 0.39364, 0.4186],
+      uGround: [0.120810499843, 0.0729792216456, 0.0278840399003],
+      uSunCol: [1, 1, 1],
+    },
+  },
+  cairn: {
+    sunColor: [0.666666666667, 0.64, 0.6],
+    position: [-515.451030672, -162.975096498, -396.591671462],
+    target: [37.2864813357, -12.5465331039, 5.71727715154],
+    hemi: [0.064, 0.0704, 0.096],
+    hemiGround: [0.000530937885371, 0.000624969098847, 0.000806353425515],
+    env: {
+      uUp: [0.460438517456, -0.887639897962, 0.00958035435479],
+      uSun: [-0.789625017154, -0.214897947707, -0.574727069448],
+      uZenith: [0.064, 0.0704, 0.096],
+      uHorizon: [0.279066666667, 0.285306666667, 0.310266666667],
+      uGround: [0.00623039355282, 0.0073338210579, 0.00946231060554],
+      uSunCol: [0.666666666667, 0.666666666667, 0.666666666667],
+    },
+  },
+} as const;
+
+/** The same tour run on the base Lighting (70f8217): environment rebuilds and summed outputs. */
+const QUIET_TOUR_GOLDEN = { rebuilds: 17, sun: 5049.810101126823, shadow: -2437219.427367606, hemi: 1152.9595042059336, env: 77.30463714239451 };
+
 describe('Lighting', () => {
-  // No GPU work happens unless the environment map is rebuilt (allowEnvRebuild = false here).
+  // No GPU work happens unless the environment map is rebuilt (allowEnvRebuild = false, or stubEnv).
   const make = () => new Lighting({} as WebGLRenderer, new Scene(), 1024);
   const ground = new Color(0.3, 0.25, 0.2);
 
@@ -120,6 +215,60 @@ describe('Lighting', () => {
     for (const v of [lt.sunDir, atmoUniforms.uSunDir.value]) expect(v.toArray()).toEqual([...SUN_DIR]);
     expect(lt.fluxScale).toBe(1);
     expect(lt.sun.intensity).toBe(5.2);
+  });
+
+  it('matches the base Lighting at golden Quiet poses', () => {
+    for (const id of ['ilex', 'vesper', 'cairn'] as const) {
+      const p = QUIET_POSES[id];
+      const g = QUIET_GOLDEN[id];
+      const def = BODIES[id];
+      const lt = make();
+      const env = stubEnv(lt);
+      const center = FOCUS.clone().addScaledVector(around(p.mu, p.az), -(def.radius + p.alt));
+      lt.update(1 / 60, FOCUS.clone(), def, center, albedo(id), p.perBody, true);
+      expect(env.rebuilds, id).toBe(1);
+      expect(lt.sunDir.toArray(), id).toEqual([...SUN_DIR]);
+      expect(lt.sun.intensity, id).toBe(5.2);
+      expectGolden(lt.sun.color.toArray(), g.sunColor, `${id} sun.color`);
+      expectGolden(lt.sun.position.toArray(), g.position, `${id} sun.position`);
+      expectGolden(lt.sun.target.position.toArray(), g.target, `${id} sun.target`);
+      expectGolden(lt.hemi.color.toArray(), g.hemi, `${id} hemi.color`);
+      expectGolden(lt.hemi.groundColor.toArray(), g.hemiGround, `${id} hemi.groundColor`);
+      expectGolden(lt.hemi.position.toArray(), g.env.uUp, `${id} hemi.position`);
+      expect(lt.hemi.intensity, id).toBe(1.35);
+      for (const k of ENV_UNIFORMS) expectGolden(env.u[k].value.toArray(), g.env[k], `${id} ${k}`);
+    }
+  });
+
+  it('matches the base Lighting over a Quiet tour', () => {
+    // 400 frames around each body through the terminator, from 50 m to 300 km up,
+    // with throttled and undrawn frames: exercises the ambient and env timers and the env key.
+    const lt = make();
+    const env = stubEnv(lt);
+    const d = { rebuilds: 0, sun: 0, shadow: 0, hemi: 0, env: 0 };
+    lt.onEnvChange = () => {
+      d.rebuilds++;
+      for (const k of ENV_UNIFORMS) d.env += wsum(env.u[k].value);
+    };
+    for (const id of ['ilex', 'vesper', 'cairn'] as const) {
+      const def = BODIES[id];
+      for (let i = 0; i < 400; i++) {
+        const a = (i / 400) * 2 * Math.PI;
+        const dir = new Vector3(Math.cos(a), 0.3 * Math.sin(3 * a), Math.sin(a)).normalize().lerp(SUN, 0.1 * Math.sin(2 * a)).normalize();
+        const alt = [50, 1500, 9000, 40000, 300000][i % 5];
+        const center = FOCUS.clone().addScaledVector(dir, -(def.radius + alt));
+        lt.update(i % 37 === 0 ? 0.25 : 1 / 60, FOCUS.clone(), def, center, albedo(id), alt < 2e5, i % 3 !== 0);
+        expect(lt.sunDir.toArray()).toEqual([...SUN_DIR]);
+        expect(aim(lt).angleTo(SUN)).toBeLessThan(1e-6);
+        d.sun += wsum(lt.sun.color);
+        d.shadow += wsum(lt.sun.position);
+        d.hemi += wsum(lt.hemi.color) + wsum(lt.hemi.groundColor) + wsum(lt.hemi.position);
+      }
+    }
+    expect(d.rebuilds).toBe(QUIET_TOUR_GOLDEN.rebuilds);
+    for (const k of ['sun', 'shadow', 'hemi', 'env'] as const) {
+      expect(Math.abs(d[k] - QUIET_TOUR_GOLDEN[k]), k).toBeLessThanOrEqual(1e-9 * Math.abs(QUIET_TOUR_GOLDEN[k]));
+    }
   });
 
   it('slews toward a new direction, and snaps on request or for large swings', () => {
@@ -137,6 +286,8 @@ describe('Lighting', () => {
     expect(a0 / DEG).toBeGreaterThan(8);
     expect(lt.sunDir.angleTo(target) / a0).toBeCloseTo(Math.exp(-1), 1);
     expect(atmoUniforms.uSunDir.value.equals(lt.sunDir)).toBe(true);
+    // The shadow-casting light follows the slewed direction, not the target.
+    expect(aim(lt).angleTo(lt.sunDir)).toBeLessThan(1e-6);
     for (let i = 0; i < 600; i++) lt.update(1 / 60, new Vector3(), earth, c, ground, true, false);
     expect(lt.sunDir.equals(target)).toBe(true);
 
@@ -159,5 +310,39 @@ describe('Lighting', () => {
     expect(lt.sunColor.toArray()).toEqual([1, 1, 1]);
     expect(lt.sun.intensity).toBe(LIGHT.sunIntensity * LIGHT.maxScale);
     expect(lt.sunDir.distanceTo(new Vector3(-1, 0, 0))).toBeLessThan(1e-12);
+  });
+
+  it('rebuilds the environment from the current light and aims the shadow light along it', () => {
+    const lt = make();
+    const env = stubEnv(lt);
+    const uSun = () => new Vector3().fromArray(env.u.uSun.value.toArray());
+    const check = (dir: Vector3, label: string) => {
+      expect(lt.sunDir.distanceTo(dir), label).toBeLessThan(1e-12);
+      expect(uSun().distanceTo(dir), label).toBeLessThan(1e-12);
+      expect(aim(lt).angleTo(dir), label).toBeLessThan(1e-6);
+    };
+    const earth = BODIES.earth;
+    const mars = BODIES.mars;
+    lt.update(1 / 60, new Vector3(), earth, new Vector3(0, -earth.radius - 100, 0), ground, true, true);
+    expect(env.rebuilds).toBe(1);
+    check(new Vector3(...sunDirFor(earth)), 'earth');
+    // 100 m up (radial up +Y), the transmittance uses Earth's own light: mu = up · sunDirFor(earth).
+    const mu = sunDirFor(earth)[1];
+    lt.sunColor.toArray().forEach((v, ch) => expect(v, `earth sunColor[${ch}]`).toBeCloseTo(sunTransCPU(earth, 100, mu, ch), 9));
+
+    // A hop to Mars: the next rebuild (env timer 1.5 s) takes Mars's light.
+    lt.snap();
+    for (let i = 0; i < 200; i++) lt.update(1 / 60, new Vector3(), mars, new Vector3(0, -mars.radius - 100, 0), ground, true, true);
+    expect(env.rebuilds).toBe(2);
+    check(new Vector3(...sunDirFor(mars)), 'mars');
+
+    // Around the Sun only the light direction changes the env key (no body, no up):
+    // moving to another side of the Sun must still rebuild with the new direction.
+    for (const p of [new Vector3(3e5, 0, 0), new Vector3(0, 3e5, 3e5)]) {
+      lt.snap();
+      for (let i = 0; i < 120; i++) lt.update(1 / 60, new Vector3(), BODIES.sun, p.clone().negate(), ground, false, true);
+      check(p.clone().negate().normalize(), `sun ${p.toArray()}`);
+    }
+    expect(env.rebuilds).toBe(4);
   });
 });
