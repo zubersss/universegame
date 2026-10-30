@@ -59,7 +59,12 @@ export class Flight {
 
   constructor(readonly p: FlightParams) {}
 
-  /** Take off: course along the heading, carrying the current velocity, rising. */
+  /**
+   * Take off: course along the heading, carrying the current velocity. Near
+   * the ground (standing, or mid-jump) it kicks upward; higher up (a fall
+   * caught in the air) the velocity is kept and turned around within the
+   * acceleration limits instead of reversing at once.
+   */
   start(vel: Vector3, sense: FlightSense): void {
     const up = sense.up;
     this.course.copy(sense.heading).addScaledVector(up, -sense.heading.dot(up)).normalize();
@@ -67,7 +72,8 @@ export class Flight {
     const h = _t.copy(vel).addScaledVector(up, -vel.dot(up));
     this.speed = Math.max(0, h.dot(this.course));
     const vz = vel.dot(up);
-    if (vz < FLIGHT_TAKEOFF_CLIMB) this.vel.addScaledVector(up, FLIGHT_TAKEOFF_CLIMB - vz);
+    const low = sense.grounded || (sense.height !== null && sense.height < this.p.landHeight);
+    if (low && vz < FLIGHT_TAKEOFF_CLIMB) this.vel.addScaledVector(up, FLIGHT_TAKEOFF_CLIMB - vz);
     this.time = 0;
   }
 

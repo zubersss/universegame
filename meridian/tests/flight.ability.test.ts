@@ -36,6 +36,22 @@ describe('flight primitive (Skyborne Flight tunables)', () => {
     expect(f.step(SIM_DT, NONE, sense({ height: 0.6 }))).toBe('flying');
   });
 
+  it('catches a fall high up without reversing at once: the descent turns around within the acceleration', () => {
+    const f = new Flight(P);
+    f.start(new Vector3(0, -30, 0), sense({ height: 200 }));
+    expect(f.vel.y).toBeCloseTo(-30, 6);
+    let prev = f.vel.y;
+    let climbingAt = -1;
+    for (let i = 1; i <= 120; i++) {
+      f.step(SIM_DT, { ...NONE, climb: true }, sense({ height: 200 }));
+      expect(f.vel.y - prev).toBeLessThanOrEqual(Math.max(P.accel, P.climb * 2) * SIM_DT + 1e-9);
+      prev = f.vel.y;
+      if (climbingAt < 0 && f.vel.y > 0) climbingAt = i;
+    }
+    expect(climbingAt * SIM_DT).toBeLessThan(0.6);
+    expect(f.vel.y).toBeCloseTo(P.climb, 3);
+  });
+
   it('speeds up at the acceleration to cruise, and only boost goes beyond', () => {
     const f = new Flight(P);
     f.start(new Vector3(), sense());
