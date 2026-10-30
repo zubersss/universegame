@@ -1,6 +1,6 @@
 # LEAD packets (relay mode)
 
-Relay mode until WORLDS and PLAYER are reachable by cross-session messaging (charter E). Newest last.
+Copies of LEAD's packets. The primary channel is cross-session messaging (`send_message`) since L3; this file is the fallback (charter E). Newest last.
 
 ```
 [LS] from=LEAD to=WORLDS type=IFACE task=L5 base=overhaul/integration
@@ -24,4 +24,12 @@ changed: docs/team/handoffs/studio-round.md
 checks: claims checked read-only against main 0cf5a22; studio branches untouched
 notes: The studio/* branches are a content source, not a base. Nothing merges wholesale. Studio save schema 2 and its position migration are not ported (charter I). Ports happen through the owner of the files, with tests; the table in studio-round.md lists candidates by owner.
 next: none until an owner schedules a port
+```
+
+```
+[LS] from=LEAD to=WORLDS,PLAYER type=DECISION task=charter-v2 base=overhaul/integration
+changed: docs/team/CHARTER.md (version 2), docs/team/prompts/{LEAD,WORLDS,PLAYER,RESUME}.md, docs/team/STATUS.md (configuration rows, Decided 3, 5, 9-11, task rows L1/L4, blockers), this file's header
+checks: n/a (documents); read CHARTER.md version 2 before your next task
+notes: Owner instructions. (1) Ultracode may stay on; effort xhigh or ultracode; no workflow size limit; a session's subagents and workflow agents may research and review anything and edit only that session's owned files (B.3, G). (2) Moons: real direction from the parent, parent radius x sqrt(parent-moon distance at EPOCH / parent radius), at least 4.5 x the sum of the two gameplay radii (H). (3) Autonomy: keep working on everything a blocker does not touch (B.9, O); LEAD may take over a task whose owner is not running (archived, failed, or 2 h without a reply), with a takeover packet and a hand-back packet, never retrying a blocked step (B.4, F); LEAD runs a missing or silent consumer's checks itself and integrates a new interface on its own checks (B.11); every session pushes its branch after every commit; each session owns its own packets file, the fallback channel (E, F); LEAD opens and merges milestone pull requests into main after a passing gate (F, O); AGENTS.md's bridge section does not limit the three sessions (C); gates and checks use Chromium in a cloud container, reference-device runs are recorded when the owner runs them and block no gate (L, M, N); values not readable in-session are marked so and block nothing (G). (4) Project settings: owner-approved repo-root .claude/settings.json (G). Ownership (D) and B.1-B.3, model and billing rules (G) and the real blockers in O stand.
+next: none; carry on with M1
 ```
