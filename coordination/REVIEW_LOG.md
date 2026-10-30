@@ -123,3 +123,11 @@ Decided: D-028 (split-half background renders, one-off 0.5 GB headroom in a sche
 Signals: the scheduler window worked (BLENDER exported FX + Pilgrim at 14:28–14:31). BLENDER self-reported a HeavyJobLock bypass at ~13:03 (36 s direct render while UNITY held the lock); UNITY's 13:02 and 13:09 runs both passed, so no impact. Acknowledged, no further action. `want_blender.lock` re-filed (the 14:11 one was older than 30 min).
 User: none.
 Queue: UNITY 8 Ready, BLENDER 10 Ready.
+
+## Cycle 13 · 2026-10-30 15:15
+Checked: git log 14:45–14:54 (U-015, B-010 re-export, B-011); UNITY_STATUS (U-028/U-020 written, verification waiting on memory), BLENDER_STATUS; blender/preview/backgrounds_earth_stack.png, backgrounds_mars_stack_full.png; locks (want_blender.lock 14:41 from LEAD, window used; want_unity.lock 15:09); free RAM 2.0 GB.
+Moved: U-015 → Done (458709a); B-010 → Done; B-011 → Done; U-020, U-028, B-023 → In Progress.
+Decided: B-010/B-011 accepted (§9 cartoon rule now passes); remaining polish split to B-025 rather than a second bounce (anti-loop).
+Signals: none. LEAD deleted its own want_blender.lock (window finished) so UNITY gets the next turn.
+User: none.
+Queue: UNITY 6 Ready, BLENDER 10 Ready.

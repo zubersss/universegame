@@ -211,12 +211,12 @@ Files: Assets/_Game/Tests/Unit/BudgetGateTests.cs, Code/Runtime/Perf/BudgetMonit
 Depends: U-007, U-011
 Lead notes: Done a289721 (cycle 12): perf_2026-10-30.md all §11.1 rows green on Intel UHD at 1080p (Earth avg 5.1 ms, p99 7.8; Space 1.8/3.1; Mars 3.5/5.3; textures ≤ 342 MB; loads 1.1 s); first-frame stall → U-028; GC metric per D-029.
 
-### U-015 · UNITY · In Progress · M1
+### U-015 · UNITY · Done · M1
 Goal: HUD and menus v1.
 Accept: main menu (New, Continue, Quit), pause, side HUD (health, oxygen placeholder, fuel, altitude bar with Escape Line marker), top HUD (speed, fuel, well indicator); OFL font logged in `docs/credits/unity.md`.
 Files: Assets/_Game/UI/, Code/Runtime/UI/
 Depends: U-010, U-011
-Lead notes: —
+Lead notes: Done 458709a (cycle 13): main menu, Esc pause, side/ship/top HUDs, JetBrains Mono (OFL) credited; EditMode 111/111, PlayMode 33/33. Visual check folded into L-010 M1 QA.
 
 ### U-016 · UNITY · Done · M1
 Goal: Placeholder audio set and `AudioDirector`.
@@ -225,7 +225,7 @@ Files: Assets/_Game/Audio/, Code/Runtime/Audio/, docs/credits/unity.md
 Depends: U-004
 Lead notes: Done 37f9ed9 (cycle 9): 7 synthesized CC0 clips (1.9 MB), AudioDirector with one listener; PlayMode clean incl. LeadQA; credits logged.
 
-### U-028 · UNITY · Ready · M1
+### U-028 · UNITY · In Progress · M1
 Goal: Shader/pipeline warm-up during planet load (ShaderVariantCollection or a hidden pre-render) so the first visible frame doesn't stall (P-17).
 Accept: BudgetGate first-visible-frame time ≤ 50 ms after Earth load, Mars entry, and launch into Space (was 215–800 ms); planet load stays ≤ 4 s.
 Files: Assets/_Game/Code/Runtime/Core/, Assets/_Game/Settings/Rendering/
@@ -254,7 +254,7 @@ Files: Assets/_Game/Code/Runtime/Rendering/, Assets/_Game/Settings/Rendering/, C
 Depends: U-005, U-006
 Lead notes: Done 42988db (cycle 9): HLSL Sprite_LitEmissive; no-point-light previews show calibration stripe, Pilgrim ports/engine/vents, self-lit Sun; ArtMaterials registry auto-filled; EditMode 96/96.
 
-### U-020 · UNITY · Ready · M1
+### U-020 · UNITY · In Progress · M1
 Goal: Terrain variants: when a sheet has tiles in slots 47–62, tile 46 picks one of them by a stable hash of (x, y) (D-020).
 Accept: same world → same variants after save/load; no variant chosen for sheets without slots 47–62; chunk apply budget unchanged (D-019); EditMode test for hash stability.
 Files: Assets/_Game/Code/Runtime/Terrain/
@@ -356,12 +356,12 @@ Files: blender/sources/characters/surveyor.blend, Assets/_Game/Art/characters/su
 Depends: B-002
 Lead notes: Done 489a964 (cycle 7): key, 7-column sheet within 2048, 46 frames / 10 clips, color+normal+emission, LFS. Polish scheduled as B-023.
 
-### B-010 · BLENDER · In Progress · M2
+### B-010 · BLENDER · Done · M2
 Goal: Earth parallax `backgrounds/earth/layer0..2` (temperate biome).
 Accept: three 2048×1024 layers tileable in x; haze gradient readable; palette per Bible §9.
 Files: Assets/_Game/Art/backgrounds/earth/
 Depends: B-002
-Lead notes: Rework in progress (cycle 7 §9 fail). Render per D-028: each layer in two halves, ≥ 0.5 GB headroom, only while no Unity process runs; want_blender.lock re-filed by LEAD 14:42.
+Lead notes: Done 6c6541d + 8efa54f (cycle 13): rendered 3D trees, ground clumps, sun-lit; passes the §9 cartoon rule. Polish items → B-025.
 
 ### B-024 · BLENDER · Ready · M2
 Goal: HeavyJobLock fairness + memory gate in `tools/blender_render.ps1` (D-026), mirroring U-023.
@@ -370,12 +370,12 @@ Files: tools/blender_render.ps1
 Depends: —
 Lead notes: PRIORITY: do this before the next full export (cycle 10).
 
-### B-011 · BLENDER · In Progress · M2
+### B-011 · BLENDER · Done · M2
 Goal: Mars parallax `backgrounds/mars/layer0..2`.
 Accept: as B-010 with the Mars palette and butterscotch sky.
 Files: Assets/_Game/Art/backgrounds/mars/
 Depends: B-010
-Lead notes: Rework in progress (cycle 7 §9 fail). Render per D-028: each layer in two halves, ≥ 0.5 GB headroom, only while no Unity process runs; want_blender.lock re-filed by LEAD 14:42.
+Lead notes: Done 8efa54f (cycle 13): rendered rocks, mesas, dunes, haze; split-half renders with no visible stitch. Mid-layer streak band → B-025.
 
 ### B-022 · BLENDER · Done · M2
 Goal: Terrain sheet revision for all 10 materials: fill slots 47–62 with 16 variants of tile 46; grass rim only on upward-facing exposed edges (sides/underside show soil with a darker rim) (D-020).
@@ -391,12 +391,19 @@ Files: Assets/_Game/Art/ships/pilgrim/, blender/scripts/
 Depends: B-006
 Lead notes: Done f1eb426 (cycle 12): side = gear retracted into the pods, side_legs = skids deployed, identical canvas and pivot (D-025).
 
-### B-023 · BLENDER · Ready · M2
+### B-023 · BLENDER · In Progress · M2
 Goal: Surveyor v2 polish: replace primitive suit parts with a sculpted soft suit (fabric folds at joints, seams, chest unit, backpack straps), visor with reflection and emission readouts; fix the death end pose (legs grounded).
 Accept: same key, sheet layout, frame count, clips, and pivot as v1 (UNITY needs no change); contact sheet reads as a real suited person at 60 px/m, not a mannequin (§9); lit preview via tools/unity_art_preview.ps1.
 Files: blender/scripts/build_surveyor.py, blender/sources/characters/surveyor.blend, Assets/_Game/Art/characters/surveyor/
 Depends: B-009
 Lead notes: Scheduled polish for the M2 exit (cycle 7), not a reopen of B-009. Do it after B-022, B-010 rework, B-011, B-019.
+
+### B-025 · BLENDER · Ready · M2
+Goal: Parallax polish from the cycle-13 review of the 3D backgrounds.
+Accept: Earth: foliage reads as leaf masses, not stacked spheres (denser, smaller leaf-card clusters with silhouette breakup); clouds are soft volumetric or painted-haze shapes, not opaque white blobs, and never overlap the near tree line. Mars: no vertical spike/streak band in the mid layer (layer1 ground); at least 3 boulder shape families with varied scale. Same keys, sizes, tiling, and memory plan (D-028).
+Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/{earth,mars}/
+Depends: B-010, B-011
+Lead notes: M2 exit polish, not a reopen. Schedule after B-023.
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
