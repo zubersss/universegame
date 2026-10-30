@@ -54,6 +54,8 @@ namespace Meridian.UI
             t.color = color ?? theme.text;
             t.raycastTarget = false;
             t.horizontalOverflow = HorizontalWrapMode.Overflow;
+            // JetBrains Mono's line height exceeds tight boxes; truncation silently drops the whole line.
+            t.verticalOverflow = VerticalWrapMode.Overflow;
             return t;
         }
 

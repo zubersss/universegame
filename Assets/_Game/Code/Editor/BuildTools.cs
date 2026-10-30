@@ -40,6 +40,7 @@ namespace Meridian.EditorTools
             if (scenes.Length == 0) { Debug.LogError("[MERIDIAN] BUILD FAILED: no scenes in Assets/_Game/Scenes"); return false; }
 
             EditorBuildSettings.scenes = scenes.Select(s => new EditorBuildSettingsScene(s, true)).ToArray();
+            PlayerSettings.bundleVersion = GameInfo.Version;
 
             var aa = UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings;
             if (aa != null)

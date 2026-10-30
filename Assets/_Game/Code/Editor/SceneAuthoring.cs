@@ -51,6 +51,7 @@ namespace Meridian.EditorTools
             save.time = coreGo.GetComponent<TimeSystem>();
             save.transitions = transitions;
             coreGo.AddComponent<Meridian.Perf.BudgetMonitor>();
+            coreGo.AddComponent<BuildSmoke>().scenes = director;
             EnsureUiTheme();
             var menu = coreGo.AddComponent<Meridian.UI.MenuController>();
             menu.actions = transitions.actions;

@@ -19,6 +19,7 @@ namespace Meridian.Ship
         public bool Aboard { get; private set; }
 
         InputAction interact, exit;
+        readonly RaycastHit2D[] hits = new RaycastHit2D[8];
 
         void Start()
         {
@@ -63,7 +64,11 @@ namespace Meridian.Ship
             if (!Aboard || !ship.Grounded) return false;
             Aboard = false;
             ship.SetPiloted(false);
+            // Step out beside the hull onto the actual ground there (it may be higher or lower than the skids).
             var p = ship.Body.position + new Vector2(SideShip.HullLength * 0.5f + 1f, -SideShip.SkidDrop + 0.05f);
+            int n = Physics2D.Raycast(new Vector2(p.x, ship.Body.position.y + 20f), Vector2.down, ContactFilter2D.noFilter, hits, 60f);
+            for (int i = 0; i < n; i++)
+                if (hits[i].rigidbody != ship.Body && hits[i].collider.attachedRigidbody != player.Body) { p.y = hits[i].point.y + 0.05f; break; }
             player.transform.position = p;
             player.gameObject.SetActive(true);
             player.Body.position = p;
