@@ -4,10 +4,14 @@ import {
   BufferGeometry,
   Color,
   CustomBlending,
+  DoubleSide,
   FrontSide,
   Group,
   Mesh,
+  NormalBlending,
   OneFactor,
+  Quaternion,
+  RingGeometry,
   ShaderMaterial,
   SphereGeometry,
   SrcAlphaFactor,
@@ -249,6 +253,94 @@ function shellMaterial(atmo: AtmoSet, skySteps: number): ShaderMaterial {
   });
 }
 
+/**
+ * Saturn's main rings in planet radii (equatorial radius 60,268 km): D
+ * 66,900-74,510 km, C 74,658-92,000, B 92,000-117,580, Cassini Division
+ * 117,580-122,170, A 122,170-136,775 with the Encke gap at 133,589 (325 km
+ * wide), F at 140,180. Reference values entered without a fetched source
+ * (estimated); the optical depths are a visual approximation.
+ */
+const RING_GLSL = /* glsl */ `
+  float ringBand(float r, float a, float b) {
+    return smoothstep(a - 0.002, a + 0.002, r) * (1.0 - smoothstep(b - 0.002, b + 0.002, r));
+  }
+  // Normal optical depth at r planet radii (0 outside the rings); fw is the
+  // radial footprint of a pixel, so ringlets finer than a pixel average out.
+  float ringTau(float r, float fw) {
+    float t = 0.03 * ringBand(r, 1.110, 1.236)
+      + 0.12 * ringBand(r, 1.239, 1.527)
+      + 1.7 * ringBand(r, 1.527, 1.951)
+      + 0.09 * ringBand(r, 1.951, 2.027)
+      + 0.55 * ringBand(r, 2.027, 2.269) * (1.0 - ringBand(r, 2.2139, 2.2193))
+      + 0.35 * ringBand(r, 2.3245, 2.3275);
+    float w = sin(r * 517.0) * sin(r * 211.0 + 1.3) * clamp(1.0 - fw * 517.0 / 3.0, 0.0, 1.0);
+    return t * (0.8 + 0.2 * w);
+  }
+`;
+const RINGS: Record<string, { inner: number; outer: number }> = { saturn: { inner: 1.1, outer: 2.34 } };
+
+/** Ring layer in the body's equatorial plane, lit by the Sun and shadowed by the planet. */
+function ringMaterial(def: BodyDef, atmo: AtmoSet, light: ProxyLighting): ShaderMaterial {
+  return new ShaderMaterial({
+    uniforms: {
+      uSunDir: atmo.uSunDir,
+      uNorth: { value: new Vector3(...def.frame.north) },
+      uR: { value: def.radius },
+      uSunCol: { value: light.sunColor },
+    },
+    vertexShader: /* glsl */ `
+      varying vec3 vLocal;
+      varying vec3 vWorld;
+      #include <common>
+      #include <logdepthbuf_pars_vertex>
+      void main() {
+        vLocal = position;
+        vec4 w = modelMatrix * vec4(position, 1.0);
+        vWorld = w.xyz;
+        gl_Position = projectionMatrix * viewMatrix * w;
+        #include <logdepthbuf_vertex>
+      }`,
+    fragmentShader: /* glsl */ `
+      varying vec3 vLocal;
+      varying vec3 vWorld;
+      uniform vec3 uSunDir, uNorth, uSunCol;
+      uniform float uR;
+      ${RING_GLSL}
+      #include <common>
+      #include <logdepthbuf_pars_fragment>
+      void main() {
+        #include <logdepthbuf_fragment>
+        float r = length(vLocal) / uR;
+        float tau = ringTau(r, fwidth(r));
+        vec3 V = normalize(cameraPosition - vWorld);
+        float muV = abs(dot(V, uNorth));
+        float muS = dot(uSunDir, uNorth);
+        // Slant opacity through the particle layer.
+        float alpha = 1.0 - exp(-tau / max(muV, 0.02));
+        if (alpha < 0.002) discard;
+        // Lit face: Lommel-Seeliger reflection of a particle layer (dim when the Sun grazes the
+        // plane, as near the 2025 equinox) plus planetshine; the far face glows where it is thin.
+        bool sameSide = muS * dot(V, uNorth) > 0.0;
+        float ls = abs(muS) / (abs(muS) + muV + 1e-4);
+        float lit = sameSide ? 0.2 + 1.6 * ls : 0.05 + 0.3 * exp(-tau);
+        // The planet's shadow across the rings.
+        vec3 P = vLocal / uR;
+        float along = dot(P, uSunDir);
+        float off = length(P - along * uSunDir);
+        lit *= along > 0.0 ? 1.0 : smoothstep(0.985, 1.015, off);
+        vec3 col = mix(vec3(0.42, 0.38, 0.33), vec3(0.86, 0.79, 0.66), smoothstep(1.45, 1.6, r));
+        col = mix(col, vec3(0.74, 0.69, 0.6), smoothstep(2.0, 2.05, r));
+        gl_FragColor = vec4(col * uSunCol * lit * RECIPROCAL_PI, alpha);
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
+      }`,
+    transparent: true,
+    depthWrite: false,
+    side: DoubleSide,
+    blending: NormalBlending,
+  });
+}
+
 /** Banded cloud-deck look of a giant planet (procedural, labelled fictional detail). */
 interface GiantLook {
   bands: number;
@@ -288,6 +380,7 @@ function giantMaterial(def: BodyDef, atmo: AtmoSet, aerialSteps: number, light: 
       uEast: { value: new Vector3(...f.east) },
       uLook: { value: new Vector3(look.bands, look.contrast, look.turbulence) },
       uSpotDef: { value: [...look.spot] },
+      uRinged: { value: RINGS[def.id] ? 1 : 0 },
       uSunCol: { value: light.sunColor },
       uHemiSky: { value: light.hemiSky },
       uHemiGround: { value: light.hemiGround },
@@ -315,7 +408,9 @@ function giantMaterial(def: BodyDef, atmo: AtmoSet, aerialSteps: number, light: 
       uniform float uSpotDef[5];
       uniform vec3 uSunCol, uHemiSky, uHemiGround, uHemiUp;
       uniform float uUnit;
+      uniform float uRinged;
       ${ATMO_GLSL}
+      ${RING_GLSL}
       #include <common>
       #include <logdepthbuf_pars_fragment>
       float gh(vec3 p) { p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
@@ -346,7 +441,14 @@ function giantMaterial(def: BodyDef, atmo: AtmoSet, aerialSteps: number, light: 
         float spot = smoothstep(1.0, 0.55, length(e)) * uSpotDef[4];
         albedo = mix(albedo, uSpot, spot);
         vec3 N = normalize(vN);
-        vec3 irr = uSunCol * max(dot(N, uSunDir), 0.0) + mix(uHemiGround, uHemiSky, dot(N, uHemiUp) * 0.5 + 0.5);
+        // Shadow of the rings: where the path to the Sun crosses the ring plane.
+        float ringSun = 1.0;
+        float sn = dot(uSunDir, uNorth);
+        if (uRinged > 0.5 && abs(sn) > 1e-3) {
+          float t = -dot(d, uNorth) / sn;
+          if (t > 0.0) ringSun = exp(-ringTau(length(d + t * uSunDir), 0.01) / abs(sn));
+        }
+        vec3 irr = uSunCol * max(dot(N, uSunDir), 0.0) * ringSun + mix(uHemiGround, uHemiSky, dot(N, uHemiUp) * 0.5 + 0.5);
         gl_FragColor = vec4(albedo * RECIPROCAL_PI * irr, 1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
@@ -371,6 +473,7 @@ export class BodyProxy {
   surface: Mesh | null = null;
   water: Mesh | null = null;
   shell: Mesh | null = null;
+  rings: Mesh | null = null;
   readonly clouds: Clouds;
   readonly roots = new Map<string, ChunkData>();
   /** Hidden while this body is the active (locally rendered) body. */
@@ -479,6 +582,16 @@ export class BodyProxy {
       this.shell.renderOrder = 1;
       this.group.add(this.shell);
     }
+    const ring = RINGS[this.def.id];
+    if (ring) {
+      const R = this.def.radius;
+      const rg = new RingGeometry(ring.inner * R, ring.outer * R, 512, 1);
+      // RingGeometry lies in the XY plane: turn its normal (+Z) onto the body's north pole.
+      rg.applyQuaternion(new Quaternion().setFromUnitVectors(new Vector3(0, 0, 1), new Vector3(...this.def.frame.north)));
+      this.rings = new Mesh(rg, ringMaterial(this.def, this.atmo, light));
+      this.rings.renderOrder = 2;
+      this.group.add(this.rings);
+    }
   }
 
   /** Place the proxy for a camera at system position `camSys` (double precision). */
@@ -500,7 +613,7 @@ export class BodyProxy {
   }
 
   dispose(): void {
-    for (const m of [this.surface, this.water, this.shell]) {
+    for (const m of [this.surface, this.water, this.shell, this.rings]) {
       if (!m) continue;
       m.geometry.dispose();
       (m.material as ShaderMaterial).dispose();
