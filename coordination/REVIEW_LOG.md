@@ -115,3 +115,11 @@ Decided: scheduling action: LEAD filed `want_blender.lock` (14:11) for BLENDER's
 Signals: BLENDER starved of the lock and memory for ~55 min (exports queued since 13:18). B-024 not yet done, so no want file had been written. Response above. If BLENDER still hasn't exported by cycle 12, LEAD will ask UNITY to pause heavy jobs for 30 min.
 User: none (the Hub is ~60 MB; closing apps wouldn't free enough to matter).
 Queue: UNITY 8 Ready, BLENDER 10 Ready.
+
+## Cycle 12 · 2026-10-30 14:45
+Checked: git log 14:09–14:32 (U-014, B-012 thruster/dig_sparks, B-019); UNITY_STATUS, BLENDER_STATUS (blocker + self-reported incident); perf_2026-10-30.md; contact sheets ships__pilgrim__side, side_legs, fx__thruster__base; free RAM 0.7 GB with UNITY's job.
+Moved: U-014 → Done (a289721); B-012 → Done; B-019 → Done (f1eb426); U-015 → In Progress.
+Decided: D-028 (split-half background renders, one-off 0.5 GB headroom in a scheduled window); D-029 (P-16 GC metric; P-17 → U-028).
+Signals: the scheduler window worked (BLENDER exported FX + Pilgrim at 14:28–14:31). BLENDER self-reported a HeavyJobLock bypass at ~13:03 (36 s direct render while UNITY held the lock); UNITY's 13:02 and 13:09 runs both passed, so no impact. Acknowledged, no further action. `want_blender.lock` re-filed (the 14:11 one was older than 30 min).
+User: none.
+Queue: UNITY 8 Ready, BLENDER 10 Ready.

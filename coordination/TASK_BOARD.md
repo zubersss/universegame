@@ -204,14 +204,14 @@ Files: Assets/_Game/Code/Runtime/Save/
 Depends: U-008, U-012
 Lead notes: Done e047727 (cycle 11): LocalLow/Zubers/MERIDIAN/saves/slotN, 3 rotating backups, atomic writes, version + migrations, autosave on transitions + 5 min; SaveLoadTests save → load identical; EditMode 108/108, PlayMode 28/28 at 13:53.
 
-### U-014 · UNITY · In Progress · M1
+### U-014 · UNITY · Done · M1
 Goal: BudgetGate v1, `BudgetMonitor`, profiling script.
 Accept: tests for frame time, GC per 300 frames, light and particle caps, memory on Earth, Mars, Space; `tools/unity_profile.ps1` writes `coordination/reports/unity/perf_<date>.md` with every Bible §11.1 row.
 Files: Assets/_Game/Tests/Unit/BudgetGateTests.cs, Code/Runtime/Perf/BudgetMonitor.cs, tools/unity_profile.ps1
 Depends: U-007, U-011
-Lead notes: —
+Lead notes: Done a289721 (cycle 12): perf_2026-10-30.md all §11.1 rows green on Intel UHD at 1080p (Earth avg 5.1 ms, p99 7.8; Space 1.8/3.1; Mars 3.5/5.3; textures ≤ 342 MB; loads 1.1 s); first-frame stall → U-028; GC metric per D-029.
 
-### U-015 · UNITY · Ready · M1
+### U-015 · UNITY · In Progress · M1
 Goal: HUD and menus v1.
 Accept: main menu (New, Continue, Quit), pause, side HUD (health, oxygen placeholder, fuel, altitude bar with Escape Line marker), top HUD (speed, fuel, well indicator); OFL font logged in `docs/credits/unity.md`.
 Files: Assets/_Game/UI/, Code/Runtime/UI/
@@ -224,6 +224,13 @@ Accept: CC0 SFX for jump, land, dig, place, thrust, UI click; one ambient loop; 
 Files: Assets/_Game/Audio/, Code/Runtime/Audio/, docs/credits/unity.md
 Depends: U-004
 Lead notes: Done 37f9ed9 (cycle 9): 7 synthesized CC0 clips (1.9 MB), AudioDirector with one listener; PlayMode clean incl. LeadQA; credits logged.
+
+### U-028 · UNITY · Ready · M1
+Goal: Shader/pipeline warm-up during planet load (ShaderVariantCollection or a hidden pre-render) so the first visible frame doesn't stall (P-17).
+Accept: BudgetGate first-visible-frame time ≤ 50 ms after Earth load, Mars entry, and launch into Space (was 215–800 ms); planet load stays ≤ 4 s.
+Files: Assets/_Game/Code/Runtime/Core/, Assets/_Game/Settings/Rendering/
+Depends: U-014
+Lead notes: Cycle 12. Do it before U-017 so the M1 build has no first-frame hitch in the playtest.
 
 ### U-017 · UNITY · Ready · M1
 Goal: M1 integration and build.
@@ -354,7 +361,7 @@ Goal: Earth parallax `backgrounds/earth/layer0..2` (temperate biome).
 Accept: three 2048×1024 layers tileable in x; haze gradient readable; palette per Bible §9.
 Files: Assets/_Game/Art/backgrounds/earth/
 Depends: B-002
-Lead notes: Rework in progress (cycle 7 §9 fail). Memory plan (cycle 11): a 2.1 GB peak can't fit, since with UNITY idle the laptop frees only ~1.9 GB. Render each layer in its own Blender process, and cap each job at ≤ 1.0 GB peak (e.g. EEVEE shadow pool 256 MB, volumetric tile 16, texture limit 1024 for far layers, render at final size, no 2× oversample). Start a job when Unity is not running and free RAM ≥ peak + 1 GB (§11.2). LEAD filed want_blender.lock at 14:11, so UNITY yields after its current job.
+Lead notes: Rework in progress (cycle 7 §9 fail). Render per D-028: each layer in two halves, ≥ 0.5 GB headroom, only while no Unity process runs; want_blender.lock re-filed by LEAD 14:42.
 
 ### B-024 · BLENDER · Ready · M2
 Goal: HeavyJobLock fairness + memory gate in `tools/blender_render.ps1` (D-026), mirroring U-023.
@@ -368,7 +375,7 @@ Goal: Mars parallax `backgrounds/mars/layer0..2`.
 Accept: as B-010 with the Mars palette and butterscotch sky.
 Files: Assets/_Game/Art/backgrounds/mars/
 Depends: B-010
-Lead notes: Rework in progress (cycle 7 §9 fail). Memory plan (cycle 11): a 2.1 GB peak can't fit, since with UNITY idle the laptop frees only ~1.9 GB. Render each layer in its own Blender process, and cap each job at ≤ 1.0 GB peak (e.g. EEVEE shadow pool 256 MB, volumetric tile 16, texture limit 1024 for far layers, render at final size, no 2× oversample). Start a job when Unity is not running and free RAM ≥ peak + 1 GB (§11.2). LEAD filed want_blender.lock at 14:11, so UNITY yields after its current job.
+Lead notes: Rework in progress (cycle 7 §9 fail). Render per D-028: each layer in two halves, ≥ 0.5 GB headroom, only while no Unity process runs; want_blender.lock re-filed by LEAD 14:42.
 
 ### B-022 · BLENDER · Done · M2
 Goal: Terrain sheet revision for all 10 materials: fill slots 47–62 with 16 variants of tile 46; grass rim only on upward-facing exposed edges (sides/underside show soil with a darker rim) (D-020).
@@ -377,12 +384,12 @@ Files: blender/scripts/gen_terrain.py, Assets/_Game/Art/terrain/
 Depends: B-007, B-008
 Lead notes: Done fb0c1dc (cycle 8): grass rim only on upward edges; 16 interior variants per sheet; joins seamless in demos.
 
-### B-019 · BLENDER · In Progress · M2
+### B-019 · BLENDER · Done · M2
 Goal: Pilgrim landing legs: `ships/pilgrim/side_legs` (same framing, pivot, and size as `side`, with legs extended below the skids).
 Accept: identical canvas and pivot to `side` so UNITY can swap without offset (diff of the two pivots = 0); legs read clearly at camera size 9; color, normal, emission.
 Files: Assets/_Game/Art/ships/pilgrim/, blender/scripts/
 Depends: B-006
-Lead notes: Option (b) approved (D-025): re-export `side` with gear retracted into the pods and add `side_legs` = today's deployed skids; same canvas and pivot.
+Lead notes: Done f1eb426 (cycle 12): side = gear retracted into the pods, side_legs = skids deployed, identical canvas and pivot (D-025).
 
 ### B-023 · BLENDER · Ready · M2
 Goal: Surveyor v2 polish: replace primitive suit parts with a sculpted soft suit (fabric folds at joints, seams, chest unit, backpack straps), visor with reflection and emission readouts; fix the death end pose (legs grounded).
@@ -391,12 +398,12 @@ Files: blender/scripts/build_surveyor.py, blender/sources/characters/surveyor.bl
 Depends: B-009
 Lead notes: Scheduled polish for the M2 exit (cycle 7), not a reopen of B-009. Do it after B-022, B-010 rework, B-011, B-019.
 
-### B-012 · BLENDER · In Progress · M2
+### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
 Accept: frames ≤ 256, sheets ≤ 1024², `.json` per sheet, emission where glowing.
 Files: Assets/_Game/Art/fx/
 Depends: B-002
-Lead notes: —
+Lead notes: Done 11828e9 + e450ab9 (cycle 12): five FX sheets; thruster contact sheet reads well (color/emission/alpha).
 
 ### B-013 · BLENDER · Ready · M2
 Goal: Icons batch 1 (16): iron, copper, carbon, silica, water_ice, oxygen, launch_fuel, hematite, perchlorate, clay, aluminium, living_seed, wood, stone, sand, nickel.
