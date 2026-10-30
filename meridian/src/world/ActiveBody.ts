@@ -175,7 +175,7 @@ export class ActiveBody {
     this.terrain.updateMorphs(dt);
     if (this.water) this.water.uniforms.uWaterTime.value += dt;
     this.terrain.cullMeshes(v);
-    this.collision.update(planetLocal);
+    this.collision.update(planetLocal, dt);
     this.props.update(dt, v.focusPlanet, v.camPlanet, planetLocal, nearGround);
   }
 

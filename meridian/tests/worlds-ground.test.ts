@@ -117,9 +117,11 @@ describe('surface queries (W8)', () => {
     expect(ring(60)).toBe(16);
     expect(ring(140)).toBe(16);
     expect(body.collision.wanted.length).toBeLessThanOrEqual(BUDGETS.maxTerrainColliders);
-    // Back to the walking block: the extra tiles are released.
+    // Back to the walking block: the extra tiles stay through the eviction grace (1 s), then are released.
     body.collision.reach = 0;
-    load(feet);
+    load(feet, new Vector3(), 30); // half a second
+    expect(ring(140)).toBe(16);
+    load(feet, new Vector3(), 60); // one more second
     expect(ring(140)).toBeLessThan(16);
     expect(body.collisionReady(feet, 20)).toBe(true);
   });
