@@ -2,5 +2,18 @@
   "schema": 1,
   "contract": "1.0",
   "notes": "One entry per asset key. See blender/README.md for the field reference.",
-  "assets": []
+  "assets": [
+    {
+      "key": "props/common/calibration",
+      "source": "sources/props/calibration.blend",
+      "build": "scripts/build_calibration.py",
+      "collection": "calibration",
+      "camera": "side",
+      "size": [160, 288],
+      "origin": [0, 0, 0],
+      "pivot": [0.5, 0.0555556],
+      "maps": ["color", "normal", "emission", "mask"],
+      "samples": 32
+    }
+  ]
 }

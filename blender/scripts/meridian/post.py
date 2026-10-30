@@ -34,19 +34,25 @@ def dilate(rgb, known, steps=C.DILATE):
     return rgb, known
 
 
+# RGB is trusted only where coverage >= 50%: un-premultiplied values of faint anti-aliased
+# edge pixels are noisy (and differ run to run). Edge pixels take their RGB from the solid
+# interior by dilation, which also gives halo-free edges. EDGE_STEPS covers the AA band.
+SOLID = 0.5
+EDGE_STEPS = 2
+
+
 def finish_color(px):
-    """px: float 0..1 straight-alpha render. Returns uint8 RGBA, RGB dilated under alpha=0."""
+    """px: float 0..1 straight-alpha render. Returns uint8 RGBA, RGB dilated 8 px past the
+    silhouette under alpha=0."""
     a = px[..., 3]
-    known = a > (0.5 / 255)
-    rgb, _ = dilate(px[..., :3], known)
+    rgb, _ = dilate(px[..., :3], a >= SOLID, C.DILATE + EDGE_STEPS)
     return _u8(np.dstack([rgb, a]))
 
 
 def finish_normal(px, alpha):
     """px: float render of (n+1)/2 in linear. alpha: coverage 0..1 from the color pass.
     Edge normals dilated 8 px, the rest filled with (128,128,255); alpha 255."""
-    known = alpha > (0.5 / 255)
-    rgb, grown = dilate(px[..., :3], known)
+    rgb, grown = dilate(px[..., :3], alpha >= SOLID, C.DILATE + EDGE_STEPS)
     fill = np.array(C.NORMAL_FILL, np.float32) / 255.0
     rgb[~grown] = fill
     out = np.dstack([rgb, np.ones(alpha.shape, np.float32)])
@@ -62,9 +68,7 @@ def finish_emission(px, alpha):
 
 def finish_mask(px, alpha):
     """Linear mask, R rim, G AO, B metallic; dilated like color; alpha unused (255)."""
-    known = alpha > (0.5 / 255)
-    rgb, _ = dilate(px[..., :3], known)
-    rgb[~known & (rgb.sum(axis=2) == 0)] = 0
+    rgb, _ = dilate(px[..., :3], alpha >= SOLID, C.DILATE + EDGE_STEPS)
     return _u8(np.dstack([rgb, np.ones(alpha.shape, np.float32)]))
 
 
@@ -158,11 +162,13 @@ def _fit(rgb, max_h):
 
 
 def contact_sheet(maps, tile_mode=None, max_h=512, gap=8):
-    """maps: dict name -> uint8 RGBA. Panels left to right: color (over checker), normal,
-    relit (upper-right light), emission, mask; second row: 2x tile of the color if tileable."""
+    """maps: dict name -> uint8 RGBA. Panels left to right: color (over checker), color RGB
+    with alpha ignored (shows the dilation), normal, relit (upper-right light), emission, mask;
+    second row: 2x tile of the color if tileable."""
     panels = []
     col = maps["color"]
     panels.append(_over_checker(col))
+    panels.append(col[..., :3].astype(np.float32) / 255.0)
     if "normal" in maps:
         panels.append(maps["normal"][..., :3].astype(np.float32) / 255.0)
         panels.append(_over_checker(relight(col, maps["normal"])))

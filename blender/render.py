@@ -56,8 +56,12 @@ def peak_mb():
                         ("PagefileUsage", ctypes.c_size_t), ("PeakPagefileUsage", ctypes.c_size_t)]
         pmc = PMC()
         pmc.cb = ctypes.sizeof(PMC)
-        h = ctypes.windll.kernel32.GetCurrentProcess()
-        ctypes.windll.psapi.GetProcessMemoryInfo(h, ctypes.byref(pmc), pmc.cb)
+        k32 = ctypes.windll.kernel32
+        k32.GetCurrentProcess.restype = wintypes.HANDLE
+        fn = k32.K32GetProcessMemoryInfo
+        fn.argtypes = [wintypes.HANDLE, ctypes.POINTER(PMC), wintypes.DWORD]
+        if not fn(k32.GetCurrentProcess(), ctypes.byref(pmc), pmc.cb):
+            return -1
         return int(pmc.PeakWorkingSetSize / 2**20)
     except Exception:
         return -1
@@ -191,7 +195,8 @@ def setup_render(scene, entry, w, h, preview):
         scene.eevee.taa_render_samples = samples
     # Flat black world so nothing but the override emission reaches the film.
     world = bpy.data.worlds.new("meridian_world")
-    world.use_nodes = True
+    if world.node_tree is None:
+        world.use_nodes = True
     bg = world.node_tree.nodes.get("Background")
     if bg is not None:
         bg.inputs["Color"].default_value = (0, 0, 0, 1)

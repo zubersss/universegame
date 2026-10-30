@@ -107,7 +107,9 @@ def _rewire(mat, pass_name):
         L.new(nvec, vt.inputs[0])
         ma = nt.nodes.new("ShaderNodeVectorMath")
         ma.operation = "MULTIPLY_ADD"
-        ma.inputs[1].default_value = (0.5, 0.5, 0.5)
+        # Blender's "Camera" vector space is +Z forward (into the scene); the contract wants
+        # +Z toward the camera (OpenGL), so Z is flipped here.
+        ma.inputs[1].default_value = (0.5, 0.5, -0.5)
         ma.inputs[2].default_value = (0.5, 0.5, 0.5)
         L.new(vt.outputs[0], ma.inputs[0])
         L.new(ma.outputs[0], emit.inputs["Color"])
