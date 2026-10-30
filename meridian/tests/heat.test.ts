@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { Vector3 } from 'three';
 import { HeatTimer, heatWarning, heatZone } from '../src/game/Heat';
@@ -88,6 +89,24 @@ describe('heat timer', () => {
     const t = new HeatTimer();
     expect(t.step(SIM_DT, 'recall')).toBe(true);
     expect(t.remaining).toBe(SUN_HEAT.recallSeconds);
+  });
+
+  it('no timer state survives a load, recover or new expedition: the countdown restarts at 15 s', () => {
+    // Reset part-way through the countdown, as Game does on a placement: the next danger step counts from 15 s.
+    const t = new HeatTimer();
+    while (t.remaining > 3) t.step(SIM_DT, 'danger');
+    t.reset();
+    t.step(SIM_DT, 'danger');
+    expect(t.remaining).toBeCloseTo(SUN_HEAT.recallSeconds - SIM_DT, 9);
+    // Game resets the timer in restore() (a load into the same game) and in
+    // placeShipLanded(), which recover() and newExpedition() go through.
+    const src = readFileSync(new URL('../src/game/Game.ts', import.meta.url), 'utf8');
+    const body = (sig: string) => src.slice(src.indexOf(sig), src.indexOf('\n  }\n', src.indexOf(sig)));
+    for (const sig of ['  restore(data: SaveData): void {', '  placeShipLanded(bodyId: BodyId, posPlanet: Vector3, quat: Quaternion): void {']) {
+      expect(body(sig)).toMatch(/this\.heat\.reset\(\);\s*this\.heatStar = null;/);
+    }
+    expect(body('  recover(): void {')).toMatch(/this\.placeShipLanded\(/);
+    expect(body('  newExpedition(): void {')).toMatch(/this\.placeShipLanded\(/);
   });
 });
 

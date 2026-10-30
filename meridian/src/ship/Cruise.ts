@@ -131,8 +131,11 @@ export function routeHop(pos: Vector3, id: BodyId, inflate: number, ids: readonl
  * center while the direct line from `pos` is clear, else planPath()[0], the
  * first waypoint of the route around the body blocking it (`bypass`), at the
  * inflation the cruise hop is planned with. A body whose inflated envelope
- * holds `pos` (the one being left) is not bypassed: climbing out clears it.
- * The Quiet System keeps its direct marker.
+ * holds `pos` (the one being left) is not bypassed while the direct line
+ * leaves it without entering its envelope, or while `pos` is inside that
+ * envelope (climbing out clears it). Otherwise, as after an approach exit at
+ * the Sun toward a far-side target, it stays a blocker and the first waypoint
+ * is a climb-out point around it. The Quiet System keeps its direct marker.
  */
 export function navWaypoint(pos: Vector3, target: BodyId, ids: readonly BodyId[] = BODY_IDS): { point: Vector3; bypass: BodyId | null } {
   const c = BODIES[target].center;
@@ -142,7 +145,10 @@ export function navWaypoint(pos: Vector3, target: BodyId, ids: readonly BodyId[]
   const others = ids.filter((id) => {
     if (id === target) return false;
     const b = BODIES[id].center;
-    return Math.hypot(pos.x - b[0], pos.y - b[1], pos.z - b[2]) > safetyRadius(BODIES[id]) + inflate;
+    const s = safetyRadius(BODIES[id]);
+    const d = Math.hypot(pos.x - b[0], pos.y - b[1], pos.z - b[2]);
+    if (d > s + inflate) return true;
+    return d >= s && segmentSphereEnter(pos, goal, _c.set(b[0], b[1], b[2]), s) >= 0;
   });
   const bypass = blockedBy(pos, goal, inflate, others);
   return { point: bypass ? planPath(pos, goal, inflate, others)[0] : goal, bypass };

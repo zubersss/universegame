@@ -1109,6 +1109,9 @@ export class Game {
       this.player.dispose();
       this.player = null;
     }
+    // A new placement (recover, new expedition) starts cool, as a load does.
+    this.heat.reset();
+    this.heatStar = null;
     const sys = new Vector3(def.center[0], def.center[1], def.center[2]).add(posPlanet);
     this.floating.rebaseTo(FloatingOrigin.rounded(sys), (d) => this.applyRebase(d));
     if (this.body && this.body.def.id !== bodyId) this.releaseBody();
@@ -1776,6 +1779,9 @@ export class Game {
       this.player = null;
     }
     this.assist.disengage();
+    // No heat timer state is saved: a load in the danger zone restarts the countdown.
+    this.heat.reset();
+    this.heatStar = null;
     const sys = new Vector3(...data.ship.sys);
     const quat = new Quaternion(...data.ship.quat).normalize();
     this.floating.rebaseTo(FloatingOrigin.rounded(sys), (d) => this.applyRebase(d));
