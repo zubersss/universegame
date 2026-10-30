@@ -72,6 +72,38 @@ export const CRUISE = {
  */
 export const SURFACE_READY: readonly BodyId[] = ['earth', 'moon', 'mars'];
 
+/**
+ * Star heat hazard (Sol only; Heat.ts), in radii from the star's center: a
+ * caution inside cautionRadii, a recallSeconds countdown inside dangerRadii,
+ * and the recall at once inside hardRadii, outside the ~1.65R point where the
+ * Sun's gravity outpulls the ship's space thrust (FLIGHT.accelSpace). The
+ * recall (a fictional emergency device) moves the ship out to recallStandoff
+ * beyond the star's cruise envelope. No timer state is saved.
+ */
+export const SUN_HEAT = {
+  cautionRadii: 3,
+  dangerRadii: 2,
+  hardRadii: 1.75,
+  recallSeconds: 15,
+  recallStandoff: 20000,
+} as const;
+
+/**
+ * Keep-out walls (KeepOut.ts) around the bodies in play that have no surface
+ * in this build, at R + atmosphereHeight + margin: inside the cruise envelope
+ * (CRUISE.envelopeMargin) and above their relief. Outside a wall the inward
+ * speed is limited so the ship stops at it at `decel` (m/s²); inside, it is
+ * pushed out at pushGain (1/s) per metre of depth, at most maxPush (m/s). The
+ * warning shows within warnBand (m) of the wall.
+ */
+export const KEEP_OUT = {
+  margin: 5000,
+  decel: 250,
+  pushGain: 1,
+  maxPush: 60,
+  warnBand: 20000,
+} as const;
+
 /** Where a new expedition starts in each playable system: parked at that body's landing site. */
 export const START_BODY: Readonly<Partial<Record<SystemId, BodyId>>> = { quiet: 'ilex', sol: 'earth' };
 

@@ -6,7 +6,7 @@ import { clamp, quatFromForwardUp } from '../core/mathx';
 import { RenderSystem } from '../render/RenderSystem';
 import { Space } from '../render/Space';
 import { atmoUniforms, createSkyMesh, patchAerial, setAtmosphereBody, updateSkyMesh } from '../render/Atmosphere';
-import { Lighting } from '../render/Lighting';
+import { Lighting, starOf } from '../render/Lighting';
 import { CameraRig } from '../render/CameraRig';
 import { makeTerrainDetailTexture } from '../render/terrainTextures';
 import { Clouds } from '../render/Clouds';
@@ -20,7 +20,7 @@ import { Exhaust } from '../ship/Exhaust';
 import { BOARDING_POINT, GEAR_PAD_BOTTOM_Y } from '../ship/ShipModel';
 import { NO_CONTROLS, type FlightOutput, type FlightOverride, type ShipControls } from '../ship/FlightModel';
 import { LandingAssist, emptyProbe, probeFootprint, type FootprintProbe } from '../ship/LandingAssist';
-import { CruiseController, cruiseHop, freeDistance, insideEnvelope, type CruiseExitReason, type CruiseLegStats } from '../ship/Cruise';
+import { CruiseController, cruiseHop, freeDistance, insideEnvelope, navWaypoint, safetyRadius, type CruiseExitReason, type CruiseLegStats } from '../ship/Cruise';
 import { Player, FOOT_OFFSET, playerShape, type WalkInput } from '../player/Player';
 import { FlightEnvProvider } from '../world/FlightEnvProvider';
 import { ActiveBody } from '../world/ActiveBody';
@@ -28,6 +28,8 @@ import { computeSites } from '../world/sites';
 import { MissionObjects, sampleName } from '../world/MissionObjects';
 import { Expedition, SURVEY_BODIES } from './Expedition';
 import { canActivate, proxyBodies, startBodyOf, startSite, surfaceReady } from './playSystem';
+import { HeatTimer, heatWarning, heatZone } from './Heat';
+import { applyKeepOut, keepOutWarning, type KeepOutState } from './KeepOut';
 import { OnFootHost, type OnFootExitReason } from './onFoot';
 import { rayCapsule } from './scan';
 import type { Species } from '../props/species';
@@ -40,7 +42,7 @@ import { bodyDataReady } from '../world/surface';
 import { createTerrainMaterials, makeTerrainUniforms, setTerrainPalette, type TerrainUniforms } from '../terrain/terrainMaterial';
 import { Hud, type Prompt } from '../ui/Hud';
 import { Markers, type MarkerSpec } from '../ui/Markers';
-import { BODY_HANDOFF, CRUISE, FLIGHT, LANDING, MAX_FRAME_GAP, MAX_STEPS_PER_FRAME, SCAN, SIM_DT, SURFACE_READY, WALK, BUDGETS, PRESETS, type QualityPreset } from './config';
+import { BODY_HANDOFF, CRUISE, FLIGHT, LANDING, MAX_FRAME_GAP, MAX_STEPS_PER_FRAME, SCAN, SIM_DT, SUN_HEAT, SURFACE_READY, WALK, BUDGETS, PRESETS, type QualityPreset } from './config';
 import { GENERATOR_VERSION, WORLD_SEED } from '../world/bodies';
 import type { Settings } from './settings';
 import { BODIES, BODY_IDS, PLAY_SYSTEM, sunDirFor, type BodyDef, type BodyId } from '../world/bodies';
@@ -183,6 +185,12 @@ export class Game {
   readonly handoffLog: HandoffEvent[] = [];
   /** Navigation destination (Tab panel). */
   navTarget: BodyId | null = null;
+  /** The body the nav marker is routing around (its first bypass waypoint), or null while the line is clear. */
+  navBypass: BodyId | null = null;
+  /** Sol hazards while flying: the star's heat timer (its star, null without one) and the nearest keep-out wall. */
+  readonly heat = new HeatTimer();
+  private heatStar: BodyDef | null = null;
+  readonly keepOut: KeepOutState = { body: null, gap: Infinity, clamped: false };
   /** Sustained-frame-time quality steps (resolution, then props, then distant LOD). */
   readonly adaptive: AdaptiveQuality;
   /** Survey progress (samples, relays, journal, transmission). */
@@ -226,6 +234,7 @@ export class Game {
     activations: 0, releases: 0, releasesNotCoarse: 0,
     cruiseEngages: 0, cruiseRefused: 0, cruiseExitApproach: 0, cruiseExitBrake: 0, cruiseExitToggle: 0, cruiseExitSafety: 0,
     scans: 0, collects: 0, collectRepeats: 0, relayActivations: 0, relayRepeats: 0, transmissions: 0, autosaves: 0, restores: 0,
+    heatRecalls: 0, keepOutSteps: 0,
   };
   private lastRejectReason: string | null = null;
 
@@ -335,6 +344,7 @@ export class Game {
       this.pendingMouse.x += mx;
       this.pendingMouse.y += my;
       alpha = this.stepper.advance(dt, (h) => this.fixedUpdate(h)).alpha;
+      if (this.heat.recall) this.recallFromHeat();
       this.updateHandoff();
       if (this.settings.adaptive && this.adaptive.frame(dt)) this.applyAdaptive();
       this.autosaveTimer += dt;
@@ -496,8 +506,77 @@ export class Game {
       ship.angvel.set(0, 0, 0);
       if (this.pendingCruiseExit) this.finishCruise(this.pendingCruiseExit);
     }
+    this.stepHazards(dt);
     if (this.mode === 'PILOTING') this.checkTouchdown(dt);
     this.maybeRebase(this.controlledPos());
+  }
+
+  /**
+   * Sol hazards after the physics step while flying (the Quiet System has no
+   * star and no walled body, so neither acts there): the heat timer against
+   * the reference body's star, whose recall runs after the fixed steps; and
+   * the keep-out walls, which limit the piloted ship's inward velocity. Cruise
+   * never reaches a wall (its envelopes sit outside them), so a cruise found
+   * inside one hands back to normal flight, where the wall pushes it out.
+   */
+  private stepHazards(dt: number): void {
+    const ko = this.keepOut;
+    const flying = this.mode === 'PILOTING' || this.mode === 'CRUISING';
+    const star = flying ? starOf(this.ref) : null;
+    const sys = _v4.copy(this.ship.currPos).add(this.origin);
+    this.heatStar = star;
+    this.heat.step(dt, star ? heatZone(distTo(sys, star.center), star.radius) : 'none');
+    if (!flying) {
+      ko.body = null;
+      ko.gap = Infinity;
+      ko.clamped = false;
+      return;
+    }
+    const vel = _v2.copy(this.ship.vel);
+    applyKeepOut(sys, vel, BODY_IDS, ko);
+    if (this.mode === 'CRUISING') {
+      if (ko.gap < 0 && !this.pendingCruiseExit) this.pendingCruiseExit = 'safety';
+    } else if (ko.clamped) {
+      this.ship.body.setLinvel({ x: vel.x, y: vel.y, z: vel.z }, true);
+      this.ship.vel.copy(vel);
+      this.counters.keepOutSteps++;
+    }
+  }
+
+  /**
+   * Heat recall (after the fixed steps, never inside one): the fictional
+   * emergency device moves the ship, at rest and facing away from the star,
+   * out to just beyond the star's cruise envelope, where cruise can engage.
+   */
+  private recallFromHeat(): void {
+    const star = this.heatStar;
+    this.heat.reset();
+    if (!star) return;
+    const ship = this.ship;
+    if (this.mode === 'CRUISING') {
+      // Rapier owns the ship again, as after placeShipLanded.
+      this.pendingCruiseExit = null;
+      ship.body.setBodyType(RAPIER.RigidBodyType.Dynamic, true);
+      this.setMode('PILOTING');
+    }
+    const c = new Vector3(star.center[0], star.center[1], star.center[2]);
+    const out = ship.currPos.clone().add(this.origin).sub(c);
+    if (out.lengthSq() < 1) out.set(0, 0, 1);
+    out.normalize();
+    const sys = c.addScaledVector(out, safetyRadius(star) + SUN_HEAT.recallStandoff);
+    const up = new Vector3(0, 1, 0).applyQuaternion(ship.currQuat);
+    if (Math.abs(up.dot(out)) > 0.99) up.set(Math.abs(out.y) < 0.9 ? 0 : 1, Math.abs(out.y) < 0.9 ? 1 : 0, 0);
+    this.floating.rebaseTo(FloatingOrigin.rounded(sys), (d) => this.applyRebase(d));
+    if (this.body) this.releaseBody();
+    ship.setPose(sys.sub(this.origin), quatFromForwardUp(out, up));
+    ship.flight.reset();
+    this.assist.disengage();
+    this.stick.set(0, 0);
+    this.cameraRig.reset();
+    this.lighting.snap();
+    this.physics.refreshQueries();
+    this.counters.heatRecalls++;
+    this.onNotice?.('Emergency recall', `Heat shield limit reached: the ship was moved out to a safe distance from the ${star.name}.`);
   }
 
   /**
@@ -1045,6 +1124,9 @@ export class Game {
       this.player.dispose();
       this.player = null;
     }
+    // A new placement (recover, new expedition) starts cool, as a load does.
+    this.heat.reset();
+    this.heatStar = null;
     const sys = new Vector3(def.center[0], def.center[1], def.center[2]).add(posPlanet);
     this.floating.rebaseTo(FloatingOrigin.rounded(sys), (d) => this.applyRebase(d));
     if (this.body && this.body.def.id !== bodyId) this.releaseBody();
@@ -1460,8 +1542,13 @@ export class Game {
     cam.updateMatrixWorld();
   }
 
-  /** Navigation marker: the target body, or its landing site once that body is local. */
+  /**
+   * Navigation marker: the target body, or its landing site once that body is
+   * local. While another body blocks the direct line (Sol), it points at the
+   * first bypass waypoint of the planned route instead (navWaypoint).
+   */
   private navMarker(markers: MarkerSpec[]): void {
+    this.navBypass = null;
     const t = this.navTarget;
     if (!t) return;
     const def = BODIES[t];
@@ -1475,6 +1562,13 @@ export class Game {
       if ((this.mode === 'LANDED' || this.mode === 'ON_FOOT') && distance < 300) return;
       markers.push({ id: 'nav', label: `${def.name} landing site`, pos, kind: 'nav', distance });
     } else {
+      const way = navWaypoint(_v4.copy(from).add(this.origin), t);
+      if (way.bypass) {
+        const pos = way.point.sub(this.origin);
+        this.navBypass = way.bypass;
+        markers.push({ id: 'nav', label: `bypass ${BODIES[way.bypass].name}`, pos, kind: 'nav', distance: from.distanceTo(pos) });
+        return;
+      }
       const pos = new Vector3(def.center[0] - this.origin.x, def.center[1] - this.origin.y, def.center[2] - this.origin.z);
       markers.push({ id: 'nav', label: def.name, pos, kind: 'nav', distance: Math.max(0, from.distanceTo(pos) - def.radius) });
     }
@@ -1550,6 +1644,13 @@ export class Game {
           const limited = limit < ship.flight.speedCap && limit < 200;
           hud.warning(limited ? 'Preparing terrain ahead — speed limited' : null);
         }
+      }
+      if (this.mode !== 'LANDED') {
+        // Sol hazards outrank the flight warnings: the star's heat first, then a keep-out wall.
+        const heat = this.heatStar ? heatWarning(this.heat, this.heatStar.name) : null;
+        const wall = keepOutWarning(this.keepOut);
+        if (heat) hud.warning(heat.text, heat.danger);
+        else if (wall) hud.warning(wall);
       }
     }
     this.missionMarkers(markers);
@@ -1693,6 +1794,9 @@ export class Game {
       this.player = null;
     }
     this.assist.disengage();
+    // No heat timer state is saved: a load in the danger zone restarts the countdown.
+    this.heat.reset();
+    this.heatStar = null;
     const sys = new Vector3(...data.ship.sys);
     const quat = new Quaternion(...data.ship.quat).normalize();
     this.floating.rebaseTo(FloatingOrigin.rounded(sys), (d) => this.applyRebase(d));
@@ -1845,6 +1949,7 @@ export class Game {
       bodyShown: this.bodyShown,
       ref: this.ref.id,
       navTarget: this.navTarget,
+      navBypass: this.navBypass,
       discoveries: [...this.expedition.discoveries],
       unlocked: [...this.expedition.unlocked],
       objective: this.expedition.objective(this.bodyShown && b ? b.def.id : null),
@@ -1880,6 +1985,8 @@ export class Game {
         flux: lt.star.flux, scale: lt.fluxScale, angularRadius: lt.star.angularRadius,
         distance: Number.isFinite(lt.star.distance) ? lt.star.distance : -1,
       },
+      heat: { zone: this.heat.zone, remaining: this.heat.remaining, recall: this.heat.recall },
+      keepOut: { body: this.keepOut.body, gap: this.keepOut.body ? this.keepOut.gap : null },
       assist: { active: this.assist.active, phase: this.assist.phase, reason: this.assist.reason, stable: this.assist.stable },
       probe: { hits: this.probe.hits, gaps: [...this.probe.gaps], slope: this.probe.slopeDeg, reason: this.probe.reason },
       player: playerInfo,
