@@ -264,7 +264,7 @@ def frame_list(entry):
     frames, clips, idx = [], [], 0
     for clip in anim["clips"]:
         n = int(clip["length"])
-        frames += [int(clip["frame_start"]) + i for i in range(n)]
+        frames += [int(clip.get("frame_start", 1)) + i for i in range(n)]
         clips.append({"name": clip["name"], "start": idx, "length": n, "loop": bool(clip.get("loop", False))})
         idx += n
     return frames, clips
@@ -294,8 +294,16 @@ def produce(entry, preview):
     scale = 0.25 if preview else 1.0
 
     if entry.get("generator"):
-        maps = run_generator(entry, preview)
+        res = run_generator(entry, preview)
         clips = None
+        if "frames" in res:   # generator frame sheet: pack like rendered sheets, write the .json
+            _, clips = frame_list(entry)
+            cols = int(entry["animations"].get("columns", 8))
+            maps = {m: post.pack_sheet([f[m] for f in res["frames"]], cols,
+                                       fill=(0, 0, 0, 0) if m == "color" else (0, 0, 0, 255))
+                    for m in maps_wanted}
+        else:
+            maps = res
     else:
         frames, clips = frame_list(entry)
         raw = {m: render_pass(entry, m, w, h, preview, frames) for m in maps_wanted}
@@ -343,7 +351,7 @@ def check(entry, maps, clips, wh, preview):
         fmax = rules.get("frame")
         if fmax and not preview and max(w, h) > fmax:
             problems.append(f"frame {w}x{h} over the {cat} frame cap {fmax}")
-    if rules["padded"]:
+    if entry.get("padded", rules["padded"]):   # tileable strips (e.g. fx/escape_band) opt out
         if clips:
             fw, fh = (int(w * (0.25 if preview else 1)), int(h * (0.25 if preview else 1)))
         else:
