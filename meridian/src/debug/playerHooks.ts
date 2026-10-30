@@ -7,6 +7,7 @@ import type { Game } from '../game/Game';
 import { playerRuntime } from '../player/install';
 import { GROUPS } from '../physics/Physics';
 import type { AbilityLogEntry, AbilityView } from '../abilities/AbilityController';
+import { BlinkPower, FlightPower, SpeedPower } from '../abilities/powers';
 
 const _v = new Vector3();
 
@@ -21,6 +22,15 @@ export interface PlayerTestApi {
   ability(): AbilityView | null;
   /** The last ability state changes {t, from, to} (bounded), oldest first. */
   abilityLog(): AbilityLogEntry[];
+  /**
+   * The active power's motion and checks, with the walker's height measured
+   * independently of the power (null when not on foot or without a power):
+   * flight setpoint and readiness limit; superspeed run speed, braking and the
+   * hazard ahead; blink aim target and jumps.
+   */
+  power(): Record<string, unknown> | null;
+  /** Free distance for the walker's capsule moved straight toward the ship's centre (m; null when not on foot). */
+  shipGap(): number | null;
 }
 
 export function playerTestHooks(game: Game): PlayerTestApi & Record<string, unknown> {
@@ -88,6 +98,52 @@ export function playerTestHooks(game: Game): PlayerTestApi & Record<string, unkn
     abilityLog() {
       const rt = playerRuntime(game);
       return rt ? rt.abilities.log.map((e) => ({ ...e })) : [];
+    },
+    power() {
+      const rt = playerRuntime(game);
+      const p = game.player;
+      const r = rt?.abilities.runtime;
+      if (!p || !r) return null;
+      // Feet above whatever the walker stands on (terrain, props, ship), by a ray from 2 m above them.
+      const feet = p.feet(new Vector3());
+      const from = new Vector3().copy(feet).addScaledVector(p.up, 2);
+      const hit = game.physics.castRay(from.x, from.y, from.z, -p.up.x, -p.up.y, -p.up.z, 5000, GROUPS.queryWalk);
+      // Feet above the generator's terrain (negative: below the ground), independent of collision.
+      const rel = feet.sub(game.bodyCenterLocal);
+      const rr = rel.length();
+      const base = {
+        primitive: r.primitive,
+        state: rt.abilities.state,
+        // The power's own refusal line (a refused step, take-off or run), while it shows.
+        refusal: r.refusal,
+        speed: Math.hypot(p.vel.length(), p.vVert),
+        vVert: p.vVert,
+        grounded: p.grounded,
+        height: hit ? hit.toi - 2 : null,
+        terrainClearance: rr - (game.ref.radius + game.terrainHeightAt(rel.divideScalar(rr))),
+        hitWall: p.hitWall,
+        // The walker's capsule intersects nothing where it stands (never inside solid).
+        clear: p.fitsAt(p.feet(new Vector3())),
+      };
+      if (r instanceof FlightPower) return { ...base, setpoint: r.flight.speed, limit: Number.isFinite(r.flight.limit) ? r.flight.limit : null };
+      if (r instanceof SpeedPower) {
+        const sp = r.speed;
+        return { ...base, run: sp.speed, braking: sp.braking, obstacle: Number.isFinite(sp.obstacle) ? sp.obstacle : null, obstacleKind: sp.obstacleKind };
+      }
+      if (r instanceof BlinkPower) {
+        const t = r.target;
+        return { ...base, aiming: r.aiming, target: { ok: t.ok, reason: t.reason, distance: t.distance }, jumps: r.lastJump.count, jumpFrom: r.lastJump.from.toArray(), jumpTo: r.lastJump.to.toArray() };
+      }
+      return base;
+    },
+    shipGap() {
+      const p = game.player;
+      if (!p) return null;
+      const to = new Vector3().copy(game.ship.currPos).sub(p.pos);
+      const d = to.length();
+      if (d < 1e-6) return 0;
+      const gap = p.sweepCapsule(to.divideScalar(d), d, 0);
+      return Number.isFinite(gap) ? gap : d;
     },
     resetSlip() {
       const a = game.player?.avatar;

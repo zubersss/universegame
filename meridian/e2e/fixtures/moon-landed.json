@@ -1,0 +1,76 @@
+{
+ "schema": 2,
+ "generator": 1,
+ "seed": 1835364913,
+ "savedAt": "2026-10-30T08:32:14.868Z",
+ "playTime": 159.33333333335227,
+ "system": "sol",
+ "mode": "LANDED",
+ "bodyId": "moon",
+ "ship": {
+  "sys": [
+   -50604.49346923828,
+   108743.50230407715,
+   -3954282.7587280273
+  ],
+  "quat": [
+   0.5620359999586231,
+   0.30685500244076874,
+   0.3794256195677993,
+   0.6678261311473055
+  ],
+  "vel": [
+   0,
+   0,
+   0
+  ],
+  "gear": 1,
+  "throttle": 0
+ },
+ "player": null,
+ "cruise": null,
+ "lastSafeLanding": {
+  "bodyId": "moon",
+  "posPlanet": [
+   -7071.944387843832,
+   3468.751877116287,
+   42932.03400484752
+  ],
+  "quat": [
+   0.5620359999586231,
+   0.30685500244076874,
+   0.3794256195677993,
+   0.6678261311473055
+  ]
+ },
+ "navTarget": "moon",
+ "discoveries": [
+  "earth",
+  "moon"
+ ],
+ "unlocked": [
+  "skyborne-flight",
+  "lunar-step"
+ ],
+ "settings": {
+  "preset": "low",
+  "adaptive": true,
+  "sensitivity": 1,
+  "invertY": false,
+  "volume": 0.8,
+  "reducedMotion": false
+ },
+ "expedition": {
+  "inventory": {
+   "ilex": 0,
+   "vesper": 0,
+   "cairn": 0
+  },
+  "collected": [],
+  "relays": [],
+  "species": [],
+  "scanned": [],
+  "transmitted": false,
+  "route": []
+ }
+}
