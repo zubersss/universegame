@@ -1,0 +1,76 @@
+{
+ "schema": 2,
+ "generator": 1,
+ "seed": 1835364913,
+ "savedAt": "2026-10-30T10:01:28.071Z",
+ "playTime": 191.35000000004442,
+ "system": "sol",
+ "mode": "LANDED",
+ "bodyId": "mars",
+ "ship": {
+  "sys": [
+   963600.0788574219,
+   -125143.83564758301,
+   4097979.766479492
+  ],
+  "quat": [
+   -0.7560043230436134,
+   0.5186896439546789,
+   -0.09760229130132515,
+   0.3871592818547262
+  ],
+  "vel": [
+   0,
+   0,
+   0
+  ],
+  "gear": 1,
+  "throttle": 0
+ },
+ "player": null,
+ "cruise": null,
+ "lastSafeLanding": {
+  "bodyId": "mars",
+  "posPlanet": [
+   -58138.94045336568,
+   -12892.158391591161,
+   -63026.286529790144
+  ],
+  "quat": [
+   -0.7560043230436134,
+   0.5186896439546789,
+   -0.09760229130132515,
+   0.3871592818547262
+  ]
+ },
+ "navTarget": "mars",
+ "discoveries": [
+  "earth",
+  "mars"
+ ],
+ "unlocked": [
+  "skyborne-flight",
+  "redline"
+ ],
+ "settings": {
+  "preset": "low",
+  "adaptive": true,
+  "sensitivity": 1,
+  "invertY": false,
+  "volume": 0.8,
+  "reducedMotion": false
+ },
+ "expedition": {
+  "inventory": {
+   "ilex": 0,
+   "vesper": 0,
+   "cairn": 0
+  },
+  "collected": [],
+  "relays": [],
+  "species": [],
+  "scanned": [],
+  "transmitted": false,
+  "route": []
+ }
+}

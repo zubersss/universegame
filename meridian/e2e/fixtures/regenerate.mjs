@@ -5,7 +5,15 @@
 // expedition starts landed on Earth; the navigation panel (Tab, then the body's
 // key) sets the course; the test autopilot flies there through player inputs
 // only and lands; the pause menu's Export writes the backup. Every body is a
-// separate expedition flown straight from Earth.
+// separate expedition flown from Earth.
+//
+// Mars lies behind the Sun from Earth. The planned route bypasses the Sun 40 km
+// outside its cruise envelope, and the autopilot leaves each cruise leg before
+// its waypoint, so the leg after the bypass clips the envelope: cruise stops
+// there and is refused from then on. So the Mars expedition first heads out
+// toward Saturn (travel goal) until the straight line to Mars passes the Sun's
+// envelope with SUN_CLEAR to spare, leaves cruise, and only then sets off for
+// Mars, on a route that never comes near the Sun.
 //
 // Run against a test build (npm run build:test, then
 // npx vite preview --outDir dist-test --port 4174):
@@ -21,6 +29,10 @@ import { fileURLToPath } from 'node:url';
 const base = process.argv[2] ?? 'http://localhost:4174/';
 const bodies = (process.argv[3] ?? 'moon,mars').split(',');
 const KEYS = { moon: 'Digit5', mars: 'Digit6' };
+/** A first leg toward another body, for destinations the Sun hides from Earth. */
+const VIA = { mars: 'saturn' };
+/** Margin (m) by which the line from the ship to the destination must pass the Sun's envelope before leaving the first leg. */
+const SUN_CLEAR = 300_000;
 const here = dirname(fileURLToPath(import.meta.url));
 
 const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
@@ -47,13 +59,40 @@ for (const body of bodies) {
   await page.keyboard.press(KEYS[body]);
   await page.keyboard.press('Tab');
   await until(`s.state === "playing" && s.navTarget === "${body}"`, 60_000);
+  if (VIA[body]) {
+    // How far (m) the segment from the ship to the destination passes outside the Sun's envelope.
+    const sunMargin = () =>
+      page.evaluate((to) => {
+        const m = window.__meridian;
+        const g = m.game;
+        const p = g.ship.currPos.clone().add(g.origin);
+        const sun = m.body('sun');
+        const d = m.body(to).center;
+        const ab = [d[0] - p.x, d[1] - p.y, d[2] - p.z];
+        const ac = [sun.center[0] - p.x, sun.center[1] - p.y, sun.center[2] - p.z];
+        const t = Math.max(0, Math.min(1, (ab[0] * ac[0] + ab[1] * ac[1] + ab[2] * ac[2]) / (ab[0] ** 2 + ab[1] ** 2 + ab[2] ** 2)));
+        return Math.hypot(ac[0] - t * ab[0], ac[1] - t * ab[1], ac[2] - t * ab[2]) - sun.safetyRadius;
+      }, body);
+    await page.evaluate((via) => window.__meridian.autopilot({ kind: 'travel', to: via }), VIA[body]);
+    const t0 = Date.now();
+    let margin;
+    while ((margin = await sunMargin()) < SUN_CLEAR) {
+      if (Date.now() - t0 > 20 * 60_000) throw new Error(`${body}: the line to it still passes ${(margin / 1000).toFixed(0)} km from the Sun's envelope after 20 min toward ${VIA[body]}: ${JSON.stringify(await page.evaluate(() => window.__meridian.autopilotState()))}`);
+      await page.waitForTimeout(1000);
+    }
+    await page.evaluate(() => window.__meridian.autopilot(null));
+    if ((await page.evaluate(() => window.__meridian.snapshot().mode)) === 'CRUISING') await page.keyboard.press('KeyG');
+    await until('s.mode === "PILOTING"', 120_000);
+    const s = await page.evaluate(() => window.__meridian.snapshot());
+    console.log(`${body}: left the leg toward ${VIA[body]} at sim ${s.simTime.toFixed(0)} s, the line to ${body} now ${(margin / 1000).toFixed(0)} km outside the Sun's envelope`);
+  }
   await page.evaluate((to) => window.__meridian.autopilot({ kind: 'travel', to }), body);
   // Progress every 30 s (wall time) until the autopilot has landed. A cruise
   // leg can end just inside a body's safety envelope (the route passes the
   // Sun on the way to Mars); the autopilot then keeps asking for cruise and is
   // refused. Restarting the travel goal climbs clear of every envelope first
   // and plans the route again from there.
-  let refusedAtStart = 0;
+  let refusedAtStart = await page.evaluate(() => window.__meridian.snapshot().counters.cruiseRefused);
   let restarts = 0;
   for (let polls = 0; ; polls++) {
     const st = await page.evaluate(() => ({
