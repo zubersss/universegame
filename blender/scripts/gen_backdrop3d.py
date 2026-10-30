@@ -466,20 +466,31 @@ def new_scene(P, W, preview, tilt_deg=0.0, target=None):
     return scene
 
 
-def render(scene, work, tag):
+def render(scene, work, tag, W):
+    """Render in two halves (D-028: halves the frame buffers, peak ~1.45 GB): the camera shifts
+    to W/4 and 3W/4, each half keeps MARGIN columns on both sides, and the cropped halves are
+    joined. Logs two proofs: stitch (both halves agree at x = W/2) and period (x = 0 vs x = W)."""
     os.makedirs(work, exist_ok=True)
-    path = os.path.join(work, f"backdrop3d_{tag}.png")
-    scene.render.filepath = path
-    bpy.ops.render.render(write_still=True)
-    px = pngio.read_png(path)
+    cam = scene.camera
+    half_px = PX_W // 2
+    scene.render.resolution_x = half_px + 2 * MARGIN
+    cam.data.ortho_scale = (W / 2) * (half_px + 2 * MARGIN) / half_px
+    parts = []
+    for k in (0, 1):
+        cam.location.x = W / 4 + k * W / 2
+        path = os.path.join(work, f"backdrop3d_{tag}_{k}.png")
+        scene.render.filepath = path
+        bpy.ops.render.render(write_still=True)
+        parts.append(pngio.read_png(path))
     m = MARGIN * scene.render.resolution_percentage // 100
-    w = px.shape[1] - 2 * m
-    # Direct periodicity proof: column x = 0 and column x = W of the wider render must match.
-    pm = px[..., :3] * px[..., 3:4]
-    period_err = float(np.abs(pm[:, m] - pm[:, m + w]).mean() * 255)
-    step = float(np.abs(np.diff(pm[:, m:m + w], axis=1)).mean() * 255)
-    print(f"MERIDIAN period check {tag}: |col(0) - col(W)| = {period_err:.2f} (mean neighbour step {step:.2f})")
-    return px[:, m:m + w].copy()
+    hw = parts[0].shape[1] - 2 * m
+    pm = [p[..., :3] * p[..., 3:4] for p in parts]
+    stitch = float(np.abs(pm[0][:, m + hw] - pm[1][:, m]).mean() * 255)     # x = W/2 in both renders
+    period = float(np.abs(pm[0][:, m] - pm[1][:, m + hw]).mean() * 255)     # x = 0 vs x = W
+    step = float(np.abs(np.diff(pm[0][:, m:m + hw], axis=1)).mean() * 255)
+    print(f"MERIDIAN period check {tag}: |col(0) - col(W)| = {period:.2f}, stitch |left(W/2) - right(W/2)| = "
+          f"{stitch:.2f} (mean neighbour step {step:.2f})")
+    return np.hstack([parts[0][:, m:m + hw], parts[1][:, m:m + hw]]).copy()
 
 
 def proto_collection(name, scene):
@@ -587,7 +598,7 @@ def forest_layer(P, spec, seed, preview, work, near):
             x, y = rnd.uniform(0, W), rnd.uniform(y_vis, d1)
             instance(scene.collection, shrubs[rnd.randrange(3)], (x, y, ground_z(x, y) - 0.2),
                      rnd.uniform(0.7, 1.6), rnd.uniform(0, 6.3), W)
-    return render(scene, work, ("near" if near else "mid") + str(seed))
+    return render(scene, work, ("near" if near else "mid") + str(seed), W)
 
 
 def far_layer(P, spec, seed, preview, work):
@@ -639,7 +650,7 @@ def far_layer(P, spec, seed, preview, work):
     pr.inputs["Roughness"].default_value = 0.9
     _haze(m, P["haze"], spec["haze"][0], spec["haze"][1], front=W)
     heightfield("range", scene.collection, W, depth_m, nx, ny, zf, m)
-    return render(scene, work, "far" + str(seed))
+    return render(scene, work, "far" + str(seed), W)
 
 
 def terrace01(a, levels, cliff=0.3):
@@ -752,7 +763,7 @@ def rock_layer(P, spec, seed, preview, work, near):
     scatter(spec["rocks"], lo, hi, 2.4)
     if spec.get("pebbles"):
         scatter(spec["pebbles"], 0.05, 0.22, 1.5)
-    return render(scene, work, ("near" if near else "mid") + str(seed))
+    return render(scene, work, ("near" if near else "mid") + str(seed), W)
 
 
 # ---------------------------------------------------------------- entry
