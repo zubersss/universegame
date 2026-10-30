@@ -114,4 +114,4 @@ Moved: U-012 → Done (5fecaeb); U-013 → Done (e047727); U-023 → Done (d692f
 Decided: scheduling action: LEAD filed `want_blender.lock` (14:11) for BLENDER's queued exports so UNITY yields after its current job. B-010/B-011 render jobs split per layer with ≤ 1.0 GB peak each (Lead notes).
 Signals: BLENDER starved of the lock and memory for ~55 min (exports queued since 13:18). B-024 not yet done, so no want file had been written. Response above. If BLENDER still hasn't exported by cycle 12, LEAD will ask UNITY to pause heavy jobs for 30 min.
 User: none (the Hub is ~60 MB; closing apps wouldn't free enough to matter).
-Queue: UNITY 9 Ready, BLENDER 10 Ready.
+Queue: UNITY 8 Ready, BLENDER 10 Ready.
