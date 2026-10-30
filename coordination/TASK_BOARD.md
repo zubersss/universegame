@@ -289,6 +289,20 @@ Files: Assets/_Game/Code/Runtime/Creatures/
 Depends: U-009
 Lead notes: M2 draft (cycle 10).
 
+### U-029 · UNITY · Ready · M2
+Goal: Hazard system v1 (Bible §7 0–3 scale) with Cryo first: per-planet/biome/time Cryo level (Earth tundra night 1; Mars day 1 / night 2; dust storm +1), suit integrity drain by level, HUD Cryo meter, warmth near a lit shelter or the ship.
+Accept: EditMode tests for the level table; PlayMode: Mars night drains suit and the ship stops the drain; level 3 is lethal within 30 s unprotected (§7 definition); the HUD meter shows the level and drain.
+Files: Assets/_Game/Code/Runtime/Hazards/, UI/
+Depends: U-025
+Lead notes: M2 draft (cycle 13). Build the API so Thermal/Radiation/Toxic/Pressure plug in later (M3).
+
+### U-030 · UNITY · Ready · M2
+Goal: POIs v1 on Earth and Mars: place the Survey Archive and the abandoned coastal launch complex (Earth), the crashed Halcyon hauler and the Warden outpost (Mars) as handmade stamps merged into the generated terrain at fixed longitudes; use B-020/B-021 props (placeholders until Done).
+Accept: each POI appears at its longitude in every new world and survives dig/save/load (stamps write diffs once); a map marker for each; PlayMode test per planet.
+Files: Assets/_Game/Code/Runtime/Planet/POI/, Assets/_Game/Prefabs/POI/
+Depends: U-007, U-013
+Lead notes: M2 draft (cycle 13). The Archive is the story start (Bible §2). Put it within 200 m of spawn.
+
 ---
 
 ## BLENDER
