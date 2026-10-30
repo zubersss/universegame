@@ -1,0 +1,6 @@
+{
+  "schema": 1,
+  "contract": "1.0",
+  "notes": "One entry per asset key. See blender/README.md for the field reference.",
+  "assets": []
+}
