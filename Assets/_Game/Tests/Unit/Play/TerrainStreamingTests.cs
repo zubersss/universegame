@@ -28,6 +28,17 @@ namespace Meridian.Tests
             done(director.PlanetSide);
         }
 
+        /// <summary>Other roles' heavy locks and Blender processes present now ("none" = a clean measurement).</summary>
+        static string OtherHeavyJobs()
+        {
+            var found = new System.Collections.Generic.List<string>();
+            if (System.IO.Directory.Exists("coordination/locks"))
+                foreach (var f in System.IO.Directory.GetFiles("coordination/locks", "heavy_*.lock"))
+                    if (!f.EndsWith("heavy_unity.lock")) found.Add(System.IO.Path.GetFileName(f));
+            if (System.Diagnostics.Process.GetProcessesByName("blender").Length > 0) found.Add("blender.exe running");
+            return found.Count == 0 ? "none" : string.Join(", ", found);
+        }
+
         static IEnumerator WaitSettled(TerrainStreamer t, float seconds)
         {
             float timeout = Time.realtimeSinceStartup + seconds;
@@ -63,6 +74,7 @@ namespace Meridian.Tests
                 Assert.IsTrue(t.AllResidentWithinRadius(out worst), $"frame {i}: resident chunk {worst} away");
             }
             float avgMs = total / frames * 1000f;
+            TestContext.Out.WriteLine($"[MERIDIAN] Load during measurement (D-019): {OtherHeavyJobs()}");
             var sorted = (double[])applyMs.Clone();
             System.Array.Sort(sorted);
             int over = 0;
