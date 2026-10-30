@@ -1,6 +1,6 @@
 import { Matrix4, Quaternion, Vector3, type MeshStandardMaterial, type Object3D, type Texture } from 'three';
 import { buildAvatar, B, DIM, restPosition, type AvatarRig } from './AvatarModel';
-import { AvatarAnimator, BALL_F, type FootGround, type GroundFn } from './AvatarAnimator';
+import { AvatarAnimator, BALL_F, type FootGround, type GroundFn, type PowerMotion } from './AvatarAnimator';
 
 /** Downward ray against walkable geometry: distance to the hit and its normal, or null. */
 export type GroundRay = (origin: Vector3, dir: Vector3, maxDist: number) => { dist: number; normal: Vector3 } | null;
@@ -24,11 +24,23 @@ export interface AvatarFrame {
   faceDir?: Vector3 | null;
   /** Ladder climbing pose (blend 0..1, phase in climb cycles). */
   climb?: { blend: number; phase: number } | null;
+  /** A power moving the body (flight leans the whole body into the direction of travel). */
+  power?: PowerMotion | null;
+  /** The walker's placement count: a change is a placement (any distance), not motion. */
+  placements?: number;
 }
+
+/** Body pitch in flight at cruise speed and above (rad, forward). */
+const FLIGHT_LEAN = 1.2;
+/** The body pitches about its middle, this far above the feet (m). */
+const PITCH_PIVOT = 0.95;
 
 const TURN_RATE = 10; // rad/s the body turns toward the movement direction
 const TELEPORT = 3; // m in one frame: treated as a placement, not motion
 const SKIN = 0.02; // the character controller keeps the capsule this far above the ground
+/** Toe cap of the boot in the foot bone's frame (forward = -Z; the ankle is 0.07 above the sole). */
+const BOOT_TIP_Y = -0.03;
+const BOOT_TIP_F = -0.17;
 
 const _q = new Quaternion();
 const _m = new Matrix4();
@@ -38,6 +50,7 @@ const _o = new Vector3();
 const _t = new Vector3();
 const _a = new Vector3();
 const _down = new Vector3();
+const _xAxis = new Vector3(1, 0, 0);
 
 /**
  * The explorer in the world: the rig placed at the walking capsule's feet,
@@ -63,12 +76,16 @@ export class Avatar {
   private readonly right = new Vector3(1, 0, 0);
   private readonly anchors = [new Vector3(), new Vector3()];
   private readonly anchored = [false, false];
+  /** The walker's placement count last frame (null before the first frame). */
+  private placementsSeen: number | null = null;
   private readonly hipsRestY: number;
   /** This frame's target root and the previous frame's (sub-step interpolation). */
   private readonly target = new Vector3();
   private readonly from = new Vector3();
   private readonly motion = new Vector3();
   private wasClimbing = false;
+  /** Current whole-body pitch (rad, forward > 0). */
+  bodyPitch = 0;
   private readonly groundFn: GroundFn;
 
   constructor(parent: Object3D, private readonly ray: GroundRay | null, heading: Vector3, private readonly envSource: (() => Texture | null) | null = null) {
@@ -118,7 +135,9 @@ export class Avatar {
     const target = this.target.copy(f.feet).addScaledVector(up, -SKIN);
     if (!this.hasPrev) this.prevRoot.copy(target);
     const dTan = this.motion.copy(target).sub(this.prevRoot);
-    if (dTan.length() > TELEPORT) {
+    const placed = f.placements !== undefined && this.placementsSeen !== null && f.placements !== this.placementsSeen;
+    if (f.placements !== undefined) this.placementsSeen = f.placements;
+    if (placed || dTan.length() > TELEPORT) {
       // A placement (recovery, restore), not motion: no landing, feet under the body.
       this.prevRoot.copy(target);
       dTan.set(0, 0, 0);
@@ -174,9 +193,14 @@ export class Avatar {
         climb: f.climb ?? null,
         lookYaw: Math.abs(lookYaw) < 1.9 ? lookYaw : 0,
         lookPitch,
+        power: f.power ?? null,
       });
     }
     this.root.copy(target);
+    // Flight: the whole body leans forward with speed (smoothed).
+    const pw = f.power;
+    const lean = pw && pw.mode === 'flight' ? FLIGHT_LEAN * Math.min(1, (pw.forward ?? pw.speed) / 60) : 0;
+    if (f.dt > 0) this.bodyPitch += (lean - this.bodyPitch) * (1 - Math.exp(-f.dt / 0.3));
 
     // Basis: forward = -Z, up = +Y, right = +X.
     _z.copy(this.facing).negate();
@@ -185,11 +209,24 @@ export class Avatar {
     const root = this.rig.root;
     root.position.copy(this.root);
     root.quaternion.setFromRotationMatrix(_m);
+    if (Math.abs(this.bodyPitch) > 1e-4) {
+      // Pitch about the body's middle (rotation about its right axis, forward = -Z).
+      _q.setFromAxisAngle(_xAxis, -this.bodyPitch);
+      root.quaternion.multiply(_q);
+      _t.set(0, PITCH_PIVOT, 0).applyQuaternion(root.quaternion);
+      root.position.addScaledVector(up, PITCH_PIVOT).sub(_t);
+    }
     this.anim.applyTo(this.rig.bones, this.hipsRestY);
     root.updateMatrixWorld(true);
     if (f.dt > 0) this.measureSlip();
     this.prevRoot.copy(this.root);
     this.hasPrev = true;
+  }
+
+  /** Points at the boot toe caps after this frame's pose, in the parent's frame (flight trails). */
+  bootTips(outL: Vector3, outR: Vector3): void {
+    outL.set(0, BOOT_TIP_Y, BOOT_TIP_F).applyMatrix4(this.rig.bones[B.footL].matrixWorld);
+    outR.set(0, BOOT_TIP_Y, BOOT_TIP_F).applyMatrix4(this.rig.bones[B.footR].matrixWorld);
   }
 
   /** Ground under a foot, from a short ray along -up starting above the foot. */

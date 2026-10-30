@@ -1,5 +1,6 @@
 import { Vector3, type PerspectiveCamera } from 'three';
-import { WALK } from '../game/config';
+import { CAMERA, WALK } from '../game/config';
+import type { PowerMotion } from '../avatar/AvatarAnimator';
 
 // Third-person camera for the explorer: a spring arm behind and slightly
 // right of the head, looking exactly along the aim direction (heading and
@@ -42,10 +43,21 @@ export const CHAR_CAMERA = {
   converge: 25,
   /** Seconds to ease back out after being pushed in. */
   easeOut: 0.3,
+  /** Time constant of the rest length following the wanted arm (s). */
+  restEase: 0.35,
   /** Minimum camera height above the analytic terrain (m). */
   minGround: 0.45,
   /** Below this arm length the body would fill the view: hide it. */
   hideBelow: 0.75,
+  /** Powers: flight pulls the arm out (rest, plus with speed); superspeed a little. */
+  flightArm: 5.6,
+  flightArmPerSpeed: 1 / 40,
+  flightArmMaxExtra: 3,
+  dashArmPerSpeed: 1 / 50,
+  dashArmMaxExtra: 2,
+  /** Field of view widens with power speed (deg; none with reduced motion). */
+  fovPerSpeed: 0.1,
+  fovMaxExtra: 12,
 } as const;
 
 const _look = new Vector3();
@@ -73,8 +85,12 @@ export class CharacterCamera {
   bodyVisible = true;
   /** Closest the camera came to the analytic terrain while in third person (diagnostics; m). */
   minTerrainClearance = Infinity;
+  /** Current field of view (deg). */
+  fov: number = CAMERA.fov;
   /** Frames where geometry pulled the arm in (diagnostics). */
   pushedFrames = 0;
+  /** Rest length of the arm, eased toward the wanted one so a power's longer arm comes in without a jolt. */
+  restArm: number = CHAR_CAMERA.arm;
 
   toggle(): void {
     this.mode = this.mode === 'third' ? 'first' : 'third';
@@ -100,7 +116,9 @@ export class CharacterCamera {
     cast: ArmCast | null,
     terrain: TerrainDeficit | null,
     reducedMotion: boolean,
+    power: PowerMotion | null = null,
   ): void {
+    this.updateFov(dt, camera, power, reducedMotion);
     _look.copy(heading).multiplyScalar(Math.cos(pitch)).addScaledVector(up, Math.sin(pitch)).normalize();
     this.look.copy(_look);
     _pivot.copy(feet).addScaledVector(up, CHAR_CAMERA.pivotUp);
@@ -133,11 +151,17 @@ export class CharacterCamera {
     this.shoulder = follow(this.shoulder, CHAR_CAMERA.shoulder, free(_anchor, _right, CHAR_CAMERA.shoulder));
     _anchor.addScaledVector(_right, this.shoulder);
     // Arm: rest length (longer when moving fast, unless reduced motion), cast backward.
-    const wanted = CHAR_CAMERA.arm + (reducedMotion ? 0 : Math.min(CHAR_CAMERA.armMaxExtra, speed * CHAR_CAMERA.armSpeedGain));
+    let wanted: number = CHAR_CAMERA.arm + (reducedMotion ? 0 : Math.min(CHAR_CAMERA.armMaxExtra, speed * CHAR_CAMERA.armSpeedGain));
+    if (power?.mode === 'flight') wanted = CHAR_CAMERA.flightArm + (reducedMotion ? 0 : Math.min(CHAR_CAMERA.flightArmMaxExtra, power.speed * CHAR_CAMERA.flightArmPerSpeed));
+    else if (power?.mode === 'dash') wanted = CHAR_CAMERA.arm + (reducedMotion ? 0 : Math.min(CHAR_CAMERA.dashArmMaxExtra, power.speed * CHAR_CAMERA.dashArmPerSpeed));
+    // The rest length eases toward the wanted one and the arm eases toward
+    // the rest length: an S-curve, so a power starting or ending (1.5 m more
+    // arm at once) never sets the camera off at speed in a single frame.
+    if (dt > 0) this.restArm += (wanted - this.restArm) * (1 - Math.exp(-dt / CHAR_CAMERA.restEase));
     _dir.copy(_look).negate();
-    const room = free(_anchor, _dir, wanted);
+    const room = free(_anchor, _dir, this.restArm);
     if (room < this.arm) this.pushedFrames++;
-    this.arm = follow(this.arm, wanted, room);
+    this.arm = follow(this.arm, this.restArm, room);
     this.position.copy(_anchor).addScaledVector(_dir, this.arm);
     // Analytic terrain clearance (colliders may not be loaded around the camera).
     if (terrain) {
@@ -152,6 +176,18 @@ export class CharacterCamera {
     this.bodyVisible = this.arm >= CHAR_CAMERA.hideBelow;
     // Look at the point the eye aims at, `converge` metres out.
     this.aimAt(camera, up, _target.copy(_pivot).addScaledVector(_look, CHAR_CAMERA.converge));
+  }
+
+  /** Field of view: the base, widened with a power's speed unless reduced motion; eased. */
+  private updateFov(dt: number, camera: PerspectiveCamera, power: PowerMotion | null, reducedMotion: boolean): void {
+    const extra = power && !reducedMotion ? Math.min(CHAR_CAMERA.fovMaxExtra, power.speed * CHAR_CAMERA.fovPerSpeed) : 0;
+    const target = CAMERA.fov + extra;
+    if (dt > 0) this.fov += (target - this.fov) * (1 - Math.exp(-dt / 0.4));
+    if (reducedMotion && !power) this.fov = target;
+    if (Math.abs(camera.fov - this.fov) > 0.01) {
+      camera.fov = this.fov;
+      camera.updateProjectionMatrix();
+    }
   }
 
   /** Place and orient the camera (radial up) toward a target point. */

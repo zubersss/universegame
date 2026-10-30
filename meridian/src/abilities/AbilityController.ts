@@ -1,6 +1,10 @@
+import { Vector3 } from 'three';
 import type { OnFootContext, OnFootExitReason } from '../game/onFoot';
 import type { AbilitySlot, WarningSeverity } from '../ui/Hud';
-import { abilityFor } from './catalog';
+import { abilityFor, primitivesOf } from './catalog';
+import { createPower, FlightPower, SpeedPower, TOUCH, type Power, type PowerWorld } from './powers';
+import { WALKABLE_COS } from '../player/Player';
+import type { PowerMotion } from '../avatar/AvatarAnimator';
 import { readAbilitySave, type AbilitySave } from './save';
 import { transitionBlocked, type AbilityConfig, type AbilityId, type AbilityState, type BodyPower, type Primitive, type TransitionContext } from './types';
 
@@ -31,6 +35,8 @@ export interface AbilityView {
 /** How many state changes the log keeps. */
 const LOG_MAX = 64;
 
+const _feet = new Vector3();
+
 /** The two HUD slot calls the controller makes (LEAD's HUD slot API). */
 export interface AbilityHud {
   setAbility(slot: AbilitySlot | null): void;
@@ -55,7 +61,19 @@ export class AbilityController {
   /** The last state changes, oldest first (bounded). */
   readonly log: AbilityLogEntry[] = [];
   /** Primitives that have a working implementation. */
-  private readonly built = new Set<Primitive>();
+  private readonly built = new Set<Primitive>(['flight', 'speed', 'blink']);
+  /** The power's runtime on this body (null: walking only). */
+  runtime: Power | null = null;
+  /** A reloaded power waits for the first step with a world to resume. */
+  private resumePending = false;
+  private shownRefusal: string | null = null;
+  /** The walker's placement count at the last step (-1: not seen yet). */
+  private placementsSeen = -1;
+  /** A short caution line of the controller's own ('land first'), and how long it stays (s). */
+  private notice: string | null = null;
+  private noticeTime = 0;
+  /** Simulation time of the last step (exit entries are stamped with it: a load may rewind the clock first). */
+  private lastStep = 0;
 
   constructor(
     private readonly hud: AbilityHud,
@@ -67,18 +85,82 @@ export class AbilityController {
   enter(ctx: AbilityEnterContext): void {
     this.bodyId = ctx.body;
     this.power = abilityFor(ctx.power !== undefined ? ctx.power : this.powerOf(ctx.body));
-    if (ctx.restored) this.restore(ctx.restored);
+    const saved = ctx.restored ? this.restore(ctx.restored) : 'walk';
+    // Game passes a power only once its destination unlocked it.
+    if (ctx.power !== undefined && this.power) this.unlocked.add(this.power.id);
+    this.runtime = this.power ? createPower(this.power) : null;
     this.state = 'walk';
+    this.resumePending = false;
+    this.placementsSeen = -1;
+    this.notice = null;
+    this.lastStep = this.clock();
+    // A reload resumes the saved power where it has a rule for it (LEAD M2
+    // plan C): flight hovers where it was saved (it never ends mid-air),
+    // superspeed resumes braking. The first step with a world starts it.
+    if (saved !== 'walk' && this.usable && this.runtime!.primitive === saved && this.runtime!.resume) {
+      this.state = saved;
+      this.resumePending = true;
+    }
     this.lastRefusal = null;
     this.showHud();
   }
 
+  /** The power can be used here now (exists, built, unlocked). */
+  get usable(): boolean {
+    const p = this.power;
+    return !!p && !!this.runtime && this.built.has(p.primitive) && this.unlocked.has(p.id);
+  }
+
   /**
-   * One fixed step. Returns true when an active power moved the character
-   * (Game's walk step is then skipped); false keeps walking.
+   * One fixed step with the game's view (null in headless tests: walking
+   * only). Returns true when an active power moved the character (Game's
+   * walk step is then skipped); false keeps walking.
    */
-  step(_dt: number): boolean {
-    return this.state !== 'walk';
+  step(dt: number, w: PowerWorld | null = null): boolean {
+    const rt = this.runtime;
+    if (!rt || !w) return this.state !== 'walk';
+    this.lastStep = this.clock();
+    this.tickNotice(dt);
+    if (this.resumePending) {
+      this.resumePending = false;
+      rt.resume!(w);
+    }
+    // The walker was re-placed (Recover, a placement by Game): a power moving
+    // it resumes from rest there, as after a reload, instead of carrying on.
+    const placed = this.placementsSeen >= 0 && w.player.placements !== this.placementsSeen;
+    this.placementsSeen = w.player.placements;
+    if (placed && this.state !== 'walk' && rt.resume) rt.resume(w);
+    // Controls that are not live do not keep presses for later (Input latches them).
+    if (!this.usable) rt.drop?.(w);
+    rt.tick(dt, this.usable ? w : null);
+    if (this.state === 'walk') {
+      if (!this.usable || !rt.wants(dt, w)) {
+        this.showHud();
+        return false;
+      }
+      if (!this.request(rt.primitive, this.context(w))) {
+        this.showHud();
+        return false;
+      }
+      rt.start(w);
+    }
+    if (rt.step(dt, w) === 'done') this.request('walk', this.context(w));
+    this.showHud();
+    return true;
+  }
+
+  /** Facts for the transition rules. A flier below the landing height counts as down (its landing flare). */
+  private context(w: PowerWorld): TransitionContext {
+    const pl = w.player;
+    const p = this.power;
+    let grounded = pl.grounded;
+    if (this.state === 'flight') {
+      // Flight hands back only touching walkable ground (charter J: never
+      // mid-air; a cliff face the controller calls ground is not a landing).
+      const g = pl.groundAt(pl.feet(_feet), 0.5, 0.6);
+      grounded = !!g && -g.h <= TOUCH && g.normal.dot(pl.up) >= WALKABLE_COS;
+    }
+    return { grounded, speed: pl.vel.length(), primitivesHere: primitivesOf(p), unlocked: !!p && this.unlocked.has(p.id), inZone: false };
   }
 
   /** Ask for a state change under the charter J rules. */
@@ -95,12 +177,43 @@ export class AbilityController {
     return true;
   }
 
+  /**
+   * A scripted move (ladder) holds the walker: the power's controls are not
+   * live (an aim preview ends, a refusal line runs out) and the slot stays current.
+   */
+  hold(dt: number): void {
+    this.tickNotice(dt);
+    this.runtime?.tick(dt, null);
+    this.showHud();
+  }
+
+  /** A caution line of the controller's own in the slot's power name (e.g. 'land first' at the ladder). */
+  refuse(reason: string, seconds = 1.5): void {
+    this.notice = reason;
+    this.noticeTime = seconds;
+    this.lastRefusal = reason;
+    this.showHud();
+  }
+
+  private tickNotice(dt: number): void {
+    if (this.notice === null) return;
+    this.noticeTime -= dt;
+    if (this.noticeTime <= 0) this.notice = null;
+  }
+
   /** ON_FOOT is ending: powers deactivate (boarding) or the character is re-placed. */
   exit(_reason: OnFootExitReason): void {
-    if (this.state !== 'walk') this.note(this.state, 'walk');
+    if (this.state !== 'walk') this.note(this.state, 'walk', this.lastStep);
+    this.notice = null;
     this.state = 'walk';
+    this.resumePending = false;
     this.power = null;
+    this.runtime = null;
     this.bodyId = null;
+    if (this.shownRefusal !== null) {
+      this.hud.setWarning(null);
+      this.shownRefusal = null;
+    }
   }
 
   /** Arriving at a destination unlocks its power (journal, L9). */
@@ -113,31 +226,61 @@ export class AbilityController {
     return { abilityState: this.state, unlocked: [...this.unlocked].sort() };
   }
 
-  /** The readout for tests (LEAD's M2 journeys) and diagnostics. */
-  view(): AbilityView {
-    return { id: this.power?.id ?? null, state: this.state, active: this.state !== 'walk', charge: 1, cooldown: 0, preview: null };
+  /** How a power is moving the body (avatar pose, camera), or null when walking. */
+  motion(): PowerMotion | null {
+    const rt = this.runtime;
+    if (!rt || this.state === 'walk') return null;
+    if (rt instanceof FlightPower) return { mode: 'flight', speed: rt.flight.vel.length(), forward: rt.forwardSpeed() };
+    if (rt instanceof SpeedPower) return { mode: 'dash', speed: rt.speed.speed };
+    return null;
   }
 
-  private note(from: AbilityState, to: AbilityState): void {
-    this.log.push({ t: this.clock(), from, to });
+  /** The readout for tests (LEAD's M2 journeys) and diagnostics. */
+  view(): AbilityView {
+    const r = this.runtime?.readout();
+    const blink = this.runtime && this.runtime.primitive === 'blink' ? (this.runtime as Power & { aiming: boolean; target: { ok: boolean; reason: string | null } }) : null;
+    return {
+      id: this.power?.id ?? null,
+      state: this.state,
+      active: this.state !== 'walk',
+      charge: r ? r.charge : 1,
+      cooldown: r ? r.cooldown : 0,
+      preview: blink && blink.aiming ? { ok: blink.target.ok, reason: blink.target.reason } : null,
+    };
+  }
+
+  /** State changes so far (the log is bounded; this counts all). */
+  changes = 0;
+
+  private note(from: AbilityState, to: AbilityState, t = this.clock()): void {
+    this.changes++;
+    this.log.push({ t, from, to });
     if (this.log.length > LOG_MAX) this.log.splice(0, this.log.length - LOG_MAX);
   }
 
-  restore(raw: unknown): void {
+  /** Restore the unlocked powers; returns the saved state, which enter() resumes where a rule allows (the character walks until then). */
+  restore(raw: unknown): AbilityState {
     const s = readAbilitySave(raw);
     this.unlocked.clear();
     for (const id of s.unlocked) this.unlocked.add(id);
-    // Powers are never resumed mid-use (see readAbilitySave).
     this.state = 'walk';
+    this.resumePending = false;
+    return s.abilityState;
   }
 
-  /** Ability slot: shown only where a power exists and is unlocked. */
+  /** Ability slot: shown only where a power exists, is built and unlocked; refusals as a caution line. */
   private showHud(): void {
     const p = this.power;
-    if (!p || !this.unlocked.has(p.id) || !this.built.has(p.primitive)) {
+    if (!p || !this.usable) {
       this.hud.setAbility(null);
       return;
     }
-    this.hud.setAbility({ name: p.name, state: this.state, charge: 1, cooldown: 0, hint: p.feedback.hint });
+    const r = this.runtime!.readout();
+    this.hud.setAbility({ name: p.name, state: this.state === 'walk' ? r.status : `${this.state} · ${r.status}`, charge: r.charge, cooldown: r.cooldown, hint: r.hint });
+    const refusal = this.runtime!.refusal ?? this.notice;
+    if (refusal !== this.shownRefusal) {
+      this.hud.setWarning(refusal ? `${p.name}: ${refusal}` : null, 'caution');
+      this.shownRefusal = refusal;
+    }
   }
 }

@@ -35,9 +35,8 @@ export function validateAbilityFields(abilityState: unknown, unlocked: unknown):
 /**
  * Lenient reader for ability fields that were already validated (or come
  * from an older record): unknown power ids are dropped; a missing or invalid
- * state reads as walking. A save never resumes a power mid-use: a character
- * restored in flight is restored walking at the saved (ground-snapped) spot,
- * which is the safe reading of "flight never ends mid-air" for a reload.
+ * state reads as walking. Which saved states resume is the controller's rule
+ * (flight hovers where it was saved, superspeed resumes braking, others walk).
  */
 export function readAbilitySave(raw: unknown): AbilitySave {
   const r = (raw ?? {}) as { abilityState?: unknown; unlocked?: unknown };

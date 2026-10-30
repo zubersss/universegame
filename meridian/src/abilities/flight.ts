@@ -31,14 +31,26 @@ export interface FlightSense {
   height: number | null;
   /** Whether the character controller reports ground contact. */
   grounded: boolean;
-  /** Collision is loaded along the path ahead (charter J readiness); false limits the speed. */
-  ready: boolean;
+  /** The ground below is walkable (no steeper than the walking limit): flight lands only there. */
+  walkable: boolean;
+  /**
+   * How far along the path collision is loaded (m; Infinity: as far as was
+   * probed). Charter J readiness: never faster than what can brake to a stop
+   * inside it, and never slower than FLIGHT_UNREADY_SPEED (limited, not stalled).
+   */
+  loaded: number;
 }
 
 export type FlightResult = 'flying' | 'landed';
 
 /** Speed allowed while collision ahead is not loaded (m/s). */
 export const FLIGHT_UNREADY_SPEED = 25;
+/** Distance kept between a stop and the end of loaded collision (m). */
+export const FLIGHT_LOAD_MARGIN = 30;
+/** Descent while settling onto the ground to land (m/s). */
+export const FLIGHT_SETTLE = 1.5;
+/** Height a flier that is not landing keeps above the ground (m). */
+export const FLIGHT_SKIM = 0.6;
 /** Upward speed at take-off (m/s). */
 export const FLIGHT_TAKEOFF_CLIMB = 6;
 
@@ -56,10 +68,17 @@ export class Flight {
   readonly vel = new Vector3();
   /** Seconds since take-off (landing is ignored briefly after take-off). */
   time = 0;
+  /** Speed allowed by the loaded collision ahead this step (m/s; Infinity: no limit). */
+  limit = Infinity;
 
   constructor(readonly p: FlightParams) {}
 
-  /** Take off: course along the heading, carrying the current velocity, rising. */
+  /**
+   * Take off: course along the heading, carrying the current velocity. Near
+   * the ground (standing, or mid-jump) it kicks upward; higher up (a fall
+   * caught in the air) the velocity is kept and turned around within the
+   * acceleration limits instead of reversing at once.
+   */
   start(vel: Vector3, sense: FlightSense): void {
     const up = sense.up;
     this.course.copy(sense.heading).addScaledVector(up, -sense.heading.dot(up)).normalize();
@@ -67,8 +86,18 @@ export class Flight {
     const h = _t.copy(vel).addScaledVector(up, -vel.dot(up));
     this.speed = Math.max(0, h.dot(this.course));
     const vz = vel.dot(up);
-    if (vz < FLIGHT_TAKEOFF_CLIMB) this.vel.addScaledVector(up, FLIGHT_TAKEOFF_CLIMB - vz);
+    const low = sense.grounded || (sense.height !== null && sense.height < this.p.landHeight);
+    if (low && vz < FLIGHT_TAKEOFF_CLIMB) this.vel.addScaledVector(up, FLIGHT_TAKEOFF_CLIMB - vz);
     this.time = 0;
+  }
+
+  /** Resume after a reload: hovering in place along the heading (a save keeps no velocity); no take-off climb, so landing is allowed at once. */
+  resume(sense: FlightSense): void {
+    const up = sense.up;
+    this.course.copy(sense.heading).addScaledVector(up, -sense.heading.dot(up)).normalize();
+    this.vel.set(0, 0, 0);
+    this.speed = 0;
+    this.time = 1;
   }
 
   /** One fixed step: returns the new velocity in `this.vel` and whether flight continues. */
@@ -96,21 +125,42 @@ export class Flight {
       else if (this.speed > cap) this.speed = Math.max(cap, this.speed - p.accel * dt);
       this.speed = Math.max(0, this.speed);
     }
-    if (!s.ready) this.speed = Math.min(this.speed, FLIGHT_UNREADY_SPEED);
+    // Readiness governs the speed flown, not the chosen setpoint: when loading
+    // catches up the flier returns to the speed the player chose.
+    this.limit = Number.isFinite(s.loaded) ? Math.max(FLIGHT_UNREADY_SPEED, Math.sqrt(2 * p.brake * Math.max(0, s.loaded - FLIGHT_LOAD_MARGIN))) : Infinity;
+    const forward = Math.min(this.speed, this.limit);
     // Vertical target: climb / descend / hold (hover), braked by X, capped near the ceiling.
     let vz = inp.brake ? 0 : inp.climb ? p.climb : inp.descend ? -p.climb : 0;
     if (s.height !== null && s.height > p.ceiling) vz = Math.min(vz, -Math.min(p.climb, s.height - p.ceiling));
-    // Velocity toward the target within the acceleration (brake rate when braking).
-    _target.copy(this.course).multiplyScalar(this.speed).addScaledVector(up, vz);
+    // Landing (charter K: below the landing height and slower than the landing
+    // speed, not climbing): over walkable ground the flier settles down and
+    // hands back only on touchdown, never in the air and never on a cliff face.
+    const settling = this.time > 0.5 && !inp.climb && this.vel.length() < p.landSpeed && s.walkable && (s.grounded || (s.height !== null && s.height < p.landHeight));
+    if (settling) vz = Math.min(vz, -FLIGHT_SETTLE);
+    // Near walkable ground: landing, the descent slows so it arrives slowly
+    // enough to land; otherwise the flier holds FLIGHT_SKIM above it and
+    // follows the terrain. Pressed into the ground it would count as standing
+    // on it, and a rise steeper than the walking limit would then stop it
+    // dead; met in the air, any slope is slid along. (Beside a cliff the ray
+    // finds the face, which is no ground to keep clear of.)
+    if (s.height !== null && s.walkable) {
+      if (settling) {
+        if (vz < 0) vz = Math.max(vz, -(0.6 * p.landSpeed + 1.2 * s.height));
+      } else vz = Math.max(vz, -1.2 * (s.height - FLIGHT_SKIM));
+    }
+    // Velocity toward the target within the acceleration (brake rate when
+    // braking), across and along up separately: a push against a wall that
+    // the controller blocks does not hold back the climb or descent.
+    _target.copy(this.course).multiplyScalar(forward).addScaledVector(up, vz);
     _t.copy(_target).sub(this.vel);
-    const maxDv = (inp.brake ? p.brake : Math.max(p.accel, p.climb * 2)) * dt;
-    const dv = _t.length();
-    if (dv > maxDv) _t.multiplyScalar(maxDv / dv);
-    this.vel.add(_t);
-    // Landing: near the ground (or touching it), slow, not climbing.
-    const slow = this.vel.length() < p.landSpeed;
-    const low = s.grounded || (s.height !== null && s.height < p.landHeight);
-    if (this.time > 0.5 && slow && low && !inp.climb && this.vel.dot(up) <= 0.1) return 'landed';
+    const dz = _t.dot(up);
+    _t.addScaledVector(up, -dz);
+    const across = (inp.brake ? p.brake : Math.max(p.accel, p.climb * 2)) * dt;
+    const along = (inp.brake ? p.brake : p.climb * 2) * dt;
+    const dh = _t.length();
+    if (dh > across) _t.multiplyScalar(across / dh);
+    this.vel.add(_t).addScaledVector(up, Math.max(-along, Math.min(along, dz)));
+    if (settling && s.grounded && this.vel.dot(up) <= 0.1) return 'landed';
     return 'flying';
   }
 }

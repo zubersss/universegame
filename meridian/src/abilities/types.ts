@@ -147,7 +147,9 @@ export const SPEED_EXIT_MAX = 7.5;
 
 /**
  * Charter J transition rules. Powers start only from walking, only where the
- * local power offers that primitive and only once unlocked. Flight ends only
+ * local power offers that primitive and only once unlocked; superspeed starts
+ * on the ground, flight also in the air (Space jumps first, so holding it
+ * takes off mid-jump, and a fall can be caught). Flight ends only
  * on the ground (never mid-air); superspeed ends only after braking to sprint
  * speed; a blink resolves to walking on arrival; drift hands back only on
  * solid footing (a zone's boundary pushes back and recalls to the ship, which
@@ -162,7 +164,6 @@ export function transitionBlocked(from: AbilityState, to: AbilityState, c: Trans
     if (!c.primitivesHere.includes(to)) return 'not available here';
     if (!c.unlocked) return 'not unlocked yet';
     if (to === 'speed' && !c.grounded) return 'needs ground';
-    if (to === 'flight' && !c.grounded) return 'take off from the ground';
     if (to === 'drift' && !c.inZone) return 'outside the zone';
     return null;
   }

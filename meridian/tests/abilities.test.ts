@@ -86,6 +86,9 @@ describe('transition rules (charter J)', () => {
     expect(transitionBlocked('walk', 'flight', here('speed'))).toMatch(/not available/);
     expect(transitionBlocked('walk', 'flight', { ...here('flight'), unlocked: false })).toMatch(/unlocked/);
     expect(transitionBlocked('speed', 'flight', here('flight'))).toMatch(/one power/);
+    // Flight may start in the air (a held Space jumps first); superspeed needs the ground.
+    expect(transitionBlocked('walk', 'flight', { ...here('flight'), grounded: false })).toBeNull();
+    expect(transitionBlocked('walk', 'speed', { ...here('speed'), grounded: false })).toMatch(/ground/);
     expect(transitionBlocked('walk', 'speed', here('speed', { grounded: false }))).toMatch(/ground/);
     expect(transitionBlocked('walk', 'drift', here('drift'))).toMatch(/zone/);
     expect(transitionBlocked('walk', 'drift', here('drift', { inZone: true }))).toBeNull();
@@ -106,31 +109,45 @@ describe('transition rules (charter J)', () => {
 });
 
 describe('ability controller (walk only in M1)', () => {
-  it('walks everywhere, hides the ability slot and refuses unbuilt powers', () => {
+  it('walks where there is no power; a built power needs unlocking and shows in the slot once unlocked', () => {
     const hud = fakeHud();
     const c = new AbilityController(hud, (id) => (id === 'ilex' ? 'walk' : 'redline'));
     c.enter({ body: 'ilex' });
     expect(c.state).toBe('walk');
     expect(c.power).toBeNull();
+    expect(c.runtime).toBeNull();
     expect(hud.calls.at(-1)).toBeNull();
     expect(c.step(1 / 60)).toBe(false);
     c.exit('board');
-    c.enter({ body: 'vesper' as never });
+    c.enter({ body: 'mars' });
     expect(c.power?.id).toBe('redline');
-    c.unlock('redline');
-    // No placeholder: the slot stays hidden and the power cannot start until speed is built.
+    expect(c.runtime?.primitive).toBe('speed');
+    // Locked: the slot stays hidden and the rules refuse.
+    expect(c.usable).toBe(false);
     expect(hud.calls.at(-1)).toBeNull();
-    expect(c.request('speed', { ...CTX, primitivesHere: ['speed'], unlocked: true })).toBe(false);
-    expect(c.lastRefusal).toMatch(/not built/);
-    expect(c.state).toBe('walk');
-    expect(c.step(1 / 60)).toBe(false);
+    expect(c.request('speed', { ...CTX, primitivesHere: ['speed'], unlocked: false })).toBe(false);
+    expect(c.lastRefusal).toMatch(/unlocked/);
+    c.unlock('redline');
+    expect(c.usable).toBe(true);
+    expect(hud.calls.at(-1)).toMatchObject({ name: 'Redline' });
+    // Game passing the power means its destination unlocked it.
+    const d = new AbilityController(fakeHud(), () => 'walk');
+    d.enter({ body: 'moon', power: 'lunar-step' });
+    expect(d.usable).toBe(true);
+    // Drift is not built yet: no placeholder (charter B.7).
+    const e = new AbilityController(fakeHud(), () => 'storm-lift');
+    e.enter({ body: 'jupiter', power: 'storm-lift' });
+    expect(e.runtime).toBeNull();
+    expect(e.usable).toBe(false);
+    expect(e.request('drift', { ...CTX, primitivesHere: ['drift'], unlocked: true, inZone: true })).toBe(false);
+    expect(e.lastRefusal).toMatch(/not built/);
   });
 
   it('pairs with the ON_FOOT host: enter, steps, exit on boarding', () => {
     const hud = fakeHud();
     const c = new AbilityController(hud, () => 'walk');
     const host = new OnFootHost();
-    host.install(c);
+    host.install({ enter: (ctx) => c.enter(ctx), step: (dt) => c.step(dt), exit: (r) => c.exit(r) });
     host.transition('LANDED', 'ON_FOOT', { body: 'cairn' }, 'relocate');
     expect(c.bodyId).toBe('cairn');
     expect(host.step(1 / 60, { forward: 0, right: 0, sprint: false, jump: false, yaw: 0, pitch: 0 })).toBe(false); // walking: Game's walk controller keeps the character
@@ -139,14 +156,15 @@ describe('ability controller (walk only in M1)', () => {
     expect(c.state).toBe('walk');
   });
 
-  it('saves and restores unlocked powers; never resumes a power mid-use', () => {
+  it('saves and restores unlocked powers; restoring alone keeps walking; junk is dropped', () => {
     const c = new AbilityController(fakeHud(), () => 'walk');
     c.unlock('lunar-step');
     c.unlock('redline');
     const snap = c.snapshot();
     expect(snap).toEqual({ abilityState: 'walk', unlocked: ['lunar-step', 'redline'] });
     const d = new AbilityController(fakeHud(), () => 'walk');
-    d.restore(JSON.parse(JSON.stringify({ ...snap, abilityState: 'flight' })));
+    // The saved state is returned for enter() to resume; nothing resumes without a body and power.
+    expect(d.restore(JSON.parse(JSON.stringify({ ...snap, abilityState: 'flight' })))).toBe('flight');
     expect(d.state).toBe('walk');
     expect([...d.unlocked].sort()).toEqual(['lunar-step', 'redline']);
     // Junk is dropped, not trusted.
@@ -180,8 +198,9 @@ describe('save module and LEAD hook points (L8/L9)', () => {
     c.enter({ body: 'mars', power: 'redline', restored: { abilityState: 'speed', unlocked: ['redline'] } });
     expect(c.power?.id).toBe('redline');
     expect([...c.unlocked]).toEqual(['redline']);
-    expect(c.state).toBe('walk'); // never resumed mid-use
-    expect(c.view()).toEqual({ id: 'redline', state: 'walk', active: false, charge: 1, cooldown: 0, preview: null });
+    expect(c.state).toBe('speed'); // resumes braking (powers.test steps it)
+    expect(c.view()).toEqual({ id: 'redline', state: 'speed', active: true, charge: 1, cooldown: 0, preview: null });
+    expect(c.log).toEqual([]); // a reload is not a state change
     // power: null means none here, whatever the body says.
     c.enter({ body: 'mars', power: null });
     expect(c.power).toBeNull();
@@ -193,5 +212,33 @@ describe('save module and LEAD hook points (L8/L9)', () => {
     expect(c.log.length).toBe(64);
     expect(c.log[0].t).toBe(36);
     expect(c.log.at(-1)).toEqual({ t: 99, from: 'walk', to: 'speed' });
+  });
+
+  it('resumes a reloaded power only where it has a rule and is usable here (LEAD plan C)', () => {
+    const cases: [string, string | null, AbilityState, string[], AbilityState][] = [
+      ['earth', 'skyborne-flight', 'flight', ['skyborne-flight'], 'flight'], // hovers where saved
+      ['mars', 'redline', 'speed', ['redline'], 'speed'], // resumes braking
+      ['moon', 'lunar-step', 'blink', ['lunar-step'], 'walk'], // a blink is instant: nothing to resume
+      ['earth', 'skyborne-flight', 'speed', ['skyborne-flight'], 'walk'], // not this body's primitive
+      ['mars', null, 'speed', ['redline'], 'walk'], // no power here
+      ['jupiter', 'storm-lift', 'drift', ['storm-lift'], 'walk'], // drift is not built yet
+    ];
+    for (const [body, power, saved, unlocked, expected] of cases) {
+      const c = new AbilityController(fakeHud(), () => 'walk');
+      c.enter({ body, power: power as never, restored: { abilityState: saved, unlocked: unlocked as never } });
+      expect(c.state, `${body} ${saved}`).toBe(expected);
+      expect(c.snapshot().abilityState).toBe(expected); // saving again before the first step keeps it
+      // Boarding (or any exit) drops a pending resume.
+      c.exit('board');
+      expect(c.state).toBe('walk');
+    }
+    // A power the save does not list as unlocked never resumes (no ctx.power: the body's own, locked).
+    const locked = new AbilityController(fakeHud(), () => 'skyborne-flight');
+    locked.enter({ body: 'earth', restored: { abilityState: 'flight', unlocked: [] } });
+    expect(locked.state).toBe('walk');
+    // Without a world (headless), a resumed power holds the character in place (step returns true).
+    const held = new AbilityController(fakeHud(), () => 'walk');
+    held.enter({ body: 'earth', power: 'skyborne-flight', restored: { abilityState: 'flight', unlocked: ['skyborne-flight'] } });
+    expect(held.step(1 / 60, null)).toBe(true);
   });
 });

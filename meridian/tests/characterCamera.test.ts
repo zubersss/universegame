@@ -275,3 +275,21 @@ describe('player with the explorer and camera on real colliders', () => {
     player.dispose();
   });
 });
+
+describe('character camera under a power', () => {
+  it('pulls out for flight and widens the view with speed, never with reduced motion', () => {
+    const cam = new PerspectiveCamera(70);
+    const a = new CharacterCamera();
+    for (let i = 0; i < 200; i++) a.update(dt, cam, new Vector3(), UP, FWD, 0, 0, null, null, false, { mode: 'flight', speed: 120 });
+    expect(a.arm).toBeCloseTo(CHAR_CAMERA.flightArm + CHAR_CAMERA.flightArmMaxExtra, 1);
+    expect(cam.fov).toBeCloseTo(70 + CHAR_CAMERA.fovMaxExtra, 0);
+    const camB = new PerspectiveCamera(70);
+    const b = new CharacterCamera();
+    for (let i = 0; i < 200; i++) b.update(dt, camB, new Vector3(), UP, FWD, 0, 0, null, null, true, { mode: 'dash', speed: 110 });
+    expect(camB.fov).toBeCloseTo(70, 3);
+    expect(b.arm).toBeCloseTo(CHAR_CAMERA.arm, 3);
+    // Back to walking: the view eases back to the base field of view.
+    for (let i = 0; i < 300; i++) a.update(dt, cam, new Vector3(), UP, FWD, 0, 0, null, null, false, null);
+    expect(cam.fov).toBeCloseTo(70, 1);
+  });
+});
