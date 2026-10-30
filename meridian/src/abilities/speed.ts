@@ -111,11 +111,19 @@ export class Speed {
     } else this.airTime = 0;
     this.speed = this.braking ? Math.max(0, this.speed - p.brake * dt) : Math.min(p.top, this.speed + p.accel * dt);
 
-    // Obstacles ahead, within the stopping distance plus margins.
+    // Direction of travel along the ground (projected onto its plane).
+    _move.copy(this.course);
+    if (s.grounded && s.normal) {
+      _move.addScaledVector(s.normal, -_move.dot(s.normal));
+      if (_move.lengthSq() > 1e-8) _move.normalize();
+      else _move.copy(this.course);
+    }
+    // Obstacles ahead, within the stopping distance plus margins: walls by a
+    // capsule sweep along the ground, slopes and ledges by probes.
     const reach = this.stopDistance(Math.max(this.speed, 1)) + this.speed * dt * 2 + STOP_MARGIN + 5;
     this.obstacle = Infinity;
     this.obstacleKind = null;
-    const wall = s.clear(this.course, Math.min(reach, this.speed * 0.6 + 6));
+    const wall = s.clear(_move, Math.min(reach, this.speed * 0.6 + 6));
     if (Number.isFinite(wall)) this.note(wall, 'wall');
     let prevH = 0;
     for (const d of PROBES) {
@@ -142,15 +150,9 @@ export class Speed {
     }
     if (!s.ready(p.lookaheadTime * this.speed + p.lookaheadMargin)) this.speed = Math.min(this.speed, SPEED_UNREADY);
 
-    // Velocity: along the ground (projected onto its plane), gravity in the air.
-    _move.copy(this.course);
-    if (s.grounded && s.normal) {
-      _move.addScaledVector(s.normal, -_move.dot(s.normal));
-      if (_move.lengthSq() > 1e-8) _move.normalize();
-      this.vVert = Math.min(0, this.vVert);
-    } else {
-      this.vVert -= s.gravity * dt;
-    }
+    // Velocity: along the ground, gravity in the air.
+    if (s.grounded && s.normal) this.vVert = Math.min(0, this.vVert);
+    else this.vVert -= s.gravity * dt;
     this.vel.copy(_move).multiplyScalar(this.speed);
     if (!s.grounded) this.vel.addScaledVector(up, this.vVert);
     if (this.braking && this.speed <= SPEED_EXIT_MAX && s.grounded) return 'done';

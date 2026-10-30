@@ -1,6 +1,8 @@
+import { Vector3 } from 'three';
 import type { OnFootContext, OnFootExitReason } from '../game/onFoot';
 import type { AbilitySlot, WarningSeverity } from '../ui/Hud';
-import { abilityFor } from './catalog';
+import { abilityFor, primitivesOf } from './catalog';
+import { createPower, type Power, type PowerWorld } from './powers';
 import { readAbilitySave, type AbilitySave } from './save';
 import { transitionBlocked, type AbilityConfig, type AbilityId, type AbilityState, type BodyPower, type Primitive, type TransitionContext } from './types';
 
@@ -31,6 +33,8 @@ export interface AbilityView {
 /** How many state changes the log keeps. */
 const LOG_MAX = 64;
 
+const _feet = new Vector3();
+
 /** The two HUD slot calls the controller makes (LEAD's HUD slot API). */
 export interface AbilityHud {
   setAbility(slot: AbilitySlot | null): void;
@@ -55,7 +59,10 @@ export class AbilityController {
   /** The last state changes, oldest first (bounded). */
   readonly log: AbilityLogEntry[] = [];
   /** Primitives that have a working implementation. */
-  private readonly built = new Set<Primitive>();
+  private readonly built = new Set<Primitive>(['flight', 'speed', 'blink']);
+  /** The power's runtime on this body (null: walking only). */
+  runtime: Power | null = null;
+  private shownRefusal: string | null = null;
 
   constructor(
     private readonly hud: AbilityHud,
@@ -68,17 +75,55 @@ export class AbilityController {
     this.bodyId = ctx.body;
     this.power = abilityFor(ctx.power !== undefined ? ctx.power : this.powerOf(ctx.body));
     if (ctx.restored) this.restore(ctx.restored);
+    // Game passes a power only once its destination unlocked it.
+    if (ctx.power !== undefined && this.power) this.unlocked.add(this.power.id);
+    this.runtime = this.power ? createPower(this.power) : null;
     this.state = 'walk';
     this.lastRefusal = null;
     this.showHud();
   }
 
+  /** The power can be used here now (exists, built, unlocked). */
+  get usable(): boolean {
+    const p = this.power;
+    return !!p && !!this.runtime && this.built.has(p.primitive) && this.unlocked.has(p.id);
+  }
+
   /**
-   * One fixed step. Returns true when an active power moved the character
-   * (Game's walk step is then skipped); false keeps walking.
+   * One fixed step with the game's view (null in headless tests: walking
+   * only). Returns true when an active power moved the character (Game's
+   * walk step is then skipped); false keeps walking.
    */
-  step(_dt: number): boolean {
-    return this.state !== 'walk';
+  step(dt: number, w: PowerWorld | null = null): boolean {
+    const rt = this.runtime;
+    if (!rt || !w) return this.state !== 'walk';
+    rt.tick(dt, this.usable ? w : null);
+    if (this.state === 'walk') {
+      if (!this.usable || !rt.wants(dt, w)) {
+        this.showHud();
+        return false;
+      }
+      if (!this.request(rt.primitive, this.context(w))) {
+        this.showHud();
+        return false;
+      }
+      rt.start(w);
+    }
+    if (rt.step(dt, w) === 'done') this.request('walk', this.context(w));
+    this.showHud();
+    return true;
+  }
+
+  /** Facts for the transition rules. A flier below the landing height counts as down (its landing flare). */
+  private context(w: PowerWorld): TransitionContext {
+    const pl = w.player;
+    const p = this.power;
+    let grounded = pl.grounded;
+    if (!grounded && this.state === 'flight' && p && p.primitive === 'flight') {
+      const g = pl.groundAt(pl.feet(_feet), 0.5, p.params.landHeight + 0.5);
+      grounded = !!g && -g.h <= p.params.landHeight + 0.1;
+    }
+    return { grounded, speed: pl.vel.length(), primitivesHere: primitivesOf(p), unlocked: !!p && this.unlocked.has(p.id), inZone: false };
   }
 
   /** Ask for a state change under the charter J rules. */
@@ -100,7 +145,12 @@ export class AbilityController {
     if (this.state !== 'walk') this.note(this.state, 'walk');
     this.state = 'walk';
     this.power = null;
+    this.runtime = null;
     this.bodyId = null;
+    if (this.shownRefusal !== null) {
+      this.hud.setWarning(null);
+      this.shownRefusal = null;
+    }
   }
 
   /** Arriving at a destination unlocks its power (journal, L9). */
@@ -115,7 +165,16 @@ export class AbilityController {
 
   /** The readout for tests (LEAD's M2 journeys) and diagnostics. */
   view(): AbilityView {
-    return { id: this.power?.id ?? null, state: this.state, active: this.state !== 'walk', charge: 1, cooldown: 0, preview: null };
+    const r = this.runtime?.readout();
+    const blink = this.runtime && this.runtime.primitive === 'blink' ? (this.runtime as Power & { aiming: boolean; target: { ok: boolean; reason: string | null } }) : null;
+    return {
+      id: this.power?.id ?? null,
+      state: this.state,
+      active: this.state !== 'walk',
+      charge: r ? r.charge : 1,
+      cooldown: r ? r.cooldown : 0,
+      preview: blink && blink.aiming ? { ok: blink.target.ok, reason: blink.target.reason } : null,
+    };
   }
 
   private note(from: AbilityState, to: AbilityState): void {
@@ -131,13 +190,19 @@ export class AbilityController {
     this.state = 'walk';
   }
 
-  /** Ability slot: shown only where a power exists and is unlocked. */
+  /** Ability slot: shown only where a power exists, is built and unlocked; refusals as a caution line. */
   private showHud(): void {
     const p = this.power;
-    if (!p || !this.unlocked.has(p.id) || !this.built.has(p.primitive)) {
+    if (!p || !this.usable) {
       this.hud.setAbility(null);
       return;
     }
-    this.hud.setAbility({ name: p.name, state: this.state, charge: 1, cooldown: 0, hint: p.feedback.hint });
+    const r = this.runtime!.readout();
+    this.hud.setAbility({ name: p.name, state: this.state === 'walk' ? r.status : `${this.state} · ${r.status}`, charge: r.charge, cooldown: r.cooldown, hint: r.hint });
+    const refusal = this.runtime!.refusal;
+    if (refusal !== this.shownRefusal) {
+      this.hud.setWarning(refusal ? `${p.name}: ${refusal}` : null, 'caution');
+      this.shownRefusal = refusal;
+    }
   }
 }

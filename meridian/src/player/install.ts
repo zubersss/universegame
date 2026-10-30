@@ -4,7 +4,9 @@
 
 import type { Game } from '../game/Game';
 import type { OnFootExitReason, OnFootHooks } from '../game/onFoot';
-import type { WalkInput } from './Player';
+import type { Player, WalkInput } from './Player';
+import type { PowerWorld } from '../abilities/powers';
+import { bodyGravity } from '../world/environment';
 import { BODIES, isBodyId } from '../world/bodies';
 import { AbilityController, type AbilityEnterContext } from '../abilities/AbilityController';
 import type { AbilitySave } from '../abilities/save';
@@ -29,6 +31,7 @@ export class PlayerRuntime implements OnFootHooks {
   private readonly pose = newScriptedPose();
   private exitsSeen: number;
   private readonly world: TransitionWorld;
+  private readonly world2: PowerWorld;
 
   constructor(private readonly game: Game) {
     this.abilities = new AbilityController(game.hud, (id) => (isBodyId(id) ? bodyPower(BODIES[id]) : 'walk'), () => game.simTime);
@@ -39,6 +42,18 @@ export class PlayerRuntime implements OnFootHooks {
       groundBelow: (p, up, out) => {
         const hit = game.physics.castRay(p.x, p.y, p.z, -up.x, -up.y, -up.z, 4, GROUPS.queryStatic);
         return hit ? out.copy(p).addScaledVector(up, -hit.toi) : null;
+      },
+    };
+    this.world2 = {
+      player: null as unknown as Player,
+      held: (code) => game.input.isDown(code),
+      pressed: (code) => game.input.consume(code),
+      walk: { forward: 0, right: 0, sprint: false, jump: false, yaw: 0, pitch: 0 },
+      center: game.bodyCenterLocal,
+      gravity: 0,
+      ready: (pt) => {
+        const b = game.body;
+        return !!b && b.collision.readyAt(_r.copy(pt).sub(game.bodyCenterLocal));
       },
     };
   }
@@ -61,7 +76,7 @@ export class PlayerRuntime implements OnFootHooks {
     this.start('exit');
   }
 
-  step(dt: number, _input: WalkInput): boolean {
+  step(dt: number, input: WalkInput): boolean {
     const g = this.game;
     const p = g.player;
     this.checkExit();
@@ -83,7 +98,22 @@ export class PlayerRuntime implements OnFootHooks {
       g.input.press('KeyE');
     }
     if (p && g.input.consume('KeyC')) p.view.toggle();
-    return this.abilities.step(dt);
+    return this.abilities.step(dt, p && g.body ? this.powerWorld(p, input) : null);
+  }
+
+  /** The game as the powers see it this step. */
+  private powerWorld(p: Player, input: WalkInput): PowerWorld {
+    const g = this.game;
+    const body = g.body!;
+    const c = body.def.center;
+    const sys = _v.copy(p.pos).add(g.origin);
+    const gravity = bodyGravity(body.def, sys.x - c[0], sys.y - c[1], sys.z - c[2], _g).length();
+    const w = this.world2;
+    w.player = p;
+    w.walk = input;
+    w.center = g.bodyCenterLocal;
+    w.gravity = gravity;
+    return w;
   }
 
   private start(kind: 'exit' | 'board'): void {
@@ -138,6 +168,10 @@ export function visualClock(simTime: number, alpha: number, last: number | null)
   const dt = last === null ? 0 : Math.min(0.25, Math.max(0, t - last));
   return { t, alpha: a, dt };
 }
+
+const _v = new Vector3();
+const _g = new Vector3();
+const _r = new Vector3();
 
 const runtimes = new WeakMap<Game, PlayerRuntime>();
 

@@ -380,10 +380,15 @@ export class Player {
     return !blocked;
   }
 
-  /** Walkable ground below a point (terrain, props, ship; never the walker itself). */
-  private groundRay(o: Vector3, d: Vector3, max: number): { dist: number; normal: Vector3 } | null {
+  /** First hit along a ray against what the walker collides with (terrain, props, ship; never itself). */
+  rayHit(o: Vector3, d: Vector3, max: number): { dist: number; normal: Vector3 } | null {
     const hit = this.physics.castRay(o.x, o.y, o.z, d.x, d.y, d.z, max, GROUPS.queryWalk);
     return hit ? { dist: hit.toi, normal: _n.set(hit.nx, hit.ny, hit.nz) } : null;
+  }
+
+  /** Walkable ground below a point (the avatar's foot placement). */
+  private groundRay(o: Vector3, d: Vector3, max: number): { dist: number; normal: Vector3 } | null {
+    return this.rayHit(o, d, max);
   }
 
   /** Sphere cast for the camera arm against terrain, props and the ship. */

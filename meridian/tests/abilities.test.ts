@@ -106,31 +106,45 @@ describe('transition rules (charter J)', () => {
 });
 
 describe('ability controller (walk only in M1)', () => {
-  it('walks everywhere, hides the ability slot and refuses unbuilt powers', () => {
+  it('walks where there is no power; a built power needs unlocking and shows in the slot once unlocked', () => {
     const hud = fakeHud();
     const c = new AbilityController(hud, (id) => (id === 'ilex' ? 'walk' : 'redline'));
     c.enter({ body: 'ilex' });
     expect(c.state).toBe('walk');
     expect(c.power).toBeNull();
+    expect(c.runtime).toBeNull();
     expect(hud.calls.at(-1)).toBeNull();
     expect(c.step(1 / 60)).toBe(false);
     c.exit('board');
-    c.enter({ body: 'vesper' as never });
+    c.enter({ body: 'mars' });
     expect(c.power?.id).toBe('redline');
-    c.unlock('redline');
-    // No placeholder: the slot stays hidden and the power cannot start until speed is built.
+    expect(c.runtime?.primitive).toBe('speed');
+    // Locked: the slot stays hidden and the rules refuse.
+    expect(c.usable).toBe(false);
     expect(hud.calls.at(-1)).toBeNull();
-    expect(c.request('speed', { ...CTX, primitivesHere: ['speed'], unlocked: true })).toBe(false);
-    expect(c.lastRefusal).toMatch(/not built/);
-    expect(c.state).toBe('walk');
-    expect(c.step(1 / 60)).toBe(false);
+    expect(c.request('speed', { ...CTX, primitivesHere: ['speed'], unlocked: false })).toBe(false);
+    expect(c.lastRefusal).toMatch(/unlocked/);
+    c.unlock('redline');
+    expect(c.usable).toBe(true);
+    expect(hud.calls.at(-1)).toMatchObject({ name: 'Redline' });
+    // Game passing the power means its destination unlocked it.
+    const d = new AbilityController(fakeHud(), () => 'walk');
+    d.enter({ body: 'moon', power: 'lunar-step' });
+    expect(d.usable).toBe(true);
+    // Drift is not built yet: no placeholder (charter B.7).
+    const e = new AbilityController(fakeHud(), () => 'storm-lift');
+    e.enter({ body: 'jupiter', power: 'storm-lift' });
+    expect(e.runtime).toBeNull();
+    expect(e.usable).toBe(false);
+    expect(e.request('drift', { ...CTX, primitivesHere: ['drift'], unlocked: true, inZone: true })).toBe(false);
+    expect(e.lastRefusal).toMatch(/not built/);
   });
 
   it('pairs with the ON_FOOT host: enter, steps, exit on boarding', () => {
     const hud = fakeHud();
     const c = new AbilityController(hud, () => 'walk');
     const host = new OnFootHost();
-    host.install(c);
+    host.install({ enter: (ctx) => c.enter(ctx), step: (dt) => c.step(dt), exit: (r) => c.exit(r) });
     host.transition('LANDED', 'ON_FOOT', { body: 'cairn' }, 'relocate');
     expect(c.bodyId).toBe('cairn');
     expect(host.step(1 / 60, { forward: 0, right: 0, sprint: false, jump: false, yaw: 0, pitch: 0 })).toBe(false); // walking: Game's walk controller keeps the character

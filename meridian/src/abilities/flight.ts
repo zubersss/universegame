@@ -100,6 +100,8 @@ export class Flight {
     // Vertical target: climb / descend / hold (hover), braked by X, capped near the ceiling.
     let vz = inp.brake ? 0 : inp.climb ? p.climb : inp.descend ? -p.climb : 0;
     if (s.height !== null && s.height > p.ceiling) vz = Math.min(vz, -Math.min(p.climb, s.height - p.ceiling));
+    // Landing flare: the descent slows near the ground so it arrives slowly enough to land.
+    if (s.height !== null && vz < 0) vz = Math.max(vz, -(0.6 * p.landSpeed + 1.2 * s.height));
     // Velocity toward the target within the acceleration (brake rate when braking).
     _target.copy(this.course).multiplyScalar(this.speed).addScaledVector(up, vz);
     _t.copy(_target).sub(this.vel);
