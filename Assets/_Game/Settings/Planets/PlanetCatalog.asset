@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2aae2454b68a63847b7b7c602213d895, type: 3}
+  m_Name: PlanetCatalog
+  m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.Planets.PlanetCatalog
+  planets:
+  - {fileID: 11400000, guid: fcaccc037c95d0949ab2327166d2722c, type: 2}
+  - {fileID: 11400000, guid: 6d19592c1d837a24fa256858c0a23051, type: 2}
+  - {fileID: 11400000, guid: 73dbbe0ba750d3f49a4aec3131de0559, type: 2}
+  - {fileID: 11400000, guid: 6e8b07c9ea829dd4cb9466351ad4594c, type: 2}
+  - {fileID: 11400000, guid: 210bafc7b5049f04b832f864d3a314a8, type: 2}
+  - {fileID: 11400000, guid: e9c706de33117874d95dc8918e3e3162, type: 2}
+  - {fileID: 11400000, guid: cea9c52e120418e42aa4b767309f8d63, type: 2}
+  - {fileID: 11400000, guid: 63533edbbfe8eca4cbc205ba7328087e, type: 2}

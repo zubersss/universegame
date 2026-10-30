@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85750363842c15a45b9285b73e7f73d4, type: 3}
+  m_Name: Venus
+  m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.Planets.PlanetConfig
+  id: 1
+  worldType: 0
+  landable: 1
+  gravity: 8.87
+  escapeVelocityKms: 10.4
+  terminalVelocity: 20
+  worldWidth: 4096
+  worldHeight: 1000
+  datumY: 320
+  escapeAltitude: 600
+  crushLineY: -1
+  dayLengthRealMinutes: 80
+  orbitRadius: 1650
+  visualRadius: 24
