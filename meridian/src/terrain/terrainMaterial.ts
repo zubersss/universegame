@@ -163,17 +163,18 @@ export function createTerrainMaterials(u: TerrainUniforms, aerialSteps: number, 
             vec3 tN = normalize(vTerrainN);
             vec3 tw = pow(abs(tN), vec3(4.0));
             tw /= (tw.x + tw.y + tw.z);
-            float viewDist = length(vViewPosition);
-            // Each detail scale fades out before its tiles shrink to a few pixels, where the
-            // repetition would read as a lattice (vertex attributes carry the far variation).
-            float fineW = 1.0 - smoothstep(35.0, 140.0, viewDist);
-            float medW = 1.0 - smoothstep(250.0, 900.0, viewDist);
-            vec4 dF = mix(vec4(0.5), triSample(vTile * 0.25, tw), fineW); // 4 m tiles, near only
+            // Each detail scale fades out as its tiles shrink from ~96 to ~32 px on screen, where
+            // the repetition would read as a lattice (vertex attributes carry the far variation).
+            // Metres per pixel along the surface: grows with distance, resolution and slant alike.
+            float mpp = max(length(dFdx(vTile)), length(dFdy(vTile)));
+            float fineW = 1.0 - smoothstep(4.0 / 96.0, 4.0 / 32.0, mpp);
+            float medW = 1.0 - smoothstep(16.0 / 96.0, 16.0 / 32.0, mpp);
+            vec4 dF = mix(vec4(0.5), triSample(vTile * 0.25, tw), fineW); // 4 m tiles
             vec4 dM = mix(vec4(0.5), triSample(vTile * 0.0625, tw), medW); // 16 m tiles
             #ifdef TERRAIN_LOW
               vec4 dL = vec4(0.5);
             #else
-              float largeW = 1.0 - smoothstep(700.0, 2000.0, viewDist);
+              float largeW = 1.0 - smoothstep(128.0 / 96.0, 128.0 / 32.0, mpp);
               vec4 dL = mix(vec4(0.5), triSample(vTile * 0.0078125, tw), largeW); // 128 m tiles
             #endif
             float rockMask, specMask;
