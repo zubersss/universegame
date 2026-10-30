@@ -131,3 +131,12 @@ Decided: B-010/B-011 accepted (§9 cartoon rule now passes); remaining polish sp
 Signals: none. LEAD deleted its own want_blender.lock (window finished) so UNITY gets the next turn.
 User: none.
 Queue: UNITY 6 Ready, BLENDER 10 Ready.
+
+## Cycle 14 · 2026-10-30 15:45
+Checked: git log 15:11–15:35 (U-020, U-028, Art metas, B-023 sources + self-rejected first render); tests_2026-10-30.md (15:36 EditMode 116/116, PlayMode 35/38 + LeadQA 1/1); perf_2026-10-30.md first-visible-frame rows; locks (heavy_unity 15:40 for U-017); free RAM 0.5 GB.
+Moved: U-020 → Done (d455251); U-028 → Done (58b1375); U-017, L-010 → In Progress.
+Decided: none.
+Signals: none. BLENDER self-rejected its first B-023 render (bandage-like wrinkles, helmet shared the fabric) and fixed it before review. B-024 is partial (memory gate in the wrapper; want-file logic not yet marked done).
+User: none.
+L-010: M1LoopTests.cs written (no teleports after boot). Run deferred: UNITY holds the lock for U-017 and free RAM is 0.5 GB.
+Queue: UNITY 7 Ready, BLENDER 10 Ready.

@@ -81,12 +81,12 @@ Files: coordination/TASK_BOARD.md
 Depends: L-008
 Lead notes: —
 
-### L-010 · LEAD · Ready · M1
+### L-010 · LEAD · In Progress · M1
 Goal: M1 QA scenario and report.
 Accept: LeadQA PlayMode test drives Earth → launch → Mars well → entry → landing → save → load; passes twice; `M1_REPORT.md` written; `Build/MERIDIAN_0.1.0/` plays.
 Files: Assets/_Game/Tests/LeadQA/M1LoopTests.cs, coordination/reviews/M1_REPORT.md
 Depends: U-017
-Lead notes: —
+Lead notes: In Progress (cycle 14): Tests/LeadQA/M1LoopTests.cs flies the loop on the ship's own controls (lift-off from rest, steer around Earth, Mars well, entry, powered landing ≤ 6 m/s, save → load). First run after U-017 lands; must pass twice.
 
 ---
 
@@ -225,14 +225,14 @@ Files: Assets/_Game/Audio/, Code/Runtime/Audio/, docs/credits/unity.md
 Depends: U-004
 Lead notes: Done 37f9ed9 (cycle 9): 7 synthesized CC0 clips (1.9 MB), AudioDirector with one listener; PlayMode clean incl. LeadQA; credits logged.
 
-### U-028 · UNITY · In Progress · M1
+### U-028 · UNITY · Done · M1
 Goal: Shader/pipeline warm-up during planet load (ShaderVariantCollection or a hidden pre-render) so the first visible frame doesn't stall (P-17).
 Accept: BudgetGate first-visible-frame time ≤ 50 ms after Earth load, Mars entry, and launch into Space (was 215–800 ms); planet load stays ≤ 4 s.
 Files: Assets/_Game/Code/Runtime/Core/, Assets/_Game/Settings/Rendering/
 Depends: U-014
-Lead notes: Cycle 12. Do it before U-017 so the M1 build has no first-frame hitch in the playtest.
+Lead notes: Done 58b1375 (cycle 14): first visible frame Earth 7.5 / Space 2.4 / Mars 1.5 ms (was 215–800); BudgetGate green.
 
-### U-017 · UNITY · Ready · M1
+### U-017 · UNITY · In Progress · M1
 Goal: M1 integration and build.
 Accept: PlayMode integration test Earth → launch → Mars → land → save → load passes twice with a clean console; `Build/MERIDIAN_0.1.0/` built by `tools/unity_build.ps1`; perf report green.
 Files: Assets/_Game/Tests/Unit/M1IntegrationTests.cs, Build/
@@ -254,12 +254,12 @@ Files: Assets/_Game/Code/Runtime/Rendering/, Assets/_Game/Settings/Rendering/, C
 Depends: U-005, U-006
 Lead notes: Done 42988db (cycle 9): HLSL Sprite_LitEmissive; no-point-light previews show calibration stripe, Pilgrim ports/engine/vents, self-lit Sun; ArtMaterials registry auto-filled; EditMode 96/96.
 
-### U-020 · UNITY · In Progress · M1
+### U-020 · UNITY · Done · M1
 Goal: Terrain variants: when a sheet has tiles in slots 47–62, tile 46 picks one of them by a stable hash of (x, y) (D-020).
 Accept: same world → same variants after save/load; no variant chosen for sheets without slots 47–62; chunk apply budget unchanged (D-019); EditMode test for hash stability.
 Files: Assets/_Game/Code/Runtime/Terrain/
 Depends: U-007, B-022
-Lead notes: Build against the current sheets (fall back to tile 46) until B-022 lands.
+Lead notes: Done d455251 (cycle 14): slots 47–62 sliced, stable wrapped (x, y) hash; EditMode 116/116, PlayMode clean 15:36.
 
 ### U-024 · UNITY · Ready · M2
 Goal: PlanetSide parallax: `backgrounds/<planet>/layer0..2` behind the terrain (layer0 slowest), plus a haze gradient per planet (Bible §9 Atmosphere).
