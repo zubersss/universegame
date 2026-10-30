@@ -67,7 +67,9 @@ namespace Meridian.Transitions
             var rt = fade.rectTransform;
             rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
             rt.offsetMin = rt.offsetMax = Vector2.zero;
-            fade.enabled = false;
+            // Boot cover (U-028): opaque until the first planet is loaded and its shaders warmed.
+            fade.color = Color.black;
+            fade.enabled = true;
         }
 
         void Start()
@@ -79,6 +81,7 @@ namespace Meridian.Transitions
             actions.FindActionMap(MeridianInput.ShipTop).Enable();
             scenes.PlanetSideLoaded += HookSide;
             if (scenes.IsReady) HookAll(); else scenes.Ready += HookAll;
+            StartCoroutine(LiftBootCover());
         }
 
         void OnDestroy()
@@ -226,6 +229,21 @@ namespace Meridian.Transitions
             LastEntrySeconds = Time.realtimeSinceStartup - t0;
             Busy = false;
             Completed?.Invoke();
+        }
+
+        public const float BootReveal = 0.3f;
+
+        IEnumerator LiftBootCover()
+        {
+            while (!scenes.IsReady) yield return null;
+            for (float t = 0f; t < BootReveal; t += Time.unscaledDeltaTime)
+            {
+                if (Busy) yield break; // a transition now owns the overlay
+                fade.color = new Color(0f, 0f, 0f, 1f - t / BootReveal);
+                yield return null;
+            }
+            fade.color = new Color(1f, 1f, 1f, 0f);
+            fade.enabled = false;
         }
 
         // ---------- helpers ----------

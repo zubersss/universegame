@@ -34,6 +34,7 @@ namespace Meridian.Tests
         readonly List<string[]> rows = new List<string[]>();   // budget, limit, measured, result
         readonly List<string> notes = new List<string>();
         readonly List<string> failures = new List<string>();
+        float firstFrameMs = -1f;
 
         [SetUp]
         public void SetUp()
@@ -42,12 +43,15 @@ namespace Meridian.Tests
             Meridian.Save.SaveSystem.RootOverride = saveRoot;
             graphics = SystemInfo.graphicsDeviceType != UnityEngine.Rendering.GraphicsDeviceType.Null;
             if (graphics) rt = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);
+            // The game warms up at the size it renders (the screen); this test renders 1920×1080 (U-028).
+            RenderWarmup.TargetSize = new Vector2Int(1920, 1080);
         }
 
         [TearDown]
         public void TearDown()
         {
             Meridian.Save.SaveSystem.RootOverride = null;
+            RenderWarmup.TargetSize = default;
             if (Directory.Exists(saveRoot)) Directory.Delete(saveRoot, true);
             if (rt != null) { rt.Release(); UnityEngine.Object.Destroy(rt); }
         }
@@ -71,7 +75,12 @@ namespace Meridian.Tests
             m.ResetWindow();
             for (int i = 0; i < Frames; i++)
             {
-                if (graphics) { view.targetTexture = rt; view.Render(); view.targetTexture = null; }
+                if (graphics)
+                {
+                    var w = System.Diagnostics.Stopwatch.StartNew();
+                    view.targetTexture = rt; view.Render(); view.targetTexture = null;
+                    if (i == 0) firstFrameMs = (float)w.Elapsed.TotalMilliseconds; // first visible frame after the load
+                }
                 yield return null;
             }
             var renderWindow = m.Snapshot(view);
@@ -81,6 +90,10 @@ namespace Meridian.Tests
         void Judge(string where, BudgetSnapshot gc, BudgetSnapshot r, int drawCallLimit)
         {
             string tag = graphics ? "rendered 1920×1080" : "headless, CPU only";
+            if (graphics)
+                Row($"First visible frame · {where}", "≤ 50 ms (U-028)", $"{firstFrameMs:F1} ms (warm-up {(where == "Space" ? "at boot" : $"{UnityEngine.Object.FindAnyObjectByType<SceneDirector>().LastPlanetWarmupMs:F0} ms at load")})", firstFrameMs <= 50f);
+            else
+                Info($"First visible frame · {where}", "≤ 50 ms (U-028)", "n/a (no graphics device)", "skipped");
             Row($"Frame time · {where}", "avg ≤ 12 ms (target), p99 ≤ 16.6 ms",
                 $"avg {r.avgFrameMs:F2} ms, p99 {r.p99FrameMs:F2} ms, max {r.maxFrameMs:F1} ms ({tag})",
                 r.avgFrameMs <= BudgetMonitor.FrameTargetMs && r.p99FrameMs <= BudgetMonitor.FrameBudgetMs);

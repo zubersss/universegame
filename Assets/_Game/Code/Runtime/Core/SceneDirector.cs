@@ -29,9 +29,29 @@ namespace Meridian.Core
             if (!SceneManager.GetSceneByName(SpaceScene).isLoaded)
                 yield return SceneManager.LoadSceneAsync(SpaceScene, LoadSceneMode.Additive);
             Space = FindRoot<SpaceRoot>(SpaceScene);
+            // Warm the top-down view now, while it is the only view loaded (one global 2D light), so the
+            // first launch never stalls on shader/pipeline setup (U-028).
+            if (Space != null) RenderWarmup.WarmUp(Space.GetComponentInChildren<Camera>());
             if (Space != null) Space.gameObject.SetActive(gameState.view == ViewMode.Space);
 
             yield return LoadPlanetSide(gameState.CurrentPlanetConfig);
+
+            // Boot only: the camera starts on the surface, so let the first chunks arrive behind the
+            // boot cover and render once more; their tilemap meshes are then built before the first
+            // visible frame (U-028). Entries arrive high above the ground and don't need this.
+            if (PlanetSide != null)
+            {
+                float until = Time.realtimeSinceStartup + 10f;
+                while (!PlanetSide.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                // The player and ship sheets arrive asynchronously; draw them once here too.
+                var playerView = PlanetSide.player != null ? PlanetSide.player.GetComponent<Meridian.Player.PlayerView>() : null;
+                var shipView = PlanetSide.ship != null ? PlanetSide.ship.GetComponentInChildren<SpriteRenderer>() : null;
+                float spritesBy = Time.realtimeSinceStartup + 3f;
+                while (Time.realtimeSinceStartup < spritesBy &&
+                       ((playerView != null && playerView.view.sprite == null) || (shipView != null && shipView.sprite == null)))
+                    yield return null;
+                LastPlanetWarmupMs += RenderWarmup.WarmUp(PlanetSide.sideCamera, PlanetSide.terrain.TileSet);
+            }
 
             IsReady = true;
             Ready?.Invoke();
@@ -39,6 +59,7 @@ namespace Meridian.Core
 
         /// <summary>Raised after PlanetSide loads and is configured (start or entry).</summary>
         public event Action PlanetSideLoaded;
+        public float LastPlanetWarmupMs { get; private set; }
 
         /// <summary>Loads PlanetSide with a planet. entryX ≥ 0 = arriving from orbit over that column (Bible §5.3).</summary>
         public IEnumerator LoadPlanetSide(PlanetConfig config, int entryX = -1)
@@ -57,6 +78,10 @@ namespace Meridian.Core
                 if (entryX >= 0) PlanetSide.ConfigureForEntry(config, entryX);
                 else PlanetSide.Configure(config);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(PlanetSideScene));
+                // Warm-up behind the boot cover or the entry fade (U-028): wait for the tile sheets, then render once off-screen.
+                float until = Time.realtimeSinceStartup + 1f;
+                while (!PlanetSide.terrain.TileSet.IsReady && Time.realtimeSinceStartup < until) yield return null;
+                LastPlanetWarmupMs = RenderWarmup.WarmUp(PlanetSide.sideCamera, PlanetSide.terrain.TileSet);
             }
             PlanetSideLoaded?.Invoke();
         }
