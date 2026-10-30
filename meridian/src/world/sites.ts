@@ -3,7 +3,7 @@
 // candidates using arithmetic only (no transcendental functions), so every
 // context (main thread, worker, other browsers) picks the same site.
 
-import { BODIES, SUN_DIR, type BodyDef, type BodyId } from './bodies';
+import { BODIES, sunDirFor, type BodyDef, type BodyId } from './bodies';
 import { faceDir } from './cube';
 import { SurfaceGenerator, type Clearing, type SurfaceInfo } from './surface';
 import { hashCombine } from '../core/rng';
@@ -122,7 +122,7 @@ export function computeSites(def: BodyDef): MissionSites {
   if (hit) return hit;
   const gen = new SurfaceGenerator(def); // base heights only (no clearings)
   const p = prefsFor(def);
-  const sun = SUN_DIR as unknown as number[];
+  const sun = sunDirFor(def);
   // 1) Coarse candidates on a cube grid (arithmetic only).
   const G = 22;
   let best: { n: V3; score: number } | null = null;
