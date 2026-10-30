@@ -42,10 +42,12 @@ function Enter-HeavyJobLock([string]$job) {
 
 function Exit-HeavyJobLock { Remove-Item $LockFile -Force -ErrorAction SilentlyContinue }
 
-function Invoke-UnityBatch([string[]]$UnityArgs, [string]$LogName) {
+function Invoke-UnityBatch([string[]]$UnityArgs, [string]$LogName, [switch]$Graphics) {
     $exe = Get-UnityExe
     $log = Join-Path $LogDir $LogName
-    $all = @('-batchmode', '-nographics', '-projectPath', $RepoRoot, '-logFile', $log) + $UnityArgs
+    $all = @('-batchmode')
+    if (-not $Graphics) { $all += '-nographics' }
+    $all += @('-projectPath', $RepoRoot, '-logFile', $log) + $UnityArgs
     $p = Start-Process -FilePath $exe -ArgumentList $all -Wait -PassThru -NoNewWindow
     return [pscustomobject]@{ ExitCode = $p.ExitCode; Log = $log }
 }
