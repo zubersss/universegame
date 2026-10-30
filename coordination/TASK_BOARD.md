@@ -86,7 +86,7 @@ Goal: M1 QA scenario and report.
 Accept: LeadQA PlayMode test drives Earth → launch → Mars well → entry → landing → save → load; passes twice; `M1_REPORT.md` written; `Build/MERIDIAN_0.1.0/` plays.
 Files: Assets/_Game/Tests/LeadQA/M1LoopTests.cs, coordination/reviews/M1_REPORT.md
 Depends: U-017
-Lead notes: In Progress (cycle 14): Tests/LeadQA/M1LoopTests.cs flies the loop on the ship's own controls (lift-off from rest, steer around Earth, Mars well, entry, powered landing ≤ 6 m/s, save → load). First run after U-017 lands; must pass twice.
+Lead notes: In Progress (cycle 16): M1LoopTests passed twice (15:55; 16:42 touchdown 2.00 m/s, 55 s). M1_REPORT.md drafted. Waiting on U-031 (0.1.1 smoke) before posting the playtest (USER-09).
 
 ---
 
@@ -261,7 +261,7 @@ Files: Assets/_Game/Code/Runtime/Terrain/
 Depends: U-007, B-022
 Lead notes: Done d455251 (cycle 14): slots 47–62 sliced, stable wrapped (x, y) hash; EditMode 116/116, PlayMode clean 15:36.
 
-### U-031 · UNITY · Ready · M1
+### U-031 · UNITY · In Progress · M1
 Goal: Rebuild the M1 playtest build after U-018 as `Build/MERIDIAN_0.1.1/` and redo the build smoke screenshots.
 Accept: on the ground the Pilgrim shows deployed skids touching the terrain (no floating hull, as seen in smoke_2_earth.png of 0.1.0, built before U-018); the menu hides the HUD behind it; smoke run clean; the 0.1.0 folder may stay.
 Files: Build/ (ignored), coordination/reports/unity/smoke_<date>/

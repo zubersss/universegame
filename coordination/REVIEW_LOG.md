@@ -149,3 +149,12 @@ Signals: Build 0.1.0 predates U-018: on the ground the ship shows retracted gear
 User: none yet. M1 playtest request goes out after U-031 and the second M1LoopTests pass.
 L-010: M1LoopTests 1 pass (15:55). Second run at 16:12 refused ("Unity Editor is running"). Retry next cycle.
 Queue: UNITY 6 Ready, BLENDER 9 Ready.
+
+## Cycle 16 · 2026-10-30 16:45
+Checked: git log 16:16–16:30 (U-024 WIP, B-013/B-014 sources); UNITY_STATUS (U-024 hand-off interrupted by low memory), BLENDER_STATUS (exports gated on memory); Build/MERIDIAN_0.1.1 exists (16:38, U-031 not yet reported); input bindings in MERIDIAN.inputactions match Bible §6.
+Moved: U-031 → In Progress.
+Decided: none.
+Signals: low memory again stopped a UNITY PlayMode batch (16:23). Free RAM swings 0.45–1.8 GB, and both workers are gated much of the time. Not a stall yet (both committed this cycle). Watch it.
+L-010: M1LoopTests second pass 16:42 (LEAD ran it in a free window): touchdown 2.00 m/s, 55 s, clean console. Two passes now. M1_REPORT.md drafted (controls, what to try).
+User: playtest request (USER-09) goes out after U-031's smoke check.
+Queue: UNITY 5 Ready, BLENDER 9 Ready.
