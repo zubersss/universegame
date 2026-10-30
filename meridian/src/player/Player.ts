@@ -18,8 +18,6 @@ export interface WalkInput {
   /** Mouse look deltas (radians) this step. */
   yaw: number;
   pitch: number;
-  /** C pressed this step: toggle first/third person. */
-  view?: boolean;
 }
 
 const _up = new Vector3();
@@ -130,7 +128,6 @@ export class Player {
       this.setHeading(this.heading);
     }
     this.pitch = Math.max(-1.45, Math.min(1.45, this.pitch + input.pitch));
-    if (input.view) this.view.toggle();
     // 3) Tangent-plane velocity with acceleration limits.
     _right.crossVectors(this.heading, this.up).normalize();
     const speed = input.sprint ? WALK.sprint : WALK.walk;

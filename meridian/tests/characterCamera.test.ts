@@ -148,9 +148,9 @@ describe('player with the explorer and camera on real colliders', () => {
     expect(scene.children.length).toBe(0);
   });
 
-  it('C pressed while walking switches to first person through the step input', () => {
+  it('the view toggle (C) switches to first person with the body hidden', () => {
     const { player, rig } = world();
-    player.step(dt, { forward: 0, right: 0, sprint: false, jump: false, yaw: 0, pitch: 0, view: true }, new Vector3(0, -1e7, 0), 9.8);
+    player.view.toggle();
     player.renderView(dt, 1, rig, null, false);
     expect(player.view.mode).toBe('first');
     expect(player.avatar!.visible).toBe(false);
