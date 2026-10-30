@@ -36,6 +36,9 @@ const PITCH_PIVOT = 0.95;
 const TURN_RATE = 10; // rad/s the body turns toward the movement direction
 const TELEPORT = 3; // m in one frame: treated as a placement, not motion
 const SKIN = 0.02; // the character controller keeps the capsule this far above the ground
+/** Toe cap of the boot in the foot bone's frame (forward = -Z; the ankle is 0.07 above the sole). */
+const BOOT_TIP_Y = -0.03;
+const BOOT_TIP_F = -0.17;
 
 const _q = new Quaternion();
 const _m = new Matrix4();
@@ -212,6 +215,12 @@ export class Avatar {
     if (f.dt > 0) this.measureSlip();
     this.prevRoot.copy(this.root);
     this.hasPrev = true;
+  }
+
+  /** Points at the boot toe caps after this frame's pose, in the parent's frame (flight trails). */
+  bootTips(outL: Vector3, outR: Vector3): void {
+    outL.set(0, BOOT_TIP_Y, BOOT_TIP_F).applyMatrix4(this.rig.bones[B.footL].matrixWorld);
+    outR.set(0, BOOT_TIP_Y, BOOT_TIP_F).applyMatrix4(this.rig.bones[B.footR].matrixWorld);
   }
 
   /** Ground under a foot, from a short ray along -up starting above the foot. */

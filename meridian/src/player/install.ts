@@ -6,7 +6,7 @@ import type { Game } from '../game/Game';
 import type { OnFootExitReason, OnFootHooks } from '../game/onFoot';
 import type { Player, WalkInput } from './Player';
 import { BlinkPower, type PowerWorld } from '../abilities/powers';
-import { PowerVfx, type VfxFrame } from '../abilities/vfx';
+import { PowerVfx, rushStrength, trailStrength, type VfxFrame } from '../abilities/vfx';
 import { AbilitySounds, type AudioBus } from '../audio/abilitySounds';
 import { bodyGravity } from '../world/environment';
 import { BODIES, isBodyId } from '../world/bodies';
@@ -101,9 +101,22 @@ export class PlayerRuntime implements OnFootHooks {
         v.flash(_fx.copy(rt.lastJump.to).addScaledVector(p.up, 1));
       }
     }
+    // Speed lines and flight trails along the full velocity (a flier climbs and dives).
     const motion = this.abilities.motion();
-    const dash = motion && motion.mode === 'dash' && p.vel.lengthSq() > 1 ? { center: p.pos, dir: _fd.copy(p.vel).normalize(), speed: motion.speed } : null;
-    v.update(dt, { up: p.up, camera: this.game.render.camera.position, aim, dash }, this.game.settings.reducedMotion);
+    let rush: VfxFrame['rush'] = null;
+    let trails: VfxFrame['trails'] = null;
+    _fd.copy(p.vel);
+    if (motion?.mode === 'flight') _fd.addScaledVector(p.up, p.vVert);
+    if (motion && _fd.lengthSq() > 1) {
+      _fd.normalize();
+      rush = { center: p.pos, dir: _fd, speed: motion.speed, strength: rushStrength(motion.mode, motion.speed) };
+      const ts = motion.mode === 'flight' ? trailStrength(motion.speed) : 0;
+      if (ts > 0 && p.avatar?.visible) {
+        p.avatar.bootTips(_tipL, _tipR);
+        trails = { from: _tips, dir: _fd, strength: ts };
+      }
+    }
+    v.update(dt, { up: p.up, camera: this.game.render.camera.position, aim, rush, trails }, this.game.settings.reducedMotion);
   }
 
   /** Sounds for one rendered frame: the rush by speed, cues on take-off, blinks and refusals. */
@@ -238,6 +251,9 @@ const _g = new Vector3();
 const _r = new Vector3();
 const _fx = new Vector3();
 const _fd = new Vector3();
+const _tipL = new Vector3();
+const _tipR = new Vector3();
+const _tips = [_tipL, _tipR] as const;
 
 const runtimes = new WeakMap<Game, PlayerRuntime>();
 
