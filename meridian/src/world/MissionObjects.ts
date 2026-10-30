@@ -15,24 +15,33 @@ import {
 } from 'three';
 import RAPIER from '@dimforge/rapier3d-compat';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import type { BodyDef, BodyId } from './bodies';
+import type { BodyDef, BodyId, DataTag } from './bodies';
 import type { MissionSites } from './sites';
-import type { SurfaceGenerator } from './surface';
+import { newSurfaceInfo, type SurfaceGenerator } from './surface';
 import { GROUPS, type Physics } from '../physics/Physics';
 import { patchAerial } from '../render/Atmosphere';
 import { hashCombine, hashFloat } from '../core/rng';
 
-// The survey relay mast and the sample deposits of the active body. Built from
-// the deterministic mission sites; sample visibility follows the collected IDs.
+// Mission objects of the active body, built from the deterministic mission
+// sites. Quiet System: the survey relay mast and the sample deposits (sample
+// visibility follows the collected IDs). Sol: First Light route beacons (lamp
+// lit once reached) and the scan targets (landmarks, no mesh).
 
 export interface MissionTarget {
   id: string;
-  kind: 'relay' | 'sample';
+  kind: 'relay' | 'sample' | 'route' | 'scan';
   /** Planet-relative position of the interaction/scan point. */
   pos: Vector3;
   up: Vector3;
   /** Scan/aim radius (m). */
   radius: number;
+  /** Display name (route waypoints and scan targets). */
+  label?: string;
+  /** Route waypoints: reached when the controlled entity is within this distance [m]. */
+  arrive?: number;
+  /** Scan targets: journal text and data tag. */
+  note?: string;
+  tag?: DataTag;
 }
 
 const _q = new Quaternion();
@@ -45,7 +54,7 @@ const SAMPLE_LOOK: Record<BodyId, { core: number; glow: number; base: number; na
 };
 
 export function sampleName(body: BodyId): string {
-  return SAMPLE_LOOK[body].name;
+  return SAMPLE_LOOK[body]?.name ?? 'Sample';
 }
 
 function relayGeometry(): { body: BufferGeometry; metal: BufferGeometry; dark: BufferGeometry; ring: BufferGeometry; lamp: BufferGeometry } {
@@ -126,15 +135,25 @@ function sampleGeometry(body: BodyId): { core: BufferGeometry; base: BufferGeome
   return { core, base };
 }
 
+/** A relay or beacon mast: lamp and ring animate when it is active. */
+interface Mast {
+  id: string;
+  lamp: MeshStandardMaterial;
+  ring: Mesh;
+  /** Collider capsule centre (planet-relative) and orientation. */
+  planet: Vector3;
+  quat: Quaternion;
+  active: boolean;
+}
+
 export class MissionObjects {
   readonly group = new Group();
   readonly targets: MissionTarget[] = [];
   private readonly sampleMeshes = new Map<string, Group>();
   private readonly materials: Material[] = [];
   private readonly geometries: BufferGeometry[] = [];
-  private readonly lampMat: MeshStandardMaterial;
-  private readonly ring: Mesh;
-  private relayCollider: RAPIER.RigidBody | null = null;
+  private readonly masts: Mast[] = [];
+  private colliders: RAPIER.RigidBody[] = [];
   private time = 0;
   active = false;
 
@@ -152,40 +171,58 @@ export class MissionObjects {
       this.materials.push(m);
       return m;
     };
+    const info = newSurfaceInfo();
+    /** Ground, or the liquid surface where the site is under water. */
+    const groundAt = (up: Vector3) => {
+      gen.info(up.x, up.y, up.z, info);
+      return Math.max(info.height, info.liquidLevel ?? -Infinity);
+    };
     const place = (dir: readonly number[], sink: number, yaw: number, obj: Group) => {
       const up = new Vector3(dir[0], dir[1], dir[2]);
-      const h = gen.height(up.x, up.y, up.z);
-      obj.position.copy(up).multiplyScalar(R + h - sink);
+      obj.position.copy(up).multiplyScalar(R + groundAt(up) - sink);
       _q.setFromUnitVectors(_Y, up);
       obj.quaternion.copy(_q).multiply(new Quaternion().setFromAxisAngle(_Y, yaw));
       return up;
     };
 
-    // Relay mast.
+    // Relay (Quiet System) or route beacon (Sol) masts.
     const rg = relayGeometry();
     this.geometries.push(rg.body, rg.metal, rg.dark, rg.ring, rg.lamp);
-    const relay = new Group();
-    this.lampMat = mat(0x2a2014, 0.4, 0, 0x6a3a10);
-    relay.add(
-      new Mesh(rg.body, mat(0xe7e2d6, 0.45, 0)),
-      new Mesh(rg.metal, mat(0xb07a3c, 0.35, 0.85)),
-      new Mesh(rg.dark, mat(0x2b2d31, 0.6, 0.3)),
-      new Mesh(rg.lamp, this.lampMat),
-    );
-    this.ring = new Mesh(rg.ring, mat(0xb07a3c, 0.35, 0.85));
-    this.ring.position.y = 6.45;
-    relay.add(this.ring);
-    for (const m of relay.children) {
-      m.castShadow = true;
-      m.receiveShadow = true;
+    const bodyMat = mat(0xe7e2d6, 0.45, 0);
+    const metalMat = mat(0xb07a3c, 0.35, 0.85);
+    const darkMat = mat(0x2b2d31, 0.6, 0.3);
+    const mast = (id: string, dir: readonly number[], yawKey: string): { obj: Group; up: Vector3 } => {
+      const obj = new Group();
+      const lamp = mat(0x2a2014, 0.4, 0, 0x6a3a10);
+      const ring = new Mesh(rg.ring, metalMat);
+      ring.position.y = 6.45;
+      obj.add(new Mesh(rg.body, bodyMat), new Mesh(rg.metal, metalMat), new Mesh(rg.dark, darkMat), new Mesh(rg.lamp, lamp), ring);
+      for (const m of obj.children) {
+        m.castShadow = true;
+        m.receiveShadow = true;
+      }
+      const up = place(dir, 0.05, hashFloat(hashCombine(def.seed, yawKey)) * Math.PI * 2, obj);
+      this.group.add(obj);
+      // Fixed capsule so the mast blocks walking and landing.
+      this.masts.push({ id, lamp, ring, planet: obj.position.clone().addScaledVector(up, 3.6), quat: obj.quaternion.clone(), active: false });
+      return { obj, up };
+    };
+
+    if (def.system !== 'quiet') {
+      sites.route.forEach((r, i) => {
+        const { obj, up } = mast(r.id, r.dir, `route-yaw-${i}`);
+        this.targets.push({ id: r.id, kind: 'route', pos: obj.position.clone().addScaledVector(up, 3.2), up, radius: 1.6, label: r.label, arrive: r.radius });
+      });
+      for (const t of sites.scans) {
+        const up = new Vector3(...t.dir);
+        const pos = up.clone().multiplyScalar(R + groundAt(up) + 2);
+        this.targets.push({ id: t.id, kind: 'scan', pos, up, radius: 4, label: t.label, note: t.note, tag: t.tag });
+      }
+      return;
     }
-    const relayUp = place(sites.relay.dir, 0.05, hashFloat(hashCombine(def.seed, 'relay-yaw')) * Math.PI * 2, relay);
-    this.group.add(relay);
-    this.targets.push({ id: sites.relay.id, kind: 'relay', pos: relay.position.clone().addScaledVector(relayUp, 3.2), up: relayUp, radius: 1.6 });
-    // Fixed capsule so the mast blocks walking and landing.
-    const c = relay.position.clone().addScaledVector(relayUp, 3.6);
-    this.relayPlanet = c;
-    this.relayQuat = relay.quaternion.clone();
+
+    const relay = mast(sites.relay.id, sites.relay.dir, 'relay-yaw');
+    this.targets.push({ id: sites.relay.id, kind: 'relay', pos: relay.obj.position.clone().addScaledVector(relay.up, 3.2), up: relay.up, radius: 1.6 });
 
     // Sample deposits.
     const look = SAMPLE_LOOK[def.id];
@@ -208,51 +245,52 @@ export class MissionObjects {
     }
   }
 
-  private readonly relayPlanet: Vector3;
-  private readonly relayQuat: Quaternion;
-
-  /** Show the deposits that have not been collected and light the relay if active. */
-  sync(isCollected: (id: string) => boolean, relayActive: boolean): void {
+  /**
+   * Show the deposits that have not been collected and light the relay if
+   * active (Quiet System); light each route beacon once `reached(id)` (Sol).
+   */
+  sync(isCollected: (id: string) => boolean, relayActive: boolean, reached?: (id: string) => boolean): void {
     for (const [id, g] of this.sampleMeshes) g.visible = !isCollected(id);
     this.active = relayActive;
-    if (relayActive) {
-      this.lampMat.emissive.setHex(0x3fe0c0);
-      this.lampMat.emissiveIntensity = 2.2;
-    } else {
-      this.lampMat.emissive.setHex(0x6a3a10);
-      this.lampMat.emissiveIntensity = 1;
+    for (const m of this.masts) {
+      m.active = this.def.system === 'quiet' ? relayActive : (reached?.(m.id) ?? false);
+      m.lamp.emissive.setHex(m.active ? 0x3fe0c0 : 0x6a3a10);
+      m.lamp.emissiveIntensity = m.active ? 2.2 : 1;
     }
   }
 
-  /** Install the relay collider (local coordinates follow the body center). */
+  /** Install the mast colliders (local coordinates follow the body center). */
   installCollider(planetLocal: Vector3): void {
     this.removeCollider();
-    const p = this.relayPlanet.clone().add(planetLocal);
-    const q = this.relayQuat;
-    const body = this.physics.world.createRigidBody(
-      RAPIER.RigidBodyDesc.fixed().setTranslation(p.x, p.y, p.z).setRotation({ x: q.x, y: q.y, z: q.z, w: q.w }),
-    );
-    const desc = RAPIER.ColliderDesc.capsule(3.4, 0.45).setCollisionGroups(GROUPS.props).setSolverGroups(GROUPS.props);
-    this.physics.world.createCollider(desc, body);
-    this.relayCollider = body;
+    for (const m of this.masts) {
+      const p = m.planet.clone().add(planetLocal);
+      const q = m.quat;
+      const body = this.physics.world.createRigidBody(
+        RAPIER.RigidBodyDesc.fixed().setTranslation(p.x, p.y, p.z).setRotation({ x: q.x, y: q.y, z: q.z, w: q.w }),
+      );
+      const desc = RAPIER.ColliderDesc.capsule(3.4, 0.45).setCollisionGroups(GROUPS.props).setSolverGroups(GROUPS.props);
+      this.physics.world.createCollider(desc, body);
+      this.colliders.push(body);
+    }
     this.physics.refreshQueries();
   }
 
   removeCollider(): void {
-    if (!this.relayCollider) return;
-    this.physics.world.removeRigidBody(this.relayCollider);
-    this.relayCollider = null;
+    for (const b of this.colliders) this.physics.world.removeRigidBody(b);
+    this.colliders = [];
   }
 
   get hasCollider(): boolean {
-    return this.relayCollider !== null;
+    return this.colliders.length > 0;
   }
 
   update(dt: number, planetLocal: Vector3): void {
     this.time += dt;
     this.group.position.copy(planetLocal);
-    this.ring.rotation.y = this.active ? this.time * 0.6 : 0.4;
-    if (this.active) this.lampMat.emissiveIntensity = 1.8 + Math.sin(this.time * 2.2) * 0.5;
+    for (const m of this.masts) {
+      m.ring.rotation.y = m.active ? this.time * 0.6 : 0.4;
+      if (m.active) m.lamp.emissiveIntensity = 1.8 + Math.sin(this.time * 2.2) * 0.5;
+    }
   }
 
   dispose(): void {

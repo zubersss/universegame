@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { BODIES, SYSTEM_BODY_IDS, sunDirFor } from '../src/world/bodies';
-import { EARTH_META, installEarthData, loadEarthData, type LayerName } from '../src/world/earthData';
+import { installEarthData, loadEarthData } from '../src/world/earthData';
 import { dirToGeo } from '../src/world/geo';
 import { computeSites } from '../src/world/sites';
 import { getSurface, newSurfaceInfo } from '../src/world/surface';
@@ -11,8 +11,7 @@ import { FIRST_LIGHT, SURVEY_BODIES } from '../src/world/survey';
 
 beforeAll(async () => {
   const dir = fileURLToPath(new URL('../src/data/earth/', import.meta.url));
-  const layers = EARTH_META.layers as Record<LayerName, { file: string }>;
-  installEarthData(await loadEarthData(async (name) => readFileSync(dir + layers[name].file)));
+  installEarthData(await loadEarthData(async (_name, _url, file) => readFileSync(dir + file)));
 });
 
 const dot = (a: readonly number[], b: readonly number[]) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];

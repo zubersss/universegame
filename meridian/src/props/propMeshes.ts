@@ -293,3 +293,91 @@ export function pebbles(): SpeciesGeometry {
   colorize(g, (p, n, c) => c.copy(b).lerp(a, 0.4 + 0.5 * Math.max(0, n.y)));
   return { lod0: g, lod1: null };
 }
+
+// ------------------------------------------------------------------- Sol
+
+/** Two-tone boulder (lighter where it faces up). Height ~1. */
+function toneBoulder(light: number, dark: number, seed: number, squash: number): SpeciesGeometry {
+  const a = lin(light);
+  const b = lin(dark);
+  const tint = (g: BufferGeometry) =>
+    colorize(g, (p, n, c) => c.copy(b).lerp(a, 0.35 + 0.45 * Math.max(0, n.y) + 0.12 * Math.sin(p.x * 9 + p.z * 5)));
+  const l0 = tint(rockGeo(2, seed, squash));
+  const l1 = tint(rockGeo(0, seed, squash));
+  l0.scale(0.6, 0.62, 0.6);
+  l1.scale(0.6, 0.62, 0.6);
+  return { lod0: merge([l0]), lod1: merge([l1]) };
+}
+
+/** Pebble cluster in two tones (near detail). */
+function tonePebbles(light: number, dark: number, seed: number): SpeciesGeometry {
+  const a = lin(light);
+  const b = lin(dark);
+  const rnd = mulberry32(seed);
+  const parts: BufferGeometry[] = [];
+  for (let i = 0; i < 6; i++) {
+    const g = rockGeo(0, seed + 1 + i, 0.6);
+    const s = 0.1 + rnd() * 0.2;
+    g.scale(s, s, s);
+    g.translate((rnd() - 0.5) * 1.3, 0, (rnd() - 0.5) * 1.3);
+    parts.push(g);
+  }
+  const g = merge(parts);
+  colorize(g, (_p, n, c) => c.copy(b).lerp(a, 0.4 + 0.5 * Math.max(0, n.y)));
+  return { lod0: g, lod1: null };
+}
+
+/** Lunar boulder: grey ejecta block. */
+export const lunarBoulder = (): SpeciesGeometry => toneBoulder(0x9d9b95, 0x5a5955, 83, 0.75);
+/** Lunar regolith pebbles. */
+export const lunarPebbles = (): SpeciesGeometry => tonePebbles(0x8f8d88, 0x4d4c49, 101);
+/** Martian vesicular basalt: dark brown-grey under a film of dust. */
+export const marsBasalt = (): SpeciesGeometry => toneBoulder(0x7a5d4a, 0x3a2c24, 91, 0.7);
+/** Martian pebbles. */
+export const marsPebbles = (): SpeciesGeometry => tonePebbles(0x8a6448, 0x3e2b20, 111);
+/** Earth boulder (weathered grey rock). */
+export const earthBoulder = (): SpeciesGeometry => toneBoulder(0x8e8b83, 0x54524c, 97, 0.8);
+
+/** Needleleaf tree: a trunk under stacked cones. Height 1. */
+export function conifer(): SpeciesGeometry {
+  const bark = lin(0x5a4430);
+  const dark = lin(0x2d5132);
+  const light = lin(0x5c8f52);
+  const make = (sides: number, tiers: number) => {
+    const trunk = new CylinderGeometry(0.022, 0.035, 0.3, Math.max(3, sides - 2), 1);
+    trunk.translate(0, 0.15, 0);
+    const parts: BufferGeometry[] = [colorize(trunk, (_p, _n, c) => c.copy(bark))];
+    for (let i = 0; i < tiers; i++) {
+      const t = tiers > 1 ? i / (tiers - 1) : 0;
+      const r = 0.22 * (1 - t * 0.5);
+      const h = tiers > 1 ? 0.42 * (1 - t * 0.25) : 0.85;
+      const cone = new ConeGeometry(r, h, sides, 1);
+      cone.translate(0, 0.16 + t * 0.5 + h / 2, 0);
+      parts.push(colorize(cone, (p, n, c) => c.copy(dark).lerp(light, Math.min(1, 0.25 + Math.max(0, n.y) * 0.5 + p.y * 0.2))));
+    }
+    return merge(parts);
+  };
+  return { lod0: make(7, 3), lod1: make(4, 1) };
+}
+
+/** Broadleaf tree: a trunk under a few rounded canopy lobes. Height 1. */
+export function broadleaf(): SpeciesGeometry {
+  const bark = lin(0x5e4733);
+  const dark = lin(0x35592a);
+  const light = lin(0x7aa64c);
+  const make = (detail: number, lobes: number) => {
+    const rnd = mulberry32(131);
+    const trunk = new CylinderGeometry(0.03, 0.05, 0.5, 5, 1);
+    trunk.translate(0, 0.25, 0);
+    const parts: BufferGeometry[] = [colorize(trunk, (_p, _n, c) => c.copy(bark))];
+    for (let i = 0; i < lobes; i++) {
+      const r = lobes > 2 ? 0.17 + rnd() * 0.1 : 0.3;
+      const blob = new IcosahedronGeometry(r, detail);
+      const spread = lobes > 2 ? 0.28 : 0.08;
+      blob.translate((rnd() - 0.5) * spread, 0.62 + rnd() * 0.18, (rnd() - 0.5) * spread);
+      parts.push(colorize(blob, (_p, n, c) => c.copy(dark).lerp(light, 0.3 + 0.5 * Math.max(0, n.y))));
+    }
+    return merge(parts);
+  };
+  return { lod0: make(1, 5), lod1: make(0, 2) };
+}

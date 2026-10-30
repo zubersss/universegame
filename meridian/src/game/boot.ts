@@ -169,7 +169,7 @@ export async function boot(): Promise<void> {
         });
       },
       onQuitToTitle: () => {
-        game?.setState('title');
+        game?.quitToTitle();
         refreshTitle();
       },
       onSettingsChanged: (s) => {

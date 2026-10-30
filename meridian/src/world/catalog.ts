@@ -52,6 +52,8 @@ interface Look {
   maxHeight: number;
   /** Ocean surface height above the datum [m] (gameplay), null without an ocean. */
   seaLevel?: number;
+  /** Height above the datum of the zero elevation [m] (gameplay). */
+  reliefZero?: number;
   atmosphere: AtmosphereDef | null;
   clouds: CloudLayerDef[];
   palette: BodyPalette;
@@ -83,20 +85,21 @@ const LOOKS: Record<string, Look> = {
   mercury: airless(
     { a1: 0x8f8579, a2: 0x6d655c, a3: 0xb0a698, b1: 0x7a736b, b2: 0x5c5650, b3: 0x9c9388, special: 0xd6d0c4, proxyNight: 0x060606 },
     {
-      explore: 'surface', surface: 'procedural', power: 'sunline-dash', maxHeight: 2000,
+      explore: 'surface', surface: 'procedural', power: 'sunline-dash', maxHeight: 2000, reliefZero: 500,
       biomeNames: ['Cratered Highlands', 'Smooth Plains'],
       description: 'The innermost planet: airless, cratered, scorched by day and frozen by night.',
       fiction: [...SCALE_FICTION, 'surface terrain is procedural', 'suit heat/cold shield'],
     },
   ),
   venus: {
-    explore: 'surface', surface: 'procedural', power: 'pressure-glide', atmosphereHeight: 14000, maxHeight: 2600,
+    explore: 'surface', surface: 'procedural', power: 'pressure-glide', atmosphereHeight: 14000, maxHeight: 2600, reliefZero: 500,
     atmosphere: {
       rayleigh: [2.6e-5, 2.4e-5, 1.4e-5], rayleighH: 2600,
       mie: [1.9e-4, 1.6e-4, 8.0e-5], mieH: 2200, mieG: 0.72,
       sunIntensity: 20, airglow: [0.006, 0.004, 0.001],
     },
-    clouds: [{ altitude: 9000, thickness: 1800, coverage: 0.92, scale: 14000, speed: 0.00004, tint: [1.0, 0.93, 0.74], opacity: 0.9, streak: 0.9 }],
+    // Closed sulphuric-acid deck (coverage above ~1.5 leaves no gaps): pale yellow, faint streaks.
+    clouds: [{ altitude: 9000, thickness: 1800, coverage: 1.6, scale: 14000, speed: 0.00004, tint: [0.84, 0.72, 0.5], opacity: 1.0, streak: 0.6 }],
     palette: { a1: 0xa8865a, a2: 0x7d5e3c, a3: 0xc7a674, b1: 0x8c6a44, b2: 0x5e4630, b3: 0xb89466, special: 0x3a2a1c, proxyNight: 0x1a0e06 },
     biomeNames: ['Tessera Highlands', 'Volcanic Plains'],
     description: 'A runaway-greenhouse world under permanent sulfuric cloud, with crushing pressure at the ground.',
@@ -118,26 +121,35 @@ const LOOKS: Record<string, Look> = {
     palette: { a1: 0x8a7a58, a2: 0x7a746a, a3: 0xb9a578, b1: 0x55703a, b2: 0x6a5f4c, b3: 0x8f9a58, special: 0xf4f7fa, proxyNight: 0x05080c },
     biomeNames: ['Uplands', 'Lowlands'],
     description: 'Home: oceans over 71% of the surface, continents shaped from real elevation data.',
-    fiction: [...SCALE_FICTION, 'relief exaggerated 8× relative to the radius', 'detail below the data resolution is procedural'],
+    fiction: [
+      ...SCALE_FICTION,
+      'relief exaggerated 8× relative to the radius',
+      'detail below the data resolution is procedural',
+      'Southern Alps: relief above the global grid kept at 35% so slopes stay climbable',
+    ],
   },
   moon: airless(
-    { a1: 0x9a9893, a2: 0x7d7b77, a3: 0xb5b3ad, b1: 0x5d5c5a, b2: 0x6e6c69, b3: 0x8b8a86, special: 0xc8c6c0, proxyNight: 0x060606 },
+    { a1: 0x9a9893, a2: 0x7d7b77, a3: 0xb5b3ad, b1: 0x868480, b2: 0x7c7a76, b3: 0x8b8a86, special: 0xc8c6c0, proxyNight: 0x060606 },
     {
-      explore: 'surface', surface: 'procedural', power: 'lunar-step', maxHeight: 4000,
+      // Real relief about -11 to +3 km (South Pole-Aitken floor to rims): gameplay /5 above a datum 2.4 km down.
+      explore: 'surface', surface: 'procedural', power: 'lunar-step', maxHeight: 3200, reliefZero: 2400,
       biomeNames: ['Highlands', 'Maria'],
       description: "Earth's moon: bright cratered highlands and dark basaltic maria.",
       fiction: [...SCALE_FICTION, 'surface terrain is procedural'],
     },
   ),
   mars: {
-    explore: 'surface', surface: 'procedural', power: 'redline', atmosphereHeight: 6000, maxHeight: 6000,
+    // Real relief about -9 to +25 km (Hellas floor to Olympus Mons over Tharsis): gameplay /5 above a datum 1.9 km down.
+    explore: 'surface', surface: 'procedural', power: 'redline', atmosphereHeight: 6000, maxHeight: 7200, reliefZero: 1900,
     atmosphere: {
       rayleigh: [2.0e-6, 4.0e-6, 8.0e-6], rayleighH: 1300,
-      mie: [6.0e-5, 4.0e-5, 2.5e-5], mieH: 1100, mieG: 0.74,
-      sunIntensity: 18, airglow: [0.004, 0.002, 0.001],
+      // Suspended dust (vertical optical depth ~0.3 red, ~0.1 blue; real Mars 0.3-0.9) gives the butterscotch sky.
+      mie: [2.6e-4, 1.6e-4, 9.0e-5], mieH: 1100, mieG: 0.74,
+      sunIntensity: 24, airglow: [0.004, 0.002, 0.001],
     },
     clouds: [{ altitude: 3600, thickness: 300, coverage: 0.12, scale: 9000, speed: 0.00001, tint: [1.0, 0.92, 0.84], opacity: 0.35, streak: 0.8 }],
-    palette: { a1: 0xb5643a, a2: 0x7e3f25, a3: 0xd08a5a, b1: 0xa0522d, b2: 0x5e4a3d, b3: 0xc9a07a, special: 0xe8e4dc, proxyNight: 0x120806 },
+    // A: bright dusty ground (butterscotch), rock, pale dust; B: dark basaltic sand and rock.
+    palette: { a1: 0xb8774a, a2: 0x8a553a, a3: 0xcf9a68, b1: 0x6f5544, b2: 0x5a463b, b3: 0x8a6c55, special: 0xe8e4dc, proxyNight: 0x120806 },
     biomeNames: ['Southern Highlands', 'Northern Lowlands'],
     description: 'A cold desert world of rust plains, giant volcanoes and canyon systems under a thin dusty sky.',
     fiction: [...SCALE_FICTION, 'surface terrain is procedural', 'sky density tuned for play'],
@@ -149,7 +161,7 @@ const LOOKS: Record<string, Look> = {
       mie: [5.0e-5, 4.2e-5, 3.0e-5], mieH: 2500, mieG: 0.7,
       sunIntensity: 16, airglow: [0.004, 0.003, 0.002],
     },
-    clouds: [{ altitude: 6000, thickness: 1500, coverage: 0.8, scale: 18000, speed: 0.00006, tint: [0.95, 0.84, 0.7], opacity: 0.85, streak: 1.0 }],
+    clouds: [], // the banded cloud deck is drawn by the proxy globe
     palette: { a1: 0xd8b48a, a2: 0xb07850, a3: 0xe8dcc8, b1: 0xc49a6c, b2: 0x8a5a3a, b3: 0xf0e6d6, special: 0xb04a2a, proxyNight: 0x0a0806 },
     biomeNames: ['Zones', 'Belts'],
     description: 'The largest planet: banded clouds of ammonia over a deep hydrogen atmosphere, no solid ground.',
@@ -158,7 +170,7 @@ const LOOKS: Record<string, Look> = {
   europa: airless(
     { a1: 0xd8d2c4, a2: 0xbfb6a4, a3: 0xeee8dc, b1: 0xc4b49a, b2: 0x8a5a3a, b3: 0xe0d6c4, special: 0xa0623e, proxyNight: 0x070708 },
     {
-      explore: 'surface', surface: 'procedural', power: 'anchor-blink', maxHeight: 400,
+      explore: 'surface', surface: 'procedural', power: 'anchor-blink', maxHeight: 1000, reliefZero: 450,
       biomeNames: ['Ridged Plains', 'Chaos Terrain'],
       description: "Jupiter's ice moon: a cracked water-ice shell over a subsurface ocean.",
       fiction: [...SCALE_FICTION, 'surface terrain is procedural'],
@@ -171,14 +183,14 @@ const LOOKS: Record<string, Look> = {
       mie: [5.0e-5, 4.6e-5, 3.4e-5], mieH: 2600, mieG: 0.7,
       sunIntensity: 15, airglow: [0.003, 0.003, 0.002],
     },
-    clouds: [{ altitude: 6000, thickness: 1500, coverage: 0.7, scale: 20000, speed: 0.00005, tint: [0.98, 0.92, 0.78], opacity: 0.8, streak: 1.0 }],
+    clouds: [], // the banded cloud deck is drawn by the proxy globe
     palette: { a1: 0xe0c890, a2: 0xc8aa70, a3: 0xf0e4c4, b1: 0xd4b880, b2: 0xb09060, b3: 0xf4ead4, special: 0xc8b07a, proxyNight: 0x0a0906 },
     biomeNames: ['Zones', 'Belts'],
     description: 'The ringed giant: pale golden cloud bands and a vast, thin ring system of ice.',
     fiction: [...SCALE_FICTION, 'ring-plane platform zone is invented'],
   },
   titan: {
-    explore: 'surface', surface: 'procedural', power: 'wing-glide', atmosphereHeight: 14000, maxHeight: 400,
+    explore: 'surface', surface: 'procedural', power: 'wing-glide', atmosphereHeight: 14000, maxHeight: 1000, reliefZero: 450,
     atmosphere: {
       rayleigh: [5.0e-6, 6.0e-6, 8.0e-6], rayleighH: 2500,
       mie: [1.2e-4, 6.0e-5, 1.5e-5], mieH: 2400, mieG: 0.68,
@@ -197,7 +209,7 @@ const LOOKS: Record<string, Look> = {
       mie: [1.5e-5, 2.0e-5, 2.0e-5], mieH: 2400, mieG: 0.72,
       sunIntensity: 13, airglow: [0.001, 0.003, 0.003],
     },
-    clouds: [{ altitude: 6000, thickness: 1200, coverage: 0.3, scale: 20000, speed: 0.00003, tint: [0.8, 0.95, 0.97], opacity: 0.4, streak: 1.0 }],
+    clouds: [], // the banded cloud deck is drawn by the proxy globe
     palette: { a1: 0x9fd8e0, a2: 0x86c4cc, a3: 0xc4ecf0, b1: 0x94d0d8, b2: 0x7ab8c0, b3: 0xd0f0f4, special: 0xe0f8fa, proxyNight: 0x050a0b },
     biomeNames: ['Haze', 'Bands'],
     description: 'A pale cyan ice giant tipped on its side, its methane haze almost featureless.',
@@ -210,7 +222,7 @@ const LOOKS: Record<string, Look> = {
       mie: [1.5e-5, 1.8e-5, 2.4e-5], mieH: 2400, mieG: 0.72,
       sunIntensity: 12, airglow: [0.001, 0.002, 0.004],
     },
-    clouds: [{ altitude: 6000, thickness: 1000, coverage: 0.25, scale: 16000, speed: 0.00008, tint: [0.92, 0.95, 1.0], opacity: 0.5, streak: 1.0 }],
+    clouds: [], // the banded cloud deck is drawn by the proxy globe
     palette: { a1: 0x3f62c8, a2: 0x2e4aa0, a3: 0x7a9ae0, b1: 0x3656b4, b2: 0x24408c, b3: 0xa8bcf0, special: 0xe8eeff, proxyNight: 0x03050c },
     biomeNames: ['Bands', 'Storms'],
     description: 'The outermost giant: deep blue methane skies and the fastest winds in the system.',
@@ -320,6 +332,7 @@ export function buildSolBodies(seedFor: (id: string) => number, firstIndex: numb
       maxLevel: maxLevelFor(radius),
       seed: seedFor(b.id),
       seaLevel: look.seaLevel ?? null,
+      reliefZero: look.reliefZero,
       surface: look.surface,
       dataset: look.dataset,
       power: look.power,

@@ -139,6 +139,12 @@ describe('ON_FOOT hook points (Mode unchanged)', () => {
     expect(src('debug/testHooks.ts')).toMatch(/player: playerTestHooks\(game\),/);
   });
 
+  it('leaves ON_FOOT before quitting to the title, so the hooks exit', () => {
+    const src = (f: string) => readFileSync(new URL(`../src/${f}`, import.meta.url), 'utf8');
+    expect(src('game/boot.ts')).toMatch(/onQuitToTitle: \(\) => \{\s*game\?\.quitToTitle\(\);/);
+    expect(src('game/Game.ts')).toMatch(/quitToTitle\(\): void \{\s*if \(this\.mode === 'ON_FOOT'\) \{\s*this\.setMode\('LANDED', 'relocate'\);[^}]*\}\s*this\.setState\('title'\);/);
+  });
+
   it('routes every Game mode change through setMode', () => {
     const src = readFileSync(new URL('../src/game/Game.ts', import.meta.url), 'utf8');
     const assigns = src.match(/this\.mode\s*=[^=]/g) ?? [];
@@ -189,7 +195,9 @@ describe('ON_FOOT hook points (Mode unchanged)', () => {
     // through the host it gets null and stays walking until an arrival unlocks the power.
     expect(bodyPower(BODIES.earth)).toBe('skyborne-flight');
     const c = new AbilityController({ setAbility() {}, setWarning() {} }, (id) => bodyPower(BODIES[id]));
-    host.install(c); // installed while on foot: enters with the host's context
+    // Since P5 the controller steps with a PowerWorld; PlayerRuntime is the real hooks
+    // object, so pass enter/exit through a thin wrapper.
+    host.install({ enter: (ctx) => c.enter(ctx), step: () => false, exit: (r) => c.exit(r) }); // installed while on foot: enters with the host's context
     expect(c.power).toBeNull();
     host.transition('ON_FOOT', 'LANDED', null, 'board');
     host.transition('LANDED', 'ON_FOOT', { body: 'earth' }, 'relocate');

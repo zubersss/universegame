@@ -15,6 +15,15 @@ interface Installed {
 
 const _p = new Vector3();
 const _d = new Vector3();
+const _v = new Vector3();
+const _side = new Vector3();
+
+/** Half-width of the path corridor kept loaded: the walker's capsule plus a margin [m]. */
+const CORRIDOR_HALF_WIDTH = 1;
+/** Seconds an installed collider survives after leaving the wanted set. */
+const EVICT_GRACE = 1;
+/** Colliders allowed above the budget while waiting out the grace. */
+const EVICT_SLACK = 16;
 
 /**
  * Contact-level triangle-mesh colliders built from the same final terrain
@@ -34,6 +43,17 @@ export class TerrainCollision {
   private readonly chunkSize: number;
   /** Max-level keys around the focus (must be present to walk/land). */
   focusKeys: string[] = [];
+  /**
+   * Extra radius [m] of max-level tiles kept around the focus near the ground,
+   * after the 3x3 block and the path corridor (e.g. an on-foot blink range so
+   * targets are loaded before they are chosen); 0 keeps just the block. Up to
+   * ~150 m fits the collider budget with room for the corridor.
+   */
+  reach = 0;
+  private reachCache: { key: string; keys: string[] } = { key: '', keys: [] };
+  /** Seconds since creation, and when each installed-but-unwanted collider left the wanted set. */
+  private clock = 0;
+  private readonly unwantedSince = new Map<string, number>();
 
   constructor(
     private readonly physics: Physics,
@@ -56,6 +76,22 @@ export class TerrainCollision {
 
   has(key: string): boolean {
     return this.installed.has(key);
+  }
+
+  /** Numeric id of the max-level tile containing a direction (cheap; no string). */
+  private tileId(x: number, y: number, z: number): number {
+    const f = dirToFace(x, y, z);
+    const N = 2 ** this.def.maxLevel;
+    const c = chunkAt(f.face, f.u, f.v, this.def.maxLevel);
+    return (f.face * N + c.y) * N + c.x;
+  }
+
+  private tileKey(id: number): string {
+    const N = 2 ** this.def.maxLevel;
+    const x = id % N;
+    const r = (id - x) / N;
+    const y = r % N;
+    return chunkKey((r - y) / N, this.def.maxLevel, x, y);
   }
 
   /**
@@ -95,23 +131,49 @@ export class TerrainCollision {
         }
       }
     }
-    // Corridor along the predicted path: stopping distance plus margin.
+    // Corridor along the predicted path (charter: speed x 2 s + braking
+    // distance + 50 m ahead, and never less than the stop + 250 m margin):
+    // every tile under a band around it, front to back. The centre line and two
+    // side lines CORRIDOR_HALF_WIDTH + step out are sampled every `step`, so a
+    // tile clipping the band at a corner reaches a side line over at least two
+    // steps and is never skipped (a 90-degree corner crossing a line at depth h
+    // spans at least 2h of it).
     this.pathSamples = [];
     const speed = vel.length();
     if (speed > 2) {
       const stop = (speed * speed) / (2 * decel);
-      if (clearance < stop + 250) {
-        const len = Math.min(stop + 250, 4000);
-        const stepLen = this.chunkSize * 0.5;
-        for (let s = stepLen; s <= len; s += stepLen) {
-          _p.copy(focusPlanet).addScaledVector(vel, s / speed);
-          const key = this.keyForDir(_p.x, _p.y, _p.z);
-          this.pathSamples.push({ key, dist: s });
-          add(key);
-          if (keys.length >= BUDGETS.maxTerrainColliders) break;
+      const ahead = Math.max(stop + 250, speed * 2 + stop + 50);
+      if (clearance < ahead) {
+        const len = Math.min(ahead, 4000);
+        const step = Math.max(2, len / 300);
+        const side = CORRIDOR_HALF_WIDTH + step;
+        // Unit path direction and its horizontal normal.
+        _v.copy(vel).multiplyScalar(1 / speed);
+        _side.crossVectors(n, _v);
+        const sl = _side.length();
+        if (sl > 1e-6) _side.multiplyScalar(1 / sl);
+        else _side.set(0, 0, 0);
+        const seen = new Set<number>();
+        let full = false;
+        for (let s = 0; s <= len && !full; s += step) {
+          _p.copy(focusPlanet).addScaledVector(_v, s);
+          for (let o = 0; o < 3; o++) {
+            const off = o === 0 ? 0 : o === 1 ? -side : side;
+            const id = this.tileId(_p.x + _side.x * off, _p.y + _side.y * off, _p.z + _side.z * off);
+            if (seen.has(id)) continue;
+            seen.add(id);
+            const key = this.tileKey(id);
+            this.pathSamples.push({ key, dist: s });
+            add(key);
+            if (keys.length >= BUDGETS.maxTerrainColliders) {
+              full = true;
+              break;
+            }
+          }
         }
       }
     }
+    if (near && this.reach > 0) for (const k of this.reachKeys(dir, basis)) add(k);
     this.wanted = keys.slice(0, BUDGETS.maxTerrainColliders);
     const reqs: ChunkRequest[] = [];
     this.wanted.forEach((k, i) => {
@@ -122,8 +184,52 @@ export class TerrainCollision {
     return reqs;
   }
 
-  /** Install/remove colliders within the per-frame budget. */
-  update(planetLocal: Vector3): void {
+  /**
+   * Tiles under the reach disc, nearest first: rings a half tile apart out to
+   * half a tile beyond the reach, samples a quarter tile apart, so tile
+   * corners at the edge of the range are not missed. Cached per focus tile.
+   */
+  private reachKeys(dir: V3, basis: [V3, V3]): string[] {
+    const cacheKey = `${this.keyForDir(dir[0], dir[1], dir[2])}:${this.reach}`;
+    if (cacheKey === this.reachCache.key) return this.reachCache.keys;
+    const keys: string[] = [];
+    const seen = new Set<string>();
+    const R = this.def.radius;
+    const s = this.chunkSize * 0.5;
+    const outer = this.reach + s;
+    for (let i = 1; ; i++) {
+      const rr = Math.min(i * s, outer);
+      const n = Math.max(8, Math.ceil((2 * Math.PI * rr) / (s * 0.5)));
+      const k = rr / R;
+      for (let j = 0; j < n; j++) {
+        const a = (2 * Math.PI * j) / n;
+        const c = Math.cos(a) * k;
+        const sn = Math.sin(a) * k;
+        const key = this.keyForDir(
+          dir[0] + c * basis[0][0] + sn * basis[1][0],
+          dir[1] + c * basis[0][1] + sn * basis[1][1],
+          dir[2] + c * basis[0][2] + sn * basis[1][2],
+        );
+        if (!seen.has(key)) {
+          seen.add(key);
+          keys.push(key);
+        }
+      }
+      if (rr >= outer) break;
+    }
+    this.reachCache = { key: cacheKey, keys };
+    return keys;
+  }
+
+  /**
+   * Install/remove colliders within the per-frame budget. A collider that
+   * drops out of the wanted set is kept for EVICT_GRACE seconds (the sampled
+   * set shifts a little every step as the focus moves, and a tile evicted now
+   * would be requested again moments later, opening a hole ahead), and only
+   * once the focus tiles exist; past the hard cap the longest-unwanted go first.
+   */
+  update(planetLocal: Vector3, dt = 1 / 60): void {
+    this.clock += dt;
     let installs = this.installsPerFrame;
     for (const k of this.wanted) {
       if (installs <= 0) break;
@@ -133,17 +239,24 @@ export class TerrainCollision {
       this.install(k, d, planetLocal);
       installs--;
     }
-    // Remove colliders no longer wanted, but only once the focus tiles exist
-    // (old coverage stays until replacement coverage is installed).
+    const want = new Set(this.wanted);
+    for (const k of this.installed.keys()) {
+      if (want.has(k)) this.unwantedSince.delete(k);
+      else if (!this.unwantedSince.has(k)) this.unwantedSince.set(k, this.clock);
+    }
+    for (const k of this.unwantedSince.keys()) if (!this.installed.has(k)) this.unwantedSince.delete(k);
+    // Old coverage stays until the focus tiles exist (replacement coverage is in).
     const focusReady = this.focusKeys.every((k) => this.installed.has(k));
-    if (focusReady || this.installed.size > BUDGETS.maxTerrainColliders) {
-      const want = new Set(this.wanted);
-      for (const [k, inst] of this.installed) {
-        if (!want.has(k)) {
-          this.physics.world.removeRigidBody(inst.body);
-          this.installed.delete(k);
-          this.changed = true;
-        }
+    const cap = BUDGETS.maxTerrainColliders + EVICT_SLACK;
+    if (focusReady || this.installed.size > cap) {
+      // Oldest-unwanted first (Map iteration is insertion order).
+      for (const [k, since] of this.unwantedSince) {
+        if (this.clock - since < EVICT_GRACE && this.installed.size <= cap) break;
+        const inst = this.installed.get(k)!;
+        this.physics.world.removeRigidBody(inst.body);
+        this.installed.delete(k);
+        this.unwantedSince.delete(k);
+        this.changed = true;
       }
     }
     if (this.changed) {
@@ -197,6 +310,7 @@ export class TerrainCollision {
   clear(): void {
     for (const inst of this.installed.values()) this.physics.world.removeRigidBody(inst.body);
     this.installed.clear();
+    this.unwantedSince.clear();
     this.wanted = [];
     this.pathSamples = [];
     this.focusKeys = [];

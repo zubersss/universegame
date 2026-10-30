@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { BODIES, type BodyDef } from '../src/world/bodies';
-import { EARTH_META, installEarthData, latLonOf, loadEarthData, sampleBilinear, sampleCubic, type EarthRasters, type LayerName } from '../src/world/earthData';
+import { installEarthData, latLonOf, loadEarthData, sampleBilinear, sampleCubic, type EarthRasters } from '../src/world/earthData';
 import { SurfaceGenerator, bodyDataReady, ensureBodyData, newSurfaceInfo } from '../src/world/surface';
 import { computeSites } from '../src/world/sites';
 import { chunkAt, dirToFace, gridDir, gridResolution } from '../src/world/cube';
@@ -20,8 +20,7 @@ let E: EarthRasters;
 
 beforeAll(async () => {
   const dir = fileURLToPath(new URL('../src/data/earth/', import.meta.url));
-  const layers = EARTH_META.layers as Record<LayerName, { file: string }>;
-  E = await loadEarthData(async (name) => readFileSync(dir + layers[name].file));
+  E = await loadEarthData(async (_name, _url, file) => readFileSync(dir + file));
   installEarthData(E);
 });
 
@@ -164,6 +163,41 @@ describe('Earth surface generator (W4)', () => {
     const victoria = at(-1, 33);
     expect(victoria.liquidLevel).toBeGreaterThan(sea + 100); // a lake well above sea level
     expect(victoria.height).toBeLessThan(victoria.liquidLevel!);
+  });
+
+  it('raises the Southern Alps from the regional grid: Aoraki a snowy summit above its valleys', () => {
+    const g = new SurfaceGenerator(earth);
+    const info = newSurfaceInfo();
+    const at = (lat: number, lon: number) => {
+      const d = dirOf(lat, lon);
+      return { ...g.info(d[0], d[1], d[2], info) };
+    };
+    const aoraki = at(-43.595, 170.142);
+    // Higher than everything 5 km (real) around it, and well above Mount Cook Village.
+    for (let k = 0; k < 8; k++) {
+      const a = (k / 8) * 2 * Math.PI;
+      expect(at(-43.595 + 0.045 * Math.sin(a), 170.142 + 0.062 * Math.cos(a)).height, `ring ${k}`).toBeLessThan(aoraki.height - 40);
+    }
+    expect(aoraki.height - at(-43.735, 170.096).height).toBeGreaterThan(120);
+    // Snow on the summit (glaciated cells lower the snow line), none on the coastal plain.
+    expect(aoraki.special).toBeGreaterThan(0.8);
+    expect(at(-42.75, 171.0).special).toBe(0);
+    // Steep but not needles: few slopes above 70 degrees (2 m baselines across the region).
+    const R = earth.radius;
+    let n = 0;
+    let steep = 0;
+    for (let lat = -43.9; lat <= -42.6; lat += 0.05) {
+      for (let lon = 169.6; lon <= 171.4; lon += 0.06) {
+        const d0 = dirOf(lat, lon);
+        const dN = dirOf(lat + 2 / ((R * Math.PI) / 180), lon);
+        const dE = dirOf(lat, lon + 2 / (((R * Math.PI) / 180) * Math.cos((lat * Math.PI) / 180)));
+        const h0 = g.height(d0[0], d0[1], d0[2]);
+        const s = Math.hypot(g.height(dN[0], dN[1], dN[2]) - h0, g.height(dE[0], dE[1], dE[2]) - h0) / 2;
+        n++;
+        if (s > Math.tan((70 * Math.PI) / 180)) steep++;
+      }
+    }
+    expect(steep / n).toBeLessThan(0.02);
   });
 
   it('is continuous in space, across the ±180° seam and around the poles', () => {

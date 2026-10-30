@@ -14,9 +14,17 @@ import {
 } from 'three';
 import { mulberry32, hashCombine } from '../core/rng';
 import { SUN_DIR, WORLD_SEED } from '../world/bodies';
+import { BG_SCALE } from './BodyProxies';
 
 const STAR_RADIUS = 3000;
 const SUN_DISTANCE = 2600;
+/** Disc angular radius of the fixed far-away sun (its original look) [rad]. */
+const SUN_THETA = (0.085 * 150) / SUN_DISTANCE;
+/** The glare reaches this far beyond the limb [rad]; the billboard covers it. */
+const SUN_GLARE = 0.06;
+
+const PLANE_NORMAL = new Vector3(0, 0, 1);
+const NEG = new Vector3();
 
 /** Seeded starfield, faint galactic band and sun disk for the scaled background scene. */
 export class Space {
@@ -62,16 +70,25 @@ export class Space {
     g.setAttribute('color', new Float32BufferAttribute(col, 3));
     g.setAttribute('size', new Float32BufferAttribute(size, 1));
     this.starMat = new ShaderMaterial({
-      uniforms: { uPixelRatio: { value: 1 }, uFade: { value: 1 } },
+      uniforms: {
+        uPixelRatio: { value: 1 },
+        uFade: { value: 1 },
+        uSunDir: { value: new Vector3(SUN_DIR[0], SUN_DIR[1], SUN_DIR[2]) },
+        uGlareCos: { value: new Vector3(2, 3, 0) }, // cos of the outer and inner glare angles (> 1: no glare)
+      },
       vertexShader: /* glsl */ `
         attribute float size;
         attribute vec3 color;
         varying vec3 vColor;
         uniform float uPixelRatio;
+        uniform vec3 uSunDir;
+        uniform vec3 uGlareCos;
         #include <common>
         #include <logdepthbuf_pars_vertex>
         void main() {
-          vColor = color;
+          // Glare: stars close to the Sun are lost in its light.
+          float cs = dot(normalize((modelMatrix * vec4(position, 1.0)).xyz - cameraPosition), uSunDir);
+          vColor = color * (1.0 - smoothstep(uGlareCos.x, uGlareCos.y, cs));
           vec4 mv = modelViewMatrix * vec4(position, 1.0);
           gl_Position = projectionMatrix * mv;
           gl_PointSize = size * uPixelRatio;
@@ -139,7 +156,12 @@ export class Space {
 
     // Sun: HDR core with soft corona, always facing the camera.
     this.sunMat = new ShaderMaterial({
-      uniforms: { uIntensity: { value: 1 } },
+      uniforms: {
+        uIntensity: { value: 1 },
+        uTanHalf: { value: 150 / SUN_DISTANCE }, // billboard half-size over its distance
+        uTheta: { value: SUN_THETA }, // disc angular radius [rad]
+        uSoft: { value: SUN_THETA * 0.18 }, // width of the disc's soft edge [rad]
+      },
       vertexShader: /* glsl */ `
         varying vec2 vUv;
         #include <common>
@@ -152,14 +174,23 @@ export class Space {
       fragmentShader: /* glsl */ `
         varying vec2 vUv;
         uniform float uIntensity;
+        uniform float uTanHalf;
+        uniform float uTheta;
+        uniform float uSoft;
         #include <common>
         #include <logdepthbuf_pars_fragment>
         void main() {
           #include <logdepthbuf_fragment>
           float r = length(vUv);
-          float core = smoothstep(0.085, 0.07, r);
-          float glow = exp(-r * 9.0) * 0.9 + exp(-r * 3.2) * 0.12;
-          vec3 c = vec3(1.0, 0.95, 0.86) * (core * 40.0 + glow * 3.0) * uIntensity;
+          float th = atan(r * uTanHalf); // angle from the Sun's centre [rad]
+          float core = smoothstep(uTheta, uTheta - uSoft, th);
+          // Linear limb darkening (u = 0.6) across the disc.
+          float q = min(th / uTheta, 1.0);
+          float limb = 1.0 - 0.6 * (1.0 - sqrt(1.0 - q * q));
+          // Glare beyond the limb, in absolute angle so it does not swell with the disc.
+          float e = max(th - uTheta, 0.0);
+          float glow = (0.42 * exp(-e * 156.0) + 0.09 * exp(-e * 55.5)) * smoothstep(1.0, 0.8, r);
+          vec3 c = vec3(1.0, 0.95, 0.86) * (core * limb * 40.0 + glow * 3.0) * uIntensity;
           gl_FragColor = vec4(c, 1.0);
           #include <tonemapping_fragment>
           #include <colorspace_fragment>
@@ -177,10 +208,45 @@ export class Space {
     this.group.add(band, this.stars, this.sun);
   }
 
-  /** Keep the sun billboard facing the background camera. */
-  update(bgCameraQuat: { x: number; y: number; z: number; w: number }, pixelRatio: number, starFade: number): void {
+  /**
+   * Keep the sun billboard facing the background camera. With `sun`, the
+   * billboard sits along `dir` (unit, from the camera) at min(distance·BG_SCALE,
+   * 2600) scene units, faces the camera along that ray, and its disc subtends
+   * `angularRadius` (radians; the glare around it keeps a fixed angular size);
+   * null keeps the fixed far-away look. Stars within the glare fade out.
+   */
+  update(
+    bgCameraQuat: { x: number; y: number; z: number; w: number },
+    pixelRatio: number,
+    starFade: number,
+    sun?: { dir: Vector3; angularRadius: number | null; distance: number },
+  ): void {
     this.sun.quaternion.set(bgCameraQuat.x, bgCameraQuat.y, bgCameraQuat.z, bgCameraQuat.w);
-    this.starMat.uniforms.uPixelRatio.value = pixelRatio;
-    this.starMat.uniforms.uFade.value = starFade;
+    const su = this.starMat.uniforms;
+    su.uPixelRatio.value = pixelRatio;
+    su.uFade.value = starFade;
+    if (!sun) return;
+    const u = this.sunMat.uniforms;
+    su.uSunDir.value.copy(sun.dir);
+    if (sun.angularRadius === null) {
+      this.sun.position.copy(sun.dir).multiplyScalar(SUN_DISTANCE);
+      this.sun.scale.setScalar(150);
+      u.uTanHalf.value = 150 / SUN_DISTANCE;
+      u.uTheta.value = SUN_THETA;
+      u.uSoft.value = SUN_THETA * 0.18;
+      su.uGlareCos.value.set(Math.cos(SUN_THETA + 0.2), Math.cos(SUN_THETA + 0.02), 0);
+      return;
+    }
+    const theta = Math.min(Math.max(sun.angularRadius, 1e-4), 1.2);
+    const dist = Math.min(sun.distance * BG_SCALE, SUN_DISTANCE);
+    const tanHalf = Math.tan(theta + SUN_GLARE);
+    this.sun.position.copy(sun.dir).multiplyScalar(dist);
+    // Perpendicular to the ray, so billboard radius maps to angle exactly (atan).
+    this.sun.quaternion.setFromUnitVectors(PLANE_NORMAL, NEG.copy(sun.dir).negate());
+    this.sun.scale.setScalar(dist * tanHalf);
+    u.uTanHalf.value = tanHalf;
+    u.uTheta.value = theta;
+    u.uSoft.value = Math.min(theta * 0.18, 0.003);
+    su.uGlareCos.value.set(Math.cos(theta + 0.2), Math.cos(theta + 0.02), 0);
   }
 }

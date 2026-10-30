@@ -28,7 +28,8 @@ const scope = self as unknown as WorkerScope;
 
 function surfaceFor(bodyId: BodyId) {
   const def = BODIES[bodyId];
-  return { def, gen: getSurface(def, computeSites(def).clearings) };
+  // Bodies without a surface (stars) have no sites; their generator has no clearings.
+  return { def, gen: getSurface(def, def.explore === 'none' ? [] : computeSites(def).clearings) };
 }
 
 scope.onmessage = async (e) => {
