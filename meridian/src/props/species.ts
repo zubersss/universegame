@@ -3,6 +3,13 @@ import type { SurfaceInfo } from '../world/surface';
 import {
   blackGlass, chalkSpire, duneBristle, fanShrub, lanternTree, pebbles, rimeShard, rustPillar, silverBoulder,
   type SpeciesGeometry,
+  broadleaf,
+  conifer,
+  earthBoulder,
+  lunarBoulder,
+  lunarPebbles,
+  marsBasalt,
+  marsPebbles,
 } from './propMeshes';
 
 export type ColliderSpec =
@@ -50,6 +57,15 @@ const ss = (a: number, b: number, x: number) => {
   const t = sat((x - a) / (b - a));
   return t * t * (3 - 2 * t);
 };
+
+/**
+ * Earth forest weight from the land-cover attributes (biome = vegetated share,
+ * variation = forest or sand share, so both high = forest), below the treeline
+ * (~2,300 m real; gameplay height = 320 + real / 5) and off snow and bare rock.
+ */
+function earthForest(s: SurfaceInfo): number {
+  return ss(0.5, 0.8, s.biome) * ss(0.5, 0.72, s.variation) * (1 - ss(0.1, 0.4, s.special)) * (1 - ss(0.55, 0.85, s.rockiness)) * (1 - ss(700, 800, s.height));
+}
 
 export const SPECIES: Species[] = [
   // ------------------------------------------------------------- Ilex
@@ -124,6 +140,67 @@ export const SPECIES: Species[] = [
     description: 'Scattered fragments of impact ejecta, sorted by nothing but chance.',
     make: pebbles, roughness: 0.8, metalness: 0.1, hMin: 1, hMax: 2, candidates: 6,
     density: (_s, slope) => 0.35 * (slope < 0.5 ? 1 : 0),
+    maxSlope: 0.5, sink: 0.02, tiltToNormal: 1, lod0: 110, range: 110, wind: 0, castShadow: false,
+    collider: null, scannable: false, scanRadius: 0.5,
+  },
+  // ------------------------------------------------------------- Earth
+  // Scenery on land only (never under water or on snow), from the land-cover data:
+  // trees where the cell is vegetated and forested, below the treeline; rocks in rough ground.
+  {
+    id: 'earth-conifer', body: 'earth', name: 'Needleleaf tree',
+    description: 'A cone-shaped evergreen of the kind that dominates cool and mountain forests.',
+    make: conifer, roughness: 0.85, metalness: 0, hMin: 9, hMax: 22, candidates: 10,
+    density: (s, slope) => (s.liquidLevel != null ? 0 : earthForest(s) * (slope < 0.35 ? 0.55 : 0.2)),
+    maxSlope: 0.55, sink: 0.02, tiltToNormal: 0, lod0: 220, range: 1200, wind: 0.012, castShadow: true,
+    collider: { type: 'capsule', radius: 0.03, halfHeight: 0.3, y: 0.32 }, scannable: false, scanRadius: 0.2,
+  },
+  {
+    id: 'earth-broadleaf', body: 'earth', name: 'Broadleaf tree',
+    description: 'A round-crowned tree of the temperate and tropical forests.',
+    make: broadleaf, roughness: 0.85, metalness: 0, hMin: 7, hMax: 18, candidates: 10,
+    density: (s, slope) => (s.liquidLevel != null ? 0 : earthForest(s) * (slope < 0.3 ? 0.5 : 0.15)),
+    maxSlope: 0.45, sink: 0.02, tiltToNormal: 0, lod0: 220, range: 1200, wind: 0.02, castShadow: true,
+    collider: { type: 'capsule', radius: 0.04, halfHeight: 0.25, y: 0.3 }, scannable: false, scanRadius: 0.25,
+  },
+  {
+    id: 'earth-boulder', body: 'earth', name: 'Boulder',
+    description: 'A weathered block of bedrock.',
+    make: earthBoulder, roughness: 0.75, metalness: 0, hMin: 0.8, hMax: 3.5, candidates: 4,
+    density: (s, slope) => (s.liquidLevel != null ? 0 : (0.04 + 0.5 * ss(0.3, 0.8, s.rockiness)) * (slope < 0.6 ? 1 : 0.4)),
+    maxSlope: 0.7, sink: 0.15, tiltToNormal: 0.8, lod0: 260, range: 900, wind: 0, castShadow: true,
+    collider: { type: 'ball', radius: 0.5, y: 0.45 }, scannable: false, scanRadius: 0.5,
+  },
+  // -------------------------------------------------------------- Moon
+  {
+    id: 'moon-boulder', body: 'moon', name: 'Ejecta boulder',
+    description: 'A block of lunar bedrock thrown out by an impact. The bright highland ones are anorthosite, made mostly of plagioclase feldspar; the dark ones on the maria are basalt.',
+    make: lunarBoulder, roughness: 0.82, metalness: 0, hMin: 0.8, hMax: 4.5, candidates: 4,
+    density: (s, slope) => (0.07 + 0.3 * ss(0.2, 0.6, s.rockiness)) * (slope < 0.5 ? 1 : 0.4),
+    maxSlope: 0.6, sink: 0.15, tiltToNormal: 0.8, lod0: 300, range: 1000, wind: 0, castShadow: true,
+    collider: { type: 'ball', radius: 0.5, y: 0.45 }, scannable: true, scanRadius: 0.5,
+  },
+  {
+    id: 'moon-pebbles', body: 'moon', name: 'Regolith pebbles',
+    description: 'Rock fragments in the lunar soil, broken by billions of years of impacts.',
+    make: lunarPebbles, roughness: 0.9, metalness: 0, hMin: 1, hMax: 2, candidates: 6,
+    density: (_s, slope) => 0.4 * (slope < 0.5 ? 1 : 0),
+    maxSlope: 0.5, sink: 0.02, tiltToNormal: 1, lod0: 110, range: 110, wind: 0, castShadow: false,
+    collider: null, scannable: false, scanRadius: 0.5,
+  },
+  // -------------------------------------------------------------- Mars
+  {
+    id: 'mars-basalt', body: 'mars', name: 'Vesicular basalt',
+    description: 'Dark volcanic rock riddled with gas bubbles under a film of red dust, like the boulders the Spirit rover examined in Gusev crater.',
+    make: marsBasalt, roughness: 0.8, metalness: 0, hMin: 0.7, hMax: 4, candidates: 4,
+    density: (s, slope) => (0.08 + 0.3 * ss(0.2, 0.6, s.rockiness)) * (slope < 0.5 ? 1 : 0.4),
+    maxSlope: 0.6, sink: 0.15, tiltToNormal: 0.8, lod0: 300, range: 1000, wind: 0, castShadow: true,
+    collider: { type: 'ball', radius: 0.5, y: 0.45 }, scannable: true, scanRadius: 0.5,
+  },
+  {
+    id: 'mars-pebbles', body: 'mars', name: 'Wind-sorted pebbles',
+    description: 'Pebbles left behind where the wind has carried the fine dust away.',
+    make: marsPebbles, roughness: 0.9, metalness: 0, hMin: 1, hMax: 2, candidates: 6,
+    density: (s, slope) => 0.4 * (1 - s.special) * (slope < 0.5 ? 1 : 0),
     maxSlope: 0.5, sink: 0.02, tiltToNormal: 1, lod0: 110, range: 110, wind: 0, castShadow: false,
     collider: null, scannable: false, scanRadius: 0.5,
   },

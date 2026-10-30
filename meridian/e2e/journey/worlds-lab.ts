@@ -33,6 +33,8 @@ import { atmoUniforms, createSkyMesh, setAtmosphereBody, updateSkyMesh } from '.
 import { BodyProxies } from '../../src/render/BodyProxies';
 import { Clouds } from '../../src/render/Clouds';
 import { Space } from '../../src/render/Space';
+import { PropSystem } from '../../src/props/PropSystem';
+import { initPhysics, Physics } from '../../src/physics/Physics';
 
 interface LabState {
   ready: boolean;
@@ -75,6 +77,7 @@ function dirOf(lat: number, lon: number): Vector3 {
 
 async function main(): Promise<void> {
   await ensureBodyData(def);
+  await initPhysics();
   const canvas = document.getElementById('c') as HTMLCanvasElement;
   const renderer = new WebGLRenderer({ canvas, antialias: true, logarithmicDepthBuffer: true });
   renderer.toneMapping = ACESFilmicToneMapping;
@@ -93,7 +96,8 @@ async function main(): Promise<void> {
 
   // Camera placement (body frame -> system axes; the local scene is camera-centred).
   const R = def.radius;
-  const gen = getSurface(def, computeSites(def).clearings);
+  const sites = computeSites(def);
+  const gen = getSurface(def, sites.clearings);
   const lat = num('lat', 0);
   const lon = num('lon', 0);
   const up = dirOf(lat, lon);
@@ -153,6 +157,10 @@ async function main(): Promise<void> {
   terrain.splitPx = 4;
   store.onData = (d) => { if (d.level === 0) proxies.addRoot(d); };
   scene.add(terrain.root);
+  // Scenery props as in the game (props=0 hides them).
+  const props = new PropSystem(def, gen, sites, new Physics(), 8);
+  props.group.visible = q.get('props') !== '0';
+  scene.add(props.group);
   const space = new Space();
   bgScene.add(space.group);
   const coverageMaterial = new MeshBasicMaterial({ color: 0xffffff });
@@ -192,6 +200,7 @@ async function main(): Promise<void> {
       terrain.updateMorphs(dt);
       if (water) water.uniforms.uWaterTime.value += dt;
       terrain.cullMeshes(view);
+      props.update(dt, camPlanet, camPlanet, planetLocal, true);
     }
     terrain.root.visible = showTerrain;
     bgCamera.quaternion.copy(camera.quaternion);
@@ -265,7 +274,7 @@ async function main(): Promise<void> {
     lab.stats = { leaves: s.leaves, rendered: s.rendered, morphing: s.morphing, maxLevel: s.maxLevel, queued: store.queued, inFlight: store.inFlightCount, proxies: proxies.readyCount, errors: store.errors, calls: renderer.info.render.calls };
     const sig = `${s.leaves}/${s.rendered}/${s.maxLevel}/${store.queued}/${store.inFlightCount}/${proxies.readyCount}`;
     if (sig !== lastSig) { lastSig = sig; lastChange = now; }
-    lab.settled = proxies.readyCount > 0 && store.queued === 0 && store.inFlightCount === 0 && s.morphing === 0 && now - lastChange > 1500 && lab.frames > 5;
+    lab.settled = proxies.readyCount > 0 && store.queued === 0 && store.inFlightCount === 0 && s.morphing === 0 && props.stats.pending === 0 && now - lastChange > 1500 && lab.frames > 5;
     hud.textContent = `${def.name}  lat ${lat.toFixed(2)}  lon ${lon.toFixed(2)}  ${orbit ? `orbit ${orbit} R` : `alt ${num('alt', 500)} m`}\nchunks ${s.rendered}  max level ${s.maxLevel}  queue ${store.queued}`;
     requestAnimationFrame(frame);
   };
