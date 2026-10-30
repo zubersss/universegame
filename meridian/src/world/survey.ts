@@ -76,3 +76,13 @@ export const FIRST_LIGHT: Readonly<Record<string, SurveySpec>> = {
 
 /** Bodies with a First Light survey, in the progression order (Earth, Moon, Mars). */
 export const SURVEY_BODIES: readonly string[] = ['earth', 'moon', 'mars'];
+
+/** Stable id of route waypoint `i` (saved in expedition progress). */
+export function routeId(body: string, i: number): string {
+  return `${body}:route:${i}`;
+}
+
+/** Stable id of scan target `i` (saved in the scanned list). */
+export function scanId(body: string, i: number): string {
+  return `${body}:poi:${i}`;
+}

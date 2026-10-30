@@ -191,11 +191,15 @@ async function main(): Promise<void> {
     bgCamera.quaternion.copy(camera.quaternion);
     bgCamera.updateMatrixWorld();
     const camSys = new Vector3(...def.center).add(camPlanet);
+    // Stars fade in a daylit sky (the game does this from the sky luminance).
+    const inAir = showTerrain && def.atmosphere != null && camPlanet.length() < R + def.atmosphereHeight;
+    const sunUp = camPlanet.clone().normalize().dot(sunDir);
+    const starFade = inAir ? 1 - Math.min(1, Math.max(0, (sunUp + 0.1) / 0.15)) : 1;
     if (sunDef) {
       const toSun = new Vector3(...sunDef.center).sub(camSys);
       const dist = toSun.length();
-      space.update(bgCamera.quaternion, 1, 1, { dir: toSun.normalize(), angularRadius: Math.asin(Math.min(1, sunDef.radius / dist)), distance: dist });
-    } else space.update(bgCamera.quaternion, 1, 1);
+      space.update(bgCamera.quaternion, 1, starFade, { dir: toSun.normalize(), angularRadius: Math.asin(Math.min(1, sunDef.radius / dist)), distance: dist });
+    } else space.update(bgCamera.quaternion, 1, starFade);
     proxies.update(camSys, showTerrain ? def.id : null, now / 1000);
     if (q.get('debug') === 'nowater') for (const p of proxies.proxies.values()) if (p.water) p.water.visible = false;
     if (q.get('debug') === 'noclouds') for (const p of proxies.proxies.values()) p.clouds.group.visible = false;
