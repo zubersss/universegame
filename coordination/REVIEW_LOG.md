@@ -175,3 +175,11 @@ Decided: D-030 (day/night values).
 Signals: BLENDER starved again (~50 min without an export window). Root cause: B-024 (want file) skipped since cycle 10. Response: LEAD filed want_blender.lock 17:41; B-024 marked BLOCKING. If BLENDER still has no window by cycle 19, LEAD asks UNITY to pause heavy jobs for 20 min.
 User: USER-09 (M1 playtest) open since 17:15.
 Queue: UNITY 5 Ready, BLENDER 8 Ready.
+
+## Cycle 19 · 2026-10-30 18:15
+Checked: git log 17:44–17:58 (U-026, B-014, B-017, B-018); UNITY_STATUS (U-026 profile RED at 17:40 under contention, re-run pending; U-027 uncompiled), BLENDER_STATUS; planets_b018_montage.png, planets__saturn__rings_contact.png (smooth at full size), props__common__shelter_door_contact.png; locks: removed LEAD's want_blender.lock (window used 17:51–17:57), want_unity.lock present; free RAM 1.8 GB.
+Moved: B-014, B-017, B-018 → Done; U-027, B-015 → In Progress.
+Decided: none.
+Signals: B-024 still not implemented (no want logic in blender_render.ps1). The LEAD-filed want file worked again. Keep B-024 BLOCKING. Watch: U-026 profile RED (Earth p99 18.8 ms) during contention. It must be green on re-run.
+User: USER-09 (M1 playtest) open since 17:15.
+Queue: UNITY 6 Ready, BLENDER 5 Ready.

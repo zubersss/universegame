@@ -289,6 +289,20 @@ Files: Assets/_Game/Code/Runtime/FX/
 Depends: U-010, U-012
 Lead notes: Cycle 16. B-012 art Done.
 
+### U-034 · UNITY · Ready · M2
+Goal: Space art pass with B-017/B-018: all eight planet discs + glows from real art, `planets/saturn/rings` at world width ≈ 446 units (BLENDER handoff: A-ring outer edge r = 500 px of 1024, Saturn R = 220.4 px), Luna disc from `planets/luna/surface`, asteroid belt drawn with `props/space/asteroid_01..06` (instanced, varied rotation/scale).
+Accept: captures of Saturn with rings, Jupiter, Neptune, and a belt segment; Space draw calls ≤ 80 and frame p99 ≤ 16.6 ms in BudgetGate; no placeholder left for any planet key.
+Files: Assets/_Game/Code/Runtime/Space/, Scenes/Space.unity
+Depends: U-022
+Lead notes: Cycle 19. Art Done: B-017, B-018.
+
+### U-035 · UNITY · Ready · M2
+Goal: Earth spawn camp with B-014 props: `landing_pad` under the Pilgrim at spawn, two `lamp`s, a `storage_crate` stack, the `smelter` (inert until M3), placed as a stamp like U-030 POIs.
+Accept: capture at spawn by day and by night (lamps glow via emission); props have colliders where you can stand on them (pad, crates); the stamp survives dig/save/load.
+Files: Assets/_Game/Code/Runtime/Planet/POI/, Prefabs/
+Depends: U-030
+Lead notes: Cycle 19. It gives the first screen of the game a sense of place.
+
 ### U-025 · UNITY · Review · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.
 Accept: EditMode test: Earth noon/midnight intensities match §9; captures at dawn/noon/dusk/night on Earth; 0 B GC per frame.
@@ -301,9 +315,9 @@ Goal: Mars dust storm (Bible §7.2): 60 s warning, 2–6 min storm every 4–7 g
 Accept: PlayMode test forces a storm: warning event 60 s before; fog shrinks visibility to 15 m; Cryo level rises by 1; storm ends inside 2–6 min; uses fx/dust when present.
 Files: Assets/_Game/Code/Runtime/Planet/Weather/
 Depends: U-025
-Lead notes: M2 draft (cycle 10).
+Lead notes: Code + tests accepted in principle (cycle 19); waiting on the storm BudgetGate leg and a profile re-run without contention. The 17:40 Earth p99 18.8 ms (RED) must come back green.
 
-### U-027 · UNITY · Ready · M2
+### U-027 · UNITY · In Progress · M2
 Goal: Creature AI v1: grazer (stag: wander, flee), pack hunter (wolf: night, chase), scavenger (dustskater), canyon hunter (scree stalker); spawns by biome and time; real gravity on bodies.
 Accept: PlayMode tests: stag flees within 8 m, wolf packs spawn only at night, creatures never fall through streamed chunks; ≤ 0.5 ms AI per frame with 20 creatures; placeholders until B-015/B-016.
 Files: Assets/_Game/Code/Runtime/Creatures/
@@ -455,14 +469,14 @@ Files: Assets/_Game/Art/icons/
 Depends: B-002
 Lead notes: Done 8ca8ba4 (cycle 17): 16 lit icons readable at 32 px (montage).
 
-### B-014 · BLENDER · In Progress · M2
+### B-014 · BLENDER · Done · M2
 Goal: Props batch 1: `props/common/{landing_pad,shelter_wall,shelter_door,smelter,storage_crate,lamp}`.
 Accept: ≤ 512², color + normal (+ emission for lamp and smelter), bottom-center pivots, mask R rim for interactables.
 Files: Assets/_Game/Art/props/common/
 Depends: B-002
-Lead notes: —
+Lead notes: Done 69b73e6 (cycle 19): landing pad, shelter wall/door, smelter, crate, lamp; worn industrial; emission for lights/windows.
 
-### B-015 · BLENDER · Ready · M2
+### B-015 · BLENDER · In Progress · M2
 Goal: Earth creatures `creatures/earth/stag`, `creatures/earth/wolf`.
 Accept: medium class (256 px), standard creature set ≤ 30 frames, `.json`, color + normal.
 Files: blender/sources/creatures/earth/, Assets/_Game/Art/creatures/earth/
@@ -476,19 +490,19 @@ Files: Assets/_Game/Art/creatures/mars/
 Depends: B-015
 Lead notes: —
 
-### B-017 · BLENDER · Ready · M2
+### B-017 · BLENDER · Done · M2
 Goal: Asteroids `props/space/asteroid_01..06` and `planets/luna/surface` (512×256).
 Accept: top-down, color + normal, six distinct silhouettes 1–6 m, sizes within contract §4.
 Files: Assets/_Game/Art/props/space/, Assets/_Game/Art/planets/luna/
 Depends: B-002
-Lead notes: —
+Lead notes: Done 087dcc9 (cycle 19): six asteroid silhouettes 1–6 m at 64 px/m (D-018 precedent), Luna 512×256 procedural.
 
-### B-018 · BLENDER · Ready · M2
+### B-018 · BLENDER · Done · M2
 Goal: Outer and inner planet discs for the space map: `planets/{mercury,venus,jupiter,saturn,uranus,neptune}/surface` (+ `glow` where an atmosphere exists: venus, jupiter, saturn, uranus, neptune) and `planets/saturn/rings` (top-down ring texture, transparent).
 Accept: contract §4 sizes (surface 2048×1024 equirect, wraps in x; glow 512×512 with disc edge at r = 200 px as for Earth); public-domain sources (NASA/JPL/USGS global mosaics) logged in `docs/credits/blender.md`, or procedural bands where no mosaic exists; Venus shows the cloud tops, not the radar surface; contact sheets with a 2× wrap row.
 Files: Assets/_Game/Art/planets/<planet>/, blender/sources/planets/<planet>/
 Depends: B-002
-Lead notes: Replaces UNITY's placeholders for the six remaining planets (U-005 list). Rings: propose the size and ring-inner/outer radii in px in your status; UNITY draws them at Saturn's ring radius 220 units (Bible §3).
+Lead notes: Done 087dcc9 (cycle 19): Mercury (MESSENGER) and Jupiter (Cassini) PD sources, procedural Venus/Saturn/Uranus/Neptune, glows, Saturn rings (smooth at full size). Integration → U-034.
 
 ### B-020 · BLENDER · Ready · M2
 Goal: Earth POI props: `props/earth/{launch_gantry,launch_tower_ruin,archive_door,archive_terminal,beacon}` for the abandoned coastal launch complex and the Survey Archive (Bible §7.1).
