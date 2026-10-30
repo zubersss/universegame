@@ -1,17 +1,20 @@
 # BLENDER STATUS
 Updated: 2026-10-30 · Session: 1
 ## Current task
-B-007 Earth terrain sets — started 2026-10-30. Generator + manifest committed (da7783f); previews pass (seam ≈ 1.0 on tile 46 for all six). Full-size export waiting on heavy_unity.lock (unity_test PlayMode, 11:13); renders as soon as it clears.
+B-009 player character characters/surveyor frame sheet — next loop tick, 2026-10-30
 ## Last completed
-B-006 Pilgrim — 4bbe06b. side 1536×512 and top 448×176, color/normal/emission each. 11.4 m industrial VTOL shuttle: lofted hull, belly lift pods (glowing vents + emitter plates), rear main engine (glowing throat + lip ring), fixed skids, dorsal fin + strobe, cockpit visor, portholes, nav lights (red port +Y, green starboard −Y). Worn paint, belly grime, chipped-metal scratches, hazard band and panel seams are procedural; seams also bump into the normal map. 11.7 s + 3.3 s, peak 1580 MB. Contact sheets: blender/preview/ships__pilgrim__{side,top}_contact.png.
+B-007 Earth terrain + B-008 Mars terrain — da7783f (generator), 2003b7a (soil/grass/stone/sand/snow), 2a70557 (water + Mars regolith/basalt/hematite/ice). Ten 1024×1024 sheets, color + normal, 47 blob variants each in BlobAutotile.cs order; tile-46 2× seam 0.76–1.19 (≈ interior step, i.e. invisible). Demo patches assembled with the blob rule (flat + relit upper-right): blender/preview/terrain__<planet>__<material>_demo.png. Peak 529 MB, ~5.5 s per sheet.
+Before that: B-006 Pilgrim — 4bbe06b. side 1536×512 and top 448×176, color/normal/emission each. 11.4 m industrial VTOL shuttle: lofted hull, belly lift pods (glowing vents + emitter plates), rear main engine (glowing throat + lip ring), fixed skids, dorsal fin + strobe, cockpit visor, portholes, nav lights (red port +Y, green starboard −Y). Worn paint, belly grime, chipped-metal scratches, hazard band and panel seams are procedural; seams also bump into the normal map. 11.7 s + 3.3 s, peak 1580 MB. Contact sheets: blender/preview/ships__pilgrim__{side,top}_contact.png.
 Before that: B-005 Sun + space — f7a1534 · B-004 Mars — 3fd3c9d · B-003 Earth — 3e281e0, e775226 (details in coordination/reports/blender/renders_2026-10-30.md).
 ## Next up
-B-009, B-010, B-012
+B-010, B-012, B-013
 ## Ready for review
 - B-002…B-005: in Review per board (waiting on the U-005 lit preview); no BLENDER action pending.
 - B-006 (4bbe06b): blender/scripts/build_pilgrim.py, blender/sources/ships/pilgrim.blend, Assets/_Game/Art/ships/pilgrim/{side,top}_{color,normal,emission}.png. render.py gained a per-asset `ppu` override (documented in blender/README.md).
+- B-007 (da7783f, 2003b7a, 2a70557): blender/scripts/gen_terrain.py, blender/scripts/meridian/noise.py, Assets/_Game/Art/terrain/earth/{soil,grass,stone,sand,snow,water}_{color,normal}.png.
+- B-008 (2a70557): Assets/_Game/Art/terrain/mars/{regolith,basalt,hematite,ice}_{color,normal}.png (manifest recipes; same generator).
 ## Handoffs
-→ UNITY: terrain/earth/* sheets follow your BlobAutotile.cs exactly (index = rank of the reduced mask, 0 = isolated, 46 = fully surrounded, N = tile above, 8 columns from top-left, no gutters, no .json; slots 47–63 transparent / normal (128,128,255)). Tiles join seamlessly in every combination (demo: blender/preview/terrain__earth__*_demo.png, assembled with the same rule). grass and soil share a seed, so their interiors match. water: alpha 0.8 (0.95 on the foam line), meant to draw on top of whatever is behind it.
+→ UNITY: terrain/mars/* use the same layout as Earth. terrain/earth/* sheets follow your BlobAutotile.cs exactly (index = rank of the reduced mask, 0 = isolated, 46 = fully surrounded, N = tile above, 8 columns from top-left, no gutters, no .json; slots 47–63 transparent / normal (128,128,255)). Tiles join seamlessly in every combination (demo: blender/preview/terrain__earth__*_demo.png, assembled with the same rule). grass and soil share a seed, so their interiors match. water: alpha 0.8 (0.95 on the foam line), meant to draw on top of whatever is behind it.
 → UNITY: ships/pilgrim: pivot = centre of mass = image centre ([0.5, 0.5]) in both views. side is true scale (PPU 128, nose → +X); skid bottoms touch the ground 1.8 m (230 px) below the pivot. top is NOT PPU 128: the 448 px cap forces 36 px/m (ship 11.4 m = 410 px), nose → +X (angle 0 = transform.right); scale it in the top-down view as you need. Emission is idle glow; thrust flames come from fx/thruster.
 → UNITY: planets/sun/surface is self-lit: draw it with emission = the emission map and no terminator/sun-direction shading. sun/glow disc edge is at r = 160 px of 512 → glow world width = 3.2 × R. backgrounds/space/layer0 is opaque; layer1/2 are transparent (straight alpha) and tile in x and y.
 → UNITY: sprite pivots come from `blender/manifest.json` `pivot` (normalized, bottom-left origin, Unity convention), and include the 8 px margin. calibration = [0.5, 0.0555556] (16 px of 288). "Bottom-center" props/characters = [0.5, margin/h].
