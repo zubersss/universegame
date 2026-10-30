@@ -113,25 +113,68 @@ export class Player {
    * One fixed step. `planetCenter` is the active body center (local);
    * `gravity` the local gravity magnitude.
    */
-  step(dt: number, input: WalkInput, planetCenter: Vector3, gravity: number): void {
-    this.prevPos.copy(this.pos);
-    // 1) Radial up and capsule realignment around the feet.
+  /** Radial up from the planet centre; re-align the capsule around its feet (heading transported). */
+  private realign(planetCenter: Vector3): void {
     _up.copy(this.pos).sub(planetCenter).normalize();
-    const feetOld = _v.copy(this.pos).addScaledVector(this.up, -FOOT_OFFSET);
     if (_up.angleTo(this.up) > 1e-6) {
+      const feetOld = _v.copy(this.pos).addScaledVector(this.up, -FOOT_OFFSET);
       this.up.copy(_up);
       alignUp(this.quat, this.up, this.quat);
       this.pos.copy(feetOld).addScaledVector(this.up, FOOT_OFFSET);
       // Parallel-transport the heading into the new tangent plane.
       this.setHeading(this.heading);
     }
-    // 2) Look.
-    if (input.yaw !== 0) {
-      _q.setFromAxisAngle(this.up, -input.yaw);
+  }
+
+  /** Mouse look: yaw about up, pitch clamped (radians). */
+  look(yaw: number, pitch: number): void {
+    if (yaw !== 0) {
+      _q.setFromAxisAngle(this.up, -yaw);
       this.heading.applyQuaternion(_q);
       this.setHeading(this.heading);
     }
-    this.pitch = Math.max(-1.45, Math.min(1.45, this.pitch + input.pitch));
+    this.pitch = Math.max(-1.45, Math.min(1.45, this.pitch + pitch));
+  }
+
+  /**
+   * Powered movement (abilities): move by velocity * dt through the character
+   * controller, without ground snapping or gravity; collisions slide and
+   * remove the blocked part of the velocity. Updates vel (horizontal), vVert
+   * and grounded like a walking step.
+   */
+  moveFree(dt: number, velocity: Vector3, planetCenter: Vector3): void {
+    this.prevPos.copy(this.pos);
+    this.realign(planetCenter);
+    if (this.snapOn) {
+      this.cc.disableSnapToGround();
+      this.snapOn = false;
+    }
+    this.cc.setUp({ x: this.up.x, y: this.up.y, z: this.up.z });
+    _desired.copy(velocity).multiplyScalar(dt);
+    this.cc.computeColliderMovement(this.collider, { x: _desired.x, y: _desired.y, z: _desired.z }, RAPIER.QueryFilterFlags.EXCLUDE_SENSORS, GROUPS.player);
+    const m = this.cc.computedMovement();
+    const wasGrounded = this.grounded;
+    this.grounded = this.cc.computedGrounded();
+    this.justLanded = this.grounded && !wasGrounded && this.airTime > 0.25;
+    this.airTime = this.grounded ? 0 : this.airTime + dt;
+    this.pos.x += m.x;
+    this.pos.y += m.y;
+    this.pos.z += m.z;
+    if (dt > 0) {
+      _v.set(m.x, m.y, m.z).divideScalar(dt);
+      this.vVert = _v.dot(this.up);
+      this.vel.copy(_v).addScaledVector(this.up, -this.vVert);
+    }
+    this.body.setNextKinematicTranslation({ x: this.pos.x, y: this.pos.y, z: this.pos.z });
+    this.body.setNextKinematicRotation({ x: this.quat.x, y: this.quat.y, z: this.quat.z, w: this.quat.w });
+  }
+
+  step(dt: number, input: WalkInput, planetCenter: Vector3, gravity: number): void {
+    this.prevPos.copy(this.pos);
+    // 1) Radial up and capsule realignment around the feet.
+    this.realign(planetCenter);
+    // 2) Look.
+    this.look(input.yaw, input.pitch);
     // 3) Tangent-plane velocity with acceleration limits.
     _right.crossVectors(this.heading, this.up).normalize();
     const speed = input.sprint ? WALK.sprint : WALK.walk;
