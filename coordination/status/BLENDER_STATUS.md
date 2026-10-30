@@ -1,7 +1,7 @@
 # BLENDER STATUS
 Updated: 2026-10-30 · Session: 1
 ## Current task
-B-012 FX batch 1 (fx/{thruster,dust,dig_sparks,escape_band,heat_shimmer}/base) — next loop tick, 2026-10-30
+B-022 terrain sheet revision (16 interior variants in slots 47–62; grass only on upward edges) — started 2026-10-30. Re-prioritised per board cycle 7: then B-010 rework (real 3D trees, FAILED §9 review), B-011 rework, B-019, B-023; B-012 after.
 ## Last completed
 B-011 Mars parallax — 4c3b39a. layer0 opaque butterscotch sky (no clouds) over a hazy 2-step mesa range; layer1 transparent mid buttes/mesas (terraced ridge with talus slopes, warped strata bands); layer2 transparent near dune ridge with basalt boulders. Tile in x (seam 0.43–1.10). Procedural, seeds 5101–5103. Peak 672 MB. Stacked check: blender/preview/backgrounds_mars_stack.png.
 Before that: B-010 Earth parallax — 2bc8fc5. layer0 opaque (sky gradient, soft cumulus band, hazy snow-capped range), layer1 transparent mid forest ridge with valley fog, layer2 transparent near forest edge (conifers + broadleaf) over grass. Haze increases with distance (0.10 / 0.42 / 0.55+). All tile in x (seam 0.92–1.14). Procedural, seeds 5001–5003, no external inputs. Peak 649 MB. Stacked 2× wrap check: blender/preview/backgrounds_earth_stack.png.
@@ -10,7 +10,7 @@ Before that: B-007 Earth terrain + B-008 Mars terrain — da7783f (generator), 2
 Before that: B-006 Pilgrim — 4bbe06b. side 1536×512 and top 448×176, color/normal/emission each. 11.4 m industrial VTOL shuttle: lofted hull, belly lift pods (glowing vents + emitter plates), rear main engine (glowing throat + lip ring), fixed skids, dorsal fin + strobe, cockpit visor, portholes, nav lights (red port +Y, green starboard −Y). Worn paint, belly grime, chipped-metal scratches, hazard band and panel seams are procedural; seams also bump into the normal map. 11.7 s + 3.3 s, peak 1580 MB. Contact sheets: blender/preview/ships__pilgrim__{side,top}_contact.png.
 Before that: B-005 Sun + space — f7a1534 · B-004 Mars — 3fd3c9d · B-003 Earth — 3e281e0, e775226 (details in coordination/reports/blender/renders_2026-10-30.md).
 ## Next up
-B-012, B-013, B-014 (then B-015, B-017, B-018, B-019, B-020, B-021, B-022)
+B-010 rework, B-011 rework, B-019, B-023 (then B-012, B-013, B-014, B-015, B-017, B-018, B-020, B-021)
 ## Ready for review
 (B-001…B-008 Done per board, cycle 6.)
 - B-010 (2bc8fc5): blender/scripts/gen_backdrop.py, Assets/_Game/Art/backgrounds/earth/layer{0,1,2}_color.png.
