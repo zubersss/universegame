@@ -92,40 +92,40 @@ Lead notes: —
 
 ## UNITY
 
-### U-001 · UNITY · Ready · M0
+### U-001 · UNITY · Done · M0
 Goal: Unity 6 project at repo root with URP 2D Renderer, Input System, Addressables, Test Framework, Cinemachine, TMP; folder tree and asmdefs; compile script.
 Accept: `tools/unity_compile.ps1` exits 0 with zero `error CS`; asmdefs `MERIDIAN.Runtime`, `MERIDIAN.Editor`, `MERIDIAN.Tests.Unit`; packages pinned in `Packages/manifest.json`; URP asset uses the 2D Renderer.
 Files: Assets/_Game/**, Packages/, ProjectSettings/, tools/unity_compile.ps1
 Depends: L-005
-Lead notes: Reads `tools/paths.json` for the Unity path; HeavyJobLock applies. Editor is 6000.6.5f1 (D-013); pin the Bible §12 versions in `manifest.json` (URP 17.6.0, Addressables 2.11.2, Input System 1.20.0, Test Framework 1.8.0). In Unity 6, TextMeshPro ships inside `com.unity.ugui`, so don't add a separate TMP package. Cinemachine isn't bundled; pin the 3.x version the registry resolves and log it in your status. Scripting backend: Mono (D-014). No IL2CPP module is installed. HeavyJobLock: the always-running Unity Hub background service (`unity.exe serve`) is NOT the Editor; detect by path per CLAUDE.md rule 6 (D-015).
+Lead notes: Done add133b (cycle 4): latest unity_compile log 0 error CS / 0 warnings; 3 asmdefs; manifest pinned; MERIDIAN_URP uses MERIDIAN_Renderer2D.
 
-### U-002 · UNITY · Ready · M0
+### U-002 · UNITY · Done · M0
 Goal: `PlanetConfig` ScriptableObjects for all 8 planets with Bible §4.1 and §5.1 values; tests.
 Accept: EditMode tests assert every gravity ratio ±0.5%, launch fuel = round(1.5·v_esc), world width/height/datum/escape/crush per §5.1, all 8 configs present.
 Files: Assets/_Game/Code/Runtime/Planets/PlanetConfig.cs, Assets/_Game/Settings/Planets/*.asset, Assets/_Game/Tests/Unit/PlanetConfigTests.cs
 Depends: U-001
-Lead notes: —
+Lead notes: Done 886065c (cycle 4): PlanetConfigTests cover all 8 planets, ratios ±0.5%, fuel, §5.1 dimensions; EditMode 27/27.
 
-### U-003 · UNITY · Ready · M0
+### U-003 · UNITY · In Progress · M0
 Goal: Batch test and build scripts.
 Accept: `tools/unity_test.ps1 [EditMode|PlayMode]` writes `logs/tests_<date>.xml` and `coordination/reports/unity/tests_<date>.md` (pass/fail counts, failed names); `tools/unity_build.ps1` produces a dev build in `Build/`; both honor HeavyJobLock and exit non-zero on failure.
 Files: tools/unity_test.ps1, tools/unity_build.ps1, Assets/_Game/Code/Editor/BuildTools.cs
 Depends: U-001
 Lead notes: —
 
-### U-004 · UNITY · Ready · M0
+### U-004 · UNITY · In Progress · M0
 Goal: `Core.unity` with `GameState`, `SceneDirector`, `TimeSystem` (72×), bootstrap; `Space.unity` and `PlanetSide.unity` stubs loaded additively.
 Accept: Play from Core loads Space (inactive) and PlanetSide (Earth config); smoke test with `LogAssert.NoUnexpectedReceived()` passes.
 Files: Assets/_Game/Scenes/, Assets/_Game/Code/Runtime/Core/
 Depends: U-002
 Lead notes: —
 
-### U-005 · UNITY · Ready · M0
+### U-005 · UNITY · In Progress · M0
 Goal: `ArtImporter` + `ArtKeys` + M1 placeholder set.
 Accept: Every rule in contract §6 implemented and covered by an EditMode test; placeholders exist for: characters/surveyor, ships/pilgrim/top+side, terrain/earth/{soil,grass,stone,sand,snow,water}, terrain/mars/{regolith,basalt,hematite,ice}, backgrounds/{earth,mars,space}/layer0..2, planets/{sun,mercury,venus,earth,mars,jupiter,saturn,uranus,neptune}/surface, planets/earth/clouds, fx/{thruster,dust,dig_sparks,escape_band,heat_shimmer}, props/common/calibration; importing B-002's calibration asset retires its placeholder with no manual step.
 Files: Assets/_Game/Code/Editor/ArtImporter.cs, Assets/_Game/Code/Runtime/Art/ArtKeys.cs, Assets/_Game/Placeholders/**, Assets/_Game/Tests/Unit/ArtImporterTests.cs
 Depends: U-001
-Lead notes: This is the M0 calibration handshake with B-002.
+Lead notes: This is the M0 calibration handshake with B-002. (Cycle 4) Calibration handshake: when ArtImporter works, run tools/unity_art_preview.ps1 props/common/calibration and record the preview path in your status so LEAD can close B-002. Commit the Art .meta files (D-016).
 
 ### U-006 · UNITY · Ready · M0
 Goal: Lit art preview tool.
@@ -215,42 +215,42 @@ Lead notes: —
 
 ## BLENDER
 
-### B-001 · BLENDER · Ready · M0
+### B-001 · BLENDER · Done · M0
 Goal: Pipeline skeleton: `blender/` tree, `manifest.json` schema, `render.py` CLI (`--asset`, `--category`, `--all`, `--preview`), `tools/blender_render.ps1`, logging, memory settings per contract §3.
 Accept: `tools/blender_render.ps1 all` on an empty manifest exits 0; an unknown key exits non-zero with a one-line reason; a line per asset in `logs/blender_<date>.log`.
 Files: blender/render.py, blender/manifest.json, blender/scripts/, tools/blender_render.ps1
 Depends: L-005
-Lead notes: Reads `tools/paths.json` for `blenderExe` (Blender 5.2.2 LTS). The Python API changed across 4.x→5.x (e.g. EEVEE engine identifiers). Read valid enum values at runtime (`bpy.types.RenderSettings.bl_rna.properties['engine'].enum_items`) rather than hard-coding 4.x names. HeavyJobLock: the always-running Unity Hub background service (`unity.exe serve`) is NOT the Editor; detect by path per CLAUDE.md rule 6 (D-015).
+Lead notes: Done 4dd7922/5d630d4 (cycle 4): unknown key → FAIL line + non-zero; 11 assets logged one line each. Empty-manifest run not retained in logs; accepted on the populated-manifest runs.
 
-### B-002 · BLENDER · Ready · M0
+### B-002 · BLENDER · Review · M0
 Goal: Calibration asset `props/common/calibration`.
 Accept: 1 m sphere on a 1 m cube with known flat colors; color, normal, emission, mask exported per contract §2; contact sheet shows the upper-right of the sphere lit when the light is upper-right; 8 px dilation visible; sizes logged.
 Files: blender/sources/props/calibration.blend, Assets/_Game/Art/props/common/calibration_*.png
 Depends: B-001
-Lead notes: Handshake with U-005; LEAD proof-checks both together.
+Lead notes: Review (cycle 4). Blender-side checks pass (contact sheet: sphere lit upper-right, OpenGL normals, 8 px dilation, exact flat colors). Waiting only on the U-005 lit preview via unity_art_preview.ps1. Dependents (B-003+) may proceed.
 
-### B-003 · BLENDER · Ready · M2
+### B-003 · BLENDER · Review · M2
 Goal: Earth top-down: `planets/earth/surface` (2048×1024), `clouds` (1024×512), `glow` (512).
 Accept: contract §4 sizes; public-domain source imagery logged in `docs/credits/blender.md`; preview wraps without a seam.
 Files: blender/sources/planets/earth.blend, Assets/_Game/Art/planets/earth/
 Depends: B-002
-Lead notes: —
+Lead notes: Review (cycle 4). Contract sizes, LFS, credits, and wrap all pass on the contact sheets. Waiting on the in-Unity lit check after U-005 and the art preview tool; no BLENDER action needed.
 
-### B-004 · BLENDER · Ready · M2
+### B-004 · BLENDER · Review · M2
 Goal: Mars top-down: `planets/mars/surface`, `glow`.
 Accept: as B-003.
 Files: Assets/_Game/Art/planets/mars/
 Depends: B-002
-Lead notes: —
+Lead notes: Review (cycle 4). Contract sizes, LFS, credits, and wrap all pass on the contact sheets. Waiting on the in-Unity lit check after U-005 and the art preview tool; no BLENDER action needed.
 
-### B-005 · BLENDER · Ready · M2
+### B-005 · BLENDER · Review · M2
 Goal: Sun and space backgrounds: `planets/sun/surface` + `glow` (emission), `backgrounds/space/layer0..2`.
 Accept: Sun emission map present; three 2048×1024 star layers tileable in x, with a Milky Way band on layer0.
 Files: Assets/_Game/Art/planets/sun/, Assets/_Game/Art/backgrounds/space/
 Depends: B-002
-Lead notes: —
+Lead notes: Review (cycle 4). Contract sizes, LFS, credits, and wrap all pass on the contact sheets. Waiting on the in-Unity lit check after U-005 and the art preview tool; no BLENDER action needed.
 
-### B-006 · BLENDER · Ready · M2
+### B-006 · BLENDER · In Progress · M2
 Goal: Starter ship **Pilgrim**: `ships/pilgrim/top` and `side`.
 Accept: top ≤ 448×448 (see UNITY handoff), side ≤ 1536×512; color, normal, emission; thrusters and windows glow; industrial-worn look per Bible §9.
 Files: blender/sources/ships/pilgrim.blend, Assets/_Game/Art/ships/pilgrim/

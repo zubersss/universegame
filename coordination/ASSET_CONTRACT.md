@@ -1,4 +1,4 @@
-# MERIDIAN — Asset Contract v1.0
+# MERIDIAN — Asset Contract v1.1
 
 Owner: LEAD (edits and version bumps, logged in `DECISIONS.md`). BLENDER produces to it;
 UNITY's `ArtImporter` enforces it. If an asset can't meet a rule, BLENDER proposes a
@@ -47,7 +47,7 @@ wraps `blender --background --python blender/render.py -- --asset <key>` (or `--
 3. Produce the color pass as unlit albedo (material override that routes base color to an
    emission shader, or Workbench flat shading), the normal pass from the Normal render pass
    converted to the convention in §2, emission from an emission-only override, mask from
-   AOVs.
+   AOVs or an equivalent material override (R rim, G AO, B metallic; D-017).
 4. Post-process (edge dilation, fill, gutters, sheet packing, size check) in Python; write
    the `.json` manifest for frame sheets; write a contact sheet to `blender/preview/`.
 5. `-Preview` renders at 25% size with low samples to `blender/preview/` only.

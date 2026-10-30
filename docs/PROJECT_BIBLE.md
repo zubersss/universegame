@@ -1,7 +1,7 @@
 # MERIDIAN — Project Bible (single source of truth)
 
 Owner: LEAD. Workers read; only LEAD edits. Changes are logged in `coordination/DECISIONS.md`.
-Version: 1.1 (versions pinned, L-005). The Lead bumps the version on every edit.
+Version: 1.2 (Cinemachine pinned, cycle 4). The Lead bumps the version on every edit.
 
 Sections: 1 Vision · 2 Setting and story · 3 The solar system in game · 4 Physics and
 numbers · 5 Views and transitions · 6 Controls · 7 The eight planets · 8 Systems →
@@ -607,7 +607,7 @@ If the laptop's RAM is upgraded, LEAD raises only this section and logs the deci
 | **M6 Polish, optimization, Windows build** | Profiling pass on every planet; load times; settings menu; credits from `docs/credits/`; zip build | All budgets green on every planet; 60-minute session with zero errors; user sign-off      |
 
 **Pinned versions (L-005, 2026-10-30; D-013, D-014).** Unity: `6000.6.5f1` (Unity 6.6, Supported stream) · Blender: `5.2.2 LTS` · URP:
-`17.6.0` · Addressables: `2.11.2` · Input System: `1.20.0` · Test Framework: `1.8.0` · Claude Code: `2.1.314`. Windows builds use the Mono scripting backend (D-014).
+`17.6.0` · Addressables: `2.11.2` · Input System: `1.20.0` · Test Framework: `1.8.0` · Cinemachine: `6.6.0` (bundled core package) · Claude Code: `2.1.314`. Windows builds use the Mono scripting backend (D-014).
 
 ---
 

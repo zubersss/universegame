@@ -33,3 +33,7 @@ crashlytics-build.properties
 *.tmp
 Thumbs.db
 .DS_Store
+
+# Python
+__pycache__/
+*.pyc

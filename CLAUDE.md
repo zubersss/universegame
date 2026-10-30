@@ -25,6 +25,9 @@ Your role is the word in your kickoff or resume message. Then read:
 | BLENDER | `blender/`; `Assets/_Game/Art/`; `tools/blender_*.ps1`; `coordination/status/BLENDER_STATUS.md`; `coordination/reports/blender/`; `docs/credits/blender.md` |
 
 \* `Placeholders/` is UNITY's. Nobody else edits another role's folders. Reading is always allowed.
+Exception (D-016): every `.meta` file under `Assets/_Game/Art/` (and `Assets/_Game/Art.meta`)
+is written and committed by UNITY, because the Unity Editor generates them and they hold
+import settings. BLENDER never creates, edits, or commits `.meta` files.
 Every file in `coordination/` has exactly one writer (the table above), so no update is
 ever overwritten.
 
