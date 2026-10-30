@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Box3, Group, Vector3, type MeshStandardMaterial } from 'three';
+import { Box3, Group, Quaternion, Texture, Vector3, type MeshStandardMaterial } from 'three';
 import { buildAvatar, B, BONE_NAMES, DIM, restPosition } from '../src/avatar/AvatarModel';
 import { AvatarAnimator, BALL_F, ankleFromBall, footTarget, gaitParams, legIK } from '../src/avatar/AvatarAnimator';
 import { Avatar, type AvatarFrame, type GroundRay } from '../src/avatar/Avatar';
@@ -65,9 +65,59 @@ describe('explorer rig', () => {
       }
       expect((m.material as MeshStandardMaterial).isMeshStandardMaterial).toBe(true);
     }
-    // Eye level matches the walker's camera height.
+    // Eye level matches the walker's camera height; the ankle joint matches the rest skeleton.
     expect(DIM.eyeY).toBeCloseTo(1.62, 2);
+    expect(restPosition('footL').y).toBeCloseTo(DIM.ankleY, 6);
+    // Knee guards sit on the front of the knees (-Z), centred on them.
+    const plate = rig.meshes.find((m) => m.name === 'explorer-plate')!;
+    const knee = restPosition('lowerLegL');
+    const pos = plate.geometry.getAttribute('position');
+    let n = 0;
+    let ax = 0;
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i);
+      const y = pos.getY(i);
+      if (Math.abs(y - knee.y) < 0.03 && Math.abs(x - knee.x) < 0.07 && pos.getZ(i) < -0.03) {
+        n++;
+        ax += x - knee.x;
+      }
+    }
+    expect(n).toBeGreaterThan(10);
+    expect(Math.abs(ax / n)).toBeLessThan(0.015);
+    // The chest blends toward the spine at its bottom only.
+    const fabric = rig.meshes.find((m) => m.name === 'explorer-fabric')!;
+    const fp = fabric.geometry.getAttribute('position');
+    const si = fabric.geometry.getAttribute('skinIndex');
+    const sw = fabric.geometry.getAttribute('skinWeight');
+    for (let i = 0; i < fp.count; i++) {
+      if (si.getX(i) !== B.chest) continue;
+      const y = fp.getY(i);
+      const spineW = si.getY(i) === B.spine ? sw.getY(i) : 0;
+      if (y > DIM.hipY + 0.42) expect(spineW).toBe(0);
+      if (y < DIM.hipY + 0.3) expect(spineW).toBeGreaterThan(0.45);
+    }
     rig.dispose();
+  });
+
+  it('picks up the scene reflection map at draw time (it can be rebuilt after the update)', () => {
+    let env: Texture | null = null;
+    const av = new Avatar(new Group(), null, FWD, () => env);
+    const m = av.rig.meshes[0];
+    const mat = m.material as MeshStandardMaterial;
+    const draw = () => m.onBeforeRender(null as never, null as never, null as never, null as never, null as never, null as never);
+    draw();
+    expect(mat.envMap).toBeNull();
+    const v0 = mat.version;
+    env = new Texture();
+    draw();
+    expect(mat.envMap).toBe(env);
+    expect(mat.version).toBeGreaterThan(v0); // the shader gains the map once
+    const v1 = mat.version;
+    env = new Texture();
+    draw();
+    expect(mat.envMap).toBe(env);
+    expect(mat.version).toBe(v1); // swapping maps needs no recompile
+    av.dispose();
   });
 
   it('leg IK puts the ankle exactly on its target in 3D (bone forward kinematics)', () => {
@@ -118,11 +168,35 @@ describe('explorer rig', () => {
 });
 
 describe('explorer animation', () => {
-  it('plants feet without sliding at walk, jog and sprint speeds on flat ground', () => {
+  it('plants feet without sliding at walk, jog and sprint speeds on flat ground, soles on the ground, no snaps', () => {
+    const maxTurn: Record<number, number> = { 1.5: 0.15, 4.5: 0.22, 7.5: 0.3 }; // rad per 60 Hz frame
     for (const speed of [1.5, 4.5, 7.5]) {
       const parent = new Group();
       const av = new Avatar(parent, null, FWD);
-      const { overreach } = walk(av, speed, 6);
+      // Feet point 2 cm above the ground (controller skin): the ground is at y = -0.02.
+      let sole = [Infinity, -Infinity];
+      let turn = 0;
+      const q = new Quaternion();
+      const qp = new Quaternion();
+      const ball = new Vector3();
+      let frame = 0;
+      const { overreach } = walk(av, speed, 6, {
+        onFrame: () => {
+          const bone = av.rig.bones[B.footL];
+          bone.getWorldQuaternion(q);
+          if (++frame > 90) {
+            turn = Math.max(turn, q.angleTo(qp));
+            if (av.anim.planted[0]) {
+              ball.set(0, -DIM.ankleY, -BALL_F).applyMatrix4(bone.matrixWorld);
+              sole = [Math.min(sole[0], ball.y + 0.02), Math.max(sole[1], ball.y + 0.02)];
+            }
+          }
+          qp.copy(q);
+        },
+      });
+      expect(sole[0]).toBeGreaterThan(-0.003);
+      expect(sole[1]).toBeLessThan(0.003);
+      expect(turn).toBeLessThan(maxTurn[speed]);
       expect(av.slipSamples).toBeGreaterThan(50);
       expect(av.maxSlip).toBeLessThan(0.002); // < 2 mm: planted feet are locked
       expect(overreach).toBe(0);
@@ -257,7 +331,7 @@ describe('explorer animation', () => {
     expect(Array.from(an.rot)).toEqual(Array.from(before));
   });
 
-  it('turns toward the movement direction and ignores teleports for the gait', () => {
+  it('turns toward the movement direction; a placement is not a step or a landing', () => {
     const av = new Avatar(new Group(), null, FWD);
     const dt = 1 / 60;
     const feet = new Vector3();
@@ -267,10 +341,19 @@ describe('explorer animation', () => {
       av.update({ dt, feet: feet.clone(), up: UP, grounded: true, vVert: 0, moveVel: side.clone().multiplyScalar(3), lookHeading: FWD, lookPitch: 0 });
     }
     expect(av.facing.dot(side)).toBeGreaterThan(0.99);
-    const phase = av.anim.phase;
-    feet.x += 500; // placement (recovery), not a step
-    av.update({ dt, feet: feet.clone(), up: UP, grounded: true, vVert: 0, moveVel: new Vector3(), lookHeading: FWD, lookPitch: 0 });
-    expect(Math.abs(av.anim.phase - phase)).toBeLessThan(0.05);
+    // A placement (recovery from mid-air, restore) is not a step: no gait
+    // advance from the jump, no landing, feet re-planted under the body.
+    for (let i = 0; i < 20; i++) av.update({ dt, feet: feet.clone(), up: UP, grounded: false, vVert: -6, moveVel: new Vector3(), lookHeading: FWD, lookPitch: 0 });
+    expect(av.anim.state).toBe('fall');
+    const lands = av.anim.entries.land;
+    const slip = av.maxSlip;
+    const settles = av.anim.settleSteps;
+    feet.x += 500;
+    for (let i = 0; i < 30; i++) av.update({ dt, feet: feet.clone(), up: UP, grounded: true, vVert: 0, moveVel: new Vector3(), lookHeading: FWD, lookPitch: 0 });
+    expect(av.anim.entries.land).toBe(lands);
+    expect(av.anim.state).toBe('idle');
+    expect(av.anim.settleSteps).toBe(settles);
+    expect(av.maxSlip).toBe(slip);
     av.dispose();
   });
 });

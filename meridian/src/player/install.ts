@@ -45,7 +45,7 @@ export class PlayerRuntime implements OnFootHooks {
   }
 
   enter(ctx: OnFootContext): void {
-    this.game.player?.attachVisual(this.game.render.scene);
+    this.game.player?.attachVisual(this.game.render.scene, () => this.game.lighting.envMap);
     this.lastVisTime = null;
     this.transition = null;
     this.abilities.enter(ctx);
@@ -104,11 +104,10 @@ export class PlayerRuntime implements OnFootHooks {
     // fixed steps, so its time is simTime - (1 - alpha) * SIM_DT. Pause,
     // loading and open panels stop the simulation and so freeze the
     // character; slow frames that drop steps never desynchronise the gait.
-    const t = g.simTime + (alpha - 1) * SIM_DT;
-    const dt = this.lastVisTime === null ? 0 : Math.min(0.25, Math.max(0, t - this.lastVisTime));
+    const { t, alpha: a, dt } = visualClock(g.simTime, alpha, this.lastVisTime);
     this.lastVisTime = t;
-    const scripted = this.transition ? this.transition.sample(this.transitionTime + (alpha - 1) * SIM_DT, this.pose) : null;
-    p.renderView(dt, alpha, g.cameraRig, g.lighting.envMap, g.settings.reducedMotion, scripted);
+    const scripted = this.transition ? this.transition.sample(this.transitionTime + (a - 1) * SIM_DT, this.pose) : null;
+    p.renderView(dt, a, g.cameraRig, g.settings.reducedMotion, scripted);
     return true;
   }
 
@@ -116,6 +115,24 @@ export class PlayerRuntime implements OnFootHooks {
     this.transition = null;
     this.abilities.exit(reason);
   }
+}
+
+/**
+ * The rendered moment on simulation time (the state shown is interpolated
+ * between fixed steps: simTime - (1 - alpha) * SIM_DT) and the animation dt
+ * since the last frame. It never runs backward: when the stepper restarts
+ * (resume after pause or loading) with a smaller alpha, the last rendered
+ * moment is held instead.
+ */
+export function visualClock(simTime: number, alpha: number, last: number | null): { t: number; alpha: number; dt: number } {
+  let a = alpha;
+  let t = simTime + (a - 1) * SIM_DT;
+  if (last !== null && t < last) {
+    a = Math.min(1, alpha + (last - t) / SIM_DT);
+    t = simTime + (a - 1) * SIM_DT;
+  }
+  const dt = last === null ? 0 : Math.min(0.25, Math.max(0, t - last));
+  return { t, alpha: a, dt };
 }
 
 const runtimes = new WeakMap<Game, PlayerRuntime>();

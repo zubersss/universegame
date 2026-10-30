@@ -52,7 +52,8 @@ export const DIM = {
   hipX: 0.1,
   thigh: 0.43,
   shin: 0.42,
-  ankleY: 0.09,
+  /** Ankle joint above the sole in the rest pose (hip joint 0.92 - thigh 0.43 - shin 0.42). */
+  ankleY: 0.07,
   shoulderX: 0.215,
   shoulderY: 1.45,
   upperArm: 0.29,
@@ -211,7 +212,7 @@ export function buildAvatar(): AvatarRig {
   add('fabric', skin(lathe([[0.15, hipY + 0.1], [0.145, hipY + 0.2], [0.16, hipY + 0.3]], 18, 0.7), B.spine, B.hips, hipY + 0.2, hipY + 0.08));
   add('seal', skin(place(new TorusGeometry(0.155, 0.022, 6, 22).rotateX(Math.PI / 2).scale(1, 1, 0.74), 0, hipY + 0.07, 0), B.hips));
   // Chest: wide, slightly deeper at the front.
-  add('fabric', skin(lathe([[0.16, hipY + 0.29], [0.19, hipY + 0.38], [0.205, hipY + 0.47], [0.19, hipY + 0.54], [0.12, hipY + 0.58], [0.06, hipY + 0.6]], 18, 0.66), B.chest, B.spine, hipY + 0.3, hipY + 0.36));
+  add('fabric', skin(lathe([[0.16, hipY + 0.29], [0.19, hipY + 0.38], [0.205, hipY + 0.47], [0.19, hipY + 0.54], [0.12, hipY + 0.58], [0.06, hipY + 0.6]], 18, 0.66), B.chest, B.spine, hipY + 0.4, hipY + 0.3));
   // Chest plate: a shell over the front of the chest, an amber edge strip
   // below it and two teal status lights on it.
   add('plate', skin(place(new SphereGeometry(0.205, 20, 8, Math.PI * 1.2, Math.PI * 0.6, Math.PI * 0.34, Math.PI * 0.3).scale(1, 1, 0.7), 0, hipY + 0.45, 0), B.chest));
@@ -277,7 +278,8 @@ export function buildAvatar(): AvatarRig {
     add('accent', skin(place(new BoxGeometry(0.02, 0.1, 0.08), h.x + side * 0.082, h.y - 0.2, h.z), ul));
     // Knee guard (plate) and knee seal.
     add('seal', skin(place(new SphereGeometry(0.066, 12, 8), k.x, k.y, k.z), ll, ul, k.y - 0.03, k.y + 0.04));
-    add('plate', skin(place(new SphereGeometry(0.062, 12, 8, Math.PI * 0.55, Math.PI * 0.9).scale(1, 1.25, 1), k.x, k.y + 0.005, k.z - 0.012), ll));
+    // Centred on the front of the knee (SphereGeometry's phi = 1.5 pi points to -Z).
+    add('plate', skin(place(new SphereGeometry(0.062, 12, 8, Math.PI * 1.05, Math.PI * 0.9).scale(1, 1.25, 1), k.x, k.y + 0.005, k.z - 0.012), ll));
     // Shin and its plate.
     add('fabric', skin(place(taper(0.06, 0.05, DIM.shin - 0.05, 14), k.x, k.y - 0.02, k.z), ll, ul, k.y - 0.06, k.y + 0.02));
     add('plate', skin(place(rot(taper(0.066, 0.058, 0.2, 14, 0.85), 0, 0, 0), k.x, k.y - 0.12, k.z - 0.004), ll));

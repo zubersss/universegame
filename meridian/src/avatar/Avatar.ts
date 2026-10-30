@@ -1,4 +1,4 @@
-import { Matrix4, Quaternion, Vector3, type Object3D, type Texture } from 'three';
+import { Matrix4, Quaternion, Vector3, type MeshStandardMaterial, type Object3D, type Texture } from 'three';
 import { buildAvatar, B, DIM, restPosition, type AvatarRig } from './AvatarModel';
 import { AvatarAnimator, BALL_F, type FootGround, type GroundFn } from './AvatarAnimator';
 
@@ -62,7 +62,6 @@ export class Avatar {
   private readonly anchors = [new Vector3(), new Vector3()];
   private readonly anchored = [false, false];
   private readonly hipsRestY: number;
-  private envMap: Texture | null = null;
   /** This frame's target root and the previous frame's (sub-step interpolation). */
   private readonly target = new Vector3();
   private readonly from = new Vector3();
@@ -70,12 +69,17 @@ export class Avatar {
   private wasClimbing = false;
   private readonly groundFn: GroundFn;
 
-  constructor(parent: Object3D, private readonly ray: GroundRay | null, heading: Vector3) {
+  constructor(parent: Object3D, private readonly ray: GroundRay | null, heading: Vector3, private readonly envSource: (() => Texture | null) | null = null) {
     this.rig = buildAvatar();
     this.hipsRestY = restPosition('hips').y;
     this.facing.copy(heading).normalize();
     parent.add(this.rig.root);
-    this.groundFn = (_side, forward, lateral) => this.footGround(forward, lateral);
+    // The scene's reflection map can be rebuilt (and the old one disposed)
+    // after this frame's update: pick it up at draw time, per material.
+    if (envSource) {
+      for (const m of this.rig.meshes) m.onBeforeRender = () => this.syncEnv(m.material as MeshStandardMaterial);
+    }
+    this.groundFn = (_side, forward, lateral, yaw) => this.footGround(forward, lateral, yaw);
   }
 
   get state(): string {
@@ -91,13 +95,12 @@ export class Avatar {
   }
 
   /** Share the scene's reflection map so the visor and plates read like the ship. */
-  setEnvMap(t: Texture | null): void {
-    if (t === this.envMap) return;
-    this.envMap = t;
-    for (const m of Object.values(this.rig.materials)) {
-      m.envMap = t;
-      m.needsUpdate = true;
-    }
+  private syncEnv(m: MeshStandardMaterial): void {
+    const t = this.envSource ? this.envSource() : null;
+    if (m.envMap === t) return;
+    // Only adding or removing the map changes the shader.
+    if (!m.envMap !== !t) m.needsUpdate = true;
+    m.envMap = t;
   }
 
   /**
@@ -114,10 +117,12 @@ export class Avatar {
     if (!this.hasPrev) this.prevRoot.copy(target);
     const dTan = this.motion.copy(target).sub(this.prevRoot);
     if (dTan.length() > TELEPORT) {
-      // A placement (recovery, restore), not motion.
+      // A placement (recovery, restore), not motion: no landing, feet under the body.
       this.prevRoot.copy(target);
       dTan.set(0, 0, 0);
       this.anchored[0] = this.anchored[1] = false;
+      this.anim.resetAir();
+      this.anim.resetFeet();
     }
     const start = this.from.copy(this.prevRoot);
     // Tangent-plane motion this frame.
@@ -186,7 +191,7 @@ export class Avatar {
   }
 
   /** Ground under a foot, from a short ray along -up starting above the foot. */
-  private footGround(forward: number, lateral: number): FootGround | null {
+  private footGround(forward: number, lateral: number, yaw: number): FootGround | null {
     if (!this.ray) return null;
     const up = this.up;
     _o.copy(this.root).addScaledVector(this.facing, forward).addScaledVector(this.right, lateral).addScaledVector(up, 0.6);
@@ -196,7 +201,9 @@ export class Avatar {
     const n = hit.normal;
     const nu = n.dot(up);
     if (nu < 0.5) return null; // wall or steep face: keep the flat target
-    return { h: 0.6 - hit.dist, pitch: Math.atan2(-n.dot(this.facing), nu) };
+    // Slope along the foot's own axis (it may be twisted from the body).
+    _t.copy(this.facing).multiplyScalar(Math.cos(yaw)).addScaledVector(this.right, -Math.sin(yaw));
+    return { h: 0.6 - hit.dist, pitch: Math.atan2(-n.dot(_t), nu) };
   }
 
   /** Track how far the ball of a planted foot drifts in the tangent plane. */

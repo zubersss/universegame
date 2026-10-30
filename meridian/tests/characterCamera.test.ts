@@ -4,7 +4,8 @@ import { CHAR_CAMERA, CharacterCamera, type ArmCast } from '../src/player/Charac
 import { initPhysics, Physics, RAPIER, GROUPS } from '../src/physics/Physics';
 import { Player, FOOT_OFFSET } from '../src/player/Player';
 import { CameraRig } from '../src/render/CameraRig';
-import { WALK } from '../src/game/config';
+import { SIM_DT, WALK } from '../src/game/config';
+import { visualClock } from '../src/player/install';
 
 const UP = new Vector3(0, 1, 0);
 const FWD = new Vector3(0, 0, -1);
@@ -137,6 +138,23 @@ describe('character camera (spring arm)', () => {
   });
 });
 
+describe('visual clock', () => {
+  it('follows interpolated simulation time and never runs backward on resume', () => {
+    const step = SIM_DT;
+    let c = visualClock(10, 0.5, null);
+    expect(c.dt).toBe(0);
+    expect(c.t).toBeCloseTo(10 - 0.5 * step, 9);
+    c = visualClock(10 + step, 0.5, c.t);
+    expect(c.dt).toBeCloseTo(step, 9);
+    // Resume: the stepper restarted at alpha 0 one step later; the last rendered moment is held.
+    const last = c.t;
+    c = visualClock(10 + step, 0, last);
+    expect(c.t).toBeCloseTo(last, 9);
+    expect(c.alpha).toBeCloseTo(0.5, 9);
+    expect(c.dt).toBe(0);
+  });
+});
+
 describe('player with the explorer and camera on real colliders', () => {
   function world() {
     const physics = new Physics();
@@ -162,7 +180,7 @@ describe('player with the explorer and camera on real colliders', () => {
     const { physics, player, scene, rig } = world();
     expect(player.avatar).not.toBeNull();
     expect(scene.children.length).toBe(1);
-    player.renderView(dt, 1, rig, null, false);
+    player.renderView(dt, 1, rig, false);
     const root = player.avatar!.rig.root.position;
     const feet = player.feet(new Vector3());
     expect(root.distanceTo(feet)).toBeLessThan(0.03); // lowered by the controller skin
@@ -172,7 +190,7 @@ describe('player with the explorer and camera on real colliders', () => {
     const wall = physics.world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(0, 2, 2.2));
     physics.world.createCollider(RAPIER.ColliderDesc.cuboid(5, 3, 0.2).setCollisionGroups(GROUPS.props), wall);
     physics.refreshQueries();
-    player.renderView(dt, 1, rig, null, false);
+    player.renderView(dt, 1, rig, false);
     expect(rig.camera.position.z).toBeLessThan(2.0 - CHAR_CAMERA.probe + 1e-3);
     expect(player.view.arm).toBeLessThan(2.2);
     // Aim ray: along the camera's view, starting level with the eye.
@@ -192,17 +210,41 @@ describe('player with the explorer and camera on real colliders', () => {
     const roof = physics.world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(0, eyeY + 0.25 + 0.1, 0));
     physics.world.createCollider(RAPIER.ColliderDesc.cuboid(20, 0.1, 20).setCollisionGroups(GROUPS.props), roof);
     physics.refreshQueries();
-    for (let i = 0; i < 60; i++) player.renderView(dt, 1, rig, null, false);
+    for (let i = 0; i < 60; i++) player.renderView(dt, 1, rig, false);
     expect(player.view.arm).toBeGreaterThan(3);
     expect(player.view.bodyVisible).toBe(true);
     expect(rig.camera.position.y).toBeLessThan(eyeY + 0.25 - CHAR_CAMERA.probe + 1e-3);
     player.dispose();
   });
 
+  it('placing the walker (recovery) clears its fall: no landing thump', () => {
+    const { physics, player } = world();
+    const idle = { forward: 0, right: 0, sprint: false, jump: false, yaw: 0, pitch: 0 };
+    // Step off into the air: a long fall.
+    player.place(new Vector3(0, 30, 0), UP);
+    for (let i = 0; i < 60; i++) {
+      player.step(dt, idle, new Vector3(0, -1e7, 0), 9.8);
+      physics.step();
+    }
+    expect(player.grounded).toBe(false);
+    expect(player.airTime).toBeGreaterThan(0.5);
+    // Recovery puts it back on the ground.
+    player.place(new Vector3(0, FOOT_OFFSET + WALK.skin + 0.01, 0), UP);
+    let thump = false;
+    for (let i = 0; i < 10; i++) {
+      player.step(dt, idle, new Vector3(0, -1e7, 0), 9.8);
+      physics.step();
+      thump ||= player.justLanded;
+    }
+    expect(player.grounded).toBe(true);
+    expect(thump).toBe(false);
+    player.dispose();
+  });
+
   it('the view toggle (C) switches to first person with the body hidden', () => {
     const { player, rig } = world();
     player.view.toggle();
-    player.renderView(dt, 1, rig, null, false);
+    player.renderView(dt, 1, rig, false);
     expect(player.view.mode).toBe('first');
     expect(player.avatar!.visible).toBe(false);
     expect(rig.camera.position.distanceTo(player.eye(1, new Vector3()))).toBeLessThan(0.01);

@@ -24,8 +24,8 @@ export interface FootGround {
   pitch: number;
 }
 
-/** Ground query: side 0 = left, 1 = right; forward and lateral offsets from the root (m). */
-export type GroundFn = (side: 0 | 1, forward: number, lateral: number) => FootGround | null;
+/** Ground query: side 0 = left, 1 = right; forward and lateral offsets from the root (m); the foot's yaw (rad, left > 0) for the slope along it. */
+export type GroundFn = (side: 0 | 1, forward: number, lateral: number, yaw: number) => FootGround | null;
 
 export interface AnimInput {
   /** Frame time (s); 0 freezes the animation (pause). */
@@ -123,7 +123,9 @@ export function footTarget(p: number, g: Gait): { f: number; y: number; pitch: n
   return {
     f: g.front - g.span + g.span * ease(u),
     y: g.lift * Math.sin(Math.PI * Math.pow(u, 0.8)),
-    pitch: 0.25 * Math.sin(Math.PI * u) * (u > 0.5 ? 1 : -0.6),
+    // Toes down after push-off, through level at mid-swing, up before
+    // touchdown, arriving at the walking heel-strike angle (continuous).
+    pitch: -0.22 * Math.sin(2 * Math.PI * u) * (1 - u) + (1 - g.run) * 0.18 * smooth(0.55, 1, u),
     stance: false,
   };
 }
@@ -220,10 +222,13 @@ interface FootLock {
   /** Yaw at the start of the current swing or settle step, and last frame's. */
   syaw: number;
   cyaw: number;
+  /** Foot pitch relative to the ground at the start of the swing (toe-off roll) and last frame's. */
+  spitch: number;
+  cpitch: number;
 }
 
 function newLock(x: number): FootLock {
-  return { locked: true, f: 0, x, sf: 0, sx: x, settle: 0, tf: 0, tx: x, cf: 0, cx: x, yaw: 0, syaw: 0, cyaw: 0 };
+  return { locked: true, f: 0, x, sf: 0, sx: x, settle: 0, tf: 0, tx: x, cf: 0, cx: x, yaw: 0, syaw: 0, cyaw: 0, spitch: 0, cpitch: 0 };
 }
 
 /** A planted foot twisted further than this from the body takes a step. */
@@ -240,6 +245,8 @@ interface FootPose {
   planted: boolean;
   /** Walking heel strike (rad, toes up): the foot pivots on its heel. */
   strike: number;
+  /** Progress through the stance 0..1 (planted feet; drives the planned heel lift). */
+  stanceU: number;
   /** Foot yaw relative to the body (rad, left > 0). */
   yaw: number;
   /** Ground under the ball of a planted foot. */
@@ -371,7 +378,7 @@ export class AvatarAnimator {
       plan.f *= amp;
       plan.y *= amp;
       plan.pitch *= amp;
-      const fp: FootPose = { f: plan.f, x: x0, y: plan.y, pitch: plan.pitch, planted: false, strike: 0, yaw: 0, gh: 0, gp: 0 };
+      const fp: FootPose = { f: plan.f, x: x0, y: plan.y, pitch: plan.pitch, planted: false, strike: 0, stanceU: 0, yaw: 0, gh: 0, gp: 0 };
       if (this.air > 0.5) {
         // Airborne: no ground contact; the air pose takes over the legs.
         L.locked = false;
@@ -379,14 +386,20 @@ export class AvatarAnimator {
         L.sf = L.cf;
         L.sx = L.cx;
         L.syaw = L.cyaw;
+        L.spitch = L.cpitch;
       } else {
-        if (!settling && L.settle === 0) {
+        if (L.settle === 0) {
           const far = L.locked && (Math.abs(L.x - x0) > 0.24 || L.f > 0.6 || L.f < -0.95 || Math.abs(L.yaw) > MAX_FOOT_YAW);
           const offRest = L.locked ? Math.abs(L.f) > 0.05 || Math.abs(L.x - x0) > 0.04 || Math.abs(L.yaw) > 0.15 : true;
-          if (far || (idle && offRest)) {
+          // Idle settling goes one foot at a time; a foot left far behind (or
+          // twisted) may start once the other foot is halfway through its step.
+          const other = this.locks[1 - i];
+          const free = far ? other.settle < SETTLE_T * 0.5 : !settling;
+          if (free && (far || (idle && offRest))) {
             L.sf = L.locked ? L.f : L.cf;
             L.sx = L.locked ? L.x : L.cx;
             L.syaw = L.locked ? L.yaw : L.cyaw;
+            L.spitch = L.cpitch;
             L.tf = idle ? 0 : clampN(plan.f, -0.25, 0.25);
             L.tx = x0;
             L.locked = false;
@@ -401,7 +414,7 @@ export class AvatarAnimator {
           fp.f = L.sf + (L.tf - L.sf) * e;
           fp.x = L.sx + (L.tx - L.sx) * e;
           fp.y = SETTLE_LIFT * Math.sin(Math.PI * u);
-          fp.pitch = 0;
+          fp.pitch = L.spitch * (1 - e);
           fp.yaw = L.syaw * (1 - e);
           L.settle = Math.max(0, L.settle - inp.dt);
           if (L.settle === 0) {
@@ -424,18 +437,30 @@ export class AvatarAnimator {
           fp.planted = true;
           fp.strike = plan.pitch;
           fp.pitch = 0;
+          fp.stanceU = plan.stance ? p / g.stance : 0;
         } else {
           if (L.locked) {
             L.locked = false;
             L.sf = L.f;
             L.sx = L.x;
             L.syaw = L.yaw;
+            L.spitch = L.cpitch;
           }
           const u = (p - g.stance) / (1 - g.stance);
           const e = ease(u);
-          fp.f = L.sf + (g.front * amp - L.sf) * e;
+          // Forward travel: a cubic whose end slopes partly follow the ground
+          // moving past the body (half its speed), so the foot leaves and
+          // lands without a velocity jump (a little kick-back after lift-off,
+          // a little retraction before touchdown).
+          const m = -0.5 * (g.cycle - g.span) * amp;
+          const u2 = u * u;
+          const u3 = u2 * u;
+          fp.f = (2 * u3 - 3 * u2 + 1) * L.sf + (u3 - 2 * u2 + u) * m + (-2 * u3 + 3 * u2) * g.front * amp + (u3 - u2) * m;
           fp.x = L.sx + (x0 - L.sx) * e;
           fp.yaw = L.syaw * (1 - e);
+          // Leave the ground still rolled (toe-off), then follow the swing's own pitch.
+          const w = ease(Math.min(1, u / 0.3));
+          fp.pitch = L.spitch * (1 - w) + plan.pitch * w;
         }
       }
       L.cf = fp.f;
@@ -444,7 +469,7 @@ export class AvatarAnimator {
       // Ground under the ball of the foot (along its own axis). Every foot is
       // posed about that point (see place() in pose()), so a swing foot
       // touches down exactly where its planted pose begins.
-      const gq = inp.ground ? inp.ground(i as 0 | 1, fp.f + BALL_F * Math.cos(fp.yaw), fp.x - BALL_F * Math.sin(fp.yaw)) : null;
+      const gq = inp.ground ? inp.ground(i as 0 | 1, fp.f + BALL_F * Math.cos(fp.yaw), fp.x - BALL_F * Math.sin(fp.yaw), fp.yaw) : null;
       if (gq) {
         fp.gh = clampN(gq.h, -0.8, 0.8);
         fp.gp = clampN(gq.pitch, -0.85, 0.85);
@@ -493,9 +518,11 @@ export class AvatarAnimator {
       const bf = ft.f + BALL_F * cy;
       const bx = ft.x - BALL_F * sy;
       if (heel) {
+        // The heel lies on the ground a foot-length back along the slope.
         const back = BALL_F + HEEL_B;
-        const a = ankleFromHeel(0, ft.gh - back * Math.tan(ft.gp), psi);
-        return { f: bf - back * cy + a.f * cy, x: bx + back * sy - a.f * sy, y: a.y };
+        const hb = back * Math.cos(ft.gp);
+        const a = ankleFromHeel(0, ft.gh - back * Math.sin(ft.gp), psi);
+        return { f: bf - hb * cy + a.f * cy, x: bx + hb * sy - a.f * sy, y: a.y };
       }
       const a = ankleFromBall(0, ft.gh, psi);
       return { f: bf + a.f * cy, x: bx - a.f * sy, y: a.y };
@@ -524,9 +551,11 @@ export class AvatarAnimator {
           const a = place(ft, ft.gp - roll, false);
           return Math.hypot(a.f, hipH - a.y, a.x - hipXOf(i));
         };
-        let roll = 0;
-        if (reachAt(0) > REACH) {
-          let lo = 0;
+        // The heel starts lifting in the second half of the stance (more when
+        // running), and at least as much as the leg needs to reach.
+        let roll = (0.35 + 0.45 * g.run) * amp * smooth(0.4, 1, ft.stanceU);
+        if (reachAt(roll) > REACH) {
+          let lo = roll;
           let hi = MAX_ROLL;
           for (let k = 0; k < 16; k++) {
             const mid = (lo + hi) / 2;
@@ -543,16 +572,19 @@ export class AvatarAnimator {
       ft.y = a.y;
       ft.pitch = psi;
     }
-    // Swing and settle feet: the same geometry, lifted (y holds the lift so far).
+    // Swing and settle feet: the same geometry, lifted (y holds the lift so
+    // far), pivoting on the ball when the toes point down and on the heel when
+    // they point up, so lift-off and touchdown match the planted poses.
     for (const ft of feet) {
       if (ft.planted) continue;
       const psi = ft.gp + ft.pitch;
-      const a = place(ft, psi, false);
+      const a = place(ft, psi, ft.pitch > 0);
       ft.f = a.f;
       ft.x = a.x;
       ft.y = a.y + ft.y;
       ft.pitch = psi;
     }
+    for (let i = 0; i < 2; i++) this.locks[i].cpitch = feet[i].pitch - feet[i].gp;
     const xr = [feet[0].x - hipXOf(0), feet[1].x - hipXOf(1)];
     this.hipsDrop = (hipH - HIP_ABOVE_ANKLE) * ground;
     this.overreach = 0;
@@ -663,6 +695,15 @@ export class AvatarAnimator {
       // Hands and feet are on the ladder, not planted on the ground.
       this.planted[0] = this.planted[1] = false;
     }
+  }
+
+  /** Forget any airborne state (the body was placed, not dropped): no landing follows. */
+  resetAir(): void {
+    this.air = 0;
+    this.airTime = 0;
+    this.minVVert = 0;
+    this.wasGrounded = true;
+    this.landTimer = 0;
   }
 
   /** Re-plant both feet at rest under the body (after a scripted move such as a ladder climb). */

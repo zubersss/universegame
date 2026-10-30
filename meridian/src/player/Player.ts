@@ -219,6 +219,9 @@ export class Player {
     this.prevPos.copy(center);
     this.vel.set(0, 0, 0);
     this.vVert = 0;
+    // Placed, not dropped: no landing thump on the next step.
+    this.airTime = 0;
+    this.justLanded = false;
     this.body.setTranslation({ x: center.x, y: center.y, z: center.z }, true);
     this.body.setRotation({ x: this.quat.x, y: this.quat.y, z: this.quat.z, w: this.quat.w }, true);
     this.setHeading(this.heading);
@@ -232,16 +235,16 @@ export class Player {
   }
 
   /** Add the visible explorer to the scene (once). */
-  attachVisual(parent: Object3D): void {
+  attachVisual(parent: Object3D, envSource: (() => Texture | null) | null = null): void {
     if (this.avatar) return;
-    this.avatar = new Avatar(parent, (o, d, max) => this.groundRay(o, d, max), this.heading);
+    this.avatar = new Avatar(parent, (o, d, max) => this.groundRay(o, d, max), this.heading, envSource);
   }
 
   /**
    * Per rendered frame: place the camera (third person by default) and pose
    * the explorer. dt = 0 freezes the animation (pause, loading).
    */
-  renderView(dt: number, alpha: number, rig: CameraRig, envMap: Texture | null, reducedMotion: boolean, scripted: ScriptedPose | null = null): void {
+  renderView(dt: number, alpha: number, rig: CameraRig, reducedMotion: boolean, scripted: ScriptedPose | null = null): void {
     // A scripted transition (ladder) moves only the visible body; the camera
     // follows it from behind its direction of travel (clear of the hull),
     // swinging there at a limited rate and back to the aim afterwards.
@@ -260,7 +263,6 @@ export class Player {
     const showBody = this.view.bodyVisible || (!!scripted && scripted.cameraWeight > 0.5);
     const a = this.avatar;
     if (!a) return;
-    a.setEnvMap(envMap);
     a.setVisible(showBody);
     a.update({
       dt,
