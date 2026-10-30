@@ -1,7 +1,7 @@
 # LEAD STATUS
-Updated: 2026-10-30 · Session: 1 · Review cycle: 2
+Updated: 2026-10-30 · Session: 1 · Review cycle: 3
 ## Current task
-Review cycle: waiting for the first worker commits (U-001, B-001).
+Review cycle every 30 min (session loop). Workers on U-001 and B-001, no commits yet.
 ## Last completed
 L-005 (versions pinned, `tools/paths.json`), L-006 (READY FOR WORKERS).
 ## Next up

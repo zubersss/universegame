@@ -45,7 +45,10 @@ ever overwritten.
    Binaries go through Git LFS (`.gitattributes`). Commit sources and final exports only.
 6. **HeavyJobLock.** Before a heavy job (Blender render above preview size, Unity batch
    compile/test/build/Addressables build) check `coordination/locks/` for another role's
-   lock younger than 2 h and check `tasklist` for `Unity.exe`/`blender.exe`. Clear → write
+   lock younger than 2 h and check for a running Unity Editor or Blender by path, not by
+   name: `Get-Process unity,blender -ErrorAction SilentlyContinue | Where-Object { $_.Path -like '*\Hub\Editor\*' -or $_.Path -like '*Blender Foundation*' }`.
+   Ignore `C:\Program Files\Unity Hub\resources\unity.exe` (the Hub's always-on background
+   service); a plain `tasklist` name match always hits it (D-015). Clear → write
    `coordination/locks/heavy_<role>.lock` (ISO time + job), run, delete it. Not clear → do
    light work and re-check later. Only LEAD deletes another role's lock, and logs it.
 7. **Accepted work stays accepted.** Don't re-polish Done tasks unless LEAD reopens them.

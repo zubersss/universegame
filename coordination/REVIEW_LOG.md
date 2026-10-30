@@ -32,3 +32,11 @@ Moved: L-005 → Done; L-006 → Done; USER-03, USER-04 → Done.
 Decided: D-011 (company "Zubers"); D-013 (Unity 6000.6.5f1, not LTS); D-014 (Mono backend). Bible → v1.1.
 Signals: none.
 User: READY FOR WORKERS posted; USER-07 open (start UNITY and BLENDER sessions); USER-08 optional.
+
+## Cycle 3 · 2026-10-30
+Checked: `git log` (no worker commits yet); UNITY_STATUS (U-001 In Progress), BLENDER_STATUS (B-001 In Progress); `coordination/locks/` (empty); running processes.
+Moved: none.
+Decided: D-015 (HeavyJobLock process check by path; CLAUDE.md rule 6 updated). PID 2828 `Unity Hub\resources\unity.exe serve` is the Hub service, not the Editor.
+Signals: none (both workers started this cycle; uncommitted U-001/B-001 work in the tree).
+User: none.
+Queue: U-001 and B-001 unblocked; downstream tasks unlock on each worker's own chain.
