@@ -109,6 +109,15 @@ export class GameAudio {
     this.ready = true;
   }
 
+  /**
+   * The effects bus for sounds made elsewhere (PLAYER's ability sounds): the
+   * audio context, the effects gain that feeds the master volume, and the
+   * shared 2 s white-noise buffer. Null until start() has created the context.
+   */
+  bus(): { ctx: AudioContext; out: GainNode; noise: AudioBuffer } | null {
+    return this.ctx ? { ctx: this.ctx, out: this.sfx, noise: this.noiseBuf } : null;
+  }
+
   private noiseSource(loop: boolean): AudioBufferSourceNode {
     const s = this.ctx!.createBufferSource();
     s.buffer = this.noiseBuf;

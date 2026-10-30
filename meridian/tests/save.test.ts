@@ -1,10 +1,16 @@
-import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   CORRUPT_KEY, LEGACY_KEY, PREV_KEY, SAVE_KEY, SAVE_SCHEMA, SaveStore, exportJson, importJson, legacySummary, validateSave, type SaveData, type V3,
 } from '../src/save/SaveSystem';
 import type { KvStore } from '../src/save/db';
-import { BODIES, GENERATOR_VERSION, SYSTEM_EXTENT, WORLD_SEED } from '../src/world/bodies';
+import { BODIES, GENERATOR_VERSION, SOL_M2_BODIES, SYSTEM_BODY_IDS, SYSTEM_EXTENT, WORLD_SEED, setPlaySystem } from '../src/world/bodies';
 import { DEFAULT_SETTINGS } from '../src/game/settings';
+import { FIRST_LIGHT, newExpedition } from '../src/game/Expedition';
+import { computeSites } from '../src/world/sites';
+import { EARTH_META, installEarthData, loadEarthData, type LayerName } from '../src/world/earthData';
+import { isAbilityId, type AbilityId } from '../src/abilities/save';
 // A schema-1 record exactly as the published MERIDIAN build wrote it. Frozen:
 // never edit it (it stands for real players' saves; e2e/journey/saves.spec.ts uses it too).
 import SCHEMA1 from './fixtures/save-schema1.json';
@@ -36,6 +42,7 @@ function sample(overrides: Partial<SaveData> = {}): SaveData {
       species: ['ilex-lantern', 'vesper-glass'],
       scanned: ['ilex:ilex-lantern:5/10/2/3:4', 'vesper:relay'],
       transmitted: false,
+      route: [],
     },
     ...overrides,
   };
@@ -45,7 +52,7 @@ function sample(overrides: Partial<SaveData> = {}): SaveData {
 function onFootAt(id: string, shipR: number, playerR: number): SaveData {
   const d = BODIES[id];
   const at = (k: number): V3 => [d.center[0] + k * d.radius, d.center[1], d.center[2]];
-  return sample({ mode: 'ON_FOOT', bodyId: id, ship: { ...sample().ship, sys: at(shipR) }, player: { sys: at(playerR), heading: [0, 0, 1], pitch: 0, abilityState: null } });
+  return sample({ mode: 'ON_FOOT', bodyId: id, ship: { ...sample().ship, sys: at(shipR) }, player: { sys: at(playerR), heading: [0, 0, 1], pitch: 0, abilityState: 'walk' } });
 }
 
 /** Cruising in open space at `sys`, flying −z at `speed`. */
@@ -87,7 +94,7 @@ describe('save validation', () => {
   });
 
   it('accepts on-foot and cruising snapshots with their extra state', () => {
-    expect(validateSave(sample({ mode: 'ON_FOOT', player: { sys: [790010, -41000, -598000], heading: [1, 0, 0], pitch: 0.2, abilityState: null } })).ok).toBe(true);
+    expect(validateSave(sample({ mode: 'ON_FOOT', player: { sys: [790010, -41000, -598000], heading: [1, 0, 0], pitch: 0.2, abilityState: 'walk' } })).ok).toBe(true);
     expect(validateSave(sample({ mode: 'CRUISING', bodyId: null, cruise: { speed: 12000, throttle: 1 } })).ok).toBe(true);
   });
 
@@ -104,11 +111,58 @@ describe('save validation', () => {
     expect(validateSave(onFootAt('cairn', 3.9, 3.95)).ok).toBe(true);
   });
 
+  it('accepts an on-foot player anywhere on the ship\'s body: powers carry them far from the ship', () => {
+    // The far side of Cairn, a body diameter from the ship (once refused beyond 20 km).
+    const d = onFootAt('cairn', 1, -1);
+    expect(2 * BODIES.cairn.radius).toBeGreaterThan(20000);
+    expect(validateSave(d).ok).toBe(true);
+  });
+
   it('accepts arrivals as discoveries and catalog powers as unlocks', () => {
     const d = sample({ discoveries: ['ilex', 'vesper', 'cairn'], unlocked: ['skyborne-flight', 'lunar-step', 'redline'] });
     const r = validateSave(d);
     expect(r.ok).toBe(true);
     if (r.ok) expect([r.data.discoveries, r.data.unlocked]).toEqual([d.discoveries, d.unlocked]);
+  });
+
+  it('accepts PLAYER ability states on foot (PLAYER validator); a pre-P2 null state reads as walking', () => {
+    for (const s of ['walk', 'flight', 'speed', 'blink', 'drift'] as const) {
+      const d = onFootAt('cairn', 1, 1.01);
+      d.player!.abilityState = s;
+      const r = importJson(exportJson(d));
+      expect(r.ok, s).toBe(true);
+      if (r.ok) expect(r.data).toEqual(d);
+    }
+    const old = onFootAt('cairn', 1, 1.01) as unknown as { player: { abilityState: unknown } };
+    old.player.abilityState = null; // as schema-2 records were written before P2
+    const r = validateSave(old);
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.data.player?.abilityState).toBe('walk');
+  });
+
+  it('keeps First Light progress: waypoints reached and scan targets scanned', () => {
+    const d = sample({
+      discoveries: ['ilex', 'vesper', 'earth'],
+      unlocked: ['skyborne-flight'],
+      expedition: { ...sample().expedition, route: ['earth:route:0', 'earth:route:1', 'mars:route:0'], scanned: ['vesper:relay', 'earth:poi:2', 'moon:poi:0'] },
+    });
+    const r = importJson(exportJson(d));
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.data).toEqual(d);
+    // A schema-2 record from before First Light has no route list: nothing reached yet.
+    const r2 = validateSave({ ...sample(), expedition: omit(sample().expedition, 'route') });
+    expect(r2.ok).toBe(true);
+    if (r2.ok) expect(r2.data.expedition.route).toEqual([]);
+  });
+
+  it('accepts only PLAYER AbilityIds that a catalog body unlocks', () => {
+    // Terminator Step is a PLAYER power, but Proxima b (M4) is not in the catalog yet.
+    expect(isAbilityId('terminator-step')).toBe(true);
+    expect(Object.values(BODIES).some((b) => b.power === 'terminator-step')).toBe(false);
+    expect(validateSave(sample({ unlocked: ['terminator-step'] })).ok).toBe(false);
+    for (const def of Object.values(BODIES)) {
+      if (def.power && def.power !== 'walk') expect(validateSave(sample({ unlocked: [def.power as AbilityId] })).ok, def.power).toBe(true);
+    }
   });
 
   const ON_FOOT = onFootAt('cairn', 1, 1.01);
@@ -138,14 +192,16 @@ describe('save validation', () => {
     ['the schema-1 body field', omit({ ...sample(), body: 'vesper' }, 'bodyId')],
     ['landed 10 R from its body', sample({ ship: { ...sample().ship, sys: [BODIES.vesper.center[0] + 10 * BODIES.vesper.radius, 0, BODIES.vesper.center[2]] } })],
     ['on foot beyond 4 R', onFootAt('cairn', 3.9, 4.05)],
+    ['on foot on another body than the ship', { ...ON_FOOT, player: { ...ON_FOOT.player!, sys: [BODIES.vesper.center[0] + BODIES.vesper.radius, BODIES.vesper.center[1], BODIES.vesper.center[2]] } }],
     ['relays on bodies not in play', sample({ expedition: { ...sample().expedition, relays: ['earth', 'mars', 'moon'], transmitted: true } })],
     ['last landing on a body not in play', sample({ lastSafeLanding: { ...sample().lastSafeLanding!, bodyId: 'sun' } })],
     ['last landing pose beyond 4 R', sample({ lastSafeLanding: { ...sample().lastSafeLanding!, posPlanet: [0, 4.1 * BODIES.vesper.radius, 0] } })],
     ['navigation to a body not in play', { ...sample(), navTarget: 'neptune' }],
     ['surface mode without body', sample({ bodyId: null })],
     ['on foot without player', sample({ mode: 'ON_FOOT' })],
-    ['player while landed', sample({ player: { sys: [0, 0, 0], heading: [1, 0, 0], pitch: 0, abilityState: null } })],
-    ['an ability state before PLAYER defines one', { ...ON_FOOT, player: { ...ON_FOOT.player!, abilityState: 'flight' } }],
+    ['player while landed', sample({ player: { sys: [0, 0, 0], heading: [1, 0, 0], pitch: 0, abilityState: 'walk' } })],
+    ['an unknown ability state', { ...ON_FOOT, player: { ...ON_FOOT.player!, abilityState: 'teleport' } }],
+    ['a non-string ability state', { ...ON_FOOT, player: { ...ON_FOOT.player!, abilityState: { state: 'flight' } } }],
     ['on foot without the ability state field', { ...ON_FOOT, player: omit(ON_FOOT.player!, 'abilityState') }],
     ['cruise state while landed', sample({ cruise: { speed: 100, throttle: 1 } })],
     ['missing discoveries', omit(sample(), 'discoveries')],
@@ -153,9 +209,17 @@ describe('save validation', () => {
     ['discovery of a body not in the catalog', sample({ discoveries: ['ilex', 'pluto'] })],
     ['duplicate discovery', sample({ discoveries: ['ilex', 'ilex'] })],
     ['missing unlocked list', omit(sample(), 'unlocked')],
-    ['unknown power', sample({ unlocked: ['teleport'] })],
-    ['walk as an unlock', sample({ unlocked: ['walk'] })],
+    ['unlocked not a list', { ...sample(), unlocked: 'redline' }],
+    ['unknown power', { ...sample(), unlocked: ['teleport'] }],
+    ['walk as an unlock', { ...sample(), unlocked: ['walk'] }],
     ['duplicate power', sample({ unlocked: ['redline', 'redline'] })],
+    ['route waypoint past the last', sample({ expedition: { ...sample().expedition, route: ['earth:route:3'] } })],
+    ['route on a body outside the catalog', sample({ expedition: { ...sample().expedition, route: ['pluto:route:0'] } })],
+    ['route on a body without First Light', sample({ expedition: { ...sample().expedition, route: ['ilex:route:0'] } })],
+    ['scan target in the route list', sample({ expedition: { ...sample().expedition, route: ['earth:poi:0'] } })],
+    ['duplicate waypoint', sample({ expedition: { ...sample().expedition, route: ['moon:route:0', 'moon:route:0'] } })],
+    ['route not a list', { ...sample(), expedition: { ...sample().expedition, route: 'earth:route:0' } }],
+    ['unknown scan target', sample({ expedition: { ...sample().expedition, scanned: ['earth:poi:3'] } })],
     ['inventory not backed by collection', sample({ expedition: { ...sample().expedition, inventory: { ilex: 3, vesper: 0, cairn: 0 } } })],
     ['duplicate collected ID', sample({ expedition: { ...sample().expedition, collected: ['ilex:sample:0', 'ilex:sample:0'] } })],
     ['unknown sample ID', sample({ expedition: { ...sample().expedition, collected: ['ilex:sample:7'] } })],
@@ -284,5 +348,74 @@ describe('save store', () => {
     expect(st.available).toBe(false);
     expect(await st.write(sample())).toBe(false);
     expect(st.failure).toMatch(/unavailable/);
+  });
+
+  it('never writes a snapshot the loader would refuse; the latest and previous saves stay', async () => {
+    const kv = new FakeKv();
+    const st = new SaveStore(kv as unknown as KvStore);
+    expect(await st.write(sample({ playTime: 1 }))).toBe(true);
+    expect(await st.write(sample({ playTime: 2 }))).toBe(true);
+    const before = new Map(kv.data);
+    // On foot beyond its body's release radius: the next start would show it as corrupt.
+    const bad = onFootAt('cairn', 1, 4.05);
+    expect(validateSave(bad).ok).toBe(false);
+    expect(await st.write(bad)).toBe(false);
+    expect(st.refused).toBe(true);
+    expect(st.failure).toBe('The current state cannot be saved: Player too far from the body.');
+    expect(kv.data).toEqual(before);
+    expect([st.latest.data?.playTime, st.previous.data?.playTime]).toEqual([2, 1]);
+    // The next good snapshot saves normally and clears the refusal.
+    expect(await st.write(sample({ playTime: 3 }))).toBe(true);
+    expect([st.refused, st.failure]).toEqual([false, null]);
+    expect((kv.data.get(PREV_KEY) as SaveData).playTime).toBe(2);
+  });
+});
+
+describe('on-foot saves along First Light', () => {
+  beforeAll(async () => {
+    // Earth's landing site is searched on WORLDS' dataset (as in worlds-survey.test).
+    const dir = fileURLToPath(new URL('../src/data/earth/', import.meta.url));
+    const layers = EARTH_META.layers as Record<LayerName, { file: string }>;
+    installEarthData(await loadEarthData(async (name) => readFileSync(dir + layers[name].file)));
+    setPlaySystem(SOL_M2_BODIES);
+  });
+  afterAll(() => setPlaySystem(SYSTEM_BODY_IDS.quiet));
+
+  it('saves and reloads the player at every waypoint and scan target, the ship at the landing site', async () => {
+    expect(FIRST_LIGHT.map((c) => c.body)).toEqual(['earth', 'moon', 'mars']);
+    for (const c of FIRST_LIGHT) {
+      const def = BODIES[c.body];
+      const sites = computeSites(def);
+      const targets = [...sites.route, ...sites.scans];
+      // WORLDS' sites carry exactly the chapter's target ids.
+      expect(targets.map((t) => t.id)).toEqual([...c.route, ...c.scans].map((t) => t.id));
+      const r = def.radius + sites.landing.height;
+      const local = (n: readonly number[]): V3 => [n[0] * r, n[1] * r, n[2] * r];
+      const sys = (n: readonly number[]): V3 => local(n).map((v, i) => v + def.center[i]) as V3;
+      const ship = sys(sites.landing.dir);
+      for (const t of targets) {
+        const d = sample({
+          system: 'sol',
+          mode: 'ON_FOOT',
+          bodyId: c.body,
+          ship: { ...sample().ship, sys: ship },
+          player: { sys: sys(t.dir), heading: [0, 0, 1], pitch: 0, abilityState: 'walk' },
+          lastSafeLanding: { bodyId: c.body, posPlanet: local(sites.landing.dir), quat: [0, 0, 0, 1] },
+          navTarget: null,
+          discoveries: [c.body],
+          unlocked: [c.power],
+          expedition: { ...newExpedition(), route: c.route.map((w) => w.id), scanned: t.id.includes(':poi:') ? [t.id] : [] },
+        });
+        const v = validateSave(d);
+        expect(v.ok, `${t.id} ${t.label}: ${v.ok ? '' : v.error}`).toBe(true);
+        // The autosave path: written, then offered as the latest save on the next start.
+        const kv = new FakeKv();
+        expect(await new SaveStore(kv as unknown as KvStore).write(d), t.id).toBe(true);
+        const next = new SaveStore(kv as unknown as KvStore);
+        await next.read();
+        expect(next.latest.error, t.id).toBeNull();
+        expect(next.latest.data?.player?.sys, t.id).toEqual(d.player!.sys);
+      }
+    }
   });
 });

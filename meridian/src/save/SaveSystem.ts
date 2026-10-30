@@ -2,14 +2,15 @@ import { BODIES, BODY_IDS, GENERATOR_VERSION, SYSTEM_BODY_IDS, SYSTEM_EXTENT, WO
 import { cruiseMaxSpeed } from '../world/scale';
 import { sanitizeSettings, type Settings } from '../game/settings';
 import { BODY_HANDOFF } from '../game/config';
-import { SURVEY_BODIES, newExpedition, powerFor, type ExpeditionState } from '../game/Expedition';
+import { ROUTE_POINTS, SURVEY_BODIES, isPoiId, isRouteId, newExpedition, powerFor, type ExpeditionState } from '../game/Expedition';
+import { validateAbilityFields, type AbilityId, type AbilityState } from '../abilities/save';
 import type { KvStore } from './db';
 
 // Save format (schema 2, charter section I): only the seed, versions, the
 // system, poses/velocities, mode, settings and progress (arrivals, unlocks,
-// survey). Terrain, meshes and physics are regenerated. A record from an
-// older schema is kept read-only under LEGACY_KEY and never migrated
-// (positions do not carry across scales).
+// ability state, survey and First Light). Terrain, meshes and physics are
+// regenerated. A record from an older schema is kept read-only under
+// LEGACY_KEY and never migrated (positions do not carry across scales).
 
 /** The schema this build writes. LEAD's constant; bodies.ts SAVE_SCHEMA_VERSION is no longer read. */
 export const SAVE_SCHEMA = 2;
@@ -30,15 +31,15 @@ export interface SaveData {
   /** Active body for LANDED/ON_FOOT (and flight near a body); null in open space. */
   bodyId: BodyId | null;
   ship: { sys: V3; quat: V4; vel: V3; gear: number; throttle: number };
-  /** abilityState stays null until PLAYER's serialized ability state exists (P2). */
-  player: { sys: V3; heading: V3; pitch: number; abilityState: null } | null;
+  /** abilityState: PLAYER's on-foot ability state (a record written before P2 holds null, read as 'walk'). */
+  player: { sys: V3; heading: V3; pitch: number; abilityState: AbilityState } | null;
   cruise: { speed: number; throttle: number } | null;
   lastSafeLanding: { bodyId: BodyId; posPlanet: V3; quat: V4 } | null;
   navTarget: BodyId | null;
   /** Bodies arrived at (landed on), in arrival order. */
   discoveries: BodyId[];
-  /** Powers those arrivals unlocked: catalog BodyDef.power strings (PLAYER's AbilityId after P2), never 'walk'. */
-  unlocked: string[];
+  /** Powers those arrivals unlocked: PLAYER's AbilityIds that are some catalog body's power (never 'walk'). */
+  unlocked: AbilityId[];
   settings: Settings;
   expedition: ExpeditionState;
 }
@@ -55,7 +56,7 @@ const MAX_FLIGHT_SPEED = 20000;
 /** Cruise speed: the cap of the longest possible hop (m/s). */
 const MAX_CRUISE_SPEED = cruiseMaxSpeed(2 * SYSTEM_EXTENT);
 /** Every power an arrival can unlock (catalog powers except the base 'walk'). */
-const POWERS: ReadonlySet<string> = new Set(Object.keys(BODIES).map((id) => powerFor(id)).filter((p): p is string => p !== null));
+const POWERS: ReadonlySet<AbilityId> = new Set(Object.keys(BODIES).map((id) => powerFor(id)).filter((p): p is AbilityId => p !== null));
 
 type Result = { ok: true; data: SaveData } | { ok: false; error: string };
 
@@ -108,7 +109,11 @@ const SAMPLE_RE = /^(ilex|vesper|cairn):sample:[0-2]$/;
 const OBJECT_RE = /^(ilex|vesper|cairn):[a-z0-9:/_-]+$/;
 const SPECIES_RE = /^(ilex|vesper|cairn)-[a-z]+$/;
 
-/** The survey (inventory, samples, relays) is the Quiet System's, whatever system is in play. */
+/**
+ * The survey (inventory, samples, relays) is the Quiet System's, whatever
+ * system is in play; First Light progress (waypoints, scan targets) is
+ * history by id, like discoveries.
+ */
 function validateExpedition(x: unknown): ExpeditionState | string {
   if (!isObj(x)) return 'progress missing';
   const inv = x.inventory;
@@ -125,9 +130,12 @@ function validateExpedition(x: unknown): ExpeditionState | string {
   if (!relays) return 'bad relay list';
   const species = stringList(x.species, (s) => SPECIES_RE.test(s), 32);
   if (!species) return 'bad species list';
-  const scanned = stringList(x.scanned, (s) => OBJECT_RE.test(s), 5000);
+  const scanned = stringList(x.scanned, (s) => OBJECT_RE.test(s) || isPoiId(s), 5000);
   if (!scanned) return 'bad scan list';
   if (typeof x.transmitted !== 'boolean') return 'bad transmission flag';
+  // Absent from schema-2 records written before First Light: no waypoint reached.
+  const route = x.route === undefined ? [] : stringList(x.route, isRouteId, ROUTE_POINTS);
+  if (!route) return 'bad route list';
   // Consistency: carried + spent samples per body never exceed what was collected there.
   for (const b of SURVEY_BODIES) {
     const got = collected.filter((s) => s.startsWith(`${b}:`)).length;
@@ -135,7 +143,7 @@ function validateExpedition(x: unknown): ExpeditionState | string {
     if (inventory[b] + spent > got) return `inconsistent samples for ${b}`;
   }
   if (x.transmitted && relays.length !== 3) return 'transmission without three relays';
-  return { inventory, collected, relays: relays as BodyId[], species, scanned, transmitted: x.transmitted };
+  return { inventory, collected, relays: relays as BodyId[], species, scanned, transmitted: x.transmitted, route };
 }
 
 /** Validate an untrusted save object (types, bounds, versions, finite numbers). */
@@ -166,21 +174,28 @@ export function validateSave(raw: unknown): Result {
   if (!sys || !quat || !vel || len(sys) > MAX_COORD || len(vel) > maxSpeed) return { ok: false, error: 'Bad ship pose.' };
   if (surface && !nearBody(sys, bodyId!)) return { ok: false, error: 'Ship too far from its body.' };
   if (!isNum(s.gear) || s.gear < 0 || s.gear > 1 || !isNum(s.throttle) || s.throttle < 0 || s.throttle > 1) return { ok: false, error: 'Bad ship controls.' };
+  // Ability fields: PLAYER's strict validator (the on-foot state, power ids,
+  // duplicates), then only powers some catalog body unlocks. A null state (a
+  // record written before P2, or not on foot) reads as 'walk'.
+  const p = raw.player;
+  const ability = validateAbilityFields(mode === 'ON_FOOT' && isObj(p) ? p.abilityState : null, raw.unlocked);
+  if (typeof ability === 'string') return { ok: false, error: `Bad ability save: ${ability}.` };
+  if (!ability.unlocked.every((u) => POWERS.has(u))) return { ok: false, error: 'Bad unlocked powers.' };
   let player: SaveData['player'] = null;
   if (mode === 'ON_FOOT') {
-    const p = raw.player;
     if (!isObj(p)) return { ok: false, error: 'Player state missing.' };
     const psys = vec(p.sys, 3, MAX_COORD);
     const heading = vec(p.heading, 3, 1.01);
     if (!psys || !heading || !isNum(p.pitch) || Math.abs(p.pitch) > 1.6) return { ok: false, error: 'Bad player pose.' };
     if (Math.abs(Math.hypot(heading[0], heading[1], heading[2]) - 1) > 1e-3) return { ok: false, error: 'Bad player heading.' };
-    // The player must be near the ship (they walked out of it) and on its body.
-    if (Math.hypot(psys[0] - sys[0], psys[1] - sys[1], psys[2] - sys[2]) > 20000) return { ok: false, error: 'Player too far from the ship.' };
+    // The player must be on the ship's body (the ship was checked above). No
+    // distance to the ship is imposed: powers carry the player anywhere on the
+    // body, and First Light targets lie tens of kilometres from the landing site.
     if (!nearBody(psys, bodyId!)) return { ok: false, error: 'Player too far from the body.' };
-    // Null until PLAYER's ability-state validator lands (P2); widening it needs no new schema.
-    if (p.abilityState !== null) return { ok: false, error: 'Bad ability state.' };
-    player = { sys: psys as V3, heading: heading as V3, pitch: p.pitch, abilityState: null };
-  } else if (raw.player !== null) return { ok: false, error: 'Unexpected player state.' };
+    // The field is required; its value was validated above.
+    if (!('abilityState' in p)) return { ok: false, error: 'Bad ability state.' };
+    player = { sys: psys as V3, heading: heading as V3, pitch: p.pitch, abilityState: ability.abilityState };
+  } else if (p !== null) return { ok: false, error: 'Unexpected player state.' };
   let cruise: SaveData['cruise'] = null;
   if (mode === 'CRUISING') {
     const c = raw.cruise;
@@ -205,8 +220,6 @@ export function validateSave(raw: unknown): Result {
   // Discoveries are history without positions: any catalog body (a Sol save stays valid in Quiet play).
   const discoveries = stringList(raw.discoveries, isBodyId, Object.keys(BODIES).length);
   if (!discoveries) return { ok: false, error: 'Bad discoveries.' };
-  const unlocked = stringList(raw.unlocked, (p) => POWERS.has(p), POWERS.size);
-  if (!unlocked) return { ok: false, error: 'Bad unlocked powers.' };
   const exp = validateExpedition(raw.expedition);
   if (typeof exp === 'string') return { ok: false, error: `Bad progress: ${exp}.` };
   return {
@@ -226,7 +239,7 @@ export function validateSave(raw: unknown): Result {
       lastSafeLanding,
       navTarget,
       discoveries,
-      unlocked,
+      unlocked: ability.unlocked,
       settings: sanitizeSettings(raw.settings),
       expedition: exp,
     },
@@ -273,8 +286,10 @@ export class SaveStore {
   previous: SlotState = { data: null, error: null, present: false };
   /** A save from an older schema, kept read-only (null when there is none). */
   legacy: LegacySave | null = null;
-  /** Why persistence is not working (null when saves work). */
+  /** Why persistence is not working, or why the last snapshot was not written (null when saves work). */
   failure: string | null = null;
+  /** The last write was refused because its snapshot would not load (storage itself works). */
+  refused = false;
 
   constructor(private readonly kv: KvStore | null) {
     if (!kv) this.failure = 'Browser storage is unavailable.';
@@ -307,6 +322,14 @@ export class SaveStore {
   /** Write a snapshot; resolves true only after the transaction completed. */
   async write(data: SaveData): Promise<boolean> {
     if (!this.kv) return false;
+    // A snapshot the loader would refuse never replaces the latest save: it
+    // would read back as corrupt and cost the progress since the last good one.
+    const check = validateSave(data);
+    this.refused = !check.ok;
+    if (!check.ok) {
+      this.failure = `The current state cannot be saved: ${check.error}`;
+      return false;
+    }
     try {
       if (this.latest.present && !this.latest.data) {
         // Preserve a corrupt latest record before replacing it.
