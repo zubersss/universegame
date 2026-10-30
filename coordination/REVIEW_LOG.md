@@ -93,7 +93,7 @@ M0 exit criteria (Bible §12), each with evidence:
 - render.py renders the calibration asset: B-002 (ead95f6), byte-identical re-render (renders_2026-10-30.md).
 - ArtImporter imports it: U-005 (bb0d201), placeholder retired; lit preview OK (U-006, cycle 6).
 - .claude/settings.json verified: L-004 (cycle 1).
-- ≥ 5 Ready tasks per worker: UNITY 9, BLENDER 11 (this cycle).
+- ≥ 5 Ready tasks per worker: UNITY 7, BLENDER 11 (this cycle). UNITY completes ~4 tasks/hour: L-009 drafts M2 UNITY tasks next cycle.
 - USER_ACTIONS complete: USER-01…07 Done; USER-08 optional.
 Decided: D-024 (M0 closed; Saturn jump 2.3 m, Bible v1.4).
 Signals: BLENDER has no commit since 12:39 on the B-010 rework while In Progress (31 min, under the 90-min threshold; Blender is rendering).
