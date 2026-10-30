@@ -22,6 +22,8 @@ namespace Meridian.Core
         public float hull = 100f;
         public float fuel = 100f;
         public float tankCapacity = 100f;
+        /// <summary>Items carried in the ship (item id → count). Inventory proper arrives in M3.</summary>
+        public System.Collections.Generic.List<CargoStack> cargo = new System.Collections.Generic.List<CargoStack>();
 
         public PlanetConfig CurrentPlanetConfig => catalog != null ? catalog.Get(currentPlanet) : null;
 
@@ -45,5 +47,15 @@ namespace Meridian.Core
         {
             if (Instance == this) Instance = null;
         }
+    }
+}
+
+namespace Meridian.Core
+{
+    [System.Serializable]
+    public struct CargoStack
+    {
+        public int itemId;
+        public int count;
     }
 }

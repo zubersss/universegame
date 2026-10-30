@@ -55,6 +55,7 @@ namespace Meridian.Player
             Button(top, "SkipDrive", "<Keyboard>/j", "<Gamepad>/buttonNorth");
             Button(top, "Fire", "<Mouse>/leftButton");
             Button(top, "Scan", "<Mouse>/rightButton");
+            Button(top, "Enter", "<Keyboard>/f", "<Gamepad>/buttonWest"); // hold inside a ring: controlled entry (§5.3)
             Button(top, "SystemMap", "<Keyboard>/m");
             Button(top, "Inventory", "<Keyboard>/tab");
 

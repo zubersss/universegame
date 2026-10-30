@@ -37,7 +37,11 @@ namespace Meridian.Core
             Ready?.Invoke();
         }
 
-        public IEnumerator LoadPlanetSide(PlanetConfig config)
+        /// <summary>Raised after PlanetSide loads and is configured (start or entry).</summary>
+        public event Action PlanetSideLoaded;
+
+        /// <summary>Loads PlanetSide with a planet. entryX ≥ 0 = arriving from orbit over that column (Bible §5.3).</summary>
+        public IEnumerator LoadPlanetSide(PlanetConfig config, int entryX = -1)
         {
             if (config == null)
             {
@@ -50,9 +54,19 @@ namespace Meridian.Core
             PlanetSide = FindRoot<PlanetSideRoot>(PlanetSideScene);
             if (PlanetSide != null)
             {
-                PlanetSide.Configure(config);
+                if (entryX >= 0) PlanetSide.ConfigureForEntry(config, entryX);
+                else PlanetSide.Configure(config);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(PlanetSideScene));
             }
+            PlanetSideLoaded?.Invoke();
+        }
+
+        /// <summary>Unloads PlanetSide (launch, Bible §5.2). Terrain edits live on in GameState.</summary>
+        public AsyncOperation UnloadPlanetSide()
+        {
+            var scene = SceneManager.GetSceneByName(PlanetSideScene);
+            PlanetSide = null;
+            return scene.isLoaded ? SceneManager.UnloadSceneAsync(scene) : null;
         }
 
         /// <summary>Shows one view and hides the other (the full transitions arrive with U-012).</summary>

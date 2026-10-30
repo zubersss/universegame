@@ -65,8 +65,12 @@ namespace Meridian.Audio
             if (scenes.IsReady) Hook(); else scenes.Ready += Hook;
         }
 
+        // Runs at boot and after every PlanetSide load (entries bring a new player and terrain).
         void Hook()
         {
+            scenes.PlanetSideLoaded -= Hook;
+            scenes.PlanetSideLoaded += Hook;
+            Unhook();
             if (scenes.PlanetSide != null)
             {
                 player = scenes.PlanetSide.player;
@@ -78,11 +82,17 @@ namespace Meridian.Audio
             if (ambient != null && !ambientSource.isPlaying) ambientSource.Play();
         }
 
-        void OnDestroy()
+        void Unhook()
         {
             if (player != null) { player.Jumped -= OnJumped; player.Landed -= OnLanded; }
             if (terrain != null) terrain.TileChanged -= OnTileChanged;
-            if (scenes != null) scenes.Ready -= Hook;
+            player = null; terrain = null;
+        }
+
+        void OnDestroy()
+        {
+            Unhook();
+            if (scenes != null) { scenes.Ready -= Hook; scenes.PlanetSideLoaded -= Hook; }
             if (Instance == this) Instance = null;
         }
 

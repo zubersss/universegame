@@ -39,6 +39,8 @@ namespace Meridian.Space
         /// <summary>Body whose well pulls hardest right now, or null.</summary>
         public string InWellOf { get; private set; }
         public bool Destroyed { get; private set; }
+        public bool Invulnerable => Time.time < invulnerableUntil;
+        float invulnerableUntil;
         public event Action SunDeath;
 
         InputAction thrustA, retroA, rotateA, boostA;
@@ -75,8 +77,28 @@ namespace Meridian.Space
             Destroyed = false;
         }
 
+        /// <summary>
+        /// Launch arrival (Bible §5.2): on the body's Atmosphere Ring at `angleDeg`, moving outward at
+        /// `speed`, nose outward, invulnerable for `invulnerableSeconds`.
+        /// </summary>
+        public void PlaceOnRing(BodyInfo body, float angleDeg, float speed, float invulnerableSeconds)
+        {
+            float a = angleDeg * Mathf.Deg2Rad;
+            var dir = new Vector2(Mathf.Cos(a), Mathf.Sin(a));
+            Position = body.position + dir * body.RingRadius;
+            Velocity = dir * speed;
+            Heading = angleDeg;
+            transform.rotation = Quaternion.Euler(0f, 0f, Heading);
+            Destroyed = false;
+            invulnerableUntil = Time.time + invulnerableSeconds;
+            placedByTransition = true;
+        }
+
+        bool placedByTransition;
+
         void Start()
         {
+            if (placedByTransition) return;
             if (!externalInput) PlaceAtWaystation("earth");
         }
 
@@ -104,7 +126,7 @@ namespace Meridian.Space
             Position += v * dt;
             transform.rotation = Quaternion.Euler(0f, 0f, Heading);
 
-            if (world != null && Position.magnitude < WellMath.SunKillFactor * WellMath.SunRadius)
+            if (world != null && !Invulnerable && Position.magnitude < WellMath.SunKillFactor * WellMath.SunRadius)
             {
                 Destroyed = true;
                 Velocity = Vector2.zero;

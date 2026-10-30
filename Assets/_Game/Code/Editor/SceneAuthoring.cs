@@ -41,6 +41,11 @@ namespace Meridian.EditorTools
             audio.scenes = director;
             audio.jump = Clip("jump"); audio.land = Clip("land"); audio.dig = Clip("dig"); audio.place = Clip("place");
             audio.uiClick = Clip("ui_click"); audio.thrust = Clip("thrust"); audio.ambient = Clip(AudioSynth.Ambient);
+            InputAuthoring.Run(); // keep the .inputactions asset identical to MeridianInput.Build()
+            var transitions = coreGo.AddComponent<Meridian.Transitions.TransitionDirector>();
+            transitions.scenes = director;
+            transitions.time = coreGo.GetComponent<TimeSystem>();
+            transitions.actions = AssetDatabase.LoadAssetAtPath<UnityEngine.InputSystem.InputActionAsset>(InputAuthoring.AssetPath);
             EditorSceneManager.SaveScene(core, CorePath);
 
             // Space (kept loaded but inactive by SceneDirector)
@@ -63,7 +68,6 @@ namespace Meridian.EditorTools
             shipGo.transform.SetParent(spaceRoot.transform, false);
             var ship = shipGo.AddComponent<Meridian.Space.SpaceShip>();
             ship.world = world;
-            if (!System.IO.File.Exists(InputAuthoring.AssetPath)) InputAuthoring.Run();
             ship.actions = AssetDatabase.LoadAssetAtPath<UnityEngine.InputSystem.InputActionAsset>(InputAuthoring.AssetPath);
             var shipView = new GameObject("View");
             shipView.transform.SetParent(shipGo.transform, false);
@@ -98,7 +102,6 @@ namespace Meridian.EditorTools
             sideComp.rig.drops = rigGo.AddComponent<Meridian.Rig.ItemDrops>();
 
             // Player: body + view + Rig input; the camera follows it.
-            if (!System.IO.File.Exists(InputAuthoring.AssetPath)) InputAuthoring.Run();
             var input = AssetDatabase.LoadAssetAtPath<UnityEngine.InputSystem.InputActionAsset>(InputAuthoring.AssetPath);
             var playerGo = new GameObject("Player");
             playerGo.transform.SetParent(sideRoot.transform, false);

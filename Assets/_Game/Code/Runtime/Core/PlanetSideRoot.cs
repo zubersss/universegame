@@ -24,9 +24,41 @@ namespace Meridian.Core
 
         public PlanetConfig Config { get; private set; }
 
+        /// <summary>Set when the planet loads from an entry (Bible §5.3); null for a normal start.</summary>
+        public Arrival? LastArrival { get; private set; }
+
+        public struct Arrival
+        {
+            public int x;               // wrapped tile column under the ship
+            public Vector2 shipPosition;
+            public Vector2 shipVelocity;
+        }
+
+        public const float EntryAboveEscapeLine = 20f;
+        public const float EntryDescentSpeed = 15f;
+
+        /// <summary>Entry from orbit: terrain streams around `entryX`; the ship flies in at Escape Line + 20 m descending 15 m/s with the player aboard.</summary>
+        public void ConfigureForEntry(PlanetConfig config, int entryX)
+        {
+            spawnX = entryX;
+            Configure(config);
+            if (ship == null) return;
+            StopAllCoroutines(); // the ship is airborne: it doesn't wait for the ground
+            ship.Body.simulated = true;
+            var pos = new Vector2(entryX + 0.5f, config.EscapeLineY + EntryAboveEscapeLine);
+            ship.Body.position = pos;
+            ship.transform.position = pos;
+            ship.Body.linearVelocity = new Vector2(0f, -EntryDescentSpeed);
+            if (player != null) StartCoroutine(HoldUntilGroundLoads(player.Body));
+            var boarding = ship.GetComponent<ShipBoarding>();
+            if (boarding != null) boarding.ForceAboard();
+            LastArrival = new Arrival { x = entryX, shipPosition = pos, shipVelocity = ship.Body.linearVelocity };
+        }
+
         public void Configure(PlanetConfig config)
         {
             Config = config;
+            LastArrival = null;
             Physics2D.gravity = config.GravityVector;
             if (terrain == null) return;
 

@@ -17,10 +17,8 @@ namespace Meridian.Tests
             AssetDatabase.LoadAssetAtPath<PlanetConfig>($"{PlanetConfigAuthoring.Folder}/{id}.asset");
 
         [TestCase(PlanetId.Mercury, 6.6f)] [TestCase(PlanetId.Venus, 2.8f)] [TestCase(PlanetId.Earth, 2.5f)]
-        [TestCase(PlanetId.Mars, 6.6f)] [TestCase(PlanetId.Jupiter, 1.0f)] [TestCase(PlanetId.Saturn, 2.35f)]
+        [TestCase(PlanetId.Mars, 6.6f)] [TestCase(PlanetId.Jupiter, 1.0f)] [TestCase(PlanetId.Saturn, 2.3f)]
         [TestCase(PlanetId.Uranus, 2.8f)] [TestCase(PlanetId.Neptune, 2.2f)]
-        // Saturn: the §4.2 table prints 2.4, but its own formula v₀²/2g = 49/20.88 = 2.35 m. Reported to LEAD (status, Handoffs).
-        // This check guards the formula and g, so it uses the formula value.
         public void JumpHeightFormulaMatchesBibleTable(PlanetId id, float bible)
         {
             float h = PlayerTuning.JumpSpeed * PlayerTuning.JumpSpeed / (2f * Load(id).gravity);

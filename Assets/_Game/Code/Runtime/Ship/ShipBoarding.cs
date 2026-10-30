@@ -48,6 +48,15 @@ namespace Meridian.Ship
             return true;
         }
 
+        /// <summary>Arrival from orbit (Bible §5.3): the surveyor is already aboard, wherever the ship is.</summary>
+        public void ForceAboard()
+        {
+            Aboard = true;
+            player.gameObject.SetActive(false);
+            ship.SetPiloted(true);
+            if (cameraFollow != null) { cameraFollow.target = ship.transform; cameraFollow.offset = new Vector2(0f, 2f); cameraFollow.SnapToTarget(); }
+        }
+
         /// <summary>Exit only when landed (Bible §6); the surveyor steps out beside the hull.</summary>
         public bool TryExit()
         {
