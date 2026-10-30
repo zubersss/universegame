@@ -42,6 +42,24 @@
       "glow_peak": 0.85,
       "glow_width": 14,
       "disc_radius": 200
+    },
+    {
+      "key": "planets/mars/surface",
+      "generator": "scripts/gen_planet.py",
+      "input": "sources/planets/mars/Mars_Viking_MDIM21_ClrMosaic_1km_3840px.jpg",
+      "size": [2048, 1024],
+      "maps": ["color"],
+      "tileable": "x"
+    },
+    {
+      "key": "planets/mars/glow",
+      "generator": "scripts/gen_planet.py",
+      "size": [512, 512],
+      "maps": ["color", "emission"],
+      "glow_color": [232, 176, 128],
+      "glow_peak": 0.45,
+      "glow_width": 8,
+      "disc_radius": 200
     }
   ]
 }
