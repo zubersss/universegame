@@ -153,7 +153,7 @@ const LOOKS: Record<string, Look> = {
       mie: [5.0e-5, 4.2e-5, 3.0e-5], mieH: 2500, mieG: 0.7,
       sunIntensity: 16, airglow: [0.004, 0.003, 0.002],
     },
-    clouds: [{ altitude: 6000, thickness: 1500, coverage: 0.8, scale: 18000, speed: 0.00006, tint: [0.95, 0.84, 0.7], opacity: 0.85, streak: 1.0 }],
+    clouds: [], // the banded cloud deck is drawn by the proxy globe
     palette: { a1: 0xd8b48a, a2: 0xb07850, a3: 0xe8dcc8, b1: 0xc49a6c, b2: 0x8a5a3a, b3: 0xf0e6d6, special: 0xb04a2a, proxyNight: 0x0a0806 },
     biomeNames: ['Zones', 'Belts'],
     description: 'The largest planet: banded clouds of ammonia over a deep hydrogen atmosphere, no solid ground.',
@@ -175,7 +175,7 @@ const LOOKS: Record<string, Look> = {
       mie: [5.0e-5, 4.6e-5, 3.4e-5], mieH: 2600, mieG: 0.7,
       sunIntensity: 15, airglow: [0.003, 0.003, 0.002],
     },
-    clouds: [{ altitude: 6000, thickness: 1500, coverage: 0.7, scale: 20000, speed: 0.00005, tint: [0.98, 0.92, 0.78], opacity: 0.8, streak: 1.0 }],
+    clouds: [], // the banded cloud deck is drawn by the proxy globe
     palette: { a1: 0xe0c890, a2: 0xc8aa70, a3: 0xf0e4c4, b1: 0xd4b880, b2: 0xb09060, b3: 0xf4ead4, special: 0xc8b07a, proxyNight: 0x0a0906 },
     biomeNames: ['Zones', 'Belts'],
     description: 'The ringed giant: pale golden cloud bands and a vast, thin ring system of ice.',
@@ -201,7 +201,7 @@ const LOOKS: Record<string, Look> = {
       mie: [1.5e-5, 2.0e-5, 2.0e-5], mieH: 2400, mieG: 0.72,
       sunIntensity: 13, airglow: [0.001, 0.003, 0.003],
     },
-    clouds: [{ altitude: 6000, thickness: 1200, coverage: 0.3, scale: 20000, speed: 0.00003, tint: [0.8, 0.95, 0.97], opacity: 0.4, streak: 1.0 }],
+    clouds: [], // the banded cloud deck is drawn by the proxy globe
     palette: { a1: 0x9fd8e0, a2: 0x86c4cc, a3: 0xc4ecf0, b1: 0x94d0d8, b2: 0x7ab8c0, b3: 0xd0f0f4, special: 0xe0f8fa, proxyNight: 0x050a0b },
     biomeNames: ['Haze', 'Bands'],
     description: 'A pale cyan ice giant tipped on its side, its methane haze almost featureless.',
@@ -214,7 +214,7 @@ const LOOKS: Record<string, Look> = {
       mie: [1.5e-5, 1.8e-5, 2.4e-5], mieH: 2400, mieG: 0.72,
       sunIntensity: 12, airglow: [0.001, 0.002, 0.004],
     },
-    clouds: [{ altitude: 6000, thickness: 1000, coverage: 0.25, scale: 16000, speed: 0.00008, tint: [0.92, 0.95, 1.0], opacity: 0.5, streak: 1.0 }],
+    clouds: [], // the banded cloud deck is drawn by the proxy globe
     palette: { a1: 0x3f62c8, a2: 0x2e4aa0, a3: 0x7a9ae0, b1: 0x3656b4, b2: 0x24408c, b3: 0xa8bcf0, special: 0xe8eeff, proxyNight: 0x03050c },
     biomeNames: ['Bands', 'Storms'],
     description: 'The outermost giant: deep blue methane skies and the fastest winds in the system.',

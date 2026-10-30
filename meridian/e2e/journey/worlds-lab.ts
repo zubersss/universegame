@@ -3,7 +3,8 @@
 // a browser before they are wired into travel. Dev server only (see
 // worlds-earth.spec.ts). Query: body, lat, lon (deg), alt (m above ground, or
 // above the datum when `orbit` is set), heading (deg from north), pitch (deg
-// below the horizon), fov, orbit (distance in body radii; looks at the body).
+// below the horizon), fov, orbit (distance in body radii; looks at the body,
+// or toward the Sun with look=sun).
 
 import {
   ACESFilmicToneMapping,
@@ -30,6 +31,7 @@ import { makeTerrainDetailTexture } from '../../src/render/terrainTextures';
 import { atmoUniforms, createSkyMesh, setAtmosphereBody, updateSkyMesh } from '../../src/render/Atmosphere';
 import { BodyProxies } from '../../src/render/BodyProxies';
 import { Clouds } from '../../src/render/Clouds';
+import { Space } from '../../src/render/Space';
 
 interface LabState {
   ready: boolean;
@@ -95,7 +97,9 @@ async function main(): Promise<void> {
   const quat = new Quaternion();
   if (orbit > 0) {
     camPlanet.copy(up).multiplyScalar(R * orbit);
-    const m = new Matrix4().lookAt(camPlanet, new Vector3(), new Vector3(...def.frame.north));
+    // look=sun turns the orbit camera toward the Sun (checks the Space sun disc and eclipses).
+    const target = q.get('look') === 'sun' ? camPlanet.clone().add(new Vector3(...sunDirFor(def))) : new Vector3();
+    const m = new Matrix4().lookAt(camPlanet, target, new Vector3(...def.frame.north));
     quat.setFromRotationMatrix(m);
   } else {
     const ground = gen.height(up.x, up.y, up.z);
@@ -144,6 +148,9 @@ async function main(): Promise<void> {
   terrain.splitPx = 4;
   store.onData = (d) => { if (d.level === 0) proxies.addRoot(d); };
   scene.add(terrain.root);
+  const space = new Space();
+  bgScene.add(space.group);
+  const sunDef = def.system === 'sol' ? BODIES.sun : null;
   const clouds = new Clouds();
   clouds.setBody(def, 1);
   scene.add(clouds.group);
@@ -184,6 +191,11 @@ async function main(): Promise<void> {
     bgCamera.quaternion.copy(camera.quaternion);
     bgCamera.updateMatrixWorld();
     const camSys = new Vector3(...def.center).add(camPlanet);
+    if (sunDef) {
+      const toSun = new Vector3(...sunDef.center).sub(camSys);
+      const dist = toSun.length();
+      space.update(bgCamera.quaternion, 1, 1, { dir: toSun.normalize(), angularRadius: Math.asin(Math.min(1, sunDef.radius / dist)), distance: dist });
+    } else space.update(bgCamera.quaternion, 1, 1);
     proxies.update(camSys, showTerrain ? def.id : null, now / 1000);
     if (q.get('debug') === 'nowater') for (const p of proxies.proxies.values()) if (p.water) p.water.visible = false;
     if (q.get('debug') === 'noclouds') for (const p of proxies.proxies.values()) p.clouds.group.visible = false;

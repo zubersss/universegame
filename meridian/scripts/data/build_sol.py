@@ -60,6 +60,15 @@ def iau_orientation(alpha0_deg, delta0_deg, w_deg):
     return ecl(pole), ecl(x)
 
 
+# IAU WGCCRE 2009 north poles (right ascension, declination; J2000), slow drift terms omitted.
+GIANT_POLES = {
+    'jupiter': (268.057, 64.495),
+    'saturn': (40.589, 83.537),
+    'uranus': (257.311, -15.175),
+    'neptune': (299.36, 43.46),
+}
+
+
 def mars_orientation(jd_tdb):
     """IAU WGCCRE 2009 Mars model without periodic terms (planetocentric, east-positive)."""
     d = jd_tdb - 2451545.0
@@ -139,6 +148,11 @@ def main():
             b['orientation'] = mars_orientation(EPOCH_JD)
         elif bid == 'moon' and 'moon' in vec and 'earth' in vec:
             b['orientation'] = moon_orientation(EPOCH_JD, vec['moon'], vec['earth'])
+        elif bid in GIANT_POLES:
+            a0, d0 = GIANT_POLES[bid]
+            north, x = iau_orientation(a0, d0, 0.0)
+            b['orientation'] = {'north': north, 'primeMeridian': x, 'tag': 'estimated',
+                                'source': 'IAU WGCCRE 2009 pole (reference values entered without a fetched source); prime meridian arbitrary (banded atmosphere)'}
         if bid == 'sun':
             # Exact by definition: the frame is heliocentric (origin at the Sun's centre).
             b['positionKm'] = f([0.0, 0.0, 0.0], M, 'km')
