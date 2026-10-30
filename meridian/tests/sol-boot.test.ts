@@ -1,14 +1,15 @@
 // L7b/L6b: Sol behind ?system=sol. The system switch made at boot, the start
-// pose, the handoff (activation) policy, the cruise hop, saves on landable
-// bodies, the navigation panel's digit keys and the background far plane, in
-// Node; boot's order and Game's use of the policy and the hop are checked in
-// their source. The browser journey is e2e/journey/travel.spec.ts ("Sol: Earth -> Moon hop").
+// pose (and the photo camera's site frame), the handoff (activation) policy,
+// the cruise hop (and a restored cruise's cap), saves on landable bodies and
+// across systems, the navigation panel's digit keys and the background far
+// plane, in Node; boot's order and Game's use of the policy and the hop are
+// checked in their source. The browser journey is e2e/journey/travel.spec.ts ("Sol: Earth -> Moon hop").
 import { readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { Vector3 } from 'three';
 import {
-  BODIES, BODY_IDS, GENERATOR_VERSION, PLAY_SYSTEM, SOL_M2_BODIES, SOL_TRAVEL_ORDER, SYSTEM_BODY_IDS, WORLD_SEED,
+  BODIES, BODY_IDS, GENERATOR_VERSION, PLAY_SYSTEM, SOL_M2_BODIES, SOL_TRAVEL_ORDER, SYSTEM_BODY_IDS, SYSTEM_EXTENT, WORLD_SEED,
   setPlaySystem, sunDirFor, type BodyId,
 } from '../src/world/bodies';
 import { BELTS } from '../src/world/catalog';
@@ -16,12 +17,13 @@ import { EARTH_META, installEarthData, loadEarthData, type LayerName } from '../
 import { bodyDataReady, getSurface } from '../src/world/surface';
 import { computeSites, tangentBasis } from '../src/world/sites';
 import { generateChunk } from '../src/terrain/chunkGen';
-import { canActivate, playBodies, proxyBodies, startBodyOf, startSite, surfaceReady, systemFromQuery } from '../src/game/playSystem';
+import { canActivate, playBodies, proxyBodies, siteFrame, startBodyOf, startSite, surfaceReady, systemFromQuery } from '../src/game/playSystem';
 import { CRUISE, SIM_DT, SURFACE_READY } from '../src/game/config';
-import { CruiseController, blockedBy, cruiseHop, hopDistance, planPath, routeHop, safetyRadius } from '../src/ship/Cruise';
+import { CruiseController, blockedBy, cruiseHop, hopDistance, planPath, resumeCap, routeHop, safetyRadius } from '../src/ship/Cruise';
 import { cruiseMaxSpeed } from '../src/world/scale';
 import { quatFromForwardUp } from '../src/core/mathx';
-import { SAVE_SCHEMA, validateSave, type SaveData } from '../src/save/SaveSystem';
+import { CORRUPT_KEY, PREV_KEY, SAVE_KEY, SAVE_SCHEMA, SaveStore, unloadableNote, validateSave, type SaveData } from '../src/save/SaveSystem';
+import type { KvStore } from '../src/save/db';
 import { newExpedition, powerFor } from '../src/game/Expedition';
 import { DEFAULT_SETTINGS } from '../src/game/settings';
 import { kindLabel, navKeyIndex, navKeyLabel } from '../src/ui/Panel';
@@ -133,6 +135,82 @@ describe('play system switch (?system=)', () => {
   });
 });
 
+describe('saves across systems (one save slot until step 10)', () => {
+  /** In-memory stand-in for the IndexedDB store (as in save.test). */
+  class MemKv {
+    data = new Map<string, unknown>();
+    async get(key: string) {
+      return this.data.get(key);
+    }
+    async put(key: string, value: unknown) {
+      this.data.set(key, structuredClone(value));
+    }
+    async rotateAndPut(key: string, backupKey: string, value: unknown, keep: (old: unknown) => boolean) {
+      const old = this.data.get(key);
+      if (old !== undefined && keep(old)) this.data.set(backupKey, old);
+      this.data.set(key, structuredClone(value));
+    }
+  }
+  const store = async (records: Record<string, unknown>) => {
+    const kv = new MemKv();
+    for (const [k, v] of Object.entries(records)) kv.data.set(k, v);
+    const st = new SaveStore(kv as unknown as KvStore);
+    await st.read();
+    return { kv, st };
+  };
+
+  it('in Sol a Quiet System save says saving here replaces it; the first save sets it aside in the free key', async () => {
+    setPlaySystem(playBodies('sol'));
+    const { kv, st } = await store({ [SAVE_KEY]: quietSave() });
+    expect(st.latest).toMatchObject({ data: null, present: true });
+    expect([st.otherSystem, st.asideFree]).toEqual([{ latest: 'quiet', previous: null }, true]);
+    expect(unloadableNote(st)).toBe(
+      'The latest save is from the Quiet System and cannot be continued in Sol. Saving in this system replaces it: ' +
+        'the first save sets it aside in browser storage, where no menu can load it. Start a new expedition.',
+    );
+    expect(await st.write(solSave())).toBe(true);
+    expect(kv.data.get(CORRUPT_KEY)).toEqual(quietSave());
+    expect(kv.data.get(SAVE_KEY)).toEqual(solSave());
+    expect(kv.data.has(PREV_KEY)).toBe(false);
+    expect(st.asideFree).toBe(false);
+  });
+
+  it('with the corrupt key taken the note says neither save is kept; saving never overwrites that key', async () => {
+    setPlaySystem(playBodies('sol'));
+    const earlier = { schema: SAVE_SCHEMA, garbage: true };
+    const quietPrev = { ...quietSave(), playTime: 7 };
+    const { kv, st } = await store({ [SAVE_KEY]: quietSave(), [PREV_KEY]: quietPrev, [CORRUPT_KEY]: earlier });
+    expect([st.otherSystem, st.asideFree, st.previous.data]).toEqual([{ latest: 'quiet', previous: 'quiet' }, false, null]);
+    expect(unloadableNote(st)).toBe(
+      'The latest save is from the Quiet System and cannot be continued in Sol. Saving in this system replaces both saves from ' +
+        'the Quiet System, and neither is kept. Start a new expedition.',
+    );
+    // The first save drops the latest (never rotated into the backup), the second rotates over the previous: as the note said.
+    expect(await st.write(solSave())).toBe(true);
+    expect([kv.data.get(CORRUPT_KEY), kv.data.get(PREV_KEY)]).toEqual([earlier, quietPrev]);
+    expect(await st.write(solSave({ playTime: 43 }))).toBe(true);
+    expect([kv.data.get(CORRUPT_KEY), kv.data.get(PREV_KEY), (kv.data.get(SAVE_KEY) as SaveData).playTime]).toEqual([earlier, solSave(), 43]);
+    // With the key free the latest is set aside and only the previous goes.
+    const free = await store({ [SAVE_KEY]: quietSave(), [PREV_KEY]: quietPrev });
+    expect(unloadableNote(free.st)).toMatch(/replaces both saves from the Quiet System: the first save sets the latest aside in browser storage/);
+  });
+
+  it('in the Quiet System a Sol save reads the same way; any other unloadable save keeps the M1 note', async () => {
+    const sol = await store({ [SAVE_KEY]: solSave() });
+    expect(sol.st.otherSystem.latest).toBe('sol');
+    expect(unloadableNote(sol.st)).toMatch(/^The latest save is from Sol and cannot be continued in the Quiet System\. Saving in this system replaces it: /);
+    const bad = await store({ [SAVE_KEY]: { schema: SAVE_SCHEMA, system: 'sol', garbage: true }, [PREV_KEY]: quietSave() });
+    expect(bad.st.otherSystem.latest).toBe('sol');
+    // A current-schema record from this system that fails validation is not another system's save.
+    const broken = await store({ [SAVE_KEY]: { ...quietSave(), mode: 'FLYING' }, [PREV_KEY]: quietSave() });
+    expect(broken.st.otherSystem).toEqual({ latest: null, previous: null });
+    expect(unloadableNote(broken.st)).toBe('The latest save could not be loaded (Bad mode.). It is kept aside unchanged. Load the previous save or start a new expedition.');
+    // The title shows this note for every present but unloadable latest save.
+    const src = readFileSync(new URL('../src/game/boot.ts', import.meta.url), 'utf8');
+    expect(src).toMatch(/\} else if \(l\.present\) \{\s*\/\/[^\n]*\n\s*menus\.setContinueAvailable\(false, unloadableNote\(saves\), true\);/);
+  });
+});
+
 describe('start pose', () => {
   it('a new expedition starts on Ilex in the Quiet System and on Earth in Sol', () => {
     expect(startBodyOf('quiet').id).toBe('ilex');
@@ -184,6 +262,34 @@ describe('start pose', () => {
     const s = startSite(def);
     expect(s.forward.length()).toBeCloseTo(1, 12);
     expect(Math.abs(s.forward.dot(s.dir))).toBeLessThan(1e-9);
+  });
+
+  it('the photo test camera frames Earth, the Moon and Mars (the relay sits on the site) and Ilex as before', () => {
+    for (const id of ['earth', 'moon', 'mars'] as const) {
+      const def = BODIES[id];
+      const sites = computeSites(def);
+      expect(sites.relay.dir).toEqual(sites.landing.dir); // a frame built from the relay collapses here
+      const { up, forward, right } = siteFrame(def, sites);
+      for (const v of [up, forward, right]) {
+        expect(v.toArray().every(Number.isFinite)).toBe(true);
+        expect(v.length()).toBeCloseTo(1, 9);
+      }
+      for (const [a, b] of [[up, forward], [up, right], [forward, right]]) expect(Math.abs(a.dot(b))).toBeLessThan(1e-9);
+      expect(up.toArray()).toEqual([...sites.landing.dir]);
+      expect(forward.toArray()).toEqual(startSite(def).forward.toArray());
+    }
+    // The Quiet System keeps the frame applyPhotoCamera built from the relay before, verbatim.
+    const sites = computeSites(BODIES.ilex);
+    const n = new Vector3(...sites.landing.dir);
+    const relay = new Vector3(...sites.relay.dir);
+    const fz = relay.sub(n.clone().multiplyScalar(relay.dot(n))).normalize();
+    const f = siteFrame(BODIES.ilex, sites);
+    expect([f.up, f.forward, f.right].map((v) => v.toArray())).toEqual([n, fz, new Vector3().crossVectors(fz, n).normalize()].map((v) => v.toArray()));
+    // applyPhotoCamera reads this frame from the active body's sites.
+    const src = readFileSync(new URL('../src/game/Game.ts', import.meta.url), 'utf8');
+    const photo = src.slice(src.indexOf('private applyPhotoCamera('), src.indexOf('private navMarker('));
+    expect(photo).toMatch(/const \{ up: n, forward: fz, right: fx \} = siteFrame\(b\.def, b\.sites\);/);
+    expect(photo).not.toMatch(/sites\.relay/);
   });
 
   it('the start pose is a valid last safe landing (newExpedition records it)', () => {
@@ -452,25 +558,63 @@ describe('cruise hop', () => {
     // Nor does a later lower retarget lower the leg's record.
     m.retarget(moonHop);
     expect(m.legStats().cap).toBe(farCap);
+  });
 
-    // A cruise resumed from a save enters at its saved speed, which can be above
-    // its remaining route's cap: entry records it (peak <= max(cap, entry)).
-    const r = new CruiseController();
-    r.begin(start, facing(start, center('neptune')), center('neptune').sub(start).setLength(farCap), moonHop);
-    const rs = r.legStats();
-    expect(rs).toMatchObject({ hop: moonHop, cap: cruiseMaxSpeed(moonHop), peak: rs.entry });
-    expect(rs.entry).toBeCloseTo(farCap, 3);
-    expect(rs.entry).toBeGreaterThan(rs.cap);
-    for (let i = 0; i < 60 * 5; i++) r.step(SIM_DT, FULL);
-    expect(r.speed).toBeLessThanOrEqual(r.maxSpeed);
-    expect(r.peak).toBeLessThanOrEqual(Math.max(r.legStats().cap, r.legStats().entry));
+  it('a cruise restored from a save keeps its pace: the cap never drops below the saved speed', () => {
+    setPlaySystem(playBodies('sol'));
+    // A leg from Earth toward Neptune, saved after 20 s at full speed: the route left is shorter, so its own cap is lower.
+    const start = center('earth').addScaledVector(center('neptune').sub(center('earth')).normalize(), safetyRadius(BODIES.earth) + 12000);
+    const leg = new CruiseController();
+    const far = cruiseHop(start, 'neptune');
+    leg.begin(start, facing(start, center('neptune')), new Vector3(), far);
+    for (let i = 0; i < 60 * 20; i++) leg.step(SIM_DT, FULL);
+    const saved = leg.speed;
+    expect(saved).toBe(cruiseMaxSpeed(far));
+    const left = cruiseHop(leg.pos, 'neptune');
+    expect(cruiseMaxSpeed(left)).toBeLessThan(0.7 * saved);
+    // Restored as Game.restore does: begin at the saved speed and hop left, the cap floored by resumeCap.
+    const restore = (minCap: number) => {
+      const r = new CruiseController();
+      r.begin(leg.pos, leg.quat, leg.velocity(new Vector3()), left, minCap);
+      r.speed = saved;
+      return r;
+    };
+    const r = restore(resumeCap('neptune', saved));
+    expect([r.hop, r.maxSpeed]).toEqual([left, saved]);
+    expect(r.accel).toBeCloseTo(leg.accel, 6);
+    // It flies on as the uninterrupted leg does, never past its cap.
+    for (let i = 0; i < 60 * 10; i++) {
+      leg.step(SIM_DT, FULL);
+      r.step(SIM_DT, FULL);
+    }
+    expect(r.speed).toBe(saved);
+    expect(r.pos.distanceTo(leg.pos)).toBeLessThan(1);
+    expect(r.legStats()).toMatchObject({ hop: left, cap: saved });
+    expect(r.legStats().peak).toBeLessThanOrEqual(r.legStats().cap);
+    expect(r.safetyStops).toBe(0);
+    // Without the floor it slowed to the remaining route's cap within the 3 s ramp (the trip took about 45 s again).
+    const old = restore(0);
+    for (let i = 0; i < 60 * 4; i++) old.step(SIM_DT, FULL);
+    expect(old.speed).toBe(cruiseMaxSpeed(left));
+
+    // The floor is the saved speed bounded by the hop rule: in Sol never above the longest hop's cap (the save bound) ...
+    expect(resumeCap('neptune', 1e9)).toBe(cruiseMaxSpeed(2 * SYSTEM_EXTENT));
+    // ... and the fixed 15 km/s without a target or in the Quiet System, whose restored cruise is unchanged.
+    expect(resumeCap(null, saved)).toBe(CRUISE.maxSpeed);
+    setPlaySystem(playBodies('quiet'));
+    const p = new Vector3(300000, 400000, 0);
+    for (const v of [9000, 15000, 18000]) {
+      const q = new CruiseController();
+      q.begin(p, facing(p, center('vesper')), new Vector3(), cruiseHop(p, 'vesper'), resumeCap('vesper', v));
+      expect([q.maxSpeed, q.accel]).toEqual([CRUISE.maxSpeed, CRUISE.accel]);
+    }
   });
 
   it("the game caps every engage, restore and retarget by the nav target's hop and logs each leg from the controller", () => {
     const src = readFileSync(new URL('../src/game/Game.ts', import.meta.url), 'utf8');
     expect(src.match(/this\.cruise\.begin\([^;]*;/g)).toEqual([
       'this.cruise.begin(_v4, ship.currQuat, ship.vel, cruiseHop(_v4, this.navTarget));',
-      'this.cruise.begin(sys, quat, fwd.clone().multiplyScalar(data.cruise.speed), cruiseHop(sys, data.navTarget));',
+      'this.cruise.begin(sys, quat, fwd.clone().multiplyScalar(data.cruise.speed), cruiseHop(sys, data.navTarget), resumeCap(data.navTarget, data.cruise.speed));',
     ]);
     expect(src).toMatch(/pushBounded\(this\.cruiseLog, \{ start: this\.cruiseStart, end: this\.simTime, target: this\.navTarget, \.\.\.this\.cruise\.legStats\(\), exit: reason \}\);/);
     expect(src.match(/pushBounded\(this\.cruiseLog,/g)).toHaveLength(1);

@@ -20,14 +20,14 @@ import { Exhaust } from '../ship/Exhaust';
 import { BOARDING_POINT, GEAR_PAD_BOTTOM_Y } from '../ship/ShipModel';
 import { NO_CONTROLS, type FlightOutput, type FlightOverride, type ShipControls } from '../ship/FlightModel';
 import { LandingAssist, emptyProbe, probeFootprint, type FootprintProbe } from '../ship/LandingAssist';
-import { CruiseController, cruiseHop, freeDistance, insideEnvelope, type CruiseExitReason, type CruiseLegStats } from '../ship/Cruise';
+import { CruiseController, cruiseHop, freeDistance, insideEnvelope, resumeCap, type CruiseExitReason, type CruiseLegStats } from '../ship/Cruise';
 import { Player, FOOT_OFFSET, playerShape, type WalkInput } from '../player/Player';
 import { FlightEnvProvider } from '../world/FlightEnvProvider';
 import { ActiveBody } from '../world/ActiveBody';
 import { computeSites } from '../world/sites';
 import { MissionObjects, sampleName } from '../world/MissionObjects';
 import { Expedition, SURVEY_BODIES } from './Expedition';
-import { canActivate, proxyBodies, startBodyOf, startSite, surfaceReady } from './playSystem';
+import { canActivate, proxyBodies, siteFrame, startBodyOf, startSite, surfaceReady } from './playSystem';
 import { OnFootHost, type OnFootExitReason } from './onFoot';
 import { rayCapsule } from './scan';
 import type { Species } from '../props/species';
@@ -86,8 +86,8 @@ export interface HandoffEvent {
 
 /**
  * A finished cruise leg (diagnostics and tests): hop, cap, entry and peak as
- * CruiseController.legStats gives them (cap = cruiseMaxSpeed(hop); peak <= cap
- * for a leg engaged from flight).
+ * CruiseController.legStats gives them (cap = cruiseMaxSpeed(hop) for a leg
+ * engaged from flight, at least the entry speed for a restored one; peak <= cap).
  */
 export interface CruiseLeg extends CruiseLegStats {
   /** Simulation times (s) of the engage (or the restore) and of the hand-back to normal flight. */
@@ -1427,11 +1427,8 @@ export class Game {
     const b = this.body;
     if (!b) return;
     const pc = this.photoCamera!;
-    const sites = b.sites;
-    const n = new Vector3(...sites.landing.dir);
-    const relay = new Vector3(...sites.relay.dir);
-    const fz = relay.sub(n.clone().multiplyScalar(relay.dot(n))).normalize();
-    const fx = new Vector3().crossVectors(fz, n).normalize();
+    // The landing site's frame (unchanged in the Quiet System; on Sol bodies the relay sits on the site).
+    const { up: n, forward: fz, right: fx } = siteFrame(b.def, b.sites);
     const R = b.def.radius;
     // Offsets are tangent-plane meters; heights are above the local terrain.
     const at = (o: [number, number, number]) => {
@@ -1723,9 +1720,10 @@ export class Game {
       this.setMode('PILOTING', 'restore');
       if (data.mode === 'CRUISING' && data.cruise) {
         // Cruise resumes only if its clearance is still safe at the saved speed,
-        // braking at the acceleration the saved hop gives (begin sets it).
+        // braking at the acceleration the saved hop gives (begin sets it); its
+        // cap never drops below the saved speed (resumeCap), so it keeps its pace.
         const fwd = new Vector3(0, 0, -1).applyQuaternion(quat);
-        this.cruise.begin(sys, quat, fwd.clone().multiplyScalar(data.cruise.speed), cruiseHop(sys, data.navTarget));
+        this.cruise.begin(sys, quat, fwd.clone().multiplyScalar(data.cruise.speed), cruiseHop(sys, data.navTarget), resumeCap(data.navTarget, data.cruise.speed));
         const need = (data.cruise.speed * data.cruise.speed) / (2 * this.cruise.accel) + CRUISE.safetyMargin;
         if (!insideEnvelope(sys) && freeDistance(sys, fwd).distance > need) {
           this.cruise.speed = data.cruise.speed;

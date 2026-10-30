@@ -282,15 +282,48 @@ export function legacySummary(raw: unknown): LegacySave | null {
 
 export type SlotState = { data: SaveData | null; error: string | null; present: boolean };
 
+/** The star system a current-schema record was saved in, when that is not the one in play (it reads as unloadable here); else null. */
+export function otherSystemOf(raw: unknown): SystemId | null {
+  return isObj(raw) && raw.schema === SAVE_SCHEMA && isSystem(raw.system) && raw.system !== playedSystem() ? raw.system : null;
+}
+
+const SYSTEM_NAMES: Record<SystemId, string> = { quiet: 'the Quiet System', sol: 'Sol', proxima: 'Proxima Centauri' };
+
+/**
+ * Title note for a latest save that is present but cannot be loaded, saying
+ * what saving now does to it. The star systems share one save slot (until
+ * plan step 10 picks the start system from the latest save), so a save from
+ * another system is replaced by the first save here: the note says so
+ * plainly, and whether that save sets it aside under CORRUPT_KEY (only when
+ * the key is free; no menu loads it from there) or drops it. A previous save
+ * from that system goes at the second save (rotation). Any other unloadable
+ * record keeps the M1 note.
+ */
+export function unloadableNote(s: Pick<SaveStore, 'latest' | 'previous' | 'otherSystem' | 'asideFree'>): string {
+  const next = `${s.previous.data ? 'Load the previous save or start' : 'Start'} a new expedition.`;
+  const other = s.otherSystem.latest;
+  if (!other) return `The latest save could not be loaded (${s.latest.error}). It is kept aside unchanged. ${next}`;
+  const name = SYSTEM_NAMES[other];
+  const both = s.otherSystem.previous === other;
+  const fate = s.asideFree
+    ? `: the first save sets ${both ? 'the latest' : 'it'} aside in browser storage, where no menu can load it`
+    : `, and ${both ? 'neither is' : 'it is not'} kept`;
+  return `The latest save is from ${name} and cannot be continued in ${SYSTEM_NAMES[playedSystem()]}. Saving in this system replaces ${both ? `both saves from ${name}` : 'it'}${fate}. ${next}`;
+}
+
 /**
  * IndexedDB persistence with a previous-good backup kept in the same
- * transaction. A corrupt latest record is never overwritten silently: it is
- * copied to its own key before the next write, and never rotated into the
- * backup slot.
+ * transaction. A corrupt latest record is never overwritten silently: before
+ * the next write it is copied to its own key when that key is free (else the
+ * title note says it is not kept), and it is never rotated into the backup slot.
  */
 export class SaveStore {
   latest: SlotState = { data: null, error: null, present: false };
   previous: SlotState = { data: null, error: null, present: false };
+  /** As of read(): the star system the latest and previous records were saved in when that is not the one in play, else null. */
+  otherSystem: { latest: SystemId | null; previous: SystemId | null } = { latest: null, previous: null };
+  /** CORRUPT_KEY is free: the next write sets an unloadable latest record aside there (otherwise it is dropped). */
+  asideFree = true;
   /** A save from an older schema, kept read-only (null when there is none). */
   legacy: LegacySave | null = null;
   /** Why persistence is not working, or why the last snapshot was not written (null when saves work). */
@@ -319,7 +352,10 @@ export class SaveStore {
       // An older schema moves to its own key before anything can overwrite it.
       if (legacySummary(raw) && (await this.kv.get(LEGACY_KEY)) === undefined) await this.kv.put(LEGACY_KEY, raw);
       this.latest = SaveStore.slot(raw);
-      this.previous = SaveStore.slot(await this.kv.get(PREV_KEY));
+      const prev = await this.kv.get(PREV_KEY);
+      this.previous = SaveStore.slot(prev);
+      this.otherSystem = { latest: otherSystemOf(raw), previous: otherSystemOf(prev) };
+      this.asideFree = (await this.kv.get(CORRUPT_KEY)) === undefined;
       this.legacy = legacySummary(await this.kv.get(LEGACY_KEY));
     } catch (e) {
       this.failure = `Could not read saves: ${(e as Error).message}`;
@@ -339,9 +375,12 @@ export class SaveStore {
     }
     try {
       if (this.latest.present && !this.latest.data) {
-        // Preserve a corrupt latest record before replacing it.
+        // Preserve a corrupt latest record before replacing it, never over an earlier one.
         const old = await this.kv.get(SAVE_KEY);
-        if ((await this.kv.get(CORRUPT_KEY)) === undefined && old !== undefined) await this.kv.put(CORRUPT_KEY, old);
+        if ((await this.kv.get(CORRUPT_KEY)) === undefined && old !== undefined) {
+          await this.kv.put(CORRUPT_KEY, old);
+          this.asideFree = false;
+        }
       }
       await this.kv.rotateAndPut(SAVE_KEY, PREV_KEY, data, (old) => validateSave(old).ok);
       if (this.latest.data) this.previous = { ...this.latest };
