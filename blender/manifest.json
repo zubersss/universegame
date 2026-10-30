@@ -60,6 +60,57 @@
       "glow_peak": 0.45,
       "glow_width": 8,
       "disc_radius": 200
+    },
+    {
+      "key": "planets/sun/surface",
+      "generator": "scripts/gen_space.py",
+      "size": [2048, 1024],
+      "maps": ["color", "emission"],
+      "seed": 1001,
+      "spots": 5,
+      "tileable": "x"
+    },
+    {
+      "key": "planets/sun/glow",
+      "generator": "scripts/gen_planet.py",
+      "size": [512, 512],
+      "maps": ["color", "emission"],
+      "glow_color": [255, 214, 150],
+      "glow_peak": 0.95,
+      "glow_width": 30,
+      "disc_radius": 160
+    },
+    {
+      "key": "backgrounds/space/layer0",
+      "generator": "scripts/gen_space.py",
+      "size": [2048, 1024],
+      "maps": ["color"],
+      "seed": 2001,
+      "stars": 9000,
+      "star_gain": 0.55,
+      "tileable": "xy"
+    },
+    {
+      "key": "backgrounds/space/layer1",
+      "generator": "scripts/gen_space.py",
+      "size": [2048, 1024],
+      "maps": ["color"],
+      "seed": 2002,
+      "stars": 1600,
+      "star_size": 0.7,
+      "star_gain": 1.0,
+      "tileable": "xy"
+    },
+    {
+      "key": "backgrounds/space/layer2",
+      "generator": "scripts/gen_space.py",
+      "size": [2048, 1024],
+      "maps": ["color"],
+      "seed": 2003,
+      "stars": 220,
+      "star_size": 1.1,
+      "star_gain": 1.6,
+      "tileable": "xy"
     }
   ]
 }

@@ -87,8 +87,9 @@ def check_padding(color_u8, pad=C.PADDING):
 
 def seam_score(color_u8, axis):
     """Ratio of the wrap-seam difference to the mean neighbouring-line difference.
-    axis 1 = horizontal tiling (compare last column with first)."""
-    img = color_u8[..., :3].astype(np.float32)
+    axis 1 = horizontal tiling (compare last column with first). Compares premultiplied color
+    (what reaches the screen), so dilation fill under alpha 0 doesn't count."""
+    img = color_u8[..., :3].astype(np.float32) * (color_u8[..., 3:4].astype(np.float32) / 255.0)
     if axis == 0:
         img = img.transpose(1, 0, 2)
     interior = np.abs(np.diff(img, axis=1)).mean()
