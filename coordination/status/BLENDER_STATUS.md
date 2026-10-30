@@ -2,6 +2,7 @@
 Updated: 2026-10-30 · Session: 1
 ## Current task
 B-011 rework (Mars rendered 3D) + B-010 re-export — 2026-10-30. Both use blender/scripts/gen_backdrop3d.py. B-010 exported once (6c6541d); a ground-grid fix since then (square cells: stretched cells streaked the near ground) needs one more Earth export. Mars previews pass (period error 0.18–0.24). Both full exports waiting on heavy_unity.lock. Then B-019, B-023; B-012 after.
+Note (2026-10-30): the system ran critically low on memory while UNITY's job held the lock; my lock-watcher was stopped by Claude Code. No BLENDER heavy job is running or queued; I will not start the exports until the lock is gone and memory has recovered (≥ 1 GB free, Bible §11.2).
 ## Last completed
 B-022 terrain revision — fb0c1dc. All 10 sheets re-exported, same file names: slots 47–62 = 16 interior variants of tile 46, slot 63 empty. Each variant blends the base texture into an independently seeded one through a window that is exactly 0 within 1 px of the border (full alt beyond 6 px), by rotation about the mean so contrast never dips (a linear mix drew a faint grid). Joins are identical to tile 46. Measured on a 16×8 interior block: autocorrelation at the 128 px period 0.12–0.16 for every material, ≈0 off-period (no visible lattice). Grass grows only on upward-facing edges; walls, ceilings and undersides show soil with the darker rim. Demos: blender/preview/terrain__<planet>__<material>_demo{,_interior}.png.
 Before that:
