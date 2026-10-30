@@ -48,7 +48,13 @@ for (const body of bodies) {
   await page.keyboard.press('Tab');
   await until(`s.state === "playing" && s.navTarget === "${body}"`, 60_000);
   await page.evaluate((to) => window.__meridian.autopilot({ kind: 'travel', to }), body);
-  // Progress every 30 s (wall time) until the autopilot has landed.
+  // Progress every 30 s (wall time) until the autopilot has landed. A cruise
+  // leg can end just inside a body's safety envelope (the route passes the
+  // Sun on the way to Mars); the autopilot then keeps asking for cruise and is
+  // refused. Restarting the travel goal climbs clear of every envelope first
+  // and plans the route again from there.
+  let refusedAtStart = 0;
+  let restarts = 0;
   for (let polls = 0; ; polls++) {
     const st = await page.evaluate(() => ({
       ap: window.__meridian.autopilotState(),
@@ -57,6 +63,15 @@ for (const body of bodies) {
     }));
     if (st.ap.phase === 'landed') break;
     if (polls > 3 * 720) throw new Error(`no landing on ${body} after 3 h: ${JSON.stringify(st.ap)}`);
+    if (st.s.counters.cruiseRefused - refusedAtStart >= 3 && (st.ap.phase === 'align' || st.ap.phase === 'engage')) {
+      if (++restarts > 10) throw new Error(`cruise refused after ${restarts - 1} restarts: ${st.notice}`);
+      console.log(`${body}: restart ${restarts} at sim ${st.s.simTime.toFixed(0)} s, cruise refused ${st.s.counters.cruiseRefused} times (${st.notice.slice(-80)})`);
+      refusedAtStart = st.s.counters.cruiseRefused;
+      await page.evaluate((to) => {
+        window.__meridian.autopilot(null);
+        window.__meridian.autopilot({ kind: 'travel', to });
+      }, body);
+    }
     if (polls % 6 === 0) {
       const c = st.s.counters;
       console.log(`${body}: sim ${st.s.simTime.toFixed(0)} s, ${st.s.mode} at ${st.s.body}, autopilot ${st.ap.phase} (wp ${st.ap.wp}/${st.ap.route.length}, ${(st.ap.distance / 1000).toFixed(1)} km), cruise engages ${c.cruiseEngages} refused ${c.cruiseRefused}; notices: ${st.notice || '-'}`);
