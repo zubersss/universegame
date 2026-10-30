@@ -87,7 +87,8 @@ export interface HandoffEvent {
 /**
  * A finished cruise leg (diagnostics and tests): hop, cap, entry and peak as
  * CruiseController.legStats gives them (cap = cruiseMaxSpeed(hop) for a leg
- * engaged from flight, at least the entry speed for a restored one; peak <= cap).
+ * engaged from flight, at least resumeCap's floor for a restored one; peak <=
+ * cap but in the case CruiseLegStats names).
  */
 export interface CruiseLeg extends CruiseLegStats {
   /** Simulation times (s) of the engage (or the restore) and of the hand-back to normal flight. */
@@ -1721,9 +1722,10 @@ export class Game {
       if (data.mode === 'CRUISING' && data.cruise) {
         // Cruise resumes only if its clearance is still safe at the saved speed,
         // braking at the acceleration the saved hop gives (begin sets it); its
-        // cap never drops below the saved speed (resumeCap), so it keeps its pace.
+        // cap is floored at saved speed ÷ throttle (resumeCap), the leg's cap
+        // once the speed had settled, so it keeps the leg's pace.
         const fwd = new Vector3(0, 0, -1).applyQuaternion(quat);
-        this.cruise.begin(sys, quat, fwd.clone().multiplyScalar(data.cruise.speed), cruiseHop(sys, data.navTarget), resumeCap(data.navTarget, data.cruise.speed));
+        this.cruise.begin(sys, quat, fwd.clone().multiplyScalar(data.cruise.speed), cruiseHop(sys, data.navTarget), resumeCap(data.navTarget, data.cruise.speed, data.cruise.throttle));
         const need = (data.cruise.speed * data.cruise.speed) / (2 * this.cruise.accel) + CRUISE.safetyMargin;
         if (!insideEnvelope(sys) && freeDistance(sys, fwd).distance > need) {
           this.cruise.speed = data.cruise.speed;

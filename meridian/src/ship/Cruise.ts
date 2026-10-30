@@ -17,7 +17,8 @@ import { cruiseMaxSpeed } from '../world/scale';
 // acceleration scaled so the ramp to the cap always takes CRUISE.rampSeconds.
 // The hop is the planned route length (routeHop), so a leg that bypasses the
 // Sun is still one cruise of about 45 s along the nav marker's waypoints. A
-// cruise restored from a save keeps a cap of at least its saved speed.
+// cruise restored from a save gets back its leg's cap from the saved speed and
+// throttle (resumeCap), once that speed had settled at throttle x cap.
 // `ids` parameters default to the bodies in play (BODY_IDS).
 
 /** Safety-envelope radius of a body: surface + atmosphere + fixed margin; a star keeps a 5R standoff. */
@@ -138,15 +139,22 @@ export function cruiseHop(pos: Vector3, target: BodyId | null): number {
 }
 
 /**
- * The cap floor (begin's minCap) for a cruise restored from a save: its saved
- * speed, which its leg's cap allowed, never above the highest cap the hop rule
+ * The cap floor (begin's minCap) for a cruise restored from a save. The save
+ * keeps no leg start (schema 2), so the leg's own hop is not recoverable; but
+ * a cruise holds throttle x cap, so the floor is speed ÷ throttle (the saved
+ * speed itself at zero throttle), never above the highest cap the hop rule
  * gives any leg toward that target (the 15 km/s floor without a target or in
- * the Quiet System, as cruiseHop; else the longest hop's). The save keeps no
- * leg start (schema 2), so the leg's own hop is not recoverable.
+ * the Quiet System, as cruiseHop; else the longest hop's). This is the leg's
+ * cap once the speed has settled; within the ramp (rampSeconds) after an
+ * engage or a throttle change it is not: a save taken while the speed was
+ * still climbing gives a lower floor, and one taken while it was still falling
+ * to a lowered throttle a higher one, so that restored cruise holds its saved
+ * speed instead of slowing on.
  */
-export function resumeCap(target: BodyId | null, speed: number): number {
+export function resumeCap(target: BodyId | null, speed: number, throttle: number): number {
   const top = !target || BODIES[target].system === 'quiet' ? CRUISE.maxSpeed : cruiseMaxSpeed(2 * SYSTEM_EXTENT);
-  return Math.min(Math.max(0, speed), top);
+  const v = Math.max(0, speed);
+  return Math.min(throttle > 0 ? v / throttle : v, top);
 }
 
 export type CruiseExitReason = 'approach' | 'brake' | 'toggle' | 'safety';
@@ -158,7 +166,8 @@ export type CruiseExitReason = 'approach' | 'brake' | 'toggle' | 'safety';
  * saved (entry) speed, so a retarget to a nearer body (which lowers the live
  * cap) never hides a faster part of the leg. peak <= cap: a leg engaged from
  * flight enters below the 15 km/s floor, and a restored cruise keeps a cap of
- * at least its entry speed (begin's minCap).
+ * at least its entry speed (begin's minCap), except one saved while it was
+ * still slowing after its course was cleared (it restores to 15 km/s).
  */
 export interface CruiseLegStats {
   /** Hop (m) planned when the leg had that cap (at begin or a retarget), as capped (≤ 2·SYSTEM_EXTENT). */
@@ -257,7 +266,7 @@ export class CruiseController {
    * Start cruising; `hop` (m) is the route length to the destination's envelope
    * (routeHop; 0 = the 15 km/s floor). `minCap` (m/s) is a floor under the cap
    * for this hop (resumeCap for a cruise restored from a save, so it keeps its
-   * pace instead of slowing to the remaining route's cap); a retarget drops it.
+   * leg's cap instead of slowing to the remaining route's); a retarget drops it.
    */
   begin(pos: Vector3, quat: Quaternion, velocity: Vector3, hop = 0, minCap = 0): void {
     this.pos.copy(pos);

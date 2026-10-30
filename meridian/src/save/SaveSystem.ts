@@ -297,7 +297,8 @@ const SYSTEM_NAMES: Record<SystemId, string> = { quiet: 'the Quiet System', sol:
  * plainly, and whether that save sets it aside under CORRUPT_KEY (only when
  * the key is free; no menu loads it from there) or drops it. A previous save
  * from that system goes at the second save (rotation). Any other unloadable
- * record keeps the M1 note.
+ * record keeps the M1 note, "kept aside unchanged", which holds only while
+ * CORRUPT_KEY is free (an M1 gap, see SaveStore).
  */
 export function unloadableNote(s: Pick<SaveStore, 'latest' | 'previous' | 'otherSystem' | 'asideFree'>): string {
   const next = `${s.previous.data ? 'Load the previous save or start' : 'Start'} a new expedition.`;
@@ -313,9 +314,13 @@ export function unloadableNote(s: Pick<SaveStore, 'latest' | 'previous' | 'other
 
 /**
  * IndexedDB persistence with a previous-good backup kept in the same
- * transaction. A corrupt latest record is never overwritten silently: before
- * the next write it is copied to its own key when that key is free (else the
- * title note says it is not kept), and it is never rotated into the backup slot.
+ * transaction. An unloadable latest record is never rotated into the backup
+ * slot: before the next write it is copied to its own key (CORRUPT_KEY) when
+ * that key is free, never over the record already there, and otherwise
+ * dropped. The title note says so for a save from another star system; for
+ * any other unloadable record it keeps the M1 text "kept aside unchanged",
+ * so with the key taken that record is still dropped without a word (an M1
+ * gap left for a later step: rewording that note changes the Quiet title).
  */
 export class SaveStore {
   latest: SlotState = { data: null, error: null, present: false };

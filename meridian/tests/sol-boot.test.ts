@@ -209,6 +209,16 @@ describe('saves across systems (one save slot until step 10)', () => {
     const src = readFileSync(new URL('../src/game/boot.ts', import.meta.url), 'utf8');
     expect(src).toMatch(/\} else if \(l\.present\) \{\s*\/\/[^\n]*\n\s*menus\.setContinueAvailable\(false, unloadableNote\(saves\), true\);/);
   });
+
+  it('M1 gap, pinned: with the corrupt key taken an unloadable save from this system is dropped although the note says kept aside', async () => {
+    const earlier = { schema: SAVE_SCHEMA, ship: 'garbage-1' };
+    const { kv, st } = await store({ [SAVE_KEY]: { schema: SAVE_SCHEMA, ship: 'garbage-2' }, [PREV_KEY]: quietSave(), [CORRUPT_KEY]: earlier });
+    expect([st.otherSystem, st.asideFree]).toEqual([{ latest: null, previous: null }, false]);
+    // The M1 note, unchanged so the Quiet title stays as it was; a later step makes it true or rewords it.
+    expect(unloadableNote(st)).toMatch(/\. It is kept aside unchanged\. Load the previous save or start a new expedition\.$/);
+    expect(await st.write({ ...quietSave(), playTime: 43 })).toBe(true);
+    expect([kv.data.get(CORRUPT_KEY), kv.data.get(PREV_KEY), (kv.data.get(SAVE_KEY) as SaveData).playTime]).toEqual([earlier, quietSave(), 43]);
+  });
 });
 
 describe('start pose', () => {
@@ -560,53 +570,86 @@ describe('cruise hop', () => {
     expect(m.legStats().cap).toBe(farCap);
   });
 
-  it('a cruise restored from a save keeps its pace: the cap never drops below the saved speed', () => {
+  it("a cruise restored from a save keeps its leg's cap: the saved speed ÷ throttle floors it", () => {
     setPlaySystem(playBodies('sol'));
-    // A leg from Earth toward Neptune, saved after 20 s at full speed: the route left is shorter, so its own cap is lower.
+    // A leg from Earth toward Neptune, saved after 20 s at a steady throttle: the route left is shorter, so its own cap is lower.
     const start = center('earth').addScaledVector(center('neptune').sub(center('earth')).normalize(), safetyRadius(BODIES.earth) + 12000);
-    const leg = new CruiseController();
     const far = cruiseHop(start, 'neptune');
-    leg.begin(start, facing(start, center('neptune')), new Vector3(), far);
-    for (let i = 0; i < 60 * 20; i++) leg.step(SIM_DT, FULL);
-    const saved = leg.speed;
-    expect(saved).toBe(cruiseMaxSpeed(far));
-    const left = cruiseHop(leg.pos, 'neptune');
-    expect(cruiseMaxSpeed(left)).toBeLessThan(0.7 * saved);
+    const fly = (c: CruiseController, throttle: number, seconds: number) => {
+      for (let i = 0; i < 60 * seconds; i++) c.step(SIM_DT, { ...FULL, throttle });
+    };
+    const legAt = (throttle: number) => {
+      const leg = new CruiseController();
+      leg.begin(start, facing(start, center('neptune')), new Vector3(), far);
+      fly(leg, throttle, 20);
+      return leg;
+    };
     // Restored as Game.restore does: begin at the saved speed and hop left, the cap floored by resumeCap.
-    const restore = (minCap: number) => {
+    const restore = (leg: CruiseController, minCap: number) => {
       const r = new CruiseController();
-      r.begin(leg.pos, leg.quat, leg.velocity(new Vector3()), left, minCap);
-      r.speed = saved;
+      r.begin(leg.pos, leg.quat, leg.velocity(new Vector3()), cruiseHop(leg.pos, 'neptune'), minCap);
+      r.speed = leg.speed;
       return r;
     };
-    const r = restore(resumeCap('neptune', saved));
-    expect([r.hop, r.maxSpeed]).toEqual([left, saved]);
-    expect(r.accel).toBeCloseTo(leg.accel, 6);
-    // It flies on as the uninterrupted leg does, never past its cap.
-    for (let i = 0; i < 60 * 10; i++) {
-      leg.step(SIM_DT, FULL);
-      r.step(SIM_DT, FULL);
+    for (const throttle of [1, 0.5]) {
+      const leg = legAt(throttle);
+      const saved = leg.speed;
+      expect(saved).toBe(throttle * cruiseMaxSpeed(far));
+      const left = cruiseHop(leg.pos, 'neptune');
+      expect(cruiseMaxSpeed(left)).toBeLessThan(0.8 * cruiseMaxSpeed(far));
+      const r = restore(leg, resumeCap('neptune', saved, throttle));
+      expect([r.hop, r.maxSpeed]).toEqual([left, cruiseMaxSpeed(far)]);
+      expect(r.accel).toBeCloseTo(leg.accel, 6);
+      // It flies on as the uninterrupted leg does, never past its cap.
+      const old = restore(leg, saved);
+      fly(old, throttle, 10);
+      for (let i = 0; i < 60 * 10; i++) {
+        leg.step(SIM_DT, { ...FULL, throttle });
+        r.step(SIM_DT, { ...FULL, throttle });
+      }
+      expect(r.speed).toBe(saved);
+      expect(r.pos.distanceTo(leg.pos)).toBeLessThan(1);
+      expect(r.legStats()).toMatchObject({ hop: left, cap: cruiseMaxSpeed(far) });
+      expect(r.legStats().peak).toBeLessThanOrEqual(r.legStats().cap);
+      expect(r.safetyStops).toBe(0);
+      // A floor of the saved speed alone (the first fix) holds it only at full throttle; below, it slows to throttle x the route left's cap.
+      expect(old.speed).toBe(throttle === 1 ? saved : throttle * cruiseMaxSpeed(left));
     }
-    expect(r.speed).toBe(saved);
-    expect(r.pos.distanceTo(leg.pos)).toBeLessThan(1);
-    expect(r.legStats()).toMatchObject({ hop: left, cap: saved });
-    expect(r.legStats().peak).toBeLessThanOrEqual(r.legStats().cap);
-    expect(r.safetyStops).toBe(0);
-    // Without the floor it slowed to the remaining route's cap within the 3 s ramp (the trip took about 45 s again).
-    const old = restore(0);
-    for (let i = 0; i < 60 * 4; i++) old.step(SIM_DT, FULL);
-    expect(old.speed).toBe(cruiseMaxSpeed(left));
+    // Without a floor it slowed to the remaining route's cap within the 3 s ramp (the trip took about 45 s again).
+    const bare = restore(legAt(1), 0);
+    fly(bare, 1, 4);
+    expect(bare.speed).toBe(bare.maxSpeed);
+    expect(bare.maxSpeed).toBeLessThan(0.8 * cruiseMaxSpeed(far));
 
-    // The floor is the saved speed bounded by the hop rule: in Sol never above the longest hop's cap (the save bound) ...
-    expect(resumeCap('neptune', 1e9)).toBe(cruiseMaxSpeed(2 * SYSTEM_EXTENT));
+    // Within the ramp after a throttle change the speed has not settled: saved 1 s after
+    // lowering the throttle to 0.5, the floor is above the leg's cap, so the restored
+    // cruise holds the saved speed while the uninterrupted leg slows on to 0.5 x its cap.
+    const falling = legAt(1);
+    fly(falling, 0.5, 1);
+    const mid = falling.speed;
+    expect(mid).toBeGreaterThan(0.5 * cruiseMaxSpeed(far));
+    const rf = restore(falling, resumeCap('neptune', mid, 0.5));
+    expect(rf.maxSpeed).toBe(Math.min(mid / 0.5, cruiseMaxSpeed(2 * SYSTEM_EXTENT)));
+    expect(rf.maxSpeed).toBeGreaterThan(cruiseMaxSpeed(far));
+    fly(falling, 0.5, 5);
+    fly(rf, 0.5, 5);
+    expect([falling.speed, rf.speed]).toEqual([0.5 * cruiseMaxSpeed(far), mid]);
+
+    // The floor is bounded by the hop rule: in Sol never above the longest hop's cap (the save bound) ...
+    expect(resumeCap('neptune', 1e9, 1)).toBe(cruiseMaxSpeed(2 * SYSTEM_EXTENT));
+    expect(resumeCap('neptune', 1e6, 0.01)).toBe(cruiseMaxSpeed(2 * SYSTEM_EXTENT));
+    // ... at zero throttle it is the saved speed ...
+    expect(resumeCap('neptune', 1e6, 0)).toBe(1e6);
     // ... and the fixed 15 km/s without a target or in the Quiet System, whose restored cruise is unchanged.
-    expect(resumeCap(null, saved)).toBe(CRUISE.maxSpeed);
+    expect(resumeCap(null, 1e6, 0.5)).toBe(CRUISE.maxSpeed);
     setPlaySystem(playBodies('quiet'));
     const p = new Vector3(300000, 400000, 0);
-    for (const v of [9000, 15000, 18000]) {
-      const q = new CruiseController();
-      q.begin(p, facing(p, center('vesper')), new Vector3(), cruiseHop(p, 'vesper'), resumeCap('vesper', v));
-      expect([q.maxSpeed, q.accel]).toEqual([CRUISE.maxSpeed, CRUISE.accel]);
+    for (const v of [0, 9000, 15000, 18000]) {
+      for (const t of [0, 0.3, 1]) {
+        const q = new CruiseController();
+        q.begin(p, facing(p, center('vesper')), new Vector3(), cruiseHop(p, 'vesper'), resumeCap('vesper', v, t));
+        expect([q.maxSpeed, q.accel]).toEqual([CRUISE.maxSpeed, CRUISE.accel]);
+      }
     }
   });
 
@@ -614,7 +657,7 @@ describe('cruise hop', () => {
     const src = readFileSync(new URL('../src/game/Game.ts', import.meta.url), 'utf8');
     expect(src.match(/this\.cruise\.begin\([^;]*;/g)).toEqual([
       'this.cruise.begin(_v4, ship.currQuat, ship.vel, cruiseHop(_v4, this.navTarget));',
-      'this.cruise.begin(sys, quat, fwd.clone().multiplyScalar(data.cruise.speed), cruiseHop(sys, data.navTarget), resumeCap(data.navTarget, data.cruise.speed));',
+      'this.cruise.begin(sys, quat, fwd.clone().multiplyScalar(data.cruise.speed), cruiseHop(sys, data.navTarget), resumeCap(data.navTarget, data.cruise.speed, data.cruise.throttle));',
     ]);
     expect(src).toMatch(/pushBounded\(this\.cruiseLog, \{ start: this\.cruiseStart, end: this\.simTime, target: this\.navTarget, \.\.\.this\.cruise\.legStats\(\), exit: reason \}\);/);
     expect(src.match(/pushBounded\(this\.cruiseLog,/g)).toHaveLength(1);
