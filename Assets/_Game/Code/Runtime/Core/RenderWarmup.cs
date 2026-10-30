@@ -25,11 +25,15 @@ namespace Meridian.Core
 
         static Sprite white;
 
+        /// <summary>Raised with true just before the warm-up render and false right after: things that only draw sometimes (weather) show themselves for it.</summary>
+        public static event System.Action<Camera, bool> Warming;
+
         public static float WarmUp(Camera cam, TerrainTileSet tiles = null)
         {
             if (cam == null || SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null) return 0f;
             var watch = Stopwatch.StartNew();
             var rig = BuildRig(cam, tiles);
+            Warming?.Invoke(cam, true);
             int w = Mathf.Max(64, TargetSize.x > 0 ? TargetSize.x : Screen.width);
             int h = Mathf.Max(64, TargetSize.y > 0 ? TargetSize.y : Screen.height);
             var rt = RenderTexture.GetTemporary(w, h, 24, RenderTextureFormat.ARGB32);
@@ -37,6 +41,7 @@ namespace Meridian.Core
             cam.targetTexture = rt;
             cam.Render();
             cam.targetTexture = previous;
+            Warming?.Invoke(cam, false);
             RenderTexture.ReleaseTemporary(rt);
             Object.DestroyImmediate(rig);
             LastMs = (float)watch.Elapsed.TotalMilliseconds;

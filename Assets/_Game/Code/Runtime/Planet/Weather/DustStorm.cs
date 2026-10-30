@@ -83,6 +83,23 @@ namespace Meridian.Planet.Weather
             fog.enabled = false;
         }
 
+        void OnEnable() => RenderWarmup.Warming += OnWarming;
+        void OnDisable() => RenderWarmup.Warming -= OnWarming;
+
+        /// <summary>The fog joins the load warm-up render (U-028) so the first storm frame doesn't compile its shader.</summary>
+        void OnWarming(Camera cam, bool on)
+        {
+            if (fog == null || cam != view) return;
+            if (on)
+            {
+                fog.GetPropertyBlock(block);
+                block.SetFloat(IntensityId, 0.001f);
+                fog.SetPropertyBlock(block);
+                fog.enabled = true;
+            }
+            else fog.enabled = OnMars && Intensity > 0f;
+        }
+
         void Start()
         {
             handle = Addressables.LoadAssetAsync<IList<Sprite>>(ArtKeys.Fx.Dust);

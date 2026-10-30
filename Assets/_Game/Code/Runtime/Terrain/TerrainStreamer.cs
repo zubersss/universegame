@@ -202,6 +202,19 @@ namespace Meridian.Terrain
             return false;
         }
 
+        /// <summary>
+        /// True when the chunk holding world tile (x, y) is resident with its collision built (U-027:
+        /// bodies there may move; elsewhere they are held so they can't fall through missing ground).
+        /// x is unwrapped, as positions are.
+        /// </summary>
+        public bool IsCollisionReady(int x, int y)
+        {
+            if (!started) return false;
+            long key = ChunkBuffer.Key(WorldNoise.FloorDiv(x, C), WorldNoise.FloorDiv(y, C));
+            if (!resident.ContainsKey(key)) return false;
+            return inProgress == null || ChunkBuffer.Key(inProgress.cx, inProgress.cy) != key;
+        }
+
         // ---------- edits (U-008) ----------
 
         public int WrapX(int x)

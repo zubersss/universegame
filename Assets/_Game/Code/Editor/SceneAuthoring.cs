@@ -204,6 +204,13 @@ namespace Meridian.EditorTools
             dustStorm.fogMaterial = EnsureMaterial("Assets/_Game/Settings/Materials/DustFog.mat", "MERIDIAN/DustFog");
             sideComp.dustStorm = dustStorm;
             sideHud.storm = dustStorm;
+            var creaturesGo = new GameObject("Creatures");
+            creaturesGo.transform.SetParent(sideRoot.transform, false);
+            var creatures = creaturesGo.AddComponent<Meridian.Creatures.CreatureDirector>();
+            creatures.terrain = sideComp.terrain;
+            creatures.player = pc;
+            creatures.dayNight = dayNight;
+            sideComp.creatures = creatures;
             EditorSceneManager.SaveScene(side, PlanetSidePath);
 
             EditorBuildSettings.scenes = new[]

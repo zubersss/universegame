@@ -206,6 +206,16 @@ namespace Meridian.Tests
             yield return Measure("Mars", side.sideCamera, BudgetMonitor.DrawCallsSide, (a, b) => { gc = a; r = b; });
             Judge("Mars", gc, r, BudgetMonitor.DrawCallsSide);
 
+            // ---- Mars in a full dust storm (U-026): the fog pass and the puffs ----
+            var storm = side.dustStorm;
+            var clock = UnityEngine.Object.FindAnyObjectByType<TimeSystem>();
+            storm.Force(0.1f, 300f);
+            clock.Advance(0.1f + Meridian.Planet.Weather.DustStorm.RampRealSeconds + 1f);
+            yield return null;
+            Assert.AreEqual(1f, storm.Intensity, 1e-3f, "full storm for the measurement");
+            yield return Measure("Mars dust storm", side.sideCamera, BudgetMonitor.DrawCallsSide, (a, b) => { gc = a; r = b; });
+            Judge("Mars dust storm", gc, r, BudgetMonitor.DrawCallsSide);
+
             StaticRows();
             WriteReport();
             Assert.IsEmpty(failures, "budgets over: " + string.Join("; ", failures));
