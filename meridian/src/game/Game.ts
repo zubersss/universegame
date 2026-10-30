@@ -27,6 +27,7 @@ import { ActiveBody } from '../world/ActiveBody';
 import { computeSites } from '../world/sites';
 import { MissionObjects, sampleName } from '../world/MissionObjects';
 import { Expedition } from './Expedition';
+import { OnFootHost, type OnFootExitReason } from './onFoot';
 import { rayCapsule } from './scan';
 import type { Species } from '../props/species';
 import type { PropInstance } from '../props/PropSystem';
@@ -107,7 +108,10 @@ export class Game {
   /** Reference body for up/altitude/lighting: the active body, else the dominant one. */
   ref: BodyDef = BODIES.ilex;
   state: AppState = 'title';
+  /** Change only through setMode() so the ON_FOOT hooks see every transition. */
   mode: Mode = 'LANDED';
+  /** Ability hook points around ON_FOOT (installed by the ability system). */
+  readonly onFoot = new OnFootHost();
   settings: Settings;
   /** Floating origin: system-coordinate position of the local origin (double precision). */
   readonly floating = new FloatingOrigin();
@@ -407,6 +411,16 @@ export class Game {
     b.terrain.extraDemand = this.mode === 'CRUISING' ? [] : b.collision.computeWanted(_v1, vel, onFoot ? 0 : env.clearance, decel);
   }
 
+  /** The single place the gameplay mode changes. */
+  private setMode(next: Mode, reason: OnFootExitReason = 'relocate'): void {
+    const prev = this.mode;
+    if (prev === next) return;
+    this.mode = next;
+    const ctx = next === 'ON_FOOT' && this.body ? { body: this.body.def.id } : null;
+    this.onFoot.transition(prev, next, ctx, reason);
+    if (prev === 'ON_FOOT') this.hud.setAbility(null);
+  }
+
   private fixedUpdate(dt: number): void {
     this.simTime += dt;
     this.stepCount++;
@@ -527,7 +541,7 @@ export class Game {
     b.setLinvel({ x: 0, y: 0, z: 0 }, false);
     b.setAngvel({ x: 0, y: 0, z: 0 }, false);
     b.setBodyType(RAPIER.RigidBodyType.KinematicPositionBased, true);
-    this.mode = 'CRUISING';
+    this.setMode('CRUISING');
     this.counters.cruiseEngages++;
     this.onNotice?.('Cruise engaged', 'W/S set cruise speed · G or X returns to normal flight.', true);
   }
@@ -565,7 +579,7 @@ export class Game {
     ship.syncFromBody();
     ship.flight.reset();
     ship.flight.throttle = clamp(this.cruise.speed / FLIGHT.capSpace, 0, 1);
-    this.mode = 'PILOTING';
+    this.setMode('PILOTING');
     if (reason === 'approach') this.counters.cruiseExitApproach++;
     else if (reason === 'brake') this.counters.cruiseExitBrake++;
     else if (reason === 'toggle') this.counters.cruiseExitToggle++;
@@ -599,7 +613,7 @@ export class Game {
   private land(): void {
     this.audio.thump(1);
     this.parkShip();
-    this.mode = 'LANDED';
+    this.setMode('LANDED');
     this.assist.disengage();
     this.ship.flight.reset();
     this.counters.landings++;
@@ -628,7 +642,7 @@ export class Game {
     const b = this.ship.body;
     b.setBodyType(RAPIER.RigidBodyType.Dynamic, true);
     b.setLinvel({ x: 0, y: 0, z: 0 }, true);
-    this.mode = 'PILOTING';
+    this.setMode('PILOTING');
     this.takeoffTimer = 1.4;
     this.ship.flight.reset();
     this.counters.takeoffs++;
@@ -700,7 +714,7 @@ export class Game {
     const heading = this.ship.forward(new Vector3());
     if (this.player) this.player.dispose();
     this.player = new Player(this.physics, spot, up, heading);
-    this.mode = 'ON_FOOT';
+    this.setMode('ON_FOOT');
     this.counters.exits++;
     this.physics.refreshQueries();
     this.input.clearAll();
@@ -720,9 +734,9 @@ export class Game {
 
   private boardShip(): void {
     if (!this.player) return;
+    this.setMode('LANDED', 'board');
     this.player.dispose();
     this.player = null;
-    this.mode = 'LANDED';
     this.counters.boardings++;
     this.autosave('boarded');
     this.cameraRig.reset();
@@ -736,6 +750,12 @@ export class Game {
     const body = this.body;
     if (!p || !body) return;
     const inp = this.input;
+    if (this.onFoot.step(dt)) {
+      // An active ability moved the character this step; the walk controller stays idle.
+      this.updateScan(dt);
+      if (inp.consume('KeyE')) this.interact();
+      return;
+    }
     const w = this.state === 'playing' ? this.readWalk() : { forward: 0, right: 0, sprint: false, jump: false, yaw: 0, pitch: 0 };
     // Never walk into missing collision data.
     _v1.copy(p.pos).sub(this.bodyCenterLocal);
@@ -953,7 +973,7 @@ export class Game {
     this.ship.gear = 1;
     this.ship.gearTarget = 1;
     this.parkShip();
-    this.mode = 'LANDED';
+    this.setMode('LANDED');
     this.assist.disengage();
     this.cameraRig.reset();
     this.physics.refreshQueries();
@@ -1186,7 +1206,7 @@ export class Game {
 
     if (playing && this.mode === 'ON_FOOT' && this.player) {
       const p = this.player;
-      this.cameraRig.firstPerson(p.eye(alpha, _v3), p.up, p.heading, p.pitch);
+      if (!this.onFoot.frame(dt, alpha)) this.cameraRig.firstPerson(p.eye(alpha, _v3), p.up, p.heading, p.pitch);
     } else if (playing && (this.mode === 'PILOTING' || this.mode === 'CRUISING')) {
       this.cameraRig.chase(dt, shipPos, shipQuat, ship.speed, radialUp, this.mode === 'CRUISING');
     } else {
@@ -1576,7 +1596,7 @@ export class Game {
       ship.gear = 1;
       ship.gearTarget = 1;
       this.parkShip();
-      this.mode = 'LANDED';
+      this.setMode('LANDED', 'restore');
       if (data.mode === 'ON_FOOT' && data.player) {
         const pl = data.player;
         const feet = new Vector3(...pl.sys).sub(this.origin);
@@ -1590,7 +1610,7 @@ export class Game {
       ship.gearTarget = data.ship.gear;
       ship.flight.reset();
       ship.flight.throttle = data.ship.throttle;
-      this.mode = 'PILOTING';
+      this.setMode('PILOTING', 'restore');
       if (data.mode === 'CRUISING' && data.cruise) {
         // Cruise resumes only if its clearance is still safe at the saved speed.
         const fwd = new Vector3(0, 0, -1).applyQuaternion(quat);
@@ -1601,7 +1621,7 @@ export class Game {
           this.cruiseThrottle = data.cruise.throttle;
           ship.body.setBodyType(RAPIER.RigidBodyType.KinematicPositionBased, true);
           ship.setPose(local, quat);
-          this.mode = 'CRUISING';
+          this.setMode('CRUISING');
         } else {
           const v = vel.length();
           if (v > CRUISE.exitSpeed) ship.setPose(local, quat, vel.multiplyScalar(CRUISE.exitSpeed / v));
@@ -1646,7 +1666,7 @@ export class Game {
     const h = heading.addScaledVector(up, -heading.dot(up)).normalize();
     this.player = new Player(this.physics, center, up, h);
     this.player.pitch = pitch;
-    this.mode = 'ON_FOOT';
+    this.setMode('ON_FOOT');
     this.physics.refreshQueries();
     return true;
   }
