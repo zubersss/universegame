@@ -227,6 +227,19 @@ namespace Meridian.Tests
         }
 
         [Test]
+        public void TerrainSheetSlicedInto47TileGridWithoutJson()
+        {
+            var c = Png(Art("terrain/earth/soil_color.png"), 1024, 1024);
+            Import(c);
+            var sprites = AssetDatabase.LoadAllAssetsAtPath(c).OfType<Sprite>().ToArray();
+            Assert.AreEqual(47, sprites.Length);
+            Assert.AreEqual(new Rect(0, 896, 128, 128), sprites.First(s => s.name == "soil_0").rect, "cell 0 top-left");
+            // Cell 46 = row 5, column 6.
+            Assert.AreEqual(new Rect(768, 256, 128, 128), sprites.First(s => s.name == "soil_46").rect);
+            Assert.AreEqual(128f, sprites[0].pixelsPerUnit);
+        }
+
+        [Test]
         public void SheetCategoryWithoutJsonLogsClearError()
         {
             var c = Png(Art("characters/surveyor/base_color.png"), 64, 64);
@@ -239,7 +252,7 @@ namespace Meridian.Tests
         [Test]
         public void AddressEqualsKeyInContractGroup()
         {
-            var c = Png(Art("terrain/mars/ice_color.png"), 64, 64);
+            var c = Png(Art("terrain/mars/ice_color.png"), 1024, 1024);
             Import(c);
             var e = Entry(c);
             Assert.NotNull(e, "addressable");

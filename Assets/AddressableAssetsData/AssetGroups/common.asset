@@ -30,18 +30,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8082048fcff2da7458b19ef021f2fbcf
-    m_Address: fx/dig_sparks/base
+  - m_GUID: 396a3fbaaa0bb7646bc37d0301174bd3
+    m_Address: ships/pilgrim/side
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8087ff34da55ffb4f85cd54c30b9cbbe
+  - m_GUID: 75476b64e68a7f24cb379ebc4b940818
     m_Address: ships/pilgrim/top
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d1767b1e6a0a5c24ebab1b8fab43931b
-    m_Address: ships/pilgrim/side
+  - m_GUID: 8082048fcff2da7458b19ef021f2fbcf
+    m_Address: fx/dig_sparks/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

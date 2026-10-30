@@ -16,6 +16,7 @@ namespace Meridian.Core
         public PlanetCatalog catalog;
         public PlanetId currentPlanet = PlanetId.Earth;
         public ViewMode view = ViewMode.PlanetSide;
+        public int worldSeed = 1969;
 
         [Header("Ship")]
         public float hull = 100f;

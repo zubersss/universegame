@@ -15,13 +15,23 @@ MonoBehaviour:
   m_GroupName: planet_mars
   m_GUID: 6cc9f8ad61a6571408cb618dfbca1025
   m_SerializeEntries:
-  - m_GUID: 2db9e05bd83e81548bee16d39d878a2b
-    m_Address: terrain/mars/basalt
+  - m_GUID: 166e092f3085d0f40afa9e8856773225
+    m_Address: terrain/mars/ice
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5268eb2b54fd1264eaf744e55d241ff1
     m_Address: backgrounds/mars/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5eb4c31d8b2d45b47b64470e39c90003
+    m_Address: terrain/mars/hematite
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6306e8f96d95d7141b2118d3dd49fad7
+    m_Address: terrain/mars/regolith
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -35,18 +45,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 9a09131639f340d48af2290a5f4dc697
-    m_Address: terrain/mars/regolith
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: ef2e1f96e277c8a488ee5c7865b7b921
-    m_Address: terrain/mars/ice
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f9e331889f647544c8ca67530c1d1101
-    m_Address: terrain/mars/hematite
+  - m_GUID: b83076e4cb5447f4eade16b3a5745db5
+    m_Address: terrain/mars/basalt
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

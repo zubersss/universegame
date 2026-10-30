@@ -47,6 +47,21 @@ namespace Meridian.EditorTools
         [Serializable] class BlenderAsset { public string key; public float[] pivot; }
         [Serializable] class BlenderManifest { public BlenderAsset[] assets; }
 
+        /// <summary>Re-applies every rule to all art and placeholders (after an importer change).</summary>
+        [MenuItem("MERIDIAN/Reimport All Art")]
+        public static void ReimportAll()
+        {
+            foreach (var root in new[] { Active.art, Active.placeholders })
+            {
+                var dir = root.TrimEnd('/');
+                if (!AssetDatabase.IsValidFolder(dir)) continue;
+                foreach (var guid in AssetDatabase.FindAssets("t:Texture2D", new[] { dir }))
+                    AssetDatabase.ImportAsset(AssetDatabase.GUIDToAssetPath(guid), ImportAssetOptions.ForceUpdate);
+            }
+            AssetDatabase.SaveAssets();
+            Debug.Log("[MERIDIAN] ArtImporter reimported all art and placeholders.");
+        }
+
         // ---------- path helpers ----------
 
         enum RootKind { None, Art, Placeholder }
@@ -120,7 +135,7 @@ namespace Meridian.EditorTools
             ti.spritePixelsPerUnit = ArtRules.PixelsPerUnit;
             SetStandaloneFormat(ti, TextureImporterFormat.BC7);
 
-            var sheet = LoadSheet(ArtRules.SheetJsonPath(assetPath));
+            var sheet = SheetFor(assetPath, key);
             if (sheet == null && rule.requiresSheet)
                 Debug.LogError($"[ArtImporter] {assetPath}: frame sheet has no {Path.GetFileName(ArtRules.SheetJsonPath(assetPath))} (contract §5); imported as a single sprite.");
 
@@ -145,6 +160,21 @@ namespace Meridian.EditorTools
             p.compressionQuality = 100;
             p.maxTextureSize = ArtRules.MaxDimension;
             ti.SetPlatformTextureSettings(p);
+        }
+
+        /// <summary>
+        /// The frame layout for a color file: its .json, or for terrain the fixed 47-tile grid
+        /// (128 px tiles, 8 columns, no gutters; contract §4).
+        /// </summary>
+        public static SheetManifest SheetFor(string colorPath, string key)
+        {
+            var json = LoadSheet(ArtRules.SheetJsonPath(colorPath));
+            if (json != null || ArtKeys.Category(key) != "terrain") return json;
+            return new SheetManifest
+            {
+                key = key, frame_width = 128, frame_height = 128, columns = 8, frames = 47,
+                gutter = 0, pivot = new[] { 0.5f, 0.5f },
+            };
         }
 
         public static SheetManifest LoadSheet(string jsonPath)
@@ -206,7 +236,7 @@ namespace Meridian.EditorTools
         /// <summary>Applies the sheet's frame rects; returns true when they changed (caller reimports).</summary>
         static bool SliceIfNeeded(string colorPath, string key)
         {
-            var m = LoadSheet(ArtRules.SheetJsonPath(colorPath));
+            var m = SheetFor(colorPath, key);
             var ti = AssetImporter.GetAtPath(colorPath) as TextureImporter;
             if (m == null || ti == null || ti.spriteImportMode != SpriteImportMode.Multiple) return false;
             ti.GetSourceTextureWidthAndHeight(out int w, out int h);

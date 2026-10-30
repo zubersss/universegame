@@ -47,8 +47,12 @@ namespace Meridian.EditorTools
             // PlanetSide (one scene for all planets)
             var side = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             var sideRoot = new GameObject("PlanetSideRoot");
-            sideRoot.AddComponent<PlanetSideRoot>();
-            AddCamera(sideRoot.transform, "SideCamera", 9f, new Color(0.45f, 0.62f, 0.85f), true);
+            var sideComp = sideRoot.AddComponent<PlanetSideRoot>();
+            sideComp.sideCamera = AddCamera(sideRoot.transform, "SideCamera", 9f, new Color(0.45f, 0.62f, 0.85f), true);
+            var terrainGo = new GameObject("Terrain");
+            terrainGo.transform.SetParent(sideRoot.transform, false);
+            terrainGo.AddComponent<Grid>();
+            sideComp.terrain = terrainGo.AddComponent<Meridian.Terrain.TerrainStreamer>();
             AddGlobalLight(sideRoot.transform);
             EditorSceneManager.SaveScene(side, PlanetSidePath);
 
@@ -63,7 +67,7 @@ namespace Meridian.EditorTools
             Debug.Log("[MERIDIAN] SceneAuthoring wrote Core, Space, PlanetSide.");
         }
 
-        static void AddCamera(Transform parent, string name, float size, Color background, bool listener)
+        static Camera AddCamera(Transform parent, string name, float size, Color background, bool listener)
         {
             var go = new GameObject(name);
             go.transform.SetParent(parent, false);
@@ -75,6 +79,7 @@ namespace Meridian.EditorTools
             cam.backgroundColor = background;
             go.tag = "MainCamera";
             if (listener) go.AddComponent<AudioListener>();
+            return cam;
         }
 
         static void AddGlobalLight(Transform parent)
