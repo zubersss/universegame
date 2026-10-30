@@ -3,6 +3,7 @@ import {
   BufferGeometry,
   Color,
   CylinderGeometry,
+  DoubleSide,
   Float32BufferAttribute,
   Group,
   Matrix4,
@@ -38,6 +39,9 @@ export interface VfxFrame {
 
 const STREAKS = 10;
 const FLASH_TIME = 0.35;
+/** Largest flash radius (m), and how far the camera must be beyond it to show the flash: never drawn around the eye (first person). */
+const FLASH_MAX = 1.65;
+const FLASH_CLEAR = 0.3;
 const REFUSED = new Color(0xff4a4a);
 /** Beyond this distance from the camera (m) the blink marker widens to keep its apparent size. */
 const MARKER_FULL = 15;
@@ -119,8 +123,9 @@ export class PowerVfx {
     this.root.name = 'power-vfx';
     // Marker: a ring on the ground and a short beam.
     // Normal blending, not additive, so the refused red reads as red on bright
-    // ground; the ring draws over terrain bumps so the target point always shows.
-    this.ringMat = new MeshBasicMaterial({ color: this.color.clone(), transparent: true, opacity: 0.85, depthWrite: false, depthTest: false, toneMapped: false });
+    // ground; the ring draws over terrain bumps so the target point always
+    // shows, and from both sides (a target above the camera is seen from below).
+    this.ringMat = new MeshBasicMaterial({ color: this.color.clone(), side: DoubleSide, transparent: true, opacity: 0.85, depthWrite: false, depthTest: false, toneMapped: false });
     this.beamMat = new MeshBasicMaterial({ color: this.color.clone(), transparent: true, opacity: 0.45, depthWrite: false, toneMapped: false });
     const ring = new Mesh(new RingGeometry(0.42, 0.56, 40).rotateX(-Math.PI / 2), this.ringMat);
     const inner = new Mesh(new RingGeometry(0.0, 0.18, 24).rotateX(-Math.PI / 2), this.ringMat);
@@ -168,12 +173,11 @@ export class PowerVfx {
     this.marker.position.add(d);
   }
 
-  /** A short flash (blink departure or arrival) at a point. */
+  /** A short flash (blink departure or arrival) at a point; drawn from the next update. */
   flash(at: Vector3): void {
     const f = this.flashes[0].t >= this.flashes[1].t ? this.flashes[0] : this.flashes[1];
     f.t = 0;
     f.mesh.position.copy(at);
-    f.mesh.visible = true;
   }
 
   update(dt: number, f: VfxFrame, reducedMotion: boolean): void {
@@ -193,15 +197,17 @@ export class PowerVfx {
       const pulse = reducedMotion ? 1 : 1 + 0.08 * Math.sin(this.time * 6);
       this.marker.scale.set(pulse * wide, 1, pulse * wide);
     } else this.marker.visible = false;
-    // Flashes.
+    // Flashes, except where the camera is in or near one (in first person the
+    // arrival flash would grow around the eye and fill the view).
     for (let i = 0; i < this.flashes.length; i++) {
       const fl = this.flashes[i];
-      if (!fl.mesh.visible) continue;
+      fl.mesh.visible = false;
+      if (fl.t >= FLASH_TIME) continue;
       fl.t += dt;
       const u = Math.min(1, fl.t / FLASH_TIME);
-      fl.mesh.scale.setScalar(reducedMotion ? 0.9 : 0.25 + 1.4 * u);
+      fl.mesh.scale.setScalar(reducedMotion ? 0.9 : 0.25 + (FLASH_MAX - 0.25) * u);
       this.flashMat[i].opacity = 0.7 * (1 - u) * (1 - u);
-      if (u >= 1) fl.mesh.visible = false;
+      fl.mesh.visible = u < 1 && fl.mesh.position.distanceTo(f.camera) > FLASH_MAX + FLASH_CLEAR;
     }
     // Speed lines (none with reduced motion).
     const d = f.rush;

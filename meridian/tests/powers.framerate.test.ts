@@ -28,8 +28,12 @@ beforeAll(async () => {
   await initPhysics();
 });
 
-/** Controls by simulation time: held keys, presses made this frame, look. Boundaries sit on multiples of 1/15 s, a frame start at every rate. */
-type Script = (t: number) => { held?: string[]; press?: string[]; jump?: boolean; pitch?: number };
+/**
+ * Controls by simulation time: held keys, presses made this frame, look (an
+ * absolute pitch, or this frame's mouse yaw). Boundaries sit on multiples of
+ * 1/15 s, a frame start at every rate.
+ */
+type Script = (t: number) => { held?: string[]; press?: string[]; jump?: boolean; pitch?: number; yaw?: number };
 
 interface FrameSample {
   t: number;
@@ -45,6 +49,8 @@ interface FrameSample {
   bones: Quaternion[];
   /** Camera position relative to the walker. */
   offset: Vector3;
+  /** Walker heading after the frame's steps. */
+  heading: Vector3;
   /** Walker displacement this frame (m). */
   moved: number;
 }
@@ -78,7 +84,6 @@ function play(body: string, power: string, gravity: number, fps: number, seconds
   });
   const held = new Set<string>();
   const presses = new Set<string>();
-  let pitch = 0;
   const per = Math.round(60 / fps);
   const steps: { t: number; state: string; pos: Vector3; speed: number }[] = [];
   const frames: FrameSample[] = [];
@@ -92,15 +97,25 @@ function play(body: string, power: string, gravity: number, fps: number, seconds
     held.clear();
     for (const k of s.held ?? []) held.add(k);
     for (const k of s.press ?? []) presses.add(k);
-    if (s.pitch !== undefined) pitch = s.pitch;
+    // The frame's mouse look goes to its first step only, as Game.readWalk
+    // hands it over (the later steps of a long frame see none): a step that
+    // drops its look loses it for good.
+    const yaw = s.yaw ?? 0;
+    const pitch = s.pitch !== undefined ? s.pitch - player.pitch : 0;
     for (let k = 0; k < per; k++) {
-      // Look is absolute here (no mouse delta), so every step sees the same pitch.
-      const walk: WalkInput = { ...IDLE, jump: k === 0 && !!s.jump, yaw: 0, pitch: pitch - player.pitch };
+      const walk: WalkInput = { ...IDLE, jump: k === 0 && !!s.jump, yaw: k === 0 ? yaw : 0, pitch: k === 0 ? pitch : 0 };
       const world: PowerWorld = { player, held: (c) => held.has(c), pressed: (c) => presses.delete(c), walk, center: CENTER, gravity, ready: () => true };
+      const was = ctl.state;
       const owned = ctl.step(SIM_DT, world);
       if (!owned) player.step(SIM_DT, walk, CENTER, gravity);
       physics.step();
       simTime += SIM_DT;
+      // Foot slip is measured from a power's hand-back on (the walker's own stop and rest).
+      if (was !== 'walk' && ctl.state === 'walk' && player.avatar) {
+        player.avatar.maxSlip = 0;
+        player.avatar.slipSamples = 0;
+        player.avatar.slipSamplesMoving = 0;
+      }
       steps.push({ t: simTime, state: ctl.state, pos: player.pos.clone(), speed: Math.hypot(player.vel.length(), player.vVert) });
     }
     // Render once per frame, as PlayerRuntime.frame does.
@@ -137,6 +152,7 @@ function play(body: string, power: string, gravity: number, fps: number, seconds
     frames.push({
       bones: bones.map((b) => rootInv.clone().multiply(b.getWorldQuaternion(new Quaternion()))),
       offset: rig.camera.position.clone().sub(player.pos),
+      heading: player.heading.clone(),
       moved,
       t: simTime,
       state: ctl.state,
@@ -281,20 +297,23 @@ describe('powers at low frame rates (fixed steps, one render per frame)', () => 
       const running = r.frames.filter((f) => f.t > 2.5 && f.t < 3);
       expect(running.length).toBeGreaterThan(6);
       expect(running.every((f) => f.avatar === 'dash' && f.streaks > 0 && f.trails === 0)).toBe(true);
-      // Back to walking: the explorer comes to rest without sliding its planted feet.
-      expect(r.avatar.maxSlip).toBeLessThan(0.02);
+      // Back to walking: the explorer stops from sprint speed on a planted
+      // foot (measured while still moving) and comes to rest, never sliding it.
+      expect(r.avatar.slipSamplesMoving, `${r.fps} fps`).toBeGreaterThan(0);
+      expect(r.avatar.maxSlip).toBeLessThan(0.002);
       expect(r.frames.at(-1)!.avatar).toBe('idle');
     }
   });
 
-  it('Lunar Step: the aimed step lands on the same spot at 60, 30, 20 and 15 fps, and the marker shows while aiming', () => {
-    // Look 4 degrees down, hold right mouse to aim, click once to step; click again during the cooldown.
+  it('Lunar Step: the aimed step lands on the same spot at 60, 30, 20 and 15 fps, the marker shows while aiming, and the click frame keeps its mouse look', () => {
+    // Look 4 degrees down, hold right mouse to aim, click once to step (turning
+    // the mouse 0.1 rad in that frame); click again during the cooldown.
     const script = (): Script => {
       let clicks = 0;
       return (t) => {
         if (t < 0.4) return { pitch: -0.07 };
         if (t < 1.4) return { held: ['MouseRight'] };
-        if (clicks === 0) return clicks++, { held: ['MouseRight'], press: ['MouseLeft'] };
+        if (clicks === 0) return clicks++, { held: ['MouseRight'], press: ['MouseLeft'], yaw: 0.1 };
         if (t < 2) return { held: ['MouseRight'] };
         if (clicks === 1) return clicks++, { held: ['MouseRight'], press: ['MouseLeft'] };
         if (t < 2.4) return { held: ['MouseRight'] };
@@ -318,6 +337,9 @@ describe('powers at low frame rates (fixed steps, one render per frame)', () => 
       expect(aiming.length).toBeGreaterThan(10);
       expect(aiming.every((f) => f.marker)).toBe(true);
       expect(r.frames.filter((f) => f.t > 2.5).some((f) => f.marker)).toBe(false);
+      // The step that blinked also turned the view by the frame's mouse yaw.
+      const after = r.frames.find((f) => f.t > 1.4)!;
+      expect(after.heading.angleTo(FWD)).toBeCloseTo(0.1, 6);
     }
   });
 });

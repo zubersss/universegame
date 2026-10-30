@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Color, Group, Mesh, MeshBasicMaterial, Vector3 } from 'three';
+import { Color, DoubleSide, Group, Mesh, MeshBasicMaterial, RingGeometry, Vector3 } from 'three';
 import { PowerVfx, rushStrength, trailStrength } from '../src/abilities/vfx';
 
 const UP = new Vector3(0, 1, 0);
@@ -48,14 +48,38 @@ describe('power effects', () => {
     expect(parent.children.length).toBe(0);
   });
 
-  it('flashes briefly where a blink leaves and lands', () => {
+  it('draws the target rings from below too: a target above the camera (a rim, an upslope) keeps its ring', () => {
     const v = new PowerVfx(new Group(), '#c8b6ff');
+    // Aimed 30 m ahead at ground 3 m above the feet, the camera 1.9 m up: below the ring's plane.
+    v.update(1 / 60, { up: UP, camera: new Vector3(0.4, 1.9, 4.2), aim: { feet: new Vector3(0, 3, -30), ok: true }, rush: null, trails: null }, false);
+    const rings = meshes(v).filter((m) => m.geometry instanceof RingGeometry);
+    expect(rings.length).toBe(2);
+    for (const r of rings) expect((r.material as MeshBasicMaterial).side).toBe(DoubleSide);
+    v.dispose();
+  });
+
+  it('flashes briefly where a blink leaves and lands, never around the eye', () => {
+    const v = new PowerVfx(new Group(), '#c8b6ff');
+    const shown = () => meshes(v).filter((m) => m.parent === v.root && m.visible);
     v.flash(new Vector3(0, 1, 0));
     v.flash(new Vector3(0, 1, -30));
-    const flashes = meshes(v).filter((m) => m.parent === v.root && m.visible);
-    expect(flashes.length).toBe(2);
+    v.update(1 / 60, { up: UP, camera: CAM, aim: null, rush: null, trails: null }, false);
+    expect(shown().length).toBe(2);
     for (let i = 0; i < 30; i++) v.update(1 / 60, { up: UP, camera: CAM, aim: null, rush: null, trails: null }, false);
-    expect(meshes(v).filter((m) => m.parent === v.root && m.visible).length).toBe(0);
+    expect(shown().length).toBe(0);
+    // First person after the blink: the eye is 0.62 m above the arrival
+    // flash. That flash is never drawn (it would grow around the eye), with
+    // or without reduced motion; the departure flash 30 m back is.
+    const eye = new Vector3(0, 1.62, -30);
+    for (const reduced of [false, true]) {
+      v.flash(new Vector3(0, 1, 0));
+      v.flash(new Vector3(0, 1, -30));
+      for (let i = 0; i < 15; i++) {
+        v.update(1 / 60, { up: UP, camera: eye, aim: null, rush: null, trails: null }, reduced);
+        expect(shown().map((m) => m.position.z)).toEqual([0]);
+      }
+      for (let i = 0; i < 15; i++) v.update(1 / 60, { up: UP, camera: eye, aim: null, rush: null, trails: null }, reduced);
+    }
     v.dispose();
   });
 

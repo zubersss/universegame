@@ -95,17 +95,27 @@ describe('blink primitive (Lunar Step tunables) on real colliders', () => {
     player.dispose();
   });
 
-  it('refuses a target where the capsule does not fit (low overhang)', () => {
+  it('refuses a target where the capsule does not fit (a slab at head height over clear ground)', () => {
     const { player } = world((ph) => {
-      // A slab 1.2 m above the ground from z = -15 to -35.
-      const w = ph.world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(0, 1.4, -25));
+      // A slab 1.4-1.8 m above the ground from z = -22 to -42: the line of
+      // sight to the ground at z = -23 passes under its front edge, the
+      // explorer's head at the target would not.
+      const w = ph.world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(0, 1.6, -32));
       ph.world.createCollider(RAPIER.ColliderDesc.cuboid(20, 0.2, 10).setCollisionGroups(GROUPS.terrain), w);
     });
     const b = new Blink(P);
-    // Aim under the slab's front edge at the ground beneath it.
-    const t = b.target(sense(player, aimAt(-5.5)));
+    const eye = player.eye(1, new Vector3());
+    const s = sense(player, new Vector3(0, 0, -23).sub(eye).normalize());
+    let fitted = 0;
+    const fits = s.fits;
+    s.fits = (feet) => {
+      fitted++;
+      return fits(feet);
+    };
+    const t = b.target(s);
     expect(t.ok).toBe(false);
-    expect(['blocked', 'no line of sight', 'no ground']).toContain(t.reason);
+    expect(t.reason).toBe('blocked');
+    expect(fitted).toBeGreaterThan(0);
     player.dispose();
   });
 });

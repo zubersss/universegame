@@ -93,8 +93,8 @@ export class PlayerRuntime implements OnFootHooks {
     return rt instanceof BlinkPower ? rt.lastJump.count : 0;
   }
 
-  /** Effects for one rendered frame. */
-  private updateVfx(dt: number, p: Player): void {
+  /** Effects for one rendered frame, at the interpolated pose the body and camera are drawn at (alpha). */
+  private updateVfx(dt: number, p: Player, alpha: number): void {
     const v = this.vfx;
     if (!v) return;
     const rt = this.abilities.runtime;
@@ -115,7 +115,7 @@ export class PlayerRuntime implements OnFootHooks {
     if (motion?.mode === 'flight') _fd.addScaledVector(p.up, p.vVert);
     if (motion && _fd.lengthSq() > 1) {
       _fd.normalize();
-      rush = { center: p.pos, dir: _fd, speed: motion.speed, strength: rushStrength(motion.mode, motion.speed) };
+      rush = { center: _rc.lerpVectors(p.prevPos, p.pos, alpha), dir: _fd, speed: motion.speed, strength: rushStrength(motion.mode, motion.speed) };
       const ts = motion.mode === 'flight' ? trailStrength(motion.speed) : 0;
       if (ts > 0 && p.avatar?.visible) {
         p.avatar.bootTips(_tipL, _tipR);
@@ -188,8 +188,28 @@ export class PlayerRuntime implements OnFootHooks {
       }
     }
     if (p && g.input.consume('KeyC')) p.view.toggle();
-    return this.abilities.step(dt, p && g.body ? this.powerWorld(p, input) : null);
+    const owned = this.abilities.step(dt, p && g.body ? this.powerWorld(p, input) : null);
+    this.guardUnload(this.abilities.state === 'flight');
+    return owned;
   }
+
+  /**
+   * While flying, the page asks before it is left: descending (Ctrl) while
+   * speeding up (W) is Ctrl+W, which closes the tab, and a page cannot cancel
+   * that shortcut, only confirm it.
+   */
+  private guardUnload(on: boolean): void {
+    if (on === this.unloadGuarded || typeof window === 'undefined') return;
+    this.unloadGuarded = on;
+    if (on) window.addEventListener('beforeunload', this.onBeforeUnload);
+    else window.removeEventListener('beforeunload', this.onBeforeUnload);
+  }
+
+  private unloadGuarded = false;
+  private readonly onBeforeUnload = (e: BeforeUnloadEvent): void => {
+    e.preventDefault();
+    e.returnValue = '';
+  };
 
   /** The game as the powers see it this step. */
   private powerWorld(p: Player, input: WalkInput): PowerWorld {
@@ -227,12 +247,13 @@ export class PlayerRuntime implements OnFootHooks {
     this.lastVisTime = t;
     const scripted = this.transition ? this.transition.sample(this.transitionTime + (a - 1) * SIM_DT, this.pose) : null;
     p.renderView(dt, a, g.cameraRig, g.settings.reducedMotion, scripted, scripted ? null : this.abilities.motion());
-    this.updateVfx(dt, p);
+    this.updateVfx(dt, p, a);
     this.updateSounds(dt);
     return true;
   }
 
   exit(reason: OnFootExitReason): void {
+    this.guardUnload(false);
     this.transition = null;
     if (this.game.player) this.game.player.onRebaseHook = null;
     this.setReach(0);
@@ -286,6 +307,7 @@ const LADDER_DROPS = ['KeyQ', 'MouseLeft', 'KeyE', 'KeyC'];
 
 const _fx = new Vector3();
 const _fd = new Vector3();
+const _rc = new Vector3();
 const _tipL = new Vector3();
 const _tipR = new Vector3();
 const _tips = [_tipL, _tipR] as const;

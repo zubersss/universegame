@@ -213,6 +213,13 @@ const LAND_TIME = (amount: number) => 0.32 + 0.12 * amount;
 /** Settle step: duration (s) and lift (m). */
 const SETTLE_T = 0.26;
 const SETTLE_LIFT = 0.07;
+/**
+ * Linear part of a power pose's fade-out (per second), on top of the eased
+ * one: the pose is gone about 0.2 s after the power ends instead of
+ * lingering faintly for a second, and while any of it remains the feet
+ * cannot plant (the walker stops from sprint speed in about that time).
+ */
+const POWER_FADE_TAIL = 1.5;
 
 /** Per-foot lock: a planted foot keeps its ground point while the body moves. */
 interface FootLock {
@@ -322,6 +329,8 @@ export class AvatarAnimator {
     const pw = input.power ?? null;
     this.fly = approach(this.fly, pw && pw.mode === 'flight' ? 1 : 0, dt, 0.15);
     this.dash = approach(this.dash, pw && pw.mode === 'dash' ? 1 : 0, dt, 0.1);
+    if (!pw || pw.mode !== 'flight') this.fly = Math.max(0, this.fly - POWER_FADE_TAIL * dt);
+    if (!pw || pw.mode !== 'dash') this.dash = Math.max(0, this.dash - POWER_FADE_TAIL * dt);
     if (pw) this.powerSpeed = approach(this.powerSpeed, pw.forward ?? pw.speed, dt, 0.2);
     if (pw && pw.mode === 'dash') this.dashPhase = (this.dashPhase + dt * Math.min(3.4, 1.2 + pw.speed / 30)) % 1;
     if (this.poweredLast && !pw) this.resetFeet();
