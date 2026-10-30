@@ -119,7 +119,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &1091627150
+--- !u!1 &1272497169
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -127,10 +127,73 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1091627154}
-  - component: {fileID: 1091627152}
-  - component: {fileID: 1091627153}
-  - component: {fileID: 1091627151}
+  - component: {fileID: 1272497172}
+  - component: {fileID: 1272497171}
+  - component: {fileID: 1272497170}
+  m_Layer: 0
+  m_Name: AudioDirector
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!81 &1272497170
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1272497169}
+  m_Enabled: 1
+--- !u!114 &1272497171
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1272497169}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1130390950f8764fadd3d0ff62c5508, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.Audio.AudioDirector
+  scenes: {fileID: 1509952947}
+  jump: {fileID: 8300000, guid: 6f686ef27a4c0e24cabdb2014f6bdb21, type: 3}
+  land: {fileID: 8300000, guid: 581d22fb5a90699498bd1c899e10f4e8, type: 3}
+  dig: {fileID: 8300000, guid: 975f38ec6326dbe408045eb98cdffd49, type: 3}
+  place: {fileID: 8300000, guid: 171d9835b22ed26439db73522970f661, type: 3}
+  uiClick: {fileID: 8300000, guid: 532a8619a3e7f8647afbe83c1eef210f, type: 3}
+  thrust: {fileID: 8300000, guid: ee7d0e4a3add304419e67660b1865e7e, type: 3}
+  ambient: {fileID: 8300000, guid: 063a84b200c35b744ab571bdfbbe5411, type: 3}
+  sfxVolume: 0.8
+  ambientVolume: 0.35
+--- !u!4 &1272497172
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1272497169}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1509952946
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1509952950}
+  - component: {fileID: 1509952948}
+  - component: {fileID: 1509952949}
+  - component: {fileID: 1509952947}
   m_Layer: 0
   m_Name: Core
   m_TagString: Untagged
@@ -138,26 +201,26 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1091627151
+--- !u!114 &1509952947
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1091627150}
+  m_GameObject: {fileID: 1509952946}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ed568adffd7bd944a9cdbaaad2356133, type: 3}
   m_Name: 
   m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.Core.SceneDirector
-  gameState: {fileID: 1091627152}
---- !u!114 &1091627152
+  gameState: {fileID: 1509952948}
+--- !u!114 &1509952948
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1091627150}
+  m_GameObject: {fileID: 1509952946}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bdbcc759f0189134991fb5f447af1feb, type: 3}
@@ -170,13 +233,13 @@ MonoBehaviour:
   hull: 100
   fuel: 100
   tankCapacity: 100
---- !u!114 &1091627153
+--- !u!114 &1509952949
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1091627150}
+  m_GameObject: {fileID: 1509952946}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c53eeaea95e1006498cfe52c151e14ec, type: 3}
@@ -184,76 +247,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.Core.TimeSystem
   gameSeconds: 0
   paused: 0
---- !u!4 &1091627154
+--- !u!4 &1509952950
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1091627150}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &2136600211
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2136600214}
-  - component: {fileID: 2136600213}
-  - component: {fileID: 2136600212}
-  m_Layer: 0
-  m_Name: AudioDirector
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!81 &2136600212
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2136600211}
-  m_Enabled: 1
---- !u!114 &2136600213
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2136600211}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d1130390950f8764fadd3d0ff62c5508, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.Audio.AudioDirector
-  scenes: {fileID: 1091627151}
-  jump: {fileID: 8300000, guid: 6f686ef27a4c0e24cabdb2014f6bdb21, type: 3}
-  land: {fileID: 8300000, guid: 581d22fb5a90699498bd1c899e10f4e8, type: 3}
-  dig: {fileID: 8300000, guid: 975f38ec6326dbe408045eb98cdffd49, type: 3}
-  place: {fileID: 8300000, guid: 171d9835b22ed26439db73522970f661, type: 3}
-  uiClick: {fileID: 8300000, guid: 532a8619a3e7f8647afbe83c1eef210f, type: 3}
-  thrust: {fileID: 8300000, guid: ee7d0e4a3add304419e67660b1865e7e, type: 3}
-  ambient: {fileID: 8300000, guid: 063a84b200c35b744ab571bdfbbe5411, type: 3}
-  sfxVolume: 0.8
-  ambientVolume: 0.35
---- !u!4 &2136600214
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2136600211}
+  m_GameObject: {fileID: 1509952946}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -266,5 +266,5 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 1091627154}
-  - {fileID: 2136600214}
+  - {fileID: 1509952950}
+  - {fileID: 1272497172}

@@ -85,6 +85,7 @@ namespace Meridian.Space
             mr.SetPropertyBlock(block);
 
             if (b.parent != null) return; // moons: flat grey until their art exists (B-017 luna)
+            AddGlow(parent, b);
             var h = Addressables.LoadAssetAsync<Texture2D>($"planets/{b.name}/surface");
             handles.Add(h);
             h.Completed += op =>
@@ -95,6 +96,41 @@ namespace Meridian.Space
                 mr.SetPropertyBlock(block);
             };
         }
+
+        /// <summary>Glow width in R (BLENDER handoffs): planets 2.56 R, the Sun 3.2 R.</summary>
+        public const float PlanetGlowWidth = 2.56f, SunGlowWidth = 3.2f;
+        readonly List<SpriteRenderer> glows = new List<SpriteRenderer>();
+        public IReadOnlyList<SpriteRenderer> Glows => glows;
+
+        /// <summary>planets/&lt;name&gt;/glow behind the disc, only where that art exists.</summary>
+        void AddGlow(Transform parent, BodyInfo b)
+        {
+            var key = $"planets/{b.name}/glow";
+            var locations = Addressables.LoadResourceLocationsAsync(key);
+            locations.Completed += loc =>
+            {
+                bool exists = loc.Status == AsyncOperationStatus.Succeeded && loc.Result != null && loc.Result.Count > 0;
+                Addressables.Release(loc);
+                if (!exists || parent == null) return;
+                var go = new GameObject("Glow");
+                go.transform.SetParent(parent, false);
+                var sr = go.AddComponent<SpriteRenderer>();
+                sr.sharedMaterial = lineMaterial; // unlit: a glow isn't lit by the scene
+                sr.sortingOrder = 9;               // just behind the disc
+                glows.Add(sr);
+                var h = Addressables.LoadAssetAsync<IList<Sprite>>(key);
+                h.Completed += op =>
+                {
+                    if (sr == null || op.Status != AsyncOperationStatus.Succeeded || op.Result.Count == 0) return;
+                    sr.sprite = op.Result[0];
+                    float width = (b.isSun ? SunGlowWidth : PlanetGlowWidth) * b.radius;
+                    go.transform.localScale = Vector3.one * (width / sr.sprite.bounds.size.x);
+                };
+                spriteHandles.Add(h);
+            };
+        }
+
+        readonly List<AsyncOperationHandle<IList<Sprite>>> spriteHandles = new List<AsyncOperationHandle<IList<Sprite>>>();
 
         static Color AtmosphereColor(string name) => name switch
         {
@@ -167,7 +203,7 @@ namespace Meridian.Space
             mr.sortingOrder = 4;
         }
 
-        static Mesh Quad()
+        public static Mesh Quad()
         {
             if (quad != null) return quad;
             quad = new Mesh { name = "DiscQuad" };
@@ -181,6 +217,7 @@ namespace Meridian.Space
         void OnDestroy()
         {
             foreach (var h in handles) if (h.IsValid()) Addressables.Release(h);
+            foreach (var h in spriteHandles) if (h.IsValid()) Addressables.Release(h);
         }
     }
 }

@@ -74,6 +74,9 @@ namespace Meridian.EditorTools
             addr.target = sr;
             addr.worldWidth = 4f;
             spaceCam.gameObject.AddComponent<Meridian.Space.SpaceCamera>().target = shipGo.transform;
+            var backdrop = spaceCam.gameObject.AddComponent<Meridian.Space.SpaceBackdrop>();
+            backdrop.view = spaceCam;
+            backdrop.layerMaterial = EnsureMaterial("Assets/_Game/Settings/Materials/ParallaxLayer.mat", "MERIDIAN/ParallaxLayer");
             var hudGo = new GameObject("SpaceHud");
             hudGo.transform.SetParent(spaceRoot.transform, false);
             hudGo.AddComponent<Meridian.Space.SpaceHud>().ship = ship;

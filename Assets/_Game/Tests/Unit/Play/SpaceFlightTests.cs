@@ -87,6 +87,29 @@ namespace Meridian.Tests
         }
 
         [UnityTest]
+        public IEnumerator Mk1ShipEscapesFromMercurysRing()
+        {
+            SpaceShip ship = null;
+            yield return BootSpace(s => ship = s);
+            var mercury = ship.world.Find("mercury").Value;
+            var outward = mercury.position.normalized; // away from the Sun
+            ship.Position = mercury.position + outward * mercury.RingRadius;
+            ship.Velocity = Vector2.zero;
+            ship.Heading = Mathf.Atan2(outward.y, outward.x) * Mathf.Rad2Deg;
+            ship.intent.thrust = 1f;
+            float t = 0f;
+            while (t < 30f && ship.Position.magnitude <= 1300f && !ship.Destroyed)
+            {
+                yield return new WaitForFixedUpdate();
+                t += Time.fixedDeltaTime;
+            }
+            TestContext.Out.WriteLine($"[MERIDIAN] Mercury ring → r 1300 in {t:F2} s (Mk1, D-022)");
+            Assert.IsFalse(ship.Destroyed);
+            Assert.Greater(ship.Position.magnitude, 1300f, "escaped the Sun's pull from Mercury with Mk1");
+            LogAssert.NoUnexpectedReceived();
+        }
+
+        [UnityTest]
         public IEnumerator SunKillsInsideOnePointTwoR()
         {
             SpaceShip ship = null;

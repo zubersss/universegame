@@ -21,6 +21,18 @@ namespace Meridian.Tests
         }
 
         [Test]
+        public void SunWellUsesKSunPerD022()
+        {
+            var sun = SpaceLayout.Build(Catalog()).Single(b => b.isSun);
+            float atMercury = WellMath.Acceleration(sun.gravity, sun.radius, 1150f, sun.wellFactor, sun.k);
+            Assert.AreEqual(14.9f, atMercury, 0.1f, "Sun pull at Mercury's orbit");
+            float r = sun.radius * Mathf.Sqrt(sun.k * sun.gravity / 30f);
+            Assert.AreEqual(810f, r, 5f, "Sun pull equals Mk1 thrust (30) at r ≈ 810");
+            Assert.AreEqual(30f, WellMath.Acceleration(sun.gravity, sun.radius, r, sun.wellFactor, sun.k), 0.01f);
+            Assert.AreEqual(1.63f, SpaceLayout.Build(Catalog()).Single(b => b.name == "earth").k, "planets keep k_well");
+        }
+
+        [Test]
         public void RingPullsMatchBible()
         {
             Assert.AreEqual(11.1f, WellMath.Acceleration(9.81f, 25f, 30f), 0.05f, "Earth at its Atmosphere Ring");

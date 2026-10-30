@@ -8,6 +8,8 @@ namespace Meridian.Space
     public static class WellMath
     {
         public const float KWell = 1.63f;
+        /// <summary>The Sun's own constant (D-022): 14.9 u/s² at Mercury's orbit, Mk1 thrust (30) at r ≈ 810.</summary>
+        public const float KSun = 0.80f;
         public const float PlanetWellFactor = 4f;
         public const float MoonWellFactor = 3f;
         public const float RingFactor = 1.2f;
@@ -15,11 +17,11 @@ namespace Meridian.Space
         public const float SunRadius = 300f;
         public const float SunKillFactor = 1.2f;
 
-        public static float Acceleration(float g, float radius, float r, float wellFactor = PlanetWellFactor)
+        public static float Acceleration(float g, float radius, float r, float wellFactor = PlanetWellFactor, float k = KWell)
         {
             if (r > wellFactor * radius || r <= 0f) return 0f;
-            float k = radius / r;
-            return KWell * g * k * k;
+            float q = radius / r;
+            return k * g * q * q;
         }
     }
 
@@ -31,6 +33,7 @@ namespace Meridian.Space
         public float radius;         // visual radius R (units)
         public float gravity;        // m/s², drives the well
         public float wellFactor;     // 4 for planets and the Sun, 3 for moons
+        public float k;              // well constant: KWell, or KSun for the Sun
         public bool landable;
         public bool isSun;
         public PlanetId planet;      // valid when landable
@@ -79,7 +82,7 @@ namespace Meridian.Space
             var list = new List<BodyInfo>
             {
                 new BodyInfo { name = "sun", position = Vector2.zero, radius = WellMath.SunRadius, gravity = WellMath.SunGravity,
-                               wellFactor = WellMath.PlanetWellFactor, isSun = true },
+                               wellFactor = WellMath.PlanetWellFactor, k = WellMath.KSun, isSun = true },
             };
             foreach (var c in catalog.planets)
             {
@@ -87,7 +90,7 @@ namespace Meridian.Space
                 list.Add(new BodyInfo
                 {
                     name = c.id.ToString().ToLowerInvariant(), position = PlanetPosition(c), radius = c.visualRadius,
-                    gravity = c.gravity, wellFactor = WellMath.PlanetWellFactor, landable = c.landable, planet = c.id,
+                    gravity = c.gravity, wellFactor = WellMath.PlanetWellFactor, k = WellMath.KWell, landable = c.landable, planet = c.id,
                 });
             }
             foreach (var m in Moons)
@@ -100,7 +103,7 @@ namespace Meridian.Space
                 {
                     name = m.name, parent = m.parent.ToString().ToLowerInvariant(),
                     position = PlanetPosition(parent) + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * d,
-                    radius = m.r, gravity = m.g, wellFactor = WellMath.MoonWellFactor,
+                    radius = m.r, gravity = m.g, wellFactor = WellMath.MoonWellFactor, k = WellMath.KWell,
                 });
             }
             return list;
@@ -119,7 +122,7 @@ namespace Meridian.Space
             {
                 var d = bodies[i].position - at;
                 float r = d.magnitude;
-                float a = WellMath.Acceleration(bodies[i].gravity, bodies[i].radius, r, bodies[i].wellFactor);
+                float a = WellMath.Acceleration(bodies[i].gravity, bodies[i].radius, r, bodies[i].wellFactor, bodies[i].k);
                 if (a > 0f) { sum += d / r * a; if (a > best) { best = a; strongest = i; } }
             }
             return sum;
