@@ -27,7 +27,8 @@ test('Lunar Step on the Moon: aimed and quick steps, cooldown and sky refusals, 
   await importFixture(page, 'moon-landed.json', 'moon');
   let r = await exitShip(page);
   expect(r.p.ability).toMatchObject({ state: 'walk', power: 'lunar-step', body: 'moon' });
-  expect(r.p.ability.unlocked).toContain('skyborne-flight');
+  // Flight is unlocked (on Earth) in this expedition, but it is Earth's power.
+  expect(await page.evaluate(() => [...(window as any).__meridian.game.expedition.unlocked])).toContain('skyborne-flight');
   expect(r.w.primitive).toBe('blink');
 
   // Space (pressed and held) is a jump here, never flight.
