@@ -30,7 +30,6 @@ const _q = new Quaternion();
 const _m = new Matrix4();
 const _x = new Vector3();
 const _z = new Vector3();
-const _d = new Vector3();
 const _o = new Vector3();
 const _t = new Vector3();
 const _a = new Vector3();
@@ -60,7 +59,10 @@ export class Avatar {
   private readonly anchored = [false, false];
   private readonly hipsRestY: number;
   private envMap: Texture | null = null;
-  private turnRate = 0;
+  /** This frame's target root and the previous frame's (sub-step interpolation). */
+  private readonly target = new Vector3();
+  private readonly from = new Vector3();
+  private readonly motion = new Vector3();
   private readonly groundFn: GroundFn;
 
   constructor(parent: Object3D, private readonly ray: GroundRay | null, heading: Vector3) {
@@ -93,67 +95,78 @@ export class Avatar {
     }
   }
 
-  /** Place, orient and animate for one rendered frame. */
+  /**
+   * Place, orient and animate for one rendered frame. A long frame (slow
+   * device, dropped steps) is animated in sub-steps of at most 1/60 s with
+   * the body's motion and turn spread evenly, so the gait never skips a
+   * stance.
+   */
   update(f: AvatarFrame): void {
     this.up.copy(f.up).normalize();
     const up = this.up;
     // Root: capsule feet, lowered by the controller's skin so the soles touch.
-    this.root.copy(f.feet).addScaledVector(up, -SKIN);
-    let moved = 0;
-    if (this.hasPrev) {
-      _d.copy(this.root).sub(this.prevRoot);
-      if (_d.length() > TELEPORT) {
-        _d.set(0, 0, 0);
-        this.anchored[0] = this.anchored[1] = false;
-      }
-      _d.addScaledVector(up, -_d.dot(up));
-    } else _d.set(0, 0, 0);
+    const target = this.target.copy(f.feet).addScaledVector(up, -SKIN);
+    if (!this.hasPrev) this.prevRoot.copy(target);
+    const dTan = this.motion.copy(target).sub(this.prevRoot);
+    if (dTan.length() > TELEPORT) {
+      // A placement (recovery, restore), not motion.
+      this.prevRoot.copy(target);
+      dTan.set(0, 0, 0);
+      this.anchored[0] = this.anchored[1] = false;
+    }
+    const start = this.from.copy(this.prevRoot);
+    // Tangent-plane motion this frame.
+    dTan.addScaledVector(up, -dTan.dot(up));
 
-    // Motion in the body's frame before this frame's turn.
     this.facing.addScaledVector(up, -this.facing.dot(up));
     if (this.facing.lengthSq() < 1e-8) this.facing.copy(f.lookHeading).addScaledVector(up, -f.lookHeading.dot(up));
     this.facing.normalize();
-    moved = _d.dot(this.facing);
-    const side = _d.dot(_a.crossVectors(this.facing, up).normalize());
     // Turn toward the intended movement direction (kept in the tangent plane).
     _t.copy(f.moveVel).addScaledVector(up, -f.moveVel.dot(up));
-    const before = this.turnRate;
-    this.turnRate = 0;
     let turn = 0;
     if (f.dt > 0 && _t.lengthSq() > 0.16) {
       _t.normalize();
       const ang = Math.atan2(_a.crossVectors(this.facing, _t).dot(up), this.facing.dot(_t));
       turn = Math.max(-TURN_RATE * f.dt, Math.min(TURN_RATE * f.dt, ang));
-      if (Math.abs(turn) > 1e-6) {
-        _q.setFromAxisAngle(up, turn);
-        this.facing.applyQuaternion(_q).normalize();
-        this.turnRate = turn / f.dt;
-      } else turn = 0;
     }
-    if (f.dt === 0) this.turnRate = before;
+
+    const n = f.dt > 0 ? Math.min(8, Math.max(1, Math.ceil(f.dt * 60 - 1e-6))) : 1;
+    const sub = f.dt / n;
+    const lookPitch = f.lookPitch * 0.6;
+    for (let k = 1; k <= n; k++) {
+      // Motion in the body's frame before this sub-step's turn.
+      this.right.crossVectors(this.facing, up).normalize();
+      const moved = dTan.dot(this.facing) / n;
+      const side = dTan.dot(this.right) / n;
+      if (turn !== 0) {
+        _q.setFromAxisAngle(up, turn / n);
+        this.facing.applyQuaternion(_q).normalize();
+        this.right.crossVectors(this.facing, up).normalize();
+      }
+      this.root.lerpVectors(start, target, k / n);
+      // Head follows the camera: yaw of the look heading relative to the body, and pitch.
+      const lookYaw = Math.atan2(_a.crossVectors(this.facing, f.lookHeading).dot(up), this.facing.dot(f.lookHeading));
+      this.anim.update({
+        dt: sub,
+        forwardDist: moved,
+        lateralDist: side,
+        turn: turn / n,
+        grounded: f.grounded,
+        vVert: f.vVert,
+        ground: f.grounded && this.ray ? this.groundFn : null,
+        lookYaw: Math.abs(lookYaw) < 1.9 ? lookYaw : 0,
+        lookPitch,
+      });
+    }
+    this.root.copy(target);
 
     // Basis: forward = -Z, up = +Y, right = +X.
-    this.right.crossVectors(this.facing, up).normalize();
     _z.copy(this.facing).negate();
     _x.copy(this.right);
     _m.makeBasis(_x, up, _z);
     const root = this.rig.root;
     root.position.copy(this.root);
     root.quaternion.setFromRotationMatrix(_m);
-
-    // Head follows the camera: yaw of the look heading relative to the body, and pitch.
-    const lookYaw = Math.atan2(_a.crossVectors(this.facing, f.lookHeading).dot(up), this.facing.dot(f.lookHeading));
-    this.anim.update({
-      dt: f.dt,
-      forwardDist: moved,
-      lateralDist: side,
-      turn,
-      grounded: f.grounded,
-      vVert: f.vVert,
-      ground: f.grounded && this.ray ? this.groundFn : null,
-      lookYaw: Math.abs(lookYaw) < 1.9 ? lookYaw : 0,
-      lookPitch: f.lookPitch * 0.6,
-    });
     this.anim.applyTo(this.rig.bones, this.hipsRestY);
     root.updateMatrixWorld(true);
     if (f.dt > 0) this.measureSlip();

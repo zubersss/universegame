@@ -259,3 +259,65 @@ describe('explorer animation', () => {
     av.dispose();
   });
 });
+
+describe('explorer animation on slow frames', () => {
+  it('keeps feet locked and steps normally on slow frames (sub-stepped)', () => {
+    // 15 fps: a running stance spans a couple of rendered frames, so slip is measurable.
+    const a = new Avatar(new Group(), null, FWD);
+    const fa = new Vector3();
+    for (let i = 0; i < 90; i++) walk(a, 7.5, 1 / 15, { dt: 1 / 15, feet: fa });
+    expect(a.anim.state).toBe('run');
+    expect(a.slipSamples).toBeGreaterThan(10);
+    expect(a.maxSlip).toBeLessThan(0.002);
+    expect(a.anim.settleSteps).toBe(0);
+    a.dispose();
+    // 4 fps (1.9 m per frame at 7.5 m/s): the gait still cycles, nothing skips into settle steps.
+    const b = new Avatar(new Group(), null, FWD);
+    const fb = new Vector3();
+    for (let i = 0; i < 40; i++) walk(b, 7.5, 0.25, { dt: 0.25, feet: fb });
+    expect(b.anim.state).toBe('run');
+    expect(b.anim.settleSteps).toBe(0);
+    expect(b.anim.overreach).toBe(0);
+    b.dispose();
+  });
+});
+
+describe('explorer turning', () => {
+  it('keeps planted feet (and their direction) fixed while the body turns in place, then re-plants them', () => {
+    const av = new Avatar(new Group(), null, FWD);
+    const feet = new Vector3();
+    const dt = 1 / 60;
+    // Stand, then ask to move sideways without moving yet: the body turns toward it at 10 rad/s.
+    for (let i = 0; i < 60; i++) av.update({ dt, feet: feet.clone(), up: UP, grounded: true, vVert: 0, moveVel: new Vector3(), lookHeading: FWD, lookPitch: 0 });
+    const right = new Vector3(3, 0, 0);
+    for (let i = 0; i < 30; i++) av.update({ dt, feet: feet.clone(), up: UP, grounded: true, vVert: 0, moveVel: right, lookHeading: FWD, lookPitch: 0 });
+    expect(av.facing.dot(new Vector3(1, 0, 0))).toBeGreaterThan(0.99);
+    expect(av.slipSamples).toBeGreaterThan(10);
+    expect(av.maxSlip).toBeLessThan(0.002);
+    // A 90° turn twists the planted feet past the limit: they step to re-align.
+    expect(av.anim.settleSteps).toBeGreaterThanOrEqual(1);
+    av.dispose();
+  });
+});
+
+describe('explorer on curves', () => {
+  it('runs a tight circle without planted feet sliding (twisted feet roll along their own axis)', () => {
+    for (const speed of [3, 7.5]) {
+      const av = new Avatar(new Group(), null, FWD);
+      const dt = 1 / 60;
+      const feet = new Vector3();
+      const vel = new Vector3();
+      let heading = 0;
+      for (let i = 0; i < 600; i++) {
+        heading += 1.5 * dt; // 1.5 rad/s turn
+        vel.set(-Math.sin(heading), 0, -Math.cos(heading)).multiplyScalar(speed);
+        feet.addScaledVector(vel, dt);
+        av.update({ dt, feet: feet.clone(), up: UP, grounded: true, vVert: 0, moveVel: vel, lookHeading: vel.clone().normalize(), lookPitch: 0 });
+      }
+      expect(av.slipSamples).toBeGreaterThan(50);
+      expect(av.maxSlip).toBeLessThan(0.003);
+      expect(av.anim.overreach).toBe(0);
+      av.dispose();
+    }
+  });
+});

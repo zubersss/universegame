@@ -7,6 +7,7 @@ import type { OnFootContext, OnFootExitReason, OnFootHooks } from '../game/onFoo
 import { BODIES, type BodyId } from '../world/bodies';
 import { AbilityController } from '../abilities/AbilityController';
 import { bodyPower } from '../abilities/catalog';
+import { SIM_DT } from '../game/config';
 
 /**
  * Everything PLAYER adds on foot: the visible explorer and the character
@@ -15,6 +16,8 @@ import { bodyPower } from '../abilities/catalog';
  */
 export class PlayerRuntime implements OnFootHooks {
   readonly abilities: AbilityController;
+  /** Simulation time of the last rendered frame's interpolated state (null after enter). */
+  private lastVisTime: number | null = null;
 
   constructor(private readonly game: Game) {
     this.abilities = new AbilityController(game.hud, (id) => {
@@ -25,6 +28,7 @@ export class PlayerRuntime implements OnFootHooks {
 
   enter(ctx: OnFootContext): void {
     this.game.player?.attachVisual(this.game.render.scene);
+    this.lastVisTime = null;
     this.abilities.enter(ctx);
   }
 
@@ -34,12 +38,18 @@ export class PlayerRuntime implements OnFootHooks {
     return this.abilities.step(dt);
   }
 
-  frame(dt: number, alpha: number): boolean {
+  frame(_dt: number, alpha: number): boolean {
     const g = this.game;
     const p = g.player;
     if (!p) return false;
-    // Pause, loading and open panels freeze the character's animation.
-    p.renderView(g.state === 'playing' ? dt : 0, alpha, g.cameraRig, g.lighting.envMap, g.settings.reducedMotion);
+    // Animate on simulation time: the rendered state is interpolated between
+    // fixed steps, so its time is simTime - (1 - alpha) * SIM_DT. Pause,
+    // loading and open panels stop the simulation and so freeze the
+    // character; slow frames that drop steps never desynchronise the gait.
+    const t = g.simTime + (alpha - 1) * SIM_DT;
+    const dt = this.lastVisTime === null ? 0 : Math.min(0.25, Math.max(0, t - this.lastVisTime));
+    this.lastVisTime = t;
+    p.renderView(dt, alpha, g.cameraRig, g.lighting.envMap, g.settings.reducedMotion);
     return true;
   }
 
