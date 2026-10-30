@@ -31,6 +31,15 @@ describe('power effects', () => {
     expect(ring.parent!.visible).toBe(true);
     expect(ring.parent!.position.distanceTo(feet)).toBeLessThan(1e-9);
     expect((ring.material as MeshBasicMaterial).color.getHexString()).toBe(new Color('#c8b6ff').getHexString());
+    // Near the camera it keeps its size; far away it widens (not taller) to stay readable.
+    const scaleAt = (at: Vector3) => {
+      v.update(1 / 60, { up: UP, camera: CAM, aim: { feet: at, ok: true }, rush: null, trails: null }, true);
+      return ring.parent!.scale.clone();
+    };
+    expect(scaleAt(new Vector3(0, 0, -5)).x).toBe(1);
+    const far = scaleAt(new Vector3(0, 0, -55));
+    expect(far.x).toBeCloseTo(new Vector3(0, 0, -55).distanceTo(CAM) / 15, 6);
+    expect(far.y).toBe(1);
     v.update(1 / 60, { up: UP, camera: CAM, aim: { feet, ok: false }, rush: null, trails: null }, false);
     expect((ring.material as MeshBasicMaterial).color.getHexString()).toBe('ff4a4a');
     v.update(1 / 60, { up: UP, camera: CAM, aim: null, rush: null, trails: null }, false);

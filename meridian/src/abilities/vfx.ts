@@ -17,12 +17,13 @@ import {
 
 // Restrained power feedback (charter K/L: visual feedback with a readable
 // camera; spectacle never obscures aiming, terrain or landings): the blink
-// target marker (green-ish when the step is allowed, red when refused), a
-// short flash where a blink leaves and arrives, faint speed lines around the
-// body at superspeed and in fast flight, and two thin trails from the boots
-// at flight boost. Neither comes near the camera. Additive, unlit, no
-// depth writes; with reduced motion the speed lines are off and the flashes
-// do not grow (the marker and the trails do not move with the scene).
+// target marker (the power colour when the step is allowed, red when
+// refused; readable at any range), a short flash where a blink leaves and
+// arrives, faint speed lines around the body at superspeed and in fast
+// flight, and two thin trails from the boots at flight boost. Neither of
+// the last two comes near the camera. Unlit, no depth writes, additive
+// except the marker; with reduced motion the speed lines are off and the
+// flashes do not grow (the marker and the trails do not move with the scene).
 
 export interface VfxFrame {
   up: Vector3;
@@ -38,6 +39,8 @@ export interface VfxFrame {
 const STREAKS = 10;
 const FLASH_TIME = 0.35;
 const REFUSED = new Color(0xff4a4a);
+/** Beyond this distance from the camera (m) the blink marker widens to keep its apparent size. */
+const MARKER_FULL = 15;
 /** Longest flight trail (m). */
 const TRAIL_MAX = 14;
 /** No trail comes closer to the camera than this (m): seen from the chase camera they stay short. */
@@ -115,11 +118,14 @@ export class PowerVfx {
     this.color = new Color(color);
     this.root.name = 'power-vfx';
     // Marker: a ring on the ground and a short beam.
-    this.ringMat = additive(this.color.clone(), 0.85);
-    this.beamMat = additive(this.color.clone(), 0.35);
+    // Normal blending, not additive, so the refused red reads as red on bright
+    // ground; the ring draws over terrain bumps so the target point always shows.
+    this.ringMat = new MeshBasicMaterial({ color: this.color.clone(), transparent: true, opacity: 0.85, depthWrite: false, depthTest: false, toneMapped: false });
+    this.beamMat = new MeshBasicMaterial({ color: this.color.clone(), transparent: true, opacity: 0.45, depthWrite: false, toneMapped: false });
     const ring = new Mesh(new RingGeometry(0.42, 0.56, 40).rotateX(-Math.PI / 2), this.ringMat);
     const inner = new Mesh(new RingGeometry(0.0, 0.18, 24).rotateX(-Math.PI / 2), this.ringMat);
     const beam = new Mesh(new CylinderGeometry(0.025, 0.025, 1.8, 8).translate(0, 0.9, 0), this.beamMat);
+    ring.renderOrder = inner.renderOrder = 10;
     ring.position.y = inner.position.y = 0.03;
     this.marker.add(ring, inner, beam);
     this.marker.visible = false;
@@ -175,8 +181,11 @@ export class PowerVfx {
       const c = f.aim.ok ? this.color : REFUSED;
       this.ringMat.color.copy(c);
       this.beamMat.color.copy(c);
+      // Wider with distance so it keeps a readable size out to the range; its
+      // height stays the explorer's 1.8 m as a size cue.
+      const wide = Math.max(1, f.aim.feet.distanceTo(f.camera) / MARKER_FULL);
       const pulse = reducedMotion ? 1 : 1 + 0.08 * Math.sin(this.time * 6);
-      this.marker.scale.set(pulse, 1, pulse);
+      this.marker.scale.set(pulse * wide, 1, pulse * wide);
     } else this.marker.visible = false;
     // Flashes.
     for (let i = 0; i < this.flashes.length; i++) {
