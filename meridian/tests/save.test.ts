@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  CORRUPT_KEY, PREV_KEY, SAVE_KEY, SaveStore, exportJson, importJson, validateSave, type SaveData,
+  CORRUPT_KEY, LEGACY_KEY, PREV_KEY, SAVE_KEY, SaveStore, exportJson, importJson, legacySummary, validateSave, type SaveData,
 } from '../src/save/SaveSystem';
 import type { KvStore } from '../src/save/db';
 import { GENERATOR_VERSION, SAVE_SCHEMA_VERSION, WORLD_SEED } from '../src/world/bodies';
@@ -75,6 +75,11 @@ describe('save validation', () => {
     ['coordinate out of bounds', sample({ ship: { ...sample().ship, sys: [9e9, 0, 0] } })],
     ['non-unit quaternion', sample({ ship: { ...sample().ship, quat: [0, 0, 0, 0.5] } })],
     ['unknown body', { ...sample(), body: 'pluto' }],
+    ['catalog body not in play', { ...sample(), body: 'earth' }],
+    ['the Sun as a body', { ...sample(), body: 'sun' }],
+    ['relays on bodies not in play', sample({ expedition: { ...sample().expedition, relays: ['earth', 'mars', 'moon'], transmitted: true } })],
+    ['last landing on a body not in play', sample({ lastSafeLanding: { ...sample().lastSafeLanding!, body: 'sun' } })],
+    ['navigation to a body not in play', { ...sample(), navTarget: 'neptune' }],
     ['surface mode without body', sample({ body: null })],
     ['on foot without player', sample({ mode: 'ON_FOOT' })],
     ['player while landed', sample({ player: { sys: [0, 0, 0], heading: [1, 0, 0], pitch: 0 } })],
@@ -138,6 +143,37 @@ describe('save store', () => {
     expect(st.failure).toMatch(/full/);
     expect((kv.data.get(SAVE_KEY) as SaveData).playTime).toBe(1);
     expect(st.latest.data?.playTime).toBe(1);
+  });
+
+  it('keeps a save from an older schema read-only and starts fresh (schema-2 plan)', async () => {
+    const kv = new FakeKv();
+    const old = { ...sample({ playTime: 99 }), schema: SAVE_SCHEMA_VERSION - 1 };
+    kv.data.set(SAVE_KEY, old);
+    const st = new SaveStore(kv as unknown as KvStore);
+    await st.read();
+    expect(st.latest).toEqual({ data: null, error: null, present: false });
+    expect(st.legacy).toEqual({ schema: SAVE_SCHEMA_VERSION - 1, savedAt: old.savedAt, playTime: 99, body: 'vesper' });
+    expect(kv.data.get(LEGACY_KEY)).toEqual(old);
+    // Saving the new game neither treats the old record as corrupt nor rotates it into the backup.
+    expect(await st.write(sample({ playTime: 1 }))).toBe(true);
+    expect(kv.data.has(CORRUPT_KEY)).toBe(false);
+    expect(kv.data.has(PREV_KEY)).toBe(false);
+    expect(kv.data.get(LEGACY_KEY)).toEqual(old);
+    const again = new SaveStore(kv as unknown as KvStore);
+    await again.read();
+    expect(again.latest.data?.playTime).toBe(1);
+    expect(again.legacy?.playTime).toBe(99);
+  });
+
+  it('classifies only older-schema records as legacy', () => {
+    expect(legacySummary(sample())).toBeNull();
+    expect(legacySummary({ ...sample(), schema: SAVE_SCHEMA_VERSION + 1 })).toBeNull();
+    expect(legacySummary('garbage')).toBeNull();
+    expect(legacySummary({ schema: 0.5 })).toBeNull();
+    expect(legacySummary({ schema: SAVE_SCHEMA_VERSION - 1, savedAt: 7, playTime: -1, body: null }))
+      .toEqual({ schema: SAVE_SCHEMA_VERSION - 1, savedAt: null, playTime: null, body: null });
+    // An old backup file is still refused for play.
+    expect(importJson(JSON.stringify({ ...sample(), schema: SAVE_SCHEMA_VERSION - 1 })).ok).toBe(false);
   });
 
   it('works without storage: writes report failure, nothing throws', async () => {

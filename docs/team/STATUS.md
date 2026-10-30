@@ -28,12 +28,13 @@ Reference device: CPU · GPU (`chrome://gpu`) · RAM 8 GB · resolution · Chrom
 | 9 | Ultracode may stay on in every session (effort `xhigh` or `ultracode`); the ultracode-off rule and the keyword-only workflow limit are removed; workflow agents edit only their session's owned files (charter version 2, B.3, G) | Owner instruction | 2026-10-29 |
 | 10 | A moon sits in its real direction from its parent at parent gameplay radius × √(real parent–moon distance at EPOCH ÷ real parent radius), at least 4.5 × the sum of the two gameplay radii (Europa and Titan otherwise sit inside their giants' 4R envelopes); planets and the Sun keep the single factor (charter version 2, H) | WORLDS DECISION: the single factor puts the Moon 7.7 km from Earth's center | 2026-10-29 |
 | 11 | LEAD works autonomously: it merges milestone pull requests into `main` after a passing gate, takes over tasks whose owner session is not running, runs a missing consumer's checks itself, and gates M1–M4 on its own environment; reference-device numbers are recorded when the owner runs them (charter version 2, B, E, F, L, M, N, O) | Owner instruction | 2026-10-29 |
+| 12 | PLAYER works autonomously on foot: ON_FOOT hooks gain frame() for camera and pose, boot calls PLAYER's src/player/install.ts, PLAYER owns src/debug/playerHooks.ts; READY needs typecheck, unit tests, build, smoke and the covering specs, while journeys over 10 minutes run once per milestone at LEAD's gate (charter version 2, B.11, D) | PLAYER's autonomy request; owner instruction to continue | 2026-10-30 |
 
 ## Integration base
 
 | Branch | Commit | Checks last run | Checkpoint tag |
 |---|---|---|---|
-| `overhaul/integration` | 30ccf78 (= `main`) | 2026-10-29: `npm ci`, typecheck, `npm test` 63/63, build, build:test, prod smoke 2/2; journeys running | — (`overhaul-m1` at the M1 gate) |
+| `overhaul/integration` | 0c22cf6 (L5/L5b + W1/W2 + save fix) | 2026-10-30: typecheck, `npm test` 83/83, build, build:test; prod 2/2; expedition, flight, landing, saves 4/4 | — (`overhaul-m1` at the M1 gate) |
 
 ## Handoff reconciliation (M1, L4)
 
@@ -52,9 +53,9 @@ Reference device: CPU · GPU (`chrome://gpu`) · RAM 8 GB · resolution · Chrom
 | L2 | LEAD | Charter, status, settings committed | L1 | | `docs/team/*`, `.claude/settings.json` | files present on `overhaul/integration` | Charter and status in 30ccf78. Owner approved repo-root `.claude/settings.json` (allow npm/npx/git/node); `crossSessionInbound` stays a per-user setting because a repo file may only tighten it. |
 | L3 | LEAD | Messaging round-trip | L2 | | — | packet to and from WORLDS and PLAYER | Done: LEAD → WORLDS and PLAYER delivered; READY packets back from both; PLAYER → WORLDS delivered. Cloud sessions talk by `send_message`; `docs/team/packets/` stays the fallback. |
 | L4 | LEAD | Handoffs reconciled | L2 | | `docs/team/handoffs/*` | table above filled; unique work preserved | Studio branches reconciled read-only, nothing deleted; DECISION packet sent; old-bot exports are reconciled when the owner supplies them; their absence does not block L4 or the M1 gate. |
-| L5 | LEAD | Contract foundations | L4 | | `src/game/*`, `src/save/*`, `src/ui/Hud.ts` | tests for Mode hooks, HUD slot API, schema-2 plan | `lead/L5-contracts` 566d144: `setMode` + ON_FOOT hooks, `hud.setAbility`/`hud.setWarning`, `save-legacy` policy; typecheck, 72/72 tests. Browser checks before merge. IFACE packets to WORLDS (BodyDef fields) and PLAYER (hooks). |
-| W1 | WORLDS | Solar-system catalog with sources | — | | `src/data/sol.json` | fields tagged measured/estimated/fictional; source + epoch recorded | |
-| W2 | WORLDS | `scale.ts` and catalog-driven `BodyDef` | W1, L5 | | `src/world/*` | Ilex, Vesper, Cairn still play | |
+| L5 | LEAD | Contract foundations | L4 | | `src/game/*`, `src/save/*`, `src/ui/Hud.ts` | tests for Mode hooks, HUD slot API, schema-2 plan | Done: L5 566d144 + L5b 49f48bb (frame hook, `installPlayer`, PLAYER test hooks), merged in 0373660; typecheck, unit tests, prod smoke, expedition, flight, landing, saves green on the integrated build. |
+| W1 | WORLDS | Solar-system catalog with sources | — | | `src/data/sol.json` | fields tagged measured/estimated/fictional; source + epoch recorded | Interim: `sol.json` with JPL DE421 positions (via PyPI); physical constants tagged estimated/unverified until NASA hosts are allowed; integrated in ce556b2. Minor labeling DEFECT sent. |
+| W2 | WORLDS | `scale.ts` and catalog-driven `BodyDef` | W1, L5 | | `src/world/*` | Ilex, Vesper, Cairn still play | Done: `scale.ts`, catalog-driven string-keyed `BodyDef` (15 bodies, `BODY_IDS` still the Quiet System), moons per charter H; Quiet System byte-identical (review); integrated in ce556b2 with LEAD's save fix 0c22cf6. |
 | W3 | WORLDS | Earth dataset converted and licensed | — | | `src/data/**`, `scripts/data/*`, `ASSET_LICENSES.md` | sampling test (Everest high, Challenger Deep low, land ≈ 29%) | |
 | W4 | WORLDS | Data-backed Earth surface spike | W3 | | `src/world/surface.ts` | region renders; proxy ↔ surface continuity test | |
 | P1 | PLAYER | Rigged character walks on Ilex in third person | — | | `src/avatar/**`, `src/player/*` | screenshots; no foot sliding; camera avoids terrain | |

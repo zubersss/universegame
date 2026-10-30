@@ -1,4 +1,4 @@
-import { BODY_IDS, isBodyId, type BodyId } from '../world/bodies';
+import { BODY_IDS, type BodyId } from '../world/bodies';
 import { speciesById } from '../props/species';
 
 // Expedition progress: discoveries, samples, relays and the final transmission.
@@ -26,7 +26,7 @@ export function newExpedition(): ExpeditionState {
 /** Body that a sample/relay ID belongs to (IDs are `${body}:...`). */
 export function bodyOfId(id: string): BodyId | null {
   const b = id.slice(0, id.indexOf(':'));
-  return isBodyId(b) ? b : null;
+  return (BODY_IDS as readonly string[]).includes(b) ? b : null;
 }
 
 export class Expedition {
