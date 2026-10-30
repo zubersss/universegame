@@ -14,6 +14,34 @@
       "pivot": [0.5, 0.0555556],
       "maps": ["color", "normal", "emission", "mask"],
       "samples": 32
+    },
+    {
+      "key": "planets/earth/surface",
+      "generator": "scripts/gen_planet.py",
+      "input": "sources/planets/earth/world.topo.bathy.200412.3x5400x2700.jpg",
+      "size": [2048, 1024],
+      "maps": ["color"],
+      "tileable": "x"
+    },
+    {
+      "key": "planets/earth/clouds",
+      "generator": "scripts/gen_planet.py",
+      "input": "sources/planets/earth/cloud_combined_2048.jpg",
+      "size": [1024, 512],
+      "cloud_floor": 0.15,
+      "cloud_gain": 1.2,
+      "maps": ["color"],
+      "tileable": "x"
+    },
+    {
+      "key": "planets/earth/glow",
+      "generator": "scripts/gen_planet.py",
+      "size": [512, 512],
+      "maps": ["color", "emission"],
+      "glow_color": [110, 170, 255],
+      "glow_peak": 0.85,
+      "glow_width": 14,
+      "disc_radius": 200
     }
   ]
 }

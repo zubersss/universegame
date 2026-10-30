@@ -179,7 +179,7 @@ def contact_sheet(maps, tile_mode=None, max_h=512, gap=8):
     rows = [panels]
     if tile_mode:
         reps = (2 if "y" in tile_mode else 1, 2 if "x" in tile_mode else 1, 1)
-        tiled = np.tile(col[..., :3].astype(np.float32) / 255.0, reps)
+        tiled = _over_checker(np.tile(col, reps))
         rows.append([_fit(tiled, max_h)])
     lines = []
     for row in rows:
