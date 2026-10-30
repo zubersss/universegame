@@ -183,3 +183,11 @@ Decided: none.
 Signals: B-024 still not implemented (no want logic in blender_render.ps1). The LEAD-filed want file worked again. Keep B-024 BLOCKING. Watch: U-026 profile RED (Earth p99 18.8 ms) during contention. It must be green on re-run.
 User: USER-09 (M1 playtest) open since 17:15.
 Queue: UNITY 6 Ready, BLENDER 5 Ready.
+
+## Cycle 20 · 2026-10-30 18:45
+Checked: git log 18:11–18:30 (U-027 + U-026 storm leg, metas/Addressables, B-015/B-020 sources); perf_2026-10-30.md (all green; Earth p99 13.3 ms, up from 7.8, watch); daynight_2026-10-30 dusk/night captures; duststorm_2026-10-30 storm capture; BLENDER creature PPU proposal.
+Moved: U-025, U-026, U-027 → Done; U-029 → In Progress.
+Decided: D-031 (per-sheet ppu for frame sheets; contract → v1.3); U-036 added.
+Signals: BLENDER queue blocked again (B-015, B-020 sources waiting). B-024 still not implemented. LEAD filed want_blender.lock 18:41 (third time). Earth p99 frame time trend 7.8 → 13.3 ms (budget 16.6): ask for a profile breakdown if it passes 14 ms.
+User: USER-09 (M1 playtest) open since 17:15.
+Queue: UNITY 6 Ready, BLENDER 7 Ready.

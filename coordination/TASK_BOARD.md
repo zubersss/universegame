@@ -303,28 +303,35 @@ Files: Assets/_Game/Code/Runtime/Planet/POI/, Prefabs/
 Depends: U-030
 Lead notes: Cycle 19. It gives the first screen of the game a sense of place.
 
-### U-025 · UNITY · Review · M2
+### U-036 · UNITY · Ready · M2
+Goal: ArtImporter honors a frame sheet's `"ppu"` field (D-031) for creature and character sheets.
+Accept: EditMode test: a sheet with "ppu": 104 imports sprites at PPU 104 (world size = px / 104); sheets without it stay at 128; B-015 stag/wolf appear at true size (stag ~2.3 m) in a capture next to the surveyor.
+Files: Assets/_Game/Code/Editor/ArtImporter.cs, Tests/Unit/
+Depends: U-005
+Lead notes: Cycle 20. Small; needed before B-015/B-016 art replaces the U-027 placeholders.
+
+### U-025 · UNITY · Done · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.
 Accept: EditMode test: Earth noon/midnight intensities match §9; captures at dawn/noon/dusk/night on Earth; 0 B GC per frame.
 Files: Assets/_Game/Code/Runtime/Planet/Lighting/
 Depends: U-004
-Lead notes: Not yet accepted (cycle 18): DayNightTests + c56a516 look good, but Accept requires dawn/noon/dusk/night captures on Earth, and none are in coordination/reports/unity/. Add them (SceneCapture at clock 0.25/0.5/0.75/0.0) and list them in your status. Day/night numbers accepted as D-030.
+Lead notes: Done c56a516 (cycle 20): DayNightTests; dawn/noon/dusk/night captures (night: ship windows glow); values per D-030.
 
-### U-026 · UNITY · In Progress · M2
+### U-026 · UNITY · Done · M2
 Goal: Mars dust storm (Bible §7.2): 60 s warning, 2–6 min storm every 4–7 game days, visibility 15 m, Cryo +1, static discharges.
 Accept: PlayMode test forces a storm: warning event 60 s before; fog shrinks visibility to 15 m; Cryo level rises by 1; storm ends inside 2–6 min; uses fx/dust when present.
 Files: Assets/_Game/Code/Runtime/Planet/Weather/
 Depends: U-025
-Lead notes: Code + tests accepted in principle (cycle 19); waiting on the storm BudgetGate leg and a profile re-run without contention. The 17:40 Earth p99 18.8 ms (RED) must come back green.
+Lead notes: Done 3b48dc7 + 4bbf8a0 (cycle 20): DustStorm tests; storm capture (15 m fog, dust puffs); BudgetGate storm leg avg 4.3 / p99 8.9 ms, first frame 2.8 ms.
 
-### U-027 · UNITY · In Progress · M2
+### U-027 · UNITY · Done · M2
 Goal: Creature AI v1: grazer (stag: wander, flee), pack hunter (wolf: night, chase), scavenger (dustskater), canyon hunter (scree stalker); spawns by biome and time; real gravity on bodies.
 Accept: PlayMode tests: stag flees within 8 m, wolf packs spawn only at night, creatures never fall through streamed chunks; ≤ 0.5 ms AI per frame with 20 creatures; placeholders until B-015/B-016.
 Files: Assets/_Game/Code/Runtime/Creatures/
 Depends: U-009
-Lead notes: M2 draft (cycle 10).
+Lead notes: Done 4bbf8a0 (cycle 20): stag/wolf/dustskater/scree stalker AI on placeholders, held on unloaded chunks, AI ≤ 0.13 ms with 20. Real art via B-015/B-016 + U-036.
 
-### U-029 · UNITY · Ready · M2
+### U-029 · UNITY · In Progress · M2
 Goal: Hazard system v1 (Bible §7 0–3 scale) with Cryo first: per-planet/biome/time Cryo level (Earth tundra night 1; Mars day 1 / night 2; dust storm +1), suit integrity drain by level, HUD Cryo meter, warmth near a lit shelter or the ship.
 Accept: EditMode tests for the level table; PlayMode: Mars night drains suit and the ship stops the drain; level 3 is lethal within 30 s unprotected (§7 definition); the HUD meter shows the level and drain.
 Files: Assets/_Game/Code/Runtime/Hazards/, UI/
