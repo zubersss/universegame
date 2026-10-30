@@ -34,7 +34,7 @@ Reference device: CPU · GPU (`chrome://gpu`) · RAM 8 GB · resolution · Chrom
 
 | Branch | Commit | Checks last run | Checkpoint tag |
 |---|---|---|---|
-| `overhaul/integration` | M1 gate build: 9721ae3 (L5–L5c, L6a, L7a, L8, `worlds/m1` W1–W4 with W5/W7 groundwork, `player/m1` P1–P4 with P5–P7 groundwork) plus this record | 2026-10-30: typecheck, `npm test` 245/245 (23 files), build, build:test; prod 2/2; all nine journeys (see M1 gate) | `overhaul-m1` → 4bd6407 (local tag; the session's git proxy refuses tag pushes with HTTP 403, so branch `lead/it-m1-gate` holds the checkpoint) |
+| `overhaul/integration` | ee14be7 + this record (`lead/it-m2b`: M1 merge 460001a + L9a + L7b + save-id fix) | 2026-10-30: typecheck, `npm test` 302/302 (25 files), build, build:test; prod 2/2; journeys Sol Earth → Moon hop, avatar-walk, expedition, flight (4.6 min), saves 5/5. Landing, planet, Quiet travel and worlds-earth run at the M2 gate | `overhaul-m1` → 4bd6407 (local tag; the session's git proxy refuses tag pushes with HTTP 403, so branch `lead/it-m1-gate` holds the checkpoint) |
 
 ## Handoff reconciliation (M1, L4)
 
@@ -64,8 +64,8 @@ Reference device: CPU · GPU (`chrome://gpu`) · RAM 8 GB · resolution · Chrom
 | L6a | LEAD | Sun lights every body from its real direction | L5 | | `src/render/Lighting.ts`, `src/game/config.ts` | per-body light tests; Quiet goldens unchanged | Done, d161e0e + review d3abfa8, 150ef31; in the M1 gate build. |
 | L7a | LEAD | Cruise reaches any M2 body within 60 s | L5 | | `src/ship/Cruise.ts`, `src/game/config.ts` | hop cap max(15 km/s, hop ÷ 45 s), 5R star standoff, system edge | Done, 8e72012 + review d406998; in the M1 gate build. |
 | L8 | LEAD | Saves carry Sol positions; older saves kept read-only | L5 | | `src/save/*` | schema 2, `save-legacy`, history line on the title | Done, ef51699 + review 185ef1e; in the M1 gate build; `saves.spec.ts` 5/5 at the gate. |
-| L7b | LEAD | Sol boot behind `?system=sol`: Earth start, activation policy, ten nav keys | L7a, W2 | | `src/game/*`, `src/ui/Panel.ts`, `src/ship/Cruise.ts` | `sol-boot.test.ts`; Sol Earth → Moon journey | b0e2292 on `lead/L7b-sol-boot` (265 unit tests); review and browser run next. |
-| L9a | LEAD | First Light state, unlock-gated powers, ability saves, audio bus | L8, P2 | | `src/game/Expedition.ts`, `src/save/*`, `src/audio/GameAudio.ts` | expedition, contracts and save tests | 9745f1e + review fixes 53457ff on `lead/L9a-first-light`; integration next. |
+| L7b | LEAD | Sol boot behind `?system=sol`: Earth start, activation policy, ten nav keys | L7a, W2 | | `src/game/*`, `src/ui/Panel.ts`, `src/ship/Cruise.ts` | `sol-boot.test.ts`; Sol Earth → Moon journey | Integrated: b0e2292 + review fix 0ce91cc (real Earth-start hop ≈ 31 km/s cap, leg stats survive a retarget, boot-order and handoff wiring tests), merged in ee14be7. Sol Earth → Moon hop journey passes (2.9 min: 4 legs, peak 28.4 km/s under a 31.0 km/s cap; Earth released before the Moon activates). Open, behind the flag: keep-out for Mercury/Venus (L7c), photo camera on Sol bodies (step 11), one save slot shared across systems (L10), mid-cruise reload re-caps to the remaining route (step 11). |
+| L9a | LEAD | First Light state, unlock-gated powers, ability saves, audio bus | L8, P2 | | `src/game/Expedition.ts`, `src/save/*`, `src/audio/GameAudio.ts` | expedition, contracts and save tests | Integrated: 9745f1e + review fixes 53457ff, merged in 5086d49; saves accept scans and species from any catalog body (823455e, WORLDS DEFECT). |
 
 ## Blockers
 
