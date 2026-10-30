@@ -16,10 +16,14 @@ MonoBehaviour:
   litEmissive: {fileID: 2100000, guid: 26b4dc6b5aec4aa48aa60247cfe73d86, type: 2}
   emissiveKeys:
   - characters/surveyor/base
+  - fx/dig_sparks/base
+  - fx/escape_band/base
+  - fx/thruster/base
   - planets/earth/glow
   - planets/mars/glow
   - planets/sun/glow
   - planets/sun/surface
   - props/common/calibration
   - ships/pilgrim/side
+  - ships/pilgrim/side_legs
   - ships/pilgrim/top
