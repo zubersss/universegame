@@ -16,10 +16,17 @@ namespace Meridian.Rig
         public TerrainStreamer terrain;
         public ItemDrops drops;
         public Transform owner;
-        [Tooltip("Material the Builder places (inventory selection arrives with the inventory task).")]
-        public byte builderTile = TileId.Soil;
+        /// <summary>Where Builder material comes from and dug items go (GameState's; U-045, closes D-021).</summary>
+        public Meridian.Items.Inventory inventory;
         /// <summary>Raised after the Beam removes a tile (U-032 dig animation).</summary>
         public event System.Action<Vector2> Dug;
+
+        void Start()
+        {
+            if (inventory == null && Meridian.Core.GameState.Instance != null) inventory = Meridian.Core.GameState.Instance.inventory;
+            if (drops != null && drops.collector == null) drops.collector = owner;
+            if (drops != null && drops.inventory == null) drops.inventory = inventory;
+        }
 
         public static Vector2Int TileOf(Vector2 world) =>
             new Vector2Int(Mathf.FloorToInt(world.x), Mathf.FloorToInt(world.y));
@@ -40,16 +47,29 @@ namespace Meridian.Rig
             if (!TileId.IsSolid(id)) return false;
             if (!terrain.SetTile(t.x, t.y, TileId.Air)) return false;
             Dug?.Invoke(world);
-            if (drops != null)
+            int item = Meridian.Items.ItemRegistry.DropOf(id);
+            if (drops != null && item != 0)
             {
                 var tile = terrain.TileSet.Get(id, 0) as UnityEngine.Tilemaps.Tile;
-                drops.Spawn(id, new Vector2(t.x + 0.5f, t.y + 0.5f), tile != null ? tile.sprite : null);
+                drops.Spawn(item, new Vector2(t.x + 0.5f, t.y + 0.5f), tile != null ? tile.sprite : null);
             }
             return true;
         }
 
-        /// <summary>Builder: places builderTile into an air or water cell that nothing solid overlaps.</summary>
-        public bool Place(Vector2 world) => Place(world, builderTile);
+        /// <summary>
+        /// Builder (player input): places the inventory's selected material and uses one up. Nothing
+        /// selected, or a material that isn't placeable: no placement.
+        /// </summary>
+        public bool Place(Vector2 world)
+        {
+            if (inventory == null) return false;
+            byte tile = inventory.SelectedTile;
+            if (tile == TileId.Air || !Place(world, tile)) return false;
+            inventory.TakeFrom(inventory.Selected, 1);
+            return true;
+        }
+
+        /// <summary>Builder as a raw tool (tests, scripted placement): places `id` without touching the inventory.</summary>
 
         public bool Place(Vector2 world, byte id)
         {

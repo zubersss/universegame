@@ -52,7 +52,7 @@ namespace Meridian.FX
             go.transform.localScale = new Vector3(scale.x, scale.y, 1f);
             var loop = go.AddComponent<FxLoop>(); // its Awake adds the SpriteRenderer
             loop.key = key;
-            loop.target.sortingOrder = name == "Shimmer" ? 12 : -1; // flames tuck behind the hull, shimmer over it
+            loop.target.sortingOrder = name == "Shimmer" ? -2 : -1; // all behind the hull: the shimmer's plasma trails around it, its bow shock glows below the belly
             loop.flicker = 0.18f;
             return loop;
         }

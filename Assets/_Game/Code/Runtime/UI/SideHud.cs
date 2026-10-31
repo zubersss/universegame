@@ -102,7 +102,13 @@ namespace Meridian.UI
             }
             StormText = UiKit.Text(root, "Storm", new Vector2(0.5f, 1f), new Vector2(0f, -40f), new Vector2(600f, 28f), 20, true, TextAnchor.MiddleCenter, new Color(1f, 0.72f, 0.45f, 1f));
             StormText.text = "";
+
+            // U-045: the Tab inventory panel lives beside the HUD (built in code, no scene change).
+            Inventory = gameObject.AddComponent<InventoryPanel>();
+            Inventory.player = player;
         }
+
+        public InventoryPanel Inventory { get; private set; }
 
         const int MaxMarkers = 4;
 

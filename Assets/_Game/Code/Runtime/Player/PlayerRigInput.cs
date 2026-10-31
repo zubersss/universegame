@@ -39,7 +39,8 @@ namespace Meridian.Player
             if (m4.WasPressedThisFrame()) module = Module.Builder;
             if (prev.WasPressedThisFrame() || next.WasPressedThisFrame())
                 module = module == Module.Beam ? Module.Builder : Module.Beam;
-            Using = rig != null && view != null && primary.IsPressed();
+            // While the inventory panel is open, clicks select slots, not tiles (U-045).
+            Using = rig != null && view != null && primary.IsPressed() && !Meridian.UI.InventoryPanel.AnyOpen;
             if (!Using) return;
 
             var screen = aim.ReadValue<Vector2>();

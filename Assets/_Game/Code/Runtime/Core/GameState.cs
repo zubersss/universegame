@@ -22,7 +22,9 @@ namespace Meridian.Core
         public float hull = 100f;
         public float fuel = 100f;
         public float tankCapacity = 100f;
-        /// <summary>Items carried in the ship (item id → count). Inventory proper arrives in M3.</summary>
+        /// <summary>The surveyor's inventory (U-045, SaveData v2).</summary>
+        public readonly Meridian.Items.Inventory inventory = new Meridian.Items.Inventory();
+        /// <summary>Items carried in the ship (item id → count).</summary>
         public System.Collections.Generic.List<CargoStack> cargo = new System.Collections.Generic.List<CargoStack>();
         /// <summary>Story and world flags (saved as story.flags), e.g. "poi_stamped:survey_archive" (U-030).</summary>
         public readonly System.Collections.Generic.List<string> storyFlags = new System.Collections.Generic.List<string>();

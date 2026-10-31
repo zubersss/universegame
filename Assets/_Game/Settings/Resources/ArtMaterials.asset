@@ -17,10 +17,29 @@ MonoBehaviour:
   unlit: {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40, type: 2}
   emissiveKeys:
   - characters/surveyor/base
+  - characters/surveyor/mk1
+  - characters/surveyor/mk2
+  - characters/surveyor/mk3
+  - creatures/mercury/cinderhulk_day
+  - creatures/mercury/cinderhulk_night
+  - creatures/mercury/cinderling
+  - creatures/mercury/flarewing
+  - creatures/mercury/shadewyrm
+  - creatures/venus/acidmoth
+  - creatures/venus/pressure_crab
+  - creatures/venus/sulfur_drifter
+  - creatures/venus/veil_serpent
+  - creatures/venus/vent_eel
+  - creatures/warden/sentinel
+  - fx/beam_ray/base
+  - fx/builder_ghost/base
   - fx/dig_sparks/base
   - fx/escape_band/base
   - fx/heat_shimmer/base
+  - fx/lance_bolt/base
+  - fx/survey_scan/base
   - fx/thruster/base
+  - fx/warden_bolt/base
   - planets/earth/glow
   - planets/jupiter/glow
   - planets/mars/glow
@@ -40,11 +59,158 @@ MonoBehaviour:
   - props/earth/beacon
   - props/mars/meridian_beacon
   - props/mars/warden_pylon
+  - props/mercury/flare_shelter
+  - props/mercury/meridian_beacon
+  - props/mercury/shelter_door
+  - props/mercury/solarite_cluster
+  - props/mercury/warden_vault_gate
+  - props/rig/beam
+  - props/rig/builder
+  - props/rig/lance
+  - props/rig/survey
+  - props/venus/aerostat_balloon
+  - props/venus/aerostat_deck
+  - props/venus/buoyancy_cell
+  - props/venus/meridian_station_door
+  - props/venus/station_hull_a
+  - props/venus/station_hull_b
+  - props/venus/vent_harvester
   - ships/pilgrim/side
   - ships/pilgrim/side_legs
   - ships/pilgrim/top
+  - ships/waystation_earth/top
+  - ships/waystation_mars/top
   clipSets:
   - key: characters/surveyor/base
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 6
+      loop: 1
+    - name: walk
+      start: 6
+      length: 8
+      loop: 1
+    - name: run
+      start: 14
+      length: 8
+      loop: 1
+    - name: jump
+      start: 22
+      length: 3
+      loop: 0
+    - name: fall
+      start: 25
+      length: 2
+      loop: 1
+    - name: land
+      start: 27
+      length: 3
+      loop: 0
+    - name: dig
+      start: 30
+      length: 6
+      loop: 1
+    - name: aim
+      start: 36
+      length: 2
+      loop: 1
+    - name: hurt
+      start: 38
+      length: 2
+      loop: 0
+    - name: death
+      start: 40
+      length: 6
+      loop: 0
+  - key: characters/surveyor/mk1
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 6
+      loop: 1
+    - name: walk
+      start: 6
+      length: 8
+      loop: 1
+    - name: run
+      start: 14
+      length: 8
+      loop: 1
+    - name: jump
+      start: 22
+      length: 3
+      loop: 0
+    - name: fall
+      start: 25
+      length: 2
+      loop: 1
+    - name: land
+      start: 27
+      length: 3
+      loop: 0
+    - name: dig
+      start: 30
+      length: 6
+      loop: 1
+    - name: aim
+      start: 36
+      length: 2
+      loop: 1
+    - name: hurt
+      start: 38
+      length: 2
+      loop: 0
+    - name: death
+      start: 40
+      length: 6
+      loop: 0
+  - key: characters/surveyor/mk2
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 6
+      loop: 1
+    - name: walk
+      start: 6
+      length: 8
+      loop: 1
+    - name: run
+      start: 14
+      length: 8
+      loop: 1
+    - name: jump
+      start: 22
+      length: 3
+      loop: 0
+    - name: fall
+      start: 25
+      length: 2
+      loop: 1
+    - name: land
+      start: 27
+      length: 3
+      loop: 0
+    - name: dig
+      start: 30
+      length: 6
+      loop: 1
+    - name: aim
+      start: 36
+      length: 2
+      loop: 1
+    - name: hurt
+      start: 38
+      length: 2
+      loop: 0
+    - name: death
+      start: 40
+      length: 6
+      loop: 0
+  - key: characters/surveyor/mk3
     fps: 12
     clips:
     - name: idle
@@ -179,6 +345,296 @@ MonoBehaviour:
       start: 22
       length: 6
       loop: 0
+  - key: creatures/mercury/cinderhulk_day
+    fps: 10
+    clips:
+    - name: idle
+      start: 0
+      length: 5
+      loop: 1
+    - name: walk
+      start: 5
+      length: 8
+      loop: 1
+    - name: attack
+      start: 13
+      length: 6
+      loop: 0
+    - name: hurt
+      start: 19
+      length: 2
+      loop: 0
+    - name: death
+      start: 21
+      length: 4
+      loop: 0
+  - key: creatures/mercury/cinderhulk_night
+    fps: 10
+    clips:
+    - name: idle
+      start: 0
+      length: 5
+      loop: 1
+    - name: walk
+      start: 5
+      length: 8
+      loop: 1
+    - name: attack
+      start: 13
+      length: 6
+      loop: 0
+    - name: hurt
+      start: 19
+      length: 2
+      loop: 0
+    - name: death
+      start: 21
+      length: 4
+      loop: 0
+  - key: creatures/mercury/cinderling
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 6
+      loop: 1
+    - name: walk
+      start: 6
+      length: 8
+      loop: 1
+    - name: attack
+      start: 14
+      length: 6
+      loop: 0
+    - name: hurt
+      start: 20
+      length: 2
+      loop: 0
+    - name: death
+      start: 22
+      length: 6
+      loop: 0
+  - key: creatures/mercury/flarewing
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 6
+      loop: 1
+    - name: walk
+      start: 6
+      length: 8
+      loop: 1
+    - name: attack
+      start: 14
+      length: 6
+      loop: 0
+    - name: hurt
+      start: 20
+      length: 2
+      loop: 0
+    - name: death
+      start: 22
+      length: 6
+      loop: 0
+  - key: creatures/mercury/glassback
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 6
+      loop: 1
+    - name: walk
+      start: 6
+      length: 8
+      loop: 1
+    - name: attack
+      start: 14
+      length: 6
+      loop: 0
+    - name: hurt
+      start: 20
+      length: 2
+      loop: 0
+    - name: death
+      start: 22
+      length: 6
+      loop: 0
+  - key: creatures/mercury/shadewyrm
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 6
+      loop: 1
+    - name: walk
+      start: 6
+      length: 8
+      loop: 1
+    - name: attack
+      start: 14
+      length: 6
+      loop: 0
+    - name: hurt
+      start: 20
+      length: 2
+      loop: 0
+    - name: death
+      start: 22
+      length: 6
+      loop: 0
+  - key: creatures/venus/acidmoth
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 6
+      loop: 1
+    - name: walk
+      start: 6
+      length: 8
+      loop: 1
+    - name: attack
+      start: 14
+      length: 6
+      loop: 0
+    - name: hurt
+      start: 20
+      length: 2
+      loop: 0
+    - name: death
+      start: 22
+      length: 6
+      loop: 0
+  - key: creatures/venus/pressure_crab
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 6
+      loop: 1
+    - name: walk
+      start: 6
+      length: 8
+      loop: 1
+    - name: attack
+      start: 14
+      length: 6
+      loop: 0
+    - name: hurt
+      start: 20
+      length: 2
+      loop: 0
+    - name: death
+      start: 22
+      length: 6
+      loop: 0
+  - key: creatures/venus/sulfur_drifter
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 6
+      loop: 1
+    - name: walk
+      start: 6
+      length: 8
+      loop: 1
+    - name: attack
+      start: 14
+      length: 6
+      loop: 0
+    - name: hurt
+      start: 20
+      length: 2
+      loop: 0
+    - name: death
+      start: 22
+      length: 6
+      loop: 0
+  - key: creatures/venus/veil_serpent
+    fps: 10
+    clips:
+    - name: idle
+      start: 0
+      length: 5
+      loop: 1
+    - name: walk
+      start: 5
+      length: 8
+      loop: 1
+    - name: attack
+      start: 13
+      length: 6
+      loop: 0
+    - name: hurt
+      start: 19
+      length: 2
+      loop: 0
+    - name: death
+      start: 21
+      length: 4
+      loop: 0
+  - key: creatures/venus/vent_eel
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 6
+      loop: 1
+    - name: walk
+      start: 6
+      length: 8
+      loop: 1
+    - name: attack
+      start: 14
+      length: 6
+      loop: 0
+    - name: hurt
+      start: 20
+      length: 2
+      loop: 0
+    - name: death
+      start: 22
+      length: 6
+      loop: 0
+  - key: creatures/warden/sentinel
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 6
+      loop: 1
+    - name: walk
+      start: 6
+      length: 8
+      loop: 1
+    - name: attack
+      start: 14
+      length: 6
+      loop: 0
+    - name: hurt
+      start: 20
+      length: 2
+      loop: 0
+    - name: death
+      start: 22
+      length: 6
+      loop: 0
+  - key: fx/beam_ray/base
+    fps: 12
+    clips:
+    - name: flow
+      start: 0
+      length: 8
+      loop: 1
+  - key: fx/builder_ghost/base
+    fps: 8
+    clips:
+    - name: idle
+      start: 0
+      length: 8
+      loop: 1
   - key: fx/dig_sparks/base
     fps: 15
     clips:
@@ -207,10 +663,31 @@ MonoBehaviour:
       start: 0
       length: 8
       loop: 1
+  - key: fx/lance_bolt/base
+    fps: 12
+    clips:
+    - name: fly
+      start: 0
+      length: 4
+      loop: 1
+  - key: fx/survey_scan/base
+    fps: 12
+    clips:
+    - name: pulse
+      start: 0
+      length: 12
+      loop: 0
   - key: fx/thruster/base
     fps: 16
     clips:
     - name: burn
       start: 0
       length: 8
+      loop: 1
+  - key: fx/warden_bolt/base
+    fps: 12
+    clips:
+    - name: fly
+      start: 0
+      length: 4
       loop: 1

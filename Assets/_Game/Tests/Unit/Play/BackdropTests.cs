@@ -44,6 +44,66 @@ namespace Meridian.Tests
         }
 
         [Test]
+        public void EarthBiomesPickTheirBackdropSets()
+        {
+            Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Desert, out int desert, out int dl);
+            Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Taiga, out int taiga, out int tl);
+            Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Ocean, out int ocean, out int ol);
+            Assert.AreEqual("earth", PlanetBackdrop.SetFor(PlanetId.Earth, 64), "forest");
+            Assert.AreEqual("earth_desert", PlanetBackdrop.SetFor(PlanetId.Earth, desert + dl / 2));
+            Assert.AreEqual("earth_taiga", PlanetBackdrop.SetFor(PlanetId.Earth, taiga + tl / 2));
+            Assert.AreEqual("earth_coast", PlanetBackdrop.SetFor(PlanetId.Earth, ocean + ol / 2));
+            Assert.AreEqual("mars", PlanetBackdrop.SetFor(PlanetId.Mars, desert + dl / 2), "other planets: one set");
+        }
+
+        /// <summary>U-038: at the plains/desert border the desert set fades in over 20 m with one extra quad; past it the desert set is the backdrop.</summary>
+        [UnityTest]
+        public IEnumerator BiomeBorderCrossFades()
+        {
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
+            var side = director.PlanetSide;
+            var b = side.backdrop;
+            var cam = side.sideCamera;
+            cam.GetComponent<Meridian.Player.CameraFollow>().enabled = false;
+            Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Desert, out int border, out _);
+            float y = cam.transform.position.y;
+
+            // Approach: the desert set loads ahead (≤ 60 m), so the border itself never waits on a sheet.
+            cam.transform.position = new Vector3(border - 50f, y, cam.transform.position.z);
+            float until = Time.realtimeSinceStartup + 10f;
+            yield return null;
+            while (Time.realtimeSinceStartup < until && !(b.MainSet == "earth" && b.LayersLoaded == 3)) yield return null;
+            for (int i = 0; i < 120; i++) yield return null; // neighbour sheets arrive
+            Assert.AreEqual("earth", b.MainSet);
+            Assert.IsNull(b.OverlaySet, "no fade 50 m from the border");
+
+            cam.transform.position = new Vector3(border + 0.5f, y, cam.transform.position.z);
+            yield return null;
+            yield return null;
+            Assert.AreEqual("earth", b.MainSet, "left of the window: plains set underneath");
+            Assert.AreEqual("earth_desert", b.OverlaySet, "desert set fading in");
+            Assert.That(b.FadeWeight, Is.InRange(0.45f, 0.6f), "half-way through the 20 m window");
+            int quads = 0;
+            foreach (var r in cam.GetComponentsInChildren<MeshRenderer>())
+                if (r.enabled && r.sortingOrder <= -199) quads++;
+            Assert.AreEqual(2, quads, "the fade costs one extra backdrop quad (≤ +3 draw calls)");
+
+            cam.transform.position = new Vector3(border + 15f, y, cam.transform.position.z);
+            yield return null;
+            yield return null;
+            Assert.AreEqual("earth_desert", b.MainSet, "past the window the desert set is the backdrop");
+            Assert.IsNull(b.OverlaySet);
+            Assert.AreEqual(3, b.LayersLoaded, "already loaded: no pop-in");
+            LogAssert.NoUnexpectedReceived();
+        }
+
+        [Test]
         public void FarLayersScrollSlowerThanNearOnes()
         {
             float f0 = PlanetBackdrop.ScreenShiftPerMetre(0), f1 = PlanetBackdrop.ScreenShiftPerMetre(1), f2 = PlanetBackdrop.ScreenShiftPerMetre(2);

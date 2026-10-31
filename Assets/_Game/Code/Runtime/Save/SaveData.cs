@@ -12,7 +12,7 @@ namespace Meridian.Save
     [Serializable]
     public sealed class SaveData
     {
-        public const int CurrentVersion = 1;
+        public const int CurrentVersion = 2;
 
         public int version = CurrentVersion;
         public string savedAtUtc;
@@ -25,6 +25,9 @@ namespace Meridian.Save
         public PlayerSave player = new PlayerSave();
         public ShipSave ship = new ShipSave();
         public List<CargoStack> cargo = new List<CargoStack>();
+        /// <summary>v2 (U-045): the surveyor's 40 slots in order (empty ones included) and the Builder's slot.</summary>
+        public List<Meridian.Items.ItemStack> inventory = new List<Meridian.Items.ItemStack>();
+        public int selectedSlot;
         public StorySave story = new StorySave();
         public List<string> catalogue = new List<string>();
         public List<string> bases = new List<string>();
@@ -37,6 +40,8 @@ namespace Meridian.Save
     {
         public Vector2 position;
         public float health = 100f;
+        /// <summary>v2: suit integrity (D-032), 0–100.</summary>
+        public float suit = 100f;
         public bool aboard;
     }
 
@@ -81,6 +86,15 @@ namespace Meridian.Save
                 data.story ??= new StorySave();
                 data.timers ??= new TimerSave();
                 data.version = 1;
+            }
+            // v1 → v2 (U-045): an empty inventory and a full suit (v1 never saved the suit, D-032).
+            if (data.version < 2)
+            {
+                data.inventory ??= new List<Meridian.Items.ItemStack>();
+                data.selectedSlot = 0;
+                data.player ??= new PlayerSave();
+                data.player.suit = 100f;
+                data.version = 2;
             }
             return data;
         }

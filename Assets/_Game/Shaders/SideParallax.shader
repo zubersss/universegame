@@ -25,6 +25,9 @@ Shader "MERIDIAN/SideParallax"
         _SkyColor ("Sky color", Color) = (0.45, 0.62, 0.85, 1)
         _Tint ("Day/night tint", Color) = (1, 1, 1, 1)
         _Alpha ("Layers alpha", Float) = 1
+        _Fade ("Overlay opacity (U-038 biome cross-fade)", Float) = 1
+        [HideInInspector] _SrcBlend ("Src blend", Float) = 1
+        [HideInInspector] _DstBlend ("Dst blend", Float) = 0
         _SeaLevel ("Sea surface (world y; far below = no sea)", Float) = -100000
         _WaterColor ("Water color at the surface", Color) = (0.07, 0.24, 0.36, 1)
         _WaterFade ("Depth (m) over which light falls to 1/e", Float) = 40
@@ -45,7 +48,7 @@ Shader "MERIDIAN/SideParallax"
     SubShader
     {
         Tags { "RenderType"="Opaque" "Queue"="Transparent" "RenderPipeline"="UniversalPipeline" }
-        Blend Off
+        Blend [_SrcBlend] [_DstBlend] // One Zero (opaque) for the backdrop; SrcAlpha OneMinusSrcAlpha for the biome cross-fade overlay (U-038)
         ZWrite Off
         Cull Off
 
@@ -69,6 +72,7 @@ Shader "MERIDIAN/SideParallax"
                 float4 _SkyColor;
                 float4 _Tint;
                 float _Alpha;
+                float _Fade;
                 float _SeaLevel;
                 float4 _WaterColor;
                 float _WaterFade;
@@ -133,6 +137,17 @@ Shader "MERIDIAN/SideParallax"
                 if (LayerUV(i.worldXY, cam, _P0, _Q0, uv)) col = Over(col, SAMPLE_TEXTURE2D(_Layer0, sampler_Layer0, uv), _Q0.x, sky);
                 if (LayerUV(i.worldXY, cam, _P1, _Q1, uv)) col = Over(col, SAMPLE_TEXTURE2D(_Layer1, sampler_Layer1, uv), _Q1.x, sky);
                 if (LayerUV(i.worldXY, cam, _P2, _Q2, uv)) col = Over(col, SAMPLE_TEXTURE2D(_Layer2, sampler_Layer2, uv), _Q2.x, sky);
+                // Below the near layer's foot no farther layer may peek out (their bases would hang there, U-040):
+                // only haze, darkening from the near layer's foot toward the ground tone over 12 m.
+                if (_Q2.z > 0.5)
+                {
+                    float foot = _Datum + (cam.y - _Datum) * (1.0 - _Q2.w) + _P2.w + _Q2.y * _P2.y;
+                    if (i.worldXY.y < foot)
+                    {
+                        half3 haze = lerp(_GroundColor.rgb, sky, 0.45);
+                        col = lerp(haze, _GroundColor.rgb * 0.8, saturate((foot - i.worldXY.y) / 12.0));
+                    }
+                }
                 col = lerp(sky, col, _Alpha);
                 // Under the sea (U-037): no landscape, just water darkening with depth (near-black by ~120 m).
                 float depth = _SeaLevel - i.worldXY.y;
@@ -144,7 +159,7 @@ Shader "MERIDIAN/SideParallax"
                     float4 m = SAMPLE_TEXTURE2D_LOD(_WallMap, sampler_point_clamp_WallMap, float2(u, 0.5), 0);
                     if (i.worldXY.y < m.r + 1.0) col = Wall(i.worldXY, m.r, m.g, m.b);
                 }
-                return half4(col * _Tint.rgb, 1);
+                return half4(col * _Tint.rgb, _Fade);
             }
             ENDHLSL
         }

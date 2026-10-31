@@ -15,12 +15,43 @@ namespace Meridian.Rig
 
         public IReadOnlyList<ItemDrop> Live => live;
 
-        public ItemDrop Spawn(byte itemId, Vector2 position, Sprite sprite)
+        /// <summary>Pickup (U-045): drops this close to the collector go into the inventory once they're this old.</summary>
+        public const float PickupRadius = 1.2f, PickupDelay = 0.4f;
+        /// <summary>Who picks drops up (the surveyor; RigTools sets it) and where they go (GameState's inventory).</summary>
+        public Transform collector;
+        public Meridian.Items.Inventory inventory;
+        /// <summary>Raised per picked-up drop with its item id (pickup sound, HUD).</summary>
+        public event System.Action<int> PickedUp;
+
+        void Start()
+        {
+            if (inventory == null && Meridian.Core.GameState.Instance != null) inventory = Meridian.Core.GameState.Instance.inventory;
+        }
+
+        void FixedUpdate()
+        {
+            if (collector == null || inventory == null || live.Count == 0) return;
+            Vector2 c = collector.position;
+            float now = Time.time;
+            for (int i = live.Count - 1; i >= 0; i--)
+            {
+                var d = live[i];
+                if (now - d.spawnedAt < PickupDelay) continue;
+                if (((Vector2)d.transform.position - c).sqrMagnitude > PickupRadius * PickupRadius) continue;
+                if (inventory.Add(d.itemId, 1) != 0) continue; // full: it stays on the ground
+                int id = d.itemId;
+                Collect(d);
+                PickedUp?.Invoke(id);
+            }
+        }
+
+        public ItemDrop Spawn(int itemId, Vector2 position, Sprite sprite)
         {
             ItemDrop d;
             if (live.Count >= MaxLive) { d = live[0]; live.RemoveAt(0); }
             else d = pool.Count > 0 ? pool.Pop() : Create();
             d.itemId = itemId;
+            d.spawnedAt = Time.time;
             d.view.sprite = sprite;
             d.transform.position = position;
             d.body.linearVelocity = new Vector2(Random.Range(-1f, 1f), 2f);

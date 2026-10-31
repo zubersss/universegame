@@ -31,11 +31,11 @@ namespace Meridian.Tests
         [Test]
         public void VersionFieldIsWrittenAndOldFilesMigrate()
         {
-            StringAssert.Contains("\"version\": 1", JsonUtility.ToJson(new SaveData(), true));
+            StringAssert.Contains($"\"version\": {SaveData.CurrentVersion}", JsonUtility.ToJson(new SaveData(), true));
             var v0 = JsonUtility.FromJson<SaveData>("{\"currentPlanet\":\"Earth\",\"view\":\"PlanetSide\"}");
             v0.version = 0; v0.cargo = null; v0.timers = null;
             var migrated = SaveMigrations.Migrate(v0);
-            Assert.AreEqual(1, migrated.version);
+            Assert.AreEqual(SaveData.CurrentVersion, migrated.version, "v0 → v1 → v2");
             Assert.NotNull(migrated.cargo); Assert.NotNull(migrated.timers);
         }
 

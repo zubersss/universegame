@@ -107,6 +107,8 @@ namespace Meridian.Save
             data.ship.fuel = state.fuel;
             data.ship.tankCapacity = state.tankCapacity;
             data.cargo.AddRange(state.cargo);
+            state.inventory.WriteTo(data.inventory);
+            data.selectedSlot = state.inventory.Selected;
             data.story.flags.AddRange(state.storyFlags);
             data.timers.gameSeconds = time != null ? time.GameSeconds : 0;
             data.timers.playSeconds = playSeconds;
@@ -119,6 +121,7 @@ namespace Meridian.Save
                     data.player.position = side.player.Body.position;
                     var vitals = side.player.Vitals ?? side.player.GetComponent<Meridian.Player.PlayerVitals>();
                     if (vitals != null) data.player.health = vitals.health;
+                    if (side.hazards != null) data.player.suit = side.hazards.SuitIntegrity;
                 }
                 if (side.ship != null)
                 {
@@ -188,6 +191,7 @@ namespace Meridian.Save
             state.tankCapacity = data.ship.tankCapacity;
             state.cargo.Clear();
             state.cargo.AddRange(data.cargo);
+            state.inventory.ReadFrom(data.inventory, data.selectedSlot);
             state.storyFlags.Clear();
             if (data.story != null && data.story.flags != null) state.storyFlags.AddRange(data.story.flags);
             if (time != null) time.SetGameSeconds(data.timers.gameSeconds);
@@ -239,6 +243,7 @@ namespace Meridian.Save
                 side.player.Body.linearVelocity = Vector2.zero;
                 var vitals = side.player.GetComponent<Meridian.Player.PlayerVitals>();
                 if (vitals != null) vitals.health = data.player.health;
+                if (side.hazards != null) side.hazards.SetSuit(data.player.suit);
                 if (data.player.aboard && side.ship != null)
                 {
                     var boarding = side.ship.GetComponent<ShipBoarding>();

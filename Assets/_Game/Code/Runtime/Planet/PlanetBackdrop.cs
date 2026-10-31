@@ -54,7 +54,6 @@ namespace Meridian.Planet
 
         MeshRenderer quad;
         readonly Texture2D[] textures = new Texture2D[3];
-        readonly AsyncOperationHandle<Texture2D>[] handles = new AsyncOperationHandle<Texture2D>[3];
         MaterialPropertyBlock block;
         public PlanetId? Planet { get; private set; }
         public int LayersLoaded { get; private set; }
@@ -123,8 +122,9 @@ namespace Meridian.Planet
             }
             quad.SetPropertyBlock(block);
             quad.enabled = true;
-            string name = planet.id.ToString().ToLowerInvariant();
-            for (int i = 0; i < 3; i++) LoadLayer(i, ArtKeys.Backgrounds.Layer(name, i));
+            baseSet = planet.id.ToString().ToLowerInvariant();
+            mainSet = null;
+            ShowMain(baseSet);
         }
 
         /// <summary>Day/night multiplier (U-025) on the sky color and every layer; 1 = full day.</summary>
@@ -143,26 +143,190 @@ namespace Meridian.Planet
 
         public static Color Tinted(Color sky, Color tint) => new Color(sky.r * tint.r, sky.g * tint.g, sky.b * tint.b, 1f);
 
-        void LoadLayer(int i, string key)
+        // ---------- art sets and the biome cross-fade (U-038) ----------
+
+        /// <summary>One backdrop art set (`backgrounds/&lt;name&gt;/layer0..2`), loaded on demand.</summary>
+        sealed class ArtSet
         {
+            public readonly Texture2D[] tex = new Texture2D[3];
+            public readonly AsyncOperationHandle<Texture2D>[] handles = new AsyncOperationHandle<Texture2D>[3];
+            public int pending, loaded;
+            public bool missing; // no layer0 art: the base set stands in
+        }
+
+        /// <summary>Width of the cross-fade window centred on a biome border (m).</summary>
+        public const float FadeWidth = 20f;
+        /// <summary>Sets within this distance of the camera load ahead; others are released.</summary>
+        public const float PreloadDistance = 60f, KeepDistance = 120f;
+
+        readonly System.Collections.Generic.Dictionary<string, ArtSet> sets = new System.Collections.Generic.Dictionary<string, ArtSet>();
+        readonly System.Collections.Generic.List<string> dropScratch = new System.Collections.Generic.List<string>();
+        string baseSet, mainSet, overlaySet;
+        MeshRenderer overlay;
+        MaterialPropertyBlock overlayBlock;
+        static readonly int FadeId = Shader.PropertyToID("_Fade");
+
+        /// <summary>The art set shown by the main backdrop / the cross-fade overlay (null when none).</summary>
+        public string MainSet => mainSet;
+        public string OverlaySet => overlay != null && overlay.enabled ? overlaySet : null;
+        /// <summary>Opacity of the overlay set over the main one (0 when not fading).</summary>
+        public float FadeWeight { get; private set; }
+
+        /// <summary>Earth's backdrop set per biome (B-026); other planets have one set.</summary>
+        public static string SetFor(PlanetId p, int x)
+        {
+            if (p != PlanetId.Earth) return p.ToString().ToLowerInvariant();
+            switch (Meridian.Terrain.EarthBiomes.At(x))
+            {
+                case Meridian.Terrain.Biome.Desert: return "earth_desert";
+                case Meridian.Terrain.Biome.Ocean: return "earth_coast";
+                case Meridian.Terrain.Biome.Taiga:
+                case Meridian.Terrain.Biome.Tundra: return "earth_taiga";
+                default: return "earth";
+            }
+        }
+
+        /// <summary>The set to draw for `name`: itself once known to exist, else the planet's base set.</summary>
+        string Resolve(string name) => sets.TryGetValue(name, out var s) && s.missing ? baseSet : name;
+
+        ArtSet Request(string name)
+        {
+            if (sets.TryGetValue(name, out var set)) return set;
+            set = new ArtSet();
+            sets[name] = set;
+            for (int i = 0; i < 3; i++) LoadLayer(name, set, i);
+            return set;
+        }
+
+        void LoadLayer(string name, ArtSet set, int i)
+        {
+            string key = ArtKeys.Backgrounds.Layer(name, i);
+            set.pending++;
             var locations = Addressables.LoadResourceLocationsAsync(key);
             locations.Completed += loc =>
             {
                 bool exists = loc.Status == AsyncOperationStatus.Succeeded && loc.Result != null && loc.Result.Count > 0;
                 Addressables.Release(loc);
-                if (!exists || quad == null) return;
-                handles[i] = Addressables.LoadAssetAsync<Texture2D>(key);
-                handles[i].Completed += op =>
+                if (!exists || quad == null || !sets.TryGetValue(name, out var live) || live != set)
                 {
-                    if (quad == null || op.Status != AsyncOperationStatus.Succeeded) return;
-                    textures[i] = op.Result;
-                    quad.GetPropertyBlock(block);
-                    block.SetTexture(LayerTex[i], op.Result);
-                    block.SetVector(LayerQ[i], new Vector4(Haze[i], ContentBase[i], 1f, Follow[i]));
-                    quad.SetPropertyBlock(block);
-                    LayersLoaded++;
+                    set.pending--;
+                    if (!exists && i == 0 && name != baseSet) set.missing = true;
+                    return;
+                }
+                set.handles[i] = Addressables.LoadAssetAsync<Texture2D>(key);
+                set.handles[i].Completed += op =>
+                {
+                    set.pending--;
+                    if (quad == null || op.Status != AsyncOperationStatus.Succeeded || !sets.TryGetValue(name, out var now) || now != set)
+                    {
+                        // Dropped while loading (planet change or released): don't keep the sheet.
+                        if (set.handles[i].IsValid()) { Addressables.Release(set.handles[i]); set.handles[i] = default; }
+                        return;
+                    }
+                    set.tex[i] = op.Result;
+                    set.loaded++;
+                    if (name == mainSet) ApplyLayer(quad, block, i, op.Result, true);
                 };
             };
+        }
+
+        void ApplyLayer(MeshRenderer r, MaterialPropertyBlock b, int i, Texture2D t, bool main)
+        {
+            r.GetPropertyBlock(b);
+            b.SetTexture(LayerTex[i], t != null ? t : Texture2D.blackTexture);
+            b.SetVector(LayerQ[i], new Vector4(Haze[i], ContentBase[i], t != null ? 1f : 0f, Follow[i]));
+            r.SetPropertyBlock(b);
+            if (main) { textures[i] = t; LayersLoaded = 0; foreach (var x in textures) if (x != null) LayersLoaded++; }
+        }
+
+        /// <summary>Switches the main backdrop to a set (its loaded layers at once, the rest as they arrive).</summary>
+        void ShowMain(string name)
+        {
+            if (name == mainSet) return;
+            mainSet = name;
+            var set = Request(name);
+            for (int i = 0; i < 3; i++) ApplyLayer(quad, block, i, set.tex[i], true);
+        }
+
+        void UpdateBiomeFade()
+        {
+            if (!Planet.HasValue || baseSet == null) return;
+            var p = Planet.Value;
+            int x = Mathf.FloorToInt(view.transform.position.x);
+            string left = Resolve(SetFor(p, x - (int)(FadeWidth * 0.5f)));
+            string right = Resolve(SetFor(p, x + (int)(FadeWidth * 0.5f)));
+            // Load the neighbours early (their sheets arrive asynchronously, never at the border).
+            Request(Resolve(SetFor(p, x - (int)PreloadDistance)));
+            Request(Resolve(SetFor(p, x + (int)PreloadDistance)));
+
+            ShowMain(left);
+            float t = 0f;
+            if (right != left)
+            {
+                // Share of the 20 m window already in the right-hand biome (21 samples, 1 m apart).
+                int n = 0, half = (int)(FadeWidth * 0.5f);
+                for (int k = -half; k <= half; k++) if (Resolve(SetFor(p, x + k)) == right) n++;
+                t = Mathf.Clamp01(n / FadeWidth);
+                var rs = Request(right);
+                if (rs.loaded == 0) t = 0f; // not here yet: keep showing the left set alone
+            }
+            FadeWeight = t;
+            SetOverlay(t > 0f ? right : null, t);
+            if ((Time.frameCount & 63) == 0) ReleaseFarSets(p, x);
+        }
+
+        void SetOverlay(string name, float t)
+        {
+            if (overlay == null)
+            {
+                if (name == null) return;
+                var go = new GameObject("BackdropFade");
+                go.transform.SetParent(view.transform, false);
+                go.transform.localPosition = new Vector3(0f, 0f, 19.9f);
+                go.AddComponent<MeshFilter>().sharedMesh = SpaceWorld.Quad();
+                overlay = go.AddComponent<MeshRenderer>();
+                var m = new Material(layerMaterial) { name = "SideParallaxFade" };
+                m.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                m.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                overlay.sharedMaterial = m;
+                overlay.sortingOrder = -199; // just over the main backdrop
+                overlayBlock = new MaterialPropertyBlock();
+            }
+            bool on = name != null;
+            if (overlay.enabled != on) overlay.enabled = on;
+            if (!on) return;
+            overlaySet = name;
+            overlay.transform.localScale = quad.transform.localScale;
+            // Everything (sky, walls, sea, tint) as the main backdrop, only the layers and the opacity differ.
+            quad.GetPropertyBlock(overlayBlock);
+            var set = sets[name];
+            for (int i = 0; i < 3; i++)
+            {
+                overlayBlock.SetTexture(LayerTex[i], set.tex[i] != null ? set.tex[i] : Texture2D.blackTexture);
+                overlayBlock.SetVector(LayerQ[i], new Vector4(Haze[i], ContentBase[i], set.tex[i] != null ? 1f : 0f, Follow[i]));
+            }
+            overlayBlock.SetFloat(FadeId, t);
+            overlay.SetPropertyBlock(overlayBlock);
+        }
+
+        void ReleaseFarSets(PlanetId p, int x)
+        {
+            dropScratch.Clear();
+            foreach (var kv in sets)
+            {
+                string n = kv.Key;
+                if (n == baseSet || n == mainSet || n == overlaySet) continue;
+                bool near = false;
+                for (int d = -(int)KeepDistance; d <= (int)KeepDistance && !near; d += 10) near = SetFor(p, x + d) == n;
+                if (!near && kv.Value.pending == 0) dropScratch.Add(n);
+            }
+            foreach (var n in dropScratch) { ReleaseSet(sets[n]); sets.Remove(n); }
+        }
+
+        static void ReleaseSet(ArtSet set)
+        {
+            for (int i = 0; i < 3; i++)
+                if (set.handles[i].IsValid()) { Addressables.Release(set.handles[i]); set.handles[i] = default; }
         }
 
         void LateUpdate()
@@ -171,6 +335,7 @@ namespace Meridian.Planet
             // Generous width: the quad must cover the view at any aspect (captures switch to 16:9 targets).
             float h = view.orthographicSize * 2f, w = h * Mathf.Max(view.aspect, 2.5f);
             quad.transform.localScale = new Vector3(w, h, 1f);
+            UpdateBiomeFade();
 
             // Underground the sky backdrop fades out (caves show the sky color only, M2 cave art later).
             float alpha = 1f;
@@ -332,8 +497,12 @@ namespace Meridian.Planet
 
         void Release()
         {
-            for (int i = 0; i < handles.Length; i++)
-                if (handles[i].IsValid()) { Addressables.Release(handles[i]); handles[i] = default; }
+            foreach (var s in sets.Values) ReleaseSet(s);
+            sets.Clear();
+            mainSet = overlaySet = null;
+            FadeWeight = 0f;
+            if (overlay != null) overlay.enabled = false;
+            for (int i = 0; i < 3; i++) textures[i] = null;
         }
 
         void OnDestroy() => Release();

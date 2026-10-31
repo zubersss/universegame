@@ -48,6 +48,8 @@ namespace Meridian.Hazards
         }
 
         public void RestoreSuit() => SuitIntegrity = HazardRules.SuitMax;
+        /// <summary>Load (SaveData v2): the saved integrity, clamped to 0..SuitMax.</summary>
+        public void SetSuit(float value) => SuitIntegrity = Mathf.Clamp(value, 0f, HazardRules.SuitMax);
 
         void Update() => Step(Time.deltaTime);
 

@@ -167,5 +167,88 @@ namespace Meridian.Tests
             Assert.LessOrEqual(max, 0.5, "≤ 0.5 ms AI in every frame (board U-027)");
             LogAssert.NoUnexpectedReceived();
         }
+
+        /// <summary>
+        /// U-042: every species' lowest opaque point (the tight sprite mesh) sits within 2 px of the ground
+        /// contact in its idle, walk and death frames; and a settled Earth creature's contact is the ground line.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator PawsOnTheGround()
+        {
+            yield return BootEarth();
+            var report = new System.Text.StringBuilder();
+            var fails = new List<string>();
+            foreach (Species s in System.Enum.GetValues(typeof(Species)))
+            {
+                string key = SpeciesSpec.Get(s).artKey;
+                var h = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<IList<Sprite>>(key);
+                yield return h;
+                Assert.AreEqual(UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded, h.Status, key);
+                var byIndex = new Dictionary<int, Sprite>();
+                foreach (var sp in h.Result)
+                {
+                    int us = sp.name.LastIndexOf('_');
+                    if (us >= 0 && int.TryParse(sp.name.Substring(us + 1), out int idx)) byIndex[idx] = sp;
+                }
+                var clips = Meridian.Rendering.ArtMaterials.ClipsFor(key);
+                Assert.NotNull(clips, key + " clips registered");
+#if UNITY_EDITOR
+                // The shipped sheet itself (the imported textures aren't CPU-readable and may be atlased).
+                string png = $"Assets/_Game/Art/{key}_color.png";
+                var spec = JsonUtility.FromJson<SheetSpec>(System.IO.File.ReadAllText($"Assets/_Game/Art/{key}.json"));
+                var cpu = new Texture2D(2, 2, TextureFormat.RGBA32, false, true);
+                Assert.IsTrue(cpu.LoadImage(System.IO.File.ReadAllBytes(png)), png);
+                var pixels = cpu.GetPixels32();
+                float pivotPx = spec.pivot[1] * spec.frame_height;
+                foreach (var clip in clips.clips)
+                {
+                    if (clip.name != "idle" && clip.name != "walk" && clip.name != "death") continue;
+                    for (int f = clip.start; f < clip.start + clip.length; f++)
+                    {
+                        Assert.IsTrue(byIndex.TryGetValue(f, out var sp), $"{key} frame {f}");
+                        // The import keeps the sheet's pivot: the ground contact is pivotPx above the frame's bottom.
+                        if (Mathf.Abs(sp.pivot.y - pivotPx) > 0.5f) fails.Add($"{key} frame {f}: imported pivot {sp.pivot.y:F1} px, sheet {pivotPx:F1} px");
+                        int x0 = (f % spec.columns) * (spec.frame_width + spec.gutter);
+                        int top = (f / spec.columns) * (spec.frame_height + spec.gutter);
+                        int y0 = cpu.height - (top + spec.frame_height); // texture rows run bottom-up
+                        int lowest = -1;
+                        for (int y = 0; y < spec.frame_height && lowest < 0; y++)
+                            for (int x = 0; x < spec.frame_width; x++)
+                                if (pixels[(y0 + y) * cpu.width + x0 + x].a > 127) { lowest = y; break; }
+                        float px = lowest - pivotPx; // lowest opaque row's bottom edge vs the ground contact
+                        report.AppendLine($"{key} {clip.name} {f}: lowest opaque {px:F1} px from contact");
+                        if (lowest < 0 || Mathf.Abs(px) > 2f) fails.Add($"{key} {clip.name} frame {f}: {px:F1} px");
+                    }
+                }
+                Object.Destroy(cpu);
+#endif
+            }
+
+            // Physics: an Earth creature at rest stands with its contact (the box bottom, the sprite pivot) on the ground line.
+            side.dayNight.Override = 0.5f;
+            float px0 = player.transform.position.x;
+            foreach (var s in new[] { Species.Stag, Species.GreyWolf })
+            {
+                var c = creatures.Spawn(s, OnSurface(px0 + (s == Species.Stag ? -34f : -44f), s)); // west of the camp: no props underfoot
+                for (int i = 0; i < 300 && c.Held; i++) yield return new WaitForFixedUpdate();
+                for (int i = 0; i < 30; i++) yield return new WaitForFixedUpdate();
+                // The box from the body itself (Collider2D.bounds can lag a frame behind a resized, re-pooled box).
+                Vector2 b = c.Body.position + c.Box.offset;
+                float boxBottom = b.y - c.Box.size.y * 0.5f, half = c.Box.size.x * 0.5f;
+                float ground = Mathf.Max(side.terrain.TopSolidY(Mathf.FloorToInt(b.x - half + 0.01f)), side.terrain.TopSolidY(Mathf.FloorToInt(b.x + half - 0.01f))) + 1f;
+                float contact = c.View.transform.position.y;
+                float twoPx = 2f / c.View.sprite.pixelsPerUnit;
+                report.AppendLine($"{s}: sprite contact {contact:F3}, box bottom {boxBottom:F3}, ground {ground:F3}; v {c.Body.linearVelocity}, state {c.State}");
+                if (Mathf.Abs(boxBottom - contact) > twoPx) fails.Add($"{s}: sprite contact {contact:F3} vs box bottom {boxBottom:F3}");
+                // Box2D keeps a contact skin of a few cm between resting colliders; anything near 0.5 m is the old sink.
+                if (Mathf.Abs(ground - boxBottom) > 0.06f) fails.Add($"{s}: box bottom {boxBottom:F3} vs ground {ground:F3}");
+            }
+            TestContext.Out.WriteLine("[MERIDIAN] U-042\n" + report);
+            Assert.IsEmpty(fails, "lowest opaque point within 2 px of the ground contact");
+            LogAssert.NoUnexpectedReceived();
+        }
+
+        [System.Serializable]
+        public sealed class SheetSpec { public int frame_width, frame_height, columns, gutter; public float[] pivot; }
     }
 }
