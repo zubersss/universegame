@@ -458,3 +458,9 @@ Moved: B-037 → Done; B-038 → In Progress; L-011 → In Progress.
 Decided: D-041 (rig tools under props/rig).
 Added: U-046 (Rig modules v1, M3).
 Signals: UNITY still blocked on USER-10.
+
+## Cycle 61 · 2026-10-31 (BLENDER message)
+Checked: review_waystations.png, review_waystation_bay.png (stamped 06:14–06:17).
+Moved: B-038 → Done (bay as placeholder); B-035 → In Progress.
+Added: B-039 (rendered 3D docking bay).
+Signals: none.

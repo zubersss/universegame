@@ -602,7 +602,7 @@ Files: blender/scripts/gen_backdrop*.py, Assets/_Game/Art/backgrounds/venus_*/
 Depends: B-028
 Lead notes: Cycle 56. Low priority, before M3 integration of Venus. (Cycle 58) Add: the darker bar crossing the Mercury flare_shelter doorway at band height; Mercury layer0_nosun variant (see B-027 notes).
 
-### B-035 · BLENDER · Ready · M3
+### B-035 · BLENDER · In Progress · M3
 Goal: Mercury creatures 2 (Bible §7.3): `creatures/mercury/flarewing` (flyer that feeds on flares; emission on the wing membranes, brighter "flare" variant frames in attack) and `creatures/mercury/shadewyrm` (ice burrower of the polar craters; long segmented body, pale frost plates).
 Accept: B-015 metaball standard (flier builder from B-032 for flarewing); one bold exaggeration each; ppu ≥ 100; stamped full-size review.
 Files: blender/scripts/build_creatures_mercury.py, Assets/_Game/Art/creatures/mercury/
@@ -623,12 +623,19 @@ Files: blender/scripts/build_rig.py, gen_fx.py, Assets/_Game/Art/items/rig/, Ass
 Depends: B-012, B-023
 Lead notes: Done (cycle 60): beam/lance/survey/builder tools (128×64, grip pivot [0.375, 0.5]), FX beam_ray, lance_bolt, survey_scan, builder_ghost; keys under props/rig (D-041). Integration → U-046.
 
-### B-038 · BLENDER · In Progress · M3
+### B-038 · BLENDER · Done · M3
 Goal: Waystations (Bible §3): top-down `ships/waystation_earth/top` and `ships/waystation_mars/top` (orbital stations, large-ship class ≤ 768 px, docking ring with emission lights), plus a side-view docking-bay interior backdrop `backgrounds/waystation/layer0..2`.
 Accept: Halcyon Freight industrial look (worn, hazard markings, lit windows); stamped review; contract sizes.
 Files: blender/scripts/build_waystation.py, Assets/_Game/Art/ships/, backgrounds/waystation/
 Depends: B-006
-Lead notes: Cycle 58. M3 trading needs Waystations.
+Lead notes: Done a9322d9 + bay (cycle 61): Earth and Mars Waystations top-down (768 px at PPU 36, lit ring windows, docking arms with guide lights). The painted 2D docking bay is a placeholder (too graphic for §9); the rendered pass → B-039.
+
+### B-039 · BLENDER · Ready · M3
+Goal: Docking-bay backdrop, rendered 3D pass: replace the 2D-painted `backgrounds/waystation/layer0..2` (B-038) with rendered 3D (lit I-beams, truss, crane, worn plated deck, Halcyon crates with bevels, scuffs, and stencils; window onto stars with interior reflections), matching §9's rendered-realism style.
+Accept: same keys, sizes, tiling; no flat-filled shapes; stamped review; split-half renders within the 1.5 GB gate.
+Files: blender/scripts/gen_backdrop3d.py (bay preset), Assets/_Game/Art/backgrounds/waystation/
+Depends: B-038
+Lead notes: Cycle 61. B-038's painted bay is a placeholder until this lands. Do it before B-034.
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
