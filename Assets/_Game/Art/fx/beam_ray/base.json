@@ -1,0 +1,22 @@
+{
+  "key": "fx/beam_ray/base",
+  "frame_width": 256,
+  "frame_height": 32,
+  "columns": 2,
+  "gutter": 4,
+  "frames": 8,
+  "fps": 12,
+  "pivot": [
+    0.0,
+    0.5
+  ],
+  "facing": "right",
+  "animations": [
+    {
+      "name": "flow",
+      "start": 0,
+      "length": 8,
+      "loop": true
+    }
+  ]
+}

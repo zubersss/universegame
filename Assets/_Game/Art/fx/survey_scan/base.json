@@ -1,0 +1,22 @@
+{
+  "key": "fx/survey_scan/base",
+  "frame_width": 240,
+  "frame_height": 240,
+  "columns": 4,
+  "gutter": 4,
+  "frames": 12,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "animations": [
+    {
+      "name": "pulse",
+      "start": 0,
+      "length": 12,
+      "loop": false
+    }
+  ]
+}

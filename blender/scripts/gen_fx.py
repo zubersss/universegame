@@ -11,7 +11,10 @@ nothing glows); colour alpha is coverage.
   dig_sparks   : burst of hot streaks from the centre, fading
   escape_band  : horizontal glowing band that flows along x; tiles in x (no side padding)
   heat_shimmer : entry plasma: bright bow-shock arc + orange-white streaks flowing up (B-030)
+  beam_ray, lance_bolt, survey_scan, builder_ghost : Rig module FX (B-037)
 """
+import math
+
 import numpy as np
 
 from meridian.noise import fft_noise
@@ -152,6 +155,92 @@ def heat_shimmer(rng, w, h, n):
     return frames
 
 
+def beam_ray(rng, w, h, n):
+    """B-037 Beam: horizontal cyan mining ray that tiles in x (Unity stretches it from the
+    muzzle to the hit point); flickering width, white-hot core; no side padding."""
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    n1 = fft_noise(rng, h, w, 8, 128, 1.0)
+    n2 = fft_noise(rng, h, w, 3, 24, 0.6)
+    frames = []
+    for i in range(n):
+        shift = int(round(i * w / n))                     # flows along x one period per loop
+        a1, a2 = np.roll(n1, shift, axis=1), np.roll(n2, 2 * shift, axis=1)
+        sig = 4.5 + 1.1 * a1 + 0.5 * a2                   # body: a thin filament read as a wire
+        I = np.exp(-((yy - h / 2) / np.maximum(sig, 1.0)) ** 2) * (0.85 + 0.15 * np.tanh(a2))
+        core = np.exp(-((yy - h / 2) / np.maximum(sig * 0.35, 0.6)) ** 2)
+        I = np.clip(I + 0.5 * core, 0, 1) * ((yy >= PAD) & (yy < h - PAD))
+        col = _ramp(I, [(0.0, C((30, 120, 200))), (0.55, C((110, 230, 255))), (1.0, C((240, 252, 255)))])
+        frames.append(_frame(col, np.clip(I * 1.3, 0, 1), glow=I))
+    return frames
+
+
+def lance_bolt(rng, w, h, n):
+    """B-037 Lance: an orange-white bolt, head at 3/4 width (pivot), trailing streak to the
+    left that flickers; Unity moves the sprite, so it doesn't tile."""
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    hx, cy = 0.75 * w, h / 2
+    nz = fft_noise(rng, h, w, 4, 40, 0.8)
+    frames = []
+    for i in range(n):
+        s = np.roll(nz, int(round(i * w / n)), axis=1)
+        behind = np.clip((hx - xx) / (hx - PAD), 0, 1)                      # 0 at the head
+        tail = np.where(xx <= hx, np.exp(-3.2 * behind) * (0.75 + 0.25 * s), np.exp(-((xx - hx) / 3.5) ** 2))
+        sig = 1.6 + 2.2 * behind
+        I = np.exp(-((yy - cy) / sig) ** 2) * tail
+        head = np.exp(-(((xx - hx) / 5.0) ** 2 + ((yy - cy) / 3.0) ** 2))
+        I = np.clip(I + head, 0, 1) * _inside(h, w)
+        col = _ramp(I, [(0.0, C((160, 40, 20))), (0.4, C((255, 110, 50))), (0.75, C((255, 200, 140))),
+                        (1.0, C((255, 250, 240)))])
+        frames.append(_frame(col, np.clip(I * 1.4, 0, 1), glow=I))
+    return frames
+
+
+def survey_scan(rng, w, h, n):
+    """B-037 Survey: a ring expanding from the centre and fading (one-shot), slightly broken
+    up, green-cyan with a bright leading edge and a faint wash inside."""
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    r = np.hypot(xx + 0.5 - w / 2, yy + 0.5 - h / 2)
+    R = w / 2 - PAD - 2
+    ang = np.arctan2(yy - h / 2, xx - w / 2)
+    brk = 0.8 + 0.2 * np.sin(ang * 7 + rng.uniform(0, 6.28)) * np.sin(ang * 3)
+    frames = []
+    for i in range(n):
+        t = (i + 1) / n
+        rr = R * (0.08 + 0.92 * t ** 0.8)
+        wd = 2.0 + 5.0 * t
+        ring = np.exp(-((r - rr) / wd) ** 2) * brk
+        wash = 0.12 * np.clip(1 - r / rr, 0, 1) * (r < rr)
+        I = np.clip((ring + wash) * (1 - t) ** 1.1 * 1.3, 0, 1) * _inside(h, w)
+        col = _ramp(I, [(0.0, C((40, 160, 140))), (0.6, C((120, 255, 200))), (1.0, C((236, 255, 246)))])
+        frames.append(_frame(col, I, glow=I))
+    return frames
+
+
+def builder_ghost(rng, w, h, n):
+    """B-037 Builder: placement preview of one 1 m block (128 px inside the 8 px padding):
+    translucent amber fill, scanlines drifting up, bright edges and corner brackets; pulses.
+    Unity tints it red when placement is blocked."""
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    x0, x1, y0, y1 = PAD, w - PAD, PAD, h - PAD
+    inside = ((xx >= x0) & (xx < x1) & (yy >= y0) & (yy < y1)).astype(np.float32)
+    d = np.minimum.reduce([xx - x0, x1 - 1 - xx, yy - y0, y1 - 1 - yy])        # px to the edge
+    edge = inside * np.clip(1.0 - d / 2.0, 0, 1)
+    cl = 0.28 * (x1 - x0)                                                        # corner bracket length
+    near_x = np.minimum(xx - x0, x1 - 1 - xx) < cl
+    near_y = np.minimum(yy - y0, y1 - 1 - yy) < cl
+    bracket = inside * np.clip(1.0 - d / 4.0, 0, 1) * (near_x & near_y)
+    frames = []
+    for i in range(n):
+        t = i / n
+        pulse = 0.85 + 0.15 * math.cos(2 * math.pi * t)
+        scan = 0.5 + 0.5 * np.sin((yy + t * 16) * (2 * math.pi / 8))           # 8 px lines drift up
+        a = np.clip(inside * (0.09 + 0.04 * scan) + 0.7 * edge + 0.3 * bracket, 0, 1) * pulse   # light fill: edges carry it
+        I = np.clip(edge + bracket + 0.35 * inside * scan, 0, 1) * pulse
+        col = _ramp(I, [(0.0, C((200, 130, 40))), (0.6, C((255, 184, 70))), (1.0, C((255, 236, 190)))])
+        frames.append(_frame(col, a, glow=I))
+    return frames
+
+
 def _inside(h, w):
     """1 inside the padded area, 0 in the 8 px margin."""
     m = np.zeros((h, w), np.float32)
@@ -167,7 +256,8 @@ def _seg_dist(xx, yy, p0, p1):
 
 
 GEN = {"thruster": thruster, "dust": dust, "dig_sparks": dig_sparks, "escape_band": escape_band,
-       "heat_shimmer": heat_shimmer}
+       "heat_shimmer": heat_shimmer, "beam_ray": beam_ray, "lance_bolt": lance_bolt,
+       "survey_scan": survey_scan, "builder_ghost": builder_ghost}
 
 
 def generate(entry, ctx):

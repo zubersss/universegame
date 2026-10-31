@@ -1,0 +1,22 @@
+{
+  "key": "fx/lance_bolt/base",
+  "frame_width": 128,
+  "frame_height": 32,
+  "columns": 2,
+  "gutter": 4,
+  "frames": 4,
+  "fps": 12,
+  "pivot": [
+    0.75,
+    0.5
+  ],
+  "facing": "right",
+  "animations": [
+    {
+      "name": "fly",
+      "start": 0,
+      "length": 4,
+      "loop": true
+    }
+  ]
+}

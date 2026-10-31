@@ -1,0 +1,22 @@
+{
+  "key": "fx/builder_ghost/base",
+  "frame_width": 144,
+  "frame_height": 144,
+  "columns": 4,
+  "gutter": 4,
+  "frames": 8,
+  "fps": 8,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "animations": [
+    {
+      "name": "idle",
+      "start": 0,
+      "length": 8,
+      "loop": true
+    }
+  ]
+}
