@@ -672,3 +672,6 @@ Checked: all commits since 14:30 reviewed; UNITY on U-046 (lock held); BLENDER i
 Moved: U-046 → In Progress.
 Queue: UNITY 9 Ready (M3), BLENDER 0 (intentional).
 User: USER-12 (M2 playtest) open.
+
+## Cycle 104 · 2026-10-31
+UNITY fixed the canyon pocket haze (5 m darken). The sky-band ghost is in mars_canyon/layer0 art itself (LEAD misattributed it to UNITY). B-049 reopened for a far-rim fix (failing check: visible artifact in game).
