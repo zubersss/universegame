@@ -39,14 +39,14 @@ def skate_pads(front, hind, leg_y, r, length, width):
 def scree_plates(sp, S, rig, coll):
     """Overlapping stone slabs along the back, tilted tail-ward so each edge breaks the
     silhouette (the stalker's exaggeration). Neck plates ride the neck bone, the rest the body
-    and tail bones, so the ridge follows the pose."""
+    bone, so the ridge follows the pose (tail plates read as stray dots at size; dropped)."""
     m = mat(f"{sp}_plate", (98, 80, 70), (66, 54, 48), 0, 0.85, 14, 0.6)
     plates = []                                     # (x, z, length, height, bone)
     neck = S["neck"]
     for t in (0.35, 0.75):
         x = neck[0][0] + (neck[-1][0] - neck[0][0]) * t
         z = neck[0][1] + (neck[-1][1] - neck[0][1]) * t + neck[1][2] * 0.85
-        plates.append((x, z, 0.12, 0.07, "neck"))
+        plates.append((x, z, 0.2, 0.14, "neck"))
     spine = S["spine"]
     x0, x1 = spine[0][0] + 0.05, spine[-1][0] - 0.02
     n = 6
@@ -54,12 +54,7 @@ def scree_plates(sp, S, rig, coll):
         x = x1 - (x1 - x0) * k / (n - 1)
         _, zc, r = min(spine, key=lambda p: abs(p[0] - x))          # nearest spine point
         size = 1.0 - 0.25 * abs(k - 2) / 3                  # biggest over the shoulders
-        plates.append((x, zc + r * 0.82, 0.2 * size, 0.13 * size, "body"))
-    tail = S["tail"]
-    for t in (0.25, 0.6):
-        x = tail[0][0] + (tail[-1][0] - tail[0][0]) * t
-        z = tail[0][1] + (tail[-1][1] - tail[0][1]) * t + tail[1][2] * 0.8
-        plates.append((x, z, 0.1 * (1.1 - t), 0.06 * (1.1 - t), "tail"))
+        plates.append((x, zc + r * 0.8, 0.34 * size, 0.24 * size, "body"))   # bold at 60 px/m (~14 px tall)
     for i, (x, z, L, H, bone) in enumerate(plates):
         bpy.ops.mesh.primitive_cube_add(size=1.0, location=(x, 0.0, z))
         ob = bpy.context.active_object
@@ -81,7 +76,7 @@ SPECIES = {
         spine=[(-0.2, 0.29, 0.06), (-0.11, 0.3, 0.075), (0.0, 0.3, 0.08), (0.1, 0.31, 0.08), (0.18, 0.32, 0.068)],
         neck=[(0.18, 0.32, 0.058), (0.24, 0.36, 0.048), (0.28, 0.39, 0.044)],
         head=[(0.28, 0.39, 0.05), (0.34, 0.39, 0.042), (0.4, 0.37, 0.026), (0.43, 0.36, 0.017)],
-        tail=[(-0.2, 0.29, 0.034), (-0.32, 0.29, 0.028), (-0.43, 0.32, 0.02), (-0.5, 0.37, 0.013)],
+        tail=[(-0.2, 0.29, 0.034), (-0.31, 0.29, 0.028), (-0.39, 0.32, 0.02), (-0.44, 0.37, 0.013)],   # fits 128 px at ppu >= 100
         front=DUST_FRONT, hind=DUST_HIND,
         blobs=skate_pads(DUST_FRONT, DUST_HIND, 0.05, 0.034, 2.7, 1.5),
         leg_y=0.05, ears=0.0, ruff=0.0, socks_z=0.07, mb_res=0.008, eye_scale=0.55,
