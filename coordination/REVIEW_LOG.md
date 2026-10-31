@@ -306,3 +306,9 @@ Moved: none.
 Decided: none.
 Signals: gate open with BLENDER idle. Response: message to take the window now.
 User: USER-09 open.
+
+## Cycle 37 · 2026-10-31 03:25 (UNITY message)
+Checked: 41f26e0 (U-043, self-test 17/17); biomes_2026-10-31/biomes_contact_sheet.png (U-037 pre-hand-off).
+Moved: U-043 → Done.
+Decided: none. U-037 pre-review: the ocean shows the backdrop under water (fix before hand-off); caves showing foliage → U-040; same forest backdrop everywhere → U-038/B-026.
+Signals: none.

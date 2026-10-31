@@ -322,7 +322,7 @@ Goal: Earth biomes v1 in SolidWorldGenerator (Bible §7.1): longitude bands for 
 Accept: EditMode test: biome at x is deterministic per seed and every biome appears once in 4096 columns; spawn is in forest; ocean has water to sea level (Datum 320) and a trench ≥ 120 m deep; chunk apply stays within D-019; captures of each biome.
 Files: Assets/_Game/Code/Runtime/Terrain/
 Depends: U-007
-Lead notes: Cycle 26. Tundra night Cryo 1 (D-032) then keys off the real biome instead of snow ground.
+Lead notes: Cycle 26. Tundra night Cryo 1 (D-032) then keys off the real biome instead of snow ground. (Cycle 37 pre-review of biomes_contact_sheet.png) Before hand-off: the ocean must not show the parallax backdrop below sea level (now the forest shows through a flat blue tint, with mirrored trees below). Hide the backdrop under water, darken water with depth (a gradient toward near-black at ~120 m), and show the seabed. Cave cells showing foliage are U-040, and the per-biome backdrops are U-038.
 
 ### U-038 · UNITY · Ready · M2
 Goal: Backdrop switching by biome: PlanetBackdrop cross-fades to `backgrounds/earth_desert|earth_taiga|earth_coast` over ~20 m at biome borders (B-026; falls back to backgrounds/earth until those exist).
@@ -359,12 +359,12 @@ Files: Assets/_Game/Code/Runtime/Creatures/, Code/Editor/ArtImporter.cs
 Depends: U-036
 Lead notes: Cycle 34. BLENDER's leads, in order: (1) the wolf is placed from its collider/hitbox (wolf y 0.04, h 0.38) or SpeciesSpec size (0.9 m) instead of the sprite pivot; (2) a stale wolf import or .meta pivot (the .meta files were modified); (3) a path that treats the default ppu 128 differently from a custom ppu. Small; do it with U-040.
 
-### U-043 · UNITY · Ready · M2
+### U-043 · UNITY · Done · M2
 Goal: Strict turns in `tools/unity_common.ps1` (D-037): replace the 2-min yield window. After UNITY releases, Enter-HeavyJobLock refuses while another role's want file (< 30 min) exists, until that file is removed. Offer one wrapper call that runs compile + EditMode + PlayMode under a single lock.
 Accept: self-test covering waiter present → refuse; waiter removed → acquire; stale want (> 30 min) → acquire; the batched call holds one lock throughout.
 Files: tools/unity_common.ps1, tools/unity_test.ps1
 Depends: U-023
-Lead notes: PRIORITY: next, before U-037 continues (cycle 35). Small.
+Lead notes: Done 41f26e0 (cycle 37): strict turns (yield to any older want < 30 min until that role takes the lock; oldest request first), unity_check.ps1 batched check under one lock; self-test 17/17.
 
 ### U-025 · UNITY · Done · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.
