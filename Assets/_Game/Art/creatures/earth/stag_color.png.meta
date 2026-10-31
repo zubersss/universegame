@@ -1,0 +1,991 @@
+fileFormatVersion: 2
+guid: c8c957f1ff696b94b868b574e10aa181
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -8048844216836788281
+    second: stag_color_0
+  - first:
+      213: -6653915012825295720
+    second: stag_color_1
+  - first:
+      213: -1655778924582744655
+    second: stag_color_2
+  - first:
+      213: 3299969899163756409
+    second: stag_color_3
+  - first:
+      213: -4806160038975184615
+    second: stag_color_4
+  - first:
+      213: 1294121245041635269
+    second: stag_color_5
+  - first:
+      213: -7517244968274552858
+    second: stag_color_6
+  - first:
+      213: 2517457062935919040
+    second: stag_color_7
+  - first:
+      213: 5567307622689887180
+    second: stag_color_8
+  - first:
+      213: -4664433936059106921
+    second: stag_color_9
+  - first:
+      213: 8036392904120517583
+    second: stag_color_10
+  - first:
+      213: 6821103677551318478
+    second: stag_color_11
+  - first:
+      213: 236676443138764299
+    second: stag_color_12
+  - first:
+      213: 7660977394405717822
+    second: stag_color_13
+  - first:
+      213: -3608841117499252457
+    second: stag_color_14
+  - first:
+      213: -1972040079150657963
+    second: stag_color_15
+  - first:
+      213: -7859649662363731036
+    second: stag_color_16
+  - first:
+      213: -2525426134768973311
+    second: stag_color_17
+  - first:
+      213: -6977093837523519985
+    second: stag_color_18
+  - first:
+      213: 7364851874657758165
+    second: stag_color_19
+  - first:
+      213: 4154628300189703975
+    second: stag_color_20
+  - first:
+      213: 1511127533604757839
+    second: stag_color_21
+  - first:
+      213: -8961567468664432785
+    second: stag_color_22
+  - first:
+      213: 468560070685160430
+    second: stag_color_23
+  - first:
+      213: -909870840721388580
+    second: stag_color_24
+  - first:
+      213: -4809041685429887008
+    second: stag_color_25
+  - first:
+      213: 8614442599857374328
+    second: stag_color_26
+  - first:
+      213: -5198231184326753774
+    second: stag_color_27
+  - first:
+      213: -5872816985465763554
+    second: stag_color_28
+  - first:
+      213: -1870227050184603913
+    second: stag_color_29
+  - first:
+      213: 3129316141280984602
+    second: stag_color_30
+  - first:
+      213: -1446254020330999900
+    second: stag_color_31
+  - first:
+      213: -766745527932607774
+    second: stag_color_32
+  - first:
+      213: -2005962264341314217
+    second: stag_color_33
+  - first:
+      213: -6789375207716291610
+    second: stag_color_34
+  - first:
+      213: 6301623181465619540
+    second: stag_color_35
+  - first:
+      213: 8263806833995698632
+    second: stag_color_36
+  - first:
+      213: 6335283591480738771
+    second: stag_color_37
+  - first:
+      213: -4579101190392212547
+    second: stag_color_38
+  - first:
+      213: 5678385351029380721
+    second: stag_color_39
+  - first:
+      213: 572631098937955245
+    second: stag_color_40
+  - first:
+      213: -3535327221124573967
+    second: stag_color_41
+  - first:
+      213: -808386968338150674
+    second: stag_color_42
+  - first:
+      213: -1249414039191914183
+    second: stag_color_43
+  - first:
+      213: -7347144609100915397
+    second: stag_color_44
+  - first:
+      213: -2051375236082080299
+    second: stag_color_45
+  - first:
+      213: -1834472193227060629
+    second: stag_color_46
+  - first:
+      213: -373262228459242826
+    second: stag_color_47
+  - first:
+      213: 2169979287064649677
+    second: stag_color_48
+  - first:
+      213: 3418065275392624657
+    second: stag_color_49
+  - first:
+      213: -7673041644382213372
+    second: stag_color_50
+  - first:
+      213: 4838652872964827142
+    second: stag_color_51
+  - first:
+      213: -8869601625086315629
+    second: stag_color_52
+  - first:
+      213: -1467611390614173082
+    second: stag_color_53
+  - first:
+      213: 6456410583652176607
+    second: stag_color_54
+  - first:
+      213: 4422476823241134150
+    second: stag_color_55
+  - first:
+      213: 3946396984181770607
+    second: stag_color_56
+  - first:
+      213: 3982546564480549033
+    second: stag_color_57
+  - first:
+      213: -3457024813161206975
+    second: stag_color_58
+  - first:
+      213: -6304193068027927128
+    second: stag_color_59
+  - first:
+      213: 4011751861040140633
+    second: stag_color_60
+  - first:
+      213: 1107712103707149983
+    second: stag_color_61
+  - first:
+      213: 2598977931556993342
+    second: stag_color_62
+  - first:
+      213: -3228442405188231677
+    second: stag_color_63
+  - first:
+      213: 8523696711708230053
+    second: stag_color_64
+  - first:
+      213: 4353881832944393616
+    second: stag_color_65
+  - first:
+      213: -6846974304859724723
+    second: stag_color_66
+  - first:
+      213: -7323748279552795803
+    second: stag_color_67
+  - first:
+      213: -8636216523474017744
+    second: stag_color_68
+  - first:
+      213: -67135141020950782
+    second: stag_color_69
+  - first:
+      213: -5320306662364783470
+    second: stag_color_70
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.0390625}
+  spritePixelsToUnits: 128
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: stag_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 780
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a9f7f021d089ffb469a5a39cdb88922f
+      internalID: -1870776388
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_1
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 780
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ea5018c66e8abc54f866f7bc45f46969
+      internalID: -803643865
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_2
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 780
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e98a62ad6d8bcfb44ae1f679c58d5917
+      internalID: -1757621768
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_3
+      rect:
+        serializedVersion: 2
+        x: 780
+        y: 780
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5f3c604428bbc6442adbc60533744cee
+      internalID: 1834728130
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_4
+      rect:
+        serializedVersion: 2
+        x: 1040
+        y: 780
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 528e56411891ad54daa98c56904a7295
+      internalID: 2064094944
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_5
+      rect:
+        serializedVersion: 2
+        x: 1300
+        y: 780
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5796da2ca2e05cf438c6b33fe09a4e55
+      internalID: -1381035038
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_6
+      rect:
+        serializedVersion: 2
+        x: 1560
+        y: 780
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 07258adb4429c3b4f8dd4bfba746601e
+      internalID: 1783873045
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_7
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 520
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9543c896c1164c040b6e3bfb249ff9dd
+      internalID: -115818189
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_8
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 520
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1c720c218b3f7bb43a2a07c020ea6bf2
+      internalID: -1106625752
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_9
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 520
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0b2636d796703654b83856b1f864d40b
+      internalID: -1537206535
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_10
+      rect:
+        serializedVersion: 2
+        x: 780
+        y: 520
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a838980f176643e49a3ee1fac1bafbb1
+      internalID: -470255366
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_11
+      rect:
+        serializedVersion: 2
+        x: 1040
+        y: 520
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 47b3671e18347ac4d90c30a28cf7add5
+      internalID: -1913889340
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_12
+      rect:
+        serializedVersion: 2
+        x: 1300
+        y: 520
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 12fdcf62638e74e448ff8f5782fd7986
+      internalID: -426798537
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_13
+      rect:
+        serializedVersion: 2
+        x: 1560
+        y: 520
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f98494988a56ca748ba2c5cdfdcc2c1b
+      internalID: -1379735484
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_14
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 260
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2ee68c8acdaa9e14fb48c20a704686ab
+      internalID: -1214689510
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_15
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 260
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b862581169fb92c4ebcb208792ea1c23
+      internalID: -943719274
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_16
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 260
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e01c3cbcbb9809649a02e73b745af486
+      internalID: 1289365703
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_17
+      rect:
+        serializedVersion: 2
+        x: 780
+        y: 260
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c3a9f7e1a4d642f41b7a307f213c1385
+      internalID: 1360006561
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_18
+      rect:
+        serializedVersion: 2
+        x: 1040
+        y: 260
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ac9a90c0530b19e4f8d25746aa31f7cd
+      internalID: 733777566
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_19
+      rect:
+        serializedVersion: 2
+        x: 1300
+        y: 260
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ee5666946b1f2a14d8076fd03026a769
+      internalID: -1364939446
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_20
+      rect:
+        serializedVersion: 2
+        x: 1560
+        y: 260
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7c7e63788a7562349a90d70adc59545b
+      internalID: 1059776875
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_21
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9a2f1823625fe554095bd87aa9d1b38b
+      internalID: -712896575
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_22
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 0
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4881908bc627c994497e3c6ca32a383b
+      internalID: 689599558
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_23
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 0
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: affc5b14234312a4ea232fd017d4d082
+      internalID: -1841853401
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_24
+      rect:
+        serializedVersion: 2
+        x: 780
+        y: 0
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 61dd2d730bf3afd42a80fb37bf456404
+      internalID: -109863905
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_25
+      rect:
+        serializedVersion: 2
+        x: 1040
+        y: 0
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 865098c4c73bf044ebfbf42b21f82174
+      internalID: -50307776
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_26
+      rect:
+        serializedVersion: 2
+        x: 1300
+        y: 0
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9bf7d6715df70874886f1cf1d8c6242c
+      internalID: 895349269
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_27
+      rect:
+        serializedVersion: 2
+        x: 1560
+        y: 0
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0390625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 736e294412688d048873e67af997927b
+      internalID: -606376579
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5548ec0c796d66346a9f155072dbaf3a
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures:
+    - texture: {fileID: 2800000, guid: e1e2cbb0622da544cbfb62b1c7474cb4, type: 3}
+      name: _NormalMap
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      stag_0: -1870776388
+      stag_1: -803643865
+      stag_10: -470255366
+      stag_11: -1913889340
+      stag_12: -426798537
+      stag_13: -1379735484
+      stag_14: -1214689510
+      stag_15: -943719274
+      stag_16: 1289365703
+      stag_17: 1360006561
+      stag_18: 733777566
+      stag_19: -1364939446
+      stag_2: -1757621768
+      stag_20: 1059776875
+      stag_21: -712896575
+      stag_22: 689599558
+      stag_23: -1841853401
+      stag_24: -109863905
+      stag_25: -50307776
+      stag_26: 895349269
+      stag_27: -606376579
+      stag_3: 1834728130
+      stag_4: 2064094944
+      stag_5: -1381035038
+      stag_6: 1783873045
+      stag_7: -115818189
+      stag_8: -1106625752
+      stag_9: -1537206535
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

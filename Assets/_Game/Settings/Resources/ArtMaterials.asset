@@ -33,6 +33,11 @@ MonoBehaviour:
   - props/common/landing_pad
   - props/common/shelter_door
   - props/common/smelter
+  - props/earth/archive_door
+  - props/earth/archive_terminal
+  - props/earth/beacon
+  - props/mars/meridian_beacon
+  - props/mars/warden_pylon
   - ships/pilgrim/side
   - ships/pilgrim/side_legs
   - ships/pilgrim/top

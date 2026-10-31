@@ -30,8 +30,38 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 37e234b279732d84094d257c983e9a8b
+    m_Address: creatures/earth/wolf
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4fa33d17bafaa4d4b985ff9bcd4bdcfc
     m_Address: terrain/earth/stone
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5a4051da21a74eb44a12dc89ad6ca1ec
+    m_Address: props/earth/archive_terminal
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7a3ec3a6331feb24cb667d9f80301f6e
+    m_Address: props/earth/launch_tower_ruin
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b3b0b2d525585cf468bab602cc7198bb
+    m_Address: props/earth/archive_door
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c7987108a289f5e4d82f00d981565f19
+    m_Address: props/earth/launch_gantry
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c8c957f1ff696b94b868b574e10aa181
+    m_Address: creatures/earth/stag
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -42,6 +72,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d2b9ab6548001084ebfb84ab91b80045
     m_Address: backgrounds/earth/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: da4050ccd37247843ba774e01c7ee54a
+    m_Address: props/earth/beacon
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

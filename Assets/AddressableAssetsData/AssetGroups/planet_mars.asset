@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: planet_mars
   m_GUID: 6cc9f8ad61a6571408cb618dfbca1025
   m_SerializeEntries:
+  - m_GUID: 061b564921695514abf47daeddc225a1
+    m_Address: props/mars/hauler_cargo
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 166e092f3085d0f40afa9e8856773225
     m_Address: terrain/mars/ice
     m_ReadOnly: 0
@@ -22,6 +27,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 41ff9a871f5e992438f1ec8b52c9b50a
     m_Address: backgrounds/mars/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 46489c5ba91c87b4986475397557df30
+    m_Address: props/mars/hauler_hull_a
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -40,13 +50,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 685873bd2e8dfa84ba48c8ccdb55ecdc
+    m_Address: props/mars/meridian_beacon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 728ab7917ea11b34cb9b40931ab20842
     m_Address: backgrounds/mars/layer2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: aafdb95c7467758419836de11600bb2d
+    m_Address: props/mars/hauler_hull_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b83076e4cb5447f4eade16b3a5745db5
     m_Address: terrain/mars/basalt
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d6fce6069ec486c4aa012b1ac26fb3c3
+    m_Address: props/mars/warden_pylon
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
