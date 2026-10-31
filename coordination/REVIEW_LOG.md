@@ -393,3 +393,9 @@ Checked: a2a7574; u040 captures (canyon wall: walls OK, inverted streak band sti
 Moved: none (U-040 still In Progress).
 Decided: none. Two fixes sent: (1) a clean layer end at its ground line + a haze gradient below; (2) shimmer sorted behind the hull.
 Signals: UNITY reported the canyon band gone, but the capture shows it. It was flagged with the coordinates.
+
+## Cycle 51 · 2026-10-31 (BLENDER message)
+Checked: review_desert.png (stamped 05:16/05:17; smooth dunes, haze, no seam).
+Moved: none (B-026 waits for the coast, then one review).
+Decided: none.
+Signals: none. Root cause: material noise discontinuous at x = W (fixed with circle-mapped 4D noise). Stale guard landed (b2e36b5: STALE.txt + review.py stamps).
