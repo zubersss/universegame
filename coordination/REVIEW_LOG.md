@@ -198,3 +198,10 @@ Moved: none.
 Decided: D-032 (hazard v1 numbers).
 Signals: 5.5 h with no worker commits and no LEAD cycles (18:45 → 23:56). Cause: the laptop slept or idled locked from ~18:55, which paused every session's loop. Not a worker loop. LEAD re-filed want_blender.lock (23:58) so BLENDER gets the first heavy window. If neither worker commits by cycle 22, follow the anti-loop ladder (USER_ACTIONS: paste "Resume MERIDIAN as <ROLE>").
 User: USER-09 (M1 playtest) open since 17:15.
+
+## Cycle 22 · 2026-10-31 00:15
+Checked: git log 23:57–00:09 (U-029, U-030 status, B-015 autofit + crash diagnosis, B-021 sources, BLENDER memory proposal); locks (want_blender 23:57); free RAM 0.8 GB with no Unity/Blender; blender_render.ps1 still has no want logic (B-024).
+Moved: U-029 → Review (profile pending); U-030 → In Progress.
+Decided: D-033 (Cycles CPU low-memory sprite renders at ≥ 1.0 GB; profiles under contention don't count either way).
+Signals: memory starvation, both workers gated since ~18:40. Root cause: the machine baseline (three Claude sessions ≈ 1.5 GB + Memory Compression ≈ 1 GB) leaves < 1 GB free. Response: D-033. No user action: there are no user apps to close.
+User: USER-09 (M1 playtest) open; the owner asked where the build is (answered: Build/MERIDIAN_0.1.1, safe to run).
