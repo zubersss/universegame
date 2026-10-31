@@ -39,6 +39,9 @@ PRESETS = {
     "earth_coast": dict(sky_top=(76, 136, 204), sky_horizon=(204, 224, 236), haze=(190, 210, 222),
                         cloud=(248, 250, 252), cloud_shade=(180, 192, 206), clouds=0.5),
     # B-027 Mercury: pitch-black sky shading to violet twilight at the horizon, huge Sun glow.
+    # B-048 Jupiter deck 1: thin sky above the cloud tops, near-black top to a cream-amber haze.
+    "jupiter_deck1": dict(sky_top=(8, 10, 24), sky_horizon=(176, 156, 128), haze=(170, 150, 122),
+                          cloud=(0, 0, 0), cloud_shade=(0, 0, 0), clouds=0.0),
     "mercury": dict(sky_top=(3, 3, 6), sky_horizon=(70, 48, 104), haze=(60, 44, 90),
                     cloud=(0, 0, 0), cloud_shade=(0, 0, 0), clouds=0.0,
                     sun_glow=(0.3, 0.29, 0.11, (255, 250, 236))),   # just above the far ridge (was hidden at 0.6)

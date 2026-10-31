@@ -117,6 +117,23 @@ PRESETS = {
              dict(W=36.0, haze=(0.12, 0.0004), tilt=0.0),
              dict(W=24.0, haze=(0.02, 0.0004), tilt=8.0, frame_up=0.12)],
     ),
+    # B-048 Jupiter deck 1 (Bible §7.5): ammonia-ice cloud tops in cream zones and rust/brick
+    # belts, streaked by zonal winds; thin sky above. Painted 2D banks (as venus_deck).
+    "jupiter_deck1": dict(
+        sun=dict(dir=(-0.4, 0.6, -0.6), strength=3.0, color=(1.0, 0.96, 0.9), angle=6.0),
+        ambient=((0.7, 0.66, 0.6), 0.6),
+        haze=(170, 150, 122),
+        stars=260,
+        banks=[dict(top=0.52, base_amp=18, r=(30, 80), billows=60, fall=240, haze=0.45, streak=0.18,
+                    bands=[(240, 226, 198), (196, 132, 84), (230, 210, 176), (160, 92, 64)], band_h=46,
+                    crown=(250, 240, 220), under=(170, 130, 96)),
+               dict(top=0.62, base_amp=26, r=(50, 140), billows=40, fall=300, haze=0.22, streak=0.16,
+                    bands=[(238, 222, 190), (186, 118, 74), (222, 198, 160), (150, 84, 58)], band_h=70,
+                    crown=(250, 238, 214), under=(160, 116, 84)),
+               dict(top=0.76, base_amp=34, r=(90, 230), billows=24, fall=360, haze=0.06, streak=0.14,
+                    bands=[(236, 218, 184), (178, 106, 66), (214, 186, 148)], band_h=110,
+                    crown=(252, 236, 206), under=(150, 104, 74))],
+    ),
     # B-027 Mercury (Bible §7.3): airless, so harsh small-angle sun, almost no ambient, little
     # haze; cratered relief; blinding grey regolith; violet twilight in the sky only.
     "mercury": dict(
@@ -1182,7 +1199,29 @@ def cloud_bank(P, spec, seed, preview):
     fb = fft_noise(rng, H, W, 20, 300, 1.4)
     lit = np.clip(lit + 0.06 * fb, 0, 1)
     crown, under = np.array(spec["crown"], np.float32) / 255, np.array(spec["under"], np.float32) / 255
+    if spec.get("streak"):
+        # B-048 zonal winds: noise stretched 8x along x (wrapped interpolation keeps the tile
+        # periodic) brightens and darkens long horizontal streaks inside the cloud body.
+        sn = fft_noise(rng, H, W // 8, 3, 120, 1.2)
+        xs = np.arange(W, dtype=np.float32) / 8
+        x0 = np.floor(xs).astype(int) % (W // 8)
+        x1 = (x0 + 1) % (W // 8)
+        f = (xs - np.floor(xs))[None, :]
+        streak = sn[:, x0] * (1 - f) + sn[:, x1] * f
+        lit = np.clip(lit + spec["streak"] * streak, 0, 1)
     rgb = under + (crown - under) * lit[..., None]
+    if spec.get("bands"):
+        # B-048 belts and zones: horizontal colour bands below the crown line, warped by noise,
+        # multiplied into the cloud colour (cream zones, rust and brick belts).
+        cols = np.array(spec["bands"], np.float32) / 255
+        warp = fft_noise(rng, H, W, 40, 400, 1.4)
+        ph = (d + 22 * warp) / spec.get("band_h", 70)
+        k = np.floor(ph).astype(int) % len(cols)
+        fr = ph - np.floor(ph)
+        nxt = (k + 1) % len(cols)
+        sm = np.clip((fr - 0.8) / 0.2, 0, 1)[..., None]                    # soft band edges
+        band = cols[k] * (1 - sm) + cols[nxt] * sm
+        rgb = rgb * (0.35 + 0.75 * band)
     hz = np.array(P["haze"], np.float32) / 255
     rgb = rgb * (1 - spec["haze"]) + hz * spec["haze"]
     edge = 1.5 + 2.5 * fft_noise(rng, H, W, 3, 24, 0.8)    # soft, slightly ragged edge
@@ -1405,6 +1444,12 @@ def generate(entry, ctx):
         bank = cloud_bank(P, P["banks"][int(layer[-1])], seed, preview)
         if layer == "layer0":
             sky = GB.sky_rgb(GB.PRESETS[planet], np.random.default_rng(seed))
+            if P.get("stars"):                                    # B-048: thin sky, stars visible
+                srng = np.random.default_rng(seed + 7)
+                n = P["stars"]
+                sy = (srng.random(n) ** 2 * 0.4 * sky.shape[0]).astype(int)
+                sx = srng.integers(0, sky.shape[1], n)
+                sky[sy, sx] = np.maximum(sky[sy, sx], srng.uniform(0.5, 1.0, n)[:, None])
             if preview:
                 sky = sky[::4, ::4]
             a = bank[..., 3:4]
