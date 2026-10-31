@@ -310,6 +310,27 @@ Files: Assets/_Game/Code/Editor/ArtImporter.cs, Tests/Unit/
 Depends: U-005
 Lead notes: Done 30af54a (cycle 26): importer honors sheet ppu; capture_creatures shows the stag at true size (~2.3 m) next to the 1.8 m surveyor.
 
+### U-037 · UNITY · Ready · M2
+Goal: Earth biomes v1 in SolidWorldGenerator (Bible §7.1): longitude bands for temperate forest (spawn), plains, desert, taiga, tundra, and ocean basins (water tiles to depth 250, D-010) with smooth transitions; surface material per biome (grass/soil, sand, snow, stone, water).
+Accept: EditMode test: biome at x is deterministic per seed and every biome appears once in 4096 columns; spawn is in forest; ocean has water to sea level (Datum 320) and a trench ≥ 120 m deep; chunk apply stays within D-019; captures of each biome.
+Files: Assets/_Game/Code/Runtime/Terrain/
+Depends: U-007
+Lead notes: Cycle 26. Tundra night Cryo 1 (D-032) then keys off the real biome instead of snow ground.
+
+### U-038 · UNITY · Ready · M2
+Goal: Backdrop switching by biome: PlanetBackdrop cross-fades to `backgrounds/earth_desert|earth_taiga|earth_coast` over ~20 m at biome borders (B-026; falls back to backgrounds/earth until those exist).
+Accept: capture pair at a forest/desert border; no draw-call growth beyond +3 during a fade; no hitch > 33 ms at a border.
+Files: Assets/_Game/Code/Runtime/Planet/
+Depends: U-037, U-024
+Lead notes: Cycle 26.
+
+### U-039 · UNITY · Ready · M2
+Goal: Mars landforms (Bible §7.2): Valles Marineris canyon (wide, 180 m deep, layered walls), Olympus Mons shield (3 km wide, 300 m tall, caldera), polar ice caps (CO₂ over water ice at both ends of x), lava-tube caves (natural radiation shelters, flagged for M3 Radiation).
+Accept: EditMode tests for each feature's position/size per seed; captures of canyon wall, Olympus flank, polar cap, and a lava tube; streaming within D-019.
+Files: Assets/_Game/Code/Runtime/Terrain/
+Depends: U-007
+Lead notes: Cycle 26. The canyon is where Mars's 2.6× jumps shine. Keep wall ledges jumpable at Mars g.
+
 ### U-025 · UNITY · Done · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.
 Accept: EditMode test: Earth noon/midnight intensities match §9; captures at dawn/noon/dusk/night on Earth; 0 B GC per frame.

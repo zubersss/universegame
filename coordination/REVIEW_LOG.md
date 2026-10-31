@@ -234,4 +234,4 @@ Moved: U-029, U-030, U-036 → Done; U-032, B-025 → In Progress.
 Decided: none.
 Signals: none. Both workers busy; the 00:40 nudge worked.
 User: USER-09 open.
-Queue: UNITY 3 Ready, BLENDER 4 Ready.
+Queue: UNITY 6 Ready (added U-037…U-039), BLENDER 4 Ready.
