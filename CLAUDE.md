@@ -61,6 +61,11 @@ ever overwritten.
    (`(Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1MB`). One heavy job
    holds the lock ≤ 20 min. UNITY batches checks: one compile + EditMode + PlayMode run
    per task hand-off, not after every edit.
+   **Strict turns (D-037).** If another role's `want_*.lock` exists when you release, you
+   may not start another heavy job until that role has run one job, removed its want file,
+   or its want file is older than 30 min. This holds even while the waiter is blocked on
+   memory, because your idle time is what frees the memory. A batched check counts as one job
+   only when it's one wrapper call that holds the lock throughout.
 7. **Accepted work stays accepted.** Don't re-polish Done tasks unless LEAD reopens them.
 8. **Stay inside the repo.** No system installs, no registry/settings changes; list those
    in your status file for USER_ACTIONS.

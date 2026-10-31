@@ -294,3 +294,8 @@ Checked: BLENDER's per-frame measurement of 3f3e20e (the lowest opaque pixel is 
 Moved: the wolf sink moved from B-031 to new U-042 (Unity-side placement). LEAD misrouted it in cycle 33; corrected.
 Decided: none.
 Signals: none.
+
+## Cycle 35 · 2026-10-31 03:12 (BLENDER turn-order question)
+Checked: locks (want_blender 02:53, heavy_unity 03:04); processes (one UNITY batch job 975 MB + its import worker, not two Editors); free RAM 0.9 GB.
+Decided: D-037 strict turns (CLAUDE.md rule 6). U-043 added (priority) to implement it in unity_common.ps1.
+Signals: BLENDER turn skipped under U-023's 2-min window. Rule gap, not misconduct.

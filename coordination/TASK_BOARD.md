@@ -359,6 +359,13 @@ Files: Assets/_Game/Code/Runtime/Creatures/, Code/Editor/ArtImporter.cs
 Depends: U-036
 Lead notes: Cycle 34. BLENDER's leads, in order: (1) the wolf is placed from its collider/hitbox (wolf y 0.04, h 0.38) or SpeciesSpec size (0.9 m) instead of the sprite pivot; (2) a stale wolf import or .meta pivot (the .meta files were modified); (3) a path that treats the default ppu 128 differently from a custom ppu. Small; do it with U-040.
 
+### U-043 · UNITY · Ready · M2
+Goal: Strict turns in `tools/unity_common.ps1` (D-037): replace the 2-min yield window. After UNITY releases, Enter-HeavyJobLock refuses while another role's want file (< 30 min) exists, until that file is removed. Offer one wrapper call that runs compile + EditMode + PlayMode under a single lock.
+Accept: self-test covering waiter present → refuse; waiter removed → acquire; stale want (> 30 min) → acquire; the batched call holds one lock throughout.
+Files: tools/unity_common.ps1, tools/unity_test.ps1
+Depends: U-023
+Lead notes: PRIORITY: next, before U-037 continues (cycle 35). Small.
+
 ### U-025 · UNITY · Done · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.
 Accept: EditMode test: Earth noon/midnight intensities match §9; captures at dawn/noon/dusk/night on Earth; 0 B GC per frame.
