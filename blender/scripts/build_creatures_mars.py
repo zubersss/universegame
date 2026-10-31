@@ -20,7 +20,7 @@ import bpy
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from build_creatures_earth import _rig_child, build  # noqa: E402
+from build_creatures_earth import _rig_child, build as build_species_set  # noqa: E402
 from build_icons import mat  # noqa: E402
 
 DEFAULT_OUT = os.path.join(os.path.dirname(HERE), "sources", "creatures", "mars.blend")
@@ -102,6 +102,12 @@ SPECIES = {
 }
 
 
+def build(out_path=DEFAULT_OUT):
+    """render.py's stale-source guard calls build(out) with no species: this module's own
+    build must pin the Mars table (the imported Earth build defaults to stag/wolf)."""
+    build_species_set(out_path, SPECIES)
+
+
 if __name__ == "__main__":
     args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
-    build(args[0] if args else DEFAULT_OUT, SPECIES)
+    build(args[0] if args else DEFAULT_OUT)
