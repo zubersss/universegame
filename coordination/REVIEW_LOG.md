@@ -619,3 +619,7 @@ Signals: none.
 Checked: fb0c88a; u040 canyon capture (haze gradient, no band); UNITY report: U-038, U-041, U-045 compiled and green, awaiting their evidence; 2220ee1 metas for all of today's art.
 Moved: U-040, U-042 → Done; U-038, U-041, U-045 → In Progress.
 Fixed (LEAD): M2SoakTests now sets CreatureDirector.AutoSpawnOverride = true (batch runs start with spawning off) and uses the non-obsolete FindObjectsByType<T>() (UNITY found both).
+
+## Cycle 91 · 2026-10-31 (UNITY message)
+Moved: U-041 (4be13c8), U-038 (1c2addc) → Done; U-044 → In Progress.
+Fixed (LEAD): M2SoakTests flight failed at "entered Mars: was Earth". The midnight launch leaves the ship on the night side; it turned in-well and fell back into Earth's ring. Now it points outward at start, thrusts through 90° turns inside the well, routes around Earth outside the well radius, has a 90 s timeout, and logs state at flight end.

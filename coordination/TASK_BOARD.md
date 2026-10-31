@@ -324,12 +324,12 @@ Files: Assets/_Game/Code/Runtime/Terrain/
 Depends: U-007
 Lead notes: Done fdc0885 (cycle 41): six longitude biomes with blended borders, ocean to 244 m, the water darkens with depth and hides the backdrop, the seabed is visible; unity_check one-lock hand-off: EditMode 142/142, PlayMode 56/56 + LeadQA 2/2.
 
-### U-038 · UNITY · In Progress · M2
+### U-038 · UNITY · Done · M2
 Goal: Backdrop switching by biome: PlanetBackdrop cross-fades to `backgrounds/earth_desert|earth_taiga|earth_coast` over ~20 m at biome borders (B-026; falls back to backgrounds/earth until those exist).
 Accept: capture pair at a forest/desert border; no draw-call growth beyond +3 during a fade; no hitch > 33 ms at a border.
 Files: Assets/_Game/Code/Runtime/Planet/
 Depends: U-037, U-024
-Lead notes: Cycle 26.
+Lead notes: Done 1c2addc (cycle 91): biome cross-fade, border walk worst frame 9.0 ms, +1 quad; also fixed sea tint to apply only on water columns.
 
 ### U-039 · UNITY · Done · M2
 Goal: Mars landforms (Bible §7.2): Valles Marineris canyon (wide, 180 m deep, layered walls), Olympus Mons shield (3 km wide, 300 m tall, caldera), polar ice caps (CO₂ over water ice at both ends of x), lava-tube caves (natural radiation shelters, flagged for M3 Radiation).
@@ -345,12 +345,12 @@ Files: Assets/_Game/Code/Runtime/Terrain/
 Depends: U-008, U-024
 Lead notes: Done fb0c88a (cycle 90): background walls, canyon haze gradient (no hanging band), seabed tint, pad deck collider, shimmer behind the hull; EditMode 163/163, PlayMode 61/61.
 
-### U-041 · UNITY · In Progress · M2
+### U-041 · UNITY · Done · M2
 Goal: BudgetGate memory in a dev build (D-036): tools/unity_profile.ps1 runs the Earth/Space/Mars legs in a development build and reads system and texture memory there; Editor rows are kept as "upper bound".
 Accept: perf report has build memory rows for every scene, all ≤ §11.1; the run fits the 20-min heavy cap.
 Files: tools/unity_profile.ps1, Assets/_Game/Code/Runtime/Core/BudgetMonitor.cs
 Depends: U-014, U-031
-Lead notes: Cycle 30 (P-21).
+Lead notes: Done 4be13c8 (cycle 91): dev-player memory Earth 883/297/2, Space 780/292/2, Mars 888/354/2 MB (system/textures/audio), all within §11.1; profile -Build in 4 min.
 
 ### U-042 · UNITY · Done · M2
 Goal: Fix the wolf drawing ~0.5 m below its feet in-game (creatures_v3.png). BLENDER verified the sheet: the lowest opaque pixel sits on the pivot [0.5, 0.03125] in every frame for both stag and wolf.
@@ -366,7 +366,7 @@ Files: tools/unity_common.ps1, tools/unity_test.ps1
 Depends: U-023
 Lead notes: Done 41f26e0 (cycle 37): strict turns (yield to any older want < 30 min until that role takes the lock; oldest request first), unity_check.ps1 batched check under one lock; self-test 17/17.
 
-### U-044 · UNITY · Ready · M2
+### U-044 · UNITY · In Progress · M2
 Goal: M2 playtest build `Build/MERIDIAN_0.2.0/` with build smoke screenshots (menu, Earth camp by day and night, a desert/ocean border, Mars canyon in a dust storm, space with Saturn) and build memory rows (U-041).
 Accept: build smoke clean; screenshots in coordination/reports/unity/smoke_<date>/; GameInfo.Version 0.2.0; every BudgetGate row green in the build.
 Files: Build/ (ignored), coordination/reports/unity/smoke_<date>/

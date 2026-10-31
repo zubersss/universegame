@@ -97,22 +97,30 @@ namespace Meridian.Tests.LeadQA
             craft.externalInput = true;
             var earthBody = craft.world.Find("earth").Value;
             var mars = craft.world.Find("mars").Value;
-            Vector2 escapePoint = earthBody.position + (craft.Position - earthBody.position).normalized * (earthBody.WellRadius + 20f);
-            timeout = Time.realtimeSinceStartup + 60f;
+            Vector2 outward = (craft.Position - earthBody.position).normalized;
+            Vector2 escapePoint = earthBody.position + outward * (earthBody.WellRadius + 20f);
+            // The launch at midnight leaves the ship on the night side, away from Mars. Point it
+            // outward first so it climbs out of the well instead of turning while gravity pulls it back.
+            craft.Heading = Mathf.Atan2(outward.y, outward.x) * Mathf.Rad2Deg;
+            timeout = Time.realtimeSinceStartup + 90f;
             while (state.view == ViewMode.Space && !transitions.Busy && Time.realtimeSinceStartup < timeout)
             {
                 Vector2 target = mars.position;
-                if ((craft.Position - earthBody.position).magnitude < earthBody.WellRadius) target = escapePoint;
-                else if (SegmentDistance(earthBody.position, craft.Position, mars.position) < earthBody.RingRadius + 15f)
+                float fromEarth = (craft.Position - earthBody.position).magnitude;
+                if (fromEarth < earthBody.WellRadius) target = escapePoint;
+                else if (SegmentDistance(earthBody.position, craft.Position, mars.position) < earthBody.WellRadius)
                 {
+                    // Orbit around Earth outside its well, on the side the ship is already on.
                     Vector2 toShip = (craft.Position - earthBody.position).normalized;
                     Vector2 perp = new Vector2(-toShip.y, toShip.x);
                     if (Vector2.Dot(perp, mars.position - earthBody.position) < 0f) perp = -perp;
                     target = earthBody.position + (toShip + perp).normalized * (earthBody.WellRadius + 30f);
                 }
-                Steer(craft, target);
+                Steer(craft, target, fromEarth < earthBody.WellRadius);
                 yield return null;
             }
+            TestContext.Out.WriteLine($"[LEADQA] flight end: view {state.view}, busy {transitions.Busy}, " +
+                $"to Mars {(craft.Position - mars.position).magnitude:F0} u, from Earth {(craft.Position - earthBody.position).magnitude:F0} u");
             yield return WaitIdle(transitions, 15f);
             Assert.AreEqual(PlanetId.Mars, state.currentPlanet, "entered Mars");
 
@@ -149,11 +157,13 @@ namespace Meridian.Tests.LeadQA
             LogAssert.NoUnexpectedReceived();
         }
 
-        static void Steer(SpaceShip craft, Vector2 target)
+        static void Steer(SpaceShip craft, Vector2 target, bool climbing)
         {
             Vector2 to = target - craft.Position;
             float delta = Mathf.DeltaAngle(craft.Heading, Mathf.Atan2(to.y, to.x) * Mathf.Rad2Deg);
-            craft.intent = new ShipIntent { rotate = Mathf.Clamp(delta / 20f, -1f, 1f), thrust = Mathf.Abs(delta) < 30f ? 1f : 0f };
+            // Inside a well keep thrusting through wider turns so gravity never wins.
+            float cone = climbing ? 90f : 30f;
+            craft.intent = new ShipIntent { rotate = Mathf.Clamp(delta / 20f, -1f, 1f), thrust = Mathf.Abs(delta) < cone ? 1f : 0f };
         }
 
         static float SegmentDistance(Vector2 p, Vector2 a, Vector2 b)
