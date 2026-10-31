@@ -770,12 +770,12 @@ Files: blender/scripts/gen_backdrop*.py, gen_terrain.py, Assets/_Game/Art/backgr
 Depends: B-028
 Lead notes: Done (cycle 81): Jupiter deck-1 cloud tops (belts by absolute height, zonal streaks, thin starry sky) + floe_ice/floe_core terrain. Proves the cloud-column look. Further giant art waits for UNITY's cloud-column generator (M4).
 
-### B-049 · BLENDER · In Progress · M3
+### B-049 · BLENDER · Done · M3
 Goal: Valles Marineris backdrop set `backgrounds/mars_canyon/layer0..2`: the view from the canyon floor, with the opposite canyon walls as terraced, layered cliffs (basalt with hematite bands, talus aprons) receding in dusty haze, butterscotch sky only in the top ~20%, and a near layer of fallen blocks and dune streaks on the floor.
 Accept: same sizes and tiling as backgrounds/mars, rendered 3D (§9, no flat fills), haze by distance, stamped review; reads clearly as "inside a deep canyon".
 Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/mars_canyon/
 Depends: B-011
-Lead notes: Cycle 100. UNITY's canyon-floor trigger (U-047, about 37 m below the datum) will cross-fade to this set (follow-up in UNITY's queue). The current canyon floor shows a flat brown haze.
+Lead notes: Done (cycle 101): continuous strata-banded canyon wall with talus, hazed far rim, near fallen blocks and dunes; sky ~27% (fine at in-game framing). UNITY hooks it to the canyon-floor trigger.
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.

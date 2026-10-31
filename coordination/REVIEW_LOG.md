@@ -659,3 +659,7 @@ Decided: D-047 (per-system budgets on median/p99; worst frame ≤ 2× logged).
 ## Cycle 100 · 2026-10-31 (UNITY message)
 Checked: u047 menu_left_third.png (good), canyon_floor_sky.png (sky added, still flat).
 Moved: U-047 → Done; B-049 → In Progress (BLENDER resumes with one targeted art task).
+
+## Cycle 101 · 2026-10-31 (BLENDER message)
+Checked: review_mars_canyon.png (15:02–15:04).
+Moved: B-049 → Done. BLENDER back to idle.
