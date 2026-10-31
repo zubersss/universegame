@@ -6,13 +6,6 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-10 — Let UNITY re-run its check (1 min)
-Claude Code stopped UNITY's test run at 05:25 because the laptop ran low on memory. UNITY's
-session won't restart a stopped job unless you ask it to.
-1. Go to the terminal window where you pasted the **UNITY** kickoff message.
-2. Type: `rerun the check` and press Enter.
-That's it. It's best done once BLENDER's current render finishes (a few minutes after 05:36).
-
 ### USER-08 — Optional: let the team run PowerShell commands without prompts (2 min)
 On Windows, Claude Code runs commands through PowerShell as well as Bash, and the
 `Bash(...)` allow rules in `.claude/settings.json` don't cover PowerShell. The Lead added
@@ -29,6 +22,7 @@ allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
   found on disk by the Lead. The IL2CPP module isn't needed (D-014).
 - 2026-10-30 · USER-07 (UNITY and BLENDER sessions started; first commits 10:23).
 - 2026-10-31 · USER-09 (M1 playtest of Build/MERIDIAN_0.1.1): done; the owner reported no problems and asked to close M1.
+- 2026-10-31 12:45 · USER-10 (the owner said "rerun the check"; relayed by LEAD to the UNITY session, which resumed).
 
 ## Status
 READY FOR WORKERS · 2026-10-30 · Start the two worker sessions now (USER-07).
