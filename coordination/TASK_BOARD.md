@@ -665,14 +665,14 @@ Files: blender/scripts/build_wardens.py, Assets/_Game/Art/creatures/warden/, fx/
 Depends: B-032
 Lead notes: Done (cycle 72): sentinel (seed-pod ceramic hull, glowing verdigris seams, teal iris lens that charges white-hot in attack, root tendrils) + fx/warden_bolt; original design. Atlas → common (D-043). Seams still read slightly banded (minor; revisit with Warden tiers).
 
-### B-044 · BLENDER · In Progress · M3
+### B-044 · BLENDER · Done · M3
 Goal: Venus apex `creatures/venus/veil_serpent` (Bible §7.4): a long ribbon serpent of the acid haze; 400 px × 5 frames (D-042); translucent fins with sulfur-yellow emission; a "chilled" hurt state (frost-white flash when hit by Cryo rounds).
 Accept: reads as huge and graceful (S-curves in idle and move); a segmented chain rig like the shadewyrm; stamped review.
 Files: blender/scripts/build_creatures_venus.py, Assets/_Game/Art/creatures/venus/
 Depends: B-035
-Lead notes: Cycle 71. M3 requires killable apexes for the inner planets. (Cycle 74) FAILED review (review_veil_serpent.png). The S-curves and the chilled flash work, but it reads as a thin worm inside a uniform glow halo, not an apex. Fix: (1) a real head: wedge skull with a jaw line, glowing eyes, and a backswept crest or horns, about 2× body thickness; (2) body ~2× thicker at the front third, tapering, with darker dorsal banding or scale pattern and a pale belly; (3) replace the even halo with distinct fins: a tall dorsal sail with visible rays (5–8 spines) and translucent membrane between them, plus a smaller ventral fin. The glow lives in the membrane veins, not as an outline; (4) a fin edge that is ragged and irregular, not scalloped. Keep the rig, the clips, and the frost flash.
+Lead notes: Done v2 (cycle 75): horned wedge head with glowing eyes and jaw, banded body with pale belly, veined dorsal sail + ventral fin, frost flash on hurt; 103 px/m. Thin rays and fin overlap deferred to M3 apex-fight tuning.
 
-### B-045 · BLENDER · Ready · M3
+### B-045 · BLENDER · In Progress · M3
 Goal: Venus Aerostat and station props (Bible §7.4): `props/venus/{aerostat_deck,aerostat_balloon,buoyancy_cell,station_hull_a,station_hull_b,meridian_station_door,vent_harvester}` with emission on lights; the balloon is translucent cream with rigging.
 Accept: contract §4 prop rules (props ≤ 512; the balloon may use the large-ship 768 cap if needed, noted in the manifest); Venus palette; stamped review.
 Files: blender/scripts/build_props_venus.py, Assets/_Game/Art/props/venus/

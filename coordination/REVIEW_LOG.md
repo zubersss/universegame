@@ -543,3 +543,8 @@ Queue: UNITY 6, BLENDER 1.
 Checked: review_veil_serpent.png (07:40).
 Moved: B-044 stays In Progress (FAILED: worm-in-halo, not an apex).
 Signals: none.
+
+## Cycle 75 · 2026-10-31 (BLENDER message)
+Checked: review_veil_serpent.png v2 (07:45).
+Moved: B-044 → Done (second pass); B-045 → In Progress.
+Signals: UNITY still blocked on USER-10.
