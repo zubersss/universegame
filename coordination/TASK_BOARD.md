@@ -385,7 +385,7 @@ Goal: Rig modules v1 (Bible §6/§8; M3 needs all modules): Beam (dig/mine ray),
 Accept: tool sprite at the hand with pivot [0.375, 0.5], rotating to the aim; muzzle offsets beam (0.47, 0.03), lance (0.52, 0.035), survey (0.30, 0.06), builder (0.44, 0.03) m; fx/beam_ray stretched from muzzle to hit (pivot [0, 0.5], tiles in x); fx/lance_bolt (pivot [0.75, 0.5]); fx/survey_scan 12-frame one-shot ring; fx/builder_ghost 8-frame pulse, tinted red when blocked; PlayMode tests per module; captures.
 Files: Assets/_Game/Code/Runtime/Rig/, Player/
 Depends: U-045, B-037
-Lead notes: Cycle 60. The art and specs come from BLENDER's B-037 hand-off (D-041).
+Lead notes: Cycle 60. The art and specs come from BLENDER's B-037 hand-off (D-041). (Cycle 66) When re-importing art: the pressure crab sheet changed to 320 px frames (B-034), and the Mercury Sun is drawn as its own sprite over backgrounds/mercury/layer0_nosun.
 
 ### U-025 · UNITY · Done · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.
@@ -595,12 +595,12 @@ Files: blender/scripts/build_props_mercury.py, Assets/_Game/Art/props/mercury/
 Depends: B-014
 Lead notes: Done (cycle 58): flare shelter, shelter door, Meridian beacon, Warden vault gate (violet emission strips), solarite cluster; all 4 maps. The dark bar across the shelter doorway → B-034.
 
-### B-034 · BLENDER · In Progress · M3
+### B-034 · BLENDER · Done · M3
 Goal: Venus backdrop polish (from the B-028 review), for the M3 exit: remove the faint sphere-edge arcs inside the near deck bank; on venus_surface make the vents read (larger glowing vent mouths with soft emission halos and rising heat haze, 4–6 per tile) and add glassy sheen to the basalt plain (§7.4 "black glassy surface lit by vents").
 Accept: stamped reviews show no arcs; vents are legible at camera size 9; same keys, sizes, seams.
 Files: blender/scripts/gen_backdrop*.py, Assets/_Game/Art/backgrounds/venus_*/
 Depends: B-028
-Lead notes: Cycle 56. Low priority, before M3 integration of Venus. (Cycle 58) Add: the darker bar crossing the Mercury flare_shelter doorway at band height; Mercury layer0_nosun variant (see B-027 notes). (Cycle 62) Add flarewing: thicken the body (~2×, a visible thorax), give the flare shell internal gradient and soft edges so it doesn't read as a flat white cut-out. (Cycle 63) Add pressure crab: a wider, flatter carapace with legs splayed out sideways (crab stance, not hanging sticks), pincers held forward.
+Lead notes: Done (cycle 66): Venus deck arcs reduced, legible vents with halos, glassy basalt; mercury/layer0_nosun; flarewing body ×2 + gradient flare shell; pressure crab wide/flat with splayed legs (now 320 px frames, 114.25 px/m, so UNITY re-imports its metas). Heat shimmer over vents would be a Unity shader (M3, optional).
 
 ### B-035 · BLENDER · Done · M3
 Goal: Mercury creatures 2 (Bible §7.3): `creatures/mercury/flarewing` (flyer that feeds on flares; emission on the wing membranes, brighter "flare" variant frames in attack) and `creatures/mercury/shadewyrm` (ice burrower of the polar craters; long segmented body, pale frost plates).

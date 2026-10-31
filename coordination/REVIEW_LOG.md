@@ -489,3 +489,9 @@ Moved: B-034 → In Progress.
 Decided: none.
 Signals: UNITY blocked ~75 min on the user-only USER-10; BLENDER far ahead (M3 art). Reminded the owner.
 Queue: UNITY 6, BLENDER 2 + B-034 in progress.
+
+## Cycle 66 · 2026-10-31 (BLENDER message)
+Checked: review_pressure_crab.png (06:43), review_flarewing.png (06:42).
+Moved: B-034 → Done; B-040 → In Progress.
+Decided: none.
+Signals: UNITY still blocked on USER-10.
