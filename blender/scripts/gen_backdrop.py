@@ -153,11 +153,15 @@ def sky_rgb(P, rng):
     t = np.clip(rows / 0.72, 0, 1) ** 1.3
     sky = shade_mix(np.broadcast_to(C(P["sky_top"]), (H_, W_, 3)), C(P["sky_horizon"]),
                     np.broadcast_to(t, (H_, W_)))
-    # Cumulus band: large soft masses from low-frequency noise, shaded undersides.
+    # Cloud band (B-025): soft painted-haze masses, stretched along x like wind-drawn cumulus,
+    # partly transparent (never opaque white blobs), and high in the sky (rows ~0.04-0.2) so
+    # they stay above the near tree line at every parallax offset.
     n = fft_noise(rng, H_, W_, 50, 800, 1.4) + 0.2 * fft_noise(rng, H_, W_, 10, 50, 0.6)
-    band = np.exp(-((rows - 0.34) / 0.12) ** 2)
-    x = np.clip((n * band - (1.0 - P["clouds"])) * 1.2, 0, 1)
-    cov = x * x * (3 - 2 * x) if P["clouds"] > 0.05 else np.zeros_like(x)   # Mars: none
+    n = sum(np.roll(n, s, axis=1) for s in range(-48, 49, 8)) / 13.0          # periodic x-stretch
+    n = n / (n.std() + 1e-6)
+    band = np.exp(-((rows - 0.12) / 0.07) ** 2)
+    x = np.clip((n * band - (1.0 - P["clouds"])) * 0.7, 0, 1)
+    cov = 0.6 * x * x * (3 - 2 * x) if P["clouds"] > 0.05 else np.zeros_like(x)   # Mars: none
     under = np.clip(np.roll(cov, -10, axis=0) - cov + 0.3, 0, 1)        # darker toward bases
     cloud = shade_mix(np.broadcast_to(C(P["cloud"]), (H_, W_, 3)), C(P["cloud_shade"]), under)
     return shade_mix(sky, cloud, cov * 0.92)

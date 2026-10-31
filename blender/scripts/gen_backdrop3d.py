@@ -48,8 +48,10 @@ PRESETS = {
         mid=dict(W=700.0, level=0.42, amp=0.10, ground=[(64, 92, 48), (82, 104, 56)], trees=520, protos=8,
                  tree_h=(14, 26), conifer=0.6, depth=(20, 140), haze=(0.20, 0.0012), fog=(0.25, 0.22),
                  tilt=12.0, frame_up=-0.08),
-        near=dict(W=64.0, level=0.28, amp=0.05, ground=[(70, 96, 44), (98, 118, 56), (86, 74, 50)], trees=16,
-                  protos=6, tree_h=(11, 19), conifer=0.45, depth=(3, 14), haze=(0.06, 0.004),
+        # B-025: near tree line kept below ~row 0.25 so the cloud band (rows ~0.04-0.2) never
+        # sits behind it at any parallax offset.
+        near=dict(W=64.0, level=0.28, amp=0.05, ground=[(70, 96, 44), (98, 118, 56), (86, 74, 50)], trees=18,
+                  protos=6, tree_h=(8.5, 14), conifer=0.45, depth=(3, 14), haze=(0.06, 0.004),
                   tufts=3800, shrubs=140, tilt=18.0, frame_up=0.12),   # 6000 tufts peaked at 2.2 GB
         leaf=[(46, 78, 34), (62, 96, 40), (84, 112, 46), (54, 88, 50)],
         needle=[(30, 58, 38), (40, 70, 44), (52, 80, 46)],
@@ -62,7 +64,7 @@ PRESETS = {
         haze=(214, 170, 128),
         far=dict(W=9000.0, level=0.40, peak=0.70, rock=[(150, 92, 64), (184, 120, 84)], snow=(0, 0, 0),
                  snowline=9.0, haze=(0.42, 0.00004), tilt=6.0, terrace=3),
-        mid=dict(W=700.0, level=0.40, amp=0.16, terrace=3, depth=(20, 140), haze=(0.22, 0.0012),
+        mid=dict(W=700.0, level=0.40, amp=0.16, terrace=3, cliff=0.55, bumps=0.015, depth=(20, 140), haze=(0.22, 0.0012),
                  ground=[(150, 84, 54), (178, 108, 72)], strata=(10.0, (206, 142, 100), 0.65),
                  rocks=260, rock_h=(3, 10), tilt=12.0, frame_up=-0.08, fog=(0.18, 0.1)),
         near=dict(W=64.0, level=0.26, amp=0.04, depth=(3, 14), haze=(0.05, 0.003),
@@ -234,6 +236,33 @@ def _bake_mesh(ob, tex_scale, strength, seed):
         p.use_smooth = True
     me.materials.append(None)
     bpy.data.objects.remove(ob)
+    return me
+
+
+def leaf_cluster_mesh(name, seed, cards=160):
+    """B-025 foliage: a leaf mass of small randomly oriented leaf cards scattered through a
+    unit ball around a smaller, darker-shaded core, so the silhouette breaks up into leaves
+    instead of reading as a smooth sphere. One empty material slot (set per object)."""
+    import bmesh
+    rnd = random.Random(seed)
+    bm = bmesh.new()
+    core = bmesh.ops.create_icosphere(bm, subdivisions=2, radius=0.62)
+    for _ in range(cards):
+        # Points biased toward the surface of the unit ball (that's where leaves catch light).
+        d = Vector((rnd.gauss(0, 1), rnd.gauss(0, 1), rnd.gauss(0, 1))).normalized()
+        c = d * (0.55 + 0.45 * rnd.random() ** 0.5)
+        n = Vector((rnd.gauss(0, 1), rnd.gauss(0, 1), rnd.gauss(0, 1))).normalized()
+        u = n.orthogonal().normalized()
+        v = n.cross(u)
+        w, h = rnd.uniform(0.09, 0.15), rnd.uniform(0.05, 0.09)
+        verts = [bm.verts.new(c + u * sx * w + v * sy * h) for sx, sy in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+        bm.faces.new(verts)
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    for p in me.polygons:
+        p.use_smooth = False
+    me.materials.append(None)
     return me
 
 
@@ -502,7 +531,7 @@ def proto_collection(name, scene):
 
 def build_protos(P, scene, rnd, spec, mats):
     lib = proto_collection("lib", scene)
-    blobs = [blob_mesh(f"blob{i}", lib, i, subdiv=4, strength=0.85, scale=0.2) for i in range(4)]
+    blobs = [leaf_cluster_mesh(f"leaves{i}", seed=100 + i) for i in range(4)]       # B-025
     whorls = [whorl_mesh(f"whorl{i}", lib, i) for i in range(3)]
     protos = []
     for k in range(spec["protos"]):
@@ -719,8 +748,14 @@ def rock_layer(P, spec, seed, preview, work, near):
     prof = (prof - prof.mean()) / (np.abs(prof - prof.mean()).max() + 1e-6)          # -1..1, + = lower
     prof = np.interp(np.arange(nx) / nx * PX_W, np.arange(PX_W), prof)
     if terr:
-        prof = 1 - 2 * terrace01((1 - prof) / 2, terr)                                  # plateaus up top
+        # B-025: wider talus (cliff fraction) — near-vertical heightfield cells streak.
+        prof = 1 - 2 * terrace01((1 - prof) / 2, terr, spec.get("cliff", 0.3))          # plateaus up top
     bumps = fft_noise(rng, ny + 1, nx, 3, 60, 0.8)
+    # B-025: relief from a 2D field, never an x-only profile extruded in depth (those slopes all
+    # run straight back from the camera and read as vertical streaks). Terraced for mesas.
+    f2 = fft_noise(rng, ny + 1, nx, 40, 260, 1.6)
+    f2 = (f2 - f2.min()) / (f2.max() - f2.min() + 1e-6)
+    mesa = 1 - 2 * (terrace01(f2, terr, spec.get("cliff", 0.3)) if terr else f2)        # -1..1, + = lower
     # Dunes: isotropic 2D undulation on the (now ~square) grid, not an x-only wave.
     dunes = 0.35 * fft_noise(rng, ny + 1, nx, 20, 90, 1.0) if spec.get("dunes") else np.zeros((ny + 1, nx))
     dune = dunes[min(ny, int(ny * (0 - y_front) / (y_back - y_front)))]               # row at y = 0 for placement
@@ -731,25 +766,40 @@ def rock_layer(P, spec, seed, preview, work, near):
 
     def zf(i, j):
         y = y_front + (y_back - y_front) * j / ny
-        return base - amp * prof[i] * wy(y) + dunes[j, i] + amp * 0.06 * bumps[j % (ny + 1), i]
+        shape = mesa[j, i] if mesa is not None else prof[i]
+        return base - amp * shape * wy(y) + dunes[j, i] + amp * spec.get("bumps", 0.06) * bumps[j % (ny + 1), i]
     heightfield("ground", scene.collection, W, y_back, nx, ny, zf, ground, y0=y_front)
 
     def ground_z(x, y):
         fi = (x % W) / W * nx
-        row = dunes[min(ny, max(0, int(round(ny * (y - y_front) / (y_back - y_front)))))]
-        return (base - amp * wy(y) * float(np.interp(fi, np.arange(nx + 1), np.r_[prof, prof[0]]))
+        j = min(ny, max(0, int(round(ny * (y - y_front) / (y_back - y_front)))))
+        row = dunes[j]
+        shp = mesa[j] if mesa is not None else prof
+        return (base - amp * wy(y) * float(np.interp(fi, np.arange(nx + 1), np.r_[shp, shp[0]]))
                 + float(np.interp(fi, np.arange(nx + 1), np.r_[row, row[0]])))
 
+    # B-025: four boulder families — rounded, angular (faceted), flat slabs, tall pointed —
+    # two variants each, so the field doesn't read as one repeated rock.
+    families = [  # (subdiv, displacement, noise scale, flat shading, scale xyz)
+        (3, 0.55, 0.7, False, (1.0, 0.85, 0.72)),     # rounded
+        (1, 0.35, 1.2, True, (1.0, 0.9, 0.8)),        # angular
+        (2, 0.3, 0.9, True, (1.35, 1.0, 0.34)),       # flat slab
+        (2, 0.4, 0.8, True, (0.62, 0.6, 1.3)),        # tall pointed
+    ]
     rocks = []
-    for k in range(4):
-        c = proto_collection(f"rock{k}", scene)
-        me = blob_mesh(f"rockmesh{k}", None, 40 + k, subdiv=3, strength=0.55, scale=0.7)
-        ob = bpy.data.objects.new("rock", me)
-        c.objects.link(ob)
-        ob.scale = (1.0, rnd.uniform(0.75, 0.95), rnd.uniform(0.6, 0.85))
-        ob.material_slots[0].link = "OBJECT"
-        ob.material_slots[0].material = rockm
-        rocks.append(c)
+    for k, (sub, st, sc, flat, s) in enumerate(families):
+        for v in range(2):
+            c = proto_collection(f"rock{k}_{v}", scene)
+            me = blob_mesh(f"rockmesh{k}_{v}", None, 40 + 10 * k + v, subdiv=sub, strength=st, scale=sc)
+            if flat:
+                for p in me.polygons:
+                    p.use_smooth = False
+            ob = bpy.data.objects.new("rock", me)
+            c.objects.link(ob)
+            ob.scale = (s[0], s[1] * rnd.uniform(0.85, 1.1), s[2] * rnd.uniform(0.85, 1.15))
+            ob.material_slots[0].link = "OBJECT"
+            ob.material_slots[0].material = rockm
+            rocks.append(c)
     y_vis = -top * 0.45 if near else d0
     lo, hi = spec["rock_h"]
 
@@ -758,9 +808,9 @@ def rock_layer(P, spec, seed, preview, work, near):
             x = rnd.uniform(0, W)
             y = y_vis + (d1 - y_vis) * rnd.random() ** (1.6 if near else 1.0)
             s = size_lo + (size_hi - size_lo) * rnd.random() ** skew
-            instance(scene.collection, rocks[rnd.randrange(4)], (x, y, ground_z(x, y) - 0.2 * s), s,
+            instance(scene.collection, rocks[rnd.randrange(len(rocks))], (x, y, ground_z(x, y) - 0.2 * s), s,
                      rnd.uniform(0, 6.3), W)
-    scatter(spec["rocks"], lo, hi, 2.4)
+    scatter(spec["rocks"], lo, hi * 1.25, 2.8)          # B-025: wider size spread, few big ones
     if spec.get("pebbles"):
         scatter(spec["pebbles"], 0.05, 0.22, 1.5)
     return render(scene, work, ("near" if near else "mid") + str(seed), W)
