@@ -57,6 +57,53 @@ PRESETS = {
         needle=[(30, 58, 38), (40, 70, 44), (52, 80, 46)],
         bark=(82, 68, 56),
     ),
+    # B-026 Earth biomes (Bible §7.1): same rendered-3D layers, biome palettes and contents.
+    "earth_desert": dict(
+        sun=dict(dir=(-0.75, 0.4, -0.6), strength=5.0, color=(1.0, 0.95, 0.85), angle=1.0),
+        ambient=((0.62, 0.62, 0.66), 0.35),
+        haze=(226, 210, 182),
+        far=dict(W=9000.0, level=0.38, peak=0.66, rock=[(196, 150, 104), (222, 182, 132)], snow=(0, 0, 0),
+                 snowline=9.0, haze=(0.42, 0.00004), tilt=6.0, terrace=2),
+        mid=dict(W=700.0, level=0.40, amp=0.12, cliff=0.5, bumps=0.02, depth=(20, 140), haze=(0.24, 0.0012),
+                 ground=[(214, 182, 128), (196, 160, 108)], strata=(9.0, (232, 200, 150), 0.4),
+                 rocks=120, rock_h=(2, 7), tilt=12.0, frame_up=-0.08, dunes=True),
+        near=dict(W=64.0, level=0.26, amp=0.05, depth=(3, 14), haze=(0.05, 0.003),
+                  ground=[(222, 192, 140), (204, 172, 120)], dunes=True,
+                  rocks=60, rock_h=(0.3, 1.8), pebbles=500, tilt=18.0, frame_up=0.12),
+        rock=[(176, 132, 92), (150, 110, 78), (196, 156, 112), (132, 100, 74)],
+    ),
+    "earth_taiga": dict(
+        sun=dict(dir=(-0.8, 0.45, -0.45), strength=3.6, color=(1.0, 0.95, 0.9), angle=2.0),
+        ambient=((0.5, 0.58, 0.68), 0.4),
+        haze=(186, 198, 210),
+        far=dict(W=9000.0, level=0.42, peak=0.84, rock=[(108, 108, 112), (132, 132, 134)], snow=(240, 244, 248),
+                 snowline=0.62, haze=(0.42, 0.00004), tilt=6.0),
+        mid=dict(W=700.0, level=0.42, amp=0.12, ground=[(58, 80, 58), (72, 92, 64)], trees=640, protos=8,
+                 tree_h=(16, 30), conifer=0.95, depth=(20, 140), haze=(0.24, 0.0012), fog=(0.3, 0.22),
+                 tilt=12.0, frame_up=-0.08),
+        near=dict(W=64.0, level=0.28, amp=0.05, ground=[(70, 88, 56), (88, 100, 66), (80, 72, 56)], trees=20,
+                  protos=6, tree_h=(9, 14), conifer=0.95, depth=(3, 14), haze=(0.07, 0.004),
+                  tufts=3000, shrubs=60, tilt=18.0, frame_up=0.12),
+        leaf=[(52, 80, 44), (66, 92, 50)],
+        needle=[(24, 48, 36), (32, 58, 42), (40, 66, 46)],
+        bark=(72, 58, 48),
+    ),
+    "earth_coast": dict(
+        sun=dict(dir=(-0.75, 0.45, -0.55), strength=4.5, color=(1.0, 0.96, 0.88), angle=1.5),
+        ambient=((0.5, 0.62, 0.78), 0.38),
+        haze=(190, 210, 222),
+        far=dict(W=9000.0, level=0.30, peak=0.52, rock=[(112, 118, 104), (136, 140, 120)], snow=(0, 0, 0),
+                 snowline=9.0, haze=(0.42, 0.00004), tilt=6.0, sea=dict(level=0.34, color=(46, 98, 140))),
+        mid=dict(W=700.0, level=0.40, amp=0.10, ground=[(84, 116, 62), (100, 124, 70)], trees=160, protos=6,
+                 tree_h=(10, 20), conifer=0.25, depth=(20, 140), haze=(0.22, 0.0012), fog=(0.2, 0.22),
+                 tilt=12.0, frame_up=-0.08),
+        near=dict(W=64.0, level=0.28, amp=0.04, ground=[(96, 124, 64), (120, 136, 76), (176, 160, 120)], trees=6,
+                  protos=4, tree_h=(7, 11), conifer=0.2, depth=(3, 14), haze=(0.06, 0.004),
+                  tufts=4000, shrubs=50, tilt=18.0, frame_up=0.12),
+        leaf=[(56, 92, 40), (74, 108, 46), (92, 120, 52)],
+        needle=[(32, 60, 40), (44, 72, 46)],
+        bark=(90, 74, 60),
+    ),
     # Bible §7.2: butterscotch sky, long shadows, rust/umber/salmon, thin haze.
     "mars": dict(
         sun=dict(dir=(-0.85, 0.35, -0.38), strength=3.6, color=(1.0, 0.9, 0.78), angle=0.8),
@@ -679,6 +726,17 @@ def far_layer(P, spec, seed, preview, work):
     pr.inputs["Roughness"].default_value = 0.9
     _haze(m, P["haze"], spec["haze"][0], spec["haze"][1], front=W)
     heightfield("range", scene.collection, W, depth_m, nx, ny, zf, m)
+    if spec.get("sea"):                                   # B-026 coast: open sea in front of the range
+        sea = spec["sea"]
+        wm = bpy.data.materials.new("sea")
+        wm.use_nodes = True
+        pr = wm.node_tree.nodes["Principled BSDF"]
+        pr.inputs["Base Color"].default_value = lin(sea["color"])
+        pr.inputs["Roughness"].default_value = 0.12
+        _haze(wm, P["haze"], spec["haze"][0], spec["haze"][1], front=W)
+        zs = top * sea["level"]
+        mesh_obj("sea", [(-W, -W, zs), (2 * W, -W, zs), (2 * W, depth_m, zs), (-W, depth_m, zs)], [(0, 1, 2, 3)],
+                 scene.collection, wm, smooth=False)
     return render(scene, work, "far" + str(seed), W)
 
 

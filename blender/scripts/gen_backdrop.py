@@ -31,6 +31,13 @@ PRESETS = {
         near=dict(color=(52, 84, 44), level=0.36, amp=55, haze=0.10, trees=70, tree_h=(110, 230), kind="forest",
                   tree_cols=[(40, 70, 40), (48, 84, 44), (62, 96, 46), (34, 60, 38)], ground_detail=(86, 110, 52)),
     ),
+    # B-026 Earth biome skies (only the sky keys are used: layers come from gen_backdrop3d).
+    "earth_desert": dict(sky_top=(96, 140, 196), sky_horizon=(236, 222, 196), haze=(226, 210, 182),
+                         cloud=(250, 248, 244), cloud_shade=(214, 206, 196), clouds=0.25),
+    "earth_taiga": dict(sky_top=(96, 124, 160), sky_horizon=(200, 210, 220), haze=(186, 198, 210),
+                        cloud=(236, 240, 244), cloud_shade=(170, 180, 192), clouds=0.6),
+    "earth_coast": dict(sky_top=(76, 136, 204), sky_horizon=(204, 224, 236), haze=(190, 210, 222),
+                        cloud=(248, 250, 252), cloud_shade=(180, 192, 206), clouds=0.5),
     # Bible §7.2: butterscotch sky, rust/umber/salmon, thin haze; mesas, dunes, basalt boulders.
     "mars": dict(
         sky_top=(150, 108, 78), sky_horizon=(222, 184, 142), haze=(214, 170, 128), cloud=(236, 214, 188),
