@@ -10,7 +10,7 @@ nothing glows); colour alpha is coverage.
   dust         : rising, spreading puff (neutral tan; tint per planet in Unity), no emission
   dig_sparks   : burst of hot streaks from the centre, fading
   escape_band  : horizontal glowing band that flows along x; tiles in x (no side padding)
-  heat_shimmer : faint rising wavy streaks for heat haze
+  heat_shimmer : entry plasma: bright bow-shock arc + orange-white streaks flowing up (B-030)
 """
 import numpy as np
 
@@ -127,16 +127,28 @@ def escape_band(rng, w, h, n):
 
 
 def heat_shimmer(rng, w, h, n):
+    """B-030: entry plasma / heat haze, additive. A bright bow-shock arc at the bottom (the
+    leading face) and orange-white plasma streaks flowing up and out, flickering; reads over
+    a dark sky. Loops: the streak noise rolls exactly one period per cycle."""
     yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
-    base = fft_noise(rng, h, w, 3, 24, 0.5)
-    env = np.clip(1 - np.hypot((xx - w / 2) / (w / 2 - PAD), (yy - h / 2) / (h / 2 - PAD)), 0, 1) ** 1.5
+    u = (xx + 0.5 - w / 2) / (w / 2 - PAD)                # -1..1 across
+    v = (h - PAD - yy - 0.5) / (h - 2 * PAD)              # 0 at the leading (bottom) edge, 1 at the top
+    base = fft_noise(rng, h, w, 24, 128, 1.0)            # long wavelengths only: smooth streaks, no speckle
+    fine = fft_noise(rng, h, w, 10, 40, 1.0)
+    inside = _inside(h, w)
     frames = []
     for i in range(n):
-        shift = int(round(-i * h / n))                    # rises one period per loop
-        s = np.roll(base, shift, axis=0)
-        streak = np.clip(np.sin(xx * 0.35 + 2.2 * s) * 0.5 + 0.5, 0, 1) ** 4
-        a = 0.22 * streak * env
-        frames.append(_frame(np.broadcast_to(C((255, 246, 232)), (h, w, 3)).copy(), a))
+        shift = int(round(-i * h / n))                    # streaks travel up one period per loop
+        s1, s2 = np.roll(base, shift, axis=0), np.roll(fine, 2 * shift, axis=0)
+        arc = v - 0.18 * u ** 2                           # bow shock: curved, hugging the bottom
+        shock = np.exp(-((arc - 0.08) / 0.07) ** 2) * np.clip(1 - np.abs(u) ** 3, 0, 1)
+        spread = 0.55 + 0.45 * np.clip(v, 0, 1)           # the wake widens as it trails
+        streak = np.clip(np.sin(u * 9.0 / spread + 0.9 * s1 + 0.35 * s2) * 0.5 + 0.5, 0, 1) ** 3
+        wake = streak * np.exp(-2.4 * np.clip(arc, 0, None)) * np.exp(-(u / spread) ** 2 * 1.4) * (arc > 0.02)
+        I = np.clip(1.15 * shock + 0.9 * wake * (0.8 + 0.2 * s2), 0, 1) * inside
+        col = _ramp(I, [(0.0, C((170, 50, 18))), (0.35, C((240, 120, 40))), (0.7, C((255, 206, 128))),
+                        (1.0, C((255, 246, 232)))])
+        frames.append(_frame(col, np.clip(I * 1.4, 0, 1), glow=I))
     return frames
 
 

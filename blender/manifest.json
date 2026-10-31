@@ -191,7 +191,7 @@
      "pivot": [0.5, 0.5], "animations": {"columns": 6, "fps": 15, "facing": "right", "clips": [{"name": "burst", "length": 6, "loop": false}]}},
     {"key": "fx/escape_band/base", "generator": "scripts/gen_fx.py", "size": [256, 64], "maps": ["color", "emission"], "seed": 6004,
      "pivot": [0.5, 0.5], "padded": false, "animations": {"columns": 2, "fps": 10, "facing": "right", "clips": [{"name": "flow", "length": 8, "loop": true}]}},
-    {"key": "fx/heat_shimmer/base", "generator": "scripts/gen_fx.py", "size": [128, 128], "maps": ["color"], "seed": 6005,
+    {"key": "fx/heat_shimmer/base", "generator": "scripts/gen_fx.py", "size": [128, 128], "maps": ["color", "emission"], "seed": 6005,
      "pivot": [0.5, 0.5], "animations": {"columns": 4, "fps": 10, "facing": "right", "clips": [{"name": "shimmer", "length": 8, "loop": true}]}},
     {"key": "icons/iron/base", "source": "sources/icons/icons.blend", "build": "scripts/build_icons.py", "collection": "icon_iron", "keep": ["icon_lights"], "beauty": true, "camera": "icon", "size": [128, 128], "ppu": 128, "pivot": [0.5, 0.5], "maps": ["color"], "samples": 32},
     {"key": "icons/copper/base", "source": "sources/icons/icons.blend", "build": "scripts/build_icons.py", "collection": "icon_copper", "keep": ["icon_lights"], "beauty": true, "camera": "icon", "size": [128, 128], "ppu": 128, "pivot": [0.5, 0.5], "maps": ["color"], "samples": 32},
