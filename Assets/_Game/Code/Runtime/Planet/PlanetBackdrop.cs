@@ -110,6 +110,7 @@ namespace Meridian.Planet
             block.SetFloat(SeaLevelId, planet.id == PlanetId.Earth ? planet.datumY + 1f : -100000f);
             seaLevel = planet.id == PlanetId.Earth ? planet.datumY + 1f : float.NegativeInfinity;
             if (underwaterMaterial != null) underwaterMaterial.SetFloat(SeaLevelId, planet.datumY + 1f);
+            planetDatum = planet.datumY;
             block.SetFloat(DatumId, planet.datumY);
             block.SetFloat(HorizonId, BaseOffset(0) + ContentBase[0] * TileHeights[0]); // the far ridge's foot
             block.SetColor(GroundId, GroundColor(planet.id));
@@ -251,12 +252,39 @@ namespace Meridian.Planet
             mainSet = name;
             var set = Request(name);
             for (int i = 0; i < 3; i++) ApplyLayer(quad, block, i, set.tex[i], true);
+            quad.GetPropertyBlock(block);
+            block.SetFloat(DatumId, DatumOf(name));
+            quad.SetPropertyBlock(block);
+        }
+
+        // ---------- Mars canyon set (B-049, LEAD cycle after U-047) ----------
+
+        public const string CanyonSet = "mars_canyon";
+        /// <summary>Camera depth below the Datum (m) where the canyon set starts / finishes fading in, and where it preloads.</summary>
+        public const float CanyonFadeStart = 37f, CanyonFadeEnd = 57f, CanyonPreload = 17f;
+        float planetDatum;
+
+        /// <summary>The level a set's layers hang off: the canyon set hangs off the canyon floor, all others off the Datum.</summary>
+        float DatumOf(string set) => set == CanyonSet ? planetDatum - Meridian.Terrain.MarsLandforms.CanyonDepth : planetDatum;
+
+        void UpdateCanyonFade()
+        {
+            float depth = planetDatum - view.transform.position.y;
+            string canyon = Resolve(CanyonSet);
+            if (depth > CanyonPreload) Request(canyon);
+            float t = canyon == baseSet ? 0f : Mathf.Clamp01((depth - CanyonFadeStart) / (CanyonFadeEnd - CanyonFadeStart));
+            if (t > 0f && (!sets.TryGetValue(canyon, out var cs) || cs.loaded == 0)) t = 0f; // not here yet: stay on the mars set
+            if (t >= 1f) { ShowMain(canyon); FadeWeight = 0f; SetOverlay(null, 0f); return; }
+            ShowMain(baseSet);
+            FadeWeight = t;
+            SetOverlay(t > 0f ? canyon : null, t);
         }
 
         void UpdateBiomeFade()
         {
             if (!Planet.HasValue || baseSet == null) return;
             var p = Planet.Value;
+            if (p == PlanetId.Mars) { UpdateCanyonFade(); return; }
             int x = Mathf.FloorToInt(view.transform.position.x);
             string left = Resolve(SetFor(p, x - (int)(FadeWidth * 0.5f)));
             string right = Resolve(SetFor(p, x + (int)(FadeWidth * 0.5f)));
@@ -310,6 +338,7 @@ namespace Meridian.Planet
                 overlayBlock.SetTexture(LayerTex[i], set.tex[i] != null ? set.tex[i] : Texture2D.blackTexture);
                 overlayBlock.SetVector(LayerQ[i], new Vector4(Haze[i], ContentBase[i], set.tex[i] != null ? 1f : 0f, Follow[i]));
             }
+            overlayBlock.SetFloat(DatumId, DatumOf(name));
             overlayBlock.SetFloat(FadeId, t);
             overlay.SetPropertyBlock(overlayBlock);
         }
@@ -321,6 +350,7 @@ namespace Meridian.Planet
             {
                 string n = kv.Key;
                 if (n == baseSet || n == mainSet || n == overlaySet) continue;
+                if (n == CanyonSet) continue; // chosen by depth, not by column
                 bool near = false;
                 for (int d = -(int)KeepDistance; d <= (int)KeepDistance && !near; d += 10) near = SetFor(p, x + d) == n;
                 if (!near && kv.Value.pending == 0) dropScratch.Add(n);
