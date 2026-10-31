@@ -607,3 +607,5 @@ Correction: UNITY rightly declined the relayed "rerun the check" (it needs the o
 
 ## Cycle 88 · 2026-10-31
 User: owner pre-approved low-memory restarts (D-046; CLAUDE.md rule 6). USER-10 updated to one paste in the UNITY window (rerun now + pre-approval in the owner's own words there).
+
+- 2026-10-31 · Owner request: milestone report pages. M0 https://claude.ai/artifact/1wc7WqMrqXTYAG2cxQHPQQ · M1 https://claude.ai/artifact/N7yS19skGtESf7xCFyTMbA (private to the owner). M2+ published on each close.
