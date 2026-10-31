@@ -1,0 +1,251 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d1cb69b9b95e0b4c99ff017df152ec7, type: 3}
+  m_Name: RecipeBook
+  m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.Crafting.RecipeBook
+  recipes:
+  - id: smelt_hematite
+    station: 1
+    inputs:
+    - item: hematite
+      count: 3
+    output:
+      item: smelter_bar_iron
+      count: 2
+    blueprint: smelting
+  - id: smelt_iron
+    station: 1
+    inputs:
+    - item: iron
+      count: 2
+    output:
+      item: smelter_bar_iron
+      count: 1
+    blueprint: smelting
+  - id: smelt_copper
+    station: 1
+    inputs:
+    - item: copper
+      count: 2
+    output:
+      item: smelter_bar_copper
+      count: 1
+    blueprint: smelting
+  - id: smelt_silica
+    station: 1
+    inputs:
+    - item: sand
+      count: 4
+    output:
+      item: silica
+      count: 1
+    blueprint: smelting
+  - id: refine_fuel
+    station: 2
+    inputs:
+    - item: water_ice
+      count: 4
+    - item: carbon
+      count: 2
+    output:
+      item: launch_fuel
+      count: 2
+    blueprint: refining
+  - id: refine_fuel_perchlorate
+    station: 2
+    inputs:
+    - item: water_ice
+      count: 2
+    - item: perchlorate
+      count: 1
+    output:
+      item: launch_fuel
+      count: 2
+    blueprint: perchlorate_oxidizer
+  - id: refine_graphite
+    station: 2
+    inputs:
+    - item: carbon
+      count: 3
+    output:
+      item: graphite
+      count: 1
+    blueprint: refining
+  - id: refine_polymer
+    station: 2
+    inputs:
+    - item: carbon
+      count: 2
+    - item: oxygen
+      count: 1
+    output:
+      item: polymer
+      count: 2
+    blueprint: refining
+  - id: fab_suit_patch
+    station: 3
+    inputs:
+    - item: smelter_bar_iron
+      count: 2
+    output:
+      item: suit_patch
+      count: 1
+    blueprint: fabrication
+  - id: fab_circuit
+    station: 3
+    inputs:
+    - item: smelter_bar_copper
+      count: 1
+    - item: silica
+      count: 2
+    output:
+      item: circuit_board
+      count: 1
+    blueprint: fabrication
+  - id: fab_radiation_liner
+    station: 3
+    inputs:
+    - item: smelter_bar_iron
+      count: 1
+    - item: graphite
+      count: 2
+    output:
+      item: radiation_liner
+      count: 1
+    blueprint: fabrication
+  - id: fab_thermal_pad
+    station: 3
+    inputs:
+    - item: smelter_bar_copper
+      count: 1
+    - item: basalt
+      count: 4
+    output:
+      item: thermal_pad
+      count: 1
+    blueprint: fabrication
+  - id: fab_cryo_pad
+    station: 3
+    inputs:
+    - item: smelter_bar_copper
+      count: 1
+    - item: water_ice
+      count: 3
+    output:
+      item: cryo_pad
+      count: 1
+    blueprint: fabrication
+  - id: fab_fuel_cell
+    station: 3
+    inputs:
+    - item: launch_fuel
+      count: 5
+    - item: smelter_bar_iron
+      count: 1
+    output:
+      item: launch_fuel_cell
+      count: 1
+    blueprint: fabrication
+  - id: fab_solarite_capacitor
+    station: 3
+    inputs:
+    - item: solarite
+      count: 2
+    - item: circuit_board
+      count: 1
+    - item: smelter_bar_copper
+      count: 1
+    output:
+      item: solarite_capacitor
+      count: 1
+    blueprint: solarite_capacitor
+  - id: fab_float_cell
+    station: 3
+    inputs:
+    - item: polymer
+      count: 3
+    - item: vitriol_glass
+      count: 2
+    - item: smelter_bar_iron
+      count: 1
+    output:
+      item: float_cell_mk1
+      count: 1
+    blueprint: float_cell_mk1
+  blueprints:
+  - id: smelting
+    name: Smelting
+    icon: smelter_bar_iron
+    requires: []
+    unlockFlag: 
+    tier: 0
+  - id: refining
+    name: Refining
+    icon: launch_fuel
+    requires: []
+    unlockFlag: 
+    tier: 0
+  - id: fabrication
+    name: Fabrication
+    icon: circuit_board
+    requires:
+    - smelting
+    unlockFlag: 
+    tier: 1
+  - id: survey_module
+    name: Survey module
+    icon: 
+    requires: []
+    unlockFlag: beacon:earth
+    tier: 1
+  - id: perchlorate_oxidizer
+    name: Perchlorate oxidizer
+    icon: perchlorate
+    requires:
+    - refining
+    unlockFlag: beacon:mars
+    tier: 2
+  - id: solarite_capacitor
+    name: Solarite capacitor
+    icon: solarite
+    requires:
+    - fabrication
+    unlockFlag: beacon:mercury
+    tier: 2
+  - id: float_cell_mk1
+    name: Float cell Mk1
+    icon: 
+    requires:
+    - fabrication
+    unlockFlag: beacon:venus
+    tier: 2
+  - id: skip_drive_mk2
+    name: Skip Drive Mk2
+    icon: 
+    requires:
+    - solarite_capacitor
+    unlockFlag: beacon:saturn
+    tier: 3
+  - id: deep_diamond_tip
+    name: Deep-diamond Rig tip
+    icon: 
+    requires:
+    - fabrication
+    unlockFlag: beacon:uranus
+    tier: 3
+  - id: thruster_mk3
+    name: Thruster Mk3
+    icon: 
+    requires:
+    - skip_drive_mk2
+    unlockFlag: beacon:jupiter
+    tier: 4

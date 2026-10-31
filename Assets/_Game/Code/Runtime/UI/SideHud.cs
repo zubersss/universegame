@@ -111,9 +111,13 @@ namespace Meridian.UI
             // U-045: the Tab inventory panel lives beside the HUD (built in code, no scene change).
             Inventory = gameObject.AddComponent<InventoryPanel>();
             Inventory.player = player;
+            // U-051: the crafting panel (B).
+            Crafting = gameObject.AddComponent<CraftingPanel>();
+            Crafting.player = player;
         }
 
         public InventoryPanel Inventory { get; private set; }
+        public CraftingPanel Crafting { get; private set; }
 
         const int MaxMarkers = 4;
 

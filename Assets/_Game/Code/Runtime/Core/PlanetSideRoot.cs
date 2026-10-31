@@ -101,6 +101,16 @@ namespace Meridian.Core
             if (sideHud != null) sideHud.ConfigureFor(config);
             if (backdrop != null) backdrop.ConfigureFor(config);
             // U-050: Venus super-rotation pushes the surveyor (off elsewhere).
+            // U-051: the Pilgrim carries a Refinery and a Fabricator.
+            if (ship != null && ship.GetComponent<Meridian.Crafting.CraftingStation>() == null)
+            {
+                foreach (var kind in new[] { Meridian.Crafting.Station.Refinery, Meridian.Crafting.Station.Fabricator })
+                {
+                    var st = ship.gameObject.AddComponent<Meridian.Crafting.CraftingStation>();
+                    st.kind = kind;
+                    st.radius = 7f;
+                }
+            }
             if (wind == null) wind = gameObject.AddComponent<Meridian.Planet.Weather.VenusWind>();
             wind.player = player;
             wind.enabled = config.id == PlanetId.Venus;

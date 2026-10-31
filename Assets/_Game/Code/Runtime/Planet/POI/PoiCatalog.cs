@@ -16,7 +16,9 @@ namespace Meridian.Planet.POI
         public readonly int topRow;
         /// <summary>U-048: a flare shelter; the placer adds a FlareShelter of this radius (m) at the prop, 0 = none.</summary>
         public readonly float shelterRadius;
-        public PoiProp(string key, float dx, float dy, Vector2 size, bool solid = false, int topRow = 0, float shelterRadius = 0f) { this.key = key; this.dx = dx; this.dy = dy; this.size = size; this.solid = solid; this.topRow = topRow; this.shelterRadius = shelterRadius; }
+        /// <summary>U-051: a crafting station this prop offers (Hand = none).</summary>
+        public readonly Meridian.Crafting.Station craftStation;
+        public PoiProp(string key, float dx, float dy, Vector2 size, bool solid = false, int topRow = 0, float shelterRadius = 0f, Meridian.Crafting.Station craftStation = Meridian.Crafting.Station.Hand) { this.key = key; this.dx = dx; this.dy = dy; this.size = size; this.solid = solid; this.topRow = topRow; this.shelterRadius = shelterRadius; this.craftStation = craftStation; }
     }
 
     /// <summary>
@@ -188,7 +190,7 @@ namespace Meridian.Planet.POI
                 new PoiProp("props/common/storage_crate", 2.6f, 0f, new Vector2(1.25f, 1f), solid: true),
                 new PoiProp("props/common/storage_crate", 3.9f, 0f, new Vector2(1.25f, 1f), solid: true),
                 new PoiProp("props/common/storage_crate", 3.25f, 1f, new Vector2(1.25f, 1f), solid: true),
-                new PoiProp("props/common/smelter", 6.2f, 0f, new Vector2(2.4f, 3f)),
+                new PoiProp("props/common/smelter", 6.2f, 0f, new Vector2(2.4f, 3f), craftStation: Meridian.Crafting.Station.Smelter),
             },
         };
 

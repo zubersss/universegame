@@ -23,6 +23,7 @@ namespace Meridian.EditorTools
         public static void Run()
         {
             System.IO.Directory.CreateDirectory(Folder);
+            CraftingAuthoring.Run(); // U-051: the recipe book (only fills an empty one)
             var catalog = AssetDatabase.LoadAssetAtPath<PlanetCatalog>(PlanetConfigAuthoring.CatalogPath);
             if (catalog == null) { PlanetConfigAuthoring.Run(); catalog = AssetDatabase.LoadAssetAtPath<PlanetCatalog>(PlanetConfigAuthoring.CatalogPath); }
 

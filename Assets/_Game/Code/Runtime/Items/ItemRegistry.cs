@@ -55,8 +55,16 @@ namespace Meridian.Items
                 ("oxygen", "Oxygen"), ("launch_fuel", "Launch fuel"), ("perchlorate", "Perchlorate"),
                 ("clay", "Clay"), ("aluminium", "Aluminium"), ("living_seed", "Living seed"),
                 ("wood", "Wood"), ("nickel", "Nickel"),
+                // U-051 (B-042 icons): refined and crafted goods, raw finds. Append only: ids never change once shipped.
+                ("smelter_bar_iron", "Iron bar"), ("smelter_bar_copper", "Copper bar"), ("graphite", "Graphite"),
+                ("suit_patch", "Suit patch"), ("circuit_board", "Circuit board"), ("radiation_liner", "Radiation liner"),
+                ("thermal_pad", "Thermal pad"), ("cryo_pad", "Cryo pad"), ("launch_fuel_cell", "Launch fuel cell"),
+                ("solarite", "Solarite"), ("polar_ice", "Polar ice"), ("deep_core_sample", "Deep core sample"),
             })
                 Add(new ItemDef { id = id++, key = key, name = name, icon = $"icons/{key}/base" });
+            // No icon yet: the panel shows the name.
+            foreach (var (key, name) in new[] { ("polymer", "Polymer"), ("solarite_capacitor", "Solarite capacitor"), ("float_cell_mk1", "Float cell Mk1") })
+                Add(new ItemDef { id = id++, key = key, name = name });
         }
 
         static void Tile(byte tile, string key, string name, string icon) =>

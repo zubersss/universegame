@@ -82,6 +82,12 @@ namespace Meridian.Planet.POI
             sr.color = poi.planet == PlanetId.Earth ? new Color(0.55f, 0.57f, 0.6f, 1f) : new Color(0.5f, 0.38f, 0.3f, 1f);
             go.transform.localScale = new Vector3(prop.size.x, prop.size.y, 1f);
             LoadArt(sr, prop.key, prop.size.x, prop.topRow);
+            if (prop.craftStation != Meridian.Crafting.Station.Hand)
+            {
+                // U-051: the prop is a crafting station (the camp's Smelter).
+                var st = go.AddComponent<Meridian.Crafting.CraftingStation>();
+                st.kind = prop.craftStation;
+            }
             if (prop.shelterRadius > 0f)
             {
                 // U-048: inside the shelter a flare can't reach (D-048).

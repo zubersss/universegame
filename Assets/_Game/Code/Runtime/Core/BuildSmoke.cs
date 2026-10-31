@@ -72,6 +72,17 @@ namespace Meridian.Core
                 yield return Wait(1.5f); // icons arrive
                 yield return Shot(folder, "smoke_8_inventory.png");
                 hud.Inventory.SetOpen(false);
+
+                // U-051: the crafting panel with the Blueprint Tree (some ore and bars in hand).
+                if (hud.Crafting != null)
+                {
+                    inv.Add(Meridian.Items.ItemRegistry.Get("hematite").id, 6);
+                    inv.Add(Meridian.Items.ItemRegistry.Get("smelter_bar_iron").id, 2);
+                    hud.Crafting.SetOpen(true);
+                    yield return Wait(1f);
+                    yield return Shot(folder, "smoke_9_crafting.png");
+                    hud.Crafting.SetOpen(false);
+                }
             }
 
             Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Ocean, out int coast, out _);
