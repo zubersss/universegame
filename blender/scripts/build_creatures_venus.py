@@ -554,44 +554,70 @@ def build_vent_eel(scene):
 
 # ---------------------------------------------------------------- B-044: Veil Serpent (apex)
 
-def fin_material(name):
-    """Translucent sulfur-yellow fin with a glowing vein network (emission)."""
+def membrane_material(name):
+    """Translucent fin membrane (alpha 0.5): pale sulfur cream; the glow lives only in a vein
+    network (Voronoi edges -> emission), not in an outline (B-044 v2 review)."""
     m = bpy.data.materials.new(name)
     m.use_nodes = True
     nt = m.node_tree
     N, L = nt.nodes, nt.links
     pr = N["Principled BSDF"]
-    pr.inputs["Alpha"].default_value = 0.6
+    pr.inputs["Alpha"].default_value = 0.5
     pr.inputs["Roughness"].default_value = 0.4
     tc = N.new("ShaderNodeTexCoord")
-    wv = N.new("ShaderNodeTexWave"); wv.wave_type = "BANDS"; wv.bands_direction = "X"
-    wv.inputs["Scale"].default_value = 6.0; wv.inputs["Distortion"].default_value = 1.5
-    L.new(tc.outputs["Object"], wv.inputs["Vector"])
+    vo = N.new("ShaderNodeTexVoronoi"); vo.feature = "DISTANCE_TO_EDGE"
+    vo.inputs["Scale"].default_value = 9.0
+    L.new(tc.outputs["Object"], vo.inputs["Vector"])
     v = N.new("ShaderNodeMapRange"); v.interpolation_type = "SMOOTHSTEP"
-    v.inputs["From Min"].default_value, v.inputs["From Max"].default_value = 0.1, 0.0
-    L.new(wv.outputs["Fac"], v.inputs["Value"])
+    v.inputs["From Min"].default_value, v.inputs["From Max"].default_value = 0.04, 0.0
+    L.new(vo.outputs["Distance"], v.inputs["Value"])
     col = N.new("ShaderNodeMix"); col.data_type = "RGBA"
     L.new(v.outputs["Result"], col.inputs[0])
-    col.inputs[6].default_value = lin((236, 210, 104)); col.inputs[7].default_value = lin((250, 228, 130))
+    col.inputs[6].default_value = lin((214, 190, 120)); col.inputs[7].default_value = lin((255, 226, 110))
     L.new(col.outputs[2], pr.inputs["Base Color"])
-    em = N.new("ShaderNodeMath"); em.operation = "MULTIPLY_ADD"
-    em.inputs[1].default_value = 1.6; em.inputs[2].default_value = 0.35       # dim glow + bright veins
+    em = N.new("ShaderNodeMix"); em.data_type = "RGBA"
     L.new(v.outputs["Result"], em.inputs[0])
-    pr.inputs["Emission Color"].default_value = lin((255, 220, 90))
-    L.new(em.outputs[0], pr.inputs["Emission Strength"])
+    em.inputs[6].default_value = (0, 0, 0, 1); em.inputs[7].default_value = lin((255, 214, 80))
+    L.new(em.outputs[2], pr.inputs["Emission Color"])
+    pr.inputs["Emission Strength"].default_value = 2.2
+    return m
+
+
+def serpent_skin(name):
+    """Body: dark dorsal bands over sulfur-umber, pale belly; masks from the 'ser' colour
+    attribute (R belly, G band), painted from the rest pose so they ride the deformation."""
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    N, L = nt.nodes, nt.links
+    pr = N["Principled BSDF"]
+    pr.inputs["Roughness"].default_value = 0.35
+    at = N.new("ShaderNodeAttribute"); at.attribute_name = "ser"
+    sep = N.new("ShaderNodeSeparateColor")
+    L.new(at.outputs["Color"], sep.inputs[0])
+    a = N.new("ShaderNodeMix"); a.data_type = "RGBA"
+    L.new(sep.outputs[1], a.inputs[0])
+    a.inputs[6].default_value = lin((168, 128, 70)); a.inputs[7].default_value = lin((70, 50, 34))
+    b = N.new("ShaderNodeMix"); b.data_type = "RGBA"
+    L.new(sep.outputs[0], b.inputs[0])
+    L.new(a.outputs[2], b.inputs[6]); b.inputs[7].default_value = lin((232, 214, 170))
+    L.new(b.outputs[2], pr.inputs["Base Color"])
     return m
 
 
 def build_veil_serpent(scene):
-    """Venus apex (B-044): a long ribbon serpent of the acid haze. 14-bone chain; metaball body
-    (wedge head -> whip tail); dorsal and ventral translucent fin ribbons weighted to the same
-    chain; a frost shell inside the body that inflates out only on the hurt frames (the
-    'chilled' flash). Flier: centred pivot, no grounding."""
+    """Venus apex (B-044 v2). 14-bone chain; metaball body thick in the front third tapering
+    to a whip tail, banded back and pale belly; a wedge skull with jaw, glowing eyes and
+    backswept horns; a tall dorsal sail (7 rays, translucent veined membrane, ragged edge)
+    and a smaller ventral fin, both weighted to the chain; frost shell for the chilled hurt.
+    Flier: centred pivot, no grounding."""
+    import random as _r
+    rnd = _r.Random(44002)
     sp = "veil_serpent"
     coll = bpy.data.collections.new(sp)
     scene.collection.children.link(coll)
     n = 14
-    x0, x1 = -1.7, 1.7
+    x0, x1 = -1.65, 1.45
     seg = (x1 - x0) / n
     ad = bpy.data.armatures.new(f"{sp}_rig")
     rig = bpy.data.objects.new(f"{sp}_rig", ad)
@@ -607,13 +633,24 @@ def build_veil_serpent(scene):
             b.use_connect = True
         prev = b
     bpy.ops.object.mode_set(mode="OBJECT")
-    radius = [0.03 + 0.11 * (k / (n - 1)) ** 0.8 for k in range(n)]           # whip tail -> thick neck
-    radius[-1] = 0.15                                                          # head
-    pts = [(x0 + k * seg, 0, 0, radius[k]) for k in range(n)] + [(x1 + 0.12, 0, -0.01, 0.06)]
-    body = _capsules_mesh(f"{sp}_body", coll, [pts], 0.008)
-    body.data.materials.append(flat_material(f"{sp}_skin", (176, 140, 84), rough=0.35))
+
+    def rad(t):                                       # thick front third, whip tail, slight neck
+        return 0.03 + 0.17 * min(1.0, t / 0.68) ** 0.9 - 0.04 * max(0.0, (t - 0.85) / 0.15)
+    radius = [rad(k / (n - 1)) for k in range(n)]
+    pts = [(x0 + k * seg, 0, 0, radius[k]) for k in range(n)]
+    body = _capsules_mesh(f"{sp}_body", coll, [pts], 0.009)
+    me = body.data
+    attr = me.color_attributes.new("ser", "FLOAT_COLOR", "POINT")
+    for k, v in enumerate(me.vertices):
+        x, y, z = v.co
+        t = (x - x0) / (x1 - x0)
+        r = max(rad(min(max(t, 0), 1)), 0.02)
+        belly = min(1.0, max(0.0, (-z / r - 0.15) / 0.3))
+        band = (1.0 if math.sin(x * 15.0) > 0.25 else 0.0) * min(1.0, max(0.0, (z / r + 0.1) / 0.3))
+        attr.data[k].color = (belly, band, 0.0, 1.0)
+    me.materials.append(serpent_skin(f"{sp}_skin"))
     bind_auto(body, rig)
-    # Frost shell: a copy of the body mesh with a Displace keyed -0.03 (inside) .. +0.018 (out).
+    # Frost shell: a copy of the body; Displace keyed inside (-0.03) except the hurt frames.
     frost = body.copy()
     frost.data = body.data.copy()
     frost.name = f"{sp}_frost"
@@ -624,34 +661,87 @@ def build_veil_serpent(scene):
     frost.data.materials.append(fm)
     dsp = frost.modifiers.new("inflate", "DISPLACE")
     dsp.mid_level = 0.0
-    # Fins: dorsal and ventral ribbons (XZ plane), scalloped, tallest mid-body, fading to the tail.
-    finm = fin_material(f"{sp}_fin")
-    for sz, hmax in ((1, 0.3), (-1, 0.18)):
+    # Fins: membrane with a ragged top edge + rays (darker opaque spines past the edge).
+    memb = membrane_material(f"{sp}_membrane")
+    raym = flat_material(f"{sp}_ray", (90, 64, 40), rough=0.4)
+
+    def fin(tag, t0, t1, sz, hmax, nrays):
         verts, faces = [], []
-        m_ = 80
+        m_ = 60
+        top = []
         for i in range(m_ + 1):
-            x = x0 + 0.15 + (x1 - 0.35 - x0 - 0.15) * i / m_
-            t = (x - x0) / (x1 - x0)
-            r = 0.03 + 0.11 * t ** 0.8
-            h = hmax * math.sin(math.pi * min(1.0, t * 1.15)) ** 0.7 * (0.82 + 0.18 * abs(math.cos(i * 0.55)))   # soft scallops
-            verts += [(x, 0, sz * r * 0.7), (x, 0, sz * (r + h))]
+            u = i / m_
+            t = t0 + (t1 - t0) * u
+            x = x0 + (x1 - x0) * t
+            r = rad(t)
+            h = hmax * math.sin(math.pi * u) ** 0.6 * (0.8 + 0.2 * math.sin(u * 7.3)) + rnd.uniform(-0.03, 0.02)
+            h = max(h, 0.02)
+            verts += [(x, 0, sz * r * 0.6), (x, 0, sz * (r + h))]
+            top.append((x, r, h))
             if i:
                 a = 2 * i
                 faces.append((a - 2, a, a + 1, a - 1))
-        me = bpy.data.meshes.new(f"{sp}_fin{sz}")
-        me.from_pydata(verts, [], faces)
-        fin = bpy.data.objects.new(f"{sp}_fin{'d' if sz > 0 else 'v'}", me)
-        coll.objects.link(fin)
-        fin.modifiers.new("solid", "SOLIDIFY").thickness = 0.006
-        fin.data.materials.append(finm)
-        bind_auto(fin, rig)
-    eye = flat_material(f"{sp}_eye", (120, 60, 10), emit=(255, 200, 80), strength=2.4)
+        mesh = bpy.data.meshes.new(f"{sp}_{tag}")
+        mesh.from_pydata(verts, [], faces)
+        ob = bpy.data.objects.new(f"{sp}_{tag}", mesh)
+        coll.objects.link(ob)
+        ob.modifiers.new("solid", "SOLIDIFY").thickness = 0.006
+        ob.data.materials.append(memb)
+        bind_auto(ob, rig)
+        rv, rf = [], []
+        for k in range(nrays):                          # rays: thin quads leaning back, past the edge
+            i = int((k + 0.5) / nrays * m_)
+            x, r, h = top[i]
+            ext = h * 1.04 + 0.01                                   # just past the edge
+            lean = -0.35 * ext
+            b0 = len(rv)
+            rv += [(x - 0.022, 0, sz * r * 0.6), (x + 0.022, 0, sz * r * 0.6),
+                   (x + lean + 0.009, 0, sz * (r + ext)), (x + lean - 0.009, 0, sz * (r + ext))]
+            rf.append((b0, b0 + 1, b0 + 2, b0 + 3))
+        rmesh = bpy.data.meshes.new(f"{sp}_{tag}_rays")
+        rmesh.from_pydata(rv, [], rf)
+        ro = bpy.data.objects.new(f"{sp}_{tag}_rays", rmesh)
+        coll.objects.link(ro)
+        ro.modifiers.new("solid", "SOLIDIFY").thickness = 0.012
+        ro.data.materials.append(raym)
+        bind_auto(ro, rig)
+    fin("sail", 0.3, 0.86, 1, 0.42, 7)                  # tall dorsal sail, front two-thirds
+    fin("ventral", 0.16, 0.46, -1, 0.26, 4)             # smaller ventral fin, further back
+    # Head: wedge skull, jaw, eyes, backswept horns (rigid on the last bone), ~2x body thickness.
+    hb = f"s{n - 1}"
+    hx = x1
+    hide = flat_material(f"{sp}_skull", (92, 68, 44), rough=0.35)
+    horn = flat_material(f"{sp}_horn", (214, 196, 160), rough=0.4)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=16, radius=1.0, location=(0, 0, 0))
+    sk = bpy.context.active_object
+    sk.name = f"{sp}_skull"
+    for v in sk.data.vertices:                          # wedge: tapers to the snout (+x)
+        tt = min(1.0, max(0.0, (v.co.x + 1) / 2))
+        v.co.y *= 1.0 - 0.55 * tt
+        v.co.z *= 1.0 - 0.45 * tt
+    sk.location = (hx + 0.14, 0, 0.06)
+    sk.scale = (0.36, 0.22, 0.26)                                    # ~2x the neck thickness
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    bpy.ops.object.shade_smooth()
+    _rig_child(sk, rig, hb, coll, hide)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=12, radius=1.0, location=(hx + 0.16, 0, -0.13))
+    jaw = bpy.context.active_object
+    jaw.scale = (0.3, 0.16, 0.08)
+    jaw.rotation_euler = (0, math.radians(8), 0)
+    bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+    _rig_child(jaw, rig, hb, coll, flat_material(f"{sp}_jaw", (210, 190, 146), rough=0.4))
+    eye = flat_material(f"{sp}_eye", (120, 60, 10), emit=(255, 200, 80), strength=2.6)
     for sy in (-1, 1):
-        bpy.ops.mesh.primitive_uv_sphere_add(segments=10, ring_count=6, radius=0.028, location=(x1 + 0.02, sy * 0.07, 0.05))
-        _rig_child(bpy.context.active_object, rig, f"s{n - 1}", coll, eye)
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=10, ring_count=6, radius=0.032, location=(hx + 0.24, sy * 0.13, 0.12))
+        _rig_child(bpy.context.active_object, rig, hb, coll, eye)
+        for j, (dz, ln) in enumerate(((0.12, 0.34), (0.05, 0.24))):   # backswept horns
+            bpy.ops.mesh.primitive_cone_add(vertices=8, radius1=0.035, radius2=0.0, depth=ln,
+                                            location=(hx - 0.04 - ln * 0.4, sy * 0.1, dz + 0.06 + ln * 0.18),
+                                            rotation=(0, math.radians(-112 + 14 * j), 0))
+            _rig_child(bpy.context.active_object, rig, hb, coll, horn)
     for name, i, f in _frames():
         t = i / CLIP_LEN[name]
-        A, lam, lift, chill = 35.0, 0.07, 0.0, False                       # long wave: deep S-curves
+        A, lam, lift, chill = 35.0, 0.07, 0.0, False
         head = [0.0] * n
         if name == "idle":
             A = 28.0
@@ -660,13 +750,13 @@ def build_veil_serpent(scene):
         elif name == "attack":
             k = [0.2, 0.6, 1.0, 0.7, 0.3, 0.1][i]
             A = 18.0
-            head[n - 3], head[n - 2], head[n - 1] = -22 * k, -18 * k, (26 if i == 3 else -12) * k   # coil, strike
+            head[n - 3], head[n - 2], head[n - 1] = -22 * k, -18 * k, (26 if i == 3 else -12) * k
         elif name == "hurt":
             A, chill = 6.0, True
             head[n - 1] = 18.0 * (1.0 if i == 0 else 0.5)
         elif name == "death":
             k = [0.15, 0.35, 0.55, 0.75, 0.92, 1.0][i]
-            A, lift = 35.0 * (1 - k), 30 * k                               # slackens, sinks nose-down
+            A, lift = 35.0 * (1 - k), 30 * k
         rig.rotation_euler = (0, math.radians(lift), 0)
         rig.keyframe_insert("rotation_euler", frame=f)
         prev_abs = 0.0
