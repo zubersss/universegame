@@ -60,7 +60,7 @@ if ($Build) {
         if ($l.error) { $rows += "| Memory $dot dev build | | probe error: $($l.error) | red |"; $memRed = $true; continue }
         $ok = ($l.systemMB -ge 0) -and ($l.systemMB -le 2560) -and ($l.textureMB -le 600) -and ($l.audioMB -le 60)
         if (-not $ok) { $memRed = $true }
-        $rows += "| Memory $dot $($l.leg) (dev build) | $le 2.5 GB system, $le 600 MB textures, $le 60 MB audio | system $($l.systemMB) MB (working set $($l.workingSetMB) MB), textures $($l.textureMB) MB, audio $($l.audioMB) MB | $(if ($ok) { 'green' } else { 'red' }) |"
+        $rows += "| Memory $dot $($l.leg) (dev build) | $le 2.5 GB system, $le 600 MB textures, $le 60 MB audio | system $($l.systemMB) MB$(if ($l.workingSetMB -gt 0) { " (working set $($l.workingSetMB) MB)" }), textures $($l.textureMB) MB, audio $($l.audioMB) MB | $(if ($ok) { 'green' } else { 'red' }) |"
     }
     if (Test-Path $report) {
         $text = Get-Content $report -Raw -Encoding UTF8
