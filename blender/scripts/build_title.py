@@ -72,6 +72,26 @@ def frame(sheet_rel, idx):
     return out
 
 
+def _blob_index(mask):
+    """Sheet index of a reduced 8-neighbour mask, as BlobAutotile.cs (canonical masks ascending)."""
+    def reduce(m):
+        if not (m & 1 and m & 4): m &= ~2
+        if not (m & 16 and m & 4): m &= ~8
+        if not (m & 16 and m & 64): m &= ~32
+        if not (m & 1 and m & 64): m &= ~128
+        return m
+    canon = [m for m in range(256) if reduce(m) == m]
+    return canon.index(reduce(mask))
+
+
+def tile(rel, mask, size):
+    """One 128 px terrain tile (8 columns, no gutters), resized to `size`."""
+    sheet = load(rel)
+    i = _blob_index(mask)
+    r, c = divmod(i, 8)
+    return resize(sheet[r * 128:(r + 1) * 128, c * 128:(c + 1) * 128], size, size)
+
+
 def background(W=1920, H=1080):
     def cover(rel):                                  # scale a 2048x1024 layer to cover the frame
         img = load(rel)
@@ -95,9 +115,19 @@ def background(W=1920, H=1080):
     halo = np.exp(-(((xx - 0.8 * W) ** 2 + (yv - 0.15 * H) ** 2) / 22.0 ** 2))[..., None]
     out = np.clip(out * (1 - mars) + mars * np.array([0.82, 0.38, 0.2]) + halo * np.array([0.08, 0.03, 0.01]), 0, 1)
     warm = np.array([0.86, 0.76, 0.7])                                  # low dawn light on the land
+    # B-046 v2: dawn on the foliage. Sunward (right) side warms toward rose/amber, the shadow
+    # side and dark values cool toward blue-violet (a flat multiply left it midday green).
+    side = np.clip(xx / W, 0, 1)[..., None]
+    sun_tint = (1 - side) * np.array([0.72, 0.74, 0.92]) + side * np.array([1.18, 0.86, 0.66])
     for rel in ("backgrounds/earth/layer1_color.png", "backgrounds/earth/layer2_color.png"):
         lay = cover(rel)
-        lay[..., :3] = np.clip(lay[..., :3] * warm, 0, 1)
+        c = lay[..., :3]
+        lum = c.mean(axis=2, keepdims=True)
+        shadow = np.clip((0.32 - lum) / 0.32, 0, 1)
+        c = c * sun_tint
+        c = c * (1 - 0.45 * shadow) + np.array([0.16, 0.16, 0.3]) * 0.45 * shadow
+        g = c.mean(axis=2, keepdims=True)                                   # pull green saturation down
+        lay[..., :3] = np.clip(g + (c - g) * 0.72, 0, 1)
         over(out, lay, 0, 0)
     # Pad: four landing-pad modules in a row; the Pilgrim lifting off above it.
     s = 0.5
@@ -111,10 +141,29 @@ def background(W=1920, H=1080):
     sw, sh = int(ship.shape[1] * s), int(ship.shape[0] * s)
     ship = resize(ship, sw, sh)
     lift = 110
-    sx, sy = cx - sw // 2, int(H * 0.5)
-    ground = sy + int(sh * 0.93) + lift + pad.shape[0]                 # pad right under the skids
-    for k in range(4):
-        over(out, pad, cx - 2 * pw + k * pw, ground - pad.shape[0])
+    sx, sy = cx - sw // 2, int(H * 0.46)
+    # B-046 v2: the real landing-pad art (deck on legs) at a readable scale, three modules,
+    # standing on a short strip of grass-topped soil built from the Earth terrain tiles.
+    big = load("props/common/landing_pad_color.png")
+    ps = 0.8
+    pad = resize(big, int(big.shape[1] * ps), int(big.shape[0] * ps))
+    pw = pad.shape[1]
+    ground = sy + int(sh * 0.93) + lift + int(pad.shape[0] * (1 - 0.138889))   # pad deck under the skids
+    ts = 64
+    n = (3 * pw) // ts + 3
+    x0 = cx - n * ts // 2
+    for k in range(n):
+        top_mask = 4 | 8 | 16 | 32 | 64                                   # E SE S SW W (grass top)
+        soil_mask = 255
+        if k == 0:
+            top_mask, soil_mask = 4 | 8 | 16, 1 | 2 | 4 | 8 | 16
+        elif k == n - 1:
+            top_mask, soil_mask = 16 | 32 | 64, 1 | 16 | 32 | 64 | 128
+        over(out, tile("terrain/earth/grass_color.png", top_mask, ts), x0 + k * ts, ground)
+        for row in (1, 2, 3):
+            over(out, tile("terrain/earth/soil_color.png", soil_mask, ts), x0 + k * ts, ground + row * ts)
+    for k in range(3):
+        over(out, pad, cx - 3 * pw // 2 + k * pw, ground - int(pad.shape[0] * (1 - 0.138889)))
     # Belly thrusters (pods at ~0.25 and ~0.69 of the ship length, pod bottoms ~0.82 of height).
     flame = frame("fx/thruster/base", 2)
     fs = 0.85
@@ -126,11 +175,11 @@ def background(W=1920, H=1080):
     dust = frame("fx/dust/base", 5)
     dust = resize(dust, int(dust.shape[1] * 2.6), int(dust.shape[0] * 2.6))
     for px in (0.2, 0.32, 0.64, 0.76):
-        over(out, dust, sx + int(sw * px) - dust.shape[1] // 2, ground - dust.shape[0] + 20, 0.55)
+        over(out, dust, sx + int(sw * px) - dust.shape[1] // 2, ground - dust.shape[0] + 10, 0.55)
     over(out, ship, sx, sy)
     # Left third calm for the menu: a soft dark gradient.
-    lg = np.clip(1 - xx / (0.42 * W), 0, 1)[..., None] ** 1.4
-    out = out * (1 - 0.5 * lg) + np.array([0.04, 0.05, 0.08]) * 0.5 * lg
+    lg = np.clip(1 - xx / (0.48 * W), 0, 1)[..., None] ** 0.9           # B-046 v2: visibly darker
+    out = out * (1 - 0.68 * lg) + np.array([0.04, 0.04, 0.08]) * 0.68 * lg
     return out
 
 
