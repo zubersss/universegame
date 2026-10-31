@@ -1,0 +1,53 @@
+{
+  "key": "creatures/mercury/cinderhulk_day",
+  "frame_width": 400,
+  "frame_height": 400,
+  "columns": 5,
+  "gutter": 4,
+  "frames": 25,
+  "fps": 10,
+  "pivot": [
+    0.5,
+    0.025
+  ],
+  "facing": "right",
+  "animations": [
+    {
+      "name": "idle",
+      "start": 0,
+      "length": 5,
+      "loop": true
+    },
+    {
+      "name": "walk",
+      "start": 5,
+      "length": 8,
+      "loop": true
+    },
+    {
+      "name": "attack",
+      "start": 13,
+      "length": 6,
+      "loop": false
+    },
+    {
+      "name": "hurt",
+      "start": 19,
+      "length": 2,
+      "loop": false
+    },
+    {
+      "name": "death",
+      "start": 21,
+      "length": 4,
+      "loop": false
+    }
+  ],
+  "hitbox": {
+    "x": 0.12,
+    "y": 0.03,
+    "w": 0.76,
+    "h": 0.5
+  },
+  "ppu": 103.5
+}

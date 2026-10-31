@@ -16,6 +16,7 @@ import os
 import random
 import sys
 
+import bmesh
 import bpy
 from mathutils import Vector
 
@@ -57,6 +58,102 @@ def glass_shards(sp, S, rig, coll):
             k += 1
 
 
+def cinder_plate_material(name, state):
+    """Cinderhulk shell (B-040). day: white-hot plates (strong white emission). night: cooled
+    charcoal plates cracked with glowing orange fracture lines (Voronoi edges -> emission)."""
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    N, L = nt.nodes, nt.links
+    pr = N["Principled BSDF"]
+    pr.inputs["Roughness"].default_value = 0.5
+    tc = N.new("ShaderNodeTexCoord")
+    if state == "day":
+        # White-hot plates, each a slightly different tone (white -> pale gold by cell), with
+        # thin amber seams between them: a plain white albedo read as a flat blob (review).
+        cells = N.new("ShaderNodeTexVoronoi"); cells.inputs["Scale"].default_value = 5.0
+        L.new(tc.outputs["Object"], cells.inputs["Vector"])
+        tone = N.new("ShaderNodeValToRGB")
+        tone.color_ramp.elements[0].color = lin((255, 250, 236))
+        tone.color_ramp.elements[1].color = lin((246, 214, 150))
+        L.new(cells.outputs["Color"], tone.inputs["Fac"])
+        edge = N.new("ShaderNodeTexVoronoi"); edge.feature = "DISTANCE_TO_EDGE"
+        edge.inputs["Scale"].default_value = 5.0
+        L.new(tc.outputs["Object"], edge.inputs["Vector"])
+        sm = N.new("ShaderNodeMapRange"); sm.interpolation_type = "SMOOTHSTEP"
+        sm.inputs["From Min"].default_value, sm.inputs["From Max"].default_value = 0.08, 0.02
+        L.new(edge.outputs["Distance"], sm.inputs["Value"])
+        mx = N.new("ShaderNodeMix"); mx.data_type = "RGBA"
+        L.new(sm.outputs["Result"], mx.inputs[0])
+        L.new(tone.outputs["Color"], mx.inputs[6]); mx.inputs[7].default_value = lin((120, 56, 24))
+        L.new(mx.outputs[2], pr.inputs["Base Color"])
+        L.new(tone.outputs["Color"], pr.inputs["Emission Color"])
+        inv = N.new("ShaderNodeMath"); inv.operation = "SUBTRACT"; inv.inputs[0].default_value = 1.0
+        L.new(sm.outputs["Result"], inv.inputs[1])
+        st = N.new("ShaderNodeMath"); st.operation = "MULTIPLY"; st.inputs[1].default_value = 0.8
+        L.new(inv.outputs[0], st.inputs[0])
+        L.new(st.outputs[0], pr.inputs["Emission Strength"])               # seams stay dark
+        return m
+    vo = N.new("ShaderNodeTexVoronoi"); vo.feature = "DISTANCE_TO_EDGE"
+    vo.inputs["Scale"].default_value = 5.0
+    L.new(tc.outputs["Object"], vo.inputs["Vector"])
+    mr = N.new("ShaderNodeMapRange"); mr.interpolation_type = "SMOOTHSTEP"
+    mr.inputs["From Min"].default_value, mr.inputs["From Max"].default_value = 0.05, 0.0
+    L.new(vo.outputs["Distance"], mr.inputs["Value"])
+    col = N.new("ShaderNodeMix"); col.data_type = "RGBA"
+    L.new(mr.outputs["Result"], col.inputs[0])
+    col.inputs[6].default_value = lin((44, 40, 42)); col.inputs[7].default_value = lin((255, 120, 40))
+    L.new(col.outputs[2], pr.inputs["Base Color"])
+    em = N.new("ShaderNodeMix"); em.data_type = "RGBA"
+    L.new(mr.outputs["Result"], em.inputs[0])
+    em.inputs[6].default_value = (0, 0, 0, 1); em.inputs[7].default_value = lin((255, 120, 40))
+    L.new(em.outputs[2], pr.inputs["Emission Color"])
+    pr.inputs["Emission Strength"].default_value = 2.4
+    return m
+
+
+def cinder_plates(sp, S, rig, coll):
+    """Domed overlapping shell plates over the back in three rows plus a head plate and a tail
+    club, rigid on their bones; material per shell state (S["state"])."""
+    m = cinder_plate_material(f"{sp}_shell", S["state"])
+    spine = S["spine"]
+
+    def plate(name, loc, scale, rot_y, bone):
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=12, radius=1.0, location=loc)
+        ob = bpy.context.active_object
+        ob.name = name
+        ob.scale = scale
+        ob.rotation_euler = (0, math.radians(rot_y), 0)
+        bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+        _rig_child(ob, rig, bone, coll, m)
+    # Dome carapace over the whole back (first pass: separate plates sank into the metaball
+    # body, which is grown by MB_GROW); cut flat below so it never covers the legs.
+    x0, x1 = spine[0][0], spine[-1][0]
+    rmax = max(q[2] for q in spine) * 1.35
+    zc = max(q[1] for q in spine)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=48, ring_count=24, radius=1.0, location=(0, 0, 0))
+    dome = bpy.context.active_object
+    dome.name = f"{sp}_dome"
+    bm = bmesh.new()
+    bm.from_mesh(dome.data)
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if v.co.z < -0.25], context="VERTS")
+    bm.to_mesh(dome.data)
+    bm.free()
+    dome.location = ((x0 + x1) / 2, 0, zc - rmax * 0.35)
+    dome.scale = ((x1 - x0) / 2 + rmax * 0.55, rmax * 1.08, rmax * 1.1)
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    bpy.ops.object.shade_smooth()
+    _rig_child(dome, rig, "body", coll, m)
+    top = zc - rmax * 0.35 + rmax * 1.1
+    xs = [x0 + 0.15 + (x1 - x0 - 0.3) * k / 4 for k in range(5)]
+    for k, x in enumerate(xs):                                      # crest plates on the dome
+        plate(f"{sp}_crest{k}", (x, 0, top - 0.06), (0.3, 0.36, 0.16), -14, "body")
+    hx, hz, hr = S["head"][1]
+    plate(f"{sp}_headplate", (hx, 0, hz + hr * 0.75), (0.28, 0.22, 0.12), -8, "head")
+    tx, tz, tr = S["tail"][-1]
+    plate(f"{sp}_club", (tx, 0, tz), (0.2, 0.18, 0.18), 0, "tail")
+
+
 SPECIES = {
     "glassback": dict(
         spine=[(-0.6, 0.74, 0.2), (-0.35, 0.78, 0.26), (0.0, 0.8, 0.28), (0.3, 0.78, 0.26), (0.5, 0.74, 0.21)],
@@ -82,6 +179,26 @@ SPECIES = {
         cracks=dict(scale=14.0, width=0.07, color=(255, 128, 36), strength=3.0),
         antler=None),
 }
+
+
+def _cinderhulk(state):
+    """Armored colossus (B-040): heavy low body (~3.4 m sweep, so 400 px frames keep ppu >= 100),
+    pillar legs, head carried low, tail ending in a club; shell plates per state."""
+    return dict(
+        spine=[(-1.0, 1.2, 0.42), (-0.55, 1.32, 0.55), (0.0, 1.36, 0.6), (0.5, 1.3, 0.55), (0.85, 1.18, 0.45)],
+        neck=[(0.85, 1.18, 0.4), (1.05, 1.05, 0.32), (1.2, 0.95, 0.28)],
+        head=[(1.2, 0.95, 0.3), (1.36, 0.86, 0.24), (1.47, 0.79, 0.17), (1.54, 0.75, 0.12)],
+        tail=[(-1.0, 1.2, 0.22), (-1.24, 1.03, 0.16), (-1.44, 0.9, 0.12), (-1.56, 0.84, 0.1)],   # fits 400 px
+        front=[(0.55, 1.0, 0.24), (0.55, 0.62, 0.22), (0.56, 0.28, 0.2), (0.57, 0.08, 0.2), (0.6, 0.0, 0.21)],
+        hind=[(-0.6, 1.02, 0.26), (-0.55, 0.62, 0.24), (-0.62, 0.3, 0.2), (-0.6, 0.08, 0.2), (-0.57, 0.0, 0.21)],
+        leg_y=0.38, ears=0.0, ruff=0.0, socks_z=0.2, eye_scale=1.4,
+        belly_z=(0.8, 0.95), far=(0.2, 0.9),
+        coat=((62, 58, 60), (44, 40, 42)), belly=(74, 68, 66), socks=(36, 32, 34),
+        antler=None, extras=cinder_plates, state=state)
+
+
+SPECIES["cinderhulk_day"] = _cinderhulk("day")
+SPECIES["cinderhulk_night"] = _cinderhulk("night")
 
 
 # ---------------------------------------------------------------- B-035: flarewing, shadewyrm
