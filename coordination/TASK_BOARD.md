@@ -553,7 +553,7 @@ Files: blender/scripts/gen_fx.py, Assets/_Game/Art/fx/heat_shimmer/
 Depends: B-012
 Lead notes: Cycle 30. Small.
 
-### B-031 · BLENDER · Ready · M2
+### B-031 · BLENDER · In Progress · M2
 Goal: Wolf silhouette polish (from the B-015 v3 review): heavy neck ruff and fur-clump outline along the back (§9 "one exaggeration" for the wolf), bushy tail (2–3× current thickness, tapering), larger upright ears, legs ~25% thicker at the upper leg, shorter snout.
 Accept: same key, sheet layout, clips, and pivot as B-015 v3; full-size frames read as a wolf, not a hyena/rodent, next to the stag; ppu ≥ 100.
 Files: blender/scripts/build_creatures_earth.py, Assets/_Game/Art/creatures/earth/
@@ -588,12 +588,12 @@ Files: blender/sources/creatures/earth/, Assets/_Game/Art/creatures/earth/
 Depends: B-009
 Lead notes: Done 3f3e20e (cycle 31), v3 metaball method: continuous bodies, real stag proportions, 5-tine antlers, attached tail, soft underside; stag 101.75 / wolf 128 px/m, 320 px × 6 columns. Wolf silhouette polish → B-031. This method is the standard for B-016 and B-029.
 
-### B-016 · BLENDER · In Progress · M2
+### B-016 · BLENDER · Done · M2
 Goal: Mars creatures `creatures/mars/dustskater` (small, 128 px), `creatures/mars/scree_stalker` (medium).
 Accept: as B-015.
 Files: Assets/_Game/Art/creatures/mars/
 Depends: B-015
-Lead notes: —
+Lead notes: Done 0b105fb + b59f108 (cycle 39): scree stalker (116.75 px/m, 320 px, serrated stone-plate ridge, long hind legs) and dustskater (105 px/m, 128 px, broad skate pads); metaball method, Mars palette, no ears (thin air).
 
 ### B-017 · BLENDER · Done · M2
 Goal: Asteroids `props/space/asteroid_01..06` and `planets/luna/surface` (512×256).

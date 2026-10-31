@@ -318,3 +318,9 @@ Checked: owner message: "I have play tested M1, you can close it."
 Moved: USER-09 → Done. M1 closed (D-038). All M1 tasks were already Done (U-001…U-018, U-028, U-031, L-010).
 Decided: D-038.
 User: no open items except optional USER-08. The next playtest request comes with M2.
+
+## Cycle 39 · 2026-10-31 (BLENDER message)
+Checked: scree_stalker_frames.png, dustskater_zoom.png (B-016).
+Moved: B-016 → Done; B-031 → In Progress.
+Decided: none.
+Signals: none. BLENDER fixed a stale-guard bug (the Mars builder had rebuilt with Earth species once).
