@@ -1,7 +1,7 @@
 # LEAD STATUS
-Updated: 2026-10-31 00:40 · Session: 1 · Review cycle: 24
+Updated: 2026-10-31 00:45 · Session: 1 · Review cycle: 25
 ## Current task
-M1 waiting on the USER-09 playtest; then turn feedback into tasks and close M1. Review cycle every 30 min.
+M1 waiting on USER-09. Each cycle: ListAgents + nudge idle workers (UNITY = universegame-54, BLENDER = universegame-c3). Review cycle every 30 min.
 ## Last completed
 L-005 (versions pinned, `tools/paths.json`), L-006 (READY FOR WORKERS).
 ## Next up

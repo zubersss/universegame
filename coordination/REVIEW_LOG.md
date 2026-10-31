@@ -219,3 +219,11 @@ Moved: B-020, B-021, B-024 → Done; B-015 → In Progress (FAILED §9 anatomy);
 Decided: D-034 (Cycles peak 1.41–1.46 GB, gate back to 1.5; 320 px / 6-column creature frames, ppu ≥ 100; contract v1.4).
 Signals: none. Both workers active again since the 00:20 nudge.
 User: USER-09 open.
+
+## Cycle 25 · 2026-10-31 00:45
+Checked: git log 00:09–00:33 (BLENDER window; no UNITY commit since 00:00); ListAgents (UNITY session universegame-54 idle, BLENDER universegame-c3 busy); locks (none); free RAM 2.1 GB.
+Moved: none.
+Decided: standing practice: every LEAD cycle checks ListAgents and messages any idle worker whose gate is open (the workers' self-paced loops keep ending). LEAD session = universegame-60, UNITY = universegame-54, BLENDER = universegame-c3.
+Signals: UNITY idle at an open gate for ~40 min with U-030 uncompiled. Response: direct message (U-030 compile/commit, U-029 clean profile, then U-036…) plus an idle-notify subscription.
+User: USER-09 open.
+Queue: UNITY 5 Ready, BLENDER 3 Ready.
