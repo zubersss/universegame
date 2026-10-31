@@ -32,7 +32,7 @@ def skate_pads(front, hind, leg_y, r, length, width):
     for pts in (front, hind):
         x, z = pts[-1][0], pts[-1][1]
         for sy in (-1, 1):
-            out.append((x + 0.02, sy * leg_y, z + r * 0.35, r, length, width, 0.42))
+            out.append((x + 0.02, sy * leg_y, z + r * 0.45, r, length, width, 0.6))
     return out
 
 
@@ -78,7 +78,7 @@ SPECIES = {
         head=[(0.28, 0.39, 0.05), (0.34, 0.39, 0.042), (0.4, 0.37, 0.026), (0.43, 0.36, 0.017)],
         tail=[(-0.2, 0.29, 0.034), (-0.31, 0.29, 0.028), (-0.39, 0.32, 0.02), (-0.44, 0.37, 0.013)],   # fits 128 px at ppu >= 100
         front=DUST_FRONT, hind=DUST_HIND,
-        blobs=skate_pads(DUST_FRONT, DUST_HIND, 0.05, 0.034, 2.7, 1.5),
+        blobs=skate_pads(DUST_FRONT, DUST_HIND, 0.05, 0.05, 2.6, 1.5),        # pads ~0.26 m: bold at 60 px/m
         leg_y=0.05, ears=0.0, ruff=0.0, socks_z=0.07, mb_res=0.008, eye_scale=0.55,
         belly_z=(0.22, 0.27), far=(0.03, 0.2),
         coat=((198, 140, 96), (160, 104, 70)), belly=(224, 190, 152), socks=(84, 56, 44),
