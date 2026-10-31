@@ -718,3 +718,6 @@ Checked: re-captured Venus vent (the harvester sits on the field; a pale haze st
 ## Cycle 118 · 2026-10-31 (UNITY message)
 Checked: u051 blueprint_tree.png (the content is right; the panel is see-through, there are no icons in recipe rows, and every CRAFT button looks alike).
 Moved: U-051 → Done. Added U-058 (UI readability pass, before the U-052 market).
+
+## Cycle 120 · 2026-10-31 (UNITY message)
+Checked: u058 crafting_after.png (readable, clear states). U-058 → Done; U-052 → In Progress. Added B-051 (missing icons: polymer, float cell).

@@ -464,12 +464,12 @@ Files: Assets/_Game/Code/Runtime/Terrain/, Planet/, POI/
 Depends: U-048
 Lead notes: Done (cycle 116): PoiStamp general fix (median ground, rock fill, cleared air, ≤ 2 m shoulders; PoiShapingTests on 3 seeds), Earth-only sea clamp, seatLow for the Venus harvester (now flush), Mercury tint floor and violet twilight. Remaining nit: a pale band (the haze strip) shows under the pad deck line at the harvester; fold into the next Venus touch (U-055/U-056).
 
-### U-058 · UNITY · Ready · M3
+### U-058 · UNITY · Done · M3
 Goal: UI readability pass (from the U-051 review): opaque or blurred panel backgrounds for the Blueprint/Recipes (B), Inventory (Tab) and future Catalogue/Market panels so the world doesn't bleed through; item icons (B-013/B-042) on every recipe input and output; CRAFT buttons clearly dimmed or disabled when you can't craft (the state must be visible, not only greyed text); the HUD hidden behind full-screen panels as on menus.
 Accept: captures of the B and Tab panels over a busy forest scene; UI tests for the disabled state.
 Files: Assets/_Game/Code/Runtime/UI/
 Depends: U-051
-Lead notes: Cycle 118. Do it before U-052's market UI so the market reuses the style.
+Lead notes: Done (cycle 120): opaque modal panels with scrim, icon recipe rows, clear CRAFT on/off state, station tags lit in reach, shared icon cache. Two items lack icons (polymer, float cell): BLENDER B-051.
 
 ### U-025 · UNITY · Done · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.
@@ -797,6 +797,13 @@ Accept: same keys, sizes, tiling; stamped review; no vertical spike combs.
 Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/mercury/
 Depends: B-027
 Lead notes: Done (cycle 112): mercury layer0 + layer0_nosun re-rendered with ridge_lo=180, rounded crater rims, no spike comb; in-game confirmation via the U-057 re-capture.
+
+### B-051 · BLENDER · Ready · M3
+Goal: Icons for crafted items still missing art: polymer, float_cell_mk1, solarite_capacitor (if absent), plus any other RecipeBook output without an icons/<key>/base (check UNITY's ItemRegistry/RecipeBook).
+Accept: same icon camera and lights as B-013/B-042; readable at 32 px on a dark UI; stamped review.
+Files: blender/scripts/build_icons.py, Assets/_Game/Art/icons/
+Depends: B-042
+Lead notes: Cycle 120 (gaps visible in the U-058 recipe panel).
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
