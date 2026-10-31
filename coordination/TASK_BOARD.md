@@ -553,19 +553,19 @@ Files: blender/scripts/build_creatures_mercury.py, Assets/_Game/Art/creatures/me
 Depends: B-015
 Lead notes: Cycle 25. Start only after B-015 passes review, so the method is proven first.
 
-### B-030 · BLENDER · Ready · M2
+### B-030 · BLENDER · In Progress · M2
 Goal: Re-render `fx/heat_shimmer` as a visible heat-haze/entry-glow sheet (orange-white plasma streaks, additive), per UNITY's handoff (the current sheet is a near-transparent pale mask).
 Accept: same key and frame layout; reads clearly over a dark sky at camera size 9; emission map present.
 Files: blender/scripts/gen_fx.py, Assets/_Game/Art/fx/heat_shimmer/
 Depends: B-012
 Lead notes: Cycle 30. Small.
 
-### B-031 · BLENDER · In Progress · M2
+### B-031 · BLENDER · Done · M2
 Goal: Wolf silhouette polish (from the B-015 v3 review): heavy neck ruff and fur-clump outline along the back (§9 "one exaggeration" for the wolf), bushy tail (2–3× current thickness, tapering), larger upright ears, legs ~25% thicker at the upper leg, shorter snout.
 Accept: same key, sheet layout, clips, and pivot as B-015 v3; full-size frames read as a wolf, not a hyena/rodent, next to the stag; ppu ≥ 100.
 Files: blender/scripts/build_creatures_earth.py, Assets/_Game/Art/creatures/earth/
 Depends: B-015
-Lead notes: Cycle 31. A focused polish task, not a reopen of B-015. Do it after B-016. (Cycle 34) The wolf sink is not in the sheet (BLENDER verified the pivot per frame); it moved to U-042. Keep the same pivot and layout.
+Lead notes: Done (cycle 43): brush tail, heavy ruff, back fur clumps, tapered upright ears (3-segment metaballs), thicker upper legs, shorter snout; 128.5 px/m; feet on pivot in every checked frame. Reads as a wolf.
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.

@@ -344,3 +344,9 @@ Moved: none.
 Decided: none.
 Signals: BLENDER holds the oldest want but sat idle between 10-min ticks. Response: told it to go now. Not a deadlock: UNITY correctly yields to the older want.
 Queue: UNITY 4 Ready, BLENDER 5 Ready.
+
+## Cycle 43 · 2026-10-31 (BLENDER message)
+Checked: wolf_b031_frames.png.
+Moved: B-031 → Done; B-030 → In Progress.
+Decided: none.
+Signals: none. BLENDER yielded and didn't re-file (D-039 followed).
