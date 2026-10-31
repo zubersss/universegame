@@ -470,3 +470,9 @@ Checked: review_flarewing.png (06:25), review_shadewyrm.png (06:22).
 Moved: B-035 → Done; B-036 → In Progress.
 Decided: none. Flarewing polish → B-034.
 Signals: none.
+
+## Cycle 63 · 2026-10-31 (BLENDER message)
+Checked: review_pressure_crab.png (06:31).
+Moved: B-036 → Done; B-039 → In Progress.
+Decided: none. Crab stance → B-034.
+Signals: UNITY still blocked on USER-10.

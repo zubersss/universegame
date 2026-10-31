@@ -600,7 +600,7 @@ Goal: Venus backdrop polish (from the B-028 review), for the M3 exit: remove the
 Accept: stamped reviews show no arcs; vents are legible at camera size 9; same keys, sizes, seams.
 Files: blender/scripts/gen_backdrop*.py, Assets/_Game/Art/backgrounds/venus_*/
 Depends: B-028
-Lead notes: Cycle 56. Low priority, before M3 integration of Venus. (Cycle 58) Add: the darker bar crossing the Mercury flare_shelter doorway at band height; Mercury layer0_nosun variant (see B-027 notes). (Cycle 62) Add flarewing: thicken the body (~2×, a visible thorax), give the flare shell internal gradient and soft edges so it doesn't read as a flat white cut-out.
+Lead notes: Cycle 56. Low priority, before M3 integration of Venus. (Cycle 58) Add: the darker bar crossing the Mercury flare_shelter doorway at band height; Mercury layer0_nosun variant (see B-027 notes). (Cycle 62) Add flarewing: thicken the body (~2×, a visible thorax), give the flare shell internal gradient and soft edges so it doesn't read as a flat white cut-out. (Cycle 63) Add pressure crab: a wider, flatter carapace with legs splayed out sideways (crab stance, not hanging sticks), pincers held forward.
 
 ### B-035 · BLENDER · Done · M3
 Goal: Mercury creatures 2 (Bible §7.3): `creatures/mercury/flarewing` (flyer that feeds on flares; emission on the wing membranes, brighter "flare" variant frames in attack) and `creatures/mercury/shadewyrm` (ice burrower of the polar craters; long segmented body, pale frost plates).
@@ -609,12 +609,12 @@ Files: blender/scripts/build_creatures_mercury.py, Assets/_Game/Art/creatures/me
 Depends: B-029, B-032
 Lead notes: Done (cycle 62): flarewing (131.25 px/m, veined emissive membranes, flare shell on attack frames) and shadewyrm (110.75 px/m, 8-segment chain, frost plates, cyan eyes). Flarewing body thickness and flare-shell flatness → B-034.
 
-### B-036 · BLENDER · In Progress · M3
+### B-036 · BLENDER · Done · M3
 Goal: Venus surface creatures (Bible §7.4): `creatures/venus/pressure_crab` (armored, slow; heavy plated carapace) and `creatures/venus/vent_eel` (heat-seeking surface eel; glowing heat pits with emission).
 Accept: B-015 standard; Venus surface palette (black glass, orange glow); ppu ≥ 100; stamped review.
 Files: blender/scripts/build_creatures_venus.py, Assets/_Game/Art/creatures/venus/
 Depends: B-032
-Lead notes: Cycle 58. M3.
+Lead notes: Done (cycle 63): pressure crab (102.25 px/m, black-glass plates with an emissive under-body, pincers, eye stalks) and vent eel (125.75 px/m, 10 segments, glowing heat pits). Crab silhouette reads beetle-like → B-034.
 
 ### B-037 · BLENDER · Done · M3
 Goal: Rig modules (Bible §6/§8): held-tool sprites `items/rig/{beam,lance,survey,builder}` (drawn in the surveyor's hand, aim pivot at the grip) + FX sheets `fx/beam_ray`, `fx/lance_bolt`, `fx/survey_scan` (expanding ring), `fx/builder_ghost` (placement preview).
@@ -630,7 +630,7 @@ Files: blender/scripts/build_waystation.py, Assets/_Game/Art/ships/, backgrounds
 Depends: B-006
 Lead notes: Done a9322d9 + bay (cycle 61): Earth and Mars Waystations top-down (768 px at PPU 36, lit ring windows, docking arms with guide lights). The painted 2D docking bay is a placeholder (too graphic for §9); the rendered pass → B-039.
 
-### B-039 · BLENDER · Ready · M3
+### B-039 · BLENDER · In Progress · M3
 Goal: Docking-bay backdrop, rendered 3D pass: replace the 2D-painted `backgrounds/waystation/layer0..2` (B-038) with rendered 3D (lit I-beams, truss, crane, worn plated deck, Halcyon crates with bevels, scuffs, and stencils; window onto stars with interior reflections), matching §9's rendered-realism style.
 Accept: same keys, sizes, tiling; no flat-filled shapes; stamped review; split-half renders within the 1.5 GB gate.
 Files: blender/scripts/gen_backdrop3d.py (bay preset), Assets/_Game/Art/backgrounds/waystation/
