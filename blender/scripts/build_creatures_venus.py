@@ -24,7 +24,8 @@ from mathutils import Vector
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from build_creatures_earth import CLIP_LEN, CLIP_ORDER, CLIP_START, bind_auto, set_pose  # noqa: E402
+from build_creatures_earth import (CLIP_LEN, CLIP_ORDER, CLIP_START, _rig_child, bind_auto,  # noqa: E402
+                                   ground_exactly, set_pose)
 from build_pilgrim import flat_material, lin  # noqa: E402
 from build_surveyor import _constant  # noqa: E402
 
@@ -44,7 +45,7 @@ def _select_only(ob):
     ob.select_set(True)
 
 
-def frames():
+def _frames():
     for name in CLIP_ORDER:
         for i in range(CLIP_LEN[name]):
             yield name, i, CLIP_START[name] + i
@@ -168,7 +169,7 @@ def build_drifter(scene):
         bpy.context.view_layer.update()
         ob.matrix_world = mw
 
-    for name, i, f in frames():
+    for name, i, f in _frames():
         t = i / CLIP_LEN[name]
         s2 = math.sin(2 * math.pi * t)
         pitch, z, squash, tsw, tlag = 0.0, 0.0, 1.0, 0.0, 0.0
@@ -303,7 +304,7 @@ def build_moth(scene):
             w.parent = root
             wings.append((w, sy, name))
 
-    for name, i, f in frames():
+    for name, i, f in _frames():
         t = i / CLIP_LEN[name]
         flap = math.sin(2 * math.pi * t * (2 if name == "walk" else 1))
         pitch, roll, z, base, amp = 0.0, 0.0, 0.0, 55.0, 25.0
@@ -334,11 +335,230 @@ def build_moth(scene):
             _constant(ob.animation_data.action)
 
 
+# ---------------------------------------------------------------- B-036: surface walkers
+
+def _glass(name):
+    """Black volcanic glass: near-black, glossy (the harsh orange light glints off it)."""
+    return flat_material(name, (26, 22, 26), metallic=0.1, rough=0.14)
+
+
+def _rigid_on_bone(ob, rig, bone, coll):
+    _link(coll, ob)
+    bpy.context.view_layer.update()
+    mw = ob.matrix_world.copy()
+    ob.parent = rig
+    ob.parent_type = "BONE"
+    ob.parent_bone = bone
+    bpy.context.view_layer.update()
+    ob.matrix_world = mw
+
+
+def _ellipsoid(name, loc, scale, mat, coll, rig, bone, seg=32):
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=seg, ring_count=seg // 2, radius=1.0, location=loc)
+    ob = bpy.context.active_object
+    ob.name = name
+    ob.scale = scale
+    bpy.ops.object.shade_smooth()
+    ob.data.materials.append(mat)
+    _rigid_on_bone(ob, rig, bone, coll)
+    return ob
+
+
+def _capsules_mesh(name, coll, chains, res):
+    """chains: lists of (x, y, z, r) points; consecutive points become metaball capsules."""
+    mb = bpy.data.metaballs.new(f"{name}_mb")
+    mb.resolution = mb.render_resolution = res
+    mb.threshold = 0.6
+    for pts in chains:
+        for (x0, y0, z0, r0), (x1, y1, z1, r1) in zip(pts, pts[1:]):
+            d = Vector((x1 - x0, y1 - y0, z1 - z0))
+            e = mb.elements.new(type="CAPSULE")
+            e.co = ((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2)
+            e.radius = 1.35 * (r0 + r1) / 2
+            e.size_x = d.length / 2
+            e.rotation = Vector((1, 0, 0)).rotation_difference(d.normalized())
+    ob = bpy.data.objects.new(name, mb)
+    coll.objects.link(ob)
+    _select_only(ob)
+    bpy.ops.object.convert(target="MESH")
+    me = bpy.context.view_layer.objects.active
+    me.name = name
+    for p in me.data.polygons:
+        p.use_smooth = True
+    return me
+
+
+def build_pressure_crab(scene):
+    """Armored, slow surface crab (ground pivot). Exaggeration: a heavy carapace of three
+    overlapping black-glass plates over an emissive orange under-body, so the glow shows only
+    in the seams. Six legs (near/far, far ones darker) and two claws on an armature; legs are
+    metaball capsules bound with automatic weights; plates, claws and eye stalks are rigid."""
+    sp = "pressure_crab"
+    coll = bpy.data.collections.new(sp)
+    scene.collection.children.link(coll)
+    zb = 0.46
+    ad = bpy.data.armatures.new(f"{sp}_rig")
+    rig = bpy.data.objects.new(f"{sp}_rig", ad)
+    coll.objects.link(rig)
+    _select_only(rig)
+    bpy.ops.object.mode_set(mode="EDIT")
+    eb = ad.edit_bones
+    body = eb.new("body"); body.head, body.tail = Vector((-0.2, 0, zb)), Vector((0.2, 0, zb))
+    legs = {}
+    for sy in (-1, 1):
+        for k, (x, dx) in enumerate(((0.32, 0.22), (0.0, 0.02), (-0.32, -0.22))):
+            tag = f"{k}{'n' if sy < 0 else 'f'}"
+            p0 = Vector((x, sy * 0.3, zb - 0.05))
+            p1 = Vector((x + dx, sy * 0.42, zb + 0.14))                     # knee up and out
+            p2 = Vector((x + 1.8 * dx, sy * 0.48, 0.0))                     # foot on the ground
+            a = eb.new(f"fem_{tag}"); a.head, a.tail = p0, p1; a.parent = body
+            b = eb.new(f"tib_{tag}"); b.head, b.tail = p1, p2; b.parent = a
+            legs[tag] = (p0, p1, p2)
+    for sy in (-1, 1):
+        tag = "n" if sy < 0 else "f"
+        a = eb.new(f"arm_{tag}"); a.head, a.tail = Vector((0.5, sy * 0.24, zb)), Vector((0.72, sy * 0.28, zb + 0.12))
+        a.parent = body
+    bpy.ops.object.mode_set(mode="OBJECT")
+    # Legs: metaball capsules -> one mesh -> automatic weights.
+    # Leg radii x1.5 after review: stick-thin legs vanished at 60 px/m.
+    chains = [[(p.x, p.y, p.z, r) for p, r in zip(pts, (0.085, 0.07, 0.035))] for pts in legs.values()]
+    chains += [[(0.46, sy * 0.24, zb, 0.08), (0.72, sy * 0.28, zb + 0.12, 0.07)] for sy in (-1, 1)]
+    legm = _capsules_mesh(f"{sp}_legs", coll, chains, 0.012)
+    legm.data.materials.append(_glass(f"{sp}_leg"))
+    bind_auto(legm, rig)
+    glass = _glass(f"{sp}_shell")
+    glow = flat_material(f"{sp}_glow", (120, 40, 10), emit=(255, 120, 40), strength=1.6)
+    _ellipsoid(f"{sp}_core", (0.0, 0, zb + 0.02), (0.62, 0.42, 0.24), glow, coll, rig, "body")
+    for k, (x, z, s) in enumerate(((-0.3, zb + 0.06, 0.95), (0.0, zb + 0.1, 1.05), (0.3, zb + 0.07, 1.0))):
+        _ellipsoid(f"{sp}_plate{k}", (x, 0, z), (0.3 * s, 0.48 * s, 0.26 * s), glass, coll, rig, "body")
+    for sy in (-1, 1):                                                       # claws: heavy pincers
+        tag = "n" if sy < 0 else "f"
+        _ellipsoid(f"{sp}_claw_{tag}", (0.88, sy * 0.28, zb + 0.16), (0.24, 0.11, 0.14), glass, coll, rig, f"arm_{tag}", 24)   # heavy pincer
+        bpy.ops.mesh.primitive_cone_add(vertices=8, radius1=0.07, radius2=0.0, depth=0.22,
+                                        location=(1.08, sy * 0.28, zb + 0.24), rotation=(0, math.pi / 2 - 0.3, 0))
+        tip = bpy.context.active_object
+        tip.data.materials.append(glass)
+        _rigid_on_bone(tip, rig, f"arm_{tag}", coll)
+    eye = flat_material(f"{sp}_eye", (80, 30, 10), emit=(255, 150, 60), strength=2.0)
+    for sy in (-1, 1):                                                       # eyes on stalks
+        _ellipsoid(f"{sp}_stalk{sy}", (0.4, sy * 0.1, zb + 0.24), (0.018, 0.018, 0.08), glass, coll, rig, "body", 12)
+        _ellipsoid(f"{sp}_eye{sy}", (0.4, sy * 0.1, zb + 0.33), (0.03, 0.03, 0.03), eye, coll, rig, "body", 12)
+    tags = list(legs)
+    for name, i, f in _frames():
+        t = i / CLIP_LEN[name]
+        pose = {b.name: 0.0 for b in rig.pose.bones}
+        pitch = 0.0
+        if name == "idle":
+            for tg in tags:
+                pose[f"fem_{tg}"] = 2 * math.sin(2 * math.pi * t)
+        elif name == "walk":
+            for j, tg in enumerate(tags):
+                ph = 0.0 if (int(tg[0]) + (tg[1] == "f")) % 2 == 0 else 0.5    # alternating tripods
+                u = 2 * math.pi * (t + ph)
+                pose[f"fem_{tg}"] = 12 * math.sin(u)
+                pose[f"tib_{tg}"] = -14 * max(0.0, math.cos(u))               # lift the swinging feet
+        elif name == "attack":
+            k = [0.2, 0.7, 1.0, 0.4, 0.1, 0.0][i]
+            pitch = -5 * k
+            for tag in ("n", "f"):
+                pose[f"arm_{tag}"] = -38 * k if i < 3 else 25 * (1 - i / 6)   # raise, then snap down
+        elif name == "hurt":
+            pitch = 8 * (1.0 if i == 0 else 0.5)
+        elif name == "death":
+            k = [0.15, 0.35, 0.55, 0.75, 0.92, 1.0][i]
+            pitch = 6 * k
+            for tg in tags:
+                pose[f"fem_{tg}"] = (-25 if tg[0] == "0" else 25 if tg[0] == "2" else 0) * k   # legs splay
+                pose[f"tib_{tg}"] = 20 * k
+            for tag in ("n", "f"):
+                pose[f"arm_{tag}"] = 20 * k
+        rig.rotation_euler = (0, math.radians(pitch), 0)
+        rig.keyframe_insert("rotation_euler", frame=f)
+        for bn, deg in pose.items():
+            set_pose(rig, bn, deg)
+            rig.pose.bones[bn].keyframe_insert("rotation_quaternion", frame=f)
+    if rig.animation_data and rig.animation_data.action:
+        _constant(rig.animation_data.action)
+    ground_exactly(rig)
+
+
+def build_vent_eel(scene):
+    """Heat-seeking surface eel (ground pivot): sleek 10-segment black-glass body on a bone
+    chain (metaball, automatic weights), a wedge head; exaggeration = a row of glowing orange
+    heat pits along each side plus a glowing mouth (emission). Low undulation, head raised and
+    sweeping for heat, lunge attack, limp death."""
+    sp = "vent_eel"
+    coll = bpy.data.collections.new(sp)
+    scene.collection.children.link(coll)
+    n = 10
+    x0, x1 = -1.1, 1.1
+    seg = (x1 - x0) / n
+    zc = 0.15
+    ad = bpy.data.armatures.new(f"{sp}_rig")
+    rig = bpy.data.objects.new(f"{sp}_rig", ad)
+    coll.objects.link(rig)
+    _select_only(rig)
+    bpy.ops.object.mode_set(mode="EDIT")
+    prev = None
+    for k in range(n):
+        b = ad.edit_bones.new(f"s{k}")
+        b.head, b.tail = Vector((x0 + k * seg, 0, zc)), Vector((x0 + (k + 1) * seg, 0, zc))
+        if prev:
+            b.parent = prev
+            b.use_connect = True
+        prev = b
+    bpy.ops.object.mode_set(mode="OBJECT")
+    radius = [0.04, 0.065, 0.09, 0.105, 0.12, 0.13, 0.135, 0.135, 0.13, 0.12]   # x1.6: 6 px tall at 60 px/m was too thin
+    pts = [(x0 + k * seg, 0, zc, radius[min(k, n - 1)]) for k in range(n)] + [(x1 + 0.05, 0, zc - 0.01, 0.04)]
+    body = _capsules_mesh(f"{sp}_body", coll, [pts], 0.008)
+    body.data.materials.append(_glass(f"{sp}_skin"))
+    bind_auto(body, rig)
+    pit = flat_material(f"{sp}_pit", (120, 40, 10), emit=(255, 130, 40), strength=2.0)
+    for k in range(2, n):                                                    # heat pits along both sides
+        for sy in (-1, 1):
+            bpy.ops.mesh.primitive_uv_sphere_add(segments=10, ring_count=6, radius=0.018,
+                                                 location=(x0 + (k + 0.5) * seg, sy * radius[k] * 1.3, zc + 0.01))
+            _rig_child(bpy.context.active_object, rig, f"s{k}", coll, pit)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=6, radius=0.03, location=(x1 + 0.08, 0, zc - 0.02))
+    _rig_child(bpy.context.active_object, rig, f"s{n - 1}", coll, pit)        # glowing mouth
+    for name, i, f in _frames():
+        t = i / CLIP_LEN[name]
+        A = 5.0
+        lift = [0.0] * n
+        sweep = 0.0
+        if name == "idle":
+            A, sweep = 2.0, 10 * math.sin(2 * math.pi * t)                   # head sweeps for heat
+            lift[n - 2], lift[n - 1] = -10.0, -8.0
+        elif name == "walk":
+            lift[n - 1] = -6.0
+        elif name == "attack":
+            k = [0.3, 0.8, 1.0, 0.5, 0.2, 0.0][i]
+            A = 1.5
+            lift[n - 3], lift[n - 2], lift[n - 1] = -18 * k, -16 * k, (14 if i == 2 else -10) * k   # rear, lunge
+        elif name == "hurt":
+            lift[n - 1] = 12.0 * (1.0 if i == 0 else 0.5)
+        elif name == "death":
+            k = [0.15, 0.35, 0.55, 0.75, 0.92, 1.0][i]
+            A = 5.0 * (1 - k)
+        prev_abs = 0.0
+        for j in range(n):
+            ab = A * math.sin(2 * math.pi * (t - j * 0.2)) + lift[j] + (sweep if j == n - 1 else 0.0)
+            set_pose(rig, f"s{j}", ab - prev_abs if j else ab)
+            prev_abs = ab
+        for pb in rig.pose.bones:
+            pb.keyframe_insert("rotation_quaternion", frame=f)
+    if rig.animation_data and rig.animation_data.action:
+        _constant(rig.animation_data.action)
+    ground_exactly(rig)
+
+
 def build(out_path=DEFAULT_OUT):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
     build_drifter(scene)
     build_moth(scene)
+    build_pressure_crab(scene)
+    build_vent_eel(scene)
     scene.frame_start = 1
     scene.frame_end = max(CLIP_START[c] + CLIP_LEN[c] - 1 for c in CLIP_ORDER)
     os.makedirs(os.path.dirname(out_path), exist_ok=True)

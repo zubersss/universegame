@@ -1,0 +1,53 @@
+{
+  "key": "creatures/venus/pressure_crab",
+  "frame_width": 256,
+  "frame_height": 256,
+  "columns": 6,
+  "gutter": 4,
+  "frames": 28,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.039062
+  ],
+  "facing": "right",
+  "animations": [
+    {
+      "name": "idle",
+      "start": 0,
+      "length": 6,
+      "loop": true
+    },
+    {
+      "name": "walk",
+      "start": 6,
+      "length": 8,
+      "loop": true
+    },
+    {
+      "name": "attack",
+      "start": 14,
+      "length": 6,
+      "loop": false
+    },
+    {
+      "name": "hurt",
+      "start": 20,
+      "length": 2,
+      "loop": false
+    },
+    {
+      "name": "death",
+      "start": 22,
+      "length": 6,
+      "loop": false
+    }
+  ],
+  "hitbox": {
+    "x": 0.15,
+    "y": 0.04,
+    "w": 0.7,
+    "h": 0.45
+  },
+  "ppu": 102.25
+}
