@@ -380,7 +380,7 @@ Files: Assets/_Game/Code/Runtime/Items/, UI/, Save/
 Depends: U-013, U-015
 Lead notes: Done (cycle 99): registry, 40 × 999 inventory, pickup, Builder uses the selected slot, Tab panel (smoke_8_inventory), SaveData v2 with suit; InventoryTests 9 + InventoryPlayTests. Full check 14:37: EditMode 163/163, LeadQA 3/3.
 
-### U-046 · UNITY · Ready · M3
+### U-046 · UNITY · In Progress · M3
 Goal: Rig modules v1 (Bible §6/§8; M3 needs all modules): Beam (dig/mine ray), Lance (projectile), Survey (scan ring that reveals and catalogues), Builder (placement with ghost), switched with 1–4 / Q/E; drawn in the surveyor's hand from B-037 art.
 Accept: tool sprite at the hand with pivot [0.375, 0.5], rotating to the aim; muzzle offsets beam (0.47, 0.03), lance (0.52, 0.035), survey (0.30, 0.06), builder (0.44, 0.03) m; fx/beam_ray stretched from muzzle to hit (pivot [0, 0.5], tiles in x); fx/lance_bolt (pivot [0.75, 0.5]); fx/survey_scan 12-frame one-shot ring; fx/builder_ghost 8-frame pulse, tinted red when blocked; PlayMode tests per module; captures.
 Files: Assets/_Game/Code/Runtime/Rig/, Player/
