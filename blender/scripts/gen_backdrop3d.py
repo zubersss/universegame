@@ -66,10 +66,10 @@ PRESETS = {
                  snowline=9.0, haze=(0.42, 0.00004), tilt=6.0, terrace=2),
         mid=dict(W=700.0, level=0.40, amp=0.12, cliff=0.5, bumps=0.004, depth=(20, 140), haze=(0.3, 0.0016),
                  ground=[(214, 182, 128), (196, 160, 108)], strata=(9.0, (232, 200, 150), 0.4),
-                 rocks=30, rock_h=(2, 7), tilt=12.0, frame_up=-0.08, dune_rows=5, dune_h=0.8),
+                 rocks=30, rock_h=(2, 7), tilt=12.0, frame_up=-0.08, dune_rows=5, dune_h=0.8, seam_keepout=True),
         near=dict(W=64.0, level=0.26, amp=0.07, bumps=0.004, depth=(3, 14), haze=(0.05, 0.003),
                   ground=[(226, 196, 144), (208, 176, 124)], dune_rows=4, dune_h=0.9, dune_mesa=0.15,
-                  rocks=14, rock_h=(0.3, 1.4), pebbles=120, tilt=18.0, frame_up=0.12),
+                  rocks=14, rock_h=(0.3, 1.4), pebbles=120, tilt=18.0, frame_up=0.12, seam_keepout=True),
         rock=[(176, 132, 92), (150, 110, 78), (196, 156, 112), (132, 100, 74)],
     ),
     "earth_taiga": dict(
@@ -944,6 +944,10 @@ def rock_layer(P, spec, seed, preview, work, near):
             x = rnd.uniform(0, W)
             y = y_vis + (d1 - y_vis) * rnd.random() ** (1.6 if near else 1.0)
             s = size_lo + (size_hi - size_lo) * rnd.random() ** skew
+            if spec.get("seam_keepout") and min(x, W - x) < 1.5 * s:
+                # B-026: a big rock straddling x = 0/W rendered differently in its two copies
+                # (debug halves); slide it clear of the seam instead.
+                x = 1.5 * s if x < W / 2 else W - 1.5 * s
             instance(scene.collection, rocks[rnd.randrange(len(rocks))], (x, y, ground_z(x, y) - 0.2 * s), s,
                      rnd.uniform(0, 6.3), W)
     scatter(spec["rocks"], lo, hi * 1.25, 2.8)          # B-025: wider size spread, few big ones
