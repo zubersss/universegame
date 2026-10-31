@@ -53,6 +53,27 @@ namespace Meridian.Core
                 side.dayNight.Override = 0.45f;
             }
 
+            // U-045: the Tab inventory panel with a few stacks (the selected one is the Builder's).
+            var hud = FindAnyObjectByType<SideHud>();
+            if (hud != null && hud.Inventory != null && GameState.Instance != null)
+            {
+                var inv = GameState.Instance.inventory;
+                inv.Clear();
+                inv.Add(Meridian.Terrain.TileId.Soil, 64);
+                inv.Add(Meridian.Terrain.TileId.Stone, 999);
+                inv.Add(Meridian.Terrain.TileId.Stone, 210);
+                foreach (var key in new[] { "iron", "copper", "carbon", "silica", "water_ice", "oxygen", "launch_fuel", "wood", "clay" })
+                {
+                    var def = Meridian.Items.ItemRegistry.Get(key);
+                    if (def != null) inv.Add(def.id, 3 + key.Length * 7);
+                }
+                inv.Select(1);
+                hud.Inventory.SetOpen(true);
+                yield return Wait(1.5f); // icons arrive
+                yield return Shot(folder, "smoke_8_inventory.png");
+                hud.Inventory.SetOpen(false);
+            }
+
             Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Ocean, out int coast, out _);
             yield return LookAt(side, coast - 10f, 8f);
             yield return Shot(folder, "smoke_4_desert_ocean.png");
