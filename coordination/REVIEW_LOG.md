@@ -630,3 +630,6 @@ Signals: none.
 
 ## Cycle 93 · 2026-10-31
 LEAD soak run 13:40: still "was Earth", but [LEADQA] flight end shows view Space, 185 u from Mars, 428 u from Earth (timed out). Cause: no drag, so bearing-only steering spirals. Fixed: steer on the velocity error (wanted velocity minus current). Rerun deferred to UNITY's lock (13:4x).
+
+## Cycle 94 · 2026-10-31
+Signals: UNITY 13:44 check stopped by Claude Code for low memory in PlayMode (second time; 0.88 GB at start). Pointed UNITY to the owner's own pre-approval in its window (D-046) for one re-run. LEAD stops running heavy jobs until U-044 lands (the 13:40 overlap was LEAD's soak run). Suggested U-044 before the soak, separately.
