@@ -163,6 +163,44 @@ namespace Meridian.Tests
             side.dayNight.Override = null;
         }
 
+        /// <summary>U-036 evidence: B-015 stag and wolf at true size next to the surveyor (Earth, noon).</summary>
+        [UnityTest]
+        public IEnumerator CaptureCreatures()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+            var side = director.PlanetSide;
+            for (int i = 0; i < 60; i++) yield return new WaitForFixedUpdate();
+            side.dayNight.Override = 0.5f;
+            var creatures = side.creatures;
+            for (int i = 0; i < 120; i++) yield return null; // creature sheets load
+            float px = side.player.transform.position.x;
+            Meridian.Creatures.Creature Put(Meridian.Creatures.Species sp, float x)
+            {
+                int tx = Mathf.FloorToInt(x);
+                int s = side.terrain.Generator.SurfaceHeight(side.terrain.WrapX(tx));
+                return creatures.Spawn(sp, new Vector2(tx + 0.5f, s + 1f + Meridian.Creatures.SpeciesSpec.Get(sp).size.y * 0.5f + 0.05f));
+            }
+            var stag = Put(Meridian.Creatures.Species.Stag, px - 4f);
+            var wolf = Put(Meridian.Creatures.Species.GreyWolf, px + 4f);
+            for (int i = 0; i < 6; i++) yield return new WaitForFixedUpdate();
+            var cam = side.sideCamera;
+            cam.GetComponent<Meridian.Player.CameraFollow>().enabled = false;
+            var playerView = side.player.GetComponentInChildren<SpriteRenderer>();
+            TestContext.Out.WriteLine($"[MERIDIAN] stag sprite {stag.View.sprite.name} {stag.View.bounds.size.x:F2} x {stag.View.bounds.size.y:F2} m, wolf {wolf.View.sprite.name} {wolf.View.bounds.size.x:F2} x {wolf.View.bounds.size.y:F2} m, surveyor {playerView.bounds.size.y:F2} m tall");
+            yield return Save(cam, name);
+            side.dayNight.Override = null;
+        }
+
         static IEnumerator Save(Camera cam, string name)
         {
             var rt = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);

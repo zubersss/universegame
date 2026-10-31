@@ -229,6 +229,28 @@ namespace Meridian.Tests
         }
 
         [Test]
+        public void SheetPpuSetsWorldSizeAndDefaultsTo128()
+        {
+            var json = Art("creatures/earth/stag.json");
+            Directory.CreateDirectory(Path.GetDirectoryName(json));
+            File.WriteAllText(json, "{\"key\":\"creatures/earth/stag\",\"frame_width\":32,\"frame_height\":32," +
+                                    "\"columns\":3,\"frames\":5,\"gutter\":4,\"pivot\":[0.5,0.0],\"ppu\":104}");
+            var c = Png(Art("creatures/earth/stag_color.png"), 104, 68);
+            var json2 = Art("creatures/earth/wolf.json");
+            File.WriteAllText(json2, "{\"key\":\"creatures/earth/wolf\",\"frame_width\":32,\"frame_height\":32," +
+                                     "\"columns\":3,\"frames\":5,\"gutter\":4,\"pivot\":[0.5,0.0]}");
+            var c2 = Png(Art("creatures/earth/wolf_color.png"), 104, 68);
+            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+            Import(c, c2);
+            Assert.AreEqual(104f, Importer(c).spritePixelsPerUnit, "sheet ppu honored");
+            var stag = AssetDatabase.LoadAllAssetsAtPath(c).OfType<Sprite>().First(s => s.name == "stag_0");
+            Assert.AreEqual(32f / 104f, stag.bounds.size.x, 1e-4f, "world size = px / 104");
+            Assert.AreEqual(128f, Importer(c2).spritePixelsPerUnit, "no ppu: 128");
+            var wolf = AssetDatabase.LoadAllAssetsAtPath(c2).OfType<Sprite>().First(s => s.name == "wolf_0");
+            Assert.AreEqual(32f / 128f, wolf.bounds.size.x, 1e-4f, "world size = px / 128");
+        }
+
+        [Test]
         public void TerrainSheetSlicedInto47TileGridWithoutJson()
         {
             var c = TerrainSheet(Art("terrain/earth/soil_color.png"), 47);

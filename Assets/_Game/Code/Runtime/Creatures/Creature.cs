@@ -58,12 +58,21 @@ namespace Meridian.Creatures
             Box.size = spec.size;
             Box.offset = Vector2.zero;
             View.sprite = sprite;
-            if (sprite != null)
+            bool placeholder = sprite == null || sprite.name.StartsWith("CreaturePlaceholder");
+            if (placeholder && sprite != null)
             {
+                // The tinted box fills the body.
                 var b = sprite.bounds.size;
                 View.transform.localScale = new Vector3(spec.size.x / Mathf.Max(0.01f, b.x), spec.size.y / Mathf.Max(0.01f, b.y), 1f);
+                View.transform.localPosition = Vector3.zero;
             }
-            View.color = sprite != null && sprite.name.StartsWith("CreaturePlaceholder") ? spec.placeholder : Color.white;
+            else
+            {
+                // Real art: true size from the sheet's ppu (U-036); its bottom pivot stands on the body's feet.
+                View.transform.localScale = Vector3.one;
+                View.transform.localPosition = new Vector3(0f, -spec.size.y * 0.5f, 0f);
+            }
+            View.color = placeholder ? spec.placeholder : Color.white;
             transform.position = position;
             gameObject.SetActive(true);
             Body.simulated = true;

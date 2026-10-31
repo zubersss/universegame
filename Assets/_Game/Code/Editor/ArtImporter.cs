@@ -20,6 +20,9 @@ namespace Meridian.EditorTools
     /// </summary>
     public sealed class ArtImporter : AssetPostprocessor
     {
+        /// <summary>Bump when the import rules change so Unity re-imports the art everywhere (2: U-036 per-sheet ppu).</summary>
+        public override uint GetVersion() => 2;
+
         /// <summary>Folders the importer watches. Tests point these at a sandbox and restore them.</summary>
         public sealed class Roots
         {
@@ -45,6 +48,8 @@ namespace Meridian.EditorTools
             public int inset;
             public float[] pivot;
             public string facing = "right";
+            /// <summary>Optional pixels per metre for this sheet (D-031/D-034: creature sheets); 0 = the 128 default.</summary>
+            public float ppu;
         }
 
         [Serializable] class BlenderAsset { public string key; public float[] pivot; }
@@ -139,6 +144,7 @@ namespace Meridian.EditorTools
             SetStandaloneFormat(ti, TextureImporterFormat.BC7);
 
             var sheet = SheetFor(assetPath, key);
+            if (sheet != null && sheet.ppu > 0f) ti.spritePixelsPerUnit = sheet.ppu; // world size stays true (U-036)
             if (sheet == null && rule.requiresSheet)
                 Debug.LogError($"[ArtImporter] {assetPath}: frame sheet has no {Path.GetFileName(ArtRules.SheetJsonPath(assetPath))} (contract §5); imported as a single sprite.");
 
