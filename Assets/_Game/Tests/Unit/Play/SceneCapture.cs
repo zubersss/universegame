@@ -420,6 +420,45 @@ namespace Meridian.Tests
             side.dayNight.Override = null;
         }
 
+        /// <summary>U-037 evidence: the middle of each Earth biome (forest, plains, desert, ocean, taiga, tundra).</summary>
+        [UnityTest]
+        public IEnumerator CaptureBiomes()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+            var side = director.PlanetSide;
+            side.dayNight.Override = 0.45f;
+            var cam = side.sideCamera;
+            cam.GetComponent<Meridian.Player.CameraFollow>().enabled = false;
+            cam.orthographicSize = 14f;
+            int i = 0;
+            foreach (Meridian.Terrain.Biome b in Enum.GetValues(typeof(Meridian.Terrain.Biome)))
+            {
+                i++;
+                Meridian.Terrain.EarthBiomes.Range(b, out int start, out int len);
+                int x = b == Meridian.Terrain.Biome.Forest ? 64 : start + len / 2;
+                if (b == Meridian.Terrain.Biome.Ocean) x = start + 50; // the sloping shelf (~26 m deep here): sea surface and seabed in one view
+                int top = side.terrain.TopSolidY(x);
+                float y = b == Meridian.Terrain.Biome.Ocean ? side.Config.datumY - 13f : top + 6f;
+                cam.transform.position = new Vector3(x + 0.5f, y, cam.transform.position.z);
+                float until = Time.realtimeSinceStartup + 15f;
+                yield return null;
+                while (!side.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                for (int k = 0; k < 5; k++) yield return null;
+                yield return Save(cam, $"{name}_{i}_{b.ToString().ToLowerInvariant()}");
+            }
+            side.dayNight.Override = null;
+        }
+
         static IEnumerator Save(Camera cam, string name)
         {
             var rt = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);

@@ -22,6 +22,9 @@ Shader "MERIDIAN/SideParallax"
         _SkyColor ("Sky color", Color) = (0.45, 0.62, 0.85, 1)
         _Tint ("Day/night tint", Color) = (1, 1, 1, 1)
         _Alpha ("Layers alpha", Float) = 1
+        _SeaLevel ("Sea surface (world y; far below = no sea)", Float) = -100000
+        _WaterColor ("Water color at the surface", Color) = (0.07, 0.24, 0.36, 1)
+        _WaterFade ("Depth (m) over which light falls to 1/e", Float) = 40
     }
     SubShader
     {
@@ -46,6 +49,9 @@ Shader "MERIDIAN/SideParallax"
                 float4 _SkyColor;
                 float4 _Tint;
                 float _Alpha;
+                float _SeaLevel;
+                float4 _WaterColor;
+                float _WaterFade;
             CBUFFER_END
 
             struct Attributes { float4 positionOS : POSITION; };
@@ -91,6 +97,9 @@ Shader "MERIDIAN/SideParallax"
                 if (LayerUV(i.worldXY, cam, _P1, _Q1, uv)) col = Over(col, SAMPLE_TEXTURE2D(_Layer1, sampler_Layer1, uv), _Q1.x, sky);
                 if (LayerUV(i.worldXY, cam, _P2, _Q2, uv)) col = Over(col, SAMPLE_TEXTURE2D(_Layer2, sampler_Layer2, uv), _Q2.x, sky);
                 col = lerp(sky, col, _Alpha);
+                // Under the sea (U-037): no landscape, just water darkening with depth (near-black by ~120 m).
+                float depth = _SeaLevel - i.worldXY.y;
+                if (depth > 0.0) col = _WaterColor.rgb * exp(-depth / _WaterFade);
                 return half4(col * _Tint.rgb, 1);
             }
             ENDHLSL

@@ -39,8 +39,9 @@ namespace Meridian.Tests
         {
             yield return Boot();
             yield return Ready(ArtKeys.Fx.Dust);
-            var pool = Object.FindAnyObjectByType<FxPool>();
-            Assert.NotNull(pool, "FxPool on PlanetSide");
+            Assert.NotNull(Object.FindAnyObjectByType<FxPool>(), "FxPool on PlanetSide");
+            // A private pool: the scene's pool may also get a landing-dust burst while we wait.
+            var pool = new GameObject("TestPool").AddComponent<FxPool>();
             int before = pool.Alive;
             Assert.IsTrue(pool.Play(ArtKeys.Fx.Dust, Vector2.zero));
             Assert.AreEqual(before + 1, pool.Alive);

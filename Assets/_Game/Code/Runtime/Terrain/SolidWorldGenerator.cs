@@ -28,7 +28,10 @@ namespace Meridian.Terrain
         public int SurfaceHeight(int x)
         {
             float n = WorldNoise.Fbm1D(x, width, seed);
-            int h = datum + (int)((n - 0.5f) * 2f * amplitude);
+            // Earth: biome bands (U-037); the forest band keeps exactly this old offset and truncation.
+            int h = planet == PlanetId.Earth
+                ? datum + (int)(EarthBiomes.Height(x, n, datum) - datum)
+                : datum + (int)((n - 0.5f) * 2f * amplitude);
             return h < 1 ? 1 : (h >= height - 1 ? height - 2 : h);
         }
 
@@ -49,9 +52,19 @@ namespace Meridian.Terrain
 
         byte EarthMaterial(int x, int y, int surface, int depth)
         {
+            var biome = EarthBiomes.At(x);
             bool shore = surface <= datum + 1;
+            switch (biome)
+            {
+                case Biome.Desert: return depth < 8 ? TileId.Sand : TileId.Stone;
+                case Biome.Ocean: return depth < 5 ? TileId.Sand : TileId.Stone;
+                case Biome.Tundra:
+                    if (depth == 0) return TileId.Snow;
+                    return depth < 4 ? TileId.Soil : TileId.Stone;
+            }
+            // Forest, plains, taiga: grass over soil over stone; sandy shores; snow only on high peaks.
             if (shore && depth < 4) return TileId.Sand;
-            if (depth == 0) return surface > datum + 20 ? TileId.Snow : TileId.Grass;
+            if (depth == 0) return surface > datum + 40 ? TileId.Snow : TileId.Grass;
             if (depth < 5) return TileId.Soil;
             return TileId.Stone;
         }

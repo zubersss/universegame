@@ -51,7 +51,9 @@ namespace Meridian.Tests
             for (int x = 0; x < c.worldWidth; x++)
             {
                 int h = g.SurfaceHeight(x);
-                Assert.That(h, Is.InRange(c.datumY - 40, c.datumY + 40), $"x={x}");
+                // Earth: down to the ocean trench (≥ 120 m deep, D-010 water to 250; U-037), up to tundra/taiga hills.
+                int low = id == PlanetId.Earth ? c.datumY - 250 : c.datumY - 40, high = id == PlanetId.Earth ? c.datumY + 50 : c.datumY + 40;
+                Assert.That(h, Is.InRange(low, high), $"x={x}");
                 int next = g.SurfaceHeight((x + 1) % c.worldWidth);
                 Assert.LessOrEqual(System.Math.Abs(next - h), 3, $"cliff between x={x} and the next column (wrap included)");
             }

@@ -9,6 +9,7 @@ namespace Meridian.Terrain
     /// </summary>
     public sealed class TerrainChunk : MonoBehaviour
     {
+        public const float WaterAlpha = 0.45f;
 
         public Tilemap solid;
         public Tilemap liquid;
@@ -59,6 +60,8 @@ namespace Meridian.Terrain
             var lr = liquidGo.AddComponent<TilemapRenderer>();
             lr.mode = TilemapRenderer.Mode.Chunk;
             lr.sortingOrder = 1;
+            // See-through water (U-037): the backdrop behind it darkens with depth and the seabed stays visible.
+            chunk.liquid.color = new Color(1f, 1f, 1f, WaterAlpha);
             FixBounds(chunk.liquid);
             return chunk;
         }

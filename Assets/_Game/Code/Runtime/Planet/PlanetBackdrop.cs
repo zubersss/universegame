@@ -43,6 +43,7 @@ namespace Meridian.Planet
         static readonly int[] LayerP = { Shader.PropertyToID("_P0"), Shader.PropertyToID("_P1"), Shader.PropertyToID("_P2") };
         static readonly int[] LayerQ = { Shader.PropertyToID("_Q0"), Shader.PropertyToID("_Q1"), Shader.PropertyToID("_Q2") };
         static readonly int SkyColorId = Shader.PropertyToID("_SkyColor");
+        static readonly int SeaLevelId = Shader.PropertyToID("_SeaLevel");
         static readonly int AlphaId = Shader.PropertyToID("_Alpha");
         static readonly int TintId = Shader.PropertyToID("_Tint");
 
@@ -90,6 +91,8 @@ namespace Meridian.Planet
             view.backgroundColor = Tinted(sky, Tint);
             block.Clear();
             block.SetColor(SkyColorId, sky);
+            // Earth's sea fills up to the Datum (water tiles at y ≤ datum): below it the backdrop is water.
+            block.SetFloat(SeaLevelId, planet.id == PlanetId.Earth ? planet.datumY + 1f : -100000f);
             block.SetColor(TintId, Tint);
             block.SetFloat(AlphaId, Alpha);
             for (int i = 0; i < 3; i++)

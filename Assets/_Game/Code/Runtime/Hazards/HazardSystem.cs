@@ -86,13 +86,7 @@ namespace Meridian.Hazards
             SuitRate = Warm ? (SuitIntegrity < HazardRules.SuitMax ? HazardRules.WarmRecharge : 0f) : -HazardRules.DrainPerSecond(worst);
         }
 
-        /// <summary>Earth tundra until biomes exist: the column's surface is snow (high ground, Bible §7.1).</summary>
-        bool InTundra(Vector2 p)
-        {
-            if (planet.id != PlanetId.Earth || terrain == null || terrain.Generator == null) return false;
-            int x = Mathf.FloorToInt(p.x);
-            int surface = terrain.Generator.SurfaceHeight(terrain.WrapX(x));
-            return terrain.GetTile(x, surface) == TileId.Snow;
-        }
+        /// <summary>Earth's tundra biome (U-037; Bible §7.1, D-032).</summary>
+        bool InTundra(Vector2 p) => planet.id == PlanetId.Earth && EarthBiomes.At(Mathf.FloorToInt(p.x)) == Biome.Tundra;
     }
 }
