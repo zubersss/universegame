@@ -514,3 +514,9 @@ Checked: review_envirosuit.png.
 Moved: B-041 → Done (B-040 rework in progress).
 Decided: none.
 Signals: UNITY still blocked on USER-10.
+
+## Cycle 70 · 2026-10-31 (BLENDER message)
+Checked: review_cinderhulk_night.png v2 (07:26).
+Moved: B-040 → Done (second pass; further polish deferred to M3 fight tuning, anti-loop); B-042 → In Progress.
+Decided: Mk3 band boost skipped.
+Signals: none.

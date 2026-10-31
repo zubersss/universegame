@@ -637,12 +637,12 @@ Files: blender/scripts/gen_backdrop3d.py (bay preset), Assets/_Game/Art/backgrou
 Depends: B-038
 Lead notes: Done (cycle 64): rendered 3D bay with linked ±W copies (geometry, shadows, textures wrap); bevelled grimy panels, star window, I-beams, crane, Halcyon crates; replaces the painted placeholder.
 
-### B-040 · BLENDER · In Progress · M3
+### B-040 · BLENDER · Done · M3
 Goal: Mercury apex `creatures/mercury/cinderhulk` (Bible §7.3): an armored colossus, large class (512 px frames per contract, sheet ≤ 2048), with a white-glowing shell on the day side and a "cooled & cracked" variant clip set (dark shell with glowing fracture lines) for the 2 min after it crosses into night, when it's vulnerable.
 Accept: metaball standard; two shell states readable at 60 px/m; emission maps for both; stamped review.
 Files: blender/scripts/build_creatures_mercury.py, Assets/_Game/Art/creatures/mercury/
 Depends: B-029
-Lead notes: Cycle 62. M3 requires killable apexes for the inner planets. (Cycle 67) FAILED review (review_cinderhulk_day/night.png). Day/night shells are distinct (good), and 400 px × 5 is approved (D-042). But it reads as a toy tortoise or table, not a colossus: (1) a real head with a heavy jaw and brow ridge, at least 1/4 of body length, not a small ball; (2) thick jointed legs with an elbow/knee bend and splayed clawed feet, not straight pillars; (3) the dome edge must overhang the flank irregularly, with plate edges, not a straight cut line; (4) the tail club as a bony mace on a tapering tail, its own material, not shell-patterned balls; (5) a lower, wider stance with the head held below the dome line so it looks heavy. Keep the rig, the clips, and both shell states.
+Lead notes: Done v2 (cycle 70): irregular shingled dome edge, lower heavy stance, clawed jointed legs, tusked head below the dome; day + night sheets, 400 px × 5 (D-042), 102.25 px/m. Remaining polish (head and tail-mace readability at side view) is deferred to the M3 apex fight tuning, when the fight shows what needs to read.
 
 ### B-041 · BLENDER · Done · M3
 Goal: Envirosuit tiers for the surveyor: `characters/surveyor/{mk1,mk2,mk3}` variants of the B-023 sheet (same layout, clips, pivot), with visible upgrades: Mk1 thermal/cryo pads, Mk2 armored plating + pressure collar, Mk3 full hard-shell with emissive visor bands.
@@ -651,7 +651,7 @@ Files: blender/scripts/build_surveyor.py, Assets/_Game/Art/characters/surveyor/
 Depends: B-023
 Lead notes: Done (cycle 69): surveyor mk1 (gold foil pads), mk2 (gunmetal plates + pressure collar), mk3 (white hard shell, larger helmet); identical layout to base. Mk3 emissive bands faint at 60 px/m (acceptable; optional boost later).
 
-### B-042 · BLENDER · Ready · M3
+### B-042 · BLENDER · In Progress · M3
 Goal: Icons batch 2 (M3 resources and crafting, Bible §7/§8): solarite, vitriol_glass, sulfur, basalt, nickel, graphite, polar_ice, deep_core_sample, launch_fuel_cell, suit_patch, cryo_pad, thermal_pad, radiation_liner, smelter_bar_iron, smelter_bar_copper, circuit_board (16 icons, same icon camera and lights as B-013).
 Accept: readable at 32 px; same style as batch 1 (the montage shows both batches side by side); stamped review.
 Files: blender/scripts/build_icons.py, Assets/_Game/Art/icons/
