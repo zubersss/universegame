@@ -1,0 +1,82 @@
+{
+  "key": "characters/surveyor/mk2",
+  "frame_width": 256,
+  "frame_height": 256,
+  "columns": 7,
+  "gutter": 4,
+  "frames": 46,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.0390625
+  ],
+  "facing": "right",
+  "animations": [
+    {
+      "name": "idle",
+      "start": 0,
+      "length": 6,
+      "loop": true
+    },
+    {
+      "name": "walk",
+      "start": 6,
+      "length": 8,
+      "loop": true
+    },
+    {
+      "name": "run",
+      "start": 14,
+      "length": 8,
+      "loop": true
+    },
+    {
+      "name": "jump",
+      "start": 22,
+      "length": 3,
+      "loop": false
+    },
+    {
+      "name": "fall",
+      "start": 25,
+      "length": 2,
+      "loop": true
+    },
+    {
+      "name": "land",
+      "start": 27,
+      "length": 3,
+      "loop": false
+    },
+    {
+      "name": "dig",
+      "start": 30,
+      "length": 6,
+      "loop": true
+    },
+    {
+      "name": "aim",
+      "start": 36,
+      "length": 2,
+      "loop": true
+    },
+    {
+      "name": "hurt",
+      "start": 38,
+      "length": 2,
+      "loop": false
+    },
+    {
+      "name": "death",
+      "start": 40,
+      "length": 6,
+      "loop": false
+    }
+  ],
+  "hitbox": {
+    "x": 0.375,
+    "y": 0.0390625,
+    "w": 0.25,
+    "h": 0.88
+  }
+}

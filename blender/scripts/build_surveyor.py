@@ -293,10 +293,64 @@ def attach(ob, parent, coll):
     set_parent(ob, parent)
 
 
-def build(out_path=DEFAULT_OUT):
-    bpy.ops.wm.read_factory_settings(use_empty=True)
-    scene = bpy.context.scene
-    coll = bpy.data.collections.new("surveyor")
+def envirosuit(tier, coll, M, torso, head, joints, hz):
+    """B-041 Envirosuit tiers, added over the base suit (same rig, clips and pivot, so UNITY
+    swaps the sheet). Each tier includes the previous one's upgrades:
+      mk1  thermal/cryo: quilted insulation pads (thighs, forearms, chest) with orange heater
+           coil stripes (emission).
+      mk2  + armour: gunmetal plates on chest, upper arms, thighs and shins; thick pressure
+           collar ring.
+      mk3  + full hard shell: large sculpted shell plates over the limbs and pack, a bigger
+           helmet shell with cyan emissive visor bands and a chest light band."""
+    lvl = {"mk1": 1, "mk2": 2, "mk3": 3}[tier]
+    quilt = fabric_material(f"quilt_{tier}", (210, 172, 92), (164, 128, 64), folds=0.5)      # gold thermal foil
+    coil = flat_material(f"coil_{tier}", (90, 40, 16), emit=(255, 130, 50), strength=1.4)
+    armor = flat_material(f"armor_{tier}", (92, 96, 104), metallic=0.7, rough=0.4)
+    armor_f = flat_material(f"armor_f_{tier}", (78, 82, 88), metallic=0.7, rough=0.4)
+    shellm = flat_material(f"hardshell_{tier}", (226, 228, 232), metallic=0.2, rough=0.3)
+    shellm_f = flat_material(f"hardshell_f_{tier}", (192, 194, 198), metallic=0.2, rough=0.3)
+    band = flat_material(f"vband_{tier}", (20, 60, 80), emit=(110, 230, 255), strength=1.8)
+    sz = HIP_Z + SHOULDER_Z
+    # mk1: insulation pads + heater coils
+    attach(rbox(f"{tier}_chestpad", (0.06, 0.38, 0.26), (0.15, 0, HIP_Z + 0.2), quilt, 0.03), torso, coll)
+    for side, sy in (("n", -1), ("f", 1)):
+        J = joints[side]
+        attach(rbox(f"{tier}_thighpad_{side}", (0.23, 0.22, 0.3), (0.0, sy * HIP_Y, HIP_Z - 0.24), quilt, 0.05), J["hip"], coll)
+        attach(rbox(f"{tier}_thighcoil_{side}", (0.012, 0.05, 0.2), (0.106, sy * HIP_Y, HIP_Z - 0.26), coil, 0.004), J["hip"], coll)
+        attach(rbox(f"{tier}_forepad_{side}", (0.15, 0.15, 0.2), (0.0, sy * SHOULDER_Y, sz - UPPER - 0.14), quilt, 0.04), J["el"], coll)
+        attach(rbox(f"{tier}_forecoil_{side}", (0.012, 0.04, 0.14), (0.066, sy * SHOULDER_Y, sz - UPPER - 0.14), coil, 0.004), J["el"], coll)
+    if lvl >= 2:
+        # mk2: armour plates + pressure collar
+        attach(rbox(f"{tier}_chestplate", (0.08, 0.4, 0.3), (0.175, 0, HIP_Z + 0.33), armor, 0.03), torso, coll)
+        attach(tube(f"{tier}_pcollar", 0.19, 0.11, (0, 0, HIP_Z + NECK_Z - 0.02), armor), torso, coll)
+        for side, sy in (("n", -1), ("f", 1)):
+            J = joints[side]
+            am = armor if side == "n" else armor_f
+            attach(ball(f"{tier}_pauldron_{side}", 0.125, (0, sy * SHOULDER_Y, sz + 0.01), am, (1.1, 1.0, 0.85)), J["sh"], coll)
+            attach(rbox(f"{tier}_uarm_{side}", (0.15, 0.15, 0.2), (0.0, sy * SHOULDER_Y, sz - 0.13), am, 0.04), J["sh"], coll)
+            attach(rbox(f"{tier}_thighplate_{side}", (0.06, 0.2, 0.26), (0.11, sy * HIP_Y, HIP_Z - 0.22), am, 0.025), J["hip"], coll)
+            attach(rbox(f"{tier}_shin_{side}", (0.08, 0.17, 0.34), (0.075, sy * HIP_Y, HIP_Z - THIGH - 0.2), am, 0.025), J["kn"], coll)
+    if lvl >= 3:
+        # mk3: full hard shell, bigger helmet, emissive visor bands
+        attach(ball(f"{tier}_helmshell", 0.168, (-0.012, 0, hz + 0.008), shellm, (1.0, 1.0, 1.02)), head, coll)
+        attach(ball(f"{tier}_visor", 0.15, (0.04, 0, hz - 0.005), flat_material(f"visor_{tier}", (20, 26, 34), metallic=0.8,
+               emit=(90, 200, 255), strength=0.3, rough=0.1), scale=(1.0, 0.86, 0.66)), head, coll)
+        for j, dz in enumerate((0.06, -0.045)):
+            attach(rbox(f"{tier}_vband{j}", (0.02, 0.2, 0.012), (0.16, 0, hz + dz), band, 0.004), head, coll)
+        attach(rbox(f"{tier}_chestshell", (0.09, 0.4, 0.4), (0.13, 0, HIP_Z + 0.27), shellm, 0.06), torso, coll)
+        attach(rbox(f"{tier}_chestband", (0.012, 0.3, 0.02), (0.18, 0, HIP_Z + 0.42), band, 0.004), torso, coll)
+        attach(rbox(f"{tier}_packshell", (0.24, 0.38, 0.5), (-0.26, 0, HIP_Z + 0.3), shellm, 0.07), torso, coll)
+        for side, sy in (("n", -1), ("f", 1)):
+            J = joints[side]
+            sm = shellm if side == "n" else shellm_f
+            attach(ball(f"{tier}_shoulder_{side}", 0.125, (0, sy * SHOULDER_Y, sz), sm, (1.05, 0.95, 0.9)), J["sh"], coll)
+            attach(rbox(f"{tier}_fore_{side}", (0.15, 0.15, 0.24), (0.0, sy * SHOULDER_Y, sz - UPPER - 0.13), sm, 0.05), J["el"], coll)
+            attach(rbox(f"{tier}_thighshell_{side}", (0.24, 0.22, 0.34), (0.0, sy * HIP_Y, HIP_Z - 0.2), sm, 0.06), J["hip"], coll)
+            attach(rbox(f"{tier}_shinshell_{side}", (0.18, 0.17, 0.34), (0.02, sy * HIP_Y, HIP_Z - THIGH - 0.2), sm, 0.05), J["kn"], coll)
+
+
+def build_one(scene, tier=None):
+    coll = bpy.data.collections.new("surveyor" if tier is None else f"surveyor_{tier}")
     scene.collection.children.link(coll)
 
     def suit(name, a, b, dark=1.0):
@@ -383,7 +437,17 @@ def build(out_path=DEFAULT_OUT):
         attach(rbox(f"boot_{side}", (0.29, 0.14, ANKLE_H + 0.04), (0.06, sy * HIP_Y, az - ANKLE_H / 2 + 0.02), M["boot_" + side], 0.035), an, coll)
         joints[side] = dict(sh=sh, el=el, hip=hp, kn=kn, an=an)
 
+    if tier:
+        envirosuit(tier, coll, M, torso, head, joints, hz)
     animate(root, torso, head, joints)
+
+
+def build(out_path=DEFAULT_OUT):
+    """Base suit first (keeps its object names), then the three Envirosuit tiers (B-041)."""
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    scene = bpy.context.scene
+    for tier in (None, "mk1", "mk2", "mk3"):
+        build_one(scene, tier)
     scene.frame_start = 1
     scene.frame_end = max(CLIP_START[c] + CLIP_LEN[c] - 1 for c in CLIP_ORDER)
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
