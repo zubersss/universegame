@@ -31,6 +31,16 @@ Shader "MERIDIAN/SideParallax"
         _Datum ("Planet Datum (world y)", Float) = 320
         _HorizonOffset ("Far horizon relative to layer 0's anchor", Float) = -4
         _GroundColor ("Hazy ground below the horizon", Color) = (0.3, 0.25, 0.2, 1)
+        _WallMap ("Per column: original ground line, near slot, deep slot (U-040)", 2D) = "black" {}
+        _WallOrigin ("World x of the wall map's first column", Float) = 0
+        _WallTex0 ("Wall: near-surface sheet", 2D) = "black" {}
+        _WallTex1 ("Wall: deep rock sheet", 2D) = "black" {}
+        _WallTex2 ("Wall: sand / ice sheet", 2D) = "black" {}
+        _WallRect0 ("UV rect of slot 0's interior tile", Vector) = (0, 0, 0, 0)
+        _WallRect1 ("UV rect of slot 1's interior tile", Vector) = (0, 0, 0, 0)
+        _WallRect2 ("UV rect of slot 2's interior tile", Vector) = (0, 0, 0, 0)
+        _WallDark ("Wall brightness", Float) = 0.32
+        _WallNear ("Near material depth (m)", Float) = 4
     }
     SubShader
     {
@@ -49,6 +59,10 @@ Shader "MERIDIAN/SideParallax"
             TEXTURE2D(_Layer0); SAMPLER(sampler_Layer0);
             TEXTURE2D(_Layer1); SAMPLER(sampler_Layer1);
             TEXTURE2D(_Layer2); SAMPLER(sampler_Layer2);
+            TEXTURE2D(_WallMap); SAMPLER(sampler_point_clamp_WallMap);
+            TEXTURE2D(_WallTex0); SAMPLER(sampler_WallTex0);
+            TEXTURE2D(_WallTex1); SAMPLER(sampler_WallTex1);
+            TEXTURE2D(_WallTex2); SAMPLER(sampler_WallTex2);
             CBUFFER_START(UnityPerMaterial)
                 float4 _P0, _P1, _P2;
                 float4 _Q0, _Q1, _Q2;
@@ -61,6 +75,10 @@ Shader "MERIDIAN/SideParallax"
                 float _Datum;
                 float _HorizonOffset;
                 float4 _GroundColor;
+                float _WallOrigin;
+                float4 _WallRect0, _WallRect1, _WallRect2;
+                float _WallDark;
+                float _WallNear;
             CBUFFER_END
 
             struct Attributes { float4 positionOS : POSITION; };
@@ -80,7 +98,7 @@ Shader "MERIDIAN/SideParallax"
             {
                 float anchor = _Datum + (cam.y - _Datum) * (1.0 - q.w);
                 uv = float2((world.x - cam.x * (1.0 - p.z)) / p.x, (world.y - anchor - p.w) / p.y);
-                if (q.z < 0.5 || uv.y < 0.0) return false; // not loaded, or below its sheet
+                if (q.z < 0.5 || uv.y < q.y) return false; // not loaded, or below its own ground line (no hanging silhouettes)
                 // Keep v off the very edge rows so clamping never picks up a filtered border.
                 uv.y = clamp(uv.y, 0.5 / 1024.0, 1.0 - 0.5 / 1024.0);
                 return true;
@@ -90,6 +108,19 @@ Shader "MERIDIAN/SideParallax"
             {
                 s.rgb = lerp(s.rgb, sky, haze);
                 return lerp(col, s.rgb, s.a);
+            }
+
+            // U-040 background wall of column c: the material that was there, dark, tiled 1 m per tile.
+            half3 Wall(float2 world, float top, float near, float deep)
+            {
+                float depth = top + 1.0 - world.y;
+                float slot = depth < _WallNear ? near : deep;
+                float2 f = frac(world);
+                half3 c;
+                if (slot < 0.5) c = SAMPLE_TEXTURE2D(_WallTex0, sampler_WallTex0, _WallRect0.xy + f * _WallRect0.zw).rgb;
+                else if (slot < 1.5) c = SAMPLE_TEXTURE2D(_WallTex1, sampler_WallTex1, _WallRect1.xy + f * _WallRect1.zw).rgb;
+                else c = SAMPLE_TEXTURE2D(_WallTex2, sampler_WallTex2, _WallRect2.xy + f * _WallRect2.zw).rgb;
+                return c * _WallDark;
             }
 
             half4 frag(Varyings i) : SV_Target
@@ -105,7 +136,14 @@ Shader "MERIDIAN/SideParallax"
                 col = lerp(sky, col, _Alpha);
                 // Under the sea (U-037): no landscape, just water darkening with depth (near-black by ~120 m).
                 float depth = _SeaLevel - i.worldXY.y;
-                if (depth > 0.0) col = _WaterColor.rgb * exp(-depth / _WaterFade);
+                if (depth > 0.0) col = _WaterColor.rgb; // the UnderwaterTint overlay darkens it with depth (U-040)
+                // Below a column's original ground line: the dark wall of its material (dug holes, caves, tubes).
+                float u = (floor(i.worldXY.x) - _WallOrigin + 0.5) / 256.0;
+                if (u > 0.0 && u < 1.0 && _WallRect1.z > 0.0)
+                {
+                    float4 m = SAMPLE_TEXTURE2D_LOD(_WallMap, sampler_point_clamp_WallMap, float2(u, 0.5), 0);
+                    if (i.worldXY.y < m.r + 1.0) col = Wall(i.worldXY, m.r, m.g, m.b);
+                }
                 return half4(col * _Tint.rgb, 1);
             }
             ENDHLSL

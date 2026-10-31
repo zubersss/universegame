@@ -66,6 +66,11 @@ namespace Meridian.Tests
             Assert.AreSame(reg.litEmissive, FxSheet.Get(ArtKeys.Fx.Thruster).material, "thruster has an emission map");
             Assert.AreSame(reg.litEmissive, FxSheet.Get(ArtKeys.Fx.DigSparks).material, "dig sparks have an emission map");
             Assert.AreSame(reg.lit, FxSheet.Get(ArtKeys.Fx.Dust).material, "dust has none");
+            yield return Ready(ArtKeys.Fx.HeatShimmer);
+            Assert.AreSame(reg.litEmissive, FxSheet.Get(ArtKeys.Fx.HeatShimmer).material, "B-030 entry shimmer has an emission map");
+            var fx = Object.FindAnyObjectByType<SceneDirector>().PlanetSide.ship.GetComponent<ShipFx>();
+            Assert.IsFalse(fx.Shimmer.unlit, "shimmer glows through its emission map, not the unlit stand-in");
+            Assert.AreEqual(Color.white, fx.Shimmer.target.color, "no orange tint over the plasma art");
         }
 
         [UnityTest]

@@ -12,7 +12,9 @@ namespace Meridian.Planet.POI
         public readonly Vector2 size;
         /// <summary>Solid props get a box collider of `size` you can stand on (U-035: pad, crates).</summary>
         public readonly bool solid;
-        public PoiProp(string key, float dx, float dy, Vector2 size, bool solid = false) { this.key = key; this.dx = dx; this.dy = dy; this.size = size; this.solid = solid; }
+        /// <summary>Solid props: the art row (pixels from the top) where the standing surface starts; 0 = the art's top (U-040: the pad deck, not its studs).</summary>
+        public readonly int topRow;
+        public PoiProp(string key, float dx, float dy, Vector2 size, bool solid = false, int topRow = 0) { this.key = key; this.dx = dx; this.dy = dy; this.size = size; this.solid = solid; this.topRow = topRow; }
     }
 
     /// <summary>
@@ -170,7 +172,7 @@ namespace Meridian.Planet.POI
             },
             props = new[]
             {
-                new PoiProp("props/common/landing_pad", 22f, 0f, new Vector2(12f, 12f * 72f / 488f), solid: true), // deck on legs, ~1.8 m
+                new PoiProp("props/common/landing_pad", 22f, 0f, new Vector2(12f, 12f * 72f / 488f), solid: true, topRow: 17), // deck on legs, ~1.8 m; studs above row 17
                 new PoiProp("props/common/lamp", 9f, 0f, new Vector2(0.7f, 0.7f * 320f / 96f)),
                 new PoiProp("props/common/lamp", 31f, 0f, new Vector2(0.7f, 0.7f * 320f / 96f)),
                 new PoiProp("props/common/storage_crate", 2.6f, 0f, new Vector2(1.25f, 1f), solid: true),

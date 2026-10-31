@@ -19,6 +19,7 @@ MonoBehaviour:
   - characters/surveyor/base
   - fx/dig_sparks/base
   - fx/escape_band/base
+  - fx/heat_shimmer/base
   - fx/thruster/base
   - planets/earth/glow
   - planets/jupiter/glow
@@ -110,6 +111,52 @@ MonoBehaviour:
       length: 6
       loop: 0
   - key: creatures/earth/wolf
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 6
+      loop: 1
+    - name: walk
+      start: 6
+      length: 8
+      loop: 1
+    - name: attack
+      start: 14
+      length: 6
+      loop: 0
+    - name: hurt
+      start: 20
+      length: 2
+      loop: 0
+    - name: death
+      start: 22
+      length: 6
+      loop: 0
+  - key: creatures/mars/dustskater
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 6
+      loop: 1
+    - name: walk
+      start: 6
+      length: 8
+      loop: 1
+    - name: attack
+      start: 14
+      length: 6
+      loop: 0
+    - name: hurt
+      start: 20
+      length: 2
+      loop: 0
+    - name: death
+      start: 22
+      length: 6
+      loop: 0
+  - key: creatures/mars/scree_stalker
     fps: 12
     clips:
     - name: idle

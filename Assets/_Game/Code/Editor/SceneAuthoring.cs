@@ -196,6 +196,7 @@ namespace Meridian.EditorTools
             planetBackdrop.view = sideComp.sideCamera;
             planetBackdrop.terrain = sideComp.terrain;
             planetBackdrop.layerMaterial = EnsureMaterial("Assets/_Game/Settings/Materials/SideParallax.mat", "MERIDIAN/SideParallax");
+            planetBackdrop.underwaterMaterial = EnsureMaterial("Assets/_Game/Settings/Materials/UnderwaterTint.mat", "MERIDIAN/UnderwaterTint");
             sideComp.backdrop = planetBackdrop;
 
             var sideAmbient = AddGlobalLight(sideRoot.transform);
@@ -234,6 +235,7 @@ namespace Meridian.EditorTools
             pois.view = sideComp.sideCamera;
             sideComp.pois = pois;
             sideHud.pois = pois;
+            planetBackdrop.pois = pois; // U-040 walls follow stamp ground lines
             var fxGo = new GameObject("FX");
             fxGo.transform.SetParent(sideRoot.transform, false);
             var sideFx = fxGo.AddComponent<Meridian.FX.SideFx>(); // U-033 dig sparks, landing and touchdown dust

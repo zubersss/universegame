@@ -80,7 +80,7 @@ namespace Meridian.Planet.POI
             sr.sprite = box;
             sr.color = poi.planet == PlanetId.Earth ? new Color(0.55f, 0.57f, 0.6f, 1f) : new Color(0.5f, 0.38f, 0.3f, 1f);
             go.transform.localScale = new Vector3(prop.size.x, prop.size.y, 1f);
-            LoadArt(sr, prop.key, prop.size.x);
+            LoadArt(sr, prop.key, prop.size.x, prop.topRow);
             if (prop.solid)
             {
                 // Its own unscaled child of the POI root (the art rescales the sprite): you can stand on it.
@@ -99,6 +99,19 @@ namespace Meridian.Planet.POI
         readonly Dictionary<SpriteRenderer, BoxCollider2D> colliderOf = new Dictionary<SpriteRenderer, BoxCollider2D>();
         public IReadOnlyList<BoxCollider2D> Solids => solids;
 
+        /// <summary>Whether column x lies in a placed POI stamp, and that stamp's ground line (U-040 walls follow it).</summary>
+        public bool StampGroundAt(int x, out int groundY)
+        {
+            foreach (var p in placed)
+            {
+                int w = width > 0 ? width : 1 << 30;
+                int d = ((x - p.def.x) % w + w) % w;
+                if (d < p.def.Width) { groundY = p.groundY; return true; }
+            }
+            groundY = 0;
+            return false;
+        }
+
         /// <summary>Top of the highest solid prop overlapping world x0..x1 (U-035: the ship lands on the pad), or -∞.</summary>
         public float SolidTopOver(float x0, float x1)
         {
@@ -112,7 +125,7 @@ namespace Meridian.Planet.POI
             return top;
         }
 
-        void LoadArt(SpriteRenderer sr, string key, float width)
+        void LoadArt(SpriteRenderer sr, string key, float width, int topRow = 0)
         {
             var loc = Addressables.LoadResourceLocationsAsync(key);
             loc.Completed += l =>
@@ -137,8 +150,11 @@ namespace Meridian.Planet.POI
                     if (colliderOf.TryGetValue(sr, out var box2d) && box2d != null)
                     {
                         var b = sr.bounds;
-                        box2d.transform.position = new Vector3(b.center.x, b.center.y, 0f);
-                        box2d.size = new Vector2(b.size.x, b.size.y);
+                        // The standing surface: topRow pixels below the top of the sprite rect (studs and rails stay walk-through).
+                        float rectTop = sr.transform.TransformPoint(new Vector3(0f, (pick.rect.height - pick.pivot.y) / pick.pixelsPerUnit, 0f)).y;
+                        float top = topRow > 0 ? rectTop - topRow / pick.pixelsPerUnit * sr.transform.lossyScale.y : b.max.y;
+                        box2d.transform.position = new Vector3(b.center.x, (b.min.y + top) * 0.5f, 0f);
+                        box2d.size = new Vector2(b.size.x, top - b.min.y);
                     }
                 };
             };

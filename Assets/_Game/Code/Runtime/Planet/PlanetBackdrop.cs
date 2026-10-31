@@ -98,6 +98,7 @@ namespace Meridian.Planet
         public void ConfigureFor(PlanetConfig planet)
         {
             Release();
+            ResetWalls();
             Planet = planet.id;
             LayersLoaded = 0;
             var sky = SkyColor(planet.id);
@@ -106,6 +107,8 @@ namespace Meridian.Planet
             block.SetColor(SkyColorId, sky);
             // Earth's sea fills up to the Datum (water tiles at y ≤ datum): below it the backdrop is water.
             block.SetFloat(SeaLevelId, planet.id == PlanetId.Earth ? planet.datumY + 1f : -100000f);
+            seaLevel = planet.id == PlanetId.Earth ? planet.datumY + 1f : float.NegativeInfinity;
+            if (underwaterMaterial != null) underwaterMaterial.SetFloat(SeaLevelId, planet.datumY + 1f);
             block.SetFloat(DatumId, planet.datumY);
             block.SetFloat(HorizonId, BaseOffset(0) + ContentBase[0] * TileHeights[0]); // the far ridge's foot
             block.SetColor(GroundId, GroundColor(planet.id));
@@ -116,7 +119,7 @@ namespace Meridian.Planet
                 textures[i] = null;
                 block.SetTexture(LayerTex[i], Texture2D.blackTexture);
                 block.SetVector(LayerP[i], new Vector4(TileHeights[i] * 2f, TileHeights[i], Factors[i], BaseOffset(i))); // 2048×1024 sheets
-                block.SetVector(LayerQ[i], new Vector4(Haze[i], 0f, 0f, Follow[i]));
+                block.SetVector(LayerQ[i], new Vector4(Haze[i], ContentBase[i], 0f, Follow[i])); // y: cut below the layer's own ground line
             }
             quad.SetPropertyBlock(block);
             quad.enabled = true;
@@ -155,7 +158,7 @@ namespace Meridian.Planet
                     textures[i] = op.Result;
                     quad.GetPropertyBlock(block);
                     block.SetTexture(LayerTex[i], op.Result);
-                    block.SetVector(LayerQ[i], new Vector4(Haze[i], 0f, 1f, Follow[i]));
+                    block.SetVector(LayerQ[i], new Vector4(Haze[i], ContentBase[i], 1f, Follow[i]));
                     quad.SetPropertyBlock(block);
                     LayersLoaded++;
                 };
@@ -185,7 +188,144 @@ namespace Meridian.Planet
                 block.SetFloat(AlphaId, alpha);
                 quad.SetPropertyBlock(block);
             }
+            UpdateWalls();
+            UpdateUnderwater();
         }
+
+        // ---------- background walls (U-040) ----------
+
+        /// <summary>Columns covered by the wall map around the camera (±128 m: any zoom).</summary>
+        public const int WallColumns = 256;
+        /// <summary>The near-surface wall material reaches this deep; deeper walls use the deep material.</summary>
+        public const float WallNearDepth = 4f;
+        public const float WallDark = 0.32f;
+
+        /// <summary>POI stamps change the original ground line where they sit (their walls follow the stamp).</summary>
+        public Meridian.Planet.POI.PoiPlacer pois;
+
+        Texture2D wallMap;
+        Color[] wallPixels;
+        int wallOrigin = int.MinValue;
+        bool wallTexturesSet;
+        public bool WallsReady => wallTexturesSet;
+
+        static readonly int WallMapId = Shader.PropertyToID("_WallMap");
+        static readonly int WallOriginId = Shader.PropertyToID("_WallOrigin");
+        static readonly int[] WallTexIds = { Shader.PropertyToID("_WallTex0"), Shader.PropertyToID("_WallTex1"), Shader.PropertyToID("_WallTex2") };
+        static readonly int[] WallRectIds = { Shader.PropertyToID("_WallRect0"), Shader.PropertyToID("_WallRect1"), Shader.PropertyToID("_WallRect2") };
+
+        /// <summary>Wall materials per planet: slot 0 near-surface, 1 deep rock, 2 the special near layer (sand / ice).</summary>
+        static byte[] WallMaterials(PlanetId p) => p == PlanetId.Mars
+            ? new[] { Meridian.Terrain.TileId.Regolith, Meridian.Terrain.TileId.Basalt, Meridian.Terrain.TileId.Ice }
+            : new[] { Meridian.Terrain.TileId.Soil, Meridian.Terrain.TileId.Stone, Meridian.Terrain.TileId.Sand };
+
+        /// <summary>The original ground line of column x (top solid tile before any digging; stamps included).</summary>
+        public int WallTop(int x)
+        {
+            if (pois != null && pois.StampGroundAt(x, out int stamped)) return stamped;
+            return terrain.Generator.SurfaceHeight(terrain.WrapX(x));
+        }
+
+        /// <summary>Near and deep wall slots of column x (biome / landform).</summary>
+        void WallSlots(int x, out int near, out int deep)
+        {
+            deep = 1;
+            near = 0;
+            if (Planet == PlanetId.Earth)
+            {
+                var b = Meridian.Terrain.EarthBiomes.At(x);
+                if (b == Meridian.Terrain.Biome.Desert || b == Meridian.Terrain.Biome.Ocean) near = 2;
+            }
+            else if (Planet == PlanetId.Mars && Meridian.Terrain.MarsLandforms.At(x) == Meridian.Terrain.MarsFeature.PolarCap) near = 2;
+        }
+
+        void UpdateWalls()
+        {
+            if (terrain == null || terrain.Generator == null || !Planet.HasValue) return;
+            if (!wallTexturesSet)
+            {
+                if (!terrain.TileSet.IsReady) return;
+                var mats = WallMaterials(Planet.Value);
+                quad.GetPropertyBlock(block);
+                for (int i = 0; i < 3; i++)
+                {
+                    var tile = terrain.TileSet.Get(mats[i], 46) as UnityEngine.Tilemaps.Tile;
+                    if (tile == null || tile.sprite == null) return;
+                    var tex = tile.sprite.texture;
+                    var r = tile.sprite.textureRect;
+                    block.SetTexture(WallTexIds[i], tex);
+                    block.SetVector(WallRectIds[i], new Vector4(r.x / tex.width, r.y / tex.height, r.width / tex.width, r.height / tex.height));
+                }
+                if (wallMap == null)
+                {
+                    wallMap = new Texture2D(WallColumns, 1, TextureFormat.RGBAFloat, false, true) { filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp, name = "WallMap" };
+                    wallPixels = new Color[WallColumns];
+                }
+                block.SetTexture(WallMapId, wallMap);
+                quad.SetPropertyBlock(block);
+                wallTexturesSet = true;
+                wallOrigin = int.MinValue;
+            }
+            int origin = Mathf.FloorToInt(view.transform.position.x) - WallColumns / 2;
+            if (Mathf.Abs(origin - wallOrigin) < 16) return; // refresh every 16 m of travel (the map spans ±128 m)
+            wallOrigin = origin;
+            for (int i = 0; i < WallColumns; i++)
+            {
+                int x = origin + i;
+                WallSlots(x, out int near, out int deep);
+                wallPixels[i] = new Color(WallTop(x), near, deep, 1f);
+            }
+            wallMap.SetPixels(wallPixels);
+            wallMap.Apply(false, false);
+            quad.GetPropertyBlock(block);
+            block.SetFloat(WallOriginId, origin);
+            quad.SetPropertyBlock(block);
+        }
+
+        // ---------- underwater tint (U-040, LEAD: seabed by water depth) ----------
+
+        /// <summary>Multiply overlay below sea level (Earth): one quad over the world, only while the sea is in view.</summary>
+        public Material underwaterMaterial;
+        MeshRenderer tintQuad;
+        float seaLevel = float.NegativeInfinity;
+        public bool UnderwaterVisible => tintQuad != null && tintQuad.enabled;
+
+        void UpdateUnderwater()
+        {
+            if (underwaterMaterial == null || view == null) return;
+            if (tintQuad == null)
+            {
+                var go = new GameObject("UnderwaterTint");
+                go.transform.SetParent(view.transform, false);
+                go.transform.localPosition = new Vector3(0f, 0f, 2f);
+                go.AddComponent<MeshFilter>().sharedMesh = SpaceWorld.Quad();
+                tintQuad = go.AddComponent<MeshRenderer>();
+                tintQuad.sharedMaterial = underwaterMaterial;
+                tintQuad.sortingOrder = 30; // over terrain, water and the surveyor; under fx and the HUD
+            }
+            float bottom = view.transform.position.y - view.orthographicSize;
+            bool on = !float.IsNegativeInfinity(seaLevel) && bottom < seaLevel;
+            if (tintQuad.enabled != on) tintQuad.enabled = on;
+            if (!on) return;
+            float h = view.orthographicSize * 2f, w = h * Mathf.Max(view.aspect, 2.5f);
+            tintQuad.transform.localScale = new Vector3(w, h, 1f);
+        }
+
+        void OnEnable() => Meridian.Core.RenderWarmup.Warming += OnWarming;
+        void OnDisable() => Meridian.Core.RenderWarmup.Warming -= OnWarming;
+
+        /// <summary>The underwater overlay joins the load warm-up render so the first sea view doesn't stall.</summary>
+        void OnWarming(Camera cam, bool on)
+        {
+            if (cam != view) return;
+            UpdateUnderwater();
+            if (tintQuad == null) return;
+            if (on) tintQuad.enabled = true;
+            else UpdateUnderwater();
+        }
+
+        /// <summary>Forget the wall textures (planet change).</summary>
+        void ResetWalls() { wallTexturesSet = false; wallOrigin = int.MinValue; }
 
         /// <summary>How far layer i's image shifts on screen per metre of camera motion (its factor).</summary>
         public static float ScreenShiftPerMetre(int i) => Factors[i];

@@ -31,12 +31,11 @@ namespace Meridian.FX
                 Main = Make("Main", ArtKeys.Fx.Thruster, new Vector2(-SideShip.HullLength * 0.5f + 0.3f, -0.1f), -90f, new Vector2(2.2f, 2.4f));
                 PodAft = Make("PodAft", ArtKeys.Fx.Thruster, new Vector2(-2.8f, -1.3f), 0f, new Vector2(1.6f, 1.8f));
                 PodFore = Make("PodFore", ArtKeys.Fx.Thruster, new Vector2(2.45f, -1.3f), 0f, new Vector2(1.6f, 1.8f));
-                Shimmer = Make("Shimmer", ArtKeys.Fx.HeatShimmer, new Vector2(0.5f, -1.6f), 0f, new Vector2(9f, 3f));
+                // B-030 entry heat: a 1 m square frame (ppu 128) with the bow-shock arc low in it and the plasma
+                // trailing up. At 13 m the arc (~85% of the width) spans the 11.4 m hull and sits ~0.7 m under
+                // the belly. Its emission map makes it glow through night and dust (Sprite_LitEmissive).
+                Shimmer = Make("Shimmer", ArtKeys.Fx.HeatShimmer, new Vector2(0.5f, 2.4f), 0f, new Vector2(13f, 13f));
                 Shimmer.flicker = 0f;
-                // The shimmer sheet is a pale mask (for a refraction pass later): tint it as the hot glow of entry.
-                Shimmer.target.color = new Color(1f, 0.55f, 0.25f, 1f);
-                Shimmer.transform.localScale = new Vector3(12f, 4.5f, 1f);
-                Shimmer.unlit = true; // heat glows: not darkened by the night or the dust
             }
             else if (top != null)
             {

@@ -56,6 +56,17 @@ namespace Meridian.Tests
             float skids = side.ship.Body.position.y - SideShip.SkidDrop;
             TestContext.Out.WriteLine($"[MERIDIAN] pad top {padTop:F2}, skids {skids:F2}, ground line {camp.groundY + 1}, player feet {side.player.Body.position.y:F2}");
             Assert.AreEqual(padTop, skids, 0.15f, "the Pilgrim rests on the pad deck");
+            // U-040: the collider top is the deck (art row 17 of 72), not the studs above it.
+            SpriteRenderer padArt = null;
+            foreach (var pl in side.pois.placed) padArt = padArt ?? pl.props.Find(r => r != null && r.name == "landing_pad");
+            Assert.IsNotNull(padArt, "pad art placed");
+            var s = padArt.sprite;
+            if (s != null && s.rect.height == 72f)
+            {
+                float rectTop = padArt.transform.TransformPoint(new Vector3(0f, (s.rect.height - s.pivot.y) / s.pixelsPerUnit, 0f)).y;
+                float px = padArt.transform.lossyScale.y / s.pixelsPerUnit;
+                Assert.AreEqual(rectTop - 17f * px, padTop, 0.03f, "pad collider top at the deck line (art row 17), studs walk-through");
+            }
             Assert.AreEqual(100f, GameState.Instance.hull, 1e-3f, "no damage settling");
             Assert.IsTrue(side.player.Grounded, "surveyor standing");
             Assert.AreEqual(camp.groundY + 1f, side.player.Body.position.y, 0.15f, "on the camp's levelled ground");
