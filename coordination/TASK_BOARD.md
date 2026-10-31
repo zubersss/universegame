@@ -336,7 +336,7 @@ Goal: Mars landforms (Bible §7.2): Valles Marineris canyon (wide, 180 m deep, l
 Accept: EditMode tests for each feature's position/size per seed; captures of canyon wall, Olympus flank, polar cap, and a lava tube; streaming within D-019.
 Files: Assets/_Game/Code/Runtime/Terrain/
 Depends: U-007
-Lead notes: Cycle 26. The canyon is where Mars's 2.6× jumps shine. Keep wall ledges jumpable at Mars g.
+Lead notes: Cycle 26. The canyon is where Mars's 2.6× jumps shine. Keep wall ledges jumpable at Mars g. (Cycle 44) FAILED visual review (mars_landforms_sheet.png); sizes per D-040 are fine. Fix: (1) random caves riddle the canyon walls and Olympus into Swiss cheese, so suppress random caves inside landform masses (keep the lava tubes and at most small pockets ≤ 3 m), or cut density by ≥ 80% there; (2) the backdrop breaks at extreme heights (canyon floor, Olympus flank): it squashes into a mirrored band, so anchor the layers to the planet Datum, show sky above the far layer and only the cave/terrain wall below, with no mirrored repeat; (3) Mars entry 1.48 s is too close to the 1.5 s limit, so precompute the landform height profile once per world (or cache per column) and get entry back to ≤ 1.35 s. Re-capture all four views.
 
 ### U-040 · UNITY · Ready · M2
 Goal: Background walls: a dug or natural underground cell shows a dark wall of the surrounding material (soil, stone, sand…) behind it instead of the sky/parallax backdrop; surface holes ≤ 3 m deep show the wall too.
