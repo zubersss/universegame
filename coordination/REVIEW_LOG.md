@@ -623,3 +623,7 @@ Fixed (LEAD): M2SoakTests now sets CreatureDirector.AutoSpawnOverride = true (ba
 ## Cycle 91 · 2026-10-31 (UNITY message)
 Moved: U-041 (4be13c8), U-038 (1c2addc) → Done; U-044 → In Progress.
 Fixed (LEAD): M2SoakTests flight failed at "entered Mars: was Earth". The midnight launch leaves the ship on the night side; it turned in-well and fell back into Earth's ring. Now it points outward at start, thrusts through 90° turns inside the well, routes around Earth outside the well radius, has a 90 s timeout, and logs state at flight end.
+
+## Cycle 92 · 2026-10-31 13:42
+Checked: UNITY busy on U-044 (coding); gate open (2.4 GB, no locks). LEAD started an M2SoakTests run via unity_test.ps1 (holds the lock).
+Signals: none.
