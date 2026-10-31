@@ -651,12 +651,33 @@ Files: blender/scripts/build_surveyor.py, Assets/_Game/Art/characters/surveyor/
 Depends: B-023
 Lead notes: Done (cycle 69): surveyor mk1 (gold foil pads), mk2 (gunmetal plates + pressure collar), mk3 (white hard shell, larger helmet); identical layout to base. Mk3 emissive bands faint at 60 px/m (acceptable; optional boost later).
 
-### B-042 · BLENDER · In Progress · M3
+### B-042 · BLENDER · Done · M3
 Goal: Icons batch 2 (M3 resources and crafting, Bible §7/§8): solarite, vitriol_glass, sulfur, basalt, nickel, graphite, polar_ice, deep_core_sample, launch_fuel_cell, suit_patch, cryo_pad, thermal_pad, radiation_liner, smelter_bar_iron, smelter_bar_copper, circuit_board (16 icons, same icon camera and lights as B-013).
 Accept: readable at 32 px; same style as batch 1 (the montage shows both batches side by side); stamped review.
 Files: blender/scripts/build_icons.py, Assets/_Game/Art/icons/
 Depends: B-013
-Lead notes: Cycle 68. Feeds U-045 inventory and M3 crafting.
+Lead notes: Done (cycle 71): 15 icons (nickel already existed in batch 1, so no duplicate); readable at 32 px on a dark UI; consistent with batch 1.
+
+### B-043 · BLENDER · In Progress · M3
+Goal: Wardens basic tier (Bible §2, §8): `creatures/warden/sentinel` (hovering autonomous drone, centred pivot, flier clip set) and `creatures/warden/sentinel_shot` FX (fx/warden_bolt). Original design: an engineered-but-organic hybrid (Sowing era), a lens eye with emission, and no resemblance to any existing game's drones.
+Accept: reads as a machine-guardian at 60 px/m; attack frames show the lens charging; emission maps; stamped review.
+Files: blender/scripts/build_wardens.py, Assets/_Game/Art/creatures/warden/, fx/warden_bolt/
+Depends: B-032
+Lead notes: Cycle 71. M3 needs basic Wardens.
+
+### B-044 · BLENDER · Ready · M3
+Goal: Venus apex `creatures/venus/veil_serpent` (Bible §7.4): a long ribbon serpent of the acid haze; 400 px × 5 frames (D-042); translucent fins with sulfur-yellow emission; a "chilled" hurt state (frost-white flash when hit by Cryo rounds).
+Accept: reads as huge and graceful (S-curves in idle and move); a segmented chain rig like the shadewyrm; stamped review.
+Files: blender/scripts/build_creatures_venus.py, Assets/_Game/Art/creatures/venus/
+Depends: B-035
+Lead notes: Cycle 71. M3 requires killable apexes for the inner planets.
+
+### B-045 · BLENDER · Ready · M3
+Goal: Venus Aerostat and station props (Bible §7.4): `props/venus/{aerostat_deck,aerostat_balloon,buoyancy_cell,station_hull_a,station_hull_b,meridian_station_door,vent_harvester}` with emission on lights; the balloon is translucent cream with rigging.
+Accept: contract §4 prop rules (props ≤ 512; the balloon may use the large-ship 768 cap if needed, noted in the manifest); Venus palette; stamped review.
+Files: blender/scripts/build_props_venus.py, Assets/_Game/Art/props/venus/
+Depends: B-014
+Lead notes: Cycle 71. Aerostat base building is M3 Venus's core activity.
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.

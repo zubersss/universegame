@@ -520,3 +520,9 @@ Checked: review_cinderhulk_night.png v2 (07:26).
 Moved: B-040 → Done (second pass; further polish deferred to M3 fight tuning, anti-loop); B-042 → In Progress.
 Decided: Mk3 band boost skipped.
 Signals: none.
+
+## Cycle 71 · 2026-10-31 (BLENDER message)
+Checked: review_icons.png (both batches, 32 px row).
+Moved: B-042 → Done; B-043 → In Progress.
+Added: B-043 Wardens basic, B-044 Veil Serpent apex, B-045 Venus Aerostat/station props (remaining M3 art; M4 still capped).
+Signals: UNITY still blocked on USER-10.
