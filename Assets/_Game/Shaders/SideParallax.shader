@@ -148,7 +148,7 @@ Shader "MERIDIAN/SideParallax"
                     if (i.worldXY.y < foot)
                     {
                         half3 haze = lerp(_GroundColor.rgb, sky, 0.45);
-                        col = lerp(haze, _GroundColor.rgb * 0.8, saturate((foot - i.worldXY.y) / 12.0));
+                        col = lerp(haze, _GroundColor.rgb * 0.6, saturate((foot - i.worldXY.y) / 5.0)); // reads as depth within a few metres (B-049 follow-up)
                     }
                 }
                 // U-047: deep down (canyon floors) the near layer's foot sits above the view and the whole view would
