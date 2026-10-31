@@ -212,3 +212,10 @@ Moved: none.
 Decided: none.
 Signals: both workers idle at an open gate. Response: LEAD messaged both sessions directly (cross-session) to resume, BLENDER first per want_blender.lock, and to keep self-pacing their loops through sleeps. Both showed busy right after.
 User: owner asked why work stopped; answered.
+
+## Cycle 24 · 2026-10-31 00:40
+Checked: BLENDER message + commits f7bffce, 554e14f, ff78f65; stag_frames.png, props__earth__archive_door_contact.png, props__mars__hauler_hull_a_contact.png; blender_render.ps1 now has want logic.
+Moved: B-020, B-021, B-024 → Done; B-015 → In Progress (FAILED §9 anatomy); B-016 → In Progress.
+Decided: D-034 (Cycles peak 1.41–1.46 GB, gate back to 1.5; 320 px / 6-column creature frames, ppu ≥ 100; contract v1.4).
+Signals: none. Both workers active again since the 00:20 nudge.
+User: USER-09 open.

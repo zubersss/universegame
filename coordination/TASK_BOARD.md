@@ -349,12 +349,12 @@ Lead notes: M2 draft (cycle 13). The Archive is the story start (Bible §2). Put
 
 ## BLENDER
 
-### B-024 · BLENDER · Ready · M2
+### B-024 · BLENDER · Done · M2
 Goal: HeavyJobLock fairness + memory gate in `tools/blender_render.ps1` (D-026), mirroring U-023.
 Accept: writes `want_blender.lock` while waiting, deletes it on acquire; yields to a fresh `want_unity.lock` after its own job; refuses below 1.5 GB free RAM; one job ≤ 20 min (split `all` exports by category).
 Files: tools/blender_render.ps1
 Depends: —
-Lead notes: BLOCKING (cycle 18): Ready since cycle 10 and skipped. Do it at the start of your next tick. It is light work (no lock needed), and without it UNITY can't see that you are waiting, so your exports stall (B-014/B-017/B-018 queued ~50 min). LEAD filed want_blender.lock 17:41 as a stopgap.
+Lead notes: Done f7bffce (cycle 24): want_blender.lock while waiting, yield, memory gate.
 
 
 ### B-001 · BLENDER · Done · M0
@@ -502,9 +502,9 @@ Goal: Earth creatures `creatures/earth/stag`, `creatures/earth/wolf`.
 Accept: medium class (256 px), standard creature set ≤ 30 frames, `.json`, color + normal.
 Files: blender/sources/creatures/earth/, Assets/_Game/Art/creatures/earth/
 Depends: B-009
-Lead notes: Cycle 22: render flat passes with Cycles CPU at ≥ 1.0 GB free (D-033); run build_creatures_earth.py first (earth.blend predates the death-pose fix). Autofit ppu per sheet is fine (D-031); report the measured Cycles peak.
+Lead notes: FAILED review (cycle 24), §9 grounded anatomy: legs are separate tubes with visible gaps at hip/knee, the body is a capsule, the neck/head read as blocks, and the antlers are undersized for the one exaggeration. Fix: one continuous mesh per animal (Skin modifier on a single connected skeleton + Subdivision, or metaballs converted to mesh), deformed by an armature, not rigid parts; deer proportions (long neck, deep chest, slender legs with visible hock and knee); antlers at least 1.5 × head length with 4+ tines; wolf with a fur-clump silhouette. Frames: 320 px in 6 columns, ppu ≥ 100 (D-034). Apply the same approach to B-016.
 
-### B-016 · BLENDER · Ready · M2
+### B-016 · BLENDER · In Progress · M2
 Goal: Mars creatures `creatures/mars/dustskater` (small, 128 px), `creatures/mars/scree_stalker` (medium).
 Accept: as B-015.
 Files: Assets/_Game/Art/creatures/mars/
@@ -525,19 +525,19 @@ Files: Assets/_Game/Art/planets/<planet>/, blender/sources/planets/<planet>/
 Depends: B-002
 Lead notes: Done 087dcc9 (cycle 19): Mercury (MESSENGER) and Jupiter (Cassini) PD sources, procedural Venus/Saturn/Uranus/Neptune, glows, Saturn rings (smooth at full size). Integration → U-034.
 
-### B-020 · BLENDER · Ready · M2
+### B-020 · BLENDER · Done · M2
 Goal: Earth POI props: `props/earth/{launch_gantry,launch_tower_ruin,archive_door,archive_terminal,beacon}` for the abandoned coastal launch complex and the Survey Archive (Bible §7.1).
 Accept: contract §4 prop rules (≤ 512×512, bottom-center pivot, color + normal, emission where lit); weathered, documentary-naturalistic per §9; `beacon` has an emission pulse-ready map.
 Files: Assets/_Game/Art/props/earth/
 Depends: B-002
-Lead notes: Promoted from Backlog ("2 Earth and 2 Mars POI prop sets").
+Lead notes: Done 554e14f (cycle 24): launch gantry/tower ruin, archive door/terminal, beacon; worn, emission on lights. Gantry stacking per BLENDER handoff.
 
-### B-021 · BLENDER · Ready · M2
+### B-021 · BLENDER · Done · M2
 Goal: Mars POI props: `props/mars/{hauler_hull_a,hauler_hull_b,hauler_cargo,warden_pylon,meridian_beacon}` for the crashed Halcyon hauler and the Warden outpost (Bible §7.2).
 Accept: contract §4 prop rules; rust-dusted per Mars §9 palette; `warden_pylon` and `meridian_beacon` carry emission.
 Files: Assets/_Game/Art/props/mars/
 Depends: B-002
-Lead notes: Promoted from Backlog.
+Lead notes: Done 554e14f (cycle 24): hauler hulls/cargo, Warden pylon, Meridian beacon. Hauler drift reads as a plain slab, so it goes into a later polish task (not a reopen).
 
 ---
 
