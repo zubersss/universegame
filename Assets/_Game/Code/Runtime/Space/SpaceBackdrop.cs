@@ -57,7 +57,9 @@ namespace Meridian.Space
         void LateUpdate()
         {
             if (view == null) return;
-            float h = view.orthographicSize * 2f, w = h * view.aspect;
+            // Generous width: the quads must cover the view at any aspect (16:9 captures from a batch-size screen).
+            float aspect = Mathf.Max(view.aspect, 2.5f);
+            float h = view.orthographicSize * 2f, w = h * aspect;
             var cam = (Vector2)view.transform.position;
             for (int i = 0; i < layers.Length; i++)
             {
@@ -66,7 +68,7 @@ namespace Meridian.Space
                 // A tile spans tilesPerScreenHeight screen heights at the reference zoom, independent of zoom.
                 float tile = 1f / tilesPerScreenHeight[i];
                 float aspectTex = 0.5f; // layers are 2048 × 1024: one tile is twice as wide as tall
-                var scale = new Vector4(view.aspect * aspectTex * tile, tile, 0f, 0f);
+                var scale = new Vector4(aspect * aspectTex * tile, tile, 0f, 0f);
                 var offset = new Vector4(cam.x * parallax[i] * aspectTex / 60f, cam.y * parallax[i] / 60f, 0f, 0f);
                 layers[i].GetPropertyBlock(block);
                 block.SetVector(UVScale, scale);

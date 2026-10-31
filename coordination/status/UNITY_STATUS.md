@@ -1,7 +1,8 @@
 # UNITY STATUS
-Updated: 2026-10-31 02:15 · Session: 1
+Updated: 2026-10-31 02:25 · Session: 1
 ## Current task
-U-034 Space art pass — next (then U-035).
+U-035 Earth spawn camp — next.
+U-034 Space art pass — this commit, Ready for review: SpaceWorld loads moon surfaces where art exists (Luna from planets/luna/surface; others stay grey), Saturn's rings from planets/saturn/rings at 1024 / 220.4 × R = 446.0 u (B-018 handoff), and draws the belt from props/space/asteroid_01..06: one mesh per kind built from each sprite's geometry, 6000 rocks in 400 clumps (35 u spread; an even spread showed ~8 rocks per screen), random rotation, 2–12 u, shade variation; the old flat belt stays as fine dust. SpaceBackdrop covers wide views (no side bars in 16:9 captures). SpaceArtTests 1/1: every planets/<name>/surface address resolves inside Art/ (no placeholder), rings 446.0 u, 6 belt meshes with asteroid textures, Luna textured, 8 glows. Captures: coordination/reports/unity/space_2026-10-31/ (Saturn with rings, Jupiter, Neptune, a belt clump, Earth with Luna + contact sheet). BudgetGate Space rows green: 15 draw calls ≤ 80, avg 3.07 / p99 6.09 ms, 0 B GC. Mars texture memory now 639 MB (P-21, Editor-uncompressed sheets; the rings + asteroid sheets add ~17 MB).
 U-033 FX hookup — this commit, Ready for review (its criteria all green; the gate's memory row is red for an unrelated reason, below).
 - Runtime/FX/: FxSheet (each fx sheet loaded once and shared: frames, first clip and fps from the registry, emissive material when it has an emission map), FxLoop (attached loops: thruster flames, entry glow, Escape band; renderer writes only on change), FxPool (48 pooled one-shots, oldest reused when full, no allocation), ShipFx (side Pilgrim: main engine aft + two belly-pod flames while thrusting, heat glow under the hull when falling > 8 m/s above 30 m; top-down: engine flame while thrusting), SideFx (dig sparks on RigTools.Dug, dust on hard landings ≥ 8 m/s at the feet, dust under both skids on SideShip.TouchedDown). The Escape band now plays its "flow" clip. BudgetMonitor counts fx sprites as particles. ArtMaterials gets an "unlit" slot (URP Sprite-Unlit-Default, set by scene authoring so builds keep the shader) for the entry glow.
 - Evidence: coordination/reports/unity/fx_2026-10-31/ (contact sheet + 6 captures: dig sparks, landing dust after a 13.7 m/s drop, ship flames, entry glow, Escape band, top-down flame). FxTests 3/3 (one-shot plays once and frees, full pool reuses slots; thruster and sparks use Sprite_LitEmissive, dust doesn't; flames on with throttle, off without). BudgetGate new "Mars FX peak" leg (pool kept full every frame, in a storm): 50 alive ≤ 600, 0 B GC, avg 4.02 / p99 6.37 ms, 99 draw calls ≤ 150. EditMode 138/138; PlayMode 52/53 own + LeadQA 2/2 (the one failure is U-032's known 54.8 µs, P-20).
@@ -43,9 +44,9 @@ U-009 Player controller — 089657b — EditMode 75/75, PlayMode 13/13 (+2 skips
 U-007 seam fix — 562f0ff — capture at a fractional camera position showed thin lines between tile rows (bilinear sampling read the neighbor sheet cell). Fix: importer slices terrain cells 1 texel inset (126 px), each Tile scales back to 1 m. Lines gone; streaming unchanged (avg 0.30 ms, p99 0.92 ms, 0/400 frames over 2 ms, worst 2.08 ms, D-019 load "none"). A first try with runtime Sprite.Create sprites caused 100–186 ms hitches and was replaced.
 U-008 Dig and place — f15f617. U-006 Lit preview — 5a75d90.
 ## Next up
-U-034, U-035
+U-035
 ## Ready for review
-U-012 (5fecaeb), U-023 (d692fdb + e2ca48d), U-013 (e047727), U-014 (a289721), U-015 (458709a), U-020 (d455251), U-028 (58b1375), U-017 (72db6b1), U-018 (6aea64d), U-024 (92bd0d7 + U-031 commit), U-031 (0.1.1 build), U-025 (day/night + one-pass backdrop), U-026 (dust storm), U-027 (creatures), U-029 (hazards/Cryo), U-030 (POIs), U-036 (sheet ppu), U-033 (FX)
+U-012 (5fecaeb), U-023 (d692fdb + e2ca48d), U-013 (e047727), U-014 (a289721), U-015 (458709a), U-020 (d455251), U-028 (58b1375), U-017 (72db6b1), U-018 (6aea64d), U-024 (92bd0d7 + U-031 commit), U-031 (0.1.1 build), U-025 (day/night + one-pass backdrop), U-026 (dust storm), U-027 (creatures), U-029 (hazards/Cryo), U-030 (POIs), U-036 (sheet ppu), U-033 (FX), U-034 (space art)
 ## Handoffs
 → BLENDER: terrain sheets are sampled 1 texel inside each 128 px cell (the outer texel ring of every cell is never shown). Keep nothing important in that ring.
 → BLENDER: keys are always 3 segments; single-variant assets use `base`. Character sheets at 256 px with 4 px gutters fit 2048 only up to 7 columns.

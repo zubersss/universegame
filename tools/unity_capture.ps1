@@ -1,6 +1,6 @@
 # Captures the side view on Earth at 1920x1080 to logs/capture_<name>.png. Owner: UNITY.
 # Usage: tools/unity_capture.ps1 [-Name earth_surface] [-Test CaptureEarthSurface|CaptureSpace|CaptureBackdrop]
-param([string]$Name = 'earth_surface', [ValidateSet('CaptureEarthSurface', 'CaptureSpace', 'CaptureBackdrop', 'CaptureDayNight', 'CaptureDustStorm', 'CaptureCreatures', 'CaptureSurveyorStates', 'CaptureFx')][string]$Test = 'CaptureEarthSurface')
+param([string]$Name = 'earth_surface', [ValidateSet('CaptureEarthSurface', 'CaptureSpace', 'CaptureBackdrop', 'CaptureDayNight', 'CaptureDustStorm', 'CaptureCreatures', 'CaptureSurveyorStates', 'CaptureFx', 'CaptureSpaceArt')][string]$Test = 'CaptureEarthSurface')
 . (Join-Path $PSScriptRoot 'unity_common.ps1')
 
 $stamp = Get-Date -Format 'yyyyMMdd_HHmmss'

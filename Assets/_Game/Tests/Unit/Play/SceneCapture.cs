@@ -348,6 +348,47 @@ namespace Meridian.Tests
             side.dayNight.Override = null;
         }
 
+        /// <summary>U-034 evidence: Saturn with its rings, Jupiter, Neptune and a belt segment (top-down).</summary>
+        [UnityTest]
+        public IEnumerator CaptureSpaceArt()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
+            director.SetView(ViewMode.Space);
+            var world = UnityEngine.Object.FindAnyObjectByType<Meridian.Space.SpaceWorld>();
+            var cam = director.Space.GetComponentInChildren<Camera>();
+            var follow = cam.GetComponent<Meridian.Space.SpaceCamera>();
+            if (follow != null) follow.enabled = false;
+            float until = Time.realtimeSinceStartup + 15f;
+            while ((world.Rings == null || world.Rings.sprite == null || world.BeltArt.Count < Meridian.Space.SpaceWorld.AsteroidKinds) && Time.realtimeSinceStartup < until) yield return null;
+            for (int i = 0; i < 30; i++) yield return null;
+            IEnumerator Shot(string label, Vector2 at, float size)
+            {
+                cam.orthographicSize = size;
+                cam.transform.position = new Vector3(at.x, at.y, cam.transform.position.z);
+                for (int i = 0; i < 3; i++) yield return null;
+                yield return Save(cam, $"{name}_{label}");
+            }
+            yield return Shot("1_saturn", world.Find("saturn").Value.position, 260f);
+            yield return Shot("2_jupiter", world.Find("jupiter").Value.position, 110f);
+            yield return Shot("3_neptune", world.Find("neptune").Value.position, 120f);
+            var belt = world.BeltClusters.Count > 0 ? world.BeltClusters[0] : new Vector2(Meridian.Space.SpaceLayout.BeltInner + 300f, 0f);
+            foreach (var mr in world.BeltArt) Debug.Log($"[MERIDIAN] {mr.name}: enabled {mr.enabled} visible {mr.isVisible} verts {mr.GetComponent<MeshFilter>().sharedMesh.vertexCount} bounds {mr.bounds} mat {mr.sharedMaterial?.name} layer {mr.sortingLayerName}/{mr.sortingOrder}");
+            var fb = world.transform.Find("Belt");
+            Debug.Log($"[MERIDIAN] fallback belt enabled {(fb != null ? fb.GetComponent<MeshRenderer>().enabled.ToString() : "none")}");
+            yield return Shot("4_belt", belt, Meridian.Transitions.TransitionDirector.SpaceDefaultSize);
+            yield return Shot("5_earth_luna", world.Find("earth").Value.position + new Vector2(60f, 60f), 120f);
+        }
+
         static IEnumerator Save(Camera cam, string name)
         {
             var rt = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);

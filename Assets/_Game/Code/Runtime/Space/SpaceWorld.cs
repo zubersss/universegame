@@ -17,6 +17,8 @@ namespace Meridian.Space
         public Material discMaterial;
         public Material lineMaterial;
         public int beltAsteroids = 900;
+        /// <summary>Asteroids in the art belt (U-034): dense enough to read as a belt at flight zoom; still 6 draw calls.</summary>
+        public int beltArtAsteroids = 6000;
         public int seed = 1969;
 
         readonly List<BodyInfo> bodies = new List<BodyInfo>();
@@ -84,8 +86,21 @@ namespace Meridian.Space
             block.SetColor(Tint, b.parent != null ? new Color(0.62f, 0.6f, 0.58f) : Color.white);
             mr.SetPropertyBlock(block);
 
-            if (b.parent != null) return; // moons: flat grey until their art exists (B-017 luna)
+            if (b.parent != null)
+            {
+                // Moons: their surface art where it exists (B-017: luna), flat grey otherwise.
+                LoadIfExists($"planets/{b.name}/surface", tex =>
+                {
+                    if (mr == null) return;
+                    mr.GetPropertyBlock(block);
+                    block.SetTexture(MainTex, tex);
+                    block.SetColor(Tint, Color.white);
+                    mr.SetPropertyBlock(block);
+                });
+                return;
+            }
             AddGlow(parent, b);
+            if (b.name == "saturn") AddRings(parent, b);
             var h = Addressables.LoadAssetAsync<Texture2D>($"planets/{b.name}/surface");
             handles.Add(h);
             h.Completed += op =>
@@ -131,6 +146,172 @@ namespace Meridian.Space
         }
 
         readonly List<AsyncOperationHandle<IList<Sprite>>> spriteHandles = new List<AsyncOperationHandle<IList<Sprite>>>();
+
+        void LoadIfExists(string key, System.Action<Texture2D> done)
+        {
+            var locations = Addressables.LoadResourceLocationsAsync(key);
+            locations.Completed += loc =>
+            {
+                bool exists = loc.Status == AsyncOperationStatus.Succeeded && loc.Result != null && loc.Result.Count > 0;
+                Addressables.Release(loc);
+                if (!exists || this == null) return;
+                var h = Addressables.LoadAssetAsync<Texture2D>(key);
+                handles.Add(h);
+                h.Completed += op => { if (op.Status == AsyncOperationStatus.Succeeded) done(op.Result); };
+            };
+        }
+
+        /// <summary>
+        /// Saturn's rings (B-018 handoff): the 1024 px sheet's A-ring outer edge is r = 500 px and Saturn's
+        /// radius is 220.4 px, so the sheet spans 1024 / 220.4 × R in the world (446 u at R 96).
+        /// </summary>
+        public const float RingSheetPx = 1024f, RingSaturnRadiusPx = 220.4f;
+        public SpriteRenderer Rings { get; private set; }
+
+        void AddRings(Transform parent, BodyInfo b)
+        {
+            const string key = "planets/saturn/rings";
+            var locations = Addressables.LoadResourceLocationsAsync(key);
+            locations.Completed += loc =>
+            {
+                bool exists = loc.Status == AsyncOperationStatus.Succeeded && loc.Result != null && loc.Result.Count > 0;
+                Addressables.Release(loc);
+                if (!exists || parent == null) return;
+                var go = new GameObject("Rings");
+                go.transform.SetParent(parent, false);
+                var sr = go.AddComponent<SpriteRenderer>();
+                sr.sharedMaterial = lineMaterial; // unlit like the discs' day side; the shadow side is in the art
+                sr.sortingOrder = 11;              // over the disc's atmosphere rim; the ring's hole leaves the globe clear
+                Rings = sr;
+                var h = Addressables.LoadAssetAsync<IList<Sprite>>(key);
+                spriteHandles.Add(h);
+                h.Completed += op =>
+                {
+                    if (sr == null || op.Status != AsyncOperationStatus.Succeeded || op.Result.Count == 0) return;
+                    sr.sprite = op.Result[0];
+                    float width = RingSheetPx / RingSaturnRadiusPx * b.radius;
+                    go.transform.localScale = Vector3.one * (width / sr.sprite.bounds.size.x);
+                };
+            };
+        }
+
+        // ---------- asteroid belt from art (U-034) ----------
+
+        public const int AsteroidKinds = 6;
+        public const int ClusterSize = 15;
+        public const float ClusterSpread = 35f;
+        readonly List<Vector2> beltClusters = new List<Vector2>();
+        /// <summary>Centers of the asteroid clumps (captures frame one).</summary>
+        public IReadOnlyList<Vector2> BeltClusters => beltClusters;
+        /// <summary>Belt meshes built from props/space/asteroid_01..06 (one per kind: ≤ 6 draw calls). Empty until the art loads.</summary>
+        public readonly List<MeshRenderer> BeltArt = new List<MeshRenderer>();
+        MeshRenderer beltFallback;
+
+        void LoadBeltArt()
+        {
+            var sprites = new Sprite[AsteroidKinds];
+            int pending = AsteroidKinds;
+            for (int k = 0; k < AsteroidKinds; k++)
+            {
+                int kind = k;
+                string key = $"props/space/asteroid_{kind + 1:00}";
+                var locations = Addressables.LoadResourceLocationsAsync(key);
+                locations.Completed += loc =>
+                {
+                    bool exists = loc.Status == AsyncOperationStatus.Succeeded && loc.Result != null && loc.Result.Count > 0;
+                    Addressables.Release(loc);
+                    if (!exists) { if (--pending == 0) BuildBeltArt(sprites); return; }
+                    var h = Addressables.LoadAssetAsync<IList<Sprite>>(key);
+                    spriteHandles.Add(h);
+                    h.Completed += op =>
+                    {
+                        if (op.Status == AsyncOperationStatus.Succeeded && op.Result.Count > 0) sprites[kind] = op.Result[0];
+                        if (--pending == 0) BuildBeltArt(sprites);
+                    };
+                };
+            }
+        }
+
+        /// <summary>
+        /// The same belt (positions, sizes, rotations from the seed) drawn with the asteroid sprites: each
+        /// kind is one mesh of its sprite's geometry instanced at varied rotation and scale.
+        /// </summary>
+        void BuildBeltArt(Sprite[] sprites)
+        {
+            if (this == null) return;
+            int kinds = 0;
+            foreach (var s in sprites) if (s != null) kinds++;
+            if (kinds == 0) return; // keep the flat belt
+            var verts = new List<Vector3>[AsteroidKinds];
+            var uvs = new List<Vector2>[AsteroidKinds];
+            var colors = new List<Color32>[AsteroidKinds];
+            var tris = new List<int>[AsteroidKinds];
+            for (int k = 0; k < AsteroidKinds; k++) { verts[k] = new List<Vector3>(); uvs[k] = new List<Vector2>(); colors[k] = new List<Color32>(); tris[k] = new List<int>(); }
+
+            var rng = new System.Random(seed + 7);
+            // Clumps: an even spread over 18 M u² shows ~8 rocks per screen; clusters read as a belt.
+            int clusters = Mathf.Max(1, beltArtAsteroids / ClusterSize);
+            beltClusters.Clear();
+            for (int c = 0; c < clusters; c++)
+            {
+                float ca = (float)rng.NextDouble() * Mathf.PI * 2f;
+                float cr = Mathf.Lerp(SpaceLayout.BeltInner + ClusterSpread, SpaceLayout.BeltOuter - ClusterSpread, (float)rng.NextDouble());
+                beltClusters.Add(new Vector2(Mathf.Cos(ca) * cr, Mathf.Sin(ca) * cr));
+            }
+            for (int i = 0; i < beltArtAsteroids; i++)
+            {
+                var center = beltClusters[i % clusters];
+                float oa = (float)rng.NextDouble() * Mathf.PI * 2f;
+                float od = ClusterSpread * Mathf.Sqrt((float)rng.NextDouble());
+                float a = Mathf.Atan2(center.y + Mathf.Sin(oa) * od, center.x + Mathf.Cos(oa) * od);
+                float r = new Vector2(center.x + Mathf.Cos(oa) * od, center.y + Mathf.Sin(oa) * od).magnitude;
+                float size = Mathf.Lerp(2f, 12f, (float)(rng.NextDouble() * rng.NextDouble())); // u across (the ship is 4)
+                float rot = (float)rng.NextDouble() * 360f;
+                int kind = rng.Next(AsteroidKinds);
+                byte shade = (byte)(185 + rng.Next(70));
+                while (sprites[kind] == null) kind = (kind + 1) % AsteroidKinds;
+                var s = sprites[kind];
+                float scale = size / Mathf.Max(s.bounds.size.x, s.bounds.size.y);
+                var m = Matrix4x4.TRS(new Vector3(Mathf.Cos(a) * r, Mathf.Sin(a) * r, 0f), Quaternion.Euler(0f, 0f, rot), Vector3.one * scale);
+                int baseIndex = verts[kind].Count;
+                var sv = s.vertices;
+                var su = s.uv;
+                for (int v = 0; v < sv.Length; v++)
+                {
+                    verts[kind].Add(m.MultiplyPoint3x4(sv[v]));
+                    uvs[kind].Add(su[v]);
+                    colors[kind].Add(new Color32(shade, shade, shade, 255));
+                }
+                foreach (var t in s.triangles) tris[kind].Add(baseIndex + t);
+            }
+
+            var mat = Meridian.Rendering.ArtMaterials.Active != null ? Meridian.Rendering.ArtMaterials.Active.lit : lineMaterial;
+            var block = new MaterialPropertyBlock();
+            var secondary = new SecondarySpriteTexture[4];
+            for (int k = 0; k < AsteroidKinds; k++)
+            {
+                if (sprites[k] == null || verts[k].Count == 0) continue;
+                var mesh = new Mesh { name = "BeltArt" + (k + 1), indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
+                mesh.SetVertices(verts[k]);
+                mesh.SetUVs(0, uvs[k]);
+                mesh.SetColors(colors[k]);
+                mesh.SetTriangles(tris[k], 0);
+                mesh.RecalculateBounds();
+                var go = new GameObject("BeltArt" + (k + 1));
+                go.transform.SetParent(transform, false);
+                go.AddComponent<MeshFilter>().sharedMesh = mesh;
+                var mr = go.AddComponent<MeshRenderer>();
+                mr.sharedMaterial = mat;
+                mr.sortingOrder = 4;
+                block.Clear();
+                block.SetTexture(MainTex, sprites[k].texture);
+                int n = sprites[k].GetSecondaryTextures(secondary);
+                for (int t = 0; t < n; t++) if (secondary[t].name == "_NormalMap") block.SetTexture("_NormalMap", secondary[t].texture);
+                mr.SetPropertyBlock(block);
+                BeltArt.Add(mr);
+            }
+            // The flat belt stays as fine dust between the clumps (one more draw call).
+        }
 
         static Color AtmosphereColor(string name) => name switch
         {
@@ -201,6 +382,8 @@ namespace Meridian.Space
             var mr = go.AddComponent<MeshRenderer>();
             mr.sharedMaterial = lineMaterial;
             mr.sortingOrder = 4;
+            beltFallback = mr; // flat stand-in until the asteroid art loads
+            LoadBeltArt();
         }
 
         public static Mesh Quad()
