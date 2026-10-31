@@ -177,8 +177,16 @@ namespace Meridian.UI
             var canvas = UiKit.Canvas(transform, "MenuCanvas", 500);
 
             mainPanel = UiKit.Panel(canvas.transform, "MainMenu", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(4000f, 4000f), theme.panel).gameObject;
+            // U-044 title art (BLENDER ui/title/*): full-screen background and the logo; the text title stays until the logo arrives.
+            var background = UiKit.Panel(mainPanel.transform, "TitleBackground", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1920f, 1080f), Color.white);
+            background.enabled = false;
             var title = UiKit.Text(mainPanel.transform, "Title", new Vector2(0.5f, 0.5f), new Vector2(0f, 220f), new Vector2(900f, 120f), 96, true, TextAnchor.MiddleCenter);
             title.text = "MERIDIAN";
+            var logo = UiKit.Panel(mainPanel.transform, "TitleLogo", new Vector2(0.5f, 0.5f), new Vector2(0f, 230f), new Vector2(900f, 180f), Color.white);
+            logo.preserveAspect = true;
+            logo.enabled = false;
+            LoadTitleArt("ui/title/background", background, null);
+            LoadTitleArt("ui/title/logo", logo, title);
             var sub = UiKit.Text(mainPanel.transform, "Subtitle", new Vector2(0.5f, 0.5f), new Vector2(0f, 140f), new Vector2(900f, 40f), 20, false, TextAnchor.MiddleCenter, theme.label);
             sub.text = "a survey of the real solar system";
             NewButton = UiKit.Button(mainPanel.transform, "NEW", new Vector2(0f, 20f), NewGame);
@@ -193,6 +201,26 @@ namespace Meridian.UI
             SaveButton = UiKit.Button(pausePanel.transform, "SAVE", new Vector2(0f, -40f), SaveNow);
             MainMenuButton = UiKit.Button(pausePanel.transform, "MAIN MENU", new Vector2(0f, -120f), ToMainMenu);
             pausePanel.SetActive(false);
+        }
+
+        /// <summary>Title art is optional: if the key isn't there, the themed text title stays.</summary>
+        void LoadTitleArt(string key, Image target, Text replaces)
+        {
+            var loc = UnityEngine.AddressableAssets.Addressables.LoadResourceLocationsAsync(key);
+            loc.Completed += l =>
+            {
+                bool exists = l.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0;
+                UnityEngine.AddressableAssets.Addressables.Release(l);
+                if (!exists || target == null) return;
+                var h = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<System.Collections.Generic.IList<Sprite>>(key);
+                h.Completed += op =>
+                {
+                    if (target == null || op.Status != UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;
+                    target.sprite = op.Result[0];
+                    target.enabled = true;
+                    if (replaces != null) replaces.enabled = false;
+                };
+            };
         }
     }
 }

@@ -117,10 +117,11 @@ namespace Meridian.UI
             for (int i = 0; i < MaxMarkers; i++)
             {
                 float y = -40f - i * 22f;
+                // Boxes are pinned by their top-right corner (UiKit): arrow -440..-420, distance -420..-340 (right-aligned), name -320..-100.
                 var right = new Vector2(1f, 1f);
-                var arrow = UiKit.Text(hudRoot, "MarkerArrow" + i, right, new Vector2(-330f, y), new Vector2(20f, 20f), 14, true, TextAnchor.MiddleCenter, new Color(1f, 0.85f, 0.5f, 1f));
-                var dist = UiKit.Text(hudRoot, "MarkerDistance" + i, right, new Vector2(-270f, y), new Vector2(80f, 20f), 14, false, TextAnchor.MiddleRight);
-                var name = UiKit.Text(hudRoot, "MarkerName" + i, right, new Vector2(-120f, y), new Vector2(210f, 20f), 13, false, TextAnchor.MiddleLeft, UiTheme.Active.label);
+                var arrow = UiKit.Text(hudRoot, "MarkerArrow" + i, right, new Vector2(-420f, y), new Vector2(20f, 20f), 14, true, TextAnchor.MiddleCenter, new Color(1f, 0.85f, 0.5f, 1f));
+                var dist = UiKit.Text(hudRoot, "MarkerDistance" + i, right, new Vector2(-340f, y), new Vector2(80f, 20f), 14, false, TextAnchor.MiddleRight);
+                var name = UiKit.Text(hudRoot, "MarkerName" + i, right, new Vector2(-100f, y), new Vector2(220f, 20f), 13, false, TextAnchor.MiddleLeft, UiTheme.Active.label);
                 arrow.text = dist.text = name.text = "";
                 markerArrows.Add(arrow); MarkerDistances.Add(dist); MarkerNames.Add(name);
                 markerLast.Add(int.MinValue);

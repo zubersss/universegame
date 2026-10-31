@@ -8,7 +8,7 @@ namespace Meridian.Core
 {
     /// <summary>
     /// Opt-in smoke run of a built player (U-017): with `-meridianSmoke &lt;folder&gt;` it screenshots the
-    /// main menu, the Earth HUD, the ship HUD and the top-down view, writes smoke_done.txt and quits.
+    /// main menu, Earth by day and night, a biome border, the Mars canyon in a storm and Saturn (U-044), writes smoke_done.txt and quits.
     /// Without the argument it does nothing. Used by tools/unity_smoke.ps1.
     /// </summary>
     public sealed class BuildSmoke : MonoBehaviour
@@ -38,20 +38,84 @@ namespace Meridian.Core
 
             if (MenuController.Instance != null && MenuController.Instance.MainMenuOpen) MenuController.Instance.NewGame();
             yield return Wait(2.5f);
-            yield return Shot(folder, "smoke_2_earth.png");
 
-            var ship = scenes.PlanetSide != null ? scenes.PlanetSide.ship : null;
-            var boarding = ship != null ? ship.GetComponent<Meridian.Ship.ShipBoarding>() : null;
-            if (boarding != null) boarding.ForceAboard();
-            yield return Wait(1.5f);
-            yield return Shot(folder, "smoke_3_ship.png");
+            // U-044 (M2 playtest build): the camp by day and by night, a biome border, the Mars canyon in a
+            // dust storm, and space at Saturn.
+            var side = scenes.PlanetSide;
+            if (side != null && side.dayNight != null)
+            {
+                side.dayNight.Override = 0.5f;
+                yield return Wait(1f);
+                yield return Shot(folder, "smoke_2_earth_day.png");
+                side.dayNight.Override = 0f;
+                yield return Wait(1f);
+                yield return Shot(folder, "smoke_3_earth_night.png");
+                side.dayNight.Override = 0.45f;
+            }
+
+            Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Ocean, out int coast, out _);
+            yield return LookAt(side, coast - 10f, 8f);
+            yield return Shot(folder, "smoke_4_desert_ocean.png");
+
+            var mars = GameState.Instance.catalog.Get(Meridian.Planets.PlanetId.Mars);
+            yield return scenes.LoadPlanetSide(mars);
+            side = scenes.PlanetSide;
+            if (side.dayNight != null) side.dayNight.Override = 0.45f;
+            // On the canyon wall's terraces (as the U-039 capture): wall, ledges and the far rim in one view.
+            int canyon = Meridian.Terrain.MarsLandforms.CanyonStart + 60;
+            yield return LookAt(side, canyon, 6f, 24f);
+            yield return Shot(folder, "smoke_5_mars_canyon.png");
+            // Storm onset (8 s ramp): early on the haze is up and the canyon still reads through it.
+            if (side.dustStorm != null) side.dustStorm.Force(0f, 60f);
+            yield return Wait(1f);
+            yield return Shot(folder, "smoke_6_mars_canyon_storm.png");
 
             scenes.SetView(ViewMode.Space);
-            yield return Wait(2.5f);
-            yield return Shot(folder, "smoke_4_space.png");
+            var craft = scenes.Space.GetComponentInChildren<Meridian.Space.SpaceShip>();
+            if (craft != null)
+            {
+                craft.externalInput = true;
+                craft.intent = default;
+                var saturn = craft.world.Find("saturn").Value;
+                // Held just outside the atmosphere ring: the planet and its rings fill the view.
+                var hold = saturn.position + new Vector2(0f, saturn.RingRadius + 20f);
+                float until = Time.realtimeSinceStartup + 3f;
+                while (Time.realtimeSinceStartup < until)
+                {
+                    craft.Position = hold;
+                    craft.Velocity = Vector2.zero;
+                    yield return null;
+                }
+            }
+            else yield return Wait(3f);
+            yield return Shot(folder, "smoke_7_space_saturn.png");
 
             File.WriteAllText(Path.Combine(folder, "smoke_done.txt"), $"OK {GameInfo.Version} {DateTime.Now:s}");
             Application.Quit();
+        }
+
+        /// <summary>Points the side camera at column x, a few metres above the ground, and waits for the terrain there.</summary>
+        static IEnumerator LookAt(PlanetSideRoot side, float x, float above, float size = 0f)
+        {
+            var follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+            if (follow != null) follow.enabled = false;
+            if (size > 0f) side.sideCamera.orthographicSize = size;
+            var cam = side.sideCamera.transform;
+            // The generator's surface: TopSolidY reads loaded chunks, and none are loaded there yet after a planet switch.
+            int ground = side.terrain.Generator.SurfaceHeight(side.terrain.WrapX(Mathf.FloorToInt(x)));
+            cam.position = new Vector3(x, ground + above, cam.position.z);
+            // Bring the surveyor along: streaming and hazards follow the player, not a free camera.
+            if (side.player != null)
+            {
+                var feet = new Vector2(x, ground + 1.05f);
+                side.player.Body.position = feet;
+                side.player.transform.position = feet;
+                side.player.Body.linearVelocity = Vector2.zero;
+            }
+            yield return null;
+            float until = Time.realtimeSinceStartup + 15f;
+            while (!side.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+            yield return Wait(2f); // backdrop sets and creatures arrive
         }
 
         static IEnumerator Wait(float seconds)

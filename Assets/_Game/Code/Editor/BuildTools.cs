@@ -41,6 +41,10 @@ namespace Meridian.EditorTools
 
             EditorBuildSettings.scenes = scenes.Select(s => new EditorBuildSettingsScene(s, true)).ToArray();
             PlayerSettings.bundleVersion = GameInfo.Version;
+            // U-044: the app icon (BLENDER ui/app/icon, 1024 px; Windows scales it for the taskbar and title bar).
+            var icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/_Game/Art/ui/app/icon_color.png");
+            if (icon != null) PlayerSettings.SetIcons(UnityEditor.Build.NamedBuildTarget.Unknown, new[] { icon }, IconKind.Any);
+            else Debug.LogWarning("[MERIDIAN] no ui/app/icon art: the build keeps the default icon");
 
             var aa = UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings;
             if (aa != null)

@@ -1,4 +1,4 @@
-# Smoke-runs the built player (U-017): screenshots menu / Earth HUD / ship HUD / space, then checks
+# Smoke-runs the built player (U-017): screenshots menu / Earth day + night / biome border / Mars canyon storm / Saturn (U-044), then checks
 # the player log for errors. Output: logs/smoke/*.png + coordination/reports/unity/smoke_<date>/. Owner: UNITY.
 # Usage: tools/unity_smoke.ps1 [-Version 0.1.1]  (default: GameInfo.Version, the build unity_build.ps1 makes)
 param([string]$Version = '')
@@ -21,7 +21,7 @@ try {
     $playerArgs = @('-meridianSmoke', $out, '-screen-width', '1920', '-screen-height', '1080', '-screen-fullscreen', '0', '-logFile', $playerLog)
     $p = Start-Process -FilePath $exe -ArgumentList $playerArgs -PassThru
     $null = $p.Handle
-    if (-not $p.WaitForExit(120000)) { Stop-Process -Id $p.Id -Force; Write-Host 'SMOKE FAILED: player did not quit within 120 s'; exit 1 }
+    if (-not $p.WaitForExit(240000)) { Stop-Process -Id $p.Id -Force; Write-Host 'SMOKE FAILED: player did not quit within 240 s'; exit 1 }
 } finally { Exit-HeavyJobLock }
 
 $done = Test-Path (Join-Path $out 'smoke_done.txt')
@@ -34,6 +34,6 @@ $errors | Select-Object -First 10 | ForEach-Object { Write-Host "  $($_.Line.Tri
 $report = Join-Path $RepoRoot ("coordination\reports\unity\smoke_" + (Get-Date -Format 'yyyy-MM-dd'))
 New-Item -ItemType Directory -Force $report | Out-Null
 $shots | ForEach-Object { Copy-Item $_.FullName (Join-Path $report $_.Name) -Force }
-if ($done -and $shots.Count -eq 4 -and $errors.Count -eq 0) { Write-Host "SMOKE OK: $report"; exit 0 }
+if ($done -and $shots.Count -eq 7 -and $errors.Count -eq 0) { Write-Host "SMOKE OK: $report"; exit 0 }
 Write-Host 'SMOKE FAILED'
 exit 1
