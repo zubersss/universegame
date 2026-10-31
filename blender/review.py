@@ -127,9 +127,24 @@ def frames(d, v, out, pick):
     print("REVIEW frames ok", out)
 
 
+def tiles(out, dirs):
+    """Terrain atlases side by side at half size (over a dark ground), one stamp each."""
+    stale = stale_keys()
+    panels = []
+    for p in dirs:                                     # colour PNG paths (terrain/<planet>/<set>_color.png)
+        img = pngio.read_png(p)
+        rgb = (img[..., :3] * img[..., 3:4] + 0.1 * (1 - img[..., 3:4]))[::2, ::2].copy()
+        stamp(rgb, p, stale)
+        panels.append(rgb)
+    write(out, np.hstack(panels))
+    print("REVIEW tiles ok", out)
+
+
 if __name__ == "__main__":
     a = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]
-    if a[0] == "stack":
+    if a[0] == "tiles":
+        tiles(a[1], a[2:])
+    elif a[0] == "stack":
         stack(a[1], a[2])
     elif a[0] == "frames":
         frames(a[1], a[2], a[3], [int(x) for x in a[4].split(",")])
