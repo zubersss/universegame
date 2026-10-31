@@ -627,3 +627,6 @@ Fixed (LEAD): M2SoakTests flight failed at "entered Mars: was Earth". The midnig
 ## Cycle 92 · 2026-10-31 13:42
 Checked: UNITY busy on U-044 (coding); gate open (2.4 GB, no locks). LEAD started an M2SoakTests run via unity_test.ps1 (holds the lock).
 Signals: none.
+
+## Cycle 93 · 2026-10-31
+LEAD soak run 13:40: still "was Earth", but [LEADQA] flight end shows view Space, 185 u from Mars, 428 u from Earth (timed out). Cause: no drag, so bearing-only steering spirals. Fixed: steer on the velocity error (wanted velocity minus current). Rerun deferred to UNITY's lock (13:4x).

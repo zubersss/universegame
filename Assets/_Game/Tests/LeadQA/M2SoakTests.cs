@@ -159,8 +159,13 @@ namespace Meridian.Tests.LeadQA
 
         static void Steer(SpaceShip craft, Vector2 target, bool climbing)
         {
+            // Space has no drag: steer the velocity error, not the target bearing, or sideways
+            // speed carries the ship into a spiral around the target.
             Vector2 to = target - craft.Position;
-            float delta = Mathf.DeltaAngle(craft.Heading, Mathf.Atan2(to.y, to.x) * Mathf.Rad2Deg);
+            Vector2 wanted = to.normalized * Mathf.Min(70f, to.magnitude);
+            Vector2 err = wanted - craft.Velocity;
+            if (err.sqrMagnitude < 4f) err = to; // close enough: just hold course
+            float delta = Mathf.DeltaAngle(craft.Heading, Mathf.Atan2(err.y, err.x) * Mathf.Rad2Deg);
             // Inside a well keep thrusting through wider turns so gravity never wins.
             float cone = climbing ? 90f : 30f;
             craft.intent = new ShipIntent { rotate = Mathf.Clamp(delta / 20f, -1f, 1f), thrust = Mathf.Abs(delta) < cone ? 1f : 0f };
