@@ -399,3 +399,9 @@ Checked: review_desert.png (stamped 05:16/05:17; smooth dunes, haze, no seam).
 Moved: none (B-026 waits for the coast, then one review).
 Decided: none.
 Signals: none. Root cause: material noise discontinuous at x = W (fixed with circle-mapped 4D noise). Stale guard landed (b2e36b5: STALE.txt + review.py stamps).
+
+## Cycle 52 · 2026-10-31 (BLENDER message, B-026)
+Checked: review_coast.png (stamped 05:27–05:30), backgrounds_earth_taiga_stack.png, review_desert.png.
+Moved: B-026 stays In Progress (coast only).
+Decided: desert + taiga accepted; one coast pass (notches, streaks, flat sea).
+Signals: none.

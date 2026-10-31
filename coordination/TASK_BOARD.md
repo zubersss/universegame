@@ -537,7 +537,7 @@ Goal: Earth biome parallax variants: `backgrounds/earth_desert/layer0..2`, `back
 Accept: same sizes/tiling as backgrounds/earth; §9 (no flat fills, haze by distance); split-half renders within D-028 memory; stacked preview per biome.
 Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/earth_*/
 Depends: B-010
-Lead notes: Cycle 19. UNITY will switch backdrops by longitude biome later (M2/M3). Use the B-025 foliage lessons if B-025 is done first. (Cycle 48) Desert hit three strikes on the tile seam. LEAD approach: periodic heightfield (noise sampled on a circle) + geometry instanced at −1/0/+1 periods and only the center rendered (shadow wrap); fallback: sun ≥ 35°. Taiga done (1b0178b).
+Lead notes: Cycle 19. UNITY will switch backdrops by longitude biome later (M2/M3). Use the B-025 foliage lessons if B-025 is done first. (Cycle 48) Desert hit three strikes on the tile seam. LEAD approach: periodic heightfield (noise sampled on a circle) + geometry instanced at −1/0/+1 periods and only the center rendered (shadow wrap); fallback: sun ≥ 35°. Taiga done (1b0178b). (Cycle 52) Desert (cb33653) and taiga (1b0178b) accepted. Coast gets one more pass: notches under the sea band, streaks on the beach back edge, flat sea → shore-to-horizon colour depth + glitter + surf line. Close B-026 on the coast re-review.
 
 ### B-027 · BLENDER · Ready · M3
 Goal: Mercury terrain sets `terrain/mercury/{regolith,basalt,sulfide,ice}` (47-blob + 16 variants, D-020) and parallax `backgrounds/mercury/layer0..2` (black sky, huge Sun glow, crater rims, violet twilight per §7.3).
