@@ -243,3 +243,10 @@ Decided: D-035 (per-system budgets on median/p99; engine first-clip setter logge
 Signals: BLENDER idle again. Response: message to keep looping, queue want_blender, do light work (B-026/B-028 sources) until its window.
 User: USER-09 open.
 Queue: UNITY 5 Ready, BLENDER 4 Ready.
+
+## Cycle 28 · 2026-10-31 02:05 (BLENDER messages)
+Checked: backgrounds_earth_stack_full.png; BLENDER report on B-015 v2 (full-size defects found by BLENDER itself), lock slip at 01:59, stale-.blend issue (guard requested).
+Moved: B-025 → Done.
+Decided: B-015 next approach approved (metaballs → mesh); CC0 base-mesh fallback pre-approved (CC0 only, logged, re-proportioned).
+Signals: B-015 at two failed passes. The three-strikes rule worked (BLENDER self-diagnosed and changed approach). BLENDER slip: the wrapper was called to file a want and it acquired the lock (24 s render while UNITY waited). Self-reported, no harm.
+User: USER-09 open.

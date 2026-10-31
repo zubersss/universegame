@@ -476,12 +476,12 @@ Files: blender/scripts/build_surveyor.py, blender/sources/characters/surveyor.bl
 Depends: B-009
 Lead notes: Done f095302 (cycle 15): soft suit, chest unit, harness, hard helmet, visor emission, mask map, flat death pose; same layout. Accepted as v2; no further polish unless the playtest asks.
 
-### B-025 · BLENDER · In Progress · M2
+### B-025 · BLENDER · Done · M2
 Goal: Parallax polish from the cycle-13 review of the 3D backgrounds.
 Accept: Earth: foliage reads as leaf masses, not stacked spheres (denser, smaller leaf-card clusters with silhouette breakup); clouds are soft volumetric or painted-haze shapes, not opaque white blobs, and never overlap the near tree line. Mars: no vertical spike/streak band in the mid layer (layer1 ground); at least 3 boulder shape families with varied scale. Same keys, sizes, tiling, and memory plan (D-028).
 Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/{earth,mars}/
 Depends: B-010, B-011
-Lead notes: M2 exit polish, not a reopen. Schedule after B-023.
+Lead notes: Done 4b09174 + layer2 re-export (cycle 28): leaf-card foliage, soft high clouds above a lowered tree line, Mars relief from a 2D field (no streaks), 4 boulder families. Distant peak slightly spiky (minor).
 
 ### B-026 · BLENDER · Ready · M2
 Goal: Earth biome parallax variants: `backgrounds/earth_desert/layer0..2`, `backgrounds/earth_taiga/layer0..2`, `backgrounds/earth_coast/layer0..2` (Bible §7.1 biomes), same rendered-3D approach as B-010 rework.
@@ -537,7 +537,7 @@ Goal: Earth creatures `creatures/earth/stag`, `creatures/earth/wolf`.
 Accept: medium class (256 px), standard creature set ≤ 30 frames, `.json`, color + normal.
 Files: blender/sources/creatures/earth/, Assets/_Game/Art/creatures/earth/
 Depends: B-009
-Lead notes: FAILED review (cycle 24), §9 grounded anatomy: legs are separate tubes with visible gaps at hip/knee, the body is a capsule, the neck/head read as blocks, and the antlers are undersized for the one exaggeration. Fix: one continuous mesh per animal (Skin modifier on a single connected skeleton + Subdivision, or metaballs converted to mesh), deformed by an armature, not rigid parts; deer proportions (long neck, deep chest, slender legs with visible hock and knee); antlers at least 1.5 × head length with 4+ tines; wolf with a fur-clump silhouette. Frames: 320 px in 6 columns, ppu ≥ 100 (D-034). Apply the same approach to B-016.
+Lead notes: FAILED review (cycle 24), §9 grounded anatomy: legs are separate tubes with visible gaps at hip/knee, the body is a capsule, the neck/head read as blocks, and the antlers are undersized for the one exaggeration. Fix: one continuous mesh per animal (Skin modifier on a single connected skeleton + Subdivision, or metaballs converted to mesh), deformed by an armature, not rigid parts; deer proportions (long neck, deep chest, slender legs with visible hock and knee); antlers at least 1.5 × head length with 4+ tines; wolf with a fur-clump silhouette. Frames: 320 px in 6 columns, ppu ≥ 100 (D-034). Apply the same approach to B-016. (Cycle 28) Second fix pass (Skin hull) failed BLENDER's own full-size check: boxy back where 4+ branches meet, belly-mask stripe, detached tail. Approved next approach: metaball capsules → one mesh, armature with automatic weights, vertex-colour markings. Pre-approved fallback: a CC0 base mesh (CC0 only, source logged in credits, re-proportioned to spec).
 
 ### B-016 · BLENDER · In Progress · M2
 Goal: Mars creatures `creatures/mars/dustskater` (small, 128 px), `creatures/mars/scree_stalker` (medium).
