@@ -59,7 +59,7 @@ PRESETS = {
     ),
     # B-026 Earth biomes (Bible §7.1): same rendered-3D layers, biome palettes and contents.
     "earth_desert": dict(
-        sun=dict(dir=(-0.75, 0.4, -0.6), strength=5.0, color=(1.0, 0.95, 0.85), angle=1.0),
+        sun=dict(dir=(-0.75, 0.4, -0.6), strength=5.0, color=(1.0, 0.95, 0.85), angle=3.0),   # soft: tiles cleanly
         ambient=((0.62, 0.62, 0.66), 0.35),
         haze=(226, 210, 182),
         far=dict(W=9000.0, level=0.38, peak=0.66, rock=[(196, 150, 104), (222, 182, 132)], snow=(0, 0, 0),
@@ -877,7 +877,8 @@ def rock_layer(P, spec, seed, preview, work, near):
         warp = fft_noise(rng, ny + 1, nx, 60, 400, 1.6)
         ph = np.arange(ny + 1, dtype=np.float32)[:, None] / ny * spec["dune_rows"] + 0.22 * warp
         sd = ph % 1.0
-        hd = np.where(sd < 0.72, sd / 0.72, (1.0 - sd) / 0.28)
+        sl = spec.get("dune_slip", 0.42)            # slip-face share; steeper faces alias in EEVEE shadows (seam)
+        hd = np.where(sd < 1 - sl, sd / (1 - sl), (1.0 - sd) / sl)
         dunes = dunes + amp * spec.get("dune_h", 0.9) * hd * hd * (3 - 2 * hd)
         mesa = mesa * spec.get("dune_mesa", 0.35) if mesa is not None else None
     dune = dunes[min(ny, int(ny * (0 - y_front) / (y_back - y_front)))]               # row at y = 0 for placement
