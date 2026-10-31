@@ -675,3 +675,6 @@ User: USER-12 (M2 playtest) open.
 
 ## Cycle 104 · 2026-10-31
 UNITY fixed the canyon pocket haze (5 m darken). The sky-band ghost is in mars_canyon/layer0 art itself (LEAD misattributed it to UNITY). B-049 reopened for a far-rim fix (failing check: visible artifact in game).
+
+## Cycle 105 · 2026-10-31 (BLENDER message)
+Checked: review_canyon_l0.png (15:12, continuous banded rim). B-049 → Done.
