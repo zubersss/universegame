@@ -288,3 +288,6 @@ def generate(entry, ctx):
     if ctx["preview"]:
         maps = {k: v[::4, ::4].copy() for k, v in maps.items()}
     return maps
+
+# B-049: the canyon floor shares the Mars sky (only its top ~20% shows above the walls).
+PRESETS["mars_canyon"] = PRESETS["mars"]

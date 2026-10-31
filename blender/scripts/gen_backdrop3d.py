@@ -134,6 +134,24 @@ PRESETS = {
                     bands=[(236, 218, 184), (178, 106, 66), (214, 186, 148)], band_h=110,
                     crown=(252, 236, 206), under=(150, 104, 74))],
     ),
+    # B-049 Valles Marineris floor: the opposite walls as tall terraced, layered cliffs (basalt
+    # with hematite bands) receding in dusty haze; sky only in the top ~20%; fallen blocks and
+    # dune streaks near. Same sizes, tiling and render path as "mars".
+    "mars_canyon": dict(
+        sun=dict(dir=(-0.8, 0.4, -0.45), strength=3.4, color=(1.0, 0.9, 0.78), angle=1.0),
+        ambient=((0.66, 0.50, 0.38), 0.46),
+        haze=(206, 160, 118),
+        far=dict(W=9000.0, level=0.62, peak=0.74, rock=[(132, 84, 62), (166, 110, 80)], snow=(0, 0, 0),
+                 snowline=9.0, haze=(0.56, 0.00004), tilt=4.0, terrace=3, rough=0.0,
+                 strata=(0.045, (84, 44, 36), 0.5)),
+        mid=dict(W=900.0, level=0.52, amp=0.27, terrace=6, wall=True, cliff=0.6, bumps=0.012, depth=(20, 160), haze=(0.26, 0.0012),
+                 ground=[(126, 76, 54), (160, 100, 70)], strata=(7.0, (86, 46, 36), 0.75),
+                 rocks=320, rock_h=(3, 12), tilt=8.0, frame_up=0.06, fog=(0.24, 0.12)),   # floor reaches the near layer (gap strip)
+        near=dict(W=64.0, level=0.24, amp=0.04, depth=(3, 14), haze=(0.05, 0.003),
+                  ground=[(150, 86, 56), (178, 110, 74)], dunes=True,
+                  rocks=60, rock_h=(0.8, 4.0), pebbles=900, tilt=18.0, frame_up=0.24),   # floor = bottom quarter
+        rock=[(86, 62, 54), (110, 78, 62), (72, 54, 48), (128, 88, 66)],
+    ),
     # B-027 Mercury (Bible §7.3): airless, so harsh small-angle sun, almost no ambient, little
     # haze; cratered relief; blinding grey regolith; violet twilight in the sky only.
     "mercury": dict(
@@ -921,7 +939,28 @@ def far_layer(P, spec, seed, preview, work):
     nt.links.new(mul.outputs[0], snow.inputs[0])
     nt.links.new(rock.outputs[2], snow.inputs[6])
     snow.inputs[7].default_value = lin(spec["snow"])
-    nt.links.new(snow.outputs[2], pr.inputs["Base Color"])
+    base_col = snow.outputs[2]
+    if spec.get("strata"):
+        # B-049 canyon walls: layered strata (hematite bands) across the far cliff, warped.
+        frac, band_col, k = spec["strata"]
+        period = top * frac
+        warp = nt.nodes.new("ShaderNodeTexNoise"); warp.inputs["Scale"].default_value = 0.0015
+        _periodic_noise(nt, geo.outputs["Position"], W, warp)
+        wz = nt.nodes.new("ShaderNodeMath"); wz.operation = "MULTIPLY_ADD"; wz.inputs[1].default_value = period * 0.7
+        nt.links.new(warp.outputs["Fac"], wz.inputs[0]); nt.links.new(sep.outputs["Z"], wz.inputs[2])
+        ph = nt.nodes.new("ShaderNodeMath"); ph.operation = "MULTIPLY"; ph.inputs[1].default_value = 2 * math.pi / period
+        nt.links.new(wz.outputs[0], ph.inputs[0])
+        sn = nt.nodes.new("ShaderNodeMath"); sn.operation = "SINE"
+        nt.links.new(ph.outputs[0], sn.inputs[0])
+        mr = nt.nodes.new("ShaderNodeMapRange")
+        mr.inputs["From Min"].default_value, mr.inputs["From Max"].default_value = 0.2, 1.0
+        mr.inputs["To Min"].default_value, mr.inputs["To Max"].default_value = 0.0, k
+        nt.links.new(sn.outputs[0], mr.inputs["Value"])
+        bm = nt.nodes.new("ShaderNodeMix"); bm.data_type = "RGBA"
+        nt.links.new(mr.outputs["Result"], bm.inputs[0])
+        nt.links.new(base_col, bm.inputs[6]); bm.inputs[7].default_value = lin(band_col)
+        base_col = bm.outputs[2]
+    nt.links.new(base_col, pr.inputs["Base Color"])
     pr.inputs["Roughness"].default_value = 0.9
     _haze(m, P["haze"], spec["haze"][0], spec["haze"][1], front=W)
     heightfield("range", scene.collection, W, depth_m, nx, ny, zf, m)
@@ -1013,6 +1052,11 @@ def rock_layer(P, spec, seed, preview, work, near):
     # run straight back from the camera and read as vertical streaks). Terraced for mesas.
     f2 = fft_noise(rng, ny + 1, nx, 40, 260, 1.6)
     f2 = (f2 - f2.min()) / (f2.max() - f2.min() + 1e-6)
+    if spec.get("wall"):
+        # B-049 canyon wall: ramp the field up toward the back so the far rows form one
+        # continuous terraced cliff stepping down toward the camera (not scattered mesas).
+        ramp = (np.arange(ny + 1, dtype=np.float32) / ny)[:, None] ** 1.3
+        f2 = np.clip(0.3 * f2 + 0.85 * ramp, 0, 1)
     if spec.get("craters"):
         # B-027: impact craters — raised rim ring + bowl; x distance wraps (layer tiles).
         gy, gx = np.mgrid[0:ny + 1, 0:nx].astype(np.float32)
