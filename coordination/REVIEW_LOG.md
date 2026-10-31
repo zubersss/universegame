@@ -387,3 +387,9 @@ Queue: UNITY 4, BLENDER 5.
 Checked: BLENDER desert forensics (debug halves near5203_*): the seam is one large boulder straddling x = 0/W; the dune relief was fine. Earlier "lumpy" verdicts came from stale PNGs, because failed renders do not overwrite exports.
 Decided: approved a rock-free band around x = 0. Requested a guard: clear target PNGs before render + time/hash stamp on contact sheets.
 Signals: stale-artifact review risk (BLENDER self-reported). Guard requested.
+
+## Cycle 50 · 2026-10-31 (UNITY message, U-040 part 1)
+Checked: a2a7574; u040 captures (canyon wall: walls OK, inverted streak band still visible; fx 4: shimmer streaks drawn over the hull).
+Moved: none (U-040 still In Progress).
+Decided: none. Two fixes sent: (1) a clean layer end at its ground line + a haze gradient below; (2) shimmer sorted behind the hull.
+Signals: UNITY reported the canyon band gone, but the capture shows it. It was flagged with the coordinates.
