@@ -38,6 +38,10 @@ PRESETS = {
                         cloud=(236, 240, 244), cloud_shade=(170, 180, 192), clouds=0.6),
     "earth_coast": dict(sky_top=(76, 136, 204), sky_horizon=(204, 224, 236), haze=(190, 210, 222),
                         cloud=(248, 250, 252), cloud_shade=(180, 192, 206), clouds=0.5),
+    # B-027 Mercury: pitch-black sky shading to violet twilight at the horizon, huge Sun glow.
+    "mercury": dict(sky_top=(3, 3, 6), sky_horizon=(70, 48, 104), haze=(60, 44, 90),
+                    cloud=(0, 0, 0), cloud_shade=(0, 0, 0), clouds=0.0,
+                    sun_glow=(0.3, 0.6, 0.16, (255, 250, 236))),
     # B-028 Venus skies (deck: bright orange-cream haze; surface: dim orange-brown murk).
     "venus_deck": dict(sky_top=(214, 170, 110), sky_horizon=(244, 226, 190), haze=(232, 206, 160),
                        cloud=(250, 238, 214), cloud_shade=(214, 182, 132), clouds=0.45),
@@ -176,7 +180,18 @@ def sky_rgb(P, rng):
     cov = 0.6 * x * x * (3 - 2 * x) if P["clouds"] > 0.05 else np.zeros_like(x)   # Mars: none
     under = np.clip(np.roll(cov, -10, axis=0) - cov + 0.3, 0, 1)        # darker toward bases
     cloud = shade_mix(np.broadcast_to(C(P["cloud"]), (H_, W_, 3)), C(P["cloud_shade"]), under)
-    return shade_mix(sky, cloud, cov * 0.92)
+    out = shade_mix(sky, cloud, cov * 0.92)
+    if P.get("sun_glow"):
+        # B-027: a huge Sun low in the sky; distance wraps in x so the layer still tiles.
+        cx, cy, r, col = P["sun_glow"]
+        xx = np.arange(W_, dtype=np.float32)[None, :]
+        dx = (xx - cx * W_ + W_ / 2) % W_ - W_ / 2
+        d = np.hypot(dx, (rows * H_) - cy * H_) / (r * H_)
+        disc = np.clip((1.0 - d) * 6, 0, 1)                          # bright limb-sharp disc
+        glow = np.exp(-np.maximum(d - 1, 0) * 2.2) * 0.8              # broad corona/scatter
+        k = np.clip(disc + glow, 0, 1)[..., None]
+        out = out * (1 - k) + C(col) * k
+    return out
 
 
 def _layer0_range(P, rng, rgb):

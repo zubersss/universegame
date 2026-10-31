@@ -104,6 +104,22 @@ PRESETS = {
         needle=[(32, 60, 40), (44, 72, 46)],
         bark=(90, 74, 60),
     ),
+    # B-027 Mercury (Bible §7.3): airless, so harsh small-angle sun, almost no ambient, little
+    # haze; cratered relief; blinding grey regolith; violet twilight in the sky only.
+    "mercury": dict(
+        sun=dict(dir=(-0.85, 0.3, -0.42), strength=6.0, color=(1.0, 0.98, 0.94), angle=0.5),
+        ambient=((0.3, 0.24, 0.42), 0.06),
+        haze=(60, 44, 90),
+        far=dict(W=9000.0, level=0.36, peak=0.56, rock=[(118, 116, 120), (150, 148, 152)], snow=(0, 0, 0),
+                 snowline=9.0, haze=(0.3, 0.00003), tilt=6.0),
+        mid=dict(W=700.0, level=0.40, amp=0.10, depth=(20, 140), haze=(0.1, 0.0006),
+                 ground=[(128, 126, 130), (104, 102, 108)], rocks=120, rock_h=(1, 5), craters=14,
+                 tilt=12.0, frame_up=-0.08),
+        near=dict(W=64.0, level=0.26, amp=0.04, depth=(3, 14), haze=(0.02, 0.001),
+                  ground=[(150, 148, 152), (122, 120, 126)], rocks=90, rock_h=(0.2, 1.4), pebbles=900, craters=6,
+                  tilt=18.0, frame_up=0.12),
+        rock=[(96, 94, 100), (70, 68, 74), (120, 118, 122)],
+    ),
     # B-028 Venus (Bible §7.4, §9 orange-cream/black). Deck: the habitable cloud layer, all
     # cloud (towers far, billowing deck tops mid/near), backlit warm haze. Surface: black glassy
     # plains under a dim orange murk, lit by lava vents.
@@ -841,6 +857,16 @@ def rock_layer(P, spec, seed, preview, work, near):
     # run straight back from the camera and read as vertical streaks). Terraced for mesas.
     f2 = fft_noise(rng, ny + 1, nx, 40, 260, 1.6)
     f2 = (f2 - f2.min()) / (f2.max() - f2.min() + 1e-6)
+    if spec.get("craters"):
+        # B-027: impact craters — raised rim ring + bowl; x distance wraps (layer tiles).
+        gy, gx = np.mgrid[0:ny + 1, 0:nx].astype(np.float32)
+        for _ in range(spec["craters"]):
+            cx, cy = rnd.uniform(0, nx), rnd.uniform(ny * 0.35, ny * 0.95)
+            R = rnd.uniform(8, 40)
+            dx = (gx - cx + nx / 2) % nx - nx / 2
+            d = np.hypot(dx, gy - cy) / R
+            f2 = f2 + 0.35 * np.exp(-((d - 1) / 0.18) ** 2) - 0.45 * np.clip(1 - d, 0, 1) ** 1.5
+        f2 = (f2 - f2.min()) / (f2.max() - f2.min() + 1e-6)
     mesa = 1 - 2 * (terrace01(f2, terr, spec.get("cliff", 0.3)) if terr else f2)        # -1..1, + = lower
     # Dunes: isotropic 2D undulation on the (now ~square) grid, not an x-only wave.
     dunes = 0.35 * fft_noise(rng, ny + 1, nx, 20, 90, 1.0) if spec.get("dunes") else np.zeros((ny + 1, nx))
