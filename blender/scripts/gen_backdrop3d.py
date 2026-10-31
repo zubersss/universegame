@@ -221,6 +221,31 @@ def _wrapped(nt, vec_socket, W):
     return cmb.outputs[0]
 
 
+def _periodic_noise(nt, pos_socket, W, nz):
+    """Feed Noise node `nz` a position mapped onto a circle in x: vector (R cos t, R sin t, y),
+    4th dimension z, with t = 2 pi x / W and R = W / 2 pi (arc length = x, so the noise scale is
+    unchanged). Periodic AND continuous at the wrap: x mod W (_wrapped) repeats the texture but
+    jumps at x = W, a seam smooth dunes made visible (B-026 desert)."""
+    N, L = nt.nodes, nt.links
+    sep = N.new("ShaderNodeSeparateXYZ")
+    L.new(pos_socket, sep.inputs[0])
+    t = N.new("ShaderNodeMath"); t.operation = "MULTIPLY"; t.inputs[1].default_value = 2 * math.pi / W
+    L.new(sep.outputs["X"], t.inputs[0])
+    R = W / (2 * math.pi)
+    parts = []
+    for op in ("COSINE", "SINE"):
+        f = N.new("ShaderNodeMath"); f.operation = op
+        L.new(t.outputs[0], f.inputs[0])
+        r = N.new("ShaderNodeMath"); r.operation = "MULTIPLY"; r.inputs[1].default_value = R
+        L.new(f.outputs[0], r.inputs[0])
+        parts.append(r.outputs[0])
+    cmb = N.new("ShaderNodeCombineXYZ")
+    L.new(parts[0], cmb.inputs["X"]); L.new(parts[1], cmb.inputs["Y"]); L.new(sep.outputs["Y"], cmb.inputs["Z"])
+    nz.noise_dimensions = "4D"
+    L.new(cmb.outputs[0], nz.inputs["Vector"])
+    L.new(sep.outputs["Z"], nz.inputs["W"])
+
+
 def mat_varied(name, cols, rough=0.85, noise_scale=0.0, bump=0.0, W=None, world_noise=False):
     """Principled with base colour picked per object through a ramp of `cols`, plus optional
     noise variation and bump. The per-object pick is a white-noise hash of the object's
@@ -255,7 +280,7 @@ def mat_varied(name, cols, rough=0.85, noise_scale=0.0, bump=0.0, W=None, world_
         nz.inputs["Detail"].default_value = 6.0
         if world_noise:
             geo = N.new("ShaderNodeNewGeometry")
-            L.new(_wrapped(nt, geo.outputs["Position"], W), nz.inputs["Vector"])
+            _periodic_noise(nt, geo.outputs["Position"], W, nz)
         else:
             tc = N.new("ShaderNodeTexCoord")
             L.new(tc.outputs["Object"], nz.inputs["Vector"])
@@ -771,7 +796,7 @@ def far_layer(P, spec, seed, preview, work):
     mul = nt.nodes.new("ShaderNodeMath"); mul.operation = "MULTIPLY"
     nt.links.new(hmr.outputs["Result"], mul.inputs[0]); nt.links.new(smr.outputs["Result"], mul.inputs[1])
     nz = nt.nodes.new("ShaderNodeTexNoise"); nz.inputs["Scale"].default_value = 0.004
-    nt.links.new(_wrapped(nt, geo.outputs["Position"], W), nz.inputs["Vector"])
+    _periodic_noise(nt, geo.outputs["Position"], W, nz)
     rock = nt.nodes.new("ShaderNodeMix"); rock.data_type = "RGBA"
     nt.links.new(nz.outputs["Fac"], rock.inputs[0])
     rock.inputs[6].default_value = lin(spec["rock"][0]); rock.inputs[7].default_value = lin(spec["rock"][1])
@@ -820,7 +845,7 @@ def mat_strata(name, cols, W, strata):
     sep = N.new("ShaderNodeSeparateXYZ")
     L.new(geo.outputs["Position"], sep.inputs[0])
     warp = N.new("ShaderNodeTexNoise"); warp.inputs["Scale"].default_value = 0.05
-    L.new(_wrapped(nt, geo.outputs["Position"], W), warp.inputs["Vector"])
+    _periodic_noise(nt, geo.outputs["Position"], W, warp)
     wz = N.new("ShaderNodeMath"); wz.operation = "MULTIPLY_ADD"; wz.inputs[1].default_value = period * 0.8
     L.new(warp.outputs["Fac"], wz.inputs[0]); L.new(sep.outputs["Z"], wz.inputs[2])
     ph = N.new("ShaderNodeMath"); ph.operation = "MULTIPLY"; ph.inputs[1].default_value = 2 * math.pi / period
