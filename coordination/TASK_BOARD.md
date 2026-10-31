@@ -651,6 +651,13 @@ Files: blender/scripts/build_surveyor.py, Assets/_Game/Art/characters/surveyor/
 Depends: B-023
 Lead notes: Cycle 62. M3 Envirosuit hazards and protection tiers (D-032).
 
+### B-042 · BLENDER · Ready · M3
+Goal: Icons batch 2 (M3 resources and crafting, Bible §7/§8): solarite, vitriol_glass, sulfur, basalt, nickel, graphite, polar_ice, deep_core_sample, launch_fuel_cell, suit_patch, cryo_pad, thermal_pad, radiation_liner, smelter_bar_iron, smelter_bar_copper, circuit_board (16 icons, same icon camera and lights as B-013).
+Accept: readable at 32 px; same style as batch 1 (the montage shows both batches side by side); stamped review.
+Files: blender/scripts/build_icons.py, Assets/_Game/Art/icons/
+Depends: B-013
+Lead notes: Cycle 68. Feeds U-045 inventory and M3 crafting.
+
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
 Accept: frames ≤ 256, sheets ≤ 1024², `.json` per sheet, emission where glowing.
