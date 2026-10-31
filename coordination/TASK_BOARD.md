@@ -352,6 +352,13 @@ Files: tools/unity_profile.ps1, Assets/_Game/Code/Runtime/Core/BudgetMonitor.cs
 Depends: U-014, U-031
 Lead notes: Cycle 30 (P-21).
 
+### U-042 · UNITY · Ready · M2
+Goal: Fix the wolf drawing ~0.5 m below its feet in-game (creatures_v3.png). BLENDER verified the sheet: the lowest opaque pixel sits on the pivot [0.5, 0.03125] in every frame for both stag and wolf.
+Accept: capture with the wolf's paws on the ground line in idle, walk, and death; a PlayMode test that a creature's lowest opaque sprite pixel is within 2 px of its feet/ground contact for every species.
+Files: Assets/_Game/Code/Runtime/Creatures/, Code/Editor/ArtImporter.cs
+Depends: U-036
+Lead notes: Cycle 34. BLENDER's leads, in order: (1) the wolf is placed from its collider/hitbox (wolf y 0.04, h 0.38) or SpeciesSpec size (0.9 m) instead of the sprite pivot; (2) a stale wolf import or .meta pivot (the .meta files were modified); (3) a path that treats the default ppu 128 differently from a custom ppu. Small; do it with U-040.
+
 ### U-025 · UNITY · Done · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.
 Accept: EditMode test: Earth noon/midnight intensities match §9; captures at dawn/noon/dusk/night on Earth; 0 B GC per frame.
@@ -544,7 +551,7 @@ Goal: Wolf silhouette polish (from the B-015 v3 review): heavy neck ruff and fur
 Accept: same key, sheet layout, clips, and pivot as B-015 v3; full-size frames read as a wolf, not a hyena/rodent, next to the stag; ppu ≥ 100.
 Files: blender/scripts/build_creatures_earth.py, Assets/_Game/Art/creatures/earth/
 Depends: B-015
-Lead notes: Cycle 31. A focused polish task, not a reopen of B-015. Do it after B-016. (Cycle 33) Also fix the wolf pivot: frame 0 draws ~0.5 m below its feet line in-game (creatures_v3.png). The feet must sit on the pivot line in every frame.
+Lead notes: Cycle 31. A focused polish task, not a reopen of B-015. Do it after B-016. (Cycle 34) The wolf sink is not in the sheet (BLENDER verified the pivot per frame); it moved to U-042. Keep the same pivot and layout.
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.

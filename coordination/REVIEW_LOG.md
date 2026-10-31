@@ -288,3 +288,9 @@ Moved: U-035 → Done; U-037 → In Progress.
 Decided: none. Routed: the wolf pivot goes to B-031, the pad collider to U-040.
 Signals: none.
 User: USER-09 open.
+
+## Cycle 34 · 2026-10-31 03:05 (BLENDER message)
+Checked: BLENDER's per-frame measurement of 3f3e20e (the lowest opaque pixel is on the pivot in frames 0/1/6/14/22/27 for both animals; JSON pivots identical).
+Moved: the wolf sink moved from B-031 to new U-042 (Unity-side placement). LEAD misrouted it in cycle 33; corrected.
+Decided: none.
+Signals: none.
