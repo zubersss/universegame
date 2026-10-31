@@ -554,3 +554,8 @@ Checked: review_venus_props.png.
 Moved: B-045 → Done (M3 art list complete); B-046 → In Progress.
 Decided: D-044 (ui category; contract v1.6). BLENDER gets user-facing polish (title key art, app icon) rather than M4 lookahead.
 Signals: UNITY still blocked on USER-10 (~2 h 30 min).
+
+## Cycle 77 · 2026-10-31 (BLENDER message)
+Checked: review_title_960.png (07:54).
+Moved: B-046 stays In Progress (one pass: real pad on ground, dawn grade on foliage, left-third gradient).
+Signals: BLENDER self-reported an unchecked wrapper refusal in a mock-up (caught). UNITY still blocked on USER-10.
