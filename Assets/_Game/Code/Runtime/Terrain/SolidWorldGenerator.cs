@@ -22,7 +22,7 @@ namespace Meridian.Terrain
             datum = config.datumY;
             planet = config.id;
             this.seed = seed ^ ((int)config.id * 7919);
-            amplitude = planet == PlanetId.Earth ? 28f : 34f;
+            amplitude = planet == PlanetId.Earth ? 28f : planet == PlanetId.Mercury ? 14f : 34f; // Mercury: low rolling plains, craters do the rest
             // The surface profile once per world (U-039 fix: it was recomputed for every tile, ~1.5 s Mars entry).
             surface = new int[width];
             for (int x = 0; x < width; x++) surface[x] = ComputeSurface(x);
@@ -43,14 +43,16 @@ namespace Meridian.Terrain
                 ? datum + (int)(EarthBiomes.Height(x, n, datum) - datum)
                 : planet == PlanetId.Mars
                     ? datum + (int)(MarsLandforms.Height(x, datum + (n - 0.5f) * 2f * amplitude) - datum) // U-039 landforms
-                    : datum + (int)((n - 0.5f) * 2f * amplitude);
+                    : planet == PlanetId.Mercury
+                        ? datum + (int)(MercuryLandforms.Height(x, width, (n - 0.5f) * 2f * amplitude, seed)) // U-048 craters + cold traps
+                        : datum + (int)((n - 0.5f) * 2f * amplitude);
             return h < 1 ? 1 : (h >= height - 1 ? height - 2 : h);
         }
 
         public byte TileAt(int x, int y)
         {
             if (y >= height) return TileId.Air;
-            if (y < 0) return planet == PlanetId.Earth ? TileId.Stone : TileId.Basalt;
+            if (y < 0) return planet == PlanetId.Earth ? TileId.Stone : planet == PlanetId.Mercury ? TileId.MercuryBasalt : TileId.Basalt;
 
             int surface = SurfaceHeight(x);
             if (y > surface)
@@ -61,9 +63,11 @@ namespace Meridian.Terrain
             // Random caves; inside Mars landforms only rare small pockets (U-039 fix: no Swiss-cheese walls).
             float caveCut = planet == PlanetId.Mars && MarsLandforms.At(x) != MarsFeature.Plains ? 0.9f : 0.72f;
             if (depth > 6 && y > 2 && WorldNoise.Value2D(x, y, 16, width, seed + 101) > caveCut
-                && !(planet == PlanetId.Mars && MarsLandforms.NearTube(x, y, SurfaceOf, 2))) return TileId.Air;
+                && !(planet == PlanetId.Mars && MarsLandforms.NearTube(x, y, SurfaceOf, 2))
+                && !(planet == PlanetId.Mercury && depth < MercuryLandforms.IceSkin + MercuryLandforms.IceThickness + 1 && MercuryLandforms.PermanentShadow(x, width))) return TileId.Air; // keep cold-trap ice whole
 
             if (planet == PlanetId.Earth) return EarthMaterial(x, y, surface, depth);
+            if (planet == PlanetId.Mercury) return MercuryMaterial(x, y, depth);
             return planet == PlanetId.Mars ? MarsMaterial(x, y, depth) : RockyMaterial(x, y, depth);
         }
 
@@ -100,6 +104,19 @@ namespace Meridian.Terrain
                     return depth < 2 ? TileId.Regolith : TileId.Basalt;
             }
             return RockyMaterial(x, y, depth);
+        }
+
+        /// <summary>Mercury (U-048, B-027): regolith over basalt with sulfide veins; cold-trap floors hold water ice under a thin skin.</summary>
+        byte MercuryMaterial(int x, int y, int depth)
+        {
+            if (MercuryLandforms.PermanentShadow(x, width))
+            {
+                if (depth < MercuryLandforms.IceSkin) return TileId.MercuryRegolith;
+                if (depth < MercuryLandforms.IceSkin + MercuryLandforms.IceThickness) return TileId.MercuryIce;
+            }
+            if (depth < 3) return TileId.MercuryRegolith;
+            if (depth > 6 && WorldNoise.Value2D(x, y, 8, width, seed + 211) > 0.80f) return TileId.Sulfide;
+            return TileId.MercuryBasalt;
         }
 
         byte RockyMaterial(int x, int y, int depth)

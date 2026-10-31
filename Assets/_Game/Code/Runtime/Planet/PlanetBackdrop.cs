@@ -1,4 +1,5 @@
 using Meridian.Art;
+using Meridian.Rendering;
 using Meridian.Planets;
 using Meridian.Space;
 using UnityEngine;
@@ -206,7 +207,8 @@ namespace Meridian.Planet
 
         void LoadLayer(string name, ArtSet set, int i)
         {
-            string key = ArtKeys.Backgrounds.Layer(name, i);
+            // Mercury (U-048): the far layer without its painted Sun; the Sun is its own sprite (MercurySun).
+            string key = name == "mercury" && i == 0 ? ArtKeys.Backgrounds.Layer(name, i) + "_nosun" : ArtKeys.Backgrounds.Layer(name, i);
             set.pending++;
             var locations = Addressables.LoadResourceLocationsAsync(key);
             locations.Completed += loc =>
@@ -254,6 +256,52 @@ namespace Meridian.Planet
             for (int i = 0; i < 3; i++) ApplyLayer(quad, block, i, set.tex[i], true);
             quad.GetPropertyBlock(block);
             block.SetFloat(DatumId, DatumOf(name));
+            quad.SetPropertyBlock(block);
+        }
+
+        // ---------- Mercury's Sun (U-048) ----------
+
+        /// <summary>Mercury's Sun: ~2.5× Earth's apparent size; radius as a share of the view's half-height.</summary>
+        public const float SunRadius = 0.32f;
+        static readonly int SunId = Shader.PropertyToID("_Sun");
+        Meridian.Core.TimeSystem clock;
+        Vector4 sunShown = new Vector4(0f, 0f, 0f, -1f);
+        /// <summary>Whether Mercury's Sun is drawn now (tests/captures), and its height (0 at dawn/dusk … 1 at noon).</summary>
+        public bool SunVisible => sunShown.w > 0.5f;
+        public float SunElevation { get; private set; }
+
+        /// <summary>
+        /// The Sun is drawn by the backdrop shader in the sky, under the layers, so the ridges hide it near the
+        /// horizon (a sprite would draw over the opaque composite). It rises on the day side (-x) at the dawn line,
+        /// stands overhead a quarter world back, sets toward +x at the dusk line; never in a cold trap.
+        /// </summary>
+        void UpdateSun()
+        {
+            var v = Vector4.zero;
+            if (Planet == PlanetId.Mercury)
+            {
+                if (clock == null) clock = FindAnyObjectByType<Meridian.Core.TimeSystem>();
+                var c = view.transform.position;
+                int w = terrain != null && terrain.Config != null ? terrain.Config.worldWidth : 2048;
+                float t = Meridian.Terrain.MercuryTerminator.LocalTime(c.x, Meridian.Terrain.MercuryTerminator.Now(clock != null ? clock.GameSeconds : 0), w);
+                bool shade = terrain != null && Meridian.Terrain.MercuryLandforms.PermanentShadow(terrain.WrapX(Mathf.FloorToInt(c.x)), w);
+                if (t > 0.2f && t < 0.8f && !shade)
+                {
+                    float phase = Mathf.Clamp01((t - 0.25f) / 0.5f) * Mathf.PI;
+                    SunElevation = Mathf.Max(0f, Mathf.Sin(phase));
+                    float half = view.orthographicSize, wide = half * Mathf.Max(view.aspect, 1f);
+                    float horizon = planetDatum + (BaseOffset(0) + ContentBase[0] * TileHeights[0]) + (c.y - planetDatum) * (1f - Follow[0]);
+                    float r = SunRadius * half;
+                    // From half below the far horizon (rising/setting behind the ridges) to high in the view at noon.
+                    float y = horizon - r * 0.5f + SunElevation * (c.y + half * 0.75f - horizon + r * 0.5f);
+                    v = new Vector4(c.x - Mathf.Cos(phase) * wide * 0.75f, y, r, 1f);
+                }
+                else SunElevation = 0f;
+            }
+            if (v == sunShown) return;
+            sunShown = v;
+            quad.GetPropertyBlock(block);
+            block.SetVector(SunId, v);
             quad.SetPropertyBlock(block);
         }
 
@@ -397,6 +445,7 @@ namespace Meridian.Planet
             }
             UpdateWalls();
             UpdateUnderwater();
+            UpdateSun();
         }
 
         // ---------- background walls (U-040) ----------
@@ -422,9 +471,12 @@ namespace Meridian.Planet
         static readonly int[] WallRectIds = { Shader.PropertyToID("_WallRect0"), Shader.PropertyToID("_WallRect1"), Shader.PropertyToID("_WallRect2") };
 
         /// <summary>Wall materials per planet: slot 0 near-surface, 1 deep rock, 2 the special near layer (sand / ice).</summary>
-        static byte[] WallMaterials(PlanetId p) => p == PlanetId.Mars
-            ? new[] { Meridian.Terrain.TileId.Regolith, Meridian.Terrain.TileId.Basalt, Meridian.Terrain.TileId.Ice }
-            : new[] { Meridian.Terrain.TileId.Soil, Meridian.Terrain.TileId.Stone, Meridian.Terrain.TileId.Sand };
+        static byte[] WallMaterials(PlanetId p) => p switch
+        {
+            PlanetId.Mars => new[] { Meridian.Terrain.TileId.Regolith, Meridian.Terrain.TileId.Basalt, Meridian.Terrain.TileId.Ice },
+            PlanetId.Mercury => new[] { Meridian.Terrain.TileId.MercuryRegolith, Meridian.Terrain.TileId.MercuryBasalt, Meridian.Terrain.TileId.MercuryIce },
+            _ => new[] { Meridian.Terrain.TileId.Soil, Meridian.Terrain.TileId.Stone, Meridian.Terrain.TileId.Sand },
+        };
 
         /// <summary>The original ground line of column x (top solid tile before any digging; stamps included).</summary>
         public int WallTop(int x)
@@ -444,6 +496,7 @@ namespace Meridian.Planet
                 if (b == Meridian.Terrain.Biome.Desert || b == Meridian.Terrain.Biome.Ocean) near = 2;
             }
             else if (Planet == PlanetId.Mars && Meridian.Terrain.MarsLandforms.At(x) == Meridian.Terrain.MarsFeature.PolarCap) near = 2;
+            else if (Planet == PlanetId.Mercury && terrain != null && Meridian.Terrain.MercuryLandforms.PermanentShadow(terrain.WrapX(x), terrain.Config.worldWidth)) near = 2;
         }
 
         void UpdateWalls()

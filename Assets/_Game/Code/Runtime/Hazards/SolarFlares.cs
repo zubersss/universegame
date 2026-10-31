@@ -33,6 +33,18 @@ namespace Meridian.Hazards
 
         float Gap() => MinGap + (float)rng.NextDouble() * (MaxGap - MinGap);
 
+        /// <summary>Seconds until the next flare starts (negative while one is under way); saved with the game (U-048).</summary>
+        public float NextIn => Current == Phase.Active ? -(end - Time.time) : nextStart - Time.time;
+
+        /// <summary>Load: restore the schedule (a flare under way resumes with its remaining time).</summary>
+        public void Restore(float nextIn)
+        {
+            if (!Running) return;
+            if (nextIn < 0f) { Current = Phase.Active; end = Time.time - nextIn; nextStart = end - ActiveSeconds; }
+            else { Current = Phase.Quiet; nextStart = Time.time + nextIn; }
+            Step();
+        }
+
         /// <summary>Schedules a flare to start in `leadSeconds` (≥ 0; tests and scripted events).</summary>
         public void Force(float leadSeconds)
         {

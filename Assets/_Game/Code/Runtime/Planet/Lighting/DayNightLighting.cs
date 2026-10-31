@@ -49,7 +49,10 @@ namespace Meridian.Planet.Lighting
         {
             if (Planet == null) return;
             if (time == null) time = FindAnyObjectByType<TimeSystem>();
-            float t = Override ?? DayNightMath.LocalTime(time != null ? time.DayFraction(Planet) : 0f);
+            float t = Override ?? (Planet.id == PlanetId.Mercury && view != null
+                // U-048: Mercury has no day cycle in place: the time of day is where you stand against the terminator.
+                ? Meridian.Terrain.MercuryTerminator.LocalTime(view.transform.position.x, Meridian.Terrain.MercuryTerminator.Now(time != null ? time.GameSeconds : 0), Planet.worldWidth)
+                : DayNightMath.LocalTime(time != null ? time.DayFraction(Planet) : 0f));
             LocalTime = t;
             var id = Planet.id;
 

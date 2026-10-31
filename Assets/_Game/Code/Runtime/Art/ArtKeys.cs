@@ -41,6 +41,10 @@ namespace Meridian.Art
             public const string MarsBasalt = "terrain/mars/basalt";
             public const string MarsHematite = "terrain/mars/hematite";
             public const string MarsIce = "terrain/mars/ice";
+            public const string MercuryRegolith = "terrain/mercury/regolith";
+            public const string MercuryBasalt = "terrain/mercury/basalt";
+            public const string MercurySulfide = "terrain/mercury/sulfide";
+            public const string MercuryIce = "terrain/mercury/ice";
         }
 
         public static class Backgrounds

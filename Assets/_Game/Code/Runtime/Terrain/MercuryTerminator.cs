@@ -17,6 +17,22 @@ namespace Meridian.Terrain
         /// <summary>Dawn terminator at real second 0.</summary>
         public const float DawnAtStart = 0f;
 
+        /// <summary>Tests and scripted scenes shift Mercury's clock (real seconds).</summary>
+        public static double ClockOffset;
+
+        /// <summary>Mercury's clock (real seconds) from the saved game clock: the terminator survives save/load (U-048).</summary>
+        public static double Now(double gameSeconds) => gameSeconds / Meridian.Core.TimeSystem.GameSecondsPerRealSecond + ClockOffset;
+
+        /// <summary>
+        /// Local time of day at x (DayNightMath: 0 midnight, 0.25 dawn, 0.5 noon, 0.75 dusk): the dawn line is
+        /// 0.25, the day side trails it to noon a quarter world back, the dusk line is 0.75, the night side ahead is 0.
+        /// </summary>
+        public static float LocalTime(float x, double realSeconds, int width)
+        {
+            float rel = Mathf.Repeat(x - Dawn(realSeconds, width), width) / width;
+            return Mathf.Repeat(0.25f - rel, 1f);
+        }
+
         /// <summary>World x of the dawn terminator after `realSeconds` (wrapped to 0..width).</summary>
         public static float Dawn(double realSeconds, int width) =>
             Mathf.Repeat(DawnAtStart + (float)(realSeconds / CreepSecondsPerMetre), width);

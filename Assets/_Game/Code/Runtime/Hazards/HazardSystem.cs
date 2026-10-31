@@ -116,7 +116,11 @@ namespace Meridian.Hazards
             }
             if (planet.id == PlanetId.Mercury)
             {
-                c.mercury = MercuryTerminator.ZoneAt(p.x, Time.timeSinceLevelLoadAsDouble + mercuryClockOffset, planet.worldWidth);
+                if (clock == null) clock = FindAnyObjectByType<Meridian.Core.TimeSystem>();
+                double now = MercuryTerminator.Now(clock != null ? clock.GameSeconds : 0) + mercuryClockOffset;
+                // Cold-trap floors (U-048) are in permanent shadow: night whatever the terminator does.
+                c.mercury = MercuryLandforms.PermanentShadow(terrain != null ? terrain.WrapX(x) : x, planet.worldWidth)
+                    ? MercuryZone.Night : MercuryTerminator.ZoneAt(p.x, now, planet.worldWidth);
                 c.flare = flares != null && flares.Current == SolarFlares.Phase.Active;
             }
             return c;
@@ -126,6 +130,7 @@ namespace Meridian.Hazards
         public double mercuryClockOffset;
 
         System.Func<int, int> surfaceAt;
+        Meridian.Core.TimeSystem clock;
 
         public HazardContext Context { get; private set; }
         /// <summary>The hazard that is draining the suit now (U-049 HUD).</summary>

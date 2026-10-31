@@ -80,9 +80,12 @@ namespace Meridian.Terrain
             started = true;
         }
 
-        public static IEnumerable<byte> MaterialsFor(PlanetId id) => id == PlanetId.Earth
-            ? new[] { TileId.Soil, TileId.Grass, TileId.Stone, TileId.Sand, TileId.Snow, TileId.Water }
-            : new[] { TileId.Regolith, TileId.Basalt, TileId.Hematite, TileId.Ice };
+        public static IEnumerable<byte> MaterialsFor(PlanetId id) => id switch
+        {
+            PlanetId.Earth => new[] { TileId.Soil, TileId.Grass, TileId.Stone, TileId.Sand, TileId.Snow, TileId.Water },
+            PlanetId.Mercury => new[] { TileId.MercuryRegolith, TileId.MercuryBasalt, TileId.Sulfide, TileId.MercuryIce },
+            _ => new[] { TileId.Regolith, TileId.Basalt, TileId.Hematite, TileId.Ice },
+        };
 
         void Work(IWorldGenerator gen, BlockingCollection<ChunkBuffer> queue)
         {

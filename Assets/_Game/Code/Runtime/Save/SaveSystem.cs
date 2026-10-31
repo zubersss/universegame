@@ -123,6 +123,7 @@ namespace Meridian.Save
                     var vitals = side.player.Vitals ?? side.player.GetComponent<Meridian.Player.PlayerVitals>();
                     if (vitals != null) data.player.health = vitals.health;
                     if (side.hazards != null) data.player.suit = side.hazards.SuitIntegrity;
+                    if (side.hazards != null && side.hazards.flares != null && side.hazards.flares.Running) data.player.mercuryFlareIn = side.hazards.flares.NextIn;
                 }
                 if (side.ship != null)
                 {
@@ -244,7 +245,7 @@ namespace Meridian.Save
                 side.player.Body.linearVelocity = Vector2.zero;
                 var vitals = side.player.GetComponent<Meridian.Player.PlayerVitals>();
                 if (vitals != null) vitals.health = data.player.health;
-                if (side.hazards != null) { side.hazards.Equip(data.player.suitTier); side.hazards.SetSuit(data.player.suit); }
+                if (side.hazards != null) { side.hazards.Equip(data.player.suitTier); side.hazards.SetSuit(data.player.suit); if (side.hazards.flares != null) side.hazards.flares.Restore(data.player.mercuryFlareIn); }
                 if (data.player.aboard && side.ship != null)
                 {
                     var boarding = side.ship.GetComponent<ShipBoarding>();

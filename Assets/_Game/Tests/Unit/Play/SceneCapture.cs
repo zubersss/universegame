@@ -565,6 +565,51 @@ namespace Meridian.Tests
             side.dayNight.Override = null;
         }
 
+        /// <summary>U-048 evidence: Mercury's day side, twilight band, night side and a polar cold trap.</summary>
+        [UnityTest]
+        public IEnumerator CaptureMercury()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
+            var mercury = GameState.Instance.catalog.Get(Meridian.Planets.PlanetId.Mercury);
+            yield return director.LoadPlanetSide(mercury);
+            var side = director.PlanetSide;
+            var cam = side.sideCamera;
+            cam.GetComponent<Meridian.Player.CameraFollow>().enabled = false;
+            var t = side.terrain;
+            var clock = UnityEngine.Object.FindAnyObjectByType<TimeSystem>();
+            int W = mercury.worldWidth;
+            IEnumerator Shot(string label, int x, float above, float size, float localDawnOffset)
+            {
+                // Put the dawn line `localDawnOffset` m ahead of x (0: twilight; +W/4: day, which trails the dawn line; -W/4: night).
+                Meridian.Terrain.MercuryTerminator.ClockOffset = 0;
+                double now = Meridian.Terrain.MercuryTerminator.Now(clock.GameSeconds);
+                Meridian.Terrain.MercuryTerminator.ClockOffset = (x + localDawnOffset) * Meridian.Terrain.MercuryTerminator.CreepSecondsPerMetre - now;
+                cam.orthographicSize = size;
+                cam.transform.position = new Vector3(x + 0.5f, t.Generator.SurfaceHeight(t.WrapX(x)) + above, cam.transform.position.z);
+                float until = Time.realtimeSinceStartup + 15f;
+                yield return null;
+                while (!t.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                for (int k = 0; k < 30; k++) yield return null;
+                yield return Save(cam, $"{name}_{label}");
+            }
+            yield return Shot("1_day", 1900, 5f, 12f, W / 4f);             // the solarite field under the Sun
+            yield return Shot("2_twilight", 600, 5f, 12f, 0f);             // the flare shelter on the dawn line
+            yield return Shot("3_night", 1000, 5f, 12f, -W / 4f);          // the Warden vault in the dark
+            int trap = Meridian.Terrain.MercuryLandforms.ColdTrapCentre(0, W);
+            yield return Shot("4_cold_trap", trap, 14f, 24f, W / 4f);      // a crater floor in permanent shadow on the day side
+            Meridian.Terrain.MercuryTerminator.ClockOffset = 0;
+        }
+
         /// <summary>U-039 evidence: Mars canyon wall, Olympus flank, polar cap and a lava tube.</summary>
         [UnityTest]
         public IEnumerator CaptureMarsLandforms()

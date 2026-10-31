@@ -14,7 +14,9 @@ namespace Meridian.Planet.POI
         public readonly bool solid;
         /// <summary>Solid props: the art row (pixels from the top) where the standing surface starts; 0 = the art's top (U-040: the pad deck, not its studs).</summary>
         public readonly int topRow;
-        public PoiProp(string key, float dx, float dy, Vector2 size, bool solid = false, int topRow = 0) { this.key = key; this.dx = dx; this.dy = dy; this.size = size; this.solid = solid; this.topRow = topRow; }
+        /// <summary>U-048: a flare shelter; the placer adds a FlareShelter of this radius (m) at the prop, 0 = none.</summary>
+        public readonly float shelterRadius;
+        public PoiProp(string key, float dx, float dy, Vector2 size, bool solid = false, int topRow = 0, float shelterRadius = 0f) { this.key = key; this.dx = dx; this.dy = dy; this.size = size; this.solid = solid; this.topRow = topRow; this.shelterRadius = shelterRadius; }
     }
 
     /// <summary>
@@ -182,7 +184,60 @@ namespace Meridian.Planet.POI
             },
         };
 
-        public static readonly PoiDef[] All = { SpawnCamp, SurveyArchive, LaunchComplex, HalcyonHauler, WardenOutpost };
+        // ---------- Mercury (U-048, B-033) ----------
+
+        static readonly string[] MercuryPad =
+        {
+            "................",
+            "................",
+            "................",
+            "................",
+            "gggggggggggggggg",
+            "################",
+            "################",
+        };
+
+        /// <summary>A flare shelter on the plains: step inside before a flare (D-048).</summary>
+        public static readonly PoiDef FlareShelterPoi = new PoiDef
+        {
+            id = "flare_shelter", label = "FLARE SHELTER", planet = PlanetId.Mercury, x = 600, groundRow = 4, stamp = MercuryPad,
+            props = new[]
+            {
+                new PoiProp("props/mercury/flare_shelter", 8f, 0f, new Vector2(3.88f, 2.13f), shelterRadius: 2.6f),
+                new PoiProp("props/mercury/shelter_door", 10.6f, 0f, new Vector2(1.75f, 2.69f)),
+            },
+        };
+
+        /// <summary>The Warden-guarded Sowing vault (Bible §7.3); Wardens arrive with U-053.</summary>
+        public static readonly PoiDef WardenVault = new PoiDef
+        {
+            id = "warden_vault", label = "WARDEN VAULT", planet = PlanetId.Mercury, x = 1000, groundRow = 4, stamp = MercuryPad,
+            props = new[] { new PoiProp("props/mercury/warden_vault_gate", 8f, 0f, new Vector2(3.94f, 3.56f)) },
+        };
+
+        /// <summary>The Mercury beacon inside a flare shelter (Bible §7.3).</summary>
+        public static readonly PoiDef MercuryBeacon = new PoiDef
+        {
+            id = "mercury_beacon", label = "MERIDIAN BEACON", planet = PlanetId.Mercury, x = 1600, groundRow = 4, stamp = MercuryPad,
+            props = new[]
+            {
+                new PoiProp("props/mercury/flare_shelter", 6f, 0f, new Vector2(3.88f, 2.13f), shelterRadius: 2.6f),
+                new PoiProp("props/mercury/meridian_beacon", 10f, 0f, new Vector2(2.06f, 3.13f)),
+            },
+        };
+
+        /// <summary>Solarite crystals, fused by flares on the day side (harvesting arrives with crafting, U-051).</summary>
+        public static readonly PoiDef SolariteField = new PoiDef
+        {
+            id = "solarite_field", label = "SOLARITE", planet = PlanetId.Mercury, x = 1900, groundRow = 4, stamp = MercuryPad,
+            props = new[]
+            {
+                new PoiProp("props/mercury/solarite_cluster", 5f, 0f, new Vector2(1.81f, 1.63f)),
+                new PoiProp("props/mercury/solarite_cluster", 10f, 0f, new Vector2(1.4f, 1.26f)),
+            },
+        };
+
+        public static readonly PoiDef[] All = { SpawnCamp, SurveyArchive, LaunchComplex, HalcyonHauler, WardenOutpost, FlareShelterPoi, WardenVault, MercuryBeacon, SolariteField };
 
         public static IEnumerable<PoiDef> For(PlanetId planet)
         {

@@ -54,7 +54,8 @@ namespace Meridian.Tests
             // Shift Mercury's clock so x sits in the wanted zone: twilight at the dawn line, day a quarter world behind it, night a quarter ahead.
             float q = mercury.worldWidth * 0.25f;
             float dawn = zone == MercuryZone.Twilight ? x : zone == MercuryZone.Day ? x + q : x - q;
-            hazards.mercuryClockOffset = Mathf.Repeat(dawn, mercury.worldWidth) * MercuryTerminator.CreepSecondsPerMetre - Time.timeSinceLevelLoadAsDouble;
+            var clock = Object.FindAnyObjectByType<TimeSystem>();
+            hazards.mercuryClockOffset = Mathf.Repeat(dawn, mercury.worldWidth) * MercuryTerminator.CreepSecondsPerMetre - MercuryTerminator.Now(clock.GameSeconds);
             hazards.Step(0f);
             Assert.AreEqual(zone, hazards.Context.mercury, "placed in the " + zone);
         }

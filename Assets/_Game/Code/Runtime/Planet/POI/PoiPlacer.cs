@@ -81,6 +81,14 @@ namespace Meridian.Planet.POI
             sr.color = poi.planet == PlanetId.Earth ? new Color(0.55f, 0.57f, 0.6f, 1f) : new Color(0.5f, 0.38f, 0.3f, 1f);
             go.transform.localScale = new Vector3(prop.size.x, prop.size.y, 1f);
             LoadArt(sr, prop.key, prop.size.x, prop.topRow);
+            if (prop.shelterRadius > 0f)
+            {
+                // U-048: inside the shelter a flare can't reach (D-048).
+                var shelter = new GameObject(go.name + "_FlareShelter").AddComponent<Meridian.Hazards.FlareShelter>();
+                shelter.transform.SetParent(root, false);
+                shelter.transform.position = new Vector3(poi.x + prop.dx, groundY + 1f + prop.dy + prop.size.y * 0.5f, 0f);
+                shelter.radius = prop.shelterRadius;
+            }
             if (prop.solid)
             {
                 // Its own unscaled child of the POI root (the art rescales the sprite): you can stand on it.

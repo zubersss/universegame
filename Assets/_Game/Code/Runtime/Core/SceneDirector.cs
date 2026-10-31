@@ -30,6 +30,7 @@ namespace Meridian.Core
             // Terrain sheets of the landable planets stay loaded for the session: entries don't re-fetch them (U-039 fix).
             Meridian.Terrain.TerrainTileSet.Preload(Meridian.Terrain.TerrainStreamer.MaterialsFor(Meridian.Planets.PlanetId.Earth));
             Meridian.Terrain.TerrainTileSet.Preload(Meridian.Terrain.TerrainStreamer.MaterialsFor(Meridian.Planets.PlanetId.Mars));
+            Meridian.Terrain.TerrainTileSet.Preload(Meridian.Terrain.TerrainStreamer.MaterialsFor(Meridian.Planets.PlanetId.Mercury));
 
             if (!SceneManager.GetSceneByName(SpaceScene).isLoaded)
                 yield return SceneManager.LoadSceneAsync(SpaceScene, LoadSceneMode.Additive);

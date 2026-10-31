@@ -38,6 +38,10 @@ namespace Meridian.Items
             Tile(TileId.Basalt, "basalt", "Basalt", null);
             Tile(TileId.Hematite, "hematite", "Hematite", "icons/hematite/base");
             Tile(TileId.Ice, "water_ice", "Water ice", "icons/water_ice/base");
+            // Mercury (U-048): its ice drops the same water ice.
+            Tile(TileId.MercuryRegolith, "mercury_regolith", "Mercury regolith", null);
+            Tile(TileId.MercuryBasalt, "mercury_basalt", "Mercury basalt", null);
+            Tile(TileId.Sulfide, "sulfide", "Sulfide", null);
 
             // Resources (B-013 batch 1); not placeable.
             int id = FirstResource;
@@ -66,6 +70,6 @@ namespace Meridian.Items
         public static ItemDef Get(string key) => key != null && byKey.TryGetValue(key, out var d) ? d : null;
 
         /// <summary>The item a dug tile drops (water drops nothing).</summary>
-        public static int DropOf(byte tile) => tile == TileId.Water || Get(tile) == null ? 0 : tile;
+        public static int DropOf(byte tile) => tile == TileId.MercuryIce ? TileId.Ice : tile == TileId.Water || Get(tile) == null ? 0 : tile;
     }
 }

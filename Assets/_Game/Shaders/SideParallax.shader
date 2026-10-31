@@ -27,6 +27,7 @@ Shader "MERIDIAN/SideParallax"
         _Alpha ("Layers alpha", Float) = 1
         _Fade ("Overlay opacity (U-038 biome cross-fade)", Float) = 1
         _ViewHalf ("Camera half-height (m), for the deep-canyon sky", Float) = 7
+        _Sun ("Sun in the sky: world x, y, radius, on (U-048 Mercury)", Vector) = (0, 0, 0, 0)
         [HideInInspector] _SrcBlend ("Src blend", Float) = 1
         [HideInInspector] _DstBlend ("Dst blend", Float) = 0
         _SeaLevel ("Sea surface (world y; far below = no sea)", Float) = -100000
@@ -75,6 +76,7 @@ Shader "MERIDIAN/SideParallax"
                 float _Alpha;
                 float _Fade;
                 float _ViewHalf;
+                float4 _Sun;
                 float _SeaLevel;
                 float4 _WaterColor;
                 float _WaterFade;
@@ -136,7 +138,23 @@ Shader "MERIDIAN/SideParallax"
                 float horizon = _Datum + _HorizonOffset + (cam.y - _Datum) * (1.0 - _Q0.w);
                 half3 col = i.worldXY.y < horizon ? lerp(_GroundColor.rgb, sky, 0.3) : sky;
                 float2 uv;
-                if (LayerUV(i.worldXY, cam, _P0, _Q0, uv)) col = Over(col, SAMPLE_TEXTURE2D(_Layer0, sampler_Layer0, uv), _Q0.x, sky);
+                // Layer 0; its sample is kept: Mercury's far layer paints an opaque black sky, and the Sun goes over that sky only.
+                half skyMask = 1.0;
+                if (LayerUV(i.worldXY, cam, _P0, _Q0, uv))
+                {
+                    half4 s0 = SAMPLE_TEXTURE2D(_Layer0, sampler_Layer0, uv);
+                    col = Over(col, s0, _Q0.x, sky);
+                    skyMask = 1.0 - s0.a * smoothstep(0.18, 0.30, dot(s0.rgb, half3(0.299, 0.587, 0.114)));
+                }
+                // U-048: the Sun in the sky, over the far sky but under the ridges (they hide it at dawn and dusk).
+                if (_Sun.w > 0.5)
+                {
+                    float d = distance(i.worldXY, _Sun.xy);
+                    float disc = saturate((_Sun.z - d) / (0.04 * _Sun.z)) * skyMask;
+                    float glow = exp(-max(d - _Sun.z, 0.0) / (0.6 * _Sun.z)) * 0.55 * skyMask;
+                    col = lerp(col, half3(1.0, 0.86, 0.62), glow);
+                    col = lerp(col, half3(1.0, 0.97, 0.88), disc);
+                }
                 if (LayerUV(i.worldXY, cam, _P1, _Q1, uv)) col = Over(col, SAMPLE_TEXTURE2D(_Layer1, sampler_Layer1, uv), _Q1.x, sky);
                 if (LayerUV(i.worldXY, cam, _P2, _Q2, uv)) col = Over(col, SAMPLE_TEXTURE2D(_Layer2, sampler_Layer2, uv), _Q2.x, sky);
                 // Below the near layer's foot no farther layer may peek out (their bases would hang there, U-040):

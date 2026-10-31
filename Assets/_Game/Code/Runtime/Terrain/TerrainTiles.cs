@@ -8,7 +8,9 @@ namespace Meridian.Terrain
         public const byte Air = 0;
         public const byte Soil = 1, Grass = 2, Stone = 3, Sand = 4, Snow = 5, Water = 6;
         public const byte Regolith = 7, Basalt = 8, Hematite = 9, Ice = 10;
-        public const int Count = 11;
+        /// <summary>Mercury (U-048, B-027).</summary>
+        public const byte MercuryRegolith = 11, MercuryBasalt = 12, Sulfide = 13, MercuryIce = 14;
+        public const int Count = 15;
 
         static readonly string[] Keys =
         {
@@ -17,6 +19,8 @@ namespace Meridian.Terrain
             ArtKeys.Terrain.EarthSand, ArtKeys.Terrain.EarthSnow, ArtKeys.Terrain.EarthWater,
             ArtKeys.Terrain.MarsRegolith, ArtKeys.Terrain.MarsBasalt, ArtKeys.Terrain.MarsHematite,
             ArtKeys.Terrain.MarsIce,
+            ArtKeys.Terrain.MercuryRegolith, ArtKeys.Terrain.MercuryBasalt, ArtKeys.Terrain.MercurySulfide,
+            ArtKeys.Terrain.MercuryIce,
         };
 
         public static string ArtKey(byte id) => id < Keys.Length ? Keys[id] : null;
