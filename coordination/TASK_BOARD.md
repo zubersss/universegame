@@ -784,12 +784,12 @@ Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/mars_cany
 Depends: B-011
 Lead notes: Done (cycle 101): continuous strata-banded canyon wall with talus, hazed far rim, near fallen blocks and dunes; sky ~27% (fine at in-game framing). UNITY hooks it to the canyon-floor trigger. (Cycle 104) Reopened for a layer0 fix: pinched spike and sliver at x ≈ 1550–1640 and stepped gaps read as hanging shapes in game; make the far rim one continuous wall. (Cycle 105) Far rim fixed: one continuous banded wall, no spikes; done.
 
-### B-050 · BLENDER · In Progress · M3
+### B-050 · BLENDER · Done · M3
 Goal: Mercury far ridges: backgrounds/mercury layer0/layer0_nosun (and layer1 if affected) show a comb of vertical spikes along the crater skyline in game (coordination/reports/unity/u048_2026-10-31/capture_mercury_1_day.png, _2_twilight.png). Same cause as the canyon rim (terraced high-frequency ridge): use the ridge_lo approach so the rims are rounded crater walls, not spikes.
 Accept: same keys, sizes, tiling; stamped review; no vertical spike combs.
 Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/mercury/
 Depends: B-027
-Lead notes: Cycle 111.
+Lead notes: Done (cycle 112): mercury layer0 + layer0_nosun re-rendered with ridge_lo=180, rounded crater rims, no spike comb; in-game confirmation via the U-057 re-capture.
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.

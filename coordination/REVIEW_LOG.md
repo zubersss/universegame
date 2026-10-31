@@ -699,3 +699,6 @@ Decided: D-049 (flare cadence 8–12 min; night side shadowed; clocks saved in U
 ## Cycle 111 · 2026-10-31 (UNITY message)
 Checked: u048 day and twilight captures.
 Moved: U-048 → Done; U-050, B-050 → In Progress. Added U-057 + B-050 (visual follow-ups, not a bounce).
+
+## Cycle 112 · 2026-10-31 (BLENDER message)
+Checked: review_mercury.png (16:23 far layer). B-050 → Done; in-game check folds into U-057.
