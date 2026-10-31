@@ -28,7 +28,7 @@ from mathutils import Vector
 import gen_backdrop as GB
 from build_pilgrim import lin
 from meridian import pngio, post
-from meridian.noise import fft_noise
+from meridian.noise import fft_noise, fft_noise_1d
 
 PX_W, PX_H = 2048, 1024
 # Rendered beyond the period on both sides, then cropped: the render's own border columns
@@ -140,6 +140,13 @@ PRESETS = {
                  ground=[(234, 212, 168), (216, 188, 142)], rocks=0, rock_h=(1, 2), tilt=12.0, frame_up=-0.08),
         near=dict(W=64.0, level=0.26, amp=0.12, bumps=0.0, depth=(3, 14), haze=(0.1, 0.003),
                   ground=[(244, 228, 192), (224, 200, 156)], rocks=0, rock_h=(0.3, 1), tilt=18.0, frame_up=0.12),
+        # Strike 4 / new approach: painted 2D cloud banks replace the heightfields above.
+        banks=[dict(top=0.44, base_amp=26, r=(36, 110), billows=46, fall=260, haze=0.42,
+                    crown=(255, 244, 222), under=(206, 160, 112)),
+               dict(top=0.56, base_amp=34, r=(60, 170), billows=34, fall=320, haze=0.22,
+                    crown=(255, 240, 214), under=(196, 148, 100)),
+               dict(top=0.72, base_amp=40, r=(100, 260), billows=22, fall=380, haze=0.06,
+                    crown=(255, 238, 208), under=(184, 134, 90))],
         rock=[(200, 180, 140)],
     ),
     "venus_surface": dict(
@@ -1084,6 +1091,75 @@ def rock_layer(P, spec, seed, preview, work, near):
     return render(scene, work, ("near" if near else "mid") + str(seed), W)
 
 
+# ---------------------------------------------------------------- 2D cloud banks (B-028)
+
+def cloud_bank(P, spec, seed, preview):
+    """A painted cumulus bank (B-028 venus_deck): every lit heightfield read as terrain, so the
+    deck is drawn in 2D. Silhouette = fbm baseline + overlapping circular billows, drawn top
+    first so lower billows overlap the bases of higher ones (cauliflower stacking). Each billow
+    is shaded as a sphere lit from the upper front (bright crowns, shadowed undersides); the
+    body darkens with depth below the crown line, with soft internal fbm; haze toward the
+    preset colour. Periodic in x by construction (wrapped distances, FFT noise).
+    Returns HxWx4 float (rgb, alpha)."""
+    rng = np.random.default_rng(seed)
+    rnd = random.Random(seed)
+    W, H = PX_W, PX_H
+    base = spec["top"] * H + spec["base_amp"] * fft_noise_1d(rng, W, 120, 1024, 1.4)
+    top = base.copy()
+    shade = np.zeros((H, W), np.float32)
+    owner = np.zeros((H, W), bool)
+    L = np.array([-0.35, -0.75, 0.56], np.float32)
+    L /= np.linalg.norm(L)
+    r0, r1 = spec["r"]
+    circles = []
+    for _ in range(spec["billows"]):
+        cx = rnd.uniform(0, W)
+        r = r0 + (r1 - r0) * rnd.random() ** 1.6
+        cy = float(np.interp(cx, np.arange(W), base)) + r * rnd.uniform(0.15, 0.55)
+        circles.append((cy, cx, r))
+        for _k in range(rnd.randint(3, 5)):               # cauliflower: sub-billows on the crown
+            a = rnd.uniform(-2.4, -0.7)                    # upper rim (y down)
+            rs = r * rnd.uniform(0.22, 0.42)
+            circles.append((cy + math.sin(a) * r * 0.82, cx + math.cos(a) * r * 0.82, rs))
+    xs = np.arange(W, dtype=np.float32)
+    for cy, cx, r in sorted(circles):                     # higher crowns first, lower overlap them
+        dx = (xs - cx + W / 2) % W - W / 2
+        cols = np.where(np.abs(dx) < r)[0]
+        h = np.sqrt(np.maximum(r * r - dx[cols] ** 2, 0))
+        top[cols] = np.minimum(top[cols], cy - h)
+        y0, y1 = int(max(0, cy - r)), int(min(H, cy + r + 1))
+        yy = np.arange(y0, y1, dtype=np.float32)[:, None]
+        ddx, ddy = dx[cols][None, :], yy - cy
+        inside = ddx ** 2 + ddy ** 2 < r * r
+        nz = np.sqrt(np.clip(1 - (ddx ** 2 + ddy ** 2) / (r * r), 0, 1))
+        lam = np.clip((ddx / r) * L[0] + (ddy / r) * L[1] + nz * L[2], 0, 1)
+        sub = shade[y0:y1][:, cols]
+        own = owner[y0:y1][:, cols]
+        dist = np.sqrt(ddx ** 2 + ddy ** 2)
+        e = np.clip((r - dist) / (0.18 * r), 0, 1)          # soft rim: melt into what's behind
+        e = np.where(own, e, inside.astype(np.float32))
+        sub[:] = np.where(inside, sub * (1 - e) + lam * e, sub)
+        own[inside] = True
+        shade[y0:y1, cols] = sub
+        owner[y0:y1, cols] = own
+    yy = np.arange(H, dtype=np.float32)[:, None]
+    d = yy - top[None, :]                                  # depth below the crown line, px
+    body = np.clip(1 - d / spec["fall"], 0.25, 1.0) * 0.75  # body away from billows: darker down
+    lit = np.where(owner, 0.18 + 0.82 * shade, body)
+    fb = fft_noise(rng, H, W, 20, 300, 1.4)
+    lit = np.clip(lit + 0.06 * fb, 0, 1)
+    crown, under = np.array(spec["crown"], np.float32) / 255, np.array(spec["under"], np.float32) / 255
+    rgb = under + (crown - under) * lit[..., None]
+    hz = np.array(P["haze"], np.float32) / 255
+    rgb = rgb * (1 - spec["haze"]) + hz * spec["haze"]
+    edge = 1.5 + 2.5 * fft_noise(rng, H, W, 3, 24, 0.8)    # soft, slightly ragged edge
+    alpha = np.clip((d + edge * 0.5) / 2.0 + 0.5, 0, 1)
+    out = np.dstack([rgb, alpha]).astype(np.float32)
+    if preview:
+        out = out[::4, ::4]
+    return out
+
+
 # ---------------------------------------------------------------- entry
 
 def _finish_transparent(px):
@@ -1097,6 +1173,16 @@ def generate(entry, ctx):
     P = PRESETS[entry.get("preset", planet)]
     seed = int(entry.get("seed", 1))
     preview, work = ctx["preview"], ctx["work"]
+    if P.get("banks"):                                   # B-028: painted 2D cloud deck
+        bank = cloud_bank(P, P["banks"][int(layer[-1])], seed, preview)
+        if layer == "layer0":
+            sky = GB.sky_rgb(GB.PRESETS[planet], np.random.default_rng(seed))
+            if preview:
+                sky = sky[::4, ::4]
+            a = bank[..., 3:4]
+            rgb = sky * (1 - a) + bank[..., :3] * a
+            return {"color": np.dstack([pngio.to_u8(rgb), np.full(rgb.shape[:2], 255, np.uint8)])}
+        return {"color": _finish_transparent(bank)}
     if layer == "layer0":
         sky = GB.sky_rgb(GB.PRESETS[planet], np.random.default_rng(seed))
         if preview:
