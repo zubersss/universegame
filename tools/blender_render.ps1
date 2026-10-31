@@ -63,10 +63,24 @@ function Test-Heavy($chosen) {
     return $false
 }
 
+# D-045: numpy-only generators (no scene render; measured whole-process peak <= 1.0 GB) may
+# run at >= 1.2 GB free with a 0.3 GB watchdog. An explicit list: gen_backdrop3d is also a
+# "generator" but renders EEVEE scenes, so "generator, no source" alone is not enough.
+$numpyGenerators = @('scripts/build_title.py', 'scripts/gen_fx.py')
+
+function Test-NumpyOnly($chosen) {
+    if ($chosen.Count -eq 0) { return $false }
+    foreach ($a in $chosen) {
+        if ($a.source -or -not $a.generator -or ($numpyGenerators -notcontains $a.generator)) { return $false }
+    }
+    return $true
+}
+
 function Get-GateMB($chosen) {
     # D-033's 1.0 GB gate for Cycles-CPU sprites was conditional on a peak <= 0.6 GB. Measured
     # 2026-10-31: 1.41-1.45 GB (Blender baseline dominates), so per D-033 every heavy job is
     # back on the D-026 1.5 GB gate. Cycles CPU stays for sprites (no GPU-texture crash risk).
+    if (Test-NumpyOnly $chosen) { return 1200 }                 # D-045
     return 1500
 }
 
@@ -104,9 +118,28 @@ for ($i = 0; $i -lt $jobs.Count; $i++) {
     $pyArgs = $job.Args + $(if ($Preview) { @('--preview') } else { @() })
     $t0 = Get-Date
     try {
-        & $blender --background --factory-startup --python-exit-code 1 --python $script -- @pyArgs |
-            ForEach-Object { if ($_ -match '^(MERIDIAN |Traceback|  File |\w+Error)') { Write-Host $_ } }
-        if ($LASTEXITCODE -ne 0) { $code = $LASTEXITCODE }
+        if ($heavy -and (Test-NumpyOnly $job.Chosen)) {
+            # D-045 watchdog: poll free RAM while the job runs; stop it under 0.3 GB.
+            $out = Join-Path $env:TEMP "blender_render_$PID.log"
+            $argList = @('--background', '--factory-startup', '--python-exit-code', '1', '--python', "`"$script`"", '--') + $pyArgs
+            $p = Start-Process -FilePath $blender -ArgumentList $argList -NoNewWindow -PassThru -RedirectStandardOutput $out
+            $killed = $false
+            while (-not $p.HasExited) {
+                Start-Sleep -Milliseconds 1000
+                $f = [int]((Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1024)
+                if ($f -lt 300) { Stop-Process -Id $p.Id -Force; $killed = $true; break }
+            }
+            $p.WaitForExit()
+            Get-Content $out -ErrorAction SilentlyContinue |
+                ForEach-Object { if ($_ -match '^(MERIDIAN |Traceback|  File |\w+Error)') { Write-Host $_ } }
+            Remove-Item $out -ErrorAction SilentlyContinue
+            if ($killed) { Write-Host "blender_render: STOPPED '$($job.Name)': free RAM fell under 300 MB (D-045 watchdog)"; $code = 4 }
+            elseif ($p.ExitCode -ne 0) { $code = $p.ExitCode }
+        } else {
+            & $blender --background --factory-startup --python-exit-code 1 --python $script -- @pyArgs |
+                ForEach-Object { if ($_ -match '^(MERIDIAN |Traceback|  File |\w+Error)') { Write-Host $_ } }
+            if ($LASTEXITCODE -ne 0) { $code = $LASTEXITCODE }
+        }
     } finally {
         if ($heavy -and (Test-Path $lock)) { Remove-Item $lock -Force }
     }
