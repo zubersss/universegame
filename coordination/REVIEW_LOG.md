@@ -592,3 +592,6 @@ Signals: team idle, blocked on USER-10 (~3 h 15 min).
 
 ## Cycle 84 · 2026-10-31 09:12
 No change: no commits since 08:10, both idle, no locks. Blocked on USER-10 (~3 h 45 min).
+
+## Cycle 85 · 2026-10-31 09:42
+No change: both idle, no locks, blocked on USER-10 (~4 h 15 min).
