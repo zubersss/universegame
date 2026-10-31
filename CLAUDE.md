@@ -65,7 +65,9 @@ ever overwritten.
    may not start another heavy job until that role has run one job, removed its want file,
    or its want file is older than 30 min. This holds even while the waiter is blocked on
    memory, because your idle time is what frees the memory. A batched check counts as one job
-   only when it's one wrapper call that holds the lock throughout.
+   only when it's one wrapper call that holds the lock throughout. After your own job, don't
+   re-file your want while another role's want exists; file it only after that role takes the
+   lock. Otherwise each side yields to the other and both stall (D-039).
 7. **Accepted work stays accepted.** Don't re-polish Done tasks unless LEAD reopens them.
 8. **Stay inside the repo.** No system installs, no registry/settings changes; list those
    in your status file for USER_ACTIONS.

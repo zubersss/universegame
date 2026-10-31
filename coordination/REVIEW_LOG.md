@@ -324,3 +324,10 @@ Checked: scree_stalker_frames.png, dustskater_zoom.png (B-016).
 Moved: B-016 → Done; B-031 → In Progress.
 Decided: none.
 Signals: none. BLENDER fixed a stale-guard bug (the Mars builder had rebuilt with Earth species once).
+
+## Cycle 40 · 2026-10-31 03:42
+Checked: git log 03:07–03:40 (U-043, B-016, metas, B-029 sources); locks: want_blender 03:37:54 and want_unity 03:38:19, no heavy lock; free RAM 1.8 GB; ListAgents (UNITY in shell, BLENDER busy on light work).
+Moved: none.
+Decided: D-039 (no re-filing a want after your own job while the other waits; CLAUDE.md rule 6).
+Signals: turn deadlock (each role deferring to the other with the gate open). Response: LEAD deleted want_blender.lock 03:41 (LEAD may delete others' locks; logged here). UNITY goes next, then BLENDER re-files.
+Queue: UNITY 5 Ready, BLENDER 5 Ready.
