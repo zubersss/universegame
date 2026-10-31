@@ -84,9 +84,15 @@ def _blob_index(mask):
     return canon.index(reduce(mask))
 
 
+_SHEETS = {}
+
+
 def tile(rel, mask, size):
-    """One 128 px terrain tile (8 columns, no gutters), resized to `size`."""
-    sheet = load(rel)
+    """One 128 px terrain tile (8 columns, no gutters), resized to `size`. Sheets are cached:
+    reloading a 1024x1024 sheet per tile pushed the whole-process peak to 1015 MB (> D-045 1.0 GB)."""
+    if rel not in _SHEETS:
+        _SHEETS[rel] = load(rel)
+    sheet = _SHEETS[rel]
     i = _blob_index(mask)
     r, c = divmod(i, 8)
     return resize(sheet[r * 128:(r + 1) * 128, c * 128:(c + 1) * 128], size, size)

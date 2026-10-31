@@ -66,7 +66,8 @@ function Test-Heavy($chosen) {
 # D-045: numpy-only generators (no scene render; measured whole-process peak <= 1.0 GB) may
 # run at >= 1.2 GB free with a 0.3 GB watchdog. An explicit list: gen_backdrop3d is also a
 # "generator" but renders EEVEE scenes, so "generator, no source" alone is not enough.
-$numpyGenerators = @('scripts/build_title.py', 'scripts/gen_fx.py')
+# build_title.py measured 1015-1033 MB whole-process (full-frame float compositing) -> over 1.0 GB, excluded.
+$numpyGenerators = @('scripts/gen_fx.py')
 
 function Test-NumpyOnly($chosen) {
     if ($chosen.Count -eq 0) { return $false }
