@@ -508,3 +508,9 @@ Moved: none.
 Added: B-042 (icons batch 2).
 Signals: UNITY blocked ~1 h 45 min on the user-only USER-10. BLENDER is producing M3 art well ahead of integration, so lookahead is capped (the M4 giants are deliberately not started).
 Queue: UNITY 6, BLENDER 2.
+
+## Cycle 69 · 2026-10-31 (BLENDER message)
+Checked: review_envirosuit.png.
+Moved: B-041 → Done (B-040 rework in progress).
+Decided: none.
+Signals: UNITY still blocked on USER-10.
