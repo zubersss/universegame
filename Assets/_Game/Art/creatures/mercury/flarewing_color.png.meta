@@ -1,0 +1,864 @@
+fileFormatVersion: 2
+guid: e0a04c2f04dd89647afa7d6074599c02
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5527531429716463551
+    second: flarewing_color_0
+  - first:
+      213: 3063648605019113530
+    second: flarewing_color_1
+  - first:
+      213: 7890730160633292019
+    second: flarewing_color_2
+  - first:
+      213: -5565932887528506126
+    second: flarewing_color_3
+  - first:
+      213: 4981908666601520694
+    second: flarewing_color_4
+  - first:
+      213: 5983911011831519429
+    second: flarewing_color_5
+  - first:
+      213: -7534245429473783010
+    second: flarewing_color_6
+  - first:
+      213: 1994442028295726577
+    second: flarewing_color_7
+  - first:
+      213: -4210751431970831389
+    second: flarewing_color_8
+  - first:
+      213: 95721469974587644
+    second: flarewing_color_9
+  - first:
+      213: 8751684471236560253
+    second: flarewing_color_10
+  - first:
+      213: 6956331159041812215
+    second: flarewing_color_11
+  - first:
+      213: 7358741294376282862
+    second: flarewing_color_12
+  - first:
+      213: 7513520178686141655
+    second: flarewing_color_13
+  - first:
+      213: -6674899103023377423
+    second: flarewing_color_14
+  - first:
+      213: -3552286510046346525
+    second: flarewing_color_15
+  - first:
+      213: 2209187854107593156
+    second: flarewing_color_16
+  - first:
+      213: 3773401257207931358
+    second: flarewing_color_17
+  - first:
+      213: -2957098223588959242
+    second: flarewing_color_18
+  - first:
+      213: -5388518811400856685
+    second: flarewing_color_19
+  - first:
+      213: -3307335769679845838
+    second: flarewing_color_20
+  - first:
+      213: -2174051150767414704
+    second: flarewing_color_21
+  - first:
+      213: -8432638317486761923
+    second: flarewing_color_22
+  - first:
+      213: -7310923684479856287
+    second: flarewing_color_23
+  - first:
+      213: -3637333955937427055
+    second: flarewing_color_24
+  - first:
+      213: 9189638892864926187
+    second: flarewing_color_25
+  - first:
+      213: 1260960442264226074
+    second: flarewing_color_26
+  - first:
+      213: 3940658422692559096
+    second: flarewing_color_27
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 131.25
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: flarewing_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1040
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1210949b31ac0374ca5ccc26062ed921
+      internalID: 126333794
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_1
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 1040
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b38b0946bdea7a84bbe9d436d9eca3a9
+      internalID: 962890046
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_2
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 1040
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 82c8ba60033d34b43b3a550f4a8c581b
+      internalID: -1843780277
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_3
+      rect:
+        serializedVersion: 2
+        x: 780
+        y: 1040
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1b70496a1ce803a42a3cab02d6aee313
+      internalID: -1827604933
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_4
+      rect:
+        serializedVersion: 2
+        x: 1040
+        y: 1040
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6109947dc0184f9459cb9e04ecb7bb7e
+      internalID: -1949449923
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_5
+      rect:
+        serializedVersion: 2
+        x: 1300
+        y: 1040
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ee860438c0a3f0e4b9aa963c08e622bd
+      internalID: -2116078027
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_6
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 780
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0e3cbcbae38d7c04f9ad7960a01fca6f
+      internalID: -2113528305
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_7
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 780
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9b5578eae26d15845ae2427ccc078f36
+      internalID: 28987822
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_8
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 780
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: efd573f109cb90e4a82e3425b03b3bd7
+      internalID: 140192495
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_9
+      rect:
+        serializedVersion: 2
+        x: 780
+        y: 780
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cbbbcc0e60782c34591f9c3f61e394de
+      internalID: 951338557
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_10
+      rect:
+        serializedVersion: 2
+        x: 1040
+        y: 780
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 25a6a266e77679b4eaabd5f2baa4e1ea
+      internalID: -1966995895
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_11
+      rect:
+        serializedVersion: 2
+        x: 1300
+        y: 780
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 10d5ad37431d8b44ab7797a9c0318020
+      internalID: 1050302047
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_12
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 520
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 87d054e2657c1da41adc802a3b0a82ae
+      internalID: -608947368
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_13
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 520
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 469742c50b939374e816abb23bb9a5d4
+      internalID: 407353249
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_14
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 520
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 701de3d393996bf4da984d556dab6cac
+      internalID: 1000164541
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_15
+      rect:
+        serializedVersion: 2
+        x: 780
+        y: 520
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 14f21053fb1e5df489597fe6755d2415
+      internalID: -740500611
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_16
+      rect:
+        serializedVersion: 2
+        x: 1040
+        y: 520
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 80d650571cfc48d4a99a392de03dae93
+      internalID: 1093634509
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_17
+      rect:
+        serializedVersion: 2
+        x: 1300
+        y: 520
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9e1304e8557c08f4db1a8baacb49b9e5
+      internalID: -1384229467
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_18
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 260
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1c9b799fe4a16214b8f3f4c8ff12010f
+      internalID: 974784707
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_19
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 260
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cc35458e6a9477449b2114e023d663e4
+      internalID: 1761485117
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_20
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 260
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e4b0abb9890c40844abe46c4b4664c0d
+      internalID: -866859583
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_21
+      rect:
+        serializedVersion: 2
+        x: 780
+        y: 260
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b1bdbc0d2106c7b4485b88868195a26c
+      internalID: 1874788369
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_22
+      rect:
+        serializedVersion: 2
+        x: 1040
+        y: 260
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 056f7f270fad8dc498161a85435646b9
+      internalID: 1368612449
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_23
+      rect:
+        serializedVersion: 2
+        x: 1300
+        y: 260
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cff44e759166e2649bc8f00845347349
+      internalID: 1841108892
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_24
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 309ab95b347b1344ab8866748a4fdddb
+      internalID: -326856962
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_25
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 0
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3fc8a11912a3f4f419d8ca71c1b07d95
+      internalID: 178041791
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_26
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 0
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ef2131f7dfeadbc4c83a02e00815bdc7
+      internalID: -907076553
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flarewing_27
+      rect:
+        serializedVersion: 2
+        x: 780
+        y: 0
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3d1690fef1b2d6147a64cc683fc3949a
+      internalID: -242809200
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: b9520e2b8bd87354c9f86d0bdc1ccfd1
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures:
+    - texture: {fileID: 2800000, guid: 0da31dc1e51876e408f48f478ad2cf20, type: 3}
+      name: _NormalMap
+    - texture: {fileID: 2800000, guid: c123bc9ccefaf894dbc02d3ddb9fba46, type: 3}
+      name: _EmissionMap
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      flarewing_0: 126333794
+      flarewing_1: 962890046
+      flarewing_10: -1966995895
+      flarewing_11: 1050302047
+      flarewing_12: -608947368
+      flarewing_13: 407353249
+      flarewing_14: 1000164541
+      flarewing_15: -740500611
+      flarewing_16: 1093634509
+      flarewing_17: -1384229467
+      flarewing_18: 974784707
+      flarewing_19: 1761485117
+      flarewing_2: -1843780277
+      flarewing_20: -866859583
+      flarewing_21: 1874788369
+      flarewing_22: 1368612449
+      flarewing_23: 1841108892
+      flarewing_24: -326856962
+      flarewing_25: 178041791
+      flarewing_26: -907076553
+      flarewing_27: -242809200
+      flarewing_3: -1827604933
+      flarewing_4: -1949449923
+      flarewing_5: -2116078027
+      flarewing_6: -2113528305
+      flarewing_7: 28987822
+      flarewing_8: 140192495
+      flarewing_9: 951338557
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

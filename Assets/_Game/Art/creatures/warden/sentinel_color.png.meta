@@ -1,0 +1,864 @@
+fileFormatVersion: 2
+guid: a6fbf93c248bcb04897ff7d2cbf2c09e
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -2318410846218887791
+    second: sentinel_color_0
+  - first:
+      213: 346463591406502779
+    second: sentinel_color_1
+  - first:
+      213: 7699412288659367225
+    second: sentinel_color_2
+  - first:
+      213: 898873654633684426
+    second: sentinel_color_3
+  - first:
+      213: 2099025488890629456
+    second: sentinel_color_4
+  - first:
+      213: -180683464887912502
+    second: sentinel_color_5
+  - first:
+      213: 2062862626835413318
+    second: sentinel_color_6
+  - first:
+      213: 5543081969477573522
+    second: sentinel_color_7
+  - first:
+      213: 4463480641924677692
+    second: sentinel_color_8
+  - first:
+      213: -1892213615955025153
+    second: sentinel_color_9
+  - first:
+      213: 6306512411455376802
+    second: sentinel_color_10
+  - first:
+      213: 2608709159237190271
+    second: sentinel_color_11
+  - first:
+      213: -8862929223032881264
+    second: sentinel_color_12
+  - first:
+      213: -4951405434097587704
+    second: sentinel_color_13
+  - first:
+      213: -3841308035195446909
+    second: sentinel_color_14
+  - first:
+      213: 5729422833195465028
+    second: sentinel_color_15
+  - first:
+      213: -2839886732135537144
+    second: sentinel_color_16
+  - first:
+      213: -475904016507522155
+    second: sentinel_color_17
+  - first:
+      213: 3254091999988252492
+    second: sentinel_color_18
+  - first:
+      213: 3683527808529738129
+    second: sentinel_color_19
+  - first:
+      213: -2757635233511338018
+    second: sentinel_color_20
+  - first:
+      213: 108090032442555
+    second: sentinel_color_21
+  - first:
+      213: -6145347462886292317
+    second: sentinel_color_22
+  - first:
+      213: -2922317901087974800
+    second: sentinel_color_23
+  - first:
+      213: -1151244672718672058
+    second: sentinel_color_24
+  - first:
+      213: -558661705163529071
+    second: sentinel_color_25
+  - first:
+      213: -7139931896053852168
+    second: sentinel_color_26
+  - first:
+      213: 8829263663091455030
+    second: sentinel_color_27
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 131.75
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: sentinel_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1040
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d168b5391e4244c45a5e7b1d76c7c88f
+      internalID: -1647684322
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_1
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 1040
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ae69e3d80a3f8dd4ea41daf2b9d24a06
+      internalID: -1162355969
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_2
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 1040
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e507b8144b7e2ca4a8c7711ce45390c0
+      internalID: -1566873586
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_3
+      rect:
+        serializedVersion: 2
+        x: 780
+        y: 1040
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 30923a077bfdaa84b8f07b3ae9fc2822
+      internalID: -1743032959
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_4
+      rect:
+        serializedVersion: 2
+        x: 1040
+        y: 1040
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0d2d74c0037a3984aa442adb473a37d7
+      internalID: 1317920374
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_5
+      rect:
+        serializedVersion: 2
+        x: 1300
+        y: 1040
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8d3a7f7433e404f4dada215e488901c3
+      internalID: -377003138
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_6
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 780
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1cf2cc77bdebafa4ab404d1ad1928931
+      internalID: -88978743
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_7
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 780
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a248d4fbba9f58543bc36fbed7fe6293
+      internalID: -514924429
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_8
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 780
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bc1065a6f3458e14db030eb76683897e
+      internalID: -540098097
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_9
+      rect:
+        serializedVersion: 2
+        x: 780
+        y: 780
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3b28f999614572c4899d374f93535161
+      internalID: 406657064
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_10
+      rect:
+        serializedVersion: 2
+        x: 1040
+        y: 780
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ee9860d04780847459bca838f3bbb975
+      internalID: -2078580452
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_11
+      rect:
+        serializedVersion: 2
+        x: 1300
+        y: 780
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4b66ab5022c50ff4cb7390fc5d6dc31c
+      internalID: 1072253599
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_12
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 520
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: af8a7e8e99ed8e640aa03ad4c5c53d12
+      internalID: 1164574751
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_13
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 520
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 86b0c285a02b00147bde75e97c09f792
+      internalID: 2069293134
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_14
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 520
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5c0c0ea8d78b5a74189d7622d9af08ba
+      internalID: 564300788
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_15
+      rect:
+        serializedVersion: 2
+        x: 780
+        y: 520
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4efd92eb55be10445aa43866f786f0ba
+      internalID: -90971209
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_16
+      rect:
+        serializedVersion: 2
+        x: 1040
+        y: 520
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6fc07752f4d2c3848ad5a6216c9b1d58
+      internalID: 792474647
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_17
+      rect:
+        serializedVersion: 2
+        x: 1300
+        y: 520
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 566be92f019d77944a5d273ae26f0e10
+      internalID: -1012778325
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_18
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 260
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6d21bd17bdffe69428f74f9aa024d9e8
+      internalID: -1822267411
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_19
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 260
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b0d9a9e43f104484cb46996bf29539b6
+      internalID: -1422806113
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_20
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 260
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5d5d16d04a314a24ea15aa9bca290cab
+      internalID: -453996545
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_21
+      rect:
+        serializedVersion: 2
+        x: 780
+        y: 260
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c5682d06380c4054b8d2034cbe7bdafa
+      internalID: -876424797
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_22
+      rect:
+        serializedVersion: 2
+        x: 1040
+        y: 260
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 62d4f0b3118cb584880aa6bdff32c42c
+      internalID: 1635103936
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_23
+      rect:
+        serializedVersion: 2
+        x: 1300
+        y: 260
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dd7575321ef30b048871e41c9fcc0310
+      internalID: -240691767
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_24
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6dc4244d2862d5e4ca96c2e26f7fb33a
+      internalID: 369180150
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_25
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 0
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0accbff51611f744eb690c472e9b8f08
+      internalID: 1239101621
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_26
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 0
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 30792973eaf816f4eab9668229856f18
+      internalID: -1033137267
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sentinel_27
+      rect:
+        serializedVersion: 2
+        x: 780
+        y: 0
+        width: 256
+        height: 256
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 00209be6111f7674b95ae6f462d6a6ae
+      internalID: 1618477608
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: b6e56aa68981919498c04ff11e0d5471
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures:
+    - texture: {fileID: 2800000, guid: 82e1b25f2c35dba468e44b7a82585dcc, type: 3}
+      name: _NormalMap
+    - texture: {fileID: 2800000, guid: fdba5bde3b6c5694ba2b7523db909eac, type: 3}
+      name: _EmissionMap
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      sentinel_0: -1647684322
+      sentinel_1: -1162355969
+      sentinel_10: -2078580452
+      sentinel_11: 1072253599
+      sentinel_12: 1164574751
+      sentinel_13: 2069293134
+      sentinel_14: 564300788
+      sentinel_15: -90971209
+      sentinel_16: 792474647
+      sentinel_17: -1012778325
+      sentinel_18: -1822267411
+      sentinel_19: -1422806113
+      sentinel_2: -1566873586
+      sentinel_20: -453996545
+      sentinel_21: -876424797
+      sentinel_22: 1635103936
+      sentinel_23: -240691767
+      sentinel_24: 369180150
+      sentinel_25: 1239101621
+      sentinel_26: -1033137267
+      sentinel_27: 1618477608
+      sentinel_3: -1743032959
+      sentinel_4: 1317920374
+      sentinel_5: -377003138
+      sentinel_6: -88978743
+      sentinel_7: -514924429
+      sentinel_8: -540098097
+      sentinel_9: 406657064
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

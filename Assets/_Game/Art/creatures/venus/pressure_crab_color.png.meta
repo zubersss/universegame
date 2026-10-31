@@ -1,0 +1,864 @@
+fileFormatVersion: 2
+guid: 450088f85df65b74391bf9aac9cdf1fb
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 2601073060881991143
+    second: pressure_crab_color_0
+  - first:
+      213: 6932363500695023971
+    second: pressure_crab_color_1
+  - first:
+      213: 4450578433429032572
+    second: pressure_crab_color_2
+  - first:
+      213: 6414809661723743910
+    second: pressure_crab_color_3
+  - first:
+      213: 4580359151910360412
+    second: pressure_crab_color_4
+  - first:
+      213: 381047828926248336
+    second: pressure_crab_color_5
+  - first:
+      213: 5981306354330314902
+    second: pressure_crab_color_6
+  - first:
+      213: 5646441841713197657
+    second: pressure_crab_color_7
+  - first:
+      213: 6018915987350923706
+    second: pressure_crab_color_8
+  - first:
+      213: -2446719951740079112
+    second: pressure_crab_color_9
+  - first:
+      213: 6653220483166352991
+    second: pressure_crab_color_10
+  - first:
+      213: 3862051088109700473
+    second: pressure_crab_color_11
+  - first:
+      213: 1275994343983669565
+    second: pressure_crab_color_12
+  - first:
+      213: 245117499970219895
+    second: pressure_crab_color_13
+  - first:
+      213: 999533220486893316
+    second: pressure_crab_color_14
+  - first:
+      213: 5581331507281579702
+    second: pressure_crab_color_15
+  - first:
+      213: 1834700319766868298
+    second: pressure_crab_color_16
+  - first:
+      213: 8840748871006844046
+    second: pressure_crab_color_17
+  - first:
+      213: 1549076525319011987
+    second: pressure_crab_color_18
+  - first:
+      213: 3712165189281308986
+    second: pressure_crab_color_19
+  - first:
+      213: -5994981784511559364
+    second: pressure_crab_color_20
+  - first:
+      213: 6636555706211525061
+    second: pressure_crab_color_21
+  - first:
+      213: 5166915728331244289
+    second: pressure_crab_color_22
+  - first:
+      213: -4912438313463049811
+    second: pressure_crab_color_23
+  - first:
+      213: -4465603773264223758
+    second: pressure_crab_color_24
+  - first:
+      213: -6325515077204286145
+    second: pressure_crab_color_25
+  - first:
+      213: 346956835530802762
+    second: pressure_crab_color_26
+  - first:
+      213: 2490918842634858870
+    second: pressure_crab_color_27
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.03125}
+  spritePixelsToUnits: 114.25
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: pressure_crab_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1296
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c78df7dbab061cd44b93bc9a9cecaee4
+      internalID: -102114421
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_1
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 1296
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0f4f791bc8667be4ab42c89c7268aab5
+      internalID: -1770169703
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_2
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 1296
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: edc331f0771604e4cb2dabb3cc8d5f17
+      internalID: 1038774785
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_3
+      rect:
+        serializedVersion: 2
+        x: 972
+        y: 1296
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4cab17b62f9b7bb459e3573f9cd11156
+      internalID: 991451990
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_4
+      rect:
+        serializedVersion: 2
+        x: 1296
+        y: 1296
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1364eaa93fa8c674f9dec9f5d00bf0c2
+      internalID: 1207622808
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_5
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 1296
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c565684b243323e4d8aed1f40dd66d19
+      internalID: 1216981903
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_6
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 972
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 958ee0c0f6b9ebd408d318796f8d9625
+      internalID: -1421301108
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_7
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 972
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 99df934e64c5bca498fab29334a6109f
+      internalID: -591591915
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_8
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 972
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ced29ae091eb4da48aa1b1f22f2de9f9
+      internalID: -152591481
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_9
+      rect:
+        serializedVersion: 2
+        x: 972
+        y: 972
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 597b14d2c099d8440b04a8b0772090dc
+      internalID: 420860482
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_10
+      rect:
+        serializedVersion: 2
+        x: 1296
+        y: 972
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dca062f3f9fb6f042a8834cfd9552e6f
+      internalID: -1360142031
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_11
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 972
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6e6d5aaa05d814f4589802640e70ec33
+      internalID: 1036475751
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_12
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 648
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0164600305b363046aeb1f2b6f34efe7
+      internalID: 2018182168
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_13
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 648
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9db146995a1a400488cecf63c4e2d39e
+      internalID: 753918788
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_14
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 648
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c9a84e4797413ec45bb414592ea607a8
+      internalID: 1147976118
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_15
+      rect:
+        serializedVersion: 2
+        x: 972
+        y: 648
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 38df5b7f4a3261443a61ac4c560bb6e1
+      internalID: 1389432017
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_16
+      rect:
+        serializedVersion: 2
+        x: 1296
+        y: 648
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ec7711fcf7d312043a26c9bdc939ab52
+      internalID: 77669570
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_17
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 648
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dcce17c97639aa64993eb64749f6a8f6
+      internalID: -939005961
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_18
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 324
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 775a37f74d1c87b418d1297dfc4a186a
+      internalID: -309803163
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_19
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 324
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6700ff5810959df4c81669f207a218af
+      internalID: 595403779
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_20
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 324
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f3ad6456601062d4a919920838a9cf5a
+      internalID: 514589484
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_21
+      rect:
+        serializedVersion: 2
+        x: 972
+        y: 324
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0004caadc94d12f41981948e8eb37d61
+      internalID: -461508303
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_22
+      rect:
+        serializedVersion: 2
+        x: 1296
+        y: 324
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1ab85cc2433915645b1ec241df8ac4dd
+      internalID: -73296435
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_23
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 324
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0478b9ba24a4bb64ba9afb32acc0f987
+      internalID: -1746828105
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_24
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1dbc66da0176fb64aa846748599720f3
+      internalID: -1378237774
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_25
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 0
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bef49a074f7146542bec2a7b69a58382
+      internalID: -1481595105
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_26
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 0
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ebf9ab7fafa4f7544b8b7377ea579313
+      internalID: -1924158570
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pressure_crab_27
+      rect:
+        serializedVersion: 2
+        x: 972
+        y: 0
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2520dd4c09d1190459505654dfc7a5ef
+      internalID: -582549562
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: e19733065cefad64c816e865d4400b89
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures:
+    - texture: {fileID: 2800000, guid: d9fcfa99a11215e4499ea76f5b909f1b, type: 3}
+      name: _NormalMap
+    - texture: {fileID: 2800000, guid: bb4fc2c7e08736b478d085fc4873fb1e, type: 3}
+      name: _EmissionMap
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      pressure_crab_0: -102114421
+      pressure_crab_1: -1770169703
+      pressure_crab_10: -1360142031
+      pressure_crab_11: 1036475751
+      pressure_crab_12: 2018182168
+      pressure_crab_13: 753918788
+      pressure_crab_14: 1147976118
+      pressure_crab_15: 1389432017
+      pressure_crab_16: 77669570
+      pressure_crab_17: -939005961
+      pressure_crab_18: -309803163
+      pressure_crab_19: 595403779
+      pressure_crab_2: 1038774785
+      pressure_crab_20: 514589484
+      pressure_crab_21: -461508303
+      pressure_crab_22: -73296435
+      pressure_crab_23: -1746828105
+      pressure_crab_24: -1378237774
+      pressure_crab_25: -1481595105
+      pressure_crab_26: -1924158570
+      pressure_crab_27: -582549562
+      pressure_crab_3: 991451990
+      pressure_crab_4: 1207622808
+      pressure_crab_5: 1216981903
+      pressure_crab_6: -1421301108
+      pressure_crab_7: -591591915
+      pressure_crab_8: -152591481
+      pressure_crab_9: 420860482
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,0 +1,103 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: planet_venus
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: planet_venus
+  m_GUID: 41723de805471664aae7da0b639ba7b6
+  m_SerializeEntries:
+  - m_GUID: 16e50df9e447a0149a3871469a580b35
+    m_Address: props/venus/station_hull_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1a96ff525ab9bc640a1bcb20990b6ec2
+    m_Address: creatures/venus/acidmoth
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1e931841007d0f14d82deaf13b335d31
+    m_Address: props/venus/aerostat_deck
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2d6ee4a3fdc41bf40b9a8c94f989aa34
+    m_Address: props/venus/aerostat_balloon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 362edc90b52e2cf4b836642a66d9e4b3
+    m_Address: props/venus/station_hull_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 373243b332c653b4d9a74582a2c1c117
+    m_Address: terrain/venus/basalt
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 450088f85df65b74391bf9aac9cdf1fb
+    m_Address: creatures/venus/pressure_crab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 59d5528d1a300f045a78e85cfbafeb91
+    m_Address: props/venus/buoyancy_cell
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6789254927b346d439f9ba2324360b9d
+    m_Address: terrain/venus/vent_glass
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7c96ee0cefffacf4980de4b16444e38c
+    m_Address: creatures/venus/vent_eel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7e7faf64851497740a23074faa96e0ff
+    m_Address: creatures/venus/veil_serpent
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: be46ac34d173f9b469da40a7f846bae6
+    m_Address: props/venus/vent_harvester
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d00082c381e657a4d933aced51dc3b76
+    m_Address: creatures/venus/sulfur_drifter
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: de81802b5eaf6c14b83a03d1566c78d7
+    m_Address: terrain/venus/tessera
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e3433963486ede94e9fa4b4c4eb1dd15
+    m_Address: props/venus/meridian_station_door
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ef8ba0b07d99de547b91a1ffd5373dbc
+    m_Address: terrain/venus/sulfur
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 6411c5ad75606954b9bab92d89b83046, type: 2}
+    - {fileID: 11400000, guid: 44abf0459f50a204d9eb1e2294ce69ba, type: 2}

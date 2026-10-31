@@ -1,0 +1,786 @@
+fileFormatVersion: 2
+guid: 7e7faf64851497740a23074faa96e0ff
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 133252567587330419
+    second: veil_serpent_color_0
+  - first:
+      213: -4809815957058810883
+    second: veil_serpent_color_1
+  - first:
+      213: -1299571773030906166
+    second: veil_serpent_color_2
+  - first:
+      213: 7439605738438237130
+    second: veil_serpent_color_3
+  - first:
+      213: -7006628339076502339
+    second: veil_serpent_color_4
+  - first:
+      213: -6359481852468080865
+    second: veil_serpent_color_5
+  - first:
+      213: 1334799455895586402
+    second: veil_serpent_color_6
+  - first:
+      213: 4936077604292553539
+    second: veil_serpent_color_7
+  - first:
+      213: -4165670531746254615
+    second: veil_serpent_color_8
+  - first:
+      213: 5170437784848449141
+    second: veil_serpent_color_9
+  - first:
+      213: 2900606790903354947
+    second: veil_serpent_color_10
+  - first:
+      213: 6394125066724691205
+    second: veil_serpent_color_11
+  - first:
+      213: -6664252393622024508
+    second: veil_serpent_color_12
+  - first:
+      213: -4554544783158877637
+    second: veil_serpent_color_13
+  - first:
+      213: 4063268127872217513
+    second: veil_serpent_color_14
+  - first:
+      213: 2301169119262324411
+    second: veil_serpent_color_15
+  - first:
+      213: 4831514052777753761
+    second: veil_serpent_color_16
+  - first:
+      213: -1953510248241073269
+    second: veil_serpent_color_17
+  - first:
+      213: 8848409080182074215
+    second: veil_serpent_color_18
+  - first:
+      213: -6430886094143254258
+    second: veil_serpent_color_19
+  - first:
+      213: -304200223819214591
+    second: veil_serpent_color_20
+  - first:
+      213: 1946884311347385466
+    second: veil_serpent_color_21
+  - first:
+      213: 1665629858786395658
+    second: veil_serpent_color_22
+  - first:
+      213: 1171629191159358940
+    second: veil_serpent_color_23
+  - first:
+      213: 4480465002250211563
+    second: veil_serpent_color_24
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 103
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: veil_serpent_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1616
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fa074d41130ebb54099432553c092359
+      internalID: 47378353
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: veil_serpent_1
+      rect:
+        serializedVersion: 2
+        x: 404
+        y: 1616
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3417b83fb822b924e8e4ff9991c71802
+      internalID: 1775471187
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: veil_serpent_2
+      rect:
+        serializedVersion: 2
+        x: 808
+        y: 1616
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2646988f4f10c5c4abf4581da073ba36
+      internalID: 168140182
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: veil_serpent_3
+      rect:
+        serializedVersion: 2
+        x: 1212
+        y: 1616
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 15ee05571d484194fb2176dc7276afe2
+      internalID: 1283605664
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: veil_serpent_4
+      rect:
+        serializedVersion: 2
+        x: 1616
+        y: 1616
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7bce7a9e87e61cf49bc4ddf251948fcf
+      internalID: 1103334467
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: veil_serpent_5
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1212
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0fe85fe8eca41944b9fb23a74e67df0b
+      internalID: -1962776259
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: veil_serpent_6
+      rect:
+        serializedVersion: 2
+        x: 404
+        y: 1212
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 56ad69110ac7eb446974ceb996eb1c63
+      internalID: -1491559498
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: veil_serpent_7
+      rect:
+        serializedVersion: 2
+        x: 808
+        y: 1212
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 901c011a5135c8f44874edf8939c014c
+      internalID: 1737082285
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: veil_serpent_8
+      rect:
+        serializedVersion: 2
+        x: 1212
+        y: 1212
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 06275f2839ffd884dba133b22ff342f8
+      internalID: -895069168
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: veil_serpent_9
+      rect:
+        serializedVersion: 2
+        x: 1616
+        y: 1212
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8513d9fb258772643a8c36b473562040
+      internalID: -1578199238
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: veil_serpent_10
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 808
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a058a2c833d46bf488b4060bf192e354
+      internalID: 1185845998
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: veil_serpent_11
+      rect:
+        serializedVersion: 2
+        x: 404
+        y: 808
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4cbc9507db923834287dc64d21dcbbc7
+      internalID: 984737753
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: veil_serpent_12
+      rect:
+        serializedVersion: 2
+        x: 808
+        y: 808
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a2b3513a7d02c9e4d8ab19259b093573
+      internalID: -1522287115
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: veil_serpent_13
+      rect:
+        serializedVersion: 2
+        x: 1212
+        y: 808
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b3324b4515a48c8419b925d0cd06474f
+      internalID: 1175640135
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: veil_serpent_14
+      rect:
+        serializedVersion: 2
+        x: 1616
+        y: 808
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ce503062157758341bf5ad295abd6338
+      internalID: 1419685181
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: veil_serpent_15
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 404
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bcde69166801dbe4aae7492eb26ae7d7
+      internalID: -1536134472
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: veil_serpent_16
+      rect:
+        serializedVersion: 2
+        x: 404
+        y: 404
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: deeeaf46c2152b944a557e6b645c2a1e
+      internalID: -498348985
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: veil_serpent_17
+      rect:
+        serializedVersion: 2
+        x: 808
+        y: 404
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fde09b230b85826468a3ce05c1d241ef
+      internalID: -1187673455
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: veil_serpent_18
+      rect:
+        serializedVersion: 2
+        x: 1212
+        y: 404
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9c46b8efc561ff1439bef5088e167021
+      internalID: 166922726
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: veil_serpent_19
+      rect:
+        serializedVersion: 2
+        x: 1616
+        y: 404
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 01d02041ed70e4a4fada8ce5812bd268
+      internalID: 1793355485
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: veil_serpent_20
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 43ba4375b66a97d4aa8d6c11acadab81
+      internalID: -35891489
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: veil_serpent_21
+      rect:
+        serializedVersion: 2
+        x: 404
+        y: 0
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c781a53981474af43b4a4537d31ad13f
+      internalID: 429051958
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: veil_serpent_22
+      rect:
+        serializedVersion: 2
+        x: 808
+        y: 0
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 668427f647cfd54458b41f9470480a49
+      internalID: -1281563220
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: veil_serpent_23
+      rect:
+        serializedVersion: 2
+        x: 1212
+        y: 0
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 54d67a5187cf85346b683a716104b07c
+      internalID: -1186054559
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: veil_serpent_24
+      rect:
+        serializedVersion: 2
+        x: 1616
+        y: 0
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 94450f94428f94848bf5d3e685446cd7
+      internalID: 958647161
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 2903df1325adb0e41949f89ee4c9a791
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures:
+    - texture: {fileID: 2800000, guid: 69838854b6ff92a439f1dff99c65fbfd, type: 3}
+      name: _NormalMap
+    - texture: {fileID: 2800000, guid: fc7e68ddf9629ff418e3c09a62d9817c, type: 3}
+      name: _EmissionMap
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      veil_serpent_0: 47378353
+      veil_serpent_1: 1775471187
+      veil_serpent_10: 1185845998
+      veil_serpent_11: 984737753
+      veil_serpent_12: -1522287115
+      veil_serpent_13: 1175640135
+      veil_serpent_14: 1419685181
+      veil_serpent_15: -1536134472
+      veil_serpent_16: -498348985
+      veil_serpent_17: -1187673455
+      veil_serpent_18: 166922726
+      veil_serpent_19: 1793355485
+      veil_serpent_2: 168140182
+      veil_serpent_20: -35891489
+      veil_serpent_21: 429051958
+      veil_serpent_22: -1281563220
+      veil_serpent_23: -1186054559
+      veil_serpent_24: 958647161
+      veil_serpent_3: 1283605664
+      veil_serpent_4: 1103334467
+      veil_serpent_5: -1962776259
+      veil_serpent_6: -1491559498
+      veil_serpent_7: 1737082285
+      veil_serpent_8: -895069168
+      veil_serpent_9: -1578199238
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

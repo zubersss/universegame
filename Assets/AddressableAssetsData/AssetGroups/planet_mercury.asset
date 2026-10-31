@@ -1,0 +1,118 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: planet_mercury
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: planet_mercury
+  m_GUID: 8ef8665429d416c49b30c435d47c6f6a
+  m_SerializeEntries:
+  - m_GUID: 075228937130f81469a18deddeafaca9
+    m_Address: backgrounds/mercury/layer0_nosun
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1a5b4b07d6163da438e56c1b5f9c130e
+    m_Address: props/mercury/meridian_beacon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 23e2db1aa31e8e04199e714e93f76587
+    m_Address: props/mercury/flare_shelter
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 35105424c57f6ec4a99be2725e446b2c
+    m_Address: props/mercury/shelter_door
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3d39a8f33a9e333428898ef65505dce4
+    m_Address: backgrounds/mercury/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3ff84eea8cee7a749803fe1b553f5c14
+    m_Address: backgrounds/mercury/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 478571dd85299fc4d81bf230b296f943
+    m_Address: terrain/mercury/basalt
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 65e011665836145478f64c120e13092f
+    m_Address: creatures/mercury/cinderhulk_night
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 681ad70f1b568f745b1d133cebc3dd0c
+    m_Address: backgrounds/mercury/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 896bdf025e7e7b941a0f7b870dbebda9
+    m_Address: terrain/mercury/regolith
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8d1c050972b6a3a4fac8c919c01d1b62
+    m_Address: creatures/mercury/cinderling
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9761f11241e126840b05572478e2eb25
+    m_Address: terrain/mercury/ice
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: aa202bc5ed49e884b837af93ee2b2da2
+    m_Address: props/mercury/warden_vault_gate
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b24cc8088e94a68418d6ecb33d3516db
+    m_Address: props/mercury/solarite_cluster
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bf277628c52a67a47b56b42244b04132
+    m_Address: creatures/mercury/cinderhulk_day
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d48c7ac8a9333d548909970b0204c1e5
+    m_Address: terrain/mercury/sulfide
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e0a04c2f04dd89647afa7d6074599c02
+    m_Address: creatures/mercury/flarewing
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f075c7686cc646446adabd1605db7294
+    m_Address: creatures/mercury/glassback
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f96df61d5f9f88448b4c97d33f257413
+    m_Address: creatures/mercury/shadewyrm
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 6247ee6e494c5c9489ccb41e1a63ab3a, type: 2}
+    - {fileID: 11400000, guid: f8229fc15c84d1e4991209db24a94f90, type: 2}

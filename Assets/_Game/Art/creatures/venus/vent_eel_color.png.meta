@@ -1,0 +1,864 @@
+fileFormatVersion: 2
+guid: 7c96ee0cefffacf4980de4b16444e38c
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -6925289384420213214
+    second: vent_eel_color_0
+  - first:
+      213: -6347343191209168904
+    second: vent_eel_color_1
+  - first:
+      213: -5563332313509034875
+    second: vent_eel_color_2
+  - first:
+      213: 6940430862134317837
+    second: vent_eel_color_3
+  - first:
+      213: -5479997593681476237
+    second: vent_eel_color_4
+  - first:
+      213: -6681871246833467496
+    second: vent_eel_color_5
+  - first:
+      213: -32510691920462282
+    second: vent_eel_color_6
+  - first:
+      213: 7819873624061890364
+    second: vent_eel_color_7
+  - first:
+      213: -687948314537120108
+    second: vent_eel_color_8
+  - first:
+      213: -2122556787361044444
+    second: vent_eel_color_9
+  - first:
+      213: 465340625783113282
+    second: vent_eel_color_10
+  - first:
+      213: 9159791433959445314
+    second: vent_eel_color_11
+  - first:
+      213: -5166598601039316358
+    second: vent_eel_color_12
+  - first:
+      213: -3296238387280523474
+    second: vent_eel_color_13
+  - first:
+      213: 4212358409112511701
+    second: vent_eel_color_14
+  - first:
+      213: 8093845136842601305
+    second: vent_eel_color_15
+  - first:
+      213: 2970555368059080362
+    second: vent_eel_color_16
+  - first:
+      213: 3603072326112278694
+    second: vent_eel_color_17
+  - first:
+      213: 5174573344067100074
+    second: vent_eel_color_18
+  - first:
+      213: 8672677456237382726
+    second: vent_eel_color_19
+  - first:
+      213: 6924750641142888713
+    second: vent_eel_color_20
+  - first:
+      213: 4302724930771429814
+    second: vent_eel_color_21
+  - first:
+      213: 7537594271314250981
+    second: vent_eel_color_22
+  - first:
+      213: -2323804841016782921
+    second: vent_eel_color_23
+  - first:
+      213: -389014046095808640
+    second: vent_eel_color_24
+  - first:
+      213: 6254489166792198945
+    second: vent_eel_color_25
+  - first:
+      213: -8764981730650142985
+    second: vent_eel_color_26
+  - first:
+      213: 476240025745570325
+    second: vent_eel_color_27
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.03125}
+  spritePixelsToUnits: 125.75
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: vent_eel_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1296
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3a706c2d55fc46246a8d7deda7a2b17f
+      internalID: -1238549466
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_1
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 1296
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4a519b8687af210489ae78139541b7dc
+      internalID: 1119962381
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_2
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 1296
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5c11d04603860c54db1d9321d019c446
+      internalID: -688449587
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_3
+      rect:
+        serializedVersion: 2
+        x: 972
+        y: 1296
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b309f9737dde1724398c2d333b7b1831
+      internalID: -501740436
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_4
+      rect:
+        serializedVersion: 2
+        x: 1296
+        y: 1296
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a91bf050a864fc845a148d702b5c55e9
+      internalID: -142286069
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_5
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 1296
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9a2546cec73ae454d994368db16b39f0
+      internalID: -1279243853
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_6
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 972
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fd48531b9c9d2774b81e5d0feb3b2c85
+      internalID: 371968571
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_7
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 972
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 623e50d125bb62849842d25c92e3b26e
+      internalID: 655686376
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_8
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 972
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 488e16bd1481ed143a0712b4fa73a569
+      internalID: 886345093
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_9
+      rect:
+        serializedVersion: 2
+        x: 972
+        y: 972
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5c1ca728783e1c840be5602fbd68b6f5
+      internalID: -1480772803
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_10
+      rect:
+        serializedVersion: 2
+        x: 1296
+        y: 972
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 64ffd1299cbbb9d44a6f8c947109296e
+      internalID: 544316452
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_11
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 972
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c0e211f12f0b21b4e9a9634e39a3cf06
+      internalID: 195682043
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_12
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 648
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7f4d27baa32bd9646a9cd59567525e44
+      internalID: -728957079
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_13
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 648
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fe501163f850ecc40b3d3b60877f40af
+      internalID: 425918820
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_14
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 648
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6f99ae40d233e574786dda7015d31f28
+      internalID: 772310049
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_15
+      rect:
+        serializedVersion: 2
+        x: 972
+        y: 648
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2a295305765510c4185b09c4c3369e58
+      internalID: 2082254180
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_16
+      rect:
+        serializedVersion: 2
+        x: 1296
+        y: 648
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: db8f209db7565b84d834ae728936ba3d
+      internalID: 1449883411
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_17
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 648
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e3b449141de3a2a488cde3167e396957
+      internalID: 843569344
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_18
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 324
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6d1ed611445750d4dbe633e68b886aa6
+      internalID: 1669372315
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_19
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 324
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 450985d41e2530a4d9bd1fe39d485339
+      internalID: 914657429
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_20
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 324
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 144b1c26509ef9b449020a48a1984e3c
+      internalID: -97598570
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_21
+      rect:
+        serializedVersion: 2
+        x: 972
+        y: 324
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d0ae758449d54a14cbded1f83098a8c7
+      internalID: 599485922
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_22
+      rect:
+        serializedVersion: 2
+        x: 1296
+        y: 324
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 46aaa9688295799418b3831d0c442299
+      internalID: 526243945
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_23
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 324
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ac102b475f32bcc4bad72424eebc3840
+      internalID: 16624142
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_24
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5144353ff9e8d374e90986ba5f4cc66a
+      internalID: 1205374461
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_25
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 0
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: aadee0ca9aaed2c428b0f25384d27f7f
+      internalID: -897536031
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_26
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 0
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b605fac374190424b8d9aa978f5c2115
+      internalID: 1640677471
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_eel_27
+      rect:
+        serializedVersion: 2
+        x: 972
+        y: 0
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bc051dc14d2184946a381e54aa2c094d
+      internalID: 1241298703
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 3ecbc5a22e4cb594d9c0e1b572db07e4
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures:
+    - texture: {fileID: 2800000, guid: 70d9a7a320c026841928fddcfa1c80fd, type: 3}
+      name: _NormalMap
+    - texture: {fileID: 2800000, guid: dc133533a2035ad49aa03906796d1453, type: 3}
+      name: _EmissionMap
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      vent_eel_0: -1238549466
+      vent_eel_1: 1119962381
+      vent_eel_10: 544316452
+      vent_eel_11: 195682043
+      vent_eel_12: -728957079
+      vent_eel_13: 425918820
+      vent_eel_14: 772310049
+      vent_eel_15: 2082254180
+      vent_eel_16: 1449883411
+      vent_eel_17: 843569344
+      vent_eel_18: 1669372315
+      vent_eel_19: 914657429
+      vent_eel_2: -688449587
+      vent_eel_20: -97598570
+      vent_eel_21: 599485922
+      vent_eel_22: 526243945
+      vent_eel_23: 16624142
+      vent_eel_24: 1205374461
+      vent_eel_25: -897536031
+      vent_eel_26: 1640677471
+      vent_eel_27: 1241298703
+      vent_eel_3: -501740436
+      vent_eel_4: -142286069
+      vent_eel_5: -1279243853
+      vent_eel_6: 371968571
+      vent_eel_7: 655686376
+      vent_eel_8: 886345093
+      vent_eel_9: -1480772803
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

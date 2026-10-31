@@ -1,0 +1,1610 @@
+fileFormatVersion: 2
+guid: 6789254927b346d439f9ba2324360b9d
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 5499621680601819863
+    second: vent_glass_color_0
+  - first:
+      213: -2147173215844715108
+    second: vent_glass_color_1
+  - first:
+      213: 8612326960474142757
+    second: vent_glass_color_2
+  - first:
+      213: -6396344031755514302
+    second: vent_glass_color_3
+  - first:
+      213: -1227631134617989440
+    second: vent_glass_color_4
+  - first:
+      213: 5786493209631905771
+    second: vent_glass_color_5
+  - first:
+      213: 4126541405018711561
+    second: vent_glass_color_6
+  - first:
+      213: -6061392878491312137
+    second: vent_glass_color_7
+  - first:
+      213: -9219162551334734093
+    second: vent_glass_color_8
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 128
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: vent_glass_0
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 897
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e521192af90df2546a8cbeba976f3609
+      internalID: 657444798
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_1
+      rect:
+        serializedVersion: 2
+        x: 129
+        y: 897
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5c85a60e1feaea4449724f4a92bc7b4c
+      internalID: 1069565
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_2
+      rect:
+        serializedVersion: 2
+        x: 257
+        y: 897
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a3dd20624e8e32c4dbb363f6e4d25259
+      internalID: -1275612535
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_3
+      rect:
+        serializedVersion: 2
+        x: 385
+        y: 897
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7027ac6385c9e2f46bb9c849f0277ce9
+      internalID: -503325998
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_4
+      rect:
+        serializedVersion: 2
+        x: 513
+        y: 897
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d18119eec8bf0794e99a7276327f6a83
+      internalID: -290805632
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_5
+      rect:
+        serializedVersion: 2
+        x: 641
+        y: 897
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c456227ca104e1d438f024bbb0aed9d6
+      internalID: 1300695714
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_6
+      rect:
+        serializedVersion: 2
+        x: 769
+        y: 897
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5f3b86a93fea66f4394c85b71b25429e
+      internalID: -484347452
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_7
+      rect:
+        serializedVersion: 2
+        x: 897
+        y: 897
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b4abe7c31ac19f042b2cf41d1abbb6d5
+      internalID: -1396485899
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_8
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 769
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d1a6503dbb402b54a92be24a5f1f6436
+      internalID: -500118987
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_9
+      rect:
+        serializedVersion: 2
+        x: 129
+        y: 769
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d188a32c47a064b408a4c179d27244c0
+      internalID: 71780024
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_10
+      rect:
+        serializedVersion: 2
+        x: 257
+        y: 769
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f39886e312fe0e54f94414aea0ea5a5b
+      internalID: 415206651
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_11
+      rect:
+        serializedVersion: 2
+        x: 385
+        y: 769
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6a60ad8afc69f5448914784753a9d50c
+      internalID: -943153404
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_12
+      rect:
+        serializedVersion: 2
+        x: 513
+        y: 769
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f886e17aca859e64cbe215b8eab50c19
+      internalID: 1209040445
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_13
+      rect:
+        serializedVersion: 2
+        x: 641
+        y: 769
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e3c6dc6079875d54595a2277ee82e504
+      internalID: -742922714
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_14
+      rect:
+        serializedVersion: 2
+        x: 769
+        y: 769
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4668a1bec13c9e44aa57311e0c221706
+      internalID: 1621420314
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_15
+      rect:
+        serializedVersion: 2
+        x: 897
+        y: 769
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c5707b522fb71a14db4c651acd7e3312
+      internalID: -2016012701
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_16
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 641
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eb85b361569f97e409c8e8a652e0d35c
+      internalID: 594030126
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_17
+      rect:
+        serializedVersion: 2
+        x: 129
+        y: 641
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 280a8793e44b0da4199f8abe5b452567
+      internalID: 1267584868
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_18
+      rect:
+        serializedVersion: 2
+        x: 257
+        y: 641
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a80bf1a9be90ab2438b2616825b25402
+      internalID: -1284485748
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_19
+      rect:
+        serializedVersion: 2
+        x: 385
+        y: 641
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: df9dd7615d4a4074cbaeb599a28b0438
+      internalID: -380529654
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_20
+      rect:
+        serializedVersion: 2
+        x: 513
+        y: 641
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 732af0ca6ea0ce64599d8f062322a6cd
+      internalID: -2070283490
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_21
+      rect:
+        serializedVersion: 2
+        x: 641
+        y: 641
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0a3ba1ba78bdb644e857e6c66729a7fb
+      internalID: -575054329
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_22
+      rect:
+        serializedVersion: 2
+        x: 769
+        y: 641
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 934d9bbd3aa003f4d862f843e3fed936
+      internalID: -29705959
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_23
+      rect:
+        serializedVersion: 2
+        x: 897
+        y: 641
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b18b53349fd97c7449ed75c66a3f92ea
+      internalID: 1659643540
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_24
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 513
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2ae407004ce06dd449cafb91531979c7
+      internalID: 422269439
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_25
+      rect:
+        serializedVersion: 2
+        x: 129
+        y: 513
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ebcad326e71569c4a8d6023fadeca13d
+      internalID: -800500208
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_26
+      rect:
+        serializedVersion: 2
+        x: 257
+        y: 513
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2a4f4254ffcbfc949b9484ed4f589ab8
+      internalID: 1298994732
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_27
+      rect:
+        serializedVersion: 2
+        x: 385
+        y: 513
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 97edfa5a7ab192f4e8c4d9a587566a58
+      internalID: -321007620
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_28
+      rect:
+        serializedVersion: 2
+        x: 513
+        y: 513
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7d19b57acb8700e44a1ca5cf8797e8ac
+      internalID: 1065879163
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_29
+      rect:
+        serializedVersion: 2
+        x: 641
+        y: 513
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 17e02b3adf7f99b42aab26ec16263d3f
+      internalID: 1194413723
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_30
+      rect:
+        serializedVersion: 2
+        x: 769
+        y: 513
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e6a3a63a5d52ee240b1e637ae2d42825
+      internalID: -1652718907
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_31
+      rect:
+        serializedVersion: 2
+        x: 897
+        y: 513
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 343aadc251aeec24f9ac63d25110e37e
+      internalID: -1348667836
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_32
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 385
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 59d374d9f9b15c4419bd0b71c72629a9
+      internalID: -1150156665
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_33
+      rect:
+        serializedVersion: 2
+        x: 129
+        y: 385
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 81d42c6303eec80499b51be69c64bb4e
+      internalID: -1420687756
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_34
+      rect:
+        serializedVersion: 2
+        x: 257
+        y: 385
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4194b0cad8323324c91ed06af9a57409
+      internalID: 338056650
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_35
+      rect:
+        serializedVersion: 2
+        x: 385
+        y: 385
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 90485cfad9605b34daf2b454f2eeb62f
+      internalID: -746114034
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_36
+      rect:
+        serializedVersion: 2
+        x: 513
+        y: 385
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 69c99c31bea197e4699860b1f6f2bac1
+      internalID: 483888980
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_37
+      rect:
+        serializedVersion: 2
+        x: 641
+        y: 385
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6c0236ba53d2daf4293c0d1b279a5f9f
+      internalID: 761569531
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_38
+      rect:
+        serializedVersion: 2
+        x: 769
+        y: 385
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ddb37e35e9bd76243bba09be0943adc6
+      internalID: -368701512
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_39
+      rect:
+        serializedVersion: 2
+        x: 897
+        y: 385
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cd0218dc023cd734d8556621234ca318
+      internalID: -190341265
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_40
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 257
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c97aa56bac8d49f4dbf0746f3134d6ad
+      internalID: -830742876
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_41
+      rect:
+        serializedVersion: 2
+        x: 129
+        y: 257
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0415bbf36341bd54b8c27cf2b5f8db96
+      internalID: -1340679126
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_42
+      rect:
+        serializedVersion: 2
+        x: 257
+        y: 257
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7f12f85854017a94fba7bedbfb86894f
+      internalID: 1594802058
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_43
+      rect:
+        serializedVersion: 2
+        x: 385
+        y: 257
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9415d836933621d428173ba5cd2c498e
+      internalID: 787305050
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_44
+      rect:
+        serializedVersion: 2
+        x: 513
+        y: 257
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9200ea94bf1212141a0a451e92cfd381
+      internalID: 1581799778
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_45
+      rect:
+        serializedVersion: 2
+        x: 641
+        y: 257
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 54d4e7e4882f147498c3c6dfd89189b9
+      internalID: 1296201025
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_46
+      rect:
+        serializedVersion: 2
+        x: 769
+        y: 257
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 774732f5b45a4904eae934d27440a3f1
+      internalID: 586579665
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_47
+      rect:
+        serializedVersion: 2
+        x: 897
+        y: 257
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6f94ac82f6f74ab47af420b3d6ffa282
+      internalID: 641310943
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_48
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 129
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 538108f3c8df1a142952a7bb6b60ae1b
+      internalID: 1039724089
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_49
+      rect:
+        serializedVersion: 2
+        x: 129
+        y: 129
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6e993cea3b15471478e4696da9172a3b
+      internalID: 1912059132
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_50
+      rect:
+        serializedVersion: 2
+        x: 257
+        y: 129
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ed348c62575e6f741ab2952e1ce1914b
+      internalID: 1890501375
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_51
+      rect:
+        serializedVersion: 2
+        x: 385
+        y: 129
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 06a6c60884d8afc48a0c04ca33563f4a
+      internalID: -2045592173
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_52
+      rect:
+        serializedVersion: 2
+        x: 513
+        y: 129
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 52b1cf0b36499f44eaa79f44e37513d0
+      internalID: 479194906
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_53
+      rect:
+        serializedVersion: 2
+        x: 641
+        y: 129
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5bda69bc780560a4ebfba40b085d0f9c
+      internalID: -1061849472
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_54
+      rect:
+        serializedVersion: 2
+        x: 769
+        y: 129
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a2eff8715eca07640bc77fe3ff162b57
+      internalID: 1682183248
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_55
+      rect:
+        serializedVersion: 2
+        x: 897
+        y: 129
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 55919e0296c38e8438bb943e703afc6d
+      internalID: 1746822808
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_56
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 1
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 466294370c7eaaf43af95459a1100021
+      internalID: 1258122657
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_57
+      rect:
+        serializedVersion: 2
+        x: 129
+        y: 1
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f138a96e8a1afd64789e290a4cc444f5
+      internalID: -1103235876
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_58
+      rect:
+        serializedVersion: 2
+        x: 257
+        y: 1
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 216adbe7dbde2a44daab238ac2590201
+      internalID: -1537238622
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_59
+      rect:
+        serializedVersion: 2
+        x: 385
+        y: 1
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 40afc27d4ecb21a4ab376f456662f737
+      internalID: -1878449084
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_60
+      rect:
+        serializedVersion: 2
+        x: 513
+        y: 1
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d02c5f9038886264ba1972739a85093e
+      internalID: 1207122268
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_61
+      rect:
+        serializedVersion: 2
+        x: 641
+        y: 1
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 99f5dc47c5bbabd40abf1ec157dece52
+      internalID: 145641428
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vent_glass_62
+      rect:
+        serializedVersion: 2
+        x: 769
+        y: 1
+        width: 126
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 38aeab054d5c6db489108b6a6dee37e4
+      internalID: 2119379285
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: e2679c8c6864a3742a41ba9ae36172b7
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures:
+    - texture: {fileID: 2800000, guid: 171d4d8320a73db4287d6a4139ef1586, type: 3}
+      name: _NormalMap
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      vent_glass_0: 657444798
+      vent_glass_1: 1069565
+      vent_glass_10: 415206651
+      vent_glass_11: -943153404
+      vent_glass_12: 1209040445
+      vent_glass_13: -742922714
+      vent_glass_14: 1621420314
+      vent_glass_15: -2016012701
+      vent_glass_16: 594030126
+      vent_glass_17: 1267584868
+      vent_glass_18: -1284485748
+      vent_glass_19: -380529654
+      vent_glass_2: -1275612535
+      vent_glass_20: -2070283490
+      vent_glass_21: -575054329
+      vent_glass_22: -29705959
+      vent_glass_23: 1659643540
+      vent_glass_24: 422269439
+      vent_glass_25: -800500208
+      vent_glass_26: 1298994732
+      vent_glass_27: -321007620
+      vent_glass_28: 1065879163
+      vent_glass_29: 1194413723
+      vent_glass_3: -503325998
+      vent_glass_30: -1652718907
+      vent_glass_31: -1348667836
+      vent_glass_32: -1150156665
+      vent_glass_33: -1420687756
+      vent_glass_34: 338056650
+      vent_glass_35: -746114034
+      vent_glass_36: 483888980
+      vent_glass_37: 761569531
+      vent_glass_38: -368701512
+      vent_glass_39: -190341265
+      vent_glass_4: -290805632
+      vent_glass_40: -830742876
+      vent_glass_41: -1340679126
+      vent_glass_42: 1594802058
+      vent_glass_43: 787305050
+      vent_glass_44: 1581799778
+      vent_glass_45: 1296201025
+      vent_glass_46: 586579665
+      vent_glass_47: 641310943
+      vent_glass_48: 1039724089
+      vent_glass_49: 1912059132
+      vent_glass_5: 1300695714
+      vent_glass_50: 1890501375
+      vent_glass_51: -2045592173
+      vent_glass_52: 479194906
+      vent_glass_53: -1061849472
+      vent_glass_54: 1682183248
+      vent_glass_55: 1746822808
+      vent_glass_56: 1258122657
+      vent_glass_57: -1103235876
+      vent_glass_58: -1537238622
+      vent_glass_59: -1878449084
+      vent_glass_6: -484347452
+      vent_glass_60: 1207122268
+      vent_glass_61: 145641428
+      vent_glass_62: 2119379285
+      vent_glass_7: -1396485899
+      vent_glass_8: -500118987
+      vent_glass_9: 71780024
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

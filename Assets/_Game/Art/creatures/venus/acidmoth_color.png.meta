@@ -1,0 +1,864 @@
+fileFormatVersion: 2
+guid: 1a96ff525ab9bc640a1bcb20990b6ec2
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 7992218521487871963
+    second: acidmoth_color_0
+  - first:
+      213: -3702192343084907402
+    second: acidmoth_color_1
+  - first:
+      213: -6155857352293351798
+    second: acidmoth_color_2
+  - first:
+      213: 5742744809043338284
+    second: acidmoth_color_3
+  - first:
+      213: 8929425532888056019
+    second: acidmoth_color_4
+  - first:
+      213: 3613850185267390526
+    second: acidmoth_color_5
+  - first:
+      213: 486678908078053203
+    second: acidmoth_color_6
+  - first:
+      213: -3685463629050062613
+    second: acidmoth_color_7
+  - first:
+      213: -8428328924896199817
+    second: acidmoth_color_8
+  - first:
+      213: -2430549544322015515
+    second: acidmoth_color_9
+  - first:
+      213: 8305399746364169399
+    second: acidmoth_color_10
+  - first:
+      213: 5568704983181132803
+    second: acidmoth_color_11
+  - first:
+      213: -4771690999311078832
+    second: acidmoth_color_12
+  - first:
+      213: 5003319985931051782
+    second: acidmoth_color_13
+  - first:
+      213: -5049115492879394489
+    second: acidmoth_color_14
+  - first:
+      213: -7022389675801790430
+    second: acidmoth_color_15
+  - first:
+      213: 2151481084299425729
+    second: acidmoth_color_16
+  - first:
+      213: 6608683936814978071
+    second: acidmoth_color_17
+  - first:
+      213: -6951653403168662193
+    second: acidmoth_color_18
+  - first:
+      213: -8785442388304126332
+    second: acidmoth_color_19
+  - first:
+      213: 960898756755512592
+    second: acidmoth_color_20
+  - first:
+      213: -4973623141454215845
+    second: acidmoth_color_21
+  - first:
+      213: 5238711416276875683
+    second: acidmoth_color_22
+  - first:
+      213: -7843187536801330803
+    second: acidmoth_color_23
+  - first:
+      213: 7308150239077389990
+    second: acidmoth_color_24
+  - first:
+      213: 4705102945681931304
+    second: acidmoth_color_25
+  - first:
+      213: -5208753536419429774
+    second: acidmoth_color_26
+  - first:
+      213: 6956241922473284472
+    second: acidmoth_color_27
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 250
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: acidmoth_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 528
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f91248c0b10651d4cbd17c4c2f9127ac
+      internalID: 423546806
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_1
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 528
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 04a7a0e1dedae9d42894cf384af485fc
+      internalID: 486394987
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_2
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 528
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5d4fc72d03bd7d64eb4d1c5071603f20
+      internalID: -1466927072
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_3
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 528
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 61d4198575346fd4eb26852524286549
+      internalID: -36137779
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_4
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 528
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5efbb1a3646160944a1c5e71b4425831
+      internalID: 1167413848
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_5
+      rect:
+        serializedVersion: 2
+        x: 660
+        y: 528
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 984d53227c024dc42ba9708ca1cce396
+      internalID: -1737795774
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_6
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 396
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bf4f9d3cb1a276e47a3106383594ce36
+      internalID: -1094970876
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_7
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 396
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9023f96670db22449ab688df2e07d44d
+      internalID: -1028531483
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_8
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 396
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c4b0d378575595f46b2be9f6c231308c
+      internalID: 1031326443
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_9
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 396
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cf594c7b15926c14d9cad1feffb0ce7e
+      internalID: -1735681685
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_10
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 396
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2342592361c58ba4cab999e50f62cff0
+      internalID: -1680857424
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_11
+      rect:
+        serializedVersion: 2
+        x: 660
+        y: 396
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 072ca0da5bbfd4147a7d522461001ca7
+      internalID: -81702344
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_12
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 264
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 11a6506886e70a8498f94a11a4e5447a
+      internalID: -2040681966
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_13
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 264
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c17abcb1284a3e44b8120f6829fb566b
+      internalID: 1837083371
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_14
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 264
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2d1bac46edfd5f943bc12f29f772713a
+      internalID: 1431523732
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_15
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 264
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e9129ed118a76904f8a1f4099125736b
+      internalID: -812667427
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_16
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 264
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0aecb08fa31c2f14f8570f561aa57d9d
+      internalID: 1498703384
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_17
+      rect:
+        serializedVersion: 2
+        x: 660
+        y: 264
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f6fe8a9af6e54de4e85da3f22f3f22f5
+      internalID: -1534809640
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_18
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 132
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0ecdd6c0744130e42ac28626e6c0262d
+      internalID: 1135308779
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_19
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 132
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eac5ce91a33925e4289041744ee19dd8
+      internalID: 1407094658
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_20
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 132
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4be2ac253f107f945b5f28f5d92547f2
+      internalID: 728839899
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_21
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 132
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 81290cd6a21c9d647addca9cd3e30557
+      internalID: 2123427156
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_22
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 132
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6d8b88f458235a647ad84bfbb0b4b340
+      internalID: 1239946067
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_23
+      rect:
+        serializedVersion: 2
+        x: 660
+        y: 132
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7280322dc29fea541a5a9fe6d96729f0
+      internalID: -60116385
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_24
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 59ee49af1f7b8a745a4c63fd9a1d7a05
+      internalID: 756508456
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_25
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 058d896bf5e495044bf6eb1ee707a738
+      internalID: 1450216501
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_26
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9aae9dc012bf4184cbe4c9831ede086b
+      internalID: -836929575
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_27
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ca6f127dfd6f28c48922eb4e4e9306a7
+      internalID: 660918519
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: beb32698b6cae234f805c1c15e9c5845
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures:
+    - texture: {fileID: 2800000, guid: 8e9f3eaf5975ced40af502cf8b2f79ca, type: 3}
+      name: _NormalMap
+    - texture: {fileID: 2800000, guid: 1086709c5a945b94e824bd08c9b497c4, type: 3}
+      name: _EmissionMap
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      acidmoth_0: 423546806
+      acidmoth_1: 486394987
+      acidmoth_10: -1680857424
+      acidmoth_11: -81702344
+      acidmoth_12: -2040681966
+      acidmoth_13: 1837083371
+      acidmoth_14: 1431523732
+      acidmoth_15: -812667427
+      acidmoth_16: 1498703384
+      acidmoth_17: -1534809640
+      acidmoth_18: 1135308779
+      acidmoth_19: 1407094658
+      acidmoth_2: -1466927072
+      acidmoth_20: 728839899
+      acidmoth_21: 2123427156
+      acidmoth_22: 1239946067
+      acidmoth_23: -60116385
+      acidmoth_24: 756508456
+      acidmoth_25: 1450216501
+      acidmoth_26: -836929575
+      acidmoth_27: 660918519
+      acidmoth_3: -36137779
+      acidmoth_4: 1167413848
+      acidmoth_5: -1737795774
+      acidmoth_6: -1094970876
+      acidmoth_7: -1028531483
+      acidmoth_8: 1031326443
+      acidmoth_9: -1735681685
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

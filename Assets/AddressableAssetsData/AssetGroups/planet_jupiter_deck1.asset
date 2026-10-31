@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: planet_jupiter_deck1
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: planet_jupiter_deck1
+  m_GUID: 5960f7add660fb744923838f5b19c776
+  m_SerializeEntries:
+  - m_GUID: c241e112d01299c42aa8eb3b8ccc0eac
+    m_Address: backgrounds/jupiter_deck1/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c52e501dd5e93494aaeb02ad0eec7479
+    m_Address: backgrounds/jupiter_deck1/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: caa1ecf30d615884aaa1e9562a5aaf60
+    m_Address: backgrounds/jupiter_deck1/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 114c27854c7ffab4cafc993ab374ebdb, type: 2}
+    - {fileID: 11400000, guid: aa6cb7f08cefe1b429bbb3e72e48f6b0, type: 2}

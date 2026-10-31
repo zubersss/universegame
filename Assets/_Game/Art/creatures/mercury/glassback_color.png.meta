@@ -1,0 +1,862 @@
+fileFormatVersion: 2
+guid: f075c7686cc646446adabd1605db7294
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 2023809241953687093
+    second: glassback_color_0
+  - first:
+      213: 8475457540588834119
+    second: glassback_color_1
+  - first:
+      213: 581016673209008382
+    second: glassback_color_2
+  - first:
+      213: -1205545612935088190
+    second: glassback_color_3
+  - first:
+      213: 2786868076403106550
+    second: glassback_color_4
+  - first:
+      213: -2991371078978107694
+    second: glassback_color_5
+  - first:
+      213: 8340164636975869179
+    second: glassback_color_6
+  - first:
+      213: 6850078387016449601
+    second: glassback_color_7
+  - first:
+      213: 2744265911845428763
+    second: glassback_color_8
+  - first:
+      213: -1479650997348272320
+    second: glassback_color_9
+  - first:
+      213: -2125719515263308184
+    second: glassback_color_10
+  - first:
+      213: 3993510813780938249
+    second: glassback_color_11
+  - first:
+      213: 9185037382741081187
+    second: glassback_color_12
+  - first:
+      213: -8769077758197233577
+    second: glassback_color_13
+  - first:
+      213: -4448040656961766962
+    second: glassback_color_14
+  - first:
+      213: 3461257999050056041
+    second: glassback_color_15
+  - first:
+      213: 3917650824907326504
+    second: glassback_color_16
+  - first:
+      213: -1218329202426699177
+    second: glassback_color_17
+  - first:
+      213: 5221088698069562122
+    second: glassback_color_18
+  - first:
+      213: 6602124544838437549
+    second: glassback_color_19
+  - first:
+      213: 2884029194748080799
+    second: glassback_color_20
+  - first:
+      213: -8393449269802600553
+    second: glassback_color_21
+  - first:
+      213: 818020705973849061
+    second: glassback_color_22
+  - first:
+      213: -6787065286171738547
+    second: glassback_color_23
+  - first:
+      213: -4107722944119854115
+    second: glassback_color_24
+  - first:
+      213: -2130026275741289676
+    second: glassback_color_25
+  - first:
+      213: 2106414589259591014
+    second: glassback_color_26
+  - first:
+      213: -2207884964740786399
+    second: glassback_color_27
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.03125}
+  spritePixelsToUnits: 132.25
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: glassback_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1296
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 40f05957bbd497742905061e0ced3f51
+      internalID: 2024445021
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_1
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 1296
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a946d27427baf654fac5426218b5b128
+      internalID: 1692148034
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_2
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 1296
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 35a551a4cdbc5e047a0466f4a8d8148f
+      internalID: 1093032994
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_3
+      rect:
+        serializedVersion: 2
+        x: 972
+        y: 1296
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 55f9393a6cde8d54ba5310af9a7cae15
+      internalID: 302656681
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_4
+      rect:
+        serializedVersion: 2
+        x: 1296
+        y: 1296
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2f8469fe34fced14ebb78263400efb8a
+      internalID: 1498399307
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_5
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 1296
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3f4c087dee7491148b024824167417ac
+      internalID: -172910888
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_6
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 972
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f3c7541e5fc7aa44db6023d80194487b
+      internalID: -1074832633
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_7
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 972
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5d22b6c17afe4a341bb90bbb1ca47547
+      internalID: -2035513662
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_8
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 972
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a66648fa9cd116340b2b12fd3a966152
+      internalID: -165022416
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_9
+      rect:
+        serializedVersion: 2
+        x: 972
+        y: 972
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a1f7a3273faa01546a33f6527c0f7acb
+      internalID: 1719657160
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_10
+      rect:
+        serializedVersion: 2
+        x: 1296
+        y: 972
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 715c3c262c8b29c40928dbb980fbb327
+      internalID: -1083492343
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_11
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 972
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: aab681bad5541db49b617048c52f9fff
+      internalID: 208875294
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_12
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 648
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5380871a1215eb842a4767fa9d8471e1
+      internalID: -1556689133
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_13
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 648
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 313174a9c17217947bda42ba034f7a6d
+      internalID: -542928568
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_14
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 648
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 115427332f6eeac43875876043487374
+      internalID: -511407532
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_15
+      rect:
+        serializedVersion: 2
+        x: 972
+        y: 648
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a58d4f818540b2b4db40c35554a17d6f
+      internalID: -825638602
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_16
+      rect:
+        serializedVersion: 2
+        x: 1296
+        y: 648
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3d078515c82eac244a5c1f0b6bf529f3
+      internalID: -953727063
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_17
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 648
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 565dc884529ae0d4a89d223b2ebc89d9
+      internalID: 379940548
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_18
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 324
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7938d50bfbbe9834db7732548a0acb72
+      internalID: -1371662131
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_19
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 324
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0533cde6e759dc14a96de005397e302b
+      internalID: -545288433
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_20
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 324
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 42ff2938b3447bc4da4c45c981d870d5
+      internalID: -1674937170
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_21
+      rect:
+        serializedVersion: 2
+        x: 972
+        y: 324
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5dc801c64b50e4947b7b7b8994d3ab92
+      internalID: 577510615
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_22
+      rect:
+        serializedVersion: 2
+        x: 1296
+        y: 324
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 46574c108258bb0428dc453ad3de041f
+      internalID: -158268917
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_23
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 324
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 27a0cfc221070f248a8709386da99d22
+      internalID: 1233360582
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_24
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f12fe488739e608459d500a94293526f
+      internalID: -2016640279
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_25
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 0
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 19ef4adf8f77a04408044a590dd8d84f
+      internalID: -1497016515
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_26
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 0
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ec23efb8f3fa88849a8afd6f4ae4983f
+      internalID: 885944904
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glassback_27
+      rect:
+        serializedVersion: 2
+        x: 972
+        y: 0
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5a3289127d30e6d4c87f4f8fbe4c9eb4
+      internalID: 217108577
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 66b3456e1fa8ac944b2d65070f2dcf60
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures:
+    - texture: {fileID: 2800000, guid: 4457a41498ad3714f917c9930c9ad6eb, type: 3}
+      name: _NormalMap
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      glassback_0: 2024445021
+      glassback_1: 1692148034
+      glassback_10: -1083492343
+      glassback_11: 208875294
+      glassback_12: -1556689133
+      glassback_13: -542928568
+      glassback_14: -511407532
+      glassback_15: -825638602
+      glassback_16: -953727063
+      glassback_17: 379940548
+      glassback_18: -1371662131
+      glassback_19: -545288433
+      glassback_2: 1093032994
+      glassback_20: -1674937170
+      glassback_21: 577510615
+      glassback_22: -158268917
+      glassback_23: 1233360582
+      glassback_24: -2016640279
+      glassback_25: -1497016515
+      glassback_26: 885944904
+      glassback_27: 217108577
+      glassback_3: 302656681
+      glassback_4: 1498399307
+      glassback_5: -172910888
+      glassback_6: -1074832633
+      glassback_7: -2035513662
+      glassback_8: -165022416
+      glassback_9: 1719657160
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

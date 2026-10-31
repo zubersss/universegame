@@ -1,0 +1,786 @@
+fileFormatVersion: 2
+guid: 65e011665836145478f64c120e13092f
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -2962836560611799169
+    second: cinderhulk_night_color_0
+  - first:
+      213: -3238782213281224693
+    second: cinderhulk_night_color_1
+  - first:
+      213: -1263143086259808324
+    second: cinderhulk_night_color_2
+  - first:
+      213: 6924570568818815943
+    second: cinderhulk_night_color_3
+  - first:
+      213: -6165630605358727444
+    second: cinderhulk_night_color_4
+  - first:
+      213: 2858618969174096295
+    second: cinderhulk_night_color_5
+  - first:
+      213: 7993970293652570602
+    second: cinderhulk_night_color_6
+  - first:
+      213: 7570845310797534400
+    second: cinderhulk_night_color_7
+  - first:
+      213: 6421165014209530128
+    second: cinderhulk_night_color_8
+  - first:
+      213: -6684831918646800622
+    second: cinderhulk_night_color_9
+  - first:
+      213: 5643483802186561162
+    second: cinderhulk_night_color_10
+  - first:
+      213: 641285519802249988
+    second: cinderhulk_night_color_11
+  - first:
+      213: -6725017191602509007
+    second: cinderhulk_night_color_12
+  - first:
+      213: -7223858459358905391
+    second: cinderhulk_night_color_13
+  - first:
+      213: 4167510457272773387
+    second: cinderhulk_night_color_14
+  - first:
+      213: -5931972307780594952
+    second: cinderhulk_night_color_15
+  - first:
+      213: 7933462364945758830
+    second: cinderhulk_night_color_16
+  - first:
+      213: 8654076494479439208
+    second: cinderhulk_night_color_17
+  - first:
+      213: 6939901565138739806
+    second: cinderhulk_night_color_18
+  - first:
+      213: -1166867035689120530
+    second: cinderhulk_night_color_19
+  - first:
+      213: -6217808828546710553
+    second: cinderhulk_night_color_20
+  - first:
+      213: -1182908488734410243
+    second: cinderhulk_night_color_21
+  - first:
+      213: -5947055712453827696
+    second: cinderhulk_night_color_22
+  - first:
+      213: -3522932764403808255
+    second: cinderhulk_night_color_23
+  - first:
+      213: -5365459513961775254
+    second: cinderhulk_night_color_24
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.025}
+  spritePixelsToUnits: 102.25
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: cinderhulk_night_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1616
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5f5e95934291dfd4fb7d836300ddef89
+      internalID: -1014906858
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_night_1
+      rect:
+        serializedVersion: 2
+        x: 404
+        y: 1616
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 06618d503f04c654096f24a25e88f819
+      internalID: -1935488034
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_night_2
+      rect:
+        serializedVersion: 2
+        x: 808
+        y: 1616
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 890b0e535a8b2a643b816b73ed361791
+      internalID: -716783076
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_night_3
+      rect:
+        serializedVersion: 2
+        x: 1212
+        y: 1616
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 74b1c2ca8104d574d92666d42359d0bd
+      internalID: 543574464
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_night_4
+      rect:
+        serializedVersion: 2
+        x: 1616
+        y: 1616
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fb4b8e594e8cf744382503f1eb4c7088
+      internalID: -921118090
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_night_5
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1212
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4024bd95357f6d44792897f725195b0a
+      internalID: 240287086
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_night_6
+      rect:
+        serializedVersion: 2
+        x: 404
+        y: 1212
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0ebf47319c296be4da89aac5e15f6c64
+      internalID: 447966790
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_night_7
+      rect:
+        serializedVersion: 2
+        x: 808
+        y: 1212
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d17ae9163f9432a4893faffe239b015d
+      internalID: 1817395040
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_night_8
+      rect:
+        serializedVersion: 2
+        x: 1212
+        y: 1212
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 82dd712132b8c9b4793a2c39c5756d28
+      internalID: 1179863172
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_night_9
+      rect:
+        serializedVersion: 2
+        x: 1616
+        y: 1212
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6925da1bfbc2b524ab91a3a7ff024615
+      internalID: 317721300
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_night_10
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 808
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5c42494be82f4ee499a75ab60d3b21ee
+      internalID: -224101950
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_night_11
+      rect:
+        serializedVersion: 2
+        x: 404
+        y: 808
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8148f6314e33c4445a6076fe91065187
+      internalID: -1736068756
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_night_12
+      rect:
+        serializedVersion: 2
+        x: 808
+        y: 808
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 95286444e6303264cb9332010222560a
+      internalID: -828414057
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_night_13
+      rect:
+        serializedVersion: 2
+        x: 1212
+        y: 808
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3ee2be0955686cc4ca98206aac9e91b3
+      internalID: 1220940804
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_night_14
+      rect:
+        serializedVersion: 2
+        x: 1616
+        y: 808
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 06b3e97171724d244b3ea7b8fb1eb190
+      internalID: 1981221260
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_night_15
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 404
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 06a3ede1d5a792f4993cabe9ddddf80c
+      internalID: 1750306141
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_night_16
+      rect:
+        serializedVersion: 2
+        x: 404
+        y: 404
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 604e564e50336714eb485354804ba5a9
+      internalID: -1316921419
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_night_17
+      rect:
+        serializedVersion: 2
+        x: 808
+        y: 404
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 63e403fdf74303645832de6b44ba54c1
+      internalID: 307960428
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_night_18
+      rect:
+        serializedVersion: 2
+        x: 1212
+        y: 404
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f0b04f9fddbfaf242847dc61c688cae7
+      internalID: -99526952
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_night_19
+      rect:
+        serializedVersion: 2
+        x: 1616
+        y: 404
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 75129deff3f61df4198e9fae4f47cd05
+      internalID: 1564482341
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_night_20
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7ce287f7ec7911844b99f2f89f04d8f8
+      internalID: 820641112
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_night_21
+      rect:
+        serializedVersion: 2
+        x: 404
+        y: 0
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8ca9c6799424d53409297aa722c802fd
+      internalID: 595936891
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_night_22
+      rect:
+        serializedVersion: 2
+        x: 808
+        y: 0
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 21b7ef7688229664f94a6b44d72a20f6
+      internalID: -16348708
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_night_23
+      rect:
+        serializedVersion: 2
+        x: 1212
+        y: 0
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 36153727543a5474aab78b2bd6a954a6
+      internalID: 631808477
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_night_24
+      rect:
+        serializedVersion: 2
+        x: 1616
+        y: 0
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b19cfe63f93ae7941af97db830863e43
+      internalID: 749226990
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: dcd61cf249d75cc4283fdf9090208a60
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures:
+    - texture: {fileID: 2800000, guid: 9b78c018f4b6f924f87104d7c3e9e83f, type: 3}
+      name: _NormalMap
+    - texture: {fileID: 2800000, guid: 797e60e9b7aaea84cbfdc572f83b1e15, type: 3}
+      name: _EmissionMap
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      cinderhulk_night_0: -1014906858
+      cinderhulk_night_1: -1935488034
+      cinderhulk_night_10: -224101950
+      cinderhulk_night_11: -1736068756
+      cinderhulk_night_12: -828414057
+      cinderhulk_night_13: 1220940804
+      cinderhulk_night_14: 1981221260
+      cinderhulk_night_15: 1750306141
+      cinderhulk_night_16: -1316921419
+      cinderhulk_night_17: 307960428
+      cinderhulk_night_18: -99526952
+      cinderhulk_night_19: 1564482341
+      cinderhulk_night_2: -716783076
+      cinderhulk_night_20: 820641112
+      cinderhulk_night_21: 595936891
+      cinderhulk_night_22: -16348708
+      cinderhulk_night_23: 631808477
+      cinderhulk_night_24: 749226990
+      cinderhulk_night_3: 543574464
+      cinderhulk_night_4: -921118090
+      cinderhulk_night_5: 240287086
+      cinderhulk_night_6: 447966790
+      cinderhulk_night_7: 1817395040
+      cinderhulk_night_8: 1179863172
+      cinderhulk_night_9: 317721300
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

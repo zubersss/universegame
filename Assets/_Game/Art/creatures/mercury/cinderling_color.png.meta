@@ -1,0 +1,864 @@
+fileFormatVersion: 2
+guid: 8d1c050972b6a3a4fac8c919c01d1b62
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -8513823609956544727
+    second: cinderling_color_0
+  - first:
+      213: -3664391120114872353
+    second: cinderling_color_1
+  - first:
+      213: -5928723468942665567
+    second: cinderling_color_2
+  - first:
+      213: -2221943109306660724
+    second: cinderling_color_3
+  - first:
+      213: -9052169332332267602
+    second: cinderling_color_4
+  - first:
+      213: -8834451663150815976
+    second: cinderling_color_5
+  - first:
+      213: 1921408349843016399
+    second: cinderling_color_6
+  - first:
+      213: -928303385002037750
+    second: cinderling_color_7
+  - first:
+      213: 2282323371116168811
+    second: cinderling_color_8
+  - first:
+      213: -1146545453184003336
+    second: cinderling_color_9
+  - first:
+      213: -1543861397349179300
+    second: cinderling_color_10
+  - first:
+      213: 5960882711724934363
+    second: cinderling_color_11
+  - first:
+      213: 4311748178577499817
+    second: cinderling_color_12
+  - first:
+      213: 2512247108879848634
+    second: cinderling_color_13
+  - first:
+      213: 3181374518502894813
+    second: cinderling_color_14
+  - first:
+      213: 1900744688493428133
+    second: cinderling_color_15
+  - first:
+      213: -7611690450919285284
+    second: cinderling_color_16
+  - first:
+      213: -1072896660562429658
+    second: cinderling_color_17
+  - first:
+      213: -1076844019661949472
+    second: cinderling_color_18
+  - first:
+      213: 4383091135380752256
+    second: cinderling_color_19
+  - first:
+      213: 695508716472999310
+    second: cinderling_color_20
+  - first:
+      213: -5589400444079844414
+    second: cinderling_color_21
+  - first:
+      213: -5646616469041249749
+    second: cinderling_color_22
+  - first:
+      213: 4069299545692153752
+    second: cinderling_color_23
+  - first:
+      213: -5680867018274684494
+    second: cinderling_color_24
+  - first:
+      213: -2371195714599148643
+    second: cinderling_color_25
+  - first:
+      213: -571857758570025093
+    second: cinderling_color_26
+  - first:
+      213: -946072809909125308
+    second: cinderling_color_27
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.09375}
+  spritePixelsToUnits: 150
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: cinderling_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 528
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c31b690161feb59408cb05b02154064f
+      internalID: -115268680
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_1
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 528
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5c9e0bdc7191464448524a6b15dd258f
+      internalID: 556020483
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_2
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 528
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 55ccee0a7a183694d9a79a14b4810026
+      internalID: -1091043380
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_3
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 528
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 04c4c0e6a8c375641891dd80ae7dfddc
+      internalID: 1862108301
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_4
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 528
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2f554c4e1c8af9543abdaf8ef5fc0f24
+      internalID: -1771139229
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_5
+      rect:
+        serializedVersion: 2
+        x: 660
+        y: 528
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7635b9fe44fae214db17295e126207d3
+      internalID: -680809897
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_6
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 396
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3847bbb095cb30d42940b1f3fe6c9b89
+      internalID: -2108987765
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_7
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 396
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 675dcfc5f71c50f49966b1fffaec7246
+      internalID: 897063723
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_8
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 396
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dc70ab0552ac50e45bd3bf9959d35990
+      internalID: -1213319744
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_9
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 396
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5eab1c964855d4a4fae267273f43821e
+      internalID: -4316923
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_10
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 396
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4db238d7bef1e92488cc2146b8de2e46
+      internalID: -1502004124
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_11
+      rect:
+        serializedVersion: 2
+        x: 660
+        y: 396
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 023a3e06af0806c4da7fdfbc375ef26b
+      internalID: 975257792
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_12
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 264
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f83d3219115956f43a7170bc07c195d5
+      internalID: -2055335291
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_13
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 264
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 07af16cebd411b2428f75d41be94d2d1
+      internalID: 107508194
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_14
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 264
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2e59eadad6ce712408c807d775f5d288
+      internalID: 1252921336
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_15
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 264
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 34684719da5f4aa459cb496b769e1345
+      internalID: 893605260
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_16
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 264
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0cb5d93c34adaab479b0a5033891875d
+      internalID: -1792594061
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_17
+      rect:
+        serializedVersion: 2
+        x: 660
+        y: 264
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4bf0d30a90e5159459613a4cd83ad997
+      internalID: 1437602337
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_18
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 132
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6160a46ce6eab8140996b635bd19d4ce
+      internalID: 529240699
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_19
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 132
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a8137d7047ec59b40992d1d39bda47ba
+      internalID: -101264081
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_20
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 132
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5a79b653c72714c42b9c354b4445797e
+      internalID: -2039734133
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_21
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 132
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cf4759190967c9a4793e87b6efc82e37
+      internalID: -1605718911
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_22
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 132
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3c8c886105597c94db8683d9562d3c66
+      internalID: -1089236197
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_23
+      rect:
+        serializedVersion: 2
+        x: 660
+        y: 132
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eb48c4cb660508a4d96ee8e000229f17
+      internalID: 2084657977
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_24
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ced66d0b51b10ad4495c334c2b4e196b
+      internalID: 1253577471
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_25
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: be7f43f204b433342bd8c9478f7402dc
+      internalID: -1980414619
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_26
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b67f8f8dc78874c41b94ed45d51428b2
+      internalID: -1646331949
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderling_27
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.09375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: aae1d4558c3b2a24195a91d3179de333
+      internalID: 1388462758
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: b2c255ce32a022b48af3a2935e346424
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures:
+    - texture: {fileID: 2800000, guid: 13c57c7ab540efe4aabb92c77b41dabf, type: 3}
+      name: _NormalMap
+    - texture: {fileID: 2800000, guid: b1cc41bd79ea2cd41843b34fff877f4b, type: 3}
+      name: _EmissionMap
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      cinderling_0: -115268680
+      cinderling_1: 556020483
+      cinderling_10: -1502004124
+      cinderling_11: 975257792
+      cinderling_12: -2055335291
+      cinderling_13: 107508194
+      cinderling_14: 1252921336
+      cinderling_15: 893605260
+      cinderling_16: -1792594061
+      cinderling_17: 1437602337
+      cinderling_18: 529240699
+      cinderling_19: -101264081
+      cinderling_2: -1091043380
+      cinderling_20: -2039734133
+      cinderling_21: -1605718911
+      cinderling_22: -1089236197
+      cinderling_23: 2084657977
+      cinderling_24: 1253577471
+      cinderling_25: -1980414619
+      cinderling_26: -1646331949
+      cinderling_27: 1388462758
+      cinderling_3: 1862108301
+      cinderling_4: -1771139229
+      cinderling_5: -680809897
+      cinderling_6: -2108987765
+      cinderling_7: 897063723
+      cinderling_8: -1213319744
+      cinderling_9: -4316923
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

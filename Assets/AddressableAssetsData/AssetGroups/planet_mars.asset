@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: planet_mars
   m_GUID: 6cc9f8ad61a6571408cb618dfbca1025
   m_SerializeEntries:
+  - m_GUID: 05eec2b6abcc5294d97e0ad0aec01200
+    m_Address: creatures/mars/scree_stalker
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 061b564921695514abf47daeddc225a1
     m_Address: props/mars/hauler_cargo
     m_ReadOnly: 0
@@ -22,6 +27,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 166e092f3085d0f40afa9e8856773225
     m_Address: terrain/mars/ice
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2f78a34c04ebe2748af0af5863b175bd
+    m_Address: creatures/mars/dustskater
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

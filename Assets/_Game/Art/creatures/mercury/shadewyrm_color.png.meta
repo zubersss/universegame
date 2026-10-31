@@ -1,0 +1,864 @@
+fileFormatVersion: 2
+guid: f96df61d5f9f88448b4c97d33f257413
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 5959658041092958107
+    second: shadewyrm_color_0
+  - first:
+      213: 6138596678547516379
+    second: shadewyrm_color_1
+  - first:
+      213: -2149357492494914186
+    second: shadewyrm_color_2
+  - first:
+      213: 2472313782739772629
+    second: shadewyrm_color_3
+  - first:
+      213: 6458377560348455899
+    second: shadewyrm_color_4
+  - first:
+      213: -6141924327627953759
+    second: shadewyrm_color_5
+  - first:
+      213: -1523368204832453635
+    second: shadewyrm_color_6
+  - first:
+      213: -2699709404974479480
+    second: shadewyrm_color_7
+  - first:
+      213: -6502512574756199587
+    second: shadewyrm_color_8
+  - first:
+      213: 3198739938781439702
+    second: shadewyrm_color_9
+  - first:
+      213: 6386273305810596913
+    second: shadewyrm_color_10
+  - first:
+      213: 8981861120984824506
+    second: shadewyrm_color_11
+  - first:
+      213: -465154454505890588
+    second: shadewyrm_color_12
+  - first:
+      213: -5930501647498623782
+    second: shadewyrm_color_13
+  - first:
+      213: -1747841245788505937
+    second: shadewyrm_color_14
+  - first:
+      213: -359720433580875570
+    second: shadewyrm_color_15
+  - first:
+      213: -4954185641084988332
+    second: shadewyrm_color_16
+  - first:
+      213: -8199029819446949095
+    second: shadewyrm_color_17
+  - first:
+      213: 6058668988923848782
+    second: shadewyrm_color_18
+  - first:
+      213: 6607919306345596404
+    second: shadewyrm_color_19
+  - first:
+      213: 6392744725472789245
+    second: shadewyrm_color_20
+  - first:
+      213: 4335178247582065154
+    second: shadewyrm_color_21
+  - first:
+      213: 817374101305577284
+    second: shadewyrm_color_22
+  - first:
+      213: -5393987751804907359
+    second: shadewyrm_color_23
+  - first:
+      213: 5516800628735185810
+    second: shadewyrm_color_24
+  - first:
+      213: 8321510812012264828
+    second: shadewyrm_color_25
+  - first:
+      213: -6349409636553933704
+    second: shadewyrm_color_26
+  - first:
+      213: -7539216043626019704
+    second: shadewyrm_color_27
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.03125}
+  spritePixelsToUnits: 110.75
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: shadewyrm_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1296
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8947482dd5c669e43ae0e9651d15e1e3
+      internalID: -1670067125
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_1
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 1296
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4e24fc898acce5d4980708697702f250
+      internalID: 1480042038
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_2
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 1296
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 09241d77bc4005f40a167b301713cec3
+      internalID: 335634946
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_3
+      rect:
+        serializedVersion: 2
+        x: 972
+        y: 1296
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2d0fd8164e5900842816cde49d4ca5c1
+      internalID: -1243456451
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_4
+      rect:
+        serializedVersion: 2
+        x: 1296
+        y: 1296
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 340ac620c21c4c64d8f8952b2ad35306
+      internalID: -241713928
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_5
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 1296
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 189b4089afea46849b13cabcac02cee0
+      internalID: -1181638720
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_6
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 972
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2040c8b2d670eff4ca3d0bc0c03ca9b7
+      internalID: 2042280055
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_7
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 972
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5b0d3dee72e93534c8d6c18a21137423
+      internalID: -9643016
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_8
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 972
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8d648dc442eebfc43acfe293051439e7
+      internalID: 1291478419
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_9
+      rect:
+        serializedVersion: 2
+        x: 972
+        y: 972
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ff0c43dc820aa4a4baa5ae645fdee745
+      internalID: -2140968751
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_10
+      rect:
+        serializedVersion: 2
+        x: 1296
+        y: 972
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c3c3f12d34f485e4ea581ae53e209f75
+      internalID: 470862890
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_11
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 972
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: db4c724289a81834daf1cdfc321f1568
+      internalID: 1701308675
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_12
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 648
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 235ee9dc6c57bd14798008b082e57b24
+      internalID: 906264167
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_13
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 648
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: def2f971da44d0c48b0b642383cfb2d4
+      internalID: -303287228
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_14
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 648
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a72d81685134b8d41ba31662c0263a37
+      internalID: -112641714
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_15
+      rect:
+        serializedVersion: 2
+        x: 972
+        y: 648
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 50c946bc49ae3b44f87bf4aae2c22ee4
+      internalID: 1665935592
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_16
+      rect:
+        serializedVersion: 2
+        x: 1296
+        y: 648
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 709d7c2305de9d047ad076bc34e8315b
+      internalID: 1531307083
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_17
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 648
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c1b421a399379a942b12bdbd4c983ce9
+      internalID: 1711836451
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_18
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 324
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 27cc3b6421141924087604769cdeade2
+      internalID: -1854756911
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_19
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 324
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 387f702423c611846aada2ffadde860c
+      internalID: -820506479
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_20
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 324
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ca87fbd7c463acb4db8e9c04e32260ae
+      internalID: -1367406441
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_21
+      rect:
+        serializedVersion: 2
+        x: 972
+        y: 324
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 776850f1a267d9347a116e9af6c37114
+      internalID: -1586045971
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_22
+      rect:
+        serializedVersion: 2
+        x: 1296
+        y: 324
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8304119e4bd759044839b7e5b17ce813
+      internalID: 408815235
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_23
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 324
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 937ee988ffad82044b65786aa9e7cf5b
+      internalID: -102796876
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_24
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 42666790eda769f458df5d541f6eacf5
+      internalID: 132004650
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_25
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 0
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fd3ec71cc725b544088f1dedcc343961
+      internalID: 201559755
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_26
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 0
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b2fcc1f8deb020c4db5a39ca15b2788e
+      internalID: 1182900330
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_27
+      rect:
+        serializedVersion: 2
+        x: 972
+        y: 0
+        width: 320
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4cae6c5baa1663a4a998044462b1a7b0
+      internalID: -1207784054
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5b0f1b3a32af0b3439fbb7171a85605a
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures:
+    - texture: {fileID: 2800000, guid: 7077a1ce3fbdc2d489ec7aa133ea05b3, type: 3}
+      name: _NormalMap
+    - texture: {fileID: 2800000, guid: fcbdccd19d7457448aecfb9b4c01a7bf, type: 3}
+      name: _EmissionMap
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      shadewyrm_0: -1670067125
+      shadewyrm_1: 1480042038
+      shadewyrm_10: 470862890
+      shadewyrm_11: 1701308675
+      shadewyrm_12: 906264167
+      shadewyrm_13: -303287228
+      shadewyrm_14: -112641714
+      shadewyrm_15: 1665935592
+      shadewyrm_16: 1531307083
+      shadewyrm_17: 1711836451
+      shadewyrm_18: -1854756911
+      shadewyrm_19: -820506479
+      shadewyrm_2: 335634946
+      shadewyrm_20: -1367406441
+      shadewyrm_21: -1586045971
+      shadewyrm_22: 408815235
+      shadewyrm_23: -102796876
+      shadewyrm_24: 132004650
+      shadewyrm_25: 201559755
+      shadewyrm_26: 1182900330
+      shadewyrm_27: -1207784054
+      shadewyrm_3: -1243456451
+      shadewyrm_4: -241713928
+      shadewyrm_5: -1181638720
+      shadewyrm_6: 2042280055
+      shadewyrm_7: -9643016
+      shadewyrm_8: 1291478419
+      shadewyrm_9: -2140968751
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

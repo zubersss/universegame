@@ -20,13 +20,38 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 13404d6f6a342ef439271a563b4cb457
+    m_Address: icons/vitriol_glass/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1b841f7594609ac4a95ad7a9e551a9cd
+    m_Address: icons/circuit_board/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1b918b7c3bcb4b846a43c7958ba61108
     m_Address: icons/sand/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1f5cb7cfbee735646b4b8a757274145d
+    m_Address: icons/cryo_pad/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 21d2bce28fe27de4a87a34e6d9a12155
+    m_Address: icons/radiation_liner/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2afe688dc08662943975af3a1c4cd4de
     m_Address: icons/iron/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2bc609320a2877146b6cbcae18439c0c
+    m_Address: icons/suit_patch/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -45,6 +70,21 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 576f69dda753e254ebb71cb92a1fb717
+    m_Address: icons/basalt/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 58a0212cbe5ca0b4a81078291601e8ea
+    m_Address: icons/launch_fuel_cell/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5f053d48b3d012047952fcd22337622b
+    m_Address: icons/polar_ice/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5f99a95a3fa6f0248a196ffc4f976ac8
     m_Address: icons/carbon/base
     m_ReadOnly: 0
@@ -52,6 +92,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 62176737a27305147bf80275647ce5f4
     m_Address: icons/hematite/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 664827720a9f9ad4487f77e6ee14b163
+    m_Address: icons/sulfur/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -70,13 +115,43 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b0c242697b73cbd4ba1c0182cdc422a5
+    m_Address: icons/smelter_bar_copper/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c07033cb786e0f44f92ae28525aaacf0
+    m_Address: icons/deep_core_sample/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c10600238fcbfde4cbd07512a8e1acdc
     m_Address: icons/water_ice/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c767d15ea4799e546886af22db7a7e7e
+    m_Address: icons/solarite/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c8ad57790de0b6f40bcc8f789a284b4d
+    m_Address: icons/thermal_pad/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dd0ccab8c289f684ca381a68ca1f1009
+    m_Address: icons/smelter_bar_iron/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: df7e6f1106efa8f42a4d931a69f789ee
     m_Address: icons/clay/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e414fc209a7343946b1ef02b48e80119
+    m_Address: icons/graphite/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

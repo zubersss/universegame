@@ -15,6 +15,16 @@ MonoBehaviour:
   m_GroupName: common
   m_GUID: 2c4d4d7494187df4f87e340b88461f4b
   m_SerializeEntries:
+  - m_GUID: 0173f121a0b0b704b93fbe456df46bd5
+    m_Address: characters/surveyor/mk2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0cd4cbd96af542244bb9e0580e03361c
+    m_Address: ships/waystation_earth/top
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1b4963630e3b0a54b9c021156dcb8f8d
     m_Address: fx/dig_sparks/base
     m_ReadOnly: 0
@@ -55,8 +65,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 654ff0c1af013944a8cf317d91b92c89
+    m_Address: characters/surveyor/mk3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 70ff14fdd1b5b854abcb772ff3a30d6c
+    m_Address: fx/lance_bolt/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 745ee70fc5e0f054c81243c5e7c35fd3
+    m_Address: fx/warden_bolt/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 75476b64e68a7f24cb379ebc4b940818
     m_Address: ships/pilgrim/top
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 99a5324075394c84e9ceb82f5582506d
+    m_Address: fx/survey_scan/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -70,6 +100,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b1edceb0053457a419da848ab60c9bb0
+    m_Address: fx/beam_ray/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c5cfc75c64331644690773ea00ba5e53
+    m_Address: ships/waystation_mars/top
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e2f5cb7dbd1351c4b92beb9a61f459eb
     m_Address: fx/heat_shimmer/base
     m_ReadOnly: 0
@@ -77,6 +117,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e5ed3773ab3349d478083ece26a3ef0c
     m_Address: props/common/shelter_door
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ebd45281c6e454b4a893e5e88b4c3b8c
+    m_Address: characters/surveyor/mk1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -92,6 +137,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: fcd6ad61e94814f4a9e435967bb79e96
     m_Address: fx/thruster/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ffed9920dc60c6140a2d9ebf0cd916db
+    m_Address: fx/builder_ghost/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

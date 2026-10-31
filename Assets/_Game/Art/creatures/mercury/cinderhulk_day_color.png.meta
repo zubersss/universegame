@@ -1,0 +1,786 @@
+fileFormatVersion: 2
+guid: bf277628c52a67a47b56b42244b04132
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 8024773022736999602
+    second: cinderhulk_day_color_0
+  - first:
+      213: 690300941549876363
+    second: cinderhulk_day_color_1
+  - first:
+      213: 331311082440943895
+    second: cinderhulk_day_color_2
+  - first:
+      213: 2461461466184861103
+    second: cinderhulk_day_color_3
+  - first:
+      213: -8645050560088551318
+    second: cinderhulk_day_color_4
+  - first:
+      213: -7651305774279252059
+    second: cinderhulk_day_color_5
+  - first:
+      213: 4667915785146132776
+    second: cinderhulk_day_color_6
+  - first:
+      213: -2615393139523648265
+    second: cinderhulk_day_color_7
+  - first:
+      213: -8538335813704553332
+    second: cinderhulk_day_color_8
+  - first:
+      213: 5826513410373292497
+    second: cinderhulk_day_color_9
+  - first:
+      213: -5574846604612096724
+    second: cinderhulk_day_color_10
+  - first:
+      213: 2406541538691889556
+    second: cinderhulk_day_color_11
+  - first:
+      213: 7000257629136354774
+    second: cinderhulk_day_color_12
+  - first:
+      213: -5861447554772539650
+    second: cinderhulk_day_color_13
+  - first:
+      213: -4538024276089218952
+    second: cinderhulk_day_color_14
+  - first:
+      213: 8555352608947089594
+    second: cinderhulk_day_color_15
+  - first:
+      213: -4378265019666910233
+    second: cinderhulk_day_color_16
+  - first:
+      213: -1425791441969100655
+    second: cinderhulk_day_color_17
+  - first:
+      213: -2696430513848746537
+    second: cinderhulk_day_color_18
+  - first:
+      213: 4814209161405276498
+    second: cinderhulk_day_color_19
+  - first:
+      213: -7499209486751059114
+    second: cinderhulk_day_color_20
+  - first:
+      213: 550899640898802559
+    second: cinderhulk_day_color_21
+  - first:
+      213: -1324452964828798685
+    second: cinderhulk_day_color_22
+  - first:
+      213: 7778328491747372883
+    second: cinderhulk_day_color_23
+  - first:
+      213: 514777167617262225
+    second: cinderhulk_day_color_24
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.025}
+  spritePixelsToUnits: 102.25
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: cinderhulk_day_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1616
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b4ed3bb8a9162a64fb0c614d3e837756
+      internalID: 1560755957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_day_1
+      rect:
+        serializedVersion: 2
+        x: 404
+        y: 1616
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 73a6d3e54f8cc44459d6aff9196d2742
+      internalID: 950938111
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_day_2
+      rect:
+        serializedVersion: 2
+        x: 808
+        y: 1616
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ed9e6d29be68b3e449289a6632486090
+      internalID: -982106214
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_day_3
+      rect:
+        serializedVersion: 2
+        x: 1212
+        y: 1616
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e80d15c3c18fa8a47911470ece502648
+      internalID: 352508253
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_day_4
+      rect:
+        serializedVersion: 2
+        x: 1616
+        y: 1616
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d7b48489421d9a641bcc821368e65515
+      internalID: 471155278
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_day_5
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1212
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 36476e69a59b59d4f9fd4b3cc59c688c
+      internalID: 1279886002
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_day_6
+      rect:
+        serializedVersion: 2
+        x: 404
+        y: 1212
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 176abf5af7772f04ca453b80409d905d
+      internalID: -841830278
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_day_7
+      rect:
+        serializedVersion: 2
+        x: 808
+        y: 1212
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: aa45f07c509d20045a1c86db4feb1c6d
+      internalID: 318661682
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_day_8
+      rect:
+        serializedVersion: 2
+        x: 1212
+        y: 1212
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4bc007083b9bda3448a255ce6a7681a9
+      internalID: -1352860987
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_day_9
+      rect:
+        serializedVersion: 2
+        x: 1616
+        y: 1212
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 360a1858336adfa4fbae2029e9f62e51
+      internalID: 1880874945
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_day_10
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 808
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4cea196980f7d7b48b6781ae3fcd00c3
+      internalID: -748161769
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_day_11
+      rect:
+        serializedVersion: 2
+        x: 404
+        y: 808
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c5c785aa5ed4d3846928bdb87804a551
+      internalID: -192560576
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_day_12
+      rect:
+        serializedVersion: 2
+        x: 808
+        y: 808
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 12d045d996637b04980764bcd45a9d12
+      internalID: -966188524
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_day_13
+      rect:
+        serializedVersion: 2
+        x: 1212
+        y: 808
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6875d8e4a8ea0154fa575d762ff1a81b
+      internalID: -16608147
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_day_14
+      rect:
+        serializedVersion: 2
+        x: 1616
+        y: 808
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6d1a1d15253a7a040826a16ec7958654
+      internalID: -1396532592
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_day_15
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 404
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 634f2821a23b1e1479bef1de3f407e82
+      internalID: -648715388
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_day_16
+      rect:
+        serializedVersion: 2
+        x: 404
+        y: 404
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 75db8f13a748b854ba80c7a796223322
+      internalID: 1284744087
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_day_17
+      rect:
+        serializedVersion: 2
+        x: 808
+        y: 404
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c3673640c21dec447bcd00e35811306a
+      internalID: -1715218642
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_day_18
+      rect:
+        serializedVersion: 2
+        x: 1212
+        y: 404
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5e754ecd65272c948ac807d49c3d6f70
+      internalID: -363852402
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_day_19
+      rect:
+        serializedVersion: 2
+        x: 1616
+        y: 404
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c2825423929c9794793593bd18b14b48
+      internalID: -765818673
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_day_20
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f0cc1518c23fca040b55cfcdc0a20b62
+      internalID: 318808827
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_day_21
+      rect:
+        serializedVersion: 2
+        x: 404
+        y: 0
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cf427b5302dbf954095c3dee5a582f5b
+      internalID: 1506293209
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_day_22
+      rect:
+        serializedVersion: 2
+        x: 808
+        y: 0
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a3966dc215ebfb4409a987809a37b2ff
+      internalID: -1969678526
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_day_23
+      rect:
+        serializedVersion: 2
+        x: 1212
+        y: 0
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bceebc95963789749b40ee7afac4fced
+      internalID: 980313540
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cinderhulk_day_24
+      rect:
+        serializedVersion: 2
+        x: 1616
+        y: 0
+        width: 400
+        height: 400
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: af412d51bcf5ad346b0784316bca86ef
+      internalID: -1636751167
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 3a869947e0d6ddf4d97602650967ed42
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures:
+    - texture: {fileID: 2800000, guid: 133d6166a8037de4d86c3588d18aae30, type: 3}
+      name: _NormalMap
+    - texture: {fileID: 2800000, guid: 87e5c17accd519a46ba9df1aa3e8b573, type: 3}
+      name: _EmissionMap
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      cinderhulk_day_0: 1560755957
+      cinderhulk_day_1: 950938111
+      cinderhulk_day_10: -748161769
+      cinderhulk_day_11: -192560576
+      cinderhulk_day_12: -966188524
+      cinderhulk_day_13: -16608147
+      cinderhulk_day_14: -1396532592
+      cinderhulk_day_15: -648715388
+      cinderhulk_day_16: 1284744087
+      cinderhulk_day_17: -1715218642
+      cinderhulk_day_18: -363852402
+      cinderhulk_day_19: -765818673
+      cinderhulk_day_2: -982106214
+      cinderhulk_day_20: 318808827
+      cinderhulk_day_21: 1506293209
+      cinderhulk_day_22: -1969678526
+      cinderhulk_day_23: 980313540
+      cinderhulk_day_24: -1636751167
+      cinderhulk_day_3: 352508253
+      cinderhulk_day_4: 471155278
+      cinderhulk_day_5: 1279886002
+      cinderhulk_day_6: -841830278
+      cinderhulk_day_7: 318661682
+      cinderhulk_day_8: -1352860987
+      cinderhulk_day_9: 1880874945
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
