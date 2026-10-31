@@ -1,0 +1,53 @@
+{
+  "key": "creatures/venus/sulfur_drifter",
+  "frame_width": 320,
+  "frame_height": 320,
+  "columns": 6,
+  "gutter": 4,
+  "frames": 28,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "animations": [
+    {
+      "name": "idle",
+      "start": 0,
+      "length": 6,
+      "loop": true
+    },
+    {
+      "name": "walk",
+      "start": 6,
+      "length": 8,
+      "loop": true
+    },
+    {
+      "name": "attack",
+      "start": 14,
+      "length": 6,
+      "loop": false
+    },
+    {
+      "name": "hurt",
+      "start": 20,
+      "length": 2,
+      "loop": false
+    },
+    {
+      "name": "death",
+      "start": 22,
+      "length": 6,
+      "loop": false
+    }
+  ],
+  "hitbox": {
+    "x": 0.2,
+    "y": 0.2,
+    "w": 0.6,
+    "h": 0.6
+  },
+  "ppu": 117.0
+}

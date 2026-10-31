@@ -362,6 +362,8 @@ def autofit(entry, frames):
     width_m = max(xs) - min(xs)
     top_m = max(zs)                                   # ground (z = 0) sits on the pivot line
     ppu = min((w - 2 * slack) / max(width_m, 1e-3), (h * (1 - py) - slack) / max(top_m, 1e-3))
+    if min(zs) < -1e-3:                               # fliers (B-032): centred pivot, body below z = 0
+        ppu = min(ppu, (h * py - slack) / -min(zs))
     ppu = float(int(ppu * 4) / 4)                     # quarter-px/m steps: stable, readable value
     cx = (max(xs) + min(xs)) / 2
     print(f"MERIDIAN autofit {entry['key']}: x [{min(xs):.2f}, {max(xs):.2f}] top {top_m:.2f} m -> ppu {ppu}, origin x {cx:.3f}")
