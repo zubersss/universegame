@@ -10,3 +10,9 @@ Assets not listed here are original work made in Blender from scripts in `blende
 | planets/mercury/surface | Mercury complete mono basemap, 2500 m/px, equirectangular (NASA / JHU-APL / Carnegie, MESSENGER MDIS); Wikimedia Commons 3840 px rendition | https://commons.wikimedia.org/wiki/File:Mercury_-_complete_mono_basemap_2500mpp_equirectangular.png | Public domain (NASA work; Commons lists PD-USGov-NASA) |
 | planets/jupiter/surface | PIA07782 "Cassini's Best Maps of Jupiter: Cylindrical Map", Dec 2000 (NASA/JPL/Space Science Institute) | https://photojournal.jpl.nasa.gov/catalog/PIA07782 (file via https://commons.wikimedia.org/wiki/File:Jupiter_Cylindrical_Map_-_Dec_2000_PIA07782.jpg) | Public domain (NASA/JPL imagery; Commons lists PD-USGov-NASA) |
 | planets/earth/clouds | Cloud combined 2048 (NASA Visible Earth, Blue Marble clouds) | https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57747/cloud_combined_2048.jpg | Public domain (NASA imagery, credit "NASA Goddard Space Flight Center") |
+
+## UI (B-046)
+
+- ui/title/logo: MERIDIAN wordmark built from hand-drawn geometric letterforms (signed-distance strokes in blender/scripts/build_title.py). No font file or third-party typeface is used.
+- ui/title/background: composed only from the project's own exported art (Earth parallax layers, Pilgrim, landing pad, thruster and dust FX); no external images.
+
