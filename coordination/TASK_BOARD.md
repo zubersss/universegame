@@ -387,12 +387,12 @@ Files: Assets/_Game/Code/Runtime/Rig/, Player/
 Depends: U-045, B-037
 Lead notes: Cycle 60. The art and specs come from BLENDER's B-037 hand-off (D-041). (Cycle 66) When re-importing art: the pressure crab sheet changed to 320 px frames (B-034), and the Mercury Sun is drawn as its own sprite over backgrounds/mercury/layer0_nosun.
 
-### U-047 · UNITY · In Progress · M3
+### U-047 · UNITY · Done · M3
 Goal: Polish from the M2 build review: (1) main menu: logo, tagline and buttons into the left third (the title art reserves it), so they don't overlap the Pilgrim; (2) Valles Marineris floor: show a sliver of sky above the far layer when the camera is deep in the canyon (it reads flat with haze only).
 Accept: menu capture with no overlap at 1920×1080 and 1280×720; canyon-floor capture with visible sky; owner playtest feedback folded in.
 Files: Assets/_Game/Code/Runtime/UI/, Planet/
 Depends: U-044
-Lead notes: Cycle 97. Do it with the owner's M2 playtest notes, if any.
+Lead notes: Done (cycle 100): menu in the left third (Pilgrim clear); canyon-floor sky gradient below about 37 m under the datum; D-047 applied; border-test race fixed. The canyon floor still reads flat, so the real canyon backdrop art is B-049, and its hookup comes after.
 
 ### U-048 · UNITY · Ready · M3
 Goal: Mercury world (Bible §7.3): SolidWorldGenerator preset with terrain/mercury sets (B-027), a day side, a night side and a ~400 m twilight band that creeps 1 m per 6 real s, two polar cold-trap craters with water ice, backdrop from backgrounds/mercury with layer0_nosun + the Sun as its own sprite, and the Mercury POIs (B-033: flare shelter, Meridian beacon, Warden vault gate, solarite clusters).
@@ -769,6 +769,13 @@ Accept: §9 look (no flat fills; band layers that read as moving cloud), tiling 
 Files: blender/scripts/gen_backdrop*.py, gen_terrain.py, Assets/_Game/Art/backgrounds/jupiter_deck1/, terrain/jupiter/
 Depends: B-028
 Lead notes: Done (cycle 81): Jupiter deck-1 cloud tops (belts by absolute height, zonal streaks, thin starry sky) + floe_ice/floe_core terrain. Proves the cloud-column look. Further giant art waits for UNITY's cloud-column generator (M4).
+
+### B-049 · BLENDER · In Progress · M3
+Goal: Valles Marineris backdrop set `backgrounds/mars_canyon/layer0..2`: the view from the canyon floor, with the opposite canyon walls as terraced, layered cliffs (basalt with hematite bands, talus aprons) receding in dusty haze, butterscotch sky only in the top ~20%, and a near layer of fallen blocks and dune streaks on the floor.
+Accept: same sizes and tiling as backgrounds/mars, rendered 3D (§9, no flat fills), haze by distance, stamped review; reads clearly as "inside a deep canyon".
+Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/mars_canyon/
+Depends: B-011
+Lead notes: Cycle 100. UNITY's canyon-floor trigger (U-047, about 37 m below the datum) will cross-fade to this set (follow-up in UNITY's queue). The current canyon floor shows a flat brown haze.
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.

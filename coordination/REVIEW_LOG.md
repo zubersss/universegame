@@ -655,3 +655,7 @@ User: USER-12 (M2 playtest) open.
 Checked: smoke_8_inventory.png; full check 14:37 (LeadQA 3/3 incl. the soak inside the full batch).
 Moved: U-045 → Done; U-047 → In Progress.
 Decided: D-047 (per-system budgets on median/p99; worst frame ≤ 2× logged).
+
+## Cycle 100 · 2026-10-31 (UNITY message)
+Checked: u047 menu_left_third.png (good), canyon_floor_sky.png (sky added, still flat).
+Moved: U-047 → Done; B-049 → In Progress (BLENDER resumes with one targeted art task).
