@@ -20,6 +20,7 @@ namespace Meridian.UI
         public SideShip ship;
         public ShipBoarding boarding;
         public Meridian.Planet.Weather.DustStorm storm;
+        public Meridian.Hazards.HazardSystem hazards;
 
         public Image HealthFill { get; private set; }
         public Image OxygenFill { get; private set; }
@@ -31,6 +32,10 @@ namespace Meridian.UI
         public Text AltText { get; private set; }
         /// <summary>U-026: "DUST STORM IN 45 s" during the warning, "DUST STORM" while it blows; empty otherwise.</summary>
         public Text StormText { get; private set; }
+        /// <summary>U-029: Cryo level 0–3, suit integrity bar, and the suit's rate ("-1.5/s", "+5/s").</summary>
+        public Text CryoText { get; private set; }
+        public Image SuitFill { get; private set; }
+        public Text SuitRateText { get; private set; }
 
         PlanetConfig planet;
         PlayerVitals vitals;
@@ -38,6 +43,8 @@ namespace Meridian.UI
         static UiKit.NumberStrings numbers;
         int lastHealth = -1, lastFuel = -1, lastAlt = int.MinValue;
         int lastStorm = -2;
+        int lastCryo = -1, lastSuit = -1, lastRate = int.MinValue;
+        static readonly string[] CryoLevels = { "0", "1", "2", "3" };
         static string[] stormWarnings;
         const string StormNow = "DUST STORM";
 
@@ -61,6 +68,12 @@ namespace Meridian.UI
             Label(root, "SHIP FUEL", -116f);
             FuelFill = UiKit.Bar(root, "Fuel", tl, new Vector2(24f, -138f), new Vector2(220f, 6f), UiTheme.Accent(null));
             FuelText = UiKit.Text(root, "FuelValue", tl, new Vector2(252f, -128f), new Vector2(80f, 24f), 18);
+            Label(root, "CRYO", -156f);
+            CryoText = UiKit.Text(root, "CryoLevel", tl, new Vector2(70f, -156f), new Vector2(30f, 18f), 13, true, TextAnchor.MiddleLeft, new Color(0.6f, 0.85f, 1f, 1f));
+            Label(root, "SUIT", -176f);
+            SuitFill = UiKit.Bar(root, "Suit", tl, new Vector2(24f, -198f), new Vector2(220f, 6f), new Color(0.6f, 0.85f, 1f, 1f));
+            SuitRateText = UiKit.Text(root, "SuitRate", tl, new Vector2(252f, -188f), new Vector2(120f, 24f), 16);
+            SuitRateText.text = "";
 
             // Altitude bar on the right edge: world bottom → world top, Escape Line marked.
             var right = new Vector2(1f, 0.5f);
@@ -81,6 +94,35 @@ namespace Meridian.UI
             }
             StormText = UiKit.Text(root, "Storm", new Vector2(0.5f, 1f), new Vector2(0f, -40f), new Vector2(600f, 28f), 20, true, TextAnchor.MiddleCenter, new Color(1f, 0.72f, 0.45f, 1f));
             StormText.text = "";
+        }
+
+        void UpdateHazards()
+        {
+            if (hazards == null) return;
+            int c = hazards.CryoLevel;
+            if (c != lastCryo) { lastCryo = c; CryoText.text = CryoLevels[Mathf.Clamp(c, 0, 3)]; }
+            int s = Mathf.CeilToInt(hazards.SuitIntegrity);
+            if (s != lastSuit) { lastSuit = s; SuitFill.fillAmount = hazards.SuitIntegrity / Meridian.Hazards.HazardRules.SuitMax; }
+            int r = Mathf.RoundToInt(hazards.SuitRate * 10f); // tenths per second
+            if (r != lastRate) { lastRate = r; SuitRateText.text = RateString(r); }
+        }
+
+        static string[] rateStrings;
+
+        /// <summary>"-1.5/s" style strings for -99.9..+9.9 per second, built once.</summary>
+        static string RateString(int tenths)
+        {
+            if (tenths == 0) return "";
+            if (rateStrings == null)
+            {
+                rateStrings = new string[1100];
+                for (int i = 0; i < rateStrings.Length; i++)
+                {
+                    int t = i - 999;
+                    rateStrings[i] = t == 0 ? "" : (t > 0 ? "+" : "-") + (Mathf.Abs(t) / 10) + "." + (Mathf.Abs(t) % 10) + "/s";
+                }
+            }
+            return rateStrings[Mathf.Clamp(tenths, -999, 100) + 999];
         }
 
         void UpdateStorm()
@@ -128,6 +170,7 @@ namespace Meridian.UI
                 if (f != lastFuel) { lastFuel = f; FuelText.text = numbers[f]; FuelFill.fillAmount = state.fuel / Mathf.Max(1f, state.tankCapacity); }
             }
             UpdateStorm();
+            UpdateHazards();
             if (planet == null) return;
             bool aboard = boarding != null && boarding.Aboard;
             var body = aboard && ship != null ? ship.Body : player != null && player.isActiveAndEnabled ? player.Body : null;

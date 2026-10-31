@@ -211,6 +211,15 @@ namespace Meridian.EditorTools
             creatures.player = pc;
             creatures.dayNight = dayNight;
             sideComp.creatures = creatures;
+            var hazards = sideRoot.AddComponent<Meridian.Hazards.HazardSystem>();
+            hazards.body = pc.transform;
+            hazards.vitals = pc.GetComponent<Meridian.Player.PlayerVitals>();
+            hazards.boarding = boarding;
+            hazards.terrain = sideComp.terrain;
+            hazards.dayNight = dayNight;
+            hazards.storm = dustStorm;
+            sideComp.hazards = hazards;
+            sideHud.hazards = hazards;
             EditorSceneManager.SaveScene(side, PlanetSidePath);
 
             EditorBuildSettings.scenes = new[]
@@ -272,6 +281,7 @@ namespace Meridian.EditorTools
             view.transform.SetParent(root.transform, false);
             var sr = view.AddComponent<SpriteRenderer>();
             sr.sortingOrder = 8;
+            root.AddComponent<Meridian.Hazards.WarmthSource>().radius = 6f; // U-029: the ship keeps the cold off nearby
             var legsView = root.AddComponent<Meridian.Ship.ShipLegsView>();
             legsView.ship = ship;
             legsView.target = sr;

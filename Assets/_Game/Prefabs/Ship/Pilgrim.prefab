@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 3796688211031740475}
   - component: {fileID: 4892946870345430379}
   - component: {fileID: 2275001359560704623}
+  - component: {fileID: 5259007489508889929}
   - component: {fileID: 1026395142164559307}
   m_Layer: 0
   m_Name: Pilgrim
@@ -129,6 +130,19 @@ MonoBehaviour:
   localHull: 100
   localFuel: 100
   localTank: 100
+--- !u!114 &5259007489508889929
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1176721208827533603}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67375d75051f39842a38031850bf1b87, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.Hazards.WarmthSource
+  radius: 6
 --- !u!114 &1026395142164559307
 MonoBehaviour:
   m_ObjectHideFlags: 0
