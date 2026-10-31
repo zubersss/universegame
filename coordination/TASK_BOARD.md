@@ -88,12 +88,12 @@ Files: Assets/_Game/Tests/LeadQA/M1LoopTests.cs, coordination/reviews/M1_REPORT.
 Depends: U-017
 Lead notes: Done (cycle 17): M1LoopTests passed twice (15:55, 16:42; touchdown 2.00 m/s); M1_REPORT.md; Build/MERIDIAN_0.1.1 plays (U-031 smoke). User playtest posted as USER-09.
 
-### L-011 · LEAD · In Progress · M2
+### L-011 · LEAD · Done · M2
 Goal: M2 QA: a LeadQA soak scenario that plays Earth (day → night, dig, creatures nearby) then flies to Mars through a dust storm, for ≥ 10 min of game time in one PlayMode run, with a clean console and BudgetGate rows recorded, plus the M2 screenshot set checked against §9.
 Accept: Tests/LeadQA/M2SoakTests.cs passes twice; screenshots (Earth day/night with creatures and POIs, Mars canyon + storm, space with all planets) reviewed in REVIEW_LOG; M2_REPORT.md written.
 Files: Assets/_Game/Tests/LeadQA/, coordination/reviews/M2_REPORT.md
 Depends: U-033, U-034, U-037, U-039, B-015, B-016
-Lead notes: In Progress (cycle 60): Tests/LeadQA/M2SoakTests.cs written (Earth night + creatures + dig, own-controls flight to Mars, landing, forced dust storm, ≥ 10 game min, clean console). Run twice after U-040 lands (UNITY is blocked on USER-10).
+Lead notes: Done (cycle 97): M2SoakTests passed twice (14:30, 14:33; touchdowns 2.68 and 4.80 m/s); screenshots reviewed; M2_REPORT.md written; owner playtest = USER-12.
 
 ---
 
@@ -366,12 +366,12 @@ Files: tools/unity_common.ps1, tools/unity_test.ps1
 Depends: U-023
 Lead notes: Done 41f26e0 (cycle 37): strict turns (yield to any older want < 30 min until that role takes the lock; oldest request first), unity_check.ps1 batched check under one lock; self-test 17/17.
 
-### U-044 · UNITY · In Progress · M2
+### U-044 · UNITY · Done · M2
 Goal: M2 playtest build `Build/MERIDIAN_0.2.0/` with build smoke screenshots (menu, Earth camp by day and night, a desert/ocean border, Mars canyon in a dust storm, space with Saturn) and build memory rows (U-041).
 Accept: build smoke clean; screenshots in coordination/reports/unity/smoke_<date>/; GameInfo.Version 0.2.0; every BudgetGate row green in the build.
 Files: Build/ (ignored), coordination/reports/unity/smoke_<date>/
 Depends: U-038, U-039, U-040, U-041, U-042
-Lead notes: Cycle 42. It closes M2 together with L-011 and the owner's playtest. (Cycle 80) Use ui/title/background + ui/title/logo on the main menu, and ui/app/icon as the Windows player icon (Player Settings).
+Lead notes: Done 3c1dbd1 (cycle 97): Build/MERIDIAN_0.2.0, smoke clean (7 shots), title art + logo + app icon, dev-player memory Earth 895/299, Space 785/294, Mars 888/357 MB; POI marker layout fixed. Menu overlap + canyon sky → U-047.
 
 ### U-045 · UNITY · In Progress · M3
 Goal: Inventory v1 (M3 lookahead): item registry from `icons/*` (B-013), pickup of the pooled drops (U-008), a stack-based player inventory (40 slots, stack 999), Tab panel with icons and counts, Builder consumes the selected material (closes D-021's "no inventory check"), SaveData v2 with inventory + suit integrity (D-032) and a v1 → v2 migration.
@@ -386,6 +386,13 @@ Accept: tool sprite at the hand with pivot [0.375, 0.5], rotating to the aim; mu
 Files: Assets/_Game/Code/Runtime/Rig/, Player/
 Depends: U-045, B-037
 Lead notes: Cycle 60. The art and specs come from BLENDER's B-037 hand-off (D-041). (Cycle 66) When re-importing art: the pressure crab sheet changed to 320 px frames (B-034), and the Mercury Sun is drawn as its own sprite over backgrounds/mercury/layer0_nosun.
+
+### U-047 · UNITY · Ready · M3
+Goal: Polish from the M2 build review: (1) main menu: logo, tagline and buttons into the left third (the title art reserves it), so they don't overlap the Pilgrim; (2) Valles Marineris floor: show a sliver of sky above the far layer when the camera is deep in the canyon (it reads flat with haze only).
+Accept: menu capture with no overlap at 1920×1080 and 1280×720; canyon-floor capture with visible sky; owner playtest feedback folded in.
+Files: Assets/_Game/Code/Runtime/UI/, Planet/
+Depends: U-044
+Lead notes: Cycle 97. Do it with the owner's M2 playtest notes, if any.
 
 ### U-025 · UNITY · Done · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.

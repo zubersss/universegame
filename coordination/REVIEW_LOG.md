@@ -639,3 +639,9 @@ User: USER-11 filed. UNITY correctly declined to treat D-046 (given in the LEAD 
 
 ## Cycle 96 · 2026-10-31 14:12
 Checked: UNITY took the lock at 14:07 for unity_check (compile + EditMode + PlayMode), so it resumed (USER-11 presumably done; confirm with UNITY on its next report). Free RAM 0.9 GB. BLENDER idle by design. LEAD runs no heavy jobs.
+
+## Cycle 97 · 2026-10-31 · M2 build ready
+Checked: 3c1dbd1 (U-044); smoke_2026-10-31 menu, Earth night, Mars canyon; M2SoakTests ×2 (14:30, 14:33).
+Moved: U-044, L-011 → Done. USER-11 → Done (owner approval given in the UNITY window).
+M2 exit (Bible §12): screenshots match §9 (reviewed), budgets green (dev-player memory + frame rows), 30-min-equivalent soak without errors (×2). Remaining: owner playtest (USER-12).
+Added: U-047 (menu overlap, canyon sky).
