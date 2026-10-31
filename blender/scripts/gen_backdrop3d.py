@@ -100,8 +100,8 @@ PRESETS = {
                  snowline=9.0, haze=(0.42, 0.00004), tilt=6.0, sea=dict(level=0.36, color=(46, 98, 140))),   # flooded: headlands only
         mid=dict(W=700.0, level=0.27, amp=0.07, ground=[(186, 174, 132), (140, 146, 92)], trees=0, protos=1,
                  tree_h=(8, 14), conifer=0.7, depth=(20, 140), haze=(0.22, 0.0012),
-                 tilt=12.0, frame_up=-0.08, sea=dict(level=0.55, shore=30.0, color=(44, 100, 146))),
-        near=dict(W=64.0, level=0.22, amp=0.015, ground=[(226, 210, 168), (212, 192, 148), (196, 176, 132)], trees=0,
+                 tilt=12.0, frame_up=-0.08, sea=dict(level=0.55, shore=30.0, shallow=(70, 176, 178), deep=(26, 70, 122))),
+        near=dict(W=64.0, level=0.22, amp=0.03, relief2d=True, ground=[(226, 210, 168), (212, 192, 148), (196, 176, 132)], trees=0,
                   protos=1, tree_h=(7, 11), conifer=0.5, depth=(3, 14), haze=(0.06, 0.004),
                   tufts=1200, shrubs=6, tilt=18.0, frame_up=0.12),
         leaf=[(56, 92, 40), (74, 108, 46), (92, 120, 52)],
@@ -713,16 +713,28 @@ def forest_layer(P, spec, seed, preview, work, near):
     prof = (prof - prof.mean()) / (np.abs(prof - prof.mean()).max() + 1e-6)
     prof = np.interp(np.arange(nx) / nx * PX_W, np.arange(PX_W), prof)
     bumps = fft_noise(rng, ny + 1, nx, 3, 60, 0.8)
+    rel2 = None
+    if spec.get("relief2d"):
+        # B-026 coast: the x-only profile extruded in depth shades as vertical streaks on a
+        # bare beach; a 2D field (as rock_layer, B-025) varies along depth too. Opt-in, so the
+        # accepted forest layers keep their exact relief.
+        rel2 = fft_noise(rng, ny + 1, nx, 40, 260, 1.6)
+        rel2 = (rel2 - rel2.mean()) / (np.abs(rel2 - rel2.mean()).max() + 1e-6)
+
+    def shape(i, j):
+        return rel2[min(j, ny), i] if rel2 is not None else prof[i]
+
     def zf(i, j):
         y = y_front + (y_back - y_front) * j / ny
         w = min(1.0, max(0.0, (y - d0 * 0.5) / max(y_back - d0 * 0.5, 1e-3)))
         w = w * w * (3 - 2 * w)
-        return base - amp * prof[i] * w + amp * 0.06 * bumps[j % (ny + 1), i]
+        return base - amp * shape(i, j) * w + amp * 0.06 * bumps[j % (ny + 1), i]
     heightfield("ground", scene.collection, W, y_back, nx, ny, zf, mats["ground"], y0=y_front)
     def ground_z(x, y):
         w = min(1.0, max(0.0, (y - d0 * 0.5) / max(y_back - d0 * 0.5, 1e-3)))
         w = w * w * (3 - 2 * w)
-        return base - amp * w * float(np.interp((x % W) / W * nx, np.arange(nx + 1), np.r_[prof, prof[0]]))
+        row = prof if rel2 is None else rel2[min(ny, max(0, int(round(ny * (y - y_front) / (y_back - y_front)))))]
+        return base - amp * w * float(np.interp((x % W) / W * nx, np.arange(nx + 1), np.r_[row, row[0]]))
     lo, hi = spec["tree_h"]
     for t in range(spec["trees"]):
         x = rnd.uniform(0, W)
@@ -765,14 +777,62 @@ def forest_layer(P, spec, seed, preview, work, near):
         # behind this layer's skyline and never showed). Flat plane from the shore line out
         # past the back; ground beyond the shore floods, the rising back hills stay headlands.
         sea = spec["sea"]
-        wm = bpy.data.materials.new("sea")
-        wm.use_nodes = True
-        pr = wm.node_tree.nodes["Principled BSDF"]
-        pr.inputs["Base Color"].default_value = lin(sea["color"])
-        pr.inputs["Roughness"].default_value = 0.25
-        _haze(wm, hz, spec["haze"][0] * 0.5, spec["haze"][1] * 0.5, None, front=W)   # stays blue
         zs = base + amp * sea["level"]
         y0s = sea["shore"]
+        wm = bpy.data.materials.new("sea")
+        wm.use_nodes = True
+        nt = wm.node_tree
+        N, L = nt.nodes, nt.links
+        pr = N["Principled BSDF"]
+        pr.inputs["Roughness"].default_value = 0.25
+        # Depth: turquoise shallows at the shore darkening to deep blue toward the back.
+        geo = N.new("ShaderNodeNewGeometry")
+        sep = N.new("ShaderNodeSeparateXYZ")
+        L.new(geo.outputs["Position"], sep.inputs[0])
+        dmr = N.new("ShaderNodeMapRange")
+        dmr.inputs["From Min"].default_value, dmr.inputs["From Max"].default_value = y0s, y0s + (y_back - y0s) * 0.6
+        L.new(sep.outputs["Y"], dmr.inputs["Value"])
+        ramp = N.new("ShaderNodeValToRGB")
+        ramp.color_ramp.elements[0].color = lin(sea["shallow"])
+        ramp.color_ramp.elements[1].color = lin(sea["deep"])
+        L.new(dmr.outputs["Result"], ramp.inputs["Fac"])
+        # Soft sun glitter: sparse bright flecks from periodic noise (tiles with the layer).
+        gn = N.new("ShaderNodeTexNoise"); gn.inputs["Scale"].default_value = 0.9; gn.inputs["Detail"].default_value = 2.0
+        _periodic_noise(nt, geo.outputs["Position"], W, gn)
+        gmr = N.new("ShaderNodeMapRange"); gmr.interpolation_type = "SMOOTHSTEP"
+        gmr.inputs["From Min"].default_value, gmr.inputs["From Max"].default_value = 0.57, 0.63
+        gmr.inputs["To Max"].default_value = 0.35
+        L.new(gn.outputs["Fac"], gmr.inputs["Value"])
+        gl = N.new("ShaderNodeMix"); gl.data_type = "RGBA"
+        L.new(gmr.outputs["Result"], gl.inputs[0])
+        L.new(ramp.outputs["Color"], gl.inputs[6]); gl.inputs[7].default_value = lin((236, 246, 250))
+        L.new(gl.outputs[2], pr.inputs["Base Color"])
+        _haze(wm, hz, spec["haze"][0] * 0.5, spec["haze"][1] * 0.5, None, front=W)
+        # Surf: a vertical foam skirt at the shore line, from sea level down below the ground.
+        # It closes the gap where the shore ground dips under the sea's front edge (the light
+        # notches: the far layer showing through) and reads as the white surf line.
+        fm = bpy.data.materials.new("surf")
+        fm.use_nodes = True
+        fnt = fm.node_tree
+        fp = fnt.nodes["Principled BSDF"]
+        fp.inputs["Roughness"].default_value = 0.6
+        # Thin bright foam crest on top, shallow water below (the skirt must stay tall to fill
+        # the gap, but a full-height white skirt read as a grey concrete strip).
+        fgeo = fnt.nodes.new("ShaderNodeNewGeometry")
+        fsep = fnt.nodes.new("ShaderNodeSeparateXYZ")
+        fnt.links.new(fgeo.outputs["Position"], fsep.inputs[0])
+        fmr = fnt.nodes.new("ShaderNodeMapRange"); fmr.interpolation_type = "SMOOTHSTEP"
+        fmr.inputs["From Min"].default_value = zs - amp * 0.18
+        fmr.inputs["From Max"].default_value = zs - amp * 0.04
+        fnt.links.new(fsep.outputs["Z"], fmr.inputs["Value"])
+        fmix = fnt.nodes.new("ShaderNodeMix"); fmix.data_type = "RGBA"
+        fnt.links.new(fmr.outputs["Result"], fmix.inputs[0])
+        fmix.inputs[6].default_value = lin(sea["shallow"]); fmix.inputs[7].default_value = lin((250, 252, 250))
+        fnt.links.new(fmix.outputs[2], fp.inputs["Base Color"])
+        _haze(fm, hz, spec["haze"][0] * 0.5, spec["haze"][1] * 0.5, None, front=W)
+        zb = base - amp * 1.5
+        mesh_obj("surf", [(-W, y0s, zb), (2 * W, y0s, zb), (2 * W, y0s, zs), (-W, y0s, zs)], [(0, 1, 2, 3)],
+                 scene.collection, fm, smooth=False)
         # Ends with the ground: the tilted ortho camera has no horizon, so a plane running
         # further back rises up the frame as a wall (first try).
         mesh_obj("sea", [(-W, y0s, zs), (2 * W, y0s, zs), (2 * W, y_back, zs), (-W, y_back, zs)],
