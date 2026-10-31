@@ -52,6 +52,7 @@ namespace Meridian.Planet.POI
             Clear();
             width = planet.worldWidth;
             var world = new SolidWorldGenerator(planet, seed);
+            shapeWorld = world; shapeDatum = planet.datumY;
             foreach (var poi in PoiCatalog.For(planet.id))
             {
                 var p = new Placed { def = poi, groundY = PoiStamp.GroundY(poi, world, planet.datumY) };
@@ -108,6 +109,9 @@ namespace Meridian.Planet.POI
         public IReadOnlyList<BoxCollider2D> Solids => solids;
 
         /// <summary>Whether column x lies in a placed POI stamp, and that stamp's ground line (U-040 walls follow it).</summary>
+        SolidWorldGenerator shapeWorld;
+        int shapeDatum;
+
         public bool StampGroundAt(int x, out int groundY)
         {
             foreach (var p in placed)
@@ -115,6 +119,8 @@ namespace Meridian.Planet.POI
                 int w = width > 0 ? width : 1 << 30;
                 int d = ((x - p.def.x) % w + w) % w;
                 if (!p.def.Floating && d < p.def.Width) { groundY = p.groundY; return true; } // floating decks are no ground line
+                // U-057: the shoulders blending a pad into the surface are ground lines too.
+                if (shapeWorld != null && PoiStamp.ShapedGround(p.def, shapeWorld, shapeDatum, x, out groundY, p.groundY)) return true;
             }
             groundY = 0;
             return false;

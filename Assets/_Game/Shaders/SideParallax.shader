@@ -28,6 +28,7 @@ Shader "MERIDIAN/SideParallax"
         _Fade ("Overlay opacity (U-038 biome cross-fade)", Float) = 1
         _ViewHalf ("Camera half-height (m), for the deep-canyon sky", Float) = 7
         _Sun ("Sun in the sky: world x, y, radius, on (U-048 Mercury)", Vector) = (0, 0, 0, 0)
+        _Glow ("Horizon glow: strength, height (m) (U-057 Mercury twilight)", Vector) = (0, 1, 0, 0)
         [HideInInspector] _SrcBlend ("Src blend", Float) = 1
         [HideInInspector] _DstBlend ("Dst blend", Float) = 0
         _SeaLevel ("Sea surface (world y; far below = no sea)", Float) = -100000
@@ -77,6 +78,7 @@ Shader "MERIDIAN/SideParallax"
                 float _Fade;
                 float _ViewHalf;
                 float4 _Sun;
+                float4 _Glow;
                 float _SeaLevel;
                 float4 _WaterColor;
                 float _WaterFade;
@@ -146,6 +148,12 @@ Shader "MERIDIAN/SideParallax"
                     col = Over(col, s0, _Q0.x, sky);
                     skyMask = 1.0 - s0.a * smoothstep(0.18, 0.30, dot(s0.rgb, half3(0.299, 0.587, 0.114)));
                 }
+                // U-057: Mercury's twilight band: a low violet glow over the horizon, under the ridges.
+                if (_Glow.x > 0.0)
+                {
+                    float above = max(i.worldXY.y - horizon, 0.0);
+                    col = lerp(col, half3(0.46, 0.3, 0.72), _Glow.x * exp(-above / _Glow.y) * skyMask);
+                }
                 // U-048: the Sun in the sky, over the far sky but under the ridges (they hide it at dawn and dusk).
                 if (_Sun.w > 0.5)
                 {
@@ -160,11 +168,13 @@ Shader "MERIDIAN/SideParallax"
                 // Below the near layer's foot no farther layer may peek out (their bases would hang there, U-040):
                 // only haze, darkening from the near layer's foot toward the ground tone over 12 m.
                 float foot = -1e9;
+                bool belowFoot = false; // near rock in shadow: keeps a tint floor like the walls (U-057)
                 if (_Q2.z > 0.5)
                 {
                     foot = _Datum + (cam.y - _Datum) * (1.0 - _Q2.w) + _P2.w + _Q2.y * _P2.y;
                     if (i.worldXY.y < foot)
                     {
+                        belowFoot = true;
                         half3 haze = lerp(_GroundColor.rgb, sky, 0.45);
                         col = lerp(haze, _GroundColor.rgb * 0.6, saturate((foot - i.worldXY.y) / 5.0)); // reads as depth within a few metres (B-049 follow-up)
                     }
@@ -186,8 +196,9 @@ Shader "MERIDIAN/SideParallax"
                 float4 m = mapped ? SAMPLE_TEXTURE2D_LOD(_WallMap, sampler_point_clamp_WallMap, float2(u, 0.5), 0) : float4(0, 0, 0, 1);
                 if (depth > 0.0 && m.a > 0.5) col = _WaterColor.rgb; // the UnderwaterTint overlay darkens it with depth (U-040)
                 // Below a column's original ground line: the dark wall of its material (dug holes, caves, tubes).
-                if (mapped && i.worldXY.y < m.r + 1.0) col = Wall(i.worldXY, m.r, m.g, m.b);
-                return half4(col * _Tint.rgb, _Fade);
+                // Walls keep a floor on the day/night tint (U-057): a dark cave on a night side reads as shadowed rock, never #000.
+                if (mapped && i.worldXY.y < m.r + 1.0) return half4(Wall(i.worldXY, m.r, m.g, m.b) * max(_Tint.rgb, 0.3), _Fade);
+                return half4(col * (belowFoot ? max(_Tint.rgb, 0.3) : _Tint.rgb), _Fade);
             }
             ENDHLSL
         }

@@ -82,6 +82,7 @@ namespace Meridian.Planet
         {
             PlanetId.Mars => new Color(0.46f, 0.29f, 0.2f),
             PlanetId.Earth => new Color(0.24f, 0.28f, 0.2f),
+            PlanetId.Mercury => new Color(0.2f, 0.19f, 0.21f), // dark regolith: the black sky must not make the haze #000 (U-057)
             _ => SkyColor(id) * 0.45f,
         };
 
@@ -265,6 +266,8 @@ namespace Meridian.Planet
         /// <summary>Mercury's Sun: ~2.5× Earth's apparent size; radius as a share of the view's half-height.</summary>
         public const float SunRadius = 0.32f;
         static readonly int SunId = Shader.PropertyToID("_Sun");
+        static readonly int GlowId = Shader.PropertyToID("_Glow");
+        Vector4 glowShown = new Vector4(0f, 1f, 0f, -1f);
         Meridian.Core.TimeSystem clock;
         Vector4 sunShown = new Vector4(0f, 0f, 0f, -1f);
         /// <summary>Whether Mercury's Sun is drawn now (tests/captures), and its height (0 at dawn/dusk … 1 at noon).</summary>
@@ -299,10 +302,23 @@ namespace Meridian.Planet
                 }
                 else SunElevation = 0f;
             }
-            if (v == sunShown) return;
+            // U-057: the twilight band glows violet low over the horizon, strongest on the terminators.
+            var g = new Vector4(0f, 1f, 0f, 0f);
+            if (Planet == PlanetId.Mercury && clock != null)
+            {
+                var c = view.transform.position;
+                int w = terrain != null && terrain.Config != null ? terrain.Config.worldWidth : 2048;
+                float t = Meridian.Terrain.MercuryTerminator.LocalTime(c.x, Meridian.Terrain.MercuryTerminator.Now(clock.GameSeconds), w);
+                float off = Mathf.Min(Mathf.Abs(t - 0.25f), Mathf.Abs(t - 0.75f));
+                float band = Meridian.Terrain.MercuryTerminator.TwilightWidth * 0.5f / w; // the band's half-width in day fractions
+                g = new Vector4(0.55f * Mathf.Clamp01(1f - off / band), view.orthographicSize * 0.6f, 0f, 0f);
+            }
+            if (v == sunShown && g == glowShown) return;
             sunShown = v;
+            glowShown = g;
             quad.GetPropertyBlock(block);
             block.SetVector(SunId, v);
+            block.SetVector(GlowId, g);
             quad.SetPropertyBlock(block);
         }
 

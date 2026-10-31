@@ -68,6 +68,27 @@ namespace Meridian.Tests
             LogAssert.NoUnexpectedReceived();
         }
 
+        /// <summary>U-057: the vent harvester's pad is real terrain at runtime (it stands on it).</summary>
+        [UnityTest]
+        public IEnumerator VentHarvesterStandsOnItsPad()
+        {
+            yield return BootVenus();
+            var poi = Meridian.Planet.POI.PoiCatalog.VentHarvester;
+            var placed = side.pois.placed.Find(p => p.def == poi);
+            Assert.NotNull(placed, "harvester placed");
+            int cx = poi.x + poi.Width / 2;
+            yield return PutAt(cx + 0.5f, placed.groundY + 3f);
+            var edits = GameState.Instance.EditsFor(PlanetId.Venus);
+            var sb = new System.Text.StringBuilder();
+            for (int y = placed.groundY; y >= placed.groundY - 9; y--) sb.Append($" y{y}:{side.terrain.GetTile(cx, y)}/{(side.terrain.RenderedTile(cx, y) != null ? "drawn" : "NONE")}");
+            TestContext.Out.WriteLine($"[MERIDIAN] harvester: ground {placed.groundY}, top solid {side.terrain.TopSolidY(cx)}, natural {side.terrain.BaseGenerator.SurfaceHeight(cx)}, diffs {edits.Count};{sb}");
+            Assert.AreEqual(placed.groundY, side.terrain.TopSolidY(cx), "the pad's top is the terrain's top");
+            Assert.IsTrue(TileId.IsSolid(side.terrain.GetTile(cx, placed.groundY)), "a solid pad tile under the harvester");
+            for (int y = placed.groundY; y >= side.terrain.BaseGenerator.SurfaceHeight(cx); y--)
+                Assert.NotNull(side.terrain.RenderedTile(cx, y), $"pad and fill are drawn (y {y})");
+            LogAssert.NoUnexpectedReceived();
+        }
+
         [UnityTest]
         public IEnumerator SurfaceDiveIsLethalWithoutMk2()
         {
