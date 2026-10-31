@@ -382,3 +382,8 @@ Moved: none.
 Decided: none. Desert seam approach given (shadow wrap via periodic heightfield + instanced copies).
 Signals: BLENDER three strikes on the desert seam; it switched to taiga and coast correctly. BLENDER holds the oldest want while idle, so it was nudged.
 Queue: UNITY 4, BLENDER 5.
+
+## Cycle 49 · 2026-10-31 (BLENDER message)
+Checked: BLENDER desert forensics (debug halves near5203_*): the seam is one large boulder straddling x = 0/W; the dune relief was fine. Earlier "lumpy" verdicts came from stale PNGs, because failed renders do not overwrite exports.
+Decided: approved a rock-free band around x = 0. Requested a guard: clear target PNGs before render + time/hash stamp on contact sheets.
+Signals: stale-artifact review risk (BLENDER self-reported). Guard requested.
