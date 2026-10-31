@@ -601,3 +601,6 @@ No change: both idle, no locks, blocked on USER-10 (~4 h 45 min).
 
 ## Cycle 87 · 2026-10-31 12:45
 User: owner typed "rerun the check" in the LEAD window; LEAD relayed it verbatim, attributed to the owner, to UNITY (universegame-54), which went busy. USER-10 → Done.
+
+## Cycle 87b · 2026-10-31 12:48
+Correction: UNITY rightly declined the relayed "rerun the check" (it needs the owner's own input in its window). USER-10 reopened; the Done line was removed.
