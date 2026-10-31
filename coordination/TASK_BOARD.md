@@ -317,12 +317,12 @@ Files: Assets/_Game/Code/Editor/ArtImporter.cs, Tests/Unit/
 Depends: U-005
 Lead notes: Done 30af54a (cycle 26): importer honors sheet ppu; capture_creatures shows the stag at true size (~2.3 m) next to the 1.8 m surveyor.
 
-### U-037 · UNITY · In Progress · M2
+### U-037 · UNITY · Done · M2
 Goal: Earth biomes v1 in SolidWorldGenerator (Bible §7.1): longitude bands for temperate forest (spawn), plains, desert, taiga, tundra, and ocean basins (water tiles to depth 250, D-010) with smooth transitions; surface material per biome (grass/soil, sand, snow, stone, water).
 Accept: EditMode test: biome at x is deterministic per seed and every biome appears once in 4096 columns; spawn is in forest; ocean has water to sea level (Datum 320) and a trench ≥ 120 m deep; chunk apply stays within D-019; captures of each biome.
 Files: Assets/_Game/Code/Runtime/Terrain/
 Depends: U-007
-Lead notes: Cycle 26. Tundra night Cryo 1 (D-032) then keys off the real biome instead of snow ground. (Cycle 37 pre-review of biomes_contact_sheet.png) Before hand-off: the ocean must not show the parallax backdrop below sea level (now the forest shows through a flat blue tint, with mirrored trees below). Hide the backdrop under water, darken water with depth (a gradient toward near-black at ~120 m), and show the seabed. Cave cells showing foliage are U-040, and the per-biome backdrops are U-038.
+Lead notes: Done fdc0885 (cycle 41): six longitude biomes with blended borders, ocean to 244 m, the water darkens with depth and hides the backdrop, the seabed is visible; unity_check one-lock hand-off: EditMode 142/142, PlayMode 56/56 + LeadQA 2/2.
 
 ### U-038 · UNITY · Ready · M2
 Goal: Backdrop switching by biome: PlanetBackdrop cross-fades to `backgrounds/earth_desert|earth_taiga|earth_coast` over ~20 m at biome borders (B-026; falls back to backgrounds/earth until those exist).
@@ -331,7 +331,7 @@ Files: Assets/_Game/Code/Runtime/Planet/
 Depends: U-037, U-024
 Lead notes: Cycle 26.
 
-### U-039 · UNITY · Ready · M2
+### U-039 · UNITY · In Progress · M2
 Goal: Mars landforms (Bible §7.2): Valles Marineris canyon (wide, 180 m deep, layered walls), Olympus Mons shield (3 km wide, 300 m tall, caldera), polar ice caps (CO₂ over water ice at both ends of x), lava-tube caves (natural radiation shelters, flagged for M3 Radiation).
 Accept: EditMode tests for each feature's position/size per seed; captures of canyon wall, Olympus flank, polar cap, and a lava tube; streaming within D-019.
 Files: Assets/_Game/Code/Runtime/Terrain/
@@ -343,7 +343,7 @@ Goal: Background walls: a dug or natural underground cell shows a dark wall of t
 Accept: capture of a fresh 1-tile hole and a cave (no forest visible through either); wall persists through save/load with the dig diffs; ≤ +2 draw calls; chunk apply within D-019.
 Files: Assets/_Game/Code/Runtime/Terrain/
 Depends: U-008, U-024
-Lead notes: Cycle 30: fx capture 1 shows bright foliage through a dug hole. (Cycle 33) Include the U-035 follow-up: landing-pad collider top at the deck surface.
+Lead notes: Cycle 30: fx capture 1 shows bright foliage through a dug hole. (Cycle 33) Include the U-035 follow-up: landing-pad collider top at the deck surface. (Cycle 41) Also tint terrain cells below sea level by water depth (they render as bright as dry sand now; ocean capture).
 
 ### U-041 · UNITY · Ready · M2
 Goal: BudgetGate memory in a dev build (D-036): tools/unity_profile.ps1 runs the Earth/Space/Mars legs in a development build and reads system and texture memory there; Editor rows are kept as "upper bound".

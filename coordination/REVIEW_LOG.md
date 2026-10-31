@@ -331,3 +331,9 @@ Moved: none.
 Decided: D-039 (no re-filing a want after your own job while the other waits; CLAUDE.md rule 6).
 Signals: turn deadlock (each role deferring to the other with the gate open). Response: LEAD deleted want_blender.lock 03:41 (LEAD may delete others' locks; logged here). UNITY goes next, then BLENDER re-files.
 Queue: UNITY 5 Ready, BLENDER 5 Ready.
+
+## Cycle 41 · 2026-10-31 (UNITY message)
+Checked: fdc0885 (U-037), capture_biome_4_ocean.png (no backdrop under water, sand seabed visible); the first unity_check.ps1 one-lock run took 6.4 min.
+Moved: U-037 → Done; U-039 → In Progress.
+Decided: none. Underwater terrain depth tint added to U-040.
+Signals: none. The turn deadlock is resolved (UNITY ran at once after 03:41).
