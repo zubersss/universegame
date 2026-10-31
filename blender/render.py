@@ -336,6 +336,9 @@ def autofit(entry, frames):
     ppu = float(int(ppu * 4) / 4)                     # quarter-px/m steps: stable, readable value
     cx = (max(xs) + min(xs)) / 2
     print(f"MERIDIAN autofit {entry['key']}: x [{min(xs):.2f}, {max(xs):.2f}] top {top_m:.2f} m -> ppu {ppu}, origin x {cx:.3f}")
+    if ppu < float(entry.get("ppu_min", 0)):    # D-034: per-sheet ppu >= 100 for creatures
+        raise AssetError(f"{entry['key']}: autofit ppu {ppu} < ppu_min {entry['ppu_min']} "
+                         f"(sweep {max(xs) - min(xs):.2f} m x {top_m:.2f} m doesn't fit {w}x{h} px)")
     return dict(entry, ppu=ppu, origin=[cx, 0.0, 0.0])
 
 

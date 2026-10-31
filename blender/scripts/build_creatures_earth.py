@@ -1,14 +1,21 @@
-"""Builds blender/sources/creatures/earth.blend: Earth creatures (B-015), stag and grey wolf.
+"""Builds blender/sources/creatures/earth.blend: Earth creatures, stag and grey wolf (B-015 v2).
 
-Same approach as the surveyor (build_surveyor.py): a hierarchy of empties as the rig, soft
-Skin-modifier body parts parented to it, poses keyed per frame, and a 2D forward-kinematics
-pass that puts the lowest hoof/paw on z = 0. Faces +X (right); near side -Y; far-side legs
-15% darker so they read behind the body in 2D. Collections `stag` and `wolf`.
-
-Standard creature set (contract §5): idle 6, walk 8 (four-beat gait), attack 6, hurt 2,
-death 6 = 28 frames. Bible §9: grounded anatomy with one alien exaggeration per species.
-Earth is home, so these stay naturalistic: the stag's exaggeration is oversized antlers, the
-wolf's a heavy ruff. Deterministic:
+v2 per LEAD cycle 24 / D-034 (v1 failed §9 "grounded anatomy": separate tubes, gaps at hip
+and knee, capsule body, small antlers):
+  * One continuous body mesh per animal: a single connected edge skeleton (spine, neck, head,
+    four three-segment legs, tail) with the modifier stack Armature -> Skin -> Subdivision.
+    The armature moves the skeleton vertices, then Skin wraps ONE surface around the posed
+    skeleton, so joints flex smoothly with no gaps and no weight painting (each skeleton vertex
+    belongs to exactly one bone; a joint vertex belongs to the child bone, so it is the pivot).
+  * Real proportions (red deer / grey wolf): deep chest, long neck, slender legs with a visible
+    carpus (front "knee") and a raised hock; the wolf has a ruff and a bushy tail.
+  * The stag's exaggeration is bold antlers: beam ~1.9x head length, 5 tines per side, built as
+    a separate rigid object on the head bone (antler is hard bone, unlike the coat).
+Animation: poses are rotations about the world Y axis (the 2D side plane), converted to each
+bone's rest frame, keyed per frame; then every frame is grounded exactly (lowest evaluated
+vertex on z = 0). Clips: idle 6, walk 8 (four-beat), attack 6, hurt 2, death 6 = 28.
+Coat colour uses Generated (undeformed) coordinates: pale belly, darker lower legs, and the
+far-side legs 15% darker so they read behind the body in 2D. Deterministic:
 
   blender --background --factory-startup --python blender/scripts/build_creatures_earth.py
 """
@@ -17,12 +24,13 @@ import os
 import sys
 
 import bpy
-from mathutils import Vector
+from mathutils import Matrix, Vector
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from build_icons import mat  # noqa: E402
-from build_surveyor import _constant, attach, empty, soft_limb  # noqa: E402
+from build_pilgrim import lin  # noqa: E402
+from build_surveyor import _constant  # noqa: E402
 
 DEFAULT_OUT = os.path.join(os.path.dirname(HERE), "sources", "creatures", "earth.blend")
 
@@ -34,204 +42,379 @@ for _c in CLIP_ORDER:
     CLIP_START[_c] = _f
     _f += CLIP_LEN[_c] + 4
 
-# Proportions (m). half = half the hip-to-shoulder distance; legs: upper, lower, foot height.
+LEGS = ("fn", "ff", "hn", "hf")     # front/hind, near (-y) / far (+y)
+
+# Skeleton in metres, side plane (x forward, z up), standing on z = 0. Each point: (x, z, radius).
+# Legs list: top (inside the body), joint 1, joint 2, fetlock, hoof/paw tip.
 SPECIES = {
-    "stag": dict(half=0.55, upper=0.46, lower=0.56, foot=0.05, body_r=(0.26, 0.3, 0.32), neck=0.48,
-                 neck_angle=55, head=0.42, tail=0.14, ears=0.14, antler=0.48,
-                 coat=((142, 100, 64), (112, 78, 50)), belly=(196, 168, 128), dark=(58, 44, 34)),
-    "wolf": dict(half=0.38, upper=0.31, lower=0.33, foot=0.04, body_r=(0.17, 0.2, 0.22), neck=0.3,
-                 neck_angle=30, head=0.34, tail=0.48, ears=0.1, antler=0.0, ruff=True,
-                 coat=((128, 124, 118), (92, 88, 84)), belly=(196, 190, 180), dark=(46, 44, 44)),
+    "stag": dict(
+        spine=[(-0.62, 1.16, 0.20), (-0.4, 1.2, 0.27), (-0.05, 1.18, 0.30), (0.32, 1.22, 0.33), (0.55, 1.26, 0.28)],
+        neck=[(0.55, 1.26, 0.20), (0.72, 1.55, 0.14), (0.86, 1.82, 0.11)],
+        head=[(0.86, 1.82, 0.11), (1.02, 1.80, 0.09), (1.2, 1.7, 0.06), (1.28, 1.64, 0.045)],
+        tail=[(-0.62, 1.16, 0.07), (-0.72, 1.08, 0.05)],
+        front=[(0.42, 1.05, 0.12), (0.4, 0.8, 0.075), (0.42, 0.44, 0.045), (0.42, 0.12, 0.032), (0.46, 0.0, 0.036)],
+        hind=[(-0.42, 1.08, 0.14), (-0.3, 0.74, 0.09), (-0.5, 0.46, 0.045), (-0.47, 0.12, 0.032), (-0.44, 0.0, 0.036)],
+        leg_y=0.13, ears=0.16, ruff=0.0,
+        coat=((140, 98, 62), (108, 74, 48)), belly=(204, 178, 138), socks=(70, 54, 42),
+        antler=dict(head_len=0.45, beam=0.85, tines=5)),
+    "wolf": dict(
+        spine=[(-0.48, 0.74, 0.13), (-0.3, 0.76, 0.17), (0.0, 0.76, 0.19), (0.28, 0.8, 0.21), (0.44, 0.82, 0.19)],
+        neck=[(0.44, 0.82, 0.17), (0.58, 0.92, 0.13), (0.68, 1.0, 0.11)],
+        head=[(0.68, 1.0, 0.11), (0.82, 0.98, 0.09), (0.96, 0.93, 0.055), (1.03, 0.9, 0.035)],
+        tail=[(-0.48, 0.74, 0.07), (-0.7, 0.6, 0.085), (-0.9, 0.44, 0.06), (-0.98, 0.36, 0.03)],
+        front=[(0.32, 0.66, 0.08), (0.3, 0.5, 0.055), (0.31, 0.24, 0.035), (0.32, 0.07, 0.03), (0.37, 0.0, 0.034)],
+        hind=[(-0.32, 0.68, 0.1), (-0.22, 0.46, 0.065), (-0.36, 0.26, 0.035), (-0.33, 0.07, 0.03), (-0.29, 0.0, 0.034)],
+        leg_y=0.1, ears=0.11, ruff=0.2,
+        coat=((126, 122, 116), (92, 88, 84)), belly=(206, 200, 190), socks=(110, 104, 98),
+        antler=None),
 }
 
 
-# ---------------------------------------------------------------- poses
-# Angles in degrees. leg swing a_<leg> (+ forward), knee flex k_<leg>; legs: fn fr hn hr
-# (front/hind, near/far). pitch (+ nose down), neck (+ head up), head (+ nose down), tail
-# (+ up), lift (m).
-
-LEGS = ("fn", "ff", "hn", "hf")
-
+# ---------------------------------------------------------------- poses (degrees)
+# s_<leg> swing (+ forward), j1/j2 flex of the two lower joints (+ = the natural fold),
+# pitch (+ nose down), neck (+ up), head (+ nose down), tail (+ up).
 
 def pose(name, i, sp):
     n = CLIP_LEN[name]
     t = i / n
-    p = {f"a_{l}": 0.0 for l in LEGS}
-    p.update({f"k_{l}": 4.0 for l in LEGS})
+    p = {f"s_{l}": 0.0 for l in LEGS}
+    p.update({f"j1_{l}": 0.0 for l in LEGS})
+    p.update({f"j2_{l}": 0.0 for l in LEGS})
     p.update(pitch=0.0, neck=0.0, head=0.0, tail=0.0)
     if name == "idle":
         s = math.sin(2 * math.pi * t)
-        p.update(neck=3 * s, head=-2 * s, tail=6 * s)
+        p.update(neck=3 * s, head=-2 * s, tail=8 * s)
     elif name == "walk":
         phase = {"hn": 0.0, "fn": 0.25, "hf": 0.5, "ff": 0.75}           # four-beat walk
         for l, ph in phase.items():
             u = 2 * math.pi * (t + ph)
-            p[f"a_{l}"] = 22 * math.sin(u)
-            p[f"k_{l}"] = 6 + 46 * max(0.0, math.cos(u))                 # flex while swinging forward
-        p.update(neck=-4 + 3 * math.sin(4 * math.pi * t), tail=8 * math.sin(2 * math.pi * t))
+            swing = max(0.0, math.cos(u))                                # 1 while the leg swings forward
+            p[f"s_{l}"] = 20 * math.sin(u)
+            p[f"j1_{l}"] = 10 + 25 * swing
+            p[f"j2_{l}"] = 8 + 45 * swing
+        p.update(neck=-3 + 3 * math.sin(4 * math.pi * t), tail=6 * math.sin(2 * math.pi * t))
     elif name == "attack":
         k = [0.0, 0.35, 0.8, 1.0, 0.6, 0.15][i]                          # wind-up, strike, recover
         if sp == "stag":                                                 # head-down antler charge
-            p.update(pitch=8 * k, neck=-26 * k, head=24 * k, a_fn=-10 * k, a_ff=-7 * k, a_hn=12 * k, a_hf=9 * k)
+            p.update(pitch=6 * k, neck=-30 * k, head=28 * k, s_fn=-12 * k, s_ff=-8 * k, s_hn=14 * k, s_hf=10 * k)
+            for l in ("hn", "hf"):
+                p[f"j1_{l}"] = 18 * k
         else:                                                            # lunge and bite
-            p.update(pitch=-6 * k, neck=10 * k, head=-12 * k, a_fn=26 * k, a_ff=20 * k, a_hn=-22 * k, a_hf=-18 * k,
-                     k_fn=4 + 30 * k, tail=20 * k)
+            p.update(pitch=-6 * k, neck=12 * k, head=-14 * k, s_fn=28 * k, s_ff=22 * k, s_hn=-24 * k, s_hf=-20 * k, tail=18 * k)
+            p["j2_fn"] = 30 * k
     elif name == "hurt":
         k = [1.0, 0.5][i]
-        p.update(pitch=-8 * k, neck=16 * k, head=-10 * k, a_fn=12 * k, a_ff=8 * k, a_hn=-10 * k, a_hf=-6 * k, tail=-15 * k)
+        p.update(pitch=-8 * k, neck=18 * k, head=-12 * k, s_fn=14 * k, s_ff=10 * k, s_hn=-10 * k, s_hf=-6 * k, tail=-14 * k)
     elif name == "death":
-        k = [0.15, 0.35, 0.55, 0.75, 0.92, 1.0][i]                       # legs buckle, body sinks
-        for l in LEGS:                                                   # legs tuck under the body
-            p[f"k_{l}"] = 4 + 110 * k
-            p[f"a_{l}"] = (-30 if l.startswith("f") else 25) * k
-        p.update(neck=-50 * k, head=25 * k, tail=-20 * k, pitch=6 * k)
+        k = [0.15, 0.35, 0.55, 0.75, 0.92, 1.0][i]                       # legs fold under, body sinks
+        for l in LEGS:
+            front = l.startswith("f")
+            p[f"s_{l}"] = (-25 if front else 30) * k
+            p[f"j1_{l}"] = 70 * k
+            p[f"j2_{l}"] = 90 * k
+        p.update(neck=-55 * k, head=30 * k, tail=-15 * k, pitch=4 * k)
     return p
 
 
-def lowest(p, sp):
-    """Lowest z relative to the root (body centre) over feet, body and head samples (2D FK)."""
-    S = SPECIES[sp]
-    r = math.radians(p["pitch"])
-
-    def rot(x, z, a):
-        return (x * math.cos(a) + z * math.sin(a), -x * math.sin(a) + z * math.cos(a))
-    pts = []
-    for l in LEGS:
-        x0 = S["half"] if l.startswith("f") else -S["half"]
-        sx, sz = rot(x0, -S["body_r"][1] * 0.5, r)
-        a1 = math.radians(p[f"a_{l}"]) - r
-        kx, kz = sx + S["upper"] * math.sin(a1), sz - S["upper"] * math.cos(a1)
-        a2 = a1 - math.radians(p[f"k_{l}"])
-        fx, fz = kx + S["lower"] * math.sin(a2), kz - S["lower"] * math.cos(a2)
-        pts += [fz - S["foot"], kz - 0.05]
-    for x in (-S["half"], 0.0, S["half"]):                              # belly
-        pts.append(rot(x, 0.0, r)[1] - S["body_r"][1])
-    hx, hz = rot(S["half"] + 0.1, 0.1, r)
-    na = math.radians(S["neck_angle"] + p["neck"]) - r
-    pts.append(hz + S["neck"] * math.sin(na) - 0.12)                      # head underside
-    return min(pts)
-
-
 # ---------------------------------------------------------------- build
+
+def coat_material(sp, S):
+    """Coat: noise-mottled fur colour, pale belly and darker lower legs (Generated Z), far-side
+    legs 15% darker (Generated Y), fur bump. Generated coords are undeformed, so the pattern
+    stays on the body as it animates."""
+    m = bpy.data.materials.new(f"{sp}_coat")
+    m.use_nodes = True
+    nt = m.node_tree
+    N, L = nt.nodes, nt.links
+    pr = N["Principled BSDF"]
+    pr.inputs["Roughness"].default_value = 0.92
+    tc = N.new("ShaderNodeTexCoord")
+    sep = N.new("ShaderNodeSeparateXYZ")
+    L.new(tc.outputs["Generated"], sep.inputs[0])
+    nz = N.new("ShaderNodeTexNoise"); nz.inputs["Scale"].default_value = 60.0; nz.inputs["Detail"].default_value = 8.0
+    L.new(tc.outputs["Object"], nz.inputs["Vector"])
+    mr = N.new("ShaderNodeMapRange"); mr.inputs["From Min"].default_value = 0.35; mr.inputs["From Max"].default_value = 0.7
+    L.new(nz.outputs["Fac"], mr.inputs["Value"])
+
+    def mix(fac, a, b):
+        mx = N.new("ShaderNodeMix"); mx.data_type = "RGBA"
+        L.new(fac, mx.inputs[0])
+        for sock, val in ((mx.inputs[6], a), (mx.inputs[7], b)):
+            if isinstance(val, tuple):
+                sock.default_value = lin(val)
+            else:
+                L.new(val, sock)
+        return mx.outputs[2]
+
+    def band(sock, lo, hi):
+        r = N.new("ShaderNodeMapRange"); r.interpolation_type = "SMOOTHSTEP"
+        r.inputs["From Min"].default_value, r.inputs["From Max"].default_value = lo, hi
+        L.new(sock, r.inputs["Value"])
+        return r.outputs["Result"]
+
+    col = mix(mr.outputs["Result"], S["coat"][0], S["coat"][1])
+    # Belly: the low side of the torso (Generated Z between legs and back).
+    zb = band(sep.outputs["Z"], 0.50, 0.42)
+    zl = band(sep.outputs["Z"], 0.34, 0.40)
+    belly = N.new("ShaderNodeMath"); belly.operation = "MULTIPLY"
+    L.new(zb, belly.inputs[0]); L.new(zl, belly.inputs[1])
+    col = mix(belly.outputs[0], col, S["belly"])
+    col = mix(band(sep.outputs["Z"], 0.16, 0.08), col, S["socks"])     # darker lower legs
+    far = N.new("ShaderNodeMath"); far.operation = "MULTIPLY"
+    L.new(band(sep.outputs["Y"], 0.6, 0.7), far.inputs[0]); L.new(band(sep.outputs["Z"], 0.42, 0.3), far.inputs[1])
+    dk = N.new("ShaderNodeMix"); dk.data_type = "RGBA"; dk.blend_type = "MULTIPLY"
+    L.new(far.outputs[0], dk.inputs[0]); L.new(col, dk.inputs[6]); dk.inputs[7].default_value = (0.85, 0.85, 0.85, 1.0)
+    L.new(dk.outputs[2], pr.inputs["Base Color"])
+    bp = N.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = 0.35
+    L.new(nz.outputs["Fac"], bp.inputs["Height"])
+    L.new(bp.outputs["Normal"], pr.inputs["Normal"])
+    return m
+
 
 def build_species(sp, scene):
     S = SPECIES[sp]
     coll = bpy.data.collections.new(sp)
     scene.collection.children.link(coll)
-    coat = {"n": mat(f"{sp}_coat_n", S["coat"][0], S["coat"][1], 0, 0.9, 40, 0.5),
-            "f": mat(f"{sp}_coat_f", tuple(int(c * 0.85) for c in S["coat"][0]), tuple(int(c * 0.85) for c in S["coat"][1]), 0, 0.9, 40, 0.5)}
-    belly = mat(f"{sp}_belly", S["belly"], tuple(int(c * 0.9) for c in S["belly"]), 0, 0.9, 40, 0.4)
-    dark = mat(f"{sp}_dark", S["dark"], tuple(int(c * 0.8) for c in S["dark"]), 0, 0.6, 20, 0.2)
-    hip_z = S["upper"] + S["lower"] + S["foot"] + S["body_r"][1] * 0.5
-    root = empty("root", (0, 0, hip_z), None, coll)
-    body = empty("body", (0, 0, hip_z), root, coll)
-    h, (r0, r1, r2) = S["half"], S["body_r"]
-    attach(soft_limb(f"{sp}_torso", (-h - 0.1, 0, hip_z + 0.02), (h + 0.12, 0, hip_z + 0.06), (r0, r1, r2), coat["n"]), body, coll)
-    attach(soft_limb(f"{sp}_belly", (-h * 0.6, 0, hip_z - r1 * 0.55), (h * 0.7, 0, hip_z - r1 * 0.5), (r1 * 0.5, r1 * 0.55, r1 * 0.5), belly), body, coll)
-    # Neck and head.
-    na = math.radians(S["neck_angle"])
-    nb = Vector((h + 0.08, 0, hip_z + r2 * 0.5))
-    neck = empty("neck", tuple(nb), body, coll)
-    nt = nb + Vector((math.cos(na), 0, math.sin(na))) * S["neck"]
-    attach(soft_limb(f"{sp}_neck", tuple(nb), tuple(nt), (r2 * 0.7, r2 * 0.5, r2 * 0.4), coat["n"]), neck, coll)
-    if S.get("ruff"):
-        attach(soft_limb(f"{sp}_ruff", tuple(nb + Vector((-0.04, 0, 0.02))), tuple(nb.lerp(nt, 0.7)), (r2 * 0.95, r2 * 0.85, r2 * 0.55), coat["n"]), neck, coll)
-    head = empty("head", tuple(nt), neck, coll)
-    hd = Vector((math.cos(math.radians(-35)), 0, math.sin(math.radians(-35))))
-    tip = nt + hd * S["head"]
-    attach(soft_limb(f"{sp}_head", tuple(nt + Vector((-0.04, 0, 0.02))), tuple(tip), (r2 * 0.5, r2 * 0.38, r2 * 0.18), coat["n"]), head, coll)
-    attach(soft_limb(f"{sp}_nose", tuple(tip - hd * 0.04), tuple(tip + hd * 0.02), (0.03, 0.03, 0.025), dark), head, coll)
-    for sy in (-1, 1):
-        e0 = nt + Vector((-0.03, sy * r2 * 0.25, r2 * 0.3))
-        attach(soft_limb(f"{sp}_ear_{sy}", tuple(e0), tuple(e0 + Vector((-0.05, sy * 0.03, S["ears"]))), (0.035, 0.03, 0.008), coat["n"]), head, coll)
-        eye = nt + hd * (S["head"] * 0.35) + Vector((0, sy * r2 * 0.3, 0.03))
-        attach(soft_limb(f"{sp}_eye_{sy}", tuple(eye), tuple(eye + Vector((0.005, 0, 0))), (0.016, 0.016, 0.016), dark), head, coll)
-    if S["antler"]:                                                     # main beam + tines, both sides
-        bone = mat(f"{sp}_antler", (206, 188, 156), (170, 150, 120), 0, 0.6, 30, 0.3)
-        for sy in (-1, 1):
-            b0 = nt + Vector((0.0, sy * r2 * 0.2, r2 * 0.35))
-            beam = [b0, b0 + Vector((-0.12, sy * 0.06, S["antler"] * 0.45)), b0 + Vector((0.02, sy * 0.1, S["antler"] * 0.85)),
-                    b0 + Vector((0.14, sy * 0.08, S["antler"]))]
-            for k in range(3):
-                attach(soft_limb(f"{sp}_beam_{sy}_{k}", tuple(beam[k]), tuple(beam[k + 1]), (0.03, 0.026, 0.022), bone), head, coll)
-            for k, (base, d) in enumerate(((1, (0.16, 0, 0.12)), (2, (0.14, 0, 0.16)), (2, (-0.12, 0, 0.14)))):
-                attach(soft_limb(f"{sp}_tine_{sy}_{k}", tuple(beam[base]), tuple(beam[base] + Vector(d)), (0.022, 0.016, 0.008), bone), head, coll)
-    # Tail.
-    tb = Vector((-h - 0.12, 0, hip_z + r0 * 0.4))
-    tail = empty("tail", tuple(tb), body, coll)
-    tdir = Vector((-0.75, 0, -0.66 if sp == "wolf" else 0.3)).normalized()
-    attach(soft_limb(f"{sp}_tail", tuple(tb), tuple(tb + tdir * S["tail"]),
-                     (0.06, 0.07, 0.03) if sp == "wolf" else (0.05, 0.05, 0.02), coat["n"]), tail, coll)
-    # Legs.
-    J = {}
+
+    # --- skeleton graph (vertices with radius and owning bone) ---
+    verts, radii, owner, edges = [], [], [], []
+
+    def add(x, y, z, r, bone, link_to=None):
+        verts.append(Vector((x, y, z)))
+        radii.append(r)
+        owner.append(bone)
+        idx = len(verts) - 1
+        if link_to is not None:
+            edges.append((link_to, idx))
+        return idx
+
+    def chain(points, bones, y=0.0, link_to=None, rscale=1.0):
+        idx = link_to
+        out = []
+        for (x, z, r), b in zip(points, bones):
+            if idx is not None and verts[idx] == Vector((x, y, z)):
+                out.append(idx)
+                continue
+            idx = add(x, y, z, r * rscale, b, idx)
+            out.append(idx)
+        return out
+
+    spine = chain(S["spine"], ["body"] * len(S["spine"]))
+    neck = chain(S["neck"][1:], ["neck", "neck"], link_to=spine[-1])
+    if S["ruff"]:
+        for k in neck:
+            radii[k] *= 1.0 + S["ruff"] * 3
+    head = chain(S["head"][1:], ["head"] * (len(S["head"]) - 1), link_to=neck[-1])
+    tail = chain(S["tail"][1:], ["tail"] * (len(S["tail"]) - 1), link_to=spine[0])
+    for sy in (-1, 1):                                                   # ears
+        e0 = add(S["head"][0][0] + 0.02, sy * 0.05, S["head"][0][1] + 0.08, 0.035, "head", head[0] if head else neck[-1])
+        add(S["head"][0][0] - 0.04, sy * 0.08, S["head"][0][1] + 0.08 + S["ears"], 0.012, "head", e0)
+    leg_root = {}
     for l in LEGS:
-        x0 = h if l.startswith("f") else -h
-        sy = -1 if l.endswith("n") else 1
-        side = "n" if l.endswith("n") else "f"
-        top = Vector((x0, sy * r1 * 0.55, hip_z - r1 * 0.5))
-        hip = empty(f"hip_{l}", tuple(top), body, coll)
-        knee_p = top - Vector((0, 0, S["upper"]))
-        thick = r1 * (0.5 if l.startswith("h") else 0.42)
-        attach(soft_limb(f"{sp}_upper_{l}", tuple(top + Vector((0, 0, 0.1))), tuple(knee_p), (thick, thick * 0.7, thick * 0.4), coat[side]), hip, coll)
-        knee = empty(f"knee_{l}", tuple(knee_p), hip, coll)
-        foot_p = knee_p - Vector((0, 0, S["lower"]))
-        attach(soft_limb(f"{sp}_lower_{l}", tuple(knee_p), tuple(foot_p), (thick * 0.4, thick * 0.3, thick * 0.28), coat[side]), knee, coll)
-        attach(soft_limb(f"{sp}_foot_{l}", tuple(foot_p + Vector((0, 0, 0.01))), tuple(foot_p + Vector((0.04, 0, -S["foot"]))),
-                         (thick * 0.3, thick * 0.32, thick * 0.3), dark), knee, coll)
-        J[l] = (hip, knee)
-    animate(sp, root, body, neck, head, tail, J, hip_z)
+        pts = S["front"] if l.startswith("f") else S["hind"]
+        y = (-1 if l.endswith("n") else 1) * S["leg_y"]
+        attach = min(spine, key=lambda k: abs(verts[k].x - pts[0][0]))
+        names = [f"u_{l}", f"m_{l}", f"l_{l}", f"l_{l}"]
+        top = add(pts[0][0], y, pts[0][1], pts[0][2], "body", attach)    # inside the body: rides the torso
+        leg_root[l] = chain(pts[1:], names, y=y, link_to=top)
+
+    me = bpy.data.meshes.new(f"{sp}_skeleton")
+    me.from_pydata([tuple(v) for v in verts], edges, [])
+    body = bpy.data.objects.new(f"{sp}_body", me)
+    coll.objects.link(body)
+
+    # --- armature (bones in the side plane; joint vertices belong to the child bone) ---
+    ad = bpy.data.armatures.new(f"{sp}_rig")
+    rig = bpy.data.objects.new(f"{sp}_rig", ad)
+    coll.objects.link(rig)
+    bpy.context.view_layer.objects.active = rig
+    bpy.ops.object.mode_set(mode="EDIT")
+    eb = ad.edit_bones
+
+    def bone(name, head, tail, parent=None):
+        b = eb.new(name)
+        b.head, b.tail = Vector(head), Vector(tail)
+        if parent:
+            b.parent = eb[parent]
+        return name
+
+    sp0, spn = S["spine"][2], S["spine"][-1]
+    bone("body", (sp0[0], 0, sp0[1]), (spn[0], 0, spn[1]))
+    bone("neck", (S["neck"][0][0], 0, S["neck"][0][1]), (S["neck"][-1][0], 0, S["neck"][-1][1]), "body")
+    bone("head", (S["head"][0][0], 0, S["head"][0][1]), (S["head"][-1][0], 0, S["head"][-1][1]), "neck")
+    bone("tail", (S["tail"][0][0], 0, S["tail"][0][1]), (S["tail"][-1][0], 0, S["tail"][-1][1]), "body")
+    for l in LEGS:
+        pts = S["front"] if l.startswith("f") else S["hind"]
+        y = (-1 if l.endswith("n") else 1) * S["leg_y"]
+        bone(f"u_{l}", (pts[0][0], y, pts[0][1]), (pts[1][0], y, pts[1][1]), "body")
+        bone(f"m_{l}", (pts[1][0], y, pts[1][1]), (pts[2][0], y, pts[2][1]), f"u_{l}")
+        bone(f"l_{l}", (pts[2][0], y, pts[2][1]), (pts[4][0], y, pts[4][1]), f"m_{l}")
+    bpy.ops.object.mode_set(mode="OBJECT")
+
+    # The upper leg bone owns the joint-1 vertex's parent segment: re-own vertices so each
+    # joint vertex belongs to the bone that starts there (the child), i.e. it is the pivot.
+    for l in LEGS:
+        ids = leg_root[l]
+        owner[ids[0]] = f"m_{l}"                       # joint 1 (elbow / stifle)
+        owner[ids[1]] = f"l_{l}"                       # joint 2 (carpus / hock)
+    for b in set(owner):
+        vg = body.vertex_groups.new(name=b)
+        vg.add([k for k, o in enumerate(owner) if o == b], 1.0, "REPLACE")
+    # Upper-leg segment vertices other than joints: u_<leg> owns nothing else; the leg top
+    # rides "body", so the upper leg's skin spans body -> joint 1 and bends at the shoulder/hip.
+
+    body.parent = rig
+    arm = body.modifiers.new("rig", "ARMATURE")
+    arm.object = rig
+    skin = body.modifiers.new("skin", "SKIN")
+    skin.use_smooth_shade = True
+    sub = body.modifiers.new("sub", "SUBSURF")
+    sub.levels = sub.render_levels = 2
+    for sv, r in zip(me.skin_vertices[0].data, radii):
+        sv.radius = (r, r)
+    me.skin_vertices[0].data[spine[2]].use_root = True
+    me.materials.append(coat_material(sp, S))
+
+    dark = mat(f"{sp}_dark", (40, 32, 28), (30, 24, 22), 0, 0.5, 20, 0.1)
+    for sy in (-1, 1):                                                   # eyes and nose on the head bone
+        hx, hz = S["head"][1][0], S["head"][1][1]
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=8, radius=0.018, location=(hx - 0.02, sy * 0.07, hz + 0.03))
+        eye = bpy.context.active_object
+        _rig_child(eye, rig, "head", coll, dark)
+    tx, tz, _ = S["head"][-1]
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=8, radius=0.035, location=(tx + 0.01, 0, tz))
+    _rig_child(bpy.context.active_object, rig, "head", coll, dark)
+    if S["antler"]:
+        build_antlers(sp, S, rig, coll)
+    animate(sp, rig, S)
 
 
-def key(ob, frame, rot_y=None, loc=None):
-    if rot_y is not None:
-        ob.rotation_euler = (0.0, math.radians(rot_y), 0.0)
-        ob.keyframe_insert("rotation_euler", frame=frame)
-    if loc is not None:
-        ob.location = loc
-        ob.keyframe_insert("location", frame=frame)
+def _rig_child(ob, rig, bone_name, coll, m):
+    for c in list(ob.users_collection):
+        c.objects.unlink(ob)
+    coll.objects.link(ob)
+    bpy.context.view_layer.update()
+    mw = ob.matrix_world.copy()
+    ob.parent = rig
+    ob.parent_type = "BONE"
+    ob.parent_bone = bone_name
+    bpy.context.view_layer.update()
+    ob.matrix_world = mw
+    bpy.ops.object.shade_smooth()
+    ob.data.materials.append(m)
 
 
-def animate(sp, root, body, neck, head, tail, J, hip_z):
+def build_antlers(sp, S, rig, coll):
+    """Main beam per side curving up-back then forward, 5 tines (brow, bez, trez, two crown),
+    beam length ~1.9x head length; a Skin skeleton on the head bone."""
+    A = S["antler"]
+    hx, hz = S["head"][0][0], S["head"][0][1]
+    verts, radii, edges = [], [], []
+
+    def add(p, r, link=None):
+        verts.append(Vector(p))
+        radii.append(r)
+        k = len(verts) - 1
+        if link is not None:
+            edges.append((link, k))
+        return k
+    L = A["beam"]
+    roots = []
+    for sy in (-1, 1):
+        base = add((hx + 0.02, sy * 0.06, hz + 0.1), 0.032)
+        roots.append(base)
+        beam_pts = [(-0.12, 0.10, 0.3), (-0.16, 0.16, 0.6), (-0.06, 0.2, 0.85), (0.08, 0.22, 1.0)]
+        beam = [base]
+        for dx, dy, f in beam_pts:
+            beam.append(add((hx + dx, sy * dy, hz + 0.1 + L * f), 0.03 * (1.1 - 0.6 * f), beam[-1]))
+        tines = [(1, (0.22, 0.0, 0.08)), (1, (0.2, 0.0, 0.16)), (2, (0.2, 0.0, 0.14)), (3, (0.12, 0.0, 0.2)), (4, (-0.08, 0.0, 0.16))]
+        for k, (bi, d) in enumerate(tines[:A["tines"]]):
+            p0 = verts[beam[bi]]
+            mid = add(tuple(p0 + Vector(d) * 0.55 + Vector((0, sy * 0.01, 0))), 0.014, beam[bi])
+            add(tuple(p0 + Vector(d)), 0.006, mid)
+    me = bpy.data.meshes.new(f"{sp}_antler_skeleton")
+    me.from_pydata([tuple(v) for v in verts], edges, [])
+    ob = bpy.data.objects.new(f"{sp}_antlers", me)
+    coll.objects.link(ob)
+    vg = ob.vertex_groups.new(name="head")
+    vg.add(list(range(len(verts))), 1.0, "REPLACE")
+    ob.parent = rig
+    a = ob.modifiers.new("rig", "ARMATURE")
+    a.object = rig
+    ob.modifiers.new("skin", "SKIN").use_smooth_shade = True
+    s = ob.modifiers.new("sub", "SUBSURF")
+    s.levels = s.render_levels = 2
+    for sv, r in zip(me.skin_vertices[0].data, radii):
+        sv.radius = (r, r)
+    for k in roots:                                                      # one root per antler
+        me.skin_vertices[0].data[k].use_root = True
+    me.materials.append(mat(f"{sp}_antler_bone", (214, 196, 162), (176, 154, 120), 0, 0.55, 30, 0.35))
+
+
+# ---------------------------------------------------------------- animation
+
+def rot_y(deg):
+    return Matrix.Rotation(math.radians(deg), 3, "Y")
+
+
+def set_pose(rig, name, deg):
+    """Rotate pose bone `name` by `deg` about the world Y axis (side plane), expressed in the
+    bone's rest frame (all rotations are about Y, so they commute down the chain)."""
+    pb = rig.pose.bones[name]
+    M = rig.data.bones[name].matrix_local.to_3x3()
+    pb.rotation_mode = "QUATERNION"
+    pb.rotation_quaternion = (M.inverted() @ rot_y(deg) @ M).to_quaternion()
+
+
+def animate(sp, rig, S):
+    scene = bpy.context.scene
     for name in CLIP_ORDER:
         for i in range(CLIP_LEN[name]):
             p = pose(name, i, sp)
             f = CLIP_START[name] + i
-            key(root, f, rot_y=p["pitch"], loc=(0.0, 0.0, -lowest(p, sp)))
-            key(body, f, rot_y=0.0)
-            key(neck, f, rot_y=-p["neck"])
-            key(head, f, rot_y=p["head"])
-            key(tail, f, rot_y=p["tail"])        # tail points -x: + rotation raises it
+            rig.rotation_euler = (0.0, math.radians(p["pitch"]), 0.0)
+            rig.keyframe_insert("rotation_euler", frame=f)
+            set_pose(rig, "neck", -p["neck"])
+            set_pose(rig, "head", p["head"])
+            set_pose(rig, "tail", p["tail"])
             for l in LEGS:
-                key(J[l][0], f, rot_y=-p[f"a_{l}"])
-                key(J[l][1], f, rot_y=p[f"k_{l}"])
-    for ob in bpy.data.objects:
-        if ob.animation_data and ob.animation_data.action:
-            _constant(ob.animation_data.action)
-    ground_exactly(root)
+                front = l.startswith("f")
+                set_pose(rig, f"u_{l}", -p[f"s_{l}"])
+                # Front: elbow folds the forearm back a little, carpus folds the cannon back.
+                # Hind: stifle folds the tibia back, hock folds the cannon forward.
+                set_pose(rig, f"m_{l}", (0.4 if front else 1.0) * p[f"j1_{l}"])
+                set_pose(rig, f"l_{l}", p[f"j2_{l}"] if front else -p[f"j2_{l}"])
+            for pb in rig.pose.bones:
+                pb.keyframe_insert("rotation_quaternion", frame=f)
+    if rig.animation_data and rig.animation_data.action:
+        _constant(rig.animation_data.action)
+    ground_exactly(rig)
 
 
-def ground_exactly(root):
-    """The FK estimate of the lowest point is approximate (it samples joints, not skin). Measure
-    the evaluated meshes on every keyed frame and re-key the root so the lowest vertex sits on
-    z = 0 exactly: no sinking into the pivot line, no floating."""
+def ground_exactly(rig):
+    """Measure the evaluated meshes on every keyed frame and key the rig's z so the lowest
+    vertex sits exactly on z = 0 (no sinking into the pivot line, no floating)."""
     scene = bpy.context.scene
-    meshes = [o for o in root.children_recursive if o.type == "MESH"]
+    meshes = [o for o in rig.children_recursive if o.type == "MESH"]
     for name in CLIP_ORDER:
         for i in range(CLIP_LEN[name]):
             f = CLIP_START[name] + i
+            rig.location.z = 0.0
             scene.frame_set(f)
+            rig.location.z = 0.0
+            bpy.context.view_layer.update()
             dg = bpy.context.evaluated_depsgraph_get()
             zmin = float("inf")
             for o in meshes:
                 ev = o.evaluated_get(dg)
-                me = ev.to_mesh()
+                m = ev.to_mesh()
                 mw = ev.matrix_world
-                zmin = min([zmin] + [(mw @ v.co).z for v in me.vertices])
+                zmin = min([zmin] + [(mw @ v.co).z for v in m.vertices])
                 ev.to_mesh_clear()
-            root.location.z -= zmin
-            root.keyframe_insert("location", frame=f)
-    if root.animation_data and root.animation_data.action:
-        _constant(root.animation_data.action)
+            rig.location.z = -zmin
+            rig.keyframe_insert("location", frame=f)
+    if rig.animation_data and rig.animation_data.action:
+        _constant(rig.animation_data.action)
 
 
 def build(out_path=DEFAULT_OUT):
