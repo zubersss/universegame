@@ -69,7 +69,8 @@ SPECIES = {
         blobs=[(0.5, 0.0, 0.84, 0.13, 1.0, 1.3, 1.25), (0.56, 0.0, 0.78, 0.1, 1.2, 1.3, 1.0),         # ruff mass
                (0.38, 0.0, 0.98, 0.07, 1.4, 1.1, 0.8), (0.18, 0.0, 0.95, 0.06, 1.5, 1.0, 0.7),         # fur clumps on
                (-0.06, 0.0, 0.93, 0.055, 1.5, 1.0, 0.7), (-0.3, 0.0, 0.9, 0.05, 1.4, 1.0, 0.7)],      # the back line
-        leg_y=0.1, ears=0.21, ear_r=(0.045, 0.03), ear_lean=0.03, ruff=0.24,   # ears clear the metaball blend belly_z=(0.54, 0.66), socks_z=0.16, far=(0.05, 0.6),
+        leg_y=0.1, ears=0.2, ear_r=(0.075, 0.05, 0.018), ear_lean=0.03, ruff=0.24,   # ears clear the metaball blend
+        belly_z=(0.54, 0.66), socks_z=0.16, far=(0.05, 0.6),
         coat=((126, 122, 116), (92, 88, 84)), belly=(206, 200, 190), socks=(110, 104, 98),
         antler=None),
 }
@@ -232,9 +233,15 @@ def build_species(sp, scene, S=None):
     tail = chain(S["tail"][1:], ["tail"] * (len(S["tail"]) - 1), link_to=spine[0])
     for sy in ((-1, 1) if S["ears"] else ()):                          # ears (none on airless/thin-air species)
         # Ear radii stay above the metaball resolution (0.014 m) or the ears vanish.
-        er0, er1 = S.get("ear_r", (0.04, 0.022))
-        e0 = add(S["head"][0][0] + 0.02, sy * 0.05, S["head"][0][1] + 0.08, er0, "head", head[0] if head else neck[-1])
-        add(S["head"][0][0] + S.get("ear_lean", -0.04), sy * 0.08, S["head"][0][1] + 0.08 + S["ears"], er1, "head", e0)
+        er = S.get("ear_r", (0.04, 0.022))
+        bx, bz = S["head"][0][0] + 0.02, S["head"][0][1] + 0.08
+        tx, tz = S["head"][0][0] + S.get("ear_lean", -0.04), bz + S["ears"]
+        e0 = add(bx, sy * 0.05, bz, er[0], "head", head[0] if head else neck[-1])
+        if len(er) == 3:
+            # A capsule takes the mean of its end radii, so a one-segment ear is a uniform
+            # stick; base -> mid -> tip gives the wide-based triangular wolf ear (B-031).
+            e0 = add((bx + tx) / 2, sy * 0.065, (bz + tz) / 2 - 0.02, er[1], "head", e0)
+        add(tx, sy * 0.08, tz, er[-1], "head", e0)
     leg_root = {}
     for l in LEGS:
         pts = S["front"] if l.startswith("f") else S["hind"]
