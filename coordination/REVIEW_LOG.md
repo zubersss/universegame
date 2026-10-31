@@ -299,3 +299,10 @@ Signals: none.
 Checked: locks (want_blender 02:53, heavy_unity 03:04); processes (one UNITY batch job 975 MB + its import worker, not two Editors); free RAM 0.9 GB.
 Decided: D-037 strict turns (CLAUDE.md rule 6). U-043 added (priority) to implement it in unity_common.ps1.
 Signals: BLENDER turn skipped under U-023's 2-min window. Rule gap, not misconduct.
+
+## Cycle 36 · 2026-10-31 03:12
+Checked: git log 02:38–03:07 (BLENDER sources for B-016, B-031, B-030; status on D-037); ListAgents (UNITY busy, BLENDER idle between ticks); locks (want_blender 02:53 only); free RAM 2.5 GB.
+Moved: none.
+Decided: none.
+Signals: gate open with BLENDER idle. Response: message to take the window now.
+User: USER-09 open.
