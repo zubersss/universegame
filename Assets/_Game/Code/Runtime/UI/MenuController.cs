@@ -171,6 +171,9 @@ namespace Meridian.UI
             go.AddComponent<InputSystemUIInputModule>();
         }
 
+        /// <summary>U-047: the title art keeps its left third clear for the menu (the Pilgrim sits right of it).</summary>
+        public const float MenuX = -640f;
+
         void Build()
         {
             var theme = UiTheme.Active;
@@ -180,18 +183,18 @@ namespace Meridian.UI
             // U-044 title art (BLENDER ui/title/*): full-screen background and the logo; the text title stays until the logo arrives.
             var background = UiKit.Panel(mainPanel.transform, "TitleBackground", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1920f, 1080f), Color.white);
             background.enabled = false;
-            var title = UiKit.Text(mainPanel.transform, "Title", new Vector2(0.5f, 0.5f), new Vector2(0f, 220f), new Vector2(900f, 120f), 96, true, TextAnchor.MiddleCenter);
+            var title = UiKit.Text(mainPanel.transform, "Title", new Vector2(0.5f, 0.5f), new Vector2(MenuX, 220f), new Vector2(900f, 120f), 96, true, TextAnchor.MiddleCenter);
             title.text = "MERIDIAN";
-            var logo = UiKit.Panel(mainPanel.transform, "TitleLogo", new Vector2(0.5f, 0.5f), new Vector2(0f, 230f), new Vector2(900f, 180f), Color.white);
+            var logo = UiKit.Panel(mainPanel.transform, "TitleLogo", new Vector2(0.5f, 0.5f), new Vector2(MenuX, 230f), new Vector2(560f, 140f), Color.white);
             logo.preserveAspect = true;
             logo.enabled = false;
             LoadTitleArt("ui/title/background", background, null);
             LoadTitleArt("ui/title/logo", logo, title);
-            var sub = UiKit.Text(mainPanel.transform, "Subtitle", new Vector2(0.5f, 0.5f), new Vector2(0f, 140f), new Vector2(900f, 40f), 20, false, TextAnchor.MiddleCenter, theme.label);
+            var sub = UiKit.Text(mainPanel.transform, "Subtitle", new Vector2(0.5f, 0.5f), new Vector2(MenuX, 140f), new Vector2(560f, 40f), 20, false, TextAnchor.MiddleCenter, theme.label);
             sub.text = "a survey of the real solar system";
-            NewButton = UiKit.Button(mainPanel.transform, "NEW", new Vector2(0f, 20f), NewGame);
-            ContinueButton = UiKit.Button(mainPanel.transform, "CONTINUE", new Vector2(0f, -60f), Continue);
-            QuitButton = UiKit.Button(mainPanel.transform, "QUIT", new Vector2(0f, -140f), Quit);
+            NewButton = UiKit.Button(mainPanel.transform, "NEW", new Vector2(MenuX, 20f), NewGame);
+            ContinueButton = UiKit.Button(mainPanel.transform, "CONTINUE", new Vector2(MenuX, -60f), Continue);
+            QuitButton = UiKit.Button(mainPanel.transform, "QUIT", new Vector2(MenuX, -140f), Quit);
             mainPanel.SetActive(false);
 
             pausePanel = UiKit.Panel(canvas.transform, "Pause", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(4000f, 4000f), theme.panel).gameObject;

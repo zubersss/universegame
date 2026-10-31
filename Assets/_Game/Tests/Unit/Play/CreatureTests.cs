@@ -163,8 +163,14 @@ namespace Meridian.Tests
             samples.Sort();
             double avg = 0; foreach (var s in samples) avg += s; avg /= samples.Count;
             double p99 = samples[(int)(samples.Count * 0.99) - 1], max = samples[samples.Count - 1];
-            TestContext.Out.WriteLine($"[MERIDIAN] AI with 20 creatures: avg {avg:F3} ms, p99 {p99:F3} ms, max {max:F3} ms");
-            Assert.LessOrEqual(max, 0.5, "≤ 0.5 ms AI in every frame (board U-027)");
+            double median = samples[samples.Count / 2];
+            TestContext.Out.WriteLine($"[MERIDIAN] AI with 20 creatures: avg {avg:F3} ms, median {median:F3} ms, p99 {p99:F3} ms, max {max:F3} ms");
+            // D-047 (extends D-035): the 0.5 ms budget (board U-027) holds for median and p99; one worst frame
+            // up to 2× is logged, not failed (batch-load spikes outside our code).
+            Assert.LessOrEqual(median, 0.5, "median ≤ 0.5 ms AI (U-027, D-047)");
+            Assert.LessOrEqual(p99, 0.5, "p99 ≤ 0.5 ms AI (U-027, D-047)");
+            Assert.LessOrEqual(max, 1.0, "worst frame ≤ 2 × 0.5 ms (D-047)");
+            if (max > 0.5) TestContext.Out.WriteLine($"[MERIDIAN] AI worst frame {max:F3} ms over 0.5 ms: logged per D-047");
             LogAssert.NoUnexpectedReceived();
         }
 

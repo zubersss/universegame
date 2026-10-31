@@ -51,6 +51,8 @@ namespace Meridian.Planet
         static readonly int GroundId = Shader.PropertyToID("_GroundColor");
         static readonly int AlphaId = Shader.PropertyToID("_Alpha");
         static readonly int TintId = Shader.PropertyToID("_Tint");
+        static readonly int ViewHalfId = Shader.PropertyToID("_ViewHalf");
+        float viewHalf = -1f;
 
         MeshRenderer quad;
         readonly Texture2D[] textures = new Texture2D[3];
@@ -169,6 +171,9 @@ namespace Meridian.Planet
         /// <summary>The art set shown by the main backdrop / the cross-fade overlay (null when none).</summary>
         public string MainSet => mainSet;
         public string OverlaySet => overlay != null && overlay.enabled ? overlaySet : null;
+        /// <summary>Whether a set's three layers are loaded (tests wait on the set preloaded ahead of a border).</summary>
+        public bool SetReady(string name) => sets.TryGetValue(name, out var s) && s.loaded == 3;
+
         /// <summary>Opacity of the overlay set over the main one (0 when not fading).</summary>
         public float FadeWeight { get; private set; }
 
@@ -335,6 +340,13 @@ namespace Meridian.Planet
             // Generous width: the quad must cover the view at any aspect (captures switch to 16:9 targets).
             float h = view.orthographicSize * 2f, w = h * Mathf.Max(view.aspect, 2.5f);
             quad.transform.localScale = new Vector3(w, h, 1f);
+            if (!Mathf.Approximately(view.orthographicSize, viewHalf))
+            {
+                viewHalf = view.orthographicSize;
+                quad.GetPropertyBlock(block);
+                block.SetFloat(ViewHalfId, viewHalf);
+                quad.SetPropertyBlock(block);
+            }
             UpdateBiomeFade();
 
             // Underground the sky backdrop fades out (caves show the sky color only, M2 cave art later).

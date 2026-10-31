@@ -558,6 +558,8 @@ namespace Meridian.Tests
             var tube = Meridian.Terrain.MarsLandforms.Tubes[0];
             int ceil = Meridian.Terrain.MarsLandforms.TubeCeiling(tube, surf);
             yield return Shot("4_lava_tube", tube.x0 + Meridian.Terrain.MarsLandforms.SkylightInset + 6f, ceil - 1f, 12f);
+            int floor = (Meridian.Terrain.MarsLandforms.CanyonStart + Meridian.Terrain.MarsLandforms.CanyonEnd) / 2;
+            yield return Shot("5_canyon_floor", floor, surf(floor) + 5f, 14f); // U-047: sky sliver over the floor
             side.dayNight.Override = null;
         }
 

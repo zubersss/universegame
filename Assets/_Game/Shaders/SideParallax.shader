@@ -26,6 +26,7 @@ Shader "MERIDIAN/SideParallax"
         _Tint ("Day/night tint", Color) = (1, 1, 1, 1)
         _Alpha ("Layers alpha", Float) = 1
         _Fade ("Overlay opacity (U-038 biome cross-fade)", Float) = 1
+        _ViewHalf ("Camera half-height (m), for the deep-canyon sky", Float) = 7
         [HideInInspector] _SrcBlend ("Src blend", Float) = 1
         [HideInInspector] _DstBlend ("Dst blend", Float) = 0
         _SeaLevel ("Sea surface (world y; far below = no sea)", Float) = -100000
@@ -73,6 +74,7 @@ Shader "MERIDIAN/SideParallax"
                 float4 _Tint;
                 float _Alpha;
                 float _Fade;
+                float _ViewHalf;
                 float _SeaLevel;
                 float4 _WaterColor;
                 float _WaterFade;
@@ -139,14 +141,23 @@ Shader "MERIDIAN/SideParallax"
                 if (LayerUV(i.worldXY, cam, _P2, _Q2, uv)) col = Over(col, SAMPLE_TEXTURE2D(_Layer2, sampler_Layer2, uv), _Q2.x, sky);
                 // Below the near layer's foot no farther layer may peek out (their bases would hang there, U-040):
                 // only haze, darkening from the near layer's foot toward the ground tone over 12 m.
+                float foot = -1e9;
                 if (_Q2.z > 0.5)
                 {
-                    float foot = _Datum + (cam.y - _Datum) * (1.0 - _Q2.w) + _P2.w + _Q2.y * _P2.y;
+                    foot = _Datum + (cam.y - _Datum) * (1.0 - _Q2.w) + _P2.w + _Q2.y * _P2.y;
                     if (i.worldXY.y < foot)
                     {
                         half3 haze = lerp(_GroundColor.rgb, sky, 0.45);
                         col = lerp(haze, _GroundColor.rgb * 0.8, saturate((foot - i.worldXY.y) / 12.0));
                     }
+                }
+                // U-047: deep down (canyon floors) the near layer's foot sits above the view and the whole view would
+                // be ground haze; open a sky sliver over the top of the view instead, so the rim reads against the sky.
+                if (max(horizon, foot) > cam.y + 0.5 * _ViewHalf)
+                {
+                    float s = smoothstep(cam.y + 0.35 * _ViewHalf, cam.y + 0.95 * _ViewHalf, i.worldXY.y);
+                    float w = saturate((max(horizon, foot) - (cam.y + 0.5 * _ViewHalf)) / (0.5 * _ViewHalf)); // fades in, no pop
+                    col = lerp(col, sky, s * 0.9 * w);
                 }
                 col = lerp(sky, col, _Alpha);
                 // Under the sea (U-037): no landscape, just water darkening with depth (near-black by ~120 m).

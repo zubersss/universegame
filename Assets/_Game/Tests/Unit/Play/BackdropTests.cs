@@ -79,7 +79,9 @@ namespace Meridian.Tests
             float until = Time.realtimeSinceStartup + 10f;
             yield return null;
             while (Time.realtimeSinceStartup < until && !(b.MainSet == "earth" && b.LayersLoaded == 3)) yield return null;
-            for (int i = 0; i < 120; i++) yield return null; // neighbour sheets arrive
+            until = Time.realtimeSinceStartup + 10f;
+            while (!b.SetReady("earth_desert") && Time.realtimeSinceStartup < until) yield return null; // preloaded ≤ 60 m ahead
+            Assert.IsTrue(b.SetReady("earth_desert"), "the desert set is loaded before the border");
             Assert.AreEqual("earth", b.MainSet);
             Assert.IsNull(b.OverlaySet, "no fade 50 m from the border");
 
