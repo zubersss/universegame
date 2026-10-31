@@ -663,3 +663,6 @@ Moved: U-047 → Done; B-049 → In Progress (BLENDER resumes with one targeted 
 ## Cycle 101 · 2026-10-31 (BLENDER message)
 Checked: review_mars_canyon.png (15:02–15:04).
 Moved: B-049 → Done. BLENDER back to idle.
+
+## Cycle 102 · 2026-10-31 (UNITY message)
+Checked: b049 capture_mars_5_canyon_floor.png (canyon reads correctly). Two small leftovers sent to UNITY (old-set ghost in the sky band; flat tan fill under the near layer foot).
