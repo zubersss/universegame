@@ -20,8 +20,8 @@ namespace Meridian.EditorTools
     /// </summary>
     public sealed class ArtImporter : AssetPostprocessor
     {
-        /// <summary>Bump when the import rules change so Unity re-imports the art everywhere (2: U-036 per-sheet ppu).</summary>
-        public override uint GetVersion() => 2;
+        /// <summary>Bump when the import rules change so Unity re-imports the art everywhere (2: U-036 per-sheet ppu, 3: U-032 clips).</summary>
+        public override uint GetVersion() => 3; // 3: U-032 sheet clips into the registry
 
         /// <summary>Folders the importer watches. Tests point these at a sandbox and restore them.</summary>
         public sealed class Roots
@@ -36,7 +36,7 @@ namespace Meridian.EditorTools
 
         public static Roots Active = new Roots();
 
-        [Serializable] class SheetClip { public string name; public int start, length; public bool loop; }
+        [Serializable] public class SheetClip { public string name; public int start, length; public bool loop; }
 
         [Serializable]
         public class SheetManifest
@@ -50,6 +50,8 @@ namespace Meridian.EditorTools
             public string facing = "right";
             /// <summary>Optional pixels per metre for this sheet (D-031/D-034: creature sheets); 0 = the 128 default.</summary>
             public float ppu;
+            /// <summary>Animation clips (contract §5); recorded in the runtime registry for U-032.</summary>
+            public SheetClip[] animations;
         }
 
         [Serializable] class BlenderAsset { public string key; public float[] pivot; }
@@ -361,11 +363,13 @@ namespace Meridian.EditorTools
                 if (isArt)
                 {
                     Register(colorPath, key);
+                    UpdateClipRegistry(colorPath, key);
                     retireKeys.Add(key);
                 }
                 else if (!File.Exists(ArtColorPath(key)))
                 {
                     Register(colorPath, key);
+                    UpdateClipRegistry(colorPath, key);
                 }
             }
 
@@ -405,6 +409,22 @@ namespace Meridian.EditorTools
             }
             AssetDatabase.CreateAsset(reg, path);
             return reg;
+        }
+
+        /// <summary>Copies a frame sheet's clips into the registry so the game can play them by name (U-032).</summary>
+        static void UpdateClipRegistry(string colorPath, string key)
+        {
+            var json = ArtRules.SheetJsonPath(colorPath);
+            var sheet = File.Exists(json) ? LoadSheet(json) : null;
+            var clips = new List<Meridian.Rendering.ArtClip>();
+            if (sheet?.animations != null)
+                foreach (var c in sheet.animations)
+                    clips.Add(new Meridian.Rendering.ArtClip { name = c.name, start = c.start, length = c.length, loop = c.loop });
+            if (clips.Count == 0 && !File.Exists(Active.materialRegistry)) return;
+            var reg = Registry();
+            if (!reg.SetClips(key, sheet != null ? sheet.fps : 12, clips)) return;
+            EditorUtility.SetDirty(reg);
+            AssetDatabase.SaveAssetIfDirty(reg);
         }
 
         static bool IsEmissiveNow(string key)

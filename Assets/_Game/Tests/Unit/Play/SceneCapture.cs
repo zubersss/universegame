@@ -201,6 +201,61 @@ namespace Meridian.Tests
             side.dayNight.Override = null;
         }
 
+        /// <summary>U-032 evidence: the surveyor in walk, run, jump, fall, land and dig (camera close in).</summary>
+        [UnityTest]
+        public IEnumerator CaptureSurveyorStates()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+            var side = director.PlanetSide;
+            var player = side.player;
+            var view = player.GetComponent<Meridian.Player.PlayerView>();
+            for (int i = 0; i < 90; i++) yield return new WaitForFixedUpdate();
+            side.dayNight.Override = 0.5f;
+            player.externalInput = true;
+            var cam = side.sideCamera;
+            cam.GetComponent<Meridian.Player.CameraFollow>().enabled = false;
+            cam.orthographicSize = 3f;
+            IEnumerator Shot(string label)
+            {
+                var p = player.transform.position;
+                cam.transform.position = new Vector3(p.x, p.y + 0.5f, cam.transform.position.z);
+                TestContext.Out.WriteLine($"[MERIDIAN] {label}: clip {view.Clip} frame {view.Frame}");
+                yield return Save(cam, $"{name}_{label}");
+            }
+            player.intent.move = -1f; // the Pilgrim is to the right
+            for (int i = 0; i < 25; i++) yield return new WaitForFixedUpdate();
+            yield return Shot("1_walk");
+            player.intent.sprint = true;
+            for (int i = 0; i < 30; i++) yield return new WaitForFixedUpdate();
+            yield return Shot("2_run");
+            player.intent.move = 0f; player.intent.sprint = false;
+            for (int i = 0; i < 40; i++) yield return new WaitForFixedUpdate();
+            player.PressJump();
+            for (int i = 0; i < 8; i++) yield return new WaitForFixedUpdate();
+            yield return Shot("3_jump");
+            for (int i = 0; i < 200 && player.Body.linearVelocity.y > -2f; i++) yield return new WaitForFixedUpdate();
+            yield return Shot("4_fall");
+            for (int i = 0; i < 300 && !player.Grounded; i++) yield return new WaitForFixedUpdate();
+            yield return null;
+            yield return Shot("5_land");
+            for (int i = 0; i < 30; i++) yield return null;
+            var b = player.Body.position;
+            side.rig.Dig(new Vector2(b.x - 1.5f, b.y - 1.2f));
+            for (int i = 0; i < 3; i++) yield return null;
+            yield return Shot("6_dig");
+            side.dayNight.Override = null;
+        }
+
         static IEnumerator Save(Camera cam, string name)
         {
             var rt = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);

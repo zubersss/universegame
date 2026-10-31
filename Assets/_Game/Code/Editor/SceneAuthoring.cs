@@ -132,6 +132,8 @@ namespace Meridian.EditorTools
             ri.rig = sideComp.rig;
             ri.view = sideComp.sideCamera;
             sideComp.rig.owner = playerGo.transform;
+            pv.rig = sideComp.rig;      // U-032: dig clip and aim facing
+            pv.rigInput = ri;
             var follow = sideComp.sideCamera.gameObject.AddComponent<Meridian.Player.CameraFollow>();
             follow.target = playerGo.transform;
 

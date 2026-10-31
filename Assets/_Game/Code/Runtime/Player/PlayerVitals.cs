@@ -11,6 +11,8 @@ namespace Meridian.Player
 
         public bool Dead => health <= 0f;
         public event Action Died;
+        /// <summary>Raised with the amount whenever health drops (U-032 hurt animation).</summary>
+        public event Action<float> Damaged;
 
         public void TakeFallImpact(float impactSpeed)
         {
@@ -22,6 +24,7 @@ namespace Meridian.Player
         {
             if (Dead) return;
             health = Mathf.Max(0f, health - amount);
+            if (amount > 0f) Damaged?.Invoke(amount);
             if (Dead) Died?.Invoke();
         }
 

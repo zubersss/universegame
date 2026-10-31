@@ -41,3 +41,128 @@ MonoBehaviour:
   - ships/pilgrim/side
   - ships/pilgrim/side_legs
   - ships/pilgrim/top
+  clipSets:
+  - key: characters/surveyor/base
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 6
+      loop: 1
+    - name: walk
+      start: 6
+      length: 8
+      loop: 1
+    - name: run
+      start: 14
+      length: 8
+      loop: 1
+    - name: jump
+      start: 22
+      length: 3
+      loop: 0
+    - name: fall
+      start: 25
+      length: 2
+      loop: 1
+    - name: land
+      start: 27
+      length: 3
+      loop: 0
+    - name: dig
+      start: 30
+      length: 6
+      loop: 1
+    - name: aim
+      start: 36
+      length: 2
+      loop: 1
+    - name: hurt
+      start: 38
+      length: 2
+      loop: 0
+    - name: death
+      start: 40
+      length: 6
+      loop: 0
+  - key: creatures/earth/stag
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 6
+      loop: 1
+    - name: walk
+      start: 6
+      length: 8
+      loop: 1
+    - name: attack
+      start: 14
+      length: 6
+      loop: 0
+    - name: hurt
+      start: 20
+      length: 2
+      loop: 0
+    - name: death
+      start: 22
+      length: 6
+      loop: 0
+  - key: creatures/earth/wolf
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 6
+      loop: 1
+    - name: walk
+      start: 6
+      length: 8
+      loop: 1
+    - name: attack
+      start: 14
+      length: 6
+      loop: 0
+    - name: hurt
+      start: 20
+      length: 2
+      loop: 0
+    - name: death
+      start: 22
+      length: 6
+      loop: 0
+  - key: fx/dig_sparks/base
+    fps: 15
+    clips:
+    - name: burst
+      start: 0
+      length: 6
+      loop: 0
+  - key: fx/dust/base
+    fps: 12
+    clips:
+    - name: puff
+      start: 0
+      length: 8
+      loop: 0
+  - key: fx/escape_band/base
+    fps: 10
+    clips:
+    - name: flow
+      start: 0
+      length: 8
+      loop: 1
+  - key: fx/heat_shimmer/base
+    fps: 10
+    clips:
+    - name: shimmer
+      start: 0
+      length: 8
+      loop: 1
+  - key: fx/thruster/base
+    fps: 16
+    clips:
+    - name: burn
+      start: 0
+      length: 8
+      loop: 1

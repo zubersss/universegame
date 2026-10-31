@@ -20,6 +20,10 @@ namespace Meridian.Player
 
         InputAction aim, primary, m1, m4, prev, next;
 
+        /// <summary>The rig is in use (primary held) this frame, and where it points (U-032: aim pose, facing).</summary>
+        public bool Using { get; private set; }
+        public Vector2 AimWorld { get; private set; }
+
         void Start()
         {
             if (controller == null || controller.actions == null) { enabled = false; return; }
@@ -35,10 +39,12 @@ namespace Meridian.Player
             if (m4.WasPressedThisFrame()) module = Module.Builder;
             if (prev.WasPressedThisFrame() || next.WasPressedThisFrame())
                 module = module == Module.Beam ? Module.Builder : Module.Beam;
-            if (rig == null || view == null || !primary.IsPressed()) return;
+            Using = rig != null && view != null && primary.IsPressed();
+            if (!Using) return;
 
             var screen = aim.ReadValue<Vector2>();
             var world = (Vector2)view.ScreenToWorldPoint(new Vector3(screen.x, screen.y, -view.transform.position.z));
+            AimWorld = world;
             if (module == Module.Beam) rig.Dig(world);
             else rig.Place(world);
         }

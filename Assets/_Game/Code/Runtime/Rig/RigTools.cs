@@ -18,6 +18,8 @@ namespace Meridian.Rig
         public Transform owner;
         [Tooltip("Material the Builder places (inventory selection arrives with the inventory task).")]
         public byte builderTile = TileId.Soil;
+        /// <summary>Raised after the Beam removes a tile (U-032 dig animation).</summary>
+        public event System.Action<Vector2> Dug;
 
         public static Vector2Int TileOf(Vector2 world) =>
             new Vector2Int(Mathf.FloorToInt(world.x), Mathf.FloorToInt(world.y));
@@ -37,6 +39,7 @@ namespace Meridian.Rig
             byte id = terrain.GetTile(t.x, t.y);
             if (!TileId.IsSolid(id)) return false;
             if (!terrain.SetTile(t.x, t.y, TileId.Air)) return false;
+            Dug?.Invoke(world);
             if (drops != null)
             {
                 var tile = terrain.TileSet.Get(id, 0) as UnityEngine.Tilemaps.Tile;
