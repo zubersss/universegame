@@ -38,6 +38,11 @@ PRESETS = {
                         cloud=(236, 240, 244), cloud_shade=(170, 180, 192), clouds=0.6),
     "earth_coast": dict(sky_top=(76, 136, 204), sky_horizon=(204, 224, 236), haze=(190, 210, 222),
                         cloud=(248, 250, 252), cloud_shade=(180, 192, 206), clouds=0.5),
+    # B-028 Venus skies (deck: bright orange-cream haze; surface: dim orange-brown murk).
+    "venus_deck": dict(sky_top=(214, 170, 110), sky_horizon=(244, 226, 190), haze=(232, 206, 160),
+                       cloud=(250, 238, 214), cloud_shade=(214, 182, 132), clouds=0.45),
+    "venus_surface": dict(sky_top=(70, 40, 24), sky_horizon=(150, 92, 52), haze=(120, 70, 40),
+                          cloud=(150, 96, 60), cloud_shade=(100, 60, 36), clouds=0.0),
     # Bible §7.2: butterscotch sky, rust/umber/salmon, thin haze; mesas, dunes, basalt boulders.
     "mars": dict(
         sky_top=(150, 108, 78), sky_horizon=(222, 184, 142), haze=(214, 170, 128), cloud=(236, 214, 188),

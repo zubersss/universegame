@@ -104,6 +104,34 @@ PRESETS = {
         needle=[(32, 60, 40), (44, 72, 46)],
         bark=(90, 74, 60),
     ),
+    # B-028 Venus (Bible §7.4, §9 orange-cream/black). Deck: the habitable cloud layer, all
+    # cloud (towers far, billowing deck tops mid/near), backlit warm haze. Surface: black glassy
+    # plains under a dim orange murk, lit by lava vents.
+    "venus_deck": dict(
+        sun=dict(dir=(-0.4, 0.8, -0.2), strength=3.0, color=(1.0, 0.86, 0.62), angle=6.0),   # low, from behind: backlit
+        ambient=((0.86, 0.72, 0.52), 0.6),
+        haze=(232, 206, 160),
+        far=dict(W=9000.0, level=0.36, peak=0.86, rock=[(236, 214, 170), (214, 184, 136)], snow=(0, 0, 0),
+                 snowline=9.0, haze=(0.36, 0.00004), tilt=6.0),
+        mid=dict(W=700.0, level=0.40, amp=0.10, depth=(20, 140), haze=(0.26, 0.0012),
+                 ground=[(228, 204, 158), (206, 176, 128)], rocks=0, rock_h=(1, 2), tilt=12.0, frame_up=-0.08, dunes=True),
+        near=dict(W=64.0, level=0.26, amp=0.06, depth=(3, 14), haze=(0.08, 0.003),
+                  ground=[(238, 220, 180), (214, 188, 140)], dunes=True, rocks=0, rock_h=(0.3, 1), tilt=18.0, frame_up=0.12),
+        rock=[(200, 180, 140)],
+    ),
+    "venus_surface": dict(
+        sun=dict(dir=(-0.5, 0.5, -0.7), strength=1.2, color=(1.0, 0.7, 0.42), angle=20.0),    # diffuse light through the deck
+        ambient=((0.56, 0.36, 0.2), 0.5),
+        haze=(120, 70, 40),
+        far=dict(W=9000.0, level=0.34, peak=0.52, rock=[(40, 34, 32), (58, 48, 42)], snow=(0, 0, 0),
+                 snowline=9.0, haze=(0.5, 0.00004), tilt=6.0),
+        mid=dict(W=700.0, level=0.40, amp=0.08, depth=(20, 140), haze=(0.3, 0.0012),
+                 ground=[(34, 30, 30), (52, 44, 40)], rocks=140, rock_h=(1, 5), vents=60, tilt=12.0, frame_up=-0.08),
+        near=dict(W=64.0, level=0.26, amp=0.04, depth=(3, 14), haze=(0.08, 0.003),
+                  ground=[(30, 26, 28), (50, 42, 40)], rocks=90, rock_h=(0.2, 1.4), pebbles=600, vents=25,
+                  tilt=18.0, frame_up=0.12),
+        rock=[(40, 34, 34), (58, 50, 46), (30, 28, 30)],
+    ),
     # Bible §7.2: butterscotch sky, long shadows, rust/umber/salmon, thin haze.
     "mars": dict(
         sun=dict(dir=(-0.85, 0.35, -0.38), strength=3.6, color=(1.0, 0.9, 0.78), angle=0.8),
@@ -871,6 +899,25 @@ def rock_layer(P, spec, seed, preview, work, near):
     scatter(spec["rocks"], lo, hi * 1.25, 2.8)          # B-025: wider size spread, few big ones
     if spec.get("pebbles"):
         scatter(spec["pebbles"], 0.05, 0.22, 1.5)
+    if spec.get("vents"):                                # B-028 Venus surface: glowing lava vents
+        vm = bpy.data.materials.new("vent")
+        vm.use_nodes = True
+        pr = vm.node_tree.nodes["Principled BSDF"]
+        pr.inputs["Base Color"].default_value = lin((90, 30, 10))
+        pr.inputs["Emission Color"].default_value = lin((255, 120, 40))
+        pr.inputs["Emission Strength"].default_value = 1.6
+        _haze(vm, P["haze"], spec["haze"][0], spec["haze"][1], front=W)
+        vc = proto_collection("vent", scene)
+        vo = bpy.data.objects.new("vent", blob_mesh("ventmesh", None, 77, subdiv=2, strength=0.3, scale=0.8))
+        vc.objects.link(vo)
+        vo.scale = (1.4, 1.0, 0.25)
+        vo.material_slots[0].link = "OBJECT"
+        vo.material_slots[0].material = vm
+        for _ in range(spec["vents"]):
+            x = rnd.uniform(0, W)
+            y = y_vis + (d1 - y_vis) * rnd.random()
+            s = lo * rnd.uniform(0.4, 1.0)
+            instance(scene.collection, vc, (x, y, ground_z(x, y) - 0.05 * s), s, rnd.uniform(0, 6.3), W)
     return render(scene, work, ("near" if near else "mid") + str(seed), W)
 
 
