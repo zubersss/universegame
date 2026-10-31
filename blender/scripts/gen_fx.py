@@ -241,6 +241,30 @@ def builder_ghost(rng, w, h, n):
     return frames
 
 
+def warden_bolt(rng, w, h, n):
+    """B-043 Warden shot: a teal-green bolt with a bright ring at the head (the sentinel's
+    lens colour) and a braided twin trail; head at 3/4 width (pivot)."""
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    hx, cy = 0.75 * w, h / 2
+    frames = []
+    for i in range(n):
+        ph = 2 * math.pi * i / n
+        behind = np.clip((hx - xx) / (hx - PAD), 0, 1)
+        fade = np.exp(-2.6 * behind) * (xx <= hx)
+        braid = 0.0
+        for k in (0, math.pi):                                       # two strands twisting
+            yc = cy + 3.5 * np.sin(behind * 14 + ph + k) * behind ** 0.5
+            braid = braid + np.exp(-((yy - yc) / 1.4) ** 2)
+        I = np.clip(braid, 0, 1) * fade
+        r = np.hypot(xx - hx, yy - cy)
+        ring = np.exp(-((r - 6.0) / 1.3) ** 2)
+        head = np.exp(-(r / 3.2) ** 2)
+        I = np.clip(I + ring + head, 0, 1) * _inside(h, w)
+        col = _ramp(I, [(0.0, C((20, 110, 90))), (0.5, C((90, 230, 200))), (1.0, C((236, 255, 248)))])
+        frames.append(_frame(col, np.clip(I * 1.4, 0, 1), glow=I))
+    return frames
+
+
 def _inside(h, w):
     """1 inside the padded area, 0 in the 8 px margin."""
     m = np.zeros((h, w), np.float32)
@@ -257,7 +281,7 @@ def _seg_dist(xx, yy, p0, p1):
 
 GEN = {"thruster": thruster, "dust": dust, "dig_sparks": dig_sparks, "escape_band": escape_band,
        "heat_shimmer": heat_shimmer, "beam_ray": beam_ray, "lance_bolt": lance_bolt,
-       "survey_scan": survey_scan, "builder_ghost": builder_ghost}
+       "survey_scan": survey_scan, "builder_ghost": builder_ghost, "warden_bolt": warden_bolt}
 
 
 def generate(entry, ctx):
