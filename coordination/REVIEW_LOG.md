@@ -369,3 +369,9 @@ Moved: none.
 Decided: none.
 Signals: BLENDER idle at an open gate. Nudged to run B-026.
 Queue: UNITY 5, BLENDER 5 (added B-032 Venus creatures, B-033 Mercury POI props).
+
+## Cycle 47 · 2026-10-31 (UNITY message)
+Checked: 5e69dad; mars_landforms_sheet.png re-capture (caves reduced; backdrop anchored; entry 1.21 s; one inverted-mesa band on the canyon floor).
+Moved: U-039 → Done (second pass); U-040 → In Progress.
+Decided: none. The canyon backdrop artifact is folded into U-040 (anti-loop, no third bounce).
+Signals: none.

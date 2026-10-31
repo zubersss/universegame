@@ -331,19 +331,19 @@ Files: Assets/_Game/Code/Runtime/Planet/
 Depends: U-037, U-024
 Lead notes: Cycle 26.
 
-### U-039 · UNITY · In Progress · M2
+### U-039 · UNITY · Done · M2
 Goal: Mars landforms (Bible §7.2): Valles Marineris canyon (wide, 180 m deep, layered walls), Olympus Mons shield (3 km wide, 300 m tall, caldera), polar ice caps (CO₂ over water ice at both ends of x), lava-tube caves (natural radiation shelters, flagged for M3 Radiation).
 Accept: EditMode tests for each feature's position/size per seed; captures of canyon wall, Olympus flank, polar cap, and a lava tube; streaming within D-019.
 Files: Assets/_Game/Code/Runtime/Terrain/
 Depends: U-007
-Lead notes: Cycle 26. The canyon is where Mars's 2.6× jumps shine. Keep wall ledges jumpable at Mars g. (Cycle 44) FAILED visual review (mars_landforms_sheet.png); sizes per D-040 are fine. Fix: (1) random caves riddle the canyon walls and Olympus into Swiss cheese, so suppress random caves inside landform masses (keep the lava tubes and at most small pockets ≤ 3 m), or cut density by ≥ 80% there; (2) the backdrop breaks at extreme heights (canyon floor, Olympus flank): it squashes into a mirrored band, so anchor the layers to the planet Datum, show sky above the far layer and only the cave/terrain wall below, with no mirrored repeat; (3) Mars entry 1.48 s is too close to the 1.5 s limit, so precompute the landform height profile once per world (or cache per column) and get entry back to ≤ 1.35 s. Re-capture all four views.
+Lead notes: Done 0ff59d4 + 5e69dad (cycle 47): landforms per D-040; random caves suppressed inside landforms (small pockets only); backdrop hung from the Datum; entry 1.48 → 1.21 s (profile once per world, sheets preloaded). The remaining canyon-floor backdrop artifact goes to U-040.
 
-### U-040 · UNITY · Ready · M2
+### U-040 · UNITY · In Progress · M2
 Goal: Background walls: a dug or natural underground cell shows a dark wall of the surrounding material (soil, stone, sand…) behind it instead of the sky/parallax backdrop; surface holes ≤ 3 m deep show the wall too.
 Accept: capture of a fresh 1-tile hole and a cave (no forest visible through either); wall persists through save/load with the dig diffs; ≤ +2 draw calls; chunk apply within D-019.
 Files: Assets/_Game/Code/Runtime/Terrain/
 Depends: U-008, U-024
-Lead notes: Cycle 30: fx capture 1 shows bright foliage through a dug hole. (Cycle 33) Include the U-035 follow-up: landing-pad collider top at the deck surface. (Cycle 41) Also tint terrain cells below sea level by water depth (they render as bright as dry sand now; ocean capture).
+Lead notes: Cycle 30: fx capture 1 shows bright foliage through a dug hole. (Cycle 33) Include the U-035 follow-up: landing-pad collider top at the deck surface. (Cycle 41) Also tint terrain cells below sea level by water depth (they render as bright as dry sand now; ocean capture). (Cycle 47) Also: on the Valles Marineris floor (mars capture 1) a band of pale mesa silhouettes hangs upside down under the rocky layer. Remove it (cut off any layer below its own ground line). Cave pockets and lava tubes showing sky color are the core of this task.
 
 ### U-041 · UNITY · Ready · M2
 Goal: BudgetGate memory in a dev build (D-036): tools/unity_profile.ps1 runs the Earth/Space/Mars legs in a development build and reads system and texture memory there; Editor rows are kept as "upper bound".
