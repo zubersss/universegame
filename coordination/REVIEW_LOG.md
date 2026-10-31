@@ -438,3 +438,9 @@ Checked: review_mercury.png (stamped 05:49/05:50).
 Moved: B-027 → Done; B-029 → In Progress.
 Decided: none. Integration note: a sun-less layer0 + a separate Sun sprite for M3.
 Signals: none.
+
+## Cycle 58 · 2026-10-31 (BLENDER message)
+Checked: review_glassback.png, review_mercury_props.png (stamped 05:51–05:55).
+Moved: B-029, B-033 → Done; B-032 → In Progress.
+Decided: none. The shelter doorway bar and Mercury layer0_nosun join B-034.
+Signals: none.

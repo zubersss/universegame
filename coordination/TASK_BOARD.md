@@ -553,12 +553,12 @@ Files: blender/scripts/gen_terrain.py, gen_backdrop3d.py, Assets/_Game/Art/terra
 Depends: B-022
 Lead notes: Done (cycle 56): 4 terrain sets (basalt, tessera, violet vent glass, ochre sulfur); venus_surface (haze, boulders, vents); venus_deck via painted 2D cumulus after 3 heightfield strikes. Polish (deck arcs, vent legibility) → B-034.
 
-### B-029 · BLENDER · In Progress · M3
+### B-029 · BLENDER · Done · M3
 Goal: Mercury creatures `creatures/mercury/glassback` (silicate grazer, medium) and `creatures/mercury/cinderling` (small swarm), same clip set as B-015.
 Accept: the B-015 rework method (one continuous armature-deformed mesh, real-feeling anatomy with one exaggeration: glassback's crystalline back plates, cinderling's glowing cracks with emission); 320 px / 6 columns for medium, 128–256 px for small; ppu ≥ 100.
 Files: blender/scripts/build_creatures_mercury.py, Assets/_Game/Art/creatures/mercury/
 Depends: B-015
-Lead notes: Cycle 25. Start only after B-015 passes review, so the method is proven first.
+Lead notes: Done f16d2ce (cycle 58): glassback (132.25 px/m, lilac glass-shard crest) and cinderling (150 px/m, glowing crack emission); metaball method.
 
 ### B-030 · BLENDER · Done · M2
 Goal: Re-render `fx/heat_shimmer` as a visible heat-haze/entry-glow sheet (orange-white plasma streaks, additive), per UNITY's handoff (the current sheet is a near-transparent pale mask).
@@ -574,26 +574,26 @@ Files: blender/scripts/build_creatures_earth.py, Assets/_Game/Art/creatures/eart
 Depends: B-015
 Lead notes: Done (cycle 43): brush tail, heavy ruff, back fur clumps, tapered upright ears (3-segment metaballs), thicker upper legs, shorter snout; 128.5 px/m; feet on pivot in every checked frame. Reads as a wolf.
 
-### B-032 · BLENDER · Ready · M3
+### B-032 · BLENDER · In Progress · M3
 Goal: Venus creatures (Bible §7.4): `creatures/venus/sulfur_drifter` (gasbag filter feeder, large, floats; 320–512 px class per D-034 rules) and `creatures/venus/acidmoth` (small swarm flyer, 128 px), standard clip set (fliers: idle/drift, move, attack, hurt, death).
 Accept: metaball method (B-015 standard); one bold exaggeration each (drifter: translucent gas sacs with emission veins; acidmoth: acid-yellow wing eyespots with emission); Venus palette (orange-cream, sulfur yellow); ppu ≥ 100; full-size frames reviewed.
 Files: blender/scripts/build_creatures_venus.py, Assets/_Game/Art/creatures/venus/
 Depends: B-015
 Lead notes: Cycle 46. M3 lookahead.
 
-### B-033 · BLENDER · Ready · M3
+### B-033 · BLENDER · Done · M3
 Goal: Mercury POI props (Bible §7.3): `props/mercury/{flare_shelter,shelter_door,meridian_beacon,warden_vault_gate,solarite_cluster}`; solarite_cluster has emission (crystals fused by flares).
 Accept: contract §4 prop rules; Mercury palette (white/black/violet), harsh light-ready normals; worn, flare-scorched metal.
 Files: blender/scripts/build_props_mercury.py, Assets/_Game/Art/props/mercury/
 Depends: B-014
-Lead notes: Cycle 46. M3 lookahead.
+Lead notes: Done (cycle 58): flare shelter, shelter door, Meridian beacon, Warden vault gate (violet emission strips), solarite cluster; all 4 maps. The dark bar across the shelter doorway → B-034.
 
 ### B-034 · BLENDER · Ready · M3
 Goal: Venus backdrop polish (from the B-028 review), for the M3 exit: remove the faint sphere-edge arcs inside the near deck bank; on venus_surface make the vents read (larger glowing vent mouths with soft emission halos and rising heat haze, 4–6 per tile) and add glassy sheen to the basalt plain (§7.4 "black glassy surface lit by vents").
 Accept: stamped reviews show no arcs; vents are legible at camera size 9; same keys, sizes, seams.
 Files: blender/scripts/gen_backdrop*.py, Assets/_Game/Art/backgrounds/venus_*/
 Depends: B-028
-Lead notes: Cycle 56. Low priority, before M3 integration of Venus.
+Lead notes: Cycle 56. Low priority, before M3 integration of Venus. (Cycle 58) Add: the darker bar crossing the Mercury flare_shelter doorway at band height; Mercury layer0_nosun variant (see B-027 notes).
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
