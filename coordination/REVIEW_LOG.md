@@ -191,3 +191,10 @@ Decided: D-031 (per-sheet ppu for frame sheets; contract → v1.3); U-036 added.
 Signals: BLENDER queue blocked again (B-015, B-020 sources waiting). B-024 still not implemented. LEAD filed want_blender.lock 18:41 (third time). Earth p99 frame time trend 7.8 → 13.3 ms (budget 16.6): ask for a profile breakdown if it passes 14 ms.
 User: USER-09 (M1 playtest) open since 17:15.
 Queue: UNITY 6 Ready, BLENDER 7 Ready.
+
+## Cycle 21 · 2026-10-30 23:58
+Checked: git log (no worker commits since 18:30); UNITY_STATUS (U-029 uncommitted work in tree; P-19), BLENDER_STATUS (B-015/B-020 waiting for a window); running processes (3 Claude sessions alive; no Unity Editor or Blender; Google updater woke 23:56, ~800 MB, transient); System log: sleep/resume at 18:55, screen locked since.
+Moved: none.
+Decided: D-032 (hazard v1 numbers).
+Signals: 5.5 h with no worker commits and no LEAD cycles (18:45 → 23:56). Cause: the laptop slept or idled locked from ~18:55, which paused every session's loop. Not a worker loop. LEAD re-filed want_blender.lock (23:58) so BLENDER gets the first heavy window. If neither worker commits by cycle 22, follow the anti-loop ladder (USER_ACTIONS: paste "Resume MERIDIAN as <ROLE>").
+User: USER-09 (M1 playtest) open since 17:15.
