@@ -371,7 +371,7 @@ Goal: M2 playtest build `Build/MERIDIAN_0.2.0/` with build smoke screenshots (me
 Accept: build smoke clean; screenshots in coordination/reports/unity/smoke_<date>/; GameInfo.Version 0.2.0; every BudgetGate row green in the build.
 Files: Build/ (ignored), coordination/reports/unity/smoke_<date>/
 Depends: U-038, U-039, U-040, U-041, U-042
-Lead notes: Cycle 42. It closes M2 together with L-011 and the owner's playtest.
+Lead notes: Cycle 42. It closes M2 together with L-011 and the owner's playtest. (Cycle 80) Use ui/title/background + ui/title/logo on the main menu, and ui/app/icon as the Windows player icon (Player Settings).
 
 ### U-045 · UNITY · Ready · M3
 Goal: Inventory v1 (M3 lookahead): item registry from `icons/*` (B-013), pickup of the pooled drops (U-008), a stack-based player inventory (40 slots, stack 999), Tab panel with icons and counts, Builder consumes the selected material (closes D-021's "no inventory check"), SaveData v2 with inventory + suit integrity (D-032) and a v1 → v2 migration.
@@ -679,19 +679,26 @@ Files: blender/scripts/build_props_venus.py, Assets/_Game/Art/props/venus/
 Depends: B-014
 Lead notes: Done (cycle 76): aerostat deck, balloon (ppu 88, under the 512 cap), buoyancy cell, two station hulls, Meridian station door (Sowing-era arch matching the Wardens), vent harvester; all 4 maps.
 
-### B-046 · BLENDER · In Progress · M2
+### B-046 · BLENDER · Done · M2
 Goal: Title-screen key art `ui/title/background` (1920×1080, color only): the Pilgrim lifting off the Earth spawn pad at dawn, the forest backdrop behind, Mars a small rust dot in the sky; leave the left third calm for the menu buttons. Also `ui/title/logo` (MERIDIAN wordmark, original, OFL font or hand-built letterforms, with transparency).
 Accept: rendered in the game's own style from existing assets (B-006, B-010, B-014); no third-party logos or fonts outside OFL (credit in docs/credits/blender.md); stamped review at 1920 and 960 wide.
 Files: blender/scripts/build_title.py, Assets/_Game/Art/ui/title/
 Depends: B-006, B-010
-Lead notes: Cycle 76. It's the first thing the owner sees in the M2 playtest. A new `ui` key category (contract §4, D-044).
+Lead notes: Done v2 (cycle 80): dawn-graded forest, real landing pad on a soil strip, darkened left third, original hand-built MERIDIAN wordmark. build_title.py peaks ~1.03 GB, so it uses the 1.5 GB gate (not D-045).
 
-### B-047 · BLENDER · Ready · M6
+### B-047 · BLENDER · Done · M6
 Goal: Windows app icon `ui/app/icon` (256×256 with 16/32/48 px variants readable): the Pilgrim's silhouette over a rust-and-blue planet arc.
 Accept: legible at 16 px; stamped review of all sizes.
 Files: blender/scripts/build_title.py, Assets/_Game/Art/ui/app/
 Depends: B-046
-Lead notes: Cycle 76. Small.
+Lead notes: Done (cycle 80): Pilgrim silhouette over a rust-to-blue arc; 256/48/32/16 readable.
+
+### B-048 · BLENDER · In Progress · M4
+Goal: M4 risk-reduction look-dev, Jupiter cloud column only (Bible §7.5/§7.6): `backgrounds/jupiter_deck1/layer0..2` (ammonia-ice cloud tops: cream/rust/brick bands rolling past, thin sky above) and `terrain/jupiter/{floe_ice,floe_core}` (floating ice-floe tile sets, 47-blob + variants).
+Accept: §9 look (no flat fills; band layers that read as moving cloud), tiling and contract sizes, stamped review. Only this one planet. The other giants wait until UNITY's cloud-column generator exists.
+Files: blender/scripts/gen_backdrop*.py, gen_terrain.py, Assets/_Game/Art/backgrounds/jupiter_deck1/, terrain/jupiter/
+Depends: B-028
+Lead notes: Cycle 80. The cloud-column world type is the biggest visual unknown in the plan, so proving its look early is worth one task. Stop after this.
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.

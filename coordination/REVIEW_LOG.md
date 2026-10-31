@@ -567,3 +567,8 @@ Signals: none.
 
 ## Cycle 79 · 2026-10-31 (BLENDER clarification)
 Decided: D-045 clarified to generator-only manifest entries (no source .blend, no render pass), including headless Blender hosting, with a whole-process peak ≤ 1.0 GB.
+
+## Cycle 80 · 2026-10-31 (BLENDER message)
+Checked: review_title_960.png v2, review_app_icon.png.
+Moved: B-046, B-047 → Done; B-048 → In Progress (single M4 look-dev task).
+Signals: BLENDER self-reported build_title.py at ~1.03 GB (just over D-045) and moved it back to the 1.5 GB gate. Correct.
