@@ -275,14 +275,14 @@ Files: Assets/_Game/Code/Runtime/Planet/, Scenes/PlanetSide.unity
 Depends: U-007
 Lead notes: Done 92bd0d7 + b327325 (cycle 17): 3-layer parallax with haze, cave fade; BackdropTests; captures; smoke_2_earth shows the forest backdrop behind terrain.
 
-### U-032 · UNITY · In Progress · M2
+### U-032 · UNITY · Done · M2
 Goal: Surveyor animation: drive the `characters/surveyor/base` frame-sheet clips (idle, walk, run, jump, fall, land, dig, aim, hurt, death) from the player controller; face the aim direction.
 Accept: PlayMode test steps the controller through walk → run → jump → fall → land → dig and asserts the clip at each state; capture strip of 6 states; ≤ 0.05 ms per frame; uses base.json clip ranges (no hard-coded indices).
 Files: Assets/_Game/Code/Runtime/Player/
 Depends: U-009
-Lead notes: Cycle 16. B-009/B-023 art has been Done since cycle 7/15 and isn't animated yet.
+Lead notes: Done 2d0d0d0 (cycle 27): clips by name from base.json via the registry, state picker, aim facing; SurveyorAnim tests; states strip OK. Perf per D-035.
 
-### U-033 · UNITY · Ready · M2
+### U-033 · UNITY · In Progress · M2
 Goal: FX hookup: `fx/thruster` on the Pilgrim (side: main engine + belly pods while thrusting; top-down: engine), `fx/dig_sparks` on Beam hits, `fx/dust` on hard landings and ship touchdown, `fx/escape_band` on the Escape Line, `fx/heat_shimmer` during entry.
 Accept: captures for each effect; particles alive ≤ 600 at peak in BudgetGate; pooled, 0 B GC per frame; effects respect the emissive material.
 Files: Assets/_Game/Code/Runtime/FX/

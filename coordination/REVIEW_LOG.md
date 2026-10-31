@@ -235,3 +235,11 @@ Decided: none.
 Signals: none. Both workers busy; the 00:40 nudge worked.
 User: USER-09 open.
 Queue: UNITY 6 Ready (added U-037…U-039), BLENDER 4 Ready.
+
+## Cycle 27 · 2026-10-31 01:45
+Checked: git log 01:08–01:32 (U-032, B-015 v2 fixes, B-028 recipes); ListAgents (UNITY busy, BLENDER idle with a closed gate); locks (heavy_unity 01:40); free RAM 0.8 GB; surveyor_2026-10-31/surveyor_states_strip.png.
+Moved: U-032 → Done; U-033 → In Progress.
+Decided: D-035 (per-system budgets on median/p99; engine first-clip setter logged ≤ 0.1 ms).
+Signals: BLENDER idle again. Response: message to keep looping, queue want_blender, do light work (B-026/B-028 sources) until its window.
+User: USER-09 open.
+Queue: UNITY 5 Ready, BLENDER 4 Ready.
