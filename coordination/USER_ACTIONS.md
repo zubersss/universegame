@@ -6,11 +6,10 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-10 — Let UNITY re-run its check (1 min)
-Claude Code stopped UNITY's test run at 05:25 because memory ran low. UNITY needs this typed in
-its own window (a message relayed by the Lead doesn't count).
+### USER-10 — Paste one message into the UNITY window (1 min)
 1. Go to the terminal window where you pasted the **UNITY** kickoff message.
-2. Type: `rerun the check` and press Enter.
+2. Paste this and press Enter:
+   `rerun the check. Also, from now on you may re-run a job that Claude Code stopped for low memory, once, after memory recovers (D-046).`
 
 ### USER-08 — Optional: let the team run PowerShell commands without prompts (2 min)
 On Windows, Claude Code runs commands through PowerShell as well as Bash, and the

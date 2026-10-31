@@ -604,3 +604,6 @@ User: owner typed "rerun the check" in the LEAD window; LEAD relayed it verbatim
 
 ## Cycle 87b · 2026-10-31 12:48
 Correction: UNITY rightly declined the relayed "rerun the check" (it needs the owner's own input in its window). USER-10 reopened; the Done line was removed.
+
+## Cycle 88 · 2026-10-31
+User: owner pre-approved low-memory restarts (D-046; CLAUDE.md rule 6). USER-10 updated to one paste in the UNITY window (rerun now + pre-approval in the owner's own words there).

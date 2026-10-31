@@ -68,6 +68,11 @@ ever overwritten.
    only when it's one wrapper call that holds the lock throughout. After your own job, don't
    re-file your want while another role's want exists; file it only after that role takes the
    lock. Otherwise each side yields to the other and both stall (D-039).
+   **Low-memory restarts (D-046, owner-approved 2026-10-31).** If Claude Code stops one of
+   your heavy jobs because system memory ran low, you may re-run that same job once, after
+   free RAM is back above your gate and the lock is yours. If it is stopped again, log it in
+   your status file and ask the owner. This covers only memory stops of your own job, not
+   permission denials or anything else.
 7. **Accepted work stays accepted.** Don't re-polish Done tasks unless LEAD reopens them.
 8. **Stay inside the repo.** No system installs, no registry/settings changes; list those
    in your status file for USER_ACTIONS.
