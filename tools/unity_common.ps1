@@ -31,7 +31,7 @@ function Test-UnityEditorRunning {
 $script:WantFile = Join-Path $LockDir 'want_unity.lock'
 $script:ReleaseStamp = Join-Path $LogDir 'unity_last_release.txt'
 $script:MinFreeGB = 1.5
-$script:YieldWindowMinutes = 2      # after releasing, UNITY yields to a waiting role for this long
+# D-037 replaced the 2-minute yield window: UNITY waits for every older request (see Enter-HeavyJobLock).
 $script:WantMaxAgeMinutes = 30      # want files older than this are ignored
 $script:MaxJobMinutes = 20          # one heavy job holds the lock at most this long
 
@@ -56,6 +56,7 @@ function Get-LastRelease {
 
 # Throws (after writing want_unity.lock) when UNITY must wait; on success holds heavy_unity.lock.
 function Enter-HeavyJobLock([string]$job) {
+    if ($env:MERIDIAN_LOCK_HELD -eq '1') { return } # inside unity_check.ps1: the outer call holds the lock (D-037)
     $cutoff = (Get-Date).AddHours(-2)
     foreach ($l in Get-ChildItem $LockDir -Filter 'heavy_*.lock' -ErrorAction SilentlyContinue) {
         if ($l.Name -ne 'heavy_unity.lock' -and $l.LastWriteTime -gt $cutoff) {
@@ -67,11 +68,13 @@ function Enter-HeavyJobLock([string]$job) {
     $blender = Get-Process blender -ErrorAction SilentlyContinue | Where-Object { $_.Path -like '*Blender Foundation*' }
     if ($blender) { Write-Want $job; throw 'blender.exe is running (HeavyJobLock).' }
 
-    $wants = Get-OtherWants
-    $sinceRelease = ((Get-Date) - (Get-LastRelease)).TotalMinutes
-    if ($wants.Count -gt 0 -and $sinceRelease -lt $YieldWindowMinutes) {
+    # D-037 strict turns: a waiting role whose request is older than ours (or we have none) goes first,
+    # until it has taken the lock (it deletes its want file then). Equal turns: the older request wins.
+    $mine = if (Test-Path $WantFile) { (Get-Item $WantFile).LastWriteTime } else { Get-Date }
+    $ahead = @(Get-OtherWants | Where-Object { $_.LastWriteTime -le $mine })
+    if ($ahead.Count -gt 0) {
         Write-Want $job
-        throw "yielding to $($wants[0].Name) (UNITY released the lock $([math]::Round($sinceRelease, 1)) min ago; D-026)"
+        throw "yielding to $($ahead[0].Name) (filed $($ahead[0].LastWriteTime.ToString('HH:mm:ss')), before UNITY's request; D-037)"
     }
     $free = Get-FreeMemoryGB
     if ($free -lt $MinFreeGB) {
@@ -83,6 +86,7 @@ function Enter-HeavyJobLock([string]$job) {
 }
 
 function Exit-HeavyJobLock {
+    if ($env:MERIDIAN_LOCK_HELD -eq '1') { return }
     Remove-Item $LockFile -Force -ErrorAction SilentlyContinue
     (Get-Date).ToString('o') | Set-Content -Encoding utf8 $ReleaseStamp
 }
