@@ -47,11 +47,12 @@ def materials(rim):
 def hauler_hull_a(c, M):
     """Cockpit section nose-down in the regolith, tilted ~14 degrees."""
     t = math.radians(14)
-    box("section", (0, 0, 1.05), (2.6, 1.8, 1.7), c, M["hull"], bevel=0.12, rot=(0, t, 0))
-    box("nose", (1.45, 0, 0.7), (0.8, 1.4, 1.0), c, M["hull"], bevel=0.22, rot=(0, t + 0.15, 0))
-    box("canopy", (1.1, -0.2, 1.4), (0.8, 1.0, 0.08), c, M["glass"], bevel=0.02, rot=(0, t - 0.5, 0))
-    box("panel_torn", (-1.25, -0.91, 1.5), (0.12, 0.04, 1.1), c, M["metal"], bevel=0.01, rot=(0, 0.3, 0))
-    box("band", (-0.4, -0.91, 0.95), (0.45, 0.02, 1.55), c, M["hull_dark"], bevel=0.01, rot=(0, t, 0))
+    # Raised 0.15 m: the tilted section's lower corner must stay above z = 0 (pivot line).
+    box("section", (0, 0, 1.2), (2.6, 1.8, 1.7), c, M["hull"], bevel=0.12, rot=(0, t, 0))
+    box("nose", (1.45, 0, 0.75), (0.8, 1.4, 1.0), c, M["hull"], bevel=0.22, rot=(0, t + 0.15, 0))
+    box("canopy", (1.1, -0.2, 1.55), (0.8, 1.0, 0.08), c, M["glass"], bevel=0.02, rot=(0, t - 0.5, 0))
+    box("panel_torn", (-1.25, -0.91, 1.65), (0.12, 0.04, 1.1), c, M["metal"], bevel=0.01, rot=(0, 0.3, 0))
+    box("band", (-0.4, -0.91, 1.1), (0.45, 0.02, 1.55), c, M["hull_dark"], bevel=0.01, rot=(0, t, 0))
     box("drift", (0.9, 0, 0.16), (2.2, 2.2, 0.32), c, M["dust"], bevel=0.15)            # regolith piled at the nose
 
 
@@ -69,9 +70,9 @@ def hauler_cargo(c, M):
     """Burst container with spilled crates."""
     box("container", (-0.4, 0, 0.75), (2.4, 1.4, 1.5), c, M["container"], bevel=0.04)
     box("door", (1.05, -0.5, 0.75), (0.06, 0.6, 1.4), c, M["container"], bevel=0.02, rot=(0, 0, -0.9))
-    box("crate_a", (1.35, 0.1, 0.3), (0.6, 0.6, 0.6), c, M["crate"], bevel=0.03, rot=(0, 0.2, 0.3))
-    box("crate_b", (1.7, -0.2, 0.22), (0.45, 0.45, 0.45), c, M["crate"], bevel=0.03, rot=(0.3, 0, -0.4))
-    box("drift", (-0.2, 0, 0.08), (3.2, 1.8, 0.16), c, M["dust"], bevel=0.07)
+    box("crate_a", (1.35, 0.1, 0.38), (0.6, 0.6, 0.6), c, M["crate"], bevel=0.03, rot=(0, 0.2, 0.3))   # tilted: lifted
+    box("crate_b", (1.7, -0.2, 0.32), (0.45, 0.45, 0.45), c, M["crate"], bevel=0.03, rot=(0.3, 0, -0.4))
+    box("drift", (-0.1, 0, 0.08), (2.8, 1.8, 0.16), c, M["dust"], bevel=0.07)
 
 
 def warden_pylon(c, M):
