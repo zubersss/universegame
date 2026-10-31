@@ -595,6 +595,34 @@ Files: blender/scripts/gen_backdrop*.py, Assets/_Game/Art/backgrounds/venus_*/
 Depends: B-028
 Lead notes: Cycle 56. Low priority, before M3 integration of Venus. (Cycle 58) Add: the darker bar crossing the Mercury flare_shelter doorway at band height; Mercury layer0_nosun variant (see B-027 notes).
 
+### B-035 · BLENDER · Ready · M3
+Goal: Mercury creatures 2 (Bible §7.3): `creatures/mercury/flarewing` (flyer that feeds on flares; emission on the wing membranes, brighter "flare" variant frames in attack) and `creatures/mercury/shadewyrm` (ice burrower of the polar craters; long segmented body, pale frost plates).
+Accept: B-015 metaball standard (flier builder from B-032 for flarewing); one bold exaggeration each; ppu ≥ 100; stamped full-size review.
+Files: blender/scripts/build_creatures_mercury.py, Assets/_Game/Art/creatures/mercury/
+Depends: B-029, B-032
+Lead notes: Cycle 58. M3.
+
+### B-036 · BLENDER · Ready · M3
+Goal: Venus surface creatures (Bible §7.4): `creatures/venus/pressure_crab` (armored, slow; heavy plated carapace) and `creatures/venus/vent_eel` (heat-seeking surface eel; glowing heat pits with emission).
+Accept: B-015 standard; Venus surface palette (black glass, orange glow); ppu ≥ 100; stamped review.
+Files: blender/scripts/build_creatures_venus.py, Assets/_Game/Art/creatures/venus/
+Depends: B-032
+Lead notes: Cycle 58. M3.
+
+### B-037 · BLENDER · Ready · M3
+Goal: Rig modules (Bible §6/§8): held-tool sprites `items/rig/{beam,lance,survey,builder}` (drawn in the surveyor's hand, aim pivot at the grip) + FX sheets `fx/beam_ray`, `fx/lance_bolt`, `fx/survey_scan` (expanding ring), `fx/builder_ghost` (placement preview).
+Accept: tools readable at 60 px/m at the surveyor's scale; grip pivot documented for UNITY; FX with emission; stamped review.
+Files: blender/scripts/build_rig.py, gen_fx.py, Assets/_Game/Art/items/rig/, Assets/_Game/Art/fx/
+Depends: B-012, B-023
+Lead notes: Cycle 58. M3 needs all Rig modules (Bible §12 M3).
+
+### B-038 · BLENDER · Ready · M3
+Goal: Waystations (Bible §3): top-down `ships/waystation_earth/top` and `ships/waystation_mars/top` (orbital stations, large-ship class ≤ 768 px, docking ring with emission lights), plus a side-view docking-bay interior backdrop `backgrounds/waystation/layer0..2`.
+Accept: Halcyon Freight industrial look (worn, hazard markings, lit windows); stamped review; contract sizes.
+Files: blender/scripts/build_waystation.py, Assets/_Game/Art/ships/, backgrounds/waystation/
+Depends: B-006
+Lead notes: Cycle 58. M3 trading needs Waystations.
+
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
 Accept: frames ≤ 256, sheets ≤ 1024², `.json` per sheet, emission where glowing.
