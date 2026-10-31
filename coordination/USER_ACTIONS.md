@@ -7,7 +7,7 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 ## Open
 
 ### USER-12 — Playtest M2 (15–30 min)
-1. Open File Explorer and go to `C:devNiversegameBuildMERIDIAN_0.2.0`.
+1. Open File Explorer and go to `C:\dev\universegame\Build\MERIDIAN_0.2.0`.
 2. Double-click `MERIDIAN.exe` ("More info" → "Run anyway" if Windows asks).
 3. Click NEW. What to try is in `coordination/reviews/M2_REPORT.md`.
 4. Tell the Lead what felt wrong, for example "done: USER-12, nights too dark".
