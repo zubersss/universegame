@@ -574,12 +574,12 @@ Files: blender/scripts/build_creatures_earth.py, Assets/_Game/Art/creatures/eart
 Depends: B-015
 Lead notes: Done (cycle 43): brush tail, heavy ruff, back fur clumps, tapered upright ears (3-segment metaballs), thicker upper legs, shorter snout; 128.5 px/m; feet on pivot in every checked frame. Reads as a wolf.
 
-### B-032 · BLENDER · In Progress · M3
+### B-032 · BLENDER · Done · M3
 Goal: Venus creatures (Bible §7.4): `creatures/venus/sulfur_drifter` (gasbag filter feeder, large, floats; 320–512 px class per D-034 rules) and `creatures/venus/acidmoth` (small swarm flyer, 128 px), standard clip set (fliers: idle/drift, move, attack, hurt, death).
 Accept: metaball method (B-015 standard); one bold exaggeration each (drifter: translucent gas sacs with emission veins; acidmoth: acid-yellow wing eyespots with emission); Venus palette (orange-cream, sulfur yellow); ppu ≥ 100; full-size frames reviewed.
 Files: blender/scripts/build_creatures_venus.py, Assets/_Game/Art/creatures/venus/
 Depends: B-015
-Lead notes: Cycle 46. M3 lookahead.
+Lead notes: Done (cycle 59): sulfur drifter (117 px/m, translucent sac + emissive vein network, gondola, filter tendrils) and acidmoth (250 px/m, emissive eyespots); fliers use a centred pivot (0.5, 0.5); flier builder added.
 
 ### B-033 · BLENDER · Done · M3
 Goal: Mercury POI props (Bible §7.3): `props/mercury/{flare_shelter,shelter_door,meridian_beacon,warden_vault_gate,solarite_cluster}`; solarite_cluster has emission (crystals fused by flares).
@@ -609,7 +609,7 @@ Files: blender/scripts/build_creatures_venus.py, Assets/_Game/Art/creatures/venu
 Depends: B-032
 Lead notes: Cycle 58. M3.
 
-### B-037 · BLENDER · Ready · M3
+### B-037 · BLENDER · In Progress · M3
 Goal: Rig modules (Bible §6/§8): held-tool sprites `items/rig/{beam,lance,survey,builder}` (drawn in the surveyor's hand, aim pivot at the grip) + FX sheets `fx/beam_ray`, `fx/lance_bolt`, `fx/survey_scan` (expanding ring), `fx/builder_ghost` (placement preview).
 Accept: tools readable at 60 px/m at the surveyor's scale; grip pivot documented for UNITY; FX with emission; stamped review.
 Files: blender/scripts/build_rig.py, gen_fx.py, Assets/_Game/Art/items/rig/, Assets/_Game/Art/fx/

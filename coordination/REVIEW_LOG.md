@@ -445,3 +445,9 @@ Moved: B-029, B-033 → Done; B-032 → In Progress.
 Decided: none. The shelter doorway bar and Mercury layer0_nosun join B-034.
 Signals: none.
 Queue after cycle 58: UNITY 5, BLENDER 5 (added B-035…B-038).
+
+## Cycle 59 · 2026-10-31 (BLENDER message)
+Checked: review_sulfur_drifter.png (stamped 06:03).
+Moved: B-032 → Done; B-037 → In Progress.
+Decided: BLENDER priority B-037 (Rig modules, core M3), then B-038, B-035, B-036, B-034.
+Signals: BLENDER thought its board was empty (it had not seen B-035…B-038). Redirected.
