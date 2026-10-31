@@ -170,6 +170,22 @@ def coat_material(sp, S):
     L.new(attr.outputs["Color"], msep.inputs[0])
     col = mix(msep.outputs[0], col, S["belly"])
     col = mix(msep.outputs[1], col, S["socks"])
+    if S.get("cracks"):
+        # Glowing cracks (B-029 cinderling): Voronoi cell edges in object space become a hot
+        # crack mask; it tints the albedo and drives Emission (the emission pass reads it).
+        cr = S["cracks"]
+        vo = N.new("ShaderNodeTexVoronoi"); vo.feature = "DISTANCE_TO_EDGE"
+        vo.inputs["Scale"].default_value = cr["scale"]
+        L.new(tc.outputs["Object"], vo.inputs["Vector"])
+        cm = N.new("ShaderNodeMapRange"); cm.interpolation_type = "SMOOTHSTEP"
+        cm.inputs["From Min"].default_value, cm.inputs["From Max"].default_value = cr["width"], 0.0
+        L.new(vo.outputs["Distance"], cm.inputs["Value"])
+        col = mix(cm.outputs["Result"], col, cr["color"])
+        ec = N.new("ShaderNodeMix"); ec.data_type = "RGBA"
+        L.new(cm.outputs["Result"], ec.inputs[0])
+        ec.inputs[6].default_value = (0, 0, 0, 1); ec.inputs[7].default_value = lin(cr["color"])
+        L.new(ec.outputs[2], pr.inputs["Emission Color"])
+        pr.inputs["Emission Strength"].default_value = cr["strength"]
     dk = N.new("ShaderNodeMix"); dk.data_type = "RGBA"; dk.blend_type = "MULTIPLY"
     L.new(msep.outputs[2], dk.inputs[0]); L.new(col, dk.inputs[6]); dk.inputs[7].default_value = (0.85, 0.85, 0.85, 1.0)
     L.new(dk.outputs[2], pr.inputs["Base Color"])
