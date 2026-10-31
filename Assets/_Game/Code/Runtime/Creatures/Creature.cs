@@ -19,6 +19,23 @@ namespace Meridian.Creatures
         /// <summary>Held: its chunk isn't loaded with collision, so the body is paused in place.</summary>
         public bool Held { get; internal set; }
         public bool Alive => gameObject.activeSelf;
+        /// <summary>Hit points left (U-046); reset at spawn from the species.</summary>
+        public float Health { get; private set; }
+        internal CreatureDirector director;
+
+        /// <summary>Damage from the player (the Lance). At 0 the creature dies (despawns) and Killed fires. True if this killed it.</summary>
+        public bool Hurt(float damage)
+        {
+            if (!Alive || damage <= 0f) return false;
+            Health -= damage;
+            if (Health > 0f) return false;
+            Health = 0f;
+            Killed?.Invoke(this);
+            if (director != null) director.Despawn(this); else gameObject.SetActive(false);
+            return true;
+        }
+
+        public static event System.Action<Creature> Killed;
 
         internal int dir = 1;
         internal float nextThink, biteReady;
@@ -49,6 +66,7 @@ namespace Meridian.Creatures
         internal void Setup(SpeciesSpec spec, Vector2 position, Sprite sprite, int serial)
         {
             Spec = spec;
+            Health = spec.maxHealth;
             this.serial = serial;
             State = CreatureState.Wander;
             Held = false;

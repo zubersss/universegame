@@ -59,6 +59,11 @@ namespace Meridian.Art
             public const string DigSparks = "fx/dig_sparks/base";
             public const string EscapeBand = "fx/escape_band/base";
             public const string HeatShimmer = "fx/heat_shimmer/base";
+            // U-046 rig modules (B-037)
+            public const string BeamRay = "fx/beam_ray/base";
+            public const string LanceBolt = "fx/lance_bolt/base";
+            public const string SurveyScan = "fx/survey_scan/base";
+            public const string BuilderGhost = "fx/builder_ghost/base";
         }
 
         public static class Props

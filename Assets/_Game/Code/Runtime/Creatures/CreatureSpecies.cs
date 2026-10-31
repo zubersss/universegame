@@ -29,22 +29,24 @@ namespace Meridian.Creatures
         public int packMin, packMax;
         public int maxAlive;
         public float biteDamage;
+        /// <summary>Hit points (U-046: the Lance deals Lance.Damage per bolt).</summary>
+        public float maxHealth = 40f;
         public Color placeholder;
 
         static readonly SpeciesSpec[] All =
         {
             new SpeciesSpec { id = Species.Stag, planet = PlanetId.Earth, artKey = "creatures/earth/stag", size = new Vector2(1.9f, 1.6f),
                 wanderSpeed = 1.2f, runSpeed = 9f, jumpSpeed = 6.5f, temper = Temper.Flees, senseRange = 8f, time = ActiveTime.Any,
-                packMin = 1, packMax = 3, maxAlive = 6, placeholder = new Color(0.55f, 0.38f, 0.22f) },
+                packMin = 1, packMax = 3, maxAlive = 6, maxHealth = 50f, placeholder = new Color(0.55f, 0.38f, 0.22f) },
             new SpeciesSpec { id = Species.GreyWolf, planet = PlanetId.Earth, artKey = "creatures/earth/wolf", size = new Vector2(1.5f, 0.9f),
                 wanderSpeed = 1.6f, runSpeed = 7.5f, jumpSpeed = 6f, temper = Temper.Hunts, senseRange = 14f, time = ActiveTime.Night,
-                packMin = 2, packMax = 4, maxAlive = 8, biteDamage = 8f, placeholder = new Color(0.45f, 0.47f, 0.5f) },
+                packMin = 2, packMax = 4, maxAlive = 8, biteDamage = 8f, maxHealth = 40f, placeholder = new Color(0.45f, 0.47f, 0.5f) },
             new SpeciesSpec { id = Species.Dustskater, planet = PlanetId.Mars, artKey = "creatures/mars/dustskater", size = new Vector2(0.8f, 0.45f),
                 wanderSpeed = 2.2f, runSpeed = 8f, jumpSpeed = 5f, temper = Temper.Flees, senseRange = 5f, time = ActiveTime.Any,
-                packMin = 1, packMax = 4, maxAlive = 8, placeholder = new Color(0.75f, 0.55f, 0.35f) },
+                packMin = 1, packMax = 4, maxAlive = 8, maxHealth = 20f, placeholder = new Color(0.75f, 0.55f, 0.35f) },
             new SpeciesSpec { id = Species.ScreeStalker, planet = PlanetId.Mars, artKey = "creatures/mars/scree_stalker", size = new Vector2(1.6f, 1.0f),
                 wanderSpeed = 1.4f, runSpeed = 7f, jumpSpeed = 7f, temper = Temper.Hunts, senseRange = 12f, time = ActiveTime.Any,
-                packMin = 2, packMax = 3, maxAlive = 6, biteDamage = 10f, placeholder = new Color(0.42f, 0.3f, 0.26f) },
+                packMin = 2, packMax = 3, maxAlive = 6, biteDamage = 10f, maxHealth = 60f, placeholder = new Color(0.42f, 0.3f, 0.26f) },
         };
 
         public static SpeciesSpec Get(Species s) => All[(int)s];

@@ -71,7 +71,10 @@ namespace Meridian.Rig
 
         /// <summary>Builder as a raw tool (tests, scripted placement): places `id` without touching the inventory.</summary>
 
-        public bool Place(Vector2 world, byte id)
+        public bool Place(Vector2 world, byte id) => CanPlace(world, id) && terrain.SetTile(TileOf(world).x, TileOf(world).y, id);
+
+        /// <summary>Whether the Builder could place `id` at the world point now (U-046: the ghost turns red when not).</summary>
+        public bool CanPlace(Vector2 world, byte id)
         {
             var t = TileOf(world);
             if (terrain == null || !InReach(t) || id == TileId.Air) return false;
@@ -80,8 +83,10 @@ namespace Meridian.Rig
             var centre = new Vector2(t.x + 0.5f, t.y + 0.5f);
             // Anything that isn't terrain in the cell (player, drop, ship) blocks placement.
             var hit = Physics2D.OverlapBox(centre, Vector2.one * 0.9f, 0f);
-            if (hit != null && hit.GetComponentInParent<TerrainChunk>() == null) return false;
-            return terrain.SetTile(t.x, t.y, id);
+            return hit == null || hit.GetComponentInParent<TerrainChunk>() != null;
         }
+
+        /// <summary>The material the player's Builder would place now (the inventory's selected stack; 0 = none).</summary>
+        public byte SelectedTile => inventory != null ? inventory.SelectedTile : (byte)0;
     }
 }

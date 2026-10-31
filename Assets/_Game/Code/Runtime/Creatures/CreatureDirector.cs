@@ -132,6 +132,7 @@ namespace Meridian.Creatures
             {
                 if (c.Alive) continue;
                 var spec = SpeciesSpec.Get(species);
+                c.director = this;
                 c.Setup(spec, position, art[(int)species] != null ? art[(int)species] : placeholder, ++serial);
                 IgnoreBodies(c);
                 AliveCount++;

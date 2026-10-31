@@ -518,6 +518,53 @@ namespace Meridian.Tests
             Assert.LessOrEqual(worst, 33f, "no hitch > 33 ms crossing the border (U-038)");
         }
 
+        /// <summary>U-046 evidence: each Rig module in the hand, in use: Beam ray, Lance bolt, Survey ring, Builder ghost (clear and blocked).</summary>
+        [UnityTest]
+        public IEnumerator CaptureRigModules()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+            var side = director.PlanetSide;
+            side.dayNight.Override = 0.45f;
+            for (int i = 0; i < 60; i++) yield return new WaitForFixedUpdate();
+            var cam = side.sideCamera;
+            cam.orthographicSize = 5f;
+            var rig = side.player.GetComponent<Meridian.Player.PlayerRigInput>();
+            var inv = GameState.Instance.inventory;
+            inv.Clear();
+            inv.Add(Meridian.Terrain.TileId.Stone, 20);
+            for (int i = 0; i < 90; i++) yield return null; // tool and fx sheets arrive
+            Vector2 feet = side.player.Body.position;
+            int gx = Mathf.FloorToInt(feet.x) + 3, top = side.terrain.TopSolidY(gx);
+
+            IEnumerator Use(Meridian.Rig.RigModule m, Vector2 aim, bool hold, int frames, string label)
+            {
+                rig.module = m;
+                rig.AimAt(aim);
+                rig.holdUse = hold;
+                for (int k = 0; k < frames; k++) yield return null;
+                yield return Save(cam, $"{name}_{label}");
+                rig.holdUse = false;
+                float rest = Time.realtimeSinceStartup + 1.2f; // the scan ring and bolts finish
+                while (Time.realtimeSinceStartup < rest) yield return null;
+            }
+            yield return Use(Meridian.Rig.RigModule.Beam, new Vector2(gx + 0.5f, top + 0.5f), true, 8, "1_beam");
+            yield return Use(Meridian.Rig.RigModule.Lance, feet + new Vector2(6f, 1.2f), true, 2, "2_lance");
+            yield return Use(Meridian.Rig.RigModule.Survey, feet + new Vector2(2f, 1f), true, 5, "3_survey");
+            yield return Use(Meridian.Rig.RigModule.Builder, new Vector2(gx + 0.5f, top + 1.5f), false, 6, "4_builder");
+            yield return Use(Meridian.Rig.RigModule.Builder, new Vector2(gx + 1.5f, side.terrain.TopSolidY(gx + 1) + 0.5f), false, 6, "5_builder_blocked");
+            side.dayNight.Override = null;
+        }
+
         /// <summary>U-039 evidence: Mars canyon wall, Olympus flank, polar cap and a lava tube.</summary>
         [UnityTest]
         public IEnumerator CaptureMarsLandforms()

@@ -94,7 +94,9 @@ namespace Meridian.Tests
             Assert.AreEqual(1, state.cargo.Count); Assert.AreEqual(12, state.cargo[0].count, "cargo");
             // The clock is restored, then keeps running at 72× while the planet loads and settles.
             double ranSince = (Time.realtimeSinceStartup - loadStart) * TimeSystem.GameSecondsPerRealSecond;
-            Assert.That(time.GameSeconds, Is.InRange(12345.0, 12345.0 + ranSince + 1.0), "game clock");
+            // + one 50 ms frame: the first frame after the load counts time from before loadStart was read.
+            double oneFrame = 0.05 * TimeSystem.GameSecondsPerRealSecond;
+            Assert.That(time.GameSeconds, Is.InRange(12345.0, 12345.0 + ranSince + oneFrame), "game clock");
             Assert.AreEqual(PlanetId.Earth, state.currentPlanet);
             Assert.AreEqual(editsBefore, t.Edits.Count, "same diffs");
             Assert.AreEqual(TileId.Air, t.GetTile(x, y), "dug tile still dug");
