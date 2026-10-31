@@ -595,7 +595,7 @@ Files: blender/scripts/build_props_mercury.py, Assets/_Game/Art/props/mercury/
 Depends: B-014
 Lead notes: Done (cycle 58): flare shelter, shelter door, Meridian beacon, Warden vault gate (violet emission strips), solarite cluster; all 4 maps. The dark bar across the shelter doorway → B-034.
 
-### B-034 · BLENDER · Ready · M3
+### B-034 · BLENDER · In Progress · M3
 Goal: Venus backdrop polish (from the B-028 review), for the M3 exit: remove the faint sphere-edge arcs inside the near deck bank; on venus_surface make the vents read (larger glowing vent mouths with soft emission halos and rising heat haze, 4–6 per tile) and add glassy sheen to the basalt plain (§7.4 "black glassy surface lit by vents").
 Accept: stamped reviews show no arcs; vents are legible at camera size 9; same keys, sizes, seams.
 Files: blender/scripts/gen_backdrop*.py, Assets/_Game/Art/backgrounds/venus_*/

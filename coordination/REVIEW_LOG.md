@@ -482,3 +482,10 @@ Checked: review_waystation_bay.png (06:35–06:37).
 Moved: B-039 → Done; B-040 → In Progress.
 Decided: BLENDER order stays B-040, B-041, B-034.
 Signals: UNITY still blocked on USER-10.
+
+## Cycle 65 · 2026-10-31 06:42
+Checked: git log 06:11–06:38 (all reviewed in cycles 60–64); ListAgents (UNITY idle on USER-10 since ~05:25, BLENDER busy on B-034); heavy_blender 06:40; free RAM 1.7 GB.
+Moved: B-034 → In Progress.
+Decided: none.
+Signals: UNITY blocked ~75 min on the user-only USER-10; BLENDER far ahead (M3 art). Reminded the owner.
+Queue: UNITY 6, BLENDER 2 + B-034 in progress.
