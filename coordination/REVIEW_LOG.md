@@ -650,3 +650,8 @@ Added: U-047 (menu overlap, canyon sky).
 Checked: UNITY busy (U-045, lock 14:3x); BLENDER idle by design.
 Added: the M3 UNITY queue U-048…U-056 (Mercury world, hazards v2 + suits, Venus world, crafting, Waystations + trading, Wardens, Catalogue, inner-planet creatures + apexes, bases). Covers every Bible §12 M3 item.
 User: USER-12 (M2 playtest) open.
+
+## Cycle 99 · 2026-10-31 (UNITY message)
+Checked: smoke_8_inventory.png; full check 14:37 (LeadQA 3/3 incl. the soak inside the full batch).
+Moved: U-045 → Done; U-047 → In Progress.
+Decided: D-047 (per-system budgets on median/p99; worst frame ≤ 2× logged).

@@ -373,12 +373,12 @@ Files: Build/ (ignored), coordination/reports/unity/smoke_<date>/
 Depends: U-038, U-039, U-040, U-041, U-042
 Lead notes: Done 3c1dbd1 (cycle 97): Build/MERIDIAN_0.2.0, smoke clean (7 shots), title art + logo + app icon, dev-player memory Earth 895/299, Space 785/294, Mars 888/357 MB; POI marker layout fixed. Menu overlap + canyon sky → U-047.
 
-### U-045 · UNITY · In Progress · M3
+### U-045 · UNITY · Done · M3
 Goal: Inventory v1 (M3 lookahead): item registry from `icons/*` (B-013), pickup of the pooled drops (U-008), a stack-based player inventory (40 slots, stack 999), Tab panel with icons and counts, Builder consumes the selected material (closes D-021's "no inventory check"), SaveData v2 with inventory + suit integrity (D-032) and a v1 → v2 migration.
 Accept: EditMode tests for stacking/splitting/migration; PlayMode: dig → pickup → count rises → place → count falls → save → load identical; Tab panel capture; 0 B GC while the panel is closed.
 Files: Assets/_Game/Code/Runtime/Items/, UI/, Save/
 Depends: U-013, U-015
-Lead notes: Cycle 48. Start after U-044 unless the M2 queue is blocked.
+Lead notes: Done (cycle 99): registry, 40 × 999 inventory, pickup, Builder uses the selected slot, Tab panel (smoke_8_inventory), SaveData v2 with suit; InventoryTests 9 + InventoryPlayTests. Full check 14:37: EditMode 163/163, LeadQA 3/3.
 
 ### U-046 · UNITY · Ready · M3
 Goal: Rig modules v1 (Bible §6/§8; M3 needs all modules): Beam (dig/mine ray), Lance (projectile), Survey (scan ring that reveals and catalogues), Builder (placement with ghost), switched with 1–4 / Q/E; drawn in the surveyor's hand from B-037 art.
@@ -387,7 +387,7 @@ Files: Assets/_Game/Code/Runtime/Rig/, Player/
 Depends: U-045, B-037
 Lead notes: Cycle 60. The art and specs come from BLENDER's B-037 hand-off (D-041). (Cycle 66) When re-importing art: the pressure crab sheet changed to 320 px frames (B-034), and the Mercury Sun is drawn as its own sprite over backgrounds/mercury/layer0_nosun.
 
-### U-047 · UNITY · Ready · M3
+### U-047 · UNITY · In Progress · M3
 Goal: Polish from the M2 build review: (1) main menu: logo, tagline and buttons into the left third (the title art reserves it), so they don't overlap the Pilgrim; (2) Valles Marineris floor: show a sliver of sky above the far layer when the camera is deep in the canyon (it reads flat with haze only).
 Accept: menu capture with no overlap at 1920×1080 and 1280×720; canyon-floor capture with visible sky; owner playtest feedback folded in.
 Files: Assets/_Game/Code/Runtime/UI/, Planet/
