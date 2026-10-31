@@ -600,16 +600,16 @@ Goal: Venus backdrop polish (from the B-028 review), for the M3 exit: remove the
 Accept: stamped reviews show no arcs; vents are legible at camera size 9; same keys, sizes, seams.
 Files: blender/scripts/gen_backdrop*.py, Assets/_Game/Art/backgrounds/venus_*/
 Depends: B-028
-Lead notes: Cycle 56. Low priority, before M3 integration of Venus. (Cycle 58) Add: the darker bar crossing the Mercury flare_shelter doorway at band height; Mercury layer0_nosun variant (see B-027 notes).
+Lead notes: Cycle 56. Low priority, before M3 integration of Venus. (Cycle 58) Add: the darker bar crossing the Mercury flare_shelter doorway at band height; Mercury layer0_nosun variant (see B-027 notes). (Cycle 62) Add flarewing: thicken the body (~2×, a visible thorax), give the flare shell internal gradient and soft edges so it doesn't read as a flat white cut-out.
 
-### B-035 · BLENDER · In Progress · M3
+### B-035 · BLENDER · Done · M3
 Goal: Mercury creatures 2 (Bible §7.3): `creatures/mercury/flarewing` (flyer that feeds on flares; emission on the wing membranes, brighter "flare" variant frames in attack) and `creatures/mercury/shadewyrm` (ice burrower of the polar craters; long segmented body, pale frost plates).
 Accept: B-015 metaball standard (flier builder from B-032 for flarewing); one bold exaggeration each; ppu ≥ 100; stamped full-size review.
 Files: blender/scripts/build_creatures_mercury.py, Assets/_Game/Art/creatures/mercury/
 Depends: B-029, B-032
-Lead notes: Cycle 58. M3.
+Lead notes: Done (cycle 62): flarewing (131.25 px/m, veined emissive membranes, flare shell on attack frames) and shadewyrm (110.75 px/m, 8-segment chain, frost plates, cyan eyes). Flarewing body thickness and flare-shell flatness → B-034.
 
-### B-036 · BLENDER · Ready · M3
+### B-036 · BLENDER · In Progress · M3
 Goal: Venus surface creatures (Bible §7.4): `creatures/venus/pressure_crab` (armored, slow; heavy plated carapace) and `creatures/venus/vent_eel` (heat-seeking surface eel; glowing heat pits with emission).
 Accept: B-015 standard; Venus surface palette (black glass, orange glow); ppu ≥ 100; stamped review.
 Files: blender/scripts/build_creatures_venus.py, Assets/_Game/Art/creatures/venus/

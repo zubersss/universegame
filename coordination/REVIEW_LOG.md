@@ -464,3 +464,9 @@ Checked: review_waystations.png, review_waystation_bay.png (stamped 06:14–06:1
 Moved: B-038 → Done (bay as placeholder); B-035 → In Progress.
 Added: B-039 (rendered 3D docking bay).
 Signals: none.
+
+## Cycle 62 · 2026-10-31 (BLENDER message)
+Checked: review_flarewing.png (06:25), review_shadewyrm.png (06:22).
+Moved: B-035 → Done; B-036 → In Progress.
+Decided: none. Flarewing polish → B-034.
+Signals: none.
