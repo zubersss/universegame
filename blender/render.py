@@ -281,6 +281,36 @@ def frame_list(entry):
     return frames, clips
 
 
+def autofit(entry, frames):
+    """Frame sheets with `"autofit": true`: measure the posed geometry over every frame and
+    return entry with `ppu` and `origin` x set so all frames fit inside the margin, feet on the
+    pivot line. One ppu for the whole sheet (sizes stay consistent between clips)."""
+    import bpy
+    from mathutils import Vector
+    scene, objs = open_source(entry, False)
+    meshes = [o for o in objs if o.type == "MESH"]
+    xs, zs = [], []
+    for fr in frames:
+        scene.frame_set(fr)
+        dg = bpy.context.evaluated_depsgraph_get()
+        for o in meshes:
+            ev = o.evaluated_get(dg)
+            for corner in ev.bound_box:
+                v = ev.matrix_world @ Vector(corner)
+                xs.append(v.x)
+                zs.append(v.z)
+    w, h = entry["size"]
+    px, py = entry.get("pivot", [0.5, 0.5])
+    slack = C.PADDING + 4
+    width_m = max(xs) - min(xs)
+    top_m = max(zs)                                   # ground (z = 0) sits on the pivot line
+    ppu = min((w - 2 * slack) / max(width_m, 1e-3), (h * (1 - py) - slack) / max(top_m, 1e-3))
+    ppu = float(int(ppu * 4) / 4)                     # quarter-px/m steps: stable, readable value
+    cx = (max(xs) + min(xs)) / 2
+    print(f"MERIDIAN autofit {entry['key']}: x [{min(xs):.2f}, {max(xs):.2f}] top {top_m:.2f} m -> ppu {ppu}, origin x {cx:.3f}")
+    return dict(entry, ppu=ppu, origin=[cx, 0.0, 0.0])
+
+
 def run_generator(entry, preview):
     """Generator assets (planet bakes, tile sets) produce their maps in a script:
     module.generate(entry, ctx) -> {map: HxWx4 uint8}."""
@@ -317,6 +347,8 @@ def produce(entry, preview):
             maps = res
     else:
         frames, clips = frame_list(entry)
+        if entry.get("autofit"):
+            entry = autofit(entry, frames)
         raw = {m: render_pass(entry, m, w, h, preview, frames) for m in maps_wanted}
         per_frame = []
         for i in range(len(frames)):
@@ -338,7 +370,7 @@ def produce(entry, preview):
                     for m in maps_wanted}
         else:
             maps = per_frame[0]
-    return maps, clips, (w, h), scale
+    return maps, clips, (w, h), entry      # entry may carry autofit's ppu/origin
 
 
 def check(entry, maps, clips, wh, preview):
@@ -450,7 +482,7 @@ def write_outputs(entry, maps, clips, wh, preview):
 
 def do_asset(entry, preview):
     t0 = time.time()
-    maps, clips, wh, _ = produce(entry, preview)
+    maps, clips, wh, entry = produce(entry, preview)
     problems, seam = check(entry, maps, clips, wh, preview)
     if problems:
         if preview:  # previews are for diagnosis: write them anyway, still fail

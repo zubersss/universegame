@@ -81,9 +81,9 @@ def pose(name, i, sp):
         p.update(pitch=-8 * k, neck=16 * k, head=-10 * k, a_fn=12 * k, a_ff=8 * k, a_hn=-10 * k, a_hf=-6 * k, tail=-15 * k)
     elif name == "death":
         k = [0.15, 0.35, 0.55, 0.75, 0.92, 1.0][i]                       # legs buckle, body sinks
-        for l in LEGS:
+        for l in LEGS:                                                   # legs tuck under the body
             p[f"k_{l}"] = 4 + 110 * k
-            p[f"a_{l}"] = (30 if l.startswith("f") else -25) * k
+            p[f"a_{l}"] = (-30 if l.startswith("f") else 25) * k
         p.update(neck=-50 * k, head=25 * k, tail=-20 * k, pitch=6 * k)
     return p
 
