@@ -380,12 +380,12 @@ Files: Assets/_Game/Code/Runtime/Items/, UI/, Save/
 Depends: U-013, U-015
 Lead notes: Done (cycle 99): registry, 40 × 999 inventory, pickup, Builder uses the selected slot, Tab panel (smoke_8_inventory), SaveData v2 with suit; InventoryTests 9 + InventoryPlayTests. Full check 14:37: EditMode 163/163, LeadQA 3/3.
 
-### U-046 · UNITY · In Progress · M3
+### U-046 · UNITY · Done · M3
 Goal: Rig modules v1 (Bible §6/§8; M3 needs all modules): Beam (dig/mine ray), Lance (projectile), Survey (scan ring that reveals and catalogues), Builder (placement with ghost), switched with 1–4 / Q/E; drawn in the surveyor's hand from B-037 art.
 Accept: tool sprite at the hand with pivot [0.375, 0.5], rotating to the aim; muzzle offsets beam (0.47, 0.03), lance (0.52, 0.035), survey (0.30, 0.06), builder (0.44, 0.03) m; fx/beam_ray stretched from muzzle to hit (pivot [0, 0.5], tiles in x); fx/lance_bolt (pivot [0.75, 0.5]); fx/survey_scan 12-frame one-shot ring; fx/builder_ghost 8-frame pulse, tinted red when blocked; PlayMode tests per module; captures.
 Files: Assets/_Game/Code/Runtime/Rig/, Player/
 Depends: U-045, B-037
-Lead notes: Cycle 60. The art and specs come from BLENDER's B-037 hand-off (D-041). (Cycle 66) When re-importing art: the pressure crab sheet changed to 320 px frames (B-034), and the Mercury Sun is drawn as its own sprite over backgrounds/mercury/layer0_nosun.
+Lead notes: Done (cycle 106): Beam ray to terrain hit, Lance bolts (40 m/s, 30 m, 25 dmg) + creature HP, Survey ring with a Surveyed event, Builder ghost (red when blocked); grip pivot and muzzles per D-041; RigModuleTests 5 + table 2; captures OK. Save/load clock-window slack (+50 ms upper bound) noted as a test-timing tolerance, not an acceptance change.
 
 ### U-047 · UNITY · Done · M3
 Goal: Polish from the M2 build review: (1) main menu: logo, tagline and buttons into the left third (the title art reserves it), so they don't overlap the Pilgrim; (2) Valles Marineris floor: show a sliver of sky above the far layer when the camera is deep in the canyon (it reads flat with haze only).
@@ -401,7 +401,7 @@ Files: Assets/_Game/Code/Runtime/Terrain/, Planet/, POI/
 Depends: U-039, U-030
 Lead notes: Cycle 98. M3.
 
-### U-049 · UNITY · Ready · M3
+### U-049 · UNITY · In Progress · M3
 Goal: Hazards v2 + Envirosuit (Bible §7, D-032): Thermal, Radiation, Toxic and Pressure on the U-029 API; Mercury solar flares (45 s warning, then 20 s of Radiation 3; shelter in shadow, underground or a flare shelter); Mars lava tubes at Radiation 0; Envirosuit tiers Mk1–3 reduce levels (k) and swap the surveyor sheet (B-041 mk1/mk2/mk3).
 Accept: EditMode tables per hazard and planet; PlayMode: a flare kills an unprotected surveyor in the open within 30 s and not inside a shelter; the Mk sheet swaps at equip; HUD shows the worst hazard.
 Files: Assets/_Game/Code/Runtime/Hazards/, Player/
