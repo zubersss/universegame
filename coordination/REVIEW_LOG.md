@@ -584,3 +584,8 @@ Checked: git log 07:36–08:10 (all reviewed; BLENDER recorded peak_mb per D-045
 Moved: none.
 Signals: the whole team is waiting on USER-10. Art is complete through M3 plus M4 look-dev; the integration backlog is UNITY U-040/U-042 (ready), U-041, U-038, U-044 (M2 build), then M3.
 User: USER-10 open ~2 h 45 min.
+
+## Cycle 83 · 2026-10-31 08:42
+Checked: no worker commits since 08:10; both sessions idle; no locks.
+Moved: none.
+Signals: team idle, blocked on USER-10 (~3 h 15 min).
