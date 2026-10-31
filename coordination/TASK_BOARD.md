@@ -366,6 +366,13 @@ Files: tools/unity_common.ps1, tools/unity_test.ps1
 Depends: U-023
 Lead notes: Done 41f26e0 (cycle 37): strict turns (yield to any older want < 30 min until that role takes the lock; oldest request first), unity_check.ps1 batched check under one lock; self-test 17/17.
 
+### U-044 · UNITY · Ready · M2
+Goal: M2 playtest build `Build/MERIDIAN_0.2.0/` with build smoke screenshots (menu, Earth camp by day and night, a desert/ocean border, Mars canyon in a dust storm, space with Saturn) and build memory rows (U-041).
+Accept: build smoke clean; screenshots in coordination/reports/unity/smoke_<date>/; GameInfo.Version 0.2.0; every BudgetGate row green in the build.
+Files: Build/ (ignored), coordination/reports/unity/smoke_<date>/
+Depends: U-038, U-039, U-040, U-041, U-042
+Lead notes: Cycle 42. It closes M2 together with L-011 and the owner's playtest.
+
 ### U-025 · UNITY · Done · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.
 Accept: EditMode test: Earth noon/midnight intensities match §9; captures at dawn/noon/dusk/night on Earth; 0 B GC per frame.
