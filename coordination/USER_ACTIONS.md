@@ -6,6 +6,13 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
+### USER-10 — Let UNITY re-run its check (1 min)
+Claude Code stopped UNITY's test run at 05:25 because the laptop ran low on memory. UNITY's
+session won't restart a stopped job unless you ask it to.
+1. Go to the terminal window where you pasted the **UNITY** kickoff message.
+2. Type: `rerun the check` and press Enter.
+That's it. It's best done once BLENDER's current render finishes (a few minutes after 05:36).
+
 ### USER-08 — Optional: let the team run PowerShell commands without prompts (2 min)
 On Windows, Claude Code runs commands through PowerShell as well as Bash, and the
 `Bash(...)` allow rules in `.claude/settings.json` don't cover PowerShell. The Lead added
