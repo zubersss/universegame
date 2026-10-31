@@ -459,6 +459,49 @@ namespace Meridian.Tests
             side.dayNight.Override = null;
         }
 
+        /// <summary>U-039 evidence: Mars canyon wall, Olympus flank, polar cap and a lava tube.</summary>
+        [UnityTest]
+        public IEnumerator CaptureMarsLandforms()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
+            yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(Meridian.Planets.PlanetId.Mars));
+            var side = director.PlanetSide;
+            side.dayNight.Override = 0.42f;
+            var cam = side.sideCamera;
+            cam.GetComponent<Meridian.Player.CameraFollow>().enabled = false;
+            var t = side.terrain;
+            System.Func<int, int> surf = x => t.Generator.SurfaceHeight(t.WrapX(x));
+            IEnumerator Shot(string label, float x, float y, float size)
+            {
+                cam.orthographicSize = size;
+                cam.transform.position = new Vector3(x, y, cam.transform.position.z);
+                float until = Time.realtimeSinceStartup + 15f;
+                yield return null;
+                while (!t.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                for (int k = 0; k < 5; k++) yield return null;
+                yield return Save(cam, $"{name}_{label}");
+            }
+            int wx = Meridian.Terrain.MarsLandforms.CanyonStart + 60;
+            yield return Shot("1_canyon_wall", wx, surf(wx) + 6f, 40f);
+            int ox = Meridian.Terrain.MarsLandforms.OlympusCenter - 140;
+            yield return Shot("2_olympus_flank", ox, surf(ox) + 4f, 40f);
+            yield return Shot("3_polar_cap", 40f, surf(40) + 4f, 14f);
+            var tube = Meridian.Terrain.MarsLandforms.Tubes[0];
+            int ceil = Meridian.Terrain.MarsLandforms.TubeCeiling(tube, surf);
+            yield return Shot("4_lava_tube", tube.x0 + Meridian.Terrain.MarsLandforms.SkylightInset + 6f, ceil - 1f, 12f);
+            side.dayNight.Override = null;
+        }
+
         static IEnumerator Save(Camera cam, string name)
         {
             var rt = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);

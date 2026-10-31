@@ -52,10 +52,13 @@ namespace Meridian.Tests
             {
                 int h = g.SurfaceHeight(x);
                 // Earth: down to the ocean trench (≥ 120 m deep, D-010 water to 250; U-037), up to tundra/taiga hills.
-                int low = id == PlanetId.Earth ? c.datumY - 250 : c.datumY - 40, high = id == PlanetId.Earth ? c.datumY + 50 : c.datumY + 40;
+                // Mars: the canyon floor (160 m) up to Olympus Mons (220 m; U-039).
+                int low = id == PlanetId.Earth ? c.datumY - 250 : c.datumY - 200, high = id == PlanetId.Earth ? c.datumY + 50 : c.datumY + 260;
                 Assert.That(h, Is.InRange(low, high), $"x={x}");
                 int next = g.SurfaceHeight((x + 1) % c.worldWidth);
-                Assert.LessOrEqual(System.Math.Abs(next - h), 3, $"cliff between x={x} and the next column (wrap included)");
+                // Canyon walls step down in 5 m risers by design (U-039 ledges); everywhere else ≤ 3.
+                int allowed = id == PlanetId.Mars && MarsLandforms.At(x) == MarsFeature.Canyon ? (int)MarsLandforms.LedgeStep + 3 : 3;
+                Assert.LessOrEqual(System.Math.Abs(next - h), allowed, $"cliff between x={x} and the next column (wrap included)");
             }
         }
 

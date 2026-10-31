@@ -25,13 +25,18 @@ namespace Meridian.Terrain
             amplitude = planet == PlanetId.Earth ? 28f : 34f;
         }
 
+        System.Func<int, int> surfaceOf;
+        System.Func<int, int> SurfaceOf => surfaceOf ??= c => SurfaceHeight(((c % width) + width) % width);
+
         public int SurfaceHeight(int x)
         {
             float n = WorldNoise.Fbm1D(x, width, seed);
             // Earth: biome bands (U-037); the forest band keeps exactly this old offset and truncation.
             int h = planet == PlanetId.Earth
                 ? datum + (int)(EarthBiomes.Height(x, n, datum) - datum)
-                : datum + (int)((n - 0.5f) * 2f * amplitude);
+                : planet == PlanetId.Mars
+                    ? datum + (int)(MarsLandforms.Height(x, datum + (n - 0.5f) * 2f * amplitude) - datum) // U-039 landforms
+                    : datum + (int)((n - 0.5f) * 2f * amplitude);
             return h < 1 ? 1 : (h >= height - 1 ? height - 2 : h);
         }
 
@@ -44,10 +49,13 @@ namespace Meridian.Terrain
             if (y > surface)
                 return planet == PlanetId.Earth && y <= datum ? TileId.Water : TileId.Air;
 
+            if (planet == PlanetId.Mars && MarsLandforms.InTube(x, y, SurfaceOf)) return TileId.Air; // lava tubes (U-039)
             int depth = surface - y;
-            if (depth > 6 && y > 2 && WorldNoise.Value2D(x, y, 16, width, seed + 101) > 0.72f) return TileId.Air;
+            if (depth > 6 && y > 2 && WorldNoise.Value2D(x, y, 16, width, seed + 101) > 0.72f
+                && !(planet == PlanetId.Mars && MarsLandforms.NearTube(x, y, SurfaceOf, 2))) return TileId.Air;
 
-            return planet == PlanetId.Earth ? EarthMaterial(x, y, surface, depth) : RockyMaterial(x, y, depth);
+            if (planet == PlanetId.Earth) return EarthMaterial(x, y, surface, depth);
+            return planet == PlanetId.Mars ? MarsMaterial(x, y, depth) : RockyMaterial(x, y, depth);
         }
 
         byte EarthMaterial(int x, int y, int surface, int depth)
@@ -67,6 +75,22 @@ namespace Meridian.Terrain
             if (depth == 0) return surface > datum + 40 ? TileId.Snow : TileId.Grass;
             if (depth < 5) return TileId.Soil;
             return TileId.Stone;
+        }
+
+        byte MarsMaterial(int x, int y, int depth)
+        {
+            switch (MarsLandforms.At(x))
+            {
+                case MarsFeature.PolarCap: // CO₂ frost over water ice
+                    if (depth < 2) return TileId.Snow;
+                    return depth < 10 ? TileId.Ice : TileId.Basalt;
+                case MarsFeature.Canyon: // layered walls: basalt with hematite-rich bands every 5 m
+                    if (depth < 2) return TileId.Regolith;
+                    return ((y / 5) % 3) == 1 ? TileId.Hematite : TileId.Basalt;
+                case MarsFeature.Olympus: // a thin regolith skin over lava
+                    return depth < 2 ? TileId.Regolith : TileId.Basalt;
+            }
+            return RockyMaterial(x, y, depth);
         }
 
         byte RockyMaterial(int x, int y, int depth)
