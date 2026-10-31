@@ -630,14 +630,14 @@ Files: blender/scripts/build_waystation.py, Assets/_Game/Art/ships/, backgrounds
 Depends: B-006
 Lead notes: Done a9322d9 + bay (cycle 61): Earth and Mars Waystations top-down (768 px at PPU 36, lit ring windows, docking arms with guide lights). The painted 2D docking bay is a placeholder (too graphic for §9); the rendered pass → B-039.
 
-### B-039 · BLENDER · In Progress · M3
+### B-039 · BLENDER · Done · M3
 Goal: Docking-bay backdrop, rendered 3D pass: replace the 2D-painted `backgrounds/waystation/layer0..2` (B-038) with rendered 3D (lit I-beams, truss, crane, worn plated deck, Halcyon crates with bevels, scuffs, and stencils; window onto stars with interior reflections), matching §9's rendered-realism style.
 Accept: same keys, sizes, tiling; no flat-filled shapes; stamped review; split-half renders within the 1.5 GB gate.
 Files: blender/scripts/gen_backdrop3d.py (bay preset), Assets/_Game/Art/backgrounds/waystation/
 Depends: B-038
-Lead notes: Cycle 61. B-038's painted bay is a placeholder until this lands. Do it before B-034.
+Lead notes: Done (cycle 64): rendered 3D bay with linked ±W copies (geometry, shadows, textures wrap); bevelled grimy panels, star window, I-beams, crane, Halcyon crates; replaces the painted placeholder.
 
-### B-040 · BLENDER · Ready · M3
+### B-040 · BLENDER · In Progress · M3
 Goal: Mercury apex `creatures/mercury/cinderhulk` (Bible §7.3): an armored colossus, large class (512 px frames per contract, sheet ≤ 2048), with a white-glowing shell on the day side and a "cooled & cracked" variant clip set (dark shell with glowing fracture lines) for the 2 min after it crosses into night, when it's vulnerable.
 Accept: metaball standard; two shell states readable at 60 px/m; emission maps for both; stamped review.
 Files: blender/scripts/build_creatures_mercury.py, Assets/_Game/Art/creatures/mercury/

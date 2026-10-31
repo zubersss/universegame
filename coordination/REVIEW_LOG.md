@@ -476,3 +476,9 @@ Checked: review_pressure_crab.png (06:31).
 Moved: B-036 → Done; B-039 → In Progress.
 Decided: none. Crab stance → B-034.
 Signals: UNITY still blocked on USER-10.
+
+## Cycle 64 · 2026-10-31 (BLENDER message)
+Checked: review_waystation_bay.png (06:35–06:37).
+Moved: B-039 → Done; B-040 → In Progress.
+Decided: BLENDER order stays B-040, B-041, B-034.
+Signals: UNITY still blocked on USER-10.
