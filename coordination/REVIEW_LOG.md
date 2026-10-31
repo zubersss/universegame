@@ -707,3 +707,7 @@ Checked: review_mercury.png (16:23 far layer). B-050 → Done; in-game check fol
 Checked: u050 deck station (good) and surface vent (raised dark POI block, pale patch).
 Moved: U-050 → Done; U-057 → In Progress (generalized to all POI stamps).
 Decided: D-050 (preload planet sheets on approach from M4).
+
+## Cycle 115 · 2026-10-31 (UNITY message)
+Checked: u057 Mercury twilight (pass), Venus vent (fail: pad ~12 m above the field; the mound is walk-through wall, not terrain).
+Moved: U-057 stays In Progress (Venus only).
