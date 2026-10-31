@@ -205,3 +205,10 @@ Moved: U-029 → Review (profile pending); U-030 → In Progress.
 Decided: D-033 (Cycles CPU low-memory sprite renders at ≥ 1.0 GB; profiles under contention don't count either way).
 Signals: memory starvation, both workers gated since ~18:40. Root cause: the machine baseline (three Claude sessions ≈ 1.5 GB + Memory Compression ≈ 1 GB) leaves < 1 GB free. Response: D-033. No user action: there are no user apps to close.
 User: USER-09 (M1 playtest) open; the owner asked where the build is (answered: Build/MERIDIAN_0.1.1, safe to run).
+
+## Cycle 23 · 2026-10-31 00:20 (owner asked why work stopped)
+Checked: ListAgents showed both worker sessions idle (loops ended during the sleep and memory waits); last worker commits 00:09; free RAM 1.6 GB with no Unity/Blender (gate open).
+Moved: none.
+Decided: none.
+Signals: both workers idle at an open gate. Response: LEAD messaged both sessions directly (cross-session) to resume, BLENDER first per want_blender.lock, and to keep self-pacing their loops through sleeps. Both showed busy right after.
+User: owner asked why work stopped; answered.
