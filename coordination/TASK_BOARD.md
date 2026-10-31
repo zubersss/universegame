@@ -476,6 +476,20 @@ Files: blender/scripts/gen_terrain.py, gen_backdrop3d.py, Assets/_Game/Art/terra
 Depends: B-022
 Lead notes: Cycle 19. M3 lookahead so the art pipeline stays ahead of UNITY.
 
+### B-028 · BLENDER · Ready · M3
+Goal: Venus art: terrain sets `terrain/venus/{basalt,tessera,vent_glass,sulfur}` (47-blob + 16 variants) for the surface, and parallax `backgrounds/venus_deck/layer0..2` (habitable cloud deck: orange-cream haze, backlit cloud towers) plus `backgrounds/venus_surface/layer0..2` (black glassy plains lit by vents) per §7.4 and §9.
+Accept: contract sizes; terrain joins seamlessly; backdrops rendered 3D (no flat fills), haze by distance; split-half renders at the 1.5 GB gate.
+Files: blender/scripts/gen_terrain.py, gen_backdrop3d.py, Assets/_Game/Art/terrain/venus/, backgrounds/venus_*/
+Depends: B-022
+Lead notes: Cycle 25. M3 lookahead.
+
+### B-029 · BLENDER · Ready · M3
+Goal: Mercury creatures `creatures/mercury/glassback` (silicate grazer, medium) and `creatures/mercury/cinderling` (small swarm), same clip set as B-015.
+Accept: the B-015 rework method (one continuous armature-deformed mesh, real-feeling anatomy with one exaggeration: glassback's crystalline back plates, cinderling's glowing cracks with emission); 320 px / 6 columns for medium, 128–256 px for small; ppu ≥ 100.
+Files: blender/scripts/build_creatures_mercury.py, Assets/_Game/Art/creatures/mercury/
+Depends: B-015
+Lead notes: Cycle 25. Start only after B-015 passes review, so the method is proven first.
+
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
 Accept: frames ≤ 256, sheets ≤ 1024², `.json` per sheet, emission where glowing.

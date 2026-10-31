@@ -226,4 +226,4 @@ Moved: none.
 Decided: standing practice: every LEAD cycle checks ListAgents and messages any idle worker whose gate is open (the workers' self-paced loops keep ending). LEAD session = universegame-60, UNITY = universegame-54, BLENDER = universegame-c3.
 Signals: UNITY idle at an open gate for ~40 min with U-030 uncompiled. Response: direct message (U-030 compile/commit, U-029 clean profile, then U-036…) plus an idle-notify subscription.
 User: USER-09 open.
-Queue: UNITY 5 Ready, BLENDER 3 Ready.
+Queue: UNITY 5 Ready, BLENDER 5 Ready (added B-028, B-029).
