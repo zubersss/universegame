@@ -107,6 +107,7 @@ namespace Meridian.Save
             data.ship.fuel = state.fuel;
             data.ship.tankCapacity = state.tankCapacity;
             data.cargo.AddRange(state.cargo);
+            data.story.flags.AddRange(state.storyFlags);
             data.timers.gameSeconds = time != null ? time.GameSeconds : 0;
             data.timers.playSeconds = playSeconds;
 
@@ -187,6 +188,8 @@ namespace Meridian.Save
             state.tankCapacity = data.ship.tankCapacity;
             state.cargo.Clear();
             state.cargo.AddRange(data.cargo);
+            state.storyFlags.Clear();
+            if (data.story != null && data.story.flags != null) state.storyFlags.AddRange(data.story.flags);
             if (time != null) time.SetGameSeconds(data.timers.gameSeconds);
             playSeconds = data.timers.playSeconds;
 

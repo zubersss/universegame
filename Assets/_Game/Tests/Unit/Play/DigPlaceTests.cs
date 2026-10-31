@@ -51,6 +51,7 @@ namespace Meridian.Tests
             int x = side.spawnX, y = t.Generator.SurfaceHeight(x);
             byte before = t.GetTile(x, y);
             Assert.IsTrue(TileId.IsSolid(before), "surface tile is solid");
+            int diffsBefore = t.Edits.Count; // a new world already holds POI stamp diffs (U-030)
             Assert.IsTrue(rig.Dig(new Vector2(x + 0.5f, y + 0.5f)), "Beam digs");
             Assert.AreEqual(TileId.Air, t.GetTile(x, y));
             Assert.IsNull(t.RenderedTile(x, y), "tile gone from the tilemap");
@@ -63,7 +64,7 @@ namespace Meridian.Tests
             Assert.IsTrue(rig.Place(new Vector2(px + 0.5f, py + 0.5f), TileId.Stone), "Builder places");
             Assert.AreEqual(TileId.Stone, t.GetTile(px, py));
             Assert.NotNull(t.RenderedTile(px, py));
-            Assert.AreEqual(2, t.Edits.Count, "two diffs recorded");
+            Assert.AreEqual(diffsBefore + 2, t.Edits.Count, "two diffs recorded");
 
             // Save the diffs, start a fresh session, load them, rebuild the planet.
             var path = Path.Combine(Application.temporaryCachePath, "meridian_test", "terrain_earth.bin");

@@ -21,6 +21,7 @@ namespace Meridian.UI
         public ShipBoarding boarding;
         public Meridian.Planet.Weather.DustStorm storm;
         public Meridian.Hazards.HazardSystem hazards;
+        public Meridian.Planet.POI.PoiPlacer pois;
 
         public Image HealthFill { get; private set; }
         public Image OxygenFill { get; private set; }
@@ -36,6 +37,12 @@ namespace Meridian.UI
         public Text CryoText { get; private set; }
         public Image SuitFill { get; private set; }
         public Text SuitRateText { get; private set; }
+        /// <summary>U-030 map markers, one per POI on this planet: "&lt; 120 m  SURVEY ARCHIVE".</summary>
+        public readonly System.Collections.Generic.List<Text> MarkerNames = new System.Collections.Generic.List<Text>();
+        public readonly System.Collections.Generic.List<Text> MarkerDistances = new System.Collections.Generic.List<Text>();
+        readonly System.Collections.Generic.List<Text> markerArrows = new System.Collections.Generic.List<Text>();
+        readonly System.Collections.Generic.List<int> markerLast = new System.Collections.Generic.List<int>();
+        Transform hudRoot;
 
         PlanetConfig planet;
         PlayerVitals vitals;
@@ -55,6 +62,7 @@ namespace Meridian.UI
             var canvas = UiKit.Canvas(transform, "SideHudCanvas", 100);
             hudCanvas = canvas;
             var root = canvas.transform;
+            hudRoot = root;
             var tl = new Vector2(0f, 1f);
 
             accentLine = UiKit.Panel(root, "Accent", tl, new Vector2(24f, -20f), new Vector2(220f, 2f), UiTheme.Accent(null));
@@ -94,6 +102,46 @@ namespace Meridian.UI
             }
             StormText = UiKit.Text(root, "Storm", new Vector2(0.5f, 1f), new Vector2(0f, -40f), new Vector2(600f, 28f), 20, true, TextAnchor.MiddleCenter, new Color(1f, 0.72f, 0.45f, 1f));
             StormText.text = "";
+        }
+
+        const int MaxMarkers = 4;
+
+        void BuildMarkers()
+        {
+            for (int i = 0; i < MaxMarkers; i++)
+            {
+                float y = -40f - i * 22f;
+                var right = new Vector2(1f, 1f);
+                var arrow = UiKit.Text(hudRoot, "MarkerArrow" + i, right, new Vector2(-330f, y), new Vector2(20f, 20f), 14, true, TextAnchor.MiddleCenter, new Color(1f, 0.85f, 0.5f, 1f));
+                var dist = UiKit.Text(hudRoot, "MarkerDistance" + i, right, new Vector2(-270f, y), new Vector2(80f, 20f), 14, false, TextAnchor.MiddleRight);
+                var name = UiKit.Text(hudRoot, "MarkerName" + i, right, new Vector2(-120f, y), new Vector2(210f, 20f), 13, false, TextAnchor.MiddleLeft, UiTheme.Active.label);
+                arrow.text = dist.text = name.text = "";
+                markerArrows.Add(arrow); MarkerDistances.Add(dist); MarkerNames.Add(name);
+                markerLast.Add(int.MinValue);
+            }
+        }
+
+        void UpdateMarkers()
+        {
+            if (pois == null) return;
+            if (markerArrows.Count == 0) BuildMarkers();
+            var body = player != null && player.isActiveAndEnabled ? (Transform)player.transform : ship != null ? ship.transform : null;
+            if (body == null) return;
+            float px = body.position.x;
+            for (int i = 0; i < MaxMarkers; i++)
+            {
+                bool on = i < pois.placed.Count;
+                if (!on) { if (MarkerNames[i].text.Length > 0) { MarkerNames[i].text = markerArrows[i].text = MarkerDistances[i].text = ""; markerLast[i] = int.MinValue; } continue; }
+                var p = pois.placed[i];
+                if (!ReferenceEquals(MarkerNames[i].text, p.def.MarkerText)) MarkerNames[i].text = p.def.MarkerText;
+                float dx = p.nearestX - px;
+                int d = Mathf.Min(Mathf.RoundToInt(Mathf.Abs(dx)), 3999);
+                int code = dx < 0f ? -d - 1 : d; // sign carries the arrow
+                if (code == markerLast[i]) continue;
+                markerLast[i] = code;
+                markerArrows[i].text = d < 3 ? "*" : dx < 0f ? "<" : ">";
+                MarkerDistances[i].text = numbers[d];
+            }
         }
 
         void UpdateHazards()
@@ -171,6 +219,7 @@ namespace Meridian.UI
             }
             UpdateStorm();
             UpdateHazards();
+            UpdateMarkers();
             if (planet == null) return;
             bool aboard = boarding != null && boarding.Aboard;
             var body = aboard && ship != null ? ship.Body : player != null && player.isActiveAndEnabled ? player.Body : null;

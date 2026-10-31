@@ -24,6 +24,10 @@ namespace Meridian.Core
         public float tankCapacity = 100f;
         /// <summary>Items carried in the ship (item id → count). Inventory proper arrives in M3.</summary>
         public System.Collections.Generic.List<CargoStack> cargo = new System.Collections.Generic.List<CargoStack>();
+        /// <summary>Story and world flags (saved as story.flags), e.g. "poi_stamped:survey_archive" (U-030).</summary>
+        public readonly System.Collections.Generic.List<string> storyFlags = new System.Collections.Generic.List<string>();
+        public bool HasFlag(string f) => storyFlags.Contains(f);
+        public void SetFlag(string f) { if (!storyFlags.Contains(f)) storyFlags.Add(f); }
 
         public PlanetConfig CurrentPlanetConfig => catalog != null ? catalog.Get(currentPlanet) : null;
 

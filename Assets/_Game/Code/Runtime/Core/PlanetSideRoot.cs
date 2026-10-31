@@ -23,6 +23,7 @@ namespace Meridian.Core
         public Meridian.Planet.Weather.DustStorm dustStorm;
         public Meridian.Creatures.CreatureDirector creatures;
         public Meridian.Hazards.HazardSystem hazards;
+        public Meridian.Planet.POI.PoiPlacer pois;
         [Tooltip("Spawn column (tiles) when no save or transition gives one.")]
         public int spawnX = 64;
         [Tooltip("The landed ship sits this many tiles right of the spawn column.")]
@@ -71,7 +72,10 @@ namespace Meridian.Core
             var state = GameState.Instance;
             int seed = state != null ? state.worldSeed : 1969;
             var follow = sideCamera != null ? sideCamera.transform : transform;
-            terrain.Begin(config, seed, follow, state != null ? state.EditsFor(config.id) : null);
+            var edits = state != null ? state.EditsFor(config.id) : null;
+            if (pois != null && edits != null) pois.StampFor(config, seed, edits); // U-030: once per world, before streaming
+            terrain.Begin(config, seed, follow, edits);
+            if (pois != null) pois.PlaceFor(config, seed);
             float surface = terrain.Generator.SurfaceHeight(spawnX) + 1f;
             StopAllCoroutines();
 

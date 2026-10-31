@@ -220,6 +220,12 @@ namespace Meridian.EditorTools
             hazards.storm = dustStorm;
             sideComp.hazards = hazards;
             sideHud.hazards = hazards;
+            var poisGo = new GameObject("POIs");
+            poisGo.transform.SetParent(sideRoot.transform, false);
+            var pois = poisGo.AddComponent<Meridian.Planet.POI.PoiPlacer>();
+            pois.view = sideComp.sideCamera;
+            sideComp.pois = pois;
+            sideHud.pois = pois;
             EditorSceneManager.SaveScene(side, PlanetSidePath);
 
             EditorBuildSettings.scenes = new[]

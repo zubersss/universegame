@@ -50,10 +50,13 @@ namespace Meridian.Tests
             yield return BootEarth();
             side.dayNight.Override = 0.5f;
             float px = player.transform.position.x;
-            var near = creatures.Spawn(Species.Stag, OnSurface(px + 7.5f, Species.Stag));
+            var near = creatures.Spawn(Species.Stag, OnSurface(px + 7f, Species.Stag)); // tile-snapped: 6.5–7.5 m away
             var far = creatures.Spawn(Species.Stag, OnSurface(px - 10f, Species.Stag));
+            // A chunk still being rebuilt holds its creatures (no thinking): start the clock once both are free.
+            for (int i = 0; i < 300 && (near.Held || far.Held); i++) yield return new WaitForFixedUpdate();
             for (int i = 0; i < 40; i++) yield return new WaitForFixedUpdate();
-            Assert.AreEqual(CreatureState.Flee, near.State, "7.5 m: flees");
+            string where = $"near held {near.Held} at {Mathf.Abs(near.Body.position.x - player.Body.position.x):F1} m, far held {far.Held} at {Mathf.Abs(far.Body.position.x - player.Body.position.x):F1} m";
+            Assert.AreEqual(CreatureState.Flee, near.State, "inside 8 m: flees (" + where + ")");
             Assert.AreNotEqual(CreatureState.Flee, far.State, "10 m: doesn't");
             float d0 = Mathf.Abs(near.Body.position.x - player.Body.position.x);
             Assert.Greater(near.Body.linearVelocity.x, 1f, "runs away (player is to its left)");
