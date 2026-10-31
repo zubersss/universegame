@@ -394,12 +394,12 @@ Files: Assets/_Game/Code/Runtime/UI/, Planet/
 Depends: U-044
 Lead notes: Done (cycle 100): menu in the left third (Pilgrim clear); canyon-floor sky gradient below about 37 m under the datum; D-047 applied; border-test race fixed. The canyon floor still reads flat, so the real canyon backdrop art is B-049, and its hookup comes after.
 
-### U-048 · UNITY · In Progress · M3
+### U-048 · UNITY · Done · M3
 Goal: Mercury world (Bible §7.3): SolidWorldGenerator preset with terrain/mercury sets (B-027), a day side, a night side and a ~400 m twilight band that creeps 1 m per 6 real s, two polar cold-trap craters with water ice, backdrop from backgrounds/mercury with layer0_nosun + the Sun as its own sprite, and the Mercury POIs (B-033: flare shelter, Meridian beacon, Warden vault gate, solarite clusters).
 Accept: EditMode tests for band position over time and cold-trap placement; captures of day, twilight, night and cold trap; entry ≤ 1.5 s; BudgetGate green.
 Files: Assets/_Game/Code/Runtime/Terrain/, Planet/, POI/
 Depends: U-039, U-030
-Lead notes: Cycle 98. M3. (Cycle 109) Include a persistent Mercury terminator + flare clock in SaveData (U-049 caveat).
+Lead notes: Done (cycle 111): Mercury terrain, cold traps, saved terminator + flare clocks, nosun backdrop with a shader Sun, four POIs, entry 1.22 s, full check green. Visual follow-ups: U-057 (black holes, pad, violet twilight), B-050 (spiky far ridges).
 
 ### U-049 · UNITY · Done · M3
 Goal: Hazards v2 + Envirosuit (Bible §7, D-032): Thermal, Radiation, Toxic and Pressure on the U-029 API; Mercury solar flares (45 s warning, then 20 s of Radiation 3; shelter in shadow, underground or a flare shelter); Mars lava tubes at Radiation 0; Envirosuit tiers Mk1–3 reduce levels (k) and swap the surveyor sheet (B-041 mk1/mk2/mk3).
@@ -408,7 +408,7 @@ Files: Assets/_Game/Code/Runtime/Hazards/, Player/
 Depends: U-029, U-045
 Lead notes: Done (cycle 109): HazardTable for Mars/Mercury/Venus per Bible §7; flares level 4 (D-048), cadence per D-049; Envirosuit tiers lower levels and swap mk1–3 sheets (saved); HUD shows the worst hazard; HazardTableTests 7 + HazardV2PlayTests 3; full check 15:44 green.
 
-### U-050 · UNITY · Ready · M3
+### U-050 · UNITY · In Progress · M3
 Goal: Venus world (Bible §7.4): hybrid column with the surface (Datum 320; terrain/venus, B-028; Thermal 3, Pressure 3, Toxic 2) and the habitable cloud deck at y 770 ± 60 (backgrounds/venus_deck) where floating station props (B-045) sit; super-rotation wind (constant lateral push, 80-min cycle); acid haze ticks; backgrounds switch deck ↔ surface with altitude.
 Accept: captures on the deck and on the surface by a vent; a timed surface dive is lethal without Mk2 Thermal + Pressure; wind test; budgets green.
 Files: Assets/_Game/Code/Runtime/Terrain/, Planet/
@@ -456,6 +456,13 @@ Accept: PlayMode: an enclosed shelter stops Cryo drain; an aerostat sinks when o
 Files: Assets/_Game/Code/Runtime/Building/
 Depends: U-046, U-049, U-050
 Lead notes: Cycle 98. M3.
+
+### U-057 · UNITY · Ready · M3
+Goal: Mercury polish from the U-048 review: (1) pure-black empty cells (right of the shelter block and under it in u048 day/night captures) should show the background wall / cold-trap shadow tone, not #000; (2) the solarite field pad lands on a crater rim and reads as a raised block, so seat it in a crater floor or on flat ground; (3) the twilight band should read violet (§7.3 "violet twilight"): add a low violet sky glow on the sunward side in the band.
+Accept: re-captured day/twilight/night with no #000 holes, the pad flush, and a visible violet glow in twilight.
+Files: Assets/_Game/Code/Runtime/Terrain/, Planet/, POI/
+Depends: U-048
+Lead notes: Cycle 111. Do it when the far-ridge art fix (B-050) lands, and re-capture once.
 
 ### U-025 · UNITY · Done · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.
@@ -776,6 +783,13 @@ Accept: same sizes and tiling as backgrounds/mars, rendered 3D (§9, no flat fil
 Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/mars_canyon/
 Depends: B-011
 Lead notes: Done (cycle 101): continuous strata-banded canyon wall with talus, hazed far rim, near fallen blocks and dunes; sky ~27% (fine at in-game framing). UNITY hooks it to the canyon-floor trigger. (Cycle 104) Reopened for a layer0 fix: pinched spike and sliver at x ≈ 1550–1640 and stepped gaps read as hanging shapes in game; make the far rim one continuous wall. (Cycle 105) Far rim fixed: one continuous banded wall, no spikes; done.
+
+### B-050 · BLENDER · In Progress · M3
+Goal: Mercury far ridges: backgrounds/mercury layer0/layer0_nosun (and layer1 if affected) show a comb of vertical spikes along the crater skyline in game (coordination/reports/unity/u048_2026-10-31/capture_mercury_1_day.png, _2_twilight.png). Same cause as the canyon rim (terraced high-frequency ridge): use the ridge_lo approach so the rims are rounded crater walls, not spikes.
+Accept: same keys, sizes, tiling; stamped review; no vertical spike combs.
+Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/mercury/
+Depends: B-027
+Lead notes: Cycle 111.
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
