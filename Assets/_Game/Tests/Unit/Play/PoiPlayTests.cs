@@ -48,7 +48,8 @@ namespace Meridian.Tests
         {
             var side = director.PlanetSide;
             var state = GameState.Instance;
-            Assert.AreEqual(2, side.pois.placed.Count, $"{planet}: two POIs placed");
+            int expected = System.Linq.Enumerable.Count(PoiCatalog.For(planet));
+            Assert.AreEqual(expected, side.pois.placed.Count, $"{planet}: every POI placed");
             foreach (var p in side.pois.placed)
             {
                 var poi = p.def;
@@ -62,8 +63,8 @@ namespace Meridian.Tests
             int shown = 0;
             foreach (var t in hud.MarkerNames)
                 foreach (var p in side.pois.placed)
-                    if (t.text.EndsWith(p.def.label)) shown++;
-            Assert.AreEqual(2, shown, $"{planet}: a HUD marker per POI");
+                    if (p.def.marker && t.text.EndsWith(p.def.label)) shown++;
+            Assert.AreEqual(side.pois.placed.FindAll(x => x.def.marker).Count, shown, $"{planet}: a HUD marker per POI (not the camp)");
         }
 
         /// <summary>Every stamp cell in the live terrain (edits included), except the one at (skipCol, skipRow).</summary>
@@ -90,7 +91,7 @@ namespace Meridian.Tests
             var side = director.PlanetSide;
             var archive = side.pois.placed.Find(p => p.def == PoiCatalog.SurveyArchive);
             Assert.NotNull(archive);
-            var marker = side.sideHud.MarkerDistances[side.pois.placed.IndexOf(archive)];
+            var marker = side.sideHud.MarkerDistances[side.pois.placed.FindAll(x => x.def.marker).IndexOf(archive)];
             int shownDistance = int.Parse(marker.text);
             Assert.That(shownDistance, Is.InRange(100, 160), "the Archive marker shows ~120 m from spawn");
 

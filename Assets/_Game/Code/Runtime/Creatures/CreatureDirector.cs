@@ -117,7 +117,7 @@ namespace Meridian.Creatures
             for (int i = 0; i < count; i++)
             {
                 int tx = Mathf.FloorToInt(x + i * 1.6f);
-                int surface = terrain.Generator.SurfaceHeight(terrain.WrapX(tx));
+                int surface = terrain.TopSolidY(tx); // real ground: stamps (spawn camp, POIs) included
                 byte top = terrain.GetTile(tx, surface);
                 if (!spec.BiomeAllows(top, surface, Planet.datumY)) return;
                 if (!terrain.IsCollisionReady(tx, surface)) return;

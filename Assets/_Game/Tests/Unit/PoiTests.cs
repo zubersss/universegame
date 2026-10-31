@@ -24,7 +24,7 @@ namespace Meridian.Tests
                 Assert.IsNotEmpty(poi.props, poi.id);
             }
             Assert.LessOrEqual(System.Math.Abs(PoiCatalog.SurveyArchive.CenterX - 64f), 200f, "the Archive is within 200 m of spawn");
-            Assert.AreEqual(2, System.Linq.Enumerable.Count(PoiCatalog.For(PlanetId.Earth)));
+            Assert.AreEqual(3, System.Linq.Enumerable.Count(PoiCatalog.For(PlanetId.Earth)), "spawn camp, Archive, launch complex");
             Assert.AreEqual(2, System.Linq.Enumerable.Count(PoiCatalog.For(PlanetId.Mars)));
         }
 

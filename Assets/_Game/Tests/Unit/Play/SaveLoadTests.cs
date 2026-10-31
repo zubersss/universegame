@@ -63,10 +63,11 @@ namespace Meridian.Tests
             var time = Object.FindAnyObjectByType<TimeSystem>();
 
             // Change the world and the run state.
-            int x = side.spawnX - 3, y = t.Generator.SurfaceHeight(x);
+            int x = side.spawnX - 3, y = t.TopSolidY(x);
             Assert.IsTrue(t.SetTile(x, y, TileId.Air));
             Assert.IsTrue(t.SetTile(x, y - 1, TileId.Air));
-            Assert.IsTrue(t.SetTile(x + 6, t.Generator.SurfaceHeight(x + 6) + 2, TileId.Stone));
+            int placedY = t.TopSolidY(x + 6) + 2; // remembered: the stone itself becomes the column's top
+            Assert.IsTrue(t.SetTile(x + 6, placedY, TileId.Stone));
             state.hull = 73f; state.fuel = 41.5f;
             state.cargo.Add(new CargoStack { itemId = 3, count = 12 });
             time.SetGameSeconds(12345.0);
@@ -78,7 +79,7 @@ namespace Meridian.Tests
             Assert.IsTrue(File.Exists(Path.Combine(save.SlotFolder, "terrain_earth.bin")));
 
             // Mess everything up, then load.
-            Assert.IsTrue(t.SetTile(x - 4, t.Generator.SurfaceHeight(x - 4), TileId.Air));
+            Assert.IsTrue(t.SetTile(x - 4, t.TopSolidY(x - 4), TileId.Air));
             state.hull = 5f; state.fuel = 1f; state.cargo.Clear(); time.SetGameSeconds(0);
             side.player.Body.position += new Vector2(20f, 5f);
 
@@ -98,8 +99,8 @@ namespace Meridian.Tests
             Assert.AreEqual(editsBefore, t.Edits.Count, "same diffs");
             Assert.AreEqual(TileId.Air, t.GetTile(x, y), "dug tile still dug");
             Assert.AreEqual(TileId.Air, t.GetTile(x, y - 1));
-            Assert.AreEqual(TileId.Stone, t.GetTile(x + 6, t.Generator.SurfaceHeight(x + 6) + 2), "placed tile back");
-            Assert.AreNotEqual(TileId.Air, t.GetTile(x - 4, t.Generator.SurfaceHeight(x - 4)), "the post-save dig is undone");
+            Assert.AreEqual(TileId.Stone, t.GetTile(x + 6, placedY), "placed tile back");
+            Assert.AreNotEqual(TileId.Air, t.GetTile(x - 4, t.TopSolidY(x - 4)), "the post-save dig is undone");
             Assert.IsNull(t.RenderedTile(x, y), "terrain drawn from the loaded diffs");
             Assert.AreEqual(playerAt.x, side.player.Body.position.x, 0.05f, "player position");
             Assert.AreEqual(playerAt.y, side.player.Body.position.y, 0.05f);

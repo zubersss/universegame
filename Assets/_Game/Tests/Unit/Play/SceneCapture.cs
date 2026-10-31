@@ -187,7 +187,7 @@ namespace Meridian.Tests
             Meridian.Creatures.Creature Put(Meridian.Creatures.Species sp, float x)
             {
                 int tx = Mathf.FloorToInt(x);
-                int s = side.terrain.Generator.SurfaceHeight(side.terrain.WrapX(tx));
+                int s = side.terrain.TopSolidY(tx);
                 return creatures.Spawn(sp, new Vector2(tx + 0.5f, s + 1f + Meridian.Creatures.SpeciesSpec.Get(sp).size.y * 0.5f + 0.05f));
             }
             var stag = Put(Meridian.Creatures.Species.Stag, px - 4f);
@@ -387,6 +387,37 @@ namespace Meridian.Tests
             Debug.Log($"[MERIDIAN] fallback belt enabled {(fb != null ? fb.GetComponent<MeshRenderer>().enabled.ToString() : "none")}");
             yield return Shot("4_belt", belt, Meridian.Transitions.TransitionDirector.SpaceDefaultSize);
             yield return Shot("5_earth_luna", world.Find("earth").Value.position + new Vector2(60f, 60f), 120f);
+        }
+
+        /// <summary>U-035 evidence: the Earth spawn camp by day and by night (lamps glow).</summary>
+        [UnityTest]
+        public IEnumerator CaptureSpawnCamp()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+            var side = director.PlanetSide;
+            for (int i = 0; i < 120; i++) yield return new WaitForFixedUpdate();
+            var cam = side.sideCamera;
+            cam.GetComponent<Meridian.Player.CameraFollow>().enabled = false;
+            var camp = side.pois.placed.Find(p => p.def == Meridian.Planet.POI.PoiCatalog.SpawnCamp);
+            cam.orthographicSize = 10f;
+            cam.transform.position = new Vector3(camp.def.CenterX, camp.groundY + 6f, cam.transform.position.z);
+            side.dayNight.Override = 0.5f;
+            for (int i = 0; i < 5; i++) yield return null;
+            yield return Save(cam, $"{name}_day");
+            side.dayNight.Override = 0.02f;
+            for (int i = 0; i < 5; i++) yield return null;
+            yield return Save(cam, $"{name}_night");
+            side.dayNight.Override = null;
         }
 
         static IEnumerator Save(Camera cam, string name)

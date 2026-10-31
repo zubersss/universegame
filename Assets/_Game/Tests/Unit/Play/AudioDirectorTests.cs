@@ -37,7 +37,7 @@ namespace Meridian.Tests
             Assert.AreEqual(Sfx.Jump, audio.LastPlayed, "jump sound");
             Assert.Greater(audio.PlayCount, count);
 
-            int x = side.spawnX + 2, y = side.terrain.Generator.SurfaceHeight(x);
+            int x = side.spawnX + 2, y = side.terrain.TopSolidY(x);
             bool dug = side.rig.Dig(new Vector2(x + 0.5f, y + 0.5f));
             Assert.IsTrue(dug, $"dig: tile {side.terrain.GetTile(x, y)} at ({x},{y}), player at {side.player.Body.position}, active {side.player.gameObject.activeInHierarchy}");
             Assert.AreEqual(Sfx.Dig, audio.LastPlayed, "dig sound");

@@ -215,6 +215,19 @@ namespace Meridian.Terrain
             return inProgress == null || ChunkBuffer.Key(inProgress.cx, inProgress.cy) != key;
         }
 
+        /// <summary>
+        /// The highest solid tile in column x, edits and POI stamps included (U-035: spawn and landing
+        /// stand on a stamped camp, not on the generated surface underneath). Scans down from 40 m above
+        /// the generated surface.
+        /// </summary>
+        public int TopSolidY(int x)
+        {
+            int start = Mathf.Min(Config.worldHeight - 1, Generator.SurfaceHeight(WrapX(x)) + 40);
+            for (int y = start; y > 0; y--)
+                if (TileId.IsSolid(GetTile(x, y))) return y;
+            return 0;
+        }
+
         // ---------- edits (U-008) ----------
 
         public int WrapX(int x)

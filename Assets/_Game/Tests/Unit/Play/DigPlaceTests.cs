@@ -48,7 +48,7 @@ namespace Meridian.Tests
             Assert.NotNull(rig, "Rig on PlanetSide");
 
             // Dig the surface tile under the spawn column.
-            int x = side.spawnX, y = t.Generator.SurfaceHeight(x);
+            int x = side.spawnX, y = t.TopSolidY(x);
             byte before = t.GetTile(x, y);
             Assert.IsTrue(TileId.IsSolid(before), "surface tile is solid");
             int diffsBefore = t.Edits.Count; // a new world already holds POI stamp diffs (U-030)
@@ -59,12 +59,16 @@ namespace Meridian.Tests
             Assert.AreEqual(before, rig.drops.Live[0].itemId, "drop is the dug material");
 
             // Place a tile in open air two columns over.
-            int px = x + 3, py = t.Generator.SurfaceHeight(px) + 3;
+            int px = x + 3, py = t.TopSolidY(px) + 3;
             Assert.AreEqual(TileId.Air, t.GetTile(px, py));
             Assert.IsTrue(rig.Place(new Vector2(px + 0.5f, py + 0.5f), TileId.Stone), "Builder places");
             Assert.AreEqual(TileId.Stone, t.GetTile(px, py));
             Assert.NotNull(t.RenderedTile(px, py));
-            Assert.AreEqual(diffsBefore + 2, t.Edits.Count, "two diffs recorded");
+            // Both changes are recorded as diffs (on stamped camp ground a dig can replace a stamp diff, so check the cells, not the count).
+            Assert.IsTrue(t.Edits.TryGet(t.WrapX(px), py, out byte placedDiff) && placedDiff == TileId.Stone, "placed tile recorded");
+            bool generatedAir = t.BaseGenerator.TileAt(t.WrapX(x), y) == TileId.Air;
+            Assert.IsTrue(t.Edits.TryGet(t.WrapX(x), y, out byte dugDiff) ? dugDiff == TileId.Air : generatedAir, "dug tile recorded (or back to its generated air)");
+            Assert.GreaterOrEqual(t.Edits.Count, diffsBefore, "no diffs lost");
 
             // Save the diffs, start a fresh session, load them, rebuild the planet.
             var path = Path.Combine(Application.temporaryCachePath, "meridian_test", "terrain_earth.bin");

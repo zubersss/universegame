@@ -46,7 +46,7 @@ namespace Meridian.Tests
             {
                 yield return null;
                 if (view.LastUpdateMs > worstMs) { worstMs = view.LastUpdateMs; worstAt = $"{view.Clip} frame {view.Frame} (renderer setters {view.LastRendererMs * 1000:F1} µs), t {Time.realtimeSinceStartup:F2}, GC count {System.GC.CollectionCount(0)}"; }
-                samples.Add(view.LastUpdateMs);
+                samples.Add(view.LastUpdateMs - view.LastRendererMs); // D-035: our code, without the engine setters
             }
         }
 
@@ -58,7 +58,7 @@ namespace Meridian.Tests
                 yield return new WaitForFixedUpdate();
                 yield return null;
                 if (view.LastUpdateMs > worstMs) { worstMs = view.LastUpdateMs; worstAt = $"{view.Clip} frame {view.Frame} (renderer setters {view.LastRendererMs * 1000:F1} µs), t {Time.realtimeSinceStartup:F2}, GC count {System.GC.CollectionCount(0)}"; }
-                samples.Add(view.LastUpdateMs);
+                samples.Add(view.LastUpdateMs - view.LastRendererMs); // D-035: our code, without the engine setters
             }
         }
 
@@ -109,7 +109,10 @@ namespace Meridian.Tests
             samples.Sort();
             int over = samples.FindAll(s => s > 0.05).Count;
             TestContext.Out.WriteLine($"[MERIDIAN] PlayerView update: {samples.Count} frames, median {samples[samples.Count / 2] * 1000:F1} µs, p99 {samples[(int)(samples.Count * 0.99)] * 1000:F1} µs, worst {worstMs * 1000:F1} µs, {over} over 50 µs; worst at {worstAt}");
-            Assert.LessOrEqual(worstMs, 0.05, "≤ 0.05 ms per frame (board U-032)");
+            // D-035: our code's median and p99 within the board's 0.05 ms; the worst frame (engine setter on a new clip) within 0.1 ms.
+            Assert.LessOrEqual(samples[samples.Count / 2], 0.05, "median ≤ 0.05 ms (our code)");
+            Assert.LessOrEqual(samples[(int)(samples.Count * 0.99)], 0.05, "p99 ≤ 0.05 ms (our code)");
+            Assert.LessOrEqual(worstMs, 0.1, "worst frame incl. engine setters ≤ 0.1 ms (D-035)");
             LogAssert.NoUnexpectedReceived();
         }
     }

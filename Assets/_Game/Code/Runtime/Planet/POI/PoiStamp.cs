@@ -26,6 +26,7 @@ namespace Meridian.Planet.POI
             '.' => TileId.Air,
             '#' => planet == PlanetId.Earth ? TileId.Stone : TileId.Basalt,
             'g' => planet == PlanetId.Earth ? TileId.Grass : TileId.Regolith,
+            's' => planet == PlanetId.Earth ? TileId.Soil : TileId.Regolith,
             _ => (byte?)null,
         };
 

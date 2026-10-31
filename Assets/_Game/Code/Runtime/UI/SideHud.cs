@@ -128,11 +128,13 @@ namespace Meridian.UI
             var body = player != null && player.isActiveAndEnabled ? (Transform)player.transform : ship != null ? ship.transform : null;
             if (body == null) return;
             float px = body.position.x;
+            int next = 0; // walks the placed POIs that show a marker (the spawn camp doesn't)
             for (int i = 0; i < MaxMarkers; i++)
             {
-                bool on = i < pois.placed.Count;
+                while (next < pois.placed.Count && !pois.placed[next].def.marker) next++;
+                bool on = next < pois.placed.Count;
                 if (!on) { if (MarkerNames[i].text.Length > 0) { MarkerNames[i].text = markerArrows[i].text = MarkerDistances[i].text = ""; markerLast[i] = int.MinValue; } continue; }
-                var p = pois.placed[i];
+                var p = pois.placed[next++];
                 if (!ReferenceEquals(MarkerNames[i].text, p.def.MarkerText)) MarkerNames[i].text = p.def.MarkerText;
                 float dx = p.nearestX - px;
                 int d = Mathf.Min(Mathf.RoundToInt(Mathf.Abs(dx)), 3999);

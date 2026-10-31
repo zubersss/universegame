@@ -45,7 +45,7 @@ namespace Meridian.Tests
             var side = director.PlanetSide;
             while (!side.terrain.IsSettled && Time.realtimeSinceStartup < timeout + 20f) yield return null;
             for (int i = 0; i < 90; i++) yield return new WaitForFixedUpdate();
-            float surface = side.terrain.Generator.SurfaceHeight(side.spawnX) + 1f;
+            float surface = side.terrain.TopSolidY(side.spawnX) + 1f; // the real ground (the spawn camp levels it, U-035)
             Assert.IsTrue(side.player.Grounded, "player grounded");
             Assert.AreEqual(surface, side.player.Body.position.y, 0.1f, "player on the surface");
             Assert.IsTrue(side.ship.Grounded, "ship landed");

@@ -81,7 +81,35 @@ namespace Meridian.Planet.POI
             sr.color = poi.planet == PlanetId.Earth ? new Color(0.55f, 0.57f, 0.6f, 1f) : new Color(0.5f, 0.38f, 0.3f, 1f);
             go.transform.localScale = new Vector3(prop.size.x, prop.size.y, 1f);
             LoadArt(sr, prop.key, prop.size.x);
+            if (prop.solid)
+            {
+                // Its own unscaled child of the POI root (the art rescales the sprite): you can stand on it.
+                var col = new GameObject(go.name + "_Collider");
+                col.transform.SetParent(root, false);
+                col.transform.position = new Vector3(poi.x + prop.dx, groundY + 1f + prop.dy + prop.size.y * 0.5f, 0f);
+                var box2d = col.AddComponent<BoxCollider2D>();
+                box2d.size = prop.size;
+                solids.Add(box2d);
+                colliderOf[sr] = box2d;
+            }
             return sr;
+        }
+
+        readonly List<BoxCollider2D> solids = new List<BoxCollider2D>();
+        readonly Dictionary<SpriteRenderer, BoxCollider2D> colliderOf = new Dictionary<SpriteRenderer, BoxCollider2D>();
+        public IReadOnlyList<BoxCollider2D> Solids => solids;
+
+        /// <summary>Top of the highest solid prop overlapping world x0..x1 (U-035: the ship lands on the pad), or -∞.</summary>
+        public float SolidTopOver(float x0, float x1)
+        {
+            float top = float.NegativeInfinity;
+            foreach (var c in solids)
+            {
+                if (c == null) continue;
+                var b = c.bounds;
+                if (b.max.x > x0 && b.min.x < x1) top = Mathf.Max(top, b.max.y);
+            }
+            return top;
         }
 
         void LoadArt(SpriteRenderer sr, string key, float width)
@@ -105,6 +133,13 @@ namespace Meridian.Planet.POI
                     if (mat != null) sr.sharedMaterial = mat;
                     float w = pick.bounds.size.x;
                     sr.transform.localScale = w > 0f ? Vector3.one * (width / w) : Vector3.one;
+                    // A solid prop's collider follows the drawn art (the catalog size is only the placeholder's).
+                    if (colliderOf.TryGetValue(sr, out var box2d) && box2d != null)
+                    {
+                        var b = sr.bounds;
+                        box2d.transform.position = new Vector3(b.center.x, b.center.y, 0f);
+                        box2d.size = new Vector2(b.size.x, b.size.y);
+                    }
                 };
             };
         }
@@ -126,6 +161,8 @@ namespace Meridian.Planet.POI
         void Clear()
         {
             placed.Clear();
+            solids.Clear();
+            colliderOf.Clear();
             for (int i = transform.childCount - 1; i >= 0; i--) Destroy(transform.GetChild(i).gameObject);
             foreach (var h in handles) if (h.IsValid()) Addressables.Release(h);
             handles.Clear();

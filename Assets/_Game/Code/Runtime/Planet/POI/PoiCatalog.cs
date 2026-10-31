@@ -10,13 +10,15 @@ namespace Meridian.Planet.POI
         public readonly string key;
         public readonly float dx, dy;
         public readonly Vector2 size;
-        public PoiProp(string key, float dx, float dy, Vector2 size) { this.key = key; this.dx = dx; this.dy = dy; this.size = size; }
+        /// <summary>Solid props get a box collider of `size` you can stand on (U-035: pad, crates).</summary>
+        public readonly bool solid;
+        public PoiProp(string key, float dx, float dy, Vector2 size, bool solid = false) { this.key = key; this.dx = dx; this.dy = dy; this.size = size; this.solid = solid; }
     }
 
     /// <summary>
     /// A handmade point of interest (U-030): a tile stamp merged into the generated terrain at a fixed
     /// column, plus props. Stamp rows run top to bottom; row `groundRow` lands on the ground line
-    /// (the local surface, never below sea level). Cells: '.' air, '#' rock, 'g' surface material,
+    /// (the local surface, never below sea level). Cells: '.' air, '#' rock, 's' soil, 'g' surface material,
     /// ' ' leave the generated tile.
     /// </summary>
     public sealed class PoiDef
@@ -28,6 +30,8 @@ namespace Meridian.Planet.POI
         public string[] stamp;
         public int groundRow;
         public PoiProp[] props;
+        /// <summary>Shows a HUD map marker (the spawn camp doesn't: you start there).</summary>
+        public bool marker = true;
 
         public int Width => stamp[0].Length;
         public float CenterX => x + Width * 0.5f;
@@ -142,7 +146,41 @@ namespace Meridian.Planet.POI
             },
         };
 
-        public static readonly PoiDef[] All = { SurveyArchive, LaunchComplex, HalcyonHauler, WardenOutpost };
+        /// <summary>
+        /// U-035 Earth spawn camp (B-014 props): levelled ground around the spawn (x 64) and the Pilgrim (x 74),
+        /// the landing pad (a deck on legs) under the ship, two lamps, a crate stack, the smelter.
+        /// </summary>
+        public static readonly PoiDef SpawnCamp = new PoiDef
+        {
+            id = "spawn_camp", label = "CAMP", planet = PlanetId.Earth, x = 52, groundRow = 8, marker = false,
+            stamp = new[]
+            {
+                "..................................",
+                "..................................",
+                "..................................",
+                "..................................",
+                "..................................",
+                "..................................",
+                "..................................",
+                "..................................",
+                "gggggggggggggggggggggggggggggggggg",
+                "ssssssssssssssssssssssssssssssssss",
+                "ssssssssssssssssssssssssssssssssss",
+                "##################################",
+            },
+            props = new[]
+            {
+                new PoiProp("props/common/landing_pad", 22f, 0f, new Vector2(12f, 12f * 72f / 488f), solid: true), // deck on legs, ~1.8 m
+                new PoiProp("props/common/lamp", 9f, 0f, new Vector2(0.7f, 0.7f * 320f / 96f)),
+                new PoiProp("props/common/lamp", 31f, 0f, new Vector2(0.7f, 0.7f * 320f / 96f)),
+                new PoiProp("props/common/storage_crate", 2.6f, 0f, new Vector2(1.25f, 1f), solid: true),
+                new PoiProp("props/common/storage_crate", 3.9f, 0f, new Vector2(1.25f, 1f), solid: true),
+                new PoiProp("props/common/storage_crate", 3.25f, 1f, new Vector2(1.25f, 1f), solid: true),
+                new PoiProp("props/common/smelter", 6.2f, 0f, new Vector2(2.4f, 3f)),
+            },
+        };
+
+        public static readonly PoiDef[] All = { SpawnCamp, SurveyArchive, LaunchComplex, HalcyonHauler, WardenOutpost };
 
         public static IEnumerable<PoiDef> For(PlanetId planet)
         {

@@ -74,7 +74,7 @@ namespace Meridian.Tests
             Assert.IsTrue(side.player.Grounded, "standing on Earth");
 
             // ---- Earth: dig with the Beam next to the player ----
-            int ex = side.spawnX + 2, ey = side.terrain.Generator.SurfaceHeight(ex);
+            int ex = side.spawnX + 2, ey = side.terrain.TopSolidY(ex);
             Assert.IsTrue(side.rig.Dig(new Vector2(ex + 0.5f, ey + 0.5f)), "dig on Earth");
 
             // ---- Board and launch from rest: the §4.1 burn (17) over the first 3 s ----
@@ -133,7 +133,7 @@ namespace Meridian.Tests
             Assert.IsTrue(boarding.TryExit(), "exit the landed ship");
             yield return Until(() => side.player.Grounded, 10f, "surveyor on the ground");
             var player = side.player;
-            int mx = Mathf.FloorToInt(player.Body.position.x) + 1, my = side.terrain.Generator.SurfaceHeight(side.terrain.WrapX(mx));
+            int mx = Mathf.FloorToInt(player.Body.position.x) + 1, my = side.terrain.TopSolidY(mx);
             Assert.IsTrue(side.rig.Dig(new Vector2(mx + 0.5f, my + 0.5f)), "dig on Mars");
             yield return Until(() => player.Grounded, 10f, "standing after the dig");
 

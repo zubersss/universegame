@@ -40,7 +40,7 @@ namespace Meridian.Tests
         Vector2 OnSurface(float x, Species s)
         {
             int tx = Mathf.FloorToInt(x);
-            int surface = side.terrain.Generator.SurfaceHeight(side.terrain.WrapX(tx));
+            int surface = side.terrain.TopSolidY(tx);
             return new Vector2(tx + 0.5f, surface + 1f + SpeciesSpec.Get(s).size.y * 0.5f + 0.05f);
         }
 

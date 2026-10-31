@@ -76,7 +76,7 @@ namespace Meridian.Core
             if (pois != null && edits != null) pois.StampFor(config, seed, edits); // U-030: once per world, before streaming
             terrain.Begin(config, seed, follow, edits);
             if (pois != null) pois.PlaceFor(config, seed);
-            float surface = terrain.Generator.SurfaceHeight(spawnX) + 1f;
+            float surface = terrain.TopSolidY(spawnX) + 1f; // stamps included (U-035 spawn camp)
             StopAllCoroutines();
 
             if (player != null)
@@ -116,8 +116,10 @@ namespace Meridian.Core
             int half = Mathf.CeilToInt(SideShip.HullLength * 0.5f);
             int top = int.MinValue;
             for (int x = centerX - half; x <= centerX + half; x++)
-                top = Mathf.Max(top, terrain.Generator.SurfaceHeight(terrain.WrapX(x)));
-            return new Vector2(centerX + 0.5f, top + 1f + SideShip.SkidDrop + 0.05f);
+                top = Mathf.Max(top, terrain.TopSolidY(x));
+            float ground = top + 1f;
+            if (pois != null) ground = Mathf.Max(ground, pois.SolidTopOver(centerX + 0.5f - SideShip.HullLength * 0.5f, centerX + 0.5f + SideShip.HullLength * 0.5f)); // on the pad (U-035)
+            return new Vector2(centerX + 0.5f, ground + SideShip.SkidDrop + 0.05f);
         }
 
         // Bodies wait frozen until the chunks around them exist, so nothing falls through unloaded ground.
