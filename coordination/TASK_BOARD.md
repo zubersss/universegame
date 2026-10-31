@@ -380,6 +380,13 @@ Files: Assets/_Game/Code/Runtime/Items/, UI/, Save/
 Depends: U-013, U-015
 Lead notes: Cycle 48. Start after U-044 unless the M2 queue is blocked.
 
+### U-046 · UNITY · Ready · M3
+Goal: Rig modules v1 (Bible §6/§8; M3 needs all modules): Beam (dig/mine ray), Lance (projectile), Survey (scan ring that reveals and catalogues), Builder (placement with ghost), switched with 1–4 / Q/E; drawn in the surveyor's hand from B-037 art.
+Accept: tool sprite at the hand with pivot [0.375, 0.5], rotating to the aim; muzzle offsets beam (0.47, 0.03), lance (0.52, 0.035), survey (0.30, 0.06), builder (0.44, 0.03) m; fx/beam_ray stretched from muzzle to hit (pivot [0, 0.5], tiles in x); fx/lance_bolt (pivot [0.75, 0.5]); fx/survey_scan 12-frame one-shot ring; fx/builder_ghost 8-frame pulse, tinted red when blocked; PlayMode tests per module; captures.
+Files: Assets/_Game/Code/Runtime/Rig/, Player/
+Depends: U-045, B-037
+Lead notes: Cycle 60. The art and specs come from BLENDER's B-037 hand-off (D-041).
+
 ### U-025 · UNITY · Done · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.
 Accept: EditMode test: Earth noon/midnight intensities match §9; captures at dawn/noon/dusk/night on Earth; 0 B GC per frame.
@@ -609,14 +616,14 @@ Files: blender/scripts/build_creatures_venus.py, Assets/_Game/Art/creatures/venu
 Depends: B-032
 Lead notes: Cycle 58. M3.
 
-### B-037 · BLENDER · In Progress · M3
+### B-037 · BLENDER · Done · M3
 Goal: Rig modules (Bible §6/§8): held-tool sprites `items/rig/{beam,lance,survey,builder}` (drawn in the surveyor's hand, aim pivot at the grip) + FX sheets `fx/beam_ray`, `fx/lance_bolt`, `fx/survey_scan` (expanding ring), `fx/builder_ghost` (placement preview).
 Accept: tools readable at 60 px/m at the surveyor's scale; grip pivot documented for UNITY; FX with emission; stamped review.
 Files: blender/scripts/build_rig.py, gen_fx.py, Assets/_Game/Art/items/rig/, Assets/_Game/Art/fx/
 Depends: B-012, B-023
-Lead notes: Cycle 58. M3 needs all Rig modules (Bible §12 M3).
+Lead notes: Done (cycle 60): beam/lance/survey/builder tools (128×64, grip pivot [0.375, 0.5]), FX beam_ray, lance_bolt, survey_scan, builder_ghost; keys under props/rig (D-041). Integration → U-046.
 
-### B-038 · BLENDER · Ready · M3
+### B-038 · BLENDER · In Progress · M3
 Goal: Waystations (Bible §3): top-down `ships/waystation_earth/top` and `ships/waystation_mars/top` (orbital stations, large-ship class ≤ 768 px, docking ring with emission lights), plus a side-view docking-bay interior backdrop `backgrounds/waystation/layer0..2`.
 Accept: Halcyon Freight industrial look (worn, hazard markings, lit windows); stamped review; contract sizes.
 Files: blender/scripts/build_waystation.py, Assets/_Game/Art/ships/, backgrounds/waystation/

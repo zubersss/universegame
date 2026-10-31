@@ -451,3 +451,10 @@ Checked: review_sulfur_drifter.png (stamped 06:03).
 Moved: B-032 → Done; B-037 → In Progress.
 Decided: BLENDER priority B-037 (Rig modules, core M3), then B-038, B-035, B-036, B-034.
 Signals: BLENDER thought its board was empty (it had not seen B-035…B-038). Redirected.
+
+## Cycle 60 · 2026-10-31
+Checked: review_rig_tools_4x.png (B-037); L-011 M2SoakTests.cs written and committed.
+Moved: B-037 → Done; B-038 → In Progress; L-011 → In Progress.
+Decided: D-041 (rig tools under props/rig).
+Added: U-046 (Rig modules v1, M3).
+Signals: UNITY still blocked on USER-10.
