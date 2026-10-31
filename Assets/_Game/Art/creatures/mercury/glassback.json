@@ -1,0 +1,53 @@
+{
+  "key": "creatures/mercury/glassback",
+  "frame_width": 320,
+  "frame_height": 320,
+  "columns": 6,
+  "gutter": 4,
+  "frames": 28,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.03125
+  ],
+  "facing": "right",
+  "animations": [
+    {
+      "name": "idle",
+      "start": 0,
+      "length": 6,
+      "loop": true
+    },
+    {
+      "name": "walk",
+      "start": 6,
+      "length": 8,
+      "loop": true
+    },
+    {
+      "name": "attack",
+      "start": 14,
+      "length": 6,
+      "loop": false
+    },
+    {
+      "name": "hurt",
+      "start": 20,
+      "length": 2,
+      "loop": false
+    },
+    {
+      "name": "death",
+      "start": 22,
+      "length": 6,
+      "loop": false
+    }
+  ],
+  "hitbox": {
+    "x": 0.16,
+    "y": 0.04,
+    "w": 0.66,
+    "h": 0.42
+  },
+  "ppu": 132.25
+}
