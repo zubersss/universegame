@@ -224,7 +224,7 @@ namespace Meridian.UI
 
         void LateUpdate()
         {
-            bool hidden = MenuController.HudHidden;
+            bool hidden = MenuController.HudHidden || InventoryPanel.AnyOpen || CraftingPanel.AnyOpen; // U-058: nothing draws through a full-screen panel
             if (hudCanvas != null && hudCanvas.enabled == hidden) hudCanvas.enabled = !hidden;
             var state = GameState.Instance;
             if (vitals == null && player != null) vitals = player.GetComponent<PlayerVitals>();

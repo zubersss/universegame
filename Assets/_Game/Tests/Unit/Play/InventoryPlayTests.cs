@@ -133,7 +133,7 @@ namespace Meridian.Tests
             panel.SetOpen(true);
             Assert.IsTrue(panel.IsOpen && Meridian.UI.InventoryPanel.AnyOpen);
             float until = Time.realtimeSinceStartup + 5f;
-            while (!panel.Icons[0].enabled && Time.realtimeSinceStartup < until) yield return null; // icon sheet arrives
+            while (!(panel.Icons[0].enabled && panel.Icons[2].enabled) && Time.realtimeSinceStartup < until) yield return null; // both icons arrive (shared cache, U-058)
             Assert.AreEqual("999", panel.Counts[0].text);
             Assert.AreEqual("201", panel.Counts[1].text);
             Assert.AreEqual("3", panel.Counts[2].text);

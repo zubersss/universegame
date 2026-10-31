@@ -78,6 +78,13 @@ namespace Meridian.Core
                 {
                     inv.Add(Meridian.Items.ItemRegistry.Get("hematite").id, 6);
                     inv.Add(Meridian.Items.ItemRegistry.Get("smelter_bar_iron").id, 2);
+                    // Stand at the camp's Smelter so the shot shows a live CRAFT next to the unavailable ones.
+                    foreach (var st in FindObjectsByType<Meridian.Crafting.CraftingStation>(FindObjectsInactive.Exclude))
+                        if (st.kind == Meridian.Crafting.Station.Smelter && side != null && side.player != null)
+                        {
+                            var at = new Vector2(st.transform.position.x + 1f, side.player.Body.position.y);
+                            side.player.Body.position = at; side.player.transform.position = at;
+                        }
                     hud.Crafting.SetOpen(true);
                     yield return Wait(1f);
                     yield return Shot(folder, "smoke_9_crafting.png");

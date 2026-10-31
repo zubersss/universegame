@@ -35,9 +35,6 @@ namespace Meridian.UI
         InputAction toggle;
         bool dirty = true;
         static UiKit.NumberStrings numbers;
-        readonly Dictionary<int, Sprite> icons = new Dictionary<int, Sprite>();
-        readonly HashSet<int> requested = new HashSet<int>();
-        readonly List<AsyncOperationHandle<IList<Sprite>>> handles = new List<AsyncOperationHandle<IList<Sprite>>>();
 
         void Start()
         {
@@ -46,6 +43,7 @@ namespace Meridian.UI
             if (inventory == null && Meridian.Core.GameState.Instance != null) inventory = Meridian.Core.GameState.Instance.inventory;
             Build();
             if (inventory != null) inventory.Changed += MarkDirty;
+            ItemIcons.Loaded += MarkDirty;
             if (player != null && player.actions != null)
             {
                 toggle = player.actions.FindActionMap(MeridianInput.OnFoot, true).FindAction("Inventory");
@@ -56,10 +54,9 @@ namespace Meridian.UI
         void OnDestroy()
         {
             if (inventory != null) inventory.Changed -= MarkDirty;
+            ItemIcons.Loaded -= MarkDirty;
             if (IsOpen) AnyOpen = false;
             if (toggle != null) toggle.performed -= OnToggle;
-            foreach (var h in handles) if (h.IsValid()) Addressables.Release(h);
-            handles.Clear();
         }
 
         void OnToggle(InputAction.CallbackContext _) => SetOpen(!IsOpen);
@@ -82,8 +79,7 @@ namespace Meridian.UI
             int rows = Inventory.SlotCount / Columns;
             var size = new Vector2(Columns * Cell + (Columns + 1) * Gap, rows * Cell + (rows + 1) * Gap + 56f);
             var center = new Vector2(0.5f, 0.5f);
-            var back = UiKit.Panel(canvas.transform, "Inventory", center, Vector2.zero, size, new Color(0.04f, 0.05f, 0.07f, 0.86f));
-            root = back.gameObject;
+            var back = UiKit.ModalPanel(canvas.transform, "Inventory", size, out root); // U-058: opaque, over a scrim
             var title = UiKit.Text(back.transform, "Title", new Vector2(0f, 1f), new Vector2(Gap + 4f, -28f), new Vector2(300f, 28f), 20, true, TextAnchor.MiddleLeft, theme.label);
             title.text = "INVENTORY";
             SelectedName = UiKit.Text(back.transform, "Selected", new Vector2(1f, 1f), new Vector2(-Gap - 4f, -28f), new Vector2(420f, 28f), 18, false, TextAnchor.MiddleRight, theme.text);
@@ -141,30 +137,7 @@ namespace Meridian.UI
             SelectedName.text = def == null ? "" : def.placeTile != 0 ? def.name + "  ·  BUILDER" : def.name;
         }
 
-        /// <summary>The item's icon (B-013), or for tile items without one the tile's own sprite; loads once.</summary>
-        Sprite IconOf(int itemId)
-        {
-            if (icons.TryGetValue(itemId, out var sp)) return sp;
-            var def = ItemRegistry.Get(itemId);
-            if (def == null) return null;
-            if (def.icon == null)
-            {
-                var tile = terrain != null ? terrain.TileSet.Get(def.placeTile, Meridian.Terrain.BlobAutotile.VariantCount - 1) as UnityEngine.Tilemaps.Tile : null;
-                if (tile != null && tile.sprite != null) icons[itemId] = tile.sprite;
-                return tile != null ? tile.sprite : null;
-            }
-            if (requested.Add(itemId))
-            {
-                var h = Addressables.LoadAssetAsync<IList<Sprite>>(def.icon);
-                handles.Add(h);
-                h.Completed += op =>
-                {
-                    if (op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;
-                    icons[itemId] = op.Result[0];
-                    dirty = true;
-                };
-            }
-            return null;
-        }
+        /// <summary>The item's icon from the shared cache (U-058); a late icon marks the panel dirty.</summary>
+        Sprite IconOf(int itemId) => ItemIcons.Get(itemId, terrain);
     }
 }

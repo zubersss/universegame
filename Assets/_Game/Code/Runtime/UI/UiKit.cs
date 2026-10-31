@@ -77,6 +77,55 @@ namespace Meridian.UI
             return b;
         }
 
+        // ---------- U-058 shared panel style ----------
+
+        /// <summary>Opaque panel fill (no world bleeding through).</summary>
+        public static readonly Color PanelFill = new Color(0.035f, 0.045f, 0.065f, 1f);
+        /// <summary>The full-screen dim behind a panel.</summary>
+        public static readonly Color ScrimColor = new Color(0f, 0f, 0f, 0.62f);
+        public static readonly Color ActionOn = new Color(0.25f, 0.55f, 0.85f, 1f), ActionOff = new Color(0.14f, 0.15f, 0.17f, 1f);
+        public static readonly Color ActionTextOn = Color.white, ActionTextOff = new Color(1f, 1f, 1f, 0.28f);
+
+        /// <summary>A full-screen scrim (blocks clicks to the world) with an opaque, framed panel centred on it. Returns the panel.</summary>
+        public static Image ModalPanel(Transform canvas, string name, Vector2 size, out GameObject root)
+        {
+            var scrim = Rect(canvas, name + "Scrim", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(4000f, 4000f)).gameObject.AddComponent<Image>();
+            scrim.color = ScrimColor;
+            scrim.raycastTarget = true;
+            root = scrim.gameObject;
+            var frame = Panel(scrim.transform, name + "Frame", new Vector2(0.5f, 0.5f), Vector2.zero, size + new Vector2(4f, 4f), UiTheme.Accent(null) * new Color(1f, 1f, 1f, 0.6f));
+            var panel = Panel(frame.transform, name, new Vector2(0.5f, 0.5f), Vector2.zero, size, PanelFill);
+            panel.raycastTarget = true;
+            return panel;
+        }
+
+        /// <summary>An action button (CRAFT, SELL, BUY): accent fill when it can act, dark and dim when not.</summary>
+        public static Button ActionButton(Transform parent, string label, Vector2 anchor, Vector2 pos, Vector2 size, UnityAction onClick)
+        {
+            var rt = Rect(parent, label, anchor, pos, size, anchor);
+            var img = rt.gameObject.AddComponent<Image>();
+            img.color = ActionOn;
+            var b = rt.gameObject.AddComponent<Button>();
+            var colors = b.colors;
+            colors.normalColor = Color.white; colors.highlightedColor = new Color(1.15f, 1.15f, 1.15f, 1f); colors.pressedColor = new Color(0.8f, 0.8f, 0.8f, 1f);
+            colors.disabledColor = Color.white; // the state shows through SetAction, not a tint
+            b.colors = colors;
+            b.onClick.AddListener(onClick);
+            var t = Text(rt, "Label", new Vector2(0.5f, 0.5f), Vector2.zero, size, 18, true, TextAnchor.MiddleCenter, ActionTextOn);
+            t.text = label;
+            return b;
+        }
+
+        /// <summary>Shows an action button as available or not (fill, label and interactable together).</summary>
+        public static void SetAction(Button b, bool on)
+        {
+            if (b.interactable == on && b.targetGraphic != null && ((Image)b.targetGraphic).color == (on ? ActionOn : ActionOff)) return;
+            b.interactable = on;
+            if (b.targetGraphic is Image img) img.color = on ? ActionOn : ActionOff;
+            var t = b.GetComponentInChildren<Text>();
+            if (t != null) t.color = on ? ActionTextOn : ActionTextOff;
+        }
+
         /// <summary>A thin horizontal bar: returns the fill image (set fillAmount 0..1).</summary>
         public static Image Bar(Transform parent, string name, Vector2 anchor, Vector2 pos, Vector2 size, Color fill)
         {

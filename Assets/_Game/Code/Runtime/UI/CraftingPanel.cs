@@ -10,9 +10,10 @@ using UnityEngine.UI;
 namespace Meridian.UI
 {
     /// <summary>
-    /// U-051: the crafting panel (B): the Blueprint Tree on the left (tier columns; unlocked nodes lit,
-    /// locked ones dim with what unlocks them) and the recipes on the right (station, inputs, a Craft button
-    /// that works when the blueprint, station and inputs are all there). Closed, it does no per-frame work.
+    /// U-051 crafting panel (B), U-058 readability: a modal opaque panel over a scrim (the HUD hides behind it).
+    /// The Blueprint Tree on the left (tier columns; unlocked nodes lit, locked ones dim with what unlocks them);
+    /// recipes on the right as icon rows (output, inputs with counts, station) with a CRAFT button that is plainly
+    /// off unless the blueprint, the station and the inputs are all there. Closed, it does no per-frame work.
     /// </summary>
     public sealed class CraftingPanel : MonoBehaviour
     {
@@ -25,33 +26,51 @@ namespace Meridian.UI
         public readonly Dictionary<string, Button> CraftButtons = new Dictionary<string, Button>();
         public string LastMessage { get; private set; } = "";
 
-        static readonly Color Lit = new Color(0.32f, 0.62f, 0.86f, 0.9f), Dim = new Color(1f, 1f, 1f, 0.08f);
+        static readonly Color Lit = new Color(0.25f, 0.55f, 0.85f, 1f), Dim = new Color(0.12f, 0.13f, 0.16f, 1f);
+        const float RowH = 42f, Icon = 30f;
+
+        sealed class Row
+        {
+            public Recipe recipe;
+            public Text name, station;
+            public readonly List<(Image icon, int itemId)> icons = new List<(Image, int)>();
+        }
+
         GameObject root;
         Text message;
         InputAction toggle;
         RecipeBook book;
         Inventory inventory;
-        readonly List<(Recipe recipe, Text label)> rows = new List<(Recipe, Text)>();
+        Meridian.Terrain.TerrainStreamer terrain;
+        readonly List<Row> rows = new List<Row>();
         float nextRefresh;
+        bool iconsDirty;
 
         void Start()
         {
             book = RecipeBook.Active;
             if (GameState.Instance != null) inventory = GameState.Instance.inventory;
+            terrain = FindAnyObjectByType<Meridian.Terrain.TerrainStreamer>();
             Build();
             if (inventory != null) inventory.Changed += Refresh;
+            ItemIcons.Loaded += MarkIcons;
             if (player != null && player.actions != null)
             {
                 toggle = player.actions.FindActionMap(MeridianInput.OnFoot, true).FindAction("BuildMenu");
-                if (toggle != null) toggle.performed += _ => SetOpen(!IsOpen);
+                if (toggle != null) toggle.performed += OnToggle;
             }
         }
 
         void OnDestroy()
         {
             if (inventory != null) inventory.Changed -= Refresh;
+            ItemIcons.Loaded -= MarkIcons;
+            if (toggle != null) toggle.performed -= OnToggle;
             if (IsOpen) AnyOpen = false;
         }
+
+        void OnToggle(InputAction.CallbackContext _) => SetOpen(!IsOpen);
+        void MarkIcons() => iconsDirty = true;
 
         public void SetOpen(bool open)
         {
@@ -59,11 +78,12 @@ namespace Meridian.UI
             root.SetActive(open);
             AnyOpen = open;
             enabled = open;
-            if (open) Refresh();
+            if (open) { FillIcons(); Refresh(); }
         }
 
         void Update()
         {
+            if (iconsDirty) { iconsDirty = false; FillIcons(); }
             // Stations come and go as the surveyor walks: refresh twice a second while open.
             if (Time.unscaledTime < nextRefresh) return;
             nextRefresh = Time.unscaledTime + 0.5f;
@@ -77,13 +97,11 @@ namespace Meridian.UI
         {
             var theme = UiTheme.Active;
             var canvas = UiKit.Canvas(transform, "CraftingCanvas", 111);
-            var center = new Vector2(0.5f, 0.5f);
-            var back = UiKit.Panel(canvas.transform, "Crafting", center, Vector2.zero, new Vector2(1840f, 820f), new Color(0.04f, 0.05f, 0.07f, 0.92f));
-            root = back.gameObject;
+            var back = UiKit.ModalPanel(canvas.transform, "Crafting", new Vector2(1840f, 900f), out root);
             var tl = new Vector2(0f, 1f);
-            UiKit.Text(back.transform, "TreeTitle", tl, new Vector2(24f, -30f), new Vector2(400f, 28f), 20, true, TextAnchor.MiddleLeft, theme.label).text = "BLUEPRINT TREE";
-            UiKit.Text(back.transform, "RecipeTitle", tl, new Vector2(820f, -30f), new Vector2(400f, 28f), 20, true, TextAnchor.MiddleLeft, theme.label).text = "RECIPES";
-            message = UiKit.Text(back.transform, "Message", new Vector2(0f, 0f), new Vector2(24f, 22f), new Vector2(1790f, 24f), 16, false, TextAnchor.MiddleLeft, theme.text);
+            UiKit.Text(back.transform, "TreeTitle", tl, new Vector2(28f, -32f), new Vector2(400f, 28f), 20, true, TextAnchor.MiddleLeft, theme.label).text = "BLUEPRINT TREE";
+            UiKit.Text(back.transform, "RecipeTitle", tl, new Vector2(860f, -32f), new Vector2(400f, 28f), 20, true, TextAnchor.MiddleLeft, theme.label).text = "RECIPES";
+            message = UiKit.Text(back.transform, "Message", new Vector2(0f, 0f), new Vector2(28f, 26f), new Vector2(1790f, 24f), 16, false, TextAnchor.MiddleLeft, theme.text);
 
             if (book == null) { message.text = "No recipe book (MERIDIAN/Authoring)"; root.SetActive(false); enabled = false; return; }
 
@@ -93,52 +111,67 @@ namespace Meridian.UI
             {
                 perTier.TryGetValue(b.tier, out int n);
                 perTier[b.tier] = n + 1;
-                var pos = new Vector2(24f + b.tier * 152f, -70f - n * 92f); // five tiers fit left of the recipes (x < 790)
-                var node = UiKit.Rect(back.transform, "Node_" + b.id, tl, pos, new Vector2(144f, 80f), tl).gameObject.AddComponent<Image>();
+                var pos = new Vector2(28f + b.tier * 158f, -72f - n * 96f);
+                var node = UiKit.Rect(back.transform, "Node_" + b.id, tl, pos, new Vector2(148f, 84f), tl).gameObject.AddComponent<Image>();
                 node.color = Dim;
                 Nodes[b.id] = node;
-                var t = UiKit.Text(node.transform, "Name", tl, new Vector2(8f, -14f), new Vector2(132f, 22f), 13, true, TextAnchor.MiddleLeft, theme.text);
+                var t = UiKit.Text(node.transform, "Name", tl, new Vector2(10f, -16f), new Vector2(132f, 22f), 14, true, TextAnchor.MiddleLeft, theme.text);
                 t.horizontalOverflow = HorizontalWrapMode.Wrap;
                 t.text = b.name;
                 string needs = string.IsNullOrEmpty(b.unlockFlag) ? (b.requires != null && b.requires.Length > 0 ? "after " + b.requires[0] : "known") : b.unlockFlag.Replace("beacon:", "beacon · ");
-                UiKit.Text(node.transform, "Needs", tl, new Vector2(8f, -50f), new Vector2(132f, 20f), 11, false, TextAnchor.MiddleLeft, theme.label).text = needs;
+                UiKit.Text(node.transform, "Needs", tl, new Vector2(10f, -62f), new Vector2(132f, 18f), 12, false, TextAnchor.MiddleLeft, theme.label).text = needs;
             }
 
-            // Recipes: a row each.
-            int row = 0;
-            foreach (var r in book.recipes)
+            // Recipes: icon rows.
+            for (int i = 0; i < book.recipes.Count; i++)
             {
-                var pos = new Vector2(820f, -70f - row * 44f);
-                var label = UiKit.Text(back.transform, "Recipe_" + r.id, tl, pos, new Vector2(560f, 36f), 14, false, TextAnchor.MiddleLeft, theme.text);
-                label.text = Describe(r);
-                rows.Add((r, label));
+                var r = book.recipes[i];
+                float y = -72f - i * RowH;
+                var row = new Row { recipe = r };
+                float x = 860f;
+                row.icons.Add((IconAt(back.transform, x, y), ItemRegistry.Get(r.output.item)?.id ?? 0));
+                row.name = UiKit.Text(back.transform, "Out_" + r.id, tl, new Vector2(x + Icon + 8f, y - 4f), new Vector2(250f, Icon), 16, true, TextAnchor.MiddleLeft, theme.text);
+                row.name.text = (r.output.count > 1 ? r.output.count + " × " : "") + Name(r.output.item);
+                x += 300f;
+                UiKit.Text(back.transform, "Arrow_" + r.id, tl, new Vector2(x, y - 4f), new Vector2(30f, Icon), 18, true, TextAnchor.MiddleCenter, theme.label).text = "←";
+                x += 40f;
+                foreach (var a in r.inputs)
+                {
+                    row.icons.Add((IconAt(back.transform, x, y), ItemRegistry.Get(a.item)?.id ?? 0));
+                    UiKit.Text(back.transform, "In_" + r.id + a.item, tl, new Vector2(x + Icon + 4f, y - 4f), new Vector2(40f, Icon), 16, true, TextAnchor.MiddleLeft, theme.text).text = "× " + a.count;
+                    x += Icon + 56f;
+                }
+                row.station = UiKit.Text(back.transform, "Station_" + r.id, tl, new Vector2(1500f, y - 4f), new Vector2(150f, Icon), 13, false, TextAnchor.MiddleLeft, theme.label);
+                row.station.text = r.station.ToString().ToUpperInvariant();
                 var recipe = r;
-                var btn = UiKit.Button(back.transform, "CRAFT", Vector2.zero, () => Craft(recipe));
-                var rt = (RectTransform)btn.transform;
-                rt.anchorMin = rt.anchorMax = rt.pivot = tl;
-                rt.anchoredPosition = new Vector2(1690f, pos.y);
-                rt.sizeDelta = new Vector2(130f, 36f);
-                CraftButtons[r.id] = btn;
-                row++;
+                CraftButtons[r.id] = UiKit.ActionButton(back.transform, "CRAFT", tl, new Vector2(1680f, y), new Vector2(130f, 34f), () => Craft(recipe));
+                rows.Add(row);
             }
             root.SetActive(false);
             enabled = false;
         }
 
-        static string Name(string key) => ItemRegistry.Get(key)?.name ?? key;
-
-        static string Describe(Recipe r)
+        static Image IconAt(Transform parent, float x, float y)
         {
-            var sb = new System.Text.StringBuilder();
-            sb.Append(r.output.count).Append(" × ").Append(Name(r.output.item)).Append("   ←   ");
-            for (int i = 0; i < r.inputs.Length; i++)
-            {
-                if (i > 0) sb.Append(" + ");
-                sb.Append(r.inputs[i].count).Append(' ').Append(Name(r.inputs[i].item));
-            }
-            sb.Append("   [").Append(r.station).Append(']');
-            return sb.ToString();
+            var img = UiKit.Panel(parent, "Icon", new Vector2(0f, 1f), new Vector2(x, y), new Vector2(Icon, Icon), Color.white);
+            img.rectTransform.pivot = new Vector2(0f, 1f);
+            img.preserveAspect = true;
+            img.enabled = false;
+            return img;
         }
+
+        void FillIcons()
+        {
+            foreach (var row in rows)
+                foreach (var (icon, id) in row.icons)
+                {
+                    var sp = ItemIcons.Get(id, terrain);
+                    icon.sprite = sp;
+                    icon.enabled = sp != null;
+                }
+        }
+
+        static string Name(string key) => ItemRegistry.Get(key)?.name ?? key;
 
         /// <summary>Crafts a recipe (buttons and tests). Returns the outcome; the panel shows it.</summary>
         public CraftingSystem.Result Craft(Recipe r)
@@ -156,16 +189,14 @@ namespace Meridian.UI
             var flags = Flags;
             foreach (var b in book.blueprints)
                 if (Nodes.TryGetValue(b.id, out var img)) img.color = CraftingSystem.IsUnlocked(b, flags) ? Lit : Dim;
-            foreach (var (r, label) in rows)
+            foreach (var row in rows)
             {
-                var check = CraftingSystem.Check(book, r, inventory, flags, Here);
+                var check = CraftingSystem.Check(book, row.recipe, inventory, flags, Here);
                 bool unlocked = check != CraftingSystem.Result.Locked;
-                label.color = unlocked ? UiTheme.Active.text : new Color(1f, 1f, 1f, 0.3f);
-                bool can = check == CraftingSystem.Result.Crafted;
-                var btn = CraftButtons[r.id];
-                btn.interactable = can;
-                var caption = btn.GetComponentInChildren<Text>();
-                if (caption != null) caption.color = can ? UiTheme.Active.text : new Color(1f, 1f, 1f, 0.22f); // clearly not craftable
+                row.name.color = unlocked ? UiTheme.Active.text : new Color(1f, 1f, 1f, 0.3f);
+                bool stationHere = check != CraftingSystem.Result.NoStation && check != CraftingSystem.Result.Locked;
+                row.station.color = stationHere ? UiTheme.Accent(null) : UiTheme.Active.label;
+                UiKit.SetAction(CraftButtons[row.recipe.id], check == CraftingSystem.Result.Crafted);
             }
         }
     }

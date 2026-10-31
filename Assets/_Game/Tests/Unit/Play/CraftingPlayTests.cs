@@ -42,9 +42,23 @@ namespace Meridian.Tests
             for (int n = 0; n < 3; n++)
             {
                 Vector2 feet = player.Body.position;
-                int x = Mathf.FloorToInt(feet.x) + 1, y = Mathf.FloorToInt(feet.y);
-                Assert.IsTrue(rig.Place(new Vector2(x + 0.5f, y + 0.5f), TileId.Hematite), "an ore seam");
+                // A free cell near the surveyor (clear of his collider, the camp props and rising ground).
+                int x = 0, y = 0;
+                bool placed = false;
+                foreach (int dx in new[] { 2, -2, 3, -3, 1, -1 })
+                {
+                    foreach (int dy in new[] { 0, 1 })
+                    {
+                        x = Mathf.FloorToInt(feet.x) + dx; y = Mathf.FloorToInt(feet.y) + dy;
+                        if (rig.Place(new Vector2(x + 0.5f, y + 0.5f), TileId.Hematite)) { placed = true; break; }
+                    }
+                    if (placed) break;
+                }
+                Assert.IsTrue(placed, "an ore seam");
                 Assert.IsTrue(rig.Dig(new Vector2(x + 0.5f, y + 0.5f)), "Beam digs the ore");
+                // Walk to the ore (it pops out of the seam).
+                for (int k = 0; k < 10; k++) yield return new WaitForFixedUpdate();
+                if (rig.drops.Live.Count > 0) { player.Body.position = rig.drops.Live[0].transform.position; player.Body.linearVelocity = Vector2.zero; }
                 float until = Time.realtimeSinceStartup + 5f;
                 while (inv.Count(hematite) < n + 1 && Time.realtimeSinceStartup < until) yield return new WaitForFixedUpdate();
             }
@@ -80,8 +94,8 @@ namespace Meridian.Tests
             // A story blueprint stays locked until its beacon.
             var perchlorate = book.FindRecipe("refine_fuel_perchlorate");
             Assert.AreEqual(CraftingSystem.Result.Locked, panel.Craft(perchlorate));
-            Assert.IsTrue(panel.Nodes["smelting"].color.a > 0.5f, "Smelting lit in the tree");
-            Assert.IsTrue(panel.Nodes["perchlorate_oxidizer"].color.a < 0.5f, "Perchlorate oxidizer dim until the Mars beacon");
+            Assert.Greater(panel.Nodes["smelting"].color.b, 0.5f, "Smelting lit in the tree");
+            Assert.Less(panel.Nodes["perchlorate_oxidizer"].color.b, 0.5f, "Perchlorate oxidizer dim until the Mars beacon");
             panel.SetOpen(false);
             LogAssert.NoUnexpectedReceived();
         }

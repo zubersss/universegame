@@ -35,7 +35,7 @@ namespace Meridian.Items
             Tile(TileId.Sand, "sand", "Sand", "icons/sand/base");
             Tile(TileId.Snow, "snow", "Snow", null);
             Tile(TileId.Regolith, "regolith", "Regolith", null);
-            Tile(TileId.Basalt, "basalt", "Basalt", null);
+            Tile(TileId.Basalt, "basalt", "Basalt", "icons/basalt/base");
             Tile(TileId.Hematite, "hematite", "Hematite", "icons/hematite/base");
             Tile(TileId.Ice, "water_ice", "Water ice", "icons/water_ice/base");
             // Mercury (U-048): its ice drops the same water ice.
