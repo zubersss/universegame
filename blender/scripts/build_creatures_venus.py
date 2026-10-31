@@ -396,7 +396,7 @@ def build_pressure_crab(scene):
     sp = "pressure_crab"
     coll = bpy.data.collections.new(sp)
     scene.collection.children.link(coll)
-    zb = 0.46
+    zb = 0.34                                                               # B-034: lower, flatter
     ad = bpy.data.armatures.new(f"{sp}_rig")
     rig = bpy.data.objects.new(f"{sp}_rig", ad)
     coll.objects.link(rig)
@@ -406,43 +406,43 @@ def build_pressure_crab(scene):
     body = eb.new("body"); body.head, body.tail = Vector((-0.2, 0, zb)), Vector((0.2, 0, zb))
     legs = {}
     for sy in (-1, 1):
-        for k, (x, dx) in enumerate(((0.32, 0.22), (0.0, 0.02), (-0.32, -0.22))):
+        for k, (x, dx) in enumerate(((0.36, 0.34), (0.05, 0.12), (-0.3, -0.34))):   # B-034: splayed fore/aft
             tag = f"{k}{'n' if sy < 0 else 'f'}"
             p0 = Vector((x, sy * 0.3, zb - 0.05))
-            p1 = Vector((x + dx, sy * 0.42, zb + 0.14))                     # knee up and out
-            p2 = Vector((x + 1.8 * dx, sy * 0.48, 0.0))                     # foot on the ground
+            p1 = Vector((x + dx, sy * 0.42, zb + 0.2))                      # knee arched high
+            p2 = Vector((x + 2.4 * dx, sy * 0.48, 0.0))                     # foot far out
             a = eb.new(f"fem_{tag}"); a.head, a.tail = p0, p1; a.parent = body
             b = eb.new(f"tib_{tag}"); b.head, b.tail = p1, p2; b.parent = a
             legs[tag] = (p0, p1, p2)
     for sy in (-1, 1):
         tag = "n" if sy < 0 else "f"
-        a = eb.new(f"arm_{tag}"); a.head, a.tail = Vector((0.5, sy * 0.24, zb)), Vector((0.72, sy * 0.28, zb + 0.12))
+        a = eb.new(f"arm_{tag}"); a.head, a.tail = Vector((0.5, sy * 0.24, zb)), Vector((0.78, sy * 0.28, zb + 0.04))   # held forward
         a.parent = body
     bpy.ops.object.mode_set(mode="OBJECT")
     # Legs: metaball capsules -> one mesh -> automatic weights.
     # Leg radii x1.5 after review: stick-thin legs vanished at 60 px/m.
     chains = [[(p.x, p.y, p.z, r) for p, r in zip(pts, (0.085, 0.07, 0.035))] for pts in legs.values()]
-    chains += [[(0.46, sy * 0.24, zb, 0.08), (0.72, sy * 0.28, zb + 0.12, 0.07)] for sy in (-1, 1)]
+    chains += [[(0.46, sy * 0.24, zb, 0.08), (0.78, sy * 0.28, zb + 0.04, 0.07)] for sy in (-1, 1)]
     legm = _capsules_mesh(f"{sp}_legs", coll, chains, 0.012)
     legm.data.materials.append(_glass(f"{sp}_leg"))
     bind_auto(legm, rig)
     glass = _glass(f"{sp}_shell")
     glow = flat_material(f"{sp}_glow", (120, 40, 10), emit=(255, 120, 40), strength=1.6)
-    _ellipsoid(f"{sp}_core", (0.0, 0, zb + 0.02), (0.62, 0.42, 0.24), glow, coll, rig, "body")
-    for k, (x, z, s) in enumerate(((-0.3, zb + 0.06, 0.95), (0.0, zb + 0.1, 1.05), (0.3, zb + 0.07, 1.0))):
-        _ellipsoid(f"{sp}_plate{k}", (x, 0, z), (0.3 * s, 0.48 * s, 0.26 * s), glass, coll, rig, "body")
+    _ellipsoid(f"{sp}_core", (0.0, 0, zb + 0.02), (0.82, 0.48, 0.17), glow, coll, rig, "body")
+    for k, (x, z, s) in enumerate(((-0.42, zb + 0.04, 0.95), (0.0, zb + 0.07, 1.05), (0.42, zb + 0.05, 1.0))):
+        _ellipsoid(f"{sp}_plate{k}", (x, 0, z), (0.42 * s, 0.54 * s, 0.18 * s), glass, coll, rig, "body")   # wide, flat
     for sy in (-1, 1):                                                       # claws: heavy pincers
         tag = "n" if sy < 0 else "f"
-        _ellipsoid(f"{sp}_claw_{tag}", (0.88, sy * 0.28, zb + 0.16), (0.24, 0.11, 0.14), glass, coll, rig, f"arm_{tag}", 24)   # heavy pincer
+        _ellipsoid(f"{sp}_claw_{tag}", (0.96, sy * 0.28, zb + 0.06), (0.24, 0.11, 0.12), glass, coll, rig, f"arm_{tag}", 24)   # heavy pincer, forward
         bpy.ops.mesh.primitive_cone_add(vertices=8, radius1=0.07, radius2=0.0, depth=0.22,
-                                        location=(1.08, sy * 0.28, zb + 0.24), rotation=(0, math.pi / 2 - 0.3, 0))
+                                        location=(1.18, sy * 0.28, zb + 0.1), rotation=(0, math.pi / 2 - 0.15, 0))
         tip = bpy.context.active_object
         tip.data.materials.append(glass)
         _rigid_on_bone(tip, rig, f"arm_{tag}", coll)
     eye = flat_material(f"{sp}_eye", (80, 30, 10), emit=(255, 150, 60), strength=2.0)
     for sy in (-1, 1):                                                       # eyes on stalks
-        _ellipsoid(f"{sp}_stalk{sy}", (0.4, sy * 0.1, zb + 0.24), (0.018, 0.018, 0.08), glass, coll, rig, "body", 12)
-        _ellipsoid(f"{sp}_eye{sy}", (0.4, sy * 0.1, zb + 0.33), (0.03, 0.03, 0.03), eye, coll, rig, "body", 12)
+        _ellipsoid(f"{sp}_stalk{sy}", (0.5, sy * 0.1, zb + 0.18), (0.018, 0.018, 0.08), glass, coll, rig, "body", 12)
+        _ellipsoid(f"{sp}_eye{sy}", (0.5, sy * 0.1, zb + 0.27), (0.03, 0.03, 0.03), eye, coll, rig, "body", 12)
     tags = list(legs)
     for name, i, f in _frames():
         t = i / CLIP_LEN[name]

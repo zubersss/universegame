@@ -165,9 +165,9 @@ PRESETS = {
         far=dict(W=9000.0, level=0.34, peak=0.52, rock=[(40, 34, 32), (58, 48, 42)], snow=(0, 0, 0),
                  snowline=9.0, haze=(0.5, 0.00004), tilt=6.0),
         mid=dict(W=700.0, level=0.40, amp=0.08, depth=(20, 140), haze=(0.3, 0.0012),
-                 ground=[(34, 30, 30), (52, 44, 40)], rocks=140, rock_h=(1, 5), vents=60, tilt=12.0, frame_up=-0.08),
+                 ground=[(34, 30, 30), (52, 44, 40)], ground_rough=0.3, rocks=140, rock_h=(1, 5), vents=60, tilt=12.0, frame_up=-0.08),
         near=dict(W=64.0, level=0.26, amp=0.04, depth=(3, 14), haze=(0.08, 0.003),
-                  ground=[(30, 26, 28), (50, 42, 40)], rocks=90, rock_h=(0.2, 1.4), pebbles=600, vents=25,
+                  ground=[(30, 26, 28), (50, 42, 40)], ground_rough=0.25, rocks=90, rock_h=(0.2, 1.4), pebbles=600, vents=25,
                   tilt=18.0, frame_up=0.12),
         rock=[(40, 34, 34), (58, 50, 46), (30, 28, 30)],
     ),
@@ -930,10 +930,11 @@ def terrace01(a, levels, cliff=0.3):
     return (k + f * f * (3 - 2 * f)) / levels
 
 
-def mat_strata(name, cols, W, strata):
+def mat_strata(name, cols, W, strata, rough=0.95):
     """Ground/cliff rock: wrapped world-space noise variation plus horizontal strata bands
-    (period m, band colour, strength), warped by noise so they don't read as ruled lines."""
-    m = mat_varied(name, cols, 0.95, 0.35, 0.6, W=W, world_noise=True)
+    (period m, band colour, strength), warped by noise so they don't read as ruled lines.
+    rough < 0.95 gives a glassy sheen (B-034 Venus basalt plain)."""
+    m = mat_varied(name, cols, rough, 0.35, 0.6, W=W, world_noise=True)
     if not strata:
         return m
     period, band_col, k = strata
@@ -974,7 +975,7 @@ def rock_layer(P, spec, seed, preview, work, near):
     rnd = random.Random(seed)
     rng = np.random.default_rng(seed)
     base, amp = top * spec["level"], top * spec["amp"]
-    ground = mat_strata("ground", spec["ground"], W, spec.get("strata"))
+    ground = mat_strata("ground", spec["ground"], W, spec.get("strata"), spec.get("ground_rough", 0.95))
     rockm = mat_varied("rock", P["rock"], 0.9, 1.2, 0.6, W=W)
     fog = spec.get("fog")
     for m in (ground, rockm):
@@ -1084,8 +1085,24 @@ def rock_layer(P, spec, seed, preview, work, near):
         pr = vm.node_tree.nodes["Principled BSDF"]
         pr.inputs["Base Color"].default_value = lin((90, 30, 10))
         pr.inputs["Emission Color"].default_value = lin((255, 120, 40))
-        pr.inputs["Emission Strength"].default_value = 1.6
+        pr.inputs["Emission Strength"].default_value = 4.0           # B-034: legible mouths
         _haze(vm, P["haze"], spec["haze"][0], spec["haze"][1], front=W)
+        hm = bpy.data.materials.new("vent_halo")                         # B-034: glow halo
+        hm.use_nodes = True
+        hp = hm.node_tree.nodes["Principled BSDF"]
+        hp.inputs["Base Color"].default_value = lin((70, 26, 12))
+        hp.inputs["Emission Color"].default_value = lin((255, 110, 40))
+        hp.inputs["Emission Strength"].default_value = 0.9
+        hp.inputs["Alpha"].default_value = 0.45
+        _haze(hm, P["haze"], spec["haze"][0], spec["haze"][1], front=W)
+        hc = proto_collection("vent_halo", scene)
+        bpy.ops.mesh.primitive_circle_add(vertices=24, radius=1.0, fill_type="TRIFAN", location=(0, 0, 0))
+        ho = bpy.context.active_object
+        for c in list(ho.users_collection):
+            c.objects.unlink(ho)
+        hc.objects.link(ho)
+        ho.scale = (3.2, 2.2, 1.0)
+        ho.data.materials.append(hm)
         vc = proto_collection("vent", scene)
         vo = bpy.data.objects.new("vent", blob_mesh("ventmesh", None, 77, subdiv=2, strength=0.3, scale=0.8))
         vc.objects.link(vo)
@@ -1095,8 +1112,10 @@ def rock_layer(P, spec, seed, preview, work, near):
         for _ in range(spec["vents"]):
             x = rnd.uniform(0, W)
             y = y_vis + (d1 - y_vis) * rnd.random()
-            s = lo * rnd.uniform(0.4, 1.0)
-            instance(scene.collection, vc, (x, y, ground_z(x, y) - 0.05 * s), s, rnd.uniform(0, 6.3), W)
+            s = lo * rnd.uniform(1.0, 2.0)                               # B-034: bigger mouths
+            rz = rnd.uniform(0, 6.3)
+            instance(scene.collection, vc, (x, y, ground_z(x, y) - 0.05 * s), s, rz, W)
+            instance(scene.collection, hc, (x, y, ground_z(x, y) + 0.02 * s), s, rz, W)
     return render(scene, work, ("near" if near else "mid") + str(seed), W)
 
 
@@ -1155,6 +1174,11 @@ def cloud_bank(P, spec, seed, preview):
     d = yy - top[None, :]                                  # depth below the crown line, px
     body = np.clip(1 - d / spec["fall"], 0.25, 1.0) * 0.75  # body away from billows: darker down
     lit = np.where(owner, 0.18 + 0.82 * shade, body)
+    # B-034: hard arcs where a billow edge crossed body pixels: a light periodic blur of the
+    # shading (3 px, wrapped in x) melts them; the silhouette (alpha) stays crisp.
+    for _ in range(5):                                       # 2 passes left faint arcs
+        lit = (lit + np.roll(lit, 1, 1) + np.roll(lit, -1, 1)) / 3
+        lit[1:-1] = (lit[1:-1] + lit[:-2] + lit[2:]) / 3
     fb = fft_noise(rng, H, W, 20, 300, 1.4)
     lit = np.clip(lit + 0.06 * fb, 0, 1)
     crown, under = np.array(spec["crown"], np.float32) / 255, np.array(spec["under"], np.float32) / 255
@@ -1387,8 +1411,11 @@ def generate(entry, ctx):
             rgb = sky * (1 - a) + bank[..., :3] * a
             return {"color": np.dstack([pngio.to_u8(rgb), np.full(rgb.shape[:2], 255, np.uint8)])}
         return {"color": _finish_transparent(bank)}
-    if layer == "layer0":
-        sky = GB.sky_rgb(GB.PRESETS[planet], np.random.default_rng(seed))
+    if layer in ("layer0", "layer0_nosun"):
+        sp = dict(GB.PRESETS[planet])
+        if layer == "layer0_nosun":                                   # B-034: UNITY draws the Sun
+            sp.pop("sun_glow", None)
+        sky = GB.sky_rgb(sp, np.random.default_rng(seed))
         if preview:
             sky = sky[::4, ::4]
         rng_px = far_layer(P, P["far"], seed, preview, work)

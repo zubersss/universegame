@@ -145,6 +145,38 @@ def _frames():
             yield name, i, CLIP_START[name] + i
 
 
+def flare_material(name):
+    """B-034 flare shell: white-hot at the wing root fading to orange and transparent toward
+    the tip and edges (a uniform shell read as a flat white cut-out). Driven by the distance
+    from the wing root in object space; the emission pass keeps linked strength sockets."""
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    N, L = nt.nodes, nt.links
+    pr = N["Principled BSDF"]
+    tc = N.new("ShaderNodeTexCoord")
+    ln = N.new("ShaderNodeVectorMath"); ln.operation = "LENGTH"
+    L.new(tc.outputs["Object"], ln.inputs[0])
+    t = N.new("ShaderNodeMapRange"); t.interpolation_type = "SMOOTHSTEP"
+    t.inputs["From Min"].default_value, t.inputs["From Max"].default_value = 0.05, 0.85
+    L.new(ln.outputs["Value"], t.inputs["Value"])
+    ramp = N.new("ShaderNodeValToRGB")
+    ramp.color_ramp.elements[0].color = lin((255, 248, 226))
+    ramp.color_ramp.elements[1].color = lin((255, 140, 50))
+    L.new(t.outputs["Result"], ramp.inputs["Fac"])
+    L.new(ramp.outputs["Color"], pr.inputs["Base Color"])
+    L.new(ramp.outputs["Color"], pr.inputs["Emission Color"])
+    inv = N.new("ShaderNodeMath"); inv.operation = "SUBTRACT"; inv.inputs[0].default_value = 1.0
+    L.new(t.outputs["Result"], inv.inputs[1])
+    al = N.new("ShaderNodeMath"); al.operation = "MULTIPLY"; al.inputs[1].default_value = 0.8
+    L.new(inv.outputs[0], al.inputs[0])
+    L.new(al.outputs[0], pr.inputs["Alpha"])
+    st = N.new("ShaderNodeMath"); st.operation = "MULTIPLY"; st.inputs[1].default_value = 3.0
+    L.new(inv.outputs[0], st.inputs[0])
+    L.new(st.outputs[0], pr.inputs["Emission Strength"])
+    return m
+
+
 def build_flarewing(scene):
     """Flier that feeds on flares (centred pivot). Dark light-absorbing body with a forked
     tail; two bat-like membranes with glowing veins (emission). The attack is the 'flare': a
@@ -157,10 +189,12 @@ def build_flarewing(scene):
     coll.objects.link(root)
     mb = bpy.data.metaballs.new(f"{sp}_mb")
     mb.resolution = mb.render_resolution = 0.01
-    for typ, co, r, size in (("ELLIPSOID", (0.0, 0, 0), 0.13, (1.6, 0.9, 0.8)),       # thorax
-                             ("ELLIPSOID", (0.22, 0, 0.02), 0.08, (1.3, 0.9, 0.9)),    # head
-                             ("CAPSULE", (-0.3, 0, -0.01), 0.05, (0.16, 1, 1)),         # tail: capsules overlap
-                             ("CAPSULE", (-0.55, 0, 0.0), 0.035, (0.16, 1, 1))):        # (short ones read as dashes)
+    # B-034: body ~2x thicker with a distinct thorax hump (it read stick-thin).
+    for typ, co, r, size in (("ELLIPSOID", (0.02, 0, 0.0), 0.22, (1.35, 0.9, 0.85)),     # thorax
+                             ("ELLIPSOID", (-0.18, 0, -0.01), 0.15, (1.3, 0.85, 0.8)),  # abdomen
+                             ("ELLIPSOID", (0.26, 0, 0.03), 0.12, (1.2, 0.9, 0.9)),     # head
+                             ("CAPSULE", (-0.38, 0, -0.01), 0.07, (0.16, 1, 1)),        # tail: capsules overlap
+                             ("CAPSULE", (-0.6, 0, 0.0), 0.045, (0.14, 1, 1))):         # (short ones read as dashes)
         e = mb.elements.new(type=typ)
         e.co, e.radius = co, r * 1.35
         e.size_x, e.size_y, e.size_z = size
@@ -183,8 +217,7 @@ def build_flarewing(scene):
         ey.data.materials.append(flat_material(f"{sp}_eye", (80, 40, 20), emit=(255, 170, 70), strength=2.0))
         ey.parent = root
     memb = membrane_material(f"{sp}_membrane", (70, 30, 22), (255, 150, 60), 1.5, 0.92)
-    hot = flat_material(f"{sp}_flare", (255, 222, 150), emit=(255, 226, 160), strength=2.4)
-    hot.node_tree.nodes["Principled BSDF"].inputs["Alpha"].default_value = 0.55   # veins show through the bloom
+    hot = flare_material(f"{sp}_flare")
     wings = []
     for sy in (-1, 1):
         # Bat-like membrane in the XY plane: root at the origin, leading edge out to the tip,
