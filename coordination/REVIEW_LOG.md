@@ -691,3 +691,7 @@ Decided: D-048 (flare = hazard level 4, 12/s), answering UNITY's U-049 acceptanc
 Checked: all commits reviewed; UNITY busy on U-049; BLENDER idle by design.
 Queue: UNITY 8 Ready (M3), BLENDER 0.
 User: USER-12 (M2 playtest) open.
+
+## Cycle 109 · 2026-10-31 (UNITY message)
+Moved: U-049 → Done; U-048 → In Progress.
+Decided: D-049 (flare cadence 8–12 min; night side shadowed; clocks saved in U-048).

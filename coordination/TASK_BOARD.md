@@ -394,19 +394,19 @@ Files: Assets/_Game/Code/Runtime/UI/, Planet/
 Depends: U-044
 Lead notes: Done (cycle 100): menu in the left third (Pilgrim clear); canyon-floor sky gradient below about 37 m under the datum; D-047 applied; border-test race fixed. The canyon floor still reads flat, so the real canyon backdrop art is B-049, and its hookup comes after.
 
-### U-048 · UNITY · Ready · M3
+### U-048 · UNITY · In Progress · M3
 Goal: Mercury world (Bible §7.3): SolidWorldGenerator preset with terrain/mercury sets (B-027), a day side, a night side and a ~400 m twilight band that creeps 1 m per 6 real s, two polar cold-trap craters with water ice, backdrop from backgrounds/mercury with layer0_nosun + the Sun as its own sprite, and the Mercury POIs (B-033: flare shelter, Meridian beacon, Warden vault gate, solarite clusters).
 Accept: EditMode tests for band position over time and cold-trap placement; captures of day, twilight, night and cold trap; entry ≤ 1.5 s; BudgetGate green.
 Files: Assets/_Game/Code/Runtime/Terrain/, Planet/, POI/
 Depends: U-039, U-030
-Lead notes: Cycle 98. M3.
+Lead notes: Cycle 98. M3. (Cycle 109) Include a persistent Mercury terminator + flare clock in SaveData (U-049 caveat).
 
-### U-049 · UNITY · In Progress · M3
+### U-049 · UNITY · Done · M3
 Goal: Hazards v2 + Envirosuit (Bible §7, D-032): Thermal, Radiation, Toxic and Pressure on the U-029 API; Mercury solar flares (45 s warning, then 20 s of Radiation 3; shelter in shadow, underground or a flare shelter); Mars lava tubes at Radiation 0; Envirosuit tiers Mk1–3 reduce levels (k) and swap the surveyor sheet (B-041 mk1/mk2/mk3).
 Accept: EditMode tables per hazard and planet; PlayMode: a flare kills an unprotected surveyor in the open within 30 s and not inside a shelter; the Mk sheet swaps at equip; HUD shows the worst hazard.
 Files: Assets/_Game/Code/Runtime/Hazards/, Player/
 Depends: U-029, U-045
-Lead notes: Cycle 98. M3. (Cycle 107) Flares = level 4, 12/s (D-048); acceptance "a flare kills an unprotected surveyor in the open within 30 s" stands.
+Lead notes: Done (cycle 109): HazardTable for Mars/Mercury/Venus per Bible §7; flares level 4 (D-048), cadence per D-049; Envirosuit tiers lower levels and swap mk1–3 sheets (saved); HUD shows the worst hazard; HazardTableTests 7 + HazardV2PlayTests 3; full check 15:44 green.
 
 ### U-050 · UNITY · Ready · M3
 Goal: Venus world (Bible §7.4): hybrid column with the surface (Datum 320; terrain/venus, B-028; Thermal 3, Pressure 3, Toxic 2) and the habitable cloud deck at y 770 ± 60 (backgrounds/venus_deck) where floating station props (B-045) sit; super-rotation wind (constant lateral push, 80-min cycle); acid haze ticks; backgrounds switch deck ↔ surface with altitude.
