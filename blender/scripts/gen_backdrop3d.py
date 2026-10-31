@@ -108,6 +108,15 @@ PRESETS = {
         needle=[(32, 60, 40), (44, 72, 46)],
         bark=(90, 74, 60),
     ),
+    # B-039 Waystation docking bay (interior): front-top work lighting, bay air haze.
+    "waystation": dict(
+        sun=dict(dir=(-0.25, 0.7, -0.67), strength=3.2, color=(1.0, 0.96, 0.9), angle=8.0),
+        ambient=((0.52, 0.56, 0.64), 0.45),
+        haze=(92, 98, 110),
+        bay=[dict(W=48.0, haze=(0.3, 0.0004), tilt=0.0),
+             dict(W=36.0, haze=(0.12, 0.0004), tilt=0.0),
+             dict(W=24.0, haze=(0.02, 0.0004), tilt=8.0, frame_up=0.12)],
+    ),
     # B-027 Mercury (Bible §7.3): airless, so harsh small-angle sun, almost no ambient, little
     # haze; cratered relief; blinding grey regolith; violet twilight in the sky only.
     "mercury": dict(
@@ -1160,6 +1169,194 @@ def cloud_bank(P, spec, seed, preview):
     return out
 
 
+# ---------------------------------------------------------------- B-039: rendered docking bay
+
+def _bay_obj(name, size, loc, mat, coll, W, bevel=0.04):
+    """A bevelled box plus linked copies at x - W and x + W (shared mesh, same object space),
+    so geometry, shadows and object-space textures all wrap with the period."""
+    bpy.ops.mesh.primitive_cube_add(size=1.0, location=loc)
+    ob = bpy.context.active_object
+    ob.name = name
+    ob.scale = size
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    if bevel:
+        bv = ob.modifiers.new("bevel", "BEVEL")
+        bv.width, bv.segments = bevel, 2
+    ob.data.materials.append(mat)
+    for c in list(ob.users_collection):
+        c.objects.unlink(ob)
+    coll.objects.link(ob)
+    for dx in (-W, W):
+        cp = ob.copy()
+        cp.location.x += dx
+        coll.objects.link(cp)
+    return ob
+
+
+def _bay_mat(name, col, dirt, rough=0.6, metal=0.4, W=None, stripes=None, emit=None, strength=1.0):
+    """Worn industrial paint: periodic grime noise (continuous at the wrap), optional hazard
+    stripes (period divides W) and emission."""
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    N, L = nt.nodes, nt.links
+    pr = N["Principled BSDF"]
+    pr.inputs["Roughness"].default_value = rough
+    pr.inputs["Metallic"].default_value = metal
+    geo = N.new("ShaderNodeNewGeometry")
+    nz = N.new("ShaderNodeTexNoise"); nz.inputs["Scale"].default_value = 0.8; nz.inputs["Detail"].default_value = 6.0
+    _periodic_noise(nt, geo.outputs["Position"], W, nz)
+    mr = N.new("ShaderNodeMapRange")
+    mr.inputs["From Min"].default_value, mr.inputs["From Max"].default_value = 0.45, 0.75
+    L.new(nz.outputs["Fac"], mr.inputs["Value"])
+    base = N.new("ShaderNodeMix"); base.data_type = "RGBA"
+    L.new(mr.outputs["Result"], base.inputs[0])
+    base.inputs[6].default_value = lin(col); base.inputs[7].default_value = lin(dirt)
+    out = base.outputs[2]
+    if stripes:
+        # Diagonal hazard stripes: fract((x + z) / period) < 0.5; the period divides W.
+        sep = N.new("ShaderNodeSeparateXYZ")
+        L.new(geo.outputs["Position"], sep.inputs[0])
+        add = N.new("ShaderNodeMath"); add.operation = "ADD"
+        L.new(sep.outputs["X"], add.inputs[0]); L.new(sep.outputs["Z"], add.inputs[1])
+        fr = N.new("ShaderNodeMath"); fr.operation = "FLOORED_MODULO"; fr.inputs[1].default_value = stripes
+        L.new(add.outputs[0], fr.inputs[0])
+        lt = N.new("ShaderNodeMath"); lt.operation = "LESS_THAN"; lt.inputs[1].default_value = stripes / 2
+        L.new(fr.outputs[0], lt.inputs[0])
+        sm = N.new("ShaderNodeMix"); sm.data_type = "RGBA"
+        L.new(lt.outputs[0], sm.inputs[0])
+        L.new(out, sm.inputs[6]); sm.inputs[7].default_value = lin((26, 26, 28))
+        out = sm.outputs[2]
+    L.new(out, pr.inputs["Base Color"])
+    bp = N.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = 0.25
+    L.new(nz.outputs["Fac"], bp.inputs["Height"])
+    L.new(bp.outputs["Normal"], pr.inputs["Normal"])
+    if emit:
+        pr.inputs["Emission Color"].default_value = lin(emit)
+        pr.inputs["Emission Strength"].default_value = strength
+    return m
+
+
+def _stars_mat(name, W):
+    """Black space with sparse emissive stars (periodic noise, so the window tiles)."""
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    N, L = nt.nodes, nt.links
+    pr = N["Principled BSDF"]
+    pr.inputs["Base Color"].default_value = (0.004, 0.005, 0.01, 1)
+    geo = N.new("ShaderNodeNewGeometry")
+    nz = N.new("ShaderNodeTexNoise"); nz.inputs["Scale"].default_value = 25.0; nz.inputs["Detail"].default_value = 0.0
+    _periodic_noise(nt, geo.outputs["Position"], W, nz)
+    mr = N.new("ShaderNodeMapRange")
+    mr.inputs["From Min"].default_value, mr.inputs["From Max"].default_value = 0.8, 0.83   # sparse pinpoints
+    mr.inputs["To Max"].default_value = 3.0
+    L.new(nz.outputs["Fac"], mr.inputs["Value"])
+    L.new(mr.outputs["Result"], pr.inputs["Emission Strength"])
+    pr.inputs["Emission Color"].default_value = (1, 1, 1, 1)
+    return m
+
+
+def bay_layer(P, spec, seed, preview, work, which):
+    W = spec["W"]
+    H = W / 2
+    scene = new_scene(P, W, preview, spec.get("tilt", 0.0), (W / 2, 0.0, H / 2 + spec.get("frame_up", 0.0) * H))
+    coll = scene.collection
+    rnd = random.Random(seed)
+    hz = P["haze"]
+
+    def haze(m):
+        _haze(m, hz, spec["haze"][0], spec["haze"][1], None, front=W)
+        return m
+    if which == 0:                                                         # back wall (opaque)
+        panel = haze(_bay_mat("panel", (92, 98, 108), (54, 56, 62), W=W))
+        seam = haze(_bay_mat("seam", (40, 42, 48), (30, 30, 34), W=W, metal=0.6))
+        frame = haze(_bay_mat("frame", (70, 74, 82), (44, 46, 52), W=W, metal=0.7))
+        haz = haze(_bay_mat("hazard", (222, 176, 40), (120, 96, 40), W=W, stripes=W / 80))
+        lamp = _bay_mat("lamp", (255, 240, 210), (255, 240, 210), W=W, emit=(255, 238, 205), strength=4.0)
+        y = 6.0
+        # Backing above and below the window band only (full height hid the star plane).
+        _bay_obj("backing_lo", (W, 0.2, 0.56 * H), (W / 2, y + 0.3, 0.28 * H), seam, coll, W, bevel=0)
+        _bay_obj("backing_hi", (W, 0.2, 0.22 * H), (W / 2, y + 0.3, 0.89 * H), seam, coll, W, bevel=0)
+        pw, ph = W / 16, 2.4
+        for i in range(16):
+            for j in range(int(H / ph)):
+                z = (j + 0.5) * ph
+                if 0.56 * H < z < 0.78 * H:                                  # window band
+                    continue
+                d = rnd.uniform(0.0, 0.08)
+                _bay_obj(f"p{i}_{j}", (pw - 0.12, 0.2, ph - 0.12), ((i + 0.5) * pw, y - d, z), panel, coll, W, 0.05)
+        # Observation window: frame, mullions, star plane behind.
+        z0, z1 = 0.56 * H, 0.78 * H
+        _bay_obj("stars", (W, 0.1, z1 - z0), (W / 2, y + 2.0, (z0 + z1) / 2), _stars_mat("stars", W), coll, W, 0)
+        _bay_obj("sill", (W, 0.6, 0.35), (W / 2, y - 0.2, z0), frame, coll, W)
+        _bay_obj("head", (W, 0.6, 0.35), (W / 2, y - 0.2, z1), frame, coll, W)
+        for i in range(8):
+            _bay_obj(f"mull{i}", (0.35, 0.5, z1 - z0), (i * W / 8, y - 0.15, (z0 + z1) / 2), frame, coll, W)
+        for i in range(8):                                                   # ceiling light fixtures
+            _bay_obj(f"lamp{i}", (2.2, 0.3, 0.25), ((i + 0.5) * W / 8, y - 0.4, H - 1.2), lamp, coll, W, 0.03)
+        _bay_obj("hazard", (W, 0.25, 0.8), (W / 2, y - 0.3, 0.2 * H), haz, coll, W, 0.02)
+    elif which == 1:                                                       # structure
+        steel = haze(_bay_mat("steel", (112, 116, 124), (60, 62, 68), W=W, metal=0.8, rough=0.45))
+        yellow = haze(_bay_mat("crane", (222, 176, 40), (110, 90, 40), W=W, metal=0.3))
+        light = _bay_mat("work", (255, 214, 140), (255, 214, 140), W=W, emit=(255, 214, 140), strength=5.0)
+        dark = haze(_bay_mat("cable", (30, 30, 32), (20, 20, 22), W=W, metal=0.5))
+        for x in (W / 4, 3 * W / 4):                                         # I-beam columns
+            _bay_obj(f"web{x}", (0.25, 0.6, H), (x, 0, H / 2), steel, coll, W, 0.02)
+            for s in (-1, 1):
+                _bay_obj(f"fl{x}{s}", (0.9, 0.12, H), (x, s * 0.36, H / 2), steel, coll, W, 0.02)
+            for z in range(2, int(H), 3):
+                _bay_obj(f"bolt{x}{z}", (1.1, 0.8, 0.18), (x, 0, z), steel, coll, W, 0.02)
+            _bay_obj(f"wl{x}", (0.4, 0.3, 0.3), (x + 0.75, -0.4, 0.45 * H), light, coll, W, 0.02)
+        ztop = H - 1.6
+        _bay_obj("chordA", (W, 0.3, 0.35), (W / 2, 0, ztop + 0.9), steel, coll, W, 0.02)
+        _bay_obj("chordB", (W, 0.3, 0.35), (W / 2, 0, ztop - 0.9), steel, coll, W, 0.02)
+        n = int(W / 2)
+        for i in range(n):                                                   # lattice: one diagonal per 2 m
+            bpy.ops.mesh.primitive_cube_add(size=1.0, location=(i * 2 + 1, 0, ztop))
+            d = bpy.context.active_object
+            d.scale = (2.6, 0.18, 0.18)
+            d.rotation_euler = (0, math.radians(40 if i % 2 else -40), 0)
+            bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+            d.data.materials.append(steel)
+            for c in list(d.users_collection):
+                c.objects.unlink(d)
+            coll.objects.link(d)
+            for dx in (-W, W):
+                cp = d.copy(); cp.location.x += dx; coll.objects.link(cp)
+        for x in (0.3 * W, 0.8 * W):                                         # crane trolley, cable, hook block
+            _bay_obj(f"trolley{x}", (2.2, 1.0, 0.9), (x, 0, ztop - 1.5), yellow, coll, W, 0.06)
+            _bay_obj(f"cable{x}", (0.08, 0.08, 6.0), (x, 0, ztop - 5.0), dark, coll, W, 0)
+            _bay_obj(f"hook{x}", (1.0, 0.7, 1.2), (x, 0, ztop - 8.5), yellow, coll, W, 0.08)
+    else:                                                                  # deck
+        deck = haze(_bay_mat("deck", (134, 138, 144), (70, 72, 76), W=W, metal=0.6, rough=0.5))
+        seam = haze(_bay_mat("dseam", (60, 62, 68), (40, 40, 44), W=W))
+        haz = haze(_bay_mat("dhaz", (232, 184, 44), (120, 96, 40), W=W, stripes=W / 48))
+        orange = haze(_bay_mat("crateO", (214, 112, 40), (90, 60, 40), W=W, metal=0.2))
+        grey = haze(_bay_mat("crateG", (120, 126, 132), (70, 72, 76), W=W, metal=0.3))
+        band = haze(_bay_mat("stencil", (30, 30, 32), (20, 20, 22), W=W))
+        rail = haze(_bay_mat("rail", (186, 190, 194), (110, 112, 116), W=W, metal=0.8, rough=0.35))
+        top = 1.0
+        _bay_obj("slab", (W, 14.0, top), (W / 2, 2.0, top / 2), seam, coll, W, 0)
+        for i in range(12):                                                  # plates with seams
+            for j in range(3):
+                _bay_obj(f"pl{i}{j}", (W / 12 - 0.08, 4.4, 0.06), ((i + 0.5) * W / 12, -3.0 + j * 4.5, top + 0.03),
+                         deck, coll, W, 0.02)
+        _bay_obj("edge", (W, 0.6, 0.12), (W / 2, -5.4, top + 0.06), haz, coll, W, 0.01)
+        for k in range(int(W / 4)):                                          # railing posts, 4 m spacing
+            _bay_obj(f"post{k}", (0.08, 0.08, 1.1), (k * 4 + 2, 3.5, top + 0.55), rail, coll, W, 0)
+        _bay_obj("rail", (W, 0.08, 0.08), (W / 2, 3.5, top + 1.1), rail, coll, W, 0)
+        for cx, stack in ((3.0, ("O", "G")), (11.0, ("G",)), (17.5, ("O", "O"))):   # crate stacks
+            z = top
+            for k, c in enumerate(stack):
+                w, h = (2.4, 1.8) if k == 0 else (2.0, 1.5)
+                m = orange if c == "O" else grey
+                _bay_obj(f"cr{cx}{k}", (w, 2.2, h), (cx + 0.2 * k, 1.0, z + h / 2), m, coll, W, 0.06)
+                _bay_obj(f"st{cx}{k}", (w * 0.7, 0.02, 0.22), (cx + 0.2 * k, -0.11, z + h * 0.55), band, coll, W, 0)
+                z += h
+    return render(scene, work, f"bay{which}_{seed}", W)
+
+
 # ---------------------------------------------------------------- entry
 
 def _finish_transparent(px):
@@ -1173,6 +1370,13 @@ def generate(entry, ctx):
     P = PRESETS[entry.get("preset", planet)]
     seed = int(entry.get("seed", 1))
     preview, work = ctx["preview"], ctx["work"]
+    if P.get("bay"):                                     # B-039: rendered 3D docking bay
+        k = int(layer[-1])
+        px = bay_layer(P, P["bay"][k], seed, preview, work, k)
+        if layer == "layer0":
+            rgb = px[..., :3] * px[..., 3:4] + np.array([0.03, 0.03, 0.04]) * (1 - px[..., 3:4])
+            return {"color": np.dstack([pngio.to_u8(rgb), np.full(rgb.shape[:2], 255, np.uint8)])}
+        return {"color": _finish_transparent(px)}
     if P.get("banks"):                                   # B-028: painted 2D cloud deck
         bank = cloud_bank(P, P["banks"][int(layer[-1])], seed, preview)
         if layer == "layer0":
