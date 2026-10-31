@@ -92,14 +92,18 @@ PRESETS = {
         sun=dict(dir=(-0.75, 0.45, -0.55), strength=4.5, color=(1.0, 0.96, 0.88), angle=1.5),
         ambient=((0.5, 0.62, 0.78), 0.38),
         haze=(190, 210, 222),
-        far=dict(W=9000.0, level=0.30, peak=0.52, rock=[(112, 118, 104), (136, 140, 120)], snow=(0, 0, 0),
-                 snowline=9.0, haze=(0.42, 0.00004), tilt=6.0, sea=dict(level=0.34, color=(46, 98, 140))),
-        mid=dict(W=700.0, level=0.40, amp=0.10, ground=[(84, 116, 62), (100, 124, 70)], trees=160, protos=6,
-                 tree_h=(10, 20), conifer=0.25, depth=(20, 140), haze=(0.22, 0.0012), fog=(0.2, 0.22),
+        # B-026 review: the first coast hid its sea behind a full-height forest (mid level 0.40 >
+        # sea 0.34) and read as plain woodland. Now three clear steps: sea with low headlands
+        # (far), a lowered sandy shore with sparse coastal pines leaving a band of sea above it
+        # (mid), a sand beach with dune grass (near).
+        far=dict(W=9000.0, level=0.30, peak=0.44, rock=[(112, 118, 104), (136, 140, 120)], snow=(0, 0, 0),
+                 snowline=9.0, haze=(0.42, 0.00004), tilt=6.0, sea=dict(level=0.37, color=(46, 98, 140))),
+        mid=dict(W=700.0, level=0.27, amp=0.07, ground=[(186, 174, 132), (140, 146, 92)], trees=28, protos=4,
+                 tree_h=(8, 16), conifer=0.7, depth=(20, 140), haze=(0.22, 0.0012),
                  tilt=12.0, frame_up=-0.08),
-        near=dict(W=64.0, level=0.28, amp=0.04, ground=[(96, 124, 64), (120, 136, 76), (176, 160, 120)], trees=6,
-                  protos=4, tree_h=(7, 11), conifer=0.2, depth=(3, 14), haze=(0.06, 0.004),
-                  tufts=4000, shrubs=50, tilt=18.0, frame_up=0.12),
+        near=dict(W=64.0, level=0.22, amp=0.03, ground=[(226, 210, 168), (212, 192, 148), (196, 176, 132)], trees=0,
+                  protos=1, tree_h=(7, 11), conifer=0.5, depth=(3, 14), haze=(0.06, 0.004),
+                  tufts=1200, shrubs=6, tilt=18.0, frame_up=0.12),
         leaf=[(56, 92, 40), (74, 108, 46), (92, 120, 52)],
         needle=[(32, 60, 40), (44, 72, 46)],
         bark=(90, 74, 60),
