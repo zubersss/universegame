@@ -702,3 +702,8 @@ Moved: U-048 → Done; U-050, B-050 → In Progress. Added U-057 + B-050 (visual
 
 ## Cycle 112 · 2026-10-31 (BLENDER message)
 Checked: review_mercury.png (16:23 far layer). B-050 → Done; in-game check folds into U-057.
+
+## Cycle 113 · 2026-10-31 (UNITY message)
+Checked: u050 deck station (good) and surface vent (raised dark POI block, pale patch).
+Moved: U-050 → Done; U-057 → In Progress (generalized to all POI stamps).
+Decided: D-050 (preload planet sheets on approach from M4).
