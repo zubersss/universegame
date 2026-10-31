@@ -596,6 +596,10 @@ namespace Meridian.Tests
                 float until = Time.realtimeSinceStartup + 15f;
                 yield return null;
                 while (!t.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                // Stand the surveyor on whatever is there now (pads included), not inside it.
+                int px = Mathf.FloorToInt(x - 2f);
+                var feet = new Vector2(px + 0.5f, t.TopSolidY(px) + 1.05f);
+                if (feet.y < y + 6f) { side.player.Body.position = feet; side.player.transform.position = feet; side.player.Body.linearVelocity = Vector2.zero; }
                 for (int k = 0; k < 60; k++) yield return null;
                 yield return Save(cam, $"{name}_{label}");
             }

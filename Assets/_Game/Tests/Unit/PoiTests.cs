@@ -47,7 +47,7 @@ namespace Meridian.Tests
                 var world = new SolidWorldGenerator(c, seed);
                 var edits = new TerrainEdits();
                 int gy = PoiStamp.Apply(poi, world, edits, c.datumY);
-                Assert.GreaterOrEqual(gy, c.datumY + 1, $"{poi.id}: ground above sea level");
+                if (poi.planet == PlanetId.Earth) Assert.GreaterOrEqual(gy, c.datumY + 1, $"{poi.id}: ground above sea level (Earth has a sea; dry worlds may seat pads below their Datum, U-057)");
                 var edited = new EditedWorld(world, edits);
                 int cells = 0;
                 for (int row = 0; row < poi.stamp.Length; row++)

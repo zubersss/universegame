@@ -42,6 +42,8 @@ namespace Meridian.Planet.POI
         /// <summary>Width of a floating POI (it has no stamp to measure).</summary>
         public int floatWidth = 24;
         public bool Floating => floatY > 0;
+        /// <summary>U-057: seat the pad at the lowest surface under the stamp (things that belong in a hollow, like a vent harvester), not the median.</summary>
+        public bool seatLow;
 
         public int Width => stamp != null ? stamp[0].Length : floatWidth;
         public float CenterX => x + Width * 0.5f;
@@ -272,7 +274,7 @@ namespace Meridian.Planet.POI
         /// <summary>A vent harvester in the first vent field (Vitriol Glass under its feet).</summary>
         public static readonly PoiDef VentHarvester = new PoiDef
         {
-            id = "vent_harvester", label = "VENT HARVESTER", planet = PlanetId.Venus, x = 1642, groundRow = 4, stamp = MercuryPad,
+            id = "vent_harvester", label = "VENT HARVESTER", planet = PlanetId.Venus, x = 1642, groundRow = 4, stamp = MercuryPad, seatLow = true,
             props = new[] { new PoiProp("props/venus/vent_harvester", 8f, 0f, new Vector2(2.81f, 3.13f)) },
         };
 

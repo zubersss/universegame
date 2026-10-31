@@ -9,7 +9,7 @@ namespace Meridian.Planet.POI
     /// </summary>
     public static class PoiStamp
     {
-        /// <summary>The stamp's ground line: the surface at its center column, never below sea level (the Datum).</summary>
+        /// <summary>The stamp's ground line: the median surface under it (or the lowest, seatLow), never below Earth's sea.</summary>
         public static int GroundY(PoiDef poi, IWorldGenerator world, int datumY)
         {
             if (poi.Floating) return poi.floatY - 1; // props stand on floatY
@@ -17,8 +17,9 @@ namespace Meridian.Planet.POI
             var hs = new int[poi.Width];
             for (int i = 0; i < hs.Length; i++) hs[i] = world.SurfaceHeight(Wrap(poi.x + i, world.Width));
             System.Array.Sort(hs);
-            int s = hs[hs.Length / 2];
-            return s < datumY + 1 ? datumY + 1 : s;
+            int s = poi.seatLow ? hs[0] : hs[hs.Length / 2];
+            // Never below sea level, where there is a sea (Earth); dry worlds seat pads in hollows below their Datum (U-057).
+            return poi.planet == PlanetId.Earth && s < datumY + 1 ? datumY + 1 : s;
         }
 
         /// <summary>World tile y of stamp row `row` (rows run top to bottom).</summary>
