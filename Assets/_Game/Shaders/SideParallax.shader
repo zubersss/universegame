@@ -1,10 +1,13 @@
 // Side-view backdrop (U-024, Bible §9 Atmosphere): the sky plus three parallax layers composited in ONE
 // opaque full-screen pass (three blended full-screen quads pushed Earth p99 from 5.8 to 15.2 ms at 1080p
 // on Intel UHD; U-025 BudgetGate).
-// Per layer i: _Pi = (tile width, tile height, parallax factor, sheet bottom relative to the camera),
-// _Qi = (haze amount, below-sheet mode 0 end / 1 clamp / 2 mirror, loaded 0/1, unused).
-// Horizontally a layer scrolls at its factor of the world's speed and repeats; vertically it is framed on
-// the camera so its ground stays under the player's feet. _Alpha fades the layers to the sky underground;
+// Per layer i: _Pi = (tile width, tile height, parallax factor, sheet bottom relative to its anchor),
+// _Qi = (haze amount, unused, loaded 0/1, vertical world-follow factor).
+// Horizontally a layer scrolls at its factor of the world's speed and repeats. Vertically it hangs off the
+// planet Datum (U-039 fix): anchor = Datum + (cameraY − Datum) × (1 − follow), so near the Datum its ground
+// sits under the player's feet, while deep in a canyon or high on Olympus the layers stay with the horizon.
+// Below a layer's sheet it shows nothing (no clamped or mirrored repeats); under the far horizon the base
+// is a hazy ground tone instead of sky. _Alpha fades the layers to the sky underground;
 // _Tint is the day/night multiplier (U-025).
 Shader "MERIDIAN/SideParallax"
 {
@@ -25,6 +28,9 @@ Shader "MERIDIAN/SideParallax"
         _SeaLevel ("Sea surface (world y; far below = no sea)", Float) = -100000
         _WaterColor ("Water color at the surface", Color) = (0.07, 0.24, 0.36, 1)
         _WaterFade ("Depth (m) over which light falls to 1/e", Float) = 40
+        _Datum ("Planet Datum (world y)", Float) = 320
+        _HorizonOffset ("Far horizon relative to layer 0's anchor", Float) = -4
+        _GroundColor ("Hazy ground below the horizon", Color) = (0.3, 0.25, 0.2, 1)
     }
     SubShader
     {
@@ -52,6 +58,9 @@ Shader "MERIDIAN/SideParallax"
                 float _SeaLevel;
                 float4 _WaterColor;
                 float _WaterFade;
+                float _Datum;
+                float _HorizonOffset;
+                float4 _GroundColor;
             CBUFFER_END
 
             struct Attributes { float4 positionOS : POSITION; };
@@ -69,13 +78,9 @@ Shader "MERIDIAN/SideParallax"
             // False where the layer shows nothing; its uv otherwise.
             bool LayerUV(float2 world, float2 cam, float4 p, float4 q, out float2 uv)
             {
-                uv = float2((world.x - cam.x * (1.0 - p.z)) / p.x, (world.y - cam.y - p.w) / p.y);
-                if (q.z < 0.5) return false;
-                if (uv.y < 0.0)
-                {
-                    if (q.y < 0.5) return false;   // middle layer: ends
-                    if (q.y > 1.5) uv.y = -uv.y;   // near layer: mirrored ground, no streaks
-                }
+                float anchor = _Datum + (cam.y - _Datum) * (1.0 - q.w);
+                uv = float2((world.x - cam.x * (1.0 - p.z)) / p.x, (world.y - anchor - p.w) / p.y);
+                if (q.z < 0.5 || uv.y < 0.0) return false; // not loaded, or below its sheet
                 // Keep v off the very edge rows so clamping never picks up a filtered border.
                 uv.y = clamp(uv.y, 0.5 / 1024.0, 1.0 - 0.5 / 1024.0);
                 return true;
@@ -91,7 +96,8 @@ Shader "MERIDIAN/SideParallax"
             {
                 float2 cam = _WorldSpaceCameraPos.xy;
                 half3 sky = _SkyColor.rgb;
-                half3 col = sky;
+                float horizon = _Datum + _HorizonOffset + (cam.y - _Datum) * (1.0 - _Q0.w);
+                half3 col = i.worldXY.y < horizon ? lerp(_GroundColor.rgb, sky, 0.3) : sky;
                 float2 uv;
                 if (LayerUV(i.worldXY, cam, _P0, _Q0, uv)) col = Over(col, SAMPLE_TEXTURE2D(_Layer0, sampler_Layer0, uv), _Q0.x, sky);
                 if (LayerUV(i.worldXY, cam, _P1, _Q1, uv)) col = Over(col, SAMPLE_TEXTURE2D(_Layer1, sampler_Layer1, uv), _Q1.x, sky);

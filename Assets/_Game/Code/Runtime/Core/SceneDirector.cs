@@ -19,12 +19,17 @@ namespace Meridian.Core
 
         public bool IsReady { get; private set; }
         public SpaceRoot Space { get; private set; }
+        /// <summary>Where the last planet load spent its time (BudgetGate prints it under the entry row).</summary>
+        public string LastLoadBreakdown { get; private set; } = "";
         public PlanetSideRoot PlanetSide { get; private set; }
         public event Action Ready;
 
         IEnumerator Start()
         {
             if (gameState == null) gameState = GameState.Instance;
+            // Terrain sheets of the landable planets stay loaded for the session: entries don't re-fetch them (U-039 fix).
+            Meridian.Terrain.TerrainTileSet.Preload(Meridian.Terrain.TerrainStreamer.MaterialsFor(Meridian.Planets.PlanetId.Earth));
+            Meridian.Terrain.TerrainTileSet.Preload(Meridian.Terrain.TerrainStreamer.MaterialsFor(Meridian.Planets.PlanetId.Mars));
 
             if (!SceneManager.GetSceneByName(SpaceScene).isLoaded)
                 yield return SceneManager.LoadSceneAsync(SpaceScene, LoadSceneMode.Additive);
@@ -69,19 +74,24 @@ namespace Meridian.Core
                 Debug.LogError("[MERIDIAN] SceneDirector: no PlanetConfig for the current planet.");
                 yield break;
             }
+            float p0 = Time.realtimeSinceStartup;
             var scene = SceneManager.GetSceneByName(PlanetSideScene);
             if (!scene.isLoaded)
                 yield return SceneManager.LoadSceneAsync(PlanetSideScene, LoadSceneMode.Additive);
+            float p1 = Time.realtimeSinceStartup;
             PlanetSide = FindRoot<PlanetSideRoot>(PlanetSideScene);
             if (PlanetSide != null)
             {
                 if (entryX >= 0) PlanetSide.ConfigureForEntry(config, entryX);
                 else PlanetSide.Configure(config);
+                float p2 = Time.realtimeSinceStartup;
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(PlanetSideScene));
                 // Warm-up behind the boot cover or the entry fade (U-028): wait for the tile sheets, then render once off-screen.
                 float until = Time.realtimeSinceStartup + 1f;
                 while (!PlanetSide.terrain.TileSet.IsReady && Time.realtimeSinceStartup < until) yield return null;
+                float p3 = Time.realtimeSinceStartup;
                 LastPlanetWarmupMs = RenderWarmup.WarmUp(PlanetSide.sideCamera, PlanetSide.terrain.TileSet);
+                LastLoadBreakdown = $"scene load {(p1 - p0) * 1000f:F0} ms, configure {(p2 - p1) * 1000f:F0} ms, tile sheets {(p3 - p2) * 1000f:F0} ms, warm-up {LastPlanetWarmupMs:F0} ms";
             }
             PlanetSideLoaded?.Invoke();
         }

@@ -20,6 +20,23 @@ namespace Meridian.Terrain
 
         public bool IsReady => pending == 0;
 
+        static readonly List<AsyncOperationHandle<IList<Sprite>>> kept = new List<AsyncOperationHandle<IList<Sprite>>>();
+        static readonly HashSet<byte> keptIds = new HashSet<byte>();
+
+        /// <summary>
+        /// Loads these materials' sheets once and keeps them for the session (U-039 fix: every planet load
+        /// re-fetched them, ~140 ms of each entry). Later Load calls then complete at once.
+        /// </summary>
+        public static void Preload(IEnumerable<byte> ids)
+        {
+            foreach (var id in ids)
+            {
+                var key = TileId.ArtKey(id);
+                if (key == null || !keptIds.Add(id)) continue;
+                kept.Add(Addressables.LoadAssetAsync<IList<Sprite>>(key));
+            }
+        }
+
         public void Load(IEnumerable<byte> ids)
         {
             foreach (var id in ids)
@@ -43,7 +60,7 @@ namespace Meridian.Terrain
             }
         }
 
-        /// <summary>Builds a material's tiles from its sliced sprites (named         /// <summary>Sheet cells 47–62 hold variants of the fully surrounded tile 46 (D-020).</summary>lt;material        /// <summary>Sheet cells 47–62 hold variants of the fully surrounded tile 46 (D-020).</summary>gt;_        /// <summary>Sheet cells 47–62 hold variants of the fully surrounded tile 46 (D-020).</summary>lt;cell        /// <summary>Sheet cells 47–62 hold variants of the fully surrounded tile 46 (D-020).</summary>gt;). Tests call it directly.</summary>
+        /// <summary>Builds a material's tiles from its sliced sprites (named &lt;material&gt;_&lt;cell&gt;). Tests call it directly.</summary>
         public void LoadFromSprites(byte id, IList<Sprite> sprites) => tiles[id] = BuildTiles(sprites, id);
 
         /// <summary>Sheet cells 47–62 hold variants of the fully surrounded tile 46 (D-020).</summary>

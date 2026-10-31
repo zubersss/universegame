@@ -22,6 +22,8 @@ namespace Meridian.Planet
         public static readonly float[] Factors = { 0.06f, 0.22f, 0.45f };
         public static readonly float[] TileHeights = { 28f, 22f, 16f };
         public static readonly float[] Haze = { 0.35f, 0.2f, 0.08f };
+        /// <summary>Vertical world-follow per layer (U-039 fix): layers hang off the Datum, so canyons and Olympus keep a sane horizon.</summary>
+        public static readonly float[] Follow = { 0.1f, 0.15f, 0.2f };
         /// <summary>
         /// Where each layer's content starts in its sheet (fraction from the bottom), read off the
         /// B-010/B-011 renders: layer0 = base of the far ridgeline, layer1 = base of the treeline/hills
@@ -44,6 +46,9 @@ namespace Meridian.Planet
         static readonly int[] LayerQ = { Shader.PropertyToID("_Q0"), Shader.PropertyToID("_Q1"), Shader.PropertyToID("_Q2") };
         static readonly int SkyColorId = Shader.PropertyToID("_SkyColor");
         static readonly int SeaLevelId = Shader.PropertyToID("_SeaLevel");
+        static readonly int DatumId = Shader.PropertyToID("_Datum");
+        static readonly int HorizonId = Shader.PropertyToID("_HorizonOffset");
+        static readonly int GroundId = Shader.PropertyToID("_GroundColor");
         static readonly int AlphaId = Shader.PropertyToID("_Alpha");
         static readonly int TintId = Shader.PropertyToID("_Tint");
 
@@ -70,6 +75,14 @@ namespace Meridian.Planet
             quad.enabled = false;
         }
 
+        /// <summary>Hazy distant ground under the far horizon (canyon floors, below the layers).</summary>
+        public static Color GroundColor(PlanetId id) => id switch
+        {
+            PlanetId.Mars => new Color(0.46f, 0.29f, 0.2f),
+            PlanetId.Earth => new Color(0.24f, 0.28f, 0.2f),
+            _ => SkyColor(id) * 0.45f,
+        };
+
         public static Color SkyColor(PlanetId id) => id switch
         {
             PlanetId.Mars => new Color(0.78f, 0.6f, 0.42f),     // butterscotch (Bible §7.2, B-011)
@@ -93,6 +106,9 @@ namespace Meridian.Planet
             block.SetColor(SkyColorId, sky);
             // Earth's sea fills up to the Datum (water tiles at y ≤ datum): below it the backdrop is water.
             block.SetFloat(SeaLevelId, planet.id == PlanetId.Earth ? planet.datumY + 1f : -100000f);
+            block.SetFloat(DatumId, planet.datumY);
+            block.SetFloat(HorizonId, BaseOffset(0) + ContentBase[0] * TileHeights[0]); // the far ridge's foot
+            block.SetColor(GroundId, GroundColor(planet.id));
             block.SetColor(TintId, Tint);
             block.SetFloat(AlphaId, Alpha);
             for (int i = 0; i < 3; i++)
@@ -100,7 +116,7 @@ namespace Meridian.Planet
                 textures[i] = null;
                 block.SetTexture(LayerTex[i], Texture2D.blackTexture);
                 block.SetVector(LayerP[i], new Vector4(TileHeights[i] * 2f, TileHeights[i], Factors[i], BaseOffset(i))); // 2048×1024 sheets
-                block.SetVector(LayerQ[i], new Vector4(Haze[i], i == 0 ? 1f : i == 2 ? 2f : 0f, 0f, 0f)); // far: clamp, near: mirror, middle: end
+                block.SetVector(LayerQ[i], new Vector4(Haze[i], 0f, 0f, Follow[i]));
             }
             quad.SetPropertyBlock(block);
             quad.enabled = true;
@@ -139,7 +155,7 @@ namespace Meridian.Planet
                     textures[i] = op.Result;
                     quad.GetPropertyBlock(block);
                     block.SetTexture(LayerTex[i], op.Result);
-                    block.SetVector(LayerQ[i], new Vector4(Haze[i], i == 0 ? 1f : i == 2 ? 2f : 0f, 1f, 0f));
+                    block.SetVector(LayerQ[i], new Vector4(Haze[i], 0f, 1f, Follow[i]));
                     quad.SetPropertyBlock(block);
                     LayersLoaded++;
                 };

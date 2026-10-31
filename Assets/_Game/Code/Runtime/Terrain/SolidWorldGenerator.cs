@@ -23,12 +23,19 @@ namespace Meridian.Terrain
             planet = config.id;
             this.seed = seed ^ ((int)config.id * 7919);
             amplitude = planet == PlanetId.Earth ? 28f : 34f;
+            // The surface profile once per world (U-039 fix: it was recomputed for every tile, ~1.5 s Mars entry).
+            surface = new int[width];
+            for (int x = 0; x < width; x++) surface[x] = ComputeSurface(x);
         }
+
+        readonly int[] surface;
 
         System.Func<int, int> surfaceOf;
         System.Func<int, int> SurfaceOf => surfaceOf ??= c => SurfaceHeight(((c % width) + width) % width);
 
-        public int SurfaceHeight(int x)
+        public int SurfaceHeight(int x) => surface[((x % width) + width) % width];
+
+        int ComputeSurface(int x)
         {
             float n = WorldNoise.Fbm1D(x, width, seed);
             // Earth: biome bands (U-037); the forest band keeps exactly this old offset and truncation.
@@ -51,7 +58,9 @@ namespace Meridian.Terrain
 
             if (planet == PlanetId.Mars && MarsLandforms.InTube(x, y, SurfaceOf)) return TileId.Air; // lava tubes (U-039)
             int depth = surface - y;
-            if (depth > 6 && y > 2 && WorldNoise.Value2D(x, y, 16, width, seed + 101) > 0.72f
+            // Random caves; inside Mars landforms only rare small pockets (U-039 fix: no Swiss-cheese walls).
+            float caveCut = planet == PlanetId.Mars && MarsLandforms.At(x) != MarsFeature.Plains ? 0.9f : 0.72f;
+            if (depth > 6 && y > 2 && WorldNoise.Value2D(x, y, 16, width, seed + 101) > caveCut
                 && !(planet == PlanetId.Mars && MarsLandforms.NearTube(x, y, SurfaceOf, 2))) return TileId.Air;
 
             if (planet == PlanetId.Earth) return EarthMaterial(x, y, surface, depth);

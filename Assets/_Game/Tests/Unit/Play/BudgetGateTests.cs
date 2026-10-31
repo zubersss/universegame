@@ -196,7 +196,7 @@ namespace Meridian.Tests
             spaceShip.Position = mars.position + new Vector2(0f, mars.RingRadius + 0.5f);
             spaceShip.Velocity = new Vector2(0f, -40f);
             yield return WaitBusyCycle(transitions, 15f);
-            Row("Planet load · Mars entry", "≤ 4 s", $"{transitions.LastEntrySeconds:F2} s", transitions.LastEntrySeconds <= 4f);
+            Row("Planet load · Mars entry", "≤ 4 s", $"{transitions.LastEntrySeconds:F2} s ({director.LastLoadBreakdown})", transitions.LastEntrySeconds <= 4f);
             Row("Transition · entry (top-down → side)", "≤ 1.5 s", $"{transitions.LastEntrySeconds:F2} s", transitions.LastEntrySeconds <= 1.5f);
 
             side = director.PlanetSide;

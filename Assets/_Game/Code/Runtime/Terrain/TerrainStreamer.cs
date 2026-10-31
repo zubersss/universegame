@@ -80,7 +80,7 @@ namespace Meridian.Terrain
             started = true;
         }
 
-        static IEnumerable<byte> MaterialsFor(PlanetId id) => id == PlanetId.Earth
+        public static IEnumerable<byte> MaterialsFor(PlanetId id) => id == PlanetId.Earth
             ? new[] { TileId.Soil, TileId.Grass, TileId.Stone, TileId.Sand, TileId.Snow, TileId.Water }
             : new[] { TileId.Regolith, TileId.Basalt, TileId.Hematite, TileId.Ice };
 
