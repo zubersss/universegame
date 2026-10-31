@@ -426,3 +426,9 @@ Decided: none. B-028 will be reviewed whole (terrain demo patches + backdrops).
 Signals: UNITY blocked on user-only USER-10 (expected).
 User: USER-10 open.
 Queue: UNITY 5, BLENDER 4.
+
+## Cycle 56 · 2026-10-31 (BLENDER message)
+Checked: review_venus_deck.png, review_venus_surface.png (stamped 05:42–05:46), review_venus_terrain.png.
+Moved: B-028 → Done; B-027 → In Progress.
+Decided: none. Polish → B-034.
+Signals: BLENDER self-reported a 1-min stale own lock (output truncation cut its cleanup). Fixed in practice.

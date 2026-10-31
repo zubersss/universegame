@@ -539,19 +539,19 @@ Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/earth_*/
 Depends: B-010
 Lead notes: Done (cycle 53): desert (cb33653, circle-mapped noise), taiga (1b0178b), coast (shore skirt, 2D beach relief, turquoise-to-deep-blue sea with glitter and surf line). All stamped fresh; seams ≤ 1.26.
 
-### B-027 · BLENDER · Ready · M3
+### B-027 · BLENDER · In Progress · M3
 Goal: Mercury terrain sets `terrain/mercury/{regolith,basalt,sulfide,ice}` (47-blob + 16 variants, D-020) and parallax `backgrounds/mercury/layer0..2` (black sky, huge Sun glow, crater rims, violet twilight per §7.3).
 Accept: contract §4 sizes; terrain joins seamlessly (demo patches); backdrop per §9 and Mercury palette (white/black/violet); split-half renders.
 Files: blender/scripts/gen_terrain.py, gen_backdrop3d.py, Assets/_Game/Art/terrain/mercury/, backgrounds/mercury/
 Depends: B-022
 Lead notes: Cycle 19. M3 lookahead so the art pipeline stays ahead of UNITY.
 
-### B-028 · BLENDER · In Progress · M3
+### B-028 · BLENDER · Done · M3
 Goal: Venus art: terrain sets `terrain/venus/{basalt,tessera,vent_glass,sulfur}` (47-blob + 16 variants) for the surface, and parallax `backgrounds/venus_deck/layer0..2` (habitable cloud deck: orange-cream haze, backlit cloud towers) plus `backgrounds/venus_surface/layer0..2` (black glassy plains lit by vents) per §7.4 and §9.
 Accept: contract sizes; terrain joins seamlessly; backdrops rendered 3D (no flat fills), haze by distance; split-half renders at the 1.5 GB gate.
 Files: blender/scripts/gen_terrain.py, gen_backdrop3d.py, Assets/_Game/Art/terrain/venus/, backgrounds/venus_*/
 Depends: B-022
-Lead notes: Cycle 25. M3 lookahead.
+Lead notes: Done (cycle 56): 4 terrain sets (basalt, tessera, violet vent glass, ochre sulfur); venus_surface (haze, boulders, vents); venus_deck via painted 2D cumulus after 3 heightfield strikes. Polish (deck arcs, vent legibility) → B-034.
 
 ### B-029 · BLENDER · Ready · M3
 Goal: Mercury creatures `creatures/mercury/glassback` (silicate grazer, medium) and `creatures/mercury/cinderling` (small swarm), same clip set as B-015.
@@ -587,6 +587,13 @@ Accept: contract §4 prop rules; Mercury palette (white/black/violet), harsh lig
 Files: blender/scripts/build_props_mercury.py, Assets/_Game/Art/props/mercury/
 Depends: B-014
 Lead notes: Cycle 46. M3 lookahead.
+
+### B-034 · BLENDER · Ready · M3
+Goal: Venus backdrop polish (from the B-028 review), for the M3 exit: remove the faint sphere-edge arcs inside the near deck bank; on venus_surface make the vents read (larger glowing vent mouths with soft emission halos and rising heat haze, 4–6 per tile) and add glassy sheen to the basalt plain (§7.4 "black glassy surface lit by vents").
+Accept: stamped reviews show no arcs; vents are legible at camera size 9; same keys, sizes, seams.
+Files: blender/scripts/gen_backdrop*.py, Assets/_Game/Art/backgrounds/venus_*/
+Depends: B-028
+Lead notes: Cycle 56. Low priority, before M3 integration of Venus.
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
