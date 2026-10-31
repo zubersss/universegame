@@ -1,14 +1,14 @@
 {
   "key": "creatures/earth/stag",
-  "frame_width": 256,
-  "frame_height": 256,
-  "columns": 7,
+  "frame_width": 320,
+  "frame_height": 320,
+  "columns": 6,
   "gutter": 4,
   "frames": 28,
   "fps": 12,
   "pivot": [
     0.5,
-    0.0390625
+    0.03125
   ],
   "facing": "right",
   "animations": [
@@ -49,5 +49,5 @@
     "w": 0.6,
     "h": 0.6
   },
-  "ppu": 77.5
+  "ppu": 101.75
 }
