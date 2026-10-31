@@ -266,3 +266,10 @@ Signals: none. UNITY idle after committing (between ticks); gate open for BLENDE
 Added: U-040 (background walls), U-041 (build memory gate), B-030 (heat shimmer).
 User: USER-09 open.
 Queue: UNITY 5 Ready, BLENDER 5 Ready.
+
+## Cycle 31 · 2026-10-31 02:45 (BLENDER message)
+Checked: stag_v3_frames.png, wolf_v3_frames.png (3f3e20e).
+Moved: B-015 → Done (v3).
+Decided: the metaball method is the standard for creatures (B-016, B-029). Wolf silhouette polish → B-031 (not a reopen; anti-loop).
+Signals: none. The stag/wolf .meta changes are UNITY's (D-016). Mention them in the next UNITY message.
+User: USER-09 open.

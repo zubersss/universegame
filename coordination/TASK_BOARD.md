@@ -539,6 +539,13 @@ Files: blender/scripts/gen_fx.py, Assets/_Game/Art/fx/heat_shimmer/
 Depends: B-012
 Lead notes: Cycle 30. Small.
 
+### B-031 · BLENDER · Ready · M2
+Goal: Wolf silhouette polish (from the B-015 v3 review): heavy neck ruff and fur-clump outline along the back (§9 "one exaggeration" for the wolf), bushy tail (2–3× current thickness, tapering), larger upright ears, legs ~25% thicker at the upper leg, shorter snout.
+Accept: same key, sheet layout, clips, and pivot as B-015 v3; full-size frames read as a wolf, not a hyena/rodent, next to the stag; ppu ≥ 100.
+Files: blender/scripts/build_creatures_earth.py, Assets/_Game/Art/creatures/earth/
+Depends: B-015
+Lead notes: Cycle 31. A focused polish task, not a reopen of B-015. Do it after B-016.
+
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
 Accept: frames ≤ 256, sheets ≤ 1024², `.json` per sheet, emission where glowing.
@@ -560,12 +567,12 @@ Files: Assets/_Game/Art/props/common/
 Depends: B-002
 Lead notes: Done 69b73e6 (cycle 19): landing pad, shelter wall/door, smelter, crate, lamp; worn industrial; emission for lights/windows.
 
-### B-015 · BLENDER · In Progress · M2
+### B-015 · BLENDER · Done · M2
 Goal: Earth creatures `creatures/earth/stag`, `creatures/earth/wolf`.
 Accept: medium class (256 px), standard creature set ≤ 30 frames, `.json`, color + normal.
 Files: blender/sources/creatures/earth/, Assets/_Game/Art/creatures/earth/
 Depends: B-009
-Lead notes: FAILED review (cycle 24), §9 grounded anatomy: legs are separate tubes with visible gaps at hip/knee, the body is a capsule, the neck/head read as blocks, and the antlers are undersized for the one exaggeration. Fix: one continuous mesh per animal (Skin modifier on a single connected skeleton + Subdivision, or metaballs converted to mesh), deformed by an armature, not rigid parts; deer proportions (long neck, deep chest, slender legs with visible hock and knee); antlers at least 1.5 × head length with 4+ tines; wolf with a fur-clump silhouette. Frames: 320 px in 6 columns, ppu ≥ 100 (D-034). Apply the same approach to B-016. (Cycle 28) Second fix pass (Skin hull) failed BLENDER's own full-size check: boxy back where 4+ branches meet, belly-mask stripe, detached tail. Approved next approach: metaball capsules → one mesh, armature with automatic weights, vertex-colour markings. Pre-approved fallback: a CC0 base mesh (CC0 only, source logged in credits, re-proportioned to spec).
+Lead notes: Done 3f3e20e (cycle 31), v3 metaball method: continuous bodies, real stag proportions, 5-tine antlers, attached tail, soft underside; stag 101.75 / wolf 128 px/m, 320 px × 6 columns. Wolf silhouette polish → B-031. This method is the standard for B-016 and B-029.
 
 ### B-016 · BLENDER · In Progress · M2
 Goal: Mars creatures `creatures/mars/dustskater` (small, 128 px), `creatures/mars/scree_stalker` (medium).
