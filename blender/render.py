@@ -540,6 +540,28 @@ def write_outputs(entry, maps, clips, wh, preview):
     return sizes
 
 
+STALE = os.path.join(HERE, "preview", "STALE.txt")
+
+
+def mark_stale(key, stale):
+    """Process guard (LEAD, B-026): a failed render leaves the previous export in place, which
+    once got reviewed as if it were new. Failed keys are listed in preview/STALE.txt (exports
+    stay put so UNITY's tree never loses art); a successful render removes the key."""
+    keys = set()
+    if os.path.isfile(STALE):
+        with open(STALE, encoding="utf-8") as fh:
+            keys = {ln.split(" | ")[0] for ln in fh.read().splitlines() if ln.strip()}
+    keys.discard(key)
+    if stale:
+        keys.add(key)
+    os.makedirs(os.path.dirname(STALE), exist_ok=True)
+    with open(STALE, "w", encoding="utf-8") as fh:
+        for k in sorted(keys):
+            fh.write(f"{k} | exports are from an earlier render; the latest one failed\n")
+    if stale:
+        log_line(f"STALE {key}: exports on disk are from an earlier render (see preview/STALE.txt)")
+
+
 def do_asset(entry, preview):
     t0 = time.time()
     maps, clips, wh, entry = produce(entry, preview)
@@ -549,6 +571,8 @@ def do_asset(entry, preview):
             write_outputs(entry, maps, clips, wh, preview)
         raise AssetError(f"{entry['key']}: " + "; ".join(problems))
     sizes = write_outputs(entry, maps, clips, wh, preview)
+    if not preview:
+        mark_stale(entry["key"], False)
     mode = "PREVIEW" if preview else "OK"
     log_line(f"{mode} {entry['key']} | {', '.join(sizes)}{' | ' + seam if seam else ''} "
              f"| {time.time() - t0:.1f}s | peak {peak_mb()}MB")
@@ -575,10 +599,14 @@ def main(argv):
         except AssetError as e:
             failed += 1
             log_line(f"FAIL {e}")
+            if not args.preview:
+                mark_stale(entry["key"], True)
         except Exception as e:  # noqa: BLE001 - any failure is one line + nonzero exit
             failed += 1
             traceback.print_exc()
             log_line(f"FAIL {entry['key']}: {type(e).__name__}: {e}")
+            if not args.preview:
+                mark_stale(entry["key"], True)
     shutil.rmtree(WORK, ignore_errors=True)
     if failed:
         log_line(f"FAIL {target} | {failed}/{len(chosen)} assets failed")
