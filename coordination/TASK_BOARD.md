@@ -532,12 +532,12 @@ Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/{earth,ma
 Depends: B-010, B-011
 Lead notes: Done 4b09174 + layer2 re-export (cycle 28): leaf-card foliage, soft high clouds above a lowered tree line, Mars relief from a 2D field (no streaks), 4 boulder families. Distant peak slightly spiky (minor).
 
-### B-026 · BLENDER · In Progress · M2
+### B-026 · BLENDER · Done · M2
 Goal: Earth biome parallax variants: `backgrounds/earth_desert/layer0..2`, `backgrounds/earth_taiga/layer0..2`, `backgrounds/earth_coast/layer0..2` (Bible §7.1 biomes), same rendered-3D approach as B-010 rework.
 Accept: same sizes/tiling as backgrounds/earth; §9 (no flat fills, haze by distance); split-half renders within D-028 memory; stacked preview per biome.
 Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/earth_*/
 Depends: B-010
-Lead notes: Cycle 19. UNITY will switch backdrops by longitude biome later (M2/M3). Use the B-025 foliage lessons if B-025 is done first. (Cycle 48) Desert hit three strikes on the tile seam. LEAD approach: periodic heightfield (noise sampled on a circle) + geometry instanced at −1/0/+1 periods and only the center rendered (shadow wrap); fallback: sun ≥ 35°. Taiga done (1b0178b). (Cycle 52) Desert (cb33653) and taiga (1b0178b) accepted. Coast gets one more pass: notches under the sea band, streaks on the beach back edge, flat sea → shore-to-horizon colour depth + glitter + surf line. Close B-026 on the coast re-review.
+Lead notes: Done (cycle 53): desert (cb33653, circle-mapped noise), taiga (1b0178b), coast (shore skirt, 2D beach relief, turquoise-to-deep-blue sea with glitter and surf line). All stamped fresh; seams ≤ 1.26.
 
 ### B-027 · BLENDER · Ready · M3
 Goal: Mercury terrain sets `terrain/mercury/{regolith,basalt,sulfide,ice}` (47-blob + 16 variants, D-020) and parallax `backgrounds/mercury/layer0..2` (black sky, huge Sun glow, crater rims, violet twilight per §7.3).
@@ -546,7 +546,7 @@ Files: blender/scripts/gen_terrain.py, gen_backdrop3d.py, Assets/_Game/Art/terra
 Depends: B-022
 Lead notes: Cycle 19. M3 lookahead so the art pipeline stays ahead of UNITY.
 
-### B-028 · BLENDER · Ready · M3
+### B-028 · BLENDER · In Progress · M3
 Goal: Venus art: terrain sets `terrain/venus/{basalt,tessera,vent_glass,sulfur}` (47-blob + 16 variants) for the surface, and parallax `backgrounds/venus_deck/layer0..2` (habitable cloud deck: orange-cream haze, backlit cloud towers) plus `backgrounds/venus_surface/layer0..2` (black glassy plains lit by vents) per §7.4 and §9.
 Accept: contract sizes; terrain joins seamlessly; backdrops rendered 3D (no flat fills), haze by distance; split-half renders at the 1.5 GB gate.
 Files: blender/scripts/gen_terrain.py, gen_backdrop3d.py, Assets/_Game/Art/terrain/venus/, backgrounds/venus_*/
