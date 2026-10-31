@@ -303,12 +303,12 @@ Files: Assets/_Game/Code/Runtime/Space/, Scenes/Space.unity
 Depends: U-022
 Lead notes: Done ef21e93 (cycle 30): Saturn rings at 446 u, Jupiter, Neptune, Luna, belt from six asteroid sprites. Belt reads sparse at the capture zoom (minor; revisit in M4 belt mining).
 
-### U-035 · UNITY · In Progress · M2
+### U-035 · UNITY · Done · M2
 Goal: Earth spawn camp with B-014 props: `landing_pad` under the Pilgrim at spawn, two `lamp`s, a `storage_crate` stack, the `smelter` (inert until M3), placed as a stamp like U-030 POIs.
 Accept: capture at spawn by day and by night (lamps glow via emission); props have colliders where you can stand on them (pad, crates); the stamp survives dig/save/load.
 Files: Assets/_Game/Code/Runtime/Planet/POI/, Prefabs/
 Depends: U-030
-Lead notes: Cycle 19. It gives the first screen of the game a sense of place.
+Lead notes: Done 7fcb8b0 (cycle 33): levelled camp stamp, 12 m pad, lamps, crates, smelter; SpawnCampTests 3/3; day/night captures; TopSolidY placement. Follow-up (do with U-040): pad collider top = deck surface, not the studs, so the landed ship sits on the deck (now ~0.35 m high).
 
 ### U-036 · UNITY · Done · M2
 Goal: ArtImporter honors a frame sheet's `"ppu"` field (D-031) for creature and character sheets.
@@ -317,7 +317,7 @@ Files: Assets/_Game/Code/Editor/ArtImporter.cs, Tests/Unit/
 Depends: U-005
 Lead notes: Done 30af54a (cycle 26): importer honors sheet ppu; capture_creatures shows the stag at true size (~2.3 m) next to the 1.8 m surveyor.
 
-### U-037 · UNITY · Ready · M2
+### U-037 · UNITY · In Progress · M2
 Goal: Earth biomes v1 in SolidWorldGenerator (Bible §7.1): longitude bands for temperate forest (spawn), plains, desert, taiga, tundra, and ocean basins (water tiles to depth 250, D-010) with smooth transitions; surface material per biome (grass/soil, sand, snow, stone, water).
 Accept: EditMode test: biome at x is deterministic per seed and every biome appears once in 4096 columns; spawn is in forest; ocean has water to sea level (Datum 320) and a trench ≥ 120 m deep; chunk apply stays within D-019; captures of each biome.
 Files: Assets/_Game/Code/Runtime/Terrain/
@@ -343,7 +343,7 @@ Goal: Background walls: a dug or natural underground cell shows a dark wall of t
 Accept: capture of a fresh 1-tile hole and a cave (no forest visible through either); wall persists through save/load with the dig diffs; ≤ +2 draw calls; chunk apply within D-019.
 Files: Assets/_Game/Code/Runtime/Terrain/
 Depends: U-008, U-024
-Lead notes: Cycle 30: fx capture 1 shows bright foliage through a dug hole.
+Lead notes: Cycle 30: fx capture 1 shows bright foliage through a dug hole. (Cycle 33) Include the U-035 follow-up: landing-pad collider top at the deck surface.
 
 ### U-041 · UNITY · Ready · M2
 Goal: BudgetGate memory in a dev build (D-036): tools/unity_profile.ps1 runs the Earth/Space/Mars legs in a development build and reads system and texture memory there; Editor rows are kept as "upper bound".
@@ -544,7 +544,7 @@ Goal: Wolf silhouette polish (from the B-015 v3 review): heavy neck ruff and fur
 Accept: same key, sheet layout, clips, and pivot as B-015 v3; full-size frames read as a wolf, not a hyena/rodent, next to the stag; ppu ≥ 100.
 Files: blender/scripts/build_creatures_earth.py, Assets/_Game/Art/creatures/earth/
 Depends: B-015
-Lead notes: Cycle 31. A focused polish task, not a reopen of B-015. Do it after B-016.
+Lead notes: Cycle 31. A focused polish task, not a reopen of B-015. Do it after B-016. (Cycle 33) Also fix the wolf pivot: frame 0 draws ~0.5 m below its feet line in-game (creatures_v3.png). The feet must sit on the pivot line in every frame.
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.

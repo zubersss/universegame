@@ -281,3 +281,10 @@ Decided: none.
 Signals: none.
 User: USER-09 open.
 Queue: UNITY 5 Ready, BLENDER 6 Ready.
+
+## Cycle 33 · 2026-10-31 02:55 (UNITY message)
+Checked: 7fcb8b0 (U-035), 7c59ad7 (B-015 v3 metas); creatures_2026-10-31/creatures_v3.png (stag ~2.3 m OK; wolf sinks ~0.5 m; ship ~0.35 m above pad deck).
+Moved: U-035 → Done; U-037 → In Progress.
+Decided: none. Routed: the wolf pivot goes to B-031, the pad collider to U-040.
+Signals: none.
+User: USER-09 open.
