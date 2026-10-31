@@ -247,6 +247,51 @@ def logo(W=1280, H=320):
     return np.dstack([rgb, a])
 
 
+def app_icon(N, bold=False):
+    """B-047 app icon at N px (supersampled 4x): a rust-to-blue planet arc across the lower half,
+    the Pilgrim's silhouette (from its side sprite alpha) climbing at 20 degrees in cream with a
+    dark outline, and an orange engine glow. bold: thicker outline, no glow (16 px legibility)."""
+    S = N * 4
+    yy, xx = np.mgrid[0:S, 0:S].astype(np.float32) / S
+    bg = np.zeros((S, S, 3), np.float32) + np.array([0.05, 0.06, 0.12])
+    r = np.hypot(xx - 0.5, yy - 1.55)
+    planet = r < 1.0
+    t = np.clip(xx, 0, 1)[..., None]
+    pcol = (1 - t) * np.array([0.72, 0.34, 0.2]) + t * np.array([0.22, 0.46, 0.78])
+    rim = np.clip(1 - np.abs(r - 1.0) / 0.03, 0, 1)[..., None]
+    img = np.where(planet[..., None], pcol * (0.75 + 0.25 * np.clip((1.0 - r) * 6, 0, 1)[..., None]), bg)
+    img = np.clip(img + rim * np.array([0.5, 0.6, 0.8]) * 0.6, 0, 1)
+    # Pilgrim silhouette from the side sprite's alpha, rotated 20 degrees nose-up.
+    ship = load("ships/pilgrim/side_color.png")[..., 3]
+    hh, ww = ship.shape
+    ang = math.radians(20)
+    cx, cy, scale = 0.5, 0.44, 0.84 / ww                     # ship spans ~84% of the icon width
+    u = (xx - cx) * math.cos(ang) - (yy - cy) * math.sin(ang)
+    v = (xx - cx) * math.sin(ang) + (yy - cy) * math.cos(ang)
+    sxp = np.clip((u / scale + ww / 2).astype(int), 0, ww - 1)
+    syp = np.clip((v / scale + hh / 2).astype(int), 0, hh - 1)
+    inside = (np.abs(u / scale) < ww / 2) & (np.abs(v / scale) < hh / 2)
+    a = ship[syp, sxp] * inside
+    # Outline: dilate the alpha by a few pixels.
+    k = (3 if bold else 2) * 4
+    dil = a.copy()
+    for dy in range(-k, k + 1, 2):
+        for dx in range(-k, k + 1, 2):
+            if dx * dx + dy * dy <= k * k:
+                dil = np.maximum(dil, np.roll(np.roll(a, dy, 0), dx, 1))
+    img = img * (1 - dil[..., None]) + np.array([0.04, 0.04, 0.06]) * dil[..., None]
+    img = img * (1 - a[..., None]) + np.array([0.95, 0.91, 0.82]) * a[..., None]
+    if not bold:
+        ex = cx - math.cos(ang) * 0.43; ey = cy + math.sin(ang) * 0.43       # engine end (stern)
+        g = np.exp(-(((xx - ex) / 0.06) ** 2 + ((yy - ey) / 0.06) ** 2))[..., None]
+        img = np.clip(img + g * np.array([1.0, 0.55, 0.2]) * 0.9, 0, 1)
+    # Round-cornered square mask.
+    q = np.maximum(np.abs(xx - 0.5) - 0.38, 0) ** 2 + np.maximum(np.abs(yy - 0.5) - 0.38, 0) ** 2
+    alpha = np.clip((0.12 - np.sqrt(q)) * S / 1.5, 0, 1)
+    out = np.dstack([img, alpha]).reshape(N, 4, N, 4, 4).mean(axis=(1, 3))
+    return out
+
+
 def generate(entry, ctx):
     global ART
     ART = os.path.normpath(os.path.join(ctx["root"], "Assets", "_Game", "Art"))
@@ -256,6 +301,10 @@ def generate(entry, ctx):
         out = np.dstack([pngio.to_u8(rgb), np.full(rgb.shape[:2], 255, np.uint8)])
     elif name == "title/logo":
         img = logo(*entry["size"])
+        out = np.dstack([pngio.to_u8(img[..., :3]), pngio.to_u8(img[..., 3])])
+    elif name.startswith("app/icon"):
+        n = int(entry["size"][0])
+        img = app_icon(n, bold=n <= 16)
         out = np.dstack([pngio.to_u8(img[..., :3]), pngio.to_u8(img[..., 3])])
     else:
         raise ValueError(entry["key"])
