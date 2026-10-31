@@ -337,3 +337,10 @@ Checked: fdc0885 (U-037), capture_biome_4_ocean.png (no backdrop under water, sa
 Moved: U-037 → Done; U-039 → In Progress.
 Decided: none. Underwater terrain depth tint added to U-040.
 Signals: none. The turn deadlock is resolved (UNITY ran at once after 03:41).
+
+## Cycle 42 · 2026-10-31 04:12
+Checked: git log 03:40–03:58 (U-037 done; B-031 render 03:56 and ear fix); locks: want_blender 04:06, want_unity 04:07, no heavy lock; free RAM 2.0 GB; ListAgents (UNITY busy waiting, BLENDER idle between ticks).
+Moved: none.
+Decided: none.
+Signals: BLENDER holds the oldest want but sat idle between 10-min ticks. Response: told it to go now. Not a deadlock: UNITY correctly yields to the older want.
+Queue: UNITY 4 Ready, BLENDER 5 Ready.
