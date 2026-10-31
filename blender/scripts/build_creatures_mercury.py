@@ -113,46 +113,92 @@ def cinder_plate_material(name, state):
 
 
 def cinder_plates(sp, S, rig, coll):
-    """Domed overlapping shell plates over the back in three rows plus a head plate and a tail
-    club, rigid on their bones; material per shell state (S["state"])."""
+    """Cinderhulk armour and anatomy (B-040 v2, LEAD review): domed carapace whose lower edge
+    is a ring of irregular overhanging plates (no straight cut line), crest plates; a heavy
+    head with jaw, brow ridge and tusks (dark hide, not shell); splayed claws on every foot;
+    a bony mace with spikes on the tapering tail (its own bone material)."""
+    import random as _r
+    rnd = _r.Random(40002)
     m = cinder_plate_material(f"{sp}_shell", S["state"])
+    hide = flat_material(f"{sp}_hide", (52, 46, 46), rough=0.6)
+    bone = flat_material(f"{sp}_bone", (196, 180, 156), rough=0.45)
     spine = S["spine"]
 
-    def plate(name, loc, scale, rot_y, bone):
-        bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=12, radius=1.0, location=loc)
+    def blob(name, loc, scale, rot, bone_name, mat, seg=24):
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=seg, ring_count=seg // 2, radius=1.0, location=loc)
         ob = bpy.context.active_object
         ob.name = name
         ob.scale = scale
-        ob.rotation_euler = (0, math.radians(rot_y), 0)
+        ob.rotation_euler = rot
         bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
-        _rig_child(ob, rig, bone, coll, m)
-    # Dome carapace over the whole back (first pass: separate plates sank into the metaball
-    # body, which is grown by MB_GROW); cut flat below so it never covers the legs.
+        _rig_child(ob, rig, bone_name, coll, mat)
+        return ob
+
+    def spike(name, loc, rot, r, depth, bone_name, mat):
+        bpy.ops.mesh.primitive_cone_add(vertices=8, radius1=r, radius2=0.0, depth=depth, location=loc, rotation=rot)
+        ob = bpy.context.active_object
+        ob.name = name
+        _rig_child(ob, rig, bone_name, coll, mat)
+        bpy.ops.object.shade_flat()
+
+    # Carapace dome (cut below), then a ring of overhanging rim plates hides the cut.
     x0, x1 = spine[0][0], spine[-1][0]
     rmax = max(q[2] for q in spine) * 1.35
     zc = max(q[1] for q in spine)
+    cx, ax, ay = (x0 + x1) / 2, (x1 - x0) / 2 + rmax * 0.55, rmax * 1.1
     bpy.ops.mesh.primitive_uv_sphere_add(segments=48, ring_count=24, radius=1.0, location=(0, 0, 0))
     dome = bpy.context.active_object
     dome.name = f"{sp}_dome"
     bm = bmesh.new()
     bm.from_mesh(dome.data)
-    bmesh.ops.delete(bm, geom=[v for v in bm.verts if v.co.z < -0.25], context="VERTS")
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if v.co.z < -0.2], context="VERTS")
     bm.to_mesh(dome.data)
     bm.free()
-    dome.location = ((x0 + x1) / 2, 0, zc - rmax * 0.35)
-    dome.scale = ((x1 - x0) / 2 + rmax * 0.55, rmax * 1.08, rmax * 1.1)
+    zb = zc - rmax * 0.08                                        # seat on the back: legs stay visible
+    dome.location = (cx, 0, zb)
+    dome.scale = (ax, ay, rmax * 0.8)                                 # lower, wider (read as a tortoise)
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
     bpy.ops.object.shade_smooth()
     _rig_child(dome, rig, "body", coll, m)
-    top = zc - rmax * 0.35 + rmax * 1.1
+    n = 16
+    for k in range(n):
+        a = 2 * math.pi * (k + rnd.uniform(-0.2, 0.2)) / n
+        rx, ry = math.cos(a) * ax * 1.02, math.sin(a) * ay * 1.02
+        drop = rnd.uniform(0.12, 0.3)                               # irregular overhang depth
+        # Thin shingle: tangent x, radial y (thin), vertical z; leaning out over the flank.
+        blob(f"{sp}_rim{k}", (cx + rx, ry, zb - rmax * 0.12 - drop * 0.4),
+             (rnd.uniform(0.24, 0.34), 0.05, 0.16 + drop * 0.6),
+             (math.radians(-22 + rnd.uniform(-6, 6)), 0, a + math.pi / 2), "body", m, seg=16)
+    top = zb + rmax * 0.8
     xs = [x0 + 0.15 + (x1 - x0 - 0.3) * k / 4 for k in range(5)]
-    for k, x in enumerate(xs):                                      # crest plates on the dome
-        plate(f"{sp}_crest{k}", (x, 0, top - 0.06), (0.3, 0.36, 0.16), -14, "body")
-    hx, hz, hr = S["head"][1]
-    plate(f"{sp}_headplate", (hx, 0, hz + hr * 0.75), (0.28, 0.22, 0.12), -8, "head")
-    tx, tz, tr = S["tail"][-1]
-    plate(f"{sp}_club", (tx, 0, tz), (0.2, 0.18, 0.18), 0, "tail")
-
+    for k, x in enumerate(xs):                                      # crest plates
+        blob(f"{sp}_crest{k}", (x, 0, top - 0.06), (0.3, 0.34, 0.17), (0, math.radians(-14), 0), "body", m)
+    # Head: heavy lower jaw, brow ridge over the eyes, two tusks (hide/bone, not shell).
+    h = S["head"]
+    hx0, hz0 = h[0][0], h[0][1]
+    hx1, hz1 = h[-1][0], h[-1][1]
+    # Outside the grown metaball surface (head radius ~0.36 at the back, 0.2 at the snout).
+    blob(f"{sp}_jaw", (hx1 - 0.16, 0, (hz0 + hz1) / 2 - 0.3), (0.42, 0.26, 0.14),
+         (0, math.radians(10), 0), "head", hide)
+    blob(f"{sp}_brow", (hx0 + 0.24, 0, hz0 + 0.3), (0.26, 0.32, 0.1), (0, math.radians(-12), 0), "head", m)
+    for sy in (-1, 1):
+        spike(f"{sp}_tusk{sy}", (hx1 + 0.02, sy * 0.15, hz1 - 0.24), (0, math.radians(-25), 0), 0.05, 0.3, "head", bone)
+    # Claws: three splayed per foot on the lower leg bone.
+    for leg in ("fn", "ff", "hn", "hf"):
+        pts = S["front"] if leg[0] == "f" else S["hind"]
+        fx = pts[-1][0]
+        y = (-1 if leg[1] == "n" else 1) * S["leg_y"]
+        for j, (dx, dy) in enumerate(((0.32, 0.0), (0.26, 0.13), (0.26, -0.13))):
+            spike(f"{sp}_claw_{leg}{j}", (fx + dx, y + dy, 0.05), (0, math.radians(100), math.atan2(dy, dx)),
+                  0.055, 0.26, f"l_{leg}", bone)
+    # Tail mace: bony ball with spikes on the tapering tail tip.
+    tx, tz, _ = S["tail"][-1]
+    blob(f"{sp}_mace", (tx - 0.05, 0, tz), (0.2, 0.18, 0.18), (0, 0, 0), "tail", bone)
+    for j, (a, e) in enumerate(((0, 0.6), (1.6, 0.4), (3.1, 0.8), (4.7, 0.3), (2.2, -0.5), (5.3, -0.4))):
+        d = (math.cos(e) * math.cos(a), math.cos(e) * math.sin(a), math.sin(e))
+        loc = (tx - 0.05 + d[0] * 0.2, d[1] * 0.18, tz + d[2] * 0.18)
+        rot = Vector((0, 0, 1)).rotation_difference(Vector(d)).to_euler()
+        spike(f"{sp}_macespike{j}", loc, rot, 0.04, 0.14, "tail", bone)
 
 SPECIES = {
     "glassback": dict(
@@ -182,20 +228,19 @@ SPECIES = {
 
 
 def _cinderhulk(state):
-    """Armored colossus (B-040): heavy low body (~3.4 m sweep, so 400 px frames keep ppu >= 100),
-    pillar legs, head carried low, tail ending in a club; shell plates per state."""
+    """Armored colossus (B-040 v2): low, wide stance; heavy head (>= 1/4 body length) carried
+    below the dome line; thick legs with a visible elbow/stifle bend; tapering tail."""
     return dict(
-        spine=[(-1.0, 1.2, 0.42), (-0.55, 1.32, 0.55), (0.0, 1.36, 0.6), (0.5, 1.3, 0.55), (0.85, 1.18, 0.45)],
-        neck=[(0.85, 1.18, 0.4), (1.05, 1.05, 0.32), (1.2, 0.95, 0.28)],
-        head=[(1.2, 0.95, 0.3), (1.36, 0.86, 0.24), (1.47, 0.79, 0.17), (1.54, 0.75, 0.12)],
-        tail=[(-1.0, 1.2, 0.22), (-1.24, 1.03, 0.16), (-1.44, 0.9, 0.12), (-1.56, 0.84, 0.1)],   # fits 400 px
-        front=[(0.55, 1.0, 0.24), (0.55, 0.62, 0.22), (0.56, 0.28, 0.2), (0.57, 0.08, 0.2), (0.6, 0.0, 0.21)],
-        hind=[(-0.6, 1.02, 0.26), (-0.55, 0.62, 0.24), (-0.62, 0.3, 0.2), (-0.6, 0.08, 0.2), (-0.57, 0.0, 0.21)],
-        leg_y=0.38, ears=0.0, ruff=0.0, socks_z=0.2, eye_scale=1.4,
-        belly_z=(0.8, 0.95), far=(0.2, 0.9),
+        spine=[(-0.95, 1.0, 0.44), (-0.5, 1.08, 0.56), (0.0, 1.1, 0.6), (0.5, 1.05, 0.56), (0.82, 0.95, 0.46)],
+        neck=[(0.82, 0.95, 0.4), (1.0, 0.82, 0.36), (1.12, 0.74, 0.34)],
+        head=[(1.12, 0.74, 0.36), (1.32, 0.68, 0.32), (1.5, 0.62, 0.26), (1.62, 0.58, 0.2)],
+        tail=[(-0.95, 1.0, 0.26), (-1.15, 0.86, 0.19), (-1.24, 0.76, 0.13), (-1.32, 0.71, 0.09)],
+        front=[(0.5, 0.8, 0.3), (0.74, 0.5, 0.21), (0.52, 0.22, 0.16), (0.58, 0.07, 0.17), (0.66, 0.0, 0.18)],   # slimmer joints: bends read
+        hind=[(-0.58, 0.82, 0.32), (-0.3, 0.5, 0.22), (-0.64, 0.22, 0.16), (-0.58, 0.07, 0.17), (-0.5, 0.0, 0.18)],
+        leg_y=0.5, ears=0.0, ruff=0.0, socks_z=0.2, eye_scale=1.4,
+        belly_z=(0.6, 0.75), far=(0.25, 0.7),
         coat=((62, 58, 60), (44, 40, 42)), belly=(74, 68, 66), socks=(36, 32, 34),
         antler=None, extras=cinder_plates, state=state)
-
 
 SPECIES["cinderhulk_day"] = _cinderhulk("day")
 SPECIES["cinderhulk_night"] = _cinderhulk("night")
