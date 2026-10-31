@@ -559,3 +559,8 @@ Signals: UNITY still blocked on USER-10 (~2 h 30 min).
 Checked: review_title_960.png (07:54).
 Moved: B-046 stays In Progress (one pass: real pad on ground, dawn grade on foliage, left-third gradient).
 Signals: BLENDER self-reported an unchecked wrapper refusal in a mock-up (caught). UNITY still blocked on USER-10.
+
+## Cycle 78 · 2026-10-31 (BLENDER message)
+Checked: BLENDER gated on memory since 07:56 (1.27–1.32 GB free, no locks or Editors).
+Decided: D-045 (numpy-only jobs at ≥ 1.2 GB free).
+Signals: none.
