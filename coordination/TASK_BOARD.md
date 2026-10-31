@@ -275,7 +275,7 @@ Files: Assets/_Game/Code/Runtime/Planet/, Scenes/PlanetSide.unity
 Depends: U-007
 Lead notes: Done 92bd0d7 + b327325 (cycle 17): 3-layer parallax with haze, cave fade; BackdropTests; captures; smoke_2_earth shows the forest backdrop behind terrain.
 
-### U-032 · UNITY · Ready · M2
+### U-032 · UNITY · In Progress · M2
 Goal: Surveyor animation: drive the `characters/surveyor/base` frame-sheet clips (idle, walk, run, jump, fall, land, dig, aim, hurt, death) from the player controller; face the aim direction.
 Accept: PlayMode test steps the controller through walk → run → jump → fall → land → dig and asserts the clip at each state; capture strip of 6 states; ≤ 0.05 ms per frame; uses base.json clip ranges (no hard-coded indices).
 Files: Assets/_Game/Code/Runtime/Player/
@@ -303,12 +303,12 @@ Files: Assets/_Game/Code/Runtime/Planet/POI/, Prefabs/
 Depends: U-030
 Lead notes: Cycle 19. It gives the first screen of the game a sense of place.
 
-### U-036 · UNITY · Ready · M2
+### U-036 · UNITY · Done · M2
 Goal: ArtImporter honors a frame sheet's `"ppu"` field (D-031) for creature and character sheets.
 Accept: EditMode test: a sheet with "ppu": 104 imports sprites at PPU 104 (world size = px / 104); sheets without it stay at 128; B-015 stag/wolf appear at true size (stag ~2.3 m) in a capture next to the surveyor.
 Files: Assets/_Game/Code/Editor/ArtImporter.cs, Tests/Unit/
 Depends: U-005
-Lead notes: Cycle 20. Small; needed before B-015/B-016 art replaces the U-027 placeholders.
+Lead notes: Done 30af54a (cycle 26): importer honors sheet ppu; capture_creatures shows the stag at true size (~2.3 m) next to the 1.8 m surveyor.
 
 ### U-025 · UNITY · Done · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.
@@ -331,19 +331,19 @@ Files: Assets/_Game/Code/Runtime/Creatures/
 Depends: U-009
 Lead notes: Done 4bbf8a0 (cycle 20): stag/wolf/dustskater/scree stalker AI on placeholders, held on unloaded chunks, AI ≤ 0.13 ms with 20. Real art via B-015/B-016 + U-036.
 
-### U-029 · UNITY · Review · M2
+### U-029 · UNITY · Done · M2
 Goal: Hazard system v1 (Bible §7 0–3 scale) with Cryo first: per-planet/biome/time Cryo level (Earth tundra night 1; Mars day 1 / night 2; dust storm +1), suit integrity drain by level, HUD Cryo meter, warmth near a lit shelter or the ship.
 Accept: EditMode tests for the level table; PlayMode: Mars night drains suit and the ship stops the drain; level 3 is lethal within 30 s unprotected (§7 definition); the HUD meter shows the level and drain.
 Files: Assets/_Game/Code/Runtime/Hazards/, UI/
 Depends: U-025
-Lead notes: Review (cycle 22). Code + tests green (b1fb61e), numbers per D-032. Profile pending: the 18:51 RED run was under memory contention, which D-033 treats as neither pass nor fail. Re-run at ≥ 1.5 GB free with no other heavy job.
+Lead notes: Done b1fb61e (cycle 26): numbers per D-032; clean profile perf_2026-10-31.md (load none) all green, Earth p99 10.5 ms, entry 1.30 s. The 18:51 RED was contention (D-033).
 
-### U-030 · UNITY · In Progress · M2
+### U-030 · UNITY · Done · M2
 Goal: POIs v1 on Earth and Mars: place the Survey Archive and the abandoned coastal launch complex (Earth), the crashed Halcyon hauler and the Warden outpost (Mars) as handmade stamps merged into the generated terrain at fixed longitudes; use B-020/B-021 props (placeholders until Done).
 Accept: each POI appears at its longitude in every new world and survives dig/save/load (stamps write diffs once); a map marker for each; PlayMode test per planet.
 Files: Assets/_Game/Code/Runtime/Planet/POI/, Assets/_Game/Prefabs/POI/
 Depends: U-007, U-013
-Lead notes: M2 draft (cycle 13). The Archive is the story start (Bible §2). Put it within 200 m of spawn.
+Lead notes: Done 3936ae1 (cycle 26): Archive at x 184 (buried room), launch complex, Halcyon hauler, Warden outpost as once-per-world stamps with B-020/B-021 props; PoiTests + PoiPlayTests. Visual check in the M2 playtest.
 
 ---
 
@@ -455,7 +455,7 @@ Files: blender/scripts/build_surveyor.py, blender/sources/characters/surveyor.bl
 Depends: B-009
 Lead notes: Done f095302 (cycle 15): soft suit, chest unit, harness, hard helmet, visor emission, mask map, flat death pose; same layout. Accepted as v2; no further polish unless the playtest asks.
 
-### B-025 · BLENDER · Ready · M2
+### B-025 · BLENDER · In Progress · M2
 Goal: Parallax polish from the cycle-13 review of the 3D backgrounds.
 Accept: Earth: foliage reads as leaf masses, not stacked spheres (denser, smaller leaf-card clusters with silhouette breakup); clouds are soft volumetric or painted-haze shapes, not opaque white blobs, and never overlap the near tree line. Mars: no vertical spike/streak band in the mid layer (layer1 ground); at least 3 boulder shape families with varied scale. Same keys, sizes, tiling, and memory plan (D-028).
 Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/{earth,mars}/

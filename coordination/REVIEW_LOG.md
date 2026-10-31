@@ -227,3 +227,11 @@ Decided: standing practice: every LEAD cycle checks ListAgents and messages any 
 Signals: UNITY idle at an open gate for ~40 min with U-030 uncompiled. Response: direct message (U-030 compile/commit, U-029 clean profile, then U-036…) plus an idle-notify subscription.
 User: USER-09 open.
 Queue: UNITY 5 Ready, BLENDER 5 Ready (added B-028, B-029).
+
+## Cycle 26 · 2026-10-31 01:15
+Checked: git log 00:40–01:08 (U-030, U-036, metas, B-025 5/6 layers, B-015 v2 sources, B-026 sources); ListAgents (both busy); perf_2026-10-31.md (load none, 0 RED; Earth p99 10.5, Space p99 4.0, entry 1.30 s); tests_2026-10-31.md (EditMode 136/136, PlayMode clean); creatures_2026-10-31/capture_creatures.png.
+Moved: U-029, U-030, U-036 → Done; U-032, B-025 → In Progress.
+Decided: none.
+Signals: none. Both workers busy; the 00:40 nudge worked.
+User: USER-09 open.
+Queue: UNITY 3 Ready, BLENDER 4 Ready.
