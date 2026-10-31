@@ -157,19 +157,16 @@ def coat_material(sp, S):
         return r.outputs["Result"]
 
     col = mix(mr.outputs["Result"], S["coat"][0], S["coat"][1])
-    # Belly: the underside of the torso (object z just above the leg tops).
-    blo, bhi = S["belly_z"]
-    zb = band(sep.outputs["Z"], bhi, bhi - 0.05)
-    zl = band(sep.outputs["Z"], blo - 0.04, blo)
-    belly = N.new("ShaderNodeMath"); belly.operation = "MULTIPLY"
-    L.new(zb, belly.inputs[0]); L.new(zl, belly.inputs[1])
-    col = mix(belly.outputs[0], col, S["belly"])
-    col = mix(band(sep.outputs["Z"], S["socks_z"], S["socks_z"] - 0.08), col, S["socks"])   # darker lower legs
-    fy, fz = S["far"]                                                    # far-side legs: +y, below the body
-    far = N.new("ShaderNodeMath"); far.operation = "MULTIPLY"
-    L.new(band(sep.outputs["Y"], fy - 0.02, fy + 0.02), far.inputs[0]); L.new(band(sep.outputs["Z"], fz, fz - 0.1), far.inputs[1])
+    # Markings come from the "markings" colour attribute, computed once from the rest pose
+    # (R belly, G socks, B far-side legs): they ride the deforming mesh and can't drift
+    # across the legs the way coordinate bands did.
+    attr = N.new("ShaderNodeAttribute"); attr.attribute_name = "markings"
+    msep = N.new("ShaderNodeSeparateColor")
+    L.new(attr.outputs["Color"], msep.inputs[0])
+    col = mix(msep.outputs[0], col, S["belly"])
+    col = mix(msep.outputs[1], col, S["socks"])
     dk = N.new("ShaderNodeMix"); dk.data_type = "RGBA"; dk.blend_type = "MULTIPLY"
-    L.new(far.outputs[0], dk.inputs[0]); L.new(col, dk.inputs[6]); dk.inputs[7].default_value = (0.85, 0.85, 0.85, 1.0)
+    L.new(msep.outputs[2], dk.inputs[0]); L.new(col, dk.inputs[6]); dk.inputs[7].default_value = (0.85, 0.85, 0.85, 1.0)
     L.new(dk.outputs[2], pr.inputs["Base Color"])
     bp = N.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = 0.35
     L.new(nz.outputs["Fac"], bp.inputs["Height"])
@@ -224,11 +221,6 @@ def build_species(sp, scene):
         top = add(pts[0][0], y, pts[0][1], pts[0][2], "body", attach)    # inside the body: rides the torso
         leg_root[l] = chain(pts[1:], names, y=y, link_to=top)
 
-    me = bpy.data.meshes.new(f"{sp}_skeleton")
-    me.from_pydata([tuple(v) for v in verts], edges, [])
-    body = bpy.data.objects.new(f"{sp}_body", me)
-    coll.objects.link(body)
-
     # --- armature (bones in the side plane; joint vertices belong to the child bone) ---
     ad = bpy.data.armatures.new(f"{sp}_rig")
     rig = bpy.data.objects.new(f"{sp}_rig", ad)
@@ -257,30 +249,10 @@ def build_species(sp, scene):
         bone(f"l_{l}", (pts[2][0], y, pts[2][1]), (pts[4][0], y, pts[4][1]), f"m_{l}")
     bpy.ops.object.mode_set(mode="OBJECT")
 
-    # The upper leg bone owns the joint-1 vertex's parent segment: re-own vertices so each
-    # joint vertex belongs to the bone that starts there (the child), i.e. it is the pivot.
-    for l in LEGS:
-        ids = leg_root[l]
-        owner[ids[0]] = f"m_{l}"                       # joint 1 (elbow / stifle)
-        owner[ids[1]] = f"l_{l}"                       # joint 2 (carpus / hock)
-    for b in set(owner):
-        vg = body.vertex_groups.new(name=b)
-        vg.add([k for k, o in enumerate(owner) if o == b], 1.0, "REPLACE")
-    # Upper-leg segment vertices other than joints: u_<leg> owns nothing else; the leg top
-    # rides "body", so the upper leg's skin spans body -> joint 1 and bends at the shoulder/hip.
-
-    body.parent = rig
-    arm = body.modifiers.new("rig", "ARMATURE")
-    arm.object = rig
-    skin = body.modifiers.new("skin", "SKIN")
-    skin.use_smooth_shade = True
-    skin.branch_smoothing = 1.0          # round the hulls where legs/neck branch off the spine
-    sub = body.modifiers.new("sub", "SUBSURF")
-    sub.levels = sub.render_levels = 2
-    for sv, r in zip(me.skin_vertices[0].data, radii):
-        sv.radius = (r, r)
-    me.skin_vertices[0].data[spine[2]].use_root = True
-    me.materials.append(coat_material(sp, S))
+    body = metaball_body(sp, S, verts, radii, edges, coll)
+    paint_markings(body, S)
+    body.data.materials.append(coat_material(sp, S))
+    bind_auto(body, rig)
 
     dark = mat(f"{sp}_dark", (40, 32, 28), (30, 24, 22), 0, 0.5, 20, 0.1)
     for sy in (-1, 1):                                                   # eyes and nose on the head bone
@@ -294,6 +266,87 @@ def build_species(sp, scene):
     if S["antler"]:
         build_antlers(sp, S, rig, coll)
     animate(sp, rig, S)
+
+
+# Metaball field: a capsule of nominal radius r shows a surface at about r / MB_GROW, so radii
+# from the skeleton table are scaled up by MB_GROW (threshold 0.6, stiffness 2).
+MB_GROW = 1.35
+
+
+def metaball_body(sp, S, verts, radii, edges, coll):
+    """B-015 v3 body: one metaball capsule per skeleton segment (radius = mean of its ends),
+    plus a deep-chest ellipsoid; metaballs blend into one organic surface at every branch
+    point (where Skin built hard hulls). Converted to one mesh and decimated."""
+    mb = bpy.data.metaballs.new(f"{sp}_mb")
+    mb.resolution = mb.render_resolution = 0.014
+    mb.threshold = 0.6
+    for a, b in edges:
+        pa, pb = verts[a], verts[b]
+        d = pb - pa
+        length = d.length
+        if length < 1e-4:
+            continue
+        el = mb.elements.new(type="CAPSULE")
+        el.co = (pa + pb) / 2
+        el.radius = MB_GROW * (radii[a] + radii[b]) / 2
+        el.size_x = length / 2
+        el.rotation = Vector((1, 0, 0)).rotation_difference(d.normalized())
+        el.stiffness = 2.0
+    sp0, sp3 = S["spine"][1], S["spine"][3]                       # deep chest / barrel
+    el = mb.elements.new(type="ELLIPSOID")
+    el.co = ((sp0[0] + sp3[0]) / 2 + 0.1, 0.0, sp3[1] - sp3[2] * 0.35)
+    el.radius = MB_GROW * sp3[2] * 1.05
+    el.size_x, el.size_y, el.size_z = 1.6, 0.85, 1.0
+    ob = bpy.data.objects.new(f"{sp}_mb", mb)
+    coll.objects.link(ob)
+    for o in bpy.context.view_layer.objects:
+        o.select_set(False)
+    bpy.context.view_layer.objects.active = ob
+    ob.select_set(True)
+    bpy.ops.object.convert(target="MESH")
+    body = bpy.context.view_layer.objects.active
+    body.name = f"{sp}_body"
+    dec = body.modifiers.new("dec", "DECIMATE")
+    dec.ratio = 0.35
+    bpy.ops.object.modifier_apply(modifier="dec")
+    for p in body.data.polygons:
+        p.use_smooth = True
+    return body
+
+
+def paint_markings(body, S):
+    """Masks in a colour attribute from the rest pose: R pale belly (torso underside), G darker
+    lower legs (socks), B far-side legs (y beyond half the leg spacing, below the torso)."""
+    me = body.data
+    attr = me.color_attributes.new("markings", "FLOAT_COLOR", "POINT")
+    spine_z = sum(p[1] for p in S["spine"]) / len(S["spine"])
+    r_body = max(p[2] for p in S["spine"])
+    belly_top, belly_bot = spine_z - 0.35 * r_body, spine_z - 1.25 * r_body
+    x0, x1 = S["spine"][0][0], S["spine"][-1][0]
+
+    def smooth(e0, e1, v):
+        t = min(1.0, max(0.0, (v - e0) / (e1 - e0)))
+        return t * t * (3 - 2 * t)
+    for k, v in enumerate(me.vertices):
+        x, y, z = v.co
+        belly = smooth(belly_top, belly_top - 0.06, z) * smooth(belly_bot - 0.08, belly_bot, z) * \
+            smooth(x0, x0 + 0.15, x) * smooth(x1, x1 - 0.15, x)
+        socks = smooth(S["socks_z"], S["socks_z"] - 0.08, z)
+        far = smooth(0.5 * S["leg_y"], S["leg_y"], y) * smooth(belly_bot, belly_bot - 0.1, z)
+        attr.data[k].color = (belly, socks, far, 1.0)
+
+
+def bind_auto(body, rig):
+    """Parent with automatic (bone heat) weights; fall back to envelopes if heat fails."""
+    for o in bpy.context.view_layer.objects:
+        o.select_set(False)
+    body.select_set(True)
+    rig.select_set(True)
+    bpy.context.view_layer.objects.active = rig
+    bpy.ops.object.parent_set(type="ARMATURE_AUTO")
+    if len(body.vertex_groups) == 0:                  # heat weighting failed silently
+        bpy.ops.object.parent_set(type="ARMATURE_ENVELOPE")
+        print("MERIDIAN bind: heat weights failed, used envelopes for", body.name)
 
 
 def _rig_child(ob, rig, bone_name, coll, m):
