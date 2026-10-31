@@ -614,3 +614,8 @@ User: owner pre-approved low-memory restarts (D-046; CLAUDE.md rule 6). USER-10 
 Checked: UNITY running its one-lock hand-off check (heavy_unity 13:08, session in shell) after the owner's go; BLENDER idle by design; free RAM 0.8 GB (D-046 covers one memory-stop retry).
 Moved: none.
 Signals: none.
+
+## Cycle 90 · 2026-10-31 (UNITY message)
+Checked: fb0c88a; u040 canyon capture (haze gradient, no band); UNITY report: U-038, U-041, U-045 compiled and green, awaiting their evidence; 2220ee1 metas for all of today's art.
+Moved: U-040, U-042 → Done; U-038, U-041, U-045 → In Progress.
+Fixed (LEAD): M2SoakTests now sets CreatureDirector.AutoSpawnOverride = true (batch runs start with spawning off) and uses the non-obsolete FindObjectsByType<T>() (UNITY found both).

@@ -31,12 +31,14 @@ namespace Meridian.Tests.LeadQA
         {
             saveRoot = System.IO.Path.Combine(Application.temporaryCachePath, "meridian_leadqa_m2_" + System.Guid.NewGuid().ToString("N").Substring(0, 6));
             SaveSystem.RootOverride = saveRoot;
+            CreatureDirector.AutoSpawnOverride = true; // batch runs start with natural spawning off
         }
 
         [TearDown]
         public void TearDown()
         {
             SaveSystem.RootOverride = null;
+            CreatureDirector.AutoSpawnOverride = null;
             if (System.IO.Directory.Exists(saveRoot)) System.IO.Directory.Delete(saveRoot, true);
         }
 
@@ -61,8 +63,8 @@ namespace Meridian.Tests.LeadQA
             double day = earth.dayLengthRealMinutes * 60.0 * TimeSystem.GameSecondsPerRealSecond;
             time.SetGameSeconds((System.Math.Floor(time.GameSeconds / day) + 1.0) * day + 0.02 * day);
             timeout = Time.realtimeSinceStartup + 30f;
-            while (Object.FindObjectsByType<Creature>(FindObjectsSortMode.None).Length == 0 && Time.realtimeSinceStartup < timeout) yield return null;
-            int creatures = Object.FindObjectsByType<Creature>(FindObjectsSortMode.None).Length;
+            while (Object.FindObjectsByType<Creature>().Length == 0 && Time.realtimeSinceStartup < timeout) yield return null;
+            int creatures = Object.FindObjectsByType<Creature>().Length;
             TestContext.Out.WriteLine($"[LEADQA] Earth night creatures: {creatures}");
             Assert.Greater(creatures, 0, "creatures spawn on Earth at night");
 

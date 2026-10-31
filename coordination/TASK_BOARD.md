@@ -324,7 +324,7 @@ Files: Assets/_Game/Code/Runtime/Terrain/
 Depends: U-007
 Lead notes: Done fdc0885 (cycle 41): six longitude biomes with blended borders, ocean to 244 m, the water darkens with depth and hides the backdrop, the seabed is visible; unity_check one-lock hand-off: EditMode 142/142, PlayMode 56/56 + LeadQA 2/2.
 
-### U-038 · UNITY · Ready · M2
+### U-038 · UNITY · In Progress · M2
 Goal: Backdrop switching by biome: PlanetBackdrop cross-fades to `backgrounds/earth_desert|earth_taiga|earth_coast` over ~20 m at biome borders (B-026; falls back to backgrounds/earth until those exist).
 Accept: capture pair at a forest/desert border; no draw-call growth beyond +3 during a fade; no hitch > 33 ms at a border.
 Files: Assets/_Game/Code/Runtime/Planet/
@@ -338,26 +338,26 @@ Files: Assets/_Game/Code/Runtime/Terrain/
 Depends: U-007
 Lead notes: Done 0ff59d4 + 5e69dad (cycle 47): landforms per D-040; random caves suppressed inside landforms (small pockets only); backdrop hung from the Datum; entry 1.48 → 1.21 s (profile once per world, sheets preloaded). The remaining canyon-floor backdrop artifact goes to U-040.
 
-### U-040 · UNITY · In Progress · M2
+### U-040 · UNITY · Done · M2
 Goal: Background walls: a dug or natural underground cell shows a dark wall of the surrounding material (soil, stone, sand…) behind it instead of the sky/parallax backdrop; surface holes ≤ 3 m deep show the wall too.
 Accept: capture of a fresh 1-tile hole and a cave (no forest visible through either); wall persists through save/load with the dig diffs; ≤ +2 draw calls; chunk apply within D-019.
 Files: Assets/_Game/Code/Runtime/Terrain/
 Depends: U-008, U-024
-Lead notes: Cycle 30: fx capture 1 shows bright foliage through a dug hole. (Cycle 33) Include the U-035 follow-up: landing-pad collider top at the deck surface. (Cycle 41) Also tint terrain cells below sea level by water depth (they render as bright as dry sand now; ocean capture). (Cycle 47) Also: on the Valles Marineris floor (mars capture 1) a band of pale mesa silhouettes hangs upside down under the rocky layer. Remove it (cut off any layer below its own ground line). Cave pockets and lava tubes showing sky color are the core of this task.
+Lead notes: Done fb0c88a (cycle 90): background walls, canyon haze gradient (no hanging band), seabed tint, pad deck collider, shimmer behind the hull; EditMode 163/163, PlayMode 61/61.
 
-### U-041 · UNITY · Ready · M2
+### U-041 · UNITY · In Progress · M2
 Goal: BudgetGate memory in a dev build (D-036): tools/unity_profile.ps1 runs the Earth/Space/Mars legs in a development build and reads system and texture memory there; Editor rows are kept as "upper bound".
 Accept: perf report has build memory rows for every scene, all ≤ §11.1; the run fits the 20-min heavy cap.
 Files: tools/unity_profile.ps1, Assets/_Game/Code/Runtime/Core/BudgetMonitor.cs
 Depends: U-014, U-031
 Lead notes: Cycle 30 (P-21).
 
-### U-042 · UNITY · Ready · M2
+### U-042 · UNITY · Done · M2
 Goal: Fix the wolf drawing ~0.5 m below its feet in-game (creatures_v3.png). BLENDER verified the sheet: the lowest opaque pixel sits on the pivot [0.5, 0.03125] in every frame for both stag and wolf.
 Accept: capture with the wolf's paws on the ground line in idle, walk, and death; a PlayMode test that a creature's lowest opaque sprite pixel is within 2 px of its feet/ground contact for every species.
 Files: Assets/_Game/Code/Runtime/Creatures/, Code/Editor/ArtImporter.cs
 Depends: U-036
-Lead notes: Cycle 34. BLENDER's leads, in order: (1) the wolf is placed from its collider/hitbox (wolf y 0.04, h 0.38) or SpeciesSpec size (0.9 m) instead of the sprite pivot; (2) a stale wolf import or .meta pivot (the .meta files were modified); (3) a path that treats the default ppu 128 differently from a custom ppu. Small; do it with U-040.
+Lead notes: Done fb0c88a (cycle 90): PawsOnTheGround passes for all four species (0 px); the sink was the pre-7c59ad7 metas.
 
 ### U-043 · UNITY · Done · M2
 Goal: Strict turns in `tools/unity_common.ps1` (D-037): replace the 2-min yield window. After UNITY releases, Enter-HeavyJobLock refuses while another role's want file (< 30 min) exists, until that file is removed. Offer one wrapper call that runs compile + EditMode + PlayMode under a single lock.
@@ -373,7 +373,7 @@ Files: Build/ (ignored), coordination/reports/unity/smoke_<date>/
 Depends: U-038, U-039, U-040, U-041, U-042
 Lead notes: Cycle 42. It closes M2 together with L-011 and the owner's playtest. (Cycle 80) Use ui/title/background + ui/title/logo on the main menu, and ui/app/icon as the Windows player icon (Player Settings).
 
-### U-045 · UNITY · Ready · M3
+### U-045 · UNITY · In Progress · M3
 Goal: Inventory v1 (M3 lookahead): item registry from `icons/*` (B-013), pickup of the pooled drops (U-008), a stack-based player inventory (40 slots, stack 999), Tab panel with icons and counts, Builder consumes the selected material (closes D-021's "no inventory check"), SaveData v2 with inventory + suit integrity (D-032) and a v1 → v2 migration.
 Accept: EditMode tests for stacking/splitting/migration; PlayMode: dig → pickup → count rises → place → count falls → save → load identical; Tab panel capture; 0 B GC while the panel is closed.
 Files: Assets/_Game/Code/Runtime/Items/, UI/, Save/
