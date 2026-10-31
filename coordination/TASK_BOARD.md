@@ -525,7 +525,7 @@ Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/{earth,ma
 Depends: B-010, B-011
 Lead notes: Done 4b09174 + layer2 re-export (cycle 28): leaf-card foliage, soft high clouds above a lowered tree line, Mars relief from a 2D field (no streaks), 4 boulder families. Distant peak slightly spiky (minor).
 
-### B-026 · BLENDER · Ready · M2
+### B-026 · BLENDER · In Progress · M2
 Goal: Earth biome parallax variants: `backgrounds/earth_desert/layer0..2`, `backgrounds/earth_taiga/layer0..2`, `backgrounds/earth_coast/layer0..2` (Bible §7.1 biomes), same rendered-3D approach as B-010 rework.
 Accept: same sizes/tiling as backgrounds/earth; §9 (no flat fills, haze by distance); split-half renders within D-028 memory; stacked preview per biome.
 Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/earth_*/
@@ -553,12 +553,12 @@ Files: blender/scripts/build_creatures_mercury.py, Assets/_Game/Art/creatures/me
 Depends: B-015
 Lead notes: Cycle 25. Start only after B-015 passes review, so the method is proven first.
 
-### B-030 · BLENDER · In Progress · M2
+### B-030 · BLENDER · Done · M2
 Goal: Re-render `fx/heat_shimmer` as a visible heat-haze/entry-glow sheet (orange-white plasma streaks, additive), per UNITY's handoff (the current sheet is a near-transparent pale mask).
 Accept: same key and frame layout; reads clearly over a dark sky at camera size 9; emission map present.
 Files: blender/scripts/gen_fx.py, Assets/_Game/Art/fx/heat_shimmer/
 Depends: B-012
-Lead notes: Cycle 30. Small.
+Lead notes: Done (cycle 45): white-hot bow-shock arc + plasma streaks, 8-frame loop, new base_emission.png; reads clearly over a dark sky. UNITY to switch the entry glow from tinted-unlit to the emissive sheet.
 
 ### B-031 · BLENDER · Done · M2
 Goal: Wolf silhouette polish (from the B-015 v3 review): heavy neck ruff and fur-clump outline along the back (§9 "one exaggeration" for the wolf), bushy tail (2–3× current thickness, tapering), larger upright ears, legs ~25% thicker at the upper leg, shorter snout.

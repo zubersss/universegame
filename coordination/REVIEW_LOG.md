@@ -356,3 +356,9 @@ Checked: 0ff59d4 (U-039); mars_landforms_sheet.png.
 Moved: U-039 stays In Progress (FAILED visual review).
 Decided: D-040 (landform scale).
 Signals: Mars entry 1.48 s vs a 1.5 s budget. Fix requested inside U-039.
+
+## Cycle 45 · 2026-10-31 (BLENDER message)
+Checked: heat_shimmer_v2_frames.png.
+Moved: B-030 → Done; B-026 → In Progress.
+Decided: none.
+Signals: none.
