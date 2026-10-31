@@ -658,14 +658,14 @@ Files: blender/scripts/build_icons.py, Assets/_Game/Art/icons/
 Depends: B-013
 Lead notes: Done (cycle 71): 15 icons (nickel already existed in batch 1, so no duplicate); readable at 32 px on a dark UI; consistent with batch 1.
 
-### B-043 · BLENDER · In Progress · M3
+### B-043 · BLENDER · Done · M3
 Goal: Wardens basic tier (Bible §2, §8): `creatures/warden/sentinel` (hovering autonomous drone, centred pivot, flier clip set) and `creatures/warden/sentinel_shot` FX (fx/warden_bolt). Original design: an engineered-but-organic hybrid (Sowing era), a lens eye with emission, and no resemblance to any existing game's drones.
 Accept: reads as a machine-guardian at 60 px/m; attack frames show the lens charging; emission maps; stamped review.
 Files: blender/scripts/build_wardens.py, Assets/_Game/Art/creatures/warden/, fx/warden_bolt/
 Depends: B-032
-Lead notes: Cycle 71. M3 needs basic Wardens.
+Lead notes: Done (cycle 72): sentinel (seed-pod ceramic hull, glowing verdigris seams, teal iris lens that charges white-hot in attack, root tendrils) + fx/warden_bolt; original design. Atlas → common (D-043). Seams still read slightly banded (minor; revisit with Warden tiers).
 
-### B-044 · BLENDER · Ready · M3
+### B-044 · BLENDER · In Progress · M3
 Goal: Venus apex `creatures/venus/veil_serpent` (Bible §7.4): a long ribbon serpent of the acid haze; 400 px × 5 frames (D-042); translucent fins with sulfur-yellow emission; a "chilled" hurt state (frost-white flash when hit by Cryo rounds).
 Accept: reads as huge and graceful (S-curves in idle and move); a segmented chain rig like the shadewyrm; stamped review.
 Files: blender/scripts/build_creatures_venus.py, Assets/_Game/Art/creatures/venus/

@@ -526,3 +526,9 @@ Checked: review_icons.png (both batches, 32 px row).
 Moved: B-042 → Done; B-043 → In Progress.
 Added: B-043 Wardens basic, B-044 Veil Serpent apex, B-045 Venus Aerostat/station props (remaining M3 art; M4 still capped).
 Signals: UNITY still blocked on USER-10.
+
+## Cycle 72 · 2026-10-31 (BLENDER message)
+Checked: review_sentinel.png (07:35).
+Moved: B-043 → Done; B-044 → In Progress.
+Decided: D-043 (Wardens in the common atlas).
+Signals: UNITY still blocked on USER-10.
