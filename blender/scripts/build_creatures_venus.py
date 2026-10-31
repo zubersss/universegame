@@ -552,6 +552,137 @@ def build_vent_eel(scene):
     ground_exactly(rig)
 
 
+# ---------------------------------------------------------------- B-044: Veil Serpent (apex)
+
+def fin_material(name):
+    """Translucent sulfur-yellow fin with a glowing vein network (emission)."""
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    N, L = nt.nodes, nt.links
+    pr = N["Principled BSDF"]
+    pr.inputs["Alpha"].default_value = 0.6
+    pr.inputs["Roughness"].default_value = 0.4
+    tc = N.new("ShaderNodeTexCoord")
+    wv = N.new("ShaderNodeTexWave"); wv.wave_type = "BANDS"; wv.bands_direction = "X"
+    wv.inputs["Scale"].default_value = 6.0; wv.inputs["Distortion"].default_value = 1.5
+    L.new(tc.outputs["Object"], wv.inputs["Vector"])
+    v = N.new("ShaderNodeMapRange"); v.interpolation_type = "SMOOTHSTEP"
+    v.inputs["From Min"].default_value, v.inputs["From Max"].default_value = 0.1, 0.0
+    L.new(wv.outputs["Fac"], v.inputs["Value"])
+    col = N.new("ShaderNodeMix"); col.data_type = "RGBA"
+    L.new(v.outputs["Result"], col.inputs[0])
+    col.inputs[6].default_value = lin((236, 210, 104)); col.inputs[7].default_value = lin((250, 228, 130))
+    L.new(col.outputs[2], pr.inputs["Base Color"])
+    em = N.new("ShaderNodeMath"); em.operation = "MULTIPLY_ADD"
+    em.inputs[1].default_value = 1.6; em.inputs[2].default_value = 0.35       # dim glow + bright veins
+    L.new(v.outputs["Result"], em.inputs[0])
+    pr.inputs["Emission Color"].default_value = lin((255, 220, 90))
+    L.new(em.outputs[0], pr.inputs["Emission Strength"])
+    return m
+
+
+def build_veil_serpent(scene):
+    """Venus apex (B-044): a long ribbon serpent of the acid haze. 14-bone chain; metaball body
+    (wedge head -> whip tail); dorsal and ventral translucent fin ribbons weighted to the same
+    chain; a frost shell inside the body that inflates out only on the hurt frames (the
+    'chilled' flash). Flier: centred pivot, no grounding."""
+    sp = "veil_serpent"
+    coll = bpy.data.collections.new(sp)
+    scene.collection.children.link(coll)
+    n = 14
+    x0, x1 = -1.7, 1.7
+    seg = (x1 - x0) / n
+    ad = bpy.data.armatures.new(f"{sp}_rig")
+    rig = bpy.data.objects.new(f"{sp}_rig", ad)
+    coll.objects.link(rig)
+    _select_only(rig)
+    bpy.ops.object.mode_set(mode="EDIT")
+    prev = None
+    for k in range(n):
+        b = ad.edit_bones.new(f"s{k}")
+        b.head, b.tail = Vector((x0 + k * seg, 0, 0)), Vector((x0 + (k + 1) * seg, 0, 0))
+        if prev:
+            b.parent = prev
+            b.use_connect = True
+        prev = b
+    bpy.ops.object.mode_set(mode="OBJECT")
+    radius = [0.03 + 0.11 * (k / (n - 1)) ** 0.8 for k in range(n)]           # whip tail -> thick neck
+    radius[-1] = 0.15                                                          # head
+    pts = [(x0 + k * seg, 0, 0, radius[k]) for k in range(n)] + [(x1 + 0.12, 0, -0.01, 0.06)]
+    body = _capsules_mesh(f"{sp}_body", coll, [pts], 0.008)
+    body.data.materials.append(flat_material(f"{sp}_skin", (176, 140, 84), rough=0.35))
+    bind_auto(body, rig)
+    # Frost shell: a copy of the body mesh with a Displace keyed -0.03 (inside) .. +0.018 (out).
+    frost = body.copy()
+    frost.data = body.data.copy()
+    frost.name = f"{sp}_frost"
+    coll.objects.link(frost)
+    frost.data.materials.clear()
+    fm = flat_material(f"{sp}_frost", (236, 246, 255), emit=(214, 236, 255), strength=1.6, rough=0.2)
+    fm.node_tree.nodes["Principled BSDF"].inputs["Alpha"].default_value = 0.85
+    frost.data.materials.append(fm)
+    dsp = frost.modifiers.new("inflate", "DISPLACE")
+    dsp.mid_level = 0.0
+    # Fins: dorsal and ventral ribbons (XZ plane), scalloped, tallest mid-body, fading to the tail.
+    finm = fin_material(f"{sp}_fin")
+    for sz, hmax in ((1, 0.3), (-1, 0.18)):
+        verts, faces = [], []
+        m_ = 80
+        for i in range(m_ + 1):
+            x = x0 + 0.15 + (x1 - 0.35 - x0 - 0.15) * i / m_
+            t = (x - x0) / (x1 - x0)
+            r = 0.03 + 0.11 * t ** 0.8
+            h = hmax * math.sin(math.pi * min(1.0, t * 1.15)) ** 0.7 * (0.82 + 0.18 * abs(math.cos(i * 0.55)))   # soft scallops
+            verts += [(x, 0, sz * r * 0.7), (x, 0, sz * (r + h))]
+            if i:
+                a = 2 * i
+                faces.append((a - 2, a, a + 1, a - 1))
+        me = bpy.data.meshes.new(f"{sp}_fin{sz}")
+        me.from_pydata(verts, [], faces)
+        fin = bpy.data.objects.new(f"{sp}_fin{'d' if sz > 0 else 'v'}", me)
+        coll.objects.link(fin)
+        fin.modifiers.new("solid", "SOLIDIFY").thickness = 0.006
+        fin.data.materials.append(finm)
+        bind_auto(fin, rig)
+    eye = flat_material(f"{sp}_eye", (120, 60, 10), emit=(255, 200, 80), strength=2.4)
+    for sy in (-1, 1):
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=10, ring_count=6, radius=0.028, location=(x1 + 0.02, sy * 0.07, 0.05))
+        _rig_child(bpy.context.active_object, rig, f"s{n - 1}", coll, eye)
+    for name, i, f in _frames():
+        t = i / CLIP_LEN[name]
+        A, lam, lift, chill = 35.0, 0.07, 0.0, False                       # long wave: deep S-curves
+        head = [0.0] * n
+        if name == "idle":
+            A = 28.0
+        elif name == "walk":
+            A, lam = 38.0, 0.07
+        elif name == "attack":
+            k = [0.2, 0.6, 1.0, 0.7, 0.3, 0.1][i]
+            A = 18.0
+            head[n - 3], head[n - 2], head[n - 1] = -22 * k, -18 * k, (26 if i == 3 else -12) * k   # coil, strike
+        elif name == "hurt":
+            A, chill = 6.0, True
+            head[n - 1] = 18.0 * (1.0 if i == 0 else 0.5)
+        elif name == "death":
+            k = [0.15, 0.35, 0.55, 0.75, 0.92, 1.0][i]
+            A, lift = 35.0 * (1 - k), 30 * k                               # slackens, sinks nose-down
+        rig.rotation_euler = (0, math.radians(lift), 0)
+        rig.keyframe_insert("rotation_euler", frame=f)
+        prev_abs = 0.0
+        for j in range(n):
+            ab = A * math.sin(2 * math.pi * (t - j * lam)) + head[j]
+            set_pose(rig, f"s{j}", ab - prev_abs if j else ab)
+            prev_abs = ab
+        for pb in rig.pose.bones:
+            pb.keyframe_insert("rotation_quaternion", frame=f)
+        dsp.strength = 0.018 if chill else -0.03
+        dsp.keyframe_insert("strength", frame=f)
+    for ob in (rig, frost):
+        if ob.animation_data and ob.animation_data.action:
+            _constant(ob.animation_data.action)
+
+
 def build(out_path=DEFAULT_OUT):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
@@ -559,6 +690,7 @@ def build(out_path=DEFAULT_OUT):
     build_moth(scene)
     build_pressure_crab(scene)
     build_vent_eel(scene)
+    build_veil_serpent(scene)
     scene.frame_start = 1
     scene.frame_end = max(CLIP_START[c] + CLIP_LEN[c] - 1 for c in CLIP_ORDER)
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
