@@ -149,16 +149,45 @@ def set_view(scene, view):
     vs.use_curve_mapping = False
 
 
+def script_deps(path, seen=None):
+    """The build script plus every local blender/scripts module it imports, recursively."""
+    import re
+    seen = seen if seen is not None else set()
+    if path in seen or not os.path.isfile(path):
+        return seen
+    seen.add(path)
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
+    for name in re.findall(r"^\s*(?:from|import)\s+([A-Za-z_]\w*)", text, re.M):
+        dep = os.path.join(HERE, "scripts", name + ".py")
+        if os.path.isfile(dep):
+            script_deps(dep, seen)
+    return seen
+
+
+def source_is_stale(entry):
+    """True when the .blend is missing, or older than its build script or anything it imports
+    (a stale scene once rendered silently because only a missing .blend triggered a build)."""
+    src = os.path.join(HERE, entry["source"])
+    if not os.path.isfile(src):
+        return True
+    if not entry.get("build"):
+        return False
+    newest = max(os.path.getmtime(p) for p in script_deps(os.path.join(HERE, entry["build"])))
+    return newest > os.path.getmtime(src)
+
+
 def open_source(entry, preview):
     import bpy
     src = os.path.join(HERE, entry["source"])
-    if not os.path.isfile(src):
+    if source_is_stale(entry):
         build = entry.get("build")
         if not build:
             raise AssetError(f"source missing: {entry['source']}")
         run_build(entry)
         if not os.path.isfile(src):
             raise AssetError(f"build {build} did not write {entry['source']}")
+        log_line(f"rebuilt: {entry['source']} (from {build})")
     bpy.ops.wm.open_mainfile(filepath=src, load_ui=False)
     scene = bpy.context.scene
     coll_name = entry.get("collection")
