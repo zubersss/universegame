@@ -406,7 +406,7 @@ Goal: Hazards v2 + Envirosuit (Bible §7, D-032): Thermal, Radiation, Toxic and 
 Accept: EditMode tables per hazard and planet; PlayMode: a flare kills an unprotected surveyor in the open within 30 s and not inside a shelter; the Mk sheet swaps at equip; HUD shows the worst hazard.
 Files: Assets/_Game/Code/Runtime/Hazards/, Player/
 Depends: U-029, U-045
-Lead notes: Cycle 98. M3.
+Lead notes: Cycle 98. M3. (Cycle 107) Flares = level 4, 12/s (D-048); acceptance "a flare kills an unprotected surveyor in the open within 30 s" stands.
 
 ### U-050 · UNITY · Ready · M3
 Goal: Venus world (Bible §7.4): hybrid column with the surface (Datum 320; terrain/venus, B-028; Thermal 3, Pressure 3, Toxic 2) and the habitable cloud deck at y 770 ± 60 (backgrounds/venus_deck) where floating station props (B-045) sit; super-rotation wind (constant lateral push, 80-min cycle); acid haze ticks; backgrounds switch deck ↔ surface with altitude.

@@ -683,3 +683,6 @@ Checked: review_canyon_l0.png (15:12, continuous banded rim). B-049 → Done.
 Checked: u046 beam and builder-blocked captures; check 15:24 (EditMode 165/165, PlayMode 80/81 then rerun 3/3, LeadQA 3/3).
 Moved: U-046 → Done; U-049 → In Progress.
 Signals: UNITY widened a timing window in its own U-013 test (+50 ms upper bound for one slow frame). Accepted as measurement tolerance (D-047 spirit); reminded that acceptance thresholds stay LEAD-only.
+
+## Cycle 107 · 2026-10-31
+Decided: D-048 (flare = hazard level 4, 12/s), answering UNITY's U-049 acceptance question; the acceptance text is unchanged.
