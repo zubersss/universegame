@@ -686,3 +686,8 @@ Signals: UNITY widened a timing window in its own U-013 test (+50 ms upper bound
 
 ## Cycle 107 · 2026-10-31
 Decided: D-048 (flare = hazard level 4, 12/s), answering UNITY's U-049 acceptance question; the acceptance text is unchanged.
+
+## Cycle 108 · 2026-10-31 15:42
+Checked: all commits reviewed; UNITY busy on U-049; BLENDER idle by design.
+Queue: UNITY 8 Ready (M3), BLENDER 0.
+User: USER-12 (M2 playtest) open.
