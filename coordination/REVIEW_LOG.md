@@ -548,3 +548,9 @@ Signals: none.
 Checked: review_veil_serpent.png v2 (07:45).
 Moved: B-044 → Done (second pass); B-045 → In Progress.
 Signals: UNITY still blocked on USER-10.
+
+## Cycle 76 · 2026-10-31 (BLENDER message)
+Checked: review_venus_props.png.
+Moved: B-045 → Done (M3 art list complete); B-046 → In Progress.
+Decided: D-044 (ui category; contract v1.6). BLENDER gets user-facing polish (title key art, app icon) rather than M4 lookahead.
+Signals: UNITY still blocked on USER-10 (~2 h 30 min).

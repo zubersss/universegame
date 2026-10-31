@@ -672,12 +672,26 @@ Files: blender/scripts/build_creatures_venus.py, Assets/_Game/Art/creatures/venu
 Depends: B-035
 Lead notes: Done v2 (cycle 75): horned wedge head with glowing eyes and jaw, banded body with pale belly, veined dorsal sail + ventral fin, frost flash on hurt; 103 px/m. Thin rays and fin overlap deferred to M3 apex-fight tuning.
 
-### B-045 · BLENDER · In Progress · M3
+### B-045 · BLENDER · Done · M3
 Goal: Venus Aerostat and station props (Bible §7.4): `props/venus/{aerostat_deck,aerostat_balloon,buoyancy_cell,station_hull_a,station_hull_b,meridian_station_door,vent_harvester}` with emission on lights; the balloon is translucent cream with rigging.
 Accept: contract §4 prop rules (props ≤ 512; the balloon may use the large-ship 768 cap if needed, noted in the manifest); Venus palette; stamped review.
 Files: blender/scripts/build_props_venus.py, Assets/_Game/Art/props/venus/
 Depends: B-014
-Lead notes: Cycle 71. Aerostat base building is M3 Venus's core activity.
+Lead notes: Done (cycle 76): aerostat deck, balloon (ppu 88, under the 512 cap), buoyancy cell, two station hulls, Meridian station door (Sowing-era arch matching the Wardens), vent harvester; all 4 maps.
+
+### B-046 · BLENDER · In Progress · M2
+Goal: Title-screen key art `ui/title/background` (1920×1080, color only): the Pilgrim lifting off the Earth spawn pad at dawn, the forest backdrop behind, Mars a small rust dot in the sky; leave the left third calm for the menu buttons. Also `ui/title/logo` (MERIDIAN wordmark, original, OFL font or hand-built letterforms, with transparency).
+Accept: rendered in the game's own style from existing assets (B-006, B-010, B-014); no third-party logos or fonts outside OFL (credit in docs/credits/blender.md); stamped review at 1920 and 960 wide.
+Files: blender/scripts/build_title.py, Assets/_Game/Art/ui/title/
+Depends: B-006, B-010
+Lead notes: Cycle 76. It's the first thing the owner sees in the M2 playtest. A new `ui` key category (contract §4, D-044).
+
+### B-047 · BLENDER · Ready · M6
+Goal: Windows app icon `ui/app/icon` (256×256 with 16/32/48 px variants readable): the Pilgrim's silhouette over a rust-and-blue planet arc.
+Accept: legible at 16 px; stamped review of all sizes.
+Files: blender/scripts/build_title.py, Assets/_Game/Art/ui/app/
+Depends: B-046
+Lead notes: Cycle 76. Small.
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.

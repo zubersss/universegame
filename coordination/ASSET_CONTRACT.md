@@ -1,4 +1,4 @@
-# MERIDIAN — Asset Contract v1.5
+# MERIDIAN — Asset Contract v1.6
 
 Owner: LEAD (edits and version bumps, logged in `DECISIONS.md`). BLENDER produces to it;
 UNITY's `ArtImporter` enforces it. If an asset can't meet a rule, BLENDER proposes a
@@ -78,6 +78,7 @@ Size classes for creatures: small ≤ 1.5 m → 128 px frames; medium ≤ 4 m �
 Per-sheet scale (D-031): a sheet `.json` may set `"ppu"` (pixels per meter) when the creature does not fit its size class at PPU 128; ArtImporter imports at that PPU.
 Mid-size creatures (D-034): frames may be 320 px in 6 columns (sheet ≤ 2048) so the per-sheet ppu stays ≥ 100.
 Large creatures (D-042): 400 px frames in 5 columns (≤ 2048) with shortened clip lengths recorded in the .json.
+UI art (D-044): `ui/<group>/<name>`, color + alpha, unlit, no normal; sized per asset in the manifest.
 
 Pre-rendered frames in a grid, row-major, 4 px gutters, with `<variant>.json`:
 
