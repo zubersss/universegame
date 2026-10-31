@@ -312,3 +312,9 @@ Checked: 41f26e0 (U-043, self-test 17/17); biomes_2026-10-31/biomes_contact_shee
 Moved: U-043 → Done.
 Decided: none. U-037 pre-review: the ocean shows the backdrop under water (fix before hand-off); caves showing foliage → U-040; same forest backdrop everywhere → U-038/B-026.
 Signals: none.
+
+## Cycle 38 · 2026-10-31 · M1 CLOSED
+Checked: owner message: "I have play tested M1, you can close it."
+Moved: USER-09 → Done. M1 closed (D-038). All M1 tasks were already Done (U-001…U-018, U-028, U-031, L-010).
+Decided: D-038.
+User: no open items except optional USER-08. The next playtest request comes with M2.

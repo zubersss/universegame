@@ -6,19 +6,6 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-09 — Playtest M1 (15–30 min)
-1. Open File Explorer and go to `C:\dev\universegame\Build\MERIDIAN_0.1.1`.
-2. Double-click `MERIDIAN.exe`. If Windows shows "Windows protected your PC", click
-   "More info" → "Run anyway" (it's our own build, not signed).
-3. Click NEW. Controls and what to try are in `coordination/reviews/M1_REPORT.md`.
-   The short version: A/D walk, Space jump, left click dig, F boards the ship, W thrust.
-   In space, turn with A/D toward Mars (straight to the right of Earth). On Mars, use W
-   gently to land slowly.
-4. Press Esc → Main Menu to quit. Then tell the Lead session in plain words what felt
-   wrong, confusing, slow, or ugly, for example "done: USER-09, landing felt too floaty".
-The team keeps working while you play, so the game may stutter now and then if a
-heavy job is running at the same time. Mention it if it bothers you.
-
 ### USER-08 — Optional: let the team run PowerShell commands without prompts (2 min)
 On Windows, Claude Code runs commands through PowerShell as well as Bash, and the
 `Bash(...)` allow rules in `.claude/settings.json` don't cover PowerShell. The Lead added
@@ -34,6 +21,7 @@ allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
 - 2026-10-30 · USER-03 (Unity 6000.6.5f1 + Hub 3.22.3) and USER-04 (Blender 5.2.2 LTS) —
   found on disk by the Lead. The IL2CPP module isn't needed (D-014).
 - 2026-10-30 · USER-07 (UNITY and BLENDER sessions started; first commits 10:23).
+- 2026-10-31 · USER-09 (M1 playtest of Build/MERIDIAN_0.1.1): done; the owner reported no problems and asked to close M1.
 
 ## Status
 READY FOR WORKERS · 2026-10-30 · Start the two worker sessions now (USER-07).

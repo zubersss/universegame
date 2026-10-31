@@ -23,3 +23,6 @@ use Continue.
 or ugly. You don't need to explain why.
 
 **What's next.** M2: real scenery, day and night, creatures, the Mars dust storm.
+
+**Closed 2026-10-31.** You playtested build 0.1.1 and asked to close M1 (D-038). Work
+continues on M2: Earth's regions, Mars landforms, creatures, and finished scenery.
