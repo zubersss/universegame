@@ -128,15 +128,18 @@ PRESETS = {
     # cloud (towers far, billowing deck tops mid/near), backlit warm haze. Surface: black glassy
     # plains under a dim orange murk, lit by lava vents.
     "venus_deck": dict(
-        sun=dict(dir=(-0.4, 0.8, -0.2), strength=3.0, color=(1.0, 0.86, 0.62), angle=6.0),   # low, from behind: backlit
-        ambient=((0.86, 0.72, 0.52), 0.6),
+        # B-028 review: the first deck read as rocky rubble (fine geometry bumps, isotropic dune
+        # noise, spiky far ridge). Clouds = only the long smooth relief (rounded heaps), no
+        # bumps, soft wide sun, high ambient, strong haze; far towers smooth (rough 0).
+        sun=dict(dir=(-0.35, 0.45, -0.82), strength=3.6, color=(1.0, 0.92, 0.74), angle=14.0),   # high: lit tops
+        ambient=((0.78, 0.62, 0.46), 0.55),
         haze=(232, 206, 160),
-        far=dict(W=9000.0, level=0.36, peak=0.86, rock=[(236, 214, 170), (214, 184, 136)], snow=(0, 0, 0),
-                 snowline=9.0, haze=(0.36, 0.00004), tilt=6.0),
-        mid=dict(W=700.0, level=0.40, amp=0.10, depth=(20, 140), haze=(0.26, 0.0012),
-                 ground=[(228, 204, 158), (206, 176, 128)], rocks=0, rock_h=(1, 2), tilt=12.0, frame_up=-0.08, dunes=True),
-        near=dict(W=64.0, level=0.26, amp=0.06, depth=(3, 14), haze=(0.08, 0.003),
-                  ground=[(238, 220, 180), (214, 188, 140)], dunes=True, rocks=0, rock_h=(0.3, 1), tilt=18.0, frame_up=0.12),
+        far=dict(W=9000.0, level=0.36, peak=0.70, rock=[(240, 222, 182), (222, 196, 150)], snow=(0, 0, 0),
+                 snowline=9.0, haze=(0.42, 0.00004), tilt=6.0, rough=0.0),
+        mid=dict(W=700.0, level=0.40, amp=0.22, bumps=0.0, depth=(20, 140), haze=(0.32, 0.0014),
+                 ground=[(234, 212, 168), (216, 188, 142)], rocks=0, rock_h=(1, 2), tilt=12.0, frame_up=-0.08),
+        near=dict(W=64.0, level=0.26, amp=0.12, bumps=0.0, depth=(3, 14), haze=(0.1, 0.003),
+                  ground=[(244, 228, 192), (224, 200, 156)], rocks=0, rock_h=(0.3, 1), tilt=18.0, frame_up=0.12),
         rock=[(200, 180, 140)],
     ),
     "venus_surface": dict(
@@ -855,7 +858,7 @@ def far_layer(P, spec, seed, preview, work):
     def zf(i, j):
         y = j / ny
         bell = math.sin(math.pi * min(1.0, y * 1.3)) ** 1.2
-        return top * spec["level"] + top * (spec["peak"] - spec["level"]) * bell * ridge[j, i] + top * 0.012 * rough[j, i] - top * 0.15 * (1 - bell)
+        return top * spec["level"] + top * (spec["peak"] - spec["level"]) * bell * ridge[j, i] + top * spec.get("rough", 0.012) * rough[j, i] - top * 0.15 * (1 - bell)
     m = bpy.data.materials.new("rock")
     m.use_nodes = True
     nt = m.node_tree
