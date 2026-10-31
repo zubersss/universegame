@@ -636,3 +636,6 @@ Signals: UNITY 13:44 check stopped by Claude Code for low memory in PlayMode (se
 
 ## Cycle 95 · 2026-10-31
 User: USER-11 filed. UNITY correctly declined to treat D-046 (given in the LEAD window) as approval for its own window. The owner must type the standing approval in the UNITY window.
+
+## Cycle 96 · 2026-10-31 14:12
+Checked: UNITY took the lock at 14:07 for unity_check (compile + EditMode + PlayMode), so it resumed (USER-11 presumably done; confirm with UNITY on its next report). Free RAM 0.9 GB. BLENDER idle by design. LEAD runs no heavy jobs.
