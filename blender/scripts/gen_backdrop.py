@@ -41,7 +41,7 @@ PRESETS = {
     # B-027 Mercury: pitch-black sky shading to violet twilight at the horizon, huge Sun glow.
     "mercury": dict(sky_top=(3, 3, 6), sky_horizon=(70, 48, 104), haze=(60, 44, 90),
                     cloud=(0, 0, 0), cloud_shade=(0, 0, 0), clouds=0.0,
-                    sun_glow=(0.3, 0.6, 0.16, (255, 250, 236))),
+                    sun_glow=(0.3, 0.29, 0.11, (255, 250, 236))),   # just above the far ridge (was hidden at 0.6)
     # B-028 Venus skies (deck: bright orange-cream haze; surface: dim orange-brown murk).
     "venus_deck": dict(sky_top=(214, 170, 110), sky_horizon=(244, 226, 190), haze=(232, 206, 160),
                        cloud=(250, 238, 214), cloud_shade=(214, 182, 132), clouds=0.45),
