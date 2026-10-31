@@ -250,3 +250,10 @@ Moved: B-025 → Done.
 Decided: B-015 next approach approved (metaballs → mesh); CC0 base-mesh fallback pre-approved (CC0 only, logged, re-proportioned).
 Signals: B-015 at two failed passes. The three-strikes rule worked (BLENDER self-diagnosed and changed approach). BLENDER slip: the wrapper was called to file a want and it acquired the lock (24 s render while UNITY waited). Self-reported, no harm.
 User: USER-09 open.
+
+## Cycle 29 · 2026-10-31 02:15
+Checked: git log 01:32–02:07 (BLENDER: stale-.blend guard cceaeb9, B-015 v3 sources, B-027 sources, B-025 done; UNITY: U-033 in progress, PlayMode lock since 02:05); ListAgents (UNITY busy, BLENDER between 10-min ticks); free RAM 2.9 GB.
+Moved: none. Added L-011 (M2 soak + screenshot QA).
+Decided: none.
+Signals: none.
+User: USER-09 open.
