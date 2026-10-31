@@ -149,6 +149,8 @@
       "maps": ["color", "normal", "emission"],
       "samples": 32
     },
+    {"key": "ships/waystation_earth/top", "source": "sources/ships/waystation.blend", "build": "scripts/build_waystation.py", "collection": "waystation_earth", "camera": "top", "size": [768, 768], "ppu": 36, "large": true, "origin": [0, 0, 1.5], "pivot": [0.5, 0.5], "maps": ["color", "normal", "emission"], "samples": 32},
+    {"key": "ships/waystation_mars/top", "source": "sources/ships/waystation.blend", "build": "scripts/build_waystation.py", "collection": "waystation_mars", "camera": "top", "size": [768, 768], "ppu": 36, "large": true, "origin": [0, 0, 1.5], "pivot": [0.5, 0.5], "maps": ["color", "normal", "emission"], "samples": 32},
     {
       "key": "characters/surveyor/base",
       "source": "sources/characters/surveyor.blend",
