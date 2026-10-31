@@ -373,6 +373,13 @@ Files: Build/ (ignored), coordination/reports/unity/smoke_<date>/
 Depends: U-038, U-039, U-040, U-041, U-042
 Lead notes: Cycle 42. It closes M2 together with L-011 and the owner's playtest.
 
+### U-045 · UNITY · Ready · M3
+Goal: Inventory v1 (M3 lookahead): item registry from `icons/*` (B-013), pickup of the pooled drops (U-008), a stack-based player inventory (40 slots, stack 999), Tab panel with icons and counts, Builder consumes the selected material (closes D-021's "no inventory check"), SaveData v2 with inventory + suit integrity (D-032) and a v1 → v2 migration.
+Accept: EditMode tests for stacking/splitting/migration; PlayMode: dig → pickup → count rises → place → count falls → save → load identical; Tab panel capture; 0 B GC while the panel is closed.
+Files: Assets/_Game/Code/Runtime/Items/, UI/, Save/
+Depends: U-013, U-015
+Lead notes: Cycle 48. Start after U-044 unless the M2 queue is blocked.
+
 ### U-025 · UNITY · Done · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.
 Accept: EditMode test: Earth noon/midnight intensities match §9; captures at dawn/noon/dusk/night on Earth; 0 B GC per frame.
