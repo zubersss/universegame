@@ -375,3 +375,10 @@ Checked: 5e69dad; mars_landforms_sheet.png re-capture (caves reduced; backdrop a
 Moved: U-039 → Done (second pass); U-040 → In Progress.
 Decided: none. The canyon backdrop artifact is folded into U-040 (anti-loop, no third bounce).
 Signals: none.
+
+## Cycle 48 · 2026-10-31 05:12
+Checked: git log 04:42–05:08 (B-026 desert 3 strikes, taiga done; U-039 done); locks: want_blender 05:08, want_unity 05:10; free RAM 2.4 GB; ListAgents (BLENDER idle with the oldest want).
+Moved: none.
+Decided: none. Desert seam approach given (shadow wrap via periodic heightfield + instanced copies).
+Signals: BLENDER three strikes on the desert seam; it switched to taiga and coast correctly. BLENDER holds the oldest want while idle, so it was nudged.
+Queue: UNITY 4, BLENDER 5.

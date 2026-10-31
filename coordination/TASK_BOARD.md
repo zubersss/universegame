@@ -530,7 +530,7 @@ Goal: Earth biome parallax variants: `backgrounds/earth_desert/layer0..2`, `back
 Accept: same sizes/tiling as backgrounds/earth; §9 (no flat fills, haze by distance); split-half renders within D-028 memory; stacked preview per biome.
 Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/earth_*/
 Depends: B-010
-Lead notes: Cycle 19. UNITY will switch backdrops by longitude biome later (M2/M3). Use the B-025 foliage lessons if B-025 is done first.
+Lead notes: Cycle 19. UNITY will switch backdrops by longitude biome later (M2/M3). Use the B-025 foliage lessons if B-025 is done first. (Cycle 48) Desert hit three strikes on the tile seam. LEAD approach: periodic heightfield (noise sampled on a circle) + geometry instanced at −1/0/+1 periods and only the center rendered (shadow wrap); fallback: sun ≥ 35°. Taiga done (1b0178b).
 
 ### B-027 · BLENDER · Ready · M3
 Goal: Mercury terrain sets `terrain/mercury/{regolith,basalt,sulfide,ice}` (47-blob + 16 variants, D-020) and parallax `backgrounds/mercury/layer0..2` (black sky, huge Sun glow, crater rims, violet twilight per §7.3).
