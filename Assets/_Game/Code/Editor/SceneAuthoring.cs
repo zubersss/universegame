@@ -53,6 +53,7 @@ namespace Meridian.EditorTools
             coreGo.AddComponent<Meridian.Perf.BudgetMonitor>();
             coreGo.AddComponent<BuildSmoke>().scenes = director;
             EnsureUiTheme();
+            EnsureUnlitMaterial();
             var menu = coreGo.AddComponent<Meridian.UI.MenuController>();
             menu.actions = transitions.actions;
             menu.save = save;
@@ -87,6 +88,7 @@ namespace Meridian.EditorTools
             addr.key = Meridian.Art.ArtKeys.Ships.PilgrimTop;
             addr.target = sr;
             addr.worldWidth = 4f;
+            shipGo.AddComponent<Meridian.FX.ShipFx>().top = ship; // U-033 engine flame
             spaceCam.gameObject.AddComponent<Meridian.Space.SpaceCamera>().target = shipGo.transform;
             var backdrop = spaceCam.gameObject.AddComponent<Meridian.Space.SpaceBackdrop>();
             backdrop.view = spaceCam;
@@ -160,6 +162,10 @@ namespace Meridian.EditorTools
             var bandArt = bandGo.AddComponent<Meridian.Art.AddressableSprite>();
             bandArt.key = Meridian.Art.ArtKeys.Fx.EscapeBand;
             bandArt.target = band.band;
+            var bandFx = bandGo.AddComponent<Meridian.FX.FxLoop>(); // U-033: the band flows (its clip), not frame 0
+            bandFx.key = Meridian.Art.ArtKeys.Fx.EscapeBand;
+            bandFx.target = band.band;
+            bandFx.active = true;
             var labelGo = new GameObject("Label");
             labelGo.transform.SetParent(bandGo.transform, false);
             band.label = labelGo.AddComponent<TextMesh>();
@@ -228,6 +234,13 @@ namespace Meridian.EditorTools
             pois.view = sideComp.sideCamera;
             sideComp.pois = pois;
             sideHud.pois = pois;
+            var fxGo = new GameObject("FX");
+            fxGo.transform.SetParent(sideRoot.transform, false);
+            var sideFx = fxGo.AddComponent<Meridian.FX.SideFx>(); // U-033 dig sparks, landing and touchdown dust
+            sideFx.pool = fxGo.AddComponent<Meridian.FX.FxPool>();
+            sideFx.rig = sideComp.rig;
+            sideFx.player = pc;
+            sideFx.ship = sideComp.ship;
             EditorSceneManager.SaveScene(side, PlanetSidePath);
 
             EditorBuildSettings.scenes = new[]
@@ -259,6 +272,16 @@ namespace Meridian.EditorTools
         public const string UiThemePath = "Assets/_Game/UI/Resources/UiTheme.asset";
 
         /// <summary>UI theme with the OFL JetBrains Mono fonts (Bible §9).</summary>
+        /// <summary>U-033: the registry's self-lit sprite material (URP Sprite-Unlit-Default), so builds keep the shader.</summary>
+        static void EnsureUnlitMaterial()
+        {
+            var reg = ArtImporter.Registry();
+            if (reg.unlit != null) return;
+            reg.unlit = AssetDatabase.LoadAssetAtPath<Material>("Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Unlit-Default.mat");
+            EditorUtility.SetDirty(reg);
+            AssetDatabase.SaveAssetIfDirty(reg);
+        }
+
         static void EnsureUiTheme()
         {
             var theme = AssetDatabase.LoadAssetAtPath<Meridian.UI.UiTheme>(UiThemePath);
@@ -290,6 +313,7 @@ namespace Meridian.EditorTools
             var sr = view.AddComponent<SpriteRenderer>();
             sr.sortingOrder = 8;
             root.AddComponent<Meridian.Hazards.WarmthSource>().radius = 6f; // U-029: the ship keeps the cold off nearby
+            root.AddComponent<Meridian.FX.ShipFx>().side = ship; // U-033 flames, entry shimmer
             var legsView = root.AddComponent<Meridian.Ship.ShipLegsView>();
             legsView.ship = ship;
             legsView.target = sr;

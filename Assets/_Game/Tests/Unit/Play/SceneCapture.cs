@@ -256,6 +256,98 @@ namespace Meridian.Tests
             side.dayNight.Override = null;
         }
 
+        /// <summary>U-033 evidence: each effect (dig sparks, landing dust, ship flames, entry shimmer, Escape band, top-down flame).</summary>
+        [UnityTest]
+        public IEnumerator CaptureFx()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+            var side = director.PlanetSide;
+            for (int i = 0; i < 90; i++) yield return new WaitForFixedUpdate();
+            side.dayNight.Override = 0.75f; // late light: flames and sparks read
+            var cam = side.sideCamera;
+            var follow = cam.GetComponent<Meridian.Player.CameraFollow>();
+            follow.enabled = false;
+            var player = side.player;
+            void Frame(Vector2 at, float size) { cam.orthographicSize = size; cam.transform.position = new Vector3(at.x, at.y, cam.transform.position.z); }
+
+            // 1 dig sparks
+            var b = player.Body.position;
+            side.rig.Dig(new Vector2(b.x - 1.5f, b.y - 1.2f));
+            Frame(b, 4f);
+            for (int i = 0; i < 4; i++) yield return null;
+            yield return Save(cam, $"{name}_1_dig_sparks");
+
+            // 2 hard-landing dust: drop the surveyor from 10 m
+            int col = Mathf.FloorToInt(b.x - 4f);
+            int surface = side.terrain.Generator.SurfaceHeight(side.terrain.WrapX(col));
+            player.Body.position = new Vector2(col + 0.5f, surface + 11f);
+            player.Body.linearVelocity = Vector2.zero;
+            for (int i = 0; i < 200 && player.Grounded; i++) yield return new WaitForFixedUpdate(); // the drop starts (Grounded is stale right after the move)
+            for (int i = 0; i < 200 && !player.Grounded; i++) yield return new WaitForFixedUpdate();
+            for (int i = 0; i < 4; i++) yield return null;
+            Frame(player.Body.position, 4f);
+            int under = Mathf.FloorToInt(player.Body.position.y - 1.1f);
+            Debug.Log($"[MERIDIAN] landing at {player.LastImpactSpeed:F1} m/s, grounded {player.Grounded}, at {player.Body.position}, tile below {side.terrain.GetTile(Mathf.FloorToInt(player.Body.position.x), under)}, surface {surface}, settled {side.terrain.IsSettled}, fx alive {Meridian.FX.FxPool.TotalAlive}");
+            yield return Save(cam, $"{name}_2_landing_dust");
+
+            // 3 side flames: aboard, lift off
+            var ship = side.ship;
+            side.hazards.boarding.ForceAboard();
+            follow.enabled = false;
+            ship.externalInput = true;
+            ship.intent.thrust = 1f;
+            for (int i = 0; i < 25; i++) yield return new WaitForFixedUpdate();
+            Frame(ship.Body.position + new Vector2(0f, -1f), 7f);
+            yield return null;
+            yield return Save(cam, $"{name}_3_ship_flames");
+
+            // 4 entry shimmer: high and falling fast, engines off
+            ship.intent.thrust = 0f;
+            ship.Body.position = new Vector2(ship.Body.position.x, ship.Body.position.y + 60f);
+            ship.Body.linearVelocity = new Vector2(0f, -15f);
+            for (int i = 0; i < 3; i++) yield return new WaitForFixedUpdate();
+            Frame(ship.Body.position, 7f);
+            yield return null;
+            var sfx = ship.GetComponent<Meridian.FX.ShipFx>();
+            Debug.Log($"[MERIDIAN] shimmer active {sfx.Shimmer.active} shown {sfx.Shimmer.target.enabled} sprite {(sfx.Shimmer.target.sprite != null)} color {sfx.Shimmer.target.color} alt {ship.AltitudeAboveGround:F0} vy {ship.Body.linearVelocity.y:F1}");
+            yield return Save(cam, $"{name}_4_entry_shimmer");
+
+            // 5 Escape band
+            Frame(new Vector2(ship.Body.position.x, side.Config.EscapeLineY), 7f);
+            for (int i = 0; i < 3; i++) yield return null;
+            yield return Save(cam, $"{name}_5_escape_band");
+
+            // 6 top-down engine flame
+            var top = UnityEngine.Object.FindAnyObjectByType<Meridian.Space.SpaceShip>(FindObjectsInactive.Include);
+            top.PlaceAtWaystation("earth");
+            top.Velocity = Vector2.zero;
+            director.SetView(ViewMode.Space);
+            top.externalInput = true;
+            top.intent.thrust = 1f;
+            var spaceCam = director.Space.GetComponentInChildren<Camera>();
+            var shipView = top.GetComponentInChildren<SpriteRenderer>(true);
+            float wait = Time.realtimeSinceStartup + 10f;
+            while (shipView.sprite == null && Time.realtimeSinceStartup < wait) yield return null; // its sheet loads when Space first shows
+            for (int i = 0; i < 10; i++) yield return null;
+            spaceCam.orthographicSize = 8f;
+            spaceCam.transform.position = new Vector3(top.transform.position.x, top.transform.position.y, spaceCam.transform.position.z);
+            var topView = top.GetComponentInChildren<SpriteRenderer>(true);
+            Debug.Log($"[MERIDIAN] space ship destroyed {top.Destroyed} active {top.gameObject.activeInHierarchy} view {topView.name} enabled {topView.enabled} sprite {(topView.sprite != null ? topView.sprite.name : "null")} at {top.Position} cam {spaceCam.transform.position}");
+            yield return Save(spaceCam, $"{name}_6_space_flame");
+            top.intent.thrust = 0f;
+            side.dayNight.Override = null;
+        }
+
         static IEnumerator Save(Camera cam, string name)
         {
             var rt = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);

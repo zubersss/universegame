@@ -140,7 +140,8 @@ namespace Meridian.Perf
             particles.AddRange(FindObjectsByType<ParticleSystem>());
             int n = 0;
             foreach (var p in particles) n += p.particleCount;
-            return n;
+            // U-033 sprite effects count as particles: pooled one-shots plus active loops.
+            return n + Meridian.FX.FxPool.TotalAlive + Meridian.FX.FxLoop.ActiveCount;
         }
     }
 }

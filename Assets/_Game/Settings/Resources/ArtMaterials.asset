@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.Rendering.ArtMaterials
   lit: {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   litEmissive: {fileID: 2100000, guid: 26b4dc6b5aec4aa48aa60247cfe73d86, type: 2}
+  unlit: {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40, type: 2}
   emissiveKeys:
   - characters/surveyor/base
   - fx/dig_sparks/base

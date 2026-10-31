@@ -15,6 +15,8 @@ namespace Meridian.Rendering
 
         public Material lit;
         public Material litEmissive;
+        /// <summary>Self-lit sprites (fx glows, U-033); set by scene authoring so builds include the shader.</summary>
+        public Material unlit;
         public List<string> emissiveKeys = new List<string>();
         /// <summary>Animation clips of frame sheets (U-032), copied from each sheet's .json by ArtImporter.</summary>
         public List<ArtClipSet> clipSets = new List<ArtClipSet>();

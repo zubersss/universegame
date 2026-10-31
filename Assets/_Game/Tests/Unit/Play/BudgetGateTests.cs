@@ -216,6 +216,17 @@ namespace Meridian.Tests
             yield return Measure("Mars dust storm", side.sideCamera, BudgetMonitor.DrawCallsSide, (a, b) => { gc = a; r = b; });
             Judge("Mars dust storm", gc, r, BudgetMonitor.DrawCallsSide);
 
+            // ---- U-033 effects at their peak: the one-shot pool kept full every frame, in the storm ----
+            var stress = new GameObject("FxStress").AddComponent<FxStress>();
+            stress.pool = side.GetComponentInChildren<Meridian.FX.FxPool>();
+            stress.around = side.sideCamera.transform;
+            Assert.NotNull(stress.pool, "FxPool on PlanetSide");
+            for (int i = 0; i < 30; i++) yield return null;
+            Assert.AreEqual(Meridian.FX.FxPool.Size, stress.pool.Alive, "pool full");
+            yield return Measure("Mars FX peak", side.sideCamera, BudgetMonitor.DrawCallsSide, (a, b) => { gc = a; r = b; });
+            Judge("Mars FX peak", gc, r, BudgetMonitor.DrawCallsSide);
+            UnityEngine.Object.Destroy(stress.gameObject);
+
             StaticRows();
             WriteReport();
             Assert.IsEmpty(failures, "budgets over: " + string.Join("; ", failures));
@@ -269,6 +280,25 @@ namespace Meridian.Tests
 #endif
         }
 
+        /// <summary>Where texture memory goes at the end of the route (Mars): the 15 largest loaded textures.</summary>
+        static void AppendTopTextures(StringBuilder sb)
+        {
+            var all = Resources.FindObjectsOfTypeAll<Texture>()
+                .Select(t => (t, bytes: UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(t)))
+                .OrderByDescending(x => x.bytes).ToList();
+            long total = all.Sum(x => x.bytes);
+            sb.AppendLine();
+            sb.AppendLine($"Largest loaded textures at the end of the route ({all.Count} textures, {total / 1048576} MB in all, Editor's own included):");
+            sb.AppendLine();
+            sb.AppendLine("| Texture | Size | Format | MB |");
+            sb.AppendLine("|---|---|---|---|");
+            foreach (var (t, bytes) in all.Take(15))
+            {
+                string fmt = t is Texture2D t2 ? t2.format.ToString() : t is RenderTexture rt ? "RT " + rt.format : t.GetType().Name;
+                sb.AppendLine($"| {t.name} | {t.width}×{t.height} | {fmt} | {bytes / 1048576f:F1} |");
+            }
+        }
+
         void WriteReport()
         {
             var path = Environment.GetEnvironmentVariable("MERIDIAN_PROFILE_REPORT");
@@ -282,6 +312,7 @@ namespace Meridian.Tests
             sb.AppendLine("| Budget (Bible §11.1) | Limit | Measured | Result |");
             sb.AppendLine("|---|---|---|---|");
             foreach (var r in rows) sb.AppendLine($"| {r[0]} | {r[1]} | {r[2]} | {r[3]} |");
+            AppendTopTextures(sb);
             TestContext.Out.WriteLine(sb.ToString());
             if (string.IsNullOrEmpty(path)) return;
             Directory.CreateDirectory(Path.GetDirectoryName(path));
@@ -296,6 +327,26 @@ namespace Meridian.Tests
                     if (!f.EndsWith("heavy_unity.lock")) found.Add(Path.GetFileName(f));
             if (System.Diagnostics.Process.GetProcessesByName("blender").Length > 0) found.Add("blender.exe running");
             return found.Count == 0 ? "none" : string.Join(", ", found);
+        }
+    }
+
+    /// <summary>Keeps an FxPool full (U-033 peak): a new dig-spark or dust burst wherever a slot frees up.</summary>
+    public sealed class FxStress : MonoBehaviour
+    {
+        public Meridian.FX.FxPool pool;
+        public Transform around;
+        int n;
+
+        void Update()
+        {
+            if (pool == null) return;
+            while (pool.Alive < Meridian.FX.FxPool.Size)
+            {
+                n++;
+                var key = (n & 1) == 0 ? Meridian.Art.ArtKeys.Fx.Dust : Meridian.Art.ArtKeys.Fx.DigSparks;
+                var p = (Vector2)around.position + new Vector2((n * 37 % 30) - 15f, (n * 11 % 12) - 6f);
+                if (!pool.Play(key, p, 1.5f)) break;
+            }
         }
     }
 }
