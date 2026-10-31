@@ -578,3 +578,9 @@ Checked: review_jupiter_deck1.png (08:08–08:09).
 Moved: B-048 → Done. BLENDER idles by design (art well ahead of integration).
 Decided: D-045 amended (numpy_only marker + recorded peak_mb ≤ 1000, BLENDER may set it).
 Signals: UNITY blocked on USER-10 (~3 h).
+
+## Cycle 82 · 2026-10-31 08:12
+Checked: git log 07:36–08:10 (all reviewed; BLENDER recorded peak_mb per D-045); ListAgents (both idle: UNITY blocked on USER-10 since 05:25, BLENDER idling by design); no locks; free RAM 1.2 GB.
+Moved: none.
+Signals: the whole team is waiting on USER-10. Art is complete through M3 plus M4 look-dev; the integration backlog is UNITY U-040/U-042 (ready), U-041, U-038, U-044 (M2 build), then M3.
+User: USER-10 open ~2 h 45 min.
