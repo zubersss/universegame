@@ -714,3 +714,7 @@ Moved: U-057 stays In Progress (Venus only).
 
 ## Cycle 116 · 2026-10-31 (UNITY message)
 Checked: re-captured Venus vent (the harvester sits on the field; a pale haze strip remains under the deck line, a minor nit deferred). U-057 → Done; U-051 → In Progress.
+
+## Cycle 118 · 2026-10-31 (UNITY message)
+Checked: u051 blueprint_tree.png (the content is right; the panel is see-through, there are no icons in recipe rows, and every CRAFT button looks alike).
+Moved: U-051 → Done. Added U-058 (UI readability pass, before the U-052 market).

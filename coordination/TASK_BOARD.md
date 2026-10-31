@@ -415,14 +415,14 @@ Files: Assets/_Game/Code/Runtime/Terrain/, Planet/
 Depends: U-049
 Lead notes: Done (cycle 113): Venus surface (tessera, vent fields with Vitriol Glass), floating Meridian station walkway on the deck, super-rotation wind on the saved clock, surface↔deck backdrop cross-fade, dive lethal unprotected (29.6 s) and survivable with Mk2; full check green. POI pad block → U-057 (generalized).
 
-### U-051 · UNITY · In Progress · M3
+### U-051 · UNITY · Done · M3
 Goal: Crafting: Smelter (ore → bars), Refinery (fuel, glass, polymers), Blueprint Tree (story blueprints per Bible §2 table) with B-042 icons; recipes data-driven (ScriptableObjects).
 Accept: EditMode recipe-graph tests (no unreachable item, no cycles); PlayMode: mine iron → smelt → craft a suit patch; UI capture of the Blueprint Tree.
 Files: Assets/_Game/Code/Runtime/Crafting/, UI/
 Depends: U-045
-Lead notes: Cycle 98. M3.
+Lead notes: Done (cycle 118): RecipeBook asset (16 recipes, 10 blueprints, §2 story unlocks by beacon), Smelter at camp, Refinery + Fabricator on the Pilgrim, Blueprint Tree + recipes panel (B); CraftingGraphTests + CraftingPlayTests; full check green. UI polish (opaque panel, item icons in recipe rows, CRAFT buttons dimmed per availability) folded into U-058.
 
-### U-052 · UNITY · Ready · M3
+### U-052 · UNITY · In Progress · M3
 Goal: Waystations and trading (Bible §3): dock at ships/waystation_earth|mars (B-038) in top-down; the docking-bay interior scene (backgrounds/waystation, B-039) with a Halcyon market (buy/sell in Scrip, prices per station), refuel and repair, and cargo contracts.
 Accept: PlayMode: dock → sell 10 iron → Scrip rises → buy fuel → undock; prices differ Earth vs Mars; save/load keeps Scrip and contracts.
 Files: Assets/_Game/Code/Runtime/Space/, Trade/, Scenes/
@@ -463,6 +463,13 @@ Accept: re-captured day/twilight/night with no #000 holes, the pad flush, and a 
 Files: Assets/_Game/Code/Runtime/Terrain/, Planet/, POI/
 Depends: U-048
 Lead notes: Done (cycle 116): PoiStamp general fix (median ground, rock fill, cleared air, ≤ 2 m shoulders; PoiShapingTests on 3 seeds), Earth-only sea clamp, seatLow for the Venus harvester (now flush), Mercury tint floor and violet twilight. Remaining nit: a pale band (the haze strip) shows under the pad deck line at the harvester; fold into the next Venus touch (U-055/U-056).
+
+### U-058 · UNITY · Ready · M3
+Goal: UI readability pass (from the U-051 review): opaque or blurred panel backgrounds for the Blueprint/Recipes (B), Inventory (Tab) and future Catalogue/Market panels so the world doesn't bleed through; item icons (B-013/B-042) on every recipe input and output; CRAFT buttons clearly dimmed or disabled when you can't craft (the state must be visible, not only greyed text); the HUD hidden behind full-screen panels as on menus.
+Accept: captures of the B and Tab panels over a busy forest scene; UI tests for the disabled state.
+Files: Assets/_Game/Code/Runtime/UI/
+Depends: U-051
+Lead notes: Cycle 118. Do it before U-052's market UI so the market reuses the style.
 
 ### U-025 · UNITY · Done · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.
