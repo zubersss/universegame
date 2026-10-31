@@ -670,7 +670,7 @@ Goal: Venus apex `creatures/venus/veil_serpent` (Bible §7.4): a long ribbon ser
 Accept: reads as huge and graceful (S-curves in idle and move); a segmented chain rig like the shadewyrm; stamped review.
 Files: blender/scripts/build_creatures_venus.py, Assets/_Game/Art/creatures/venus/
 Depends: B-035
-Lead notes: Cycle 71. M3 requires killable apexes for the inner planets.
+Lead notes: Cycle 71. M3 requires killable apexes for the inner planets. (Cycle 74) FAILED review (review_veil_serpent.png). The S-curves and the chilled flash work, but it reads as a thin worm inside a uniform glow halo, not an apex. Fix: (1) a real head: wedge skull with a jaw line, glowing eyes, and a backswept crest or horns, about 2× body thickness; (2) body ~2× thicker at the front third, tapering, with darker dorsal banding or scale pattern and a pale belly; (3) replace the even halo with distinct fins: a tall dorsal sail with visible rays (5–8 spines) and translucent membrane between them, plus a smaller ventral fin. The glow lives in the membrane veins, not as an outline; (4) a fin edge that is ragged and irregular, not scalloped. Keep the rig, the clips, and the frost flash.
 
 ### B-045 · BLENDER · Ready · M3
 Goal: Venus Aerostat and station props (Bible §7.4): `props/venus/{aerostat_deck,aerostat_balloon,buoyancy_cell,station_hull_a,station_hull_b,meridian_station_door,vent_harvester}` with emission on lights; the balloon is translucent cream with rigging.
