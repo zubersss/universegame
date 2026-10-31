@@ -567,6 +567,20 @@ Files: blender/scripts/build_creatures_earth.py, Assets/_Game/Art/creatures/eart
 Depends: B-015
 Lead notes: Done (cycle 43): brush tail, heavy ruff, back fur clumps, tapered upright ears (3-segment metaballs), thicker upper legs, shorter snout; 128.5 px/m; feet on pivot in every checked frame. Reads as a wolf.
 
+### B-032 · BLENDER · Ready · M3
+Goal: Venus creatures (Bible §7.4): `creatures/venus/sulfur_drifter` (gasbag filter feeder, large, floats; 320–512 px class per D-034 rules) and `creatures/venus/acidmoth` (small swarm flyer, 128 px), standard clip set (fliers: idle/drift, move, attack, hurt, death).
+Accept: metaball method (B-015 standard); one bold exaggeration each (drifter: translucent gas sacs with emission veins; acidmoth: acid-yellow wing eyespots with emission); Venus palette (orange-cream, sulfur yellow); ppu ≥ 100; full-size frames reviewed.
+Files: blender/scripts/build_creatures_venus.py, Assets/_Game/Art/creatures/venus/
+Depends: B-015
+Lead notes: Cycle 46. M3 lookahead.
+
+### B-033 · BLENDER · Ready · M3
+Goal: Mercury POI props (Bible §7.3): `props/mercury/{flare_shelter,shelter_door,meridian_beacon,warden_vault_gate,solarite_cluster}`; solarite_cluster has emission (crystals fused by flares).
+Accept: contract §4 prop rules; Mercury palette (white/black/violet), harsh light-ready normals; worn, flare-scorched metal.
+Files: blender/scripts/build_props_mercury.py, Assets/_Game/Art/props/mercury/
+Depends: B-014
+Lead notes: Cycle 46. M3 lookahead.
+
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
 Accept: frames ≤ 256, sheets ≤ 1024², `.json` per sheet, emission where glowing.
