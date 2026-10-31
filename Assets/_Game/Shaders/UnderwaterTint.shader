@@ -9,6 +9,8 @@ Shader "MERIDIAN/UnderwaterTint"
         _Tint ("Shallow-water tint", Color) = (0.55, 0.78, 0.95, 1)
         _Fade ("Depth (m) over which light falls to 1/e", Float) = 45
         _Floor ("Darkest multiplier", Float) = 0.06
+        _WallMap ("Per column (PlanetBackdrop): a = sea water in this column", 2D) = "black" {}
+        _WallOrigin ("World x of the map's first column", Float) = 0
     }
     SubShader
     {
@@ -24,29 +26,36 @@ Shader "MERIDIAN/UnderwaterTint"
             #pragma fragment frag
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
+            TEXTURE2D(_WallMap); SAMPLER(sampler_point_clamp_WallMap);
+
             CBUFFER_START(UnityPerMaterial)
                 float _SeaLevel;
                 float4 _Tint;
                 float _Fade;
                 float _Floor;
+                float _WallOrigin;
             CBUFFER_END
 
             struct Attributes { float4 positionOS : POSITION; };
-            struct Varyings { float4 positionCS : SV_POSITION; float worldY : TEXCOORD0; };
+            struct Varyings { float4 positionCS : SV_POSITION; float2 world : TEXCOORD0; };
 
             Varyings vert(Attributes v)
             {
                 Varyings o;
                 float3 ws = TransformObjectToWorld(v.positionOS.xyz);
                 o.positionCS = TransformWorldToHClip(ws);
-                o.worldY = ws.y;
+                o.world = ws.xy;
                 return o;
             }
 
             half4 frag(Varyings i) : SV_Target
             {
-                float depth = _SeaLevel - i.worldY;
+                float depth = _SeaLevel - i.world.y;
                 if (depth <= 0.0) return half4(1, 1, 1, 1);
+                // Only columns that hold sea water (dry desert dips below sea level stay untinted).
+                float u = (floor(i.world.x) - _WallOrigin + 0.5) / 256.0;
+                if (u <= 0.0 || u >= 1.0) return half4(1, 1, 1, 1);
+                if (SAMPLE_TEXTURE2D_LOD(_WallMap, sampler_point_clamp_WallMap, float2(u, 0.5), 0).a < 0.5) return half4(1, 1, 1, 1);
                 float k = max(_Floor, exp(-depth / _Fade));
                 return half4(_Tint.rgb * k, 1);
             }

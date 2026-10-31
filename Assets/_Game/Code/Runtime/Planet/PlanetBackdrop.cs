@@ -438,12 +438,19 @@ namespace Meridian.Planet
             {
                 int x = origin + i;
                 WallSlots(x, out int near, out int deep);
-                wallPixels[i] = new Color(WallTop(x), near, deep, 1f);
+                // a: 1 where the column holds sea water at sea level (the underwater tint applies only there).
+                bool sea = !float.IsNegativeInfinity(seaLevel) && terrain.Generator.TileAt(terrain.WrapX(x), (int)seaLevel - 1) == Meridian.Terrain.TileId.Water;
+                wallPixels[i] = new Color(WallTop(x), near, deep, sea ? 1f : 0f);
             }
             wallMap.SetPixels(wallPixels);
             wallMap.Apply(false, false);
             quad.GetPropertyBlock(block);
             block.SetFloat(WallOriginId, origin);
+            if (underwaterMaterial != null)
+            {
+                underwaterMaterial.SetTexture(WallMapId, wallMap);
+                underwaterMaterial.SetFloat(WallOriginId, origin);
+            }
             quad.SetPropertyBlock(block);
         }
 

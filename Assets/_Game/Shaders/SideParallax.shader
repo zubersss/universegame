@@ -151,14 +151,13 @@ Shader "MERIDIAN/SideParallax"
                 col = lerp(sky, col, _Alpha);
                 // Under the sea (U-037): no landscape, just water darkening with depth (near-black by ~120 m).
                 float depth = _SeaLevel - i.worldXY.y;
-                if (depth > 0.0) col = _WaterColor.rgb; // the UnderwaterTint overlay darkens it with depth (U-040)
-                // Below a column's original ground line: the dark wall of its material (dug holes, caves, tubes).
+                // Sea water only in columns that hold it (wall map a; until the map exists, everything below sea level).
                 float u = (floor(i.worldXY.x) - _WallOrigin + 0.5) / 256.0;
-                if (u > 0.0 && u < 1.0 && _WallRect1.z > 0.0)
-                {
-                    float4 m = SAMPLE_TEXTURE2D_LOD(_WallMap, sampler_point_clamp_WallMap, float2(u, 0.5), 0);
-                    if (i.worldXY.y < m.r + 1.0) col = Wall(i.worldXY, m.r, m.g, m.b);
-                }
+                bool mapped = u > 0.0 && u < 1.0 && _WallRect1.z > 0.0;
+                float4 m = mapped ? SAMPLE_TEXTURE2D_LOD(_WallMap, sampler_point_clamp_WallMap, float2(u, 0.5), 0) : float4(0, 0, 0, 1);
+                if (depth > 0.0 && m.a > 0.5) col = _WaterColor.rgb; // the UnderwaterTint overlay darkens it with depth (U-040)
+                // Below a column's original ground line: the dark wall of its material (dug holes, caves, tubes).
+                if (mapped && i.worldXY.y < m.r + 1.0) col = Wall(i.worldXY, m.r, m.g, m.b);
                 return half4(col * _Tint.rgb, _Fade);
             }
             ENDHLSL

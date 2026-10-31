@@ -459,6 +459,65 @@ namespace Meridian.Tests
             side.dayNight.Override = null;
         }
 
+        /// <summary>
+        /// U-038 evidence: the plains/desert border before, half-way through and past the 20 m cross-fade,
+        /// and the camera walked across it at sprint speed with no frame over 33 ms (the sets load ahead).
+        /// </summary>
+        [UnityTest]
+        public IEnumerator CaptureBiomeBorder()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+            var side = director.PlanetSide;
+            side.dayNight.Override = 0.45f;
+            var cam = side.sideCamera;
+            cam.GetComponent<Meridian.Player.CameraFollow>().enabled = false;
+            cam.orthographicSize = 14f;
+            Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Desert, out int border, out _);
+
+            IEnumerator ShootAt(float x, string label)
+            {
+                int top = side.terrain.TopSolidY(Mathf.FloorToInt(x));
+                cam.transform.position = new Vector3(x, top + 6f, cam.transform.position.z);
+                float until = Time.realtimeSinceStartup + 15f;
+                yield return null;
+                while (!side.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                for (int k = 0; k < 90; k++) yield return null; // neighbour sets arrive
+                yield return Save(cam, $"{name}_{label}");
+            }
+            yield return ShootAt(border - 40f, "1_plains");
+            yield return ShootAt(border + 0.5f, "2_crossfade");
+            TestContext.Out.WriteLine($"[MERIDIAN] at the border: main {side.backdrop.MainSet}, overlay {side.backdrop.OverlaySet}, weight {side.backdrop.FadeWeight:F2}");
+            yield return ShootAt(border + 40f, "3_desert");
+
+            // Walk the camera across the border at sprint speed (≈ 9 m/s) and watch every frame.
+            float x0 = border - 80f, x1 = border + 80f, worst = 0f, worstAt = 0f;
+            cam.transform.position = new Vector3(x0, cam.transform.position.y, cam.transform.position.z);
+            for (int k = 0; k < 30; k++) yield return null;
+            float pos = x0;
+            while (pos < x1)
+            {
+                float t0 = Time.realtimeSinceStartup;
+                yield return null;
+                float ms = (Time.realtimeSinceStartup - t0) * 1000f;
+                if (ms > worst) { worst = ms; worstAt = pos; }
+                pos += 9f * Mathf.Min(Time.unscaledDeltaTime, 1f / 30f);
+                cam.transform.position = new Vector3(pos, side.terrain.TopSolidY(Mathf.FloorToInt(pos)) + 6f, cam.transform.position.z);
+            }
+            TestContext.Out.WriteLine($"[MERIDIAN] border walk: worst frame {worst:F1} ms at x {worstAt:F0} (border {border})");
+            side.dayNight.Override = null;
+            Assert.LessOrEqual(worst, 33f, "no hitch > 33 ms crossing the border (U-038)");
+        }
+
         /// <summary>U-039 evidence: Mars canyon wall, Olympus flank, polar cap and a lava tube.</summary>
         [UnityTest]
         public IEnumerator CaptureMarsLandforms()
