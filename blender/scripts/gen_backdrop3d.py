@@ -1215,7 +1215,7 @@ def cloud_bank(P, spec, seed, preview):
         # multiplied into the cloud colour (cream zones, rust and brick belts).
         cols = np.array(spec["bands"], np.float32) / 255
         warp = fft_noise(rng, H, W, 40, 400, 1.4)
-        ph = (d + 22 * warp) / spec.get("band_h", 70)
+        ph = (yy + 8 * warp) / spec.get("band_h", 70)      # absolute height: belts run straight across (depth-keyed bands read as camouflage blotches)
         k = np.floor(ph).astype(int) % len(cols)
         fr = ph - np.floor(ph)
         nxt = (k + 1) % len(cols)

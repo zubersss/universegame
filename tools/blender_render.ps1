@@ -72,7 +72,9 @@ $numpyGenerators = @('scripts/gen_fx.py')
 function Test-NumpyOnly($chosen) {
     if ($chosen.Count -eq 0) { return $false }
     foreach ($a in $chosen) {
-        if ($a.source -or -not $a.generator -or ($numpyGenerators -notcontains $a.generator)) { return $false }
+        # Listed generator, or an entry the manifest marks "numpy_only" (e.g. gen_backdrop3d banks presets,
+        # gen_terrain: measured 0.53-0.68 GB, no scene opened).
+        if ($a.source -or -not $a.generator -or (($numpyGenerators -notcontains $a.generator) -and -not $a.numpy_only)) { return $false }
     }
     return $true
 }
