@@ -432,3 +432,9 @@ Checked: review_venus_deck.png, review_venus_surface.png (stamped 05:42–05:46)
 Moved: B-028 → Done; B-027 → In Progress.
 Decided: none. Polish → B-034.
 Signals: BLENDER self-reported a 1-min stale own lock (output truncation cut its cleanup). Fixed in practice.
+
+## Cycle 57 · 2026-10-31 (BLENDER message)
+Checked: review_mercury.png (stamped 05:49/05:50).
+Moved: B-027 → Done; B-029 → In Progress.
+Decided: none. Integration note: a sun-less layer0 + a separate Sun sprite for M3.
+Signals: none.

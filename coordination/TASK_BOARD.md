@@ -539,12 +539,12 @@ Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/earth_*/
 Depends: B-010
 Lead notes: Done (cycle 53): desert (cb33653, circle-mapped noise), taiga (1b0178b), coast (shore skirt, 2D beach relief, turquoise-to-deep-blue sea with glitter and surf line). All stamped fresh; seams ≤ 1.26.
 
-### B-027 · BLENDER · In Progress · M3
+### B-027 · BLENDER · Done · M3
 Goal: Mercury terrain sets `terrain/mercury/{regolith,basalt,sulfide,ice}` (47-blob + 16 variants, D-020) and parallax `backgrounds/mercury/layer0..2` (black sky, huge Sun glow, crater rims, violet twilight per §7.3).
 Accept: contract §4 sizes; terrain joins seamlessly (demo patches); backdrop per §9 and Mercury palette (white/black/violet); split-half renders.
 Files: blender/scripts/gen_terrain.py, gen_backdrop3d.py, Assets/_Game/Art/terrain/mercury/, backgrounds/mercury/
 Depends: B-022
-Lead notes: Cycle 19. M3 lookahead so the art pipeline stays ahead of UNITY.
+Lead notes: Done 2ee2cc4 + backdrop (cycle 57): Mercury terrain (regolith, basalt, sulfide, polar ice); backdrop with black sky, huge Sun + corona, violet twilight, cratered skyline. Integration note for M3: the Sun is baked into the tiling layer0, so two Suns could show if one tile is narrower than the view. Before Venus/Mercury integration, BLENDER provides a sun-less layer0 variant and UNITY draws the Sun as its own sprite (planets/sun/glow) at a fixed sky position.
 
 ### B-028 · BLENDER · Done · M3
 Goal: Venus art: terrain sets `terrain/venus/{basalt,tessera,vent_glass,sulfur}` (47-blob + 16 variants) for the surface, and parallax `backgrounds/venus_deck/layer0..2` (habitable cloud deck: orange-cream haze, backlit cloud towers) plus `backgrounds/venus_surface/layer0..2` (black glassy plains lit by vents) per §7.4 and §9.
@@ -553,7 +553,7 @@ Files: blender/scripts/gen_terrain.py, gen_backdrop3d.py, Assets/_Game/Art/terra
 Depends: B-022
 Lead notes: Done (cycle 56): 4 terrain sets (basalt, tessera, violet vent glass, ochre sulfur); venus_surface (haze, boulders, vents); venus_deck via painted 2D cumulus after 3 heightfield strikes. Polish (deck arcs, vent legibility) → B-034.
 
-### B-029 · BLENDER · Ready · M3
+### B-029 · BLENDER · In Progress · M3
 Goal: Mercury creatures `creatures/mercury/glassback` (silicate grazer, medium) and `creatures/mercury/cinderling` (small swarm), same clip set as B-015.
 Accept: the B-015 rework method (one continuous armature-deformed mesh, real-feeling anatomy with one exaggeration: glassback's crystalline back plates, cinderling's glowing cracks with emission); 320 px / 6 columns for medium, 128–256 px for small; ppu ≥ 100.
 Files: blender/scripts/build_creatures_mercury.py, Assets/_Game/Art/creatures/mercury/
