@@ -637,6 +637,20 @@ Files: blender/scripts/gen_backdrop3d.py (bay preset), Assets/_Game/Art/backgrou
 Depends: B-038
 Lead notes: Cycle 61. B-038's painted bay is a placeholder until this lands. Do it before B-034.
 
+### B-040 · BLENDER · Ready · M3
+Goal: Mercury apex `creatures/mercury/cinderhulk` (Bible §7.3): an armored colossus, large class (512 px frames per contract, sheet ≤ 2048), with a white-glowing shell on the day side and a "cooled & cracked" variant clip set (dark shell with glowing fracture lines) for the 2 min after it crosses into night, when it's vulnerable.
+Accept: metaball standard; two shell states readable at 60 px/m; emission maps for both; stamped review.
+Files: blender/scripts/build_creatures_mercury.py, Assets/_Game/Art/creatures/mercury/
+Depends: B-029
+Lead notes: Cycle 62. M3 requires killable apexes for the inner planets.
+
+### B-041 · BLENDER · Ready · M3
+Goal: Envirosuit tiers for the surveyor: `characters/surveyor/{mk1,mk2,mk3}` variants of the B-023 sheet (same layout, clips, pivot), with visible upgrades: Mk1 thermal/cryo pads, Mk2 armored plating + pressure collar, Mk3 full hard-shell with emissive visor bands.
+Accept: identical frame layout to base (UNITY swaps the sheet); each tier distinct at 60 px/m; stamped review.
+Files: blender/scripts/build_surveyor.py, Assets/_Game/Art/characters/surveyor/
+Depends: B-023
+Lead notes: Cycle 62. M3 Envirosuit hazards and protection tiers (D-032).
+
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
 Accept: frames ≤ 256, sheets ≤ 1024², `.json` per sheet, emission where glowing.
