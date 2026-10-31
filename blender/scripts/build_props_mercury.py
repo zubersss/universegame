@@ -37,7 +37,7 @@ def materials(rim):
         "door": paint_material("door_panel", (210, 208, 206), (60, 52, 56)),
         "violet": flat_material("status_violet", (60, 40, 90), emit=(176, 120, 255), strength=1.2),
         "lamp": flat_material("beacon_lamp", (60, 40, 90), emit=(200, 160, 255), strength=1.0, rough=0.2),
-        "vault": paint_material("vault_stone", (34, 32, 40), (18, 16, 22), seams=False),
+        "vault": paint_material("vault_stone", (34, 32, 40), (18, 16, 22), seams=False, scratches=False),   # flecks read as stars
         "seam": flat_material("vault_seam", (50, 30, 80), emit=(160, 110, 255), strength=1.2),
         "solarite": flat_material("solarite", (255, 214, 140), emit=(255, 200, 110), strength=1.6, rough=0.15),
         "solarite_core": flat_material("solarite_core", (255, 246, 220), emit=(255, 240, 210), strength=2.2, rough=0.1),
@@ -69,11 +69,11 @@ def flare_shelter(c, M):
     dome.data.materials.append(M["shell"])
     bpy.ops.object.shade_smooth()
     box("band", (0, 0, 0.55), (3.5, 2.9, 0.16), c, M["shell_dark"], bevel=0.06)
-    box("entry", (0.0, -1.32, 0.62), (0.9, 0.4, 1.2), c, M["shell_dark"], bevel=0.08)
+    box("entry", (0.0, -1.45, 0.62), (0.9, 0.5, 1.2), c, M["shell_dark"], bevel=0.08)    # in front of the band
     box("bank_l", (-1.45, 0, 0.2), (0.8, 2.6, 0.4), c, M["regolith"], bevel=0.18)
     box("bank_r", (1.45, 0, 0.2), (0.8, 2.6, 0.4), c, M["regolith"], bevel=0.18)
     cyl("vent", (0.7, 0, 1.75), 0.12, 0.3, c, M["metal"], verts=12)
-    box("status", (0.0, -1.53, 1.3), (0.5, 0.03, 0.07), c, M["violet"], bevel=0.01)
+    box("status", (0.0, -1.72, 1.3), (0.5, 0.03, 0.07), c, M["violet"], bevel=0.01)
 
 
 def shelter_door(c, M):
@@ -91,7 +91,7 @@ def meridian_beacon(c, M):
     for k in range(3):
         a = 2 * math.pi * k / 3 + 0.4
         strut(c, f"leg_{k}", (0.8 * math.cos(a), 0.0), (0.0, 1.9), 0.07, M["metal"])
-    cyl("mast", (0, 0, 2.2), 0.06, 0.7, c, M["metal"], verts=16)
+    cyl("mast", (0, 0, 2.35), 0.06, 1.0, c, M["metal"], verts=16)                   # runs up to the cap (no floating cap)
     sphere("lamp", (0, 0, 2.62), 0.12, c, M["lamp"])
     cyl("cap", (0, 0, 2.86), 0.34, 0.08, c, M["shell"], verts=24, r2=0.12)        # flare shield
     box("plinth", (0, 0, 0.08), (1.8, 1.2, 0.16), c, M["shell_dark"], bevel=0.05)

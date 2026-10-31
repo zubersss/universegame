@@ -140,9 +140,33 @@ def tiles(out, dirs):
     print("REVIEW tiles ok", out)
 
 
+def sprites(out, paths):
+    """Prop sprites over a neutral backdrop, bottom-aligned side by side; emission added on
+    top when present; one stamp per sprite."""
+    stale = stale_keys()
+    imgs = [pngio.read_png(p) for p in paths]
+    H = max(i.shape[0] for i in imgs)
+    bg = np.array([0.55, 0.62, 0.70], np.float32)
+    panels = []
+    for p, img in zip(paths, imgs):
+        h, w = img.shape[:2]
+        rgb = img[..., :3] * img[..., 3:4] + bg * (1 - img[..., 3:4])
+        ep = p.replace("_color.png", "_emission.png")
+        if os.path.exists(ep):
+            rgb = np.clip(rgb + pngio.read_png(ep)[..., :3] * 0.8, 0, 1)
+        panel = np.tile(bg, (H, w + 8, 1)).astype(np.float32)
+        panel[H - h:, 4:4 + w] = rgb
+        stamp(panel, p, stale)
+        panels.append(panel)
+    write(out, np.hstack(panels))
+    print("REVIEW sprites ok", out)
+
+
 if __name__ == "__main__":
     a = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]
-    if a[0] == "tiles":
+    if a[0] == "sprites":
+        sprites(a[1], a[2:])
+    elif a[0] == "tiles":
         tiles(a[1], a[2:])
     elif a[0] == "stack":
         stack(a[1], a[2])
