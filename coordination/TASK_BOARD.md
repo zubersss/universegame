@@ -798,12 +798,12 @@ Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/mercury/
 Depends: B-027
 Lead notes: Done (cycle 112): mercury layer0 + layer0_nosun re-rendered with ridge_lo=180, rounded crater rims, no spike comb; in-game confirmation via the U-057 re-capture.
 
-### B-051 · BLENDER · Ready · M3
+### B-051 · BLENDER · Done · M3
 Goal: Icons for crafted items still missing art: polymer, float_cell_mk1, solarite_capacitor (if absent), plus any other RecipeBook output without an icons/<key>/base (check UNITY's ItemRegistry/RecipeBook).
 Accept: same icon camera and lights as B-013/B-042; readable at 32 px on a dark UI; stamped review.
 Files: blender/scripts/build_icons.py, Assets/_Game/Art/icons/
 Depends: B-042
-Lead notes: Cycle 120 (gaps visible in the U-058 recipe panel).
+Lead notes: Done (cycle 122): 7 icons (polymer, float cell, solarite capacitor, survey module, skip drive Mk2, deep-diamond tip, thruster Mk3), consistent with batches 1–2, readable at 32 px. 128 px icon renders count as below preview size (not heavy, CLAUDE.md rule 6).
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.

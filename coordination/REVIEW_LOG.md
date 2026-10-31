@@ -724,3 +724,6 @@ Checked: u058 crafting_after.png (readable, clear states). U-058 → Done; U-052
 
 ## Cycle 121 · 2026-10-31 18:42
 Checked: want_blender 18:24 (B-051 icons), want_unity 18:25 (unity_check); no heavy lock, no Editor or Blender; free RAM 1.43 GB (< 1.5 gate). The Claude sessions hold 1.6 GB. Not a deadlock: strict turns put BLENDER first, and it waits for memory. If the gate stays shut past cycle 122, consider letting B-051 run as a numpy-free beauty job at a measured peak.
+
+## Cycle 122 · 2026-10-31 (BLENDER message)
+Checked: review_icons_b3.png. B-051 → Done (the audit found 5 extra blueprint icons).
