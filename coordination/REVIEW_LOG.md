@@ -564,3 +564,6 @@ Signals: BLENDER self-reported an unchecked wrapper refusal in a mock-up (caught
 Checked: BLENDER gated on memory since 07:56 (1.27–1.32 GB free, no locks or Editors).
 Decided: D-045 (numpy-only jobs at ≥ 1.2 GB free).
 Signals: none.
+
+## Cycle 79 · 2026-10-31 (BLENDER clarification)
+Decided: D-045 clarified to generator-only manifest entries (no source .blend, no render pass), including headless Blender hosting, with a whole-process peak ≤ 1.0 GB.
