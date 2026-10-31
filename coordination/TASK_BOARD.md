@@ -693,12 +693,12 @@ Files: blender/scripts/build_title.py, Assets/_Game/Art/ui/app/
 Depends: B-046
 Lead notes: Done (cycle 80): Pilgrim silhouette over a rust-to-blue arc; 256/48/32/16 readable.
 
-### B-048 · BLENDER · In Progress · M4
+### B-048 · BLENDER · Done · M4
 Goal: M4 risk-reduction look-dev, Jupiter cloud column only (Bible §7.5/§7.6): `backgrounds/jupiter_deck1/layer0..2` (ammonia-ice cloud tops: cream/rust/brick bands rolling past, thin sky above) and `terrain/jupiter/{floe_ice,floe_core}` (floating ice-floe tile sets, 47-blob + variants).
 Accept: §9 look (no flat fills; band layers that read as moving cloud), tiling and contract sizes, stamped review. Only this one planet. The other giants wait until UNITY's cloud-column generator exists.
 Files: blender/scripts/gen_backdrop*.py, gen_terrain.py, Assets/_Game/Art/backgrounds/jupiter_deck1/, terrain/jupiter/
 Depends: B-028
-Lead notes: Cycle 80. The cloud-column world type is the biggest visual unknown in the plan, so proving its look early is worth one task. Stop after this.
+Lead notes: Done (cycle 81): Jupiter deck-1 cloud tops (belts by absolute height, zonal streaks, thin starry sky) + floe_ice/floe_core terrain. Proves the cloud-column look. Further giant art waits for UNITY's cloud-column generator (M4).
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.

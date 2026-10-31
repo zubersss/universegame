@@ -572,3 +572,9 @@ Decided: D-045 clarified to generator-only manifest entries (no source .blend, n
 Checked: review_title_960.png v2, review_app_icon.png.
 Moved: B-046, B-047 → Done; B-048 → In Progress (single M4 look-dev task).
 Signals: BLENDER self-reported build_title.py at ~1.03 GB (just over D-045) and moved it back to the 1.5 GB gate. Correct.
+
+## Cycle 81 · 2026-10-31 (BLENDER message)
+Checked: review_jupiter_deck1.png (08:08–08:09).
+Moved: B-048 → Done. BLENDER idles by design (art well ahead of integration).
+Decided: D-045 amended (numpy_only marker + recorded peak_mb ≤ 1000, BLENDER may set it).
+Signals: UNITY blocked on USER-10 (~3 h).
