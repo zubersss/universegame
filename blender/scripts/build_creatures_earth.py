@@ -54,9 +54,9 @@ SPECIES = {
         tail=[(-0.62, 1.16, 0.07), (-0.72, 1.08, 0.05)],
         front=[(0.42, 1.05, 0.12), (0.4, 0.8, 0.075), (0.42, 0.44, 0.045), (0.42, 0.12, 0.032), (0.46, 0.0, 0.036)],
         hind=[(-0.42, 1.08, 0.14), (-0.3, 0.74, 0.09), (-0.5, 0.46, 0.045), (-0.47, 0.12, 0.032), (-0.44, 0.0, 0.036)],
-        leg_y=0.13, ears=0.16, ruff=0.0,
+        leg_y=0.13, ears=0.16, ruff=0.0, belly_z=(0.86, 1.0), socks_z=0.32, far=(0.07, 0.95),
         coat=((140, 98, 62), (108, 74, 48)), belly=(204, 178, 138), socks=(70, 54, 42),
-        antler=dict(head_len=0.45, beam=0.85, tines=5)),
+        antler=dict(head_len=0.45, beam=0.70, tines=5)),        # beam 1.56x head (D-034: >= 1.5x)
     "wolf": dict(
         spine=[(-0.48, 0.74, 0.13), (-0.3, 0.76, 0.17), (0.0, 0.76, 0.19), (0.28, 0.8, 0.21), (0.44, 0.82, 0.19)],
         neck=[(0.44, 0.82, 0.17), (0.58, 0.92, 0.13), (0.68, 1.0, 0.11)],
@@ -64,7 +64,7 @@ SPECIES = {
         tail=[(-0.48, 0.74, 0.07), (-0.7, 0.6, 0.085), (-0.9, 0.44, 0.06), (-0.98, 0.36, 0.03)],
         front=[(0.32, 0.66, 0.08), (0.3, 0.5, 0.055), (0.31, 0.24, 0.035), (0.32, 0.07, 0.03), (0.37, 0.0, 0.034)],
         hind=[(-0.32, 0.68, 0.1), (-0.22, 0.46, 0.065), (-0.36, 0.26, 0.035), (-0.33, 0.07, 0.03), (-0.29, 0.0, 0.034)],
-        leg_y=0.1, ears=0.11, ruff=0.2,
+        leg_y=0.1, ears=0.11, ruff=0.2, belly_z=(0.54, 0.66), socks_z=0.16, far=(0.05, 0.6),
         coat=((126, 122, 116), (92, 88, 84)), belly=(206, 200, 190), socks=(110, 104, 98),
         antler=None),
 }
@@ -96,7 +96,7 @@ def pose(name, i, sp):
     elif name == "attack":
         k = [0.0, 0.35, 0.8, 1.0, 0.6, 0.15][i]                          # wind-up, strike, recover
         if sp == "stag":                                                 # head-down antler charge
-            p.update(pitch=6 * k, neck=-30 * k, head=28 * k, s_fn=-12 * k, s_ff=-8 * k, s_hn=14 * k, s_hf=10 * k)
+            p.update(pitch=6 * k, neck=-20 * k, head=26 * k, s_fn=-10 * k, s_ff=-7 * k, s_hn=12 * k, s_hf=9 * k)
             for l in ("hn", "hf"):
                 p[f"j1_{l}"] = 18 * k
         else:                                                            # lunge and bite
@@ -112,7 +112,9 @@ def pose(name, i, sp):
             p[f"s_{l}"] = (-25 if front else 30) * k
             p[f"j1_{l}"] = 70 * k
             p[f"j2_{l}"] = 90 * k
-        p.update(neck=-55 * k, head=30 * k, tail=-15 * k, pitch=4 * k)
+        # The head sinks but tips nose-up, so a stag's antlers rake back instead of sweeping
+        # 0.9 m forward (measured: that alone pushed the sheet below ppu 100).
+        p.update(neck=-30 * k, head=-20 * k, tail=-15 * k, pitch=4 * k)
     return p
 
 
@@ -130,7 +132,9 @@ def coat_material(sp, S):
     pr.inputs["Roughness"].default_value = 0.92
     tc = N.new("ShaderNodeTexCoord")
     sep = N.new("ShaderNodeSeparateXYZ")
-    L.new(tc.outputs["Generated"], sep.inputs[0])
+    # Object space in metres (Generated coords on a Skin mesh map from the wire skeleton's
+    # bounds and put the bands in nonsense places).
+    L.new(tc.outputs["Object"], sep.inputs[0])
     nz = N.new("ShaderNodeTexNoise"); nz.inputs["Scale"].default_value = 60.0; nz.inputs["Detail"].default_value = 8.0
     L.new(tc.outputs["Object"], nz.inputs["Vector"])
     mr = N.new("ShaderNodeMapRange"); mr.inputs["From Min"].default_value = 0.35; mr.inputs["From Max"].default_value = 0.7
@@ -153,15 +157,17 @@ def coat_material(sp, S):
         return r.outputs["Result"]
 
     col = mix(mr.outputs["Result"], S["coat"][0], S["coat"][1])
-    # Belly: the low side of the torso (Generated Z between legs and back).
-    zb = band(sep.outputs["Z"], 0.50, 0.42)
-    zl = band(sep.outputs["Z"], 0.34, 0.40)
+    # Belly: the underside of the torso (object z just above the leg tops).
+    blo, bhi = S["belly_z"]
+    zb = band(sep.outputs["Z"], bhi, bhi - 0.05)
+    zl = band(sep.outputs["Z"], blo - 0.04, blo)
     belly = N.new("ShaderNodeMath"); belly.operation = "MULTIPLY"
     L.new(zb, belly.inputs[0]); L.new(zl, belly.inputs[1])
     col = mix(belly.outputs[0], col, S["belly"])
-    col = mix(band(sep.outputs["Z"], 0.16, 0.08), col, S["socks"])     # darker lower legs
+    col = mix(band(sep.outputs["Z"], S["socks_z"], S["socks_z"] - 0.08), col, S["socks"])   # darker lower legs
+    fy, fz = S["far"]                                                    # far-side legs: +y, below the body
     far = N.new("ShaderNodeMath"); far.operation = "MULTIPLY"
-    L.new(band(sep.outputs["Y"], 0.6, 0.7), far.inputs[0]); L.new(band(sep.outputs["Z"], 0.42, 0.3), far.inputs[1])
+    L.new(band(sep.outputs["Y"], fy - 0.02, fy + 0.02), far.inputs[0]); L.new(band(sep.outputs["Z"], fz, fz - 0.1), far.inputs[1])
     dk = N.new("ShaderNodeMix"); dk.data_type = "RGBA"; dk.blend_type = "MULTIPLY"
     L.new(far.outputs[0], dk.inputs[0]); L.new(col, dk.inputs[6]); dk.inputs[7].default_value = (0.85, 0.85, 0.85, 1.0)
     L.new(dk.outputs[2], pr.inputs["Base Color"])
@@ -268,6 +274,7 @@ def build_species(sp, scene):
     arm.object = rig
     skin = body.modifiers.new("skin", "SKIN")
     skin.use_smooth_shade = True
+    skin.branch_smoothing = 1.0          # round the hulls where legs/neck branch off the spine
     sub = body.modifiers.new("sub", "SUBSURF")
     sub.levels = sub.render_levels = 2
     for sv, r in zip(me.skin_vertices[0].data, radii):
@@ -327,7 +334,7 @@ def build_antlers(sp, S, rig, coll):
         beam = [base]
         for dx, dy, f in beam_pts:
             beam.append(add((hx + dx, sy * dy, hz + 0.1 + L * f), 0.03 * (1.1 - 0.6 * f), beam[-1]))
-        tines = [(1, (0.22, 0.0, 0.08)), (1, (0.2, 0.0, 0.16)), (2, (0.2, 0.0, 0.14)), (3, (0.12, 0.0, 0.2)), (4, (-0.08, 0.0, 0.16))]
+        tines = [(1, (0.18, 0.0, 0.07)), (1, (0.16, 0.0, 0.13)), (2, (0.16, 0.0, 0.12)), (3, (0.1, 0.0, 0.16)), (4, (-0.07, 0.0, 0.13))]
         for k, (bi, d) in enumerate(tines[:A["tines"]]):
             p0 = verts[beam[bi]]
             mid = add(tuple(p0 + Vector(d) * 0.55 + Vector((0, sy * 0.01, 0))), 0.014, beam[bi])
