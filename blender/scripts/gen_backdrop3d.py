@@ -64,12 +64,12 @@ PRESETS = {
         haze=(226, 210, 182),
         far=dict(W=9000.0, level=0.38, peak=0.66, rock=[(196, 150, 104), (222, 182, 132)], snow=(0, 0, 0),
                  snowline=9.0, haze=(0.42, 0.00004), tilt=6.0, terrace=2),
-        mid=dict(W=700.0, level=0.40, amp=0.12, cliff=0.5, bumps=0.02, depth=(20, 140), haze=(0.24, 0.0012),
+        mid=dict(W=700.0, level=0.40, amp=0.12, cliff=0.5, bumps=0.004, depth=(20, 140), haze=(0.3, 0.0016),
                  ground=[(214, 182, 128), (196, 160, 108)], strata=(9.0, (232, 200, 150), 0.4),
-                 rocks=120, rock_h=(2, 7), tilt=12.0, frame_up=-0.08, dunes=True),
-        near=dict(W=64.0, level=0.26, amp=0.05, depth=(3, 14), haze=(0.05, 0.003),
-                  ground=[(222, 192, 140), (204, 172, 120)], dunes=True,
-                  rocks=60, rock_h=(0.3, 1.8), pebbles=500, tilt=18.0, frame_up=0.12),
+                 rocks=30, rock_h=(2, 7), tilt=12.0, frame_up=-0.08, dune_rows=5, dune_h=0.8),
+        near=dict(W=64.0, level=0.26, amp=0.07, bumps=0.004, depth=(3, 14), haze=(0.05, 0.003),
+                  ground=[(226, 196, 144), (208, 176, 124)], dune_rows=4, dune_h=0.9, dune_mesa=0.15,
+                  rocks=14, rock_h=(0.3, 1.4), pebbles=120, tilt=18.0, frame_up=0.12),
         rock=[(176, 132, 92), (150, 110, 78), (196, 156, 112), (132, 100, 74)],
     ),
     "earth_taiga": dict(
@@ -870,6 +870,16 @@ def rock_layer(P, spec, seed, preview, work, near):
     mesa = 1 - 2 * (terrace01(f2, terr, spec.get("cliff", 0.3)) if terr else f2)        # -1..1, + = lower
     # Dunes: isotropic 2D undulation on the (now ~square) grid, not an x-only wave.
     dunes = 0.35 * fft_noise(rng, ny + 1, nx, 20, 90, 1.0) if spec.get("dunes") else np.zeros((ny + 1, nx))
+    if spec.get("dune_rows"):
+        # B-026 desert: rows of asymmetric dune ridges receding in depth (gentle windward rise,
+        # steep slip face), warped so crests wander; each row is a smooth silhouette, the
+        # opposite of the isotropic lumps above. Mesa noise and bumps are damped under them.
+        warp = fft_noise(rng, ny + 1, nx, 60, 400, 1.6)
+        ph = np.arange(ny + 1, dtype=np.float32)[:, None] / ny * spec["dune_rows"] + 0.22 * warp
+        sd = ph % 1.0
+        hd = np.where(sd < 0.72, sd / 0.72, (1.0 - sd) / 0.28)
+        dunes = dunes + amp * spec.get("dune_h", 0.9) * hd * hd * (3 - 2 * hd)
+        mesa = mesa * spec.get("dune_mesa", 0.35) if mesa is not None else None
     dune = dunes[min(ny, int(ny * (0 - y_front) / (y_back - y_front)))]               # row at y = 0 for placement
 
     def wy(y):
