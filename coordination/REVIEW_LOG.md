@@ -645,3 +645,8 @@ Checked: 3c1dbd1 (U-044); smoke_2026-10-31 menu, Earth night, Mars canyon; M2Soa
 Moved: U-044, L-011 → Done. USER-11 → Done (owner approval given in the UNITY window).
 M2 exit (Bible §12): screenshots match §9 (reviewed), budgets green (dev-player memory + frame rows), 30-min-equivalent soak without errors (×2). Remaining: owner playtest (USER-12).
 Added: U-047 (menu overlap, canyon sky).
+
+## Cycle 98 · 2026-10-31 14:42
+Checked: UNITY busy (U-045, lock 14:3x); BLENDER idle by design.
+Added: the M3 UNITY queue U-048…U-056 (Mercury world, hazards v2 + suits, Venus world, crafting, Waystations + trading, Wardens, Catalogue, inner-planet creatures + apexes, bases). Covers every Bible §12 M3 item.
+User: USER-12 (M2 playtest) open.

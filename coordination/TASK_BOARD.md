@@ -394,6 +394,69 @@ Files: Assets/_Game/Code/Runtime/UI/, Planet/
 Depends: U-044
 Lead notes: Cycle 97. Do it with the owner's M2 playtest notes, if any.
 
+### U-048 · UNITY · Ready · M3
+Goal: Mercury world (Bible §7.3): SolidWorldGenerator preset with terrain/mercury sets (B-027), a day side, a night side and a ~400 m twilight band that creeps 1 m per 6 real s, two polar cold-trap craters with water ice, backdrop from backgrounds/mercury with layer0_nosun + the Sun as its own sprite, and the Mercury POIs (B-033: flare shelter, Meridian beacon, Warden vault gate, solarite clusters).
+Accept: EditMode tests for band position over time and cold-trap placement; captures of day, twilight, night and cold trap; entry ≤ 1.5 s; BudgetGate green.
+Files: Assets/_Game/Code/Runtime/Terrain/, Planet/, POI/
+Depends: U-039, U-030
+Lead notes: Cycle 98. M3.
+
+### U-049 · UNITY · Ready · M3
+Goal: Hazards v2 + Envirosuit (Bible §7, D-032): Thermal, Radiation, Toxic and Pressure on the U-029 API; Mercury solar flares (45 s warning, then 20 s of Radiation 3; shelter in shadow, underground or a flare shelter); Mars lava tubes at Radiation 0; Envirosuit tiers Mk1–3 reduce levels (k) and swap the surveyor sheet (B-041 mk1/mk2/mk3).
+Accept: EditMode tables per hazard and planet; PlayMode: a flare kills an unprotected surveyor in the open within 30 s and not inside a shelter; the Mk sheet swaps at equip; HUD shows the worst hazard.
+Files: Assets/_Game/Code/Runtime/Hazards/, Player/
+Depends: U-029, U-045
+Lead notes: Cycle 98. M3.
+
+### U-050 · UNITY · Ready · M3
+Goal: Venus world (Bible §7.4): hybrid column with the surface (Datum 320; terrain/venus, B-028; Thermal 3, Pressure 3, Toxic 2) and the habitable cloud deck at y 770 ± 60 (backgrounds/venus_deck) where floating station props (B-045) sit; super-rotation wind (constant lateral push, 80-min cycle); acid haze ticks; backgrounds switch deck ↔ surface with altitude.
+Accept: captures on the deck and on the surface by a vent; a timed surface dive is lethal without Mk2 Thermal + Pressure; wind test; budgets green.
+Files: Assets/_Game/Code/Runtime/Terrain/, Planet/
+Depends: U-049
+Lead notes: Cycle 98. M3.
+
+### U-051 · UNITY · Ready · M3
+Goal: Crafting: Smelter (ore → bars), Refinery (fuel, glass, polymers), Blueprint Tree (story blueprints per Bible §2 table) with B-042 icons; recipes data-driven (ScriptableObjects).
+Accept: EditMode recipe-graph tests (no unreachable item, no cycles); PlayMode: mine iron → smelt → craft a suit patch; UI capture of the Blueprint Tree.
+Files: Assets/_Game/Code/Runtime/Crafting/, UI/
+Depends: U-045
+Lead notes: Cycle 98. M3.
+
+### U-052 · UNITY · Ready · M3
+Goal: Waystations and trading (Bible §3): dock at ships/waystation_earth|mars (B-038) in top-down; the docking-bay interior scene (backgrounds/waystation, B-039) with a Halcyon market (buy/sell in Scrip, prices per station), refuel and repair, and cargo contracts.
+Accept: PlayMode: dock → sell 10 iron → Scrip rises → buy fuel → undock; prices differ Earth vs Mars; save/load keeps Scrip and contracts.
+Files: Assets/_Game/Code/Runtime/Space/, Trade/, Scenes/
+Depends: U-045, U-034
+Lead notes: Cycle 98. M3.
+
+### U-053 · UNITY · Ready · M3
+Goal: Wardens basic (Bible §2): creatures/warden/sentinel (B-043, common atlas per D-043) patrol POIs and respond when the player over-mines a local area (threshold per chunk); fx/warden_bolt projectiles; the sentinel can be destroyed with the Lance.
+Accept: PlayMode: digging past the threshold near a vault spawns a sentinel within 10 s; bolts damage the suit; Lance kills it; ≤ 0.3 ms AI with 6 sentinels.
+Files: Assets/_Game/Code/Runtime/Creatures/Wardens/
+Depends: U-046, U-027
+Lead notes: Cycle 98. M3.
+
+### U-054 · UNITY · Ready · M3
+Goal: Survey Catalogue + Datacores: the Survey module (U-046) scans creatures, minerals and POIs; first scans pay Datacores; Catalogue panel (N) lists entries with icons and per-planet completion.
+Accept: PlayMode: scan a stag → entry + Datacores; rescans pay nothing; save/load keeps the catalogue; panel capture.
+Files: Assets/_Game/Code/Runtime/Survey/, UI/
+Depends: U-046
+Lead notes: Cycle 98. M3.
+
+### U-055 · UNITY · Ready · M3
+Goal: Inner-planet creatures + apexes: Mercury glassback, cinderling, flarewing, shadewyrm (B-029, B-035); Venus sulfur drifter, acidmoth (fliers, centred pivot), pressure crab, vent eel (B-032, B-036, B-034); apexes Cinderhulk (day/night sheets, vulnerable 2 min after crossing into night, B-040) and Veil Serpent (Cryo rounds, chilled flash on hurt frames, B-044).
+Accept: each species spawns in its biome or zone with correct ground or flight placement; both apexes killable by their rule (PlayMode tests); AI ≤ 0.5 ms with 20 creatures.
+Files: Assets/_Game/Code/Runtime/Creatures/
+Depends: U-048, U-050, U-046
+Lead notes: Cycle 98. M3 exit needs killable apexes.
+
+### U-056 · UNITY · Ready · M3
+Goal: Bases v1: build shelter walls, doors, lamps and crates (B-014) with the Builder; a closed shelter counts as warmth and protection for hazards; Venus Aerostat platforms (B-045) with a buoyancy budget (lift ≥ load, HUD margin).
+Accept: PlayMode: an enclosed shelter stops Cryo drain; an aerostat sinks when overloaded; save/load keeps the base.
+Files: Assets/_Game/Code/Runtime/Building/
+Depends: U-046, U-049, U-050
+Lead notes: Cycle 98. M3.
+
 ### U-025 · UNITY · Done · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.
 Accept: EditMode test: Earth noon/midnight intensities match §9; captures at dawn/noon/dusk/night on Earth; 0 B GC per frame.
