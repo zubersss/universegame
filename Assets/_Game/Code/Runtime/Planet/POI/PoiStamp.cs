@@ -12,6 +12,7 @@ namespace Meridian.Planet.POI
         /// <summary>The stamp's ground line: the surface at its center column, never below sea level (the Datum).</summary>
         public static int GroundY(PoiDef poi, IWorldGenerator world, int datumY)
         {
+            if (poi.Floating) return poi.floatY - 1; // props stand on floatY
             int cx = Wrap(poi.x + poi.Width / 2, world.Width);
             int s = world.SurfaceHeight(cx);
             return s < datumY + 1 ? datumY + 1 : s;
@@ -24,9 +25,9 @@ namespace Meridian.Planet.POI
         public static byte? CellTile(char c, PlanetId planet) => c switch
         {
             '.' => TileId.Air,
-            '#' => planet == PlanetId.Earth ? TileId.Stone : planet == PlanetId.Mercury ? TileId.MercuryBasalt : TileId.Basalt,
-            'g' => planet == PlanetId.Earth ? TileId.Grass : planet == PlanetId.Mercury ? TileId.MercuryRegolith : TileId.Regolith,
-            's' => planet == PlanetId.Earth ? TileId.Soil : planet == PlanetId.Mercury ? TileId.MercuryRegolith : TileId.Regolith,
+            '#' => planet == PlanetId.Earth ? TileId.Stone : planet == PlanetId.Mercury ? TileId.MercuryBasalt : planet == PlanetId.Venus ? TileId.VenusBasalt : TileId.Basalt,
+            'g' => planet == PlanetId.Earth ? TileId.Grass : planet == PlanetId.Mercury ? TileId.MercuryRegolith : planet == PlanetId.Venus ? TileId.VenusBasalt : TileId.Regolith,
+            's' => planet == PlanetId.Earth ? TileId.Soil : planet == PlanetId.Mercury ? TileId.MercuryRegolith : planet == PlanetId.Venus ? TileId.VenusBasalt : TileId.Regolith,
             _ => (byte?)null,
         };
 
@@ -34,6 +35,7 @@ namespace Meridian.Planet.POI
         public static int Apply(PoiDef poi, IWorldGenerator baseWorld, TerrainEdits edits, int datumY)
         {
             int gy = GroundY(poi, baseWorld, datumY);
+            if (poi.stamp == null) return gy; // floating POIs have no terrain stamp
             for (int row = 0; row < poi.stamp.Length; row++)
             {
                 int y = RowY(poi, row, gy);

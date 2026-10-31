@@ -21,6 +21,10 @@ namespace Meridian.Player
     public sealed class PlayerController : MonoBehaviour
     {
         public InputActionAsset actions;
+        /// <summary>Air speed (m/s, +x) the surveyor drifts with (U-050 Venus wind; 0 elsewhere).</summary>
+        [System.NonSerialized] public float windX;
+        /// <summary>Share of the wind that moves a grounded surveyor.</summary>
+        public const float WindGrip = 0.35f;
         [Tooltip("Tests drive the controller through `intent` instead of devices.")]
         public bool externalInput;
         public PlayerIntent intent;
@@ -94,7 +98,8 @@ namespace Meridian.Player
             // Horizontal: accelerate toward the target speed.
             float target = Mathf.Clamp(intent.move, -1f, 1f) * (intent.sprint ? PlayerTuning.SprintSpeed : PlayerTuning.WalkSpeed);
             float accel = Grounded ? PlayerTuning.GroundAcceleration : PlayerTuning.AirAcceleration;
-            v.x = Mathf.MoveTowards(v.x, target, accel * dt);
+            // U-050: moving air (Venus super-rotation) carries the surveyor; on the ground the feet resist two thirds of it.
+            v.x = Mathf.MoveTowards(v.x, target + windX * (Grounded ? WindGrip : 1f), accel * dt);
             if (Mathf.Abs(intent.move) > 0.01f) Facing = intent.move > 0 ? 1 : -1;
 
             // Jump. Physics applies gravity before moving the body, so starting at v₀ + g·dt/2

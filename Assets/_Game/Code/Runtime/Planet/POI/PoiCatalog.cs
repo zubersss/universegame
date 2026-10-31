@@ -37,7 +37,13 @@ namespace Meridian.Planet.POI
         /// <summary>Shows a HUD map marker (the spawn camp doesn't: you start there).</summary>
         public bool marker = true;
 
-        public int Width => stamp[0].Length;
+        /// <summary>U-050: a floating POI (Venus cloud-deck stations): no terrain stamp; props stand on this world y.</summary>
+        public int floatY;
+        /// <summary>Width of a floating POI (it has no stamp to measure).</summary>
+        public int floatWidth = 24;
+        public bool Floating => floatY > 0;
+
+        public int Width => stamp != null ? stamp[0].Length : floatWidth;
         public float CenterX => x + Width * 0.5f;
         public string StampedFlag => "poi_stamped:" + id;
         string markerText;
@@ -237,7 +243,40 @@ namespace Meridian.Planet.POI
             },
         };
 
-        public static readonly PoiDef[] All = { SpawnCamp, SurveyArchive, LaunchComplex, HalcyonHauler, WardenOutpost, FlareShelterPoi, WardenVault, MercuryBeacon, SolariteField };
+        // ---------- Venus (U-050, B-045) ----------
+
+        /// <summary>Deck surface above a deck prop's base (art row 62 of 336, railings above).</summary>
+        const float DeckTop = (336f - 62f) / 128f;
+
+        /// <summary>The Meridian station (Venus beacon, Warden origin) floating on the cloud deck: five deck pieces, hull modules, the door, buoyancy cells and balloons.</summary>
+        public static readonly PoiDef MeridianStation = new PoiDef
+        {
+            id = "meridian_station", label = "MERIDIAN STATION", planet = PlanetId.Venus, x = 2000, floatY = 768, floatWidth = 20,
+            props = new[]
+            {
+                new PoiProp("props/venus/aerostat_deck", 2f, 0f, new Vector2(4f, 2.63f), solid: true, topRow: 62),
+                new PoiProp("props/venus/aerostat_deck", 6f, 0f, new Vector2(4f, 2.63f), solid: true, topRow: 62),
+                new PoiProp("props/venus/aerostat_deck", 10f, 0f, new Vector2(4f, 2.63f), solid: true, topRow: 62),
+                new PoiProp("props/venus/aerostat_deck", 14f, 0f, new Vector2(4f, 2.63f), solid: true, topRow: 62),
+                new PoiProp("props/venus/aerostat_deck", 18f, 0f, new Vector2(4f, 2.63f), solid: true, topRow: 62),
+                new PoiProp("props/venus/station_hull_a", 5f, DeckTop, new Vector2(3.81f, 3.19f)),
+                new PoiProp("props/venus/meridian_station_door", 10f, DeckTop, new Vector2(2.19f, 3.5f)),
+                new PoiProp("props/venus/station_hull_b", 15f, DeckTop, new Vector2(3.81f, 3.19f)),
+                new PoiProp("props/venus/buoyancy_cell", 1.2f, DeckTop, new Vector2(1.5f, 1.31f)),
+                new PoiProp("props/venus/buoyancy_cell", 18.8f, DeckTop, new Vector2(1.5f, 1.31f)),
+                new PoiProp("props/venus/aerostat_balloon", 6f, DeckTop + 4.5f, new Vector2(3f, 4f)),
+                new PoiProp("props/venus/aerostat_balloon", 14f, DeckTop + 4.5f, new Vector2(3f, 4f)),
+            },
+        };
+
+        /// <summary>A vent harvester in the first vent field (Vitriol Glass under its feet).</summary>
+        public static readonly PoiDef VentHarvester = new PoiDef
+        {
+            id = "vent_harvester", label = "VENT HARVESTER", planet = PlanetId.Venus, x = 1642, groundRow = 4, stamp = MercuryPad,
+            props = new[] { new PoiProp("props/venus/vent_harvester", 8f, 0f, new Vector2(2.81f, 3.13f)) },
+        };
+
+        public static readonly PoiDef[] All = { SpawnCamp, SurveyArchive, LaunchComplex, HalcyonHauler, WardenOutpost, FlareShelterPoi, WardenVault, MercuryBeacon, SolariteField, MeridianStation, VentHarvester };
 
         public static IEnumerable<PoiDef> For(PlanetId planet)
         {

@@ -45,14 +45,16 @@ namespace Meridian.Terrain
                     ? datum + (int)(MarsLandforms.Height(x, datum + (n - 0.5f) * 2f * amplitude) - datum) // U-039 landforms
                     : planet == PlanetId.Mercury
                         ? datum + (int)(MercuryLandforms.Height(x, width, (n - 0.5f) * 2f * amplitude, seed)) // U-048 craters + cold traps
-                        : datum + (int)((n - 0.5f) * 2f * amplitude);
+                        : planet == PlanetId.Venus
+                            ? datum + (int)VenusLandforms.Height(x, (n - 0.5f) * 2f * amplitude) // U-050 tesserae + vents
+                            : datum + (int)((n - 0.5f) * 2f * amplitude);
             return h < 1 ? 1 : (h >= height - 1 ? height - 2 : h);
         }
 
         public byte TileAt(int x, int y)
         {
             if (y >= height) return TileId.Air;
-            if (y < 0) return planet == PlanetId.Earth ? TileId.Stone : planet == PlanetId.Mercury ? TileId.MercuryBasalt : TileId.Basalt;
+            if (y < 0) return planet == PlanetId.Earth ? TileId.Stone : planet == PlanetId.Mercury ? TileId.MercuryBasalt : planet == PlanetId.Venus ? TileId.VenusBasalt : TileId.Basalt;
 
             int surface = SurfaceHeight(x);
             if (y > surface)
@@ -68,6 +70,7 @@ namespace Meridian.Terrain
 
             if (planet == PlanetId.Earth) return EarthMaterial(x, y, surface, depth);
             if (planet == PlanetId.Mercury) return MercuryMaterial(x, y, depth);
+            if (planet == PlanetId.Venus) return VenusLandforms.Material(x, depth, WorldNoise.Value2D(x, y, 6, width, seed + 401));
             return planet == PlanetId.Mars ? MarsMaterial(x, y, depth) : RockyMaterial(x, y, depth);
         }
 

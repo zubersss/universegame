@@ -84,6 +84,7 @@ namespace Meridian.Terrain
         {
             PlanetId.Earth => new[] { TileId.Soil, TileId.Grass, TileId.Stone, TileId.Sand, TileId.Snow, TileId.Water },
             PlanetId.Mercury => new[] { TileId.MercuryRegolith, TileId.MercuryBasalt, TileId.Sulfide, TileId.MercuryIce },
+            PlanetId.Venus => new[] { TileId.VenusBasalt, TileId.Sulfur, TileId.Tessera, TileId.VentGlass },
             _ => new[] { TileId.Regolith, TileId.Basalt, TileId.Hematite, TileId.Ice },
         };
 

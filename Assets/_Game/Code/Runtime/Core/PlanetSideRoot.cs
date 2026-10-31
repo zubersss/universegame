@@ -21,6 +21,8 @@ namespace Meridian.Core
         public Meridian.Planet.PlanetBackdrop backdrop;
         public Meridian.Planet.Lighting.DayNightLighting dayNight;
         public Meridian.Planet.Weather.DustStorm dustStorm;
+        /// <summary>Venus super-rotation (U-050), created at configure.</summary>
+        public Meridian.Planet.Weather.VenusWind wind { get; private set; }
         public Meridian.Creatures.CreatureDirector creatures;
         public Meridian.Hazards.HazardSystem hazards;
         public Meridian.Planet.POI.PoiPlacer pois;
@@ -98,6 +100,10 @@ namespace Meridian.Core
             if (escapeBand != null) escapeBand.ConfigureFor(config);
             if (sideHud != null) sideHud.ConfigureFor(config);
             if (backdrop != null) backdrop.ConfigureFor(config);
+            // U-050: Venus super-rotation pushes the surveyor (off elsewhere).
+            if (wind == null) wind = gameObject.AddComponent<Meridian.Planet.Weather.VenusWind>();
+            wind.player = player;
+            wind.enabled = config.id == PlanetId.Venus;
             if (dayNight != null) dayNight.ConfigureFor(config);
             if (dustStorm != null) dustStorm.ConfigureFor(config, seed);
             if (creatures != null) creatures.ConfigureFor(config, seed);

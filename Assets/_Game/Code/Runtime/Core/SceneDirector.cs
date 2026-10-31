@@ -31,6 +31,7 @@ namespace Meridian.Core
             Meridian.Terrain.TerrainTileSet.Preload(Meridian.Terrain.TerrainStreamer.MaterialsFor(Meridian.Planets.PlanetId.Earth));
             Meridian.Terrain.TerrainTileSet.Preload(Meridian.Terrain.TerrainStreamer.MaterialsFor(Meridian.Planets.PlanetId.Mars));
             Meridian.Terrain.TerrainTileSet.Preload(Meridian.Terrain.TerrainStreamer.MaterialsFor(Meridian.Planets.PlanetId.Mercury));
+            Meridian.Terrain.TerrainTileSet.Preload(Meridian.Terrain.TerrainStreamer.MaterialsFor(Meridian.Planets.PlanetId.Venus));
 
             if (!SceneManager.GetSceneByName(SpaceScene).isLoaded)
                 yield return SceneManager.LoadSceneAsync(SpaceScene, LoadSceneMode.Additive);

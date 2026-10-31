@@ -114,7 +114,7 @@ namespace Meridian.Planet.POI
             {
                 int w = width > 0 ? width : 1 << 30;
                 int d = ((x - p.def.x) % w + w) % w;
-                if (d < p.def.Width) { groundY = p.groundY; return true; }
+                if (!p.def.Floating && d < p.def.Width) { groundY = p.groundY; return true; } // floating decks are no ground line
             }
             groundY = 0;
             return false;

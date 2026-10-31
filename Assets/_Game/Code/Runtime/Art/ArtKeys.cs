@@ -45,6 +45,10 @@ namespace Meridian.Art
             public const string MercuryBasalt = "terrain/mercury/basalt";
             public const string MercurySulfide = "terrain/mercury/sulfide";
             public const string MercuryIce = "terrain/mercury/ice";
+            public const string VenusBasalt = "terrain/venus/basalt";
+            public const string VenusSulfur = "terrain/venus/sulfur";
+            public const string VenusTessera = "terrain/venus/tessera";
+            public const string VenusVentGlass = "terrain/venus/vent_glass";
         }
 
         public static class Backgrounds

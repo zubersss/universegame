@@ -256,6 +256,7 @@ namespace Meridian.Planet
             for (int i = 0; i < 3; i++) ApplyLayer(quad, block, i, set.tex[i], true);
             quad.GetPropertyBlock(block);
             block.SetFloat(DatumId, DatumOf(name));
+            if (Planet.HasValue) block.SetColor(GroundId, GroundColorOf(name, Planet.Value));
             quad.SetPropertyBlock(block);
         }
 
@@ -313,7 +314,11 @@ namespace Meridian.Planet
         float planetDatum;
 
         /// <summary>The level a set's layers hang off: the canyon set hangs off the canyon floor, all others off the Datum.</summary>
-        float DatumOf(string set) => set == CanyonSet ? planetDatum - Meridian.Terrain.MarsLandforms.CanyonDepth : planetDatum;
+        /// <summary>The haze tone under a set's layers: below Venus's cloud deck you look down into cloud, not onto ground.</summary>
+        static Color GroundColorOf(string set, PlanetId p) => set == VenusDeck ? new Color(0.8f, 0.66f, 0.46f) : GroundColor(p);
+
+        float DatumOf(string set) => set == CanyonSet ? planetDatum - Meridian.Terrain.MarsLandforms.CanyonDepth
+            : set == VenusDeck ? Meridian.Terrain.VenusLandforms.DeckY - 2f : planetDatum;
 
         void UpdateCanyonFade()
         {
@@ -328,11 +333,32 @@ namespace Meridian.Planet
             SetOverlay(t > 0f ? canyon : null, t);
         }
 
+        // ---------- Venus: surface ↔ cloud deck (U-050) ----------
+
+        public const string VenusDeck = "venus_deck", VenusSurface = "venus_surface";
+        /// <summary>Camera height where the deck set starts / finishes replacing the surface set.</summary>
+        public const float VenusFadeBottom = 640f, VenusFadeTop = 700f;
+
+        void UpdateVenusFade()
+        {
+            float y = view.transform.position.y;
+            // Both sets stay loaded on Venus: a dive or a climb crosses the band in seconds.
+            var deck = Request(VenusDeck);
+            Request(VenusSurface);
+            float t = Mathf.Clamp01((y - VenusFadeBottom) / (VenusFadeTop - VenusFadeBottom));
+            if (t > 0f && deck.loaded == 0) t = 0f;
+            if (t >= 1f) { ShowMain(VenusDeck); FadeWeight = 0f; SetOverlay(null, 0f); return; }
+            ShowMain(VenusSurface);
+            FadeWeight = t;
+            SetOverlay(t > 0f ? VenusDeck : null, t);
+        }
+
         void UpdateBiomeFade()
         {
             if (!Planet.HasValue || baseSet == null) return;
             var p = Planet.Value;
             if (p == PlanetId.Mars) { UpdateCanyonFade(); return; }
+            if (p == PlanetId.Venus) { UpdateVenusFade(); return; }
             int x = Mathf.FloorToInt(view.transform.position.x);
             string left = Resolve(SetFor(p, x - (int)(FadeWidth * 0.5f)));
             string right = Resolve(SetFor(p, x + (int)(FadeWidth * 0.5f)));
@@ -387,6 +413,7 @@ namespace Meridian.Planet
                 overlayBlock.SetVector(LayerQ[i], new Vector4(Haze[i], ContentBase[i], set.tex[i] != null ? 1f : 0f, Follow[i]));
             }
             overlayBlock.SetFloat(DatumId, DatumOf(name));
+            if (Planet.HasValue) overlayBlock.SetColor(GroundId, GroundColorOf(name, Planet.Value));
             overlayBlock.SetFloat(FadeId, t);
             overlay.SetPropertyBlock(overlayBlock);
         }
@@ -398,7 +425,7 @@ namespace Meridian.Planet
             {
                 string n = kv.Key;
                 if (n == baseSet || n == mainSet || n == overlaySet) continue;
-                if (n == CanyonSet) continue; // chosen by depth, not by column
+                if (n == CanyonSet || n == VenusDeck || n == VenusSurface) continue; // chosen by height, not by column
                 bool near = false;
                 for (int d = -(int)KeepDistance; d <= (int)KeepDistance && !near; d += 10) near = SetFor(p, x + d) == n;
                 if (!near && kv.Value.pending == 0) dropScratch.Add(n);
@@ -475,6 +502,7 @@ namespace Meridian.Planet
         {
             PlanetId.Mars => new[] { Meridian.Terrain.TileId.Regolith, Meridian.Terrain.TileId.Basalt, Meridian.Terrain.TileId.Ice },
             PlanetId.Mercury => new[] { Meridian.Terrain.TileId.MercuryRegolith, Meridian.Terrain.TileId.MercuryBasalt, Meridian.Terrain.TileId.MercuryIce },
+            PlanetId.Venus => new[] { Meridian.Terrain.TileId.VenusBasalt, Meridian.Terrain.TileId.VenusBasalt, Meridian.Terrain.TileId.Tessera },
             _ => new[] { Meridian.Terrain.TileId.Soil, Meridian.Terrain.TileId.Stone, Meridian.Terrain.TileId.Sand },
         };
 

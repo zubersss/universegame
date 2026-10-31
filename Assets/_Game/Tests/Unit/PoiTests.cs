@@ -19,6 +19,13 @@ namespace Meridian.Tests
             {
                 var c = Config(poi.planet);
                 Assert.That(poi.x, Is.InRange(0, c.worldWidth - poi.Width), $"{poi.id} inside the world");
+                Assert.IsNotEmpty(poi.props, poi.id);
+                if (poi.Floating)
+                {
+                    Assert.IsNull(poi.stamp, $"{poi.id}: floating POIs stamp no terrain");
+                    Assert.That(poi.floatY, Is.InRange(c.datumY + 1, c.worldHeight - 10), $"{poi.id} floats inside the world");
+                    continue;
+                }
                 foreach (var row in poi.stamp) Assert.AreEqual(poi.Width, row.Length, $"{poi.id} rows all {poi.Width} wide");
                 Assert.That(poi.groundRow, Is.InRange(0, poi.stamp.Length - 1));
                 Assert.IsNotEmpty(poi.props, poi.id);
@@ -27,6 +34,7 @@ namespace Meridian.Tests
             Assert.AreEqual(3, System.Linq.Enumerable.Count(PoiCatalog.For(PlanetId.Earth)), "spawn camp, Archive, launch complex");
             Assert.AreEqual(2, System.Linq.Enumerable.Count(PoiCatalog.For(PlanetId.Mars)));
             Assert.AreEqual(4, System.Linq.Enumerable.Count(PoiCatalog.For(PlanetId.Mercury)), "flare shelter, Warden vault, beacon, solarite (U-048)");
+            Assert.AreEqual(2, System.Linq.Enumerable.Count(PoiCatalog.For(PlanetId.Venus)), "Meridian station (floating), vent harvester (U-050)");
         }
 
         [Test]
@@ -34,6 +42,7 @@ namespace Meridian.Tests
         {
             foreach (var poi in PoiCatalog.All)
             {
+                if (poi.Floating) continue; // no stamp (U-050)
                 var c = Config(poi.planet);
                 var world = new SolidWorldGenerator(c, seed);
                 var edits = new TerrainEdits();

@@ -565,6 +565,48 @@ namespace Meridian.Tests
             side.dayNight.Override = null;
         }
 
+        /// <summary>U-050 evidence: the Meridian station on Venus's cloud deck, and the surface by a vent field.</summary>
+        [UnityTest]
+        public IEnumerator CaptureVenus()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
+            yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(Meridian.Planets.PlanetId.Venus));
+            var side = director.PlanetSide;
+            side.hazards.enabled = false;
+            side.dayNight.Override = 0.45f;
+            var cam = side.sideCamera;
+            cam.GetComponent<Meridian.Player.CameraFollow>().enabled = false;
+            var t = side.terrain;
+            IEnumerator Shot(string label, float x, float y, float size)
+            {
+                cam.orthographicSize = size;
+                cam.transform.position = new Vector3(x, y, cam.transform.position.z);
+                var p = new Vector2(x - 2f, y - 3f);
+                side.player.Body.position = p; side.player.transform.position = p; // streaming follows the surveyor too
+                float until = Time.realtimeSinceStartup + 15f;
+                yield return null;
+                while (!t.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                for (int k = 0; k < 60; k++) yield return null;
+                yield return Save(cam, $"{name}_{label}");
+            }
+            var station = Meridian.Planet.POI.PoiCatalog.MeridianStation;
+            yield return Shot("1_deck_station", station.x + 10f, station.floatY + 6f, 12f);
+            var vent = Meridian.Terrain.VenusLandforms.Vents[0];
+            int vx = (vent.x0 + vent.x1) / 2;
+            yield return Shot("2_surface_vent", vx, t.Generator.SurfaceHeight(t.WrapX(vx)) + 6f, 12f);
+            side.dayNight.Override = null;
+        }
+
         /// <summary>U-048 evidence: Mercury's day side, twilight band, night side and a polar cold trap.</summary>
         [UnityTest]
         public IEnumerator CaptureMercury()
