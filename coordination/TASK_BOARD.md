@@ -415,7 +415,7 @@ Files: Assets/_Game/Code/Runtime/Terrain/, Planet/
 Depends: U-049
 Lead notes: Done (cycle 113): Venus surface (tessera, vent fields with Vitriol Glass), floating Meridian station walkway on the deck, super-rotation wind on the saved clock, surface↔deck backdrop cross-fade, dive lethal unprotected (29.6 s) and survivable with Mk2; full check green. POI pad block → U-057 (generalized).
 
-### U-051 · UNITY · Ready · M3
+### U-051 · UNITY · In Progress · M3
 Goal: Crafting: Smelter (ore → bars), Refinery (fuel, glass, polymers), Blueprint Tree (story blueprints per Bible §2 table) with B-042 icons; recipes data-driven (ScriptableObjects).
 Accept: EditMode recipe-graph tests (no unreachable item, no cycles); PlayMode: mine iron → smelt → craft a suit patch; UI capture of the Blueprint Tree.
 Files: Assets/_Game/Code/Runtime/Crafting/, UI/
@@ -457,12 +457,12 @@ Files: Assets/_Game/Code/Runtime/Building/
 Depends: U-046, U-049, U-050
 Lead notes: Cycle 98. M3.
 
-### U-057 · UNITY · In Progress · M3
+### U-057 · UNITY · Done · M3
 Goal: Mercury polish from the U-048 review: (1) pure-black empty cells (right of the shelter block and under it in u048 day/night captures) should show the background wall / cold-trap shadow tone, not #000; (2) the solarite field pad lands on a crater rim and reads as a raised block, so seat it in a crater floor or on flat ground; (3) the twilight band should read violet (§7.3 "violet twilight"): add a low violet sky glow on the sunward side in the band.
 Accept: re-captured day/twilight/night with no #000 holes, the pad flush, and a visible violet glow in twilight.
 Files: Assets/_Game/Code/Runtime/Terrain/, Planet/, POI/
 Depends: U-048
-Lead notes: Cycle 111/113. Widened in cycle 113: POI stamps on uneven ground (Mercury solarite pad, Venus vent harvester in u050 capture 2) raise a dark rectangular block above the terrain, and a pale flat backdrop patch shows beside it. Fix it generally in PoiStamp: blend the levelled pad into the surrounding surface with sloped shoulders (no vertical block faces taller than 2 m), fill under-pad cells with real terrain material (not a dark wall), and never leave backdrop showing between a pad and the ground. Re-capture Mercury + Venus + one Earth/Mars POI.
+Lead notes: Done (cycle 116): PoiStamp general fix (median ground, rock fill, cleared air, ≤ 2 m shoulders; PoiShapingTests on 3 seeds), Earth-only sea clamp, seatLow for the Venus harvester (now flush), Mercury tint floor and violet twilight. Remaining nit: a pale band (the haze strip) shows under the pad deck line at the harvester; fold into the next Venus touch (U-055/U-056).
 
 ### U-025 · UNITY · Done · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.

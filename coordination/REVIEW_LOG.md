@@ -711,3 +711,6 @@ Decided: D-050 (preload planet sheets on approach from M4).
 ## Cycle 115 · 2026-10-31 (UNITY message)
 Checked: u057 Mercury twilight (pass), Venus vent (fail: pad ~12 m above the field; the mound is walk-through wall, not terrain).
 Moved: U-057 stays In Progress (Venus only).
+
+## Cycle 116 · 2026-10-31 (UNITY message)
+Checked: re-captured Venus vent (the harvester sits on the field; a pale haze strip remains under the deck line, a minor nit deferred). U-057 → Done; U-051 → In Progress.
