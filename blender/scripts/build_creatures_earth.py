@@ -174,8 +174,8 @@ def coat_material(sp, S):
     return m
 
 
-def build_species(sp, scene):
-    S = SPECIES[sp]
+def build_species(sp, scene, S=None):
+    S = S or SPECIES[sp]
     coll = bpy.data.collections.new(sp)
     scene.collection.children.link(coll)
 
@@ -209,7 +209,7 @@ def build_species(sp, scene):
             radii[k] *= 1.0 + S["ruff"] * 3
     head = chain(S["head"][1:], ["head"] * (len(S["head"]) - 1), link_to=neck[-1])
     tail = chain(S["tail"][1:], ["tail"] * (len(S["tail"]) - 1), link_to=spine[0])
-    for sy in (-1, 1):                                                   # ears
+    for sy in ((-1, 1) if S["ears"] else ()):                          # ears (none on airless/thin-air species)
         # Ear radii stay above the metaball resolution (0.014 m) or the ears vanish.
         e0 = add(S["head"][0][0] + 0.02, sy * 0.05, S["head"][0][1] + 0.08, 0.04, "head", head[0] if head else neck[-1])
         add(S["head"][0][0] - 0.04, sy * 0.08, S["head"][0][1] + 0.08 + S["ears"], 0.022, "head", e0)
@@ -256,16 +256,19 @@ def build_species(sp, scene):
     bind_auto(body, rig)
 
     dark = mat(f"{sp}_dark", (40, 32, 28), (30, 24, 22), 0, 0.5, 20, 0.1)
+    es = S.get("eye_scale", 1.0)                                        # small species: smaller eyes/nose
     for sy in (-1, 1):                                                   # eyes and nose on the head bone
         hx, hz = S["head"][1][0], S["head"][1][1]
-        bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=8, radius=0.018, location=(hx - 0.02, sy * 0.07, hz + 0.03))
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=8, radius=0.018 * es, location=(hx - 0.02 * es, sy * 0.07 * es, hz + 0.03 * es))
         eye = bpy.context.active_object
         _rig_child(eye, rig, "head", coll, dark)
     tx, tz, _ = S["head"][-1]
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=8, radius=0.035, location=(tx + 0.01, 0, tz))
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=8, radius=0.035 * es, location=(tx + 0.01 * es, 0, tz))
     _rig_child(bpy.context.active_object, rig, "head", coll, dark)
-    if S["antler"]:
+    if S.get("antler"):
         build_antlers(sp, S, rig, coll)
+    if S.get("extras"):                                                  # rigid species parts (plates, ...)
+        S["extras"](sp, S, rig, coll)
     animate(sp, rig, S)
 
 
@@ -279,7 +282,7 @@ def metaball_body(sp, S, verts, radii, edges, coll):
     plus a deep-chest ellipsoid; metaballs blend into one organic surface at every branch
     point (where Skin built hard hulls). Converted to one mesh and decimated."""
     mb = bpy.data.metaballs.new(f"{sp}_mb")
-    mb.resolution = mb.render_resolution = 0.014
+    mb.resolution = mb.render_resolution = S.get("mb_res", 0.014)     # finer for small species
     mb.threshold = 0.6
     for a, b in edges:
         pa, pb = verts[a], verts[b]
@@ -298,6 +301,11 @@ def metaball_body(sp, S, verts, radii, edges, coll):
     el.co = ((sp0[0] + sp3[0]) / 2 + 0.1, 0.0, sp3[1] - sp3[2] * 0.35)
     el.radius = MB_GROW * sp3[2] * 1.05
     el.size_x, el.size_y, el.size_z = 1.6, 0.85, 1.0
+    for x, y, z, r, sx, sy, sz in S.get("blobs", []):                # species extras (e.g. skate feet)
+        el = mb.elements.new(type="ELLIPSOID")
+        el.co = (x, y, z)
+        el.radius = MB_GROW * r
+        el.size_x, el.size_y, el.size_z = sx, sy, sz
     ob = bpy.data.objects.new(f"{sp}_mb", mb)
     coll.objects.link(ob)
     for o in bpy.context.view_layer.objects:
@@ -478,11 +486,12 @@ def ground_exactly(rig):
         _constant(rig.animation_data.action)
 
 
-def build(out_path=DEFAULT_OUT):
+def build(out_path=DEFAULT_OUT, species=None):
+    """species: {name: spec} (default the Earth table); other planets' builders pass theirs."""
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
-    for sp in SPECIES:
-        build_species(sp, scene)
+    for sp, S in (species or SPECIES).items():
+        build_species(sp, scene, S)
     scene.frame_start = 1
     scene.frame_end = max(CLIP_START[c] + CLIP_LEN[c] - 1 for c in CLIP_ORDER)
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
