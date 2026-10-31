@@ -210,8 +210,9 @@ def build_species(sp, scene):
     head = chain(S["head"][1:], ["head"] * (len(S["head"]) - 1), link_to=neck[-1])
     tail = chain(S["tail"][1:], ["tail"] * (len(S["tail"]) - 1), link_to=spine[0])
     for sy in (-1, 1):                                                   # ears
-        e0 = add(S["head"][0][0] + 0.02, sy * 0.05, S["head"][0][1] + 0.08, 0.035, "head", head[0] if head else neck[-1])
-        add(S["head"][0][0] - 0.04, sy * 0.08, S["head"][0][1] + 0.08 + S["ears"], 0.012, "head", e0)
+        # Ear radii stay above the metaball resolution (0.014 m) or the ears vanish.
+        e0 = add(S["head"][0][0] + 0.02, sy * 0.05, S["head"][0][1] + 0.08, 0.04, "head", head[0] if head else neck[-1])
+        add(S["head"][0][0] - 0.04, sy * 0.08, S["head"][0][1] + 0.08 + S["ears"], 0.022, "head", e0)
     leg_root = {}
     for l in LEGS:
         pts = S["front"] if l.startswith("f") else S["hind"]
@@ -321,7 +322,7 @@ def paint_markings(body, S):
     attr = me.color_attributes.new("markings", "FLOAT_COLOR", "POINT")
     spine_z = sum(p[1] for p in S["spine"]) / len(S["spine"])
     r_body = max(p[2] for p in S["spine"])
-    belly_top, belly_bot = spine_z - 0.35 * r_body, spine_z - 1.25 * r_body
+    belly_top, belly_bot = spine_z - 0.8 * r_body, spine_z - 1.25 * r_body    # underside only
     x0, x1 = S["spine"][0][0], S["spine"][-1][0]
 
     def smooth(e0, e1, v):
@@ -329,8 +330,8 @@ def paint_markings(body, S):
         return t * t * (3 - 2 * t)
     for k, v in enumerate(me.vertices):
         x, y, z = v.co
-        belly = smooth(belly_top, belly_top - 0.06, z) * smooth(belly_bot - 0.08, belly_bot, z) * \
-            smooth(x0, x0 + 0.15, x) * smooth(x1, x1 - 0.15, x)
+        belly = smooth(belly_top, belly_top - 0.12, z) * smooth(belly_bot - 0.08, belly_bot, z) * \
+            smooth(x0 + 0.1, x0 + 0.35, x) * smooth(x1 - 0.05, x1 - 0.3, x)      # soft edges, ends faded
         socks = smooth(S["socks_z"], S["socks_z"] - 0.08, z)
         far = smooth(0.5 * S["leg_y"], S["leg_y"], y) * smooth(belly_bot, belly_bot - 0.1, z)
         attr.data[k].color = (belly, socks, far, 1.0)
