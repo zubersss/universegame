@@ -36,8 +36,8 @@ for _c in CLIP_ORDER:
 
 # Proportions (m). half = half the hip-to-shoulder distance; legs: upper, lower, foot height.
 SPECIES = {
-    "stag": dict(half=0.55, upper=0.46, lower=0.56, foot=0.05, body_r=(0.26, 0.3, 0.32), neck=0.55,
-                 neck_angle=55, head=0.42, tail=0.14, ears=0.14, antler=0.62,
+    "stag": dict(half=0.55, upper=0.46, lower=0.56, foot=0.05, body_r=(0.26, 0.3, 0.32), neck=0.48,
+                 neck_angle=55, head=0.42, tail=0.14, ears=0.14, antler=0.48,
                  coat=((142, 100, 64), (112, 78, 50)), belly=(196, 168, 128), dark=(58, 44, 34)),
     "wolf": dict(half=0.38, upper=0.31, lower=0.33, foot=0.04, body_r=(0.17, 0.2, 0.22), neck=0.3,
                  neck_angle=30, head=0.34, tail=0.48, ears=0.1, antler=0.0, ruff=True,
@@ -72,7 +72,7 @@ def pose(name, i, sp):
     elif name == "attack":
         k = [0.0, 0.35, 0.8, 1.0, 0.6, 0.15][i]                          # wind-up, strike, recover
         if sp == "stag":                                                 # head-down antler charge
-            p.update(pitch=8 * k, neck=-38 * k, head=30 * k, a_fn=-14 * k, a_ff=-10 * k, a_hn=18 * k, a_hf=14 * k)
+            p.update(pitch=8 * k, neck=-26 * k, head=24 * k, a_fn=-10 * k, a_ff=-7 * k, a_hn=12 * k, a_hf=9 * k)
         else:                                                            # lunge and bite
             p.update(pitch=-6 * k, neck=10 * k, head=-12 * k, a_fn=26 * k, a_ff=20 * k, a_hn=-22 * k, a_hf=-18 * k,
                      k_fn=4 + 30 * k, tail=20 * k)
@@ -207,6 +207,31 @@ def animate(sp, root, body, neck, head, tail, J, hip_z):
     for ob in bpy.data.objects:
         if ob.animation_data and ob.animation_data.action:
             _constant(ob.animation_data.action)
+    ground_exactly(root)
+
+
+def ground_exactly(root):
+    """The FK estimate of the lowest point is approximate (it samples joints, not skin). Measure
+    the evaluated meshes on every keyed frame and re-key the root so the lowest vertex sits on
+    z = 0 exactly: no sinking into the pivot line, no floating."""
+    scene = bpy.context.scene
+    meshes = [o for o in root.children_recursive if o.type == "MESH"]
+    for name in CLIP_ORDER:
+        for i in range(CLIP_LEN[name]):
+            f = CLIP_START[name] + i
+            scene.frame_set(f)
+            dg = bpy.context.evaluated_depsgraph_get()
+            zmin = float("inf")
+            for o in meshes:
+                ev = o.evaluated_get(dg)
+                me = ev.to_mesh()
+                mw = ev.matrix_world
+                zmin = min([zmin] + [(mw @ v.co).z for v in me.vertices])
+                ev.to_mesh_clear()
+            root.location.z -= zmin
+            root.keyframe_insert("location", frame=f)
+    if root.animation_data and root.animation_data.action:
+        _constant(root.animation_data.action)
 
 
 def build(out_path=DEFAULT_OUT):

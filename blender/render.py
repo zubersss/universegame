@@ -113,10 +113,21 @@ def select(assets, args):
 
 # ---------------------------------------------------------------- scene setup
 
+# D-033: flat sprite passes (emission overrides) and lit icons render on Cycles CPU: no GPU
+# buffers in shared RAM (EEVEE's crashed at ~0.6 GB free), ~half the peak.
+CYCLES_CPU_CATEGORIES = {"props", "creatures", "characters", "ships", "icons"}
+
+
+def engine_kind(entry):
+    if entry.get("engine"):
+        return entry["engine"]
+    return "cycles_cpu" if entry["key"].split("/")[0] in CYCLES_CPU_CATEGORIES else "eevee"
+
+
 def pick_engine(kind):
     import bpy
     items = [e.identifier for e in bpy.types.RenderSettings.bl_rna.properties["engine"].enum_items]
-    if kind == "cycles" and "CYCLES" in items:
+    if kind in ("cycles", "cycles_cpu") and "CYCLES" in items:
         return "CYCLES"
     for name in ("BLENDER_EEVEE", "BLENDER_EEVEE_NEXT"):
         if name in items:
@@ -175,7 +186,7 @@ def run_build(entry):
 def setup_render(scene, entry, w, h, preview):
     import bpy
     r = scene.render
-    r.engine = pick_engine(entry.get("engine", "eevee"))
+    r.engine = pick_engine(engine_kind(entry))
     r.resolution_x, r.resolution_y = w, h
     r.resolution_percentage = 25 if preview else 100
     r.film_transparent = True
@@ -191,8 +202,16 @@ def setup_render(scene, entry, w, h, preview):
         samples = min(samples, 8)
     if r.engine == "CYCLES":
         cy = scene.cycles
-        cy.samples = min(samples, 128)
+        cy.device = "CPU"
+        if engine_kind(entry) == "cycles_cpu":
+            cy.samples = 4 if preview else 16              # D-033: flat passes need few samples
+        else:
+            cy.samples = min(samples, 128)
         cy.use_denoising = True
+        if hasattr(cy, "denoiser"):
+            cy.denoiser = "OPENIMAGEDENOISE"
+        if hasattr(cy, "use_auto_tile"):
+            cy.use_auto_tile = True
         if hasattr(cy, "tile_size"):
             cy.tile_size = 256
     else:
@@ -257,6 +276,10 @@ def render_pass(entry, pass_name, w, h, preview, frames):
     set_view(scene, "Standard" if pass_name in ("color", "emission") else "Raw")
     if not (entry.get("beauty") and pass_name == "color"):
         passes.apply(objs, pass_name)
+    if scene.render.engine == "CYCLES":
+        # Flat emission passes have no noise; denoising would only nudge exact albedo/normal
+        # values. Only AO (mask G) and lit beauty renders need it.
+        scene.cycles.use_denoising = pass_name == "mask" or bool(entry.get("beauty"))
     os.makedirs(WORK, exist_ok=True)
     out = []
     for i, fr in enumerate(frames):
@@ -294,11 +317,16 @@ def autofit(entry, frames):
         scene.frame_set(fr)
         dg = bpy.context.evaluated_depsgraph_get()
         for o in meshes:
+            # Exact extents from the evaluated vertices (rotated bounding boxes overestimate:
+            # the stag's antler boxes alone added ~0.4 m).
             ev = o.evaluated_get(dg)
-            for corner in ev.bound_box:
-                v = ev.matrix_world @ Vector(corner)
-                xs.append(v.x)
-                zs.append(v.z)
+            me = ev.to_mesh()
+            mw = ev.matrix_world
+            for v in me.vertices:
+                p = mw @ v.co
+                xs.append(p.x)
+                zs.append(p.z)
+            ev.to_mesh_clear()
     w, h = entry["size"]
     px, py = entry.get("pivot", [0.5, 0.5])
     slack = C.PADDING + 4

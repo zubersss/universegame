@@ -6,8 +6,11 @@
   A key has three parts (props/common/calibration); one or two parts is a category prefix.
   Full renders above 512 px or of more than one asset are heavy jobs: they honor
   HeavyJobLock (CLAUDE.md rule 6) and refuse to start while Unity's Editor or another
-  Blender runs, or below 1.5 GB free RAM (D-026). Exit codes: 0 ok, 1 render/contract
-  failure, 2 bad usage, 3 HeavyJobLock busy (lock, process or memory gate).
+  Blender runs, or below the memory gate: 1.0 GB free for Cycles-CPU sprite categories
+  (D-033), 1.5 GB otherwise (D-026). While refused it leaves coordination/locks/want_blender.lock
+  so UNITY can see BLENDER is waiting, and deletes it on acquire (B-024). `all` runs one
+  Blender process per category and yields to a fresh want_unity.lock between them.
+  Exit codes: 0 ok, 1 render/contract failure, 2 bad usage, 3 busy / gated / yielded.
 #>
 param(
     [Parameter(Mandatory = $true, Position = 0)][string]$Target,
@@ -27,49 +30,93 @@ catch { $paths = ($rawPaths -replace '(?<!\\)\\(?![\\"])', '\\') | ConvertFrom-J
 $blender = $paths.blenderExe
 if (-not $blender -or -not (Test-Path $blender)) { Fail 2 "blenderExe not found: '$blender'" }
 
-# Resolve the target against the manifest to decide whether this is a heavy job.
+# Resolve the target into jobs. `all` is split by category: one Blender process per category,
+# so no single job runs long (D-026: <= 20 min) and BLENDER can yield to UNITY between them.
 $manifest = Get-Content (Join-Path $Root 'blender/manifest.json') -Raw | ConvertFrom-Json
 $assets = @($manifest.assets)
+$jobs = @()
 if ($Target -eq 'all') {
-    $pyArgs = @('--all'); $chosen = $assets
+    foreach ($cat in ($assets | ForEach-Object { $_.key.Split('/')[0] } | Select-Object -Unique)) {
+        $jobs += , @{ Name = $cat; Args = @('--category', $cat); Chosen = @($assets | Where-Object { $_.key.StartsWith("$cat/") }) }
+    }
 } elseif (($Target.ToCharArray() | Where-Object { $_ -eq '/' }).Count -eq 2) {
-    $pyArgs = @('--asset', $Target); $chosen = @($assets | Where-Object { $_.key -eq $Target })
+    $jobs += , @{ Name = $Target; Args = @('--asset', $Target); Chosen = @($assets | Where-Object { $_.key -eq $Target }) }
 } else {
     $pre = $Target.Trim('/')
-    $pyArgs = @('--category', $pre); $chosen = @($assets | Where-Object { $_.key -eq $pre -or $_.key.StartsWith("$pre/") })
+    $jobs += , @{ Name = $pre; Args = @('--category', $pre); Chosen = @($assets | Where-Object { $_.key -eq $pre -or $_.key.StartsWith("$pre/") }) }
 }
-if ($Preview) { $pyArgs += '--preview' }
+if ($jobs.Count -eq 0) { $jobs += , @{ Name = $Target; Args = @('--all'); Chosen = @() } }
 
-$heavy = $false
-if (-not $Preview) {
-    if ($chosen.Count -gt 1) { $heavy = $true }
+$locks = Join-Path $Root 'coordination/locks'
+$lock = Join-Path $locks 'heavy_blender.lock'
+$want = Join-Path $locks 'want_blender.lock'
+# D-033: flat sprite categories render on Cycles CPU (render.py) and may run at >= 1.0 GB free.
+$cyclesCpu = @('props', 'creatures', 'characters', 'ships', 'icons')
+
+function Test-Heavy($chosen) {
+    if ($Preview) { return $false }
+    if ($chosen.Count -gt 1) { return $true }
     foreach ($a in $chosen) {
-        if ($a.size -and (($a.size | Measure-Object -Maximum).Maximum -gt 512)) { $heavy = $true }
-        if ($a.animations) { $heavy = $true }   # a frame sheet is a batch of renders
+        if ($a.size -and (($a.size | Measure-Object -Maximum).Maximum -gt 512)) { return $true }
+        if ($a.animations) { return $true }      # a frame sheet is a batch of renders
     }
+    return $false
 }
 
-$lock = Join-Path $Root 'coordination/locks/heavy_blender.lock'
-if ($heavy) {
+function Get-GateMB($chosen) {
+    # D-033's 1.0 GB gate for Cycles-CPU sprites was conditional on a peak <= 0.6 GB. Measured
+    # 2026-10-31: 1.41-1.45 GB (Blender baseline dominates), so per D-033 every heavy job is
+    # back on the D-026 1.5 GB gate. Cycles CPU stays for sprites (no GPU-texture crash risk).
+    return 1500
+}
+
+function Request-Heavy($job) {
+    # Returns $null when acquired, else the reason. While refused, want_blender.lock stays.
     $cutoff = (Get-Date).AddHours(-2)
-    $others = Get-ChildItem (Join-Path $Root 'coordination/locks') -Filter 'heavy_*.lock' -ErrorAction SilentlyContinue |
+    $others = Get-ChildItem $locks -Filter 'heavy_*.lock' -ErrorAction SilentlyContinue |
         Where-Object { $_.Name -ne 'heavy_blender.lock' -and $_.LastWriteTime -gt $cutoff }
-    if ($others) { Fail 3 "HeavyJobLock busy: $($others.Name -join ', ')" }
     $procs = Get-Process unity, blender -ErrorAction SilentlyContinue |
         Where-Object { $_.Path -like '*\Hub\Editor\*' -or $_.Path -like '*Blender Foundation*' }
-    if ($procs) { Fail 3 "HeavyJobLock busy: running $(($procs | ForEach-Object { $_.ProcessName }) -join ', ')" }
-    # D-026 memory gate: no heavy job below 1.5 GB free RAM.
     $freeMB = [int]((Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1024)
-    if ($freeMB -lt 1500) { Fail 3 "HeavyJobLock memory gate: $freeMB MB free (< 1500, D-026)" }
-    Set-Content -Path $lock -Value "$((Get-Date).ToString('s')) blender_render $Target" -Encoding utf8
+    $gate = Get-GateMB $job.Chosen
+    $reason = $null
+    if ($others) { $reason = "HeavyJobLock busy: $($others.Name -join ', ')" }
+    elseif ($procs) { $reason = "HeavyJobLock busy: running $(($procs | ForEach-Object { $_.ProcessName }) -join ', ')" }
+    elseif ($freeMB -lt $gate) { $reason = "HeavyJobLock memory gate: $freeMB MB free (< $gate)" }
+    if ($reason) {
+        Set-Content -Path $want -Value "$((Get-Date).ToString('s')) blender waiting: $Target" -Encoding utf8
+        return $reason
+    }
+    if (Test-Path $want) { Remove-Item $want -Force }        # acquired: stop signalling
+    Set-Content -Path $lock -Value "$((Get-Date).ToString('s')) blender_render $($job.Name) (gate $gate MB, free $freeMB MB)" -Encoding utf8
+    return $null
 }
 
-try {
-    $script = Join-Path $Root 'blender/render.py'
-    & $blender --background --factory-startup --python-exit-code 1 --python $script -- @pyArgs |
-        ForEach-Object { if ($_ -match '^(MERIDIAN |Traceback|  File |\w+Error)') { Write-Host $_ } }
-    $code = $LASTEXITCODE
-} finally {
-    if ($heavy -and (Test-Path $lock)) { Remove-Item $lock -Force }
+$script = Join-Path $Root 'blender/render.py'
+$code = 0
+for ($i = 0; $i -lt $jobs.Count; $i++) {
+    $job = $jobs[$i]
+    $heavy = Test-Heavy $job.Chosen
+    if ($heavy) {
+        $why = Request-Heavy $job
+        if ($why) { Fail 3 $why }
+    }
+    $pyArgs = $job.Args + $(if ($Preview) { @('--preview') } else { @() })
+    $t0 = Get-Date
+    try {
+        & $blender --background --factory-startup --python-exit-code 1 --python $script -- @pyArgs |
+            ForEach-Object { if ($_ -match '^(MERIDIAN |Traceback|  File |\w+Error)') { Write-Host $_ } }
+        if ($LASTEXITCODE -ne 0) { $code = $LASTEXITCODE }
+    } finally {
+        if ($heavy -and (Test-Path $lock)) { Remove-Item $lock -Force }
+    }
+    $mins = ((Get-Date) - $t0).TotalMinutes
+    if ($mins -gt 20) { Write-Host ("blender_render: job '{0}' took {1:N1} min (> 20, D-026); split it further" -f $job.Name, $mins) }
+    # Fairness (D-026): after each job, yield to a waiting UNITY if more jobs remain.
+    $wantUnity = Get-Item (Join-Path $locks 'want_unity.lock') -ErrorAction SilentlyContinue
+    if ($heavy -and $i -lt $jobs.Count - 1 -and $wantUnity -and $wantUnity.LastWriteTime -gt (Get-Date).AddMinutes(-30)) {
+        Set-Content -Path $want -Value "$((Get-Date).ToString('s')) blender waiting: $Target (yielded after $($job.Name))" -Encoding utf8
+        Fail 3 "yielded to UNITY after '$($job.Name)'; re-run to continue"
+    }
 }
 exit $code
