@@ -1,4 +1,4 @@
-"""Builds blender/sources/icons/icons.blend: item icons batch 1 (B-013).
+"""Builds blender/sources/icons/icons.blend: item icons batch 1 (B-013) and batch 2 (B-042).
 
 One collection per item (`icon_<item>`), each centred on the origin and fitting a ~0.8 m
 box, plus a shared `icon_lights` rig (sun from the upper right, cool sky fill). render.py
@@ -24,6 +24,11 @@ DEFAULT_OUT = os.path.join(os.path.dirname(HERE), "sources", "icons", "icons.ble
 
 ITEMS = ["iron", "copper", "carbon", "silica", "water_ice", "oxygen", "launch_fuel", "hematite",
          "perchlorate", "clay", "aluminium", "living_seed", "wood", "stone", "sand", "nickel"]
+# B-042 batch 2 (M3 resources and crafting). Appended after batch 1 so batch 1's shared random
+# stream (and its icons) stay identical. `nickel` was already in batch 1.
+ITEMS2 = ["solarite", "vitriol_glass", "sulfur", "basalt", "graphite", "polar_ice", "deep_core_sample",
+          "launch_fuel_cell", "suit_patch", "cryo_pad", "thermal_pad", "radiation_liner",
+          "smelter_bar_iron", "smelter_bar_copper", "circuit_board"]
 
 
 # ---------------------------------------------------------------- materials
@@ -238,6 +243,109 @@ def build_item(item, coll, rnd):
              (0.34, 0.28, 0.24), subdiv=3, strength=0.4, scale=0.5)
 
 
+def ingot(coll, name, m):
+    """Trapezoid ingot (narrower on top), as batch 1's aluminium."""
+    bpy.ops.mesh.primitive_cube_add(size=1.0)
+    ob = _link(bpy.context.active_object, coll)
+    ob.name = name
+    for v in ob.data.vertices:
+        if v.co.z > 0:
+            v.co.x *= 0.78
+            v.co.y *= 0.7
+    ob.scale = (0.6, 0.3, 0.2)
+    bv = ob.modifiers.new("bev", "BEVEL"); bv.width, bv.segments = 0.03, 3
+    ob.data.materials.append(m)
+    return ob
+
+
+def quilted_pad(coll, name, m, accent, accent_name):
+    """A square quilted pad (2x2 puffy cells) with an emissive accent strip across it."""
+    for i in range(2):
+        for j in range(2):
+            box(coll, f"{name}_cell{i}{j}", m, (0.27, 0.27, 0.1), ((i - 0.5) * 0.28, (j - 0.5) * 0.28, 0), bevel=0.05)
+    box(coll, accent_name, accent, (0.58, 0.05, 0.03), (0, 0, 0.06), bevel=0.01)
+
+
+def build_item2(item, coll, rnd):
+    if item == "solarite":
+        amber = mat("solarite", (255, 200, 110), (255, 160, 60), 0.0, 0.15, 4, 0.0, emit=(255, 196, 100), strength=1.2)
+        for k, (pos, h, r, tilt) in enumerate((((0, 0, -0.16), 0.46, 0.1, (0.0, 0.05)), ((0.14, 0.05, -0.16), 0.34, 0.08, (0.45, 0.2)),
+                                               ((-0.14, 0.03, -0.16), 0.3, 0.08, (-0.4, -0.2)), ((0.03, -0.13, -0.16), 0.26, 0.07, (0.2, -0.5)))):
+            prism(coll, f"crystal{k}", amber, pos, h, r, tilt, rnd.uniform(0, 1))
+        rock(coll, "base", mat("solarite_base", (60, 56, 58), (40, 38, 40), 0, 0.6, 8), 21, (0.22, 0.16, 0.05), loc=(0, 0, -0.17))
+    elif item == "vitriol_glass":
+        g = mat("vitriol", (176, 214, 70), (120, 168, 40), 0.0, 0.05, 3, 0.0, alpha=0.8)
+        rock(coll, "shard", g, 22, (0.36, 0.22, 0.3), subdiv=1, strength=0.35, flat=True)
+    elif item == "sulfur":
+        sm = mat("sulfur", (236, 214, 60), (206, 176, 40), 0.0, 0.55, 6, 0.3)
+        rock(coll, "lump", sm, 23, (0.34, 0.3, 0.26), subdiv=2, strength=0.3, flat=True)
+        for k in range(4):
+            box(coll, f"xtal{k}", sm, (0.08, 0.08, 0.08), (rnd.uniform(-0.18, 0.18), rnd.uniform(-0.25, -0.15), rnd.uniform(-0.05, 0.15)),
+                (rnd.uniform(0, 1), rnd.uniform(0, 1), rnd.uniform(0, 1)), bevel=0.005)
+    elif item == "basalt":
+        bm_ = mat("basalt", (96, 96, 104), (70, 70, 78), 0.0, 0.55, 8, 0.4)   # lighter: read at 32 px on dark UI
+        for k, (x, y, h) in enumerate(((0, 0, 0.5), (0.17, 0.05, 0.4), (-0.15, 0.06, 0.36), (0.02, 0.17, 0.3))):
+            ob = cyl(coll, f"column{k}", bm_, 0.1, h, (x, y, -0.25 + h / 2), verts=6, smooth=False)
+    elif item == "graphite":
+        gm = mat("graphite", (120, 124, 132), (86, 90, 98), 0.8, 0.22, 10, 0.1)   # silvery sheen
+        for k in range(5):
+            box(coll, f"flake{k}", gm, (0.5 - 0.05 * k, 0.36 - 0.04 * k, 0.05), (0.02 * k, -0.01 * k, -0.12 + 0.06 * k),
+                (0, 0, rnd.uniform(-0.25, 0.25)), bevel=0.01)
+    elif item == "polar_ice":
+        ice = mat("polar_ice", (226, 240, 252), (190, 216, 240), 0.0, 0.1, 3, 0.1)
+        box(coll, "block", ice, (0.46, 0.38, 0.4), (0, 0, 0), bevel=0.05)
+        for k, z in enumerate((-0.08, 0.06)):                          # dark dust bands in the ice
+            box(coll, f"dust{k}", mat(f"dust{k}", (110, 108, 112)), (0.465, 0.385, 0.025), (0, 0, z), bevel=0.01)
+    elif item == "deep_core_sample":
+        for k, (col, h) in enumerate((((120, 96, 74), 0.12), ((70, 66, 70), 0.1), ((190, 172, 130), 0.08), ((96, 70, 56), 0.12))):
+            z = -0.2 + sum(x[1] for x in (((0, 0), 0.12), ((0, 0), 0.1), ((0, 0), 0.08), ((0, 0), 0.12))[:k]) + h / 2
+            cyl(coll, f"stratum{k}", mat(f"stratum{k}", col, None, 0.0, 0.8, 9, 0.4), 0.12, h, (0, 0, z))
+        steel = mat("core_cap", (160, 164, 170), metallic=1.0, rough=0.3)
+        cyl(coll, "cap_lo", steel, 0.13, 0.04, (0, 0, -0.22))
+        cyl(coll, "cap_hi", steel, 0.13, 0.04, (0, 0, 0.24))
+    elif item == "launch_fuel_cell":
+        cyl(coll, "cell", mat("cell_body", (230, 232, 236), metallic=0.3, rough=0.35), 0.15, 0.5, (0, 0, -0.02))
+        cyl(coll, "glow", mat("cell_glow", (120, 40, 20), emit=(255, 110, 40), strength=1.6), 0.153, 0.1, (0, 0, -0.02))
+        cyl(coll, "term", mat("cell_term", (60, 62, 66), metallic=1.0, rough=0.4), 0.07, 0.06, (0, 0, 0.26))
+        cyl(coll, "foot", mat("cell_foot", (60, 62, 66), metallic=1.0, rough=0.4), 0.155, 0.04, (0, 0, -0.27))
+    elif item == "suit_patch":
+        box(coll, "patch", mat("patch", (214, 112, 44), (176, 86, 32), 0.0, 0.85, 20, 0.3), (0.5, 0.5, 0.05), (0, 0, 0), bevel=0.04)
+        st = mat("stitch", (240, 236, 220))
+        for k in range(10):                                            # stitches round the edge
+            t = k / 10
+            box(coll, f"st{k}", st, (0.04, 0.012, 0.01), (-0.22 + 0.44 * t, -0.22, 0.03), bevel=0.002)
+            box(coll, f"st2{k}", st, (0.04, 0.012, 0.01), (-0.22 + 0.44 * t, 0.22, 0.03), bevel=0.002)
+    elif item == "cryo_pad":
+        quilted_pad(coll, "cryo", mat("cryo_quilt", (150, 196, 236), (110, 160, 210), 0.0, 0.6, 14, 0.3),
+                    mat("cryo_glow", (40, 90, 140), emit=(120, 210, 255), strength=1.4), "frost_strip")
+    elif item == "thermal_pad":
+        quilted_pad(coll, "thermal", mat("thermal_quilt", (214, 174, 92), (170, 130, 64), 0.4, 0.4, 14, 0.3),
+                    mat("thermal_coil", (120, 40, 16), emit=(255, 130, 50), strength=1.4), "coil_strip")
+    elif item == "radiation_liner":
+        sheet = mat("liner", (96, 98, 104), (70, 72, 78), 0.5, 0.45, 12, 0.2)
+        for k in range(3):                                             # folded sheet: stacked layers
+            box(coll, f"fold{k}", sheet, (0.52, 0.42, 0.05), (0.02 * k, 0.015 * k, -0.08 + 0.06 * k), bevel=0.02)
+        cyl(coll, "badge", mat("rad_yellow", (232, 196, 40)), 0.13, 0.02, (0.04, 0.03, 0.1))
+        cyl(coll, "hub", mat("rad_black", (24, 24, 26)), 0.025, 0.025, (0.04, 0.03, 0.11))
+        for k in range(3):                                             # trefoil blades
+            a = math.pi / 2 + 2 * math.pi * k / 3
+            box(coll, f"blade{k}", mat(f"rad_blade{k}", (24, 24, 26)), (0.07, 0.06, 0.012),
+                (0.04 + 0.07 * math.cos(a), 0.03 + 0.07 * math.sin(a), 0.115), (0, 0, a), bevel=0.003)
+    elif item == "smelter_bar_iron":
+        ingot(coll, "ingot", mat("bar_iron", (130, 132, 138), (100, 102, 108), 0.6, 0.35, 12, 0.05))
+    elif item == "smelter_bar_copper":
+        ingot(coll, "ingot", mat("bar_copper", (214, 120, 70), (180, 96, 56), 0.6, 0.3, 12, 0.05))
+    elif item == "circuit_board":
+        box(coll, "pcb", mat("pcb", (40, 120, 70), (30, 96, 56), 0.0, 0.5, 20, 0.1), (0.56, 0.42, 0.04), (0, 0, 0), bevel=0.01)
+        gold = mat("trace", (220, 180, 80), metallic=1.0, rough=0.3)
+        for k in range(5):
+            box(coll, f"trace{k}", gold, (0.44, 0.012, 0.006), (0, -0.16 + 0.08 * k, 0.024), bevel=0.0)
+        chip = mat("chip", (30, 30, 34), (20, 20, 22), 0.2, 0.4)
+        box(coll, "chip0", chip, (0.16, 0.16, 0.04), (-0.08, 0.02, 0.04), bevel=0.01)
+        box(coll, "chip1", chip, (0.1, 0.08, 0.035), (0.15, -0.1, 0.04), bevel=0.008)
+        ball(coll, "led", mat("pcb_led", (30, 80, 40), emit=(90, 255, 120), strength=1.4), 0.025, (0.18, 0.12, 0.04))
+
+
 def build(out_path=DEFAULT_OUT):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
@@ -246,6 +354,10 @@ def build(out_path=DEFAULT_OUT):
         coll = bpy.data.collections.new(f"icon_{item}")
         scene.collection.children.link(coll)
         build_item(item, coll, rnd)
+    for item in ITEMS2:
+        coll = bpy.data.collections.new(f"icon_{item}")
+        scene.collection.children.link(coll)
+        build_item2(item, coll, rnd)
     lights = bpy.data.collections.new("icon_lights")
     scene.collection.children.link(lights)
     sd = bpy.data.lights.new("key", "SUN")
