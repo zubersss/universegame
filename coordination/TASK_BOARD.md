@@ -88,12 +88,12 @@ Files: Assets/_Game/Tests/LeadQA/M1LoopTests.cs, coordination/reviews/M1_REPORT.
 Depends: U-017
 Lead notes: Done (cycle 17): M1LoopTests passed twice (15:55, 16:42; touchdown 2.00 m/s); M1_REPORT.md; Build/MERIDIAN_0.1.1 plays (U-031 smoke). User playtest posted as USER-09.
 
-### L-011 · LEAD · Ready · M2
+### L-011 · LEAD · In Progress · M2
 Goal: M2 QA: a LeadQA soak scenario that plays Earth (day → night, dig, creatures nearby) then flies to Mars through a dust storm, for ≥ 10 min of game time in one PlayMode run, with a clean console and BudgetGate rows recorded, plus the M2 screenshot set checked against §9.
 Accept: Tests/LeadQA/M2SoakTests.cs passes twice; screenshots (Earth day/night with creatures and POIs, Mars canyon + storm, space with all planets) reviewed in REVIEW_LOG; M2_REPORT.md written.
 Files: Assets/_Game/Tests/LeadQA/, coordination/reviews/M2_REPORT.md
 Depends: U-033, U-034, U-037, U-039, B-015, B-016
-Lead notes: Write the test once U-033/U-037 land. The run must fit the 20-min heavy-job cap (D-026).
+Lead notes: In Progress (cycle 60): Tests/LeadQA/M2SoakTests.cs written (Earth night + creatures + dig, own-controls flight to Mars, landing, forced dust storm, ≥ 10 game min, clean console). Run twice after U-040 lands (UNITY is blocked on USER-10).
 
 ---
 
