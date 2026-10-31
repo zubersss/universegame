@@ -142,7 +142,7 @@ PRESETS = {
         ambient=((0.66, 0.50, 0.38), 0.46),
         haze=(206, 160, 118),
         far=dict(W=9000.0, level=0.62, peak=0.74, rock=[(132, 84, 62), (166, 110, 80)], snow=(0, 0, 0),
-                 snowline=9.0, haze=(0.56, 0.00004), tilt=4.0, terrace=3, rough=0.0,
+                 snowline=9.0, haze=(0.56, 0.00004), tilt=4.0, rough=0.0, ridge_lo=220,   # one continuous wall: no terraces (blocks, spikes)
                  strata=(0.045, (84, 44, 36), 0.5)),
         mid=dict(W=900.0, level=0.52, amp=0.27, terrace=6, wall=True, cliff=0.6, bumps=0.012, depth=(20, 160), haze=(0.26, 0.0012),
                  ground=[(126, 76, 54), (160, 100, 70)], strata=(7.0, (86, 46, 36), 0.75),
@@ -900,7 +900,7 @@ def far_layer(P, spec, seed, preview, work):
     rng = np.random.default_rng(seed)
     nx, ny = 640, 48
     top = W / 2
-    ridge = fft_noise(rng, ny + 1, nx, 30, 640, 1.6)
+    ridge = fft_noise(rng, ny + 1, nx, spec.get("ridge_lo", 30), 640, 1.6)   # ridge_lo: smoother rims (B-049)
     ridge = (ridge - ridge.min()) / (ridge.max() - ridge.min())
     if spec.get("terrace"):
         ridge = terrace01(ridge, spec["terrace"])
