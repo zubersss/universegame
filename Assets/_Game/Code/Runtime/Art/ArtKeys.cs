@@ -17,6 +17,8 @@ namespace Meridian.Art
         public static class Characters
         {
             public const string Surveyor = "characters/surveyor/base";
+            /// <summary>U-049: the surveyor sheet per Envirosuit tier (0 = base, 1–3 = B-041 mk1–mk3).</summary>
+            public static string SurveyorSheet(int tier) => tier <= 0 ? Surveyor : "characters/surveyor/mk" + System.Math.Clamp(tier, 1, 3);
         }
 
         public static class Ships

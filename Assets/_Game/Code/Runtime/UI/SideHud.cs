@@ -51,7 +51,11 @@ namespace Meridian.UI
         int lastHealth = -1, lastFuel = -1, lastAlt = int.MinValue;
         int lastStorm = -2;
         int lastCryo = -1, lastSuit = -1, lastRate = int.MinValue;
-        static readonly string[] CryoLevels = { "0", "1", "2", "3" };
+        static readonly string[] CryoLevels = { "0", "1", "2", "3", "4" };
+        static readonly string[] KindNames = { "THERMAL", "CRYO", "RADIATION", "TOXIC", "PRESSURE" };
+        int lastKind = -1;
+        /// <summary>U-049: the name of the hazard shown beside the level (the worst one).</summary>
+        public Text HazardLabel { get; private set; }
         static string[] stormWarnings;
         const string StormNow = "DUST STORM";
 
@@ -76,8 +80,9 @@ namespace Meridian.UI
             Label(root, "SHIP FUEL", -116f);
             FuelFill = UiKit.Bar(root, "Fuel", tl, new Vector2(24f, -138f), new Vector2(220f, 6f), UiTheme.Accent(null));
             FuelText = UiKit.Text(root, "FuelValue", tl, new Vector2(252f, -128f), new Vector2(80f, 24f), 18);
-            Label(root, "CRYO", -156f);
-            CryoText = UiKit.Text(root, "CryoLevel", tl, new Vector2(70f, -156f), new Vector2(30f, 18f), 13, true, TextAnchor.MiddleLeft, new Color(0.6f, 0.85f, 1f, 1f));
+            HazardLabel = UiKit.Text(root, "HazardKind", new Vector2(0f, 1f), new Vector2(24f, -156f), new Vector2(200f, 18f), 13, false, TextAnchor.MiddleLeft, UiTheme.Active.label);
+            HazardLabel.text = KindNames[(int)Meridian.Hazards.HazardKind.Cryo];
+            CryoText = UiKit.Text(root, "CryoLevel", tl, new Vector2(110f, -156f), new Vector2(30f, 18f), 13, true, TextAnchor.MiddleLeft, new Color(0.6f, 0.85f, 1f, 1f));
             Label(root, "SUIT", -176f);
             SuitFill = UiKit.Bar(root, "Suit", tl, new Vector2(24f, -198f), new Vector2(220f, 6f), new Color(0.6f, 0.85f, 1f, 1f));
             SuitRateText = UiKit.Text(root, "SuitRate", tl, new Vector2(252f, -188f), new Vector2(120f, 24f), 16);
@@ -156,8 +161,11 @@ namespace Meridian.UI
         void UpdateHazards()
         {
             if (hazards == null) return;
-            int c = hazards.CryoLevel;
-            if (c != lastCryo) { lastCryo = c; CryoText.text = CryoLevels[Mathf.Clamp(c, 0, 3)]; }
+            // U-049: the worst hazard after the suit (its name and effective level); Cryo while nothing bites.
+            int c = hazards.EffectiveLevel;
+            int k = c > 0 ? (int)hazards.WorstKind : (int)Meridian.Hazards.HazardKind.Cryo;
+            if (c != lastCryo) { lastCryo = c; CryoText.text = CryoLevels[Mathf.Clamp(c, 0, 4)]; }
+            if (k != lastKind) { lastKind = k; HazardLabel.text = KindNames[k]; }
             int s = Mathf.CeilToInt(hazards.SuitIntegrity);
             if (s != lastSuit) { lastSuit = s; SuitFill.fillAmount = hazards.SuitIntegrity / Meridian.Hazards.HazardRules.SuitMax; }
             int r = Mathf.RoundToInt(hazards.SuitRate * 10f); // tenths per second

@@ -108,6 +108,7 @@ namespace Meridian.Save
             data.ship.tankCapacity = state.tankCapacity;
             data.cargo.AddRange(state.cargo);
             state.inventory.WriteTo(data.inventory);
+            data.player.suitTier = state.suitTier;
             data.selectedSlot = state.inventory.Selected;
             data.story.flags.AddRange(state.storyFlags);
             data.timers.gameSeconds = time != null ? time.GameSeconds : 0;
@@ -243,7 +244,7 @@ namespace Meridian.Save
                 side.player.Body.linearVelocity = Vector2.zero;
                 var vitals = side.player.GetComponent<Meridian.Player.PlayerVitals>();
                 if (vitals != null) vitals.health = data.player.health;
-                if (side.hazards != null) side.hazards.SetSuit(data.player.suit);
+                if (side.hazards != null) { side.hazards.Equip(data.player.suitTier); side.hazards.SetSuit(data.player.suit); }
                 if (data.player.aboard && side.ship != null)
                 {
                     var boarding = side.ship.GetComponent<ShipBoarding>();

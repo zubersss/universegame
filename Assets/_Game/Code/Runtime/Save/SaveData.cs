@@ -42,6 +42,8 @@ namespace Meridian.Save
         public float health = 100f;
         /// <summary>v2: suit integrity (D-032), 0–100.</summary>
         public float suit = 100f;
+        /// <summary>v2 (U-049): Envirosuit tier 0–3 (absent in early v2 files: 0).</summary>
+        public int suitTier;
         public bool aboard;
     }
 

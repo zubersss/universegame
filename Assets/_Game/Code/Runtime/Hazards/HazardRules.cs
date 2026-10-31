@@ -27,9 +27,14 @@ namespace Meridian.Hazards
             <= 0 => 0f,
             1 => 0.4f,                                    // a cold night: the suit lasts ~4 min
             2 => 1.5f,                                    // Mars night: ~1 min of suit
-            _ => (SuitMax + 100f) / Level3Seconds,        // 6.78/s: suit + 100 health gone in 29.5 s
+            3 => (SuitMax + 100f) / Level3Seconds,        // 6.78/s: suit + 100 health gone in 29.5 s
+            _ => FlareDrain,                              // level 4 (D-048): a solar flare, 12/s
         };
 
-        public static int Effective(int level, int protectionTier) => Mathf.Clamp(level - protectionTier, 0, 3);
+        /// <summary>D-048: a flare is Radiation level 4, used only by flares (death in ≈ 16.7 s of its 20 s).</summary>
+        public const int FlareLevel = 4;
+        public const float FlareDrain = 12f;
+
+        public static int Effective(int level, int protectionTier) => Mathf.Clamp(level - protectionTier, 0, FlareLevel);
     }
 }

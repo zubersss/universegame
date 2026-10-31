@@ -44,6 +44,10 @@ namespace Meridian.Hazards
         public void ConfigureFor(PlanetConfig p)
         {
             planet = p;
+            if (flares == null) flares = gameObject.AddComponent<SolarFlares>();
+            flares.Run(p.id == PlanetId.Mercury, p.id.GetHashCode() * 7919 + 17);
+            var state = Meridian.Core.GameState.Instance;
+            if (state != null && state.suitTier != SuitTier) Equip(state.suitTier);
             Evaluate();
         }
 
@@ -76,16 +80,76 @@ namespace Meridian.Hazards
             if (planet == null) { EffectiveLevel = 0; SuitRate = 0f; return; }
             bool aboard = boarding != null && boarding.Aboard;
             var p = aboard && boarding.ship != null ? (Vector2)boarding.ship.transform.position : body != null ? (Vector2)body.position : (Vector2)transform.position;
-            float t = dayNight != null ? dayNight.LocalTime : 0.5f;
-            levels[(int)HazardKind.Cryo] = Cryo.Level(planet.id, t, storm != null ? storm.CryoBonus : 0, InTundra(p));
+            Context = Where(p);
+            HazardTable.Levels(Context, levels);
 
             Warm = aboard || WarmthSource.AnyCovers(p);
-            int worst = 0;
-            if (!Warm)
-                for (int i = 0; i < levels.Length; i++)
-                    worst = Mathf.Max(worst, HazardRules.Effective(levels[i], protection[i]));
+            var kind = HazardKind.Cryo;
+            int worst = Warm ? 0 : HazardTable.Worst(levels, protection, out kind);
+            WorstKind = Warm ? HazardKind.Cryo : kind;
             EffectiveLevel = worst;
             SuitRate = Warm ? (SuitIntegrity < HazardRules.SuitMax ? HazardRules.WarmRecharge : 0f) : -HazardRules.DrainPerSecond(worst);
+        }
+
+        /// <summary>U-049: what the hazards need to know about a place (planet, time, depth, zone, flare).</summary>
+        HazardContext Where(Vector2 p)
+        {
+            int x = Mathf.FloorToInt(p.x), y = Mathf.FloorToInt(p.y);
+            var c = new HazardContext
+            {
+                planet = planet.id,
+                localTime = dayNight != null ? dayNight.LocalTime : 0.5f,
+                stormCryo = storm != null ? storm.CryoBonus : 0,
+                tundra = InTundra(p),
+                y = p.y,
+                sheltered = FlareShelter.AnyCovers(p),
+            };
+            if (terrain != null && terrain.Generator != null)
+            {
+                // Rock overhead: the original ground line (or a built roof) is above the surveyor's head.
+                c.underground = terrain.TopSolidY(x) > y + 1;
+                if (planet.id == PlanetId.Mars)
+                {
+                    surfaceAt ??= sx => terrain.Generator.SurfaceHeight(terrain.WrapX(sx)); // built once: no per-frame closure
+                    c.lavaTube = MarsLandforms.InTube(terrain.WrapX(x), y, surfaceAt);
+                }
+            }
+            if (planet.id == PlanetId.Mercury)
+            {
+                c.mercury = MercuryTerminator.ZoneAt(p.x, Time.timeSinceLevelLoadAsDouble + mercuryClockOffset, planet.worldWidth);
+                c.flare = flares != null && flares.Current == SolarFlares.Phase.Active;
+            }
+            return c;
+        }
+
+        /// <summary>Tests and scripted scenes move the terminator by shifting Mercury's clock (seconds).</summary>
+        public double mercuryClockOffset;
+
+        System.Func<int, int> surfaceAt;
+
+        public HazardContext Context { get; private set; }
+        /// <summary>The hazard that is draining the suit now (U-049 HUD).</summary>
+        public HazardKind WorstKind { get; private set; }
+
+        /// <summary>Mercury's flares (created on demand; run only on Mercury).</summary>
+        public SolarFlares flares;
+
+        // ---------- Envirosuit (U-049) ----------
+
+        /// <summary>Envirosuit tier 0–3 (Mk1–Mk3): every hazard's level drops by the tier.</summary>
+        public int SuitTier { get; private set; }
+        /// <summary>Raised with the tier when a suit is equipped (the surveyor's sheet swaps).</summary>
+        public static event System.Action<int> SuitEquipped;
+
+        public void Equip(int tier)
+        {
+            tier = Mathf.Clamp(tier, 0, 3);
+            SuitTier = tier;
+            for (int i = 0; i < protection.Length; i++) protection[i] = tier;
+            var state = Meridian.Core.GameState.Instance;
+            if (state != null) state.suitTier = tier;
+            SuitEquipped?.Invoke(tier);
+            Evaluate();
         }
 
         /// <summary>Earth's tundra biome (U-037; Bible §7.1, D-032).</summary>

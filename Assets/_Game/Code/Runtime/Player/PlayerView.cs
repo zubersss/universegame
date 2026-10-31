@@ -40,10 +40,29 @@ namespace Meridian.Player
 
         void Start()
         {
-            clips = ArtMaterials.ClipsFor(ArtKeys.Characters.Surveyor);
-            handle = Addressables.LoadAssetAsync<IList<Sprite>>(ArtKeys.Characters.Surveyor);
-            handle.Completed += op =>
+            var tier = Meridian.Core.GameState.Instance != null ? Meridian.Core.GameState.Instance.suitTier : 0;
+            LoadSheet(ArtKeys.Characters.SurveyorSheet(tier));
+            Meridian.Hazards.HazardSystem.SuitEquipped += OnSuitEquipped;
+            Hook();
+        }
+
+        /// <summary>The loaded sheet's key (U-049: base, mk1, mk2, mk3).</summary>
+        public string SheetKey { get; private set; }
+
+        void OnSuitEquipped(int tier) => LoadSheet(ArtKeys.Characters.SurveyorSheet(tier));
+
+        /// <summary>Loads a surveyor sheet (all share the clip layout); the old one is released once the new one shows.</summary>
+        void LoadSheet(string key)
+        {
+            if (key == SheetKey) return;
+            SheetKey = key;
+            var old = handle;
+            clips = ArtMaterials.ClipsFor(key) ?? ArtMaterials.ClipsFor(ArtKeys.Characters.Surveyor);
+            var h = Addressables.LoadAssetAsync<IList<Sprite>>(key);
+            handle = h;
+            h.Completed += op =>
             {
+                if (view != null && SheetKey != key) { Addressables.Release(h); return; } // superseded by another suit
                 if (view == null) return; // scene unloaded before the load finished
                 if (op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;
                 var list = new Sprite[op.Result.Count];
@@ -58,10 +77,10 @@ namespace Meridian.Player
                 for (int i = list.Length - 1; i >= 0; i--) view.sprite = list[i];
                 bool f0 = view.flipX; view.flipX = !f0; view.flipX = f0; // the first flip has a one-off cost too
                 shown = 0;
-                var mat = ArtMaterials.MaterialFor(ArtKeys.Characters.Surveyor);
+                var mat = ArtMaterials.MaterialFor(key);
                 if (mat != null) view.sharedMaterial = mat;
+                if (old.IsValid()) Addressables.Release(old);
             };
-            Hook();
         }
 
         void Hook()
@@ -135,6 +154,7 @@ namespace Meridian.Player
                 if (controller.Vitals != null) controller.Vitals.Damaged -= OnDamaged;
                 if (rig != null) rig.Dug -= OnDug;
             }
+            Meridian.Hazards.HazardSystem.SuitEquipped -= OnSuitEquipped;
             if (handle.IsValid()) Addressables.Release(handle);
         }
     }
