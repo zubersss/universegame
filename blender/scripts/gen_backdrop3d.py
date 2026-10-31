@@ -96,12 +96,12 @@ PRESETS = {
         # sea 0.34) and read as plain woodland. Now three clear steps: sea with low headlands
         # (far), a lowered sandy shore with sparse coastal pines leaving a band of sea above it
         # (mid), a sand beach with dune grass (near).
-        far=dict(W=9000.0, level=0.30, peak=0.44, rock=[(112, 118, 104), (136, 140, 120)], snow=(0, 0, 0),
-                 snowline=9.0, haze=(0.42, 0.00004), tilt=6.0, sea=dict(level=0.37, color=(46, 98, 140))),
-        mid=dict(W=700.0, level=0.27, amp=0.07, ground=[(186, 174, 132), (140, 146, 92)], trees=28, protos=4,
-                 tree_h=(8, 16), conifer=0.7, depth=(20, 140), haze=(0.22, 0.0012),
-                 tilt=12.0, frame_up=-0.08),
-        near=dict(W=64.0, level=0.22, amp=0.03, ground=[(226, 210, 168), (212, 192, 148), (196, 176, 132)], trees=0,
+        far=dict(W=9000.0, level=0.18, peak=0.40, rock=[(112, 118, 104), (136, 140, 120)], snow=(0, 0, 0),
+                 snowline=9.0, haze=(0.42, 0.00004), tilt=6.0, sea=dict(level=0.36, color=(46, 98, 140))),   # flooded: headlands only
+        mid=dict(W=700.0, level=0.27, amp=0.07, ground=[(186, 174, 132), (140, 146, 92)], trees=0, protos=1,
+                 tree_h=(8, 14), conifer=0.7, depth=(20, 140), haze=(0.22, 0.0012),
+                 tilt=12.0, frame_up=-0.08, sea=dict(level=0.55, shore=30.0, color=(44, 100, 146))),
+        near=dict(W=64.0, level=0.22, amp=0.015, ground=[(226, 210, 168), (212, 192, 148), (196, 176, 132)], trees=0,
                   protos=1, tree_h=(7, 11), conifer=0.5, depth=(3, 14), haze=(0.06, 0.004),
                   tufts=1200, shrubs=6, tilt=18.0, frame_up=0.12),
         leaf=[(56, 92, 40), (74, 108, 46), (92, 120, 52)],
@@ -760,6 +760,23 @@ def forest_layer(P, spec, seed, preview, work, near):
             x, y = rnd.uniform(0, W), rnd.uniform(y_vis, d1)
             instance(scene.collection, shrubs[rnd.randrange(3)], (x, y, ground_z(x, y) - 0.2),
                      rnd.uniform(0.7, 1.6), rnd.uniform(0, 6.3), W)
+    if spec.get("sea"):
+        # B-026 coast: the sea lives in the layer whose rows it fills (in the far layer it sat
+        # behind this layer's skyline and never showed). Flat plane from the shore line out
+        # past the back; ground beyond the shore floods, the rising back hills stay headlands.
+        sea = spec["sea"]
+        wm = bpy.data.materials.new("sea")
+        wm.use_nodes = True
+        pr = wm.node_tree.nodes["Principled BSDF"]
+        pr.inputs["Base Color"].default_value = lin(sea["color"])
+        pr.inputs["Roughness"].default_value = 0.25
+        _haze(wm, hz, spec["haze"][0] * 0.5, spec["haze"][1] * 0.5, None, front=W)   # stays blue
+        zs = base + amp * sea["level"]
+        y0s = sea["shore"]
+        # Ends with the ground: the tilted ortho camera has no horizon, so a plane running
+        # further back rises up the frame as a wall (first try).
+        mesh_obj("sea", [(-W, y0s, zs), (2 * W, y0s, zs), (2 * W, y_back, zs), (-W, y_back, zs)],
+                 [(0, 1, 2, 3)], scene.collection, wm, smooth=False)
     return render(scene, work, ("near" if near else "mid") + str(seed), W)
 
 
