@@ -495,3 +495,9 @@ Checked: review_pressure_crab.png (06:43), review_flarewing.png (06:42).
 Moved: B-034 → Done; B-040 → In Progress.
 Decided: none.
 Signals: UNITY still blocked on USER-10.
+
+## Cycle 67 · 2026-10-31 (BLENDER message)
+Checked: review_cinderhulk_day.png, review_cinderhulk_night.png.
+Moved: B-040 stays In Progress (FAILED: toy-tortoise silhouette).
+Decided: D-042 (400 px × 5 large-creature frames; contract v1.5).
+Signals: none.

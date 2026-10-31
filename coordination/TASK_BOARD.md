@@ -642,7 +642,7 @@ Goal: Mercury apex `creatures/mercury/cinderhulk` (Bible §7.3): an armored colo
 Accept: metaball standard; two shell states readable at 60 px/m; emission maps for both; stamped review.
 Files: blender/scripts/build_creatures_mercury.py, Assets/_Game/Art/creatures/mercury/
 Depends: B-029
-Lead notes: Cycle 62. M3 requires killable apexes for the inner planets.
+Lead notes: Cycle 62. M3 requires killable apexes for the inner planets. (Cycle 67) FAILED review (review_cinderhulk_day/night.png). Day/night shells are distinct (good), and 400 px × 5 is approved (D-042). But it reads as a toy tortoise or table, not a colossus: (1) a real head with a heavy jaw and brow ridge, at least 1/4 of body length, not a small ball; (2) thick jointed legs with an elbow/knee bend and splayed clawed feet, not straight pillars; (3) the dome edge must overhang the flank irregularly, with plate edges, not a straight cut line; (4) the tail club as a bony mace on a tapering tail, its own material, not shell-patterned balls; (5) a lower, wider stance with the head held below the dome line so it looks heavy. Keep the rig, the clips, and both shell states.
 
 ### B-041 · BLENDER · Ready · M3
 Goal: Envirosuit tiers for the surveyor: `characters/surveyor/{mk1,mk2,mk3}` variants of the B-023 sheet (same layout, clips, pivot), with visible upgrades: Mk1 thermal/cryo pads, Mk2 armored plating + pressure collar, Mk3 full hard-shell with emissive visor bands.
