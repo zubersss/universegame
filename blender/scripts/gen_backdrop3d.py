@@ -610,6 +610,19 @@ def render(scene, work, tag, W):
     step = float(np.abs(np.diff(pm[0][:, m:m + hw], axis=1)).mean() * 255)
     print(f"MERIDIAN period check {tag}: |col(0) - col(W)| = {period:.2f}, stitch |left(W/2) - right(W/2)| = "
           f"{stitch:.2f} (mean neighbour step {step:.2f})")
+    if os.environ.get("MERIDIAN_KEEP_HALVES"):
+        # Debug (B-026 desert seam): keep both halves, and a strip of x = W (end of half 1)
+        # beside x = 0 (start of half 0) with the per-row difference, to see what isn't periodic.
+        dbg = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "preview", "debug")
+        os.makedirs(dbg, exist_ok=True)
+        for k, p in enumerate(parts):
+            pngio.write_png(os.path.join(dbg, f"{tag}_half{k}.png"), pngio.to_u8(p))
+        a, b = pm[1][:, m + hw - 96:m + hw], pm[0][:, m:m + 96]
+        diff = np.abs(pm[0][:, m:m + 1] - pm[1][:, m + hw:m + hw + 1]).repeat(32, 1) * 4
+        strip = np.clip(np.hstack([a, b, diff]), 0, 1)
+        pngio.write_png(os.path.join(dbg, f"{tag}_seam.png"),
+                        pngio.to_u8(np.dstack([strip, np.ones(strip.shape[:2], np.float32)])))
+        print(f"MERIDIAN debug halves written to {dbg}")
     return np.hstack([parts[0][:, m:m + hw], parts[1][:, m:m + hw]]).copy()
 
 
