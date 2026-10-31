@@ -257,3 +257,12 @@ Moved: none. Added L-011 (M2 soak + screenshot QA).
 Decided: none.
 Signals: none.
 User: USER-09 open.
+
+## Cycle 30 · 2026-10-31 02:30 (UNITY idle notice)
+Checked: commits 38b9583 (U-033), ef21e93 (U-034); fx_contact_sheet.png; space_contact_sheet.png; perf_2026-10-31.md (memory rows RED at Mars 639 MB textures, Editor artifact per UNITY P-21); free RAM 2.9 GB, no locks.
+Moved: U-033, U-034 → Done; U-035 → In Progress.
+Decided: D-036 (memory budget measured in a dev build).
+Signals: none. UNITY idle after committing (between ticks); gate open for BLENDER.
+Added: U-040 (background walls), U-041 (build memory gate), B-030 (heat shimmer).
+User: USER-09 open.
+Queue: UNITY 5 Ready, BLENDER 5 Ready.

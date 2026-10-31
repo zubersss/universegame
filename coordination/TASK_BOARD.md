@@ -289,21 +289,21 @@ Files: Assets/_Game/Code/Runtime/Player/
 Depends: U-009
 Lead notes: Done 2d0d0d0 (cycle 27): clips by name from base.json via the registry, state picker, aim facing; SurveyorAnim tests; states strip OK. Perf per D-035.
 
-### U-033 · UNITY · In Progress · M2
+### U-033 · UNITY · Done · M2
 Goal: FX hookup: `fx/thruster` on the Pilgrim (side: main engine + belly pods while thrusting; top-down: engine), `fx/dig_sparks` on Beam hits, `fx/dust` on hard landings and ship touchdown, `fx/escape_band` on the Escape Line, `fx/heat_shimmer` during entry.
 Accept: captures for each effect; particles alive ≤ 600 at peak in BudgetGate; pooled, 0 B GC per frame; effects respect the emissive material.
 Files: Assets/_Game/Code/Runtime/FX/
 Depends: U-010, U-012
-Lead notes: Cycle 16. B-012 art Done.
+Lead notes: Done 38b9583 (cycle 30): flames, sparks, dust, Escape band, entry glow, top-down flame; pooled, 0 B GC; FX peak leg green (99 draw calls). The memory row is an Editor artifact (D-036 → U-041); the hole backdrop → U-040; heat_shimmer art → B-030.
 
-### U-034 · UNITY · Ready · M2
+### U-034 · UNITY · Done · M2
 Goal: Space art pass with B-017/B-018: all eight planet discs + glows from real art, `planets/saturn/rings` at world width ≈ 446 units (BLENDER handoff: A-ring outer edge r = 500 px of 1024, Saturn R = 220.4 px), Luna disc from `planets/luna/surface`, asteroid belt drawn with `props/space/asteroid_01..06` (instanced, varied rotation/scale).
 Accept: captures of Saturn with rings, Jupiter, Neptune, and a belt segment; Space draw calls ≤ 80 and frame p99 ≤ 16.6 ms in BudgetGate; no placeholder left for any planet key.
 Files: Assets/_Game/Code/Runtime/Space/, Scenes/Space.unity
 Depends: U-022
-Lead notes: Cycle 19. Art Done: B-017, B-018.
+Lead notes: Done ef21e93 (cycle 30): Saturn rings at 446 u, Jupiter, Neptune, Luna, belt from six asteroid sprites. Belt reads sparse at the capture zoom (minor; revisit in M4 belt mining).
 
-### U-035 · UNITY · Ready · M2
+### U-035 · UNITY · In Progress · M2
 Goal: Earth spawn camp with B-014 props: `landing_pad` under the Pilgrim at spawn, two `lamp`s, a `storage_crate` stack, the `smelter` (inert until M3), placed as a stamp like U-030 POIs.
 Accept: capture at spawn by day and by night (lamps glow via emission); props have colliders where you can stand on them (pad, crates); the stamp survives dig/save/load.
 Files: Assets/_Game/Code/Runtime/Planet/POI/, Prefabs/
@@ -337,6 +337,20 @@ Accept: EditMode tests for each feature's position/size per seed; captures of ca
 Files: Assets/_Game/Code/Runtime/Terrain/
 Depends: U-007
 Lead notes: Cycle 26. The canyon is where Mars's 2.6× jumps shine. Keep wall ledges jumpable at Mars g.
+
+### U-040 · UNITY · Ready · M2
+Goal: Background walls: a dug or natural underground cell shows a dark wall of the surrounding material (soil, stone, sand…) behind it instead of the sky/parallax backdrop; surface holes ≤ 3 m deep show the wall too.
+Accept: capture of a fresh 1-tile hole and a cave (no forest visible through either); wall persists through save/load with the dig diffs; ≤ +2 draw calls; chunk apply within D-019.
+Files: Assets/_Game/Code/Runtime/Terrain/
+Depends: U-008, U-024
+Lead notes: Cycle 30: fx capture 1 shows bright foliage through a dug hole.
+
+### U-041 · UNITY · Ready · M2
+Goal: BudgetGate memory in a dev build (D-036): tools/unity_profile.ps1 runs the Earth/Space/Mars legs in a development build and reads system and texture memory there; Editor rows are kept as "upper bound".
+Accept: perf report has build memory rows for every scene, all ≤ §11.1; the run fits the 20-min heavy cap.
+Files: tools/unity_profile.ps1, Assets/_Game/Code/Runtime/Core/BudgetMonitor.cs
+Depends: U-014, U-031
+Lead notes: Cycle 30 (P-21).
 
 ### U-025 · UNITY · Done · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.
@@ -517,6 +531,13 @@ Accept: the B-015 rework method (one continuous armature-deformed mesh, real-fee
 Files: blender/scripts/build_creatures_mercury.py, Assets/_Game/Art/creatures/mercury/
 Depends: B-015
 Lead notes: Cycle 25. Start only after B-015 passes review, so the method is proven first.
+
+### B-030 · BLENDER · Ready · M2
+Goal: Re-render `fx/heat_shimmer` as a visible heat-haze/entry-glow sheet (orange-white plasma streaks, additive), per UNITY's handoff (the current sheet is a near-transparent pale mask).
+Accept: same key and frame layout; reads clearly over a dark sky at camera size 9; emission map present.
+Files: blender/scripts/gen_fx.py, Assets/_Game/Art/fx/heat_shimmer/
+Depends: B-012
+Lead notes: Cycle 30. Small.
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
