@@ -633,3 +633,6 @@ LEAD soak run 13:40: still "was Earth", but [LEADQA] flight end shows view Space
 
 ## Cycle 94 · 2026-10-31
 Signals: UNITY 13:44 check stopped by Claude Code for low memory in PlayMode (second time; 0.88 GB at start). Pointed UNITY to the owner's own pre-approval in its window (D-046) for one re-run. LEAD stops running heavy jobs until U-044 lands (the 13:40 overlap was LEAD's soak run). Suggested U-044 before the soak, separately.
+
+## Cycle 95 · 2026-10-31
+User: USER-11 filed. UNITY correctly declined to treat D-046 (given in the LEAD window) as approval for its own window. The owner must type the standing approval in the UNITY window.

@@ -6,10 +6,12 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-10 — Paste one message into the UNITY window (1 min)
+### USER-11 — Paste one message into the UNITY window (1 min)
+Claude Code stopped UNITY's test run again (13:44) because memory ran low.
 1. Go to the terminal window where you pasted the **UNITY** kickoff message.
-2. Paste this and press Enter:
-   `rerun the check. Also, from now on you may re-run a job that Claude Code stopped for low memory, once, after memory recovers (D-046).`
+2. Paste this whole line and press Enter:
+   `rerun the check. From now on, if Claude Code stops one of your jobs for low memory, you may re-run it once after memory recovers.`
+The second sentence is the standing approval. Typed there, it stops this from blocking the team again.
 
 ### USER-08 — Optional: let the team run PowerShell commands without prompts (2 min)
 On Windows, Claude Code runs commands through PowerShell as well as Bash, and the
@@ -27,6 +29,7 @@ allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
   found on disk by the Lead. The IL2CPP module isn't needed (D-014).
 - 2026-10-30 · USER-07 (UNITY and BLENDER sessions started; first commits 10:23).
 - 2026-10-31 · USER-09 (M1 playtest of Build/MERIDIAN_0.1.1): done; the owner reported no problems and asked to close M1.
+- 2026-10-31 13:0x · USER-10 (the owner typed "rerun the check" in the UNITY window; the standing-approval sentence was not included, so it became USER-11).
 
 ## Status
 READY FOR WORKERS · 2026-10-30 · Start the two worker sessions now (USER-07).
