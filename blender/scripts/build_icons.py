@@ -29,6 +29,9 @@ ITEMS = ["iron", "copper", "carbon", "silica", "water_ice", "oxygen", "launch_fu
 ITEMS2 = ["solarite", "vitriol_glass", "sulfur", "basalt", "graphite", "polar_ice", "deep_core_sample",
           "launch_fuel_cell", "suit_patch", "cryo_pad", "thermal_pad", "radiation_liner",
           "smelter_bar_iron", "smelter_bar_copper", "circuit_board"]
+# B-051 batch 3: crafted items and blueprint nodes without an icon (RecipeBook audit).
+ITEMS3 = ["polymer", "float_cell_mk1", "solarite_capacitor", "survey_module", "skip_drive_mk2",
+          "deep_diamond_tip", "thruster_mk3"]
 
 
 # ---------------------------------------------------------------- materials
@@ -346,6 +349,68 @@ def build_item2(item, coll, rnd):
         ball(coll, "led", mat("pcb_led", (30, 80, 40), emit=(90, 255, 120), strength=1.4), 0.025, (0.18, 0.12, 0.04))
 
 
+def cone(coll, name, m, r1, r2, depth, loc, rot=(0, 0, 0), verts=40):
+    """Tapered cylinder (frustum)."""
+    bpy.ops.mesh.primitive_cone_add(vertices=verts, radius1=r1, radius2=r2, depth=depth, location=loc, rotation=rot)
+    ob = _link(bpy.context.active_object, coll)
+    ob.name = name
+    bpy.ops.object.shade_smooth()
+    ob.data.materials.append(m)
+    return ob
+
+
+def build_item3(item, coll, rnd):
+    metal = mat("b3_metal", (150, 154, 160), metallic=1.0, rough=0.3)
+    dark = mat("b3_dark", (52, 54, 58), metallic=0.5, rough=0.45)
+    if item == "polymer":
+        poly = mat("polymer", (236, 230, 214), (214, 206, 186), 0.0, 0.18, 6, 0.05)
+        cyl(coll, "roll", poly, 0.17, 0.5, (0, 0, 0.0), rot=(0, math.pi / 2, 0.4), verts=48)
+        cyl(coll, "core", dark, 0.06, 0.52, (0, 0, 0.0), rot=(0, math.pi / 2, 0.4), verts=24)
+        box(coll, "sheet", poly, (0.42, 0.3, 0.012), (0.1, -0.2, -0.18), (0, 0, 0.4), bevel=0.004)
+        for k in range(5):
+            ball(coll, f"pellet{k}", mat(f"pellet{k}", (240, 200, 120), alpha=0.85), 0.04,
+                 (rnd.uniform(-0.25, 0.25), rnd.uniform(-0.32, -0.22), -0.2))
+    elif item == "float_cell_mk1":
+        ball(coll, "cell", mat("fcell", (232, 214, 172), (200, 180, 120), 0.0, 0.35, 6, 0.1), 1.0, (0, 0, 0), (0.36, 0.25, 0.25))
+        for x in (-0.17, 0.17):
+            cyl(coll, f"strap{x}", metal, 0.265, 0.035, (x, 0, 0), rot=(0, math.pi / 2, 0), verts=40)
+        cyl(coll, "band", mat("fband", (214, 120, 52)), 0.255, 0.08, (0, 0, 0), rot=(0, math.pi / 2, 0), verts=40)
+        ball(coll, "light", mat("flight", (120, 50, 16), emit=(255, 140, 60), strength=1.6), 0.035, (0.0, -0.24, 0.1))
+    elif item == "solarite_capacitor":
+        cyl(coll, "body", dark, 0.15, 0.46, (0, 0, 0))
+        cyl(coll, "window", mat("scap_core", (255, 200, 110), emit=(255, 196, 100), strength=1.6, rough=0.15), 0.153, 0.22, (0, 0, 0))
+        for z in (-0.25, 0.25):
+            cyl(coll, f"cap{z}", metal, 0.16, 0.05, (0, 0, z))
+        for x in (-0.06, 0.06):
+            cyl(coll, f"term{x}", metal, 0.025, 0.08, (x, 0, 0.31), verts=12)
+    elif item == "survey_module":
+        box(coll, "body", mat("sm_body", (196, 198, 194), (150, 150, 146), 0.2, 0.4), (0.4, 0.2, 0.28), (0, 0, 0), bevel=0.04)
+        box(coll, "screen", mat("sm_screen", (30, 80, 50), emit=(120, 255, 170), strength=1.2), (0.24, 0.01, 0.16), (-0.03, -0.105, 0.02), bevel=0.01)
+        cone(coll, "dish", metal, 0.14, 0.07, 0.05, (0.26, 0, 0.04), rot=(0, math.pi / 2, 0))
+        cyl(coll, "antenna", dark, 0.012, 0.22, (-0.14, 0, 0.24), verts=8)
+        ball(coll, "tip", mat("sm_tip", (30, 80, 50), emit=(120, 255, 170), strength=1.4), 0.025, (-0.14, 0, 0.36))
+    elif item == "skip_drive_mk2":
+        bpy.ops.mesh.primitive_torus_add(major_radius=0.27, minor_radius=0.07, location=(0, 0, 0), rotation=(math.pi / 2.6, 0, 0))
+        ring = _link(bpy.context.active_object, coll)
+        ring.data.materials.append(metal)
+        ball(coll, "core", mat("skip_core", (120, 90, 220), emit=(170, 130, 255), strength=2.0), 0.13, (0, 0, 0))
+        for k in range(4):
+            a = 2 * math.pi * k / 4
+            box(coll, f"strut{k}", dark, (0.2, 0.03, 0.03), (0.14 * math.cos(a), 0, 0.14 * math.sin(a)), (0, -a, 0), bevel=0.005)
+    elif item == "deep_diamond_tip":
+        cyl(coll, "shank", metal, 0.07, 0.3, (0, 0, -0.18), verts=6, smooth=False)
+        cyl(coll, "collar", dark, 0.12, 0.06, (0, 0, -0.02), verts=24)
+        bpy.ops.mesh.primitive_cone_add(vertices=8, radius1=0.15, radius2=0.0, depth=0.34, location=(0, 0, 0.18))
+        tip = _link(bpy.context.active_object, coll)
+        tip.data.materials.append(mat("diamond", (210, 240, 250), (170, 214, 236), 0.0, 0.05, 3, 0.0))
+        bpy.ops.object.shade_flat()
+    elif item == "thruster_mk3":
+        cone(coll, "bell", mat("t3_bell", (120, 112, 104), metallic=0.9, rough=0.35), 0.24, 0.1, 0.42, (0, 0, -0.06))
+        cyl(coll, "glow", mat("t3_glow", (120, 50, 16), emit=(255, 140, 50), strength=2.0), 0.2, 0.02, (0, 0, -0.27))
+        cyl(coll, "chamber", dark, 0.12, 0.16, (0, 0, 0.22))
+        cyl(coll, "ring", mat("t3_ring", (214, 120, 52)), 0.13, 0.04, (0, 0, 0.16))
+
+
 def build(out_path=DEFAULT_OUT):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
@@ -358,6 +423,10 @@ def build(out_path=DEFAULT_OUT):
         coll = bpy.data.collections.new(f"icon_{item}")
         scene.collection.children.link(coll)
         build_item2(item, coll, rnd)
+    for item in ITEMS3:                                        # after batches 1-2: their icons unchanged
+        coll = bpy.data.collections.new(f"icon_{item}")
+        scene.collection.children.link(coll)
+        build_item3(item, coll, rnd)
     lights = bpy.data.collections.new("icon_lights")
     scene.collection.children.link(lights)
     sd = bpy.data.lights.new("key", "SUN")
