@@ -291,3 +291,10 @@ def generate(entry, ctx):
 
 # B-049: the canyon floor shares the Mars sky (only its top ~20% shows above the walls).
 PRESETS["mars_canyon"] = PRESETS["mars"]
+
+# B-055 Jupiter column, below deck 1: no sky above the deck tops, only the overhead deck's
+# underside glow fading into deep haze (darker and warmer with depth).
+PRESETS["jupiter_deck2"] = dict(sky_top=(64, 52, 46), sky_horizon=(120, 92, 70), haze=(110, 86, 66),
+                                cloud=(0, 0, 0), cloud_shade=(0, 0, 0), clouds=0.0)
+PRESETS["jupiter_deck3"] = dict(sky_top=(70, 40, 26), sky_horizon=(150, 88, 50), haze=(140, 84, 50),
+                                cloud=(0, 0, 0), cloud_shade=(0, 0, 0), clouds=0.0)

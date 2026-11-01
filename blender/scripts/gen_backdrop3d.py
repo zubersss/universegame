@@ -153,6 +153,36 @@ PRESETS = {
                   rocks=60, rock_h=(0.8, 4.0), pebbles=900, tilt=18.0, frame_up=0.24),   # floor = bottom quarter
         rock=[(86, 62, 54), (110, 78, 62), (72, 54, 48), (128, 88, 66)],
     ),
+    # B-055 Jupiter deck 2 (NH4SH clouds): darker, ochre-umber, dense, lit from inside by
+    # lightning. Deck 3 (water clouds): warm, tall storm towers, deeper and redder.
+    "jupiter_deck2": dict(
+        sun=dict(dir=(-0.4, 0.6, -0.6), strength=1.0, color=(1.0, 0.9, 0.8), angle=10.0),
+        ambient=((0.5, 0.42, 0.36), 0.5),
+        haze=(110, 86, 66),
+        banks=[dict(top=0.30, base_amp=22, r=(40, 110), billows=56, fall=320, haze=0.5, streak=0.14,
+                    bands=[(176, 146, 110), (130, 92, 64), (160, 124, 90)], band_h=60,
+                    crown=(196, 166, 128), under=(84, 62, 48), lightning=(3, (200, 214, 255)), flash=0.7),
+               dict(top=0.42, base_amp=30, r=(60, 160), billows=40, fall=380, haze=0.3, streak=0.12,
+                    bands=[(170, 138, 100), (120, 84, 58), (150, 114, 82)], band_h=90,
+                    crown=(190, 158, 120), under=(76, 56, 42), lightning=(2, (210, 222, 255)), flash=0.8),
+               dict(top=0.6, base_amp=38, r=(100, 240), billows=24, fall=440, haze=0.12, streak=0.1,
+                    bands=[(164, 130, 94), (112, 78, 54)], band_h=130,
+                    crown=(184, 150, 112), under=(66, 48, 36), lightning=(1, (220, 230, 255)), flash=0.9)],
+    ),
+    "jupiter_deck3": dict(
+        sun=dict(dir=(-0.4, 0.6, -0.6), strength=1.0, color=(1.0, 0.9, 0.8), angle=10.0),
+        ambient=((0.56, 0.36, 0.24), 0.5),
+        haze=(140, 84, 50),
+        banks=[dict(top=0.24, base_amp=60, r=(60, 180), billows=30, fall=420, haze=0.5, streak=0.08,
+                    bands=[(214, 150, 98), (170, 104, 66)], band_h=110,
+                    crown=(232, 176, 120), under=(96, 52, 32)),
+               dict(top=0.36, base_amp=80, r=(90, 260), billows=22, fall=480, haze=0.28, streak=0.07,
+                    bands=[(206, 140, 90), (160, 94, 58)], band_h=150,
+                    crown=(226, 166, 110), under=(88, 46, 28), lightning=(1, (255, 236, 200)), flash=0.6),
+               dict(top=0.55, base_amp=90, r=(140, 340), billows=14, fall=520, haze=0.1, streak=0.06,
+                    bands=[(198, 128, 80), (150, 84, 50)], band_h=200,
+                    crown=(220, 156, 100), under=(78, 40, 24))],
+    ),
     # B-027 Mercury (Bible §7.3): airless, so harsh small-angle sun, almost no ambient, little
     # haze; cratered relief; blinding grey regolith; violet twilight in the sky only.
     "mercury": dict(
@@ -1269,6 +1299,29 @@ def cloud_bank(P, spec, seed, preview):
         rgb = rgb * (0.35 + 0.75 * band)
     hz = np.array(P["haze"], np.float32) / 255
     rgb = rgb * (1 - spec["haze"]) + hz * spec["haze"]
+    if spec.get("lightning"):
+        # B-055 deck 2: lightning lighting the clouds from inside. Soft bluish-white glows deep in
+        # the body (x distance wraps, so the tile stays periodic), and a jagged channel through
+        # the brightest ones.
+        n, col = spec["lightning"]
+        col = np.array(col, np.float32) / 255
+        xs = np.arange(W, dtype=np.float32)[None, :]
+        for k in range(n):
+            cx = rnd.uniform(0, W)
+            cy = float(np.interp(cx, np.arange(W), top)) + rnd.uniform(60, 220)
+            R = rnd.uniform(70, 160)
+            dx = (xs - cx + W / 2) % W - W / 2
+            g = np.exp(-(dx ** 2 + (yy - cy) ** 2) / (2 * R * R))
+            g = g * np.clip(d / 40.0, 0, 1)                           # inside the cloud only
+            rgb = np.clip(rgb + g[..., None] * col * spec.get("flash", 0.9), 0, 1)
+            if k < 2:                                                  # a visible channel
+                x, y = cx, cy - R * 0.6
+                for _ in range(int(R * 1.2 / 6)):
+                    nx_, ny_ = x + rnd.uniform(-7, 7), y + 6
+                    xi = np.arange(int(min(x, nx_)) - 2, int(max(x, nx_)) + 3) % W
+                    yi = int(max(0, min(H - 1, ny_)))
+                    rgb[yi, xi] = np.clip(rgb[yi, xi] + col * 0.8, 0, 1)
+                    x, y = nx_, ny_
     edge = 1.5 + 2.5 * fft_noise(rng, H, W, 3, 24, 0.8)    # soft, slightly ragged edge
     alpha = np.clip((d + edge * 0.5) / 2.0 + 0.5, 0, 1)
     out = np.dstack([rgb, alpha]).astype(np.float32)
