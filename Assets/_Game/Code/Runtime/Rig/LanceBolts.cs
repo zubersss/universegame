@@ -32,6 +32,7 @@ namespace Meridian.Rig
 
         /// <summary>Raised when a bolt hits a creature (the creature, whether it died).</summary>
         public event System.Action<Meridian.Creatures.Creature, bool> HitCreature;
+        public event System.Action<Meridian.Creatures.Wardens.Sentinel, bool> HitSentinel;
         public int Live { get; private set; }
 
         void Awake()
@@ -92,6 +93,13 @@ namespace Meridian.Rig
                     {
                         bool killed = creature.Hurt(Damage);
                         HitCreature?.Invoke(creature, killed);
+                        stop = true;
+                    }
+                    else if (col.GetComponentInParent<Meridian.Creatures.Wardens.Sentinel>() is var sentinel && sentinel != null && sentinel.Alive)
+                    {
+                        // U-053: the Lance brings sentinels down.
+                        bool killed = sentinel.Hurt(Damage);
+                        HitSentinel?.Invoke(sentinel, killed);
                         stop = true;
                     }
                     else if (col.GetComponentInParent<TerrainChunk>() != null) stop = true;

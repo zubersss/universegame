@@ -55,6 +55,15 @@ namespace Meridian.Hazards
         /// <summary>Load (SaveData v2): the saved integrity, clamped to 0..SuitMax.</summary>
         public void SetSuit(float value) => SuitIntegrity = Mathf.Clamp(value, 0f, HazardRules.SuitMax);
 
+        /// <summary>A hit (U-053 Warden bolts): off the suit first, the rest off health.</summary>
+        public void DamageSuit(float amount)
+        {
+            if (amount <= 0f) return;
+            float fromSuit = Mathf.Min(SuitIntegrity, amount);
+            SuitIntegrity -= fromSuit;
+            if (amount > fromSuit && vitals != null) vitals.Damage(amount - fromSuit);
+        }
+
         void Update() => Step(Time.deltaTime);
 
         /// <summary>One update of `dt` seconds (tests drive it directly to simulate long exposures).</summary>

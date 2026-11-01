@@ -24,6 +24,7 @@ namespace Meridian.Core
         /// <summary>Venus super-rotation (U-050), created at configure.</summary>
         public Meridian.Planet.Weather.VenusWind wind { get; private set; }
         public Meridian.Survey.SurveyScanner scanner { get; private set; }
+        public Meridian.Creatures.Wardens.WardenDirector wardens { get; private set; }
         public Meridian.Creatures.CreatureDirector creatures;
         public Meridian.Hazards.HazardSystem hazards;
         public Meridian.Planet.POI.PoiPlacer pois;
@@ -120,6 +121,13 @@ namespace Meridian.Core
             if (dayNight != null) dayNight.ConfigureFor(config);
             if (dustStorm != null) dustStorm.ConfigureFor(config, seed);
             if (creatures != null) creatures.ConfigureFor(config, seed);
+            // U-053: Wardens patrol their sites and answer over-mining.
+            if (wardens == null)
+            {
+                wardens = gameObject.AddComponent<Meridian.Creatures.Wardens.WardenDirector>();
+                wardens.terrain = terrain; wardens.player = player; wardens.hazards = hazards; wardens.pois = pois;
+            }
+            wardens.ConfigureFor(config);
             if (hazards != null) hazards.ConfigureFor(config);
             if (sideCamera != null)
             {

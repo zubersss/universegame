@@ -74,6 +74,8 @@ namespace Meridian.Art
             public const string LanceBolt = "fx/lance_bolt/base";
             public const string SurveyScan = "fx/survey_scan/base";
             public const string BuilderGhost = "fx/builder_ghost/base";
+            // U-053 (B-043)
+            public const string WardenBolt = "fx/warden_bolt/base";
         }
 
         public static class Props

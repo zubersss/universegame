@@ -110,6 +110,21 @@ namespace Meridian.Core
             yield return scenes.LoadPlanetSide(mars);
             side = scenes.PlanetSide;
             if (side.dayNight != null) side.dayNight.Override = 0.45f;
+            // U-053: the Mars Warden outpost, its patrol and a sentinel called by over-mining, firing.
+            if (side.wardens != null)
+            {
+                float outpost = Meridian.Planet.POI.PoiCatalog.WardenOutpost.CenterX;
+                yield return LookAt(side, outpost + 10f, 3f, 9f);
+                if (side.hazards != null) side.hazards.enabled = false;
+                var feet = side.player.Body.position;
+                var hunter = side.wardens.Spawn(feet + new Vector2(5f, 4.5f), feet, Meridian.Creatures.Wardens.SentinelState.Hunt);
+                yield return Wait(1.4f);
+                if (hunter != null) side.wardens.Fire(hunter.Body.position, side.player.Body.position + new Vector2(0f, 0.9f) - hunter.Body.position);
+                yield return Wait(0.15f);
+                yield return Shot(folder, "smoke_12_warden.png");
+                side.wardens.DespawnAll();
+                if (side.hazards != null) side.hazards.enabled = true;
+            }
             // On the canyon wall's terraces (as the U-039 capture): wall, ledges and the far rim in one view.
             int canyon = Meridian.Terrain.MarsLandforms.CanyonStart + 60;
             yield return LookAt(side, canyon, 6f, 24f);
