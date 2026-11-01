@@ -455,7 +455,7 @@ Goal: Inner-planet creatures + apexes: Mercury glassback, cinderling, flarewing,
 Accept: each species spawns in its biome or zone with correct ground or flight placement; both apexes killable by their rule (PlayMode tests); AI ≤ 0.5 ms with 20 creatures.
 Files: Assets/_Game/Code/Runtime/Creatures/
 Depends: U-048, U-050, U-046
-Lead notes: Cycle 98. M3 exit needs killable apexes.
+Lead notes: Cycle 98. M3 exit needs killable apexes. (Cycle 131) Two fixes before Done: (1) capture 2 "Cinderhulk after nightfall" shows the white-hot DAY shell on the night side, so the night sheet swap does not show in the build path (check the swap trigger vs the capture setup); (2) the Veil Serpent reads tiny next to the deck balloons; scale it ≥ 3× so the apex dominates the frame (its sheet ppu stays; scale the transform). Re-capture 2 and 4.
 
 ### U-056 · UNITY · Ready · M3
 Goal: Bases v1: build shelter walls, doors, lamps and crates (B-014) with the Builder; a closed shelter counts as warmth and protection for hazards; Venus Aerostat platforms (B-045) with a buoyancy budget (lift ≥ load, HUD margin).
@@ -839,6 +839,13 @@ Accept: a stamped before/after review per changed layer; same keys, sizes, tilin
 Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/
 Depends: B-052
 Lead notes: Cycle 129. BLENDER's offer, accepted; it reopens no accepted art except for this visible artifact.
+
+### B-054 · BLENDER · Ready · M3
+Goal: Icon `icons/cryo_round/base`: a frost-blue Lance round (an ammunition slug with a frosted cap and a cyan emissive band).
+Accept: same icon camera and lights as B-013/B-042/B-051; readable at 32 px; stamped review.
+Files: blender/scripts/build_icons.py, Assets/_Game/Art/icons/cryo_round/
+Depends: B-051
+Lead notes: Cycle 131. Needed by U-055.
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.

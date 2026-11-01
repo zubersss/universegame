@@ -748,3 +748,6 @@ Checked: review_warden_bolt.png, review_earth_b052.png. B-052 → Done.
 
 ## Cycle 129 · 2026-10-31
 Added: B-053 (spike-comb audit on the other far layers; BLENDER offer accepted).
+
+## Cycle 131 · 2026-10-31 (UNITY message)
+Checked: u055 Cinderhulk night (day shell shown) and Venus deck (good scene; the serpent is too small). U-055 stays In Progress for those two. D-053 numbers. Added B-054 (cryo round icon).
