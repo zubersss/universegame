@@ -422,12 +422,12 @@ Files: Assets/_Game/Code/Runtime/Crafting/, UI/
 Depends: U-045
 Lead notes: Done (cycle 118): RecipeBook asset (16 recipes, 10 blueprints, §2 story unlocks by beacon), Smelter at camp, Refinery + Fabricator on the Pilgrim, Blueprint Tree + recipes panel (B); CraftingGraphTests + CraftingPlayTests; full check green. UI polish (opaque panel, item icons in recipe rows, CRAFT buttons dimmed per availability) folded into U-058.
 
-### U-052 · UNITY · In Progress · M3
+### U-052 · UNITY · Done · M3
 Goal: Waystations and trading (Bible §3): dock at ships/waystation_earth|mars (B-038) in top-down; the docking-bay interior scene (backgrounds/waystation, B-039) with a Halcyon market (buy/sell in Scrip, prices per station), refuel and repair, and cargo contracts.
 Accept: PlayMode: dock → sell 10 iron → Scrip rises → buy fuel → undock; prices differ Earth vs Mars; save/load keeps Scrip and contracts.
 Files: Assets/_Game/Code/Runtime/Space/, Trade/, Scenes/
 Depends: U-045, U-034
-Lead notes: Cycle 98. M3.
+Lead notes: Done (cycle 124): Earth + Mars Waystations, docking (F, < 12 u, < 8 u/s), bay with Halcyon market (16 goods, per-station prices, sell 60%), refuel/repair, 2 cargo contracts each, Scrip 200 start, saved; B-051 icons wired; MarketTests 4 + WaystationPlayTests; full check green.
 
 ### U-053 · UNITY · Ready · M3
 Goal: Wardens basic (Bible §2): creatures/warden/sentinel (B-043, common atlas per D-043) patrol POIs and respond when the player over-mines a local area (threshold per chunk); fx/warden_bolt projectiles; the sentinel can be destroyed with the Lance.
@@ -436,7 +436,7 @@ Files: Assets/_Game/Code/Runtime/Creatures/Wardens/
 Depends: U-046, U-027
 Lead notes: Cycle 98. M3.
 
-### U-054 · UNITY · Ready · M3
+### U-054 · UNITY · In Progress · M3
 Goal: Survey Catalogue + Datacores: the Survey module (U-046) scans creatures, minerals and POIs; first scans pay Datacores; Catalogue panel (N) lists entries with icons and per-planet completion.
 Accept: PlayMode: scan a stag → entry + Datacores; rescans pay nothing; save/load keeps the catalogue; panel capture.
 Files: Assets/_Game/Code/Runtime/Survey/, UI/
