@@ -32,6 +32,8 @@ ITEMS2 = ["solarite", "vitriol_glass", "sulfur", "basalt", "graphite", "polar_ic
 # B-051 batch 3: crafted items and blueprint nodes without an icon (RecipeBook audit).
 ITEMS3 = ["polymer", "float_cell_mk1", "solarite_capacitor", "survey_module", "skip_drive_mk2",
           "deep_diamond_tip", "thruster_mk3"]
+# B-054 batch 4.
+ITEMS4 = ["cryo_round"]
 
 
 # ---------------------------------------------------------------- materials
@@ -411,6 +413,25 @@ def build_item3(item, coll, rnd):
         cyl(coll, "ring", mat("t3_ring", (214, 120, 52)), 0.13, 0.04, (0, 0, 0.16))
 
 
+def build_item4(item, coll, rnd):
+    if item == "cryo_round":
+        # Lance round: brass-steel casing, frost-blue slug with a frosted (rough, pale) nose cap,
+        # cyan emissive band; tilted for the icon read.
+        rot = (0, math.radians(-55), 0.35)
+        case = mat("cr_case", (176, 150, 96), metallic=1.0, rough=0.35)
+        slug = mat("cr_slug", (120, 176, 220), (90, 140, 196), 0.6, 0.3, 8, 0.1)
+        frost = mat("cr_frost", (232, 244, 252), (200, 222, 240), 0.0, 0.85, 30, 0.6)
+        band = mat("cr_band", (40, 120, 140), emit=(120, 240, 255), strength=1.8)
+        d = (math.sin(math.radians(55)) * math.cos(0.35), math.sin(math.radians(55)) * math.sin(0.35), math.cos(math.radians(55)))
+        def at(t):
+            return (-d[0] * t, -d[1] * t, d[2] * t)
+        cyl(coll, "case", case, 0.11, 0.3, at(-0.16), rot=rot)
+        cyl(coll, "rim", case, 0.12, 0.03, at(-0.31), rot=rot)
+        cyl(coll, "slug", slug, 0.1, 0.24, at(0.1), rot=rot)
+        cyl(coll, "band", band, 0.104, 0.05, at(0.02), rot=rot)
+        cone(coll, "cap", frost, 0.1, 0.0, 0.2, at(0.32), rot=rot, verts=32)
+
+
 def build(out_path=DEFAULT_OUT):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
@@ -427,6 +448,10 @@ def build(out_path=DEFAULT_OUT):
         coll = bpy.data.collections.new(f"icon_{item}")
         scene.collection.children.link(coll)
         build_item3(item, coll, rnd)
+    for item in ITEMS4:
+        coll = bpy.data.collections.new(f"icon_{item}")
+        scene.collection.children.link(coll)
+        build_item4(item, coll, rnd)
     lights = bpy.data.collections.new("icon_lights")
     scene.collection.children.link(lights)
     sd = bpy.data.lights.new("key", "SUN")
