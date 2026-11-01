@@ -457,12 +457,12 @@ Files: Assets/_Game/Code/Runtime/Creatures/
 Depends: U-048, U-050, U-046
 Lead notes: Done (cycle 132): 10 inner species with zone/time spawn rules, fliers, sheet animation everywhere; Cinderhulk night sheet tracks the terminator every frame (cracked dark shell when vulnerable); Veil Serpent at 3× art scale (9.8 × 2.3 m) and killable only with Cryo rounds; numbers D-053; tests 10/10.
 
-### U-056 · UNITY · In Progress · M3
+### U-056 · UNITY · Done · M3
 Goal: Bases v1: build shelter walls, doors, lamps and crates (B-014) with the Builder; a closed shelter counts as warmth and protection for hazards; Venus Aerostat platforms (B-045) with a buoyancy budget (lift ≥ load, HUD margin).
 Accept: PlayMode: an enclosed shelter stops Cryo drain; an aerostat sinks when overloaded; save/load keeps the base.
 Files: Assets/_Game/Code/Runtime/Building/
 Depends: U-046, U-049, U-050
-Lead notes: Cycle 98. M3.
+Lead notes: Done 4b34228 (cycle 141): wall/door/lamp/crate/deck pieces with recipes; shelter flood-fill counts as warmth; Venus aerostat buoyancy (sinks per missing lift, HUD margin); saved; BuoyancyTests + BaseTests; full check green. Sink anomaly + lamp light → U-064.
 
 ### U-057 · UNITY · Done · M3
 Goal: Mercury polish from the U-048 review: (1) pure-black empty cells (right of the shelter block and under it in u048 day/night captures) should show the background wall / cold-trap shadow tone, not #000; (2) the solarite field pad lands on a crater rim and reads as a raised block, so seat it in a crater floor or on flat ground; (3) the twilight band should read violet (§7.3 "violet twilight"): add a low violet sky glow on the sunward side in the band.
@@ -489,7 +489,7 @@ Lead notes: Done bac7e80 (cycle 137): solarite 90 s post-flare window (Beam cuts
 Goal: M3 playtest build `Build/MERIDIAN_0.3.0/` with build smoke screenshots (Mercury day + twilight + flare shelter, Venus deck station + surface vent, crafting panel, market, catalogue, a Warden, both apexes) and dev-build memory rows for all four inner planets.
 Accept: build smoke clean; every BudgetGate row green in the build; GameInfo 0.3.0; the M2 UI nits (catalogue scrim, selected planet, unscanned silhouettes) folded in.
 Files: Build/ (ignored), coordination/reports/unity/smoke_<date>/
-Depends: U-053, U-055, U-056, U-059
+Depends: U-053, U-055, U-056, U-059, U-064
 Lead notes: Cycle 126. Closes M3 with L-012 and the owner's playtest.
 
 ### U-061 · UNITY · Ready · M4
@@ -512,6 +512,13 @@ Accept: PlayMode: Earth → Neptune in ≈ 11 s at skip speed; refuses inside a 
 Files: Assets/_Game/Code/Runtime/Space/
 Depends: U-034, U-051
 Lead notes: Cycle 138. M4.
+
+### U-064 · UNITY · In Progress · M3
+Goal: (1) investigate the surveyor resting 2 m below TopSolidY ~30 m from the Mars camp (x 94), reported during U-056: the stamp's collider vs its drawn tiles, or a stale chunk collider (cf. the U-007 collider fix); (2) placed base lamps should cast a small warm Point Light 2D (radius ~5 m) so a shelter interior is lit at night (mars_shelter.png is dark inside).
+Accept: a PlayMode test walks the surveyor across every POI stamp on Earth and Mars and asserts feet within 0.1 m of TopSolidY; the night shelter capture shows lamplight.
+Files: Assets/_Game/Code/Runtime/Terrain/, Building/
+Depends: U-056, U-057
+Lead notes: Cycle 141. Do it inside the U-060 window if small; it must land before the M3 build.
 
 ### U-025 · UNITY · Done · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.

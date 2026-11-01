@@ -769,3 +769,6 @@ Added the first M4 tasks: U-061 (cloud-column generator), U-062 (float cells + j
 
 ## Cycle 140 · 2026-10-31 22:12
 Checked: B-055 interim review_jupiter_deck3.png (warm storm towers with a lit core; on track). UNITY holds the lock (U-056 check). B-055 → In Progress.
+
+## Cycle 141 · 2026-10-31 (UNITY message)
+Checked: u056 mars_shelter.png (shelter works, dark inside), venus_aerostat.png (good). U-056 → Done. Added U-064 (POI sink anomaly + lamp light) before U-060.
