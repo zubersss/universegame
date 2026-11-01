@@ -1569,18 +1569,21 @@ def generate(entry, ctx):
                 sky = sky[::4, ::4]
             a = bank[..., 3:4]
             rgb = sky * (1 - a) + bank[..., :3] * a
-            if P.get("crush"):
-                # B-055 jupiter_deep: the Crush Line, a dark-red glowing band near the bottom with
-                # a dark core line, softly modulated along x by periodic noise (tiles).
-                cy, cw, col = P["crush"]
-                Hh, Ww = rgb.shape[:2]
-                yy = np.arange(Hh, dtype=np.float32)[:, None] / Hh
-                mod = 0.75 + 0.25 * fft_noise(np.random.default_rng(seed + 3), 1, Ww, 60, Ww, 1.2)[0][None, :]
-                glow = np.exp(-((yy - cy) / cw) ** 2) * mod
-                core = np.exp(-((yy - cy) / (cw * 0.12)) ** 2)
-                rgb = np.clip(rgb + glow[..., None] * (np.array(col, np.float32) / 255), 0, 1)
-                rgb = rgb * (1 - 0.7 * core[..., None])
             return {"color": np.dstack([pngio.to_u8(rgb), np.full(rgb.shape[:2], 255, np.uint8)])}
+        if P.get("crush") and layer == "layer2":
+            # B-055 jupiter_deep: the Crush Line, painted on the NEAR layer (the opaque cloud bases
+            # of the mid/near layers covered it in layer0): a dark-red glowing band with a dark
+            # core line, softly modulated along x by periodic noise (tiles).
+            cy, cw, col = P["crush"]
+            Hh, Ww = bank.shape[:2]
+            yy = np.arange(Hh, dtype=np.float32)[:, None] / Hh
+            mod = 0.75 + 0.25 * fft_noise(np.random.default_rng(seed + 3), 1, Ww, 60, Ww, 1.2)[0][None, :]
+            glow = np.exp(-((yy - cy) / cw) ** 2) * mod
+            core = np.exp(-((yy - cy) / (cw * 0.12)) ** 2)
+            bank = bank.copy()
+            bank[..., :3] = np.clip(bank[..., :3] + glow[..., None] * (np.array(col, np.float32) / 255), 0, 1)
+            bank[..., :3] *= (1 - 0.7 * core[..., None])
+            bank[..., 3] = np.maximum(bank[..., 3], np.clip(glow * 1.2, 0, 1))
         return {"color": _finish_transparent(bank)}
     if layer in ("layer0", "layer0_nosun"):
         sp = dict(GB.PRESETS[planet])
