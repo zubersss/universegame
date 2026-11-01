@@ -781,3 +781,6 @@ UNITY U-064 interim: root cause found (Mars tile set lacked Snow, so polar frost
 
 ## Cycle 145 · 2026-10-31 23:42
 Signals: memory baseline creep. The 3 Claude sessions hold ~800 MB private each after 38 h; free RAM 1.26 GB with no heavy job, so the team is gated. User: USER-13 (restart the three windows with resume messages; the UNITY resume repeats the standing restart approval in its own window).
+
+## Cycle 146 · 2026-11-01 00:42
+No worker commits except the BLENDER resume point; free RAM 0.72 GB; both idle. Waiting on USER-13. LEAD resume point written.
