@@ -77,7 +77,7 @@ PRESETS = {
         ambient=((0.5, 0.58, 0.68), 0.4),
         haze=(186, 198, 210),
         far=dict(W=9000.0, level=0.42, peak=0.84, rock=[(108, 108, 112), (132, 132, 134)], snow=(240, 244, 248),
-                 snowline=0.62, haze=(0.42, 0.00004), tilt=6.0, rough=0.003, ridge_lo=80),   # B-053: ridged peaks, no comb
+                 snowline=0.62, haze=(0.42, 0.00004), tilt=6.0, rough=0.0, ridge_lo=90),   # B-053: smooth face (rough streaked on the 48-row grid)
         mid=dict(W=700.0, level=0.42, amp=0.12, ground=[(58, 80, 58), (72, 92, 64)], trees=640, protos=8,
                  tree_h=(16, 30), conifer=0.95, depth=(20, 140), haze=(0.24, 0.0012), fog=(0.3, 0.22),
                  tilt=12.0, frame_up=-0.08),
