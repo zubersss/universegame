@@ -436,12 +436,12 @@ Files: Assets/_Game/Code/Runtime/Space/, Trade/, Scenes/
 Depends: U-045, U-034
 Lead notes: Done (cycle 124): Earth + Mars Waystations, docking (F, < 12 u, < 8 u/s), bay with Halcyon market (16 goods, per-station prices, sell 60%), refuel/repair, 2 cargo contracts each, Scrip 200 start, saved; B-051 icons wired; MarketTests 4 + WaystationPlayTests; full check green.
 
-### U-053 · UNITY · In Progress · M3
+### U-053 · UNITY · Done · M3
 Goal: Wardens basic (Bible §2): creatures/warden/sentinel (B-043, common atlas per D-043) patrol POIs and respond when the player over-mines a local area (threshold per chunk); fx/warden_bolt projectiles; the sentinel can be destroyed with the Lance.
 Accept: PlayMode: digging past the threshold near a vault spawns a sentinel within 10 s; bolts damage the suit; Lance kills it; ≤ 0.3 ms AI with 6 sentinels.
 Files: Assets/_Game/Code/Runtime/Creatures/Wardens/
 Depends: U-046, U-027
-Lead notes: Cycle 98. M3.
+Lead notes: Done 6c4deab (cycle 127): Warden meter, patrols at sites, hunters with bolts, Lance kills in 3, pooled; numbers per D-052; AI p99 0.06 ms; full check green. Bolt readability → B-052.
 
 ### U-054 · UNITY · Done · M3
 Goal: Survey Catalogue + Datacores: the Survey module (U-046) scans creatures, minerals and POIs; first scans pay Datacores; Catalogue panel (N) lists entries with icons and per-planet completion.
@@ -450,7 +450,7 @@ Files: Assets/_Game/Code/Runtime/Survey/, UI/
 Depends: U-046
 Lead notes: Done a7576ae (cycle 125): data-driven catalogue per planet, first-scan Datacores (D-051), N panel with % per planet, saved; tests green. Nits for the next UI touch: the catalogue panel lacks the U-058 scrim (world shows at full brightness at the sides), all planet buttons look selected, so highlight only the current one; unscanned entries could show a dark silhouette or icon instead of a blank tile.
 
-### U-055 · UNITY · Ready · M3
+### U-055 · UNITY · In Progress · M3
 Goal: Inner-planet creatures + apexes: Mercury glassback, cinderling, flarewing, shadewyrm (B-029, B-035); Venus sulfur drifter, acidmoth (fliers, centred pivot), pressure crab, vent eel (B-032, B-036, B-034); apexes Cinderhulk (day/night sheets, vulnerable 2 min after crossing into night, B-040) and Veil Serpent (Cryo rounds, chilled flash on hurt frames, B-044).
 Accept: each species spawns in its biome or zone with correct ground or flight placement; both apexes killable by their rule (PlayMode tests); AI ≤ 0.5 ms with 20 creatures.
 Files: Assets/_Game/Code/Runtime/Creatures/
@@ -825,6 +825,13 @@ Accept: same icon camera and lights as B-013/B-042; readable at 32 px on a dark 
 Files: blender/scripts/build_icons.py, Assets/_Game/Art/icons/
 Depends: B-042
 Lead notes: Done (cycle 122): 7 icons (polymer, float cell, solarite capacitor, survey module, skip drive Mk2, deep-diamond tip, thruster Mk3), consistent with batches 1–2, readable at 32 px. 128 px icon renders count as below preview size (not heavy, CLAUDE.md rule 6).
+
+### B-052 · BLENDER · In Progress · M3
+Goal: (1) fx/warden_bolt reads too small at gameplay zoom: a bigger, brighter teal head (≈ 2× size) with a short glowing trail; same key and pivot rule. (2) backgrounds/mars layer0 far ridges show the same vertical spike comb as Mercury did (coordination/reports/unity/u053_2026-10-31/warden_outpost.png, top-left/right): re-render with the ridge_lo approach (rounded far rims). Check backgrounds/earth layer0's distant range for the same artifact and fix it if present.
+Accept: stamped reviews; same keys, sizes, tiling; the bolt is readable at 60 px/m over a busy Mars backdrop.
+Files: blender/scripts/gen_fx.py, gen_backdrop3d.py, Assets/_Game/Art/fx/warden_bolt/, backgrounds/mars/, backgrounds/earth/
+Depends: B-043, B-050
+Lead notes: Cycle 127.
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
