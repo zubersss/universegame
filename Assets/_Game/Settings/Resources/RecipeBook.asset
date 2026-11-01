@@ -203,7 +203,7 @@ MonoBehaviour:
     tier: 1
   - id: survey_module
     name: Survey module
-    icon: 
+    icon: survey_module
     requires: []
     unlockFlag: beacon:earth
     tier: 1
@@ -216,35 +216,35 @@ MonoBehaviour:
     tier: 2
   - id: solarite_capacitor
     name: Solarite capacitor
-    icon: solarite
+    icon: solarite_capacitor
     requires:
     - fabrication
     unlockFlag: beacon:mercury
     tier: 2
   - id: float_cell_mk1
     name: Float cell Mk1
-    icon: 
+    icon: float_cell_mk1
     requires:
     - fabrication
     unlockFlag: beacon:venus
     tier: 2
   - id: skip_drive_mk2
     name: Skip Drive Mk2
-    icon: 
+    icon: skip_drive_mk2
     requires:
     - solarite_capacitor
     unlockFlag: beacon:saturn
     tier: 3
   - id: deep_diamond_tip
     name: Deep-diamond Rig tip
-    icon: 
+    icon: deep_diamond_tip
     requires:
     - fabrication
     unlockFlag: beacon:uranus
     tier: 3
   - id: thruster_mk3
     name: Thruster Mk3
-    icon: 
+    icon: thruster_mk3
     requires:
     - skip_drive_mk2
     unlockFlag: beacon:jupiter

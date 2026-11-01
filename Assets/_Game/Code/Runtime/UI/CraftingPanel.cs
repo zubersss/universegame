@@ -43,6 +43,7 @@ namespace Meridian.UI
         Inventory inventory;
         Meridian.Terrain.TerrainStreamer terrain;
         readonly List<Row> rows = new List<Row>();
+        readonly List<(Image img, string name)> nodeIcons = new List<(Image, string)>();
         float nextRefresh;
         bool iconsDirty;
 
@@ -115,6 +116,11 @@ namespace Meridian.UI
                 var node = UiKit.Rect(back.transform, "Node_" + b.id, tl, pos, new Vector2(148f, 84f), tl).gameObject.AddComponent<Image>();
                 node.color = Dim;
                 Nodes[b.id] = node;
+                var nodeIcon = UiKit.Panel(node.transform, "Icon", new Vector2(1f, 0f), new Vector2(-6f, 6f), new Vector2(30f, 30f), Color.white);
+                nodeIcon.rectTransform.pivot = new Vector2(1f, 0f);
+                nodeIcon.preserveAspect = true;
+                nodeIcon.enabled = false;
+                nodeIcons.Add((nodeIcon, b.icon));
                 var t = UiKit.Text(node.transform, "Name", tl, new Vector2(10f, -16f), new Vector2(132f, 22f), 14, true, TextAnchor.MiddleLeft, theme.text);
                 t.horizontalOverflow = HorizontalWrapMode.Wrap;
                 t.text = b.name;
@@ -162,6 +168,13 @@ namespace Meridian.UI
 
         void FillIcons()
         {
+            foreach (var (img, name) in nodeIcons)
+            {
+                // A blueprint icon is an art name (B-051), or an item's key.
+                var sp = ItemIcons.GetNamed(name);
+                img.sprite = sp;
+                img.enabled = sp != null;
+            }
             foreach (var row in rows)
                 foreach (var (icon, id) in row.icons)
                 {

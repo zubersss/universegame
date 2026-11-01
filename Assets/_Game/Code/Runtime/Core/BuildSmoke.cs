@@ -129,6 +129,24 @@ namespace Meridian.Core
             else yield return Wait(3f);
             yield return Shot(folder, "smoke_7_space_saturn.png");
 
+            // U-052: docked at the Earth Waystation, the Halcyon market open (some goods aboard, a thirsty tank).
+            var bay = scenes.Space != null ? scenes.Space.GetComponent<Meridian.Trade.DockingBay>() : null;
+            if (bay != null && GameState.Instance != null)
+            {
+                var st = GameState.Instance;
+                st.inventory.Add(Meridian.Items.ItemRegistry.Get("iron").id, 12);
+                st.inventory.Add(Meridian.Items.ItemRegistry.Get("suit_patch").id, 3);
+                st.fuel = st.tankCapacity * 0.4f;
+                st.hull = 82f;
+                yield return Wait(0.5f);
+                if (bay.Dock("earth"))
+                {
+                    yield return Wait(1.5f); // bay art and icons arrive
+                    yield return Shot(folder, "smoke_10_waystation.png");
+                    bay.Undock();
+                }
+            }
+
             File.WriteAllText(Path.Combine(folder, "smoke_done.txt"), $"OK {GameInfo.Version} {DateTime.Now:s}");
             Application.Quit();
         }

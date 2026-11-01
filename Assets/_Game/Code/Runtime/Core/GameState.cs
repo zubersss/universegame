@@ -26,6 +26,10 @@ namespace Meridian.Core
         public readonly Meridian.Items.Inventory inventory = new Meridian.Items.Inventory();
         /// <summary>Envirosuit tier (U-049): 0 none, 1–3 Mk1–Mk3; lowers every hazard by its tier.</summary>
         public int suitTier;
+        /// <summary>Halcyon Scrip (U-052).</summary>
+        public int scrip = Meridian.Trade.Market.StartingScrip;
+        /// <summary>Accepted Halcyon cargo contracts (U-052; done ones stay for the log).</summary>
+        public readonly System.Collections.Generic.List<Meridian.Trade.Contract> contracts = new System.Collections.Generic.List<Meridian.Trade.Contract>();
         /// <summary>Items carried in the ship (item id → count).</summary>
         public System.Collections.Generic.List<CargoStack> cargo = new System.Collections.Generic.List<CargoStack>();
         /// <summary>Story and world flags (saved as story.flags), e.g. "poi_stamped:survey_archive" (U-030).</summary>

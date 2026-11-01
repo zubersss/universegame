@@ -55,13 +55,13 @@ namespace Meridian.Crafting
             B("smelting", "Smelting", 0, "smelter_bar_iron", null),
             B("refining", "Refining", 0, "launch_fuel", null),
             B("fabrication", "Fabrication", 1, "circuit_board", null, "smelting"),
-            B("survey_module", "Survey module", 1, null, "beacon:earth"),
+            B("survey_module", "Survey module", 1, "survey_module", "beacon:earth"),
             B("perchlorate_oxidizer", "Perchlorate oxidizer", 2, "perchlorate", "beacon:mars", "refining"),
-            B("solarite_capacitor", "Solarite capacitor", 2, "solarite", "beacon:mercury", "fabrication"),
-            B("float_cell_mk1", "Float cell Mk1", 2, null, "beacon:venus", "fabrication"),
-            B("skip_drive_mk2", "Skip Drive Mk2", 3, null, "beacon:saturn", "solarite_capacitor"),
-            B("deep_diamond_tip", "Deep-diamond Rig tip", 3, null, "beacon:uranus", "fabrication"),
-            B("thruster_mk3", "Thruster Mk3", 4, null, "beacon:jupiter", "skip_drive_mk2"),
+            B("solarite_capacitor", "Solarite capacitor", 2, "solarite_capacitor", "beacon:mercury", "fabrication"),
+            B("float_cell_mk1", "Float cell Mk1", 2, "float_cell_mk1", "beacon:venus", "fabrication"),
+            B("skip_drive_mk2", "Skip Drive Mk2", 3, "skip_drive_mk2", "beacon:saturn", "solarite_capacitor"),
+            B("deep_diamond_tip", "Deep-diamond Rig tip", 3, "deep_diamond_tip", "beacon:uranus", "fabrication"),
+            B("thruster_mk3", "Thruster Mk3", 4, "thruster_mk3", "beacon:jupiter", "skip_drive_mk2"),
         };
     }
 }

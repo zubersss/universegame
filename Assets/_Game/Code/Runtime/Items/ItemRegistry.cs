@@ -62,9 +62,9 @@ namespace Meridian.Items
                 ("solarite", "Solarite"), ("polar_ice", "Polar ice"), ("deep_core_sample", "Deep core sample"),
             })
                 Add(new ItemDef { id = id++, key = key, name = name, icon = $"icons/{key}/base" });
-            // No icon yet: the panel shows the name.
+            // B-051 icons.
             foreach (var (key, name) in new[] { ("polymer", "Polymer"), ("solarite_capacitor", "Solarite capacitor"), ("float_cell_mk1", "Float cell Mk1") })
-                Add(new ItemDef { id = id++, key = key, name = name });
+                Add(new ItemDef { id = id++, key = key, name = name, icon = $"icons/{key}/base" });
         }
 
         static void Tile(byte tile, string key, string name, string icon) =>

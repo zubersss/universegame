@@ -43,6 +43,27 @@ namespace Meridian.UI
             return null;
         }
 
+        static readonly Dictionary<string, Sprite> named = new Dictionary<string, Sprite>();
+        static readonly HashSet<string> namedRequested = new HashSet<string>();
+
+        /// <summary>An icon by its art name (icons/&lt;name&gt;/base): blueprint nodes, which are not items (B-051).</summary>
+        public static Sprite GetNamed(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return null;
+            if (named.TryGetValue(name, out var sp)) return sp;
+            if (namedRequested.Add(name))
+            {
+                var h = Addressables.LoadAssetAsync<IList<Sprite>>($"icons/{name}/base");
+                h.Completed += op =>
+                {
+                    if (op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;
+                    named[name] = op.Result[0];
+                    Loaded?.Invoke();
+                };
+            }
+            return null;
+        }
+
         public static Sprite Get(string key, Meridian.Terrain.TerrainStreamer terrain = null)
         {
             var def = ItemRegistry.Get(key);

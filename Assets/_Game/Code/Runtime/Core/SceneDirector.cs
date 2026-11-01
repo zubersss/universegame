@@ -36,6 +36,8 @@ namespace Meridian.Core
             if (!SceneManager.GetSceneByName(SpaceScene).isLoaded)
                 yield return SceneManager.LoadSceneAsync(SpaceScene, LoadSceneMode.Additive);
             Space = FindRoot<SpaceRoot>(SpaceScene);
+            // U-052: Waystations and the docking bay live with the top-down view.
+            if (Space != null && Space.GetComponent<Meridian.Trade.DockingBay>() == null) Space.gameObject.AddComponent<Meridian.Trade.DockingBay>();
             // Warm the top-down view now, while it is the only view loaded (one global 2D light), so the
             // first launch never stalls on shader/pipeline setup (U-028).
             if (Space != null) RenderWarmup.WarmUp(Space.GetComponentInChildren<Camera>());

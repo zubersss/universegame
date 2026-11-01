@@ -45,6 +45,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2877e378ea65a344398fce9ca03e81f3
+    m_Address: icons/survey_module/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2afe688dc08662943975af3a1c4cd4de
     m_Address: icons/iron/base
     m_ReadOnly: 0
@@ -95,13 +100,33 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6230df896a31d064e89b24d01b93f368
+    m_Address: icons/float_cell_mk1/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6330c89eaeedd0749ae12bec87233729
+    m_Address: icons/thruster_mk3/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 664827720a9f9ad4487f77e6ee14b163
     m_Address: icons/sulfur/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6e9810b653ff8974f89de23c3d5d7e89
+    m_Address: icons/skip_drive_mk2/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 70ded1c061e0867439cc0b94ac088929
     m_Address: icons/perchlorate/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 817be05767d835e46b4a07edd9639022
+    m_Address: icons/polymer/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -112,6 +137,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a2a2e10700666d94aa4cf4a0c68af7eb
     m_Address: icons/wood/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ae4fda4abc731934fa654b98c38249c5
+    m_Address: icons/solarite_capacitor/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -137,6 +167,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c8ad57790de0b6f40bcc8f789a284b4d
     m_Address: icons/thermal_pad/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d7477594af34a9440a8d2b980d3ed268
+    m_Address: icons/deep_diamond_tip/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

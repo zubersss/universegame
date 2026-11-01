@@ -25,6 +25,9 @@ namespace Meridian.Save
         public PlayerSave player = new PlayerSave();
         public ShipSave ship = new ShipSave();
         public List<CargoStack> cargo = new List<CargoStack>();
+        /// <summary>v2 (U-052): Halcyon Scrip and accepted cargo contracts (absent in early v2 files: the starting purse, none).</summary>
+        public int scrip = Meridian.Trade.Market.StartingScrip;
+        public List<Meridian.Trade.Contract> contracts = new List<Meridian.Trade.Contract>();
         /// <summary>v2 (U-045): the surveyor's 40 slots in order (empty ones included) and the Builder's slot.</summary>
         public List<Meridian.Items.ItemStack> inventory = new List<Meridian.Items.ItemStack>();
         public int selectedSlot;
