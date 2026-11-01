@@ -450,12 +450,12 @@ Files: Assets/_Game/Code/Runtime/Survey/, UI/
 Depends: U-046
 Lead notes: Done a7576ae (cycle 125): data-driven catalogue per planet, first-scan Datacores (D-051), N panel with % per planet, saved; tests green. Nits for the next UI touch: the catalogue panel lacks the U-058 scrim (world shows at full brightness at the sides), all planet buttons look selected, so highlight only the current one; unscanned entries could show a dark silhouette or icon instead of a blank tile.
 
-### U-055 · UNITY · In Progress · M3
+### U-055 · UNITY · Done · M3
 Goal: Inner-planet creatures + apexes: Mercury glassback, cinderling, flarewing, shadewyrm (B-029, B-035); Venus sulfur drifter, acidmoth (fliers, centred pivot), pressure crab, vent eel (B-032, B-036, B-034); apexes Cinderhulk (day/night sheets, vulnerable 2 min after crossing into night, B-040) and Veil Serpent (Cryo rounds, chilled flash on hurt frames, B-044).
 Accept: each species spawns in its biome or zone with correct ground or flight placement; both apexes killable by their rule (PlayMode tests); AI ≤ 0.5 ms with 20 creatures.
 Files: Assets/_Game/Code/Runtime/Creatures/
 Depends: U-048, U-050, U-046
-Lead notes: Cycle 98. M3 exit needs killable apexes. (Cycle 131) Two fixes before Done: (1) capture 2 "Cinderhulk after nightfall" shows the white-hot DAY shell on the night side, so the night sheet swap does not show in the build path (check the swap trigger vs the capture setup); (2) the Veil Serpent reads tiny next to the deck balloons; scale it ≥ 3× so the apex dominates the frame (its sheet ppu stays; scale the transform). Re-capture 2 and 4.
+Lead notes: Done (cycle 132): 10 inner species with zone/time spawn rules, fliers, sheet animation everywhere; Cinderhulk night sheet tracks the terminator every frame (cracked dark shell when vulnerable); Veil Serpent at 3× art scale (9.8 × 2.3 m) and killable only with Cryo rounds; numbers D-053; tests 10/10.
 
 ### U-056 · UNITY · Ready · M3
 Goal: Bases v1: build shelter walls, doors, lamps and crates (B-014) with the Builder; a closed shelter counts as warmth and protection for hazards; Venus Aerostat platforms (B-045) with a buoyancy budget (lift ≥ load, HUD margin).
@@ -478,7 +478,7 @@ Files: Assets/_Game/Code/Runtime/UI/
 Depends: U-051
 Lead notes: Done (cycle 120): opaque modal panels with scrim, icon recipe rows, clear CRAFT on/off state, station tags lit in reach, shared icon cache. Two items lack icons (polymer, float cell): BLENDER B-051.
 
-### U-059 · UNITY · Ready · M3
+### U-059 · UNITY · In Progress · M3
 Goal: Inner-planet "only here" resources (Bible §7, M3 exit): Solarite on Mercury's day side is harvestable only for 90 s after each flare (crystals glow, then crust over; Beam yields solarite); Venus Vitriol Glass (done) confirmed reachable; Mars Perchlorate (polar and plains deposits) and Wormplate placeholder (drop from the Tharsis Worm, M4+, stubbed); Earth Living Seed (forest/plains drop, plantable crop placeholder).
 Accept: PlayMode: solarite mineable at +30 s after a flare and not at +120 s; each "only here" item obtainable on its planet in a seeded world (EditMode scan of the generators); catalogue entries exist.
 Files: Assets/_Game/Code/Runtime/Terrain/, Hazards/, Items/
