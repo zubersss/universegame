@@ -745,3 +745,6 @@ Checked: u053 warden_outpost.png (sentinels and the tower read well; the bolt is
 
 ## Cycle 128 · 2026-10-31 (BLENDER message)
 Checked: review_warden_bolt.png, review_earth_b052.png. B-052 → Done.
+
+## Cycle 129 · 2026-10-31
+Added: B-053 (spike-comb audit on the other far layers; BLENDER offer accepted).

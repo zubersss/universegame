@@ -833,6 +833,13 @@ Files: blender/scripts/gen_fx.py, gen_backdrop3d.py, Assets/_Game/Art/fx/warden_
 Depends: B-043, B-050
 Lead notes: Done (cycle 128): bigger and brighter warden bolt within 128×32 (enough, no resize); Mars layer0 rolling far hills (ridge_lo 200); Earth layer0 snowy peak without the comb (ridge_lo 80). UNITY re-imports.
 
+### B-053 · BLENDER · In Progress · M3
+Goal: Audit the far ridges of accepted backdrops for the spike comb (same generator as B-050/B-052): backgrounds/earth_desert, earth_taiga, earth_coast, venus_surface layer0 (and the jupiter_deck1 far layer if it uses ridges). Re-render only the layers that show it, with ridge_lo (keep peaks where the art needs them).
+Accept: a stamped before/after review per changed layer; same keys, sizes, tiling; unchanged layers listed as "checked, no comb".
+Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/
+Depends: B-052
+Lead notes: Cycle 129. BLENDER's offer, accepted; it reopens no accepted art except for this visible artifact.
+
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
 Accept: frames ≤ 256, sheets ≤ 1024², `.json` per sheet, emission where glowing.
