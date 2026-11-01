@@ -120,7 +120,7 @@ namespace Meridian.Core
             wind.enabled = config.id == PlanetId.Venus;
             if (dayNight != null) dayNight.ConfigureFor(config);
             if (dustStorm != null) dustStorm.ConfigureFor(config, seed);
-            if (creatures != null) creatures.ConfigureFor(config, seed);
+            if (creatures != null) { creatures.hazards = hazards; creatures.ConfigureFor(config, seed); }
             // U-053: Wardens patrol their sites and answer over-mining.
             if (wardens == null)
             {

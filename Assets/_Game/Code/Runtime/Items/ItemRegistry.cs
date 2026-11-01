@@ -65,6 +65,8 @@ namespace Meridian.Items
             // B-051 icons.
             foreach (var (key, name) in new[] { ("polymer", "Polymer"), ("solarite_capacitor", "Solarite capacitor"), ("float_cell_mk1", "Float cell Mk1") })
                 Add(new ItemDef { id = id++, key = key, name = name, icon = $"icons/{key}/base" });
+            // U-055: Lance ammunition, the Veil Serpent's counter. No icon yet (the panels show its name).
+            Add(new ItemDef { id = id++, key = "cryo_round", name = "Cryo round" });
         }
 
         static void Tile(byte tile, string key, string name, string icon) =>

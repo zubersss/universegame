@@ -656,6 +656,113 @@ namespace Meridian.Tests
             Meridian.Terrain.MercuryTerminator.ClockOffset = 0;
         }
 
+        /// <summary>
+        /// U-055 evidence: the Mercury twilight band (glassback, cinderlings, flarewing, the Cinderhulk by day and
+        /// after nightfall) and Venus (drifters, acidmoths and the Veil Serpent on the deck; crab and vent eels below).
+        /// </summary>
+        [UnityTest]
+        public IEnumerator CaptureInnerCreatures()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
+
+            PlanetSideRoot side = null;
+            IEnumerator Go(Meridian.Planets.PlanetId planet)
+            {
+                yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(planet));
+                side = director.PlanetSide;
+                side.hazards.enabled = false;
+                if (side.wardens != null) side.wardens.enabled = false;
+                var v = side.player.GetComponent<Meridian.Player.PlayerVitals>();
+                v.maxHealth = v.health = 1e6f;
+                side.sideCamera.GetComponent<Meridian.Player.CameraFollow>().enabled = false;
+                float until = Time.realtimeSinceStartup + 10f;
+                foreach (Meridian.Creatures.Species s in Enum.GetValues(typeof(Meridian.Creatures.Species)))
+                    if (Meridian.Creatures.SpeciesSpec.Get(s).planet == planet)
+                        while (!side.creatures.ArtReady(s) && Time.realtimeSinceStartup < until) yield return null;
+            }
+            IEnumerator Stand(Vector2 feet, float camAbove, float size)
+            {
+                var p = side.player;
+                p.Body.position = feet; p.transform.position = feet; p.Body.linearVelocity = Vector2.zero;
+                side.sideCamera.orthographicSize = size;
+                side.sideCamera.transform.position = new Vector3(feet.x, feet.y + camAbove, side.sideCamera.transform.position.z);
+                float until = Time.realtimeSinceStartup + 15f;
+                yield return null;
+                while (!side.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                for (int k = 0; k < 30; k++) yield return new WaitForFixedUpdate();
+            }
+            void Put(Meridian.Creatures.Species s, float x, float y)
+            {
+                var c = side.creatures.Spawn(s, new Vector2(x, y));
+                if (c != null) c.Body.linearVelocity = Vector2.zero;
+            }
+            float Ground(float x, Meridian.Creatures.Species s) =>
+                side.terrain.TopSolidY(Mathf.FloorToInt(x)) + 1f + Meridian.Creatures.SpeciesSpec.Get(s).size.y * 0.5f + 0.05f;
+
+            // Mercury: the dawn line through the frame.
+            yield return Go(Meridian.Planets.PlanetId.Mercury);
+            var t = side.terrain;
+            int x0 = 2600;
+            yield return Stand(new Vector2(x0 + 0.5f, t.Generator.SurfaceHeight(t.WrapX(x0)) + 1.05f), 3f, 9f);
+            // Mercury's shared clock: the lighting, the backdrop and the creatures all read it.
+            Meridian.Terrain.MercuryTerminator.ClockOffset = 0;
+            double now = side.creatures.MercuryNow;
+            float dawn = Meridian.Terrain.MercuryTerminator.Dawn(now, side.Config.worldWidth);
+            Meridian.Terrain.MercuryTerminator.ClockOffset = (x0 - dawn) * Meridian.Terrain.MercuryTerminator.CreepSecondsPerMetre;
+            Put(Meridian.Creatures.Species.Glassback, x0 - 9f, Ground(x0 - 9f, Meridian.Creatures.Species.Glassback));
+            for (int i = 0; i < 4; i++) Put(Meridian.Creatures.Species.Cinderling, x0 - 4f + i * 1.1f, Ground(x0 - 4f + i * 1.1f, Meridian.Creatures.Species.Cinderling));
+            Put(Meridian.Creatures.Species.Flarewing, x0 + 3f, t.TopSolidY(x0 + 3) + 7f);
+            Put(Meridian.Creatures.Species.Cinderhulk, x0 + 9f, Ground(x0 + 9f, Meridian.Creatures.Species.Cinderhulk));
+            for (int k = 0; k < 20; k++) yield return null;
+            yield return Save(side.sideCamera, $"{name}_1_mercury_twilight");
+            // Night falls on the Cinderhulk: its cooled, cracked shell.
+            Meridian.Terrain.MercuryTerminator.ClockOffset -= 400f * Meridian.Terrain.MercuryTerminator.CreepSecondsPerMetre;
+            for (int k = 0; k < 30; k++) yield return null;
+            yield return Save(side.sideCamera, $"{name}_2_mercury_cinderhulk_night");
+            Meridian.Terrain.MercuryTerminator.ClockOffset = 0;
+            int trap = Meridian.Terrain.MercuryLandforms.ColdTrapCentre(0, side.Config.worldWidth);
+            side.creatures.DespawnAll();
+            yield return Stand(new Vector2(trap + 0.5f, t.Generator.SurfaceHeight(t.WrapX(trap)) + 1.05f), 2f, 7f);
+            Put(Meridian.Creatures.Species.Shadewyrm, trap + 4.5f, Ground(trap + 4.5f, Meridian.Creatures.Species.Shadewyrm));
+            for (int k = 0; k < 20; k++) yield return null;
+            yield return Save(side.sideCamera, $"{name}_3_mercury_shadewyrm");
+
+            // Venus: the deck of the Meridian station.
+            yield return Go(Meridian.Planets.PlanetId.Venus);
+            var station = Meridian.Planet.POI.PoiCatalog.MeridianStation;
+            float until2 = Time.realtimeSinceStartup + 5f;
+            while (side.pois.Solids.Count < 5 && Time.realtimeSinceStartup < until2) yield return null;
+            float deck = station.floatY + (336f - 62f) / 128f;
+            float sx = station.x + 10f;
+            yield return Stand(new Vector2(sx, deck + 1.5f), 3f, 10f);
+            Put(Meridian.Creatures.Species.SulfurDrifter, sx - 8f, deck + 7f);
+            Put(Meridian.Creatures.Species.SulfurDrifter, sx + 10f, deck + 9f);
+            for (int i = 0; i < 4; i++) Put(Meridian.Creatures.Species.Acidmoth, sx + 2f + i * 0.8f, deck + 3.5f + (i % 2) * 0.6f);
+            Put(Meridian.Creatures.Species.VeilSerpent, sx - 2f, deck + 10f);
+            for (int k = 0; k < 15; k++) yield return null;
+            yield return Save(side.sideCamera, $"{name}_4_venus_deck");
+            // The surface by a vent field.
+            side.creatures.DespawnAll();
+            var vent = Meridian.Terrain.VenusLandforms.Vents[0];
+            int vx = vent.x0 - 6;
+            t = side.terrain;
+            yield return Stand(new Vector2(vx + 0.5f, t.Generator.SurfaceHeight(t.WrapX(vx)) + 1.05f), 2f, 8f);
+            Put(Meridian.Creatures.Species.PressureCrab, vx - 6f, Ground(vx - 6f, Meridian.Creatures.Species.PressureCrab));
+            Put(Meridian.Creatures.Species.VentEel, vx + 7f, Ground(vx + 7f, Meridian.Creatures.Species.VentEel));
+            for (int k = 0; k < 20; k++) yield return null;
+            yield return Save(side.sideCamera, $"{name}_5_venus_surface");
+        }
+
         /// <summary>U-039 evidence: Mars canyon wall, Olympus flank, polar cap and a lava tube.</summary>
         [UnityTest]
         public IEnumerator CaptureMarsLandforms()

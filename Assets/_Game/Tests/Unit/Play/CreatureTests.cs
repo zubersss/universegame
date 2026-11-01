@@ -184,9 +184,17 @@ namespace Meridian.Tests
             yield return BootEarth();
             var report = new System.Text.StringBuilder();
             var fails = new List<string>();
+            // Walkers only: fliers (U-055) use a centred pivot and never stand. The Cinderhulk's night sheet too.
+            var keys = new List<string>();
             foreach (Species s in System.Enum.GetValues(typeof(Species)))
             {
-                string key = SpeciesSpec.Get(s).artKey;
+                var sp0 = SpeciesSpec.Get(s);
+                if (sp0.Flies) continue;
+                keys.Add(sp0.artKey);
+                if (sp0.nightArtKey != null) keys.Add(sp0.nightArtKey);
+            }
+            foreach (string key in keys)
+            {
                 var h = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<IList<Sprite>>(key);
                 yield return h;
                 Assert.AreEqual(UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded, h.Status, key);

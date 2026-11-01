@@ -155,6 +155,17 @@ MonoBehaviour:
       item: launch_fuel_cell
       count: 1
     blueprint: fabrication
+  - id: fab_cryo_rounds
+    station: 3
+    inputs:
+    - item: polar_ice
+      count: 2
+    - item: smelter_bar_iron
+      count: 1
+    output:
+      item: cryo_round
+      count: 6
+    blueprint: fabrication
   - id: fab_solarite_capacitor
     station: 3
     inputs:

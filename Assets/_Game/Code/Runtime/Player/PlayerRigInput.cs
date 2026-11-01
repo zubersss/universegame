@@ -84,7 +84,15 @@ namespace Meridian.Player
                 case RigModule.Builder: rig.Place(AimWorld); break;
                 case RigModule.Lance:
                     if (Time.time < nextLance || Bolts == null || ToolView == null) break;
-                    if (Bolts.Fire(ToolView.MuzzleWorld, AimWorld - ToolView.MuzzleWorld)) nextLance = Time.time + LanceCooldown;
+                    // U-055: Cryo rounds in the pack load first (one per shot).
+                    var inv = Meridian.Core.GameState.Instance != null ? Meridian.Core.GameState.Instance.inventory : null;
+                    var cryoDef = Meridian.Items.ItemRegistry.Get("cryo_round");
+                    bool cryo = inv != null && cryoDef != null && inv.Count(cryoDef.id) > 0;
+                    if (Bolts.Fire(ToolView.MuzzleWorld, AimWorld - ToolView.MuzzleWorld, cryo))
+                    {
+                        nextLance = Time.time + LanceCooldown;
+                        if (cryo) inv.Remove(cryoDef.id, 1);
+                    }
                     break;
                 case RigModule.Survey:
                     if (!pressedNow || Time.time < nextSurvey) break;

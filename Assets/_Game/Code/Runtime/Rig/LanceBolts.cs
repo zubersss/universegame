@@ -22,7 +22,7 @@ namespace Meridian.Rig
             public SpriteRenderer view;
             public Vector2 pos, dir;
             public float travelled, age;
-            public bool live;
+            public bool live, cryo;
         }
 
         readonly List<Bolt> bolts = new List<Bolt>(PoolSize);
@@ -51,13 +51,18 @@ namespace Meridian.Rig
         void Start() => sheet = FxSheet.Get(ArtKeys.Fx.LanceBolt);
 
         /// <summary>Fires one bolt; false if all are in flight.</summary>
-        public bool Fire(Vector2 from, Vector2 direction)
+        public bool Fire(Vector2 from, Vector2 direction) => Fire(from, direction, false);
+
+        /// <summary>Fires one bolt; `cryo` for a Cryo round (U-055: tinted ice-blue, the Veil Serpent's bane).</summary>
+        public bool Fire(Vector2 from, Vector2 direction, bool cryo)
         {
             if (direction.sqrMagnitude < 1e-6f) return false;
             foreach (var b in bolts)
             {
                 if (b.live) continue;
                 b.live = true;
+                b.cryo = cryo;
+                b.view.color = cryo ? new Color(0.55f, 0.85f, 1f) : Color.white;
                 b.pos = from;
                 b.dir = direction.normalized;
                 b.travelled = 0f;
@@ -91,7 +96,7 @@ namespace Meridian.Rig
                     var creature = col.GetComponentInParent<Meridian.Creatures.Creature>();
                     if (creature != null && creature.Alive)
                     {
-                        bool killed = creature.Hurt(Damage);
+                        bool killed = creature.Hurt(Damage, b.cryo);
                         HitCreature?.Invoke(creature, killed);
                         stop = true;
                     }
