@@ -736,3 +736,6 @@ Checked: u052 docking_bay.png. U-052 → Done; U-054 → In Progress. The owner-
 
 ## Cycle 125 · 2026-10-31 (UNITY message)
 Checked: u054 catalogue.png. U-054 → Done; U-053 → In Progress. D-051 payouts.
+
+## Cycle 126 · 2026-10-31 19:42
+Added: U-059 ("only here" resources, M3 exit), U-060 (M3 build), L-012 (M3 QA). Queue: UNITY 4 Ready + U-053 in progress.
