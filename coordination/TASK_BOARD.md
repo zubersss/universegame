@@ -429,19 +429,19 @@ Files: Assets/_Game/Code/Runtime/Space/, Trade/, Scenes/
 Depends: U-045, U-034
 Lead notes: Done (cycle 124): Earth + Mars Waystations, docking (F, < 12 u, < 8 u/s), bay with Halcyon market (16 goods, per-station prices, sell 60%), refuel/repair, 2 cargo contracts each, Scrip 200 start, saved; B-051 icons wired; MarketTests 4 + WaystationPlayTests; full check green.
 
-### U-053 · UNITY · Ready · M3
+### U-053 · UNITY · In Progress · M3
 Goal: Wardens basic (Bible §2): creatures/warden/sentinel (B-043, common atlas per D-043) patrol POIs and respond when the player over-mines a local area (threshold per chunk); fx/warden_bolt projectiles; the sentinel can be destroyed with the Lance.
 Accept: PlayMode: digging past the threshold near a vault spawns a sentinel within 10 s; bolts damage the suit; Lance kills it; ≤ 0.3 ms AI with 6 sentinels.
 Files: Assets/_Game/Code/Runtime/Creatures/Wardens/
 Depends: U-046, U-027
 Lead notes: Cycle 98. M3.
 
-### U-054 · UNITY · In Progress · M3
+### U-054 · UNITY · Done · M3
 Goal: Survey Catalogue + Datacores: the Survey module (U-046) scans creatures, minerals and POIs; first scans pay Datacores; Catalogue panel (N) lists entries with icons and per-planet completion.
 Accept: PlayMode: scan a stag → entry + Datacores; rescans pay nothing; save/load keeps the catalogue; panel capture.
 Files: Assets/_Game/Code/Runtime/Survey/, UI/
 Depends: U-046
-Lead notes: Cycle 98. M3.
+Lead notes: Done a7576ae (cycle 125): data-driven catalogue per planet, first-scan Datacores (D-051), N panel with % per planet, saved; tests green. Nits for the next UI touch: the catalogue panel lacks the U-058 scrim (world shows at full brightness at the sides), all planet buttons look selected, so highlight only the current one; unscanned entries could show a dark silhouette or icon instead of a blank tile.
 
 ### U-055 · UNITY · Ready · M3
 Goal: Inner-planet creatures + apexes: Mercury glassback, cinderling, flarewing, shadewyrm (B-029, B-035); Venus sulfur drifter, acidmoth (fliers, centred pivot), pressure crab, vent eel (B-032, B-036, B-034); apexes Cinderhulk (day/night sheets, vulnerable 2 min after crossing into night, B-040) and Veil Serpent (Cryo rounds, chilled flash on hurt frames, B-044).
