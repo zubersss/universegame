@@ -250,18 +250,21 @@ def warden_bolt(rng, w, h, n):
     for i in range(n):
         ph = 2 * math.pi * i / n
         behind = np.clip((hx - xx) / (hx - PAD), 0, 1)
-        fade = np.exp(-2.6 * behind) * (xx <= hx)
+        fade = np.exp(-4.5 * behind) * (xx <= hx)                    # B-052: short trail
         braid = 0.0
         for k in (0, math.pi):                                       # two strands twisting
             yc = cy + 3.5 * np.sin(behind * 14 + ph + k) * behind ** 0.5
-            braid = braid + np.exp(-((yy - yc) / 1.4) ** 2)
+            braid = braid + np.exp(-((yy - yc) / 2.4) ** 2)
         I = np.clip(braid, 0, 1) * fade
         r = np.hypot(xx - hx, yy - cy)
-        ring = np.exp(-((r - 6.0) / 1.3) ** 2)
-        head = np.exp(-(r / 3.2) ** 2)
-        I = np.clip(I + ring + head, 0, 1) * _inside(h, w)
+        # B-052: head ~2x in area within the 16 px inner band of the 32 px frame (size kept):
+        # solid bright core r~5, rim ring at the band edge, soft halo.
+        ring = np.exp(-((r - 6.6) / 1.2) ** 2)
+        head = np.clip(1.05 * np.exp(-(r / 5.0) ** 2), 0, 1)        # keeps a teal tint (1.6 clipped to flat white)
+        halo = 0.5 * np.exp(-(r / 9.0) ** 2)
+        I = np.clip(I + ring + head + halo, 0, 1) * _inside(h, w)
         col = _ramp(I, [(0.0, C((20, 110, 90))), (0.5, C((90, 230, 200))), (1.0, C((236, 255, 248)))])
-        frames.append(_frame(col, np.clip(I * 1.4, 0, 1), glow=I))
+        frames.append(_frame(col, np.clip(I * 1.6, 0, 1), glow=np.clip(I * 1.3, 0, 1)))
     return frames
 
 

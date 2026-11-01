@@ -44,7 +44,7 @@ PRESETS = {
         ambient=((0.50, 0.60, 0.76), 0.35),
         haze=(184, 202, 214),
         far=dict(W=9000.0, level=0.42, peak=0.82, rock=[(112, 108, 104), (138, 132, 124)], snow=(236, 240, 246),
-                 snowline=0.74, haze=(0.40, 0.00004), tilt=6.0),
+                 snowline=0.74, haze=(0.40, 0.00004), tilt=6.0, rough=0.003, ridge_lo=80),   # B-052: ridged peaks, no spike comb (200 read as a dome)
         mid=dict(W=700.0, level=0.42, amp=0.10, ground=[(64, 92, 48), (82, 104, 56)], trees=520, protos=8,
                  tree_h=(14, 26), conifer=0.6, depth=(20, 140), haze=(0.20, 0.0012), fog=(0.25, 0.22),
                  tilt=12.0, frame_up=-0.08),
@@ -211,8 +211,8 @@ PRESETS = {
         sun=dict(dir=(-0.85, 0.35, -0.38), strength=3.6, color=(1.0, 0.9, 0.78), angle=0.8),
         ambient=((0.66, 0.50, 0.38), 0.42),
         haze=(214, 170, 128),
-        far=dict(W=9000.0, level=0.40, peak=0.70, rock=[(150, 92, 64), (184, 120, 84)], snow=(0, 0, 0),
-                 snowline=9.0, haze=(0.42, 0.00004), tilt=6.0, terrace=3),
+        far=dict(W=9000.0, level=0.40, peak=0.62, rock=[(150, 92, 64), (184, 120, 84)], snow=(0, 0, 0),
+                 snowline=9.0, haze=(0.42, 0.00004), tilt=6.0, rough=0.0, ridge_lo=200),   # B-052: no spike comb
         mid=dict(W=700.0, level=0.40, amp=0.16, terrace=3, cliff=0.55, bumps=0.015, depth=(20, 140), haze=(0.22, 0.0012),
                  ground=[(150, 84, 54), (178, 108, 72)], strata=(10.0, (206, 142, 100), 0.65),
                  rocks=260, rock_h=(3, 10), tilt=12.0, frame_up=-0.08, fog=(0.18, 0.1)),
