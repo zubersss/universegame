@@ -838,14 +838,14 @@ Goal: Audit the far ridges of accepted backdrops for the spike comb (same genera
 Accept: a stamped before/after review per changed layer; same keys, sizes, tiling; unchanged layers listed as "checked, no comb".
 Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/
 Depends: B-052
-Lead notes: Cycle 129. BLENDER's offer, accepted; it reopens no accepted art except for this visible artifact.
+Lead notes: Cycle 129. BLENDER's offer, accepted; it reopens no accepted art except for this visible artifact. (Cycle 135) Desert, coast and venus_surface accepted. Taiga still shows a dense vertical streak curtain down the whole mountain face (review_b053 row 2, right). Smooth the face like the desert massif (raise ridge_lo or drop roughness below the snow line) and keep only the snow cap ridged.
 
-### B-054 · BLENDER · Ready · M3
+### B-054 · BLENDER · Done · M3
 Goal: Icon `icons/cryo_round/base`: a frost-blue Lance round (an ammunition slug with a frosted cap and a cyan emissive band).
 Accept: same icon camera and lights as B-013/B-042/B-051; readable at 32 px; stamped review.
 Files: blender/scripts/build_icons.py, Assets/_Game/Art/icons/cryo_round/
 Depends: B-051
-Lead notes: Cycle 131. Needed by U-055.
+Lead notes: Done (cycle 135): cryo round icon (brass casing, frost-blue slug, cyan band), readable at 32 px.
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
