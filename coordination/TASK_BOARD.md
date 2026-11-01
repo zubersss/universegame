@@ -868,7 +868,7 @@ Files: blender/scripts/build_icons.py, Assets/_Game/Art/icons/cryo_round/
 Depends: B-051
 Lead notes: Done (cycle 135): cryo round icon (brass casing, frost-blue slug, cyan band), readable at 32 px.
 
-### B-055 · BLENDER · Ready · M4
+### B-055 · BLENDER · In Progress · M4
 Goal: Jupiter column art completion (Bible §7.6): backgrounds/jupiter_deck2 (ammonium-hydrosulfide clouds, darker, lightning-lit), jupiter_deck3 (water clouds, warm storm towers), jupiter_deep (dark pressure haze with a glowing Crush band below); terrain/jupiter/floe_derelict (Meridian-expedition wreckage as standable floe material); props/jupiter/{husk_tortoise (Ballast tortoise husk platform), derelict_pod, beacon_vault}.
 Accept: same pipeline rules (§9, tiling, painted cloud banks per B-048), stamped reviews; deck colours read as getting darker and warmer with depth.
 Files: blender/scripts/gen_backdrop*.py, gen_terrain.py, build_props_jupiter.py, Assets/_Game/Art/backgrounds/jupiter_*/, terrain/jupiter/, props/jupiter/
