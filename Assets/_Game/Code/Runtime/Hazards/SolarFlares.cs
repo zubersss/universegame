@@ -18,6 +18,12 @@ namespace Meridian.Hazards
         /// <summary>Seconds until the flare starts (Warning) or ends (Active).</summary>
         public float SecondsLeft { get; private set; }
         public bool Running { get; private set; }
+        /// <summary>Time.time the last flare ended (U-059: Solarite is harvestable for 90 s after). -inf before the first.</summary>
+        public float LastEnded { get; private set; } = float.NegativeInfinity;
+        public float SinceLastFlare => Time.time - LastEnded;
+
+        /// <summary>Tests and scripted scenes: a flare ended at `time` (Time.time).</summary>
+        public void EndedAt(float time) => LastEnded = time;
 
         float nextStart = float.MaxValue, end;
         System.Random rng = new System.Random(1969);
@@ -63,6 +69,7 @@ namespace Meridian.Hazards
                 SecondsLeft = end - now;
                 if (now < end) return;
                 Current = Phase.Quiet;
+                LastEnded = end;
                 nextStart = now + Gap();
             }
             if (now >= nextStart)

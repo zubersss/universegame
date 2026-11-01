@@ -34,6 +34,10 @@ namespace Meridian.UI
         readonly List<(Image icon, Text name, Text info)> cells = new List<(Image, Text, Text)>();
         readonly Dictionary<string, Sprite> creatureIcons = new Dictionary<string, Sprite>();
         readonly HashSet<string> creatureRequested = new HashSet<string>();
+        readonly Dictionary<PlanetId, Button> planetButtons = new Dictionary<PlanetId, Button>();
+        /// <summary>Unscanned entries: their icon as a dark silhouette (LEAD, U-054 review).</summary>
+        static readonly Color Silhouette = new Color(0f, 0f, 0f, 0.7f);
+        static readonly Color PlanetIdle = new Color(0.12f, 0.16f, 0.22f, 1f);
         readonly List<AsyncOperationHandle<IList<Sprite>>> handles = new List<AsyncOperationHandle<IList<Sprite>>>();
         bool dirty;
 
@@ -90,7 +94,7 @@ namespace Meridian.UI
             {
                 float y = -80f - row * 56f;
                 var planet = p;
-                var b = UiKit.ActionButton(back.transform, p.ToString().ToUpperInvariant(), tl, new Vector2(28f, y), new Vector2(200f, 44f), () => Show(planet));
+                planetButtons[p] = UiKit.ActionButton(back.transform, p.ToString().ToUpperInvariant(), tl, new Vector2(28f, y), new Vector2(200f, 44f), () => Show(planet));
                 Completion[p] = UiKit.Text(back.transform, "Pct_" + p, tl, new Vector2(240f, y - 8f), new Vector2(80f, 28f), 16, true, TextAnchor.MiddleLeft, theme.label);
                 row++;
             }
@@ -144,6 +148,14 @@ namespace Meridian.UI
                 var list = Catalogue.For(kv.Key);
                 kv.Value.text = list.Count == 0 ? "—" : $"{Mathf.RoundToInt(Catalogue.Completion(kv.Key, state.catalogue) * 100f)}%";
             }
+            // Only the planet shown reads as selected; the rest stay clickable in a quiet fill (LEAD, U-054 review).
+            foreach (var kv in planetButtons)
+            {
+                bool on = kv.Key == Shown;
+                if (kv.Value.targetGraphic is Image img) img.color = on ? UiKit.ActionOn : PlanetIdle;
+                var label = kv.Value.GetComponentInChildren<Text>();
+                if (label != null) label.color = on ? UiKit.ActionTextOn : new Color(1f, 1f, 1f, 0.6f);
+            }
             var entries = Catalogue.For(Shown);
             for (int i = 0; i < cells.Count; i++)
             {
@@ -156,9 +168,11 @@ namespace Meridian.UI
                 name.text = known ? e.name : "?";
                 info.text = known ? $"{e.kind.ToString().ToUpperInvariant()}  ·  {e.Datacores} DC" : e.kind.ToString().ToUpperInvariant() + "  ·  not yet surveyed";
                 name.color = known ? UiTheme.Active.text : new Color(1f, 1f, 1f, 0.35f);
-                var sp = known ? IconOf(e) : null;
+                // Scanned: the icon. Unscanned: the same icon as a dark silhouette — a shape to look for.
+                var sp = IconOf(e);
                 icon.sprite = sp;
                 icon.enabled = sp != null;
+                icon.color = known ? Color.white : Silhouette;
             }
         }
     }

@@ -25,6 +25,7 @@ namespace Meridian.Core
         public Meridian.Planet.Weather.VenusWind wind { get; private set; }
         public Meridian.Survey.SurveyScanner scanner { get; private set; }
         public Meridian.Creatures.Wardens.WardenDirector wardens { get; private set; }
+        public Meridian.Hazards.SolariteCrystals solarite { get; private set; }
         public Meridian.Creatures.CreatureDirector creatures;
         public Meridian.Hazards.HazardSystem hazards;
         public Meridian.Planet.POI.PoiPlacer pois;
@@ -129,6 +130,10 @@ namespace Meridian.Core
             }
             wardens.ConfigureFor(config);
             if (hazards != null) hazards.ConfigureFor(config);
+            // U-059: Solarite crystals answer the flares (Mercury); after the hazards, which own the flare clock.
+            if (solarite == null) { solarite = gameObject.AddComponent<Meridian.Hazards.SolariteCrystals>(); solarite.pois = pois; solarite.rig = rig; }
+            solarite.flares = hazards != null ? hazards.flares : null;
+            solarite.ConfigureFor(config.id);
             if (sideCamera != null)
             {
                 sideCamera.transform.position = new Vector3(spawnX + 0.5f, surface + 3f, -10f);

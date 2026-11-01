@@ -52,7 +52,7 @@ namespace Meridian.Rig
             else d = pool.Count > 0 ? pool.Pop() : Create();
             d.itemId = itemId;
             d.spawnedAt = Time.time;
-            d.view.sprite = sprite;
+            d.view.sprite = sprite != null ? sprite : Meridian.UI.ItemIcons.Get(itemId); // U-059: crafted finds show their icon
             d.transform.position = position;
             d.body.linearVelocity = new Vector2(Random.Range(-1f, 1f), 2f);
             d.gameObject.SetActive(true);

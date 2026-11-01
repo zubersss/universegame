@@ -53,6 +53,10 @@ namespace Meridian.Survey
                 if (item == 0 || !seen.Add(item)) continue;
                 list.Add(new CatalogueEntry { id = MineralId(item), kind = EntryKind.Mineral, planet = p, name = ItemRegistry.Get(item).name, itemId = item });
             }
+            // U-059: the planet's "only here" find, when it isn't a terrain material already (Solarite, perchlorate, living seed).
+            var only = Meridian.Items.ItemRegistry.Get(Meridian.Items.OnlyHere.KeyFor(p) ?? "");
+            if (only != null && seen.Add(only.id))
+                list.Add(new CatalogueEntry { id = MineralId(only.id), kind = EntryKind.Mineral, planet = p, name = only.name, itemId = only.id });
             foreach (var poi in PoiCatalog.For(p))
                 list.Add(new CatalogueEntry { id = SiteId(poi), kind = EntryKind.Site, planet = p, name = Pretty(poi.label.ToLowerInvariant()) });
             cache[p] = list;

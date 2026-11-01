@@ -43,18 +43,36 @@ namespace Meridian.Rig
         {
             var t = TileOf(world);
             if (terrain == null || !InReach(t)) return false;
+            // U-059: harvestable props first (Mercury's Solarite crystals): -1 not one, 0 glanced off, 1 cut.
+            if (harvest != null)
+            {
+                int h = harvest(world);
+                if (h >= 0)
+                {
+                    if (h > 0) Dug?.Invoke(world);
+                    return h > 0;
+                }
+            }
             byte id = terrain.GetTile(t.x, t.y);
             if (!TileId.IsSolid(id)) return false;
             if (!terrain.SetTile(t.x, t.y, TileId.Air)) return false;
             Dug?.Invoke(world);
             int item = Meridian.Items.ItemRegistry.DropOf(id);
+            // U-059: "only here" finds (Mars perchlorate deposits, Earth living seed).
+            int depth = terrain.Generator != null ? terrain.Generator.SurfaceHeight(terrain.WrapX(t.x)) - t.y : 0;
+            var (replace, bonus) = Meridian.Items.OnlyHere.DropAt(terrain.Config.id, id, terrain.WrapX(t.x), t.y, depth);
+            if (replace != 0) item = replace;
             if (drops != null && item != 0)
             {
-                var tile = terrain.TileSet.Get(id, 0) as UnityEngine.Tilemaps.Tile;
+                var tile = replace != 0 ? null : terrain.TileSet.Get(id, 0) as UnityEngine.Tilemaps.Tile;
                 drops.Spawn(item, new Vector2(t.x + 0.5f, t.y + 0.5f), tile != null ? tile.sprite : null);
             }
+            if (drops != null && bonus != 0) drops.Spawn(bonus, new Vector2(t.x + 0.5f, t.y + 0.7f), null);
             return true;
         }
+
+        /// <summary>U-059: a harvestable at the Beam's point (set by SolariteCrystals on Mercury).</summary>
+        public System.Func<Vector2, int> harvest;
 
         /// <summary>
         /// Builder (player input): places the inventory's selected material and uses one up. Nothing

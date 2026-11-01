@@ -62,8 +62,25 @@ namespace Meridian.Survey
                         if (dx * dx + dy * dy > ScanRadius * ScanRadius) continue;
                         byte t = side.terrain.GetTile(cx + dx, cy + dy);
                         int item = Meridian.Items.ItemRegistry.DropOf(t);
+                        // U-059: "only here" finds in the ground (perchlorate deposits, living seed turf).
+                        if (item != 0)
+                        {
+                            int wx = side.terrain.WrapX(cx + dx), y = cy + dy;
+                            var (replace, bonus) = Meridian.Items.OnlyHere.DropAt(planet, t, wx, y, side.terrain.Generator.SurfaceHeight(wx) - y);
+                            if (replace != 0) item = replace;
+                            if (bonus != 0 && seenItems.Add(bonus)) Pay(planet, Catalogue.MineralId(bonus), state);
+                        }
                         if (item != 0 && seenItems.Add(item)) Pay(planet, Catalogue.MineralId(item), state);
                     }
+            }
+
+            // U-059: Solarite crystals in reach.
+            if (side.solarite != null && side.solarite.isActiveAndEnabled)
+            {
+                var solarite = Meridian.Items.ItemRegistry.Get("solarite");
+                foreach (var c in side.solarite.Centres)
+                    if (solarite != null && (c - centre).sqrMagnitude <= ScanRadius * ScanRadius && seenItems.Add(solarite.id))
+                        Pay(planet, Catalogue.MineralId(solarite.id), state);
             }
 
             // Sites: a POI whose stamp reaches into the scan.

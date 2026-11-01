@@ -55,7 +55,11 @@ namespace Meridian.Tests
             Assert.IsTrue(rig.Dig(new Vector2(x + 0.5f, y + 0.5f)), "Beam digs");
             Assert.AreEqual(TileId.Air, t.GetTile(x, y));
             Assert.IsNull(t.RenderedTile(x, y), "tile gone from the tilemap");
-            Assert.AreEqual(1, rig.drops.Live.Count, "item dropped");
+            // The tile's own item; the spawn column's turf may also yield a Living Seed (U-059 bonus).
+            int own = Meridian.Items.ItemRegistry.DropOf(before);
+            var (_, bonus) = Meridian.Items.OnlyHere.DropAt(side.Config.id, before, t.WrapX(x), y, 0);
+            Assert.AreEqual(1, System.Linq.Enumerable.Count(rig.drops.Live, d => d.itemId == own), "item dropped");
+            Assert.AreEqual(bonus != 0 ? 2 : 1, rig.drops.Live.Count, "plus the only-here bonus when there is one");
             Assert.AreEqual(before, rig.drops.Live[0].itemId, "drop is the dug material");
 
             // Place a tile in open air two columns over.
