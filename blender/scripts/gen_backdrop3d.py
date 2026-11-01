@@ -63,7 +63,7 @@ PRESETS = {
         ambient=((0.62, 0.62, 0.66), 0.35),
         haze=(226, 210, 182),
         far=dict(W=9000.0, level=0.38, peak=0.66, rock=[(196, 150, 104), (222, 182, 132)], snow=(0, 0, 0),
-                 snowline=9.0, haze=(0.42, 0.00004), tilt=6.0, terrace=2),
+                 snowline=9.0, haze=(0.42, 0.00004), tilt=6.0, rough=0.0, ridge_lo=120),   # B-053: no spike comb (terraces made blocky spikes)
         mid=dict(W=700.0, level=0.40, amp=0.12, cliff=0.5, bumps=0.004, depth=(20, 140), haze=(0.3, 0.0016),
                  ground=[(214, 182, 128), (196, 160, 108)], strata=(9.0, (232, 200, 150), 0.4),
                  rocks=30, rock_h=(2, 7), tilt=12.0, frame_up=-0.08, dune_rows=5, dune_h=0.8, seam_keepout=True),
@@ -77,7 +77,7 @@ PRESETS = {
         ambient=((0.5, 0.58, 0.68), 0.4),
         haze=(186, 198, 210),
         far=dict(W=9000.0, level=0.42, peak=0.84, rock=[(108, 108, 112), (132, 132, 134)], snow=(240, 244, 248),
-                 snowline=0.62, haze=(0.42, 0.00004), tilt=6.0),
+                 snowline=0.62, haze=(0.42, 0.00004), tilt=6.0, rough=0.003, ridge_lo=80),   # B-053: ridged peaks, no comb
         mid=dict(W=700.0, level=0.42, amp=0.12, ground=[(58, 80, 58), (72, 92, 64)], trees=640, protos=8,
                  tree_h=(16, 30), conifer=0.95, depth=(20, 140), haze=(0.24, 0.0012), fog=(0.3, 0.22),
                  tilt=12.0, frame_up=-0.08),
@@ -97,7 +97,8 @@ PRESETS = {
         # (far), a lowered sandy shore with sparse coastal pines leaving a band of sea above it
         # (mid), a sand beach with dune grass (near).
         far=dict(W=9000.0, level=0.18, peak=0.40, rock=[(112, 118, 104), (136, 140, 120)], snow=(0, 0, 0),
-                 snowline=9.0, haze=(0.42, 0.00004), tilt=6.0, sea=dict(level=0.36, color=(46, 98, 140))),   # flooded: headlands only
+                 snowline=9.0, haze=(0.42, 0.00004), tilt=6.0, rough=0.0, ridge_lo=120,
+                 sea=dict(level=0.36, color=(46, 98, 140))),   # flooded: headlands only; B-053: no spike comb
         mid=dict(W=700.0, level=0.27, amp=0.07, ground=[(186, 174, 132), (140, 146, 92)], trees=0, protos=1,
                  tree_h=(8, 14), conifer=0.7, depth=(20, 140), haze=(0.22, 0.0012),
                  tilt=12.0, frame_up=-0.08, sea=dict(level=0.55, shore=30.0, shallow=(70, 176, 178), deep=(26, 70, 122))),
@@ -198,7 +199,7 @@ PRESETS = {
         ambient=((0.56, 0.36, 0.2), 0.5),
         haze=(120, 70, 40),
         far=dict(W=9000.0, level=0.34, peak=0.52, rock=[(40, 34, 32), (58, 48, 42)], snow=(0, 0, 0),
-                 snowline=9.0, haze=(0.5, 0.00004), tilt=6.0),
+                 snowline=9.0, haze=(0.5, 0.00004), tilt=6.0, rough=0.0, ridge_lo=150),   # B-053: no spike comb
         mid=dict(W=700.0, level=0.40, amp=0.08, depth=(20, 140), haze=(0.3, 0.0012),
                  ground=[(34, 30, 30), (52, 44, 40)], ground_rough=0.3, rocks=140, rock_h=(1, 5), vents=60, tilt=12.0, frame_up=-0.08),
         near=dict(W=64.0, level=0.26, amp=0.04, depth=(3, 14), haze=(0.08, 0.003),
