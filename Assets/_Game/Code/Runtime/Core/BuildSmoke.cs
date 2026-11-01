@@ -92,6 +92,16 @@ namespace Meridian.Core
                 }
             }
 
+            // U-054: a Survey pulse at the camp, then the catalogue (N).
+            if (hud != null && hud.Catalogue != null && side != null && side.scanner != null)
+            {
+                side.scanner.Scan(side.player.Body.position);
+                hud.Catalogue.SetOpen(true);
+                yield return Wait(1.5f); // icons arrive
+                yield return Shot(folder, "smoke_11_catalogue.png");
+                hud.Catalogue.SetOpen(false);
+            }
+
             Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Ocean, out int coast, out _);
             yield return LookAt(side, coast - 10f, 8f);
             yield return Shot(folder, "smoke_4_desert_ocean.png");

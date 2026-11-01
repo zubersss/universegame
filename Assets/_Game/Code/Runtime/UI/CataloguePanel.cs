@@ -1,0 +1,165 @@
+using System.Collections.Generic;
+using Meridian.Core;
+using Meridian.Planets;
+using Meridian.Player;
+using Meridian.Survey;
+using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.InputSystem;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.UI;
+
+namespace Meridian.UI
+{
+    /// <summary>
+    /// U-054 Survey Catalogue (N), on the U-058 panel style: the planets with their completion on the left, the
+    /// chosen planet's entries on the right (creatures, minerals, sites): scanned ones with icon, name and the
+    /// Datacores they paid, unscanned ones as "?". The current planet opens first. No per-frame work while closed.
+    /// </summary>
+    public sealed class CataloguePanel : MonoBehaviour
+    {
+        public PlayerController player;
+        public static bool AnyOpen { get; private set; }
+        public bool IsOpen => root != null && root.activeSelf;
+        public PlanetId Shown { get; private set; } = PlanetId.Earth;
+
+        /// <summary>Planet completion labels and the entry name labels (tests and captures read them).</summary>
+        public readonly Dictionary<PlanetId, Text> Completion = new Dictionary<PlanetId, Text>();
+        public readonly List<Text> EntryNames = new List<Text>();
+
+        const int MaxEntries = 24, Cols = 3;
+        GameObject root;
+        Text header;
+        InputAction toggle;
+        readonly List<(Image icon, Text name, Text info)> cells = new List<(Image, Text, Text)>();
+        readonly Dictionary<string, Sprite> creatureIcons = new Dictionary<string, Sprite>();
+        readonly HashSet<string> creatureRequested = new HashSet<string>();
+        readonly List<AsyncOperationHandle<IList<Sprite>>> handles = new List<AsyncOperationHandle<IList<Sprite>>>();
+        bool dirty;
+
+        void Start()
+        {
+            Build();
+            ItemIcons.Loaded += MarkDirty;
+            if (player != null && player.actions != null)
+            {
+                toggle = player.actions.FindActionMap(MeridianInput.OnFoot, true).FindAction("Catalogue");
+                if (toggle != null) toggle.performed += OnToggle;
+            }
+        }
+
+        void OnDestroy()
+        {
+            ItemIcons.Loaded -= MarkDirty;
+            if (toggle != null) toggle.performed -= OnToggle;
+            foreach (var h in handles) if (h.IsValid()) Addressables.Release(h);
+            if (IsOpen) AnyOpen = false;
+        }
+
+        void OnToggle(InputAction.CallbackContext _) => SetOpen(!IsOpen);
+        void MarkDirty() => dirty = true;
+
+        public void SetOpen(bool open)
+        {
+            if (root == null || root.activeSelf == open) return;
+            root.SetActive(open);
+            AnyOpen = open;
+            enabled = open;
+            if (open)
+            {
+                var here = FindAnyObjectByType<PlanetSideRoot>();
+                if (here != null && here.Config != null) Shown = here.Config.id;
+                Redraw();
+            }
+        }
+
+        public void Show(PlanetId p) { Shown = p; Redraw(); }
+
+        void Update() { if (dirty) Redraw(); }
+
+        void Build()
+        {
+            var theme = UiTheme.Active;
+            var canvas = UiKit.Canvas(transform, "CatalogueCanvas", 113);
+            var back = UiKit.ModalPanel(canvas.transform, "Catalogue", new Vector2(1500f, 860f), out root);
+            var tl = new Vector2(0f, 1f);
+            header = UiKit.Text(back.transform, "Header", tl, new Vector2(28f, -32f), new Vector2(1200f, 28f), 20, true, TextAnchor.MiddleLeft, theme.text);
+
+            int row = 0;
+            foreach (PlanetId p in System.Enum.GetValues(typeof(PlanetId)))
+            {
+                float y = -80f - row * 56f;
+                var planet = p;
+                var b = UiKit.ActionButton(back.transform, p.ToString().ToUpperInvariant(), tl, new Vector2(28f, y), new Vector2(200f, 44f), () => Show(planet));
+                Completion[p] = UiKit.Text(back.transform, "Pct_" + p, tl, new Vector2(240f, y - 8f), new Vector2(80f, 28f), 16, true, TextAnchor.MiddleLeft, theme.label);
+                row++;
+            }
+
+            for (int i = 0; i < MaxEntries; i++)
+            {
+                float x = 360f + (i % Cols) * 370f, y = -80f - (i / Cols) * 92f;
+                var cell = UiKit.Rect(back.transform, "Entry" + i, tl, new Vector2(x, y), new Vector2(356f, 80f), tl).gameObject.AddComponent<Image>();
+                cell.color = new Color(1f, 1f, 1f, 0.05f);
+                var icon = UiKit.Panel(cell.transform, "Icon", tl, new Vector2(8f, -8f), new Vector2(64f, 64f), Color.white);
+                icon.rectTransform.pivot = tl; icon.preserveAspect = true; icon.enabled = false;
+                var name = UiKit.Text(cell.transform, "Name", tl, new Vector2(84f, -20f), new Vector2(260f, 24f), 16, true, TextAnchor.MiddleLeft, theme.text);
+                var info = UiKit.Text(cell.transform, "Info", tl, new Vector2(84f, -50f), new Vector2(260f, 20f), 13, false, TextAnchor.MiddleLeft, theme.label);
+                cells.Add((icon, name, info));
+                EntryNames.Add(name);
+            }
+            root.SetActive(false);
+            enabled = false;
+        }
+
+        Sprite IconOf(CatalogueEntry e)
+        {
+            if (e.kind == EntryKind.Mineral) return ItemIcons.Get(e.itemId, FindAnyObjectByType<Meridian.Terrain.TerrainStreamer>());
+            if (e.kind != EntryKind.Creature || string.IsNullOrEmpty(e.artKey)) return null;
+            if (creatureIcons.TryGetValue(e.artKey, out var sp)) return sp;
+            if (creatureRequested.Add(e.artKey))
+            {
+                var key = e.artKey;
+                var h = Addressables.LoadAssetAsync<IList<Sprite>>(key);
+                handles.Add(h);
+                h.Completed += op =>
+                {
+                    if (op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;
+                    Sprite first = op.Result[0];
+                    foreach (var s in op.Result) if (s.name.EndsWith("_0")) first = s;
+                    creatureIcons[key] = first;
+                    dirty = true;
+                };
+            }
+            return null;
+        }
+
+        void Redraw()
+        {
+            dirty = false;
+            var state = GameState.Instance;
+            if (root == null || state == null) return;
+            header.text = $"SURVEY CATALOGUE  ·  {Shown.ToString().ToUpperInvariant()}        {state.datacores} DATACORES";
+            foreach (var kv in Completion)
+            {
+                var list = Catalogue.For(kv.Key);
+                kv.Value.text = list.Count == 0 ? "—" : $"{Mathf.RoundToInt(Catalogue.Completion(kv.Key, state.catalogue) * 100f)}%";
+            }
+            var entries = Catalogue.For(Shown);
+            for (int i = 0; i < cells.Count; i++)
+            {
+                var (icon, name, info) = cells[i];
+                bool on = i < entries.Count;
+                icon.transform.parent.gameObject.SetActive(on);
+                if (!on) continue;
+                var e = entries[i];
+                bool known = state.catalogue.Contains(e.id);
+                name.text = known ? e.name : "?";
+                info.text = known ? $"{e.kind.ToString().ToUpperInvariant()}  ·  {e.Datacores} DC" : e.kind.ToString().ToUpperInvariant() + "  ·  not yet surveyed";
+                name.color = known ? UiTheme.Active.text : new Color(1f, 1f, 1f, 0.35f);
+                var sp = known ? IconOf(e) : null;
+                icon.sprite = sp;
+                icon.enabled = sp != null;
+            }
+        }
+    }
+}

@@ -114,10 +114,14 @@ namespace Meridian.UI
             // U-051: the crafting panel (B).
             Crafting = gameObject.AddComponent<CraftingPanel>();
             Crafting.player = player;
+            // U-054: the Survey Catalogue (N).
+            Catalogue = gameObject.AddComponent<CataloguePanel>();
+            Catalogue.player = player;
         }
 
         public InventoryPanel Inventory { get; private set; }
         public CraftingPanel Crafting { get; private set; }
+        public CataloguePanel Catalogue { get; private set; }
 
         const int MaxMarkers = 4;
 
@@ -224,7 +228,7 @@ namespace Meridian.UI
 
         void LateUpdate()
         {
-            bool hidden = MenuController.HudHidden || InventoryPanel.AnyOpen || CraftingPanel.AnyOpen; // U-058: nothing draws through a full-screen panel
+            bool hidden = MenuController.HudHidden || InventoryPanel.AnyOpen || CraftingPanel.AnyOpen || CataloguePanel.AnyOpen; // U-058: nothing draws through a full-screen panel
             if (hudCanvas != null && hudCanvas.enabled == hidden) hudCanvas.enabled = !hidden;
             var state = GameState.Instance;
             if (vitals == null && player != null) vitals = player.GetComponent<PlayerVitals>();

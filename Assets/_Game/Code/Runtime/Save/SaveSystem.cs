@@ -108,6 +108,8 @@ namespace Meridian.Save
             data.ship.tankCapacity = state.tankCapacity;
             data.cargo.AddRange(state.cargo);
             data.scrip = state.scrip;
+            data.datacores = state.datacores;
+            data.catalogue.AddRange(state.catalogue);
             data.contracts.AddRange(state.contracts);
             state.inventory.WriteTo(data.inventory);
             data.player.suitTier = state.suitTier;
@@ -196,6 +198,9 @@ namespace Meridian.Save
             state.cargo.Clear();
             state.cargo.AddRange(data.cargo);
             state.scrip = data.scrip;
+            state.datacores = data.datacores;
+            state.catalogue.Clear();
+            if (data.catalogue != null) foreach (var id in data.catalogue) state.catalogue.Add(id);
             state.contracts.Clear();
             if (data.contracts != null) state.contracts.AddRange(data.contracts);
             state.inventory.ReadFrom(data.inventory, data.selectedSlot);

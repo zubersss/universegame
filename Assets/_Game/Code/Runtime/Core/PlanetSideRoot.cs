@@ -23,6 +23,7 @@ namespace Meridian.Core
         public Meridian.Planet.Weather.DustStorm dustStorm;
         /// <summary>Venus super-rotation (U-050), created at configure.</summary>
         public Meridian.Planet.Weather.VenusWind wind { get; private set; }
+        public Meridian.Survey.SurveyScanner scanner { get; private set; }
         public Meridian.Creatures.CreatureDirector creatures;
         public Meridian.Hazards.HazardSystem hazards;
         public Meridian.Planet.POI.PoiPlacer pois;
@@ -111,6 +112,8 @@ namespace Meridian.Core
                     st.radius = 7f;
                 }
             }
+            // U-054: Survey pulses fill the catalogue.
+            if (scanner == null) { scanner = gameObject.AddComponent<Meridian.Survey.SurveyScanner>(); scanner.side = this; }
             if (wind == null) wind = gameObject.AddComponent<Meridian.Planet.Weather.VenusWind>();
             wind.player = player;
             wind.enabled = config.id == PlanetId.Venus;

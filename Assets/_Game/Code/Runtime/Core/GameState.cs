@@ -28,6 +28,9 @@ namespace Meridian.Core
         public int suitTier;
         /// <summary>Halcyon Scrip (U-052).</summary>
         public int scrip = Meridian.Trade.Market.StartingScrip;
+        /// <summary>Survey Datacores and the catalogue of scanned entries (U-054).</summary>
+        public int datacores;
+        public readonly System.Collections.Generic.HashSet<string> catalogue = new System.Collections.Generic.HashSet<string>();
         /// <summary>Accepted Halcyon cargo contracts (U-052; done ones stay for the log).</summary>
         public readonly System.Collections.Generic.List<Meridian.Trade.Contract> contracts = new System.Collections.Generic.List<Meridian.Trade.Contract>();
         /// <summary>Items carried in the ship (item id → count).</summary>

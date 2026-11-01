@@ -27,6 +27,8 @@ namespace Meridian.Save
         public List<CargoStack> cargo = new List<CargoStack>();
         /// <summary>v2 (U-052): Halcyon Scrip and accepted cargo contracts (absent in early v2 files: the starting purse, none).</summary>
         public int scrip = Meridian.Trade.Market.StartingScrip;
+        /// <summary>v2 (U-054): Survey Datacores (the catalogue ids are in `catalogue`).</summary>
+        public int datacores;
         public List<Meridian.Trade.Contract> contracts = new List<Meridian.Trade.Contract>();
         /// <summary>v2 (U-045): the surveyor's 40 slots in order (empty ones included) and the Builder's slot.</summary>
         public List<Meridian.Items.ItemStack> inventory = new List<Meridian.Items.ItemStack>();
