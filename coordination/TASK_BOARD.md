@@ -457,7 +457,7 @@ Files: Assets/_Game/Code/Runtime/Creatures/
 Depends: U-048, U-050, U-046
 Lead notes: Done (cycle 132): 10 inner species with zone/time spawn rules, fliers, sheet animation everywhere; Cinderhulk night sheet tracks the terminator every frame (cracked dark shell when vulnerable); Veil Serpent at 3× art scale (9.8 × 2.3 m) and killable only with Cryo rounds; numbers D-053; tests 10/10.
 
-### U-056 · UNITY · Ready · M3
+### U-056 · UNITY · In Progress · M3
 Goal: Bases v1: build shelter walls, doors, lamps and crates (B-014) with the Builder; a closed shelter counts as warmth and protection for hazards; Venus Aerostat platforms (B-045) with a buoyancy budget (lift ≥ load, HUD margin).
 Accept: PlayMode: an enclosed shelter stops Cryo drain; an aerostat sinks when overloaded; save/load keeps the base.
 Files: Assets/_Game/Code/Runtime/Building/
@@ -478,12 +478,12 @@ Files: Assets/_Game/Code/Runtime/UI/
 Depends: U-051
 Lead notes: Done (cycle 120): opaque modal panels with scrim, icon recipe rows, clear CRAFT on/off state, station tags lit in reach, shared icon cache. Two items lack icons (polymer, float cell): BLENDER B-051.
 
-### U-059 · UNITY · In Progress · M3
+### U-059 · UNITY · Done · M3
 Goal: Inner-planet "only here" resources (Bible §7, M3 exit): Solarite on Mercury's day side is harvestable only for 90 s after each flare (crystals glow, then crust over; Beam yields solarite); Venus Vitriol Glass (done) confirmed reachable; Mars Perchlorate (polar and plains deposits) and Wormplate placeholder (drop from the Tharsis Worm, M4+, stubbed); Earth Living Seed (forest/plains drop, plantable crop placeholder).
 Accept: PlayMode: solarite mineable at +30 s after a flare and not at +120 s; each "only here" item obtainable on its planet in a seeded world (EditMode scan of the generators); catalogue entries exist.
 Files: Assets/_Game/Code/Runtime/Terrain/, Hazards/, Items/
 Depends: U-049, U-051
-Lead notes: Cycle 126. M3 exit criterion.
+Lead notes: Done bac7e80 (cycle 137): solarite 90 s post-flare window (Beam cuts 3 per cluster, then crusts), Mars perchlorate deposits (plains + polar cap), Earth living seed drop, Venus vent glass confirmed, wormplate stub; OnlyHereTests 4 + SolariteTests; catalogue entries; full check green. Catalogue nits 2 and 3 fixed; scrim deepened to 78% for all panels (cycle 137).
 
 ### U-060 · UNITY · Ready · M3
 Goal: M3 playtest build `Build/MERIDIAN_0.3.0/` with build smoke screenshots (Mercury day + twilight + flare shelter, Venus deck station + surface vent, crafting panel, market, catalogue, a Warden, both apexes) and dev-build memory rows for all four inner planets.

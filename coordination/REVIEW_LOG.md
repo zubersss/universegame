@@ -760,3 +760,6 @@ Checked: review_b053_before_after.png, review_cryo_round.png. B-054 → Done. B-
 
 ## Cycle 136 · 2026-10-31 (BLENDER message)
 Checked: review_taiga_b053.png. B-053 → Done. BLENDER ran one job at 21:23 under the 30-min want-expiry rule (UNITY want from 20:53): correct.
+
+## Cycle 137 · 2026-10-31 (UNITY message)
+Moved: U-059 → Done; U-056 → In Progress (U-060 depends on it). Decided: shared panel scrim 62% → 78%.
