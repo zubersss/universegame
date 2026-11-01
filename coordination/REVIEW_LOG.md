@@ -757,3 +757,6 @@ Checked: re-captured u055 2 (cracked night shell) and 4 (serpent spans the deck)
 
 ## Cycle 135 · 2026-10-31 (BLENDER message)
 Checked: review_b053_before_after.png, review_cryo_round.png. B-054 → Done. B-053: 3 of 4 accepted, taiga face still streaked (one more pass).
+
+## Cycle 136 · 2026-10-31 (BLENDER message)
+Checked: review_taiga_b053.png. B-053 → Done. BLENDER ran one job at 21:23 under the 30-min want-expiry rule (UNITY want from 20:53): correct.
