@@ -775,3 +775,6 @@ Checked: u056 mars_shelter.png (shelter works, dark inside), venus_aerostat.png 
 
 ## Cycle 143 · 2026-10-31 23:12
 Signals: no commits since 22:23; both idle; the gate hovered at 1.44–1.50 GB (FreePhysicalMemory ≈ Available MBytes, includes standby). Nudged BLENDER (jupiter_deep qualifies for D-045) and UNITY (resume, re-file want).
+
+## Cycle 144 · 2026-10-31
+UNITY U-064 interim: root cause found (Mars tile set lacked Snow, so polar frost had no art or collision), TileSetCoverageTests + FootingTests added (91/93 columns; 2 frost columns by the Pilgrim still 0.25–0.5 m low), lamps lit. Run queued at the 1.5 GB gate (RAM 1.36–1.42 GB). Gate kept.
