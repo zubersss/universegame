@@ -727,7 +727,8 @@ namespace Meridian.Tests
             yield return Save(side.sideCamera, $"{name}_1_mercury_twilight");
             // Night falls on the Cinderhulk: its cooled, cracked shell.
             Meridian.Terrain.MercuryTerminator.ClockOffset -= 400f * Meridian.Terrain.MercuryTerminator.CreepSecondsPerMetre;
-            for (int k = 0; k < 30; k++) yield return null;
+            float settle = Time.realtimeSinceStartup + 0.8f; // the lighting eases; the hulk swaps its sheet at once
+            while (Time.realtimeSinceStartup < settle) yield return null;
             yield return Save(side.sideCamera, $"{name}_2_mercury_cinderhulk_night");
             Meridian.Terrain.MercuryTerminator.ClockOffset = 0;
             int trap = Meridian.Terrain.MercuryLandforms.ColdTrapCentre(0, side.Config.worldWidth);
@@ -748,7 +749,7 @@ namespace Meridian.Tests
             Put(Meridian.Creatures.Species.SulfurDrifter, sx - 8f, deck + 7f);
             Put(Meridian.Creatures.Species.SulfurDrifter, sx + 10f, deck + 9f);
             for (int i = 0; i < 4; i++) Put(Meridian.Creatures.Species.Acidmoth, sx + 2f + i * 0.8f, deck + 3.5f + (i % 2) * 0.6f);
-            Put(Meridian.Creatures.Species.VeilSerpent, sx - 2f, deck + 10f);
+            Put(Meridian.Creatures.Species.VeilSerpent, sx - 1f, deck + 9f); // drawn 3×: it spans the deck
             for (int k = 0; k < 15; k++) yield return null;
             yield return Save(side.sideCamera, $"{name}_4_venus_deck");
             // The surface by a vent field.

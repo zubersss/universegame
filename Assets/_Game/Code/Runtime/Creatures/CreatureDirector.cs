@@ -298,6 +298,9 @@ namespace Meridian.Creatures
                 if (c.Held) { c.Held = false; c.Body.simulated = true; c.Body.linearVelocity = Vector2.zero; }
             }
 
+            // The Cinderhulk follows the terminator every frame: its night sheet shows (and its window opens)
+            // the moment it crosses, not at its next think (LEAD, U-055 review).
+            if (spec.nightArtKey != null) TrackZone(c, now);
             if (now >= c.nextThink)
             {
                 c.nextThink = now + ThinkInterval;
@@ -359,13 +362,7 @@ namespace Meridian.Creatures
         void Think(Creature c, float dx, float dy, float adx, bool flare, float now)
         {
             var spec = c.Spec;
-            // The terminator (Mercury): the zone where it stands, and when it crossed into night.
-            if (Planet.id == PlanetId.Mercury)
-            {
-                var zone = ZoneAt(c.Body.position.x);
-                if (zone == MercuryZone.Night && c.Zone != MercuryZone.Night) c.NightfallAt = now;
-                c.Zone = zone;
-            }
+            if (Planet.id == PlanetId.Mercury) TrackZone(c, now);
             if (spec.Flies) c.altitude = AltitudeFor(c);
 
             bool playerAlive = vitals == null || !vitals.Dead;
@@ -387,6 +384,15 @@ namespace Meridian.Creatures
             c.State = r < 0.25f ? CreatureState.Idle : CreatureState.Wander;
             if (spec.Flies && c.State == CreatureState.Idle) c.State = CreatureState.Wander; // fliers keep moving
             if (r > 0.9f) c.dir = -c.dir;
+        }
+
+        /// <summary>The terminator (Mercury): the zone where it stands, and when it crossed into night.</summary>
+        void TrackZone(Creature c, float now)
+        {
+            if (Planet.id != PlanetId.Mercury) return;
+            var zone = ZoneAt(c.Body.position.x);
+            if (zone == MercuryZone.Night && c.Zone != MercuryZone.Night) c.NightfallAt = now;
+            c.Zone = zone;
         }
 
         /// <summary>The height a flier keeps: its hover band over the ground below, or a lane in the deck band.</summary>

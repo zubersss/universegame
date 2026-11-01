@@ -217,7 +217,12 @@ namespace Meridian.Tests
             while (hulk.Zone != MercuryZone.Night && Time.time < until) yield return null;
             Assert.AreEqual(MercuryZone.Night, hulk.Zone, "it crossed into night");
             Assert.IsTrue(hulk.Vulnerable, "the shell has cracked");
-            for (int i = 0; i < 10; i++) yield return null;
+            // The night sheet whenever it is vulnerable, from the first frame on.
+            for (int i = 0; i < 30; i++)
+            {
+                if (hulk.Vulnerable) StringAssert.Contains("cinderhulk_night", hulk.View.sprite.texture.name, $"frame {i}: vulnerable in the day sheet");
+                yield return null;
+            }
             Assert.AreNotEqual(daySprite, hulk.View.sprite);
             StringAssert.Contains("cinderhulk_night", hulk.View.sprite.texture.name, "the cooled night sheet");
             int killed = 0;

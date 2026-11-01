@@ -69,6 +69,8 @@ namespace Meridian.Creatures
         /// <summary>Flarewing: hunts while a solar flare is active, keeps clear otherwise.</summary>
         public bool huntsDuringFlare;
         public bool apex;
+        /// <summary>Drawn scale over the sheet's true size (ppu kept). The Veil Serpent is drawn 3× so the apex dominates the deck (LEAD, U-055 review).</summary>
+        public float artScale = 1f;
 
         public bool Flies => habitat != Habitat.Ground;
 
@@ -118,7 +120,7 @@ namespace Meridian.Creatures
             new SpeciesSpec { id = Species.VentEel, planet = PlanetId.Venus, artKey = "creatures/venus/vent_eel", size = new Vector2(2.0f, 0.55f),
                 wanderSpeed = 1.6f, runSpeed = 6f, jumpSpeed = 5f, temper = Temper.Hunts, senseRange = 10f, time = ActiveTime.Any,
                 packMin = 1, packMax = 3, maxAlive = 5, biteDamage = 9f, maxHealth = 45f, placeholder = new Color(0.8f, 0.35f, 0.2f) },
-            new SpeciesSpec { id = Species.VeilSerpent, planet = PlanetId.Venus, artKey = "creatures/venus/veil_serpent", size = new Vector2(3.3f, 0.8f),
+            new SpeciesSpec { id = Species.VeilSerpent, planet = PlanetId.Venus, artKey = "creatures/venus/veil_serpent", size = new Vector2(9.8f, 2.3f), artScale = 3f,
                 wanderSpeed = 2.5f, runSpeed = 6.5f, temper = Temper.Hunts, senseRange = 18f, time = ActiveTime.Any, habitat = Habitat.Deck,
                 packMin = 1, packMax = 1, maxAlive = 1, biteDamage = 20f, maxHealth = 200f, apex = true, placeholder = new Color(0.95f, 0.7f, 0.5f) },
         };

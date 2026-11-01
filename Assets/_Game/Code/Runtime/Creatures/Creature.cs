@@ -120,7 +120,7 @@ namespace Meridian.Creatures
             {
                 // Real art: true size from the sheet's ppu (U-036). Walkers: the bottom pivot stands on the
                 // body's feet. Fliers (U-055): the centred pivot sits on the body's centre.
-                View.transform.localScale = Vector3.one;
+                View.transform.localScale = Vector3.one * spec.artScale;
                 View.transform.localPosition = spec.Flies ? Vector3.zero : new Vector3(0f, -spec.size.y * 0.5f, 0f);
             }
             View.color = placeholder ? spec.placeholder : Color.white;
