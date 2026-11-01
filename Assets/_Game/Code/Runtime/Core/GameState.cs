@@ -30,6 +30,9 @@ namespace Meridian.Core
         public int scrip = Meridian.Trade.Market.StartingScrip;
         /// <summary>Survey Datacores and the catalogue of scanned entries (U-054).</summary>
         public int datacores;
+        /// <summary>Bases (U-056): placed pieces and aerostats, every planet.</summary>
+        public readonly System.Collections.Generic.List<Meridian.Building.BasePieceSave> basePieces = new System.Collections.Generic.List<Meridian.Building.BasePieceSave>();
+        public readonly System.Collections.Generic.List<Meridian.Building.AerostatSave> aerostats = new System.Collections.Generic.List<Meridian.Building.AerostatSave>();
         public readonly System.Collections.Generic.HashSet<string> catalogue = new System.Collections.Generic.HashSet<string>();
         /// <summary>Accepted Halcyon cargo contracts (U-052; done ones stay for the log).</summary>
         public readonly System.Collections.Generic.List<Meridian.Trade.Contract> contracts = new System.Collections.Generic.List<Meridian.Trade.Contract>();

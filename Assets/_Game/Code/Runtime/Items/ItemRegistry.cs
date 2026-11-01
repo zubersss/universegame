@@ -69,6 +69,10 @@ namespace Meridian.Items
             Add(new ItemDef { id = id++, key = "cryo_round", name = "Cryo round", icon = "icons/cryo_round/base" });
             // U-059: the Tharsis Worm's plate (M4+): registered, no source yet.
             Add(new ItemDef { id = id++, key = "wormplate", name = "Wormplate" });
+            // U-056 base pieces (B-014, B-045): their art is their icon. The float cell (B-051) is the aerostat's lift.
+            foreach (var (key, name, art) in new[] { ("shelter_wall", "Shelter wall", "props/common/shelter_wall"), ("shelter_door", "Shelter door", "props/common/shelter_door"),
+                ("lamp", "Lamp", "props/common/lamp"), ("storage_crate", "Storage crate", "props/common/storage_crate"), ("aerostat_deck", "Aerostat deck", "props/venus/aerostat_deck") })
+                Add(new ItemDef { id = id++, key = key, name = name, icon = art });
         }
 
         static void Tile(byte tile, string key, string name, string icon) =>

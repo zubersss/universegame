@@ -36,6 +36,9 @@ namespace Meridian.Save
         public StorySave story = new StorySave();
         public List<string> catalogue = new List<string>();
         public List<string> bases = new List<string>();
+        /// <summary>v2 (U-056): base pieces and aerostats.</summary>
+        public List<Meridian.Building.BasePieceSave> basePieces = new List<Meridian.Building.BasePieceSave>();
+        public List<Meridian.Building.AerostatSave> aerostats = new List<Meridian.Building.AerostatSave>();
         public TimerSave timers = new TimerSave();
         public List<string> terrainFiles = new List<string>();
     }

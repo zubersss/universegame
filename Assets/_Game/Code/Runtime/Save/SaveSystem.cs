@@ -110,6 +110,8 @@ namespace Meridian.Save
             data.scrip = state.scrip;
             data.datacores = state.datacores;
             data.catalogue.AddRange(state.catalogue);
+            data.basePieces.AddRange(state.basePieces);
+            data.aerostats.AddRange(state.aerostats);
             data.contracts.AddRange(state.contracts);
             state.inventory.WriteTo(data.inventory);
             data.player.suitTier = state.suitTier;
@@ -201,6 +203,9 @@ namespace Meridian.Save
             state.datacores = data.datacores;
             state.catalogue.Clear();
             if (data.catalogue != null) foreach (var id in data.catalogue) state.catalogue.Add(id);
+            state.basePieces.Clear(); state.aerostats.Clear();
+            if (data.basePieces != null) state.basePieces.AddRange(data.basePieces);
+            if (data.aerostats != null) state.aerostats.AddRange(data.aerostats);
             state.contracts.Clear();
             if (data.contracts != null) state.contracts.AddRange(data.contracts);
             state.inventory.ReadFrom(data.inventory, data.selectedSlot);

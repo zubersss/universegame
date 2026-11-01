@@ -43,6 +43,8 @@ namespace Meridian.Rig
         {
             var t = TileOf(world);
             if (terrain == null || !InReach(t)) return false;
+            // U-056: base pieces come down first (their item comes back).
+            if (dismantle != null && dismantle(world)) { Dug?.Invoke(world); return true; }
             // U-059: harvestable props first (Mercury's Solarite crystals): -1 not one, 0 glanced off, 1 cut.
             if (harvest != null)
             {
@@ -73,6 +75,9 @@ namespace Meridian.Rig
 
         /// <summary>U-059: a harvestable at the Beam's point (set by SolariteCrystals on Mercury).</summary>
         public System.Func<Vector2, int> harvest;
+        /// <summary>U-056: the Beam on a base piece (BaseBuilder.Dismantle); the Builder with a base-piece item (BaseBuilder.PlaceItem).</summary>
+        public System.Func<Vector2, bool> dismantle;
+        public System.Func<Vector2, int, bool> placePiece;
 
         /// <summary>
         /// Builder (player input): places the inventory's selected material and uses one up. Nothing
@@ -81,6 +86,13 @@ namespace Meridian.Rig
         public bool Place(Vector2 world)
         {
             if (inventory == null) return false;
+            // U-056: a base-piece item (wall, door, lamp, crate, deck, float cell) builds that piece.
+            var held = inventory[inventory.Selected];
+            if (!held.IsEmpty && placePiece != null && InReach(TileOf(world)) && placePiece(world, held.itemId))
+            {
+                inventory.TakeFrom(inventory.Selected, 1);
+                return true;
+            }
             byte tile = inventory.SelectedTile;
             if (tile == TileId.Air || !Place(world, tile)) return false;
             inventory.TakeFrom(inventory.Selected, 1);

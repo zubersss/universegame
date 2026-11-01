@@ -125,6 +125,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7da6ad55aea412442b8b32841d9b6bc7
+    m_Address: icons/cryo_round/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 817be05767d835e46b4a07edd9639022
     m_Address: icons/polymer/base
     m_ReadOnly: 0

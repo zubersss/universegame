@@ -43,6 +43,12 @@ namespace Meridian.Crafting
             R("fab_fuel_cell", Station.Fabricator, A("launch_fuel_cell"), "fabrication", A("launch_fuel", 5), A("smelter_bar_iron")),
             // U-055: Cryo-charged Lance rounds from Mercury's polar ice (Bible §7.4: the Veil Serpent's counter).
             R("fab_cryo_rounds", Station.Fabricator, A("cryo_round", 6), "fabrication", A("polar_ice", 2), A("smelter_bar_iron")),
+            // U-056 base pieces.
+            R("fab_shelter_wall", Station.Fabricator, A("shelter_wall", 4), "fabrication", A("smelter_bar_iron", 2)),
+            R("fab_shelter_door", Station.Fabricator, A("shelter_door"), "fabrication", A("smelter_bar_iron", 2), A("circuit_board")),
+            R("fab_lamp", Station.Fabricator, A("lamp", 2), "fabrication", A("smelter_bar_copper"), A("silica")),
+            R("fab_storage_crate", Station.Fabricator, A("storage_crate"), "fabrication", A("smelter_bar_iron", 2)),
+            R("fab_aerostat_deck", Station.Fabricator, A("aerostat_deck", 2), "fabrication", A("polymer", 2), A("smelter_bar_iron")),
             // Story blueprints (Bible §2).
             R("fab_solarite_capacitor", Station.Fabricator, A("solarite_capacitor"), "solarite_capacitor", A("solarite", 2), A("circuit_board"), A("smelter_bar_copper")),
             R("fab_float_cell", Station.Fabricator, A("float_cell_mk1"), "float_cell_mk1", A("polymer", 3), A("vitriol_glass", 2), A("smelter_bar_iron")),

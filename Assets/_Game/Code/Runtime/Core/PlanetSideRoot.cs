@@ -26,6 +26,7 @@ namespace Meridian.Core
         public Meridian.Survey.SurveyScanner scanner { get; private set; }
         public Meridian.Creatures.Wardens.WardenDirector wardens { get; private set; }
         public Meridian.Hazards.SolariteCrystals solarite { get; private set; }
+        public Meridian.Building.BaseBuilder bases { get; private set; }
         public Meridian.Creatures.CreatureDirector creatures;
         public Meridian.Hazards.HazardSystem hazards;
         public Meridian.Planet.POI.PoiPlacer pois;
@@ -134,6 +135,9 @@ namespace Meridian.Core
             if (solarite == null) { solarite = gameObject.AddComponent<Meridian.Hazards.SolariteCrystals>(); solarite.pois = pois; solarite.rig = rig; }
             solarite.flares = hazards != null ? hazards.flares : null;
             solarite.ConfigureFor(config.id);
+            // U-056: this planet's base, rebuilt from the save; the Builder and the Beam work on its pieces.
+            if (bases == null) { bases = gameObject.AddComponent<Meridian.Building.BaseBuilder>(); bases.terrain = terrain; bases.rig = rig; bases.player = player != null ? player.transform : null; }
+            bases.ConfigureFor(config.id);
             if (sideCamera != null)
             {
                 sideCamera.transform.position = new Vector3(spawnX + 0.5f, surface + 3f, -10f);

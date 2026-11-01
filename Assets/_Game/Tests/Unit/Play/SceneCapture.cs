@@ -764,6 +764,86 @@ namespace Meridian.Tests
             yield return Save(side.sideCamera, $"{name}_5_venus_surface");
         }
 
+        /// <summary>U-056 evidence: a shelter on the Mars plains at night (walls, door, lamp, crate) and a Venus aerostat beside the station.</summary>
+        [UnityTest]
+        public IEnumerator CaptureBases()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
+            GameState.Instance.basePieces.Clear();
+            GameState.Instance.aerostats.Clear();
+
+            // Mars plains at night: a shelter around the surveyor.
+            yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(Meridian.Planets.PlanetId.Mars));
+            var side = director.PlanetSide;
+            side.hazards.enabled = false;
+            if (side.wardens != null) side.wardens.enabled = false;
+            var t = side.terrain;
+            int px = Mathf.FloorToInt(side.player.Body.position.x) + 200;
+            var feet = new Vector2(px + 0.5f, t.Generator.SurfaceHeight(t.WrapX(px)) + 1.05f);
+            side.player.Body.position = feet; side.player.transform.position = feet;
+            float until = Time.realtimeSinceStartup + 15f;
+            yield return null;
+            while (!t.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+            feet = new Vector2(px + 0.5f, t.TopSolidY(px) + 1.05f);
+            side.player.Body.position = feet; side.player.transform.position = feet;
+            side.dayNight.Override = 0.02f;
+            var b = side.bases;
+            int x0 = px - 4, x1 = px + 4, top = 0;
+            for (int x = x0; x <= x1; x++) top = Mathf.Max(top, t.TopSolidY(x));
+            int roof = top + 4;
+            for (int y = t.TopSolidY(x0) + 1; y < roof; y++) b.Place(new Vector2(x0 + 0.5f, y + 0.5f), Meridian.Building.PieceKind.Wall);
+            int dg = t.TopSolidY(x1) + 1;
+            b.Place(new Vector2(x1 + 0.5f, dg + 0.5f), Meridian.Building.PieceKind.Door);
+            for (int y = dg + 2; y < roof; y++) b.Place(new Vector2(x1 + 0.5f, y + 0.5f), Meridian.Building.PieceKind.Wall);
+            for (int x = x0; x <= x1; x++) b.Place(new Vector2(x + 0.5f, roof + 0.5f), Meridian.Building.PieceKind.Wall);
+            b.Place(new Vector2(px - 2 + 0.5f, t.TopSolidY(px - 2) + 1.5f), Meridian.Building.PieceKind.Lamp);
+            b.Place(new Vector2(px + 2 + 0.5f, t.TopSolidY(px + 2) + 1.5f), Meridian.Building.PieceKind.Crate);
+            var cam = side.sideCamera;
+            cam.GetComponent<Meridian.Player.CameraFollow>().enabled = false;
+            cam.orthographicSize = 6f;
+            cam.transform.position = new Vector3(px + 0.5f, top + 3f, cam.transform.position.z);
+            for (int k = 0; k < 60; k++) yield return new WaitForFixedUpdate();
+            Debug.Log($"[MERIDIAN] Mars shelter: sheltered {b.Sheltered(side.player.Body.position)} ({b.LastFlood})");
+            yield return Save(cam, $"{name}_1_mars_shelter");
+
+            // Venus: an aerostat in open air beside the Meridian station.
+            yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(Meridian.Planets.PlanetId.Venus));
+            side = director.PlanetSide;
+            side.hazards.enabled = false;
+            var station = Meridian.Planet.POI.PoiCatalog.MeridianStation;
+            until = Time.realtimeSinceStartup + 5f;
+            while (side.pois.Solids.Count < 5 && Time.realtimeSinceStartup < until) yield return null;
+            float deck = station.floatY + (336f - 62f) / 128f;
+            feet = new Vector2(station.x + 6f, deck + 1.5f);
+            side.dayNight.Override = 0.5f;
+            side.player.Body.position = feet; side.player.transform.position = feet;
+            b = side.bases;
+            int ax = Mathf.FloorToInt(station.x - 14f), ay = Mathf.FloorToInt(deck);
+            for (int i = 0; i < 4; i++) b.Place(new Vector2(ax + i * 2 + 0.5f, ay + 0.5f), Meridian.Building.PieceKind.Deck);
+            b.Place(new Vector2(ax + 0.5f, ay + 1.5f), Meridian.Building.PieceKind.FloatCell);
+            b.Place(new Vector2(ax + 6.5f, ay + 1.5f), Meridian.Building.PieceKind.FloatCell);
+            b.Place(new Vector2(ax + 3.5f, ay + 1.5f), Meridian.Building.PieceKind.Crate);
+            b.Place(new Vector2(ax + 2.5f, ay + 1.5f), Meridian.Building.PieceKind.Lamp);
+            cam = side.sideCamera;
+            cam.GetComponent<Meridian.Player.CameraFollow>().enabled = false;
+            cam.orthographicSize = 8f;
+            cam.transform.position = new Vector3(station.x - 6f, deck + 3f, cam.transform.position.z);
+            for (int k = 0; k < 60; k++) yield return new WaitForFixedUpdate();
+            yield return Save(cam, $"{name}_2_venus_aerostat");
+            GameState.Instance.basePieces.Clear();
+            GameState.Instance.aerostats.Clear();
+        }
+
         /// <summary>U-039 evidence: Mars canyon wall, Olympus flank, polar cap and a lava tube.</summary>
         [UnityTest]
         public IEnumerator CaptureMarsLandforms()

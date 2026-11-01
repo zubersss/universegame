@@ -166,6 +166,57 @@ MonoBehaviour:
       item: cryo_round
       count: 6
     blueprint: fabrication
+  - id: fab_shelter_wall
+    station: 3
+    inputs:
+    - item: smelter_bar_iron
+      count: 2
+    output:
+      item: shelter_wall
+      count: 4
+    blueprint: fabrication
+  - id: fab_shelter_door
+    station: 3
+    inputs:
+    - item: smelter_bar_iron
+      count: 2
+    - item: circuit_board
+      count: 1
+    output:
+      item: shelter_door
+      count: 1
+    blueprint: fabrication
+  - id: fab_lamp
+    station: 3
+    inputs:
+    - item: smelter_bar_copper
+      count: 1
+    - item: silica
+      count: 1
+    output:
+      item: lamp
+      count: 2
+    blueprint: fabrication
+  - id: fab_storage_crate
+    station: 3
+    inputs:
+    - item: smelter_bar_iron
+      count: 2
+    output:
+      item: storage_crate
+      count: 1
+    blueprint: fabrication
+  - id: fab_aerostat_deck
+    station: 3
+    inputs:
+    - item: polymer
+      count: 2
+    - item: smelter_bar_iron
+      count: 1
+    output:
+      item: aerostat_deck
+      count: 2
+    blueprint: fabrication
   - id: fab_solarite_capacitor
     station: 3
     inputs:

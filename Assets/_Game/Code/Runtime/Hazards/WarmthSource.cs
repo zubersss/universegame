@@ -16,6 +16,9 @@ namespace Meridian.Hazards
         void OnEnable() => active.Add(this);
         void OnDisable() => active.Remove(this);
 
+        /// <summary>U-056: a sealed base shelter at p (BaseBuilder) counts as warmth and protection.</summary>
+        public static System.Func<Vector2, bool> Shelter;
+
         public static bool AnyCovers(Vector2 p)
         {
             for (int i = 0; i < active.Count; i++)
@@ -23,7 +26,7 @@ namespace Meridian.Hazards
                 var s = active[i];
                 if (((Vector2)s.transform.position - p).sqrMagnitude <= s.radius * s.radius) return true;
             }
-            return false;
+            return Shelter != null && Shelter(p);
         }
     }
 }

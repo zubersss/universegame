@@ -82,7 +82,7 @@ namespace Meridian.UI
         /// <summary>Opaque panel fill (no world bleeding through).</summary>
         public static readonly Color PanelFill = new Color(0.035f, 0.045f, 0.065f, 1f);
         /// <summary>The full-screen dim behind a panel.</summary>
-        public static readonly Color ScrimColor = new Color(0f, 0f, 0f, 0.62f);
+        public static readonly Color ScrimColor = new Color(0f, 0f, 0f, 0.78f); // LEAD, U-059 review: deeper, the world recedes behind every panel
         public static readonly Color ActionOn = new Color(0.25f, 0.55f, 0.85f, 1f), ActionOff = new Color(0.14f, 0.15f, 0.17f, 1f);
         public static readonly Color ActionTextOn = Color.white, ActionTextOff = new Color(1f, 1f, 1f, 0.28f);
 
