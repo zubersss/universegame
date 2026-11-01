@@ -183,6 +183,23 @@ PRESETS = {
                     bands=[(198, 128, 80), (150, 84, 50)], band_h=200,
                     crown=(220, 156, 100), under=(78, 40, 24))],
     ),
+    # B-055 Jupiter deep (y 300-100): dark pressure haze, sparse low-contrast heavy cloud,
+    # and the Crush Line glowing dark red below.
+    "jupiter_deep": dict(
+        sun=dict(dir=(-0.4, 0.6, -0.6), strength=0.6, color=(1.0, 0.8, 0.7), angle=12.0),
+        ambient=((0.4, 0.24, 0.18), 0.5),
+        haze=(52, 24, 18),
+        crush=(0.88, 0.07, (190, 50, 24)),
+        banks=[dict(top=0.46, base_amp=28, r=(50, 140), billows=36, fall=360, haze=0.62, streak=0.1,
+                    bands=[(120, 72, 52), (90, 50, 36)], band_h=90,
+                    crown=(130, 84, 62), under=(40, 20, 16)),
+               dict(top=0.56, base_amp=34, r=(80, 200), billows=26, fall=420, haze=0.42, streak=0.08,
+                    bands=[(112, 64, 46), (82, 44, 32)], band_h=130,
+                    crown=(124, 78, 56), under=(36, 18, 14)),
+               dict(top=0.7, base_amp=40, r=(120, 300), billows=18, fall=480, haze=0.24, streak=0.06,
+                    bands=[(104, 58, 40), (74, 38, 28)], band_h=180,
+                    crown=(118, 72, 52), under=(32, 16, 12))],
+    ),
     # B-027 Mercury (Bible §7.3): airless, so harsh small-angle sun, almost no ambient, little
     # haze; cratered relief; blinding grey regolith; violet twilight in the sky only.
     "mercury": dict(
@@ -1552,6 +1569,17 @@ def generate(entry, ctx):
                 sky = sky[::4, ::4]
             a = bank[..., 3:4]
             rgb = sky * (1 - a) + bank[..., :3] * a
+            if P.get("crush"):
+                # B-055 jupiter_deep: the Crush Line, a dark-red glowing band near the bottom with
+                # a dark core line, softly modulated along x by periodic noise (tiles).
+                cy, cw, col = P["crush"]
+                Hh, Ww = rgb.shape[:2]
+                yy = np.arange(Hh, dtype=np.float32)[:, None] / Hh
+                mod = 0.75 + 0.25 * fft_noise(np.random.default_rng(seed + 3), 1, Ww, 60, Ww, 1.2)[0][None, :]
+                glow = np.exp(-((yy - cy) / cw) ** 2) * mod
+                core = np.exp(-((yy - cy) / (cw * 0.12)) ** 2)
+                rgb = np.clip(rgb + glow[..., None] * (np.array(col, np.float32) / 255), 0, 1)
+                rgb = rgb * (1 - 0.7 * core[..., None])
             return {"color": np.dstack([pngio.to_u8(rgb), np.full(rgb.shape[:2], 255, np.uint8)])}
         return {"color": _finish_transparent(bank)}
     if layer in ("layer0", "layer0_nosun"):

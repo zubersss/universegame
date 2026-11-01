@@ -298,3 +298,5 @@ PRESETS["jupiter_deck2"] = dict(sky_top=(64, 52, 46), sky_horizon=(120, 92, 70),
                                 cloud=(0, 0, 0), cloud_shade=(0, 0, 0), clouds=0.0)
 PRESETS["jupiter_deck3"] = dict(sky_top=(70, 40, 26), sky_horizon=(150, 88, 50), haze=(140, 84, 50),
                                 cloud=(0, 0, 0), cloud_shade=(0, 0, 0), clouds=0.0)
+PRESETS["jupiter_deep"] = dict(sky_top=(60, 30, 22), sky_horizon=(36, 16, 14), haze=(52, 24, 18),
+                               cloud=(0, 0, 0), cloud_shade=(0, 0, 0), clouds=0.0)
