@@ -778,3 +778,6 @@ Signals: no commits since 22:23; both idle; the gate hovered at 1.44–1.50 GB (
 
 ## Cycle 144 · 2026-10-31
 UNITY U-064 interim: root cause found (Mars tile set lacked Snow, so polar frost had no art or collision), TileSetCoverageTests + FootingTests added (91/93 columns; 2 frost columns by the Pilgrim still 0.25–0.5 m low), lamps lit. Run queued at the 1.5 GB gate (RAM 1.36–1.42 GB). Gate kept.
+
+## Cycle 145 · 2026-10-31 23:42
+Signals: memory baseline creep. The 3 Claude sessions hold ~800 MB private each after 38 h; free RAM 1.26 GB with no heavy job, so the team is gated. User: USER-13 (restart the three windows with resume messages; the UNITY resume repeats the standing restart approval in its own window).

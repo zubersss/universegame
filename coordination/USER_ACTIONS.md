@@ -6,6 +6,14 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
+### USER-13 — Restart the three Claude windows to free memory (5 min)
+After ~38 hours each session uses ~800 MB, so the workers wait for memory. Restarting frees ~1.5–2 GB; nothing is lost (each resumes from the repo).
+1. In each of the three windows, type `/exit` and press Enter.
+2. In each window type `claude` and press Enter, then paste:
+   - LEAD window: `Resume MERIDIAN as LEAD`, then `/loop 30m run a review cycle per your charter, keep both workers stocked, and tell me only if you need something from me`
+   - UNITY window: `Resume MERIDIAN as UNITY. From now on, if Claude Code stops one of your jobs for low memory, you may re-run it once after memory recovers.`
+   - BLENDER window: `Resume MERIDIAN as BLENDER`
+
 ### USER-12 — Playtest M2 (15–30 min)
 1. Open File Explorer and go to `C:\dev\universegame\Build\MERIDIAN_0.2.0`.
 2. Double-click `MERIDIAN.exe` ("More info" → "Run anyway" if Windows asks).
