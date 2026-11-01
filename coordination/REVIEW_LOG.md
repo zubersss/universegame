@@ -763,3 +763,6 @@ Checked: review_taiga_b053.png. B-053 → Done. BLENDER ran one job at 21:23 und
 
 ## Cycle 137 · 2026-10-31 (UNITY message)
 Moved: U-059 → Done; U-056 → In Progress (U-060 depends on it). Decided: shared panel scrim 62% → 78%.
+
+## Cycle 138 · 2026-10-31 21:42
+Added the first M4 tasks: U-061 (cloud-column generator), U-062 (float cells + jetpacks), U-063 (Skip Drive), B-055 (Jupiter deck 2/3/deep + floe/husk art). M3 remaining: U-056, U-060, L-012.

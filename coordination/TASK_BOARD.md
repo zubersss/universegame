@@ -492,6 +492,27 @@ Files: Build/ (ignored), coordination/reports/unity/smoke_<date>/
 Depends: U-053, U-055, U-056, U-059
 Lead notes: Cycle 126. Closes M3 with L-012 and the owner's playtest.
 
+### U-061 · UNITY · Ready · M4
+Goal: Cloud-column world generator (Bible §7.5, D-004): a 4096 × 2000 column with no ground; Escape Line, Datum (1-bar cloud tops), Decks 1–3, Deep and the Crush Line (y 100, lethal, pulsing "CRUSH" band); floating ice floes (solid, mineable platforms) seeded per deck with density by deck; floes sublimate 30–90 s after the player disturbs them; derelicts and creature husks as standable floes; the same chunk streaming as solid worlds. Start with Jupiter using terrain/jupiter floe_ice/floe_core and backgrounds/jupiter_deck1 (B-048).
+Accept: EditMode tests for deck bands and floe density per seed; PlayMode: land on a floe from the ship, dig it, and it sublimates in the window; falling past the Crush Line respawns at the ship with a 20% Scrip fee; streaming within D-019; preload on approach (D-050).
+Files: Assets/_Game/Code/Runtime/Terrain/CloudColumn/
+Depends: U-007, U-048
+Lead notes: Cycle 138. The first M4 task and the biggest technical unknown of the plan.
+
+### U-062 · UNITY · Ready · M4
+Goal: Float cells + jetpack Mk2/Mk3 (Bible §4.2): Float cell Mk1 +6 m/s², Mk2 +12 buoyancy, usable only below the Datum, toggled with V; jetpack Mk2/Mk3 thrust/burn per the §4.2 table; Jupiter 2.53 g makes Mk3 the only climbing jetpack.
+Accept: PlayMode on Jupiter: Mk1 jetpack slows a fall but can't climb; Mk3 climbs; Float Mk1 below the Datum arrests a fall; the HUD shows buoyancy margin.
+Files: Assets/_Game/Code/Runtime/Player/
+Depends: U-061
+Lead notes: Cycle 138. M4.
+
+### U-063 · UNITY · Ready · M4
+Goal: Skip Drive (Bible §3): hold J to spool 3 s, then travel at 1,200 u/s, consuming skip fuel per second; disabled inside any gravity well; skip-fuel item (Helium-3 Condensate, Saturn; deuterium from water at 1/3 efficiency) in the RecipeBook.
+Accept: PlayMode: Earth → Neptune in ≈ 11 s at skip speed; refuses inside a well; fuel drains per second; the HUD shows the spool.
+Files: Assets/_Game/Code/Runtime/Space/
+Depends: U-034, U-051
+Lead notes: Cycle 138. M4.
+
 ### U-025 · UNITY · Done · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.
 Accept: EditMode test: Earth noon/midnight intensities match §9; captures at dawn/noon/dusk/night on Earth; 0 B GC per frame.
@@ -846,6 +867,13 @@ Accept: same icon camera and lights as B-013/B-042/B-051; readable at 32 px; sta
 Files: blender/scripts/build_icons.py, Assets/_Game/Art/icons/cryo_round/
 Depends: B-051
 Lead notes: Done (cycle 135): cryo round icon (brass casing, frost-blue slug, cyan band), readable at 32 px.
+
+### B-055 · BLENDER · Ready · M4
+Goal: Jupiter column art completion (Bible §7.6): backgrounds/jupiter_deck2 (ammonium-hydrosulfide clouds, darker, lightning-lit), jupiter_deck3 (water clouds, warm storm towers), jupiter_deep (dark pressure haze with a glowing Crush band below); terrain/jupiter/floe_derelict (Meridian-expedition wreckage as standable floe material); props/jupiter/{husk_tortoise (Ballast tortoise husk platform), derelict_pod, beacon_vault}.
+Accept: same pipeline rules (§9, tiling, painted cloud banks per B-048), stamped reviews; deck colours read as getting darker and warmer with depth.
+Files: blender/scripts/gen_backdrop*.py, gen_terrain.py, build_props_jupiter.py, Assets/_Game/Art/backgrounds/jupiter_*/, terrain/jupiter/, props/jupiter/
+Depends: B-048
+Lead notes: Cycle 138. Start once U-061 shows the column in game (or now if idle; deck 2–3 backdrops are safe to start).
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
