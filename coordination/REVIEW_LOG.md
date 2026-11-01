@@ -742,3 +742,6 @@ Added: U-059 ("only here" resources, M3 exit), U-060 (M3 build), L-012 (M3 QA). 
 
 ## Cycle 127 · 2026-10-31 (UNITY message)
 Checked: u053 warden_outpost.png (sentinels and the tower read well; the bolt is tiny; Mars far ridges show a spike comb). U-053 → Done; U-055 → In Progress. D-052. Added B-052 (bolt + Mars/Earth far ridges).
+
+## Cycle 128 · 2026-10-31 (BLENDER message)
+Checked: review_warden_bolt.png, review_earth_b052.png. B-052 → Done.

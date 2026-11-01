@@ -826,12 +826,12 @@ Files: blender/scripts/build_icons.py, Assets/_Game/Art/icons/
 Depends: B-042
 Lead notes: Done (cycle 122): 7 icons (polymer, float cell, solarite capacitor, survey module, skip drive Mk2, deep-diamond tip, thruster Mk3), consistent with batches 1–2, readable at 32 px. 128 px icon renders count as below preview size (not heavy, CLAUDE.md rule 6).
 
-### B-052 · BLENDER · In Progress · M3
+### B-052 · BLENDER · Done · M3
 Goal: (1) fx/warden_bolt reads too small at gameplay zoom: a bigger, brighter teal head (≈ 2× size) with a short glowing trail; same key and pivot rule. (2) backgrounds/mars layer0 far ridges show the same vertical spike comb as Mercury did (coordination/reports/unity/u053_2026-10-31/warden_outpost.png, top-left/right): re-render with the ridge_lo approach (rounded far rims). Check backgrounds/earth layer0's distant range for the same artifact and fix it if present.
 Accept: stamped reviews; same keys, sizes, tiling; the bolt is readable at 60 px/m over a busy Mars backdrop.
 Files: blender/scripts/gen_fx.py, gen_backdrop3d.py, Assets/_Game/Art/fx/warden_bolt/, backgrounds/mars/, backgrounds/earth/
 Depends: B-043, B-050
-Lead notes: Cycle 127.
+Lead notes: Done (cycle 128): bigger and brighter warden bolt within 128×32 (enough, no resize); Mars layer0 rolling far hills (ridge_lo 200); Earth layer0 snowy peak without the comb (ridge_lo 80). UNITY re-imports.
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
