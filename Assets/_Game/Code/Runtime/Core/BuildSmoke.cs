@@ -64,6 +64,27 @@ namespace Meridian.Core
                 yield return Wait(1f);
                 yield return Shot(folder, "smoke_3_earth_night.png");
                 side.dayNight.Override = 0.45f;
+                // U-077 smoke: a dig ahead of the surveyor (the Beam), then the Pilgrim airborne with its gear up.
+                if (side.player != null && side.rig != null)
+                {
+                    var p = side.player.transform.position;
+                    bool dug = side.rig.Dig(new Vector2(p.x - 1.5f, p.y - 1.2f));
+                    yield return Wait(0.6f);
+                    Debug.Log($"[MERIDIAN] smoke dig: {dug}");
+                    yield return Shot(folder, "smoke_3b_earth_dig.png");
+                }
+                if (side.ship != null && side.ship.Body != null)
+                {
+                    var rest = side.ship.Body.position;
+                    var air = rest + new Vector2(0f, 16f);
+                    side.ship.Body.position = air; side.ship.transform.position = air; side.ship.Body.linearVelocity = Vector2.zero;
+                    yield return LookAt(side, air.x, 12f, 9f);
+                    yield return Wait(0.3f);
+                    Debug.Log($"[MERIDIAN] smoke ship airborne: altitude {side.ship.AltitudeAboveGround:F1} m, legs deployed {side.ship.LegsDeployed}");
+                    yield return Shot(folder, "smoke_3c_ship_airborne.png");
+                    side.ship.Body.position = rest; side.ship.transform.position = rest; side.ship.Body.linearVelocity = Vector2.zero;
+                    yield return Wait(0.5f);
+                }
             }
 
             // U-045: the Tab inventory panel with a few stacks (the selected one is the Builder's).
