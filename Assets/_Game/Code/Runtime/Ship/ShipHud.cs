@@ -34,7 +34,8 @@ namespace Meridian.Ship
             UiKit.Text(canvas.transform, "TwLabel", tl, new Vector2(170f, -176f), new Vector2(120f, 18f), 13, false, TextAnchor.MiddleLeft, theme.label).text = "T/W";
             ThrustToWeight = UiKit.Text(canvas.transform, "Tw", tl, new Vector2(170f, -200f), new Vector2(120f, 30f), 26);
             Warning = UiKit.Text(canvas.transform, "Warning", tl, new Vector2(24f, -236f), new Vector2(520f, 24f), 16, true, TextAnchor.MiddleLeft, theme.warning);
-            Warning.text = "THRUST < GRAVITY: CANNOT LAUNCH";
+            Warning.text = ThrustBelowGravityLine;
+            Warning.enabled = false;
             root.SetActive(false);
         }
 
@@ -47,8 +48,18 @@ namespace Meridian.Ship
             if (v != lastVs) { lastVs = v; VerticalSpeed.text = signed[v]; }
             int t = Mathf.RoundToInt(ship.Thrust / Mathf.Max(0.01f, ship.Gravity) * 10f);
             if (t != lastTwr) { lastTwr = t; ThrustToWeight.text = tenths[t]; }
-            Warning.enabled = ship.ThrustBelowGravity;
+            // U-065: a Thruster mark the §4.3 table doesn't allow here says so (on the ground); else the thrust < g warning.
+            int w = ship.Grounded && !ship.CanLaunchHere ? ship.ThrusterMark : ship.ThrustBelowGravity ? 0 : -1;
+            if (w != lastWarning)
+            {
+                lastWarning = w;
+                Warning.enabled = w >= 0;
+                if (w >= 0) Warning.text = w == 0 ? ThrustBelowGravityLine : ShipMarks.CantLiftOff[Mathf.Clamp(w, 1, 3)];
+            }
         }
+
+        const string ThrustBelowGravityLine = "THRUST < GRAVITY: CANNOT LAUNCH";
+        int lastWarning = int.MinValue;
 
     }
 }

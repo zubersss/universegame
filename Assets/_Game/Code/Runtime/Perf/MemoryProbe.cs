@@ -86,6 +86,16 @@ namespace Meridian.Perf
             float until = Time.realtimeSinceStartup + 20f;
             while (!marsSide.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
             yield return Leg("Mars", marsSide.sideCamera);
+
+            // ---- U-060: Mercury and Venus, loaded directly to keep the probe short ----
+            foreach (var id in new[] { Meridian.Planets.PlanetId.Mercury, Meridian.Planets.PlanetId.Venus })
+            {
+                yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(id));
+                var s = director.PlanetSide;
+                until = Time.realtimeSinceStartup + 20f;
+                while (!s.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                yield return Leg(id.ToString(), s.sideCamera);
+            }
             Finish(null);
         }
 

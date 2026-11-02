@@ -12,7 +12,9 @@ namespace Meridian.Terrain
         public const byte MercuryRegolith = 11, MercuryBasalt = 12, Sulfide = 13, MercuryIce = 14;
         /// <summary>Venus (U-050, B-028): vent glass is Vitriol Glass (Bible §7.4).</summary>
         public const byte VenusBasalt = 15, Sulfur = 16, Tessera = 17, VentGlass = 18;
-        public const int Count = 19;
+        /// <summary>Cloud-column floes (U-061, B-048): the ice skin and the denser core.</summary>
+        public const byte FloeIce = 19, FloeCore = 20;
+        public const int Count = 21;
 
         static readonly string[] Keys =
         {
@@ -24,6 +26,7 @@ namespace Meridian.Terrain
             ArtKeys.Terrain.MercuryRegolith, ArtKeys.Terrain.MercuryBasalt, ArtKeys.Terrain.MercurySulfide,
             ArtKeys.Terrain.MercuryIce,
             ArtKeys.Terrain.VenusBasalt, ArtKeys.Terrain.VenusSulfur, ArtKeys.Terrain.VenusTessera, ArtKeys.Terrain.VenusVentGlass,
+            ArtKeys.Terrain.JupiterFloeIce, ArtKeys.Terrain.JupiterFloeCore,
         };
 
         public static string ArtKey(byte id) => id < Keys.Length ? Keys[id] : null;

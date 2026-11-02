@@ -154,6 +154,12 @@ namespace Meridian.Tests
             Assert.NotNull(deck.aerostat);
             Assert.NotNull(bases.Place(new Vector2(x + 2.5f, y + 0.5f), PieceKind.Deck), "a second deck joins it");
             Assert.NotNull(bases.Place(new Vector2(x + 0.5f, y + 1.5f), PieceKind.FloatCell), "a float cell lifts it");
+            var lamp = bases.Place(new Vector2(x + 1.5f, y + 1.5f), PieceKind.Lamp);
+            Assert.NotNull(lamp, "a lamp on the deck");
+            var light = lamp.go.GetComponentInChildren<UnityEngine.Rendering.Universal.Light2D>();
+            Assert.NotNull(light, "lamps cast light (U-064)");
+            Assert.AreEqual(BaseBuilder.LampRadius, light.pointLightOuterRadius, 1e-3f);
+            bases.Dismantle(new Vector2(x + 1.5f, y + 1.5f));
             var a = deck.aerostat;
             Assert.AreEqual(1, bases.aerostats.Count);
             Assert.AreEqual(6f, a.Lift); Assert.AreEqual(4f, a.Load);

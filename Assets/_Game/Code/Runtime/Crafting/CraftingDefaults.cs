@@ -67,6 +67,11 @@ namespace Meridian.Crafting
             R("fab_float_cell_mk2", Station.Fabricator, A("float_cell_mk2"), "float_cell_mk2", A("float_cell_mk1"), A("polymer", 4), A("helium3_condensate", 2), A("circuit_board")),
             R("fab_jetpack_mk2", Station.Fabricator, A("jetpack_mk2"), "jetpack_mk2", A("smelter_bar_iron", 4), A("circuit_board", 2), A("launch_fuel_cell", 2)),
             R("fab_jetpack_mk3", Station.Fabricator, A("jetpack_mk3"), "jetpack_mk3", A("jetpack_mk2"), A("deep_diamond", 2), A("solarite_capacitor"), A("helium3_condensate", 4)),
+            // U-065 ship upgrades (§4.3; P-26 numbers): installed on the Pilgrim when crafted.
+            R("fab_thruster_mk2", Station.Fabricator, A("thruster_mk2"), "thruster_mk2", A("smelter_bar_iron", 6), A("circuit_board", 2), A("launch_fuel_cell")),
+            R("fab_thruster_mk3", Station.Fabricator, A("thruster_mk3"), "thruster_mk3", A("thruster_mk2"), A("metallic_hydrogen", 4), A("solarite_capacitor", 2), A("smelter_bar_copper", 4)),
+            R("fab_tank_mk2", Station.Fabricator, A("tank_mk2"), "tank_mk2", A("smelter_bar_iron", 8), A("polymer", 2)),
+            R("fab_tank_mk3", Station.Fabricator, A("tank_mk3"), "tank_mk3", A("tank_mk2"), A("smelter_bar_iron", 12), A("polymer", 4), A("aluminium", 6)),
         };
 
         static Blueprint B(string id, string name, int tier, string icon, string unlockFlag, params string[] requires) =>
@@ -89,6 +94,10 @@ namespace Meridian.Crafting
             B("jetpack_mk2", "Jetpack Mk2", 2, "jetpack_mk2", null, "fabrication"),
             B("float_cell_mk2", "Float cell Mk2", 3, "float_cell_mk2", null, "float_cell_mk1"),
             B("jetpack_mk3", "Jetpack Mk3", 4, "jetpack_mk3", "beacon:uranus", "jetpack_mk2", "deep_diamond_tip"),
+            // U-065 (P-26): Thruster Mk2 and the tanks are trades; Thruster Mk3 stays the Jupiter beacon's (above).
+            B("thruster_mk2", "Thruster Mk2", 2, "thruster_mk2", null, "fabrication"),
+            B("tank_mk2", "Tank Mk2", 2, "tank_mk2", null, "fabrication"),
+            B("tank_mk3", "Tank Mk3", 3, "tank_mk3", null, "tank_mk2"),
         };
     }
 }

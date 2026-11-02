@@ -38,6 +38,9 @@ namespace Meridian.Core
             Space = FindRoot<SpaceRoot>(SpaceScene);
             // U-052: Waystations and the docking bay live with the top-down view.
             if (Space != null && Space.GetComponent<Meridian.Trade.DockingBay>() == null) Space.gameObject.AddComponent<Meridian.Trade.DockingBay>();
+            // U-063: the Skip Drive rides the top-down ship.
+            var topShip = Space != null ? Space.GetComponentInChildren<Meridian.Space.SpaceShip>(true) : null;
+            if (topShip != null && topShip.GetComponent<Meridian.Space.SkipDrive>() == null) topShip.gameObject.AddComponent<Meridian.Space.SkipDrive>().ship = topShip;
             // Warm the top-down view now, while it is the only view loaded (one global 2D light), so the
             // first launch never stalls on shader/pipeline setup (U-028).
             if (Space != null) RenderWarmup.WarmUp(Space.GetComponentInChildren<Camera>());

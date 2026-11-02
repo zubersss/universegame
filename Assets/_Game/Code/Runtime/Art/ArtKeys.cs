@@ -49,6 +49,9 @@ namespace Meridian.Art
             public const string VenusSulfur = "terrain/venus/sulfur";
             public const string VenusTessera = "terrain/venus/tessera";
             public const string VenusVentGlass = "terrain/venus/vent_glass";
+            // U-061 cloud-column floes (B-048): one sheet each, every giant (Jupiter first).
+            public const string JupiterFloeIce = "terrain/jupiter/floe_ice";
+            public const string JupiterFloeCore = "terrain/jupiter/floe_core";
         }
 
         public static class Backgrounds

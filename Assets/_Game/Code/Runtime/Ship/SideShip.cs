@@ -54,9 +54,15 @@ namespace Meridian.Ship
         public event Action EscapeLineCrossed;
         public event Action<float> TouchedDown;
 
-        public float Thrust => thrusterMark >= 3 ? 35f : thrusterMark == 2 ? 20f : 12f;
+        /// <summary>U-065: the fitted Thruster mark (GameState; the serialized field only when there is none, tests).</summary>
+        public int ThrusterMark => GameState.Instance != null ? GameState.Instance.thrusterMark : thrusterMark;
+        public float Thrust => ShipMarks.Thrust(ThrusterMark);
         public float Gravity => -Physics2D.gravity.y;
         public bool ThrustBelowGravity => Thrust < Gravity;
+        /// <summary>§4.3 "Can launch from": false where this Thruster mark may not lift off (the HUD says so).</summary>
+        public bool CanLaunchHere => planet == null || ShipMarks.CanLaunch(ThrusterMark, planet.id);
+        /// <summary>True while the pilot asks for lift on the ground where the mark can't launch.</summary>
+        public bool LaunchRefused { get; private set; }
 
         public float Hull
         {
@@ -126,6 +132,9 @@ namespace Meridian.Ship
 
 
             float up = Mathf.Clamp01(intent.thrust), down = Mathf.Clamp01(intent.retro);
+            // U-065: on the ground, a Thruster mark the table doesn't allow here gives no lift (and no launch burn).
+            LaunchRefused = Grounded && up > 0f && !CanLaunchHere;
+            if (LaunchRefused) up = 0f;
             bool firing = up > 0f || down > 0f || Mathf.Abs(intent.lateral) > 0.01f;
             // A new launch burn arms while the ship sits at rest with the throttle released, so a
             // ship that can't lift (thrust < g) pays the cost once, not every step.

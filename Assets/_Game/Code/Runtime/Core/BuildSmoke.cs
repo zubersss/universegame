@@ -134,6 +134,48 @@ namespace Meridian.Core
             yield return Wait(1f);
             yield return Shot(folder, "smoke_6_mars_canyon_storm.png");
 
+            // U-060 (M3 playtest build): Mercury by day and on the twilight line at the flare shelter, the
+            // Cinderhulk after nightfall; Venus's Meridian station with the Veil Serpent, and a surface vent field.
+            yield return scenes.LoadPlanetSide(GameState.Instance.catalog.Get(Meridian.Planets.PlanetId.Mercury));
+            side = scenes.PlanetSide;
+            if (side.hazards != null) side.hazards.enabled = false;
+            if (side.wardens != null) side.wardens.enabled = false;
+            int mw = side.Config.worldWidth;
+            var solarField = Meridian.Planet.POI.PoiCatalog.SolariteField;
+            yield return Dawn(side, solarField.CenterX + mw / 4f);                  // the field a quarter world behind the dawn line: full day
+            yield return LookAt(side, solarField.CenterX, 4f, 10f);
+            yield return Shot(folder, "smoke_13_mercury_day.png");
+            var shelter = Meridian.Planet.POI.PoiCatalog.FlareShelterPoi;
+            yield return Dawn(side, shelter.CenterX);                               // the dawn line through the shelter: violet twilight
+            yield return LookAt(side, shelter.CenterX, 4f, 10f);
+            yield return Shot(folder, "smoke_14_mercury_twilight_shelter.png");
+            // Both apexes: the Cinderhulk walks the band, then night falls on it.
+            float hx = side.player.Body.position.x + 6f;
+            int ht = Mathf.FloorToInt(hx);
+            side.creatures.Spawn(Meridian.Creatures.Species.Cinderhulk,
+                new Vector2(ht + 0.5f, side.terrain.TopSolidY(ht) + 1f + Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.Cinderhulk).size.y * 0.5f + 0.05f));
+            yield return Wait(0.5f);
+            Meridian.Terrain.MercuryTerminator.ClockOffset -= 400f * Meridian.Terrain.MercuryTerminator.CreepSecondsPerMetre;
+            yield return Wait(1f);
+            yield return Shot(folder, "smoke_15_cinderhulk_night.png");
+            Meridian.Terrain.MercuryTerminator.ClockOffset = 0;
+
+            yield return scenes.LoadPlanetSide(GameState.Instance.catalog.Get(Meridian.Planets.PlanetId.Venus));
+            side = scenes.PlanetSide;
+            if (side.hazards != null) side.hazards.enabled = false;
+            if (side.dayNight != null) side.dayNight.Override = 0.5f;
+            var station = Meridian.Planet.POI.PoiCatalog.MeridianStation;
+            float deck = station.floatY + (336f - 62f) / 128f;
+            yield return Stand(side, new Vector2(station.x + 10f, deck + 1.5f), 3f, 10f);
+            side.creatures.Spawn(Meridian.Creatures.Species.VeilSerpent, new Vector2(station.x + 9f, deck + 9f));
+            side.creatures.Spawn(Meridian.Creatures.Species.SulfurDrifter, new Vector2(station.x - 2f, deck + 7f));
+            yield return Wait(0.8f);
+            yield return Shot(folder, "smoke_16_venus_station.png");
+            side.creatures.DespawnAll();
+            var vent = Meridian.Terrain.VenusLandforms.Vents[0];
+            yield return LookAt(side, (vent.x0 + vent.x1) * 0.5f, 4f, 9f);
+            yield return Shot(folder, "smoke_17_venus_vent.png");
+
             scenes.SetView(ViewMode.Space);
             var craft = scenes.Space.GetComponentInChildren<Meridian.Space.SpaceShip>();
             if (craft != null)
@@ -198,6 +240,32 @@ namespace Meridian.Core
             float until = Time.realtimeSinceStartup + 15f;
             while (!side.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
             yield return Wait(2f); // backdrop sets and creatures arrive
+        }
+
+        /// <summary>Mercury: puts the dawn line at x (Mercury's shared clock: lighting, backdrop and creatures follow).</summary>
+        static IEnumerator Dawn(PlanetSideRoot side, float x)
+        {
+            Meridian.Terrain.MercuryTerminator.ClockOffset = 0;
+            var clock = FindAnyObjectByType<TimeSystem>();
+            double now = Meridian.Terrain.MercuryTerminator.Now(clock != null ? clock.GameSeconds : 0);
+            float dawn = Meridian.Terrain.MercuryTerminator.Dawn(now, side.Config.worldWidth);
+            Meridian.Terrain.MercuryTerminator.ClockOffset = (x - dawn) * Meridian.Terrain.MercuryTerminator.CreepSecondsPerMetre;
+            yield return null;
+        }
+
+        /// <summary>Stands the surveyor at `feet` (a deck, a platform) with the camera `above` it, and waits for the ground.</summary>
+        static IEnumerator Stand(PlanetSideRoot side, Vector2 feet, float above, float size)
+        {
+            var follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+            if (follow != null) follow.enabled = false;
+            side.sideCamera.orthographicSize = size;
+            side.player.Body.position = feet; side.player.transform.position = feet; side.player.Body.linearVelocity = Vector2.zero;
+            var cam = side.sideCamera.transform;
+            cam.position = new Vector3(feet.x, feet.y + above, cam.position.z);
+            yield return null;
+            float until = Time.realtimeSinceStartup + 15f;
+            while (!side.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+            yield return Wait(2f);
         }
 
         static IEnumerator Wait(float seconds)

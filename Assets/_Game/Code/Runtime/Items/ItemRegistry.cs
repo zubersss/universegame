@@ -83,6 +83,8 @@ namespace Meridian.Items
                 ("ring_ice", "Ring ice"), ("ring_rock", "Ring rock"), ("methane_ice", "Methane ice"),
                 ("deep_diamond", "Deep Diamond"), ("superionic_ice", "Superionic Ice"),
                 ("float_cell_mk2", "Float cell Mk2"), ("jetpack_mk2", "Jetpack Mk2"), ("jetpack_mk3", "Jetpack Mk3"),
+                // U-065 ship upgrades (Bible §4.3): installed when crafted (ShipMarks.Install).
+                ("thruster_mk2", "Thruster Mk2"), ("thruster_mk3", "Thruster Mk3"), ("tank_mk2", "Tank Mk2"), ("tank_mk3", "Tank Mk3"),
             })
                 Add(new ItemDef { id = id++, key = key, name = name, icon = $"icons/{key}/base" });
         }

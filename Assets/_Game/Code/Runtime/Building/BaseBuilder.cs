@@ -24,6 +24,8 @@ namespace Meridian.Building
     {
         public const int MaxShelterCells = 300, ShelterReach = 16;
         public const float HudRange = 15f;
+        /// <summary>A lamp's warm light reaches this far (m; LEAD, U-064).</summary>
+        public const float LampRadius = 5f;
 
         public TerrainStreamer terrain;
         public Meridian.Rig.RigTools rig;
@@ -238,6 +240,19 @@ namespace Meridian.Building
                 var box = go.AddComponent<BoxCollider2D>();
                 box.size = spec.size;
                 box.offset = new Vector2(spec.size.x * 0.5f, spec.size.y * 0.5f);
+            }
+            if (spec.kind == PieceKind.Lamp)
+            {
+                // U-064: a lamp lights its shelter: a small warm point light at its head.
+                var lightGo = new GameObject("Light");
+                lightGo.transform.SetParent(go.transform, false);
+                lightGo.transform.localPosition = new Vector3(spec.size.x * 0.5f, spec.size.y - 0.2f, 0f);
+                var light = lightGo.AddComponent<UnityEngine.Rendering.Universal.Light2D>();
+                light.lightType = UnityEngine.Rendering.Universal.Light2D.LightType.Point;
+                light.pointLightOuterRadius = LampRadius;
+                light.pointLightInnerRadius = 0.4f;
+                light.intensity = 1.1f;
+                light.color = new Color(1f, 0.8f, 0.55f);
             }
             var viewGo = new GameObject("View");
             viewGo.transform.SetParent(go.transform, false);

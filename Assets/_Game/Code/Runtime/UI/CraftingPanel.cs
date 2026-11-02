@@ -191,6 +191,12 @@ namespace Meridian.UI
         {
             var result = CraftingSystem.Craft(book, r, inventory, Flags, Here);
             LastMessage = result == CraftingSystem.Result.Crafted ? $"Crafted {r.output.count} × {Name(r.output.item)}" : $"{Name(r.output.item)}: {result}";
+            // U-065: a ship upgrade fits itself to the Pilgrim when crafted (the item is used up).
+            if (result == CraftingSystem.Result.Crafted && Meridian.Ship.ShipMarks.Install(GameState.Instance, r.output.item))
+            {
+                inventory.Remove(ItemRegistry.Get(r.output.item).id, 1);
+                LastMessage = $"Installed {Name(r.output.item)}";
+            }
             if (message != null) message.text = LastMessage;
             Refresh();
             return result;

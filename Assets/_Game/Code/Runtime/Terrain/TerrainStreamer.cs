@@ -85,7 +85,8 @@ namespace Meridian.Terrain
             PlanetId.Earth => new[] { TileId.Soil, TileId.Grass, TileId.Stone, TileId.Sand, TileId.Snow, TileId.Water },
             PlanetId.Mercury => new[] { TileId.MercuryRegolith, TileId.MercuryBasalt, TileId.Sulfide, TileId.MercuryIce },
             PlanetId.Venus => new[] { TileId.VenusBasalt, TileId.Sulfur, TileId.Tessera, TileId.VentGlass },
-            _ => new[] { TileId.Regolith, TileId.Basalt, TileId.Hematite, TileId.Ice },
+            // Mars: the polar cap wears CO₂ frost (Snow) over its ice (U-039); without it the frost had no art and no collision (U-064).
+            _ => new[] { TileId.Regolith, TileId.Basalt, TileId.Hematite, TileId.Ice, TileId.Snow },
         };
 
         void Work(IWorldGenerator gen, BlockingCollection<ChunkBuffer> queue)

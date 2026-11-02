@@ -106,9 +106,12 @@ namespace Meridian.Save
             data.ship.hull = state.hull;
             data.ship.fuel = state.fuel;
             data.ship.tankCapacity = state.tankCapacity;
+            data.ship.thrusterMark = state.thrusterMark;
+            data.ship.tankMark = state.tankMark;
             data.cargo.AddRange(state.cargo);
             data.scrip = state.scrip;
             data.datacores = state.datacores;
+            data.skipFuel = state.skipFuel;
             data.catalogue.AddRange(state.catalogue);
             data.basePieces.AddRange(state.basePieces);
             data.aerostats.AddRange(state.aerostats);
@@ -197,10 +200,13 @@ namespace Meridian.Save
             state.hull = data.ship.hull;
             state.fuel = data.ship.fuel;
             state.tankCapacity = data.ship.tankCapacity;
+            state.thrusterMark = Mathf.Clamp(data.ship.thrusterMark, 1, 3);
+            state.tankMark = Mathf.Clamp(data.ship.tankMark, 1, 3);
             state.cargo.Clear();
             state.cargo.AddRange(data.cargo);
             state.scrip = data.scrip;
             state.datacores = data.datacores;
+            state.skipFuel = data.skipFuel;
             state.catalogue.Clear();
             if (data.catalogue != null) foreach (var id in data.catalogue) state.catalogue.Add(id);
             state.basePieces.Clear(); state.aerostats.Clear();

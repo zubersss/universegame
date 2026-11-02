@@ -31,6 +31,8 @@ namespace Meridian.Space
         public bool externalInput;
         public ShipIntent intent;
         public int thrusterMark = 1;
+        /// <summary>U-063: skip speed while the Skip Drive runs (0: normal flight). Set by SkipDrive.</summary>
+        public float skipSpeed;
 
         public Vector2 Velocity { get; set; }
         public Vector2 Position { get => transform.position; set => transform.position = new Vector3(value.x, value.y, 0f); }
@@ -45,7 +47,9 @@ namespace Meridian.Space
 
         InputAction thrustA, retroA, rotateA, boostA;
 
-        public float Thrust => thrusterMark >= 3 ? 70f : thrusterMark == 2 ? 45f : 30f;
+        /// <summary>U-065: the fitted Thruster mark is shared with the side view (GameState; the field only without one).</summary>
+        int Mark => GameState.Instance != null ? GameState.Instance.thrusterMark : thrusterMark;
+        public float Thrust => Mark >= 3 ? 70f : Mark == 2 ? 45f : 30f;
 
         void Awake()
         {
@@ -119,9 +123,14 @@ namespace Meridian.Space
             int strongest = -1;
             LastPull = world != null ? SpaceLayout.Pull(world.Bodies, Position, out strongest) : Vector2.zero;
             InWellOf = strongest >= 0 ? world.Bodies[strongest].name : null;
-            var v = Velocity + (accel + LastPull) * dt;
-            float cap = boosting ? SpaceLayout.BoostSpeed : SpaceLayout.CruiseSpeed;
-            if (v.sqrMagnitude > cap * cap) v = v.normalized * cap;
+            Vector2 v;
+            if (skipSpeed > 0f) v = nose * skipSpeed; // U-063: in skip, straight along the heading; no pull, no cap
+            else
+            {
+                v = Velocity + (accel + LastPull) * dt;
+                float cap = boosting ? SpaceLayout.BoostSpeed : SpaceLayout.CruiseSpeed;
+                if (v.sqrMagnitude > cap * cap) v = v.normalized * cap;
+            }
             Velocity = v;
             Position += v * dt;
             transform.rotation = Quaternion.Euler(0f, 0f, Heading);
