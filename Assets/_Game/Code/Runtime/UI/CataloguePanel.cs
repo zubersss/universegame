@@ -75,6 +75,20 @@ namespace Meridian.UI
                 if (here != null && here.Config != null) Shown = here.Config.id;
                 Redraw();
             }
+            else ReleaseCreatureIcons();
+        }
+
+        /// <summary>
+        /// U-060: a creature icon is the first frame of the species' whole sheet (color, normal, emission). Keeping
+        /// every sheet ever shown held other planets' creatures in memory; closed, the panel lets them go.
+        /// </summary>
+        void ReleaseCreatureIcons()
+        {
+            foreach (var c in cells) if (c.icon != null) c.icon.sprite = null;
+            foreach (var h in handles) if (h.IsValid()) Addressables.Release(h);
+            handles.Clear();
+            creatureIcons.Clear();
+            creatureRequested.Clear();
         }
 
         public void Show(PlanetId p) { Shown = p; Redraw(); }
