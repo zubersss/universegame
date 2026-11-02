@@ -142,7 +142,7 @@ Goal: Ship, props and depth bands: the Pilgrim and props batch 1 as model prefab
 Accept: an Earth capture shows blocks, back wall, ridges, sky dome and the ship with depth; BuildTests, ShipSideTests, SpaceArtTests green.
 Files: Assets/_Game/Code/Runtime/Ship/, Building/, Planet/Backdrop/, Prefabs/
 Depends: U-073, U-074
-Lead notes: Cycle 171. R1. Cycle 179: the landing pad is now a 2 m module (D-068): the camp spawns two modules (4 m) under the Pilgrim; landing-rule width = 4 m; shelter_door plays its `open` clip; lamps light from socket_light.
+Lead notes: Cycle 171. R1. Cycle 179: the landing pad is now a 2 m module (D-068): the camp spawns two modules (4 m) under the Pilgrim; landing-rule width = 4 m; shelter_door plays its `open` clip; lamps light from socket_light. Cycle 202 review of u076_2026-11-02: mars_shelter_night.png PASSES (lamp model lit from socket_light, wall/door/crate models, boulders, ridge). earth_camp_day.png: ship on the pad modules, props, surveyor, ridge and skyline all read; FAIL on the flora, Art matches §9: the trees render flat-shaded and untextured (faceted crowns in solid greens), unlike BLENDER's review_b085_grove.png (smooth, textured). Likely the importer: mesh normals/smoothing lost on the atlas models, or the generated atlas material not using atlas_color/atlas_normal. Fix, then re-shoot. Also apply D-071 (P-33) in the same pass.
 
 ### U-077 · UNITY · Ready · R1
 Goal: BudgetGate 3D rows (Bible §11.1 geometry row: ≤ 300 k triangles, ≤ 400 draw calls, ≤ 150 shadow casters) + `unity_profile` reads them; R1 build `Build/MERIDIAN_0.4.0/` with a smoke set (Earth day, night with a lamp, digging, the ship landed and flying, Space).
@@ -1212,19 +1212,19 @@ Files: blender/scripts/build_wardens.py, gen_fx.py, Assets/_Game/Art/creatures/w
 Depends: B-002
 Lead notes: Cycle 169. M4.
 
-### B-083 · BLENDER · In Progress · R1
+### B-083 · BLENDER · Done · R1
 Goal: Earth depth bands (contract §9 depth-bands row): per Earth region (forest, plains, desert, ocean/coast, taiga, tundra) a `backgrounds/earth_<region>/ridge_mid.glb` (z 20–60 m strip, tileable every 256 m, ≤ 8 k tris, baked PBR from the v1 ridge recipes), a shared `skyline_far.glb` (≤ 4 k tris) and a `skydome` 2048×1024 equirect `color` per region derived from the v1 layer0 skies.
 Accept: tiles seamlessly in x; reads as the v1 parallax from the side rail in UNITY's preview; stamped turntables; D-045/D-066 peaks measured.
 Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/earth_*/
 Depends: B-077
-Lead notes: Cycle 186: art accepted in full. skyline_far v3 (11 seeded depth rows, broad massif, capped slopes, snow band; 2,560 tris; turntable stamped 02:22) reads as a snow-capped range; ridge_mid ×6 and skydomes ×6 accepted in cycle 183. Done on U-076's first capture with the depth bands in the scene.
+Lead notes: Cycle 186: art accepted in full. skyline_far v3 (11 seeded depth rows, broad massif, capped slopes, snow band; 2,560 tris; turntable stamped 02:22) reads as a snow-capped range; ridge_mid ×6 and skydomes ×6 accepted in cycle 183. Done on U-076's first capture with the depth bands in the scene. Done (cycle 202): depth bands in the scene per u076 earth_camp_day.png (forest ridge + snow skyline) and mars_shelter_night.png (mars_plains ridge).
 
-### B-084 · BLENDER · In Progress · R1
+### B-084 · BLENDER · Done · R1
 Goal: Earth POI props as models: the Survey Archive, Launch Complex pieces, crashed Halcyon hauler, Warden outpost obelisk and the B-020/B-021 prop sets, each ≤ 6 k tris (hauler ≤ 15 k with LOD1), standable tops flat, emissive where lit.
 Accept: contract §9; stamped turntables; UNITY lit preview for Done.
 Files: blender/sources/props/earth/, build_props_earth.py, Assets/_Game/Art/props/earth/
 Depends: B-077
-Lead notes: Cycle 187 (b31f865): art accepted on the turntables (archive door + terminal, launch gantry + tower ruin, Earth beacon, hauler hull_a/hull_b/cargo with LOD1, Warden pylon, Meridian beacon; 188–1,404 tris). Rulings: the hauler stays as the three v1 pieces UNITY already places (no hero wreck now); the pylon stays the v1 obelisk. Done on UNITY's lit preview (fold into U-076's run).
+Lead notes: Cycle 187 (b31f865): art accepted on the turntables (archive door + terminal, launch gantry + tower ruin, Earth beacon, hauler hull_a/hull_b/cargo with LOD1, Warden pylon, Meridian beacon; 188–1,404 tris). Rulings: the hauler stays as the three v1 pieces UNITY already places (no hero wreck now); the pylon stays the v1 obelisk. Done on UNITY's lit preview (fold into U-076's run). Done (cycle 202): POI props in the scene per the u076 captures and UNITY's U-076 swaps (12 swaps, lit preview run r1_models).
 
 ### B-085 · BLENDER · In Progress · R1
 Goal: Earth scenery for the near band and the play plane: 3 tree species (forest/taiga variants), 2 bushes, 3 rocks, grass tufts, a cactus and a dead tree, each ≤ 2 k tris with LOD1 at ≤ 800, sharing one 2048 atlas material; wind-sway via a vertex-colour mask (R = sway weight).
