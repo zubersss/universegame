@@ -1238,7 +1238,7 @@ Goal: Mars scenery and POI props as models: boulders ×3, regolith rocks ×2, ic
 Accept: contract §9; a stamped field preview (20 instances) under the Mars Sun (0.75); UNITY lit preview for Done.
 Files: blender/sources/props/mars/, build_props_mars.py, Assets/_Game/Art/props/mars_flora/, props/mars/
 Depends: B-077
-Lead notes: Cycle 188. R2.
+Lead notes: Cycle 194 (2eed996): art accepted on review_b089_field.png (boulders, rocks, ice chunks, dust bush, stalactite/stalagmite on one Mars atlas with LOD1; new POI prop ice_drill_rig; the other Mars POIs were already made in B-084). Done on R2's lit preview.
 
 ### B-090 · BLENDER · In Progress · R2
 Goal: Space objects as models for U-078's lit top-down scene: `props/space/waystation` (the Earth/Mars Waystation as one model with a lit docking bay and running lights, LOD1), `props/space/asteroid_01..06` as low-poly rocks (≤ 600 tris each) from the v1 silhouettes, `planets/<name>/rings` for Saturn as a flat ring mesh with an alpha texture.
@@ -1247,7 +1247,7 @@ Files: blender/scripts/build_waystation.py, build_asteroids.py, gen_planet.py, A
 Depends: B-077
 Lead notes: Cycle 192 (3e7fbc6): art accepted on the top-down turntables (ring station with solar panels, docking arms and guide lights, 14,250 tris + LOD1; waystation_mars; six asteroids 80–570 tris; planets/saturn/ring_mesh annulus at R = 96 m using rings_color.png alpha). Done on U-078's lit Space capture.
 
-### B-091 · BLENDER · Ready · R3
+### B-091 · BLENDER · In Progress · R3
 Goal: Mercury and Venus terrain block materials (R3 prep, as B-080/B-086): every tile material in `MercuryTileSet` (regolith, basalt, solarite crust, shadow ice, impact glass…) and `VenusTileSet` (basalt, sulfur crust, vent glass, station deck plates…), top/side PBR sets at 512², 2 m repeat, plus backwalls; palettes per §9.
 Accept: tiles seamlessly; reads as the v1 materials under each planet's Sun in UNITY's lit preview; stamped contact sheets.
 Files: blender/scripts/gen_terrain.py, Assets/_Game/Art/terrain/{mercury,venus}/
