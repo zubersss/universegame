@@ -80,6 +80,8 @@ def merge_collection(objs):
         skinned = any(md.type == "ARMATURE" for md in ob.modifiers)
         ev = ob.evaluated_get(dg)
         me = bpy.data.meshes.new_from_object(ev, preserve_all_data_layers=True, depsgraph=dg)
+        orco = me.attributes.new("meridian_orco", "FLOAT_VECTOR", "POINT")   # original object space (B-093)
+        orco.data.foreach_set("vector", [c for v in me.vertices for c in v.co])
         me.transform(to_local @ ob.matrix_world if to_local is not None else ob.matrix_world)
         d = bpy.data.objects.new(ob.name + "_x", me)
         bpy.context.scene.collection.objects.link(d)
@@ -101,6 +103,7 @@ def merge_collection(objs):
         bpy.ops.object.join()
     mesh = bpy.context.view_layer.objects.active
     mesh.name = "model"
+    _orco_materials(mesh)
     mesh.data.name = "model"
     for o in meshes:                                 # originals stay out of the export
         o.hide_render, o.hide_viewport = True, True
@@ -117,6 +120,107 @@ def merge_collection(objs):
             rig.animation_data.action = saved[1]
         bpy.context.view_layer.update()
     return mesh, rig
+
+
+def bake_objects_to_bones(objs, frames):
+    """B-093: v1 creatures that animate plain objects (wing meshes, a root empty, sacs) cannot be
+    merged into one skinned mesh as-is. Give every animated object (and its animated ancestors)
+    a bone whose rest = the object's world transform at frames[0], bake its world motion into
+    the rig's action at every v1 frame, and re-parent the meshes to those bones. Returns the rig
+    (the existing one, or a new `baked_rig`)."""
+    from mathutils import Matrix
+    scene = bpy.context.scene
+    rig = next((o for o in objs if o.type == "ARMATURE"), None)
+    anim = [o for o in objs if o.type in ("MESH", "EMPTY") and o.animation_data and o.animation_data.action]
+    if not anim:
+        return rig
+    sel = set(anim)
+    for o in list(anim):                                  # animated ancestors that are objects
+        p = o.parent
+        while p is not None and p.type != "ARMATURE":
+            if p.animation_data and p.animation_data.action:
+                sel.add(p)
+            p = p.parent
+    if rig is None:
+        ad = bpy.data.armatures.new("baked_rig")
+        rig = bpy.data.objects.new("baked_rig", ad)
+        bpy.context.scene.collection.objects.link(rig)
+        for c in objs[0].users_collection:
+            c.objects.link(rig)
+    scene.frame_set(frames[0])
+    bpy.context.view_layer.update()
+    rest = {o: o.matrix_world.copy() for o in sel}
+    mesh_rest = {o: o.matrix_world.copy() for o in objs if o.type == "MESH"}   # before any clearing
+
+    def depth(o):
+        d, p = 0, o.parent
+        while p is not None:
+            d, p = d + 1, p.parent
+        return d
+    order = sorted(sel, key=depth)
+
+    def parent_bone(o):
+        p = o.parent
+        while p is not None:
+            if p in sel:
+                return "b_" + p.name
+            if p.type == "ARMATURE":
+                return o.parent_bone if o.parent is p else None
+            p = p.parent
+        return None
+    for o in bpy.context.view_layer.objects:
+        o.select_set(False)
+    bpy.context.view_layer.objects.active = rig
+    rig.select_set(True)
+    bpy.ops.object.mode_set(mode="EDIT")
+    inv = rig.matrix_world.inverted()
+    for o in order:
+        b = rig.data.edit_bones.new("b_" + o.name)
+        m = inv @ rest[o]
+        loc, rot, _ = m.decompose()
+        b.head = loc
+        b.tail = loc + rot @ Vector((0.0, 0.05, 0.0))
+        b.align_roll(rot @ Vector((0.0, 0.0, 1.0)))
+        pb = parent_bone(o)
+        if pb:
+            b.parent = rig.data.edit_bones[pb]
+    bpy.ops.object.mode_set(mode="OBJECT")
+    bpy.context.view_layer.update()
+    if rig.animation_data is None:
+        rig.animation_data_create()
+    if rig.animation_data.action is None:
+        rig.animation_data.action = bpy.data.actions.new("baked")
+    for f in frames:                                      # bake world motion (parents first)
+        scene.frame_set(f)
+        bpy.context.view_layer.update()
+        mw = {o: o.matrix_world.copy() for o in order}
+        for o in order:
+            pbn = rig.pose.bones["b_" + o.name]
+            pbn.rotation_mode = "QUATERNION"
+            target = inv @ mw[o] @ rest[o].inverted() @ (rig.matrix_world @ rig.data.bones[pbn.name].matrix_local)
+            pbn.matrix = target
+            bpy.context.view_layer.update()
+            pbn.keyframe_insert("location", frame=f)
+            pbn.keyframe_insert("rotation_quaternion", frame=f)
+            pbn.keyframe_insert("scale", frame=f)
+    scene.frame_set(frames[0])
+    for o in order:                                       # stop object animation, ride the bones
+        o.animation_data_clear()
+    bpy.context.view_layer.update()
+    for o in objs:
+        if o.type != "MESH":
+            continue
+        host, p = (o if o in sel else None), o.parent
+        while host is None and p is not None:            # nearest animated ancestor
+            if p in sel:
+                host = p
+            p = p.parent
+        if host is None:                                 # not under any animated object: leave it
+            continue
+        o.parent, o.parent_type, o.parent_bone = rig, "BONE", "b_" + host.name
+        bpy.context.view_layer.update()
+        o.matrix_world = mesh_rest[o]
+    return rig
 
 
 def retime_clips(rig, clips):
@@ -174,6 +278,29 @@ def auto_decimate(mesh, budget):
             bpy.ops.object.modifier_move_to_index(modifier=md.name, index=len(mesh.modifiers) - 1)
     bpy.ops.object.modifier_apply(modifier="budget")
     return triangle_count(mesh)
+
+
+def _orco_materials(mesh):
+    """Procedural v1 materials read Texture Coordinate > Object; after the merge every part sits
+    in rig space, so patterns shifted (the acidmoth's eyespots fell off its wings). Re-route
+    those links to the per-vertex original object coordinates stored before the merge."""
+    done = set()
+    for slot in mesh.material_slots:
+        m = slot.material
+        if m is None or not m.use_nodes or m.name in done:
+            continue
+        done.add(m.name)
+        nt = m.node_tree
+        for tc in [n for n in nt.nodes if n.type == "TEX_COORD"]:
+            links = [l for l in nt.links if l.from_node == tc and l.from_socket.name == "Object"]
+            if not links:
+                continue
+            at = nt.nodes.new("ShaderNodeAttribute")
+            at.attribute_name = "meridian_orco"
+            for l in links:
+                to = l.to_socket
+                nt.links.remove(l)
+                nt.links.new(at.outputs["Vector"], to)
 
 
 def triangle_count(mesh):
@@ -460,6 +587,11 @@ def export_model(entry, art_dir, preview_dir, objs, stamp_fn):
     scene = bpy.context.scene
     scene.render.fps, scene.render.fps_base = 30, 1.0
     clips = entry.get("clips", [])
+    if entry.get("bake_objects"):
+        frames = sorted({c["start"] + i for c in entry["retime"] for i in range(c["length"])})
+        rig_b = bake_objects_to_bones(objs, frames)
+        if rig_b is not None and rig_b not in objs:
+            objs = list(objs) + [rig_b]
     if entry.get("retime"):
         rig0 = next((o for o in objs if o.type == "ARMATURE"), None)
         if rig0 is None:
