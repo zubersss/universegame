@@ -973,14 +973,14 @@ Files: blender/scripts/build_icons.py, Assets/_Game/Art/icons/<id>/
 Depends: B-054
 Lead notes: Done 37053f6 + 07335f6 (cycle 154): 13 icons, montage icons_b061_montage.png, all distinct at 32 px. Self-reported nits (helium3 glow pinkish, metallic_hydrogen beads small, ring_ice egg-like, jetpack_mk3 thin on dark UI) deferred to the M4 playtest; no polish pass now.
 
-### B-062 · BLENDER · Ready · M4
+### B-062 · BLENDER · Done · M4
 Goal: Uranus column art (Bible §7.5, §7.8): backgrounds/uranus_deck1..3 and uranus_deep (featureless cyan fog, dim light at sunlight 0.25, faint bands only hinted; crystalline sparkle below Deck 3 for the diamond rain; a dark-season variant tint for the unlit half as a second preset), terrain/uranus/floe_ice and floe_core (methane ice, pale cyan).
 Accept: same rules as B-055/B-058 (tiling, seams, stamped reviews, D-045 peak_mb measured before any numpy_only marker); reads clearly as Uranus next to Saturn (cyan, dim, low contrast).
 Files: blender/scripts/gen_backdrop*.py, gen_terrain.py, Assets/_Game/Art/backgrounds/uranus_*/, terrain/uranus/
 Depends: B-048
-Lead notes: Cycle 151. M4. After B-058.
+Lead notes: Done 89e88b1 + 27d8a24 (cycle 158): day and dark-season decks + floes; reviews review_uranus_*/review_uranus_dark_* (stamped 21:47–21:54): dim cyan, low contrast, dark season reads as a colder blue; clearly distinct from Saturn. numpy_only peaks 681/683 MB.
 
-### B-063 · BLENDER · Ready · M4
+### B-063 · BLENDER · In Progress · M4
 Goal: Neptune column art (Bible §7.5, §7.9): backgrounds/neptune_deck1..3 and neptune_deep (deep indigo, white wisps streaking sideways to sell the wind, a dark storm mass that seems to breathe in deck 2–3), terrain/neptune/floe_ice and floe_core, plus terrain/neptune/superionic_ice (black "hot ice" with a faint inner glow, Deep only).
 Accept: same pipeline rules; streaks tile horizontally; superionic ice readable against the deep backdrop; stamped reviews.
 Files: blender/scripts/gen_backdrop*.py, gen_terrain.py, Assets/_Game/Art/backgrounds/neptune_*/, terrain/neptune/
