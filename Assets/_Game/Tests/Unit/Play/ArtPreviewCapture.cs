@@ -36,6 +36,18 @@ namespace Meridian.Tests
 
 #if UNITY_EDITOR
             // U-075 / B-078: a 3D model (contract v2 §9) previews under the Earth Sun from the side rail.
+            // Several model keys can come comma-separated (one Unity session for a whole delivery).
+            if (key.Contains(","))
+            {
+                foreach (var k in key.Split(','))
+                {
+                    var kk = k.Trim();
+                    var g = $"Assets/_Game/Art/{kk}.glb";
+                    Assert.IsTrue(File.Exists(g), $"{g}: model missing");
+                    yield return RenderModel(kk, g);
+                }
+                yield break;
+            }
             var glb = $"Assets/_Game/Art/{key}.glb";
             if (File.Exists(glb)) { yield return RenderModel(key, glb); yield break; }
 #endif
@@ -144,7 +156,7 @@ namespace Meridian.Tests
 
             var cam = new GameObject("PreviewCamera").AddComponent<Camera>();
             cam.transform.position = new Vector3(b.center.x, b.center.y, -10f);
-            Meridian.CameraRig.SideView.Configure(cam, b.extents.y * 1.25f);
+            Meridian.CameraRig.SideView.Configure(cam, Mathf.Max(b.extents.y, Mathf.Max(b.extents.x, b.extents.z)) * 1.25f); // fits long ships (square frame)
             cam.transform.position = new Vector3(b.center.x, b.center.y, cam.transform.position.z);
             cam.clearFlags = CameraClearFlags.SolidColor;
             cam.backgroundColor = new Color(0.45f, 0.58f, 0.75f, 1f); // Earth sky
@@ -159,7 +171,7 @@ namespace Meridian.Tests
             File.WriteAllBytes(baseName + "_34.png", turned.EncodeToPNG());
             TestContext.Out.WriteLine($"[MERIDIAN] model preview {key}: bounds {b.min} … {b.max}, {rends.Length} renderer(s), idle sampled {(anim != null && anim["idle"] != null)}, Sun {sun.intensity:F2} {sun.color}");
             UnityEngine.Object.Destroy(side); UnityEngine.Object.Destroy(turned);
-            UnityEngine.Object.Destroy(go);
+            UnityEngine.Object.Destroy(go); UnityEngine.Object.Destroy(sun.gameObject); UnityEngine.Object.Destroy(cam.gameObject);
         }
 #endif
 
