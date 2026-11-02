@@ -77,7 +77,9 @@ namespace Meridian.Creatures
             for (int s = 0; s < SpeciesCount; s++)
             {
                 var spec = SpeciesSpec.Get((Species)s);
-                if (spec.planet != planet.id) continue;
+                // U-060: the PlanetSide scene is reused across planets; drop other planets' creature sheets
+                // (they stayed loaded until destroy and the dev-build texture memory grew with every planet).
+                if (spec.planet != planet.id) { ReleaseArt(s); continue; }
                 if (art[s] == null && !artHandles[s].IsValid()) LoadArt(s, spec.artKey, false);
                 if (spec.nightArtKey != null && nightFrames[s] == null && !nightHandles[s].IsValid()) LoadArt(s, spec.nightArtKey, true);
             }
@@ -92,6 +94,9 @@ namespace Meridian.Creatures
                 bool exists = l.Status == AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0;
                 Addressables.Release(l);
                 if (!exists || this == null) return;
+                // Left the species' planet while the lookup ran: don't load it (nothing would release it).
+                if (Planet == null || SpeciesSpec.Get((Species)s).planet != Planet.id) return;
+                if ((night ? nightHandles[s] : artHandles[s]).IsValid()) return;
                 var h = Addressables.LoadAssetAsync<IList<Sprite>>(key);
                 if (night) nightHandles[s] = h; else artHandles[s] = h;
                 h.Completed += op =>
@@ -109,6 +114,17 @@ namespace Meridian.Creatures
                     art[s] = list[0];
                 };
             };
+        }
+
+        void ReleaseArt(int s)
+        {
+            if (artHandles[s].IsValid()) Addressables.Release(artHandles[s]);
+            if (nightHandles[s].IsValid()) Addressables.Release(nightHandles[s]);
+            artHandles[s] = default;
+            nightHandles[s] = default;
+            art[s] = null;
+            frames[s] = null;
+            nightFrames[s] = null;
         }
 
         /// <summary>Whether a species' art has arrived (tests wait on it).</summary>

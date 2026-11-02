@@ -66,10 +66,18 @@ namespace Meridian.Tests
                     var feet = new Vector2(x + 0.5f, top + 1.05f);
                     // A solid body already standing there (the landed Pilgrim's hull on Mars, x 72–76) makes the
                     // spot unstandable: placing the surveyor inside it only measures depenetration. Skip and log.
-                    bool occupied = false;
+                    // D-057: every skipped column must lie within the landed ship's footprint (|x − ship x| ≤ 4).
+                    Meridian.Ship.SideShip hull = null;
                     foreach (var c in Physics2D.OverlapBoxAll(feet + new Vector2(0f, 0.9f), new Vector2(0.5f, 1.6f), 0f))
-                        if (!c.isTrigger && c.GetComponentInParent<Meridian.Ship.SideShip>() != null) { occupied = true; log.AppendLine($"{planet} {where} x {x}: skipped, inside {c.name}"); break; }
-                    if (occupied) { skipped++; continue; }
+                        if (!c.isTrigger && (hull = c.GetComponentInParent<Meridian.Ship.SideShip>()) != null) break;
+                    if (hull != null)
+                    {
+                        float shipX = hull.Body.position.x;
+                        log.AppendLine($"{planet} {where} x {x}: skipped, inside {hull.name} (ship x {shipX:F1})");
+                        if (Mathf.Abs(x + 0.5f - shipX) > 4f) fails.Add($"{planet} {where} x {x}: skipped outside the ship's footprint (ship x {shipX:F1})");
+                        skipped++;
+                        continue;
+                    }
                     side.player.Body.position = feet; side.player.transform.position = feet; side.player.Body.linearVelocity = Vector2.zero;
                     for (int i = 0; i < 25; i++) yield return new WaitForFixedUpdate();
                     float y = side.player.Body.position.y, ground = top + 1f;
@@ -92,7 +100,7 @@ namespace Meridian.Tests
                 }
             }
             TestContext.Out.WriteLine($"[MERIDIAN] footing: {checkedCols} columns, {skipped} skipped (occupied by a hull), {fails.Count} off\n{log}");
-            Assert.LessOrEqual(skipped, 4, "only the columns under the landed ship are skipped");
+            Assert.GreaterOrEqual(checkedCols, 80, "D-057: at least 80 columns measured");
             Assert.IsEmpty(fails, string.Join("\n", fails));
             LogAssert.NoUnexpectedReceived();
         }

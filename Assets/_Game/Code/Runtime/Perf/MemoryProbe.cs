@@ -116,6 +116,30 @@ namespace Meridian.Perf
             lines.AppendLine($"{{\"leg\":\"{where}\",\"systemMB\":{s.systemMemoryMB},\"textureMB\":{s.textureMemoryMB},\"audioMB\":{s.audioMemoryMB}," +
                              $"\"avgFrameMs\":{s.avgFrameMs.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}," +
                              $"\"workingSetMB\":{System.Diagnostics.Process.GetCurrentProcess().WorkingSet64 / (1024 * 1024)}}}");
+            TopTextures(where, 15);
+        }
+
+        /// <summary>U-060 diagnosis: the largest loaded textures at this leg (name, size, format, MB), one JSON line.</summary>
+        void TopTextures(string where, int count)
+        {
+            var all = Resources.FindObjectsOfTypeAll<Texture>();
+            var sizes = new long[all.Length];
+            for (int i = 0; i < all.Length; i++) sizes[i] = UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(all[i]);
+            var order = new int[all.Length];
+            for (int i = 0; i < order.Length; i++) order[i] = i;
+            Array.Sort(order, (a, b) => sizes[b].CompareTo(sizes[a]));
+            var sb = new StringBuilder();
+            sb.Append($"{{\"leg\":\"{where}\",\"textures\":{all.Length},\"top\":[");
+            for (int k = 0; k < Math.Min(count, order.Length); k++)
+            {
+                var t = all[order[k]];
+                string fmt = t is Texture2D t2 ? t2.format.ToString() : t.GetType().Name;
+                string name = (t.name ?? "").Replace("\"", "'");
+                if (k > 0) sb.Append(',');
+                sb.Append($"\"{name} {t.width}x{t.height} {fmt} {sizes[order[k]] / (1024 * 1024)}MB\"");
+            }
+            sb.Append("]}");
+            lines.AppendLine(sb.ToString());
         }
 
         void Finish(string error)

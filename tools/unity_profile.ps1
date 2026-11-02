@@ -51,10 +51,10 @@ $memRed = $false
 $le = [char]0x2264; $ar = [char]0x2192; $times = [char]0x00D7; $sec = [char]0x00A7; $dot = [char]0x00B7
 if ($Build) {
     $rows = @('', '## Memory in the development player (U-041, D-036)', '',
-        "The route Earth $ar launch $ar Space $ar entry $ar Mars in Build/MERIDIAN_<version>/MERIDIAN.exe (development build), 1920${times}1080 windowed; counters read after 120 frames per leg. The Editor rows above stay as an upper bound.", '',
+        "The route Earth $ar launch $ar Space $ar entry $ar Mars, then Mercury and Venus loaded directly (U-060), in Build/MERIDIAN_<version>/MERIDIAN.exe (development build), 1920${times}1080 windowed; counters read after 120 frames per leg. The Editor rows above stay as an upper bound.", '',
         "| Row | Budget (${sec}11.1) | Measured | Status |", '|---|---|---|---|')
     $legs = @()
-    if ($buildOk -and (Test-Path $probeOut)) { $legs = @(Get-Content $probeOut | Where-Object { $_.Trim() } | ForEach-Object { $_ | ConvertFrom-Json }) }
+    if ($buildOk -and (Test-Path $probeOut)) { $legs = @(Get-Content $probeOut | Where-Object { $_.Trim() } | ForEach-Object { $_ | ConvertFrom-Json } | Where-Object { $null -ne $_.systemMB }) }
     if ($legs.Count -eq 0) { $rows += "| Memory $dot dev build | $le 2.5 GB system, $le 600 MB textures, $le 60 MB audio | no probe result (build or probe failed) | red |"; $memRed = $true }
     foreach ($l in $legs) {
         if ($l.error) { $rows += "| Memory $dot dev build | | probe error: $($l.error) | red |"; $memRed = $true; continue }

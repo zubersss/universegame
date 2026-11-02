@@ -125,6 +125,25 @@ namespace Meridian.Core
                 side.wardens.DespawnAll();
                 if (side.hazards != null) side.hazards.enabled = true;
             }
+            // U-064 evidence (U-060): a sealed shelter on the Mars plains at night, lit from inside by a lamp.
+            if (side.bases != null)
+            {
+                int sx = side.spawnX + 200;
+                yield return LookAt(side, sx + 0.5f, 3f, 7f);
+                var t = side.terrain;
+                int top = t.TopSolidY(sx);
+                for (int dx = -3; dx <= 3; dx++) top = Mathf.Max(top, t.TopSolidY(sx + dx));
+                int roof = top + 5;
+                foreach (int wx in new[] { sx - 3, sx + 3 })
+                    for (int wy = t.TopSolidY(wx) + 1; wy < roof; wy++)
+                        if (side.bases.PieceAt(new Vector2Int(wx, wy)) == null) side.bases.Place(new Vector2(wx + 0.5f, wy + 0.5f), Meridian.Building.PieceKind.Wall);
+                for (int wx = sx - 3; wx <= sx + 3; wx++) side.bases.Place(new Vector2(wx + 0.5f, roof + 0.5f), Meridian.Building.PieceKind.Wall);
+                side.bases.Place(new Vector2(sx + 1.5f, t.TopSolidY(sx + 1) + 1.5f), Meridian.Building.PieceKind.Lamp);
+                if (side.dayNight != null) side.dayNight.Override = 0f;
+                yield return Wait(1f);
+                yield return Shot(folder, "smoke_18_mars_shelter_night_lamp.png");
+                if (side.dayNight != null) side.dayNight.Override = 0.45f;
+            }
             // On the canyon wall's terraces (as the U-039 capture): wall, ledges and the far rim in one view.
             int canyon = Meridian.Terrain.MarsLandforms.CanyonStart + 60;
             yield return LookAt(side, canyon, 6f, 24f);

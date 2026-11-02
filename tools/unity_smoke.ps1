@@ -34,6 +34,6 @@ $errors | Select-Object -First 10 | ForEach-Object { Write-Host "  $($_.Line.Tri
 $report = Join-Path $RepoRoot ("coordination\reports\unity\smoke_" + (Get-Date -Format 'yyyy-MM-dd'))
 New-Item -ItemType Directory -Force $report | Out-Null
 $shots | ForEach-Object { Copy-Item $_.FullName (Join-Path $report $_.Name) -Force }
-if ($done -and $shots.Count -eq 12 -and $errors.Count -eq 0) { Write-Host "SMOKE OK: $report"; exit 0 }
+if ($done -and $shots.Count -eq 18 -and $errors.Count -eq 0) { Write-Host "SMOKE OK: $report"; exit 0 }
 Write-Host 'SMOKE FAILED'
 exit 1
