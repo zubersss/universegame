@@ -958,3 +958,6 @@ Queue: added B-088 (Mars depth bands), B-089 (Mars scenery + POI props), B-090 (
 ## Cycle 189 · 2026-11-02 02:5x (BLENDER message)
 Checked: review_terrain_mars_regolith.png, _hematite.png (stamped 02:45; rust and dark-rust sets, seams invisible). B-086 art accepted; Done on R2's lit Mars blocks. BLENDER next: B-087.
 
+## Cycle 190 · 2026-11-02 02:5x (BLENDER message)
+Checked: review_creatures_mars_scree_stalker.png, _dustskater.png (stamped 02:48–02:49; read as the v1 silhouettes). B-087 art accepted; Done on R2's lit preview. B-088 → In Progress.
+

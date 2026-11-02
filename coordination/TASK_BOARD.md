@@ -1219,14 +1219,14 @@ Files: blender/scripts/gen_terrain.py, Assets/_Game/Art/terrain/mars/
 Depends: B-077
 Lead notes: Cycle 189 (dc2b3c0): art accepted (regolith, basalt, hematite, ice, snow + basalt backwall; the board's clay/perchlorate/lava-tube examples are items or generator features, not tile materials, so none were due). Done on UNITY's first lit Mars block capture in R2.
 
-### B-087 · BLENDER · Ready · R2
+### B-087 · BLENDER · In Progress · R2
 Goal: Mars creatures as models: `creatures/mars/dustskater` (small class, ≤ 3 k tris) and `creatures/mars/scree_stalker` (medium, ≤ 8 k), full walker clip sets from the v1 rigs, materials matching Mars (silicate, dust).
 Accept: contract §9; stamped turntables; UNITY lit preview at 60 px/m reads as the v1 silhouettes.
 Files: blender/sources/creatures/mars/, build_creatures_mars.py, Assets/_Game/Art/creatures/mars/
 Depends: B-077
-Lead notes: Cycle 181. R2 prep.
+Lead notes: Cycle 190: art accepted on the turntables (dustskater 2,850 tris on skate pads; scree_stalker 7,598 tris with back plates; 16-joint skins, 5 clips). Done on UNITY's lit preview in R2.
 
-### B-088 · BLENDER · Ready · R2
+### B-088 · BLENDER · In Progress · R2
 Goal: Mars depth bands (contract §9 depth-bands row), the R2 counterpart of B-083: `backgrounds/mars_<region>/ridge_mid.glb` for canyon, plains, polar and tharsis (Olympus Mons as the far hero), a shared `skyline_far.glb`, and skydomes per region (rust/salmon skies, the v1 dust haze; a `storm` skydome variant for the dust storm).
 Accept: tiles seamlessly in x; reads as the v1 Mars parallax from the side rail; stamped turntables; peaks measured.
 Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/mars_*/
