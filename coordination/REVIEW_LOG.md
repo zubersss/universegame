@@ -809,3 +809,10 @@ Queue: BLENDER had 3 untouched Ready tasks with deps met (B-056, B-059, B-060); 
 
 ## Cycle 152 · 2026-11-01 20:5x (BLENDER message)
 Checked: 04ac1e7 Saturn 12 layers + floe_ice/core (numpy_only, peak 694 MB); review_saturn_deck1.png stamped 20:44–20:45: pale gold banks, ring-plane line, clearly distinct from Jupiter. B-058 accepted on art; it closes when BLENDER marks it Ready with the deck2/3/deep reviews. Claude Code stopped BLENDER's B-061 icon render for low memory; BLENDER removed its own stale lock correctly. Ruled: D-046 (rule 6) covers every role, so BLENDER may re-run once after UNITY's turn at ≥ 1.5 GB without asking the owner; split into two calls to lower the peak.
+
+## Cycle 153 · 2026-11-01 21:1x
+Checked: tests_2026-11-01.md 20:59–21:00 (EditMode 223/223; PlayMode 90/110 own + LeadQA 3/3; 1 failure, FootingTests' own skip cap 7 > 4 with 0 of 86 columns off); compile 0 errors / 0 warnings (baseline not exceeded); commits 6e54f23, e26a10b, b7611f5; SkipDriveTests 2/2 (D-054).
+Moved: U-065, U-068, U-069 → Done. U-064 stays In Progress (D-057 to apply; lamp capture to come with the U-060 smoke). Decided: D-057 (P-27). UNITY kept the test strict and proposed first this time.
+Locks: none held, no wants; free RAM 2.23 GB. BLENDER's B-061 re-run waits for the owner's answer in its window (BLENDER treats Claude Code's stop notice as needing the owner's own words); the owner was told in the LEAD window.
+Queue: UNITY Ready with deps met: U-060 (after U-064), U-061, U-063 (code done, Review pending its hand-off), U-066, U-067; BLENDER: B-056, B-059, B-060, B-062, B-063.
+

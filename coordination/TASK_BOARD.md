@@ -490,7 +490,7 @@ Goal: M3 playtest build `Build/MERIDIAN_0.3.0/` with build smoke screenshots (Me
 Accept: build smoke clean; every BudgetGate row green in the build; GameInfo 0.3.0; the M2 UI nits (catalogue scrim, selected planet, unscanned silhouettes) folded in.
 Files: Build/ (ignored), coordination/reports/unity/smoke_<date>/
 Depends: U-053, U-055, U-056, U-059, U-064
-Lead notes: Cycle 126. Closes M3 with L-012 and the owner's playtest.
+Lead notes: Cycle 126. Closes M3 with L-012 and the owner's playtest. Cycle 153: add a night shot of the Mars shelter with a lit lamp (U-064 evidence); FootingTests per D-057 must pass in the same run.
 
 ### U-061 · UNITY · Ready · M4
 Goal: Cloud-column world generator (Bible §7.5, D-004): a 4096 × 2000 column with no ground; Escape Line, Datum (1-bar cloud tops), Decks 1–3, Deep and the Crush Line (y 100, lethal, pulsing "CRUSH" band); floating ice floes (solid, mineable platforms) seeded per deck with density by deck; floes sublimate 30–90 s after the player disturbs them; derelicts and creature husks as standable floes; the same chunk streaming as solid worlds. Start with Jupiter using terrain/jupiter floe_ice/floe_core and backgrounds/jupiter_deck1 (B-048).
@@ -518,14 +518,14 @@ Goal: (1) investigate the surveyor resting 2 m below TopSolidY ~30 m from the Ma
 Accept: a PlayMode test walks the surveyor across every POI stamp on Earth and Mars and asserts feet within 0.1 m of TopSolidY; the night shelter capture shows lamplight.
 Files: Assets/_Game/Code/Runtime/Terrain/, Building/
 Depends: U-056, U-057
-Lead notes: Cycle 141. Do it inside the U-060 window if small; it must land before the M3 build.
+Lead notes: Cycle 153: footing goal met (86 columns, 0 off). D-057 ratifies P-27: apply it to FootingTests. The lamp still needs its capture evidence: add a "Mars shelter at night, lamp lit" shot to the U-060 build smoke; U-064 closes on that run.
 
-### U-065 · UNITY · Ready · M4
+### U-065 · UNITY · Done · M4
 Goal: Thruster Mk2/Mk3 and Tank Mk2/Mk3 (Bible §4.3): 12 / 20 / 35 m/s² vertical, lateral 60%; launch allowed only where the table's "Can launch from" row says (Mk1: Mercury, Venus, Earth, Mars, Uranus; Mk2: + Saturn, Neptune; Mk3: + Jupiter); tanks 100/200/400; craftable ship upgrades in the RecipeBook; the HUD says "Thruster MkN can't lift off here" instead of a silent fail.
 Accept: EditMode: launch permission table for all 8 planets × 3 marks; PlayMode: Mk1 refuses on Saturn with the HUD line, Mk2 lifts off Saturn; tank capacity follows the mark; save/load keeps the marks.
 Files: Assets/_Game/Code/Runtime/Ship/, Items/, Tests/
 Depends: U-010
-Lead notes: Cycle 147. M4. No dependency on the column; start any time.
+Lead notes: Done 6e54f23 + e26a10b (cycle 153): check 20:58 compile 0/0, EditMode 223/223 (ShipMarksTests 5/5), ShipMarksPlayTests green (Mk1 refused on Saturn with the HUD line, Mk2 lifts off).
 
 ### U-066 · UNITY · Ready · M4
 Goal: Top-down ring and belt mining (Bible §3, §7.7): mining lanes in the asteroid Belt and Saturn's rings, density by distance with safe gaps; the ship's mining beam breaks ring ice / ring rock bodies (placeholder sprites until B-059) into water ice, silicates, iron; Ring Mites (placeholder) swarm a ship that mines for > 20 s and chew hull 1/s each until shot or outrun.
@@ -541,19 +541,19 @@ Files: Assets/_Game/Code/Runtime/Player/Rig/, Tests/
 Depends: U-049
 Lead notes: Cycle 147. M4. Test on solid worlds now; the floe case joins once U-061 lands.
 
-### U-068 · UNITY · Ready · M4
+### U-068 · UNITY · Done · M4
 Goal: Giant-world hazard bands (Bible §7.5–7.9) as data: per planet and per deck, hazard levels (Radiation, Cryo, Thermal, Pressure) read by the existing hazard system; Jupiter values from §7.6 (Radiation 3 above Deck 2, 1 below; Cryo 2 in Deck 1; Thermal 2 in Deep), Saturn/Uranus/Neptune from §7.7–7.9; a pure lookup HazardBands.For(planet, y) so it is testable before the column renders.
 Accept: EditMode table tests for each giant at one y per band; suit meters show the band level when the player is placed at that y in a stub scene.
 Files: Assets/_Game/Code/Runtime/Hazards/GiantBands.cs, Tests/
 Depends: U-049
-Lead notes: Cycle 147. M4. Pure data + lookup; U-061 consumes it.
+Lead notes: Done adb433e (cycle 153): GiantBandsTests 5 + GiantBandsPlayTests green in the 20:20 and 20:58 checks; numbers per D-055.
 
-### U-069 · UNITY · Ready · M4
+### U-069 · UNITY · Done · M4
 Goal: Catalogue + recipes for M4 materials (Bible §7.6–7.9): metallic_hydrogen, ammonia_ice, phosphorus_pigment, ring_ice, ring_rock, methane_ice, deep_diamond, superionic_ice; float_cell_mk1/mk2 and jetpack_mk2/mk3 recipes (pick the numbers from §4.2 and the §7 gates; list them in your status for LEAD's D- entry); icons from B-061 (placeholders until it lands).
 Accept: EditMode: every new item has a catalogue entry, an icon key, and at least one source (generator, drop, or recipe stub); RecipeBook loads with no duplicate ids.
 Files: Assets/_Game/Code/Runtime/Items/, Data/, Tests/
 Depends: U-051
-Lead notes: Cycle 147. M4. Icon keys = the item ids above (B-061 uses the same).
+Lead notes: Done adb06a3 + 7a413c1 (cycle 153): M4ItemsTests 5 green, RecipeBook reset; recipes per D-056; placeholder icons until B-061.
 
 ### U-025 · UNITY · Done · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.
