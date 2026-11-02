@@ -636,6 +636,27 @@ Files: Assets/_Game/Code/Runtime/Camera/, tools/unity_smoke.ps1
 Depends: U-072
 Lead notes: Cycle 176. R1. Small; it makes every later review honest about depth.
 
+### U-081 · UNITY · Ready · R2
+Goal: Mars in 3D, the R2 counterpart of U-076: Mars block arrays from B-086, Mars depth bands from B-088 (ridge_mid per region, Tharsis skyline, storm skydome crossfade during dust storms), Mars flora and POI props from B-089/B-084 placed by the existing POI/scenery rules, Mars creatures already through ModelView; dust storms as 3D particles + the ×4 fog; the M2 smoke set (canyon, storm, polar, Olympus, night) re-shot in 3D with the depth preset.
+Accept: M2SoakTests + CreatureTests green; a Mars capture set matching §9 v2; §11.1 incl. the geometry row green on Mars in the dev build.
+Files: Assets/_Game/Code/Runtime/Planet/, Terrain/, Prefabs/
+Depends: U-073, U-074, U-075
+Lead notes: Cycle 199. R2. Start after U-076; everything it needs from BLENDER is in.
+
+### U-083 · UNITY · Ready · R2
+Goal: Interactive rim glow (Bible §9 v2 Readability): props and creatures the player can interact with show a faint emissive rim driven by the mask's B channel when the player is within 3 m (material float set by the interaction system); pickups pulse; the HUD prompt unchanged.
+Accept: PlayMode: the rim float is 1 within 3 m and 0 beyond; a capture shows the smelter rim-lit beside the surveyor; 0 B GC per frame.
+Files: Assets/_Game/Code/Runtime/Interaction/, Shaders/
+Depends: U-075
+Lead notes: Cycle 199. R2.
+
+### U-084 · UNITY · Ready · R2
+Goal: Block mesher performance pass: greedy meshing in a Burst job off the main thread (apply on the main thread ≤ 2 ms per chunk per D-019), mesh and collider pooling, a per-planet `TerrainBlocks` material instance; measure the §11.1 geometry row (triangles, draw calls, shadow casters) on Earth and Mars with everything placed and record it in perf_<date>.md.
+Accept: chunk apply ≤ 2 ms p99 while streaming at run speed; geometry row green; no visible pop at chunk edges in a depth capture.
+Files: Assets/_Game/Code/Runtime/Terrain/, Tests/
+Depends: U-073
+Lead notes: Cycle 199. R2. Lock-free coding; the measurement joins a scheduled check.
+
 ### U-025 · UNITY · Done · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.
 Accept: EditMode test: Earth noon/midnight intensities match §9; captures at dawn/noon/dusk/night on Earth; 0 B GC per frame.
@@ -1288,6 +1309,34 @@ Accept: contract §9; stamped turntables; UNITY lit preview for Done.
 Files: build_wardens.py, Assets/_Game/Art/creatures/warden/
 Depends: B-077
 Lead notes: Cycle 198: art accepted on the turntables (sentinel 7,600 tris; hunter 7,440 tris as a slimmer dart pod with strike prongs; centred pivots; idle/walk/fly/attack/hurt/death; iris, core and prongs on bones; indigo lights and shield ring). Pipeline fix: species-prefixed actions. Done on R3's lit preview.
+
+### B-097 · BLENDER · Ready · R4
+Goal: Jupiter column in 3D: floe block materials (`terrain/jupiter/floe_ice`, `floe_core`, `floe_derelict` as top/side PBR sets at 512², 2 m repeat, from the v1 recipes) and the cloud decks as depth-band assets: `backgrounds/jupiter_deck1..3/` and `jupiter_deep/` each as three translucent cloud-bank planes (`deck_far.glb`, `deck_mid.glb`, `deck_near.glb`: alpha-textured strips from the B-048/B-055 painted banks, tileable every 256 m) plus a skydome per deck; the Crush band on the near plane of `deep` (as learned in B-055).
+Accept: contract §9; tiles seamlessly; stamped turntables composited as a stack; peaks measured.
+Files: blender/scripts/gen_terrain.py, gen_backdrop3d.py, Assets/_Game/Art/terrain/jupiter/, backgrounds/jupiter_*/
+Depends: B-077
+Lead notes: Cycle 199. R4 (M4 in 3D) prep; reuses the superseded B-048/B-055 work.
+
+### B-098 · BLENDER · Ready · R4
+Goal: Jupiter creatures as models from the B-056 sources: stormglider (flier), lightning_eel (segmented, emissive stripe), belt_wasp (small), ballast_tortoise (large; its death pose matches the husk) and the husk_tortoise prop; size classes per contract §9; LOD1 for the tortoise.
+Accept: contract §9; stamped turntables; UNITY lit preview for Done.
+Files: build_creatures_jupiter.py, build_props_jupiter.py, Assets/_Game/Art/creatures/jupiter/, props/jupiter/
+Depends: B-077
+Lead notes: Cycle 199. R4 prep.
+
+### B-099 · BLENDER · Ready · R4
+Goal: Jupiter and Neptune POI props as models from the B-055/B-068 sources: derelict_pod, beacon_vault, the Meridian wreck bow/mid/stern (standable tops), wind_anchor; plus the aerostat modules (cell, deck, strut) as models if not already made under B-095.
+Accept: contract §9 (ppu/LOD rules); standable tops flat; stamped turntables; UNITY lit preview for Done.
+Files: build_props_jupiter.py, build_props_neptune.py, build_props_common.py, Assets/_Game/Art/props/{jupiter,neptune,common}/
+Depends: B-077
+Lead notes: Cycle 199. R4 prep.
+
+### B-100 · BLENDER · Ready · R4
+Goal: Saturn column in 3D (as B-097) from the B-058 sources: floe materials, deck planes for saturn_deck1..3 and saturn_deep (ring-plane line in the deck 1 skydome), plus the Saturn creatures as models from the B-060 sources (helium_jelly with its `rise` clip, hex_drake, floe_moth) and the ring-mining props from B-059/B-068 (ring_ice/ring_rock as low-poly bodies, ring_rig, helium_trap, hexagon_wall_marker).
+Accept: contract §9; stamped turntables; UNITY lit preview for Done.
+Files: gen_terrain.py, gen_backdrop3d.py, build_creatures_saturn.py, build_props_saturn.py, Assets/_Game/Art/{terrain,backgrounds,creatures,props}/saturn*/
+Depends: B-077
+Lead notes: Cycle 199. R4 prep.
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
