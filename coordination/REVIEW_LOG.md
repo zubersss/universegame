@@ -904,3 +904,6 @@ Queues: UNITY Ready R1 U-073..U-077 (5); BLENDER Ready R1 B-078..B-082 (5), B-07
 Checked: tests_2026-11-02.md 00:40–00:41 (EditMode 229/229 incl. SideViewTests; PlayMode 91/110 + LeadQA 10/10, 0 failed); compile 0 errors / 0 warnings; earth_perspective_rail.png (tiles, camp, surveyor, Pilgrim under the perspective rail; flat and full-bright as expected before U-073/U-074). U-072 → Done. B-077 → Done on UNITY's import check (e7dc190); D-065 fixes the facing on the export side; contract v2.2.
 Queues: UNITY Ready R1 U-073..U-077 (5); BLENDER Ready R1 B-078..B-082 (5).
 
+## Cycle 175 · 2026-11-02 01:1x (BLENDER message)
+Checked: review_characters_surveyor_base.png (stamped 01:05; front, ¾, back). B-078 art accepted; Done waits on UNITY's lit preview + facing re-check. D-066: 2.0 GB gate for 2048² model bakes (contract §9.1 item 6). BLENDER next: B-079 Pilgrim.
+

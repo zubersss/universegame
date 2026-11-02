@@ -664,12 +664,12 @@ Files: blender/scripts/build_calibration.py, blender/render.py, Assets/_Game/Art
 Depends: —
 Lead notes: Done 09c6f27 + f6108e4 (cycle 174): calibration glb imported by UNITY (e7dc190): clips and lengths kept, feet at y = 0, 984 tris, materials from the maps. Facing was mirrored by glTFast → D-065 (export facing glTF −X); re-export the calibration once under B-078's first turn.
 
-### B-078 · BLENDER · Ready · R1
+### B-078 · BLENDER · In Progress · R1
 Goal: The surveyor as a model: `characters/surveyor/base.glb`, ≤ 12 k triangles, 2048 textures, the full §5 clip set at 30 fps, a `float_pack` socket (empty) on the back and a `rig_tool` socket in the right hand; reuse the existing surveyor rig.
 Accept: contract §9; clips loop where they should; stamped turntable; UNITY lit preview.
 Files: blender/sources/characters/surveyor.blend, build_surveyor.py, Assets/_Game/Art/characters/surveyor/
 Depends: B-077
-Lead notes: Cycle 171. R1.
+Lead notes: Cycle 175 (0f4193a): art accepted on the stamped turntable (reads as the v1 surveyor: white suit, orange shoulders, pack, rig tool, blue visor; 9,228 tris, 10 clips, 2 sockets). Done once UNITY's lit preview (tools/unity_art_preview.ps1) and the D-065 facing re-check are in.
 
 ### B-079 · BLENDER · Ready · R1
 Goal: The Pilgrim as a model: `ships/pilgrim/base.glb` (12 m long), ≤ 15 k triangles, emissive engines and windows, landing gear, a `cockpit` socket, `LOD1`; a top-down `top` is no longer separate (the same model is viewed from above in Space).

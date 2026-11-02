@@ -155,6 +155,6 @@ Existing Done assets are not re-exported unless a task says so.
 3. **No images inside the glb.** Materials carry factors only; `ArtImporter` builds the URP Lit material from the four PNGs beside the glb.
 4. **Mask channels.** R metallic, G baked ambient occlusion, B rim/interactive glow, A smoothness (= 1 − roughness).
 5. **Colour check tolerance** for v2 bakes: ±4/255 (Cycles colour bakes run ~1.5 % low).
-6. **Memory gate.** Model bake + export jobs use the 1.5 GB gate (measured 1.44–1.56 GB).
+6. **Memory gate.** Model bake + export jobs with 1024² maps use the 1.5 GB gate (measured 1.44–1.56 GB); 2048² maps need ≥ 2.0 GB free (measured 1.77–1.89 GB; D-066).
 7. **Sockets** are empties named `socket_<name>` exported as glTF nodes, and listed in the json.
 8. **LFS.** `*.glb` and `*.gltf` are LFS (`.gitattributes`). A glb committed before this rule is re-added once (`git rm --cached` + `git add`) by its owner so it becomes a pointer.
