@@ -1,7 +1,7 @@
 # LEAD STATUS
-Updated: 2026-11-01 22:4x · Session: 2 · Review cycle: 160
+Updated: 2026-11-01 23:1x · Session: 2 · Review cycle: 161
 ## Current task
-Review cycle every 30 min (/loop cron job in this session). M2 waiting on owner playtest USER-12; M3: U-064 (check queued at the memory gate) → U-060 M3 build → L-012 (write Tests/LeadQA/M3InnerTests.cs) → M3_REPORT + milestone page. M4 queue stocked in cycle 147 (U-061..U-069, B-055..B-061).
+L-012: writing Tests/LeadQA/M3InnerTests.cs against Build 0.3.0 code, then a LeadQA run (HeavyJobLock), M3_REPORT and the milestone page. U-060 Done (cycle 161).
 ## Last completed
 Cycle 147: queue refill (5 UNITY, 6 BLENDER), USER-13 done, USER-14 added.
 ## Next up

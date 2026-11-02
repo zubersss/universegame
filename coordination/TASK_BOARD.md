@@ -95,7 +95,7 @@ Files: Assets/_Game/Tests/LeadQA/, coordination/reviews/M2_REPORT.md
 Depends: U-033, U-034, U-037, U-039, B-015, B-016
 Lead notes: Done (cycle 97): M2SoakTests passed twice (14:30, 14:33; touchdowns 2.68 and 4.80 m/s); screenshots reviewed; M2_REPORT.md written; owner playtest = USER-12.
 
-### L-012 · LEAD · Ready · M3
+### L-012 · LEAD · In Progress · M3
 Goal: M3 QA: LeadQA M3InnerTests: Earth → launch → Mercury entry; survive a forced flare in a shelter; mine solarite in the window; fly to Venus; dock-free direct entry to the deck station; craft a radiation liner; sell at the Earth Waystation; ≤ 15 min game time per run; clean console; M3_REPORT.md + milestone page.
 Accept: passes twice; screenshots checked vs §9; M3_REPORT written; owner playtest posted.
 Files: Assets/_Game/Tests/LeadQA/M3InnerTests.cs, coordination/reviews/M3_REPORT.md
@@ -485,12 +485,12 @@ Files: Assets/_Game/Code/Runtime/Terrain/, Hazards/, Items/
 Depends: U-049, U-051
 Lead notes: Done bac7e80 (cycle 137): solarite 90 s post-flare window (Beam cuts 3 per cluster, then crusts), Mars perchlorate deposits (plains + polar cap), Earth living seed drop, Venus vent glass confirmed, wormplate stub; OnlyHereTests 4 + SolariteTests; catalogue entries; full check green. Catalogue nits 2 and 3 fixed; scrim deepened to 78% for all panels (cycle 137).
 
-### U-060 · UNITY · In Progress · M3
+### U-060 · UNITY · Done · M3
 Goal: M3 playtest build `Build/MERIDIAN_0.3.0/` with build smoke screenshots (Mercury day + twilight + flare shelter, Venus deck station + surface vent, crafting panel, market, catalogue, a Warden, both apexes) and dev-build memory rows for all four inner planets.
 Accept: build smoke clean; every BudgetGate row green in the build; GameInfo 0.3.0; the M2 UI nits (catalogue scrim, selected planet, unscanned silhouettes) folded in.
 Files: Build/ (ignored), coordination/reports/unity/smoke_<date>/
 Depends: U-053, U-055, U-056, U-059, U-064
-Lead notes: Cycle 126. Closes M3 with L-012 and the owner's playtest. Cycle 153: add a night shot of the Mars shelter with a lit lamp (U-064 evidence); FootingTests per D-057 must pass in the same run. Cycle 157 (three strikes; LEAD approach): (1) The bundles in Build/MERIDIAN_0.3.0/.../aa are dated Oct 31 22:20, so the player build is shipping STALE Addressables content and import changes never reach the player. Before BuildPipeline.BuildPlayer, call AddressableAssetSettings.CleanPlayerContent() then AddressableAssetSettings.BuildPlayerContent() (or enable 'Build Addressables on Player Build' in the settings), and assert the aa folder's timestamps are fresh in BuildTools. (2) If the sheets are packed in a SpriteAtlas, the atlas's own Standalone platform settings decide the format (they override the texture's BC7); set them to BC7 / compressed. (3) Retention: an Addressables asset stays resident until its whole bundle's refcount reaches 0, and UnloadUnusedAssets can't free it while the bundle is held. The D-050 terrain preloads keep each planet's bundle open, so its creature sheets stay too. Split creature sheets into their own group per planet (Bundle Mode: Pack Separately or Pack Together By Label) apart from the terrain tile sheets, and Release() each creature handle on planet unload. Accept is unchanged: textures ≤ 600 MB on every inner planet in the dev build.
+Lead notes: Done 2e1f495 + 657f999 + a4fa60a (cycle 161): Build/MERIDIAN_0.3.0 (352 MB); check 22:46 compile 0/0, EditMode 224/224, PlayMode 91/110 + LeadQA 3/3, 0 failed; BudgetGate green (Earth p99 9.41 ms, Mars entry 1.34 s); dev-build textures Earth 187, Space 162, Mars 190, Mercury 258, Venus 308 MB (all ≤ 600); 18-shot smoke checked (Mercury day, Venus station read right).
 
 ### U-061 · UNITY · Ready · M4
 Goal: Cloud-column world generator (Bible §7.5, D-004): a 4096 × 2000 column with no ground; Escape Line, Datum (1-bar cloud tops), Decks 1–3, Deep and the Crush Line (y 100, lethal, pulsing "CRUSH" band); floating ice floes (solid, mineable platforms) seeded per deck with density by deck; floes sublimate 30–90 s after the player disturbs them; derelicts and creature husks as standable floes; the same chunk streaming as solid worlds. Start with Jupiter using terrain/jupiter floe_ice/floe_core and backgrounds/jupiter_deck1 (B-048).
@@ -518,7 +518,7 @@ Goal: (1) investigate the surveyor resting 2 m below TopSolidY ~30 m from the Ma
 Accept: a PlayMode test walks the surveyor across every POI stamp on Earth and Mars and asserts feet within 0.1 m of TopSolidY; the night shelter capture shows lamplight.
 Files: Assets/_Game/Code/Runtime/Terrain/, Building/
 Depends: U-056, U-057
-Lead notes: Cycle 153: footing goal met (86 columns, 0 off). D-057 ratifies P-27: apply it to FootingTests. The lamp still needs its capture evidence: add a "Mars shelter at night, lamp lit" shot to the U-060 build smoke; U-064 closes on that run.
+Lead notes: Cycle 161: footing part accepted (FootingTests green under D-057). FAIL lamp evidence: smoke_18_mars_shelter_night_lamp.png shows the lamp post but no visible warm light pool; the shelter interior is as dark as outside. Check the Point Light 2D: Target Sorting Layers must include the terrain, props and character layers; intensity ~1.0, outer radius 5 m, falloff ~0.5, warm colour (1.0, 0.8, 0.55); and that the prop isn't rendered with an unlit material that ignores lights. Re-shoot the same capture. Not blocking the M3 playtest; ship it in the next build.
 
 ### U-065 · UNITY · Done · M4
 Goal: Thruster Mk2/Mk3 and Tank Mk2/Mk3 (Bible §4.3): 12 / 20 / 35 m/s² vertical, lateral 60%; launch allowed only where the table's "Can launch from" row says (Mk1: Mercury, Venus, Earth, Mars, Uranus; Mk2: + Saturn, Neptune; Mk3: + Jupiter); tanks 100/200/400; craftable ship upgrades in the RecipeBook; the HUD says "Thruster MkN can't lift off here" instead of a silent fail.

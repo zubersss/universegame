@@ -847,3 +847,7 @@ Checked: c764d7f (U-060 root cause: NPOT + mipmaps are stored uncompressed; ArtI
 Decided: D-061 (keep NPOT sheets, no mips; the UNITY → BLENDER POT handoff is declined for now). Waiting for the dev-build re-profile to confirm ≤ 600 MB on Mercury/Venus.
 Queues: UNITY U-061, U-063, U-066, U-067, U-070, U-071; BLENDER B-056, B-059, B-060, B-064, B-065. No stalls.
 
+## Cycle 161 · 2026-11-01 23:1x
+Checked: tests 22:46–22:47 (EditMode 224/224, PlayMode 91/110 + LeadQA 3/3, 0 failed); compile 0 errors (warnings 0, under baseline); perf_2026-11-01.md BudgetGate green and dev-build memory rows all green (textures 162–308 MB; Venus 912 → 308 after D-061); Build/MERIDIAN_0.3.0 present; smoke_2026-11-01 shots 13 (Mercury day), 16 (Venus station), 18 (Mars shelter night).
+Moved: U-060 → Done (M3 build exists). U-064 lamp FAIL (no visible light pool in shot 18) → stays In Progress with a fix list, not blocking the playtest. L-012 → In Progress (LEAD writes M3InnerTests next).
+
