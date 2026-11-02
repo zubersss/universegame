@@ -312,7 +312,7 @@ PRESETS = {
         sun=dict(dir=(-0.5, 0.5, -0.7), strength=0.25, color=(0.84, 0.92, 1.0), angle=22.0),
         ambient=((0.3, 0.44, 0.54), 0.5),
         haze=(44, 74, 90),
-        sparkle=(900, (230, 248, 255)),                  # diamond rain: bright glints in the haze
+        sparkle=(1600, (240, 252, 255)),                 # diamond rain: bright glints in the haze
         crush=(0.88, 0.07, (120, 170, 220)),
         banks=[dict(top=0.46, base_amp=18, r=(60, 160), billows=30, fall=380, haze=0.66, streak=0.06,
                     bands=[(70, 108, 124), (62, 100, 116)], band_h=120,
@@ -331,7 +331,7 @@ PRESETS = {
         ambient=((0.36, 0.44, 0.78), 0.6),
         haze=(70, 96, 176),
         stars=180,
-        wisps=(14, (236, 242, 255), 1.1),
+        wisps=(7, (236, 242, 255), 0.55),
         banks=[dict(top=0.52, base_amp=14, r=(40, 110), billows=44, fall=260, haze=0.55, streak=0.22,
                     bands=[(84, 116, 200), (70, 98, 184), (92, 126, 208)], band_h=70,
                     crown=(118, 150, 222), under=(40, 56, 120)),
@@ -346,8 +346,8 @@ PRESETS = {
         sun=dict(dir=(-0.5, 0.5, -0.7), strength=0.4, color=(0.84, 0.9, 1.0), angle=16.0),
         ambient=((0.28, 0.34, 0.68), 0.55),
         haze=(46, 64, 132),
-        wisps=(10, (220, 230, 255), 0.9),
-        storm=(0.62, 0.5, 0.16, 0.2, (16, 20, 52)),
+        wisps=(6, (220, 230, 255), 0.45),
+        storm=(0.62, 0.62, 0.24, 0.22, (16, 20, 52)),
         banks=[dict(top=0.3, base_amp=16, r=(50, 130), billows=40, fall=320, haze=0.55, streak=0.2,
                     bands=[(60, 84, 162), (50, 70, 146)], band_h=90,
                     crown=(84, 110, 186), under=(24, 34, 84)),
@@ -362,8 +362,8 @@ PRESETS = {
         sun=dict(dir=(-0.5, 0.5, -0.7), strength=0.3, color=(0.82, 0.88, 1.0), angle=18.0),
         ambient=((0.24, 0.28, 0.6), 0.5),
         haze=(32, 44, 100),
-        wisps=(8, (200, 214, 250), 0.7),
-        storm=(0.3, 0.42, 0.2, 0.26, (10, 12, 36)),
+        wisps=(5, (200, 214, 250), 0.38),
+        storm=(0.3, 0.58, 0.28, 0.26, (10, 12, 36)),
         banks=[dict(top=0.26, base_amp=18, r=(60, 160), billows=36, fall=380, haze=0.55, streak=0.16,
                     bands=[(44, 62, 132), (36, 52, 118)], band_h=110,
                     crown=(64, 84, 156), under=(16, 22, 60)),
@@ -378,7 +378,7 @@ PRESETS = {
         sun=dict(dir=(-0.5, 0.5, -0.7), strength=0.2, color=(0.8, 0.86, 1.0), angle=20.0),
         ambient=((0.2, 0.22, 0.5), 0.5),
         haze=(18, 22, 58),
-        wisps=(5, (170, 186, 236), 0.5),
+        wisps=(4, (170, 186, 236), 0.3),
         crush=(0.88, 0.07, (90, 120, 255)),
         banks=[dict(top=0.46, base_amp=18, r=(60, 160), billows=30, fall=380, haze=0.62, streak=0.12,
                     bands=[(30, 40, 92), (24, 32, 80)], band_h=120,
@@ -1792,11 +1792,13 @@ def generate(entry, ctx):
             dx = np.minimum(np.abs(xx / Ww - cx), 1 - np.abs(xx / Ww - cx))     # wraps in x
             wob = 1 + 0.12 * fft_noise(np.random.default_rng(seed + 5), Hh, Ww, Ww / 24, Ww / 4, 1.0)
             d = np.hypot(dx / rx, (yy / Hh - cy) / ry) * wob
-            m = np.clip((1.0 - d) / 0.35, 0, 1) ** 1.5
+            # v2: soft falloff over most of the radius and darkening only where the bank already
+            # has cloud (a first pass filled its own alpha and cut a hard dark notch).
+            m = np.clip((1.0 - d) / 0.7, 0, 1) ** 2
             bank = bank.copy()
             c = np.array(scol, np.float32) / 255
-            bank[..., :3] = bank[..., :3] * (1 - 0.85 * m[..., None]) + c * 0.85 * m[..., None]
-            bank[..., 3] = np.maximum(bank[..., 3], m)
+            k = 0.7 * m[..., None] * bank[..., 3:4]
+            bank[..., :3] = bank[..., :3] * (1 - k) + c * k
         if P.get("wisps") and layer in ("layer1", "layer2"):
             # B-063 Neptune: white wisps streaking sideways (wind). Thin horizontal bands of
             # x-periodic noise, so the streaks tile.
@@ -1806,9 +1808,12 @@ def generate(entry, ctx):
             yy = np.arange(Hh, dtype=np.float32)[:, None]
             acc = np.zeros((Hh, Ww), np.float32)
             for _ in range(n):
+                # v2: long soft streaks (a first pass with short, thin, high-contrast segments read
+                # as rain / dotted lights). Wavelengths ~1/8 to 2/3 of the width, soft threshold.
                 y0 = wrng.uniform(0.08, 0.7) * Hh
-                th = wrng.uniform(1.5, 5.0) * Hh / 1024
-                streak = np.clip(fft_noise(wrng, 1, Ww, Ww / 40, Ww / 3, 0.8)[0] - 0.4, 0, None)
+                th = wrng.uniform(5.0, 14.0) * Hh / 1024
+                s = fft_noise(wrng, 1, Ww, Ww / 8, Ww / 1.5, 0.6)[0]
+                streak = np.clip((s + 0.2) / 1.6, 0, 1) ** 2
                 acc += np.exp(-((yy - y0) / th) ** 2) * streak[None, :]
             acc = np.clip(acc * k, 0, 1)
             bank = bank.copy()
@@ -1823,11 +1828,11 @@ def generate(entry, ctx):
             n = max(1, n * Hh * Ww // (1024 * 2048))
             srng = np.random.default_rng(seed + 11)
             sy = srng.integers(int(Hh * 0.2), Hh, n)
-            sx = srng.integers(0, Ww, n)
+            sx = srng.integers(3, Ww - 3, n)               # glints clear of the wrap seam (tile check)
             sv = srng.uniform(0.4, 1.0, n)
             bank = bank.copy()
             c = np.array(scol, np.float32) / 255
-            for dy, dx, w in ((0, 0, 1.0), (1, 0, 0.35), (-1, 0, 0.35), (0, 1, 0.35), (0, -1, 0.35)):
+            for dy, dx, w in ((0, 0, 1.0), (1, 0, 0.6), (-1, 0, 0.6), (0, 1, 0.6), (0, -1, 0.6), (2, 0, 0.25), (-2, 0, 0.25), (0, 2, 0.25), (0, -2, 0.25)):
                 yy, xx = np.clip(sy + dy, 0, Hh - 1), (sx + dx) % Ww
                 k = (sv * w)[:, None]
                 bank[yy, xx, :3] = bank[yy, xx, :3] * (1 - k) + c * k
