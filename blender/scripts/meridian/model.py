@@ -53,24 +53,45 @@ def merge_collection(objs):
     rigs = {o for o in objs if o.type == "ARMATURE"}
     if not meshes:
         raise ModelError("no meshes in the source collection")
+    rig = next((a for a in (_bone_of(o)[0] for o in meshes) if a is not None), None) or (next(iter(rigs)) if rigs else None)
+    # Bind at REST (fix 2026-11-02): the first exports merged at the current frame, so the
+    # active clip's frame-1 pose was baked into the bind shape and then applied again by the
+    # animation. Rest pose + the rig object's own (keyed) transform neutralised, meshes stored
+    # in the rig's local space.
+    saved = None
+    if rig is not None:
+        saved = (rig.data.pose_position, rig.animation_data.action if rig.animation_data else None, rig.matrix_basis.copy())
+        rig.data.pose_position = "REST"
+        if rig.animation_data:
+            rig.animation_data.action = None
+        rig.matrix_basis = rig.matrix_basis.__class__.Identity(4)
+    skinned_mods = []
+    for ob in meshes:                                 # skinned bodies: evaluate without the armature
+        for md in ob.modifiers:
+            if md.type == "ARMATURE" and md.show_viewport:
+                md.show_viewport = False
+                skinned_mods.append(md)
+    bpy.context.view_layer.update()
     dg = bpy.context.evaluated_depsgraph_get()
+    to_local = rig.matrix_world.inverted() if rig is not None else None
     dups = []
-    rig = None
     for ob in meshes:
         arm, bone = _bone_of(ob)
-        if arm is not None:
-            rig = arm
+        skinned = any(md.type == "ARMATURE" for md in ob.modifiers)
         ev = ob.evaluated_get(dg)
         me = bpy.data.meshes.new_from_object(ev, preserve_all_data_layers=True, depsgraph=dg)
-        me.transform(ob.matrix_world)
+        me.transform(to_local @ ob.matrix_world if to_local is not None else ob.matrix_world)
         d = bpy.data.objects.new(ob.name + "_x", me)
         bpy.context.scene.collection.objects.link(d)
-        if arm is not None:
-            vg = d.vertex_groups.new(name=bone or arm.data.bones[0].name)
+        if skinned:                                   # keep its own bone weights
+            for g in ob.vertex_groups:
+                d.vertex_groups.new(name=g.name)
+        elif rig is not None:                         # rigid part: weight 1 to its bone (or the first bone)
+            vg = d.vertex_groups.new(name=bone or rig.data.bones[0].name)
             vg.add(list(range(len(me.vertices))), 1.0, "REPLACE")
         dups.append(d)
-    if rig is None and rigs:
-        rig = next(iter(rigs))
+    for md in skinned_mods:
+        md.show_viewport = True
     for o in bpy.context.view_layer.objects:
         o.select_set(False)
     for d in dups:
@@ -84,11 +105,75 @@ def merge_collection(objs):
     for o in meshes:                                 # originals stay out of the export
         o.hide_render, o.hide_viewport = True, True
     if rig is not None:
+        for md in list(mesh.modifiers):
+            mesh.modifiers.remove(md)
         mod = mesh.modifiers.new("Armature", "ARMATURE")
         mod.object = rig
         mesh.parent = rig
-        mesh.matrix_parent_inverse = rig.matrix_world.inverted()
+        mesh.matrix_parent_inverse.identity()
+        mesh.matrix_basis.identity()                 # data is already in rig space
+        rig.data.pose_position = "POSE"
+        if saved[1] is not None:
+            rig.animation_data.action = saved[1]
+        bpy.context.view_layer.update()
     return mesh, rig
+
+
+def retime_clips(rig, clips):
+    """v1 single-timeline animation -> one action per clip at 30 fps (contract §9).
+    clips: [{name, start, length, fpp, loop}] in v1 frames. Samples every fcurve of the rig's
+    current action at start+i, keys it at 1 + k*fpp (Bezier in-betweens), loops close on pose 0
+    and one-shots hold the last pose; then removes the source action so it isn't exported.
+    Returns the clip list for the json (name, frames, loop)."""
+    src = rig.animation_data.action if rig.animation_data else None
+    if src is None:
+        raise ModelError("retime: rig has no action")
+    fcs = getattr(src, "fcurves", None)
+    if fcs is None:                                   # Blender 5 layered actions
+        fcs = [fc for layer in src.layers for strip in layer.strips for bag in strip.channelbags for fc in bag.fcurves]
+    curves = [(fc.data_path, fc.array_index, fc) for fc in fcs]
+    out = []
+    for c in clips:
+        act = bpy.data.actions.new(c["name"])
+        act.use_fake_user = True
+        rig.animation_data.action = act
+        n, fpp = c["length"], c["fpp"]
+        idx = list(range(n)) + ([0] if c.get("loop") else [n - 1])
+        for k, i in enumerate(idx):
+            f = 1 + k * fpp
+            for path, ai, fc in curves:
+                v = fc.evaluate(c["start"] + i)
+                owner_path, prop = (path.rsplit(".", 1) if "." in path else ("", path))
+                owner = rig.path_resolve(owner_path) if owner_path else rig
+                vec = getattr(owner, prop)
+                try:
+                    vec[ai] = v
+                except TypeError:
+                    setattr(owner, prop, v)
+                owner.keyframe_insert(prop, index=ai, frame=f)
+        out.append({"name": c["name"], "frames": n * fpp, "loop": bool(c.get("loop"))})
+    rig.animation_data.action = None
+    bpy.data.actions.remove(src)
+    rig.animation_data.action = bpy.data.actions[clips[0]["name"]]
+    return out
+
+
+def auto_decimate(mesh, budget):
+    """Collapse-decimate to <= 95 % of the triangle budget (keeps UVs-to-be, vertex groups)."""
+    tris = triangle_count(mesh)
+    if tris <= budget:
+        return tris
+    dec = mesh.modifiers.new("budget", "DECIMATE")
+    dec.ratio = 0.95 * budget / tris
+    for o in bpy.context.view_layer.objects:
+        o.select_set(False)
+    bpy.context.view_layer.objects.active = mesh
+    mesh.select_set(True)
+    for md in list(mesh.modifiers):                  # decimate must run before the armature
+        if md.type == "ARMATURE":
+            bpy.ops.object.modifier_move_to_index(modifier=md.name, index=len(mesh.modifiers) - 1)
+    bpy.ops.object.modifier_apply(modifier="budget")
+    return triangle_count(mesh)
 
 
 def triangle_count(mesh):
@@ -300,7 +385,7 @@ def export_glb(path, mesh, rig, extras=()):
 
 # ---------------------------------------------------------------- 6. turntable
 
-def turntable(mesh, rig, out_png, sun_dir=(-0.6, 0.4, -0.7), size=384, frame=1):
+def turntable(mesh, rig, out_png, sun_dir=(-0.6, 0.4, -0.7), size=384, frame=1, angles=(0.0, -45.0, 180.0)):
     """Eevee, planet Sun from the upper right, neutral grey floor, views front (+X), 3/4, back."""
     scene = bpy.context.scene
     for name in ("BLENDER_EEVEE", "BLENDER_EEVEE_NEXT"):
@@ -344,7 +429,7 @@ def turntable(mesh, rig, out_png, sun_dir=(-0.6, 0.4, -0.7), size=384, frame=1):
     scene.camera = cam
     panels = []
     dist = radius * 4.2
-    for ang in (0.0, -45.0, 180.0):                 # front (+X), 3/4 (front-left toward the camera side), back
+    for ang in angles:                              # D-068: characters/creatures/ships +X, 3/4, back; props camera side (-Y), 3/4, far side
         a = math.radians(ang)
         cam.location = centre + Vector((math.cos(a) * dist, math.sin(a) * dist, radius * 0.9))
         cam.rotation_euler = (centre - cam.location).to_track_quat("-Z", "Y").to_euler()
@@ -367,9 +452,24 @@ def export_model(entry, art_dir, preview_dir, objs, stamp_fn):
     size = int(entry.get("texture", 1024))
     scene = bpy.context.scene
     scene.render.fps, scene.render.fps_base = 30, 1.0
+    clips = entry.get("clips", [])
+    if entry.get("retime"):
+        rig0 = next((o for o in objs if o.type == "ARMATURE"), None)
+        if rig0 is None:
+            raise ModelError("retime: no armature in the collection")
+        clips = retime_clips(rig0, entry["retime"])
     mesh, rig = merge_collection(objs)
-    tris = triangle_count(mesh)
+    if rig is not None and clips:
+        # Export only the declared clips: ACTIONS mode also picks up any other action whose
+        # channels match (the wolf's action rode along on the stag, same bone names).
+        keep = {c["name"] for c in clips}
+        for act in list(bpy.data.actions):
+            if act.name not in keep:
+                bpy.data.actions.remove(act)
     budget = int(entry.get("tri_budget", 1 << 30))
+    if entry.get("auto_decimate"):
+        auto_decimate(mesh, budget)
+    tris = triangle_count(mesh)
     if tris > budget:
         raise ModelError(f"{tris} triangles > budget {budget}")
     unwrap(mesh)
@@ -408,14 +508,14 @@ def export_model(entry, art_dir, preview_dir, objs, stamp_fn):
         lod_tris = triangle_count(lod)
         extras.append(lod)
     export_glb(glb, mesh, rig, extras)
-    clips = entry.get("clips", [])
     meta = {"key": key, "format": "glb", "contract": "v2.2", "facing": "+X in Unity (exported facing glTF -X, D-065)", "up": "+Y", "units": "m",
             "origin": entry.get("origin_rule", "feet"), "triangles": tris, "lod1_triangles": lod_tris, "texture": size,
             "maps": list(MAPS), "fps": 30, "clips": clips,
             "sockets": [o.name[len("socket_"):] for o in sockets] or entry.get("sockets", [])}
     with open(os.path.join(out_dir, f"{variant}.json"), "w", encoding="utf-8") as fh:
         json.dump(meta, fh, indent=1)
-    sheet = turntable(mesh, rig, os.path.join(preview_dir, f"review_{key.replace('/', '_')}"))
+    angles = (-90.0, -45.0, 90.0) if entry.get("origin_rule") == "base" else (0.0, -45.0, 180.0)
+    sheet = turntable(mesh, rig, os.path.join(preview_dir, f"review_{key.replace('/', '_')}"), angles=angles)
     out = os.path.join(preview_dir, f"review_{key.replace('/', '_')}.png")
     stamp_fn(sheet, glb)
     pngio.write_png(out, np.dstack([pngio.to_u8(np.clip(sheet, 0, 1)), np.full(sheet.shape[:2], 255, np.uint8)]))
