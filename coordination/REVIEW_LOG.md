@@ -1012,3 +1012,6 @@ UNITY diagnosed the flat flora: the flora atlas PNGs exceed the 4 MB cap, ArtImp
 Memory gate closed for both roles since 11:58 with no heavy job: free RAM 0.99 GB; claude ×11 = 1.44 GB (15 h old), Memory Compression 0.92 GB, Chrome 0.16, Unity Hub 0.12. Same creep as USER-13. Posted USER-17 (close Chrome + Hub, restart the three windows with resume messages; BLENDER gets the standing D-046 sentence too). No D-045-style exception: the band export's peak (~1.55 GB) is above free RAM. Both workers: light work (sources, tests written, no heavy jobs) until the restart.
 LEAD resume point: cycle 205; R1 waits on U-076's flora re-shoot (D-072 applied) and U-077's 0.4.0 build; BLENDER on B-092 (sources committed, export pending) → B-094 → B-097. Milestone page at R1 close (memory: milestone-artifacts).
 
+
+## Cycle 206 · 2026-11-02 12:1x
+Waiting on USER-17 (memory restart): free RAM 1.07 GB, claude 1.32 GB; both wants still filed (11:58/11:59), no heavy job possible. Light work landed: UNITY 77e5bf1 (D-071) + 533cc5a (D-072 importer v10, uncommitted no more); BLENDER 3a377de (B-092 sources). No other signals. Queues unchanged (UNITY 5 Ready; BLENDER 4 Ready + 1 active; B-094 after B-092).

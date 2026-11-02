@@ -1,5 +1,5 @@
 # LEAD STATUS
-Updated: 2026-11-02 12:1x · Session: 2 (Fable 5.1), resume point before USER-17 · Review cycle: 205
+Updated: 2026-11-02 12:1x · Session: 2 (Fable 5.1), resume point before USER-17 · Review cycle: 206
 ## Current task
 R1: U-072, U-073, U-074 Done; U-075 (Animator views + glb importer) and U-076 (models in the scene, depth bands) are the last big pieces, then U-077 builds 0.4.0 for the owner's playtest. BLENDER is ahead: all R1 art done, R2 art half done, R3 queued.
 ## Last completed
