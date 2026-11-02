@@ -1,6 +1,6 @@
 # Batch compile gate: exits 0 only with zero 'error CS'. Owner: UNITY.
-# Usage: tools/unity_compile.ps1 [-ExecuteMethod Namespace.Class.Method]
-param([string]$ExecuteMethod = '')
+# Usage: tools/unity_compile.ps1 [-ExecuteMethod Namespace.Class.Method] [-Graphics]  (-Graphics: no -nographics, e.g. texture reimports, U-060)
+param([string]$ExecuteMethod = '', [switch]$Graphics)
 . (Join-Path $PSScriptRoot 'unity_common.ps1')
 
 $stamp = Get-Date -Format 'yyyyMMdd_HHmmss'
@@ -8,7 +8,7 @@ try { Enter-HeavyJobLock 'unity_compile' } catch { Write-Host "BLOCKED: $_"; exi
 try {
     $unityArgs = @('-quit')
     if ($ExecuteMethod) { $unityArgs += @('-executeMethod', $ExecuteMethod) }
-    $r = Invoke-UnityBatch $unityArgs "unity_compile_$stamp.log"
+    $r = Invoke-UnityBatch $unityArgs "unity_compile_$stamp.log" -Graphics:$Graphics
 } finally { Exit-HeavyJobLock }
 
 $errors = Get-CompileErrors $r.Log
