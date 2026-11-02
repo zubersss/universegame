@@ -54,10 +54,28 @@ namespace Meridian.EditorTools
             var aa = UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings;
             if (aa != null)
             {
+                // U-060 (LEAD cycle 157): a clean content build every time, so the player never ships stale bundles.
+                var started = DateTime.Now;
+                AddressableAssetSettings.CleanPlayerContent(aa.ActivePlayerDataBuilder);
                 AddressableAssetSettings.BuildPlayerContent(out var aaResult);
                 if (!string.IsNullOrEmpty(aaResult.Error))
                 {
                     Debug.LogError($"[MERIDIAN] BUILD FAILED: Addressables: {aaResult.Error}");
+                    return false;
+                }
+                // Assert the content is fresh: every bundle the content build wrote is newer than this build's start.
+                var root = UnityEngine.AddressableAssets.Addressables.BuildPath;
+                int stale = 0, total = 0;
+                if (System.IO.Directory.Exists(root))
+                    foreach (var f in System.IO.Directory.GetFiles(root, "*.bundle", System.IO.SearchOption.AllDirectories))
+                    {
+                        total++;
+                        if (System.IO.File.GetLastWriteTime(f) < started.AddSeconds(-5)) stale++;
+                    }
+                Debug.Log($"[MERIDIAN] Addressables content: {total} bundles in {root}, {stale} older than this build");
+                if (total == 0 || stale > 0)
+                {
+                    Debug.LogError($"[MERIDIAN] BUILD FAILED: Addressables content not fresh ({stale}/{total} stale bundles in {root})");
                     return false;
                 }
             }
