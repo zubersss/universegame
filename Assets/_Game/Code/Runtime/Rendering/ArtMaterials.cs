@@ -97,6 +97,36 @@ namespace Meridian.Rendering
             return true;
         }
 
+        /// <summary>U-075: clips of 3D models (from each model's json: name, frames, loop, fps), kept apart from sheet clips.</summary>
+        public List<ArtClipSet> modelClipSets = new List<ArtClipSet>();
+
+        /// <summary>The clips of a model key (start 0, length = frames), or null.</summary>
+        public static ArtClipSet ModelClipsFor(string key)
+        {
+            var a = Active;
+            if (a == null || a.modelClipSets == null) return null;
+            foreach (var s in a.modelClipSets) if (s.key == key) return s;
+            return null;
+        }
+
+        /// <summary>Editor: ArtImporter v9 records a model's clips. Returns true when they changed.</summary>
+        public bool SetModelClips(string key, int fps, List<ArtClip> clips)
+        {
+            modelClipSets ??= new List<ArtClipSet>();
+            int i = modelClipSets.FindIndex(s => s.key == key);
+            if (clips == null || clips.Count == 0)
+            {
+                if (i < 0) return false;
+                modelClipSets.RemoveAt(i);
+                return true;
+            }
+            var set = new ArtClipSet { key = key, fps = fps, clips = clips };
+            if (i >= 0 && JsonUtility.ToJson(modelClipSets[i]) == JsonUtility.ToJson(set)) return false;
+            if (i >= 0) modelClipSets[i] = set; else modelClipSets.Add(set);
+            modelClipSets.Sort((a, b) => string.CompareOrdinal(a.key, b.key));
+            return true;
+        }
+
         /// <summary>Editor: called by ArtImporter. Returns true when the list changed.</summary>
         public bool SetEmissive(string key, bool emissive)
         {

@@ -18,10 +18,10 @@ namespace Meridian.EditorTools
     /// per category, secondary textures, frame-sheet slicing, Addressable address = key, atlas
     /// membership, and placeholder retirement. No manual step.
     /// </summary>
-    public sealed class ArtImporter : AssetPostprocessor
+    public sealed partial class ArtImporter : AssetPostprocessor
     {
         /// <summary>Bump when the import rules change so Unity re-imports the art everywhere (2: U-036 per-sheet ppu, 3: U-032 clips).</summary>
-        public override uint GetVersion() => 8; // 3: U-032 clips; 4: U-060 mips only on POT; 5: U-075 model maps beside a .glb are not sprites; 6: B-080 block material textures; 7: model keys get a placeholder; 8: shared model atlases (B-085)
+        public override uint GetVersion() => 9; // 3: U-032 clips; 4: U-060 mips only on POT; 5: U-075 model maps beside a .glb are not sprites; 6: B-080 block material textures; 7: model keys get a placeholder; 8: shared model atlases (B-085); 9: model materials, addresses, clips
 
         /// <summary>Folders the importer watches. Tests point these at a sandbox and restore them.</summary>
         public sealed class Roots
@@ -470,6 +470,11 @@ namespace Meridian.EditorTools
                 if (File.Exists(ph) && !File.Exists(ArtColorPath(key))) Register(ph, key);
             }
             if (materialKeys.Count > 0) UpdateMaterialRegistry(materialKeys);
+
+            // U-075: models (glb + json + maps): generated material, addresses, clip registry.
+            var modelKeys = new HashSet<string>();
+            CollectModelKeys(imported.Concat(moved), modelKeys);
+            GenerateModels(modelKeys);
         }
 
         // ---------- material registry (U-019) ----------

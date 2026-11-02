@@ -23,6 +23,8 @@ namespace Meridian.Player
 
         /// <summary>The playing clip's name and the frame index shown (tests, capture).</summary>
         public string Clip { get; private set; } = SurveyorAnim.Idle;
+        /// <summary>U-075: the surveyor's 3D model view (Ready once B-078's model has loaded; until then the sheet draws).</summary>
+        public Meridian.Art.ModelView Model { get; private set; }
         public int Frame { get; private set; }
         public double LastUpdateMs { get; private set; }
         /// <summary>Part of LastUpdateMs spent inside SpriteRenderer setters (Unity work, not ours).</summary>
@@ -42,6 +44,12 @@ namespace Meridian.Player
         {
             var tier = Meridian.Core.GameState.Instance != null ? Meridian.Core.GameState.Instance.suitTier : 0;
             LoadSheet(ArtKeys.Characters.SurveyorSheet(tier));
+            // U-075: the surveyor's 3D model (B-078) replaces the sheet once it has loaded.
+            var modelGo = new GameObject("Model");
+            modelGo.transform.SetParent(view.transform.parent, false);
+            modelGo.transform.localPosition = view.transform.localPosition;
+            Model = modelGo.AddComponent<Meridian.Art.ModelView>();
+            Model.Load(ArtKeys.Characters.Surveyor);
             Meridian.Hazards.HazardSystem.SuitEquipped += OnSuitEquipped;
             Hook();
         }
@@ -125,6 +133,16 @@ namespace Meridian.Player
             // Facing: toward the aim point while using the rig, else the move direction.
             bool aimFacing = usingRig || sinceDig < SurveyorAnim.DigTime;
             bool flip = aimFacing ? rigInput != null && rigInput.AimWorld.x < transform.position.x : controller.Facing < 0;
+            if (Model != null && Model.Ready)
+            {
+                // U-075: the model plays the same clip names; the sheet is hidden.
+                if (view.enabled) view.enabled = false;
+                Model.Play(Clip);
+                Model.SetFacing(!flip);
+                LastRendererMs = 0;
+                LastUpdateMs = watch.Elapsed.TotalMilliseconds;
+                return;
+            }
             double before = watch.Elapsed.TotalMilliseconds;
             if (flip != view.flipX) view.flipX = flip;
             double renderer = watch.Elapsed.TotalMilliseconds - before;
