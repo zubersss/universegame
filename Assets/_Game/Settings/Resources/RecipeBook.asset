@@ -91,6 +91,15 @@ MonoBehaviour:
       item: polymer
       count: 2
     blueprint: refining
+  - id: refine_deuterium
+    station: 2
+    inputs:
+    - item: water_ice
+      count: 4
+    output:
+      item: deuterium
+      count: 1
+    blueprint: refining
   - id: fab_suit_patch
     station: 3
     inputs:
@@ -243,6 +252,96 @@ MonoBehaviour:
       item: float_cell_mk1
       count: 1
     blueprint: float_cell_mk1
+  - id: refine_ring_ice
+    station: 2
+    inputs:
+    - item: ring_ice
+      count: 1
+    output:
+      item: water_ice
+      count: 2
+    blueprint: refining
+  - id: smelt_ring_rock
+    station: 1
+    inputs:
+    - item: ring_rock
+      count: 3
+    output:
+      item: smelter_bar_iron
+      count: 1
+    blueprint: smelting
+  - id: smelt_ring_rock_silica
+    station: 1
+    inputs:
+    - item: ring_rock
+      count: 2
+    output:
+      item: silica
+      count: 2
+    blueprint: smelting
+  - id: refine_methane
+    station: 2
+    inputs:
+    - item: methane_ice
+      count: 2
+    output:
+      item: carbon
+      count: 2
+    blueprint: refining
+  - id: refine_ammonia_polymer
+    station: 2
+    inputs:
+    - item: ammonia_ice
+      count: 2
+    - item: carbon
+      count: 1
+    output:
+      item: polymer
+      count: 2
+    blueprint: refining
+  - id: fab_float_cell_mk2
+    station: 3
+    inputs:
+    - item: float_cell_mk1
+      count: 1
+    - item: polymer
+      count: 4
+    - item: helium3_condensate
+      count: 2
+    - item: circuit_board
+      count: 1
+    output:
+      item: float_cell_mk2
+      count: 1
+    blueprint: float_cell_mk2
+  - id: fab_jetpack_mk2
+    station: 3
+    inputs:
+    - item: smelter_bar_iron
+      count: 4
+    - item: circuit_board
+      count: 2
+    - item: launch_fuel_cell
+      count: 2
+    output:
+      item: jetpack_mk2
+      count: 1
+    blueprint: jetpack_mk2
+  - id: fab_jetpack_mk3
+    station: 3
+    inputs:
+    - item: jetpack_mk2
+      count: 1
+    - item: deep_diamond
+      count: 2
+    - item: solarite_capacitor
+      count: 1
+    - item: helium3_condensate
+      count: 4
+    output:
+      item: jetpack_mk3
+      count: 1
+    blueprint: jetpack_mk3
   blueprints:
   - id: smelting
     name: Smelting
@@ -310,4 +409,26 @@ MonoBehaviour:
     requires:
     - skip_drive_mk2
     unlockFlag: beacon:jupiter
+    tier: 4
+  - id: jetpack_mk2
+    name: Jetpack Mk2
+    icon: jetpack_mk2
+    requires:
+    - fabrication
+    unlockFlag: 
+    tier: 2
+  - id: float_cell_mk2
+    name: Float cell Mk2
+    icon: float_cell_mk2
+    requires:
+    - float_cell_mk1
+    unlockFlag: 
+    tier: 3
+  - id: jetpack_mk3
+    name: Jetpack Mk3
+    icon: jetpack_mk3
+    requires:
+    - jetpack_mk2
+    - deep_diamond_tip
+    unlockFlag: beacon:uranus
     tier: 4

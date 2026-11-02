@@ -15,13 +15,38 @@ MonoBehaviour:
   m_GroupName: icons
   m_GUID: 2b9ee71490380d1489a3b9317ca715f4
   m_SerializeEntries:
+  - m_GUID: 01bb6ff082d69f24080b69df5351cd07
+    m_Address: icons/helium3_condensate/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 04820382c61deb640b9293715829443a
+    m_Address: icons/metallic_hydrogen/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 083a7ab526db9be43afaf625ca514d25
+    m_Address: icons/phosphorus_pigment/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 10b85a935de85c344ac2489eb9147fed
     m_Address: icons/copper/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 129d36059b3fcca47879af4074ba76b5
+    m_Address: icons/deep_diamond/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 13404d6f6a342ef439271a563b4cb457
     m_Address: icons/vitriol_glass/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 13aa9698175a77f4dad584ae49894d0c
+    m_Address: icons/ammonia_ice/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -60,6 +85,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2d51c19a4b245694cbf2d8e5892cab4e
+    m_Address: icons/ring_rock/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2e0a7cf91e20a0d4fa7aa8bd9a488c2a
     m_Address: icons/nickel/base
     m_ReadOnly: 0
@@ -72,6 +102,16 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3425c2eb0e42a6f4287b9f1b29f0afc3
     m_Address: icons/stone/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 438b879b0fac9a442935971cf7498622
+    m_Address: icons/jetpack_mk2/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 542d4f541d4429e4ba6e5d359f727c0b
+    m_Address: icons/deuterium/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -135,6 +175,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8df4c6ca3c9da4940b6303e32e4d514b
+    m_Address: icons/float_cell_mk2/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9cd7db039a01aad48b330d041b166754
     m_Address: icons/aluminium/base
     m_ReadOnly: 0
@@ -165,6 +210,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c619a64c4cf04cd448b833787442caf9
+    m_Address: icons/superionic_ice/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c767d15ea4799e546886af22db7a7e7e
     m_Address: icons/solarite/base
     m_ReadOnly: 0
@@ -177,6 +227,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d7477594af34a9440a8d2b980d3ed268
     m_Address: icons/deep_diamond_tip/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dbbea6d071a4cb34c97b0d6159e6a75c
+    m_Address: icons/methane_ice/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -202,6 +257,16 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f1430af326136694281b1645a70b53a3
     m_Address: icons/living_seed/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f48182520e125ef4d8cd69a6683e7266
+    m_Address: icons/ring_ice/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f73ee8304c766484a9c156a7f714c583
+    m_Address: icons/jetpack_mk3/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
