@@ -19,7 +19,10 @@ namespace Meridian.Crafting
             "soil", "grass", "stone", "sand", "snow", "regolith", "basalt", "hematite", "water_ice",
             "mercury_regolith", "mercury_basalt", "sulfide", "sulfur", "tessera", "vitriol_glass",
             "iron", "copper", "carbon", "oxygen", "perchlorate", "clay", "aluminium", "living_seed", "wood", "nickel",
-            "solarite", "polar_ice", "deep_core_sample",
+            "solarite", "polar_ice", "deep_core_sample", "helium3_condensate",
+            // U-069 M4 (GiantResources: floes, veins, ring mining, diamond rain).
+            "metallic_hydrogen", "ammonia_ice", "phosphorus_pigment", "ring_ice", "ring_rock", "methane_ice",
+            "deep_diamond", "superionic_ice",
         };
 
         public static List<Recipe> Recipes() => new List<Recipe>
@@ -34,6 +37,8 @@ namespace Meridian.Crafting
             R("refine_fuel_perchlorate", Station.Refinery, A("launch_fuel", 2), "perchlorate_oxidizer", A("water_ice", 2), A("perchlorate")),
             R("refine_graphite", Station.Refinery, A("graphite"), "refining", A("carbon", 3)),
             R("refine_polymer", Station.Refinery, A("polymer", 2), "refining", A("carbon", 2), A("oxygen")),
+            // U-063: skip fuel from water (deuterium, a third as good as Saturn's Helium-3).
+            R("refine_deuterium", Station.Refinery, A("deuterium"), "refining", A("water_ice", 4)),
             // Fabricator: parts and suit kit.
             R("fab_suit_patch", Station.Fabricator, A("suit_patch"), "fabrication", A("smelter_bar_iron", 2)),
             R("fab_circuit", Station.Fabricator, A("circuit_board"), "fabrication", A("smelter_bar_copper"), A("silica", 2)),
@@ -52,6 +57,16 @@ namespace Meridian.Crafting
             // Story blueprints (Bible §2).
             R("fab_solarite_capacitor", Station.Fabricator, A("solarite_capacitor"), "solarite_capacitor", A("solarite", 2), A("circuit_board"), A("smelter_bar_copper")),
             R("fab_float_cell", Station.Fabricator, A("float_cell_mk1"), "float_cell_mk1", A("polymer", 3), A("vitriol_glass", 2), A("smelter_bar_iron")),
+            // U-069 M4: ring and giant materials into the existing chain (P-24 numbers, LEAD's D- entry).
+            R("refine_ring_ice", Station.Refinery, A("water_ice", 2), "refining", A("ring_ice")),
+            R("smelt_ring_rock", Station.Smelter, A("smelter_bar_iron"), "smelting", A("ring_rock", 3)),
+            R("smelt_ring_rock_silica", Station.Smelter, A("silica", 2), "smelting", A("ring_rock", 2)),
+            R("refine_methane", Station.Refinery, A("carbon", 2), "refining", A("methane_ice", 2)),
+            R("refine_ammonia_polymer", Station.Refinery, A("polymer", 2), "refining", A("ammonia_ice", 2), A("carbon")),
+            // Gear: Float cell Mk2 (+12 m/s², §4.2), Jetpack Mk2 (20 m/s², 4.5 s) and Mk3 (30 m/s², 6 s; Uranus beacon, §4.2 note).
+            R("fab_float_cell_mk2", Station.Fabricator, A("float_cell_mk2"), "float_cell_mk2", A("float_cell_mk1"), A("polymer", 4), A("helium3_condensate", 2), A("circuit_board")),
+            R("fab_jetpack_mk2", Station.Fabricator, A("jetpack_mk2"), "jetpack_mk2", A("smelter_bar_iron", 4), A("circuit_board", 2), A("launch_fuel_cell", 2)),
+            R("fab_jetpack_mk3", Station.Fabricator, A("jetpack_mk3"), "jetpack_mk3", A("jetpack_mk2"), A("deep_diamond", 2), A("solarite_capacitor"), A("helium3_condensate", 4)),
         };
 
         static Blueprint B(string id, string name, int tier, string icon, string unlockFlag, params string[] requires) =>
@@ -70,6 +85,10 @@ namespace Meridian.Crafting
             B("skip_drive_mk2", "Skip Drive Mk2", 3, "skip_drive_mk2", "beacon:saturn", "solarite_capacitor"),
             B("deep_diamond_tip", "Deep-diamond Rig tip", 3, "deep_diamond_tip", "beacon:uranus", "fabrication"),
             B("thruster_mk3", "Thruster Mk3", 4, "thruster_mk3", "beacon:jupiter", "skip_drive_mk2"),
+            // U-069 (P-24): Jetpack Mk2 is a trade; Float cell Mk2 follows Mk1; Jetpack Mk3 is story-gated at the Uranus beacon (§4.2).
+            B("jetpack_mk2", "Jetpack Mk2", 2, "jetpack_mk2", null, "fabrication"),
+            B("float_cell_mk2", "Float cell Mk2", 3, "float_cell_mk2", null, "float_cell_mk1"),
+            B("jetpack_mk3", "Jetpack Mk3", 4, "jetpack_mk3", "beacon:uranus", "jetpack_mk2", "deep_diamond_tip"),
         };
     }
 }

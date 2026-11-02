@@ -73,6 +73,18 @@ namespace Meridian.Items
             foreach (var (key, name, art) in new[] { ("shelter_wall", "Shelter wall", "props/common/shelter_wall"), ("shelter_door", "Shelter door", "props/common/shelter_door"),
                 ("lamp", "Lamp", "props/common/lamp"), ("storage_crate", "Storage crate", "props/common/storage_crate"), ("aerostat_deck", "Aerostat deck", "props/venus/aerostat_deck") })
                 Add(new ItemDef { id = id++, key = key, name = name, icon = art });
+            // U-063 skip fuel: Helium-3 Condensate (Saturn) and deuterium (refined from water, a third as good).
+            Add(new ItemDef { id = id++, key = "helium3_condensate", name = "Helium-3 Condensate", icon = "icons/helium3_condensate/base" }); // B-061
+            Add(new ItemDef { id = id++, key = "deuterium", name = "Deuterium", icon = "icons/deuterium/base" });                         // B-061
+            // U-069 M4 materials (Bible §7.6–7.9) and gear; icons from B-061 (same keys), placeholders until then.
+            foreach (var (key, name) in new[]
+            {
+                ("metallic_hydrogen", "Metallic Hydrogen"), ("ammonia_ice", "Ammonia ice"), ("phosphorus_pigment", "Phosphorus pigment"),
+                ("ring_ice", "Ring ice"), ("ring_rock", "Ring rock"), ("methane_ice", "Methane ice"),
+                ("deep_diamond", "Deep Diamond"), ("superionic_ice", "Superionic Ice"),
+                ("float_cell_mk2", "Float cell Mk2"), ("jetpack_mk2", "Jetpack Mk2"), ("jetpack_mk3", "Jetpack Mk3"),
+            })
+                Add(new ItemDef { id = id++, key = key, name = name, icon = $"icons/{key}/base" });
         }
 
         static void Tile(byte tile, string key, string name, string icon) =>

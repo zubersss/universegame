@@ -57,6 +57,14 @@ namespace Meridian.Survey
             var only = Meridian.Items.ItemRegistry.Get(Meridian.Items.OnlyHere.KeyFor(p) ?? "");
             if (only != null && seen.Add(only.id))
                 list.Add(new CatalogueEntry { id = MineralId(only.id), kind = EntryKind.Mineral, planet = p, name = only.name, itemId = only.id });
+            // U-069: the giants' and rings' raw resources (GiantResources).
+            foreach (var g in Meridian.Items.GiantResources.All)
+            {
+                if (!Meridian.Items.GiantResources.On(g, p)) continue;
+                var def = Meridian.Items.ItemRegistry.Get(g.key);
+                if (def != null && seen.Add(def.id))
+                    list.Add(new CatalogueEntry { id = MineralId(def.id), kind = EntryKind.Mineral, planet = p, name = def.name, itemId = def.id });
+            }
             foreach (var poi in PoiCatalog.For(p))
                 list.Add(new CatalogueEntry { id = SiteId(poi), kind = EntryKind.Site, planet = p, name = Pretty(poi.label.ToLowerInvariant()) });
             cache[p] = list;
