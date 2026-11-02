@@ -116,21 +116,21 @@ Files: Assets/_Game/Settings/, Code/Runtime/Camera/, Prefabs/
 Depends: —
 Lead notes: Done c70bfd8 + b395a26 + 308aac2 (cycle 174): Universal renderer Forward+, side rail per D-064, SideViewTests 60.0 px/m, EditMode 229/229, PlayMode 0 failed incl. M1LoopTests + SmokeTests; earth_perspective_rail.png checked. The "depth" and lighting parts of the Accept line belong to U-073/U-074 and move there.
 
-### U-073 · UNITY · Ready · R1
+### U-073 · UNITY · In Progress · R1
 Goal: Chunk block mesher (Bible §10.4 v2): `TerrainChunk` builds one greedy-meshed block mesh of 1 m cubes (exposed faces only, 1 m deep) with UVs into a per-planet `Texture2DArray` (top/side layer per tile material; flat placeholder colours until B-080); a back-wall quad; dig/place rebuilds only that chunk within the frame; the Tilemap stays for collision and data with its renderer off; `TerrainBlocks` shader (array textures, height blend between layers).
 Accept: EditMode: face count for a known chunk pattern; rebuild ≤ 2 ms per chunk (D-019); PlayMode: dig removes the block in the same frame and collision matches; streaming within budget; FootingTests green.
 Files: Assets/_Game/Code/Runtime/Terrain/, Shaders/
 Depends: U-072
 Lead notes: Cycle 171. R1. The biggest piece; keep the chunk API so generators and save diffs don't change.
 
-### U-074 · UNITY · Ready · R1
+### U-074 · UNITY · In Progress · R1
 Goal: 3D lighting from `TimeSystem` (Bible §10.5 v2): one directional Sun (angle, colour, intensity per planet per §9 and D-030), per-planet ambient gradient, soft shadows (one cascade, 30 m), bloom; lamps, thrusters, vents become point lights (≤ 8 visible); distance fog per planet replaces the haze gradient; Light2D components removed.
 Accept: DayNightTests adapted (noon/midnight intensities per §9); night darkens the terrain; a lamp pools light on blocks and the back wall; BaseTests green; budgets.
 Files: Assets/_Game/Code/Runtime/Planet/Lighting/, Building/
 Depends: U-072
 Lead notes: Cycle 171. R1.
 
-### U-075 · UNITY · Ready · R1
+### U-075 · UNITY · In Progress · R1
 Goal: Model-based views: `CharacterView`/`CreatureView` drive an Animator with clips named exactly as the old sheet clips (contract §5 names), facing by a 180° yaw turn, hit flashes by material property; `ArtImporter` v5 imports `.glb` per contract §9 (materials from the four maps, clip names kept, address = key, placeholder retired); capsule/box placeholders until B-078/B-082; the hit/footing/interaction code unchanged.
 Accept: ArtImporterTests for a sample glb (B-077's calibration model); every clip name used in code resolves on the placeholder Animator; FootingTests, creature tests green.
 Files: Assets/_Game/Code/Runtime/Creatures/, Player/, Code/Editor/ArtImporter.cs, Tests/
@@ -615,6 +615,27 @@ Files: Assets/_Game/Code/Runtime/Building/Aerostat/, Tests/
 Depends: U-056
 Lead notes: Cycle 153. M4. Reuse the Venus aerostat code; the Crush respawn hook joins once U-061 lands.
 
+### U-078 · UNITY · Ready · R1
+Goal: Planets as spheres in Space (Bible §10.5 v2): each planet disc becomes a sphere mesh with the equirect `planets/<name>/surface` texture, the atmosphere rim and cloud layer as a slightly larger translucent shell, the terminator from the real Sun direction, Saturn's rings as a flat ring mesh; the top-down orthographic camera, wells, belt and stations unchanged.
+Accept: SpaceArtTests still resolve every planet key; a Space capture shows lit spheres with terminators and Saturn's rings; Space budgets within §11.1.
+Files: Assets/_Game/Code/Runtime/Space/, Shaders/, Prefabs/Space/
+Depends: U-072
+Lead notes: Cycle 176. R1. Independent of the terrain work.
+
+### U-079 · UNITY · Ready · R1
+Goal: FX in 3D: thruster, landing dust, dig sparks, heat shimmer and the Escape band become camera-facing billboards or particle systems on the play plane using the existing `fx/*` sheets and keys; emissive FX feed bloom; nothing uses Light2D or sprite sorting layers.
+Accept: FX keys resolve; a capture shows the thruster flame and dig sparks lit/emissive under the Universal renderer; 0 B GC per frame as before.
+Files: Assets/_Game/Code/Runtime/FX/, Prefabs/FX/
+Depends: U-072
+Lead notes: Cycle 176. R1.
+
+### U-080 · UNITY · Ready · R1
+Goal: Review camera for depth: photo mode (`P`) gains an orbit of ±30° yaw and ±15° pitch around the player (mouse drag) and a "depth" preset used by `tools/unity_smoke.ps1` captures, so reviews can show the block relief, back wall and depth bands; gameplay camera unchanged.
+Accept: a smoke capture named `*_depth.png` from the yaw preset; SideViewTests unaffected.
+Files: Assets/_Game/Code/Runtime/Camera/, tools/unity_smoke.ps1
+Depends: U-072
+Lead notes: Cycle 176. R1. Small; it makes every later review honest about depth.
+
 ### U-025 · UNITY · Done · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.
 Accept: EditMode test: Earth noon/midnight intensities match §9; captures at dawn/noon/dusk/night on Earth; 0 B GC per frame.
@@ -671,7 +692,7 @@ Files: blender/sources/characters/surveyor.blend, build_surveyor.py, Assets/_Gam
 Depends: B-077
 Lead notes: Cycle 175 (0f4193a): art accepted on the stamped turntable (reads as the v1 surveyor: white suit, orange shoulders, pack, rig tool, blue visor; 9,228 tris, 10 clips, 2 sockets). Done once UNITY's lit preview (tools/unity_art_preview.ps1) and the D-065 facing re-check are in.
 
-### B-079 · BLENDER · Ready · R1
+### B-079 · BLENDER · In Progress · R1
 Goal: The Pilgrim as a model: `ships/pilgrim/base.glb` (12 m long), ≤ 15 k triangles, emissive engines and windows, landing gear, a `cockpit` socket, `LOD1`; a top-down `top` is no longer separate (the same model is viewed from above in Space).
 Accept: contract §9; stamped turntable; the landing-gear footprint matches the current landing_pad width.
 Files: blender/sources/ships/pilgrim.blend, build_pilgrim.py, Assets/_Game/Art/ships/pilgrim/
@@ -1169,6 +1190,27 @@ Accept: same clip set as the basic Wardens; mk2 reads as the same family but hea
 Files: blender/scripts/build_wardens.py, gen_fx.py, Assets/_Game/Art/creatures/warden/, fx/
 Depends: B-002
 Lead notes: Cycle 169. M4.
+
+### B-083 · BLENDER · Ready · R1
+Goal: Earth depth bands (contract §9 depth-bands row): per Earth region (forest, plains, desert, ocean/coast, taiga, tundra) a `backgrounds/earth_<region>/ridge_mid.glb` (z 20–60 m strip, tileable every 256 m, ≤ 8 k tris, baked PBR from the v1 ridge recipes), a shared `skyline_far.glb` (≤ 4 k tris) and a `skydome` 2048×1024 equirect `color` per region derived from the v1 layer0 skies.
+Accept: tiles seamlessly in x; reads as the v1 parallax from the side rail in UNITY's preview; stamped turntables; D-045/D-066 peaks measured.
+Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/earth_*/
+Depends: B-077
+Lead notes: Cycle 176. R1. Feeds U-076.
+
+### B-084 · BLENDER · Ready · R1
+Goal: Earth POI props as models: the Survey Archive, Launch Complex pieces, crashed Halcyon hauler, Warden outpost obelisk and the B-020/B-021 prop sets, each ≤ 6 k tris (hauler ≤ 15 k with LOD1), standable tops flat, emissive where lit.
+Accept: contract §9; stamped turntables; UNITY lit preview for Done.
+Files: blender/sources/props/earth/, build_props_earth.py, Assets/_Game/Art/props/earth/
+Depends: B-077
+Lead notes: Cycle 176. R1.
+
+### B-085 · BLENDER · Ready · R1
+Goal: Earth scenery for the near band and the play plane: 3 tree species (forest/taiga variants), 2 bushes, 3 rocks, grass tufts, a cactus and a dead tree, each ≤ 2 k tris with LOD1 at ≤ 800, sharing one 2048 atlas material; wind-sway via a vertex-colour mask (R = sway weight).
+Accept: contract §9; a stamped grove preview (20 instances) reads under the Earth Sun; UNITY lit preview for Done.
+Files: blender/sources/props/earth_flora/, build_props_earth.py, Assets/_Game/Art/props/earth_flora/
+Depends: B-077
+Lead notes: Cycle 176. R1. Feeds U-076's near props plane.
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
