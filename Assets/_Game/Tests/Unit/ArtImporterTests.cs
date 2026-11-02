@@ -170,6 +170,10 @@ namespace Meridian.Tests
             Importer(fx).ReadTextureSettings(s);
             Assert.IsFalse(Importer(fx).mipmapEnabled, "fx have no mips");
             Assert.AreEqual(SpriteMeshType.FullRect, s.spriteMeshType, "fx are full rect");
+            // U-060: non-power-of-two art never gets mips (NPOT + mips is stored uncompressed).
+            var npot = Png(Art("ships/pilgrim/top_color.png"), 96, 32);
+            Import(npot);
+            Assert.IsFalse(Importer(npot).mipmapEnabled, "NPOT ship art: no mips, so it compresses to BC7");
         }
 
         [Test]

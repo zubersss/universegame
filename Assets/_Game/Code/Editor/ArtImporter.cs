@@ -21,7 +21,7 @@ namespace Meridian.EditorTools
     public sealed class ArtImporter : AssetPostprocessor
     {
         /// <summary>Bump when the import rules change so Unity re-imports the art everywhere (2: U-036 per-sheet ppu, 3: U-032 clips).</summary>
-        public override uint GetVersion() => 3; // 3: U-032 sheet clips into the registry
+        public override uint GetVersion() => 4; // 3: U-032 sheet clips into the registry; 4: U-060 mips only on POT (BC7 again)
 
         /// <summary>Folders the importer watches. Tests point these at a sandbox and restore them.</summary>
         public sealed class Roots
@@ -110,7 +110,10 @@ namespace Meridian.EditorTools
             }
 
             var rule = ArtRules.RuleFor(key);
-            ti.mipmapEnabled = rule.mips;
+            // U-060 (ArtCompressionProbe): Unity stores a non-power-of-two texture with mipmaps UNCOMPRESSED
+            // (RGBA32/RGB24, ~4× the memory) whatever the BC7/BC5 setting, because its smaller mips stop being
+            // multiples of 4. Mips only for power-of-two art; NPOT sheets (1940×1616 …) import as BC7/BC5 without.
+            ti.mipmapEnabled = rule.mips && Mathf.IsPowerOfTwo(w) && Mathf.IsPowerOfTwo(h);
             ti.filterMode = FilterMode.Bilinear;
             ti.wrapMode = rule.repeat ? TextureWrapMode.Repeat : TextureWrapMode.Clamp;
             ti.maxTextureSize = ArtRules.MaxDimension;

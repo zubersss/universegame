@@ -38,6 +38,9 @@ namespace Meridian.Tests
                                           $"{(tex != null ? tex.width + "x" + tex.height : "")}, readable {ti.isReadable}, type {ti.textureType}");
                 Assert.IsTrue(ps.overridden, path + ": Standalone override set by ArtImporter");
                 Assert.IsTrue(ps.format == TextureImporterFormat.BC7 || ps.format == TextureImporterFormat.BC5, path + ": BC7/BC5 for Standalone");
+                // U-060: NPOT + mipmaps stored them uncompressed; ArtImporter v4 keeps mips to POT art only.
+                Assert.NotNull(tex, path);
+                Assert.IsTrue(tex.format == TextureFormat.BC7 || tex.format == TextureFormat.BC5, $"{path}: stored {tex.format}, expected BC7/BC5");
             }
             Assert.Greater(found, 0, "at least one sheet to check");
         }
