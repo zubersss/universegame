@@ -1005,3 +1005,6 @@ Gap: the owner's usage limit stopped all three sessions at ~04:24 (BLENDER's res
 Checked: review_props_mercury_flare_shelter.png, review_props_venus_station_hull_a.png (stamped 04:00–04:15). B-095 art accepted; Done on R3's lit preview. B-092 → In Progress.
 Queues: UNITY U-078/U-079/U-081/U-083/U-084 Ready (5) + U-076/U-080 active; BLENDER B-097..B-100 Ready (4) + B-092 active, B-094 after B-092 → add one next cycle.
 
+## Cycle 204 · 2026-11-02 12:1x (UNITY message)
+UNITY diagnosed the flat flora: the flora atlas PNGs exceed the 4 MB cap, ArtImporter rejected them, and Unity imported the normal map as an sRGB sprite. D-072 ratifies P-34 (model maps exempt from the byte cap; 2048² and the texture budget remain). UNITY: importer v10 + tests, re-shoot with D-071 applied → U-076 Done.
+

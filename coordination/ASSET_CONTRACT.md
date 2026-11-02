@@ -1,4 +1,4 @@
-# MERIDIAN — Asset Contract v2.3
+# MERIDIAN — Asset Contract v2.4
 
 > **v2 (D-062, 2026-11-02).** Models replace sprites. §9 is the rule set for every 3D category
 > (`terrain`, `backgrounds` (now skyline/ridge/deck meshes), `ships`, `characters`, `creatures`,
@@ -158,3 +158,4 @@ Existing Done assets are not re-exported unless a task says so.
 6. **Memory gate.** Model bake + export jobs with 1024² maps use the 1.5 GB gate (measured 1.44–1.56 GB); 2048² maps need ≥ 2.0 GB free (measured 1.77–1.89 GB; D-066).
 7. **Sockets** are empties named `socket_<name>` exported as glTF nodes, and listed in the json.
 8. **LFS.** `*.glb` and `*.gltf` are LFS (`.gitattributes`). A glb committed before this rule is re-added once (`git rm --cached` + `git add`) by its owner so it becomes a pointer.
+9. **Model map size (D-072).** Model maps are exempt from §2's 4 MB PNG cap; the 2048² cap and the §11.1 texture budget still apply.
