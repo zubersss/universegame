@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: planet_mars_plains
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: planet_mars_plains
+  m_GUID: 855d8fb9c2d78284484d976d872d1ff1
+  m_SerializeEntries:
+  - m_GUID: 2c78088d7745f0f4787fd57d28f96888
+    m_Address: backgrounds/mars_plains/ridge_mid
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a947563fbc164a445bf0bb87bf5bc5a8
+    m_Address: backgrounds/mars_plains/ridge_mid
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cd5a17c72f0d99b44a8b67e88368add6
+    m_Address: backgrounds/mars_plains/ridge_mid
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: da3c452bab52f304881e688caec4cabf
+    m_Address: backgrounds/mars_plains/skydome
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 41a8d468236740749886c3c41c2ad5d9, type: 2}
+    - {fileID: 11400000, guid: 43e9b51148cb3c249ba0c7408e50fbeb, type: 2}

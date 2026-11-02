@@ -25,6 +25,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 14b8ab36c53ccad4b8cb3e0a6ba716cb
+    m_Address: props/common/shelter_door
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 14c010d3a930ab842aa0a25f7ae0d0bc
     m_Address: props/common/aerostat_deck
     m_ReadOnly: 0
@@ -40,8 +45,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1849d1e0c7ecf354db6baa0f66018d5b
+    m_Address: props/common/lamp
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1b4963630e3b0a54b9c021156dcb8f8d
     m_Address: fx/dig_sparks/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1b49c0bb47a3a8e4ab005b7279b15838
+    m_Address: props/common/shelter_door
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -52,6 +67,26 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2882b8f74e9126f4a9e1db7032dae691
     m_Address: fx/dust/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2a443670123d36744b7af7e45cebb1fe
+    m_Address: props/common/storage_crate
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2c9c2d88809946848984d6598a73b85d
+    m_Address: props/common/shelter_wall
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2d15d114ea449c34a8b8eb88b6968525
+    m_Address: characters/calibration/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 32420f76d76966443a1ab2217dba8158
+    m_Address: props/common/smelter
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -75,6 +110,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4d8dbc95d58febf4eb5760f5be2dc7b4
+    m_Address: props/common/shelter_wall
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 568bbd6f78a0f0249915ee6cbc3dccb3
     m_Address: fx/floe_sublimate/base
     m_ReadOnly: 0
@@ -95,13 +135,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 685901aa5b0965d499d5ac592c9f18e2
+    m_Address: ships/pilgrim/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6c3faf4ae33b2df48aabd9d5edc20914
     m_Address: props/common/smelter
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6e3dea05ef2f6e8448faad25650d7719
+    m_Address: props/common/landing_pad
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 70ff14fdd1b5b854abcb772ff3a30d6c
     m_Address: fx/lance_bolt/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 73fb3cc6b0c2ec54e8c2f171c3af0429
+    m_Address: characters/surveyor/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -125,8 +180,33 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8972d820501a76a469805729d50f2d1f
+    m_Address: props/common/landing_pad
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8a980373b7c2c034c988d173f14b5195
+    m_Address: characters/calibration/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8c73a022be83f5e4a9378d56953e3efd
+    m_Address: props/common/storage_crate
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9036804e6ffc5eb45846912204e90558
     m_Address: props/common/lamp
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 973c668998217024cb86fe4878de2857
+    m_Address: props/common/lamp
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9986a5f98e963bc4e9555b26cc6c8e03
+    m_Address: ships/pilgrim/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -180,6 +260,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: be424f8b3b68d4644b1a391251c0398d
+    m_Address: props/common/smelter
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c36d4610cb781c542993e0f0b0f50314
     m_Address: fx/crush_pulse/base
     m_ReadOnly: 0
@@ -222,6 +307,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f114f31ae58332f4398d677146073051
     m_Address: props/common/calibration
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f31f033105d464d488291fc041408aad
+    m_Address: characters/surveyor/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

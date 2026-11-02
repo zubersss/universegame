@@ -1,0 +1,133 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: planet_earth_flora
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: planet_earth_flora
+  m_GUID: 840b3410f6f51744984c817a7bea5800
+  m_SerializeEntries:
+  - m_GUID: 0396aa0fc4a8edf4c908810b98052cbb
+    m_Address: props/earth_flora/rock_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 117f1bb2bbd304948863f2822f534ddd
+    m_Address: props/earth_flora/rock_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1e0e15784d513fa47a364de9576ff921
+    m_Address: props/earth_flora/grass
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 25a58d692a76052418bd23e42c7e9952
+    m_Address: props/earth_flora/bush_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2d2cbcc998e3dfc4d8780d98c2c50ec7
+    m_Address: props/earth_flora/dead_tree
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 32ce352215f940947a1d5f4f351b069a
+    m_Address: props/earth_flora/bush_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 38bb02163bcde594e8838aeff93900d0
+    m_Address: props/earth_flora/tree_spruce
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3be3894c3f15199419bf2f9f78d8e0cb
+    m_Address: props/earth_flora/tree_birch
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 45033bc19bc3b214ab0c496d3289de43
+    m_Address: props/earth_flora/cactus
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 47ab010f33cb0be489547f8c2f69f025
+    m_Address: props/earth_flora/bush_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 58acafa47e208b4439e92d5f4f881045
+    m_Address: props/earth_flora/dead_tree
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 79f418475a4682d4cadccbfb63dfc224
+    m_Address: props/earth_flora/rock_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7be44ae1303a31d44aad60039596d96d
+    m_Address: props/earth_flora/tree_oak
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7cb74702cb4e399419b03066ee6027e7
+    m_Address: props/earth_flora/tree_birch
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 887c7b9d69fe0cf4cb99c2c17a0ad1e7
+    m_Address: props/earth_flora/cactus
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a66fdf7e55e2fd342bcd0d2d49e5ff8f
+    m_Address: props/earth_flora/tree_spruce
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: caf2d5c1f31a282409087b591846bd4a
+    m_Address: props/earth_flora/rock_c
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d9539303628238f49b881221b6bd7a49
+    m_Address: props/earth_flora/bush_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f0c8c96bf5ba8304abdb2f48b87c1eaa
+    m_Address: props/earth_flora/rock_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f3e3a4748db01bf4a817afbb9220bdbb
+    m_Address: props/earth_flora/rock_c
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fbad70f66bbea60408ecf85cb4310050
+    m_Address: props/earth_flora/grass
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fc1b1b037e0de1b4db44f7c35f8f38af
+    m_Address: props/earth_flora/tree_oak
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 4e4b4d6a14dd2ed40b76dc001682cfb4, type: 2}
+    - {fileID: 11400000, guid: 374f88f87eac54149930bea6206ceee7, type: 2}

@@ -20,8 +20,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 48944bcfc584dc24a8effd2178d454fb
+    m_Address: backgrounds/mars_canyon/ridge_mid
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8781dd5facfb57743a8c0504ce6444eb
     m_Address: backgrounds/mars_canyon/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ae334fd0587850c48ae794c2a4dee7be
+    m_Address: backgrounds/mars_canyon/ridge_mid
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c0809e47ba51d7f4090ef215174fb201
+    m_Address: backgrounds/mars_canyon/ridge_mid
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: db9f78a04b231cd40894d66aa1a3e0aa
+    m_Address: backgrounds/mars_canyon/skydome
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

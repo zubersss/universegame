@@ -1,0 +1,123 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: planet_mars_flora
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: planet_mars_flora
+  m_GUID: c7721bc0617b17b49b417471cccd1af5
+  m_SerializeEntries:
+  - m_GUID: 06d6104e8188cd94b932975c4c6c2f70
+    m_Address: props/mars_flora/rock_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4516b69dcfc54834681c137193dada91
+    m_Address: props/mars_flora/boulder_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4cc3939d3a4e35b4ba5afa9260e3ed9f
+    m_Address: props/mars_flora/ice_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 574478a16c196f248b35264fff4f721c
+    m_Address: props/mars_flora/ice_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5f8dacaabb8907543a18dd315e52f2e3
+    m_Address: props/mars_flora/rock_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6494095829b09dc47b702defc3095519
+    m_Address: props/mars_flora/dust_bush
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6675b221ed4aef947b02a170e061ba95
+    m_Address: props/mars_flora/boulder_c
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 69c5c6b36e51b8440bd228f10ebeead2
+    m_Address: props/mars_flora/stalagmite
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7ef9b4e8410e41c418d9975a1f3c32e7
+    m_Address: props/mars_flora/stalactite
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9678606137b8a1a4c92f995ac5a6d33b
+    m_Address: props/mars_flora/boulder_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 978db14c0bb59d84b8cadc0a272f9a54
+    m_Address: props/mars_flora/rock_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 97fae21ebf6ae634d924867aeaab669b
+    m_Address: props/mars_flora/ice_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9f9b3f9128386ec4ca4fdec4d01c9150
+    m_Address: props/mars_flora/boulder_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b456e0470afb539469ed32c16a1a19d2
+    m_Address: props/mars_flora/rock_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c13e2b6aeaad89342ad03c435a4032e8
+    m_Address: props/mars_flora/stalactite
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c1a965e652a537a4699ceaa7979323e3
+    m_Address: props/mars_flora/ice_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cdea05041bd49e5428d9ca590792872e
+    m_Address: props/mars_flora/stalagmite
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: deb494cd281f20a44a37c94fd77f5b07
+    m_Address: props/mars_flora/boulder_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e73fa1710a2b0674fafc5653e910ebf6
+    m_Address: props/mars_flora/dust_bush
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fa82ba5ece367cc44ad8723303f8916e
+    m_Address: props/mars_flora/boulder_c
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 17babc490f7473343a5ad409e85cdb21, type: 2}
+    - {fileID: 11400000, guid: 6e3820467b1182f40b6074cbea528e60, type: 2}

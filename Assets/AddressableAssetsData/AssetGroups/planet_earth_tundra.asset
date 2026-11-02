@@ -15,7 +15,17 @@ MonoBehaviour:
   m_GroupName: planet_earth_tundra
   m_GUID: 293f3fc26af370548bacbb28cb689e99
   m_SerializeEntries:
+  - m_GUID: 11acca7b6eeb1744cbd94e521e8e0ebf
+    m_Address: backgrounds/earth_tundra/ridge_mid
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4dd06b36823c0f741835d6ea2adf0fbd
+    m_Address: backgrounds/earth_tundra/ridge_mid
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d4d1a748ee0f18546879699767c6fe50
     m_Address: backgrounds/earth_tundra/ridge_mid
     m_ReadOnly: 0
     m_SerializedLabels: []

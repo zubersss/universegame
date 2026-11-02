@@ -125,6 +125,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c1fe06891ab66dd48b7103fc61514c2a
+    m_Address: planets/saturn/ring_mesh
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c5f5484f60a03884ebe8a5f737ed1e9d
     m_Address: planets/io/surface
     m_ReadOnly: 0

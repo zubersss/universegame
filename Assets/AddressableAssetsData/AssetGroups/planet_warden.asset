@@ -15,7 +15,32 @@ MonoBehaviour:
   m_GroupName: planet_warden
   m_GUID: 4dafc1d6caef5f74e8cc108aec0be9e4
   m_SerializeEntries:
-  - m_GUID: a6fbf93c248bcb04897ff7d2cbf2c09e
+  - m_GUID: 3d737ddb418e5db49883b53325a45e8d
+    m_Address: creatures/warden/hunter
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 474de15462a0595449cc6bdcc187d037
+    m_Address: creatures/warden/sentinel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 514bd0b45d5558743890fade4ef9b89f
+    m_Address: creatures/warden/sentinel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 80106bd8766a5664596817463d4af250
+    m_Address: creatures/warden/hunter
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ca2c8e6dc692d4e4ea8c994d0ba50aa2
+    m_Address: creatures/warden/hunter
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: eca933ba05eb663449c827411867f135
     m_Address: creatures/warden/sentinel
     m_ReadOnly: 0
     m_SerializedLabels: []

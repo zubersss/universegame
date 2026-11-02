@@ -15,8 +15,28 @@ MonoBehaviour:
   m_GroupName: planet_mars
   m_GUID: 6cc9f8ad61a6571408cb618dfbca1025
   m_SerializeEntries:
+  - m_GUID: 031e7cc4b9d25b14c84e5d54b984b448
+    m_Address: backgrounds/mars/skyline_far
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 13f5fa67ea081bd43b770b25b7b39627
+    m_Address: creatures/mars/dustskater
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 166e092f3085d0f40afa9e8856773225
     m_Address: terrain/mars/ice
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1954a9618328cfa4eab62915617506d7
+    m_Address: props/mars/hauler_hull_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1d0fccb440886ae4cabcab0483fbf987
+    m_Address: props/mars/hauler_hull_b
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -35,6 +55,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 577a8c6f0ff46a146a4dac55a3d10293
+    m_Address: props/mars/warden_pylon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5d55141ea5c835d4a863768051d3e74f
+    m_Address: creatures/mars/scree_stalker
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5eb4c31d8b2d45b47b64470e39c90003
     m_Address: terrain/mars/hematite
     m_ReadOnly: 0
@@ -50,6 +80,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 65d0bb885c06eed4d8e0696c466b40d2
+    m_Address: props/mars/meridian_beacon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6d166e55d465cf0478334ebea53db158
     m_Address: props/mars/warden_pylon
     m_ReadOnly: 0
@@ -60,7 +95,62 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 81fb0c4684df0bb48920256c9f0c65f1
+    m_Address: creatures/mars/scree_stalker
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 864335240e8fd8e4d8a7e81e14aa54bc
+    m_Address: creatures/mars/dustskater
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 943e330ceed5208428f09f5ac3c8d073
+    m_Address: props/mars/hauler_hull_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 961329ad0cceb124788573b63decc968
+    m_Address: props/mars/meridian_beacon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 980be6589de6be542ac5f66d0c638c51
+    m_Address: props/mars/ice_drill_rig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 99051a06bd5cb5848b3daa20ceaa39d1
+    m_Address: props/mars/hauler_hull_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9f43a05fcca3a284f9df02d150410789
+    m_Address: props/mars/hauler_cargo
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a18ce33cc4b70574ebd3019af39bd4ff
+    m_Address: props/mars/ice_drill_rig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a97ddf1cde57c5b408aebd51da3822f9
+    m_Address: backgrounds/mars/skydome_storm
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ae17977d2d16b544f82fd0bef62c6d00
+    m_Address: backgrounds/mars/skyline_far
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: afa1c463187a95047973e203a52dac4b
+    m_Address: props/mars/ice_drill_rig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b358b2ec6f9911e40bd90958d4f3ad0a
     m_Address: props/mars/hauler_cargo
     m_ReadOnly: 0
     m_SerializedLabels: []
@@ -75,6 +165,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c3e65b7a8a697bf4b98f2fa092d03c54
+    m_Address: props/mars/hauler_cargo
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d6973e86ea058f74290520f762e87765
     m_Address: creatures/mars/scree_stalker
     m_ReadOnly: 0
@@ -82,6 +177,16 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d8dae2eb880bdf948b2ef293a082b5a4
     m_Address: props/mars/hauler_hull_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ea97b410a97f16340b853ded31dfdd87
+    m_Address: props/mars/warden_pylon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f4eab4ecc1d2d634db1e00c735001869
+    m_Address: backgrounds/mars/skyline_far
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

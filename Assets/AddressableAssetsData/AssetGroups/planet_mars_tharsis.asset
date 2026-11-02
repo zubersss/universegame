@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: planet_mars_tharsis
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: planet_mars_tharsis
+  m_GUID: 51d27bcded8afff48a830e87bed4aa26
+  m_SerializeEntries:
+  - m_GUID: 2b251cb50916fbd4cb2e0b77ba950957
+    m_Address: backgrounds/mars_tharsis/ridge_mid
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4672d4b83d25fc640b869cdfefb766ba
+    m_Address: backgrounds/mars_tharsis/skyline_far
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 46844a7f53074d4478123759cd68157e
+    m_Address: backgrounds/mars_tharsis/ridge_mid
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 510e3dcc5a306f64fab918706e062b8c
+    m_Address: backgrounds/mars_tharsis/skydome
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 58d4dc23567d41c41a6b7f3fe1785962
+    m_Address: backgrounds/mars_tharsis/skyline_far
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 750285f1bd21a1a498ad6447f88d0823
+    m_Address: backgrounds/mars_tharsis/skyline_far
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: aacd7e84487672f44911dc06b50a9848
+    m_Address: backgrounds/mars_tharsis/ridge_mid
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 52578bba0b2f41e4f9cb537937270bb1, type: 2}
+    - {fileID: 11400000, guid: dedec7b0e92f5624ebdece1b9609ff12, type: 2}
