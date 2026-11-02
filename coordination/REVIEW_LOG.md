@@ -944,3 +944,7 @@ Core-loop regression cause (UNITY, 8810845): B-081 replaced props/common/landing
 
 ## Cycle 185 · 2026-11-02 02:3x (UNITY message)
 Checked: tests_2026-11-02.md targeted re-check 02:14–02:21: M1LoopRun1/2, LeadQA M1LoopTests + M2SoakTests, SpawnCampTests 3/3, CreaturesNeverFallThroughStreamedChunks all pass after 8810845; only PawsOnTheGround (stag clips) stays red until U-075. Core-loop regression closed. Lamps carry a 3D point light (61f1a58); U-074 capture next.
+
+## Cycle 186 · 2026-11-02 02:4x (BLENDER message)
+Checked: review_backgrounds_earth_skyline_far.png v3 (stamped 02:22): reads as a mountain range in all three panels. B-083 art accepted in full; Done on U-076's capture. BLENDER next: B-084, B-085.
+

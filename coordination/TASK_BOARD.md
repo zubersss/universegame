@@ -1196,7 +1196,7 @@ Goal: Earth depth bands (contract §9 depth-bands row): per Earth region (forest
 Accept: tiles seamlessly in x; reads as the v1 parallax from the side rail in UNITY's preview; stamped turntables; D-045/D-066 peaks measured.
 Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/earth_*/
 Depends: B-077
-Lead notes: Cycle 183 (9e5f063): the six ridge_mid strips and the six skydomes are accepted (forest strip reads as a wooded ridge; skies match the v1 presets). FAIL skyline_far, Art matches §9: even in the front panel the peaks read as thin fins/curtains, because every depth row shares one ridge profile. Fix: give each depth row its own profile (different seed, lower frequency and amplitude toward the back), broaden the bases (peaks sit on a wide massif, not on the floor), cap the slope so faces are never vertical sheets, and add the v1 snow line as a vertex-colour band. Re-export skyline_far only, then mark Ready.
+Lead notes: Cycle 186: art accepted in full. skyline_far v3 (11 seeded depth rows, broad massif, capped slopes, snow band; 2,560 tris; turntable stamped 02:22) reads as a snow-capped range; ridge_mid ×6 and skydomes ×6 accepted in cycle 183. Done on U-076's first capture with the depth bands in the scene.
 
 ### B-084 · BLENDER · Ready · R1
 Goal: Earth POI props as models: the Survey Archive, Launch Complex pieces, crashed Halcyon hauler, Warden outpost obelisk and the B-020/B-021 prop sets, each ≤ 6 k tris (hauler ≤ 15 k with LOD1), standable tops flat, emissive where lit.
