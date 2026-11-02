@@ -520,6 +520,41 @@ Files: Assets/_Game/Code/Runtime/Terrain/, Building/
 Depends: U-056, U-057
 Lead notes: Cycle 141. Do it inside the U-060 window if small; it must land before the M3 build.
 
+### U-065 · UNITY · Ready · M4
+Goal: Thruster Mk2/Mk3 and Tank Mk2/Mk3 (Bible §4.3): 12 / 20 / 35 m/s² vertical, lateral 60%; launch allowed only where the table's "Can launch from" row says (Mk1: Mercury, Venus, Earth, Mars, Uranus; Mk2: + Saturn, Neptune; Mk3: + Jupiter); tanks 100/200/400; craftable ship upgrades in the RecipeBook; the HUD says "Thruster MkN can't lift off here" instead of a silent fail.
+Accept: EditMode: launch permission table for all 8 planets × 3 marks; PlayMode: Mk1 refuses on Saturn with the HUD line, Mk2 lifts off Saturn; tank capacity follows the mark; save/load keeps the marks.
+Files: Assets/_Game/Code/Runtime/Ship/, Items/, Tests/
+Depends: U-010
+Lead notes: Cycle 147. M4. No dependency on the column; start any time.
+
+### U-066 · UNITY · Ready · M4
+Goal: Top-down ring and belt mining (Bible §3, §7.7): mining lanes in the asteroid Belt and Saturn's rings, density by distance with safe gaps; the ship's mining beam breaks ring ice / ring rock bodies (placeholder sprites until B-059) into water ice, silicates, iron; Ring Mites (placeholder) swarm a ship that mines for > 20 s and chew hull 1/s each until shot or outrun.
+Accept: EditMode: lane density profile per seed with at least one gap; PlayMode: mine one ring body → cargo gains items; mites spawn after 20 s of mining and damage hull; Space scene budgets within §11.1.
+Files: Assets/_Game/Code/Runtime/Space/Mining/, Tests/
+Depends: U-034
+Lead notes: Cycle 147. M4.
+
+### U-067 · UNITY · Ready · M4
+Goal: Grapple Rig module (Bible §7.5 movement, §8 Rig table): fire at a floe/solid tile within 18 m, reel at 10 m/s, swing under gravity, release on jump; works on solid worlds too; no ammo; cooldown 0.5 s.
+Accept: PlayMode on Earth: grapple to a ledge 12 m up and arrive; a shot at 25 m misses; under Jupiter gravity the reel still lifts the player; the HUD shows the reticle range.
+Files: Assets/_Game/Code/Runtime/Player/Rig/, Tests/
+Depends: U-049
+Lead notes: Cycle 147. M4. Test on solid worlds now; the floe case joins once U-061 lands.
+
+### U-068 · UNITY · Ready · M4
+Goal: Giant-world hazard bands (Bible §7.5–7.9) as data: per planet and per deck, hazard levels (Radiation, Cryo, Thermal, Pressure) read by the existing hazard system; Jupiter values from §7.6 (Radiation 3 above Deck 2, 1 below; Cryo 2 in Deck 1; Thermal 2 in Deep), Saturn/Uranus/Neptune from §7.7–7.9; a pure lookup HazardBands.For(planet, y) so it is testable before the column renders.
+Accept: EditMode table tests for each giant at one y per band; suit meters show the band level when the player is placed at that y in a stub scene.
+Files: Assets/_Game/Code/Runtime/Hazards/GiantBands.cs, Tests/
+Depends: U-049
+Lead notes: Cycle 147. M4. Pure data + lookup; U-061 consumes it.
+
+### U-069 · UNITY · Ready · M4
+Goal: Catalogue + recipes for M4 materials (Bible §7.6–7.9): metallic_hydrogen, ammonia_ice, phosphorus_pigment, ring_ice, ring_rock, methane_ice, deep_diamond, superionic_ice; float_cell_mk1/mk2 and jetpack_mk2/mk3 recipes (pick the numbers from §4.2 and the §7 gates; list them in your status for LEAD's D- entry); icons from B-061 (placeholders until it lands).
+Accept: EditMode: every new item has a catalogue entry, an icon key, and at least one source (generator, drop, or recipe stub); RecipeBook loads with no duplicate ids.
+Files: Assets/_Game/Code/Runtime/Items/, Data/, Tests/
+Depends: U-051
+Lead notes: Cycle 147. M4. Icon keys = the item ids above (B-061 uses the same).
+
 ### U-025 · UNITY · Done · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.
 Accept: EditMode test: Earth noon/midnight intensities match §9; captures at dawn/noon/dusk/night on Earth; 0 B GC per frame.
@@ -881,6 +916,48 @@ Accept: same pipeline rules (§9, tiling, painted cloud banks per B-048), stampe
 Files: blender/scripts/gen_backdrop*.py, gen_terrain.py, build_props_jupiter.py, Assets/_Game/Art/backgrounds/jupiter_*/, terrain/jupiter/, props/jupiter/
 Depends: B-048
 Lead notes: Cycle 138. Start once U-061 shows the column in game (or now if idle; deck 2–3 backdrops are safe to start).
+
+### B-056 · BLENDER · Ready · M4
+Goal: Jupiter creatures (Bible §7.6): `creatures/jupiter/stormglider` (manta floater, flier clip set), `lightning_eel` (electric, Deck 2, cyan-white emissive along the body), `belt_wasp` (small radiation-adapted swarm unit, 128 px), `ballast_tortoise` (huge slow floater; its dead pose must read as a standable platform; match B-055's husk_tortoise silhouette).
+Accept: contract §4 sizes and the same clip names as the inner creatures; emission where glowing; cream/rust/brick palette (§9); stamped review contact sheet.
+Files: blender/scripts/build_creatures_jupiter.py, Assets/_Game/Art/creatures/jupiter/
+Depends: B-002
+Lead notes: Cycle 147. M4.
+
+### B-057 · BLENDER · Ready · M4
+Goal: Jupiter apex `creatures/jupiter/vortex_whale` (Bible §7.6): a 500 m floater built as segments (head, repeatable body, tail) that UNITY chains; per-segment size per the Venus apex precedent (D-042: 400 px × 5 frames); a "song" glow-pulse state; harpoon-anchor socket points in the JSON.
+Accept: segments join without seams in a chained preview; stamped review; frames and sheets within contract §4.
+Files: blender/scripts/build_creatures_jupiter.py, Assets/_Game/Art/creatures/jupiter/vortex_whale/
+Depends: B-056
+Lead notes: Cycle 147. M4.
+
+### B-058 · BLENDER · Ready · M4
+Goal: Saturn column art (Bible §7.5, §7.7): backgrounds/saturn_deck1..3 and saturn_deep (pale gold and butter bands, soft low sun, the ring plane as a bright line across the upper sky in deck 1), terrain/saturn/floe_ice and floe_core; reuse the B-048/B-055 painted-cloud-bank pipeline.
+Accept: same rules as B-055 (tiling, seams, stamped reviews, D-045 peak_mb measured before any numpy_only marker); decks darker and warmer with depth; clearly paler and golder than Jupiter.
+Files: blender/scripts/gen_backdrop*.py, gen_terrain.py, Assets/_Game/Art/backgrounds/saturn_*/, terrain/saturn/
+Depends: B-048
+Lead notes: Cycle 147. M4. Start once B-055 is in review.
+
+### B-059 · BLENDER · Ready · M4
+Goal: Ring and belt mining art (Bible §7.7): `props/space/ring_ice_01..04` (bright icy chunks), `props/space/ring_rock_01..04` (grey-brown silicate), `creatures/space/ringmite` (tiny top-down swarm unit, 64 px, chewing clip), `fx/ring_dust` (debris puff when a body breaks).
+Accept: top-down camera and scale as the B-010 asteroids (64 px/m, D-018); sheets ≤ 1024²; stamped review.
+Files: blender/scripts/build_asteroids.py, gen_fx.py, Assets/_Game/Art/props/space/, creatures/space/, fx/ring_dust/
+Depends: B-010
+Lead notes: Cycle 147. M4. Feeds U-066.
+
+### B-060 · BLENDER · Ready · M4
+Goal: Saturn creatures (Bible §7.7): `creatures/saturn/helium_jelly` (translucent; add a "rise" clip for when it's hit), `hex_drake` (winged, flier clip set), `floe_moth` (small, 128 px).
+Accept: contract §4 sizes and clips; pale gold palette, translucency where stated; stamped review.
+Files: blender/scripts/build_creatures_saturn.py, Assets/_Game/Art/creatures/saturn/
+Depends: B-002
+Lead notes: Cycle 147. M4.
+
+### B-061 · BLENDER · Ready · M4
+Goal: Icons batch M4 (keys match U-063 and U-069): helium3_condensate, deuterium, metallic_hydrogen, ammonia_ice, phosphorus_pigment, ring_ice, ring_rock, methane_ice, deep_diamond, superionic_ice, float_cell_mk1, float_cell_mk2, jetpack_mk2, jetpack_mk3.
+Accept: same icon camera and lights as B-013/B-042/B-054; readable at 32 px; stamped review.
+Files: blender/scripts/build_icons.py, Assets/_Game/Art/icons/<id>/
+Depends: B-054
+Lead notes: Cycle 147. M4. helium3_condensate and deuterium first (U-063 uses them now). Small job; good while UNITY holds the lock.
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.

@@ -6,13 +6,11 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-13 — Restart the three Claude windows to free memory (5 min)
-After ~38 hours each session uses ~800 MB, so the workers wait for memory. Restarting frees ~1.5–2 GB; nothing is lost (each resumes from the repo).
-1. In each of the three windows, type `/exit` and press Enter.
-2. In each window type `claude` and press Enter, then paste:
-   - LEAD window: `Resume MERIDIAN as LEAD`, then `/loop 30m run a review cycle per your charter, keep both workers stocked, and tell me only if you need something from me`
-   - UNITY window: `Resume MERIDIAN as UNITY. From now on, if Claude Code stops one of your jobs for low memory, you may re-run it once after memory recovers.`
-   - BLENDER window: `Resume MERIDIAN as BLENDER`
+### USER-14 — Free a little memory so UNITY's test run can start (2 min)
+The team's test run needs 1.5 GB free memory; with everything idle the laptop has about 1.0 GB free.
+1. Close browser windows and any other apps you aren't using.
+2. Quit Unity Hub: click the ^ arrow at the bottom right of the taskbar, right-click the Unity Hub icon → Quit. The team doesn't need Hub open.
+3. Leave the three Claude windows open. Tell the Lead "done: USER-14".
 
 ### USER-12 — Playtest M2 (15–30 min)
 1. Open File Explorer and go to `C:\dev\universegame\Build\MERIDIAN_0.2.0`.
@@ -28,6 +26,7 @@ If you get too many "allow this command?" prompts, tell the Lead "approve PowerS
 allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
 
 ## Done
+- 2026-11-01 20:0x · USER-13 (the owner restarted all three windows; the LEAD loop is running again).
 - 2026-10-30 · USER-01 (Git 2.56 and Git LFS 3.8 already installed; the Lead ran
   `git lfs install --local`), USER-02 (repo already at `C:\dev\universegame`),
   USER-05 (Claude Code 2.1.314 already running), USER-06 (89 GB free, 7.6 GB RAM) —
