@@ -60,7 +60,10 @@ namespace Meridian.Terrain
             Stop();
             Config = config;
             follow = target;
-            BaseGenerator = new SolidWorldGenerator(config, seed);
+            // U-061: the giants are cloud columns (floes, no ground) behind the same generator interface.
+            BaseGenerator = config.worldType == WorldType.CloudColumn
+                ? new Meridian.Terrain.CloudColumn.CloudWorldGenerator(config, seed)
+                : new SolidWorldGenerator(config, seed);
             Edits = edits ?? new TerrainEdits();
             Generator = new EditedWorld(BaseGenerator, Edits);
             stale.Clear();
@@ -85,6 +88,8 @@ namespace Meridian.Terrain
             PlanetId.Earth => new[] { TileId.Soil, TileId.Grass, TileId.Stone, TileId.Sand, TileId.Snow, TileId.Water },
             PlanetId.Mercury => new[] { TileId.MercuryRegolith, TileId.MercuryBasalt, TileId.Sulfide, TileId.MercuryIce },
             PlanetId.Venus => new[] { TileId.VenusBasalt, TileId.Sulfur, TileId.Tessera, TileId.VentGlass },
+            // U-061: the giants' cloud columns hold only floes (ice skin over a denser core; Jupiter's art for now, B-048).
+            PlanetId.Jupiter or PlanetId.Saturn or PlanetId.Uranus or PlanetId.Neptune => new[] { TileId.FloeIce, TileId.FloeCore },
             // Mars: the polar cap wears CO₂ frost (Snow) over its ice (U-039); without it the frost had no art and no collision (U-064).
             _ => new[] { TileId.Regolith, TileId.Basalt, TileId.Hematite, TileId.Ice, TileId.Snow },
         };
