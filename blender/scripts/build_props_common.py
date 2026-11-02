@@ -326,6 +326,10 @@ def build_model(out_path=MODEL_OUT):
         coll = bpy.data.collections.new(f"prop_{name}")
         scene.collection.children.link(coll)
         fn(coll, materials(0.1 if name in INTERACTABLE else 0.0))
+    for name in ("aerostat_cell", "aerostat_deck", "aerostat_strut"):   # B-095: the B-069 aerostat modules as models
+        coll = bpy.data.collections.new(f"prop_{name}")
+        scene.collection.children.link(coll)
+        PROPS2[name](coll, materials2(0.0))
     scene.frame_start, scene.frame_end = 1, 19
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     bpy.ops.wm.save_as_mainfile(filepath=out_path, compress=True)
