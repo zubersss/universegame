@@ -1,7 +1,7 @@
 # LEAD STATUS
-Updated: 2026-11-02 01:4x · Session: 2 (Fable 5.1) · Review cycle: 180
+Updated: 2026-11-02 01:4x · Session: 2 (Fable 5.1) · Review cycle: 181
 ## Current task
-R1 (Earth in 3D): U-072 and B-077 Done; the Blender→Unity model handshake works (D-065 facing). Next proof-checks: U-073 block mesher capture (depth), U-074 lighting, B-078 surveyor turntable.
+R1 (Earth in 3D): first 3D Earth capture accepted (cycle 181). Waiting on UNITY's PlayMode run to close U-073 and the lit previews to close B-078..B-082. Next proof-checks: U-074 night/lamp capture, U-076 models in the scene. Add 2 BLENDER tasks next cycle (R2 Mars prep is the natural source).
 ## Last completed
 Cycle 147: queue refill (5 UNITY, 6 BLENDER), USER-13 done, USER-14 added.
 ## Next up
