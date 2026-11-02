@@ -34,6 +34,12 @@ namespace Meridian.Tests
             var scene = SceneManager.CreateScene("ArtPreview");
             SceneManager.SetActiveScene(scene);
 
+#if UNITY_EDITOR
+            // U-075 / B-078: a 3D model (contract v2 §9) previews under the Earth Sun from the side rail.
+            var glb = $"Assets/_Game/Art/{key}.glb";
+            if (File.Exists(glb)) { yield return RenderModel(key, glb); yield break; }
+#endif
+
             var handle = Addressables.LoadAssetAsync<IList<Sprite>>(key);
             yield return handle;
             var sprite = handle.Result?.OrderBy(s => FrameIndex(s.name)).FirstOrDefault();
@@ -97,6 +103,65 @@ namespace Meridian.Tests
             Addressables.Release(handle);
             yield return SceneManager.UnloadSceneAsync(scene);
         }
+
+#if UNITY_EDITOR
+        /// <summary>
+        /// U-075 / B-078: a .glb model with its URP/Lit material built from the four maps (ModelMaterials, §9.1),
+        /// posed at idle, lit by the Earth noon Sun (DayNightMath) and the Earth ambient, seen from the side rail
+        /// (SideView, FOV 35°). Writes logs/preview_&lt;key&gt;.png (side view) and _34.png (a 35° turn, to show depth).
+        /// </summary>
+        IEnumerator RenderModel(string key, string glbPath)
+        {
+            var prefab = UnityEditor.AssetDatabase.LoadMainAssetAtPath(glbPath) as GameObject;
+            Assert.NotNull(prefab, $"{glbPath}: no model (glTF importer missing?)");
+            var go = UnityEngine.Object.Instantiate(prefab);
+            go.transform.position = Vector3.zero;
+
+            string dir = Path.GetDirectoryName(glbPath).Replace('\\', '/'), variant = Path.GetFileNameWithoutExtension(glbPath);
+            Texture2D Map(string m) => UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>($"{dir}/{variant}_{m}.png");
+            var mat = Meridian.Rendering.ModelMaterials.FromMaps(Map("color"), Map("normal"), Map("mask"), Map("emission"), variant + "_preview");
+            var rends = go.GetComponentsInChildren<Renderer>();
+            Assert.Greater(rends.Length, 0, "the model has renderers");
+            foreach (var r in rends) r.sharedMaterial = mat;
+
+            // Pose: the idle clip a third of the way in (legacy clips from glTFast until ArtImporter v5's Animator).
+            var anim = go.GetComponentInChildren<Animation>();
+            if (anim != null && anim["idle"] != null) { var st = anim["idle"]; st.enabled = true; st.time = st.length * 0.33f; st.weight = 1f; anim.Sample(); st.enabled = false; }
+            yield return null;
+
+            var b = rends[0].bounds;
+            foreach (var r in rends) b.Encapsulate(r.bounds);
+
+            var p = Meridian.Planets.PlanetId.Earth;
+            var sun = new GameObject("Sun").AddComponent<Light>();
+            sun.type = LightType.Directional;
+            sun.color = Meridian.Planet.Lighting.DayNightMath.SunColor(p, 0.5f);
+            sun.intensity = Meridian.Planet.Lighting.DayNightMath.Sunlight(p);
+            sun.shadows = LightShadows.Soft;
+            sun.transform.rotation = Quaternion.Euler(45f, -35f, 0f); // high, from the upper left, slightly in front
+            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+            RenderSettings.ambientLight = Meridian.Planet.Lighting.DayNightMath.AmbientColor(p, 0.5f) * Meridian.Planet.Lighting.DayNightMath.AmbientIntensity(p, 0.5f);
+
+            var cam = new GameObject("PreviewCamera").AddComponent<Camera>();
+            cam.transform.position = new Vector3(b.center.x, b.center.y, -10f);
+            Meridian.CameraRig.SideView.Configure(cam, b.extents.y * 1.25f);
+            cam.transform.position = new Vector3(b.center.x, b.center.y, cam.transform.position.z);
+            cam.clearFlags = CameraClearFlags.SolidColor;
+            cam.backgroundColor = new Color(0.45f, 0.58f, 0.75f, 1f); // Earth sky
+            yield return null;
+
+            string baseName = $"logs/preview_{key.Replace('/', '_')}";
+            var side = Render(cam);
+            File.WriteAllBytes(baseName + ".png", side.EncodeToPNG());
+            go.transform.rotation = Quaternion.Euler(0f, 35f, 0f);
+            yield return null;
+            var turned = Render(cam);
+            File.WriteAllBytes(baseName + "_34.png", turned.EncodeToPNG());
+            TestContext.Out.WriteLine($"[MERIDIAN] model preview {key}: bounds {b.min} … {b.max}, {rends.Length} renderer(s), idle sampled {(anim != null && anim["idle"] != null)}, Sun {sun.intensity:F2} {sun.color}");
+            UnityEngine.Object.Destroy(side); UnityEngine.Object.Destroy(turned);
+            UnityEngine.Object.Destroy(go);
+        }
+#endif
 
         static Texture2D Render(Camera cam)
         {
