@@ -980,12 +980,12 @@ Files: blender/scripts/gen_backdrop*.py, gen_terrain.py, Assets/_Game/Art/backgr
 Depends: B-048
 Lead notes: Done 89e88b1 + 27d8a24 (cycle 158): day and dark-season decks + floes; reviews review_uranus_*/review_uranus_dark_* (stamped 21:47–21:54): dim cyan, low contrast, dark season reads as a colder blue; clearly distinct from Saturn. numpy_only peaks 681/683 MB.
 
-### B-063 · BLENDER · In Progress · M4
+### B-063 · BLENDER · Done · M4
 Goal: Neptune column art (Bible §7.5, §7.9): backgrounds/neptune_deck1..3 and neptune_deep (deep indigo, white wisps streaking sideways to sell the wind, a dark storm mass that seems to breathe in deck 2–3), terrain/neptune/floe_ice and floe_core, plus terrain/neptune/superionic_ice (black "hot ice" with a faint inner glow, Deep only).
 Accept: same pipeline rules; streaks tile horizontally; superionic ice readable against the deep backdrop; stamped reviews.
 Files: blender/scripts/gen_backdrop*.py, gen_terrain.py, Assets/_Game/Art/backgrounds/neptune_*/, terrain/neptune/
 Depends: B-048
-Lead notes: Cycle 151. M4. After B-062.
+Lead notes: Done (cycle 159): Neptune decks + floe_ice/floe_core/superionic_ice (27d8a24) and storm v4 on the near layer; review_neptune_deck2/3.png stamped 22:29–22:30: deep indigo, long white wind streaks, a soft dark storm mass.
 
 ### B-064 · BLENDER · Ready · M4
 Goal: Uranus creatures (Bible §7.8): `creatures/uranus/frostwisp` (small luminous floater, cyan-white emission, 128 px), `methane_ray` (glider, flier clip set), `hailcrab` (shelled walker whose shell catches diamonds; a "shell up" defend clip), `tiltbird` (migrating flier, small flock unit).

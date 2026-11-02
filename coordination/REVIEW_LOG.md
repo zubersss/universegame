@@ -837,3 +837,8 @@ Locks: none; free RAM 2.05 GB. Queues: UNITY 6 Ready, BLENDER 5 (B-056, B-059, B
 Checked: review_uranus_deck2.png, review_uranus_dark_deck2.png (stamped; dim cyan vs colder dark-season blue). B-062 → Done. B-063 → In Progress (Neptune storm mass too faint, storm v3 next). Husk v2 was already accepted in cycle 157.
 Signal: D-037 slip, self-reported by BLENDER (a 45 s second job at 22:19 with want_unity 22:13 present; UNITY took the lock right after, no harm done). Decided D-059: the wrapper enforces the turn rule in code.
 Queue: added B-064 (Uranus creatures), B-065 (Neptune creatures); BLENDER untouched Ready with deps met: B-056, B-059, B-060, B-064, B-065.
+
+## Cycle 159 · 2026-11-01 22:3x (BLENDER message)
+Checked: review_neptune_deck2.png (stamps 21:58/22:29). B-063 → Done (storm took 4 versions; the near-layer occlusion lesson from jupiter_deep repeated, now noted in BLENDER_STATUS). D-060: guard refinement accepted.
+Signal: UNITY re-filed want_unity at 22:28:20 while still holding its lock, a second D-039 breach today (first at 20:36). Messaged UNITY. If it happens a third time, UNITY's wrapper gets the same guard as a task.
+
