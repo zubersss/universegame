@@ -1,4 +1,4 @@
-"""Builds blender/sources/icons/icons.blend: item icons batch 1 (B-013) and batch 2 (B-042).
+"""Builds blender/sources/icons/icons.blend: item icons batches 1-5 (B-013, B-042, B-051, B-054, B-061).
 
 One collection per item (`icon_<item>`), each centred on the origin and fitting a ~0.8 m
 box, plus a shared `icon_lights` rig (sun from the upper right, cool sky fill). render.py
@@ -34,6 +34,8 @@ ITEMS3 = ["polymer", "float_cell_mk1", "solarite_capacitor", "survey_module", "s
           "deep_diamond_tip", "thruster_mk3"]
 # B-054 batch 4.
 ITEMS4 = ["cryo_round"]
+# B-061 batch 5 (M4; keys match U-063 / U-069). float_cell_mk1 already exists (B-051).
+ITEMS5 = ["helium3_condensate", "deuterium", "metallic_hydrogen", "ammonia_ice", "phosphorus_pigment", "ring_ice", "ring_rock", "methane_ice", "deep_diamond", "superionic_ice", "float_cell_mk2", "jetpack_mk2", "jetpack_mk3"]
 
 
 # ---------------------------------------------------------------- materials
@@ -432,6 +434,112 @@ def build_item4(item, coll, rnd):
         cone(coll, "cap", frost, 0.1, 0.0, 0.2, at(0.32), rot=rot, verts=32)
 
 
+def build_item5(item, coll, rnd):
+    metal = mat("b5_metal", (150, 154, 160), metallic=1.0, rough=0.3)
+    dark = mat("b5_dark", (52, 54, 58), metallic=0.5, rough=0.45)
+    if item == "helium3_condensate":
+        # Cryo flask: steel caps, pale violet glowing condensate behind a window, frost collar.
+        cyl(coll, "flask", mat("he3_body", (214, 218, 226), metallic=0.4, rough=0.35), 0.15, 0.5, (0, 0, -0.02))
+        cyl(coll, "window", mat("he3_core", (150, 120, 220), emit=(200, 170, 255), strength=1.8, rough=0.1), 0.153, 0.24, (0, 0, -0.04))
+        for z in (-0.27, 0.23):
+            cyl(coll, f"cap{z}", metal, 0.16, 0.05, (0, 0, z))
+        cyl(coll, "valve", dark, 0.05, 0.1, (0, 0, 0.3))
+        cyl(coll, "frost", mat("he3_frost", (236, 242, 250), (206, 220, 236), 0.0, 0.85, 30, 0.6), 0.165, 0.04, (0, 0, 0.17))
+    elif item == "deuterium":
+        # Heavy-water sphere tank on a ring stand, teal glow band.
+        ball(coll, "tank", mat("d2_tank", (196, 206, 214), (160, 172, 182), 0.6, 0.3, 8, 0.05), 0.22, (0, 0, 0.04))
+        cyl(coll, "band", mat("d2_band", (30, 110, 120), emit=(80, 230, 220), strength=1.6), 0.224, 0.06, (0, 0, 0.04))
+        cyl(coll, "stand", dark, 0.16, 0.06, (0, 0, -0.2))
+        cyl(coll, "neck", metal, 0.05, 0.08, (0, 0, 0.29))
+    elif item == "metallic_hydrogen":
+        # Liquid-metal beads (chrome) in an open pressure cradle with a blue-white glow.
+        cyl(coll, "cradle", dark, 0.26, 0.08, (0, 0, -0.2))
+        cyl(coll, "glow", mat("mh_glow", (40, 70, 120), emit=(170, 210, 255), strength=1.8), 0.22, 0.02, (0, 0, -0.155))
+        chrome = mat("mh_chrome", (226, 232, 240), metallic=1.0, rough=0.08)
+        for k, (p, r) in enumerate((((0, 0, -0.02), 0.15), ((0.15, 0.06, -0.08), 0.09), ((-0.14, 0.05, -0.09), 0.08), ((0.04, -0.14, -0.09), 0.07))):
+            ball(coll, f"bead{k}", chrome, r, p, (1.0, 1.0, 0.85))
+    elif item == "ammonia_ice":
+        # Cream-white crystal cluster (distinct from blue water ice).
+        am = mat("nh3_ice", (246, 240, 222), (222, 212, 184), 0.0, 0.2, 4, 0.05)
+        for k, (pos, h, r, tilt) in enumerate((((0, 0, -0.18), 0.4, 0.12, (0.0, 0.05)), ((0.16, 0.04, -0.18), 0.3, 0.1, (0.45, 0.2)),
+                                               ((-0.16, 0.03, -0.18), 0.28, 0.1, (-0.4, -0.25)), ((0.03, 0.15, -0.18), 0.24, 0.09, (0.2, -0.5)))):
+            prism(coll, f"crystal{k}", am, pos, h, r, tilt, rnd.uniform(0, 1))
+        rock(coll, "base", mat("nh3_base", (200, 186, 150), (170, 156, 124), 0, 0.8, 8), 51, (0.22, 0.16, 0.05), loc=(0, 0, -0.19))
+    elif item == "phosphorus_pigment":
+        # Brick-red powder heap in a shallow steel dish (Red Spot floes).
+        cyl(coll, "dish", metal, 0.32, 0.05, (0, 0, -0.2), verts=48)
+        bpy.ops.mesh.primitive_cone_add(vertices=64, radius1=0.28, radius2=0.0, depth=0.3, location=(0, 0, -0.03))
+        ob = _link(bpy.context.active_object, coll)
+        ob.name = "heap"
+        sub = ob.modifiers.new("sub", "SUBSURF")
+        sub.levels = sub.render_levels = 2
+        bpy.ops.object.shade_smooth()
+        ob.data.materials.append(mat("p_pigment", (196, 64, 38), (150, 44, 30), 0.0, 0.9, 40, 0.6, emit=(255, 90, 50), strength=0.12))
+    elif item == "ring_ice":
+        # Bright porous ring chunk: near-white, rounded.
+        rock(coll, "chunk", mat("ring_ice", (248, 250, 255), (214, 228, 244), 0.0, 0.25, 14, 0.5), 52, (0.34, 0.3, 0.28),
+             subdiv=3, strength=0.35, scale=0.7)
+    elif item == "ring_rock":
+        rock(coll, "chunk", mat("ring_rock", (132, 116, 100), (96, 84, 74), 0.0, 0.8, 9, 0.5), 53, (0.36, 0.28, 0.22),
+             subdiv=2, strength=0.4, scale=0.6, flat=True)
+    elif item == "methane_ice":
+        # Pale cyan-green faceted chunk (Uranus / Neptune).
+        rock(coll, "chunk", mat("ch4_ice", (178, 236, 226), (126, 200, 196), 0.0, 0.1, 3, 0.15), 54, (0.32, 0.3, 0.3),
+             subdiv=1, strength=0.25, flat=True)
+    elif item == "deep_diamond":
+        # Cut gem: crown + pavilion, pale blue-white.
+        gem = mat("deep_diamond", (224, 244, 252), (180, 220, 240), 0.0, 0.03, 3, 0.0)
+        bpy.ops.mesh.primitive_cone_add(vertices=8, radius1=0.24, radius2=0.0, depth=0.24, location=(0, 0, 0.1))
+        top = _link(bpy.context.active_object, coll)
+        top.name = "crown"
+        top.data.materials.append(gem)
+        top.rotation_euler.z = 0.3
+        bpy.ops.object.shade_flat()
+        bpy.ops.mesh.primitive_cone_add(vertices=8, radius1=0.24, radius2=0.0, depth=0.34, location=(0, 0, -0.19), rotation=(math.pi, 0, 0.3))
+        bot = _link(bpy.context.active_object, coll)
+        bot.name = "pavilion"
+        bot.data.materials.append(gem)
+        bpy.ops.object.shade_flat()
+    elif item == "superionic_ice":
+        # Dark lattice frame round a hot violet-blue core.
+        box(coll, "core", mat("si_core", (90, 60, 160), emit=(150, 120, 255), strength=2.2), (0.3, 0.3, 0.3), (0, 0, 0), bevel=0.02)
+        frame = mat("si_frame", (40, 42, 56), (26, 28, 38), 0.3, 0.3, 10, 0.1)
+        for i in (-1, 1):
+            for j in (-1, 1):
+                box(coll, f"ex{i}{j}", frame, (0.44, 0.06, 0.06), (0, 0.19 * i, 0.19 * j), bevel=0.01)
+                box(coll, f"ey{i}{j}", frame, (0.06, 0.44, 0.06), (0.19 * i, 0, 0.19 * j), bevel=0.01)
+                box(coll, f"ez{i}{j}", frame, (0.06, 0.06, 0.44), (0.19 * i, 0.19 * j, 0), bevel=0.01)
+    elif item == "float_cell_mk2":
+        # Mk1 shape, told apart by a silver hull, cyan band, three straps and two lights.
+        ball(coll, "cell", mat("fcell2", (206, 212, 220), (170, 178, 188), 0.4, 0.3, 6, 0.1), 1.0, (0, 0, 0), (0.38, 0.27, 0.27))
+        for x in (-0.22, 0.0, 0.22):
+            cyl(coll, f"strap{x}", dark, 0.275 if x == 0 else 0.25, 0.035, (x, 0, 0), rot=(0, math.pi / 2, 0), verts=40)
+        cyl(coll, "band", mat("fband2", (30, 110, 140), emit=(90, 220, 255), strength=1.4), 0.27, 0.06, (0.11, 0, 0), rot=(0, math.pi / 2, 0), verts=40)
+        for x in (-0.11, 0.11):
+            ball(coll, f"light{x}", mat(f"flight2{x}", (30, 90, 120), emit=(110, 230, 255), strength=1.8), 0.03, (x, -0.26, 0.1))
+    elif item in ("jetpack_mk2", "jetpack_mk3"):
+        # Mk2: two orange tanks, orange flame rings. Mk3: three gunmetal tanks, wider bells, cyan glow + stripe.
+        mk3 = item == "jetpack_mk3"
+        pre = "jp3" if mk3 else "jp2"
+        if mk3:
+            tank = mat(pre + "_tank", (70, 74, 82), (50, 54, 60), 0.5, 0.35, 6, 0.05)
+            glow = mat(pre + "_glow", (40, 90, 120), emit=(110, 220, 255), strength=1.8)
+        else:
+            tank = mat(pre + "_tank", (214, 120, 52), (176, 92, 38), 0.2, 0.35, 6, 0.05)
+            glow = mat(pre + "_glow", (120, 50, 16), emit=(255, 140, 60), strength=1.8)
+        box(coll, "back", dark, (0.36, 0.08, 0.44), (0, 0.12, 0.02), bevel=0.03)
+        xs = (-0.17, 0.0, 0.17) if mk3 else (-0.11, 0.11)
+        r = 0.075 if mk3 else 0.1
+        bell_r = r * 1.25 if mk3 else r
+        for x in xs:
+            cyl(coll, f"tank{x}", tank, r, 0.44, (x, 0, 0.04))
+            ball(coll, f"dome{x}", tank, r, (x, 0, 0.26))
+            cone(coll, f"bell{x}", metal, r * 0.75, bell_r, 0.12, (x, 0, -0.24))
+            cyl(coll, f"flame{x}", glow, bell_r * 0.9, 0.015, (x, 0, -0.305))
+        if mk3:
+            box(coll, "stripe", glow, (0.38, 0.01, 0.03), (0, 0.075, 0.15), bevel=0.005)
+
+
 def build(out_path=DEFAULT_OUT):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
@@ -452,6 +560,10 @@ def build(out_path=DEFAULT_OUT):
         coll = bpy.data.collections.new(f"icon_{item}")
         scene.collection.children.link(coll)
         build_item4(item, coll, rnd)
+    for item in ITEMS5:
+        coll = bpy.data.collections.new(f"icon_{item}")
+        scene.collection.children.link(coll)
+        build_item5(item, coll, rnd)
     lights = bpy.data.collections.new("icon_lights")
     scene.collection.children.link(lights)
     sd = bpy.data.lights.new("key", "SUN")
