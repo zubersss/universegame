@@ -12,7 +12,7 @@ namespace Meridian.Tests
         public void RidgeAndSkylineFollowTheBiome()
         {
             Assert.AreEqual("backgrounds/earth_forest/ridge_mid", DepthBands.RidgeFor(PlanetId.Earth, 64), "spawn: forest");
-            Assert.AreEqual("backgrounds/earth_coast/ridge_mid", DepthBands.RidgeFor(PlanetId.Earth, 2048), "launch complex: coast");
+            Assert.AreEqual("backgrounds/earth_coast/ridge_mid", DepthBands.RidgeFor(PlanetId.Earth, 2500), "ocean band: the coast ridge");
             Assert.AreEqual("backgrounds/earth_desert/ridge_mid", DepthBands.RidgeFor(PlanetId.Earth, 1500));
             Assert.AreEqual("backgrounds/mars_plains/ridge_mid", DepthBands.RidgeFor(PlanetId.Mars, 100));
             Assert.IsNull(DepthBands.RidgeFor(PlanetId.Venus, 0), "no bands yet off Earth and Mars");
