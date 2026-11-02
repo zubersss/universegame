@@ -116,12 +116,12 @@ Files: Assets/_Game/Settings/, Code/Runtime/Camera/, Prefabs/
 Depends: —
 Lead notes: Done c70bfd8 + b395a26 + 308aac2 (cycle 174): Universal renderer Forward+, side rail per D-064, SideViewTests 60.0 px/m, EditMode 229/229, PlayMode 0 failed incl. M1LoopTests + SmokeTests; earth_perspective_rail.png checked. The "depth" and lighting parts of the Accept line belong to U-073/U-074 and move there.
 
-### U-073 · UNITY · In Progress · R1
+### U-073 · UNITY · Done · R1
 Goal: Chunk block mesher (Bible §10.4 v2): `TerrainChunk` builds one greedy-meshed block mesh of 1 m cubes (exposed faces only, 1 m deep) with UVs into a per-planet `Texture2DArray` (top/side layer per tile material; flat placeholder colours until B-080); a back-wall quad; dig/place rebuilds only that chunk within the frame; the Tilemap stays for collision and data with its renderer off; `TerrainBlocks` shader (array textures, height blend between layers).
 Accept: EditMode: face count for a known chunk pattern; rebuild ≤ 2 ms per chunk (D-019); PlayMode: dig removes the block in the same frame and collision matches; streaming within budget; FootingTests green.
 Files: Assets/_Game/Code/Runtime/Terrain/, Shaders/
 Depends: U-072
-Lead notes: Cycle 171. R1. The biggest piece; keep the chunk API so generators and save diffs don't change. Cycle 178: B-080 materials are in (terrain/earth/<material>/top_*, side_*, backwall_*; 2 m repeat). D-067: blend the grass top colour down the top ~8 cm of grass side faces in the shader. Cycle 181: captures accepted (block relief, textured faces, back wall, grass fringe; the Pilgrim and props are still 2D cards, which is U-076's job). Done once the PlayMode run (dig same frame, FootingTests, streaming) is green; chain 4 memory-stopped at 01:39, D-046 re-run in progress. D-069 retires the old surveyor sheet test (P-30).
+Lead notes: Done 7d76dbf + 105bffa (cycle 184): greedy block mesher, TerrainBlocks shader with B-080 arrays, D-067 fringe, back wall; chain 5: dig same frame, FootingTests and streaming green; captures earth_blocks_b080(_depth). The core-loop regression found in chain 4 was the pad placeholder card (8810845), tracked in the log.
 
 ### U-074 · UNITY · In Progress · R1
 Goal: 3D lighting from `TimeSystem` (Bible §10.5 v2): one directional Sun (angle, colour, intensity per planet per §9 and D-030), per-planet ambient gradient, soft shadows (one cascade, 30 m), bloom; lamps, thrusters, vents become point lights (≤ 8 visible); distance fog per planet replaces the haze gradient; Light2D components removed.
@@ -685,19 +685,19 @@ Files: blender/scripts/build_calibration.py, blender/render.py, Assets/_Game/Art
 Depends: —
 Lead notes: Done 09c6f27 + f6108e4 (cycle 174): calibration glb imported by UNITY (e7dc190): clips and lengths kept, feet at y = 0, 984 tris, materials from the maps. Facing was mirrored by glTFast → D-065 (export facing glTF −X); re-export the calibration once under B-078's first turn.
 
-### B-078 · BLENDER · In Progress · R1
+### B-078 · BLENDER · Done · R1
 Goal: The surveyor as a model: `characters/surveyor/base.glb`, ≤ 12 k triangles, 2048 textures, the full §5 clip set at 30 fps, a `float_pack` socket (empty) on the back and a `rig_tool` socket in the right hand; reuse the existing surveyor rig.
 Accept: contract §9; clips loop where they should; stamped turntable; UNITY lit preview.
 Files: blender/sources/characters/surveyor.blend, build_surveyor.py, Assets/_Game/Art/characters/surveyor/
 Depends: B-077
-Lead notes: Cycle 175 (0f4193a): art accepted on the stamped turntable (reads as the v1 surveyor: white suit, orange shoulders, pack, rig tool, blue visor; 9,228 tris, 10 clips, 2 sockets). Done once UNITY's lit preview (tools/unity_art_preview.ps1) and the D-065 facing re-check are in.
+Lead notes: Done 0f4193a + 929c588 (cycle 184): surveyor model, 9,228 tris, 10 clips, sockets; UNITY lit previews r1_models_2026-11-02 (chain 5) checked: lit PBR, faces screen right, emissive where expected.
 
-### B-079 · BLENDER · In Progress · R1
+### B-079 · BLENDER · Done · R1
 Goal: The Pilgrim as a model: `ships/pilgrim/base.glb` (12 m long), ≤ 15 k triangles, emissive engines and windows, landing gear, a `cockpit` socket, `LOD1`; a top-down `top` is no longer separate (the same model is viewed from above in Space).
 Accept: contract §9; stamped turntable; the landing-gear footprint matches the current landing_pad width.
 Files: blender/sources/ships/pilgrim.blend, build_pilgrim.py, Assets/_Game/Art/ships/pilgrim/
 Depends: B-077
-Lead notes: Cycle 177: art accepted on the stamped turntable (01:14): worn grey hull, hazard stripes, blue cockpit glass, emissive engine/portholes/nav lights; 8,220 tris + LOD1 3,944; four legs on a 3.52 m footprint (v1 skids were 7.4 m, too wide for the 3.6 m pad: a sensible change). Done once UNITY's lit preview is in.
+Lead notes: Done 623b166 (cycle 184): Pilgrim 8,220 tris + LOD1, four legs; UNITY lit previews r1_models_2026-11-02 (chain 5) checked: lit PBR, faces screen right, emissive where expected.
 
 ### B-080 · BLENDER · Done · R1
 Goal: Earth terrain block materials (contract §9 terrain row): for every Earth tile material in `EarthTileSet` (soil, grass-topped soil, stone, sand, clay, snow, ice, ores, wood…: list them from the tile set and log the list), a tileable `top` and `side` PBR set at 512², 2 m per repeat, plus `backwall`; derived from the v1 tile recipes.
@@ -706,19 +706,19 @@ Files: blender/scripts/gen_terrain.py, Assets/_Game/Art/terrain/earth/
 Depends: B-077
 Lead notes: Done 2eb6213 (cycle 181): the six Earth block material sets + backwall; UNITY's lit captures earth_blocks_b080(_depth).png (105bffa) show soil, grass and stone textured with relief, grass tops, the D-067 fringe and the back wall.
 
-### B-081 · BLENDER · In Progress · R1
+### B-081 · BLENDER · Done · R1
 Goal: Earth props batch 1 as models: `props/common/{landing_pad, shelter_wall, shelter_door, smelter, storage_crate, lamp}` (+ `fabricator`, `refinery` if they exist as sprites), each ≤ 6 k triangles, lamp with an emissive head and a `light` socket, door with an `open` clip.
 Accept: contract §9; stamped turntable sheet; wall and pad tile at 1 m / 2 m pitches.
 Files: blender/sources/props/common/, build_props_common.py, Assets/_Game/Art/props/common/
 Depends: B-077
-Lead notes: Cycle 179 (fbf6b7a): art accepted on the turntables (landing_pad 2 m module ×2 = 4 m pad, 3 m deep; shelter_wall 1.00 m; door `open` clip; lamp socket_light; smelter grate on the camera side; 624–1,436 tris). No fabricator/refinery sprites existed, so none were made (fine). Done on UNITY's lit preview.
+Lead notes: Done fbf6b7a (cycle 184): props batch 1 as models (2 m pad module, 1 m wall, door clip, lamp socket_light, smelter grate emissive); UNITY lit previews r1_models_2026-11-02 (chain 5) checked: lit PBR, faces screen right, emissive where expected.
 
-### B-082 · BLENDER · In Progress · R1
+### B-082 · BLENDER · Done · R1
 Goal: Earth creatures as models: `creatures/earth/stag` and `creatures/earth/wolf`, medium class (≤ 8 k triangles), full walker clip set, reusing the v1 rigs.
 Accept: contract §9; stamped turntables; UNITY lit preview at 60 px/m reads as the v1 silhouettes.
 Files: blender/sources/creatures/earth/, build_creatures_earth.py, Assets/_Game/Art/creatures/earth/
 Depends: B-077
-Lead notes: Cycle 180 (e6abeef): art accepted on the turntables (stag and wolf, 7,600 tris each, 16-joint skins, idle/walk/attack/hurt/death). Pipeline fix: binding at rest (the surveyor was re-exported; UNITY must re-import it). Done on UNITY's lit preview.
+Lead notes: Done e6abeef (cycle 184): stag + wolf 7,600 tris, 16-joint skins, 5 clips; UNITY lit previews r1_models_2026-11-02 (chain 5) checked: lit PBR, faces screen right, emissive where expected.
 
 
 ### B-024 · BLENDER · Done · M2

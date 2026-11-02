@@ -937,3 +937,7 @@ Queues: UNITY U-078, U-079 Ready + U-073/074/075/080 active; BLENDER B-084..B-08
 ## Cycle 183 · 2026-11-02 02:2x (BLENDER message)
 Checked: review_backgrounds_earth_forest_ridge_mid.png, _skyline_far.png, _forest_skydome.png (stamped 01:53–02:13). ridge_mid ×6 and skydomes ×6 accepted; skyline_far fails Art matches (fin-shaped peaks from a shared profile per row) → fix list in B-083's Lead notes. B-083 stays In Progress; BLENDER may do B-084 in between.
 
+## Cycle 184 · 2026-11-02 02:3x (UNITY message)
+Checked: r1_models_2026-11-02 lit previews (surveyor side, Pilgrim side, stag ¾, smelter side + ¾, lamp side): PBR lit under the Earth Sun, facing +X, emissive engine/grate/lamp head. B-078, B-079, B-081, B-082 → Done. U-073 → Done on chain 5 (own tests green).
+Core-loop regression cause (UNITY, 8810845): B-081 replaced props/common/landing_pad_color.png, so the pad loaded a generated 160×288 placeholder card; PoiPlacer scaled it to the declared 12 m width and refit the solid collider to the art's height (~21 m), trapping the landed Pilgrim; the launch never climbed out. Fix: a loaded sprite whose aspect differs from the declared size by > 25 % is stretched to the declared size and keeps the declared collider. Targeted re-check running; M1LoopRun1/2, M2Soak and SpawnCampTests must be green there before U-074/U-076 captures count.
+
