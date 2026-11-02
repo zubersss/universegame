@@ -21,7 +21,7 @@ namespace Meridian.EditorTools
     public sealed class ArtImporter : AssetPostprocessor
     {
         /// <summary>Bump when the import rules change so Unity re-imports the art everywhere (2: U-036 per-sheet ppu, 3: U-032 clips).</summary>
-        public override uint GetVersion() => 6; // 3: U-032 clips; 4: U-060 mips only on POT; 5: U-075 model maps beside a .glb are not sprites; 6: B-080 block material textures
+        public override uint GetVersion() => 7; // 3: U-032 clips; 4: U-060 mips only on POT; 5: U-075 model maps beside a .glb are not sprites; 6: B-080 block material textures; 7: model keys get a placeholder
 
         /// <summary>Folders the importer watches. Tests point these at a sandbox and restore them.</summary>
         public sealed class Roots
@@ -423,6 +423,13 @@ namespace Meridian.EditorTools
                     UnregisterArt(colorPath, key);
                     var ph = PlaceholderColorPath(key);
                     if (File.Exists(ph)) { Register(ph, key); UpdateClipRegistry(ph, key); }
+                    else
+                    {
+                        // Contract §1: a key without loadable 2D art gets a placeholder, so 2D loaders never hit an
+                        // unknown address (the props/creatures that turned into models had none). Its own import registers it.
+                        PlaceholderGenerator.Write(key, false);
+                        if (File.Exists(ph)) AssetDatabase.ImportAsset(ph, ImportAssetOptions.ForceUpdate);
+                    }
                     continue;
                 }
                 SliceIfNeeded(colorPath, key);
@@ -435,7 +442,7 @@ namespace Meridian.EditorTools
                     UpdateClipRegistry(colorPath, key);
                     retireKeys.Add(key);
                 }
-                else if (!File.Exists(ArtColorPath(key)))
+                else if (!File.Exists(ArtColorPath(key)) || File.Exists(Active.art + key + ".glb")) // v5: a model key keeps its placeholder
                 {
                     Register(colorPath, key);
                     UpdateClipRegistry(colorPath, key);
