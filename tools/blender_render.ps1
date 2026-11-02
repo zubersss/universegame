@@ -56,6 +56,7 @@ if ($jobs.Count -eq 0) { $jobs += , @{ Name = $Target; Args = @('--all'); Chosen
 $locks = Join-Path $Root 'coordination/locks'
 $lock = Join-Path $locks 'heavy_blender.lock'
 $want = Join-Path $locks 'want_blender.lock'
+$stamp = Join-Path $Root 'blender/preview/last_heavy.txt'      # end time of BLENDER's last heavy job (gitignored)
 # D-033: flat sprite categories render on Cycles CPU (render.py) and may run at >= 1.0 GB free.
 $cyclesCpu = @('props', 'creatures', 'characters', 'ships', 'icons')
 
@@ -100,6 +101,15 @@ function Request-Heavy($job) {
         Where-Object { $_.Name -ne 'heavy_blender.lock' -and $_.LastWriteTime -gt $cutoff }
     $procs = Get-Process unity, blender -ErrorAction SilentlyContinue |
         Where-Object { $_.Path -like '*\Hub\Editor\*' -or $_.Path -like '*Blender Foundation*' }
+    # D-059 turn guard (strict turns, D-037): if BLENDER finished a heavy job within the last
+    # 30 min and another role's want is younger than 30 min, that role goes next. Refuse WITHOUT
+    # filing want_blender.lock (D-039: no re-filing right after your own job).
+    $recentRun = (Test-Path $stamp) -and ((Get-Item $stamp).LastWriteTime -gt (Get-Date).AddMinutes(-30))
+    $waiting = Get-ChildItem $locks -Filter 'want_*.lock' -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -ne 'want_blender.lock' -and $_.LastWriteTime -gt (Get-Date).AddMinutes(-30) }
+    if ($recentRun -and $waiting) {
+        return "turn guard (D-059): $($waiting.Name -join ', ') waiting and BLENDER ran at $((Get-Item $stamp).LastWriteTime.ToString('HH:mm:ss')); their turn"
+    }
     $freeMB = [int]((Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1024)
     $gate = Get-GateMB $job.Chosen
     $reason = $null
@@ -150,7 +160,10 @@ for ($i = 0; $i -lt $jobs.Count; $i++) {
             if ($LASTEXITCODE -ne 0) { $code = $LASTEXITCODE }
         }
     } finally {
-        if ($heavy -and (Test-Path $lock)) { Remove-Item $lock -Force }
+        if ($heavy -and (Test-Path $lock)) {
+            Remove-Item $lock -Force
+            Set-Content -Path $stamp -Value "$((Get-Date).ToString('s')) $($job.Name)" -Encoding utf8   # D-059 turn guard
+        }
     }
     $mins = ((Get-Date) - $t0).TotalMinutes
     if ($mins -gt 20) { Write-Host ("blender_render: job '{0}' took {1:N1} min (> 20, D-026); split it further" -f $job.Name, $mins) }
