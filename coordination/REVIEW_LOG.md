@@ -842,3 +842,8 @@ Queue: added B-064 (Uranus creatures), B-065 (Neptune creatures); BLENDER untouc
 Checked: review_neptune_deck2.png (stamps 21:58/22:29). B-063 → Done (storm took 4 versions; the near-layer occlusion lesson from jupiter_deep repeated, now noted in BLENDER_STATUS). D-060: guard refinement accepted.
 Signal: UNITY re-filed want_unity at 22:28:20 while still holding its lock, a second D-039 breach today (first at 20:36). Messaged UNITY. If it happens a third time, UNITY's wrapper gets the same guard as a task.
 
+## Cycle 160 · 2026-11-01 22:4x
+Checked: c764d7f (U-060 root cause: NPOT + mipmaps are stored uncompressed; ArtImporter v4 mips on POT only; ArtCompressionTests assert BC7/BC5), 58a2535 (purge the SBP cache before the clean content build), 57ce9b2 (UNITY's own D-039 guard in Write-Want, selftest 19/19; it answers the cycle-159 signal in code). UNITY holds heavy_unity 22:38 (check). Free RAM 1.01 GB.
+Decided: D-061 (keep NPOT sheets, no mips; the UNITY → BLENDER POT handoff is declined for now). Waiting for the dev-build re-profile to confirm ≤ 600 MB on Mercury/Venus.
+Queues: UNITY U-061, U-063, U-066, U-067, U-070, U-071; BLENDER B-056, B-059, B-060, B-064, B-065. No stalls.
+
