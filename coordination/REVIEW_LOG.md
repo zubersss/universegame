@@ -983,3 +983,6 @@ Checked: review_terrain_venus_vent_glass.png, review_terrain_mercury_regolith.pn
 ## Cycle 197 · 2026-11-02 03:4x (UNITY message)
 Checked: tests_2026-11-02.md 03:20 EditMode 239/239; 03:29 PlayMode 18/19 (PawsOnTheGround read padded SkinnedMeshRenderer.bounds) then 03:36 10/10 after measuring baked vertices (every model's lowest vertex at 0.000 m: BLENDER's exports are exact); compile 0 errors. U-075 → Done. U-076 → In Progress. R1 remaining: U-076 (models, props, depth bands, flora in the scene), U-077 (0.4.0 build + geometry budget rows).
 
+## Cycle 198 · 2026-11-02 03:4x (BLENDER message)
+Checked: review_creatures_warden_sentinel.png, _hunter.png (stamped 03:38–03:39; glowing iris pods on legs, running-light rings). B-096 art accepted; Done on R3's lit preview. B-093 → In Progress.
+

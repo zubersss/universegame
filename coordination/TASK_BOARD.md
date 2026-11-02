@@ -1261,7 +1261,7 @@ Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/{mercury,
 Depends: B-077
 Lead notes: Cycle 193. R3.
 
-### B-093 · BLENDER · Ready · R3
+### B-093 · BLENDER · In Progress · R3
 Goal: Mercury and Venus creatures as models from the v1 sources (B-04x): every non-apex creature of `creatures/mercury/*` and `creatures/venus/*` (list them from the v1 manifest and log the list), size class per contract §9, full clip sets from the v1 rigs, emission where they glow.
 Accept: contract §9; stamped turntables; UNITY lit preview for Done.
 Files: blender/sources/creatures/{mercury,venus}/, build_creatures_mercury.py, build_creatures_venus.py, Assets/_Game/Art/creatures/{mercury,venus}/
@@ -1287,7 +1287,7 @@ Goal: Wardens as models: `creatures/warden/sentinel` and `creatures/warden/hunte
 Accept: contract §9; stamped turntables; UNITY lit preview for Done.
 Files: build_wardens.py, Assets/_Game/Art/creatures/warden/
 Depends: B-077
-Lead notes: Cycle 193. R3.
+Lead notes: Cycle 198: art accepted on the turntables (sentinel 7,600 tris; hunter 7,440 tris as a slimmer dart pod with strike prongs; centred pivots; idle/walk/fly/attack/hurt/death; iris, core and prongs on bones; indigo lights and shield ring). Pipeline fix: species-prefixed actions. Done on R3's lit preview.
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
