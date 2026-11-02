@@ -966,12 +966,12 @@ Files: blender/scripts/build_creatures_saturn.py, Assets/_Game/Art/creatures/sat
 Depends: B-002
 Lead notes: Cycle 147. M4.
 
-### B-061 · BLENDER · Ready · M4
+### B-061 · BLENDER · Done · M4
 Goal: Icons batch M4 (keys match U-063 and U-069): helium3_condensate, deuterium, metallic_hydrogen, ammonia_ice, phosphorus_pigment, ring_ice, ring_rock, methane_ice, deep_diamond, superionic_ice, float_cell_mk1, float_cell_mk2, jetpack_mk2, jetpack_mk3.
 Accept: same icon camera and lights as B-013/B-042/B-054; readable at 32 px; stamped review.
 Files: blender/scripts/build_icons.py, Assets/_Game/Art/icons/<id>/
 Depends: B-054
-Lead notes: Cycle 147. M4. helium3_condensate and deuterium first (U-063 uses them now). Small job; good while UNITY holds the lock.
+Lead notes: Done 37053f6 + 07335f6 (cycle 154): 13 icons, montage icons_b061_montage.png, all distinct at 32 px. Self-reported nits (helium3 glow pinkish, metallic_hydrogen beads small, ring_ice egg-like, jetpack_mk3 thin on dark UI) deferred to the M4 playtest; no polish pass now.
 
 ### B-062 · BLENDER · Ready · M4
 Goal: Uranus column art (Bible §7.5, §7.8): backgrounds/uranus_deck1..3 and uranus_deep (featureless cyan fog, dim light at sunlight 0.25, faint bands only hinted; crystalline sparkle below Deck 3 for the diamond rain; a dark-season variant tint for the unlit half as a second preset), terrain/uranus/floe_ice and floe_core (methane ice, pale cyan).
