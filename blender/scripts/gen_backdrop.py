@@ -300,3 +300,12 @@ PRESETS["jupiter_deck3"] = dict(sky_top=(70, 40, 26), sky_horizon=(150, 88, 50),
                                 cloud=(0, 0, 0), cloud_shade=(0, 0, 0), clouds=0.0)
 PRESETS["jupiter_deep"] = dict(sky_top=(60, 30, 22), sky_horizon=(36, 16, 14), haze=(52, 24, 18),
                                cloud=(0, 0, 0), cloud_shade=(0, 0, 0), clouds=0.0)
+# B-058 Saturn column skies: paler and golder than Jupiter at every depth.
+PRESETS["saturn_deck1"] = dict(sky_top=(14, 16, 32), sky_horizon=(222, 204, 164), haze=(214, 196, 156),
+                               cloud=(0, 0, 0), cloud_shade=(0, 0, 0), clouds=0.0)
+PRESETS["saturn_deck2"] = dict(sky_top=(118, 102, 76), sky_horizon=(180, 156, 112), haze=(170, 148, 106),
+                               cloud=(0, 0, 0), cloud_shade=(0, 0, 0), clouds=0.0)
+PRESETS["saturn_deck3"] = dict(sky_top=(112, 80, 50), sky_horizon=(188, 140, 88), haze=(178, 132, 82),
+                               cloud=(0, 0, 0), cloud_shade=(0, 0, 0), clouds=0.0)
+PRESETS["saturn_deep"] = dict(sky_top=(96, 70, 42), sky_horizon=(62, 42, 26), haze=(84, 60, 36),
+                              cloud=(0, 0, 0), cloud_shade=(0, 0, 0), clouds=0.0)

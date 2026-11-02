@@ -200,6 +200,68 @@ PRESETS = {
                     bands=[(104, 58, 40), (74, 38, 28)], band_h=180,
                     crown=(118, 72, 52), under=(32, 16, 12))],
     ),
+    # B-058 Saturn column (Bible §7.7): pale gold and butter bands, soft low sun, the ring plane
+    # as a bright line across the upper sky of deck 1. Same painted-bank pipeline as Jupiter,
+    # paler and golder at every depth; decks still darken and warm going down.
+    "saturn_deck1": dict(
+        sun=dict(dir=(-0.75, 0.45, -0.3), strength=2.4, color=(1.0, 0.94, 0.84), angle=10.0),
+        ambient=((0.76, 0.72, 0.62), 0.62),
+        haze=(214, 196, 156),
+        stars=200,
+        ring=(0.15, 0.0035, (255, 248, 226)),
+        banks=[dict(top=0.52, base_amp=16, r=(30, 80), billows=60, fall=240, haze=0.5, streak=0.2,
+                    bands=[(248, 240, 214), (226, 204, 150), (240, 230, 196), (216, 190, 136)], band_h=52,
+                    crown=(252, 246, 228), under=(196, 170, 120)),
+               dict(top=0.62, base_amp=24, r=(50, 140), billows=40, fall=300, haze=0.26, streak=0.18,
+                    bands=[(246, 236, 206), (222, 196, 140), (236, 222, 184), (208, 180, 124)], band_h=78,
+                    crown=(252, 244, 222), under=(188, 160, 110)),
+               dict(top=0.76, base_amp=30, r=(90, 230), billows=24, fall=360, haze=0.08, streak=0.16,
+                    bands=[(244, 232, 198), (216, 188, 130), (232, 214, 172)], band_h=120,
+                    crown=(254, 244, 216), under=(180, 150, 100))],
+    ),
+    "saturn_deck2": dict(
+        sun=dict(dir=(-0.75, 0.45, -0.3), strength=1.2, color=(1.0, 0.92, 0.8), angle=12.0),
+        ambient=((0.62, 0.56, 0.44), 0.55),
+        haze=(170, 148, 106),
+        banks=[dict(top=0.30, base_amp=20, r=(40, 110), billows=56, fall=320, haze=0.5, streak=0.14,
+                    bands=[(214, 190, 140), (182, 154, 104), (202, 176, 126)], band_h=64,
+                    crown=(230, 210, 162), under=(130, 108, 72), lightning=(1, (230, 236, 255)), flash=0.5),
+               dict(top=0.42, base_amp=28, r=(60, 160), billows=40, fall=380, haze=0.3, streak=0.12,
+                    bands=[(208, 182, 130), (174, 144, 96), (194, 166, 116)], band_h=96,
+                    crown=(226, 204, 154), under=(120, 98, 64)),
+               dict(top=0.6, base_amp=34, r=(100, 240), billows=24, fall=440, haze=0.12, streak=0.1,
+                    bands=[(202, 174, 122), (166, 136, 88)], band_h=136,
+                    crown=(222, 198, 146), under=(110, 88, 58), lightning=(1, (236, 240, 255)), flash=0.6)],
+    ),
+    "saturn_deck3": dict(
+        sun=dict(dir=(-0.75, 0.45, -0.3), strength=1.0, color=(1.0, 0.88, 0.74), angle=12.0),
+        ambient=((0.62, 0.48, 0.32), 0.5),
+        haze=(178, 132, 82),
+        banks=[dict(top=0.24, base_amp=28, r=(60, 180), billows=40, fall=420, haze=0.5, streak=0.08,
+                    bands=[(226, 184, 124), (196, 150, 94)], band_h=116,
+                    crown=(240, 204, 146), under=(130, 92, 56)),
+               dict(top=0.36, base_amp=34, r=(90, 260), billows=30, fall=480, haze=0.28, streak=0.07,
+                    bands=[(220, 176, 116), (188, 140, 86)], band_h=156,
+                    crown=(236, 198, 138), under=(120, 82, 48), lightning=(1, (255, 240, 210)), flash=0.5),
+               dict(top=0.55, base_amp=38, r=(140, 340), billows=20, fall=520, haze=0.1, streak=0.06,
+                    bands=[(214, 166, 106), (178, 128, 76)], band_h=206,
+                    crown=(232, 190, 128), under=(110, 74, 42))],
+    ),
+    "saturn_deep": dict(
+        sun=dict(dir=(-0.75, 0.45, -0.3), strength=0.6, color=(1.0, 0.84, 0.7), angle=14.0),
+        ambient=((0.46, 0.34, 0.22), 0.5),
+        haze=(84, 60, 36),
+        crush=(0.88, 0.07, (200, 96, 36)),
+        banks=[dict(top=0.46, base_amp=26, r=(50, 140), billows=36, fall=360, haze=0.62, streak=0.1,
+                    bands=[(150, 116, 76), (120, 90, 58)], band_h=96,
+                    crown=(162, 128, 86), under=(60, 42, 26)),
+               dict(top=0.56, base_amp=32, r=(80, 200), billows=26, fall=420, haze=0.42, streak=0.08,
+                    bands=[(142, 108, 70), (112, 82, 52)], band_h=136,
+                    crown=(154, 120, 80), under=(54, 38, 22)),
+               dict(top=0.7, base_amp=38, r=(120, 300), billows=18, fall=480, haze=0.24, streak=0.06,
+                    bands=[(134, 100, 64), (104, 76, 46)], band_h=186,
+                    crown=(148, 112, 74), under=(48, 34, 20))],
+    ),
     # B-027 Mercury (Bible §7.3): airless, so harsh small-angle sun, almost no ambient, little
     # haze; cratered relief; blinding grey regolith; violet twilight in the sky only.
     "mercury": dict(
@@ -1565,6 +1627,13 @@ def generate(entry, ctx):
                 sy = (srng.random(n) ** 2 * 0.4 * sky.shape[0]).astype(int)
                 sx = srng.integers(0, sky.shape[1], n)
                 sky[sy, sx] = np.maximum(sky[sy, sx], srng.uniform(0.5, 1.0, n)[:, None])
+            if P.get("ring"):
+                # B-058 Saturn deck 1: the ring plane seen edge-on, a bright horizontal line with a
+                # soft glow (horizontal, so the layer still tiles in x).
+                ry, rw, rcol = P["ring"]
+                yy = np.arange(sky.shape[0], dtype=np.float32)[:, None] / sky.shape[0]
+                line = np.exp(-((yy - ry) / rw) ** 2) + 0.25 * np.exp(-((yy - ry) / (rw * 6)) ** 2)
+                sky = np.clip(sky + (np.clip(line, 0, 1)[..., None] * (np.array(rcol, np.float32) / 255 - sky)), 0, 1)
             if preview:
                 sky = sky[::4, ::4]
             a = bank[..., 3:4]
