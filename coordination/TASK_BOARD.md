@@ -109,12 +109,12 @@ Lead notes: Done (cycle 168): M3InnerTests 738fd43 passed twice (UNITY checks 23
 > **R1 (D-062).** 2D tasks U-061..U-071 are Superseded (their code and sources stay in the tree and
 > get reused). R-tasks below rebuild Earth in 3D while keeping every system.
 
-### U-072 · UNITY · In Progress · R1
+### U-072 · UNITY · Done · R1
 Goal: 3D renderer and side-rail camera: switch the URP asset to the Universal (3D) Renderer with Forward+ (keep the 2D renderer asset in the project for the archive branch only); a perspective Cinemachine camera on a rail at z = −18 m, vertical FOV 35°, following the player on z = 0 with the current damping and look-ahead, giving ≈ 60 px/m at 1080p; Physics2D untouched; the HUD, panels and Space scene unchanged; `ArtMaterials` gains URP/Lit entries.
 Accept: Core, Space and PlanetSide load with no errors; M1LoopTests + SmokeTests pass; an EditMode test asserts the on-plane density (60 ± 3 px/m); a capture shows the terrain with depth (placeholder blocks).
 Files: Assets/_Game/Settings/, Code/Runtime/Camera/, Prefabs/
 Depends: —
-Lead notes: Cycle 171. R1. First; everything else builds on it. Cycle 173: D-064 ratifies P-29 (rail at z = −28.5 m for FOV 35° and 60 px/m; CameraFollow, no Cinemachine). In progress c70bfd8/b395a26, check running.
+Lead notes: Done c70bfd8 + b395a26 + 308aac2 (cycle 174): Universal renderer Forward+, side rail per D-064, SideViewTests 60.0 px/m, EditMode 229/229, PlayMode 0 failed incl. M1LoopTests + SmokeTests; earth_perspective_rail.png checked. The "depth" and lighting parts of the Accept line belong to U-073/U-074 and move there.
 
 ### U-073 · UNITY · Ready · R1
 Goal: Chunk block mesher (Bible §10.4 v2): `TerrainChunk` builds one greedy-meshed block mesh of 1 m cubes (exposed faces only, 1 m deep) with UVs into a per-planet `Texture2DArray` (top/side layer per tile material; flat placeholder colours until B-080); a back-wall quad; dig/place rebuilds only that chunk within the frame; the Tilemap stays for collision and data with its renderer off; `TerrainBlocks` shader (array textures, height blend between layers).
@@ -657,12 +657,12 @@ Lead notes: Done 3936ae1 (cycle 26): Archive at x 184 (buried room), launch comp
 > **R1 (D-062).** 2D tasks B-056..B-076 are Superseded; their `.blend` sources (rigs, props,
 > terrain recipes) are the starting point for the models. Contract v2 §9 is the rule set.
 
-### B-077 · BLENDER · In Progress · R1
+### B-077 · BLENDER · Done · R1
 Goal: Contract v2 pipeline test (the B-002 handshake again, in 3D): export the calibration figure as `characters/calibration/base.glb` with two clips (`idle`, `walk`), the four v2 maps, +X facing, feet at the origin; a stamped turntable contact sheet; a `render.py` export path for glb (`export_model(key)`); propose contract §9 changes you need in BLENDER_STATUS.
 Accept: UNITY's ArtImporter v5 imports it with the clip names intact and the materials assigned (U-075 confirms); the turntable review is stamped.
 Files: blender/scripts/build_calibration.py, blender/render.py, Assets/_Game/Art/characters/calibration/
 Depends: —
-Lead notes: Cycle 172 (09c6f27): glb + four maps + json exported, 984 tris, idle/walk clips, turntable checked (bake colours within tolerance, emissive stripe on +X). Proposals ratified as contract v2.1 (D-063). Done once UNITY confirms the import (U-075).
+Lead notes: Done 09c6f27 + f6108e4 (cycle 174): calibration glb imported by UNITY (e7dc190): clips and lengths kept, feet at y = 0, 984 tris, materials from the maps. Facing was mirrored by glTFast → D-065 (export facing glTF −X); re-export the calibration once under B-078's first turn.
 
 ### B-078 · BLENDER · Ready · R1
 Goal: The surveyor as a model: `characters/surveyor/base.glb`, ≤ 12 k triangles, 2048 textures, the full §5 clip set at 30 fps, a `float_pack` socket (empty) on the back and a `rig_tool` socket in the right hand; reuse the existing surveyor rig.

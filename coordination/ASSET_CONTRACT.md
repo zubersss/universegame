@@ -1,4 +1,4 @@
-# MERIDIAN — Asset Contract v2.1
+# MERIDIAN — Asset Contract v2.2
 
 > **v2 (D-062, 2026-11-02).** Models replace sprites. §9 is the rule set for every 3D category
 > (`terrain`, `backgrounds` (now skyline/ridge/deck meshes), `ships`, `characters`, `creatures`,
@@ -137,7 +137,7 @@ Existing Done assets are not re-exported unless a task says so.
 | Rule | Value |
 |------|-------|
 | File | `Assets/_Game/Art/<category>/<name>/<variant>.glb` (glTF binary, Y-up, metres), textures beside it as `<variant>_<map>.png`; sources `blender/sources/<category>/<name>.blend` |
-| Orientation | Faces **+X** (screen right); up +Y; the play plane is z = 0 with the model centred on it (depth split front/back) |
+| Orientation | Faces **+X in Unity** (screen right). glTFast mirrors X on import, so **export facing glTF −X** (D-065); up +Y; the play plane is z = 0 with the model centred on it (depth split front/back) |
 | Origin | Characters, creatures (walkers), props: bottom-centre at the feet/base. Fliers, ships, fx: centre of mass. Terrain block textures: n/a |
 | Textures | `color` (sRGB base colour), `normal` (tangent space, OpenGL +Y), `mask` (R metallic, G ambient occlusion, B rim/interactive glow, A smoothness), `emission` (sRGB). 1024² default; 2048² for the surveyor, ships and apex parts; terrain sets 512² per face |
 | Triangles | small creature/prop ≤ 3 k · medium ≤ 8 k · large ≤ 20 k · apex ≤ 60 k across parts · surveyor ≤ 12 k · ship ≤ 15 k · POI prop ≤ 6 k. Count after export |

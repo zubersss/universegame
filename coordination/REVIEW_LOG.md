@@ -900,3 +900,7 @@ Checked: review_characters_calibration_base.png (stamped 00:38): sphere/cube cal
 Checked: c70bfd8 + b395a26 (U-072: SideView rail camera, Render3DSetup Universal/Forward+, URP/Lit registry entries, SideViewTests), heavy_unity 00:40 check running; f6108e4 base.glb re-added through LFS. Decided: D-064 (P-29). U-072 → In Progress. UNITY's untracked InitTestScene*.unity leftovers: UNITY may delete them (its folder). Free RAM 0.77 GB during the check.
 Queues: UNITY Ready R1 U-073..U-077 (5); BLENDER Ready R1 B-078..B-082 (5), B-077 awaiting the import confirmation.
 
+## Cycle 174 · 2026-11-02 01:1x (UNITY message)
+Checked: tests_2026-11-02.md 00:40–00:41 (EditMode 229/229 incl. SideViewTests; PlayMode 91/110 + LeadQA 10/10, 0 failed); compile 0 errors / 0 warnings; earth_perspective_rail.png (tiles, camp, surveyor, Pilgrim under the perspective rail; flat and full-bright as expected before U-073/U-074). U-072 → Done. B-077 → Done on UNITY's import check (e7dc190); D-065 fixes the facing on the export side; contract v2.2.
+Queues: UNITY Ready R1 U-073..U-077 (5); BLENDER Ready R1 B-078..B-082 (5).
+

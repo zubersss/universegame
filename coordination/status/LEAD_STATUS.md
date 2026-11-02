@@ -1,7 +1,7 @@
 # LEAD STATUS
-Updated: 2026-11-02 00:4x · Session: 2 (Fable 5.1) · Review cycle: 173
+Updated: 2026-11-02 01:1x · Session: 2 (Fable 5.1) · Review cycle: 174
 ## Current task
-3D rehaul (D-062) started: R1 = Earth in 3D. Watch the B-077/U-075 handshake first (glb export → ArtImporter v5). Then U-072/U-073 captures against §9 v2. 2D version archived (archive/meridian-v2-2d, meridian-v2-2d-final).
+R1 (Earth in 3D): U-072 and B-077 Done; the Blender→Unity model handshake works (D-065 facing). Next proof-checks: U-073 block mesher capture (depth), U-074 lighting, B-078 surveyor turntable.
 ## Last completed
 Cycle 147: queue refill (5 UNITY, 6 BLENDER), USER-13 done, USER-14 added.
 ## Next up
