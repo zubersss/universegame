@@ -1015,12 +1015,12 @@ Files: blender/scripts/gen_fx.py, Assets/_Game/Art/fx/
 Depends: B-012
 Lead notes: Done 64f0265 + ba59ac8 (cycle 166): 10 FX sheets (3 lightning variants, diamond rain, methane hail, wind streaks, CRUSH band, skip spool + streak, floe sublimate); review_b067_fx.png stamped 00:01; numpy_only peak 327 MB.
 
-### B-068 · BLENDER · Ready · M4
+### B-068 · BLENDER · Done · M4
 Goal: Giant POI props (Bible §7.7–7.9): `props/saturn/{ring_rig, helium_trap, hexagon_wall_marker}` (the ring-mining rig with the Saturn beacon; a Deck 2–3 helium-rain trap; a wind-wall marker), `props/uranus/{tilted_derelict, umbrella_platform}` (the beacon derelict leaning at the axial tilt; a diamond-catching umbrella platform), `props/neptune/{wind_anchor, meridian_wreck_bow, meridian_wreck_mid, meridian_wreck_stern}` (the *Meridian* herself in three standable segments, alive with faint running lights).
 Accept: contract §4 sizes (ppu per D-018 where a prop exceeds the margin); standable tops read flat; emission on beacons and running lights; stamped contact sheets.
 Files: blender/scripts/build_props_saturn.py, build_props_uranus.py, build_props_neptune.py, Assets/_Game/Art/props/{saturn,uranus,neptune}/
 Depends: B-055
-Lead notes: Cycle 164. M4. Reuse the Jupiter prop recipes (riveted cream hull, rust band) for the Meridian wreck so the expedition reads as one fleet.
+Lead notes: Done 00abc78 (cycle 167): 9 props; Meridian wreck bow/mid/stern share the Jupiter hull recipe with lit portholes, torn ends, running lights and flat deck lines (512×400, ppu 108 per D-018); review_b068_props.png + review_b068_wreck.png stamped 00:08–00:09. Process gain: props are now grounded at z = 0 and framed from measured extents.
 
 ### B-069 · BLENDER · Ready · M4
 Goal: Aerostat and giant gear props (Bible §7.5, §4.2): `props/common/{aerostat_cell, aerostat_deck, aerostat_strut}` (the buildable platform modules: a gas cell, a deck plate, a strut, each tileable with the Venus aerostat look), `props/common/float_cell_pack` (the player's back-mounted float cell, two marks), `props/common/grapple_hook` + `fx/grapple_line` (the Rig grapple head and a tileable cable).
