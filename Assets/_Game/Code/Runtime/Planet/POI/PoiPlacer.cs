@@ -82,6 +82,9 @@ namespace Meridian.Planet.POI
             sr.color = poi.planet == PlanetId.Earth ? new Color(0.55f, 0.57f, 0.6f, 1f) : new Color(0.5f, 0.38f, 0.3f, 1f);
             go.transform.localScale = new Vector3(prop.size.x, prop.size.y, 1f);
             LoadArt(sr, prop.key, prop.size, prop.topRow);
+            // U-076: the prop's 3D model stands on the same base point and replaces the card once loaded.
+            var swap = Meridian.Art.ModelSwap.Attach(sr, prop.key, root, root.InverseTransformPoint(go.transform.position), prop.tiles, prop.tiles > 1 ? prop.size.x / prop.tiles : 0f);
+            swaps.Add(swap);
             if (prop.craftStation != Meridian.Crafting.Station.Hand)
             {
                 // U-051: the prop is a crafting station (the camp's Smelter).
@@ -110,6 +113,9 @@ namespace Meridian.Planet.POI
             return sr;
         }
 
+        readonly List<Meridian.Art.ModelSwap> swaps = new List<Meridian.Art.ModelSwap>();
+        /// <summary>U-076: the placed props' model swaps (tests, captures).</summary>
+        public IReadOnlyList<Meridian.Art.ModelSwap> ModelSwaps => swaps;
         readonly List<BoxCollider2D> solids = new List<BoxCollider2D>();
         readonly Dictionary<SpriteRenderer, BoxCollider2D> colliderOf = new Dictionary<SpriteRenderer, BoxCollider2D>();
         public IReadOnlyList<BoxCollider2D> Solids => solids;
@@ -209,6 +215,7 @@ namespace Meridian.Planet.POI
         {
             placed.Clear();
             solids.Clear();
+            swaps.Clear();
             colliderOf.Clear();
             for (int i = transform.childCount - 1; i >= 0; i--) Destroy(transform.GetChild(i).gameObject);
             foreach (var h in handles) if (h.IsValid()) Addressables.Release(h);

@@ -28,7 +28,21 @@ namespace Meridian.Ship
         {
             retractedHandle = Load(ArtKeys.Ships.PilgrimSide, s => Retracted = s);
             deployedHandle = Load(ArtKeys.Ships.PilgrimSideLegs, s => Deployed = s);
+            // U-076: the Pilgrim's model (B-079) replaces the side sprites once loaded. Its origin is the centre of
+            // mass, so its lowest point (the skid feet) is set on the skid line, SkidDrop below the body.
+            if (ship != null && target != null)
+            {
+                Model = ModelSwap.Attach(target, ArtKeys.Ships.PilgrimModel, ship.transform, Vector3.zero);
+                Model.Swapped += s =>
+                {
+                    var b = ModelSwap.ModelBounds(s.Views[0].Instance);
+                    s.transform.localPosition = new Vector3(0f, -SideShip.SkidDrop - b.min.y, 0f);
+                };
+            }
         }
+
+        /// <summary>U-076: the Pilgrim's 3D model view.</summary>
+        public ModelSwap Model { get; private set; }
 
         AsyncOperationHandle<IList<Sprite>> Load(string key, System.Action<Sprite> set)
         {

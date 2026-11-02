@@ -976,5 +976,91 @@ namespace Meridian.Tests
             UnityEngine.Object.Destroy(tex);
             rt.Release();
         }
+
+        /// <summary>U-076 evidence: the Earth camp with models, depth bands and flora (day, then the depth preset), and the Mars shelter at night with its lamp, wall and door models.</summary>
+        [UnityTest]
+        public IEnumerator CaptureDepthBands()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+            var side = director.PlanetSide;
+            for (int i = 0; i < 120; i++) yield return new WaitForFixedUpdate();
+            // Every prop swap, the Pilgrim and the bands load asynchronously: wait for them all.
+            float until = Time.realtimeSinceStartup + 30f;
+            while (Time.realtimeSinceStartup < until)
+            {
+                bool all = side.depthBands != null && side.depthBands.RidgeReady && side.depthBands.SkylineReady;
+                foreach (var s in side.pois.ModelSwaps) all &= s.Ready;
+                var legs = side.ship.GetComponentInChildren<Meridian.Ship.ShipLegsView>();
+                all &= legs != null && legs.Model != null && legs.Model.Ready;
+                if (all) break;
+                yield return null;
+            }
+            for (int i = 0; i < 30; i++) yield return null; // flora views settle
+            var cam = side.sideCamera;
+            cam.GetComponent<Meridian.Player.CameraFollow>().enabled = false;
+            var camp = side.pois.placed.Find(p => p.def == Meridian.Planet.POI.PoiCatalog.SpawnCamp);
+            Meridian.CameraRig.SideView.SetHalfHeight(cam, 10f);
+            var pivot = new Vector3(camp.def.CenterX, camp.groundY + 6f, 0f);
+            cam.transform.position = new Vector3(pivot.x, pivot.y, cam.transform.position.z);
+            side.dayNight.Override = 0.5f;
+            for (int i = 0; i < 5; i++) yield return null;
+            Debug.Log($"[MERIDIAN] U-076 Earth: ridge {side.depthBands.RidgeKey} depth {side.depthBands.RidgeDepth} mirrored {side.depthBands.RidgeMirrored}, flora {side.depthBands.FloraCount}, swaps {side.pois.ModelSwaps.Count}, sky quad bands {side.backdrop.DepthBandsOn}");
+            yield return Save(cam, $"{name}_1_earth_camp_day");
+            var pos = cam.transform.position;
+            Meridian.CameraRig.PhotoOrbit.Depth(cam, pivot);
+            for (int i = 0; i < 3; i++) yield return null;
+            yield return Save(cam, $"{name}_2_earth_camp_depth");
+            cam.transform.position = pos; cam.transform.rotation = Quaternion.identity;
+            side.dayNight.Override = null;
+
+            // The U-074 Mars shelter at night, re-shot with the lamp, wall and door models.
+            GameState.Instance.basePieces.Clear();
+            yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(Meridian.Planets.PlanetId.Mars));
+            side = director.PlanetSide;
+            side.hazards.enabled = false;
+            if (side.wardens != null) side.wardens.enabled = false;
+            var t = side.terrain;
+            int px = Mathf.FloorToInt(side.player.Body.position.x) + 200;
+            var feet = new Vector2(px + 0.5f, t.Generator.SurfaceHeight(t.WrapX(px)) + 1.05f);
+            side.player.Body.position = feet; side.player.transform.position = feet;
+            until = Time.realtimeSinceStartup + 15f;
+            yield return null;
+            while (!t.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+            feet = new Vector2(px + 0.5f, t.TopSolidY(px) + 1.05f);
+            side.player.Body.position = feet; side.player.transform.position = feet;
+            side.dayNight.Override = 0.02f;
+            var b = side.bases;
+            int x0 = px - 4, x1 = px + 4, top = 0;
+            for (int x = x0; x <= x1; x++) top = Mathf.Max(top, t.TopSolidY(x));
+            int roof = top + 4;
+            for (int y = t.TopSolidY(x0) + 1; y < roof; y++) b.Place(new Vector2(x0 + 0.5f, y + 0.5f), Meridian.Building.PieceKind.Wall);
+            int dg = t.TopSolidY(x1) + 1;
+            b.Place(new Vector2(x1 + 0.5f, dg + 0.5f), Meridian.Building.PieceKind.Door);
+            for (int y = dg + 2; y < roof; y++) b.Place(new Vector2(x1 + 0.5f, y + 0.5f), Meridian.Building.PieceKind.Wall);
+            for (int x = x0; x <= x1; x++) b.Place(new Vector2(x + 0.5f, roof + 0.5f), Meridian.Building.PieceKind.Wall);
+            var lamp = b.Place(new Vector2(px - 2 + 0.5f, t.TopSolidY(px - 2) + 1.5f), Meridian.Building.PieceKind.Lamp);
+            b.Place(new Vector2(px + 2 + 0.5f, t.TopSolidY(px + 2) + 1.5f), Meridian.Building.PieceKind.Crate);
+            cam = side.sideCamera;
+            cam.GetComponent<Meridian.Player.CameraFollow>().enabled = false;
+            Meridian.CameraRig.SideView.SetHalfHeight(cam, 6f);
+            cam.transform.position = new Vector3(px + 0.5f, top + 3f, cam.transform.position.z);
+            until = Time.realtimeSinceStartup + 20f;
+            while (Time.realtimeSinceStartup < until && (lamp == null || lamp.model == null || !lamp.model.Ready)) yield return null;
+            for (int k = 0; k < 60; k++) yield return new WaitForFixedUpdate();
+            var lightT = lamp != null && lamp.go != null ? lamp.go.transform.Find("Light") : null;
+            Debug.Log($"[MERIDIAN] U-076 Mars shelter: lamp model {(lamp != null && lamp.model != null && lamp.model.Ready)}, light at {(lightT != null ? lightT.position.ToString("F2") : "none")}, sheltered {b.Sheltered(side.player.Body.position)}");
+            yield return Save(cam, $"{name}_3_mars_shelter_night");
+            side.dayNight.Override = null;
+        }
     }
 }

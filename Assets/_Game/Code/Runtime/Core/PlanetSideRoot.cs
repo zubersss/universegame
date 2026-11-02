@@ -19,6 +19,8 @@ namespace Meridian.Core
         public ShipHud shipHud;
         public Meridian.UI.SideHud sideHud;
         public Meridian.Planet.PlanetBackdrop backdrop;
+        /// <summary>U-076: created at runtime in Configure.</summary>
+        public Meridian.Planet.Backdrop.DepthBands depthBands;
         public Meridian.Planet.Lighting.DayNightLighting dayNight;
         public Meridian.Planet.Weather.DustStorm dustStorm;
         /// <summary>Venus super-rotation (U-050), created at configure.</summary>
@@ -104,6 +106,19 @@ namespace Meridian.Core
             if (escapeBand != null) escapeBand.ConfigureFor(config);
             if (sideHud != null) sideHud.ConfigureFor(config);
             if (backdrop != null) backdrop.ConfigureFor(config);
+            // U-076: the 3D depth bands (ground strip, flora, ridges, skyline) behind the play plane; added here like
+            // PhotoOrbit so the scenes need no re-authoring.
+            if (depthBands == null && terrain != null)
+            {
+                var go = new GameObject("DepthBands");
+                go.transform.SetParent(transform, false);
+                depthBands = go.AddComponent<Meridian.Planet.Backdrop.DepthBands>();
+            }
+            if (depthBands != null)
+            {
+                depthBands.view = sideCamera; depthBands.terrain = terrain; depthBands.backdrop = backdrop; depthBands.pois = pois;
+                depthBands.ConfigureFor(config);
+            }
             // U-050: Venus super-rotation pushes the surveyor (off elsewhere).
             // U-051: the Pilgrim carries a Refinery and a Fabricator.
             if (ship != null && ship.GetComponent<Meridian.Crafting.CraftingStation>() == null)

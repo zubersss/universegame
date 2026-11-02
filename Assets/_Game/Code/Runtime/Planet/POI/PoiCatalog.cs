@@ -18,7 +18,9 @@ namespace Meridian.Planet.POI
         public readonly float shelterRadius;
         /// <summary>U-051: a crafting station this prop offers (Hand = none).</summary>
         public readonly Meridian.Crafting.Station craftStation;
-        public PoiProp(string key, float dx, float dy, Vector2 size, bool solid = false, int topRow = 0, float shelterRadius = 0f, Meridian.Crafting.Station craftStation = Meridian.Crafting.Station.Hand) { this.key = key; this.dx = dx; this.dy = dy; this.size = size; this.solid = solid; this.topRow = topRow; this.shelterRadius = shelterRadius; this.craftStation = craftStation; }
+        /// <summary>U-076: copies of the model side by side across `size.x` (the 2 m landing-pad module, D-068); 1 = one model.</summary>
+        public readonly int tiles;
+        public PoiProp(string key, float dx, float dy, Vector2 size, bool solid = false, int topRow = 0, float shelterRadius = 0f, Meridian.Crafting.Station craftStation = Meridian.Crafting.Station.Hand, int tiles = 1) { this.key = key; this.dx = dx; this.dy = dy; this.size = size; this.solid = solid; this.topRow = topRow; this.shelterRadius = shelterRadius; this.craftStation = craftStation; this.tiles = tiles; }
     }
 
     /// <summary>
@@ -184,7 +186,8 @@ namespace Meridian.Planet.POI
             },
             props = new[]
             {
-                new PoiProp("props/common/landing_pad", 22f, 0f, new Vector2(12f, 12f * 72f / 488f), solid: true, topRow: 17), // deck on legs, ~1.8 m; studs above row 17
+                // D-068 / U-076: two 2 m pad modules (4 m: the Pilgrim's 3.52 m gear), deck 0.38 m; one collider over both.
+                new PoiProp("props/common/landing_pad", 22.5f, 0f, new Vector2(4f, 0.38f), solid: true, tiles: 2), // centred under the Pilgrim (spawn 64 + 10, +0.5)
                 new PoiProp("props/common/lamp", 9f, 0f, new Vector2(0.7f, 0.7f * 320f / 96f)),
                 new PoiProp("props/common/lamp", 31f, 0f, new Vector2(0.7f, 0.7f * 320f / 96f)),
                 new PoiProp("props/common/storage_crate", 2.6f, 0f, new Vector2(1.25f, 1f), solid: true),

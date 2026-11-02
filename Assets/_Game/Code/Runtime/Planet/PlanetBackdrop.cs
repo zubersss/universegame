@@ -239,8 +239,21 @@ namespace Meridian.Planet
             };
         }
 
+        /// <summary>U-076: with the 3D depth bands drawn, this quad shows only layer 0 (the sky), parked behind the skyline.</summary>
+        public bool DepthBandsOn { get; private set; }
+        public const float DepthBandsBehindPlane = 450f;
+
+        public void SetDepthBands(bool on)
+        {
+            if (on == DepthBandsOn) return;
+            DepthBandsOn = on;
+            if (mainSet != null && sets.TryGetValue(mainSet, out var set))
+                for (int i = 1; i < 3; i++) ApplyLayer(quad, block, i, set.tex[i], true);
+        }
+
         void ApplyLayer(MeshRenderer r, MaterialPropertyBlock b, int i, Texture2D t, bool main)
         {
+            if (DepthBandsOn && i > 0) t = null; // ridges and skyline are meshes now
             r.GetPropertyBlock(b);
             b.SetTexture(LayerTex[i], t != null ? t : Texture2D.blackTexture);
             b.SetVector(LayerQ[i], new Vector4(Haze[i], ContentBase[i], t != null ? 1f : 0f, Follow[i]));
@@ -461,7 +474,9 @@ namespace Meridian.Planet
             // Generous width: the quad must cover the view at any aspect (captures switch to 16:9 targets).
             // U-072: under the perspective rail the quad sits behind the play plane and is sized for its depth;
             // the shader keeps working in play-plane metres (viewHalf), so the art scale doesn't change.
-            float quadDepth = Meridian.CameraRig.SideView.BackdropDepth(view);
+            float quadDepth = DepthBandsOn && !view.orthographic
+                ? Meridian.CameraRig.SideView.PlaneDistance(view) + DepthBandsBehindPlane // behind skyline_far (z ≤ 400 m)
+                : Meridian.CameraRig.SideView.BackdropDepth(view);
             float h = Meridian.CameraRig.SideView.HalfHeightAtDepth(view, quadDepth) * 2f, w = h * Mathf.Max(view.aspect, 2.5f);
             quad.transform.localPosition = new Vector3(0f, 0f, quadDepth);
             quad.transform.localScale = new Vector3(w, h, 1f);

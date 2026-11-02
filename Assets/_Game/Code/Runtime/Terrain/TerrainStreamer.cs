@@ -124,6 +124,9 @@ namespace Meridian.Terrain
         int[] wallPoiPad;
         const int WallUnknown = int.MinValue + 1;
 
+        /// <summary>U-076: the column's original surface row (POI-shaped ground included, player digs not): the ground behind the play plane.</summary>
+        public int OriginalTop(int x) => ((TerrainChunk.IBlockWorld)this).WallTop(x);
+
         int TerrainChunk.IBlockWorld.WallTop(int x)
         {
             if (Config == null || Config.worldType != WorldType.Solid) return int.MinValue;

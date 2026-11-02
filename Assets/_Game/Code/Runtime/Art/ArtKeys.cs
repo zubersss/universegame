@@ -27,6 +27,8 @@ namespace Meridian.Art
             public const string PilgrimSide = "ships/pilgrim/side";
             /// <summary>Skids deployed (below 10 m, Bible §4.3; D-025). `PilgrimSide` is gear retracted.</summary>
             public const string PilgrimSideLegs = "ships/pilgrim/side_legs";
+            /// <summary>U-076: the Pilgrim's 3D model (B-079), centre-of-mass origin.</summary>
+            public const string PilgrimModel = "ships/pilgrim/base";
         }
 
         public static class Terrain

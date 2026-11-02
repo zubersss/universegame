@@ -97,11 +97,57 @@ namespace Meridian.Art
             renderers = Instance.GetComponentsInChildren<Renderer>();
             if (material != null) foreach (var r in renderers) r.sharedMaterial = material;
             block = new MaterialPropertyBlock();
-            BuildGraph();
+            SetUpLods();
+            if (clips != null && clips.Count > 0) BuildGraph(); // static props: no animator, no graph
             Ready = true;
             SetFacing(facingRight);
             Loaded?.Invoke();
         }
+
+        /// <summary>U-076: a model with a "*_LOD1" node (contract v2.2) gets a LODGroup: that node's renderers are LOD1.</summary>
+        void SetUpLods()
+        {
+            Transform lod1 = null;
+            foreach (var t in Instance.GetComponentsInChildren<Transform>(true))
+                if (t.name.EndsWith("_LOD1")) { lod1 = t; break; }
+            if (lod1 == null) return;
+            var near = new List<Renderer>();
+            var far = new List<Renderer>();
+            foreach (var r in renderers) (r.transform.IsChildOf(lod1) ? far : near).Add(r);
+            if (near.Count == 0 || far.Count == 0) return;
+            var group = Instance.AddComponent<LODGroup>();
+            group.SetLODs(new[] { new LOD(LodSwitch, near.ToArray()), new LOD(LodCull, far.ToArray()) });
+            group.RecalculateBounds();
+        }
+
+        /// <summary>Screen-height fractions: LOD0 above 10 %, LOD1 down to 0.5 % (a rail-camera prop is rarely below).</summary>
+        public const float LodSwitch = 0.10f, LodCull = 0.005f;
+
+        /// <summary>
+        /// U-076: runs one-shot `name` forward to its end (true) or backward to its start (false) and holds there:
+        /// the door's `open` clip opens and closes it. Returns false if unknown.
+        /// </summary>
+        public bool PlayToward(string name, bool forward)
+        {
+            if (!Ready || name == null || !playables.TryGetValue(name, out var p)) return false;
+            if (name != Current)
+            {
+                Current = name;
+                if (playing.IsValid()) playing.Pause();
+                playing = p;
+                playingLength = (float)p.GetAnimationClip().length;
+                p.SetTime(0); // a fresh one-shot starts at its first pose (a door that was never opened is closed)
+                p.Play();
+                output.SetSourcePlayable(p);
+            }
+            playingLoops = false;
+            Towards = forward ? 1 : -1;
+            playing.SetSpeed(Towards);
+            return true;
+        }
+
+        /// <summary>+1 running to (or held at) the end, −1 to the start; 0 after a plain Play.</summary>
+        public int Towards { get; private set; }
 
         void BuildGraph()
         {
@@ -128,9 +174,10 @@ namespace Meridian.Art
         public bool Play(string name)
         {
             if (!Ready || name == null) return false;
-            if (name == Current) return true;
+            if (name == Current && Towards == 0) return true;
             if (!playables.TryGetValue(name, out var p)) return false;
             Current = name;
+            Towards = 0;
             if (playing.IsValid()) playing.Pause();
             playing = p;
             playingLoops = loops.TryGetValue(name, out var l) && l;
@@ -156,10 +203,11 @@ namespace Meridian.Art
         {
             if (!Ready) return;
             // One-shots hold their last frame (Mecanim import loops every clip; the json says which ones don't).
-            if (!playingLoops && playing.IsValid() && playing.GetTime() >= playingLength)
+            if (!playingLoops && playing.IsValid())
             {
-                playing.SetTime(Mathf.Max(0f, playingLength - 0.001f));
-                playing.SetSpeed(0);
+                double t = playing.GetTime();
+                if (Towards >= 0 && t >= playingLength) { playing.SetTime(Mathf.Max(0f, playingLength - 0.001f)); playing.SetSpeed(0); }
+                else if (Towards < 0 && t <= 0) { playing.SetTime(0); playing.SetSpeed(0); }
             }
             bool flashing = Time.time < flashUntil;
             if (flashing != flashShown && renderers != null)

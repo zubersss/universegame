@@ -39,6 +39,8 @@ namespace Meridian.Building
             public BasePieceSave save;
             public GameObject go;
             public Aerostat aerostat;
+            /// <summary>U-076: the piece's 3D model (replaces the sprite once loaded).</summary>
+            public Meridian.Art.ModelSwap model;
         }
 
         public sealed class Aerostat
@@ -271,6 +273,24 @@ namespace Meridian.Building
             var view = viewGo.AddComponent<SpriteRenderer>();
             view.sortingOrder = 3;
             Dress(view, spec);
+            // U-076: the piece's model on the footprint's bottom centre, scaled like the sprite (stretch pieces fill
+            // their cells; the others keep their proportions at the footprint's height).
+            piece.model = Meridian.Art.ModelSwap.Attach(view, spec.artKey, go.transform, viewGo.transform.localPosition,
+                fit: spec.stretch ? Meridian.Art.ModelSwap.Fit.Stretch : Meridian.Art.ModelSwap.Fit.Height, footprint: spec.size);
+            if (spec.kind == PieceKind.Lamp)
+            {
+                var lightT = go.transform.Find("Light");
+                piece.model.Swapped += s =>
+                {
+                    // LEAD cycle 179: the lamp lights from its bulb (socket_light); the 3D light keeps its U-074 offset
+                    // in front of the block faces.
+                    var socket = s.Find("socket_light");
+                    if (socket == null || lightT == null) return;
+                    var p = socket.position;
+                    lightT.position = new Vector3(p.x, p.y, p.z - Lamp3DFront);
+                };
+            }
+            if (spec.kind == PieceKind.Door) doors.Add(piece);
             pieces.Add(piece);
             return piece;
         }
@@ -406,8 +426,29 @@ namespace Meridian.Building
 
         // ---------- aerostats ----------
 
+        readonly List<Piece> doors = new List<Piece>();
+        /// <summary>U-076: a door's model opens (its `open` clip) while the surveyor is this close, and closes after.</summary>
+        public const float DoorOpenRange = 1.8f;
+        public const string DoorClip = "open";
+
+        void UpdateDoors()
+        {
+            for (int i = doors.Count - 1; i >= 0; i--)
+            {
+                var d = doors[i];
+                if (d.go == null) { doors.RemoveAt(i); continue; }
+                var m = d.model != null && d.model.Ready ? d.model.Views[0] : null;
+                if (m == null) continue;
+                bool near = player != null && Mathf.Abs(player.position.x - (d.go.transform.position.x + d.spec.size.x * 0.5f)) < DoorOpenRange
+                            && player.position.y > d.go.transform.position.y - 0.5f && player.position.y < d.go.transform.position.y + d.spec.size.y;
+                int want = near ? 1 : -1;
+                if (m.Towards != want) m.PlayToward(DoorClip, near);
+            }
+        }
+
         void Update()
         {
+            UpdateDoors();
             float dt = Time.deltaTime;
             Aerostat nearest = null;
             float best = HudRange * HudRange;
