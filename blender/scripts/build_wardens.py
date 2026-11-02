@@ -223,6 +223,210 @@ def build(out_path=DEFAULT_OUT):
     print("MERIDIAN built", out_path)
 
 
+# ---------------------------------------------------------------- contract v2 models (B-096)
+# Everything that moves rides a bone (glTF cannot animate merged sub-objects): iris petals on
+# petal bones (hinged at the bezel), the charge core on a scaling bone, hunter prongs on bones.
+# Clips keyed directly at 30 fps: idle, walk, fly (= walk; contract §5 flier set), attack, hurt,
+# death. Indigo running lights and a shield emitter (LEAD, B-096) on both drones.
+from mathutils import Matrix  # noqa: E402
+
+MODEL_OUT = os.path.join(os.path.dirname(HERE), "sources", "creatures", "warden_model.blend")
+CLIPS30 = [("idle", 36, True), ("walk", 24, True), ("fly", 24, True), ("attack", 18, False), ("hurt", 8, False), ("death", 30, False)]
+WARDEN_SPECS = {
+    # pod length/height, lens radius, tendrils, fins, prongs
+    "sentinel": dict(pod=(0.48, 0.3, 0.3), taper=0.75, lens=0.17, tend=[(-0.25, -0.12), (-0.1, 0.0), (-0.32, 0.12)], tend_len=1.0,
+                     petals=6, prongs=False, lights=4),
+    "hunter":   dict(pod=(0.62, 0.2, 0.18), taper=0.88, lens=0.11, tend=[(-0.38, -0.08), (-0.38, 0.08)], tend_len=0.7,
+                     petals=4, prongs=True, lights=6),
+}
+
+
+def _rot_world(rig, bone, R):
+    pb = rig.pose.bones[bone]
+    M = rig.data.bones[bone].matrix_local.to_3x3()
+    pb.rotation_mode = "QUATERNION"
+    pb.rotation_quaternion = (M.inverted() @ R @ M).to_quaternion()
+
+
+def build_warden_model(scene, sp, S):
+    coll = bpy.data.collections.new(sp)
+    scene.collection.children.link(coll)
+    L, H, W = S["pod"]
+    nose = L * 0.88
+    ad = bpy.data.armatures.new(f"{sp}_rig")
+    rig = bpy.data.objects.new(f"{sp}_rig", ad)
+    coll.objects.link(rig)
+    _select_only(rig)
+    bpy.ops.object.mode_set(mode="EDIT")
+    eb = ad.edit_bones
+    root = eb.new("root"); root.head, root.tail = Vector((-0.2, 0, 0)), Vector((0.2, 0, 0))
+    tl = S["tend_len"]
+    for k, (x, y) in enumerate(S["tend"]):
+        a = eb.new(f"tA_{k}"); a.head, a.tail = Vector((x, y, -H * 0.7)), Vector((x - 0.12 * tl, y, -0.5 * tl)); a.parent = root
+        b = eb.new(f"tB_{k}"); b.head, b.tail = a.tail.copy(), Vector((x - 0.3 * tl, y, -0.74 * tl)); b.parent = a
+    pr = S["lens"]
+    piv = []
+    for k in range(S["petals"]):
+        ang = 2 * math.pi * k / S["petals"]
+        hpos = Vector((nose + 0.01, pr * math.cos(ang), pr * math.sin(ang)))
+        p = eb.new(f"petal_{k}"); p.head, p.tail = hpos, hpos + Vector((0.08, 0, 0)); p.parent = root
+        piv.append((f"petal_{k}", ang))
+    c = eb.new("core"); c.head, c.tail = Vector((nose + 0.15, 0, 0)), Vector((nose + 0.25, 0, 0)); c.parent = root
+    if S["prongs"]:
+        for s in (-1, 1):
+            p = eb.new(f"prong_{s}"); p.head, p.tail = Vector((nose * 0.7, 0, s * H * 0.6)), Vector((nose + 0.2, 0, s * H * 0.5)); p.parent = root
+    bpy.ops.object.mode_set(mode="OBJECT")
+
+    mb = bpy.data.metaballs.new(f"{sp}_mb")
+    mb.resolution = mb.render_resolution = 0.012
+    for x, y in S["tend"]:
+        pts = [(x, y, -H * 0.66, 0.042), (x - 0.12 * tl, y, -0.5 * tl, 0.03), (x - 0.3 * tl, y, -0.74 * tl, 0.016)]
+        for (x0, y0, z0, r0), (x1, y1, z1, r1) in zip(pts, pts[1:]):
+            d = Vector((x1 - x0, y1 - y0, z1 - z0))
+            e = mb.elements.new(type="CAPSULE")
+            e.co = ((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2)
+            e.radius = 1.35 * (r0 + r1) / 2
+            e.size_x = d.length / 2
+            e.rotation = Vector((1, 0, 0)).rotation_difference(d.normalized())
+    mbo = bpy.data.objects.new(f"{sp}_mb", mb)
+    coll.objects.link(mbo)
+    _select_only(mbo)
+    bpy.ops.object.convert(target="MESH")
+    tendrils = bpy.context.view_layer.objects.active
+    tendrils.name = f"{sp}_tendrils"
+    for p in tendrils.data.polygons:
+        p.use_smooth = True
+    tendrils.data.materials.append(flat_material(f"{sp}_root", (120, 104, 84), rough=0.7))
+    bind_auto(tendrils, rig)
+
+    hull = hull_material(f"{sp}_hull")
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=16, radius=1.0, location=(0, 0, 0))
+    pod = bpy.context.active_object
+    for v in pod.data.vertices:
+        t = min(1.0, max(0.0, (1 - v.co.x) / 2))
+        k = 1.0 - S["taper"] * t ** 1.6
+        v.co.y *= k
+        v.co.z *= k
+    pod.scale = (L, W, H)
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    bpy.ops.object.shade_smooth()
+    pod.data.materials.append(hull)
+    _on_bone(pod, rig, "root", coll)
+    for sz in (-1, 1):                                                # stabiliser vanes
+        bpy.ops.mesh.primitive_cone_add(vertices=4, radius1=0.12, radius2=0.0, depth=0.34 * (1.3 if S["prongs"] else 1.0),
+                                        location=(-L * 0.62, 0, sz * H * 0.66), rotation=(0, math.radians(-90 + sz * 25), 0))
+        vane = bpy.context.active_object
+        vane.scale = (1.0, 0.25, 1.0)
+        vane.data.materials.append(hull)
+        _on_bone(vane, rig, "root", coll)
+    bezel_m = flat_material(f"{sp}_bezel", (96, 92, 84), metallic=0.5, rough=0.4)
+    bpy.ops.mesh.primitive_torus_add(major_radius=pr * 1.18, minor_radius=pr * 0.3, location=(nose - 0.03, 0, 0), rotation=(0, math.pi / 2, 0))
+    bz = bpy.context.active_object
+    bz.data.materials.append(bezel_m)
+    _on_bone(bz, rig, "root", coll)
+    lens_m = flat_material(f"{sp}_lens", (20, 70, 70), metallic=0.2, emit=(90, 230, 210), strength=1.4, rough=0.08)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=20, ring_count=10, radius=pr, location=(nose, 0, 0))
+    ln = bpy.context.active_object
+    ln.scale = (0.85, 1.0, 1.0)
+    ln.data.materials.append(lens_m)
+    _on_bone(ln, rig, "root", coll)
+    core_m = flat_material(f"{sp}_core", (220, 255, 240), emit=(200, 255, 235), strength=3.0)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=6, radius=pr * 0.6, location=(nose + 0.15, 0, 0))
+    co = bpy.context.active_object
+    co.data.materials.append(core_m)
+    _on_bone(co, rig, "core", coll)
+    for name, ang in piv:                                             # petals hang inward over the lens
+        bpy.ops.mesh.primitive_cube_add(size=1.0)
+        pt = bpy.context.active_object
+        pt.scale = (0.03, pr * 0.47, pr * 0.6)
+        pt.rotation_euler = (ang, 0, 0)
+        hp = Vector((nose + 0.01, pr * math.cos(ang), pr * math.sin(ang)))
+        pt.location = hp - Vector((0, math.cos(ang), math.sin(ang))) * pr * 0.45
+        pt.data.materials.append(hull)
+        _on_bone(pt, rig, name, coll)
+    if S["prongs"]:                                                   # hunter: forward prongs (strike)
+        for s in (-1, 1):
+            bpy.ops.mesh.primitive_cone_add(vertices=6, radius1=0.035, radius2=0.004, depth=0.34,
+                                            location=(nose * 0.95, 0, s * H * 0.55), rotation=(0, math.pi / 2 - s * 0.12, 0))
+            pg = bpy.context.active_object
+            pg.data.materials.append(bezel_m)
+            _on_bone(pg, rig, f"prong_{s}", coll)
+    ind = flat_material(f"{sp}_indigo", (30, 26, 80), emit=(110, 100, 255), strength=2.2)
+    for k in range(S["lights"]):                                      # indigo running lights along the flanks
+        pairs = max(1, S["lights"] // 2)
+        x = L * (0.4 - 0.7 * (k // 2) / max(1, pairs - 1))    # pairs spread from the front to the back
+        s = 1 if k % 2 else -1
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=10, ring_count=5, radius=0.025, location=(x, s * W * 0.82 * (1 - 0.3 * abs(x) / L), H * 0.15))
+        lt = bpy.context.active_object
+        lt.data.materials.append(ind)
+        _on_bone(lt, rig, "root", coll)
+    bpy.ops.mesh.primitive_torus_add(major_radius=W * 0.7, minor_radius=0.025, location=(-L * 0.05, 0, -H * 0.9))
+    sh = bpy.context.active_object                                    # shield emitter ring under the belly
+    sh.data.materials.append(ind)
+    _on_bone(sh, rig, "root", coll)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=12, radius=W * 0.3, depth=0.05, location=(-L * 0.05, 0, -H * 0.86))
+    sc = bpy.context.active_object
+    sc.data.materials.append(bezel_m)
+    _on_bone(sc, rig, "root", coll)
+
+    rig.animation_data_create()
+    Mroot = rig.data.bones["root"].matrix_local.to_3x3()
+    for name, n, loop in CLIPS30:
+        act = bpy.data.actions.new(f"{sp}|{name}")           # species prefix: one blend holds both drones
+        act.use_fake_user = True
+        rig.animation_data.action = act
+        step = 3
+        for f in list(range(1, n + 1, step)) + [n + 1]:
+            t = (f - 1) / n
+            s2 = math.sin(2 * math.pi * t)
+            pitch, z, open_, charge, sway, prong = 0.0, 0.0, 0.25, 0.0, 6 * s2, 0.0
+            if name == "idle":
+                z = 0.03 * s2
+            elif name in ("walk", "fly"):
+                pitch, sway = -8.0 - (6.0 if S["prongs"] else 0.0), 12 * s2
+            elif name == "attack":
+                k = math.sin(math.pi * min(1.0, t * 1.2))
+                pitch, open_, charge, prong = -4 * k, 0.25 + 0.75 * k, k, (20 * k if S["prongs"] else 0)
+            elif name == "hurt":
+                k = 1 - t
+                pitch, open_ = 12 * k, 0.0
+            elif name == "death":
+                k = min(1.0, t)
+                pitch, z, open_, sway = 50 * k, -0.25 * k, 0.0, 0.0
+            pb = rig.pose.bones["root"]
+            pb.location = Mroot.inverted() @ Vector((0, 0, z))
+            _rot_world(rig, "root", Matrix.Rotation(math.radians(pitch), 3, "Y"))
+            for k2 in range(len(S["tend"])):
+                set_pose(rig, f"tA_{k2}", sway * math.cos(k2) - (20 if name in ("walk", "fly") else 0))
+                set_pose(rig, f"tB_{k2}", 1.4 * sway * math.cos(k2 + 0.7))
+            for bname, ang in piv:                                     # hinge about the bezel tangent
+                axis = Vector((0, -math.sin(ang), math.cos(ang)))
+                _rot_world(rig, bname, Matrix.Rotation(math.radians(70 * open_), 3, axis))
+            cs = max(0.02, charge * 1.3)
+            rig.pose.bones["core"].scale = (cs, cs, cs)
+            if S["prongs"]:
+                for s in (-1, 1):
+                    _rot_world(rig, f"prong_{s}", Matrix.Rotation(math.radians(s * prong), 3, "Y"))
+            for b in rig.pose.bones:
+                b.keyframe_insert("rotation_quaternion", frame=f)
+                b.keyframe_insert("location", frame=f)
+                b.keyframe_insert("scale", frame=f)
+        rig.animation_data.action = None
+    rig.animation_data.action = bpy.data.actions[f"{sp}|idle"]
+
+
+def build_model(out_path=MODEL_OUT):
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    scene = bpy.context.scene
+    scene.render.fps = 30
+    for sp, S in WARDEN_SPECS.items():
+        build_warden_model(scene, sp, S)
+    scene.frame_start, scene.frame_end = 1, 37
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    bpy.ops.wm.save_as_mainfile(filepath=out_path, compress=True)
+    print("MERIDIAN built", out_path)
+
+
 if __name__ == "__main__":
     args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     build(args[0] if args else DEFAULT_OUT)

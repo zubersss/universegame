@@ -470,9 +470,19 @@ def export_model(entry, art_dir, preview_dir, objs, stamp_fn):
         # Export only the declared clips: ACTIONS mode also picks up any other action whose
         # channels match (the wolf's action rode along on the stag, same bone names).
         keep = {c["name"] for c in clips}
-        for act in list(bpy.data.actions):
-            if act.name not in keep:
-                bpy.data.actions.remove(act)
+        prefix = entry.get("collection", "") + "|"
+        own = {act.name[len(prefix):]: act for act in bpy.data.actions if act.name.startswith(prefix)}
+        for act in list(bpy.data.actions):           # several species per blend: keep only this one's clips
+            if act.name.startswith(prefix) and act.name[len(prefix):] in keep:
+                continue
+            if act.name in keep and act.name not in own:
+                continue
+            bpy.data.actions.remove(act)
+        for clip, act in own.items():
+            if clip in keep:
+                act.name = clip                      # glTF animation name = clip name
+        if rig.animation_data and "idle" in bpy.data.actions:
+            rig.animation_data.action = bpy.data.actions["idle"]
     budget = int(entry.get("tri_budget", 1 << 30))
     if entry.get("auto_decimate"):
         auto_decimate(mesh, budget)

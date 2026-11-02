@@ -1,53 +1,54 @@
 {
-  "key": "creatures/warden/sentinel",
-  "frame_width": 256,
-  "frame_height": 256,
-  "columns": 6,
-  "gutter": 4,
-  "frames": 28,
-  "fps": 12,
-  "pivot": [
-    0.5,
-    0.5
-  ],
-  "facing": "right",
-  "animations": [
-    {
-      "name": "idle",
-      "start": 0,
-      "length": 6,
-      "loop": true
-    },
-    {
-      "name": "walk",
-      "start": 6,
-      "length": 8,
-      "loop": true
-    },
-    {
-      "name": "attack",
-      "start": 14,
-      "length": 6,
-      "loop": false
-    },
-    {
-      "name": "hurt",
-      "start": 20,
-      "length": 2,
-      "loop": false
-    },
-    {
-      "name": "death",
-      "start": 22,
-      "length": 6,
-      "loop": false
-    }
-  ],
-  "hitbox": {
-    "x": 0.25,
-    "y": 0.3,
-    "w": 0.5,
-    "h": 0.4
+ "key": "creatures/warden/sentinel",
+ "format": "glb",
+ "contract": "v2.2",
+ "facing": "+X in Unity (exported facing glTF -X, D-065)",
+ "up": "+Y",
+ "units": "m",
+ "origin": "centre",
+ "triangles": 7600,
+ "lod1_triangles": null,
+ "texture": 1024,
+ "maps": [
+  "color",
+  "normal",
+  "mask",
+  "emission"
+ ],
+ "fps": 30,
+ "clips": [
+  {
+   "name": "idle",
+   "frames": 36,
+   "loop": true
   },
-  "ppu": 131.75
+  {
+   "name": "walk",
+   "frames": 24,
+   "loop": true
+  },
+  {
+   "name": "fly",
+   "frames": 24,
+   "loop": true
+  },
+  {
+   "name": "attack",
+   "frames": 18,
+   "loop": false
+  },
+  {
+   "name": "hurt",
+   "frames": 8,
+   "loop": false
+  },
+  {
+   "name": "death",
+   "frames": 30,
+   "loop": false
+  }
+ ],
+ "atlas": null,
+ "vertex_color": null,
+ "sockets": []
 }
