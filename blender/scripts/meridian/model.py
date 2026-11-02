@@ -444,7 +444,7 @@ def bake_maps(mesh, size, samples=16):
 
 # ---------------------------------------------------------------- 4. export material
 
-def export_material(mesh, maps_paths, emissive):
+def export_material(mesh, maps_paths, emissive, alpha=None):
     """One material using the baked maps (a second slot is not needed: emission is a map)."""
     m = bpy.data.materials.new("model_mat")
     m.use_nodes = True
@@ -463,6 +463,14 @@ def export_material(mesh, maps_paths, emissive):
     if emissive:
         nt.links.new(tex(maps_paths["emission"], False).outputs["Color"], pr.inputs["Emission Color"])
         pr.inputs["Emission Strength"].default_value = 1.0
+    if alpha is not None:                                 # B-092: translucent strips (glTF alphaMode BLEND)
+        pr.inputs["Alpha"].default_value = float(alpha)
+        for attr, val in (("surface_render_method", "BLENDED"), ("blend_method", "BLEND")):
+            try:
+                setattr(m, attr, val)
+            except (AttributeError, TypeError):
+                pass
+        m.use_backface_culling = False
     mesh.data.materials.clear()
     mesh.data.materials.append(m)
     return m
@@ -638,7 +646,7 @@ def export_model(entry, art_dir, preview_dir, objs, stamp_fn):
         paths[mname] = p
     if not atlas:
         emissive = float(maps["emission"].max()) > 0.02
-        export_material(mesh, paths, emissive)
+        export_material(mesh, paths, emissive, entry.get("alpha"))
     glb = os.path.join(out_dir, f"{variant}.glb")
     sockets = [o for o in objs if o.type == "EMPTY" and o.name.startswith("socket_")]
     extras = list(sockets)

@@ -66,7 +66,7 @@ def make_terms(rng, n, kmax):
     return [(rng.randint(1, kmax), rng.uniform(0, 2 * math.pi), rng.uniform(0.4, 1.0) / (1 + 0.3 * i)) for i in range(n)]
 
 
-def vc_material(name):
+def vc_material(name, emit=0.0):
     m = bpy.data.materials.new(name)
     m.use_nodes = True
     nt = m.node_tree
@@ -75,6 +75,9 @@ def vc_material(name):
     attr.layer_name = "col"
     nt.links.new(attr.outputs["Color"], pr.inputs["Base Color"])
     pr.inputs["Roughness"].default_value = 0.92
+    if emit:                                          # B-092 Venus vents: the colour attribute also glows
+        nt.links.new(attr.outputs["Color"], pr.inputs["Emission Color"])
+        pr.inputs["Emission Strength"].default_value = emit
     return m
 
 
@@ -133,7 +136,7 @@ class Builder:
     def tris(self):
         return sum(len(f) - 2 for f in self.faces)
 
-    def mesh(self, name, coll):
+    def mesh(self, name, coll, emit=0.0):
         me = bpy.data.meshes.new(name)
         me.from_pydata(self.verts, [], self.faces)
         me.update()
@@ -142,7 +145,7 @@ class Builder:
             ca.data[i].color = c
         ob = bpy.data.objects.new(name, me)
         coll.objects.link(ob)
-        me.materials.append(vc_material(name + "_mat"))
+        me.materials.append(vc_material(name + "_mat", emit))
         for p in me.polygons:
             p.use_smooth = False
         return ob
@@ -155,11 +158,19 @@ def ridge(region, R, coll):
     xs = [-PERIOD / 2 + 2.0 * i for i in range(129)]                 # 2 m spacing, both ends on the period
     ys = [20.0 + 5.0 * j for j in range(9)]                          # 20..60 m depth
     sea = R.get("sea")
+    craters = [(rng.uniform(-PERIOD / 2, PERIOD / 2), rng.uniform(24.0, 56.0), rng.uniform(*R.get("crater_r", (4.0, 14.0))))
+               for _ in range(R.get("craters", 0))]                   # B-092 Mercury: raised rims, shallow bowls
+    if R.get("cloud"):                                               # B-092 Venus deck: long smooth heaps, no fine hills
+        hill_t = make_terms(rng, 4, 3)
 
     def h(x, y):
         d = (y - 20.0) / 40.0                                        # 0 front .. 1 back
         z = periodic(rng, x, PERIOD, hill_t, R["hill"]) * (0.4 + 0.6 * d)
         z += R["rise"] * d * (0.6 + 0.4 * periodic(rng, x, PERIOD, rise_t, 1.0))
+        for cx, cy, cr in craters:
+            dx = ((x - cx + PERIOD / 2) % PERIOD) - PERIOD / 2
+            dd = math.hypot(dx, y - cy)
+            z += 0.22 * cr * math.exp(-((dd - cr) / (0.22 * cr)) ** 2) - 0.12 * cr * max(0.0, 1 - dd / cr)
         if R.get("terrace"):                                         # desert mesas: stepped
             t = R["terrace"]
             z = t * math.floor(z / t) + min(t, max(0.0, (z % t) - 0.6 * t) * 2.5)
@@ -167,9 +178,15 @@ def ridge(region, R, coll):
             z = min(z, sea["level"])
         return z
 
+    zr = [h(x, y) for y in ys for x in xs]
+    zlo, zhi = min(zr), max(max(zr), min(zr) + 1e-3)
+
     def col(x, y, z):
         n = 0.5 + 0.5 * periodic(rng, x + 3 * y, PERIOD, col_t, 1.0) / 1.5
         c = [a + (b - a) * max(0.0, min(1.0, n)) for a, b in zip(g0, g1)]
+        if R.get("cloud"):                                           # under-colour low, lit crown high
+            k = (z - zlo) / (zhi - zlo)
+            c = [a + (b - a) * k for a, b in zip(R["cloud"][0], R["cloud"][1])]
         if R.get("strata"):
             sc, per = R["strata"]
             k = 0.5 + 0.5 * math.sin(2 * math.pi * z / per)
@@ -224,7 +241,18 @@ def ridge(region, R, coll):
                 b.blob(x + dx, y, z + r * 0.35, r, c)
             placed.append((x, y))
     ob = b.mesh(f"ridge_{region}", coll)
-    return ob, b.tris(), len(placed)
+    nv = R.get("vents", 0)
+    if nv:                                                           # B-092 Venus surface: lava vents, a second emissive mesh
+        vb = Builder()
+        for i in range(nv):
+            x, y = rng.uniform(-PERIOD / 2, PERIOD / 2), rng.uniform(21.0, 59.0)
+            r = rng.uniform(0.5, 1.3)
+            c = lin(rng.choice([(255, 120, 40), (255, 90, 30), (255, 160, 70)]))
+            for dx in ([0.0] + ([PERIOD] if x < -PERIOD / 2 + 3 else []) + ([-PERIOD] if x > PERIOD / 2 - 3 else [])):
+                vb.blob(x + dx, y, h(x, y) + r * 0.15, r, c)
+            placed.append((x, y))
+        vb.mesh(f"vents_{region}", coll, emit=2.0)
+    return ob, b.tris() + (nv * 24), len(placed)
 
 
 def skyline(coll, name="skyline_far", period=2 * PERIOD, nx=128, rock0=(112, 120, 132), rock1=(138, 146, 156),
@@ -352,6 +380,57 @@ def build_mars(out_path=MARS_OUT):
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     bpy.ops.wm.save_as_mainfile(filepath=out_path, compress=True)
     print("MERIDIAN built", out_path)
+
+
+# ---------------------------------------------------------------- B-092 Mercury + Venus
+MERCURY_OUT = os.path.join(os.path.dirname(HERE), "sources", "backgrounds", "mercury_bands.blend")
+VENUS_OUT = os.path.join(os.path.dirname(HERE), "sources", "backgrounds", "venus_bands.blend")
+MERC_ROCKS = [(96, 94, 100), (70, 68, 74), (120, 118, 122)]
+MERCURY_REGIONS = {   # v1 mercury preset: grey regolith, crater rims; night = the same ground in starlight (darker, bluer)
+    "day":      dict(ground=[(128, 126, 130), (104, 102, 108)], hill=3, rise=10, craters=9, crater_r=(5.0, 16.0),
+                     trees=0, conifer=0.0, tree_h=(0, 0), rocks=90, rock_r=(0.5, 2.2), rock_cols=MERC_ROCKS, seed=31),
+    "twilight": dict(ground=[(104, 102, 112), (84, 82, 94)], hill=3, rise=12, craters=8, crater_r=(5.0, 16.0),
+                     trees=0, conifer=0.0, tree_h=(0, 0), rocks=80, rock_r=(0.5, 2.2), rock_cols=MERC_ROCKS, seed=32),
+    "night":    dict(ground=[(46, 46, 60), (34, 34, 46)], hill=3, rise=10, craters=9, crater_r=(5.0, 16.0),
+                     trees=0, conifer=0.0, tree_h=(0, 0), rocks=70, rock_r=(0.5, 2.2),
+                     rock_cols=[(40, 40, 52), (30, 30, 40), (52, 52, 64)], seed=33),
+}
+VENUS_REGIONS = {
+    # deck: cloud-top masses, no ground. A translucent strip (manifest alpha) of long smooth heaps
+    # coloured under -> crown by height, from the v1 venus_deck bank colours.
+    "deck":    dict(ground=[(234, 212, 168), (216, 188, 142)], cloud=((206, 160, 112), (255, 244, 222)), hill=9, rise=14,
+                    trees=0, conifer=0.0, tree_h=(0, 0), rocks=0, seed=41),
+    # surface: black glassy basalt plains, dark boulders, lava vents (emissive second mesh).
+    "surface": dict(ground=[(34, 30, 30), (52, 44, 40)], hill=3, rise=18, trees=0, conifer=0.0, tree_h=(0, 0),
+                    rocks=110, rock_r=(0.6, 2.6), rock_cols=[(40, 34, 34), (58, 50, 46), (30, 28, 30)], vents=28, seed=42),
+}
+
+
+def _build_planet(out_path, regions, sky_kw):
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    scene = bpy.context.scene
+    report = []
+    for region, R in regions.items():
+        coll = bpy.data.collections.new(f"ridge_{region}")
+        scene.collection.children.link(coll)
+        _, tris, n = ridge(region, R, coll)
+        report.append(f"{region}: {tris} tris, {n} placed")
+    coll = bpy.data.collections.new("skyline_far")
+    scene.collection.children.link(coll)
+    _, st = skyline(coll, snow=None, **sky_kw)
+    report.append(f"skyline_far: {st} tris")
+    print("MERIDIAN bands", "; ".join(report))
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    bpy.ops.wm.save_as_mainfile(filepath=out_path, compress=True)
+    print("MERIDIAN built", out_path)
+
+
+def build_mercury(out_path=MERCURY_OUT):
+    _build_planet(out_path, MERCURY_REGIONS, dict(rock0=(118, 116, 120), rock1=(150, 148, 152), seed=93, amp0=34.0, massif0=40.0))
+
+
+def build_venus(out_path=VENUS_OUT):
+    _build_planet(out_path, VENUS_REGIONS, dict(rock0=(40, 34, 32), rock1=(58, 48, 42), seed=94, amp0=36.0, massif0=44.0))
 
 
 if __name__ == "__main__":

@@ -18,7 +18,7 @@ def C(c):
     return np.array(c, np.float32) / 255.0
 
 
-def skydome(P, seed):
+def skydome(P, seed, sun=None, stars=0):
     rng = np.random.default_rng(seed)
     v = (np.arange(H, dtype=np.float32) + 0.5)[:, None] / H              # 0 zenith .. 1 nadir
     up = np.clip(1 - v / 0.5, 0, 1)                                       # 1 at the zenith, 0 at the horizon
@@ -39,6 +39,28 @@ def skydome(P, seed):
         shade = np.clip(0.55 + 0.45 * np.roll(n, -10, axis=0) - 0.3 * np.roll(n, 8, axis=0), 0, 1)   # lit tops, shaded bases
         cc = C(P["cloud_shade"]) * (1 - shade[..., None]) + C(P["cloud"]) * shade[..., None]
         sky = sky * (1 - dens[..., None]) + cc * dens[..., None]
+    if sun:                                                               # B-092 Mercury day: the huge Sun disc + glow
+        su, sv, sr, scol = sun
+        u = (np.arange(W, dtype=np.float32) + 0.5)[None, :] / W
+        du = np.abs(u - su) % 1.0
+        du = np.minimum(du, 1 - du) * 2.0                                 # equirect: a horizontal unit is half a vertical one
+        dd = np.hypot(du, v - sv)
+        glow = np.exp(-(dd / (sr * 4)) ** 2) * 0.6 + np.exp(-(dd / (sr * 1.6)) ** 2) * 0.5
+        disc = np.clip((sr - dd) / (sr * 0.08), 0, 1)
+        c = C(scol)
+        sky = sky * (1 - glow[..., None]) + c * glow[..., None]
+        sky = np.where(disc[..., None] > 0, c * disc[..., None] + sky * (1 - disc[..., None]), sky)
+    if stars:                                                             # B-092 Mercury night: stars above the horizon
+        srng = np.random.default_rng(seed + 17)
+        n = int(stars)
+        sy = (srng.random(n) ** 1.3 * 0.49 * H).astype(int)
+        sx = srng.integers(0, W, n)
+        br = srng.uniform(0.35, 1.0, n)
+        for yy0, xx0, b in zip(sy, sx, br):
+            sky[yy0, xx0] = np.maximum(sky[yy0, xx0], b)
+            if b > 0.8:
+                sky[yy0, (xx0 + 1) % W] = np.maximum(sky[yy0, (xx0 + 1) % W], b * 0.5)
+                sky[min(yy0 + 1, H - 1), xx0] = np.maximum(sky[min(yy0 + 1, H - 1), xx0], b * 0.5)
     return np.clip(sky, 0, 1)
 
 
@@ -47,7 +69,7 @@ def export_skydome(entry, art_dir):
     _, name, variant = entry["key"].split("/")
     P = dict(GB.PRESETS[entry.get("sky_preset", name)]) if entry.get("sky_preset", name) in GB.PRESETS else {}
     P.update(entry.get("sky", {}))
-    img = skydome(P, int(entry.get("seed", 1)))
+    img = skydome(P, int(entry.get("seed", 1)), entry.get("sun"), int(entry.get("stars", 0)))
     d = os.path.join(art_dir, "backgrounds", name)
     os.makedirs(d, exist_ok=True)
     path = os.path.join(d, f"{variant}_color.png")             # skydome / skydome_storm (B-088)
