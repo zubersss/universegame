@@ -21,7 +21,7 @@ namespace Meridian.EditorTools
     public sealed class ArtImporter : AssetPostprocessor
     {
         /// <summary>Bump when the import rules change so Unity re-imports the art everywhere (2: U-036 per-sheet ppu, 3: U-032 clips).</summary>
-        public override uint GetVersion() => 4; // 3: U-032 sheet clips into the registry; 4: U-060 mips only on POT (BC7 again)
+        public override uint GetVersion() => 5; // 3: U-032 clips; 4: U-060 mips only on POT; 5: U-075 model maps beside a .glb are not sprites
 
         /// <summary>Folders the importer watches. Tests point these at a sandbox and restore them.</summary>
         public sealed class Roots
@@ -359,6 +359,16 @@ namespace Meridian.EditorTools
                 Classify(colorPath, out var rel);
                 ArtRules.TryParse(rel, out var key, out _);
                 if (!PassesValidation(colorPath)) continue;
+                // U-075 (contract v2 §9): a colour map beside a .glb is a model texture, not a sprite sheet. Until the
+                // model views read models (ArtImporter v5), the key stays on its 2D placeholder: un-address the map
+                // and keep the placeholder addressed, so 2D views never draw a whole 2048² texture as one sprite.
+                if (colorPath.StartsWith(Active.art, StringComparison.Ordinal) && File.Exists(Active.art + key + ".glb"))
+                {
+                    UnregisterArt(colorPath, key);
+                    var ph = PlaceholderColorPath(key);
+                    if (File.Exists(ph)) { Register(ph, key); UpdateClipRegistry(ph, key); }
+                    continue;
+                }
                 SliceIfNeeded(colorPath, key);
                 LinkSecondaries(colorPath, key);
                 materialKeys.Add(key);
@@ -506,6 +516,16 @@ namespace Meridian.EditorTools
             if (entry.address != key) entry.SetAddress(key, true);
             var atlas = ArtRules.AtlasFor(key);
             if (atlas != null) AddToAtlas(atlas, colorPath);
+        }
+
+        /// <summary>U-075: removes an art colour map's address and atlas entry (model textures aren't sprites).</summary>
+        static void UnregisterArt(string colorPath, string key)
+        {
+            var guid = AssetDatabase.AssetPathToGUID(colorPath);
+            if (string.IsNullOrEmpty(guid)) return;
+            if (Settings.FindAssetEntry(guid) != null) Settings.RemoveAssetEntry(guid, true);
+            var atlas = ArtRules.AtlasFor(key);
+            if (atlas != null) RemoveFromAtlas(atlas, colorPath);
         }
 
         static void RetirePlaceholder(string key)

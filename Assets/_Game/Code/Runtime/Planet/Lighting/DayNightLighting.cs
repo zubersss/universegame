@@ -73,8 +73,44 @@ namespace Meridian.Planet.Lighting
                     sun.transform.position = new Vector3(c.x + d.x, c.y + d.y, 0f);
                 }
             }
+            Apply3D(id, t);
             SkyTint = DayNightMath.SkyTint(id, t);
             if (backdrop != null) backdrop.SetTint(SkyTint);
+        }
+
+        // ---------- U-074 (Bible 2.0 §10.5): the 3D Sun and ambient, from the same numbers ----------
+
+        /// <summary>The directional Sun for the 3D renderer (created on first use).</summary>
+        public Light Sun3D { get; private set; }
+        /// <summary>How far the Sun leans toward the camera side, so block fronts catch light (0 = grazing).</summary>
+        public const float SunTowardCamera = 0.7f;
+
+        void Apply3D(PlanetId id, float t)
+        {
+            if (Sun3D == null)
+            {
+                var go = new GameObject("Sun3D");
+                go.transform.SetParent(transform, false);
+                Sun3D = go.AddComponent<Light>();
+                Sun3D.type = LightType.Directional;
+                Sun3D.shadows = LightShadows.Soft;
+                Sun3D.shadowStrength = 0.85f;
+            }
+            float k = DayNightMath.SunIntensity(id, t) * (1f - 0.75f * StormDim);
+            Sun3D.intensity = k;
+            Sun3D.color = DayNightMath.SunColor(id, t);
+            var d = DayNightMath.SunDirection(t);
+            // Light travels from the Sun (up/side, a little toward the camera at −z) into the scene.
+            var forward = new Vector3(-d.x, -d.y, SunTowardCamera);
+            if (forward.sqrMagnitude > 1e-6f) Sun3D.transform.rotation = Quaternion.LookRotation(forward.normalized, Vector3.up);
+            var amb = Color.Lerp(DayNightMath.AmbientColor(id, t), StormAmbient, 0.6f * StormDim)
+                      * (DayNightMath.AmbientIntensity(id, t) * (1f + 0.4f * StormDim) + 1.5f * Flash);
+            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+            RenderSettings.ambientLight = amb;
+            // Lit shaders read the ambient probe (SH); set it directly so it follows the clock every frame (struct, no GC).
+            var sh = new UnityEngine.Rendering.SphericalHarmonicsL2();
+            sh.AddAmbientLight(amb);
+            RenderSettings.ambientProbe = sh;
         }
     }
 }
