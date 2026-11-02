@@ -446,7 +446,12 @@ namespace Meridian.Tests
             Assert.IsNull(ArtRules.Validate(12L * 1024 * 1024, 2048, 2048, modelMap: true), "a 12 MB 2048² model map passes");
             StringAssert.Contains("4 MB", ArtRules.Validate(12L * 1024 * 1024, 2048, 2048, modelMap: false), "a sheet keeps the cap");
             StringAssert.Contains("exceeds", ArtRules.Validate(1024, 4096, 2048, modelMap: true), "the dimension cap stays for model maps");
-            Assert.IsTrue(ArtImporter.IsModelKey("props/earth_flora/atlas"), "the flora atlas is a model key (v8)");
+            // IsModelKey (v8) in the sandboxed Art root: a folder with a .glb makes its "atlas" a model key.
+            Directory.CreateDirectory(Art("props/test_flora"));
+            File.WriteAllBytes(Art("props/test_flora/leaf.glb"), new byte[0]);
+            Assert.IsTrue(ArtImporter.IsModelKey("props/test_flora/atlas"), "a model folder's atlas is a model key");
+            Assert.IsTrue(ArtImporter.IsModelKey("props/test_flora/leaf"), "a key with its own .glb");
+            Assert.IsFalse(ArtImporter.IsModelKey("props/test_flora/other"), "a sheet key in the same folder is not");
         }
     }
 }
