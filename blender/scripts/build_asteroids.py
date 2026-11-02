@@ -78,13 +78,45 @@ RING = {
 }
 
 
+def _ice_chunk(coll, M, name, seed, size, loc=(0, 0, 0)):
+    """v2 (LEAD cycle 170): a hard faceted ice chunk, not a soft puff: low-subdivision
+    displaced icosphere, flat-shaded (cleavage planes), glossy white grading to a cool blue,
+    weak bump (the strong noise bump read as fuzz)."""
+    return rock(coll, name, M["ice"], seed, size, subdiv=2, strength=0.45 * max(size), scale=1.0 * max(size), flat=True, loc=loc)
+
+
+def _ice_cracks(coll, M, seed, r, top):
+    """Two or three dark cracks across the top face (seen from the top camera)."""
+    import math
+    import random
+    from build_icons import box
+    rnd = random.Random(seed)
+    for k in range(rnd.choice((2, 3))):
+        a = rnd.uniform(0, math.pi)
+        ln = r * rnd.uniform(0.45, 0.75)                                 # stays inside the silhouette
+        ox, oy = rnd.uniform(-0.15, 0.15) * r, rnd.uniform(-0.15, 0.15) * r
+        box(coll, f"crack{k}", M["crack"], (ln, 0.012 + 0.01 * r, 0.01), (ox, oy, top), rot=(0, 0, a), bevel=0.002)
+
+
 def build_ring(scene):
-    M = {"ice": mat("ring_ice", (240, 246, 252), (196, 218, 238), 0.0, 0.25, 1.8, 0.45),
-         "rock": mat("ring_rock", (134, 118, 102), (96, 84, 74), 0.0, 0.85, 1.6, 0.55)}
+    M = {"ice": mat("ring_ice", (246, 250, 255), (150, 190, 228), 0.0, 0.08, 1.4, 0.06),
+         "rock": mat("ring_rock", (134, 118, 102), (96, 84, 74), 0.0, 0.85, 1.6, 0.55),
+         "crack": mat("ring_ice_crack", (60, 84, 112))}
     for k, (name, (dia, shape, cls)) in enumerate(RING.items()):
         coll = bpy.data.collections.new(name)
         scene.collection.children.link(coll)
         r, seed = dia / 2, 101 + k
+        if cls == "ice":
+            if shape == "binary":
+                _ice_chunk(coll, M, "lobe_a", seed, (r * 0.6, r * 0.52, r * 0.5), loc=(-r * 0.4, 0, 0))
+                _ice_chunk(coll, M, "lobe_b", seed + 50, (r * 0.45, r * 0.42, r * 0.4), loc=(r * 0.5, r * 0.1, 0))
+                _ice_cracks(coll, M, seed, r * 0.55, r * 0.62)
+            else:
+                sz = {"round": (r, r * 0.9, r * 0.8), "lumpy": (r * 0.95, r * 0.8, r * 0.7),
+                      "slab": (r, r * 0.7, r * 0.32)}[shape]
+                _ice_chunk(coll, M, "body", seed, sz)
+                _ice_cracks(coll, M, seed, r, sz[2] * 1.15)                 # a little high: displacement must not bury them (top camera)
+            continue
         if shape == "round":
             rock(coll, "body", M[cls], seed, (r, r * 0.9, r * 0.85), subdiv=4, strength=0.18 * r, scale=0.7 * r)
         elif shape == "lumpy":
