@@ -713,12 +713,12 @@ Files: blender/sources/props/common/, build_props_common.py, Assets/_Game/Art/pr
 Depends: B-077
 Lead notes: Cycle 179 (fbf6b7a): art accepted on the turntables (landing_pad 2 m module ×2 = 4 m pad, 3 m deep; shelter_wall 1.00 m; door `open` clip; lamp socket_light; smelter grate on the camera side; 624–1,436 tris). No fabricator/refinery sprites existed, so none were made (fine). Done on UNITY's lit preview.
 
-### B-082 · BLENDER · Ready · R1
+### B-082 · BLENDER · In Progress · R1
 Goal: Earth creatures as models: `creatures/earth/stag` and `creatures/earth/wolf`, medium class (≤ 8 k triangles), full walker clip set, reusing the v1 rigs.
 Accept: contract §9; stamped turntables; UNITY lit preview at 60 px/m reads as the v1 silhouettes.
 Files: blender/sources/creatures/earth/, build_creatures_earth.py, Assets/_Game/Art/creatures/earth/
 Depends: B-077
-Lead notes: Cycle 171. R1.
+Lead notes: Cycle 180 (e6abeef): art accepted on the turntables (stag and wolf, 7,600 tris each, 16-joint skins, idle/walk/attack/hurt/death). Pipeline fix: binding at rest (the surveyor was re-exported; UNITY must re-import it). Done on UNITY's lit preview.
 
 
 ### B-024 · BLENDER · Done · M2
@@ -1191,7 +1191,7 @@ Files: blender/scripts/build_wardens.py, gen_fx.py, Assets/_Game/Art/creatures/w
 Depends: B-002
 Lead notes: Cycle 169. M4.
 
-### B-083 · BLENDER · Ready · R1
+### B-083 · BLENDER · In Progress · R1
 Goal: Earth depth bands (contract §9 depth-bands row): per Earth region (forest, plains, desert, ocean/coast, taiga, tundra) a `backgrounds/earth_<region>/ridge_mid.glb` (z 20–60 m strip, tileable every 256 m, ≤ 8 k tris, baked PBR from the v1 ridge recipes), a shared `skyline_far.glb` (≤ 4 k tris) and a `skydome` 2048×1024 equirect `color` per region derived from the v1 layer0 skies.
 Accept: tiles seamlessly in x; reads as the v1 parallax from the side rail in UNITY's preview; stamped turntables; D-045/D-066 peaks measured.
 Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/earth_*/

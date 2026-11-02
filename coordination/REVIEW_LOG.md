@@ -920,3 +920,6 @@ Checked: review_terrain_earth_grass.png and _stone.png (stamped 01:18; read as t
 ## Cycle 179 · 2026-11-02 01:3x (BLENDER message)
 Checked: review_props_common_landing_pad.png, _smelter.png (stamped 01:23–01:26). B-081 art accepted; Done on UNITY's lit preview. D-068: prop turntable panels camera-side/¾/far; 2 m pad modules. U-076 note added. BLENDER next: B-082.
 
+## Cycle 180 · 2026-11-02 01:4x (BLENDER message)
+Checked: review_creatures_earth_stag.png, _wolf.png (stamped 01:34–01:35; grounded anatomy, read as the v1 silhouettes). B-082 art accepted. BLENDER self-found two pipeline bugs (bind pose baked at the current frame; undeclared actions exported) and fixed both; surveyor re-exported. All R1 BLENDER art (B-078..B-082) now waits only on UNITY's lit previews. B-083 → In Progress.
+
