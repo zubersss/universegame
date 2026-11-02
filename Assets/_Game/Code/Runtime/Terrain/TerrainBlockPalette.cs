@@ -50,6 +50,105 @@ namespace Meridian.Terrain
             _ => new Color(0.3f, 0.3f, 0.32f),
         };
 
+        /// <summary>The arrays the TerrainBlocks shader samples. normal/mask are null on placeholder planets.</summary>
+        public struct Arrays
+        {
+            public Texture2DArray color, normal, mask;
+            public bool Real => normal != null;
+        }
+
+        static PlanetId? realPlanet;
+        static Arrays realArrays;
+
+        /// <summary>
+        /// B-080: the planet's block material textures (ArtMaterials.blockTextures) copied on the GPU into three arrays
+        /// (colour BC7 sRGB, normal BC5, mask BC7 linear; 512² with mips). Layers the planet doesn't use repeat the
+        /// back wall. Falls back to the flat placeholder palette when the planet has none or the maps don't match.
+        /// Only the current planet's real arrays are kept.
+        /// </summary>
+        public static Arrays ArraysFor(PlanetId planet)
+        {
+            if (realPlanet == planet && realArrays.color != null) return realArrays;
+            Release();
+            var real = BuildReal(planet);
+            if (real.color != null) { realPlanet = planet; realArrays = real; return real; }
+            return new Arrays { color = For(planet) };
+        }
+
+        static void Release()
+        {
+            if (realArrays.color != null) Object.Destroy(realArrays.color);
+            if (realArrays.normal != null) Object.Destroy(realArrays.normal);
+            if (realArrays.mask != null) Object.Destroy(realArrays.mask);
+            realArrays = default;
+            realPlanet = null;
+        }
+
+        static Arrays BuildReal(PlanetId planet)
+        {
+            var reg = Meridian.Rendering.ArtMaterials.Active;
+            if (reg == null || reg.blockTextures == null || reg.blockTextures.Count == 0) return default;
+            string p = planet.ToString().ToLowerInvariant();
+            var wall = reg.FindBlock(p, "backwall", "wall");
+            if (wall == null || wall.color == null || wall.normal == null || wall.mask == null) return default;
+            if (SystemInfo.copyTextureSupport == UnityEngine.Rendering.CopyTextureSupport.None) return default;
+
+            var layers = new Meridian.Rendering.ArtMaterials.BlockTexture[BlockMesher.LayerCount];
+            int found = 0;
+            for (int id = 1; id < TileId.Count; id++)
+            {
+                var key = TileId.ArtKey((byte)id);
+                if (key == null) continue;
+                var parts = key.Split('/');
+                if (parts.Length != 3 || parts[1] != p) continue;
+                var top = reg.FindBlock(p, parts[2], "top");
+                var side = reg.FindBlock(p, parts[2], "side");
+                if (top != null) { layers[BlockMesher.TopLayer((byte)id)] = top; found++; }
+                if (side != null) { layers[BlockMesher.SideLayer((byte)id)] = side; found++; }
+            }
+            if (found == 0) return default;
+            layers[BlockMesher.BackWallLayer] = wall;
+            for (int i = 0; i < layers.Length; i++)
+            {
+                var l = layers[i];
+                if (l == null || l.color == null || l.normal == null || l.mask == null || !Same(l, wall)) layers[i] = wall; // unused or incomplete: the wall
+            }
+
+            var a = new Arrays
+            {
+                color = NewArray(wall.color, layers.Length, "BlockColor_" + planet),
+                normal = NewArray(wall.normal, layers.Length, "BlockNormal_" + planet),
+                mask = NewArray(wall.mask, layers.Length, "BlockMask_" + planet),
+            };
+            for (int i = 0; i < layers.Length; i++)
+            {
+                Graphics.CopyTexture(layers[i].color, 0, a.color, i);
+                Graphics.CopyTexture(layers[i].normal, 0, a.normal, i);
+                Graphics.CopyTexture(layers[i].mask, 0, a.mask, i);
+            }
+            Debug.Log($"[MERIDIAN] block textures for {planet}: {found} faces from the registry, {layers.Length} layers ({wall.color.width}² {wall.color.graphicsFormat})");
+            return a;
+        }
+
+        static bool Same(Meridian.Rendering.ArtMaterials.BlockTexture l, Meridian.Rendering.ArtMaterials.BlockTexture w) =>
+            l.color.width == w.color.width && l.color.height == w.color.height && l.color.graphicsFormat == w.color.graphicsFormat && l.color.mipmapCount == w.color.mipmapCount
+            && l.normal.graphicsFormat == w.normal.graphicsFormat && l.normal.width == w.normal.width && l.normal.mipmapCount == w.normal.mipmapCount
+            && l.mask.graphicsFormat == w.mask.graphicsFormat && l.mask.width == w.mask.width && l.mask.mipmapCount == w.mask.mipmapCount;
+
+        static Texture2DArray NewArray(Texture2D like, int depth, string name)
+        {
+            var flags = UnityEngine.Experimental.Rendering.TextureCreationFlags.DontInitializePixels;
+            if (like.mipmapCount > 1) flags |= UnityEngine.Experimental.Rendering.TextureCreationFlags.MipChain;
+            var arr = new Texture2DArray(like.width, like.height, depth, like.graphicsFormat, flags, like.mipmapCount)
+            {
+                name = name,
+                wrapMode = TextureWrapMode.Repeat,
+                filterMode = FilterMode.Trilinear,
+                anisoLevel = 4,
+            };
+            return arr;
+        }
+
         public static Texture2DArray For(PlanetId planet)
         {
             if (cache.TryGetValue(planet, out var arr) && arr != null) return arr;

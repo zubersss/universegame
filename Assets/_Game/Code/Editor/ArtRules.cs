@@ -32,6 +32,28 @@ namespace Meridian.EditorTools
             { "planets", "terrain", "backgrounds", "ships", "characters", "creatures", "props", "fx", "icons", "ui" };
 
         /// <summary>Splits a path relative to a root into key and map. False if the name breaks §1.</summary>
+        // U-073 / B-080 (contract v2): block materials, not sprites.
+        static readonly Regex BlockPattern = new Regex(
+            @"^terrain/(?<planet>[a-z0-9_]+)/(?:(?<mat>[a-z0-9_]+)/(?<face>top|side)|(?<wall>backwall))_(?<map>color|normal|mask)\.png$");
+
+        /// <summary>
+        /// A 3D block material texture: terrain/&lt;planet&gt;/&lt;material&gt;/{top,side}_&lt;map&gt;.png or
+        /// terrain/&lt;planet&gt;/backwall_&lt;map&gt;.png (512², tileable at 2 m; color/normal/mask).
+        /// face is "top", "side" or "wall"; material is "backwall" for the wall.
+        /// </summary>
+        public static bool IsBlockTexture(string relativePath, out string planet, out string material, out string face, out ArtMap map)
+        {
+            planet = material = face = null; map = ArtMap.Color;
+            var m = BlockPattern.Match(relativePath ?? "");
+            if (!m.Success) return false;
+            planet = m.Groups["planet"].Value;
+            bool wall = m.Groups["wall"].Success;
+            material = wall ? "backwall" : m.Groups["mat"].Value;
+            face = wall ? "wall" : m.Groups["face"].Value;
+            map = m.Groups["map"].Value switch { "normal" => ArtMap.Normal, "mask" => ArtMap.Mask, _ => ArtMap.Color };
+            return true;
+        }
+
         public static bool TryParse(string relativePath, out string key, out ArtMap map)
         {
             key = null; map = ArtMap.Color;

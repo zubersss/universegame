@@ -22,6 +22,25 @@ namespace Meridian.Rendering
         public Material meshLitEmissive;
         /// <summary>U-073: MERIDIAN/TerrainBlocks (block mesh, Texture2DArray per planet); referenced here so builds keep the shader.</summary>
         public Material terrainBlocks;
+        /// <summary>U-073 / B-080: block material textures per planet (ArtImporter fills it; the arrays are built at runtime).</summary>
+        public List<BlockTexture> blockTextures = new List<BlockTexture>();
+
+        [System.Serializable]
+        public sealed class BlockTexture
+        {
+            public string planet;   // "earth"
+            public string material; // "soil" … or "backwall"
+            public string face;     // "top", "side" or "wall"
+            public Texture2D color, normal, mask;
+        }
+
+        /// <summary>The registered block texture for a planet/material/face, or null.</summary>
+        public BlockTexture FindBlock(string planet, string material, string face)
+        {
+            foreach (var b in blockTextures)
+                if (b != null && b.planet == planet && b.material == material && b.face == face) return b;
+            return null;
+        }
         public List<string> emissiveKeys = new List<string>();
         /// <summary>Animation clips of frame sheets (U-032), copied from each sheet's .json by ArtImporter.</summary>
         public List<ArtClipSet> clipSets = new List<ArtClipSet>();

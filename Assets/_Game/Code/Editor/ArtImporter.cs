@@ -21,7 +21,7 @@ namespace Meridian.EditorTools
     public sealed class ArtImporter : AssetPostprocessor
     {
         /// <summary>Bump when the import rules change so Unity re-imports the art everywhere (2: U-036 per-sheet ppu, 3: U-032 clips).</summary>
-        public override uint GetVersion() => 5; // 3: U-032 clips; 4: U-060 mips only on POT; 5: U-075 model maps beside a .glb are not sprites
+        public override uint GetVersion() => 6; // 3: U-032 clips; 4: U-060 mips only on POT; 5: U-075 model maps beside a .glb are not sprites; 6: B-080 block material textures
 
         /// <summary>Folders the importer watches. Tests point these at a sandbox and restore them.</summary>
         public sealed class Roots
@@ -96,6 +96,13 @@ namespace Meridian.EditorTools
             if (kind == RootKind.None || !rel.EndsWith(".png", StringComparison.Ordinal)) return;
             var ti = (TextureImporter)assetImporter;
 
+            // U-073 / B-080: block material textures are plain repeat-wrapped textures for the block arrays.
+            if (kind == RootKind.Art && ArtRules.IsBlockTexture(rel, out _, out _, out _, out var blockMap))
+            {
+                ConfigureBlockTexture(ti, blockMap);
+                return;
+            }
+
             if (!ArtRules.TryParse(rel, out var key, out var map))
             {
                 Debug.LogError($"[ArtImporter] Rejected {assetPath}: name must be <category>/<name>/<variant>_<color|normal|emission|mask>.png, lowercase a-z 0-9 _ (contract §1).");
@@ -164,6 +171,51 @@ namespace Meridian.EditorTools
             ti.spriteImportMode = sheet != null ? SpriteImportMode.Multiple : SpriteImportMode.Single;
             // Rects are applied in postprocess (SliceIfNeeded): sprite data written during
             // preprocess is not picked up by the import already in flight.
+        }
+
+        /// <summary>U-073 / B-080: a block material map: Default/NormalMap texture, mips, repeat, trilinear, BC7/BC5 at 512.</summary>
+        static void ConfigureBlockTexture(TextureImporter ti, ArtMap map)
+        {
+            ti.textureType = map == ArtMap.Normal ? TextureImporterType.NormalMap : TextureImporterType.Default;
+            ti.sRGBTexture = map == ArtMap.Color;
+            ti.alphaIsTransparency = false;
+            ti.mipmapEnabled = true;                 // 512² is power-of-two: mips and BC compression both hold (D-061)
+            ti.wrapMode = TextureWrapMode.Repeat;
+            ti.filterMode = FilterMode.Trilinear;
+            ti.anisoLevel = 4;
+            ti.maxTextureSize = 512;
+            ti.isReadable = false;
+            ti.textureCompression = TextureImporterCompression.CompressedHQ;
+            var p = ti.GetPlatformTextureSettings("Standalone");
+            p.overridden = true;
+            p.format = map == ArtMap.Normal ? TextureImporterFormat.BC5 : TextureImporterFormat.BC7;
+            p.compressionQuality = 100;
+            p.maxTextureSize = 512;
+            ti.SetPlatformTextureSettings(p);
+        }
+
+        /// <summary>U-073 / B-080: records block material textures in the registry (planet/material/face → maps).</summary>
+        static void RegisterBlockTextures(System.Collections.Generic.List<string> paths)
+        {
+            var reg = Registry();
+            bool dirty = false;
+            foreach (var path in paths)
+            {
+                Classify(path, out var rel);
+                if (!ArtRules.IsBlockTexture(rel, out var planet, out var material, out var face, out var map)) continue;
+                var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+                if (tex == null) continue;
+                var e = reg.FindBlock(planet, material, face);
+                if (e == null) { e = new Meridian.Rendering.ArtMaterials.BlockTexture { planet = planet, material = material, face = face }; reg.blockTextures.Add(e); }
+                switch (map)
+                {
+                    case ArtMap.Normal: e.normal = tex; break;
+                    case ArtMap.Mask: e.mask = tex; break;
+                    default: e.color = tex; break;
+                }
+                dirty = true;
+            }
+            if (dirty) { EditorUtility.SetDirty(reg); AssetDatabase.SaveAssetIfDirty(reg); }
         }
 
         static void SetStandaloneFormat(TextureImporter ti, TextureImporterFormat format)
@@ -325,6 +377,7 @@ namespace Meridian.EditorTools
         static void OnPostprocessAllAssets(string[] imported, string[] deleted, string[] moved, string[] movedFrom)
         {
             var colors = new HashSet<string>();
+            var blockPaths = new List<string>();
             var retireKeys = new HashSet<string>();
             var restoreKeys = new HashSet<string>();
 
@@ -340,10 +393,13 @@ namespace Meridian.EditorTools
                     if (File.Exists(color)) AssetDatabase.ImportAsset(color, ImportAssetOptions.ForceUpdate);
                     continue;
                 }
+                // U-073 / B-080: block materials go to the registry, never to the sprite pipeline.
+                if (kind == RootKind.Art && ArtRules.IsBlockTexture(rel, out _, out _, out _, out _)) { blockPaths.Add(path); continue; }
                 if (!ArtRules.TryParse(rel, out var key, out var map)) continue;
                 var colorPath = (kind == RootKind.Art ? Active.art : Active.placeholders) + key + "_color.png";
                 if (File.Exists(colorPath)) colors.Add(colorPath);
             }
+            if (blockPaths.Count > 0) RegisterBlockTextures(blockPaths);
 
             var materialKeys = new HashSet<string>();
             foreach (var raw in deleted.Concat(movedFrom))

@@ -81,9 +81,24 @@ namespace Meridian.Terrain
             int needed = (2 * R + 1) * (2 * R + 1) + 2 * R + 1;
             while (pool.Count + resident.Count < needed) pool.Push(TerrainChunk.Create(transform));
             // U-073: block meshes with the planet's palette (one shared material instance per streamer).
+            wallTops = null; // per-planet back-wall tops, recomputed lazily
             var reg = Meridian.Rendering.ArtMaterials.Active;
             if (blockMaterial == null && reg != null && reg.terrainBlocks != null) blockMaterial = new Material(reg.terrainBlocks) { name = "Terrain_Blocks (planet)" };
-            if (blockMaterial != null) blockMaterial.SetTexture(BlockArrayId, TerrainBlockPalette.For(config.id));
+            if (blockMaterial != null)
+            {
+                // B-080: real block textures (colour/normal/mask arrays) when the planet has them; else the flat palette.
+                var arrays = TerrainBlockPalette.ArraysFor(config.id);
+                blockMaterial.SetTexture(BlockArrayId, arrays.color);
+                if (arrays.Real)
+                {
+                    blockMaterial.SetTexture(BlockNormalsId, arrays.normal);
+                    blockMaterial.SetTexture(BlockMasksId, arrays.mask);
+                    blockMaterial.EnableKeyword("_BLOCK_MAPS");
+                }
+                else blockMaterial.DisableKeyword("_BLOCK_MAPS");
+                // D-067: the grass top colour blends down the top ~8 cm of grass side faces.
+                blockMaterial.SetFloat(FringeLayerId, BlockMesher.SideLayer(TileId.Grass));
+            }
             foreach (var c in pool) c.UseBlocks(this, blockMaterial);
             foreach (var c in resident.Values) c.UseBlocks(this, blockMaterial);
             started = true;
@@ -91,6 +106,9 @@ namespace Meridian.Terrain
 
         // ---------- U-073: the world as the block mesher sees it ----------
         static readonly int BlockArrayId = Shader.PropertyToID("_BlockArray");
+        static readonly int BlockNormalsId = Shader.PropertyToID("_BlockNormals");
+        static readonly int BlockMasksId = Shader.PropertyToID("_BlockMasks");
+        static readonly int FringeLayerId = Shader.PropertyToID("_FringeLayer");
         Material blockMaterial;
 
         /// <summary>The planet's block material (tests, captures).</summary>
@@ -98,8 +116,36 @@ namespace Meridian.Terrain
 
         byte TerrainChunk.IBlockWorld.TileAt(int x, int y) => GetTile(x, y);
 
-        int TerrainChunk.IBlockWorld.WallTop(int x) =>
-            Config != null && Config.worldType == WorldType.Solid ? BaseGenerator.SurfaceHeight(WrapX(x)) : int.MinValue;
+        // Back-wall top per column: the original surface, lowered where a POI stamp shaped the ground (the spawn camp
+        // levels a hill: without this the wall filled the levelled cells). Player digs don't count, so digging shows
+        // the wall. Computed once per column per planet.
+        int[] wallTops;
+        Meridian.Planet.POI.PoiDef[] wallPois;
+        int[] wallPoiPad;
+        const int WallUnknown = int.MinValue + 1;
+
+        int TerrainChunk.IBlockWorld.WallTop(int x)
+        {
+            if (Config == null || Config.worldType != WorldType.Solid) return int.MinValue;
+            int wx = WrapX(x);
+            if (wallTops == null || wallTops.Length != Config.worldWidth)
+            {
+                wallTops = new int[Config.worldWidth];
+                for (int i = 0; i < wallTops.Length; i++) wallTops[i] = WallUnknown;
+                var list = new List<Meridian.Planet.POI.PoiDef>();
+                foreach (var p in Meridian.Planet.POI.PoiCatalog.For(Config.id)) if (!p.Floating && p.stamp != null) list.Add(p);
+                wallPois = list.ToArray();
+                wallPoiPad = new int[wallPois.Length];
+                for (int i = 0; i < wallPois.Length; i++) wallPoiPad[i] = Meridian.Planet.POI.PoiStamp.GroundY(wallPois[i], BaseGenerator, Config.datumY);
+            }
+            int top = wallTops[wx];
+            if (top != WallUnknown) return top;
+            top = BaseGenerator.SurfaceHeight(wx);
+            for (int i = 0; i < wallPois.Length; i++)
+                if (Meridian.Planet.POI.PoiStamp.ShapedGround(wallPois[i], BaseGenerator, Config.datumY, wx, out int g, wallPoiPad[i]) && g < top) top = g;
+            wallTops[wx] = top;
+            return top;
+        }
 
         public static IEnumerable<byte> MaterialsFor(PlanetId id) => id switch
         {

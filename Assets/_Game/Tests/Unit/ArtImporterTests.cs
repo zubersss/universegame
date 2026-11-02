@@ -380,6 +380,7 @@ namespace Meridian.Tests
             {
                 var rel = file.Replace('\\', '/').Substring(saved.art.Length);
                 Assert.IsTrue(ArtRules.TryParse(rel, out var key, out _));
+                if (File.Exists(saved.art + key + ".glb")) continue; // v5: a model's emission lives in its own material (ModelMaterials)
                 Assert.IsTrue(reg.IsEmissive(key), $"{key} has an emission map");
             }
         }
@@ -407,6 +408,19 @@ namespace Meridian.Tests
         // ---------- key ↔ placeholder coverage (real roots) ----------
 
         [Test]
+        public void BlockMaterialPathsAreRecognised()
+        {
+            Assert.IsTrue(ArtRules.IsBlockTexture("terrain/earth/soil/top_color.png", out var p, out var m, out var f, out var map));
+            Assert.AreEqual(("earth", "soil", "top", ArtMap.Color), (p, m, f, map));
+            Assert.IsTrue(ArtRules.IsBlockTexture("terrain/earth/grass/side_normal.png", out _, out m, out f, out map));
+            Assert.AreEqual(("grass", "side", ArtMap.Normal), (m, f, map));
+            Assert.IsTrue(ArtRules.IsBlockTexture("terrain/earth/backwall_mask.png", out _, out m, out f, out map));
+            Assert.AreEqual(("backwall", "wall", ArtMap.Mask), (m, f, map));
+            Assert.IsFalse(ArtRules.IsBlockTexture("terrain/earth/soil_color.png", out _, out _, out _, out _), "the v1 tile sheet is not a block material");
+            Assert.IsFalse(ArtRules.IsBlockTexture("terrain/earth/soil/front_color.png", out _, out _, out _, out _), "only top/side faces");
+        }
+
+        [Test]
         public void EveryM1KeyHasAPlaceholderOrRealArtWithItsAddress()
         {
             ArtImporter.Active = saved;
@@ -415,7 +429,10 @@ namespace Meridian.Tests
                 var art = ArtImporter.ArtColorPath(key);
                 var ph = ArtImporter.PlaceholderColorPath(key);
                 Assert.IsTrue(File.Exists(ph), $"placeholder missing for {key}");
-                var addressed = File.Exists(art) ? art : ph;
+                // ArtImporter v5 (U-075): a key whose art is a model (.glb beside the maps) stays on its 2D placeholder
+                // until the model views read models; its colour map is a model texture, not a sprite.
+                bool model = File.Exists(saved.art + key + ".glb");
+                var addressed = File.Exists(art) && !model ? art : ph;
                 Assert.AreEqual(key, Entry(addressed)?.address, $"{key} addressed at {addressed}");
                 if (ArtRules.RuleFor(key).lit)
                     Assert.IsTrue(File.Exists(ArtRules.SiblingPath(ph, ArtMap.Normal)), $"{key} placeholder normal");
