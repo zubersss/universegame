@@ -142,7 +142,7 @@ Goal: Ship, props and depth bands: the Pilgrim and props batch 1 as model prefab
 Accept: an Earth capture shows blocks, back wall, ridges, sky dome and the ship with depth; BuildTests, ShipSideTests, SpaceArtTests green.
 Files: Assets/_Game/Code/Runtime/Ship/, Building/, Planet/Backdrop/, Prefabs/
 Depends: U-073, U-074
-Lead notes: Cycle 171. R1.
+Lead notes: Cycle 171. R1. Cycle 179: the landing pad is now a 2 m module (D-068): the camp spawns two modules (4 m) under the Pilgrim; landing-rule width = 4 m; shelter_door plays its `open` clip; lamps light from socket_light.
 
 ### U-077 · UNITY · Ready · R1
 Goal: BudgetGate 3D rows (Bible §11.1 geometry row: ≤ 300 k triangles, ≤ 400 draw calls, ≤ 150 shadow casters) + `unity_profile` reads them; R1 build `Build/MERIDIAN_0.4.0/` with a smoke set (Earth day, night with a lamp, digging, the ship landed and flying, Space).
@@ -706,12 +706,12 @@ Files: blender/scripts/gen_terrain.py, Assets/_Game/Art/terrain/earth/
 Depends: B-077
 Lead notes: Cycle 178 (2eb6213): art accepted on the stamped relit sheets (soil, grass, stone, sand, snow, water + backwall; top/side × color/normal/mask at 512², seams 0.76–1.25, numpy_only peak 377 MB). Done once U-073 shows them on blocks in a lit capture. Fringe rule: D-067.
 
-### B-081 · BLENDER · Ready · R1
+### B-081 · BLENDER · In Progress · R1
 Goal: Earth props batch 1 as models: `props/common/{landing_pad, shelter_wall, shelter_door, smelter, storage_crate, lamp}` (+ `fabricator`, `refinery` if they exist as sprites), each ≤ 6 k triangles, lamp with an emissive head and a `light` socket, door with an `open` clip.
 Accept: contract §9; stamped turntable sheet; wall and pad tile at 1 m / 2 m pitches.
 Files: blender/sources/props/common/, build_props_common.py, Assets/_Game/Art/props/common/
 Depends: B-077
-Lead notes: Cycle 171. R1.
+Lead notes: Cycle 179 (fbf6b7a): art accepted on the turntables (landing_pad 2 m module ×2 = 4 m pad, 3 m deep; shelter_wall 1.00 m; door `open` clip; lamp socket_light; smelter grate on the camera side; 624–1,436 tris). No fabricator/refinery sprites existed, so none were made (fine). Done on UNITY's lit preview.
 
 ### B-082 · BLENDER · Ready · R1
 Goal: Earth creatures as models: `creatures/earth/stag` and `creatures/earth/wolf`, medium class (≤ 8 k triangles), full walker clip set, reusing the v1 rigs.

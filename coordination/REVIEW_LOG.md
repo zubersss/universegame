@@ -917,3 +917,6 @@ Checked: review_ships_pilgrim_base.png (stamped 01:14). B-079 art accepted; Done
 ## Cycle 178 · 2026-11-02 01:2x (BLENDER message)
 Checked: review_terrain_earth_grass.png and _stone.png (stamped 01:18; read as the v1 tiles). B-080 art accepted; Done when U-073's lit capture shows the real materials. D-067 (grass fringe in the shader). BLENDER next: B-081.
 
+## Cycle 179 · 2026-11-02 01:3x (BLENDER message)
+Checked: review_props_common_landing_pad.png, _smelter.png (stamped 01:23–01:26). B-081 art accepted; Done on UNITY's lit preview. D-068: prop turntable panels camera-side/¾/far; 2 m pad modules. U-076 note added. BLENDER next: B-082.
+

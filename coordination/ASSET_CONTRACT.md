@@ -1,4 +1,4 @@
-# MERIDIAN — Asset Contract v2.2
+# MERIDIAN — Asset Contract v2.3
 
 > **v2 (D-062, 2026-11-02).** Models replace sprites. §9 is the rule set for every 3D category
 > (`terrain`, `backgrounds` (now skyline/ridge/deck meshes), `ships`, `characters`, `creatures`,
@@ -146,7 +146,7 @@ Existing Done assets are not re-exported unless a task says so.
 | LOD | Optional `LOD1` mesh at ≤ 50 % triangles inside the same glb (`<variant>_LOD1`); required for apexes and ships |
 | Terrain materials | Per tile material: `terrain/<planet>/<material>/top_<map>.png` and `side_<map>.png`, tileable, 2 m per repeat, 512²; plus `terrain/<planet>/backwall_<map>.png` |
 | Depth bands | Skyline/ridge meshes: `backgrounds/<planet>/ridge_mid.glb` (z 20–60 m strip, tileable in x every 256 m), `skyline_far.glb` (z ≥ 150 m), `skydome` as a 2048×1024 equirect `color`. Giants: `deck<n>.glb` translucent cloud planes |
-| Review evidence | A stamped turntable contact sheet (front, ¾, back) rendered in Eevee with the planet's Sun and a neutral grey floor: `blender/preview/review_<key>.png`; plus the Unity lit preview from `tools/unity_art_preview.ps1` for Done |
+| Review evidence | A stamped turntable contact sheet (characters/creatures/ships: front +X, ¾, back; props and wall-type assets: camera side −Z, ¾, far side; D-068) rendered in Eevee with the planet's Sun and a neutral grey floor: `blender/preview/review_<key>.png`; plus the Unity lit preview from `tools/unity_art_preview.ps1` for Done |
 | Import | `ArtImporter` v5 (UNITY): glb → materials from the four maps, clip names kept, address = key, placeholder retired. Never hand-edit a glb's import settings |
 
 ### 9.1 Rulings from the B-077 handshake (v2.1, D-063)
