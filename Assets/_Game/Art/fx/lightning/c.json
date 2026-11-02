@@ -1,0 +1,22 @@
+{
+  "key": "fx/lightning/c",
+  "frame_width": 128,
+  "frame_height": 256,
+  "columns": 3,
+  "gutter": 4,
+  "frames": 6,
+  "fps": 14,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "animations": [
+    {
+      "name": "strike",
+      "start": 0,
+      "length": 6,
+      "loop": false
+    }
+  ]
+}

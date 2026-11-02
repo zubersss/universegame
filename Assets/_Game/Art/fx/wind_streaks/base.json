@@ -1,0 +1,22 @@
+{
+  "key": "fx/wind_streaks/base",
+  "frame_width": 256,
+  "frame_height": 128,
+  "columns": 3,
+  "gutter": 4,
+  "frames": 8,
+  "fps": 10,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "animations": [
+    {
+      "name": "flow",
+      "start": 0,
+      "length": 8,
+      "loop": true
+    }
+  ]
+}

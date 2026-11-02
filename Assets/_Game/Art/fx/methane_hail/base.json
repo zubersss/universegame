@@ -1,0 +1,22 @@
+{
+  "key": "fx/methane_hail/base",
+  "frame_width": 128,
+  "frame_height": 256,
+  "columns": 4,
+  "gutter": 4,
+  "frames": 8,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "animations": [
+    {
+      "name": "fall",
+      "start": 0,
+      "length": 8,
+      "loop": true
+    }
+  ]
+}

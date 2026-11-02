@@ -1,0 +1,22 @@
+{
+  "key": "fx/skip_spool/base",
+  "frame_width": 128,
+  "frame_height": 128,
+  "columns": 4,
+  "gutter": 4,
+  "frames": 8,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "animations": [
+    {
+      "name": "spool",
+      "start": 0,
+      "length": 8,
+      "loop": false
+    }
+  ]
+}

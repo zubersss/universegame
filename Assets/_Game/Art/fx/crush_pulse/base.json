@@ -1,0 +1,22 @@
+{
+  "key": "fx/crush_pulse/base",
+  "frame_width": 256,
+  "frame_height": 64,
+  "columns": 2,
+  "gutter": 4,
+  "frames": 8,
+  "fps": 8,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "animations": [
+    {
+      "name": "pulse",
+      "start": 0,
+      "length": 8,
+      "loop": true
+    }
+  ]
+}
