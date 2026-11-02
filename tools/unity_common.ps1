@@ -40,6 +40,11 @@ function Get-FreeMemoryGB {
 }
 
 function Write-Want([string]$job) {
+    # D-039 guard (LEAD cycle 159): never file a want while UNITY still holds the lock, and after UNITY's own
+    # job never file one while another role's want is waiting: that role goes first, and UNITY files only once
+    # its heavy lock appears (its want is gone then). Without a want UNITY still retries and yields (D-037).
+    if (Test-Path $LockFile) { return }
+    if ((Get-OtherWants).Count -gt 0 -and (Get-LastRelease) -gt (Get-Date).AddMinutes(-$WantMaxAgeMinutes)) { return }
     if (-not (Test-Path $WantFile)) { "$((Get-Date).ToString('s')) $job" | Set-Content -Encoding utf8 $WantFile }
 }
 

@@ -42,12 +42,14 @@ $err = TryEnter
 Check 'yields to a waiting role (strict turns, D-037)' ($err -like '*yielding to want_blender.lock*D-037*')
 $err = TryEnter
 Check 'keeps yielding while that role has not taken the lock' ($err -like '*yielding to want_blender.lock*')
+Check 'D-039 guard: no want filed after own job while another role waits' (-not (Test-Path $WantFile))
 
 # 3b. That role takes the lock (deletes its want) and runs; UNITY waits on the lock, then goes.
 Remove-Item (Join-Path $tmp 'want_blender.lock')
 'x' | Set-Content (Join-Path $tmp 'heavy_blender.lock')
 $err = TryEnter
 Check 'waits while that role runs its job' ($err -like '*held by heavy_blender.lock*')
+Check 'D-039 guard: files its want once that role holds the lock' (Test-Path $WantFile)
 Remove-Item (Join-Path $tmp 'heavy_blender.lock')
 $err = TryEnter
 Check 'goes once that role has had its turn' ($null -eq $err)
