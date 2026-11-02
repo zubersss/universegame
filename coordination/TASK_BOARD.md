@@ -1212,6 +1212,20 @@ Files: blender/sources/props/earth_flora/, build_props_earth.py, Assets/_Game/Ar
 Depends: B-077
 Lead notes: Cycle 176. R1. Feeds U-076's near props plane.
 
+### B-086 · BLENDER · Ready · R2
+Goal: Mars terrain block materials (contract §9 terrain row), the R2 counterpart of B-080: every Mars tile material in `MarsTileSet` (regolith, basalt, hematite, clay, perchlorate, polar ice, CO₂ frost/snow, lava-tube rock…: list them from the tile set and log the list), top/side PBR sets at 512², 2 m per repeat, plus `terrain/mars/backwall`; from the v1 recipes, rust/salmon palette (§9).
+Accept: tiles seamlessly; reads as the v1 Mars under the Mars Sun (0.75) in UNITY's lit preview; stamped contact sheet; peaks measured (D-045/D-066).
+Files: blender/scripts/gen_terrain.py, Assets/_Game/Art/terrain/mars/
+Depends: B-077
+Lead notes: Cycle 181. R2 prep; numpy-light, good lock-free work after B-083.
+
+### B-087 · BLENDER · Ready · R2
+Goal: Mars creatures as models: `creatures/mars/dustskater` (small class, ≤ 3 k tris) and `creatures/mars/scree_stalker` (medium, ≤ 8 k), full walker clip sets from the v1 rigs, materials matching Mars (silicate, dust).
+Accept: contract §9; stamped turntables; UNITY lit preview at 60 px/m reads as the v1 silhouettes.
+Files: blender/sources/creatures/mars/, build_creatures_mars.py, Assets/_Game/Art/creatures/mars/
+Depends: B-077
+Lead notes: Cycle 181. R2 prep.
+
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
 Accept: frames ≤ 256, sheets ≤ 1024², `.json` per sheet, emission where glowing.

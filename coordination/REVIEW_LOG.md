@@ -927,4 +927,4 @@ Checked: review_creatures_earth_stag.png, _wolf.png (stamped 01:34–01:35; grou
 Checked: u073_2026-11-02/earth_blocks_b080.png and _depth.png (105bffa): the first 3D Earth: textured 1 m blocks with relief, grass tops, back wall, lit by the Sun3D; the v1 parallax paintings still sit behind (until U-076/B-083) and the Pilgrim/props are flat cards (U-076). tests_2026-11-02.md 01:36 EditMode 236/237 (only P-30's retired test). Chain 4 (model previews → PlayMode) memory-stopped at 01:39, D-046 re-run under heavy_unity 01:41. Free RAM 1.84 GB.
 Moved: B-080 → Done. U-073 stays In Progress until the PlayMode run. Decided: D-069 (P-30). No stall signals; both roles commit every few minutes.
 Queues: UNITY active/Ready with deps met: U-073, U-074, U-075, U-080 (In Progress), U-078, U-079 (5 + U-080); BLENDER Ready: B-083 (In Progress), B-084, B-085 + B-078/B-079/B-081/B-082 awaiting lit previews → add two BLENDER tasks next cycle.
-
+Added B-086 (Mars block materials) and B-087 (Mars creatures) now rather than next cycle; BLENDER Ready with deps met: B-084, B-085, B-086, B-087 + B-083 In Progress.
