@@ -597,9 +597,33 @@ def do_model(entry, preview):
              f"| review {os.path.basename(info['review'])} | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
 
 
+def do_terrain3d(entry, preview):
+    """Contract v2 terrain block materials (§9 terrain row, B-080): numpy only."""
+    t0 = time.time()
+    if preview:
+        raise AssetError(f"{entry['key']}: terrain3d has no preview mode")
+    import gen_terrain3d as GT3
+    sys.path.insert(0, HERE)
+    import review
+    res = GT3.export_terrain3d(entry, ART)
+    key = entry["key"]
+    sheet = os.path.join(PREVIEW, f"review_{key.replace('/', '_')}.png")
+    first = next(iter(res))
+    _, planet, material = key.split("/")
+    src = (os.path.join(ART, "terrain", planet, "backwall_color.png") if material == "backwall"
+           else os.path.join(ART, "terrain", planet, material, f"{first}_color.png"))
+    GT3.contact(list(res.items()), sheet,
+                lambda img, p: review.draw(img, review.stamp_text(p), 2, img.shape[0] - 16, (1.0, 1.0, 0.85)), src)
+    mark_stale(key, False)
+    seams = ", ".join(f"{k} seam {v[1][0]}/{v[1][1]}" for k, v in res.items())
+    log_line(f"OK {key} | {', '.join(res)} 512^2 color/normal/mask | {seams} | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
+
+
 def do_asset(entry, preview):
     if entry.get("model"):
         return do_model(entry, preview)
+    if entry.get("terrain3d"):
+        return do_terrain3d(entry, preview)
     t0 = time.time()
     maps, clips, wh, entry = produce(entry, preview)
     problems, seam = check(entry, maps, clips, wh, preview)
