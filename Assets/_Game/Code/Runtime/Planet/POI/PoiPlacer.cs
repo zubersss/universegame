@@ -81,7 +81,7 @@ namespace Meridian.Planet.POI
             sr.sprite = box;
             sr.color = poi.planet == PlanetId.Earth ? new Color(0.55f, 0.57f, 0.6f, 1f) : new Color(0.5f, 0.38f, 0.3f, 1f);
             go.transform.localScale = new Vector3(prop.size.x, prop.size.y, 1f);
-            LoadArt(sr, prop.key, prop.size.x, prop.topRow);
+            LoadArt(sr, prop.key, prop.size, prop.topRow);
             if (prop.craftStation != Meridian.Crafting.Station.Hand)
             {
                 // U-051: the prop is a crafting station (the camp's Smelter).
@@ -145,8 +145,9 @@ namespace Meridian.Planet.POI
             return top;
         }
 
-        void LoadArt(SpriteRenderer sr, string key, float width, int topRow = 0)
+        void LoadArt(SpriteRenderer sr, string key, Vector2 declared, int topRow = 0)
         {
+            float width = declared.x;
             var loc = Addressables.LoadResourceLocationsAsync(key);
             loc.Completed += l =>
             {
@@ -165,6 +166,16 @@ namespace Meridian.Planet.POI
                     var mat = ArtMaterials.MaterialFor(key);
                     if (mat != null) sr.sharedMaterial = mat;
                     float w = pick.bounds.size.x;
+                    // R1 transition: a prop whose art became a model now loads a generated placeholder card whose
+                    // proportions have nothing to do with the declared size (the 12 m pad grew a ~20 m tall collider
+                    // around the landed Pilgrim, which then couldn't launch). When the sprite's aspect is off by more than
+                    // 25 % from the declared size, stretch the card to that size and keep the declared collider.
+                    float spriteAspect = w > 0f ? pick.bounds.size.y / w : 0f, declaredAspect = declared.x > 0f ? declared.y / declared.x : 0f;
+                    if (declaredAspect > 0f && spriteAspect > 0f && Mathf.Abs(spriteAspect / declaredAspect - 1f) > 0.25f)
+                    {
+                        sr.transform.localScale = new Vector3(declared.x / w, declared.y / pick.bounds.size.y, 1f);
+                        return;
+                    }
                     sr.transform.localScale = w > 0f ? Vector3.one * (width / w) : Vector3.one;
                     // A solid prop's collider follows the drawn art (the catalog size is only the placeholder's).
                     if (colliderOf.TryGetValue(sr, out var box2d) && box2d != null)
