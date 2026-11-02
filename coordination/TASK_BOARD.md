@@ -931,7 +931,7 @@ Files: blender/scripts/gen_backdrop*.py, gen_terrain.py, build_props_jupiter.py,
 Depends: B-048
 Lead notes: Done (cycle 157): deck2/3 + deep backdrops, floe_derelict, derelict_pod, beacon_vault (cycle 156), husk_tortoise v2 af4ebdc (dead husk: slumped head with a hollow socket, cracked and missing plates, flat walk line, desaturated).
 
-### B-056 · BLENDER · Ready · M4
+### B-056 · BLENDER · In Progress · M4
 Goal: Jupiter creatures (Bible §7.6): `creatures/jupiter/stormglider` (manta floater, flier clip set), `lightning_eel` (electric, Deck 2, cyan-white emissive along the body), `belt_wasp` (small radiation-adapted swarm unit, 128 px), `ballast_tortoise` (huge slow floater; its dead pose must read as a standable platform; match B-055's husk_tortoise silhouette).
 Accept: contract §4 sizes and the same clip names as the inner creatures; emission where glowing; cream/rust/brick palette (§9); stamped review contact sheet.
 Files: blender/scripts/build_creatures_jupiter.py, Assets/_Game/Art/creatures/jupiter/

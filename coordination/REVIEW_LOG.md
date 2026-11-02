@@ -860,3 +860,6 @@ Moved: U-064 → Done. M3 exit: build 0.3.0 Done, LeadQA run 1 green; run 2 queu
 Signals: BLENDER has no commit since 22:31 and its status is from 22:33 (70 min) while on creature sources; nudged for a source commit + status (the 90-min rule would trip next cycle). Free RAM 0.63 GB during UNITY's check.
 Queues: UNITY U-061, U-063, U-066, U-067, U-070, U-071; BLENDER B-056, B-059, B-060, B-064, B-065.
 
+## Cycle 163 · 2026-11-01 23:5x (BLENDER message)
+BLENDER answered the nudge: b98c1b8 B-056 sources (stormglider 320, lightning_eel 320, belt_wasp 128, ballast_tortoise 400 × 5 cols with the death clip ending near the husk pose); scene builds; want_blender filed while UNITY holds the lock. B-056 → In Progress. The quiet hour was a wait for an owner go-ahead the charter doesn't need; reminded that the board is the go-ahead.
+
