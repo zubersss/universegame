@@ -429,6 +429,7 @@ def turntable(mesh, rig, out_png, sun_dir=(-0.6, 0.4, -0.7), size=384, frame=1, 
     scene.camera = cam
     panels = []
     dist = radius * 4.2
+    cd.clip_start, cd.clip_end = max(0.05, dist * 0.002), dist * 4.0     # large bands (skyline ~600 m) sat past the default far clip
     for ang in angles:                              # D-068: characters/creatures/ships +X, 3/4, back; props camera side (-Y), 3/4, far side
         a = math.radians(ang)
         cam.location = centre + Vector((math.cos(a) * dist, math.sin(a) * dist, radius * 0.9))
@@ -514,7 +515,7 @@ def export_model(entry, art_dir, preview_dir, objs, stamp_fn):
             "sockets": [o.name[len("socket_"):] for o in sockets] or entry.get("sockets", [])}
     with open(os.path.join(out_dir, f"{variant}.json"), "w", encoding="utf-8") as fh:
         json.dump(meta, fh, indent=1)
-    angles = (-90.0, -45.0, 90.0) if entry.get("origin_rule") == "base" else (0.0, -45.0, 180.0)
+    angles = (-90.0, -45.0, 90.0) if entry.get("origin_rule") in ("base", "band") else (0.0, -45.0, 180.0)   # D-068 (bands as props: seen from the camera side)
     sheet = turntable(mesh, rig, os.path.join(preview_dir, f"review_{key.replace('/', '_')}"), angles=angles)
     out = os.path.join(preview_dir, f"review_{key.replace('/', '_')}.png")
     stamp_fn(sheet, glb)

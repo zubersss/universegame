@@ -1,0 +1,21 @@
+{
+ "key": "backgrounds/earth_desert/ridge_mid",
+ "format": "glb",
+ "contract": "v2.2",
+ "facing": "+X in Unity (exported facing glTF -X, D-065)",
+ "up": "+Y",
+ "units": "m",
+ "origin": "band",
+ "triangles": 2048,
+ "lod1_triangles": null,
+ "texture": 1024,
+ "maps": [
+  "color",
+  "normal",
+  "mask",
+  "emission"
+ ],
+ "fps": 30,
+ "clips": [],
+ "sockets": []
+}

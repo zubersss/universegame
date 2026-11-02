@@ -619,9 +619,26 @@ def do_terrain3d(entry, preview):
     log_line(f"OK {key} | {', '.join(res)} 512^2 color/normal/mask | {seams} | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
 
 
+def do_skydome(entry, preview):
+    """Contract v2 skydome (§9 depth bands, B-083): 2048x1024 equirect colour, numpy only."""
+    t0 = time.time()
+    import gen_skydome as SD
+    sys.path.insert(0, HERE)
+    import review
+    path, img, seam = SD.export_skydome(entry, ART)
+    sheet = img[::2, ::2].copy()
+    review.draw(sheet, review.stamp_text(path), 2, sheet.shape[0] - 16, (1.0, 1.0, 0.85))
+    out = os.path.join(PREVIEW, f"review_{entry['key'].replace('/', '_')}.png")
+    pngio.write_png(out, np.dstack([pngio.to_u8(np.clip(sheet, 0, 1)), np.full(sheet.shape[:2], 255, np.uint8)]))
+    mark_stale(entry["key"], False)
+    log_line(f"OK {entry['key']} | skydome 2048x1024 color | seam_x={seam} | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
+
+
 def do_asset(entry, preview):
     if entry.get("model"):
         return do_model(entry, preview)
+    if entry.get("skydome"):
+        return do_skydome(entry, preview)
     if entry.get("terrain3d"):
         return do_terrain3d(entry, preview)
     t0 = time.time()
