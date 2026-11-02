@@ -555,6 +555,20 @@ Files: Assets/_Game/Code/Runtime/Items/, Data/, Tests/
 Depends: U-051
 Lead notes: Done adb06a3 + 7a413c1 (cycle 153): M4ItemsTests 5 green, RecipeBook reset; recipes per D-056; placeholder icons until B-061.
 
+### U-070 · UNITY · Ready · M4
+Goal: Jupiter creatures v1 (Bible §7.6) on the U-055 creature framework, with placeholders until B-056: Stormglider (passive manta floater, drifts between floes), Lightning eel (Deck 2, charges 1.5 s then arcs 20 damage within 6 m), Belt wasp (Deck 1 swarm of 5–8, radiation-adapted, chases within 20 m), Ballast tortoise (huge slow floater; on death it becomes a standable floe for 120 s). Numbers you pick go in your status for LEAD's D- entry.
+Accept: EditMode: spawn tables per deck; PlayMode in a stub column: eel arcs only after its tell; a killed tortoise is standable (feet within 0.1 m of its top); wasps give up past 40 m.
+Files: Assets/_Game/Code/Runtime/Creatures/Jupiter/, Tests/
+Depends: U-055
+Lead notes: Cycle 153. M4. Build against a stub column now; switch to U-061's column when it lands.
+
+### U-071 · UNITY · Ready · M4
+Goal: Aerostat platforms (Bible §7.5, Venus precedent in U-056): buildable on giants; each module lists mass and lift; the HUD shows the buoyancy margin; a platform with negative margin sinks 1 m/s until fixed; the respawn point after a Crush Line death is the last Aerostat (else the ship).
+Accept: EditMode: margin = Σ lift − Σ mass per module set; PlayMode: overloading sinks, removing a module stops the sink; Crush respawn picks the Aerostat; save/load keeps the platform.
+Files: Assets/_Game/Code/Runtime/Building/Aerostat/, Tests/
+Depends: U-056
+Lead notes: Cycle 153. M4. Reuse the Venus aerostat code; the Crush respawn hook joins once U-061 lands.
+
 ### U-025 · UNITY · Done · M2
 Goal: Day/night lighting: sun Light2D angle and color follow TimeSystem (20 min Earth day, 20.5 min Mars), sunlight intensity from Bible §9 per planet, ambient night level, sky tint.
 Accept: EditMode test: Earth noon/midnight intensities match §9; captures at dawn/noon/dusk/night on Earth; 0 B GC per frame.

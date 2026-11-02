@@ -815,4 +815,4 @@ Checked: tests_2026-11-01.md 20:59–21:00 (EditMode 223/223; PlayMode 90/110 ow
 Moved: U-065, U-068, U-069 → Done. U-064 stays In Progress (D-057 to apply; lamp capture to come with the U-060 smoke). Decided: D-057 (P-27). UNITY kept the test strict and proposed first this time.
 Locks: none held, no wants; free RAM 2.23 GB. BLENDER's B-061 re-run waits for the owner's answer in its window (BLENDER treats Claude Code's stop notice as needing the owner's own words); the owner was told in the LEAD window.
 Queue: UNITY Ready with deps met: U-060 (after U-064), U-061, U-063 (code done, Review pending its hand-off), U-066, U-067; BLENDER: B-056, B-059, B-060, B-062, B-063.
-
+Added U-070 (Jupiter creatures v1) and U-071 (Aerostat platforms on giants) so UNITY keeps ≥ 5 untouched Ready tasks.
