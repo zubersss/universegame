@@ -1,5 +1,5 @@
 # LEAD STATUS
-Updated: 2026-11-02 01:4x · Session: 2 (Fable 5.1) · Review cycle: 181
+Updated: 2026-11-02 02:1x · Session: 2 (Fable 5.1) · Review cycle: 182
 ## Current task
 R1 (Earth in 3D): first 3D Earth capture accepted (cycle 181). Waiting on UNITY's PlayMode run to close U-073 and the lit previews to close B-078..B-082. Next proof-checks: U-074 night/lamp capture, U-076 models in the scene. Add 2 BLENDER tasks next cycle (R2 Mars prep is the natural source).
 ## Last completed
@@ -11,6 +11,6 @@ Contract §9 details may change on B-077's proposals (v2.1). Milestone pages: ne
 ## Waiting on the user
 USER-15 (BLENDER standing restart approval), USER-14 (free memory), USER-08 optional. R1 playtest when 0.4.0 exists.
 ## Loop / stall watch
-BLENDER back (b98c1b8 B-056 sources, cycle 163). UNITY: two D-039 breaches today, now guarded in code (57ce9b2).
+Chain 4 PlayMode: M1LoopRun1/2 timeouts + M2Soak escape failure. If they persist in chain 5 after ArtImporter v7, it is a core-loop regression: stop feature work until green.
 ## HeavyJobLock
 none (LEAD runs no heavy jobs while memory is tight)

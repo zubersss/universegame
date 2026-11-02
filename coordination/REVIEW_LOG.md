@@ -928,3 +928,9 @@ Checked: u073_2026-11-02/earth_blocks_b080.png and _depth.png (105bffa): the fir
 Moved: B-080 → Done. U-073 stays In Progress until the PlayMode run. Decided: D-069 (P-30). No stall signals; both roles commit every few minutes.
 Queues: UNITY active/Ready with deps met: U-073, U-074, U-075, U-080 (In Progress), U-078, U-079 (5 + U-080); BLENDER Ready: B-083 (In Progress), B-084, B-085 + B-078/B-079/B-081/B-082 awaiting lit previews → add two BLENDER tasks next cycle.
 Added B-086 (Mars block materials) and B-087 (Mars creatures) now rather than next cycle; BLENDER Ready with deps met: B-084, B-085, B-086, B-087 + B-083 In Progress.
+
+## Cycle 182 · 2026-11-02 02:1x
+Checked: tests_2026-11-02.md chain 4 (01:40–01:53): EditMode green; PlayMode 85/110 + LeadQA 8/10, 7 failures: InvalidKeyException for props/common/{lamp,shelter_wall,shelter_door,storage_crate} and creatures/earth/{stag,wolf} (keys left their 2D maps when the models landed but had no placeholders) → fixed by ArtImporter v7 (4adaabd); M1LoopRun1/2 timed out at "climb to the Escape Line and launch", M2SoakTests "escaped Earth" false, SpawnCampTests pad height, PawsOnTheGround (stag clips null). UNITY expects the key fix to clear most of these; chain 5 (full check + lit previews) is queued behind BLENDER's skyline render (heavy_blender 02:11).
+Risk flagged: if M1LoopRun1/2 still time out after v7, the core loop is broken by the rehaul and that outranks every other R1 task. U-073 stays In Progress; nothing moved. Free RAM 2.06 GB. BLENDER on B-083 (skyline_far rendering).
+Queues: UNITY U-078, U-079 Ready + U-073/074/075/080 active; BLENDER B-084..B-087 Ready + B-083 active.
+
