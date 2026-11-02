@@ -111,8 +111,56 @@ def mat_water(rng, p):
     return col, h
 
 
+def _plate_layout():
+    """Hull plates periodic over 128 px: two rows 64 px tall (0.5 m), plates 128 px wide (1 m),
+    row 1 offset by half a plate (vertical seams at x = 0 in row 0, x = 64 in row 1).
+    Returns x/y inside the plate (px), seam distance (px), vertical-seam distance and plate id."""
+    yy, xx = np.mgrid[0:T, 0:T].astype(np.float32) + 0.5      # pixel centres: seams symmetric across the wrap
+    yy, xx = (yy - 20) % T, (xx - 40) % T      # seams off the tile borders so the 1 m grid does not show
+    row = (yy >= 64).astype(np.int32)
+    xs = (xx + 64 * row) % 128
+    ys = yy % 64
+    dv = np.minimum(xs, 128 - xs)
+    dist = np.minimum(dv, np.minimum(ys, 64 - ys))
+    pid = row
+    return xs, ys, dist, dv, pid
+
+
+def mat_plate(rng, p):
+    """Meridian-expedition hull wreckage (B-055 floe_derelict): worn cream paint over dark
+    metal, 1 m x 0.5 m staggered plates with riveted butt joints, scuffs to bare metal,
+    ochre NH4SH stains running down, a little frost."""
+    xs, ys, dist, dv, pid = _plate_layout()
+    base = fft_noise(rng, T, T, 10, 128, 0.9)
+    fine = fft_noise(rng, T, T, 1.0, 4, 0.2)
+    tone = rng.uniform(-1, 1, 2)[pid]
+    paint = _mix3(srgb(p.get("dark", (150, 136, 112))), srgb(p.get("light", (214, 200, 172))),
+                  0.55 + 0.14 * base + 0.04 * fine + 0.10 * tone)
+    scuff = np.clip((fft_noise(rng, T, T, 24, 128, 0.9) - p.get("scuff_thresh", 2.0)) / 0.3, 0, 1)
+    metal = _mix3(srgb(p.get("metal_dark", (58, 60, 64))), srgb(p.get("metal_light", (104, 106, 110))), 0.5 + 0.25 * fine)
+    col = _mix3(paint, metal, scuff)
+    seam = np.clip(1.5 - dist, 0, 1)
+    col = _mix3(col, srgb(p.get("seam_col", (52, 48, 44))), seam * p.get("seam_k", 0.6))
+    # Rivets: 3 px heads in one column 5 px each side of the vertical butt joint, every 16 px.
+    rx = np.abs(dv - 5)
+    ry = np.abs(((ys + 8) % 16) - 8)
+    rivet = np.clip(2.0 - np.hypot(rx, ry), 0, 1)
+    col = _mix3(col, srgb(p.get("rivet_col", (112, 104, 92))), rivet * 0.7)
+    # Stains: x-only noise faded by a slow 2D field and strongest just under each horizontal
+    # seam, so streaks run down from the joints.
+    st = fft_noise_1d(rng, T, 3, 20, 0.5)[None, :] * np.ones((T, 1), np.float32)
+    fade = np.clip(0.5 + 0.6 * fft_noise(rng, T, T, 24, 128, 0.8), 0, 1)
+    drip = np.exp(-ys / 36.0)
+    streak = np.clip((st - 0.3) / 0.9, 0, 1) * fade * (0.35 + 0.65 * drip)
+    col = _mix3(col, srgb(p.get("stain_col", (140, 88, 46))), streak * p.get("stain_k", 0.7))
+    frost = np.clip((fft_noise(rng, T, T, 6, 30, 0.6) - 1.8) / 0.5, 0, 1)
+    col = _mix3(col, srgb(p.get("frost_col", (226, 232, 238))), frost * 0.55)
+    h = 1.2 * base + 0.15 * fine - 2.0 * seam + 1.4 * rivet - 0.5 * scuff + 0.3 * frost
+    return col, h
+
+
 RECIPES = {"soil": mat_soil, "grass": mat_soil, "stone": mat_stone, "sand": mat_sand,
-           "snow": mat_snow, "water": mat_water}
+           "snow": mat_snow, "water": mat_water, "plate": mat_plate}
 # Other planets' materials pick a recipe and an edge style in the manifest
 # ("recipe": "stone", "edge": "snow", colors and recipe parameters alongside).
 
@@ -127,6 +175,8 @@ EDGE = {
     "stone": dict(inset=3, amp=2.0, lo=10, hi=60, depth=9, rim=12, rim_col=(70, 68, 66), rim_k=0.3),
     "sand":  dict(inset=3, amp=1.2, lo=12, hi=64, depth=3, rim=10, rim_col=(176, 148, 100), rim_k=0.3),
     "snow":  dict(inset=3, amp=1.6, lo=10, hi=64, depth=7, rim=14, rim_col=(196, 210, 228), rim_k=0.4),
+    # Torn hull edge: short jagged contour, frosted rim (B-055 floe_derelict).
+    "plate": dict(inset=3, amp=1.8, lo=8, hi=48, depth=7, rim=9, rim_col=(206, 212, 220), rim_k=0.35),
     "water": dict(inset=1, amp=0.0, lo=8, hi=64, depth=1, rim=4, rim_col=(30, 80, 110), rim_k=0.0,
                   band=(7, 1), band_dark=(150, 196, 214), band_light=(196, 228, 238), alpha=0.8, top_only_band=True),
 }
