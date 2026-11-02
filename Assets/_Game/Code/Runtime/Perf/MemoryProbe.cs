@@ -87,9 +87,14 @@ namespace Meridian.Perf
             while (!marsSide.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
             yield return Leg("Mars", marsSide.sideCamera);
 
-            // ---- U-060: Mercury and Venus, loaded directly to keep the probe short ----
+            // ---- U-060: Mercury and Venus. Switch the way a launch does (the planet side unloads, unused assets
+            // are freed), then load the next planet directly to keep the probe short ----
             foreach (var id in new[] { Meridian.Planets.PlanetId.Mercury, Meridian.Planets.PlanetId.Venus })
             {
+                var unload = director.UnloadPlanetSide();
+                if (unload != null) while (!unload.isDone) yield return null;
+                var unused = Resources.UnloadUnusedAssets();
+                while (!unused.isDone) yield return null;
                 yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(id));
                 var s = director.PlanetSide;
                 until = Time.realtimeSinceStartup + 20f;

@@ -41,6 +41,11 @@ namespace Meridian.EditorTools
 
             EditorBuildSettings.scenes = scenes.Select(s => new EditorBuildSettingsScene(s, true)).ToArray();
             PlayerSettings.bundleVersion = GameInfo.Version;
+            // U-060: a per-user build override can force uncompressed textures (the 0.3.0 dev build held RGBA32
+            // sheets although their Standalone import is BC7). Builds always use the import settings.
+            Debug.Log($"[MERIDIAN] texture overrides before build: compression {EditorUserBuildSettings.overrideTextureCompression}, max size {EditorUserBuildSettings.overrideMaxTextureSize}");
+            EditorUserBuildSettings.overrideTextureCompression = OverrideTextureCompression.NoOverride;
+            EditorUserBuildSettings.overrideMaxTextureSize = 0;
             // U-044: the app icon (BLENDER ui/app/icon, 1024 px; Windows scales it for the taskbar and title bar).
             var icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/_Game/Art/ui/app/icon_color.png");
             if (icon != null) PlayerSettings.SetIcons(UnityEditor.Build.NamedBuildTarget.Unknown, new[] { icon }, IconKind.Any);

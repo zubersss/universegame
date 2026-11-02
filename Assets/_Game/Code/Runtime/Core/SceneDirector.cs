@@ -108,7 +108,12 @@ namespace Meridian.Core
         {
             var scene = SceneManager.GetSceneByName(PlanetSideScene);
             PlanetSide = null;
-            return scene.isLoaded ? SceneManager.UnloadSceneAsync(scene) : null;
+            if (!scene.isLoaded) return null;
+            var op = SceneManager.UnloadSceneAsync(scene);
+            // U-060: released planet art (creatures, backdrops, props) stays in memory while its bundle is still
+            // open (the terrain sheets keep every inner planet's bundle loaded); free it once the scene is gone.
+            if (op != null) op.completed += _ => Resources.UnloadUnusedAssets();
+            return op;
         }
 
         /// <summary>Shows one view and hides the other (the full transitions arrive with U-012).</summary>
