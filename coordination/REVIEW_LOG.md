@@ -851,3 +851,5 @@ Queues: UNITY U-061, U-063, U-066, U-067, U-070, U-071; BLENDER B-056, B-059, B-
 Checked: tests 22:46–22:47 (EditMode 224/224, PlayMode 91/110 + LeadQA 3/3, 0 failed); compile 0 errors (warnings 0, under baseline); perf_2026-11-01.md BudgetGate green and dev-build memory rows all green (textures 162–308 MB; Venus 912 → 308 after D-061); Build/MERIDIAN_0.3.0 present; smoke_2026-11-01 shots 13 (Mercury day), 16 (Venus station), 18 (Mars shelter night).
 Moved: U-060 → Done (M3 build exists). U-064 lamp FAIL (no visible light pool in shot 18) → stays In Progress with a fix list, not blocking the playtest. L-012 → In Progress (LEAD writes M3InnerTests next).
 
+
+L-012: M3InnerTests.cs committed 738fd43 (7 steps; step 7 bounds the summed Unity game time at 900 s because TimeSystem runs at 72x; the space legs use the ring-placement shortcut from MercuryEntryTests). UNITY asked to run LeadQA in its next two checks; it must pass twice.
