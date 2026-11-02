@@ -30,7 +30,7 @@ namespace Meridian.Hazards
 
     /// <summary>
     /// U-049 hazard tables (Bible §7, D-032, D-048): each hazard's raw level (0–3, a flare 4) for a place.
-    /// Pure, no allocation (the caller passes the array). Planets without a design yet stay at 0.
+    /// Pure, no allocation (the caller passes the array). The giants read GiantBands (U-068).
     /// </summary>
     public static class HazardTable
     {
@@ -72,6 +72,13 @@ namespace Meridian.Hazards
                     levels[(int)HazardKind.Thermal] = furnace;
                     levels[(int)HazardKind.Pressure] = furnace;
                     levels[(int)HazardKind.Toxic] = c.y < VenusAcidRain ? 2 : 1;
+                    break;
+
+                case PlanetId.Jupiter:
+                case PlanetId.Saturn:
+                case PlanetId.Uranus:
+                case PlanetId.Neptune:
+                    GiantBands.For(c.planet, c.y, levels);                         // U-068: cloud-column bands
                     break;
             }
         }
