@@ -6,12 +6,6 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-16 — Playtest M3 (15–30 min)
-1. Open File Explorer and go to `C:\dev\universegame\Build\MERIDIAN_0.3.0`.
-2. Double-click `MERIDIAN.exe` ("More info" → "Run anyway" if Windows asks).
-3. Click NEW. What to try is on the M3 page the Lead sent you, or in `coordination/reviews/M3_REPORT.md`.
-4. Tell the Lead what felt wrong, for example "done: USER-16, flares too frequent". This also covers USER-12 (the M2 playtest) if you skip that one.
-
 ### USER-15 — Give BLENDER the same memory-restart permission UNITY has (1 min)
 When the laptop runs low on memory, Claude Code stops the running job and the BLENDER session waits for you to type permission before trying again. UNITY already has standing permission; BLENDER keeps asking you each time (21:34 and again around 00:00). Paste this into the **BLENDER window** exactly:
 
@@ -25,12 +19,6 @@ The team's test run needs 1.5 GB free memory; with everything idle the laptop ha
 2. Quit Unity Hub: click the ^ arrow at the bottom right of the taskbar, right-click the Unity Hub icon → Quit. The team doesn't need Hub open.
 3. Leave the three Claude windows open. Tell the Lead "done: USER-14".
 
-### USER-12 — Playtest M2 (15–30 min)
-1. Open File Explorer and go to `C:\dev\universegame\Build\MERIDIAN_0.2.0`.
-2. Double-click `MERIDIAN.exe` ("More info" → "Run anyway" if Windows asks).
-3. Click NEW. What to try is in `coordination/reviews/M2_REPORT.md`.
-4. Tell the Lead what felt wrong, for example "done: USER-12, nights too dark".
-
 ### USER-08 — Optional: let the team run PowerShell commands without prompts (2 min)
 On Windows, Claude Code runs commands through PowerShell as well as Bash, and the
 `Bash(...)` allow rules in `.claude/settings.json` don't cover PowerShell. The Lead added
@@ -39,6 +27,7 @@ If you get too many "allow this command?" prompts, tell the Lead "approve PowerS
 allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
 
 ## Done
+- 2026-11-02 00:5x · USER-16 and USER-12 (M3/M2 playtests) withdrawn: the owner chose the 3D rehaul (D-062) and "switch now". The next playtest is R1 (Earth in 3D).
 - 2026-11-01 20:0x · USER-13 (the owner restarted all three windows; the LEAD loop is running again).
 - 2026-10-30 · USER-01 (Git 2.56 and Git LFS 3.8 already installed; the Lead ran
   `git lfs install --local`), USER-02 (repo already at `C:\dev\universegame`),

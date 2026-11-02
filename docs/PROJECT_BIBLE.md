@@ -1,7 +1,7 @@
 # MERIDIAN — Project Bible (single source of truth)
 
 Owner: LEAD. Workers read; only LEAD edits. Changes are logged in `coordination/DECISIONS.md`.
-Version: 1.5 (skip time to Neptune, Jupiter radiation with Mk3; D-054/D-055, cycle 151). The Lead bumps the version on every edit.
+Version: 2.0 (3D rehaul, D-062, 2026-11-02: §5.1 camera, §9, §10.1, §10.4–10.6, §11.1 rows, §12 R-milestones). Earlier numbers and designs are unchanged. The Lead bumps the version on every edit.
 
 Sections: 1 Vision · 2 Setting and story · 3 The solar system in game · 4 Physics and
 numbers · 5 Views and transitions · 6 Controls · 7 The eight planets · 8 Systems →
@@ -9,6 +9,10 @@ milestones · 9 Art style guide · 10 Technical architecture · 11 Performance b
 12 Milestone plan · 13 Glossary
 
 ---
+
+> **Rehaul notice (D-062, 2026-11-02).** MERIDIAN is now a 3D-looking game with the same
+> side-view play. Everything in §1–§8 and §11 stands. §9 and §10 describe the 3D build. Where an
+> older sentence says "sprite", "frame sheet", "Tilemap" or "2D light", read §9/§10 instead.
 
 ## 1. Vision and pillars
 
@@ -466,32 +470,35 @@ recovery fee).
 
 ---
 
-## 9. Art style guide
+## 9. Art style guide (v2, 3D)
 
-**Target.** Rendered realism in 2D: the look of a nature documentary still, with painterly
-softness in haze and clouds. No outlines, no pixelation, no cel shading.
+**Target.** Rendered realism in real-time 3D, seen from the side: the look of a nature
+documentary still, with painterly softness in haze and clouds. No outlines, no cel shading,
+no pixelation, no low-poly "faceted" stylisation. The game plays on one plane (z = 0); depth
+exists to be looked at, not walked into.
 
 | Rule                 | Specification                                                                                |
 |----------------------|----------------------------------------------------------------------------------------------|
-| Scale                | PPU 128 (1 m = 128 px source). A human is 1.8 m = 230 px. Default on-screen density ≈ 60 px/m |
-| Lighting             | Color maps are unlit albedo; Unity 2D lights do all shading via normal maps. Each planet has a sunlight intensity (clamped): Mercury 1.6, Venus 1.2, Earth 1.0, Mars 0.75, Jupiter 0.45, Saturn 0.35, Uranus 0.25, Neptune 0.2, and an ambient color |
-| Palettes             | Earth greens/blues/ochres · Mars rust/salmon · Mercury white/black/violet · Venus orange-cream/black · Jupiter cream/rust/brick · Saturn pale gold · Uranus cyan fog · Neptune indigo/white · Space near-black with a Milky Way band and warm Sun |
-| Readability          | Every creature silhouette reads at 60 px/m against its planet's background; interactive props have a 10% brighter rim in the mask map |
-| Atmosphere           | 3 parallax layers per planet (far sky/clouds, mid terrain, near detail) plus a haze gradient; gas giants add band layers that scroll at different speeds |
-| Creatures            | Grounded anatomy with one alien exaggeration per species; materials match the planet (silicate, sulfur, ice) |
-| Ships                | Industrial-realistic, worn, legible thrusters and lights; emission maps for engines and windows |
-| UI                   | Thin HUD, planet-tinted accents, numerals in a monospace OFL font, one-line tooltips      |
-| Fonts                | OFL-licensed only (candidates: Inter, JetBrains Mono); logged in `docs/credits/unity.md`   |
-| Forbidden            | Any name, logo, silhouette, or story element from existing games; anything that reads as pixel art or a cartoon |
+| Scale                | 1 Unity unit = 1 m. A human is 1.8 m. The camera (§5.1) shows ≈ 60 px/m at 1080p on the play plane |
+| Lighting             | PBR (URP Lit): base colour, normal, metallic/smoothness, emission. One directional Sun per planet with the §9 v1 intensities (Mercury 1.6 … Neptune 0.2), a per-planet ambient gradient, soft Sun shadows, ≤ 8 visible point lights (lamps, thrusters, vents, lightning) |
+| Palettes             | unchanged: Earth greens/blues/ochres · Mars rust/salmon · Mercury white/black/violet · Venus orange-cream/black · Jupiter cream/rust/brick · Saturn pale gold · Uranus cyan fog · Neptune indigo/white · Space near-black with a Milky Way band |
+| Readability          | Every creature silhouette reads at 60 px/m against its planet; interactive props carry a faint emissive rim (mask) when the player is within 3 m |
+| Depth                | Terrain is 1 m-deep blocks with a back wall 1 m behind; beyond it, three depth bands: near props (z 2–6 m), mid ridges (z 20–60 m), far skyline and sky dome (z ≥ 150 m); haze by distance per planet. Giants: cloud decks as layered translucent planes at those depths |
+| Creatures            | Grounded anatomy with one alien exaggeration per species; rigged and animated; materials match the planet (silicate, sulfur, ice) |
+| Ships                | Industrial-realistic, worn, legible thrusters and lights; emissive engines and windows      |
+| UI                   | unchanged: thin HUD, planet-tinted accents, monospace OFL numerals, one-line tooltips; icons stay 2D |
+| Fonts                | OFL-licensed only; logged in `docs/credits/unity.md`                                        |
+| Forbidden            | Any name, logo, silhouette, or story element from existing games; anything that reads as a cartoon, pixel art or a low-poly stylised look |
 
 ---
 
 ## 10. Technical architecture
 
 ### 10.1 Stack
-Unity 6 LTS (exact build pinned in §12), URP with the 2D Renderer, Input System,
-Addressables, Unity Test Framework, Cinemachine (2D), TextMeshPro. Blender LTS (pinned in
-§12), Eevee for sprites, Cycles for planet bakes, all scripted in Python.
+Unity 6 LTS (exact build pinned in §12), URP with the **Universal (3D) Renderer, Forward+**,
+Input System, Addressables, Unity Test Framework, Cinemachine (3D follow on a side rail),
+TextMeshPro. Physics stays **Physics2D** on the x–y plane. Blender LTS (pinned in §12): models
+and rigs exported as glTF (`.glb`), textures baked in Cycles/Eevee, all scripted in Python.
 
 ### 10.2 Repo layout
 ```
@@ -514,29 +521,34 @@ Only `Assets/` and `Packages/` are imported by Unity; `.blend` files never go un
   loads and unload when it unloads; `common` (player, ship, UI, FX) stays resident.
 
 ### 10.4 Terrain
-Data: 1 m tiles in 32 × 32 chunks, generated from a seed by `IWorldGenerator`
-implementations: `SolidWorldGenerator` (Earth, Mars, Mercury, Venus) and
-`CloudColumnGenerator` (giants). Generation runs on a worker thread, applied on the main
-thread within 2 ms per frame. Rendering: Unity Tilemap per chunk with RuleTiles that carry
-normal maps (secondary texture), random variants, and an edge-blend overlay tilemap for soft
-transitions. Collision: `TilemapCollider2D` + `CompositeCollider2D` per chunk; only the
-edited chunk rebuilds. Persistence: only player changes are saved as `(chunk, index, tileId)`
-diffs. Only chunks within 2 of the camera stay in memory; others are pooled.
+Data (unchanged): 1 m tiles in 32 × 32 chunks, generated from a seed by `IWorldGenerator`
+implementations (`SolidWorldGenerator`, `CloudColumnGenerator`); generation on a worker
+thread, applied on the main thread within 2 ms per frame; only player changes are saved as
+`(chunk, index, tileId)` diffs; chunks within 2 of the camera stay in memory.
+Rendering (v2): each chunk builds one **block mesh**: 1 m cubes, 1 m deep, only faces exposed to
+air are emitted, greedy-meshed, UVs into a per-planet `Texture2DArray` (top and side texture per
+tile material, tileable at 2 m); a back-wall quad 1 m behind the play plane carries the
+planet's rock material; a dig or place rebuilds only that chunk's mesh within the same frame.
+Edge blending between materials comes from the shader (height-blend on the array layers), not
+from overlay tiles. Collision (unchanged): `TilemapCollider2D` + `CompositeCollider2D` per chunk
+on the x–y plane; the Tilemap stays as the collision and data carrier, with its renderer off.
 
 ### 10.5 Lighting and materials
-Sprite material `Sprite_LitEmissive` (Shader Graph): albedo, `_NormalMap`, `_EmissionMap`,
-`_MaskTex` (R = rim strength). Planet discs use `PlanetDisc` (equirect texture → sphere
-projection on a disc, rotation offset, terminator from the Sun direction, atmosphere rim,
-optional cloud layer). Lights: one global light per scene, the Sun as a far light, ≤ 8
-visible local lights (player lamp, thrusters, vents, lightning), light textures for haze.
+Materials are URP Lit (base colour sRGB, normal, metallic (R) + smoothness (A), emission) through
+the `ArtMaterials` registry; the terrain uses a `TerrainBlocks` shader (array textures, height
+blend). Planet discs in space are spheres with the equirect `PlanetDisc` textures (atmosphere rim,
+clouds, terminator from the Sun). Lights: one directional Sun per scene driven by `TimeSystem`
+(angle, colour, intensity per §9), a per-planet ambient gradient (sky/equator/ground), ≤ 8 visible
+point lights, soft Sun shadows (one cascade, 30 m), bloom on emission, SSAO off by default (budget).
+Haze: per-planet distance fog matching the v1 haze gradient.
 
 ### 10.6 Art pipeline (summary; the contract is authoritative)
-Blender renders every asset to `Assets/_Game/Art/<key>_<map>.png`. `ArtImporter`
-(`Assets/_Game/Code/Editor/ArtImporter.cs`, an `AssetPostprocessor`) applies import settings
-per category, links secondary textures, slices frame sheets from the `.json` manifest,
-assigns the Addressable address = asset key, adds the sprite to the right atlas, and
-retires the matching file in `Placeholders/`. Code loads art only by key through
-`ArtKeys` constants, never by path.
+Blender exports every model to `Assets/_Game/Art/<category>/<name>/<variant>.glb` with its
+textures beside it; 2D categories (icons, ui, planet equirects, fx billboards) stay PNG.
+`ArtImporter` (UNITY) applies import settings per category, names and loops animation clips,
+assigns materials from the textures, sets the Addressable address = asset key, and retires the
+matching placeholder. Code loads art only by key through `ArtKeys`, never by path. Views play
+clips by the same names as the v1 sheet clips, so gameplay code does not change.
 
 ### 10.7 Save format
 `%USERPROFILE%/AppData/LocalLow/<company>/MERIDIAN/saves/slot<N>/` holds `state.json`
@@ -570,6 +582,7 @@ digging, BudgetGate (frame time, GC, light and particle caps, memory).
 |-------------------------------|-------------------------------------------------------------------|
 | Frame time                    | ≤ 16.6 ms at 1080p on the dev laptop; target ≤ 12 ms average      |
 | RAM (built game)              | ≤ 2.5 GB working set; ≤ 600 MB textures loaded; ≤ 60 MB audio     |
+| Geometry (v2, 3D)             | ≤ 300 k triangles on screen; ≤ 400 draw calls (SRP batcher on); ≤ 150 shadow casters; one shadow cascade |
 | Draw calls                    | ≤ 150 side view, ≤ 80 top-down (atlases, batching)                |
 | 2D lights visible             | ≤ 8 (hard cap 12); shadows only on the player lamp                |
 | Particles alive               | ≤ 600; every emitter pooled                                       |
@@ -603,6 +616,10 @@ If the laptop's RAM is upgraded, LEAD raises only this section and logs the deci
 | **M2 Earth, Mars, space — final art and feel** | Real terrain materials, parallax, planet discs, Sun, Pilgrim, player, 2 creatures per planet, day/night, Mars dust storm, basic Cryo, placeholder audio | Screenshots match §9; budgets green; 30-minute play without errors                          |
 | **M3 Inner planets complete** | Mercury and Venus full designs; Envirosuit hazards; all Rig modules; Smelter/Refinery/Blueprint Tree; inventory; Waystations and trading; Wardens basic; Catalogue; bases | Each inner planet's "only here" obtainable; apexes killable; tests for hazards and economy |
 | **M4 The giants**       | Cloud-column generator; floes, Float cells, Aerostats, Crush Line; Skip Drive; belt and ring mining; all four giants' hazards, creatures, apexes; Thruster Mk2/Mk3 | Full progression Earth → Neptune completable by LEAD's QA script; budgets green on Jupiter |
+| **R1 3D pipeline proof (Earth)** | The 3D renderer and side-rail camera; block-mesh terrain with PBR materials; Sun + lamps in 3D; the surveyor, the Pilgrim, Earth props batch 1 and two Earth creatures as animated models; sky dome, ridges and near props replace the parallax layers | `M1LoopTests`, `SmokeTests` and the M2/M3 gameplay tests pass unchanged; §11.1 (incl. the geometry row) green on Earth; captures match §9 v2; owner playtest |
+| **R2 Earth, Mars, space in 3D** | All M2 content as models and materials: Mars terrain, creatures, props, POIs; planets as spheres in space; day/night and dust storms in 3D | As M2's exit, plus `M2SoakTests`                                                            |
+| **R3 Inner planets in 3D** | Mercury and Venus, stations, Wardens, both apexes, bases and lamps as models | As M3's exit: `M3InnerTests` pass twice; owner playtest                                   |
+| **M4 The giants (3D)** | As the M4 row, built 3D from the start; the 2D M4 tasks are re-cut after R3 | As the M4 row                                                                             |
 | **M5 Full systems**     | Story and factions; missions; space combat and Red Hollow; four ship classes; Gates; weather; Warden tiers; full audio; orbital drift | Story completable; both endings; every §8 row Done                                         |
 | **M6 Polish, optimization, Windows build** | Profiling pass on every planet; load times; settings menu; credits from `docs/credits/`; zip build | All budgets green on every planet; 60-minute session with zero errors; user sign-off      |
 

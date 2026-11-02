@@ -106,6 +106,52 @@ Lead notes: Done (cycle 168): M3InnerTests 738fd43 passed twice (UNITY checks 23
 
 ## UNITY
 
+> **R1 (D-062).** 2D tasks U-061..U-071 are Superseded (their code and sources stay in the tree and
+> get reused). R-tasks below rebuild Earth in 3D while keeping every system.
+
+### U-072 · UNITY · Ready · R1
+Goal: 3D renderer and side-rail camera: switch the URP asset to the Universal (3D) Renderer with Forward+ (keep the 2D renderer asset in the project for the archive branch only); a perspective Cinemachine camera on a rail at z = −18 m, vertical FOV 35°, following the player on z = 0 with the current damping and look-ahead, giving ≈ 60 px/m at 1080p; Physics2D untouched; the HUD, panels and Space scene unchanged; `ArtMaterials` gains URP/Lit entries.
+Accept: Core, Space and PlanetSide load with no errors; M1LoopTests + SmokeTests pass; an EditMode test asserts the on-plane density (60 ± 3 px/m); a capture shows the terrain with depth (placeholder blocks).
+Files: Assets/_Game/Settings/, Code/Runtime/Camera/, Prefabs/
+Depends: —
+Lead notes: Cycle 171. R1. First; everything else builds on it.
+
+### U-073 · UNITY · Ready · R1
+Goal: Chunk block mesher (Bible §10.4 v2): `TerrainChunk` builds one greedy-meshed block mesh of 1 m cubes (exposed faces only, 1 m deep) with UVs into a per-planet `Texture2DArray` (top/side layer per tile material; flat placeholder colours until B-080); a back-wall quad; dig/place rebuilds only that chunk within the frame; the Tilemap stays for collision and data with its renderer off; `TerrainBlocks` shader (array textures, height blend between layers).
+Accept: EditMode: face count for a known chunk pattern; rebuild ≤ 2 ms per chunk (D-019); PlayMode: dig removes the block in the same frame and collision matches; streaming within budget; FootingTests green.
+Files: Assets/_Game/Code/Runtime/Terrain/, Shaders/
+Depends: U-072
+Lead notes: Cycle 171. R1. The biggest piece; keep the chunk API so generators and save diffs don't change.
+
+### U-074 · UNITY · Ready · R1
+Goal: 3D lighting from `TimeSystem` (Bible §10.5 v2): one directional Sun (angle, colour, intensity per planet per §9 and D-030), per-planet ambient gradient, soft shadows (one cascade, 30 m), bloom; lamps, thrusters, vents become point lights (≤ 8 visible); distance fog per planet replaces the haze gradient; Light2D components removed.
+Accept: DayNightTests adapted (noon/midnight intensities per §9); night darkens the terrain; a lamp pools light on blocks and the back wall; BaseTests green; budgets.
+Files: Assets/_Game/Code/Runtime/Planet/Lighting/, Building/
+Depends: U-072
+Lead notes: Cycle 171. R1.
+
+### U-075 · UNITY · Ready · R1
+Goal: Model-based views: `CharacterView`/`CreatureView` drive an Animator with clips named exactly as the old sheet clips (contract §5 names), facing by a 180° yaw turn, hit flashes by material property; `ArtImporter` v5 imports `.glb` per contract §9 (materials from the four maps, clip names kept, address = key, placeholder retired); capsule/box placeholders until B-078/B-082; the hit/footing/interaction code unchanged.
+Accept: ArtImporterTests for a sample glb (B-077's calibration model); every clip name used in code resolves on the placeholder Animator; FootingTests, creature tests green.
+Files: Assets/_Game/Code/Runtime/Creatures/, Player/, Code/Editor/ArtImporter.cs, Tests/
+Depends: U-072
+Lead notes: Cycle 171. R1. Handshake with B-077 like B-002/U-005.
+
+### U-076 · UNITY · Ready · R1
+Goal: Ship, props and depth bands: the Pilgrim and props batch 1 as model prefabs (placeholders until B-079/B-081); the building system places 3D prefabs on the plane; the three parallax layers become depth bands (near props plane z 2–6 m, mid ridge mesh strip z 20–60 m, far skyline + sky dome ≥ 150 m) fed by the planet config; Space keeps its top-down view with planet spheres.
+Accept: an Earth capture shows blocks, back wall, ridges, sky dome and the ship with depth; BuildTests, ShipSideTests, SpaceArtTests green.
+Files: Assets/_Game/Code/Runtime/Ship/, Building/, Planet/Backdrop/, Prefabs/
+Depends: U-073, U-074
+Lead notes: Cycle 171. R1.
+
+### U-077 · UNITY · Ready · R1
+Goal: BudgetGate 3D rows (Bible §11.1 geometry row: ≤ 300 k triangles, ≤ 400 draw calls, ≤ 150 shadow casters) + `unity_profile` reads them; R1 build `Build/MERIDIAN_0.4.0/` with a smoke set (Earth day, night with a lamp, digging, the ship landed and flying, Space).
+Accept: every BudgetGate row green on Earth in the dev build; smoke clean; GameInfo 0.4.0.
+Files: Assets/_Game/Tests/Unit/BudgetGateTests.cs, tools/unity_profile.ps1, Build/
+Depends: U-075, U-076
+Lead notes: Cycle 171. R1 close, with the owner's playtest.
+
+
 ### U-001 · UNITY · Done · M0
 Goal: Unity 6 project at repo root with URP 2D Renderer, Input System, Addressables, Test Framework, Cinemachine, TMP; folder tree and asmdefs; compile script.
 Accept: `tools/unity_compile.ps1` exits 0 with zero `error CS`; asmdefs `MERIDIAN.Runtime`, `MERIDIAN.Editor`, `MERIDIAN.Tests.Unit`; packages pinned in `Packages/manifest.json`; URP asset uses the 2D Renderer.
@@ -492,21 +538,21 @@ Files: Build/ (ignored), coordination/reports/unity/smoke_<date>/
 Depends: U-053, U-055, U-056, U-059, U-064
 Lead notes: Done 2e1f495 + 657f999 + a4fa60a (cycle 161): Build/MERIDIAN_0.3.0 (352 MB); check 22:46 compile 0/0, EditMode 224/224, PlayMode 91/110 + LeadQA 3/3, 0 failed; BudgetGate green (Earth p99 9.41 ms, Mars entry 1.34 s); dev-build textures Earth 187, Space 162, Mars 190, Mercury 258, Venus 308 MB (all ≤ 600); 18-shot smoke checked (Mercury day, Venus station read right).
 
-### U-061 · UNITY · Ready · M4
+### U-061 · UNITY · Superseded · M4
 Goal: Cloud-column world generator (Bible §7.5, D-004): a 4096 × 2000 column with no ground; Escape Line, Datum (1-bar cloud tops), Decks 1–3, Deep and the Crush Line (y 100, lethal, pulsing "CRUSH" band); floating ice floes (solid, mineable platforms) seeded per deck with density by deck; floes sublimate 30–90 s after the player disturbs them; derelicts and creature husks as standable floes; the same chunk streaming as solid worlds. Start with Jupiter using terrain/jupiter floe_ice/floe_core and backgrounds/jupiter_deck1 (B-048).
 Accept: EditMode tests for deck bands and floe density per seed; PlayMode: land on a floe from the ship, dig it, and it sublimates in the window; falling past the Crush Line respawns at the ship with a 20% Scrip fee; streaming within D-019; preload on approach (D-050).
 Files: Assets/_Game/Code/Runtime/Terrain/CloudColumn/
 Depends: U-007, U-048
 Lead notes: Cycle 138. The first M4 task and the biggest technical unknown of the plan.
 
-### U-062 · UNITY · Ready · M4
+### U-062 · UNITY · Superseded · M4
 Goal: Float cells + jetpack Mk2/Mk3 (Bible §4.2): Float cell Mk1 +6 m/s², Mk2 +12 buoyancy, usable only below the Datum, toggled with V; jetpack Mk2/Mk3 thrust/burn per the §4.2 table; Jupiter 2.53 g makes Mk3 the only climbing jetpack.
 Accept: PlayMode on Jupiter: Mk1 jetpack slows a fall but can't climb; Mk3 climbs; Float Mk1 below the Datum arrests a fall; the HUD shows buoyancy margin.
 Files: Assets/_Game/Code/Runtime/Player/
 Depends: U-061
 Lead notes: Cycle 138. M4.
 
-### U-063 · UNITY · Ready · M4
+### U-063 · UNITY · Superseded · M4
 Goal: Skip Drive (Bible §3): hold J to spool 3 s, then travel at 1,200 u/s, consuming skip fuel per second; disabled inside any gravity well; skip-fuel item (Helium-3 Condensate, Saturn; deuterium from water at 1/3 efficiency) in the RecipeBook.
 Accept: PlayMode: Earth → Neptune in ≈ 11 s at skip speed; refuses inside a well; fuel drains per second; the HUD shows the spool.
 Files: Assets/_Game/Code/Runtime/Space/
@@ -527,14 +573,14 @@ Files: Assets/_Game/Code/Runtime/Ship/, Items/, Tests/
 Depends: U-010
 Lead notes: Done 6e54f23 + e26a10b (cycle 153): check 20:58 compile 0/0, EditMode 223/223 (ShipMarksTests 5/5), ShipMarksPlayTests green (Mk1 refused on Saturn with the HUD line, Mk2 lifts off).
 
-### U-066 · UNITY · Ready · M4
+### U-066 · UNITY · Superseded · M4
 Goal: Top-down ring and belt mining (Bible §3, §7.7): mining lanes in the asteroid Belt and Saturn's rings, density by distance with safe gaps; the ship's mining beam breaks ring ice / ring rock bodies (placeholder sprites until B-059) into water ice, silicates, iron; Ring Mites (placeholder) swarm a ship that mines for > 20 s and chew hull 1/s each until shot or outrun.
 Accept: EditMode: lane density profile per seed with at least one gap; PlayMode: mine one ring body → cargo gains items; mites spawn after 20 s of mining and damage hull; Space scene budgets within §11.1.
 Files: Assets/_Game/Code/Runtime/Space/Mining/, Tests/
 Depends: U-034
 Lead notes: Cycle 147. M4.
 
-### U-067 · UNITY · Ready · M4
+### U-067 · UNITY · Superseded · M4
 Goal: Grapple Rig module (Bible §7.5 movement, §8 Rig table): fire at a floe/solid tile within 18 m, reel at 10 m/s, swing under gravity, release on jump; works on solid worlds too; no ammo; cooldown 0.5 s.
 Accept: PlayMode on Earth: grapple to a ledge 12 m up and arrive; a shot at 25 m misses; under Jupiter gravity the reel still lifts the player; the HUD shows the reticle range.
 Files: Assets/_Game/Code/Runtime/Player/Rig/, Tests/
@@ -555,14 +601,14 @@ Files: Assets/_Game/Code/Runtime/Items/, Data/, Tests/
 Depends: U-051
 Lead notes: Done adb06a3 + 7a413c1 (cycle 153): M4ItemsTests 5 green, RecipeBook reset; recipes per D-056; placeholder icons until B-061.
 
-### U-070 · UNITY · Ready · M4
+### U-070 · UNITY · Superseded · M4
 Goal: Jupiter creatures v1 (Bible §7.6) on the U-055 creature framework, with placeholders until B-056: Stormglider (passive manta floater, drifts between floes), Lightning eel (Deck 2, charges 1.5 s then arcs 20 damage within 6 m), Belt wasp (Deck 1 swarm of 5–8, radiation-adapted, chases within 20 m), Ballast tortoise (huge slow floater; on death it becomes a standable floe for 120 s). Numbers you pick go in your status for LEAD's D- entry.
 Accept: EditMode: spawn tables per deck; PlayMode in a stub column: eel arcs only after its tell; a killed tortoise is standable (feet within 0.1 m of its top); wasps give up past 40 m.
 Files: Assets/_Game/Code/Runtime/Creatures/Jupiter/, Tests/
 Depends: U-055
 Lead notes: Cycle 153. M4. Build against a stub column now; switch to U-061's column when it lands.
 
-### U-071 · UNITY · Ready · M4
+### U-071 · UNITY · Superseded · M4
 Goal: Aerostat platforms (Bible §7.5, Venus precedent in U-056): buildable on giants; each module lists mass and lift; the HUD shows the buoyancy margin; a platform with negative margin sinks 1 m/s until fixed; the respawn point after a Crush Line death is the last Aerostat (else the ship).
 Accept: EditMode: margin = Σ lift − Σ mass per module set; PlayMode: overloading sinks, removing a module stops the sink; Crush respawn picks the Aerostat; save/load keeps the platform.
 Files: Assets/_Game/Code/Runtime/Building/Aerostat/, Tests/
@@ -607,6 +653,52 @@ Lead notes: Done 3936ae1 (cycle 26): Archive at x 184 (buried room), launch comp
 ---
 
 ## BLENDER
+
+> **R1 (D-062).** 2D tasks B-056..B-076 are Superseded; their `.blend` sources (rigs, props,
+> terrain recipes) are the starting point for the models. Contract v2 §9 is the rule set.
+
+### B-077 · BLENDER · Ready · R1
+Goal: Contract v2 pipeline test (the B-002 handshake again, in 3D): export the calibration figure as `characters/calibration/base.glb` with two clips (`idle`, `walk`), the four v2 maps, +X facing, feet at the origin; a stamped turntable contact sheet; a `render.py` export path for glb (`export_model(key)`); propose contract §9 changes you need in BLENDER_STATUS.
+Accept: UNITY's ArtImporter v5 imports it with the clip names intact and the materials assigned (U-075 confirms); the turntable review is stamped.
+Files: blender/scripts/build_calibration.py, blender/render.py, Assets/_Game/Art/characters/calibration/
+Depends: —
+Lead notes: Cycle 171. R1. Do this first; everything else waits on the import working.
+
+### B-078 · BLENDER · Ready · R1
+Goal: The surveyor as a model: `characters/surveyor/base.glb`, ≤ 12 k triangles, 2048 textures, the full §5 clip set at 30 fps, a `float_pack` socket (empty) on the back and a `rig_tool` socket in the right hand; reuse the existing surveyor rig.
+Accept: contract §9; clips loop where they should; stamped turntable; UNITY lit preview.
+Files: blender/sources/characters/surveyor.blend, build_surveyor.py, Assets/_Game/Art/characters/surveyor/
+Depends: B-077
+Lead notes: Cycle 171. R1.
+
+### B-079 · BLENDER · Ready · R1
+Goal: The Pilgrim as a model: `ships/pilgrim/base.glb` (12 m long), ≤ 15 k triangles, emissive engines and windows, landing gear, a `cockpit` socket, `LOD1`; a top-down `top` is no longer separate (the same model is viewed from above in Space).
+Accept: contract §9; stamped turntable; the landing-gear footprint matches the current landing_pad width.
+Files: blender/sources/ships/pilgrim.blend, build_pilgrim.py, Assets/_Game/Art/ships/pilgrim/
+Depends: B-077
+Lead notes: Cycle 171. R1.
+
+### B-080 · BLENDER · Ready · R1
+Goal: Earth terrain block materials (contract §9 terrain row): for every Earth tile material in `EarthTileSet` (soil, grass-topped soil, stone, sand, clay, snow, ice, ores, wood…: list them from the tile set and log the list), a tileable `top` and `side` PBR set at 512², 2 m per repeat, plus `backwall`; derived from the v1 tile recipes.
+Accept: tiles seamlessly (2× tiled preview); reads as the v1 materials under the Earth Sun in the UNITY lit preview; stamped contact sheet of all sets.
+Files: blender/scripts/gen_terrain.py, Assets/_Game/Art/terrain/earth/
+Depends: B-077
+Lead notes: Cycle 171. R1. Numpy/Cycles bakes; measure peaks (D-045).
+
+### B-081 · BLENDER · Ready · R1
+Goal: Earth props batch 1 as models: `props/common/{landing_pad, shelter_wall, shelter_door, smelter, storage_crate, lamp}` (+ `fabricator`, `refinery` if they exist as sprites), each ≤ 6 k triangles, lamp with an emissive head and a `light` socket, door with an `open` clip.
+Accept: contract §9; stamped turntable sheet; wall and pad tile at 1 m / 2 m pitches.
+Files: blender/sources/props/common/, build_props_common.py, Assets/_Game/Art/props/common/
+Depends: B-077
+Lead notes: Cycle 171. R1.
+
+### B-082 · BLENDER · Ready · R1
+Goal: Earth creatures as models: `creatures/earth/stag` and `creatures/earth/wolf`, medium class (≤ 8 k triangles), full walker clip set, reusing the v1 rigs.
+Accept: contract §9; stamped turntables; UNITY lit preview at 60 px/m reads as the v1 silhouettes.
+Files: blender/sources/creatures/earth/, build_creatures_earth.py, Assets/_Game/Art/creatures/earth/
+Depends: B-077
+Lead notes: Cycle 171. R1.
+
 
 ### B-024 · BLENDER · Done · M2
 Goal: HeavyJobLock fairness + memory gate in `tools/blender_render.ps1` (D-026), mirroring U-023.
@@ -931,35 +1023,35 @@ Files: blender/scripts/gen_backdrop*.py, gen_terrain.py, build_props_jupiter.py,
 Depends: B-048
 Lead notes: Done (cycle 157): deck2/3 + deep backdrops, floe_derelict, derelict_pod, beacon_vault (cycle 156), husk_tortoise v2 af4ebdc (dead husk: slumped head with a hollow socket, cracked and missing plates, flat walk line, desaturated).
 
-### B-056 · BLENDER · In Progress · M4
+### B-056 · BLENDER · Superseded · M4
 Goal: Jupiter creatures (Bible §7.6): `creatures/jupiter/stormglider` (manta floater, flier clip set), `lightning_eel` (electric, Deck 2, cyan-white emissive along the body), `belt_wasp` (small radiation-adapted swarm unit, 128 px), `ballast_tortoise` (huge slow floater; its dead pose must read as a standable platform; match B-055's husk_tortoise silhouette).
 Accept: contract §4 sizes and the same clip names as the inner creatures; emission where glowing; cream/rust/brick palette (§9); stamped review contact sheet.
 Files: blender/scripts/build_creatures_jupiter.py, Assets/_Game/Art/creatures/jupiter/
 Depends: B-002
 Lead notes: Cycle 147. M4.
 
-### B-057 · BLENDER · Ready · M4
+### B-057 · BLENDER · Superseded · M4
 Goal: Jupiter apex `creatures/jupiter/vortex_whale` (Bible §7.6): a 500 m floater built as segments (head, repeatable body, tail) that UNITY chains; per-segment size per the Venus apex precedent (D-042: 400 px × 5 frames); a "song" glow-pulse state; harpoon-anchor socket points in the JSON.
 Accept: segments join without seams in a chained preview; stamped review; frames and sheets within contract §4.
 Files: blender/scripts/build_creatures_jupiter.py, Assets/_Game/Art/creatures/jupiter/vortex_whale/
 Depends: B-056
 Lead notes: Cycle 147. M4.
 
-### B-058 · BLENDER · Ready · M4
+### B-058 · BLENDER · Superseded · M4
 Goal: Saturn column art (Bible §7.5, §7.7): backgrounds/saturn_deck1..3 and saturn_deep (pale gold and butter bands, soft low sun, the ring plane as a bright line across the upper sky in deck 1), terrain/saturn/floe_ice and floe_core; reuse the B-048/B-055 painted-cloud-bank pipeline.
 Accept: same rules as B-055 (tiling, seams, stamped reviews, D-045 peak_mb measured before any numpy_only marker); decks darker and warmer with depth; clearly paler and golder than Jupiter.
 Files: blender/scripts/gen_backdrop*.py, gen_terrain.py, Assets/_Game/Art/backgrounds/saturn_*/, terrain/saturn/
 Depends: B-048
 Lead notes: Cycle 147. M4. Start once B-055 is in review.
 
-### B-059 · BLENDER · In Progress · M4
+### B-059 · BLENDER · Superseded · M4
 Goal: Ring and belt mining art (Bible §7.7): `props/space/ring_ice_01..04` (bright icy chunks), `props/space/ring_rock_01..04` (grey-brown silicate), `creatures/space/ringmite` (tiny top-down swarm unit, 64 px, chewing clip), `fx/ring_dust` (debris puff when a body breaks).
 Accept: top-down camera and scale as the B-010 asteroids (64 px/m, D-018); sheets ≤ 1024²; stamped review.
 Files: blender/scripts/build_asteroids.py, gen_fx.py, Assets/_Game/Art/props/space/, creatures/space/, fx/ring_dust/
 Depends: B-010
 Lead notes: Cycle 170 (bfbebbe): ring_rock_01..04, ringmite (ppu 54, idle/chew/hurt/death) and fx/ring_dust accepted. FAIL ring_ice_01..04, Art matches §9: they read as soft cotton puffs, not icy chunks. Fix: a hard irregular silhouette (faceted, a few flat cleavage planes), a bright specular highlight on the sun side and a cool blue shadow side, two or three dark cracks, no soft outer fuzz. Re-render the four ice bodies only, then mark Ready.
 
-### B-060 · BLENDER · In Progress · M4
+### B-060 · BLENDER · Superseded · M4
 Goal: Saturn creatures (Bible §7.7): `creatures/saturn/helium_jelly` (translucent; add a "rise" clip for when it's hit), `hex_drake` (winged, flier clip set), `floe_moth` (small, 128 px).
 Accept: contract §4 sizes and clips; pale gold palette, translucency where stated; stamped review.
 Files: blender/scripts/build_creatures_saturn.py, Assets/_Game/Art/creatures/saturn/
@@ -987,21 +1079,21 @@ Files: blender/scripts/gen_backdrop*.py, gen_terrain.py, Assets/_Game/Art/backgr
 Depends: B-048
 Lead notes: Done (cycle 159): Neptune decks + floe_ice/floe_core/superionic_ice (27d8a24) and storm v4 on the near layer; review_neptune_deck2/3.png stamped 22:29–22:30: deep indigo, long white wind streaks, a soft dark storm mass.
 
-### B-064 · BLENDER · In Progress · M4
+### B-064 · BLENDER · Superseded · M4
 Goal: Uranus creatures (Bible §7.8): `creatures/uranus/frostwisp` (small luminous floater, cyan-white emission, 128 px), `methane_ray` (glider, flier clip set), `hailcrab` (shelled walker whose shell catches diamonds; a "shell up" defend clip), `tiltbird` (migrating flier, small flock unit).
 Accept: contract §4 sizes and clips as earlier creatures; dim-light readable (test the contact sheet at Uranus sunlight 0.25 in the lit preview); stamped review.
 Files: blender/scripts/build_creatures_uranus.py, Assets/_Game/Art/creatures/uranus/
 Depends: B-002
 Lead notes: Cycle 158. M4.
 
-### B-065 · BLENDER · In Progress · M4
+### B-065 · BLENDER · Superseded · M4
 Goal: Neptune creatures (Bible §7.9): `creatures/neptune/windrider` (sail-finned floater), `shadow_shoal` (dark fast fish-like swarm unit, 128 px, faint rim light so it reads on indigo), `pressure_phantom` (translucent, Deck 3), `anchor_worm` (holds floes; a coiled "anchored" pose and a free clip).
 Accept: contract §4 sizes and clips; readable against the B-063 indigo decks; translucency where stated; stamped review.
 Files: blender/scripts/build_creatures_neptune.py, Assets/_Game/Art/creatures/neptune/
 Depends: B-002
 Lead notes: Cycle 158. M4.
 
-### B-066 · BLENDER · Ready · M4
+### B-066 · BLENDER · Superseded · M4
 Goal: Saturn apex `creatures/saturn/polar_hydra` (Bible §7.7): a six-headed cloud serpent of the Hexagon's eye, built as a body segment set plus six head variants (each head a separate sprite with idle/strike/destroyed clips) so UNITY can remove heads one at a time; Venus apex precedent for size (D-042: 400 px × 5 frames per segment); pale gold with a cold inner glow.
 Accept: heads and body join without seams in a chained preview; destroyed-head state reads at gameplay scale; frames and sheets within contract §4; stamped review.
 Files: blender/scripts/build_creatures_saturn.py, Assets/_Game/Art/creatures/saturn/polar_hydra/
@@ -1036,42 +1128,42 @@ Files: blender/scripts/gen_planet.py, Assets/_Game/Art/planets/{io,europa,titan,
 Depends: B-010
 Lead notes: Done c6b401b + ba59ac8 (cycle 166): Io (sulfur, hotspots), Europa (cracked white), Titan (orange haze), Enceladus, Miranda, Triton + two plume glows; review_b070_moons.png stamped 00:01. Short plumes (~40 px) accepted: moons are small sky objects.
 
-### B-071 · BLENDER · Ready · M4
+### B-071 · BLENDER · Superseded · M4
 Goal: Uranus apex `creatures/uranus/diamondback_colossus` (Bible §7.8): a huge armoured crawler of the diamond-rain layer, built as body + limb segments; joints are separate sprites with an "exposed" state (visible only while it reaches to feed) so UNITY can make only the joints take damage; diamond armour reads as faceted and sparkling in dim light; size per the Venus apex precedent (D-042: 400 px × 5 frames per segment).
 Accept: a chained preview with the feed pose showing the exposed joints; stamped review; frames and sheets within contract §4.
 Files: blender/scripts/build_creatures_uranus.py, Assets/_Game/Art/creatures/uranus/diamondback_colossus/
 Depends: B-064
 Lead notes: Cycle 169. M4.
 
-### B-072 · BLENDER · Ready · M4
+### B-072 · BLENDER · Superseded · M4
 Goal: Neptune apex `creatures/neptune/umbral_leviathan` (Bible §7.9): the final boss, a vast dark floater of the Great Dark Spot, built as head/body/tail segments plus a separate "maw" and two "anchor fin" sprites with their own clips; near-black with a faint indigo rim so it reads against the B-063 decks; a "roar" state with internal light.
 Accept: chained preview reads at the gameplay scale against neptune_deck3; the rim light keeps the silhouette readable; stamped review; contract §4.
 Files: blender/scripts/build_creatures_neptune.py, Assets/_Game/Art/creatures/neptune/umbral_leviathan/
 Depends: B-065
 Lead notes: Cycle 169. M4.
 
-### B-073 · BLENDER · Ready · M4
+### B-073 · BLENDER · Superseded · M4
 Goal: Giant zone overlays (Bible §7.6–7.9): side-view near-layer overlays that mark the four big zones: `backgrounds/jupiter_red_spot` (600 m of fast cream-and-brick wind bands, tileable, with spinning-floe debris wisps), `backgrounds/saturn_hexagon_wall` (a translucent rotating wind wall, 3 variants), `backgrounds/uranus_dark_season` tint overlay (already partly done in B-062; make it a separate alpha layer so UNITY can crossfade), `backgrounds/neptune_dark_storm` (a 400 m breathing storm mass with an inward pull suggested by streak direction, 2 frames for the breathing).
 Accept: each is an alpha overlay that tiles horizontally; stamped reviews composited over the matching deck; D-045 peaks measured.
 Files: blender/scripts/gen_backdrop*.py, Assets/_Game/Art/backgrounds/{jupiter_red_spot,saturn_hexagon_wall,uranus_dark_season,neptune_dark_storm}/
 Depends: B-048
 Lead notes: Cycle 169. M4. Numpy-only pipeline; good lock-free work.
 
-### B-074 · BLENDER · Ready · M4
+### B-074 · BLENDER · Superseded · M4
 Goal: M4 HUD and panel icons (ui/): buoyancy margin (up/down arrow in a cell), skip fuel, skip spool, wind (with direction), season (lit/dark half), Crush warning, float cell on/off, grapple ready, aerostat module slots (cell, deck, strut); plus item icons for the M4 recipes not covered by B-061: aerostat_cell, aerostat_deck, aerostat_strut, wind_anchor, grapple_hook, polymer.
 Accept: same style and size as the existing ui/ HUD icons; readable at 24 px; item icons match B-013 camera and lights; stamped montage.
 Files: blender/scripts/build_icons.py, blender/scripts/build_ui.py, Assets/_Game/Art/ui/, Assets/_Game/Art/icons/
 Depends: B-061
 Lead notes: Cycle 169. M4. Keys as written; UNITY will use them in U-062/U-067/U-071.
 
-### B-075 · BLENDER · Ready · M4
+### B-075 · BLENDER · Superseded · M4
 Goal: Saturn Waystation, Halcyon's largest market (Bible §7.7): `props/space/waystation_saturn` as a bigger top-down station sprite than the Earth/Mars waystation (B-0xx), with a ring-dock arm, lit hangars and a market canopy; plus `props/space/ring_rig_topdown` (the ring-mining rig as seen from space).
 Accept: same top-down camera and scale as the existing waystation; sheets within contract §4; stamped review next to the Earth waystation for scale.
 Files: blender/scripts/build_waystation.py, Assets/_Game/Art/props/space/
 Depends: B-014
 Lead notes: Cycle 169. M4. Feeds U-066 and the Saturn market.
 
-### B-076 · BLENDER · Ready · M4
+### B-076 · BLENDER · Superseded · M4
 Goal: Wardens, giant tier (Bible §2, §7.9 "the hardest Warden tier"): `creatures/warden/sentinel_mk2` and `creatures/warden/hunter_mk2` (heavier hulls, pressure-rated, indigo running lights, a visible shield emitter), `fx/warden_shield` (a hex-cell shield flash), `fx/warden_bolt_heavy`.
 Accept: same clip set as the basic Wardens; mk2 reads as the same family but heavier at a glance; stamped review beside the mk1 sprites.
 Files: blender/scripts/build_wardens.py, gen_fx.py, Assets/_Game/Art/creatures/warden/, fx/

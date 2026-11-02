@@ -1,5 +1,8 @@
 # MERIDIAN — Start Here
 
+> **2 Nov 2026:** MERIDIAN is being rebuilt with a 3D look (same side-view play). The finished 2D
+> version is kept on branch `archive/meridian-v2-2d` (build 0.3.0). See `coordination/DECISIONS.md` D-062.
+
 MERIDIAN is a 2D space-survival game set in our real solar system, built by three AI
 sessions (Claude Code) that do all of the development. Your job is the part that needs
 a human: install software, start the sessions, paste a few messages, playtest, and

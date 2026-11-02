@@ -887,3 +887,8 @@ Checked: b069_tiling_and_back.png (3 decks at a 2 m pitch, 3 struts stacked with
 ## Cycle 170 · 2026-11-02 00:4x (BLENDER message)
 Checked: review_b059_ring.png, review_b059_ringmite.png (stamped 00:20). Rock bodies, ringmite and the dust puff pass. ring_ice_01..04 fail Art matches (soft puffs rather than icy chunks); B-059 stays In Progress with a fix list for the four ice bodies only.
 
+## Cycle 171 · 2026-11-02 00:5x–01:1x · 3D REHAUL (D-062)
+Owner directive in the LEAD window: "make it 3D but keep everything else"; after the cost explanation the owner chose the 3D look with side-view play and "switch now" (M3 playtest skipped). Done: both workers told to stop 2D work; tag `meridian-v2-2d-final` + branch `archive/meridian-v2-2d` pushed; D-062; Bible 2.0 (§5.1 camera via U-072, §9 v2, §10.1/10.4/10.5/10.6, §11.1 geometry row, §12 R1–R3 rows); ASSET_CONTRACT v2.0 (§9 models); board: U-061..U-071 and B-056..B-076 Superseded, R1 tasks U-072..U-077 and B-077..B-082 written; USER-16/USER-12 withdrawn; README notice.
+BLENDER's ring_ice v2 (B-059) was not reviewed: superseded, no fault.
+Open risks: integrated-graphics performance with 3D terrain (fallback logged in D-062); Blender glb export + ArtImporter v5 handshake (B-077/U-075) is the first thing to proof-check.
+

@@ -1,4 +1,9 @@
-# MERIDIAN — Asset Contract v1.6
+# MERIDIAN — Asset Contract v2.0
+
+> **v2 (D-062, 2026-11-02).** Models replace sprites. §9 is the rule set for every 3D category
+> (`terrain`, `backgrounds` (now skyline/ridge/deck meshes), `ships`, `characters`, `creatures`,
+> `props`). §1–§8 still apply to the categories that stay 2D: `icons`, `ui`, `planets` (equirects),
+> `fx` (billboard sheets), and to keys, folders, legal and hand-off rules.
 
 Owner: LEAD (edits and version bumps, logged in `DECISIONS.md`). BLENDER produces to it;
 UNITY's `ArtImporter` enforces it. If an asset can't meet a rule, BLENDER proposes a
@@ -126,3 +131,20 @@ style guide (Bible §9) in the review.
 Propose in your status file (what, why, which assets). LEAD decides within one review cycle,
 bumps the version here, logs it in `DECISIONS.md`, and lists any re-exports as tasks.
 Existing Done assets are not re-exported unless a task says so.
+
+## 9. 3D model assets (v2)
+
+| Rule | Value |
+|------|-------|
+| File | `Assets/_Game/Art/<category>/<name>/<variant>.glb` (glTF binary, Y-up, metres), textures beside it as `<variant>_<map>.png`; sources `blender/sources/<category>/<name>.blend` |
+| Orientation | Faces **+X** (screen right); up +Y; the play plane is z = 0 with the model centred on it (depth split front/back) |
+| Origin | Characters, creatures (walkers), props: bottom-centre at the feet/base. Fliers, ships, fx: centre of mass. Terrain block textures: n/a |
+| Textures | `color` (sRGB base colour), `normal` (tangent space, OpenGL +Y), `mask` (R metallic, G ambient occlusion, B rim/interactive glow, A smoothness), `emission` (sRGB). 1024² default; 2048² for the surveyor, ships and apex parts; terrain sets 512² per face |
+| Triangles | small creature/prop ≤ 3 k · medium ≤ 8 k · large ≤ 20 k · apex ≤ 60 k across parts · surveyor ≤ 12 k · ship ≤ 15 k · POI prop ≤ 6 k. Count after export |
+| Materials | One material per model where possible (two for emissive parts); no transparent materials except glass/fins (alpha clip preferred) |
+| Rig and clips | Armature baked to keyframes at 30 fps, root motion off, loop flags set; clip names exactly as §5's sheet clip names (`idle`, `walk`, `run`, `jump`, `fall`, `dig`, `hurt`, `death`, `attack`, flier set …). Extra clips named in the task |
+| LOD | Optional `LOD1` mesh at ≤ 50 % triangles inside the same glb (`<variant>_LOD1`); required for apexes and ships |
+| Terrain materials | Per tile material: `terrain/<planet>/<material>/top_<map>.png` and `side_<map>.png`, tileable, 2 m per repeat, 512²; plus `terrain/<planet>/backwall_<map>.png` |
+| Depth bands | Skyline/ridge meshes: `backgrounds/<planet>/ridge_mid.glb` (z 20–60 m strip, tileable in x every 256 m), `skyline_far.glb` (z ≥ 150 m), `skydome` as a 2048×1024 equirect `color`. Giants: `deck<n>.glb` translucent cloud planes |
+| Review evidence | A stamped turntable contact sheet (front, ¾, back) rendered in Eevee with the planet's Sun and a neutral grey floor: `blender/preview/review_<key>.png`; plus the Unity lit preview from `tools/unity_art_preview.ps1` for Done |
+| Import | `ArtImporter` v5 (UNITY): glb → materials from the four maps, clip names kept, address = key, placeholder retired. Never hand-edit a glb's import settings |
