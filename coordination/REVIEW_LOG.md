@@ -819,3 +819,9 @@ Added U-070 (Jupiter creatures v1) and U-071 (Aerostat platforms on giants) so U
 
 ## Cycle 154 · 2026-11-01 (BLENDER message)
 Checked: icons_b061_montage.png (13 icons at 128 and 32 px on a dark panel; all distinct). The owner approved the D-046 re-run in the BLENDER window at 21:34; split per cycle 152 (peaks 1440 and 1532 MB) with UNITY's turn in between. B-061 → Done (37053f6, 07335f6); the 4 self-reported nits are deferred to the M4 playtest (accepted work is not polished). BLENDER next: B-055 props.
+
+## Cycle 155 · 2026-11-01 21:4x
+Checked: tests 21:14–21:15 (EditMode 223/223, PlayMode 91/110 + LeadQA 3/3, 0 failures; FootingTests green under D-057); perf_2026-11-01.md dev-build rows (Mercury 703 MB, Venus 955 MB textures, over the §11.1 600 MB line). UNITY's diagnosis: build sheets ship uncompressed RGBA32 (per-user texture-compression override suspected) and planet art isn't released after unload; fixes in f72e821/9c5e668, profile run 3 under heavy_unity 21:42. BLENDER want 21:43 queued correctly (D-039).
+Moved: U-060 → In Progress. Decided: D-058 (P-28: Editor memory rows are Info; Mars entry 1.53 s still a failure). U-064 closes when the U-060 smoke shows the Mars shelter night shot.
+Queue: UNITY U-061, U-063, U-066, U-067, U-070, U-071 Ready; BLENDER B-056, B-059, B-060, B-062, B-063. Free RAM 0.77 GB during UNITY's profile.
+

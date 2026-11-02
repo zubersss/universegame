@@ -485,7 +485,7 @@ Files: Assets/_Game/Code/Runtime/Terrain/, Hazards/, Items/
 Depends: U-049, U-051
 Lead notes: Done bac7e80 (cycle 137): solarite 90 s post-flare window (Beam cuts 3 per cluster, then crusts), Mars perchlorate deposits (plains + polar cap), Earth living seed drop, Venus vent glass confirmed, wormplate stub; OnlyHereTests 4 + SolariteTests; catalogue entries; full check green. Catalogue nits 2 and 3 fixed; scrim deepened to 78% for all panels (cycle 137).
 
-### U-060 · UNITY · Ready · M3
+### U-060 · UNITY · In Progress · M3
 Goal: M3 playtest build `Build/MERIDIAN_0.3.0/` with build smoke screenshots (Mercury day + twilight + flare shelter, Venus deck station + surface vent, crafting panel, market, catalogue, a Warden, both apexes) and dev-build memory rows for all four inner planets.
 Accept: build smoke clean; every BudgetGate row green in the build; GameInfo 0.3.0; the M2 UI nits (catalogue scrim, selected planet, unscanned silhouettes) folded in.
 Files: Build/ (ignored), coordination/reports/unity/smoke_<date>/
