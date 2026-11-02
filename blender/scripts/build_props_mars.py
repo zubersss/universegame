@@ -22,7 +22,7 @@ from build_pilgrim import box, cyl, flat_material, paint_material, sphere  # noq
 from build_props_earth import strut  # noqa: E402
 
 DEFAULT_OUT = os.path.join(os.path.dirname(HERE), "sources", "props", "mars.blend")
-INTERACTABLE = {"hauler_cargo", "warden_pylon", "meridian_beacon"}
+INTERACTABLE = {"hauler_cargo", "warden_pylon", "meridian_beacon", "ice_drill_rig"}
 
 
 def materials(rim):
@@ -110,8 +110,24 @@ def meridian_beacon(c, M):
     box("drift", (0, 0, 0.06), (2.0, 1.4, 0.12), c, M["dust"], bevel=0.05)
 
 
+def ice_drill_rig(c, M):
+    """B-089 ice-cap drill rig (new, no v1 sprite): a skid frame, an A-frame derrick ~4.2 m with
+    a drill string, a pump and a tank, a cyan status panel and a work light, a dust drift."""
+    box("skid", (0, 0, 0.12), (3.0, 1.6, 0.24), c, M["hull_dark"], bevel=0.04)
+    for s in (-1, 1):
+        strut(c, f"aframe_{s}", (s * 0.9, 0.0), (0.0, 4.2), 0.08, M["metal"])
+    box("crown", (0, 0, 4.2), (0.5, 0.4, 0.3), c, M["hull"], bevel=0.04)
+    cyl("drill", (0, 0, 2.1), 0.07, 4.0, c, M["metal"], verts=12)
+    cyl("collar", (0, 0, 0.42), 0.22, 0.3, c, M["hull_dark"], verts=20)
+    box("pump", (1.0, 0.1, 0.75), (0.8, 0.9, 0.9), c, M["container"], bevel=0.04)
+    cyl("tank", (-1.05, 0.1, 0.75), 0.42, 1.0, c, M["hull"], rot=(math.pi / 2, 0, 0), verts=24)
+    box("panel", (1.0, -0.36, 0.85), (0.3, 0.02, 0.2), c, M["seam"], bevel=0.005)
+    sphere("work_light", (0.0, -0.25, 3.6), 0.09, c, M["lamp"])
+    box("drift", (-0.9, 0.4, 0.08), (1.6, 1.0, 0.16), c, M["dust"], bevel=0.06)
+
+
 PROPS = {"hauler_hull_a": hauler_hull_a, "hauler_hull_b": hauler_hull_b, "hauler_cargo": hauler_cargo,
-         "warden_pylon": warden_pylon, "meridian_beacon": meridian_beacon}
+         "warden_pylon": warden_pylon, "meridian_beacon": meridian_beacon, "ice_drill_rig": ice_drill_rig}
 
 
 def build(out_path=DEFAULT_OUT):

@@ -646,7 +646,7 @@ def do_flora_atlas(entry, preview):
     out = os.path.join(PREVIEW, f"review_{entry['key'].replace('/', '_')}.png")
     pngio.write_png(out, np.dstack([pngio.to_u8(np.clip(sheet, 0, 1)), np.full(sheet.shape[:2], 255, np.uint8)]))
     mark_stale(entry["key"], False)
-    log_line(f"OK {entry['key']} | atlas 2048^2 color/normal/mask/emission, {len(FA.TILES)} tiles | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
+    log_line(f"OK {entry['key']} | atlas 2048^2 color/normal/mask/emission, {len(FA.TILE_SETS[entry.get("set", "earth")])} tiles | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
 
 
 def do_asset(entry, preview):

@@ -33,12 +33,24 @@ TILES = [
     ("grass_dry",    {"recipe": "soil", "dark": [150, 132, 82], "light": [196, 178, 112], "pebble_thresh": 3.0}, 0.2),
     ("spare",        {"recipe": "soil", "dark": [100, 100, 100], "light": [120, 120, 120], "pebble_thresh": 3.0}, 0.2),
 ]
+MARS_TILES = [   # B-089 Mars set (v1 Mars recipes)
+    ("rock_rust",   {"recipe": "stone", "dark": [120, 74, 54], "light": [172, 112, 80], "crack_col": [80, 46, 34], "crack_k": 0.5}, 0.2),
+    ("rock_basalt", {"recipe": "stone", "dark": [52, 46, 44], "light": [96, 84, 78], "crack_col": [34, 30, 29], "crack_k": 0.5, "pits": True}, 0.25),
+    ("regolith",    {"recipe": "soil", "dark": [128, 66, 42], "light": [190, 112, 76], "pebble_light": [176, 128, 98], "pebble_dark": [62, 50, 46], "pebble_thresh": 1.9}, 0.15),
+    ("hematite",    {"recipe": "soil", "dark": [84, 44, 38], "light": [132, 70, 56], "pebble_light": [150, 140, 142], "pebble_size": 4, "pebble_thresh": 1.4}, 0.35),
+    ("ice",         {"recipe": "stone", "dark": [196, 212, 226], "light": [238, 243, 248], "crack_col": [150, 180, 205], "crack_k": 0.6}, 0.6),
+    ("ice_dirty",   {"recipe": "stone", "dark": [190, 170, 160], "light": [232, 222, 214], "crack_col": [150, 110, 90], "crack_k": 0.5}, 0.45),
+    ("dust_bush",   {"recipe": "stone", "dark": [96, 66, 50], "light": [150, 110, 82], "crack_col": [60, 40, 30], "crack_k": 0.7}, 0.1),
+    ("lavatube",    {"recipe": "stone", "dark": [36, 30, 30], "light": [72, 60, 58], "crack_col": [20, 18, 18], "crack_k": 0.6, "pits": True}, 0.45),
+]
+TILE_SETS = {"earth": TILES, "mars": MARS_TILES}
+CURRENT = "earth"                                  # build_flora sets this while building a planet's set
 INDEX = {name: i for i, (name, _, _) in enumerate(TILES)}
 
 
 def tile_rect(name, inset=12):
     """UV rect (u0, v0, u1, v1) of a tile with an inset in px; UV v=0 is the BOTTOM (Blender)."""
-    i = INDEX[name]
+    i = [n for n, _, _ in TILE_SETS[CURRENT]].index(name)
     r, c = divmod(i, GRID)
     s = N * GRID
     u0 = (c * N + inset) / s
@@ -48,11 +60,11 @@ def tile_rect(name, inset=12):
     return u0, v0, u1, v1
 
 
-def build_atlas(seed=8501):
+def build_atlas(seed=8501, tiles=TILES):
     S = N * GRID
     out = {m: np.zeros((S, S, 4), np.float32) for m in ("color", "normal", "mask", "emission")}
     out["emission"][..., 3] = 1
-    for i, (name, spec, smooth) in enumerate(TILES):
+    for i, (name, spec, smooth) in enumerate(tiles):
         face = G3.make_face(spec, seed + i, smooth, 0.4)
         r, c = divmod(i, GRID)
         ys, xs = slice(r * N, (r + 1) * N), slice(c * N, (c + 1) * N)
@@ -65,9 +77,10 @@ def build_atlas(seed=8501):
 
 
 def export_atlas(entry, art_dir):
-    d = os.path.join(art_dir, "props", "earth_flora")
+    _, name, _ = entry["key"].split("/")                 # props/earth_flora/atlas, props/mars_flora/atlas
+    d = os.path.join(art_dir, "props", name)
     os.makedirs(d, exist_ok=True)
-    maps = build_atlas(int(entry.get("seed", 8501)))
+    maps = build_atlas(int(entry.get("seed", 8501)), TILE_SETS[entry.get("set", "earth")])
     paths = {}
     for m, a in maps.items():
         p = os.path.join(d, f"atlas_{m}.png")

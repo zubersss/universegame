@@ -27,18 +27,18 @@ DEFAULT_OUT = os.path.join(os.path.dirname(HERE), "sources", "props", "earth_flo
 ART = os.path.join(os.path.dirname(os.path.dirname(HERE)), "Assets", "_Game", "Art", "props", "earth_flora")
 
 
-def atlas_material():
-    m = bpy.data.materials.new("earth_flora_atlas")
+def atlas_material(art=ART, name="earth_flora_atlas"):
+    m = bpy.data.materials.new(name)
     m.use_nodes = True
     nt = m.node_tree
     pr = nt.nodes["Principled BSDF"]
     pr.inputs["Roughness"].default_value = 0.8
-    cpath = os.path.join(ART, "atlas_color.png")
+    cpath = os.path.join(art, "atlas_color.png")
     if os.path.isfile(cpath):
         t = nt.nodes.new("ShaderNodeTexImage")
         t.image = bpy.data.images.load(cpath, check_existing=True)
         nt.links.new(t.outputs["Color"], pr.inputs["Base Color"])
-        npath = os.path.join(ART, "atlas_normal.png")
+        npath = os.path.join(art, "atlas_normal.png")
         if os.path.isfile(npath):
             n = nt.nodes.new("ShaderNodeTexImage")
             n.image = bpy.data.images.load(npath, check_existing=True)
@@ -276,6 +276,96 @@ def build(out_path=DEFAULT_OUT):
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     bpy.ops.wm.save_as_mainfile(filepath=out_path, compress=True)
     print("MERIDIAN built", out_path)
+
+
+# ---------------------------------------------------------------- B-089 Mars set
+MARS_OUT = os.path.join(os.path.dirname(HERE), "sources", "props", "mars_flora.blend")
+MARS_ART = os.path.join(os.path.dirname(ART), "mars_flora")
+
+
+def ice_chunk(coll, tile, size, seed):
+    """v2: faceted ice (flat-shaded cleavage planes, as the B-059 ring ice v2)."""
+    ob = finish(blob(coll, 1.0, (0, 0, size[2] * 0.5), size, 2, seed=seed, rough=0.45), tile, "sph", lambda f, z: 0.0)
+    for p in ob.data.polygons:
+        p.use_smooth = False
+    return ob
+
+
+def dust_bush(coll, rnd):
+    """Dead, wiry dust bush (fictional Mars xerophyte husk), v2: denser and thicker so it reads
+    at 60 px/m: 14 main stems with forked tips over a low woody crown."""
+    finish(blob(coll, 0.18, (0, 0, 0.08), (1.4, 1.4, 0.6), 1, seed=70, rough=0.3), "dust_bush", "sph", lambda f, z: 0.1)
+    for k in range(14):
+        b, tip = branch(coll, (rnd.uniform(-0.12, 0.12), rnd.uniform(-0.12, 0.12), 0.08), rnd.uniform(0.45, 0.9), 0.05,
+                        rnd.uniform(0, 2 * math.pi), rnd.uniform(0.3, 1.15), sides=5)
+        finish(b, "dust_bush", "cyl", lambda f, z: 0.2 + 0.4 * f)
+        for j in range(2):
+            b2, _ = branch(coll, tip, rnd.uniform(0.2, 0.4), 0.025, rnd.uniform(0, 2 * math.pi), rnd.uniform(0.0, 0.9), sides=4)
+            finish(b2, "dust_bush", "cyl", lambda f, z: 0.6)
+
+
+def _drip_column(coll, rnd, z_sign, height, r0):
+    """Lava-tube dripstone: 4 stacked, slightly offset, tapering lumpy tiers plus ring bulges,
+    growing from the origin along z_sign (+1 floor, -1 ceiling)."""
+    zc, r = 0.0, r0
+    for k in range(4):
+        h = height * (0.34 - 0.06 * k)
+        dx, dy = rnd.uniform(-0.04, 0.04), rnd.uniform(-0.04, 0.04)
+        ob = cyl(coll, r, r * 0.62, h, (dx, dy, z_sign * (zc + h / 2)), 12)
+        if z_sign < 0:
+            ob.rotation_euler = (math.pi, 0, 0)
+        finish(ob, "lavatube", "cyl", lambda f, z: 0.0)
+        finish(blob(coll, r * 0.95, (dx, dy, z_sign * (zc + h * 0.1)), (1, 1, 0.45), 1, seed=80 + k, rough=0.2),
+               "lavatube", "sph", lambda f, z: 0.0)
+        zc += h
+        r *= 0.62
+    tip = cyl(coll, r, 0.0, height * 0.12, (0, 0, z_sign * (zc + height * 0.06)), 8)
+    if z_sign < 0:
+        tip.rotation_euler = (math.pi, 0, 0)
+    finish(tip, "lavatube", "cyl", lambda f, z: 0.0)
+
+
+def stalactite(coll, rnd):
+    """Hangs from its origin (the ceiling) down to about -1.6 m."""
+    _drip_column(coll, rnd, -1, 1.6, 0.34)
+
+
+def stalagmite(coll, rnd):
+    _drip_column(coll, rnd, +1, 1.4, 0.42)
+
+
+MARS_FLORA = {
+    "boulder_a": lambda c, r: rock(c, r, "rock_rust", (1.2, 1.0, 0.85), 60),
+    "boulder_b": lambda c, r: rock(c, r, "rock_basalt", (1.8, 1.3, 1.1), 61),
+    "boulder_c": lambda c, r: rock(c, r, "rock_rust", (0.9, 0.85, 1.2), 62),
+    "rock_a": lambda c, r: rock(c, r, "regolith", (0.5, 0.4, 0.25), 63),
+    "rock_b": lambda c, r: rock(c, r, "hematite", (0.35, 0.3, 0.22), 64),
+    "ice_a": lambda c, r: ice_chunk(c, "ice", (0.9, 0.7, 0.6), 65),
+    "ice_b": lambda c, r: ice_chunk(c, "ice_dirty", (1.4, 1.0, 0.7), 66),
+    "dust_bush": dust_bush, "stalactite": stalactite, "stalagmite": stalagmite,
+}
+
+
+def build_mars(out_path=MARS_OUT):
+    FA.CURRENT = "mars"
+    try:
+        bpy.ops.wm.read_factory_settings(use_empty=True)
+        scene = bpy.context.scene
+        mat = atlas_material(MARS_ART, "mars_flora_atlas")
+        report = []
+        for name, fn in MARS_FLORA.items():
+            coll = bpy.data.collections.new(f"flora_{name}")
+            scene.collection.children.link(coll)
+            fn(coll, random.Random(zlib.crc32(name.encode())))
+            ob = join(coll, name, mat)
+            ob.data.calc_loop_triangles()
+            report.append(f"{name} {len(ob.data.loop_triangles)}")
+        print("MERIDIAN flora tris:", ", ".join(report))
+        os.makedirs(os.path.dirname(out_path), exist_ok=True)
+        bpy.ops.wm.save_as_mainfile(filepath=out_path, compress=True)
+        print("MERIDIAN built", out_path)
+    finally:
+        FA.CURRENT = "earth"
 
 
 if __name__ == "__main__":
