@@ -993,3 +993,6 @@ Queues: UNITY Ready with deps met was 2 → added U-081 (Mars in 3D), U-083 (int
 ## Cycle 200 · 2026-11-02 03:5x (BLENDER message)
 Checked: review_creatures_mercury_flarewing.png, review_creatures_venus_acidmoth.png (stamped 03:48–03:52). B-093 art accepted; Done on R3's lit preview. B-095 → In Progress. Owner note: usage is tight (12 % weekly on the workers' pool); workers asked to move to Fable; LEAD messages reduced to essentials from here.
 
+
+## Cycle 201 · 2026-11-02 04:1x
+No hand-offs to review. UNITY: U-076 first pass written (2f087e5: ModelSwap for props/pieces/ship, 2 m pad modules under a 4 m collider, lamp at socket_light, door clip; DepthBandsTests), check running. BLENDER: B-095 rendering (heavy_blender 04:11). No signals; free RAM 1.75 GB. Queues: UNITY U-078/U-079/U-081/U-083/U-084 Ready (5); BLENDER B-092/B-097..B-100 Ready (5).
