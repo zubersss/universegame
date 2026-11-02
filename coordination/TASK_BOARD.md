@@ -929,7 +929,7 @@ Goal: Jupiter column art completion (Bible §7.6): backgrounds/jupiter_deck2 (am
 Accept: same pipeline rules (§9, tiling, painted cloud banks per B-048), stamped reviews; deck colours read as getting darker and warmer with depth.
 Files: blender/scripts/gen_backdrop*.py, gen_terrain.py, build_props_jupiter.py, Assets/_Game/Art/backgrounds/jupiter_*/, terrain/jupiter/, props/jupiter/
 Depends: B-048
-Lead notes: Cycle 138. Start once U-061 shows the column in game (or now if idle; deck 2–3 backdrops are safe to start).
+Lead notes: Cycle 156: backdrops (deck2/3, deep), floe_derelict, derelict_pod and beacon_vault accepted (contact sheets checked; ppu 92 for the husk per D-018 is fine). FAIL husk_tortoise, Art matches §1/§9 (realistic look, and §7.5 says a creature husk): it reads as a live cartoon tortoise (open eye, upright head, rounded legs, toy-like bumps). Fix: a dead husk. No eye (a dark empty socket), head slumped down and partly hidden, legs withered and tucked or gone, shell plates cracked with one or two missing, ammonia rime in the cracks, darker and desaturated cream/rust, and a flat, readable walkable top line. Then re-render husk_tortoise only and mark Ready.
 
 ### B-056 · BLENDER · Ready · M4
 Goal: Jupiter creatures (Bible §7.6): `creatures/jupiter/stormglider` (manta floater, flier clip set), `lightning_eel` (electric, Deck 2, cyan-white emissive along the body), `belt_wasp` (small radiation-adapted swarm unit, 128 px), `ballast_tortoise` (huge slow floater; its dead pose must read as a standable platform; match B-055's husk_tortoise silhouette).

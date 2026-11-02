@@ -825,3 +825,6 @@ Checked: tests 21:14–21:15 (EditMode 223/223, PlayMode 91/110 + LeadQA 3/3, 0 
 Moved: U-060 → In Progress. Decided: D-058 (P-28: Editor memory rows are Info; Mars entry 1.53 s still a failure). U-064 closes when the U-060 smoke shows the Mars shelter night shot.
 Queue: UNITY U-061, U-063, U-066, U-067, U-070, U-071 Ready; BLENDER B-056, B-059, B-060, B-062, B-063. Free RAM 0.77 GB during UNITY's profile.
 
+## Cycle 156 · 2026-11-01 22:1x (BLENDER message)
+Checked: props__jupiter__{husk_tortoise,derelict_pod,beacon_vault}_contact.png (89e88b1, 27d8a24). Pod and vault read right (riveted cream hull, rust band, red/amber emissive marker; vault mast beacon and door strip). Husk FAIL (Art matches §1/§9/§7.5): it reads as a live cartoon tortoise, not a husk. B-055 stays In Progress with an exact fix list. B-062/B-063 exported (numpy_only, peaks 681–688 MB), stamped reviews wait for memory; review them next cycle.
+
