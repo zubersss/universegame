@@ -20,6 +20,8 @@ namespace Meridian.Rendering
         /// <summary>U-072 (Bible 2.0 §10.5): URP/Lit for 3D models and placeholder meshes; the emissive variant has emission on.</summary>
         public Material meshLit;
         public Material meshLitEmissive;
+        /// <summary>U-073: MERIDIAN/TerrainBlocks (block mesh, Texture2DArray per planet); referenced here so builds keep the shader.</summary>
+        public Material terrainBlocks;
         public List<string> emissiveKeys = new List<string>();
         /// <summary>Animation clips of frame sheets (U-032), copied from each sheet's .json by ArtImporter.</summary>
         public List<ArtClipSet> clipSets = new List<ArtClipSet>();

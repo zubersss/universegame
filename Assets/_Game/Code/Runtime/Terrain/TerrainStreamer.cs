@@ -14,7 +14,7 @@ namespace Meridian.Terrain
     /// the main thread within 2 ms per frame, only chunks within 2 of the camera resident, others
     /// pooled. The world wraps in x.
     /// </summary>
-    public sealed class TerrainStreamer : MonoBehaviour
+    public sealed class TerrainStreamer : MonoBehaviour, TerrainChunk.IBlockWorld
     {
         const int C = TerrainConstants.ChunkSize, R = TerrainConstants.ResidentRadius;
 
@@ -80,8 +80,26 @@ namespace Meridian.Terrain
             // Pre-warm the pool at load so streaming never pays for GameObject creation.
             int needed = (2 * R + 1) * (2 * R + 1) + 2 * R + 1;
             while (pool.Count + resident.Count < needed) pool.Push(TerrainChunk.Create(transform));
+            // U-073: block meshes with the planet's palette (one shared material instance per streamer).
+            var reg = Meridian.Rendering.ArtMaterials.Active;
+            if (blockMaterial == null && reg != null && reg.terrainBlocks != null) blockMaterial = new Material(reg.terrainBlocks) { name = "Terrain_Blocks (planet)" };
+            if (blockMaterial != null) blockMaterial.SetTexture(BlockArrayId, TerrainBlockPalette.For(config.id));
+            foreach (var c in pool) c.UseBlocks(this, blockMaterial);
+            foreach (var c in resident.Values) c.UseBlocks(this, blockMaterial);
             started = true;
         }
+
+        // ---------- U-073: the world as the block mesher sees it ----------
+        static readonly int BlockArrayId = Shader.PropertyToID("_BlockArray");
+        Material blockMaterial;
+
+        /// <summary>The planet's block material (tests, captures).</summary>
+        public Material BlockMaterial => blockMaterial;
+
+        byte TerrainChunk.IBlockWorld.TileAt(int x, int y) => GetTile(x, y);
+
+        int TerrainChunk.IBlockWorld.WallTop(int x) =>
+            Config != null && Config.worldType == WorldType.Solid ? BaseGenerator.SurfaceHeight(WrapX(x)) : int.MinValue;
 
         public static IEnumerable<byte> MaterialsFor(PlanetId id) => id switch
         {
@@ -202,7 +220,8 @@ namespace Meridian.Terrain
                 }
                 pending.Remove(key);
                 if (!Wanted(b.cx, b.cy) || resident.ContainsKey(key)) { ChunkBuffer.Return(b); continue; }
-                inProgressChunk = pool.Count > 0 ? pool.Pop() : TerrainChunk.Create(transform);
+                if (pool.Count > 0) inProgressChunk = pool.Pop();
+                else { inProgressChunk = TerrainChunk.Create(transform); inProgressChunk.UseBlocks(this, blockMaterial); }
                 inProgressChunk.Begin(b);
                 resident[key] = inProgressChunk;
                 inProgress = b;

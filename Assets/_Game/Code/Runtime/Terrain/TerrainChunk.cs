@@ -17,6 +17,72 @@ namespace Meridian.Terrain
         CompositeCollider2D composite;
         TilemapCollider2D tileCollider;
 
+        // ---------- U-073 block mesh (Bible 2.0 §10.4): the Tilemap stays as collision and data, renderer off ----------
+
+        /// <summary>What the mesher needs from the world beyond this chunk (implemented by TerrainStreamer).</summary>
+        public interface IBlockWorld
+        {
+            /// <summary>Tile at world (x, y), edits included; x unwrapped; Air outside the world's height.</summary>
+            byte TileAt(int x, int y);
+            /// <summary>Highest world y that gets back wall in column x (the original surface); int.MinValue = none.</summary>
+            int WallTop(int x);
+        }
+
+        /// <summary>When true the block mesh renders and the tilemap renderer is off (the 3D view).</summary>
+        public static bool BlocksEnabled = true;
+
+        readonly byte[] ids = new byte[TerrainConstants.ChunkSize * TerrainConstants.ChunkSize];
+        IBlockWorld world;
+        MeshRenderer blockRenderer;
+        Mesh blockMesh;
+        System.Func<int, int, byte> outsideFn;
+        System.Func<int, int> wallFn;
+        static BlockMesher.Buffers buffers; // main thread only
+        /// <summary>Quads in the current block mesh (tests, budget rows).</summary>
+        public int BlockQuads { get; private set; }
+        /// <summary>The last block rebuild's main-thread cost (ms).</summary>
+        public static double LastBuildMs { get; private set; }
+
+        public byte LocalTile(int lx, int ly) => ids[ly * TerrainConstants.ChunkSize + lx];
+
+        /// <summary>Hooks the chunk to its world and the planet's block material (streamer, on Begin).</summary>
+        public void UseBlocks(IBlockWorld w, Material material)
+        {
+            world = w;
+            if (blockRenderer != null) blockRenderer.sharedMaterial = material;
+            var sr = GetComponent<TilemapRenderer>();
+            bool on = BlocksEnabled && material != null;
+            if (sr != null) sr.enabled = !on;
+            if (blockRenderer != null) blockRenderer.enabled = on;
+        }
+
+        bool filled;
+
+        void BuildBlocks()
+        {
+            if (blockRenderer == null || !blockRenderer.enabled) return;
+            if (!filled) { blockMesh.Clear(); BlockQuads = 0; return; } // pooled/cleared: nothing to show
+            const int C = TerrainConstants.ChunkSize;
+            buffers ??= new BlockMesher.Buffers();
+            outsideFn ??= (lx, ly) => world != null ? world.TileAt(cx * C + lx, cy * C + ly) : TileId.Air;
+            wallFn ??= lx =>
+            {
+                if (world == null) return -1;
+                int top = world.WallTop(cx * C + lx);
+                return top == int.MinValue ? -1 : top - cy * C;
+            };
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            BlockMesher.Build(ids, outsideFn, wallFn, cx * C, cy * C, buffers);
+            blockMesh.Clear();
+            blockMesh.SetVertices(buffers.vertices);
+            blockMesh.SetNormals(buffers.normals);
+            blockMesh.SetUVs(0, buffers.uv);
+            blockMesh.SetTriangles(buffers.triangles, 0, false);
+            blockMesh.bounds = new Bounds(new Vector3(C * 0.5f, C * 0.5f, 0.25f), new Vector3(C, C, BlockMesher.BackWallZ - BlockMesher.FrontZ + 0.5f));
+            BlockQuads = buffers.Quads;
+            LastBuildMs = watch.Elapsed.TotalMilliseconds;
+        }
+
         // Allocating the full 32×32 up front keeps SetTilesBlock from growing bounds mid-stream.
         static void FixBounds(Tilemap map)
         {
@@ -32,6 +98,7 @@ namespace Meridian.Terrain
             // collider is built from stale shapes and bodies can fall through fresh ground.
             tileCollider.ProcessTilemapChanges();
             composite.GenerateGeometry();
+            BuildBlocks(); // U-073: the block mesh follows every finished stream and every edit, in the same frame
         }
 
         public static TerrainChunk Create(Transform parent)
@@ -68,6 +135,17 @@ namespace Meridian.Terrain
             // See-through water (U-037): the backdrop behind it darkens with depth and the seabed stays visible.
             chunk.liquid.color = new Color(1f, 1f, 1f, WaterAlpha);
             FixBounds(chunk.liquid);
+
+            // U-073: the block mesh renderer (material and world come from the streamer via UseBlocks).
+            var blocksGo = new GameObject("Blocks");
+            blocksGo.transform.SetParent(go.transform, false);
+            chunk.blockMesh = new Mesh { name = "ChunkBlocks" };
+            chunk.blockMesh.MarkDynamic();
+            blocksGo.AddComponent<MeshFilter>().sharedMesh = chunk.blockMesh;
+            chunk.blockRenderer = blocksGo.AddComponent<MeshRenderer>();
+            chunk.blockRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+            chunk.blockRenderer.receiveShadows = true;
+            chunk.blockRenderer.enabled = false;
             return chunk;
         }
 
@@ -78,6 +156,7 @@ namespace Meridian.Terrain
         {
             cx = data.cx; cy = data.cy;
             transform.localPosition = new Vector3(cx * TerrainConstants.ChunkSize, cy * TerrainConstants.ChunkSize, 0f);
+            filled = true;
         }
 
         /// <summary>Writes rows [row, row + RowsPerStep) into the tilemaps. Scratch arrays (RowsPerStep × 32) are the caller's.</summary>
@@ -88,6 +167,7 @@ namespace Meridian.Terrain
             for (int i = 0; i < RowsPerStep * C; i++)
             {
                 byte id = data.ids[start + i];
+                ids[start + i] = id; // U-073: the mesher's copy (same row-major layout)
                 int wx = ((data.cx * C + i % C) % worldWidth + worldWidth) % worldWidth;
                 var tile = id == TileId.Air ? null : set.Get(id, data.blob[start + i], wx, data.cy * C + row + i / C);
                 bool isLiquid = TileId.IsLiquid(id);
@@ -104,6 +184,7 @@ namespace Meridian.Terrain
         {
             var p = new Vector3Int(lx, ly, 0);
             bool isLiquid = TileId.IsLiquid(id);
+            ids[ly * TerrainConstants.ChunkSize + lx] = id; // U-073
             solid.SetTile(p, isLiquid ? null : tile);
             liquid.SetTile(p, isLiquid ? tile : null);
         }
@@ -112,6 +193,8 @@ namespace Meridian.Terrain
         {
             solid.ClearAllTiles();
             liquid.ClearAllTiles();
+            System.Array.Clear(ids, 0, ids.Length); // U-073: empty mesh until the next stream
+            filled = false;
             FixBounds(solid);
             FixBounds(liquid);
             FinishCollision();

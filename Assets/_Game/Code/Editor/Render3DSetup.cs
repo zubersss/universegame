@@ -50,12 +50,31 @@ namespace Meridian.EditorTools
             {
                 reg.meshLit = LitMaterial("Mesh_Lit", false);
                 reg.meshLitEmissive = LitMaterial("Mesh_LitEmissive", true);
+                reg.terrainBlocks = TerrainBlocksMaterial();
                 EditorUtility.SetDirty(reg);
             }
             else Debug.LogError("[MERIDIAN] Render3DSetup: no ArtMaterials registry");
 
             AssetDatabase.SaveAssets();
             Debug.Log($"[MERIDIAN] Render3DSetup: {UrpPath} → {RendererPath} ({data.renderingMode}), HDR {urp.supportsHDR}, cascades {urp.shadowCascadeCount}, shadow distance {urp.shadowDistance}; registry meshLit {(reg != null && reg.meshLit != null)}");
+        }
+
+        /// <summary>U-073: the block mesh material (the per-planet Texture2DArray is set at runtime).</summary>
+        static Material TerrainBlocksMaterial()
+        {
+            var path = $"{MatDir}/Terrain_Blocks.mat";
+            var m = AssetDatabase.LoadAssetAtPath<Material>(path);
+            var shader = Shader.Find("MERIDIAN/TerrainBlocks");
+            if (shader == null) { Debug.LogError("[MERIDIAN] Render3DSetup: shader MERIDIAN/TerrainBlocks not found"); return null; }
+            if (m == null)
+            {
+                m = new Material(shader) { name = "Terrain_Blocks" };
+                AssetDatabase.CreateAsset(m, path);
+            }
+            else m.shader = shader;
+            m.enableInstancing = false;
+            EditorUtility.SetDirty(m);
+            return m;
         }
 
         static Material LitMaterial(string name, bool emissive)
