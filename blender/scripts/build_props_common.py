@@ -246,6 +246,92 @@ def build(out_path=DEFAULT_OUT):
     print("MERIDIAN built", out_path)
 
 
+# ---------------------------------------------------------------- contract v2 models (B-081)
+MODEL_OUT = os.path.join(os.path.dirname(HERE), "sources", "props", "common_model.blend")
+
+
+def landing_pad_v2(c, M):
+    """2.0 m pad module (x -1..1), 3 m deep (the Pilgrim's feet sit 1.2 m off centre in depth);
+    identical ends, so modules tile at a 2 m pitch (two modules = 4 m for the Pilgrim's 3.52 m
+    gear footprint)."""
+    box("deck", (0, 0, 0.27), (2.0, 3.0, 0.16), c, M["deck"], bevel=0.0)
+    for x in (-0.5, 0.5):
+        box(f"leg_{x}", (x, 0, 0.1), (0.18, 2.8, 0.2), c, M["dark"], bevel=0.02)
+    for k in range(10):                               # hazard edge on the front face (period 0.2 m divides 2 m)
+        box(f"chev_{k}", (-0.9 + k * 0.2, -1.505, 0.27), (0.1, 0.01, 0.12), c, M["yellow" if k % 2 == 0 else "black"], bevel=0)
+    for x in (-0.5, 0.5):
+        box(f"edge_light_{x}", (x, -1.51, 0.36), (0.12, 0.02, 0.04), c, M["amber"], bevel=0.005)
+    for k in range(5):                                # deck plates seams across, also 0.4 m pitch
+        box(f"seam_{k}", (-0.8 + 0.4 * k, 0, 0.352), (0.02, 2.9, 0.006), c, M["dark"], bevel=0)
+
+
+def shelter_door_v2(c, M):
+    """Door frame on `root`, leaf on `door`; clip `open` (18 frames): the leaf slides +X behind
+    the right post."""
+    import math as _m
+    from mathutils import Vector
+    shelter_door(c, M)
+    ad = bpy.data.armatures.new("door_rig")
+    rig = bpy.data.objects.new("door_rig", ad)
+    c.objects.link(rig)
+    for o in bpy.context.view_layer.objects:
+        o.select_set(False)
+    bpy.context.view_layer.objects.active = rig
+    rig.select_set(True)
+    bpy.ops.object.mode_set(mode="EDIT")
+    r = ad.edit_bones.new("root")
+    r.head, r.tail = Vector((0, 0, 0)), Vector((0, 0, 0.5))
+    d = ad.edit_bones.new("door")
+    d.head, d.tail, d.parent = Vector((0, 0, 0)), Vector((0, 0, 0.5)), r
+    bpy.ops.object.mode_set(mode="OBJECT")
+    bpy.context.view_layer.update()
+    for ob in list(c.objects):
+        if ob.type != "MESH":
+            continue
+        bone = "door" if ob.name in ("door", "window", "kick", "handle") or ob.name.startswith(("door", "window", "kick", "handle")) else "root"
+        mw = ob.matrix_world.copy()
+        ob.parent, ob.parent_type, ob.parent_bone = rig, "BONE", bone
+        bpy.context.view_layer.update()
+        ob.matrix_world = mw
+    rig.animation_data_create()
+    act = bpy.data.actions.new("open")
+    act.use_fake_user = True
+    rig.animation_data.action = act
+    pb = rig.pose.bones["door"]
+    for f, k in ((1, 0.0), (4, 0.08), (15, 0.92), (19, 1.0)):     # ease in/out over 18 frames
+        pb.location = (0.96 * k, 0.0, 0.0)                         # bone-local X = world X
+        pb.keyframe_insert("location", frame=f)
+    rig.animation_data.action = None
+    rig.animation_data.action = act
+
+
+def lamp_v2(c, M):
+    lamp(c, M)
+    s = bpy.data.objects.new("socket_light", None)
+    s.empty_display_size = 0.05
+    c.objects.link(s)
+    s.location = (0.14, 0.0, 1.93)                    # at the bulb, Unity hangs a spot light here
+
+
+MODEL_PROPS = {"landing_pad": landing_pad_v2, "shelter_wall": shelter_wall, "shelter_door": shelter_door_v2,
+               "smelter": smelter, "storage_crate": storage_crate, "lamp": lamp_v2}
+
+
+def build_model(out_path=MODEL_OUT):
+    """Contract v2 props batch 1 (B-081): one collection per prop, real scale, base at z = 0."""
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    scene = bpy.context.scene
+    scene.render.fps = 30
+    for name, fn in MODEL_PROPS.items():
+        coll = bpy.data.collections.new(f"prop_{name}")
+        scene.collection.children.link(coll)
+        fn(coll, materials(0.1 if name in INTERACTABLE else 0.0))
+    scene.frame_start, scene.frame_end = 1, 19
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    bpy.ops.wm.save_as_mainfile(filepath=out_path, compress=True)
+    print("MERIDIAN built", out_path)
+
+
 if __name__ == "__main__":
     args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     build(args[0] if args else DEFAULT_OUT)
