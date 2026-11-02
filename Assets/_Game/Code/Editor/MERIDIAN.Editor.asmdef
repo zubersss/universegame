@@ -6,6 +6,7 @@
         "Unity.InputSystem",
         "Unity.Addressables",
         "Unity.Addressables.Editor",
+        "Unity.ScriptableBuildPipeline.Editor",
         "Unity.ResourceManager",
         "Unity.RenderPipelines.Core.Runtime",
         "Unity.RenderPipelines.Universal.Runtime",

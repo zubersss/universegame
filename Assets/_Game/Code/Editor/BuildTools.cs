@@ -57,6 +57,9 @@ namespace Meridian.EditorTools
                 // U-060 (LEAD cycle 157): a clean content build every time, so the player never ships stale bundles.
                 var started = DateTime.Now;
                 AddressableAssetSettings.CleanPlayerContent(aa.ActivePlayerDataBuilder);
+                // The build cache copies unchanged bundles with their old timestamps; purge it so every bundle is
+                // rebuilt from the current imports (and the freshness check below means something).
+                UnityEditor.Build.Pipeline.Utilities.BuildCache.PurgeCache(false);
                 AddressableAssetSettings.BuildPlayerContent(out var aaResult);
                 if (!string.IsNullOrEmpty(aaResult.Error))
                 {
