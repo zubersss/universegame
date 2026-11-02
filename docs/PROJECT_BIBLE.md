@@ -1,7 +1,7 @@
 # MERIDIAN — Project Bible (single source of truth)
 
 Owner: LEAD. Workers read; only LEAD edits. Changes are logged in `coordination/DECISIONS.md`.
-Version: 2.0 (3D rehaul, D-062, 2026-11-02: §5.1 camera, §9, §10.1, §10.4–10.6, §11.1 rows, §12 R-milestones). Earlier numbers and designs are unchanged. The Lead bumps the version on every edit.
+Version: 2.1 (D-064 camera rail; 2.0 = 3D rehaul, D-062, 2026-11-02: §5.1 camera, §9, §10.1, §10.4–10.6, §11.1 rows, §12 R-milestones). Earlier numbers and designs are unchanged. The Lead bumps the version on every edit.
 
 Sections: 1 Vision · 2 Setting and story · 3 The solar system in game · 4 Physics and
 numbers · 5 Views and transitions · 6 Controls · 7 The eight planets · 8 Systems →
@@ -496,8 +496,8 @@ exists to be looked at, not walked into.
 
 ### 10.1 Stack
 Unity 6 LTS (exact build pinned in §12), URP with the **Universal (3D) Renderer, Forward+**,
-Input System, Addressables, Unity Test Framework, Cinemachine (3D follow on a side rail),
-TextMeshPro. Physics stays **Physics2D** on the x–y plane. Blender LTS (pinned in §12): models
+Input System, Addressables, Unity Test Framework, `CameraFollow` on a perspective side rail
+(FOV 35°, z = −28.5 m for 60 px/m; D-064; Cinemachine not required), TextMeshPro. Physics stays **Physics2D** on the x–y plane. Blender LTS (pinned in §12): models
 and rigs exported as glTF (`.glb`), textures baked in Cycles/Eevee, all scripted in Python.
 
 ### 10.2 Repo layout

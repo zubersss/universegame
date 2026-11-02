@@ -109,12 +109,12 @@ Lead notes: Done (cycle 168): M3InnerTests 738fd43 passed twice (UNITY checks 23
 > **R1 (D-062).** 2D tasks U-061..U-071 are Superseded (their code and sources stay in the tree and
 > get reused). R-tasks below rebuild Earth in 3D while keeping every system.
 
-### U-072 · UNITY · Ready · R1
+### U-072 · UNITY · In Progress · R1
 Goal: 3D renderer and side-rail camera: switch the URP asset to the Universal (3D) Renderer with Forward+ (keep the 2D renderer asset in the project for the archive branch only); a perspective Cinemachine camera on a rail at z = −18 m, vertical FOV 35°, following the player on z = 0 with the current damping and look-ahead, giving ≈ 60 px/m at 1080p; Physics2D untouched; the HUD, panels and Space scene unchanged; `ArtMaterials` gains URP/Lit entries.
 Accept: Core, Space and PlanetSide load with no errors; M1LoopTests + SmokeTests pass; an EditMode test asserts the on-plane density (60 ± 3 px/m); a capture shows the terrain with depth (placeholder blocks).
 Files: Assets/_Game/Settings/, Code/Runtime/Camera/, Prefabs/
 Depends: —
-Lead notes: Cycle 171. R1. First; everything else builds on it.
+Lead notes: Cycle 171. R1. First; everything else builds on it. Cycle 173: D-064 ratifies P-29 (rail at z = −28.5 m for FOV 35° and 60 px/m; CameraFollow, no Cinemachine). In progress c70bfd8/b395a26, check running.
 
 ### U-073 · UNITY · Ready · R1
 Goal: Chunk block mesher (Bible §10.4 v2): `TerrainChunk` builds one greedy-meshed block mesh of 1 m cubes (exposed faces only, 1 m deep) with UVs into a per-planet `Texture2DArray` (top/side layer per tile material; flat placeholder colours until B-080); a back-wall quad; dig/place rebuilds only that chunk within the frame; the Tilemap stays for collision and data with its renderer off; `TerrainBlocks` shader (array textures, height blend between layers).

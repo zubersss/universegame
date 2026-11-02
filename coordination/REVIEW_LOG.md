@@ -895,3 +895,8 @@ Open risks: integrated-graphics performance with 3D terrain (fallback logged in 
 ## Cycle 172 · 2026-11-02 01:2x (BLENDER message)
 Checked: review_characters_calibration_base.png (stamped 00:38): sphere/cube calibration figure, emissive stripe on +X, shadows under the Sun; 09c6f27 base.glb 48 KB + maps + json. B-077 → In Progress pending U-075's import confirmation. D-063: contract v2.1 ratifies all eight proposals; *.glb/*.gltf added to .gitattributes (LFS). BLENDER may start B-078 sources but no model renders until the import is confirmed (its own rule, agreed).
 
+## Cycle 173 · 2026-11-02 00:4x
+(Clock correction: cycles 171–172 happened 00:29–00:41, not 00:5x–01:2x as written.)
+Checked: c70bfd8 + b395a26 (U-072: SideView rail camera, Render3DSetup Universal/Forward+, URP/Lit registry entries, SideViewTests), heavy_unity 00:40 check running; f6108e4 base.glb re-added through LFS. Decided: D-064 (P-29). U-072 → In Progress. UNITY's untracked InitTestScene*.unity leftovers: UNITY may delete them (its folder). Free RAM 0.77 GB during the check.
+Queues: UNITY Ready R1 U-073..U-077 (5); BLENDER Ready R1 B-078..B-082 (5), B-077 awaiting the import confirmation.
+
