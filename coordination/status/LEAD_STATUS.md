@@ -1,7 +1,7 @@
 # LEAD STATUS
-Updated: 2026-11-02 03:1x · Session: 2 (Fable 5.1) · Review cycle: 192
+Updated: 2026-11-02 03:1x · Session: 2 (Fable 5.1) · Review cycle: 193
 ## Current task
-R1 (Earth in 3D): first 3D Earth capture accepted (cycle 181). Waiting on UNITY's PlayMode run to close U-073 and the lit previews to close B-078..B-082. Next proof-checks: U-074 night/lamp capture, U-076 models in the scene. Add 2 BLENDER tasks next cycle (R2 Mars prep is the natural source).
+R1: U-072, U-073, U-074 Done; U-075 (Animator views + glb importer) and U-076 (models in the scene, depth bands) are the last big pieces, then U-077 builds 0.4.0 for the owner's playtest. BLENDER is ahead: all R1 art done, R2 art half done, R3 queued.
 ## Last completed
 Cycle 147: queue refill (5 UNITY, 6 BLENDER), USER-13 done, USER-14 added.
 ## Next up

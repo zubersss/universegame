@@ -123,12 +123,12 @@ Files: Assets/_Game/Code/Runtime/Terrain/, Shaders/
 Depends: U-072
 Lead notes: Done 7d76dbf + 105bffa (cycle 184): greedy block mesher, TerrainBlocks shader with B-080 arrays, D-067 fringe, back wall; chain 5: dig same frame, FootingTests and streaming green; captures earth_blocks_b080(_depth). The core-loop regression found in chain 4 was the pad placeholder card (8810845), tracked in the log.
 
-### U-074 · UNITY · In Progress · R1
+### U-074 · UNITY · Done · R1
 Goal: 3D lighting from `TimeSystem` (Bible §10.5 v2): one directional Sun (angle, colour, intensity per planet per §9 and D-030), per-planet ambient gradient, soft shadows (one cascade, 30 m), bloom; lamps, thrusters, vents become point lights (≤ 8 visible); distance fog per planet replaces the haze gradient; Light2D components removed.
 Accept: DayNightTests adapted (noon/midnight intensities per §9); night darkens the terrain; a lamp pools light on blocks and the back wall; BaseTests green; budgets.
 Files: Assets/_Game/Code/Runtime/Planet/Lighting/, Building/
 Depends: U-072
-Lead notes: Cycle 171. R1.
+Lead notes: Done 4c439ca + 61f1a58 + 8405680 + 179d35d (cycle 193): Sun3D + ambient from DayNightMath, lamp point lights (1.6 m off the faces, 8 m), per-planet exp² fog, bloom; DayNightTests.The3DSunAndAmbientFollowTheClock; EditMode 237/237, compile 0/0; u074_2026-11-02/mars_shelter_night_lamp.png: night-dark terrain and backdrop, warm pool on the regolith blocks. Placeholder cards still full-bright until U-075/U-076 (expected).
 
 ### U-075 · UNITY · In Progress · R1
 Goal: Model-based views: `CharacterView`/`CreatureView` drive an Animator with clips named exactly as the old sheet clips (contract §5 names), facing by a 180° yaw turn, hit flashes by material property; `ArtImporter` v5 imports `.glb` per contract §9 (materials from the four maps, clip names kept, address = key, placeholder retired); capsule/box placeholders until B-078/B-082; the hit/footing/interaction code unchanged.
@@ -1253,6 +1253,41 @@ Accept: tiles seamlessly; reads as the v1 materials under each planet's Sun in U
 Files: blender/scripts/gen_terrain.py, Assets/_Game/Art/terrain/{mercury,venus}/
 Depends: B-077
 Lead notes: Cycle 188. R3 prep; numpy-light.
+
+### B-092 · BLENDER · Ready · R3
+Goal: Mercury and Venus depth bands (as B-083/B-088): Mercury `ridge_mid` for day side, twilight band and night side (grey regolith crater rims, a violet-black sky skydome with the huge Sun on the day side; a night skydome with stars), Venus `ridge_mid` for the cloud deck (cloud-top masses as translucent planes, no ground) and the surface (black basalt plains with vent glows), skydomes orange-cream (deck) and dark orange (surface); shared `skyline_far` per planet.
+Accept: tiles seamlessly; reads as the v1 parallax from the side rail; stamped turntables; peaks measured.
+Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/{mercury,venus}_*/
+Depends: B-077
+Lead notes: Cycle 193. R3.
+
+### B-093 · BLENDER · Ready · R3
+Goal: Mercury and Venus creatures as models from the v1 sources (B-04x): every non-apex creature of `creatures/mercury/*` and `creatures/venus/*` (list them from the v1 manifest and log the list), size class per contract §9, full clip sets from the v1 rigs, emission where they glow.
+Accept: contract §9; stamped turntables; UNITY lit preview for Done.
+Files: blender/sources/creatures/{mercury,venus}/, build_creatures_mercury.py, build_creatures_venus.py, Assets/_Game/Art/creatures/{mercury,venus}/
+Depends: B-077
+Lead notes: Cycle 193. R3.
+
+### B-094 · BLENDER · Ready · R3
+Goal: Mercury and Venus apexes as models: `creatures/mercury/cinderhulk` (large class, lava-cracked back with emission that dims on the night side via a material float) and `creatures/venus/veil_serpent` (segmented ribbon: head, repeatable body, tail; translucent fins; a "chilled" white-flash state), LOD1 for both.
+Accept: contract §9; chained preview for the serpent; stamped turntables; UNITY lit preview for Done.
+Files: build_creatures_mercury.py, build_creatures_venus.py, Assets/_Game/Art/creatures/{mercury,venus}/
+Depends: B-093
+Lead notes: Cycle 193. R3.
+
+### B-095 · BLENDER · Ready · R3
+Goal: Mercury and Venus props and stations as models: flare shelter (dome + door clip), Mercury equipment locker, solarite crystal cluster (3 states: glowing, crusted, cut), the Venus station modules (deck module, hab, airlock arch, balloon cell, railing, vent harvester), aerostat pieces already covered by B-069 are re-made as models here too (aerostat_cell/deck/strut), the Mars/Earth Waystation surface pads if any.
+Accept: contract §9 (ppu/LOD rules); station modules tile at their v1 pitches; stamped turntables; UNITY lit preview for Done.
+Files: build_props_mercury.py, build_props_venus.py, build_props_common.py, Assets/_Game/Art/props/{mercury,venus,common}/
+Depends: B-077
+Lead notes: Cycle 193. R3.
+
+### B-096 · BLENDER · Ready · R3
+Goal: Wardens as models: `creatures/warden/sentinel` and `creatures/warden/hunter` (hovering drones, centred pivot, flier clip set, indigo running lights, a shield emitter), plus `fx/warden_bolt` as a billboard sheet is kept (2D fx stay 2D).
+Accept: contract §9; stamped turntables; UNITY lit preview for Done.
+Files: build_wardens.py, Assets/_Game/Art/creatures/warden/
+Depends: B-077
+Lead notes: Cycle 193. R3.
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.

@@ -967,3 +967,7 @@ Checked: review_backgrounds_mars_canyon_ridge_mid.png, _tharsis_skyline_far.png,
 ## Cycle 192 · 2026-11-02 03:1x (BLENDER message)
 Checked: review_props_space_waystation.png, review_planets_saturn_ring_mesh.png (stamped 03:05–03:07). B-090 art accepted; Done on U-078's Space capture. U-078 note added. B-089 → In Progress.
 
+## Cycle 193 · 2026-11-02 03:1x
+Checked: u074_2026-11-02/mars_shelter_night_lamp.png (night-dark blocks and backdrop, warm lamp pool on the regolith fronts; 2D placeholder cards full-bright as expected); tests_2026-11-02.md 02:54 EditMode 237/237 (the flora-atlas emission failure fixed in v8); compile 0/0. U-074 → Done. Chain 6 (full check + night re-capture) running. No signals; both roles commit every few minutes. Free RAM 1.73 GB.
+Queues: UNITY U-075 (next), U-076 (deps now met), U-078, U-079 Ready + U-080 active = 5. BLENDER: added B-092 (Mercury/Venus depth bands), B-093 (Mercury/Venus creatures), B-094 (Cinderhulk + Veil Serpent), B-095 (Mercury/Venus props + stations), B-096 (Wardens); Ready B-091..B-096 (6) + B-089 active.
+
