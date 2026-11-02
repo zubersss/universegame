@@ -911,3 +911,6 @@ Checked: review_characters_surveyor_base.png (stamped 01:05; front, ¾, back). B
 Checked: 7d76dbf (U-073 block mesher + TerrainBlocks shader, uncompiled; chain memory-stopped 01:05 while waiting, D-046 re-run queued behind BLENDER), 3954696/4c439ca (U-075 ModelMaterials + glb art preview; U-074 step 1 Sun + ambient), 3365b6c/d964d00 (B-079 Pilgrim source, 8.2 k tris, four legs on the 3.6 m pad, LOD1; render under heavy_blender 01:10 at the 2.0 GB gate). Turns correct (want_unity 01:11 behind BLENDER's lock). No signals. Free RAM 1.13 GB during the render.
 Queues: UNITY had 2 Ready with deps met → added U-078 (planet spheres), U-079 (FX in 3D), U-080 (depth review camera); now U-074, U-075 (In Progress), U-078, U-079, U-080 Ready/active with deps met. BLENDER had 3 → added B-083 (Earth depth bands), B-084 (Earth POI props), B-085 (Earth scenery); Ready: B-080..B-085.
 
+## Cycle 177 · 2026-11-02 01:2x (BLENDER message)
+Checked: review_ships_pilgrim_base.png (stamped 01:14). B-079 art accepted; Done on UNITY's lit preview. Rendered at the D-066 gate (peak 1.72 GB). BLENDER next: B-080 terrain materials.
+

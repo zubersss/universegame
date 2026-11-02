@@ -697,7 +697,7 @@ Goal: The Pilgrim as a model: `ships/pilgrim/base.glb` (12 m long), ≤ 15 k tri
 Accept: contract §9; stamped turntable; the landing-gear footprint matches the current landing_pad width.
 Files: blender/sources/ships/pilgrim.blend, build_pilgrim.py, Assets/_Game/Art/ships/pilgrim/
 Depends: B-077
-Lead notes: Cycle 171. R1.
+Lead notes: Cycle 177: art accepted on the stamped turntable (01:14): worn grey hull, hazard stripes, blue cockpit glass, emissive engine/portholes/nav lights; 8,220 tris + LOD1 3,944; four legs on a 3.52 m footprint (v1 skids were 7.4 m, too wide for the 3.6 m pad: a sensible change). Done once UNITY's lit preview is in.
 
 ### B-080 · BLENDER · Ready · R1
 Goal: Earth terrain block materials (contract §9 terrain row): for every Earth tile material in `EarthTileSet` (soil, grass-topped soil, stone, sand, clay, snow, ice, ores, wood…: list them from the tile set and log the list), a tileable `top` and `side` PBR set at 512², 2 m per repeat, plus `backwall`; derived from the v1 tile recipes.
