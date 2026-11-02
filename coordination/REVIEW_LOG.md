@@ -1008,3 +1008,7 @@ Queues: UNITY U-078/U-079/U-081/U-083/U-084 Ready (5) + U-076/U-080 active; BLEN
 ## Cycle 204 · 2026-11-02 12:1x (UNITY message)
 UNITY diagnosed the flat flora: the flora atlas PNGs exceed the 4 MB cap, ArtImporter rejected them, and Unity imported the normal map as an sRGB sprite. D-072 ratifies P-34 (model maps exempt from the byte cap; 2048² and the texture budget remain). UNITY: importer v10 + tests, re-shoot with D-071 applied → U-076 Done.
 
+## Cycle 205 · 2026-11-02 12:1x (BLENDER message)
+Memory gate closed for both roles since 11:58 with no heavy job: free RAM 0.99 GB; claude ×11 = 1.44 GB (15 h old), Memory Compression 0.92 GB, Chrome 0.16, Unity Hub 0.12. Same creep as USER-13. Posted USER-17 (close Chrome + Hub, restart the three windows with resume messages; BLENDER gets the standing D-046 sentence too). No D-045-style exception: the band export's peak (~1.55 GB) is above free RAM. Both workers: light work (sources, tests written, no heavy jobs) until the restart.
+LEAD resume point: cycle 205; R1 waits on U-076's flora re-shoot (D-072 applied) and U-077's 0.4.0 build; BLENDER on B-092 (sources committed, export pending) → B-094 → B-097. Milestone page at R1 close (memory: milestone-artifacts).
+

@@ -6,6 +6,15 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
+### USER-17 — Free memory: close two apps, then restart the three Claude windows (5 min)
+After 15 hours the three Claude sessions hold about 1.4 GB and the memory gate has been closed for both workers since 11:58 (free RAM ~1.0 GB, gate 1.5 GB). Nothing is lost by restarting; each session resumes from the repo.
+1. Close Chrome and quit Unity Hub (taskbar ^ arrow → right-click Unity Hub → Quit).
+2. In each of the three Claude windows type `/exit`, then `claude`, then paste:
+   - LEAD window: `Resume MERIDIAN as LEAD`, then `/loop 30m run a review cycle per your charter, keep both workers stocked, and tell me only if you need something from me`
+   - UNITY window: `Resume MERIDIAN as UNITY. From now on, if Claude Code stops one of your jobs for low memory, you may re-run it once after memory recovers.`
+   - BLENDER window: `Resume MERIDIAN as BLENDER. From now on, if Claude Code stops one of your jobs for low memory, you may re-run it once after memory recovers.`
+3. Tell the Lead "done: USER-17".
+
 ### USER-15 — Give BLENDER the same memory-restart permission UNITY has (1 min)
 When the laptop runs low on memory, Claude Code stops the running job and the BLENDER session waits for you to type permission before trying again. UNITY already has standing permission; BLENDER keeps asking you each time (21:34 and again around 00:00). Paste this into the **BLENDER window** exactly:
 
