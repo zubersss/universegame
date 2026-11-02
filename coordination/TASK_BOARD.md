@@ -1287,7 +1287,7 @@ Goal: Mercury and Venus creatures as models from the v1 sources (B-04x): every n
 Accept: contract §9; stamped turntables; UNITY lit preview for Done.
 Files: blender/sources/creatures/{mercury,venus}/, build_creatures_mercury.py, build_creatures_venus.py, Assets/_Game/Art/creatures/{mercury,venus}/
 Depends: B-077
-Lead notes: Cycle 193. R3.
+Lead notes: Cycle 200: art accepted on the turntables (flarewing, acidmoth checked; 8 species: Mercury glassback/cinderling/flarewing/shadewyrm, Venus sulfur_drifter/acidmoth/pressure_crab/vent_eel). Pipeline fixes: object animation baked to bones; merge keeps original coordinates. Done on R3's lit preview.
 
 ### B-094 · BLENDER · Ready · R3
 Goal: Mercury and Venus apexes as models: `creatures/mercury/cinderhulk` (large class, lava-cracked back with emission that dims on the night side via a material float) and `creatures/venus/veil_serpent` (segmented ribbon: head, repeatable body, tail; translucent fins; a "chilled" white-flash state), LOD1 for both.
@@ -1296,7 +1296,7 @@ Files: build_creatures_mercury.py, build_creatures_venus.py, Assets/_Game/Art/cr
 Depends: B-093
 Lead notes: Cycle 193. R3.
 
-### B-095 · BLENDER · Ready · R3
+### B-095 · BLENDER · In Progress · R3
 Goal: Mercury and Venus props and stations as models: flare shelter (dome + door clip), Mercury equipment locker, solarite crystal cluster (3 states: glowing, crusted, cut), the Venus station modules (deck module, hab, airlock arch, balloon cell, railing, vent harvester), aerostat pieces already covered by B-069 are re-made as models here too (aerostat_cell/deck/strut), the Mars/Earth Waystation surface pads if any.
 Accept: contract §9 (ppu/LOD rules); station modules tile at their v1 pitches; stamped turntables; UNITY lit preview for Done.
 Files: build_props_mercury.py, build_props_venus.py, build_props_common.py, Assets/_Game/Art/props/{mercury,venus,common}/
