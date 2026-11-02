@@ -1022,12 +1022,12 @@ Files: blender/scripts/build_props_saturn.py, build_props_uranus.py, build_props
 Depends: B-055
 Lead notes: Done 00abc78 (cycle 167): 9 props; Meridian wreck bow/mid/stern share the Jupiter hull recipe with lit portholes, torn ends, running lights and flat deck lines (512×400, ppu 108 per D-018); review_b068_props.png + review_b068_wreck.png stamped 00:08–00:09. Process gain: props are now grounded at z = 0 and framed from measured extents.
 
-### B-069 · BLENDER · Ready · M4
+### B-069 · BLENDER · Done · M4
 Goal: Aerostat and giant gear props (Bible §7.5, §4.2): `props/common/{aerostat_cell, aerostat_deck, aerostat_strut}` (the buildable platform modules: a gas cell, a deck plate, a strut, each tileable with the Venus aerostat look), `props/common/float_cell_pack` (the player's back-mounted float cell, two marks), `props/common/grapple_hook` + `fx/grapple_line` (the Rig grapple head and a tileable cable).
 Accept: deck and strut tile seamlessly in a 3-wide preview; the float cell reads on the surveyor's back at 1:1; stamped contact sheet.
 Files: blender/scripts/build_props_common.py, gen_fx.py, Assets/_Game/Art/props/common/, fx/grapple_line/
 Depends: B-014
-Lead notes: Cycle 164. M4. Feeds U-067 (grapple) and U-071 (aerostats).
+Lead notes: Done cfc0151 (cycle 169): aerostat_deck (2 m pitch), aerostat_strut (2 m, stacks with continuous braces), aerostat_cell, float_cell_pack mk1/mk2 at 1:1 on the surveyor, grapple_hook (pivot at the line point) + fx/grapple_line; b069_tiling_and_back.png and review_b069.png (stamped 00:14) checked.
 
 ### B-070 · BLENDER · Done · M4
 Goal: Moon sky objects for the giants (Bible §7.6–7.9): `planets/io/surface`, `planets/europa/surface`, `planets/titan/surface`, `planets/enceladus/surface`, `planets/miranda/surface`, `planets/triton/surface` at 512×256 like Luna (B-010), with the geyser plumes of Enceladus and Triton as a `glow` layer; Io with volcanic hotspots.
@@ -1035,6 +1035,48 @@ Accept: same camera and lighting as Luna; real albedo/colour cues (Io yellow-sul
 Files: blender/scripts/gen_planet.py, Assets/_Game/Art/planets/{io,europa,titan,enceladus,miranda,triton}/
 Depends: B-010
 Lead notes: Done c6b401b + ba59ac8 (cycle 166): Io (sulfur, hotspots), Europa (cracked white), Titan (orange haze), Enceladus, Miranda, Triton + two plume glows; review_b070_moons.png stamped 00:01. Short plumes (~40 px) accepted: moons are small sky objects.
+
+### B-071 · BLENDER · Ready · M4
+Goal: Uranus apex `creatures/uranus/diamondback_colossus` (Bible §7.8): a huge armoured crawler of the diamond-rain layer, built as body + limb segments; joints are separate sprites with an "exposed" state (visible only while it reaches to feed) so UNITY can make only the joints take damage; diamond armour reads as faceted and sparkling in dim light; size per the Venus apex precedent (D-042: 400 px × 5 frames per segment).
+Accept: a chained preview with the feed pose showing the exposed joints; stamped review; frames and sheets within contract §4.
+Files: blender/scripts/build_creatures_uranus.py, Assets/_Game/Art/creatures/uranus/diamondback_colossus/
+Depends: B-064
+Lead notes: Cycle 169. M4.
+
+### B-072 · BLENDER · Ready · M4
+Goal: Neptune apex `creatures/neptune/umbral_leviathan` (Bible §7.9): the final boss, a vast dark floater of the Great Dark Spot, built as head/body/tail segments plus a separate "maw" and two "anchor fin" sprites with their own clips; near-black with a faint indigo rim so it reads against the B-063 decks; a "roar" state with internal light.
+Accept: chained preview reads at the gameplay scale against neptune_deck3; the rim light keeps the silhouette readable; stamped review; contract §4.
+Files: blender/scripts/build_creatures_neptune.py, Assets/_Game/Art/creatures/neptune/umbral_leviathan/
+Depends: B-065
+Lead notes: Cycle 169. M4.
+
+### B-073 · BLENDER · Ready · M4
+Goal: Giant zone overlays (Bible §7.6–7.9): side-view near-layer overlays that mark the four big zones: `backgrounds/jupiter_red_spot` (600 m of fast cream-and-brick wind bands, tileable, with spinning-floe debris wisps), `backgrounds/saturn_hexagon_wall` (a translucent rotating wind wall, 3 variants), `backgrounds/uranus_dark_season` tint overlay (already partly done in B-062; make it a separate alpha layer so UNITY can crossfade), `backgrounds/neptune_dark_storm` (a 400 m breathing storm mass with an inward pull suggested by streak direction, 2 frames for the breathing).
+Accept: each is an alpha overlay that tiles horizontally; stamped reviews composited over the matching deck; D-045 peaks measured.
+Files: blender/scripts/gen_backdrop*.py, Assets/_Game/Art/backgrounds/{jupiter_red_spot,saturn_hexagon_wall,uranus_dark_season,neptune_dark_storm}/
+Depends: B-048
+Lead notes: Cycle 169. M4. Numpy-only pipeline; good lock-free work.
+
+### B-074 · BLENDER · Ready · M4
+Goal: M4 HUD and panel icons (ui/): buoyancy margin (up/down arrow in a cell), skip fuel, skip spool, wind (with direction), season (lit/dark half), Crush warning, float cell on/off, grapple ready, aerostat module slots (cell, deck, strut); plus item icons for the M4 recipes not covered by B-061: aerostat_cell, aerostat_deck, aerostat_strut, wind_anchor, grapple_hook, polymer.
+Accept: same style and size as the existing ui/ HUD icons; readable at 24 px; item icons match B-013 camera and lights; stamped montage.
+Files: blender/scripts/build_icons.py, blender/scripts/build_ui.py, Assets/_Game/Art/ui/, Assets/_Game/Art/icons/
+Depends: B-061
+Lead notes: Cycle 169. M4. Keys as written; UNITY will use them in U-062/U-067/U-071.
+
+### B-075 · BLENDER · Ready · M4
+Goal: Saturn Waystation, Halcyon's largest market (Bible §7.7): `props/space/waystation_saturn` as a bigger top-down station sprite than the Earth/Mars waystation (B-0xx), with a ring-dock arm, lit hangars and a market canopy; plus `props/space/ring_rig_topdown` (the ring-mining rig as seen from space).
+Accept: same top-down camera and scale as the existing waystation; sheets within contract §4; stamped review next to the Earth waystation for scale.
+Files: blender/scripts/build_waystation.py, Assets/_Game/Art/props/space/
+Depends: B-014
+Lead notes: Cycle 169. M4. Feeds U-066 and the Saturn market.
+
+### B-076 · BLENDER · Ready · M4
+Goal: Wardens, giant tier (Bible §2, §7.9 "the hardest Warden tier"): `creatures/warden/sentinel_mk2` and `creatures/warden/hunter_mk2` (heavier hulls, pressure-rated, indigo running lights, a visible shield emitter), `fx/warden_shield` (a hex-cell shield flash), `fx/warden_bolt_heavy`.
+Accept: same clip set as the basic Wardens; mk2 reads as the same family but heavier at a glance; stamped review beside the mk1 sprites.
+Files: blender/scripts/build_wardens.py, gen_fx.py, Assets/_Game/Art/creatures/warden/, fx/
+Depends: B-002
+Lead notes: Cycle 169. M4.
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
