@@ -34,7 +34,7 @@ namespace Meridian.Tests
                 planted++;
                 Assert.AreEqual(p1.key, p2.key);
                 Assert.AreEqual(z1, z2);
-                Assert.That(z1, Is.InRange(p1.tree ? DepthBands.TreeNearZ : DepthBands.FloraNearZ, DepthBands.FloraFarZ), $"{p1.key} at x {x}: behind the play plane");
+                Assert.That(z1, Is.InRange(p1.tree ? DepthBands.TreeNearZ : DepthBands.FloraNearZ, p1.tree ? DepthBands.TreeFarZ : DepthBands.FloraFarZ), $"{p1.key} at x {x}: in its depth band (D-071)");
                 Assert.That(yaw1, Is.InRange(0f, 360f));
                 Assert.That(s1, Is.InRange(0.85f, 1.15f));
                 if (p1.tree) trees++;

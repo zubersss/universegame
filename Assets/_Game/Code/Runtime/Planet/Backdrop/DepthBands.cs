@@ -11,8 +11,8 @@ namespace Meridian.Planet.Backdrop
     /// parallax layers 1 and 2 (layer 0, the sky, stays on PlanetBackdrop's quad, pushed behind the skyline):
     ///  · ground: a strip of the column's original surface from the blocks' back face (z 0.5) to z 12, with risers
     ///    and a skirt, in the planet's block material: the near props plane stands on it;
-    ///  · flora: seeded per column on that strip, z 1.5–9 (trees ≥ 3.5 so their crowns stay behind the surveyor),
-    ///    per biome (B-085 Earth, B-089 Mars), none inside POI stamps or on water;
+    ///  · flora: seeded per column on that strip, z 1.5–9 for ground cover,
+    ///    per biome (B-085 Earth, B-089 Mars; trees z 6–12 and 6 % of forest columns, D-071), none inside POI stamps or on water;
     ///  · ridge_mid (z 20–60 m, 256 m period) per region and skyline_far (z 150–400 m, 512 m period): three copies
     ///    each, re-centred on the camera, standing on the mean surface around it.
     /// All of it is world-fixed, so the perspective rail gives the parallax. Bands fade with the sky underground.
@@ -27,7 +27,8 @@ namespace Meridian.Planet.Backdrop
         public const float RidgePeriod = 256f, SkylinePeriod = 512f;
         public const float GroundBackZ = 12f, GroundSkirt = 40f;
         public const int GroundHalfWidth = 96, GroundStep = 16;
-        public const float FloraNearZ = 1.5f, FloraFarZ = 9f, TreeNearZ = 3.5f;
+        /// <summary>D-071: ground flora z 1.5–9; trees z 6–12 so their crowns sit behind the surveyor and leave the ridge visible.</summary>
+        public const float FloraNearZ = 1.5f, FloraFarZ = 9f, TreeNearZ = 6f, TreeFarZ = 12f;
         /// <summary>The mean surface under the bands: columns sampled every 8 m over ±64 m, eased over ~2 s.</summary>
         public const int BaseHalfWidth = 64, BaseStep = 8;
         public const float BaseEase = 2f;
@@ -103,7 +104,7 @@ namespace Meridian.Planet.Backdrop
         }
 
         const string EF = "props/earth_flora/", MF = "props/mars_flora/";
-        static readonly FloraPick[] Forest = { new FloraPick(EF + "tree_oak", 0.10f, true), new FloraPick(EF + "tree_birch", 0.05f, true), new FloraPick(EF + "bush_a", 0.08f), new FloraPick(EF + "bush_b", 0.05f), new FloraPick(EF + "rock_c", 0.04f), new FloraPick(EF + "grass", 0.22f) };
+        static readonly FloraPick[] Forest = { new FloraPick(EF + "tree_oak", 0.04f, true), new FloraPick(EF + "tree_birch", 0.02f, true), /* D-071: trees 6 % */ new FloraPick(EF + "bush_a", 0.08f), new FloraPick(EF + "bush_b", 0.05f), new FloraPick(EF + "rock_c", 0.04f), new FloraPick(EF + "grass", 0.22f) };
         static readonly FloraPick[] Plains = { new FloraPick(EF + "grass", 0.32f), new FloraPick(EF + "bush_a", 0.06f), new FloraPick(EF + "tree_birch", 0.03f, true), new FloraPick(EF + "tree_oak", 0.02f, true), new FloraPick(EF + "rock_a", 0.03f) };
         static readonly FloraPick[] Desert = { new FloraPick(EF + "cactus", 0.07f), new FloraPick(EF + "dead_tree", 0.02f, true), new FloraPick(EF + "rock_b", 0.05f) };
         static readonly FloraPick[] Coast = { new FloraPick(EF + "grass", 0.15f), new FloraPick(EF + "rock_a", 0.05f), new FloraPick(EF + "tree_spruce", 0.03f, true) };
@@ -147,8 +148,8 @@ namespace Meridian.Planet.Backdrop
                 acc += f.chance;
                 if (r >= acc) continue;
                 pick = f;
-                float near = f.tree ? TreeNearZ : FloraNearZ;
-                z = Mathf.Lerp(near, FloraFarZ, Unit(x, 0x2D));
+                float near = f.tree ? TreeNearZ : FloraNearZ, far = f.tree ? TreeFarZ : FloraFarZ;
+                z = Mathf.Lerp(near, far, Unit(x, 0x2D));
                 yaw = Unit(x, 0x7A) * 360f;
                 scale = Mathf.Lerp(0.85f, 1.15f, Unit(x, 0x5C));
                 return true;
