@@ -1,5 +1,5 @@
 # LEAD STATUS
-Updated: 2026-11-02 04:2x · Session: 2 (Fable 5.1) · Review cycle: 202
+Updated: 2026-11-02 11:5x · Session: 2 (Fable 5.1) · Review cycle: 203
 ## Current task
 R1: U-072, U-073, U-074 Done; U-075 (Animator views + glb importer) and U-076 (models in the scene, depth bands) are the last big pieces, then U-077 builds 0.4.0 for the owner's playtest. BLENDER is ahead: all R1 art done, R2 art half done, R3 queued.
 ## Last completed
@@ -11,6 +11,6 @@ Contract §9 details may change on B-077's proposals (v2.1). Milestone pages: ne
 ## Waiting on the user
 USER-15 (BLENDER standing restart approval), USER-14 (free memory), USER-08 optional. R1 playtest when 0.4.0 exists.
 ## Loop / stall watch
-Core-loop green again (re-check 02:14–02:21). Watch: PawsOnTheGround until U-075; the R1 budget row (geometry) once U-076 lands.
+Usage-limit stop 04:24–11:5x (all sessions). Watch that both workers resume (first commits expected within 30 min).
 ## HeavyJobLock
 none (LEAD runs no heavy jobs while memory is tight)
