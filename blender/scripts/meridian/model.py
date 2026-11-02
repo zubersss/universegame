@@ -280,14 +280,21 @@ def export_glb(path, mesh, rig, extras=()):
     # (a 180 deg turn about the vertical axis on the top node, not a mirror). After Unity's mirror
     # it faces +X, and the Blender camera side (-Y -> glTF +Z -> turned to -Z) lands on Unity's
     # camera side (-Z). The turn is undone after export (the turntable stays front = +X).
-    top = rig if rig is not None else mesh
-    saved = top.rotation_euler.copy()
-    top.rotation_euler = (saved.x, saved.y, saved.z + math.pi)
+    # Every top-level selected object turns about the world origin (rig case: just the rig, the
+    # mesh/LOD/sockets are its children; prop/ship case: mesh, LOD1 and sockets each).
+    from mathutils import Matrix
+    sel = [o for o in bpy.context.view_layer.objects if o.select_get()]
+    tops = [o for o in sel if o.parent not in sel]
+    saved = {o: o.matrix_world.copy() for o in tops}
+    turn = Matrix.Rotation(math.pi, 4, "Z")
+    for o in tops:
+        o.matrix_world = turn @ saved[o]
     bpy.context.view_layer.update()
     try:
         bpy.ops.export_scene.gltf(**kw)
     finally:
-        top.rotation_euler = saved
+        for o in tops:
+            o.matrix_world = saved[o]
         bpy.context.view_layer.update()
 
 
@@ -379,10 +386,31 @@ def export_model(entry, art_dir, preview_dir, objs, stamp_fn):
     export_material(mesh, paths, emissive)
     glb = os.path.join(out_dir, f"{variant}.glb")
     sockets = [o for o in objs if o.type == "EMPTY" and o.name.startswith("socket_")]
-    export_glb(glb, mesh, rig, sockets)
+    extras = list(sockets)
+    lod_tris = None
+    if entry.get("lod1"):
+        # Contract §9 LOD: `<variant>_LOD1` at <= 50 % triangles in the same glb, same UVs and
+        # material (decimate keeps UVs, vertex groups and the armature binding).
+        lod = mesh.copy()
+        lod.data = mesh.data.copy()
+        lod.name = lod.data.name = f"{variant}_LOD1"
+        bpy.context.scene.collection.objects.link(lod)
+        if rig is not None:
+            lod.parent = rig
+            lod.matrix_parent_inverse = mesh.matrix_parent_inverse.copy()
+        dec = lod.modifiers.new("lod", "DECIMATE")
+        dec.ratio = 0.48
+        for o in bpy.context.view_layer.objects:
+            o.select_set(False)
+        bpy.context.view_layer.objects.active = lod
+        lod.select_set(True)
+        bpy.ops.object.modifier_apply(modifier="lod")
+        lod_tris = triangle_count(lod)
+        extras.append(lod)
+    export_glb(glb, mesh, rig, extras)
     clips = entry.get("clips", [])
     meta = {"key": key, "format": "glb", "contract": "v2.2", "facing": "+X in Unity (exported facing glTF -X, D-065)", "up": "+Y", "units": "m",
-            "origin": entry.get("origin_rule", "feet"), "triangles": tris, "texture": size,
+            "origin": entry.get("origin_rule", "feet"), "triangles": tris, "lod1_triangles": lod_tris, "texture": size,
             "maps": list(MAPS), "fps": 30, "clips": clips,
             "sockets": [o.name[len("socket_"):] for o in sockets] or entry.get("sockets", [])}
     with open(os.path.join(out_dir, f"{variant}.json"), "w", encoding="utf-8") as fh:

@@ -92,6 +92,7 @@ function Get-GateMB($chosen) {
     # 2026-10-31: 1.41-1.45 GB (Blender baseline dominates), so per D-033 every heavy job is
     # back on the D-026 1.5 GB gate. Cycles CPU stays for sprites (no GPU-texture crash risk).
     if (Test-NumpyOnly $chosen) { return 1200 }                 # D-045
+    foreach ($a in $chosen) { if ($a.model -and [int]$a.texture -ge 2048) { return 2000 } }   # D-066: 2048^2 bakes peak 1.77-1.89 GB
     return 1500
 }
 

@@ -292,7 +292,7 @@ def hull_half_width(x):
     return HULL[0][1]
 
 
-def build(out_path=DEFAULT_OUT):
+def build(out_path=DEFAULT_OUT, model=False):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
     coll = bpy.data.collections.new("pilgrim")
@@ -351,12 +351,23 @@ def build(out_path=DEFAULT_OUT):
             for sy in (-1, 1):
                 box(f"pod_{name}_vent_{k}_{sy}", (x - 0.45 + k * 0.3, sy * 1.105, 0.74), (0.16, 0.02, 0.18), coll, engine, bevel=0)
 
-    # Fixed landing skids: rails and struts.
-    for sy in (-1, 1):
-        cyl(f"skid_{sy}", (-0.3, sy * 1.30, 0.09), 0.08, 7.4, coll, metal, rot=(0, math.pi / 2, 0), verts=16)
-        for x in (-4.0, -2.0, 1.4, 3.0):
-            cyl(f"strut_{x}_{sy}", (x, sy * 1.18, 0.5), 0.06, 0.85, coll, metal, rot=(sy * 0.28, 0, 0), verts=12)
-        sphere(f"skid_cap_{sy}", (3.4, sy * 1.30, 0.09), 0.08, coll, metal)
+    if not model:
+        # Fixed landing skids: rails and struts.
+        for sy in (-1, 1):
+            cyl(f"skid_{sy}", (-0.3, sy * 1.30, 0.09), 0.08, 7.4, coll, metal, rot=(0, math.pi / 2, 0), verts=16)
+            for x in (-4.0, -2.0, 1.4, 3.0):
+                cyl(f"strut_{x}_{sy}", (x, sy * 1.18, 0.5), 0.06, 0.85, coll, metal, rot=(sy * 0.28, 0, 0), verts=12)
+            sphere(f"skid_cap_{sy}", (3.4, sy * 1.30, 0.09), 0.08, coll, metal)
+    else:
+        # B-079 landing legs: four legs whose foot pads sit within the landing pad's 3.6 m deck
+        # (feet at x = +-1.55 m after the 12 m scale -> footprint ~3.5 m). Upper strut from the
+        # belly between the lift pods, a knee, a lower leg, a round foot pad on z = 0.
+        for sy in (-1, 1):
+            for x in (-1.47, 1.47):                                  # pre-scale (x 1.0526 -> +-1.55 m)
+                cyl(f"leg_upper_{x}_{sy}", (x, sy * 0.95, 0.62), 0.07, 0.55, coll, metal, rot=(sy * 0.45, 0, 0), verts=12)
+                sphere(f"leg_knee_{x}_{sy}", (x, sy * 1.08, 0.36), 0.08, coll, dark)
+                cyl(f"leg_lower_{x}_{sy}", (x, sy * 1.12, 0.2), 0.055, 0.36, coll, metal, verts=12)
+                cyl(f"leg_foot_{x}_{sy}", (x, sy * 1.14, 0.025), 0.2, 0.05, coll, dark, verts=20)
 
     # Nav lights: red port (+Y), green starboard (-Y) on the hull shoulders; nose and tail whites.
     sphere("nav_port", (0.2, 1.53, 2.55), 0.06, coll, red)
@@ -366,17 +377,46 @@ def build(out_path=DEFAULT_OUT):
     # Render sets (D-025): `pilgrim` keeps everything (top view, unchanged); `pilgrim_deployed`
     # = everything (side_legs); `pilgrim_retracted` = everything but the landing gear, which
     # folds into the pods in flight (side). Objects are linked, not copied.
-    gear = {o for o in coll.objects if o.name.startswith(("skid_", "strut_"))}
-    for name, members in (("pilgrim_deployed", list(coll.objects)),
-                          ("pilgrim_retracted", [o for o in coll.objects if o not in gear])):
-        c = bpy.data.collections.new(name)
-        scene.collection.children.link(c)
-        for o in members:
-            c.objects.link(o)
-
+    if not model:
+        gear = {o for o in coll.objects if o.name.startswith(("skid_", "strut_"))}
+        for name, members in (("pilgrim_deployed", list(coll.objects)),
+                              ("pilgrim_retracted", [o for o in coll.objects if o not in gear])):
+            c = bpy.data.collections.new(name)
+            scene.collection.children.link(c)
+            for o in members:
+                c.objects.link(o)
+    else:
+        # Contract v2 (B-079): 12 m long (v1 hull is 11.4 m), centre of mass at the origin (v1
+        # CoM (0, 0, 1.8)), cockpit socket behind the visor.
+        from mathutils import Matrix, Vector
+        k = 12.0 / 11.4
+        xf = Matrix.Scale(k, 4) @ Matrix.Translation((0, 0, -1.8))
+        bpy.context.view_layer.update()
+        for o in list(coll.objects):
+            o.matrix_world = xf @ o.matrix_world
+        bpy.context.view_layer.update()
+        for o in list(coll.objects):                      # bake the scale so bevels/UVs see real metres
+            for c in bpy.context.view_layer.objects:
+                c.select_set(False)
+            o.select_set(True)
+            bpy.context.view_layer.objects.active = o
+            bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        s = bpy.data.objects.new("socket_cockpit", None)
+        s.empty_display_size = 0.2
+        coll.objects.link(s)
+        s.location = xf @ Vector((3.2, 0.0, 2.15))
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     bpy.ops.wm.save_as_mainfile(filepath=out_path, compress=True)
     print("MERIDIAN built", out_path)
+
+
+MODEL_OUT = os.path.join(os.path.dirname(HERE), "sources", "ships", "pilgrim_model.blend")
+
+
+def build_model(out_path=MODEL_OUT):
+    """Contract v2 Pilgrim (B-079): landing legs that fit the pad, 12 m, CoM at the origin,
+    cockpit socket; no render sets."""
+    build(out_path, model=True)
 
 
 if __name__ == "__main__":
