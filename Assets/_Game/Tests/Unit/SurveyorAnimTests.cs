@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Meridian.Tests
 {
-    /// <summary>U-032: clip choice by priority, and the clip ranges come from base.json via the registry.</summary>
+    /// <summary>U-032: clip choice by priority (the sheet-registry check moved to U-075, D-069).</summary>
     public class SurveyorAnimTests
     {
         static AnimInputs Still() => new AnimInputs { grounded = true, sinceHurt = 99f, sinceLand = 99f, sinceDig = 99f };
@@ -28,25 +28,7 @@ namespace Meridian.Tests
             a.dead = true; Assert.AreEqual(SurveyorAnim.Death, SurveyorAnim.Pick(a), "death beats everything");
         }
 
-        [Test]
-        public void RegistryHoldsTheSurveyorClipsFromBaseJson()
-        {
-            var json = File.ReadAllText("Assets/_Game/Art/characters/surveyor/base.json");
-            var sheet = JsonUtility.FromJson<Meridian.EditorTools.ArtImporter.SheetManifest>(json);
-            var set = ArtMaterials.ClipsFor(ArtKeys.Characters.Surveyor);
-            Assert.NotNull(set, "registry has the surveyor clips");
-            Assert.AreEqual(sheet.fps, set.fps);
-            Assert.AreEqual(sheet.animations.Length, set.clips.Count);
-            foreach (var c in sheet.animations)
-            {
-                Assert.IsTrue(set.TryGet(c.name, out var r), c.name);
-                Assert.AreEqual(c.start, r.start, c.name);
-                Assert.AreEqual(c.length, r.length, c.name);
-                Assert.AreEqual(c.loop, r.loop, c.name);
-            }
-            foreach (var name in new[] { SurveyorAnim.Idle, SurveyorAnim.Walk, SurveyorAnim.Run, SurveyorAnim.Jump, SurveyorAnim.Fall,
-                                         SurveyorAnim.Land, SurveyorAnim.Dig, SurveyorAnim.Aim, SurveyorAnim.Hurt, SurveyorAnim.Death })
-                Assert.IsTrue(set.TryGet(name, out _), $"base.json has '{name}'");
-        }
+        // D-069 (P-30): RegistryHoldsTheSurveyorClipsFromBaseJson retired. base.json became the surveyor model's json (B-078);
+        // its intent (clip names, count and lengths from the json) moves into U-075's Animator check.
     }
 }
