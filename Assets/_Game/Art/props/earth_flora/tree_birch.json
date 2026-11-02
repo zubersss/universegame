@@ -1,0 +1,23 @@
+{
+ "key": "props/earth_flora/tree_birch",
+ "format": "glb",
+ "contract": "v2.2",
+ "facing": "+X in Unity (exported facing glTF -X, D-065)",
+ "up": "+Y",
+ "units": "m",
+ "origin": "base",
+ "triangles": 1308,
+ "lod1_triangles": 626,
+ "texture": 2048,
+ "maps": [
+  "color",
+  "normal",
+  "mask",
+  "emission"
+ ],
+ "fps": 30,
+ "clips": [],
+ "atlas": "props/earth_flora/atlas",
+ "vertex_color": true,
+ "sockets": []
+}

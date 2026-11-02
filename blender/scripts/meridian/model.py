@@ -343,7 +343,7 @@ def export_material(mesh, maps_paths, emissive):
 
 # ---------------------------------------------------------------- 5. glb
 
-def export_glb(path, mesh, rig, extras=()):
+def export_glb(path, mesh, rig, extras=(), vertex_colors=False):
     for o in bpy.context.view_layer.objects:
         o.select_set(False)
     mesh.select_set(True)
@@ -357,6 +357,8 @@ def export_glb(path, mesh, rig, extras=()):
     bpy.context.view_layer.objects.active = rig or mesh
     kw = dict(filepath=path, export_format="GLB", use_selection=True, export_yup=True, export_apply=False,
               export_animations=rig is not None, export_image_format="NONE")
+    if vertex_colors:                                # B-085: COLOR_0 = sway mask (R)
+        kw["export_vertex_color"] = "ACTIVE"
     if rig is not None:
         kw.update(export_animation_mode="ACTIONS", export_frame_range=False, export_force_sampling=True,
                   export_anim_slide_to_zero=True,                      # clips start at t = 0 (was +1 frame)
@@ -473,18 +475,24 @@ def export_model(entry, art_dir, preview_dir, objs, stamp_fn):
     tris = triangle_count(mesh)
     if tris > budget:
         raise ModelError(f"{tris} triangles > budget {budget}")
-    unwrap(mesh)
-    maps = bake_maps(mesh, size, samples=int(entry.get("bake_samples", 16)))
+    atlas = entry.get("atlas")
     paths = {}
-    for mname in MAPS:
+    if atlas:                                        # B-085: shared atlas, authored UVs, no bake
+        maps = None
+        emissive = False
+    else:
+        unwrap(mesh)
+        maps = bake_maps(mesh, size, samples=int(entry.get("bake_samples", 16)))
+    for mname in (MAPS if not atlas else ()):
         a = maps[mname]
         if a.shape[2] == 3:
             a = np.dstack([a, np.ones(a.shape[:2], np.float32)])
         p = os.path.join(out_dir, f"{variant}_{mname}.png")
         pngio.write_png(p, pngio.to_u8(np.clip(a, 0, 1)))
         paths[mname] = p
-    emissive = float(maps["emission"].max()) > 0.02
-    export_material(mesh, paths, emissive)
+    if not atlas:
+        emissive = float(maps["emission"].max()) > 0.02
+        export_material(mesh, paths, emissive)
     glb = os.path.join(out_dir, f"{variant}.glb")
     sockets = [o for o in objs if o.type == "EMPTY" and o.name.startswith("socket_")]
     extras = list(sockets)
@@ -500,7 +508,7 @@ def export_model(entry, art_dir, preview_dir, objs, stamp_fn):
             lod.parent = rig
             lod.matrix_parent_inverse = mesh.matrix_parent_inverse.copy()
         dec = lod.modifiers.new("lod", "DECIMATE")
-        dec.ratio = 0.48
+        dec.ratio = min(0.48, float(entry.get("lod1_max", 1 << 30)) / max(1, tris))
         for o in bpy.context.view_layer.objects:
             o.select_set(False)
         bpy.context.view_layer.objects.active = lod
@@ -508,10 +516,11 @@ def export_model(entry, art_dir, preview_dir, objs, stamp_fn):
         bpy.ops.object.modifier_apply(modifier="lod")
         lod_tris = triangle_count(lod)
         extras.append(lod)
-    export_glb(glb, mesh, rig, extras)
+    export_glb(glb, mesh, rig, extras, vertex_colors=bool(entry.get("vertex_colors")))
     meta = {"key": key, "format": "glb", "contract": "v2.2", "facing": "+X in Unity (exported facing glTF -X, D-065)", "up": "+Y", "units": "m",
             "origin": entry.get("origin_rule", "feet"), "triangles": tris, "lod1_triangles": lod_tris, "texture": size,
-            "maps": list(MAPS), "fps": 30, "clips": clips,
+            "maps": list(MAPS), "fps": 30, "clips": clips, "atlas": atlas,
+            "vertex_color": entry.get("vertex_colors"),
             "sockets": [o.name[len("socket_"):] for o in sockets] or entry.get("sockets", [])}
     with open(os.path.join(out_dir, f"{variant}.json"), "w", encoding="utf-8") as fh:
         json.dump(meta, fh, indent=1)
