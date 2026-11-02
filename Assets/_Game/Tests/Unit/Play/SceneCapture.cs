@@ -958,6 +958,21 @@ namespace Meridian.Tests
             var output = $"logs/capture_{name}.png";
             File.WriteAllBytes(output, tex.EncodeToPNG());
             TestContext.Out.WriteLine($"[MERIDIAN] CAPTURE OK: {output}");
+
+            // U-080: the same spot from the depth preset (yaw/pitch orbit around the surveyor): block relief, back wall.
+            var pivot = player != null ? (Vector3)player.Body.position + new Vector3(0f, 1.2f, 0f) : cam.transform.position + Vector3.forward * Meridian.CameraRig.SideView.PlaneDistance(cam);
+            Meridian.CameraRig.PhotoOrbit.Depth(cam, pivot);
+            for (int i = 0; i < 3; i++) yield return null;
+            cam.targetTexture = rt;
+            cam.Render();
+            RenderTexture.active = rt;
+            tex.ReadPixels(new Rect(0, 0, 1920, 1080), 0, 0);
+            tex.Apply();
+            RenderTexture.active = prev;
+            cam.targetTexture = null;
+            var depthOut = $"logs/capture_{name}_depth.png";
+            File.WriteAllBytes(depthOut, tex.EncodeToPNG());
+            TestContext.Out.WriteLine($"[MERIDIAN] CAPTURE OK: {depthOut}");
             UnityEngine.Object.Destroy(tex);
             rt.Release();
         }

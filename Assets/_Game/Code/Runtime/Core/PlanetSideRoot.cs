@@ -143,6 +143,10 @@ namespace Meridian.Core
                 sideCamera.transform.position = new Vector3(spawnX + 0.5f, surface + 3f, sideCamera.orthographic ? -10f : -Meridian.CameraRig.SideView.DistanceFor(Meridian.CameraRig.SideView.HalfHeight(sideCamera)));
                 var cf = sideCamera.GetComponent<CameraFollow>();
                 if (cf != null) cf.SnapToTarget();
+                // U-080: photo-mode orbit for depth reviews (added here so the scenes need no re-authoring).
+                var orbit = sideCamera.GetComponent<Meridian.CameraRig.PhotoOrbit>();
+                if (orbit == null) orbit = sideCamera.gameObject.AddComponent<Meridian.CameraRig.PhotoOrbit>();
+                if (player != null) orbit.target = player.transform;
             }
         }
 

@@ -47,6 +47,19 @@ namespace Meridian.Core
                 side.dayNight.Override = 0.5f;
                 yield return Wait(1f);
                 yield return Shot(folder, "smoke_2_earth_day.png");
+                // U-080: the same view from the depth preset (yaw/pitch orbit), so reviews see block relief and the back wall.
+                {
+                    var cam = side.sideCamera;
+                    var follow = cam.GetComponent<Meridian.Player.CameraFollow>();
+                    var railPos = cam.transform.position;
+                    if (follow != null) follow.enabled = false;
+                    var pivot = side.player != null ? side.player.transform.position + new Vector3(0f, 1.2f, 0f) : new Vector3(railPos.x, railPos.y, 0f);
+                    Meridian.CameraRig.PhotoOrbit.Depth(cam, pivot);
+                    yield return Wait(0.5f);
+                    yield return Shot(folder, "smoke_2b_earth_day_depth.png");
+                    cam.transform.SetPositionAndRotation(railPos, Quaternion.identity);
+                    if (follow != null) { follow.enabled = true; follow.SnapToTarget(); }
+                }
                 side.dayNight.Override = 0f;
                 yield return Wait(1f);
                 yield return Shot(folder, "smoke_3_earth_night.png");
