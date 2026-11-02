@@ -7,6 +7,7 @@
  "units": "m",
  "origin": "feet",
  "triangles": 9228,
+ "lod1_triangles": null,
  "texture": 2048,
  "maps": [
   "color",
