@@ -35,7 +35,7 @@ namespace Meridian.Tests
             while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
             director.SetView(ViewMode.Space);
             var cam = director.Space.GetComponentInChildren<Camera>();
-            cam.orthographicSize = 260f; // Earth, Luna, Mars and both wells in one frame
+            Meridian.CameraRig.SideView.SetHalfHeight(cam, 260f); // Earth, Luna, Mars and both wells in one frame
             for (int i = 0; i < 30; i++) yield return null; // textures load
 
             using (var draws = Unity.Profiling.ProfilerRecorder.StartNew(Unity.Profiling.ProfilerCategory.Render, "Draw Calls Count"))
@@ -224,7 +224,7 @@ namespace Meridian.Tests
             player.externalInput = true;
             var cam = side.sideCamera;
             cam.GetComponent<Meridian.Player.CameraFollow>().enabled = false;
-            cam.orthographicSize = 3f;
+            Meridian.CameraRig.SideView.SetHalfHeight(cam, 3f);
             IEnumerator Shot(string label)
             {
                 var p = player.transform.position;
@@ -278,7 +278,7 @@ namespace Meridian.Tests
             var follow = cam.GetComponent<Meridian.Player.CameraFollow>();
             follow.enabled = false;
             var player = side.player;
-            void Frame(Vector2 at, float size) { cam.orthographicSize = size; cam.transform.position = new Vector3(at.x, at.y, cam.transform.position.z); }
+            void Frame(Vector2 at, float size) { Meridian.CameraRig.SideView.SetHalfHeight(cam, size); cam.transform.position = new Vector3(at.x, at.y, cam.transform.position.z); }
 
             // 1 dig sparks
             var b = player.Body.position;
@@ -339,7 +339,7 @@ namespace Meridian.Tests
             float wait = Time.realtimeSinceStartup + 10f;
             while (shipView.sprite == null && Time.realtimeSinceStartup < wait) yield return null; // its sheet loads when Space first shows
             for (int i = 0; i < 10; i++) yield return null;
-            spaceCam.orthographicSize = 8f;
+            Meridian.CameraRig.SideView.SetHalfHeight(spaceCam, 8f);
             spaceCam.transform.position = new Vector3(top.transform.position.x, top.transform.position.y, spaceCam.transform.position.z);
             var topView = top.GetComponentInChildren<SpriteRenderer>(true);
             Debug.Log($"[MERIDIAN] space ship destroyed {top.Destroyed} active {top.gameObject.activeInHierarchy} view {topView.name} enabled {topView.enabled} sprite {(topView.sprite != null ? topView.sprite.name : "null")} at {top.Position} cam {spaceCam.transform.position}");
@@ -373,7 +373,7 @@ namespace Meridian.Tests
             for (int i = 0; i < 30; i++) yield return null;
             IEnumerator Shot(string label, Vector2 at, float size)
             {
-                cam.orthographicSize = size;
+                Meridian.CameraRig.SideView.SetHalfHeight(cam, size);
                 cam.transform.position = new Vector3(at.x, at.y, cam.transform.position.z);
                 for (int i = 0; i < 3; i++) yield return null;
                 yield return Save(cam, $"{name}_{label}");
@@ -409,7 +409,7 @@ namespace Meridian.Tests
             var cam = side.sideCamera;
             cam.GetComponent<Meridian.Player.CameraFollow>().enabled = false;
             var camp = side.pois.placed.Find(p => p.def == Meridian.Planet.POI.PoiCatalog.SpawnCamp);
-            cam.orthographicSize = 10f;
+            Meridian.CameraRig.SideView.SetHalfHeight(cam, 10f);
             cam.transform.position = new Vector3(camp.def.CenterX, camp.groundY + 6f, cam.transform.position.z);
             side.dayNight.Override = 0.5f;
             for (int i = 0; i < 5; i++) yield return null;
@@ -439,7 +439,7 @@ namespace Meridian.Tests
             side.dayNight.Override = 0.45f;
             var cam = side.sideCamera;
             cam.GetComponent<Meridian.Player.CameraFollow>().enabled = false;
-            cam.orthographicSize = 14f;
+            Meridian.CameraRig.SideView.SetHalfHeight(cam, 14f);
             int i = 0;
             foreach (Meridian.Terrain.Biome b in Enum.GetValues(typeof(Meridian.Terrain.Biome)))
             {
@@ -481,7 +481,7 @@ namespace Meridian.Tests
             side.dayNight.Override = 0.45f;
             var cam = side.sideCamera;
             cam.GetComponent<Meridian.Player.CameraFollow>().enabled = false;
-            cam.orthographicSize = 14f;
+            Meridian.CameraRig.SideView.SetHalfHeight(cam, 14f);
             Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Desert, out int border, out _);
 
             IEnumerator ShootAt(float x, string label)
@@ -537,7 +537,7 @@ namespace Meridian.Tests
             side.dayNight.Override = 0.45f;
             for (int i = 0; i < 60; i++) yield return new WaitForFixedUpdate();
             var cam = side.sideCamera;
-            cam.orthographicSize = 5f;
+            Meridian.CameraRig.SideView.SetHalfHeight(cam, 5f);
             var rig = side.player.GetComponent<Meridian.Player.PlayerRigInput>();
             var inv = GameState.Instance.inventory;
             inv.Clear();
@@ -589,7 +589,7 @@ namespace Meridian.Tests
             var t = side.terrain;
             IEnumerator Shot(string label, float x, float y, float size)
             {
-                cam.orthographicSize = size;
+                Meridian.CameraRig.SideView.SetHalfHeight(cam, size);
                 cam.transform.position = new Vector3(x, y, cam.transform.position.z);
                 var p = new Vector2(x - 2f, y - 3f);
                 side.player.Body.position = p; side.player.transform.position = p; // streaming follows the surveyor too
@@ -640,7 +640,7 @@ namespace Meridian.Tests
                 Meridian.Terrain.MercuryTerminator.ClockOffset = 0;
                 double now = Meridian.Terrain.MercuryTerminator.Now(clock.GameSeconds);
                 Meridian.Terrain.MercuryTerminator.ClockOffset = (x + localDawnOffset) * Meridian.Terrain.MercuryTerminator.CreepSecondsPerMetre - now;
-                cam.orthographicSize = size;
+                Meridian.CameraRig.SideView.SetHalfHeight(cam, size);
                 cam.transform.position = new Vector3(x + 0.5f, t.Generator.SurfaceHeight(t.WrapX(x)) + above, cam.transform.position.z);
                 float until = Time.realtimeSinceStartup + 15f;
                 yield return null;
@@ -694,7 +694,7 @@ namespace Meridian.Tests
             {
                 var p = side.player;
                 p.Body.position = feet; p.transform.position = feet; p.Body.linearVelocity = Vector2.zero;
-                side.sideCamera.orthographicSize = size;
+                Meridian.CameraRig.SideView.SetHalfHeight(side.sideCamera, size);
                 side.sideCamera.transform.position = new Vector3(feet.x, feet.y + camAbove, side.sideCamera.transform.position.z);
                 float until = Time.realtimeSinceStartup + 15f;
                 yield return null;
@@ -810,7 +810,7 @@ namespace Meridian.Tests
             b.Place(new Vector2(px + 2 + 0.5f, t.TopSolidY(px + 2) + 1.5f), Meridian.Building.PieceKind.Crate);
             var cam = side.sideCamera;
             cam.GetComponent<Meridian.Player.CameraFollow>().enabled = false;
-            cam.orthographicSize = 6f;
+            Meridian.CameraRig.SideView.SetHalfHeight(cam, 6f);
             cam.transform.position = new Vector3(px + 0.5f, top + 3f, cam.transform.position.z);
             for (int k = 0; k < 60; k++) yield return new WaitForFixedUpdate();
             Debug.Log($"[MERIDIAN] Mars shelter: sheltered {b.Sheltered(side.player.Body.position)} ({b.LastFlood})");
@@ -836,7 +836,7 @@ namespace Meridian.Tests
             b.Place(new Vector2(ax + 2.5f, ay + 1.5f), Meridian.Building.PieceKind.Lamp);
             cam = side.sideCamera;
             cam.GetComponent<Meridian.Player.CameraFollow>().enabled = false;
-            cam.orthographicSize = 8f;
+            Meridian.CameraRig.SideView.SetHalfHeight(cam, 8f);
             cam.transform.position = new Vector3(station.x - 6f, deck + 3f, cam.transform.position.z);
             for (int k = 0; k < 60; k++) yield return new WaitForFixedUpdate();
             yield return Save(cam, $"{name}_2_venus_aerostat");
@@ -868,7 +868,7 @@ namespace Meridian.Tests
             System.Func<int, int> surf = x => t.Generator.SurfaceHeight(t.WrapX(x));
             IEnumerator Shot(string label, float x, float y, float size)
             {
-                cam.orthographicSize = size;
+                Meridian.CameraRig.SideView.SetHalfHeight(cam, size);
                 cam.transform.position = new Vector3(x, y, cam.transform.position.z);
                 float until = Time.realtimeSinceStartup + 15f;
                 yield return null;
@@ -938,7 +938,7 @@ namespace Meridian.Tests
             var cam = director.PlanetSide.sideCamera;
             var follow = cam.GetComponent<Meridian.Player.CameraFollow>();
             if (follow != null) follow.enabled = false;
-            Assert.AreEqual(9f, cam.orthographicSize, "default ortho size (Bible §5.1)");
+            Assert.AreEqual(9f, Meridian.CameraRig.SideView.HalfHeight(cam), 0.01f, "default half height on the play plane (Bible §5.1)");
             // Look a little below the surface so the shot shows surface, soil and stone seams.
             cam.transform.position += new Vector3(0f, -5f, 0f);
             for (int i = 0; i < 5; i++) yield return null;

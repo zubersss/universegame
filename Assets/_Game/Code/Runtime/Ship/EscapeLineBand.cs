@@ -22,7 +22,7 @@ namespace Meridian.Ship
         void LateUpdate()
         {
             if (view == null) return;
-            float width = view.orthographicSize * 2f * view.aspect + 4f;
+            float width = Meridian.CameraRig.SideView.HalfHeight(view) * 2f * view.aspect + 4f;
             transform.position = new Vector3(view.transform.position.x, lineY, 0f);
             if (band != null)
             {

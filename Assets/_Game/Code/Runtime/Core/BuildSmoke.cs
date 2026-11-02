@@ -242,7 +242,7 @@ namespace Meridian.Core
         {
             var follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
             if (follow != null) follow.enabled = false;
-            if (size > 0f) side.sideCamera.orthographicSize = size;
+            if (size > 0f) Meridian.CameraRig.SideView.SetHalfHeight(side.sideCamera, size);
             var cam = side.sideCamera.transform;
             // The generator's surface: TopSolidY reads loaded chunks, and none are loaded there yet after a planet switch.
             int ground = side.terrain.Generator.SurfaceHeight(side.terrain.WrapX(Mathf.FloorToInt(x)));
@@ -277,7 +277,7 @@ namespace Meridian.Core
         {
             var follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
             if (follow != null) follow.enabled = false;
-            side.sideCamera.orthographicSize = size;
+            Meridian.CameraRig.SideView.SetHalfHeight(side.sideCamera, size);
             side.player.Body.position = feet; side.player.transform.position = feet; side.player.Body.linearVelocity = Vector2.zero;
             var cam = side.sideCamera.transform;
             cam.position = new Vector3(feet.x, feet.y + above, cam.position.z);

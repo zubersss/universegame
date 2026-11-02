@@ -198,7 +198,10 @@ namespace Meridian.Planet.Weather
                 if (fog.enabled != on) fog.enabled = on;
                 if (on && view != null)
                 {
-                    float h = view.orthographicSize * 2f, w = h * Mathf.Max(view.aspect, 2.5f);
+                    // U-072: just in front of the play plane (the fog's centre/radius are play-plane world units).
+                    float fz = view.orthographic ? 1f : Meridian.CameraRig.SideView.PlaneDistance(view) - 0.5f;
+                    fog.transform.localPosition = new Vector3(0f, 0f, fz);
+                    float h = Meridian.CameraRig.SideView.HalfHeightAtDepth(view, fz) * 2f, w = h * Mathf.Max(view.aspect, 2.5f);
                     fog.transform.localScale = new Vector3(w, h, 1f);
                     var c = focus != null ? focus.position : view.transform.position;
                     fog.GetPropertyBlock(block);

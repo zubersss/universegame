@@ -128,10 +128,10 @@ namespace Meridian.Transitions
             var cam = side.sideCamera;
             sideShip.SetPiloted(false); // input locked
 
-            float startSize = cam.orthographicSize;
+            float startSize = Meridian.CameraRig.SideView.HalfHeight(cam);
             for (float t = 0f; t < LaunchLock; t += Time.unscaledDeltaTime)
             {
-                cam.orthographicSize = Mathf.Lerp(startSize, SideZoomOut, t / LaunchLock);
+                Meridian.CameraRig.SideView.SetHalfHeight(cam, Mathf.Lerp(startSize, SideZoomOut, t / LaunchLock));
                 yield return null;
             }
             yield return Fade(0f, 1f, LaunchFade);

@@ -104,6 +104,7 @@ namespace Meridian.EditorTools
             var sideRoot = new GameObject("PlanetSideRoot");
             var sideComp = sideRoot.AddComponent<PlanetSideRoot>();
             sideComp.sideCamera = AddCamera(sideRoot.transform, "SideCamera", 9f, new Color(0.45f, 0.62f, 0.85f), false);
+            Meridian.CameraRig.SideView.Configure(sideComp.sideCamera); // U-072: perspective side rail (CameraFollow also does it at runtime)
             var terrainGo = new GameObject("Terrain");
             terrainGo.transform.SetParent(sideRoot.transform, false);
             terrainGo.AddComponent<Grid>();

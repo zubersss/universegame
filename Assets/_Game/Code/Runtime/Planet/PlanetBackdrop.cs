@@ -293,7 +293,7 @@ namespace Meridian.Planet
                 {
                     float phase = Mathf.Clamp01((t - 0.25f) / 0.5f) * Mathf.PI;
                     SunElevation = Mathf.Max(0f, Mathf.Sin(phase));
-                    float half = view.orthographicSize, wide = half * Mathf.Max(view.aspect, 1f);
+                    float half = Meridian.CameraRig.SideView.HalfHeight(view), wide = half * Mathf.Max(view.aspect, 1f);
                     float horizon = planetDatum + (BaseOffset(0) + ContentBase[0] * TileHeights[0]) + (c.y - planetDatum) * (1f - Follow[0]);
                     float r = SunRadius * half;
                     // From half below the far horizon (rising/setting behind the ridges) to high in the view at noon.
@@ -311,7 +311,7 @@ namespace Meridian.Planet
                 float t = Meridian.Terrain.MercuryTerminator.LocalTime(c.x, Meridian.Terrain.MercuryTerminator.Now(clock.GameSeconds), w);
                 float off = Mathf.Min(Mathf.Abs(t - 0.25f), Mathf.Abs(t - 0.75f));
                 float band = Meridian.Terrain.MercuryTerminator.TwilightWidth * 0.5f / w; // the band's half-width in day fractions
-                g = new Vector4(0.55f * Mathf.Clamp01(1f - off / band), view.orthographicSize * 0.6f, 0f, 0f);
+                g = new Vector4(0.55f * Mathf.Clamp01(1f - off / band), Meridian.CameraRig.SideView.HalfHeight(view) * 0.6f, 0f, 0f);
             }
             if (v == sunShown && g == glowShown) return;
             sunShown = v;
@@ -459,11 +459,21 @@ namespace Meridian.Planet
         {
             if (view == null || quad == null) return;
             // Generous width: the quad must cover the view at any aspect (captures switch to 16:9 targets).
-            float h = view.orthographicSize * 2f, w = h * Mathf.Max(view.aspect, 2.5f);
+            // U-072: under the perspective rail the quad sits behind the play plane and is sized for its depth;
+            // the shader keeps working in play-plane metres (viewHalf), so the art scale doesn't change.
+            float depth = Meridian.CameraRig.SideView.BackdropDepth(view);
+            float h = Meridian.CameraRig.SideView.HalfHeightAtDepth(view, depth) * 2f, w = h * Mathf.Max(view.aspect, 2.5f);
+            quad.transform.localPosition = new Vector3(0f, 0f, depth);
             quad.transform.localScale = new Vector3(w, h, 1f);
-            if (!Mathf.Approximately(view.orthographicSize, viewHalf))
+            if (overlay != null)
             {
-                viewHalf = view.orthographicSize;
+                overlay.transform.localPosition = new Vector3(0f, 0f, depth - 0.1f);
+                overlay.transform.localScale = quad.transform.localScale;
+            }
+            float planeHalf = Meridian.CameraRig.SideView.HalfHeight(view);
+            if (!Mathf.Approximately(planeHalf, viewHalf))
+            {
+                viewHalf = planeHalf;
                 quad.GetPropertyBlock(block);
                 block.SetFloat(ViewHalfId, viewHalf);
                 quad.SetPropertyBlock(block);
@@ -614,11 +624,14 @@ namespace Meridian.Planet
                 tintQuad.sharedMaterial = underwaterMaterial;
                 tintQuad.sortingOrder = 30; // over terrain, water and the surveyor; under fx and the HUD
             }
-            float bottom = view.transform.position.y - view.orthographicSize;
+            float bottom = view.transform.position.y - Meridian.CameraRig.SideView.HalfHeight(view);
             bool on = !float.IsNegativeInfinity(seaLevel) && bottom < seaLevel;
             if (tintQuad.enabled != on) tintQuad.enabled = on;
             if (!on) return;
-            float h = view.orthographicSize * 2f, w = h * Mathf.Max(view.aspect, 2.5f);
+            // U-072: just in front of the play plane, so its world y (the tint's depth below sea level) matches the plane.
+            float tz = view.orthographic ? 2f : Meridian.CameraRig.SideView.PlaneDistance(view) - 0.5f;
+            tintQuad.transform.localPosition = new Vector3(0f, 0f, tz);
+            float h = Meridian.CameraRig.SideView.HalfHeightAtDepth(view, tz) * 2f, w = h * Mathf.Max(view.aspect, 2.5f);
             tintQuad.transform.localScale = new Vector3(w, h, 1f);
         }
 

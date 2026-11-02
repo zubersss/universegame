@@ -118,7 +118,7 @@ namespace Meridian.Perf
             lights.Clear();
             lights.AddRange(FindObjectsByType<Light2D>());
             if (view == null) return lights.Count;
-            float h = view.orthographicSize, w = h * view.aspect;
+            float h = Meridian.CameraRig.SideView.HalfHeight(view), w = h * view.aspect;
             var c = (Vector2)view.transform.position;
             var rect = new Rect(c.x - w, c.y - h, 2f * w, 2f * h);
             int n = 0;

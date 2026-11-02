@@ -140,7 +140,7 @@ namespace Meridian.Core
             bases.ConfigureFor(config.id);
             if (sideCamera != null)
             {
-                sideCamera.transform.position = new Vector3(spawnX + 0.5f, surface + 3f, -10f);
+                sideCamera.transform.position = new Vector3(spawnX + 0.5f, surface + 3f, sideCamera.orthographic ? -10f : -Meridian.CameraRig.SideView.DistanceFor(Meridian.CameraRig.SideView.HalfHeight(sideCamera)));
                 var cf = sideCamera.GetComponent<CameraFollow>();
                 if (cf != null) cf.SnapToTarget();
             }
