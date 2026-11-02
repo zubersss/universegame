@@ -214,7 +214,7 @@ def run_build(entry):
     spec = importlib.util.spec_from_file_location("meridian_build", path)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
-    mod.build(os.path.join(HERE, entry["source"]))
+    getattr(mod, entry.get("build_fn", "build"))(os.path.join(HERE, entry["source"]))   # v2: one script, several sources
 
 
 def setup_render(scene, entry, w, h, preview):
@@ -569,7 +569,37 @@ def mark_stale(key, stale):
         log_line(f"STALE {key}: exports on disk are from an earlier render (see preview/STALE.txt)")
 
 
+def do_model(entry, preview):
+    """Contract v2 (§9, B-077): export a glb + four maps + json and a stamped turntable."""
+    t0 = time.time()
+    if preview:
+        raise AssetError(f"{entry['key']}: models have no preview mode (render the turntable instead)")
+    from meridian import model
+    sys.path.insert(0, HERE)
+    import review
+    scene, objs = open_source(entry, preview)
+    for ob in objs:
+        if ob.type == "ARMATURE":
+            ob.hide_render = False
+    stale = review.stale_keys()
+
+    def stamp_fn(img, path):
+        review.draw(img, review.stamp_text(path), 2, img.shape[0] - 16, (1.0, 1.0, 0.85))
+        if entry["key"] in stale:
+            review.draw(img, "STALE", 2, 2, (1.0, 0.15, 0.1), scale=4)
+    try:
+        info = model.export_model(entry, ART, PREVIEW, objs, stamp_fn)
+    except model.ModelError as e:
+        raise AssetError(f"{entry['key']}: {e}")
+    mark_stale(entry["key"], False)
+    log_line(f"OK {entry['key']} | glb {info['triangles']} tris, maps {info['texture']}^2"
+             f"{', emissive' if info['emissive'] else ''}, clips {','.join(info['clips']) or '-'} "
+             f"| review {os.path.basename(info['review'])} | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
+
+
 def do_asset(entry, preview):
+    if entry.get("model"):
+        return do_model(entry, preview)
     t0 = time.time()
     maps, clips, wh, entry = produce(entry, preview)
     problems, seam = check(entry, maps, clips, wh, preview)

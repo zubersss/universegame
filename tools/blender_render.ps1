@@ -63,6 +63,7 @@ $cyclesCpu = @('props', 'creatures', 'characters', 'ships', 'icons')
 function Test-Heavy($chosen) {
     if ($Preview) { return $false }
     if ($chosen.Count -gt 1) { return $true }
+    foreach ($a in $chosen) { if ($a.model) { return $true } }   # v2 models: Cycles bakes + Eevee turntable
     foreach ($a in $chosen) {
         if ($a.size -and (($a.size | Measure-Object -Maximum).Maximum -gt 512)) { return $true }
         if ($a.animations) { return $true }      # a frame sheet is a batch of renders

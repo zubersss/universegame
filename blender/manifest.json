@@ -15,6 +15,7 @@
       "maps": ["color", "normal", "emission", "mask"],
       "samples": 32
     },
+    {"key": "characters/calibration/base", "model": true, "source": "sources/characters/calibration.blend", "build": "scripts/build_calibration.py", "build_fn": "build_model", "collection": "calibration_fig", "texture": 1024, "tri_budget": 3000, "origin_rule": "feet", "clips": [{"name": "idle", "frames": 30, "loop": true}, {"name": "walk", "frames": 24, "loop": true}], "note": "contract v2 handshake (B-077); known colours as build_calibration.py"},
     {
       "key": "planets/earth/surface",
       "generator": "scripts/gen_planet.py",

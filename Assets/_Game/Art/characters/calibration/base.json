@@ -1,0 +1,31 @@
+{
+ "key": "characters/calibration/base",
+ "format": "glb",
+ "contract": "v2",
+ "facing": "+X",
+ "up": "+Y",
+ "units": "m",
+ "origin": "feet",
+ "triangles": 984,
+ "texture": 1024,
+ "maps": [
+  "color",
+  "normal",
+  "mask",
+  "emission"
+ ],
+ "fps": 30,
+ "clips": [
+  {
+   "name": "idle",
+   "frames": 30,
+   "loop": true
+  },
+  {
+   "name": "walk",
+   "frames": 24,
+   "loop": true
+  }
+ ],
+ "sockets": []
+}
