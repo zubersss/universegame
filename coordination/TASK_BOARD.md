@@ -959,6 +959,20 @@ Files: blender/scripts/build_icons.py, Assets/_Game/Art/icons/<id>/
 Depends: B-054
 Lead notes: Cycle 147. M4. helium3_condensate and deuterium first (U-063 uses them now). Small job; good while UNITY holds the lock.
 
+### B-062 · BLENDER · Ready · M4
+Goal: Uranus column art (Bible §7.5, §7.8): backgrounds/uranus_deck1..3 and uranus_deep (featureless cyan fog, dim light at sunlight 0.25, faint bands only hinted; crystalline sparkle below Deck 3 for the diamond rain; a dark-season variant tint for the unlit half as a second preset), terrain/uranus/floe_ice and floe_core (methane ice, pale cyan).
+Accept: same rules as B-055/B-058 (tiling, seams, stamped reviews, D-045 peak_mb measured before any numpy_only marker); reads clearly as Uranus next to Saturn (cyan, dim, low contrast).
+Files: blender/scripts/gen_backdrop*.py, gen_terrain.py, Assets/_Game/Art/backgrounds/uranus_*/, terrain/uranus/
+Depends: B-048
+Lead notes: Cycle 151. M4. After B-058.
+
+### B-063 · BLENDER · Ready · M4
+Goal: Neptune column art (Bible §7.5, §7.9): backgrounds/neptune_deck1..3 and neptune_deep (deep indigo, white wisps streaking sideways to sell the wind, a dark storm mass that seems to breathe in deck 2–3), terrain/neptune/floe_ice and floe_core, plus terrain/neptune/superionic_ice (black "hot ice" with a faint inner glow, Deep only).
+Accept: same pipeline rules; streaks tile horizontally; superionic ice readable against the deep backdrop; stamped reviews.
+Files: blender/scripts/gen_backdrop*.py, gen_terrain.py, Assets/_Game/Art/backgrounds/neptune_*/, terrain/neptune/
+Depends: B-048
+Lead notes: Cycle 151. M4. After B-062.
+
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
 Accept: frames ≤ 256, sheets ≤ 1024², `.json` per sheet, emission where glowing.

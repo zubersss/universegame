@@ -805,4 +805,4 @@ Checked: tests_2026-11-01.md 20:22–20:23 (EditMode 218/218; PlayMode 88/109 + 
 Decided: D-054 (skip time = layout distance / 1,200; Bible 1.5), D-055 (giant hazard numbers; keep the suit model; §7.6 amended), D-056 (M4 recipes; footing test skips ship-occupied columns). Process signal: UNITY changed the SkipDrive assertion before LEAD ruled (second time after D-019); ratified anyway.
 Locks: UNITY filed want_unity 20:36:33 right after its own job while want_blender (20:20:55) existed, which breaks D-039 and could deadlock again. LEAD deleted want_unity.lock (logged here); BLENDER goes next. Free RAM 1.79 GB, no heavy lock.
 U-064 stays In Progress until the targeted re-check (FootingTests + SkipDriveTests) passes.
-
+Queue: BLENDER had 3 untouched Ready tasks with deps met (B-056, B-059, B-060); added B-062 (Uranus column art) and B-063 (Neptune column art). UNITY: U-061, U-063, U-065, U-066, U-067 Ready; U-068/U-069 compiled and tested, so they move to Review on UNITY's hand-off.
