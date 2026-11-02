@@ -362,6 +362,7 @@ namespace Meridian.Creatures
             }
             c.Body.linearVelocity = v;
             if (c.View != null) c.View.flipX = (spec.Flies ? (v.x != 0f ? Mathf.Sign(v.x) : c.dir) : c.dir) < 0;
+            if (c.Model != null && c.Model.Ready && c.View != null) c.Model.SetFacing(!c.View.flipX); // U-075: the model faces like the sprite
 
             // Bite.
             bool hunting = c.State == CreatureState.Chase;

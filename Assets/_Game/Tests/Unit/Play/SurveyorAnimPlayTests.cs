@@ -65,8 +65,10 @@ namespace Meridian.Tests
         void AssertClip(string name)
         {
             Assert.AreEqual(name, view.Clip, $"clip ({player.Body.linearVelocity}, grounded {player.Grounded})");
-            Assert.IsTrue(ArtMaterials.ClipsFor(ArtKeys.Characters.Surveyor).TryGet(name, out var c));
-            Assert.That(view.Frame, Is.InRange(c.start, c.start + c.length - 1), $"{name} frame from base.json's range");
+            // D-070 (P-32): the surveyor is a model now (B-078): the model view plays the picked clip (sheet frames no longer step).
+            Assert.NotNull(view.Model, "PlayerView has a model view");
+            Assert.IsTrue(view.Model.Ready, "the surveyor model is loaded");
+            Assert.AreEqual(name, view.Model.Current, $"the model plays '{name}'");
         }
 
         [UnityTest]
@@ -74,6 +76,8 @@ namespace Meridian.Tests
         {
             yield return Boot();
             yield return Frames(30); // warm (first frames include loading)
+            float modelUntil = Time.realtimeSinceStartup + 20f;
+            while ((view.Model == null || !view.Model.Ready) && Time.realtimeSinceStartup < modelUntil) yield return Frames(1);
             worstMs = 0; samples.Clear();
             AssertClip(SurveyorAnim.Idle);
 

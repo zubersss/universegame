@@ -17,6 +17,9 @@ namespace Meridian.Creatures
         public Rigidbody2D Body { get; private set; }
         public BoxCollider2D Box { get; private set; }
         public SpriteRenderer View { get; private set; }
+        /// <summary>U-075: the species' 3D model (B-082 …), Ready once loaded; until then (or without a model) the sprite draws.</summary>
+        public Meridian.Art.ModelView Model { get; private set; }
+        static readonly string[] ModelClips = { "idle", "walk", "attack", "hurt" }; // same order as the sheet clips
         public CreatureState State { get; internal set; }
         /// <summary>Held: its chunk isn't loaded with collision, so the body is paused in place.</summary>
         public bool Held { get; internal set; }
@@ -124,6 +127,8 @@ namespace Meridian.Creatures
                 View.transform.localPosition = spec.Flies ? Vector3.zero : new Vector3(0f, -spec.size.y * 0.5f, 0f);
             }
             View.color = placeholder ? spec.placeholder : Color.white;
+            View.enabled = true;
+            EnsureModel(spec);
             transform.position = position;
             gameObject.SetActive(true);
             Body.gravityScale = spec.Flies ? 0f : 1f;
@@ -132,9 +137,33 @@ namespace Meridian.Creatures
             Body.linearVelocity = Vector2.zero;
         }
 
+        /// <summary>U-075: one model view per creature, swapped when a pooled body comes back as another species.</summary>
+        void EnsureModel(SpeciesSpec spec)
+        {
+            if (Model != null && Model.Key == spec.artKey) return;
+            if (Model != null) Destroy(Model.gameObject);
+            var go = new GameObject("Model");
+            go.transform.SetParent(transform, false);
+            // The model's origin is its feet (contract §9): walkers stand on the body's bottom, fliers sit on its centre.
+            go.transform.localPosition = spec.Flies ? Vector3.zero : new Vector3(0f, -spec.size.y * 0.5f, 0f);
+            Model = go.AddComponent<Meridian.Art.ModelView>();
+            Model.Load(spec.artKey);
+        }
+
         /// <summary>Picks this frame's sprite (idle / walk / attack / hurt) and the chill tint. No allocation.</summary>
         internal void Animate(float dt, float speed)
         {
+            if (Model != null && Model.Ready)
+            {
+                // U-075: the model plays the same clip choice by name; the sheet stays hidden.
+                if (hurtFor > 0f) hurtFor -= dt;
+                if (attackFor > 0f) attackFor -= dt;
+                if (chillFor > 0f) { chillFor -= dt; if (chillFor > 0f) Model.Flash(0.05f); }
+                if (View.enabled) View.enabled = false;
+                int pick = hurtFor > 0f ? 3 : attackFor > 0f ? 2 : speed > 0.3f ? 1 : 0;
+                Model.Play(ModelClips[pick]);
+                return;
+            }
             anim += dt;
             if (hurtFor > 0f) hurtFor -= dt;
             if (attackFor > 0f) attackFor -= dt;

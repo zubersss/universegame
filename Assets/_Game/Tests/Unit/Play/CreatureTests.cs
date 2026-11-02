@@ -195,6 +195,29 @@ namespace Meridian.Tests
             }
             foreach (string key in keys)
             {
+#if UNITY_EDITOR
+                // D-070 (P-31): a model species (B-082) is checked on its model: the json's clips registered, feet on y 0.
+                string glb = $"Assets/_Game/Art/{key}.glb";
+                if (System.IO.File.Exists(glb))
+                {
+                    var mclips = Meridian.Rendering.ArtMaterials.ModelClipsFor(key);
+                    Assert.NotNull(mclips, key + " model clips registered");
+                    var mjson = JsonUtility.FromJson<ModelJson>(System.IO.File.ReadAllText($"Assets/_Game/Art/{key}.json"));
+                    Assert.AreEqual(mjson.clips.Length, mclips.clips.Count, key + " clip count = json");
+                    foreach (var mc in mjson.clips) Assert.IsTrue(mclips.TryGet(mc.name, out _), $"{key} clip '{mc.name}'");
+                    var prefab = UnityEditor.AssetDatabase.LoadMainAssetAtPath(glb) as GameObject;
+                    Assert.NotNull(prefab, glb);
+                    var inst = Object.Instantiate(prefab);
+                    inst.transform.position = Vector3.zero;
+                    var rends = inst.GetComponentsInChildren<Renderer>();
+                    var mb = rends[0].bounds;
+                    foreach (var r in rends) mb.Encapsulate(r.bounds);
+                    report.AppendLine($"{key} model: bounds bottom {mb.min.y:F3} m");
+                    if (Mathf.Abs(mb.min.y) > 0.02f) fails.Add($"{key} model: feet at y {mb.min.y:F3} (± 0.02)");
+                    Object.Destroy(inst);
+                    continue;
+                }
+#endif
                 var h = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<IList<Sprite>>(key);
                 yield return h;
                 Assert.AreEqual(UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded, h.Status, key);
@@ -250,8 +273,11 @@ namespace Meridian.Tests
                 Vector2 b = c.Body.position + c.Box.offset;
                 float boxBottom = b.y - c.Box.size.y * 0.5f, half = c.Box.size.x * 0.5f;
                 float ground = Mathf.Max(side.terrain.TopSolidY(Mathf.FloorToInt(b.x - half + 0.01f)), side.terrain.TopSolidY(Mathf.FloorToInt(b.x + half - 0.01f))) + 1f;
-                float contact = c.View.transform.position.y;
-                float twoPx = 2f / c.View.sprite.pixelsPerUnit;
+                // D-070: a model species stands on its model's feet origin; wait for the model to load.
+                for (int i = 0; i < 600 && c.Model != null && !c.Model.Ready; i++) yield return null;
+                bool model = c.Model != null && c.Model.Ready;
+                float contact = model ? c.Model.transform.position.y : c.View.transform.position.y;
+                float twoPx = model ? 0.02f : 2f / c.View.sprite.pixelsPerUnit;
                 report.AppendLine($"{s}: sprite contact {contact:F3}, box bottom {boxBottom:F3}, ground {ground:F3}; v {c.Body.linearVelocity}, state {c.State}");
                 if (Mathf.Abs(boxBottom - contact) > twoPx) fails.Add($"{s}: sprite contact {contact:F3} vs box bottom {boxBottom:F3}");
                 // Box2D keeps a contact skin of a few cm between resting colliders; anything near 0.5 m is the old sink.
@@ -264,5 +290,8 @@ namespace Meridian.Tests
 
         [System.Serializable]
         public sealed class SheetSpec { public int frame_width, frame_height, columns, gutter; public float[] pivot; }
+
+        [System.Serializable] public sealed class ModelJson { public int fps; public ModelJsonClip[] clips; }
+        [System.Serializable] public sealed class ModelJsonClip { public string name; public int frames; public bool loop; }
     }
 }
