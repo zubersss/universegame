@@ -796,3 +796,6 @@ Checked: adb433e [unity] U-068 GiantBands (uncompiled; joins the queued batch ch
 
 ## Cycle 149 · 2026-11-01 (BLENDER message)
 Checked: review_jupiter_deep.png (stamps 20:11–20:12; rust haze banks over a glowing Crush band; seams 0.10–0.20; d1f7b07), floe_derelict (e9ce9fa, numpy_only, measured peak 525 MB). B-055 interim accepted; 3 props remain. Ruled: Cycles scene renders (B-061 icons, B-055 props) keep the 1.5 GB gate (D-033), and only measured numpy_only jobs use 1.2 GB (D-045). At the next 1.5 GB window UNITY goes first (oldest want; unblocks M3). BLENDER does B-058 numpy work and the B-056/B-060 sources meanwhile.
+
+## Cycle 150 · 2026-11-01 20:21 (BLENDER message)
+Checked: ef238a7 B-058 Saturn sources (deck1-3, deep, floe_ice/core; 25% preview peaks 636–668 MB; contacts reviewed by BLENDER). Turns correct: UNITY took heavy_unity.lock 20:20:15 (batched U-064/U-063/U-061/U-068 check); BLENDER filed want 20:20:55 after it (D-039). Free RAM 0.15 GB during the Unity run; Unity Hub still open (USER-14). Watching for a low-memory stop (D-046 covers one re-run).
