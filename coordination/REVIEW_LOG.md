@@ -914,3 +914,6 @@ Queues: UNITY had 2 Ready with deps met → added U-078 (planet spheres), U-079 
 ## Cycle 177 · 2026-11-02 01:2x (BLENDER message)
 Checked: review_ships_pilgrim_base.png (stamped 01:14). B-079 art accepted; Done on UNITY's lit preview. Rendered at the D-066 gate (peak 1.72 GB). BLENDER next: B-080 terrain materials.
 
+## Cycle 178 · 2026-11-02 01:2x (BLENDER message)
+Checked: review_terrain_earth_grass.png and _stone.png (stamped 01:18; read as the v1 tiles). B-080 art accepted; Done when U-073's lit capture shows the real materials. D-067 (grass fringe in the shader). BLENDER next: B-081.
+

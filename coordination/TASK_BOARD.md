@@ -121,7 +121,7 @@ Goal: Chunk block mesher (Bible §10.4 v2): `TerrainChunk` builds one greedy-mes
 Accept: EditMode: face count for a known chunk pattern; rebuild ≤ 2 ms per chunk (D-019); PlayMode: dig removes the block in the same frame and collision matches; streaming within budget; FootingTests green.
 Files: Assets/_Game/Code/Runtime/Terrain/, Shaders/
 Depends: U-072
-Lead notes: Cycle 171. R1. The biggest piece; keep the chunk API so generators and save diffs don't change.
+Lead notes: Cycle 171. R1. The biggest piece; keep the chunk API so generators and save diffs don't change. Cycle 178: B-080 materials are in (terrain/earth/<material>/top_*, side_*, backwall_*; 2 m repeat). D-067: blend the grass top colour down the top ~8 cm of grass side faces in the shader.
 
 ### U-074 · UNITY · In Progress · R1
 Goal: 3D lighting from `TimeSystem` (Bible §10.5 v2): one directional Sun (angle, colour, intensity per planet per §9 and D-030), per-planet ambient gradient, soft shadows (one cascade, 30 m), bloom; lamps, thrusters, vents become point lights (≤ 8 visible); distance fog per planet replaces the haze gradient; Light2D components removed.
@@ -699,12 +699,12 @@ Files: blender/sources/ships/pilgrim.blend, build_pilgrim.py, Assets/_Game/Art/s
 Depends: B-077
 Lead notes: Cycle 177: art accepted on the stamped turntable (01:14): worn grey hull, hazard stripes, blue cockpit glass, emissive engine/portholes/nav lights; 8,220 tris + LOD1 3,944; four legs on a 3.52 m footprint (v1 skids were 7.4 m, too wide for the 3.6 m pad: a sensible change). Done once UNITY's lit preview is in.
 
-### B-080 · BLENDER · Ready · R1
+### B-080 · BLENDER · In Progress · R1
 Goal: Earth terrain block materials (contract §9 terrain row): for every Earth tile material in `EarthTileSet` (soil, grass-topped soil, stone, sand, clay, snow, ice, ores, wood…: list them from the tile set and log the list), a tileable `top` and `side` PBR set at 512², 2 m per repeat, plus `backwall`; derived from the v1 tile recipes.
 Accept: tiles seamlessly (2× tiled preview); reads as the v1 materials under the Earth Sun in the UNITY lit preview; stamped contact sheet of all sets.
 Files: blender/scripts/gen_terrain.py, Assets/_Game/Art/terrain/earth/
 Depends: B-077
-Lead notes: Cycle 171. R1. Numpy/Cycles bakes; measure peaks (D-045).
+Lead notes: Cycle 178 (2eb6213): art accepted on the stamped relit sheets (soil, grass, stone, sand, snow, water + backwall; top/side × color/normal/mask at 512², seams 0.76–1.25, numpy_only peak 377 MB). Done once U-073 shows them on blocks in a lit capture. Fringe rule: D-067.
 
 ### B-081 · BLENDER · Ready · R1
 Goal: Earth props batch 1 as models: `props/common/{landing_pad, shelter_wall, shelter_door, smelter, storage_crate, lamp}` (+ `fabricator`, `refinery` if they exist as sprites), each ≤ 6 k triangles, lamp with an emissive head and a `light` socket, door with an `open` clip.
