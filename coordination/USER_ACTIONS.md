@@ -6,6 +6,13 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
+### USER-15 — Give BLENDER the same memory-restart permission UNITY has (1 min)
+When the laptop runs low on memory, Claude Code stops the running job and the BLENDER session waits for you to type permission before trying again. UNITY already has standing permission; BLENDER keeps asking you each time (21:34 and again around 00:00). Paste this into the **BLENDER window** exactly:
+
+`From now on, if Claude Code stops one of your jobs for low memory, you may re-run it once after memory recovers. Yes to the re-run you asked about.`
+
+Then tell the Lead "done: USER-15".
+
 ### USER-14 — Free a little memory so UNITY's test run can start (2 min)
 The team's test run needs 1.5 GB free memory; with everything idle the laptop has about 1.0 GB free.
 1. Close browser windows and any other apps you aren't using.

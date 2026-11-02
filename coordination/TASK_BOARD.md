@@ -1008,7 +1008,7 @@ Files: blender/scripts/build_creatures_saturn.py, Assets/_Game/Art/creatures/sat
 Depends: B-060
 Lead notes: Cycle 164. M4.
 
-### B-067 · BLENDER · Ready · M4
+### B-067 · BLENDER · In Progress · M4
 Goal: Giant-world FX batch (Bible §7.5–7.9): `fx/lightning` (Deck 2–3 bolt + flash, 3 variants), `fx/diamond_rain` (falling 5–20 cm diamonds, sparkle), `fx/methane_hail`, `fx/wind_streaks` (Neptune lateral gusts, tileable), `fx/crush_pulse` (the pulsing dark band with the "CRUSH" label), `fx/skip_spool` + `fx/skip_streak` (Skip Drive spool-up glow and the travel streak, top-down), `fx/floe_sublimate` (a floe fading to vapour).
 Accept: frames ≤ 256, sheets ≤ 1024², `.json` per sheet, emission where glowing; same rules as B-012; stamped contact sheet.
 Files: blender/scripts/gen_fx.py, Assets/_Game/Art/fx/
@@ -1029,7 +1029,7 @@ Files: blender/scripts/build_props_common.py, gen_fx.py, Assets/_Game/Art/props/
 Depends: B-014
 Lead notes: Cycle 164. M4. Feeds U-067 (grapple) and U-071 (aerostats).
 
-### B-070 · BLENDER · Ready · M4
+### B-070 · BLENDER · In Progress · M4
 Goal: Moon sky objects for the giants (Bible §7.6–7.9): `planets/io/surface`, `planets/europa/surface`, `planets/titan/surface`, `planets/enceladus/surface`, `planets/miranda/surface`, `planets/triton/surface` at 512×256 like Luna (B-010), with the geyser plumes of Enceladus and Triton as a `glow` layer; Io with volcanic hotspots.
 Accept: same camera and lighting as Luna; real albedo/colour cues (Io yellow-sulfur, Europa cracked white, Titan orange haze, Triton pink-grey); stamped montage.
 Files: blender/scripts/gen_planet.py, Assets/_Game/Art/planets/{io,europa,titan,enceladus,miranda,triton}/
