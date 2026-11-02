@@ -869,3 +869,6 @@ BLENDER committed all four creature sets as sources (b98c1b8, c5257ed, 4cc0789);
 ## Cycle 165 · 2026-11-02 00:0x (BLENDER message)
 Claude Code stopped BLENDER's B-056 render for low memory at ~00:00 (18 s in, 2.0 GB free at lock time; nothing exported; stale lock removed by BLENDER). BLENDER waits for the owner's typed D-046 approval, as at 21:34. Added USER-15: the owner gives BLENDER the standing D-046 sentence in its window, so this stops recurring. Sources committed meanwhile: B-067 FX (64f0265), B-070 moons (c6b401b) → In Progress.
 
+## Cycle 166 · 2026-11-02 00:1x (BLENDER message)
+Checked: review_b067_fx.png (10 sheets) and review_b070_moons.png (6 surfaces, 2 plume glows), both stamped 00:01, one numpy job (peak 327 MB, ~15 s). B-067 and B-070 → Done. Plume length accepted as is. BLENDER will run short jobs in the foreground (both memory stops hit background waiters). B-056 render still waits on USER-15.
+
