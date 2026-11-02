@@ -892,3 +892,6 @@ Owner directive in the LEAD window: "make it 3D but keep everything else"; after
 BLENDER's ring_ice v2 (B-059) was not reviewed: superseded, no fault.
 Open risks: integrated-graphics performance with 3D terrain (fallback logged in D-062); Blender glb export + ArtImporter v5 handshake (B-077/U-075) is the first thing to proof-check.
 
+## Cycle 172 · 2026-11-02 01:2x (BLENDER message)
+Checked: review_characters_calibration_base.png (stamped 00:38): sphere/cube calibration figure, emissive stripe on +X, shadows under the Sun; 09c6f27 base.glb 48 KB + maps + json. B-077 → In Progress pending U-075's import confirmation. D-063: contract v2.1 ratifies all eight proposals; *.glb/*.gltf added to .gitattributes (LFS). BLENDER may start B-078 sources but no model renders until the import is confirmed (its own rule, agreed).
+

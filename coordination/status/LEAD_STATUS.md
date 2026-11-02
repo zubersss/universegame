@@ -1,5 +1,5 @@
 # LEAD STATUS
-Updated: 2026-11-02 01:1x · Session: 2 (Fable 5.1) · Review cycle: 171
+Updated: 2026-11-02 01:2x · Session: 2 (Fable 5.1) · Review cycle: 172
 ## Current task
 3D rehaul (D-062) started: R1 = Earth in 3D. Watch the B-077/U-075 handshake first (glb export → ArtImporter v5). Then U-072/U-073 captures against §9 v2. 2D version archived (archive/meridian-v2-2d, meridian-v2-2d-final).
 ## Last completed

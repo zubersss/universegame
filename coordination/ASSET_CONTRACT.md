@@ -1,4 +1,4 @@
-# MERIDIAN — Asset Contract v2.0
+# MERIDIAN — Asset Contract v2.1
 
 > **v2 (D-062, 2026-11-02).** Models replace sprites. §9 is the rule set for every 3D category
 > (`terrain`, `backgrounds` (now skyline/ridge/deck meshes), `ships`, `characters`, `creatures`,
@@ -148,3 +148,13 @@ Existing Done assets are not re-exported unless a task says so.
 | Depth bands | Skyline/ridge meshes: `backgrounds/<planet>/ridge_mid.glb` (z 20–60 m strip, tileable in x every 256 m), `skyline_far.glb` (z ≥ 150 m), `skydome` as a 2048×1024 equirect `color`. Giants: `deck<n>.glb` translucent cloud planes |
 | Review evidence | A stamped turntable contact sheet (front, ¾, back) rendered in Eevee with the planet's Sun and a neutral grey floor: `blender/preview/review_<key>.png`; plus the Unity lit preview from `tools/unity_art_preview.ps1` for Done |
 | Import | `ArtImporter` v5 (UNITY): glb → materials from the four maps, clip names kept, address = key, placeholder retired. Never hand-edit a glb's import settings |
+
+### 9.1 Rulings from the B-077 handshake (v2.1, D-063)
+1. **Sidecar json.** Every model ships `<variant>.json` beside the glb: `clips` (name, frames, fps, loop), `sockets` (name → node), `triangles`, `lod1` (bool). glTF has no loop flag; the importer reads loops from here.
+2. **Clip timing.** A clip of n frames at 30 fps has its last key equal to its first and exports as n/30 s; the importer loops without repeating the last frame.
+3. **No images inside the glb.** Materials carry factors only; `ArtImporter` builds the URP Lit material from the four PNGs beside the glb.
+4. **Mask channels.** R metallic, G baked ambient occlusion, B rim/interactive glow, A smoothness (= 1 − roughness).
+5. **Colour check tolerance** for v2 bakes: ±4/255 (Cycles colour bakes run ~1.5 % low).
+6. **Memory gate.** Model bake + export jobs use the 1.5 GB gate (measured 1.44–1.56 GB).
+7. **Sockets** are empties named `socket_<name>` exported as glTF nodes, and listed in the json.
+8. **LFS.** `*.glb` and `*.gltf` are LFS (`.gitattributes`). A glb committed before this rule is re-added once (`git rm --cached` + `git add`) by its owner so it becomes a pointer.

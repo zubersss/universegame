@@ -657,12 +657,12 @@ Lead notes: Done 3936ae1 (cycle 26): Archive at x 184 (buried room), launch comp
 > **R1 (D-062).** 2D tasks B-056..B-076 are Superseded; their `.blend` sources (rigs, props,
 > terrain recipes) are the starting point for the models. Contract v2 §9 is the rule set.
 
-### B-077 · BLENDER · Ready · R1
+### B-077 · BLENDER · In Progress · R1
 Goal: Contract v2 pipeline test (the B-002 handshake again, in 3D): export the calibration figure as `characters/calibration/base.glb` with two clips (`idle`, `walk`), the four v2 maps, +X facing, feet at the origin; a stamped turntable contact sheet; a `render.py` export path for glb (`export_model(key)`); propose contract §9 changes you need in BLENDER_STATUS.
 Accept: UNITY's ArtImporter v5 imports it with the clip names intact and the materials assigned (U-075 confirms); the turntable review is stamped.
 Files: blender/scripts/build_calibration.py, blender/render.py, Assets/_Game/Art/characters/calibration/
 Depends: —
-Lead notes: Cycle 171. R1. Do this first; everything else waits on the import working.
+Lead notes: Cycle 172 (09c6f27): glb + four maps + json exported, 984 tris, idle/walk clips, turntable checked (bake colours within tolerance, emissive stripe on +X). Proposals ratified as contract v2.1 (D-063). Done once UNITY confirms the import (U-075).
 
 ### B-078 · BLENDER · Ready · R1
 Goal: The surveyor as a model: `characters/surveyor/base.glb`, ≤ 12 k triangles, 2048 textures, the full §5 clip set at 30 fps, a `float_pack` socket (empty) on the back and a `rig_tool` socket in the right hand; reuse the existing surveyor rig.
