@@ -65,22 +65,27 @@ namespace Meridian.Art
                 modelHandle.Completed += op => { prefab = op.Status == AsyncOperationStatus.Succeeded ? op.Result : null; Done(); };
                 clipsHandle = Addressables.LoadAssetAsync<IList<AnimationClip>>(modelLoc);
                 clipsHandle.Completed += op => { clips = op.Status == AsyncOperationStatus.Succeeded ? op.Result : null; Done(); };
-                LoadOptional(key, typeof(Material), () =>
-                {
-                    materialHandle = Addressables.LoadAssetAsync<Material>(key);
-                    materialHandle.Completed += op => { material = op.Status == AsyncOperationStatus.Succeeded ? op.Result : null; Done(); };
-                });
+                LoadGeneratedMaterial(key);
             };
         }
 
-        void LoadOptional(string key, System.Type type, System.Action load)
+        /// <summary>
+        /// The key's generated material (Generated/Models/&lt;key&gt;.mat). The .glb carries glTFast's own material as a
+        /// sub-asset, which also matches a Material lookup on the key, so pick the location of the .mat file itself.
+        /// </summary>
+        void LoadGeneratedMaterial(string key)
         {
-            var locs = Addressables.LoadResourceLocationsAsync(key, type);
+            var locs = Addressables.LoadResourceLocationsAsync(key, typeof(Material));
             locs.Completed += l =>
             {
-                bool has = l.Status == AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0;
+                IResourceLocation matLoc = null;
+                if (l.Status == AsyncOperationStatus.Succeeded && l.Result != null)
+                    foreach (var loc in l.Result)
+                        if (loc.InternalId != null && loc.InternalId.EndsWith(".mat", System.StringComparison.OrdinalIgnoreCase)) { matLoc = loc; break; }
                 Addressables.Release(l);
-                if (has && this != null) load(); else Done();
+                if (matLoc == null || this == null) { Done(); return; }
+                materialHandle = Addressables.LoadAssetAsync<Material>(matLoc);
+                materialHandle.Completed += op => { material = op.Status == AsyncOperationStatus.Succeeded ? op.Result : null; Done(); };
             };
         }
 
