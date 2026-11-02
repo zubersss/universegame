@@ -473,6 +473,24 @@ def floe_sublimate(rng, w, h, n):
     return frames
 
 
+def grapple_line(rng, w, h, n):
+    """B-069 Rig grapple cable: two twisted steel strands, tileable in x (twist period 16 px
+    divides the width); a light along the top edge reads as round wire. Static (1 frame)."""
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    cy, amp, per = h / 2, 1.6, 16.0
+    I = np.zeros((h, w), np.float32)
+    shade = np.zeros((h, w), np.float32)
+    for ph in (0.0, math.pi):
+        yc = cy + amp * np.sin(2 * math.pi * xx / per + ph)
+        front = 0.5 + 0.5 * np.cos(2 * math.pi * xx / per + ph)      # strand in front -> brighter
+        d = (yy - yc) / 1.6
+        s = np.exp(-d ** 2)
+        I = np.maximum(I, s)
+        shade = np.where(s > 0.3, np.maximum(shade, (0.55 + 0.45 * front) * (1 - 0.35 * np.clip(d, 0, 1))), shade)
+    col = _ramp(shade, [(0.0, C((70, 72, 78))), (0.6, C((150, 154, 160))), (1.0, C((214, 218, 224)))])
+    return [_frame(col, np.clip(I * 1.4, 0, 1)) for _ in range(n)]
+
+
 def _inside(h, w):
     """1 inside the padded area, 0 in the 8 px margin."""
     m = np.zeros((h, w), np.float32)
@@ -492,7 +510,7 @@ GEN = {"thruster": thruster, "dust": dust, "dig_sparks": dig_sparks, "escape_ban
        "survey_scan": survey_scan, "builder_ghost": builder_ghost, "warden_bolt": warden_bolt,
        "lightning": lightning, "diamond_rain": diamond_rain, "methane_hail": methane_hail,
        "wind_streaks": wind_streaks, "crush_pulse": crush_pulse, "skip_spool": skip_spool,
-       "skip_streak": skip_streak, "floe_sublimate": floe_sublimate}
+       "skip_streak": skip_streak, "floe_sublimate": floe_sublimate, "grapple_line": grapple_line}
 
 
 def generate(entry, ctx):

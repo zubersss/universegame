@@ -1,0 +1,22 @@
+{
+  "key": "fx/grapple_line/base",
+  "frame_width": 128,
+  "frame_height": 16,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 1,
+  "pivot": [
+    0.0,
+    0.5
+  ],
+  "facing": "right",
+  "animations": [
+    {
+      "name": "line",
+      "start": 0,
+      "length": 1,
+      "loop": true
+    }
+  ]
+}
