@@ -959,7 +959,7 @@ Files: blender/scripts/build_asteroids.py, gen_fx.py, Assets/_Game/Art/props/spa
 Depends: B-010
 Lead notes: Cycle 147. M4. Feeds U-066.
 
-### B-060 · BLENDER · Ready · M4
+### B-060 · BLENDER · In Progress · M4
 Goal: Saturn creatures (Bible §7.7): `creatures/saturn/helium_jelly` (translucent; add a "rise" clip for when it's hit), `hex_drake` (winged, flier clip set), `floe_moth` (small, 128 px).
 Accept: contract §4 sizes and clips; pale gold palette, translucency where stated; stamped review.
 Files: blender/scripts/build_creatures_saturn.py, Assets/_Game/Art/creatures/saturn/
@@ -987,19 +987,54 @@ Files: blender/scripts/gen_backdrop*.py, gen_terrain.py, Assets/_Game/Art/backgr
 Depends: B-048
 Lead notes: Done (cycle 159): Neptune decks + floe_ice/floe_core/superionic_ice (27d8a24) and storm v4 on the near layer; review_neptune_deck2/3.png stamped 22:29–22:30: deep indigo, long white wind streaks, a soft dark storm mass.
 
-### B-064 · BLENDER · Ready · M4
+### B-064 · BLENDER · In Progress · M4
 Goal: Uranus creatures (Bible §7.8): `creatures/uranus/frostwisp` (small luminous floater, cyan-white emission, 128 px), `methane_ray` (glider, flier clip set), `hailcrab` (shelled walker whose shell catches diamonds; a "shell up" defend clip), `tiltbird` (migrating flier, small flock unit).
 Accept: contract §4 sizes and clips as earlier creatures; dim-light readable (test the contact sheet at Uranus sunlight 0.25 in the lit preview); stamped review.
 Files: blender/scripts/build_creatures_uranus.py, Assets/_Game/Art/creatures/uranus/
 Depends: B-002
 Lead notes: Cycle 158. M4.
 
-### B-065 · BLENDER · Ready · M4
+### B-065 · BLENDER · In Progress · M4
 Goal: Neptune creatures (Bible §7.9): `creatures/neptune/windrider` (sail-finned floater), `shadow_shoal` (dark fast fish-like swarm unit, 128 px, faint rim light so it reads on indigo), `pressure_phantom` (translucent, Deck 3), `anchor_worm` (holds floes; a coiled "anchored" pose and a free clip).
 Accept: contract §4 sizes and clips; readable against the B-063 indigo decks; translucency where stated; stamped review.
 Files: blender/scripts/build_creatures_neptune.py, Assets/_Game/Art/creatures/neptune/
 Depends: B-002
 Lead notes: Cycle 158. M4.
+
+### B-066 · BLENDER · Ready · M4
+Goal: Saturn apex `creatures/saturn/polar_hydra` (Bible §7.7): a six-headed cloud serpent of the Hexagon's eye, built as a body segment set plus six head variants (each head a separate sprite with idle/strike/destroyed clips) so UNITY can remove heads one at a time; Venus apex precedent for size (D-042: 400 px × 5 frames per segment); pale gold with a cold inner glow.
+Accept: heads and body join without seams in a chained preview; destroyed-head state reads at gameplay scale; frames and sheets within contract §4; stamped review.
+Files: blender/scripts/build_creatures_saturn.py, Assets/_Game/Art/creatures/saturn/polar_hydra/
+Depends: B-060
+Lead notes: Cycle 164. M4.
+
+### B-067 · BLENDER · Ready · M4
+Goal: Giant-world FX batch (Bible §7.5–7.9): `fx/lightning` (Deck 2–3 bolt + flash, 3 variants), `fx/diamond_rain` (falling 5–20 cm diamonds, sparkle), `fx/methane_hail`, `fx/wind_streaks` (Neptune lateral gusts, tileable), `fx/crush_pulse` (the pulsing dark band with the "CRUSH" label), `fx/skip_spool` + `fx/skip_streak` (Skip Drive spool-up glow and the travel streak, top-down), `fx/floe_sublimate` (a floe fading to vapour).
+Accept: frames ≤ 256, sheets ≤ 1024², `.json` per sheet, emission where glowing; same rules as B-012; stamped contact sheet.
+Files: blender/scripts/gen_fx.py, Assets/_Game/Art/fx/
+Depends: B-012
+Lead notes: Cycle 164. M4. Light numpy work for most of these; good while UNITY holds the lock.
+
+### B-068 · BLENDER · Ready · M4
+Goal: Giant POI props (Bible §7.7–7.9): `props/saturn/{ring_rig, helium_trap, hexagon_wall_marker}` (the ring-mining rig with the Saturn beacon; a Deck 2–3 helium-rain trap; a wind-wall marker), `props/uranus/{tilted_derelict, umbrella_platform}` (the beacon derelict leaning at the axial tilt; a diamond-catching umbrella platform), `props/neptune/{wind_anchor, meridian_wreck_bow, meridian_wreck_mid, meridian_wreck_stern}` (the *Meridian* herself in three standable segments, alive with faint running lights).
+Accept: contract §4 sizes (ppu per D-018 where a prop exceeds the margin); standable tops read flat; emission on beacons and running lights; stamped contact sheets.
+Files: blender/scripts/build_props_saturn.py, build_props_uranus.py, build_props_neptune.py, Assets/_Game/Art/props/{saturn,uranus,neptune}/
+Depends: B-055
+Lead notes: Cycle 164. M4. Reuse the Jupiter prop recipes (riveted cream hull, rust band) for the Meridian wreck so the expedition reads as one fleet.
+
+### B-069 · BLENDER · Ready · M4
+Goal: Aerostat and giant gear props (Bible §7.5, §4.2): `props/common/{aerostat_cell, aerostat_deck, aerostat_strut}` (the buildable platform modules: a gas cell, a deck plate, a strut, each tileable with the Venus aerostat look), `props/common/float_cell_pack` (the player's back-mounted float cell, two marks), `props/common/grapple_hook` + `fx/grapple_line` (the Rig grapple head and a tileable cable).
+Accept: deck and strut tile seamlessly in a 3-wide preview; the float cell reads on the surveyor's back at 1:1; stamped contact sheet.
+Files: blender/scripts/build_props_common.py, gen_fx.py, Assets/_Game/Art/props/common/, fx/grapple_line/
+Depends: B-014
+Lead notes: Cycle 164. M4. Feeds U-067 (grapple) and U-071 (aerostats).
+
+### B-070 · BLENDER · Ready · M4
+Goal: Moon sky objects for the giants (Bible §7.6–7.9): `planets/io/surface`, `planets/europa/surface`, `planets/titan/surface`, `planets/enceladus/surface`, `planets/miranda/surface`, `planets/triton/surface` at 512×256 like Luna (B-010), with the geyser plumes of Enceladus and Triton as a `glow` layer; Io with volcanic hotspots.
+Accept: same camera and lighting as Luna; real albedo/colour cues (Io yellow-sulfur, Europa cracked white, Titan orange haze, Triton pink-grey); stamped montage.
+Files: blender/scripts/gen_planet.py, Assets/_Game/Art/planets/{io,europa,titan,enceladus,miranda,triton}/
+Depends: B-010
+Lead notes: Cycle 164. M4. Light job; procedural like Venus/Saturn in B-011.
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
