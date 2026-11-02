@@ -214,20 +214,55 @@ def ridge(region, R, coll):
 
 
 def skyline(coll):
-    rng = random.Random(77)
-    big, mid, fine = make_terms(rng, 4, 4), make_terms(rng, 7, 12), make_terms(rng, 4, 20)
+    """v3 (LEAD cycle 183): a mountain range, not fins. Each depth row has its own profile (own
+    seed; frequency and amplitude fall toward the back), lightly smoothed across rows so the
+    range stays coherent; peaks ride on a broad massif instead of rising from the floor; an
+    upper-envelope pass caps every slope near 45 deg (no vertical sheets); snow is a soft
+    vertex-colour band at the v1 snow line (~0.74 of the peak height)."""
     P = 2 * PERIOD
-    xs = [-PERIOD + 2.0 * PERIOD / 256 * i for i in range(257)]       # 512 m, 2 m steps
-    ys = [150.0, 200.0, 260.0, 320.0, 400.0]
+    nx = 128                                                          # 4 m steps over 512 m
+    xs = [-PERIOD + P / nx * i for i in range(nx + 1)]
+    ys = [150.0 + 25.0 * j for j in range(11)]                        # 150..400 m
     rock0, rock1, snow = (112, 120, 132), (138, 146, 156), (232, 238, 246)
+    base_rng = random.Random(77)
+    massif_t = make_terms(base_rng, 3, 2)                             # broad base, 1-2 waves per 512 m
+    Z = []
+    for j, y in enumerate(ys):
+        d = j / (len(ys) - 1)                                         # 0 front .. 1 back
+        rr = random.Random(1000 + j)
+        kmax = max(3, int(round(14 - 9 * d)))                         # lower frequency toward the back
+        peaks_t = make_terms(rr, 6, kmax)
+        amp = 46 - 18 * d                                             # lower amplitude toward the back
+        rise = math.sin(math.pi / 2 * min(1.0, d * 2.2))              # the massif rises over the first rows
+        row = []
+        for x in xs:
+            massif = 55 + periodic(None, x, P, massif_t, 18)
+            pk = max(0.0, periodic(None, x, P, peaks_t, amp) + 0.35 * amp)
+            row.append(rise * (massif + pk * (0.55 + 0.45 * massif / 73.0)))
+        Z.append(row)
+    for _ in range(2):                                                # light smoothing across depth rows
+        Z = [Z[0]] + [[0.25 * a + 0.5 * b + 0.25 * c for a, b, c in zip(Z[j - 1], Z[j], Z[j + 1])]
+                      for j in range(1, len(Z) - 1)] + [Z[-1]]
+    sx, sy = P / nx, 25.0
+    for _ in range(4):                                                # slope cap (upper envelope, ~45 deg)
+        for row in Z:
+            for i in range(nx + 1):
+                l, r = row[(i - 1) % nx], row[(i + 1) % nx]            # wraps: keeps the 512 m period
+                row[i] = min(row[i], l + sx * 1.0, r + sx * 1.0)
+            row[nx] = row[0]
+        for j in range(len(Z)):
+            for i in range(nx + 1):
+                nb = [Z[k][i] for k in (j - 1, j + 1) if 0 <= k < len(Z)]
+                Z[j][i] = min([Z[j][i]] + [v + sy * 1.0 for v in nb])
+    peak = max(max(r) for r in Z)
+    line = 0.74 * peak
+    zmap = {(round(x, 3), y): Z[j][i] for j, y in enumerate(ys) for i, x in enumerate(xs)}
 
     def h(x, y):
-        d = (y - 150.0) / 250.0
-        ridge_line = 75 + periodic(rng, x, P, big, 30) + periodic(rng, x, P, mid, 26) + periodic(rng, x, P, fine, 2.0)   # v2: even range, no single dominant peak, no fluting
-        return max(0.0, ridge_line * (0.25 + 0.75 * math.sin(math.pi * min(1.0, d * 1.2) / 2)))
+        return zmap[(round(x, 3), y)]
 
     def col(x, y, z):
-        k = max(0.0, min(1.0, (z - 95.0) / 10.0))
+        k = max(0.0, min(1.0, (z - line) / 8.0))
         n = 0.5 + 0.5 * math.sin(2 * math.pi * x / P * 7 + y * 0.03)
         c = [a + (b2 - a) * n for a, b2 in zip(rock0, rock1)]
         return lin([a + (b2 - a) * k for a, b2 in zip(c, snow)])

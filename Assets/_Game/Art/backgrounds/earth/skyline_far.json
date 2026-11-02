@@ -6,7 +6,7 @@
  "up": "+Y",
  "units": "m",
  "origin": "band",
- "triangles": 2048,
+ "triangles": 2560,
  "lod1_triangles": null,
  "texture": 1024,
  "maps": [
