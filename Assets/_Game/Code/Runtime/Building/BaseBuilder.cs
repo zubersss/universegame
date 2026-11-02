@@ -26,6 +26,8 @@ namespace Meridian.Building
         public const float HudRange = 15f;
         /// <summary>A lamp's warm light reaches this far (m; LEAD, U-064).</summary>
         public const float LampRadius = 5f;
+        /// <summary>U-074: the 3D lamp light (URP point lights fade to zero at their range, so the range exceeds the pool radius).</summary>
+        public const float Lamp3DRangeFactor = 1.6f, Lamp3DIntensity = 3f;
 
         public TerrainStreamer terrain;
         public Meridian.Rig.RigTools rig;
@@ -253,6 +255,15 @@ namespace Meridian.Building
                 light.pointLightInnerRadius = 0.4f;
                 light.intensity = 1.1f;
                 light.color = new Color(1f, 0.8f, 0.55f);
+                // U-074 (Bible 2.0 §10.5): the 3D renderer's lamp: a warm point light a little in front of the play plane,
+                // so it pools on block fronts and the back wall; no shadows (budget: ≤ 150 casters, Sun only).
+                var lamp3D = lightGo.AddComponent<Light>();
+                lamp3D.type = LightType.Point;
+                lamp3D.color = light.color;
+                lamp3D.range = LampRadius * Lamp3DRangeFactor;
+                lamp3D.intensity = Lamp3DIntensity;
+                lamp3D.shadows = LightShadows.None;
+                lightGo.transform.localPosition += new Vector3(0f, 0f, -0.8f);
             }
             var viewGo = new GameObject("View");
             viewGo.transform.SetParent(go.transform, false);
