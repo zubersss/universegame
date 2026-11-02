@@ -107,7 +107,13 @@ function Request-Heavy($job) {
     $recentRun = (Test-Path $stamp) -and ((Get-Item $stamp).LastWriteTime -gt (Get-Date).AddMinutes(-30))
     $waiting = Get-ChildItem $locks -Filter 'want_*.lock' -ErrorAction SilentlyContinue |
         Where-Object { $_.Name -ne 'want_blender.lock' -and $_.LastWriteTime -gt (Get-Date).AddMinutes(-30) }
-    if ($recentRun -and $waiting) {
+    # Exception: my own want was filed after my last job (I waited through another role's turn,
+    # D-039) and before every other want -> it's my turn under D-037, even if they re-filed.
+    $myWant = Get-Item $want -ErrorAction SilentlyContinue
+    $waitedMyTurn = $myWant -and $recentRun -and $waiting -and
+        ($myWant.LastWriteTime -gt (Get-Item $stamp).LastWriteTime) -and
+        -not ($waiting | Where-Object { $_.LastWriteTime -le $myWant.LastWriteTime })
+    if ($recentRun -and $waiting -and -not $waitedMyTurn) {
         return "turn guard (D-059): $($waiting.Name -join ', ') waiting and BLENDER ran at $((Get-Item $stamp).LastWriteTime.ToString('HH:mm:ss')); their turn"
     }
     $freeMB = [int]((Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1024)

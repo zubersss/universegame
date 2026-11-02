@@ -347,7 +347,7 @@ PRESETS = {
         ambient=((0.28, 0.34, 0.68), 0.55),
         haze=(46, 64, 132),
         wisps=(6, (220, 230, 255), 0.45),
-        storm=(0.62, 0.62, 0.24, 0.22, (16, 20, 52)),
+        storm=(0.62, 0.74, 0.2, 0.17, (16, 20, 52)),
         banks=[dict(top=0.3, base_amp=16, r=(50, 130), billows=40, fall=320, haze=0.55, streak=0.2,
                     bands=[(60, 84, 162), (50, 70, 146)], band_h=90,
                     crown=(84, 110, 186), under=(24, 34, 84)),
@@ -363,7 +363,7 @@ PRESETS = {
         ambient=((0.24, 0.28, 0.6), 0.5),
         haze=(32, 44, 100),
         wisps=(5, (200, 214, 250), 0.38),
-        storm=(0.3, 0.58, 0.28, 0.26, (10, 12, 36)),
+        storm=(0.3, 0.7, 0.24, 0.2, (10, 12, 36)),
         banks=[dict(top=0.26, base_amp=18, r=(60, 160), billows=36, fall=380, haze=0.55, streak=0.16,
                     bands=[(44, 62, 132), (36, 52, 118)], band_h=110,
                     crown=(64, 84, 156), under=(16, 22, 60)),
@@ -1783,8 +1783,9 @@ def generate(entry, ctx):
             a = bank[..., 3:4]
             rgb = sky * (1 - a) + bank[..., :3] * a
             return {"color": np.dstack([pngio.to_u8(rgb), np.full(rgb.shape[:2], 255, np.uint8)])}
-        if P.get("storm") and layer == "layer1":
-            # B-063 Neptune deck 2-3: a dark storm mass (soft ellipse) in the mid layer; UNITY
+        if P.get("storm") and layer == "layer2":
+            # B-063 Neptune deck 2-3: a dark storm mass (soft ellipse) on the NEAR layer (v4: on the
+            # mid layer the near clouds hid it, as with the jupiter_deep Crush band); UNITY
             # scales it slowly to make it "breathe". Darkens the bank and fills its own alpha.
             cx, cy, rx, ry, scol = P["storm"]
             Hh, Ww = bank.shape[:2]
@@ -1794,10 +1795,10 @@ def generate(entry, ctx):
             d = np.hypot(dx / rx, (yy / Hh - cy) / ry) * wob
             # v2: soft falloff over most of the radius and darkening only where the bank already
             # has cloud (a first pass filled its own alpha and cut a hard dark notch).
-            m = np.clip((1.0 - d) / 0.7, 0, 1) ** 2
+            m = np.clip((1.0 - d) / 0.55, 0, 1) ** 1.2         # v3: v2 (0.7, ^2, 0.7) was too faint to read
             bank = bank.copy()
             c = np.array(scol, np.float32) / 255
-            k = 0.7 * m[..., None] * bank[..., 3:4]
+            k = 0.95 * m[..., None] * bank[..., 3:4]
             bank[..., :3] = bank[..., :3] * (1 - k) + c * k
         if P.get("wisps") and layer in ("layer1", "layer2"):
             # B-063 Neptune: white wisps streaking sideways (wind). Thin horizontal bands of
