@@ -320,3 +320,10 @@ for _d, (_top, _hor, _haze) in _URANUS_SKY.items():
     _dk = lambda c: tuple(int(round(v * f)) for v, f in zip(c, (0.55, 0.62, 0.78)))  # noqa: E731
     PRESETS["uranus_dark_" + _d] = dict(sky_top=_dk(_top), sky_horizon=_dk(_hor), haze=_dk(_haze),
                                         cloud=(0, 0, 0), cloud_shade=(0, 0, 0), clouds=0.0)
+# B-063 Neptune column skies: deep indigo, darker with depth.
+for _d, (_top, _hor, _haze) in {"deck1": ((6, 8, 26), (80, 108, 190), (70, 96, 176)),
+                               "deck2": ((26, 34, 82), (52, 72, 144), (46, 64, 132)),
+                               "deck3": ((18, 24, 60), (36, 50, 110), (32, 44, 100)),
+                               "deep": ((14, 18, 46), (8, 10, 30), (18, 22, 58))}.items():
+    PRESETS["neptune_" + _d] = dict(sky_top=_top, sky_horizon=_hor, haze=_haze,
+                                    cloud=(0, 0, 0), cloud_shade=(0, 0, 0), clouds=0.0)

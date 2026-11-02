@@ -324,6 +324,72 @@ PRESETS = {
                     bands=[(58, 96, 112), (50, 88, 104)], band_h=200,
                     crown=(72, 110, 126), under=(26, 44, 56))],
     ),
+    # B-063 Neptune column (Bible §7.9): deep indigo, white wisps streaking sideways (the wind),
+    # a dark storm mass in decks 2-3 (UNITY makes it breathe by scale), dim cold light.
+    "neptune_deck1": dict(
+        sun=dict(dir=(-0.5, 0.5, -0.7), strength=0.6, color=(0.86, 0.92, 1.0), angle=14.0),
+        ambient=((0.36, 0.44, 0.78), 0.6),
+        haze=(70, 96, 176),
+        stars=180,
+        wisps=(14, (236, 242, 255), 1.1),
+        banks=[dict(top=0.52, base_amp=14, r=(40, 110), billows=44, fall=260, haze=0.55, streak=0.22,
+                    bands=[(84, 116, 200), (70, 98, 184), (92, 126, 208)], band_h=70,
+                    crown=(118, 150, 222), under=(40, 56, 120)),
+               dict(top=0.62, base_amp=18, r=(60, 170), billows=30, fall=320, haze=0.32, streak=0.2,
+                    bands=[(76, 106, 192), (62, 88, 174)], band_h=110,
+                    crown=(110, 142, 216), under=(36, 50, 110)),
+               dict(top=0.76, base_amp=22, r=(100, 260), billows=20, fall=380, haze=0.12, streak=0.18,
+                    bands=[(70, 98, 184), (56, 80, 164)], band_h=160,
+                    crown=(104, 134, 210), under=(32, 44, 100))],
+    ),
+    "neptune_deck2": dict(
+        sun=dict(dir=(-0.5, 0.5, -0.7), strength=0.4, color=(0.84, 0.9, 1.0), angle=16.0),
+        ambient=((0.28, 0.34, 0.68), 0.55),
+        haze=(46, 64, 132),
+        wisps=(10, (220, 230, 255), 0.9),
+        storm=(0.62, 0.5, 0.16, 0.2, (16, 20, 52)),
+        banks=[dict(top=0.3, base_amp=16, r=(50, 130), billows=40, fall=320, haze=0.55, streak=0.2,
+                    bands=[(60, 84, 162), (50, 70, 146)], band_h=90,
+                    crown=(84, 110, 186), under=(24, 34, 84)),
+               dict(top=0.44, base_amp=20, r=(70, 190), billows=28, fall=380, haze=0.32, streak=0.18,
+                    bands=[(54, 76, 152), (44, 62, 136)], band_h=130,
+                    crown=(78, 102, 178), under=(22, 30, 76)),
+               dict(top=0.6, base_amp=24, r=(110, 280), billows=18, fall=440, haze=0.12, streak=0.16,
+                    bands=[(48, 68, 142), (40, 56, 126)], band_h=180,
+                    crown=(72, 96, 170), under=(20, 28, 70))],
+    ),
+    "neptune_deck3": dict(
+        sun=dict(dir=(-0.5, 0.5, -0.7), strength=0.3, color=(0.82, 0.88, 1.0), angle=18.0),
+        ambient=((0.24, 0.28, 0.6), 0.5),
+        haze=(32, 44, 100),
+        wisps=(8, (200, 214, 250), 0.7),
+        storm=(0.3, 0.42, 0.2, 0.26, (10, 12, 36)),
+        banks=[dict(top=0.26, base_amp=18, r=(60, 160), billows=36, fall=380, haze=0.55, streak=0.16,
+                    bands=[(44, 62, 132), (36, 52, 118)], band_h=110,
+                    crown=(64, 84, 156), under=(16, 22, 60)),
+               dict(top=0.4, base_amp=22, r=(90, 230), billows=26, fall=440, haze=0.32, streak=0.14,
+                    bands=[(40, 56, 124), (32, 46, 110)], band_h=150,
+                    crown=(58, 78, 148), under=(14, 20, 54)),
+               dict(top=0.56, base_amp=26, r=(130, 320), billows=16, fall=500, haze=0.12, streak=0.12,
+                    bands=[(36, 50, 116), (28, 40, 100)], band_h=200,
+                    crown=(52, 72, 140), under=(12, 18, 48))],
+    ),
+    "neptune_deep": dict(
+        sun=dict(dir=(-0.5, 0.5, -0.7), strength=0.2, color=(0.8, 0.86, 1.0), angle=20.0),
+        ambient=((0.2, 0.22, 0.5), 0.5),
+        haze=(18, 22, 58),
+        wisps=(5, (170, 186, 236), 0.5),
+        crush=(0.88, 0.07, (90, 120, 255)),
+        banks=[dict(top=0.46, base_amp=18, r=(60, 160), billows=30, fall=380, haze=0.62, streak=0.12,
+                    bands=[(30, 40, 92), (24, 32, 80)], band_h=120,
+                    crown=(42, 54, 110), under=(8, 10, 32)),
+               dict(top=0.56, base_amp=22, r=(90, 220), billows=22, fall=440, haze=0.42, streak=0.1,
+                    bands=[(26, 36, 84), (20, 28, 72)], band_h=160,
+                    crown=(38, 50, 102), under=(8, 10, 28)),
+               dict(top=0.7, base_amp=26, r=(130, 300), billows=16, fall=500, haze=0.22, streak=0.08,
+                    bands=[(24, 32, 78), (18, 24, 64)], band_h=200,
+                    crown=(34, 46, 96), under=(6, 8, 24))],
+    ),
     # B-027 Mercury (Bible §7.3): airless, so harsh small-angle sun, almost no ambient, little
     # haze; cratered relief; blinding grey regolith; violet twilight in the sky only.
     "mercury": dict(
@@ -1717,6 +1783,38 @@ def generate(entry, ctx):
             a = bank[..., 3:4]
             rgb = sky * (1 - a) + bank[..., :3] * a
             return {"color": np.dstack([pngio.to_u8(rgb), np.full(rgb.shape[:2], 255, np.uint8)])}
+        if P.get("storm") and layer == "layer1":
+            # B-063 Neptune deck 2-3: a dark storm mass (soft ellipse) in the mid layer; UNITY
+            # scales it slowly to make it "breathe". Darkens the bank and fills its own alpha.
+            cx, cy, rx, ry, scol = P["storm"]
+            Hh, Ww = bank.shape[:2]
+            yy, xx = np.mgrid[0:Hh, 0:Ww].astype(np.float32)
+            dx = np.minimum(np.abs(xx / Ww - cx), 1 - np.abs(xx / Ww - cx))     # wraps in x
+            wob = 1 + 0.12 * fft_noise(np.random.default_rng(seed + 5), Hh, Ww, Ww / 24, Ww / 4, 1.0)
+            d = np.hypot(dx / rx, (yy / Hh - cy) / ry) * wob
+            m = np.clip((1.0 - d) / 0.35, 0, 1) ** 1.5
+            bank = bank.copy()
+            c = np.array(scol, np.float32) / 255
+            bank[..., :3] = bank[..., :3] * (1 - 0.85 * m[..., None]) + c * 0.85 * m[..., None]
+            bank[..., 3] = np.maximum(bank[..., 3], m)
+        if P.get("wisps") and layer in ("layer1", "layer2"):
+            # B-063 Neptune: white wisps streaking sideways (wind). Thin horizontal bands of
+            # x-periodic noise, so the streaks tile.
+            n, wcol, k = P["wisps"]
+            Hh, Ww = bank.shape[:2]
+            wrng = np.random.default_rng(seed + 9)
+            yy = np.arange(Hh, dtype=np.float32)[:, None]
+            acc = np.zeros((Hh, Ww), np.float32)
+            for _ in range(n):
+                y0 = wrng.uniform(0.08, 0.7) * Hh
+                th = wrng.uniform(1.5, 5.0) * Hh / 1024
+                streak = np.clip(fft_noise(wrng, 1, Ww, Ww / 40, Ww / 3, 0.8)[0] - 0.4, 0, None)
+                acc += np.exp(-((yy - y0) / th) ** 2) * streak[None, :]
+            acc = np.clip(acc * k, 0, 1)
+            bank = bank.copy()
+            c = np.array(wcol, np.float32) / 255
+            bank[..., :3] = bank[..., :3] * (1 - acc[..., None]) + c * acc[..., None]
+            bank[..., 3] = np.maximum(bank[..., 3], acc)
         if P.get("sparkle") and layer == "layer1":
             # B-062 Uranus deep: diamond rain, small bright glints scattered through the mid haze
             # (single pixels with a 1 px soft cross; x wraps, so the layer still tiles).
