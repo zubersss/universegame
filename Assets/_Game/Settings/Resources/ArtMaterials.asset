@@ -396,6 +396,7 @@ MonoBehaviour:
   - props/venus/aerostat_deck
   - props/venus/buoyancy_cell
   - props/venus/meridian_station_door
+  - props/venus/railing
   - props/venus/station_hull_a
   - props/venus/station_hull_b
   - props/venus/vent_harvester

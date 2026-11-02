@@ -30,11 +30,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 14c010d3a930ab842aa0a25f7ae0d0bc
-    m_Address: props/common/aerostat_deck
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 15faa380aa77e0a4b807ac07fe903259
     m_Address: props/common/float_cell_pack_mk2
     m_ReadOnly: 0
@@ -62,6 +57,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1c868be6593f13c49b73137f5a8e3a9d
     m_Address: characters/surveyor/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2370d4464cfc3a647a99d6b4393eaaa7
+    m_Address: props/common/aerostat_strut
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -115,6 +115,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 53c73f7c749eb4b4d8b44811254e2ac1
+    m_Address: props/common/aerostat_deck
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 568bbd6f78a0f0249915ee6cbc3dccb3
     m_Address: fx/floe_sublimate/base
     m_ReadOnly: 0
@@ -122,6 +127,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 574550d3caa13f94e9d11bb31b7903a2
     m_Address: fx/wind_streaks/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5fc63c482f9940c4d92cd0fe5f564a96
+    m_Address: props/common/aerostat_cell
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -175,8 +185,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 83a0b18da05a2db44b9624d893bb8164
+    m_Address: props/common/aerostat_deck
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 84c01c34602afe041b8c802dfdabcd83
     m_Address: props/common/shelter_door
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 877666fbe9b11074f9de5da9bcf90afc
+    m_Address: props/common/aerostat_deck
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -205,8 +225,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 994845076f1d18f4ca941ff608b0417c
+    m_Address: props/common/aerostat_strut
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9986a5f98e963bc4e9555b26cc6c8e03
     m_Address: ships/pilgrim/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 99a49fbf68200fd4883cc07dcd3b37fe
+    m_Address: props/common/aerostat_cell
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -240,11 +270,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b0b88d037b61c3f44afbe717c4e01265
-    m_Address: props/common/aerostat_cell
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b1edceb0053457a419da848ab60c9bb0
     m_Address: fx/beam_ray/base
     m_ReadOnly: 0
@@ -270,11 +295,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c41c9eb0237b6c44ebf9d862748025f1
-    m_Address: props/common/aerostat_strut
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c5cfc75c64331644690773ea00ba5e53
     m_Address: ships/waystation_mars/top
     m_ReadOnly: 0
@@ -287,6 +307,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cc03f2da218c19a40938bde6641e8548
     m_Address: props/common/storage_crate
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d50713f521102484ab4fc56ebe1747b0
+    m_Address: props/common/aerostat_cell
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -312,6 +337,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f31f033105d464d488291fc041408aad
     m_Address: characters/surveyor/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f52020564ba3f284d987645b9024a6af
+    m_Address: props/common/aerostat_strut
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
