@@ -1,8 +1,8 @@
 {
  "key": "characters/calibration/base",
  "format": "glb",
- "contract": "v2",
- "facing": "+X",
+ "contract": "v2.2",
+ "facing": "+X in Unity (exported facing glTF -X, D-065)",
  "up": "+Y",
  "units": "m",
  "origin": "feet",

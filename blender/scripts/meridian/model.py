@@ -276,7 +276,19 @@ def export_glb(path, mesh, rig, extras=()):
         kw.update(export_animation_mode="ACTIONS", export_frame_range=False, export_force_sampling=True,
                   export_anim_slide_to_zero=True,                      # clips start at t = 0 (was +1 frame)
                   export_optimize_animation_size=False)
-    bpy.ops.export_scene.gltf(**kw)
+    # D-065 (contract v2.2): glTFast mirrors X on import, so the model is exported facing glTF -X
+    # (a 180 deg turn about the vertical axis on the top node, not a mirror). After Unity's mirror
+    # it faces +X, and the Blender camera side (-Y -> glTF +Z -> turned to -Z) lands on Unity's
+    # camera side (-Z). The turn is undone after export (the turntable stays front = +X).
+    top = rig if rig is not None else mesh
+    saved = top.rotation_euler.copy()
+    top.rotation_euler = (saved.x, saved.y, saved.z + math.pi)
+    bpy.context.view_layer.update()
+    try:
+        bpy.ops.export_scene.gltf(**kw)
+    finally:
+        top.rotation_euler = saved
+        bpy.context.view_layer.update()
 
 
 # ---------------------------------------------------------------- 6. turntable
@@ -369,7 +381,7 @@ def export_model(entry, art_dir, preview_dir, objs, stamp_fn):
     sockets = [o for o in objs if o.type == "EMPTY" and o.name.startswith("socket_")]
     export_glb(glb, mesh, rig, sockets)
     clips = entry.get("clips", [])
-    meta = {"key": key, "format": "glb", "contract": "v2", "facing": "+X", "up": "+Y", "units": "m",
+    meta = {"key": key, "format": "glb", "contract": "v2.2", "facing": "+X in Unity (exported facing glTF -X, D-065)", "up": "+Y", "units": "m",
             "origin": entry.get("origin_rule", "feet"), "triangles": tris, "texture": size,
             "maps": list(MAPS), "fps": 30, "clips": clips,
             "sockets": [o.name[len("socket_"):] for o in sockets] or entry.get("sockets", [])}
