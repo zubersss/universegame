@@ -57,6 +57,9 @@ MonoBehaviour:
   - props/earth/archive_door
   - props/earth/archive_terminal
   - props/earth/beacon
+  - props/jupiter/beacon_vault
+  - props/jupiter/derelict_pod
+  - props/jupiter/husk_tortoise
   - props/mars/meridian_beacon
   - props/mars/warden_pylon
   - props/mercury/flare_shelter

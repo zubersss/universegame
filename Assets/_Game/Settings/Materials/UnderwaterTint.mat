@@ -22,12 +22,17 @@ Material:
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
-    m_TexEnvs: []
+    m_TexEnvs:
+    - _WallMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _Fade: 45
     - _Floor: 0.06
     - _SeaLevel: 321
+    - _WallOrigin: 614
     m_Colors:
     - _Tint: {r: 0.54999995, g: 0.78, b: 0.95, a: 1}
   m_BuildTextureStacks: []
