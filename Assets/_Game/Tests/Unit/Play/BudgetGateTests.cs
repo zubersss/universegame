@@ -239,7 +239,7 @@ namespace Meridian.Tests
         void StaticRows()
         {
 #if UNITY_EDITOR
-            int wrongColor = 0, wrongNormal = 0, missingMips = 0, total = 0;
+            int wrongColor = 0, wrongNormal = 0, missingMips = 0, npotNoMips = 0, total = 0;
             foreach (var root in new[] { "Assets/_Game/Art", "Assets/_Game/Placeholders" })
             foreach (var guid in UnityEditor.AssetDatabase.FindAssets("t:Texture2D", new[] { root }))
             {
@@ -250,10 +250,13 @@ namespace Meridian.Tests
                 if (path.EndsWith("_normal.png")) { if (fmt != UnityEditor.TextureImporterFormat.BC5) wrongNormal++; }
                 else if (path.EndsWith("_color.png") && fmt != UnityEditor.TextureImporterFormat.BC7) wrongColor++;
                 bool world = !path.Contains("/fx/") && !path.Contains("/icons/") && !path.Contains("/ui/");
-                if (path.EndsWith("_color.png") && world && !ti.mipmapEnabled) missingMips++;
+                // D-061: non-power-of-two sheets import without mips (NPOT + mips would be stored uncompressed).
+                ti.GetSourceTextureWidthAndHeight(out int tw, out int th);
+                bool pot = Mathf.IsPowerOfTwo(tw) && Mathf.IsPowerOfTwo(th);
+                if (path.EndsWith("_color.png") && world && !ti.mipmapEnabled) { if (pot) missingMips++; else npotNoMips++; }
             }
-            Row("Textures", "BC7 color, BC5 normals, mips on world sprites",
-                $"{total} textures: {wrongColor} color not BC7, {wrongNormal} normals not BC5, {missingMips} world sprites without mips",
+            Row("Textures", "BC7 color, BC5 normals, mips on POT world sprites (NPOT: none, D-061)",
+                $"{total} textures: {wrongColor} color not BC7, {wrongNormal} normals not BC5, {missingMips} POT world sprites without mips ({npotNoMips} NPOT without, D-061)",
                 wrongColor == 0 && wrongNormal == 0 && missingMips == 0);
 
             int bigAtlas = 0, atlases = 0;
