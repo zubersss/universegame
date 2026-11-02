@@ -209,36 +209,58 @@ def ridge(region, R, coll):
                 b.cone(x + dx, y, z - 0.2, th * 0.06, th * 0.5, 4, lin((82, 68, 56)))
                 b.blob(x + dx, y, z + th * 0.62, th * 0.32, c)
         placed.append((x, y))
+    # B-088 boulders (Mars has no trees): 24-tri blobs from the region's rock palette, wrapped
+    # at the seam like the trees, capped by the budget.
+    nr = R.get("rocks", 0)
+    if nr:
+        nr = min(nr, int((TRI_BUDGET - b.tris()) / (24 * 1.15)))
+        for i in range(nr):
+            x = rng.uniform(-PERIOD / 2, PERIOD / 2)
+            y = rng.uniform(21.0, 59.0)
+            z = h(x, y)
+            r = rng.uniform(*R.get("rock_r", (0.6, 2.4)))
+            c = lin(rng.choice(R["rock_cols"]))
+            for dx in ([0.0] + ([PERIOD] if x < -PERIOD / 2 + 4 else []) + ([-PERIOD] if x > PERIOD / 2 - 4 else [])):
+                b.blob(x + dx, y, z + r * 0.35, r, c)
+            placed.append((x, y))
     ob = b.mesh(f"ridge_{region}", coll)
     return ob, b.tris(), len(placed)
 
 
-def skyline(coll):
+def skyline(coll, name="skyline_far", period=2 * PERIOD, nx=128, rock0=(112, 120, 132), rock1=(138, 146, 156),
+            snow=(232, 238, 246), seed=77, hero=None, snow_frac=0.74, amp0=46.0, massif0=55.0):
     """v3 (LEAD cycle 183): a mountain range, not fins. Each depth row has its own profile (own
     seed; frequency and amplitude fall toward the back), lightly smoothed across rows so the
     range stays coherent; peaks ride on a broad massif instead of rising from the floor; an
     upper-envelope pass caps every slope near 45 deg (no vertical sheets); snow is a soft
     vertex-colour band at the v1 snow line (~0.74 of the peak height)."""
-    P = 2 * PERIOD
-    nx = 128                                                          # 4 m steps over 512 m
+    P = period                                                        # Earth: 512 m, 4 m steps
     xs = [-PERIOD + P / nx * i for i in range(nx + 1)]
     ys = [150.0 + 25.0 * j for j in range(11)]                        # 150..400 m
-    rock0, rock1, snow = (112, 120, 132), (138, 146, 156), (232, 238, 246)
-    base_rng = random.Random(77)
+    base_rng = random.Random(seed)
+    row_seed = 1000 if seed == 77 else seed * 100                     # Earth keeps its accepted seeds
     massif_t = make_terms(base_rng, 3, 2)                             # broad base, 1-2 waves per 512 m
     Z = []
     for j, y in enumerate(ys):
         d = j / (len(ys) - 1)                                         # 0 front .. 1 back
-        rr = random.Random(1000 + j)
+        rr = random.Random(row_seed + j)
         kmax = max(3, int(round(14 - 9 * d)))                         # lower frequency toward the back
         peaks_t = make_terms(rr, 6, kmax)
-        amp = 46 - 18 * d                                             # lower amplitude toward the back
+        amp = amp0 - 18 * d                                           # lower amplitude toward the back
         rise = math.sin(math.pi / 2 * min(1.0, d * 2.2))              # the massif rises over the first rows
         row = []
         for x in xs:
-            massif = 55 + periodic(None, x, P, massif_t, 18)
+            massif = massif0 + periodic(None, x, P, massif_t, 18)
             pk = max(0.0, periodic(None, x, P, peaks_t, amp) + 0.35 * amp)
-            row.append(rise * (massif + pk * (0.55 + 0.45 * massif / 73.0)))
+            z = rise * (massif + pk * (0.55 + 0.45 * massif / 73.0))
+            if hero:                                                  # B-088 Olympus Mons: broad shield, caldera top
+                hx, hr, hh = hero
+                dx = ((x - hx + P / 2) % P) - P / 2
+                if abs(dx) < hr:
+                    sh = hh * (1 - (dx / hr) ** 2) ** 0.7 * min(1.0, 0.25 + 1.5 * d)   # v2: full height in the back rows (a sine faded it there)
+                    sh = min(sh, 0.93 * hh) - 0.04 * hh * max(0.0, 1 - abs(dx) / (0.12 * hr))
+                    z = max(z, sh)
+            row.append(z)
         Z.append(row)
     for _ in range(2):                                                # light smoothing across depth rows
         Z = [Z[0]] + [[0.25 * a + 0.5 * b + 0.25 * c for a, b, c in zip(Z[j - 1], Z[j], Z[j + 1])]
@@ -255,21 +277,21 @@ def skyline(coll):
                 nb = [Z[k][i] for k in (j - 1, j + 1) if 0 <= k < len(Z)]
                 Z[j][i] = min([Z[j][i]] + [v + sy * 1.0 for v in nb])
     peak = max(max(r) for r in Z)
-    line = 0.74 * peak
+    line = snow_frac * peak
     zmap = {(round(x, 3), y): Z[j][i] for j, y in enumerate(ys) for i, x in enumerate(xs)}
 
     def h(x, y):
         return zmap[(round(x, 3), y)]
 
     def col(x, y, z):
-        k = max(0.0, min(1.0, (z - line) / 8.0))
+        k = max(0.0, min(1.0, (z - line) / 8.0)) if snow else 0.0
         n = 0.5 + 0.5 * math.sin(2 * math.pi * x / P * 7 + y * 0.03)
         c = [a + (b2 - a) * n for a, b2 in zip(rock0, rock1)]
-        return lin([a + (b2 - a) * k for a, b2 in zip(c, snow)])
+        return lin([a + (b2 - a) * k for a, b2 in zip(c, snow)] if snow else c)
 
     b = Builder()
     b.quad_grid(xs, ys, h, col)
-    return b.mesh("skyline_far", coll), b.tris()
+    return b.mesh(name, coll), b.tris()
 
 
 def build(out_path=DEFAULT_OUT):
@@ -285,6 +307,47 @@ def build(out_path=DEFAULT_OUT):
     scene.collection.children.link(coll)
     _, st = skyline(coll)
     report.append(f"skyline_far: {st} tris")
+    print("MERIDIAN bands", "; ".join(report))
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    bpy.ops.wm.save_as_mainfile(filepath=out_path, compress=True)
+    print("MERIDIAN built", out_path)
+
+
+# ---------------------------------------------------------------- B-088 Mars
+MARS_OUT = os.path.join(os.path.dirname(HERE), "sources", "backgrounds", "mars_bands.blend")
+MARS_ROCKS = [(96, 70, 58), (120, 86, 66), (80, 60, 52), (140, 96, 72)]
+MARS_REGIONS = {   # colours from the v1 gen_backdrop3d mars / mars_canyon presets
+    "canyon": dict(ground=[(126, 76, 54), (160, 100, 70)], hill=5, rise=34, terrace=6.0, strata=((86, 46, 36), 6.0),
+                   trees=0, conifer=0.0, tree_h=(0, 0), rocks=150, rock_r=(0.8, 3.0), rock_cols=MARS_ROCKS, seed=21),
+    "plains": dict(ground=[(150, 86, 56), (178, 110, 74)], hill=2.5, rise=8, trees=0, conifer=0.0, tree_h=(0, 0),
+                   rocks=110, rock_r=(0.4, 2.0), rock_cols=MARS_ROCKS, seed=22),
+    "polar":  dict(ground=[(214, 196, 188), (236, 224, 218)], hill=3, rise=14, terrace=2.5, strata=((178, 134, 112), 3.0),
+                   trees=0, conifer=0.0, tree_h=(0, 0), rocks=14, rock_r=(0.4, 1.4), rock_cols=MARS_ROCKS, seed=23),
+    "tharsis": dict(ground=[(84, 62, 54), (118, 84, 66)], hill=4, rise=20, trees=0, conifer=0.0, tree_h=(0, 0),
+                    rocks=130, rock_r=(0.6, 2.6), rock_cols=[(62, 50, 46), (80, 62, 54), (104, 76, 62)], seed=24),
+}
+
+
+def build_mars(out_path=MARS_OUT):
+    """Mars ridges per region, the shared Mars skyline (rust, no snow), and the Tharsis skyline
+    with Olympus Mons as the far hero (1024 m period so the shield isn't stamped every 512 m)."""
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    scene = bpy.context.scene
+    report = []
+    for region, R in MARS_REGIONS.items():
+        coll = bpy.data.collections.new(f"ridge_{region}")
+        scene.collection.children.link(coll)
+        ob, tris, n = ridge(region, R, coll)
+        report.append(f"{region}: {tris} tris, {n} rocks")
+    coll = bpy.data.collections.new("skyline_far")
+    scene.collection.children.link(coll)
+    _, st = skyline(coll, rock0=(150, 96, 70), rock1=(182, 126, 92), snow=None, seed=91, amp0=40.0, massif0=48.0)
+    report.append(f"skyline_far: {st} tris")
+    coll = bpy.data.collections.new("skyline_far_tharsis")
+    scene.collection.children.link(coll)
+    _, st2 = skyline(coll, name="skyline_far_tharsis", period=4 * PERIOD, nx=128, rock0=(138, 88, 66), rock1=(170, 116, 86),
+                     snow=None, seed=92, hero=(0.0, 340.0, 260.0), amp0=30.0, massif0=40.0)
+    report.append(f"skyline_far_tharsis: {st2} tris")
     print("MERIDIAN bands", "; ".join(report))
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     bpy.ops.wm.save_as_mainfile(filepath=out_path, compress=True)

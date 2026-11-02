@@ -44,13 +44,13 @@ def skydome(P, seed):
 
 def export_skydome(entry, art_dir):
     import gen_backdrop as GB
-    _, name, _variant = entry["key"].split("/")
+    _, name, variant = entry["key"].split("/")
     P = dict(GB.PRESETS[entry.get("sky_preset", name)]) if entry.get("sky_preset", name) in GB.PRESETS else {}
     P.update(entry.get("sky", {}))
     img = skydome(P, int(entry.get("seed", 1)))
     d = os.path.join(art_dir, "backgrounds", name)
     os.makedirs(d, exist_ok=True)
-    path = os.path.join(d, "skydome_color.png")
+    path = os.path.join(d, f"{variant}_color.png")             # skydome / skydome_storm (B-088)
     pngio.write_png(path, np.dstack([pngio.to_u8(img), np.full((H, W), 255, np.uint8)]))
     seam = float(np.abs(img[:, 0] - img[:, -1]).mean() / (np.abs(np.diff(img, axis=1)).mean() + 1e-6))
     return path, img, round(seam, 2)
