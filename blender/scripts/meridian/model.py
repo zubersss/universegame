@@ -258,10 +258,13 @@ def export_material(mesh, maps_paths, emissive):
 
 # ---------------------------------------------------------------- 5. glb
 
-def export_glb(path, mesh, rig):
+def export_glb(path, mesh, rig, extras=()):
     for o in bpy.context.view_layer.objects:
         o.select_set(False)
     mesh.select_set(True)
+    for e in extras:                                 # socket_<name> empties (contract v2.1 §9.1)
+        e.hide_viewport = e.hide_render = False
+        e.select_set(True)
     if rig is not None:
         rig.select_set(True)
         rig.hide_render = False
@@ -363,12 +366,13 @@ def export_model(entry, art_dir, preview_dir, objs, stamp_fn):
     emissive = float(maps["emission"].max()) > 0.02
     export_material(mesh, paths, emissive)
     glb = os.path.join(out_dir, f"{variant}.glb")
-    export_glb(glb, mesh, rig)
+    sockets = [o for o in objs if o.type == "EMPTY" and o.name.startswith("socket_")]
+    export_glb(glb, mesh, rig, sockets)
     clips = entry.get("clips", [])
     meta = {"key": key, "format": "glb", "contract": "v2", "facing": "+X", "up": "+Y", "units": "m",
             "origin": entry.get("origin_rule", "feet"), "triangles": tris, "texture": size,
             "maps": list(MAPS), "fps": 30, "clips": clips,
-            "sockets": entry.get("sockets", [])}
+            "sockets": [o.name[len("socket_"):] for o in sockets] or entry.get("sockets", [])}
     with open(os.path.join(out_dir, f"{variant}.json"), "w", encoding="utf-8") as fh:
         json.dump(meta, fh, indent=1)
     sheet = turntable(mesh, rig, os.path.join(preview_dir, f"review_{key.replace('/', '_')}"))

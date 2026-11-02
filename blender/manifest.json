@@ -152,34 +152,7 @@
     },
     {"key": "ships/waystation_earth/top", "source": "sources/ships/waystation.blend", "build": "scripts/build_waystation.py", "collection": "waystation_earth", "camera": "top", "size": [768, 768], "ppu": 36, "large": true, "origin": [0, 0, 1.5], "pivot": [0.5, 0.5], "maps": ["color", "normal", "emission"], "samples": 32},
     {"key": "ships/waystation_mars/top", "source": "sources/ships/waystation.blend", "build": "scripts/build_waystation.py", "collection": "waystation_mars", "camera": "top", "size": [768, 768], "ppu": 36, "large": true, "origin": [0, 0, 1.5], "pivot": [0.5, 0.5], "maps": ["color", "normal", "emission"], "samples": 32},
-    {
-      "key": "characters/surveyor/base",
-      "source": "sources/characters/surveyor.blend",
-      "build": "scripts/build_surveyor.py",
-      "collection": "surveyor",
-      "camera": "side",
-      "size": [256, 256],
-      "origin": [0, 0, 0],
-      "pivot": [0.5, 0.0390625],
-      "maps": ["color", "normal", "emission", "mask"],
-      "samples": 24,
-      "animations": {
-        "columns": 7, "fps": 12, "facing": "right",
-        "hitbox": {"x": 0.375, "y": 0.0390625, "w": 0.25, "h": 0.88},
-        "clips": [
-          {"name": "idle",  "frame_start": 1,  "length": 6, "loop": true},
-          {"name": "walk",  "frame_start": 11, "length": 8, "loop": true},
-          {"name": "run",   "frame_start": 23, "length": 8, "loop": true},
-          {"name": "jump",  "frame_start": 35, "length": 3, "loop": false},
-          {"name": "fall",  "frame_start": 42, "length": 2, "loop": true},
-          {"name": "land",  "frame_start": 48, "length": 3, "loop": false},
-          {"name": "dig",   "frame_start": 55, "length": 6, "loop": true},
-          {"name": "aim",   "frame_start": 65, "length": 2, "loop": true},
-          {"name": "hurt",  "frame_start": 71, "length": 2, "loop": false},
-          {"name": "death", "frame_start": 77, "length": 6, "loop": false}
-        ]
-      }
-    },
+    {"key": "characters/surveyor/base", "model": true, "source": "sources/characters/surveyor_model.blend", "build": "scripts/build_surveyor.py", "build_fn": "build_model", "collection": "surveyor", "texture": 2048, "tri_budget": 12000, "origin_rule": "feet", "clips": [{"name": "idle", "frames": 36, "loop": true}, {"name": "walk", "frames": 24, "loop": true}, {"name": "run", "frames": 16, "loop": true}, {"name": "jump", "frames": 9, "loop": false}, {"name": "fall", "frames": 12, "loop": true}, {"name": "land", "frames": 9, "loop": false}, {"name": "dig", "frames": 18, "loop": true}, {"name": "aim", "frames": 12, "loop": true}, {"name": "hurt", "frames": 8, "loop": false}, {"name": "death", "frames": 30, "loop": false}], "note": "contract v2 surveyor (B-078); replaces the archived v1 sheet entry (archive/meridian-v2-2d)"},
     {"key": "characters/surveyor/mk1", "source": "sources/characters/surveyor.blend", "build": "scripts/build_surveyor.py", "collection": "surveyor_mk1", "camera": "side", "size": [256, 256], "origin": [0, 0, 0], "pivot": [0.5, 0.0390625], "maps": ["color", "normal", "emission", "mask"], "samples": 24, "animations": {"columns": 7, "fps": 12, "facing": "right", "hitbox": {"x": 0.375, "y": 0.0390625, "w": 0.25, "h": 0.88}, "clips": [{"name": "idle", "frame_start": 1, "length": 6, "loop": true}, {"name": "walk", "frame_start": 11, "length": 8, "loop": true}, {"name": "run", "frame_start": 23, "length": 8, "loop": true}, {"name": "jump", "frame_start": 35, "length": 3, "loop": false}, {"name": "fall", "frame_start": 42, "length": 2, "loop": true}, {"name": "land", "frame_start": 48, "length": 3, "loop": false}, {"name": "dig", "frame_start": 55, "length": 6, "loop": true}, {"name": "aim", "frame_start": 65, "length": 2, "loop": true}, {"name": "hurt", "frame_start": 71, "length": 2, "loop": false}, {"name": "death", "frame_start": 77, "length": 6, "loop": false}]}},
     {"key": "characters/surveyor/mk2", "source": "sources/characters/surveyor.blend", "build": "scripts/build_surveyor.py", "collection": "surveyor_mk2", "camera": "side", "size": [256, 256], "origin": [0, 0, 0], "pivot": [0.5, 0.0390625], "maps": ["color", "normal", "emission", "mask"], "samples": 24, "animations": {"columns": 7, "fps": 12, "facing": "right", "hitbox": {"x": 0.375, "y": 0.0390625, "w": 0.25, "h": 0.88}, "clips": [{"name": "idle", "frame_start": 1, "length": 6, "loop": true}, {"name": "walk", "frame_start": 11, "length": 8, "loop": true}, {"name": "run", "frame_start": 23, "length": 8, "loop": true}, {"name": "jump", "frame_start": 35, "length": 3, "loop": false}, {"name": "fall", "frame_start": 42, "length": 2, "loop": true}, {"name": "land", "frame_start": 48, "length": 3, "loop": false}, {"name": "dig", "frame_start": 55, "length": 6, "loop": true}, {"name": "aim", "frame_start": 65, "length": 2, "loop": true}, {"name": "hurt", "frame_start": 71, "length": 2, "loop": false}, {"name": "death", "frame_start": 77, "length": 6, "loop": false}]}},
     {"key": "characters/surveyor/mk3", "source": "sources/characters/surveyor.blend", "build": "scripts/build_surveyor.py", "collection": "surveyor_mk3", "camera": "side", "size": [256, 256], "origin": [0, 0, 0], "pivot": [0.5, 0.0390625], "maps": ["color", "normal", "emission", "mask"], "samples": 24, "animations": {"columns": 7, "fps": 12, "facing": "right", "hitbox": {"x": 0.375, "y": 0.0390625, "w": 0.25, "h": 0.88}, "clips": [{"name": "idle", "frame_start": 1, "length": 6, "loop": true}, {"name": "walk", "frame_start": 11, "length": 8, "loop": true}, {"name": "run", "frame_start": 23, "length": 8, "loop": true}, {"name": "jump", "frame_start": 35, "length": 3, "loop": false}, {"name": "fall", "frame_start": 42, "length": 2, "loop": true}, {"name": "land", "frame_start": 48, "length": 3, "loop": false}, {"name": "dig", "frame_start": 55, "length": 6, "loop": true}, {"name": "aim", "frame_start": 65, "length": 2, "loop": true}, {"name": "hurt", "frame_start": 71, "length": 2, "loop": false}, {"name": "death", "frame_start": 77, "length": 6, "loop": false}]}},

@@ -33,6 +33,8 @@ UPPER, FORE = 0.30, 0.28
 SHOULDER_Z = 0.44          # above the hip
 NECK_Z = 0.53              # head joint above the hip
 HIP_Y, SHOULDER_Y = 0.10, 0.22
+# Contract v2 model (B-078): lighter primitives to fit 12 k triangles; the v1 sheet build keeps the dense ones.
+LOW_POLY = False
 
 # ---------------------------------------------------------------- clips
 # Angles in degrees. hip/sh: swing forward (+). kn: knee bend (+). el: elbow bend (+).
@@ -176,14 +178,15 @@ def rbox(name, size, center, mat, bevel=0.03):
     bpy.ops.object.transform_apply(scale=True)
     mod = ob.modifiers.new("bevel", "BEVEL")
     mod.width = min(bevel, min(size) * 0.45)
-    mod.segments = 3
+    mod.segments = 2 if LOW_POLY else 3
     bpy.ops.object.shade_smooth()
     ob.data.materials.append(mat)
     return ob
 
 
 def ball(name, radius, center, mat, scale=(1, 1, 1)):
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=16, radius=radius, location=center)
+    seg = (24, 12) if LOW_POLY else (32, 16)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=seg[0], ring_count=seg[1], radius=radius, location=center)
     ob = bpy.context.active_object
     ob.name = name
     ob.scale = scale
@@ -194,7 +197,7 @@ def ball(name, radius, center, mat, scale=(1, 1, 1)):
 
 
 def tube(name, radius, depth, center, mat, rot=(0, 0, 0), verts=24):
-    bpy.ops.mesh.primitive_cylinder_add(vertices=verts, radius=radius, depth=depth, location=center, rotation=rot)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=min(verts, 16) if LOW_POLY else verts, radius=radius, depth=depth, location=center, rotation=rot)
     ob = bpy.context.active_object
     ob.name = name
     bpy.ops.object.shade_smooth()
@@ -215,7 +218,7 @@ def soft_limb(name, top, bottom, radii, mat):
     for sv, r in zip(me.skin_vertices[0].data, radii):
         sv.radius = (r, r * 0.94)
     sub = ob.modifiers.new("sub", "SUBSURF")
-    sub.levels = sub.render_levels = 2
+    sub.levels = sub.render_levels = 1 if LOW_POLY else 2
     me.materials.append(mat)
     return ob
 
@@ -349,7 +352,7 @@ def envirosuit(tier, coll, M, torso, head, joints, hz):
             attach(rbox(f"{tier}_shinshell_{side}", (0.18, 0.17, 0.34), (0.02, sy * HIP_Y, HIP_Z - THIGH - 0.2), sm, 0.05), J["kn"], coll)
 
 
-def build_one(scene, tier=None):
+def build_one(scene, tier=None, do_animate=True):
     coll = bpy.data.collections.new("surveyor" if tier is None else f"surveyor_{tier}")
     scene.collection.children.link(coll)
 
@@ -439,7 +442,9 @@ def build_one(scene, tier=None):
 
     if tier:
         envirosuit(tier, coll, M, torso, head, joints, hz)
-    animate(root, torso, head, joints)
+    if do_animate:
+        animate(root, torso, head, joints)
+    return dict(coll=coll, root=root, torso=torso, head=head, joints=joints)
 
 
 def build(out_path=DEFAULT_OUT):
@@ -450,6 +455,131 @@ def build(out_path=DEFAULT_OUT):
         build_one(scene, tier)
     scene.frame_start = 1
     scene.frame_end = max(CLIP_START[c] + CLIP_LEN[c] - 1 for c in CLIP_ORDER)
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    bpy.ops.wm.save_as_mainfile(filepath=out_path, compress=True)
+    print("MERIDIAN built", out_path)
+
+
+# ---------------------------------------------------------------- contract v2 model (B-078)
+MODEL_OUT = os.path.join(os.path.dirname(HERE), "sources", "characters", "surveyor_model.blend")
+# Frames per v1 pose at 30 fps, so each clip has a natural duration (v1 sheets were ~10 fps).
+MODEL_FPP = {"idle": 6, "walk": 3, "run": 2, "jump": 3, "fall": 6, "land": 3, "dig": 3, "aim": 6, "hurt": 4, "death": 5}
+
+
+def model_clips():
+    """Clip list for the manifest/json: frames at 30 fps and loop flags (contract v2.1 §9.1)."""
+    return [{"name": c, "frames": CLIP_LEN[c] * MODEL_FPP[c], "loop": bool(CLIP_LOOP.get(c))} for c in CLIP_ORDER]
+
+
+def empties_to_armature(parts, coll):
+    """Replace the empty hierarchy with an armature: one bone per joint empty (head at the
+    empty, tail 0.1 m up, same parent chain), each mesh re-parented to its joint's bone with its
+    world placement kept. Returns the rig."""
+    from mathutils import Matrix  # noqa: F401
+    root = parts["root"]
+    empties = []
+
+    def walk(e):
+        empties.append(e)
+        for ch in e.children:
+            if ch.type == "EMPTY":
+                walk(ch)
+    walk(root)
+    bpy.context.view_layer.update()
+    ad = bpy.data.armatures.new("surveyor_rig")
+    rig = bpy.data.objects.new("surveyor_rig", ad)
+    coll.objects.link(rig)
+    for o in bpy.context.view_layer.objects:
+        o.select_set(False)
+    bpy.context.view_layer.objects.active = rig
+    rig.select_set(True)
+    bpy.ops.object.mode_set(mode="EDIT")
+    for e in empties:
+        b = ad.edit_bones.new(e.name)
+        h = e.matrix_world.translation.copy()
+        b.head, b.tail = h, h + Vector((0, 0, 0.1))
+        if e.parent is not None and e.parent.type == "EMPTY":
+            b.parent = ad.edit_bones[e.parent.name]
+    bpy.ops.object.mode_set(mode="OBJECT")
+    bpy.context.view_layer.update()
+    for e in empties:
+        for ch in list(e.children):
+            if ch.type != "MESH":
+                continue
+            mw = ch.matrix_world.copy()
+            ch.parent, ch.parent_type, ch.parent_bone = rig, "BONE", e.name
+            bpy.context.view_layer.update()
+            ch.matrix_world = mw
+    for e in reversed(empties):
+        bpy.data.objects.remove(e, do_unlink=True)
+    return rig
+
+
+def add_socket(rig, coll, name, bone, world_loc):
+    s = bpy.data.objects.new(f"socket_{name}", None)
+    s.empty_display_size = 0.05
+    coll.objects.link(s)
+    s.location = world_loc
+    bpy.context.view_layer.update()
+    mw = s.matrix_world.copy()
+    s.parent, s.parent_type, s.parent_bone = rig, "BONE", bone
+    bpy.context.view_layer.update()
+    s.matrix_world = mw
+    return s
+
+
+def animate_model(rig):
+    """One action per clip at 30 fps from the v1 pose tables, with in-betweens (Bezier);
+    loops end on their first pose. Root: lean/rotation + vertical ground offset only (no
+    horizontal root motion, contract §9)."""
+    from build_creatures_earth import set_pose
+    rig.animation_data_create()
+    for name in CLIP_ORDER:
+        n, fpp = CLIP_LEN[name], MODEL_FPP[name]
+        act = bpy.data.actions.new(name)
+        act.use_fake_user = True
+        rig.animation_data.action = act
+        idx = list(range(n)) + ([0] if CLIP_LOOP.get(name) else [])
+        for k, i in enumerate(idx):
+            p = clip_pose(name, i)
+            f = 1 + k * fpp
+            x0, x1, zmin = body_extent(p)
+            ground = -zmin + p.get("lift", 0.0)
+            pr = rig.pose.bones["root"]
+            pr.location = (0.0, ground - HIP_Z, 0.0)           # bone-local Y = world up
+            set_pose(rig, "root", p.get("rot", 0))
+            set_pose(rig, "torso", p.get("torso", 0))
+            set_pose(rig, "head", p.get("head", 0))
+            for s in ("n", "f"):
+                hip, kn = p.get(f"hip_{s}", 0), p.get(f"kn_{s}", 0)
+                set_pose(rig, f"hip_{s}", -hip)
+                set_pose(rig, f"kn_{s}", kn)
+                set_pose(rig, f"an_{s}", hip - kn - p.get(f"an_{s}", 0))
+                set_pose(rig, f"sh_{s}", -p.get(f"sh_{s}", 0))
+                set_pose(rig, f"el_{s}", -p.get(f"el_{s}", 0))
+            pr.keyframe_insert("location", frame=f)
+            for pb in rig.pose.bones:
+                pb.keyframe_insert("rotation_quaternion", frame=f)
+        rig.animation_data.action = None
+    rig.animation_data.action = bpy.data.actions["idle"]
+
+
+def build_model(out_path=MODEL_OUT):
+    """Contract v2 surveyor (B-078): base suit only, empties -> armature, §5 clip set at 30 fps,
+    sockets float_pack (back) and rig_tool (right hand = near/camera side, holding the Beam)."""
+    global LOW_POLY
+    LOW_POLY = True
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    scene = bpy.context.scene
+    scene.render.fps = 30
+    parts = build_one(scene, None, do_animate=False)
+    coll = parts["coll"]
+    rig = empties_to_armature(parts, coll)
+    wz = HIP_Z + SHOULDER_Z - UPPER - FORE
+    add_socket(rig, coll, "float_pack", "torso", (-0.37, 0.0, HIP_Z + 0.32))
+    add_socket(rig, coll, "rig_tool", "el_n", (0.02, -SHOULDER_Y, wz - 0.08))
+    animate_model(rig)
+    scene.frame_start, scene.frame_end = 1, max(c["frames"] for c in model_clips()) + 1
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     bpy.ops.wm.save_as_mainfile(filepath=out_path, compress=True)
     print("MERIDIAN built", out_path)
