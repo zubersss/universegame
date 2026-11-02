@@ -980,3 +980,6 @@ U-075 progress: EditMode 239/239 incl. ModelImportTests (calibration + surveyor 
 ## Cycle 196 · 2026-11-02 03:3x (BLENDER message)
 Checked: review_terrain_venus_vent_glass.png, review_terrain_mercury_regolith.png (stamped 03:25–03:26). B-091 art accepted; Done on R3's lit blocks. B-096 → In Progress.
 
+## Cycle 197 · 2026-11-02 03:4x (UNITY message)
+Checked: tests_2026-11-02.md 03:20 EditMode 239/239; 03:29 PlayMode 18/19 (PawsOnTheGround read padded SkinnedMeshRenderer.bounds) then 03:36 10/10 after measuring baked vertices (every model's lowest vertex at 0.000 m: BLENDER's exports are exact); compile 0 errors. U-075 → Done. U-076 → In Progress. R1 remaining: U-076 (models, props, depth bands, flora in the scene), U-077 (0.4.0 build + geometry budget rows).
+

@@ -130,14 +130,14 @@ Files: Assets/_Game/Code/Runtime/Planet/Lighting/, Building/
 Depends: U-072
 Lead notes: Done 4c439ca + 61f1a58 + 8405680 + 179d35d (cycle 193): Sun3D + ambient from DayNightMath, lamp point lights (1.6 m off the faces, 8 m), per-planet exp² fog, bloom; DayNightTests.The3DSunAndAmbientFollowTheClock; EditMode 237/237, compile 0/0; u074_2026-11-02/mars_shelter_night_lamp.png: night-dark terrain and backdrop, warm pool on the regolith blocks. Placeholder cards still full-bright until U-075/U-076 (expected).
 
-### U-075 · UNITY · In Progress · R1
+### U-075 · UNITY · Done · R1
 Goal: Model-based views: `CharacterView`/`CreatureView` drive an Animator with clips named exactly as the old sheet clips (contract §5 names), facing by a 180° yaw turn, hit flashes by material property; `ArtImporter` v5 imports `.glb` per contract §9 (materials from the four maps, clip names kept, address = key, placeholder retired); capsule/box placeholders until B-078/B-082; the hit/footing/interaction code unchanged.
 Accept: ArtImporterTests for a sample glb (B-077's calibration model); every clip name used in code resolves on the placeholder Animator; FootingTests, creature tests green.
 Files: Assets/_Game/Code/Runtime/Creatures/, Player/, Code/Editor/ArtImporter.cs, Tests/
 Depends: U-072
-Lead notes: Cycle 171. R1. Handshake with B-077 like B-002/U-005.
+Lead notes: Done cb1b3cb + a052069 + d50b5f6 (cycle 197): ModelView drives the surveyor, stag, wolf, dustskater and scree stalker by clip name (sheet species keep sprites); ArtImporter v5–v8 (glb → Mecanim, materials from the maps, loops/sockets from the json, generated placeholders, atlas rule); EditMode 239/239 incl. ModelImportTests; targeted PlayMode 03:29 + 03:36 green (ModelView, SurveyorAnim per D-070, CreatureTests 10/10 with feet measured on baked vertices, Footing, M1Integration, SpawnCamp); compile 0/0.
 
-### U-076 · UNITY · Ready · R1
+### U-076 · UNITY · In Progress · R1
 Goal: Ship, props and depth bands: the Pilgrim and props batch 1 as model prefabs (placeholders until B-079/B-081); the building system places 3D prefabs on the plane; the three parallax layers become depth bands (near props plane z 2–6 m, mid ridge mesh strip z 20–60 m, far skyline + sky dome ≥ 150 m) fed by the planet config; Space keeps its top-down view with planet spheres.
 Accept: an Earth capture shows blocks, back wall, ridges, sky dome and the ship with depth; BuildTests, ShipSideTests, SpaceArtTests green.
 Files: Assets/_Game/Code/Runtime/Ship/, Building/, Planet/Backdrop/, Prefabs/
