@@ -380,7 +380,7 @@ namespace Meridian.Tests
             {
                 var rel = file.Replace('\\', '/').Substring(saved.art.Length);
                 Assert.IsTrue(ArtRules.TryParse(rel, out var key, out _));
-                if (File.Exists(saved.art + key + ".glb")) continue; // v5: a model's emission lives in its own material (ModelMaterials)
+                if (ArtImporter.IsModelKey(key)) continue; // v5: a model's (or shared atlas's) emission lives in its own material (ModelMaterials)
                 Assert.IsTrue(reg.IsEmissive(key), $"{key} has an emission map");
             }
         }
@@ -431,7 +431,7 @@ namespace Meridian.Tests
                 Assert.IsTrue(File.Exists(ph), $"placeholder missing for {key}");
                 // ArtImporter v5 (U-075): a key whose art is a model (.glb beside the maps) stays on its 2D placeholder
                 // until the model views read models; its colour map is a model texture, not a sprite.
-                bool model = File.Exists(saved.art + key + ".glb");
+                bool model = ArtImporter.IsModelKey(key);
                 var addressed = File.Exists(art) && !model ? art : ph;
                 Assert.AreEqual(key, Entry(addressed)?.address, $"{key} addressed at {addressed}");
                 if (ArtRules.RuleFor(key).lit)

@@ -21,7 +21,7 @@ namespace Meridian.EditorTools
     public sealed class ArtImporter : AssetPostprocessor
     {
         /// <summary>Bump when the import rules change so Unity re-imports the art everywhere (2: U-036 per-sheet ppu, 3: U-032 clips).</summary>
-        public override uint GetVersion() => 7; // 3: U-032 clips; 4: U-060 mips only on POT; 5: U-075 model maps beside a .glb are not sprites; 6: B-080 block material textures; 7: model keys get a placeholder
+        public override uint GetVersion() => 8; // 3: U-032 clips; 4: U-060 mips only on POT; 5: U-075 model maps beside a .glb are not sprites; 6: B-080 block material textures; 7: model keys get a placeholder; 8: shared model atlases (B-085)
 
         /// <summary>Folders the importer watches. Tests point these at a sandbox and restore them.</summary>
         public sealed class Roots
@@ -86,6 +86,20 @@ namespace Meridian.EditorTools
         }
 
         public static string ArtColorPath(string key) => Active.art + key + "_color.png";
+
+        /// <summary>
+        /// U-075 / B-085: the key's maps belong to a 3D model, not a sprite: its own &lt;key&gt;.glb exists, or it is a
+        /// shared "atlas" material in a folder of models (props/earth_flora/atlas_* serves 11 flora models).
+        /// </summary>
+        public static bool IsModelKey(string key)
+        {
+            if (string.IsNullOrEmpty(key)) return false;
+            if (File.Exists(Active.art + key + ".glb")) return true;
+            int slash = key.LastIndexOf('/');
+            if (slash < 0 || key.Substring(slash + 1) != "atlas") return false;
+            var dir = Active.art + key.Substring(0, slash);
+            return Directory.Exists(dir) && Directory.GetFiles(dir, "*.glb").Length > 0;
+        }
         public static string PlaceholderColorPath(string key) => Active.placeholders + key + "_color.png";
 
         // ---------- preprocess: import settings ----------
@@ -418,7 +432,7 @@ namespace Meridian.EditorTools
                 // U-075 (contract v2 §9): a colour map beside a .glb is a model texture, not a sprite sheet. Until the
                 // model views read models (ArtImporter v5), the key stays on its 2D placeholder: un-address the map
                 // and keep the placeholder addressed, so 2D views never draw a whole 2048² texture as one sprite.
-                if (colorPath.StartsWith(Active.art, StringComparison.Ordinal) && File.Exists(Active.art + key + ".glb"))
+                if (colorPath.StartsWith(Active.art, StringComparison.Ordinal) && IsModelKey(key))
                 {
                     UnregisterArt(colorPath, key);
                     var ph = PlaceholderColorPath(key);
@@ -427,7 +441,7 @@ namespace Meridian.EditorTools
                     {
                         // Contract §1: a key without loadable 2D art gets a placeholder, so 2D loaders never hit an
                         // unknown address (the props/creatures that turned into models had none). Its own import registers it.
-                        PlaceholderGenerator.Write(key, false);
+                        if (File.Exists(Active.art + key + ".glb")) PlaceholderGenerator.Write(key, false); // not for a shared atlas: no 2D loader asks for it
                         if (File.Exists(ph)) AssetDatabase.ImportAsset(ph, ImportAssetOptions.ForceUpdate);
                     }
                     continue;
@@ -442,7 +456,7 @@ namespace Meridian.EditorTools
                     UpdateClipRegistry(colorPath, key);
                     retireKeys.Add(key);
                 }
-                else if (!File.Exists(ArtColorPath(key)) || File.Exists(Active.art + key + ".glb")) // v5: a model key keeps its placeholder
+                else if (!File.Exists(ArtColorPath(key)) || IsModelKey(key)) // v5: a model key keeps its placeholder
                 {
                     Register(colorPath, key);
                     UpdateClipRegistry(colorPath, key);
