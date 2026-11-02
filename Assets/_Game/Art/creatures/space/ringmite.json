@@ -1,0 +1,47 @@
+{
+  "key": "creatures/space/ringmite",
+  "frame_width": 64,
+  "frame_height": 64,
+  "columns": 7,
+  "gutter": 4,
+  "frames": 14,
+  "fps": 10,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "animations": [
+    {
+      "name": "idle",
+      "start": 0,
+      "length": 4,
+      "loop": true
+    },
+    {
+      "name": "chew",
+      "start": 4,
+      "length": 4,
+      "loop": true
+    },
+    {
+      "name": "hurt",
+      "start": 8,
+      "length": 2,
+      "loop": false
+    },
+    {
+      "name": "death",
+      "start": 10,
+      "length": 4,
+      "loop": false
+    }
+  ],
+  "hitbox": {
+    "x": 0.25,
+    "y": 0.25,
+    "w": 0.5,
+    "h": 0.5
+  },
+  "ppu": 54
+}

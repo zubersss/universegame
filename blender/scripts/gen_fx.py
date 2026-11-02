@@ -491,6 +491,41 @@ def grapple_line(rng, w, h, n):
     return [_frame(col, np.clip(I * 1.4, 0, 1)) for _ in range(n)]
 
 
+def ring_dust(rng, w, h, n):
+    """B-059 debris puff when a ring body breaks (top-down, one-shot): ice-white and grey grit
+    flying out radially from the centre, a soft dust cloud expanding and fading; a brief bright
+    glint on the first frames."""
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    cx, cy = w / 2, h / 2
+    R = w / 2 - PAD - 4
+    k = 60
+    ang = rng.uniform(0, 2 * np.pi, k)
+    spd = rng.uniform(0.35, 1.0, k) * R
+    sz = rng.uniform(0.8, 2.2, k)
+    grey = rng.random(k) < 0.4
+    cloud = fft_noise(rng, h, w, 6, 40, 0.8)
+    frames = []
+    for i in range(n):
+        t = (i + 1) / n
+        I = np.zeros((h, w), np.float32)
+        G = np.zeros((h, w), np.float32)
+        for a, s, z, g in zip(ang, spd, sz, grey):
+            px, py = cx + np.cos(a) * s * t ** 0.7, cy + np.sin(a) * s * t ** 0.7
+            d = np.exp(-(((xx - px) ** 2 + (yy - py) ** 2) / (z * z)))
+            if g:
+                G = np.maximum(G, d)
+            else:
+                I = np.maximum(I, d)
+        r = np.hypot(xx - cx, yy - cy) / (R * (0.25 + 0.7 * t))
+        puff = np.clip(1 - r + 0.25 * cloud, 0, 1) ** 1.5 * (1 - t) * 0.6
+        glint = np.exp(-(np.hypot(xx - cx, yy - cy) / (3 + 4 * t)) ** 2) * max(0.0, 1 - 2.5 * t)
+        a = np.clip(np.maximum.reduce([I * (1 - t ** 3), G * (1 - t ** 3), puff, glint]), 0, 1) * _inside(h, w)
+        col = C((236, 242, 250)) * (1 - G[..., None]) + C((128, 122, 116)) * G[..., None]
+        col = col * (1 - puff[..., None] * 0.3) + C((200, 206, 214)) * puff[..., None] * 0.3
+        frames.append(_frame(col, a, glow=np.clip(glint + 0.2 * I * (1 - t), 0, 1)))
+    return frames
+
+
 def _inside(h, w):
     """1 inside the padded area, 0 in the 8 px margin."""
     m = np.zeros((h, w), np.float32)
@@ -510,7 +545,7 @@ GEN = {"thruster": thruster, "dust": dust, "dig_sparks": dig_sparks, "escape_ban
        "survey_scan": survey_scan, "builder_ghost": builder_ghost, "warden_bolt": warden_bolt,
        "lightning": lightning, "diamond_rain": diamond_rain, "methane_hail": methane_hail,
        "wind_streaks": wind_streaks, "crush_pulse": crush_pulse, "skip_spool": skip_spool,
-       "skip_streak": skip_streak, "floe_sublimate": floe_sublimate, "grapple_line": grapple_line}
+       "skip_streak": skip_streak, "floe_sublimate": floe_sublimate, "grapple_line": grapple_line, "ring_dust": ring_dust}
 
 
 def generate(entry, ctx):
