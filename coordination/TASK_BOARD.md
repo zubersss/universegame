@@ -952,12 +952,12 @@ Files: blender/scripts/gen_backdrop*.py, gen_terrain.py, Assets/_Game/Art/backgr
 Depends: B-048
 Lead notes: Cycle 147. M4. Start once B-055 is in review.
 
-### B-059 · BLENDER · Ready · M4
+### B-059 · BLENDER · In Progress · M4
 Goal: Ring and belt mining art (Bible §7.7): `props/space/ring_ice_01..04` (bright icy chunks), `props/space/ring_rock_01..04` (grey-brown silicate), `creatures/space/ringmite` (tiny top-down swarm unit, 64 px, chewing clip), `fx/ring_dust` (debris puff when a body breaks).
 Accept: top-down camera and scale as the B-010 asteroids (64 px/m, D-018); sheets ≤ 1024²; stamped review.
 Files: blender/scripts/build_asteroids.py, gen_fx.py, Assets/_Game/Art/props/space/, creatures/space/, fx/ring_dust/
 Depends: B-010
-Lead notes: Cycle 147. M4. Feeds U-066.
+Lead notes: Cycle 170 (bfbebbe): ring_rock_01..04, ringmite (ppu 54, idle/chew/hurt/death) and fx/ring_dust accepted. FAIL ring_ice_01..04, Art matches §9: they read as soft cotton puffs, not icy chunks. Fix: a hard irregular silhouette (faceted, a few flat cleavage planes), a bright specular highlight on the sun side and a cool blue shadow side, two or three dark cracks, no soft outer fuzz. Re-render the four ice bodies only, then mark Ready.
 
 ### B-060 · BLENDER · In Progress · M4
 Goal: Saturn creatures (Bible §7.7): `creatures/saturn/helium_jelly` (translucent; add a "rise" clip for when it's hit), `hex_drake` (winged, flier clip set), `floe_moth` (small, 128 px).
