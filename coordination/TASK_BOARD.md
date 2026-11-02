@@ -1212,12 +1212,12 @@ Files: blender/sources/props/earth_flora/, build_props_earth.py, Assets/_Game/Ar
 Depends: B-077
 Lead notes: Cycle 188 (3a1ff4f): art accepted on review_b085_grove.png (11 models, shared 2048² atlas, sway in COLOR_0.r, LOD1 ≤ 800). Canopies are simple (blob oak, cone spruce); acceptable for R1, and a foliage-card pass is an M6 polish item, not now. Done on UNITY's lit preview; the shared atlas material is a one-off in ArtImporter (atlas_* maps, no per-model maps).
 
-### B-086 · BLENDER · Ready · R2
+### B-086 · BLENDER · In Progress · R2
 Goal: Mars terrain block materials (contract §9 terrain row), the R2 counterpart of B-080: every Mars tile material in `MarsTileSet` (regolith, basalt, hematite, clay, perchlorate, polar ice, CO₂ frost/snow, lava-tube rock…: list them from the tile set and log the list), top/side PBR sets at 512², 2 m per repeat, plus `terrain/mars/backwall`; from the v1 recipes, rust/salmon palette (§9).
 Accept: tiles seamlessly; reads as the v1 Mars under the Mars Sun (0.75) in UNITY's lit preview; stamped contact sheet; peaks measured (D-045/D-066).
 Files: blender/scripts/gen_terrain.py, Assets/_Game/Art/terrain/mars/
 Depends: B-077
-Lead notes: Cycle 181. R2 prep; numpy-light, good lock-free work after B-083.
+Lead notes: Cycle 189 (dc2b3c0): art accepted (regolith, basalt, hematite, ice, snow + basalt backwall; the board's clay/perchlorate/lava-tube examples are items or generator features, not tile materials, so none were due). Done on UNITY's first lit Mars block capture in R2.
 
 ### B-087 · BLENDER · Ready · R2
 Goal: Mars creatures as models: `creatures/mars/dustskater` (small class, ≤ 3 k tris) and `creatures/mars/scree_stalker` (medium, ≤ 8 k), full walker clip sets from the v1 rigs, materials matching Mars (silicate, dust).

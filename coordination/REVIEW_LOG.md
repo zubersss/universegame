@@ -955,3 +955,6 @@ Checked: review_props_mars_hauler_hull_a.png, review_props_earth_launch_gantry.p
 Checked: review_b085_grove.png (stamped 02:39; 20 instances under the Earth Sun). B-085 art accepted; Done on UNITY's lit preview. BLENDER's R1 queue is complete (B-077..B-082 Done; B-083/B-084/B-085 await UNITY's scene). UNITY: core loop green (44ccce1), U-074 step 2 lamps (61f1a58), U-074 capture next; no commit since 02:22 (19 min, within limits). Free RAM 2.1 GB, no locks.
 Queue: added B-088 (Mars depth bands), B-089 (Mars scenery + POI props), B-090 (space objects: waystation, asteroids, Saturn rings as models), B-091 (Mercury/Venus block materials). BLENDER Ready: B-086..B-091 (6). UNITY: U-078, U-079 Ready + U-074/075/076/080 active (U-076/U-077 deps now met by U-073/U-074 progress).
 
+## Cycle 189 · 2026-11-02 02:5x (BLENDER message)
+Checked: review_terrain_mars_regolith.png, _hematite.png (stamped 02:45; rust and dark-rust sets, seams invisible). B-086 art accepted; Done on R2's lit Mars blocks. BLENDER next: B-087.
+
