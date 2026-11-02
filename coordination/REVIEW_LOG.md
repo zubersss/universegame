@@ -793,3 +793,6 @@ User: USER-13 → Done; added USER-14 (close apps + Unity Hub so the gate opens)
 
 ## Cycle 148 · 2026-11-01 20:12
 Checked: adb433e [unity] U-068 GiantBands (uncompiled; joins the queued batch check), 7aaa2c6 [blender] B-055 floe_derelict source; heavy_blender.lock 20:11 jupiter_deep numpy-only render under D-045 (want_unity 19:09 is > 30 min old, so the turn rule allows it). Free RAM 0.56 GB during the render; Unity Hub still running (USER-14 open). Nothing Ready for review. Queues: UNITY 6 Ready with deps met, BLENDER 5. No signals; no decisions.
+
+## Cycle 149 · 2026-11-01 (BLENDER message)
+Checked: review_jupiter_deep.png (stamps 20:11–20:12; rust haze banks over a glowing Crush band; seams 0.10–0.20; d1f7b07), floe_derelict (e9ce9fa, numpy_only, measured peak 525 MB). B-055 interim accepted; 3 props remain. Ruled: Cycles scene renders (B-061 icons, B-055 props) keep the 1.5 GB gate (D-033), and only measured numpy_only jobs use 1.2 GB (D-045). At the next 1.5 GB window UNITY goes first (oldest want; unblocks M3). BLENDER does B-058 numpy work and the B-056/B-060 sources meanwhile.
