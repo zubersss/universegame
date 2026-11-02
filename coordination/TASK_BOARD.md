@@ -1205,12 +1205,12 @@ Files: blender/sources/props/earth/, build_props_earth.py, Assets/_Game/Art/prop
 Depends: B-077
 Lead notes: Cycle 187 (b31f865): art accepted on the turntables (archive door + terminal, launch gantry + tower ruin, Earth beacon, hauler hull_a/hull_b/cargo with LOD1, Warden pylon, Meridian beacon; 188–1,404 tris). Rulings: the hauler stays as the three v1 pieces UNITY already places (no hero wreck now); the pylon stays the v1 obelisk. Done on UNITY's lit preview (fold into U-076's run).
 
-### B-085 · BLENDER · Ready · R1
+### B-085 · BLENDER · In Progress · R1
 Goal: Earth scenery for the near band and the play plane: 3 tree species (forest/taiga variants), 2 bushes, 3 rocks, grass tufts, a cactus and a dead tree, each ≤ 2 k tris with LOD1 at ≤ 800, sharing one 2048 atlas material; wind-sway via a vertex-colour mask (R = sway weight).
 Accept: contract §9; a stamped grove preview (20 instances) reads under the Earth Sun; UNITY lit preview for Done.
 Files: blender/sources/props/earth_flora/, build_props_earth.py, Assets/_Game/Art/props/earth_flora/
 Depends: B-077
-Lead notes: Cycle 176. R1. Feeds U-076's near props plane.
+Lead notes: Cycle 188 (3a1ff4f): art accepted on review_b085_grove.png (11 models, shared 2048² atlas, sway in COLOR_0.r, LOD1 ≤ 800). Canopies are simple (blob oak, cone spruce); acceptable for R1, and a foliage-card pass is an M6 polish item, not now. Done on UNITY's lit preview; the shared atlas material is a one-off in ArtImporter (atlas_* maps, no per-model maps).
 
 ### B-086 · BLENDER · Ready · R2
 Goal: Mars terrain block materials (contract §9 terrain row), the R2 counterpart of B-080: every Mars tile material in `MarsTileSet` (regolith, basalt, hematite, clay, perchlorate, polar ice, CO₂ frost/snow, lava-tube rock…: list them from the tile set and log the list), top/side PBR sets at 512², 2 m per repeat, plus `terrain/mars/backwall`; from the v1 recipes, rust/salmon palette (§9).
@@ -1225,6 +1225,34 @@ Accept: contract §9; stamped turntables; UNITY lit preview at 60 px/m reads as 
 Files: blender/sources/creatures/mars/, build_creatures_mars.py, Assets/_Game/Art/creatures/mars/
 Depends: B-077
 Lead notes: Cycle 181. R2 prep.
+
+### B-088 · BLENDER · Ready · R2
+Goal: Mars depth bands (contract §9 depth-bands row), the R2 counterpart of B-083: `backgrounds/mars_<region>/ridge_mid.glb` for canyon, plains, polar and tharsis (Olympus Mons as the far hero), a shared `skyline_far.glb`, and skydomes per region (rust/salmon skies, the v1 dust haze; a `storm` skydome variant for the dust storm).
+Accept: tiles seamlessly in x; reads as the v1 Mars parallax from the side rail; stamped turntables; peaks measured.
+Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/mars_*/
+Depends: B-077
+Lead notes: Cycle 188. R2.
+
+### B-089 · BLENDER · Ready · R2
+Goal: Mars scenery and POI props as models: boulders ×3, regolith rocks ×2, ice chunks ×2, a dead shrub-like "dust bush", lava-tube stalactite/stalagmite pair (each ≤ 1.5 k tris, LOD1, one shared atlas); the Mars POI props from the v1 sources not already covered by B-084 (crash-site debris, the Mars Waystation surface beacon, ice-cap drill rig), ≤ 6 k tris each.
+Accept: contract §9; a stamped field preview (20 instances) under the Mars Sun (0.75); UNITY lit preview for Done.
+Files: blender/sources/props/mars/, build_props_mars.py, Assets/_Game/Art/props/mars_flora/, props/mars/
+Depends: B-077
+Lead notes: Cycle 188. R2.
+
+### B-090 · BLENDER · Ready · R2
+Goal: Space objects as models for U-078's lit top-down scene: `props/space/waystation` (the Earth/Mars Waystation as one model with a lit docking bay and running lights, LOD1), `props/space/asteroid_01..06` as low-poly rocks (≤ 600 tris each) from the v1 silhouettes, `planets/<name>/rings` for Saturn as a flat ring mesh with an alpha texture.
+Accept: contract §9; top-down turntables at the Space camera scale; UNITY lit preview for Done.
+Files: blender/scripts/build_waystation.py, build_asteroids.py, gen_planet.py, Assets/_Game/Art/props/space/, planets/saturn/
+Depends: B-077
+Lead notes: Cycle 188. R2. Feeds U-078.
+
+### B-091 · BLENDER · Ready · R3
+Goal: Mercury and Venus terrain block materials (R3 prep, as B-080/B-086): every tile material in `MercuryTileSet` (regolith, basalt, solarite crust, shadow ice, impact glass…) and `VenusTileSet` (basalt, sulfur crust, vent glass, station deck plates…), top/side PBR sets at 512², 2 m repeat, plus backwalls; palettes per §9.
+Accept: tiles seamlessly; reads as the v1 materials under each planet's Sun in UNITY's lit preview; stamped contact sheets.
+Files: blender/scripts/gen_terrain.py, Assets/_Game/Art/terrain/{mercury,venus}/
+Depends: B-077
+Lead notes: Cycle 188. R3 prep; numpy-light.
 
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
