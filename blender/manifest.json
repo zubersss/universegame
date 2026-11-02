@@ -113,6 +113,7 @@
       "star_gain": 1.6,
       "tileable": "xy"
     },
+    {"key": "ships/pilgrim/base", "model": true, "source": "sources/ships/pilgrim_model.blend", "build": "scripts/build_pilgrim.py", "build_fn": "build_model", "collection": "pilgrim", "texture": 2048, "tri_budget": 15000, "lod1": true, "origin_rule": "centre_of_mass", "clips": [], "note": "contract v2 Pilgrim (B-079): 12 m, landing legs (footprint 3.52 m fits the 3.6 m pad), socket_cockpit, LOD1; replaces v1 side/side_legs/top sprites (archived)"},
     {
       "key": "ships/pilgrim/side",
       "source": "sources/ships/pilgrim.blend",
