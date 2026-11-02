@@ -806,3 +806,6 @@ Decided: D-054 (skip time = layout distance / 1,200; Bible 1.5), D-055 (giant ha
 Locks: UNITY filed want_unity 20:36:33 right after its own job while want_blender (20:20:55) existed, which breaks D-039 and could deadlock again. LEAD deleted want_unity.lock (logged here); BLENDER goes next. Free RAM 1.79 GB, no heavy lock.
 U-064 stays In Progress until the targeted re-check (FootingTests + SkipDriveTests) passes.
 Queue: BLENDER had 3 untouched Ready tasks with deps met (B-056, B-059, B-060); added B-062 (Uranus column art) and B-063 (Neptune column art). UNITY: U-061, U-063, U-065, U-066, U-067 Ready; U-068/U-069 compiled and tested, so they move to Review on UNITY's hand-off.
+
+## Cycle 152 · 2026-11-01 20:5x (BLENDER message)
+Checked: 04ac1e7 Saturn 12 layers + floe_ice/core (numpy_only, peak 694 MB); review_saturn_deck1.png stamped 20:44–20:45: pale gold banks, ring-plane line, clearly distinct from Jupiter. B-058 accepted on art; it closes when BLENDER marks it Ready with the deck2/3/deep reviews. Claude Code stopped BLENDER's B-061 icon render for low memory; BLENDER removed its own stale lock correctly. Ruled: D-046 (rule 6) covers every role, so BLENDER may re-run once after UNITY's turn at ≥ 1.5 GB without asking the owner; split into two calls to lower the peak.
