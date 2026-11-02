@@ -6,6 +6,12 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
+### USER-16 — Playtest M3 (15–30 min)
+1. Open File Explorer and go to `C:\dev\universegame\Build\MERIDIAN_0.3.0`.
+2. Double-click `MERIDIAN.exe` ("More info" → "Run anyway" if Windows asks).
+3. Click NEW. What to try is on the M3 page the Lead sent you, or in `coordination/reviews/M3_REPORT.md`.
+4. Tell the Lead what felt wrong, for example "done: USER-16, flares too frequent". This also covers USER-12 (the M2 playtest) if you skip that one.
+
 ### USER-15 — Give BLENDER the same memory-restart permission UNITY has (1 min)
 When the laptop runs low on memory, Claude Code stops the running job and the BLENDER session waits for you to type permission before trying again. UNITY already has standing permission; BLENDER keeps asking you each time (21:34 and again around 00:00). Paste this into the **BLENDER window** exactly:
 

@@ -95,12 +95,12 @@ Files: Assets/_Game/Tests/LeadQA/, coordination/reviews/M2_REPORT.md
 Depends: U-033, U-034, U-037, U-039, B-015, B-016
 Lead notes: Done (cycle 97): M2SoakTests passed twice (14:30, 14:33; touchdowns 2.68 and 4.80 m/s); screenshots reviewed; M2_REPORT.md written; owner playtest = USER-12.
 
-### L-012 · LEAD · In Progress · M3
+### L-012 · LEAD · Done · M3
 Goal: M3 QA: LeadQA M3InnerTests: Earth → launch → Mercury entry; survive a forced flare in a shelter; mine solarite in the window; fly to Venus; dock-free direct entry to the deck station; craft a radiation liner; sell at the Earth Waystation; ≤ 15 min game time per run; clean console; M3_REPORT.md + milestone page.
 Accept: passes twice; screenshots checked vs §9; M3_REPORT written; owner playtest posted.
 Files: Assets/_Game/Tests/LeadQA/M3InnerTests.cs, coordination/reviews/M3_REPORT.md
 Depends: U-060
-Lead notes: Cycle 126. Write the test once U-059 lands.
+Lead notes: Done (cycle 168): M3InnerTests 738fd43 passed twice (UNITY checks 23:16 and 23:46, 7/7 each); 0.3.0 smoke shots checked; M3_REPORT.md written; milestone page published https://claude.ai/artifact/EfXnC1s4pys8zi3e5WDeQy; USER-16 playtest posted. M3 closes on the owner's playtest.
 
 ---
 
