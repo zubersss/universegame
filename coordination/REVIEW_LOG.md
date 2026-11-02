@@ -836,4 +836,4 @@ Locks: none; free RAM 2.05 GB. Queues: UNITY 6 Ready, BLENDER 5 (B-056, B-059, B
 ## Cycle 158 · 2026-11-01 22:2x (BLENDER message)
 Checked: review_uranus_deck2.png, review_uranus_dark_deck2.png (stamped; dim cyan vs colder dark-season blue). B-062 → Done. B-063 → In Progress (Neptune storm mass too faint, storm v3 next). Husk v2 was already accepted in cycle 157.
 Signal: D-037 slip, self-reported by BLENDER (a 45 s second job at 22:19 with want_unity 22:13 present; UNITY took the lock right after, no harm done). Decided D-059: the wrapper enforces the turn rule in code.
-
+Queue: added B-064 (Uranus creatures), B-065 (Neptune creatures); BLENDER untouched Ready with deps met: B-056, B-059, B-060, B-064, B-065.

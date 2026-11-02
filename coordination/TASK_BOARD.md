@@ -987,6 +987,20 @@ Files: blender/scripts/gen_backdrop*.py, gen_terrain.py, Assets/_Game/Art/backgr
 Depends: B-048
 Lead notes: Cycle 151. M4. After B-062.
 
+### B-064 · BLENDER · Ready · M4
+Goal: Uranus creatures (Bible §7.8): `creatures/uranus/frostwisp` (small luminous floater, cyan-white emission, 128 px), `methane_ray` (glider, flier clip set), `hailcrab` (shelled walker whose shell catches diamonds; a "shell up" defend clip), `tiltbird` (migrating flier, small flock unit).
+Accept: contract §4 sizes and clips as earlier creatures; dim-light readable (test the contact sheet at Uranus sunlight 0.25 in the lit preview); stamped review.
+Files: blender/scripts/build_creatures_uranus.py, Assets/_Game/Art/creatures/uranus/
+Depends: B-002
+Lead notes: Cycle 158. M4.
+
+### B-065 · BLENDER · Ready · M4
+Goal: Neptune creatures (Bible §7.9): `creatures/neptune/windrider` (sail-finned floater), `shadow_shoal` (dark fast fish-like swarm unit, 128 px, faint rim light so it reads on indigo), `pressure_phantom` (translucent, Deck 3), `anchor_worm` (holds floes; a coiled "anchored" pose and a free clip).
+Accept: contract §4 sizes and clips; readable against the B-063 indigo decks; translucency where stated; stamped review.
+Files: blender/scripts/build_creatures_neptune.py, Assets/_Game/Art/creatures/neptune/
+Depends: B-002
+Lead notes: Cycle 158. M4.
+
 ### B-012 · BLENDER · Done · M2
 Goal: FX batch 1: `fx/thruster`, `fx/dust`, `fx/dig_sparks`, `fx/escape_band`, `fx/heat_shimmer`.
 Accept: frames ≤ 256, sheets ≤ 1024², `.json` per sheet, emission where glowing.
