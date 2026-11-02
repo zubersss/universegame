@@ -105,9 +105,11 @@ namespace Meridian.Tests
             Row($"Particles alive · {where}", "≤ 600", r.particlesAlive.ToString(), r.particlesAlive <= BudgetMonitor.ParticlesCap);
             Row($"GC per 300 frames · {where}", "≤ 1 KB (main-thread managed allocations; P-16)",
                 $"{gc.gcBytesLast300} B (Unity GC counter incl. Editor: {gc.gcProfilerBytes / 1024} KB)", gc.gcBytesLast300 <= BudgetMonitor.GcBytesPer300);
-            Row($"Memory · {where}", "≤ 2.5 GB system, ≤ 600 MB textures, ≤ 60 MB audio",
+            // D-036/D-058: memory is judged in the development build (unity_profile -Build); the Editor row is info only.
+            bool memOk = Within(r.systemMemoryMB, BudgetMonitor.RamMB) && Within(r.textureMemoryMB, BudgetMonitor.TexturesMB) && Within(r.audioMemoryMB, BudgetMonitor.AudioMB);
+            Info($"Memory · {where} (Editor)", "≤ 2.5 GB system, ≤ 600 MB textures, ≤ 60 MB audio",
                 $"system {Mb(r.systemMemoryMB)}, textures {Mb(r.textureMemoryMB)}, audio {Mb(r.audioMemoryMB)} (Editor process: upper bound)",
-                Within(r.systemMemoryMB, BudgetMonitor.RamMB) && Within(r.textureMemoryMB, BudgetMonitor.TexturesMB) && Within(r.audioMemoryMB, BudgetMonitor.AudioMB));
+                memOk ? "info (within)" : "info (over; the dev-build row decides, D-058)");
         }
 
         static string Mb(long v) => v < 0 ? "n/a" : $"{v} MB";
