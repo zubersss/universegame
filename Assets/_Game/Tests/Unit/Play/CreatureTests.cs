@@ -209,11 +209,20 @@ namespace Meridian.Tests
                     Assert.NotNull(prefab, glb);
                     var inst = Object.Instantiate(prefab);
                     inst.transform.position = Vector3.zero;
-                    var rends = inst.GetComponentsInChildren<Renderer>();
-                    var mb = rends[0].bounds;
-                    foreach (var r in rends) mb.Encapsulate(r.bounds);
-                    report.AppendLine($"{key} model: bounds bottom {mb.min.y:F3} m");
-                    if (Mathf.Abs(mb.min.y) > 0.02f) fails.Add($"{key} model: feet at y {mb.min.y:F3} (± 0.02)");
+                    // The geometry's lowest point (SkinnedMeshRenderer.bounds is the importer's padded estimate, not the vertices).
+                    float bottom = float.PositiveInfinity, padded = float.PositiveInfinity;
+                    foreach (var smr in inst.GetComponentsInChildren<SkinnedMeshRenderer>())
+                    {
+                        padded = Mathf.Min(padded, smr.bounds.min.y);
+                        var baked = new Mesh();
+                        smr.BakeMesh(baked, true);
+                        foreach (var v in baked.vertices) bottom = Mathf.Min(bottom, smr.transform.TransformPoint(v).y);
+                        Object.Destroy(baked);
+                    }
+                    foreach (var mf in inst.GetComponentsInChildren<MeshFilter>())
+                        if (mf.sharedMesh != null) foreach (var v in mf.sharedMesh.vertices) bottom = Mathf.Min(bottom, mf.transform.TransformPoint(v).y);
+                    report.AppendLine($"{key} model: lowest vertex {bottom:F3} m (renderer bounds {padded:F3})");
+                    if (Mathf.Abs(bottom) > 0.02f) fails.Add($"{key} model: feet at y {bottom:F3} (± 0.02)");
                     Object.Destroy(inst);
                     continue;
                 }
