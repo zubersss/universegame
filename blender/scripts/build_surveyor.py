@@ -539,7 +539,7 @@ def animate_model(rig):
         act = bpy.data.actions.new(name)
         act.use_fake_user = True
         rig.animation_data.action = act
-        idx = list(range(n)) + ([0] if CLIP_LOOP.get(name) else [])
+        idx = list(range(n)) + ([0] if CLIP_LOOP.get(name) else [n - 1])   # loops close on pose 0; one-shots hold the last pose (clip = n * fpp frames)
         for k, i in enumerate(idx):
             p = clip_pose(name, i)
             f = 1 + k * fpp
