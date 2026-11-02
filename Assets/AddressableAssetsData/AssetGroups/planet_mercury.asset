@@ -20,18 +20,53 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 1a5b4b07d6163da438e56c1b5f9c130e
-    m_Address: props/mercury/meridian_beacon
+  - m_GUID: 0aa92a0c5fe1d7941a62723897204f35
+    m_Address: creatures/mercury/shadewyrm
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 23e2db1aa31e8e04199e714e93f76587
-    m_Address: props/mercury/flare_shelter
+  - m_GUID: 0fed9741fe114ef4ea4f923fce5ba229
+    m_Address: creatures/mercury/cinderling
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 35105424c57f6ec4a99be2725e446b2c
+  - m_GUID: 10ca2000fdda1604a85534730132ef7a
+    m_Address: creatures/mercury/glassback
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 12fc45d20e3b49b4985f1e8ab96cbd55
     m_Address: props/mercury/shelter_door
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1a608291bbd266e45907b48896d6a869
+    m_Address: props/mercury/shelter_door
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1d837d8d16304da44a67275f8ed9d503
+    m_Address: creatures/mercury/flarewing
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 200bee08d96517a4995137ad94cd6262
+    m_Address: props/mercury/warden_vault_gate
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 21f19c03c83e4d147894b5725f4ffa62
+    m_Address: creatures/mercury/glassback
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 28054e3a81105394f96a2f8a62c7f2f2
+    m_Address: creatures/mercury/cinderling
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3ba060b30506f2041adc76526805f9b4
+    m_Address: props/mercury/flare_shelter
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -45,8 +80,38 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 461ba09c49ff5a84b859baa437aa4295
+    m_Address: props/mercury/equipment_locker
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 478571dd85299fc4d81bf230b296f943
     m_Address: terrain/mercury/basalt
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 479ae04f00c4a9b4fb1b82a2d233a14f
+    m_Address: props/mercury/solarite_crusted
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4f028203dbe973a41b193cc94bc8352e
+    m_Address: props/mercury/flare_shelter
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4f1cb62af3798364781dddca41f06934
+    m_Address: props/mercury/meridian_beacon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4fcc32fbae4ffd94b9dae1bff8d2a162
+    m_Address: props/mercury/solarite_cut
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6114434e886c1b449b3de6497678e6b4
+    m_Address: props/mercury/solarite_cut
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -55,8 +120,43 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 66007d8ec9f459546826951e753b1b9f
+    m_Address: creatures/mercury/shadewyrm
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 681ad70f1b568f745b1d133cebc3dd0c
     m_Address: backgrounds/mercury/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6b24416d74b18ed4b99f614160072c71
+    m_Address: props/mercury/equipment_locker
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 73054ba25d086a24dbad37ce96d93397
+    m_Address: props/mercury/meridian_beacon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7b37fd72fe88e2240a65bb539b3bcc5f
+    m_Address: props/mercury/shelter_door
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7cfb3d3bddc7b1e48a132a97619604cb
+    m_Address: creatures/mercury/flarewing
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8616caaa1eb6cd3488511e6a92f9765c
+    m_Address: props/mercury/solarite_crusted
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 86187be122de32b49b9b8867b981974d
+    m_Address: props/mercury/solarite_cut
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -65,8 +165,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8d1c050972b6a3a4fac8c919c01d1b62
-    m_Address: creatures/mercury/cinderling
+  - m_GUID: 8b6abf7cc21b25f44b7162b88a7a5731
+    m_Address: props/mercury/solarite_cluster
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8f8b0f42307a2f545b2874b9740cdca8
+    m_Address: props/mercury/solarite_crusted
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -75,12 +180,27 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: aa202bc5ed49e884b837af93ee2b2da2
+  - m_GUID: aafb55ab9fc73474bba418653e7f9e75
+    m_Address: creatures/mercury/cinderling
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ad19d4db1c901754faeacf43a11e41bb
+    m_Address: props/mercury/meridian_beacon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b01b2666d5a81754284d38f50d97b51c
+    m_Address: creatures/mercury/shadewyrm
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b0658ba40162d694eb598c7cf1c09cc9
     m_Address: props/mercury/warden_vault_gate
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b24cc8088e94a68418d6ecb33d3516db
+  - m_GUID: b7df9063282463b4c9fc8485ae349c04
     m_Address: props/mercury/solarite_cluster
     m_ReadOnly: 0
     m_SerializedLabels: []
@@ -90,23 +210,38 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c766abd0730b45f4b9d7f64a66ff3132
+    m_Address: props/mercury/equipment_locker
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c7e660d36c0f88b499ed2a480a3f9dd5
+    m_Address: props/mercury/solarite_cluster
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cc44b747795a37b42b93056932741d16
+    m_Address: props/mercury/warden_vault_gate
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d25e9d6c998b4a5469c19fe201b57e62
+    m_Address: creatures/mercury/flarewing
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d48c7ac8a9333d548909970b0204c1e5
     m_Address: terrain/mercury/sulfide
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e0a04c2f04dd89647afa7d6074599c02
-    m_Address: creatures/mercury/flarewing
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f075c7686cc646446adabd1605db7294
+  - m_GUID: d6bf760c63001ba4794fa547f62cd7f9
     m_Address: creatures/mercury/glassback
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f96df61d5f9f88448b4c97d33f257413
-    m_Address: creatures/mercury/shadewyrm
+  - m_GUID: dd2998aabee1fba41b0584d3818269de
+    m_Address: props/mercury/flare_shelter
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

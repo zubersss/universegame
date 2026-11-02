@@ -15,13 +15,23 @@ MonoBehaviour:
   m_GroupName: planet_venus
   m_GUID: 41723de805471664aae7da0b639ba7b6
   m_SerializeEntries:
+  - m_GUID: 083e5aea6a707b64088b00a133fba926
+    m_Address: creatures/venus/vent_eel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 16e50df9e447a0149a3871469a580b35
     m_Address: props/venus/station_hull_a
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 1a96ff525ab9bc640a1bcb20990b6ec2
+  - m_GUID: 1c1c280d4ccfc654b978ecd372bec5a2
     m_Address: creatures/venus/acidmoth
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1c3f69e84eeb5fc46983d473f785d0ad
+    m_Address: creatures/venus/sulfur_drifter
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -30,8 +40,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2d67f0f010f0474498422715087b6d9f
+    m_Address: creatures/venus/acidmoth
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2d6ee4a3fdc41bf40b9a8c94f989aa34
     m_Address: props/venus/aerostat_balloon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3149a0366dc0fc143adb357453b8a55d
+    m_Address: creatures/venus/pressure_crab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 31ae2d02e28196b4ca0099f0099835fb
+    m_Address: creatures/venus/pressure_crab
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -45,8 +70,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 450088f85df65b74391bf9aac9cdf1fb
-    m_Address: creatures/venus/pressure_crab
+  - m_GUID: 3f99bb4d8b085ea4da85dd1253c671b8
+    m_Address: creatures/venus/vent_eel
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -60,13 +85,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 7c96ee0cefffacf4980de4b16444e38c
+  - m_GUID: 7e7faf64851497740a23074faa96e0ff
+    m_Address: creatures/venus/veil_serpent
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a646208def30aeb4ca68278adae36f6b
     m_Address: creatures/venus/vent_eel
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 7e7faf64851497740a23074faa96e0ff
-    m_Address: creatures/venus/veil_serpent
+  - m_GUID: ab46a4e15c0a8e843aa4f7fe7235ac73
+    m_Address: creatures/venus/pressure_crab
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -75,7 +105,12 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d00082c381e657a4d933aced51dc3b76
+  - m_GUID: c48cdb9e0f4859b4089341b4274a8527
+    m_Address: creatures/venus/acidmoth
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cd9f0a668875a1048a59b656e8564004
     m_Address: creatures/venus/sulfur_drifter
     m_ReadOnly: 0
     m_SerializedLabels: []
@@ -92,6 +127,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ef8ba0b07d99de547b91a1ffd5373dbc
     m_Address: terrain/venus/sulfur
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f5676157e1d249c4a841d9d21073c5b8
+    m_Address: creatures/venus/sulfur_drifter
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

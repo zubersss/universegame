@@ -298,6 +298,7 @@ MonoBehaviour:
   - creatures/mercury/cinderhulk_night
   - creatures/mercury/cinderling
   - creatures/mercury/flarewing
+  - creatures/mercury/glassback
   - creatures/mercury/shadewyrm
   - creatures/space/ringmite
   - creatures/venus/acidmoth
@@ -362,10 +363,13 @@ MonoBehaviour:
   - props/mars/ice_drill_rig
   - props/mars/meridian_beacon
   - props/mars/warden_pylon
+  - props/mercury/equipment_locker
   - props/mercury/flare_shelter
   - props/mercury/meridian_beacon
   - props/mercury/shelter_door
   - props/mercury/solarite_cluster
+  - props/mercury/solarite_crusted
+  - props/mercury/solarite_cut
   - props/mercury/warden_vault_gate
   - props/neptune/meridian_wreck_bow
   - props/neptune/meridian_wreck_mid
@@ -663,98 +667,6 @@ MonoBehaviour:
       start: 21
       length: 4
       loop: 0
-  - key: creatures/mercury/cinderling
-    fps: 12
-    clips:
-    - name: idle
-      start: 0
-      length: 6
-      loop: 1
-    - name: walk
-      start: 6
-      length: 8
-      loop: 1
-    - name: attack
-      start: 14
-      length: 6
-      loop: 0
-    - name: hurt
-      start: 20
-      length: 2
-      loop: 0
-    - name: death
-      start: 22
-      length: 6
-      loop: 0
-  - key: creatures/mercury/flarewing
-    fps: 12
-    clips:
-    - name: idle
-      start: 0
-      length: 6
-      loop: 1
-    - name: walk
-      start: 6
-      length: 8
-      loop: 1
-    - name: attack
-      start: 14
-      length: 6
-      loop: 0
-    - name: hurt
-      start: 20
-      length: 2
-      loop: 0
-    - name: death
-      start: 22
-      length: 6
-      loop: 0
-  - key: creatures/mercury/glassback
-    fps: 12
-    clips:
-    - name: idle
-      start: 0
-      length: 6
-      loop: 1
-    - name: walk
-      start: 6
-      length: 8
-      loop: 1
-    - name: attack
-      start: 14
-      length: 6
-      loop: 0
-    - name: hurt
-      start: 20
-      length: 2
-      loop: 0
-    - name: death
-      start: 22
-      length: 6
-      loop: 0
-  - key: creatures/mercury/shadewyrm
-    fps: 12
-    clips:
-    - name: idle
-      start: 0
-      length: 6
-      loop: 1
-    - name: walk
-      start: 6
-      length: 8
-      loop: 1
-    - name: attack
-      start: 14
-      length: 6
-      loop: 0
-    - name: hurt
-      start: 20
-      length: 2
-      loop: 0
-    - name: death
-      start: 22
-      length: 6
-      loop: 0
   - key: creatures/space/ringmite
     fps: 10
     clips:
@@ -773,75 +685,6 @@ MonoBehaviour:
     - name: death
       start: 10
       length: 4
-      loop: 0
-  - key: creatures/venus/acidmoth
-    fps: 12
-    clips:
-    - name: idle
-      start: 0
-      length: 6
-      loop: 1
-    - name: walk
-      start: 6
-      length: 8
-      loop: 1
-    - name: attack
-      start: 14
-      length: 6
-      loop: 0
-    - name: hurt
-      start: 20
-      length: 2
-      loop: 0
-    - name: death
-      start: 22
-      length: 6
-      loop: 0
-  - key: creatures/venus/pressure_crab
-    fps: 12
-    clips:
-    - name: idle
-      start: 0
-      length: 6
-      loop: 1
-    - name: walk
-      start: 6
-      length: 8
-      loop: 1
-    - name: attack
-      start: 14
-      length: 6
-      loop: 0
-    - name: hurt
-      start: 20
-      length: 2
-      loop: 0
-    - name: death
-      start: 22
-      length: 6
-      loop: 0
-  - key: creatures/venus/sulfur_drifter
-    fps: 12
-    clips:
-    - name: idle
-      start: 0
-      length: 6
-      loop: 1
-    - name: walk
-      start: 6
-      length: 8
-      loop: 1
-    - name: attack
-      start: 14
-      length: 6
-      loop: 0
-    - name: hurt
-      start: 20
-      length: 2
-      loop: 0
-    - name: death
-      start: 22
-      length: 6
       loop: 0
   - key: creatures/venus/veil_serpent
     fps: 10
@@ -865,29 +708,6 @@ MonoBehaviour:
     - name: death
       start: 21
       length: 4
-      loop: 0
-  - key: creatures/venus/vent_eel
-    fps: 12
-    clips:
-    - name: idle
-      start: 0
-      length: 6
-      loop: 1
-    - name: walk
-      start: 6
-      length: 8
-      loop: 1
-    - name: attack
-      start: 14
-      length: 6
-      loop: 0
-    - name: hurt
-      start: 20
-      length: 2
-      loop: 0
-    - name: death
-      start: 22
-      length: 6
       loop: 0
   - key: fx/beam_ray/base
     fps: 12
@@ -1190,6 +1010,202 @@ MonoBehaviour:
       start: 0
       length: 30
       loop: 0
+  - key: creatures/mercury/cinderling
+    fps: 30
+    clips:
+    - name: idle
+      start: 0
+      length: 36
+      loop: 1
+    - name: walk
+      start: 0
+      length: 24
+      loop: 1
+    - name: attack
+      start: 0
+      length: 18
+      loop: 0
+    - name: hurt
+      start: 0
+      length: 8
+      loop: 0
+    - name: death
+      start: 0
+      length: 30
+      loop: 0
+  - key: creatures/mercury/flarewing
+    fps: 30
+    clips:
+    - name: idle
+      start: 0
+      length: 36
+      loop: 1
+    - name: walk
+      start: 0
+      length: 24
+      loop: 1
+    - name: attack
+      start: 0
+      length: 18
+      loop: 0
+    - name: hurt
+      start: 0
+      length: 8
+      loop: 0
+    - name: death
+      start: 0
+      length: 30
+      loop: 0
+    - name: fly
+      start: 0
+      length: 24
+      loop: 1
+  - key: creatures/mercury/glassback
+    fps: 30
+    clips:
+    - name: idle
+      start: 0
+      length: 36
+      loop: 1
+    - name: walk
+      start: 0
+      length: 24
+      loop: 1
+    - name: attack
+      start: 0
+      length: 18
+      loop: 0
+    - name: hurt
+      start: 0
+      length: 8
+      loop: 0
+    - name: death
+      start: 0
+      length: 30
+      loop: 0
+  - key: creatures/mercury/shadewyrm
+    fps: 30
+    clips:
+    - name: idle
+      start: 0
+      length: 36
+      loop: 1
+    - name: walk
+      start: 0
+      length: 24
+      loop: 1
+    - name: attack
+      start: 0
+      length: 18
+      loop: 0
+    - name: hurt
+      start: 0
+      length: 8
+      loop: 0
+    - name: death
+      start: 0
+      length: 30
+      loop: 0
+  - key: creatures/venus/acidmoth
+    fps: 30
+    clips:
+    - name: idle
+      start: 0
+      length: 36
+      loop: 1
+    - name: walk
+      start: 0
+      length: 24
+      loop: 1
+    - name: attack
+      start: 0
+      length: 18
+      loop: 0
+    - name: hurt
+      start: 0
+      length: 8
+      loop: 0
+    - name: death
+      start: 0
+      length: 30
+      loop: 0
+    - name: fly
+      start: 0
+      length: 24
+      loop: 1
+  - key: creatures/venus/pressure_crab
+    fps: 30
+    clips:
+    - name: idle
+      start: 0
+      length: 36
+      loop: 1
+    - name: walk
+      start: 0
+      length: 24
+      loop: 1
+    - name: attack
+      start: 0
+      length: 18
+      loop: 0
+    - name: hurt
+      start: 0
+      length: 8
+      loop: 0
+    - name: death
+      start: 0
+      length: 30
+      loop: 0
+  - key: creatures/venus/sulfur_drifter
+    fps: 30
+    clips:
+    - name: idle
+      start: 0
+      length: 36
+      loop: 1
+    - name: walk
+      start: 0
+      length: 24
+      loop: 1
+    - name: attack
+      start: 0
+      length: 18
+      loop: 0
+    - name: hurt
+      start: 0
+      length: 8
+      loop: 0
+    - name: death
+      start: 0
+      length: 30
+      loop: 0
+    - name: fly
+      start: 0
+      length: 24
+      loop: 1
+  - key: creatures/venus/vent_eel
+    fps: 30
+    clips:
+    - name: idle
+      start: 0
+      length: 36
+      loop: 1
+    - name: walk
+      start: 0
+      length: 24
+      loop: 1
+    - name: attack
+      start: 0
+      length: 18
+      loop: 0
+    - name: hurt
+      start: 0
+      length: 8
+      loop: 0
+    - name: death
+      start: 0
+      length: 30
+      loop: 0
   - key: creatures/warden/hunter
     fps: 30
     clips:
@@ -1245,6 +1261,13 @@ MonoBehaviour:
       length: 30
       loop: 0
   - key: props/common/shelter_door
+    fps: 30
+    clips:
+    - name: open
+      start: 0
+      length: 18
+      loop: 0
+  - key: props/mercury/shelter_door
     fps: 30
     clips:
     - name: open
