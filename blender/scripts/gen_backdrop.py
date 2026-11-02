@@ -309,3 +309,14 @@ PRESETS["saturn_deck3"] = dict(sky_top=(112, 80, 50), sky_horizon=(188, 140, 88)
                                cloud=(0, 0, 0), cloud_shade=(0, 0, 0), clouds=0.0)
 PRESETS["saturn_deep"] = dict(sky_top=(96, 70, 42), sky_horizon=(62, 42, 26), haze=(84, 60, 36),
                               cloud=(0, 0, 0), cloud_shade=(0, 0, 0), clouds=0.0)
+# B-062 Uranus column skies: dim, low-contrast cyan; `uranus_dark_*` = dark-season tint.
+_URANUS_SKY = {"deck1": ((20, 34, 44), (160, 208, 214), (150, 200, 206)),
+               "deck2": ((84, 128, 138), (120, 170, 180), (110, 160, 170)),
+               "deck3": ((60, 100, 114), (84, 130, 144), (76, 120, 134)),
+               "deep": ((40, 68, 82), (28, 50, 62), (44, 74, 90))}
+for _d, (_top, _hor, _haze) in _URANUS_SKY.items():
+    PRESETS["uranus_" + _d] = dict(sky_top=_top, sky_horizon=_hor, haze=_haze,
+                                   cloud=(0, 0, 0), cloud_shade=(0, 0, 0), clouds=0.0)
+    _dk = lambda c: tuple(int(round(v * f)) for v, f in zip(c, (0.55, 0.62, 0.78)))  # noqa: E731
+    PRESETS["uranus_dark_" + _d] = dict(sky_top=_dk(_top), sky_horizon=_dk(_hor), haze=_dk(_haze),
+                                        cloud=(0, 0, 0), cloud_shade=(0, 0, 0), clouds=0.0)

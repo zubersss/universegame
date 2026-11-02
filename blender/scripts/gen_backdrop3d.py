@@ -262,6 +262,68 @@ PRESETS = {
                     bands=[(134, 100, 64), (104, 76, 46)], band_h=186,
                     crown=(148, 112, 74), under=(48, 34, 20))],
     ),
+    # B-062 Uranus column (Bible §7.8): featureless cyan fog, dim light (sunlight 0.25), bands
+    # only hinted (low-contrast pairs), diamond-rain sparkle in the deep. `uranus_dark_*` are
+    # the dark-season tint for the unlit half (same banks, colder and dimmer), built below.
+    "uranus_deck1": dict(
+        sun=dict(dir=(-0.5, 0.5, -0.7), strength=0.75, color=(0.9, 0.97, 1.0), angle=16.0),
+        ambient=((0.56, 0.74, 0.78), 0.62),
+        haze=(150, 200, 206),
+        stars=140,
+        banks=[dict(top=0.52, base_amp=12, r=(40, 110), billows=44, fall=260, haze=0.62, streak=0.08,
+                    bands=[(176, 222, 226), (164, 212, 218)], band_h=90,
+                    crown=(196, 232, 234), under=(118, 168, 176)),
+               dict(top=0.62, base_amp=16, r=(60, 170), billows=30, fall=320, haze=0.4, streak=0.07,
+                    bands=[(168, 216, 222), (156, 204, 212)], band_h=130,
+                    crown=(190, 228, 232), under=(110, 160, 170)),
+               dict(top=0.76, base_amp=20, r=(100, 260), billows=20, fall=380, haze=0.18, streak=0.06,
+                    bands=[(160, 210, 216), (148, 198, 206)], band_h=180,
+                    crown=(184, 224, 228), under=(102, 152, 162))],
+    ),
+    "uranus_deck2": dict(
+        sun=dict(dir=(-0.5, 0.5, -0.7), strength=0.5, color=(0.88, 0.96, 1.0), angle=18.0),
+        ambient=((0.46, 0.64, 0.7), 0.58),
+        haze=(110, 160, 170),
+        banks=[dict(top=0.3, base_amp=14, r=(50, 130), billows=40, fall=320, haze=0.62, streak=0.07,
+                    bands=[(136, 186, 194), (126, 176, 186)], band_h=100,
+                    crown=(156, 204, 210), under=(80, 124, 134)),
+               dict(top=0.44, base_amp=18, r=(70, 190), billows=28, fall=380, haze=0.4, streak=0.06,
+                    bands=[(128, 178, 188), (118, 168, 178)], band_h=140,
+                    crown=(150, 198, 206), under=(74, 116, 128)),
+               dict(top=0.6, base_amp=22, r=(110, 280), billows=18, fall=440, haze=0.18, streak=0.05,
+                    bands=[(120, 170, 180), (110, 160, 172)], band_h=190,
+                    crown=(144, 192, 200), under=(68, 108, 120))],
+    ),
+    "uranus_deck3": dict(
+        sun=dict(dir=(-0.5, 0.5, -0.7), strength=0.35, color=(0.86, 0.94, 1.0), angle=20.0),
+        ambient=((0.38, 0.54, 0.62), 0.55),
+        haze=(76, 120, 134),
+        banks=[dict(top=0.26, base_amp=16, r=(60, 160), billows=36, fall=380, haze=0.62, streak=0.06,
+                    bands=[(102, 148, 160), (94, 140, 154)], band_h=120,
+                    crown=(120, 166, 176), under=(54, 88, 100)),
+               dict(top=0.4, base_amp=20, r=(90, 230), billows=26, fall=440, haze=0.4, streak=0.05,
+                    bands=[(96, 142, 156), (88, 134, 148)], band_h=160,
+                    crown=(114, 160, 172), under=(50, 82, 96)),
+               dict(top=0.56, base_amp=24, r=(130, 320), billows=16, fall=500, haze=0.18, streak=0.04,
+                    bands=[(90, 136, 150), (82, 128, 142)], band_h=210,
+                    crown=(108, 154, 166), under=(46, 76, 90))],
+    ),
+    "uranus_deep": dict(
+        sun=dict(dir=(-0.5, 0.5, -0.7), strength=0.25, color=(0.84, 0.92, 1.0), angle=22.0),
+        ambient=((0.3, 0.44, 0.54), 0.5),
+        haze=(44, 74, 90),
+        sparkle=(900, (230, 248, 255)),                  # diamond rain: bright glints in the haze
+        crush=(0.88, 0.07, (120, 170, 220)),
+        banks=[dict(top=0.46, base_amp=18, r=(60, 160), billows=30, fall=380, haze=0.66, streak=0.06,
+                    bands=[(70, 108, 124), (62, 100, 116)], band_h=120,
+                    crown=(84, 122, 138), under=(30, 52, 64)),
+               dict(top=0.56, base_amp=22, r=(90, 220), billows=22, fall=440, haze=0.46, streak=0.05,
+                    bands=[(64, 102, 118), (56, 94, 110)], band_h=160,
+                    crown=(78, 116, 132), under=(28, 48, 60)),
+               dict(top=0.7, base_amp=26, r=(130, 300), billows=16, fall=500, haze=0.26, streak=0.04,
+                    bands=[(58, 96, 112), (50, 88, 104)], band_h=200,
+                    crown=(72, 110, 126), under=(26, 44, 56))],
+    ),
     # B-027 Mercury (Bible §7.3): airless, so harsh small-angle sun, almost no ambient, little
     # haze; cratered relief; blinding grey regolith; violet twilight in the sky only.
     "mercury": dict(
@@ -332,6 +394,22 @@ PRESETS = {
         rock=[(96, 70, 58), (120, 86, 66), (80, 60, 52), (140, 96, 72)],   # basalt under rust dust
     ),
 }
+
+
+def _dark_season(c, k=(0.55, 0.62, 0.78)):
+    """B-062 dark-season tint: dimmer and bluer (the unlit hemisphere in Uranus' long night)."""
+    return tuple(int(round(v * f)) for v, f in zip(c, k))
+
+
+for _d in ("deck1", "deck2", "deck3", "deep"):
+    _src = PRESETS["uranus_" + _d]
+    _amb, _amb_k = _src["ambient"]
+    _p = dict(_src, haze=_dark_season(_src["haze"]),
+              sun=dict(_src["sun"], strength=_src["sun"]["strength"] * 0.35),
+              ambient=(tuple(v * f for v, f in zip(_amb, (0.55, 0.62, 0.78))), _amb_k))
+    _p["banks"] = [dict(b, bands=[_dark_season(c) for c in b["bands"]], crown=_dark_season(b["crown"]),
+                        under=_dark_season(b["under"])) for b in _src["banks"]]
+    PRESETS["uranus_dark_" + _d] = _p
 
 
 # ---------------------------------------------------------------- materials
@@ -1639,6 +1717,23 @@ def generate(entry, ctx):
             a = bank[..., 3:4]
             rgb = sky * (1 - a) + bank[..., :3] * a
             return {"color": np.dstack([pngio.to_u8(rgb), np.full(rgb.shape[:2], 255, np.uint8)])}
+        if P.get("sparkle") and layer == "layer1":
+            # B-062 Uranus deep: diamond rain, small bright glints scattered through the mid haze
+            # (single pixels with a 1 px soft cross; x wraps, so the layer still tiles).
+            n, scol = P["sparkle"]
+            Hh, Ww = bank.shape[:2]
+            n = max(1, n * Hh * Ww // (1024 * 2048))
+            srng = np.random.default_rng(seed + 11)
+            sy = srng.integers(int(Hh * 0.2), Hh, n)
+            sx = srng.integers(0, Ww, n)
+            sv = srng.uniform(0.4, 1.0, n)
+            bank = bank.copy()
+            c = np.array(scol, np.float32) / 255
+            for dy, dx, w in ((0, 0, 1.0), (1, 0, 0.35), (-1, 0, 0.35), (0, 1, 0.35), (0, -1, 0.35)):
+                yy, xx = np.clip(sy + dy, 0, Hh - 1), (sx + dx) % Ww
+                k = (sv * w)[:, None]
+                bank[yy, xx, :3] = bank[yy, xx, :3] * (1 - k) + c * k
+                bank[yy, xx, 3] = np.maximum(bank[yy, xx, 3], sv * w)
         if P.get("crush") and layer == "layer2":
             # B-055 jupiter_deep: the Crush Line, painted on the NEAR layer (the opaque cloud bases
             # of the mid/near layers covered it in layer0): a dark-red glowing band with a dark
