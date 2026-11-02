@@ -111,6 +111,25 @@ namespace Meridian.Planet.Lighting
             var sh = new UnityEngine.Rendering.SphericalHarmonicsL2();
             sh.AddAmbientLight(amb);
             RenderSettings.ambientProbe = sh;
+
+            // Distance haze per planet (replaces the v1 haze gradient): the view's tinted sky colour, thicker in dust.
+            RenderSettings.fog = true;
+            RenderSettings.fogMode = FogMode.ExponentialSquared;
+            RenderSettings.fogColor = view != null ? view.backgroundColor : amb;
+            RenderSettings.fogDensity = FogDensity(id) * (1f + 3f * StormDim);
+            if (!postFxReady) { Meridian.Rendering.PostFx.Ensure(view); postFxReady = true; }
         }
+
+        bool postFxReady;
+
+        /// <summary>U-074: exp² fog density per planet: thin enough that the play plane (≈ 28 m away) stays clear, the far skyline hazes.</summary>
+        public static float FogDensity(PlanetId p) => p switch
+        {
+            PlanetId.Mercury => 0.0005f, // no air: only a trace, for depth
+            PlanetId.Venus => 0.012f,    // sulfuric murk
+            PlanetId.Mars => 0.006f,     // suspended dust
+            PlanetId.Earth => 0.004f,
+            _ => 0.008f,                 // giants: cloud haze
+        };
     }
 }
