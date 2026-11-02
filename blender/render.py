@@ -98,9 +98,14 @@ def select(assets, args):
     if args.all:
         return assets
     if args.asset:
-        hit = [a for a in assets if a["key"] == args.asset]
-        if not hit:
-            raise AssetError(f"unknown asset key '{args.asset}' (not in blender/manifest.json)")
+        # One key, or a comma-separated list rendered in the given order in one process (so a
+        # batch holds the lock as one job, D-037).
+        by_key = {a["key"]: a for a in assets}
+        hit = []
+        for k in [k.strip() for k in args.asset.split(",") if k.strip()]:
+            if k not in by_key:
+                raise AssetError(f"unknown asset key '{k}' (not in blender/manifest.json)")
+            hit.append(by_key[k])
         return hit
     pre = args.category.strip("/")
     hit = [a for a in assets if a["key"] == pre or a["key"].startswith(pre + "/")]

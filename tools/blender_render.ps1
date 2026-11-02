@@ -39,6 +39,12 @@ if ($Target -eq 'all') {
     foreach ($cat in ($assets | ForEach-Object { $_.key.Split('/')[0] } | Select-Object -Unique)) {
         $jobs += , @{ Name = $cat; Args = @('--category', $cat); Chosen = @($assets | Where-Object { $_.key.StartsWith("$cat/") }) }
     }
+} elseif ($Target.Contains(',')) {
+    # Comma-separated asset keys: one Blender process, one lock hold (one job under D-037).
+    $keys = @($Target.Split(',') | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+    $missing = @($keys | Where-Object { $k = $_; -not ($assets | Where-Object { $_.key -eq $k }) })
+    if ($missing.Count -gt 0) { Fail 2 "unknown asset key(s): $($missing -join ', ')" }
+    $jobs += , @{ Name = "$($keys.Count) assets"; Args = @('--asset', ($keys -join ',')); Chosen = @($assets | Where-Object { $keys -contains $_.key }) }
 } elseif (($Target.ToCharArray() | Where-Object { $_ -eq '/' }).Count -eq 2) {
     $jobs += , @{ Name = $Target; Args = @('--asset', $Target); Chosen = @($assets | Where-Object { $_.key -eq $Target }) }
 } else {
