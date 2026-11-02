@@ -620,7 +620,7 @@ Goal: Planets as spheres in Space (Bible §10.5 v2): each planet disc becomes a 
 Accept: SpaceArtTests still resolve every planet key; a Space capture shows lit spheres with terminators and Saturn's rings; Space budgets within §11.1.
 Files: Assets/_Game/Code/Runtime/Space/, Shaders/, Prefabs/Space/
 Depends: U-072
-Lead notes: Cycle 176. R1. Independent of the terrain work.
+Lead notes: Cycle 176. R1. Independent of the terrain work. Cycle 192: B-090 models are in: props/space/waystation (+ waystation_mars, LOD1), asteroid_01..06, planets/saturn/ring_mesh (alpha from rings_color.png, double-sided; handoff in BLENDER_STATUS). Use them in place of the sprites; the U-078 capture closes B-090.
 
 ### U-079 · UNITY · Ready · R1
 Goal: FX in 3D: thruster, landing dust, dig sparks, heat shimmer and the Escape band become camera-facing billboards or particle systems on the play plane using the existing `fx/*` sheets and keys; emissive FX feed bloom; nothing uses Light2D or sprite sorting layers.
@@ -1233,7 +1233,7 @@ Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/mars_*/
 Depends: B-077
 Lead notes: Cycle 191 (00f0a65): art accepted on the turntables (canyon terraces with strata and boulders; Olympus Mons as a broad shield on a 1024 m period; storm skydome). Done on R2's first Mars capture with the bands in the scene.
 
-### B-089 · BLENDER · Ready · R2
+### B-089 · BLENDER · In Progress · R2
 Goal: Mars scenery and POI props as models: boulders ×3, regolith rocks ×2, ice chunks ×2, a dead shrub-like "dust bush", lava-tube stalactite/stalagmite pair (each ≤ 1.5 k tris, LOD1, one shared atlas); the Mars POI props from the v1 sources not already covered by B-084 (crash-site debris, the Mars Waystation surface beacon, ice-cap drill rig), ≤ 6 k tris each.
 Accept: contract §9; a stamped field preview (20 instances) under the Mars Sun (0.75); UNITY lit preview for Done.
 Files: blender/sources/props/mars/, build_props_mars.py, Assets/_Game/Art/props/mars_flora/, props/mars/
@@ -1245,7 +1245,7 @@ Goal: Space objects as models for U-078's lit top-down scene: `props/space/wayst
 Accept: contract §9; top-down turntables at the Space camera scale; UNITY lit preview for Done.
 Files: blender/scripts/build_waystation.py, build_asteroids.py, gen_planet.py, Assets/_Game/Art/props/space/, planets/saturn/
 Depends: B-077
-Lead notes: Cycle 188. R2. Feeds U-078.
+Lead notes: Cycle 192 (3e7fbc6): art accepted on the top-down turntables (ring station with solar panels, docking arms and guide lights, 14,250 tris + LOD1; waystation_mars; six asteroids 80–570 tris; planets/saturn/ring_mesh annulus at R = 96 m using rings_color.png alpha). Done on U-078's lit Space capture.
 
 ### B-091 · BLENDER · Ready · R3
 Goal: Mercury and Venus terrain block materials (R3 prep, as B-080/B-086): every tile material in `MercuryTileSet` (regolith, basalt, solarite crust, shadow ice, impact glass…) and `VenusTileSet` (basalt, sulfur crust, vent glass, station deck plates…), top/side PBR sets at 512², 2 m repeat, plus backwalls; palettes per §9.
