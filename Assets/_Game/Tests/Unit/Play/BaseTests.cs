@@ -159,6 +159,15 @@ namespace Meridian.Tests
             var light = lamp.go.GetComponentInChildren<UnityEngine.Rendering.Universal.Light2D>();
             Assert.NotNull(light, "lamps cast light (U-064)");
             Assert.AreEqual(BaseBuilder.LampRadius, light.pointLightOuterRadius, 1e-3f);
+            // U-064 (LEAD cycle 161): the ground must take 2D light, or a lamp casts no pool and night never darkens it.
+            var lit = Meridian.Rendering.ArtMaterials.Active.lit;
+            int chunks = 0;
+            foreach (var r in side.terrain.GetComponentsInChildren<UnityEngine.Tilemaps.TilemapRenderer>())
+            {
+                chunks++;
+                Assert.AreSame(lit, r.sharedMaterial, $"{r.name}: terrain uses the lit sprite material");
+            }
+            Assert.Greater(chunks, 0, "terrain chunks loaded");
             bases.Dismantle(new Vector2(x + 1.5f, y + 1.5f));
             var a = deck.aerostat;
             Assert.AreEqual(1, bases.aerostats.Count);

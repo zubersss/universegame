@@ -43,6 +43,10 @@ namespace Meridian.Terrain
             chunk.solid = go.AddComponent<Tilemap>();
             var sr = go.AddComponent<TilemapRenderer>();
             sr.mode = TilemapRenderer.Mode.Chunk;
+            // U-064: a renderer added at runtime gets Unity's unlit default sprite material, so the terrain ignored
+            // every 2D light (full brightness at night, no lamp pool). Use the art's lit material (normal maps on).
+            var lit = Meridian.Rendering.ArtMaterials.Active != null ? Meridian.Rendering.ArtMaterials.Active.lit : null;
+            if (lit != null) sr.sharedMaterial = lit;
             var body = go.AddComponent<Rigidbody2D>();
             body.bodyType = RigidbodyType2D.Static;
             var tc = go.AddComponent<TilemapCollider2D>();
@@ -60,6 +64,7 @@ namespace Meridian.Terrain
             var lr = liquidGo.AddComponent<TilemapRenderer>();
             lr.mode = TilemapRenderer.Mode.Chunk;
             lr.sortingOrder = 1;
+            if (lit != null) lr.sharedMaterial = lit;
             // See-through water (U-037): the backdrop behind it darkens with depth and the seabed stays visible.
             chunk.liquid.color = new Color(1f, 1f, 1f, WaterAlpha);
             FixBounds(chunk.liquid);
