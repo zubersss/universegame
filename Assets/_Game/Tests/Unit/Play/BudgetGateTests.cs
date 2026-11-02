@@ -101,6 +101,13 @@ namespace Meridian.Tests
                 Row($"Draw calls · {where}", $"≤ {drawCallLimit}", r.drawCalls.ToString(), r.drawCalls <= drawCallLimit);
             else
                 Info($"Draw calls · {where}", $"≤ {drawCallLimit}", "n/a (no graphics device)", "skipped");
+            // U-077 (Bible §11.1, 3D): geometry per frame.
+            if (r.triangles >= 0)
+                Row($"Geometry · {where}", "≤ 300 k triangles, ≤ 150 shadow casters",
+                    $"{r.triangles / 1000f:F1} k triangles, {r.shadowCasters} shadow casters",
+                    r.triangles <= BudgetMonitor.TrianglesCap && r.shadowCasters <= BudgetMonitor.ShadowCastersCap);
+            else
+                Info($"Geometry · {where}", "≤ 300 k triangles, ≤ 150 shadow casters", "n/a (no graphics device)", "skipped");
             Row($"2D lights visible · {where}", "≤ 8 (hard cap 12)", r.lightsVisible.ToString(), r.lightsVisible <= BudgetMonitor.LightsTarget);
             Row($"Particles alive · {where}", "≤ 600", r.particlesAlive.ToString(), r.particlesAlive <= BudgetMonitor.ParticlesCap);
             Row($"GC per 300 frames · {where}", "≤ 1 KB (main-thread managed allocations; P-16)",

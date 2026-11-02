@@ -11,6 +11,7 @@ namespace Meridian.Perf
         public float avgFrameMs, p99FrameMs, maxFrameMs;
         public int frames;
         public long drawCalls;            // last rendered frame; -1 when no graphics device
+        public long triangles, shadowCasters; // U-077 (Bible §11.1 geometry row): last rendered frame; -1 when unavailable
         public long gcBytesLast300;       // managed bytes allocated on the main thread (gameplay code) over the window
         public long gcProfilerBytes;      // Unity "GC Allocated In Frame" counter over the window (in the Editor it includes Editor work)
         public int lightsVisible;         // 2D lights touching the camera view (global lights included)
@@ -30,6 +31,8 @@ namespace Meridian.Perf
         public const int DrawCallsSide = 150, DrawCallsTop = 80;
         public const int LightsTarget = 8, LightsHardCap = 12;
         public const int ParticlesCap = 600;
+        /// <summary>U-077 (Bible §11.1, 3D): geometry per frame.</summary>
+        public const long TrianglesCap = 300_000, ShadowCastersCap = 150;
         public const long GcBytesPer300 = 1024;
         public const long RamMB = 2560, TexturesMB = 600, AudioMB = 60;
 
@@ -42,7 +45,7 @@ namespace Meridian.Perf
         readonly float[] sortScratch = new float[Window];
         int head, count;
 
-        ProfilerRecorder draws, gcFrame, systemMem, textureMem, audioMem;
+        ProfilerRecorder draws, tris, casters, gcFrame, systemMem, textureMem, audioMem;
         readonly List<Light2D> lights = new List<Light2D>();
         readonly List<ParticleSystem> particles = new List<ParticleSystem>();
 
@@ -55,6 +58,8 @@ namespace Meridian.Perf
         void OnEnable()
         {
             draws = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Draw Calls Count");
+            tris = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Triangles Count");
+            casters = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Shadow Casters Count");
             gcFrame = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Allocated In Frame");
             systemMem = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "System Used Memory");
             textureMem = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Texture Memory");
@@ -105,6 +110,8 @@ namespace Meridian.Perf
             s.gcBytesLast300 = gc;
             s.gcProfilerBytes = gcp;
             s.drawCalls = SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null ? -1 : (draws.Valid ? draws.LastValue : -1);
+            s.triangles = s.drawCalls < 0 ? -1 : (tris.Valid ? tris.LastValue : -1);
+            s.shadowCasters = s.drawCalls < 0 ? -1 : (casters.Valid ? casters.LastValue : -1);
             s.lightsVisible = CountVisibleLights(view);
             s.particlesAlive = CountParticles();
             s.systemMemoryMB = systemMem.Valid ? systemMem.LastValue / (1024 * 1024) : -1;
