@@ -513,12 +513,12 @@ Files: Assets/_Game/Code/Runtime/Space/
 Depends: U-034, U-051
 Lead notes: Cycle 138. M4.
 
-### U-064 · UNITY · In Progress · M3
+### U-064 · UNITY · Done · M3
 Goal: (1) investigate the surveyor resting 2 m below TopSolidY ~30 m from the Mars camp (x 94), reported during U-056: the stamp's collider vs its drawn tiles, or a stale chunk collider (cf. the U-007 collider fix); (2) placed base lamps should cast a small warm Point Light 2D (radius ~5 m) so a shelter interior is lit at night (mars_shelter.png is dark inside).
 Accept: a PlayMode test walks the surveyor across every POI stamp on Earth and Mars and asserts feet within 0.1 m of TopSolidY; the night shelter capture shows lamplight.
 Files: Assets/_Game/Code/Runtime/Terrain/, Building/
 Depends: U-056, U-057
-Lead notes: Cycle 161: footing part accepted (FootingTests green under D-057). FAIL lamp evidence: smoke_18_mars_shelter_night_lamp.png shows the lamp post but no visible warm light pool; the shelter interior is as dark as outside. Check the Point Light 2D: Target Sorting Layers must include the terrain, props and character layers; intensity ~1.0, outer radius 5 m, falloff ~0.5, warm colour (1.0, 0.8, 0.55); and that the prop isn't rendered with an unlit material that ignores lights. Re-shoot the same capture. Not blocking the M3 playtest; ship it in the next build.
+Lead notes: Done 2182953 + 0cd743f (cycle 162): Mars frost tile set fix, FootingTests 86 columns 0 off (D-057), lamps carry a warm Point Light 2D; root cause of the dark lamp was unlit terrain (runtime tilemaps had no material), now ArtMaterials.lit + BaseTests assert; smoke_18 shows the lamp pool and smoke_3 shows night terrain darkening; check 23:16–23:35 green (EditMode 224/224, PlayMode 91/110 + LeadQA 10/10, BudgetGate green, Earth p99 13.67 ms).
 
 ### U-065 · UNITY · Done · M4
 Goal: Thruster Mk2/Mk3 and Tank Mk2/Mk3 (Bible §4.3): 12 / 20 / 35 m/s² vertical, lateral 60%; launch allowed only where the table's "Can launch from" row says (Mk1: Mercury, Venus, Earth, Mars, Uranus; Mk2: + Saturn, Neptune; Mk3: + Jupiter); tanks 100/200/400; craftable ship upgrades in the RecipeBook; the HUD says "Thruster MkN can't lift off here" instead of a silent fail.

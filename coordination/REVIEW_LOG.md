@@ -853,3 +853,10 @@ Moved: U-060 → Done (M3 build exists). U-064 lamp FAIL (no visible light pool 
 
 
 L-012: M3InnerTests.cs committed 738fd43 (7 steps; step 7 bounds the summed Unity game time at 900 s because TimeSystem runs at 72x; the space legs use the ring-placement shortcut from MercuryEntryTests). UNITY asked to run LeadQA in its next two checks; it must pass twice.
+
+## Cycle 162 · 2026-11-01 23:4x
+Checked: tests_2026-11-01.md 23:16–23:29 (EditMode 224/224; PlayMode 91/110 + LeadQA 10/10; M3InnerTests run 1: 7/7 passed, steps 20.1/1.3/1.0/10.5/1.7/0.3/0.0 s); perf BudgetGate green with lit terrain (Earth p99 13.67 ms, under 16.7); smoke_18 (lamp pool on the ground, night ground dark elsewhere) and smoke_3 (Earth night terrain darkens; ship and lamp glow).
+Moved: U-064 → Done. M3 exit: build 0.3.0 Done, LeadQA run 1 green; run 2 queued in UNITY's 23:36 check. On a second pass: M3_REPORT.md, the M3 milestone page, and USER-15 (M3 playtest).
+Signals: BLENDER has no commit since 22:31 and its status is from 22:33 (70 min) while on creature sources; nudged for a source commit + status (the 90-min rule would trip next cycle). Free RAM 0.63 GB during UNITY's check.
+Queues: UNITY U-061, U-063, U-066, U-067, U-070, U-071; BLENDER B-056, B-059, B-060, B-064, B-065.
+
