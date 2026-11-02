@@ -828,3 +828,8 @@ Queue: UNITY U-061, U-063, U-066, U-067, U-070, U-071 Ready; BLENDER B-056, B-05
 ## Cycle 156 · 2026-11-01 22:1x (BLENDER message)
 Checked: props__jupiter__{husk_tortoise,derelict_pod,beacon_vault}_contact.png (89e88b1, 27d8a24). Pod and vault read right (riveted cream hull, rust band, red/amber emissive marker; vault mast beacon and door strip). Husk FAIL (Art matches §1/§9/§7.5): it reads as a live cartoon tortoise, not a husk. B-055 stays In Progress with an exact fix list. B-062/B-063 exported (numpy_only, peaks 681–688 MB), stamped reviews wait for memory; review them next cycle.
 
+## Cycle 157 · 2026-11-01 22:1x
+Checked: props__jupiter__husk_tortoise_contact.png v2 (af4ebdc): reads as a dead, flat-topped husk. B-055 → Done. perf_2026-11-01.md run 4: Earth 357, Space 264, Mars 351 MB textures green; Mercury 680, Venus 912 MB red (limit 600). UNITY_STATUS: three strikes on U-060 texture memory, diagnosis written.
+Signal: three strikes (U-060). Response: concrete approach in U-060's Lead notes: stale Addressables content in the build (aa bundles dated Oct 31), so clean and rebuild player content before BuildPlayer; SpriteAtlas platform format; split creature sheets into their own bundles apart from the D-050 terrain preloads and release their handles.
+Locks: none; free RAM 2.05 GB. Queues: UNITY 6 Ready, BLENDER 5 (B-056, B-059, B-060, B-062/B-063 pending stamped reviews).
+
