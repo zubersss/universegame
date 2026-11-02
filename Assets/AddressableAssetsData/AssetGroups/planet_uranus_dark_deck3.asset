@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: planet_uranus_dark_deck3
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: planet_uranus_dark_deck3
+  m_GUID: ef25a5e5f1d0cce4b8bf1a9eb88df7f4
+  m_SerializeEntries:
+  - m_GUID: 7721150285044214fb0062b3a0f2ec48
+    m_Address: backgrounds/uranus_dark_deck3/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ba8caf038c6c70c4da755b8ace768c82
+    m_Address: backgrounds/uranus_dark_deck3/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c703364239661ea47888c75a7a710aa2
+    m_Address: backgrounds/uranus_dark_deck3/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: a7010c3b2bdf8dd4d954fbcb016c6021, type: 2}
+    - {fileID: 11400000, guid: 2d1d052533a37b3449b8e6f71a48dee8, type: 2}

@@ -15,8 +15,28 @@ MonoBehaviour:
   m_GroupName: planet_jupiter
   m_GUID: 9165fb439bf9f244e82b63273fa4b964
   m_SerializeEntries:
+  - m_GUID: 07edd0af3c4c2d848a9f0cd4494c4cdf
+    m_Address: props/jupiter/husk_tortoise
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 41e502030a7bfd642a5fa183f21212d6
+    m_Address: terrain/jupiter/floe_derelict
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 51646d7da3589154b880c18ef72f9ef3
+    m_Address: props/jupiter/beacon_vault
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 82317d64251e44e4eabc403b98efd612
     m_Address: terrain/jupiter/floe_core
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9fc391061677f6a4391a1973086ccd0b
+    m_Address: props/jupiter/derelict_pod
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
