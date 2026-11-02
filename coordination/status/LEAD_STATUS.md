@@ -1,5 +1,5 @@
 # LEAD STATUS
-Updated: 2026-11-02 02:3x · Session: 2 (Fable 5.1) · Review cycle: 184
+Updated: 2026-11-02 02:3x · Session: 2 (Fable 5.1) · Review cycle: 185
 ## Current task
 R1 (Earth in 3D): first 3D Earth capture accepted (cycle 181). Waiting on UNITY's PlayMode run to close U-073 and the lit previews to close B-078..B-082. Next proof-checks: U-074 night/lamp capture, U-076 models in the scene. Add 2 BLENDER tasks next cycle (R2 Mars prep is the natural source).
 ## Last completed
@@ -11,6 +11,6 @@ Contract §9 details may change on B-077's proposals (v2.1). Milestone pages: ne
 ## Waiting on the user
 USER-15 (BLENDER standing restart approval), USER-14 (free memory), USER-08 optional. R1 playtest when 0.4.0 exists.
 ## Loop / stall watch
-Core-loop regression (pad placeholder card) fixed in 8810845; confirm M1LoopRun1/2 green in the targeted re-check, else escalate to the top of the board.
+Core-loop green again (re-check 02:14–02:21). Watch: PawsOnTheGround until U-075; the R1 budget row (geometry) once U-076 lands.
 ## HeavyJobLock
 none (LEAD runs no heavy jobs while memory is tight)

@@ -941,3 +941,6 @@ Checked: review_backgrounds_earth_forest_ridge_mid.png, _skyline_far.png, _fores
 Checked: r1_models_2026-11-02 lit previews (surveyor side, Pilgrim side, stag ¾, smelter side + ¾, lamp side): PBR lit under the Earth Sun, facing +X, emissive engine/grate/lamp head. B-078, B-079, B-081, B-082 → Done. U-073 → Done on chain 5 (own tests green).
 Core-loop regression cause (UNITY, 8810845): B-081 replaced props/common/landing_pad_color.png, so the pad loaded a generated 160×288 placeholder card; PoiPlacer scaled it to the declared 12 m width and refit the solid collider to the art's height (~21 m), trapping the landed Pilgrim; the launch never climbed out. Fix: a loaded sprite whose aspect differs from the declared size by > 25 % is stretched to the declared size and keeps the declared collider. Targeted re-check running; M1LoopRun1/2, M2Soak and SpawnCampTests must be green there before U-074/U-076 captures count.
 
+
+## Cycle 185 · 2026-11-02 02:3x (UNITY message)
+Checked: tests_2026-11-02.md targeted re-check 02:14–02:21: M1LoopRun1/2, LeadQA M1LoopTests + M2SoakTests, SpawnCampTests 3/3, CreaturesNeverFallThroughStreamedChunks all pass after 8810845; only PawsOnTheGround (stag clips) stays red until U-075. Core-loop regression closed. Lamps carry a 3D point light (61f1a58); U-074 capture next.
