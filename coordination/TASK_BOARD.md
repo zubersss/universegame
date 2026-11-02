@@ -1198,12 +1198,12 @@ Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/earth_*/
 Depends: B-077
 Lead notes: Cycle 186: art accepted in full. skyline_far v3 (11 seeded depth rows, broad massif, capped slopes, snow band; 2,560 tris; turntable stamped 02:22) reads as a snow-capped range; ridge_mid ×6 and skydomes ×6 accepted in cycle 183. Done on U-076's first capture with the depth bands in the scene.
 
-### B-084 · BLENDER · Ready · R1
+### B-084 · BLENDER · In Progress · R1
 Goal: Earth POI props as models: the Survey Archive, Launch Complex pieces, crashed Halcyon hauler, Warden outpost obelisk and the B-020/B-021 prop sets, each ≤ 6 k tris (hauler ≤ 15 k with LOD1), standable tops flat, emissive where lit.
 Accept: contract §9; stamped turntables; UNITY lit preview for Done.
 Files: blender/sources/props/earth/, build_props_earth.py, Assets/_Game/Art/props/earth/
 Depends: B-077
-Lead notes: Cycle 176. R1.
+Lead notes: Cycle 187 (b31f865): art accepted on the turntables (archive door + terminal, launch gantry + tower ruin, Earth beacon, hauler hull_a/hull_b/cargo with LOD1, Warden pylon, Meridian beacon; 188–1,404 tris). Rulings: the hauler stays as the three v1 pieces UNITY already places (no hero wreck now); the pylon stays the v1 obelisk. Done on UNITY's lit preview (fold into U-076's run).
 
 ### B-085 · BLENDER · Ready · R1
 Goal: Earth scenery for the near band and the play plane: 3 tree species (forest/taiga variants), 2 bushes, 3 rocks, grass tufts, a cactus and a dead tree, each ≤ 2 k tris with LOD1 at ≤ 800, sharing one 2048 atlas material; wind-sway via a vertex-colour mask (R = sway weight).

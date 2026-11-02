@@ -948,3 +948,6 @@ Checked: tests_2026-11-02.md targeted re-check 02:14–02:21: M1LoopRun1/2, Lead
 ## Cycle 186 · 2026-11-02 02:4x (BLENDER message)
 Checked: review_backgrounds_earth_skyline_far.png v3 (stamped 02:22): reads as a mountain range in all three panels. B-083 art accepted in full; Done on U-076's capture. BLENDER next: B-084, B-085.
 
+## Cycle 187 · 2026-11-02 02:4x (BLENDER message)
+Checked: review_props_mars_hauler_hull_a.png, review_props_earth_launch_gantry.png, review_props_mars_warden_pylon.png (stamped 02:24–02:32); read as the v1 landmarks. B-084 art accepted; hauler kept as three pieces; pylon kept simple. Done on UNITY's lit preview. BLENDER next: B-085.
+
