@@ -17,12 +17,169 @@ MonoBehaviour:
   unlit: {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40, type: 2}
   meshLit: {fileID: 2100000, guid: 2f5e957e152da584b9e4a5fb30e2788c, type: 2}
   meshLitEmissive: {fileID: 2100000, guid: e9084edb029bd244893010700efc7f0d, type: 2}
+  terrainBlocks: {fileID: 2100000, guid: be7a751b1d75b894583b11ad32ea7065, type: 2}
+  blockTextures:
+  - planet: earth
+    material: grass
+    face: top
+    color: {fileID: 2800000, guid: 17c6488dc03da2648ae3c4ad1ad93493, type: 3}
+    normal: {fileID: 2800000, guid: 049653d2947415d4f917fb264d4d1eaf, type: 3}
+    mask: {fileID: 2800000, guid: b498466ba5731924fb4d21f40d6dbedf, type: 3}
+  - planet: earth
+    material: backwall
+    face: wall
+    color: {fileID: 2800000, guid: 2cc1b90e4bce8814bb8863465f117e9d, type: 3}
+    normal: {fileID: 2800000, guid: 3100a95810769384ca54fe0a20c2fbe6, type: 3}
+    mask: {fileID: 2800000, guid: 8fa5f15e21c07ef439bee50875b717c4, type: 3}
+  - planet: earth
+    material: stone
+    face: side
+    color: {fileID: 2800000, guid: b9ba87c9480553b46a8825b3c57fcf69, type: 3}
+    normal: {fileID: 2800000, guid: 7365d81d398df8446acfe28c72d73149, type: 3}
+    mask: {fileID: 2800000, guid: 9431b75b5fb320943817797e157d9486, type: 3}
+  - planet: earth
+    material: sand
+    face: top
+    color: {fileID: 2800000, guid: c0e0f8e2205a3dd45b40ff046e40bbdd, type: 3}
+    normal: {fileID: 2800000, guid: 0394cf26c4d41a04da79f982c46c77a7, type: 3}
+    mask: {fileID: 2800000, guid: 74f61e7d4ba50ac4aa1b43aa63cb1964, type: 3}
+  - planet: earth
+    material: stone
+    face: top
+    color: {fileID: 2800000, guid: 7d8c500342d634840941031d6985ade5, type: 3}
+    normal: {fileID: 2800000, guid: e0ffecba11b689d4bb6b637fcd847e5f, type: 3}
+    mask: {fileID: 2800000, guid: fc64359883834934190c22171fed663c, type: 3}
+  - planet: earth
+    material: sand
+    face: side
+    color: {fileID: 2800000, guid: 230f27baee4a69e40ad0c8cd06ccf356, type: 3}
+    normal: {fileID: 2800000, guid: eec867294863b794aa0b46af8770a568, type: 3}
+    mask: {fileID: 2800000, guid: 31f99dd5c204aaf4cbe17d803b5a482c, type: 3}
+  - planet: earth
+    material: snow
+    face: top
+    color: {fileID: 2800000, guid: 79bc2f32a0c4ec24d906bc5e90b79200, type: 3}
+    normal: {fileID: 2800000, guid: 701479551436b3c429cde3f87dd11ee9, type: 3}
+    mask: {fileID: 2800000, guid: 0da8de63c1407c444be23ad9524c12db, type: 3}
+  - planet: earth
+    material: soil
+    face: side
+    color: {fileID: 2800000, guid: 861c6fed966d9eb4681a1b8be7859e93, type: 3}
+    normal: {fileID: 2800000, guid: 2aa301c50fe3b784bad81accef895eaf, type: 3}
+    mask: {fileID: 2800000, guid: 2b0bf75293f660c49b8dfadbecfdf0f5, type: 3}
+  - planet: earth
+    material: water
+    face: top
+    color: {fileID: 2800000, guid: b1667171cfb1e4f41b4d919f0af3760a, type: 3}
+    normal: {fileID: 2800000, guid: e7c8f1e2f147c6f4b892b94874b34cb4, type: 3}
+    mask: {fileID: 2800000, guid: f88fcee483754fe459b693c8f43c1f59, type: 3}
+  - planet: earth
+    material: snow
+    face: side
+    color: {fileID: 2800000, guid: e0d291d73eda786489ca10127aa81dbb, type: 3}
+    normal: {fileID: 2800000, guid: b7c83c736ea9a244c9232125c5b32cf0, type: 3}
+    mask: {fileID: 2800000, guid: c6d1fd64f62625c4a96ce4560a2e9494, type: 3}
+  - planet: earth
+    material: water
+    face: side
+    color: {fileID: 2800000, guid: 193d2732e5226634bbb71b6d931f60a6, type: 3}
+    normal: {fileID: 2800000, guid: e8bf355a9d3e2d7448d087d47492d185, type: 3}
+    mask: {fileID: 2800000, guid: 9285d3e9c44efb7448ee3a6a557a5e85, type: 3}
+  - planet: earth
+    material: grass
+    face: side
+    color: {fileID: 2800000, guid: 185b1dcc5db051e40b4549a554d0df92, type: 3}
+    normal: {fileID: 2800000, guid: da8838fb2ad01bd4c908689e06e1e5af, type: 3}
+    mask: {fileID: 2800000, guid: 70d988dc1830d7f4388e6be7248fcfd9, type: 3}
+  - planet: earth
+    material: soil
+    face: top
+    color: {fileID: 2800000, guid: b3aed76a8e8ca994fa74f8596445de7c, type: 3}
+    normal: {fileID: 2800000, guid: 4cf587f023e8dd448b92b0179918f25f, type: 3}
+    mask: {fileID: 2800000, guid: 38e9d52cc5857c54cbae6a3f4ac23887, type: 3}
+  - planet: mars
+    material: hematite
+    face: top
+    color: {fileID: 2800000, guid: ce799e2096e7821458977845bbd99cd1, type: 3}
+    normal: {fileID: 2800000, guid: a0d05a89abe9b194f89ee32bbbfea290, type: 3}
+    mask: {fileID: 2800000, guid: 0cceaac380af41643a995312b942f506, type: 3}
+  - planet: mars
+    material: ice
+    face: top
+    color: {fileID: 2800000, guid: a68537aee51d14f4880578727c8f13d0, type: 3}
+    normal: {fileID: 2800000, guid: a9f3e17d4b2905b4fb2efe255231681d, type: 3}
+    mask: {fileID: 2800000, guid: a9f20d51be4fcaa4e8044b60b073905d, type: 3}
+  - planet: mars
+    material: basalt
+    face: top
+    color: {fileID: 2800000, guid: 60e2a9b3629cafa4db3d18a3a6b43de4, type: 3}
+    normal: {fileID: 2800000, guid: f8c12d7e523802e45b0bfdf82ea7b6bc, type: 3}
+    mask: {fileID: 2800000, guid: 2e43c89c20f1b4c4d949275de67b379b, type: 3}
+  - planet: mars
+    material: snow
+    face: top
+    color: {fileID: 2800000, guid: 58e2a990cefb8cd4db8abfcd11e8992b, type: 3}
+    normal: {fileID: 2800000, guid: ce6e42fb4c3339d49b63d79ad8becf74, type: 3}
+    mask: {fileID: 2800000, guid: 37598f39c6a684340bb1f7dda4344101, type: 3}
+  - planet: mars
+    material: hematite
+    face: side
+    color: {fileID: 2800000, guid: 4dbd90b31de64a34389e3b0f5153af4a, type: 3}
+    normal: {fileID: 2800000, guid: 5c7d01f4066488d499ecec527b34c318, type: 3}
+    mask: {fileID: 2800000, guid: aff6462426499d849a1379037480f063, type: 3}
+  - planet: mars
+    material: backwall
+    face: wall
+    color: {fileID: 2800000, guid: b936a7651cbcbb64c96180578f316ae9, type: 3}
+    normal: {fileID: 2800000, guid: 3443d00a99fb5714c9715fceaacba537, type: 3}
+    mask: {fileID: 2800000, guid: ece77560583cf284dbec583f360c930c, type: 3}
+  - planet: mars
+    material: snow
+    face: side
+    color: {fileID: 2800000, guid: d60eda21afbf3bb448ade7522a7a5194, type: 3}
+    normal: {fileID: 2800000, guid: d192142e1a6850242b774ccfca2ca302, type: 3}
+    mask: {fileID: 2800000, guid: 04053c7756ed2554dab00e817cb5e708, type: 3}
+  - planet: mars
+    material: regolith
+    face: side
+    color: {fileID: 2800000, guid: 12646aedb5caddc46ac2ffa8a5c54d80, type: 3}
+    normal: {fileID: 2800000, guid: fb089719c18babf42a10cd5b01467ff2, type: 3}
+    mask: {fileID: 2800000, guid: b442e489e4be47948a7c9eb6f2a2c095, type: 3}
+  - planet: mars
+    material: regolith
+    face: top
+    color: {fileID: 2800000, guid: 9b77751b931e8824d894312225aefde4, type: 3}
+    normal: {fileID: 2800000, guid: f43f4e15bc7d5e147892a1ec27a95f89, type: 3}
+    mask: {fileID: 2800000, guid: 82d689629ee7f924db1a53c70362e638, type: 3}
+  - planet: mars
+    material: basalt
+    face: side
+    color: {fileID: 2800000, guid: e01a303addfed294ab5b0517b451177e, type: 3}
+    normal: {fileID: 2800000, guid: 9097c40cb10a4cf41b89ce82a1d3dfd5, type: 3}
+    mask: {fileID: 2800000, guid: e1ea6e8415e678c4483421536cfcc1a5, type: 3}
+  - planet: mars
+    material: ice
+    face: side
+    color: {fileID: 2800000, guid: 33ba2fba209b0784d94c49fbd890256b, type: 3}
+    normal: {fileID: 2800000, guid: 19faa29d80d74f749baa581e0d604758, type: 3}
+    mask: {fileID: 2800000, guid: d7c0efe6917f13445a99a092ddd2ba2c, type: 3}
   emissiveKeys:
+  - backgrounds/earth/skyline_far
+  - backgrounds/earth_coast/ridge_mid
+  - backgrounds/earth_desert/ridge_mid
+  - backgrounds/earth_forest/ridge_mid
+  - backgrounds/earth_plains/ridge_mid
+  - backgrounds/earth_taiga/ridge_mid
+  - backgrounds/earth_tundra/ridge_mid
   - characters/calibration/base
   - characters/surveyor/base
   - characters/surveyor/mk1
   - characters/surveyor/mk2
   - characters/surveyor/mk3
+  - creatures/earth/stag
+  - creatures/earth/wolf
+  - creatures/mars/dustskater
+  - creatures/mars/scree_stalker
   - creatures/mercury/cinderhulk_day
   - creatures/mercury/cinderhulk_night
   - creatures/mercury/cinderling
@@ -73,13 +230,20 @@ MonoBehaviour:
   - props/common/lamp
   - props/common/landing_pad
   - props/common/shelter_door
+  - props/common/shelter_wall
   - props/common/smelter
+  - props/common/storage_crate
   - props/earth/archive_door
   - props/earth/archive_terminal
   - props/earth/beacon
+  - props/earth/launch_gantry
+  - props/earth/launch_tower_ruin
   - props/jupiter/beacon_vault
   - props/jupiter/derelict_pod
   - props/jupiter/husk_tortoise
+  - props/mars/hauler_cargo
+  - props/mars/hauler_hull_a
+  - props/mars/hauler_hull_b
   - props/mars/meridian_beacon
   - props/mars/warden_pylon
   - props/mercury/flare_shelter
@@ -107,12 +271,56 @@ MonoBehaviour:
   - props/venus/station_hull_a
   - props/venus/station_hull_b
   - props/venus/vent_harvester
+  - ships/pilgrim/base
   - ships/pilgrim/side
   - ships/pilgrim/side_legs
   - ships/pilgrim/top
   - ships/waystation_earth/top
   - ships/waystation_mars/top
   clipSets:
+  - key: characters/calibration/base
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 6
+      loop: 1
+    - name: walk
+      start: 6
+      length: 8
+      loop: 1
+    - name: run
+      start: 14
+      length: 8
+      loop: 1
+    - name: jump
+      start: 22
+      length: 3
+      loop: 0
+    - name: fall
+      start: 25
+      length: 2
+      loop: 1
+    - name: land
+      start: 27
+      length: 3
+      loop: 0
+    - name: dig
+      start: 30
+      length: 6
+      loop: 1
+    - name: aim
+      start: 36
+      length: 2
+      loop: 1
+    - name: hurt
+      start: 38
+      length: 2
+      loop: 0
+    - name: death
+      start: 40
+      length: 8
+      loop: 0
   - key: characters/surveyor/base
     fps: 12
     clips:
@@ -154,7 +362,7 @@ MonoBehaviour:
       loop: 0
     - name: death
       start: 40
-      length: 6
+      length: 8
       loop: 0
   - key: characters/surveyor/mk1
     fps: 12
@@ -283,98 +491,6 @@ MonoBehaviour:
       loop: 0
     - name: death
       start: 40
-      length: 6
-      loop: 0
-  - key: creatures/earth/stag
-    fps: 12
-    clips:
-    - name: idle
-      start: 0
-      length: 6
-      loop: 1
-    - name: walk
-      start: 6
-      length: 8
-      loop: 1
-    - name: attack
-      start: 14
-      length: 6
-      loop: 0
-    - name: hurt
-      start: 20
-      length: 2
-      loop: 0
-    - name: death
-      start: 22
-      length: 6
-      loop: 0
-  - key: creatures/earth/wolf
-    fps: 12
-    clips:
-    - name: idle
-      start: 0
-      length: 6
-      loop: 1
-    - name: walk
-      start: 6
-      length: 8
-      loop: 1
-    - name: attack
-      start: 14
-      length: 6
-      loop: 0
-    - name: hurt
-      start: 20
-      length: 2
-      loop: 0
-    - name: death
-      start: 22
-      length: 6
-      loop: 0
-  - key: creatures/mars/dustskater
-    fps: 12
-    clips:
-    - name: idle
-      start: 0
-      length: 6
-      loop: 1
-    - name: walk
-      start: 6
-      length: 8
-      loop: 1
-    - name: attack
-      start: 14
-      length: 6
-      loop: 0
-    - name: hurt
-      start: 20
-      length: 2
-      loop: 0
-    - name: death
-      start: 22
-      length: 6
-      loop: 0
-  - key: creatures/mars/scree_stalker
-    fps: 12
-    clips:
-    - name: idle
-      start: 0
-      length: 6
-      loop: 1
-    - name: walk
-      start: 6
-      length: 8
-      loop: 1
-    - name: attack
-      start: 14
-      length: 6
-      loop: 0
-    - name: hurt
-      start: 20
-      length: 2
-      loop: 0
-    - name: death
-      start: 22
       length: 6
       loop: 0
   - key: creatures/mercury/cinderhulk_day

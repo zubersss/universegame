@@ -71,10 +71,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 755e60739c8d8b441afdd1adce701964, type: 2}
   - {fileID: 11400000, guid: 723a0aee10d1de0448e52e4db0a47150, type: 2}
   - {fileID: 11400000, guid: f038d35a6a432e041b5eefd38bcf3198, type: 2}
+  - {fileID: 11400000, guid: 1acd134a61b5dcb47929a1a37022fdef, type: 2}
   - {fileID: 11400000, guid: 49af10133532c794bb54f106c2cf7b91, type: 2}
   - {fileID: 11400000, guid: 308f93da7923c6048918edcd5e2a52e3, type: 2}
   - {fileID: 11400000, guid: 4025be1334a07cd4fa3d02e59a8c4842, type: 2}
   - {fileID: 11400000, guid: 8fa5c06677952e44581d0b96ff9aa930, type: 2}
+  - {fileID: 11400000, guid: 60fcd9f6f16a7c548b82dee586c9b41d, type: 2}
   - {fileID: 11400000, guid: b8fcdbcbbbcc5aa4187bce604ca664ba, type: 2}
   - {fileID: 11400000, guid: dadfefde8217c504cbc966de750a5526, type: 2}
   - {fileID: 11400000, guid: aba95cfa949cf874c848068177c64496, type: 2}
@@ -105,6 +107,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3b2e9a8bfd98a2944acbc0adbef29de0, type: 2}
   - {fileID: 11400000, guid: 62d0f49ff1ca5fa46bb8f64551771b30, type: 2}
   - {fileID: 11400000, guid: bf7e969b827264e439608a8bcc22c0a4, type: 2}
+  - {fileID: 11400000, guid: 647349a287dfc044d9ae01977cef48bb, type: 2}
   - {fileID: 11400000, guid: d1663756a49d29e4b8777e5f9e4e6ffb, type: 2}
   m_BuildSettings:
     m_LogResourceManagerExceptions: 1

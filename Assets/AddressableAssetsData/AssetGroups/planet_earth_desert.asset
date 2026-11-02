@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: planet_earth_desert
   m_GUID: 7fe535a6cad3fb745b11504939e68e17
   m_SerializeEntries:
+  - m_GUID: 003ad5ea176049e40b876fc57b699244
+    m_Address: backgrounds/earth_desert/skydome
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4132dfc6f772b2441a321c4f6c872ae2
     m_Address: backgrounds/earth_desert/layer2
     m_ReadOnly: 0
@@ -27,6 +32,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 688edc780066a3044965040a46741e87
     m_Address: backgrounds/earth_desert/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fb12be13ef3749e418723e469c1cf7f9
+    m_Address: backgrounds/earth_desert/ridge_mid
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

@@ -15,6 +15,16 @@ MonoBehaviour:
   m_GroupName: planet_earth_taiga
   m_GUID: 0095bbd701512224b8a034acab122f28
   m_SerializeEntries:
+  - m_GUID: 380b00f206eabc34a92f5098e4bb3567
+    m_Address: backgrounds/earth_taiga/skydome
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5ad022d342022204884376100232a845
+    m_Address: backgrounds/earth_taiga/ridge_mid
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 609c6d2f34a5f014b8983a94c54075dc
     m_Address: backgrounds/earth_taiga/layer2
     m_ReadOnly: 0

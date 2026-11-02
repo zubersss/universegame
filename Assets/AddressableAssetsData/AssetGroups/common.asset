@@ -45,13 +45,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 2882b8f74e9126f4a9e1db7032dae691
-    m_Address: fx/dust/base
+  - m_GUID: 1c868be6593f13c49b73137f5a8e3a9d
+    m_Address: characters/surveyor/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 363d18841e934d94abaf1f55db0ab3dd
-    m_Address: props/common/storage_crate
+  - m_GUID: 2882b8f74e9126f4a9e1db7032dae691
+    m_Address: fx/dust/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -65,23 +65,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 3cac6df33d7d22b4e80c53124e407fef
-    m_Address: props/common/landing_pad
+  - m_GUID: 40e87f4dafdb3694b936aeeb574d948a
+    m_Address: characters/calibration/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4663ff78cebe3064f913ab97ad862c71
     m_Address: props/common/grapple_hook
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 46ccadffb72011848b2a42bdde3233f5
-    m_Address: props/common/smelter
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 4798bf3e3fd15a242ad39ab6a8fb2821
-    m_Address: characters/surveyor/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -95,11 +85,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 64e78b42a2d64074586aecd669952c4d
-    m_Address: props/common/lamp
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 654ff0c1af013944a8cf317d91b92c89
     m_Address: characters/surveyor/mk3
     m_ReadOnly: 0
@@ -107,6 +92,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6800afe4b54a12347854e88cfe7bdf54
     m_Address: fx/grapple_line/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6c3faf4ae33b2df48aabd9d5edc20914
+    m_Address: props/common/smelter
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -130,6 +120,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 84c01c34602afe041b8c802dfdabcd83
+    m_Address: props/common/shelter_door
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9036804e6ffc5eb45846912204e90558
+    m_Address: props/common/lamp
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 99a5324075394c84e9ceb82f5582506d
     m_Address: fx/survey_scan/base
     m_ReadOnly: 0
@@ -150,13 +150,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 9fda55f33ae0d6742ac2aa66beba8fdd
-    m_Address: props/common/shelter_wall
+  - m_GUID: a73a2fa04abd32d4aab12c5b39621655
+    m_Address: props/common/float_cell_pack_mk1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a73a2fa04abd32d4aab12c5b39621655
-    m_Address: props/common/float_cell_pack_mk1
+  - m_GUID: b01ae80293cac204db1e17fa5c1689de
+    m_Address: ships/pilgrim/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -170,8 +170,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: bc2f3a7f580750342bc34e3f99b0713f
-    m_Address: characters/calibration/base
+  - m_GUID: b2350f496c2199142b42dfb243946c26
+    m_Address: props/common/landing_pad
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bbb69bb75eed37347b0579b7e949ceab
+    m_Address: props/common/shelter_wall
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -195,6 +200,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cc03f2da218c19a40938bde6641e8548
+    m_Address: props/common/storage_crate
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e0da0d4d096855647ab3c6b3c141e940
     m_Address: fx/methane_hail/base
     m_ReadOnly: 0
@@ -202,11 +212,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e2f5cb7dbd1351c4b92beb9a61f459eb
     m_Address: fx/heat_shimmer/base
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e5ed3773ab3349d478083ece26a3ef0c
-    m_Address: props/common/shelter_door
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

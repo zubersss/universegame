@@ -20,6 +20,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 40d616f9c1997484095bae12aa219641
+    m_Address: backgrounds/earth_coast/skydome
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7db2cac2d861b8e438cc41ecaf62fa0c
+    m_Address: backgrounds/earth_coast/ridge_mid
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8309ebccc6698084787e14654237511e
     m_Address: backgrounds/earth_coast/layer1
     m_ReadOnly: 0
