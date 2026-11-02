@@ -131,9 +131,16 @@ namespace Meridian.EditorTools
         }
 
         /// <summary>Null when the file meets §2; otherwise the one-line rejection reason.</summary>
-        public static string Validate(long fileBytes, int width, int height)
+        public static string Validate(long fileBytes, int width, int height) => Validate(fileBytes, width, height, false);
+
+        /// <summary>
+        /// D-072 (P-34, contract v2.4): a model map (beside a .glb, or a model folder's shared atlas) keeps the 2048² cap and the
+        /// runtime texture budget but is exempt from the 4 MB PNG-bytes cap: PNG bytes measure source entropy, not
+        /// runtime cost (stored BC7/BC5, a 2048² map costs the same whatever its PNG size).
+        /// </summary>
+        public static string Validate(long fileBytes, int width, int height, bool modelMap)
         {
-            if (fileBytes > MaxFileBytes) return $"file is {fileBytes / 1024} KB, over the 4 MB limit";
+            if (!modelMap && fileBytes > MaxFileBytes) return $"file is {fileBytes / 1024} KB, over the 4 MB limit";
             if (width > MaxDimension || height > MaxDimension) return $"{width}×{height} exceeds {MaxDimension}×{MaxDimension}";
             return null;
         }

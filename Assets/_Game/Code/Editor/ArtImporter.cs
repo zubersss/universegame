@@ -21,7 +21,7 @@ namespace Meridian.EditorTools
     public sealed partial class ArtImporter : AssetPostprocessor
     {
         /// <summary>Bump when the import rules change so Unity re-imports the art everywhere (2: U-036 per-sheet ppu, 3: U-032 clips).</summary>
-        public override uint GetVersion() => 9; // 3: U-032 clips; 4: U-060 mips only on POT; 5: U-075 model maps beside a .glb are not sprites; 6: B-080 block material textures; 7: model keys get a placeholder; 8: shared model atlases (B-085); 9: model materials, addresses, clips
+        public override uint GetVersion() => 10; // 10: D-072 model maps exempt from the 4 MB cap (the flora atlases reimport); 3: U-032 clips; 4: U-060 mips only on POT; 5: U-075 model maps beside a .glb are not sprites; 6: B-080 block material textures; 7: model keys get a placeholder; 8: shared model atlases (B-085); 9: model materials, addresses, clips
 
         /// <summary>Folders the importer watches. Tests point these at a sandbox and restore them.</summary>
         public sealed class Roots
@@ -123,7 +123,7 @@ namespace Meridian.EditorTools
                 return;
             }
             ti.GetSourceTextureWidthAndHeight(out int w, out int h);
-            var reason = ArtRules.Validate(ArtRules.FileBytes(assetPath), w, h);
+            var reason = ArtRules.Validate(ArtRules.FileBytes(assetPath), w, h, kind == RootKind.Art && IsModelKey(key)); // D-072: model maps are not capped by PNG bytes
             if (reason != null)
             {
                 Debug.LogError($"[ArtImporter] Rejected {assetPath}: {reason} (contract §2).");

@@ -438,5 +438,15 @@ namespace Meridian.Tests
                     Assert.IsTrue(File.Exists(ArtRules.SiblingPath(ph, ArtMap.Normal)), $"{key} placeholder normal");
             }
         }
+
+        [Test]
+        public void ModelMapsAreCappedByDimensionNotByFileSize()
+        {
+            // D-072 (P-34): a 2048² model atlas may exceed 4 MB as PNG (the flora atlases do); sheets keep the 4 MB cap.
+            Assert.IsNull(ArtRules.Validate(12L * 1024 * 1024, 2048, 2048, modelMap: true), "a 12 MB 2048² model map passes");
+            StringAssert.Contains("4 MB", ArtRules.Validate(12L * 1024 * 1024, 2048, 2048, modelMap: false), "a sheet keeps the cap");
+            StringAssert.Contains("exceeds", ArtRules.Validate(1024, 4096, 2048, modelMap: true), "the dimension cap stays for model maps");
+            Assert.IsTrue(ArtImporter.IsModelKey("props/earth_flora/atlas"), "the flora atlas is a model key (v8)");
+        }
     }
 }
