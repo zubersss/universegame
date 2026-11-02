@@ -975,5 +975,8 @@ Queues: UNITY U-075 (next), U-076 (deps now met), U-078, U-079 Ready + U-080 act
 Checked: review_b089_field.png (stamped 03:12; 20 instances under the Mars Sun). B-089 art accepted; Done on R2's lit preview. B-091 → In Progress. BLENDER's R2 art is now complete on its side (B-086..B-090).
 
 ## Cycle 195 · 2026-11-02 03:2x (UNITY message)
-U-075 progress: EditMode 239/239 incl. ModelImportTests (calibration + surveyor as Mecanim, addressed, generated URP/Lit material, clips match the json); the surveyor plays every clip in PlayMode; a material-lookup bug (glTFast's embedded material matching the key) fixed. Decided: D-070 (P-31, P-32). Next: creatures through ModelView, then U-076.
+U-075 progress: EditMode 239/239 incl. ModelImportTests (calibration + surveyor as Mecanim, addressed, generated URP/Lit material, clips match the json); the surveyor plays every clip in PlayMode; a material-lookup bug (glTFast's embedded material matching the key) fix in 9fe5a78, unverified until the next check. Decided: D-070 (P-31, P-32). Next: creatures through ModelView, then U-076.
+
+## Cycle 196 · 2026-11-02 03:3x (BLENDER message)
+Checked: review_terrain_venus_vent_glass.png, review_terrain_mercury_regolith.png (stamped 03:25–03:26). B-091 art accepted; Done on R3's lit blocks. B-096 → In Progress.
 

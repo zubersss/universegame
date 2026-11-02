@@ -1252,7 +1252,7 @@ Goal: Mercury and Venus terrain block materials (R3 prep, as B-080/B-086): every
 Accept: tiles seamlessly; reads as the v1 materials under each planet's Sun in UNITY's lit preview; stamped contact sheets.
 Files: blender/scripts/gen_terrain.py, Assets/_Game/Art/terrain/{mercury,venus}/
 Depends: B-077
-Lead notes: Cycle 188. R3 prep; numpy-light.
+Lead notes: Cycle 196 (7c77065): art accepted (Mercury regolith/basalt/sulfide/ice; Venus basalt/tessera/vent glass/sulfur; basalt backwalls; the board's solarite crust, impact glass and deck plates are items/props, not tile materials, so none were due). Done on R3's first lit block captures.
 
 ### B-092 · BLENDER · Ready · R3
 Goal: Mercury and Venus depth bands (as B-083/B-088): Mercury `ridge_mid` for day side, twilight band and night side (grey regolith crater rims, a violet-black sky skydome with the huge Sun on the day side; a night skydome with stars), Venus `ridge_mid` for the cloud deck (cloud-top masses as translucent planes, no ground) and the surface (black basalt plains with vent glows), skydomes orange-cream (deck) and dark orange (surface); shared `skyline_far` per planet.
@@ -1282,7 +1282,7 @@ Files: build_props_mercury.py, build_props_venus.py, build_props_common.py, Asse
 Depends: B-077
 Lead notes: Cycle 193. R3.
 
-### B-096 · BLENDER · Ready · R3
+### B-096 · BLENDER · In Progress · R3
 Goal: Wardens as models: `creatures/warden/sentinel` and `creatures/warden/hunter` (hovering drones, centred pivot, flier clip set, indigo running lights, a shield emitter), plus `fx/warden_bolt` as a billboard sheet is kept (2D fx stay 2D).
 Accept: contract §9; stamped turntables; UNITY lit preview for Done.
 Files: build_wardens.py, Assets/_Game/Art/creatures/warden/
