@@ -1,0 +1,23 @@
+{
+ "key": "props/venus/vent_harvester",
+ "format": "glb",
+ "contract": "v2.2",
+ "facing": "+X in Unity (exported facing glTF -X, D-065)",
+ "up": "+Y",
+ "units": "m",
+ "origin": "base",
+ "triangles": 852,
+ "lod1_triangles": null,
+ "texture": 1024,
+ "maps": [
+  "color",
+  "normal",
+  "mask",
+  "emission"
+ ],
+ "fps": 30,
+ "clips": [],
+ "atlas": null,
+ "vertex_color": null,
+ "sockets": []
+}

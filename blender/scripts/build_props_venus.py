@@ -206,6 +206,38 @@ def build(out_path=DEFAULT_OUT):
     print("MERIDIAN built", out_path)
 
 
+# ---------------------------------------------------------------- contract v2 models (B-095)
+MODEL_OUT = os.path.join(os.path.dirname(HERE), "sources", "props", "venus_model.blend")
+
+
+def railing(c, M):
+    """Deck railing module exactly 2.0 m (x -1..1): posts at +-0.5 so modules tile at a 2 m pitch
+    with a uniform 1 m post spacing, top rail, mid rail, cream kick plate, two deck lights."""
+    for x in (-0.5, 0.5):
+        cyl(f"post{x}", (x, 0, 0.5), 0.03, 1.0, c, M["metal"], verts=8)
+    box("rail", (0, 0, 1.02), (2.0, 0.05, 0.05), c, M["metal"], bevel=0.0)
+    box("mid", (0, 0, 0.55), (2.0, 0.03, 0.03), c, M["metal"], bevel=0.0)
+    box("kick", (0, 0, 0.08), (2.0, 0.04, 0.16), c, M["hull"], bevel=0.0)
+    box("kick_band", (0, -0.025, 0.08), (2.0, 0.01, 0.05), c, M["orange"], bevel=0.0)
+    for x in (-0.5, 0.5):
+        sphere(f"lamp{x}", (x, -0.05, 1.1), 0.05, c, M["light"])
+
+
+MODEL_PROPS = dict(PROPS, railing=railing)
+
+
+def build_model(out_path=MODEL_OUT):
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    scene = bpy.context.scene
+    for name, fn in MODEL_PROPS.items():
+        coll = bpy.data.collections.new(f"prop_{name}")
+        scene.collection.children.link(coll)
+        fn(coll, materials(0.1 if name in INTERACTABLE else 0.0))
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    bpy.ops.wm.save_as_mainfile(filepath=out_path, compress=True)
+    print("MERIDIAN built", out_path)
+
+
 if __name__ == "__main__":
     args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     build(args[0] if args else DEFAULT_OUT)
