@@ -461,13 +461,13 @@ namespace Meridian.Planet
             // Generous width: the quad must cover the view at any aspect (captures switch to 16:9 targets).
             // U-072: under the perspective rail the quad sits behind the play plane and is sized for its depth;
             // the shader keeps working in play-plane metres (viewHalf), so the art scale doesn't change.
-            float depth = Meridian.CameraRig.SideView.BackdropDepth(view);
-            float h = Meridian.CameraRig.SideView.HalfHeightAtDepth(view, depth) * 2f, w = h * Mathf.Max(view.aspect, 2.5f);
-            quad.transform.localPosition = new Vector3(0f, 0f, depth);
+            float quadDepth = Meridian.CameraRig.SideView.BackdropDepth(view);
+            float h = Meridian.CameraRig.SideView.HalfHeightAtDepth(view, quadDepth) * 2f, w = h * Mathf.Max(view.aspect, 2.5f);
+            quad.transform.localPosition = new Vector3(0f, 0f, quadDepth);
             quad.transform.localScale = new Vector3(w, h, 1f);
             if (overlay != null)
             {
-                overlay.transform.localPosition = new Vector3(0f, 0f, depth - 0.1f);
+                overlay.transform.localPosition = new Vector3(0f, 0f, quadDepth - 0.1f);
                 overlay.transform.localScale = quad.transform.localScale;
             }
             float planeHalf = Meridian.CameraRig.SideView.HalfHeight(view);
