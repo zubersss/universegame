@@ -24,6 +24,41 @@ namespace Meridian.Tests
         }
 
         [Test]
+        public void The3DSunAndAmbientFollowTheClock()
+        {
+            // U-074 (Bible 2.0 §10.5): the directional Sun3D and the ambient probe carry the §9 numbers at noon and midnight.
+            var go = new GameObject("DayNight3D");
+            var post = (GameObject)null;
+            var cfg = ScriptableObject.CreateInstance<PlanetConfig>();
+            try
+            {
+                cfg.id = PlanetId.Earth;
+                var dn = go.AddComponent<DayNightLighting>();
+                dn.Override = Noon;
+                dn.ConfigureFor(cfg);
+                Assert.NotNull(dn.Sun3D, "a directional Sun for the 3D renderer");
+                Assert.AreEqual(LightType.Directional, dn.Sun3D.type);
+                Assert.AreEqual(1.0f, dn.Sun3D.intensity, 1e-4f, "Earth noon Sun 1.0 (§9)");
+                Assert.Less(dn.Sun3D.transform.forward.y, -0.5f, "noon light falls from above");
+                Assert.Greater(dn.Sun3D.transform.forward.z, 0f, "and from the camera side, so block fronts catch it");
+                float noonAmbient = RenderSettings.ambientLight.maxColorComponent;
+                Assert.IsTrue(RenderSettings.fog, "distance fog on");
+                dn.Override = Midnight;
+                dn.Apply();
+                Assert.AreEqual(0f, dn.Sun3D.intensity, 1e-4f, "no Sun at midnight");
+                Assert.Less(RenderSettings.ambientLight.maxColorComponent, noonAmbient, "night ambient is darker");
+                post = GameObject.Find("PostFx (bloom)");
+                Assert.NotNull(Meridian.Rendering.PostFx.ActiveBloom, "bloom volume");
+            }
+            finally
+            {
+                Object.DestroyImmediate(go);
+                if (post != null) Object.DestroyImmediate(post);
+                Object.DestroyImmediate(cfg);
+            }
+        }
+
+        [Test]
         public void EveryPlanetNoonSunlightIsItsBibleValue()
         {
             var expected = new (PlanetId, float)[]

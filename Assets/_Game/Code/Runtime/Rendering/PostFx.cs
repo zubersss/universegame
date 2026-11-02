@@ -19,7 +19,7 @@ namespace Meridian.Rendering
             if (volume == null)
             {
                 var go = new GameObject("PostFx (bloom)");
-                Object.DontDestroyOnLoad(go);
+                if (Application.isPlaying) Object.DontDestroyOnLoad(go); // EditMode tests: a plain scene object
                 volume = go.AddComponent<Volume>();
                 volume.isGlobal = true;
                 volume.priority = 10f;
