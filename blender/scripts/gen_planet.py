@@ -106,7 +106,61 @@ def moon(entry, w, h):
         floor = np.clip(1 - d, 0, 1) * 0.12
         rim = np.exp(-((d - 1) / 0.18) ** 2) * 0.16
         rgb = rgb * (1 - floor[..., None]) + rim[..., None] * 0.9
+    rgb = _moon_features(entry, rng, rgb, xx, yy, w, h)
     return {"color": _u8(np.dstack([np.clip(rgb, 0, 1), np.ones((h, w), np.float32)]))}
+
+
+def _moon_features(entry, rng, rgb, xx, yy, w, h):
+    """B-070 optional surface features for the giants' moons (all periodic in x):
+    `patches` [sRGB, k, wavelength_px]: blotchy terrain (Miranda's coronae, Triton's cantaloupe),
+    `cracks` [sRGB, k, count]: long thin curved lineae (Europa), wrapping in longitude,
+    `stripes` [sRGB, k, lat01]: a few parallel 'tiger stripes' near one latitude (Enceladus),
+    `hotspots` [count, sRGB core, sRGB halo]: volcanic spots with dark centres and coloured
+    deposits (Io), `cap` [sRGB, lat01_start, k]: a polar cap from lat01_start to the pole."""
+    from meridian.noise import fft_noise, fft_noise_1d
+    lat = (yy + 0.5) / h
+    if entry.get("patches"):
+        col, k, wl = entry["patches"]
+        n = fft_noise(rng, h, w, wl * 0.3 * w / 512, wl * w / 512, 1.0)
+        m = np.clip((np.abs(n) - 0.5) * 2.5, 0, 1) * k
+        rgb = rgb * (1 - m[..., None]) + (np.array(col, np.float32) / 255) * m[..., None]
+    if entry.get("cracks"):
+        col, k, count = entry["cracks"]
+        c = np.array(col, np.float32) / 255
+        for _ in range(int(count)):
+            y0 = rng.uniform(0.15, 0.85) * h
+            amp = rng.uniform(4, 22) * h / 256
+            path = y0 + amp * fft_noise_1d(rng, w, w / 3, w, 1.0)          # periodic in x
+            tilt = rng.uniform(-0.12, 0.12) * h                             # gentle: lineae cross at varied angles, not as waves
+            ph = rng.uniform(0, 2 * np.pi)
+            yc = path + tilt * np.sin(2 * np.pi * np.arange(w) / w + ph)
+            d = np.abs(yy - yc[None, :])
+            m = np.exp(-(d / rng.uniform(0.6, 1.4)) ** 2) * k
+            rgb = rgb * (1 - m[..., None]) + c * m[..., None]
+    if entry.get("stripes"):
+        col, k, la = entry["stripes"]
+        c = np.array(col, np.float32) / 255
+        for s in range(4):
+            yc = (la + 0.025 * s) * h + 2.0 * np.sin(2 * np.pi * (xx / w) * 3 + s)
+            m = np.exp(-((yy - yc) / 0.9) ** 2) * k * np.clip(np.sin(np.pi * ((xx / w + 0.1 * s) % 1.0)) * 1.5, 0, 1)
+            rgb = rgb * (1 - m[..., None]) + c * m[..., None]
+    if entry.get("hotspots"):
+        count, core, halo = entry["hotspots"]
+        cc, hc = np.array(core, np.float32) / 255, np.array(halo, np.float32) / 255
+        for _ in range(int(count)):
+            cx, cy = rng.random() * w, (0.12 + 0.76 * rng.random()) * h
+            r = rng.uniform(2.0, 6.0) * w / 512
+            dx = (xx - cx + w / 2) % w - w / 2
+            d = np.hypot(dx, yy - cy) / r
+            ring = np.clip(1.6 - d, 0, 1) ** 1.5 * 0.7
+            rgb = rgb * (1 - ring[..., None]) + hc * ring[..., None]
+            dot = np.clip(1 - d * 1.6, 0, 1)
+            rgb = rgb * (1 - dot[..., None]) + cc * dot[..., None]
+    if entry.get("cap"):
+        col, start, k = entry["cap"]
+        m = np.clip((lat - start) / 0.08, 0, 1) * k
+        rgb = rgb * (1 - m[..., None]) + (np.array(col, np.float32) / 255) * m[..., None]
+    return rgb
 
 
 # Saturn's rings, radii in units of Saturn's equatorial radius (60,268 km), inner -> outer,
@@ -174,6 +228,17 @@ def glow(entry, ctx, w, h):
     outer = np.exp(-np.maximum(r - rd, 0) / width)
     fade = np.clip((edge - r) / (16 * s), 0, 1)       # reach zero before the margin
     a = peak * np.where(r < rd, inner, outer) * fade
+    # B-070 geyser plumes (Enceladus, Triton): jets rising from the limb, `plumes`
+    # [[angle_deg (0 = up, clockwise), length_px, width_px, strength], ...].
+    for ang, ln, wd, st in entry.get("plumes", []):
+        th = np.radians(ang)
+        ux, uy = np.sin(th), -np.cos(th)                               # image y points down
+        px, py = xx + 0.5 - w / 2, yy + 0.5 - h / 2
+        along = px * ux + py * uy - rd                                 # distance out from the limb
+        across = -px * uy + py * ux
+        spread = wd * s * (0.5 + along / max(ln * s, 1))
+        jet = np.exp(-(across / np.maximum(spread, 1)) ** 2) * np.clip(1 - along / (ln * s), 0, 1) * (along > -4 * s)
+        a = np.maximum(a, st * jet * fade)
     col = np.array(entry.get("glow_color", [110, 170, 255]), np.float32) / 255.0
     rgb = np.broadcast_to(col, (h, w, 3)).copy()
     color = _u8(np.dstack([rgb, a]))
