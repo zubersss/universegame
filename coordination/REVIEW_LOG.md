@@ -799,3 +799,10 @@ Checked: review_jupiter_deep.png (stamps 20:11–20:12; rust haze banks over a g
 
 ## Cycle 150 · 2026-11-01 20:21 (BLENDER message)
 Checked: ef238a7 B-058 Saturn sources (deck1-3, deep, floe_ice/core; 25% preview peaks 636–668 MB; contacts reviewed by BLENDER). Turns correct: UNITY took heavy_unity.lock 20:20:15 (batched U-064/U-063/U-061/U-068 check); BLENDER filed want 20:20:55 after it (D-039). Free RAM 0.15 GB during the Unity run; Unity Hub still open (USER-14). Watching for a low-memory stop (D-046 covers one re-run).
+
+## Cycle 151 · 2026-11-01 20:4x
+Checked: tests_2026-11-01.md 20:22–20:23 (EditMode 218/218; PlayMode 88/109 + LeadQA 3/3, 2 failures: FootingTests Mars spawn x 72/76 (surveyor spawned inside the Pilgrim hull) and SkipDriveTests 13.26 s vs 11 ± 2); compile 0 errors / 0 warnings; commits 7a413c1, e6d785d, adb06a3, adb433e; BLENDER ef238a7 (B-058 sources).
+Decided: D-054 (skip time = layout distance / 1,200; Bible 1.5), D-055 (giant hazard numbers; keep the suit model; §7.6 amended), D-056 (M4 recipes; footing test skips ship-occupied columns). Process signal: UNITY changed the SkipDrive assertion before LEAD ruled (second time after D-019); ratified anyway.
+Locks: UNITY filed want_unity 20:36:33 right after its own job while want_blender (20:20:55) existed, which breaks D-039 and could deadlock again. LEAD deleted want_unity.lock (logged here); BLENDER goes next. Free RAM 1.79 GB, no heavy lock.
+U-064 stays In Progress until the targeted re-check (FootingTests + SkipDriveTests) passes.
+

@@ -1,7 +1,7 @@
 # MERIDIAN — Project Bible (single source of truth)
 
 Owner: LEAD. Workers read; only LEAD edits. Changes are logged in `coordination/DECISIONS.md`.
-Version: 1.4 (Saturn jump height 2.3 m, cycle 9). The Lead bumps the version on every edit.
+Version: 1.5 (skip time to Neptune, Jupiter radiation with Mk3; D-054/D-055, cycle 151). The Lead bumps the version on every edit.
 
 Sections: 1 Vision · 2 Setting and story · 3 The solar system in game · 4 Physics and
 numbers · 5 Views and transitions · 6 Controls · 7 The eight planets · 8 Systems →
@@ -106,7 +106,7 @@ orbit, Belt (Red Hollow black market), Saturn orbit (Halcyon).
 
 **Ship speeds (top-down).** Cruise 80 u/s · Boost 160 u/s (uses main fuel) · Skip Drive
 1,200 u/s after a 3 s spool, consumes skip fuel per second, disabled inside a Gravity Well.
-Earth → Mars ≈ 7 s cruise; Earth → Neptune ≈ 11 s skip.
+Earth → Mars ≈ 7 s cruise; Earth → Neptune ≈ 13 s skip (layout distance / 1,200 u/s; D-054).
 
 ---
 
@@ -364,7 +364,7 @@ the Crush Line ends it (respawn at the last Aerostat or the ship, cargo kept, 20
 recovery fee).
 
 ### 7.6 Jupiter — the storm giant
-- **Hazards.** Radiation 3 everywhere above Deck 2 (the belts; Mk3 brings it to 1; Deck 2
+- **Hazards.** Radiation 3 everywhere above Deck 2 (the belts; Mk3 brings it to 0; Deck 2
   and below are shielded by the atmosphere to 1), lightning (Deck 2–3), gravity 2.53×
   (fall damage above 2.9 m; jetpack Mk3 required; Thruster Mk3 required to launch),
   Cryo 2 in Deck 1, Thermal 2 in Deep. The **Great Red Spot** is a 600 m wide zone where
