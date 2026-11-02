@@ -1231,7 +1231,7 @@ Goal: Mars depth bands (contract §9 depth-bands row), the R2 counterpart of B-0
 Accept: tiles seamlessly in x; reads as the v1 Mars parallax from the side rail; stamped turntables; peaks measured.
 Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/mars_*/
 Depends: B-077
-Lead notes: Cycle 188. R2.
+Lead notes: Cycle 191 (00f0a65): art accepted on the turntables (canyon terraces with strata and boulders; Olympus Mons as a broad shield on a 1024 m period; storm skydome). Done on R2's first Mars capture with the bands in the scene.
 
 ### B-089 · BLENDER · Ready · R2
 Goal: Mars scenery and POI props as models: boulders ×3, regolith rocks ×2, ice chunks ×2, a dead shrub-like "dust bush", lava-tube stalactite/stalagmite pair (each ≤ 1.5 k tris, LOD1, one shared atlas); the Mars POI props from the v1 sources not already covered by B-084 (crash-site debris, the Mars Waystation surface beacon, ice-cap drill rig), ≤ 6 k tris each.
@@ -1240,7 +1240,7 @@ Files: blender/sources/props/mars/, build_props_mars.py, Assets/_Game/Art/props/
 Depends: B-077
 Lead notes: Cycle 188. R2.
 
-### B-090 · BLENDER · Ready · R2
+### B-090 · BLENDER · In Progress · R2
 Goal: Space objects as models for U-078's lit top-down scene: `props/space/waystation` (the Earth/Mars Waystation as one model with a lit docking bay and running lights, LOD1), `props/space/asteroid_01..06` as low-poly rocks (≤ 600 tris each) from the v1 silhouettes, `planets/<name>/rings` for Saturn as a flat ring mesh with an alpha texture.
 Accept: contract §9; top-down turntables at the Space camera scale; UNITY lit preview for Done.
 Files: blender/scripts/build_waystation.py, build_asteroids.py, gen_planet.py, Assets/_Game/Art/props/space/, planets/saturn/
