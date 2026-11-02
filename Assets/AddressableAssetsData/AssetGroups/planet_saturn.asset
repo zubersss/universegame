@@ -15,13 +15,28 @@ MonoBehaviour:
   m_GroupName: planet_saturn
   m_GUID: 2396332e3a403ca47ae054abe6d3507a
   m_SerializeEntries:
+  - m_GUID: 4c18ae2b04e8d7c4381fcc0496317a81
+    m_Address: props/saturn/hexagon_wall_marker
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6f2541456f79e124d82ff9dda11779d3
     m_Address: terrain/saturn/floe_ice
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a7ca42482caf4e44383e5e2280e0e4ba
+    m_Address: props/saturn/ring_rig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c259ccb51c7331b41b1439bd89e019b3
     m_Address: terrain/saturn/floe_core
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ea40925d9ff75ab49aa42a5a5b5f9445
+    m_Address: props/saturn/helium_trap
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

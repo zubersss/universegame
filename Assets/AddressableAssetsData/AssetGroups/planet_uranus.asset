@@ -15,8 +15,18 @@ MonoBehaviour:
   m_GroupName: planet_uranus
   m_GUID: 228d135278ddb8047970734d38f19d68
   m_SerializeEntries:
+  - m_GUID: 105f2e3a5ba07db49b6fb3d962c62295
+    m_Address: props/uranus/umbrella_platform
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4b3599be7038efd41a4cc2d341f326e0
     m_Address: terrain/uranus/floe_ice
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 87fda5904b1b3b447840d32543f8c6ea
+    m_Address: props/uranus/tilted_derelict
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

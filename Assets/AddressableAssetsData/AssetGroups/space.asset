@@ -20,6 +20,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2f58e5839ace3c04a896ae3e09df1976
+    m_Address: planets/enceladus/glow
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3a9529481300d854f9fef32cc94c67c3
     m_Address: backgrounds/space/layer2
     m_ReadOnly: 0
@@ -32,6 +37,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 466ff57b4f57acd4c877d4b56407b0f7
     m_Address: planets/mercury/surface
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 492603fe4af8f994bafbaff0451071fc
+    m_Address: planets/europa/surface
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -105,6 +115,21 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bf0316bbe7b43ff4f96f334936358784
+    m_Address: planets/triton/glow
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c0c7170bd6102ff43a4399e54200f6a9
+    m_Address: planets/triton/surface
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c5f5484f60a03884ebe8a5f737ed1e9d
+    m_Address: planets/io/surface
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c8338c9077ae2f54090605ee3fb2f916
     m_Address: planets/saturn/glow
     m_ReadOnly: 0
@@ -120,13 +145,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d7257e93e6387c2429173a1f081b6ed5
+    m_Address: planets/titan/surface
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e2d667a789f571f418ef3ad50835a133
     m_Address: planets/mars/glow
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e594b32bddb1a16419f50acfe25e1161
+    m_Address: planets/enceladus/surface
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f28ca8f147dd3ef4386dc6a912a1091f
     m_Address: planets/sun/glow
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fc4d5eb9cf68300478770c3319444039
+    m_Address: planets/miranda/surface
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

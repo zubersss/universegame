@@ -20,8 +20,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 24409b94d74b6224987334b79974a404
+    m_Address: props/space/ring_ice_04
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2c18b11124e191e418570057caa5fddd
+    m_Address: props/space/ring_rock_01
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3584c8df357d9144da2553a4a41ba137
     m_Address: props/space/asteroid_03
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 36e8f8125f159ac48a896c36087c21b5
+    m_Address: props/space/ring_ice_01
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -37,6 +52,36 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7b7e03260660d7948a4fef27d5e2981f
     m_Address: props/space/asteroid_01
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8baffeeac33e89c42b1a704b02a86aae
+    m_Address: props/space/ring_ice_02
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 902f384d96a06544eb68178ca8c350be
+    m_Address: props/space/ring_ice_03
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d04cf138aecaad243a0486083edf3862
+    m_Address: props/space/ring_rock_02
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e3461f5bcef8d3d4597f2952787a2254
+    m_Address: props/space/ring_rock_04
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: eb695b2e5420abd44bd143cd525f9674
+    m_Address: creatures/space/ringmite
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fa03a4705d9bac3438eb16fa8770b91f
+    m_Address: props/space/ring_rock_03
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

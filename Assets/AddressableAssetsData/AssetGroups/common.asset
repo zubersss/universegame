@@ -25,6 +25,21 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 14c010d3a930ab842aa0a25f7ae0d0bc
+    m_Address: props/common/aerostat_deck
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 15faa380aa77e0a4b807ac07fe903259
+    m_Address: props/common/float_cell_pack_mk2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 16831c47852051744b6f8d33f7af2af3
+    m_Address: fx/ring_dust/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1b4963630e3b0a54b9c021156dcb8f8d
     m_Address: fx/dig_sparks/base
     m_ReadOnly: 0
@@ -40,6 +55,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3902495cdc5a8a84c8ff2edd74c35820
+    m_Address: fx/skip_spool/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 396a3fbaaa0bb7646bc37d0301174bd3
     m_Address: ships/pilgrim/side
     m_ReadOnly: 0
@@ -47,6 +67,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3cac6df33d7d22b4e80c53124e407fef
     m_Address: props/common/landing_pad
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4663ff78cebe3064f913ab97ad862c71
+    m_Address: props/common/grapple_hook
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -60,6 +85,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 568bbd6f78a0f0249915ee6cbc3dccb3
+    m_Address: fx/floe_sublimate/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 574550d3caa13f94e9d11bb31b7903a2
+    m_Address: fx/wind_streaks/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 64e78b42a2d64074586aecd669952c4d
     m_Address: props/common/lamp
     m_ReadOnly: 0
@@ -67,6 +102,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 654ff0c1af013944a8cf317d91b92c89
     m_Address: characters/surveyor/mk3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6800afe4b54a12347854e88cfe7bdf54
+    m_Address: fx/grapple_line/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -85,6 +125,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 81b24b3ec972e2b4380074870a6c8ea7
+    m_Address: fx/lightning/a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 99a5324075394c84e9ceb82f5582506d
     m_Address: fx/survey_scan/base
     m_ReadOnly: 0
@@ -95,8 +140,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9decda84a7c9fc74ebdd6899fa28df40
+    m_Address: fx/skip_streak/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9f1f130c96673f242806134791501089
+    m_Address: fx/lightning/b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9fda55f33ae0d6742ac2aa66beba8fdd
     m_Address: props/common/shelter_wall
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a73a2fa04abd32d4aab12c5b39621655
+    m_Address: props/common/float_cell_pack_mk1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b0b88d037b61c3f44afbe717c4e01265
+    m_Address: props/common/aerostat_cell
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -105,8 +170,33 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bc2f3a7f580750342bc34e3f99b0713f
+    m_Address: characters/calibration/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c36d4610cb781c542993e0f0b0f50314
+    m_Address: fx/crush_pulse/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c41c9eb0237b6c44ebf9d862748025f1
+    m_Address: props/common/aerostat_strut
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c5cfc75c64331644690773ea00ba5e53
     m_Address: ships/waystation_mars/top
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c8d8025037eccd74b935b017af9f70aa
+    m_Address: fx/diamond_rain/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e0da0d4d096855647ab3c6b3c141e940
+    m_Address: fx/methane_hail/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -137,6 +227,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: fcd6ad61e94814f4a9e435967bb79e96
     m_Address: fx/thruster/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fe73895ddc81ea54f84c93a82aa1d0f8
+    m_Address: fx/lightning/c
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

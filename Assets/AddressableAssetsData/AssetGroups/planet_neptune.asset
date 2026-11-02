@@ -15,8 +15,23 @@ MonoBehaviour:
   m_GroupName: planet_neptune
   m_GUID: 369253cc60f54d049b1845bd7551bb25
   m_SerializeEntries:
+  - m_GUID: 1d59ca5c8ac41244abf331ab753c29fc
+    m_Address: props/neptune/wind_anchor
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 251218e35c1d6534e8476b6e20d28688
+    m_Address: props/neptune/meridian_wreck_mid
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 55e8ca66f9912cc469d0c28c64a22f19
     m_Address: terrain/neptune/superionic_ice
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 73484da7d6ef95b4da106b2b7272b4ab
+    m_Address: props/neptune/meridian_wreck_bow
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -27,6 +42,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8213d765c6ea3754d98f328fd34a511b
     m_Address: terrain/neptune/floe_core
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9a16bf02f8aac154f8ab567737ae72a2
+    m_Address: props/neptune/meridian_wreck_stern
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

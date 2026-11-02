@@ -15,7 +15,10 @@ MonoBehaviour:
   lit: {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   litEmissive: {fileID: 2100000, guid: 26b4dc6b5aec4aa48aa60247cfe73d86, type: 2}
   unlit: {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40, type: 2}
+  meshLit: {fileID: 2100000, guid: 2f5e957e152da584b9e4a5fb30e2788c, type: 2}
+  meshLitEmissive: {fileID: 2100000, guid: e9084edb029bd244893010700efc7f0d, type: 2}
   emissiveKeys:
+  - characters/calibration/base
   - characters/surveyor/base
   - characters/surveyor/mk1
   - characters/surveyor/mk2
@@ -25,6 +28,7 @@ MonoBehaviour:
   - creatures/mercury/cinderling
   - creatures/mercury/flarewing
   - creatures/mercury/shadewyrm
+  - creatures/space/ringmite
   - creatures/venus/acidmoth
   - creatures/venus/pressure_crab
   - creatures/venus/sulfur_drifter
@@ -33,23 +37,39 @@ MonoBehaviour:
   - creatures/warden/sentinel
   - fx/beam_ray/base
   - fx/builder_ghost/base
+  - fx/crush_pulse/base
+  - fx/diamond_rain/base
   - fx/dig_sparks/base
   - fx/escape_band/base
   - fx/heat_shimmer/base
   - fx/lance_bolt/base
+  - fx/lightning/a
+  - fx/lightning/b
+  - fx/lightning/c
+  - fx/ring_dust/base
+  - fx/skip_spool/base
+  - fx/skip_streak/base
   - fx/survey_scan/base
   - fx/thruster/base
   - fx/warden_bolt/base
   - planets/earth/glow
+  - planets/enceladus/glow
   - planets/jupiter/glow
   - planets/mars/glow
   - planets/neptune/glow
   - planets/saturn/glow
   - planets/sun/glow
   - planets/sun/surface
+  - planets/triton/glow
   - planets/uranus/glow
   - planets/venus/glow
+  - props/common/aerostat_cell
+  - props/common/aerostat_deck
+  - props/common/aerostat_strut
   - props/common/calibration
+  - props/common/float_cell_pack_mk1
+  - props/common/float_cell_pack_mk2
+  - props/common/grapple_hook
   - props/common/lamp
   - props/common/landing_pad
   - props/common/shelter_door
@@ -67,10 +87,19 @@ MonoBehaviour:
   - props/mercury/shelter_door
   - props/mercury/solarite_cluster
   - props/mercury/warden_vault_gate
+  - props/neptune/meridian_wreck_bow
+  - props/neptune/meridian_wreck_mid
+  - props/neptune/meridian_wreck_stern
+  - props/neptune/wind_anchor
   - props/rig/beam
   - props/rig/builder
   - props/rig/lance
   - props/rig/survey
+  - props/saturn/helium_trap
+  - props/saturn/hexagon_wall_marker
+  - props/saturn/ring_rig
+  - props/uranus/tilted_derelict
+  - props/uranus/umbrella_platform
   - props/venus/aerostat_balloon
   - props/venus/aerostat_deck
   - props/venus/buoyancy_cell
@@ -486,6 +515,25 @@ MonoBehaviour:
       start: 22
       length: 6
       loop: 0
+  - key: creatures/space/ringmite
+    fps: 10
+    clips:
+    - name: idle
+      start: 0
+      length: 4
+      loop: 1
+    - name: chew
+      start: 4
+      length: 4
+      loop: 1
+    - name: hurt
+      start: 8
+      length: 2
+      loop: 0
+    - name: death
+      start: 10
+      length: 4
+      loop: 0
   - key: creatures/venus/acidmoth
     fps: 12
     clips:
@@ -638,6 +686,20 @@ MonoBehaviour:
       start: 0
       length: 8
       loop: 1
+  - key: fx/crush_pulse/base
+    fps: 8
+    clips:
+    - name: pulse
+      start: 0
+      length: 8
+      loop: 1
+  - key: fx/diamond_rain/base
+    fps: 10
+    clips:
+    - name: fall
+      start: 0
+      length: 8
+      loop: 1
   - key: fx/dig_sparks/base
     fps: 15
     clips:
@@ -659,6 +721,20 @@ MonoBehaviour:
       start: 0
       length: 8
       loop: 1
+  - key: fx/floe_sublimate/base
+    fps: 10
+    clips:
+    - name: sublimate
+      start: 0
+      length: 8
+      loop: 0
+  - key: fx/grapple_line/base
+    fps: 1
+    clips:
+    - name: line
+      start: 0
+      length: 1
+      loop: 1
   - key: fx/heat_shimmer/base
     fps: 10
     clips:
@@ -672,6 +748,55 @@ MonoBehaviour:
     - name: fly
       start: 0
       length: 4
+      loop: 1
+  - key: fx/lightning/a
+    fps: 14
+    clips:
+    - name: strike
+      start: 0
+      length: 6
+      loop: 0
+  - key: fx/lightning/b
+    fps: 14
+    clips:
+    - name: strike
+      start: 0
+      length: 6
+      loop: 0
+  - key: fx/lightning/c
+    fps: 14
+    clips:
+    - name: strike
+      start: 0
+      length: 6
+      loop: 0
+  - key: fx/methane_hail/base
+    fps: 12
+    clips:
+    - name: fall
+      start: 0
+      length: 8
+      loop: 1
+  - key: fx/ring_dust/base
+    fps: 12
+    clips:
+    - name: burst
+      start: 0
+      length: 8
+      loop: 0
+  - key: fx/skip_spool/base
+    fps: 12
+    clips:
+    - name: spool
+      start: 0
+      length: 8
+      loop: 0
+  - key: fx/skip_streak/base
+    fps: 12
+    clips:
+    - name: flow
+      start: 0
+      length: 8
       loop: 1
   - key: fx/survey_scan/base
     fps: 12
@@ -693,4 +818,11 @@ MonoBehaviour:
     - name: fly
       start: 0
       length: 4
+      loop: 1
+  - key: fx/wind_streaks/base
+    fps: 10
+    clips:
+    - name: flow
+      start: 0
+      length: 8
       loop: 1
