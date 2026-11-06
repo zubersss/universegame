@@ -1,5 +1,6 @@
 # LEAD STATUS
-Updated: 2026-11-06 16:5x · Session: 6 · Review cycle: 236
+Updated: 2026-11-06 17:0x · Session: 6 · Review cycle: 237
+Cycle 237: U-095, U-096 Done; U-100, U-101 added. C0 now waits mostly on BLENDER art (B-112, B-113, B-114). Next review: B-112 face plant sheet.
 Cycle 236: B-115 Done; U-095 accepted, Done owed on a tests entry with the final code (rides on U-096 check); D-094 contention ruling; P-39 settings panel to Backlog. Next: B-112 face plant review; U-096 iris strip.
 Cycle 235: U-093, U-094, B-111 Done on check 7 + the earth_c0 capture; D-092/D-093; U-099, B-116, B-117 added. Next review items: B-112 face plant, U-095 film pass capture (closes B-115).
 Cycle 234: stall over (7 worker commits 15:06–15:27). B-110 Done, B-111 step 2 art accepted, U-093/U-094 check 1 compile clean + EditMode green, PlayMode owed. BLENDER on B-112 sources; UNITY's turn for the PlayMode re-run + earth_c0 capture with the real surveyor. D-073 slip by BLENDER at 15:09 (bpy preview under UNITY's lock), self-logged; watch for a repeat.
