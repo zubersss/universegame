@@ -158,7 +158,7 @@ namespace Meridian.EditorTools
             var second = Segment(key, 1);
             if (category == "backgrounds")
             {
-                foreach (PlanetId id in System.Enum.GetValues(typeof(PlanetId)))
+                foreach (Meridian.Planets.PlanetId id in System.Enum.GetValues(typeof(Meridian.Planets.PlanetId)))
                 {
                     var p = id.ToString().ToLowerInvariant();
                     if (second == p || second.StartsWith(p + "_", System.StringComparison.Ordinal)) { planet = p; return true; }
