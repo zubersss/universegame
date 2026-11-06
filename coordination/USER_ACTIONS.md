@@ -13,6 +13,12 @@ At 23:3x on 2026-11-05 the laptop had 0.37 GB free; the gate is 1.5 GB, so neith
 3. If "Antimalware Service Executable" is still above 300 MB in Task Manager, wait for the Defender scan to finish (a few minutes) rather than killing it.
 4. Tell the Lead "done: USER-18". Nothing else is needed; the workers resume on their own once memory is above the gate.
 
+### USER-19 - Windows Update is holding the memory the workers need (check in 30 min)
+At 00:2x on 2026-11-06 "Windows Modules Installer Worker" (TiWorker) was using 1.36 GB while installing an update, which keeps free RAM below the 1.5 GB gate. It ends on its own, usually within half an hour; the workers poll and start as soon as it does.
+1. If it is still above 1 GB in Task Manager after 30 minutes, open Settings > Windows Update and let the install finish there (do not pause it mid-install).
+2. If Windows asks to restart, tell the Lead first ("restart pending"); I will have the workers finish their current jobs and then you restart and paste the three resume messages (as in USER-17).
+3. Nothing else: no need to report "done" unless step 2 happens.
+
 ### USER-08 — Optional: let the team run PowerShell commands without prompts (2 min)
 On Windows, Claude Code runs commands through PowerShell as well as Bash, and the
 `Bash(...)` allow rules in `.claude/settings.json` don't cover PowerShell. The Lead added
