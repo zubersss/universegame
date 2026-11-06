@@ -39,7 +39,7 @@ namespace Meridian.Tests
             rigs.Load("flora/earth/rigset");
             timeout = Time.realtimeSinceStartup + 15f;
             while (!rigs.Ready && Time.realtimeSinceStartup < timeout) yield return null;
-            Assert.IsTrue(rigs.Ready, "flora/earth/rigset loaded (json, parts, controller)");
+            Assert.IsTrue(rigs.Ready, $"flora/earth/rigset loaded: json {rigs.Set != null} (parse error: {rigs.ParseError ?? "none"}), parts {rigs.SpriteCount}, controller {rigs.Controller != null}; nothing found at: {rigs.Missing}");
             rigs.Populate(Count, 0.6f, player.Body.position.x, 12345); // ±90 m: inside the resident chunks
             Assert.AreEqual(Count, rigs.Plants.Count, "300 plants");
 

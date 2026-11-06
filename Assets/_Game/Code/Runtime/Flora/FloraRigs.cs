@@ -49,6 +49,10 @@ namespace Meridian.Flora
         public RigSet Set { get; private set; }
         public RuntimeAnimatorController Controller { get; private set; }
         public bool Ready => Set != null && sprites.Count > 0 && Controller != null;
+        public int SpriteCount => sprites.Count;
+        /// <summary>Addresses the probes found nothing for (tests): "json", "sprites", "controller".</summary>
+        public string Missing { get; private set; } = "";
+        public string ParseError { get; private set; }
         public readonly List<RigPlant> Plants = new List<RigPlant>(320);
         /// <summary>Last frame's loop time (ms): the budget line is 1.0 ms for 300 plants (Animator evaluation is Unity's, outside this).</summary>
         public float LastMs { get; private set; }
@@ -67,7 +71,7 @@ namespace Meridian.Flora
         {
             Clear();
             Key = key;
-            Probe<TextAsset>(key + JsonSuffix, h => h.Completed += op => { if (this != null && op.Status == AsyncOperationStatus.Succeeded && op.Result != null) { Set = RigSet.Parse(op.Result.text, out var err); if (Set == null) Debug.LogError($"[FloraRigs] {key}: {err}"); TryPending(); } });
+            Probe<TextAsset>(key + JsonSuffix, h => h.Completed += op => { if (this != null && op.Status == AsyncOperationStatus.Succeeded && op.Result != null) { Set = RigSet.Parse(op.Result.text, out var err); ParseError = err; if (Set == null) Debug.LogError($"[FloraRigs] {key}: {err}"); TryPending(); } });
             Probe<IList<Sprite>>(key, h => h.Completed += op => { if (this != null && op.Status == AsyncOperationStatus.Succeeded && op.Result != null) { foreach (var s in op.Result) sprites[s.name] = s; TryPending(); } });
             Probe<RuntimeAnimatorController>(key + AnimatorSuffix, h => h.Completed += op => { if (this != null && op.Status == AsyncOperationStatus.Succeeded) { Controller = op.Result; TryPending(); } });
         }
@@ -79,7 +83,8 @@ namespace Meridian.Flora
             {
                 IResourceLocation loc = l.Status == AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0 ? l.Result[0] : null;
                 ArtLoad.Release(l);
-                if (loc == null || this == null) return;
+                if (this == null) return;
+                if (loc == null) { Missing += address + " "; return; }
                 var h = ArtLoad.Asset<T>(loc, Key);
                 handles.Add(h);
                 load(h);

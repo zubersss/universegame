@@ -75,6 +75,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2f262404424c1804bb951474634c1148
+    m_Address: flora/earth/rigset/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 39b4eac07bf93ee43a7c6f594a382767
     m_Address: creatures/earth/stag
     m_ReadOnly: 0

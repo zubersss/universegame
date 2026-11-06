@@ -91,6 +91,23 @@ namespace Meridian.EditorTools
             return curve;
         }
 
+        /// <summary>The live json at "&lt;key&gt;/json" (a TextAsset the runtime parses); an art json takes the address off the placeholder's entry.</summary>
+        static void AddressJson(string jsonPath, string key, bool placeholder)
+        {
+            var settings = ArtImporter.Settings;
+            if (!placeholder)
+            {
+                var phPath = ArtImporter.Active.placeholders + key + ".json";
+                var phGuid = AssetDatabase.AssetPathToGUID(phPath);
+                if (!string.IsNullOrEmpty(phGuid) && settings.FindAssetEntry(phGuid) != null) settings.RemoveAssetEntry(phGuid);
+            }
+            var guid = AssetDatabase.AssetPathToGUID(jsonPath);
+            if (string.IsNullOrEmpty(guid)) return;
+            var entry = settings.CreateOrMoveEntry(guid, ArtImporter.GroupNamed(ArtRules.GroupFor(key)), false, true);
+            string address = key + "/json";
+            if (entry.address != address) entry.SetAddress(address, true);
+        }
+
         /// <summary>Slices the sheet into the set's parts (rects from the json, bottom-left origin); true when the rects changed (a re-import follows).</summary>
         static bool SliceParts(string colorPath, RigSet set)
         {
@@ -159,6 +176,7 @@ namespace Meridian.EditorTools
             var set = RigSet.Parse(File.ReadAllText(jsonPath), out var error);
             if (set == null) { Debug.LogError($"[ArtImporter] Rejected {jsonPath}: {error} (contract §11.3)."); return null; }
             if (SliceParts(colorPath, set)) return null; // the re-import comes back through here with the parts in place
+            AddressJson(jsonPath, key, placeholder);
 
             Directory.CreateDirectory(Folder(key));
             var path = ControllerPath(key);
@@ -197,6 +215,7 @@ namespace Meridian.EditorTools
                 string address = key + "/animator";
                 if (entry.address != address) entry.SetAddress(address, true);
             }
+            AssetDatabase.SaveAssets(); // the address must reach disk before the Editor quits (an -ExecuteMethod run)
             return controller;
         }
     }

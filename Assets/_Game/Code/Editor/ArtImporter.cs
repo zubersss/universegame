@@ -596,8 +596,15 @@ namespace Meridian.EditorTools
                     continue;
                 }
                 // U-097 (contract §11.3): flora/<planet>/rigset.json is a TextAsset at <key>/json; its sheet re-imports below like any sidecar.
-                if (rel.EndsWith("/rigset.json", StringComparison.Ordinal) && kind != RootKind.None)
-                    AddressStage(path, rel.Substring(0, rel.Length - ".json".Length) + "/json");
+                if (rel.EndsWith("/rigset.json", StringComparison.Ordinal) && (kind == RootKind.Art || !File.Exists(Active.art + rel)))
+                {
+                    AddressStage(path, rel.Substring(0, rel.Length - ".json".Length) + "/json"); // the live json only: art, else the placeholder
+                    if (kind == RootKind.Art)
+                    {
+                        var phGuid = AssetDatabase.AssetPathToGUID(Active.placeholders + rel); // the placeholder's entry would share the address
+                        if (!string.IsNullOrEmpty(phGuid) && Settings.FindAssetEntry(phGuid) != null) Settings.RemoveAssetEntry(phGuid);
+                    }
+                }
                 // U-094 (contract §11.4): a painted scene's backgrounds/<planet>/<scene>/<scene>.json is a TextAsset at that scene key.
                 var sceneJson = V3SceneKey(rel);
                 if (sceneJson != null) { AddressStage(path, sceneJson); continue; }

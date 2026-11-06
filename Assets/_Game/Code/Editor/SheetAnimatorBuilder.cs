@@ -75,6 +75,7 @@ namespace Meridian.EditorTools
                 string address = Meridian.View2D.SheetClock.ControllerAddress(key);
                 if (entry.address != address) entry.SetAddress(address, true);
             }
+            AssetDatabase.SaveAssets(); // the address must reach disk before the Editor quits (an -ExecuteMethod run)
             return controller;
         }
 
