@@ -1,5 +1,6 @@
 # LEAD STATUS
-Updated: 2026-11-06 15:0x · Session: 6 · Review cycle: 233
+Updated: 2026-11-06 15:3x · Session: 6 · Review cycle: 234
+Cycle 234: stall over (7 worker commits 15:06–15:27). B-110 Done, B-111 step 2 art accepted, U-093/U-094 check 1 compile clean + EditMode green, PlayMode owed. BLENDER on B-112 sources; UNITY's turn for the PlayMode re-run + earth_c0 capture with the real surveyor. D-073 slip by BLENDER at 15:09 (bpy preview under UNITY's lock), self-logged; watch for a repeat.
 Cycle 233: B-111 step 1 OK, step 2 released. Both workers idle since 12:03 (3 h, no commits, want_blender.lock from 11:57 never used while RAM sat at 1.7-1.8 GB): messaged both sessions with the go-ahead (BLENDER first: B-110 export then B-111 step 2; UNITY next: U-093 + U-094 check). If neither commits by the next cycle, USER_ACTIONS gets a "type continue in both windows" item.
 Cycle 232: both workers on C0 as planned. B-115 art accepted, B-110 preview accepted (export on the gate), U-093 code read (moves only, no combat types compiled; check owed). Gate 1.68 GB at 12:02; turn order BLENDER (B-110 export) then UNITY (U-093 check).
 ## Current task
