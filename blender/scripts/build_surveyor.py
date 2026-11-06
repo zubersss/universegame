@@ -466,9 +466,93 @@ MODEL_OUT = os.path.join(os.path.dirname(HERE), "sources", "characters", "survey
 MODEL_FPP = {"idle": 6, "walk": 3, "run": 2, "jump": 3, "fall": 6, "land": 3, "dig": 3, "aim": 6, "hurt": 4, "death": 5}
 
 
+MODEL_FPS = 60                    # contract v2.5 (B-103): surveyor clips at 60 fps
+FEEL_ORDER = ["jump_anticipate", "land_hard", "dash", "parry", "parry_hit", "hit_react"]
+MODEL_ORDER = CLIP_ORDER + FEEL_ORDER
+
+
+def _p(base, **d):
+    """Copy of pose `base` with keys replaced (d) and `add_<key>` offsets added."""
+    p = dict(base)
+    for k, v in d.items():
+        if k.startswith("add_"):
+            k = k[4:]
+            p[k] = p.get(k, 0) + v
+        else:
+            p[k] = v
+    return p
+
+
+STAND = pose_idle(0, CLIP_LEN["idle"])
+DIG0 = pose_dig(0, CLIP_LEN["dig"])
+# Parry strike with the Rig arm (near arm, socket rig_tool): arm straight out, lunge on the near leg.
+STRIKE = dict(torso=12, head=-6, sh_n=92, el_n=4, sh_f=30, el_f=60, hip_n=26, kn_n=34, hip_f=-16, kn_f=20)
+
+
+def feel_keys(name):
+    """B-103 clips at 60 fps: (frames, loop, [(frame, pose)]); the last key sits on `frames`.
+    Action clips get 2-4 frames of anticipation and one overshoot key (Bible §4.2, contract §9).
+    Exaggerate timing, not anatomy: joint angles stay inside the v1 tables' ranges."""
+    J0, J1, J2 = JUMP
+    L0, L1, L2 = LAND
+    A0, A1 = AIM
+    H0, H1 = HURT
+    if name == "jump":       # 18 f: crouch, dip deeper (anticipation), push up past the reach, tuck
+        return 18, False, [(0, J0), (3, _p(J0, add_torso=6, add_hip_n=8, add_kn_n=12, add_hip_f=8, add_kn_f=12, add_sh_n=-12, add_sh_f=-12)),
+                           (7, _p(J1, sh_n=92, sh_f=80, torso=2, hip_n=-12)), (9, J1),
+                           (14, _p(J2, add_hip_n=8, add_kn_n=10, add_hip_f=8, add_kn_f=8)), (18, J2)]
+    if name == "land":       # 18 f: legs reach for the ground, contact, sink past it, rise past stand
+        return 18, False, [(0, _p(FALL[0], hip_n=30, kn_n=14, hip_f=12, kn_f=18)), (3, L0),
+                           (6, _p(L0, add_torso=5, add_hip_n=7, add_kn_n=10, add_hip_f=7, add_kn_f=10)),
+                           (10, L1), (15, _p(L2, torso=1, hip_n=5, kn_n=8, hip_f=4, kn_f=7)), (18, L2)]
+    if name == "dig":        # 36 f loop: raise the Beam (wind-up), strike down, overshoot, settle
+        return 36, True, [(0, DIG0), (10, _p(DIG0, sh_n=84, el_n=30, torso=10, head=-2)),
+                          (14, _p(DIG0, sh_n=88, el_n=32, torso=8, head=-1)),
+                          (19, _p(DIG0, sh_n=36, el_n=6, torso=26, head=-10, kn_n=34)),
+                          (22, _p(DIG0, sh_n=30, el_n=4, torso=28, head=-11, kn_n=38)),
+                          (27, _p(DIG0, sh_n=46, el_n=10, torso=22)), (36, DIG0)]
+    if name == "aim":        # 24 f loop: dip, rise past the line, settle (breathing hold)
+        return 24, True, [(0, A0), (4, _p(A0, add_sh_n=-2.5, add_sh_f=-2)), (8, _p(A0, add_sh_n=3.5, add_sh_f=3, torso=5)),
+                          (14, A1), (24, A0)]
+    if name == "hurt":       # 16 f: brace, snap back past the hurt pose within 2 frames, recover
+        return 16, False, [(0, _p(STAND, torso=6, head=0)), (2, _p(H0, torso=-24, head=-20)), (5, H0), (10, H1), (16, H1)]
+    if name == "jump_anticipate":   # 8 f: crouch with the arms swinging back, hand off on jump's first pose
+        return 8, False, [(0, STAND), (4, dict(torso=18, head=-10, hip_n=34, kn_n=62, hip_f=30, kn_f=58,
+                                               sh_n=-48, el_n=20, sh_f=-40, el_f=22)), (8, J0)]
+    if name == "land_hard":  # 20 f: contact, deep knee bend with the arms forward, sink past it, recover past stand
+        deep = dict(torso=40, head=-22, hip_n=80, kn_n=128, hip_f=76, kn_f=124, sh_n=70, el_n=30, sh_f=60, el_f=34)
+        return 20, False, [(0, _p(L0, torso=22, hip_n=48, kn_n=78, hip_f=44, kn_f=74, sh_n=50, sh_f=40)), (3, deep),
+                           (6, _p(deep, torso=44, hip_n=84, kn_n=134, hip_f=80, kn_f=130, sh_n=76, sh_f=66)),
+                           (12, L1), (16, _p(STAND, torso=0, hip_n=1, kn_n=2, hip_f=-3, kn_f=2)), (20, STAND)]
+    if name == "dash":       # 12 f: coil back, 30 deg lean (root 20 + torso 10) with the near arm trailing
+        lean = dict(rot=20, torso=10, head=-14, hip_n=30, kn_n=40, hip_f=-34, kn_f=30, sh_n=-70, el_n=20, sh_f=40, el_f=50)
+        return 12, False, [(0, STAND), (2, _p(STAND, torso=-6, hip_n=10, kn_n=24, hip_f=-6, kn_f=20, sh_n=20, sh_f=-10)),
+                           (5, lean), (8, _p(lean, rot=23, torso=11, sh_n=-76)), (12, lean)]
+    if name == "parry":      # 20 f: 4 wind-up, 4 strike with the Rig arm (+ overshoot), 12 hold and recover
+        return 20, False, [(0, STAND), (4, dict(torso=-8, head=4, sh_n=-36, el_n=95, sh_f=20, el_f=40, hip_n=14, kn_n=22, hip_f=-10, kn_f=16)),
+                           (8, STRIKE), (10, _p(STRIKE, sh_n=98, torso=14)), (14, STRIKE), (20, STAND)]
+    if name == "parry_hit":  # 12 f: braced strike, recoil from the blocked blow, push back past it, brace
+        braced = _p(STRIKE, kn_n=40, kn_f=26)
+        return 12, False, [(0, braced), (2, _p(braced, torso=-4, head=2, sh_n=78, el_n=26)),
+                           (5, _p(braced, torso=15, sh_n=95)), (12, braced)]
+    if name == "hit_react":  # 16 f: torso snaps away, the head holds a frame (counter-turn) then follows
+        return 16, False, [(0, STAND), (2, _p(STAND, torso=-22, head=20, sh_n=-24, sh_f=30)),
+                           (3, _p(STAND, torso=-24, head=-4, sh_n=-28, sh_f=34)),
+                           (4, _p(STAND, torso=-23, head=-18, sh_n=-26, sh_f=32)),
+                           (8, _p(STAND, torso=-12, head=-8, sh_n=-8, sh_f=18)), (16, STAND)]
+    # Resampled v1 clips (idle, walk, run, fall, death): same poses, twice the frames.
+    n, fpp = CLIP_LEN[name], MODEL_FPP[name] * MODEL_FPS // 30
+    idx = list(range(n)) + ([0] if CLIP_LOOP.get(name) else [n - 1])
+    return n * fpp, bool(CLIP_LOOP.get(name)), [(k * fpp, clip_pose(name, i)) for k, i in enumerate(idx)]
+
+
 def model_clips():
-    """Clip list for the manifest/json: frames at 30 fps and loop flags (contract v2.1 §9.1)."""
-    return [{"name": c, "frames": CLIP_LEN[c] * MODEL_FPP[c], "loop": bool(CLIP_LOOP.get(c))} for c in CLIP_ORDER]
+    """Clip list for the manifest/json: frames at MODEL_FPS and loop flags (contract v2.5 §9)."""
+    out = []
+    for c in MODEL_ORDER:
+        frames, loop, _ = feel_keys(c)
+        out.append({"name": c, "frames": frames, "loop": loop})
+    return out
 
 
 def empties_to_armature(parts, coll):
@@ -529,20 +613,19 @@ def add_socket(rig, coll, name, bone, world_loc):
 
 
 def animate_model(rig):
-    """One action per clip at 30 fps from the v1 pose tables, with in-betweens (Bezier);
+    """One action per clip at MODEL_FPS from feel_keys (v1 pose tables + B-103 feel keys), Bezier in-betweens;
     loops end on their first pose. Root: lean/rotation + vertical ground offset only (no
     horizontal root motion, contract §9)."""
     from build_creatures_earth import set_pose
     rig.animation_data_create()
-    for name in CLIP_ORDER:
-        n, fpp = CLIP_LEN[name], MODEL_FPP[name]
+    for name in MODEL_ORDER:
+        frames, loop, keys = feel_keys(name)          # B-103: 60 fps keys; loops close on their first pose
+        assert keys[0][0] == 0 and keys[-1][0] == frames, name
         act = bpy.data.actions.new(name)
         act.use_fake_user = True
         rig.animation_data.action = act
-        idx = list(range(n)) + ([0] if CLIP_LOOP.get(name) else [n - 1])   # loops close on pose 0; one-shots hold the last pose (clip = n * fpp frames)
-        for k, i in enumerate(idx):
-            p = clip_pose(name, i)
-            f = 1 + k * fpp
+        for k, p in keys:
+            f = 1 + k
             x0, x1, zmin = body_extent(p)
             ground = -zmin + p.get("lift", 0.0)
             pr = rig.pose.bones["root"]
@@ -571,7 +654,7 @@ def build_model(out_path=MODEL_OUT):
     LOW_POLY = True
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
-    scene.render.fps = 30
+    scene.render.fps = MODEL_FPS
     parts = build_one(scene, None, do_animate=False)
     coll = parts["coll"]
     rig = empties_to_armature(parts, coll)

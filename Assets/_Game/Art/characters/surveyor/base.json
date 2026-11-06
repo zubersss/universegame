@@ -15,59 +15,107 @@
   "mask",
   "emission"
  ],
- "fps": 30,
+ "fps": 60,
  "clips": [
   {
    "name": "idle",
-   "frames": 36,
-   "loop": true
+   "frames": 72,
+   "loop": true,
+   "fps": 60
   },
   {
    "name": "walk",
-   "frames": 24,
-   "loop": true
+   "frames": 48,
+   "loop": true,
+   "fps": 60
   },
   {
    "name": "run",
-   "frames": 16,
-   "loop": true
+   "frames": 32,
+   "loop": true,
+   "fps": 60
   },
   {
    "name": "jump",
-   "frames": 9,
-   "loop": false
+   "frames": 18,
+   "loop": false,
+   "fps": 60
   },
   {
    "name": "fall",
-   "frames": 12,
-   "loop": true
+   "frames": 24,
+   "loop": true,
+   "fps": 60
   },
   {
    "name": "land",
-   "frames": 9,
-   "loop": false
+   "frames": 18,
+   "loop": false,
+   "fps": 60
   },
   {
    "name": "dig",
-   "frames": 18,
-   "loop": true
+   "frames": 36,
+   "loop": true,
+   "fps": 60
   },
   {
    "name": "aim",
-   "frames": 12,
-   "loop": true
+   "frames": 24,
+   "loop": true,
+   "fps": 60
   },
   {
    "name": "hurt",
-   "frames": 8,
-   "loop": false
+   "frames": 16,
+   "loop": false,
+   "fps": 60
   },
   {
    "name": "death",
-   "frames": 30,
-   "loop": false
+   "frames": 60,
+   "loop": false,
+   "fps": 60
+  },
+  {
+   "name": "jump_anticipate",
+   "frames": 8,
+   "loop": false,
+   "fps": 60
+  },
+  {
+   "name": "land_hard",
+   "frames": 20,
+   "loop": false,
+   "fps": 60
+  },
+  {
+   "name": "dash",
+   "frames": 12,
+   "loop": false,
+   "fps": 60
+  },
+  {
+   "name": "parry",
+   "frames": 20,
+   "loop": false,
+   "fps": 60
+  },
+  {
+   "name": "parry_hit",
+   "frames": 12,
+   "loop": false,
+   "fps": 60
+  },
+  {
+   "name": "hit_react",
+   "frames": 16,
+   "loop": false,
+   "fps": 60
   }
  ],
+ "atlas": null,
+ "vertex_color": null,
  "sockets": [
   "float_pack",
   "rig_tool"

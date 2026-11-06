@@ -684,7 +684,8 @@ def export_model(entry, art_dir, preview_dir, objs, stamp_fn):
     os.makedirs(out_dir, exist_ok=True)
     size = int(entry.get("texture", 1024))
     scene = bpy.context.scene
-    scene.render.fps, scene.render.fps_base = 30, 1.0
+    fps = int(entry.get("fps", 30))                  # contract v2.5: 60 for the surveyor and apexes
+    scene.render.fps, scene.render.fps_base = fps, 1.0
     clips = entry.get("clips", [])
     if entry.get("bake_objects"):
         frames = sorted({c["start"] + i for c in entry["retime"] for i in range(c["length"])})
@@ -722,21 +723,31 @@ def export_model(entry, art_dir, preview_dir, objs, stamp_fn):
         raise ModelError(f"{tris} triangles > budget {budget}")
     atlas = entry.get("atlas")
     paths = {}
+    reused = False
     if atlas:                                        # B-085: shared atlas, authored UVs, no bake
         maps = None
         emissive = False
     else:
         if not (entry.get("keep_uv") and mesh.data.uv_layers):   # B-102 round 2: bands author their UVs
             unwrap(mesh)
-        maps = bake_maps(mesh, size, samples=int(entry.get("bake_samples", 16)), alpha_map=entry.get("alpha") == "map")
-    for mname in (MAPS if not atlas else ()):
+        old = {m: os.path.join(out_dir, f"{variant}_{m}.png") for m in MAPS}
+        if entry.get("reuse_maps") and all(os.path.isfile(p) for p in old.values()):
+            # B-103: clip-only re-export. Same mesh + same deterministic unwrap -> the committed
+            # maps still fit; skip the bake (no 2048^2 bake buffers, 1.5 GB gate).
+            paths = old
+            emissive = float(pngio.read_png(old["emission"])[..., :3].max()) > 0.02
+            export_material(mesh, paths, emissive, entry.get("alpha"))
+            reused = True
+        else:
+            maps = bake_maps(mesh, size, samples=int(entry.get("bake_samples", 16)), alpha_map=entry.get("alpha") == "map")
+    for mname in (MAPS if not atlas and not reused else ()):
         a = maps[mname]
         if a.shape[2] == 3:
             a = np.dstack([a, np.ones(a.shape[:2], np.float32)])
         p = os.path.join(out_dir, f"{variant}_{mname}.png")
         pngio.write_png(p, pngio.to_u8(np.clip(a, 0, 1)))
         paths[mname] = p
-    if not atlas:
+    if not atlas and not reused:
         emissive = float(maps["emission"].max()) > 0.02
         export_material(mesh, paths, emissive, entry.get("alpha"))
     glb = os.path.join(out_dir, f"{variant}.glb")
@@ -775,7 +786,7 @@ def export_model(entry, art_dir, preview_dir, objs, stamp_fn):
     export_glb(glb, mesh, rig, extras, vertex_colors=bool(entry.get("vertex_colors")))
     meta = {"key": key, "format": "glb", "contract": "v2.2", "facing": "+X in Unity (exported facing glTF -X, D-065)", "up": "+Y", "units": "m",
             "origin": entry.get("origin_rule", "feet"), "triangles": tris, "lod1_triangles": lod_tris, "texture": size,
-            "maps": list(MAPS), "fps": 30, "clips": clips, "atlas": atlas,
+            "maps": list(MAPS), "fps": fps, "clips": [dict(c, fps=fps) if fps != 30 else c for c in clips], "atlas": atlas,
             "vertex_color": entry.get("vertex_colors"),
             "sockets": [o.name[len("socket_"):] for o in sockets] or entry.get("sockets", [])}
     if entry.get("alpha_clip"):                      # contract v2.6 ruling 10 (D-082): cut-out cards -> alpha clip + double-sided
