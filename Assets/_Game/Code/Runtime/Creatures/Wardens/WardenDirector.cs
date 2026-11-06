@@ -99,6 +99,20 @@ namespace Meridian.Creatures.Wardens
             pending.Add((Time.time + SpawnDelay, new Vector2(x + 0.5f, y)));
         }
 
+        /// <summary>
+        /// Moves a kinematic sentinel toward `to` at `speed` through its velocity (applied per physics step, whatever the frame
+        /// rate). MovePosition from the Update loop crawled at high frame rates: the body position only changes at physics steps, so
+        /// every Update re-aimed the same step (a sentinel 12 m away took minutes: the WardenPlayTests flake).
+        /// </summary>
+        static void Steer(Sentinel s, Vector2 pos, Vector2 to, float speed)
+        {
+            var off = to - pos;
+            float dist = off.magnitude;
+            if (dist < 1e-4f) { s.Body.linearVelocity = Vector2.zero; return; }
+            float v = Mathf.Min(speed, dist / Time.fixedDeltaTime); // never overshoot the point within one step
+            s.Body.linearVelocity = off / dist * v;
+        }
+
         /// <summary>Takes a pooled sentinel; null when all MaxSentinels are out.</summary>
         public Sentinel Spawn(Vector2 at, Vector2 post, SentinelState state)
         {
@@ -148,7 +162,7 @@ namespace Meridian.Creatures.Wardens
                     float tx = s.Post.x + s.sweep * Sentinel.PatrolHalfWidth;
                     if ((s.sweep > 0 && pos.x >= tx) || (s.sweep < 0 && pos.x <= tx)) s.sweep = -s.sweep;
                     var to = new Vector2(tx, s.Post.y + Mathf.Sin(now * 1.3f + s.Post.x) * 0.4f);
-                    s.Body.MovePosition(Vector2.MoveTowards(pos, to, Sentinel.PatrolSpeed * dt));
+                    Steer(s, pos, to, Sentinel.PatrolSpeed);
                     face = s.sweep;
                 }
                 else
@@ -158,7 +172,7 @@ namespace Meridian.Creatures.Wardens
                     // D-087: hover close beside the surveyor (2 m out, 1 m up) and ring the bell; walking into it bumps.
                     float side = pos.x >= target.x ? 1f : -1f;
                     var hold = target + new Vector2(side * 2f, 1f + Mathf.Sin(now * 2f + s.Post.x) * 0.3f);
-                    s.Body.MovePosition(Vector2.MoveTowards(pos, hold, Sentinel.HuntSpeed * dt));
+                    Steer(s, pos, hold, Sentinel.HuntSpeed);
                     face = off.x;
                     s.ringIn -= dt;
                     if (s.ringIn <= 0f && off.sqrMagnitude <= RingRange * RingRange) { s.ringIn = RingEvery; s.Play("attack"); }

@@ -346,7 +346,7 @@ namespace Meridian.Creatures
             }
             else
             {
-                bool quiet = Mathf.Abs(v.y) < 0.6f;
+                bool quiet = Mathf.Abs(v.y) < 1.0f; // not airborne (a body pressed into a prop jitters a little)
                 bool grounded = quiet && TileId.IsSolid(terrain.GetTile(tx, ty));
                 // U-099: a wall the tiles cannot show (a crate stack, a base piece, the pad): the body stands still while it wants to
                 // run, whatever it stands on (on a crate the tile under the feet is air).

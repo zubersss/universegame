@@ -48,9 +48,9 @@ namespace Meridian.Tests
         public IEnumerator AFleeingStagAtTheCampCratesTurnsAndKeepsMoving()
         {
             yield return Boot();
-            // The crate stack sits a few metres left of the spawn; a stag between it and the surveyor flees left into it.
+            // The smelter and crate stack sit 5–10 m left of the spawn; a stag just left of the surveyor flees into them.
             float px = player.Body.position.x;
-            var stag = creatures.Spawn(Species.Stag, OnSurface(px - 4f, Species.Stag));
+            var stag = creatures.Spawn(Species.Stag, OnSurface(px - 2f, Species.Stag)); // between the lamp and the surveyor: it flees left into the smelter and crates
             Assert.NotNull(stag);
             for (int i = 0; i < 300 && stag.Held; i++) yield return new WaitForFixedUpdate();
             for (int i = 0; i < 20; i++) yield return new WaitForFixedUpdate();
