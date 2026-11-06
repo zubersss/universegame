@@ -12,5 +12,7 @@ none. Contract v2.4 current (D-072).
 USER-18 (free memory: close Chrome, Xbox app, Phone Link), USER-08 optional.
 ## Loop / stall watch
 Both workers restarted 11-05 ~23:30: expect first commits (the uncommitted leftovers) within 30 min; the first heavy job waits on USER-18. Memory gate closed at 0.37 GB free.
+## Session addresses (ListAgents, 11-05)
+BLENDER = zuber-29 (confirmed), UNITY = zuber-85 (by elimination, unconfirmed).
 ## HeavyJobLock
 none (LEAD runs no heavy jobs while memory is tight)
