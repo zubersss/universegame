@@ -1,0 +1,103 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: planet_mercury_scenery
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: planet_mercury_scenery
+  m_GUID: 21a7a5ae7ae71764f9d065158efa7c86
+  m_SerializeEntries:
+  - m_GUID: 1ad7fea61cdcd534fa3be9a1a8f15deb
+    m_Address: props/mercury_scenery/boulder_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 274ab285a28c37f4a8d56114885f4bfa
+    m_Address: props/mercury_scenery/boulder_c
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 31bdfb4bfaf2f7f488e1434b4710e87a
+    m_Address: props/mercury_scenery/boulder_c
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3f3f5775a9c10b24aae584f362ae42d6
+    m_Address: props/mercury_scenery/glass_shard_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4e99a3b60c65fc442bf03440df22ed8c
+    m_Address: props/mercury_scenery/ice_pocket
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 55045ba6b95668845bcf69940435ede0
+    m_Address: props/mercury_scenery/glass_shard_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 56e4cc7bfee8a0449922ad427e698d1c
+    m_Address: props/mercury_scenery/glass_shard_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8700f6c193039f54fb86ef6685c84165
+    m_Address: props/mercury_scenery/rim_rock
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 89ba0820eac8d6642a122fa2429aa925
+    m_Address: props/mercury_scenery/ice_pocket
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9475b4c78be075e4b907a446f019002d
+    m_Address: props/mercury_scenery/boulder_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: aded1320e50b45d419b3369b5fabbf84
+    m_Address: props/mercury_scenery/solarite_outcrop
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b3d57d23f8f8cba46a93f969eebbb7da
+    m_Address: props/mercury_scenery/solarite_outcrop
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bcbf58e1769851c48941c94f97af589d
+    m_Address: props/mercury_scenery/rim_rock
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cd2b5455818b78143a1f8fc8fe1dcfce
+    m_Address: props/mercury_scenery/boulder_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d500a8f39d27f534c898aaadafb037b8
+    m_Address: props/mercury_scenery/boulder_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f4c0d08eefe419a46b4e530376eee2b2
+    m_Address: props/mercury_scenery/glass_shard_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 96f5cc6836679af41b75c911eb97b3a4, type: 2}
+    - {fileID: 11400000, guid: 00d2e84572e77954a9bd43af0a597680, type: 2}
