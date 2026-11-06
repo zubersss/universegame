@@ -1,0 +1,33 @@
+{
+  "key": "characters/calibration_v3/side",
+  "style": "v3",
+  "frame_width": 160,
+  "frame_height": 160,
+  "columns": 12,
+  "gutter": 4,
+  "frames": 20,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.0
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [
+    {
+      "name": "idle",
+      "start": 0,
+      "length": 8,
+      "loop": true,
+      "loop_from": 0
+    },
+    {
+      "name": "walk",
+      "start": 8,
+      "length": 12,
+      "loop": true,
+      "loop_from": 0
+    }
+  ],
+  "squash_root": true
+}
