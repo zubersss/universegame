@@ -1,0 +1,23 @@
+{
+ "key": "props/mercury_scenery/ice_pocket",
+ "format": "glb",
+ "contract": "v2.2",
+ "facing": "+X in Unity (exported facing glTF -X, D-065)",
+ "up": "+Y",
+ "units": "m",
+ "origin": "base",
+ "triangles": 180,
+ "lod1_triangles": 86,
+ "texture": 2048,
+ "maps": [
+  "color",
+  "normal",
+  "mask",
+  "emission"
+ ],
+ "fps": 30,
+ "clips": [],
+ "atlas": "props/mercury_scenery/atlas",
+ "vertex_color": true,
+ "sockets": []
+}

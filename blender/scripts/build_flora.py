@@ -390,7 +390,7 @@ def _flat(ob):
 
 def shard(coll, rnd, tile, size, seed, lean=0.5):
     """Impact glass: an elongated, cleaved chunk standing on a corner (flat-shaded facets)."""
-    ob = blob(coll, 1.0, (0, 0, 0), size, 1, seed=seed, rough=0.55)
+    ob = blob(coll, 1.0, (0, 0, 0), size, 2, seed=seed, rough=0.55)
     ob.rotation_euler = (rnd.uniform(-lean, lean), rnd.uniform(-lean, lean), rnd.uniform(0, 6.28))
     ob.location = (0, 0, size[2] * 0.62)
     return _flat(finish(ob, tile, "sph", _STILL))
