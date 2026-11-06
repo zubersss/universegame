@@ -161,7 +161,7 @@ untouched, and `FeelTests` proves every planet's jump height to ± 1 cm.
 | Hit stop | the game clock pauses 50 ms when the player is hit, 33 ms when the player lands a Lance or parry hit; never more than 90 ms in any chain |
 | Hit reaction (player) | knocked 0.8 m away from the hit over 0.12 s, a 2-frame white flash, the `hit_react` clip; `hurt` stays for environmental damage |
 | Hit reaction (creature) | knocked 0.5 m, flash, squash 0.85 for 0.12 s, `hit_react` clip; a staggered creature plays `stagger` |
-| Squash and stretch (visual root only, volume-preserving: width = 1/√height) | crouch anticipation 0.8 tall for 0.06 s before take-off; take-off stretch 1.25 for 0.08 s; landing squash 0.7 at ≥ 6 m/s impact (scaled linearly from 1.0 at 2 m/s) recovering in 0.18 s with one overshoot to 1.05; dash stretch 1.3 along the dash; hit squash 0.85. Colliders, the Rigidbody and gravity never scale |
+| Squash and stretch (visual root only, volume-preserving: width = 1/√height) | crouch anticipation 0.8 tall over the first 0.06 s of the jump (the body leaves the ground on the input frame; the crouch is drawn over the first frames of the rise, never as an input delay, D-084); take-off stretch 1.25 for the next 0.08 s; landing squash 0.7 at ≥ 6 m/s impact (scaled linearly from 1.0 at 2 m/s) recovering in 0.18 s with one overshoot to 1.05; dash stretch 1.3 along the dash; hit squash 0.85. Colliders, the Rigidbody and gravity never scale |
 | Clip timing | surveyor and apex clips at 60 fps, creatures at 30 fps; every action clip has 2–4 frames of anticipation and an overshoot key on the follow-through; a hit reads within 2 frames |
 
 **Jetpack** (thrust in m/s² while fuel lasts; net lift = thrust − g; recharges in 2 s on ground):
