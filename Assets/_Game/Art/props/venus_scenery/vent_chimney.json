@@ -1,0 +1,23 @@
+{
+ "key": "props/venus_scenery/vent_chimney",
+ "format": "glb",
+ "contract": "v2.2",
+ "facing": "+X in Unity (exported facing glTF -X, D-065)",
+ "up": "+Y",
+ "units": "m",
+ "origin": "base",
+ "triangles": 204,
+ "lod1_triangles": 96,
+ "texture": 2048,
+ "maps": [
+  "color",
+  "normal",
+  "mask",
+  "emission"
+ ],
+ "fps": 30,
+ "clips": [],
+ "atlas": "props/venus_scenery/atlas",
+ "vertex_color": true,
+ "sockets": []
+}
