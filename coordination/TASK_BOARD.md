@@ -127,18 +127,19 @@ Files: Code/Runtime/Camera/, Code/Runtime/View2D/, Code/Editor/ArtImporter.cs, S
 Depends: —
 Lead notes: Cycle 233: part 1 noted (2518faf, uncompiled: importer v13, SheetAnimatorBuilder, View2D, CartoonImportTests). One batched check covers U-093 + U-094 part 1 together; the smoke_c0_earth PlayMode test and the capture can follow in a second check with part 2. B-115's film overlays (af18479) and B-110's calibration_v3 sheet are in the tree for the importer tests. Cycle 234: part 2 noted (875bcb7: smoke_c0_earth + CaptureC0Earth). The real surveyor sheet is in (b5b1d29, Art/characters/surveyor/side, clips idle/walk/jump/land/look_camera): import it in the owed check, run CartoonSmokeTests, and capture earth_c0 with it rather than the placeholder. Done on the capture + green PlayMode. Cycle 235: DONE (5b04177; earth_c0_placeholder.png + README 16:08: ortho 16.875 m, three placeholder parallax strips, the real surveyor at ≈ 130 px with 12 fps clips; CartoonSmokeTests green with a clean console; importer v13 caps tested incl. the 8-atlas refusal). Terrain, props and the Pilgrim stay 3D in C0 by design; their cartoon versions are C1+ cards.
 
-### U-095 · UNITY · Ready · C0
+### U-095 · UNITY · Done · C0
 Goal: One full-screen film pass (single shader, single blit, URP renderer feature): grain, vignette, drifting dust specks and hairline scratches from the three 512² tiled overlays (`fx/film/*`), brightness flicker ≤ ±2 %, warm/sepia grade; no Bloom, no volumetrics, HDR off. Settings → "Film effects" toggle (default on), saved in settings.
 Accept: GPU cost ≤ 0.6 ms at 1080p in the profile; the toggle removes the pass (test); overlays imported 512² (test); before/after capture pair in the C0 report.
 Files: Assets/_Game/Shaders/FilmPass.shader, Code/Runtime/Rendering/, Code/Runtime/UI/Settings/
 Depends: — (placeholder noise overlays until B-115)
-Lead notes: Cycle 236: ART + BUDGET ACCEPTED (7b00dab): earth_c0_film_on/off pair (warm grade, vignette, grain and dust subtle at 1080p, flicker ≤ 2 %); perf row "Film pass GPU · Earth" on 11.24 / off 11.62 ms = inside the 0.6 ms line; profile 16:43 compile 0/0; the toggle test passed on a real device at 16:31. OWED for Done: one tests_<date>.md entry run on the final code showing FilmTests 4/4 in EditMode and FilmPlayTests green (the report's last entry is 16:31, 1/2 with the cost test that since moved into the probe). Batch it with U-096's check; no separate job. Rulings: the 16:43 entry-transition red is a contention run (D-094), the 16:37 1.46 s stands; HDR off project-wide and the film pass on every Game camera are per Bible §9.4 (the 3D planets are superseded, their bloom with them); P-39 accepted, the pause-panel FILM EFFECTS button is the toggle until the settings panel card (Backlog U-1xx).
+Lead notes: Cycle 236: ART + BUDGET ACCEPTED (7b00dab): earth_c0_film_on/off pair (warm grade, vignette, grain and dust subtle at 1080p, flicker ≤ 2 %); perf row "Film pass GPU · Earth" on 11.24 / off 11.62 ms = inside the 0.6 ms line; profile 16:43 compile 0/0; the toggle test passed on a real device at 16:31. OWED for Done: one tests_<date>.md entry run on the final code showing FilmTests 4/4 in EditMode and FilmPlayTests green (the report's last entry is 16:31, 1/2 with the cost test that since moved into the probe). Batch it with U-096's check; no separate job. Rulings: the 16:43 entry-transition red is a contention run (D-094), the 16:37 1.46 s stands; HDR off project-wide and the film pass on every Game camera are per Bible §9.4 (the 3D planets are superseded, their bloom with them); P-39 accepted, the pause-panel FILM EFFECTS button is the toggle until the settings panel card (Backlog U-102). Cycle 237: DONE (tests_2026-11-06.md 16:52 EditMode 275/275 incl. FilmTests 4, 16:53 PlayMode 0 failed with FilmPlayTests green; the Editor GPU-cost test skipped by design, the probe row holds the number).
 
-### U-096 · UNITY · Ready · C0
+### U-096 · UNITY · Done · C0
 Goal: Iris-out / iris-in circle wipe as a cheap shader cutout (one quad, no texture), 0.35 s each way, centred on the surveyor (or the ship), used by launch, entry and area entry; the load runs while the screen is black.
 Accept: TransitionTests: launch and entry stay ≤ 1.5 s with the iris included; an EditMode test for the radius curve; a 6-frame capture strip in the C0 report.
 Files: Assets/_Game/Shaders/IrisWipe.shader, Code/Runtime/Transitions/
 Depends: —
+Lead notes: Cycle 237: DONE (d577013; check 16:52–16:55: compile 0/0, EditMode 275/275 incl. IrisTests, PlayMode 0 failed; TransitionTests launch 1.00 s / entry 1.07 s with the iris, the v3 white fades retired; iris_strip.png: 6 frames closing on the surveyor, 4 px soft edge; ConkOut uses it).
 
 ### U-097 · UNITY · Ready · C0
 Goal: Rubber-hose rig path for flora and props (contract §11.3): build sprite bones + skinning (Unity 2D Animation) from `rigset.json`; one texture and one animator controller per planet's set; sway idle on the planet beat, sampled stepped at 12 Hz; staggered start phases; face swaps (blink, yawn, giggle); react within 3 m (turn to look); the 40-animated-object cap with distant flora falling back to a 3-frame idle or a static frame.
@@ -158,6 +159,20 @@ Accept: PlayMode `CreatureWallTests`: a wolf fleeing into the camp's crate stack
 Files: Assets/_Game/Code/Runtime/Creatures/CreatureDirector.cs, Tests/Play/CreatureWallTests.cs
 Depends: —
 Lead notes: Cycle 235. Lock-free after U-095; small. Report the WardenPlayTests result of every check until it passes 5 in a row.
+
+### U-100 · UNITY · Ready · C0
+Goal: Cartoon ground placeholder for the C0 scene so the style test reads cartoon edge to edge: a flat Earth-palette dirt strip with a thick ink top line and a one-tone grass lip (`Placeholders/terrain/earth/ground_strip.png`, 512×128 tile, PPU 64) drawn over the 3D terrain blocks on Earth while `CartoonStage.Enabled` (the blocks stay for collision and dig; the strip follows the dug column heights at 1 m steps). The camp props and the Pilgrim get a flat ink-outlined silhouette tint (one material swap, `ArtMaterials.Cartoon`), no new art.
+Accept: `earth_c0_ground.png` capture with no 3D texture visible on the ground line; CartoonSmokeTests unchanged and green; TerrainTests (dig/place) unchanged; frame time avg ≤ 12 ms on Earth in the next profile.
+Files: Assets/_Game/Placeholders/terrain/, Code/Runtime/View2D/GroundStrip.cs, Code/Runtime/Art/ArtMaterials.cs
+Depends: U-094
+Lead notes: Cycle 237. Placeholder only (BLENDER's painted terrain is a C1 card); keep it under 150 lines.
+
+### U-101 · UNITY · Ready · C0
+Goal: U-098 capture tooling ahead of the art: `SceneCapture.CaptureC0Strip` records the C0 scene for 20 s at 2 stills per second into `reports/unity/c0_<date>/strip/` plus a contact sheet (6 × 7 at 320 px), driving the surveyor through idle → walk → jump/land → walk past a plant anchor → look_camera; the profile gains the rows U-098 asks for (working set, p99 frame time, animated-object count ≤ 40, sprite atlases per planet ≤ 8).
+Accept: the contact sheet and a profile with the four rows in `reports/unity/`; runs on the placeholder plant/critter keys so U-098 only swaps art in.
+Files: Assets/_Game/Code/Editor/SceneCapture.cs, tools/unity_profile.ps1, Code/Runtime/Perf/BudgetMonitor.cs
+Depends: U-094
+Lead notes: Cycle 237. Lock-free code; one capture + profile when the lock is free.
 
 
 > **R1 (D-062).** 2D tasks U-061..U-071 are Superseded (their code and sources stay in the tree and
@@ -1639,7 +1654,7 @@ Cryo meter (U), `PlanetDisc` shader with real textures (U). (POI prop sets promo
 R3 (drafted cycle 207): U-085 Mercury and Venus in 3D (the R3 counterpart of U-081: B-091 block arrays, B-092 bands incl. the translucent Venus deck strip and the day/twilight/night Mercury skydomes, B-093/B-096 creatures and Wardens through ModelView, B-095 props and station modules via ModelSwap, B-101 scenery; the cinderhulk emission float driven by the day side; the veil serpent chained from veil_serpent_tail + n×body + head, each module's clip offset by J×0.07 cycles for J bones behind it; M3InnerTests + the M3 smoke set re-shot with the depth preset). Promote when U-081 is Done.
 S1 → every planet (drafted cycle 220, D-076): the stage layer sets for the giants ride on B-097/B-100 (decks + wisps + stage.json); U-081 and U-085 gain 'stage layers resident and the §11.1 v3 rows green on that planet' as acceptance when promoted; S1 report `coordination/reviews/S1_REPORT.md` + milestone page after U-092 and the owner's playtest.
 
-### U-10x · UNITY · Backlog · C1
+### U-102 · UNITY · Backlog · C1
 Goal: Settings panel (P-39): one panel reachable from the pause menu and the title screen: Film effects (moves the FILM EFFECTS button here), master/music/SFX volume, key rebinding read-only list, language placeholder; saved through GameSettings; cartoon frame per contract §11 UI once B-1xx UI art exists (placeholder frame until then).
 Accept: MenuHudTests cover open/close and the film toggle round trip; settings persist across a restart (test); clean console.
 Files: Assets/_Game/Code/Runtime/UI/Settings/
