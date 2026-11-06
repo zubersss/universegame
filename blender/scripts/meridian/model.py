@@ -28,6 +28,20 @@ import bpy
 import numpy as np
 from mathutils import Vector
 
+
+def bend_normals(ob):
+    """Custom normals: card loops take their stored 'bend' (crown-volume) normal, wood keeps its own."""
+    me = ob.data
+    if "bend" not in me.attributes:
+        return
+    bend = me.attributes["bend"].data
+    cn = [Vector(c.vector) for c in me.corner_normals]
+    out = []
+    for li, loop in enumerate(me.loops):
+        b = Vector(bend[loop.vertex_index].vector)
+        out.append(b.normalized() if b.length > 1e-4 else cn[li])
+    me.normals_split_custom_set(out)
+
 from meridian import pngio
 
 MAPS = ("color", "normal", "mask", "emission")
@@ -517,6 +531,33 @@ def export_material(mesh, maps_paths, emissive, alpha=None):
 
 # ---------------------------------------------------------------- 5. glb
 
+def _drop_cards(lod, cap, tris):
+    """B-109 LOD1 for card crowns: keep every step-th card cluster (step 2, 3, ...) until the mesh is
+    within `cap` triangles and <= 50 % of LOD0; the wood is untouched; bent normals re-applied."""
+    import bmesh
+    step = 2
+    while True:
+        bm = bmesh.new()
+        bm.from_mesh(lod.data)
+        lay = bm.verts.layers.int.get("card")
+        kill = [f for f in bm.faces if f.verts[0][lay] and (f.verts[0][lay] - 1) % step != 0]
+        bmesh.ops.delete(bm, geom=kill, context="FACES")
+        me = bpy.data.meshes.new(lod.data.name + "_try")
+        bm.to_mesh(me)
+        bm.free()
+        me.calc_loop_triangles()
+        n = len(me.loop_triangles)
+        if (n <= cap and n <= tris * 0.5) or step >= 8:
+            old = lod.data
+            lod.data = me
+            me.name = old.name
+            bpy.data.meshes.remove(old)
+            bend_normals(lod)
+            return n
+        bpy.data.meshes.remove(me)
+        step += 1
+
+
 def export_glb(path, mesh, rig, extras=(), vertex_colors=False):
     for o in bpy.context.view_layer.objects:
         o.select_set(False)
@@ -708,13 +749,16 @@ def export_model(entry, art_dir, preview_dir, objs, stamp_fn):
         if rig is not None:
             lod.parent = rig
             lod.matrix_parent_inverse = mesh.matrix_parent_inverse.copy()
-        dec = lod.modifiers.new("lod", "DECIMATE")
-        dec.ratio = min(0.48, float(entry.get("lod1_max", 1 << 30)) / max(1, tris))
-        for o in bpy.context.view_layer.objects:
-            o.select_set(False)
-        bpy.context.view_layer.objects.active = lod
-        lod.select_set(True)
-        bpy.ops.object.modifier_apply(modifier="lod")
+        if entry.get("lod1_cards") and "card" in lod.data.attributes:
+            _drop_cards(lod, int(entry.get("lod1_max", 1 << 30)), tris)   # B-109: fewer card clusters, wood kept
+        else:
+            dec = lod.modifiers.new("lod", "DECIMATE")
+            dec.ratio = min(0.48, float(entry.get("lod1_max", 1 << 30)) / max(1, tris))
+            for o in bpy.context.view_layer.objects:
+                o.select_set(False)
+            bpy.context.view_layer.objects.active = lod
+            lod.select_set(True)
+            bpy.ops.object.modifier_apply(modifier="lod")
         lod_tris = triangle_count(lod)
         extras.append(lod)
     export_glb(glb, mesh, rig, extras, vertex_colors=bool(entry.get("vertex_colors")))
@@ -723,6 +767,8 @@ def export_model(entry, art_dir, preview_dir, objs, stamp_fn):
             "maps": list(MAPS), "fps": 30, "clips": clips, "atlas": atlas,
             "vertex_color": entry.get("vertex_colors"),
             "sockets": [o.name[len("socket_"):] for o in sockets] or entry.get("sockets", [])}
+    if entry.get("alpha_clip"):                      # contract v2.6 ruling 10 (D-082): cut-out cards -> alpha clip + double-sided
+        meta["alpha_clip"] = True
     with open(os.path.join(out_dir, f"{variant}.json"), "w", encoding="utf-8") as fh:
         json.dump(meta, fh, indent=1)
     angles = ("top", -45.0, 0.0) if entry.get("origin_rule") == "space" else (-90.0, -45.0, 90.0) if entry.get("origin_rule") in ("base", "band") else (0.0, -45.0, 180.0)   # D-068 (bands as props: seen from the camera side)

@@ -18,11 +18,12 @@ import random
 import sys
 
 import bpy
-from mathutils import Vector
+from mathutils import Matrix, Vector
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import gen_flora_atlas as FA  # noqa: E402
+from meridian import model  # noqa: E402
 
 DEFAULT_OUT = os.path.join(os.path.dirname(HERE), "sources", "props", "earth_flora.blend")
 ART = os.path.join(os.path.dirname(os.path.dirname(HERE)), "Assets", "_Game", "Art", "props", "earth_flora")
@@ -39,6 +40,13 @@ def atlas_material(art=ART, name="earth_flora_atlas"):
         t = nt.nodes.new("ShaderNodeTexImage")
         t.image = bpy.data.images.load(cpath, check_existing=True)
         nt.links.new(t.outputs["Color"], pr.inputs["Base Color"])
+        nt.links.new(t.outputs["Alpha"], pr.inputs["Alpha"])        # B-109 leaf cards (other tiles: alpha 1)
+        for attr, val in (("surface_render_method", "DITHERED"), ("blend_method", "CLIP")):
+            try:
+                setattr(m, attr, val)
+            except (AttributeError, TypeError):
+                pass
+        m.use_backface_culling = False
         npath = os.path.join(art, "atlas_normal.png")
         if os.path.isfile(npath):
             n = nt.nodes.new("ShaderNodeTexImage")
@@ -161,47 +169,216 @@ def join(coll, name, mat):
 
 # ---------------------------------------------------------------- species
 
+# ---------------------------------------------------------------- B-109 canopies (leaf-cluster cards)
+# Crowns are clusters of alpha-cut leaf cards from the atlas 'leafcards' tile (gen_flora_atlas
+# CARD_KINDS), each cluster a crossed pair of quads so no cluster vanishes edge-on to the side
+# camera. Every card vertex stores a 'bend' normal pointing out of the crown volume (the crown
+# centre for broadleaf, the trunk axis for conifers), applied as custom normals after the join, so
+# the lighting reads as one rounded crown instead of many flat planes. 'card' = cluster index + 1
+# (0 on wood) lets model.py build LOD1 by dropping clusters (manifest lod1_cards) instead of
+# decimating cards into slivers. Wood is several tapered segments per limb, smooth-shaded.
+
+def limb(coll, base, length, r0, r1, yaw, pitch, rnd, tile, sway, sides=8, segs=2, wander=0.25, gravity=0.0):
+    """A tapered limb of `segs` chained segments from `base` toward (yaw, pitch); each joint turns
+    by up to `wander` rad and sags by `gravity` rad. Returns (tip, last yaw, last pitch)."""
+    p = Vector(base)
+    for s in range(segs):
+        ra = r0 + (r1 - r0) * s / segs
+        rb = r0 + (r1 - r0) * (s + 1) / segs
+        seg_len = length / segs
+        d = Vector((math.cos(pitch) * math.cos(yaw), math.cos(pitch) * math.sin(yaw), math.sin(pitch)))
+        mid = p + d * (seg_len / 2)
+        rot = (0.0, math.acos(max(-1.0, min(1.0, d.z))), math.atan2(d.y, d.x))
+        ob = cyl(coll, ra, rb, seg_len + ra * 0.6, tuple(mid), sides, rot)       # overlap hides the joint
+        finish(ob, tile, "cyl", sway)
+        p = p + d * seg_len
+        yaw += rnd.uniform(-wander, wander)
+        pitch += rnd.uniform(-wander, wander) * 0.6 - gravity
+    return tuple(p), yaw, pitch
+
+
+def cards(coll, kind, anchors, size, bend_fn, sway_fn, rnd, roll=0.6):
+    """One mesh of crossed card pairs. anchors: [(pos, up)] with `up` the twig direction (card bottom
+    at pos). size: card edge in m (x 0.8-1.2 per card). bend_fn(v) -> outward normal at vertex v."""
+    u0, v0, u1, v1 = FA.tile_rect("leafcards", sub=kind)
+    verts, faces, uvs, bends, ids = [], [], [], [], []
+    for k, (pos, up) in enumerate(anchors):
+        s = size * rnd.uniform(0.8, 1.2)
+        up = Vector(up).normalized()
+        ref = Vector((0, 0, 1)) if abs(up.z) < 0.9 else Vector((1, 0, 0))
+        side = up.cross(ref).normalized()
+        side = Matrix.Rotation(rnd.uniform(-roll, roll), 3, up) @ side
+        base = Vector(pos) - up * (0.1 * s)                                       # the card's twig enters 10 % up
+        for sd in (side, up.cross(side).normalized()):
+            i = len(verts)
+            for (a, b) in ((-0.5, 0.0), (0.5, 0.0), (0.5, 1.0), (-0.5, 1.0)):
+                v = base + sd * (a * s) + up * (b * s)
+                verts.append(tuple(v))
+                uvs.append((u0 + (a + 0.5) * (u1 - u0), v0 + b * (v1 - v0)))
+                bends.append(bend_fn(v))
+                ids.append(k + 1)
+            faces.append((i, i + 1, i + 2, i + 3))
+    me = bpy.data.meshes.new(f"cards_{kind}")
+    me.from_pydata(verts, [], faces)
+    me.update()
+    uvl = me.uv_layers.new(name="UVMap").data
+    for poly in me.polygons:
+        poly.use_smooth = True
+        for li in poly.loop_indices:
+            uvl[li].uv = uvs[me.loops[li].vertex_index]
+    ca = me.color_attributes.new("sway", "FLOAT_COLOR", "POINT")
+    ba = me.attributes.new("bend", "FLOAT_VECTOR", "POINT")
+    ia = me.attributes.new("card", "INT", "POINT")
+    for i, v in enumerate(verts):
+        ca.data[i].color = (max(0.0, min(1.0, sway_fn(v[2]))), 0.0, 0.0, 1.0)
+        ba.data[i].vector = bends[i]
+        ia.data[i].value = ids[i]
+    me.color_attributes.active_color = ca
+    ob = bpy.data.objects.new(f"cards_{kind}", me)
+    coll.objects.link(ob)
+    return ob
+
+
+def _shell_anchors(rnd, n, centre, radii, zmin=-0.45, shell=0.55, up_bias=0.45):
+    """n points in an ellipsoid crown, biased to the outer shell; up = outward + some world up."""
+    c, out = Vector(centre), []
+    for _ in range(n):
+        while True:
+            d = Vector((rnd.gauss(0, 1), rnd.gauss(0, 1), rnd.gauss(0, 1)))
+            if d.length > 1e-3:
+                d.normalize()
+                if d.z >= zmin:
+                    break
+        rr = shell + (1 - shell) * rnd.random() ** 0.5
+        p = c + Vector((d.x * radii[0], d.y * radii[1], d.z * radii[2])) * rr
+        out.append((tuple(p), tuple((d + Vector((0, 0, up_bias))).normalized())))
+    return out
+
+
+def _crown_bend(centre, radii, toward=0.8):
+    c = Vector(centre)
+
+    def fn(v):
+        o = Vector(v) - c
+        o = Vector((o.x / radii[0], o.y / radii[1], o.z / radii[2]))
+        return tuple((o.normalized() * toward + Vector((0, 0, 1 - toward))).normalized()) if o.length > 1e-4 else (0.0, 0.0, 1.0)
+    return fn
+
+
+def _height_sway(z0, z1, lo=0.5, hi=1.0):
+    return lambda z: lo + (hi - lo) * max(0.0, min(1.0, (z - z0) / max(z1 - z0, 1e-3)))
+
+
+def _wood_sway(h):
+    return lambda f, z: 0.45 * min(1.0, max(0.0, z / h)) ** 2
+
+
 def tree_oak(coll, rnd):
-    t = finish(cyl(coll, 0.38, 0.2, 4.6, (0, 0, 2.3), 10), "bark_oak", "cyl", trunk_sway)
-    for k, yaw in enumerate((0.4, 2.5, 4.4)):
-        b, tip = branch(coll, (0, 0, 3.4 + 0.3 * k), 1.8, 0.12, yaw, 0.6)
-        finish(b, "bark_oak", "cyl", lambda f, z: 0.4 + 0.2 * f)
-    for k, (x, y, z, r) in enumerate(((0, 0, 6.2, 2.1), (1.3, 0.4, 5.4, 1.5), (-1.3, -0.3, 5.5, 1.5), (0.3, -1.2, 5.7, 1.4), (-0.4, 1.2, 5.9, 1.4))):
-        finish(blob(coll, r, (x, y, z), (1, 1, 0.82), 3, seed=k), "leaf_oak", "sph", crown_sway)
-    return t
-
-
-def tree_spruce(coll, rnd):
-    finish(cyl(coll, 0.26, 0.08, 9.0, (0, 0, 4.5), 8), "bark_spruce", "cyl", trunk_sway)
-    layers = 10
-    for k in range(layers):
-        f = k / (layers - 1)
-        r = 2.2 * (1 - f) + 0.35
-        z = 1.6 + f * 7.6
-        finish(cyl(coll, r, 0.0, 1.7 - 0.7 * f, (0, 0, z), 18, (0, 0, rnd.uniform(0, 1))), "needles", "sph",
-               lambda ff, zz, f=f: 0.45 + 0.55 * f)
-    return None
+    """Oak (B-109): flared trunk in three leaning segments, five forked main limbs, a broad crown of
+    ~120 crossed oak-leaf clusters around the limb ends."""
+    ws = _wood_sway(8.0)
+    finish(cyl(coll, 0.62, 0.4, 0.7, (0, 0, 0.35), 12), "bark_oak", "cyl", ws)                  # root flare
+    top, _, _ = limb(coll, (0, 0, 0.3), 3.9, 0.42, 0.27, rnd.uniform(0, 6.28), math.radians(86), rnd, "bark_oak",
+                     ws, sides=12, segs=3, wander=0.08)
+    for k in range(4):                                                                            # surface roots
+        limb(coll, (0, 0, 0.35), rnd.uniform(0.7, 1.0), 0.16, 0.05, k * 1.57 + rnd.uniform(-0.3, 0.3), -0.35, rnd,
+             "bark_oak", ws, sides=6, segs=1)
+    centre, radii = (0.0, 0.0, 6.0), (2.7, 2.5, 2.0)
+    for k in range(5):
+        yaw = k * 1.257 + rnd.uniform(-0.25, 0.25)
+        b0 = (top[0] * 0.8, top[1] * 0.8, 3.0 + 0.25 * k)
+        tip, y, p = limb(coll, b0, rnd.uniform(1.9, 2.5), 0.17, 0.08, yaw, rnd.uniform(0.45, 0.8), rnd, "bark_oak",
+                         ws, sides=8, segs=2, wander=0.3)
+        for j in range(2):
+            limb(coll, tip, rnd.uniform(0.8, 1.3), 0.075, 0.03, y + (0.6 if j else -0.6), p + rnd.uniform(-0.2, 0.3), rnd,
+                 "bark_oak", ws, sides=6, segs=1)
+    an = _shell_anchors(rnd, 120, centre, radii)
+    cards(coll, "oak", an, 1.55, _crown_bend(centre, radii), _height_sway(3.5, 8.2, 0.55, 1.0), rnd)
 
 
 def tree_birch(coll, rnd):
-    finish(cyl(coll, 0.17, 0.08, 7.2, (0, 0, 3.6), 8), "bark_birch", "cyl", trunk_sway)
-    for k, (x, y, z, r) in enumerate(((0, 0, 7.0, 1.3), (0.7, 0.2, 6.0, 1.0), (-0.6, -0.2, 6.2, 1.0), (0.1, 0.6, 5.4, 0.9))):
-        finish(blob(coll, r, (x, y, z), (0.8, 0.8, 1.25), 3, seed=10 + k), "leaf_birch", "sph", crown_sway)
+    """Birch (B-109): a slim white trunk with a slight S lean, ascending limbs, a narrow tall crown of
+    ~100 small drooping leaf clusters."""
+    ws = _wood_sway(9.0)
+    top, _, _ = limb(coll, (0, 0, 0.0), 8.0, 0.19, 0.06, rnd.uniform(0, 6.28), math.radians(87), rnd, "bark_birch",
+                     ws, sides=10, segs=4, wander=0.07)
+    centre, radii = (top[0] * 0.6, top[1] * 0.6, 6.3), (1.55, 1.45, 2.5)
+    for k in range(6):
+        z = 3.6 + 0.65 * k
+        f = (z - 0.0) / 8.0
+        base = (top[0] * f, top[1] * f, z)
+        tip, y, p = limb(coll, base, rnd.uniform(1.2, 1.9), 0.07, 0.025, k * 2.4 + rnd.uniform(-0.3, 0.3),
+                         rnd.uniform(0.75, 1.1), rnd, "bark_birch", ws, sides=6, segs=2, wander=0.25, gravity=0.35)
+    an = [(p, tuple((Vector(u) + Vector((0, 0, -0.9))).normalized())) for p, u in _shell_anchors(rnd, 100, centre, radii, up_bias=0.0)]
+    cards(coll, "birch", an, 1.15, _crown_bend(centre, radii), _height_sway(3.5, 8.8, 0.55, 1.0), rnd)
+
+
+def tree_spruce(coll, rnd):
+    """Spruce (B-109): a tapered trunk carrying 11 tiers of needle sprays (crossed needle cards along
+    drooping branches), wide at the bottom, a spire of upturned sprays at the top."""
+    ws = _wood_sway(10.0)
+    finish(cyl(coll, 0.3, 0.05, 10.0, (0, 0, 5.0), 10), "bark_spruce", "cyl", ws)
+    tiers, an, bend_axis = 11, [], 0.0
+    for t in range(tiers):
+        f = t / (tiers - 1)
+        z = 1.3 + 8.0 * f
+        R = 2.5 * (1 - f) ** 0.9 + 0.35
+        n = max(4, int(round(10 * (1 - f))) + 3)
+        off = rnd.uniform(0, 6.28)
+        for k in range(n):
+            yaw = off + k * 2 * math.pi / n + rnd.uniform(-0.2, 0.2)
+            droop = -0.35 + 0.5 * f + rnd.uniform(-0.1, 0.1)
+            d = Vector((math.cos(yaw), math.sin(yaw), droop)).normalized()
+            if f < 0.85:
+                limb(coll, (0, 0, z), R * 0.75, 0.05 * (1 - f) + 0.015, 0.012, yaw, math.asin(d.z), rnd, "bark_spruce",
+                     ws, sides=4, segs=1)
+            an.append((tuple(Vector((0, 0, z)) + d * 0.1), tuple(d)))
+    an.append(((0.0, 0.0, 9.3), (0.0, 0.0, 1.0)))                                               # the leader
+
+    def bend(v):
+        o = Vector((v[0], v[1], 0.0))
+        return tuple((o.normalized() * 0.7 + Vector((0, 0, 0.55))).normalized()) if o.length > 1e-4 else (0.0, 0.0, 1.0)
+    cards(coll, "needle", an, 2.1, bend, _height_sway(1.0, 10.0, 0.45, 1.0), rnd, roll=0.25)
+
+
+def _bush(coll, rnd, n, centre, radii, size, stems):
+    ws = lambda f, z: 0.15 * f
+    for k in range(stems):
+        limb(coll, (rnd.uniform(-0.15, 0.15), rnd.uniform(-0.15, 0.15), 0.0), rnd.uniform(0.6, 0.9), 0.04, 0.015,
+             rnd.uniform(0, 6.28), rnd.uniform(0.9, 1.3), rnd, "bark_oak", ws, sides=5, segs=1)
+    an = _shell_anchors(rnd, n, centre, radii, zmin=-0.2, shell=0.45, up_bias=0.6)
+    cards(coll, "bush", an, size, _crown_bend(centre, radii, 0.75), _height_sway(0.0, centre[2] + radii[2], 0.15, 0.8), rnd)
 
 
 def bush_a(coll, rnd):
-    for k, (x, y, z, r) in enumerate(((0, 0, 0.55, 0.65), (0.5, 0.15, 0.45, 0.5), (-0.45, -0.1, 0.42, 0.5), (0.05, 0.4, 0.4, 0.45))):
-        finish(blob(coll, r, (x, y, z), (1, 1, 0.85), 3, seed=20 + k), "leaf_bush", "sph", lambda f, z: 0.2 + 0.6 * f)
+    _bush(coll, rnd, 60, (0.0, 0.0, 0.55), (0.95, 0.8, 0.55), 0.8, 4)
 
 
 def bush_b(coll, rnd):
-    for k, (x, y, z, r) in enumerate(((0, 0, 0.5, 0.55), (0.4, -0.1, 0.4, 0.42), (-0.38, 0.12, 0.38, 0.42))):
-        finish(blob(coll, r, (x, y, z), (1, 1, 0.9), 3, seed=30 + k), "leaf_bush", "sph", lambda f, z: 0.2 + 0.6 * f)
-    for k in range(14):
+    _bush(coll, rnd, 46, (0.0, 0.0, 0.5), (0.8, 0.7, 0.5), 0.72, 3)
+    for k in range(12):
         a = rnd.uniform(0, 2 * math.pi)
-        rr = rnd.uniform(0.35, 0.55)
-        finish(blob(coll, 0.05, (rr * math.cos(a), rr * math.sin(a), rnd.uniform(0.35, 0.85)), subdiv=1, seed=40 + k, rough=0.0),
+        rr = rnd.uniform(0.45, 0.7)
+        finish(blob(coll, 0.05, (rr * math.cos(a), rr * math.sin(a) * 0.85, rnd.uniform(0.35, 0.85)), subdiv=1, seed=40 + k, rough=0.0),
                "berries", "sph", lambda f, z: 0.5)
+
+
+def dead_tree(coll, rnd):
+    """Dead tree (B-109): a leaning, gnarled trunk in segments, seven crooked two-segment limbs that fork
+    twice, smooth bark (no cones)."""
+    ws = _wood_sway(6.0)
+    top, ty, tp = limb(coll, (0, 0, 0.0), 5.0, 0.32, 0.1, rnd.uniform(0, 6.28), math.radians(84), rnd, "bark_dead",
+                       ws, sides=10, segs=4, wander=0.12)
+    for k in range(7):
+        f = 0.45 + 0.08 * k
+        base = (top[0] * f, top[1] * f, 5.0 * f)
+        tip, y, p = limb(coll, base, rnd.uniform(1.1, 1.9), 0.11 * (1.1 - f * 0.5), 0.04, k * 2.2 + rnd.uniform(-0.4, 0.4),
+                         rnd.uniform(0.25, 0.85), rnd, "bark_dead", ws, sides=7, segs=2, wander=0.45)
+        for j in range(2):
+            t2, y2, p2 = limb(coll, tip, rnd.uniform(0.5, 0.9), 0.04, 0.015, y + (0.55 if j else -0.55), p + rnd.uniform(-0.3, 0.4),
+                              rnd, "bark_dead", ws, sides=5, segs=1)
+            limb(coll, t2, rnd.uniform(0.25, 0.45), 0.015, 0.006, y2 + rnd.uniform(-0.6, 0.6), p2 + 0.2, rnd, "bark_dead",
+                 ws, sides=4, segs=1)
 
 
 def rock(coll, rnd, tile, size, seed):
@@ -248,15 +425,6 @@ def cactus(coll, rnd):
         finish(_own(coll, bpy.context.active_object), "cactus", "sph", lambda f, z: 0.05)
 
 
-def dead_tree(coll, rnd):
-    finish(cyl(coll, 0.3, 0.12, 5.0, (0, 0, 2.5), 8), "bark_dead", "cyl", trunk_sway)
-    for k in range(6):
-        b, tip = branch(coll, (0, 0, 2.6 + 0.35 * k), rnd.uniform(1.0, 1.9), 0.1, rnd.uniform(0, 2 * math.pi), rnd.uniform(0.3, 0.9))
-        finish(b, "bark_dead", "cyl", lambda f, z: 0.3 + 0.3 * f)
-        b2, _ = branch(coll, tip, rnd.uniform(0.5, 0.9), 0.045, rnd.uniform(0, 2 * math.pi), rnd.uniform(0.2, 1.0), sides=5)
-        finish(b2, "bark_dead", "cyl", lambda f, z: 0.5)
-
-
 FLORA = {
     "tree_oak": tree_oak, "tree_spruce": tree_spruce, "tree_birch": tree_birch,
     "bush_a": bush_a, "bush_b": bush_b,
@@ -277,6 +445,7 @@ def build(out_path=DEFAULT_OUT):
         scene.collection.children.link(coll)
         fn(coll, random.Random(zlib.crc32(name.encode())))   # deterministic (hash() is salted per process)
         ob = join(coll, name, mat)
+        model.bend_normals(ob)                          # B-109: crown-volume normals on the cards
         ob.data.calc_loop_triangles()
         report.append(f"{name} {len(ob.data.loop_triangles)}")
     print("MERIDIAN flora tris:", ", ".join(report))
@@ -505,22 +674,22 @@ def vent_chimney(coll, rnd):
     a sag on one side where the wall slumped, and a recessed glowing mouth (vent_mouth tile,
     emissive) with glow spill over the lip."""
     finish(blob(coll, 0.6, (0, 0, 0.16), (1.6, 1.45, 0.5), 2, seed=96, rough=0.45), "lava_crust", "sph", _STILL)
-    body = cyl(coll, 0.62, 0.36, 1.25, (0, 0, 0.62), 12)
+    body = cyl(coll, 0.66, 0.5, 1.05, (0, 0, 0.52), 12)            # cycle 223: lower, wider throat
     finish(body, "lava_crust", "cyl", _STILL)
     for k in range(10):                                              # rim lumps at uneven heights; the sag side sits lower
         a = k * 0.628 + rnd.uniform(-0.15, 0.15)
         sag = 0.5 * max(0.0, math.cos(a - 2.2)) ** 2                 # the slumped side
         r = rnd.uniform(0.11, 0.18)
-        lump = blob(coll, r, (0.33 * math.cos(a), 0.33 * math.sin(a), 1.2 + rnd.uniform(0.0, 0.16) - 0.28 * sag), (1.1, 1.0, 0.8), 1,
+        lump = blob(coll, r, (0.47 * math.cos(a), 0.47 * math.sin(a), 1.0 + rnd.uniform(0.0, 0.12) - 0.24 * sag), (1.1, 1.0, 0.8), 1,
                     seed=100 + k, rough=0.35)
         finish(lump, "lava_crust", "sph", _STILL)
-    slump = blob(coll, 0.3, (0.5 * math.cos(2.2), 0.5 * math.sin(2.2), 0.72), (1.3, 1.0, 1.4), 1, seed=111, rough=0.3)
+    slump = blob(coll, 0.3, (0.6 * math.cos(2.2), 0.6 * math.sin(2.2), 0.6), (1.3, 1.0, 1.4), 1, seed=111, rough=0.3)
     finish(slump, "lava_crust", "sph", _STILL)
-    mouth = cyl(coll, 0.3, 0.16, 0.5, (0, 0, 1.0), 12)              # recessed glowing throat
+    mouth = cyl(coll, 0.44, 0.22, 0.4, (0, 0, 0.86), 12)            # recessed glowing throat (cycle 223: wider, lower)
     finish(mouth, "vent_mouth", "cyl", _STILL)
     for k in range(4):                                               # glow spill over the lip
         a = rnd.uniform(0, 6.28)
-        finish(blob(coll, 0.09, (0.3 * math.cos(a), 0.3 * math.sin(a), 1.2), (1.4, 1.2, 0.5), 1, seed=120 + k, rough=0.0),
+        finish(blob(coll, 0.12, (0.44 * math.cos(a), 0.44 * math.sin(a), 1.02), (1.4, 1.2, 0.5), 1, seed=120 + k, rough=0.0),
                "vent_mouth", "sph", _STILL)
 
 
@@ -592,13 +761,14 @@ def build_venus_scenery(out_path=VENUS_OUT):
 
 
 SUNS = {   # review evidence (B-101 accept): 20 instances under that planet's Sun; sky ambient per planet
+    "earth": dict(sun=3.5, sun_col=(1.0, 0.97, 0.92), sun_dir=(-0.6, 0.4, -0.7), ambient=((0.45, 0.58, 0.78), 0.7)),
     "mercury": dict(sun=6.7, sun_col=(1.0, 0.98, 0.95), sun_dir=(-0.55, 0.35, -0.75), ambient=((0.08, 0.06, 0.12), 0.15)),
     "venus": dict(sun=0.1, sun_col=(1.0, 0.8, 0.55), sun_dir=(-0.4, 0.3, -0.85), ambient=((0.85, 0.55, 0.25), 0.9)),
     "mars": dict(sun=0.75, sun_col=(1.0, 0.9, 0.8), sun_dir=(-0.6, 0.4, -0.7), ambient=((0.7, 0.5, 0.4), 0.3)),
 }
 
 
-def field_preview(blend_path, planet, out_png, n=20, seed=7, width=1536, height=512):
+def field_preview(blend_path, planet, out_png, n=20, seed=7, width=1536, height=512, names=None, camp=False):
     """Stamped field preview: `n` instances of the scenery models from `blend_path` scattered on a
     grey floor under the planet's Sun (SUNS), Eevee, camera side (-Y) at play-plane height."""
     import numpy as np
@@ -608,7 +778,7 @@ def field_preview(blend_path, planet, out_png, n=20, seed=7, width=1536, height=
     bpy.ops.wm.open_mainfile(filepath=blend_path)
     scene = bpy.context.scene
     rnd = random.Random(seed)
-    protos = [o for o in scene.objects if o.type == "MESH"]
+    protos = [o for o in scene.objects if o.type == "MESH" and (names is None or o.name in names)]
     for o in protos:
         o.hide_render = True
     x0 = -float(n) * 0.9
@@ -619,6 +789,10 @@ def field_preview(blend_path, planet, out_png, n=20, seed=7, width=1536, height=
         ob.data = src.data
         ob.hide_render = False
         ob.location = (x, rnd.uniform(-0.6, 0.6), 0.0)
+        if camp:                                     # B-109: z 2-12 m behind the play plane, across the 1080p frame
+            dpt = rnd.uniform(2.0, 12.0)
+            half = (28.5 + dpt) * math.tan(math.radians(17.5)) * 16 / 9
+            ob.location = (rnd.uniform(-half, half) * 0.92, dpt, 0.0)
         ob.rotation_euler = (0, 0, rnd.uniform(0, 6.28))
         scene.collection.objects.link(ob)
         x += rnd.uniform(1.3, 2.2)
@@ -652,10 +826,13 @@ def field_preview(blend_path, planet, out_png, n=20, seed=7, width=1536, height=
     cd = bpy.data.cameras.new("field_cam")
     cd.type = "ORTHO"
     cd.ortho_scale = (x - x0) * 1.05
+    if camp:                                         # the game's side rail: 35 deg vertical FOV at 28.5 m = 60 px/m at 1080p
+        cd.type, cd.sensor_fit, cd.angle = "PERSP", "VERTICAL", math.radians(35)
+        scene.render.resolution_x, scene.render.resolution_y = 1920, 1080
     cam = bpy.data.objects.new("field_cam", cd)
     scene.collection.objects.link(cam)
     scene.camera = cam
-    cam.location = ((x + x0) / 2, -30.0, 1.2)
+    cam.location = (0.0, -28.5, 6.5) if camp else ((x + x0) / 2, -30.0, 1.2)
     cam.rotation_euler = (math.radians(90), 0, 0)
     path = out_png + ".raw.png"
     scene.render.filepath = path

@@ -65,7 +65,7 @@ VENUS_TILES = [
     ("sulfur",       {"recipe": "soil", "dark": [168, 146, 70], "light": [212, 192, 110], "pebble_light": [230, 216, 150], "pebble_dark": [138, 108, 50], "pebble_size": 5, "pebble_thresh": 1.6}, 0.2),
     ("vent_glass",   {"recipe": "stone", "dark": [14, 12, 18], "light": [78, 64, 92], "crack_col": [150, 128, 168], "crack_k": 0.45}, 0.7),
     ("vent_mouth",   {"recipe": "stone", "dark": [38, 18, 14], "light": [84, 38, 24], "crack_col": [255, 126, 44], "crack_k": 0.95, "pits": True}, 0.35,
-                     {"color": [255, 128, 46], "from": "light", "k": 1.0}),
+                     {"color": [255, 128, 46], "from": "light", "k": 3.0}),   # LEAD cycle 223: 3x, the glow pools from the level camera
     ("lava_crust",   {"recipe": "stone", "dark": [24, 21, 21], "light": [58, 49, 46], "crack_col": [92, 44, 26], "crack_k": 0.6, "pits": True}, 0.3),
     ("sulfur_rim",   {"recipe": "soil", "dark": [198, 178, 98], "light": [240, 228, 156], "pebble_light": [250, 244, 206], "pebble_dark": [160, 132, 60], "pebble_size": 4, "pebble_thresh": 1.3}, 0.35),
 ]
