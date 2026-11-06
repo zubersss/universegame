@@ -58,6 +58,7 @@ namespace Meridian.Rendering
         {
             if (material == null || !Meridian.Core.GameSettings.FilmEffects) return;
             if (renderingData.cameraData.cameraType != CameraType.Game) return;
+            if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null) return; // -nographics test runs: no blit target can exist (it crashed the null device)
             pass.material = material;
             renderer.EnqueuePass(pass);
         }

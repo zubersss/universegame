@@ -23,6 +23,8 @@ namespace Meridian.Tests
 
         IEnumerator Boot()
         {
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Ignore("No graphics device: the film pass is skipped under -nographics; run with a graphics device (tools/unity_test.ps1 -Graphics).");
 #if UNITY_EDITOR
             yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
                 CorePath, new LoadSceneParameters(LoadSceneMode.Single));

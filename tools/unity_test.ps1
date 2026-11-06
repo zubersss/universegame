@@ -1,11 +1,12 @@
-# Batch test runner. Owner: UNITY.
+﻿# Batch test runner. Owner: UNITY.
 # Usage: tools/unity_test.ps1 [EditMode|PlayMode] [-Filter <regex>] [-Assembly "A;B"]
 # Default assemblies: ours for the mode plus LEAD's MERIDIAN.Tests.LeadQA (U-021).
 # Writes logs/tests_<date>_<mode>.xml and appends a summary to coordination/reports/unity/tests_<date>.md.
 param(
     [ValidateSet('EditMode', 'PlayMode')][string]$Mode = 'EditMode',
     [string]$Filter = '',
-    [string]$Assembly = ''
+    [string]$Assembly = '',
+    [switch]$Graphics  # U-095: a real graphics device (the film pass and GPU timings exist only there)
 )
 . (Join-Path $PSScriptRoot 'unity_common.ps1')
 
@@ -23,7 +24,7 @@ try {
     $assembly = if ($Assembly) { $Assembly } elseif ($Mode -eq 'EditMode') { 'MERIDIAN.Tests.Unit;MERIDIAN.Tests.LeadQA' } else { 'MERIDIAN.Tests.Play;MERIDIAN.Tests.LeadQA' }
     $unityArgs = @('-runTests', '-testPlatform', $Mode, '-testResults', $xml, '-assemblyNames', $assembly)
     if ($Filter) { $unityArgs += @('-testFilter', $Filter) }
-    $r = Invoke-UnityBatch $unityArgs "unity_test_${date}_$Mode.log"
+    $r = Invoke-UnityBatch $unityArgs "unity_test_${date}_$Mode.log" -Graphics:$Graphics
 } finally { Exit-HeavyJobLock }
 
 $errors = Get-CompileErrors $r.Log
