@@ -89,8 +89,17 @@ def drawing(layer, frame):
     return fr.drawing
 
 
+class Xf:
+    """A drawing seen through a 2D transform: stroke(Xf(d, f), pts) draws f(pts) into d. Lets
+    helpers such as pie_eye draw rig parts posed by a bone chain (B-112 preview loops)."""
+    def __init__(self, d, f):
+        self.d, self.f = d, f
+
+
 def stroke(d, pts, mat_index, radius=OUTER, cyclic=False, radii=None):
     """pts: [(x, z), ...] in metres. radii: optional per-point radius list."""
+    while isinstance(d, Xf):
+        pts, d = d.f(list(pts)), d.d
     d.add_strokes([len(pts)])
     s = d.strokes[len(d.strokes) - 1]
     s.material_index = mat_index

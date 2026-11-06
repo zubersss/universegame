@@ -821,7 +821,7 @@ def do_v3_rigset(entry, preview):
         part_meta.append({"name": ob.name[len("part_"):], "rect": [x, H - (ytop + h), w, h],
                           "pivot": [round(pv[0], 4), round(pv[1], 4)]})
     meta = {"key": key, "style": "v3", "ppu": v3.PPU, "rect_origin": "bottom_left",
-            "parts": part_meta, "plants": entry.get("plants", [])}
+            "parts": part_meta, "plants": entry.get("plants") or json.loads(scene.get("rig_plants", "[]"))}
     problems = v3.validate_rigset(meta, sheet.shape)
     if problems and not preview:
         raise AssetError(f"{key}: " + "; ".join(problems))

@@ -1,0 +1,230 @@
+{
+  "key": "flora/earth/rigset",
+  "style": "v3",
+  "ppu": 64,
+  "rect_origin": "bottom_left",
+  "parts": [
+    {
+      "name": "eyes_blink",
+      "rect": [
+        72,
+        8,
+        28,
+        12
+      ],
+      "pivot": [
+        0.4434,
+        0.5276
+      ]
+    },
+    {
+      "name": "eyes_open",
+      "rect": [
+        208,
+        56,
+        28,
+        20
+      ],
+      "pivot": [
+        0.4459,
+        0.4569
+      ]
+    },
+    {
+      "name": "head",
+      "rect": [
+        0,
+        24,
+        52,
+        52
+      ],
+      "pivot": [
+        0.4876,
+        0.168
+      ]
+    },
+    {
+      "name": "leaf_l",
+      "rect": [
+        120,
+        48,
+        40,
+        28
+      ],
+      "pivot": [
+        0.8031,
+        0.3789
+      ]
+    },
+    {
+      "name": "leaf_r",
+      "rect": [
+        164,
+        48,
+        40,
+        28
+      ],
+      "pivot": [
+        0.1781,
+        0.3789
+      ]
+    },
+    {
+      "name": "mouth_giggle",
+      "rect": [
+        24,
+        4,
+        20,
+        16
+      ],
+      "pivot": [
+        0.4928,
+        0.4544
+      ]
+    },
+    {
+      "name": "mouth_smile",
+      "rect": [
+        48,
+        4,
+        20,
+        16
+      ],
+      "pivot": [
+        0.4607,
+        0.3848
+      ]
+    },
+    {
+      "name": "mouth_yawn",
+      "rect": [
+        0,
+        0,
+        20,
+        20
+      ],
+      "pivot": [
+        0.4199,
+        0.4991
+      ]
+    },
+    {
+      "name": "stem_lower",
+      "rect": [
+        56,
+        24,
+        28,
+        52
+      ],
+      "pivot": [
+        0.4222,
+        0.2273
+      ]
+    },
+    {
+      "name": "stem_upper",
+      "rect": [
+        88,
+        28,
+        28,
+        48
+      ],
+      "pivot": [
+        0.471,
+        0.2465
+      ]
+    }
+  ],
+  "plants": [
+    {
+      "name": "snoozle",
+      "bones": [
+        {
+          "name": "root",
+          "part": "stem_lower",
+          "parent": null,
+          "length": 0.42,
+          "order": 0
+        },
+        {
+          "name": "leaf_l",
+          "part": "leaf_l",
+          "parent": "root",
+          "length": 0.3,
+          "offset_m": [
+            0.0,
+            0.2
+          ],
+          "order": 1
+        },
+        {
+          "name": "leaf_r",
+          "part": "leaf_r",
+          "parent": "root",
+          "length": 0.3,
+          "offset_m": [
+            0.0,
+            0.28
+          ],
+          "order": 2
+        },
+        {
+          "name": "stem2",
+          "part": "stem_upper",
+          "parent": "root",
+          "length": 0.36,
+          "order": 3
+        },
+        {
+          "name": "head",
+          "part": "head",
+          "parent": "stem2",
+          "length": 0.3,
+          "order": 4
+        }
+      ],
+      "swaps": {
+        "eyes": [
+          "eyes_open",
+          "eyes_blink"
+        ],
+        "mouth": [
+          "mouth_smile",
+          "mouth_yawn",
+          "mouth_giggle"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "eyes",
+          "bone": "head",
+          "offset_m": [
+            0.0,
+            0.32
+          ],
+          "order": 5
+        },
+        {
+          "slot": "mouth",
+          "bone": "head",
+          "offset_m": [
+            0.0,
+            0.19
+          ],
+          "order": 6
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 12,
+        "beat_bpm": 110,
+        "squash": 0.08
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_look",
+        "swap": "mouth_giggle"
+      }
+    }
+  ]
+}
