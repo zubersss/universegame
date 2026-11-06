@@ -67,7 +67,7 @@ VENUS_TILES = [
     ("vent_mouth",   {"recipe": "stone", "dark": [38, 18, 14], "light": [84, 38, 24], "crack_col": [255, 126, 44], "crack_k": 0.95, "pits": True}, 0.35,
                      {"color": [255, 128, 46], "from": "light", "k": 1.0}),
     ("lava_crust",   {"recipe": "stone", "dark": [24, 21, 21], "light": [58, 49, 46], "crack_col": [92, 44, 26], "crack_k": 0.6, "pits": True}, 0.3),
-    ("spare",        {"recipe": "soil", "dark": [100, 100, 100], "light": [120, 120, 120], "pebble_thresh": 3.0}, 0.2),
+    ("sulfur_rim",   {"recipe": "soil", "dark": [198, 178, 98], "light": [240, 228, 156], "pebble_light": [250, 244, 206], "pebble_dark": [160, 132, 60], "pebble_size": 4, "pebble_thresh": 1.3}, 0.35),
 ]
 TILE_SETS = {"earth": TILES, "mars": MARS_TILES, "mercury": MERCURY_TILES, "venus": VENUS_TILES}
 CURRENT = "earth"                                  # build_flora sets this while building a planet's set

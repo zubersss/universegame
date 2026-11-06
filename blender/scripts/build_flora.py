@@ -424,51 +424,121 @@ def ice_pocket(coll, rnd):
                      "ice_dirty", "sph", _STILL))
 
 
+def _hex_column(coll, x, y, r, h, tile, rnd, tilt=0.0, yaw=0.0, steps=3):
+    """One basalt column as stacked hexagonal segments whose tops break at different heights
+    (the stepped, broken crowns of a real colonnade); `tilt` leans the whole column."""
+    z = 0.0
+    hs = [h * f for f in (0.55, 0.28, 0.17)][:steps]
+    for k, hk in enumerate(hs):
+        rk = r * (1.0 - 0.06 * k)
+        dx = (k * 0.35 * r) * math.cos(yaw) if k else 0.0            # upper segments sit off-axis: a broken step
+        dy = (k * 0.35 * r) * math.sin(yaw) if k else 0.0
+        ob = cyl(coll, rk, rk * rnd.uniform(0.9, 1.0), hk, (x + dx + math.sin(tilt) * (z + hk / 2), y + dy, (z + hk / 2) * math.cos(tilt)),
+                 6, rot=(0, tilt, yaw))
+        _flat(finish(ob, tile, "cyl", _STILL))
+        z += hk
+        if rnd.random() < 0.45:                                      # some columns stop early (sheared)
+            break
+
+
 def basalt_columns(coll, rnd, n, hmax, seed):
-    """Columnar basalt: a cluster of hexagonal prisms of stepped heights (Venus vent fields)."""
+    """Columnar basalt (B-101 round 2): a cluster of 5-9 hexagonal prisms with broken stepped
+    tops, one tilted outlier leaning out of the cluster, and a rubble skirt of fallen segments."""
     rnd = random.Random(seed)
-    cells = [(0, 0)] + [(0.46 * math.cos(a), 0.46 * math.sin(a)) for a in (0, 1.05, 2.09, 3.14, 4.19, 5.24)]
+    cells = [(0.0, 0.0)] + [(0.5 * math.cos(a), 0.5 * math.sin(a)) for a in (0.0, 1.05, 2.09, 3.14, 4.19, 5.24)]
+    cells += [(1.0 * math.cos(a), 1.0 * math.sin(a)) for a in (0.5, 2.6, 4.7)]
     for k, (x, y) in enumerate(cells[:n]):
-        h = hmax * (1.0 if k == 0 else rnd.uniform(0.45, 0.85))
-        ob = cyl(coll, 0.26, 0.24, h, (x, y, h / 2), 6, rot=(0, 0, rnd.uniform(-0.1, 0.1)))
-        _flat(finish(ob, "basalt_column", "cyl", _STILL))
+        h = hmax * (1.0 if k == 0 else rnd.uniform(0.4, 0.9))
+        _hex_column(coll, x, y, rnd.uniform(0.2, 0.28), h, "basalt_column", rnd, yaw=rnd.uniform(0, 6.28), steps=3)
+    ox, oy = 0.75 * math.cos(1.8), 0.75 * math.sin(1.8)              # the tilted outlier, leaning outward
+    _hex_column(coll, ox, oy, 0.22, hmax * 0.7, "basalt_column", rnd, tilt=0.42, yaw=1.8, steps=2)
+    for k in range(4):                                               # fallen segments at the foot
+        a = rnd.uniform(0, 6.28)
+        ob = cyl(coll, 0.18, 0.17, rnd.uniform(0.25, 0.5), (1.1 * math.cos(a), 0.9 * math.sin(a), 0.16), 6,
+                 rot=(math.radians(90), 0, a))
+        _flat(finish(ob, "basalt", "cyl", _STILL))
 
 
 def tessera_slab(coll, rnd):
-    """A tilted, deeply cracked highland slab (tesserae)."""
+    """Tessera (B-101 round 2): a tilted highland slab with a ridged, cracked top (a displaced
+    cap over the block) and a second slab leaning on it."""
     bpy.ops.mesh.primitive_cube_add(size=1.0, location=(0, 0, 0))
     ob = _own(coll, bpy.context.active_object)
-    ob.scale = (1.7, 0.95, 0.36)
-    ob.rotation_euler = (0.08, 0.2, 0.35)
-    ob.location = (0, 0, 0.3)
+    ob.scale = (1.7, 0.95, 0.3)
+    ob.rotation_euler = (0.06, 0.16, 0.35)
+    ob.location = (0, 0, 0.22)
     bev = ob.modifiers.new("bev", "BEVEL")
-    bev.width, bev.segments = 0.06, 2
+    bev.width, bev.segments = 0.05, 2
     _flat(finish(ob, "tessera", "sph", _STILL))
-    finish(blob(coll, 0.4, (0.55, -0.3, 0.14), (1.2, 1.0, 0.5), 2, seed=93, rough=0.4), "tessera", "sph", _STILL)
+    cap = blob(coll, 1.0, (0.02, 0.0, 0.42), (0.86, 0.5, 0.16), 3, seed=93, rough=0.5)      # ridged cracked top
+    cap.rotation_euler = (0.06, 0.16, 0.35)
+    finish(cap, "tessera", "sph", _STILL)
+    for k in range(5):                                               # parallel ridges across the top
+        t = -0.6 + 0.3 * k
+        ob = cyl(coll, 0.05, 0.03, 0.9, (t * math.cos(0.35), t * math.sin(0.35), 0.5 + 0.16 * t), 6,
+                 rot=(math.radians(90), 0, 0.35 + math.radians(90)))
+        _flat(finish(ob, "tessera", "cyl", _STILL))
+    side = blob(coll, 0.45, (0.9, -0.5, 0.2), (1.3, 0.8, 0.45), 2, seed=94, rough=0.4)         # the leaning second slab
+    side.rotation_euler = (0.3, 0.1, 0.9)
+    finish(side, "tessera", "sph", _STILL)
 
 
 def sulfur_crust(coll, rnd):
-    """Low sulfur crust mound with pyrite 'frost' lumps."""
-    finish(blob(coll, 1.0, (0, 0, 0.1), (1.6, 1.25, 0.3), 3, seed=94, rough=0.5), "sulfur", "sph", _STILL)
-    for k in range(6):
-        a = rnd.uniform(0, 6.28)
-        r = rnd.uniform(0.08, 0.16)
-        finish(blob(coll, r, (0.6 * math.cos(a) * rnd.uniform(0.3, 1), 0.45 * math.sin(a), 0.18), (1, 1, 0.8), 1, seed=95 + k, rough=0.3),
-               "sulfur", "sph", _STILL)
+    """Sulfur crust (B-101 round 2): a low mound carrying raised, cracked crust plates (0.1-0.2 m
+    relief) with brighter pyrite-flecked rims (the sulfur_rim tile), tilted every which way."""
+    finish(blob(coll, 1.0, (0, 0, 0.08), (1.6, 1.25, 0.26), 2, seed=95, rough=0.4), "sulfur", "sph", _STILL)
+    for k in range(9):
+        a = k * 0.7 + rnd.uniform(-0.2, 0.2)
+        rr = 0.0 if k == 0 else rnd.uniform(0.45, 1.05)
+        x, y = rr * math.cos(a) * 1.2, rr * math.sin(a) * 0.9
+        r, h = rnd.uniform(0.26, 0.42), rnd.uniform(0.1, 0.2)
+        z = 0.2 - 0.12 * rr + h / 2
+        rot = (rnd.uniform(-0.2, 0.2), rnd.uniform(-0.2, 0.2), rnd.uniform(0, 6.28))
+        rim = cyl(coll, r * 1.08, r * 1.02, h, (x, y, z), rnd.choice((5, 6, 7)), rot=rot)
+        _flat(finish(rim, "sulfur_rim", "cyl", _STILL))
+        top = cyl(coll, r * 0.82, r * 0.86, h * 0.5, (x, y, z + h * 0.42), 6, rot=rot)
+        _flat(finish(top, "sulfur", "cyl", _STILL))
 
 
 def vent_chimney(coll, rnd):
-    """A 1.6 m cooled-lava chimney with an emissive vent mouth (the atlas vent_mouth tile glows)."""
-    finish(cyl(coll, 0.6, 0.34, 1.3, (0, 0, 0.65), 12), "lava_crust", "cyl", _STILL)
-    finish(blob(coll, 0.55, (0, 0, 0.16), (1.5, 1.4, 0.45), 2, seed=96, rough=0.45), "lava_crust", "sph", _STILL)
-    finish(cyl(coll, 0.36, 0.22, 0.32, (0, 0, 1.42), 12), "vent_mouth", "cyl", _STILL)
-    finish(cyl(coll, 0.2, 0.12, 0.1, (0, 0, 1.56), 10), "vent_mouth", "cyl", _STILL)
+    """Vent chimney (B-101 round 2): a built-up cone of cooled lava with an irregular lumpy rim,
+    a sag on one side where the wall slumped, and a recessed glowing mouth (vent_mouth tile,
+    emissive) with glow spill over the lip."""
+    finish(blob(coll, 0.6, (0, 0, 0.16), (1.6, 1.45, 0.5), 2, seed=96, rough=0.45), "lava_crust", "sph", _STILL)
+    body = cyl(coll, 0.62, 0.36, 1.25, (0, 0, 0.62), 12)
+    finish(body, "lava_crust", "cyl", _STILL)
+    for k in range(10):                                              # rim lumps at uneven heights; the sag side sits lower
+        a = k * 0.628 + rnd.uniform(-0.15, 0.15)
+        sag = 0.5 * max(0.0, math.cos(a - 2.2)) ** 2                 # the slumped side
+        r = rnd.uniform(0.11, 0.18)
+        lump = blob(coll, r, (0.33 * math.cos(a), 0.33 * math.sin(a), 1.2 + rnd.uniform(0.0, 0.16) - 0.28 * sag), (1.1, 1.0, 0.8), 1,
+                    seed=100 + k, rough=0.35)
+        finish(lump, "lava_crust", "sph", _STILL)
+    slump = blob(coll, 0.3, (0.5 * math.cos(2.2), 0.5 * math.sin(2.2), 0.72), (1.3, 1.0, 1.4), 1, seed=111, rough=0.3)
+    finish(slump, "lava_crust", "sph", _STILL)
+    mouth = cyl(coll, 0.3, 0.16, 0.5, (0, 0, 1.0), 12)              # recessed glowing throat
+    finish(mouth, "vent_mouth", "cyl", _STILL)
+    for k in range(4):                                               # glow spill over the lip
+        a = rnd.uniform(0, 6.28)
+        finish(blob(coll, 0.09, (0.3 * math.cos(a), 0.3 * math.sin(a), 1.2), (1.4, 1.2, 0.5), 1, seed=120 + k, rough=0.0),
+               "vent_mouth", "sph", _STILL)
 
 
 def lava_blister(coll, rnd):
-    """A cooled lava blister: a cracked dome with a glassy sag at the crown."""
-    finish(blob(coll, 1.0, (0, 0, 0.12), (1.35, 1.15, 0.5), 3, seed=97, rough=0.22), "lava_crust", "sph", _STILL)
-    finish(blob(coll, 0.3, (0.2, 0.1, 0.5), (1.4, 1.0, 0.35), 1, seed=98, rough=0.35), "vent_glass", "sph", _STILL)
+    """Lava blister (B-101 round 2): a cracked, cooled dome whose seams still glow (vent_mouth
+    tile, emissive) in a radial crack pattern, with a glassy sag at the crown."""
+    finish(blob(coll, 1.0, (0, 0, 0.1), (1.35, 1.15, 0.52), 3, seed=97, rough=0.28), "lava_crust", "sph", _STILL)
+    for k in range(7):                                               # glowing seams radiating from the crown
+        a = k * 0.9 + rnd.uniform(-0.25, 0.25)
+        ln = rnd.uniform(0.5, 0.95)
+        mid = 0.5 * ln
+        x, y = mid * 1.35 * math.cos(a) + 0.1, mid * 1.15 * math.sin(a) + 0.05
+        z = 0.1 + 0.52 * math.sqrt(max(0.0, 1.0 - (mid * 1.0) ** 2)) * 0.95
+        pitch = math.atan2(0.52 * mid, math.sqrt(max(1e-3, 1.0 - mid * mid)))     # follow the dome's slope
+        ob = cyl(coll, 0.03, 0.025, ln * 1.25, (x, y, z), 4, rot=(0, math.radians(90) - 0.0, a))
+        ob.rotation_euler = (0, math.radians(90) + pitch * 0.9, a)
+        finish(ob, "vent_mouth", "cyl", _STILL)
+    finish(blob(coll, 0.28, (0.1, 0.05, 0.58), (1.3, 1.0, 0.3), 1, seed=98, rough=0.3), "vent_glass", "sph", _STILL)
 
 
 MERCURY_SCENERY = {
@@ -482,8 +552,8 @@ MERCURY_SCENERY = {
     "ice_pocket": ice_pocket,
 }
 VENUS_SCENERY = {
-    "column_a": lambda c, r: basalt_columns(c, r, 7, 1.9, 110),
-    "column_b": lambda c, r: basalt_columns(c, r, 4, 1.2, 111),
+    "column_a": lambda c, r: basalt_columns(c, r, 9, 1.9, 110),
+    "column_b": lambda c, r: basalt_columns(c, r, 5, 1.3, 111),
     "tessera_slab": tessera_slab,
     "sulfur_crust": sulfur_crust,
     "vent_chimney": vent_chimney,
