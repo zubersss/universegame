@@ -20,6 +20,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 119ec32efb2be0048864f3de82ef1be7
+    m_Address: creatures/venus/veil_serpent_head
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1c1c280d4ccfc654b978ecd372bec5a2
     m_Address: creatures/venus/acidmoth
     m_ReadOnly: 0
@@ -115,6 +120,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7a6bc6dab9ca974469147e1243eebbce
+    m_Address: creatures/venus/veil_serpent_head
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7e7faf64851497740a23074faa96e0ff
     m_Address: creatures/venus/veil_serpent
     m_ReadOnly: 0
@@ -127,6 +137,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8c3b13ccfdd73784098499ea0765558c
     m_Address: props/venus/aerostat_balloon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 913b7ad0aada57f4f953c05ba834f160
+    m_Address: creatures/venus/veil_serpent_head
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -147,6 +162,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a646208def30aeb4ca68278adae36f6b
     m_Address: creatures/venus/vent_eel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a9ee8e9585dd6c3438d458717682dbc5
+    m_Address: creatures/venus/veil_serpent_body
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -210,8 +230,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e4f0ccd077c8d944a9316326c688728a
+    m_Address: creatures/venus/veil_serpent_body
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e662c2777cecd6140b0879adcb6ff8e7
     m_Address: props/venus/railing
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e916dd222dd295744b691708df18ff4c
+    m_Address: creatures/venus/veil_serpent_body
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

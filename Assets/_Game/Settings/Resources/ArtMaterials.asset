@@ -301,6 +301,7 @@ MonoBehaviour:
   - creatures/earth/wolf
   - creatures/mars/dustskater
   - creatures/mars/scree_stalker
+  - creatures/mercury/cinderhulk
   - creatures/mercury/cinderhulk_day
   - creatures/mercury/cinderhulk_night
   - creatures/mercury/cinderling
@@ -312,6 +313,8 @@ MonoBehaviour:
   - creatures/venus/pressure_crab
   - creatures/venus/sulfur_drifter
   - creatures/venus/veil_serpent
+  - creatures/venus/veil_serpent_body
+  - creatures/venus/veil_serpent_head
   - creatures/venus/vent_eel
   - creatures/warden/hunter
   - creatures/warden/sentinel
@@ -1018,6 +1021,29 @@ MonoBehaviour:
       start: 0
       length: 30
       loop: 0
+  - key: creatures/mercury/cinderhulk
+    fps: 30
+    clips:
+    - name: idle
+      start: 0
+      length: 36
+      loop: 1
+    - name: walk
+      start: 0
+      length: 24
+      loop: 1
+    - name: attack
+      start: 0
+      length: 18
+      loop: 0
+    - name: hurt
+      start: 0
+      length: 8
+      loop: 0
+    - name: death
+      start: 0
+      length: 30
+      loop: 0
   - key: creatures/mercury/cinderling
     fps: 30
     clips:
@@ -1191,6 +1217,60 @@ MonoBehaviour:
       start: 0
       length: 24
       loop: 1
+  - key: creatures/venus/veil_serpent_body
+    fps: 30
+    clips:
+    - name: idle
+      start: 0
+      length: 36
+      loop: 1
+    - name: walk
+      start: 0
+      length: 24
+      loop: 1
+    - name: fly
+      start: 0
+      length: 24
+      loop: 1
+    - name: attack
+      start: 0
+      length: 18
+      loop: 0
+    - name: hurt
+      start: 0
+      length: 8
+      loop: 0
+    - name: death
+      start: 0
+      length: 30
+      loop: 0
+  - key: creatures/venus/veil_serpent_head
+    fps: 30
+    clips:
+    - name: idle
+      start: 0
+      length: 36
+      loop: 1
+    - name: walk
+      start: 0
+      length: 24
+      loop: 1
+    - name: fly
+      start: 0
+      length: 24
+      loop: 1
+    - name: attack
+      start: 0
+      length: 18
+      loop: 0
+    - name: hurt
+      start: 0
+      length: 8
+      loop: 0
+    - name: death
+      start: 0
+      length: 30
+      loop: 0
   - key: creatures/venus/vent_eel
     fps: 30
     clips:

@@ -40,6 +40,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 11e467c22b311a749870ce99927a16fa
+    m_Address: creatures/mercury/cinderhulk
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 12fc45d20e3b49b4985f1e8ab96cbd55
     m_Address: props/mercury/shelter_door
     m_ReadOnly: 0
@@ -165,6 +170,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8594e86c9e1601144a958f5eb40660f9
+    m_Address: creatures/mercury/cinderhulk
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8616caaa1eb6cd3488511e6a92f9765c
     m_Address: props/mercury/solarite_crusted
     m_ReadOnly: 0
@@ -217,6 +227,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b7df9063282463b4c9fc8485ae349c04
     m_Address: props/mercury/solarite_cluster
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b8e7431b26e741a4394ca12fd13f540f
+    m_Address: creatures/mercury/cinderhulk
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
