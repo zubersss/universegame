@@ -1,5 +1,5 @@
 # LEAD STATUS
-Updated: 2026-11-06 00:2x · Session: 3 (Fable 5.1), resumed after a 3-day gap · Review cycle: 207
+Updated: 2026-11-06 00:3x · Session: 3 (Fable 5.1), resumed after a 3-day gap · Review cycle: 207
 ## Current task
 R1 close: U-076 Done (cycle 209). B-102 (ridge band fix) is the R1 art blocker, then U-077 builds 0.4.0 → R1 report + milestone page + owner playtest. BLENDER: commit B-092 exports and B-094 sources, then B-094 export when the gate opens (≥ 2.0 GB for 2048² bakes, D-066).
 ## Last completed
@@ -9,7 +9,7 @@ Review B-102 turntables on BLENDER's hand-off (smooth, short, hazed tree line); 
 ## Pending decisions
 none. Contract v2.4 current (D-072).
 ## Waiting on the user
-USER-19 (Windows Update holding 1.36 GB; restart notice if asked), USER-08 optional. USER-18 done (apps closed).
+nothing (USER-19 resolved itself: the update finished 00:24), USER-08 optional.
 ## Loop / stall watch
 Memory back to 1.89 GB at 23:5x. UNITY holds the older want (23:49) for the u076b capture + U-077 profile/smoke; BLENDER next (B-094 export, 2.0 GB). Watch: U-076 capture within one cycle; B-094 export does not start before UNITY's job.
 ## Session addresses (ListAgents, 11-05)
