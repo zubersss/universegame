@@ -69,7 +69,7 @@ def spiral(cx, cz, r, turns=2.2, n=40):
 
 def draw_surveyor(d, M, pose=None, seed=0):
     p = dict(view="side", expr="happy", bob=0.0, sz=1.0, lean=0.0, legs=((0.0, 0.0), (0.0, 0.0)),
-             arms=(0.0, 0.0), look=None, blink=0.0, bob_tip=0.0, pack_swing=0.0, pack_dz=0.0, hose_lag=0.0, puff=0.0)
+             arms=(0.0, 0.0), look=None, blink=0.0, bob_tip=0.0, pack_swing=0.0, pack_dz=0.0, hose_lag=0.0, puff=0.0, star_rot=0.6, speed=0.0)
     p.update(pose or {})
     view, expr = p["view"], p["expr"]
     face_dir = {"side": 1.0, "tq": 0.55, "front": 0.0}[view]
@@ -255,9 +255,15 @@ def draw_surveyor(d, M, pose=None, seed=0):
     G.stroke(d, G.lumpy_ellipse(tip[0], tip[1] + 0.01, 0.10, 0.06, n=16, lump=0.03, seed=seed + 7)[:9] + [(tip[0] - 0.06, tip[1] - 0.05), (tip[0], tip[1] - 0.17), (tip[0] + 0.06, tip[1] - 0.05)], M["teal"], O, cyclic=True)
     if expr == "dizzy":
         for k in range(3):
-            a = 0.6 + 2.1 * k
+            a = p["star_rot"] + 2.1 * k
             G.stroke(d, star(hc[0] + 0.52 * math.cos(a), hc[1] + 0.30 + 0.12 * math.sin(a), 0.08, rot=a, seed=k),
                      M["star"], I, cyclic=True)
+    # dash speed lines: three bowed ink streaks trailing the body
+    if p["speed"] > 0:
+        for k, z in enumerate((0.62, 0.98, 1.42)):
+            x0 = -0.48 - 0.06 * k
+            G.stroke(d, G.bowed_line((x0, z + p["bob"]), (x0 - 0.30 * p["speed"] - 0.06 * k, z + p["bob"] + 0.02), bow=0.04, n=8),
+                     M["ink"], I)
     # landing smoke puffs: round cartoon clouds rolling out from both boots
     if p["puff"] > 0:
         t = p["puff"]
@@ -274,7 +280,8 @@ DESIGN = [("side", "happy"), ("front", "happy"), ("tq", "happy"),
 DESIGN_OUT = os.path.join(os.path.dirname(HERE), "sources", "characters", "surveyor_v3_design.blend")
 
 # characters/surveyor/side clips (contract §11.2 caps; LEAD cycle 233 counts)
-CLIPS = [("idle", 10), ("walk", 12), ("jump", 8), ("land", 8), ("look_camera", 12)]
+CLIPS = [("idle", 10), ("walk", 12), ("jump", 8), ("land", 8), ("look_camera", 12),
+         ("bump", 10), ("conk_out", 12), ("run", 12), ("fall", 8), ("dash", 6)]          # B-116 appended
 TAU = 2 * math.pi
 
 
@@ -327,6 +334,57 @@ def look_pose(i):
                 pack_swing=[0.0, 0.06, 0.08, -0.03, 0.02, 0.0, 0.0, 0.0, 0.0, 0.0, -0.06, -0.02][i])
 
 
+# ---- B-116: bump, conk_out, run, fall, dash (same sheet key; contract caps bump <= 10, conk_out <= 12)
+BUMP = [dict(expr="surprised", sz=0.82, lean=-0.26, bob=-0.03, legs=((-0.14, 0.0), (-0.04, 0.06)), arms=(2.2, 1.8), pack_swing=0.25, pack_dz=0.05, hose_lag=0.08, bob_tip=-0.16),
+        dict(expr="surprised", sz=1.10, lean=-0.30, legs=((-0.18, 0.0), (-0.10, 0.0)), arms=(2.0, 1.6), pack_swing=0.18, pack_dz=0.02, hose_lag=0.06, bob_tip=-0.12),
+        dict(expr="dizzy", sz=0.92, lean=-0.14, star_rot=0.0, arms=(0.9, 0.6), pack_swing=0.05, hose_lag=0.03, bob_tip=0.08),
+        dict(expr="dizzy", sz=1.03, lean=0.06, star_rot=0.7, arms=(0.4, 0.2), pack_swing=-0.08, hose_lag=-0.03, bob_tip=0.12),
+        dict(expr="dizzy", sz=0.98, lean=-0.06, star_rot=1.4, arms=(0.2, 0.4), pack_swing=0.08, hose_lag=0.04, bob_tip=-0.08),
+        dict(expr="dizzy", sz=1.02, lean=0.05, star_rot=2.1, arms=(0.3, 0.1), pack_swing=-0.06, hose_lag=-0.03, bob_tip=0.06),
+        dict(expr="dizzy", sz=0.99, lean=-0.03, star_rot=2.8, arms=(0.1, 0.2), pack_swing=0.04, hose_lag=0.02, bob_tip=-0.04),
+        dict(expr="dizzy", sz=1.0, lean=0.02, star_rot=3.5, pack_swing=-0.02, bob_tip=0.03),
+        dict(sz=1.03, blink=1.0, pack_swing=0.02, bob_tip=-0.02),
+        dict(sz=1.0)]
+
+CONK = [dict(expr="dizzy", star_rot=0.0, lean=0.08, sz=1.02, arms=(0.3, -0.2), bob_tip=-0.06, pack_swing=-0.05),
+        dict(expr="dizzy", star_rot=0.7, lean=-0.10, sz=0.98, arms=(-0.2, 0.4), bob_tip=0.08, pack_swing=0.08),
+        dict(expr="dizzy", star_rot=1.4, lean=0.13, sz=1.03, arms=(0.4, -0.3), bob_tip=-0.10, pack_swing=-0.10),
+        dict(expr="dizzy", star_rot=2.1, lean=-0.15, sz=0.97, arms=(-0.3, 0.5), bob_tip=0.12, pack_swing=0.12),
+        dict(expr="dizzy", star_rot=2.8, lean=0.10, sz=1.06, bob=0.02, arms=(0.6, 0.5), bob_tip=-0.08, pack_swing=-0.06),
+        dict(expr="dizzy", star_rot=3.5, sz=0.86, bob=-0.08, legs=((0.06, 0.0), (0.10, 0.0)), arms=(0.2, 0.1), bob_tip=0.06, pack_dz=0.04),
+        dict(expr="dizzy", star_rot=4.2, sz=0.74, bob=-0.18, lean=-0.06, legs=((0.12, 0.0), (0.18, 0.0)), arms=(-0.2, -0.1), bob_tip=0.10, pack_dz=0.06, hose_lag=0.05),
+        dict(expr="dizzy", star_rot=4.9, sz=0.64, bob=-0.28, lean=-0.14, legs=((0.20, 0.0), (0.26, 0.0)), arms=(-0.5, -0.3), bob_tip=0.12, pack_dz=0.03, hose_lag=0.06, puff=0.2),
+        dict(expr="dizzy", star_rot=5.6, sz=0.60, bob=-0.33, lean=-0.18, legs=((0.24, 0.0), (0.30, 0.0)), arms=(-0.6, -0.4), bob_tip=0.06, pack_dz=-0.02, hose_lag=0.02, puff=0.5),
+        dict(expr="dizzy", star_rot=6.3, sz=0.62, bob=-0.33, lean=-0.17, legs=((0.24, 0.0), (0.30, 0.0)), arms=(-0.6, -0.4), bob_tip=-0.03, puff=0.8),
+        dict(expr="dizzy", star_rot=7.0, sz=0.61, bob=-0.33, lean=-0.18, legs=((0.24, 0.0), (0.30, 0.0)), arms=(-0.6, -0.4), bob_tip=0.01, puff=1.0),
+        dict(expr="dizzy", star_rot=7.7, sz=0.61, bob=-0.33, lean=-0.18, legs=((0.24, 0.0), (0.30, 0.0)), arms=(-0.6, -0.4), blink=0.6)]
+
+
+def run_pose(i):
+    ph = TAU * i / 12
+    legs = tuple((0.38 * math.sin(ph + math.pi * k), max(0.0, 0.24 * math.cos(ph + math.pi * k))) for k in range(2))
+    return dict(legs=legs, bob=0.09 * abs(math.cos(ph)) - 0.03, sz=1.0 + 0.08 * math.cos(2 * ph), lean=0.22,
+                arms=(1.1 * math.sin(ph), -1.1 * math.sin(ph)), expr="determined",
+                pack_swing=0.20 * math.sin(2 * ph - 1.0) + 0.12, pack_dz=0.05 * math.cos(2 * ph - 1.0),
+                hose_lag=0.08 * math.sin(2 * ph - 1.8), bob_tip=0.12 + 0.05 * math.sin(2 * ph - 1.4), look=(0.7, 0.0))
+
+
+def fall_pose(i):
+    ph = TAU * i / 8
+    return dict(expr="surprised", sz=1.06 + 0.02 * math.sin(ph), bob=0.04,
+                legs=((-0.08 + 0.05 * math.sin(ph), 0.22 + 0.04 * math.cos(ph)), (0.08 - 0.05 * math.sin(ph), 0.26 - 0.04 * math.cos(ph))),
+                arms=(2.6 + 0.15 * math.sin(ph), 2.4 - 0.15 * math.sin(ph)), pack_swing=-0.10 + 0.05 * math.sin(ph - 0.8),
+                pack_dz=0.06, hose_lag=-0.09 + 0.03 * math.sin(ph - 1.6), bob_tip=-0.10 + 0.04 * math.sin(ph - 1.2))
+
+
+DASH = [dict(sz=0.86, lean=0.20, legs=((-0.10, 0.0), (0.04, 0.0)), arms=(-0.8, -0.6), expr="determined", pack_swing=-0.05, bob_tip=0.06),
+        dict(sz=0.74, lean=0.38, bob=0.03, legs=((-0.30, 0.18), (-0.12, 0.12)), arms=(-1.3, -1.1), expr="determined", speed=0.6, pack_swing=-0.30, pack_dz=0.04, hose_lag=0.10, bob_tip=0.22),
+        dict(sz=0.72, lean=0.40, bob=0.03, legs=((-0.32, 0.18), (-0.14, 0.12)), arms=(-1.35, -1.15), expr="determined", speed=1.0, pack_swing=-0.34, pack_dz=0.04, hose_lag=0.12, bob_tip=0.24),
+        dict(sz=0.76, lean=0.36, bob=0.03, legs=((-0.28, 0.16), (-0.10, 0.10)), arms=(-1.2, -1.0), expr="determined", speed=0.8, pack_swing=-0.28, pack_dz=0.03, hose_lag=0.10, bob_tip=0.20),
+        dict(sz=0.92, lean=0.22, legs=((-0.16, 0.04), (0.02, 0.0)), arms=(-0.6, -0.4), expr="determined", speed=0.3, pack_swing=-0.10, hose_lag=0.04, bob_tip=0.08),
+        dict(sz=1.04, lean=0.10, arms=(-0.2, -0.1), pack_swing=0.06, hose_lag=-0.02, bob_tip=-0.04)]
+
+
 def build(out=DEFAULT_OUT):
     """characters/surveyor/side: the step-2 clips, one drawing per frame at 12 fps."""
     scene = G.new_scene()
@@ -335,7 +393,8 @@ def build(out=DEFAULT_OUT):
     M = materials(gp)
     layer = gp.layers.new("art")
     poses = [idle_pose(i) for i in range(10)] + [walk_pose(i) for i in range(12)] + JUMP + LAND + \
-        [look_pose(i) for i in range(12)]
+        [look_pose(i) for i in range(12)] + BUMP + CONK + [run_pose(i) for i in range(12)] + \
+        [fall_pose(i) for i in range(8)] + DASH
     for f, pose in enumerate(poses):
         draw_surveyor(G.drawing(layer, f + 1), M, pose, seed=7 * f)
     G.mark_clips(scene, CLIPS)
