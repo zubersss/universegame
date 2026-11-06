@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: planet_mercury_twilight
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: planet_mercury_twilight
+  m_GUID: cb27bd55a48107242b7386994719a6b7
+  m_SerializeEntries:
+  - m_GUID: 0f7719375b7e6e4479fa59c5d2fac301
+    m_Address: backgrounds/mercury_twilight/ridge_mid
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 215df0f0bc60ae34f8c779b1b34d7221
+    m_Address: backgrounds/mercury_twilight/ridge_mid
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: abb4281a4983f5a4a8ac1833f3679bbc
+    m_Address: backgrounds/mercury_twilight/ridge_mid
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b5ad50fbf0449cd42a0fedef0d8e1a9f
+    m_Address: backgrounds/mercury_twilight/skydome
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 8046636eac762b543941806f6b832275, type: 2}
+    - {fileID: 11400000, guid: a35bf2babf11fb04896d68880a823e5b, type: 2}

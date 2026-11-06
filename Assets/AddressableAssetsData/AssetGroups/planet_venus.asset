@@ -30,6 +30,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1f091211803a3eb4285712bcb672f247
+    m_Address: backgrounds/venus/skyline_far
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 26df22cb7a9e4524aa020270b209b095
     m_Address: props/venus/station_hull_b
     m_ReadOnly: 0
@@ -105,8 +110,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 78043f08f519ec445a4f6f09cd76ca76
+    m_Address: backgrounds/venus/skyline_far
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7e7faf64851497740a23074faa96e0ff
     m_Address: creatures/venus/veil_serpent
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8405d7e75a3e4e145b4b80547b762791
+    m_Address: backgrounds/venus/skyline_far
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

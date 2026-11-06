@@ -285,6 +285,13 @@ MonoBehaviour:
   - backgrounds/mars_polar/ridge_mid
   - backgrounds/mars_tharsis/ridge_mid
   - backgrounds/mars_tharsis/skyline_far
+  - backgrounds/mercury/skyline_far
+  - backgrounds/mercury_day/ridge_mid
+  - backgrounds/mercury_night/ridge_mid
+  - backgrounds/mercury_twilight/ridge_mid
+  - backgrounds/venus/skyline_far
+  - backgrounds/venus_deck/ridge_mid
+  - backgrounds/venus_surface/ridge_mid
   - characters/calibration/base
   - characters/surveyor/base
   - characters/surveyor/mk1

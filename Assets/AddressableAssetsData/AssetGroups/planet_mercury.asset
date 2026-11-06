@@ -20,6 +20,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0a0ab4c337f03be4385238cf59b26021
+    m_Address: backgrounds/mercury/skyline_far
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0aa92a0c5fe1d7941a62723897204f35
     m_Address: creatures/mercury/shadewyrm
     m_ReadOnly: 0
@@ -37,6 +42,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 12fc45d20e3b49b4985f1e8ab96cbd55
     m_Address: props/mercury/shelter_door
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1616e0c441cbc3c42b11bc7d563c13b3
+    m_Address: backgrounds/mercury/skyline_far
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -62,6 +72,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 28054e3a81105394f96a2f8a62c7f2f2
     m_Address: creatures/mercury/cinderling
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3545e02955b5d304f8a4cf268c425ade
+    m_Address: backgrounds/mercury/skyline_far
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: planet_mercury_day
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: planet_mercury_day
+  m_GUID: 26c7a823ffb98024481cda2bdc2ae4c6
+  m_SerializeEntries:
+  - m_GUID: 0af549d4561e5e84981be8c0ea04c8f0
+    m_Address: backgrounds/mercury_day/skydome
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 65de87d4c0858f14f8d08179103fd67d
+    m_Address: backgrounds/mercury_day/ridge_mid
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9e1616b7452bfe14cb704b65d00771d6
+    m_Address: backgrounds/mercury_day/ridge_mid
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c1d92df3589fc084bb798bb068d074c2
+    m_Address: backgrounds/mercury_day/ridge_mid
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: d0969b7a3b4130444abb14c4b2f66d7d, type: 2}
+    - {fileID: 11400000, guid: 29aacb18d126df64a96e9d826f9f34a9, type: 2}

@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: planet_venus_deck
   m_GUID: 16a1081e4d90f07458d408a1e03cb664
   m_SerializeEntries:
+  - m_GUID: 4b4ae7afc897b124b88615ac00944215
+    m_Address: backgrounds/venus_deck/ridge_mid
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4f9e103cdc8c0e14c97f9036a2f4a0f7
     m_Address: backgrounds/venus_deck/layer2
     m_ReadOnly: 0
@@ -27,6 +32,21 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: aa55900d7a19ee444b760f241ab51006
     m_Address: backgrounds/venus_deck/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: caf53d4f3aa7a1a4bba926bacc2f0897
+    m_Address: backgrounds/venus_deck/skydome
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e83da4a0ae5190942aad37a5eaef4b80
+    m_Address: backgrounds/venus_deck/ridge_mid
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ed491a98ad134b841b5b1a165e35b22f
+    m_Address: backgrounds/venus_deck/ridge_mid
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
