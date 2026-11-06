@@ -649,9 +649,33 @@ def do_flora_atlas(entry, preview):
     log_line(f"OK {entry['key']} | atlas 2048^2 color/normal/mask/emission, {len(FA.TILE_SETS[entry.get("set", "earth")])} tiles | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
 
 
+def do_deck_plane(entry, preview):
+    """B-097 giant deck planes: a painted cloud bank (RGBA) on a 256 x 128 m quad."""
+    t0 = time.time()
+    if preview:
+        raise AssetError(f"{entry['key']}: deck planes have no preview mode (the review sheet is written on export)")
+    import gen_deckplane as DP
+    sys.path.insert(0, HERE)
+    import review
+    stale = review.stale_keys()
+
+    def stamp(img, path):
+        review.draw(img, review.stamp_text(path), 2, img.shape[0] - 16, (1.0, 1.0, 0.85))
+        if entry["key"] in stale:
+            review.draw(img, "STALE", 2, 2, (1.0, 0.15, 0.1), scale=4)
+    info = DP.export_deck_plane(entry, ART, PREVIEW, stamp)
+    mark_stale(entry["key"], False)
+    log_line(f"OK {entry['key']} | deck plane 256x128 m, color{'+emission' if 'emission' in info['maps'] else ''} 2048x1024 RGBA, "
+             f"coverage {info['coverage']}, seam {info['seam']} | review {os.path.basename(info['review'])}"
+             f"{' + stack' if info['stack'] else ''} | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
+
+
+
 def do_asset(entry, preview):
     if entry.get("model"):
         return do_model(entry, preview)
+    if entry.get("deck_plane"):
+        return do_deck_plane(entry, preview)
     if entry.get("flora_atlas"):
         return do_flora_atlas(entry, preview)
     if entry.get("skydome"):
