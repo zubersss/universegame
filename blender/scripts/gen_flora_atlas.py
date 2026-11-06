@@ -43,14 +43,40 @@ MARS_TILES = [   # B-089 Mars set (v1 Mars recipes)
     ("dust_bush",   {"recipe": "stone", "dark": [96, 66, 50], "light": [150, 110, 82], "crack_col": [60, 40, 30], "crack_k": 0.7}, 0.1),
     ("lavatube",    {"recipe": "stone", "dark": [36, 30, 30], "light": [72, 60, 58], "crack_col": [20, 18, 18], "crack_k": 0.6, "pits": True}, 0.45),
 ]
-TILE_SETS = {"earth": TILES, "mars": MARS_TILES}
+# B-101 Mercury scenery (Bible §7.3 look: blinding regolith, black sky; palettes from the B-091 block
+# materials and the B-095 solarite). A 4th tuple element is an emission spec: colour (sRGB), which
+# part of the tile glows ("light" = the bright areas, "dark" = the dark areas), strength.
+MERCURY_TILES = [
+    ("regolith",     {"recipe": "soil", "dark": [112, 110, 116], "light": [160, 158, 162], "pebble_light": [186, 184, 188], "pebble_dark": [64, 62, 68], "pebble_thresh": 1.7}, 0.12),
+    ("basalt",       {"recipe": "stone", "dark": [52, 50, 56], "light": [86, 82, 90], "crack_col": [32, 30, 34], "crack_k": 0.5, "pits": True}, 0.25),
+    ("rim_rock",     {"recipe": "stone", "dark": [124, 120, 126], "light": [178, 174, 178], "crack_col": [70, 66, 72], "crack_k": 0.7, "strata": [0.5, 96]}, 0.18),
+    ("impact_glass", {"recipe": "stone", "dark": [18, 16, 24], "light": [72, 62, 84], "crack_col": [164, 150, 184], "crack_k": 0.55}, 0.8),
+    ("solarite",     {"recipe": "stone", "dark": [222, 184, 118], "light": [255, 238, 196], "crack_col": [196, 146, 80], "crack_k": 0.4}, 0.65,
+                     {"color": [255, 204, 120], "from": "light", "k": 1.0}),
+    ("solarite_rock", {"recipe": "stone", "dark": [44, 40, 46], "light": [80, 74, 80], "crack_col": [120, 90, 60], "crack_k": 0.6, "pits": True}, 0.3),
+    ("ice",          {"recipe": "stone", "dark": [196, 208, 226], "light": [234, 240, 248], "crack_col": [150, 170, 200], "crack_k": 0.55}, 0.6),
+    ("ice_dirty",    {"recipe": "stone", "dark": [150, 156, 168], "light": [204, 208, 216], "crack_col": [110, 116, 130], "crack_k": 0.5}, 0.45),
+]
+# B-101 Venus surface scenery (§7.4: black glassy surface lit by vents; B-091 Venus palettes).
+VENUS_TILES = [
+    ("basalt",       {"recipe": "stone", "dark": [36, 32, 30], "light": [74, 64, 58], "crack_col": [20, 18, 18], "crack_k": 0.5, "pits": True}, 0.25),
+    ("basalt_column", {"recipe": "stone", "dark": [30, 27, 26], "light": [68, 60, 54], "crack_col": [16, 14, 14], "crack_k": 0.85, "strata": [0.35, 128]}, 0.3),
+    ("tessera",      {"recipe": "stone", "dark": [92, 80, 68], "light": [138, 120, 100], "crack_col": [58, 50, 44], "crack_k": 0.75}, 0.2),
+    ("sulfur",       {"recipe": "soil", "dark": [168, 146, 70], "light": [212, 192, 110], "pebble_light": [230, 216, 150], "pebble_dark": [138, 108, 50], "pebble_size": 5, "pebble_thresh": 1.6}, 0.2),
+    ("vent_glass",   {"recipe": "stone", "dark": [14, 12, 18], "light": [78, 64, 92], "crack_col": [150, 128, 168], "crack_k": 0.45}, 0.7),
+    ("vent_mouth",   {"recipe": "stone", "dark": [38, 18, 14], "light": [84, 38, 24], "crack_col": [255, 126, 44], "crack_k": 0.95, "pits": True}, 0.35,
+                     {"color": [255, 128, 46], "from": "light", "k": 1.0}),
+    ("lava_crust",   {"recipe": "stone", "dark": [24, 21, 21], "light": [58, 49, 46], "crack_col": [92, 44, 26], "crack_k": 0.6, "pits": True}, 0.3),
+    ("spare",        {"recipe": "soil", "dark": [100, 100, 100], "light": [120, 120, 120], "pebble_thresh": 3.0}, 0.2),
+]
+TILE_SETS = {"earth": TILES, "mars": MARS_TILES, "mercury": MERCURY_TILES, "venus": VENUS_TILES}
 CURRENT = "earth"                                  # build_flora sets this while building a planet's set
-INDEX = {name: i for i, (name, _, _) in enumerate(TILES)}
+INDEX = {name: i for i, (name, *_) in enumerate(TILES)}
 
 
 def tile_rect(name, inset=12):
     """UV rect (u0, v0, u1, v1) of a tile with an inset in px; UV v=0 is the BOTTOM (Blender)."""
-    i = [n for n, _, _ in TILE_SETS[CURRENT]].index(name)
+    i = [t[0] for t in TILE_SETS[CURRENT]].index(name)
     r, c = divmod(i, GRID)
     s = N * GRID
     u0 = (c * N + inset) / s
@@ -64,7 +90,9 @@ def build_atlas(seed=8501, tiles=TILES):
     S = N * GRID
     out = {m: np.zeros((S, S, 4), np.float32) for m in ("color", "normal", "mask", "emission")}
     out["emission"][..., 3] = 1
-    for i, (name, spec, smooth) in enumerate(tiles):
+    for i, tile in enumerate(tiles):
+        name, spec, smooth = tile[:3]
+        emit = tile[3] if len(tile) > 3 else None
         face = G3.make_face(spec, seed + i, smooth, 0.4)
         r, c = divmod(i, GRID)
         ys, xs = slice(r * N, (r + 1) * N), slice(c * N, (c + 1) * N)
@@ -73,6 +101,14 @@ def build_atlas(seed=8501, tiles=TILES):
         out["normal"][ys, xs, :3] = face["normal"]
         out["normal"][ys, xs, 3] = 1
         out["mask"][ys, xs] = face["mask"]
+        if emit:                                          # B-101: emissive tiles (solarite, vent mouths)
+            lum = face["color"] @ np.array([0.30, 0.59, 0.11], np.float32)
+            lo, hi = np.percentile(lum, 8), np.percentile(lum, 92)
+            m = np.clip((lum - lo) / max(hi - lo, 1e-3), 0, 1)
+            if emit.get("from", "light") == "dark":
+                m = 1.0 - m
+            m = m ** 1.5 * float(emit.get("k", 1.0))
+            out["emission"][ys, xs, :3] = m[..., None] * (np.array(emit["color"], np.float32) / 255.0)
     return out
 
 
