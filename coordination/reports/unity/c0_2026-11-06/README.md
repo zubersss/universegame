@@ -29,3 +29,18 @@ MERIDIAN/FilmPass: grain, dust and scratches from fx/film/{grain,dust,scratches}
   MERIDIAN_URP; the cartoon camera renders no bloom post.
 - The 16:43 gate run was red on one unrelated row (entry transition 1.77 s, breakdown slower everywhere with the Editor
   at 232 MB free during the measurement); see UNITY_STATUS for the note to LEAD.
+
+## U-096 · iris wipe (16:55 capture, 16:52–16:55 check)
+
+`iris_strip.png`: six frames of the iris-out closing on the surveyor at t = 0, 0.07, 0.14, 0.21, 0.28, 0.35 s (radii
+1.021, 0.980, 0.858, 0.653, 0.368, 0.000 screen heights; accelerating close, the open is the same curve backwards).
+One full-screen quad on the transition canvas with MERIDIAN/IrisWipe (a circle cutout, no texture, 4 px soft edge).
+
+- Launch: input lock 0.3 s + iris-out on the ship + scene switch + iris-in on the ship in space: `TransitionTests`
+  measured 1.00 s (limit 1.5). Entry: the camera pushes in while the iris closes on the ship (0.35 s), the planet loads
+  while the screen is black, the iris opens on the ship flying in: 1.07 s (limit 1.5). The v3 white fades are retired.
+- ConkOut (U-093) closes the iris on the fallen surveyor and opens it at the wake.
+- Check (16:52–16:55, real graphics device): compile 0/0, EditMode 275/275 (IrisTests 3: cover radius to every
+  corner, 0.35 s close to 0 / mirrored open, shader present; FilmTests 4), PlayMode 7/8, 0 failed, 1 skipped (the
+  Editor GPU-cost test ignores itself: the number is the probe's); filter TransitionTests|WardenPlayTests|ConkOutTests|
+  FilmPlayTests|CartoonSmokeTests.
