@@ -1,4 +1,4 @@
-using System;
+while ((!world.RingsReady || !world.BeltReady) && Time.realtimeSinceStartup < until) yield return null;using System;
 using System.Collections;
 using System.IO;
 using Meridian.Core;
@@ -369,7 +369,7 @@ namespace Meridian.Tests
             var follow = cam.GetComponent<Meridian.Space.SpaceCamera>();
             if (follow != null) follow.enabled = false;
             float until = Time.realtimeSinceStartup + 15f;
-            while ((world.Rings == null || world.Rings.sprite == null || world.BeltArt.Count < Meridian.Space.SpaceWorld.AsteroidKinds) && Time.realtimeSinceStartup < until) yield return null;
+            while ((!world.RingsReady || !world.BeltReady) && Time.realtimeSinceStartup < until) yield return null;
             for (int i = 0; i < 30; i++) yield return null;
             IEnumerator Shot(string label, Vector2 at, float size)
             {
@@ -382,7 +382,7 @@ namespace Meridian.Tests
             yield return Shot("2_jupiter", world.Find("jupiter").Value.position, 110f);
             yield return Shot("3_neptune", world.Find("neptune").Value.position, 120f);
             var belt = world.BeltClusters.Count > 0 ? world.BeltClusters[0] : new Vector2(Meridian.Space.SpaceLayout.BeltInner + 300f, 0f);
-            foreach (var mr in world.BeltArt) Debug.Log($"[MERIDIAN] {mr.name}: enabled {mr.enabled} visible {mr.isVisible} verts {mr.GetComponent<MeshFilter>().sharedMesh.vertexCount} bounds {mr.bounds} mat {mr.sharedMaterial?.name} layer {mr.sortingLayerName}/{mr.sortingOrder}");
+            foreach (var k in world.Belt) Debug.Log($"[MERIDIAN] belt {k.key}: {k.count} rocks × {k.triangles} tris, mat {k.material.name}"); Debug.Log($"[MERIDIAN] belt rocks {world.BeltRocks}, rings ready {world.RingsReady} ({(world.Rings != null ? world.Rings.bounds.size.x : 0f):F1} u), shells {world.Shells.Count}");
             var fb = world.transform.Find("Belt");
             Debug.Log($"[MERIDIAN] fallback belt enabled {(fb != null ? fb.GetComponent<MeshRenderer>().enabled.ToString() : "none")}");
             yield return Shot("4_belt", belt, Meridian.Transitions.TransitionDirector.SpaceDefaultSize);

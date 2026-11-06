@@ -3,36 +3,61 @@ using Meridian.Core;
 using Meridian.Planets;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.Rendering;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.ResourceManagement.ResourceLocations;
 
 namespace Meridian.Space
 {
     /// <summary>
-    /// Builds the top-down map from SpaceLayout: Sun and planet discs (PlanetDisc shader), moons,
-    /// Atmosphere Rings, Gravity Well edges, and the belt as one mesh. Lives under SpaceRoot.
+    /// Builds the top-down map from SpaceLayout: the Sun and planets as spheroids lit from the Sun (SpaceLit,
+    /// U-078: terminator from the real Sun direction, atmosphere halo shell, cloud shell where the art has one),
+    /// moons, Saturn's ring mesh, Atmosphere Rings, Gravity Well edges, the dust belt as one mesh and the
+    /// asteroid models instanced over it. Lives under SpaceRoot.
     /// </summary>
     public sealed class SpaceWorld : MonoBehaviour
     {
         public PlanetCatalog catalog;
+        /// <summary>The v1 PlanetDisc material (SceneAuthoring still assigns it); unused since U-078.</summary>
         public Material discMaterial;
         public Material lineMaterial;
+        /// <summary>MERIDIAN/SpaceLit; Resources/SpaceLit when the scene has none.</summary>
+        public Material spaceLitMaterial;
         public int beltAsteroids = 900;
-        /// <summary>Asteroids in the art belt (U-034): dense enough to read as a belt at flight zoom; still 6 draw calls.</summary>
-        public int beltArtAsteroids = 6000;
+        /// <summary>
+        /// Asteroid models instanced over the dust belt (U-078). Each is 80–570 triangles (B-090), so the count is
+        /// also capped by BeltTriangleBudget; the dust belt keeps the belt dense between them.
+        /// </summary>
+        public int beltModelRocks = 400;
         public int seed = 1969;
+
+        /// <summary>Triangles the belt rocks may add to the Space view (Bible §11.1 geometry row: 300 k in all).</summary>
+        public const int BeltTriangleBudget = 140_000;
+        /// <summary>The ring mesh (B-090) is modelled for Saturn's R = 96 u; its outer edge is 2.269 R.</summary>
+        public const float RingMeshRadius = 96f, RingOuterR = 2.269f;
+        public const float AtmoShellWidth = 0.08f, CloudShellWidth = 0.02f;
+        /// <summary>Earth's cloud shell turns once per this many seconds.</summary>
+        public const float CloudTurnSeconds = 600f;
 
         readonly List<BodyInfo> bodies = new List<BodyInfo>();
         readonly List<AsyncOperationHandle<Texture2D>> handles = new List<AsyncOperationHandle<Texture2D>>();
+        readonly List<AsyncOperationHandle<GameObject>> prefabHandles = new List<AsyncOperationHandle<GameObject>>();
+        readonly List<AsyncOperationHandle<Material>> materialHandles = new List<AsyncOperationHandle<Material>>();
         static Mesh quad;
         public IReadOnlyList<BodyInfo> Bodies => bodies;
         public bool Built { get; private set; }
 
         static readonly int MainTex = Shader.PropertyToID("_MainTex");
+        static readonly int EmissionMap = Shader.PropertyToID("_EmissionMap");
         static readonly int Tint = Shader.PropertyToID("_Tint");
-        static readonly int SunDir = Shader.PropertyToID("_SunDir");
+        static readonly int Rotation = Shader.PropertyToID("_Rotation");
         static readonly int AtmoColor = Shader.PropertyToID("_AtmoColor");
-        static readonly int AtmoWidth = Shader.PropertyToID("_AtmoWidth");
+        static readonly int AtmoShell = Shader.PropertyToID("_AtmoShell");
         static readonly int Emissive = Shader.PropertyToID("_Emissive");
+        static readonly int Ambient = Shader.PropertyToID("_Ambient");
+        static readonly int AlphaFromTex = Shader.PropertyToID("_AlphaFromTex");
+        static readonly int CullProp = Shader.PropertyToID("_Cull");
+        static readonly int RimStrength = Shader.PropertyToID("_RimStrength");
 
         void Awake()
         {
@@ -46,6 +71,21 @@ namespace Meridian.Space
             return null;
         }
 
+        /// <summary>The shared SpaceLit material: the scene's, or Resources/SpaceLit (its asset keeps the shader in builds).</summary>
+        public Material SpaceLit
+        {
+            get
+            {
+                if (spaceLitMaterial == null) spaceLitMaterial = Resources.Load<Material>("SpaceLit");
+                if (spaceLitMaterial == null)
+                {
+                    var shader = Shader.Find("MERIDIAN/SpaceLit");
+                    spaceLitMaterial = shader != null ? new Material(shader) { name = "SpaceLit (runtime)" } : lineMaterial;
+                }
+                return spaceLitMaterial;
+            }
+        }
+
         public void Build()
         {
             if (Built) return;
@@ -55,7 +95,7 @@ namespace Meridian.Space
                 var go = new GameObject(b.name);
                 go.transform.SetParent(transform, false);
                 go.transform.localPosition = b.position;
-                AddDisc(go.transform, b);
+                AddSphere(go.transform, b);
                 if (b.landable) AddCircle(go.transform, "AtmosphereRing", b.RingRadius, new Color(0.55f, 0.8f, 1f, 0.55f), 0.004f);
                 AddCircle(go.transform, "GravityWell", b.WellRadius,
                     b.isSun ? new Color(1f, 0.55f, 0.2f, 0.25f) : new Color(1f, 1f, 1f, 0.12f), 0.0025f);
@@ -66,22 +106,21 @@ namespace Meridian.Space
             Built = true;
         }
 
-        void AddDisc(Transform parent, BodyInfo b)
-        {
-            const float atmo = 0.08f;
-            var go = new GameObject("Disc");
-            go.transform.SetParent(parent, false);
-            go.transform.localScale = Vector3.one * (2f * b.radius * (1f + atmo));
-            go.AddComponent<MeshFilter>().sharedMesh = Quad();
-            var mr = go.AddComponent<MeshRenderer>();
-            mr.sharedMaterial = discMaterial;
-            mr.sortingOrder = 10;
+        // ---------- planets as spheroids (U-078) ----------
 
-            var block = new MaterialPropertyBlock();
-            var dir = b.isSun ? Vector2.left : (-b.position).normalized;
-            block.SetVector(SunDir, new Vector4(dir.x, dir.y, 0.35f, 0f));
-            block.SetFloat(AtmoWidth, atmo);
+        MeshRenderer cloudShell;
+        MaterialPropertyBlock cloudBlock;
+        float cloudTurn;
+
+        /// <summary>
+        /// The body as a spheroid named "Disc" (its surface, lit by SpaceLit from the Sun), plus an atmosphere halo
+        /// shell for bodies with an atmosphere and a cloud shell where planets/&lt;name&gt;/clouds exists.
+        /// </summary>
+        void AddSphere(Transform parent, BodyInfo b)
+        {
+            var mr = AddShell(parent, "Disc", 2f * b.radius, 10, out var block);
             block.SetFloat(Emissive, b.isSun ? 1f : 0f);
+            block.SetFloat(Ambient, 0.06f);
             block.SetColor(AtmoColor, b.isSun ? new Color(1f, 0.75f, 0.35f, 1f) : AtmosphereColor(b.name));
             block.SetColor(Tint, b.parent != null ? new Color(0.62f, 0.6f, 0.58f) : Color.white);
             mr.SetPropertyBlock(block);
@@ -110,6 +149,59 @@ namespace Meridian.Space
                 block.SetTexture(MainTex, op.Result);
                 mr.SetPropertyBlock(block);
             };
+            if (b.isSun) return;
+
+            var atmo = AtmosphereColor(b.name);
+            if (atmo.a > 0.15f)
+            {
+                var shell = AddShell(parent, "Atmo", 2f * b.radius * (1f + AtmoShellWidth), 12, out var ab);
+                ab.SetFloat(AtmoShell, 1f);
+                ab.SetColor(AtmoColor, atmo);
+                shell.SetPropertyBlock(ab);
+                Shells.Add(shell);
+            }
+            LoadIfExists($"planets/{b.name}/clouds", tex =>
+            {
+                if (parent == null) return;
+                var clouds = AddShell(parent, "Clouds", 2f * b.radius * (1f + CloudShellWidth), 11, out var cb);
+                cb.SetTexture(MainTex, tex);
+                cb.SetFloat(AlphaFromTex, 2f);
+                cb.SetFloat(Ambient, 0.06f);
+                cb.SetFloat(RimStrength, 0f);
+                cb.SetColor(AtmoColor, atmo);
+                clouds.SetPropertyBlock(cb);
+                Shells.Add(clouds);
+                if (b.name == "earth") { cloudShell = clouds; cloudBlock = cb; }
+            });
+        }
+
+        /// <summary>Atmosphere and cloud shells, for tests and captures.</summary>
+        public readonly List<MeshRenderer> Shells = new List<MeshRenderer>();
+
+        MeshRenderer AddShell(Transform parent, string name, float diameter, int order, out MaterialPropertyBlock block)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(parent, false);
+            go.transform.localScale = Vector3.one * diameter;
+            go.AddComponent<MeshFilter>().sharedMesh = SpaceMeshes.Spheroid();
+            var mr = go.AddComponent<MeshRenderer>();
+            mr.sharedMaterial = SpaceLit;
+            mr.shadowCastingMode = ShadowCastingMode.Off;
+            mr.receiveShadows = false;
+            mr.sortingOrder = order;
+            block = new MaterialPropertyBlock();
+            return mr;
+        }
+
+        void Update()
+        {
+            if (cloudShell != null)
+            {
+                cloudTurn = (cloudTurn + Time.deltaTime / CloudTurnSeconds) % 1f;
+                cloudBlock.SetFloat(Rotation, cloudTurn);
+                cloudShell.SetPropertyBlock(cloudBlock);
+            }
+            if (beltReady) DrawBelt();
         }
 
         /// <summary>Glow width in R (BLENDER handoffs): planets 2.56 R, the Sun 3.2 R.</summary>
@@ -161,41 +253,98 @@ namespace Meridian.Space
             };
         }
 
-        /// <summary>
-        /// Saturn's rings (B-018 handoff): the 1024 px sheet's A-ring outer edge is r = 500 px and Saturn's
-        /// radius is 220.4 px, so the sheet spans 1024 / 220.4 × R in the world (446 u at R 96).
-        /// </summary>
-        public const float RingSheetPx = 1024f, RingSaturnRadiusPx = 220.4f;
-        public SpriteRenderer Rings { get; private set; }
-
-        void AddRings(Transform parent, BodyInfo b)
+        /// <summary>The key's model prefab (a .glb under Art/) when it exists; null otherwise.</summary>
+        void LoadModelIfExists(string key, System.Action<GameObject> done)
         {
-            const string key = "planets/saturn/rings";
-            var locations = Addressables.LoadResourceLocationsAsync(key);
+            var locations = Addressables.LoadResourceLocationsAsync(key, typeof(GameObject));
             locations.Completed += loc =>
             {
-                bool exists = loc.Status == AsyncOperationStatus.Succeeded && loc.Result != null && loc.Result.Count > 0;
+                IResourceLocation glb = null;
+                if (loc.Status == AsyncOperationStatus.Succeeded && loc.Result != null)
+                    foreach (var l in loc.Result)
+                        if (l.InternalId != null && l.InternalId.EndsWith(".glb", System.StringComparison.OrdinalIgnoreCase)) { glb = l; break; }
                 Addressables.Release(loc);
-                if (!exists || parent == null) return;
-                var go = new GameObject("Rings");
-                go.transform.SetParent(parent, false);
-                var sr = go.AddComponent<SpriteRenderer>();
-                sr.sharedMaterial = lineMaterial; // unlit like the discs' day side; the shadow side is in the art
-                sr.sortingOrder = 11;              // over the disc's atmosphere rim; the ring's hole leaves the globe clear
-                Rings = sr;
-                var h = Addressables.LoadAssetAsync<IList<Sprite>>(key);
-                spriteHandles.Add(h);
-                h.Completed += op =>
-                {
-                    if (sr == null || op.Status != AsyncOperationStatus.Succeeded || op.Result.Count == 0) return;
-                    sr.sprite = op.Result[0];
-                    float width = RingSheetPx / RingSaturnRadiusPx * b.radius;
-                    go.transform.localScale = Vector3.one * (width / sr.sprite.bounds.size.x);
-                };
+                if (glb == null || this == null) { done(null); return; }
+                var h = Addressables.LoadAssetAsync<GameObject>(glb);
+                prefabHandles.Add(h);
+                h.Completed += op => done(op.Status == AsyncOperationStatus.Succeeded ? op.Result : null);
             };
         }
 
-        // ---------- asteroid belt from art (U-034) ----------
+        /// <summary>The key's generated material (Generated/Models/&lt;key&gt;.mat) for its maps; null when there is none.</summary>
+        void LoadGeneratedMaterial(string key, System.Action<Material> done)
+        {
+            var locations = Addressables.LoadResourceLocationsAsync(key, typeof(Material));
+            locations.Completed += loc =>
+            {
+                IResourceLocation mat = null;
+                if (loc.Status == AsyncOperationStatus.Succeeded && loc.Result != null)
+                    foreach (var l in loc.Result)
+                        if (l.InternalId != null && l.InternalId.EndsWith(".mat", System.StringComparison.OrdinalIgnoreCase)) { mat = l; break; }
+                Addressables.Release(loc);
+                if (mat == null || this == null) { done(null); return; }
+                var h = Addressables.LoadAssetAsync<Material>(mat);
+                materialHandles.Add(h);
+                h.Completed += op => done(op.Status == AsyncOperationStatus.Succeeded ? op.Result : null);
+            };
+        }
+
+        /// <summary>A SpaceLit material carrying a generated URP/Lit material's albedo and emission maps.</summary>
+        public Material SpaceLitFrom(Material generated, string name)
+        {
+            var m = new Material(SpaceLit) { name = name };
+            if (generated != null)
+            {
+                if (generated.HasProperty("_BaseMap")) m.SetTexture(MainTex, generated.GetTexture("_BaseMap"));
+                if (generated.HasProperty("_EmissionMap")) m.SetTexture(EmissionMap, generated.GetTexture("_EmissionMap"));
+            }
+            m.SetFloat(Ambient, 0.25f);
+            m.SetFloat(RimStrength, 0f);
+            m.enableInstancing = true;
+            return m;
+        }
+
+        /// <summary>
+        /// Saturn's rings (B-090): planets/saturn/ring_mesh, a flat annulus 1.239–2.269 R modelled for R = 96 in the
+        /// horizontal (XZ) plane, turned into the view plane and scaled to Saturn's R; the texture is the
+        /// planets/saturn/rings sheet (colour + alpha, the shadow side in the art), drawn unlit and double-sided.
+        /// </summary>
+        public MeshRenderer Rings { get; private set; }
+        public bool RingsReady { get; private set; }
+
+        void AddRings(Transform parent, BodyInfo b)
+        {
+            LoadModelIfExists("planets/saturn/ring_mesh", prefab =>
+            {
+                if (prefab == null || parent == null) return;
+                var go = Instantiate(prefab, parent, false);
+                go.name = "Rings";
+                go.transform.localPosition = Vector3.zero;
+                go.transform.localRotation = Quaternion.Euler(-90f, 0f, 0f);
+                go.transform.localScale = Vector3.one * (b.radius / RingMeshRadius);
+                var mr = go.GetComponentInChildren<MeshRenderer>();
+                if (mr == null) return;
+                var mat = SpaceLitFrom(null, "Rings");
+                mat.SetFloat(Emissive, 1f);
+                mat.SetFloat(AlphaFromTex, 1f);
+                mat.SetFloat(CullProp, 0f);
+                mr.sharedMaterial = mat;
+                mr.shadowCastingMode = ShadowCastingMode.Off;
+                mr.receiveShadows = false;
+                mr.sortingOrder = 12;
+                Rings = mr;
+                var h = Addressables.LoadAssetAsync<IList<Sprite>>("planets/saturn/rings");
+                spriteHandles.Add(h);
+                h.Completed += op =>
+                {
+                    if (mr == null || op.Status != AsyncOperationStatus.Succeeded || op.Result.Count == 0) return;
+                    mat.SetTexture(MainTex, op.Result[0].texture);
+                    RingsReady = true;
+                };
+            });
+        }
+
+        // ---------- asteroid belt from the models (U-034 → U-078) ----------
 
         public const int AsteroidKinds = 6;
         public const int ClusterSize = 15;
@@ -203,54 +352,63 @@ namespace Meridian.Space
         readonly List<Vector2> beltClusters = new List<Vector2>();
         /// <summary>Centers of the asteroid clumps (captures frame one).</summary>
         public IReadOnlyList<Vector2> BeltClusters => beltClusters;
-        /// <summary>Belt meshes built from props/space/asteroid_01..06 (one per kind: ≤ 6 draw calls). Empty until the art loads.</summary>
-        public readonly List<MeshRenderer> BeltArt = new List<MeshRenderer>();
+
+        /// <summary>One asteroid model and its instances over the belt: one instanced draw per kind.</summary>
+        public sealed class BeltKind
+        {
+            public string key;
+            public Mesh mesh;
+            public Material material;
+            public Matrix4x4[] matrices;
+            public int count;
+            public int triangles;
+        }
+        /// <summary>Belt kinds with their art loaded (props/space/asteroid_01..06); empty until the models arrive.</summary>
+        public readonly List<BeltKind> Belt = new List<BeltKind>();
+        /// <summary>Rocks placed over the belt once the models are in.</summary>
+        public int BeltRocks { get; private set; }
+        public bool BeltReady => beltReady;
+        bool beltReady;
         MeshRenderer beltFallback;
+        RenderParams beltParams;
 
         void LoadBeltArt()
         {
-            var sprites = new Sprite[AsteroidKinds];
-            int pending = AsteroidKinds;
+            var kinds = new BeltKind[AsteroidKinds];
+            int pending = AsteroidKinds * 2;
             for (int k = 0; k < AsteroidKinds; k++)
             {
                 int kind = k;
                 string key = $"props/space/asteroid_{kind + 1:00}";
-                var locations = Addressables.LoadResourceLocationsAsync(key);
-                locations.Completed += loc =>
+                kinds[kind] = new BeltKind { key = key };
+                LoadModelIfExists(key, prefab =>
                 {
-                    bool exists = loc.Status == AsyncOperationStatus.Succeeded && loc.Result != null && loc.Result.Count > 0;
-                    Addressables.Release(loc);
-                    if (!exists) { if (--pending == 0) BuildBeltArt(sprites); return; }
-                    var h = Addressables.LoadAssetAsync<IList<Sprite>>(key);
-                    spriteHandles.Add(h);
-                    h.Completed += op =>
-                    {
-                        if (op.Status == AsyncOperationStatus.Succeeded && op.Result.Count > 0) sprites[kind] = op.Result[0];
-                        if (--pending == 0) BuildBeltArt(sprites);
-                    };
-                };
+                    var mf = prefab != null ? prefab.GetComponentInChildren<MeshFilter>() : null;
+                    if (mf != null && mf.sharedMesh != null) { kinds[kind].mesh = mf.sharedMesh; kinds[kind].triangles = (int)(mf.sharedMesh.GetIndexCount(0) / 3); }
+                    if (--pending == 0) BuildBeltArt(kinds);
+                });
+                LoadGeneratedMaterial(key, generated =>
+                {
+                    kinds[kind].material = SpaceLitFrom(generated, "Belt " + key);
+                    if (--pending == 0) BuildBeltArt(kinds);
+                });
             }
         }
 
         /// <summary>
-        /// The same belt (positions, sizes, rotations from the seed) drawn with the asteroid sprites: each
-        /// kind is one mesh of its sprite's geometry instanced at varied rotation and scale.
+        /// The same belt (positions, sizes, rotations from the seed) with the asteroid models: each kind is one
+        /// instanced draw (Graphics.RenderMeshInstanced), the rock count capped by BeltTriangleBudget.
         /// </summary>
-        void BuildBeltArt(Sprite[] sprites)
+        void BuildBeltArt(BeltKind[] kinds)
         {
             if (this == null) return;
-            int kinds = 0;
-            foreach (var s in sprites) if (s != null) kinds++;
-            if (kinds == 0) return; // keep the flat belt
-            var verts = new List<Vector3>[AsteroidKinds];
-            var uvs = new List<Vector2>[AsteroidKinds];
-            var colors = new List<Color32>[AsteroidKinds];
-            var tris = new List<int>[AsteroidKinds];
-            for (int k = 0; k < AsteroidKinds; k++) { verts[k] = new List<Vector3>(); uvs[k] = new List<Vector2>(); colors[k] = new List<Color32>(); tris[k] = new List<int>(); }
-
+            int loaded = 0, triSum = 0;
+            foreach (var k in kinds) if (k.mesh != null && k.material != null) { loaded++; triSum += k.triangles; }
+            if (loaded == 0) return; // keep the flat belt
+            int rocks = Mathf.Min(beltModelRocks, BeltTriangleBudget / Mathf.Max(1, triSum / loaded));
+            var counts = new int[AsteroidKinds];
             var rng = new System.Random(seed + 7);
-            // Clumps: an even spread over 18 M u² shows ~8 rocks per screen; clusters read as a belt.
-            int clusters = Mathf.Max(1, beltArtAsteroids / ClusterSize);
+            int clusters = Mathf.Max(1, rocks / ClusterSize);
             beltClusters.Clear();
             for (int c = 0; c < clusters; c++)
             {
@@ -258,59 +416,54 @@ namespace Meridian.Space
                 float cr = Mathf.Lerp(SpaceLayout.BeltInner + ClusterSpread, SpaceLayout.BeltOuter - ClusterSpread, (float)rng.NextDouble());
                 beltClusters.Add(new Vector2(Mathf.Cos(ca) * cr, Mathf.Sin(ca) * cr));
             }
-            for (int i = 0; i < beltArtAsteroids; i++)
+            var placed = new List<(int kind, Matrix4x4 m)>(rocks);
+            for (int i = 0; i < rocks; i++)
             {
                 var center = beltClusters[i % clusters];
                 float oa = (float)rng.NextDouble() * Mathf.PI * 2f;
                 float od = ClusterSpread * Mathf.Sqrt((float)rng.NextDouble());
-                float a = Mathf.Atan2(center.y + Mathf.Sin(oa) * od, center.x + Mathf.Cos(oa) * od);
-                float r = new Vector2(center.x + Mathf.Cos(oa) * od, center.y + Mathf.Sin(oa) * od).magnitude;
+                var p = new Vector2(center.x + Mathf.Cos(oa) * od, center.y + Mathf.Sin(oa) * od);
                 float size = Mathf.Lerp(2f, 12f, (float)(rng.NextDouble() * rng.NextDouble())); // u across (the ship is 4)
-                float rot = (float)rng.NextDouble() * 360f;
+                var rot = Quaternion.Euler((float)rng.NextDouble() * 360f, (float)rng.NextDouble() * 360f, (float)rng.NextDouble() * 360f);
                 int kind = rng.Next(AsteroidKinds);
-                byte shade = (byte)(185 + rng.Next(70));
-                while (sprites[kind] == null) kind = (kind + 1) % AsteroidKinds;
-                var s = sprites[kind];
-                float scale = size / Mathf.Max(s.bounds.size.x, s.bounds.size.y);
-                var m = Matrix4x4.TRS(new Vector3(Mathf.Cos(a) * r, Mathf.Sin(a) * r, 0f), Quaternion.Euler(0f, 0f, rot), Vector3.one * scale);
-                int baseIndex = verts[kind].Count;
-                var sv = s.vertices;
-                var su = s.uv;
-                for (int v = 0; v < sv.Length; v++)
-                {
-                    verts[kind].Add(m.MultiplyPoint3x4(sv[v]));
-                    uvs[kind].Add(su[v]);
-                    colors[kind].Add(new Color32(shade, shade, shade, 255));
-                }
-                foreach (var t in s.triangles) tris[kind].Add(baseIndex + t);
+                while (kinds[kind].mesh == null || kinds[kind].material == null) kind = (kind + 1) % AsteroidKinds;
+                var ext = kinds[kind].mesh.bounds.size;
+                float scale = size / Mathf.Max(ext.x, Mathf.Max(ext.y, ext.z));
+                placed.Add((kind, Matrix4x4.TRS(new Vector3(p.x, p.y, 0f), rot, Vector3.one * scale)));
+                counts[kind]++;
             }
-
-            var mat = Meridian.Rendering.ArtMaterials.Active != null ? Meridian.Rendering.ArtMaterials.Active.lit : lineMaterial;
-            var block = new MaterialPropertyBlock();
-            var secondary = new SecondarySpriteTexture[4];
+            Belt.Clear();
             for (int k = 0; k < AsteroidKinds; k++)
             {
-                if (sprites[k] == null || verts[k].Count == 0) continue;
-                var mesh = new Mesh { name = "BeltArt" + (k + 1), indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
-                mesh.SetVertices(verts[k]);
-                mesh.SetUVs(0, uvs[k]);
-                mesh.SetColors(colors[k]);
-                mesh.SetTriangles(tris[k], 0);
-                mesh.RecalculateBounds();
-                var go = new GameObject("BeltArt" + (k + 1));
-                go.transform.SetParent(transform, false);
-                go.AddComponent<MeshFilter>().sharedMesh = mesh;
-                var mr = go.AddComponent<MeshRenderer>();
-                mr.sharedMaterial = mat;
-                mr.sortingOrder = 4;
-                block.Clear();
-                block.SetTexture(MainTex, sprites[k].texture);
-                int n = sprites[k].GetSecondaryTextures(secondary);
-                for (int t = 0; t < n; t++) if (secondary[t].name == "_NormalMap") block.SetTexture("_NormalMap", secondary[t].texture);
-                mr.SetPropertyBlock(block);
-                BeltArt.Add(mr);
+                var kind = kinds[k];
+                if (kind.mesh == null || kind.material == null || counts[k] == 0) continue;
+                kind.matrices = new Matrix4x4[counts[k]];
+                kind.count = 0;
+                Belt.Add(kind);
             }
-            // The flat belt stays as fine dust between the clumps (one more draw call).
+            foreach (var (kind, m) in placed) kinds[kind].matrices[kinds[kind].count++] = m;
+            BeltRocks = rocks;
+            float extent = SpaceLayout.BeltOuter + 20f;
+            beltParams = new RenderParams
+            {
+                worldBounds = new Bounds(transform.position, new Vector3(2f * extent, 2f * extent, 40f)),
+                shadowCastingMode = ShadowCastingMode.Off,
+                receiveShadows = false,
+                layer = gameObject.layer,
+            };
+            beltReady = true;
+            // The flat belt stays as fine dust between the rocks (one more draw call).
+        }
+
+        /// <summary>One instanced draw per kind, every frame; no allocation (the matrices are fixed).</summary>
+        void DrawBelt()
+        {
+            for (int i = 0; i < Belt.Count; i++)
+            {
+                var kind = Belt[i];
+                beltParams.material = kind.material;
+                Graphics.RenderMeshInstanced(beltParams, kind.mesh, 0, kind.matrices, kind.count);
+            }
         }
 
         static Color AtmosphereColor(string name) => name switch
@@ -382,7 +535,7 @@ namespace Meridian.Space
             var mr = go.AddComponent<MeshRenderer>();
             mr.sharedMaterial = lineMaterial;
             mr.sortingOrder = 4;
-            beltFallback = mr; // flat stand-in until the asteroid art loads
+            beltFallback = mr; // fine dust under the rocks
             LoadBeltArt();
         }
 
@@ -401,6 +554,8 @@ namespace Meridian.Space
         {
             foreach (var h in handles) if (h.IsValid()) Addressables.Release(h);
             foreach (var h in spriteHandles) if (h.IsValid()) Addressables.Release(h);
+            foreach (var h in prefabHandles) if (h.IsValid()) Addressables.Release(h);
+            foreach (var h in materialHandles) if (h.IsValid()) Addressables.Release(h);
         }
     }
 }
