@@ -346,24 +346,26 @@ namespace Meridian.Creatures
             }
             else
             {
-                bool grounded = Mathf.Abs(v.y) < 0.6f && TileId.IsSolid(terrain.GetTile(tx, ty));
-                if (grounded && speed > 0f)
+                bool quiet = Mathf.Abs(v.y) < 0.6f;
+                bool grounded = quiet && TileId.IsSolid(terrain.GetTile(tx, ty));
+                // U-099: a wall the tiles cannot show (a crate stack, a base piece, the pad): the body stands still while it wants to
+                // run, whatever it stands on (on a crate the tile under the feet is air).
+                c.blockedFor = speed > 0f && quiet && Mathf.Abs(v.x) < 0.1f ? c.blockedFor + dt : 0f;
+                bool stuck = c.blockedFor > BlockedSeconds;
+                if ((grounded && speed > 0f) || stuck)
                 {
                     int ahead = Mathf.FloorToInt(pos.x + c.dir * (spec.size.x * 0.5f + 0.3f));
                     int feet = ty + 1;
-                    bool wall = TileId.IsSolid(terrain.GetTile(ahead, feet));
-                    // U-099: a wall the tiles cannot show (a crate stack, a base piece, the pad): the body stands still while it wants to run.
-                    bool stuck = Mathf.Abs(v.x) < 0.1f && c.blockedFor > BlockedSeconds;
+                    bool wall = grounded && TileId.IsSolid(terrain.GetTile(ahead, feet));
                     if (wall || stuck)
                     {
-                        bool climbable = wall && !TileId.IsSolid(terrain.GetTile(ahead, feet + 2)) && !TileId.IsSolid(terrain.GetTile(tx, feet + Mathf.CeilToInt(spec.size.y) + 1));
+                        // A 1-tile step is hopped (air above it and headroom); anything taller is a wall (U-099: a 2-tile wall stops a chase).
+                        bool climbable = wall && !TileId.IsSolid(terrain.GetTile(ahead, feet + 1)) && !TileId.IsSolid(terrain.GetTile(tx, feet + Mathf.CeilToInt(spec.size.y) + 1));
                         if (climbable) v.y = spec.jumpSpeed;
                         else if (c.State == CreatureState.Chase) speed = 0f; // waits at the wall, never bumps through it; the legs stop with the body
-                        else { c.dir = -c.dir; c.blockedFor = 0f; } // Wander and Flee turn and move on along the wall
+                        else { c.dir = -c.dir; c.blockedFor = 0f; c.keepDirUntil = now + WallTurnSeconds; } // Wander and Flee turn and move on along the wall
                     }
-                    c.blockedFor = Mathf.Abs(v.x) < 0.1f ? c.blockedFor + dt : 0f;
                 }
-                else c.blockedFor = 0f;
                 v.x = Mathf.MoveTowards(v.x, c.dir * speed, Accel * dt);
             }
             if (c.knockFor > 0f) { c.knockFor -= dt; v.x = c.knockVx; } // U-089: the hit knock overrides the steering
@@ -398,6 +400,8 @@ namespace Meridian.Creatures
         public const float BumpEvery = 1.2f;
         /// <summary>U-099: a creature that wanted to move but stood still this long is blocked by something the tiles do not show.</summary>
         public const float BlockedSeconds = 0.2f;
+        /// <summary>U-099: after a wall turn a fleeing creature keeps its new direction this long before its thinks may re-aim it away from the surveyor.</summary>
+        public const float WallTurnSeconds = 1.5f;
         /// <summary>Bumps given since load (tests).</summary>
         public int Bumps { get; private set; }
 
@@ -412,7 +416,7 @@ namespace Meridian.Creatures
             if (now < c.fleeUntil) hunts = false; // the Veil Serpent recoils from cold
             if (!hunts)
             {
-                if (adx < spec.senseRange || now < c.fleeUntil) { c.State = CreatureState.Flee; c.dir = dx > 0f ? -1 : 1; return; }
+                if (adx < spec.senseRange || now < c.fleeUntil) { c.State = CreatureState.Flee; if (now >= c.keepDirUntil) c.dir = dx > 0f ? -1 : 1; return; } // U-099: a wall turn holds
                 if (c.State == CreatureState.Flee && adx < spec.senseRange * 1.8f) return; // keep running a while
             }
             else

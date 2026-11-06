@@ -31,7 +31,7 @@ namespace Meridian.Creatures
         public bool Alive => gameObject.activeSelf;
         internal float knockFor, knockVx, flashFor;
         /// <summary>U-099: seconds the body has stood still while wanting to move (a wall the terrain check cannot see: props, pieces).</summary>
-        internal float blockedFor;
+        internal float blockedFor, keepDirUntil;
         /// <summary>U-099: the clip picked last frame (0 idle, 1 walk, 2 attack/bump, 3 hurt); tests read it.</summary>
         public int LastPick { get; private set; }
         Color baseColor = Color.white;
@@ -91,7 +91,7 @@ namespace Meridian.Creatures
             dir = (serial & 1) == 0 ? 1 : -1;
             nextThink = 0f;
             biteReady = 0f;
-            hurtFor = attackFor = chillFor = anim = knockFor = flashFor = blockedFor = 0f;
+            hurtFor = attackFor = chillFor = anim = knockFor = flashFor = blockedFor = keepDirUntil = 0f;
             fleeUntil = 0f;
             lastClip = -1;
             altitude = position.y;

@@ -534,7 +534,7 @@ namespace Meridian.EditorTools
         {
             var m = SheetFor(colorPath, key);
             var ti = AssetImporter.GetAtPath(colorPath) as TextureImporter;
-            if (m == null || ti == null || ti.spriteImportMode != SpriteImportMode.Multiple) return false;
+            if (m == null || !m.IsSheet || ti == null || ti.spriteImportMode != SpriteImportMode.Multiple) return false; // a v3 sidecar without frames (a rig set, an overlay) is not a frame grid: RigSetBuilder slices rig parts
             ti.GetSourceTextureWidthAndHeight(out int w, out int h);
             var pivot = PivotFor(key, m, h);
 

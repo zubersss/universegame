@@ -76,16 +76,18 @@ namespace Meridian.Flora
             Probe<RuntimeAnimatorController>(key + AnimatorSuffix, h => h.Completed += op => { if (this != null && op.Status == AsyncOperationStatus.Succeeded) { Controller = op.Result; TryPending(); } });
         }
 
+        /// <summary>A sprite list cannot be found by type (an Editor location probe for IList&lt;Sprite&gt; returns nothing): probe the key untyped and load by key, as CreatureDirector does.</summary>
         void Probe<T>(string address, System.Action<AsyncOperationHandle<T>> load)
         {
-            var probe = Addressables.LoadResourceLocationsAsync(address, typeof(T));
+            bool spriteList = typeof(T) == typeof(IList<Sprite>);
+            var probe = spriteList ? Addressables.LoadResourceLocationsAsync(address) : Addressables.LoadResourceLocationsAsync(address, typeof(T));
             probe.Completed += l =>
             {
                 IResourceLocation loc = l.Status == AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0 ? l.Result[0] : null;
                 ArtLoad.Release(l);
                 if (this == null) return;
                 if (loc == null) { Missing += address + " "; return; }
-                var h = ArtLoad.Asset<T>(loc, Key);
+                var h = spriteList ? ArtLoad.Asset<T>(address) : ArtLoad.Asset<T>(loc, Key);
                 handles.Add(h);
                 load(h);
             };

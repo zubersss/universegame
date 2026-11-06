@@ -67,15 +67,17 @@ namespace Meridian.View2D
             Probe<RuntimeAnimatorController>(SheetClock.ControllerAddress(sheetKey), h => { controllerHandle = h; h.Completed += op => { if (this != null && op.Status == AsyncOperationStatus.Succeeded && op.Result != null) { Animator.runtimeAnimatorController = op.Result; Play(Clip, true); } }; });
         }
 
+        /// <summary>A sprite list cannot be found by type (an Editor location probe for IList&lt;Sprite&gt; returns nothing): probe untyped and load by key.</summary>
         void Probe<T>(string address, System.Action<AsyncOperationHandle<T>> load)
         {
-            var probe = Addressables.LoadResourceLocationsAsync(address, typeof(T));
+            bool spriteList = typeof(T) == typeof(IList<Sprite>);
+            var probe = spriteList ? Addressables.LoadResourceLocationsAsync(address) : Addressables.LoadResourceLocationsAsync(address, typeof(T));
             probe.Completed += l =>
             {
                 IResourceLocation loc = l.Status == AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0 ? l.Result[0] : null;
                 ArtLoad.Release(l);
                 if (loc == null || this == null) return;
-                load(ArtLoad.Asset<T>(loc, key));
+                load(spriteList ? ArtLoad.Asset<T>(address) : ArtLoad.Asset<T>(loc, key));
             };
         }
 
