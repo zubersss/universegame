@@ -30,6 +30,10 @@ namespace Meridian.Creatures
         public bool Held { get; internal set; }
         public bool Alive => gameObject.activeSelf;
         internal float knockFor, knockVx, flashFor;
+        /// <summary>U-099: seconds the body has stood still while wanting to move (a wall the terrain check cannot see: props, pieces).</summary>
+        internal float blockedFor;
+        /// <summary>U-099: the clip picked last frame (0 idle, 1 walk, 2 attack/bump, 3 hurt); tests read it.</summary>
+        public int LastPick { get; private set; }
         Color baseColor = Color.white;
         internal CreatureDirector director;
 
@@ -87,7 +91,7 @@ namespace Meridian.Creatures
             dir = (serial & 1) == 0 ? 1 : -1;
             nextThink = 0f;
             biteReady = 0f;
-            hurtFor = attackFor = chillFor = anim = knockFor = flashFor = 0f;
+            hurtFor = attackFor = chillFor = anim = knockFor = flashFor = blockedFor = 0f;
             fleeUntil = 0f;
             lastClip = -1;
             altitude = position.y;
@@ -159,6 +163,7 @@ namespace Meridian.Creatures
                 if (chillFor > 0f) { chillFor -= dt; if (chillFor > 0f) Model.Flash(0.05f); }
                 if (View.enabled) View.enabled = false;
                 int pick = hurtFor > 0f ? 3 : attackFor > 0f ? 2 : speed > 0.3f ? 1 : 0;
+                LastPick = pick;
                 // U-089: hit_react when the model has it, else the hurt stand-in.
                 if (pick == 3) { if (!Model.Play(HitReactClip)) Model.Play(ModelClips[3]); }
                 else Model.Play(ModelClips[pick]);
@@ -177,6 +182,7 @@ namespace Meridian.Creatures
             if (sheet == null || clips == null || clips.clips.Count == 0) return;
             // Clip order in every B-0xx creature sheet: idle, walk, attack, hurt, death.
             int want = hurtFor > 0f ? 3 : attackFor > 0f ? 2 : speed > 0.3f ? 1 : 0;
+            LastPick = want;
             if (want >= clips.clips.Count) want = 0;
             if (want != lastClip) { lastClip = want; anim = 0f; }
             var clip = clips.clips[want];

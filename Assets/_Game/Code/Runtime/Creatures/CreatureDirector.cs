@@ -352,13 +352,18 @@ namespace Meridian.Creatures
                     int ahead = Mathf.FloorToInt(pos.x + c.dir * (spec.size.x * 0.5f + 0.3f));
                     int feet = ty + 1;
                     bool wall = TileId.IsSolid(terrain.GetTile(ahead, feet));
-                    if (wall)
+                    // U-099: a wall the tiles cannot show (a crate stack, a base piece, the pad): the body stands still while it wants to run.
+                    bool stuck = Mathf.Abs(v.x) < 0.1f && c.blockedFor > BlockedSeconds;
+                    if (wall || stuck)
                     {
-                        bool climbable = !TileId.IsSolid(terrain.GetTile(ahead, feet + 2)) && !TileId.IsSolid(terrain.GetTile(tx, feet + Mathf.CeilToInt(spec.size.y) + 1));
+                        bool climbable = wall && !TileId.IsSolid(terrain.GetTile(ahead, feet + 2)) && !TileId.IsSolid(terrain.GetTile(tx, feet + Mathf.CeilToInt(spec.size.y) + 1));
                         if (climbable) v.y = spec.jumpSpeed;
-                        else if (c.State == CreatureState.Wander) c.dir = -c.dir; // a cliff: turn back
+                        else if (c.State == CreatureState.Chase) speed = 0f; // waits at the wall, never bumps through it; the legs stop with the body
+                        else { c.dir = -c.dir; c.blockedFor = 0f; } // Wander and Flee turn and move on along the wall
                     }
+                    c.blockedFor = Mathf.Abs(v.x) < 0.1f ? c.blockedFor + dt : 0f;
                 }
+                else c.blockedFor = 0f;
                 v.x = Mathf.MoveTowards(v.x, c.dir * speed, Accel * dt);
             }
             if (c.knockFor > 0f) { c.knockFor -= dt; v.x = c.knockVx; } // U-089: the hit knock overrides the steering
@@ -391,6 +396,8 @@ namespace Meridian.Creatures
 
         /// <summary>Seconds between two bumps by one creature.</summary>
         public const float BumpEvery = 1.2f;
+        /// <summary>U-099: a creature that wanted to move but stood still this long is blocked by something the tiles do not show.</summary>
+        public const float BlockedSeconds = 0.2f;
         /// <summary>Bumps given since load (tests).</summary>
         public int Bumps { get; private set; }
 
