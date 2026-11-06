@@ -98,7 +98,7 @@ namespace Meridian.Tests
             var a = MeridianInput.Build();
             string[] foot = { "Move", "Sprint", "Jump", "Crouch", "Aim", "RigPrimary", "RigSecondary", "Module1", "Module2",
                               "Module3", "Module4", "ModulePrev", "ModuleNext", "Interact", "BuildMenu", "Inventory", "Map",
-                              "Catalogue", "FloatCell" };
+                              "Catalogue", "FloatCell", "Dash", "Parry" };
             foreach (var name in foot) Assert.NotNull(a.FindAction($"{MeridianInput.OnFoot}/{name}"), name);
             foreach (var name in new[] { "Thrust", "Retro", "Lateral", "Exit" })
                 Assert.NotNull(a.FindAction($"{MeridianInput.ShipSide}/{name}"), name);
@@ -107,6 +107,8 @@ namespace Meridian.Tests
             Assert.NotNull(a.FindAction($"{MeridianInput.Always}/Pause"));
             Assert.IsTrue(a.FindAction("OnFoot/Jump").bindings.Any(b => b.path == "<Keyboard>/space"));
             Assert.IsTrue(a.FindAction("OnFoot/Sprint").bindings.Any(b => b.path == "<Keyboard>/leftShift"));
+            Assert.IsTrue(a.FindAction("OnFoot/Dash").bindings.Any(b => b.path == "<Keyboard>/leftShift"), "dash = Shift (D-078)");
+            Assert.IsTrue(a.FindAction("OnFoot/Parry").bindings.Any(b => b.path == "<Keyboard>/c"), "parry = C (D-078)");
             Object.DestroyImmediate(a);
         }
 

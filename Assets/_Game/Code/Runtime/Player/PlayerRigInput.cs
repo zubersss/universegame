@@ -66,6 +66,7 @@ namespace Meridian.Player
 
             var screen = aim.ReadValue<Vector2>();
             if (view != null && !externalAim) AimWorld = (Vector2)view.ScreenToWorldPoint(new Vector3(screen.x, screen.y, -view.transform.position.z));
+            if (controller != null && controller.Body != null) controller.Aim = AimWorld - controller.Body.position; // U-088: a parried projectile reflects along the aim
             // While the inventory panel is open, clicks select slots, not tiles (U-045).
             bool pressed = (primary.IsPressed() || holdUse) && !Meridian.UI.InventoryPanel.AnyOpen && !Meridian.UI.CraftingPanel.AnyOpen && !Meridian.UI.CataloguePanel.AnyOpen;
             bool edge = primary.WasPressedThisFrame() || (holdUse && !heldLast);

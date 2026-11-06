@@ -24,7 +24,7 @@ namespace Meridian.Player
         {
             if (Dead) return;
             health = Mathf.Max(0f, health - amount);
-            if (amount > 0f) Damaged?.Invoke(amount);
+            if (amount > 0f) { Meridian.Core.HitStop.Request(Meridian.Core.HitStopClock.PlayerHit); Damaged?.Invoke(amount); } // U-088: 50 ms hit stop
             if (Dead) Died?.Invoke();
         }
 

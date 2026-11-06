@@ -12,9 +12,16 @@ namespace Meridian.Player
         public const float JumpBuffer = 0.12f;
         public const float SafeImpact = 12f;           // no damage below
         public const float LethalImpact = 24f;         // lethal at or above (unupgraded)
-        public const float GroundAcceleration = 40f;   // reach walk speed in 0.1 s
-        public const float AirAcceleration = 20f;
+        // U-088 (Bible §4.2 Feel v3, D-078): accelerations, braking, the turn and the jump cut change velocities only; never g or v₀.
+        public const float GroundAcceleration = 60f;   // walk speed in 0.07 s
+        public const float Braking = 80f;              // stop in 0.05 s
+        public const float TurnAcceleration = 165f;    // a sprint turn reverses its velocity within 0.08 s
+        public const float AirAcceleration = 30f;
+        public const float JumpCutFactor = 0.4f;       // releasing the jump while rising keeps 40 % of the upward speed
         public const float Height = 1.8f, Width = 0.6f;
+
+        /// <summary>The take-off speed the controller writes: physics applies g·dt before the move, so v₀ + g·dt/2 makes the arc peak at exactly v₀²/2g.</summary>
+        public static float JumpStartSpeed(float g, float dt) => JumpSpeed + 0.5f * g * dt;
     }
 
     /// <summary>Coyote time and jump buffering (Bible §4.2), driven by explicit time steps.</summary>

@@ -10,6 +10,7 @@ namespace Meridian.Player
         public bool sprint;
         public bool jumpHeld;
         public bool jumpPressed; // went down since the last fixed step
+        public bool dashPressed, parryPressed; // U-088: Shift tapped in the air / C, for one fixed step
     }
 
     /// <summary>
@@ -40,11 +41,17 @@ namespace Meridian.Player
         public event System.Action Jumped;
         /// <summary>Raised on touchdown with the impact speed (m/s).</summary>
         public event System.Action<float> Landed;
+        /// <summary>U-088 (Bible §4.2 Feel): the air dash and the parry, pure solvers stepped in FixedUpdate.</summary>
+        public AirDash Dash { get; } = new AirDash();
+        public Parry Parry { get; } = new Parry();
+        /// <summary>Where the player aims (PlayerRigInput writes it); a parried projectile reflects along it.</summary>
+        public Vector2 Aim { get; set; }
+        public event System.Action ParryLanded;
 
         readonly JumpTimer jumpTimer = new JumpTimer();
         readonly ContactPoint2D[] contacts = new ContactPoint2D[8];
-        InputAction moveAction, sprintAction, jumpAction;
-        bool jumpLatched;
+        InputAction moveAction, sprintAction, jumpAction, dashAction, parryAction;
+        bool jumpLatched, dashLatched, parryLatched, jumpHeldLast;
         float airTimeSinceJump;
         float fallSpeed;
 
@@ -68,6 +75,8 @@ namespace Meridian.Player
                 moveAction = foot.FindAction("Move");
                 sprintAction = foot.FindAction("Sprint");
                 jumpAction = foot.FindAction("Jump");
+                dashAction = foot.FindAction("Dash", false);
+                parryAction = foot.FindAction("Parry", false);
                 foot.Enable();
             }
         }
@@ -79,10 +88,24 @@ namespace Meridian.Player
             intent.sprint = sprintAction.IsPressed();
             intent.jumpHeld = jumpAction.IsPressed();
             if (jumpAction.WasPressedThisFrame()) jumpLatched = true;
+            if (dashAction != null && dashAction.WasPressedThisFrame()) dashLatched = true;
+            if (parryAction != null && parryAction.WasPressedThisFrame()) parryLatched = true;
         }
 
         /// <summary>Tests: press jump for the next fixed step.</summary>
         public void PressJump() => jumpLatched = true;
+        public void PressDash() => dashLatched = true;
+        public void PressParry() => parryLatched = true;
+
+        /// <summary>U-088: an attack reaching the player. True when the parry window caught it: no damage, the dash refreshed, ParryLanded raised.</summary>
+        public bool TryParryAttack(Vector2 from)
+        {
+            if (!Parry.Catch()) return false;
+            Dash.Refresh();
+            Meridian.Core.HitStop.Request(Meridian.Core.HitStopClock.ParryHit);
+            ParryLanded?.Invoke();
+            return true;
+        }
 
         void FixedUpdate()
         {
@@ -97,9 +120,17 @@ namespace Meridian.Player
 
             // Horizontal: accelerate toward the target speed.
             float target = Mathf.Clamp(intent.move, -1f, 1f) * (intent.sprint ? PlayerTuning.SprintSpeed : PlayerTuning.WalkSpeed);
-            float accel = Grounded ? PlayerTuning.GroundAcceleration : PlayerTuning.AirAcceleration;
             // U-050: moving air (Venus super-rotation) carries the surveyor; on the ground the feet resist two thirds of it.
-            v.x = Mathf.MoveTowards(v.x, target + windX * (Grounded ? WindGrip : 1f), accel * dt);
+            float goalX = target + windX * (Grounded ? WindGrip : 1f);
+            // U-088 (Bible §4.2 Feel v3): 60 m/s² to speed, 80 braking, a turn reverses within 0.08 s; 30 in the air.
+            float accel = PlayerTuning.AirAcceleration;
+            if (Grounded)
+            {
+                bool braking = Mathf.Abs(target) < 0.01f;
+                bool turning = !braking && Mathf.Abs(v.x) > 0.1f && Mathf.Sign(target) != Mathf.Sign(v.x);
+                accel = braking ? PlayerTuning.Braking : turning ? PlayerTuning.TurnAcceleration : PlayerTuning.GroundAcceleration;
+            }
+            v.x = Mathf.MoveTowards(v.x, goalX, accel * dt);
             if (Mathf.Abs(intent.move) > 0.01f) Facing = intent.move > 0 ? 1 : -1;
 
             // Jump. Physics applies gravity before moving the body, so starting at v₀ + g·dt/2
@@ -109,7 +140,7 @@ namespace Meridian.Player
             bool jumped = jumpTimer.Step(dt, Grounded, pressed);
             if (jumped)
             {
-                v.y = PlayerTuning.JumpSpeed + 0.5f * g * dt;
+                v.y = PlayerTuning.JumpStartSpeed(g, dt);
                 Grounded = false;
                 airTimeSinceJump = 0f;
                 Jumped?.Invoke();
@@ -120,6 +151,26 @@ namespace Meridian.Player
             // A tap is only a jump.
             bool jetHeld = intent.jumpHeld && !Grounded && !jumped && (airTimeSinceJump > 0.25f || pressed);
             v.y += Jetpack.Step(dt, jetHeld, Grounded) * dt;
+
+            // U-088: jump cut: releasing the jump while rising keeps 40 % of the upward speed (the full height is unchanged).
+            if (jumpHeldLast && !intent.jumpHeld && !Grounded && !jumped && v.y > 0f) v.y *= PlayerTuning.JumpCutFactor;
+            jumpHeldLast = intent.jumpHeld;
+
+            // U-088: air dash: a velocity override (9 m/s facing for 0.18 s, vertical held at 0), then the planet's g resumes at once.
+            bool dashNow = dashLatched || intent.dashPressed;
+            dashLatched = false; intent.dashPressed = false;
+            if (dashNow) Dash.TryStart(!Grounded, Facing);
+            if (Dash.Step(dt, Grounded, out float dashShare))
+            {
+                v.x = Dash.Direction * AirDash.Speed * dashShare;
+                v.y = g * dt * dashShare; // physics applies g·dt before moving: this leaves the step's vertical motion at 0
+            }
+
+            // U-088: parry window and recovery.
+            bool parryNow = parryLatched || intent.parryPressed;
+            parryLatched = false; intent.parryPressed = false;
+            if (parryNow) Parry.TryStart();
+            Parry.Step(dt);
 
             if (v.y < -terminalVelocity) v.y = -terminalVelocity;
             Body.linearVelocity = v;

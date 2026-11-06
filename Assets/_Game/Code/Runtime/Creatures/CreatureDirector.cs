@@ -298,6 +298,16 @@ namespace Meridian.Creatures
         {
             var spec = c.Spec;
             Vector2 pos = c.Body.position;
+            // U-088: a parried creature is staggered (Creature.StaggerSeconds): it stands, bites nothing, then resumes.
+            if (c.staggerFor > 0f)
+            {
+                c.staggerFor -= dt;
+                var sv = c.Body.linearVelocity;
+                sv.x = Mathf.MoveTowards(sv.x, 0f, Creature.StaggerBrake * dt);
+                c.Body.linearVelocity = sv;
+                c.Animate(dt, 0f);
+                return;
+            }
             float dx = player.x - pos.x, dy = player.y - pos.y, adx = Mathf.Abs(dx);
 
             if (adx > DespawnDistance || Mathf.Abs(dy) > DespawnDistance || (!spec.ActiveAt(daylight) && adx > 22f)) { Despawn(c); return; } // night hunters leave at dawn, off-screen
@@ -368,13 +378,18 @@ namespace Meridian.Creatures
             // Bite.
             bool hunting = c.State == CreatureState.Chase;
             float reachX = spec.size.x * 0.5f + 0.6f, reachY = spec.Flies ? spec.size.y * 0.5f + 1.2f : 1.4f;
-            if (hunting && vitals != null && !vitals.Dead && adx < reachX && Mathf.Abs(dy) < reachY && now >= c.biteReady)
-            {
-                c.biteReady = now + 1.2f;
-                c.attackFor = 0.4f;
-                vitals.Damage(spec.biteDamage);
-            }
+            if (hunting && vitals != null && !vitals.Dead && adx < reachX && Mathf.Abs(dy) < reachY && now >= c.biteReady) Bite(c, now);
             c.Animate(dt, Mathf.Abs(v.x) + (spec.Flies ? Mathf.Abs(v.y) : 0f));
+        }
+
+        /// <summary>U-088: a bite lands unless the player's parry window catches it: then 0 damage and the attacker staggers 1.2 s.</summary>
+        public void Bite(Creature c, float now)
+        {
+            c.biteReady = now + 1.2f;
+            c.attackFor = 0.4f;
+            if (player != null && player.TryParryAttack(c.Body.position)) { c.staggerFor = Creature.StaggerSeconds; c.attackFor = 0f; return; }
+            if (vitals == null && player != null) vitals = player.GetComponent<PlayerVitals>();
+            if (vitals != null) vitals.Damage(c.Spec.biteDamage);
         }
 
         void Think(Creature c, float dx, float dy, float adx, bool flare, float now)

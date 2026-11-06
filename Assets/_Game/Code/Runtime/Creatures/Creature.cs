@@ -26,6 +26,10 @@ namespace Meridian.Creatures
         public bool Alive => gameObject.activeSelf;
         /// <summary>Hit points left (U-046); reset at spawn from the species.</summary>
         public float Health { get; private set; }
+        /// <summary>U-088: a parried attacker stands staggered this long.</summary>
+        public const float StaggerSeconds = 1.2f, StaggerBrake = 20f;
+        public bool IsStaggered => staggerFor > 0f;
+        internal float staggerFor;
         internal CreatureDirector director;
 
         /// <summary>Mercury zone at the creature (U-055: Cinderhulk sheet and window).</summary>
@@ -102,7 +106,7 @@ namespace Meridian.Creatures
             dir = (serial & 1) == 0 ? 1 : -1;
             nextThink = 0f;
             biteReady = 0f;
-            hurtFor = attackFor = chillFor = anim = 0f;
+            hurtFor = attackFor = chillFor = anim = staggerFor = 0f;
             fleeUntil = 0f;
             lastClip = -1;
             altitude = position.y;

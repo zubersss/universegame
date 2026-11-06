@@ -97,6 +97,7 @@ namespace Meridian.Rig
                     if (creature != null && creature.Alive)
                     {
                         bool killed = creature.Hurt(Damage, b.cryo);
+                        if (!creature.LastHitShrugged) Meridian.Core.HitStop.Request(Meridian.Core.HitStopClock.LanceHit); // U-088: 33 ms when a Lance hit lands
                         HitCreature?.Invoke(creature, killed);
                         stop = true;
                     }

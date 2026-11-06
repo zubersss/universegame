@@ -37,7 +37,7 @@ namespace Meridian.Creatures.Wardens
         public int BoltsLive { get; private set; }
         public int Trips { get; private set; }
 
-        sealed class Bolt { public SpriteRenderer view; public Vector2 pos, dir; public float travelled, age; public bool live; }
+        sealed class Bolt { public SpriteRenderer view; public Vector2 pos, dir; public float travelled, age; public bool live, reflected; }
         readonly List<Bolt> bolts = new List<Bolt>(BoltPool);
         readonly List<(float at, Vector2 where)> pending = new List<(float, Vector2)>(4);
         readonly System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
@@ -193,6 +193,15 @@ namespace Meridian.Creatures.Wardens
             LastAiMs = (float)watch.Elapsed.TotalMilliseconds;
         }
 
+        /// <summary>Tests: bolt slot `i` (position, direction, reflected); false for a free or missing slot.</summary>
+        public bool TryGetBolt(int i, out Vector2 pos, out Vector2 dir, out bool reflected)
+        {
+            pos = dir = Vector2.zero; reflected = false;
+            if (i < 0 || i >= bolts.Count || !bolts[i].live) return false;
+            pos = bolts[i].pos; dir = bolts[i].dir; reflected = bolts[i].reflected;
+            return true;
+        }
+
         public bool Fire(Vector2 from, Vector2 direction)
         {
             if (direction.sqrMagnitude < 1e-6f) return false;
@@ -204,6 +213,7 @@ namespace Meridian.Creatures.Wardens
                 b.dir = direction.normalized;
                 b.travelled = 0f;
                 b.age = 0f;
+                b.reflected = false;
                 b.view.transform.SetPositionAndRotation(from, Quaternion.Euler(0f, 0f, Mathf.Atan2(b.dir.y, b.dir.x) * Mathf.Rad2Deg));
                 if (boltSheet != null && boltSheet.Ready)
                 {
@@ -227,10 +237,22 @@ namespace Meridian.Creatures.Wardens
                 b.pos += b.dir * step;
                 b.travelled += step;
                 bool stop = b.travelled >= BoltRange;
-                if (!stop && player != null && (b.pos - target).sqrMagnitude <= BoltHitRadius * BoltHitRadius)
+                if (!stop && !b.reflected && player != null && (b.pos - target).sqrMagnitude <= BoltHitRadius * BoltHitRadius)
                 {
-                    if (hazards != null) hazards.DamageSuit(BoltDamage);
-                    stop = true;
+                    // U-088: a parried bolt flies back along the aim (the facing when there is no aim) and never hits the player again.
+                    if (player.TryParryAttack(b.pos))
+                    {
+                        var aim = player.Aim.sqrMagnitude > 1e-4f ? player.Aim.normalized : new Vector2(player.Facing, 0f);
+                        b.dir = aim;
+                        b.reflected = true;
+                        b.travelled = 0f;
+                        b.view.transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(aim.y, aim.x) * Mathf.Rad2Deg);
+                    }
+                    else
+                    {
+                        if (hazards != null) hazards.DamageSuit(BoltDamage);
+                        stop = true;
+                    }
                 }
                 if (!stop && terrain != null && TileId.IsSolid(terrain.GetTile(Mathf.FloorToInt(b.pos.x), Mathf.FloorToInt(b.pos.y)))) stop = true;
                 if (stop) { Retire(b); continue; }
