@@ -6,8 +6,8 @@
  "up": "+Y",
  "units": "m",
  "origin": "base",
- "triangles": 1696,
- "lod1_triangles": 800,
+ "triangles": 1216,
+ "lod1_triangles": 796,
  "texture": 2048,
  "maps": [
   "color",
@@ -19,5 +19,6 @@
  "clips": [],
  "atlas": "props/earth_flora/atlas",
  "vertex_color": true,
- "sockets": []
+ "sockets": [],
+ "alpha_clip": true
 }

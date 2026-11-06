@@ -202,8 +202,9 @@ def cards(coll, kind, anchors, size, bend_fn, sway_fn, rnd, roll=0.6):
     at pos). size: card edge in m (x 0.8-1.2 per card). bend_fn(v) -> outward normal at vertex v."""
     u0, v0, u1, v1 = FA.tile_rect("leafcards", sub=kind)
     verts, faces, uvs, bends, ids = [], [], [], [], []
-    for k, (pos, up) in enumerate(anchors):
-        s = size * rnd.uniform(0.8, 1.2)
+    for k, anc in enumerate(anchors):
+        pos, up = anc[0], anc[1]
+        s = (anc[2] if len(anc) > 2 else size) * rnd.uniform(0.8, 1.2)
         up = Vector(up).normalized()
         ref = Vector((0, 0, 1)) if abs(up.z) < 0.9 else Vector((1, 0, 0))
         side = up.cross(ref).normalized()
@@ -323,17 +324,17 @@ def tree_spruce(coll, rnd):
         f = t / (tiers - 1)
         z = 1.3 + 8.0 * f
         R = 2.5 * (1 - f) ** 0.9 + 0.35
-        n = max(4, int(round(10 * (1 - f))) + 3)
+        n = max(5, int(round(11 * (1 - f))) + 4)
         off = rnd.uniform(0, 6.28)
         for k in range(n):
             yaw = off + k * 2 * math.pi / n + rnd.uniform(-0.2, 0.2)
             droop = -0.35 + 0.5 * f + rnd.uniform(-0.1, 0.1)
             d = Vector((math.cos(yaw), math.sin(yaw), droop)).normalized()
             if f < 0.85:
-                limb(coll, (0, 0, z), R * 0.75, 0.05 * (1 - f) + 0.015, 0.012, yaw, math.asin(d.z), rnd, "bark_spruce",
+                limb(coll, (0, 0, z), R * 0.45, 0.05 * (1 - f) + 0.015, 0.012, yaw, math.asin(d.z), rnd, "bark_spruce",
                      ws, sides=4, segs=1)
-            an.append((tuple(Vector((0, 0, z)) + d * 0.1), tuple(d)))
-    an.append(((0.0, 0.0, 9.3), (0.0, 0.0, 1.0)))                                               # the leader
+            an.append((tuple(Vector((0, 0, z)) + d * 0.1), tuple(d), R * 0.75 + 0.85))   # upper sprays overlap the next tier
+    an.append(((0.0, 0.0, 9.3), (0.0, 0.0, 1.0), 1.0))                                               # the leader
 
     def bend(v):
         o = Vector((v[0], v[1], 0.0))
@@ -685,11 +686,15 @@ def vent_chimney(coll, rnd):
         finish(lump, "lava_crust", "sph", _STILL)
     slump = blob(coll, 0.3, (0.6 * math.cos(2.2), 0.6 * math.sin(2.2), 0.6), (1.3, 1.0, 1.4), 1, seed=111, rough=0.3)
     finish(slump, "lava_crust", "sph", _STILL)
-    mouth = cyl(coll, 0.44, 0.22, 0.4, (0, 0, 0.86), 12)            # recessed glowing throat (cycle 223: wider, lower)
+    mouth = cyl(coll, 0.2, 0.46, 0.42, (0, 0, 0.87), 12)            # glowing funnel flaring up to the rim (cycle 223: reads from a level camera)
     finish(mouth, "vent_mouth", "cyl", _STILL)
-    for k in range(4):                                               # glow spill over the lip
-        a = rnd.uniform(0, 6.28)
-        finish(blob(coll, 0.12, (0.44 * math.cos(a), 0.44 * math.sin(a), 1.02), (1.4, 1.2, 0.5), 1, seed=120 + k, rough=0.0),
+    for k in range(7):                                               # glow spill over the lip, a broken ring
+        a = k * 0.9 + rnd.uniform(-0.2, 0.2)
+        finish(blob(coll, 0.14, (0.46 * math.cos(a), 0.46 * math.sin(a), 1.04), (1.4, 1.2, 0.55), 1, seed=120 + k, rough=0.0),
+               "vent_mouth", "sph", _STILL)
+    for k, a in enumerate((2.2, 4.4, 5.6)):                          # fresh lava drips down the outer wall (the camera side shows them)
+        rr = 0.6
+        finish(blob(coll, 0.09, (rr * math.cos(a), rr * math.sin(a), 0.72), (1.0, 1.0, 3.2), 1, seed=130 + k, rough=0.0),
                "vent_mouth", "sph", _STILL)
 
 
@@ -704,7 +709,7 @@ def lava_blister(coll, rnd):
         x, y = mid * 1.35 * math.cos(a) + 0.1, mid * 1.15 * math.sin(a) + 0.05
         z = 0.1 + 0.52 * math.sqrt(max(0.0, 1.0 - (mid * 1.0) ** 2)) * 0.95
         pitch = math.atan2(0.52 * mid, math.sqrt(max(1e-3, 1.0 - mid * mid)))     # follow the dome's slope
-        ob = cyl(coll, 0.03, 0.025, ln * 1.25, (x, y, z), 4, rot=(0, math.radians(90) - 0.0, a))
+        ob = cyl(coll, 0.06, 0.045, ln * 1.25, (x, y, z), 5, rot=(0, math.radians(90) - 0.0, a))
         ob.rotation_euler = (0, math.radians(90) + pitch * 0.9, a)
         finish(ob, "vent_mouth", "cyl", _STILL)
     finish(blob(coll, 0.28, (0.1, 0.05, 0.58), (1.3, 1.0, 0.3), 1, seed=98, rough=0.3), "vent_glass", "sph", _STILL)
@@ -778,9 +783,10 @@ def field_preview(blend_path, planet, out_png, n=20, seed=7, width=1536, height=
     bpy.ops.wm.open_mainfile(filepath=blend_path)
     scene = bpy.context.scene
     rnd = random.Random(seed)
+    for o in scene.objects:
+        if o.type == "MESH":
+            o.hide_render = True
     protos = [o for o in scene.objects if o.type == "MESH" and (names is None or o.name in names)]
-    for o in protos:
-        o.hide_render = True
     x0 = -float(n) * 0.9
     x = x0
     for i in range(n):

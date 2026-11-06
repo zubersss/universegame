@@ -547,11 +547,22 @@ def _drop_cards(lod, cap, tris):
         bm.free()
         me.calc_loop_triangles()
         n = len(me.loop_triangles)
-        if (n <= cap and n <= tris * 0.5) or step >= 8:
+        if (n <= cap and n <= tris * 0.5) or step >= 4:
             old = lod.data
+            for m in old.materials:                    # bm.to_mesh into a new mesh drops the slots (LOD1 rendered untextured)
+                me.materials.append(m)
             lod.data = me
             me.name = old.name
             bpy.data.meshes.remove(old)
+            limit = min(cap, int(tris * 0.5))
+            if n > limit:                              # wood-heavy (spruce twigs): decimate what is left
+                dec = lod.modifiers.new("lod", "DECIMATE")
+                dec.ratio = limit / n * 0.97
+                for o in bpy.context.view_layer.objects:
+                    o.select_set(False)
+                bpy.context.view_layer.objects.active = lod
+                lod.select_set(True)
+                bpy.ops.object.modifier_apply(modifier="lod")
             bend_normals(lod)
             return n
         bpy.data.meshes.remove(me)
