@@ -13,6 +13,6 @@ USER-20 (optional: close Edge while memory is short). The R1 playtest item comes
 ## Loop / stall watch
 Sessions restarted 01:26; first commits expected by 02:0x. Watch: UNITY commits the 01:19 release outputs before any new code; BLENDER's B-101 export waits for 1.5 GB free (0.7 GB at 01:28). want_blender.lock 01:19 live.
 ## Session addresses (ListAgents, 11-06 01:28)
-zuber-04 and zuber-c7 (roles unconfirmed; asked). This session: zuber-38.
+UNITY = zuber-c7 (confirmed 01:5x), BLENDER = zuber-04 (by elimination; unconfirmed). This session: zuber-38.
 ## HeavyJobLock
 none (LEAD runs no heavy jobs while memory is tight)
