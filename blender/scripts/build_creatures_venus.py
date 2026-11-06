@@ -1,4 +1,4 @@
-"""Builds blender/sources/creatures/venus.blend: Venus cloud-deck fliers (B-032, Bible ยง7.4).
+"""Builds blender/sources/creatures/venus.blend: Venus cloud-deck fliers (B-032, Bible section 7.4).
 
 Fliers, so no ground: each creature is centred on the origin and the sheet pivot is the
 centre (render.py autofit checks the bottom extent too when the pivot is raised). Same clip
@@ -938,7 +938,7 @@ def _serpent_module(scene, which, nb, rnd):
                                                 rotation=(0, math.radians(-112 + 14 * j), 0))
                 _rig_child(bpy.context.active_object, rig, hb, coll, horn)
 
-    # Chain sockets (contract ง9.1 item 7): socket_root at the tail-side end (static, the point UNITY
+    # Chain sockets (contract section 9.1 item 7): socket_root at the tail-side end (static, the point UNITY
     # places on the previous module's socket_next), socket_next at the head-side end riding the last
     # bone, so the next module follows the wave. Attach by position only: every module's bones carry
     # absolute angles (the v1 chain), so inheriting the socket's rotation would double the bend.
