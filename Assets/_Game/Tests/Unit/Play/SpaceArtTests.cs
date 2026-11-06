@@ -29,6 +29,9 @@ namespace Meridian.Tests
             var director = Object.FindAnyObjectByType<SceneDirector>();
             float timeout = Time.realtimeSinceStartup + 30f;
             while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
+            // The Space root wakes on the view switch: DockingBay.Start creates the waystations then.
+            director.SetView(ViewMode.Space);
+            yield return null;
             var world = Object.FindAnyObjectByType<SpaceWorld>(FindObjectsInactive.Include);
             Assert.NotNull(world);
 
