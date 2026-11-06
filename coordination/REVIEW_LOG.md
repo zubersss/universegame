@@ -1057,3 +1057,7 @@ BLENDER's next turn: tail + body re-export in one call (socket regex fixed in 18
 
 ## Cycle 215 · 2026-11-06 00:4x (UNITY message)
 Checked: unity_compile_20261106_003501.log 0 errors / 0 warnings; tests_2026-11-06.md 00:39 EditMode 243/243; reimport output committed (434086d: 89 model colour maps Default/sRGB + mips; 7878bc6: placeholder normal-map metas). U-077 job 1 passes (5.7 min under the lock, 00:35-00:41). Turns: BLENDER took the lock 00:40 (serpent tail + body re-export); UNITY files its want for job 2 (unity_release.ps1 -SkipEditMode: compile + profile -Build + smoke 21 -> Build/MERIDIAN_0.4.0) once BLENDER holds it, U-078 code stays out of Assets until then. Next review: the perf and smoke reports and the Earth day shot (B-102 frame-height check), then the R1 report + page + USER playtest item.
+
+## Cycle 216 · 2026-11-06 00:5x (BLENDER message)
+Checked: logs/blender_2026-11-06.log OK veil_serpent_tail 00:43 + body 00:45 (peaks 1911 MB); review_creatures_venus_veil_serpent_tail.png stamped 00:43 (tapering tail, dorsal sail, ventral fin). B-094 art accepted in full; stays In Progress until U-085's lit preview. BLENDER next: B-101 (want filed 00:46, refreshed), then B-097. UNITY holds heavy_unity.lock since 00:46: U-077 job 2 (release: compile + profile -Build + smoke 21). No signals.
+Queues: UNITY U-078/U-079/U-080/U-081/U-083/U-084 Ready (6) + U-077 active; BLENDER B-097..B-101 Ready (5) + B-094 waiting on UNITY.
