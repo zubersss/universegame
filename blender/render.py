@@ -541,6 +541,11 @@ def write_outputs(entry, maps, clips, wh, preview):
             json.dump(meta, f, indent=2)
             f.write("\n")
         sizes.append("json")
+    elif entry.get("sidecar"):          # v3 single images (e.g. film overlays, §11.6): {"key", "style": "v3", ...}
+        with open(os.path.join(dest, f"{variant}.json"), "w", encoding="utf-8", newline="\n") as f:
+            json.dump({"key": key, **entry["sidecar"]}, f, indent=2)
+            f.write("\n")
+        sizes.append("json")
     sheet = post.contact_sheet(maps, entry.get("tileable"), tile_img=tile_image(entry, maps["color"]))
     os.makedirs(PREVIEW, exist_ok=True)
     pngio.write_png(os.path.join(PREVIEW, f"{key.replace('/', '__')}_contact.png"), sheet)

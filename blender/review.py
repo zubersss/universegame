@@ -378,9 +378,44 @@ def v3_rigset_review(entry, meta, sheet, sheet_path, out, part_imgs, stats):
         draw(canvas, stamp_text(sheet_path) + " preview", 2, canvas.shape[0] - 16, (1.0, 1.0, 0.85))
     write(out, canvas)
 
+def film(out, paths):
+    """Film overlays (§11.6): each tiled 2x2 and cropped so the four-tile seam crossing sits in
+    the panel centre (crosshair ticks mark it); row 1 at game strength on paper, row 2 boosted
+    x4 around mid-grey so seams and specks are easy to see. One stamp per overlay."""
+    stale = stale_keys()
+    top, bottom = [], []
+    for p in paths:
+        img = pngio.read_png(p)
+        t = np.tile(img, (2, 2, 1))
+        n = img.shape[0]
+        c = t[n - 192:n + 192, n - 192:n + 192]
+        rgb, a = c[..., :3], c[..., 3:4]
+        if (a > 0.99).all():                        # grain: overlay around mid-grey
+            game = np.clip(PAPER + (rgb - 0.5) * 0.35, 0, 1)
+            boost = np.clip(0.5 + (rgb - 0.5) * 4.0, 0, 1)
+        else:
+            game = rgb * a * 0.6 + PAPER * (1 - a * 0.6)
+            boost = rgb * np.clip(a * 4, 0, 1) + 0.5 * (1 - np.clip(a * 4, 0, 1))
+        for im in (game, boost):
+            im[0:6, 191:193] = (0.85, 0.1, 0.1)
+            im[-6:, 191:193] = (0.85, 0.1, 0.1)
+            im[191:193, 0:6] = (0.85, 0.1, 0.1)
+            im[191:193, -6:] = (0.85, 0.1, 0.1)
+        game = np.ascontiguousarray(game)
+        _label(game, os.path.basename(p).replace("_color.png", "") + " at game strength", 4, 4)
+        _label(boost, "x4 boost", 4, 4)
+        stamp(game, p, stale)
+        top.append(np.pad(game, ((0, 0), (0, 8), (0, 0)), constant_values=1.0))
+        bottom.append(np.pad(boost, ((0, 0), (0, 8), (0, 0)), constant_values=1.0))
+    write(out, np.vstack([np.hstack(top), np.full((8, sum(x.shape[1] for x in top), 3), 1.0), np.hstack(bottom)]))
+    print("REVIEW film ok", out)
+
+
 if __name__ == "__main__":
     a = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]
-    if a[0] == "sprites":
+    if a[0] == "film":
+        film(a[1], a[2:])
+    elif a[0] == "sprites":
         sprites(a[1], a[2:])
     elif a[0] == "tiles":
         tiles(a[1], a[2:])
