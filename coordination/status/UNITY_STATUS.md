@@ -1,6 +1,7 @@
 # UNITY STATUS
 Updated: 2026-11-06 15:1x · Session: 5
 ## Current task
+ 15:1x CHECK 1 (U-093 + U-094 parts 1-2, one lock 15:07-15:14): compile 0/0, EditMode 265/267, both reds in my new CartoonImportTests and fixed (test time; extra hold key made walk 13/12 s). PlayMode not reached. want_blender (B-111 step 2) appeared as I released: D-037, BLENDER goes next; I file want_unity once heavy_blender appears, then re-run the same check (EditMode + PlayMode BumpTests|ConkOutTests|FeelPlayTests|SquashPlayTests|WardenPlayTests|RigModuleTests|InnerCreatureTests|MenuHudTests|CreatureTests|CartoonSmokeTests), then CaptureC0Earth.
  15:1x RESUME on LEAD cycle 233: 1.74 GB free, no Editor/Blender, want_blender (11:57) first. Lock-free now: U-094 part 2 (smoke_c0_earth + SceneCapture.CaptureC0Earth). Then the batched check U-093 + U-094 part 1 after BLENDER's B-110 export releases (or at 15:2x if no heavy_blender.lock appears).
  13:4x U-094 part 1 COMMITTED uncompiled (see git log): importer v13, SheetAnimatorBuilder, View2D (SheetClock, SpriteCharacterView, ParallaxLayers, CartoonStage), placeholder surveyor sheet, CartoonImportTests. LEFT for U-094: PlayMode smoke_c0_earth (CartoonStage.Enabled = true, LogAssert clean), SceneCapture.CaptureC0Earth -> reports/unity/c0_<date>/earth_c0_placeholder.png, the <= 8 atlases per planet rule. Owed heavy job (one batched check when my turn + >= 1.5 GB): compile + EditMode + PlayMode for U-093 and U-094.
  12:5x U-093 code COMMITTED uncompiled (24faf9f, see the commit text). Verification owed: one batched check (compile + EditMode + PlayMode BumpTests|ConkOutTests|FeelPlayTests|SquashPlayTests|WardenPlayTests|RigModuleTests|InnerCreatureTests|MenuHudTests|CreatureTests|M1Integration) when it is my turn: want_blender.lock is up (D-037: BLENDER first) and free RAM is 0.7 GB (gate 1.5). Meanwhile lock-free: U-094 (v4 2D render path) code.
@@ -189,4 +190,4 @@ P-32 (U-075, needs a ruling; test left strict): SurveyorAnimPlayTests.WalkRunJum
 USER: free RAM has been 0.4-0.8 GB since 01:3x; both heavy queues (BLENDER B-101 export, UNITY release call 5) need 1.5 GB free: please close ChatGPT/Edge/WSL (vmmem) or restart, then both jobs run on their own.
 (none)
 ## HeavyJobLock
-none held; not waiting yet (want_blender.lock up, 0.7 GB free); I file want_unity once BLENDER takes the lock (D-039).
+none held; BLENDER next (want_blender 15:1x); want_unity after heavy_blender appears (D-039)
