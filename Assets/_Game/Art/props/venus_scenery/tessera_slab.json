@@ -6,8 +6,8 @@
  "up": "+Y",
  "units": "m",
  "origin": "base",
- "triangles": 188,
- "lod1_triangles": 90,
+ "triangles": 608,
+ "lod1_triangles": 290,
  "texture": 2048,
  "maps": [
   "color",
