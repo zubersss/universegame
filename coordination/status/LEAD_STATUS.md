@@ -1,16 +1,16 @@
 # LEAD STATUS
-Updated: 2026-11-02 12:1x · Session: 2 (Fable 5.1), resume point before USER-17 · Review cycle: 206
+Updated: 2026-11-05 23:4x · Session: 3 (Fable 5.1), resumed after a 3-day gap · Review cycle: 207
 ## Current task
-R1: U-072, U-073, U-074 Done; U-075 (Animator views + glb importer) and U-076 (models in the scene, depth bands) are the last big pieces, then U-077 builds 0.4.0 for the owner's playtest. BLENDER is ahead: all R1 art done, R2 art half done, R3 queued.
+R1 close: U-076 needs one check + the u076b capture (steps in its Lead notes), then U-077 builds 0.4.0 → R1 report + milestone page + owner playtest. BLENDER: commit B-092 exports and B-094 sources, then B-094 export when the gate opens (≥ 2.0 GB for 2048² bakes, D-066).
 ## Last completed
-Cycle 147: queue refill (5 UNITY, 6 BLENDER), USER-13 done, USER-14 added.
+Cycle 207: B-092 art accepted; board, backlog (U-085), USER-18 written; stale want_unity deleted.
 ## Next up
-After restart: ListAgents (names change), check U-076 re-shoot (flora smooth + D-071) → U-076 Done → U-077 build 0.4.0 → R1 report + page + USER playtest. BLENDER B-092 export once the gate opens.
+Review cycle when either worker hands off: U-076 capture (trees textured, smooth, behind the ridge) → Done; B-092 commit → wait for UNITY's R3 preview. Then U-077 build checks (BudgetGate rows, smoke 21 shots, perf) → R1 report under 200 words + Artifact page (memory: milestone-artifacts) + USER playtest item.
 ## Pending decisions
-Contract §9 details may change on B-077's proposals (v2.1). Milestone pages: next one at R1 close.
+none. Contract v2.4 current (D-072).
 ## Waiting on the user
-USER-17 (memory restart), USER-15 (folded into USER-17's BLENDER line), USER-14 (folded into USER-17), USER-08 optional.
+USER-18 (free memory: close Chrome, Xbox app, Phone Link), USER-08 optional.
 ## Loop / stall watch
-Usage-limit stop 04:24–11:5x (all sessions). Watch that both workers resume (first commits expected within 30 min).
+Both workers restarted 11-05 ~23:30: expect first commits (the uncommitted leftovers) within 30 min; the first heavy job waits on USER-18. Memory gate closed at 0.37 GB free.
 ## HeavyJobLock
 none (LEAD runs no heavy jobs while memory is tight)

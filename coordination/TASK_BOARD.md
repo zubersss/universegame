@@ -142,14 +142,14 @@ Goal: Ship, props and depth bands: the Pilgrim and props batch 1 as model prefab
 Accept: an Earth capture shows blocks, back wall, ridges, sky dome and the ship with depth; BuildTests, ShipSideTests, SpaceArtTests green.
 Files: Assets/_Game/Code/Runtime/Ship/, Building/, Planet/Backdrop/, Prefabs/
 Depends: U-073, U-074
-Lead notes: Cycle 171. R1. Cycle 179: the landing pad is now a 2 m module (D-068): the camp spawns two modules (4 m) under the Pilgrim; landing-rule width = 4 m; shelter_door plays its `open` clip; lamps light from socket_light. Cycle 202 review of u076_2026-11-02: mars_shelter_night.png PASSES (lamp model lit from socket_light, wall/door/crate models, boulders, ridge). earth_camp_day.png: ship on the pad modules, props, surveyor, ridge and skyline all read; FAIL on the flora, Art matches §9: the trees render flat-shaded and untextured (faceted crowns in solid greens), unlike BLENDER's review_b085_grove.png (smooth, textured). Likely the importer: mesh normals/smoothing lost on the atlas models, or the generated atlas material not using atlas_color/atlas_normal. Fix, then re-shoot. Also apply D-071 (P-33) in the same pass.
+Lead notes: Cycle 171. R1. Cycle 179: the landing pad is now a 2 m module (D-068): the camp spawns two modules (4 m) under the Pilgrim; landing-rule width = 4 m; shelter_door plays its `open` clip; lamps light from socket_light. Cycle 202 review of u076_2026-11-02: mars_shelter_night.png PASSES (lamp model lit from socket_light, wall/door/crate models, boulders, ridge). earth_camp_day.png: ship on the pad modules, props, surveyor, ridge and skyline all read; FAIL on the flora, Art matches §9: the trees render flat-shaded and untextured (faceted crowns in solid greens), unlike BLENDER's review_b085_grove.png (smooth, textured). Likely the importer: mesh normals/smoothing lost on the atlas models, or the generated atlas material not using atlas_color/atlas_normal. Fix, then re-shoot. Also apply D-071 (P-33) in the same pass. Cycle 207 (2026-11-05, resume after USER-17): D-071 (77e5bf1) and D-072 (533cc5a, importer v10) are in; the 12:23 EditMode run was 242/243 with the one red (ModelMapsAreCappedByDimensionNotByFileSize) fixed in dfd7ce3 but never re-run; the re-check filed as want_unity 12:27 died with the restart. Left to Done: (1) commit the v10 reimport leftovers still untracked in the tree (Generated/Models/creatures/{mercury,venus}, props/{mercury,venus}, props/common/aerostat_*.mat and their .meta files, calibration/base.mat); (2) one check: compile + EditMode + PlayMode `U076SceneTests|ModelViewPlayTests`, expect 243/243 and atlas_normal.png.meta typed NormalMap/linear; (3) `unity_capture.ps1 -Params @{ Name='u076b'; Test='CaptureDepthBands' }`, copy earth_camp_day/depth over reports/unity/u076_2026-11-02/, trees textured and smooth behind the ridge → tell LEAD. Memory: free RAM was 0.37 GB at 23:3x; wait for the USER-18 gate (1.5 GB) before the check.
 
 ### U-077 · UNITY · Ready · R1
 Goal: BudgetGate 3D rows (Bible §11.1 geometry row: ≤ 300 k triangles, ≤ 400 draw calls, ≤ 150 shadow casters) + `unity_profile` reads them; R1 build `Build/MERIDIAN_0.4.0/` with a smoke set (Earth day, night with a lamp, digging, the ship landed and flying, Space).
 Accept: every BudgetGate row green on Earth in the dev build; smoke clean; GameInfo 0.4.0.
 Files: Assets/_Game/Tests/Unit/BudgetGateTests.cs, tools/unity_profile.ps1, Build/
 Depends: U-075, U-076
-Lead notes: Cycle 171. R1 close, with the owner's playtest.
+Lead notes: Cycle 171. R1 close, with the owner's playtest. Cycle 207: first slice (b5bf4bc: BudgetMonitor triangle/shadow-caster counters + caps, BudgetGate Geometry rows, GameInfo 0.4.0) and the smoke legs smoke_3b_earth_dig / smoke_3c_ship_airborne (490e08e) are committed uncompiled; left: unity_smoke.ps1 count 19 → 21, compile with the U-076 check (one wrapper call, not two), `unity_profile.ps1 -Build`, `unity_smoke.ps1`, perf + smoke reports, Build/MERIDIAN_0.4.0/. Start the moment U-076's capture is sent; don't wait for LEAD's Done.
 
 
 ### U-001 · UNITY · Done · M0
@@ -1280,7 +1280,7 @@ Goal: Mercury and Venus depth bands (as B-083/B-088): Mercury `ridge_mid` for da
 Accept: tiles seamlessly; reads as the v1 parallax from the side rail; stamped turntables; peaks measured.
 Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/{mercury,venus}_*/
 Depends: B-077
-Lead notes: Cycle 193. R3.
+Lead notes: Cycle 193. R3. Cycle 207 (2026-11-05): art accepted on the stamped turntables review_backgrounds_{mercury_day,mercury_twilight,mercury_night,venus_deck,venus_surface}_ridge_mid.png and the two skyline_far panels (12:28–12:30; log OK ×12, peak 1534 MB): grey cratered regolith strips with boulders, Venus deck cloud heaps, basalt plains with lava vents. The exports are NOT committed: Assets/_Game/Art/backgrounds/mercury*/, venus*/, sources/backgrounds/{mercury,venus}_bands.blend and the manifest sit untracked/modified in the tree since the 12:30 restart. First thing: commit them (`[blender] B-092 exports`), then this is Done on UNITY's R3 lit preview.
 
 ### B-093 · BLENDER · In Progress · R3
 Goal: Mercury and Venus creatures as models from the v1 sources (B-04x): every non-apex creature of `creatures/mercury/*` and `creatures/venus/*` (list them from the v1 manifest and log the list), size class per contract §9, full clip sets from the v1 rigs, emission where they glow.
@@ -1289,12 +1289,12 @@ Files: blender/sources/creatures/{mercury,venus}/, build_creatures_mercury.py, b
 Depends: B-077
 Lead notes: Cycle 200: art accepted on the turntables (flarewing, acidmoth checked; 8 species: Mercury glassback/cinderling/flarewing/shadewyrm, Venus sulfur_drifter/acidmoth/pressure_crab/vent_eel). Pipeline fixes: object animation baked to bones; merge keeps original coordinates. Done on R3's lit preview.
 
-### B-094 · BLENDER · Ready · R3
+### B-094 · BLENDER · In Progress · R3
 Goal: Mercury and Venus apexes as models: `creatures/mercury/cinderhulk` (large class, lava-cracked back with emission that dims on the night side via a material float) and `creatures/venus/veil_serpent` (segmented ribbon: head, repeatable body, tail; translucent fins; a "chilled" white-flash state), LOD1 for both.
 Accept: contract §9; chained preview for the serpent; stamped turntables; UNITY lit preview for Done.
 Files: build_creatures_mercury.py, build_creatures_venus.py, Assets/_Game/Art/creatures/{mercury,venus}/
 Depends: B-093
-Lead notes: Cycle 193. R3.
+Lead notes: Cycle 193. R3. Cycle 207: started before the restart and left uncommitted: build_creatures_venus.py `build_serpent_modules` (+188 lines), model.py changes, manifest entries creatures/mercury/cinderhulk (one model, night dims the emission at runtime) and creatures/venus/veil_serpent_{head,body,tail} (chained by UNITY; a module with J bones behind it plays its clip delayed by J×0.07 cycles). Commit those sources as they stand before any export (they are reviewable work; an uncommitted tree is not). The three-module serpent and the single cinderhulk are approved as the design; the chaining rule goes to UNITY's R3 task (U-085, Backlog). Export 2048² bakes need ≥ 2.0 GB free (D-066): if the gate stays shut, bake at 1024² for the turntables and note it.
 
 ### B-095 · BLENDER · In Progress · R3
 Goal: Mercury and Venus props and stations as models: flare shelter (dome + door clip), Mercury equipment locker, solarite crystal cluster (3 states: glowing, crusted, cut), the Venus station modules (deck module, hab, airlock arch, balloon cell, railing, vent harvester), aerostat pieces already covered by B-069 are re-made as models here too (aerostat_cell/deck/strut), the Mars/Earth Waystation surface pads if any.
@@ -1330,6 +1330,13 @@ Accept: contract §9 (ppu/LOD rules); standable tops flat; stamped turntables; U
 Files: build_props_jupiter.py, build_props_neptune.py, build_props_common.py, Assets/_Game/Art/props/{jupiter,neptune,common}/
 Depends: B-077
 Lead notes: Cycle 199. R4 prep.
+
+### B-101 · BLENDER · Ready · R3
+Goal: Mercury and Venus scenery props as models (the R3 counterpart of B-089): Mercury near-band and play-plane scenery (regolith boulders ×3, impact-glass shards ×2, solarite outcrop, crater-rim rock, ice pocket for the polar/night side) and Venus surface scenery (basalt columns ×2, tessera slab, sulfur crust, vent chimney, cooled lava blister), each ≤ 2 k tris with LOD1 ≤ 800, one shared 2048² atlas per planet (gen_flora_atlas TILE_SETS), emission on the solarite and vent chimney; no flora (nothing grows); the Venus deck gets no scenery (no ground).
+Accept: contract §9; a stamped field preview per planet (20 instances under that planet's Sun: Mercury 6.7, Venus 0.1 diffuse) reads at 60 px/m; UNITY lit preview for Done.
+Files: blender/sources/props/{mercury,venus}_scenery/, build_props_mercury.py, build_props_venus.py, Assets/_Game/Art/props/{mercury_scenery,venus_scenery}/
+Depends: B-077
+Lead notes: Cycle 207. R3. After B-094; before the R4 tasks.
 
 ### B-100 · BLENDER · Ready · R4
 Goal: Saturn column in 3D (as B-097) from the B-058 sources: floe materials, deck planes for saturn_deck1..3 and saturn_deep (ring-plane line in the deck 1 skydome), plus the Saturn creatures as models from the B-060 sources (helium_jelly with its `rise` clip, hex_drake, floe_moth) and the ring-mining props from B-059/B-068 (ring_ice/ring_rock as low-poly bodies, ring_rig, helium_trap, hexagon_wall_marker).
@@ -1406,3 +1413,4 @@ Lead notes: Done 554e14f (cycle 24): hauler hulls/cargo, Warden pylon, Meridian 
 ## Backlog (not yet Ready; LEAD promotes)
 M2: Earth/Mars POIs, day/night lighting pass (U), Mars dust storm (U), creature AI v1 (U),
 Cryo meter (U), `PlanetDisc` shader with real textures (U). (POI prop sets promoted to B-020, B-021 in cycle 5.)
+R3 (drafted cycle 207): U-085 Mercury and Venus in 3D (the R3 counterpart of U-081: B-091 block arrays, B-092 bands incl. the translucent Venus deck strip and the day/twilight/night Mercury skydomes, B-093/B-096 creatures and Wardens through ModelView, B-095 props and station modules via ModelSwap, B-101 scenery; the cinderhulk emission float driven by the day side; the veil serpent chained from veil_serpent_tail + n×body + head, each module's clip offset by J×0.07 cycles for J bones behind it; M3InnerTests + the M3 smoke set re-shot with the depth preset). Promote when U-081 is Done.

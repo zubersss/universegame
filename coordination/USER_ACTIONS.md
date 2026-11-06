@@ -6,27 +6,12 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-17 — Free memory: close two apps, then restart the three Claude windows (5 min)
-After 15 hours the three Claude sessions hold about 1.4 GB and the memory gate has been closed for both workers since 11:58 (free RAM ~1.0 GB, gate 1.5 GB). Nothing is lost by restarting; each session resumes from the repo.
-1. Close Chrome and quit Unity Hub (taskbar ^ arrow → right-click Unity Hub → Quit).
-2. In each of the three Claude windows type `/exit`, then `claude`, then paste:
-   - LEAD window: `Resume MERIDIAN as LEAD`, then `/loop 30m run a review cycle per your charter, keep both workers stocked, and tell me only if you need something from me`
-   - UNITY window: `Resume MERIDIAN as UNITY. From now on, if Claude Code stops one of your jobs for low memory, you may re-run it once after memory recovers.`
-   - BLENDER window: `Resume MERIDIAN as BLENDER. From now on, if Claude Code stops one of your jobs for low memory, you may re-run it once after memory recovers.`
-3. Tell the Lead "done: USER-17".
-
-### USER-15 — Give BLENDER the same memory-restart permission UNITY has (1 min)
-When the laptop runs low on memory, Claude Code stops the running job and the BLENDER session waits for you to type permission before trying again. UNITY already has standing permission; BLENDER keeps asking you each time (21:34 and again around 00:00). Paste this into the **BLENDER window** exactly:
-
-`From now on, if Claude Code stops one of your jobs for low memory, you may re-run it once after memory recovers. Yes to the re-run you asked about.`
-
-Then tell the Lead "done: USER-15".
-
-### USER-14 — Free a little memory so UNITY's test run can start (2 min)
-The team's test run needs 1.5 GB free memory; with everything idle the laptop has about 1.0 GB free.
-1. Close browser windows and any other apps you aren't using.
-2. Quit Unity Hub: click the ^ arrow at the bottom right of the taskbar, right-click the Unity Hub icon → Quit. The team doesn't need Hub open.
-3. Leave the three Claude windows open. Tell the Lead "done: USER-14".
+### USER-18 — Free memory before the workers' first heavy job (3 min)
+At 23:3x on 2026-11-05 the laptop had 0.37 GB free; the gate is 1.5 GB, so neither worker can compile, test or export yet. The four Claude sessions use about 1.2 GB (normal). The rest is apps we don't need:
+1. Close Chrome.
+2. Close the Xbox app and Phone Link (taskbar ^ arrow → right-click each → Exit; or Task Manager → right-click → End task).
+3. If "Antimalware Service Executable" is still above 300 MB in Task Manager, wait for the Defender scan to finish (a few minutes) rather than killing it.
+4. Tell the Lead "done: USER-18". Nothing else is needed; the workers resume on their own once memory is above the gate.
 
 ### USER-08 — Optional: let the team run PowerShell commands without prompts (2 min)
 On Windows, Claude Code runs commands through PowerShell as well as Bash, and the
@@ -36,6 +21,7 @@ If you get too many "allow this command?" prompts, tell the Lead "approve PowerS
 allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
 
 ## Done
+- 2026-11-05 23:3x · USER-17 (the three windows were restarted; LEAD found two peer sessions at resume). USER-14 and USER-15 were folded into it. Memory is still short → USER-18.
 - 2026-11-02 00:5x · USER-16 and USER-12 (M3/M2 playtests) withdrawn: the owner chose the 3D rehaul (D-062) and "switch now". The next playtest is R1 (Earth in 3D).
 - 2026-11-01 20:0x · USER-13 (the owner restarted all three windows; the LEAD loop is running again).
 - 2026-10-30 · USER-01 (Git 2.56 and Git LFS 3.8 already installed; the Lead ran

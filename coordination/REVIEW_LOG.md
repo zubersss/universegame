@@ -1015,3 +1015,11 @@ LEAD resume point: cycle 205; R1 waits on U-076's flora re-shoot (D-072 applied)
 
 ## Cycle 206 · 2026-11-02 12:1x
 Waiting on USER-17 (memory restart): free RAM 1.07 GB, claude 1.32 GB; both wants still filed (11:58/11:59), no heavy job possible. Light work landed: UNITY 77e5bf1 (D-071) + 533cc5a (D-072 importer v10, uncommitted no more); BLENDER 3a377de (B-092 sources). No other signals. Queues unchanged (UNITY 5 Ready; BLENDER 4 Ready + 1 active; B-094 after B-092).
+
+## Cycle 207 · 2026-11-05 23:4x (resume after a 3-day gap)
+Gap: all three sessions stopped at ~12:30 on 11-02 (USER-17 restart) and were restarted on 11-05 ~23:30 (two peer sessions found at resume). Nothing committed since; main == origin/main. No locks except a stale want_unity (12:27, 3 days old) → deleted and logged here. Free RAM 0.37 GB (Defender scan 375 MB, four claude 1.2 GB, Xbox app, Phone Link, Chrome) → USER-18; no heavy job can start until it is above 1.5 GB.
+Checked: logs/blender_2026-11-02.log 12:27–12:30 (OK ×12, peak 1534 MB) and review_backgrounds_{mercury_day,venus_deck,venus_surface}_ridge_mid.png stamped 12:28–12:29 → B-092 art accepted; its exports and two band sources are uncommitted in the tree (BLENDER commits first). tests_2026-11-02.md 12:23 EditMode 242/243 (the one red fixed in dfd7ce3, unverified) → U-076 stays In Progress with the exact remaining steps in Lead notes. logs/u076_check4: queued then blocked by BLENDER's export, never ran.
+Uncommitted work found: UNITY's v10 reimport leftovers (Generated/Models mercury/venus creature + prop materials, aerostat mats, metas); BLENDER's B-092 exports + B-094 serpent-module sources (build_creatures_venus.py, model.py, manifest). Both told to commit first. MERIDIAN_SETUP.md (the architect output, 10-30) sits untracked at the root; harmless, left alone.
+Moved: B-094 → In Progress (work exists). Added B-101 (Mercury/Venus scenery props, R3) so BLENDER has 5 Ready; U-085 (Mercury/Venus in 3D incl. serpent chaining) drafted in Backlog. U-077 notes: smoke legs committed uncompiled; chain it onto the U-076 check as one wrapper call.
+Queues: UNITY U-078/U-079/U-080/U-081/U-083/U-084 Ready (6) + U-076 active, U-077 next. BLENDER B-097..B-101 Ready (5) + B-094 active, B-092 commit pending.
+No decisions. Milestone page at R1 close (after the owner's 0.4.0 playtest).
