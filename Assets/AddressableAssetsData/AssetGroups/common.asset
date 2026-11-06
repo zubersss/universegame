@@ -20,11 +20,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 0787838fecbb7454982a3edb3bec9ece
-    m_Address: characters/surveyor/side
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0cd4cbd96af542244bb9e0580e03361c
     m_Address: ships/waystation_earth/top
     m_ReadOnly: 0
@@ -132,6 +127,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 51202e0b6ff5b1e49a2992a59558975f
     m_Address: fx/film/scratches
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 52913a9ed2c763d4f801732247459fb6
+    m_Address: characters/surveyor/side
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

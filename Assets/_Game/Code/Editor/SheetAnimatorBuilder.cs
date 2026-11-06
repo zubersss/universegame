@@ -25,6 +25,10 @@ namespace Meridian.EditorTools
         {
             var sheet = ArtImporter.SheetFor(colorPath, key);
             if (sheet == null || !sheet.IsV3 || !sheet.IsSheet || sheet.animations == null || sheet.animations.Length == 0) return null;
+            // A placeholder never overrides the art's controller: the clips bind sprite objects, so a later placeholder
+            // re-import would put placeholder drawings back in front of the real sheet (C0 capture, 2026-11-06).
+            bool placeholder = colorPath.StartsWith(ArtImporter.Active.placeholders, System.StringComparison.Ordinal);
+            if (placeholder && File.Exists(ArtImporter.ArtColorPath(key))) return null;
             string variant = key.Substring(key.LastIndexOf('/') + 1);
             var sprites = AssetDatabase.LoadAllAssetsAtPath(colorPath).OfType<Sprite>()
                 .GroupBy(s => s.name).ToDictionary(g => g.Key, g => g.First());
@@ -33,6 +37,7 @@ namespace Meridian.EditorTools
             Directory.CreateDirectory(Folder(key));
             var path = ControllerPath(key);
             if (AssetDatabase.LoadAssetAtPath<AnimatorController>(path) != null) AssetDatabase.DeleteAsset(path);
+            foreach (var stale in Directory.GetFiles(Folder(key), "*.anim")) AssetDatabase.DeleteAsset(stale.Replace('\\', '/')); // clips of a previous sheet
             var controller = AnimatorController.CreateAnimatorControllerAtPath(path);
             var machine = controller.layers[0].stateMachine;
 
@@ -72,5 +77,27 @@ namespace Meridian.EditorTools
             }
             return controller;
         }
-    }
-}
+
+        /// <summary>
+        /// Rebuilds every v3 sheet's clips and controller from the live sheet (art, else placeholder): MERIDIAN menu, or
+        /// `tools/unity_check.ps1 -ExecuteMethod Meridian.EditorTools.SheetAnimatorBuilder.RebuildAll`. Returns the count.
+        /// </summary>
+        [MenuItem("MERIDIAN/Rebuild Sheet Animators")]
+        public static int RebuildAll()
+        {
+            int built = 0;
+            foreach (var root in new[] { ArtImporter.Active.art, ArtImporter.Active.placeholders })
+            {
+                var dir = root.TrimEnd('/');
+                if (!Directory.Exists(dir)) continue;
+                foreach (var png in Directory.GetFiles(dir, "*_color.png", SearchOption.AllDirectories))
+                {
+                    var colorPath = png.Replace('\\', '/');
+                    var rel = colorPath.Substring(root.Length);
+                    if (!ArtRules.TryParse(rel, out var key, out var map) || map != Meridian.Art.ArtMap.Color) continue;
+                    if (BuildIfV3(colorPath, key) != null) built++;
+                }
+            }
+            Debug.Log($"[MERIDIAN] SheetAnimatorBuilder: rebuilt {built} controller(s)");
+            return built;
+        }

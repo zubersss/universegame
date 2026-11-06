@@ -55,7 +55,7 @@ namespace Meridian.Tests
                 float off = sr.transform.position.x - expect;
                 float rem = w > 0f ? Mathf.Abs(off - Mathf.Round(off / w) * w) : Mathf.Abs(off);
                 Assert.Less(rem, 0.01f, $"layer {l.n} x follows parallax {l.parallax}");
-                Assert.AreEqual(ParallaxMath.LayerY(c.y, layers.datumY, l.y_m, l.parallax), sr.transform.position.y, 0.01f, $"layer {l.n} y");
+                Assert.AreEqual(ParallaxMath.LayerY(c.y, layers.anchorY, layers.datumY, l.y_m, l.parallax), sr.transform.position.y, 0.01f, $"layer {l.n} y");
             }
 
             // The surveyor draws from the v3 sheet and walks at 12 fps.

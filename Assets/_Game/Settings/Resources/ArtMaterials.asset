@@ -656,29 +656,17 @@ MonoBehaviour:
       start: 10
       length: 12
       loop: 1
-    - name: run
-      start: 22
-      length: 12
-      loop: 1
     - name: jump
-      start: 34
+      start: 22
       length: 8
       loop: 0
-    - name: fall
-      start: 42
-      length: 8
-      loop: 1
     - name: land
-      start: 50
+      start: 30
       length: 8
       loop: 0
-    - name: bump
-      start: 58
-      length: 8
-      loop: 0
-    - name: conk_out
-      start: 66
-      length: 8
+    - name: look_camera
+      start: 38
+      length: 12
       loop: 0
   - key: creatures/mercury/cinderhulk_day
     fps: 10

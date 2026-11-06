@@ -853,6 +853,20 @@ namespace Meridian.EditorTools
 
         public static string AtlasPath(string atlas) => Active.atlasFolder + Active.groupPrefix + atlas + ".spriteatlasv2";
 
+        /// <summary>U-094: how many sprite atlases a planet has on disk (planet_&lt;name&gt;*.spriteatlasv2 under the atlas folder).</summary>
+        public static int AtlasCountFor(string planet)
+        {
+            if (!Directory.Exists(Active.atlasFolder)) return 0;
+            int n = 0;
+            foreach (var f in Directory.GetFiles(Active.atlasFolder, "*.spriteatlasv2"))
+            {
+                var name = Path.GetFileNameWithoutExtension(f);
+                if (!string.IsNullOrEmpty(Active.groupPrefix) && name.StartsWith(Active.groupPrefix, StringComparison.Ordinal)) name = name.Substring(Active.groupPrefix.Length);
+                if (ArtRules.AtlasPlanet(name) == planet) n++;
+            }
+            return n;
+        }
+
         static void AddToAtlas(string atlas, string texturePath)
         {
             var path = AtlasPath(atlas);
@@ -867,6 +881,13 @@ namespace Meridian.EditorTools
             }
             else
             {
+                // U-094 (contract §11.8): a planet gets at most 8 atlases; a ninth is refused and its texture stays unpacked.
+                var planet = ArtRules.AtlasPlanet(atlas);
+                if (planet != null && ArtRules.AtlasCapReached(AtlasCountFor(planet)))
+                {
+                    Debug.LogError($"[ArtImporter] Rejected atlas {atlas} for {texturePath}: {planet} already has {ArtRules.MaxAtlasesPerPlanet} sprite atlases (contract §11.8).");
+                    return;
+                }
                 Directory.CreateDirectory(Active.atlasFolder);
                 asset = new SpriteAtlasAsset();
             }

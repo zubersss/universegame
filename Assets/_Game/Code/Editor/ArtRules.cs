@@ -205,6 +205,20 @@ namespace Meridian.EditorTools
         public const int V3Fps = 12;
         /// <summary>Contract §11.6: film overlays are 512² tiles.</summary>
         public const int OverlaySize = 512;
+        /// <summary>Contract §11.8 / Bible §9.6: at most this many sprite atlases per planet.</summary>
+        public const int MaxAtlasesPerPlanet = 8;
+
+        /// <summary>The planet an atlas name belongs to ("planet_earth_flora" → "earth"; "planet_uranus_dark_deck1" → "uranus"); null for common/ui/icons/space.</summary>
+        public static string AtlasPlanet(string atlasName)
+        {
+            if (atlasName == null || !atlasName.StartsWith("planet_", System.StringComparison.Ordinal)) return null;
+            var rest = atlasName.Substring("planet_".Length);
+            int cut = rest.IndexOf('_');
+            return cut < 0 ? rest : rest.Substring(0, cut);
+        }
+
+        /// <summary>True when a planet already has the cap's number of atlases, so a new one may not be created.</summary>
+        public static bool AtlasCapReached(int atlasesOfPlanet) => atlasesOfPlanet >= MaxAtlasesPerPlanet;
 
         // §11.4 / B-114: background layers and palette strips carry a fourth segment.
         static readonly Regex V3FourSegment = new Regex(@"^(backgrounds/[a-z0-9_]+/[a-z0-9_]+/layer[0-9]|ui/palettes/[a-z0-9_]+/strip)$");

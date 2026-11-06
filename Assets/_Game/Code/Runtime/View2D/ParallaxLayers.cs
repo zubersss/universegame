@@ -35,12 +35,15 @@ namespace Meridian.View2D
     /// <summary>
     /// U-094: where a parallax layer sits, pure C#. `parallax` is the layer's scroll factor against the ground: 1 scrolls with
     /// the ground, 0.1 drifts at a tenth of it (far), 0 stays fixed to the screen. The layer's bottom rests y_m above the
-    /// planet's surface datum when the camera looks at the datum and moves vertically by the same factor.
+    /// planet's surface datum when the camera sits at its resting height over that datum (`anchorY`: the stage camera's
+    /// centre over flat ground, frame/2 − 3 m above the floor) and moves vertically by the same factor.
     /// </summary>
     public static class ParallaxMath
     {
         public static float LayerX(float cameraX, float parallax) => cameraX * (1f - parallax);
-        public static float LayerY(float cameraY, float datumY, float yM, float parallax) => datumY + yM + (cameraY - datumY) * (1f - parallax);
+        public static float LayerY(float cameraY, float anchorY, float datumY, float yM, float parallax) => datumY + yM + (cameraY - anchorY) * (1f - parallax);
+        /// <summary>The stage camera's resting centre over a floor at `datumY` (Bible §5.1: the frame bottom 3 m under the floor).</summary>
+        public static float AnchorY(float datumY) => datumY + SheetClock.FrameHeight * 0.5f - Meridian.CameraRig.StageCamera.FloorBelow;
     }
 
     /// <summary>
@@ -54,6 +57,8 @@ namespace Meridian.View2D
         public Camera view;
         /// <summary>World height of the planet's surface datum (the layers' y_m are above it).</summary>
         public float datumY;
+        /// <summary>ParallaxMath.AnchorY(datumY): where the camera rests over the datum.</summary>
+        public float anchorY;
         public const int BackOrder = -200;
         /// <summary>Placeholder strip size (m) and tints far → near (muted Earth plains: sky haze, hills, meadow).</summary>
         public const float PlaceholderWidth = 32f, PlaceholderHeight = 8f;
@@ -72,6 +77,7 @@ namespace Meridian.View2D
         {
             Clear();
             datumY = surfaceDatum;
+            anchorY = ParallaxMath.AnchorY(surfaceDatum);
             SceneKey = $"backgrounds/{planet}/{scene}";
             Build(SceneLayout.Default());
             Probe<TextAsset>(SceneKey, h => h.Completed += op =>
@@ -151,7 +157,7 @@ namespace Meridian.View2D
                 float x = ParallaxMath.LayerX(c.x, l.parallax);
                 // Keep the 3-wide strip centred on the camera: shift by whole tile widths (tileable art, no seam).
                 if (w > 0f) x += Mathf.Round((c.x - x) / w) * w;
-                sr.transform.position = new Vector3(x, ParallaxMath.LayerY(c.y, datumY, l.y_m, l.parallax), 0f);
+                sr.transform.position = new Vector3(x, ParallaxMath.LayerY(c.y, anchorY, datumY, l.y_m, l.parallax), 0f);
             }
         }
 

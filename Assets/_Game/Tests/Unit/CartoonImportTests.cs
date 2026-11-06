@@ -62,6 +62,19 @@ namespace Meridian.Tests
         }
 
         [Test]
+        public void AtMostEightAtlasesPerPlanet()
+        {
+            Assert.AreEqual("earth", ArtRules.AtlasPlanet("planet_earth"));
+            Assert.AreEqual("earth", ArtRules.AtlasPlanet("planet_earth_flora"));
+            Assert.AreEqual("uranus", ArtRules.AtlasPlanet("planet_uranus_dark_deck1"));
+            Assert.IsNull(ArtRules.AtlasPlanet("common"));
+            Assert.IsNull(ArtRules.AtlasPlanet("ui"));
+            Assert.IsFalse(ArtRules.AtlasCapReached(7), "an eighth atlas may be created");
+            Assert.IsTrue(ArtRules.AtlasCapReached(8), "a ninth may not (contract §11.8)");
+            Assert.LessOrEqual(ArtImporter.AtlasCountFor("earth"), ArtRules.MaxAtlasesPerPlanet, "Earth is within the cap in the tree");
+        }
+
+        [Test]
         public void TheSheetClockStepsOnTwosAt12Fps()
         {
             Assert.AreEqual(0, SheetClock.Frame(0f, 12, true));
@@ -84,7 +97,10 @@ namespace Meridian.Tests
                 float a = ParallaxMath.LayerX(100f, l.parallax), b = ParallaxMath.LayerX(110f, l.parallax);
                 Assert.AreEqual(10f * (1f - l.parallax), b - a, 1e-4f, $"layer {l.n} world shift");
                 Assert.AreEqual(10f * l.parallax, (110f - b) - (100f - a), 1e-4f, $"layer {l.n} screen scroll = its factor");
-                Assert.AreEqual(320f + l.y_m, ParallaxMath.LayerY(320f, 320f, l.y_m, l.parallax), 1e-4f, "on the datum + y_m when the camera looks at the datum");
+                float anchor = ParallaxMath.AnchorY(320f);
+                Assert.AreEqual(5.4375f, anchor - 320f, 1e-3f, "the camera rests 16.875/2 − 3 m over the floor");
+                Assert.AreEqual(320f + l.y_m, ParallaxMath.LayerY(anchor, anchor, 320f, l.y_m, l.parallax), 1e-4f, "bottom on the datum + y_m when the camera rests over the datum");
+                Assert.AreEqual(320f + l.y_m + 2f * (1f - l.parallax), ParallaxMath.LayerY(anchor + 2f, anchor, 320f, l.y_m, l.parallax), 1e-4f, "rises by the factor with the camera");
             }
             Assert.AreEqual(3, SceneLayout.Parse("not json").layers.Length, "bad json → the default 3 layers");
         }
@@ -93,13 +109,16 @@ namespace Meridian.Tests
         public void TheSurveyorPlaceholderWalksAt12Fps()
         {
             const string key = "characters/surveyor/side";
-            var color = ArtImporter.PlaceholderColorPath(key);
-            Assert.IsTrue(File.Exists(color), "v3 placeholder sheet at the contract key");
+            Assert.IsTrue(File.Exists(ArtImporter.PlaceholderColorPath(key)), "v3 placeholder sheet at the contract key");
+            // The live sheet: BLENDER's art once it exists (B-111), else the placeholder; the builder follows the same rule.
+            var color = File.Exists(ArtImporter.ArtColorPath(key)) ? ArtImporter.ArtColorPath(key) : ArtImporter.PlaceholderColorPath(key);
             var sheet = ArtImporter.SheetFor(color, key);
             Assert.NotNull(sheet);
             Assert.IsTrue(sheet.IsV3 && sheet.IsSheet);
-            Assert.IsNull(ArtImporter.V3Reason(key, sheet, 1956, 1564), "the placeholder passes v13");
             var ti = (TextureImporter)AssetImporter.GetAtPath(color);
+            ti.GetSourceTextureWidthAndHeight(out int sw, out int sh);
+            Assert.IsNull(ArtImporter.V3Reason(key, sheet, sw, sh), $"{color} passes v13");
+            Assert.IsNull(SheetAnimatorBuilder.BuildIfV3(ArtImporter.PlaceholderColorPath(key), key) != null && color != ArtImporter.PlaceholderColorPath(key) ? "built" : null, "a placeholder never builds over the art's controller");
             Assert.AreEqual(64f, ti.spritePixelsPerUnit, "PPU from the json");
             Assert.IsFalse(ti.mipmapEnabled, "no mips");
             var controller = SheetAnimatorBuilder.BuildIfV3(color, key);
@@ -110,7 +129,7 @@ namespace Meridian.Tests
             Assert.AreEqual(1f, walk.length, 1e-3f, "12 drawings at 12 fps = 1 s");
             var binding = AnimationUtility.GetObjectReferenceCurveBindings(walk).Single();
             var keys = AnimationUtility.GetObjectReferenceCurve(walk, binding);
-            Assert.AreEqual(12, keys.Length, "one key per drawing");
+            Assert.AreEqual(12, keys.Length, "one key per drawing (walk is 12 in both sheets)");
             for (int i = 1; i < keys.Length; i++) Assert.AreEqual(1f / 12f, keys[i].time - keys[i - 1].time, 1e-4f, "on twos");
             Assert.IsTrue(keys.All(k => k.value is Sprite), "every key is a sheet sprite");
             Assert.IsTrue(AnimationUtility.GetAnimationClipSettings(walk).loopTime, "walk loops");
