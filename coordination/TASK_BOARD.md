@@ -1338,12 +1338,12 @@ Files: build_props_jupiter.py, build_props_neptune.py, build_props_common.py, As
 Depends: B-077
 Lead notes: Cycle 199. R4 prep.
 
-### B-101 · BLENDER · Ready · R3
+### B-101 · BLENDER · In Progress · R3
 Goal: Mercury and Venus scenery props as models (the R3 counterpart of B-089): Mercury near-band and play-plane scenery (regolith boulders ×3, impact-glass shards ×2, solarite outcrop, crater-rim rock, ice pocket for the polar/night side) and Venus surface scenery (basalt columns ×2, tessera slab, sulfur crust, vent chimney, cooled lava blister), each ≤ 2 k tris with LOD1 ≤ 800, one shared 2048² atlas per planet (gen_flora_atlas TILE_SETS), emission on the solarite and vent chimney; no flora (nothing grows); the Venus deck gets no scenery (no ground).
 Accept: contract §9; a stamped field preview per planet (20 instances under that planet's Sun: Mercury 6.7, Venus 0.1 diffuse) reads at 60 px/m; UNITY lit preview for Done.
 Files: blender/sources/props/{mercury,venus}_scenery/, build_props_mercury.py, build_props_venus.py, Assets/_Game/Art/props/{mercury_scenery,venus_scenery}/
 Depends: B-077
-Lead notes: Cycle 207. R3. After B-094; before the R4 tasks.
+Lead notes: Cycle 207. R3. After B-094; before the R4 tasks. Cycle 219 (01:1x): Mercury half ACCEPTED on review_b101_field_mercury.png (00:57; 2e7fe21): lumpy regolith boulders, pale shards, solarite spires read under the 6.7 Sun. Venus half FAILS Art matches (Bible section 9 v2 'no low-poly look') on review_b101_field_venus.png (01:09; 5109dfd): the basalt columns are stacked boxes, the sulfur crust and lava blister are flat discs, the vent chimney a plain cone with a dull mouth; the set reads as placeholder silhouettes at 80-440 tris. Round 2 for the 6 Venus models, budget up to 1.5 k tris each (LOD1 <= 800 stays): basalt columns as clusters of 5-9 hexagonal prisms with broken, stepped tops and tilted outliers; tessera slab with ridged, cracked top faces; sulfur crust as raised cracked plates (0.1-0.2 m relief) with brighter rims; vent chimney with an irregular built-up rim, a glowing mouth (atlas emission wired in the preview material) and a sag on one side; lava blister as a cracked dome with emissive seams. Re-render both field sheets with emission; Mercury needs no model change.
 
 ### B-100 · BLENDER · Ready · R4
 Goal: Saturn column in 3D (as B-097) from the B-058 sources: floe materials, deck planes for saturn_deck1..3 and saturn_deep (ring-plane line in the deck 1 skydome), plus the Saturn creatures as models from the B-060 sources (helium_jelly with its `rise` clip, hex_drake, floe_moth) and the ring-mining props from B-059/B-068 (ring_ice/ring_rock as low-poly bodies, ring_rig, helium_trap, hexagon_wall_marker).
