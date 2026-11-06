@@ -411,6 +411,7 @@ MonoBehaviour:
   - props/venus/station_hull_a
   - props/venus/station_hull_b
   - props/venus/vent_harvester
+  - props/venus_scenery/atlas
   - ships/pilgrim/base
   - ships/pilgrim/side
   - ships/pilgrim/side_legs

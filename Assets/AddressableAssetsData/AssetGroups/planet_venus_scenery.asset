@@ -15,8 +15,68 @@ MonoBehaviour:
   m_GroupName: planet_venus_scenery
   m_GUID: 6a505db85376143438bd57af20e5014b
   m_SerializeEntries:
+  - m_GUID: 0d4a82094f0e51842a0f439ab9450282
+    m_Address: props/venus_scenery/vent_chimney
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 480dc882c2f4ff944a0e174d09c2abd3
+    m_Address: props/venus_scenery/lava_blister
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4b20d8e9fee34424b9e5816ccfa53812
+    m_Address: props/venus_scenery/lava_blister
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5251841230f91e448b7ed8098c972a28
+    m_Address: props/venus_scenery/tessera_slab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 74fe2309676cc37439efecd12a6fb4bc
     m_Address: props/venus_scenery/atlas
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 82274b84aac118141932483d564571cc
+    m_Address: props/venus_scenery/column_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9846584e65395194aa8dd62c63d4d3e6
+    m_Address: props/venus_scenery/tessera_slab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9ba997e03479592428923ba5ee654293
+    m_Address: props/venus_scenery/sulfur_crust
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a2658321c534b464284c11d47d33cd3b
+    m_Address: props/venus_scenery/sulfur_crust
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b1ec02072013afd4fa3227f01e8edddf
+    m_Address: props/venus_scenery/column_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d7bb1e87a677d7f49a3be1c847418206
+    m_Address: props/venus_scenery/column_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dbe941552fa5d2a4981ed8704aa425b0
+    m_Address: props/venus_scenery/column_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f6a0ca83ef24e9b41bb91be3f8414370
+    m_Address: props/venus_scenery/vent_chimney
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
