@@ -33,7 +33,8 @@ MonoBehaviour:
   - m_GUID: 81976e1bcf0e401438d998ca14183071
     m_Address: backgrounds/venus_surface/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_venus_surface
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a1766bd9997f59a49bfca04613ed87f4
     m_Address: backgrounds/venus_surface/ridge_mid
@@ -43,7 +44,8 @@ MonoBehaviour:
   - m_GUID: cdc784f7218b53141b012c7cd4c25458
     m_Address: backgrounds/venus_surface/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_venus_surface
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f2db8dfa1eba6ec4da2bd22c2079fc21
     m_Address: backgrounds/venus_surface/layer1

@@ -51,7 +51,7 @@ namespace Meridian.FX
             loc.Completed += l =>
             {
                 bool exists = l.Status == AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0;
-                Addressables.Release(l);
+                global::Meridian.Art.ArtLoad.Release(l);
                 if (!exists) return;
                 ArtLoad.Asset<IList<Sprite>>(key).Completed += op =>
                 {

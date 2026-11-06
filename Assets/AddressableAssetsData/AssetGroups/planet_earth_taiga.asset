@@ -18,12 +18,14 @@ MonoBehaviour:
   - m_GUID: 0385f125b89bfe84aaf94844e6bcc811
     m_Address: backgrounds/earth_taiga/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_earth_taiga
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 23d71362d6427ee4bb68bf8799df5593
     m_Address: backgrounds/earth_taiga/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_earth_taiga
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 380b00f206eabc34a92f5098e4bb3567
     m_Address: backgrounds/earth_taiga/skydome

@@ -61,7 +61,7 @@ namespace Meridian.Trade
                 if (loc.Status == AsyncOperationStatus.Succeeded && loc.Result != null)
                     foreach (var l in loc.Result)
                         if (l.InternalId != null && l.InternalId.EndsWith(".glb", System.StringComparison.OrdinalIgnoreCase)) { glb = l; break; }
-                Addressables.Release(loc);
+                global::Meridian.Art.ArtLoad.Release(loc);
                 if (glb == null || this == null) return;
                 handle = ArtLoad.Asset<GameObject>(glb, key);
                 handle.Completed += op =>
@@ -77,7 +77,7 @@ namespace Meridian.Trade
                 if (loc.Status == AsyncOperationStatus.Succeeded && loc.Result != null)
                     foreach (var l in loc.Result)
                         if (l.InternalId != null && l.InternalId.EndsWith(".mat", System.StringComparison.OrdinalIgnoreCase)) { mat = l; break; }
-                Addressables.Release(loc);
+                global::Meridian.Art.ArtLoad.Release(loc);
                 if (mat == null || this == null) return;
                 materialHandle = ArtLoad.Asset<Material>(mat, key);
                 materialHandle.Completed += op =>
@@ -121,8 +121,8 @@ namespace Meridian.Trade
 
         void OnDestroy()
         {
-            if (handle.IsValid()) Addressables.Release(handle);
-            if (materialHandle.IsValid()) Addressables.Release(materialHandle);
+            if (handle.IsValid()) global::Meridian.Art.ArtLoad.Release(handle);
+            if (materialHandle.IsValid()) global::Meridian.Art.ArtLoad.Release(materialHandle);
         }
 
         /// <summary>The station a ship can dock at here (in range and slow enough), or null.</summary>

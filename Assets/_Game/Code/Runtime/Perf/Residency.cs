@@ -25,6 +25,13 @@ namespace Meridian.Perf
             entries.Add(new Entry { group = group, key = key ?? group, handle = handle });
         }
 
+        /// <summary>U-091: a handle is being released (ArtLoad.Release): drop one entry of it. No allocation.</summary>
+        public static void Untrack(AsyncOperationHandle handle)
+        {
+            for (int i = entries.Count - 1; i >= 0; i--)
+                if (entries[i].handle.Equals(handle)) { entries.RemoveAt(i); return; }
+        }
+
         /// <summary>The keys still held in a planet's groups, with counts (reports only: allocates). U-091 evidence.</summary>
         public static string Holders(string planetGroup)
         {

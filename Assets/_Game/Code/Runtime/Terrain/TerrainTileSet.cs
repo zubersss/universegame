@@ -156,7 +156,7 @@ namespace Meridian.Terrain
                 if (set != null)
                     foreach (var t in set)
                         if (t != null) UnityEngine.Object.Destroy(t);
-            foreach (var h in handles) if (h.IsValid()) Addressables.Release(h);
+            foreach (var h in handles) if (h.IsValid()) global::Meridian.Art.ArtLoad.Release(h);
             handles.Clear();
         }
     }

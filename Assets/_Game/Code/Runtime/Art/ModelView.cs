@@ -61,7 +61,7 @@ namespace Meridian.Art
                 // The key also addresses its 2D placeholder and its material: load the model and its clip sub-assets
                 // from the GameObject location itself, never by the bare key.
                 IResourceLocation modelLoc = l.Status == AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0 ? l.Result[0] : null;
-                Addressables.Release(l);
+                global::Meridian.Art.ArtLoad.Release(l);
                 if (modelLoc == null || this == null) { Loading = false; return; } // no model: the caller keeps its 2D view
                 pending = 3;
                 modelHandle = ArtLoad.Asset<GameObject>(modelLoc, key);
@@ -85,7 +85,7 @@ namespace Meridian.Art
                 if (l.Status == AsyncOperationStatus.Succeeded && l.Result != null)
                     foreach (var loc in l.Result)
                         if (loc.InternalId != null && loc.InternalId.EndsWith(".mat", System.StringComparison.OrdinalIgnoreCase)) { matLoc = loc; break; }
-                Addressables.Release(l);
+                global::Meridian.Art.ArtLoad.Release(l);
                 if (matLoc == null || this == null) { Done(); return; }
                 materialHandle = ArtLoad.Asset<Material>(matLoc, key);
                 materialHandle.Completed += op => { material = op.Status == AsyncOperationStatus.Succeeded ? op.Result : null; Done(); };
@@ -263,9 +263,9 @@ namespace Meridian.Art
         void OnDestroy()
         {
             if (graph.IsValid()) graph.Destroy();
-            if (modelHandle.IsValid()) Addressables.Release(modelHandle);
-            if (materialHandle.IsValid()) Addressables.Release(materialHandle);
-            if (clipsHandle.IsValid()) Addressables.Release(clipsHandle);
+            if (modelHandle.IsValid()) global::Meridian.Art.ArtLoad.Release(modelHandle);
+            if (materialHandle.IsValid()) global::Meridian.Art.ArtLoad.Release(materialHandle);
+            if (clipsHandle.IsValid()) global::Meridian.Art.ArtLoad.Release(clipsHandle);
         }
     }
 }

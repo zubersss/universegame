@@ -18,7 +18,8 @@ MonoBehaviour:
   - m_GUID: 4b4ae7afc897b124b88615ac00944215
     m_Address: backgrounds/venus_deck/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_venus_deck
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4f9e103cdc8c0e14c97f9036a2f4a0f7
     m_Address: backgrounds/venus_deck/layer2
@@ -43,7 +44,8 @@ MonoBehaviour:
   - m_GUID: e83da4a0ae5190942aad37a5eaef4b80
     m_Address: backgrounds/venus_deck/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_venus_deck
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ed491a98ad134b841b5b1a165e35b22f
     m_Address: backgrounds/venus_deck/ridge_mid

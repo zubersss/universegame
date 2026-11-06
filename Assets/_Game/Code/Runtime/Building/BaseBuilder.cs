@@ -89,7 +89,7 @@ namespace Meridian.Building
         void OnDestroy()
         {
             if (terrain != null) terrain.TileChanged -= OnTile;
-            foreach (var h in handles) if (h.IsValid()) Addressables.Release(h);
+            foreach (var h in handles) if (h.IsValid()) global::Meridian.Art.ArtLoad.Release(h);
         }
 
         /// <summary>Rebuilds this planet's base from the saved records; hooks the Builder and the Beam.</summary>

@@ -57,7 +57,7 @@ namespace Meridian.UI
         {
             ItemIcons.Loaded -= MarkDirty;
             if (toggle != null) toggle.performed -= OnToggle;
-            foreach (var h in handles) if (h.IsValid()) Addressables.Release(h);
+            foreach (var h in handles) if (h.IsValid()) global::Meridian.Art.ArtLoad.Release(h);
             if (IsOpen) AnyOpen = false;
         }
 
@@ -86,7 +86,7 @@ namespace Meridian.UI
         void ReleaseCreatureIcons()
         {
             foreach (var c in cells) if (c.icon != null) c.icon.sprite = null;
-            foreach (var h in handles) if (h.IsValid()) Addressables.Release(h);
+            foreach (var h in handles) if (h.IsValid()) global::Meridian.Art.ArtLoad.Release(h);
             handles.Clear();
             creatureIcons.Clear();
             creatureRequested.Clear();

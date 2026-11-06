@@ -18,17 +18,20 @@ MonoBehaviour:
   - m_GUID: 2b251cb50916fbd4cb2e0b77ba950957
     m_Address: backgrounds/mars_tharsis/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_mars_tharsis
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4672d4b83d25fc640b869cdfefb766ba
     m_Address: backgrounds/mars_tharsis/skyline_far
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_mars_tharsis
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 46844a7f53074d4478123759cd68157e
     m_Address: backgrounds/mars_tharsis/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_mars_tharsis
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 510e3dcc5a306f64fab918706e062b8c
     m_Address: backgrounds/mars_tharsis/skydome
@@ -43,7 +46,8 @@ MonoBehaviour:
   - m_GUID: 750285f1bd21a1a498ad6447f88d0823
     m_Address: backgrounds/mars_tharsis/skyline_far
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_mars_tharsis
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: aacd7e84487672f44911dc06b50a9848
     m_Address: backgrounds/mars_tharsis/ridge_mid

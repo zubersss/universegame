@@ -59,7 +59,7 @@ namespace Meridian.Trade
         {
             if (dock != null) dock.performed -= OnDockKey;
             ItemIcons.Loaded -= FillIcons;
-            foreach (var h in handles) if (h.IsValid()) Addressables.Release(h);
+            foreach (var h in handles) if (h.IsValid()) global::Meridian.Art.ArtLoad.Release(h);
             if (Docked) AnyOpen = false;
         }
 

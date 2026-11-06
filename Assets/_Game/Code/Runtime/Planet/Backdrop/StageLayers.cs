@@ -158,7 +158,7 @@ namespace Meridian.Planet.Backdrop
             probe.Completed += l =>
             {
                 bool any = l.Status == AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0;
-                Addressables.Release(l);
+                global::Meridian.Art.ArtLoad.Release(l);
                 if (this == null || !sets.TryGetValue(region, out var live) || live != s) return;
                 if (!any) { s.nothingToLoad = true; return; }
                 s.handle = ArtLoad.Assets<UnityEngine.Object>(s.label, "planet_" + planetName);
@@ -168,7 +168,7 @@ namespace Meridian.Planet.Backdrop
             mprobe.Completed += l =>
             {
                 bool any = l.Status == AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0;
-                Addressables.Release(l);
+                global::Meridian.Art.ArtLoad.Release(l);
                 if (this == null) return;
                 if (!any) { s.manifestChecked = true; return; }
                 s.manifestHandle = ArtLoad.Asset<TextAsset>(manifestKey);
@@ -226,8 +226,8 @@ namespace Meridian.Planet.Backdrop
         {
             if (!sets.TryGetValue(region, out var s)) return;
             sets.Remove(region);
-            if (s.handle.IsValid()) Addressables.Release(s.handle);
-            if (s.manifestHandle.IsValid()) Addressables.Release(s.manifestHandle);
+            if (s.handle.IsValid()) global::Meridian.Art.ArtLoad.Release(s.handle);
+            if (s.manifestHandle.IsValid()) global::Meridian.Art.ArtLoad.Release(s.manifestHandle);
         }
 
         // ---------- set-pieces (layer 6, per stage.json) ----------
@@ -341,7 +341,7 @@ namespace Meridian.Planet.Backdrop
                 probe.Completed += l =>
                 {
                     bool any = l.Status == AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0;
-                    Addressables.Release(l);
+                    global::Meridian.Art.ArtLoad.Release(l);
                     if (this == null) return;
                     if (!any) { cloudMissing = true; return; } // the dome alone: no strip to draw
                     cloudHandle = ArtLoad.Asset<Texture2D>(key);
@@ -408,7 +408,7 @@ namespace Meridian.Planet.Backdrop
             foreach (var r in new List<string>(sets.Keys)) ReleaseSet(r);
             if (cloudGo != null) Destroy(cloudGo);
             cloudGo = null; cloudRenderer = null; cloudMissing = false;
-            if (cloudHandle.IsValid()) { Addressables.Release(cloudHandle); cloudHandle = default; }
+            if (cloudHandle.IsValid()) { global::Meridian.Art.ArtLoad.Release(cloudHandle); cloudHandle = default; }
             Region = null; Manifest = null;
         }
 

@@ -18,7 +18,8 @@ MonoBehaviour:
   - m_GUID: abc74374684d1b044926bf3bdaad6043
     m_Address: backgrounds/earth_forest/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_earth_forest
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bf0d9b61d03b1924bb60b00a12829786
     m_Address: backgrounds/earth_forest/skydome
@@ -33,7 +34,8 @@ MonoBehaviour:
   - m_GUID: f8b429f8284ab66448559cd50834d679
     m_Address: backgrounds/earth_forest/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_earth_forest
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}

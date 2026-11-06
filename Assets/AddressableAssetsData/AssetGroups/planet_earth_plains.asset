@@ -18,7 +18,8 @@ MonoBehaviour:
   - m_GUID: 20a58c2e8b0f1fc4d8e3fb524283313f
     m_Address: backgrounds/earth_plains/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_earth_plains
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8d50ffd40fa9f9141b550cda360198a4
     m_Address: backgrounds/earth_plains/skydome
@@ -33,7 +34,8 @@ MonoBehaviour:
   - m_GUID: dc3f939824b87f443995b3396fffad0c
     m_Address: backgrounds/earth_plains/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_earth_plains
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}

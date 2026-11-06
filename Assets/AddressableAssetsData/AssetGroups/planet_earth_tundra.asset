@@ -18,7 +18,8 @@ MonoBehaviour:
   - m_GUID: 11acca7b6eeb1744cbd94e521e8e0ebf
     m_Address: backgrounds/earth_tundra/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_earth_tundra
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4dd06b36823c0f741835d6ea2adf0fbd
     m_Address: backgrounds/earth_tundra/ridge_mid
@@ -28,7 +29,8 @@ MonoBehaviour:
   - m_GUID: d4d1a748ee0f18546879699767c6fe50
     m_Address: backgrounds/earth_tundra/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_earth_tundra
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e69c0e7f25cb74549b8364c3a516fee7
     m_Address: backgrounds/earth_tundra/skydome

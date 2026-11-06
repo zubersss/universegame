@@ -93,7 +93,7 @@ namespace Meridian.Creatures
             loc.Completed += l =>
             {
                 bool exists = l.Status == AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0;
-                Addressables.Release(l);
+                global::Meridian.Art.ArtLoad.Release(l);
                 if (!exists || this == null) return;
                 // Left the species' planet while the lookup ran: don't load it (nothing would release it).
                 if (Planet == null || SpeciesSpec.Get((Species)s).planet != Planet.id) return;
@@ -119,8 +119,8 @@ namespace Meridian.Creatures
 
         void ReleaseArt(int s)
         {
-            if (artHandles[s].IsValid()) Addressables.Release(artHandles[s]);
-            if (nightHandles[s].IsValid()) Addressables.Release(nightHandles[s]);
+            if (artHandles[s].IsValid()) global::Meridian.Art.ArtLoad.Release(artHandles[s]);
+            if (nightHandles[s].IsValid()) global::Meridian.Art.ArtLoad.Release(nightHandles[s]);
             artHandles[s] = default;
             nightHandles[s] = default;
             art[s] = null;
@@ -445,8 +445,8 @@ namespace Meridian.Creatures
 
         void OnDestroy()
         {
-            for (int i = 0; i < artHandles.Length; i++) if (artHandles[i].IsValid()) Addressables.Release(artHandles[i]);
-            for (int i = 0; i < nightHandles.Length; i++) if (nightHandles[i].IsValid()) Addressables.Release(nightHandles[i]);
+            for (int i = 0; i < artHandles.Length; i++) if (artHandles[i].IsValid()) global::Meridian.Art.ArtLoad.Release(artHandles[i]);
+            for (int i = 0; i < nightHandles.Length; i++) if (nightHandles[i].IsValid()) global::Meridian.Art.ArtLoad.Release(nightHandles[i]);
         }
     }
 }

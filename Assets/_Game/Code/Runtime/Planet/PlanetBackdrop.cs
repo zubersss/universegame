@@ -215,7 +215,7 @@ namespace Meridian.Planet
             locations.Completed += loc =>
             {
                 bool exists = loc.Status == AsyncOperationStatus.Succeeded && loc.Result != null && loc.Result.Count > 0;
-                Addressables.Release(loc);
+                global::Meridian.Art.ArtLoad.Release(loc);
                 if (!exists || quad == null || !sets.TryGetValue(name, out var live) || live != set)
                 {
                     set.pending--;
@@ -229,7 +229,7 @@ namespace Meridian.Planet
                     if (quad == null || op.Status != AsyncOperationStatus.Succeeded || !sets.TryGetValue(name, out var now) || now != set)
                     {
                         // Dropped while loading (planet change or released): don't keep the sheet.
-                        if (set.handles[i].IsValid()) { Addressables.Release(set.handles[i]); set.handles[i] = default; }
+                        if (set.handles[i].IsValid()) { global::Meridian.Art.ArtLoad.Release(set.handles[i]); set.handles[i] = default; }
                         return;
                     }
                     set.tex[i] = op.Result;
@@ -465,7 +465,7 @@ namespace Meridian.Planet
         static void ReleaseSet(ArtSet set)
         {
             for (int i = 0; i < 3; i++)
-                if (set.handles[i].IsValid()) { Addressables.Release(set.handles[i]); set.handles[i] = default; }
+                if (set.handles[i].IsValid()) { global::Meridian.Art.ArtLoad.Release(set.handles[i]); set.handles[i] = default; }
         }
 
         void LateUpdate()

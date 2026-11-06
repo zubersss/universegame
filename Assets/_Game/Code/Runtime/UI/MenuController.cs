@@ -213,7 +213,7 @@ namespace Meridian.UI
             loc.Completed += l =>
             {
                 bool exists = l.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0;
-                UnityEngine.AddressableAssets.Addressables.Release(l);
+                global::Meridian.Art.ArtLoad.Release(l);
                 if (!exists || target == null) return;
                 var h = Meridian.Art.ArtLoad.Asset<System.Collections.Generic.IList<Sprite>>(key);
                 h.Completed += op =>

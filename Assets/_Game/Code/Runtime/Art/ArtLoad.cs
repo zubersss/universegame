@@ -34,6 +34,20 @@ namespace Meridian.Art
             return h;
         }
 
+        /// <summary>
+        /// U-091: every release goes through here. Addressables shares one operation per asset, so a released handle stays
+        /// IsValid while another holder (the session preload, a second view) keeps the operation alive; Residency drops
+        /// the entry here instead of waiting for IsValid to turn false. Untracked handles (location lists) just release.
+        /// </summary>
+        public static void Release(AsyncOperationHandle handle)
+        {
+            if (!handle.IsValid()) return;
+            Meridian.Perf.Residency.Untrack(handle);
+            Addressables.Release(handle);
+        }
+
+        public static void Release<T>(AsyncOperationHandle<T> handle) => Release((AsyncOperationHandle)handle);
+
         /// <summary>A load the game keeps for the whole session (TerrainTileSet.Preload): reported under "session", never judged.</summary>
         public static AsyncOperationHandle<T> Session<T>(string key)
         {

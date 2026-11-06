@@ -28,12 +28,14 @@ MonoBehaviour:
   - m_GUID: 9e1616b7452bfe14cb704b65d00771d6
     m_Address: backgrounds/mercury_day/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_mercury_day
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c1d92df3589fc084bb798bb068d074c2
     m_Address: backgrounds/mercury_day/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_mercury_day
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}

@@ -23,12 +23,14 @@ MonoBehaviour:
   - m_GUID: dbd6a30f247b06f42ad314e467dc4b79
     m_Address: backgrounds/mars_polar/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_mars_polar
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e843e287c33aab24696831fa37ab6424
     m_Address: backgrounds/mars_polar/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_mars_polar
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f922669606b29a24c9bba86301df3e80
     m_Address: backgrounds/mars_polar/ridge_mid

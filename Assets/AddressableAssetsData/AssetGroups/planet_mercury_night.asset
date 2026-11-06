@@ -23,7 +23,8 @@ MonoBehaviour:
   - m_GUID: 4bcdcec16c3f9ec4e8685366699b82cf
     m_Address: backgrounds/mercury_night/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_mercury_night
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5998bc735ea3c4e43bafb214a9c8d97c
     m_Address: backgrounds/mercury_night/skydome
@@ -33,7 +34,8 @@ MonoBehaviour:
   - m_GUID: 6383ac2ec551d9447ad79b60217a77c6
     m_Address: backgrounds/mercury_night/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_mercury_night
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}

@@ -23,7 +23,8 @@ MonoBehaviour:
   - m_GUID: 2be6fedf3e4df294198c859a43db60b7
     m_Address: backgrounds/earth_desert/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_earth_desert
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4132dfc6f772b2441a321c4f6c872ae2
     m_Address: backgrounds/earth_desert/layer2
@@ -43,7 +44,8 @@ MonoBehaviour:
   - m_GUID: df0964f62db677e4a86a90a17a18c3f3
     m_Address: backgrounds/earth_desert/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_earth_desert
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: fb12be13ef3749e418723e469c1cf7f9
     m_Address: backgrounds/earth_desert/ridge_mid

@@ -159,7 +159,7 @@ namespace Meridian.Planet.POI
             loc.Completed += l =>
             {
                 bool exists = l.Status == AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0;
-                Addressables.Release(l);
+                global::Meridian.Art.ArtLoad.Release(l);
                 if (!exists || sr == null) return;
                 var h = ArtLoad.Asset<IList<Sprite>>(key);
                 handles.Add(h);
@@ -219,13 +219,13 @@ namespace Meridian.Planet.POI
             swaps.Clear();
             colliderOf.Clear();
             for (int i = transform.childCount - 1; i >= 0; i--) Destroy(transform.GetChild(i).gameObject);
-            foreach (var h in handles) if (h.IsValid()) Addressables.Release(h);
+            foreach (var h in handles) if (h.IsValid()) global::Meridian.Art.ArtLoad.Release(h);
             handles.Clear();
         }
 
         void OnDestroy()
         {
-            foreach (var h in handles) if (h.IsValid()) Addressables.Release(h);
+            foreach (var h in handles) if (h.IsValid()) global::Meridian.Art.ArtLoad.Release(h);
         }
     }
 }

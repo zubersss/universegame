@@ -72,8 +72,8 @@ namespace Meridian.Ship
 
         void OnDestroy()
         {
-            if (retractedHandle.IsValid()) Addressables.Release(retractedHandle);
-            if (deployedHandle.IsValid()) Addressables.Release(deployedHandle);
+            if (retractedHandle.IsValid()) global::Meridian.Art.ArtLoad.Release(retractedHandle);
+            if (deployedHandle.IsValid()) global::Meridian.Art.ArtLoad.Release(deployedHandle);
         }
     }
 }

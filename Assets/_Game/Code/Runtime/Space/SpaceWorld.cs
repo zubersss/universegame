@@ -219,7 +219,7 @@ namespace Meridian.Space
             locations.Completed += loc =>
             {
                 bool exists = loc.Status == AsyncOperationStatus.Succeeded && loc.Result != null && loc.Result.Count > 0;
-                Addressables.Release(loc);
+                global::Meridian.Art.ArtLoad.Release(loc);
                 if (!exists || parent == null) return;
                 var go = new GameObject("Glow");
                 go.transform.SetParent(parent, false);
@@ -247,7 +247,7 @@ namespace Meridian.Space
             locations.Completed += loc =>
             {
                 bool exists = loc.Status == AsyncOperationStatus.Succeeded && loc.Result != null && loc.Result.Count > 0;
-                Addressables.Release(loc);
+                global::Meridian.Art.ArtLoad.Release(loc);
                 if (!exists || this == null) return;
                 var h = ArtLoad.Asset<Texture2D>(key);
                 handles.Add(h);
@@ -265,7 +265,7 @@ namespace Meridian.Space
                 if (loc.Status == AsyncOperationStatus.Succeeded && loc.Result != null)
                     foreach (var l in loc.Result)
                         if (l.InternalId != null && l.InternalId.EndsWith(".glb", System.StringComparison.OrdinalIgnoreCase)) { glb = l; break; }
-                Addressables.Release(loc);
+                global::Meridian.Art.ArtLoad.Release(loc);
                 if (glb == null || this == null) { done(null); return; }
                 var h = ArtLoad.Asset<GameObject>(glb, key);
                 prefabHandles.Add(h);
@@ -283,7 +283,7 @@ namespace Meridian.Space
                 if (loc.Status == AsyncOperationStatus.Succeeded && loc.Result != null)
                     foreach (var l in loc.Result)
                         if (l.InternalId != null && l.InternalId.EndsWith(".mat", System.StringComparison.OrdinalIgnoreCase)) { mat = l; break; }
-                Addressables.Release(loc);
+                global::Meridian.Art.ArtLoad.Release(loc);
                 if (mat == null || this == null) { done(null); return; }
                 var h = ArtLoad.Asset<Material>(mat, key);
                 materialHandles.Add(h);
@@ -555,10 +555,10 @@ namespace Meridian.Space
 
         void OnDestroy()
         {
-            foreach (var h in handles) if (h.IsValid()) Addressables.Release(h);
-            foreach (var h in spriteHandles) if (h.IsValid()) Addressables.Release(h);
-            foreach (var h in prefabHandles) if (h.IsValid()) Addressables.Release(h);
-            foreach (var h in materialHandles) if (h.IsValid()) Addressables.Release(h);
+            foreach (var h in handles) if (h.IsValid()) global::Meridian.Art.ArtLoad.Release(h);
+            foreach (var h in spriteHandles) if (h.IsValid()) global::Meridian.Art.ArtLoad.Release(h);
+            foreach (var h in prefabHandles) if (h.IsValid()) global::Meridian.Art.ArtLoad.Release(h);
+            foreach (var h in materialHandles) if (h.IsValid()) global::Meridian.Art.ArtLoad.Release(h);
         }
     }
 }

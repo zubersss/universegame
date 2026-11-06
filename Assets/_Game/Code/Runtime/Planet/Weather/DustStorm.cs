@@ -257,7 +257,7 @@ namespace Meridian.Planet.Weather
 
         void OnDestroy()
         {
-            if (handle.IsValid()) Addressables.Release(handle);
+            if (handle.IsValid()) global::Meridian.Art.ArtLoad.Release(handle);
         }
     }
 }

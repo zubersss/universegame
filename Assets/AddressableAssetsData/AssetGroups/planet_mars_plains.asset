@@ -23,12 +23,14 @@ MonoBehaviour:
   - m_GUID: a947563fbc164a445bf0bb87bf5bc5a8
     m_Address: backgrounds/mars_plains/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_mars_plains
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cd5a17c72f0d99b44a8b67e88368add6
     m_Address: backgrounds/mars_plains/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_mars_plains
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: da3c452bab52f304881e688caec4cabf
     m_Address: backgrounds/mars_plains/skydome

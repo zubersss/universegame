@@ -28,12 +28,14 @@ MonoBehaviour:
   - m_GUID: 5d129944474030243846439e2147143b
     m_Address: backgrounds/earth_coast/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_earth_coast
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 72cf11e6d6b75d948a4d843d3cd3232f
     m_Address: backgrounds/earth_coast/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_earth_coast
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7db2cac2d861b8e438cc41ecaf62fa0c
     m_Address: backgrounds/earth_coast/ridge_mid

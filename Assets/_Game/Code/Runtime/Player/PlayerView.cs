@@ -85,7 +85,7 @@ namespace Meridian.Player
             handle = h;
             h.Completed += op =>
             {
-                if (view != null && SheetKey != key) { Addressables.Release(h); return; } // superseded by another suit
+                if (view != null && SheetKey != key) { global::Meridian.Art.ArtLoad.Release(h); return; } // superseded by another suit
                 if (view == null) return; // scene unloaded before the load finished
                 if (op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;
                 var list = new Sprite[op.Result.Count];
@@ -102,7 +102,7 @@ namespace Meridian.Player
                 shown = 0;
                 var mat = ArtMaterials.MaterialFor(key);
                 if (mat != null) view.sharedMaterial = mat;
-                if (old.IsValid()) Addressables.Release(old);
+                if (old.IsValid()) global::Meridian.Art.ArtLoad.Release(old);
             };
         }
 
@@ -215,7 +215,7 @@ namespace Meridian.Player
                 if (rig != null) rig.Dug -= OnDug;
             }
             Meridian.Hazards.HazardSystem.SuitEquipped -= OnSuitEquipped;
-            if (handle.IsValid()) Addressables.Release(handle);
+            if (handle.IsValid()) global::Meridian.Art.ArtLoad.Release(handle);
         }
     }
 }
