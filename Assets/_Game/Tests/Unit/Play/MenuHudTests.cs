@@ -109,11 +109,14 @@ namespace Meridian.Tests
             var side = director.PlanetSide;
             var hud = side.sideHud;
             Assert.NotNull(hud, "SideHud on PlanetSide");
+            // U-093: the top gauge is Suit power = (suit integrity + reserve) / 200: full suit + reserve 64 = 82 %.
+            side.hazards.enabled = false;
+            side.hazards.RestoreSuit();
             side.player.GetComponent<PlayerVitals>().health = 64f;
             GameState.Instance.fuel = 41f;
             yield return null; yield return null;
-            Assert.AreEqual("64", hud.HealthText.text);
-            Assert.AreEqual(0.64f, hud.HealthFill.fillAmount, 1e-3f);
+            Assert.AreEqual("82", hud.HealthText.text);
+            Assert.AreEqual(0.82f, hud.HealthFill.fillAmount, 1e-3f);
             Assert.AreEqual("41", hud.FuelText.text);
             Assert.AreEqual(0.41f, hud.FuelFill.fillAmount, 1e-3f);
             Assert.AreEqual(1f, hud.OxygenFill.fillAmount, "oxygen placeholder full");

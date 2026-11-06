@@ -15,7 +15,7 @@ namespace Meridian.Tests
 {
     /// <summary>
     /// U-055 (PlayMode): every Mercury and Venus species spawns by its rule with ground or flight placement;
-    /// the Cinderhulk dies only in the window after it crosses into night; the Veil Serpent only to Cryo rounds;
+    /// (the Cinderhulk and Veil Serpent Lance cases are archived with the Lance, D-087);
     /// AI ≤ 0.5 ms with 20 inner-planet creatures (D-047: median and p99).
     /// </summary>
     public class InnerCreatureTests
@@ -178,110 +178,6 @@ namespace Meridian.Tests
             if (eel == null) fails.Add("VentEel: refused in the vent field"); else yield return CheckPlacement(eel, fails, log);
             TestContext.Out.WriteLine("[MERIDIAN] Venus placement:\n" + log);
             Assert.IsEmpty(fails, string.Join("\n", fails));
-            LogAssert.NoUnexpectedReceived();
-        }
-
-        /// <summary>Fires Lance bolts into c from close range until it dies or `shots` are spent.</summary>
-        IEnumerator Shoot(LanceBolts lance, Creature c, int shots, bool cryo)
-        {
-            for (int i = 0; i < shots && c.Alive; i++)
-            {
-                var at = c.Body.position;
-                lance.Fire(at + new Vector2(-2.5f, 0f), Vector2.right, cryo);
-                for (int k = 0; k < 6; k++) yield return new WaitForFixedUpdate();
-            }
-        }
-
-        [UnityTest]
-        public IEnumerator CinderhulkDiesOnlyAfterNightfall()
-        {
-            yield return Boot(PlanetId.Mercury);
-            float x0 = player.Body.position.x + 40f;
-            DawnAt(x0);
-            yield return PutAt(x0);
-            var hulk = SpawnNear(Species.Cinderhulk);
-            Assert.NotNull(hulk, "a Cinderhulk in the band");
-            for (int i = 0; i < 20; i++) yield return null;
-            Assert.AreNotEqual(MercuryZone.Night, hulk.Zone);
-            var lance = Object.FindAnyObjectByType<LanceBolts>();
-            float hp = hulk.Health;
-            yield return Shoot(lance, hulk, 3, false);
-            Assert.IsTrue(hulk.Alive);
-            Assert.AreEqual(hp, hulk.Health, "the white-hot shell shrugs off the Lance");
-            Assert.IsTrue(hulk.LastHitShrugged);
-            var daySprite = hulk.View.sprite;
-
-            // Night falls on it: move the dawn line 400 m back (it now stands on the night side).
-            side.hazards.mercuryClockOffset -= 400f * MercuryTerminator.CreepSecondsPerMetre;
-            float until = Time.time + 2f;
-            while (hulk.Zone != MercuryZone.Night && Time.time < until) yield return null;
-            Assert.AreEqual(MercuryZone.Night, hulk.Zone, "it crossed into night");
-            Assert.IsTrue(hulk.Vulnerable, "the shell has cracked");
-            // The night sheet whenever it is vulnerable, from the first frame on.
-            for (int i = 0; i < 30; i++)
-            {
-                if (hulk.Vulnerable) StringAssert.Contains("cinderhulk_night", hulk.View.sprite.texture.name, $"frame {i}: vulnerable in the day sheet");
-                yield return null;
-            }
-            Assert.AreNotEqual(daySprite, hulk.View.sprite);
-            StringAssert.Contains("cinderhulk_night", hulk.View.sprite.texture.name, "the cooled night sheet");
-            int killed = 0;
-            System.Action<Creature> count = c => { if (c == hulk) killed++; };
-            Creature.Killed += count;
-            yield return Shoot(lance, hulk, 16, false);
-            Creature.Killed -= count;
-            Assert.IsFalse(hulk.Alive, "the Lance kills it in the window");
-            Assert.AreEqual(1, killed);
-            LogAssert.NoUnexpectedReceived();
-        }
-
-        [UnityTest]
-        public IEnumerator VeilSerpentFallsOnlyToCryoRounds()
-        {
-            yield return Boot(PlanetId.Venus);
-            var station = Meridian.Planet.POI.PoiCatalog.MeridianStation;
-            float until = Time.realtimeSinceStartup + 5f;
-            while (side.pois.Solids.Count < 5 && Time.realtimeSinceStartup < until) yield return null;
-            yield return PutAt(new Vector2(station.x + 10f, station.floatY + (336f - 62f) / 128f + 1.5f));
-            var serpent = SpawnNear(Species.VeilSerpent);
-            Assert.NotNull(serpent);
-            var lance = Object.FindAnyObjectByType<LanceBolts>();
-            float hp = serpent.Health;
-            yield return Shoot(lance, serpent, 3, false);
-            Assert.AreEqual(hp, serpent.Health, "plain rounds glance off");
-
-            // The Rig loads Cryo rounds from the pack: one per shot.
-            var inv = GameState.Instance.inventory;
-            var cryo = Meridian.Items.ItemRegistry.Get("cryo_round");
-            Assert.NotNull(cryo, "cryo_round item");
-            inv.Add(cryo.id, 1);
-            var rig = player.GetComponent<PlayerRigInput>();
-            rig.module = RigModule.Lance;
-            rig.AimAt(serpent.Body.position);
-            rig.holdUse = true;
-            yield return null;
-            yield return null;
-            rig.holdUse = false;
-            Assert.AreEqual(0, inv.Count(cryo.id), "the round was spent");
-
-            // Cryo rounds: a chilled flash, a recoil, then death.
-            bool chilled = false;
-            int killed = 0;
-            System.Action<Creature> count = c => { if (c == serpent) killed++; };
-            Creature.Killed += count;
-            for (int i = 0; i < 16 && serpent.Alive; i++)
-            {
-                lance.Fire(serpent.Body.position + new Vector2(-2.5f, 0f), Vector2.right, true);
-                for (int k = 0; k < 6; k++)
-                {
-                    yield return new WaitForFixedUpdate();
-                    if (serpent.Alive && serpent.View.color.r < 0.9f && serpent.View.color.b > 0.9f) chilled = true;
-                }
-            }
-            Creature.Killed -= count;
-            Assert.IsTrue(chilled, "the chilled flash on its hurt frames");
-            Assert.IsFalse(serpent.Alive, "Cryo rounds kill the Veil Serpent");
-            Assert.AreEqual(1, killed);
             LogAssert.NoUnexpectedReceived();
         }
 

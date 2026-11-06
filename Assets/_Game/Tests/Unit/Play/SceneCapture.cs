@@ -566,7 +566,7 @@ namespace Meridian.Tests
             Assert.LessOrEqual(worst, 33f, "no hitch > 33 ms crossing the border (U-038)");
         }
 
-        /// <summary>U-046 evidence: each Rig module in the hand, in use: Beam ray, Lance bolt, Survey ring, Builder ghost (clear and blocked).</summary>
+        /// <summary>U-046 evidence: each Rig module in the hand, in use: Beam ray, Grapple (slot 2, D-087), Survey ring, Builder ghost (clear and blocked).</summary>
         [UnityTest]
         public IEnumerator CaptureRigModules()
         {
@@ -602,11 +602,11 @@ namespace Meridian.Tests
                 for (int k = 0; k < frames; k++) yield return null;
                 yield return Save(cam, $"{name}_{label}");
                 rig.holdUse = false;
-                float rest = Time.realtimeSinceStartup + 1.2f; // the scan ring and bolts finish
+                float rest = Time.realtimeSinceStartup + 1.2f; // the scan ring finishes
                 while (Time.realtimeSinceStartup < rest) yield return null;
             }
             yield return Use(Meridian.Rig.RigModule.Beam, new Vector2(gx + 0.5f, top + 0.5f), true, 8, "1_beam");
-            yield return Use(Meridian.Rig.RigModule.Lance, feet + new Vector2(6f, 1.2f), true, 2, "2_lance");
+            yield return Use(Meridian.Rig.RigModule.Grapple, feet + new Vector2(6f, 1.2f), true, 2, "2_grapple"); // D-087: slot 2 is the Grapple (no action yet)
             yield return Use(Meridian.Rig.RigModule.Survey, feet + new Vector2(2f, 1f), true, 5, "3_survey");
             yield return Use(Meridian.Rig.RigModule.Builder, new Vector2(gx + 0.5f, top + 1.5f), false, 6, "4_builder");
             yield return Use(Meridian.Rig.RigModule.Builder, new Vector2(gx + 1.5f, side.terrain.TopSolidY(gx + 1) + 0.5f), false, 6, "5_builder_blocked");

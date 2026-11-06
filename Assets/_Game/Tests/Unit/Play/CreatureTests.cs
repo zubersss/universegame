@@ -34,7 +34,7 @@ namespace Meridian.Tests
             player = side.player;
             for (int i = 0; i < 60; i++) yield return new WaitForFixedUpdate(); // player settles
             var vitals = player.GetComponent<PlayerVitals>();
-            vitals.maxHealth = vitals.health = 1e6f; // bites must not end the test
+            vitals.maxHealth = vitals.health = 1e6f; // a hazard must not end the test (bumps never drain)
         }
 
         Vector2 OnSurface(float x, Species s)

@@ -60,18 +60,18 @@ namespace Meridian.Core
                     cam.transform.SetPositionAndRotation(railPos, Quaternion.identity);
                     if (follow != null) { follow.enabled = true; follow.SnapToTarget(); }
                 }
-                // U-092 smoke: the fight zoom (U-087): two wolves within 14 m open the frame to 22 m within 1 s.
+                // U-093 smoke (D-087): a wolf reaches the surveyor and bumps them (0.8 m knock, the bump clip); no meter changes.
                 if (side.creatures != null && side.player != null && side.player.Body != null)
                 {
                     var feet = side.player.Body.position;
-                    var w1 = side.creatures.Spawn(Meridian.Creatures.Species.GreyWolf, feet + new Vector2(5f, 1f));
-                    var w2 = side.creatures.Spawn(Meridian.Creatures.Species.GreyWolf, feet + new Vector2(-6f, 1f));
-                    yield return Wait(1.3f);
-                    var cf = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
-                    Debug.Log($"[MERIDIAN] smoke fight zoom: frame {(cf != null ? cf.Stage.Frame : 0f):F1} m, wolves {(w1 != null ? 1 : 0) + (w2 != null ? 1 : 0)}");
-                    yield return Shot(folder, "smoke_2c_earth_fight_zoom.png");
+                    var w1 = side.creatures.Spawn(Meridian.Creatures.Species.GreyWolf, feet + new Vector2(2.5f, 0.6f));
+                    int before = side.player.BumpCount;
+                    float bumpUntil = Time.realtimeSinceStartup + 4f;
+                    while (side.player.BumpCount == before && Time.realtimeSinceStartup < bumpUntil) yield return null;
+                    yield return Wait(0.05f);
+                    Debug.Log($"[MERIDIAN] smoke bump: {side.player.BumpCount - before} bump(s)");
+                    yield return Shot(folder, "smoke_2c_earth_bump.png");
                     if (w1 != null) side.creatures.Despawn(w1);
-                    if (w2 != null) side.creatures.Despawn(w2);
                     yield return Wait(0.3f);
                 }
                 side.dayNight.Override = 0f;
@@ -87,7 +87,7 @@ namespace Meridian.Core
                     Debug.Log($"[MERIDIAN] smoke dig: {dug}");
                     yield return Shot(folder, "smoke_3b_earth_dig.png");
                 }
-                // U-089 smoke: a hard landing (the squash, one frame after touchdown) and the parry stance.
+                // U-089 smoke: a hard landing (the squash, one frame after touchdown).
                 if (side.player != null && side.player.Body != null)
                 {
                     var pv = side.player.GetComponentInChildren<Meridian.Player.PlayerView>();
@@ -99,9 +99,6 @@ namespace Meridian.Core
                     while (!side.player.Grounded && Time.realtimeSinceStartup < until) yield return new WaitForFixedUpdate();
                     Debug.Log($"[MERIDIAN] smoke landing: {side.player.LastImpactSpeed:F1} m/s, visual y {(pv != null && pv.VisualRoot != null ? pv.VisualRoot.localScale.y : 1f):F2}");
                     yield return Shot(folder, "smoke_3d_landing_squash.png");
-                    side.player.PressParry();
-                    yield return new WaitForFixedUpdate();
-                    yield return Shot(folder, "smoke_3e_parry.png");
                 }
                 if (side.ship != null && side.ship.Body != null)
                 {
@@ -179,7 +176,7 @@ namespace Meridian.Core
             yield return scenes.LoadPlanetSide(mars);
             side = scenes.PlanetSide;
             if (side.dayNight != null) side.dayNight.Override = 0.45f;
-            // U-053: the Mars Warden outpost, its patrol and a sentinel called by over-mining, firing.
+            // U-053: the Mars Warden outpost, its patrol and a sentinel called by over-mining, hovering beside the surveyor (D-087: it never fires).
             if (side.wardens != null)
             {
                 float outpost = Meridian.Planet.POI.PoiCatalog.WardenOutpost.CenterX;
@@ -188,8 +185,6 @@ namespace Meridian.Core
                 var feet = side.player.Body.position;
                 var hunter = side.wardens.Spawn(feet + new Vector2(5f, 4.5f), feet, Meridian.Creatures.Wardens.SentinelState.Hunt);
                 yield return Wait(1.4f);
-                if (hunter != null) side.wardens.Fire(hunter.Body.position, side.player.Body.position + new Vector2(0f, 0.9f) - hunter.Body.position);
-                yield return Wait(0.15f);
                 yield return Shot(folder, "smoke_12_warden.png");
                 side.wardens.DespawnAll();
                 if (side.hazards != null) side.hazards.enabled = true;

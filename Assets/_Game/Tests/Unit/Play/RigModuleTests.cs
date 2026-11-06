@@ -12,7 +12,7 @@ using UnityEngine.TestTools;
 
 namespace Meridian.Tests
 {
-    /// <summary>U-046 (PlayMode): tool in hand turned to the aim; Beam ray to the hit; Lance kills; Survey pulses once; Builder ghost red when blocked.</summary>
+    /// <summary>U-046 (PlayMode): tool in hand turned to the aim; Beam ray to the hit; Survey pulses once (the Lance case is archived, D-087); Builder ghost red when blocked.</summary>
     public class RigModuleTests
     {
         const string CorePath = "Assets/_Game/Scenes/Core.unity";
@@ -91,34 +91,6 @@ namespace Meridian.Tests
             yield return null;
             yield return null;
             Assert.IsFalse(tool.Beam.enabled, "off when released");
-            LogAssert.NoUnexpectedReceived();
-        }
-
-        [UnityTest]
-        public IEnumerator LanceBoltsKillAStag()
-        {
-            yield return Boot();
-            var creatures = side.creatures;
-            int sx = Mathf.FloorToInt(Feet.x) - 7;
-            var spec = SpeciesSpec.Get(Species.Stag);
-            var stag = creatures.Spawn(Species.Stag, new Vector2(sx + 0.5f, side.terrain.TopSolidY(sx) + 1f + spec.size.y * 0.5f + 0.05f));
-            Assert.NotNull(stag);
-            bool killed = false;
-            int hits = 0;
-            rig.Bolts.HitCreature += (c, k) => { if (c == stag) { hits++; killed |= k; } };
-            rig.module = RigModule.Lance;
-            rig.holdUse = true;
-            float until = Time.realtimeSinceStartup + 8f;
-            while (!killed && Time.realtimeSinceStartup < until)
-            {
-                if (stag.Alive) rig.AimAt(stag.Body.position);
-                yield return new WaitForFixedUpdate();
-            }
-            rig.holdUse = false;
-            TestContext.Out.WriteLine($"[MERIDIAN] Lance: {hits} hits, killed {killed}");
-            Assert.IsTrue(killed, "the Lance kills a stag");
-            Assert.AreEqual(Mathf.CeilToInt(spec.maxHealth / LanceBolts.Damage), hits, "health / damage bolts");
-            Assert.IsFalse(stag.Alive, "despawned at death");
             LogAssert.NoUnexpectedReceived();
         }
 

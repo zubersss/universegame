@@ -10,7 +10,7 @@ namespace Meridian.Tests
     /// <summary>U-032: clip choice by priority (the sheet-registry check moved to U-075, D-069).</summary>
     public class SurveyorAnimTests
     {
-        static AnimInputs Still() => new AnimInputs { grounded = true, sinceHurt = 99f, sinceLand = 99f, sinceDig = 99f, sinceHitReact = 99f, sinceJump = 99f, sinceParryHit = 99f };
+        static AnimInputs Still() => new AnimInputs { grounded = true, sinceHurt = 99f, sinceLand = 99f, sinceDig = 99f, sinceBump = 99f, sinceJump = 99f };
 
         [Test]
         public void PicksByPriority()
@@ -25,7 +25,10 @@ namespace Meridian.Tests
             a.vy = -3f; Assert.AreEqual(SurveyorAnim.Fall, SurveyorAnim.Pick(a), "falling");
             a.sinceDig = 0.1f; Assert.AreEqual(SurveyorAnim.Dig, SurveyorAnim.Pick(a), "digging, even airborne");
             a.sinceHurt = 0.1f; Assert.AreEqual(SurveyorAnim.Hurt, SurveyorAnim.Pick(a), "hurt beats dig");
-            a.dead = true; Assert.AreEqual(SurveyorAnim.Death, SurveyorAnim.Pick(a), "death beats everything");
+            a.dead = true; Assert.AreEqual(SurveyorAnim.ConkOut, SurveyorAnim.Pick(a), "conk out (Suit power 0) beats everything");
+            Assert.AreEqual(SurveyorAnim.Death, SurveyorAnim.StandIn(SurveyorAnim.ConkOut), "conk_out stands in as the old death clip");
+            a.dead = false; a.sinceBump = 0.1f; Assert.AreEqual(SurveyorAnim.Bump, SurveyorAnim.Pick(a), "a bump (U-093)");
+            Assert.AreEqual(SurveyorAnim.Hurt, SurveyorAnim.StandIn(SurveyorAnim.Bump));
         }
 
         // D-069 (P-30): RegistryHoldsTheSurveyorClipsFromBaseJson retired. base.json became the surveyor model's json (B-078);

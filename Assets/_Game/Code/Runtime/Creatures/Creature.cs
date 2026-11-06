@@ -20,7 +20,7 @@ namespace Meridian.Creatures
         /// <summary>U-089: the visual root (sheet + model) SquashStretch scales about the feet; the box and body never scale.</summary>
         public Transform Visual { get; private set; }
         public Meridian.Player.SquashStretch Squash { get; } = new Meridian.Player.SquashStretch();
-        public const string HitReactClip = "hit_react", StaggerClip = "stagger";
+        public const string HitReactClip = "hit_react";
         static readonly Color FlashTint = new Color(1.6f, 1.6f, 1.6f, 1f);
         /// <summary>U-075: the species' 3D model (B-082 …), Ready once loaded; until then (or without a model) the sprite draws.</summary>
         public Meridian.Art.ModelView Model { get; private set; }
@@ -29,12 +29,7 @@ namespace Meridian.Creatures
         /// <summary>Held: its chunk isn't loaded with collision, so the body is paused in place.</summary>
         public bool Held { get; internal set; }
         public bool Alive => gameObject.activeSelf;
-        /// <summary>Hit points left (U-046); reset at spawn from the species.</summary>
-        public float Health { get; private set; }
-        /// <summary>U-088: a parried attacker stands staggered this long.</summary>
-        public const float StaggerSeconds = 1.2f, StaggerBrake = 20f;
-        public bool IsStaggered => staggerFor > 0f;
-        internal float staggerFor, knockFor, knockVx, flashFor;
+        internal float knockFor, knockVx, flashFor;
         Color baseColor = Color.white;
         internal CreatureDirector director;
 
@@ -44,29 +39,7 @@ namespace Meridian.Creatures
         public float NightfallAt { get; internal set; } = float.NegativeInfinity;
         /// <summary>Cinderhulk: the cracked-shell window is open now.</summary>
         public bool Vulnerable => ApexRules.CanHurt(Spec.id, true, Zone, Time.time - NightfallAt);
-        /// <summary>The last hit didn't land (the Cinderhulk's hot shell, the Veil Serpent without Cryo).</summary>
-        public bool LastHitShrugged { get; private set; }
-
-        /// <summary>Damage from the player (the Lance). At 0 the creature dies (despawns) and Killed fires. True if this killed it.</summary>
-        public bool Hurt(float damage) => Hurt(damage, false);
-
-        /// <summary>A hit; `cryo` for Cryo rounds (U-055). The apex rules decide whether it lands.</summary>
-        public bool Hurt(float damage, bool cryo)
-        {
-            if (!Alive || damage <= 0f) return false;
-            LastHitShrugged = !ApexRules.CanHurt(Spec.id, cryo, Zone, Time.time - NightfallAt);
-            if (LastHitShrugged) return false;
-            Health -= damage;
-            hurtFor = 0.3f;
-            if (cryo) { chillFor = 0.35f; if (Spec.id == Species.VeilSerpent) fleeUntil = Time.time + 4f; }
-            if (Health > 0f) return false;
-            Health = 0f;
-            Killed?.Invoke(this);
-            if (director != null) director.Despawn(this); else gameObject.SetActive(false);
-            return true;
-        }
-
-        public static event System.Action<Creature> Killed;
+        // D-087 (U-093): no hit points, no Hurt, no Killed: the Lance is archived (Assets/_Game/Archive/Combat~).
 
         internal int dir = 1;
         internal float nextThink, biteReady, hurtFor, attackFor, chillFor, fleeUntil, anim, altitude;
@@ -105,7 +78,6 @@ namespace Meridian.Creatures
         internal void Setup(SpeciesSpec spec, Vector2 position, Sprite sprite, Sprite[] frames, Sprite[] nightFrames, ArtClipSet clips, int serial)
         {
             Spec = spec;
-            Health = spec.maxHealth;
             this.serial = serial;
             this.frames = frames;
             this.nightFrames = nightFrames;
@@ -115,12 +87,11 @@ namespace Meridian.Creatures
             dir = (serial & 1) == 0 ? 1 : -1;
             nextThink = 0f;
             biteReady = 0f;
-            hurtFor = attackFor = chillFor = anim = staggerFor = knockFor = flashFor = 0f;
+            hurtFor = attackFor = chillFor = anim = knockFor = flashFor = 0f;
             fleeUntil = 0f;
             lastClip = -1;
             altitude = position.y;
             NightfallAt = float.NegativeInfinity;
-            LastHitShrugged = false;
             Box.size = spec.size;
             Box.offset = Vector2.zero;
             // U-089: the visual root sits at the feet (walkers) or the centre (fliers), so squashes keep the feet planted.
@@ -167,8 +138,7 @@ namespace Meridian.Creatures
             Model.Load(spec.artKey);
         }
 
-        /// <summary>Picks this frame's sprite (idle / walk / attack / hurt) and the chill tint. No allocation.</summary>
-        /// <summary>U-089 (Bible §4.2): the hit reaction: knocked 0.5 m along `away` over 0.12 s, a 2-frame flash, a 0.85 squash.</summary>
+        /// <summary>U-093: the bump reaction (U-089 squash kept): knocked 0.5 m along `away` over 0.12 s, a 2-frame flash, a 0.85 squash.</summary>
         public void React(Vector2 away)
         {
             knockFor = Meridian.Player.PlayerController.KnockTime;
@@ -189,9 +159,8 @@ namespace Meridian.Creatures
                 if (chillFor > 0f) { chillFor -= dt; if (chillFor > 0f) Model.Flash(0.05f); }
                 if (View.enabled) View.enabled = false;
                 int pick = hurtFor > 0f ? 3 : attackFor > 0f ? 2 : speed > 0.3f ? 1 : 0;
-                // U-089: hit_react / stagger when the model has them (B-106), else the hurt / idle stand-ins.
-                if (IsStaggered) { if (!Model.Play(StaggerClip)) Model.Play(ModelClips[0]); }
-                else if (pick == 3) { if (!Model.Play(HitReactClip)) Model.Play(ModelClips[3]); }
+                // U-089: hit_react when the model has it, else the hurt stand-in.
+                if (pick == 3) { if (!Model.Play(HitReactClip)) Model.Play(ModelClips[3]); }
                 else Model.Play(ModelClips[pick]);
                 return;
             }

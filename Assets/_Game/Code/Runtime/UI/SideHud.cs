@@ -70,7 +70,7 @@ namespace Meridian.UI
             var tl = new Vector2(0f, 1f);
 
             accentLine = UiKit.Panel(root, "Accent", tl, new Vector2(24f, -20f), new Vector2(220f, 2f), UiTheme.Accent(null));
-            Label(root, "HEALTH", -36f);
+            Label(root, "SUIT POWER", -36f); // U-093 (D-087): no health; the suit's integrity + reserve as one gauge
             HealthFill = UiKit.Bar(root, "Health", tl, new Vector2(24f, -58f), new Vector2(220f, 6f), theme.health);
             HealthText = UiKit.Text(root, "HealthValue", tl, new Vector2(252f, -48f), new Vector2(80f, 24f), 18);
             Label(root, "O2", -76f);
@@ -234,8 +234,11 @@ namespace Meridian.UI
             if (vitals == null && player != null) vitals = player.GetComponent<PlayerVitals>();
             if (vitals != null)
             {
-                int h = Mathf.CeilToInt(vitals.health);
-                if (h != lastHealth) { lastHealth = h; HealthText.text = numbers[h]; HealthFill.fillAmount = vitals.health / vitals.maxHealth; }
+                // U-093: Suit power % = (suit integrity + reserve) / (SuitMax + reserve max); without a HazardSystem, the reserve alone.
+                float suit = hazards != null ? hazards.SuitIntegrity : 0f, suitMax = hazards != null ? Meridian.Hazards.HazardRules.SuitMax : 0f;
+                float power = (suit + vitals.health) / Mathf.Max(1f, suitMax + vitals.maxHealth);
+                int h = Mathf.CeilToInt(power * 100f - 1e-3f);
+                if (h != lastHealth) { lastHealth = h; HealthText.text = numbers[h]; HealthFill.fillAmount = power; }
             }
             if (state != null)
             {

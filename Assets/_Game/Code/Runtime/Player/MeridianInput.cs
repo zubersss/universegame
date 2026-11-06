@@ -23,7 +23,6 @@ namespace Meridian.Player
             Button(foot, "Sprint", "<Keyboard>/leftShift", "<Gamepad>/leftStickPress");
             Button(foot, "Jump", "<Keyboard>/space", "<Gamepad>/buttonSouth");
             Button(foot, "Dash", "<Keyboard>/leftShift", "<Gamepad>/buttonEast");   // U-088 (D-078): Shift tapped while airborne
-            Button(foot, "Parry", "<Keyboard>/c", "<Gamepad>/buttonNorth");        // U-088 (D-078): C reads as "counter"
             Button(foot, "Crouch", "<Keyboard>/s", "<Gamepad>/leftStick/down");
             foot.AddAction("Aim", InputActionType.Value, "<Mouse>/position", expectedControlLayout: "Vector2");
             Button(foot, "RigPrimary", "<Mouse>/leftButton", "<Gamepad>/rightTrigger");

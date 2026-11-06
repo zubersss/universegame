@@ -24,9 +24,9 @@ namespace Meridian.Player
         public bool stage = true;
         public PlayerController player;
         public TerrainStreamer terrain;
+        /// <summary>Kept for the scene wiring; D-087 removed the fight zoom that read it.</summary>
         public CreatureDirector creatures;
 
-        public const float HostileRange = 14f, ApexRange = 25f;
         /// <summary>How far below the feet the stage floor is looked for (tiles).</summary>
         public const int FloorScan = 64;
 
@@ -36,7 +36,7 @@ namespace Meridian.Player
 
         Vector3 velocity;
         Camera cam;
-        PlayerVitals vitals;
+        PlayerController hooked;
 
         void Awake()
         {
@@ -44,28 +44,24 @@ namespace Meridian.Player
             if (cam != null && perspectiveRail) SideView.Configure(cam);
         }
 
-        void OnEnable()
-        {
-            Hook();
-            Meridian.Creatures.Creature.Killed += OnKilled;
-        }
+        void OnEnable() => Hook();
 
         void OnDisable()
         {
-            Meridian.Creatures.Creature.Killed -= OnKilled;
-            if (vitals != null) vitals.Damaged -= OnDamaged;
-            vitals = null;
+            if (hooked != null) hooked.Bumped -= OnBumped;
+            hooked = null;
         }
 
+        /// <summary>U-093: a bump shakes the frame (position only).</summary>
         void Hook()
         {
-            if (vitals != null) return;
-            vitals = target != null ? target.GetComponent<PlayerVitals>() : null;
-            if (vitals != null) vitals.Damaged += OnDamaged;
+            if (hooked == player || player == null) return;
+            if (hooked != null) hooked.Bumped -= OnBumped;
+            hooked = player;
+            hooked.Bumped += OnBumped;
         }
 
-        void OnDamaged(float _) => Stage.Impact(StageCamera.HitShake);
-        void OnKilled(Meridian.Creatures.Creature _) => Stage.Impact(StageCamera.KillShake);
+        void OnBumped() => Stage.Impact(StageCamera.BumpShake);
 
         bool StageActive => stage && player != null && cam != null && !cam.orthographic;
 
@@ -102,24 +98,10 @@ namespace Meridian.Player
         {
             var feet = player.Body != null ? player.Body.position : (Vector2)target.position;
             var v = player.Body != null ? player.Body.linearVelocity : Vector2.zero;
-            int hostiles = 0;
-            bool apex = false;
-            if (creatures != null)
-            {
-                var all = creatures.All;
-                for (int k = 0; k < all.Count; k++)
-                {
-                    var c = all[k];
-                    if (c == null || !c.Alive || c.Body == null || c.Spec == null) continue;
-                    float d2 = ((Vector2)c.Body.position - feet).sqrMagnitude;
-                    if (c.Spec.apex) { if (d2 <= ApexRange * ApexRange) apex = true; }
-                    else if (c.Spec.temper == Temper.Hunts && d2 <= HostileRange * HostileRange) hostiles++;
-                }
-            }
             return new StageInput
             {
                 playerX = feet.x, playerY = feet.y, facing = player.Facing, speedX = v.x, speedY = v.y,
-                grounded = player.Grounded, floorY = FloorUnder(feet), hostilesNear = hostiles, apexNear = apex,
+                grounded = player.Grounded, floorY = FloorUnder(feet),
                 baseFrame = BaseFrame, dt = dt,
             };
         }

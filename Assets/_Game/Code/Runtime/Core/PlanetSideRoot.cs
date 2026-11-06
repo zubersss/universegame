@@ -31,6 +31,8 @@ namespace Meridian.Core
         public Meridian.Creatures.Wardens.WardenDirector wardens { get; private set; }
         public Meridian.Hazards.SolariteCrystals solarite { get; private set; }
         public Meridian.Building.BaseBuilder bases { get; private set; }
+        /// <summary>U-093: Suit power 0 -> conk out, wake at the last base or the ship (created in Configure).</summary>
+        public ConkOut conkOut { get; private set; }
         public Meridian.Creatures.CreatureDirector creatures;
         public Meridian.Hazards.HazardSystem hazards;
         public Meridian.Planet.POI.PoiPlacer pois;
@@ -163,6 +165,10 @@ namespace Meridian.Core
             // U-056: this planet's base, rebuilt from the save; the Builder and the Beam work on its pieces.
             if (bases == null) { bases = gameObject.AddComponent<Meridian.Building.BaseBuilder>(); bases.terrain = terrain; bases.rig = rig; bases.player = player != null ? player.transform : null; }
             bases.ConfigureFor(config.id);
+            if (conkOut == null) conkOut = gameObject.AddComponent<ConkOut>();
+            conkOut.player = player; conkOut.hazards = hazards; conkOut.bases = bases; conkOut.ship = ship; conkOut.terrain = terrain;
+            conkOut.vitals = player != null ? player.GetComponent<PlayerVitals>() : null;
+            conkOut.Hook();
             if (sideCamera != null)
             {
                 sideCamera.transform.position = new Vector3(spawnX + 0.5f, surface + 3f, sideCamera.orthographic ? -10f : -Meridian.CameraRig.SideView.DistanceFor(Meridian.CameraRig.SideView.HalfHeight(sideCamera)));

@@ -15,7 +15,7 @@ namespace Meridian.Creatures
     /// <summary>
     /// U-027: spawns the planet's creatures off-screen by biome and time of day, despawns them far away,
     /// and runs every creature's AI in one loop: think 4×/s (flee or chase the player, wander), steer
-    /// every frame (run, hop 1–2 tile steps, turn at walls), bite when a hunter reaches the player.
+    /// every frame (run, hop 1–2 tile steps, turn at walls), bump when a hunter reaches the player (U-093, D-087: no bites).
     /// Creatures whose chunk isn't loaded with collision are held in place, so none falls through
     /// streamed ground. At most 20 alive. No allocation per frame.
     /// U-055: fliers (a hover band over the ground, or Venus's cloud deck) steer in 2D without gravity;
@@ -248,7 +248,7 @@ namespace Meridian.Creatures
 
         void IgnoreBodies(Creature c)
         {
-            // Creatures pass through each other and through the player (contact is a bite, not a shove).
+            // Creatures pass through each other and through the player (contact is a bump, not a physics shove).
             foreach (var o in pool) if (o != c) Physics2D.IgnoreCollision(c.Box, o.Box, true);
             if (player != null)
             {
@@ -298,16 +298,6 @@ namespace Meridian.Creatures
         {
             var spec = c.Spec;
             Vector2 pos = c.Body.position;
-            // U-088: a parried creature is staggered (Creature.StaggerSeconds): it stands, bites nothing, then resumes.
-            if (c.staggerFor > 0f)
-            {
-                c.staggerFor -= dt;
-                var sv = c.Body.linearVelocity;
-                if (c.knockFor > 0f) { c.knockFor -= dt; sv.x = c.knockVx; } else sv.x = Mathf.MoveTowards(sv.x, 0f, Creature.StaggerBrake * dt);
-                c.Body.linearVelocity = sv;
-                c.Animate(dt, 0f);
-                return;
-            }
             float dx = player.x - pos.x, dy = player.y - pos.y, adx = Mathf.Abs(dx);
 
             if (adx > DespawnDistance || Mathf.Abs(dy) > DespawnDistance || (!spec.ActiveAt(daylight) && adx > 22f)) { Despawn(c); return; } // night hunters leave at dawn, off-screen
@@ -376,23 +366,33 @@ namespace Meridian.Creatures
             if (c.View != null) c.View.flipX = (spec.Flies ? (v.x != 0f ? Mathf.Sign(v.x) : c.dir) : c.dir) < 0;
             if (c.Model != null && c.Model.Ready && c.View != null) c.Model.SetFacing(!c.View.flipX); // U-075: the model faces like the sprite
 
-            // Bite.
+            // U-093 (D-087): a chasing creature that reaches the surveyor bumps them (no damage).
             bool hunting = c.State == CreatureState.Chase;
             float reachX = spec.size.x * 0.5f + 0.6f, reachY = spec.Flies ? spec.size.y * 0.5f + 1.2f : 1.4f;
-            if (hunting && vitals != null && !vitals.Dead && adx < reachX && Mathf.Abs(dy) < reachY && now >= c.biteReady) Bite(c, now);
+            if (hunting && vitals != null && !vitals.Dead && adx < reachX && Mathf.Abs(dy) < reachY && now >= c.biteReady) Bump(c, now);
             c.Animate(dt, Mathf.Abs(v.x) + (spec.Flies ? Mathf.Abs(v.y) : 0f));
         }
 
-        /// <summary>U-088: a bite lands unless the player's parry window catches it: then 0 damage and the attacker staggers 1.2 s.</summary>
-        public void Bite(Creature c, float now)
+        /// <summary>
+        /// U-093 (D-087): contact. The surveyor is bumped 0.8 m away with dizzy stars (PlayerController.Bump), the creature
+        /// bounces 0.5 m back with a squash (Creature.React) and plays its `attack` clip as the bump; no meter changes.
+        /// One bump per creature per BumpEvery.
+        /// </summary>
+        public void Bump(Creature c, float now)
         {
-            c.biteReady = now + 1.2f;
+            c.biteReady = now + BumpEvery;
             c.attackFor = 0.4f;
-            if (player != null && player.TryParryAttack(c.Body.position)) { c.staggerFor = Creature.StaggerSeconds; c.attackFor = 0f; return; }
-            if (vitals == null && player != null) vitals = player.GetComponent<PlayerVitals>();
-            player?.Knock(c.Body.position); // U-089: knocked away from the biter, flash, hit_react
-            if (vitals != null) vitals.Damage(c.Spec.biteDamage);
+            if (player == null) return;
+            Vector2 from = c.Body.position;
+            player.Bump(from);
+            c.React(from - player.Body.position);
+            Bumps++;
         }
+
+        /// <summary>Seconds between two bumps by one creature.</summary>
+        public const float BumpEvery = 1.2f;
+        /// <summary>Bumps given since load (tests).</summary>
+        public int Bumps { get; private set; }
 
         void Think(Creature c, float dx, float dy, float adx, bool flare, float now)
         {

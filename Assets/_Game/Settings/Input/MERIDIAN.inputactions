@@ -47,16 +47,6 @@
                     "priority": 0
                 },
                 {
-                    "name": "Parry",
-                    "type": "Button",
-                    "id": "f264784d-50a8-49de-9bc1-04f4d5b61aec",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false,
-                    "priority": 0
-                },
-                {
                     "name": "Crouch",
                     "type": "Button",
                     "id": "136df9fe-602d-42a4-a0ce-aaf44cc3d526",
@@ -325,28 +315,6 @@
                     "processors": "",
                     "groups": "",
                     "action": "Dash",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "1dce7bc8-75b2-4c08-aebc-ea4186e12e23",
-                    "path": "<Keyboard>/c",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Parry",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "67279138-395a-4f58-9b91-eafebe99d33b",
-                    "path": "<Gamepad>/buttonNorth",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Parry",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

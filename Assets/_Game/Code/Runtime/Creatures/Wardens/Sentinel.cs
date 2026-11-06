@@ -4,34 +4,32 @@ using UnityEngine;
 
 namespace Meridian.Creatures.Wardens
 {
-    public enum SentinelState { Patrol, Hunt, Dying }
+    public enum SentinelState { Patrol, Hunt }
 
     /// <summary>
     /// U-053: a Warden sentinel (B-043 creatures/warden/sentinel). It hovers (no gravity): on patrol it sweeps
-    /// PatrolHalfWidth either side of its post; hunting, it holds a firing point above and beside the surveyor
-    /// and the director fires its bolts. The Lance kills it (Hurt). Moved by the director, not by its own Update.
+    /// PatrolHalfWidth either side of its post; called, it closes in on the surveyor, rings its bell (the `attack`
+    /// clip) and bumps them on contact. D-087: it never shoots and can't be destroyed (the Lance is archived); the tow
+    /// and the 5-minute Beam lock arrive with their own task. Moved by the director, not by its own Update.
     /// </summary>
     public sealed class Sentinel : MonoBehaviour
     {
-        public const float MaxHealth = 75f, PatrolSpeed = 2f, HuntSpeed = 6f, PatrolHalfWidth = 8f;
-        public const float Size = 1.6f, DeathSeconds = 0.5f;
+        public const float PatrolSpeed = 2f, HuntSpeed = 6f, PatrolHalfWidth = 8f;
+        public const float Size = 1.6f;
         public const string ArtKey = "creatures/warden/sentinel";
 
         public SentinelState State { get; internal set; }
-        public float Health { get; private set; }
-        public bool Alive => gameObject.activeSelf && State != SentinelState.Dying;
+        public bool Alive => gameObject.activeSelf;
         public Vector2 Post { get; internal set; }
         public Rigidbody2D Body { get; private set; }
 
         internal WardenDirector director;
-        internal float fireIn, anim, dyingFor;
+        internal float ringIn, bumpReady, anim;
         internal int sweep = 1;
         SpriteRenderer view;
         FxSheet sheet;
         ArtClipSet clips;
         string playing;
-
-        public static event System.Action<Sentinel> Destroyed;
 
         internal void Build()
         {
@@ -49,29 +47,15 @@ namespace Meridian.Creatures.Wardens
 
         internal void Begin(Vector2 at, Vector2 post, SentinelState state)
         {
-            Health = MaxHealth;
             Post = post;
             State = state;
-            fireIn = 1.2f;
+            ringIn = 1.2f;
+            bumpReady = 0f;
             anim = 0f;
-            dyingFor = 0f;
             playing = null;
             Body.position = at;
             transform.position = at;
             gameObject.SetActive(true);
-        }
-
-        /// <summary>Damage (the Lance). True if this destroyed it.</summary>
-        public bool Hurt(float damage)
-        {
-            if (!Alive || damage <= 0f) return false;
-            Health -= damage;
-            if (Health > 0f) { Play("hurt"); return false; }
-            Health = 0f;
-            State = SentinelState.Dying;
-            Play("death");
-            Destroyed?.Invoke(this);
-            return true;
         }
 
         internal void Play(string clip) { if (playing != clip) { playing = clip; anim = 0f; } }
@@ -90,7 +74,7 @@ namespace Meridian.Creatures.Wardens
             int step = Mathf.FloorToInt(anim * (clips.fps > 0 ? clips.fps : 12));
             if (!clip.loop && step >= clip.length)
             {
-                if (playing == "hurt" || playing == "attack") playing = null;
+                if (playing == "attack") playing = null;
                 step = clip.length - 1;
             }
             int f = clip.start + (clip.loop ? step % clip.length : Mathf.Min(step, clip.length - 1));

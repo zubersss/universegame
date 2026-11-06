@@ -74,7 +74,7 @@ namespace Meridian.Player
 
         void LoadTool(RigModule m)
         {
-            string key = RigModules.ArtKey(m);
+            string key = RigModules.LoadKey(m);
             var h = ArtLoad.Asset<IList<Sprite>>(key);
             handles.Add(h);
             h.Completed += op =>
@@ -91,7 +91,7 @@ namespace Meridian.Player
         {
             shown = m;
             Tool.sprite = tools[(int)m];
-            var mat = ArtMaterials.MaterialFor(RigModules.ArtKey(m));
+            var mat = ArtMaterials.MaterialFor(RigModules.LoadKey(m));
             if (mat != null) Tool.sharedMaterial = mat;
         }
 

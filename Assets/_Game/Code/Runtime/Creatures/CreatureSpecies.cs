@@ -59,9 +59,6 @@ namespace Meridian.Creatures
         public ActiveTime time;
         public int packMin, packMax;
         public int maxAlive;
-        public float biteDamage;
-        /// <summary>Hit points (U-046: the Lance deals Lance.Damage per bolt).</summary>
-        public float maxHealth = 40f;
         public Color placeholder;
         public Habitat habitat;
         /// <summary>Air: the height band above the ground it keeps (m).</summary>
@@ -78,51 +75,51 @@ namespace Meridian.Creatures
         {
             new SpeciesSpec { id = Species.Stag, planet = PlanetId.Earth, artKey = "creatures/earth/stag", size = new Vector2(1.9f, 1.6f),
                 wanderSpeed = 1.2f, runSpeed = 9f, jumpSpeed = 6.5f, temper = Temper.Flees, senseRange = 8f, time = ActiveTime.Any,
-                packMin = 1, packMax = 3, maxAlive = 6, maxHealth = 50f, placeholder = new Color(0.55f, 0.38f, 0.22f) },
+                packMin = 1, packMax = 3, maxAlive = 6, placeholder = new Color(0.55f, 0.38f, 0.22f) },
             new SpeciesSpec { id = Species.GreyWolf, planet = PlanetId.Earth, artKey = "creatures/earth/wolf", size = new Vector2(1.5f, 0.9f),
                 wanderSpeed = 1.6f, runSpeed = 7.5f, jumpSpeed = 6f, temper = Temper.Hunts, senseRange = 14f, time = ActiveTime.Night,
-                packMin = 2, packMax = 4, maxAlive = 8, biteDamage = 8f, maxHealth = 40f, placeholder = new Color(0.45f, 0.47f, 0.5f) },
+                packMin = 2, packMax = 4, maxAlive = 8, placeholder = new Color(0.45f, 0.47f, 0.5f) },
             new SpeciesSpec { id = Species.Dustskater, planet = PlanetId.Mars, artKey = "creatures/mars/dustskater", size = new Vector2(0.8f, 0.45f),
                 wanderSpeed = 2.2f, runSpeed = 8f, jumpSpeed = 5f, temper = Temper.Flees, senseRange = 5f, time = ActiveTime.Any,
-                packMin = 1, packMax = 4, maxAlive = 8, maxHealth = 20f, placeholder = new Color(0.75f, 0.55f, 0.35f) },
+                packMin = 1, packMax = 4, maxAlive = 8, placeholder = new Color(0.75f, 0.55f, 0.35f) },
             new SpeciesSpec { id = Species.ScreeStalker, planet = PlanetId.Mars, artKey = "creatures/mars/scree_stalker", size = new Vector2(1.6f, 1.0f),
                 wanderSpeed = 1.4f, runSpeed = 7f, jumpSpeed = 7f, temper = Temper.Hunts, senseRange = 12f, time = ActiveTime.Any,
-                packMin = 2, packMax = 3, maxAlive = 6, biteDamage = 10f, maxHealth = 60f, placeholder = new Color(0.42f, 0.3f, 0.26f) },
+                packMin = 2, packMax = 3, maxAlive = 6, placeholder = new Color(0.42f, 0.3f, 0.26f) },
 
             // Mercury (Bible §7.3). Mercury's low gravity (0.38 g) carries every hop further.
             new SpeciesSpec { id = Species.Glassback, planet = PlanetId.Mercury, artKey = "creatures/mercury/glassback", size = new Vector2(1.6f, 1.2f),
                 wanderSpeed = 1.0f, runSpeed = 5f, jumpSpeed = 4f, temper = Temper.Flees, senseRange = 7f, time = ActiveTime.Any,
-                packMin = 1, packMax = 3, maxAlive = 6, maxHealth = 70f, placeholder = new Color(0.7f, 0.75f, 0.8f) },
+                packMin = 1, packMax = 3, maxAlive = 6, placeholder = new Color(0.7f, 0.75f, 0.8f) },
             new SpeciesSpec { id = Species.Cinderling, planet = PlanetId.Mercury, artKey = "creatures/mercury/cinderling", size = new Vector2(0.55f, 0.35f),
                 wanderSpeed = 2.4f, runSpeed = 7.5f, jumpSpeed = 4f, temper = Temper.Hunts, senseRange = 10f, time = ActiveTime.Any,
-                packMin = 3, packMax = 6, maxAlive = 10, biteDamage = 3f, maxHealth = 15f, placeholder = new Color(0.9f, 0.45f, 0.2f) },
+                packMin = 3, packMax = 6, maxAlive = 10, placeholder = new Color(0.9f, 0.45f, 0.2f) },
             new SpeciesSpec { id = Species.Flarewing, planet = PlanetId.Mercury, artKey = "creatures/mercury/flarewing", size = new Vector2(1.0f, 0.75f),
                 wanderSpeed = 3f, runSpeed = 9f, temper = Temper.Flees, senseRange = 9f, time = ActiveTime.Any, habitat = Habitat.Air,
                 hoverMin = 4f, hoverMax = 9f, huntsDuringFlare = true,
-                packMin = 1, packMax = 2, maxAlive = 4, biteDamage = 9f, maxHealth = 35f, placeholder = new Color(1f, 0.85f, 0.4f) },
+                packMin = 1, packMax = 2, maxAlive = 4, placeholder = new Color(1f, 0.85f, 0.4f) },
             new SpeciesSpec { id = Species.Shadewyrm, planet = PlanetId.Mercury, artKey = "creatures/mercury/shadewyrm", size = new Vector2(2.3f, 0.7f),
                 wanderSpeed = 1.2f, runSpeed = 6f, jumpSpeed = 4f, temper = Temper.Hunts, senseRange = 11f, time = ActiveTime.Any,
-                packMin = 1, packMax = 2, maxAlive = 3, biteDamage = 14f, maxHealth = 80f, placeholder = new Color(0.55f, 0.65f, 0.8f) },
+                packMin = 1, packMax = 2, maxAlive = 3, placeholder = new Color(0.55f, 0.65f, 0.8f) },
             new SpeciesSpec { id = Species.Cinderhulk, planet = PlanetId.Mercury, artKey = "creatures/mercury/cinderhulk_day", nightArtKey = "creatures/mercury/cinderhulk_night",
                 size = new Vector2(3.0f, 1.9f), wanderSpeed = 0.8f, runSpeed = 2.6f, jumpSpeed = 4f, temper = Temper.Hunts, senseRange = 16f, time = ActiveTime.Any,
-                packMin = 1, packMax = 1, maxAlive = 1, biteDamage = 25f, maxHealth = 200f, apex = true, placeholder = new Color(0.95f, 0.95f, 0.9f) },
+                packMin = 1, packMax = 1, maxAlive = 1, apex = true, placeholder = new Color(0.95f, 0.95f, 0.9f) },
 
             // Venus (Bible §7.4).
             new SpeciesSpec { id = Species.SulfurDrifter, planet = PlanetId.Venus, artKey = "creatures/venus/sulfur_drifter", size = new Vector2(1.6f, 1.6f),
                 wanderSpeed = 1.0f, runSpeed = 2.5f, temper = Temper.Flees, senseRange = 6f, time = ActiveTime.Any, habitat = Habitat.Deck,
-                packMin = 1, packMax = 3, maxAlive = 6, maxHealth = 40f, placeholder = new Color(0.9f, 0.85f, 0.4f) },
+                packMin = 1, packMax = 3, maxAlive = 6, placeholder = new Color(0.9f, 0.85f, 0.4f) },
             new SpeciesSpec { id = Species.Acidmoth, planet = PlanetId.Venus, artKey = "creatures/venus/acidmoth", size = new Vector2(0.4f, 0.4f),
                 wanderSpeed = 2.5f, runSpeed = 5f, temper = Temper.Hunts, senseRange = 12f, time = ActiveTime.Any, habitat = Habitat.Deck,
-                packMin = 3, packMax = 6, maxAlive = 10, biteDamage = 2f, maxHealth = 10f, placeholder = new Color(0.8f, 0.9f, 0.5f) },
+                packMin = 3, packMax = 6, maxAlive = 10, placeholder = new Color(0.8f, 0.9f, 0.5f) },
             new SpeciesSpec { id = Species.PressureCrab, planet = PlanetId.Venus, artKey = "creatures/venus/pressure_crab", size = new Vector2(1.9f, 1.2f),
                 wanderSpeed = 0.7f, runSpeed = 2.2f, jumpSpeed = 4f, temper = Temper.Hunts, senseRange = 5f, time = ActiveTime.Any,
-                packMin = 1, packMax = 2, maxAlive = 4, biteDamage = 12f, maxHealth = 120f, placeholder = new Color(0.4f, 0.3f, 0.3f) },
+                packMin = 1, packMax = 2, maxAlive = 4, placeholder = new Color(0.4f, 0.3f, 0.3f) },
             new SpeciesSpec { id = Species.VentEel, planet = PlanetId.Venus, artKey = "creatures/venus/vent_eel", size = new Vector2(2.0f, 0.55f),
                 wanderSpeed = 1.6f, runSpeed = 6f, jumpSpeed = 5f, temper = Temper.Hunts, senseRange = 10f, time = ActiveTime.Any,
-                packMin = 1, packMax = 3, maxAlive = 5, biteDamage = 9f, maxHealth = 45f, placeholder = new Color(0.8f, 0.35f, 0.2f) },
+                packMin = 1, packMax = 3, maxAlive = 5, placeholder = new Color(0.8f, 0.35f, 0.2f) },
             new SpeciesSpec { id = Species.VeilSerpent, planet = PlanetId.Venus, artKey = "creatures/venus/veil_serpent", size = new Vector2(9.8f, 2.3f), artScale = 3f,
                 wanderSpeed = 2.5f, runSpeed = 6.5f, temper = Temper.Hunts, senseRange = 18f, time = ActiveTime.Any, habitat = Habitat.Deck,
-                packMin = 1, packMax = 1, maxAlive = 1, biteDamage = 20f, maxHealth = 200f, apex = true, placeholder = new Color(0.95f, 0.7f, 0.5f) },
+                packMin = 1, packMax = 1, maxAlive = 1, apex = true, placeholder = new Color(0.95f, 0.7f, 0.5f) },
         };
 
         public static SpeciesSpec Get(Species s) => All[(int)s];

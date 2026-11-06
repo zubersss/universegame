@@ -55,7 +55,7 @@ namespace Meridian.Hazards
         /// <summary>Load (SaveData v2): the saved integrity, clamped to 0..SuitMax.</summary>
         public void SetSuit(float value) => SuitIntegrity = Mathf.Clamp(value, 0f, HazardRules.SuitMax);
 
-        /// <summary>A hit (U-053 Warden bolts): off the suit first, the rest off health.</summary>
+        /// <summary>A one-off drain of Suit power: off the suit integrity first, the rest off the reserve (PlayerVitals).</summary>
         public void DamageSuit(float amount)
         {
             if (amount <= 0f) return;

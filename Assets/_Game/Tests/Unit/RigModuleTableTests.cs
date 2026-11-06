@@ -10,7 +10,7 @@ namespace Meridian.Tests
         [Test]
         public void QAndECycleThroughAllFourAndWrap()
         {
-            Assert.AreEqual(RigModule.Lance, RigModules.Next(RigModule.Beam, +1));
+            Assert.AreEqual(RigModule.Grapple, RigModules.Next(RigModule.Beam, +1));
             Assert.AreEqual(RigModule.Beam, RigModules.Next(RigModule.Builder, +1), "E wraps");
             Assert.AreEqual(RigModule.Builder, RigModules.Next(RigModule.Beam, -1), "Q wraps");
             var m = RigModule.Survey;
@@ -22,10 +22,10 @@ namespace Meridian.Tests
         public void MuzzleOffsetsAndArtMatchTheHandOff()
         {
             Assert.AreEqual(new Vector2(0.47f, 0.03f), RigModules.Muzzle(RigModule.Beam));
-            Assert.AreEqual(new Vector2(0.52f, 0.035f), RigModules.Muzzle(RigModule.Lance));
+            Assert.AreEqual(new Vector2(0.52f, 0.035f), RigModules.Muzzle(RigModule.Grapple));
             Assert.AreEqual(new Vector2(0.30f, 0.06f), RigModules.Muzzle(RigModule.Survey));
             Assert.AreEqual(new Vector2(0.44f, 0.03f), RigModules.Muzzle(RigModule.Builder));
-            Assert.AreEqual("props/rig/lance", RigModules.ArtKey(RigModule.Lance));
+            Assert.AreEqual("props/rig/grapple", RigModules.ArtKey(RigModule.Grapple));
         }
     }
 }

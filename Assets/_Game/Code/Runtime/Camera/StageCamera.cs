@@ -10,8 +10,6 @@ namespace Meridian.CameraRig
         public float speedX, speedY;    // player velocity
         public bool grounded;
         public float floorY;            // the stage floor: ground height under the player's feet
-        public int hostilesNear;        // hunting creatures within 14 m
-        public bool apexNear;           // an apex within 25 m
         public float baseFrame;         // the player's zoom (frame height, m); 0 = the default 18
         public float dt;
     }
@@ -32,10 +30,10 @@ namespace Meridian.CameraRig
         public const float LongFall = 10f, FallFollowTime = 0.4f;
         /// <summary>The body centre above the feet, the point kept inside the middle band.</summary>
         public const float BodyCentre = 0.9f;
-        // Fight zoom.
-        public const float DefaultFrame = 18f, FightFrame = 22f, ApexFrame = 26f, ZoomInTime = 1f, ZoomOutTime = 2f, CalmDelay = 3f;
-        // Impact shake: position only, never rotation.
-        public const float HitShake = 0.15f, KillShake = 0.08f, ShakeTime = 0.10f;
+        /// <summary>The frame height (m). D-087: no fight zoom; the player's own zoom (baseFrame) applies at once.</summary>
+        public const float DefaultFrame = 18f;
+        // Bump shake: position only, never rotation (U-093: a creature or Warden bump; there are no hits or kills).
+        public const float BumpShake = 0.15f, ShakeTime = 0.10f;
 
         public float X { get; private set; }
         public float Y { get; private set; }
@@ -51,7 +49,6 @@ namespace Meridian.CameraRig
         bool haveFloor, landedFollow;
         float heldFloor; // the floor the frame was last set from: a floor that dropped below it holds the frame
         float fallTop;
-        float calmTimer = CalmDelay, returnRate;
         float shakeT, shakeAmp;
 
         /// <summary>Puts the camera where the rules would settle it (scene start, after the photo orbit).</summary>
@@ -59,8 +56,6 @@ namespace Meridian.CameraRig
         {
             float baseF = i.baseFrame > 0f ? i.baseFrame : DefaultFrame;
             Frame = baseF;
-            returnRate = 0f;
-            calmTimer = CalmDelay;
             look = 0f; lookVel = 0f; rel = 0f; relVel = 0f;
             X = i.playerX;
             floorS = i.floorY; floorVel = 0f; haveFloor = true; heldFloor = floorS;
@@ -69,7 +64,7 @@ namespace Meridian.CameraRig
             Shake = Vector2.zero; shakeT = 0f; shakeAmp = 0f;
         }
 
-        /// <summary>A hit on the player (HitShake) or a kill (KillShake): the larger pending amplitude wins.</summary>
+        /// <summary>A bump (BumpShake): the larger pending amplitude wins.</summary>
         public void Impact(float amplitude)
         {
             shakeAmp = Mathf.Max(shakeAmp, amplitude);
@@ -80,33 +75,10 @@ namespace Meridian.CameraRig
         {
             float dt = Mathf.Max(1e-5f, i.dt);
             if (!haveFloor) Snap(i);
-            StepZoom(i, dt);
+            Frame = i.baseFrame > 0f ? i.baseFrame : DefaultFrame;
             StepHorizontal(i, dt);
             StepVertical(i, dt);
             StepShake(dt);
-        }
-
-        void StepZoom(in StageInput i, float dt)
-        {
-            float baseF = i.baseFrame > 0f ? i.baseFrame : DefaultFrame;
-            float target = i.apexNear ? Mathf.Max(baseF, ApexFrame) : i.hostilesNear >= 2 ? Mathf.Max(baseF, FightFrame) : baseF;
-            if (target > baseF)
-            {
-                // The frame grows to the fight size over ZoomInTime; a bigger threat grows it further at the same pace.
-                calmTimer = 0f;
-                returnRate = 0f;
-                Frame = Mathf.MoveTowards(Frame, target, (target - baseF) / ZoomInTime * dt);
-                return;
-            }
-            calmTimer += dt;
-            if (Frame > baseF + 1e-4f)
-            {
-                if (calmTimer < CalmDelay) return; // hold the fight frame through 3 s of calm
-                if (returnRate <= 0f) returnRate = (Frame - baseF) / ZoomOutTime;
-                Frame = Mathf.MoveTowards(Frame, baseF, returnRate * dt);
-                if (Frame <= baseF + 1e-4f) { Frame = baseF; returnRate = 0f; }
-            }
-            else Frame = baseF; // the player's own zoom applies at once
         }
 
         void StepHorizontal(in StageInput i, float dt)

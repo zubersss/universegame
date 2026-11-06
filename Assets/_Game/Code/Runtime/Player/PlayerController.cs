@@ -10,12 +10,13 @@ namespace Meridian.Player
         public bool sprint;
         public bool jumpHeld;
         public bool jumpPressed; // went down since the last fixed step
-        public bool dashPressed, parryPressed; // U-088: Shift tapped in the air / C, for one fixed step
+        public bool dashPressed; // U-088: Shift tapped in the air, for one fixed step
     }
 
     /// <summary>
     /// Side-view player body (Bible §4.2): fixed jump impulse under the planet's real gravity,
-    /// walk/sprint, coyote time and jump buffer, terminal velocity, fall damage, Jetpack.
+    /// walk/sprint, coyote time and jump buffer, terminal velocity, hard landings (Suit power), Jetpack, the air dash.
+    /// D-087: no combat; a creature, Warden or hazard contact is a Bump (a knock with dizzy stars, never a meter).
     /// Gravity comes from Physics2D.gravity, which PlanetSideRoot sets per planet.
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D), typeof(CapsuleCollider2D))]
@@ -41,29 +42,32 @@ namespace Meridian.Player
         public event System.Action Jumped;
         /// <summary>Raised on touchdown with the impact speed (m/s).</summary>
         public event System.Action<float> Landed;
-        /// <summary>U-088 (Bible §4.2 Feel): the air dash and the parry, pure solvers stepped in FixedUpdate.</summary>
+        /// <summary>U-088 (Bible §4.2 Feel): the air dash, a pure solver stepped in FixedUpdate.</summary>
         public AirDash Dash { get; } = new AirDash();
-        public Parry Parry { get; } = new Parry();
-        /// <summary>Where the player aims (PlayerRigInput writes it); a parried projectile reflects along it.</summary>
-        public Vector2 Aim { get; set; }
-        public event System.Action ParryLanded;
-        /// <summary>U-089: hit by a creature or a bolt: knocked KnockDistance away from it over KnockTime (a velocity override).</summary>
-        public event System.Action Knocked;
+        /// <summary>
+        /// U-093 (D-087): bumped by a creature, a Warden or a hazard: knocked KnockDistance away from `from` over KnockTime
+        /// (a velocity override), the `bump` clip and dizzy stars (Bumped). No meter changes: there is no health.
+        /// </summary>
+        public event System.Action Bumped;
         public const float KnockDistance = 0.8f, KnockTime = 0.12f;
+        /// <summary>Bumps taken since load (tests, the dizzy-stars FX hook).</summary>
+        public int BumpCount { get; private set; }
         float knockFor, knockVx;
+        bool knockEnded;
 
-        public void Knock(Vector2 from)
+        public void Bump(Vector2 from)
         {
             float x = Body != null ? Body.position.x : transform.position.x;
             knockFor = KnockTime;
             knockVx = (x >= from.x ? 1f : -1f) * (KnockDistance / KnockTime);
-            Knocked?.Invoke();
+            BumpCount++;
+            Bumped?.Invoke();
         }
 
         readonly JumpTimer jumpTimer = new JumpTimer();
         readonly ContactPoint2D[] contacts = new ContactPoint2D[8];
-        InputAction moveAction, sprintAction, jumpAction, dashAction, parryAction;
-        bool jumpLatched, dashLatched, parryLatched, jumpHeldLast;
+        InputAction moveAction, sprintAction, jumpAction, dashAction;
+        bool jumpLatched, dashLatched, jumpHeldLast;
         float airTimeSinceJump;
         float fallSpeed;
 
@@ -88,7 +92,6 @@ namespace Meridian.Player
                 sprintAction = foot.FindAction("Sprint");
                 jumpAction = foot.FindAction("Jump");
                 dashAction = foot.FindAction("Dash", false);
-                parryAction = foot.FindAction("Parry", false);
                 foot.Enable();
             }
         }
@@ -101,23 +104,11 @@ namespace Meridian.Player
             intent.jumpHeld = jumpAction.IsPressed();
             if (jumpAction.WasPressedThisFrame()) jumpLatched = true;
             if (dashAction != null && dashAction.WasPressedThisFrame()) dashLatched = true;
-            if (parryAction != null && parryAction.WasPressedThisFrame()) parryLatched = true;
         }
 
         /// <summary>Tests: press jump for the next fixed step.</summary>
         public void PressJump() => jumpLatched = true;
         public void PressDash() => dashLatched = true;
-        public void PressParry() => parryLatched = true;
-
-        /// <summary>U-088: an attack reaching the player. True when the parry window caught it: no damage, the dash refreshed, ParryLanded raised.</summary>
-        public bool TryParryAttack(Vector2 from)
-        {
-            if (!Parry.Catch()) return false;
-            Dash.Refresh();
-            Meridian.Core.HitStop.Request(Meridian.Core.HitStopClock.ParryHit);
-            ParryLanded?.Invoke();
-            return true;
-        }
 
         void FixedUpdate()
         {
@@ -131,6 +122,8 @@ namespace Meridian.Player
             fallSpeed = v.y < 0f ? -v.y : 0f;
 
             // Horizontal: accelerate toward the target speed.
+            // U-093: the knock stops dead when it ends, so a bump moves the surveyor KnockDistance, not a braking slide more.
+            if (knockEnded) { v.x = 0f; knockEnded = false; }
             float target = Mathf.Clamp(intent.move, -1f, 1f) * (intent.sprint ? PlayerTuning.SprintSpeed : PlayerTuning.WalkSpeed);
             // U-050: moving air (Venus super-rotation) carries the surveyor; on the ground the feet resist two thirds of it.
             float goalX = target + windX * (Grounded ? WindGrip : 1f);
@@ -178,14 +171,13 @@ namespace Meridian.Player
                 v.y = g * dt * dashShare; // physics applies g·dt before moving: this leaves the step's vertical motion at 0
             }
 
-            // U-089: the hit reaction knock (0.8 m away over 0.12 s).
-            if (knockFor > 0f) { knockFor -= dt; v.x = knockVx; }
-
-            // U-088: parry window and recovery.
-            bool parryNow = parryLatched || intent.parryPressed;
-            parryLatched = false; intent.parryPressed = false;
-            if (parryNow) Parry.TryStart();
-            Parry.Step(dt);
+            // U-093: the bump knock (0.8 m away over 0.12 s).
+            if (knockFor > 0f)
+            {
+                knockFor -= dt;
+                v.x = knockVx;
+                if (knockFor <= dt * 0.5f) { knockFor = 0f; knockEnded = true; } // whole steps only: 0.12 s = 6 steps at 50 Hz
+            }
 
             if (v.y < -terminalVelocity) v.y = -terminalVelocity;
             Body.linearVelocity = v;

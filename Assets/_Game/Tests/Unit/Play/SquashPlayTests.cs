@@ -69,7 +69,7 @@ namespace Meridian.Tests
         }
 
         [UnityTest]
-        public IEnumerator AWolfHitShowsKnockFlashAndTheCreatureSquashInTheSameFrame()
+        public IEnumerator AWolfBumpShowsKnockFlashAndTheCreatureSquashInTheSameFrame()
         {
             yield return Boot();
             var creatures = side.creatures;
@@ -77,19 +77,16 @@ namespace Meridian.Tests
             var wolf = creatures.Spawn(Species.GreyWolf, feet + new Vector2(1.2f, 0.6f)); // to the right
             Assert.NotNull(wolf, "a wolf beside the surveyor");
             yield return new WaitForFixedUpdate();
-            creatures.Bite(wolf, Time.time); // unparried
+            creatures.Bump(wolf, Time.time); // U-093 (D-087): a bump; the surveyor and the wolf both react
             yield return null;
-            Debug.Log($"[MERIDIAN] bite: player vx {player.Body.linearVelocity.x:F2}, flashing {view.Flashing}, clip {view.Clip}");
+            Debug.Log($"[MERIDIAN] bump: player vx {player.Body.linearVelocity.x:F2}, flashing {view.Flashing}, clip {view.Clip}");
             Assert.Less(player.Body.linearVelocity.x, -3f, "knocked away from the wolf (left)");
             Assert.IsTrue(view.Flashing, "the 2-frame white flash");
-            Assert.IsTrue(view.Clip == SurveyorAnim.HitReact || view.Clip == SurveyorAnim.Hurt, "hit_react (or its hurt stand-in)");
-            // The Lance lands on the wolf: knock, flash and squash on its visual root.
-            wolf.Hurt(1f);
-            wolf.React(Vector2.right);
-            yield return null;
-            Debug.Log($"[MERIDIAN] creature hit: visual y {wolf.Visual.localScale.y:F2}, vx {wolf.Body.linearVelocity.x:F2}");
+            Assert.IsTrue(view.Clip == SurveyorAnim.Bump || view.Clip == SurveyorAnim.Hurt, "bump (or its hurt stand-in)");
+            // The wolf bounces back: knock and squash on its visual root, the same frame.
+            Debug.Log($"[MERIDIAN] creature bump: visual y {wolf.Visual.localScale.y:F2}, vx {wolf.Body.linearVelocity.x:F2}");
             Assert.AreEqual(SquashStretch.HitScale, wolf.Visual.localScale.y, 0.03f, "0.85 squash");
-            Assert.Greater(wolf.Body.linearVelocity.x, 2f, "knocked along the hit");
+            Assert.Greater(wolf.Body.linearVelocity.x, 2f, "bounced away from the surveyor (right)");
             Assert.AreEqual(wolf.Spec.size, wolf.Box.size, "the creature's collider never scales");
             creatures.Despawn(wolf);
             LogAssert.NoUnexpectedReceived();

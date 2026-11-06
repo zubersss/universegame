@@ -36,7 +36,7 @@ namespace Meridian.Player
         public bool Flashing => Time.time < flashUntil;
         public const float FlashSeconds = 2f / 60f;
         static readonly Color FlashTint = new Color(1.6f, 1.6f, 1.6f, 1f);
-        float flashUntil = -1f, sinceHitReact = 99f, sinceJump = 99f, sinceParryHit = 99f, landSpeed;
+        float flashUntil = -1f, sinceBump = 99f, sinceJump = 99f, landSpeed;
         bool flashShown;
 
         AsyncOperationHandle<IList<Sprite>> handle;
@@ -112,16 +112,14 @@ namespace Meridian.Player
             hooked = true;
             controller.Landed += OnLanded;
             controller.Jumped += OnJumped;
-            controller.Knocked += OnKnocked;
-            controller.ParryLanded += OnParryLanded;
+            controller.Bumped += OnBumped;
             if (controller.Vitals != null) controller.Vitals.Damaged += OnDamaged;
             if (rig != null) rig.Dug += OnDug;
         }
 
         void OnLanded(float speed) { sinceLand = 0f; landSpeed = speed; Squash.Land(speed); }
         void OnJumped() { sinceJump = 0f; Squash.TakeOff(); }
-        void OnKnocked() { sinceHitReact = 0f; flashUntil = Time.time + FlashSeconds; }
-        void OnParryLanded() => sinceParryHit = 0f;
+        void OnBumped() { sinceBump = 0f; flashUntil = Time.time + FlashSeconds; }
         void OnDamaged(float amount) => sinceHurt = 0f;
         void OnDug(Vector2 at) => sinceDig = 0f;
 
@@ -139,7 +137,7 @@ namespace Meridian.Player
             if (!hooked) Hook();
             float dt = Time.deltaTime;
             sinceHurt += dt; sinceLand += dt; sinceDig += dt;
-            sinceHitReact += dt; sinceJump += dt; sinceParryHit += dt;
+            sinceBump += dt; sinceJump += dt;
             // U-089: squash and stretch on the visual root only; the dash stretches along x while it runs.
             if (controller.Dash.Active && !Squash.Dashing) Squash.Dash(AirDash.Duration);
             if (VisualRoot != null) VisualRoot.localScale = Squash.Step(dt);
@@ -154,8 +152,8 @@ namespace Meridian.Player
                 usingRig = usingRig,
                 vx = v.x, vy = v.y,
                 sinceHurt = sinceHurt, sinceLand = sinceLand, sinceDig = sinceDig,
-                sinceHitReact = sinceHitReact, sinceJump = sinceJump, sinceParryHit = sinceParryHit, landSpeed = landSpeed,
-                dashing = controller.Dash.Active, parrying = controller.Parry.Active || controller.Parry.Recovering,
+                sinceBump = sinceBump, sinceJump = sinceJump, landSpeed = landSpeed,
+                dashing = controller.Dash.Active,
             };
             string clip = Resolve(SurveyorAnim.Pick(input));
             bool changed = !ReferenceEquals(clip, Clip);
@@ -209,8 +207,7 @@ namespace Meridian.Player
             {
                 controller.Landed -= OnLanded;
                 controller.Jumped -= OnJumped;
-                controller.Knocked -= OnKnocked;
-                controller.ParryLanded -= OnParryLanded;
+                controller.Bumped -= OnBumped;
                 if (controller.Vitals != null) controller.Vitals.Damaged -= OnDamaged;
                 if (rig != null) rig.Dug -= OnDug;
             }

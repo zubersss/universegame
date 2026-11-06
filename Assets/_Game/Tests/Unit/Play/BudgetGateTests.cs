@@ -249,7 +249,6 @@ namespace Meridian.Tests
             Judge("Mars FX peak", gc, r, BudgetMonitor.DrawCallsSide);
             UnityEngine.Object.Destroy(stress.gameObject);
 
-            Info("Hit stop", "≤ 90 ms (v3)", "n/a until U-089 (HitStop lands with the feel pass)", "pending");
             StaticRows();
             WriteReport();
             Assert.IsEmpty(failures, "budgets over: " + string.Join("; ", failures));

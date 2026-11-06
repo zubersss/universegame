@@ -7,13 +7,13 @@ using UnityEngine.InputSystem;
 namespace Meridian.Player
 {
     /// <summary>
-    /// Mouse aim + Rig buttons (Bible §6/§8; U-046): 1 Beam, 2 Lance, 3 Survey, 4 Builder, Q/E cycle.
-    /// Left click uses the module: the Beam digs and the Builder places while held; the Lance fires and
-    /// the Survey pulses once per press (with a cooldown).
+    /// Mouse aim + Rig buttons (Bible §6/§8 v4; U-046): 1 Beam, 2 Grapple, 3 Survey, 4 Builder, Q/E cycle.
+    /// Left click uses the module: the Beam digs and the Builder places while held; the Survey pulses once per
+    /// press (with a cooldown); the Grapple does nothing until its task (D-087 retired the Lance from slot 2).
     /// </summary>
     public sealed class PlayerRigInput : MonoBehaviour
     {
-        public const float LanceCooldown = 0.3f, SurveyCooldown = 1.2f;
+        public const float SurveyCooldown = 1.2f;
 
         public RigTools rig;
         public Camera view;
@@ -22,13 +22,12 @@ namespace Meridian.Player
 
         InputAction aim, primary, prev, next;
         readonly InputAction[] slots = new InputAction[RigModules.Count + 1];
-        float nextLance, nextSurvey;
+        float nextSurvey;
 
         /// <summary>The rig is in use (primary held) this frame, and where it points (U-032: aim pose, facing).</summary>
         public bool Using { get; private set; }
         public Vector2 AimWorld { get; private set; }
         public RigToolView ToolView { get; private set; }
-        public LanceBolts Bolts { get; private set; }
         public FxPool Fx { get; private set; }
 
         /// <summary>Raised when the Survey pulses (U-054 scans what the ring covers), with the pulse centre.</summary>
@@ -50,11 +49,9 @@ namespace Meridian.Player
             ToolView = GetComponent<RigToolView>() ?? gameObject.AddComponent<RigToolView>();
             ToolView.input = this;
             ToolView.rig = rig;
-            Bolts = new GameObject("LanceBolts").AddComponent<LanceBolts>();
             Fx = FindAnyObjectByType<FxPool>();
-            // Load now: a first pulse or shot would otherwise find its sheet not ready (as SideFx does).
+            // Load now: a first pulse would otherwise find its sheet not ready (as SideFx does).
             FxSheet.Get(ArtKeys.Fx.SurveyScan);
-            FxSheet.Get(ArtKeys.Fx.LanceBolt);
         }
 
         void Update()
@@ -66,7 +63,6 @@ namespace Meridian.Player
 
             var screen = aim.ReadValue<Vector2>();
             if (view != null && !externalAim) AimWorld = (Vector2)view.ScreenToWorldPoint(new Vector3(screen.x, screen.y, -view.transform.position.z));
-            if (controller != null && controller.Body != null) controller.Aim = AimWorld - controller.Body.position; // U-088: a parried projectile reflects along the aim
             // While the inventory panel is open, clicks select slots, not tiles (U-045).
             bool pressed = (primary.IsPressed() || holdUse) && !Meridian.UI.InventoryPanel.AnyOpen && !Meridian.UI.CraftingPanel.AnyOpen && !Meridian.UI.CataloguePanel.AnyOpen;
             bool edge = primary.WasPressedThisFrame() || (holdUse && !heldLast);
@@ -83,18 +79,7 @@ namespace Meridian.Player
             {
                 case RigModule.Beam: rig.Dig(AimWorld); break;
                 case RigModule.Builder: rig.Place(AimWorld); break;
-                case RigModule.Lance:
-                    if (Time.time < nextLance || Bolts == null || ToolView == null) break;
-                    // U-055: Cryo rounds in the pack load first (one per shot).
-                    var inv = Meridian.Core.GameState.Instance != null ? Meridian.Core.GameState.Instance.inventory : null;
-                    var cryoDef = Meridian.Items.ItemRegistry.Get("cryo_round");
-                    bool cryo = inv != null && cryoDef != null && inv.Count(cryoDef.id) > 0;
-                    if (Bolts.Fire(ToolView.MuzzleWorld, AimWorld - ToolView.MuzzleWorld, cryo))
-                    {
-                        nextLance = Time.time + LanceCooldown;
-                        if (cryo) inv.Remove(cryoDef.id, 1);
-                    }
-                    break;
+                case RigModule.Grapple: break; // its own task (Bible: M4)
                 case RigModule.Survey:
                     if (!pressedNow || Time.time < nextSurvey) break;
                     nextSurvey = Time.time + SurveyCooldown;

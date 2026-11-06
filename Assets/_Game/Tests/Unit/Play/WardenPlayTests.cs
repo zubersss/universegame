@@ -15,7 +15,7 @@ namespace Meridian.Tests
 {
     /// <summary>
     /// U-053 (PlayMode): digging past the threshold near the Mercury Warden vault calls a sentinel within 10 s;
-    /// its bolts come off the suit; the Lance destroys it; six hunting sentinels cost ≤ 0.3 ms of AI (D-047: median and p99).
+    /// D-087 (U-093): it closes in and rings but never shoots, and no meter moves; six hunting sentinels cost ≤ 0.3 ms of AI (D-047: median and p99).
     /// </summary>
     public class WardenPlayTests
     {
@@ -36,7 +36,7 @@ namespace Meridian.Tests
             var side = director.PlanetSide;
             var wardens = side.wardens;
             Assert.NotNull(wardens, "WardenDirector on PlanetSide");
-            side.hazards.enabled = false; // only the bolts touch the suit here
+            side.hazards.enabled = false; // nothing else touches the suit here
             side.hazards.RestoreSuit();
 
             // The vault's patrol.
@@ -78,31 +78,15 @@ namespace Meridian.Tests
             TestContext.Out.WriteLine($"[MERIDIAN] sentinel after {Time.time - tripped:F1} s");
             Assert.AreEqual(SentinelState.Hunt, patrol.State, "the vault patrol joins the hunt");
 
-            // Its bolts come off the suit.
-            float suit0 = side.hazards.SuitIntegrity, health0 = player.GetComponent<Meridian.Player.PlayerVitals>().health;
-            float until = Time.time + 12f;
-            while (side.hazards.SuitIntegrity >= suit0 && Time.time < until) yield return null;
-            Assert.Less(side.hazards.SuitIntegrity, suit0, "a bolt hit the suit");
-            Assert.AreEqual(health0, player.GetComponent<Meridian.Player.PlayerVitals>().health, "the suit takes it first");
-
-            // The Lance brings it down: three bolts of 25.
-            var lance = Object.FindAnyObjectByType<LanceBolts>();
-            Assert.NotNull(lance);
-            int destroyed = 0;
-            System.Action<Sentinel> count = s => { if (s == hunter) destroyed++; };
-            Sentinel.Destroyed += count;
-            until = Time.time + 10f;
-            while (hunter.Alive && Time.time < until)
-            {
-                var at = hunter.Body.position;
-                lance.Fire(at + new Vector2(-1.5f, 0f), Vector2.right);
-                for (int i = 0; i < 4; i++) yield return new WaitForFixedUpdate();
-            }
-            Sentinel.Destroyed -= count;
-            Assert.IsFalse(hunter.Alive, "the Lance destroyed it");
-            Assert.AreEqual(1, destroyed);
-            yield return new WaitForSeconds(Sentinel.DeathSeconds + 0.1f);
-            Assert.IsFalse(hunter.gameObject.activeSelf, "gone after its death animation");
+            // D-087: it hunts beside the surveyor and rings its bell, but never shoots: Suit power stays where it was.
+            var vitals = player.GetComponent<Meridian.Player.PlayerVitals>();
+            float suit0 = side.hazards.SuitIntegrity, reserve0 = vitals.health;
+            float until = Time.time + 6f;
+            while (Time.time < until) yield return null;
+            Assert.AreEqual(suit0, side.hazards.SuitIntegrity, 1e-4f, "no shot ever drains the suit");
+            Assert.AreEqual(reserve0, vitals.health, 1e-4f, "nor the reserve");
+            Assert.IsTrue(hunter.Alive, "a sentinel can't be destroyed (no Lance)");
+            Assert.LessOrEqual((hunter.Body.position - (player.Body.position + new Vector2(0f, 0.9f))).magnitude, WardenDirector.RingRange, "it stays close, ringing");
 
             // Budget: six hunting sentinels.
             while (wardens.Active < WardenDirector.MaxSentinels)

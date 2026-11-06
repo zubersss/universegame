@@ -124,55 +124,29 @@ namespace Meridian.Tests
         }
 
         [Test]
-        public void E_FightZoomGrowsInOneSecondAndReturnsFiveSecondsAfterCalm()
+        public void E_TheFrameIsThePlayersZoomWithNoFightZoom()
         {
+            // D-087 (U-093): no fight zoom; the frame is always the player's own zoom (the default 18 m here).
             var cam = Settled(100f, 320f);
-            float t = 0f;
-            float frameAtOne = 0f;
-            while (t < 1.0f + 1e-4f)
-            {
-                var i = Standing(100f, 320f);
-                i.hostilesNear = 2;
-                cam.Step(i);
-                t += Dt;
-                if (Mathf.Abs(t - 1.0f) < Dt * 0.5f) frameAtOne = cam.Frame;
-            }
-            TestContext.Out.WriteLine($"[MERIDIAN] fight zoom: frame {frameAtOne:F2} m at 1.0 s");
-            Assert.AreEqual(StageCamera.FightFrame, frameAtOne, 0.05f, "22 m at 1.0 s ± 0.05");
-            // Calm: the fight frame holds 3 s, then returns over 2 s.
-            float calm = 0f;
-            float frameAtTwo = 0f;
-            while (calm < 5.0f + 1e-4f)
-            {
-                cam.Step(Standing(100f, 320f));
-                calm += Dt;
-                if (Mathf.Abs(calm - 2.0f) < Dt * 0.5f) frameAtTwo = cam.Frame;
-            }
-            Assert.AreEqual(StageCamera.FightFrame, frameAtTwo, 0.05f, "still 22 m after 2 s of calm");
-            Assert.AreEqual(StageCamera.DefaultFrame, cam.Frame, 0.05f, "back at 18 m by 5.0 s after calm");
-            // The stage-floor rule holds throughout: the frame bottom never rose above floor − 3.
-            Assert.LessOrEqual(cam.Y - cam.Frame * 0.5f, 320f - StageCamera.FloorBelow + 0.01f, "frame bottom ≤ floor − 3 m");
+            for (int n = 0; n < 300; n++) cam.Step(Standing(100f, 320f));
+            Assert.AreEqual(StageCamera.DefaultFrame, cam.Frame, 1e-4f, "18 m");
+            var i = Standing(100f, 320f);
+            i.baseFrame = 24f;
+            cam.Step(i);
+            Assert.AreEqual(24f, cam.Frame, 1e-4f, "the wheel zoom applies at once");
         }
 
         [Test]
-        public void E2_AnApexNearbyOpensTheFrameTo26()
+        public void F_BumpShakeIsPositionOnlyAndFadesInOneTenthOfASecond()
         {
             var cam = Settled(100f, 320f);
-            for (int n = 0; n < 130; n++) { var i = Standing(100f, 320f); i.apexNear = true; cam.Step(i); }
-            Assert.AreEqual(StageCamera.ApexFrame, cam.Frame, 0.05f);
-        }
-
-        [Test]
-        public void F_ImpactShakeIsPositionOnlyAndFadesInOneTenthOfASecond()
-        {
-            var cam = Settled(100f, 320f);
-            cam.Impact(StageCamera.HitShake);
+            cam.Impact(StageCamera.BumpShake);
             float peak = 0f;
             int n = 0;
             for (; n < 12; n++) { cam.Step(Standing(100f, 320f)); peak = Mathf.Max(peak, cam.Shake.magnitude); }
-            TestContext.Out.WriteLine($"[MERIDIAN] hit shake peak {peak:F3} m");
+            TestContext.Out.WriteLine($"[MERIDIAN] bump shake peak {peak:F3} m");
             Assert.Greater(peak, 0.02f, "the shake is visible");
-            Assert.LessOrEqual(peak, StageCamera.HitShake + 1e-4f, "never more than 0.15 m");
+            Assert.LessOrEqual(peak, StageCamera.BumpShake + 1e-4f, "never more than 0.15 m");
             for (; n < 14; n++) cam.Step(Standing(100f, 320f));
             Assert.AreEqual(0f, cam.Shake.magnitude, 1e-5f, "gone after 0.10 s");
             // The solver has no rotation output at all: Shake is an offset, X/Y/Frame are positions and a size.

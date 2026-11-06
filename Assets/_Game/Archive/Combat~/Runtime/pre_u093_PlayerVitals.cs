@@ -1,0 +1,33 @@
+using System;
+using UnityEngine;
+
+namespace Meridian.Player
+{
+    /// <summary>Player health (oxygen and Cryo arrive with their systems).</summary>
+    public sealed class PlayerVitals : MonoBehaviour
+    {
+        public float maxHealth = 100f;
+        public float health = 100f;
+
+        public bool Dead => health <= 0f;
+        public event Action Died;
+        /// <summary>Raised with the amount whenever health drops (U-032 hurt animation).</summary>
+        public event Action<float> Damaged;
+
+        public void TakeFallImpact(float impactSpeed)
+        {
+            float f = FallDamage.Fraction(impactSpeed);
+            if (f > 0f) Damage(f * maxHealth);
+        }
+
+        public void Damage(float amount)
+        {
+            if (Dead) return;
+            health = Mathf.Max(0f, health - amount);
+            if (amount > 0f) { Meridian.Core.HitStop.Request(Meridian.Core.HitStopClock.PlayerHit); Damaged?.Invoke(amount); } // U-088: 50 ms hit stop
+            if (Dead) Died?.Invoke();
+        }
+
+        public void Restore() => health = maxHealth;
+    }
+}
