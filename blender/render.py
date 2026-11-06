@@ -707,6 +707,8 @@ def do_v3_sheet(entry, preview):
     t0 = time.time()
     key = entry["key"]
     variant = key.split("/")[2]
+    if entry.get("preview_only") and not preview:
+        raise AssetError(f"{key}: preview-only entry (run with -Preview)")
     scene, objs = open_source(entry, preview)
     fw, fh = entry["frame"]
     pivot = tuple(entry.get("pivot", [0.5, 0.0]))
@@ -752,6 +754,11 @@ def do_v3_sheet(entry, preview):
              "problems": problems, "sheet_wh": (sheet.shape[1], sheet.shape[0]), "png_kb": n // 1024}
     task = entry.get("review_name", key.replace("/", "_"))
     out = os.path.join(PREVIEW, f"review_{task}{'_preview' if preview else ''}.png")
+    z = int(entry.get("design_zoom", 0))
+    if z:                               # design sheets: every drawing again at z x (same strokes, PPU x z)
+        stats["zoom_frames"] = [GR.render_frame(GR.collect(scene, objs, markers[c["name"]] + k), fw * z, fh * z,
+                                                v3.PPU * z, pivot, ss=2, seed=int(entry.get("seed", 1)) * 1000 + markers[c["name"]] + k)[0]
+                                for c in entry["clips"] for k in range(int(c["frames"]))]
     boxes = review.v3_sheet_review(entry, meta, frames, png, out, stats)
     if not preview:
         mark_stale(key, False)

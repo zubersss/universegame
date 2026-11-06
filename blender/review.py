@@ -347,6 +347,19 @@ def v3_sheet_review(entry, meta, frames, sheet_path, out, stats, stale=None):
     ours = entry.get("ours")
     if ours:
         _label(bot, f"what makes it ours: {ours}"[:160], 8, bot_h - 40)
+    zf = stats.get("zoom_frames")
+    if zf:
+        zh, zw = zf[0].shape[:2]
+        per = max(1, (W - 16) // (zw + 8))
+        labels = entry.get("labels", [])
+        for r0 in range(0, len(zf), per):
+            zrow = np.tile(PAPER, (zh + 30, W, 1))
+            for j, im in enumerate(zf[r0:r0 + per]):
+                xx = 8 + j * (zw + 8)
+                _over(zrow, im, xx, 24)
+                _label(zrow, labels[r0 + j] if r0 + j < len(labels) else str(r0 + j), xx + 2, 4)
+            rows.insert(2 + r0 // per, zrow)
+
     rows.append(bot)
 
     img = np.vstack(rows)
