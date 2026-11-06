@@ -73,6 +73,22 @@ namespace Meridian.Core
                     Debug.Log($"[MERIDIAN] smoke dig: {dug}");
                     yield return Shot(folder, "smoke_3b_earth_dig.png");
                 }
+                // U-089 smoke: a hard landing (the squash, one frame after touchdown) and the parry stance.
+                if (side.player != null && side.player.Body != null)
+                {
+                    var pv = side.player.GetComponentInChildren<Meridian.Player.PlayerView>();
+                    var feet = side.player.Body.position;
+                    var up = feet + new Vector2(0f, 3.5f);
+                    side.player.Body.position = up; side.player.transform.position = up; side.player.Body.linearVelocity = Vector2.zero;
+                    float until = Time.realtimeSinceStartup + 4f;
+                    while (side.player.Grounded && Time.realtimeSinceStartup < until) yield return new WaitForFixedUpdate(); // the drop begins
+                    while (!side.player.Grounded && Time.realtimeSinceStartup < until) yield return new WaitForFixedUpdate();
+                    Debug.Log($"[MERIDIAN] smoke landing: {side.player.LastImpactSpeed:F1} m/s, visual y {(pv != null && pv.VisualRoot != null ? pv.VisualRoot.localScale.y : 1f):F2}");
+                    yield return Shot(folder, "smoke_3d_landing_squash.png");
+                    side.player.PressParry();
+                    yield return new WaitForFixedUpdate();
+                    yield return Shot(folder, "smoke_3e_parry.png");
+                }
                 if (side.ship != null && side.ship.Body != null)
                 {
                     var rest = side.ship.Body.position;

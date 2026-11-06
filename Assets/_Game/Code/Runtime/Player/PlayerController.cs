@@ -47,6 +47,18 @@ namespace Meridian.Player
         /// <summary>Where the player aims (PlayerRigInput writes it); a parried projectile reflects along it.</summary>
         public Vector2 Aim { get; set; }
         public event System.Action ParryLanded;
+        /// <summary>U-089: hit by a creature or a bolt: knocked KnockDistance away from it over KnockTime (a velocity override).</summary>
+        public event System.Action Knocked;
+        public const float KnockDistance = 0.8f, KnockTime = 0.12f;
+        float knockFor, knockVx;
+
+        public void Knock(Vector2 from)
+        {
+            float x = Body != null ? Body.position.x : transform.position.x;
+            knockFor = KnockTime;
+            knockVx = (x >= from.x ? 1f : -1f) * (KnockDistance / KnockTime);
+            Knocked?.Invoke();
+        }
 
         readonly JumpTimer jumpTimer = new JumpTimer();
         readonly ContactPoint2D[] contacts = new ContactPoint2D[8];
@@ -165,6 +177,9 @@ namespace Meridian.Player
                 v.x = Dash.Direction * AirDash.Speed * dashShare;
                 v.y = g * dt * dashShare; // physics applies g·dt before moving: this leaves the step's vertical motion at 0
             }
+
+            // U-089: the hit reaction knock (0.8 m away over 0.12 s).
+            if (knockFor > 0f) { knockFor -= dt; v.x = knockVx; }
 
             // U-088: parry window and recovery.
             bool parryNow = parryLatched || intent.parryPressed;

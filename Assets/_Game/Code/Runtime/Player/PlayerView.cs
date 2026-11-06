@@ -29,6 +29,15 @@ namespace Meridian.Player
         public double LastUpdateMs { get; private set; }
         /// <summary>Part of LastUpdateMs spent inside SpriteRenderer setters (Unity work, not ours).</summary>
         public double LastRendererMs { get; private set; }
+        /// <summary>U-089: the scaled visual root (sheet + model); the collider and body never scale.</summary>
+        public Transform VisualRoot { get; private set; }
+        public SquashStretch Squash { get; } = new SquashStretch();
+        /// <summary>U-089: the 2-frame white flash of a hit reaction is showing.</summary>
+        public bool Flashing => Time.time < flashUntil;
+        public const float FlashSeconds = 2f / 60f;
+        static readonly Color FlashTint = new Color(1.6f, 1.6f, 1.6f, 1f);
+        float flashUntil = -1f, sinceHitReact = 99f, sinceJump = 99f, sinceParryHit = 99f, landSpeed;
+        bool flashShown;
 
         AsyncOperationHandle<IList<Sprite>> handle;
         Sprite[] frames;
@@ -45,9 +54,15 @@ namespace Meridian.Player
             var tier = Meridian.Core.GameState.Instance != null ? Meridian.Core.GameState.Instance.suitTier : 0;
             LoadSheet(ArtKeys.Characters.SurveyorSheet(tier));
             // U-075: the surveyor's 3D model (B-078) replaces the sheet once it has loaded.
+            // U-089: a visual root (scaled by SquashStretch about the feet) holds the sheet and the model; the collider and body never scale.
+            VisualRoot = new GameObject("Visual").transform;
+            VisualRoot.SetParent(view.transform.parent, false);
+            VisualRoot.localPosition = Vector3.zero;
+            var viewLocal = view.transform.localPosition;
+            if (view.transform != VisualRoot.parent) { view.transform.SetParent(VisualRoot, false); view.transform.localPosition = viewLocal; }
             var modelGo = new GameObject("Model");
-            modelGo.transform.SetParent(view.transform.parent, false);
-            modelGo.transform.localPosition = view.transform.localPosition;
+            modelGo.transform.SetParent(VisualRoot, false);
+            modelGo.transform.localPosition = viewLocal;
             Model = modelGo.AddComponent<Meridian.Art.ModelView>();
             Model.Load(ArtKeys.Characters.Surveyor);
             Meridian.Hazards.HazardSystem.SuitEquipped += OnSuitEquipped;
@@ -96,13 +111,26 @@ namespace Meridian.Player
             if (hooked || controller == null) return;
             hooked = true;
             controller.Landed += OnLanded;
+            controller.Jumped += OnJumped;
+            controller.Knocked += OnKnocked;
+            controller.ParryLanded += OnParryLanded;
             if (controller.Vitals != null) controller.Vitals.Damaged += OnDamaged;
             if (rig != null) rig.Dug += OnDug;
         }
 
-        void OnLanded(float speed) => sinceLand = 0f;
+        void OnLanded(float speed) { sinceLand = 0f; landSpeed = speed; Squash.Land(speed); }
+        void OnJumped() { sinceJump = 0f; Squash.TakeOff(); }
+        void OnKnocked() { sinceHitReact = 0f; flashUntil = Time.time + FlashSeconds; }
+        void OnParryLanded() => sinceParryHit = 0f;
         void OnDamaged(float amount) => sinceHurt = 0f;
         void OnDug(Vector2 at) => sinceDig = 0f;
+
+        /// <summary>U-089: a feel clip the sheet lacks falls back to its stand-in (the model shares the sheet's names, B-103 fills both).</summary>
+        string Resolve(string clip)
+        {
+            if (clips == null || clips.TryGet(clip, out _)) return clip;
+            return SurveyorAnim.StandIn(clip);
+        }
 
         void LateUpdate()
         {
@@ -111,6 +139,10 @@ namespace Meridian.Player
             if (!hooked) Hook();
             float dt = Time.deltaTime;
             sinceHurt += dt; sinceLand += dt; sinceDig += dt;
+            sinceHitReact += dt; sinceJump += dt; sinceParryHit += dt;
+            // U-089: squash and stretch on the visual root only; the dash stretches along x while it runs.
+            if (controller.Dash.Active && !Squash.Dashing) Squash.Dash(AirDash.Duration);
+            if (VisualRoot != null) VisualRoot.localScale = Squash.Step(dt);
 
             var body = controller.Body;
             var v = body != null ? body.linearVelocity : Vector2.zero;
@@ -122,8 +154,10 @@ namespace Meridian.Player
                 usingRig = usingRig,
                 vx = v.x, vy = v.y,
                 sinceHurt = sinceHurt, sinceLand = sinceLand, sinceDig = sinceDig,
+                sinceHitReact = sinceHitReact, sinceJump = sinceJump, sinceParryHit = sinceParryHit, landSpeed = landSpeed,
+                dashing = controller.Dash.Active, parrying = controller.Parry.Active || controller.Parry.Recovering,
             };
-            string clip = SurveyorAnim.Pick(input);
+            string clip = Resolve(SurveyorAnim.Pick(input));
             bool changed = !ReferenceEquals(clip, Clip);
             if (changed) { Clip = clip; clipTime = 0f; }
             else clipTime += dt;
@@ -137,6 +171,9 @@ namespace Meridian.Player
             {
                 // U-075: the model plays the same clip names; the sheet is hidden.
                 if (view.enabled) view.enabled = false;
+                bool flashing = Flashing;
+                if (flashing && !flashShown) Model.Flash(FlashSeconds);
+                flashShown = flashing;
                 Model.Play(Clip);
                 Model.SetFacing(!flip);
                 LastRendererMs = 0;
@@ -145,6 +182,8 @@ namespace Meridian.Player
             }
             double before = watch.Elapsed.TotalMilliseconds;
             if (flip != view.flipX) view.flipX = flip;
+            bool fl = Flashing;
+            if (fl != flashShown) { flashShown = fl; view.color = fl ? FlashTint : Color.white; }
             double renderer = watch.Elapsed.TotalMilliseconds - before;
 
             if (frames != null && hasCurrent)
@@ -169,6 +208,9 @@ namespace Meridian.Player
             if (hooked && controller != null)
             {
                 controller.Landed -= OnLanded;
+                controller.Jumped -= OnJumped;
+                controller.Knocked -= OnKnocked;
+                controller.ParryLanded -= OnParryLanded;
                 if (controller.Vitals != null) controller.Vitals.Damaged -= OnDamaged;
                 if (rig != null) rig.Dug -= OnDug;
             }

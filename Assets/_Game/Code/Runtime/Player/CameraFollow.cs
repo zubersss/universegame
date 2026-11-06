@@ -44,10 +44,15 @@ namespace Meridian.Player
             if (cam != null && perspectiveRail) SideView.Configure(cam);
         }
 
-        void OnEnable() => Hook();
+        void OnEnable()
+        {
+            Hook();
+            Meridian.Creatures.Creature.Killed += OnKilled;
+        }
 
         void OnDisable()
         {
+            Meridian.Creatures.Creature.Killed -= OnKilled;
             if (vitals != null) vitals.Damaged -= OnDamaged;
             vitals = null;
         }
@@ -60,6 +65,7 @@ namespace Meridian.Player
         }
 
         void OnDamaged(float _) => Stage.Impact(StageCamera.HitShake);
+        void OnKilled(Meridian.Creatures.Creature _) => Stage.Impact(StageCamera.KillShake);
 
         bool StageActive => stage && player != null && cam != null && !cam.orthographic;
 

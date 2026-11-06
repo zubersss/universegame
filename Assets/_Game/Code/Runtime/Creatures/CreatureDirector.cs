@@ -303,7 +303,7 @@ namespace Meridian.Creatures
             {
                 c.staggerFor -= dt;
                 var sv = c.Body.linearVelocity;
-                sv.x = Mathf.MoveTowards(sv.x, 0f, Creature.StaggerBrake * dt);
+                if (c.knockFor > 0f) { c.knockFor -= dt; sv.x = c.knockVx; } else sv.x = Mathf.MoveTowards(sv.x, 0f, Creature.StaggerBrake * dt);
                 c.Body.linearVelocity = sv;
                 c.Animate(dt, 0f);
                 return;
@@ -371,6 +371,7 @@ namespace Meridian.Creatures
                 }
                 v.x = Mathf.MoveTowards(v.x, c.dir * speed, Accel * dt);
             }
+            if (c.knockFor > 0f) { c.knockFor -= dt; v.x = c.knockVx; } // U-089: the hit knock overrides the steering
             c.Body.linearVelocity = v;
             if (c.View != null) c.View.flipX = (spec.Flies ? (v.x != 0f ? Mathf.Sign(v.x) : c.dir) : c.dir) < 0;
             if (c.Model != null && c.Model.Ready && c.View != null) c.Model.SetFacing(!c.View.flipX); // U-075: the model faces like the sprite
@@ -389,6 +390,7 @@ namespace Meridian.Creatures
             c.attackFor = 0.4f;
             if (player != null && player.TryParryAttack(c.Body.position)) { c.staggerFor = Creature.StaggerSeconds; c.attackFor = 0f; return; }
             if (vitals == null && player != null) vitals = player.GetComponent<PlayerVitals>();
+            player?.Knock(c.Body.position); // U-089: knocked away from the biter, flash, hit_react
             if (vitals != null) vitals.Damage(c.Spec.biteDamage);
         }
 

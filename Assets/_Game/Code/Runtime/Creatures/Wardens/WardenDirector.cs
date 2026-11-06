@@ -250,6 +250,7 @@ namespace Meridian.Creatures.Wardens
                     }
                     else
                     {
+                        player.Knock(b.pos); // U-089
                         if (hazards != null) hazards.DamageSuit(BoltDamage);
                         stop = true;
                     }
