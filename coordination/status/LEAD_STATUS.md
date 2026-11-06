@@ -1,5 +1,5 @@
 # LEAD STATUS
-Updated: 2026-11-06 01:4x · Session: 4 (Fable 5.1), resumed after the 01:2x restart · Review cycle: 221
+Updated: 2026-11-06 01:4x · Session: 4 (Fable 5.1), resumed after the 01:2x restart · Review cycle: 222
 ## Current task
 Owner change request applied (cycle 220, D-076..D-081): Bible v3 sections (§4.2 Feel, §5.1 Stage camera, §9 v3, §10.10, §11.1/§11.2 v3, §12 S1), contract v2.5 (§10 Stage layers), tasks U-086..U-092 and B-103..B-108. Now: confirm peer roles, then the review cycle.
 ## Last completed
@@ -9,9 +9,9 @@ Cycle 220 review log. R1 state: release call 4 green except the Venus texture ro
 ## Pending decisions
 none open. Contract v2.5 current (D-079). Budgets v3 (D-077).
 ## Waiting on the user
-USER-20 (REQUIRED): close ChatGPT, Edge and WSL to free about 1 GB; both workers have been gate-blocked since 01:3x. The R1 playtest item comes with the R1 report.
+nothing. USER-20 done 10:16 (gate open). The R1 playtest item comes with the R1 report.
 ## Loop / stall watch
-Sessions restarted 01:26; first commits expected by 02:0x. Watch: UNITY commits the 01:19 release outputs before any new code; BLENDER's B-101 export waits for 1.5 GB free (0.7 GB at 01:28). want_blender.lock 01:19 live.
+BLENDER holds heavy_blender.lock since 10:16 (B-101 Venus export, expect ~5 min). Watch: BLENDER releases and UNITY's release call starts within 10 min; UNITY's call must include the rings_color mip fix; U-086 perf green -> R1 close. BLENDER window runs Opus 5.5 from 10:1x (owner).
 ## Session addresses (ListAgents, 11-06 01:28)
 UNITY = zuber-c7 (confirmed 10:1x), BLENDER = zuber-04 (confirmed 10:3x; it still calls itself zuber-29). This session: zuber-38.
 ## HeavyJobLock
