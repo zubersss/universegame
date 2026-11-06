@@ -82,11 +82,17 @@ namespace Meridian.Tests
             var vitals = player.GetComponent<Meridian.Player.PlayerVitals>();
             float suit0 = side.hazards.SuitIntegrity, reserve0 = vitals.health;
             float until = Time.time + 6f;
-            while (Time.time < until) yield return null;
+            var trace = new System.Text.StringBuilder();
+            float nextSample = Time.time;
+            while (Time.time < until)
+            {
+                if (Time.time >= nextSample) { trace.Append($" {Time.time - until + 6f:F1}s:{hunter.Body.position.x:F1},{hunter.Body.position.y:F1}/{hunter.State}"); nextSample += 0.5f; }
+                yield return null;
+            }
             Assert.AreEqual(suit0, side.hazards.SuitIntegrity, 1e-4f, "no shot ever drains the suit");
             Assert.AreEqual(reserve0, vitals.health, 1e-4f, "nor the reserve");
             Assert.IsTrue(hunter.Alive, "a sentinel can't be destroyed (no Lance)");
-            Assert.LessOrEqual((hunter.Body.position - (player.Body.position + new Vector2(0f, 0.9f))).magnitude, WardenDirector.RingRange, $"it stays close, ringing (hunter {hunter.Body.position} {hunter.State} active {hunter.gameObject.activeSelf}, player {player.Body.position} simulated {player.Body.simulated} grounded {player.Grounded}, bumps {wardens.Bumps}, feet were {feet})");
+            Assert.LessOrEqual((hunter.Body.position - (player.Body.position + new Vector2(0f, 0.9f))).magnitude, WardenDirector.RingRange, $"it stays close, ringing (hunter {hunter.Body.position} {hunter.State} active {hunter.gameObject.activeSelf}, player {player.Body.position} simulated {player.Body.simulated} grounded {player.Grounded}, bumps {wardens.Bumps}, feet were {feet}; body simulated {hunter.Body.simulated} {hunter.Body.bodyType} enabled {hunter.enabled}/{wardens.enabled}, active {wardens.Active}, ai {wardens.LastAiMs:F3} ms, dt {Time.deltaTime:F3}, scale {Time.timeScale}; trace{trace})");
 
             // Budget: six hunting sentinels.
             while (wardens.Active < WardenDirector.MaxSentinels)
