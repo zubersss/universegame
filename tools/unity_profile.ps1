@@ -1,4 +1,4 @@
-# BudgetGate profile run (U-014): runs BudgetGateTests with graphics and writes
+﻿# BudgetGate profile run (U-014): runs BudgetGateTests with graphics and writes
 # coordination/reports/unity/perf_<date>.md with every Bible section 11.1 row. Owner: UNITY.
 # -Build (U-041, D-036): also builds the development player and runs its memory probe
 # (Earth, Space, Mars, Mercury, Venus) under the same lock, adding "dev build" rows to the report.
@@ -82,6 +82,17 @@ if ($runProbe) {
             $rows += "| Residency $dot $($l.leg) (dev build) | previous planet released within 5 s (v3) | $($l.prevGroup) handles $($l.prevHandles) after $($l.prevWait) s (holders: $($l.holders)); resident: $($l.resident) | $(if ($resOk) { 'green' } else { 'red' }) |"
         }
     }
+    # U-095: the film pass's GPU cost at 1080p (FrameTimingManager in the player: frame GPU time with the pass on minus off).
+    $film = @()
+    if ($buildOk -and (Test-Path $probeOut)) { $film = @(Get-Content $probeOut | Where-Object { $_.Trim() } | ForEach-Object { $_ | ConvertFrom-Json } | Where-Object { $null -ne $_.filmPassMs }) }
+    if ($film.Count -eq 0) { $rows += "| Film pass GPU $dot Earth (dev build) | $le 0.6 ms at 1080p (U-095) | no film probe result | red |"; $memRed = $true }
+    foreach ($f in $film) {
+        $pass = [double]$f.filmPassMs
+        $fok = ([double]$f.filmGpuOnMs -gt 0) -and ($pass -le 0.6)
+        if (-not $fok) { $memRed = $true }
+        $fText = if ([double]$f.filmGpuOnMs -le 0) { 'no GPU timings from FrameTimingManager' } else { "on $($f.filmGpuOnMs) ms, off $($f.filmGpuOffMs) ms, pass $($f.filmPassMs) ms at $($f.width)${times}$($f.height)" }
+        $rows += "| Film pass GPU $dot $($f.leg) (dev build) | $le 0.6 ms at 1080p (U-095) | $fText | $(if ($fok) { 'green' } else { 'red' }) |"
+    }
     if (Test-Path $report) {
         $text = Get-Content $report -Raw -Encoding UTF8
         $cut = $text.IndexOf("`n## Memory in the development player")
@@ -90,7 +101,7 @@ if ($runProbe) {
     } else {
         Set-Content -Path $report -Value (($rows -join "`n") + "`n") -Encoding UTF8 -NoNewline
     }
-    $rows | Where-Object { $_ -like '| Memory*' -or $_ -like '| Residency*' } | ForEach-Object { Write-Host $_ }
+    $rows | Where-Object { $_ -like '| Memory*' -or $_ -like '| Residency*' -or $_ -like '| Film*' } | ForEach-Object { Write-Host $_ }
 }
 
 if ($SkipGate) { if ($memRed) { Write-Host 'BUILD MEMORY RED'; exit 1 } else { Write-Host 'BUILD MEMORY GREEN'; exit 0 } }

@@ -132,6 +132,37 @@ namespace Meridian.Perf
                              $"\"avgFrameMs\":{s.avgFrameMs.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}," +
                              $"\"workingSetMB\":{s.workingSetMB},\"meshMB\":{s.meshMemoryMB},\"resident\":\"{Residency.ResidentGroups()}\",\"prevGroup\":\"{prevGroup}\",\"prevHandles\":{prevHandles},\"holders\":\"{(prevGroup != null ? Residency.Holders(prevGroup).Replace("\"", "'") : "")}\",\"prevWait\":{prevWait.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}}}");
             TopTextures(where, 15);
+            if (where == "Earth") yield return FilmGpu(where); // U-095: the film pass's GPU cost at 1080p
+        }
+
+        /// <summary>
+        /// U-095: GPU frame time (FrameTimingManager, Frame Timing Stats on) over 120 frames with the film pass on and
+        /// off after 30 warm-up frames each; the difference is the pass's cost (Bible §9.4: ≤ 0.6 ms at 1080p). One JSON line.
+        /// </summary>
+        IEnumerator FilmGpu(string where)
+        {
+            bool before = Meridian.Core.GameSettings.FilmEffects;
+            float on = 0f, off = 0f;
+            yield return FilmGpuAverage(false, v => off = v);
+            yield return FilmGpuAverage(true, v => on = v);
+            Meridian.Core.GameSettings.FilmEffects = before;
+            var ci = System.Globalization.CultureInfo.InvariantCulture;
+            lines.AppendLine($"{{\"leg\":\"{where}\",\"filmGpuOnMs\":{on.ToString("F3", ci)},\"filmGpuOffMs\":{off.ToString("F3", ci)},\"filmPassMs\":{(on - off).ToString("F3", ci)},\"width\":{Screen.width},\"height\":{Screen.height}}}");
+        }
+
+        IEnumerator FilmGpuAverage(bool film, Action<float> result)
+        {
+            Meridian.Core.GameSettings.FilmEffects = film;
+            for (int i = 0; i < 30; i++) yield return null;
+            var timings = new FrameTiming[1];
+            double sum = 0; int n = 0;
+            for (int i = 0; i < 120; i++)
+            {
+                yield return null;
+                FrameTimingManager.CaptureFrameTimings();
+                if (FrameTimingManager.GetLatestTimings(1, timings) == 1 && timings[0].gpuFrameTime > 0) { sum += timings[0].gpuFrameTime; n++; }
+            }
+            result(n > 0 ? (float)(sum / n) : 0f);
         }
 
         /// <summary>U-060 diagnosis: the largest loaded textures at this leg (name, size, format, MB), one JSON line.</summary>
