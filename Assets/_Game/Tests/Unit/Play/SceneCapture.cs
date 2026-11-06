@@ -962,10 +962,20 @@ namespace Meridian.Tests
                 while (view != null && !view.Ready && Time.realtimeSinceStartup < timeout) yield return null;
                 for (int i = 0; i < 60; i++) yield return null;
                 Debug.Log($"[MERIDIAN] c0 capture: cartoon {(side.cartoon != null && side.cartoon.Active)}, ortho {side.sideCamera.orthographicSize:F3}, layers {(side.cartoon != null && side.cartoon.Layers != null ? side.cartoon.Layers.renderers.Count : 0)}, surveyor clip {(view != null ? view.Clip : "none")}");
-                yield return Save(side.sideCamera, $"{name}_earth_c0_placeholder");
                 var dir = $"coordination/reports/unity/c0_{DateTime.Now:yyyy-MM-dd}";
                 Directory.CreateDirectory(dir);
+                // U-095: the before/after pair: film off (also the U-094 placeholder shot) and film on.
+                bool film = Meridian.Core.GameSettings.FilmEffects;
+                Meridian.Core.GameSettings.FilmEffects = false;
+                for (int i = 0; i < 3; i++) yield return null;
+                yield return Save(side.sideCamera, $"{name}_earth_c0_placeholder");
                 File.Copy($"logs/capture_{name}_earth_c0_placeholder.png", $"{dir}/earth_c0_placeholder.png", true);
+                File.Copy($"logs/capture_{name}_earth_c0_placeholder.png", $"{dir}/earth_c0_film_off.png", true);
+                Meridian.Core.GameSettings.FilmEffects = true;
+                for (int i = 0; i < 3; i++) yield return null;
+                yield return Save(side.sideCamera, $"{name}_earth_c0_film_on");
+                File.Copy($"logs/capture_{name}_earth_c0_film_on.png", $"{dir}/earth_c0_film_on.png", true);
+                Meridian.Core.GameSettings.FilmEffects = film;
                 side.dayNight.Override = null;
             }
             finally { Meridian.View2D.CartoonStage.Enabled = false; }

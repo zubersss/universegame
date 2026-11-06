@@ -203,7 +203,17 @@ namespace Meridian.UI
             ResumeButton = UiKit.Button(pausePanel.transform, "RESUME", new Vector2(0f, 40f), Resume);
             SaveButton = UiKit.Button(pausePanel.transform, "SAVE", new Vector2(0f, -40f), SaveNow);
             MainMenuButton = UiKit.Button(pausePanel.transform, "MAIN MENU", new Vector2(0f, -120f), ToMainMenu);
+            FilmButton = UiKit.Button(pausePanel.transform, FilmLabel(), new Vector2(0f, -200f), ToggleFilm); // U-095: the Film effects setting
             pausePanel.SetActive(false);
+        }
+
+        public UnityEngine.UI.Button FilmButton { get; private set; }
+        static string FilmLabel() => Meridian.Core.GameSettings.FilmEffects ? "FILM EFFECTS: ON" : "FILM EFFECTS: OFF";
+        void ToggleFilm()
+        {
+            Meridian.Core.GameSettings.FilmEffects = !Meridian.Core.GameSettings.FilmEffects;
+            var t = FilmButton != null ? FilmButton.GetComponentInChildren<Text>() : null;
+            if (t != null) t.text = FilmLabel();
         }
 
         /// <summary>Title art is optional: if the key isn't there, the themed text title stays.</summary>

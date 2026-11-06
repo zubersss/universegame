@@ -39,6 +39,8 @@ namespace Meridian.View2D
             var follow = cam != null ? cam.GetComponent<CameraFollow>() : null;
             if (follow != null) follow.UseCartoonFrame();
             else if (cam != null) { cam.orthographic = true; cam.orthographicSize = SheetClock.FrameHeight * 0.5f; }
+            // Bible §9.4 v4: no bloom / HDR post on the cartoon camera; the film pass (U-095) is a renderer feature, not a volume.
+            if (cam != null) { var extra = cam.GetComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>(); if (extra != null) extra.renderPostProcessing = false; }
 
 
             if (Layers == null)
