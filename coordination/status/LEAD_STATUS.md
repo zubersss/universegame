@@ -1,5 +1,5 @@
 # LEAD STATUS
-Updated: 2026-11-06 01:4x · Session: 4 (Fable 5.1), resumed after the 01:2x restart · Review cycle: 223
+Updated: 2026-11-06 01:4x · Session: 4 (Fable 5.1), resumed after the 01:2x restart · Review cycle: 224
 ## Current task
 Owner change request applied (cycle 220, D-076..D-081): Bible v3 sections (§4.2 Feel, §5.1 Stage camera, §9 v3, §10.10, §11.1/§11.2 v3, §12 S1), contract v2.5 (§10 Stage layers), tasks U-086..U-092 and B-103..B-108. Now: confirm peer roles, then the review cycle.
 ## Last completed
@@ -11,7 +11,7 @@ none open. Contract v2.6 current (D-082). Budgets v3 (D-077).
 ## Waiting on the user
 nothing. USER-20 done 10:16 (gate open). The R1 playtest item comes with the R1 report.
 ## Loop / stall watch
-Lock free since 10:18 (B-101 Venus export done, accepted cycle 223). Watch: UNITY's release call starts within 10 min of 10:18 and includes the rings fix, the u078 capture and ruling 10; U-086 perf green -> R1 close. BLENDER on B-109 canopy builders (scripts-only until UNITY's job ends). BLENDER window runs Opus 5.5 from 10:1x (owner).
+UNITY holds heavy_unity since 10:40 (profile -Probe + u078 capture; check passed 10:31). BLENDER want 10:41 (spruce LOD1 re-export, 1 asset) goes next, then B-103. Watch: UNITY's results by 11:0x -> R1 close; free RAM 0.27 GB during the probe (memory-stop risk, D-046 covers one re-run). BLENDER window runs Opus 5.5 from 10:1x (owner).
 ## Session addresses (ListAgents, 11-06 01:28)
 UNITY = zuber-c7 (confirmed 10:1x), BLENDER = zuber-04 (confirmed 10:3x; it still calls itself zuber-29). This session: zuber-38.
 ## HeavyJobLock
