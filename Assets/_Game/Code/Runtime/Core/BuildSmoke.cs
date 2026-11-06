@@ -77,11 +77,16 @@ namespace Meridian.Core
                 {
                     var rest = side.ship.Body.position;
                     var air = rest + new Vector2(0f, 16f);
+                    // Held in the air for the shot (gravity off): LookAt's settle lasts seconds, long enough to fall back onto the pad.
+                    float gravity = side.ship.Body.gravityScale;
+                    side.ship.Body.gravityScale = 0f;
                     side.ship.Body.position = air; side.ship.transform.position = air; side.ship.Body.linearVelocity = Vector2.zero;
                     yield return LookAt(side, air.x, 12f, 9f);
-                    yield return Wait(0.3f);
+                    side.ship.Body.position = air; side.ship.transform.position = air; side.ship.Body.linearVelocity = Vector2.zero;
+                    yield return Wait(0.6f); // the legs retract above LegsAltitude
                     Debug.Log($"[MERIDIAN] smoke ship airborne: altitude {side.ship.AltitudeAboveGround:F1} m, legs deployed {side.ship.LegsDeployed}");
                     yield return Shot(folder, "smoke_3c_ship_airborne.png");
+                    side.ship.Body.gravityScale = gravity;
                     side.ship.Body.position = rest; side.ship.transform.position = rest; side.ship.Body.linearVelocity = Vector2.zero;
                     yield return Wait(0.5f);
                 }

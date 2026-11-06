@@ -315,6 +315,7 @@ MonoBehaviour:
   - creatures/venus/veil_serpent
   - creatures/venus/veil_serpent_body
   - creatures/venus/veil_serpent_head
+  - creatures/venus/veil_serpent_tail
   - creatures/venus/vent_eel
   - creatures/warden/hunter
   - creatures/warden/sentinel
@@ -1245,6 +1246,33 @@ MonoBehaviour:
       length: 30
       loop: 0
   - key: creatures/venus/veil_serpent_head
+    fps: 30
+    clips:
+    - name: idle
+      start: 0
+      length: 36
+      loop: 1
+    - name: walk
+      start: 0
+      length: 24
+      loop: 1
+    - name: fly
+      start: 0
+      length: 24
+      loop: 1
+    - name: attack
+      start: 0
+      length: 18
+      loop: 0
+    - name: hurt
+      start: 0
+      length: 8
+      loop: 0
+    - name: death
+      start: 0
+      length: 30
+      loop: 0
+  - key: creatures/venus/veil_serpent_tail
     fps: 30
     clips:
     - name: idle
