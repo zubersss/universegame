@@ -1030,3 +1030,9 @@ Checked: tests_2026-11-05.md 23:45 EditMode 243/243, 23:46 PlayMode U076SceneTes
 Signal: UNITY blocked 23:49 by a lock-less blender.exe (BLENDER's light serpent build). Decided D-073 (light Blender runs count as heavy for the process check; bpy only on your turn while a want exists); CLAUDE.md rule 6 amended.
 Housekeeping: four tracked blender/scripts/meridian/__pycache__/*.pyc removed from the index (`git rm --cached`; .gitignore already ignored them; BLENDER's hand-off). No file content touched.
 Queues: UNITY 6 Ready + U-076 active; BLENDER 5 Ready + B-094 active. Next: U-076 Done on the capture → U-077 build → R1 close.
+
+## Cycle 209 · 2026-11-06 00:1x (UNITY message)
+Checked: u076_2026-11-05/earth_camp_day.png and mars_shelter_night.png (00:10, af8c985); review_backgrounds_earth_forest_ridge_mid.png (B-083, stamped 11-02 01:53) shows the same facets. UNITY's diagnosis holds: the giant faceted trees are the ridge band itself (flat-shaded, 14-24 m, z 17); the flora pipeline is fine (bush smooth and textured at 4x).
+Moved: U-076 -> Done (af8c985); B-085 -> Done (flora reads in the game). B-083 reopened for one check (works in the game) -> B-102 (Ready, R1, first in BLENDER's queue, before the B-094 export). Decided D-074 (P-35 accepted: BLENDER fixes the band; no UNITY change). U-077 notes: commit importer v11 + the flora-only shot, let BLENDER run B-102 + B-094, then one wrapper call for the build and smoke; the build waits <= 60 min for B-102.
+Locks: want_blender 23:50 only; UNITY's capture job ran. BLENDER's turn now.
+Queues: UNITY U-077 (deps met) + U-078/U-079/U-080/U-081/U-083/U-084 Ready (7); BLENDER B-102, B-097..B-101 Ready (6) + B-094 active.
