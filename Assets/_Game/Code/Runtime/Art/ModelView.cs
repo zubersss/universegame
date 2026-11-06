@@ -21,6 +21,8 @@ namespace Meridian.Art
     {
         public string Key { get; private set; }
         public bool Ready { get; private set; }
+        /// <summary>U-090: a load is in flight (the key may still turn out to have no model).</summary>
+        public bool Loading { get; private set; }
         public GameObject Instance { get; private set; }
         public string Current { get; private set; }
         /// <summary>Names of the clips the model carries (tests).</summary>
@@ -52,6 +54,7 @@ namespace Meridian.Art
         public void Load(string key)
         {
             Key = key;
+            Loading = true;
             var locs = Addressables.LoadResourceLocationsAsync(key, typeof(GameObject));
             locs.Completed += l =>
             {
@@ -59,7 +62,7 @@ namespace Meridian.Art
                 // from the GameObject location itself, never by the bare key.
                 IResourceLocation modelLoc = l.Status == AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0 ? l.Result[0] : null;
                 Addressables.Release(l);
-                if (modelLoc == null || this == null) return; // no model: the caller keeps its 2D view
+                if (modelLoc == null || this == null) { Loading = false; return; } // no model: the caller keeps its 2D view
                 pending = 3;
                 modelHandle = ArtLoad.Asset<GameObject>(modelLoc, key);
                 modelHandle.Completed += op => { prefab = op.Status == AsyncOperationStatus.Succeeded ? op.Result : null; Done(); };
@@ -100,7 +103,10 @@ namespace Meridian.Art
             SetUpLods();
             if (clips != null && clips.Count > 0) BuildGraph(); // static props: no animator, no graph
             Ready = true;
+            Loading = false;
             SetFacing(facingRight);
+            if (tint != Color.white) ApplyTint();
+            if (!shadows) SetShadows(false);
             Loaded?.Invoke();
         }
 
@@ -199,6 +205,36 @@ namespace Meridian.Art
         /// <summary>A short emissive hit flash (seconds).</summary>
         public void Flash(float seconds = 0.12f) => flashUntil = Time.time + seconds;
 
+        Color tint = Color.white;
+        bool shadows = true;
+        static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+
+        /// <summary>U-090: a colour multiplier on every renderer (the stage haze tint); kept through the hit flash.</summary>
+        public void SetTint(Color c)
+        {
+            tint = c;
+            if (Ready) ApplyTint();
+        }
+
+        void ApplyTint()
+        {
+            if (renderers == null) return;
+            foreach (var r in renderers)
+            {
+                r.GetPropertyBlock(block);
+                block.SetColor(BaseColorId, tint);
+                r.SetPropertyBlock(block);
+            }
+        }
+
+        /// <summary>U-090: shadow casting on every renderer (stage layers and foreground pieces cast none).</summary>
+        public void SetShadows(bool on)
+        {
+            shadows = on;
+            if (renderers == null) return;
+            foreach (var r in renderers) r.shadowCastingMode = on ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off;
+        }
+
         void LateUpdate()
         {
             if (!Ready) return;
@@ -216,7 +252,7 @@ namespace Meridian.Art
                 foreach (var r in renderers)
                 {
                     r.GetPropertyBlock(block);
-                    if (flashing) block.SetColor(EmissionId, new Color(2f, 1.6f, 1.4f)); else block.Clear();
+                    if (flashing) block.SetColor(EmissionId, new Color(2f, 1.6f, 1.4f)); else { block.Clear(); if (tint != Color.white) block.SetColor(BaseColorId, tint); }
                     r.SetPropertyBlock(block);
                 }
             }

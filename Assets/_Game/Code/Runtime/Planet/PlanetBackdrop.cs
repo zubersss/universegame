@@ -241,7 +241,7 @@ namespace Meridian.Planet
 
         /// <summary>U-076: with the 3D depth bands drawn, this quad shows only layer 0 (the sky), parked behind the skyline.</summary>
         public bool DepthBandsOn { get; private set; }
-        public const float DepthBandsBehindPlane = 450f;
+        public const float DepthBandsBehindPlane = 600f; // U-090: behind the 500 m cloud strip (was 450)
 
         public void SetDepthBands(bool on)
         {

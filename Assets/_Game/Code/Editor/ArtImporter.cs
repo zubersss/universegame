@@ -508,6 +508,13 @@ namespace Meridian.EditorTools
                 var kind = Classify(raw, out var rel);
                 if (kind == RootKind.None) continue;
                 var path = ArtRules.Normalize(raw);
+                // U-090 (contract §10): a region's stage.json is addressed as a TextAsset under backgrounds/<planet>_<region>/stage.
+                if (rel.EndsWith("/stage.json", StringComparison.Ordinal) && kind == RootKind.Art)
+                {
+                    var stageKey = rel.Substring(0, rel.Length - ".json".Length);
+                    AddressStage(path, stageKey);
+                    continue;
+                }
                 if (rel.EndsWith(".json", StringComparison.Ordinal))
                 {
                     // A new or edited sheet manifest re-slices its color sheet.
@@ -708,8 +715,30 @@ namespace Meridian.EditorTools
             if (string.IsNullOrEmpty(guid)) return;
             var entry = Settings.CreateOrMoveEntry(guid, GroupNamed(ArtRules.GroupFor(key)), false, true);
             if (entry.address != key) entry.SetAddress(key, true);
+            StageLabel(entry, key);
             var atlas = ArtRules.AtlasFor(key);
             if (atlas != null) AddToAtlas(atlas, colorPath);
+        }
+
+        /// <summary>U-090 (Bible §10.10): every asset of a region's set carries the label stage_<planet>_<region> (backgrounds/<planet>_<region>/…).</summary>
+        static void StageLabel(UnityEditor.AddressableAssets.Settings.AddressableAssetEntry entry, string key)
+        {
+            if (entry == null || !ArtRules.IsStageLayer(key, out _) || ArtKeys.Category(key) != "backgrounds") return;
+            var second = key.Split('/')[1];
+            if (second.IndexOf('_') < 0) return; // the planet-wide layers (rocks, clouds) stay in the planet group without a region label
+            var label = "stage_" + second;
+            Settings.AddLabel(label, false);
+            entry.SetLabel(label, true, true, false);
+        }
+
+        /// <summary>U-090: a stage.json addressed as a TextAsset under its key, labelled with its region's set.</summary>
+        static void AddressStage(string path, string key)
+        {
+            var guid = AssetDatabase.AssetPathToGUID(path);
+            if (string.IsNullOrEmpty(guid)) return;
+            var entry = Settings.CreateOrMoveEntry(guid, GroupNamed(ArtRules.GroupFor(key)), false, true);
+            if (entry.address != key) entry.SetAddress(key, true);
+            StageLabel(entry, key);
         }
 
         /// <summary>U-075: removes an art colour map's address and atlas entry (model textures aren't sprites).</summary>

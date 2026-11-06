@@ -64,6 +64,10 @@ namespace Meridian.Planet.Backdrop
         public Mesh Ground => groundMesh;
         /// <summary>The ridge model's depth range after placement (a check that it lies behind the play plane).</summary>
         public Vector2 RidgeDepth { get; private set; }
+        /// <summary>U-090: the eased mean surface the bands stand on (StageLayers places its layers on it too).</summary>
+        public float BaseY => baseY;
+        /// <summary>U-090: the ridge slot counts as drawn when its model is missing (its placeholder is the ground strip's skirt).</summary>
+        public bool RidgePlaceholder => ridge != null && !ridge.Ready && groundMesh != null;
         public bool RidgeMirrored { get; private set; }
 
         public void ConfigureFor(PlanetConfig config)

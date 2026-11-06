@@ -119,6 +119,7 @@ namespace Meridian.EditorTools
             if (string.IsNullOrEmpty(guid)) return;
             var entry = Settings.CreateOrMoveEntry(guid, GroupNamed(ArtRules.GroupFor(key)), false, true);
             if (entry.address != key) entry.SetAddress(key, true);
+            StageLabel(entry, key); // U-090
         }
     }
 }

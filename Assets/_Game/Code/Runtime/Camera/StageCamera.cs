@@ -141,7 +141,7 @@ namespace Meridian.CameraRig
             if (i.grounded)
             {
                 fallTop = i.playerY;
-                if (FallFollowing) { FallFollowing = false; landedFollow = true; }
+                if (FallFollowing) { FallFollowing = false; landedFollow = true; floorS = i.floorY; floorVel = 0f; } // the fall follow already moved the frame: the floor is where we landed
             }
             else
             {
@@ -162,7 +162,9 @@ namespace Meridian.CameraRig
             if (!floorDropped || landedFollow) { goal = yFloor; heldFloor = floorS; }
             float banded = Mathf.Clamp(goal, pc - half, pc + half);
             if (banded != goal) { goal = banded; heldFloor = floorS; }
-            Y = Mathf.MoveTowards(Y, goal, VerticalMaxSpeed * dt);
+            // After a long fall the frame is still catching up: it settles onto the stage floor within the 0.4 s follow, else 6 m/s.
+            float speed = landedFollow ? Mathf.Max(VerticalMaxSpeed, Mathf.Abs(goal - Y) / (FallFollowTime * 0.5f)) : VerticalMaxSpeed;
+            Y = Mathf.MoveTowards(Y, goal, speed * dt);
             yVel = 0f;
             if (landedFollow && Mathf.Abs(goal - Y) < 0.02f) landedFollow = false; // the frame is back on the stage floor after the long fall
         }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceLocations;
@@ -22,6 +23,14 @@ namespace Meridian.Art
         {
             var h = Addressables.LoadAssetAsync<T>(location);
             Meridian.Perf.Residency.Track(key, h);
+            return h;
+        }
+
+        /// <summary>U-090: every asset under an Addressables label (a stage set), tracked under `group` with the label as its key.</summary>
+        public static AsyncOperationHandle<IList<T>> Assets<T>(string label, string group)
+        {
+            var h = Addressables.LoadAssetsAsync<T>(label, null);
+            Meridian.Perf.Residency.Track(h, group, label);
             return h;
         }
 

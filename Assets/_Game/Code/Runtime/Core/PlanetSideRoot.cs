@@ -21,6 +21,8 @@ namespace Meridian.Core
         public Meridian.Planet.PlanetBackdrop backdrop;
         /// <summary>U-076: created at runtime in Configure.</summary>
         public Meridian.Planet.Backdrop.DepthBands depthBands;
+        /// <summary>U-090: the stage layer stack (foreground, rocks, hills, region skyline, set-pieces, cloud strip, set streaming).</summary>
+        public Meridian.Planet.Backdrop.StageLayers stage { get; private set; }
         public Meridian.Planet.Lighting.DayNightLighting dayNight;
         public Meridian.Planet.Weather.DustStorm dustStorm;
         /// <summary>Venus super-rotation (U-050), created at configure.</summary>
@@ -118,6 +120,14 @@ namespace Meridian.Core
             {
                 depthBands.view = sideCamera; depthBands.terrain = terrain; depthBands.backdrop = backdrop; depthBands.pois = pois;
                 depthBands.ConfigureFor(config);
+                if (stage == null)
+                {
+                    var sgo = new GameObject("StageLayers");
+                    sgo.transform.SetParent(transform, false);
+                    stage = sgo.AddComponent<Meridian.Planet.Backdrop.StageLayers>();
+                }
+                stage.view = sideCamera; stage.terrain = terrain; stage.pois = pois; stage.bands = depthBands; stage.backdrop = backdrop;
+                stage.ConfigureFor(config);
             }
             // U-050: Venus super-rotation pushes the surveyor (off elsewhere).
             // U-051: the Pilgrim carries a Refinery and a Fabricator.
