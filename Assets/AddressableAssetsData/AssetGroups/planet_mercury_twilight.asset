@@ -24,7 +24,8 @@ MonoBehaviour:
   - m_GUID: 215df0f0bc60ae34f8c779b1b34d7221
     m_Address: backgrounds/mercury_twilight/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_mercury_twilight
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: abb4281a4983f5a4a8ac1833f3679bbc
     m_Address: backgrounds/mercury_twilight/ridge_mid
@@ -35,7 +36,8 @@ MonoBehaviour:
   - m_GUID: b5ad50fbf0449cd42a0fedef0d8e1a9f
     m_Address: backgrounds/mercury_twilight/skydome
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_mercury_twilight
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}

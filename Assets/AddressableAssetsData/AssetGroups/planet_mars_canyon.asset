@@ -18,7 +18,8 @@ MonoBehaviour:
   - m_GUID: 3e5882a76b2abdb4eb36049cd05c93fe
     m_Address: backgrounds/mars_canyon/layer1
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_mars_canyon
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 48944bcfc584dc24a8effd2178d454fb
     m_Address: backgrounds/mars_canyon/ridge_mid
@@ -29,7 +30,8 @@ MonoBehaviour:
   - m_GUID: 8781dd5facfb57743a8c0504ce6444eb
     m_Address: backgrounds/mars_canyon/layer2
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_mars_canyon
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ae334fd0587850c48ae794c2a4dee7be
     m_Address: backgrounds/mars_canyon/ridge_mid
@@ -40,17 +42,20 @@ MonoBehaviour:
   - m_GUID: c0809e47ba51d7f4090ef215174fb201
     m_Address: backgrounds/mars_canyon/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_mars_canyon
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: db9f78a04b231cd40894d66aa1a3e0aa
     m_Address: backgrounds/mars_canyon/skydome
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_mars_canyon
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f7feaab4e73916f4091dec6b6d0b868f
     m_Address: backgrounds/mars_canyon/layer0
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_mars_canyon
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}

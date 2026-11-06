@@ -30,27 +30,32 @@ MonoBehaviour:
   - m_GUID: 380b00f206eabc34a92f5098e4bb3567
     m_Address: backgrounds/earth_taiga/skydome
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_earth_taiga
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5ad022d342022204884376100232a845
     m_Address: backgrounds/earth_taiga/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_earth_taiga
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 609c6d2f34a5f014b8983a94c54075dc
     m_Address: backgrounds/earth_taiga/layer2
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_earth_taiga
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8102095768a181c488c9cbf2c8609be7
     m_Address: backgrounds/earth_taiga/layer1
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_earth_taiga
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b2a4e393ed3e0294f8d65a9dd8171357
     m_Address: backgrounds/earth_taiga/layer0
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_earth_taiga
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}

@@ -18,17 +18,20 @@ MonoBehaviour:
   - m_GUID: 0a6ead4fe2a912841bba2a4c66404072
     m_Address: backgrounds/uranus_dark_deck2/layer0
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_uranus_dark_deck2
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 89aa162e83ed00b4390dd618b7d4d1ce
     m_Address: backgrounds/uranus_dark_deck2/layer2
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_uranus_dark_deck2
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d310048be18c2f14ba2524db05311cf0
     m_Address: backgrounds/uranus_dark_deck2/layer1
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_uranus_dark_deck2
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}

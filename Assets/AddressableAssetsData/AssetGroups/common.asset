@@ -20,6 +20,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0787838fecbb7454982a3edb3bec9ece
+    m_Address: characters/surveyor/side
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0cd4cbd96af542244bb9e0580e03361c
     m_Address: ships/waystation_earth/top
     m_ReadOnly: 0
@@ -90,6 +95,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3702078a52a959842807eb5a837ff033
+    m_Address: characters/calibration_v3/side
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3902495cdc5a8a84c8ff2edd74c35820
     m_Address: fx/skip_spool/base
     m_ReadOnly: 0
@@ -112,6 +122,16 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4d8dbc95d58febf4eb5760f5be2dc7b4
     m_Address: props/common/shelter_wall
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4e5bcae4877173942bc69f18e6f2e86a
+    m_Address: fx/film/grain
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 51202e0b6ff5b1e49a2992a59558975f
+    m_Address: fx/film/scratches
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -177,6 +197,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 75476b64e68a7f24cb379ebc4b940818
     m_Address: ships/pilgrim/top
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7c43a867e0c17f548894812ae5894989
+    m_Address: fx/film/dust
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -257,6 +282,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9f1f130c96673f242806134791501089
     m_Address: fx/lightning/b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a541c069ddd0685478734423dcdfb924
+    m_Address: characters/surveyor/side/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

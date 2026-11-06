@@ -18,17 +18,20 @@ MonoBehaviour:
   - m_GUID: c612383ab931ca4458da046fa3432071
     m_Address: backgrounds/jupiter_deep/layer1
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_jupiter_deep
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: db7c7c49a32fa6f4cad27106b99a49da
     m_Address: backgrounds/jupiter_deep/layer2
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_jupiter_deep
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f1b2b0bf846557b40b14b0163e56f90a
     m_Address: backgrounds/jupiter_deep/layer0
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_jupiter_deep
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}

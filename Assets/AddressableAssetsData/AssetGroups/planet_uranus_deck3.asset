@@ -18,17 +18,20 @@ MonoBehaviour:
   - m_GUID: 8e7f5db051fbd194fa323810dcfe3ca3
     m_Address: backgrounds/uranus_deck3/layer1
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_uranus_deck3
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9c20847f424144046939dfe0b5b89690
     m_Address: backgrounds/uranus_deck3/layer2
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_uranus_deck3
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f14f3878da81636498e810c42a27971b
     m_Address: backgrounds/uranus_deck3/layer0
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_uranus_deck3
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}

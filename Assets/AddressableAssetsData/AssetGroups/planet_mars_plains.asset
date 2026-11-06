@@ -18,7 +18,8 @@ MonoBehaviour:
   - m_GUID: 2c78088d7745f0f4787fd57d28f96888
     m_Address: backgrounds/mars_plains/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_mars_plains
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a947563fbc164a445bf0bb87bf5bc5a8
     m_Address: backgrounds/mars_plains/ridge_mid
@@ -35,7 +36,8 @@ MonoBehaviour:
   - m_GUID: da3c452bab52f304881e688caec4cabf
     m_Address: backgrounds/mars_plains/skydome
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_mars_plains
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}

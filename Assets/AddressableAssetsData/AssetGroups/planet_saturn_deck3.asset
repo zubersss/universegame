@@ -18,17 +18,20 @@ MonoBehaviour:
   - m_GUID: 30c063ac8cd850e489de8e72dfd7dfcd
     m_Address: backgrounds/saturn_deck3/layer1
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_saturn_deck3
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 901c35fceb767c6419442295da6894fd
     m_Address: backgrounds/saturn_deck3/layer0
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_saturn_deck3
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b36c9e56a69f6c9499526738d03b95df
     m_Address: backgrounds/saturn_deck3/layer2
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_saturn_deck3
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}

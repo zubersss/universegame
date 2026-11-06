@@ -462,6 +462,17 @@ MonoBehaviour:
       start: 40
       length: 8
       loop: 0
+  - key: characters/calibration_v3/side
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 8
+      loop: 1
+    - name: walk
+      start: 8
+      length: 12
+      loop: 1
   - key: characters/surveyor/base
     fps: 12
     clips:
@@ -633,6 +644,41 @@ MonoBehaviour:
     - name: death
       start: 40
       length: 6
+      loop: 0
+  - key: characters/surveyor/side
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 10
+      loop: 1
+    - name: walk
+      start: 10
+      length: 12
+      loop: 1
+    - name: run
+      start: 22
+      length: 12
+      loop: 1
+    - name: jump
+      start: 34
+      length: 8
+      loop: 0
+    - name: fall
+      start: 42
+      length: 8
+      loop: 1
+    - name: land
+      start: 50
+      length: 8
+      loop: 0
+    - name: bump
+      start: 58
+      length: 8
+      loop: 0
+    - name: conk_out
+      start: 66
+      length: 8
       loop: 0
   - key: creatures/mercury/cinderhulk_day
     fps: 10
@@ -889,47 +935,71 @@ MonoBehaviour:
       length: 24
       loop: 1
   - key: characters/surveyor/base
-    fps: 30
+    fps: 60
     clips:
     - name: idle
       start: 0
-      length: 36
+      length: 72
       loop: 1
     - name: walk
       start: 0
-      length: 24
+      length: 48
       loop: 1
     - name: run
       start: 0
-      length: 16
+      length: 32
       loop: 1
     - name: jump
       start: 0
-      length: 9
+      length: 18
       loop: 0
     - name: fall
       start: 0
-      length: 12
+      length: 24
       loop: 1
     - name: land
       start: 0
-      length: 9
+      length: 18
       loop: 0
     - name: dig
       start: 0
-      length: 18
+      length: 36
       loop: 1
     - name: aim
       start: 0
-      length: 12
+      length: 24
       loop: 1
     - name: hurt
       start: 0
-      length: 8
+      length: 16
       loop: 0
     - name: death
       start: 0
-      length: 30
+      length: 60
+      loop: 0
+    - name: jump_anticipate
+      start: 0
+      length: 8
+      loop: 0
+    - name: land_hard
+      start: 0
+      length: 20
+      loop: 0
+    - name: dash
+      start: 0
+      length: 12
+      loop: 0
+    - name: parry
+      start: 0
+      length: 20
+      loop: 0
+    - name: parry_hit
+      start: 0
+      length: 12
+      loop: 0
+    - name: hit_react
+      start: 0
+      length: 16
       loop: 0
   - key: creatures/earth/stag
     fps: 30

@@ -15,7 +15,7 @@ MonoBehaviour:
   m_DefaultGroup: 400d48d31f9e6f543baf819ff0e46987
   m_currentHash:
     serializedVersion: 2
-    Hash: 9c98bfcb2da5833e390aa956ba4a7326
+    Hash: 00000000000000000000000000000000
   m_ExtractTypeTreeData: 0
   m_DisableWriteTypeTree: 0
   m_OptimizeCatalogSize: 0
@@ -173,6 +173,26 @@ MonoBehaviour:
     - stage_earth_tundra
     - stage_mercury_day
     - stage_mars_polar
+    - stage_uranus_dark_deep
+    - stage_saturn_deck1
+    - stage_uranus_deck2
+    - stage_neptune_deck2
+    - stage_saturn_deep
+    - stage_saturn_deck2
+    - stage_saturn_deck3
+    - stage_uranus_deck3
+    - stage_uranus_dark_deck2
+    - stage_neptune_deck1
+    - stage_uranus_deep
+    - stage_uranus_dark_deck1
+    - stage_jupiter_deep
+    - stage_jupiter_deck1
+    - stage_uranus_deck1
+    - stage_jupiter_deck3
+    - stage_neptune_deep
+    - stage_uranus_dark_deck3
+    - stage_neptune_deck3
+    - stage_jupiter_deck2
   m_SchemaTemplates: []
   m_GroupTemplateObjects:
   - {fileID: 11400000, guid: 564f481c29626884a9f73686cae80a86, type: 2}

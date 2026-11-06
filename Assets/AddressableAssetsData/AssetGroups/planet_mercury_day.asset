@@ -18,12 +18,14 @@ MonoBehaviour:
   - m_GUID: 0af549d4561e5e84981be8c0ea04c8f0
     m_Address: backgrounds/mercury_day/skydome
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_mercury_day
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 65de87d4c0858f14f8d08179103fd67d
     m_Address: backgrounds/mercury_day/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_mercury_day
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9e1616b7452bfe14cb704b65d00771d6
     m_Address: backgrounds/mercury_day/ridge_mid

@@ -69,7 +69,7 @@ namespace Meridian.Tests
             Assert.AreEqual(1, SheetClock.Frame(1f / 12f, 12, true));
             Assert.AreEqual(0, SheetClock.Frame(1f, 12, true), "a 12-frame loop is one second");
             Assert.AreEqual(7, SheetClock.Frame(5f, 8, false), "a one-off holds its last drawing");
-            Assert.AreEqual(3, SheetClock.Frame(10f / 12f, 8, true, 2), "loop_from 2: 8,9 → 2,3");
+            Assert.AreEqual(3, SheetClock.Frame(9f / 12f, 8, true, 2), "loop_from 2: steps 8,9 → drawings 2,3");
             Assert.AreEqual(16.875f, SheetClock.FrameHeight, 1e-4f, "1080 px at 64 px/m");
         }
 
@@ -110,7 +110,7 @@ namespace Meridian.Tests
             Assert.AreEqual(1f, walk.length, 1e-3f, "12 drawings at 12 fps = 1 s");
             var binding = AnimationUtility.GetObjectReferenceCurveBindings(walk).Single();
             var keys = AnimationUtility.GetObjectReferenceCurve(walk, binding);
-            Assert.AreEqual(13, keys.Length);
+            Assert.AreEqual(12, keys.Length, "one key per drawing");
             for (int i = 1; i < keys.Length; i++) Assert.AreEqual(1f / 12f, keys[i].time - keys[i - 1].time, 1e-4f, "on twos");
             Assert.IsTrue(keys.All(k => k.value is Sprite), "every key is a sheet sprite");
             Assert.IsTrue(AnimationUtility.GetAnimationClipSettings(walk).loopTime, "walk loops");

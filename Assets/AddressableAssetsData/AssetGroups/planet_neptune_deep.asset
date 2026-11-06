@@ -18,17 +18,20 @@ MonoBehaviour:
   - m_GUID: 621ce106250cb7544a11966b4a1bc082
     m_Address: backgrounds/neptune_deep/layer0
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_neptune_deep
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 74d339e6894d3194bb072176a65288f1
     m_Address: backgrounds/neptune_deep/layer1
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_neptune_deep
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8b09157b6c7cd7d469d8455e74034515
     m_Address: backgrounds/neptune_deep/layer2
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_neptune_deep
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}

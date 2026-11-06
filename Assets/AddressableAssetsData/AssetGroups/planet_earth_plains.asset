@@ -24,12 +24,14 @@ MonoBehaviour:
   - m_GUID: 8d50ffd40fa9f9141b550cda360198a4
     m_Address: backgrounds/earth_plains/skydome
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_earth_plains
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ac9023cc3a0fb4a43a0df2e45d6e492b
     m_Address: backgrounds/earth_plains/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_earth_plains
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: dc3f939824b87f443995b3396fffad0c
     m_Address: backgrounds/earth_plains/ridge_mid

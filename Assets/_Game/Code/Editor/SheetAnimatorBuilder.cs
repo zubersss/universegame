@@ -40,10 +40,11 @@ namespace Meridian.EditorTools
             float step = 1f / Meridian.EditorTools.ArtRules.V3Fps;
             foreach (var c in sheet.animations)
             {
-                var keys = new ObjectReferenceKeyframe[c.length + 1];
-                for (int i = 0; i <= c.length; i++)
+                // One key per drawing; Unity holds a sprite curve's last key for one more frame (1/12 s), so a clip of n lasts n/12 s.
+                var keys = new ObjectReferenceKeyframe[c.length];
+                for (int i = 0; i < c.length; i++)
                 {
-                    int frame = c.start + Mathf.Min(i, c.length - 1); // the extra last key holds the final drawing for its 1/12 s
+                    int frame = c.start + i;
                     sprites.TryGetValue($"{variant}_{frame}", out var sprite);
                     keys[i] = new ObjectReferenceKeyframe { time = i * step, value = sprite };
                 }

@@ -18,12 +18,14 @@ MonoBehaviour:
   - m_GUID: 314e0e553b1615c4a94c64839dfcf518
     m_Address: backgrounds/earth_coast/layer2
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_earth_coast
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 40d616f9c1997484095bae12aa219641
     m_Address: backgrounds/earth_coast/skydome
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_earth_coast
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5d129944474030243846439e2147143b
     m_Address: backgrounds/earth_coast/ridge_mid
@@ -40,17 +42,20 @@ MonoBehaviour:
   - m_GUID: 7db2cac2d861b8e438cc41ecaf62fa0c
     m_Address: backgrounds/earth_coast/ridge_mid
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_earth_coast
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8309ebccc6698084787e14654237511e
     m_Address: backgrounds/earth_coast/layer1
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_earth_coast
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cc6177dd29886da4eae8b790e3ddc8c5
     m_Address: backgrounds/earth_coast/layer0
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - stage_earth_coast
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}
