@@ -1,4 +1,4 @@
-while ((!world.RingsReady || !world.BeltReady) && Time.realtimeSinceStartup < until) yield return null;using System;
+using System;
 using System.Collections;
 using System.IO;
 using Meridian.Core;
