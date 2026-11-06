@@ -76,6 +76,9 @@ ever overwritten.
    **Light Blender runs (D-073).** Any `blender.exe` you start, even a light bpy build, makes
    the process check fail for the other role. While another role's `want_*.lock` exists, run
    bpy only under your own heavy lock (your turn), or not at all; do scripts-only work instead.
+   **Live wants (D-075).** While you are still waiting, rewrite your `want_<role>.lock` (new ISO
+   time) on every poll; a want is "older than 30 min" only when its writer stopped refreshing it.
+   Never treat a want as expired while that role's status file says it is polling for the gate.
 7. **Accepted work stays accepted.** Don't re-polish Done tasks unless LEAD reopens them.
 8. **Stay inside the repo.** No system installs, no registry/settings changes; list those
    in your status file for USER_ACTIONS.
