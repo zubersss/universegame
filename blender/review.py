@@ -36,6 +36,26 @@ FONT = {
 }
 
 
+# v3 review sheets (§11.7) print words: the rest of the alphabet (case-insensitive) + punctuation.
+FONT.update({
+    "g": "011100101101011", "h": "101101111101101", "i": "111010010010111", "j": "001001001101010",
+    "k": "101101110101101", "l": "100100100100111", "m": "101111111101101", "n": "110101101101101",
+    "o": "010101101101010", "p": "110101110100100", "q": "010101101110011", "r": "110101110101101",
+    "s": "011100010001110", "t": "111010010010010", "u": "101101101101111", "v": "101101101101010",
+    "w": "101101111111101", "x": "101101010101101", "y": "101101010010010", "z": "111001010100111",
+    ".": "000000000000010", ",": "000000000010100", "/": "001001010100100", "(": "010100100100010",
+    ")": "010001001001010", "+": "000010111010000", "=": "000111000111000", "#": "101111101111101",
+    "[": "110100100100110", "]": "011001001001011", "%": "101001010100101", "'": "010010000000000",
+    "?": "111001010000010", "!": "010010010000010", "_": "000000000000111", ">": "100010001010100",
+    "<": "001010100010001", "*": "101010101000000", '"': "101101000000000", ";": "000010000010100",
+    "~": "000011110000000", "^": "010101000000000", "|": "010010010010010",
+})
+
+
+def glyph(ch):
+    return FONT.get(ch) or FONT.get(ch.lower()) or FONT[" "]
+
+
 def stale_keys():
     if not os.path.isfile(STALE):
         return set()
@@ -64,7 +84,7 @@ def draw(img, text, x, y, color, scale=2):
     h = 7 * scale
     img[y:y + h, x:x + w] = img[y:y + h, x:x + w] * 0.25
     for i, ch in enumerate(text):
-        g = FONT.get(ch, FONT[" "])
+        g = glyph(ch)
         for r in range(5):
             for c in range(3):
                 if g[r * 3 + c] == "1":
@@ -161,6 +181,202 @@ def sprites(out, paths):
     write(out, np.hstack(panels))
     print("REVIEW sprites ok", out)
 
+
+
+
+# ---------------------------------------------------------------- v3 cartoon review (contract §11.7)
+
+BOXES = [
+    ("ink", "thick hand-inked outline, no perfect geometry"),
+    ("cel", "flat cel colour, one shadow tone, muted aged palette"),
+    ("twos", "animated on twos (12 fps), within the frame caps"),
+    ("motion", "squash + stretch, rubber-hose limbs, secondary motion"),
+    ("idle", "has an idle loop (nothing sits still)"),
+    ("original", "original design, not any existing character"),
+    ("sheet", "sprite sheet + json per the contract"),
+    ("budget", "fits the atlas + RAM budget after import"),
+    ("style", "consistent with the approved style test"),
+]
+PAPER = np.array([0.91, 0.88, 0.81], np.float32)
+DARK = (0.12, 0.10, 0.09)
+
+
+def _hexf(h):
+    h = h.lstrip("#")
+    return np.array([int(h[i:i + 2], 16) for i in (0, 2, 4)], np.float32) / 255.0
+
+
+def _over(dst, rgba_u8, x, y):
+    f = rgba_u8.astype(np.float32) / 255.0
+    h, w = f.shape[:2]
+    a = f[..., 3:4]
+    dst[y:y + h, x:x + w] = f[..., :3] * a + dst[y:y + h, x:x + w] * (1 - a)
+
+
+def _label(img, text, x, y, scale=2, color=(1.0, 0.97, 0.85)):
+    draw(img, text, x, y, color, scale)
+
+
+def planet_background(planet, scene, W, H):
+    """The planet's painted layers when B-114 has exported them (tiled to W), else a flat
+    placeholder in the planet palette (sky over a ground band) so the asset can be judged."""
+    from meridian import v3
+    d = os.path.join(ART, "backgrounds", planet, scene)
+    layers = sorted(f for f in os.listdir(d) if f.startswith("layer") and f.endswith("_color.png")) if os.path.isdir(d) else []
+    pal = v3.PALETTES[planet]
+    bg = np.empty((H, W, 3), np.float32)
+    bg[:] = _hexf(pal["sky"])
+    if not layers:
+        bg[int(H * 0.72):] = _hexf(pal["green"])
+        return bg, "placeholder (no painted layers yet)"
+    for f in layers:
+        img = pngio.read_png(os.path.join(d, f))
+        lh, lw = img.shape[:2]
+        reps = -(-W // lw)
+        img = np.tile(img, (1, reps, 1))[:, :W]
+        if lh > H:
+            img = img[lh - H:]
+        y = H - img.shape[0]
+        a = img[..., 3:4]
+        bg[y:] = img[..., :3] * a + bg[y:] * (1 - a)
+    return bg, f"{len(layers)} painted layers"
+
+
+def ink_zoom(frame_u8, box=64):
+    """2x nearest zoom of the box with the most ink in a frame."""
+    from meridian import v3
+    ink = np.array(v3.hex_rgb(v3.INK), np.int32)
+    m = ((np.abs(frame_u8[..., :3].astype(np.int32) - ink).max(-1) < 24) & (frame_u8[..., 3] > 200)).astype(np.int32)
+    H, W = m.shape
+    box = min(box, H, W)
+    ii = np.pad(m.cumsum(0).cumsum(1), ((1, 0), (1, 0)))
+    s = ii[box:, box:] - ii[:-box, box:] - ii[box:, :-box] + ii[:-box, :-box]
+    y, x = np.unravel_index(int(s.argmax()), s.shape)
+    crop = frame_u8[y:y + box, x:x + box]
+    return np.repeat(np.repeat(crop, 2, 0), 2, 1)
+
+
+def v3_sheet_review(entry, meta, frames, sheet_path, out, stats, stale=None):
+    """frames: per-frame HxWx4 uint8 in sheet order. stats: ink widths, palette, problems.
+    Returns {box: (mark, note)}; mark 'x' measured/checked, 's' BLENDER self-check, ' ' open."""
+    from meridian import v3
+    stale = stale_keys() if stale is None else stale
+    planet = entry.get("planet", "earth")
+    fw, fh = meta["frame_width"], meta["frame_height"]
+    clips = meta["animations"]
+    longest = max(c["length"] for c in clips)
+    W = max(1400, 16 + longest * (fw + 8))
+    rows = []
+
+    # header
+    head = np.tile(PAPER, (30, W, 1))
+    _label(head, f"review {meta['key']}  style v3  ppu {meta['ppu']}  {meta['fps']} fps  "
+                 f"sheet {stats['sheet_wh'][0]}x{stats['sheet_wh'][1]}  {stats['png_kb']} kb", 6, 6)
+    rows.append(head)
+
+    # on the planet background at 1x: first frame of each clip + mid walk/idle frames
+    bh = fh + 48
+    bg, bg_note = planet_background(planet, entry.get("bg_scene", "plains"), W, bh)
+    x = 16
+    for c in clips:
+        for k in sorted({0, c["length"] // 2}):
+            if x + fw > W:
+                break
+            _over(bg, frames[c["start"] + k], x, bh - fh - 8)
+            x += fw + 8
+    _label(bg, f"at 1x on {planet} background: {bg_note}", 6, 4)
+    rows.append(bg)
+
+    # every clip as a numbered frame strip
+    for c in clips:
+        strip = np.tile(PAPER, (fh + 40, W, 1))
+        _label(strip, f"{c['name']}  {c['length']} frames  {'loop' if c['loop'] else 'once'}  "
+                      f"cap {v3.cap_of(c['name'])[0]}-{v3.cap_of(c['name'])[1]}", 6, 4)
+        for k in range(c["length"]):
+            xx = 8 + k * (fw + 8)
+            if xx + fw > W:
+                break
+            strip[22:22 + fh, xx:xx + fw] = PAPER * 0.96
+            _over(strip, frames[c["start"] + k], xx, 22)
+            _label(strip, str(k), xx + 2, 24 + fh - 14)
+        rows.append(strip)
+
+    # bottom: ink zoom, palette strip, checklist
+    bot_h = 380
+    bot = np.tile(PAPER, (bot_h, W, 1))
+    z = ink_zoom(frames[0])
+    _over(bot, z, 8, 26)
+    _label(bot, "ink 2x", 8, 6)
+    pal = v3.PALETTES[planet]
+    px0 = 8 + z.shape[1] + 24
+    _label(bot, f"palette {planet} + one shadow tone each", px0, 6)
+    for i, k in enumerate(v3.PALETTE_ORDER):
+        xx = px0 + i * 46
+        bot[26:66, xx:xx + 40] = _hexf(pal[k])
+        if k != "ink":
+            bot[70:90, xx:xx + 40] = _hexf(v3.shadow_of(pal[k], planet))
+        _label(bot, pal[k][1:], xx, 94, scale=1)
+    ow, iw = stats["outer_px"], stats["inner_px"]
+    lines = [
+        f"outer ink {ow[0]:.1f}-{ow[1]:.1f} px (4-6)  interior {iw[0]:.1f}-{iw[1]:.1f} px (1.5-3)  jitter +-20%",
+        f"palette hits {stats['palette'][0] * 100:.1f}% of solid pixels" + (f"  off: {' '.join(stats['palette'][1])}" if stats['palette'][1] else ""),
+        f"json {'valid' if not stats['problems'] else 'INVALID: ' + '; '.join(stats['problems'])[:120]}",
+    ]
+    for i, ln in enumerate(lines):
+        _label(bot, ln, px0, 112 + i * 18)
+
+    sc = entry.get("self_check", {})
+    ink_ok = v3.OUTER_PX[0] - 0.05 <= ow[0] and ow[1] <= v3.OUTER_PX[1] + 0.05 and \
+        (iw == (0, 0) or (v3.INNER_PX[0] - 0.05 <= iw[0] and iw[1] <= v3.INNER_PX[1] + 0.05))
+    res = {
+        "ink": ("x" if ink_ok else "!", "measured widths" + ("; " + sc["ink"] if "ink" in sc else "")),
+        "cel": ("x" if stats["palette"][0] >= 0.98 else "!", f"{stats['palette'][0] * 100:.1f}% palette"),
+        "twos": ("x" if not stats["problems"] else "!", "fps 12, caps"),
+        "motion": ("s", sc["motion"]) if "motion" in sc else (" ", "BLENDER did not self-check"),
+        "idle": ("x", "idle loops") if any(c["name"] == "idle" and c["loop"] for c in clips) else ("!", "no looping idle"),
+        "original": ("s", sc["original"]) if "original" in sc else (" ", "LEAD (§9.8)"),
+        "sheet": ("x" if not stats["problems"] else "!", "png + json written, validated"),
+        "budget": ("x" if stats["sheet_wh"][0] <= 2048 and stats["sheet_wh"][1] <= 2048 else "!",
+                   "sheet side; UNITY confirms after import"),
+        "style": ("s", sc["style"]) if "style" in sc else (" ", "LEAD, against the C0 style test"),
+    }
+    _label(bot, "bible 9.7 checklist  (x checked  s self-check  ! fails  blank: not mine to tick)", px0, 170)
+    for i, (k, text) in enumerate(BOXES):
+        mark, note = res[k]
+        _label(bot, f"[{mark}] {text}  -  {note}"[:135], px0, 188 + i * 16)
+    ours = entry.get("ours")
+    if ours:
+        _label(bot, f"what makes it ours: {ours}"[:160], 8, bot_h - 40)
+    rows.append(bot)
+
+    img = np.vstack(rows)
+    stamp(img, sheet_path, stale) if os.path.normpath(sheet_path).startswith(ART) else \
+        draw(img, stamp_text(sheet_path) + " preview", 2, img.shape[0] - 16, (1.0, 1.0, 0.85))
+    write(out, img)
+    return res
+
+
+def v3_rigset_review(entry, meta, sheet, sheet_path, out, part_imgs, stats):
+    """Rig set: the packed sheet over paper, each part with its pivot marked, json validity."""
+    stale = stale_keys()
+    H, W = sheet.shape[:2]
+    canvas = np.tile(PAPER, (H + 80, max(W + 16, 900), 1))
+    _label(canvas, f"review {meta['key']}  rig set  {W}x{H}  {len(meta['parts'])} parts  "
+                   f"{len(meta['plants'])} plants  {stats['png_kb']} kb", 6, 6)
+    _over(canvas, sheet, 8, 30)
+    for p in meta["parts"]:
+        x, y, w, h = p["rect"]
+        top = H - (y + h)
+        cx, cy = int(8 + x + p["pivot"][0] * w), int(30 + top + (1 - p["pivot"][1]) * h)
+        canvas[max(cy - 1, 0):cy + 2, max(cx - 4, 0):cx + 5] = (0.85, 0.1, 0.1)
+        canvas[max(cy - 4, 0):cy + 5, max(cx - 1, 0):cx + 2] = (0.85, 0.1, 0.1)
+    _label(canvas, f"json {'valid' if not stats['problems'] else 'INVALID: ' + '; '.join(stats['problems'])[:120]}",
+           6, H + 38)
+    if os.path.normpath(sheet_path).startswith(ART):
+        stamp(canvas, sheet_path, stale)
+    else:
+        draw(canvas, stamp_text(sheet_path) + " preview", 2, canvas.shape[0] - 16, (1.0, 1.0, 0.85))
+    write(out, canvas)
 
 if __name__ == "__main__":
     a = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]

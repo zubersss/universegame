@@ -671,7 +671,170 @@ def do_deck_plane(entry, preview):
 
 
 
+def _v3_dest(entry, preview):
+    cat, name, _variant = entry["key"].split("/")
+    return os.path.join(PREVIEW, entry["key"].replace("/", "__")) if preview else os.path.join(ART, cat, name)
+
+
+def _v3_write_png(path, img, key):
+    from meridian import v3
+    n = pngio.write_png(path, img)
+    if n > v3.MAX_FILE_BYTES:
+        raise AssetError(f"{key}: {os.path.basename(path)} is {n / 2**20:.1f} MB, over the 4 MB cap")
+    return n
+
+
+def _v3_ink_stats(widths):
+    from meridian import v3
+    outer = [w for w in widths if w[0] >= v3.OUTER_SPLIT]
+    inner = [w for w in widths if w[0] < v3.OUTER_SPLIT]
+    rng = lambda ws: (min(w[1] for w in ws), max(w[2] for w in ws)) if ws else (0, 0)  # noqa: E731
+    return rng(outer), rng(inner)
+
+
+def do_v3_sheet(entry, preview):
+    """Contract v3.0 §11.2 (B-110): Grease Pencil drawings -> 1x frames at 12 fps -> one sheet
+    + json + the §11.7 review sheet. Clips start at the timeline markers named after them."""
+    import gp_raster as GR
+    from meridian import v3
+    sys.path.insert(0, HERE)
+    import review
+    t0 = time.time()
+    key = entry["key"]
+    variant = key.split("/")[2]
+    scene, objs = open_source(entry, preview)
+    fw, fh = entry["frame"]
+    pivot = tuple(entry.get("pivot", [0.5, 0.0]))
+    ss = 2 if preview else 4
+    markers = {m.name: m.frame for m in scene.timeline_markers}
+    frames, clips, widths = [], [], []
+    for c in entry["clips"]:
+        if c["name"] not in markers:
+            raise AssetError(f"{key}: no timeline marker '{c['name']}' in {entry['source']}")
+        clips.append({"name": c["name"], "start": len(frames), "length": int(c["frames"]),
+                      "loop": bool(c.get("loop", False))})
+        if c.get("loop"):
+            clips[-1]["loop_from"] = int(c.get("loop_from", 0))
+        for k in range(int(c["frames"])):
+            f = markers[c["name"]] + k
+            img, w = GR.render_frame(GR.collect(scene, objs, f), fw, fh, v3.PPU, pivot, ss=ss,
+                                     seed=int(entry.get("seed", 1)) * 1000 + f)
+            frames.append(img)
+            widths += w
+    m = v3.EDGE_MARGIN
+    clipped = [i for i, im in enumerate(frames)
+               if im[:m, :, 3].any() or (pivot[1] > 0 and im[-m:, :, 3].any()) or im[:, :m, 3].any() or im[:, -m:, 3].any()]
+    cols = int(entry.get("columns", v3.columns_for(fw, len(frames))))
+    sheet = post.pack_sheet(frames, cols, gutter=v3.GUTTER, fill=(0, 0, 0, 0))
+    meta = {"key": key, "style": "v3", "frame_width": fw, "frame_height": fh, "columns": cols,
+            "gutter": v3.GUTTER, "frames": len(frames), "fps": v3.FPS, "pivot": list(pivot),
+            "facing": entry.get("facing", "right"), "ppu": v3.PPU, "animations": clips,
+            "squash_root": bool(entry.get("squash_root", True))}
+    problems = v3.validate_sheet(meta, sheet.shape)
+    if clipped:
+        problems.append(f"frames {clipped[:8]} touch the {m} px frame edge (drawing clipped)")
+    dest = _v3_dest(entry, preview)
+    os.makedirs(dest, exist_ok=True)
+    png = os.path.join(dest, f"{variant}_color.png")
+    if problems and not preview:
+        raise AssetError(f"{key}: " + "; ".join(problems))
+    n = _v3_write_png(png, sheet, key)
+    with open(os.path.join(dest, f"{variant}.json"), "w", encoding="utf-8", newline="\n") as fh_:
+        json.dump(meta, fh_, indent=2)
+        fh_.write("\n")
+    outer, inner = _v3_ink_stats(widths)
+    stats = {"outer_px": outer, "inner_px": inner, "palette": v3.palette_hits(sheet, entry.get("planet", "earth")),
+             "problems": problems, "sheet_wh": (sheet.shape[1], sheet.shape[0]), "png_kb": n // 1024}
+    task = entry.get("review_name", key.replace("/", "_"))
+    out = os.path.join(PREVIEW, f"review_{task}{'_preview' if preview else ''}.png")
+    boxes = review.v3_sheet_review(entry, meta, frames, png, out, stats)
+    if not preview:
+        mark_stale(key, False)
+    open_boxes = [k for k, (mk, _n) in boxes.items() if mk != "x"]
+    log_line(f"{'PREVIEW' if preview else 'OK'} {key} | v3 sheet {sheet.shape[1]}x{sheet.shape[0]} {n // 1024}KB, "
+             f"{len(frames)} frames {fw}x{fh} @12fps ({', '.join(c['name'] + ' ' + str(c['length']) for c in clips)}) "
+             f"| ink outer {outer[0]:.1f}-{outer[1]:.1f}px inner {inner[0]:.1f}-{inner[1]:.1f}px "
+             f"| palette {stats['palette'][0] * 100:.1f}% | boxes not x: {','.join(open_boxes) or '-'} "
+             f"| review {os.path.basename(out)} | {time.time() - t0:.1f}s | peak {peak_mb()}MB"
+             + (f" | PROBLEMS {'; '.join(problems)}" if problems else ""))
+    if problems:
+        raise AssetError(f"{key}: " + "; ".join(problems))
+
+
+def do_v3_rigset(entry, preview):
+    """Contract v3.0 §11.3 (B-110): every GP object `part_<name>` in the collection is one rig
+    part, drawn at frame 1 around its object origin (= the part's pivot); parts are shelf-packed
+    into one <= 2048 sheet; the json carries the rects (bottom-left origin, px), pivots and the
+    manifest's plants (bones, swaps, idle, react)."""
+    import gp_raster as GR
+    from meridian import v3
+    sys.path.insert(0, HERE)
+    import review
+    t0 = time.time()
+    key = entry["key"]
+    variant = key.split("/")[2]
+    if entry.get("preview_only") and not preview:
+        raise AssetError(f"{key}: preview-only test entry (run with -Preview)")
+    scene, objs = open_source(entry, preview)
+    ss = 2 if preview else 4
+    pad = 4
+    parts = sorted([o for o in objs if o.type == "GREASEPENCIL" and o.name.startswith("part_")], key=lambda o: o.name)
+    if not parts:
+        raise AssetError(f"{key}: no part_<name> Grease Pencil objects in the collection")
+    imgs, piv = [], []
+    for ob in parts:
+        strokes = GR.collect(scene, [ob], int(entry.get("frame_number", 1)))
+        if not strokes:
+            raise AssetError(f"{key}: {ob.name} has no strokes at frame 1")
+        ox, oz = ob.matrix_world.translation.x, ob.matrix_world.translation.z
+        allp = np.vstack([s["xz"] for s in strokes])
+        rmax = max(float(s["radius"].max()) for s in strokes) * 1.25
+        x0, x1 = allp[:, 0].min() - rmax, allp[:, 0].max() + rmax
+        z0, z1 = allp[:, 1].min() - rmax, allp[:, 1].max() + rmax
+        w = int(np.ceil((x1 - x0) * v3.PPU)) + 2 * pad
+        h = int(np.ceil((z1 - z0) * v3.PPU)) + 2 * pad
+        w, h = -(-w // 4) * 4, -(-h // 4) * 4
+        px_piv = ((ox - x0) * v3.PPU + pad) / w, ((oz - z0) * v3.PPU + pad) / h
+        for s in strokes:              # re-centre: the frame's pivot is the part's pivot
+            s["xz"] = s["xz"] - np.array([ox, oz])
+        img, _w = GR.render_frame(strokes, w, h, v3.PPU, px_piv, ss=ss, seed=int(entry.get("seed", 1)))
+        imgs.append(img)
+        piv.append(px_piv)
+    pos, W, H = v3.shelf_pack([(im.shape[1], im.shape[0]) for im in imgs])
+    sheet = np.zeros((H, W, 4), np.uint8)
+    part_meta = []
+    for ob, im, (x, ytop), pv in zip(parts, imgs, pos, piv):
+        h, w = im.shape[:2]
+        sheet[ytop:ytop + h, x:x + w] = im
+        part_meta.append({"name": ob.name[len("part_"):], "rect": [x, H - (ytop + h), w, h],
+                          "pivot": [round(pv[0], 4), round(pv[1], 4)]})
+    meta = {"key": key, "style": "v3", "ppu": v3.PPU, "rect_origin": "bottom_left",
+            "parts": part_meta, "plants": entry.get("plants", [])}
+    problems = v3.validate_rigset(meta, sheet.shape)
+    if problems and not preview:
+        raise AssetError(f"{key}: " + "; ".join(problems))
+    dest = _v3_dest(entry, preview)
+    os.makedirs(dest, exist_ok=True)
+    png = os.path.join(dest, f"{variant}_color.png")
+    n = _v3_write_png(png, sheet, key)
+    with open(os.path.join(dest, f"{variant}.json"), "w", encoding="utf-8", newline="\n") as fh_:
+        json.dump(meta, fh_, indent=2)
+        fh_.write("\n")
+    task = entry.get("review_name", key.replace("/", "_"))
+    out = os.path.join(PREVIEW, f"review_{task}{'_preview' if preview else ''}.png")
+    review.v3_rigset_review(entry, meta, sheet, png, out, imgs, {"problems": problems, "png_kb": n // 1024})
+    if not preview:
+        mark_stale(key, False)
+    log_line(f"{'PREVIEW' if preview else 'OK'} {key} | v3 rig set {W}x{H} {n // 1024}KB, {len(part_meta)} parts, "
+             f"{len(meta['plants'])} plants | review {os.path.basename(out)} | {time.time() - t0:.1f}s | peak {peak_mb()}MB"
+             + (f" | PROBLEMS {'; '.join(problems)}" if problems else ""))
+    if problems:
+        raise AssetError(f"{key}: " + "; ".join(problems))
+
+
 def do_asset(entry, preview):
+    if entry.get("style") == "v3":      # contract v3.0 §11 cartoon assets (B-110)
+        return do_v3_rigset(entry, preview) if entry.get("rigset") else do_v3_sheet(entry, preview)
     if entry.get("model"):
         return do_model(entry, preview)
     if entry.get("deck_plane"):
@@ -703,8 +866,11 @@ def main(argv):
     g.add_argument("--asset")
     g.add_argument("--category")
     g.add_argument("--all", action="store_true")
+    g.add_argument("--sheet", help="a v3 sheet or rig set key (contract §11); same as --asset for style v3")
     ap.add_argument("--preview", action="store_true")
     args = ap.parse_args(argv)
+    if args.sheet:
+        args.asset = args.sheet
     _man, assets = load_manifest()
     chosen = select(assets, args)
     target = args.asset or args.category or "all"

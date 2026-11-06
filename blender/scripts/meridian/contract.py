@@ -24,6 +24,7 @@ CATEGORIES = {
     "fx":          {"size": (1024, 1024), "padded": True,  "lit": False, "frame": 256},
     "icons":       {"size": (128, 128),   "padded": True,  "lit": False, "exact": True},
     "ui":          {"size": (2048, 2048), "padded": False, "lit": False},   # v1.6 / D-044: sized per asset
+    "flora":       {"size": (2048, 2048), "padded": False, "lit": False},   # v3.0 §11.3 rig sets (style v3 only)
 }
 
 # Per-variant overrides of the category caps (contract §4).
