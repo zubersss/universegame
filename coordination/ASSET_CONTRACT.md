@@ -1,6 +1,6 @@
-# MERIDIAN — Asset Contract v2.5
+# MERIDIAN — Asset Contract v2.6
 
-> **v2.5 (D-079, 2026-11-06).** Stage layers (§10: per-region layer files, caps, `stage.json`, stage sheets), clips at the sidecar's fps (60 for the surveyor and apexes), the feel clip set (§9 Rig row).
+> **v2.5 (D-079, 2026-11-06).** Stage layers (§10: per-region layer files, caps, `stage.json`, stage sheets), clips at the sidecar's fps (60 for the surveyor and apexes), the feel clip set (§9 Rig row). **v2.6 (D-082):** §9.1 ruling 10, the `alpha_clip` sidecar flag.
 
 > **v2 (D-062, 2026-11-02).** Models replace sprites. §9 is the rule set for every 3D category
 > (`terrain`, `backgrounds` (now skyline/ridge/deck meshes), `ships`, `characters`, `creatures`,
@@ -161,6 +161,7 @@ Existing Done assets are not re-exported unless a task says so.
 7. **Sockets** are empties named `socket_<name>` exported as glTF nodes, and listed in the json.
 8. **LFS.** `*.glb` and `*.gltf` are LFS (`.gitattributes`). A glb committed before this rule is re-added once (`git rm --cached` + `git add`) by its owner so it becomes a pointer.
 9. **Model map size (D-072).** Model maps are exempt from §2's 4 MB PNG cap; the 2048² cap and the §11.1 texture budget still apply.
+10. **Alpha-clipped models (v2.6, D-082).** A sidecar json with `"alpha_clip": true` means the model's colour map carries alpha for cut-out cards (leaf clusters, needles, wisps, fins); `ArtImporter` sets that material to alpha clip (cutoff 0.5) and double-sided. Without the flag, alpha in a colour map is ignored. Blend (translucent) stays reserved for glass, fins and cloud planes named in a task.
 
 ## 10. Stage layers (v2.5, D-079)
 
