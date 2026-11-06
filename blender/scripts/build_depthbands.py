@@ -29,16 +29,16 @@ TRI_BUDGET = 7600                 # contract 8 k, minus margin
 
 REGIONS = {
     #          ground colours (sRGB)                hill  rise  trees conifer  tree h     extras
-    "forest": dict(ground=[(64, 92, 48), (82, 104, 56)], hill=6, rise=26, trees=220, conifer=0.6, tree_h=(14, 24),
+    "forest": dict(ground=[(64, 92, 48), (82, 104, 56)], hill=6, rise=26, trees=220, conifer=0.6, tree_h=(6, 12), haze=(184, 202, 214),
                    needle=[(30, 58, 38), (40, 70, 44)], leaf=[(46, 78, 34), (62, 96, 40), (84, 112, 46)], seed=1),
-    "plains": dict(ground=[(110, 134, 64), (132, 150, 76)], hill=3, rise=10, trees=22, conifer=0.2, tree_h=(9, 15),
+    "plains": dict(ground=[(110, 134, 64), (132, 150, 76)], hill=3, rise=10, trees=22, conifer=0.2, tree_h=(5, 9), haze=(190, 204, 214),
                    needle=[(36, 64, 40)], leaf=[(62, 96, 40), (84, 112, 46)], seed=2),
     "desert": dict(ground=[(214, 182, 128), (196, 160, 108)], hill=4, rise=24, trees=0, conifer=0.0, tree_h=(0, 0),
                    strata=((232, 200, 150), 4.5), terrace=5.0, seed=3),
-    "coast":  dict(ground=[(186, 174, 132), (140, 146, 92)], hill=2, rise=6, trees=45, conifer=0.9, tree_h=(8, 13),
+    "coast":  dict(ground=[(186, 174, 132), (140, 146, 92)], hill=2, rise=6, trees=45, conifer=0.9, tree_h=(5, 9), haze=(190, 210, 222),
                    needle=[(32, 60, 40), (44, 72, 46)], leaf=[(56, 92, 40)],
                    sea=dict(y=42.0, level=-1.5, shallow=(70, 176, 178), deep=(26, 70, 122)), seed=4),
-    "taiga":  dict(ground=[(58, 80, 58), (72, 92, 64)], hill=7, rise=30, trees=260, conifer=0.95, tree_h=(16, 28),
+    "taiga":  dict(ground=[(58, 80, 58), (72, 92, 64)], hill=7, rise=30, trees=260, conifer=0.95, tree_h=(7, 14), haze=(186, 198, 210),
                    needle=[(24, 48, 36), (32, 58, 42), (40, 66, 46)], leaf=[(52, 80, 44)],
                    snow=((236, 240, 246), 24.0), seed=5),
     "tundra": dict(ground=[(150, 150, 128), (176, 170, 146)], hill=4, rise=12, trees=8, conifer=1.0, tree_h=(3, 6),
@@ -136,7 +136,7 @@ class Builder:
     def tris(self):
         return sum(len(f) - 2 for f in self.faces)
 
-    def mesh(self, name, coll, emit=0.0):
+    def mesh(self, name, coll, emit=0.0, smooth_from=None):
         me = bpy.data.meshes.new(name)
         me.from_pydata(self.verts, [], self.faces)
         me.update()
@@ -146,8 +146,19 @@ class Builder:
         ob = bpy.data.objects.new(name, me)
         coll.objects.link(ob)
         me.materials.append(vc_material(name + "_mat", emit))
-        for p in me.polygons:
-            p.use_smooth = False
+        for p in me.polygons:                                      # B-102: faces from smooth_from on (the trees) are
+            p.use_smooth = smooth_from is not None and p.index >= smooth_from   # smooth-shaded; the strip stays faceted
+        if smooth_from is not None:                                 # auto-smooth: edges sharper than 60 deg stay hard
+            owners = {}
+            for p in me.polygons:
+                if p.index >= smooth_from:
+                    for ek in p.edge_keys:
+                        owners.setdefault(ek, []).append(p.normal.copy())
+            sharp = me.attributes.new("sharp_edge", "BOOLEAN", "EDGE")
+            for e in me.edges:
+                ns = owners.get(tuple(sorted(e.vertices)), [])
+                if len(ns) == 2 and ns[0].dot(ns[1]) < math.cos(math.radians(60.0)):
+                    sharp.data[e.index].value = True
         return ob
 
 
@@ -202,6 +213,7 @@ def ridge(region, R, coll):
     b = Builder()
     b.quad_grid(xs, ys, h, col)
     ground_tris = b.tris()
+    ground_faces = len(b.faces)
     # Trees: cap by the budget. Conifer = two stacked 6-sided cones (12 tris); broadleaf = blob
     # (24 tris) on a 4-sided stem (4 tris).
     n = R["trees"]
@@ -210,12 +222,13 @@ def ridge(region, R, coll):
     placed = []
     for i in range(n):
         x = rng.uniform(-PERIOD / 2, PERIOD / 2)
-        y = rng.uniform(22.0, 58.0)
+        y = rng.uniform(30.0, 58.0)                                  # B-102: no trees in the z 20 and 25 rows
         z = h(x, y)
         if sea and (y >= sea["y"] - 2 or z <= sea["level"] + 0.5):
             continue
         th = rng.uniform(*R["tree_h"])
         conifer = rng.random() < R["conifer"]
+        y = max(y, 30.0 + th * (0.22 if conifer else 0.32))              # B-102: the whole crown stays at z >= 30
         for dx in ([0.0] + ([PERIOD] if x < -PERIOD / 2 + 6 else []) + ([-PERIOD] if x > PERIOD / 2 - 6 else [])):
             if conifer:
                 c = lin(rng.choice(R["needle"]))
@@ -240,7 +253,12 @@ def ridge(region, R, coll):
             for dx in ([0.0] + ([PERIOD] if x < -PERIOD / 2 + 4 else []) + ([-PERIOD] if x > PERIOD / 2 - 4 else [])):
                 b.blob(x + dx, y, z + r * 0.35, r, c)
             placed.append((x, y))
-    ob = b.mesh(f"ridge_{region}", coll)
+    if R.get("haze"):                                                # B-102: atmospheric tint toward the sky haze,
+        hz = lin(R["haze"])                                          # 20 % at z 20 -> 45 % at z 60
+        for i, (v, c) in enumerate(zip(b.verts, b.cols)):
+            k = 0.20 + 0.25 * max(0.0, min(1.0, (v[1] - 20.0) / 40.0))
+            b.cols[i] = tuple(a + (hb - a) * k for a, hb in zip(c[:3], hz[:3])) + (c[3],)
+    ob = b.mesh(f"ridge_{region}", coll, smooth_from=ground_faces if R["trees"] else None)
     nv = R.get("vents", 0)
     if nv:                                                           # B-092 Venus surface: lava vents, a second emissive mesh
         vb = Builder()
