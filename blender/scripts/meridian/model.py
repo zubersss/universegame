@@ -388,7 +388,7 @@ def _pixels(img):
     return a.reshape(img.size[1], img.size[0], 4)[::-1]          # top row first (PNG order)
 
 
-def bake_maps(mesh, size, samples=16):
+def bake_maps(mesh, size, samples=16, alpha_map=False):
     scene = bpy.context.scene
     scene.render.engine = "CYCLES"
     scene.cycles.device = "CPU"
@@ -407,6 +407,16 @@ def bake_maps(mesh, size, samples=16):
         bpy.ops.object.bake(**kw)
         return _pixels(img)
 
+    alpha_saved = []                                      # B-094: Principled Alpha scales every pass; bake opaque
+    for slot in mesh.material_slots:
+        pr = _principled(slot.material)
+        if pr is None:
+            continue
+        ai = pr.inputs["Alpha"]
+        alpha_saved.append((slot.material, ai, ai.default_value, [l.from_socket for l in ai.links]))
+        for l in list(ai.links):
+            slot.material.node_tree.links.remove(l)
+        ai.default_value = 1.0
     # Cycles' diffuse colour = base colour x (1 - metallic): a metallic part bakes black (the
     # calibration cube did). Metallic goes to the mask, so switch it off for the colour bake.
     undo = []
@@ -436,8 +446,32 @@ def bake_maps(mesh, size, samples=16):
             out[which] = bake(which, True, type="EMIT")
         finally:
             _restore(undo)
+    color = out["color"][..., :3]
+    if alpha_map:                                         # B-094: per-part alpha -> the colour map's A (fins)
+        undo = []
+        for m, ai, v, srcs in alpha_saved:
+            pr, nt = _principled(m), m.node_tree
+            ec, es = pr.inputs["Emission Color"], pr.inputs["Emission Strength"]
+            saved = (tuple(ec.default_value), es.default_value, [l.from_socket for l in ec.links])
+            for l in list(ec.links):
+                nt.links.remove(l)
+            if srcs:
+                nt.links.new(srcs[0], ec)
+            else:
+                ec.default_value = (v, v, v, 1.0)
+            es.default_value = 1.0
+            undo.append((m, pr, saved))
+        try:
+            out["alpha"] = bake("alpha", True, type="EMIT")
+        finally:
+            _restore(undo)
+        color = np.dstack([color, out["alpha"][..., 0]])
+    for m, ai, v, srcs in alpha_saved:
+        ai.default_value = v
+        for src in srcs:
+            m.node_tree.links.new(src, ai)
     mask = np.dstack([out["metallic"][..., 0], out["ao"][..., 0], out["rim"][..., 0], 1.0 - out["rough"][..., 0]])
-    maps = {"color": out["color"][..., :3], "normal": out["normal"][..., :3], "mask": mask,
+    maps = {"color": color, "normal": out["normal"][..., :3], "mask": mask,
             "emission": out["emission"][..., :3]}
     return maps
 
@@ -456,7 +490,8 @@ def export_material(mesh, maps_paths, emissive, alpha=None):
         n.image = bpy.data.images.load(path, check_existing=False)
         n.image.colorspace_settings.name = "Non-Color" if non_color else "sRGB"
         return n
-    nt.links.new(tex(maps_paths["color"], False).outputs["Color"], pr.inputs["Base Color"])
+    ct = tex(maps_paths["color"], False)
+    nt.links.new(ct.outputs["Color"], pr.inputs["Base Color"])
     nm = nt.nodes.new("ShaderNodeNormalMap")
     nt.links.new(tex(maps_paths["normal"], True).outputs["Color"], nm.inputs["Color"])
     nt.links.new(nm.outputs["Normal"], pr.inputs["Normal"])
@@ -464,7 +499,10 @@ def export_material(mesh, maps_paths, emissive, alpha=None):
         nt.links.new(tex(maps_paths["emission"], False).outputs["Color"], pr.inputs["Emission Color"])
         pr.inputs["Emission Strength"].default_value = 1.0
     if alpha is not None:                                 # B-092: translucent strips (glTF alphaMode BLEND)
-        pr.inputs["Alpha"].default_value = float(alpha)
+        if alpha == "map":                               # B-094: alpha from the colour map's A
+            nt.links.new(ct.outputs["Alpha"], pr.inputs["Alpha"])
+        else:
+            pr.inputs["Alpha"].default_value = float(alpha)
         for attr, val in (("surface_render_method", "BLENDED"), ("blend_method", "BLEND")):
             try:
                 setattr(m, attr, val)
@@ -636,7 +674,7 @@ def export_model(entry, art_dir, preview_dir, objs, stamp_fn):
         emissive = False
     else:
         unwrap(mesh)
-        maps = bake_maps(mesh, size, samples=int(entry.get("bake_samples", 16)))
+        maps = bake_maps(mesh, size, samples=int(entry.get("bake_samples", 16)), alpha_map=entry.get("alpha") == "map")
     for mname in (MAPS if not atlas else ()):
         a = maps[mname]
         if a.shape[2] == 3:

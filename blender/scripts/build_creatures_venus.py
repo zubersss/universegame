@@ -788,6 +788,194 @@ def build(out_path=DEFAULT_OUT):
     print("MERIDIAN built", out_path)
 
 
+# ---------------------------------------------------------------- contract v2 (B-094): segmented ribbon
+# The v1 apex (one 14-bone chain) becomes three glbs that UNITY chains: veil_serpent_head,
+# a repeatable veil_serpent_body and veil_serpent_tail. Each module is a short bone chain along
+# +x (bone s0 at the tail side, as v1), body radius R_BODY at every interface, capsule ends
+# reaching 0.12 m into the neighbour so the join shows no notch, banding with a whole number of
+# bands per module (phase 0 at both ends). The dorsal sail runs over the body modules at a
+# constant height, dies out on the head and rises out of the tail; the ventral fin sits on the
+# tail. Fins are the v1 membrane (Principled Alpha 0.5, baked to the colour map's alpha).
+# Clips keyed at 30 fps per module with the v1 wave (phase -j*LAM per bone, j local). In a
+# chain, a module with J bones behind it plays its clip delayed by J*LAM cycles (tail 0,
+# body_1 0.42, body_2 0.70, head 0.98 for tail+2 bodies+head). The chilled white flash and the
+# death lift are chain-level (UNITY: a material emission override; the chain's transform).
+SERPENT_OUT = os.path.join(os.path.dirname(HERE), "sources", "creatures", "venus_serpent_model.blend")
+SEG = 0.22                       # bone length (v1: 3.1 m over 14 bones)
+R_BODY = 0.19                    # body radius at every module interface
+LAM = 0.07                       # v1 phase per bone, in cycles
+MODULES = {"head": 4, "body": 4, "tail": 6}
+SERPENT_CLIPS = [("idle", 36, True), ("walk", 24, True), ("fly", 24, True), ("attack", 18, False), ("hurt", 8, False), ("death", 30, False)]
+
+
+def _serpent_module(scene, which, nb, rnd):
+    sp = f"veil_serpent_{which}"
+    coll = bpy.data.collections.new(sp)
+    scene.collection.children.link(coll)
+    L = nb * SEG
+    x0, x1 = -L / 2, L / 2
+    ad = bpy.data.armatures.new(f"{sp}_rig")
+    rig = bpy.data.objects.new(f"{sp}_rig", ad)
+    coll.objects.link(rig)
+    _select_only(rig)
+    bpy.ops.object.mode_set(mode="EDIT")
+    prev = None
+    for k in range(nb):
+        b = ad.edit_bones.new(f"s{k}")
+        b.head, b.tail = Vector((x0 + k * SEG, 0, 0)), Vector((x0 + (k + 1) * SEG, 0, 0))
+        if prev:
+            b.parent, b.use_connect = prev, True
+        prev = b
+    bpy.ops.object.mode_set(mode="OBJECT")
+
+    def rad(t):                                  # t 0 (tail side) .. 1 (head side) of this module
+        if which == "tail":
+            return 0.03 + (R_BODY - 0.03) * t ** 0.9
+        return R_BODY
+    ext = 0.12
+    pts = [(x0 + k * SEG, 0, 0, rad(k / nb)) for k in range(nb + 1)]
+    if which != "tail":
+        pts.insert(0, (x0 - ext, 0, 0, rad(0.0)))
+    if which != "head":
+        pts.append((x1 + ext, 0, 0, rad(1.0)))
+    body = _capsules_mesh(f"{sp}_body", coll, [pts], 0.009)
+    me = body.data
+    attr = me.color_attributes.new("ser", "FLOAT_COLOR", "POINT")
+    band_period = L / (2 if which != "tail" else 4)
+    for k, v in enumerate(me.vertices):
+        x, y, z = v.co
+        t = min(max((x - x0) / L, 0.0), 1.0)
+        r = max(rad(t), 0.02)
+        belly = min(1.0, max(0.0, (-z / r - 0.15) / 0.3))
+        band = (1.0 if math.sin(2 * math.pi * x / band_period) > 0.25 else 0.0) * min(1.0, max(0.0, (z / r + 0.1) / 0.3))
+        attr.data[k].color = (belly, band, 0.0, 1.0)
+    me.materials.append(serpent_skin(f"{sp}_skin"))
+    bind_auto(body, rig)
+
+    memb = membrane_material(f"{sp}_membrane")
+    raym = flat_material(f"{sp}_ray", (90, 64, 40), rough=0.4)
+
+    def fin(tag, t0, t1, sz, h0, h1, nrays, bell=0.0):
+        verts, faces, top = [], [], []
+        m_ = 40
+        for i in range(m_ + 1):
+            u = i / m_
+            t = t0 + (t1 - t0) * u
+            x = x0 + L * t
+            r = rad(t)
+            h = h0 + (h1 - h0) * u + bell * math.sin(math.pi * u) ** 0.6
+            h += (0.06 * math.sin(u * 23.0) + rnd.uniform(-0.02, 0.015)) * math.sin(math.pi * u) * h   # ragged, straight ends
+            h = max(h, 0.015)
+            verts += [(x, 0, sz * r * 0.6), (x, 0, sz * (r + h))]
+            top.append((x, r, h))
+            if i:
+                a = 2 * i
+                faces.append((a - 2, a, a + 1, a - 1))
+        mesh = bpy.data.meshes.new(f"{sp}_{tag}")
+        mesh.from_pydata(verts, [], faces)
+        ob = bpy.data.objects.new(f"{sp}_{tag}", mesh)
+        coll.objects.link(ob)
+        ob.modifiers.new("solid", "SOLIDIFY").thickness = 0.006
+        ob.data.materials.append(memb)
+        bind_auto(ob, rig)
+        rv, rf = [], []
+        for k in range(nrays):
+            i = int((k + 0.5) / nrays * m_)
+            x, r, h = top[i]
+            e = h * 1.04 + 0.01
+            lean = -0.35 * e
+            b0 = len(rv)
+            rv += [(x - 0.022, 0, sz * r * 0.6), (x + 0.022, 0, sz * r * 0.6),
+                   (x + lean + 0.009, 0, sz * (r + e)), (x + lean - 0.009, 0, sz * (r + e))]
+            rf.append((b0, b0 + 1, b0 + 2, b0 + 3))
+        rmesh = bpy.data.meshes.new(f"{sp}_{tag}_rays")
+        rmesh.from_pydata(rv, [], rf)
+        ro = bpy.data.objects.new(f"{sp}_{tag}_rays", rmesh)
+        coll.objects.link(ro)
+        ro.modifiers.new("solid", "SOLIDIFY").thickness = 0.012
+        ro.data.materials.append(raym)
+        bind_auto(ro, rig)
+
+    SAIL = 0.42
+    if which == "body":
+        fin("sail", 0.0, 1.0, 1, SAIL, SAIL, 2)
+    elif which == "head":
+        fin("sail", 0.0, 0.72, 1, SAIL, 0.0, 2)
+    else:
+        fin("sail", 0.55, 1.0, 1, 0.0, SAIL, 2)
+        fin("ventral", 0.2, 0.7, -1, 0.0, 0.0, 4, bell=0.26)
+
+    if which == "head":                          # v1 skull: wedge, jaw, glowing eyes, backswept horns
+        hb = f"s{nb - 1}"
+        hx = x1
+        hide = flat_material(f"{sp}_skull", (92, 68, 44), rough=0.35)
+        horn = flat_material(f"{sp}_horn", (214, 196, 160), rough=0.4)
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=16, radius=1.0, location=(0, 0, 0))
+        sk = bpy.context.active_object
+        sk.name = f"{sp}_skull"
+        for v in sk.data.vertices:
+            tt = min(1.0, max(0.0, (v.co.x + 1) / 2))
+            v.co.y *= 1.0 - 0.55 * tt
+            v.co.z *= 1.0 - 0.45 * tt
+        sk.location = (hx + 0.14, 0, 0.06)
+        sk.scale = (0.36, 0.22, 0.26)
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        bpy.ops.object.shade_smooth()
+        _rig_child(sk, rig, hb, coll, hide)
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=12, radius=1.0, location=(hx + 0.16, 0, -0.13))
+        jaw = bpy.context.active_object
+        jaw.scale = (0.3, 0.16, 0.08)
+        jaw.rotation_euler = (0, math.radians(8), 0)
+        bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+        _rig_child(jaw, rig, hb, coll, flat_material(f"{sp}_jaw", (210, 190, 146), rough=0.4))
+        eye = flat_material(f"{sp}_eye", (120, 60, 10), emit=(255, 200, 80), strength=2.6)
+        for sy in (-1, 1):
+            bpy.ops.mesh.primitive_uv_sphere_add(segments=10, ring_count=6, radius=0.032, location=(hx + 0.24, sy * 0.13, 0.12))
+            _rig_child(bpy.context.active_object, rig, hb, coll, eye)
+            for j, (dz, ln) in enumerate(((0.12, 0.34), (0.05, 0.24))):
+                bpy.ops.mesh.primitive_cone_add(vertices=8, radius1=0.035, radius2=0.0, depth=ln,
+                                                location=(hx - 0.04 - ln * 0.4, sy * 0.1, dz + 0.06 + ln * 0.18),
+                                                rotation=(0, math.radians(-112 + 14 * j), 0))
+                _rig_child(bpy.context.active_object, rig, hb, coll, horn)
+
+    rig.animation_data_create()
+    for name, nfr, loop in SERPENT_CLIPS:
+        act = bpy.data.actions.new(f"{sp}|{name}")
+        act.use_fake_user = True
+        rig.animation_data.action = act
+        for f in list(range(1, nfr + 1, 3)) + [nfr + 1]:
+            t = (f - 1) / nfr
+            A = {"idle": 28.0, "walk": 38.0, "fly": 38.0, "attack": 18.0, "hurt": 6.0, "death": 35.0 * (1 - t)}[name]
+            head = [0.0] * nb
+            if which == "head" and name == "attack":
+                k = math.sin(math.pi * min(1.0, t * 1.2))
+                head[nb - 3], head[nb - 2], head[nb - 1] = -22 * k, -18 * k, (26 if 0.4 < t < 0.6 else -12) * k
+            if which == "head" and name == "hurt":
+                head[nb - 1] = 18.0 * (1 - t)
+            prev_abs = 0.0
+            for j in range(nb):
+                ab = A * math.sin(2 * math.pi * (t - j * LAM)) + head[j]
+                set_pose(rig, f"s{j}", ab - prev_abs if j else ab)
+                prev_abs = ab
+            for pb in rig.pose.bones:
+                pb.keyframe_insert("rotation_quaternion", frame=f)
+        rig.animation_data.action = None
+    rig.animation_data.action = bpy.data.actions[f"{sp}|idle"]
+
+
+def build_serpent_modules(out_path=SERPENT_OUT):
+    import random as _r
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    scene = bpy.context.scene
+    scene.render.fps = 30
+    for which, nb in MODULES.items():
+        _serpent_module(scene, which, nb, _r.Random(44002 + nb))
+    scene.frame_start, scene.frame_end = 1, 37
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    bpy.ops.wm.save_as_mainfile(filepath=out_path, compress=True)
+    print("MERIDIAN built", out_path)
+
+
 if __name__ == "__main__":
     args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     build(args[0] if args else DEFAULT_OUT)
