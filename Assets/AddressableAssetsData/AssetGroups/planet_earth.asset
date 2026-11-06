@@ -35,6 +35,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0b5d6a3f9d7b2744ca44c6799074a6b6
+    m_Address: flora/earth/rigset/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 13e95768f5d36994b9be282380e68945
     m_Address: creatures/earth/wolf
     m_ReadOnly: 0
@@ -97,6 +102,16 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 60c2fa003aecf484da9562643a48fd4b
     m_Address: props/earth/archive_door
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 61715d9f6ae66d24aa04c20a45a607ce
+    m_Address: flora/earth/rigset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 64b77ccf7f3695a40a9a3a7d409f1bf0
+    m_Address: flora/earth/rigset/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

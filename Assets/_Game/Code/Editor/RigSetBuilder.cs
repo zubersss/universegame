@@ -102,7 +102,9 @@ namespace Meridian.EditorTools
             var dp = factory.GetSpriteEditorDataProviderFromObject(ti);
             dp.InitSpriteEditorDataProvider();
             var current = dp.GetSpriteRects();
-            var existing = current.GroupBy(r => r.name).ToDictionary(g => g.Key, g => g.First().spriteID);
+            // The provider hands the rects back in its own order: compare by name, so an already-sliced sheet is left alone
+            // (an ordered compare re-sliced and re-imported BLENDER's sheet on every pass).
+            var byName = current.GroupBy(r => r.name).ToDictionary(g => g.Key, g => g.First());
             var rects = new SpriteRect[set.parts.Length];
             bool same = current.Length == rects.Length;
             for (int i = 0; i < set.parts.Length; i++)
@@ -110,8 +112,9 @@ namespace Meridian.EditorTools
                 var p = set.parts[i];
                 var rect = new Rect(p.rect[0], p.rect[1], p.rect[2], p.rect[3]);
                 var pivot = p.pivot != null && p.pivot.Length == 2 ? new Vector2(p.pivot[0], p.pivot[1]) : new Vector2(0.5f, 0f);
-                rects[i] = new SpriteRect { name = p.name, rect = rect, alignment = SpriteAlignment.Custom, pivot = pivot, spriteID = existing.TryGetValue(p.name, out var id) ? id : GUID.Generate() };
-                if (same && !(current[i].name == p.name && current[i].rect == rect && current[i].pivot == pivot)) same = false;
+                byName.TryGetValue(p.name, out var have);
+                rects[i] = new SpriteRect { name = p.name, rect = rect, alignment = SpriteAlignment.Custom, pivot = pivot, spriteID = have != null ? have.spriteID : GUID.Generate() };
+                if (same && (have == null || have.rect != rect || (have.pivot - pivot).sqrMagnitude > 1e-6f)) same = false;
             }
             if (same) return false;
             dp.SetSpriteRects(rects);

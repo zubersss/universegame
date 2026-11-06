@@ -170,11 +170,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 68e4c20391cfb714baa2c34c4e68f600
-    m_Address: characters/calibration_v3/side/animator
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6c3faf4ae33b2df48aabd9d5edc20914
     m_Address: props/common/smelter
     m_ReadOnly: 0

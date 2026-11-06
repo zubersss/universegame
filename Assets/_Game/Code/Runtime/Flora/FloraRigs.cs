@@ -130,21 +130,21 @@ namespace Meridian.Flora
                     if (pi >= 0 && pi < i && plant.Bones[pi] != null) { parent = plant.Bones[pi]; up = def.bones[pi].length; }
                 }
                 bgo.transform.SetParent(parent, false);
-                bgo.transform.localPosition = new Vector3(0f, up, 0f);
+                bgo.transform.localPosition = b.offset_m != null && b.offset_m.Length == 2 ? new Vector3(b.offset_m[0], b.offset_m[1], 0f) : new Vector3(0f, up, 0f);
                 plant.Bones[i] = bgo.transform;
                 if (!string.IsNullOrEmpty(b.part) && sprites.TryGetValue(b.part, out var sprite))
                 {
                     var sr = bgo.AddComponent<SpriteRenderer>();
                     sr.sprite = sprite;
-                    sr.sortingOrder = SortingOrder + i;
+                    sr.sortingOrder = SortingOrder + (b.order >= 0 ? b.order : i);
                     plant.Parts[i] = sr;
                 }
             }
-            // Face swaps sit on the last bone's tip (the head).
+            // Face swaps: on the slot's bone at its offset (B-112 json), else on the last bone's tip (the head).
             var head = plant.Bones[def.bones.Length - 1];
             float headUp = def.bones[def.bones.Length - 1].length * 0.5f;
-            plant.Eyes = Swap(plant, head, "eyes", new Vector3(0f, headUp + 0.08f, 0f), def.bones.Length + 1);
-            plant.Mouth = Swap(plant, head, "mouth", new Vector3(0f, headUp - 0.12f, 0f), def.bones.Length + 2);
+            plant.Eyes = Swap(plant, SlotBone(plant, "eyes", head), "eyes", SlotOffset(def, "eyes", new Vector3(0f, headUp + 0.08f, 0f)), SlotOrder(def, "eyes", def.bones.Length + 1));
+            plant.Mouth = Swap(plant, SlotBone(plant, "mouth", head), "mouth", SlotOffset(def, "mouth", new Vector3(0f, headUp - 0.12f, 0f)), SlotOrder(def, "mouth", def.bones.Length + 2));
             plant.Animator = go.AddComponent<Animator>();
             plant.Animator.runtimeAnimatorController = Controller;
             plant.Animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
@@ -154,6 +154,33 @@ namespace Meridian.Flora
             plant.FullRate = true;
             Plants.Add(plant);
             return plant;
+        }
+
+        static RigSet.Slot FindSlot(RigSet.Plant def, string slot)
+        {
+            if (def.slots == null) return null;
+            foreach (var s in def.slots) if (s.slot == slot) return s;
+            return null;
+        }
+
+        static Transform SlotBone(RigPlant plant, string slot, Transform fallback)
+        {
+            var s = FindSlot(plant.Def, slot);
+            if (s == null || string.IsNullOrEmpty(s.bone)) return fallback;
+            int i = System.Array.FindIndex(plant.Def.bones, b => b.name == s.bone);
+            return i >= 0 && plant.Bones[i] != null ? plant.Bones[i] : fallback;
+        }
+
+        static Vector3 SlotOffset(RigSet.Plant def, string slot, Vector3 fallback)
+        {
+            var s = FindSlot(def, slot);
+            return s != null && s.offset_m != null && s.offset_m.Length == 2 ? new Vector3(s.offset_m[0], s.offset_m[1], 0f) : fallback;
+        }
+
+        static int SlotOrder(RigSet.Plant def, string slot, int fallback)
+        {
+            var s = FindSlot(def, slot);
+            return s != null && s.order >= 0 ? s.order : fallback;
         }
 
         SpriteRenderer Swap(RigPlant plant, Transform head, string slot, Vector3 local, int order)

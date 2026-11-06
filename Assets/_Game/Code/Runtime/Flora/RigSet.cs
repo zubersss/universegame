@@ -15,7 +15,10 @@ namespace Meridian.Flora
         public const int MaxBones = 6;
 
         [System.Serializable] public sealed class Part { public string name; public int[] rect; public float[] pivot; }
-        [System.Serializable] public sealed class Bone { public string name; public string part; public string parent; public float length = 0.5f; }
+        /// <summary>`offset_m`: where the bone sits on its parent (m; default: the parent's tip, straight up); `order`: draw order within the plant (default: bone index).</summary>
+        [System.Serializable] public sealed class Bone { public string name; public string part; public string parent; public float length = 0.5f; public float[] offset_m; public int order = -1; }
+        /// <summary>A face swap slot's anchor: the bone it hangs on, its offset (m) and draw order (B-112 json; optional).</summary>
+        [System.Serializable] public sealed class Slot { public string slot; public string bone; public float[] offset_m; public int order = -1; }
         [System.Serializable] public sealed class Idle { public string type = "sway"; public float amplitude_deg = 10f; public float beat_bpm = 110f; public float squash = 0.08f; }
         [System.Serializable] public sealed class React { public float radius_m = 3f; public string action = "turn_look"; public string swap; }
         [System.Serializable]
@@ -23,6 +26,7 @@ namespace Meridian.Flora
         {
             public string name;
             public Bone[] bones;
+            public Slot[] slots;
             public Idle idle = new Idle();
             public React react = new React();
             /// <summary>Face swap slots → part names (first = the resting face); filled by Parse from the json's `swaps` object.</summary>
