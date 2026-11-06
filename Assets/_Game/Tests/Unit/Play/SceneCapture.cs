@@ -389,6 +389,54 @@ namespace Meridian.Tests
             yield return Shot("5_earth_luna", world.Find("earth").Value.position + new Vector2(60f, 60f), 120f);
         }
 
+        /// <summary>U-090 evidence: the Earth camp stage stack from the rail and in the depth preset, and a wide frame at the forest/plains border.</summary>
+        [UnityTest]
+        public IEnumerator CaptureStageLayers()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+            var side = director.PlanetSide;
+            for (int i = 0; i < 120; i++) yield return new WaitForFixedUpdate();
+            var cam = side.sideCamera;
+            var follow = cam.GetComponent<Meridian.Player.CameraFollow>();
+            follow.enabled = false;
+            var camp = side.pois.placed.Find(p => p.def == Meridian.Planet.POI.PoiCatalog.SpawnCamp);
+            var pivot = new Vector3(camp.def.CenterX, camp.groundY + 6f, 0f);
+            Meridian.CameraRig.SideView.SetHalfHeight(cam, 10f);
+            cam.transform.position = new Vector3(pivot.x, pivot.y, cam.transform.position.z);
+            side.dayNight.Override = 0.5f;
+            float until = Time.realtimeSinceStartup + 25f;
+            while (Time.realtimeSinceStartup < until && side.stage.DrawnSlots() < 7) yield return null;
+            for (int i = 0; i < 30; i++) yield return null;
+            var sb = new System.Text.StringBuilder();
+            foreach (var l in side.stage.Layers) sb.Append($"{l.slot}:{(l.ready ? "art" : l.placeholder ? "placeholder" : "missing")}@{l.z:F0} ");
+            Debug.Log($"[MERIDIAN] U-090 stage {side.stage.Region}: {side.stage.DrawnSlots()} slots: {sb}");
+            yield return Save(cam, $"{name}_1_earth_camp_stage");
+            var railPos = cam.transform.position;
+            Meridian.CameraRig.PhotoOrbit.Depth(cam, pivot);
+            for (int i = 0; i < 3; i++) yield return null;
+            yield return Save(cam, $"{name}_2_earth_camp_stage_depth");
+            cam.transform.SetPositionAndRotation(railPos, Quaternion.identity);
+            // Wide: the forest/plains border, 28 m frame.
+            Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Plains, out int border, out _);
+            Meridian.CameraRig.SideView.SetHalfHeight(cam, 14f);
+            cam.transform.position = new Vector3(border - 40f, side.terrain.OriginalTop(border - 40) + 8f, cam.transform.position.z);
+            until = Time.realtimeSinceStartup + 20f;
+            while (Time.realtimeSinceStartup < until && side.stage.DrawnSlots() < 7) yield return null;
+            for (int i = 0; i < 30; i++) yield return null;
+            yield return Save(cam, $"{name}_3_border_wide");
+            side.dayNight.Override = null;
+        }
+
         /// <summary>U-035 evidence: the Earth spawn camp by day and by night (lamps glow).</summary>
         [UnityTest]
         public IEnumerator CaptureSpawnCamp()
