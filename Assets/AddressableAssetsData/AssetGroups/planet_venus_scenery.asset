@@ -35,11 +35,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 74fe2309676cc37439efecd12a6fb4bc
-    m_Address: props/venus_scenery/atlas
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 82274b84aac118141932483d564571cc
     m_Address: props/venus_scenery/column_b
     m_ReadOnly: 0

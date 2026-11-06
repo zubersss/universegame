@@ -21,12 +21,42 @@ namespace Meridian.Perf
             public UIntPtr PeakPagefileUsage;
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        struct MemoryStatus
+        {
+            public uint dwLength;
+            public uint dwMemoryLoad;
+            public ulong ullTotalPhys;
+            public ulong ullAvailPhys;
+            public ulong ullTotalPageFile;
+            public ulong ullAvailPageFile;
+            public ulong ullTotalVirtual;
+            public ulong ullAvailVirtual;
+            public ulong ullAvailExtendedVirtual;
+        }
+
 #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
         [DllImport("psapi.dll", SetLastError = true)]
         static extern bool GetProcessMemoryInfo(IntPtr process, out Counters counters, uint size);
         [DllImport("kernel32.dll")]
         static extern IntPtr GetCurrentProcess();
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern bool GlobalMemoryStatusEx(ref MemoryStatus status);
 #endif
+
+        /// <summary>D-083: free physical memory of the machine (MB), the number the heavy-job gate reads; -1 off Windows.</summary>
+        public static long FreeSystemMB()
+        {
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+            try
+            {
+                var s = new MemoryStatus { dwLength = (uint)Marshal.SizeOf<MemoryStatus>() };
+                if (GlobalMemoryStatusEx(ref s)) return (long)(s.ullAvailPhys / (1024UL * 1024UL));
+            }
+            catch (Exception) { }
+#endif
+            return -1;
+        }
 
         public static long WorkingSetMB()
         {

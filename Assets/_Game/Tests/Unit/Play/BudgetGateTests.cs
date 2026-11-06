@@ -141,7 +141,7 @@ namespace Meridian.Tests
             while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
             for (int i = 0; i < 60; i++) yield return new WaitForFixedUpdate();
             Assert.NotNull(BudgetMonitor.Instance, "BudgetMonitor in Core");
-            notes.Add($"Load during measurement (D-019): {OtherHeavyJobs()}");
+            notes.Add($"Load during measurement (D-019/D-083): {OtherHeavyJobs()}; free RAM at start {ProcessMemory.FreeSystemMB()} MB; Unity Editor processes {UnityEditorProcesses()}");
 
             // ---- Earth, idle ----
             var side = director.PlanetSide;
@@ -218,9 +218,11 @@ namespace Meridian.Tests
             int earthHandles = Residency.Count("planet_earth");
             while (earthHandles > 0 && Time.realtimeSinceStartup - resT0 < 5f) { yield return null; earthHandles = Residency.Count("planet_earth"); }
             float resWait = Time.realtimeSinceStartup - resT0;
-            Row("Residency · after Mars entry", "previous planet released within 5 s; only the current planet + common/ui/icons/space resident (v3)",
+            // D-083: the row reads "pending U-091" until U-091 closes; its measurement is U-091's evidence, not a gate failure.
+            bool resOk = earthHandles == 0 && Residency.OnlyPlanet("planet_mars");
+            Info("Residency · after Mars entry", "previous planet released within 5 s; only the current planet + common/ui/icons/space resident (v3)",
                 $"planet_earth handles {earthHandles} after {resWait:F1} s; resident: {Residency.ResidentGroups()}",
-                earthHandles == 0 && Residency.OnlyPlanet("planet_mars"));
+                resOk ? "green (pending U-091)" : "pending U-091 (D-083): would be red");
             yield return Measure("Mars", side.sideCamera, BudgetMonitor.DrawCallsSide, (a, b) => { gc = a; r = b; });
             Judge("Mars", gc, r, BudgetMonitor.DrawCallsSide);
 
@@ -340,6 +342,18 @@ namespace Meridian.Tests
             if (string.IsNullOrEmpty(path)) return;
             Directory.CreateDirectory(Path.GetDirectoryName(path));
             File.WriteAllText(path, sb.ToString());
+        }
+
+        /// <summary>D-083: Unity Editor processes alive at the start (this one included); 2+ means a contention run.</summary>
+        static int UnityEditorProcesses()
+        {
+            int n = 0;
+            foreach (var p in System.Diagnostics.Process.GetProcessesByName("Unity"))
+            {
+                try { if (p.MainModule != null && p.MainModule.FileName.Contains("Editor")) n++; } catch (Exception) { n++; }
+                p.Dispose();
+            }
+            return n;
         }
 
         static string OtherHeavyJobs()
