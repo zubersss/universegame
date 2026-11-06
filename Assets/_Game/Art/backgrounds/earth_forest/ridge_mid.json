@@ -17,5 +17,7 @@
  ],
  "fps": 30,
  "clips": [],
+ "atlas": null,
+ "vertex_color": null,
  "sockets": []
 }

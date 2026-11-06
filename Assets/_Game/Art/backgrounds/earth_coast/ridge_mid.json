@@ -6,7 +6,7 @@
  "up": "+Y",
  "units": "m",
  "origin": "band",
- "triangles": 2308,
+ "triangles": 2272,
  "lod1_triangles": null,
  "texture": 1024,
  "maps": [
@@ -17,5 +17,7 @@
  ],
  "fps": 30,
  "clips": [],
+ "atlas": null,
+ "vertex_color": null,
  "sockets": []
 }
