@@ -147,6 +147,23 @@ Jump impulse is fixed; gravity is real; upgrades scale the impulse, never gravit
 | Terminal velocity (m/s, play layer)    | Mercury 60 (no air; design cap), Venus 20, Earth 50, Mars 55, Jupiter 45, Saturn 48, Uranus 50, Neptune 50 |
 | Coyote time / jump buffer              | 0.10 s / 0.12 s                                 |
 
+**Feel (v3, D-076/D-078): snappy, readable, physically honest.** Everything below changes
+velocities, timers and the *visual* root only; gravity, v₀ and the jump heights above are
+untouched, and `FeelTests` proves every planet's jump height to ± 1 cm.
+
+| Quantity | Value |
+|----------|-------|
+| Ground acceleration / braking | 60 / 80 m/s² (walk speed in 0.07 s; stop in 0.05 s); a turn flips facing at once and reverses velocity within 0.08 s |
+| Air acceleration | 30 m/s² |
+| Jump cut | releasing Space while rising caps the remaining upward speed to 40 % (variable height; the maximum height is unchanged) |
+| Air dash | Shift tapped while airborne: 9 m/s in the facing direction for 0.18 s (1.62 m on every planet); vertical speed held at 0 for those 0.18 s, then real g resumes at once; one per airtime, refreshed by landing or a successful parry; 0.35 s cooldown; no invulnerability |
+| Parry | C: active window 0.12 s, whiff recovery 0.40 s (no cancel), on the ground and in the air. A parried melee attack does 0 damage and staggers the attacker for 1.2 s; a parried projectile (Warden bolt, thrown shard, spit) is reflected along the aim; a parry refreshes the air dash and gives 0.3 s of flash |
+| Hit stop | the game clock pauses 50 ms when the player is hit, 33 ms when the player lands a Lance or parry hit; never more than 90 ms in any chain |
+| Hit reaction (player) | knocked 0.8 m away from the hit over 0.12 s, a 2-frame white flash, the `hit_react` clip; `hurt` stays for environmental damage |
+| Hit reaction (creature) | knocked 0.5 m, flash, squash 0.85 for 0.12 s, `hit_react` clip; a staggered creature plays `stagger` |
+| Squash and stretch (visual root only, volume-preserving: width = 1/√height) | crouch anticipation 0.8 tall for 0.06 s before take-off; take-off stretch 1.25 for 0.08 s; landing squash 0.7 at ≥ 6 m/s impact (scaled linearly from 1.0 at 2 m/s) recovering in 0.18 s with one overshoot to 1.05; dash stretch 1.3 along the dash; hit squash 0.85. Colliders, the Rigidbody and gravity never scale |
+| Clip timing | surveyor and apex clips at 60 fps, creatures at 30 fps; every action clip has 2–4 frames of anticipation and an overshoot key on the follow-through; a hit reads within 2 frames |
+
 **Jetpack** (thrust in m/s² while fuel lasts; net lift = thrust − g; recharges in 2 s on ground):
 
 | Mark | Thrust | Burn | Mercury | Venus | Earth | Mars  | Jupiter | Saturn | Uranus | Neptune |
@@ -184,8 +201,21 @@ The Sun's well pulls with g = 274 m/s² but uses its own k_sun = 0.80 instead of
 
 ### 5.1 Side view (on a planet)
 
-Camera: orthographic, default size 9 (18 m tall), zoom 6–14 with the mouse wheel. The
-world is a horizontal cylinder (wraps). Coordinates are tiles = meters.
+**Stage camera (v3, D-076).** A perspective rail (FOV 35°, `SideView`, U-072) that frames the
+play plane 18 m tall at 1080p (60 px/m; the mouse-wheel zoom, 12–28 m tall, stays as a player
+option). The camera behaves like a theatre set seen from the stalls: it follows sideways
+smoothly and holds its height; the player moves within the frame, not the frame around the player.
+
+| Rule | Value |
+|------|-------|
+| Horizontal follow | dead zone ± 1.5 m around the frame centre; outside it the camera eases with a 0.25 s critically damped follow; look-ahead 2 m in the facing direction eased over 0.6 s; camera speed never exceeds player speed + 2 m/s |
+| Vertical hold | the frame bottom sits 3 m below the *stage floor*: the ground height under the player, sampled from the terrain and smoothed over 0.8 s. Jumps (≤ 6.6 m) and jetpack hops never move the camera. The camera moves vertically only when the player leaves the middle 60 % of the frame, at ≤ 6 m/s; a fall longer than 10 m switches to a 0.4 s follow until landing |
+| Fight zoom | ≥ 2 hostile creatures within 14 m, or an apex within 25 m: the frame grows to 22 m tall (apex: 26 m) over 1.0 s and returns over 2.0 s after 3 s of calm; the stage-floor rule holds throughout |
+| Impact | a hit on the player: 0.15 m shake for 0.10 s (position only, never rotation); a kill: 0.08 m. Hit stop per §4.2 Feel |
+| Digging and building | unchanged: the frame holds while the player digs down until the 60 % rule moves it |
+| Photo mode | `P` orbit (U-080) unchanged |
+
+The world is a horizontal cylinder (wraps). Coordinates are tiles = meters.
 
 | Planet  | Width (tiles) | Height | Datum y (surface or 1-bar cloud top) | Escape Line altitude above Datum | Escape Line y | Crush Line y |
 |---------|---------------|--------|--------------------------------------|----------------------------------|---------------|--------------|
@@ -241,6 +271,8 @@ Both transitions are covered by PlayMode tests (§10.9).
 |            | Interact / board ship      | F                                         |
 |            | Build menu / Inventory / Map / Catalogue | B / Tab / M / N              |
 |            | Float cell toggle (giants) | V                                         |
+|            | Air dash                   | Shift (tap while airborne)                |
+|            | Parry                      | C                                         |
 | Ship, side | Main thrust / retro        | W / S                                     |
 |            | Lateral                    | A, D                                      |
 |            | Exit ship (landed)         | F                                         |
@@ -483,9 +515,11 @@ exists to be looked at, not walked into.
 | Lighting             | PBR (URP Lit): base colour, normal, metallic/smoothness, emission. One directional Sun per planet with the §9 v1 intensities (Mercury 1.6 … Neptune 0.2), a per-planet ambient gradient, soft Sun shadows, ≤ 8 visible point lights (lamps, thrusters, vents, lightning) |
 | Palettes             | unchanged: Earth greens/blues/ochres · Mars rust/salmon · Mercury white/black/violet · Venus orange-cream/black · Jupiter cream/rust/brick · Saturn pale gold · Uranus cyan fog · Neptune indigo/white · Space near-black with a Milky Way band |
 | Readability          | Every creature silhouette reads at 60 px/m against its planet; interactive props carry a faint emissive rim (mask) when the player is within 3 m |
-| Depth                | Terrain is 1 m-deep blocks with a back wall 1 m behind; beyond it, three depth bands: near props (z 2–6 m), mid ridges (z 20–60 m), far skyline and sky dome (z ≥ 150 m); haze by distance per planet. Giants: cloud decks as layered translucent planes at those depths |
+| Depth (stage layers, v3) | Terrain is 1 m-deep blocks with a back wall 1 m behind. Every region is dressed as a painted stage of at least seven layers (§10.10): foreground pieces that pass in front of the player (z −3 to −1.5 m), the play plane, near flora (z 2–6), near rocks (z 8–14), mid ridge (z 20–60), far hills (z 80–140), far mountains (z 150–400), a slow cloud strip (z 500) and the sky dome; haze by depth per planet. Giants: the cloud decks are the layers (deck_near/mid/far plus foreground wisps) |
+| Stage composition    | Mountains, mesas, cliffs and other landmarks are **set-pieces**: authored meshes placed at fixed longitudes per region from `stage.json`, three variants per region, never noise. Each frame reads as a composed set: one dominant landmark, one secondary, open sky on at least a third of the width. Original designs only |
 | Creatures            | Grounded anatomy with one alien exaggeration per species; rigged and animated; materials match the planet (silicate, sulfur, ice) |
 | Ships                | Industrial-realistic, worn, legible thrusters and lights; emissive engines and windows      |
+| Animation            | Readable, exaggerated motion on realistic bodies: anticipation before every action, follow-through after, squash and stretch on jumps, landings, dashes and hits (§4.2 Feel); hits read within 2 frames; surveyor and apex clips at 60 fps, creatures at 30 |
 | UI                   | unchanged: thin HUD, planet-tinted accents, monospace OFL numerals, one-line tooltips; icons stay 2D |
 | Fonts                | OFL-licensed only; logged in `docs/credits/unity.md`                                        |
 | Forbidden            | Any name, logo, silhouette, or story element from existing games; anything that reads as a cartoon, pixel art or a low-poly stylised look |
@@ -574,24 +608,56 @@ digging, BudgetGate (frame time, GC, light and particle caps, memory).
 
 ---
 
+### 10.10 Stage layers (v3, D-079)
+Per region, `StageLayers` (the v3 `DepthBands`) builds the stack below from Addressable keys under
+`backgrounds/<planet>_<region>/` (contract §10 names the files and caps). Parallax is real depth on
+the perspective rail; the painted-stage look comes from authored set-pieces, per-layer haze tint
+and composition, not from scrolling sprites. Digging and building act on the play plane only; no
+layer has collision.
+
+| # | Layer | Depth z | Source | Tiling / placement |
+|---|-------|---------|--------|--------------------|
+| 0 | Foreground | −3 … −1.5 m | `props/<planet>_foreground/*` (6 pieces per planet) | 1 per 12 m, never within 6 m of the spawn, a POI or a landing pad; may cover the player ≤ 0.5 s at run speed; shadows off |
+| 1 | Play plane | 0 | terrain blocks, props, creatures | unchanged |
+| 2 | Near flora | 2 … 6 m | `props/<planet>_flora/*` | unchanged (D-071) |
+| 3 | Near rocks | 8 … 14 m | `rocks_near.glb` | period 128 m |
+| 4 | Mid ridge | 20 … 60 m | `ridge_mid.glb` | period 256 m |
+| 5 | Far hills | 80 … 140 m | `hills_far.glb` | period 512 m |
+| 6 | Far mountains | 150 … 400 m | `skyline_far.glb` (composed peaks) + `setpiece_<a|b|c>.glb` | skyline period 1024 m; set-pieces at the `stage.json` longitudes (fraction of the region width), scale and mirror per entry |
+| 7 | Sky | 500 m / dome | `clouds_color.png` strip scrolling 0.5 m/s; `skydome_color.png` | strip period 2048 m |
+
+Streaming: the current region's layers and the adjacent region's are resident (the adjacent set
+preloads when the player is within 200 m of the border and unloads 5 s after it is two regions
+away); each set is one Addressable label `stage_<planet>_<region>`. Layer textures per planet
+(all its regions) ≤ 700 MB stored (contract §10).
+
 ## 11. Performance budgets (requirements, not goals)
 
 ### 11.1 The game — enforced by BudgetGate (`Assets/_Game/Tests/Unit/BudgetGateTests.cs` plus the runtime `BudgetMonitor`, owned by UNITY; LEAD confirms numbers at every review)
 
-| Budget                        | Limit                                                             |
+| Budget                        | Limit (v3, D-077; measured in the dev build, D-058)               |
 |-------------------------------|-------------------------------------------------------------------|
-| Frame time                    | ≤ 16.6 ms at 1080p on the dev laptop; target ≤ 12 ms average      |
-| RAM (built game)              | ≤ 2.5 GB working set; ≤ 600 MB textures loaded; ≤ 60 MB audio     |
-| Geometry (v2, 3D)             | ≤ 300 k triangles on screen; ≤ 400 draw calls (SRP batcher on); ≤ 150 shadow casters; one shadow cascade |
-| Draw calls                    | ≤ 150 side view, ≤ 80 top-down (atlases, batching)                |
-| 2D lights visible             | ≤ 8 (hard cap 12); shadows only on the player lamp                |
-| Particles alive               | ≤ 600; every emitter pooled                                       |
+| Frame time                    | ≤ 16.6 ms p99 at 1080p on the dev laptop; ≤ 12 ms average         |
+| RAM (built game)              | ≤ 4.5 GB working set (hard ceiling; 4.0 GB is the warning line) with the Editor closed and the three sessions idle; ≤ 2.0 GB textures loaded; ≤ 600 MB meshes; ≤ 150 MB audio |
+| Residency                     | Only the current planet's Addressable groups (+ `common`, `ui`, `space`) are loaded; the previous planet's groups release within 5 s of a transition; stage layers per §10.10 |
+| Geometry (v3)                 | ≤ 500 k triangles on screen; ≤ 500 draw calls (SRP batcher on); ≤ 150 shadow casters; one shadow cascade; layers beyond z 20 m cast no shadows |
+| Draw calls                    | ≤ 250 side view, ≤ 80 top-down (atlases, batching)                |
+| Lights visible                | ≤ 8 point lights (hard cap 12); shadows only from the Sun and the player lamp |
+| Particles alive               | ≤ 1500; every emitter pooled                                      |
 | GC allocation (steady state)  | ≤ 1 KB per 300 frames; zero per-frame allocations in gameplay code |
-| Chunk generation              | ≤ 2 ms main-thread per frame; no hitch > 33 ms during streaming   |
-| Planet load                   | ≤ 4 s; space ↔ planet transition ≤ 1.5 s                          |
-| Textures                      | BC7 (color), BC5 (normals), mipmaps on world sprites; atlases ≤ 2048² |
+| Chunk generation              | ≤ 2 ms main-thread per frame; no hitch > 33 ms during streaming or at a region border |
+| Planet load                   | ≤ 5 s; space ↔ planet transition ≤ 1.5 s; hit stop never > 90 ms  |
+| Textures                      | BC7 (colour), BC5 (normals), mips on every world texture; atlases ≤ 2048²; per-layer caps in contract §10; mip streaming on with a 1.5 GB budget |
+| Animation                     | surveyor and apexes 60 fps clips, others 30 fps; ≤ 2 ms skinning per frame with 20 creatures |
 | Audio                         | Vorbis, streamed for music, compressed in memory for SFX          |
-| Asset size caps               | Per the contract (§4 there); the importer rejects oversize files  |
+| Asset size caps               | Per the contract (§4, §9, §10 there); the importer rejects oversize files |
+
+How the 4.5 GB was set (D-077): the laptop shows 7.6 GB; Windows plus the three Claude Code
+sessions take about 3 GB; the dev workflow keeps ≥ 1 GB free. The budget is spent on what the
+player sees and feels (stage layers, 60 fps clips, resident adjacent regions), never on waste:
+compression, atlases, pooling and per-planet groups stay mandatory. If a feature cannot fit,
+UNITY proposes the closest alternative in its status file and LEAD decides; nothing is dropped
+silently.
 
 ### 11.2 The dev workflow — enforced by HeavyJobLock (LEAD schedules; everyone complies)
 
@@ -599,8 +665,9 @@ digging, BudgetGate (frame time, GC, light and particle caps, memory).
 |----------------------------------------|------------------------------------------------------------------------|
 | Unity Editor (interactive or batch)    | ≤ 3.5 GB; only one instance per project exists, so batch jobs never run while the Editor is open |
 | Blender heavy render (> 512 px or batch) | ≤ 2.5 GB; never while `Unity.exe` is running; headless; exits after each batch |
-| Claude Code sessions (3)               | ≈ 1 GB total; keep logs terse, read large files by section            |
-| Free RAM                               | ≥ 1 GB headroom; browsers closed during work                          |
+| Claude Code sessions (3)               | ≈ 2 GB total (1.7 GB measured 2026-11-06 with six claude.exe); keep logs terse, read large files by section |
+| Free RAM                               | ≥ 1 GB headroom at all times; heavy jobs start only above the gate (1.5 GB; 2.0 GB for 2048² bakes, D-026/D-066); browsers closed during work |
+| Built game during a dev smoke          | runs only after the Editor batch has exited, never beside it; ≤ 4.5 GB per §11.1 (D-080) |
 | Heavy jobs                             | Serialized through `coordination/locks/heavy_<role>.lock` (CLAUDE.md rule 6) |
 
 If the laptop's RAM is upgraded, LEAD raises only this section and logs the decision.
@@ -617,9 +684,10 @@ If the laptop's RAM is upgraded, LEAD raises only this section and logs the deci
 | **M3 Inner planets complete** | Mercury and Venus full designs; Envirosuit hazards; all Rig modules; Smelter/Refinery/Blueprint Tree; inventory; Waystations and trading; Wardens basic; Catalogue; bases | Each inner planet's "only here" obtainable; apexes killable; tests for hazards and economy |
 | **M4 The giants**       | Cloud-column generator; floes, Float cells, Aerostats, Crush Line; Skip Drive; belt and ring mining; all four giants' hazards, creatures, apexes; Thruster Mk2/Mk3 | Full progression Earth → Neptune completable by LEAD's QA script; budgets green on Jupiter |
 | **R1 3D pipeline proof (Earth)** | The 3D renderer and side-rail camera; block-mesh terrain with PBR materials; Sun + lamps in 3D; the surveyor, the Pilgrim, Earth props batch 1 and two Earth creatures as animated models; sky dome, ridges and near props replace the parallax layers | `M1LoopTests`, `SmokeTests` and the M2/M3 gameplay tests pass unchanged; §11.1 (incl. the geometry row) green on Earth; captures match §9 v2; owner playtest |
-| **R2 Earth, Mars, space in 3D** | All M2 content as models and materials: Mars terrain, creatures, props, POIs; planets as spheres in space; day/night and dust storms in 3D | As M2's exit, plus `M2SoakTests`                                                            |
-| **R3 Inner planets in 3D** | Mercury and Venus, stations, Wardens, both apexes, bases and lamps as models | As M3's exit: `M3InnerTests` pass twice; owner playtest                                   |
-| **M4 The giants (3D)** | As the M4 row, built 3D from the start; the 2D M4 tasks are re-cut after R3 | As the M4 row                                                                             |
+| **S1 Stage and feel (Earth)** | The stage camera (§5.1), snappy movement with air dash, parry, squash-and-stretch and hit reactions (§4.2 Feel), the seven-layer stage per Earth region with set-pieces and foreground (§10.10), 60 fps surveyor clips, budgets v3 (§11.1) with adjacent-region streaming | `M1LoopTests`, `SmokeTests` and the M2/M3 gameplay tests pass unchanged; jump heights per planet unchanged ± 1 cm; StageCamera, Feel, SquashStretch, StageLayer and Residency tests green; §11.1 v3 green on Earth, Space and Mars (frame time, 4.5 GB, 2.0 GB textures); stage sheets match §9 v3; owner playtest of `Build/MERIDIAN_0.5.0/` |
+| **R2 Earth, Mars, space in 3D** | All M2 content as models and materials: Mars terrain, creatures, props, POIs; planets as spheres in space; day/night and dust storms in 3D; Mars stage layer sets and set-pieces (§10.10) | As M2's exit, plus `M2SoakTests`                                                            |
+| **R3 Inner planets in 3D** | Mercury and Venus, stations, Wardens, both apexes, bases and lamps as models; Mercury and Venus stage layer sets and set-pieces (§10.10) | As M3's exit: `M3InnerTests` pass twice; owner playtest                                   |
+| **M4 The giants (3D)** | As the M4 row, built 3D from the start; the cloud decks as the stage layers (§10.10); the 2D M4 tasks are re-cut after R3 | As the M4 row                                                                             |
 | **M5 Full systems**     | Story and factions; missions; space combat and Red Hollow; four ship classes; Gates; weather; Warden tiers; full audio; orbital drift | Story completable; both endings; every §8 row Done                                         |
 | **M6 Polish, optimization, Windows build** | Profiling pass on every planet; load times; settings menu; credits from `docs/credits/`; zip build | All budgets green on every planet; 60-minute session with zero errors; user sign-off      |
 

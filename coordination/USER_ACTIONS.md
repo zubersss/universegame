@@ -26,6 +26,10 @@ matching PowerShell *deny* rules, but isn't allowed to grant itself new *allow* 
 If you get too many "allow this command?" prompts, tell the Lead "approve PowerShell
 allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
 
+### USER-20 - Keep memory free for tonight's S1 jobs (1 min, optional)
+Free RAM was 0.2-0.7 GB at 01:28 (six Claude Code processes 1.7 GB, Edge 0.4 GB, Defender 0.3 GB). The workers start their heavy jobs only above 1.5 GB, so each extra app you close shortens their wait. If you are not using Microsoft Edge, close it. Nothing to report back.
+The R1 playtest item (Build/MERIDIAN_0.4.0) arrives with the R1 report once UNITY's last profile is green; the next real playtest after that is S1 (the stage camera, dash and parry; Build/MERIDIAN_0.5.0).
+
 ## Done
 - 2026-11-05 23:3x · USER-17 (the three windows were restarted; LEAD found two peer sessions at resume). USER-14 and USER-15 were folded into it. Memory is still short → USER-18.
 - 2026-11-02 00:5x · USER-16 and USER-12 (M3/M2 playtests) withdrawn: the owner chose the 3D rehaul (D-062) and "switch now". The next playtest is R1 (Earth in 3D).

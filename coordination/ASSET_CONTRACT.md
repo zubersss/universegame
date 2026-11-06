@@ -1,4 +1,6 @@
-# MERIDIAN — Asset Contract v2.4
+# MERIDIAN — Asset Contract v2.5
+
+> **v2.5 (D-079, 2026-11-06).** Stage layers (§10: per-region layer files, caps, `stage.json`, stage sheets), clips at the sidecar's fps (60 for the surveyor and apexes), the feel clip set (§9 Rig row).
 
 > **v2 (D-062, 2026-11-02).** Models replace sprites. §9 is the rule set for every 3D category
 > (`terrain`, `backgrounds` (now skyline/ridge/deck meshes), `ships`, `characters`, `creatures`,
@@ -142,16 +144,16 @@ Existing Done assets are not re-exported unless a task says so.
 | Textures | `color` (sRGB base colour), `normal` (tangent space, OpenGL +Y), `mask` (R metallic, G ambient occlusion, B rim/interactive glow, A smoothness), `emission` (sRGB). 1024² default; 2048² for the surveyor, ships and apex parts; terrain sets 512² per face |
 | Triangles | small creature/prop ≤ 3 k · medium ≤ 8 k · large ≤ 20 k · apex ≤ 60 k across parts · surveyor ≤ 12 k · ship ≤ 15 k · POI prop ≤ 6 k. Count after export |
 | Materials | One material per model where possible (two for emissive parts); no transparent materials except glass/fins (alpha clip preferred) |
-| Rig and clips | Armature baked to keyframes at 30 fps, root motion off, loop flags set; clip names exactly as §5's sheet clip names (`idle`, `walk`, `run`, `jump`, `fall`, `dig`, `hurt`, `death`, `attack`, flier set …). Extra clips named in the task |
+| Rig and clips | Armature baked to keyframes at the sidecar's fps (30 default; **60 for the surveyor and apexes**, v2.5), root motion off, loop flags set; clip names exactly as §5's sheet clip names (`idle`, `walk`, `run`, `jump`, `fall`, `dig`, `hurt`, `death`, `attack`, flier set …). Feel clips (v2.5, Bible §4.2): surveyor `jump_anticipate`, `land_hard`, `dash`, `parry`, `parry_hit`, `hit_react`; every creature with an attack `hit_react`, `stagger`. Every action clip carries 2–4 frames of anticipation and one overshoot key. Extra clips named in the task |
 | LOD | Optional `LOD1` mesh at ≤ 50 % triangles inside the same glb (`<variant>_LOD1`); required for apexes and ships |
 | Terrain materials | Per tile material: `terrain/<planet>/<material>/top_<map>.png` and `side_<map>.png`, tileable, 2 m per repeat, 512²; plus `terrain/<planet>/backwall_<map>.png` |
-| Depth bands | Skyline/ridge meshes: `backgrounds/<planet>/ridge_mid.glb` (z 20–60 m strip, tileable in x every 256 m), `skyline_far.glb` (z ≥ 150 m), `skydome` as a 2048×1024 equirect `color`. Giants: `deck<n>.glb` translucent cloud planes |
+| Stage layers (v2.5) | See §10: per region `rocks_near.glb`, `ridge_mid.glb`, `hills_far.glb`, `skyline_far.glb`, `setpiece_<a|b|c>.glb`, `stage.json`, `skydome_color.png`; per planet `clouds_color.png` and the foreground pieces under `props/<planet>_foreground/`. Giants: `deck_far/mid/near.glb` translucent cloud planes plus `wisp_*` foreground |
 | Review evidence | A stamped turntable contact sheet (characters/creatures/ships: front +X, ¾, back; props and wall-type assets: camera side −Z, ¾, far side; D-068) rendered in Eevee with the planet's Sun and a neutral grey floor: `blender/preview/review_<key>.png`; plus the Unity lit preview from `tools/unity_art_preview.ps1` for Done |
 | Import | `ArtImporter` v5 (UNITY): glb → materials from the four maps, clip names kept, address = key, placeholder retired. Never hand-edit a glb's import settings |
 
 ### 9.1 Rulings from the B-077 handshake (v2.1, D-063)
 1. **Sidecar json.** Every model ships `<variant>.json` beside the glb: `clips` (name, frames, fps, loop), `sockets` (name → node), `triangles`, `lod1` (bool). glTF has no loop flag; the importer reads loops from here.
-2. **Clip timing.** A clip of n frames at 30 fps has its last key equal to its first and exports as n/30 s; the importer loops without repeating the last frame.
+2. **Clip timing.** A clip of n frames at the sidecar's fps (30; 60 for the surveyor and apexes, v2.5) has its last key equal to its first and exports as n/fps s; the importer loops without repeating the last frame.
 3. **No images inside the glb.** Materials carry factors only; `ArtImporter` builds the URP Lit material from the four PNGs beside the glb.
 4. **Mask channels.** R metallic, G baked ambient occlusion, B rim/interactive glow, A smoothness (= 1 − roughness).
 5. **Colour check tolerance** for v2 bakes: ±4/255 (Cycles colour bakes run ~1.5 % low).
@@ -159,3 +161,46 @@ Existing Done assets are not re-exported unless a task says so.
 7. **Sockets** are empties named `socket_<name>` exported as glTF nodes, and listed in the json.
 8. **LFS.** `*.glb` and `*.gltf` are LFS (`.gitattributes`). A glb committed before this rule is re-added once (`git rm --cached` + `git add`) by its owner so it becomes a pointer.
 9. **Model map size (D-072).** Model maps are exempt from §2's 4 MB PNG cap; the 2048² cap and the §11.1 texture budget still apply.
+
+## 10. Stage layers (v2.5, D-079)
+
+Bible §10.10 defines the stack; this section fixes the files, caps and evidence. Every layer mesh
+follows §9 (glb, Y-up, metres, the facing rule, four maps beside the glb, sidecar json). No layer
+asset carries collision. Haze: bake the vertex colour toward the region's sky haze by depth
+(20 % at z 20 → 45 % at z 60 → 70 % at z 150 and beyond, as B-102); UNITY's distance fog adds
+the rest.
+
+| Layer file (under `backgrounds/<planet>_<region>/` unless noted) | Depth z | Period / size | Triangles | Textures |
+|---|---|---|---|---|
+| `props/<planet>_foreground/<name>.glb` (6 per planet; ≥ 2 with translucent edges) | −3 … −1.5 m | pieces 1.5–4 m tall, origin base | ≤ 2 k each, no LOD1 | one 1024² atlas per planet (`props/<planet>_foreground/atlas_*`) |
+| `rocks_near.glb` | 8 … 14 m | tileable every 128 m | ≤ 6 k | planet-shared `backgrounds/<planet>/rocks_atlas_*` 2048² |
+| `ridge_mid.glb` | 20 … 60 m | 256 m | ≤ 8 k | 1024² own maps (unchanged) |
+| `hills_far.glb` | 80 … 140 m | 512 m | ≤ 4 k | 1024² own maps |
+| `skyline_far.glb` (composed peaks; three silhouettes per planet in rotation) | 150 … 400 m | 1024 m | ≤ 6 k | 1024² own maps |
+| `setpiece_a.glb`, `setpiece_b.glb`, `setpiece_c.glb` | 30 … 140 m (per `stage.json`) | one landmark each, origin base | ≤ 10 k, LOD1 ≤ 4 k | 2048² own maps |
+| `backgrounds/<planet>/clouds_color.png` | 500 m | 2048 × 512 RGBA strip, period 2048 m | — | ≤ 2 MB stored (BC7) |
+| `skydome_color.png` | dome | 2048 × 1024 equirect | — | unchanged |
+| Giants: `deck_far.glb`, `deck_mid.glb`, `deck_near.glb`, `props/<planet>_foreground/wisp_*.glb` | per B-097 | 256 m | ≤ 2 k per plane | 2048 × 1024 RGBA per plane |
+
+Per-planet cap: the sum of every layer texture a planet can have resident (all its regions) is
+≤ 700 MB stored (BC7/BC5 with mips); BLENDER reports the sum in its render report and
+`ArtImporter` (UNITY, U-091) rejects the newest layer of a planet over the cap.
+
+**`stage.json`** (one per region beside `ridge_mid.glb`; authored by BLENDER, read by UNITY):
+```json
+{ "region": "earth_forest",
+  "setpieces": [ { "key": "setpiece_a", "at": 0.18, "z": 110, "scale": 1.0, "mirror": false },
+                 { "key": "setpiece_b", "at": 0.55, "z": 60,  "scale": 1.2, "mirror": true  },
+                 { "key": "setpiece_c", "at": 0.82, "z": 130, "scale": 0.9, "mirror": false } ],
+  "foreground": { "pieces": ["tuft", "fern", "boulder", "log"], "spacing_m": 12 },
+  "haze_rgb": [0.72, 0.78, 0.86] }
+```
+`at` is the fraction of the region's width from its western edge (UNITY applies it on the wrapped
+world). A region has 2–4 set-pieces, no two within 120 m.
+
+**Review evidence (stage sheet).** `blender/preview/stage_<planet>_<region>.png`: the whole stack
+(layers 0–7, with the play-plane ground as a grey block row) rendered in Eevee from the side-rail
+camera at 60 px/m, 1920 × 1080, under that planet's Sun and haze, stamped by `review.py`; plus
+UNITY's `*_depth.png` smoke capture for Done. The sheet must read as one composed set: a dominant
+landmark, a secondary one, open sky on at least a third of the width, no visible facet or tiling
+seam at 1080p.
