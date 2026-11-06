@@ -178,7 +178,7 @@ namespace Meridian.Planet.Backdrop
             if (skyline == null && sk != null) skyline = MakeBand(sk, SkylinePeriod);
 
             bool shown = backdrop == null || backdrop.Alpha > 0.01f;
-            PlaceBand(ridge, camX, shown);
+            PlaceBand(ridge, camX, shown && !ridgeHidden);
             PlaceBand(skyline, camX, shown);
             if (backdrop != null) backdrop.SetDepthBands(RidgeReady || SkylineReady);
 
@@ -206,7 +206,8 @@ namespace Meridian.Planet.Backdrop
         }
 
         /// <summary>Review captures: hides or shows the ridge band so the near flora can be judged on its own.</summary>
-        public void SetRidgeVisible(bool visible) { if (ridge != null && ridge.root != null) ridge.root.SetActive(visible); }
+        public void SetRidgeVisible(bool visible) { ridgeHidden = !visible; if (ridge != null && ridge.root != null) ridge.root.SetActive(visible); }
+        bool ridgeHidden; // PlaceBand re-applies the band's active state every frame
 
         void DropBand(Band b)
         {
