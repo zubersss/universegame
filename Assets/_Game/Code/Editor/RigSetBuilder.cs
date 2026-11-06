@@ -124,6 +124,30 @@ namespace Meridian.EditorTools
             return true;
         }
 
+        /// <summary>
+        /// Rebuilds every rig set's parts and controller from the live sheet (art, else placeholder): MERIDIAN menu, or
+        /// `tools/unity_check.ps1 -ExecuteMethod Meridian.EditorTools.RigSetBuilder.RebuildAll`. Returns the count built.
+        /// </summary>
+        [MenuItem("MERIDIAN/Rebuild Rig Sets")]
+        public static int RebuildAll()
+        {
+            int built = 0;
+            foreach (var root in new[] { ArtImporter.Active.art, ArtImporter.Active.placeholders })
+            {
+                var dir = root.TrimEnd('/');
+                if (!Directory.Exists(dir)) continue;
+                foreach (var png in Directory.GetFiles(dir, "rigset_color.png", SearchOption.AllDirectories))
+                {
+                    var colorPath = png.Replace('\\', '/');
+                    var rel = colorPath.Substring(root.Length);
+                    if (!ArtRules.TryParse(rel, out var key, out var map) || map != Meridian.Art.ArtMap.Color) continue;
+                    if (BuildIfRigSet(colorPath, key) != null) built++;
+                }
+            }
+            Debug.Log($"[MERIDIAN] RigSetBuilder: rebuilt {built} rig set controller(s)");
+            return built;
+        }
+
         /// <summary>Builds (or rebuilds) the set's parts and controller when `colorPath` is a rig-set sheet; returns the controller, else null.</summary>
         public static AnimatorController BuildIfRigSet(string colorPath, string key)
         {
