@@ -47,6 +47,12 @@ def atlas_material(art=ART, name="earth_flora_atlas"):
             nm = nt.nodes.new("ShaderNodeNormalMap")
             nt.links.new(n.outputs["Color"], nm.inputs["Color"])
             nt.links.new(nm.outputs["Normal"], pr.inputs["Normal"])
+        epath = os.path.join(art, "atlas_emission.png")
+        if os.path.isfile(epath):                        # B-101: emissive tiles glow in the previews too
+            e = nt.nodes.new("ShaderNodeTexImage")
+            e.image = bpy.data.images.load(epath, check_existing=True)
+            nt.links.new(e.outputs["Color"], pr.inputs["Emission Color"])
+            pr.inputs["Emission Strength"].default_value = 2.0
     return m
 
 
