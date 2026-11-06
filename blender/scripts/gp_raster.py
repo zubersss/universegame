@@ -83,6 +83,7 @@ def collect(scene, objects, frame):
                 out.append({
                     "xz": pos[a:b][:, [0, 2]], "radius": rad[a:b] * scale,
                     "cyclic": bool(s.cyclic), "fill": fill, "ink": ink,
+                    "behind": bool(data.materials[mi].get("ink_behind", False)),
                     "id": zlib.crc32(f"{ob.name}|{layer.name}|{si}".encode()) & 0xFFFFFF,
                 })
     return out
@@ -174,15 +175,21 @@ def render_frame(strokes, fw, fh, ppu, pivot=(0.5, 0.0), ss=4, seed=0, origin_x=
         xz = st["xz"]
         px = (xz[:, 0] - origin_x) * k + W * pivot[0]
         py = H * (1.0 - pivot[1]) - xz[:, 1] * k
-        if st["fill"] is not None and st["cyclic"] and len(xz) >= 3:
+        has_fill = st["fill"] is not None and st["cyclic"] and len(xz) >= 3
+        behind = bool(st.get("behind")) and has_fill
+        if has_fill and not behind:
             over(_poly_mask(px, py, H, W), st["fill"])
         if st["ink"] is not None:
             r_m = jittered_radius(xz, st["radius"].astype(np.float64), seed * 7919 + st["id"], ppu)
             r = r_m * k
             if r.max() * 2 / ss >= 0.5:       # hairline 'fill-only' strokes carry ~0 radius
-                over(_ink_mask(px, py, r, st["cyclic"], H, W), st["ink"])
+                # ink behind (small parts): a 2r capsule under the fill shows exactly 2r outside the
+                # shape, the same visible width as a centred r line, and the colour keeps its area
+                over(_ink_mask(px, py, r * (2 if behind else 1), st["cyclic"], H, W), st["ink"])
                 nom = float(np.median(st["radius"])) * ppu * 2
                 widths.append((round(nom, 2), float(r_m.min() * ppu * 2), float(r_m.max() * ppu * 2)))
+        if behind:
+            over(_poly_mask(px, py, H, W), st["fill"])
     small = acc.reshape(fh, ss, fw, ss, 4).mean(axis=(1, 3))
     a = small[..., 3:4]
     rgb = np.where(a > 1e-6, small[..., :3] / np.maximum(a, 1e-6), 0.0)

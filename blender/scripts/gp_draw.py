@@ -62,8 +62,10 @@ def collection(name):
     return c
 
 
-def mat(gp, name, fill=None, ink=True, ink_hex=INK):
-    """Material slot on gp: fill colour hex (or None) + ink stroke. Returns its index."""
+def mat(gp, name, fill=None, ink=True, ink_hex=INK, behind=False):
+    """Material slot on gp: fill colour hex (or None) + ink stroke. Returns its index.
+    behind=True: the ink is drawn under the fill at twice the radius (gp_raster), for parts too
+    small for a centred line to leave any colour (beaks, feet, thin feathers)."""
     for i, m in enumerate(gp.materials):
         if m and m.name == name:
             return i
@@ -80,6 +82,8 @@ def mat(gp, name, fill=None, ink=True, ink_hex=INK):
         m["srgb_ink"] = ink_hex
         if fill is not None:
             m["srgb_fill"] = fill
+        if behind:
+            m["ink_behind"] = True
     gp.materials.append(m)
     return len(gp.materials) - 1
 

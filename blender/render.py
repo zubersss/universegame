@@ -844,7 +844,72 @@ def do_v3_rigset(entry, preview):
         raise AssetError(f"{key}: " + "; ".join(problems))
 
 
+def do_painted_bg(entry, preview):
+    """Contract v3.0 §11.4 (B-114): painted watercolour parallax layers + <scene>.json, numpy
+    only; review: the layers stacked and tiled 2x, the surveyor's sheet frames at 1x on top."""
+    import gen_painted_bg as BG
+    sys.path.insert(0, HERE)
+    import review
+    t0 = time.time()
+    if preview:
+        raise AssetError(f"{entry['key']}: painted backgrounds have no preview mode")
+    info, meta = BG.export_background(entry, ART)
+    bad = [f"layer{i} seam {s:.2f}" for i, (_p, _img, _n, s) in enumerate(info) if s > float(entry.get("seam_limit", 2.0))]
+    if bad:
+        raise AssetError(f"{entry['key']}: tile check failed: {', '.join(bad)}")
+    H = max(img.shape[0] for _p, img, _n, _s in info)
+    Wd = info[0][1].shape[1] * 2
+    canvas = np.zeros((H, Wd, 3), np.float32)
+    ground = 64                                           # px of near layer under the surface line in the review
+    for (_p, img, _n, _s), L in zip(info, meta["layers"]):
+        f = np.tile(img.astype(np.float32) / 255.0, (1, 2, 1))
+        h = f.shape[0]
+        y0 = H - h - max(0, int(round((L["y_m"] + 0.5) * v3_ppu())))
+        y0 = max(0, min(H - h, y0))
+        a = f[..., 3:4]
+        canvas[y0:y0 + h] = f[..., :3] * a + canvas[y0:y0 + h] * (1 - a)
+    sv = os.path.join(ART, "characters", "surveyor", "side_color.png")
+    js = os.path.join(ART, "characters", "surveyor", "side.json")
+    if os.path.isfile(sv) and os.path.isfile(js):
+        sheet = pngio.to_u8(pngio.read_png(sv))
+        sm = json.load(open(js, encoding="utf-8"))
+        fw, fh, cols, g = sm["frame_width"], sm["frame_height"], sm["columns"], sm.get("gutter", 4)
+        for k, idx in enumerate((0, 12, 25, 46)):         # idle, walk, jump stretch, look_camera front
+            r, c = divmod(idx, cols)
+            fr = sheet[r * (fh + g):r * (fh + g) + fh, c * (fw + g):c * (fw + g) + fw]
+            review._over(canvas, fr, 200 + k * 900, H - fh - ground)
+    for i, (p, _img, _n, _s) in enumerate(info):
+        review.draw(canvas, f"layer{i} " + review.stamp_text(p), 4, 4 + 18 * i, (1.0, 1.0, 0.85))
+    review.draw(canvas, "2x tiled, seam at the centre; surveyor at 1x", 4, H - 18, (1.0, 1.0, 0.85))
+    out = os.path.join(PREVIEW, f"review_{entry.get('review_name', entry['key'].replace('/', '_'))}.png")
+    review.write(out, canvas)
+    mark_stale(entry["key"], False)
+    log_line(f"OK {entry['key']} | painted {len(info)} layers "
+             + ", ".join(f"layer{i} {img.shape[1]}x{img.shape[0]} {n // 1024}KB seam {s:.2f}" for i, (_p, img, n, s) in enumerate(info))
+             + f" + {entry['key'].split('/')[2]}.json | review {os.path.basename(out)} | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
+
+
+def v3_ppu():
+    from meridian import v3
+    return v3.PPU
+
+
+def do_palette_strip(entry, preview):
+    """Bible §9.1 planet palette as an 8x1 strip + json (B-114)."""
+    import gen_painted_bg as BG
+    t0 = time.time()
+    if preview:
+        raise AssetError(f"{entry['key']}: palette strips have no preview mode")
+    p, strip = BG.export_palette(entry, ART)
+    mark_stale(entry["key"], False)
+    log_line(f"OK {entry['key']} | strip {strip.shape[1]}x{strip.shape[0]} + strip.json | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
+
+
 def do_asset(entry, preview):
+    if entry.get("painted_bg"):         # v3 §11.4 painted layers (B-114)
+        return do_painted_bg(entry, preview)
+    if entry.get("palette_strip"):
+        return do_palette_strip(entry, preview)
     if entry.get("style") == "v3":      # contract v3.0 §11 cartoon assets (B-110)
         return do_v3_rigset(entry, preview) if entry.get("rigset") else do_v3_sheet(entry, preview)
     if entry.get("model"):
