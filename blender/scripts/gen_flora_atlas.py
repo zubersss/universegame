@@ -31,7 +31,7 @@ TILES = [
     ("cactus",       {"recipe": "sand", "dark": [58, 104, 62], "light": [92, 140, 84]}, 0.35),
     ("berries",      {"recipe": "soil", "dark": [120, 20, 24], "light": [196, 40, 42], "pebble_thresh": 3.0}, 0.6),
     ("grass_dry",    {"recipe": "soil", "dark": [150, 132, 82], "light": [196, 178, 112], "pebble_thresh": 3.0}, 0.2),
-    ("spare",        {"recipe": "soil", "dark": [100, 100, 100], "light": [120, 120, 120], "pebble_thresh": 3.0}, 0.2),
+    ("leafcards",    {"cards": ["oak", "birch", "bush", "needle"]}, 0.35),     # B-109: 2x2 alpha leaf-cluster cards (was "spare")
 ]
 MARS_TILES = [   # B-089 Mars set (v1 Mars recipes)
     ("rock_rust",   {"recipe": "stone", "dark": [120, 74, 54], "light": [172, 112, 80], "crack_col": [80, 46, 34], "crack_k": 0.5}, 0.2),
@@ -74,16 +74,147 @@ CURRENT = "earth"                                  # build_flora sets this while
 INDEX = {name: i for i, (name, *_) in enumerate(TILES)}
 
 
-def tile_rect(name, inset=12):
-    """UV rect (u0, v0, u1, v1) of a tile with an inset in px; UV v=0 is the BOTTOM (Blender)."""
-    i = [t[0] for t in TILE_SETS[CURRENT]].index(name)
+def tile_rect(name, inset=12, sub=None):
+    """UV rect (u0, v0, u1, v1) of a tile with an inset in px; UV v=0 is the BOTTOM (Blender).
+    `sub` (B-109) picks one quarter of a 2x2 card tile (0 top-left, 1 top-right, 2 bottom-left,
+    3 bottom-right, or a card name from the tile's "cards" list); cards map the whole quarter
+    (inset 0) because their alpha is already 0 within 14 px of its edge."""
+    tiles = TILE_SETS[CURRENT]
+    i = [t[0] for t in tiles].index(name)
     r, c = divmod(i, GRID)
     s = N * GRID
-    u0 = (c * N + inset) / s
-    u1 = ((c + 1) * N - inset) / s
-    v1 = 1.0 - (r * N + inset) / s                    # image row 0 = top = v 1
-    v0 = 1.0 - ((r + 1) * N - inset) / s
+    x0, y0, size = c * N, r * N, N
+    if sub is not None:
+        if isinstance(sub, str):
+            sub = tiles[i][1]["cards"].index(sub)
+        sr, sc = divmod(int(sub), 2)
+        size = N // 2
+        x0, y0, inset = x0 + sc * size, y0 + sr * size, 0
+    u0 = (x0 + inset) / s
+    u1 = (x0 + size - inset) / s
+    v1 = 1.0 - (y0 + inset) / s                       # image row 0 = top = v 1
+    v0 = 1.0 - (y0 + size - inset) / s
     return u0, v0, u1, v1
+
+
+# ---------------------------------------------------------------- B-109 leaf-cluster cards
+
+CARD_KINDS = {   # leaf palette (dark, light), leaf length range in px of a 256 card, width/length, count, rim lobes, twig colour
+    "oak":    dict(dark=(34, 62, 26), light=(92, 130, 52), L=(30, 44), W=0.55, n=110, lobes=5, twig=(70, 56, 42)),
+    "birch":  dict(dark=(66, 104, 42), light=(140, 172, 74), L=(18, 28), W=0.62, n=150, lobes=0, twig=(196, 190, 178)),
+    "bush":   dict(dark=(42, 64, 30), light=(104, 126, 60), L=(14, 22), W=0.7, n=190, lobes=0, twig=(66, 52, 40)),
+    "needle": dict(dark=(18, 40, 30), light=(48, 80, 52), L=(26, 40), W=0.08, n=260, lobes=0, twig=(78, 58, 44)),
+}
+
+
+def _card(kind, seed, size=256, ss=2):
+    """One alpha-cut leaf-cluster card, painted leaf by leaf (back to front) at `ss` x supersample.
+    Returns color RGBA, normal RGB (0..1) and mask RGBA, size x size float32. The cluster hangs on a
+    twig that enters at the bottom centre (the card's attach point); leaves are ellipses (oak with
+    lobed rims, needles as thin strokes along side twigs), each shaded from its own tilt so a card
+    reads as many small lit surfaces; alpha is 0 within 14 px of the card edge."""
+    K = CARD_KINDS[kind]
+    rng = np.random.default_rng(seed)
+    S = size * ss
+    col = np.zeros((S, S, 3), np.float32)
+    hgt = np.zeros((S, S), np.float32)
+    nrm = np.zeros((S, S, 3), np.float32)
+    nrm[..., 2] = 1.0
+    cov = np.zeros((S, S), np.float32)
+    dark, light = np.array(K["dark"], np.float32) / 255, np.array(K["light"], np.float32) / 255
+    tw = np.array(K["twig"], np.float32) / 255
+    up = np.array([0, 0, 1], np.float32)
+    cx, cy, R = S * 0.5, S * 0.47, S * 0.36
+    yy, xx = np.mgrid[0:S, 0:S].astype(np.float32)
+
+    def stroke(x0, y0, x1, y1, w, c):
+        dx, dy = x1 - x0, y1 - y0
+        ln2 = max(dx * dx + dy * dy, 1e-6)
+        t = np.clip(((xx - x0) * dx + (yy - y0) * dy) / ln2, 0, 1)
+        d = np.hypot(xx - (x0 + t * dx), yy - (y0 + t * dy))
+        m = np.clip(w - d + 0.5, 0, 1)[..., None]
+        col[:] = col * (1 - m) + c * m
+        nrm[:] = nrm * (1 - m) + up * m
+        cov[:] = np.maximum(cov, m[..., 0])
+
+    base_y = S * 0.9
+    stem_top = (cx + rng.uniform(-0.05, 0.05) * S, cy - R * 0.55)
+    stroke(cx, base_y, stem_top[0], stem_top[1], 1.6 * ss, tw)
+    twigs = [(cx, base_y, stem_top[0], stem_top[1])]
+    for k in range(int(rng.integers(3, 6))):
+        f = rng.uniform(0.15, 0.85)
+        bx, by = cx + (stem_top[0] - cx) * f, base_y + (stem_top[1] - base_y) * f
+        a = rng.uniform(0.35, 1.1) * (1 if k % 2 else -1) - np.pi / 2
+        ln = R * rng.uniform(0.45, 0.8)
+        ex, ey = bx + np.cos(a) * ln, by + np.sin(a) * ln
+        stroke(bx, by, ex, ey, 1.0 * ss, tw)
+        twigs.append((bx, by, ex, ey))
+    for _k in range(K["n"]):
+        if kind == "needle":
+            bx, by, ex, ey = twigs[int(rng.integers(len(twigs)))]
+            f = rng.uniform(0.05, 1.0)
+            px, py = bx + (ex - bx) * f, by + (ey - by) * f
+            ang = np.arctan2(ey - by, ex - bx) + rng.choice((-1.0, 1.0)) * rng.uniform(0.5, 1.1)
+        else:
+            rr = R * np.sqrt(rng.uniform(0, 1)) * 0.95
+            th = rng.uniform(0, 2 * np.pi)
+            px, py = cx + rr * np.cos(th), cy + rr * np.sin(th) * 0.92
+            ang = th + rng.uniform(-0.8, 0.8)                     # leaves point outward from the centre
+        L = rng.uniform(*K["L"]) * ss
+        W = L * K["W"] * 0.5
+        ux, uy = np.cos(ang), np.sin(ang)
+        x0, x1 = int(max(0, px - L - 2)), int(min(S, px + L + 2))
+        y0, y1 = int(max(0, py - L - 2)), int(min(S, py + L + 2))
+        if x1 <= x0 or y1 <= y0:
+            continue
+        X, Y = xx[y0:y1, x0:x1] - px, yy[y0:y1, x0:x1] - py
+        a = X * ux + Y * uy                                        # along the leaf (0 at the petiole)
+        b = -X * uy + Y * ux                                       # across it
+        s = np.clip(a / L, 0, 1)
+        if kind == "needle":
+            half = np.maximum(W, 0.7 * ss) * (1 - 0.6 * s)
+        else:
+            half = W * np.sin(np.pi * s) ** (1.2 if kind == "birch" else 0.8)
+            if K["lobes"]:
+                half = half * (0.78 + 0.22 * np.abs(np.cos(K["lobes"] * np.pi * s)))
+        inside = (a >= 0) & (a <= L)
+        m = np.clip(half - np.abs(b) + 0.5, 0, 1) * inside
+        if not m.any():
+            continue
+        tilt = rng.normal(0, 0.45, 2)                              # the leaf's own facing
+        n = np.array([tilt[0], -tilt[1], 1.0], np.float32)
+        n /= np.linalg.norm(n)
+        lit = float(np.clip(0.55 + 0.45 * (0.5 * n[0] + 0.5 * n[1] + 0.7 * n[2]), 0, 1))
+        depth = max(0.0, 1 - np.hypot(px - cx, py - cy) / (R * 1.3))   # inner leaves a little darker
+        tone = float(np.clip(rng.uniform(0.15, 0.95) * (0.6 + 0.4 * lit) * (0.7 + 0.3 * (1 - depth)), 0, 1))
+        c = dark + (light - dark) * tone
+        rib = 0.0 if kind == "needle" else np.clip(1 - np.abs(b) / (0.12 * W + 0.6 * ss), 0, 1) * inside
+        cc = c[None, None, :] * (1 - 0.25 * np.asarray(rib, np.float32)[..., None] if kind != "needle" else 1)
+        mm = m[..., None]
+        col[y0:y1, x0:x1] = col[y0:y1, x0:x1] * (1 - mm) + cc * mm
+        nrm[y0:y1, x0:x1] = nrm[y0:y1, x0:x1] * (1 - mm) + n * mm
+        hgt[y0:y1, x0:x1] = np.maximum(hgt[y0:y1, x0:x1], m * (0.4 + 0.6 * np.sin(np.pi * s)) * (0.5 + 0.5 * depth))
+        cov[y0:y1, x0:x1] = np.maximum(cov[y0:y1, x0:x1], m)
+    e = np.minimum(np.minimum(xx, S - 1 - xx), np.minimum(yy, S - 1 - yy)) / ss
+    cov *= np.clip((e - 14) / 4, 0, 1)
+
+    def down(arr):
+        return arr.reshape(size, ss, size, ss, *arr.shape[2:]).mean(axis=(1, 3))
+    cov_d = down(cov)
+    col_d, nrm_d, hgt_d = down(col * cov[..., None]), down(nrm * cov[..., None]), down(hgt)
+    w = np.maximum(cov_d[..., None], 1e-4)
+    rgb = np.where(cov_d[..., None] > 1e-4, col_d / w, 0).astype(np.float32)
+    nn = np.where(cov_d[..., None] > 1e-4, nrm_d / w, up).astype(np.float32)
+    from meridian import post
+    known = cov_d >= 0.5
+    rgb, k2 = post.dilate(rgb, known, steps=12)                    # colour under the cut so mips never bleed black
+    rgb[~k2] = rgb[k2].mean(axis=0) if k2.any() else dark
+    nn = nn / np.maximum(np.linalg.norm(nn, axis=-1, keepdims=True), 1e-6)
+    nn[cov_d < 0.5] = up
+    color = np.dstack([np.clip(rgb, 0, 1), np.clip(cov_d, 0, 1)]).astype(np.float32)
+    ao = np.clip(0.75 + 0.25 * hgt_d, 0.6, 1.0).astype(np.float32)
+    mask = np.dstack([np.zeros_like(ao), ao, np.zeros_like(ao), np.full_like(ao, 0.35)])
+    return color, (nn * 0.5 + 0.5).astype(np.float32), mask
 
 
 def build_atlas(seed=8501, tiles=TILES):
@@ -93,9 +224,21 @@ def build_atlas(seed=8501, tiles=TILES):
     for i, tile in enumerate(tiles):
         name, spec, smooth = tile[:3]
         emit = tile[3] if len(tile) > 3 else None
-        face = G3.make_face(spec, seed + i, smooth, 0.4)
         r, c = divmod(i, GRID)
         ys, xs = slice(r * N, (r + 1) * N), slice(c * N, (c + 1) * N)
+        if "cards" in spec:                               # B-109: 2x2 alpha leaf-cluster cards
+            h = N // 2
+            for q, kind in enumerate(spec["cards"]):
+                sr, sc = divmod(q, 2)
+                qy = slice(r * N + sr * h, r * N + (sr + 1) * h)
+                qx = slice(c * N + sc * h, c * N + (sc + 1) * h)
+                cc, nn, mm = _card(kind, seed + 100 * i + q, size=h)
+                out["color"][qy, qx] = cc
+                out["normal"][qy, qx, :3] = nn
+                out["normal"][qy, qx, 3] = 1
+                out["mask"][qy, qx] = mm
+            continue
+        face = G3.make_face(spec, seed + i, smooth, 0.4)
         out["color"][ys, xs, :3] = face["color"]
         out["color"][ys, xs, 3] = 1
         out["normal"][ys, xs, :3] = face["normal"]
