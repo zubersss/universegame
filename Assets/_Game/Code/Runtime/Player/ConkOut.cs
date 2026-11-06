@@ -26,6 +26,8 @@ namespace Meridian.Player
         public BaseBuilder bases;
         public SideShip ship;
         public TerrainStreamer terrain;
+        /// <summary>The side camera: the iris (U-096) closes on the fallen surveyor and opens on the woken one.</summary>
+        public Camera view;
 
         public bool Out { get; private set; }
         public int Count { get; private set; }
@@ -63,6 +65,8 @@ namespace Meridian.Player
             Vector2 at = player != null && player.Body != null ? player.Body.position : (Vector2)transform.position;
             if (player != null && player.Body != null) { player.Body.linearVelocity = Vector2.zero; player.Body.simulated = false; }
             ConkedOut?.Invoke(at);
+            var iris = Meridian.Transitions.IrisWipe.Instance;
+            if (iris != null) StartCoroutine(iris.Close(Meridian.Transitions.IrisWipe.ScreenCentre(view, at)));
         }
 
         void Update()
@@ -97,6 +101,8 @@ namespace Meridian.Player
             if (vitals != null) vitals.Restore();
             if (hazards != null) hazards.RestoreSuit();
             Woke?.Invoke(feet);
+            var iris = Meridian.Transitions.IrisWipe.Instance;
+            if (iris != null && iris.Closed) StartCoroutine(iris.Open(Meridian.Transitions.IrisWipe.ScreenCentre(view, feet)));
         }
 
         /// <summary>The last base piece placed here, else beside the ship; standing on the ground at that column.</summary>

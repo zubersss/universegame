@@ -981,6 +981,74 @@ namespace Meridian.Tests
             finally { Meridian.View2D.CartoonStage.Enabled = false; }
         }
 
+        /// <summary>U-096 evidence: a 6-frame strip of the iris-out on the surveyor (t = 0 … 0.35 s), 320×180 each, in reports/unity/c0_&lt;date&gt;/iris_strip.png.</summary>
+        [UnityTest]
+        public IEnumerator CaptureIrisStrip()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                side.dayNight.Override = 0.45f;
+                for (int i = 0; i < 60; i++) yield return null;
+                var iris = Meridian.Transitions.IrisWipe.Instance;
+                Assert.NotNull(iris, "IrisWipe on the transition canvas");
+                var canvas = iris.GetComponentInParent<Canvas>();
+                var mode = canvas.renderMode;
+                // A camera render never includes a screen-space overlay canvas: draw it through the side camera for the shots.
+                canvas.renderMode = RenderMode.ScreenSpaceCamera; canvas.worldCamera = side.sideCamera; canvas.planeDistance = 1f;
+                var cam = side.sideCamera;
+                var centre = Meridian.Transitions.IrisWipe.ScreenCentre(cam, side.player.Body.position + new Vector2(0f, 0.9f));
+                const int frames = 6, w = 320, h = 180;
+                var strip = new Texture2D(w * frames, h, TextureFormat.RGB24, false);
+                var full = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);
+                var small = new RenderTexture(w, h, 0, RenderTextureFormat.ARGB32);
+                try
+                {
+                    for (int i = 0; i < frames; i++)
+                    {
+                        float t = Meridian.Transitions.IrisMath.Seconds * i / (frames - 1);
+                        iris.Preview(centre, t, true);
+                        yield return null;
+                        cam.targetTexture = full; cam.Render(); cam.targetTexture = null;
+                        Graphics.Blit(full, small);
+                        var prev = RenderTexture.active;
+                        RenderTexture.active = small;
+                        strip.ReadPixels(new Rect(0, 0, w, h), i * w, 0);
+                        RenderTexture.active = prev;
+                        Debug.Log($"[MERIDIAN] iris strip frame {i}: t {t:F3} s, radius {iris.Radius:F3} screen heights");
+                    }
+                    strip.Apply();
+                    Directory.CreateDirectory("logs");
+                    var output = $"logs/capture_{name}_iris_strip.png";
+                    File.WriteAllBytes(output, strip.EncodeToPNG());
+                    TestContext.Out.WriteLine($"[MERIDIAN] CAPTURE OK: {output}");
+                    var dir = $"coordination/reports/unity/c0_{DateTime.Now:yyyy-MM-dd}";
+                    Directory.CreateDirectory(dir);
+                    File.Copy(output, $"{dir}/iris_strip.png", true);
+                }
+                finally
+                {
+                    iris.SetOpen();
+                    canvas.renderMode = mode;
+                    UnityEngine.Object.Destroy(strip); full.Release(); small.Release();
+                }
+                side.dayNight.Override = null;
+            }
+            finally { Meridian.View2D.CartoonStage.Enabled = false; }
+        }
+
         static IEnumerator Save(Camera cam, string name)
         {
             var rt = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);

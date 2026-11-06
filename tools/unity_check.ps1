@@ -1,8 +1,8 @@
-# One hand-off check under a single HeavyJobLock (U-043, D-037): compile (optionally running an
+﻿# One hand-off check under a single HeavyJobLock (U-043, D-037): compile (optionally running an
 # -ExecuteMethod such as scene authoring), then EditMode, then PlayMode, without giving the lock up
 # in between. Use with unity_when_clear.ps1 to wait for the turn. Owner: UNITY.
 # Usage: tools/unity_check.ps1 [-ExecuteMethod Meridian.EditorTools.SceneAuthoring.Run] [-PlayFilter "A|B"] [-SkipEditMode] [-SkipPlayMode]
-param([string]$ExecuteMethod = '', [string]$PlayFilter = '', [switch]$SkipEditMode, [switch]$SkipPlayMode)
+param([string]$ExecuteMethod = '', [string]$PlayFilter = '', [switch]$SkipEditMode, [switch]$SkipPlayMode, [switch]$Graphics)
 . (Join-Path $PSScriptRoot 'unity_common.ps1')
 
 try { Enter-HeavyJobLock 'unity_check (compile + EditMode + PlayMode)' } catch { Write-Host "BLOCKED: $_"; exit 2 }
@@ -22,6 +22,7 @@ try {
         Write-Host '== PlayMode'
         $p = @{ Mode = 'PlayMode' }
         if ($PlayFilter) { $p.Filter = $PlayFilter }
+        if ($Graphics) { $p.Graphics = $true }  # U-095: PlayMode on a real graphics device (film pass, GPU timings)
         & (Join-Path $PSScriptRoot 'unity_test.ps1') @p
         $code = $LASTEXITCODE
     }

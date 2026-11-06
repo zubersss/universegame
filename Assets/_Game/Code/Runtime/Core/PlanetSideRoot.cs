@@ -168,7 +168,7 @@ namespace Meridian.Core
             if (bases == null) { bases = gameObject.AddComponent<Meridian.Building.BaseBuilder>(); bases.terrain = terrain; bases.rig = rig; bases.player = player != null ? player.transform : null; }
             bases.ConfigureFor(config.id);
             if (conkOut == null) conkOut = gameObject.AddComponent<ConkOut>();
-            conkOut.player = player; conkOut.hazards = hazards; conkOut.bases = bases; conkOut.ship = ship; conkOut.terrain = terrain;
+            conkOut.player = player; conkOut.hazards = hazards; conkOut.bases = bases; conkOut.ship = ship; conkOut.terrain = terrain; conkOut.view = sideCamera;
             conkOut.vitals = player != null ? player.GetComponent<PlayerVitals>() : null;
             conkOut.Hook();
             if (sideCamera != null)

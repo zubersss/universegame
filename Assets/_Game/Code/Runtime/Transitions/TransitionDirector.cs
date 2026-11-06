@@ -20,8 +20,10 @@ namespace Meridian.Transitions
     /// </summary>
     public sealed class TransitionDirector : MonoBehaviour
     {
-        public const float LaunchLock = 0.3f, LaunchFade = 0.5f, LaunchReveal = 0.25f; // total 1.05 s ≤ 1.5 s
+        public const float LaunchLock = 0.3f, LaunchFade = 0.5f, LaunchReveal = 0.25f; // v3 white fades (unused since U-096: the iris, 0.35 s each way)
         public const float EntryFade = 0.8f, EntryReveal = 0.3f;
+        /// <summary>U-096 (Bible §9.3 v4): launch = lock 0.3 s + iris-out 0.35 + switch + iris-in 0.35; entry = push-in under the iris-out 0.35 + load + iris-in 0.35.</summary>
+        public const float IrisSeconds = IrisMath.Seconds;
         public const float RingOutwardSpeed = 20f;
         public const float InvulnerableSeconds = 1f;
         public const float EnterHoldSeconds = 0.5f;
@@ -46,6 +48,7 @@ namespace Meridian.Transitions
         SideShip sideShip;
         SpaceShip spaceShip;
         Image fade;
+        IrisWipe iris;
         float[] prevDistance;
         float enterHeld;
         InputAction enterAction;
@@ -70,6 +73,7 @@ namespace Meridian.Transitions
             // Boot cover (U-028): opaque until the first planet is loaded and its shaders warmed.
             fade.color = Color.black;
             fade.enabled = true;
+            iris = IrisWipe.Create(canvasGo.transform); // U-096: the iris quad, above the fade
         }
 
         void Start()
@@ -134,7 +138,7 @@ namespace Meridian.Transitions
                 Meridian.CameraRig.SideView.SetHalfHeight(cam, Mathf.Lerp(startSize, SideZoomOut, t / LaunchLock));
                 yield return null;
             }
-            yield return Fade(0f, 1f, LaunchFade);
+            yield return iris.Close(IrisWipe.ScreenCentre(cam, sideShip.Body.position), IrisSeconds); // U-096: iris-out on the ship
 
             float angle = Longitude(sideShip.Body.position.x, planet.worldWidth) + RotationDegrees(time, planet);
             var body = FindBody(planet.id);
@@ -154,7 +158,7 @@ namespace Meridian.Transitions
             if (spaceCam != null) spaceCam.orthographicSize = SpaceDefaultSize;
             ResetCrossings();
 
-            yield return Fade(1f, 0f, LaunchReveal);
+            yield return iris.Open(IrisWipe.ScreenCentre(spaceCam, spaceShip.Position), IrisSeconds); // iris-in on the ship in space
             LastLaunchSeconds = Time.realtimeSinceStartup - t0;
             Busy = false;
             Completed?.Invoke();
@@ -204,16 +208,14 @@ namespace Meridian.Transitions
             float angle = Mathf.Atan2(offset.y, offset.x) * Mathf.Rad2Deg;
             spaceShip.Velocity = Vector2.zero;
 
-            // Heat shimmer stand-in: the fade starts warm and goes white (fx/heat_shimmer arrives with B-012 polish).
-            for (float t = 0f; t < EntryFade; t += Time.unscaledDeltaTime)
+            // U-096: the camera pushes in on the ship while the iris closes on it (0.35 s); the load runs while the screen is black.
+            StartCoroutine(iris.Close(IrisWipe.ScreenCentre(spaceCam, spaceShip.Position), IrisSeconds));
+            for (float t = 0f; t < IrisSeconds; t += Time.unscaledDeltaTime)
             {
-                float k = t / EntryFade;
-                if (spaceCam != null) spaceCam.orthographicSize = Mathf.Lerp(startSize, SpacePushIn, k);
-                fade.enabled = true;
-                fade.color = new Color(1f, Mathf.Lerp(0.75f, 1f, k), Mathf.Lerp(0.5f, 1f, k), k);
+                if (spaceCam != null) spaceCam.orthographicSize = Mathf.Lerp(startSize, SpacePushIn, t / IrisSeconds);
                 yield return null;
             }
-            fade.color = Color.white;
+            while (iris.Busy) yield return null;
 
             var config = State.catalog.Get(body.planet);
             float longitude = angle - RotationDegrees(time, config);
@@ -225,7 +227,9 @@ namespace Meridian.Transitions
             if (spaceCam != null) spaceCam.orthographicSize = SpaceDefaultSize;
             yield return scenes.LoadPlanetSide(config, x);
 
-            yield return Fade(1f, 0f, EntryReveal);
+            var sideNow = scenes.PlanetSide;
+            var landed = sideNow != null && sideNow.ship != null ? sideNow.ship.transform.position : (sideNow != null && sideNow.player != null ? sideNow.player.transform.position : Vector3.zero);
+            yield return iris.Open(IrisWipe.ScreenCentre(sideNow != null ? sideNow.sideCamera : null, landed), IrisSeconds); // iris-in on the ship flying in
             LastEntrySeconds = Time.realtimeSinceStartup - t0;
             Busy = false;
             Completed?.Invoke();
