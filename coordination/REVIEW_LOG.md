@@ -1122,3 +1122,9 @@ Moved: nothing. B-103's export landed after D-086 and stays Superseded, not revi
 Board: U-093 note (archive move as its own commit, then Bump/ConkOut), B-110 note (numpy-only packer, validator and B-115 overlays first, B-111 design sheet below 512 px; first GP render waits for the gate and an Editor-free window), U-091 note (D-089 numbers at promotion). Queue: 6 Ready C0 cards per worker, none blocked.
 User: USER-22 posted (close ChatGPT and Copilot); USER-18 and USER-19 retired.
 Next 3 for UNITY: U-093, U-094, U-095. Next 3 for BLENDER: B-110, B-115, B-111 step 1.
+
+## Cycle 232 · 2026-11-06 12:0x
+Checked: commits 24b19cb, 24faf9f, af18479, eb00ea7, 5072ac7; both status files; locks (want_blender only); free RAM 1.68 GB at 12:02 (0.13 at 11:4x).
+Loop scan: no signals; both workers took the C0 cards in board order.
+B-115: review_b115_film.png -> art accepted, Done on the U-095 capture. B-110: review_b110_calibration_v3_preview.png -> preview accepted, Done on the full export. U-093: 24faf9f has 6 renames into Archive/Combat~, 0 deletions, no combat class compiled -> waits on its batched check. Turn order: BLENDER export, then the UNITY check (D-037).
+Owner: Remote Control set up on this session (name lead). USER-22 still open; RAM recovered, so it is no longer urgent.
