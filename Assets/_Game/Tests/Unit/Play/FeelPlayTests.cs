@@ -53,7 +53,7 @@ namespace Meridian.Tests
             Assert.IsTrue(player.Dash.Active, $"dash on (grounded {player.Grounded}, simulated {player.Body.simulated}, vy {player.Body.linearVelocity.y:F2}, rose {player.Body.position.y - y0:F3} m, available {player.Dash.Available}, cooldown {player.Dash.CooldownLeft:F2})");
             yield return Until(() => !player.Dash.Active, 1f);
             float dashed = player.Body.position.x - x0;
-            Debug.Log($"[MERIDIAN] air dash moved {dashed:F2} m (facing {player.Facing})");
+            TestContext.Out.WriteLine($"[MERIDIAN] air dash moved {dashed:F2} m (facing {player.Facing})");
             Assert.AreEqual(AirDash.Distance * player.Facing, dashed, 0.15f, "about 1.62 m in the facing direction");
             if (!player.Grounded)
             {

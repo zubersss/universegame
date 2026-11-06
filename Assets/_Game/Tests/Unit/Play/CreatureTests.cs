@@ -49,19 +49,26 @@ namespace Meridian.Tests
         {
             yield return BootEarth();
             side.dayNight.Override = 0.5f;
+            // Open ground 40 m west of the camp: the camp's props, pad and ship (U-035/U-076) block a running stag on both flanks.
+            int ptx = Mathf.FloorToInt(player.Body.position.x) - 40;
+            var open = new Vector2(ptx + 0.5f, side.terrain.TopSolidY(ptx) + 1.05f);
+            player.Body.position = open; player.transform.position = open; player.Body.linearVelocity = Vector2.zero;
+            yield return null;
+            float settle = Time.realtimeSinceStartup + 15f;
+            while (!side.terrain.IsSettled && Time.realtimeSinceStartup < settle) yield return null;
+            for (int i = 0; i < 30; i++) yield return new WaitForFixedUpdate();
             float px = player.transform.position.x;
-            // Left of the camp: the right side holds the landing pad and the Pilgrim (U-076), which a fleeing stag would run into.
-            var near = creatures.Spawn(Species.Stag, OnSurface(px - 7f, Species.Stag)); // tile-snapped: 6.5–7.5 m away
-            var far = creatures.Spawn(Species.Stag, OnSurface(px - 11f, Species.Stag));
+            var near = creatures.Spawn(Species.Stag, OnSurface(px + 7f, Species.Stag)); // tile-snapped: 6.5–7.5 m away
+            var far = creatures.Spawn(Species.Stag, OnSurface(px - 10f, Species.Stag));
             // A chunk still being rebuilt holds its creatures (no thinking): start the clock once both are free.
             for (int i = 0; i < 300 && (near.Held || far.Held); i++) yield return new WaitForFixedUpdate();
             for (int i = 0; i < 40; i++) yield return new WaitForFixedUpdate();
             string where = $"near held {near.Held} at {Mathf.Abs(near.Body.position.x - player.Body.position.x):F1} m, far held {far.Held} at {Mathf.Abs(far.Body.position.x - player.Body.position.x):F1} m";
             Assert.AreEqual(CreatureState.Flee, near.State, "inside 8 m: flees (" + where + ")");
-            Assert.AreNotEqual(CreatureState.Flee, far.State, "11 m: doesn't");
+            Assert.AreNotEqual(CreatureState.Flee, far.State, "10 m: doesn't");
             float d0 = Mathf.Abs(near.Body.position.x - player.Body.position.x);
             int ntx = Mathf.FloorToInt(near.Body.position.x), nty = Mathf.FloorToInt(near.Body.position.y - near.Spec.size.y * 0.5f - 0.1f);
-            Assert.Less(near.Body.linearVelocity.x, -1f, $"runs away (player is to its right; held {near.Held}, simulated {near.Body.simulated}, state {near.State}, at {near.Body.position}, ready {side.terrain.IsCollisionReady(ntx, nty)}/{side.terrain.IsCollisionReady(ntx, nty - 2)}, settled {side.terrain.IsSettled})");
+            Assert.Greater(near.Body.linearVelocity.x, 1f, $"runs away (player is to its left; held {near.Held}, simulated {near.Body.simulated}, state {near.State}, at {near.Body.position}, ready {side.terrain.IsCollisionReady(ntx, nty)}/{side.terrain.IsCollisionReady(ntx, nty - 2)}, settled {side.terrain.IsSettled})");
             for (int i = 0; i < 60; i++) yield return new WaitForFixedUpdate();
             float d1 = Mathf.Abs(near.Body.position.x - player.Body.position.x);
             TestContext.Out.WriteLine($"[MERIDIAN] stag: {d0:F1} m → {d1:F1} m in 1.2 s");
