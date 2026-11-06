@@ -201,7 +201,7 @@ namespace Meridian.Space
                 cloudBlock.SetFloat(Rotation, cloudTurn);
                 cloudShell.SetPropertyBlock(cloudBlock);
             }
-            if (beltReady) DrawBelt();
+            if (beltReady && SystemInfo.graphicsDeviceType != GraphicsDeviceType.Null) DrawBelt(); // no device under -nographics tests
         }
 
         /// <summary>Glow width in R (BLENDER handoffs): planets 2.56 R, the Sun 3.2 R.</summary>
