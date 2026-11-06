@@ -59,7 +59,8 @@ namespace Meridian.Tests
             Assert.AreEqual(CreatureState.Flee, near.State, "inside 8 m: flees (" + where + ")");
             Assert.AreNotEqual(CreatureState.Flee, far.State, "10 m: doesn't");
             float d0 = Mathf.Abs(near.Body.position.x - player.Body.position.x);
-            Assert.Greater(near.Body.linearVelocity.x, 1f, "runs away (player is to its left)");
+            int ntx = Mathf.FloorToInt(near.Body.position.x), nty = Mathf.FloorToInt(near.Body.position.y - near.Spec.size.y * 0.5f - 0.1f);
+            Assert.Greater(near.Body.linearVelocity.x, 1f, $"runs away (player is to its left; held {near.Held}, simulated {near.Body.simulated}, state {near.State}, at {near.Body.position}, ready {side.terrain.IsCollisionReady(ntx, nty)}/{side.terrain.IsCollisionReady(ntx, nty - 2)}, settled {side.terrain.IsSettled})");
             for (int i = 0; i < 60; i++) yield return new WaitForFixedUpdate();
             float d1 = Mathf.Abs(near.Body.position.x - player.Body.position.x);
             TestContext.Out.WriteLine($"[MERIDIAN] stag: {d0:F1} m → {d1:F1} m in 1.2 s");

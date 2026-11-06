@@ -43,13 +43,14 @@ namespace Meridian.Tests
         public IEnumerator OneDashPerAirtimeRefreshedByLanding()
         {
             yield return Boot();
+            float y0 = player.Body.position.y;
             player.PressJump();
             yield return Until(() => !player.Grounded, 2f);
             Assert.IsFalse(player.Grounded, "took off");
             float x0 = player.Body.position.x;
             player.PressDash();
             yield return new WaitForFixedUpdate();
-            Assert.IsTrue(player.Dash.Active, "dash on");
+            Assert.IsTrue(player.Dash.Active, $"dash on (grounded {player.Grounded}, simulated {player.Body.simulated}, vy {player.Body.linearVelocity.y:F2}, rose {player.Body.position.y - y0:F3} m, available {player.Dash.Available}, cooldown {player.Dash.CooldownLeft:F2})");
             yield return Until(() => !player.Dash.Active, 1f);
             float dashed = player.Body.position.x - x0;
             Debug.Log($"[MERIDIAN] air dash moved {dashed:F2} m (facing {player.Facing})");

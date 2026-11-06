@@ -85,6 +85,13 @@ namespace Meridian.Tests
                     var c = creatures.SpawnAt(s, Mathf.FloorToInt(px + sgn * d), player.Body.position.y);
                     if (c != null) return c;
                 }
+            // Refused everywhere: say why for the nearest column each side (the rule, or the ground's collision not resident).
+            foreach (int sgn in new[] { 1, -1 })
+            {
+                int tx = Mathf.FloorToInt(px + sgn * 8);
+                var site = creatures.SiteAt(tx, player.Body.position.y);
+                TestContext.Out.WriteLine($"[MERIDIAN] {s} refused at {tx}: allows {SpeciesSpec.Get(s).Allows(site)}, tile {site.surfaceTile} surface {site.surfaceY} zone {site.zone} t {site.localTime:F2}, collision ready {side.terrain.IsCollisionReady(tx, site.surfaceY)}, settled {side.terrain.IsSettled}, player {player.Body.position} simulated {player.Body.simulated}");
+            }
             return null;
         }
 

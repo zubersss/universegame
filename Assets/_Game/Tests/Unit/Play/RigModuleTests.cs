@@ -52,7 +52,8 @@ namespace Meridian.Tests
                 rig.module = m;
                 rig.AimAt(Feet + new Vector2(3f, 2.5f));
                 for (int i = 0; i < 3; i++) yield return null;
-                Assert.That(tool.Tool.sprite.name, Does.Contain(m.ToString().ToLowerInvariant()), "module art " + m);
+                var loadKey = RigModules.LoadKey(m); // U-093: the Grapple shows the old slot-2 sprite until its art exists
+                Assert.That(tool.Tool.sprite.name, Does.Contain(loadKey.Substring(loadKey.LastIndexOf('/') + 1)), "module art " + m);
                 var s = tool.Tool.sprite;
                 Assert.AreEqual(0.375f, s.pivot.x / s.rect.width, 0.01f, "grip pivot x (D-041)");
                 Assert.AreEqual(0.5f, s.pivot.y / s.rect.height, 0.01f, "grip pivot y");

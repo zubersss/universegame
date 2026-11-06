@@ -64,6 +64,7 @@ namespace Meridian.Tests
             timeout = Time.realtimeSinceStartup + 10f;
             while (!view.Ready && Time.realtimeSinceStartup < timeout) yield return null;
             Assert.IsTrue(view.Ready, "characters/surveyor/side loaded (placeholder until B-111)");
+            for (int i = 0; i < 3; i++) yield return null; // the first drawing lands on the next frame
             Assert.NotNull(view.Renderer.sprite, "a drawing on screen");
             var player = side.player;
             player.externalInput = true;

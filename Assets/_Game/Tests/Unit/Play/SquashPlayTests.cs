@@ -56,7 +56,7 @@ namespace Meridian.Tests
             Assert.IsTrue(landed, "landed");
             yield return null; // the same frame's LateUpdate applied the squash
             float squashed = view.VisualRoot.localScale.y;
-            Debug.Log($"[MERIDIAN] landing {impact:F1} m/s: visual y {squashed:F2} one frame after touchdown");
+            TestContext.Out.WriteLine($"[MERIDIAN] landing {impact:F1} m/s: visual y {squashed:F2} one frame after touchdown");
             Assert.AreEqual(7f, impact, 0.6f, "about 7 m/s");
             Assert.LessOrEqual(squashed, 0.76f, "squashed to ≈ 0.7 within one frame");
             Assert.AreEqual(size0, capsule.size, "capsule size unchanged");
@@ -79,12 +79,12 @@ namespace Meridian.Tests
             yield return new WaitForFixedUpdate();
             creatures.Bump(wolf, Time.time); // U-093 (D-087): a bump; the surveyor and the wolf both react
             yield return null;
-            Debug.Log($"[MERIDIAN] bump: player vx {player.Body.linearVelocity.x:F2}, flashing {view.Flashing}, clip {view.Clip}");
+            TestContext.Out.WriteLine($"[MERIDIAN] bump: player vx {player.Body.linearVelocity.x:F2}, flashing {view.Flashing}, clip {view.Clip}");
             Assert.Less(player.Body.linearVelocity.x, -3f, "knocked away from the wolf (left)");
             Assert.IsTrue(view.Flashing, "the 2-frame white flash");
             Assert.IsTrue(view.Clip == SurveyorAnim.Bump || view.Clip == SurveyorAnim.Hurt, "bump (or its hurt stand-in)");
             // The wolf bounces back: knock and squash on its visual root, the same frame.
-            Debug.Log($"[MERIDIAN] creature bump: visual y {wolf.Visual.localScale.y:F2}, vx {wolf.Body.linearVelocity.x:F2}");
+            TestContext.Out.WriteLine($"[MERIDIAN] creature bump: visual y {wolf.Visual.localScale.y:F2}, vx {wolf.Body.linearVelocity.x:F2}");
             Assert.AreEqual(SquashStretch.HitScale, wolf.Visual.localScale.y, 0.03f, "0.85 squash");
             Assert.Greater(wolf.Body.linearVelocity.x, 2f, "bounced away from the surveyor (right)");
             Assert.AreEqual(wolf.Spec.size, wolf.Box.size, "the creature's collider never scales");

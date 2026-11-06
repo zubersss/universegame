@@ -51,7 +51,7 @@ namespace Meridian.View2D
             Renderer = root.AddComponent<SpriteRenderer>();
             Renderer.sortingOrder = sortingOrder;
             Animator = root.AddComponent<Animator>();
-            Animator.cullingMode = AnimatorCullingMode.CullCompletely;
+            Animator.cullingMode = AnimatorCullingMode.AlwaysAnimate; // an empty renderer has no bounds: a culled Animator would never set its first sprite
         }
 
         void Start() { if (!string.IsNullOrEmpty(key)) Load(key); }
@@ -156,8 +156,8 @@ namespace Meridian.View2D
         /// <summary>Fallback drawing while no controller is loaded: the clip's frame on the 12 fps clock.</summary>
         void Apply()
         {
-            if (UsesAnimator) { Frame = -1; return; }
             if (frames == null || frames.Length == 0) return;
+            if (UsesAnimator) { Frame = -1; if (Renderer.sprite == null) Renderer.sprite = frames[0]; return; } // the controller draws from its next update
             int f = hasCurrent ? current.start + SheetClock.Frame(clipTime, current.length, current.loop) : 0;
             if (f < 0 || f >= frames.Length) f = 0;
             Frame = hasCurrent ? f - current.start : 0;

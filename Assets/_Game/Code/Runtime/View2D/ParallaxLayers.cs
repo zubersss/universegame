@@ -115,11 +115,11 @@ namespace Meridian.View2D
             if (white == null)
             {
                 var tex = Texture2D.whiteTexture;
-                white = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0f), tex.width);
+                white = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0f), tex.width, 0, SpriteMeshType.FullRect);
                 white.name = "ParallaxPlaceholder";
             }
             sr.sprite = white;
-            sr.drawMode = SpriteDrawMode.Sliced;
+            sr.drawMode = SpriteDrawMode.Tiled;
             sr.size = new Vector2(PlaceholderWidth * 3f, PlaceholderHeight - n);
             sr.color = PlaceholderTints[Mathf.Clamp(n, 0, PlaceholderTints.Length - 1)];
         }

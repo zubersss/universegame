@@ -106,7 +106,9 @@ namespace Meridian.Player
             float x;
             if (bases != null && bases.pieces.Count > 0 && bases.pieces[bases.pieces.Count - 1].go != null)
             {
-                x = bases.pieces[bases.pieces.Count - 1].go.transform.position.x;
+                // Just right of the piece (its cells are solid or occupied): never inside it.
+                var piece = bases.pieces[bases.pieces.Count - 1];
+                x = Mathf.Floor(piece.go.transform.position.x) + piece.spec.size.x + 0.5f;
                 atBase = true;
             }
             else if (ship != null) x = ship.transform.position.x - BesideShip;

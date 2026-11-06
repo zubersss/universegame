@@ -76,12 +76,12 @@ namespace Meridian.Tests
             side.creatures.Despawn(wolf); // nothing else touches the surveyor while the knock runs
             for (int i = 0; i < 25; i++) yield return new WaitForFixedUpdate(); // 0.5 s: the knock and any settling
             float moved = player.Body.position.x - x0;
-            Debug.Log($"[MERIDIAN] bump knock {moved:F3} m");
+            TestContext.Out.WriteLine($"[MERIDIAN] bump knock {moved:F3} m");
             Assert.AreEqual(PlayerController.KnockDistance, moved, 0.05f, "0.8 m away from the creature");
             AssertUnchanged(before, Read());
             var view = player.GetComponentInChildren<PlayerView>();
             Assert.Greater(side.creatures.Bumps, 0, "the director counted it");
-            if (view != null) Debug.Log($"[MERIDIAN] clip after the bump: {view.Clip}");
+            if (view != null) TestContext.Out.WriteLine($"[MERIDIAN] clip after the bump: {view.Clip}");
             LogAssert.NoUnexpectedReceived();
         }
 

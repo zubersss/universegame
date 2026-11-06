@@ -86,7 +86,7 @@ namespace Meridian.Tests
             Assert.AreEqual(suit0, side.hazards.SuitIntegrity, 1e-4f, "no shot ever drains the suit");
             Assert.AreEqual(reserve0, vitals.health, 1e-4f, "nor the reserve");
             Assert.IsTrue(hunter.Alive, "a sentinel can't be destroyed (no Lance)");
-            Assert.LessOrEqual((hunter.Body.position - (player.Body.position + new Vector2(0f, 0.9f))).magnitude, WardenDirector.RingRange, "it stays close, ringing");
+            Assert.LessOrEqual((hunter.Body.position - (player.Body.position + new Vector2(0f, 0.9f))).magnitude, WardenDirector.RingRange, $"it stays close, ringing (hunter {hunter.Body.position} {hunter.State} active {hunter.gameObject.activeSelf}, player {player.Body.position} simulated {player.Body.simulated} grounded {player.Grounded}, bumps {wardens.Bumps}, feet were {feet})");
 
             // Budget: six hunting sentinels.
             while (wardens.Active < WardenDirector.MaxSentinels)

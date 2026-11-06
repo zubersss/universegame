@@ -88,8 +88,8 @@ namespace Meridian.Tests
             Assert.AreEqual(1, side.conkOut.Count);
             Assert.IsFalse(side.conkOut.Out, "awake");
             Assert.IsTrue(side.conkOut.LastWakeAtBase, "woke at the base");
-            Debug.Log($"[MERIDIAN] conk out: woke at {player.Body.position} (crate x {crate.go.transform.position.x:F1})");
-            Assert.AreEqual(crate.go.transform.position.x, player.Body.position.x, 1.0f, "at the base's column");
+            TestContext.Out.WriteLine($"[MERIDIAN] conk out: woke at {player.Body.position} (crate x {crate.go.transform.position.x:F1})");
+            Assert.AreEqual(Mathf.Floor(crate.go.transform.position.x) + crate.spec.size.x + 0.5f, player.Body.position.x, 0.6f, "standing just right of the base piece");
             Assert.IsTrue(player.Body.simulated);
             Assert.AreEqual(vitals.maxHealth, vitals.health, 1e-4f, "reserve full");
             Assert.AreEqual(HazardRules.SuitMax, side.hazards.SuitIntegrity, 1e-4f, "suit full");
@@ -115,7 +115,7 @@ namespace Meridian.Tests
             yield return WaitWake(1);
             Assert.IsFalse(side.conkOut.LastWakeAtBase, "the ship");
             float shipX = side.ship.transform.position.x;
-            Debug.Log($"[MERIDIAN] conk out: woke at {player.Body.position}, ship x {shipX:F1}");
+            TestContext.Out.WriteLine($"[MERIDIAN] conk out: woke at {player.Body.position}, ship x {shipX:F1}");
             Assert.AreEqual(shipX - ConkOut.BesideShip, player.Body.position.x, 1.0f, "beside the ship");
             Assert.IsFalse(vitals.Dead);
             Assert.AreEqual(pack, PackTotal(), "cargo kept");
