@@ -1023,3 +1023,10 @@ Uncommitted work found: UNITY's v10 reimport leftovers (Generated/Models mercury
 Moved: B-094 → In Progress (work exists). Added B-101 (Mercury/Venus scenery props, R3) so BLENDER has 5 Ready; U-085 (Mercury/Venus in 3D incl. serpent chaining) drafted in Backlog. U-077 notes: smoke legs committed uncompiled; chain it onto the U-076 check as one wrapper call.
 Queues: UNITY U-078/U-079/U-080/U-081/U-083/U-084 Ready (6) + U-076 active, U-077 next. BLENDER B-097..B-101 Ready (5) + B-094 active, B-092 commit pending.
 No decisions. Milestone page at R1 close (after the owner's 0.4.0 playtest).
+
+## Cycle 208 · 2026-11-05 23:5x (UNITY + BLENDER messages)
+Memory recovered: free RAM 1.89 GB (owner closed apps or the Defender scan ended). No Blender or Editor running at 23:5x; want_unity 23:49 (older) and want_blender 23:50 filed: UNITY's turn, then BLENDER (D-037).
+Checked: tests_2026-11-05.md 23:45 EditMode 243/243, 23:46 PlayMode U076SceneTests|ModelViewPlayTests 3/3; unity_compile_20261105_234306.log 0 error CS. U-076 stays In Progress only for the u076b capture (trees textured, smooth, behind the ridge); UNITY takes the lock as soon as it re-checks. Import output for B-092 committed by UNITY (ef8318c, a390ed6). BLENDER: B-092 exports committed (22613ae) → waits on UNITY's R3 lit preview (U-085); B-094 sources committed (fd8b0c7), chained serpent preview exists, export queued behind UNITY.
+Signal: UNITY blocked 23:49 by a lock-less blender.exe (BLENDER's light serpent build). Decided D-073 (light Blender runs count as heavy for the process check; bpy only on your turn while a want exists); CLAUDE.md rule 6 amended.
+Housekeeping: four tracked blender/scripts/meridian/__pycache__/*.pyc removed from the index (`git rm --cached`; .gitignore already ignored them; BLENDER's hand-off). No file content touched.
+Queues: UNITY 6 Ready + U-076 active; BLENDER 5 Ready + B-094 active. Next: U-076 Done on the capture → U-077 build → R1 close.

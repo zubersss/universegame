@@ -73,6 +73,9 @@ ever overwritten.
    free RAM is back above your gate and the lock is yours. If it is stopped again, log it in
    your status file and ask the owner. This covers only memory stops of your own job, not
    permission denials or anything else.
+   **Light Blender runs (D-073).** Any `blender.exe` you start, even a light bpy build, makes
+   the process check fail for the other role. While another role's `want_*.lock` exists, run
+   bpy only under your own heavy lock (your turn), or not at all; do scripts-only work instead.
 7. **Accepted work stays accepted.** Don't re-polish Done tasks unless LEAD reopens them.
 8. **Stay inside the repo.** No system installs, no registry/settings changes; list those
    in your status file for USER_ACTIONS.
