@@ -937,6 +937,40 @@ namespace Meridian.Tests
             side.dayNight.Override = null;
         }
 
+        /// <summary>U-094 evidence: Earth on the v4 path with placeholders (ortho 16.875 m frame, parallax strips, v3 surveyor sheet), copied to reports/unity/c0_&lt;date&gt;/earth_c0_placeholder.png.</summary>
+        [UnityTest]
+        public IEnumerator CaptureC0Earth()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                side.dayNight.Override = 0.45f;
+                var view = side.cartoon != null ? side.cartoon.Surveyor : null;
+                timeout = Time.realtimeSinceStartup + 10f;
+                while (view != null && !view.Ready && Time.realtimeSinceStartup < timeout) yield return null;
+                for (int i = 0; i < 60; i++) yield return null;
+                Debug.Log($"[MERIDIAN] c0 capture: cartoon {(side.cartoon != null && side.cartoon.Active)}, ortho {side.sideCamera.orthographicSize:F3}, layers {(side.cartoon != null && side.cartoon.Layers != null ? side.cartoon.Layers.renderers.Count : 0)}, surveyor clip {(view != null ? view.Clip : "none")}");
+                yield return Save(side.sideCamera, $"{name}_earth_c0_placeholder");
+                var dir = $"coordination/reports/unity/c0_{DateTime.Now:yyyy-MM-dd}";
+                Directory.CreateDirectory(dir);
+                File.Copy($"logs/capture_{name}_earth_c0_placeholder.png", $"{dir}/earth_c0_placeholder.png", true);
+                side.dayNight.Override = null;
+            }
+            finally { Meridian.View2D.CartoonStage.Enabled = false; }
+        }
+
         static IEnumerator Save(Camera cam, string name)
         {
             var rt = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);
