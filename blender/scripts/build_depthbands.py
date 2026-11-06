@@ -29,16 +29,16 @@ TRI_BUDGET = 7600                 # contract 8 k, minus margin
 
 REGIONS = {
     #          ground colours (sRGB)                hill  rise  trees conifer  tree h     extras
-    "forest": dict(ground=[(64, 92, 48), (82, 104, 56)], hill=6, rise=26, trees=220, conifer=0.6, tree_h=(6, 12), haze=(184, 202, 214),
+    "forest": dict(ground=[(64, 92, 48), (82, 104, 56)], hill=6, rise=12, trees=220, conifer=0.6, tree_h=(6, 12), haze=(184, 202, 214),
                    needle=[(30, 58, 38), (40, 70, 44)], leaf=[(46, 78, 34), (62, 96, 40), (84, 112, 46)], seed=1),
     "plains": dict(ground=[(110, 134, 64), (132, 150, 76)], hill=3, rise=10, trees=22, conifer=0.2, tree_h=(5, 9), haze=(190, 204, 214),
                    needle=[(36, 64, 40)], leaf=[(62, 96, 40), (84, 112, 46)], seed=2),
     "desert": dict(ground=[(214, 182, 128), (196, 160, 108)], hill=4, rise=24, trees=0, conifer=0.0, tree_h=(0, 0),
                    strata=((232, 200, 150), 4.5), terrace=5.0, seed=3),
-    "coast":  dict(ground=[(186, 174, 132), (140, 146, 92)], hill=2, rise=6, trees=45, conifer=0.9, tree_h=(5, 9), haze=(190, 210, 222),
+    "coast":  dict(ground=[(186, 174, 132), (140, 146, 92)], hill=2, rise=4, trees=45, conifer=0.9, tree_h=(5, 9), haze=(190, 210, 222),
                    needle=[(32, 60, 40), (44, 72, 46)], leaf=[(56, 92, 40)],
                    sea=dict(y=42.0, level=-1.5, shallow=(70, 176, 178), deep=(26, 70, 122)), seed=4),
-    "taiga":  dict(ground=[(58, 80, 58), (72, 92, 64)], hill=7, rise=30, trees=260, conifer=0.95, tree_h=(7, 14), haze=(186, 198, 210),
+    "taiga":  dict(ground=[(58, 80, 58), (72, 92, 64)], hill=7, rise=14, trees=260, conifer=0.95, tree_h=(7, 14), haze=(186, 198, 210),
                    needle=[(24, 48, 36), (32, 58, 42), (40, 66, 46)], leaf=[(52, 80, 44)],
                    snow=((236, 240, 246), 24.0), seed=5),
     "tundra": dict(ground=[(150, 150, 128), (176, 170, 146)], hill=4, rise=12, trees=8, conifer=1.0, tree_h=(3, 6),
@@ -84,6 +84,7 @@ def vc_material(name, emit=0.0):
 class Builder:
     def __init__(self):
         self.verts, self.faces, self.cols = [], [], []
+        self.islands = []                                  # B-102 round 2: (v0, v1) vertex ranges of the trees
 
     def quad_grid(self, xs, ys, hfun, cfun):
         base = len(self.verts)
@@ -133,10 +134,41 @@ class Builder:
             self.faces.append((lo[(s + 1) % 6], hi[(s + 1) % 6], hi[s]))
         del base
 
+    def author_uvs(self, me, ground_verts):
+        """Authored UVs (B-102 round 2) so the glTF export never splits a vertex: the ground strip
+        projected from the top into the upper half (one island, a heightfield never overlaps),
+        every tree projected from the camera side into its own cell of a grid in the lower half
+        (front and back faces share texels: per-tree colours are flat and the normals are smooth)."""
+        uv = me.uv_layers.new(name="UVMap").data
+        vs = self.verts
+        xs = [v[0] for v in vs[:ground_verts]] or [0.0]
+        ys = [v[1] for v in vs[:ground_verts]] or [0.0]
+        x0, x1, y0, y1 = min(xs), max(xs), min(ys), max(ys)
+        n = len(self.islands)
+        cols = max(1, int(math.ceil(math.sqrt(n * 2.0))))
+        rows = max(1, int(math.ceil(n / cols)))
+        cw, ch = 1.0 / cols, 0.5 / rows
+        cell_of = {}
+        for k, (a, b) in enumerate(self.islands):
+            r, c = divmod(k, cols)
+            px = [vs[i][0] for i in range(a, b)]
+            pz = [vs[i][2] for i in range(a, b)]
+            bx0, bx1, bz0, bz1 = min(px), max(px), min(pz), max(pz)
+            for i in range(a, b):
+                cell_of[i] = (c * cw + 0.08 * cw + 0.84 * cw * (vs[i][0] - bx0) / max(bx1 - bx0, 1e-6),
+                              r * ch + 0.08 * ch + 0.84 * ch * (vs[i][2] - bz0) / max(bz1 - bz0, 1e-6))
+        for poly in me.polygons:
+            for li in poly.loop_indices:
+                i = me.loops[li].vertex_index
+                if i < ground_verts:
+                    uv[li].uv = ((vs[i][0] - x0) / max(x1 - x0, 1e-6), 0.52 + 0.47 * (vs[i][1] - y0) / max(y1 - y0, 1e-6))
+                else:
+                    uv[li].uv = cell_of.get(i, (0.0, 0.0))
+
     def tris(self):
         return sum(len(f) - 2 for f in self.faces)
 
-    def mesh(self, name, coll, emit=0.0, smooth_from=None):
+    def mesh(self, name, coll, emit=0.0, smooth_from=None, ground_verts=0):
         me = bpy.data.meshes.new(name)
         me.from_pydata(self.verts, [], self.faces)
         me.update()
@@ -146,19 +178,10 @@ class Builder:
         ob = bpy.data.objects.new(name, me)
         coll.objects.link(ob)
         me.materials.append(vc_material(name + "_mat", emit))
-        for p in me.polygons:                                      # B-102: faces from smooth_from on (the trees) are
-            p.use_smooth = smooth_from is not None and p.index >= smooth_from   # smooth-shaded; the strip stays faceted
-        if smooth_from is not None:                                 # auto-smooth: edges sharper than 60 deg stay hard
-            owners = {}
-            for p in me.polygons:
-                if p.index >= smooth_from:
-                    for ek in p.edge_keys:
-                        owners.setdefault(ek, []).append(p.normal.copy())
-            sharp = me.attributes.new("sharp_edge", "BOOLEAN", "EDGE")
-            for e in me.edges:
-                ns = owners.get(tuple(sorted(e.vertices)), [])
-                if len(ns) == 2 and ns[0].dot(ns[1]) < math.cos(math.radians(60.0)):
-                    sharp.data[e.index].value = True
+        for p in me.polygons:                                      # B-102 round 2: everything smooth, no sharp split
+            p.use_smooth = smooth_from is not None               # (the split and the smart-project islands doubled the
+        if smooth_from is not None and self.islands:              # vertex count and read faceted in the game)
+            self.author_uvs(me, ground_verts)
         return ob
 
 
@@ -214,6 +237,7 @@ def ridge(region, R, coll):
     b.quad_grid(xs, ys, h, col)
     ground_tris = b.tris()
     ground_faces = len(b.faces)
+    ground_verts = len(b.verts)
     # Trees: cap by the budget. Conifer = two stacked 6-sided cones (12 tris); broadleaf = blob
     # (24 tris) on a 4-sided stem (4 tris).
     n = R["trees"]
@@ -230,6 +254,7 @@ def ridge(region, R, coll):
         conifer = rng.random() < R["conifer"]
         y = max(y, 30.0 + th * (0.22 if conifer else 0.32))              # B-102: the whole crown stays at z >= 30
         for dx in ([0.0] + ([PERIOD] if x < -PERIOD / 2 + 6 else []) + ([-PERIOD] if x > PERIOD / 2 - 6 else [])):
+            v0 = len(b.verts)
             if conifer:
                 c = lin(rng.choice(R["needle"]))
                 b.cone(x + dx, y, z - 0.3, th * 0.22, th * 0.62, 6, c)
@@ -238,6 +263,7 @@ def ridge(region, R, coll):
                 c = lin(rng.choice(R["leaf"]))
                 b.cone(x + dx, y, z - 0.2, th * 0.06, th * 0.5, 4, lin((82, 68, 56)))
                 b.blob(x + dx, y, z + th * 0.62, th * 0.32, c)
+            b.islands.append((v0, len(b.verts)))
         placed.append((x, y))
     # B-088 boulders (Mars has no trees): 24-tri blobs from the region's rock palette, wrapped
     # at the seam like the trees, capped by the budget.
@@ -258,7 +284,7 @@ def ridge(region, R, coll):
         for i, (v, c) in enumerate(zip(b.verts, b.cols)):
             k = 0.20 + 0.25 * max(0.0, min(1.0, (v[1] - 20.0) / 40.0))
             b.cols[i] = tuple(a + (hb - a) * k for a, hb in zip(c[:3], hz[:3])) + (c[3],)
-    ob = b.mesh(f"ridge_{region}", coll, smooth_from=ground_faces if R["trees"] else None)
+    ob = b.mesh(f"ridge_{region}", coll, smooth_from=ground_faces if R["trees"] else None, ground_verts=ground_verts)
     nv = R.get("vents", 0)
     if nv:                                                           # B-092 Venus surface: lava vents, a second emissive mesh
         vb = Builder()

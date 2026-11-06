@@ -674,7 +674,8 @@ def export_model(entry, art_dir, preview_dir, objs, stamp_fn):
         maps = None
         emissive = False
     else:
-        unwrap(mesh)
+        if not (entry.get("keep_uv") and mesh.data.uv_layers):   # B-102 round 2: bands author their UVs
+            unwrap(mesh)
         maps = bake_maps(mesh, size, samples=int(entry.get("bake_samples", 16)), alpha_map=entry.get("alpha") == "map")
     for mname in (MAPS if not atlas else ()):
         a = maps[mname]
