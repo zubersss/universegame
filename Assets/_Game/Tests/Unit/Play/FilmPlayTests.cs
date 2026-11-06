@@ -35,25 +35,38 @@ namespace Meridian.Tests
             for (int i = 0; i < 30; i++) yield return null;
         }
 
+        /// <summary>Batch mode renders the game view only on demand: the tests render the side camera themselves (as the captures do).</summary>
+        IEnumerator Render(Camera cam, int frames)
+        {
+            for (int i = 0; i < frames; i++) { cam.Render(); yield return null; }
+        }
+
         [UnityTest]
         public IEnumerator TheToggleRemovesThePass()
         {
             yield return Boot();
-            GameSettings.FilmEffects = true;
-            for (int i = 0; i < 3; i++) yield return null;
-            int a = FilmFeature.FramesRendered;
-            for (int i = 0; i < 10; i++) yield return null;
-            Assert.Greater(FilmFeature.FramesRendered, a, "the pass records while Film effects is on");
-            GameSettings.FilmEffects = false;
-            for (int i = 0; i < 3; i++) yield return null;
-            int b = FilmFeature.FramesRendered;
-            for (int i = 0; i < 10; i++) yield return null;
-            Assert.AreEqual(b, FilmFeature.FramesRendered, "nothing is recorded while it is off");
-            GameSettings.FilmEffects = true;
-            for (int i = 0; i < 3; i++) yield return null;
-            int c = FilmFeature.FramesRendered;
-            yield return null; yield return null;
-            Assert.Greater(FilmFeature.FramesRendered, c, "back on");
+            var cam = Object.FindAnyObjectByType<SceneDirector>().PlanetSide.sideCamera;
+            var rt = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);
+            cam.targetTexture = rt;
+            try
+            {
+                GameSettings.FilmEffects = true;
+                yield return Render(cam, 3);
+                int a = FilmFeature.FramesRendered;
+                yield return Render(cam, 10);
+                Assert.GreaterOrEqual(FilmFeature.FramesRendered - a, 10, "the pass records every render while Film effects is on");
+                GameSettings.FilmEffects = false;
+                yield return Render(cam, 3);
+                int b = FilmFeature.FramesRendered;
+                yield return Render(cam, 10);
+                Assert.AreEqual(b, FilmFeature.FramesRendered, "nothing is recorded while it is off");
+                GameSettings.FilmEffects = true;
+                yield return Render(cam, 3);
+                int c = FilmFeature.FramesRendered;
+                yield return Render(cam, 2);
+                Assert.Greater(FilmFeature.FramesRendered, c, "back on");
+            }
+            finally { cam.targetTexture = null; rt.Release(); }
             LogAssert.NoUnexpectedReceived();
         }
 
@@ -82,11 +95,13 @@ namespace Meridian.Tests
         IEnumerator Measure(bool film, System.Action<float> result)
         {
             GameSettings.FilmEffects = film;
-            for (int i = 0; i < 30; i++) yield return null;
+            for (int i = 0; i < 30; i++) { Object.FindAnyObjectByType<SceneDirector>().PlanetSide.sideCamera.Render(); yield return null; }
             var timings = new FrameTiming[1];
             double sum = 0; int n = 0;
+            var cam = Object.FindAnyObjectByType<SceneDirector>().PlanetSide.sideCamera;
             for (int i = 0; i < 120; i++)
             {
+                cam.Render();
                 yield return null;
                 FrameTimingManager.CaptureFrameTimings();
                 if (FrameTimingManager.GetLatestTimings(1, timings) == 1 && timings[0].gpuFrameTime > 0) { sum += timings[0].gpuFrameTime; n++; }

@@ -12,7 +12,7 @@ Shader "MERIDIAN/FilmPass"
             Name "Film"
 
             HLSLPROGRAM
-            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
             #pragma vertex Vert
             #pragma fragment Frag
@@ -28,7 +28,7 @@ Shader "MERIDIAN/FilmPass"
             half4 Frag(Varyings i) : SV_Target
             {
                 float2 uv = i.texcoord;
-                half3 col = SAMPLE_TEXTURE2D(_BlitTexture, sampler_LinearClamp, uv).rgb;
+                half3 col = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv).rgb;
                 float2 t = uv * _Tile.xy;
                 half4 g = SAMPLE_TEXTURE2D(_Grain, sampler_Grain, t + _Offsets.xy);
                 half4 d = SAMPLE_TEXTURE2D(_Dust, sampler_Dust, t + _Offsets.zw);
