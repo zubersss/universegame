@@ -26,9 +26,14 @@ matching PowerShell *deny* rules, but isn't allowed to grant itself new *allow* 
 If you get too many "allow this command?" prompts, tell the Lead "approve PowerShell
 allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
 
-### USER-20 - Keep memory free for tonight's S1 jobs (1 min, optional)
-Free RAM was 0.2-0.7 GB at 01:28 (six Claude Code processes 1.7 GB, Edge 0.4 GB, Defender 0.3 GB). The workers start their heavy jobs only above 1.5 GB, so each extra app you close shortens their wait. If you are not using Microsoft Edge, close it. Nothing to report back.
-The R1 playtest item (Build/MERIDIAN_0.4.0) arrives with the R1 report once UNITY's last profile is green; the next real playtest after that is S1 (the stage camera, dash and parry; Build/MERIDIAN_0.5.0).
+### USER-20 - Free about 1 GB of memory so the workers can run again (2 min, REQUIRED)
+Both workers have been waiting since 01:30: free RAM is 0.6-0.9 GB and their jobs need 1.5 GB. The apps holding it (from Task Manager at 10:0x) are ones you can close:
+1. ChatGPT (three processes, about 0.4 GB): close the app and its window from the tray.
+2. Microsoft Edge (about 0.25 GB): close every window.
+3. WSL (vmmem, about 0.2 GB): open PowerShell and run `wsl --shutdown`.
+4. Leave the three Claude Code windows open. "Memory Compression" and "Antimalware Service Executable" are Windows; do not end them.
+5. Tell the Lead "done: USER-20". The workers poll every minute and start on their own once 1.5 GB is free (BLENDER first, then UNITY).
+If it is still under 1.5 GB after that, tell the Lead what Task Manager's top five memory users are.
 
 ## Done
 - 2026-11-05 23:3x · USER-17 (the three windows were restarted; LEAD found two peer sessions at resume). USER-14 and USER-15 were folded into it. Memory is still short → USER-18.
