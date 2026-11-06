@@ -132,6 +132,7 @@ Goal: One full-screen film pass (single shader, single blit, URP renderer featur
 Accept: GPU cost ≤ 0.6 ms at 1080p in the profile; the toggle removes the pass (test); overlays imported 512² (test); before/after capture pair in the C0 report.
 Files: Assets/_Game/Shaders/FilmPass.shader, Code/Runtime/Rendering/, Code/Runtime/UI/Settings/
 Depends: — (placeholder noise overlays until B-115)
+Lead notes: Cycle 236: ART + BUDGET ACCEPTED (7b00dab): earth_c0_film_on/off pair (warm grade, vignette, grain and dust subtle at 1080p, flicker ≤ 2 %); perf row "Film pass GPU · Earth" on 11.24 / off 11.62 ms = inside the 0.6 ms line; profile 16:43 compile 0/0; the toggle test passed on a real device at 16:31. OWED for Done: one tests_<date>.md entry run on the final code showing FilmTests 4/4 in EditMode and FilmPlayTests green (the report's last entry is 16:31, 1/2 with the cost test that since moved into the probe). Batch it with U-096's check; no separate job. Rulings: the 16:43 entry-transition red is a contention run (D-094), the 16:37 1.46 s stands; HDR off project-wide and the film pass on every Game camera are per Bible §9.4 (the 3D planets are superseded, their bloom with them); P-39 accepted, the pause-panel FILM EFFECTS button is the toggle until the settings panel card (Backlog U-1xx).
 
 ### U-096 · UNITY · Ready · C0
 Goal: Iris-out / iris-in circle wipe as a cheap shader cutout (one quad, no texture), 0.35 s each way, centred on the surveyor (or the ship), used by launch, entry and area entry; the load runs while the screen is black.
@@ -836,12 +837,12 @@ Accept: 2× tiled preview with no seam; the surveyor placeholder pops off it at 
 Files: blender/sources/backgrounds/earth_plains_v3.blend (or a painted-texture script), Assets/_Game/Art/backgrounds/earth/plains/, Assets/_Game/Art/ui/palettes/earth/
 Depends: —
 
-### B-115 · BLENDER · Ready · C0
+### B-115 · BLENDER · Done · C0
 Goal: Film overlays `fx/film/grain`, `dust`, `scratches`: 512×512, seamless tile, greyscale + alpha (contract §11.6), subtle (dust ≤ 8 specks per tile, 1–2 hairline scratches).
 Accept: 2× tiled preview with no seam; each file 512²; UNITY's U-095 capture reads subtle at 1080p.
 Files: blender/scripts/gen_film_overlays.py, Assets/_Game/Art/fx/film/
 Depends: —
-Lead notes: Cycle 232: ART ACCEPTED (af18479, review_b115_film.png stamped 11:55-11:56): three 512² tiles, no visible seam at the 2×2 crossings, grain fine and even, dust 7 specks + 1 fibre, 2 scratch hairlines with breaks; reads subtle at game strength. Done on UNITY's U-095 1080p capture.
+Lead notes: Cycle 232: ART ACCEPTED (af18479, review_b115_film.png stamped 11:55-11:56): three 512² tiles, no visible seam at the 2×2 crossings, grain fine and even, dust 7 specks + 1 fibre, 2 scratch hairlines with breaks; reads subtle at game strength. Done on UNITY's U-095 1080p capture. Cycle 236: DONE (earth_c0_film_on.png 16:32: the three overlays tile at 1:1 with no seam, grain and dust read faint at 1080p, as specified).
 
 ### B-116 · BLENDER · Ready · C0
 Goal: The surveyor's missing gameplay clips on `characters/surveyor/side` (same sheet key, re-export; UNITY handoff 16:1x): `bump` (≤ 10: 0.8 m knock-back pose, dizzy stars over the helmet, settle), `conk_out` (≤ 12: wobble, eyes to spirals, slump; the iris-out starts on its last frame), then `run` (12, bigger stride and lean than walk), `fall` (8 loop, arms up, hose streaming), `dash` (6, horizontal stretch with speed lines). Bump and conk_out first: they are the two calls the game makes now.
@@ -1637,3 +1638,10 @@ M2: Earth/Mars POIs, day/night lighting pass (U), Mars dust storm (U), creature 
 Cryo meter (U), `PlanetDisc` shader with real textures (U). (POI prop sets promoted to B-020, B-021 in cycle 5.)
 R3 (drafted cycle 207): U-085 Mercury and Venus in 3D (the R3 counterpart of U-081: B-091 block arrays, B-092 bands incl. the translucent Venus deck strip and the day/twilight/night Mercury skydomes, B-093/B-096 creatures and Wardens through ModelView, B-095 props and station modules via ModelSwap, B-101 scenery; the cinderhulk emission float driven by the day side; the veil serpent chained from veil_serpent_tail + n×body + head, each module's clip offset by J×0.07 cycles for J bones behind it; M3InnerTests + the M3 smoke set re-shot with the depth preset). Promote when U-081 is Done.
 S1 → every planet (drafted cycle 220, D-076): the stage layer sets for the giants ride on B-097/B-100 (decks + wisps + stage.json); U-081 and U-085 gain 'stage layers resident and the §11.1 v3 rows green on that planet' as acceptance when promoted; S1 report `coordination/reviews/S1_REPORT.md` + milestone page after U-092 and the owner's playtest.
+
+### U-10x · UNITY · Backlog · C1
+Goal: Settings panel (P-39): one panel reachable from the pause menu and the title screen: Film effects (moves the FILM EFFECTS button here), master/music/SFX volume, key rebinding read-only list, language placeholder; saved through GameSettings; cartoon frame per contract §11 UI once B-1xx UI art exists (placeholder frame until then).
+Accept: MenuHudTests cover open/close and the film toggle round trip; settings persist across a restart (test); clean console.
+Files: Assets/_Game/Code/Runtime/UI/Settings/
+Depends: U-095
+Lead notes: Cycle 236. Promoted with the C1 cards.
