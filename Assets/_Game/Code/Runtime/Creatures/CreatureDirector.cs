@@ -348,10 +348,20 @@ namespace Meridian.Creatures
             {
                 bool quiet = Mathf.Abs(v.y) < 1.0f; // not airborne (a body pressed into a prop jitters a little)
                 bool grounded = quiet && TileId.IsSolid(terrain.GetTile(tx, ty));
-                // U-099: a wall the tiles cannot show (a crate stack, a base piece, the pad): the body stands still while it wants to
-                // run, whatever it stands on (on a crate the tile under the feet is air).
-                c.blockedFor = speed > 0f && quiet && Mathf.Abs(v.x) < 0.1f ? c.blockedFor + dt : 0f;
-                bool stuck = c.blockedFor > BlockedSeconds;
+                // U-099: a wall the tiles cannot show (a crate stack, a base piece, the pad): the body has not moved for BlockedSeconds
+                // while it wanted to run, whatever it stands on. Judged on position over time, never on the velocity: between two
+                // physics steps an Update reads back the velocity it set the frame before.
+                bool stuck = false;
+                if (speed > 0f && quiet)
+                {
+                    if (now - c.blockAnchorT >= BlockedSeconds)
+                    {
+                        stuck = c.blockAnchorT > 0f && Mathf.Abs(pos.x - c.blockAnchorX) < 0.1f;
+                        c.blockAnchorX = pos.x; c.blockAnchorT = now;
+                    }
+                }
+                else { c.blockAnchorX = pos.x; c.blockAnchorT = now; }
+                if (c.State == CreatureState.Chase && now < c.waitUntil) speed = 0f; // waiting at a wall it cannot see
                 if ((grounded && speed > 0f) || stuck)
                 {
                     int ahead = Mathf.FloorToInt(pos.x + c.dir * (spec.size.x * 0.5f + 0.3f));
@@ -362,8 +372,8 @@ namespace Meridian.Creatures
                         // A 1-tile step is hopped (air above it and headroom); anything taller is a wall (U-099: a 2-tile wall stops a chase).
                         bool climbable = wall && !TileId.IsSolid(terrain.GetTile(ahead, feet + 1)) && !TileId.IsSolid(terrain.GetTile(tx, feet + Mathf.CeilToInt(spec.size.y) + 1));
                         if (climbable) v.y = spec.jumpSpeed;
-                        else if (c.State == CreatureState.Chase) speed = 0f; // waits at the wall, never bumps through it; the legs stop with the body
-                        else { c.dir = -c.dir; c.blockedFor = 0f; c.keepDirUntil = now + WallTurnSeconds; } // Wander and Flee turn and move on along the wall
+                        else if (c.State == CreatureState.Chase) { speed = 0f; if (stuck) c.waitUntil = now + BlockedSeconds; } // waits at the wall, never bumps through it; the legs stop with the body
+                        else { c.dir = -c.dir; c.keepDirUntil = now + WallTurnSeconds; c.blockAnchorX = pos.x; c.blockAnchorT = now; } // Wander and Flee turn and move on along the wall
                     }
                 }
                 v.x = Mathf.MoveTowards(v.x, c.dir * speed, Accel * dt);
