@@ -689,7 +689,7 @@ def export_model(entry, art_dir, preview_dir, objs, stamp_fn):
     glb = os.path.join(out_dir, f"{variant}.glb")
     sockets = [o for o in objs if o.type == "EMPTY" and o.name.startswith("socket_")]
     for o in sockets:                                # B-094: several modules per blend share socket names; Blender
-        base = re.sub(r".d{3}$", "", o.name)       # suffixed the copies (socket_root.001): export the bare name
+        base = re.sub(r"\.\d{3}$", "", o.name)       # suffixed the copies (socket_root.001): export the bare name
         if base != o.name:
             other = bpy.data.objects.get(base)
             if other is not None:
