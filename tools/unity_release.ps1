@@ -25,8 +25,8 @@ try {
         & (Join-Path $PSScriptRoot 'unity_profile.ps1') -Build
         $profileCode = $LASTEXITCODE   # a red BudgetGate row still leaves a build to smoke; reported below
     }
-    $version = (Select-String -Path (Join-Path $RepoRoot 'Assets_GameCodeRuntimeGameInfo.cs') -Pattern 'Version = "([^"]+)"').Matches[0].Groups[1].Value
-    if ($code -eq 0 -and -not $SkipSmoke -and (Test-Path (Join-Path $RepoRoot "BuildMERIDIAN_$versionMERIDIAN.exe"))) {
+    $version = (Select-String -Path (Join-Path $RepoRoot 'Assets\_Game\Code\Runtime\GameInfo.cs') -Pattern 'Version = "([^"]+)"').Matches[0].Groups[1].Value
+    if ($code -eq 0 -and -not $SkipSmoke -and (Test-Path (Join-Path $RepoRoot "Build\MERIDIAN_$version\MERIDIAN.exe"))) {
         Write-Host '== smoke'
         & (Join-Path $PSScriptRoot 'unity_smoke.ps1')
         $code = $LASTEXITCODE
