@@ -34,7 +34,10 @@ namespace Meridian.Player
         /// <summary>The player's own zoom as a frame height (m); the wheel changes it in 1 m steps.</summary>
         public float BaseFrame { get; private set; } = SideView.DefaultHalfHeight * 2f;
 
-        Vector3 velocity;
+        /// <summary>U-093/U-094: a target that moved farther than this in one frame was teleported (a load, a wake, a test): the camera snaps, so the terrain streaming around it follows at once.</summary>
+        public const float Teleport = 15f;
+        Vector3 velocity, lastTarget;
+        bool haveLast;
         Camera cam;
         PlayerController hooked;
 
@@ -82,6 +85,8 @@ namespace Meridian.Player
         void LateUpdate()
         {
             if (target == null) return;
+            if (haveLast && (target.position - lastTarget).sqrMagnitude > Teleport * Teleport) SnapToTarget();
+            lastTarget = target.position; haveLast = true;
             var mouse = Mouse.current;
             if (cam != null && mouse != null)
             {

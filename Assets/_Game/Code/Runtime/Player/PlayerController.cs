@@ -116,8 +116,11 @@ namespace Meridian.Player
             float g = -Physics2D.gravity.y * Body.gravityScale;
             bool wasGrounded = Grounded;
             Grounded = CheckGrounded();
-
             var v = Body.linearVelocity;
+            // Box2D refreshes contact flags at the start of a step, so the ground still reads as touching for one step after
+            // take-off; a body that just jumped and is rising is airborne (the first airborne dash would be refused otherwise).
+            if (Grounded && v.y > 0f && airTimeSinceJump < 2.5f * dt) Grounded = false;
+
             if (Grounded && !wasGrounded) Land(fallSpeed);
             fallSpeed = v.y < 0f ? -v.y : 0f;
 
