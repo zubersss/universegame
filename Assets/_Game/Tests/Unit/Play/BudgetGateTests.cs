@@ -103,19 +103,19 @@ namespace Meridian.Tests
                 Info($"Draw calls · {where}", $"≤ {drawCallLimit}", "n/a (no graphics device)", "skipped");
             // U-077 (Bible §11.1, 3D): geometry per frame.
             if (r.triangles >= 0)
-                Row($"Geometry · {where}", "≤ 300 k triangles, ≤ 150 shadow casters",
+                Row($"Geometry · {where}", "≤ 500 k triangles, ≤ 150 shadow casters (v3)",
                     $"{r.triangles / 1000f:F1} k triangles, {r.shadowCasters} shadow casters",
                     r.triangles <= BudgetMonitor.TrianglesCap && r.shadowCasters <= BudgetMonitor.ShadowCastersCap);
             else
-                Info($"Geometry · {where}", "≤ 300 k triangles, ≤ 150 shadow casters", "n/a (no graphics device)", "skipped");
+                Info($"Geometry · {where}", "≤ 500 k triangles, ≤ 150 shadow casters (v3)", "n/a (no graphics device)", "skipped");
             Row($"2D lights visible · {where}", "≤ 8 (hard cap 12)", r.lightsVisible.ToString(), r.lightsVisible <= BudgetMonitor.LightsTarget);
-            Row($"Particles alive · {where}", "≤ 600", r.particlesAlive.ToString(), r.particlesAlive <= BudgetMonitor.ParticlesCap);
+            Row($"Particles alive · {where}", "≤ 1500 (v3)", r.particlesAlive.ToString(), r.particlesAlive <= BudgetMonitor.ParticlesCap);
             Row($"GC per 300 frames · {where}", "≤ 1 KB (main-thread managed allocations; P-16)",
                 $"{gc.gcBytesLast300} B (Unity GC counter incl. Editor: {gc.gcProfilerBytes / 1024} KB)", gc.gcBytesLast300 <= BudgetMonitor.GcBytesPer300);
             // D-036/D-058: memory is judged in the development build (unity_profile -Build); the Editor row is info only.
-            bool memOk = Within(r.systemMemoryMB, BudgetMonitor.RamMB) && Within(r.textureMemoryMB, BudgetMonitor.TexturesMB) && Within(r.audioMemoryMB, BudgetMonitor.AudioMB);
-            Info($"Memory · {where} (Editor)", "≤ 2.5 GB system, ≤ 600 MB textures, ≤ 60 MB audio",
-                $"system {Mb(r.systemMemoryMB)}, textures {Mb(r.textureMemoryMB)}, audio {Mb(r.audioMemoryMB)} (Editor process: upper bound)",
+            bool memOk = Within(r.workingSetMB, BudgetMonitor.RamMB) && Within(r.textureMemoryMB, BudgetMonitor.TexturesMB) && Within(r.meshMemoryMB, BudgetMonitor.MeshesMB) && Within(r.audioMemoryMB, BudgetMonitor.AudioMB);
+            Info($"Memory · {where} (Editor)", "≤ 4.5 GB working set (warn 4.0), ≤ 2.0 GB textures, ≤ 600 MB meshes, ≤ 150 MB audio (v3, D-077)",
+                $"working set {Mb(r.workingSetMB)}, system {Mb(r.systemMemoryMB)}, textures {Mb(r.textureMemoryMB)}, meshes {Mb(r.meshMemoryMB)}, audio {Mb(r.audioMemoryMB)} (Editor process: upper bound)",
                 memOk ? "info (within)" : "info (over; the dev-build row decides, D-058)");
         }
 
@@ -205,13 +205,22 @@ namespace Meridian.Tests
             spaceShip.Position = mars.position + new Vector2(0f, mars.RingRadius + 0.5f);
             spaceShip.Velocity = new Vector2(0f, -40f);
             yield return WaitBusyCycle(transitions, 15f);
-            Row("Planet load · Mars entry", "≤ 4 s", $"{transitions.LastEntrySeconds:F2} s ({director.LastLoadBreakdown})", transitions.LastEntrySeconds <= 4f);
+            Row("Planet load · Mars entry", "≤ 5 s (v3)", $"{transitions.LastEntrySeconds:F2} s ({director.LastLoadBreakdown})", transitions.LastEntrySeconds <= 5f);
             Row("Transition · entry (top-down → side)", "≤ 1.5 s", $"{transitions.LastEntrySeconds:F2} s", transitions.LastEntrySeconds <= 1.5f);
 
             side = director.PlanetSide;
             Assert.NotNull(side, "entered a planet");
             Assert.AreEqual(Meridian.Planets.PlanetId.Mars, side.Config.id);
             while (!side.terrain.IsSettled) yield return null;
+            // U-086 (Bible §11.1 v3 Residency): the previous planet's groups release within 5 s of the transition; only the
+            // current planet's groups (+ common, ui, icons, space; "session" = TerrainTileSet.Preload) stay resident.
+            float resT0 = Time.realtimeSinceStartup;
+            int earthHandles = Residency.Count("planet_earth");
+            while (earthHandles > 0 && Time.realtimeSinceStartup - resT0 < 5f) { yield return null; earthHandles = Residency.Count("planet_earth"); }
+            float resWait = Time.realtimeSinceStartup - resT0;
+            Row("Residency · after Mars entry", "previous planet released within 5 s; only the current planet + common/ui/icons/space resident (v3)",
+                $"planet_earth handles {earthHandles} after {resWait:F1} s; resident: {Residency.ResidentGroups()}",
+                earthHandles == 0 && Residency.OnlyPlanet("planet_mars"));
             yield return Measure("Mars", side.sideCamera, BudgetMonitor.DrawCallsSide, (a, b) => { gc = a; r = b; });
             Judge("Mars", gc, r, BudgetMonitor.DrawCallsSide);
 
@@ -236,6 +245,7 @@ namespace Meridian.Tests
             Judge("Mars FX peak", gc, r, BudgetMonitor.DrawCallsSide);
             UnityEngine.Object.Destroy(stress.gameObject);
 
+            Info("Hit stop", "≤ 90 ms (v3)", "n/a until U-089 (HitStop lands with the feel pass)", "pending");
             StaticRows();
             WriteReport();
             Assert.IsEmpty(failures, "budgets over: " + string.Join("; ", failures));
@@ -247,6 +257,7 @@ namespace Meridian.Tests
         {
 #if UNITY_EDITOR
             int wrongColor = 0, wrongNormal = 0, missingMips = 0, npotNoMips = 0, total = 0;
+            var wrong = new List<string>();
             foreach (var root in new[] { "Assets/_Game/Art", "Assets/_Game/Placeholders" })
             foreach (var guid in UnityEditor.AssetDatabase.FindAssets("t:Texture2D", new[] { root }))
             {
@@ -254,8 +265,8 @@ namespace Meridian.Tests
                 if (!(UnityEditor.AssetImporter.GetAtPath(path) is UnityEditor.TextureImporter ti)) continue;
                 total++;
                 var fmt = ti.GetPlatformTextureSettings("Standalone").format;
-                if (path.EndsWith("_normal.png")) { if (fmt != UnityEditor.TextureImporterFormat.BC5) wrongNormal++; }
-                else if (path.EndsWith("_color.png") && fmt != UnityEditor.TextureImporterFormat.BC7) wrongColor++;
+                if (path.EndsWith("_normal.png")) { if (fmt != UnityEditor.TextureImporterFormat.BC5) { wrongNormal++; wrong.Add(path); } }
+                else if (path.EndsWith("_color.png") && fmt != UnityEditor.TextureImporterFormat.BC7) { wrongColor++; wrong.Add(path); }
                 bool world = !path.Contains("/fx/") && !path.Contains("/icons/") && !path.Contains("/ui/");
                 // D-061: non-power-of-two sheets import without mips (NPOT + mips would be stored uncompressed).
                 ti.GetSourceTextureWidthAndHeight(out int tw, out int th);
@@ -263,7 +274,7 @@ namespace Meridian.Tests
                 if (path.EndsWith("_color.png") && world && !ti.mipmapEnabled) { if (pot) missingMips++; else npotNoMips++; }
             }
             Row("Textures", "BC7 color, BC5 normals, mips on POT world sprites (NPOT: none, D-061)",
-                $"{total} textures: {wrongColor} color not BC7, {wrongNormal} normals not BC5, {missingMips} POT world sprites without mips ({npotNoMips} NPOT without, D-061)",
+                $"{total} textures: {wrongColor} color not BC7, {wrongNormal} normals not BC5, {missingMips} POT world sprites without mips ({npotNoMips} NPOT without, D-061){(wrong.Count > 0 ? "; off-rule: " + string.Join(", ", wrong.Take(5)) : "")}",
                 wrongColor == 0 && wrongNormal == 0 && missingMips == 0);
 
             int bigAtlas = 0, atlases = 0;
@@ -317,7 +328,7 @@ namespace Meridian.Tests
             var sb = new StringBuilder();
             sb.AppendLine($"# UNITY performance report {DateTime.Now:yyyy-MM-dd HH:mm}");
             sb.AppendLine();
-            sb.AppendLine($"BudgetGate v1 (U-014): `BudgetGateTests.EarthSpaceMarsStayWithinBudgets`. Graphics: {(graphics ? SystemInfo.graphicsDeviceName : "none (headless)")}. " +
+            sb.AppendLine($"BudgetGate v3 (U-014; U-086 with the D-077 limits): `BudgetGateTests.EarthSpaceMarsStayWithinBudgets`. Graphics: {(graphics ? SystemInfo.graphicsDeviceName : "none (headless)")}. " +
                           "Memory rows read the Editor process, an upper bound for the built game.");
             foreach (var n in notes) sb.AppendLine($"- {n}");
             sb.AppendLine();

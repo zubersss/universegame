@@ -38,5 +38,20 @@ namespace Meridian.Rendering
             else m.DisableKeyword("_EMISSION");
             return m;
         }
+
+        /// <summary>
+        /// D-082 (contract v2.6 ruling 10): a model whose sidecar says alpha_clip draws cut-out (cutoff 0.5) and double-sided:
+        /// the B-109 canopy cards on the shared flora atlas. URP/Lit alpha clipping keys off _AlphaClip + _ALPHATEST_ON.
+        /// </summary>
+        public static void SetAlphaClip(Material m)
+        {
+            m.SetFloat("_AlphaClip", 1f);
+            m.SetFloat("_Cutoff", 0.5f);
+            m.EnableKeyword("_ALPHATEST_ON");
+            m.SetFloat("_Cull", (float)UnityEngine.Rendering.CullMode.Off);
+            m.doubleSidedGI = true;
+            m.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
+            m.SetOverrideTag("RenderType", "TransparentCutout");
+        }
     }
 }

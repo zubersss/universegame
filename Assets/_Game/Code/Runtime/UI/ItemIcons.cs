@@ -1,3 +1,4 @@
+using Meridian.Art;
 using System.Collections.Generic;
 using Meridian.Items;
 using UnityEngine;
@@ -32,7 +33,7 @@ namespace Meridian.UI
             }
             if (requested.Add(itemId))
             {
-                var h = Addressables.LoadAssetAsync<IList<Sprite>>(def.icon);
+                var h = ArtLoad.Asset<IList<Sprite>>(def.icon);
                 h.Completed += op =>
                 {
                     if (op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;
@@ -53,7 +54,7 @@ namespace Meridian.UI
             if (named.TryGetValue(name, out var sp)) return sp;
             if (namedRequested.Add(name))
             {
-                var h = Addressables.LoadAssetAsync<IList<Sprite>>($"icons/{name}/base");
+                var h = ArtLoad.Asset<IList<Sprite>>($"icons/{name}/base");
                 h.Completed += op =>
                 {
                     if (op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;

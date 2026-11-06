@@ -1,3 +1,4 @@
+using Meridian.Art;
 using System.Collections.Generic;
 using Meridian.Core;
 using Meridian.Items;
@@ -345,7 +346,7 @@ namespace Meridian.Building
         {
             if (art.TryGetValue(spec.artKey, out var sp)) { Fit(view, spec, sp); return; }
             if (!requested.Add(spec.artKey)) { StartCoroutine(WaitFor(view, spec)); return; }
-            var h = Addressables.LoadAssetAsync<IList<Sprite>>(spec.artKey);
+            var h = ArtLoad.Asset<IList<Sprite>>(spec.artKey);
             handles.Add(h);
             h.Completed += op =>
             {

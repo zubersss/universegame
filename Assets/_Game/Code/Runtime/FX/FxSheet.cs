@@ -1,3 +1,4 @@
+using Meridian.Art;
 using System.Collections.Generic;
 using Meridian.Rendering;
 using UnityEngine;
@@ -52,7 +53,7 @@ namespace Meridian.FX
                 bool exists = l.Status == AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0;
                 Addressables.Release(l);
                 if (!exists) return;
-                Addressables.LoadAssetAsync<IList<Sprite>>(key).Completed += op =>
+                ArtLoad.Asset<IList<Sprite>>(key).Completed += op =>
                 {
                     if (op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;
                     var list = new Sprite[op.Result.Count];

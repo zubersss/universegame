@@ -66,7 +66,7 @@ namespace Meridian.Player
             SheetKey = key;
             var old = handle;
             clips = ArtMaterials.ClipsFor(key) ?? ArtMaterials.ClipsFor(ArtKeys.Characters.Surveyor);
-            var h = Addressables.LoadAssetAsync<IList<Sprite>>(key);
+            var h = ArtLoad.Asset<IList<Sprite>>(key);
             handle = h;
             h.Completed += op =>
             {

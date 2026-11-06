@@ -61,9 +61,9 @@ namespace Meridian.Art
                 Addressables.Release(l);
                 if (modelLoc == null || this == null) return; // no model: the caller keeps its 2D view
                 pending = 3;
-                modelHandle = Addressables.LoadAssetAsync<GameObject>(modelLoc);
+                modelHandle = ArtLoad.Asset<GameObject>(modelLoc, key);
                 modelHandle.Completed += op => { prefab = op.Status == AsyncOperationStatus.Succeeded ? op.Result : null; Done(); };
-                clipsHandle = Addressables.LoadAssetAsync<IList<AnimationClip>>(modelLoc);
+                clipsHandle = ArtLoad.Asset<IList<AnimationClip>>(modelLoc, key);
                 clipsHandle.Completed += op => { clips = op.Status == AsyncOperationStatus.Succeeded ? op.Result : null; Done(); };
                 LoadGeneratedMaterial(key);
             };
@@ -84,7 +84,7 @@ namespace Meridian.Art
                         if (loc.InternalId != null && loc.InternalId.EndsWith(".mat", System.StringComparison.OrdinalIgnoreCase)) { matLoc = loc; break; }
                 Addressables.Release(l);
                 if (matLoc == null || this == null) { Done(); return; }
-                materialHandle = Addressables.LoadAssetAsync<Material>(matLoc);
+                materialHandle = ArtLoad.Asset<Material>(matLoc, key);
                 materialHandle.Completed += op => { material = op.Status == AsyncOperationStatus.Succeeded ? op.Result : null; Done(); };
             };
         }

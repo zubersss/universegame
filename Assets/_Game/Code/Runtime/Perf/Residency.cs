@@ -1,0 +1,87 @@
+using System.Collections.Generic;
+using UnityEngine.ResourceManagement.AsyncOperations;
+
+namespace Meridian.Perf
+{
+    /// <summary>
+    /// U-086 (Bible §11.1 v3, Residency row): which Addressable groups hold live handles. Every asset load goes
+    /// through ArtLoad, which registers (group, handle); a handle counts while it IsValid (a released handle's
+    /// operation is destroyed). GroupOf mirrors ArtRules.GroupFor (Editor) at runtime. "session" holds what the
+    /// game keeps on purpose for the whole run (TerrainTileSet.Preload) and is reported, not judged.
+    /// </summary>
+    public static class Residency
+    {
+        public const string Session = "session";
+
+        struct Entry { public string group; public AsyncOperationHandle handle; }
+        static readonly List<Entry> entries = new List<Entry>(256);
+        static readonly List<string> groups = new List<string>(8);
+
+        public static void Track(string key, AsyncOperationHandle handle) => Track(handle, GroupOf(key));
+
+        public static void Track(AsyncOperationHandle handle, string group)
+        {
+            if (!handle.IsValid()) return;
+            entries.Add(new Entry { group = group, handle = handle });
+        }
+
+        /// <summary>Live handles into `group` ("planet_earth", "common", …).</summary>
+        public static int Count(string group)
+        {
+            Prune();
+            int n = 0;
+            foreach (var e in entries) if (e.group == group) n++;
+            return n;
+        }
+
+        public static int Total { get { Prune(); return entries.Count; } }
+
+        /// <summary>Groups with at least one live handle, sorted, comma-separated (reports only: allocates).</summary>
+        public static string ResidentGroups()
+        {
+            Prune();
+            groups.Clear();
+            foreach (var e in entries) if (!groups.Contains(e.group)) groups.Add(e.group);
+            groups.Sort(string.CompareOrdinal);
+            return string.Join(", ", groups);
+        }
+
+        /// <summary>True when every resident planet group is `currentPlanetGroup` (common, ui, icons, space and session are always allowed).</summary>
+        public static bool OnlyPlanet(string currentPlanetGroup)
+        {
+            Prune();
+            foreach (var e in entries)
+                if (e.group.StartsWith("planet_", System.StringComparison.Ordinal) && e.group != currentPlanetGroup) return false;
+            return true;
+        }
+
+        public static string PlanetGroup(Meridian.Planets.PlanetId id) => "planet_" + id.ToString().ToLowerInvariant();
+
+        /// <summary>Addressables group of a key (Bible §10.3; the same table as ArtRules.GroupFor).</summary>
+        public static string GroupOf(string key)
+        {
+            if (string.IsNullOrEmpty(key)) return "common";
+            int a = key.IndexOf('/');
+            string category = a < 0 ? key : key.Substring(0, a);
+            int b = a < 0 ? -1 : key.IndexOf('/', a + 1);
+            string second = a < 0 ? "" : b < 0 ? key.Substring(a + 1) : key.Substring(a + 1, b - a - 1);
+            switch (category)
+            {
+                case "terrain":
+                case "creatures": return "planet_" + second;
+                case "props": return second == "common" ? "common" : "planet_" + second;
+                case "backgrounds": return second == "space" ? "space" : "planet_" + second;
+                case "planets": return "space";
+                case "icons": return "icons";
+                case "ui": return "ui";
+                default: return "common"; // ships, characters, fx
+            }
+        }
+
+        static void Prune()
+        {
+            for (int i = entries.Count - 1; i >= 0; i--)
+                if (!entries[i].handle.IsValid()) entries.RemoveAt(i);
+        }
+    }
+}

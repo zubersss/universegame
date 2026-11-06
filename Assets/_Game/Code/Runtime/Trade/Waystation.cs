@@ -1,3 +1,4 @@
+using Meridian.Art;
 using System.Collections.Generic;
 using Meridian.Space;
 using UnityEngine;
@@ -62,7 +63,7 @@ namespace Meridian.Trade
                         if (l.InternalId != null && l.InternalId.EndsWith(".glb", System.StringComparison.OrdinalIgnoreCase)) { glb = l; break; }
                 Addressables.Release(loc);
                 if (glb == null || this == null) return;
-                handle = Addressables.LoadAssetAsync<GameObject>(glb);
+                handle = ArtLoad.Asset<GameObject>(glb, key);
                 handle.Completed += op =>
                 {
                     if (this == null || op.Status != AsyncOperationStatus.Succeeded || op.Result == null) return;
@@ -78,7 +79,7 @@ namespace Meridian.Trade
                         if (l.InternalId != null && l.InternalId.EndsWith(".mat", System.StringComparison.OrdinalIgnoreCase)) { mat = l; break; }
                 Addressables.Release(loc);
                 if (mat == null || this == null) return;
-                materialHandle = Addressables.LoadAssetAsync<Material>(mat);
+                materialHandle = ArtLoad.Asset<Material>(mat, key);
                 materialHandle.Completed += op =>
                 {
                     if (this == null || op.Status != AsyncOperationStatus.Succeeded) return;

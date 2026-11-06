@@ -21,7 +21,7 @@ namespace Meridian.EditorTools
     public sealed partial class ArtImporter : AssetPostprocessor
     {
         /// <summary>Bump when the import rules change so Unity re-imports the art everywhere (2: U-036 per-sheet ppu, 3: U-032 clips).</summary>
-        public override uint GetVersion() => 12; // 12: P-36 model maps stream their mips (U-077 Venus texture row); 11: U-076 model colour maps are Default/sRGB with mips (ConfigureModelColor); 10: D-072 model maps exempt from the 4 MB cap (the flora atlases reimport); 3: U-032 clips; 4: U-060 mips only on POT; 5: U-075 model maps beside a .glb are not sprites; 6: B-080 block material textures; 7: model keys get a placeholder; 8: shared model atlases (B-085); 9: model materials, addresses, clips
+        public override uint GetVersion() => 12; // 12: model maps flagged for mip streaming (P-36; the QualitySettings switch comes with U-091) and the Saturn ring sheet trilinear (U-086); 11: U-076 model colour maps are Default/sRGB with mips (ConfigureModelColor); 10: D-072 model maps exempt from the 4 MB cap (the flora atlases reimport); 3: U-032 clips; 4: U-060 mips only on POT; 5: U-075 model maps beside a .glb are not sprites; 6: B-080 block material textures; 7: model keys get a placeholder; 8: shared model atlases (B-085); 9: model materials, addresses, clips
 
         /// <summary>Folders the importer watches. Tests point these at a sandbox and restore them.</summary>
         public sealed class Roots
@@ -177,6 +177,8 @@ namespace Meridian.EditorTools
             ti.wrapMode = rule.repeat ? TextureWrapMode.Repeat : TextureWrapMode.Clamp;
             ti.maxTextureSize = ArtRules.MaxDimension;
             ti.textureCompression = TextureImporterCompression.CompressedHQ;
+            // U-086 (LEAD cycle 221): the Saturn ring sheet covers a 435 u annulus; trilinear + aniso keep its bands clean at any zoom.
+            if (key == "planets/saturn/rings") { ti.mipmapEnabled = true; ti.filterMode = FilterMode.Trilinear; ti.anisoLevel = 8; }
 
             switch (map)
             {

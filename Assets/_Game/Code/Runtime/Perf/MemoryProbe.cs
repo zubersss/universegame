@@ -74,7 +74,7 @@ namespace Meridian.Perf
             var earth = spaceShip.world.Find("earth").Value;
             spaceShip.Position = earth.position + new Vector2(0f, earth.WellRadius + 50f);
             spaceShip.Velocity = Vector2.zero;
-            yield return Leg("Space", spaceCam);
+            yield return Leg("Space", spaceCam, "planet_earth");
 
             // ---- Entry → Mars ----
             while (spaceShip.Invulnerable) yield return null;
@@ -85,7 +85,7 @@ namespace Meridian.Perf
             var marsSide = director.PlanetSide;
             float until = Time.realtimeSinceStartup + 20f;
             while (!marsSide.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
-            yield return Leg("Mars", marsSide.sideCamera);
+            yield return Leg("Mars", marsSide.sideCamera, "planet_earth");
 
             // ---- U-060: Mercury and Venus. Switch the way a launch does (the planet side unloads, unused assets
             // are freed), then load the next planet directly to keep the probe short ----
@@ -99,7 +99,7 @@ namespace Meridian.Perf
                 var s = director.PlanetSide;
                 until = Time.realtimeSinceStartup + 20f;
                 while (!s.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
-                yield return Leg(id.ToString(), s.sideCamera);
+                yield return Leg(id.ToString(), s.sideCamera, id == Meridian.Planets.PlanetId.Mercury ? "planet_mars" : "planet_mercury");
             }
             Finish(null);
         }
@@ -111,16 +111,26 @@ namespace Meridian.Perf
             while (t.Busy && Time.realtimeSinceStartup < timeout) yield return null;
         }
 
-        IEnumerator Leg(string where, Camera cam)
+        IEnumerator Leg(string where, Camera cam, string prevGroup = null)
         {
             var monitor = BudgetMonitor.Instance;
             if (monitor == null) { lines.AppendLine($"{{\"leg\":\"{where}\",\"error\":\"no BudgetMonitor\"}}"); yield break; }
+            // U-086 (Bible §11.1 v3 Residency): the previous planet's handles should be gone within 5 s of the switch.
+            int prevHandles = -1;
+            float prevWait = 0f;
+            if (prevGroup != null)
+            {
+                float t0 = Time.realtimeSinceStartup;
+                prevHandles = Residency.Count(prevGroup);
+                while (prevHandles > 0 && Time.realtimeSinceStartup - t0 < 5f) { yield return null; prevHandles = Residency.Count(prevGroup); }
+                prevWait = Time.realtimeSinceStartup - t0;
+            }
             monitor.ResetWindow();
             for (int i = 0; i < SettleFrames; i++) yield return null;
             var s = monitor.Snapshot(cam);
             lines.AppendLine($"{{\"leg\":\"{where}\",\"systemMB\":{s.systemMemoryMB},\"textureMB\":{s.textureMemoryMB},\"audioMB\":{s.audioMemoryMB}," +
                              $"\"avgFrameMs\":{s.avgFrameMs.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}," +
-                             $"\"workingSetMB\":{System.Diagnostics.Process.GetCurrentProcess().WorkingSet64 / (1024 * 1024)}}}");
+                             $"\"workingSetMB\":{s.workingSetMB},\"meshMB\":{s.meshMemoryMB},\"resident\":\"{Residency.ResidentGroups()}\",\"prevGroup\":\"{prevGroup}\",\"prevHandles\":{prevHandles},\"prevWait\":{prevWait.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}}}");
             TopTextures(where, 15);
         }
 

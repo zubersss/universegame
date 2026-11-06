@@ -215,7 +215,7 @@ namespace Meridian.UI
                 bool exists = l.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0;
                 UnityEngine.AddressableAssets.Addressables.Release(l);
                 if (!exists || target == null) return;
-                var h = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<System.Collections.Generic.IList<Sprite>>(key);
+                var h = Meridian.Art.ArtLoad.Asset<System.Collections.Generic.IList<Sprite>>(key);
                 h.Completed += op =>
                 {
                     if (target == null || op.Status != UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;

@@ -32,7 +32,7 @@ namespace Meridian.EditorTools
             }
         }
 
-        [Serializable] sealed class ModelManifest { public int fps = 30; public ModelClipJson[] clips; }
+        [Serializable] sealed class ModelManifest { public int fps = 30; public ModelClipJson[] clips; public bool alpha_clip; } // alpha_clip: contract v2.6 ruling 10 (D-082)
         [Serializable] sealed class ModelClipJson { public string name; public int frames; public bool loop; }
 
         /// <summary>Model keys touched by this import batch: a .glb, its json, or one of its maps (incl. a shared atlas).</summary>
@@ -75,12 +75,18 @@ namespace Meridian.EditorTools
 
                 // Material from the maps beside the model, or the folder's shared atlas.
                 string basePath = Active.art + key, atlasBase = Active.art + key.Substring(0, key.LastIndexOf('/')) + "/atlas";
+                // The sidecar first: its alpha_clip flag (D-082) shapes the material below; its clips go to the registry.
+                var json = basePath + ".json";
+                ModelManifest manifest = null;
+                if (File.Exists(json)) manifest = JsonUtility.FromJson<ModelManifest>(File.ReadAllText(json));
+
                 string maps = File.Exists(basePath + "_color.png") ? basePath : File.Exists(atlasBase + "_color.png") ? atlasBase : null;
                 Material mat = null;
                 if (maps != null)
                 {
                     Texture2D Map(string m) => AssetDatabase.LoadAssetAtPath<Texture2D>($"{maps}_{m}.png");
                     var built = ModelMaterials.FromMaps(Map("color"), Map("normal"), Map("mask"), Map("emission"), key.Replace('/', '_'));
+                    if (manifest != null && manifest.alpha_clip) ModelMaterials.SetAlphaClip(built); // D-082: cut-out leaves, double-sided
                     var matPath = GeneratedModels + key + ".mat";
                     Directory.CreateDirectory(Path.GetDirectoryName(matPath));
                     mat = AssetDatabase.LoadAssetAtPath<Material>(matPath);
@@ -93,17 +99,12 @@ namespace Meridian.EditorTools
                 if (mat != null) Address(AssetDatabase.GetAssetPath(mat), key);
 
                 // Clips from the json (glTF has no loop flag).
-                var json = basePath + ".json";
                 var clips = new List<ArtClip>();
                 int fps = 30;
-                if (File.Exists(json))
+                if (manifest != null)
                 {
-                    var m = JsonUtility.FromJson<ModelManifest>(File.ReadAllText(json));
-                    if (m != null)
-                    {
-                        fps = m.fps > 0 ? m.fps : 30;
-                        if (m.clips != null) foreach (var c in m.clips) if (!string.IsNullOrEmpty(c.name)) clips.Add(new ArtClip { name = c.name, start = 0, length = c.frames, loop = c.loop });
-                    }
+                    fps = manifest.fps > 0 ? manifest.fps : 30;
+                    if (manifest.clips != null) foreach (var c in manifest.clips) if (!string.IsNullOrEmpty(c.name)) clips.Add(new ArtClip { name = c.name, start = 0, length = c.frames, loop = c.loop });
                 }
                 regDirty |= reg.SetModelClips(key, fps, clips);
             }

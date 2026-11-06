@@ -1,3 +1,4 @@
+using Meridian.Art;
 using System.Collections.Generic;
 using Meridian.Core;
 using Meridian.Planets;
@@ -160,7 +161,7 @@ namespace Meridian.Planet.POI
                 bool exists = l.Status == AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0;
                 Addressables.Release(l);
                 if (!exists || sr == null) return;
-                var h = Addressables.LoadAssetAsync<IList<Sprite>>(key);
+                var h = ArtLoad.Asset<IList<Sprite>>(key);
                 handles.Add(h);
                 h.Completed += op =>
                 {

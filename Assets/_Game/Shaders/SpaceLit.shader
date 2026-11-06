@@ -26,6 +26,7 @@ Shader "MERIDIAN/SpaceLit"
         _RimStrength ("Rim strength on the surface", Float) = 0.6
         _AlphaFromTex ("Alpha from the albedo texture", Float) = 0
         _Cull ("Cull", Float) = 2
+        _Radial ("Radial sampling (ring sheets)", Float) = 0
     }
     SubShader
     {
@@ -58,6 +59,7 @@ Shader "MERIDIAN/SpaceLit"
                 float _RimStrength;
                 float _AlphaFromTex;
                 float _Cull;
+                float _Radial;
             CBUFFER_END
 
             struct Attributes
@@ -114,7 +116,16 @@ Shader "MERIDIAN/SpaceLit"
                     return half4(_AtmoColor.rgb, a);
                 }
 
-                half4 tex = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv);
+                half4 tex;
+                if (_Radial > 0.5)
+                {
+                    // U-086: a ring sheet is circles of bands, so sample the planar sheet along four radii and average: the texel
+                    // grid never shows as stair steps or moire at any zoom, and the mips still work along the radius.
+                    float r = length(i.uv - 0.5);
+                    tex = 0.25 * (SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, float2(0.5 + r, 0.5)) + SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, float2(0.5 - r, 0.5))
+                                + SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, float2(0.5, 0.5 + r)) + SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, float2(0.5, 0.5 - r)));
+                }
+                else tex = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv);
                 half3 albedo = tex.rgb * _Tint.rgb * i.shade;
                 // _AlphaFromTex 1: the texture's alpha; 2: alpha × luminance (cloud sheets that may be opaque white-on-black).
                 float lum = dot(tex.rgb, float3(0.299, 0.587, 0.114));

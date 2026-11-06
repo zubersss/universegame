@@ -1,3 +1,4 @@
+using Meridian.Art;
 using System.Collections.Generic;
 using Meridian.Core;
 using Meridian.Items;
@@ -258,7 +259,7 @@ namespace Meridian.Trade
 
         void LoadLayer(int i, RawImage target)
         {
-            var h = Addressables.LoadAssetAsync<Texture2D>($"backgrounds/waystation/layer{i}");
+            var h = ArtLoad.Asset<Texture2D>($"backgrounds/waystation/layer{i}");
             handles.Add(h);
             h.Completed += op =>
             {

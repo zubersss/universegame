@@ -16,7 +16,7 @@ namespace Meridian.Art
         void Start()
         {
             if (string.IsNullOrEmpty(key) || target == null) return;
-            handle = Addressables.LoadAssetAsync<IList<Sprite>>(key);
+            handle = ArtLoad.Asset<IList<Sprite>>(key);
             handle.Completed += op =>
             {
                 if (target == null || op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;

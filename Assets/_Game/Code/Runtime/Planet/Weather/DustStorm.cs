@@ -102,7 +102,7 @@ namespace Meridian.Planet.Weather
 
         void Start()
         {
-            handle = Addressables.LoadAssetAsync<IList<Sprite>>(ArtKeys.Fx.Dust);
+            handle = ArtLoad.Asset<IList<Sprite>>(ArtKeys.Fx.Dust);
             handle.Completed += op =>
             {
                 if (this == null || op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;

@@ -1,3 +1,4 @@
+using Meridian.Art;
 using System.Collections.Generic;
 using Meridian.Core;
 using Meridian.Planets;
@@ -137,7 +138,7 @@ namespace Meridian.UI
             if (creatureRequested.Add(e.artKey))
             {
                 var key = e.artKey;
-                var h = Addressables.LoadAssetAsync<IList<Sprite>>(key);
+                var h = ArtLoad.Asset<IList<Sprite>>(key);
                 handles.Add(h);
                 h.Completed += op =>
                 {

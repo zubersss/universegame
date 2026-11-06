@@ -75,7 +75,7 @@ namespace Meridian.Player
         void LoadTool(RigModule m)
         {
             string key = RigModules.ArtKey(m);
-            var h = Addressables.LoadAssetAsync<IList<Sprite>>(key);
+            var h = ArtLoad.Asset<IList<Sprite>>(key);
             handles.Add(h);
             h.Completed += op =>
             {

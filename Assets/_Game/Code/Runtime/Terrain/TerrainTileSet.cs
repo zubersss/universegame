@@ -1,3 +1,4 @@
+using Meridian.Art;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -33,7 +34,7 @@ namespace Meridian.Terrain
             {
                 var key = TileId.ArtKey(id);
                 if (key == null || !keptIds.Add(id)) continue;
-                kept.Add(Addressables.LoadAssetAsync<IList<Sprite>>(key));
+                kept.Add(ArtLoad.Session<IList<Sprite>>(key));
             }
         }
 
@@ -45,7 +46,7 @@ namespace Meridian.Terrain
                 if (key == null || tiles[id] != null) continue;
                 pending++;
                 byte captured = id;
-                var h = Addressables.LoadAssetAsync<IList<Sprite>>(key);
+                var h = ArtLoad.Asset<IList<Sprite>>(key);
                 handles.Add(h);
                 h.Completed += op =>
                 {

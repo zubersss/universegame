@@ -222,7 +222,7 @@ namespace Meridian.Planet
                     if (!exists && i == 0 && name != baseSet) set.missing = true;
                     return;
                 }
-                set.handles[i] = Addressables.LoadAssetAsync<Texture2D>(key);
+                set.handles[i] = ArtLoad.Asset<Texture2D>(key);
                 set.handles[i].Completed += op =>
                 {
                     set.pending--;

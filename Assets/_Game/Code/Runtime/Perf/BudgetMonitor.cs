@@ -17,6 +17,8 @@ namespace Meridian.Perf
         public int lightsVisible;         // 2D lights touching the camera view (global lights included)
         public int particlesAlive;
         public long systemMemoryMB, textureMemoryMB, audioMemoryMB; // -1 when the counter is unavailable
+        public long meshMemoryMB;         // U-086 (v3): "Mesh Memory" counter
+        public long workingSetMB;         // U-086 (v3): the OS working set of the process (ProcessMemory); -1 off Windows
     }
 
     /// <summary>
@@ -28,13 +30,14 @@ namespace Meridian.Perf
     {
         public const int Window = 300;
         public const float FrameBudgetMs = 16.6f, FrameTargetMs = 12f;
-        public const int DrawCallsSide = 150, DrawCallsTop = 80;
+        public const int DrawCallsSide = 250, DrawCallsTop = 80; // v3 (D-077): 250 side view, 80 top-down
         public const int LightsTarget = 8, LightsHardCap = 12;
-        public const int ParticlesCap = 600;
+        public const int ParticlesCap = 1500; // v3 (D-077)
         /// <summary>U-077 (Bible §11.1, 3D): geometry per frame.</summary>
-        public const long TrianglesCap = 300_000, ShadowCastersCap = 150;
+        public const long TrianglesCap = 500_000, ShadowCastersCap = 150; // v3 (D-077): 500 k
         public const long GcBytesPer300 = 1024;
-        public const long RamMB = 2560, TexturesMB = 600, AudioMB = 60;
+        // U-086 (Bible §11.1 v3, D-077): the built game, Editor closed: working set ≤ 4.5 GB (warning line 4.0), textures ≤ 2.0 GB, meshes ≤ 600 MB, audio ≤ 150 MB.
+        public const long RamMB = 4608, RamWarnMB = 4096, TexturesMB = 2048, MeshesMB = 600, AudioMB = 150;
 
         public static BudgetMonitor Instance { get; private set; }
 
@@ -45,7 +48,7 @@ namespace Meridian.Perf
         readonly float[] sortScratch = new float[Window];
         int head, count;
 
-        ProfilerRecorder draws, tris, casters, gcFrame, systemMem, textureMem, audioMem;
+        ProfilerRecorder draws, tris, casters, gcFrame, systemMem, textureMem, audioMem, meshMem;
         readonly List<Light2D> lights = new List<Light2D>();
         readonly List<ParticleSystem> particles = new List<ParticleSystem>();
 
@@ -64,11 +67,12 @@ namespace Meridian.Perf
             systemMem = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "System Used Memory");
             textureMem = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Texture Memory");
             audioMem = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Audio Used Memory");
+            meshMem = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Mesh Memory");
         }
 
         void OnDisable()
         {
-            draws.Dispose(); tris.Dispose(); casters.Dispose(); gcFrame.Dispose(); systemMem.Dispose(); textureMem.Dispose(); audioMem.Dispose();
+            draws.Dispose(); tris.Dispose(); casters.Dispose(); gcFrame.Dispose(); systemMem.Dispose(); textureMem.Dispose(); audioMem.Dispose(); meshMem.Dispose();
         }
 
         void OnDestroy() { if (Instance == this) Instance = null; }
@@ -117,6 +121,8 @@ namespace Meridian.Perf
             s.systemMemoryMB = systemMem.Valid ? systemMem.LastValue / (1024 * 1024) : -1;
             s.textureMemoryMB = textureMem.Valid ? textureMem.LastValue / (1024 * 1024) : -1;
             s.audioMemoryMB = audioMem.Valid ? audioMem.LastValue / (1024 * 1024) : -1;
+            s.meshMemoryMB = meshMem.Valid ? meshMem.LastValue / (1024 * 1024) : -1;
+            s.workingSetMB = ProcessMemory.WorkingSetMB();
             return s;
         }
 

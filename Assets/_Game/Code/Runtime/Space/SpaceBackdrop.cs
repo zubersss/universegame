@@ -43,7 +43,7 @@ namespace Meridian.Space
                 mr.sortingOrder = -100 + i;
                 layers[i] = mr;
                 int index = i;
-                handles[i] = Addressables.LoadAssetAsync<Texture2D>(ArtKeys.Backgrounds.Layer("space", i));
+                handles[i] = ArtLoad.Asset<Texture2D>(ArtKeys.Backgrounds.Layer("space", i));
                 handles[i].Completed += op =>
                 {
                     if (mr == null || op.Status != AsyncOperationStatus.Succeeded) return;

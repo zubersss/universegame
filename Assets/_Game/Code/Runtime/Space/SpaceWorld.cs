@@ -1,3 +1,4 @@
+using Meridian.Art;
 using System.Collections.Generic;
 using Meridian.Core;
 using Meridian.Planets;
@@ -57,6 +58,7 @@ namespace Meridian.Space
         static readonly int Ambient = Shader.PropertyToID("_Ambient");
         static readonly int AlphaFromTex = Shader.PropertyToID("_AlphaFromTex");
         static readonly int CullProp = Shader.PropertyToID("_Cull");
+        static readonly int RadialProp = Shader.PropertyToID("_Radial"); // U-086: ring sheets sampled radially
         static readonly int RimStrength = Shader.PropertyToID("_RimStrength");
 
         void Awake()
@@ -140,7 +142,7 @@ namespace Meridian.Space
             }
             AddGlow(parent, b);
             if (b.name == "saturn") AddRings(parent, b);
-            var h = Addressables.LoadAssetAsync<Texture2D>($"planets/{b.name}/surface");
+            var h = ArtLoad.Asset<Texture2D>($"planets/{b.name}/surface");
             handles.Add(h);
             h.Completed += op =>
             {
@@ -225,7 +227,7 @@ namespace Meridian.Space
                 sr.sharedMaterial = lineMaterial; // unlit: a glow isn't lit by the scene
                 sr.sortingOrder = 9;               // just behind the disc
                 glows.Add(sr);
-                var h = Addressables.LoadAssetAsync<IList<Sprite>>(key);
+                var h = ArtLoad.Asset<IList<Sprite>>(key);
                 h.Completed += op =>
                 {
                     if (sr == null || op.Status != AsyncOperationStatus.Succeeded || op.Result.Count == 0) return;
@@ -247,7 +249,7 @@ namespace Meridian.Space
                 bool exists = loc.Status == AsyncOperationStatus.Succeeded && loc.Result != null && loc.Result.Count > 0;
                 Addressables.Release(loc);
                 if (!exists || this == null) return;
-                var h = Addressables.LoadAssetAsync<Texture2D>(key);
+                var h = ArtLoad.Asset<Texture2D>(key);
                 handles.Add(h);
                 h.Completed += op => { if (op.Status == AsyncOperationStatus.Succeeded) done(op.Result); };
             };
@@ -265,7 +267,7 @@ namespace Meridian.Space
                         if (l.InternalId != null && l.InternalId.EndsWith(".glb", System.StringComparison.OrdinalIgnoreCase)) { glb = l; break; }
                 Addressables.Release(loc);
                 if (glb == null || this == null) { done(null); return; }
-                var h = Addressables.LoadAssetAsync<GameObject>(glb);
+                var h = ArtLoad.Asset<GameObject>(glb, key);
                 prefabHandles.Add(h);
                 h.Completed += op => done(op.Status == AsyncOperationStatus.Succeeded ? op.Result : null);
             };
@@ -283,7 +285,7 @@ namespace Meridian.Space
                         if (l.InternalId != null && l.InternalId.EndsWith(".mat", System.StringComparison.OrdinalIgnoreCase)) { mat = l; break; }
                 Addressables.Release(loc);
                 if (mat == null || this == null) { done(null); return; }
-                var h = Addressables.LoadAssetAsync<Material>(mat);
+                var h = ArtLoad.Asset<Material>(mat, key);
                 materialHandles.Add(h);
                 h.Completed += op => done(op.Status == AsyncOperationStatus.Succeeded ? op.Result : null);
             };
@@ -328,12 +330,13 @@ namespace Meridian.Space
                 mat.SetFloat(Emissive, 1f);
                 mat.SetFloat(AlphaFromTex, 1f);
                 mat.SetFloat(CullProp, 0f);
+                mat.SetFloat(RadialProp, 1f);
                 mr.sharedMaterial = mat;
                 mr.shadowCastingMode = ShadowCastingMode.Off;
                 mr.receiveShadows = false;
                 mr.sortingOrder = 12;
                 Rings = mr;
-                var h = Addressables.LoadAssetAsync<IList<Sprite>>("planets/saturn/rings");
+                var h = ArtLoad.Asset<IList<Sprite>>("planets/saturn/rings");
                 spriteHandles.Add(h);
                 h.Completed += op =>
                 {

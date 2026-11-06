@@ -1,3 +1,4 @@
+using Meridian.Art;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Meridian.Planet.Lighting;
@@ -97,7 +98,7 @@ namespace Meridian.Creatures
                 // Left the species' planet while the lookup ran: don't load it (nothing would release it).
                 if (Planet == null || SpeciesSpec.Get((Species)s).planet != Planet.id) return;
                 if ((night ? nightHandles[s] : artHandles[s]).IsValid()) return;
-                var h = Addressables.LoadAssetAsync<IList<Sprite>>(key);
+                var h = ArtLoad.Asset<IList<Sprite>>(key);
                 if (night) nightHandles[s] = h; else artHandles[s] = h;
                 h.Completed += op =>
                 {

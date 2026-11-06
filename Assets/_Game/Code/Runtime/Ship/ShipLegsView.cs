@@ -46,7 +46,7 @@ namespace Meridian.Ship
 
         AsyncOperationHandle<IList<Sprite>> Load(string key, System.Action<Sprite> set)
         {
-            var h = Addressables.LoadAssetAsync<IList<Sprite>>(key);
+            var h = ArtLoad.Asset<IList<Sprite>>(key);
             h.Completed += op =>
             {
                 if (this == null || op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;
