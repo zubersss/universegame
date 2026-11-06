@@ -21,7 +21,7 @@ namespace Meridian.EditorTools
     public sealed partial class ArtImporter : AssetPostprocessor
     {
         /// <summary>Bump when the import rules change so Unity re-imports the art everywhere (2: U-036 per-sheet ppu, 3: U-032 clips).</summary>
-        public override uint GetVersion() => 11; // 11: U-076 model colour maps are Default/sRGB with mips (ConfigureModelColor); 10: D-072 model maps exempt from the 4 MB cap (the flora atlases reimport); 3: U-032 clips; 4: U-060 mips only on POT; 5: U-075 model maps beside a .glb are not sprites; 6: B-080 block material textures; 7: model keys get a placeholder; 8: shared model atlases (B-085); 9: model materials, addresses, clips
+        public override uint GetVersion() => 12; // 12: P-36 model maps stream their mips (U-077 Venus texture row); 11: U-076 model colour maps are Default/sRGB with mips (ConfigureModelColor); 10: D-072 model maps exempt from the 4 MB cap (the flora atlases reimport); 3: U-032 clips; 4: U-060 mips only on POT; 5: U-075 model maps beside a .glb are not sprites; 6: B-080 block material textures; 7: model keys get a placeholder; 8: shared model atlases (B-085); 9: model materials, addresses, clips
 
         /// <summary>Folders the importer watches. Tests point these at a sandbox and restore them.</summary>
         public sealed class Roots
@@ -102,6 +102,44 @@ namespace Meridian.EditorTools
         }
         public static string PlaceholderColorPath(string key) => Active.placeholders + key + "_color.png";
 
+        /// <summary>
+        /// P-36 (U-077): a model map streams its mips (QualitySettings.streamingMipmapsActive), so maps of creatures and
+        /// props that are off screen keep only their low mips in the build. Not the belt asteroids: they draw through
+        /// Graphics.RenderMeshInstanced, which has no renderer for the streaming system to track.
+        /// </summary>
+        public static bool StreamsMips(string key) =>
+            IsModelKey(key) && !key.StartsWith("props/space/asteroid_", StringComparison.Ordinal);
+
+        /// <summary>
+        /// U-077: a model's maps (its own, or its folder's shared atlas) that imported before the model existed were
+        /// treated as sheets (B-101: the Venus scenery atlas came one commit before the Venus models, so its normal map
+        /// was rejected by the 4 MB cap and kept Unity's default import). Re-imports every such map; returns the count.
+        /// </summary>
+        public static int EnsureModelMapsImported(string key)
+        {
+            int slash = key.LastIndexOf('/');
+            var bases = new[] { key, slash < 0 ? null : key.Substring(0, slash) + "/atlas" };
+            int count = 0;
+            foreach (var mapKey in bases)
+            {
+                if (mapKey == null || !IsModelKey(mapKey)) continue;
+                bool streams = StreamsMips(mapKey);
+                foreach (ArtMap map in Enum.GetValues(typeof(ArtMap)))
+                {
+                    var path = Active.art + mapKey + "_" + map.ToString().ToLowerInvariant() + ".png";
+                    if (!(AssetImporter.GetAtPath(path) is TextureImporter ti)) continue;
+                    var want = map == ArtMap.Normal ? TextureImporterType.NormalMap : TextureImporterType.Default;
+                    var fmt = ti.GetPlatformTextureSettings("Standalone").format;
+                    bool ok = ti.textureType == want && ti.streamingMipmaps == streams
+                              && fmt == (map == ArtMap.Normal ? TextureImporterFormat.BC5 : TextureImporterFormat.BC7);
+                    if (ok) continue;
+                    AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+                    count++;
+                }
+            }
+            return count;
+        }
+
         // ---------- preprocess: import settings ----------
 
         void OnPreprocessTexture()
@@ -161,6 +199,12 @@ namespace Meridian.EditorTools
                     ti.sRGBTexture = false;
                     SetStandaloneFormat(ti, TextureImporterFormat.BC7);
                     break;
+            }
+            // P-36 (U-077): model maps stream their mips (power-of-two only: NPOT + mips is stored uncompressed, D-061).
+            if (kind == RootKind.Art && IsModelKey(key))
+            {
+                ti.mipmapEnabled = Mathf.IsPowerOfTwo(w) && Mathf.IsPowerOfTwo(h);
+                ti.streamingMipmaps = ti.mipmapEnabled && StreamsMips(key);
             }
         }
 
@@ -487,6 +531,10 @@ namespace Meridian.EditorTools
             if (materialKeys.Count > 0) UpdateMaterialRegistry(materialKeys);
 
             // U-075: models (glb + json + maps): generated material, addresses, clip registry.
+            // U-077: maps that arrived before their model (B-101's Venus atlas) were imported as sheets; fix them first.
+            foreach (var raw in imported.Concat(moved))
+                if (Classify(raw, out var rel) == RootKind.Art && rel.EndsWith(".glb", StringComparison.Ordinal))
+                    EnsureModelMapsImported(rel.Substring(0, rel.Length - 4));
             var modelKeys = new HashSet<string>();
             CollectModelKeys(imported.Concat(moved), modelKeys);
             GenerateModels(modelKeys);

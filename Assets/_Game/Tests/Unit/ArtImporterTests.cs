@@ -453,5 +453,24 @@ namespace Meridian.Tests
             Assert.IsTrue(ArtImporter.IsModelKey("props/test_flora/leaf"), "a key with its own .glb");
             Assert.IsFalse(ArtImporter.IsModelKey("props/test_flora/other"), "a sheet key in the same folder is not");
         }
+
+        [Test]
+        public void ModelMapsStreamMipsAndAnAtlasImportedBeforeItsModelsIsReimported()
+        {
+            // P-36 (U-077): a model map streams its mips, a sheet does not, belt asteroids never (RenderMeshInstanced).
+            var atlas = Png(Art("props/test_flora/atlas_color.png"), 64, 64);
+            var sheet = Png(Art("ships/pilgrim/side_color.png"), 64, 32);
+            Import(atlas, sheet);
+            Assert.AreEqual(TextureImporterType.Sprite, Importer(atlas).textureType, "no model yet: the atlas imports as a sheet");
+            Assert.IsFalse(Importer(sheet).streamingMipmaps, "sheets do not stream");
+            // B-101: the models land one commit after their atlas; the .glb import re-imports the atlas as model maps.
+            File.WriteAllBytes(Art("props/test_flora/leaf.glb"), new byte[0]);
+            Assert.AreEqual(1, ArtImporter.EnsureModelMapsImported("props/test_flora/leaf"), "the atlas is re-imported once its folder has a model");
+            var ti = Importer(atlas);
+            Assert.AreEqual(TextureImporterType.Default, ti.textureType, "a model map, not a sprite");
+            Assert.IsTrue(ti.mipmapEnabled && ti.streamingMipmaps, "model maps stream their mips");
+            Assert.AreEqual(0, ArtImporter.EnsureModelMapsImported("props/test_flora/leaf"), "nothing left to re-import");
+            Assert.IsFalse(ArtImporter.StreamsMips("props/space/asteroid_01"), "belt rocks draw without a renderer");
+        }
     }
 }
