@@ -62,7 +62,7 @@ namespace Meridian.EditorTools
             var m = FilePattern.Match(relativePath);
             if (!m.Success) return false;
             key = m.Groups["key"].Value;
-            if (!KeyPattern.IsMatch(key)) return false;
+            if (!KeyPattern.IsMatch(key) && !IsV3FourSegmentKey(key)) return false;
             if (System.Array.IndexOf(Categories, ArtKeys.Category(key)) < 0) return false;
             map = m.Groups["map"].Value switch
             {
@@ -196,5 +196,68 @@ namespace Meridian.EditorTools
             var fi = new FileInfo(assetPath);
             return fi.Exists ? fi.Length : 0;
         }
+
+        // ---------- v3 cartoon assets (contract v3.0 §11, ArtImporter v13; U-094) ----------
+
+        /// <summary>Contract §11.1: v3 art is drawn at 64 px per metre (1x for 1080p: 16.875 m of height on screen).</summary>
+        public const int V3PixelsPerUnit = 64;
+        /// <summary>Contract §11.2: every v3 sheet plays at 12 fps (on twos).</summary>
+        public const int V3Fps = 12;
+        /// <summary>Contract §11.6: film overlays are 512² tiles.</summary>
+        public const int OverlaySize = 512;
+
+        // §11.4 / B-114: background layers and palette strips carry a fourth segment.
+        static readonly Regex V3FourSegment = new Regex(@"^(backgrounds/[a-z0-9_]+/[a-z0-9_]+/layer[0-9]|ui/palettes/[a-z0-9_]+/strip)$");
+
+        /// <summary>A 4-segment key the v3 contract allows (backgrounds/&lt;planet&gt;/&lt;scene&gt;/layer&lt;N&gt;, ui/palettes/&lt;planet&gt;/strip).</summary>
+        public static bool IsV3FourSegmentKey(string key) => key != null && V3FourSegment.IsMatch(key);
+
+        /// <summary>The painted scene a background layer belongs to: backgrounds/earth/plains/layer2 → backgrounds/earth/plains.</summary>
+        public static string SceneKeyOf(string layerKey)
+        {
+            if (!IsV3FourSegmentKey(layerKey) || !layerKey.StartsWith("backgrounds/", System.StringComparison.Ordinal)) return null;
+            return layerKey.Substring(0, layerKey.LastIndexOf('/'));
+        }
+
+        public static bool IsOverlayKey(string key) => key != null && key.StartsWith("fx/film/", System.StringComparison.Ordinal);
+
+        /// <summary>Contract §11.2 frame caps by clip name: idle 8–12, walk/run/fly 12–16, jump/land 8–10, every other clip ≤ 16.</summary>
+        public static void ClipCap(string clip, out int min, out int max)
+        {
+            switch (clip)
+            {
+                case "idle": min = 8; max = 12; return;
+                case "walk": case "run": case "fly": min = 12; max = 16; return;
+                case "jump": case "land": min = 8; max = 10; return;
+                default: min = 1; max = 16; return;
+            }
+        }
+
+        /// <summary>
+        /// Contract §11.8: null when a v3 sheet may import; otherwise the one-line reason it is rejected (a sheet over 2048,
+        /// an fps other than 12, a clip over its frame cap or outside the sheet). `clipNames`/`clipLengths`/`clipStarts` run in parallel.
+        /// </summary>
+        public static string ValidateV3Sheet(int textureWidth, int textureHeight, int fps, int frames, string[] clipNames, int[] clipStarts, int[] clipLengths)
+        {
+            if (textureWidth > MaxDimension || textureHeight > MaxDimension) return $"sheet {textureWidth}×{textureHeight} is over {MaxDimension}×{MaxDimension}";
+            if (fps != V3Fps) return $"fps {fps}: v3 sheets play at {V3Fps}";
+            int n = clipNames != null ? clipNames.Length : 0;
+            for (int i = 0; i < n; i++)
+            {
+                ClipCap(clipNames[i], out _, out int max);
+                if (clipLengths[i] > max) return $"clip '{clipNames[i]}' has {clipLengths[i]} frames, over its cap of {max}";
+                if (clipLengths[i] <= 0 || clipStarts[i] < 0 || clipStarts[i] + clipLengths[i] > frames)
+                    return $"clip '{clipNames[i]}' ({clipStarts[i]}+{clipLengths[i]}) lies outside the sheet's {frames} frames";
+            }
+            return null;
+        }
+
+        /// <summary>Contract §11.6: null for a 512² film overlay; otherwise the reason.</summary>
+        public static string ValidateOverlay(int width, int height) =>
+            width == OverlaySize && height == OverlaySize ? null : $"film overlay is {width}×{height}, must be {OverlaySize}×{OverlaySize}";
+
+        /// <summary>Contract §11.4: a background layer is ≤ 2048 wide and ≤ 1024 high.</summary>
+        public static string ValidateBackgroundLayer(int width, int height) =>
+            width <= MaxDimension && height <= 1024 ? null : $"background layer {width}×{height} is over 2048×1024";
     }
 }

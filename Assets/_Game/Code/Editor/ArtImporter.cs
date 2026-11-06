@@ -21,7 +21,7 @@ namespace Meridian.EditorTools
     public sealed partial class ArtImporter : AssetPostprocessor
     {
         /// <summary>Bump when the import rules change so Unity re-imports the art everywhere (2: U-036 per-sheet ppu, 3: U-032 clips).</summary>
-        public override uint GetVersion() => 12; // 12: model maps flagged for mip streaming (P-36; the QualitySettings switch comes with U-091) and the Saturn ring sheet trilinear (U-086); 11: U-076 model colour maps are Default/sRGB with mips (ConfigureModelColor); 10: D-072 model maps exempt from the 4 MB cap (the flora atlases reimport); 3: U-032 clips; 4: U-060 mips only on POT; 5: U-075 model maps beside a .glb are not sprites; 6: B-080 block material textures; 7: model keys get a placeholder; 8: shared model atlases (B-085); 9: model materials, addresses, clips
+        public override uint GetVersion() => 13; // 13: U-094 v3 cartoon assets (contract v3.0 §11.8: Sprite at the json PPU 64, no mips, BC7, overlays 512², sheets ≤ 2048 at 12 fps with capped clips, Animator controllers, scene json addressed); 12: model maps flagged for mip streaming (P-36; the QualitySettings switch comes with U-091) and the Saturn ring sheet trilinear (U-086); 11: U-076 model colour maps are Default/sRGB with mips (ConfigureModelColor); 10: D-072 model maps exempt from the 4 MB cap (the flora atlases reimport); 3: U-032 clips; 4: U-060 mips only on POT; 5: U-075 model maps beside a .glb are not sprites; 6: B-080 block material textures; 7: model keys get a placeholder; 8: shared model atlases (B-085); 9: model materials, addresses, clips
 
         /// <summary>Folders the importer watches. Tests point these at a sandbox and restore them.</summary>
         public sealed class Roots
@@ -36,7 +36,7 @@ namespace Meridian.EditorTools
 
         public static Roots Active = new Roots();
 
-        [Serializable] public class SheetClip { public string name; public int start, length; public bool loop; }
+        [Serializable] public class SheetClip { public string name; public int start, length; public bool loop; public int loop_from; }
 
         [Serializable]
         public class SheetManifest
@@ -52,6 +52,13 @@ namespace Meridian.EditorTools
             public float ppu;
             /// <summary>Animation clips (contract §5); recorded in the runtime registry for U-032.</summary>
             public SheetClip[] animations;
+            /// <summary>Contract v3.0 §11: "v3" routes the asset to the cartoon rules (ArtImporter v13).</summary>
+            public string style;
+            /// <summary>§11.6 film overlay / tileable image (no frames).</summary>
+            public bool overlay, tile, squash_root;
+            public bool IsV3 => style == "v3";
+            /// <summary>A frame sheet (frames &gt; 0); a v3 sidecar without frames describes a single image.</summary>
+            public bool IsSheet => frames > 0 && frame_width > 0 && frame_height > 0 && columns > 0;
         }
 
         [Serializable] class BlenderAsset { public string key; public float[] pivot; }
@@ -168,6 +175,9 @@ namespace Meridian.EditorTools
                 return;
             }
 
+            // U-094 (contract v3.0 §11, v13): cartoon assets take their own rules and skip the v2 lit/model paths.
+            if (map == ArtMap.Color && ConfigureV3(ti, key, w, h)) return;
+
             // U-091 (contract §10): a planet's stage-layer textures stay under 700 MB stored; the newest layer over the cap is rejected.
             if (kind == RootKind.Art && ArtRules.IsStageLayer(key, out var layerPlanet))
             {
@@ -244,6 +254,74 @@ namespace Meridian.EditorTools
             ti.spriteImportMode = sheet != null ? SpriteImportMode.Multiple : SpriteImportMode.Single;
             // Rects are applied in postprocess (SliceIfNeeded): sprite data written during
             // preprocess is not picked up by the import already in flight.
+        }
+
+        /// <summary>
+        /// U-094 (contract v3.0 §11.8, ArtImporter v13): a v3 asset (sidecar "style": "v3", a background layer or a palette
+        /// strip) imports as a Sprite at the json PPU (64 by default), no mips, BC7, bilinear; tileable images repeat.
+        /// Rejected with one console line: a sheet over 2048, fps other than 12, a clip over its cap, an overlay not 512².
+        /// Returns false for v2 assets (the caller carries on with the old rules).
+        /// </summary>
+        bool ConfigureV3(TextureImporter ti, string key, int w, int h)
+        {
+            var sheet = SheetFor(assetPath, key);
+            if (!IsV3(key, sheet)) return false;
+            string reason = V3Reason(key, sheet, w, h);
+            if (reason != null)
+            {
+                Debug.LogError($"[ArtImporter] Rejected {assetPath}: {reason} (contract §11.8).");
+                return true; // handled: the texture keeps Unity's defaults and is never registered
+            }
+
+            ti.textureType = TextureImporterType.Sprite;
+            ti.sRGBTexture = true;
+            ti.alphaIsTransparency = true;
+            ti.mipmapEnabled = false;
+            ti.streamingMipmaps = false;
+            ti.filterMode = FilterMode.Bilinear;
+            bool tiles = ArtRules.IsOverlayKey(key) || ArtRules.SceneKeyOf(key) != null || (sheet != null && sheet.tile);
+            ti.wrapMode = tiles ? TextureWrapMode.Repeat : TextureWrapMode.Clamp;
+            ti.maxTextureSize = ArtRules.MaxDimension;
+            ti.textureCompression = TextureImporterCompression.CompressedHQ;
+            ti.spritePixelsPerUnit = sheet != null && sheet.ppu > 0f ? sheet.ppu : ArtRules.V3PixelsPerUnit;
+            SetStandaloneFormat(ti, TextureImporterFormat.BC7);
+
+            bool frames = sheet != null && sheet.IsSheet;
+            var pivot = frames && sheet.pivot != null && sheet.pivot.Length == 2 ? new Vector2(sheet.pivot[0], sheet.pivot[1])
+                : ArtRules.SceneKeyOf(key) != null ? new Vector2(0.5f, 0f) : new Vector2(0.5f, 0.5f); // layers stand on their y_m line
+            var s = new TextureImporterSettings();
+            ti.ReadTextureSettings(s);
+            s.spriteMeshType = tiles ? SpriteMeshType.FullRect : SpriteMeshType.Tight;
+            s.spriteAlignment = (int)SpriteAlignment.Custom;
+            s.spritePivot = pivot;
+            s.spriteMode = frames ? (int)SpriteImportMode.Multiple : (int)SpriteImportMode.Single;
+            ti.SetTextureSettings(s);
+            ti.spriteImportMode = frames ? SpriteImportMode.Multiple : SpriteImportMode.Single;
+            return true;
+        }
+
+        /// <summary>U-094: "backgrounds/earth/plains/plains.json" → "backgrounds/earth/plains"; null for any other path.</summary>
+        public static string V3SceneKey(string relativePath)
+        {
+            if (relativePath == null || !relativePath.StartsWith("backgrounds/", StringComparison.Ordinal) || !relativePath.EndsWith(".json", StringComparison.Ordinal)) return null;
+            var parts = relativePath.Substring(0, relativePath.Length - ".json".Length).Split('/');
+            if (parts.Length != 4 || parts[3] != parts[2]) return null;
+            return parts[0] + "/" + parts[1] + "/" + parts[2];
+        }
+
+        /// <summary>U-094: a v3 asset: its sidecar says "style": "v3", or its key is a v3 background layer / palette strip.</summary>
+        public static bool IsV3(string key, SheetManifest sheet) => ArtRules.IsV3FourSegmentKey(key) || (sheet != null && sheet.IsV3);
+
+        /// <summary>U-094: contract §11.8 rejection reason for a v3 asset, or null.</summary>
+        public static string V3Reason(string key, SheetManifest sheet, int w, int h)
+        {
+            if (ArtRules.IsOverlayKey(key)) return ArtRules.ValidateOverlay(w, h);
+            if (ArtRules.SceneKeyOf(key) != null) return ArtRules.ValidateBackgroundLayer(w, h);
+            if (sheet == null || !sheet.IsSheet) return w > ArtRules.MaxDimension || h > ArtRules.MaxDimension ? $"{w}×{h} is over 2048×2048" : null;
+            int n = sheet.animations != null ? sheet.animations.Length : 0;
+            var names = new string[n]; var starts = new int[n]; var lengths = new int[n];
+            for (int i = 0; i < n; i++) { names[i] = sheet.animations[i].name; starts[i] = sheet.animations[i].start; lengths[i] = sheet.animations[i].length; }
+            return ArtRules.ValidateV3Sheet(w, h, sheet.fps, sheet.frames, names, starts, lengths);
         }
 
         /// <summary>U-076: a model key's color map (beside a .glb, or a model folder's shared atlas): Default/sRGB, mips, trilinear, BC7; no sprite settings.</summary>
@@ -398,6 +476,7 @@ namespace Meridian.EditorTools
             try
             {
                 var m = JsonUtility.FromJson<SheetManifest>(File.ReadAllText(jsonPath));
+                if (m != null && m.IsV3 && !m.IsSheet) return m; // U-094: a v3 single image (overlay, layer, strip)
                 if (m == null || m.frame_width <= 0 || m.frame_height <= 0 || m.columns <= 0 || m.frames <= 0)
                 {
                     Debug.LogError($"[ArtImporter] {jsonPath}: needs frame_width, frame_height, columns, frames > 0 (contract §5).");
@@ -515,6 +594,9 @@ namespace Meridian.EditorTools
                     AddressStage(path, stageKey);
                     continue;
                 }
+                // U-094 (contract §11.4): a painted scene's backgrounds/<planet>/<scene>/<scene>.json is a TextAsset at that scene key.
+                var sceneJson = V3SceneKey(rel);
+                if (sceneJson != null) { AddressStage(path, sceneJson); continue; }
                 if (rel.EndsWith(".json", StringComparison.Ordinal))
                 {
                     // A new or edited sheet manifest re-slices its color sheet.
@@ -562,6 +644,7 @@ namespace Meridian.EditorTools
                     continue;
                 }
                 SliceIfNeeded(colorPath, key);
+                SheetAnimatorBuilder.BuildIfV3(colorPath, key); // U-094: Animator clips at 12 fps + one controller per sheet
                 LinkSecondaries(colorPath, key);
                 materialKeys.Add(key);
                 bool isArt = colorPath.StartsWith(Active.art, StringComparison.Ordinal);
@@ -665,7 +748,12 @@ namespace Meridian.EditorTools
             var ti = AssetImporter.GetAtPath(colorPath) as TextureImporter;
             if (ti == null) return false;
             ti.GetSourceTextureWidthAndHeight(out int w, out int h);
-            return ArtRules.Validate(ArtRules.FileBytes(colorPath), w, h) == null;
+            if (ArtRules.Validate(ArtRules.FileBytes(colorPath), w, h) != null) return false;
+            // U-094: a rejected v3 asset is never addressed.
+            Classify(colorPath, out var rel);
+            if (!ArtRules.TryParse(rel, out var key, out _)) return true;
+            var sheet = SheetFor(colorPath, key);
+            return !IsV3(key, sheet) || V3Reason(key, sheet, w, h) == null;
         }
 
         static void LinkSecondaries(string colorPath, string key)

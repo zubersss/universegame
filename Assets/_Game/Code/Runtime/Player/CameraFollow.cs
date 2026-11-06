@@ -63,7 +63,21 @@ namespace Meridian.Player
 
         void OnBumped() => Stage.Impact(StageCamera.BumpShake);
 
-        bool StageActive => stage && player != null && cam != null && !cam.orthographic;
+        /// <summary>U-094 (Bible §9.5 v4): the cartoon side view is orthographic, 16.875 m tall, with the same stage rules.</summary>
+        public bool Cartoon { get; private set; }
+
+        bool StageActive => stage && player != null && cam != null && (Cartoon || !cam.orthographic);
+
+        /// <summary>U-094: switch this camera to the v4 orthographic frame (1080 px = 16.875 m at PPU 64), snapped on the player.</summary>
+        public void UseCartoonFrame()
+        {
+            if (cam == null) cam = GetComponent<Camera>();
+            Cartoon = true;
+            perspectiveRail = false;
+            if (cam != null) { cam.orthographic = true; cam.orthographicSize = Meridian.View2D.SheetClock.FrameHeight * 0.5f; }
+            BaseFrame = Meridian.View2D.SheetClock.FrameHeight;
+            SnapToTarget();
+        }
 
         void LateUpdate()
         {
@@ -91,6 +105,12 @@ namespace Meridian.Player
 
         void Apply()
         {
+            if (Cartoon)
+            {
+                if (cam.orthographicSize != Stage.Frame * 0.5f) cam.orthographicSize = Stage.Frame * 0.5f;
+                transform.position = new Vector3(Stage.X + Stage.Shake.x, Stage.Y + Stage.Shake.y, -10f);
+                return;
+            }
             transform.position = new Vector3(Stage.X + Stage.Shake.x, Stage.Y + Stage.Shake.y, -SideView.DistanceFor(Stage.Frame * 0.5f));
         }
 

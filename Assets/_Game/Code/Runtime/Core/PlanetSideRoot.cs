@@ -33,6 +33,8 @@ namespace Meridian.Core
         public Meridian.Building.BaseBuilder bases { get; private set; }
         /// <summary>U-093: Suit power 0 -> conk out, wake at the last base or the ship (created in Configure).</summary>
         public ConkOut conkOut { get; private set; }
+        /// <summary>U-094: the v4 cartoon side view (on for converted planets while CartoonStage.Enabled).</summary>
+        public Meridian.View2D.CartoonStage cartoon { get; private set; }
         public Meridian.Creatures.CreatureDirector creatures;
         public Meridian.Hazards.HazardSystem hazards;
         public Meridian.Planet.POI.PoiPlacer pois;
@@ -179,6 +181,9 @@ namespace Meridian.Core
                 if (orbit == null) orbit = sideCamera.gameObject.AddComponent<Meridian.CameraRig.PhotoOrbit>();
                 if (player != null) orbit.target = player.transform;
             }
+            // U-094: the v4 2D render path (orthographic 16.875 m frame, painted parallax, sprite surveyor) where converted.
+            if (cartoon == null) cartoon = gameObject.AddComponent<Meridian.View2D.CartoonStage>();
+            cartoon.ConfigureFor(this, config, surface);
         }
 
         /// <summary>Skids on the highest ground under the hull's footprint.</summary>

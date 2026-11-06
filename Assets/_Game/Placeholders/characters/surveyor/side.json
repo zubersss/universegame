@@ -1,0 +1,16 @@
+{
+  "key": "characters/surveyor/side", "style": "v3",
+  "frame_width": 192, "frame_height": 192, "columns": 10, "frames": 74, "gutter": 4,
+  "fps": 12, "pivot": [0.5, 0.0], "facing": "right", "ppu": 64,
+  "animations": [
+    {"name": "idle", "start": 0, "length": 10, "loop": true, "loop_from": 0},
+    {"name": "walk", "start": 10, "length": 12, "loop": true, "loop_from": 0},
+    {"name": "run", "start": 22, "length": 12, "loop": true, "loop_from": 0},
+    {"name": "jump", "start": 34, "length": 8, "loop": false, "loop_from": 0},
+    {"name": "fall", "start": 42, "length": 8, "loop": true, "loop_from": 0},
+    {"name": "land", "start": 50, "length": 8, "loop": false, "loop_from": 0},
+    {"name": "bump", "start": 58, "length": 8, "loop": false, "loop_from": 0},
+    {"name": "conk_out", "start": 66, "length": 8, "loop": false, "loop_from": 0}
+  ],
+  "squash_root": true
+}
