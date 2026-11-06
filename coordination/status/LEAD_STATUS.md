@@ -1,5 +1,5 @@
 # LEAD STATUS
-Updated: 2026-11-06 01:4x · Session: 4 (Fable 5.1), resumed after the 01:2x restart · Review cycle: 224
+Updated: 2026-11-06 01:4x · Session: 4 (Fable 5.1), resumed after the 01:2x restart · Review cycle: 225
 ## Current task
 Owner change request applied (cycle 220, D-076..D-081): Bible v3 sections (§4.2 Feel, §5.1 Stage camera, §9 v3, §10.10, §11.1/§11.2 v3, §12 S1), contract v2.5 (§10 Stage layers), tasks U-086..U-092 and B-103..B-108. Now: confirm peer roles, then the review cycle.
 ## Last completed
@@ -7,11 +7,11 @@ Cycle 220 review log. R1 state: release call 4 green except the Venus texture ro
 ## Next up
 1. Peers reply with roles -> record here. 2. (done cycle 221: smoke_7 fails on ring aliasing, smoke_3c passes the airborne check but exposes the faceted near flora -> B-109.) Next: U-078 verdict on the u078 CaptureSpaceArt capture. 3. When U-086's perf is green: U-077 Done, B-102 Done, B-090 Done (U-078 capture), R1 report (coordination/reviews/R1_REPORT.md, < 200 words) + milestone page (memory: milestone-artifacts) + USER-21 playtest of 0.4.0. 4. Then the S1 cycle: StageCamera/Feel tests, stage sheets, block-out check for B-105.
 ## Pending decisions
-none open. Contract v2.6 current (D-082). Budgets v3 (D-077).
+none open. Contract v2.6 (D-082). Budgets v3 (D-077); D-083 pending rows + contention re-runs.
 ## Waiting on the user
 nothing. USER-20 done 10:16 (gate open). The R1 playtest item comes with the R1 report.
 ## Loop / stall watch
-UNITY holds heavy_unity since 10:40 (profile -Probe + u078 capture; check passed 10:31). BLENDER want 10:41 (spruce LOD1 re-export, 1 asset) goes next, then B-103. Watch: UNITY's results by 11:0x -> R1 close; free RAM 0.27 GB during the probe (memory-stop risk, D-046 covers one re-run). BLENDER window runs Opus 5.5 from 10:1x (owner).
+UNITY: u078 capture running (lock 10:44:40); then ONE profile re-run under the gate (D-083) -> R1 close if Earth + the three contention rows are green. BLENDER on B-103 (clips), no lock. Watch: the re-run must start with >= 1.5 GB free and no blender.exe; if it stays red, it is a regression (v12 or ring fix) and R1 holds. BLENDER window runs Opus 5.5 from 10:1x (owner).
 ## Session addresses (ListAgents, 11-06 01:28)
 UNITY = zuber-c7 (confirmed 10:1x), BLENDER = zuber-04 (confirmed 10:3x; it still calls itself zuber-29). This session: zuber-38.
 ## HeavyJobLock
