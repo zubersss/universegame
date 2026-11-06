@@ -68,7 +68,7 @@ namespace Meridian.Perf
 
         void OnDisable()
         {
-            draws.Dispose(); gcFrame.Dispose(); systemMem.Dispose(); textureMem.Dispose(); audioMem.Dispose();
+            draws.Dispose(); tris.Dispose(); casters.Dispose(); gcFrame.Dispose(); systemMem.Dispose(); textureMem.Dispose(); audioMem.Dispose();
         }
 
         void OnDestroy() { if (Instance == this) Instance = null; }
