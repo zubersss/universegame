@@ -20,7 +20,7 @@ import os
 import sys
 
 import bpy
-from mathutils import Vector
+from mathutils import Matrix, Vector
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -554,7 +554,7 @@ def build_vent_eel(scene):
 
 # ---------------------------------------------------------------- B-044: Veil Serpent (apex)
 
-def membrane_material(name):
+def membrane_material(name, scale=9.0, edge=0.04):
     """Translucent fin membrane (alpha 0.5): pale sulfur cream; the glow lives only in a vein
     network (Voronoi edges -> emission), not in an outline (B-044 v2 review)."""
     m = bpy.data.materials.new(name)
@@ -566,10 +566,10 @@ def membrane_material(name):
     pr.inputs["Roughness"].default_value = 0.4
     tc = N.new("ShaderNodeTexCoord")
     vo = N.new("ShaderNodeTexVoronoi"); vo.feature = "DISTANCE_TO_EDGE"
-    vo.inputs["Scale"].default_value = 9.0
+    vo.inputs["Scale"].default_value = scale
     L.new(tc.outputs["Object"], vo.inputs["Vector"])
     v = N.new("ShaderNodeMapRange"); v.interpolation_type = "SMOOTHSTEP"
-    v.inputs["From Min"].default_value, v.inputs["From Max"].default_value = 0.04, 0.0
+    v.inputs["From Min"].default_value, v.inputs["From Max"].default_value = edge, 0.0
     L.new(vo.outputs["Distance"], v.inputs["Value"])
     col = N.new("ShaderNodeMix"); col.data_type = "RGBA"
     L.new(v.outputs["Result"], col.inputs[0])
@@ -662,7 +662,7 @@ def build_veil_serpent(scene):
     dsp = frost.modifiers.new("inflate", "DISPLACE")
     dsp.mid_level = 0.0
     # Fins: membrane with a ragged top edge + rays (darker opaque spines past the edge).
-    memb = membrane_material(f"{sp}_membrane")
+    memb = membrane_material(f"{sp}_membrane", scale=24.0, edge=0.022)      # finer veins than v1 (read at 60 px/m)
     raym = flat_material(f"{sp}_ray", (90, 64, 40), rough=0.4)
 
     def fin(tag, t0, t1, sz, hmax, nrays):
@@ -852,10 +852,10 @@ def _serpent_module(scene, which, nb, rnd):
     me.materials.append(serpent_skin(f"{sp}_skin"))
     bind_auto(body, rig)
 
-    memb = membrane_material(f"{sp}_membrane")
+    memb = membrane_material(f"{sp}_membrane", scale=24.0, edge=0.022)      # finer veins than v1 (read at 60 px/m)
     raym = flat_material(f"{sp}_ray", (90, 64, 40), rough=0.4)
 
-    def fin(tag, t0, t1, sz, h0, h1, nrays, bell=0.0):
+    def fin(tag, t0, t1, sz, h0, h1, nrays, bell=0.0, lobe=0.0):
         verts, faces, top = [], [], []
         m_ = 40
         for i in range(m_ + 1):
@@ -863,7 +863,7 @@ def _serpent_module(scene, which, nb, rnd):
             t = t0 + (t1 - t0) * u
             x = x0 + L * t
             r = rad(t)
-            h = h0 + (h1 - h0) * u + bell * math.sin(math.pi * u) ** 0.6
+            h = (h0 + (h1 - h0) * u) * (1.0 - lobe + lobe * math.sin(math.pi * u) ** 0.7) + bell * math.sin(math.pi * u) ** 0.6   # lobe: taper to the joins
             h += (0.06 * math.sin(u * 23.0) + rnd.uniform(-0.02, 0.015)) * math.sin(math.pi * u) * h   # ragged, straight ends
             h = max(h, 0.015)
             verts += [(x, 0, sz * r * 0.6), (x, 0, sz * (r + h))]
@@ -898,11 +898,11 @@ def _serpent_module(scene, which, nb, rnd):
 
     SAIL = 0.42
     if which == "body":
-        fin("sail", 0.0, 1.0, 1, SAIL, SAIL, 2)
-    elif which == "head":
-        fin("sail", 0.0, 0.72, 1, SAIL, 0.0, 2)
+        fin("sail", 0.0, 1.0, 1, SAIL, SAIL, 3, lobe=0.65)      # one crest lobe per module: the ends sit at 0.35 SAIL so
+    elif which == "head":                                       # the bend between modules shows no notch (B-094 chain preview)
+        fin("sail", 0.0, 0.72, 1, SAIL, 0.0, 2, lobe=0.65)
     else:
-        fin("sail", 0.55, 1.0, 1, 0.0, SAIL, 2)
+        fin("sail", 0.55, 1.0, 1, 0.0, SAIL, 2, lobe=0.65)
         fin("ventral", 0.2, 0.7, -1, 0.0, 0.0, 4, bell=0.26)
 
     if which == "head":                          # v1 skull: wedge, jaw, glowing eyes, backswept horns
@@ -937,6 +937,24 @@ def _serpent_module(scene, which, nb, rnd):
                                                 location=(hx - 0.04 - ln * 0.4, sy * 0.1, dz + 0.06 + ln * 0.18),
                                                 rotation=(0, math.radians(-112 + 14 * j), 0))
                 _rig_child(bpy.context.active_object, rig, hb, coll, horn)
+
+    # Chain sockets (contract §9.1 item 7): socket_root at the tail-side end (static, the point UNITY
+    # places on the previous module's socket_next), socket_next at the head-side end riding the last
+    # bone, so the next module follows the wave. Attach by position only: every module's bones carry
+    # absolute angles (the v1 chain), so inheriting the socket's rotation would double the bend.
+    if which != "tail":
+        so = bpy.data.objects.new("socket_root", None)
+        so.empty_display_size = 0.05
+        coll.objects.link(so)
+        so.parent = rig
+        so.location = (x0, 0, 0)
+    if which != "head":
+        sn = bpy.data.objects.new("socket_next", None)
+        sn.empty_display_size = 0.05
+        coll.objects.link(sn)
+        sn.parent, sn.parent_type, sn.parent_bone = rig, "BONE", f"s{nb - 1}"
+        bpy.context.view_layer.update()
+        sn.matrix_world = Matrix.Translation((x1, 0, 0))
 
     rig.animation_data_create()
     for name, nfr, loop in SERPENT_CLIPS:
@@ -974,6 +992,123 @@ def build_serpent_modules(out_path=SERPENT_OUT):
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     bpy.ops.wm.save_as_mainfile(filepath=out_path, compress=True)
     print("MERIDIAN built", out_path)
+
+
+def preview_serpent_chain(out_png=None, clip="walk", t=0.3, order=("tail", "body", "body", "head")):
+    """B-094 review evidence: the modules chained as UNITY will chain them (each module's
+    socket_root placed on the previous module's socket_next, position only), every module's clip
+    evaluated at the delayed phase t - J*LAM (J = bones behind it), rendered in Eevee with the
+    turntable Sun: a side panel (camera -Y, orthographic, the whole chain) and a 3/4 panel.
+    Writes blender/preview/review_b094_serpent_chain.png (stamped)."""
+    import numpy as np
+    sys.path.insert(0, os.path.dirname(HERE))                     # blender/: review.py
+    from meridian import pngio
+    import review
+    if not os.path.exists(SERPENT_OUT):
+        build_serpent_modules()
+    bpy.ops.wm.open_mainfile(filepath=SERPENT_OUT)
+    scene = bpy.context.scene
+    for m in bpy.data.materials:                                  # fins: Eevee needs the blend mode
+        pr = m.node_tree.nodes.get("Principled BSDF") if m.use_nodes else None
+        if pr is not None and pr.inputs["Alpha"].default_value < 1.0:
+            for attr, val in (("surface_render_method", "BLENDED"), ("blend_method", "BLEND")):
+                try:
+                    setattr(m, attr, val)
+                except (AttributeError, TypeError):
+                    pass
+    nfr = dict((n, f) for n, f, _ in SERPENT_CLIPS)[clip]
+    used, J, anchor, log = {}, 0, Vector((0, 0, 0)), []
+    for which in order:
+        src = bpy.data.collections[f"veil_serpent_{which}"]
+        objs = list(src.all_objects)
+        if used.get(which):                                       # a repeated body: a real copy
+            bpy.ops.object.select_all(action="DESELECT")
+            for o in objs:
+                o.hide_viewport = False
+                o.select_set(True)
+            bpy.ops.object.duplicate(linked=False)
+            objs = list(bpy.context.selected_objects)
+        used[which] = used.get(which, 0) + 1
+        rig = next(o for o in objs if o.type == "ARMATURE")
+        nb = len(rig.data.bones)
+        L = nb * SEG
+        rig.location = anchor + Vector((L / 2, 0, 0))             # socket_root (x0 = -L/2) lands on the anchor
+        act = bpy.data.actions[f"veil_serpent_{which}|{clip}"]
+        frame = 1 + ((t - J * LAM) % 1.0) * nfr
+        rig.animation_data.action = None
+        fcurves = [fc for layer in act.layers for strip in layer.strips for cb in strip.channelbags for fc in cb.fcurves]   # Blender 4.4+ slotted actions
+        for fc in fcurves:
+            try:
+                prop = rig.path_resolve(fc.data_path)
+            except ValueError:
+                continue
+            prop[fc.array_index] = fc.evaluate(frame)
+        bpy.context.view_layer.update()
+        nxt = next((o for o in objs if o.type == "EMPTY" and o.name.startswith("socket_next")), None)
+        log.append(f"{which}: J={J} delay={J * LAM:.2f} cyc frame={frame:.1f} root=({anchor.x:.3f},{anchor.z:.3f})")
+        anchor = nxt.matrix_world.translation.copy() if nxt else anchor + Vector((L, 0, 0))
+        J += nb
+    for line in log:
+        print("CHAIN", line)
+    xs, zs = [], []
+    dg = bpy.context.evaluated_depsgraph_get()
+    for o in scene.objects:
+        if o.type == "MESH":
+            ev = o.evaluated_get(dg)
+            for v in ev.data.vertices:
+                p = ev.matrix_world @ v.co
+                xs.append(p.x)
+                zs.append(p.z)
+    lo, hi = Vector((min(xs), 0, min(zs))), Vector((max(xs), 0, max(zs)))
+    centre, length = (lo + hi) / 2, hi.x - lo.x
+    print(f"CHAIN extent x {lo.x:.2f}..{hi.x:.2f} ({length:.2f} m), z {lo.z:.2f}..{hi.z:.2f}")
+    for name in ("BLENDER_EEVEE", "BLENDER_EEVEE_NEXT"):
+        try:
+            scene.render.engine = name
+            break
+        except TypeError:
+            continue
+    scene.eevee.taa_render_samples = 16
+    scene.render.film_transparent = False
+    sd = bpy.data.lights.new("tt_sun", "SUN")
+    sd.energy = 3.5
+    sun = bpy.data.objects.new("tt_sun", sd)
+    scene.collection.objects.link(sun)
+    sun.rotation_euler = Vector((-0.6, 0.4, -0.7)).to_track_quat("-Z", "Y").to_euler()
+    scene.world = scene.world or bpy.data.worlds.new("tt_world")
+    scene.world.use_nodes = True
+    bg = scene.world.node_tree.nodes.get("Background")
+    if bg:
+        bg.inputs["Color"].default_value = (0.42, 0.45, 0.5, 1)
+        bg.inputs["Strength"].default_value = 0.6
+    cd = bpy.data.cameras.new("tt_cam")
+    cam = bpy.data.objects.new("tt_cam", cd)
+    scene.collection.objects.link(cam)
+    scene.camera = cam
+    out_png = out_png or os.path.join(os.path.dirname(HERE), "preview", "review_b094_serpent_chain.png")
+    panels = []
+    for tag, (w, h) in (("side", (1536, 512)), ("quarter", (768, 512))):
+        scene.render.resolution_x, scene.render.resolution_y = w, h
+        if tag == "side":
+            cd.type = "ORTHO"
+            cd.ortho_scale = length * 1.12
+            cam.location = centre + Vector((0, -10, 0))
+        else:
+            cd.type = "PERSP"
+            cd.lens = 50
+            cam.location = centre + Vector((length * 0.9, -length * 0.9, length * 0.35))
+        cam.rotation_euler = (centre - cam.location).to_track_quat("-Z", "Y").to_euler()
+        path = out_png + f".{tag}.png"
+        scene.render.filepath = path
+        bpy.ops.render.render(write_still=True)
+        panels.append(pngio.read_png(path)[..., :3])
+        os.remove(path)
+    sheet = np.hstack(panels)
+    review.draw(sheet, review.stamp_text(SERPENT_OUT) + f" {clip} t={t}", 2, sheet.shape[0] - 16, (1.0, 1.0, 0.85))
+    pngio.write_png(out_png, np.dstack([pngio.to_u8(np.clip(sheet, 0, 1)), np.full(sheet.shape[:2], 255, np.uint8)]))
+    print("MERIDIAN chain preview", out_png)
+    return out_png
+
 
 
 if __name__ == "__main__":

@@ -22,6 +22,7 @@ is y = 0). glTF export with export_yup maps Blender Z-up to glTF Y-up.
 import json
 import math
 import os
+import re
 
 import bpy
 import numpy as np
@@ -687,6 +688,13 @@ def export_model(entry, art_dir, preview_dir, objs, stamp_fn):
         export_material(mesh, paths, emissive, entry.get("alpha"))
     glb = os.path.join(out_dir, f"{variant}.glb")
     sockets = [o for o in objs if o.type == "EMPTY" and o.name.startswith("socket_")]
+    for o in sockets:                                # B-094: several modules per blend share socket names; Blender
+        base = re.sub(r".d{3}$", "", o.name)       # suffixed the copies (socket_root.001): export the bare name
+        if base != o.name:
+            other = bpy.data.objects.get(base)
+            if other is not None:
+                other.name = base + ".swap"
+            o.name = base
     extras = list(sockets)
     lod_tris = None
     if entry.get("lod1"):
