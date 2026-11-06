@@ -678,12 +678,12 @@ Files: Assets/_Game/Code/Runtime/FX/, Prefabs/FX/
 Depends: U-072
 Lead notes: Cycle 176. R1.
 
-### U-080 · UNITY · Ready · R1
+### U-080 · UNITY · Done · R1
 Goal: Review camera for depth: photo mode (`P`) gains an orbit of ±30° yaw and ±15° pitch around the player (mouse drag) and a "depth" preset used by `tools/unity_smoke.ps1` captures, so reviews can show the block relief, back wall and depth bands; gameplay camera unchanged.
 Accept: a smoke capture named `*_depth.png` from the yaw preset; SideViewTests unaffected.
 Files: Assets/_Game/Code/Runtime/Camera/, tools/unity_smoke.ps1
 Depends: U-072
-Lead notes: Cycle 176. R1. Small; it makes every later review honest about depth.
+Lead notes: Cycle 176. R1. Small; it makes every later review honest about depth. Cycle 229 (11:2x): Done (5f80da1): Camera/PhotoOrbit.cs (MaxYaw 30, MaxPitch 15, Depth preset 25/10 at the rail distance, CameraFollow paused only while the orbit is on); smoke_2b_earth_day_depth.png (01:18) shows block relief, back wall and the bands; SideViewTests in the 263/263 EditMode run (11:06). The flora in that shot predates B-109; the next smoke shows the new trees.
 
 ### U-081 · UNITY · Ready · R2
 Goal: Mars in 3D, the R2 counterpart of U-076: Mars block arrays from B-086, Mars depth bands from B-088 (ridge_mid per region, Tharsis skyline, storm skydome crossfade during dust storms), Mars flora and POI props from B-089/B-084 placed by the existing POI/scenery rules, Mars creatures already through ModelView; dust storms as 3D particles + the ×4 fog; the M2 smoke set (canyon, storm, polar, Olympus, night) re-shot in 3D with the depth preset.

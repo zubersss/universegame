@@ -1107,3 +1107,7 @@ Checked: coordination/reports/unity/u078_2026-11-06/capture_u078_1_saturn.png an
 
 ## Cycle 228 · 2026-11-06 11:2x (UNITY message)
 Checked: perf_2026-11-06.md (2c50253, gate-clean run 2.7 GB free): Space first frame 7.2 ms, launch 1.43 s, Earth rows, dev-build memory rows all green; RED entry transition 1.54 s, Mars first frame 177.5 ms. First Editor run after the v12 reimport (335 textures) = the cycle 217 pattern. D-085 (warm-up run after a reimport) -> one final profile after the feel check, mip streaming ON (U-091 committed it at 1.5 GB). If still red: regression, R1 holds, UNITY bisects. Load line fixed to the wrapper's pre-launch number and Hub\Editor paths only. Feel check (U-087..U-089 + ResidencyTests) running. No signals; the R1 close has moved twice on measurement, both with a logged cause.
+
+## Cycle 229 · 2026-11-06 11:2x (owner: continue; UNITY status)
+UNITY: check #4 was memory-stopped during PlayMode at 11:1x (compile 0/0 and EditMode 263/263 at 11:06 had passed; stale lock removed); the D-046 re-run took the lock 11:12:51 (unity_check -SkipEditMode -PlayFilter 10 fixtures, then the D-085 final profile). Free RAM 0.77 GB during it (Unity 1.4 GB, Memory Compression 1.2 GB); a second stop goes to the owner per D-046. UNITY also has U-079 prepared (scratchpad, applied after the chain), U-090 capture in, U-092 prep in.
+Checked: PhotoOrbit.cs (5f80da1), smoke_2b_earth_day_depth.png, the EditMode run -> U-080 Done. BLENDER on B-103, status 10:4x (no hand-off yet). No signals. R1 close still waits on the final profile.
