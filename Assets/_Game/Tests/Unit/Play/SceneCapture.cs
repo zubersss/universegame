@@ -1016,6 +1016,12 @@ namespace Meridian.Tests
             for (int i = 0; i < 5; i++) yield return null;
             Debug.Log($"[MERIDIAN] U-076 Earth: ridge {side.depthBands.RidgeKey} depth {side.depthBands.RidgeDepth} mirrored {side.depthBands.RidgeMirrored}, flora {side.depthBands.FloraCount}, swaps {side.pois.ModelSwaps.Count}, sky quad bands {side.backdrop.DepthBandsOn}");
             yield return Save(cam, $"{name}_1_earth_camp_day");
+            // Flora on its own (ridge band hidden): the band's low-poly trees otherwise fill the frame (U-076 review, 2026-11-05).
+            side.depthBands.SetRidgeVisible(false);
+            for (int i = 0; i < 3; i++) yield return null;
+            yield return Save(cam, $"{name}_1b_earth_camp_flora");
+            side.depthBands.SetRidgeVisible(true);
+            for (int i = 0; i < 3; i++) yield return null;
             var pos = cam.transform.position;
             Meridian.CameraRig.PhotoOrbit.Depth(cam, pivot);
             for (int i = 0; i < 3; i++) yield return null;

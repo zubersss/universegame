@@ -205,6 +205,9 @@ namespace Meridian.Planet.Backdrop
             return b;
         }
 
+        /// <summary>Review captures: hides or shows the ridge band so the near flora can be judged on its own.</summary>
+        public void SetRidgeVisible(bool visible) { if (ridge != null && ridge.root != null) ridge.root.SetActive(visible); }
+
         void DropBand(Band b)
         {
             if (b != null && b.root != null) Destroy(b.root);
