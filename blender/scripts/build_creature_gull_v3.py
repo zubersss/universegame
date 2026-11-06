@@ -165,8 +165,8 @@ REACT = [dict(sz=0.85, bob=-0.03, tuft=0.2, tail=-0.1, look=(0.6, -0.2)),
          dict(sz=1.02, eye_pop=1.05, tuft=-0.1, tail=0.05),
          dict(sz=1.0, tuft=0.05)]
 
-BUMP = [dict(sz=0.75, lean=-0.30, bob=-0.03, head=(-0.06, -0.04), eye_pop=1.4, tuft=0.8, tail=0.5, wing=0.8, beak_open=0.5, legs=((-0.06, 0.04), (0.04, 0.06))),
-        dict(sz=0.82, lean=-0.22, head=(-0.05, -0.02), tuft=0.6, tail=0.4, wing=0.6, stars=0.0, beak_open=0.3),
+BUMP = [dict(sz=0.75, lean=-0.18, bob=-0.03, head=(-0.06, -0.04), eye_pop=1.4, tuft=0.8, tail=0.5, wing=0.8, beak_open=0.5, legs=((-0.06, 0.04), (0.04, 0.06))),
+        dict(sz=0.82, lean=-0.14, head=(-0.05, -0.02), tuft=0.6, tail=0.4, wing=0.6, stars=0.0, beak_open=0.3),
         dict(sz=1.10, lean=-0.10, head=(-0.02, 0.03), tuft=-0.3, tail=-0.2, wing=0.2, stars=0.6),
         dict(sz=0.96, rock=0.10, tuft=0.3, tail=0.2, stars=1.2),
         dict(sz=1.02, rock=-0.10, tuft=-0.2, tail=-0.2, stars=1.8),

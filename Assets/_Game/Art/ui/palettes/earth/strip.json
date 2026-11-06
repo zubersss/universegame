@@ -1,0 +1,47 @@
+{
+  "key": "ui/palettes/earth/strip",
+  "style": "v3",
+  "palette": true,
+  "colors": [
+    {
+      "name": "offwhite",
+      "hex": "#F2E6CF",
+      "shadow": "#C5B6A1"
+    },
+    {
+      "name": "red",
+      "hex": "#C8553D",
+      "shadow": "#A7503B"
+    },
+    {
+      "name": "mustard",
+      "hex": "#D9A93F",
+      "shadow": "#B38B3C"
+    },
+    {
+      "name": "teal",
+      "hex": "#3E8A86",
+      "shadow": "#47766E"
+    },
+    {
+      "name": "green",
+      "hex": "#7A9A5B",
+      "shadow": "#718150"
+    },
+    {
+      "name": "sky",
+      "hex": "#9FB7B9",
+      "shadow": "#8B9592"
+    },
+    {
+      "name": "brown",
+      "hex": "#5B4636",
+      "shadow": "#5B4636"
+    },
+    {
+      "name": "ink",
+      "hex": "#1E1A17",
+      "shadow": null
+    }
+  ]
+}

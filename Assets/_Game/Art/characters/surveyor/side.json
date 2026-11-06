@@ -5,7 +5,7 @@
   "frame_height": 192,
   "columns": 10,
   "gutter": 4,
-  "frames": 50,
+  "frames": 98,
   "fps": 12,
   "pivot": [
     0.5,
@@ -44,6 +44,38 @@
       "name": "look_camera",
       "start": 38,
       "length": 12,
+      "loop": false
+    },
+    {
+      "name": "bump",
+      "start": 50,
+      "length": 10,
+      "loop": false
+    },
+    {
+      "name": "conk_out",
+      "start": 60,
+      "length": 12,
+      "loop": false
+    },
+    {
+      "name": "run",
+      "start": 72,
+      "length": 12,
+      "loop": true,
+      "loop_from": 0
+    },
+    {
+      "name": "fall",
+      "start": 84,
+      "length": 8,
+      "loop": true,
+      "loop_from": 0
+    },
+    {
+      "name": "dash",
+      "start": 92,
+      "length": 6,
       "loop": false
     }
   ],
