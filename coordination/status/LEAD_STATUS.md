@@ -1,18 +1,18 @@
 # LEAD STATUS
-Updated: 2026-11-06 01:4x · Session: 4 (Fable 5.1), resumed after the 01:2x restart · Review cycle: 229
+Updated: 2026-11-06 11:4x · Session: 5 (Opus 5.5), resumed after a break · Review cycle: 230
 ## Current task
-Owner change request applied (cycle 220, D-076..D-081): Bible v3 sections (§4.2 Feel, §5.1 Stage camera, §9 v3, §10.10, §11.1/§11.2 v3, §12 S1), contract v2.5 (§10 Stage layers), tasks U-086..U-092 and B-103..B-108. Now: confirm peer roles, then the review cycle.
+Owner art direction v4 (1930s rubber-hose cartoon, no combat) applied in cycle 230: Bible 4.0 §9, contract v3.0 §11, D-086..D-091, board C0 cards. Now: direct C0 (the style test) and review each asset on the Bible §9.7 checklist.
 ## Last completed
-Cycle 220 review log. R1 state: release call 4 green except the Venus texture row (green under D-077); U-077 closes on U-086's profile; outputs uncommitted in UNITY's tree.
+Cycle 230: R1 closed (D-088) on the 11:17 profile; 32 open 3D/S1 cards superseded; U-093..U-098 and B-110..B-115 Ready.
 ## Next up
-1. Peers reply with roles -> record here. 2. (done cycle 221: smoke_7 fails on ring aliasing, smoke_3c passes the airborne check but exposes the faceted near flora -> B-109.) Next: U-078 verdict on the u078 CaptureSpaceArt capture. 3. When U-086's perf is green: U-077 Done, B-102 Done, B-090 Done (U-078 capture), R1 report (coordination/reviews/R1_REPORT.md, < 200 words) + milestone page (memory: milestone-artifacts) + USER-21 playtest of 0.4.0. 4. Then the S1 cycle: StageCamera/Feel tests, stage sheets, block-out check for B-105.
+1. Review B-111 step 1 (surveyor design sheet) as soon as it lands: §9.7 + §9.8 originality; write OK or fixes in its Lead notes. 2. Review U-093 (combat removal) hand-off: compile, tests. 3. Schedule render windows (D-091): BLENDER sheet batches only while no Editor is open. 4. When U-098 lands: run §9.7 on every C0 asset, write coordination/reviews/C0_STYLE_REFERENCE.md, owner look-over item in USER_ACTIONS, then promote the C1 Backlog cards.
 ## Pending decisions
-none open. Contract v2.6 (D-082). Budgets v3 (D-077); D-083 pending rows + contention re-runs.
+none open.
 ## Waiting on the user
-nothing. USER-20 done 10:16 (gate open). The R1 playtest item comes with the R1 report.
+nothing (USER-21 dropped, D-088).
 ## Loop / stall watch
-UNITY: check #4 memory-stopped 11:1x, D-046 re-run under heavy_unity since 11:12:51 (PlayMode 10 fixtures, then the FINAL profile, D-085) -> R1 close if entry transition ≤ 1.5 s and Mars first frame ≤ 50 ms; else regression bisect and R1 holds. A second memory stop goes to the owner (USER item). U-080 Done (cycle 229). BLENDER on B-103 (clips), no lock. Watch: the re-run must start with >= 1.5 GB free and no blender.exe; if it stays red, it is a regression (v12 or ring fix) and R1 holds. BLENDER window runs Opus 5.5 from 10:1x (owner).
+Both workers must pick up the v4 change on their next resume; if a worker keeps working a Superseded card for one more cycle, message it (ListAgents) and add a USER_ACTIONS paste item.
 ## Session addresses (ListAgents, 11-06 01:28)
-UNITY = zuber-c7 (confirmed 10:1x), BLENDER = zuber-04 (confirmed 10:3x; it still calls itself zuber-29). This session: zuber-38.
+UNITY = zuber-c7, BLENDER = zuber-04 (it still calls itself zuber-29). This session: re-check with ListAgents.
 ## HeavyJobLock
 none (LEAD runs no heavy jobs while memory is tight)

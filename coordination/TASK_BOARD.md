@@ -106,6 +106,51 @@ Lead notes: Done (cycle 168): M3InnerTests 738fd43 passed twice (UNITY checks 23
 
 ## UNITY
 
+> **C0 STYLE TEST (D-086, owner, 2026-11-06). Read Bible §9 v4 and contract v3.0 §11 first.**
+> The game is now a 1930s rubber-hose cartoon; combat is cancelled (D-087). Every open 3D and S1
+> card below is Superseded (its code stays; move what you retire to `Assets/_Game/Archive/`, never
+> delete). R1 closed (D-088): U-077 and U-086 Done on the 11:17 profile. Work the cards in this
+> order; build against v3 placeholder sheets until BLENDER's land. Memory: no heavy job below
+> 1.5 GB free (11:2x read 0.46 GB); close the Editor after every batch (D-091).
+
+### U-093 · UNITY · Ready · C0
+Goal: Remove combat (D-087): move Parry, HitStop/HitStopClock, the Lance module, creature bite/bolt attacks, fight zoom, kill shake, health/damage on the player and creatures, and their tests (FeelPlayTests parry cases, U-092 fight-zoom prep) to `Assets/_Game/Archive/Combat/` excluded from compilation (an `.asmdef` with no platforms, or `~` folder). Replace with: `Bump` (0.8 m knock over 0.12 s + `bump` clip + dizzy-stars hook, no damage) from creature contact and hazards; hazards drain Suit power; at 0 `ConkOut` (iris-out, respawn at the last base or the ship, cargo kept). Rig slots: Beam, Survey, Builder, Grapple. Keep the air dash, StageCamera follow (minus fight zoom) and SquashStretch.
+Accept: compile 0 errors, warnings ≤ baseline; no type named Parry/HitStop/Lance compiled; EditMode + PlayMode green incl. new `BumpTests` (knock distance, no meter other than Suit power changes) and `ConkOutTests` (Suit power 0 → respawn at the base with cargo kept); M1LoopTests unchanged; the 13 check-#4b failures are either archived with their feature or fixed.
+Files: Assets/_Game/Code/Runtime/Player/, Creatures/, Camera/, Assets/_Game/Archive/Combat/, Tests/
+Depends: —
+Lead notes: Cycle 230. Lock-free code first; one batched check at hand-off.
+
+### U-094 · UNITY · Ready · C0
+Goal: The v4 2D render path for one Earth surface scene: orthographic side camera 16.875 m tall (PPU 64) keeping §5.1 follow rules; `ArtImporter` v13 for `style: v3` assets (contract §11.8: Sprite import at the json PPU, no mips, BC7, Sprite Atlas per planet ≤ 8, Animator clips at 12 fps from sheets, caps enforced); `SpriteCharacterView` for the surveyor and creatures driving those clips with a runtime flip and a squash root; a `ParallaxLayers` component for 3–5 painted layers from `<scene>.json`; v3 placeholder sheets (flat-colour blobs with an ink outline) at the same keys so the scene runs before art lands. The 3D renderer stays in the project for the archive only.
+Accept: EditMode: importer rejects a sheet > 2048, a clip over its cap, fps ≠ 12 (tests); the surveyor placeholder walks at 12 fps (Animator sample rate asserted); parallax offsets match the json factors; PlayMode smoke `smoke_c0_earth` with `LogAssert.NoUnexpectedReceived()`; capture `reports/unity/c0_<date>/earth_c0_placeholder.png`.
+Files: Code/Runtime/Camera/, Code/Runtime/View2D/, Code/Editor/ArtImporter.cs, Settings/, Placeholders/, Scenes/
+Depends: —
+
+### U-095 · UNITY · Ready · C0
+Goal: One full-screen film pass (single shader, single blit, URP renderer feature): grain, vignette, drifting dust specks and hairline scratches from the three 512² tiled overlays (`fx/film/*`), brightness flicker ≤ ±2 %, warm/sepia grade; no Bloom, no volumetrics, HDR off. Settings → "Film effects" toggle (default on), saved in settings.
+Accept: GPU cost ≤ 0.6 ms at 1080p in the profile; the toggle removes the pass (test); overlays imported 512² (test); before/after capture pair in the C0 report.
+Files: Assets/_Game/Shaders/FilmPass.shader, Code/Runtime/Rendering/, Code/Runtime/UI/Settings/
+Depends: — (placeholder noise overlays until B-115)
+
+### U-096 · UNITY · Ready · C0
+Goal: Iris-out / iris-in circle wipe as a cheap shader cutout (one quad, no texture), 0.35 s each way, centred on the surveyor (or the ship), used by launch, entry and area entry; the load runs while the screen is black.
+Accept: TransitionTests: launch and entry stay ≤ 1.5 s with the iris included; an EditMode test for the radius curve; a 6-frame capture strip in the C0 report.
+Files: Assets/_Game/Shaders/IrisWipe.shader, Code/Runtime/Transitions/
+Depends: —
+
+### U-097 · UNITY · Ready · C0
+Goal: Rubber-hose rig path for flora and props (contract §11.3): build sprite bones + skinning (Unity 2D Animation) from `rigset.json`; one texture and one animator controller per planet's set; sway idle on the planet beat, sampled stepped at 12 Hz; staggered start phases; face swaps (blink, yawn, giggle); react within 3 m (turn to look); the 40-animated-object cap with distant flora falling back to a 3-frame idle or a static frame.
+Accept: RigFloraTests: 300 plants share 1 texture + 1 controller; ≤ 40 animate at full rate; phases differ; the react fires within 3 m; CPU ≤ 1.0 ms for 300 plants in the profile.
+Files: Code/Runtime/Flora/, Packages/manifest.json (com.unity.2d.animation, pinned, logged), Tests/
+Depends: —
+
+### U-098 · UNITY · Ready · C0
+Goal: Assemble the C0 style-test scene with BLENDER's art (B-111..B-115): the surveyor, one face plant (several instances), one critter, the painted 3-layer Earth background, the film pass, the iris transition from space; a 20 s capture video-strip and stills; profile it.
+Accept: `reports/unity/c0_<date>/` with stills (idle, walk, jump/land, plant react, critter idle, iris mid-wipe, film on/off) and the profile: working set < 2.0 GB, 60 fps p99 ≤ 16.6 ms; PlayMode smoke green. LEAD then runs the §9.7 checklist per asset.
+Files: Scenes/, reports/unity/c0_<date>/
+Depends: U-094, U-095, U-096, U-097, B-111, B-112, B-113, B-114, B-115
+
+
 > **R1 (D-062).** 2D tasks U-061..U-071 are Superseded (their code and sources stay in the tree and
 > get reused). R-tasks below rebuild Earth in 3D while keeping every system.
 
@@ -144,7 +189,7 @@ Files: Assets/_Game/Code/Runtime/Ship/, Building/, Planet/Backdrop/, Prefabs/
 Depends: U-073, U-074
 Lead notes: Cycle 171. R1. Cycle 179: the landing pad is now a 2 m module (D-068): the camp spawns two modules (4 m) under the Pilgrim; landing-rule width = 4 m; shelter_door plays its `open` clip; lamps light from socket_light. Cycle 202 review of u076_2026-11-02: mars_shelter_night.png PASSES (lamp model lit from socket_light, wall/door/crate models, boulders, ridge). earth_camp_day.png: ship on the pad modules, props, surveyor, ridge and skyline all read; FAIL on the flora, Art matches §9: the trees render flat-shaded and untextured (faceted crowns in solid greens), unlike BLENDER's review_b085_grove.png (smooth, textured). Likely the importer: mesh normals/smoothing lost on the atlas models, or the generated atlas material not using atlas_color/atlas_normal. Fix, then re-shoot. Also apply D-071 (P-33) in the same pass. Cycle 207 (2026-11-05, resume after USER-17): D-071 (77e5bf1) and D-072 (533cc5a, importer v10) are in; the 12:23 EditMode run was 242/243 with the one red (ModelMapsAreCappedByDimensionNotByFileSize) fixed in dfd7ce3 but never re-run; the re-check filed as want_unity 12:27 died with the restart. Left to Done: (1) commit the v10 reimport leftovers still untracked in the tree (Generated/Models/creatures/{mercury,venus}, props/{mercury,venus}, props/common/aerostat_*.mat and their .meta files, calibration/base.mat); (2) one check: compile + EditMode + PlayMode `U076SceneTests|ModelViewPlayTests`, expect 243/243 and atlas_normal.png.meta typed NormalMap/linear; (3) `unity_capture.ps1 -Params @{ Name='u076b'; Test='CaptureDepthBands' }`, copy earth_camp_day/depth over reports/unity/u076_2026-11-02/, trees textured and smooth behind the ridge → tell LEAD. Memory: free RAM was 0.37 GB at 23:3x; wait for the USER-18 gate (1.5 GB) before the check. Cycle 209 (2026-11-06): Done af8c985 + 490e08e: u076_2026-11-05/earth_camp_day.png (the Pilgrim on the pad modules, props, surveyor, the forest ridge and the snow skyline with depth), mars_shelter_night.png passes; compile 0/0, EditMode 243/243, PlayMode U076SceneTests|ModelViewPlayTests 3/3. The faceted 'trees' are B-083's earth_forest/ridge_mid (flat-shaded 14-24 m trees at z 17), not the flora: the near bush is smooth and textured. That is an art fail on B-083, reopened as B-102; no UNITY change (D-074).
 
-### U-077 · UNITY · Ready · R1
+### U-077 · UNITY · Done · R1
 Goal: BudgetGate 3D rows (Bible §11.1 geometry row: ≤ 300 k triangles, ≤ 400 draw calls, ≤ 150 shadow casters) + `unity_profile` reads them; R1 build `Build/MERIDIAN_0.4.0/` with a smoke set (Earth day, night with a lamp, digging, the ship landed and flying, Space).
 Accept: every BudgetGate row green on Earth in the dev build; smoke clean; GameInfo 0.4.0.
 Files: Assets/_Game/Tests/Unit/BudgetGateTests.cs, tools/unity_profile.ps1, Build/
@@ -152,49 +197,49 @@ Depends: U-075, U-076
 Lead notes: Cycle 171. R1 close, with the owner's playtest. Cycle 207: first slice (b5bf4bc: BudgetMonitor triangle/shadow-caster counters + caps, BudgetGate Geometry rows, GameInfo 0.4.0) and the smoke legs smoke_3b_earth_dig / smoke_3c_ship_airborne (490e08e) are committed uncompiled; left: unity_smoke.ps1 count 19 → 21, compile with the U-076 check (one wrapper call, not two), `unity_profile.ps1 -Build`, `unity_smoke.ps1`, perf + smoke reports, Build/MERIDIAN_0.4.0/. Start the moment U-076's capture is sent; don't wait for LEAD's Done. Cycle 209: order of work: (1) commit importer v11 (colour maps Default/sRGB + mips) and the flora-only CaptureDepthBands shot; (2) let BLENDER take the lock for B-102 + B-094 (one call, about 10 min); (3) then one wrapper call: compile + the v11 reimport + EditMode + unity_profile -Build + unity_smoke (21 shots) -> Build/MERIDIAN_0.4.0/. The Earth day smoke shot must show the B-102 ridge; if B-102 is not in within 60 min of your (2), build anyway and note it. Cycle 217: job 2 ran (8.8 min): Build/MERIDIAN_0.4.0/MERIDIAN.exe, smoke 21/0 errors, perf_2026-11-06.md all green except Transition entry 1.53 s vs 1.5 s (RED stays; first run after the full reimport; UNITY re-measures on its next turn, no loosening) and the Earth day shot fails on B-102 (BLENDER round 2). Venus dev-build textures 558/600 MB after the v11 mips: watch row, D-072 reopens at 600. Next turn, one release call after BLENDER's B-102 round 2 lands: unity_check with the U-078 tests folded in only if it fits the 20 min, else U-078 waits; rebuild 0.4.0, re-measure the transition, re-shoot smoke 2, 2b, 3c and 7. R1 closes on that build. Cycle 220 (01:3x): release call 4 (01:10-01:19, u077_release4_20261106.log) ran compile 0/0, EditMode 245/245, PlayMode 8/8, build 539 MB, smoke 21/0, every perf row green (transition entry 1.39 s) except the Venus dev-build texture row 630/600 MB and one normal map not BC5. Under budgets v3 (D-077, 2.0 GB) the Venus row is green; U-086 updates the gate and re-profiles; the call's outputs are still uncommitted in the tree (perf/tests reports, 21 shots, generated materials, metas, link.xml): commit them first. Closes on U-086's green profile; then the R1 report + owner playtest.
 
 
-### U-086 · UNITY · Ready · R1
+### U-086 · UNITY · Done · R1
 Goal: BudgetGate v3 (Bible §11.1 v3, D-077): limits 4.5 GB working set (warn above 4.0), 2.0 GB textures, 600 MB meshes, 150 MB audio, 500 k triangles, 500 draw calls (250 side view), 1500 particles; a Residency row (the previous planet's groups released within 5 s of a transition, by Addressables handle count); a hit-stop row (≤ 90 ms; placeholder until U-089); per-planet dev-build memory rows kept; `unity_profile.ps1` prints the new rows. Before anything: commit the 01:19 release-call outputs as they stand (perf/tests reports, 21 smoke shots, generated materials, Art metas, link.xml).
 Accept: `perf_<date>.md` from one profile-only run (no rebuild) all green incl. Venus textures (630 MB < 2.0 GB) and the one BC5 miss fixed (name the texture in the report); 0.4.0's smoke stays valid; EditMode green; U-077 then closes.
 Files: Assets/_Game/Tests/Unit/BudgetGateTests.cs, Assets/_Game/Code/Runtime/Perf/BudgetMonitor.cs, tools/unity_profile.ps1
 Depends: U-077
 Lead notes: Cycle 220. First task, light: one profile under the lock (≤ 6 min), after BLENDER's B-101 export if its want is up. The thresholds are the owner's (D-077), not yours to tune. Cycle 223: BLENDER released the lock 10:18, no want filed: your turn now. Fold in (same call): (a) the rings_color mip fix and the u078 CaptureSpaceArt capture (U-078 note); (b) contract §9.1 ruling 10 (D-082): a model whose sidecar json says `"alpha_clip": true` gets its ArtImporter material set to alpha clip (cutoff 0.5) and double-sided; the B-109 Earth flora jsons will carry it and the Earth flora atlas_color already carries alpha (6550853). Keep mip streaming for U-091. Cycle 225 (10:5x): check OK 10:23-10:31 (617d01c; compile 0/0, EditMode 246/246, SpaceArtTests radial rings 1/1). Profile -Probe 10:40-10:42 (perf_2026-11-06.md 10:42): Earth rows green, Venus textures 630 MB green under v3, BC5 misses 0, dev-build memory rows green; THREE RED rows are contention candidates (run started with 0.27 GB free, two Unity processes; Earth warm-up 3386 ms vs 640 ms at 01:14): First visible frame Space 212.9 ms (01:14: 29.1), Mars 263.6 ms (1.4), Transition entry 1.87 s (1.39). Per D-083: one re-run of `unity_profile -Probe` when ≥ 1.5 GB is free, Blender not running and the u078 capture finished; the load line reports free RAM at start from now on. Residency row: 'pending U-091' (D-083); its measurement (planet_earth 7 handles after Mars entry) is the U-091 evidence, not a U-086 failure. No loosening. U-077 closes on the re-run if Earth and those three rows are green. Cycle 228 (11:2x): gate-clean re-run (2c50253, 2.7 GB free, one Editor): Space first frame 7.2 ms green, launch 1.43 s green, Earth green, dev-build memory green; still RED entry transition 1.54 s and Mars first frame 177.5 ms. It was the first Editor run after the v12 reimport of 335 textures, the pattern of cycle 217 (v11: 1.53 s, then 1.39 s). D-085: a first profile after a full Art reimport is a warm-up; ONE more `unity_profile -Probe` after the feel check, its own lock call, with mip streaming ON as now committed. That one is final: if either row stays red, it is a regression (bisect: ring fix vs v12 vs streaming) and R1 holds. Report the Mars warm-up and the transition breakdown (scene load / configure / tile sheets / warm-up) in that run.
 
-### U-087 · UNITY · Ready · S1
+### U-087 · UNITY · Superseded (D-086) · S1
 Goal: Stage camera (Bible §5.1 v3): a pure C# `StageCamera` solver (inputs: player x/y/facing/speed, stage-floor height, hostile count and apex distance, dt; outputs: camera x/y and frame height) driving `CameraFollow`: ± 1.5 m dead zone, 0.25 s damped follow, 2 m look-ahead over 0.6 s, speed cap player + 2 m/s; vertical hold on the stage floor (frame bottom 3 m below the ground height smoothed over 0.8 s), vertical motion only outside the middle 60 % of the frame at ≤ 6 m/s, falls > 10 m use a 0.4 s follow; fight zoom 18 → 22 m (apex 26 m) in 1.0 s, back in 2.0 s after 3 s calm; impact shake 0.15 m / 0.10 s position-only; `SnapToTarget` and the photo orbit kept. The stage floor comes from `TerrainStreamer` (ground column under the player).
 Accept: EditMode `StageCameraTests`: (a) a 2.5 m jump moves camera y by 0.00 m; (b) a 6.6 m jump (Mars) by 0.00 m; (c) a 15 m fall is followed within 0.4 s; (d) running right at 6.5 m/s holds the player 1.5–3.5 m left of centre after 1 s; (e) fight zoom reaches 22 m at 1.0 s ± 0.05 and is back at 18 m by 5.0 s after calm; (f) shake never rotates. PlayMode `StageCameraPlayTests` on Earth: a jump at the camp leaves camera y unchanged. Frame time Earth avg ≤ 12 ms / p99 ≤ 16.6 ms unchanged; 0 B GC per frame; `SideViewTests` and `M1LoopTests` unchanged; the smoke set re-shot with the new framing.
 Files: Assets/_Game/Code/Runtime/Camera/StageCamera.cs, Assets/_Game/Code/Runtime/Player/CameraFollow.cs, Assets/_Game/Tests/Unit/StageCameraTests.cs, Assets/_Game/Tests/Play/StageCameraPlayTests.cs
 Depends: U-086
 Lead notes: Cycle 220. Lock-free coding; one check together with U-088 and U-089.
 
-### U-088 · UNITY · Ready · S1
+### U-088 · UNITY · Superseded (D-086) · S1
 Goal: Feel v3 movement (Bible §4.2 Feel): `PlayerTuning` v3 (ground accel 60, braking 80, air accel 30, instant facing flip with velocity reversal ≤ 0.08 s, jump cut to 40 % on release), an `AirDash` solver (Shift tapped while airborne: 9 m/s facing for 0.18 s with vertical speed held at 0, then g resumes; one per airtime; refreshed by landing or a parry; 0.35 s cooldown), a `Parry` solver (C: 0.12 s window, 0.40 s whiff recovery, air and ground; a parried melee attack does 0 damage and staggers the attacker 1.2 s; a parried projectile reflects along the aim; refreshes the dash), input actions `Dash` and `Parry` in `MeridianInput`, an `IParryable` hook on `Creature` attacks, `LanceBolts`, Warden bolts and thrown projectiles; hit stop 50 ms (player hit) / 33 ms (Lance or parry hit) through a pooled `HitStop` (unscaled timers unaffected). Gravity, v₀ and heights untouched.
 Accept: EditMode `FeelTests`: jump height per the §4.2 table on all 8 planets within ± 1 cm (same test before and after); dash distance 1.62 m ± 0.02 on all 8 planets; the dash ends with the planet's g; parry window and recovery timings; hit stop ≤ 90 ms across a 5-hit chain. PlayMode `FeelPlayTests` on Earth: one dash per airtime, a second only after landing; a parried wolf bite does 0 damage and staggers it 1.2 s; a parried Warden bolt travels back along the aim. `M1LoopTests` and `M2SoakTests` unchanged; 0 B GC per frame; frame time unchanged.
 Files: Assets/_Game/Code/Runtime/Player/PlayerMotion.cs, PlayerController.cs, MeridianInput.cs, AirDash.cs, Parry.cs, Assets/_Game/Code/Runtime/Core/HitStop.cs, Creatures/Creature.cs, Creatures/Wardens/, Rig/LanceBolts.cs, Assets/_Game/Tests/Unit/FeelTests.cs, Assets/_Game/Tests/Play/FeelPlayTests.cs
 Depends: U-086
 Lead notes: Cycle 220. The dash is a velocity override like the jetpack's thrust, not a gravity change; the ± 1 cm test is the proof that the owner's hard rule holds. Cycle 224: UNITY's note accepted: no creature throws anything yet, so the parry reflects Warden bolts only (the projectile test case uses a Warden bolt); spit and shards join when a throwing creature exists. Hook: PlayerController.TryParryAttack(from) from CreatureDirector.Bite and WardenDirector.StepBolts (874f2cf, uncompiled).
 
-### U-089 · UNITY · Ready · S1
+### U-089 · UNITY · Superseded (D-086) · S1
 Goal: Squash-and-stretch, anticipation and hit reactions (Bible §4.2 Feel): `SquashStretch` on the visual root only (volume-preserving; curves per §4.2: crouch 0.8 / 0.06 s, take-off 1.25 / 0.08 s, landing 0.7 at ≥ 6 m/s scaled from 1.0 at 2 m/s with a 1.05 overshoot in 0.18 s, dash 1.3, hit 0.85); `SurveyorAnim` plays `jump_anticipate`, `land_hard`, `dash`, `parry`, `parry_hit`, `hit_react` (scale-only stand-ins until B-103 lands); the player hit reaction (0.8 m knock over 0.12 s, a 2-frame white flash through a material float); creature reactions through `ModelView` (0.5 m knock, flash, squash, `hit_react` / `stagger` or stand-ins until B-106); the camera shake hook of U-087.
 Accept: EditMode `SquashStretchTests`: sx·sy·sz = 1 ± 1 % along every curve; the `CapsuleCollider2D` and `Rigidbody2D` unchanged during a 0.7 squash. PlayMode: a 7 m/s landing reaches 0.7 within one frame and 1.0 ± 0.02 by 0.2 s; a wolf hit shows the player's knock and flash and the creature's squash in the same frame; 0 B GC; frame time unchanged; new smoke shots `smoke_3d_landing_squash` and `smoke_3e_parry` (23 shots).
 Files: Assets/_Game/Code/Runtime/Player/SquashStretch.cs, SurveyorAnim.cs, Assets/_Game/Code/Runtime/Art/ModelView.cs, FX/HitFlash.cs, tools/unity_smoke.ps1, Assets/_Game/Tests/
 Depends: U-088
 Lead notes: Cycle 220. Visual root only, never the collider or the body. Cycle 226: P-37 accepted (D-084): the jump leaves the ground on the input frame; the 0.8 crouch is drawn over the first 0.06 s of the rise, then the 1.25 stretch; no input delay anywhere in the feel pass. Bible §4.2 reworded. Code in 518ce28 (uncompiled) matches.
 
-### U-090 · UNITY · Ready · S1
+### U-090 · UNITY · Superseded (D-086) · S1
 Goal: Stage layers runtime (Bible §10.10, contract §10): `StageLayers` replaces `DepthBands` (keep its public API for the tests): layers 0–7 per region (foreground pieces 1 per 12 m from `props/<planet>_foreground/*`, never within 6 m of the spawn, a POI or a pad, shadows off; `rocks_near` 128 m; `ridge_mid`; `hills_far` 512 m; `skyline_far` 1024 m plus set-pieces from `stage.json`; the cloud strip at z 500 scrolling 0.5 m/s; the skydome), per-layer haze tint from `haze_rgb`, one Addressable label `stage_<planet>_<region>` per set, the adjacent region preloaded within 200 m of a border and unloaded 5 s after two regions away; flat tinted placeholder quads under `Placeholders/` for every missing layer so all 8 planets run before BLENDER's sets land; digging and building untouched (no layer has collision).
 Accept: PlayMode `StageLayerTests`: every Earth region resolves ≥ 7 distinct layers (placeholders count) at their §10.10 depths; no foreground piece within 6 m of the spawn or a POI; crossing a region border at run speed: no hitch > 33 ms, the next set resident before arrival, the old set released within 5 s (handle count); a `*_depth.png` capture shows the stack. Earth dev build: frame time avg ≤ 12 / p99 ≤ 16.6 ms, triangles ≤ 500 k, draw calls ≤ 250, textures ≤ 2.0 GB, working set ≤ 4.5 GB. `TerrainTests` (dig/place) and `M1LoopTests` unchanged.
 Files: Assets/_Game/Code/Runtime/Planet/Backdrop/StageLayers.cs, DepthBands.cs, Assets/AddressableAssetsData/, Assets/_Game/Placeholders/, Assets/_Game/Tests/Play/StageLayerTests.cs
 Depends: U-087
 Lead notes: Cycle 220. Build it on placeholders first; B-104/B-105 swap in through the importer with no code change. Foreground pieces are plain `ModelView`s at negative z.
 
-### U-091 · UNITY · Ready · S1
+### U-091 · UNITY · Ready · C1
 Goal: Residency and streaming for budgets v3: `TerrainStreamer` keeps chunks within 3 of the camera (was 2); per-planet Addressable groups verified exclusive (the current planet + `common` + `ui` + `space` only; the previous planet's groups and stage sets released within 5 s of a transition); texture mip streaming on with a 1.5 GB budget; `BudgetMonitor` Residency row from handle counts and the streaming budget; audio ≤ 150 MB with music streamed; `ArtImporter` rejects a planet's newest layer when the planet's layer textures exceed 700 MB stored (contract §10).
 Accept: PlayMode `ResidencyTests`: Earth → Space → Mars → Space → Earth: after each hop the released planet's handles are 0 within 5 s and the working set returns to within 10 % of the first visit; perf rows for all five scenes: working set ≤ 4.5 GB, textures ≤ 2.0 GB; planet load ≤ 5 s; transition ≤ 1.5 s; no hitch > 33 ms while streaming at run speed with radius 3.
 Files: Assets/_Game/Code/Runtime/Terrain/TerrainStreamer.cs, Assets/_Game/Code/Runtime/Perf/BudgetMonitor.cs, Assets/_Game/Code/Editor/ArtImporter.cs, Assets/AddressableAssetsData/, Assets/_Game/Tests/Play/ResidencyTests.cs
 Depends: U-086
 Lead notes: Cycle 220. Lock-free coding; its measurement joins U-090's check. Cycle 225: first evidence from U-086's probe (perf_2026-11-06.md 10:42, Residency row): after Mars entry planet_earth still holds 7 handles at 5.0 s and the resident list is common, planet_earth, planet_mars, planet_mars_flora, planet_mars_plains, planet_space, planet_warden, planet_waystation, session, space, ui. Find the 7 holders first (ArtLoad wraps every load; log the keys); the fix is release on transition, not a longer timeout.
 
-### U-092 · UNITY · Ready · S1
+### U-092 · UNITY · Superseded (D-086) · S1
 Goal: S1 build `Build/MERIDIAN_0.5.0/`: GameInfo 0.5.0; `unity_release.ps1` with the FULL PlayMode suite (no filter), profile -Build, the 23-shot smoke set re-framed by the stage camera plus `smoke_2c_earth_fight_zoom` (24); perf and smoke reports.
 Accept: compile 0/0; EditMode and PlayMode all green with no filter; every §11.1 v3 row green on Earth, Space and Mars; smoke 24 shots, 0 errors; the Earth day and depth shots show ≥ 7 layers with the B-104/B-105 art and the surveyor's B-103 clips.
 Files: Assets/_Game/Code/Runtime/GameInfo.cs, tools/unity_smoke.ps1, Build/
@@ -664,14 +709,14 @@ Files: Assets/_Game/Code/Runtime/Building/Aerostat/, Tests/
 Depends: U-056
 Lead notes: Cycle 153. M4. Reuse the Venus aerostat code; the Crush respawn hook joins once U-061 lands.
 
-### U-078 · UNITY · Ready · R1
+### U-078 · UNITY · Superseded (D-086) · R1
 Goal: Planets as spheres in Space (Bible §10.5 v2): each planet disc becomes a sphere mesh with the equirect `planets/<name>/surface` texture, the atmosphere rim and cloud layer as a slightly larger translucent shell, the terminator from the real Sun direction, Saturn's rings as a flat ring mesh; the top-down orthographic camera, wells, belt and stations unchanged.
 Accept: SpaceArtTests still resolve every planet key; a Space capture shows lit spheres with terminators and Saturn's rings; Space budgets within §11.1.
 Files: Assets/_Game/Code/Runtime/Space/, Shaders/, Prefabs/Space/
 Depends: U-072
 Lead notes: Cycle 176. R1. Independent of the terrain work. Cycle 192: B-090 models are in: props/space/waystation (+ waystation_mars, LOD1), asteroid_01..06, planets/saturn/ring_mesh (alpha from rings_color.png, double-sided; handoff in BLENDER_STATUS). Use them in place of the sprites; the U-078 capture closes B-090. Cycle 220: its code compiled and SpaceArtTests passed 8/8 in release call 4 (01:11); smoke_7_space_saturn (01:19) is the capture: LEAD reviews it next cycle. Queue order now: U-086, then U-087–U-091, then U-078 polish if any, U-079, U-080, U-092. Cycle 221 (10:2x): smoke_7 FAILS Art matches: the ring sheet aliases into stair-stepped bands and moiré across the whole frame (the rings fill the shot at the ship's zoom), and nothing in the shot shows a lit sphere or terminator (only a cream edge of the planet at the bottom). Fix with U-086's call: rings_color imported with mips + trilinear + aniso 8 (or the ring material samples the sheet radially with a mip bias of −0.5), and the CaptureSpaceArt capture (`unity_capture.ps1 -Name u078`) framed on Saturn as a whole (sphere + rings + terminator) plus one on Earth with Luna. Accept unchanged; verdict on that capture. Cycle 227 (11:1x): capture u078_2026-11-06/ (123aa95, 10:47) PASSES Art matches: Saturn as a lit sphere with a terminator inside clean radial-sampled rings (no moiré), Jupiter and Neptune with terminators, the belt, Earth with the atmosphere rim, Luna and the waystation. The rings' baked shadow side averaged out is accepted (a real ring shadow is a later polish, not reopened). SpaceArtTests 8/8 (01:11) and 1/1 (10:31). Done together with U-077 on the profile re-run (Space rows green under the gate).
 
-### U-079 · UNITY · Ready · R1
+### U-079 · UNITY · Superseded (D-086) · R1
 Goal: FX in 3D: thruster, landing dust, dig sparks, heat shimmer and the Escape band become camera-facing billboards or particle systems on the play plane using the existing `fx/*` sheets and keys; emissive FX feed bloom; nothing uses Light2D or sprite sorting layers.
 Accept: FX keys resolve; a capture shows the thruster flame and dig sparks lit/emissive under the Universal renderer; 0 B GC per frame as before.
 Files: Assets/_Game/Code/Runtime/FX/, Prefabs/FX/
@@ -685,21 +730,21 @@ Files: Assets/_Game/Code/Runtime/Camera/, tools/unity_smoke.ps1
 Depends: U-072
 Lead notes: Cycle 176. R1. Small; it makes every later review honest about depth. Cycle 229 (11:2x): Done (5f80da1): Camera/PhotoOrbit.cs (MaxYaw 30, MaxPitch 15, Depth preset 25/10 at the rail distance, CameraFollow paused only while the orbit is on); smoke_2b_earth_day_depth.png (01:18) shows block relief, back wall and the bands; SideViewTests in the 263/263 EditMode run (11:06). The flora in that shot predates B-109; the next smoke shows the new trees.
 
-### U-081 · UNITY · Ready · R2
+### U-081 · UNITY · Superseded (D-086) · R2
 Goal: Mars in 3D, the R2 counterpart of U-076: Mars block arrays from B-086, Mars depth bands from B-088 (ridge_mid per region, Tharsis skyline, storm skydome crossfade during dust storms), Mars flora and POI props from B-089/B-084 placed by the existing POI/scenery rules, Mars creatures already through ModelView; dust storms as 3D particles + the ×4 fog; the M2 smoke set (canyon, storm, polar, Olympus, night) re-shot in 3D with the depth preset.
 Accept: M2SoakTests + CreatureTests green; a Mars capture set matching §9 v2; §11.1 incl. the geometry row green on Mars in the dev build.
 Files: Assets/_Game/Code/Runtime/Planet/, Terrain/, Prefabs/
 Depends: U-073, U-074, U-075
 Lead notes: Cycle 199. R2. Start after U-076; everything it needs from BLENDER is in.
 
-### U-083 · UNITY · Ready · R2
+### U-083 · UNITY · Superseded (D-086) · R2
 Goal: Interactive rim glow (Bible §9 v2 Readability): props and creatures the player can interact with show a faint emissive rim driven by the mask's B channel when the player is within 3 m (material float set by the interaction system); pickups pulse; the HUD prompt unchanged.
 Accept: PlayMode: the rim float is 1 within 3 m and 0 beyond; a capture shows the smelter rim-lit beside the surveyor; 0 B GC per frame.
 Files: Assets/_Game/Code/Runtime/Interaction/, Shaders/
 Depends: U-075
 Lead notes: Cycle 199. R2.
 
-### U-084 · UNITY · Ready · R2
+### U-084 · UNITY · Superseded (D-086) · R2
 Goal: Block mesher performance pass: greedy meshing in a Burst job off the main thread (apply on the main thread ≤ 2 ms per chunk per D-019), mesh and collider pooling, a per-planet `TerrainBlocks` material instance; measure the §11.1 geometry row (triangles, draw calls, shadow casters) on Earth and Mars with everything placed and record it in perf_<date>.md.
 Accept: chunk apply ≤ 2 ms p99 while streaming at run speed; geometry row green; no visible pop at chunk edges in a depth capture.
 Files: Assets/_Game/Code/Runtime/Terrain/, Tests/
@@ -744,6 +789,50 @@ Lead notes: Done 3936ae1 (cycle 26): Archive at x 184 (buried room), launch comp
 ---
 
 ## BLENDER
+
+> **C0 STYLE TEST (D-086, owner, 2026-11-06). Read Bible §9 v4 and contract v3.0 §11 first.**
+> The game is now a 1930s rubber-hose cartoon. Every open 3D and S1 card below is Superseded
+> (sources stay). Work the cards in this order. Grease Pencil drawing builds are light only below
+> 512 px; sheet batches are heavy and run only while no Unity Editor is open (D-091), at
+> ≥ 1.5 GB free. Originality (§9.8): era techniques, never a property; no cup/mug heads.
+
+### B-110 · BLENDER · Ready · C0
+Goal: The v3 pipeline: `render.py --sheet` renders a Grease Pencil (or Line Art + two-tone toon) object to 1x frames at 12 fps, applies ±20 % ink-thickness jitter, packs a contract §11.2 sheet + json (4 px gutters, ≤ 2048), and writes the §11.7 review sheet (`review.py`); also packs §11.3 rig sets. Prove it on a 2-clip test blob (`characters/calibration_v3/side`).
+Accept: the test sheet's json validates against §11.2 (fps 12, caps, ppu 64); review sheet stamped with the 2× ink zoom; log OK; peak RAM in the status.
+Files: blender/render.py, blender/review.py, blender/scripts/gp_*.py, Assets/_Game/Art/characters/calibration_v3/
+Depends: —
+Lead notes: Cycle 230. First, it unblocks every C0 asset.
+
+### B-111 · BLENDER · Ready · C0
+Goal: The surveyor redesigned (§9.3): an original rubber-hose astronaut with a big round fishbowl helmet and an expressive face inside (pie-cut eyes), white gloves, boots, hose limbs, Earth palette. Step 1: a design sheet (front/side/3-4, 4 expressions, the "what makes it ours" line) at preview size for LEAD's review. Step 2 (after LEAD's OK in the board notes): `characters/surveyor/side` sheet with idle (10), walk (12, head bob, big arm swing), jump (8, stretch), land (8, squash + smoke puff), look_camera (≤ 12).
+Accept: §9.7 nine boxes on the review sheet; clips within caps at 12 fps; ≈ 128 px tall at 1x; sheet ≤ 2048.
+Files: blender/sources/characters/surveyor_v3.blend, Assets/_Game/Art/characters/surveyor/
+Depends: B-110 (step 2 only)
+
+### B-112 · BLENDER · Ready · C0
+Goal: One Earth plant with a face (original design, e.g. a yawning meadow flower with leaf hands) as a simple rig: `flora/earth/rigset` per contract §11.3, ≤ 6 bones, swaps for blink / yawn / giggle, sway idle on a 110 bpm beat with 8 % squash, react = turn to look within 3 m. Plus a 12-frame preview loop of the rig in Blender for the review sheet.
+Accept: §9.7 boxes; one texture ≤ 2048 holds every part; json validates.
+Files: blender/sources/flora/earth_rigset.blend, Assets/_Game/Art/flora/earth/
+Depends: B-110
+
+### B-113 · BLENDER · Ready · C0
+Goal: One small friendly Earth critter from §7.1's roster (BLENDER picks the smallest; redraw in the style): frame-by-frame sheet `creatures/earth/<name>` with idle (8–12, rhythmic bob), walk (12), react (eye-pop, ≤ 10), bump (dizzy stars, ≤ 10). Pie-cut eyes, rubber-hose legs, ears/tail with follow-through.
+Accept: §9.7 boxes; caps; 12 fps; sheet ≤ 2048.
+Files: blender/sources/creatures/earth_<name>_v3.blend, Assets/_Game/Art/creatures/earth/<name>/
+Depends: B-110
+
+### B-114 · BLENDER · Ready · C0
+Goal: The painted Earth plains background in 3 layers (`backgrounds/earth/plains/layer0..2`, contract §11.4: watercolour, paper texture, soft bleed, no ink, tileable, ≤ 2048×1024) + `plains.json` parallax factors, and the Earth palette strip `ui/palettes/earth/strip` (the 8 Bible §9.1 colours).
+Accept: 2× tiled preview with no seam; the surveyor placeholder pops off it at 1x (review sheet); ≤ 4 MB per PNG.
+Files: blender/sources/backgrounds/earth_plains_v3.blend (or a painted-texture script), Assets/_Game/Art/backgrounds/earth/plains/, Assets/_Game/Art/ui/palettes/earth/
+Depends: —
+
+### B-115 · BLENDER · Ready · C0
+Goal: Film overlays `fx/film/grain`, `dust`, `scratches`: 512×512, seamless tile, greyscale + alpha (contract §11.6), subtle (dust ≤ 8 specks per tile, 1–2 hairline scratches).
+Accept: 2× tiled preview with no seam; each file 512²; UNITY's U-095 capture reads subtle at 1080p.
+Files: blender/scripts/gen_film_overlays.py, Assets/_Game/Art/fx/film/
+Depends: —
+
 
 > **R1 (D-062).** 2D tasks B-056..B-076 are Superseded; their `.blend` sources (rigs, props,
 > terrain recipes) are the starting point for the models. Contract v2 §9 is the rule set.
@@ -1282,28 +1371,28 @@ Files: blender/sources/props/earth_flora/, build_props_earth.py, Assets/_Game/Ar
 Depends: B-077
 Lead notes: Cycle 188 (3a1ff4f): art accepted on review_b085_grove.png (11 models, shared 2048² atlas, sway in COLOR_0.r, LOD1 ≤ 800). Canopies are simple (blob oak, cone spruce); acceptable for R1, and a foliage-card pass is an M6 polish item, not now. Done on UNITY's lit preview; the shared atlas material is a one-off in ArtImporter (atlas_* maps, no per-model maps). Cycle 209: Done on u076_2026-11-05/earth_camp_day.png (UNITY's 4x crop: bush smooth, atlas-textured; tree_oak.glb smooth normals, atlas UVs, mask R0/G244/B0/A0.35, the generated URP/Lit material binds the atlas maps).
 
-### B-086 · BLENDER · In Progress · R2
+### B-086 · BLENDER · Superseded (D-086) · R2
 Goal: Mars terrain block materials (contract §9 terrain row), the R2 counterpart of B-080: every Mars tile material in `MarsTileSet` (regolith, basalt, hematite, clay, perchlorate, polar ice, CO₂ frost/snow, lava-tube rock…: list them from the tile set and log the list), top/side PBR sets at 512², 2 m per repeat, plus `terrain/mars/backwall`; from the v1 recipes, rust/salmon palette (§9).
 Accept: tiles seamlessly; reads as the v1 Mars under the Mars Sun (0.75) in UNITY's lit preview; stamped contact sheet; peaks measured (D-045/D-066).
 Files: blender/scripts/gen_terrain.py, Assets/_Game/Art/terrain/mars/
 Depends: B-077
 Lead notes: Cycle 189 (dc2b3c0): art accepted (regolith, basalt, hematite, ice, snow + basalt backwall; the board's clay/perchlorate/lava-tube examples are items or generator features, not tile materials, so none were due). Done on UNITY's first lit Mars block capture in R2.
 
-### B-087 · BLENDER · In Progress · R2
+### B-087 · BLENDER · Superseded (D-086) · R2
 Goal: Mars creatures as models: `creatures/mars/dustskater` (small class, ≤ 3 k tris) and `creatures/mars/scree_stalker` (medium, ≤ 8 k), full walker clip sets from the v1 rigs, materials matching Mars (silicate, dust).
 Accept: contract §9; stamped turntables; UNITY lit preview at 60 px/m reads as the v1 silhouettes.
 Files: blender/sources/creatures/mars/, build_creatures_mars.py, Assets/_Game/Art/creatures/mars/
 Depends: B-077
 Lead notes: Cycle 190: art accepted on the turntables (dustskater 2,850 tris on skate pads; scree_stalker 7,598 tris with back plates; 16-joint skins, 5 clips). Done on UNITY's lit preview in R2.
 
-### B-088 · BLENDER · In Progress · R2
+### B-088 · BLENDER · Superseded (D-086) · R2
 Goal: Mars depth bands (contract §9 depth-bands row), the R2 counterpart of B-083: `backgrounds/mars_<region>/ridge_mid.glb` for canyon, plains, polar and tharsis (Olympus Mons as the far hero), a shared `skyline_far.glb`, and skydomes per region (rust/salmon skies, the v1 dust haze; a `storm` skydome variant for the dust storm).
 Accept: tiles seamlessly in x; reads as the v1 Mars parallax from the side rail; stamped turntables; peaks measured.
 Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/mars_*/
 Depends: B-077
 Lead notes: Cycle 191 (00f0a65): art accepted on the turntables (canyon terraces with strata and boulders; Olympus Mons as a broad shield on a 1024 m period; storm skydome). Done on R2's first Mars capture with the bands in the scene.
 
-### B-089 · BLENDER · In Progress · R2
+### B-089 · BLENDER · Superseded (D-086) · R2
 Goal: Mars scenery and POI props as models: boulders ×3, regolith rocks ×2, ice chunks ×2, a dead shrub-like "dust bush", lava-tube stalactite/stalagmite pair (each ≤ 1.5 k tris, LOD1, one shared atlas); the Mars POI props from the v1 sources not already covered by B-084 (crash-site debris, the Mars Waystation surface beacon, ice-cap drill rig), ≤ 6 k tris each.
 Accept: contract §9; a stamped field preview (20 instances) under the Mars Sun (0.75); UNITY lit preview for Done.
 Files: blender/sources/props/mars/, build_props_mars.py, Assets/_Game/Art/props/mars_flora/, props/mars/
@@ -1317,133 +1406,133 @@ Files: blender/scripts/build_waystation.py, build_asteroids.py, gen_planet.py, A
 Depends: B-077
 Lead notes: Cycle 192 (3e7fbc6): art accepted on the top-down turntables (ring station with solar panels, docking arms and guide lights, 14,250 tris + LOD1; waystation_mars; six asteroids 80–570 tris; planets/saturn/ring_mesh annulus at R = 96 m using rings_color.png alpha). Done on U-078's lit Space capture. Cycle 227: Done (3e7fbc6 art; U-078 capture 123aa95: station, ring mesh and belt rocks lit in the game).
 
-### B-091 · BLENDER · In Progress · R3
+### B-091 · BLENDER · Superseded (D-086) · R3
 Goal: Mercury and Venus terrain block materials (R3 prep, as B-080/B-086): every tile material in `MercuryTileSet` (regolith, basalt, solarite crust, shadow ice, impact glass…) and `VenusTileSet` (basalt, sulfur crust, vent glass, station deck plates…), top/side PBR sets at 512², 2 m repeat, plus backwalls; palettes per §9.
 Accept: tiles seamlessly; reads as the v1 materials under each planet's Sun in UNITY's lit preview; stamped contact sheets.
 Files: blender/scripts/gen_terrain.py, Assets/_Game/Art/terrain/{mercury,venus}/
 Depends: B-077
 Lead notes: Cycle 196 (7c77065): art accepted (Mercury regolith/basalt/sulfide/ice; Venus basalt/tessera/vent glass/sulfur; basalt backwalls; the board's solarite crust, impact glass and deck plates are items/props, not tile materials, so none were due). Done on R3's first lit block captures.
 
-### B-092 · BLENDER · In Progress · R3
+### B-092 · BLENDER · Superseded (D-086) · R3
 Goal: Mercury and Venus depth bands (as B-083/B-088): Mercury `ridge_mid` for day side, twilight band and night side (grey regolith crater rims, a violet-black sky skydome with the huge Sun on the day side; a night skydome with stars), Venus `ridge_mid` for the cloud deck (cloud-top masses as translucent planes, no ground) and the surface (black basalt plains with vent glows), skydomes orange-cream (deck) and dark orange (surface); shared `skyline_far` per planet.
 Accept: tiles seamlessly; reads as the v1 parallax from the side rail; stamped turntables; peaks measured.
 Files: blender/scripts/gen_backdrop3d.py, Assets/_Game/Art/backgrounds/{mercury,venus}_*/
 Depends: B-077
 Lead notes: Cycle 193. R3. Cycle 207 (2026-11-05): art accepted on the stamped turntables review_backgrounds_{mercury_day,mercury_twilight,mercury_night,venus_deck,venus_surface}_ridge_mid.png and the two skyline_far panels (12:28–12:30; log OK ×12, peak 1534 MB): grey cratered regolith strips with boulders, Venus deck cloud heaps, basalt plains with lava vents. The exports are NOT committed: Assets/_Game/Art/backgrounds/mercury*/, venus*/, sources/backgrounds/{mercury,venus}_bands.blend and the manifest sit untracked/modified in the tree since the 12:30 restart. First thing: commit them (`[blender] B-092 exports`), then this is Done on UNITY's R3 lit preview.
 
-### B-093 · BLENDER · In Progress · R3
+### B-093 · BLENDER · Superseded (D-086) · R3
 Goal: Mercury and Venus creatures as models from the v1 sources (B-04x): every non-apex creature of `creatures/mercury/*` and `creatures/venus/*` (list them from the v1 manifest and log the list), size class per contract §9, full clip sets from the v1 rigs, emission where they glow.
 Accept: contract §9; stamped turntables; UNITY lit preview for Done.
 Files: blender/sources/creatures/{mercury,venus}/, build_creatures_mercury.py, build_creatures_venus.py, Assets/_Game/Art/creatures/{mercury,venus}/
 Depends: B-077
 Lead notes: Cycle 200: art accepted on the turntables (flarewing, acidmoth checked; 8 species: Mercury glassback/cinderling/flarewing/shadewyrm, Venus sulfur_drifter/acidmoth/pressure_crab/vent_eel). Pipeline fixes: object animation baked to bones; merge keeps original coordinates. Done on R3's lit preview.
 
-### B-102 · BLENDER · In Progress · R1
+### B-102 · BLENDER · Done · R1
 Goal: Fix the Earth ridge bands (reopen of B-083, D-074): re-export `backgrounds/earth_{forest,taiga,coast,plains}/ridge_mid` from build_depthbands.py so the band reads as a distant tree line, not low-poly blobs: (1) tree crowns and trunks smooth-shaded (`use_smooth=True` on the tree meshes, auto-smooth about 60 deg; the ground/hill strip may stay faceted under its colours), (2) tree heights forest (6, 12), taiga (7, 14), coast (5, 9), plains (5, 9), (3) no trees in the two nearest rows (z 20 and 25 m); the tree line starts at z >= 30 m, (4) atmospheric tint: blend every vertex colour toward the region's sky haze colour by 20 % at z 20 -> 45 % at z 60 so the band sits behind the near flora, (5) tri and vertex counts <= B-083's. Desert, tundra, ocean and skyline_far are untouched.
 Accept: stamped turntables; UNITY's next Earth day capture (U-077 smoke) shows the ridge tree line topping out below 45 % of frame height with no visible facet at 1080p and the B-085 flora reading in front of it; peaks measured; 4 assets in one wrapper call.
 Files: blender/scripts/build_depthbands.py, Assets/_Game/Art/backgrounds/earth_{forest,taiga,coast,plains}/
 Depends: B-083
 Lead notes: Cycle 209. R1 blocker: do it before the B-094 export (same lock, one call if the wrapper allows); the 0.4.0 build waits up to 60 min for it. The flora (B-085) is fine; only the band changes. Cycle 212 (00:3x): art accepted on review_backgrounds_earth_forest_ridge_mid.png (stamped 00:24; log OK x4, peak 1746 MB, 5ecfb99): short hazed tree line behind a bare front strip, no facets at turntable size. Done on the U-077 Earth day smoke shot (the frame-height check is the real test). Cycle 217 (01:0x): FAILS that check in smoke_2026-11-06/smoke_2_earth_day.png: crowns still faceted (the 60-degree sharp-edge split kept every crown edge sharp: forest ridge_mid.glb 12,066 verts for 6,044 tris) and the tree line tops out at about 15 % from the top of the frame because the forest ground rises 26 m. Round 2, your very next call (4 assets, ~2 min): (a) tree crowns and trunks smooth with NO sharp-edge split (auto-smooth off or angle 180 deg; target verts <= 0.6 x tris + 50 per band), (b) rise forest 26 -> 12, taiga 30 -> 14, coast 6 -> 4, plains unchanged, (c) keep the cycle-209 heights, haze and z >= 30 tree line. Accept unchanged: in UNITY's next smoke_2_earth_day the highest crown sits below 45 % of frame height from the top and no facet is visible at 1080p. Cycle 218 (01:0x): round 2 exported 01:02-01:04 (d2020d6; log OK x4, peak 1709 MB): no sharp split, authored UVs (the split came mostly from the smart-UV islands; model.py keep_uv), rises forest 12 / taiga 14 / coast 4; glb verts = unique verts (forest 4757 / 6044 tris, taiga 5047 / 5496, coast 1395 / 2272, plains 1574 / 2648). The 0.6 x tris target was wrong for cone trees (7 verts per 6 tris); the criterion is 'no split vertices', met. Export accepted; Done on UNITY's next smoke_2_earth_day.
 
-### B-094 · BLENDER · In Progress · R3
+### B-094 · BLENDER · Superseded (D-086) · R3
 Goal: Mercury and Venus apexes as models: `creatures/mercury/cinderhulk` (large class, lava-cracked back with emission that dims on the night side via a material float) and `creatures/venus/veil_serpent` (segmented ribbon: head, repeatable body, tail; translucent fins; a "chilled" white-flash state), LOD1 for both.
 Accept: contract §9; chained preview for the serpent; stamped turntables; UNITY lit preview for Done.
 Files: build_creatures_mercury.py, build_creatures_venus.py, Assets/_Game/Art/creatures/{mercury,venus}/
 Depends: B-093
 Lead notes: Cycle 193. R3. Cycle 212: cinderhulk exported (00:28, 19,000 tris, 2048^2, LOD1, 5 clips, peak 1952 MB); the serpent head/body export FAILED 00:29 with UnicodeDecodeError (byte 0xa7 at offset 46362 of a file read as UTF-8: a cp1252 section sign or degree sign in a script/note; open that file with the right encoding or replace the character). Fix is light work; export the three modules after UNITY's U-077 job 1. Cycle 213 (00:4x): encoding fixed; head (19,000 + LOD1) and body (11,400 + LOD1 5,472) exported 00:32-00:34 at 2048^2 (ea191ea head + cinderhulk). Art accepted on review_creatures_mercury_cinderhulk.png (00:28: cracked-plate carapace, dark body, claws) and review_b094_serpent_chain.png (continuous banded ribbon, veined translucent sail, no notch at the joins). Left: the tail export and a body re-export with the socket named socket_next (the glb carries socket_root.001), both on BLENDER's next turn; then Done on UNITY's R3 lit preview (U-085). Cycle 216 (00:5x): tail (15,200 + LOD1 7,296) and body re-export in one call 00:43-00:45 (5aa4b57; sockets root/next bare; chain tail + 2 bodies + head = 57,000 tris < 60 k); review_creatures_venus_veil_serpent_tail.png (00:43) reads. All B-094 art accepted; Done on U-085's lit preview. BLENDER → B-101. Cycle 207: started before the restart and left uncommitted: build_creatures_venus.py `build_serpent_modules` (+188 lines), model.py changes, manifest entries creatures/mercury/cinderhulk (one model, night dims the emission at runtime) and creatures/venus/veil_serpent_{head,body,tail} (chained by UNITY; a module with J bones behind it plays its clip delayed by J×0.07 cycles). Commit those sources as they stand before any export (they are reviewable work; an uncommitted tree is not). The three-module serpent and the single cinderhulk are approved as the design; the chaining rule goes to UNITY's R3 task (U-085, Backlog). Export 2048² bakes need ≥ 2.0 GB free (D-066): if the gate stays shut, bake at 1024² for the turntables and note it.
 
-### B-095 · BLENDER · In Progress · R3
+### B-095 · BLENDER · Superseded (D-086) · R3
 Goal: Mercury and Venus props and stations as models: flare shelter (dome + door clip), Mercury equipment locker, solarite crystal cluster (3 states: glowing, crusted, cut), the Venus station modules (deck module, hab, airlock arch, balloon cell, railing, vent harvester), aerostat pieces already covered by B-069 are re-made as models here too (aerostat_cell/deck/strut), the Mars/Earth Waystation surface pads if any.
 Accept: contract §9 (ppu/LOD rules); station modules tile at their v1 pitches; stamped turntables; UNITY lit preview for Done.
 Files: build_props_mercury.py, build_props_venus.py, build_props_common.py, Assets/_Game/Art/props/{mercury,venus,common}/
 Depends: B-077
 Lead notes: Cycle 203 (3a33ba1 + 7968f97): art accepted on the turntables (flare shelter, Venus station hull checked; 19 models incl. solarite in three states, Venus hab/deck/balloon/cell/arch/harvester/railing, aerostat cell/deck/strut at 2 m). No Waystation surface pads exist in any source (fine). Done on R3's lit preview.
 
-### B-096 · BLENDER · In Progress · R3
+### B-096 · BLENDER · Superseded (D-086) · R3
 Goal: Wardens as models: `creatures/warden/sentinel` and `creatures/warden/hunter` (hovering drones, centred pivot, flier clip set, indigo running lights, a shield emitter), plus `fx/warden_bolt` as a billboard sheet is kept (2D fx stay 2D).
 Accept: contract §9; stamped turntables; UNITY lit preview for Done.
 Files: build_wardens.py, Assets/_Game/Art/creatures/warden/
 Depends: B-077
 Lead notes: Cycle 198: art accepted on the turntables (sentinel 7,600 tris; hunter 7,440 tris as a slimmer dart pod with strike prongs; centred pivots; idle/walk/fly/attack/hurt/death; iris, core and prongs on bones; indigo lights and shield ring). Pipeline fix: species-prefixed actions. Done on R3's lit preview.
 
-### B-097 · BLENDER · Ready · R4
+### B-097 · BLENDER · Superseded (D-086) · R4
 Goal: Jupiter column in 3D: floe block materials (`terrain/jupiter/floe_ice`, `floe_core`, `floe_derelict` as top/side PBR sets at 512², 2 m repeat, from the v1 recipes) and the cloud decks as depth-band assets: `backgrounds/jupiter_deck1..3/` and `jupiter_deep/` each as three translucent cloud-bank planes (`deck_far.glb`, `deck_mid.glb`, `deck_near.glb`: alpha-textured strips from the B-048/B-055 painted banks, tileable every 256 m) plus a skydome per deck; the Crush band on the near plane of `deep` (as learned in B-055).
 Accept: contract §9; tiles seamlessly; stamped turntables composited as a stack; peaks measured.
 Files: blender/scripts/gen_terrain.py, gen_backdrop3d.py, Assets/_Game/Art/terrain/jupiter/, backgrounds/jupiter_*/
 Depends: B-077
 Lead notes: Cycle 199. R4 (M4 in 3D) prep; reuses the superseded B-048/B-055 work. Cycle 220: after B-108; add a `stage.json` per deck and `props/jupiter_foreground/wisp_*` pieces (contract §10 giants row).
 
-### B-098 · BLENDER · Ready · R4
+### B-098 · BLENDER · Superseded (D-086) · R4
 Goal: Jupiter creatures as models from the B-056 sources: stormglider (flier), lightning_eel (segmented, emissive stripe), belt_wasp (small), ballast_tortoise (large; its death pose matches the husk) and the husk_tortoise prop; size classes per contract §9; LOD1 for the tortoise.
 Accept: contract §9; stamped turntables; UNITY lit preview for Done.
 Files: build_creatures_jupiter.py, build_props_jupiter.py, Assets/_Game/Art/creatures/jupiter/, props/jupiter/
 Depends: B-077
 Lead notes: Cycle 199. R4 prep.
 
-### B-099 · BLENDER · Ready · R4
+### B-099 · BLENDER · Superseded (D-086) · R4
 Goal: Jupiter and Neptune POI props as models from the B-055/B-068 sources: derelict_pod, beacon_vault, the Meridian wreck bow/mid/stern (standable tops), wind_anchor; plus the aerostat modules (cell, deck, strut) as models if not already made under B-095.
 Accept: contract §9 (ppu/LOD rules); standable tops flat; stamped turntables; UNITY lit preview for Done.
 Files: build_props_jupiter.py, build_props_neptune.py, build_props_common.py, Assets/_Game/Art/props/{jupiter,neptune,common}/
 Depends: B-077
 Lead notes: Cycle 199. R4 prep.
 
-### B-101 · BLENDER · In Progress · R3
+### B-101 · BLENDER · Superseded (D-086) · R3
 Goal: Mercury and Venus scenery props as models (the R3 counterpart of B-089): Mercury near-band and play-plane scenery (regolith boulders ×3, impact-glass shards ×2, solarite outcrop, crater-rim rock, ice pocket for the polar/night side) and Venus surface scenery (basalt columns ×2, tessera slab, sulfur crust, vent chimney, cooled lava blister), each ≤ 2 k tris with LOD1 ≤ 800, one shared 2048² atlas per planet (gen_flora_atlas TILE_SETS), emission on the solarite and vent chimney; no flora (nothing grows); the Venus deck gets no scenery (no ground).
 Accept: contract §9; a stamped field preview per planet (20 instances under that planet's Sun: Mercury 6.7, Venus 0.1 diffuse) reads at 60 px/m; UNITY lit preview for Done.
 Files: blender/sources/props/{mercury,venus}_scenery/, build_props_mercury.py, build_props_venus.py, Assets/_Game/Art/props/{mercury_scenery,venus_scenery}/
 Depends: B-077
 Lead notes: Cycle 207. R3. After B-094; before the R4 tasks. Cycle 219 (01:1x): Mercury half ACCEPTED on review_b101_field_mercury.png (00:57; 2e7fe21): lumpy regolith boulders, pale shards, solarite spires read under the 6.7 Sun. Venus half FAILS Art matches (Bible section 9 v2 'no low-poly look') on review_b101_field_venus.png (01:09; 5109dfd): the basalt columns are stacked boxes, the sulfur crust and lava blister are flat discs, the vent chimney a plain cone with a dull mouth; the set reads as placeholder silhouettes at 80-440 tris. Round 2 for the 6 Venus models, budget up to 1.5 k tris each (LOD1 <= 800 stays): basalt columns as clusters of 5-9 hexagonal prisms with broken, stepped tops and tilted outliers; tessera slab with ridged, cracked top faces; sulfur crust as raised cracked plates (0.1-0.2 m relief) with brighter rims; vent chimney with an irregular built-up rim, a glowing mouth (atlas emission wired in the preview material) and a sag on one side; lava blister as a cracked dome with emissive seams. Re-render both field sheets with emission; Mercury needs no model change. Cycle 220 (01:3x): still your first job (the Venus round 2 sources 42f0e6a are in; export when the gate opens), then B-109 (near flora v2, the most visible Earth failure) → B-103 → B-104 → B-105 → B-106 → B-107 → B-108 → B-097. Also in your next commit: `git rm --cached` the four tracked `blender/scripts/meridian/__pycache__/*.pyc` (already gitignored). Cycle 223 (10:2x): Venus round 2 ACCEPTED (ecf5e08; log OK x7 10:16-10:17, peak 1586 MB; review_props_venus_scenery_{column_a,vent_chimney}.png and review_b101_field_venus.png stamped 10:17): hex colonnades with fallen segments, ridged tessera, raised plates, lumpy chimney, blister seams, all textured. One touch-up, bundled into your next export call (the B-109 Earth flora call, not a lock of its own): vent_mouth emission about 3x stronger and the chimney mouth wider and lower so the glow reads as a pool from the level camera; lava_blister seams the same. Done on UNITY's lit preview (U-085).
 
-### B-109 · BLENDER · Ready · S1
+### B-109 · BLENDER · Superseded (D-086) · S1
 Goal: Earth near flora round 2 (reopen of B-085 for one check, Bible §9 v2/v3 'no low-poly faceted look'): the trees that stand at z 2–12 in every Earth frame (`props/earth_flora/tree_oak`, `tree_birch`, `tree_spruce`, `dead_tree`, `bush_a`, `bush_b`; `grass` and the rocks are fine) currently read as flat-shaded polyhedra crowns and plain cones. Rebuild each crown as a real canopy: 40–120 overlapping leaf-cluster cards from the flora atlas (alpha-clipped, two-sided, with normals bent toward the crown centre so the lighting reads as one volume), a modelled trunk and three to five main branches with bark detail, conifers as 8–12 tiers of needle cards on a tapered trunk; silhouettes must read as oak, birch, spruce at 60 px/m; 1.5–3 k tris each, LOD1 ≤ 1.2 k (fewer cards), sway through COLOR_0 as before; bushes and grass the same way at ≤ 800 tris. Atlas: add leaf-cluster and needle tiles to the existing 2048² Earth flora atlas (keep the colour tiles the other models use in place).
 Accept: contract §9; a stamped field preview (20 instances at the camp distance, Earth Sun) with no visible facet, no polyhedral crown and no plain cone at 60 px/m; triangle counts in the json; peaks ≤ 2.0 GB (the 2048² atlas); UNITY's next Earth smoke shot (U-086 or U-092) for Done.
 Files: blender/scripts/build_flora.py, gen_flora_atlas.py, blender/sources/props/earth_flora.blend, Assets/_Game/Art/props/earth_flora/
 Depends: B-085
 Lead notes: Cycle 221 (10:2x). Evidence: smoke_3c_ship_airborne.png and smoke_2_earth_day.png (01:18): every crown in the near band is a faceted polyhedron, every conifer a smooth cone. This is the B-085 flora itself (the B-102 ridge is fixed). No code change on UNITY's side; the importer swaps the models in. Before B-103: this failure is in every Earth frame, the clips are not. Cycle 224 (10:4x): art ACCEPTED on review_b109_field_earth.png (stamped 10:39; log OK atlas 10:32 + 6 models 10:33-10:39, peaks ≤ 1.69 GB; 2e6a775): layered needle spruces, white birches with soft crowns, broad oaks on forked limbs, gnarled dead trees, full bushes; no facet, polyhedron or cone at 60 px/m. Counts: oak 1216 (LOD1 796), birch 784 (436), spruce 1616 (1244), bush_a 304 (144), bush_b 472 (312), dead_tree 872 (418); the 1.5 k lower bound is waived (the crowns read full; the look is the criterion). Owed: tree_spruce LOD1 ≤ 1.2 k re-export (fix in; want filed 10:41, after UNITY's job). Done on UNITY's next Earth smoke shot with the alpha-clip materials (U-086's capture if it includes Earth, else U-092).
 
-### B-103 · BLENDER · Ready · S1
+### B-103 · BLENDER · Superseded (D-086) · S1
 Goal: Surveyor clips v2 at 60 fps (contract §9 Rig row v2.5): re-export `characters/surveyor/base` with every existing clip resampled to 60 fps and given anticipation (2–4 frames) and follow-through (one overshoot key) where it acts (jump, land, dig, aim, hurt), plus the new clips `jump_anticipate` (8 f: crouch and arm swing), `land_hard` (20 f: deep knee bend, arms forward, recover), `dash` (12 f: 30° lean, trailing arm), `parry` (20 f: 4 wind-up, 4 strike with the Rig arm, 12 hold and recover), `parry_hit` (12 f: braced pose with a recoil), `hit_react` (16 f: torso snaps away, head follows a frame later). Mesh, maps (2048²), rig and triangles (≤ 12 k) unchanged; sidecar `fps: 60`.
 Accept: `base.json` lists 16 clips at fps 60 with the frame counts above; the glb's triangle count unchanged; a stamped clip strip `blender/preview/review_characters_surveyor_clips.png` (6 frames each of jump_anticipate, land_hard, dash, parry, hit_react) plus the turntable; peak measured (no map re-bake: 1.5 GB gate). Done on UNITY's U-089 capture.
 Files: the surveyor builder in blender/scripts/, blender/sources/characters/surveyor.blend, Assets/_Game/Art/characters/surveyor/base.glb, base.json
 Depends: B-077
 Lead notes: Cycle 220. Original poses; exaggerate timing, not anatomy (Bible §9 v3 Animation row). Export the glb + json only, file-only pathspecs, no .meta.
 
-### B-104 · BLENDER · Ready · S1
+### B-104 · BLENDER · Superseded (D-086) · S1
 Goal: Earth stage layer sets (contract §10) for forest, taiga, coast, plains, desert, tundra: per region `rocks_near.glb` (z 8–14, period 128 m, ≤ 6 k, on the planet-shared `backgrounds/earth/rocks_atlas_*` 2048²), `hills_far.glb` (z 80–140, period 512 m, ≤ 4 k, 1024²), `stage.json` (set-piece slots for B-105, foreground pieces, haze_rgb); per planet `backgrounds/earth/clouds_color.png` (2048 × 512 RGBA strip) and six foreground pieces `props/earth_foreground/{tuft,fern,boulder,log,branch,reeds}.glb` (≤ 2 k each, one 1024² atlas, origin base, two with translucent edges). Haze baked by depth as B-102. `build_depthbands.py` gains the two bands, `build_flora.py` the foreground set, `render.py` a stage-sheet mode (`--stage <planet>_<region>`: the whole stack from the rail camera at 60 px/m, 1920 × 1080, stamped).
 Accept: contract §10 caps per file; the planet's layer-texture sum reported ≤ 700 MB stored; six stamped stage sheets `blender/preview/stage_earth_<region>.png` that read as composed sets with no facet or seam; log OK per asset; peaks ≤ 1.5 GB (1024²) and ≤ 2.0 GB (the 2048² atlas); UNITY's Earth depth capture (U-090) for Done.
 Files: blender/scripts/build_depthbands.py, build_flora.py, gen_flora_atlas.py, render.py, blender/sources/backgrounds/earth_bands.blend, Assets/_Game/Art/backgrounds/earth_*/, backgrounds/earth/, props/earth_foreground/
 Depends: B-102
 Lead notes: Cycle 220. The stage-sheet renderer is part of this task and is reused by every planet. Foreground pieces are seen from 1.5 m: real leaf and bark detail, no cards.
 
-### B-105 · BLENDER · Ready · S1
+### B-105 · BLENDER · Superseded (D-086) · S1
 Goal: Earth set-pieces and composed skylines (Bible §9 v3 Stage composition): three landmarks per region (18). Forest: split granite tor, waterfall cliff, dead giant oak. Taiga: granite dome, burnt-stand ridge, frozen lake shelf. Coast: sea-stack pair, headland arch, dune-backed cliff. Plains: lone crowned hill, river bluff, standing-stone ring. Desert: twin mesas, rock-spine dune crest, salt-flat ridge. Tundra: glacier snout, frost-shattered peaks, erratic field. Each `setpiece_<a|b|c>.glb` ≤ 10 k tris (LOD1 ≤ 4 k), 2048² own maps, origin base, haze by depth; `backgrounds/earth/skyline_far.glb` rebuilt as three composed peak silhouettes (period 1024 m) replacing the noise ridge; every `stage.json` `setpieces` filled (2–4 per region with `at`, `z`, `scale`, `mirror`; no two within 120 m).
 Accept: contract §10; every stage sheet shows one dominant and one secondary landmark with at least a third open sky; no facet at 60 px/m; original forms (no real-world or fictional landmark replicated); log OK ×19; peaks ≤ 2.0 GB; UNITY's depth capture for Done.
 Files: blender/scripts/build_setpieces.py, build_depthbands.py, blender/sources/backgrounds/earth_setpieces.blend, Assets/_Game/Art/backgrounds/earth_*/setpiece_*.glb, backgrounds/earth/skyline_far.glb
 Depends: B-104
 Lead notes: Cycle 220. Compose first: block out all 18 at ~500 tris and send one stage sheet per region for an early check, then detail and bake.
 
-### B-106 · BLENDER · Ready · S1
+### B-106 · BLENDER · Superseded (D-086) · S1
 Goal: Creature reaction clips (contract §9 Rig row v2.5): `hit_react` (6 f: snap away from the hit, head lags a frame) and `stagger` (24 f: lose footing, recover) at 30 fps for every creature with an attack or bite: Earth wolf; Mars scree_stalker; Mercury glassback, shadewyrm, cinderhulk; Venus pressure_crab, vent_eel, veil_serpent (head module; the body follows by chaining); Wardens sentinel and hunter (a flinch and a lights-flicker stagger). glb + json re-export only; meshes, maps and other clips unchanged.
 Accept: each json lists the two clips; triangle counts unchanged; a stamped strip per species `review_creatures_<planet>_<name>_react.png` (4 frames each); log OK per export; peaks ≤ 1.5 GB (no re-bake). UNITY's U-089 capture for Done.
 Files: blender/scripts/build_creatures_*.py, build_wardens.py, Assets/_Game/Art/creatures/*/<name>.glb, <name>.json
 Depends: B-103
 Lead notes: Cycle 220. One wrapper call per planet; 2048² maps are not re-baked.
 
-### B-107 · BLENDER · Ready · S1
+### B-107 · BLENDER · Superseded (D-086) · S1
 Goal: Mars stage layer sets and set-pieces (as B-104 + B-105) for canyon, plains, polar, tharsis: `rocks_near`, `hills_far`, `stage.json`, `backgrounds/mars/clouds_color.png` (thin dust veils), six foreground pieces `props/mars_foreground/` (regolith rock, slab, dust bush, ice chunk, drift, cairn), 12 set-pieces (canyon: layered wall tower, collapsed arch, scree fan; plains: crater rim, dust-devil scar field, lone butte; polar: ice scarp, layered cap edge, frost field; tharsis: lava channel, shield flank, caldera lip; Olympus stays the far hero), `skyline_far` as composed peaks; the storm skydome kept.
 Accept: as B-104/B-105 (caps, ≤ 700 MB per planet, four stage sheets, peaks); UNITY's Mars depth capture (U-081) for Done.
 Files: build_depthbands.py, build_setpieces.py, build_flora.py, blender/sources/backgrounds/mars_*.blend, Assets/_Game/Art/backgrounds/mars_*/, backgrounds/mars/, props/mars_foreground/
 Depends: B-105
 Lead notes: Cycle 220. The R2 counterpart; U-081 consumes it.
 
-### B-108 · BLENDER · Ready · S1
+### B-108 · BLENDER · Superseded (D-086) · S1
 Goal: Mercury and Venus stage layer sets and set-pieces (as B-104 + B-105). Mercury day/twilight/night: `rocks_near` crater-rim rubble, `hills_far` basin rims, set-pieces central-peak crater, scarp cliff, ejecta ray field; black sky, no cloud strip; foreground `props/mercury_foreground/` shards, boulders, solarite stubs. Venus surface: `rocks_near` basalt columns, `hills_far` tessera, set-pieces pancake dome, rift wall, collapsed lava tube; `clouds_color.png` as low sulfur haze; foreground vent rubble and glowing crust pieces. Venus deck (no ground): foreground cloud wisps `props/venus_foreground/wisp_*` plus `deck_near/mid/far` translucent planes as the layers, and a `stage.json`.
 Accept: as B-104/B-105 (caps, ≤ 700 MB per planet, five stage sheets, peaks); UNITY's R3 depth captures (U-085) for Done.
 Files: build_depthbands.py, build_setpieces.py, build_flora.py, gen_deckplane.py, blender/sources/backgrounds/{mercury,venus}_*.blend, Assets/_Game/Art/backgrounds/{mercury,venus}_*/, props/{mercury,venus}_foreground/
 Depends: B-107
 Lead notes: Cycle 220. The R3 counterpart. The giants' decks (B-097, B-100) already follow the layer rule; they add a `stage.json` and `wisp_*` foreground pieces.
 
-### B-100 · BLENDER · Ready · R4
+### B-100 · BLENDER · Superseded (D-086) · R4
 Goal: Saturn column in 3D (as B-097) from the B-058 sources: floe materials, deck planes for saturn_deck1..3 and saturn_deep (ring-plane line in the deck 1 skydome), plus the Saturn creatures as models from the B-060 sources (helium_jelly with its `rise` clip, hex_drake, floe_moth) and the ring-mining props from B-059/B-068 (ring_ice/ring_rock as low-poly bodies, ring_rig, helium_trap, hexagon_wall_marker).
 Accept: contract §9; stamped turntables; UNITY lit preview for Done.
 Files: gen_terrain.py, gen_backdrop3d.py, build_creatures_saturn.py, build_props_saturn.py, Assets/_Game/Art/{terrain,backgrounds,creatures,props}/saturn*/
@@ -1516,6 +1605,10 @@ Lead notes: Done 554e14f (cycle 24): hauler hulls/cargo, Warden pylon, Meridian 
 ---
 
 ## Backlog (not yet Ready; LEAD promotes)
+
+> **C1 (Step 2, D-086): promoted when LEAD approves the C0 style test.** All Depends: C0 approval.
+- B-116 surveyor full clip set (run, fall, dig, build, bump, surprise, conk_out, jetpack, climb_in) · B-117 Pilgrim side + top sheets (face front, wobbling fins, puff exhaust; thrust stretch / cut squash) · B-118 eight planet discs with personality idles (§11.5) · B-119 painted starfield + 3 nebula cards · B-120 HUD gauges (Suit power, oxygen, gravity) + Escape Line dotted line and sign.
+- U-099 ship and space view on v3 sprites (discs, starfield parallax, puff exhaust FX) · U-100 cartoon HUD gauges + Escape Line sign · U-101 surveyor full Animator at 12 fps with smear/eye-pop hooks · U-102 Space profile < 2 GB and M1LoopTests with the new art · U-091 (whole-planet unload: the Residency leak) is the first C1 card.
 M2: Earth/Mars POIs, day/night lighting pass (U), Mars dust storm (U), creature AI v1 (U),
 Cryo meter (U), `PlanetDisc` shader with real textures (U). (POI prop sets promoted to B-020, B-021 in cycle 5.)
 R3 (drafted cycle 207): U-085 Mercury and Venus in 3D (the R3 counterpart of U-081: B-091 block arrays, B-092 bands incl. the translucent Venus deck strip and the day/twilight/night Mercury skydomes, B-093/B-096 creatures and Wardens through ModelView, B-095 props and station modules via ModelSwap, B-101 scenery; the cinderhulk emission float driven by the day side; the veil serpent chained from veil_serpent_tail + n×body + head, each module's clip offset by J×0.07 cycles for J bones behind it; M3InnerTests + the M3 smoke set re-shot with the depth preset). Promote when U-081 is Done.

@@ -1,4 +1,10 @@
-# MERIDIAN — Asset Contract v2.6
+# MERIDIAN — Asset Contract v3.0
+
+> **v3.0 (D-086, 2026-11-06): the cartoon contract. §11 is the rule set for every new asset.**
+> §9 (3D models) and §10 (stage layers) are frozen: nothing new is made to them, and the files
+> already imported stay until UNITY archives them. §1 keys/folders and §2 Legal/Padding/Edges/
+> Max-file still apply; §2's PPU, normal, mask and emission rows and §5's creature `attack/hurt/
+> death` clips do not apply to v3 assets (see §11).
 
 > **v2.5 (D-079, 2026-11-06).** Stage layers (§10: per-region layer files, caps, `stage.json`, stage sheets), clips at the sidecar's fps (60 for the surveyor and apexes), the feel clip set (§9 Rig row). **v2.6 (D-082):** §9.1 ruling 10, the `alpha_clip` sidecar flag.
 
@@ -205,3 +211,85 @@ camera at 60 px/m, 1920 × 1080, under that planet's Sun and haze, stamped by `r
 UNITY's `*_depth.png` smoke capture for Done. The sheet must read as one composed set: a dominant
 landmark, a secondary one, open sky on at least a third of the width, no visible facet or tiling
 seam at 1080p.
+
+## 11. Cartoon assets (v3.0, D-086; Bible §9 v4)
+
+**11.1 Global (overrides §2 for v3 assets).** PPU **64**, drawn and rendered at 1x for
+1920×1080 (no 4K source in `Assets/`). PNG 8-bit RGBA straight alpha, `color` map only: flat cel
+colour + ink, at most one shadow tone per colour, no normal/mask/emission maps (a glowing part is
+drawn in its colour; UNITY may tint it). Ink `#1E1A17`, outer silhouette 4–6 px, interior
+1.5–3 px, jitter ±20 %. Palette from the planet strip `ui/palettes/<planet>/strip_color.png` (8×1).
+Sources: one asset per `.blend` (Grease Pencil objects), no texture above 2048, no 4K.
+Every v3 asset's sidecar carries `"style": "v3"` so ArtImporter routes it to the v3 rules.
+
+**11.2 Sprite sheets (every animated asset).** Transparent PNG grid, row-major, 4 px gutters,
+≤ 2048×2048, with `<variant>.json`:
+```json
+{
+  "key": "characters/surveyor/side", "style": "v3",
+  "frame_width": 192, "frame_height": 192, "columns": 10, "frames": 58,
+  "fps": 12, "pivot": [0.5, 0.0], "facing": "right", "ppu": 64,
+  "animations": [
+    {"name": "idle", "start": 0,  "length": 10, "loop": true,  "loop_from": 0},
+    {"name": "walk", "start": 10, "length": 12, "loop": true,  "loop_from": 0},
+    {"name": "jump", "start": 22, "length": 8,  "loop": false},
+    {"name": "land", "start": 30, "length": 8,  "loop": false}
+  ],
+  "squash_root": true
+}
+```
+`fps` is always 12 (on twos). Frame caps per clip: idle 8–12, walk/run 12–16, jump/land 8–10,
+one-off specials ≤ 16. Facing is a runtime flip; never draw the mirror. Clip sets:
+- **surveyor** (hero, full frame-by-frame): idle, walk, run, jump, fall, land, dig, build, bump
+  (dizzy stars), look_camera, surprise (eye-pop), conk_out, jetpack, climb_in. No attack/hurt/death.
+- **creatures** (frame-by-frame or rig): idle, walk (fliers: fly), react (turn-to-look / eye-pop),
+  bump, flee or follow. No attack/hurt/death (D-087).
+- **ship** (hero): side idle, thrust (stretch), cut (squash), land_puff; top idle, thrust, turn.
+
+**11.3 Simple rigs (background flora and props).** One sheet per planet's flora set:
+`flora/<planet>/rigset_color.png` (≤ 2048²) holding every part (stem segments, leaves, petals,
+face pieces, blink/yawn mouth swaps), plus `rigset.json`:
+```json
+{
+  "key": "flora/earth/rigset", "style": "v3", "ppu": 64,
+  "parts": [{"name": "daisy_stem", "rect": [0, 0, 64, 256], "pivot": [0.5, 0.0]}],
+  "plants": [{
+    "name": "daisy",
+    "bones": [{"name": "root", "part": "daisy_stem", "parent": null, "length": 0.6},
+              {"name": "stem2", "parent": "root", "length": 0.6}],
+    "swaps": {"mouth": ["mouth_smile", "mouth_yawn", "mouth_giggle"], "eyes": ["eyes_open", "eyes_blink"]},
+    "idle":  {"type": "sway", "amplitude_deg": 12, "beat_bpm": 110, "squash": 0.08},
+    "react": {"radius_m": 3.0, "action": "turn_look", "swap": "mouth_giggle"}
+  }]
+}
+```
+Unity builds the bones (2D Animation skinning) from this; every plant on a planet shares the
+one texture and one animator controller. ≤ 6 bones per plant. Props with wobble idles use the
+same format under `props/<planet>/rigset`.
+
+**11.4 Backgrounds.** `backgrounds/<planet>/<scene>/layer<N>_color.png`, N = 0 (farthest) … 4,
+3–5 layers per surface scene, painted watercolour with paper texture, **no ink outline**,
+horizontally tileable (2× tiled preview in the review sheet), height ≤ 1024, width ≤ 2048, plus
+`<scene>.json`: `{"layers": [{"n": 0, "parallax": 0.1, "y_m": 4.0}, ...]}`. Space:
+`backgrounds/space/starfield/` (tileable 2048² starfield + up to 3 nebula cards ≤ 1024²).
+
+**11.5 Planet discs (space view).** `planets/<planet>/disc_color.png`, watercolour fill + ink
+outline, ≤ 1024² (Saturn with rings ≤ 2048×1024); a personality idle as a sheet ≤ 12 frames
+(`disc.json`, fps 12) or a rig (`disc_rig.json`, e.g. ring wobble, band swirl UV scroll).
+
+**11.6 UI, title cards, film overlays.** `ui/<group>/<name>_color.png` (§5 D-044 rule): paper
+panels and painted signs as 9-slice PNGs with `"slice": [l, t, r, b]` in the json; title cards
+per planet `ui/titlecards/<planet>_color.png` ≤ 1920×540; HUD gauges `ui/hud/<gauge>_color.png`
++ needle parts. Film overlays `fx/film/{grain,dust,scratches}_color.png`, **512×512, tileable,**
+greyscale in RGB with alpha. The iris uses no texture (shader).
+
+**11.7 Review sheet (before every handoff).** `blender/preview/review_<task>.png`: the asset on
+its planet's background at 1x, every clip as a frame strip with frame numbers, a 2× zoom of the
+ink line, the palette strip, the nine §9.7 boxes self-checked, and one line "what makes it ours"
+for characters. BLENDER names in its status which boxes it could not tick and why.
+
+**11.8 Import (UNITY, ArtImporter v13).** `style: v3` assets import as Sprite (PPU from json),
+no mip maps, BC7 (or DXT5 Crunch), packed into ≤ 8 Sprite Atlases per planet (Addressable label
+`planet_<name>`); sheets sliced and Animator clips generated at 12 fps; rig sets build a shared
+controller. Rejected with a clear console message: a sheet over 2048, a clip over its frame cap,
+an fps other than 12, an overlay that is not 512².

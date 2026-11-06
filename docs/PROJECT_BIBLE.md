@@ -1,7 +1,7 @@
 # MERIDIAN — Project Bible (single source of truth)
 
 Owner: LEAD. Workers read; only LEAD edits. Changes are logged in `coordination/DECISIONS.md`.
-Version: 2.1 (D-064 camera rail; 2.0 = 3D rehaul, D-062, 2026-11-02: §5.1 camera, §9, §10.1, §10.4–10.6, §11.1 rows, §12 R-milestones). Earlier numbers and designs are unchanged. The Lead bumps the version on every edit.
+Version: 4.0 (D-086..D-091, 2026-11-06: owner art direction "1930s rubber-hose cartoon"; §9 rewritten, combat cancelled, C-milestones in §12). 3.x = stage and feel (D-076..D-085); 2.x = 3D rehaul (D-062). The Lead bumps the version on every edit.
 
 Sections: 1 Vision · 2 Setting and story · 3 The solar system in game · 4 Physics and
 numbers · 5 Views and transitions · 6 Controls · 7 The eight planets · 8 Systems →
@@ -10,9 +10,31 @@ milestones · 9 Art style guide · 10 Technical architecture · 11 Performance b
 
 ---
 
-> **Rehaul notice (D-062, 2026-11-02).** MERIDIAN is now a 3D-looking game with the same
-> side-view play. Everything in §1–§8 and §11 stands. §9 and §10 describe the 3D build. Where an
-> older sentence says "sprite", "frame sheet", "Tilemap" or "2D light", read §9/§10 instead.
+> **Art direction v4 (owner, D-086, 2026-11-06). This notice overrides every older line below.**
+> MERIDIAN now looks and moves like a 1930s hand-inked rubber-hose cartoon (the era and its
+> techniques, never any existing game's characters, logos, fonts or assets). §9 is the new art
+> bible. Systems stay: the 8 planets, real gravity, side view on planets, top-down space, Escape
+> Lines, digging/building, exploration, creatures, activities, survival meters.
+> **Superseded by v4:** the 3D look (D-062: PBR, glb models, the perspective rail, block meshes,
+> §10.4–10.6 and §10.10 as written); pillar 3 "Realistic 2D"; every "realism" or "no cartoon"
+> rule. Art is 2D again: sprites, sprite sheets, painted parallax PNGs, 2D bones (§9, contract §11).
+> **Cancelled (D-087): all combat.** No weapons (the Lance, Pulse cannon), parry, hit stop, fight
+> zoom, bosses or boss phases, bullet patterns, health bars, kills, bounties, space combat, the
+> Shrike fighter, hull/suit shields. Creatures are friendly or neutral. Replacements:
+> - A creature or hazard **bump** knocks the player 0.8 m with dizzy stars; it never subtracts
+>   health (there is none). Hazards (heat, cold, pressure, radiation, toxic, falls ≥ 24 m/s) drain
+>   **Suit power**; at 0 the surveyor **conks out**: dizzy stars, iris-out, wake at the last base or
+>   ship with the cargo kept (pillar 5). Suit power and oxygen are the only meters.
+> - **Apexes become Grand creatures**: a non-combat encounter solved with the planet's systems
+>   (hazard modules, Grapple, Float cells, light, the ship), ending in a full Survey scan. The
+>   reward (Datacore, "only here" resource) is unchanged. Read "kill/hunt/fight" in §7 that way.
+> - **Wardens** stay as over-mining enforcement but never shoot: they ring a bell, then tow the
+>   player out of the area and lock the Beam there for 5 min.
+> - **Red Hollow** become rival salvagers (races, deliveries, trades), never a fight.
+> - Rig modules: Beam, Survey, Builder, Grapple (slot 2 retired). The air dash stays (movement).
+> Milestones: R1 closes as is (D-088); S1, R2, R3 and the 3D M4 row are superseded by C0–C4
+> (§12); M3–M6 gameplay scope stands minus combat.
+> Where an older sentence says "model", "glb", "PBR", "lit" or "rail camera", read §9/§10 v4.
 
 ## 1. Vision and pillars
 
@@ -26,10 +48,11 @@ physics make it one.
    pressure, and radiation follow the real planet.
 2. **Every world matters.** Each planet has a resource, a creature, and an activity found
    nowhere else, so the player goes everywhere.
-3. **Realistic 2D.** Rendered, lit, normal-mapped art. Painterly-photographic, not pixel
-   art, not cartoon.
-4. **Runs on an 8 GB laptop at 60 FPS.** Realism from technique (baked maps, 2D lights,
-   streaming), never from brute force.
+3. **A living 1930s cartoon (v4, D-086).** Hand-inked rubber-hose characters, flat cel colour,
+   painted watercolour backgrounds, a gentle film treatment; everything on a surface moves.
+   Original designs only, never mistakable for any existing cartoon or game.
+4. **Runs on an 8 GB laptop at 60 FPS, under 2 GB in play.** The look comes from technique
+   (animating on twos, shared rigs, small tiled overlays, one post pass), never brute force.
 5. **The player is never stuck.** Every hard state (no fuel, stranded on Jupiter, dead on
    Venus) has a recovery path.
 
@@ -502,27 +525,83 @@ recovery fee).
 
 ---
 
-## 9. Art style guide (v2, 3D)
+## 9. Art bible (v4, 1930s rubber-hose cartoon; owner direction, D-086)
 
-**Target.** Rendered realism in real-time 3D, seen from the side: the look of a nature
-documentary still, with painterly softness in haze and clouds. No outlines, no cel shading,
-no pixelation, no low-poly "faceted" stylisation. The game plays on one plane (z = 0); depth
-exists to be looked at, not walked into.
+The era and its techniques, our own designs. Every asset passes the §9.7 checklist before LEAD
+accepts it, and the approved **style test** (C0, §12) is the reference everything else matches.
 
-| Rule                 | Specification                                                                                |
-|----------------------|----------------------------------------------------------------------------------------------|
-| Scale                | 1 Unity unit = 1 m. A human is 1.8 m. The camera (§5.1) shows ≈ 60 px/m at 1080p on the play plane |
-| Lighting             | PBR (URP Lit): base colour, normal, metallic/smoothness, emission. One directional Sun per planet with the §9 v1 intensities (Mercury 1.6 … Neptune 0.2), a per-planet ambient gradient, soft Sun shadows, ≤ 8 visible point lights (lamps, thrusters, vents, lightning) |
-| Palettes             | unchanged: Earth greens/blues/ochres · Mars rust/salmon · Mercury white/black/violet · Venus orange-cream/black · Jupiter cream/rust/brick · Saturn pale gold · Uranus cyan fog · Neptune indigo/white · Space near-black with a Milky Way band |
-| Readability          | Every creature silhouette reads at 60 px/m against its planet; interactive props carry a faint emissive rim (mask) when the player is within 3 m |
-| Depth (stage layers, v3) | Terrain is 1 m-deep blocks with a back wall 1 m behind. Every region is dressed as a painted stage of at least seven layers (§10.10): foreground pieces that pass in front of the player (z −3 to −1.5 m), the play plane, near flora (z 2–6), near rocks (z 8–14), mid ridge (z 20–60), far hills (z 80–140), far mountains (z 150–400), a slow cloud strip (z 500) and the sky dome; haze by depth per planet. Giants: the cloud decks are the layers (deck_near/mid/far plus foreground wisps) |
-| Stage composition    | Mountains, mesas, cliffs and other landmarks are **set-pieces**: authored meshes placed at fixed longitudes per region from `stage.json`, three variants per region, never noise. Each frame reads as a composed set: one dominant landmark, one secondary, open sky on at least a third of the width. Original designs only |
-| Creatures            | Grounded anatomy with one alien exaggeration per species; rigged and animated; materials match the planet (silicate, sulfur, ice) |
-| Ships                | Industrial-realistic, worn, legible thrusters and lights; emissive engines and windows      |
-| Animation            | Readable, exaggerated motion on realistic bodies: anticipation before every action, follow-through after, squash and stretch on jumps, landings, dashes and hits (§4.2 Feel); hits read within 2 frames; surveyor and apex clips at 60 fps, creatures at 30 |
-| UI                   | unchanged: thin HUD, planet-tinted accents, monospace OFL numerals, one-line tooltips; icons stay 2D |
-| Fonts                | OFL-licensed only; logged in `docs/credits/unity.md`                                        |
-| Forbidden            | Any name, logo, silhouette, or story element from existing games; anything that reads as a cartoon, pixel art or a low-poly stylised look |
+### 9.1 The look
+| Rule | Specification |
+|------|---------------|
+| Linework | Every character, creature, plant, ship and prop has a thick, slightly wobbly ink outline, as if brushed by hand. Ink colour `#1E1A17`. At 1x: outer silhouette 4–6 px, interior lines 1.5–3 px, thickness jittered ±20 % along the stroke. No perfect geometry: circles a little lumpy, straight lines bow slightly |
+| Colour | Flat cel colour inside the lines, **at most one shadow tone per colour**. No gradients, no realistic lighting, no normal maps, no specular |
+| Palette | Muted and slightly aged: warm off-whites (never `#FFFFFF`), soft reds, mustard yellows, teal, dusty greens. Each planet has its own 6–8 colour palette from this family, written into its first planet task and stored as `ui/palettes/<planet>` (one 8×1 strip). **Earth (C0):** off-white `#F2E6CF`, soft red `#C8553D`, mustard `#D9A93F`, teal `#3E8A86`, dusty green `#7A9A5B`, faded sky `#9FB7B9`, shadow brown `#5B4636`, ink `#1E1A17` |
+| Characters | Era cues: pie-cut eyes (black pupil with a wedge cut out), white gloves, round bodies, big simple expressions |
+| Backgrounds | Painted watercolour: soft edges, visible paper texture, slight colour bleed, **no ink outlines** (characters must pop off them). 3–5 parallax layers per surface scene (replaces the seven-layer stage of v3). Space: a painted starfield with soft hand-painted nebulas |
+| Film treatment | One full-screen pass: subtle grain, slight vignette, faint drifting dust specks and hairline scratches, a very gentle brightness flicker (≤ ±2 %), slight warm/sepia grade. Comfortable for hours. **Settings → "Film effects" toggle** (default on) |
+| UI and text | Vintage hand-lettered feel from OFL fonts only: titles **Limelight**, body and HUD **Patrick Hand** (D-090; never a font from an existing game). Panels look like aged paper or painted signs. Planet title cards slide in like old intertitles |
+
+### 9.2 The motion
+| Rule | Specification |
+|------|---------------|
+| Rubber hose | Limbs have no joints: arms, legs, tails, antennae, vines and ship exhaust bend like soft tubes. Hands and feet stay big and round |
+| Squash and stretch | On everything that moves: jumps, landings, bounces, engine thrust, ground impacts. Exaggerate, then pull back 20 % if it looks broken. It lives on the visual root; physics (§4) never changes |
+| On twos | Character, creature, flora and prop animation plays at **12 fps** (each drawing held 2 frames of 24). Rigged flora bones are sampled stepped at 12 Hz. Camera, parallax and UI move smoothly at the real frame rate |
+| Everything is alive | Nothing on a planet surface is static: plants sway and breathe, rocks bob, props wobble, trees bounce. Every idle is a rhythmic bob to an unheard beat (one shared beat per planet, 100–120 bpm) |
+| Secondary motion | Ears, leaves, petals, hoses and antennae drag behind and overshoot on stops |
+| Walk / run | Bouncy walk, head bob on every step, big arm swings; running leans the whole body forward |
+| Era tricks | Eye-pops on surprise, smear frames on fast moves, multiple-limb blur, smoke puffs on landing, dizzy stars on bumps (never combat), pausing to look at the camera |
+| Transitions | Planet ↔ space and entering an area use an **iris-out / iris-in** circle wipe (0.35 s each way, inside the §11 1.5 s transition budget) |
+
+### 9.3 What gets the style
+- **Player (the surveyor):** an original rubber-hose character: a big round fishbowl helmet with an expressive face inside, gloves, boots, rubber-hose limbs.
+- **Ship (Pilgrim):** a bendy vintage rocket with a face-like front, fins that wobble, exhaust in round cartoon puffs. Thrust = stretch, cut thrust = squash.
+- **Planets (space view):** painted watercolour discs with ink outlines and a subtle personality (Jupiter's bands swirl, Saturn's rings wobble, Neptune looks grumpy). They must still read as the real planets.
+- **Flora (the priority):** each planet has its own original flora with faces and personalities: rubber-hose stems that sway, petals and leaves that act like hands, flowers that yawn, cacti that shiver, vines that curl and uncurl. Plants react when the player passes within 3 m (turn to look, bounce, giggle). Gas-giant cloud layers get cloud-plants and floating puffball flora.
+- **Creatures:** the existing §7 roster redrawn in the style, friendly or neutral (D-087), pie-cut eyes and bouncy idles. Grand creatures (the former apexes) included.
+- **Props and resources:** minerals, crystals, collectibles and tools get faces or wobble idles.
+- **HUD:** cartoon gauges for Suit power, oxygen and the gravity readout; the Escape Line is a hand-painted dotted line with a little sign on it.
+
+### 9.4 Pipeline (detail in contract §11)
+- **BLENDER:** Grease Pencil for frame-by-frame 2D drawing. Existing 3D models (ships, planets) may be reused through Grease Pencil Line Art or Freestyle plus a flat two-tone toon shader, rendered to 2D frames with jittered line thickness. Every animated asset ships as a transparent PNG **sprite sheet + JSON** (frame size, count, fps 12, loops). Backgrounds ship as separate painted parallax PNG layers. UI frames, title cards and film overlays (grain, dust, scratches) ship as tileable PNGs. **Hero assets** (player, ship) are full frame-by-frame; **background flora and props** use a **simple rig**: a few bendable parts on one sheet, animated in Unity with bones.
+- **UNITY:** 2D sprites with the Animator and Sprite Atlas; character animators at 12 fps; the rubber-hose rig path with Unity 2D Animation (sprite bones + skinning) so one texture serves hundreds of plants; **one** full-screen post shader (grain + vignette + dust/scratches + flicker + warm grade in a single pass; no Bloom, no volumetrics, no HDR); the iris wipe as a cheap shader cutout; the Film effects toggle; art replaced planet by planet as sheets arrive, old assets moved to `Assets/_Game/Archive/` (never deleted).
+
+### 9.5 Scale and camera (v4)
+1 Unity unit = 1 m; **PPU 64** for all v4 art, drawn and rendered at 1x for 1920×1080 (never 4K
+sources in the build). The side view is an orthographic camera 16.875 m tall (1080 / 64) with
+the §5.1 follow rules (dead zone, look-ahead, vertical hold); fight zoom is cancelled. The
+surveyor stands about 2.0 m (≈ 128 px) with the helmet. Gameplay numbers in §4 are unchanged.
+
+### 9.6 Budgets for art (hard rules; LEAD enforces; also §11)
+- Sprite atlases ≤ 2048×2048, compressed (BC7, or DXT5 Crunch). **≤ 8 atlases loaded per planet.**
+- Frame caps: idle 8–12, walk/run 12–16, jump/land 8–10, one-off specials ≤ 16. Mirror by flipping at runtime; never draw a mirror version.
+- Only the current planet's assets are loaded; the previous planet unloads before the next loads. Space keeps only the planet discs and starfield.
+- ≤ 40 animated objects on screen; beyond that, distant flora switches to a 3-frame cheap idle or a static frame. Idle start times are staggered.
+- Rigged flora share one texture and one animator controller per planet.
+- Film overlays are small tiled textures (512×512), never full-screen images.
+- The game stays **under 2 GB RAM in play** and 60 fps on integrated graphics; profile after every planet is converted.
+- Workflow: BLENDER never runs a heavy render batch while UNITY has the Editor open with a scene loaded; LEAD schedules render windows (D-091). One asset per `.blend`, no 4K textures.
+
+### 9.7 Acceptance checklist (LEAD, every asset)
+- [ ] Thick hand-inked outline, no perfect geometry
+- [ ] Flat cel colour, one shadow tone max, muted aged palette
+- [ ] Animated on twos, within the frame caps
+- [ ] Visible squash and stretch, rubber-hose limbs, secondary motion
+- [ ] Has an idle loop (nothing sits still)
+- [ ] Original design, not recognizable as any existing character
+- [ ] Sprite sheet + metadata delivered per the asset contract
+- [ ] Fits the atlas and RAM budget after import
+- [ ] Looks consistent with the approved style test
+
+LEAD records the nine boxes per asset in `REVIEW_LOG.md`; one unchecked box sends it back to In Progress.
+
+### 9.8 Originality (forbidden)
+Borrow the era (1928–1938 studio cartoons) and its techniques, never a property. Forbidden: any
+character, silhouette, logo, font, title-card wording or layout, UI, boss or map from Cuphead or
+any other game or cartoon; cup-, mug-, teacup- or dice-headed characters; straws on heads; round
+black mouse ears; any recognisable studio mascot. Pie-cut eyes, white gloves and rubber-hose
+limbs are era conventions and allowed, but every combined design must be our own. Each new
+character design ships with a one-line "what makes it ours" note on its review sheet.
 
 ---
 
@@ -638,7 +717,7 @@ away); each set is one Addressable label `stage_<planet>_<region>`. Layer textur
 | Budget                        | Limit (v3, D-077; measured in the dev build, D-058)               |
 |-------------------------------|-------------------------------------------------------------------|
 | Frame time                    | ≤ 16.6 ms p99 at 1080p on the dev laptop; ≤ 12 ms average         |
-| RAM (built game)              | ≤ 4.5 GB working set (hard ceiling; 4.0 GB is the warning line) with the Editor closed and the three sessions idle; ≤ 2.0 GB textures loaded; ≤ 600 MB meshes; ≤ 150 MB audio |
+| RAM (built game)              | **v4 (D-089): < 2.0 GB working set in play** (warning line 1.7 GB) with the Editor closed; ≤ 512 MB textures loaded; ≤ 8 sprite atlases (≤ 2048², BC7 or DXT5 Crunch) per planet; ≤ 150 MB audio; ≤ 40 animated objects on screen. (v3's 4.5 GB / 2.0 GB textures / 600 MB meshes is retired) |
 | Residency                     | Only the current planet's Addressable groups (+ `common`, `ui`, `space`) are loaded; the previous planet's groups release within 5 s of a transition; stage layers per §10.10 |
 | Geometry (v3)                 | ≤ 500 k triangles on screen; ≤ 500 draw calls (SRP batcher on); ≤ 150 shadow casters; one shadow cascade; layers beyond z 20 m cast no shadows |
 | Draw calls                    | ≤ 250 side view, ≤ 80 top-down (atlases, batching)                |
@@ -684,7 +763,12 @@ If the laptop's RAM is upgraded, LEAD raises only this section and logs the deci
 | **M3 Inner planets complete** | Mercury and Venus full designs; Envirosuit hazards; all Rig modules; Smelter/Refinery/Blueprint Tree; inventory; Waystations and trading; Wardens basic; Catalogue; bases | Each inner planet's "only here" obtainable; apexes killable; tests for hazards and economy |
 | **M4 The giants**       | Cloud-column generator; floes, Float cells, Aerostats, Crush Line; Skip Drive; belt and ring mining; all four giants' hazards, creatures, apexes; Thruster Mk2/Mk3 | Full progression Earth → Neptune completable by LEAD's QA script; budgets green on Jupiter |
 | **R1 3D pipeline proof (Earth)** | The 3D renderer and side-rail camera; block-mesh terrain with PBR materials; Sun + lamps in 3D; the surveyor, the Pilgrim, Earth props batch 1 and two Earth creatures as animated models; sky dome, ridges and near props replace the parallax layers | `M1LoopTests`, `SmokeTests` and the M2/M3 gameplay tests pass unchanged; §11.1 (incl. the geometry row) green on Earth; captures match §9 v2; owner playtest |
-| **S1 Stage and feel (Earth)** | The stage camera (§5.1), snappy movement with air dash, parry, squash-and-stretch and hit reactions (§4.2 Feel), the seven-layer stage per Earth region with set-pieces and foreground (§10.10), 60 fps surveyor clips, budgets v3 (§11.1) with adjacent-region streaming | `M1LoopTests`, `SmokeTests` and the M2/M3 gameplay tests pass unchanged; jump heights per planet unchanged ± 1 cm; StageCamera, Feel, SquashStretch, StageLayer and Residency tests green; §11.1 v3 green on Earth, Space and Mars (frame time, 4.5 GB, 2.0 GB textures); stage sheets match §9 v3; owner playtest of `Build/MERIDIAN_0.5.0/` |
+| **C0 Style test (Earth) — v4, first and alone** | One small Earth surface scene: the new surveyor, one plant with a face and a sway idle, one critter, a painted 3-layer background, the film shader, an iris transition | LEAD passes every asset on the §9.7 checklist and the scene against §9; the capture becomes the reference (`coordination/reviews/C0_STYLE_REFERENCE.md`); budgets < 2 GB; owner look-over |
+| **C1 Player, ship, space** | The surveyor's full clip set, the Pilgrim (side + top), planet discs for all 8, the painted starfield, the cartoon HUD gauges and Escape Line sign | §9.7 per asset; M1LoopTests pass with the new art; Space < 2 GB, 60 fps |
+| **C2 Planets in cartoon** | In order: Earth, Mars, Mercury, Venus cloud layer, then the gas-giant cloud layers (Jupiter, Saturn), then Uranus and Neptune. Each planet: flora, creatures, props, 3–5 background layers, palette | Per planet: §9.7 on every asset; the planet passes §11.1 v4 (profile after each); gameplay tests unchanged |
+| **C3 UI** | Menus, planet title cards (intertitle slide-in), settings with the Film effects toggle, paper/sign panels, Limelight + Patrick Hand | §9.7; every menu reachable by keyboard; toggle persists in the save |
+| **C4 Profile and playtest build** | Full profile on the laptop, a playtest build | Every planet green on §11.1 v4; owner playtest |
+| ~~**S1 Stage and feel (Earth)**~~ *Cancelled by D-086/D-087: its non-combat parts (stage camera, air dash, squash) carry into C0–C1.* | The stage camera (§5.1), snappy movement with air dash, parry, squash-and-stretch and hit reactions (§4.2 Feel), the seven-layer stage per Earth region with set-pieces and foreground (§10.10), 60 fps surveyor clips, budgets v3 (§11.1) with adjacent-region streaming | `M1LoopTests`, `SmokeTests` and the M2/M3 gameplay tests pass unchanged; jump heights per planet unchanged ± 1 cm; StageCamera, Feel, SquashStretch, StageLayer and Residency tests green; §11.1 v3 green on Earth, Space and Mars (frame time, 4.5 GB, 2.0 GB textures); stage sheets match §9 v3; owner playtest of `Build/MERIDIAN_0.5.0/` |
 | **R2 Earth, Mars, space in 3D** | All M2 content as models and materials: Mars terrain, creatures, props, POIs; planets as spheres in space; day/night and dust storms in 3D; Mars stage layer sets and set-pieces (§10.10) | As M2's exit, plus `M2SoakTests`                                                            |
 | **R3 Inner planets in 3D** | Mercury and Venus, stations, Wardens, both apexes, bases and lamps as models; Mercury and Venus stage layer sets and set-pieces (§10.10) | As M3's exit: `M3InnerTests` pass twice; owner playtest                                   |
 | **M4 The giants (3D)** | As the M4 row, built 3D from the start; the cloud decks as the stage layers (§10.10); the 2D M4 tasks are re-cut after R3 | As the M4 row                                                                             |

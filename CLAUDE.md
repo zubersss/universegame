@@ -1,6 +1,6 @@
 # MERIDIAN — Project Rules (read first, every session)
 
-MERIDIAN is a 2D, realistic-looking survival-exploration game set in our real solar
+MERIDIAN is a 2D survival-exploration game drawn and animated as a 1930s rubber-hose cartoon (Bible §9 v4, D-086; original designs only, no combat, D-087) set in our real solar
 system: Terraria-style side view on each of the 8 planets, top-down view in space, real
 gravity ratios everywhere. Unity 6 (URP 2D Renderer) + Blender-rendered art. Three
 Claude Code sessions build it: LEAD (Lead Director), UNITY (Unity Engineer), BLENDER
@@ -83,6 +83,6 @@ ever overwritten.
 8. **Stay inside the repo.** No system installs, no registry/settings changes; list those
    in your status file for USER_ACTIONS.
 9. **Budgets are requirements** (Bible §11): 60 FPS at 1080p on integrated graphics,
-   ≤ 2.5 GB RAM in the build, and the dev workflow must fit 8 GB.
+   < 2 GB RAM in play (D-089), and the dev workflow must fit 8 GB.
 10. **Status after every task.** Your status file is how the others trust you and how a
     fresh session resumes. Update it when you start a task, finish one, hand off, or block.
