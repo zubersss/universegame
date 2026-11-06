@@ -1,0 +1,25 @@
+{
+  "key": "flora/earth/rigset", "style": "v3", "ppu": 64,
+  "parts": [
+    {"name": "stem", "rect": [0, 0, 32, 128], "pivot": [0.5, 0.0]},
+    {"name": "leaf_l", "rect": [40, 0, 64, 32], "pivot": [1.0, 0.5]},
+    {"name": "leaf_r", "rect": [112, 0, 64, 32], "pivot": [0.0, 0.5]},
+    {"name": "head", "rect": [184, 0, 96, 96], "pivot": [0.5, 0.0]},
+    {"name": "eyes_open", "rect": [0, -136, 64, 24], "pivot": [0.5, 0.5]},
+    {"name": "eyes_blink", "rect": [72, -136, 64, 24], "pivot": [0.5, 0.5]},
+    {"name": "mouth_smile", "rect": [0, -168, 48, 24], "pivot": [0.5, 0.5]},
+    {"name": "mouth_yawn", "rect": [56, -168, 48, 24], "pivot": [0.5, 0.5]},
+    {"name": "mouth_giggle", "rect": [112, -168, 48, 24], "pivot": [0.5, 0.5]}
+  ],
+  "plants": [{
+    "name": "daisy",
+    "bones": [{"name": "root", "part": "stem", "parent": null, "length": 1.0},
+              {"name": "stem2", "part": "stem", "parent": "root", "length": 1.0},
+              {"name": "leaf_left", "part": "leaf_l", "parent": "root", "length": 0.0},
+              {"name": "leaf_right", "part": "leaf_r", "parent": "stem2", "length": 0.0},
+              {"name": "head", "part": "head", "parent": "stem2", "length": 0.75}],
+    "swaps": {"mouth": ["mouth_smile", "mouth_yawn", "mouth_giggle"], "eyes": ["eyes_open", "eyes_blink"]},
+    "idle":  {"type": "sway", "amplitude_deg": 12, "beat_bpm": 110, "squash": 0.08},
+    "react": {"radius_m": 3.0, "action": "turn_look", "swap": "mouth_giggle"}
+  }]
+}

@@ -20,8 +20,13 @@ namespace Meridian.View2D
 
         public const string SurveyorKey = "characters/surveyor/side";
         public const string EarthScene = "plains";
+        /// <summary>Rigged plants around the camp in C0 (every FloraSpacing m, jittered).</summary>
+        public const int FloraCount = 48;
+        public const float FloraSpacing = 2.5f;
 
         public ParallaxLayers Layers { get; private set; }
+        /// <summary>U-097: the planet's rigged flora (placeholder set until B-112).</summary>
+        public Meridian.Flora.FloraRigs Flora { get; private set; }
         public SpriteCharacterView Surveyor { get; private set; }
         public bool Active { get; private set; }
 
@@ -52,6 +57,10 @@ namespace Meridian.View2D
             Layers.gameObject.SetActive(true);
             Layers.view = cam;
             Layers.ConfigureFor(config.id.ToString().ToLowerInvariant(), EarthScene, surfaceDatum);
+            if (Flora == null) { var fgo = new GameObject("CartoonFlora"); fgo.transform.SetParent(transform, false); Flora = fgo.AddComponent<Meridian.Flora.FloraRigs>(); }
+            Flora.view = cam; Flora.player = side.player != null ? side.player.transform : null; Flora.terrain = side.terrain;
+            Flora.Load("flora/" + config.id.ToString().ToLowerInvariant() + "/rigset");
+            Flora.Populate(FloraCount, FloraSpacing, side.spawnX + 0.5f, config.id.GetHashCode() * 31 + 7);
 
             if (side.player != null && Surveyor == null)
             {

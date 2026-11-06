@@ -287,6 +287,7 @@ namespace Meridian.EditorTools
             SetStandaloneFormat(ti, TextureImporterFormat.BC7);
 
             bool frames = sheet != null && sheet.IsSheet;
+            bool multiple = frames || RigSetBuilder.IsRigSet(key); // a rig set's parts are sliced by RigSetBuilder and must stay Multiple
             var pivot = frames && sheet.pivot != null && sheet.pivot.Length == 2 ? new Vector2(sheet.pivot[0], sheet.pivot[1])
                 : ArtRules.SceneKeyOf(key) != null ? new Vector2(0.5f, 0f) : new Vector2(0.5f, 0.5f); // layers stand on their y_m line
             var s = new TextureImporterSettings();
@@ -294,9 +295,9 @@ namespace Meridian.EditorTools
             s.spriteMeshType = tiles ? SpriteMeshType.FullRect : SpriteMeshType.Tight;
             s.spriteAlignment = (int)SpriteAlignment.Custom;
             s.spritePivot = pivot;
-            s.spriteMode = frames ? (int)SpriteImportMode.Multiple : (int)SpriteImportMode.Single;
+            s.spriteMode = multiple ? (int)SpriteImportMode.Multiple : (int)SpriteImportMode.Single;
             ti.SetTextureSettings(s);
-            ti.spriteImportMode = frames ? SpriteImportMode.Multiple : SpriteImportMode.Single;
+            ti.spriteImportMode = multiple ? SpriteImportMode.Multiple : SpriteImportMode.Single;
             return true;
         }
 
@@ -594,6 +595,9 @@ namespace Meridian.EditorTools
                     AddressStage(path, stageKey);
                     continue;
                 }
+                // U-097 (contract §11.3): flora/<planet>/rigset.json is a TextAsset at <key>/json; its sheet re-imports below like any sidecar.
+                if (rel.EndsWith("/rigset.json", StringComparison.Ordinal) && kind != RootKind.None)
+                    AddressStage(path, rel.Substring(0, rel.Length - ".json".Length) + "/json");
                 // U-094 (contract §11.4): a painted scene's backgrounds/<planet>/<scene>/<scene>.json is a TextAsset at that scene key.
                 var sceneJson = V3SceneKey(rel);
                 if (sceneJson != null) { AddressStage(path, sceneJson); continue; }
@@ -645,6 +649,7 @@ namespace Meridian.EditorTools
                 }
                 SliceIfNeeded(colorPath, key);
                 SheetAnimatorBuilder.BuildIfV3(colorPath, key); // U-094: Animator clips at 12 fps + one controller per sheet
+                RigSetBuilder.BuildIfRigSet(colorPath, key);  // U-097: part rects + one sway controller per rig set
                 LinkSecondaries(colorPath, key);
                 materialKeys.Add(key);
                 bool isArt = colorPath.StartsWith(Active.art, StringComparison.Ordinal);

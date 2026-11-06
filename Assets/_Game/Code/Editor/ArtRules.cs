@@ -31,7 +31,7 @@ namespace Meridian.EditorTools
         static readonly Regex FilePattern = new Regex(@"^(?<key>.+)_(?<map>color|normal|emission|mask)\.png$");
 
         public static readonly string[] Categories =
-            { "planets", "terrain", "backgrounds", "ships", "characters", "creatures", "props", "fx", "icons", "ui" };
+            { "planets", "terrain", "backgrounds", "ships", "characters", "creatures", "props", "flora", "fx", "icons", "ui" }; // flora: v3 rig sets (contract §11.3, U-097)
 
         /// <summary>Splits a path relative to a root into key and map. False if the name breaks §1.</summary>
         // U-073 / B-080 (contract v2): block materials, not sprites.
@@ -86,6 +86,7 @@ namespace Meridian.EditorTools
                 case "characters": return new CategoryRule(true, true, false, true, true, false);
                 case "creatures": return new CategoryRule(true, true, false, true, true, false);
                 case "props": return new CategoryRule(true, true, false, true, false, false);
+                case "flora": return new CategoryRule(false, false, false, true, false, false); // v3 rig set parts (U-097)
                 case "fx": return new CategoryRule(false, false, true, false, false, false);
                 default: return new CategoryRule(false, false, true, false, false, false); // icons, ui
             }
@@ -106,6 +107,7 @@ namespace Meridian.EditorTools
                 case "terrain":
                 case "creatures": return "planet_" + second;
                 case "props": return second == "common" ? "common" : "planet_" + second;
+                case "flora": return "planet_" + second;
                 case "backgrounds": return second == "space" ? "space" : "planet_" + second;
                 case "planets": return "space";
                 case "icons": return "icons";
@@ -123,6 +125,7 @@ namespace Meridian.EditorTools
                 case "terrain":
                 case "creatures": return "planet_" + second;
                 case "props": return second == "common" ? "common" : "planet_" + second;
+                case "flora": return "planet_" + second;
                 case "ships":
                 case "characters":
                 case "fx": return "common";

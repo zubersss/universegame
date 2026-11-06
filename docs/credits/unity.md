@@ -33,3 +33,7 @@ domain under **CC0 1.0** (https://creativecommons.org/publicdomain/zero/1.0/).
 Unity packages (URP, Input System, Addressables, Test Framework, Cinemachine, uGUI/TextMeshPro,
 2D Tilemap Extras) are used under the Unity Companion License via `Packages/manifest.json`; no
 third-party code is vendored into `Assets/`.
+
+U-097 (2026-11-06): `com.unity.2d.animation` pinned to 16.0.1, the version bundled with Unity 6000.6.5f1
+(no registry fetch), Unity Companion License; it carries the sprite-bone tooling for the contract §11.3 rig
+sets. The runtime rigs (Code/Runtime/Flora) drive bone Transforms + part sprites and need no package API.

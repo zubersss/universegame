@@ -1,0 +1,100 @@
+﻿using System.IO;
+using System.Linq;
+using Meridian.EditorTools;
+using Meridian.Flora;
+using NUnit.Framework;
+using UnityEditor;
+using UnityEditor.Animations;
+using UnityEngine;
+
+namespace Meridian.Tests
+{
+    /// <summary>U-097 (EditMode): rigset.json parsing per contract Â§11.3 (parts, â‰¤ 6 bones, swaps, idle, react, rejections) and the generated sway clips: stepped at 12 Hz over two beats, one controller per set.</summary>
+    public class RigSetTests
+    {
+        const string Key = "flora/earth/rigset";
+
+        static string LiveJson()
+        {
+            var art = ArtImporter.ArtColorPath(Key);
+            var path = RigSetBuilder.JsonPath(File.Exists(art) ? art : ArtImporter.PlaceholderColorPath(Key));
+            Assert.IsTrue(File.Exists(path), "rigset.json beside the live sheet");
+            return File.ReadAllText(path);
+        }
+
+        [Test]
+        public void ThePlaceholderSetParsesPerTheContract()
+        {
+            var set = RigSet.Parse(LiveJson(), out var error);
+            Assert.IsNull(error, error);
+            Assert.AreEqual("v3", set.style);
+            Assert.AreEqual(64f, set.ppu);
+            Assert.GreaterOrEqual(set.parts.Length, 5, "parts on the sheet");
+            Assert.GreaterOrEqual(set.plants.Length, 1);
+            var plant = set.plants[0];
+            Assert.LessOrEqual(plant.BoneCount, RigSet.MaxBones, "â‰¤ 6 bones");
+            Assert.IsTrue(plant.swaps.ContainsKey("mouth") && plant.swaps["mouth"].Length == 3, "mouth swaps: smile, yawn, giggle");
+            Assert.IsTrue(plant.swaps.ContainsKey("eyes") && plant.swaps["eyes"].Length == 2, "eyes swaps: open, blink");
+            Assert.AreEqual("sway", plant.idle.type);
+            Assert.AreEqual(110f, plant.idle.beat_bpm, 1e-3f);
+            Assert.AreEqual(3f, plant.react.radius_m, 1e-3f);
+            Assert.AreEqual("turn_look", plant.react.action);
+            Assert.NotNull(set.FindPart(plant.react.swap), "the react swap is a part");
+            foreach (var b in plant.bones) if (!string.IsNullOrEmpty(b.part)) Assert.NotNull(set.FindPart(b.part), b.part);
+        }
+
+        [Test]
+        public void BadSetsAreRejectedWithAReason()
+        {
+            Assert.IsNull(RigSet.Parse("{\"parts\": [], \"plants\": []}", out var e1)); StringAssert.Contains("no parts", e1);
+            const string head = "{\"parts\": [{\"name\": \"a\", \"rect\": [0,0,8,8]}], \"plants\": [{\"name\": \"p\", \"bones\": [";
+            string seven = head + string.Join(",", new[] { 0, 1, 2, 3, 4, 5, 6 }.Select(i => $"{{\"name\": \"b{i}\", \"part\": \"a\", \"parent\": {(i == 0 ? "null" : $"\"b{i - 1}\"")}, \"length\": 0.5}}")) + "]}]}";
+            Assert.IsNull(RigSet.Parse(seven, out var e2)); StringAssert.Contains("over 6", e2);
+            Assert.IsNull(RigSet.Parse(head + "{\"name\": \"b0\", \"part\": \"missing\", \"parent\": null}]}]}", out var e3)); StringAssert.Contains("missing part", e3);
+            Assert.IsNull(RigSet.Parse(head + "{\"name\": \"b0\", \"part\": \"a\", \"parent\": null}], \"swaps\": {\"mouth\": [\"nope\"]}}]}", out var e4)); StringAssert.Contains("nope", e4);
+            Assert.IsNull(RigSet.Parse("not json", out var e5)); StringAssert.Contains("invalid", e5);
+        }
+
+        [Test]
+        public void SwayClipsAreSteppedAt12HzOverTwoBeats()
+        {
+            var curve = RigSetBuilder.SwayCurve(12f, 110f, 1, 5);
+            float period = 120f / 110f;
+            Assert.AreEqual(Mathf.RoundToInt(period * 12f) + 1, curve.length, "one key per 1/12 s over two beats, plus the loop key");
+            for (int i = 1; i < curve.length; i++) Assert.AreEqual(1f / 12f, curve[i].time - curve[i - 1].time, 1e-4f, "12 Hz");
+            for (int i = 0; i < curve.length; i++)
+            {
+                Assert.AreEqual(AnimationUtility.TangentMode.Constant, AnimationUtility.GetKeyLeftTangentMode(curve, i), "stepped (left)");
+                Assert.AreEqual(AnimationUtility.TangentMode.Constant, AnimationUtility.GetKeyRightTangentMode(curve, i), "stepped (right)");
+                Assert.LessOrEqual(Mathf.Abs(curve[i].value), 12f / 5f + 1e-4f, "each bone takes its share of the amplitude");
+            }
+            Assert.AreEqual(curve[0].value, curve[curve.length - 1].value, 1e-5f, "seamless loop");
+            var squash = RigSetBuilder.SquashCurve(0.08f, 110f, true);
+            float min = 9f, max = 0f;
+            for (int i = 0; i < squash.length; i++) { min = Mathf.Min(min, squash[i].value); max = Mathf.Max(max, squash[i].value); }
+            Assert.AreEqual(1.08f, max, 1e-3f, "8 % squash up");
+            Assert.AreEqual(0.92f, min, 1e-3f, "and down");
+        }
+
+        [Test]
+        public void TheSetHasOneControllerWithAStatePerPlant()
+        {
+            var set = RigSet.Parse(LiveJson(), out _);
+            var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(RigSetBuilder.ControllerPath(Key));
+            Assert.NotNull(controller, "generated by the importer (RigSetBuilder)");
+            var machine = controller.layers[0].stateMachine;
+            Assert.AreEqual(set.plants.Length, machine.states.Length, "one state per plant");
+            foreach (var plant in set.plants)
+            {
+                var state = System.Array.Find(machine.states, s => s.state.name == plant.name);
+                Assert.NotNull(state.state, plant.name);
+                Assert.AreEqual(12f, ((AnimationClip)state.state.motion).frameRate, "12 fps");
+            }
+            var art = ArtImporter.ArtColorPath(Key);
+            var color = File.Exists(art) ? art : ArtImporter.PlaceholderColorPath(Key);
+            var ti = (TextureImporter)AssetImporter.GetAtPath(color);
+            Assert.AreEqual(SpriteImportMode.Multiple, ti.spriteImportMode, "the sheet is sliced into parts");
+            Assert.AreEqual(64f, ti.spritePixelsPerUnit);
+        }
+    }
+}
