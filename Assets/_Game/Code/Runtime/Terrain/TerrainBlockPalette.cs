@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Meridian.Planets;
 using UnityEngine;
 
@@ -7,14 +7,16 @@ namespace Meridian.Terrain
     /// <summary>
     /// U-073: the per-planet Texture2DArray the block mesh samples (BlockMesher layers: top/side per tile material,
     /// back wall last). Until BLENDER's B-080 block textures exist every layer is a flat placeholder colour with a
-    /// little noise (so faces and edges read in captures). Built once per planet and kept; tiny (8×8 per layer).
+    /// little noise (so faces and edges read in captures). Built once per planet and kept; tiny (8Ã—8 per layer).
     /// </summary>
     public static class TerrainBlockPalette
     {
+        /// <summary>Logs the array build per planet (a U-073 diagnostic; off so test runs with LogAssert stay clean).</summary>
+        public static bool Verbose;
         const int Size = 8;
         static readonly Dictionary<PlanetId, Texture2DArray> cache = new Dictionary<PlanetId, Texture2DArray>();
 
-        /// <summary>Top and side colours of a tile material (placeholder; palettes per Bible §9).</summary>
+        /// <summary>Top and side colours of a tile material (placeholder; palettes per Bible Â§9).</summary>
         public static (Color top, Color side) ColorsOf(byte id) => id switch
         {
             TileId.Soil => (new Color(0.42f, 0.30f, 0.20f), new Color(0.40f, 0.28f, 0.18f)),
@@ -62,7 +64,7 @@ namespace Meridian.Terrain
 
         /// <summary>
         /// B-080: the planet's block material textures (ArtMaterials.blockTextures) copied on the GPU into three arrays
-        /// (colour BC7 sRGB, normal BC5, mask BC7 linear; 512² with mips). Layers the planet doesn't use repeat the
+        /// (colour BC7 sRGB, normal BC5, mask BC7 linear; 512Â² with mips). Layers the planet doesn't use repeat the
         /// back wall. Falls back to the flat placeholder palette when the planet has none or the maps don't match.
         /// Only the current planet's real arrays are kept.
         /// </summary>
@@ -126,7 +128,7 @@ namespace Meridian.Terrain
                 Graphics.CopyTexture(layers[i].normal, 0, a.normal, i);
                 Graphics.CopyTexture(layers[i].mask, 0, a.mask, i);
             }
-            Debug.Log($"[MERIDIAN] block textures for {planet}: {found} faces from the registry, {layers.Length} layers ({wall.color.width}² {wall.color.graphicsFormat})");
+            if (Verbose) Debug.Log($"[MERIDIAN] block textures for {planet}: {found} faces from the registry, {layers.Length} layers ({wall.color.width}Â² {wall.color.graphicsFormat})");
             return a;
         }
 
@@ -177,7 +179,7 @@ namespace Meridian.Terrain
             for (int i = 0; i < px.Length; i++)
             {
                 h ^= h << 13; h ^= h >> 17; h ^= h << 5;
-                float k = 0.92f + (h & 0xFF) / 255f * 0.16f; // ±8% grain
+                float k = 0.92f + (h & 0xFF) / 255f * 0.16f; // Â±8% grain
                 px[i] = new Color(c.r * k, c.g * k, c.b * k, 1f);
             }
         }
