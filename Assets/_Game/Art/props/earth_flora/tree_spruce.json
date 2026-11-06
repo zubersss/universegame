@@ -7,7 +7,7 @@
  "units": "m",
  "origin": "base",
  "triangles": 1616,
- "lod1_triangles": 1244,
+ "lod1_triangles": 778,
  "texture": 2048,
  "maps": [
   "color",
