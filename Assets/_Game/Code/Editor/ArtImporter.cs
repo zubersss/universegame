@@ -142,7 +142,10 @@ namespace Meridian.EditorTools
 
             switch (map)
             {
-                case ArtMap.Color: ConfigureColor(ti, key, rule, w, h); break;
+                case ArtMap.Color:
+                    if (kind == RootKind.Art && IsModelKey(key)) ConfigureModelColor(ti); // U-076: a model map is a plain sRGB texture, not a sprite
+                    else ConfigureColor(ti, key, rule, w, h);
+                    break;
                 case ArtMap.Normal:
                     ti.textureType = TextureImporterType.NormalMap;
                     ti.sRGBTexture = false;
@@ -185,6 +188,18 @@ namespace Meridian.EditorTools
             ti.spriteImportMode = sheet != null ? SpriteImportMode.Multiple : SpriteImportMode.Single;
             // Rects are applied in postprocess (SliceIfNeeded): sprite data written during
             // preprocess is not picked up by the import already in flight.
+        }
+
+        /// <summary>U-076: a model key's color map (beside a .glb, or a model folder's shared atlas): Default/sRGB, mips, trilinear, BC7; no sprite settings.</summary>
+        static void ConfigureModelColor(TextureImporter ti)
+        {
+            ti.textureType = TextureImporterType.Default;
+            ti.sRGBTexture = true;
+            ti.alphaIsTransparency = false;
+            ti.mipmapEnabled = true;
+            ti.filterMode = FilterMode.Trilinear;
+            ti.anisoLevel = 2;
+            SetStandaloneFormat(ti, TextureImporterFormat.BC7);
         }
 
         /// <summary>U-073 / B-080: a block material map: Default/NormalMap texture, mips, repeat, trilinear, BC7/BC5 at 512.</summary>
