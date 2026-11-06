@@ -2,8 +2,8 @@
 # reimports run), EditMode, the BudgetGate profile with the development build and its memory probe
 # (unity_profile.ps1 -Build), then the player smoke set (unity_smoke.ps1), without giving the lock up
 # in between. Use with unity_when_clear.ps1 to wait for the turn. Owner: UNITY.
-# Usage: tools/unity_release.ps1 [-SkipEditMode] [-PlayFilter "A|B"] [-SkipProfile] [-SkipSmoke]
-param([switch]$SkipEditMode, [string]$PlayFilter = '', [switch]$SkipProfile, [switch]$SkipSmoke)
+# Usage: tools/unity_release.ps1 [-SkipEditMode] [-PlayFilter "A|B" | -FullPlayMode] [-SkipProfile] [-SkipSmoke]
+param([switch]$SkipEditMode, [string]$PlayFilter = '', [switch]$FullPlayMode, [switch]$SkipProfile, [switch]$SkipSmoke)
 . (Join-Path $PSScriptRoot 'unity_common.ps1')
 
 try { Enter-HeavyJobLock 'unity_release (compile + EditMode + profile -Build + smoke)' } catch { Write-Host "BLOCKED: $_"; exit 2 }
@@ -19,7 +19,12 @@ try {
         & (Join-Path $PSScriptRoot 'unity_test.ps1') -Mode EditMode
         $code = $LASTEXITCODE
     }
-    if ($code -eq 0 -and $PlayFilter) {
+    if ($code -eq 0 -and $FullPlayMode) {
+        Write-Host '== PlayMode (full suite, U-092)'
+        & (Join-Path $PSScriptRoot 'unity_test.ps1') -Mode PlayMode
+        $code = $LASTEXITCODE
+    }
+    elseif ($code -eq 0 -and $PlayFilter) {
         Write-Host "== PlayMode ($PlayFilter)"
         & (Join-Path $PSScriptRoot 'unity_test.ps1') -Mode PlayMode -Filter $PlayFilter
         $code = $LASTEXITCODE

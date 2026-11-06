@@ -60,6 +60,20 @@ namespace Meridian.Core
                     cam.transform.SetPositionAndRotation(railPos, Quaternion.identity);
                     if (follow != null) { follow.enabled = true; follow.SnapToTarget(); }
                 }
+                // U-092 smoke: the fight zoom (U-087): two wolves within 14 m open the frame to 22 m within 1 s.
+                if (side.creatures != null && side.player != null && side.player.Body != null)
+                {
+                    var feet = side.player.Body.position;
+                    var w1 = side.creatures.Spawn(Meridian.Creatures.Species.GreyWolf, feet + new Vector2(5f, 1f));
+                    var w2 = side.creatures.Spawn(Meridian.Creatures.Species.GreyWolf, feet + new Vector2(-6f, 1f));
+                    yield return Wait(1.3f);
+                    var cf = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+                    Debug.Log($"[MERIDIAN] smoke fight zoom: frame {(cf != null ? cf.Stage.Frame : 0f):F1} m, wolves {(w1 != null ? 1 : 0) + (w2 != null ? 1 : 0)}");
+                    yield return Shot(folder, "smoke_2c_earth_fight_zoom.png");
+                    if (w1 != null) side.creatures.Despawn(w1);
+                    if (w2 != null) side.creatures.Despawn(w2);
+                    yield return Wait(0.3f);
+                }
                 side.dayNight.Override = 0f;
                 yield return Wait(1f);
                 yield return Shot(folder, "smoke_3_earth_night.png");
