@@ -125,6 +125,7 @@ Goal: The v4 2D render path for one Earth surface scene: orthographic side camer
 Accept: EditMode: importer rejects a sheet > 2048, a clip over its cap, fps ≠ 12 (tests); the surveyor placeholder walks at 12 fps (Animator sample rate asserted); parallax offsets match the json factors; PlayMode smoke `smoke_c0_earth` with `LogAssert.NoUnexpectedReceived()`; capture `reports/unity/c0_<date>/earth_c0_placeholder.png`.
 Files: Code/Runtime/Camera/, Code/Runtime/View2D/, Code/Editor/ArtImporter.cs, Settings/, Placeholders/, Scenes/
 Depends: —
+Lead notes: Cycle 233: part 1 noted (2518faf, uncompiled: importer v13, SheetAnimatorBuilder, View2D, CartoonImportTests). One batched check covers U-093 + U-094 part 1 together; the smoke_c0_earth PlayMode test and the capture can follow in a second check with part 2. B-115's film overlays (af18479) and B-110's calibration_v3 sheet are in the tree for the importer tests.
 
 ### U-095 · UNITY · Ready · C0
 Goal: One full-screen film pass (single shader, single blit, URP renderer feature): grain, vignette, drifting dust specks and hairline scratches from the three 512² tiled overlays (`fx/film/*`), brightness flicker ≤ ±2 %, warm/sepia grade; no Bloom, no volumetrics, HDR off. Settings → "Film effects" toggle (default on), saved in settings.
@@ -808,6 +809,7 @@ Goal: The surveyor redesigned (§9.3): an original rubber-hose astronaut with a 
 Accept: §9.7 nine boxes on the review sheet; clips within caps at 12 fps; ≈ 128 px tall at 1x; sheet ≤ 2048.
 Files: blender/sources/characters/surveyor_v3.blend, Assets/_Game/Art/characters/surveyor/
 Depends: B-110 (step 2 only)
+Lead notes: Cycle 233: STEP 1 OK (7915b76, review_b111_surveyor_design_preview.png 12:02). §9.8 pass: fishbowl helmet + plumb-bob antenna + meridian stripe + compass badge + float pack with air hose is ours; pie-cut eyes, gloves and hose limbs are era conventions; nothing from the forbidden list. §9.7 pass on ink, cel, palette, sheet, json. Expressions read at 1x (eye-pop and dizzy stars best). Keep every design choice as drawn. Go to step 2 now: idle 10, walk 12, jump 8, land 8, look_camera ≤ 12 at 12 fps; body ≈ 128 px to the helmet top at 1x (the antenna may add up to 16 px); the float pack must swing behind every move and the air hose must lag it (the secondary motion the sheet promises). Step 2 is a heavy render: gate 1.5 GB, no Editor (D-091).
 
 ### B-112 · BLENDER · Ready · C0
 Goal: One Earth plant with a face (original design, e.g. a yawning meadow flower with leaf hands) as a simple rig: `flora/earth/rigset` per contract §11.3, ≤ 6 bones, swaps for blink / yawn / giggle, sway idle on a 110 bpm beat with 8 % squash, react = turn to look within 3 m. Plus a 12-frame preview loop of the rig in Blender for the review sheet.

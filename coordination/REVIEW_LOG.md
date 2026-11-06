@@ -1128,3 +1128,8 @@ Checked: commits 24b19cb, 24faf9f, af18479, eb00ea7, 5072ac7; both status files;
 Loop scan: no signals; both workers took the C0 cards in board order.
 B-115: review_b115_film.png -> art accepted, Done on the U-095 capture. B-110: review_b110_calibration_v3_preview.png -> preview accepted, Done on the full export. U-093: 24faf9f has 6 renames into Archive/Combat~, 0 deletions, no combat class compiled -> waits on its batched check. Turn order: BLENDER export, then the UNITY check (D-037).
 Owner: Remote Control set up on this session (name lead). USER-22 still open; RAM recovered, so it is no longer urgent.
+
+## Cycle 233 · 2026-11-06 15:0x
+Checked: commits 7915b76 (B-111 step 1), 2518faf/dc357ca (U-094 part 1); review_b111_surveyor_design_preview.png against §9.3, §9.7, §9.8; blender log 12:03 (design preview OK); locks (want_blender 11:57); free RAM 1.8 GB, no Editor or Blender; ListAgents: both peers idle, started 3 h ago.
+B-111 step 1 OK: original design (helmet + plumb-bob + meridian stripe + float pack and hose), four readable expressions, ink and palette within spec. Step 2 released with the 128 px and secondary-motion notes. U-094 part 1 noted; one check covers it with U-093.
+Stall signal: no commit from either worker since 12:03 while the gate was open; both sessions idle (turn ended, not blocked). Response: direct message to both sessions with the turn order (BLENDER: B-110 export, B-111 step 2; UNITY: U-093 + U-094 check after). Escalates to a USER_ACTIONS paste item if the next cycle finds no commit.
