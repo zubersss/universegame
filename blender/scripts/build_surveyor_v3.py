@@ -69,7 +69,7 @@ def spiral(cx, cz, r, turns=2.2, n=40):
 
 def draw_surveyor(d, M, pose=None, seed=0):
     p = dict(view="side", expr="happy", bob=0.0, sz=1.0, lean=0.0, legs=((0.0, 0.0), (0.0, 0.0)),
-             arms=(0.0, 0.0), look=None, blink=0.0, bob_tip=0.0)
+             arms=(0.0, 0.0), look=None, blink=0.0, bob_tip=0.0, pack_swing=0.0, pack_dz=0.0, hose_lag=0.0, puff=0.0)
     p.update(pose or {})
     view, expr = p["view"], p["expr"]
     face_dir = {"side": 1.0, "tq": 0.55, "front": 0.0}[view]
@@ -132,17 +132,24 @@ def draw_surveyor(d, M, pose=None, seed=0):
     # float pack: on the back (side: behind at -x; tq: peeks out left; front: hidden but straps)
     if view in ("side", "tq"):
         px = -0.36 if view == "side" else -0.33
-        pack = X(G.lumpy_ellipse(px, 0.92, 0.17, 0.25, n=32, lump=0.04, seed=seed + 51))
+        strap = X1(px + 0.02, 1.14)
+        sw, pdz = p["pack_swing"], p["pack_dz"]
+
+        def PK(pts):                                # the pack hangs from its strap: swing + bounce
+            cs, sn = math.cos(sw), math.sin(sw)
+            return [(strap[0] + (x - strap[0]) * cs - (z - strap[1]) * sn, strap[1] + (x - strap[0]) * sn + (z - strap[1]) * cs + pdz)
+                    for x, z in pts]
+        pack = PK(X(G.lumpy_ellipse(px, 0.92, 0.17, 0.25, n=32, lump=0.04, seed=seed + 51)))
         G.stroke(d, pack, M["red"], O, cyclic=True)
-        lo = [q for q in pack if q[1] < X1(px, 0.80)[1]]
+        lo = [q for q in pack if q[1] < PK([X1(px, 0.80)])[0][1]]
         if len(lo) > 3:
             G.stroke(d, lo, M["red_sh"], 0.0, cyclic=True)
             G.stroke(d, pack, M["ink"], O, cyclic=True)
-        dial = X1(px - 0.02, 1.00)
+        dial = PK([X1(px - 0.02, 1.00)])[0]
         G.stroke(d, G.lumpy_ellipse(dial[0], dial[1], 0.055, 0.055, n=18, seed=seed + 52), M["mustard"], I, cyclic=True)
         # rubber air hose from the pack top to the helmet back
-        a, b = X1(px + 0.02, 1.14), X1(-0.28 if view == "side" else -0.22, 1.30)
-        c = ((a[0] + b[0]) / 2 - 0.12, (a[1] + b[1]) / 2 + 0.02)
+        a, b = PK([strap])[0], X1(-0.28 if view == "side" else -0.22, 1.30)
+        c = ((a[0] + b[0]) / 2 - 0.12 - p["hose_lag"], (a[1] + b[1]) / 2 + 0.02 - 0.5 * abs(p["hose_lag"]))
         G.stroke(d, G.hose_outline(G.bezier(a, c, b, n=10), 0.06), M["teal"], O, cyclic=True)
     leg(1, legs[1][0], legs[1][1], False)
 
@@ -243,21 +250,101 @@ def draw_surveyor(d, M, pose=None, seed=0):
     G.stroke(d, [(hc[0] + hr * 0.78 * math.cos(2.95), hc[1] + hr * 0.78 * math.sin(2.95))], M["glint"], I)
     # antenna + plumb bob (drags behind by bob_tip)
     base = (hc[0] - 0.05 * face_dir, hc[1] + hr * 0.97)
-    tip = (base[0] - p["bob_tip"] - 0.02, base[1] + 0.27)
-    G.stroke(d, G.bezier(base, (base[0] + 0.05, base[1] + 0.13), tip, n=10), M["ink"], I)
+    tip = (base[0] - p["bob_tip"] - 0.02, base[1] + 0.17)
+    G.stroke(d, G.bezier(base, (base[0] + 0.04, base[1] + 0.09), tip, n=10), M["ink"], I)
     G.stroke(d, G.lumpy_ellipse(tip[0], tip[1] + 0.01, 0.10, 0.06, n=16, lump=0.03, seed=seed + 7)[:9] + [(tip[0] - 0.06, tip[1] - 0.05), (tip[0], tip[1] - 0.17), (tip[0] + 0.06, tip[1] - 0.05)], M["teal"], O, cyclic=True)
     if expr == "dizzy":
         for k in range(3):
             a = 0.6 + 2.1 * k
             G.stroke(d, star(hc[0] + 0.52 * math.cos(a), hc[1] + 0.30 + 0.12 * math.sin(a), 0.08, rot=a, seed=k),
                      M["star"], I, cyclic=True)
+    # landing smoke puffs: round cartoon clouds rolling out from both boots
+    if p["puff"] > 0:
+        t = p["puff"]
+        for k, side in enumerate((-1, 1)):
+            for j in range(2):
+                r = (0.07 + 0.05 * j) * (0.6 + 0.8 * t)
+                cx = side * (0.30 + 0.28 * t + 0.14 * j)
+                G.stroke(d, G.lumpy_ellipse(cx, r * 0.9 + O * 1.25 + 0.02 * t, r, r * 0.85, n=20, lump=0.06,
+                                            seed=seed + 101 + 2 * k + j), M["glove"], O, cyclic=True)
 
 
 DESIGN = [("side", "happy"), ("front", "happy"), ("tq", "happy"),
           ("front", "surprised"), ("front", "determined"), ("front", "dizzy"), ("side", "surprised")]
+DESIGN_OUT = os.path.join(os.path.dirname(HERE), "sources", "characters", "surveyor_v3_design.blend")
+
+# characters/surveyor/side clips (contract §11.2 caps; LEAD cycle 233 counts)
+CLIPS = [("idle", 10), ("walk", 12), ("jump", 8), ("land", 8), ("look_camera", 12)]
+TAU = 2 * math.pi
+
+
+def idle_pose(i):
+    ph = TAU * i / 10
+    return dict(sz=1.0 + 0.045 * math.cos(ph), bob=0.012 * math.cos(ph),
+                arms=(0.10 * math.sin(ph), -0.10 * math.sin(ph)),
+                pack_swing=0.05 * math.sin(ph - 1.2), pack_dz=-0.02 * math.cos(ph - 1.2),
+                hose_lag=0.03 * math.sin(ph - 2.0), bob_tip=0.035 * math.sin(ph - 1.6),
+                blink={7: 0.6, 8: 1.0}.get(i, 0.0))
+
+
+def walk_pose(i):
+    ph = TAU * i / 12
+    legs = tuple((0.26 * math.sin(ph + math.pi * k), max(0.0, 0.15 * math.cos(ph + math.pi * k))) for k in range(2))
+    return dict(legs=legs, bob=0.07 * abs(math.cos(ph)) - 0.02, sz=1.0 + 0.055 * math.cos(2 * ph), lean=0.08,
+                arms=(0.75 * math.sin(ph), -0.75 * math.sin(ph)),
+                pack_swing=0.12 * math.sin(2 * ph - 1.0) + 0.06, pack_dz=0.03 * math.cos(2 * ph - 1.0),
+                hose_lag=0.05 * math.sin(2 * ph - 1.8), bob_tip=0.06 + 0.04 * math.sin(2 * ph - 1.4),
+                look=(0.6, 0.0))
+
+
+# jump: crouch, launch stretch, rise, tuck at the apex (the climb itself is physics)
+JUMP = [dict(sz=0.78, bob=-0.06, legs=((-0.06, 0.0), (0.06, 0.0)), arms=(-0.6, -0.4), pack_swing=0.10, pack_dz=0.04, hose_lag=0.04, bob_tip=0.02),
+        dict(sz=1.28, bob=0.04, legs=((-0.08, 0.10), (0.04, 0.05)), arms=(2.6, 2.4), pack_swing=-0.20, pack_dz=-0.08, hose_lag=-0.06, bob_tip=-0.06),
+        dict(sz=1.20, bob=0.05, legs=((-0.06, 0.16), (0.06, 0.12)), arms=(2.5, 2.3), pack_swing=-0.16, pack_dz=-0.07, hose_lag=-0.07, bob_tip=-0.08),
+        dict(sz=1.10, bob=0.06, legs=((-0.04, 0.22), (0.08, 0.20)), arms=(2.2, 2.0), pack_swing=-0.08, pack_dz=-0.04, hose_lag=-0.05, bob_tip=-0.05),
+        dict(sz=1.02, bob=0.06, legs=((-0.10, 0.26), (0.12, 0.24)), arms=(1.6, 1.4), pack_swing=0.02, pack_dz=0.00, hose_lag=-0.01, bob_tip=0.0),
+        dict(sz=0.98, bob=0.06, legs=((-0.12, 0.28), (0.14, 0.26)), arms=(1.3, 1.1), pack_swing=0.06, pack_dz=0.02, hose_lag=0.02, bob_tip=0.03),
+        dict(sz=1.00, bob=0.06, legs=((-0.12, 0.28), (0.14, 0.26)), arms=(1.2, 1.0), pack_swing=0.04, pack_dz=0.01, hose_lag=0.03, bob_tip=0.02),
+        dict(sz=1.00, bob=0.06, legs=((-0.11, 0.27), (0.13, 0.25)), arms=(1.25, 1.05), pack_swing=0.02, pack_dz=0.0, hose_lag=0.02, bob_tip=0.01)]
+
+# land: contact squash with a smoke puff, overshoot, settle; pack keeps falling, then catches up
+LAND = [dict(sz=0.70, bob=-0.08, legs=((-0.16, 0.0), (0.16, 0.0)), arms=(1.2, 1.0), pack_swing=0.05, pack_dz=-0.10, hose_lag=-0.08, bob_tip=-0.06, puff=0.15),
+        dict(sz=0.76, bob=-0.07, legs=((-0.15, 0.0), (0.15, 0.0)), arms=(0.9, 0.7), pack_swing=0.14, pack_dz=-0.06, hose_lag=-0.05, bob_tip=0.06, puff=0.40),
+        dict(sz=0.88, bob=-0.04, legs=((-0.12, 0.0), (0.12, 0.0)), arms=(0.5, 0.3), pack_swing=0.18, pack_dz=0.0, hose_lag=0.02, bob_tip=0.08, puff=0.65),
+        dict(sz=1.06, bob=0.01, legs=((-0.08, 0.0), (0.08, 0.0)), arms=(0.2, 0.0), pack_swing=0.08, pack_dz=0.04, hose_lag=0.05, bob_tip=0.04, puff=0.85),
+        dict(sz=0.98, bob=0.0, legs=((-0.06, 0.0), (0.06, 0.0)), arms=(0.05, -0.05), pack_swing=-0.03, pack_dz=0.01, hose_lag=0.02, bob_tip=-0.02, puff=1.0),
+        dict(sz=1.01, bob=0.0, arms=(0.0, 0.0), pack_swing=0.02, pack_dz=0.0, hose_lag=-0.01, bob_tip=0.01),
+        dict(sz=1.0, bob=0.0, pack_swing=-0.01, hose_lag=0.01),
+        dict(sz=1.0, bob=0.0)]
+
+
+def look_pose(i):
+    """Stop, turn to the camera, a pleased blink and a little wave of the plumb bob, turn back."""
+    view = ["side", "tq", "front", "front", "front", "front", "front", "front", "front", "front", "tq", "side"][i]
+    sz = [1.0, 1.04, 1.06, 1.0, 1.0, 1.02, 1.0, 1.0, 1.0, 1.0, 1.03, 1.0][i]
+    return dict(view=view, sz=sz, blink={6: 0.6, 7: 1.0}.get(i, 0.0), look=(0.0, 0.1) if view == "front" else None,
+                bob_tip=[0.0, 0.05, 0.08, -0.04, 0.03, -0.02, 0.01, 0.0, 0.0, 0.0, -0.05, -0.02][i],
+                pack_swing=[0.0, 0.06, 0.08, -0.03, 0.02, 0.0, 0.0, 0.0, 0.0, 0.0, -0.06, -0.02][i])
 
 
 def build(out=DEFAULT_OUT):
+    """characters/surveyor/side: the step-2 clips, one drawing per frame at 12 fps."""
+    scene = G.new_scene()
+    coll = G.collection("surveyor")
+    ob, gp = G.gp_object("surveyor", coll)
+    M = materials(gp)
+    layer = gp.layers.new("art")
+    poses = [idle_pose(i) for i in range(10)] + [walk_pose(i) for i in range(12)] + JUMP + LAND + \
+        [look_pose(i) for i in range(12)]
+    for f, pose in enumerate(poses):
+        draw_surveyor(G.drawing(layer, f + 1), M, pose, seed=7 * f)
+    G.mark_clips(scene, CLIPS)
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    bpy.ops.wm.save_as_mainfile(filepath=out)
+    return out
+
+
+def build_design(out=DESIGN_OUT):
     scene = G.new_scene()
     coll = G.collection("surveyor")
     ob, gp = G.gp_object("surveyor", coll)
