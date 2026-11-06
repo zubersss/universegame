@@ -455,6 +455,22 @@ namespace Meridian.Tests
         }
 
         [Test]
+        public void StageLayersAreCappedAt700MegabytesStoredPerPlanet()
+        {
+            // U-091 (contract §10): which keys count as a planet's stage layers, and how their stored size is estimated.
+            Assert.IsTrue(ArtRules.IsStageLayer("backgrounds/earth_forest/ridge_mid", out var p) && p == "earth", "a region band");
+            Assert.IsTrue(ArtRules.IsStageLayer("backgrounds/earth/clouds", out p) && p == "earth", "the planet's cloud strip");
+            Assert.IsTrue(ArtRules.IsStageLayer("props/mars_foreground/atlas", out p) && p == "mars", "the foreground atlas");
+            Assert.IsFalse(ArtRules.IsStageLayer("backgrounds/space/layer0", out _), "space is not a planet");
+            Assert.IsFalse(ArtRules.IsStageLayer("props/earth_flora/tree_oak", out _), "flora is not a layer");
+            Assert.AreEqual(2048L * 2048L * 4L / 3L, ArtRules.StoredBytes(2048, 2048), "BC7/BC5 with mips: 1 byte per texel × 4/3");
+            Assert.AreEqual(700L * 1024L * 1024L, ArtRules.LayerCapBytes);
+            // The sandbox has no layers: the sum is 0 and a first 2048² layer passes.
+            Assert.AreEqual(0L, ArtImporter.StageLayerBytes("earth", ""));
+            Assert.Less(ArtRules.StoredBytes(2048, 2048), ArtRules.LayerCapBytes);
+        }
+
+        [Test]
         public void ModelMapsStreamMipsAndAnAtlasImportedBeforeItsModelsIsReimported()
         {
             // P-36 (U-077): a model map streams its mips, a sheet does not, belt asteroids never (RenderMeshInstanced).

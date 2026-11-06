@@ -21,10 +21,12 @@ try { Enter-HeavyJobLock $jobName } catch { Write-Host "BLOCKED: $_"; exit 2 }
 try {
     if (-not $SkipGate) {
         $env:MERIDIAN_PROFILE_REPORT = $report
+        $env:MERIDIAN_FREE_RAM_MB = [int]((Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1024)  # D-083: free RAM before the Editor launches
         $unityArgs = @('-runTests', '-testPlatform', 'PlayMode', '-assemblyNames', 'MERIDIAN.Tests.Play',
             '-testFilter', 'Meridian.Tests.BudgetGateTests', '-testResults', $xml)
         $r = Invoke-UnityBatch $unityArgs "unity_profile_$stamp.log" -Graphics
         Remove-Item Env:\MERIDIAN_PROFILE_REPORT -ErrorAction SilentlyContinue
+        Remove-Item Env:\MERIDIAN_FREE_RAM_MB -ErrorAction SilentlyContinue
         Write-Host "Log: $($r.Log)"
     }
     if ($Build) {
@@ -77,7 +79,7 @@ if ($runProbe) {
         if ($l.prevGroup) {
             $resOk = ([int]$l.prevHandles -eq 0)
             if (-not $resOk) { $memRed = $true }
-            $rows += "| Residency $dot $($l.leg) (dev build) | previous planet released within 5 s (v3) | $($l.prevGroup) handles $($l.prevHandles) after $($l.prevWait) s; resident: $($l.resident) | $(if ($resOk) { 'green' } else { 'red' }) |"
+            $rows += "| Residency $dot $($l.leg) (dev build) | previous planet released within 5 s (v3) | $($l.prevGroup) handles $($l.prevHandles) after $($l.prevWait) s (holders: $($l.holders)); resident: $($l.resident) | $(if ($resOk) { 'green' } else { 'red' }) |"
         }
     }
     if (Test-Path $report) {

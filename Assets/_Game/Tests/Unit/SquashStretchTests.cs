@@ -11,8 +11,8 @@ namespace Meridian.Tests
 
         static float RunCurve(SquashStretch s, out float min, out float max, out int steps)
         {
-            min = 10f; max = 0f; steps = 0;
-            float worst = 0f;
+            min = s.Factor; max = s.Factor; steps = 0;
+            float worst = Mathf.Abs(s.Scale.x * s.Scale.y * s.Scale.z - 1f);
             while (s.Active)
             {
                 var v = s.Step(Dt);
@@ -45,10 +45,8 @@ namespace Meridian.Tests
             s.Land(1.5f);
             Assert.IsFalse(s.Active, "no squash below 2 m/s");
             s.Land(4f);
-            s.Step(0f);
             Assert.AreEqual(Mathf.Lerp(1f, 0.7f, 0.5f), s.Factor, 0.01f, "4 m/s: halfway between 1.0 and 0.7");
             s.Land(7f);
-            s.Step(0f);
             Assert.AreEqual(0.7f, s.Factor, 0.001f, "0.7 at once at ≥ 6 m/s");
             float t = 0f;
             while (s.Active) { s.Step(Dt); t += Dt; }

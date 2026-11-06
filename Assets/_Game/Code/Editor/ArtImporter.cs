@@ -168,6 +168,16 @@ namespace Meridian.EditorTools
                 return;
             }
 
+            // U-091 (contract §10): a planet's stage-layer textures stay under 700 MB stored; the newest layer over the cap is rejected.
+            if (kind == RootKind.Art && ArtRules.IsStageLayer(key, out var layerPlanet))
+            {
+                long stored = StageLayerBytes(layerPlanet, assetPath) + ArtRules.StoredBytes(w, h);
+                if (stored > ArtRules.LayerCapBytes)
+                {
+                    Debug.LogError($"[ArtImporter] Rejected {assetPath}: {layerPlanet}'s stage layers would store {stored / 1048576} MB, over the 700 MB cap (contract §10).");
+                    return;
+                }
+            }
             var rule = ArtRules.RuleFor(key);
             // U-060 (ArtCompressionProbe): Unity stores a non-power-of-two texture with mipmaps UNCOMPRESSED
             // (RGBA32/RGB24, ~4× the memory) whatever the BC7/BC5 setting, because its smaller mips stop being
@@ -291,6 +301,43 @@ namespace Meridian.EditorTools
                 dirty = true;
             }
             if (dirty) { EditorUtility.SetDirty(reg); AssetDatabase.SaveAssetIfDirty(reg); }
+        }
+
+        /// <summary>U-091: stored bytes of every stage-layer PNG of `planet` already in Art/ (IHDR dimensions), `except` one path.</summary>
+        public static long StageLayerBytes(string planet, string except)
+        {
+            long sum = 0;
+            foreach (var root in new[] { Active.art + "backgrounds", Active.art + "props" })
+            {
+                if (!Directory.Exists(root)) continue;
+                foreach (var file in Directory.GetFiles(root, "*.png", SearchOption.AllDirectories))
+                {
+                    var path = ArtRules.Normalize(file);
+                    if (path == ArtRules.Normalize(except)) continue;
+                    if (Classify(path, out var rel) != RootKind.Art || !ArtRules.TryParse(rel, out var k, out _)) continue;
+                    if (!ArtRules.IsStageLayer(k, out var p) || p != planet) continue;
+                    if (PngSize(path, out int pw, out int ph)) sum += ArtRules.StoredBytes(pw, ph);
+                }
+            }
+            return sum;
+        }
+
+        /// <summary>Width and height from a PNG's IHDR chunk (no decode).</summary>
+        static bool PngSize(string path, out int width, out int height)
+        {
+            width = height = 0;
+            try
+            {
+                using (var f = File.OpenRead(path))
+                {
+                    var b = new byte[24];
+                    if (f.Read(b, 0, 24) < 24) return false;
+                    width = (b[16] << 24) | (b[17] << 16) | (b[18] << 8) | b[19];
+                    height = (b[20] << 24) | (b[21] << 16) | (b[22] << 8) | b[23];
+                    return width > 0 && height > 0;
+                }
+            }
+            catch (IOException) { return false; }
         }
 
         static void SetStandaloneFormat(TextureImporter ti, TextureImporterFormat format)

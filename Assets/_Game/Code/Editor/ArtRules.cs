@@ -21,6 +21,8 @@ namespace Meridian.EditorTools
     {
         public const int PixelsPerUnit = 128;
         public const int MaxDimension = 2048;
+        /// <summary>U-091 (contract §10): a planet's stage-layer textures, all regions, ≤ 700 MB stored (BC7/BC5 with mips).</summary>
+        public const long LayerCapBytes = 700L * 1024L * 1024L;
         public const long MaxFileBytes = 4L * 1024 * 1024;
         public const int DefaultPaddingPx = 8;
 
@@ -144,6 +146,35 @@ namespace Meridian.EditorTools
             if (width > MaxDimension || height > MaxDimension) return $"{width}×{height} exceeds {MaxDimension}×{MaxDimension}";
             return null;
         }
+
+        /// <summary>
+        /// U-091 (contract §10): the key is a stage-layer texture of `planet`: backgrounds/<planet>/… (rocks atlas, clouds, sky),
+        /// backgrounds/<planet>_<region>/… (ridge, hills, skyline, set-pieces) or props/<planet>_foreground/… (the foreground atlas).
+        /// </summary>
+        public static bool IsStageLayer(string key, out string planet)
+        {
+            planet = null;
+            var category = ArtKeys.Category(key);
+            var second = Segment(key, 1);
+            if (category == "backgrounds")
+            {
+                foreach (PlanetId id in System.Enum.GetValues(typeof(PlanetId)))
+                {
+                    var p = id.ToString().ToLowerInvariant();
+                    if (second == p || second.StartsWith(p + "_", System.StringComparison.Ordinal)) { planet = p; return true; }
+                }
+                return false;
+            }
+            if (category == "props" && second.EndsWith("_foreground", System.StringComparison.Ordinal))
+            {
+                planet = second.Substring(0, second.Length - "_foreground".Length);
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>Stored size of a BC7/BC5 texture with mips: 1 byte per texel × 4/3 (both formats are 8 bits per texel).</summary>
+        public static long StoredBytes(int width, int height) => (long)width * height * 4L / 3L;
 
         /// <summary>Default pivot when neither the sheet .json nor blender/manifest.json gives one.</summary>
         public static Vector2 DefaultPivot(string key, int height)

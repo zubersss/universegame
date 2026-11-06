@@ -10,7 +10,7 @@ namespace Meridian.Tests
     /// <summary>U-032: clip choice by priority (the sheet-registry check moved to U-075, D-069).</summary>
     public class SurveyorAnimTests
     {
-        static AnimInputs Still() => new AnimInputs { grounded = true, sinceHurt = 99f, sinceLand = 99f, sinceDig = 99f };
+        static AnimInputs Still() => new AnimInputs { grounded = true, sinceHurt = 99f, sinceLand = 99f, sinceDig = 99f, sinceHitReact = 99f, sinceJump = 99f, sinceParryHit = 99f };
 
         [Test]
         public void PicksByPriority()

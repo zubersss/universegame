@@ -13,16 +13,29 @@ namespace Meridian.Perf
     {
         public const string Session = "session";
 
-        struct Entry { public string group; public AsyncOperationHandle handle; }
+        struct Entry { public string group, key; public AsyncOperationHandle handle; }
         static readonly List<Entry> entries = new List<Entry>(256);
         static readonly List<string> groups = new List<string>(8);
 
-        public static void Track(string key, AsyncOperationHandle handle) => Track(handle, GroupOf(key));
+        public static void Track(string key, AsyncOperationHandle handle) => Track(handle, GroupOf(key), key);
 
-        public static void Track(AsyncOperationHandle handle, string group)
+        public static void Track(AsyncOperationHandle handle, string group, string key = null)
         {
             if (!handle.IsValid()) return;
-            entries.Add(new Entry { group = group, handle = handle });
+            entries.Add(new Entry { group = group, key = key ?? group, handle = handle });
+        }
+
+        /// <summary>The keys still held in a planet's groups, with counts (reports only: allocates). U-091 evidence.</summary>
+        public static string Holders(string planetGroup)
+        {
+            Prune();
+            var counts = new Dictionary<string, int>();
+            foreach (var e in entries)
+                if (PlanetOf(e.group) == planetGroup) counts[e.key] = counts.TryGetValue(e.key, out var n) ? n + 1 : 1;
+            var parts = new List<string>(counts.Count);
+            foreach (var kv in counts) parts.Add(kv.Value > 1 ? kv.Key + " x" + kv.Value : kv.Key);
+            parts.Sort(string.CompareOrdinal);
+            return parts.Count == 0 ? "none" : string.Join(", ", parts);
         }
 
         /// <summary>Live handles into `group` ("planet_earth", "common", …).</summary>
@@ -46,13 +59,41 @@ namespace Meridian.Perf
             return string.Join(", ", groups);
         }
 
-        /// <summary>True when every resident planet group is `currentPlanetGroup` (common, ui, icons, space and session are always allowed).</summary>
+        /// <summary>
+        /// True when no other planet's groups are resident. A planet's groups are "planet_<name>" and "planet_<name>_<suffix>"
+        /// (props/mars_flora → planet_mars_flora); "planet_warden", "planet_waystation" and "planet_space" are not planets.
+        /// common, ui, icons, space and session are always allowed.
+        /// </summary>
         public static bool OnlyPlanet(string currentPlanetGroup)
         {
             Prune();
             foreach (var e in entries)
-                if (e.group.StartsWith("planet_", System.StringComparison.Ordinal) && e.group != currentPlanetGroup) return false;
+            {
+                var other = PlanetOf(e.group);
+                if (other != null && other != currentPlanetGroup) return false;
+            }
             return true;
+        }
+
+        /// <summary>"planet_<name>" when `group` belongs to a planet (its own group or a suffixed one), else null.</summary>
+        public static string PlanetOf(string group)
+        {
+            if (group == null || !group.StartsWith("planet_", System.StringComparison.Ordinal)) return null;
+            foreach (Meridian.Planets.PlanetId id in System.Enum.GetValues(typeof(Meridian.Planets.PlanetId)))
+            {
+                var g = PlanetGroup(id);
+                if (group == g || group.StartsWith(g + "_", System.StringComparison.Ordinal)) return g;
+            }
+            return null;
+        }
+
+        /// <summary>Live handles into any of a planet's groups (its own and the suffixed ones).</summary>
+        public static int CountPlanet(string planetGroup)
+        {
+            Prune();
+            int n = 0;
+            foreach (var e in entries) if (PlanetOf(e.group) == planetGroup) n++;
+            return n;
         }
 
         public static string PlanetGroup(Meridian.Planets.PlanetId id) => "planet_" + id.ToString().ToLowerInvariant();

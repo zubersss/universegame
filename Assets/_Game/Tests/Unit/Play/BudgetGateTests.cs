@@ -141,7 +141,9 @@ namespace Meridian.Tests
             while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
             for (int i = 0; i < 60; i++) yield return new WaitForFixedUpdate();
             Assert.NotNull(BudgetMonitor.Instance, "BudgetMonitor in Core");
-            notes.Add($"Load during measurement (D-019/D-083): {OtherHeavyJobs()}; free RAM at start {ProcessMemory.FreeSystemMB()} MB; Unity Editor processes {UnityEditorProcesses()}");
+            // D-083: the wrapper measures free RAM before the Editor launches (MERIDIAN_FREE_RAM_MB); inside the Editor the number is already spent.
+            var freeAtStart = Environment.GetEnvironmentVariable("MERIDIAN_FREE_RAM_MB");
+            notes.Add($"Load during measurement (D-019/D-083): {OtherHeavyJobs()}; free RAM at start {(string.IsNullOrEmpty(freeAtStart) ? "n/a (no wrapper)" : freeAtStart + " MB")} (in-Editor now {ProcessMemory.FreeSystemMB()} MB); Unity Editor processes {UnityEditorProcesses()}");
 
             // ---- Earth, idle ----
             var side = director.PlanetSide;
@@ -215,13 +217,13 @@ namespace Meridian.Tests
             // U-086 (Bible §11.1 v3 Residency): the previous planet's groups release within 5 s of the transition; only the
             // current planet's groups (+ common, ui, icons, space; "session" = TerrainTileSet.Preload) stay resident.
             float resT0 = Time.realtimeSinceStartup;
-            int earthHandles = Residency.Count("planet_earth");
-            while (earthHandles > 0 && Time.realtimeSinceStartup - resT0 < 5f) { yield return null; earthHandles = Residency.Count("planet_earth"); }
+            int earthHandles = Residency.CountPlanet("planet_earth");
+            while (earthHandles > 0 && Time.realtimeSinceStartup - resT0 < 5f) { yield return null; earthHandles = Residency.CountPlanet("planet_earth"); }
             float resWait = Time.realtimeSinceStartup - resT0;
             // D-083: the row reads "pending U-091" until U-091 closes; its measurement is U-091's evidence, not a gate failure.
             bool resOk = earthHandles == 0 && Residency.OnlyPlanet("planet_mars");
             Info("Residency · after Mars entry", "previous planet released within 5 s; only the current planet + common/ui/icons/space resident (v3)",
-                $"planet_earth handles {earthHandles} after {resWait:F1} s; resident: {Residency.ResidentGroups()}",
+                $"planet_earth handles {earthHandles} after {resWait:F1} s (holders: {Residency.Holders("planet_earth")}); resident: {Residency.ResidentGroups()}",
                 resOk ? "green (pending U-091)" : "pending U-091 (D-083): would be red");
             yield return Measure("Mars", side.sideCamera, BudgetMonitor.DrawCallsSide, (a, b) => { gc = a; r = b; });
             Judge("Mars", gc, r, BudgetMonitor.DrawCallsSide);
@@ -350,7 +352,8 @@ namespace Meridian.Tests
             int n = 0;
             foreach (var p in System.Diagnostics.Process.GetProcessesByName("Unity"))
             {
-                try { if (p.MainModule != null && p.MainModule.FileName.Contains("Editor")) n++; } catch (Exception) { n++; }
+                // D-015: the Hub's always-on unity.exe is not an Editor; count only Hub\Editor installs, and never a process we cannot read.
+                try { if (p.MainModule != null && p.MainModule.FileName.IndexOf(@"\Hub\Editor\", StringComparison.OrdinalIgnoreCase) >= 0) n++; } catch (Exception) { }
                 p.Dispose();
             }
             return n;

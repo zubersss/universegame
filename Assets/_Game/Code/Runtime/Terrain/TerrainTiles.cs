@@ -39,7 +39,7 @@ namespace Meridian.Terrain
         public const int ChunkSize = 32;
         public const int TilesPerChunk = ChunkSize * ChunkSize;
         /// <summary>Chunks within this Chebyshev distance of the camera's chunk stay resident (Bible §10.4).</summary>
-        public const int ResidentRadius = 2;
+        public const int ResidentRadius = 3; // U-091 (budgets v3): chunks within 3 of the camera stay resident (was 2)
         /// <summary>Main-thread budget for applying generated chunks, per frame (Bible §11.1).</summary>
         public const double ApplyBudgetMs = 2.0;
         /// <summary>Bands are planned against this soft limit so one unexpected slow band still lands under ApplyBudgetMs.</summary>

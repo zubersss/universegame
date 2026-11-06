@@ -121,8 +121,8 @@ namespace Meridian.Perf
             if (prevGroup != null)
             {
                 float t0 = Time.realtimeSinceStartup;
-                prevHandles = Residency.Count(prevGroup);
-                while (prevHandles > 0 && Time.realtimeSinceStartup - t0 < 5f) { yield return null; prevHandles = Residency.Count(prevGroup); }
+                prevHandles = Residency.CountPlanet(prevGroup);
+                while (prevHandles > 0 && Time.realtimeSinceStartup - t0 < 5f) { yield return null; prevHandles = Residency.CountPlanet(prevGroup); }
                 prevWait = Time.realtimeSinceStartup - t0;
             }
             monitor.ResetWindow();
@@ -130,7 +130,7 @@ namespace Meridian.Perf
             var s = monitor.Snapshot(cam);
             lines.AppendLine($"{{\"leg\":\"{where}\",\"systemMB\":{s.systemMemoryMB},\"textureMB\":{s.textureMemoryMB},\"audioMB\":{s.audioMemoryMB}," +
                              $"\"avgFrameMs\":{s.avgFrameMs.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}," +
-                             $"\"workingSetMB\":{s.workingSetMB},\"meshMB\":{s.meshMemoryMB},\"resident\":\"{Residency.ResidentGroups()}\",\"prevGroup\":\"{prevGroup}\",\"prevHandles\":{prevHandles},\"prevWait\":{prevWait.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}}}");
+                             $"\"workingSetMB\":{s.workingSetMB},\"meshMB\":{s.meshMemoryMB},\"resident\":\"{Residency.ResidentGroups()}\",\"prevGroup\":\"{prevGroup}\",\"prevHandles\":{prevHandles},\"holders\":\"{(prevGroup != null ? Residency.Holders(prevGroup).Replace("\"", "'") : "")}\",\"prevWait\":{prevWait.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}}}");
             TopTextures(where, 15);
         }
 

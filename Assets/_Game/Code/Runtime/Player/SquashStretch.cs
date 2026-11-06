@@ -32,7 +32,18 @@ namespace Meridian.Player
             count = 0;
         }
 
-        void Add(float at, float value) { keys[count].t = at; keys[count].v = value; count++; }
+        void Add(float at, float value)
+        {
+            keys[count].t = at; keys[count].v = value; count++;
+            if (count == 1) Apply(value); // the event frame shows the first key at once (a landing is 0.7 on the touchdown frame)
+        }
+
+        void Apply(float f)
+        {
+            Factor = f;
+            float side = 1f / Mathf.Sqrt(Mathf.Max(0.01f, f));
+            Scale = Dashing ? new Vector3(f, side, side) : new Vector3(side, f, side);
+        }
 
         /// <summary>At the jump: the crouch anticipation, then the take-off stretch.</summary>
         public void TakeOff()
@@ -83,9 +94,8 @@ namespace Meridian.Player
                     break;
                 }
             }
-            Factor = f;
-            float side = 1f / Mathf.Sqrt(Mathf.Max(0.01f, f));
-            Scale = Dashing && count > 0 ? new Vector3(f, side, side) : new Vector3(side, f, side);
+            if (count == 0) Dashing = false;
+            Apply(f);
             return Scale;
         }
     }

@@ -117,9 +117,15 @@ namespace Meridian.CameraRig
             float prevX = X;
             // Inside the dead zone a standing player never drags the camera; a moving one is followed at once so the
             // look-ahead builds up, with the camera never faster than the player + 2 m/s.
-            if (moving || Mathf.Abs(X - desired) > DeadZone)
+            if (moving)
             {
-                rel = Mathf.SmoothDamp(rel, look, ref relVel, FollowTime, Mathf.Infinity, dt);
+                rel = look; // the look-ahead itself eases over 0.6 s; the speed cap below keeps the motion smooth
+                relVel = 0f;
+                X = i.playerX + rel;
+            }
+            else if (Mathf.Abs(X - desired) > DeadZone)
+            {
+                rel = Mathf.SmoothDamp(rel, look, ref relVel, FollowTime, Mathf.Infinity, dt); // a standing player outside the zone: the 0.25 s follow
                 X = i.playerX + rel;
             }
             else relVel = 0f;
@@ -156,16 +162,9 @@ namespace Meridian.CameraRig
             if (!floorDropped || landedFollow) { goal = yFloor; heldFloor = floorS; }
             float banded = Mathf.Clamp(goal, pc - half, pc + half);
             if (banded != goal) { goal = banded; heldFloor = floorS; }
-            if (landedFollow)
-            {
-                Y = Mathf.SmoothDamp(Y, goal, ref yVel, FallFollowTime, Mathf.Infinity, dt);
-                if (Mathf.Abs(goal - Y) < 0.02f) { landedFollow = false; yVel = 0f; }
-            }
-            else
-            {
-                Y = Mathf.MoveTowards(Y, goal, VerticalMaxSpeed * dt);
-                yVel = 0f;
-            }
+            Y = Mathf.MoveTowards(Y, goal, VerticalMaxSpeed * dt);
+            yVel = 0f;
+            if (landedFollow && Mathf.Abs(goal - Y) < 0.02f) landedFollow = false; // the frame is back on the stage floor after the long fall
         }
 
         void StepShake(float dt)
