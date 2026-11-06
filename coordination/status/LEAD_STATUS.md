@@ -1,5 +1,5 @@
 # LEAD STATUS
-Updated: 2026-11-06 01:4x · Session: 4 (Fable 5.1), resumed after the 01:2x restart · Review cycle: 226
+Updated: 2026-11-06 01:4x · Session: 4 (Fable 5.1), resumed after the 01:2x restart · Review cycle: 227
 ## Current task
 Owner change request applied (cycle 220, D-076..D-081): Bible v3 sections (§4.2 Feel, §5.1 Stage camera, §9 v3, §10.10, §11.1/§11.2 v3, §12 S1), contract v2.5 (§10 Stage layers), tasks U-086..U-092 and B-103..B-108. Now: confirm peer roles, then the review cycle.
 ## Last completed
@@ -11,7 +11,7 @@ none open. Contract v2.6 (D-082). Budgets v3 (D-077); D-083 pending rows + conte
 ## Waiting on the user
 nothing. USER-20 done 10:16 (gate open). The R1 playtest item comes with the R1 report.
 ## Loop / stall watch
-UNITY: u078 capture running (lock 10:44:40); then ONE profile re-run under the gate (D-083) -> R1 close if Earth + the three contention rows are green. BLENDER on B-103 (clips), no lock. Watch: the re-run must start with >= 1.5 GB free and no blender.exe; if it stays red, it is a regression (v12 or ring fix) and R1 holds. BLENDER window runs Opus 5.5 from 10:1x (owner).
+UNITY: u078 capture accepted (cycle 227); the gate-clean profile re-run started 11:1x -> R1 close (U-077 + U-078 Done) if Earth + the three contention rows are green; then its U-087..U-089 check. BLENDER on B-103 (clips), no lock. Watch: the re-run must start with >= 1.5 GB free and no blender.exe; if it stays red, it is a regression (v12 or ring fix) and R1 holds. BLENDER window runs Opus 5.5 from 10:1x (owner).
 ## Session addresses (ListAgents, 11-06 01:28)
 UNITY = zuber-c7 (confirmed 10:1x), BLENDER = zuber-04 (confirmed 10:3x; it still calls itself zuber-29). This session: zuber-38.
 ## HeavyJobLock

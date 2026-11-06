@@ -1101,3 +1101,6 @@ Checked: logs/blender_2026-11-06.log line 89 (tree_spruce 10:44, LOD1 778 per 23
 
 ## Cycle 226 · 2026-11-06 11:0x (UNITY status)
 U-089 committed uncompiled (518ce28): SquashStretch, PlayerView Visual root, hit reactions, two new smoke legs (23 shots), tests. U-087/U-088/U-089 all in the tree uncompiled; the running profile compiles them (a break shows in UNITY's next status line). P-37 decided: D-084, jump instant, crouch drawn over the rise; Bible §4.2 reworded. UNITY's next check: PlayMode StageCamera|Feel|Squash|FxTests|PlayerPlayTests|CreatureTests|M1LoopTests after the capture and the profile re-run. UNITY has two local commits not yet pushed (its job).
+
+## Cycle 227 · 2026-11-06 11:1x (UNITY message)
+Checked: coordination/reports/unity/u078_2026-11-06/capture_u078_1_saturn.png and _5_earth_luna.png (10:47, 123aa95). U-078 art accepted (lit spheres, terminators, clean rings, atmosphere rim, Luna, waystation, belt). B-090 -> Done (its Done condition was this capture). U-078 and U-077 close together on the profile re-run (started 11:1x at 2.7 GB free, one Unity process, no blender, no want: a gate-clean run per D-083), then UNITY's U-087..U-089 check with the agreed filter. UNITY pushed its local commits. No signals.
