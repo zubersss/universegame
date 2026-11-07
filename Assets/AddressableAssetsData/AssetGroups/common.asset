@@ -285,6 +285,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a541c069ddd0685478734423dcdfb924
+    m_Address: characters/surveyor/side/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a73a2fa04abd32d4aab12c5b39621655
     m_Address: props/common/float_cell_pack_mk1
     m_ReadOnly: 0

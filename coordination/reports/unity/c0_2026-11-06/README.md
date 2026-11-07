@@ -67,3 +67,16 @@ stay 3D until U-100.
 - WardenPlayTests' flake found and fixed on the way: the sentinel was moved by `MovePosition` from Update, which at high
   Editor frame rates re-aimed the same step every frame (the body position changes only at physics steps); it now
   steers through a kinematic velocity.
+
+## U-100 (round 2) · U-101 (18:2x–18:4x)
+
+- `earth_c0_ground.png` (18:38): no block texture in the frame: the strip slice per column, a flat dirt fill (a tile cut
+  from the strip sheet) down to the frame bottom, an ink edge down each step, and a shaded flat back wall inside a dug
+  column. GroundStrip is 113 lines. Check (18:3x): compile 0/0, EditMode 279/279, PlayMode 11/11 incl. TerrainTests.
+- `strip/contact_sheet.png` + `strip/still_00..39.png` (U-101 `CaptureC0Strip`): 20 s at 2 stills/s, 6 × 7 at 320 px,
+  idle → walk → jump/land → walk back past a plant → look_camera. Runs on whatever art the keys hold (U-098 swaps art in).
+- Gate (`perf_2026-11-06.md`, 18:4x, BUDGETGATE GREEN), Earth C0 (cartoon) leg: working set 763 MB (< 2.0 GB, D-089),
+  frame time avg 5.23 / p99 9.62 ms, 155 draw calls, animated objects 38 (≤ 40; flora full rate 38, cheap 10, 48 plants),
+  sprite atlases 1 planet_earth* (≤ 8). The textures row now counts v3 assets apart (no mips by contract §11.8).
+- One gull (Species.Gull, B-113) is spawned over the camp on the cartoon path; it is small and flees, so it is not
+  guaranteed to be inside every frame.
