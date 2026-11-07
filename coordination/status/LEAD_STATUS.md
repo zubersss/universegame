@@ -1,5 +1,6 @@
 # LEAD STATUS
-Updated: 2026-11-06 23:4x · Session: 6 · Review cycle: 247 · Cadence: every 30 min (owner; session cron a3a2c2aa)
+Updated: 2026-11-06 23:47 · Session: 6 · Review cycle: 248 · Cadence: every 30 min (owner; session cron a3a2c2aa)
+Cycle 248 (tick): nothing Ready; UNITY mid-wiring (icon keys, fonts, importer, Addressable groups in the tree), BLENDER on the C2 plant rig sources; locks empty, 2.62 GB free; no nudge needed.
 Cycle 247: both hand-offs verified. U-107, U-108, U-105, B-126 Done; B-121 / B-122 / B-128 exports verified; U-091 checked with one red row → D-114 warm baseline, re-run next; U-109 climb sky added; U-103 / U-104 released to wire the drawn rig and the HUD. Owner page updated in place (Round 2 before/after) → USER-24. Next: UNITY's C1 wiring batch hand-off (drawn ship captures, HUD capture, warm-leg probe, climb sky), then U-106 → C1_REPORT.md.
 Cycle 246: B-119 + B-120 art accepted and exports verified; B-121 / B-122 / B-128 previews accepted; U-103 scout answers; the Escape Line sign is lettered by UNITY at runtime; D-112 live ranks; D-113 status files ≤ 12 KB. BLENDER nudged (idle 50 min).
 Cycle 245: B-125 Done; U-107 landed (two owed fixes, batched with U-108); D-110 U-091 rulings; D-111 Pilgrim rig set (B-122/U-103 rewritten); B-128; C2 Earth plant designs approved.
