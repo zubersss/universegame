@@ -216,7 +216,12 @@ def draw_pressure_crab(d, M, pose=None, seed=0):
     for k in range(4):                                                                    # shell plate ridges + vent-orange flecks
         x = -0.28 + 0.18 * k
         G.seam(db, G.bezier((x, 0.16), (x + 0.04, cz + 0.06), (x + 0.02, cz + rz * 0.95 * math.sqrt(max(0.0, 1 - (x / rx) ** 2))), n=6), M["ink"])
-    G.specks(db, [(-0.2, cz + 0.08), (0.05, cz + 0.12), (0.25, cz + 0.02)], M["ink"])
+    for k, (x, z, r) in enumerate(((-0.18, cz + 0.12, 0.07), (0.04, cz + 0.16, 0.06), (0.22, cz + 0.08, 0.05))):   # sulphur crust
+        G.stroke(db, G.lumpy_ellipse(x, z, r * 1.3, r * 0.8, n=12, lump=0.15, seed=seed + 30 + k), M["sulphur_f"], 0.0, cyclic=True)
+    lit = [q for q in shell if q[1] > cz + rz * 0.55 and q[0] < 0.1]
+    if len(lit) > 2:                                                                      # a cream rim lit from above (reads on black basalt)
+        G.stroke(db, G.hose_outline(lit, 0.025), M["cream_f"], 0.0, cyclic=True)
+    G.specks(db, [(-0.2, cz + 0.02), (0.05, cz + 0.05), (0.25, cz - 0.02)], M["ink"])
     G.stroke(db, [(-0.36, 0.16), (0.36, 0.16)], M["ink"], I)
     G.stroke(db, shell, M["ink"], O, cyclic=True)
     K.legs_pass(d, M, B, spec, p, far=False)
@@ -225,7 +230,7 @@ def draw_pressure_crab(d, M, pose=None, seed=0):
         root = (0.32 + 0.04 * k, 0.22 - 0.02 * k)
         el = (root[0] + 0.14 * math.cos(a), root[1] + 0.14 * math.sin(a) * (1 - t))
         G.stroke(db, G.hose_outline([root, el], 0.05), M["basalt_b"], I, cyclic=True)
-        claw = G.lumpy_ellipse(el[0] + 0.04, el[1] + 0.02, 0.06, 0.04, n=14, lump=0.05, seed=seed + 10 + k, rot=a)
+        claw = G.lumpy_ellipse(el[0] + 0.05, el[1] + 0.02, 0.085, 0.055, n=14, lump=0.05, seed=seed + 10 + k, rot=a)
         G.stroke(db, claw, M["vent"], O, cyclic=True)
         G.seam(db, [(el[0] + 0.02, el[1] + 0.02), (el[0] + 0.09, el[1] + 0.03)], M["ink"])
     if t < 0.8:                                                                           # the eyes on the stalks
@@ -306,8 +311,8 @@ def draw_vent_eel(d, M, pose=None, seed=0):
     if e is not None:                                                                     # at the vent: rises behind its rim
         hx, hz = 0.08 + 0.03 * e, max(0.20 + 0.40 * e + p["bob"], 0.18)
         spine = G.bezier((hx - 0.02, hz - 0.04), (hx - 0.06, hz - 0.2), (0.0, 0.2), (-0.02, 0.10), n=12)
-        eel_body(d, M, spine, 0.075, 0.07, seed)
-        dk = G.Xf(d, K.turn((hx - 0.06, hz - 0.03), p["head_rot"], (0.0, 0.0), K.scale_about((hx, hz), 1.2)))
+        eel_body(d, M, spine, 0.11, 0.10, seed)
+        dk = G.Xf(d, K.turn((hx - 0.06, hz - 0.03), p["head_rot"], (0.0, 0.0), K.scale_about((hx, hz), 1.45)))
         eel_head(dk, M, hx, hz, p, seed)
         return
     B = K.Body(p, (0.0, 0.1))
@@ -316,12 +321,12 @@ def draw_vent_eel(d, M, pose=None, seed=0):
     for i in range(20):                                                                   # an S-wave slither along the ground
         t = i / 19
         x = 0.62 - 1.45 * t
-        z = 0.09 + 0.05 * max(0.0, math.sin(p["wave"] - 6.0 * t)) * t + 0.12 * p["curl"] * math.sin(math.pi * t)
+        z = 0.135 + 0.05 * max(0.0, math.sin(p["wave"] - 6.0 * t)) * t + 0.12 * p["curl"] * math.sin(math.pi * t)
         spine.append((x, z))
-    eel_body(db, M, spine, 0.075, 0.025, seed)
+    eel_body(db, M, spine, 0.11, 0.035, seed)
     H = K.turn((0.62, 0.1), p["head_rot"], p["head"], B)
-    hx, hz = 0.70, 0.13
-    dk = G.Xf(G.Xf(d, H), K.scale_about((hx, hz), 1.2))
+    hx, hz = 0.70, 0.15
+    dk = G.Xf(G.Xf(d, H), K.scale_about((hx, hz), 1.45))
     eel_head(dk, M, hx, hz, p, seed)
 
 
@@ -337,7 +342,8 @@ def eel_poses():
     out += [dict(hole=1.0, eye_pop=1.3), dict(hole=1.12, eye_pop=1.6, mouth=0.5), dict(hole=0.7, eye_pop=1.3, mouth=0.3),
             dict(hole=0.35, eye_pop=1.2), dict(hole=0.12, eye_pop=1.35, look=(0.6, 0.0)), dict(hole=0.12, look=(0.9, 0.0)),
             dict(hole=0.1, blink=1.0), dict(hole=0.15, look=(0.3, 0.0))]                  # react: duck behind the vent rim
-    out += [dict(q, rock=0.4 * q.get("rock", 0.0), shift=0.5 * q.get("shift", 0.0)) for q in K.bump_clip()]
+    out += [dict(q, rock=0.4 * q.get("rock", 0.0), shift=0.5 * q.get("shift", 0.0),          # the big low head: a smaller drop
+                 head=(q.get("head", (0.0, 0.0))[0], 0.3 * q.get("head", (0.0, 0.0))[1])) for q in K.bump_clip()]
     for i in range(10):                                                                   # idle_open: a pause in the open, curling
         ph = TAU * i / 10
         _ph, q = K.idle_common(i, 10)
@@ -398,13 +404,16 @@ def preview(out_dir, name="sulfur_drifter"):
         sp = SPECIES[name]
         fw, fh = sp["frame"]
         piv = sp.get("pivot", (0.5, 0.0))
-        frames, widths = [], []
+        frames, widths, below = [], [], []
         for f, pose in enumerate(sp["poses"]()):
             gp = fakegp.FakeGP()
             M = mats(gp, name)
             d = fakegp.FakeDrawing()
             sp["draw"](d, M, pose, seed=5 * f)
-            img, w = GR.render_frame(fakegp.strokes_of(d, gp, as_object=(name, "art")), fw, fh, 64, piv, ss=4, seed=sp["seed"] * 1000 + f + 1)
+            st = fakegp.strokes_of(d, gp, as_object=(name, "art"))
+            if piv[1] == 0.0 and min(float((s_["xz"][:, 1] - s_["radius"] * 1.2).min()) for s_ in st) * 64 < -2.0:
+                below.append(f)                                                            # feet-pivot creatures: the ground line
+            img, w = GR.render_frame(st, fw, fh, 64, piv, ss=4, seed=sp["seed"] * 1000 + f + 1)
             frames.append(img)
             widths += w
         cols = v3.columns_for(fw, len(frames))
@@ -420,9 +429,12 @@ def preview(out_dir, name="sulfur_drifter"):
         meta = {"key": f"creatures/venus/{name}", "style": "v3", "frame_width": fw, "frame_height": fh, "columns": cols, "gutter": 4,
                 "frames": len(frames), "fps": 12, "pivot": list(piv), "facing": "right", "ppu": 64, "animations": anims, "squash_root": True}
         problems = v3.validate_sheet(meta, sheet.shape)
-        clipped = [i for i, im in enumerate(frames) if im[:2, :, 3].any() or im[-2:, :, 3].any() or im[:, :2, 3].any() or im[:, -2:, 3].any()]
+        bottom = piv[1] != 0.0                                                             # centre pivots: all four edges; walkers: sides + top
+        clipped = [i for i, im in enumerate(frames) if im[:2, :, 3].any() or (bottom and im[-2:, :, 3].any()) or im[:, :2, 3].any() or im[:, -2:, 3].any()]
         if clipped:
             problems.append(f"frames {clipped[:8]} touch the 2 px edge")
+        if below:
+            problems.append(f"frames {below[:8]} below the ground line")
         dd = os.path.join(out_dir, "b147_venus")
         os.makedirs(dd, exist_ok=True)
         png = os.path.join(dd, f"{name}_color.png")
