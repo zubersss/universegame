@@ -1,0 +1,23 @@
+{
+  "key": "planets/earth/luna_near",
+  "style": "v3",
+  "frame_width": 356,
+  "frame_height": 356,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "ppu": 24.0,
+  "space_ppu": 24.0,
+  "radius_u": 7,
+  "radius_px": 168.0,
+  "near_of": "planets/earth/luna",
+  "scale_vs_far": 8.0,
+  "animations": [],
+  "note": "D-128: the far disc's frame 0 at 8.00x for near-range zoom (DiscSprite swaps above ~6x); a static frame"
+}

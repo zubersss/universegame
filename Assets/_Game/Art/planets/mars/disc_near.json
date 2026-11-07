@@ -1,0 +1,23 @@
+{
+  "key": "planets/mars/disc_near",
+  "style": "v3",
+  "frame_width": 512,
+  "frame_height": 512,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "ppu": 14.4706,
+  "space_ppu": 14.4706,
+  "radius_u": 17,
+  "radius_px": 246.0,
+  "near_of": "planets/mars/disc",
+  "scale_vs_far": 4.8235,
+  "animations": [],
+  "note": "D-128: the far disc's frame 0 at 4.82x for near-range zoom (DiscSprite swaps above ~6x); a static frame"
+}
