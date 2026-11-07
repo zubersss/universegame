@@ -1,22 +1,24 @@
 # UNITY STATUS
-Updated: 2026-11-07 14:58 · Session: 8 (resumed 14:3x after a break; session 7's detail is in git log and coordination/status/archive/UNITY_2026-11-07.md)
+Updated: 2026-11-07 15:08 · Session: 8 (resumed 14:3x after a break; session 7's detail is in git log and coordination/status/archive/UNITY_2026-11-07.md)
 ## Current task
-U-124 C3 UI (with U-102), lock-free code. Started 14:4x. U-102 is in (fba6d92b: the settings panel, volumes, Film toggle moved in, SettingsTests ×3 + MenuHudTests +1; it compiled clean in the 14:52 capture's Editor run, its tests run in the U-124 check). U-124 in progress: the importer's 9-slice rule (`slice` [l, t, r, b] → Sprite.border, FullRect), ArtKeys.Ui panel / card / switch keys, UiPaper (paper on the pause card, settings, inventory, catalogue = scroll, crafting = sign; text to ink on the paper), TitleCard (the intertitle slide-in after the entry's iris), the Film switch art on its row; committed ahead of its check so B-151 exports behind it.
+U-125 Venus on the cartoon stage, lock-free code (LEAD 273 order: after the C3 code). Started 15:08.
+U-124 + U-102 code in and checked: f550e3f8 (+ f263fca3, two CS0618 in the new capture fixed). Lock 15:03:37–15:05:26 (1.8 min, released): compile 0 errors (the two warnings fixed after), EditMode 367/367 (SettingsTests ×3, PaperUiTests ×5, P-48's GroundStrip assert). Owed: B-151's export (BLENDER) → one lock = the PlayMode slice (MenuHudTests incl. PaperPanelsOpenAndCloseFromTheKeyboard + SettingsOpenFromBothMenus…) + CaptureU124Ui (u124/: the three title cards on their planets, pause, settings, inventory, catalogue scroll, crafting sign) → U-102, U-124 to LEAD; then U-132 (Build 0.4.5 + smoke).
 ## Last completed
-U-123 Mercury hand-off (14:58): one lock 14:51:06–14:55:25 (4.3 min): the 13-leg probe on Build/MERIDIAN_0.4.4 BUILD MEMORY GREEN (Mercury load 0.75 s, working set 922 MB, private 1256 MB, textures 315 MB, entry 1.01 s, released on return; Creep 7 MB per visit, green, every Unity counter 0 per visit incl. the Mono heap and the native reserve; first-visit 7.2 MB; Film pass ~0 ms) + U-131 (CaptureU123Mercury 14:55 on B-165's RGBA strips with P-48: the 64 px join phase gone, worst phase 1.8 levels vs 10.9 / 12.8 max before). Earlier: captures 14:05, BudgetGate 14:08 green, P-48 228687c0, Build 0.4.4 BUILD OK 14:15 (550 MB); commits 9b213611, the README / perf / frames below.
+U-123 + U-131 Done (LEAD cycle 272, bff29043): Mercury on the cartoon stage, the 0.4.4 probe green on 13 legs (Creep 7 MB, a watch row), B-165's joins gone.
 ## Next up
-U-124 + U-102 check (compile + EditMode, then the MenuHud slice) → B-151 exports behind the committed code → the U-124 captures (the panels, a title card per planet) → U-125 Venus.
+B-151 → the U-124 PlayMode slice + captures → U-132 Build 0.4.5 + smoke; U-125 Venus code now; U-126 floe caps (lock-free); U-127 Jupiter after U-125.
 ## Ready for review
-U-123 (with B-148, B-149, B-150): coordination/reports/unity/c2_mercury/README.md (the check, the captures, the 0.4.4 probe). U-131: B-165's joins gone (README § U-131; u123/u131_band_2x.png).
+(none until the U-124 captures)
 ## Handoffs
-→ LEAD: B-165 can close on U-131 (the RGBA gutters + P-48 clear the joins on the night frame).
+→ BLENDER (via LEAD): U-124's code is in (f550e3f8): B-151 can export; the importer reads `slice` [l, t, r, b] on a single image; the title cards draw 1:1 (1600×452 fits); the Film switch reads its parts `off` / `on` by name.
 ## Blockers
 (none)
 ## Proposals
-P-50: U-124's paper map: pause = a 640×560 card behind the pause buttons; settings, inventory as named; the catalogue takes the scroll (a parchment record), the crafting panel the wooden sign; on paper the panel's own text turns to ink (buttons and cells keep theirs). LEAD redirects if another use is meant for sign / scroll.
+(none open; P-50 yes, LEAD 272)
+Note: with a panel open the UI's default Navigate also reads A / D, which walk the surveyor; the menus stop the gameplay maps, the in-game panels don't. Harmless (the selection moves with the walk); a later card if LEAD wants the panels to pause the walk.
 ## For USER_ACTIONS
 (none)
 ## Housekeeping
 Editor churn in the tree from the cut runs (TMP font asset, animator.controllers, UnderwaterTint.mat, link.xml.meta, two InitTestScene files): never staged; my commits list files explicitly.
 ## HeavyJobLock
-none held (released 14:55:25); no want on file (BLENDER's 14:52 want goes next).
+none held (released 15:05:26); no want on file (BLENDER's want goes next; mine follows B-151's export).
