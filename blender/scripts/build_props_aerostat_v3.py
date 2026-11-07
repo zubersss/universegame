@@ -253,7 +253,7 @@ def main(out, imgs=None, widths=None, stamp_paths=()):
         notes.append(f"{name}: palette {hits * 100:.0f}%, json {'valid' if not problems else problems}")
         x += big.shape[1] + 24
     rows.append(r)
-    scene = np.tile(bg, (420, W, 1))
+    scene = np.tile(bg, (520, W, 1))                                                       # room for the 128 px strut under the deck
     base_y = 330
     deck = imgs["aerostat_deck"][0]
     for c in range(4):                                                                     # a 4-module deck (8 m)

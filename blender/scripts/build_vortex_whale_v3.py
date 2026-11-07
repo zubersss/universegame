@@ -281,8 +281,12 @@ def preview(out_dir, scale=0.25, path=None, stamp="preview (not exported)"):
     sys.path.insert(0, os.path.dirname(HERE))
     import review
     import preview_c2_earth_rigs as PR
-    img, widths = render_pose(*pose_idle(0), scale=scale)
-    widths = [(a / scale, b / scale, c / scale) for a, b, c in widths]
+    img, _w = render_pose(*pose_idle(0), scale=scale)
+    gp = fakegp.FakeGP()                                                       # ink + palette measured at 1x on the head alone
+    M = mats(gp)                                                               # (below ~0.5x the raster clamps every line to >= 1 px)
+    d = fakegp.FakeDrawing()
+    PARTS["head"](d, M)
+    head1x, widths = GR.render_frame(fakegp.strokes_of(d, gp, as_object=("vortex_whale", "art")), 960, 704, 64, (0.08, 0.5), ss=2, seed=3)
     W = img.shape[1] + 200
     rows = []
     head = np.tile(review.PAPER, (30, W, 1)).astype(np.float32)
@@ -318,7 +322,7 @@ def preview(out_dir, scale=0.25, path=None, stamp="preview (not exported)"):
             rows.append(row)
     outer = [w for w in widths if w[0] >= v3.OUTER_SPLIT]
     inner = [w for w in widths if w[0] < v3.OUTER_SPLIT]
-    hits, off = v3.palette_hits(img, "jupiter")
+    hits, off = v3.palette_hits(head1x, "jupiter")
     foot = np.tile(review.PAPER, (50, W, 1)).astype(np.float32)
     review._label(foot, f"ink at 1x outer {min(w[1] for w in outer):.1f}-{max(w[2] for w in outer):.1f} px, interior {min(w[1] for w in inner):.1f}-"
                         f"{max(w[2] for w in inner):.1f} px; jupiter palette {hits * 100:.1f}% {off[:3]}; parts: {', '.join(PARTS)}", 6, 8)
