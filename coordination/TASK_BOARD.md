@@ -22,11 +22,12 @@ When the lock frees, the highest pending job here goes next, even if the other r
 older (D-037 alternation applies only between equal ranks). A rank is live only while its role
 has a want on file or holds the lock (D-112): if the top rank has no want when the lock frees,
 the next live rank runs now and the skipped role goes next after it files. A role below the top
-keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 260 (06:0x; the lock is free, 1.36 GB free (under the 1.5 GB gate at the tick); UNITY's C2 batch A code commit 1 is in (43fe88e9) and its commit 2 + U-121 are coded; BLENDER's four exports (B-136, B-140, B-141, B-131) are verified and it has no heavy job queued). A role files its want only when the queue says it is next after the running job:
-1. UNITY · batch A: commit 2 (U-121 flip + guard, the swimmers, the disc_near swap, the pending-keys watcher, B-131's orphan metas) → one check when free RAM is above the gate (compile + EditMode incl. the prop-sheet rule on B-131's six sheets; PlayMode A / B incl. M1LoopTests ×2 on the cartoon path) → the profile -Build re-run → Build/MERIDIAN_0.4.1 → the hand-off with captures (the camp at 1x, stag / wolf / bear, the swimmers in the coast water, space_6 near) and the re-measured C1 Earth rows → USER-26's play part released.
-2. BLENDER · one slot ≤ 5 min when the lock is free with no UNITY want and RAM allows: the B-145 Mercury backdrop studies (day / twilight / night, FFT); otherwise lock-free.
-3. UNITY · batch B (U-110, U-111, U-116, U-119, the U-115 follow-up) → check → hand-off; then U-118 Mars promoted; B-142 + B-144 exports after U-118's code (`replaces_v2` on the Mars models).
-4. BLENDER · the Mercury strip + rig set exports when the Mercury cards open (after U-118).
+keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 261 (06:3x; the lock is free, 1.9 GB free; UNITY is between its PlayMode halves (A 44/54 at 06:04, B 53/63 at 06:14: 17 reds, ruled D-133) and their fixes; BLENDER's four memory-gated runs can go now). A role files its want only when the queue says it is next after the running job:
+1. BLENDER · now, lock-free with the lock free (each run measured, one at a time): the Mercury rig dry run, the backdrop stub smoke test, the Glassback and Cinderling full reviews; then one slot ≤ 5 min for the Mercury backdrop studies, only if UNITY's want is not yet on file.
+2. UNITY · the D-133 fixes (five regressions + the 3D-path tests set explicit or rewritten) → EditMode + the PlayMode halves again → the captures (the camp at 1×, stag / wolf / bear + the swimmers, space_6) → the profile -Build → Build/MERIDIAN_0.4.1 → commit 2 with the c1 README's Earth rows replaced → USER-26's play part released.
+3. UNITY · batch B (U-110, U-111, U-116, U-119, the U-115 follow-up) → check → hand-off; then U-118 Mars promoted; B-142 + B-144 exports after U-118's code.
+4. BLENDER · the Mercury strip + rig set exports when the Mercury cards open; B-146 / B-147 previews meanwhile.
+
 
 
 
@@ -56,11 +57,11 @@ Then one batched check per hand-off when your turn in the queue comes (compile +
 
 
 **BLENDER** (numpy / scripts only while UNITY holds the lock or a want; bpy only under your own lock; under 0.3 GB free, code only; otherwise one item per measured run beside the other role's job, under ~150 MB)
-- B-145 Mercury creatures 2–4 in your list's order: the Shadewyrm with its ice-burrow den as a separate prop (D-126), the Glassback, the Cinderling (faces kept, no teeth; one measured process each).
-- The Mercury rig-set sources (`flora/mercury/rigset` in the Earth manner from the five accepted plants, ≤ 6 bones, swaps, `biomes`) and a dry run, ready for the Mercury cards.
-- B-142 rows complete (the lurker `idle_open`, the mound, the two `replaces_v2` rows) and a scratch-tree dry run; B-144's rows are done.
-- The Mercury backdrop study sources (day: blinding regolith under an ink-black sky; twilight: the violet band; night: the slate side with the lit station), so the FFT run is one slot call.
-- `c2_mercury_designs.md` to the accepted state (palette, five plants, the Flarewing); README upkeep.
+- The four pending runs (now, the lock is free and RAM is 1.9 GB): the Mercury rig dry run, the backdrop stub smoke test, the Glassback and Cinderling full reviews (the files `review_glassback.png` / `review_cinderling.png` in blender/preview are 10-31 model renders, not these designs: name the new ones `review_b145_mercury_<name>_preview.png`).
+- B-146 C3 UI art designs: paper panels as 9-slice sheets (the pause / settings / inventory frames, a sign, a scroll), the planet title cards for Earth, Mars and Mercury (≤ 1920×540, Limelight lettering drawn as ink), the Film-effects toggle's switch; previews only.
+- B-147 Venus design prep (C2 order 4; Bible §7.4 the dive world): the palette with the Mars checks, the cloud-layer backdrop study notes (the aerostat deck strip, the sulphur haze), five faceless plants for the deck and the surface, the creature re-ink list; nothing exported.
+- The Mercury backdrop studies' slot script (one call, ≤ 5 min) ready; `c2_mercury_designs.md` and README upkeep.
+
 
 
 
@@ -293,7 +294,7 @@ Goal: The cartoon path on by default (D-132, P-48): `CartoonStage.Enabled` defau
 Accept: the build boots Earth on the cartoon stage (a PlayMode assert and the build's first-frame log line); M1LoopTests 2 of 2 green on the cartoon path; the profile's Earth rows re-measured and green (the boot row's result reported either way, U-120 owns it if red); Build/MERIDIAN_0.4.1 plays; no capture changes needed.
 Files: Code/Runtime/View2D/CartoonStage.cs, Code/Runtime/Planet/, Tests/, tools/unity_profile.ps1
 Depends: U-106
-Lead notes: Cycle 259 (05:5x, D-132). First in C2 batch A; the owner's playtest (USER-26) waits for 0.4.1. If the loop tests fail on the cartoon path, stop and report: C1 reopens in full.
+Lead notes: Cycle 259 (05:5x, D-132). First in C2 batch A; the owner's playtest (USER-26) waits for 0.4.1. If the loop tests fail on the cartoon path, stop and report: C1 reopens in full. Cycle 261: step 1 EditMode 338/339 (the PropSpriteTests wall row, D-125), step 2 M1LoopTests 1/1 ×2 on the cartoon path (05:58, 06:01: C1 stands, D-132 (4)); step 3 the halves A 44/54 and B 53/63 with 17 reds, ruled D-133: five regressions to fix (the ResidencyTests planet_earth holder `terrain/earth/ground_strip`, the wolf's bump → idle, the two CreatureTests nulls on the sheet path, the ClimbSkyPlayTests edge assert), the InnerCreatureTests timing re-measured at good RAM, and the 3D-path tests set explicit, rewritten to the cartoon equivalent or retired per the D-133 table. Then the captures, the profile -Build, 0.4.1.
 
 ### U-112 · UNITY · Ready · C1
 Goal: Per-visit memory creep (D-116): `MemoryProbe` prints per leg the Mono heap (`Profiler.GetMonoUsedSizeLong` / `GetMonoHeapSizeLong`), the native allocator totals (`Profiler.GetTotalAllocatedMemoryLong`, `GetTotalReservedMemoryLong`, `GetTotalUnusedReservedMemoryLong`) and the counts that can grow per visit (Addressable handles held, pooled chunks, live GameObjects, TMP objects, audio sources); `unity_profile.ps1` adds the `Creep per visit` row = (private at the last leg − private at Earth (warm)) / planet visits; then find and fix the top source of today's ≈ 15 MB per visit.
@@ -1208,7 +1209,21 @@ Goal: C2 Mercury design prep (Bible §12 C2 order 3; §7.3 "the twilight run"): 
 Accept: one review per group at 1x on a Mercury stand-in beside the surveyor; the ten boxes self-checked; nothing exported.
 Files: blender/scripts/build_c2_mercury_*.py, coordination/reports/blender/c2_mercury_designs.md
 Depends: B-139
-Lead notes: Cycle 258. The same shape as B-139; LEAD accepts the designs before any Mercury card is written. Previews only when free RAM allows. Cycle 259: PALETTE ACCEPTED (37ed2ab, c2_mercury_designs.md §1: blinding regolith, ember, sun gold, cold steel teal, dusty sage, violet twilight, night slate; every check passing incl. the violet terminator hue and the near-neutral regolith) → D-130: into `meridian.v3.PALETTES["mercury"]`; the `ui/palettes/mercury/strip` export rides B-145's first export slot. Part 2 (the five plants) is previewed when RAM allows; reviewed on hand-off. Cycle 260: PLANTS ACCEPTED (18e602bd; review_b145_mercury_plants_preview.png: Sunfan, Embercap with its spore puff, Glassreed recoloured to cold teal so it reads on the violet twilight, Shadebloom, Coilwort; faceless; palette 100 %) and the FLAREWING ACCEPTED (4adf12ed; 124×124, idle 10 / fly 12 at index 1 / react 8 / bump 10 / flare_dance 12; a violet moth-bat with an ember belly and gold vanes, one eye, closed mouth). Next: the Shadewyrm + den, the Glassback, the Cinderling; the backdrop studies in a slot.
+Lead notes: Cycle 258. The same shape as B-139; LEAD accepts the designs before any Mercury card is written. Previews only when free RAM allows. Cycle 259: PALETTE ACCEPTED (37ed2ab, c2_mercury_designs.md §1: blinding regolith, ember, sun gold, cold steel teal, dusty sage, violet twilight, night slate; every check passing incl. the violet terminator hue and the near-neutral regolith) → D-130: into `meridian.v3.PALETTES["mercury"]`; the `ui/palettes/mercury/strip` export rides B-145's first export slot. Part 2 (the five plants) is previewed when RAM allows; reviewed on hand-off. Cycle 260: PLANTS ACCEPTED (18e602bd; review_b145_mercury_plants_preview.png: Sunfan, Embercap with its spore puff, Glassreed recoloured to cold teal so it reads on the violet twilight, Shadebloom, Coilwort; faceless; palette 100 %) and the FLAREWING ACCEPTED (4adf12ed; 124×124, idle 10 / fly 12 at index 1 / react 8 / bump 10 / flare_dance 12; a violet moth-bat with an ember belly and gold vanes, one eye, closed mouth). Next: the Shadewyrm + den, the Glassback, the Cinderling; the backdrop studies in a slot. Cycle 261: SHADEWYRM + ICE BURROW ACCEPTED (164f6f8d, 2b753f53; review_b145_mercury_shadewyrm_preview.png 05:58 and review_b145_ice_burrow_preview.png 06:00: a frost-capped teal wyrm with a round head, two eyes and a closed mouth, idle peek / walk hump / react duck / bump / `idle_open`; the 112×40 burrow drawn in front on the shared pivot; the 05:58 review listed six frames below the ground line and an invalid json, fixed per BLENDER's status by 06:22: the re-check line must say json valid). Glassback (e1865227) and Cinderling (9037f9b3) are reviewed when their full reviews render (the `review_glassback.png` / `review_cinderling.png` files are 10-31 model renders). Rig-set sources (c16565c5, bones 2 / 2 / 6 / 2 / 2) and backdrop sources (7c5cd276) noted; the report is at the accepted state (b25eedc7).
+
+### B-146 · BLENDER · Ready · C3
+Goal: C3 UI art designs (Bible §12 C3; contract §11.6): paper panels as 9-slice sheets with `slice` in the json (the pause menu, the settings panel for U-102, the inventory, a hand-painted sign, a scroll), the planet title cards `ui/titlecards/<planet>` for Earth, Mars and Mercury (≤ 1920×540, the name lettered in Limelight as drawn ink, one painted vignette each, intertitle style), and the Film-effects toggle's switch; the Earth palette for the paper, each planet's palette for its card; previews only.
+Accept: the ten §9.7 boxes that apply on a stamped preview (each panel at 1x with Patrick Hand sample text, each card at 1x); the 9-slice margins named in the json; nothing exported until a C3 export card.
+Files: blender/scripts/build_ui_v3.py, blender/sources/ui/panels_v3.blend, titlecards_v3.blend
+Depends: B-121
+Lead notes: Cycle 261. Sideways work while UNITY wires C2 Earth: the menus and title cards are the owner's next visible layer after the planets. LEAD accepts the designs before the export card.
+
+### B-147 · BLENDER · Ready · C2
+Goal: C2 Venus design prep (Bible §12 C2 order 4; §7.4 the dive world): the Venus palette proposal with the Mars checks, the cloud-layer backdrop study notes (the aerostat deck strip, the sulphur haze bands, the surface glow below), five faceless plants (deck and surface forms), the creature re-ink list (sizes, clips, order; faces kept, no teeth), the station and aerostat props that differ; `coordination/reports/blender/c2_venus_designs.md`.
+Accept: one review per group at 1x on a Venus stand-in beside the surveyor; the ten boxes self-checked; nothing exported.
+Files: blender/scripts/build_c2_venus_*.py, coordination/reports/blender/c2_venus_designs.md
+Depends: B-145
+Lead notes: Cycle 261. After B-146; previews only when free RAM allows.
 
 > **R1 (D-062).** 2D tasks B-056..B-076 are Superseded; their `.blend` sources (rigs, props,
 > terrain recipes) are the starting point for the models. Contract v2 §9 is the rule set.
