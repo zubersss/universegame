@@ -1,8 +1,8 @@
 # BLENDER STATUS
-Updated: 2026-11-07 15:52 · Session: 8 (resumed 14:3x after the ~14:17 machine restart; C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 16:01 · Session: 8 (resumed 14:3x after the ~14:17 machine restart; C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-Behind UNITY's U-132 build chain (rank 1; its lock since 15:42:22, ~25 min); want_blender filed 15:43:00 (rank 2). My next turn: (1) the B-161 stamped reviews in one driver run (plants, floes, rig dry run, the four creatures, the props, the Leviathan; it stops if UNITY files a want); then, re-filed after UNITY's next lock, (2) B-152 export (backgrounds/venus/deck + surface, straight); (3) B-153 export (flora/venus/rigset, terrain/venus/ground_strip_set, ui/palettes/venus). B-154 waits for U-125's code.
+15:58:59-15:59:59 SLOT: the B-161 review driver finished review_b161_neptune_plants_preview.png (53 s, 328 MB; ink and palette clean) and stopped when UNITY filed a want (15:59:36). Next turn: (1) the rest of the B-161 reviews (floes, rig dry run, the four creatures, the props, the Leviathan; ~3 min); then, re-filed after UNITY's next lock, (2) B-152 export (backgrounds/venus/deck + surface, straight); (3) B-153 export (flora/venus/rigset, terrain/venus/ground_strip_set, ui/palettes/venus). B-154 waits for U-125's code.
 B-161 Neptune SOURCE COMPLETE (lock-free): palette D-148 (decf9ad0), flora a1924873 + rig set 994e266c, floes 5de84381, deck scenes (build_backdrop_v3), creatures (windrider, shadow_shoal, pressure_phantom, anchor_worm), props 170d4db0 (wind_anchor + the Meridian wreck in three ~7.5 m segments, D-148), the Umbral Leviathan 64bfe144 (a Grand rig, 8 bones, validate_rigset valid; the bands dim / lit as the Survey puzzle). Every piece smoke-clean lock-free (ink in range, palette >= 99.7 %, inside its frame). Left: the stamped reviews (my next slot), then the deck studies in slots.
 Done meanwhile: B-158 Uranus DONE as designs; B-151 exported (611c0c81); B-152 deck study ACCEPTED straight; D-149: no sign redraw (crafting moves onto the inventory paper).
 
@@ -42,4 +42,4 @@ none (B-161's three ruled in D-148).
 none (USER-28, closing ChatGPT + Edge for RAM, is LEAD's).
 
 ## HeavyJobLock
-none held; want_blender filed 15:43:00 behind UNITY's U-132 build chain (rank 1).
+none held (released 15:59:59); no want on file: UNITY's want (15:59:36) goes next; I re-file when its lock appears (D-039).
