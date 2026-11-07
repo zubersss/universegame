@@ -22,14 +22,15 @@ When the lock frees, the highest pending job here goes next, even if the other r
 older (D-037 alternation applies only between equal ranks). A rank is live only while its role
 has a want on file or holds the lock (D-112): if the top rank has no want when the lock frees,
 the next live rank runs now and the skipped role goes next after it files. A role below the top
-keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 250 (00:5x; the lock is free and UNITY's want is on file since 00:26, but free RAM is 0.5 GB against the 1.5 GB gate: ChatGPT (1.1 GB), Copilot, Edge and Chrome hold it → USER-25 asks the owner to close them; until then nobody starts a heavy job and both roles work their lists):
-1. UNITY · U-103 check + captures with the drawn rig (want on file, keep it refreshed; go the moment free RAM is above 1.5 GB).
-2. UNITY · U-104 check + the 1080p HUD capture.
-3. UNITY · U-109 check + the three climb captures.
+keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 251 (01:3x; the gate opened at 01:04 (1.98 GB free) and UNITY holds the lock since 01:06 for the U-103 + U-109 check: compile clean, EditMode 316/316 on the third run at 01:16, PlayMode running; free RAM 0.36 GB while it runs, so nothing else starts):
+1. UNITY · U-103 + U-109 check (running), then the U-103 captures (pad, tilted climb, Escape Line, Space Pilgrim) and the U-109 climb captures, each a short lock.
+2. BLENDER · one slot ≤ 15 min after UNITY's captures: B-132 export (stag, wolf, bear; `replaces_v2` removes the eight stag / wolf v2 files; D-119) + the B-133 forest / coast previews (numpy, > 300 MB). File `want_blender.lock` now (UNITY holds the lock, D-039) so the rank is live (D-112).
+3. UNITY · U-104 check + the 1080p HUD capture.
 4. UNITY · U-106 profile (11 legs, D-116 rows) + the 20 s flight strip.
-5. BLENDER · B-131 export + the six glb removals, one batch ≤ 10 min, only after UNITY's status says the U-113 code is committed (D-117), in the first BLENDER slot between UNITY's checks (D-112).
-6. BLENDER · B-132 / B-133 exports as their previews are accepted, one batch each, between UNITY's slots.
+5. BLENDER · B-131 export + the six glb removals, only after UNITY's status says the U-113 code is committed (D-117).
+6. BLENDER · B-133 export once the previews are accepted; B-134 (surveyor `side_b`) export once its preview is accepted (C1, D-121: it ranks above the C2 exports when both are ready).
 7. UNITY · U-112 creep hunt probe runs, after U-106.
+
 
 
 ## While waiting (lock-free work; CLAUDE.md rule 3, D-109)
@@ -39,22 +40,25 @@ Rules: nothing here needs the lock; it stays under ~300 MB of extra RAM; no Unit
 did in your status before the next poll. LEAD tops each list up to ≥ 3 items every cycle.
 
 **UNITY**
-- U-109 climb-sky code and its capture test written before the check (a code-built gradient or a vertex-coloured quad; no texture).
+- U-104 swap code before its check: the six gauge parts + needles from `ui/hud/gauges.json` at 12 Hz, the `escape_line` tile at the line's altitude, the blank `escape_sign` lettered ESCAPE LINE in Patrick Hand, the ship HUD rows; MenuHudTests extended.
 - U-108 leftovers: react `turn_bounce` gets a real bounce (a 0.15 s root squash on react, pure, tested); `FloraRigs.CycleClockOffset` becomes internal (InternalsVisibleTo for the tests).
-- U-106 prep: the `reports/unity/c1_<date>/` capture list and the 20 s flight-strip script (pad → Escape Line → space → entry → touchdown under scripted input), tests first.
-- U-104 swap code written before its check: the six gauge parts + needles from `ui/hud/gauges.json` at 12 Hz, the `escape_line` tile at the line's altitude, the blank `escape_sign` lettered ESCAPE LINE in Patrick Hand, the ship HUD rows; MenuHudTests extended.
+- U-106 prep: the 20 s flight-strip script (pad → Escape Line → space → entry → touchdown under scripted input), tests first (the c1_2026-11-07 evidence list is in, 5e05474).
 - U-112 instrumentation half (lock-free, so U-106's profile already prints it): per-leg Mono heap, native allocator totals and the per-visit counts in `MemoryProbe`; the `Creep per visit` row in `unity_profile.ps1`; the Return rows on private commit with working set as info (D-116).
-- `docs/credits/unity.md` audit (Limelight / Patrick Hand + OFL arrive with U-104); ArtImporter ignores the sign's `lettering` fields without a warning (assert).
-- U-113 code half, after the items above (D-117, lock-free): `ModelSwap` keeps the SpriteRenderer when the key resolves to a v3 sheet and no model (the six camp props once B-131's export lands), with the sheet's Animator (door `open` once on use, smelter `working` while crafting, lamp `flicker` at night), pivot and px size from the json at PPU 64, pad / wall tiling at 2 m / 1 m; tests against the sizes in the B-131 card notes; no check until B-131's export is in.
+- U-115 code half (D-121): the surveyor controller takes clips from `characters/surveyor/side` and `side_b` (same frame size, pivot, PPU; clip names unique across the two), `SpriteCharacterView` swaps the texture with the clip; a test with a stand-in `side_b` json.
+- Test rulings (D-120), one commit: `ArtRules.ClipCap` gains `swim` (12–16); FootingTests' cap becomes "every skipped column inside the landed ship's footprint and ≥ 80 columns measured" (P-27); BudgetGateTests' Editor memory rows print as Info (P-28); the base.json surveyor tests read `side.json` or retire per D-120 (P-30, P-32); CreatureTests.PawsOnTheGround judges sheet species and lists model species as skipped until their C2 conversion (P-31).
+- `docs/credits/unity.md` audit (Limelight / Patrick Hand + OFL); ArtImporter ignores the sign's `lettering` fields without a warning (assert).
+- U-113 code half (D-117, lock-free): `ModelSwap` keeps the SpriteRenderer when the key resolves to a v3 sheet and no model (the six camp props once B-131's export lands), with the sheet's Animator (door `open` once on use, smelter `working` while crafting, lamp `flicker` at night), pivot and px size from the json at PPU 64, pad / wall tiling at 2 m / 1 m; tests against the sizes in BLENDER's U-113 hand-off; no check until B-131's export is in.
+- U-114 code half (D-119): stag / wolf SpeciesSpec sizes from the sheets (1.5 × 2.0 m, 1.2 × 1.0 m), the bear (2.1 × 1.3 m, territorial: react = rear-up + huff, flee when pushed), `flee` / `follow` found by name, the P-38 wall rule (Flee turns along a wall it cannot climb or hops a 1-tile step; Chase waits).
 Then one batched check for everything written when your turn in the queue comes.
 
+
 **BLENDER** (numpy / scripts only while UNITY holds the lock or a want; bpy only under your own lock)
-- B-131 export wiring, lock-free: the `render.py` prop sheet path and the six manifest rows switched from `model: true` to v3 sheet rows (sizes per your preview, pivot on the ground line, `tile: true` for pad and wall, `interactable: true`, clips door open 6 / smelter working 8 / lamp flicker 4), the stamped review builder, and the list of `.glb` + v2 map files the export commit removes, so the export is one ≤ 10 min batch when D-117's turn comes (after UNITY's U-113 code commit).
-- B-132 design previews: stag, grey wolf, brown bear (faces kept, pie-cut eyes, no bared teeth), poses and clip tables per your list; the bear's frame size checked against the 2048 cap.
-- B-133 layer studies: forest and coast far / mid / near layers as fakegp previews with the 2× seam check.
+- B-132 export readiness, lock-free: the wolf review's "beside the surveyor" ValueError fixed so the export's stamped review shows the surveyor (§11.7); the `replaces_v2` export dry-run into a scratch tree like B-131's (the eight stag / wolf v2 files listed).
+- B-134 (C1, D-121): the surveyor's five missing clips on `characters/surveyor/side_b` as fakegp previews at 1x beside the current sheet's idle: dig (loop 8–12), build (loop 8–12), surprise (eye-pop, once ≤ 16), jetpack (loop 8–12), climb_in (once ≤ 16).
+- B-135 design previews: pike, shark, squid (faces kept, no teeth; `swim` 12–16 as the travel clip), per your re-ink list order 2.
 - A painted Sun disc design (C2 candidate, preview only; the Sun stays a lit spheroid through C1 per the U-103 ruling).
-- `git rm --cached` the four tracked `blender/scripts/meridian/__pycache__/*.pyc` in one commit (`.gitignore` already lists them; they predate the rule and show as modified after every run).
-- `blender/README_v4.md`: how a v4.1 sheet is drawn, measured and reviewed, so a fresh session resumes without reading the code.
+- (B-133's forest / coast previews need > 300 MB: they run in your lock slot, queue #2, not lock-free.)
+
 
 
 **LEAD**
@@ -271,7 +275,7 @@ Goal: Climb sky. Above the painted plains sky the side camera shows its flat cle
 Accept: side captures at 0 m, half-way and at the Escape Line show no flat band or seam between the painted sky and the gradient; stars visible at the Escape Line; FlightPlayTests and TransitionTests green; no new texture (a gradient built in code or a vertex-coloured quad); the Earth perf rows unchanged.
 Files: Code/Runtime/Planet/PlanetBackdrop.cs, Code/Runtime/Planet/Backdrop/StageLayers.cs, Tests/
 Depends: U-107
-Lead notes: Cycle 247. Found in the U-107 climb re-shoot; it goes before U-106's flight strip because the owner flies this climb every launch. Code only, no BLENDER sheet; the C2 Earth backdrop pass may later paint the upper sky, and this gradient stays underneath it. Cycle 250: Files line amended on UNITY's scout (00:5x): the Earth climb runs on the cartoon path, so the gradient lives in View2D/CartoonStage + a new ClimbSky component behind ParallaxLayers (not PlanetBackdrop / StageLayers); layer0's top-row colour read once per scene load from the texture; no new asset. Accepted.
+Lead notes: Cycle 247. Found in the U-107 climb re-shoot; it goes before U-106's flight strip because the owner flies this climb every launch. Code only, no BLENDER sheet; the C2 Earth backdrop pass may later paint the upper sky, and this gradient stays underneath it. Cycle 250: Files line amended on UNITY's scout (00:5x): the Earth climb runs on the cartoon path, so the gradient lives in View2D/CartoonStage + a new ClimbSky component behind ParallaxLayers (not PlanetBackdrop / StageLayers); layer0's top-row colour read once per scene load from the texture; no new asset. Accepted. Cycle 251: P-43 ruled D-118: the gradient is cartoon-path only; Mars and Mercury get it when they convert to the cartoon stage (C2), no `_Climb` uniform in SideParallax. Check running 01:06–; EditMode 316/316 at 01:16 on the third run (RigSetTests against the six-plant B-129 set).
 
 ### U-112 · UNITY · Ready · C1
 Goal: Per-visit memory creep (D-116): `MemoryProbe` prints per leg the Mono heap (`Profiler.GetMonoUsedSizeLong` / `GetMonoHeapSizeLong`), the native allocator totals (`Profiler.GetTotalAllocatedMemoryLong`, `GetTotalReservedMemoryLong`, `GetTotalUnusedReservedMemoryLong`) and the counts that can grow per visit (Addressable handles held, pooled chunks, live GameObjects, TMP objects, audio sources); `unity_profile.ps1` adds the `Creep per visit` row = (private at the last leg − private at Earth (warm)) / planet visits; then find and fix the top source of today's ≈ 15 MB per visit.
@@ -280,6 +284,13 @@ Files: Code/Runtime/Perf/MemoryProbe.cs, Code/Runtime/Perf/BudgetMonitor.cs, too
 Depends: U-106
 Lead notes: Cycle 249. The instrumentation half is lock-free and sits on your While-waiting list so U-106's own profile already prints it; the hunt and the fix run after U-106 so the C1 build is not held for a 15 MB-per-visit creep that reaches the 1.7 GB warning only after dozens of planet visits.
 
+
+### U-115 · UNITY · Ready · C1
+Goal: Two-sheet surveyor (D-121): the surveyor's controller takes clips from `characters/surveyor/side` and `characters/surveyor/side_b` (B-134: dig, build, surprise, jetpack, climb_in; same frame size, pivot and PPU; clip names unique across the two); `SpriteCharacterView` swaps the texture with the clip; U-105's stand-ins for those five resolve to the real clips once `side_b` imports; both sheets in the Earth atlas count (D-110 (2)).
+Accept: SurveyorAnimTests: with a stand-in `side_b` json every state resolves and the five clips play their own frames (EditMode); with B-134 imported, the stand-in table shows 0 stand-ins for dig / build / surprise / jetpack / climb_in; CartoonSmoke green; the Earth perf rows unchanged.
+Files: Code/Editor/SheetAnimatorBuilder.cs, Code/Runtime/View2D/SpriteCharacterView.cs, Code/Runtime/Player/, Tests/
+Depends: U-105
+Lead notes: Cycle 251 (D-121). Code half lock-free (While-waiting #5) so B-134's export drops straight in; the check rides your next batch after U-104.
 
 > **R1 (D-062).** 2D tasks U-061..U-071 are Superseded (their code and sources stay in the tree and
 > get reused). R-tasks below rebuild Earth in 3D while keeping every system.
@@ -1087,15 +1098,29 @@ Goal: Earth land creatures re-inked (your list coordination/reports/blender/c2_e
 Accept: the ten §9.7 boxes per creature on a stamped review (1x on the plains beside the surveyor); json valid; where UNITY already binds a stag or wolf clip by index, the index is preserved or the change is in your status; one texture each.
 Files: blender/scripts/build_creatures_earth_v3.py, blender/sources/creatures/earth_v3.blend, Assets/_Game/Art/creatures/earth/
 Depends: B-124
-Lead notes: Cycle 249 (D-115). Gus (B-127) is the reference. Design previews first, then one export batch for the three. The water creatures (pike, shark, squid) and the Hadal Maw rig follow as B-13x once these are in.
+Lead notes: Cycle 249 (D-115). Gus (B-127) is the reference. Design previews first, then one export batch for the three. The water creatures (pike, shark, squid) and the Hadal Maw rig follow as B-13x once these are in. Cycle 251: PREVIEWS ACCEPTED (dcaee7d; review_b132_earth_{stag,wolf,bear}_preview.png + the lineup, 01:15–01:17): stag 192×176 (idle 10, walk 12, react 8, bump 10, flee 12), wolf 160×128 (+ follow 12, flee 14), bear 224×160 on a 2048×1144 sheet (exactly the cap, accepted); ink 2.0–3.0 / 1.0–1.5 px, palette 100 %, faces kept with pie eyes, no teeth, dizzy stars not X eyes, nothing below the ground line; clip indices 0–3 = Gus's order, flee / follow by name. Deviations accepted: one .blend per creature (contract §11.1); the sheets' body sizes differ from the v2 SpeciesSpec (UNITY's U-114). Ruled D-119: no UNITY code gates the export (Creature.EnsureModel finds no GameObject under the key and the sheet path plays, as the gull does today), so export in your next slot (queue #2) with `replaces_v2` removing the eight stag / wolf v2 files (UNITY deletes the .meta files, D-016). Before it: fix the wolf review's surveyor placement (ValueError) so the stamped review carries the surveyor.
 
 ### B-133 · BLENDER · Ready · C2
 Goal: Earth biome backdrops in the B-114 manner: painted watercolour layer sets for forest and coast (three layers each: far ridge, mid tree line or sea, near; 2048 × ≤ 1024 tiling in x; paper grain; Earth palette; nothing face-like), `backgrounds/earth_forest/layer0..2` and `backgrounds/earth_coast/layer0..2` with their scene jsons in the SceneLayout schema; the plains set stays as it is.
 Accept: 2× tile check with no seam; ≤ 4 MB per PNG; a 1080p composite per biome at 1x with the surveyor; the ten boxes that apply; UNITY's StageLayers loads them by key with no code change.
 Files: blender/scripts/build_backdrop_v3.py, Assets/_Game/Art/backgrounds/earth_forest/, Assets/_Game/Art/backgrounds/earth_coast/
 Depends: B-114
-Lead notes: Cycle 249 (D-115). After the B-131 and B-132 previews; previews lock-free, exports in one batch.
+Lead notes: Cycle 249 (D-115). After the B-131 and B-132 previews; previews lock-free, exports in one batch. Cycle 251: paths amended to `backgrounds/earth/forest/` and `backgrounds/earth/coast/` (contract §11.4 `backgrounds/<planet>/<scene>/`, the ParallaxLayers shape); the Goal's `earth_forest` / `earth_coast` names are struck. Sources written (1d83053); the previews (FFT washes, > 300 MB) run in your lock slot (queue #2), not lock-free.
 
+
+### B-134 · BLENDER · Ready · C1
+Goal: The surveyor's five missing C1 clips (Bible §12 C1 "the surveyor's full clip set"; contract §11.2 surveyor list) on a second sheet `characters/surveyor/side_b` (D-121: `side` is 1960 px tall at 98 frames, the cap), same 192×192 frames, pivot, PPU 64, v3.1 ink and the B-125 character: dig (loop 8–12, the pick swings, dirt chips), build (loop 8–12, hammer + a part snapping in), surprise (eye-pop, once ≤ 16, hat lift), jetpack (loop 8–12, pack flame, scarf streams), climb_in (once ≤ 16, up the fin-leg and through the hatch; its last frame hides the surveyor). Clip names unique across the two sheets; `side` untouched.
+Accept: the ten §9.7 boxes on a stamped review (each clip as a strip beside `side`'s idle at 1x, the 2× ink crop); json valid (`style: v3`, fps 12, the same pivot as `side`); sheet ≤ 2048²; log OK; UNITY's U-115 plays all five from the controller.
+Files: blender/scripts/build_surveyor_v3.py (or the B-125 builder), blender/sources/characters/surveyor_side_b.blend, Assets/_Game/Art/characters/surveyor/side_b_color.png + side_b.json
+Depends: B-125
+Lead notes: Cycle 251 (D-121). C1 scope that sat in the Backlog note since cycle 238; it ranks above the C2 exports once its preview is accepted. Preview lock-free (While-waiting #2), export in one short batch. U-105's ResolveOn stand-ins (land_hard, jump_anticipate, …) are UNITY states, not contract clips: these five are the whole gap.
+
+### B-135 · BLENDER · Ready · C2
+Goal: Earth water creatures re-inked (your list coordination/reports/blender/c2_earth_creature_reink.md, order 2): pike, shark, squid at v3.1 with faces kept (pie-cut eyes, no bared teeth, D-087 / D-101), two shadow tones, interior detail; clips per §11.2 with `swim` 12–16 as the travel clip (D-119), idle 8–12, react ≤ 16, bump ≤ 16, flee ≤ 16; one sheet ≤ 2048² each; the below-ground check replaced by a below-water-floor check in your status.
+Accept: the ten §9.7 boxes per creature on a stamped review (1x in the coast water beside the surveyor); json valid; clip indices 0–3 in Gus's order, the rest by name; one texture each.
+Files: blender/scripts/build_creatures_earth_v3.py, blender/sources/creatures/earth_{pike,shark,squid}_v3.blend, Assets/_Game/Art/creatures/earth/
+Depends: B-132
+Lead notes: Cycle 251 (D-119). Design previews first (While-waiting #3), then one export batch. The Hadal Maw is B-136 (Backlog) as a §11.3 rig set.
 
 > **R1 (D-062).** 2D tasks B-056..B-076 are Superseded; their `.blend` sources (rigs, props,
 > terrain recipes) are the starting point for the models. Contract v2 §9 is the rule set.
@@ -1905,3 +1930,17 @@ Files: Code/Runtime/Art/ModelSwap.cs, ModelView.cs, Code/Runtime/Planet/POI/PoiP
 Depends: U-106, B-131
 Lead notes: Cycle 250 (D-117). The code half is lock-free and sits last on the While-waiting list so B-131's export can land in BLENDER's first slot after it; the check rides your next batch. The B-131 preview is the size reference until the export: blender/preview/review_b131_props_preview.png.
 
+
+### U-114 · UNITY · Backlog · C2
+Goal: Earth land creatures on v3 sheets (D-119): after B-132's export removes the stag / wolf models, both play their sheets through the existing creature sheet path (as the gull does) with SpeciesSpec sizes from the drawings (stag 1.5 × 2.0 m, wolf 1.2 × 1.0 m); the brown bear gets a SpeciesSpec (`creatures/earth/bear`, 2.1 × 1.3 m, territorial per Bible §7.1: react = rear-up + huff, flee when pushed, no chase); `flee` and the wolf's `follow` are found by name (indices 0–3 stay Gus's order); P-38: a fleeing creature that meets a wall it cannot climb turns along it or hops a 1-tile step, a chasing one waits.
+Accept: CreatureTests: the three species resolve their sheets with no importer error and PawsOnTheGround passes for them; the bear spawns on the plains and rears on contact; a plains capture with stag, wolf and bear at 1x beside the surveyor; the 300-creature loop p99 unchanged.
+Files: Code/Runtime/Creatures/CreatureSpecies.cs, Creature.cs, CreatureBrain.cs, Tests/
+Depends: U-106, B-132
+Lead notes: Cycle 251 (D-119). Code half on the While-waiting list (last); promoted with U-110 / U-111 when U-106 is in. If a stag or wolf still shows the grey model after the export, the Library kept the model address: reimport the two colour maps (D-117's reopen clause).
+
+### B-136 · BLENDER · Backlog · C2
+Goal: The Hadal Maw as a §11.3 rig set (`creatures/earth/hadal_maw/rigset`: body segments, jaw, fins, lure as parts + bones ≤ 6, idle sway and a jaw-open react; no teeth bared, D-087), too big for one frame sheet (your c2_earth_creature_reink.md proposal 2).
+Accept: the ten boxes on a stamped assembled review at 1x beside the surveyor; rigset.json valid; sheet ≤ 2048².
+Files: blender/scripts/build_creatures_earth_v3.py, Assets/_Game/Art/creatures/earth/hadal_maw/
+Depends: B-135
+Lead notes: Cycle 251 (D-119). Promoted when B-135's previews are accepted.

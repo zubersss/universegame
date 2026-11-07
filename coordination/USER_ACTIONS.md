@@ -6,14 +6,6 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-25 — Free the memory gate: close ChatGPT, Copilot, Edge and Chrome (2 min)
-Both workers are stuck behind the 1.5 GB memory gate: at 00:45 the laptop had 0.5 GB free, with
-ChatGPT using 1.1 GB, Copilot 0.4 GB, Edge 0.6 GB and Chrome 0.3 GB. Right-click each one's icon
-in the taskbar and choose "Close window" (ChatGPT also sits in the tray by the clock: right-click
-its icon → Quit). The Xbox app and Phone Link can go too (0.2 GB). The sessions see the free
-memory on their next poll and start their checks by themselves; nothing to paste. If the Lead
-still reports under 1.5 GB free after that, tell it "memory still short".
-
 
 ### USER-24 — Look over round 2 of the cartoon style (5 min)
 Open https://claude.ai/artifact/RpnrBEGMbKM1mSGicBYqZQ (the C0 page, now with a "Round 2" section on top).
@@ -30,6 +22,7 @@ If you get too many "allow this command?" prompts, tell the Lead "approve PowerS
 allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
 
 ## Done
+- 2026-11-07 01:04 · USER-25 done: free RAM reached 1.98 GB (ChatGPT, Copilot and Chrome gone); UNITY's U-103 + U-109 check started at 01:06.
 - 2026-11-06 19:3x · USER-23 done: the owner kept the look and asked for four changes (thinner detailed ink, faces only on people and animals, an upright Pilgrim, fully manual fuel-free flight) → D-100..D-104, Bible 4.1, contract v3.1, cards U-107, B-123..B-127. A second look-over follows when the re-inked set lands (C1).
 - 2026-11-06 19:0x · USER-22 retired by LEAD: free memory has stayed above the gate since 15:00 (2.6 GB at 19:00) without the owner's action.
 - 2026-11-06 11:4x · USER-18 and USER-19 retired by LEAD: the Windows Update worker is gone and the gate opened several times since; the current memory ask is USER-22.
