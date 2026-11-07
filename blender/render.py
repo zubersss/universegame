@@ -1080,12 +1080,15 @@ def do_prop_sheet_set(entry, preview):
     """B-131 (D-117): props/common/{landing_pad, shelter_wall, shelter_door, smelter, storage_crate, lamp} as v3.1
     sheets (colour + json only, one sheet <= 512^2 each), drawn with fakegp + numpy. The export removes each key's v2
     model files (.glb + normal/mask/emission; UNITY deletes the .meta files, D-016). The set entry exports all six +
-    review_b131_props.png; a single prop row (`prop_sheet`) exports that prop only."""
+    review_b131_props.png; a single prop row (`prop_sheet`) exports that prop only. The row's `generator` names the
+    module (default build_props_common_v3; build_props_mars_v3 has the same API: PROPS, KEY, render_all, export, main).
+    A row with both flags exports its one prop and writes its review (props/mars/tube_mound, D-126)."""
     from meridian import fakegp
     t0 = time.time()
+    mod = os.path.splitext(os.path.basename(entry.get("generator", "scripts/build_props_common_v3.py")))[0]
     if preview:
-        raise AssetError(f"{entry['key']}: no preview mode (python build_props_common_v3.py <png>)")
-    import build_props_common_v3 as PC
+        raise AssetError(f"{entry['key']}: no preview mode (python {mod}.py <png>)")
+    PC = __import__(mod)
     names = [entry["key"].split("/")[2]] if entry.get("prop_sheet") else list(PC.PROPS)
     keys = [PC.KEY.format(n) for n in names]
     fakegp.install()                    # an earlier review script in this batch may have restored gp_draw.mat
@@ -1098,7 +1101,7 @@ def do_prop_sheet_set(entry, preview):
                 mark_stale(k, True)
             raise
         if entry.get("prop_sheet_set"):
-            stamps = [os.path.join(ART, "props", "common", n + "_color.png") for n in names]
+            stamps = [os.path.join(ART, *PC.KEY.format(n).split("/")) + "_color.png" for n in names]
             PC.main(os.path.join(PREVIEW, f"review_{entry.get('review_name', 'b131_props')}.png"), imgs, widths, stamp_paths=stamps)
     finally:
         fakegp.restore()
