@@ -410,7 +410,8 @@ def lurker_head(d, M, hx, hz, p, seed):
     helmet = [q for q in G.lumpy_ellipse(hx - 0.01, hz + 0.012, 0.125, 0.11, n=34, lump=0.04, seed=seed + 3) if q[1] > hz + 0.035]
     G.stroke(d, helmet + [R(0.10, 0.03), R(-0.12, 0.03)], M["helmet"], O, cyclic=True)                  # the rock helmet plate
     G.specks(d, [R(-0.04, 0.085), R(0.03, 0.09), R(-0.08, 0.06)], M["ink"])
-    G.stroke(d, G.lumpy_ellipse(*R(0.25, -0.027 + sn), 0.032, 0.027, n=14, seed=seed + 6), M["nose"], I, cyclic=True)
+    nb = p.get("nose", 1.0)                                                       # the nose bulb pulses while it sniffs (idle_open)
+    G.stroke(d, G.lumpy_ellipse(*R(0.25 + 0.01 * (nb - 1), -0.027 + sn), 0.032 * nb, 0.027 * nb, n=14, seed=seed + 6), M["nose"], I, cyclic=True)
     for k, a in enumerate((0.35, 0.0, -0.35)):                                    # whiskers
         x0, z0 = R(0.19, -0.035 + sn)
         G.stroke(d, [(x0, z0), (x0 + 0.03 * math.cos(a) + 0.01, z0 + 0.03 * math.sin(a) - 0.005), (x0 + 0.075 * math.cos(a), z0 + 0.075 * math.sin(a))], M["ink"], I)
@@ -536,6 +537,14 @@ def lurker_poses():
             dict(hole=0.17, blink=1.0),
             dict(hole=0.2, look=(0.3, 0.0))]
     out += K.bump_clip()
+    for i in range(10):                                                           # idle_open (cycle 258): away from the den, the
+        ph = TAU * i / 10                                                         # whole body: breathe, sniff the air twice, the
+        sniff = 1.0 if i in (1, 2, 6, 7) else 0.0                                 # nose bulb pulsing, a glance back, a tail flick
+        _ph, q = K.idle_common(i, 10)
+        q.update(head_rot=0.06 * math.sin(ph) + (0.05 if sniff else 0.0), head=(0.01 * sniff, 0.0), sniff=sniff,
+                 nose=1.0 + (0.28 if i in (2, 7) else 0.14 if sniff else 0.0), tail=0.08 * math.sin(ph - 1.2),
+                 look=(0.8, 0.1) if i < 5 else ((-0.6, 0.1) if i in (5, 8) else (0.6, 0.0)), blink={4: 0.6, 9: 1.0}.get(i, 0.0))
+        out.append(q)
     return out
 
 
@@ -715,8 +724,8 @@ SPECIES = {
                                       "original": "our own canyon lizard-hound: teal hide, rust spine plates, cheek frill; curious, never a fighter (D-087), no teeth"},
                           ours="a low teal lizard-hound whose rust crest shoots up when it is surprised and who trots after you nose-down, tail swinging"),
     "tube_lurker": dict(draw=draw_tube_lurker, poses=lurker_poses, mats=mats_lurker, frame=(160, 64), seed=33,
-                        clips=[("idle", 10, True), ("walk", 12, True), ("react", 8, False), ("bump", 10, False)],
-                        self_check={"ink": "rock plate bands, helmet plate, specks, hatch, snout wrinkles, whiskers, toe seams, mound cracks",
+                        clips=[("idle", 10, True), ("walk", 12, True), ("react", 8, False), ("bump", 10, False), ("idle_open", 10, True)],
+                        self_check={"ink": "rock plate bands, helmet plate, specks, hatch, snout wrinkles, whiskers, toe seams",
                                     "motion": "idle peeks over its den mound and looks about, react startles and ducks (eyes over the rim), walk scuttles with a tail wag",
                                     "original": "our own tube dweller: a rock-plated mole-thing with a red nose bulb and glow-ringed eyes; shy, never an ambusher (D-087), no teeth"},
                         ours="a shy rock-plated tube dweller that peeks over its den mound and ducks, leaving two glowing eyes over the rim", den="props/mars/tube_mound"),
