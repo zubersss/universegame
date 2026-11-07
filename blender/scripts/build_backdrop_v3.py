@@ -871,11 +871,11 @@ def bolt(mask, rng, x, y, L, depth=0):
     while L > 6:
         seg = rng.uniform(10, 22)
         ang = math.pi + rng.uniform(-0.6, 0.6)
-        dab(mask, x, y, seg, ang, w=1 if depth else 2)
+        dab(mask, x, y, seg, ang, w=2 if depth else 3)
         x, y = x + math.sin(ang) * seg, y - math.cos(ang) * seg
         L -= seg
         if depth < 1 and rng.random() < 0.18:
-            bolt(mask, rng, x, y, L * 0.5, depth + 1)
+            bolt(mask, rng, x, y, L * 0.45, depth + 1)
 
 
 def crush_band(stack, rng, pal, H):
@@ -883,8 +883,8 @@ def crush_band(stack, rng, pal, H):
     in Limelight (cream with a drawn-ink edge, build_ui_v3's TrueType reader) every 1024 px so the layer tiles."""
     import build_ui_v3 as UI
     band = np.zeros((H, W), np.float32)
-    top = BG.ridge(rng, [(4, 0.6), (9, 0.4)], base=H - 78, amp=4)
-    band[:] = BG._ridge_mask(H, top)
+    top = BG.ridge(rng, [(4, 0.6), (9, 0.4)], base=H - 168, amp=4)
+    band[:] = BG._ridge_mask(H, top) * (np.arange(H)[:, None] < H - 90)                  # 78 px tall, 90 px above the foot
     stack.append(wash32(rng, H, band, BG._mix(pal["brown"], BG._rgb(v3.INK), 0.45), var=0.03, edge_dark=0.15, bleed=1.2))
     tm = UI.text_mask(UI.LIMELIGHT, "CRUSH", 58, tracking=0.12, wobble=0.5, seed=7)
     h, w = tm.shape
@@ -892,7 +892,7 @@ def crush_band(stack, rng, pal, H):
     grow = tm.copy()
     for dy, dx in ((-2, 0), (2, 0), (0, -2), (0, 2), (-1, -1), (1, 1), (-1, 1), (1, -1)):
         grow = np.maximum(grow, np.roll(np.roll(tm, dy, 0), dx, 1))
-    y0 = H - 39 - h // 2
+    y0 = H - 129 - h // 2
     for x0 in (256 - w // 2, 1280 - w // 2):
         fill[y0:y0 + h, x0:x0 + w] = np.maximum(fill[y0:y0 + h, x0:x0 + w], tm)
         edge[y0:y0 + h, x0:x0 + w] = np.maximum(edge[y0:y0 + h, x0:x0 + w], grow)
@@ -900,21 +900,26 @@ def crush_band(stack, rng, pal, H):
     stack.append((np.broadcast_to(pal["offwhite"], (H, W, 3)).astype(np.float32), fill.astype(np.float32)))
 
 
+def spiral_mask(H, cx, cy, R, k=0, arms=3, thr=0.35, sx=1.6, sz=0.55, wind=2.4, r0=0.32):
+    """Arm k of `arms` interleaved log-spiral bands round (cx, cy) (angle - wind ln r), squashed by sx / sz, tapering at
+    the rim: a full-size mask (x wraps)."""
+    x0, x1 = int(cx - (sx + 0.1) * R), int(cx + (sx + 0.1) * R)
+    y0, y1 = max(int(cy - (sz + 0.07) * R), 0), min(int(cy + (sz + 0.07) * R), H)
+    X, Y = np.meshgrid(np.arange(x0, x1) + 0.5, np.arange(y0, y1) + 0.5)
+    u, v = (X - cx) / sx, (Y - cy) / sz
+    r = np.hypot(u, v)
+    sp = np.arctan2(v, u) - wind * np.log(np.maximum(r, 1.0) / R)
+    ring = (r > r0 * R) & (r < R * (0.92 + 0.08 * np.sin(5 * np.arctan2(v, u))))
+    m = np.zeros((H, W), np.float32)
+    m[y0:y1, np.arange(x0, x1) % W] = ((np.cos(arms * sp - k * TAU_BG / arms) > thr) & ring).astype(np.float32)
+    return m
+
+
 def spot_swirl(stack, rng, pal, H, cx, cy, R):
     """The Great Red Spot: a brick oval eye inside three interleaved spiral arms (brick, cream, rust-brick) cut from a
     log-spiral coordinate (angle - 2.4 ln r), tapering out at the rim; UNITY turns it slowly."""
-    x0, x1 = int(cx - 1.7 * R), int(cx + 1.7 * R)
-    y0, y1 = max(int(cy - 0.62 * R), 0), min(int(cy + 0.62 * R), H)
-    X, Y = np.meshgrid(np.arange(x0, x1) + 0.5, np.arange(y0, y1) + 0.5)
-    u, v = (X - cx) / 1.6, (Y - cy) / 0.55
-    r = np.hypot(u, v)
-    sp = np.arctan2(v, u) - 2.4 * np.log(np.maximum(r, 1.0) / R)
-    ring = (r > 0.32 * R) & (r < R * (0.92 + 0.08 * np.sin(5 * np.arctan2(v, u))))
     for k, col in enumerate((pal["red"], pal["offwhite"], BG._mix(pal["red"], pal["mustard"], 0.5))):
-        arm = np.zeros((H, W), np.float32)
-        band = (np.cos(3 * sp - k * TAU_BG / 3) > 0.35) & ring
-        arm[y0:y1, np.arange(x0, x1) % W] = band.astype(np.float32)
-        stack.append(tint(rng, H, arm, col, 0.8, var=0.04, edge_dark=0.04, bleed=2.0))
+        stack.append(tint(rng, H, spiral_mask(H, cx, cy, R, k), col, 0.8, var=0.04, edge_dark=0.04, bleed=2.0))
     eye = np.zeros((H, W), np.float32)
     ell(eye, cx, cy, R * 0.55, R * 0.24)
     stack.append(wash32(rng, H, eye, pal["red"], var=0.05, edge_dark=0.10, bleed=2.0))
@@ -958,15 +963,11 @@ def jupiter_scene(seed, deck="deck1"):
         glow = np.roll(towers, 8, 0) * (1 - towers)
         stack.append(tint(rng, H, np.maximum(glow, 0), pal["red"], 0.6, var=0.03, edge_dark=0.0, bleed=3.0))
         stack.append(wash32(rng, H, towers, BG._mix(pal["brown"], pal["red"], 0.3), var=0.05, edge_dark=0.07, bleed=2.5))
-    if deck == "deep":                                                                   # slow brick-and-umber swirls
+    if deck == "deep":                                                                   # slow brick-and-umber swirls (spiral bands)
         for k in range(5):
-            sw = np.zeros((H, W), np.float32)
-            cx, cy = rng.uniform(0, W), rng.uniform(300, 700)
-            for t in np.linspace(0, 1, 30):
-                a = 1.8 * TAU_BG * t
-                r = 30 + 160 * t
-                ell(sw, cx + r * math.cos(a) * 1.8, cy + r * math.sin(a) * 0.5, 18 + 20 * t, 10 + 8 * t)
-            stack.append(tint(rng, H, sw, BG._mix(pal["red"], pal["brown"], 0.5), 0.45, var=0.04, edge_dark=0.0, bleed=5.0))
+            cx, cy, R = rng.uniform(250, W - 250), rng.uniform(320, 680), rng.uniform(110, 170)
+            stack.append(tint(rng, H, spiral_mask(H, cx, cy, R, 0, arms=2, thr=0.2, sx=1.8, sz=0.5, wind=2.0, r0=0.15),
+                              BG._mix(pal["red"], pal["brown"], 0.5), 0.45, var=0.04, edge_dark=0.0, bleed=4.0))
     out.append(finish(stack, rng, H))
     # layer1: the nearer banks (frosted tops on deck 1), a station (deck 2), anvils + a Stormglider's shadow (deck 3),
     # the Red Spot's swirl (spot), heat shimmer (deep)
@@ -996,8 +997,8 @@ def jupiter_scene(seed, deck="deck1"):
             anv = np.zeros((H, W), np.float32)
             for _k in range(3):
                 ax = rng.uniform(0, W)
-                cloud_tower(anv, ax, 330, 220, 70, rng)
-                ell(anv, ax, 120, 230, 34)                                               # the flat anvil top
+                cloud_tower(anv, ax, 330, 220, 90, rng)
+                poly(anv, [(ax - 70, 150), (ax - 40, 108), (ax + 340, 92), (ax + 380, 104), (ax + 120, 132), (ax + 40, 160)])   # the anvil, sheared downwind
             stack.append(wash32(rng, H, anv, BG._mix(pal["brown"], pal["sky"], 0.35), var=0.05, edge_dark=0.06, bleed=2.0))
             gl = np.zeros((H, W), np.float32)                                            # a Stormglider's shadow (no face)
             gx, gy = rng.uniform(300, 1700), 230
@@ -1027,11 +1028,15 @@ def jupiter_scene(seed, deck="deck1"):
     if deck == "deck2":
         glow, bolts = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
         for _k in range(4):
-            bx, by = rng.uniform(0, W), rng.uniform(250, 300)
-            ell(glow, bx, by + 50, 110, 40)
-            bolt(bolts, rng, bx, by, 90)
-        stack.append(tint(rng, H, glow, pal["teal"], 0.35, var=0.03, edge_dark=0.0, bleed=12.0))   # the flash under the floor (a tone)
-        stack.append(tint(rng, H, bolts, pal["offwhite"], 0.95, var=0.0, edge_dark=0.0, bleed=0.6))
+            bx, by = rng.uniform(0, W), rng.uniform(110, 160)
+            ell(glow, bx, by + 70, 130, 55)
+            bolt(bolts, rng, bx, by, 140)
+        halo = bolts.copy()
+        for dy, dx in ((-2, 0), (2, 0), (0, -2), (0, 2), (-3, 0), (3, 0)):
+            halo = np.maximum(halo, np.roll(np.roll(bolts, dy, 0), dx, 1))
+        stack.append(tint(rng, H, glow, BG._mix(pal["offwhite"], pal["teal"], 0.3), 0.45, var=0.03, edge_dark=0.0, bleed=14.0))   # the flash (a tone)
+        stack.append(tint(rng, H, halo, pal["teal"], 0.7, var=0.0, edge_dark=0.0, bleed=1.0))
+        stack.append(tint(rng, H, bolts, pal["offwhite"], 1.0, var=0.0, edge_dark=0.0, bleed=0.5))
     if deck == "deck3":
         rain = np.zeros((H, W), np.float32)
         for _k in range(140):
