@@ -3065,5 +3065,97 @@ namespace Meridian.Tests
                 Meridian.View2D.CartoonStage.Enabled = wasCartoon;
             }
         }
+
+        /// <summary>
+        /// U-125 (B-152 / B-153 / B-154): Venus on the cartoon stage at 1x in reports/unity/u125/: 1_deck_1x (the surveyor on the Meridian station's
+        /// deck: the deck set off the cloud deck, the deck-plank strip, a Sulfur drifter), 2_surface_vent_1x (the first vent field: the surface set,
+        /// the basalt crust, a Pressure crab and the Vent eel at its vent mouth).
+        /// </summary>
+        [UnityTest, Timeout(180000)]
+        public IEnumerator CaptureU125Venus()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
+                yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(Meridian.Planets.PlanetId.Venus));
+                var side = director.PlanetSide;
+                timeout = Time.realtimeSinceStartup + 20f;
+                while (!side.terrain.IsSettled && Time.realtimeSinceStartup < timeout) yield return null;
+                if (side.hazards != null) side.hazards.enabled = false;
+                if (side.wardens != null) side.wardens.enabled = false;
+                var creatures = side.creatures;
+                creatures.autoSpawn = false;
+                creatures.DespawnAll();
+                var stage = side.cartoon;
+                var cam = side.sideCamera;
+                var body = side.player.GetComponent<Rigidbody2D>();
+                var dir = "coordination/reports/unity/u125";
+                Directory.CreateDirectory(dir);
+
+                IEnumerator Carry(float x, float y)
+                {
+                    if (body != null) { body.simulated = false; body.position = new Vector2(x, y); }
+                    side.player.transform.position = new Vector3(x, y, side.player.transform.position.z);
+                    yield return null; yield return null;
+                }
+                IEnumerator Settle(string scene)
+                {
+                    float until = Time.realtimeSinceStartup + 10f;
+                    while ((stage.Scene != scene || stage.Fading || stage.Layers.placeholders.Contains(true)) && Time.realtimeSinceStartup < until) yield return null;
+                    until = Time.realtimeSinceStartup + 1.5f;
+                    while (Time.realtimeSinceStartup < until) yield return null;
+                }
+                IEnumerator Shot(string label)
+                {
+                    yield return Save(cam, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u125 {label}: scene {stage.Scene} → {stage.Layers.SceneKey} (fallback {stage.Layers.UsedFallback}), datum {stage.Layers.datumY:F1}, strips {stage.Ground.MaterialsLoaded}, plank frames {stage.Ground.DeckFramesShown}, plants {stage.Flora.SpriteCount}");
+                }
+
+                // 1. On the Meridian station's deck with a Sulfur drifter.
+                var station = Meridian.Planet.POI.PoiCatalog.MeridianStation;
+                float deckTop = station.floatY + Meridian.Planet.POI.PoiCatalog.DeckTop;
+                float sx = station.x + station.floatWidth * 0.5f;
+                yield return Carry(sx, deckTop + 0.05f);
+                yield return Settle(Meridian.View2D.CartoonStage.VenusDeckScene);
+                creatures.Spawn(Meridian.Creatures.Species.SulfurDrifter, new Vector2(sx + 5f, deckTop + 4f));
+                yield return Shot("1_deck_1x");
+                creatures.DespawnAll();
+
+                // 2. The first vent field: a Pressure crab beside the vent, the Vent eel at its mouth.
+                var vent = Meridian.Terrain.VenusLandforms.Vents[0];
+                int vx = (vent.x0 + vent.x1) / 2;
+                float ground = side.terrain.TopSolidY(vx) + 1f;
+                yield return Carry(vx - 4f, side.terrain.TopSolidY(vx - 4) + 1.05f);
+                yield return Settle(Meridian.View2D.CartoonStage.VenusSurfaceScene);
+                var eel = Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.VentEel);
+                creatures.Spawn(Meridian.Creatures.Species.VentEel, new Vector2(vx + 0.5f, ground + eel.size.y * 0.5f + 0.05f)); // its vent mouth in front (D-126)
+                var crab = Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.PressureCrab);
+                int cx = vx - 9;
+                creatures.Spawn(Meridian.Creatures.Species.PressureCrab, new Vector2(cx + 0.5f, side.terrain.TopSolidY(cx) + 1f + crab.size.y * 0.5f + 0.05f));
+                float wait = Time.realtimeSinceStartup + 1.5f;
+                while (Time.realtimeSinceStartup < wait) yield return null;
+                yield return Shot("2_surface_vent_1x");
+                creatures.DespawnAll();
+                if (body != null) body.simulated = true;
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+            }
+        }
     }
 }
