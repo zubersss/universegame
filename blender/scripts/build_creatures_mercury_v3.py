@@ -4,6 +4,8 @@ pie eyes, dizzy stars), in the Mercury palette (D-130). Faces kept, friendly or 
   shadewyrm  160x80, a shy ice burrower of the polar craters (see its section): idle peeks over its den
              props/mercury/ice_burrow (D-126, drawn by UNITY in front on the same pivot), walk 12, react 8 (ducks), bump 10,
              idle_open 10.
+  glassback  176x112, the silicate grazer riding the twilight band (see its section): idle 10 (grazing), walk 12,
+             react 8 (the shards ring up), bump 10, flee 12.
   flarewing  124x124, a flyer that feeds on flares ("aggressive" becomes excited, D-087): a violet moth-bat with ember
              belly, membrane wings on drawn ribs, gold flare-catching vanes at the wing tips and a forked gold-tipped
              tail. Pivot at the body centre (the B-135 swimmers' rule for creatures that leave the ground); clips idle 10
@@ -52,6 +54,10 @@ def mats(gp, sp):
         out[key + "_sh"] = m(key + "_mid", fill=SH(h), ink=False)
         out[key + "_dp"] = m(key + "_deep", fill=DP(h), ink=False)
         out[key + "_b"] = m(key + "_behind", fill=h, behind=True)
+    legs = {"glassback": "offwhite", "cinderling": "red"}.get(sp, "sky")              # the kit's legs_pass / paw names
+    out["leg"], out["coat"] = m("leg", fill=SH(P[legs])), m("coat", fill=SH(P[legs]))
+    out["leg_far"], out["far"] = m("leg_far", fill=DP(P[legs])), m("far", fill=DP(P[legs]))
+    out["claw"] = m("claw", fill=P["offwhite"], behind=True)
     return out
 
 
@@ -253,6 +259,106 @@ def shadewyrm_poses():
     return out
 
 
+# ---------------------------------------------------------------- glassback (silicate grazer of the twilight band)
+# A slow stocky grazer: a pale regolith-grey hide with a slate underside, thick hose legs on round feet, a long soft
+# snout it nibbles the regolith with, pie eyes; five cold-teal crystal shards along its back (drawn facets and an
+# off-white glint, no translucency) that ring and lift when it is startled. ~1.8 x 1.1 m (the shards to ~1.4 m).
+
+GLASS = dict(hips=[(-0.30, 0.42), (0.34, 0.44), (-0.38, 0.40), (0.26, 0.42)], feet=[-0.34, 0.40, -0.44, 0.32],
+             ankle=0.06, leg_w=0.12, bend_hind=-0.10, bend_front=0.06, foot="paw", paw=(0.08, 0.04, 2, 0), dangle=0.3)
+GB = (0.0, 0.52, 0.55, 0.26)
+SHARDS = [(-0.40, 0.20, 0.10), (-0.20, 0.30, 0.12), (0.02, 0.36, 0.13), (0.22, 0.30, 0.12), (0.40, 0.20, 0.09)]   # x, height, half width
+
+
+def shard(d, M, base, h, w, ang, glint, seed):
+    """An angular crystal: a hexagonal prism tip on `base` toward ang; a light facet, a mid facet, the glint."""
+    c, s = math.cos(ang), math.sin(ang)
+
+    def at(u, v):
+        return (base[0] + c * u * h - s * v * w, base[1] + s * u * h + c * v * w)
+    shape = [at(-0.15, -1.0), at(0.75, -1.0), at(1.0, -0.25), at(1.0, 0.2), at(0.75, 1.0), at(-0.15, 1.0)]
+    G.stroke(d, shape, M["ice_f"], 0.0, cyclic=True)
+    G.stroke(d, [at(-0.15, 0.1), at(0.75, 0.1), at(1.0, 0.2), at(0.75, 1.0), at(-0.15, 1.0)], M["ice_sh"], 0.0, cyclic=True)   # the far facet
+    G.seam(d, [at(0.0, 0.1), at(0.75, 0.1), at(1.0, -0.05)], M["ink"])
+    t = 0.3 + 0.4 * glint
+    G.stroke(d, [at(t, -0.75), at(t + 0.18, -0.75), at(t + 0.12, -0.45), at(t - 0.04, -0.45)], M["white_f"], 0.0, cyclic=True)
+    G.stroke(d, shape, M["ink"], O, cyclic=True)
+
+
+def draw_glassback(d, M, pose=None, seed=0):
+    p = K.base_pose()
+    p.update(dict(chime=0.0, glint=0.0, graze=0.0))
+    p.update(pose or {})
+    cx, cz, rx, rz = GB
+    B = K.Body(p, (cx, cz))
+    db = G.Xf(d, B)
+    K.legs_pass(d, M, B, GLASS, p, far=True)
+    for k, (x, h, w) in enumerate(SHARDS):                                                # shards behind the hide's top line
+        top = cz + rz * math.sqrt(max(0.0, 1 - (x / rx) ** 2))
+        normal = math.atan2((top - cz) / rz ** 2, x / rx ** 2)
+        hh = h * (1 + 0.35 * p["chime"]) * (1 + 0.04 * math.sin(p["glint"] * 6 + k))
+        shard(db, M, (x, top - 0.06), hh + 0.06, w, normal + math.radians(8), (p["glint"] + 0.3 * k) % 1.0, seed + k)
+        if p["chime"] > 0.3:                                                               # ring marks (a chime, never a zap)
+            tip = (x + math.cos(normal) * (hh + 0.12), top + math.sin(normal) * (hh + 0.12))
+            G.stroke(db, [(tip[0] - 0.05, tip[1]), (tip[0] - 0.03, tip[1] + 0.03)], M["ink"], I)
+            G.stroke(db, [(tip[0] + 0.05, tip[1]), (tip[0] + 0.03, tip[1] + 0.03)], M["ink"], I)
+    body = [(x, max(z, 0.30)) for x, z in K.body_shape(cx, cz, rx, rz, seed + 1, chest=0.03)]
+    G.stroke(db, body, M["white_sh"], 0.0, cyclic=True)                                    # the pale regolith-grey hide
+    n = len(body)
+    low = [body[i] for i in range(n) if math.sin(TAU * i / n) < -0.40]
+    G.stroke(db, low + [(cx + (x - cx) * 0.9, cz + (z - cz) * 0.4) for x, z in low][::-1], M["slate_sh"], 0.0, cyclic=True)
+    G.stroke(db, [q for q in body if q[0] < -0.35] + [(-0.35, cz)], M["white_dp"], 0.0, cyclic=True)
+    for k in range(4):                                                                    # hide folds + specks
+        x = -0.30 + 0.18 * k
+        G.seam(db, [(x, cz + 0.12), (x + 0.03, cz - 0.02), (x - 0.01, cz - 0.14)], M["ink"])
+    G.specks(db, [(-0.2, 0.6), (0.1, 0.62), (0.3, 0.55), (-0.4, 0.5)], M["ink"])
+    G.stroke(db, body, M["ink"], O, cyclic=True)
+    K.legs_pass(d, M, B, GLASS, p, far=False)
+    J = (0.46, 0.56)
+    hx, hz = 0.66, 0.56 - 0.18 * p["graze"]
+    H = K.turn(J, p["head_rot"] - 0.35 * p["graze"], p["head"], B)
+    dk = G.Xf(G.Xf(d, H), K.scale_about((hx, hz), 1.2))
+
+    def R(dx, dz):
+        return (hx + dx, hz + dz)
+    G.stroke(dk, G.lumpy_ellipse(hx, hz, 0.15, 0.13, n=28, lump=0.03, seed=seed + 2), M["white_sh"], O, cyclic=True)
+    snout = G.bezier(R(0.06, 0.06), R(0.18, 0.04), R(0.27, -0.02 + 0.01 * p["sniff"]), n=8) + \
+        G.bezier(R(0.29, -0.06), R(0.25, -0.11), R(0.17, -0.11), n=5) + G.bezier(R(0.12, -0.11), R(0.05, -0.10), R(0.0, -0.08), n=5)
+    G.stroke(dk, snout, M["white_sh"], O, cyclic=True)
+    G.stroke(dk, G.lumpy_ellipse(*R(0.265, -0.035), 0.03, 0.025, n=10, seed=seed + 5), M["slate"], I, cyclic=True)   # the nose pad
+    G.seam(dk, [R(0.12, 0.03), R(0.20, 0.01)], M["ink"])
+    if p["mouth"] > 0.05:
+        G.stroke(dk, G.lumpy_ellipse(*R(0.18, -0.10), 0.016 + 0.01 * p["mouth"], 0.01 + 0.012 * p["mouth"], n=10, seed=seed + 6), M["mouth"], I, cyclic=True)
+    else:
+        G.seam(dk, G.bezier(R(0.25, -0.085), R(0.18, -0.095), R(0.10, -0.085), n=5), M["ink"])
+    K.eyes(dk, M, *R(0.02, 0.03), 0.032, 0.042, 0.06, p, seed)
+    for k in (0, 1):                                                                      # two small round ears
+        G.stroke(dk, G.lumpy_ellipse(*R(-0.09 + 0.06 * k, 0.12), 0.04, 0.03, n=10, seed=seed + 7 + k, rot=0.4 + p["ears"]), M["white_dp" if k == 0 else "white_sh"], I, cyclic=True)
+    if p["stars"] is not None:
+        K.stars(dk, M, hx, hz + 0.25, 0.16, p["stars"])
+
+
+def glassback_poses():
+    out = []
+    for i in range(10):                                                                   # idle: grazing, nibbles twice, glints walk
+        ph, q = K.idle_common(i, 10)
+        q.update(graze=0.5 + 0.5 * math.sin(ph - 1.0), sniff=1.0 if i in (2, 3, 7) else 0.0, glint=i / 10, ears=0.1 * math.sin(ph),
+                 blink={5: 0.6, 6: 1.0}.get(i, 0.0), look=(0.6, -0.3))
+        out.append(q)
+    for i in range(12):                                                                   # walk: a slow amble
+        ph = TAU * i / 12
+        out.append(dict(legs=K.walk_legs(ph, 0.11, 0.05), bob=0.012 * math.cos(2 * ph), sz=1 + 0.02 * math.cos(2 * ph),
+                        rock=0.02 * math.sin(ph), head_rot=0.04 * math.sin(2 * ph - 0.5), glint=i / 12, graze=0.15, look=(0.9, -0.1)))
+    out += [dict(sz=0.95, look=(0.7, 0.0), chime=0.2), dict(sz=0.92, chime=0.5, eye_pop=1.2),           # react: the shards ring up
+            dict(sz=1.06, chime=1.0, eye_pop=1.5, mouth=0.4, head_rot=0.12, glint=0.3), dict(sz=1.04, chime=0.9, eye_pop=1.4, glint=0.6, head_rot=0.12),
+            dict(sz=1.02, chime=0.6, eye_pop=1.2, glint=0.9), dict(chime=0.35, glint=0.2, look=(0.9, 0.2)), dict(chime=0.15, glint=0.5), dict(chime=0.0)]
+    out += K.bump_clip(lambda f: dict(chime=0.3 if f.get("stars") is not None else 0.0))
+    for i in range(12):                                                                   # flee: a lumbering trot
+        legs, bob, sz, rock = K.gallop(i / 6, A=0.5, lz=0.45)
+        out.append(dict(legs=legs, bob=bob, sz=sz, rock=0.6 * rock, lean=0.04, head_rot=-0.05, chime=0.2, glint=i / 12, ears=0.4, look=(0.9, 0.0)))
+    return out
+
+
 SPECIES = {
     "flarewing": dict(draw=draw_flarewing, poses=flarewing_poses, mats=mats, frame=(124, 124), seed=41, pivot=(0.5, 0.5), flyer=True,
                       clips=[("idle", 10, True), ("fly", 12, True), ("react", 8, False), ("bump", 10, False), ("flare_dance", 12, True)],
@@ -266,6 +372,12 @@ SPECIES = {
                                   "motion": "idle peeks over its ice burrow and looks about; walk humps tail to head; react ducks; idle_open breathes and curls",
                                   "original": "our own ice wyrm: frost-capped teal segments, a big round head; shy, never an ambusher (D-087), no teeth"},
                       ours="a shy frost-capped wyrm that peeks over its ice burrow and humps along the crater floor like a caterpillar"),
+    "glassback": dict(draw=draw_glassback, poses=glassback_poses, mats=mats, frame=(176, 112), seed=43,
+                      clips=[("idle", 10, True), ("walk", 12, True), ("react", 8, False), ("bump", 10, False), ("flee", 12, True)],
+                      self_check={"ink": "crystal facet seams + glints, hide folds, specks, toe seams, a muzzle seam",
+                                  "motion": "grazes with the head dipping, glints walk along the shards, an amble; react: the shards ring up and lift",
+                                  "original": "our own silicate grazer: a pale hide with cold-teal crystal shards; gentle, no teeth"},
+                      ours="a gentle pale grazer whose cold-teal crystal shards ring and lift when it is startled"),
 }
 
 
