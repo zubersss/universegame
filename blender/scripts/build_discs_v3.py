@@ -239,7 +239,38 @@ def interior_marks(name, d, f, nf):
     return marks
 
 
-def saturn_rings(R, tilt=0.30):
+LIMB_PX = 2.0                    # B-143: the soft alpha limb's width in texels
+
+
+def soft_limb(img, width=LIMB_PX, solid=250):
+    """B-143: a soft alpha limb OUTSIDE the silhouette, so near-range bilinear zoom (10x at space_6) draws a round edge, not
+    1-texel stairs. Every pixel with alpha >= `solid` stays byte-identical (the ink and the fill); a pixel outside gets
+    alpha max(its own, ramp(distance to the nearest solid pixel)), ramp = 1 - (d - 0.5) / width (0.75 at d 1, ~0.25 at 2),
+    and a fully transparent one takes the ink colour (the outline is the outermost thing on every disc and ring edge)."""
+    a = img[..., 3]
+    S = a >= solid
+    H, W = a.shape
+    k = int(np.ceil(width + 0.5))
+    P = np.pad(S, k)
+    dist = np.full((H, W), np.inf, np.float32)
+    for dy in range(-k, k + 1):
+        for dx in range(-k, k + 1):
+            d = (dx * dx + dy * dy) ** 0.5
+            if 0 < d <= width + 0.5:
+                hit = P[k + dy:k + dy + H, k + dx:k + dx + W]
+                dist = np.where(hit & (d < dist), np.float32(d), dist)
+    ramp = np.clip(1.0 - (dist - 0.5) / width, 0.0, 1.0)
+    want = np.rint(ramp * 255).astype(np.uint8)
+    out = img.copy()
+    grow = (~S) & (want > a)
+    empty = grow & (a == 0)
+    ink = np.rint(PAL["ink"] * 255).astype(np.uint8)
+    out[empty, :3] = ink
+    out[grow, 3] = want[grow]
+    return out
+
+
+def saturn_rings(R, tilt=0.30, limb=True):
     """Rings as two static parts (back = the half behind the body, front = in front): bands
     1.24-2.27 R with the Cassini gap, ink on the outer and inner edges. -> (back, front) uint8."""
     Rr = 2.27 * R
@@ -272,13 +303,15 @@ def saturn_rings(R, tilt=0.30):
     small = acc.reshape(H, SS, W, SS, 4).mean(axis=(1, 3))
     al = small[..., 3:4]
     img = np.clip(np.rint(np.dstack([np.where(al > 1e-6, small[..., :3] / np.maximum(al, 1e-6), 0), al]) * 255), 0, 255).astype(np.uint8)
+    if limb:                                   # B-143: before the split, so the cut line is never feathered twice
+        img = soft_limb(img)
     back, front = img.copy(), img.copy()
     back[H // 2:] = 0                          # upper half passes behind the body
     front[:H // 2] = 0
     return back, front
 
 
-def build_disc(name):
+def build_disc(name, limb=True):
     R = RADIUS_U[name] * SPACE_PPU
     nf = FRAMES.get(name, 12)
     pad = 10 if name != "uranus" else 10
@@ -286,7 +319,8 @@ def build_disc(name):
     for f in range(nf):
         d = Disc(name, R, pad, seed=zlib.crc32(name.encode()) % 1000)
         rgb, ink, rgba = paint(name, d, f, nf)
-        frames.append(finish(d, rgb, ink, rgba))
+        im = finish(d, rgb, ink, rgba)
+        frames.append(soft_limb(im) if limb else im)
     return frames, R
 
 
@@ -302,7 +336,7 @@ def sheet_meta(key, frames, R_px, name):
 ORDER = ["mercury", "venus", "earth", "mars", "jupiter", "saturn", "uranus", "neptune"]
 
 
-def export(art, preview_dir, stamp=None):
+def export(art, preview_dir, stamp=None, prebuilt=None):
     """D-098 / contract §11.5: planets/<planet>/disc_color.png + disc.json (Luna: planets/earth/
     luna_*), Saturn's rings_back / rings_front + disc_rig.json; validated; then the review sheet
     (built from the same frames). Returns [(key, w, h, frames, kb)]."""
@@ -310,7 +344,7 @@ def export(art, preview_dir, stamp=None):
     out = []
     tiles = {}
     for name in ORDER + ["luna"]:
-        frames, R = build_disc(name)
+        frames, R = prebuilt[name] if prebuilt else build_disc(name)
         tiles[name] = (frames, R)
         planet, variant = ("earth", "luna") if name == "luna" else (name, "disc")
         key = f"planets/{planet}/{variant}"
@@ -328,7 +362,7 @@ def export(art, preview_dir, stamp=None):
             _json.dump(meta, f, indent=2)
             f.write("\n")
         out.append((key, sheet.shape[1], sheet.shape[0], len(frames), n // 1024))
-    back, front = saturn_rings(RADIUS_U["saturn"] * SPACE_PPU)
+    back, front = prebuilt["_rings"] if prebuilt else saturn_rings(RADIUS_U["saturn"] * SPACE_PPU)
     d = os.path.join(art, "planets", "saturn")
     for nm, im in (("rings_back", back), ("rings_front", front)):
         n = pngio.write_png(os.path.join(d, f"{nm}_color.png"), im)
@@ -491,5 +525,80 @@ def preview(out_dir, tiles=None, out_name="review_b119_discs_preview.png", stamp
     print("review written", img.shape, f"{time.time() - t0:.1f}s", "ink", ow, iw, len(inner))
 
 
+def _old_frames(art, planet, variant):
+    """The committed sheet's frames (B-143's "before")."""
+    import json as _json
+    m = _json.load(open(os.path.join(art, "planets", planet, f"{variant}.json"), encoding="utf-8"))
+    sh = pngio.read_png_np(os.path.join(art, "planets", planet, f"{variant}_color.png"))
+    fw, fh, g, c = m["frame_width"], m["frame_height"], m.get("gutter", v3.GUTTER), m["columns"]
+    return [sh[(i // c) * (fh + g):(i // c) * (fh + g) + fh, (i % c) * (fw + g):(i % c) * (fw + g) + fw] for i in range(m["frames"])]
+
+
+def b143(art, preview_dir, report, write=True):
+    """B-143 in one run: rebuild every disc + Luna + the ring parts with the soft limb, prove against the committed
+    sheets that every pixel solid before is byte-identical and only the limb changed, then (write=True) export and write
+    the evidence (a limb-row diff per disc: the centre row's alpha across the left limb, before -> after)."""
+    import time as _t
+    t0 = _t.time()
+    rows, problems, built = [], [], {}
+    for name in ORDER + ["luna"]:
+        planet, variant = ("earth", "luna") if name == "luna" else (name, "disc")
+        old = _old_frames(art, planet, variant)
+        frames, R = build_disc(name)
+        built[name] = (frames, R)
+        if len(old) != len(frames) or old[0].shape != frames[0].shape:
+            problems.append(f"{name}: shape {old[0].shape} x{len(old)} -> {frames[0].shape} x{len(frames)}")
+            continue
+        same_in = changed = outside_only = 0
+        for o, n in zip(old, frames):
+            S = o[..., 3] >= 250
+            same_in += int((o[S] == n[S]).all())
+            diff = (o != n).any(-1)
+            changed += int(diff.sum())
+            outside_only += int(not (diff & S).any())
+        if same_in != len(frames) or outside_only != len(frames):
+            problems.append(f"{name}: solid pixels changed in {len(frames) - same_in} frames")
+        o, n = old[0], frames[0]
+        cy = o.shape[0] // 2
+        xs = np.nonzero(o[cy, :, 3] >= 250)[0]
+        x0 = int(xs.min()) if len(xs) else 0
+        seg = slice(max(0, x0 - 4), x0 + 2)
+        rows.append(f"| {planet}/{variant} | {len(frames)} | {frames[0].shape[1]} | {same_in}/{len(frames)} | {changed // len(frames)} | "
+                    f"{' '.join(str(v) for v in o[cy, seg, 3])} | {' '.join(str(v) for v in n[cy, seg, 3])} |")
+    back, front = saturn_rings(RADIUS_U["saturn"] * SPACE_PPU)
+    built["_rings"] = (back, front)
+    for nm, im in (("rings_back", back), ("rings_front", front)):
+        o = pngio.read_png_np(os.path.join(art, "planets", "saturn", f"{nm}_color.png"))
+        S = o[..., 3] >= 250
+        ok = o.shape == im.shape and (o[S] == im[S]).all()
+        if not ok:
+            problems.append(f"saturn/{nm}: solid pixels changed or shape {o.shape} -> {im.shape}")
+        cx = o.shape[1] // 2
+        col = o[:, cx, 3]
+        ys = np.nonzero(col >= 250)[0]
+        y0 = int(ys.min()) if len(ys) else 0
+        seg = slice(max(0, y0 - 4), y0 + 2)
+        rows.append(f"| saturn/{nm} | 1 | {im.shape[1]} | {int(ok)}/1 | {int((o != im).any(-1).sum()) if o.shape == im.shape else -1} | "
+                    f"{' '.join(str(v) for v in o[seg, cx, 3])} | {' '.join(str(v) for v in im[seg, cx, 3])} |")
+    if problems:
+        raise ValueError("B-143 checks: " + "; ".join(problems))
+    out = []
+    if write:
+        out, _tiles = export(art, preview_dir, prebuilt=built)
+    with open(report, "w", encoding="utf-8", newline="\n") as f:
+        f.write("# B-143 soft alpha limb: evidence (BLENDER, " + _t.strftime("%Y-%m-%d %H:%M") + ")\n\n")
+        f.write(f"`build_discs_v3.soft_limb` ({LIMB_PX:.0f} texels, outside the silhouette): every pixel with alpha >= 250 in the\n"
+                "committed sheet is byte-identical in the new one (ink and fill); only the limb changed. Limb row = the frame's centre\n"
+                "row (a ring part: its centre column, top edge), alpha from 4 px outside the first solid pixel to 1 px inside.\n\n")
+        f.write("| key | frames | frame px | solid identical | changed px / frame | limb alpha before | limb alpha after |\n|---|---|---|---|---|---|---|\n")
+        f.write("\n".join(rows) + "\n\n")
+        f.write(("Exported: " + ", ".join(f"{k} {w}x{h} {kb} KB" for k, w, h, _n, kb in out) if write else "Dry run (nothing written to Assets).")
+                + f"\n\n{_t.time() - t0:.0f} s.\n")
+    return rows, out
+
+
 if __name__ == "__main__":
-    preview(sys.argv[1])
+    if len(sys.argv) > 2 and sys.argv[1] == "--b143":           # build_discs_v3.py --b143 <art> <preview dir> <report> [--dry]
+        print("\n".join(b143(sys.argv[2], sys.argv[3], sys.argv[4], write="--dry" not in sys.argv)[0]))
+    else:
+        preview(sys.argv[1])
