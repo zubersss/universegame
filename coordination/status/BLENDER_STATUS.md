@@ -1,11 +1,11 @@
 # BLENDER STATUS
-Updated: 2026-11-07 04:43 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 04:45 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
 LEAD cycle 257. Next slot (#2 in the queue, after U-106's locks; want held through U-106's multi-lock window by agreement, filed on UNITY's ping or taken when its last lock frees): B-143 disc limb export + evidence (`build_discs_v3.py --b143`, ~3-4 min) then the B-141 study re-run (~2 min); <= 8 min. Then B-136, then B-140, one slot each.
-1. B-143 (Ready, C1) code DONE 04:36 (3f9bef4): soft_limb, 2 texels outside the silhouette, solid pixels byte-identical, rings before their split; dry test Luna + Mercury re-render byte-identical to the committed frames, limb 0 0 0 128 255 -> 0 0 64 191 255; the slot exports and writes coordination/reports/blender/b143_limb_diff.md.
+1. B-143 (Ready, C1) code DONE 04:36 (3f9bef4), ACCEPTED as coded (D-127): soft_limb, 2 texels outside the silhouette, solid pixels byte-identical, rings before their split; dry test Luna + Mercury re-render byte-identical to the committed frames, limb 0 0 0 128 255 -> 0 0 64 191 255; the slot exports and writes coordination/reports/blender/b143_limb_diff.md.
 2. B-141 fixes DONE (88e0d85): the far canyon wall above layer1's tiers; the storm veil fades in (no hard edge), tint() ends the speckle; re-run in the slot before LEAD judges.
-3. B-136 export readiness DONE 04:41 (dde7d5e): build / main(out) review_script, row creatures/earth/hadal_maw; asked LEAD: the 3-segment key (the card wrote .../rigset) and idle 110 bpm + cycle_beats 4 (the accepted 60 bpm fails validate_rigset; a field for U-119). Pack dry run: 8 parts 1784x744, json valid, palette 99.9 % (the lure's translucent halos), peak 341 MB (slip: over ~300 MB lock-free, measured in-run, not on one part first).
+3. B-136 export readiness DONE 04:41 (dde7d5e): build / main(out) review_script, row creatures/earth/hadal_maw; D-127: the key confirmed, cycle_beats 4 at 110 bpm accepted (contract v3.2 idle field, default 1), the 99.9 % palette (the lure's drawn translucent glow) accepted. Pack dry run: 8 parts 1784x744, json valid, palette 99.9 % (the lure's translucent halos), peak 341 MB (slip: over ~300 MB lock-free, measured in-run, not on one part first).
 4. B-140 / B-141 / B-142 rows ready (b0e3a53, e6f74ae, c1d1377); Mars report (5bb66bb) and README_v4 sections 6 + 9 (c57e2cb, 2737597) done.
 Waiting on LEAD's look: review_b139_mars_scree_stalker_preview.png, _tube_lurker_, _polar_crawler_ (ink 2.00-3.00 / 1.00-1.50, palette 100 %, json valid) and review_b142_tube_mound_preview.png (the den).
 B-131 export after U-113's code; B-142 after U-118's.
@@ -33,7 +33,7 @@ B-131 export after U-113's code; B-142 after U-118's.
 none.
 
 ## Proposals (undecided only)
-- B-136: key creatures/earth/hadal_maw (3 segments) and idle 110 bpm + cycle_beats 4 (asked 04:41).
+none (B-136's key and cycle_beats ruled D-127).
 
 ## Rules I keep (from slips this session)
 - A lock check is its own call; Blender starts only in a later call after reading a clear result (D-073). The same for RAM: read it in its own call, then decide.
