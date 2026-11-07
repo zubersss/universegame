@@ -9,7 +9,7 @@ TextureImporter:
   serializedVersion: 13
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 1
+    enableMipMap: 0
     sRGBTexture: 1
     linearTexture: 0
     fadeOut: 0
@@ -25,7 +25,7 @@ TextureImporter:
     normalMapFilter: 0
     flipGreenChannel: 0
   isReadable: 0
-  streamingMipmaps: 1
+  streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
   ignoreMipmapLimit: 0
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 2
+    filterMode: 1
     aniso: 2
     mipBias: 0
     wrapU: 1
@@ -46,20 +46,20 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 9
-  spritePivot: {x: 0.5, y: 0.0078125}
-  spritePixelsToUnits: 128
+  spritePivot: {x: 0.5, y: 0.052083}
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
-  alphaIsTransparency: 0
+  alphaIsTransparency: 1
   spriteTessellationMethod: 0
   spriteTessellationDetail: -1
   spriteGeometrySubdivision: -1
-  textureType: 0
+  textureType: 8
   textureShape: 1
   singleChannelComponent: 0
   flipbookRows: 1
@@ -115,23 +115,177 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: smelter_color_0
+      name: smelter_0
       rect:
         serializedVersion: 2
-        x: 23
-        y: 8
-        width: 210
-        height: 292
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 196
+        width: 112
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.052083}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 000b277fb439ec130800000000000000
-      internalID: 3588967907544182784
+      spriteID: f00b4065a8af68e47b57cd8208e3175f
+      internalID: 921574042
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: smelter_1
+      rect:
+        serializedVersion: 2
+        x: 116
+        y: 196
+        width: 112
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.052083}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 31a5b1a09b33c0c46b1886569d25acff
+      internalID: -1141401319
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: smelter_2
+      rect:
+        serializedVersion: 2
+        x: 232
+        y: 196
+        width: 112
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.052083}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7e72f4ddc7ff211458260cb144b425dd
+      internalID: -143402942
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: smelter_3
+      rect:
+        serializedVersion: 2
+        x: 348
+        y: 196
+        width: 112
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.052083}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: adc85f547d9785c44b9728205d079773
+      internalID: -1036237852
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: smelter_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 112
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.052083}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7443ef949ef9d254e8642265845c290a
+      internalID: 480876732
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: smelter_5
+      rect:
+        serializedVersion: 2
+        x: 116
+        y: 0
+        width: 112
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.052083}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9d6996d6622fabd459c348c024436ff2
+      internalID: -85919896
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: smelter_6
+      rect:
+        serializedVersion: 2
+        x: 232
+        y: 0
+        width: 112
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.052083}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e825251a8552edb4284bacfbfb6c8943
+      internalID: -429660485
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: smelter_7
+      rect:
+        serializedVersion: 2
+        x: 348
+        y: 0
+        width: 112
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.052083}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6ff370a103c7e9c418bf503477c6bee1
+      internalID: 502036476
       vertices: []
       indices: 
       edges: []
@@ -146,16 +300,18 @@ TextureImporter:
     indices: 
     edges: []
     weights: []
-    secondaryTextures:
-    - texture: {fileID: 2800000, guid: 2ebaf68ea65e76d4187241694e68db5e, type: 3}
-      name: _NormalMap
-    - texture: {fileID: 2800000, guid: 2335a14da5291eb489eaa9a200c15a27, type: 3}
-      name: _EmissionMap
-    - texture: {fileID: 2800000, guid: c061b333db3b01545a1254329143372f, type: 3}
-      name: _MaskTex
+    secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      smelter_0: 921574042
+      smelter_1: -1141401319
+      smelter_2: -143402942
+      smelter_3: -1036237852
+      smelter_4: 480876732
+      smelter_5: -85919896
+      smelter_6: -429660485
+      smelter_7: 502036476
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

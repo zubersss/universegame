@@ -13,6 +13,10 @@ namespace Meridian.Tests
     public class StageCameraPlayTests
     {
         const string CorePath = "Assets/_Game/Scenes/Core.unity";
+        bool wasCartoon = true;
+        // D-132: the 18 m stage frame is the 3D path's camera; the game runs Earth on the cartoon path, so this class switches it off for its run and restores it.
+        [SetUp] public void ThreeDPath() { wasCartoon = Meridian.View2D.CartoonStage.Enabled; Meridian.View2D.CartoonStage.Enabled = false; }
+        [TearDown] public void RestoreCartoon() { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
 
         [UnityTest]
         public IEnumerator AJumpAtTheCampLeavesTheCameraHeightUnchanged()

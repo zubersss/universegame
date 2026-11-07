@@ -98,8 +98,28 @@ namespace Meridian.Tests
                 if (sr.name == "lamp")
                 {
                     float until = Time.realtimeSinceStartup + 5f;
-                    while (sr.sharedMaterial != ArtMaterials.Active.litEmissive && Time.realtimeSinceStartup < until) yield return null;
-                    Assert.AreSame(ArtMaterials.Active.litEmissive, sr.sharedMaterial, "lamps glow by their emission map");
+                    // U-113 (D-117, B-131): the lamp is a v3 sheet, colour + json only: it glows by its flicker clip, not an emission map.
+                    Meridian.Art.SheetProp sheet = null;
+                    while (Time.realtimeSinceStartup < until)
+                    {
+                        sheet = sr.GetComponent<Meridian.Art.SheetProp>();
+                        if ((sheet != null && sheet.Ready) || sr.sharedMaterial == ArtMaterials.Active.litEmissive) break;
+                        yield return null;
+                    }
+                    if (sheet != null)
+                    {
+                        Assert.IsTrue(sheet.Ready, "the lamp sheet dressed the card");
+                        Assert.NotNull(sr.sprite, "the lamp draws its frame");
+                        // Night: the lamp's `flicker` loop is its glow (the drawn halo is in the frames themselves).
+                        var was = side.dayNight.Override;
+                        side.dayNight.Override = 0f;
+                        float night = Time.realtimeSinceStartup + 5f;
+                        while (sheet.Playing != Meridian.Art.SheetProp.FlickerClip && Time.realtimeSinceStartup < night) yield return null;
+                        TestContext.Out.WriteLine($"[MERIDIAN] lamp sheet: playing {sheet.Playing ?? "frame 0"} at night, sprite {sr.sprite.name}");
+                        Assert.AreEqual(Meridian.Art.SheetProp.FlickerClip, sheet.Playing, "the lamp flickers by night (D-117: no emission map)");
+                        side.dayNight.Override = was;
+                    }
+                    else Assert.AreSame(ArtMaterials.Active.litEmissive, sr.sharedMaterial, "lamps glow by their emission map");
                 }
 
             int x = PoiCatalog.SpawnCamp.x + 1, y = camp.groundY;

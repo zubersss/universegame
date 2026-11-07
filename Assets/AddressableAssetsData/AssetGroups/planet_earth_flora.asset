@@ -65,8 +65,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4f308488e84eed94dbfe3e926f047368
+    m_Address: props/earth_flora/bush_b/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 58acafa47e208b4439e92d5f4f881045
     m_Address: props/earth_flora/dead_tree
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 79b427ce48ae1dc4880c0d38825fdf23
+    m_Address: props/earth_flora/rock_c/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -85,13 +95,43 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7debf672106634043bce97b00cf54106
+    m_Address: props/earth_flora/tree_spruce/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 85fa72106771ac242a3dcd6017d8878b
+    m_Address: props/earth_flora/cactus/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 887c7b9d69fe0cf4cb99c2c17a0ad1e7
     m_Address: props/earth_flora/cactus
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 89988f4fa7d089d40bd33157fad6f151
+    m_Address: props/earth_flora/rock_a/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8f2eaf6ef22f07d4682c7961b1d0c174
+    m_Address: props/earth_flora/bush_a/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9d834bda40013c845a3fa555e3f40023
+    m_Address: props/earth_flora/tree_birch/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a66fdf7e55e2fd342bcd0d2d49e5ff8f
     m_Address: props/earth_flora/tree_spruce
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ab95a03968c85d4448c89d9c29227ab0
+    m_Address: props/earth_flora/dead_tree/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -105,8 +145,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: eff23ef42de8c4d429d0de621ce13e2c
+    m_Address: props/earth_flora/rock_b/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f0c8c96bf5ba8304abdb2f48b87c1eaa
     m_Address: props/earth_flora/rock_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f32bf09830920f447a902171a8c07bbd
+    m_Address: props/earth_flora/grass/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -122,6 +172,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: fc1b1b037e0de1b4db44f7c35f8f38af
     m_Address: props/earth_flora/tree_oak
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fc7e38db696de1b45a7978daa95c5b42
+    m_Address: props/earth_flora/tree_oak/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

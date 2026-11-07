@@ -15,6 +15,8 @@ namespace Meridian.Creatures
         Gull,
         // U-114 (D-119, B-132): the brown bear, territorial (Bible §7.1); last so every older index stays.
         BrownBear,
+        // U-114 (B-135, cycle 259): the Earth swimmers, Water habitat; appended so every older index stays.
+        Pike, Shark, Squid,
     }
 
     /// <summary>What a creature does about the player.</summary>
@@ -27,13 +29,17 @@ namespace Meridian.Creatures
     /// Where a creature lives (U-055): on the ground under gravity; in the air a few metres over the ground
     /// (hoverMin..hoverMax); or on Venus's cloud deck (VenusLandforms.DeckY ± DeckHalfBand).
     /// </summary>
-    public enum Habitat { Ground, Air, Deck }
+    /// <summary>U-114: Water swims between its floor clearance and the surface of a water column, turning at the pool's walls.</summary>
+    public enum Habitat { Ground, Air, Deck, Water }
 
     /// <summary>What a spawn rule sees of one candidate column (U-055).</summary>
     public struct SpawnSite
     {
         public int x, surfaceY, datumY, worldWidth;
         public byte surfaceTile;
+        /// <summary>U-114: the tile just above the top solid (Water over a pool floor) and how many water tiles stand on it.</summary>
+        public byte aboveTile;
+        public int waterDepth;
         public PlanetId planet;
         /// <summary>Mercury: the zone at x and its local time (0.25 dawn line, 0.75 dusk line).</summary>
         public MercuryZone zone;
@@ -68,6 +74,11 @@ namespace Meridian.Creatures
         public Habitat habitat;
         /// <summary>Air: the height band above the ground it keeps (m).</summary>
         public float hoverMin = 3f, hoverMax = 7f;
+        /// <summary>U-114: a swimmer's clearance above the pool floor (B-135: pike 0.38, shark 0.87, squid 0.70 m).</summary>
+        public float floorClearance;
+        /// <summary>U-114: the water a swimmer needs over the floor: its own height plus its floor clearance.</summary>
+        public float WaterDepthNeeded => size.y + floorClearance;
+        public bool Swims => habitat == Habitat.Water;
         /// <summary>Flarewing: hunts while a solar flare is active, keeps clear otherwise.</summary>
         public bool huntsDuringFlare;
         public bool apex;
@@ -132,6 +143,17 @@ namespace Meridian.Creatures
             new SpeciesSpec { id = Species.BrownBear, planet = PlanetId.Earth, artKey = "creatures/earth/bear", size = new Vector2(2.1f, 1.3f),
                 wanderSpeed = 1.1f, runSpeed = 6.5f, jumpSpeed = 4.5f, temper = Temper.Territorial, senseRange = 6f, time = ActiveTime.Any,
                 packMin = 1, packMax = 1, maxAlive = 2, placeholder = new Color(0.45f, 0.28f, 0.18f) },
+            // U-114 (B-135): the Earth swimmers on their v3 sheets (idle, swim, react, bump, flee), pivot centre, sizes from the frames at PPU 64;
+            // they spawn in water deep enough for their height plus floor clearance and swim between that clearance and the surface.
+            new SpeciesSpec { id = Species.Pike, planet = PlanetId.Earth, artKey = "creatures/earth/pike", size = new Vector2(2.0f, 1.25f), floorClearance = 0.38f,
+                wanderSpeed = 1.5f, runSpeed = 5f, temper = Temper.Flees, senseRange = 5f, time = ActiveTime.Any, habitat = Habitat.Water,
+                packMin = 2, packMax = 4, maxAlive = 6, placeholder = new Color(0.45f, 0.6f, 0.4f) },
+            new SpeciesSpec { id = Species.Shark, planet = PlanetId.Earth, artKey = "creatures/earth/shark", size = new Vector2(3.5f, 2.0f), floorClearance = 0.87f,
+                wanderSpeed = 1.2f, runSpeed = 6f, temper = Temper.Territorial, senseRange = 7f, time = ActiveTime.Any, habitat = Habitat.Water,
+                packMin = 1, packMax = 1, maxAlive = 2, placeholder = new Color(0.5f, 0.55f, 0.62f) },
+            new SpeciesSpec { id = Species.Squid, planet = PlanetId.Earth, artKey = "creatures/earth/squid", size = new Vector2(5.0f, 2.25f), floorClearance = 0.70f,
+                wanderSpeed = 0.9f, runSpeed = 4.5f, temper = Temper.Flees, senseRange = 6f, time = ActiveTime.Any, habitat = Habitat.Water,
+                packMin = 1, packMax = 1, maxAlive = 2, placeholder = new Color(0.8f, 0.5f, 0.55f) },
         };
 
         public static SpeciesSpec Get(Species s) => All[(int)s];
@@ -148,6 +170,8 @@ namespace Meridian.Creatures
             Species.GreyWolf => s.surfaceTile == TileId.Grass || s.surfaceTile == TileId.Snow,
             Species.BrownBear => s.surfaceTile == TileId.Grass,                  // U-114: forest floor and meadows, like the stag
             Species.Gull => s.surfaceTile == TileId.Grass || s.surfaceTile == TileId.Sand,
+            // U-114: a swimmer wants water over the floor at least as deep as its own height plus its floor clearance.
+            Species.Pike or Species.Shark or Species.Squid => s.aboveTile == TileId.Water && s.waterDepth >= WaterDepthNeeded,
             Species.Dustskater => s.surfaceTile == TileId.Regolith,
             Species.ScreeStalker => s.surfaceTile == TileId.Regolith && s.surfaceY <= s.datumY - 12, // low ground: canyon floors
             Species.Glassback => s.zone == MercuryZone.Twilight && !InColdTrap(s),

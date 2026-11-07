@@ -18,12 +18,14 @@ namespace Meridian.Tests
     {
         const string CorePath = "Assets/_Game/Scenes/Core.unity";
 
+        bool wasCartoon = true;
         [TearDown]
-        public void Off() => CartoonStage.Enabled = false;
+        public void Off() => CartoonStage.Enabled = wasCartoon;
 
         [UnityTest]
         public IEnumerator smoke_c0_earth()
         {
+            wasCartoon = CartoonStage.Enabled;
             CartoonStage.Enabled = true;
 #if UNITY_EDITOR
             yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(

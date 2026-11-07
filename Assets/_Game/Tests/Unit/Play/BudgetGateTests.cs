@@ -250,6 +250,7 @@ namespace Meridian.Tests
             UnityEngine.Object.Destroy(stress.gameObject);
 
             // ---- Earth on the v4 cartoon path (U-101: the rows U-098 asks for; Bible §9.6, D-089) ----
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
             Meridian.View2D.CartoonStage.Enabled = true;
             try
             {
@@ -271,7 +272,7 @@ namespace Meridian.Tests
                 int atlases = AtlasFilesFor("earth");
                 Row("Sprite atlases · Earth", "≤ 8 per planet (contract §11.8)", $"{atlases} planet_earth* atlases on disk", atlases <= 8);
             }
-            finally { Meridian.View2D.CartoonStage.Enabled = false; }
+            finally { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
 
             StaticRows();
             WriteReport();

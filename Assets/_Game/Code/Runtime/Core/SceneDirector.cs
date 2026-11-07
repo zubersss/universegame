@@ -117,12 +117,24 @@ namespace Meridian.Core
         /// </summary>
         public float LastPlanetLoadSeconds { get; private set; } = -1f;
 
+        /// <summary>U-120: what the planet's groups were still loading when the terrain had settled (the time after the scene's own
+        /// breakdown goes here), and how long after the settle the last of it finished. Report text; "none" when nothing waited.</summary>
+        public string LastLoadPending { get; private set; } = "";
+
         IEnumerator WatchPlanetLoad(int gen, float origin, PlanetSideRoot side, string group)
         {
-            float firstDone = -1f, deadline = origin + 30f;
+            float firstDone = -1f, deadline = origin + 30f, settledAt = -1f;
+            LastLoadPending = "";
             while (gen == loadGeneration && side != null)
             {
-                bool done = side.terrain != null && side.terrain.IsSettled && Meridian.Perf.Residency.PendingPlanet(group) == 0;
+                bool settled = side.terrain != null && side.terrain.IsSettled;
+                if (settled && settledAt < 0f)
+                {
+                    settledAt = Time.realtimeSinceStartup;
+                    LastLoadPending = $"terrain settled at {settledAt - origin:F2} s; still loading: {Meridian.Perf.Residency.PendingKeys(group)}";
+                }
+                bool done = settled && Meridian.Perf.Residency.PendingPlanet(group) == 0;
+                if (done && firstDone >= 0f && settledAt >= 0f) LastLoadPending += $"; last load done {firstDone - settledAt:F2} s after the settle";
                 if (done && firstDone >= 0f) { LastPlanetLoadSeconds = firstDone - origin; yield break; } // confirmed on the next frame
                 firstDone = done ? Time.realtimeSinceStartup : -1f; // a chained load (the stage-set probe) gets one frame to start
                 if (Time.realtimeSinceStartup > deadline) { LastPlanetLoadSeconds = Time.realtimeSinceStartup - origin; yield break; } // a slow load fails with a number

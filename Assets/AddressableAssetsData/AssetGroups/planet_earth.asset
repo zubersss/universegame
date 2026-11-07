@@ -190,6 +190,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 735caacfa1f32f64b8d8eebe0f88410a
+    m_Address: props/earth/launch_gantry/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 75f5a553cd896ab42b881dc3a77ce6bd
     m_Address: props/earth/archive_terminal
     m_ReadOnly: 0
@@ -270,6 +275,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: afbe842cb8c3d5443b4fa2c58f078d87
+    m_Address: props/earth/archive_terminal/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b1354cb653481f644bda3c02014ef3ad
+    m_Address: props/earth/beacon/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b5d8e227c977a0f42b786521b6c4ed58
     m_Address: backgrounds/earth/forest/layer1
     m_ReadOnly: 0
@@ -330,8 +345,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f550563fdb8b23146ad194bcfd0139c2
+    m_Address: props/earth/archive_door/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f6a5a279e5d677940978741e39495c16
     m_Address: backgrounds/earth/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f85321d5b77969e4fbc673324e79adfe
+    m_Address: props/earth/launch_tower_ruin/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

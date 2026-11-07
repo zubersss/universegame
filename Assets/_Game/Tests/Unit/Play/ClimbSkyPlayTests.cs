@@ -61,7 +61,8 @@ namespace Meridian.Tests
                 Assert.IsTrue(sky.Overlay.enabled, "the overlay is on once the art is in");
                 Assert.AreEqual(ParallaxLayers.BackOrder + sky.layers.Layout.layers.Length, sky.Overlay.sortingOrder, "the overlay draws in front of every painted layer");
                 Assert.Less(sky.Overlay.sortingOrder, 0, "and behind the terrain");
-                Assert.IsTrue(sky.TopMeasured, "the edge colour is measured from layer0's top band");
+                if (SystemInfo.graphicsDeviceType != UnityEngine.Rendering.GraphicsDeviceType.Null)
+                    Assert.IsTrue(sky.TopMeasured, "the edge colour is measured from layer0's top band"); // the blit needs a graphics device (-nographics runs keep the planet's sky colour)
                 var mpb = new MaterialPropertyBlock();
                 sky.Gradient.GetPropertyBlock(mpb);
                 Assert.AreSame(Texture2D.whiteTexture, mpb.GetTexture("_MainTex"), "the shade draws flat: a white texel, not the shared material's last sprite");

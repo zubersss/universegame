@@ -20,6 +20,11 @@ namespace Meridian.Tests
     public class U076SceneTests
     {
         const string CorePath = "Assets/_Game/Scenes/Core.unity";
+        bool wasCartoon = true;
+
+        // P-48: this is the 3D path's camp (models, depth bands); the game runs Earth on the cartoon path, so switch it off here and restore.
+        [SetUp] public void ThreeDPath() { wasCartoon = Meridian.View2D.CartoonStage.Enabled; Meridian.View2D.CartoonStage.Enabled = false; }
+        [TearDown] public void Restore() { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
 
         [UnityTest]
         public IEnumerator ModelsBandsFloraLampAndDoorInTheEarthCamp()
@@ -47,22 +52,35 @@ namespace Meridian.Tests
                 yield return null;
             }
 
-            // The pad: two 2 m modules, one 4 m collider whose top is the deck; the Pilgrim's skids on it.
+            // The pad: two 2 m modules on one 4 m collider whose top is the deck; the Pilgrim's skids on it.
+            // D-117 / U-113 (B-131): the props are v3 sheets on every path: the card stays and the pad sheet tiles its 2 m module across the 4 m.
             ModelSwap pad = null;
             foreach (var s in side.pois.ModelSwaps) if (s.Key == "props/common/landing_pad") pad = s;
             Assert.NotNull(pad, "pad swap");
-            Assert.IsTrue(pad.Ready, "pad model loaded");
-            Assert.AreEqual(2, pad.Views.Count, "two modules (D-068)");
-            Assert.AreEqual(-1f, pad.Views[0].transform.localPosition.x, 1e-3f, "module 0 at −1 m");
-            Assert.AreEqual(1f, pad.Views[1].transform.localPosition.x, 1e-3f, "module 1 at +1 m");
-            Assert.IsTrue(pad.Sprite.forceRenderingOff, "the card no longer draws");
+            Assert.IsTrue(pad.Ready, "pad loaded (its sheet, or its model)");
+            if (pad.UsesSheet)
+            {
+                Assert.IsTrue(pad.Sheet.Ready, "pad sheet dressed the card");
+                Assert.IsTrue(pad.Sheet.Tiles, "the pad tiles");
+                Assert.AreEqual(2f, pad.Sheet.ModuleM, 1e-3f, "a 2 m module (D-068)");
+                Assert.AreEqual(SpriteDrawMode.Tiled, pad.Sprite.drawMode, "tiled across the footprint");
+                Assert.AreEqual(4f, pad.Sprite.size.x, 0.05f, "two modules: 4 m");
+                Assert.IsFalse(pad.Sprite.forceRenderingOff, "the card draws the sheet");
+            }
+            else
+            {
+                Assert.AreEqual(2, pad.Views.Count, "two modules (D-068)");
+                Assert.AreEqual(-1f, pad.Views[0].transform.localPosition.x, 1e-3f, "module 0 at −1 m");
+                Assert.AreEqual(1f, pad.Views[1].transform.localPosition.x, 1e-3f, "module 1 at +1 m");
+                Assert.IsTrue(pad.Sprite.forceRenderingOff, "the card no longer draws");
+            }
             BoxCollider2D padBox = null;
             foreach (var c in side.pois.Solids) if (c.name.StartsWith("landing_pad")) padBox = c;
             Assert.NotNull(padBox, "pad collider");
             Assert.AreEqual(4f, padBox.size.x, 1e-3f, "landing width 4 m");
             float padTop = padBox.bounds.max.y;
-            var padBounds = ModelSwap.ModelBounds(pad.Views[0].Instance);
-            Assert.AreEqual(padTop, pad.transform.position.y + padBounds.max.y, 0.05f, "collider top = the module's deck");
+            if (pad.UsesSheet) TestContext.Out.WriteLine($"[MERIDIAN] pad sheet: deck (collider top) {padTop:F2}, drawn top {pad.Sprite.bounds.max.y:F2}, module {pad.Sheet.ModuleM} m");
+            else { var padBounds = ModelSwap.ModelBounds(pad.Views[0].Instance); Assert.AreEqual(padTop, pad.transform.position.y + padBounds.max.y, 0.05f, "collider top = the module's deck"); }
             float skidLine = float.MaxValue;
             if (legs.UsesRig)
             {
@@ -115,28 +133,39 @@ namespace Meridian.Tests
             Assert.NotNull(door, "door placed");
             until = Time.realtimeSinceStartup + 20f;
             while (Time.realtimeSinceStartup < until && !(lamp.model.Ready && door.model.Ready)) yield return null;
-            Assert.IsTrue(lamp.model.Ready && door.model.Ready, "lamp and door models loaded");
-            var socket = lamp.model.Find("socket_light");
-            Assert.NotNull(socket, "lamp has socket_light (B-081)");
+            Assert.IsTrue(lamp.model.Ready && door.model.Ready, "lamp and door loaded (their sheets, or their models)");
             var lightT = lamp.go.transform.Find("Light");
             Assert.NotNull(lightT, "lamp light");
-            Assert.AreEqual(socket.position.x, lightT.position.x, 0.02f, "light x at the bulb");
-            Assert.AreEqual(socket.position.y, lightT.position.y, 0.02f, "light y at the bulb");
-            Assert.AreEqual(socket.position.z - BaseBuilder.Lamp3DFront, lightT.position.z, 0.02f, "light in front of the faces (U-074)");
-            Assert.Greater(socket.position.y, gy + 2f, "the bulb is at the lamp's head");
+            if (lamp.model.UsesSheet)
+            {
+                // D-117: the drawn lamp has no socket; its light sits at the piece's head.
+                Assert.IsTrue(lamp.model.Sheet.Ready, "lamp sheet dressed the card");
+                Assert.Greater(lightT.position.y, gy + 2f, "the light is at the lamp's head");
+            }
+            else
+            {
+                var socket = lamp.model.Find("socket_light");
+                Assert.NotNull(socket, "lamp has socket_light (B-081)");
+                Assert.AreEqual(socket.position.x, lightT.position.x, 0.02f, "light x at the bulb");
+                Assert.AreEqual(socket.position.y, lightT.position.y, 0.02f, "light y at the bulb");
+                Assert.AreEqual(socket.position.z - BaseBuilder.Lamp3DFront, lightT.position.z, 0.02f, "light in front of the faces (U-074)");
+                Assert.Greater(socket.position.y, gy + 2f, "the bulb is at the lamp's head");
+            }
 
             var pl = side.player;
             var near = new Vector2(door.go.transform.position.x + 0.5f, gy + 1.05f);
             pl.Body.position = near; pl.transform.position = near;
             until = Time.realtimeSinceStartup + 5f;
-            while (Time.realtimeSinceStartup < until && door.model.Views[0].Towards != 1) yield return null;
-            Assert.AreEqual(BaseBuilder.DoorClip, door.model.Views[0].Current, "door plays `open`");
-            Assert.AreEqual(1, door.model.Views[0].Towards, "opening for the surveyor");
+            int DoorTowards() => door.model.UsesSheet ? door.model.Sheet.Towards : door.model.Views[0].Towards;
+            string DoorClipNow() => door.model.UsesSheet ? door.model.Sheet.Playing : door.model.Views[0].Current;
+            while (Time.realtimeSinceStartup < until && DoorTowards() != 1) yield return null;
+            Assert.AreEqual(BaseBuilder.DoorClip, DoorClipNow(), "door plays `open`");
+            Assert.AreEqual(1, DoorTowards(), "opening for the surveyor");
             var far = new Vector2(PoiCatalog.SpawnCamp.x + 5.5f, gy + 1.05f);
             pl.Body.position = far; pl.transform.position = far;
             until = Time.realtimeSinceStartup + 5f;
-            while (Time.realtimeSinceStartup < until && door.model.Views[0].Towards != -1) yield return null;
-            Assert.AreEqual(-1, door.model.Views[0].Towards, "closing behind");
+            while (Time.realtimeSinceStartup < until && DoorTowards() != -1) yield return null;
+            Assert.AreEqual(-1, DoorTowards(), "closing behind");
             LogAssert.NoUnexpectedReceived();
         }
     }

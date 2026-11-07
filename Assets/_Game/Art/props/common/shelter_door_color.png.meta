@@ -9,7 +9,7 @@ TextureImporter:
   serializedVersion: 13
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 1
+    enableMipMap: 0
     sRGBTexture: 1
     linearTexture: 0
     fadeOut: 0
@@ -25,7 +25,7 @@ TextureImporter:
     normalMapFilter: 0
     flipGreenChannel: 0
   isReadable: 0
-  streamingMipmaps: 1
+  streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
   ignoreMipmapLimit: 0
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 2
+    filterMode: 1
     aniso: 2
     mipBias: 0
     wrapU: 1
@@ -46,20 +46,20 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 9
-  spritePivot: {x: 0.5, y: 0.0078125}
-  spritePixelsToUnits: 128
+  spritePivot: {x: 0.5, y: 0.056818}
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
-  alphaIsTransparency: 0
+  alphaIsTransparency: 1
   spriteTessellationMethod: 0
   spriteTessellationDetail: -1
   spriteGeometrySubdivision: -1
-  textureType: 0
+  textureType: 8
   textureShape: 1
   singleChannelComponent: 0
   flipbookRows: 1
@@ -115,23 +115,133 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: shelter_door_color_0
+      name: shelter_door_0
       rect:
         serializedVersion: 2
-        x: 13
-        y: 8
-        width: 158
-        height: 324
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 180
+        width: 88
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.056818}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: e7bbe3caef0fd3a40800000000000000
-      internalID: 5349696908988169086
+      spriteID: aefffcc9718b2a64a9dbc4f0db3bde41
+      internalID: 1145364818
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shelter_door_1
+      rect:
+        serializedVersion: 2
+        x: 92
+        y: 180
+        width: 88
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.056818}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9573363b2690f3a4392368a42e970962
+      internalID: -33285398
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shelter_door_2
+      rect:
+        serializedVersion: 2
+        x: 184
+        y: 180
+        width: 88
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.056818}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3fb55a58358b4ad46a1053b19e61cb60
+      internalID: -1536497917
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shelter_door_3
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 88
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.056818}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: be3b9a14bcd130141a11d713f6910184
+      internalID: -736389730
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shelter_door_4
+      rect:
+        serializedVersion: 2
+        x: 92
+        y: 0
+        width: 88
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.056818}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 33f6e49cfa8c9a34bbf72a94757f4166
+      internalID: 1808492368
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shelter_door_5
+      rect:
+        serializedVersion: 2
+        x: 184
+        y: 0
+        width: 88
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.056818}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4fd9b436b0c13774ba83dcd7ee4261ab
+      internalID: 689535238
       vertices: []
       indices: 
       edges: []
@@ -146,16 +256,16 @@ TextureImporter:
     indices: 
     edges: []
     weights: []
-    secondaryTextures:
-    - texture: {fileID: 2800000, guid: be133fb2ac8a0d04e8e2e8f6bae9f435, type: 3}
-      name: _NormalMap
-    - texture: {fileID: 2800000, guid: 7c323a1b1b4c82143800c9060deea08e, type: 3}
-      name: _EmissionMap
-    - texture: {fileID: 2800000, guid: 93d3b70ff027a8c46a534345c4c128d1, type: 3}
-      name: _MaskTex
+    secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      shelter_door_0: 1145364818
+      shelter_door_1: -33285398
+      shelter_door_2: -1536497917
+      shelter_door_3: -736389730
+      shelter_door_4: 1808492368
+      shelter_door_5: 689535238
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -111,6 +111,20 @@ namespace Meridian.Perf
             return n;
         }
 
+        /// <summary>U-120: the keys of a planet's loads still in flight, with counts (reports only: allocates); "none" when nothing is pending.</summary>
+        public static string PendingKeys(string planetGroup)
+        {
+            Prune();
+            var counts = new Dictionary<string, int>();
+            foreach (var e in entries)
+                if (!e.handle.IsDone && PlanetOf(e.group) == planetGroup) counts[e.key] = counts.TryGetValue(e.key, out var n) ? n + 1 : 1;
+            if (counts.Count == 0) return "none";
+            var parts = new List<string>(counts.Count);
+            foreach (var kv in counts) parts.Add(kv.Value > 1 ? kv.Key + " x" + kv.Value : kv.Key);
+            parts.Sort(string.CompareOrdinal);
+            return string.Join(", ", parts);
+        }
+
         /// <summary>Loads into a planet's groups still in flight (U-091: the planet-load watch in SceneDirector). No allocation.</summary>
         public static int PendingPlanet(string planetGroup)
         {

@@ -111,16 +111,20 @@ namespace Meridian.Core
             }
             if (escapeBand != null) escapeBand.ConfigureFor(config);
             if (sideHud != null) sideHud.ConfigureFor(config);
-            if (backdrop != null) backdrop.ConfigureFor(config);
+            // U-112 / U-120 (D-118): the 3D scenery (sky backdrop, depth bands, stage layers) belongs to the 3D path alone. On the
+            // cartoon path it is not configured at all, so it never starts the region-band and sky-layer loads CartoonStage used
+            // to switch off a moment later (the per-visit creep and part of the cold boot's pending loads).
+            bool cartoonPath = Meridian.View2D.CartoonStage.Enabled && Meridian.View2D.CartoonStage.Converted(config.id);
+            if (backdrop != null && !cartoonPath) backdrop.ConfigureFor(config);
             // U-076: the 3D depth bands (ground strip, flora, ridges, skyline) behind the play plane; added here like
             // PhotoOrbit so the scenes need no re-authoring.
-            if (depthBands == null && terrain != null)
+            if (depthBands == null && terrain != null && !cartoonPath)
             {
                 var go = new GameObject("DepthBands");
                 go.transform.SetParent(transform, false);
                 depthBands = go.AddComponent<Meridian.Planet.Backdrop.DepthBands>();
             }
-            if (depthBands != null)
+            if (depthBands != null && !cartoonPath)
             {
                 depthBands.view = sideCamera; depthBands.terrain = terrain; depthBands.backdrop = backdrop; depthBands.pois = pois;
                 depthBands.ConfigureFor(config);

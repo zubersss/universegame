@@ -40,6 +40,7 @@ namespace Meridian.View2D
         public void Load()
         {
             if (terrain != null) { terrain.TileChanged -= OnTile; terrain.TileChanged += OnTile; }
+            if (handle.IsValid()) ArtLoad.Release(handle); // U-121: a second Load (re-configure) must not orphan the first handle (ResidencyTests' lone planet_earth holder)
             handle = ArtLoad.Asset<IList<Sprite>>(Key);
             handle.Completed += op =>
             {

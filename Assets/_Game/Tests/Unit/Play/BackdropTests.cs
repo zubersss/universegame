@@ -13,6 +13,10 @@ namespace Meridian.Tests
     public class BackdropTests
     {
         const string CorePath = "Assets/_Game/Scenes/Core.unity";
+        bool wasCartoon = true;
+        // D-132: PlanetBackdrop is the 3D path's sky and biome sets; the game runs Earth on the cartoon path, so this class switches it off for its run and restores it.
+        [SetUp] public void ThreeDPath() { wasCartoon = Meridian.View2D.CartoonStage.Enabled; Meridian.View2D.CartoonStage.Enabled = false; }
+        [TearDown] public void RestoreCartoon() { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
 
         [UnityTest]
         public IEnumerator EarthAndMarsLoadThreeLayersWithTheirSky()

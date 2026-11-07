@@ -141,17 +141,31 @@ namespace Meridian.Art
         public static Vector3 FitScale(Vector2 art, Vector2 footprint, bool stretch) =>
             stretch ? new Vector3(footprint.x / art.x, footprint.y / art.y, 1f) : Vector3.one * (footprint.y / art.y);
 
-        /// <summary>A one-shot: forward from its first drawing (speed 1) or backward from its last (speed −1), holding the end.</summary>
+        /// <summary>A one-shot: forward from its first drawing (speed 1), or backward from its last, holding the end. A backward play
+        /// samples the state by hand each frame (Animator.speed may not go negative outside the recorder).</summary>
         public bool PlayToward(string clip, bool forward)
         {
             if (Animator == null) return false;
             int hash = Animator.StringToHash(clip);
             if (!Animator.HasState(0, hash)) return false;
             Animator.Play(hash, 0, forward ? 0f : 1f);
-            Animator.speed = forward ? 1f : -1f;
+            Animator.speed = forward ? 1f : 0f;
+            reversing = !forward; reverseHash = hash; reverseT = 1f; reverseLen = 0f;
             Playing = clip;
             Towards = forward ? 1 : -1;
             return true;
+        }
+
+        bool reversing; int reverseHash; float reverseT, reverseLen;
+
+        /// <summary>The backward one-shot: the state's normalized time runs 1 → 0 at the clip's own length, then holds its first drawing.</summary>
+        void StepReverse(float dt)
+        {
+            if (!reversing || Animator == null) return;
+            if (reverseLen <= 0f) { var info = Animator.GetCurrentAnimatorStateInfo(0); reverseLen = info.length > 0f ? info.length : 0.5f; }
+            reverseT -= dt / reverseLen;
+            if (reverseT <= 0f) { reverseT = 0f; reversing = false; }
+            Animator.Play(reverseHash, 0, reverseT);
         }
 
         /// <summary>Holds a looping clip on (plays it) or off (back to frame 0, stopped).</summary>
@@ -160,7 +174,7 @@ namespace Meridian.Art
             if (Animator == null) return false;
             int hash = Animator.StringToHash(clip);
             if (!Animator.HasState(0, hash)) return false;
-            if (on && Playing != clip) { Animator.Play(hash, 0, 0f); Animator.speed = 1f; Playing = clip; }
+            if (on && Playing != clip) { Animator.Play(hash, 0, 0f); Animator.speed = 1f; reversing = false; Playing = clip; }
             else if (!on && Playing == clip) { Animator.Play(hash, 0, 0f); Animator.speed = 0f; Playing = null; }
             return true;
         }
@@ -170,6 +184,7 @@ namespace Meridian.Art
             if (!Ready) return;
             if (scaleOwned && Renderer.transform.localScale != wantScale) Renderer.transform.localScale = wantScale; // a later card fit (LoadArt / Dress) never undoes the sheet's
             if (Animator == null) return;
+            StepReverse(Time.deltaTime);
             if (station != null) Loop(WorkingClip, station.Working);
             else if (Animator.HasState(0, Animator.StringToHash(FlickerClip)))
             {

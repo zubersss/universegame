@@ -14,7 +14,8 @@ namespace Meridian.View2D
     public sealed class CartoonStage : MonoBehaviour
     {
         /// <summary>Master switch (tests, the C0 style-test entry). Off by default until LEAD converts a planet.</summary>
-        public static bool Enabled;
+        /// <summary>P-48 (D-086 / D-099): the v4 cartoon path is the game's path on converted planets; on by default. Tests of the 3D path on Earth switch it off for their run and restore it.</summary>
+        public static bool Enabled = true;
         /// <summary>The planets whose v4 art path is on when Enabled (C0: Earth).</summary>
         public static bool Converted(Meridian.Planets.PlanetId id) => id == Meridian.Planets.PlanetId.Earth;
 

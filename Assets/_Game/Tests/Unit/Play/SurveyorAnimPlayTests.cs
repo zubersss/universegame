@@ -18,6 +18,8 @@ namespace Meridian.Tests
         PlanetSideRoot side;
         PlayerController player;
         PlayerView view;
+        Meridian.View2D.SpriteCharacterView drawn;
+        string CurrentClip => drawn != null ? drawn.Clip : view.Clip;
         double worstMs;
         string worstAt = "";
         readonly System.Collections.Generic.List<double> samples = new System.Collections.Generic.List<double>();
@@ -34,8 +36,11 @@ namespace Meridian.Tests
             side = director.PlanetSide;
             player = side.player;
             view = player.GetComponent<PlayerView>();
+            // D-133: on the cartoon path the drawn surveyor (SpriteCharacterView) plays the clips; PlayerView is the 3D path's.
+            drawn = side.cartoon != null && side.cartoon.Active ? side.cartoon.Surveyor : null;
             for (int i = 0; i < 60; i++) yield return new WaitForFixedUpdate();
-            while (view.view.sprite == null && Time.realtimeSinceStartup < timeout + 10f) yield return null;
+            if (drawn != null) { while (drawn.Renderer.sprite == null && Time.realtimeSinceStartup < timeout + 10f) yield return null; }
+            else while (view.view.sprite == null && Time.realtimeSinceStartup < timeout + 10f) yield return null;
             player.externalInput = true;
             player.intent = default;
         }
@@ -64,7 +69,8 @@ namespace Meridian.Tests
 
         void AssertClip(string name)
         {
-            Assert.AreEqual(name, view.Clip, $"clip ({player.Body.linearVelocity}, grounded {player.Grounded})");
+            Assert.AreEqual(name, CurrentClip, $"clip ({player.Body.linearVelocity}, grounded {player.Grounded})");
+            if (drawn != null) return; // the drawn surveyor steps its own sheet (U-105); the model asserts below are the 3D path's
             // D-070 (P-32): the surveyor is a model now (B-078): the model view plays the picked clip (sheet frames no longer step).
             Assert.NotNull(view.Model, "PlayerView has a model view");
             Assert.IsTrue(view.Model.Ready, "the surveyor model is loaded");
@@ -77,7 +83,7 @@ namespace Meridian.Tests
             yield return Boot();
             yield return Frames(30); // warm (first frames include loading)
             float modelUntil = Time.realtimeSinceStartup + 20f;
-            while ((view.Model == null || !view.Model.Ready) && Time.realtimeSinceStartup < modelUntil) yield return Frames(1);
+            while (drawn == null && (view.Model == null || !view.Model.Ready) && Time.realtimeSinceStartup < modelUntil) yield return Frames(1);
             worstMs = 0; samples.Clear();
             AssertClip(SurveyorAnim.Idle);
 
@@ -111,13 +117,13 @@ namespace Meridian.Tests
 
             yield return Steps(20);
             var p = player.Body.position;
-            Assert.IsTrue(side.rig.Dig(new Vector2(p.x - 1.5f, p.y - 1.2f)), "Beam digs the ground ahead");
+            Assert.IsTrue(side.rig.Dig(new Vector2(p.x - 2.2f, p.y - 1.2f)), "Beam digs the ground ahead"); // D-133: a full tile ahead, never under the drawn surveyor's own foot (07:05: the dug tile dropped them into `fall`)
             yield return Frames(2);
             AssertClip(SurveyorAnim.Dig);
 
             samples.Sort();
             int over = samples.FindAll(s => s > 0.05).Count;
-            TestContext.Out.WriteLine($"[MERIDIAN] PlayerView update: {samples.Count} frames, median {samples[samples.Count / 2] * 1000:F1} µs, p99 {samples[(int)(samples.Count * 0.99)] * 1000:F1} µs, worst {worstMs * 1000:F1} µs, {over} over 50 µs; worst at {worstAt}");
+            TestContext.Out.WriteLine($"[MERIDIAN] PlayerView update{(drawn != null ? " (3D view idle behind the drawn surveyor)" : "")}: {samples.Count} frames, median {samples[samples.Count / 2] * 1000:F1} µs, p99 {samples[(int)(samples.Count * 0.99)] * 1000:F1} µs, worst {worstMs * 1000:F1} µs, {over} over 50 µs; worst at {worstAt}");
             // D-035: our code's median and p99 within the board's 0.05 ms; the worst frame (engine setter on a new clip) within 0.1 ms.
             Assert.LessOrEqual(samples[samples.Count / 2], 0.05, "median ≤ 0.05 ms (our code)");
             Assert.LessOrEqual(samples[(int)(samples.Count * 0.99)], 0.05, "p99 ≤ 0.05 ms (our code)");

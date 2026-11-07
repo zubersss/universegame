@@ -354,12 +354,6 @@ MonoBehaviour:
   - props/common/float_cell_pack_mk1
   - props/common/float_cell_pack_mk2
   - props/common/grapple_hook
-  - props/common/lamp
-  - props/common/landing_pad
-  - props/common/shelter_door
-  - props/common/shelter_wall
-  - props/common/smelter
-  - props/common/storage_crate
   - props/earth/archive_door
   - props/earth/archive_terminal
   - props/earth/beacon
@@ -1180,6 +1174,27 @@ MonoBehaviour:
     - name: idle
       start: 0
       length: 12
+      loop: 1
+  - key: props/common/lamp
+    fps: 12
+    clips:
+    - name: flicker
+      start: 0
+      length: 4
+      loop: 1
+  - key: props/common/shelter_door
+    fps: 12
+    clips:
+    - name: open
+      start: 0
+      length: 6
+      loop: 0
+  - key: props/common/smelter
+    fps: 12
+    clips:
+    - name: working
+      start: 0
+      length: 8
       loop: 1
   - key: ships/pilgrim/puff
     fps: 12

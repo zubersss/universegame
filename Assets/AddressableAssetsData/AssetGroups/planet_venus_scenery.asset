@@ -20,6 +20,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1f607126c7d3edb4092e4175459e8405
+    m_Address: props/venus_scenery/tessera_slab/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 480dc882c2f4ff944a0e174d09c2abd3
     m_Address: props/venus_scenery/lava_blister
     m_ReadOnly: 0
@@ -32,6 +37,21 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5251841230f91e448b7ed8098c972a28
     m_Address: props/venus_scenery/tessera_slab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 56278fac655964f4cb21e2a3ca183832
+    m_Address: props/venus_scenery/column_b/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 67aaf2de2f9d7c24482f2424aba32cf4
+    m_Address: props/venus_scenery/lava_blister/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 68ff3f1d33fa7094ab4a4c57e79e719a
+    m_Address: props/venus_scenery/sulfur_crust/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -50,6 +70,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9c2d31b5b223cf141bece3866f62ff33
+    m_Address: props/venus_scenery/vent_chimney/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a2658321c534b464284c11d47d33cd3b
     m_Address: props/venus_scenery/sulfur_crust
     m_ReadOnly: 0
@@ -57,6 +82,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b1ec02072013afd4fa3227f01e8edddf
     m_Address: props/venus_scenery/column_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b5cb10143b9c4044dbe9431b26b16b92
+    m_Address: props/venus_scenery/column_a/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

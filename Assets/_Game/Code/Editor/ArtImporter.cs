@@ -449,21 +449,28 @@ namespace Meridian.EditorTools
             return stored > ArtRules.PlanetTextureCap;
         }
 
-        /// <summary>U-103: addresses every planets/* sidecar already on disk at &lt;key&gt;/json (one-time: -ExecuteMethod Meridian.EditorTools.ArtImporter.AddressPlanetSidecars).</summary>
+        /// <summary>U-103: addresses every planets/* sidecar already on disk at &lt;key&gt;/json (one-time: -ExecuteMethod Meridian.EditorTools.ArtImporter.AddressPlanetSidecars). U-113: and every props/* sidecar.</summary>
         public static int AddressPlanetSidecars()
         {
             int n = 0;
-            var root = Active.art + "planets";
-            if (Directory.Exists(root))
+            foreach (var folder in new[] { "planets", "props" })
+            {
+                var root = Active.art + folder;
+                if (!Directory.Exists(root)) continue;
                 foreach (var file in Directory.GetFiles(root, "*.json", SearchOption.AllDirectories))
                 {
                     var path = ArtRules.Normalize(file);
                     if (Classify(path, out var rel) != RootKind.Art) continue;
-                    AddressStage(path, rel.Substring(0, rel.Length - ".json".Length) + "/json");
+                    var key = rel.Substring(0, rel.Length - ".json".Length) + "/json";
+                    var guid = AssetDatabase.AssetPathToGUID(path);
+                    var entry = string.IsNullOrEmpty(guid) ? null : Settings.FindAssetEntry(guid);
+                    if (entry != null && entry.address == key) continue; // already addressed: no churn
+                    AddressStage(path, key);
                     n++;
                 }
-            AssetDatabase.SaveAssets();
-            Debug.Log($"[ArtImporter] AddressPlanetSidecars: {n} sidecars addressed.");
+            }
+            if (n > 0) AssetDatabase.SaveAssets();
+            if (n > 0) Debug.Log($"[ArtImporter] AddressPlanetSidecars: {n} sidecars addressed (planets, props).");
             return n;
         }
 
@@ -772,7 +779,9 @@ namespace Meridian.EditorTools
                 if (rel.EndsWith(".json", StringComparison.Ordinal))
                 {
                     // U-103 (D-098): planets/* sidecars (disc, luna, rings, disc_rig) are TextAssets at <key>/json: the runtime reads radius_u and the wobble.
-                    if (kind == RootKind.Art && rel.StartsWith("planets/", StringComparison.Ordinal)) AddressStage(path, rel.Substring(0, rel.Length - ".json".Length) + "/json");
+                    // U-113 (D-117): props/* sidecars too: ModelSwap probes <key>/json to take the sheet path when the key has no model, and SheetProp reads the clips, the tile module and the ground line from it.
+                    if (kind == RootKind.Art && (rel.StartsWith("planets/", StringComparison.Ordinal) || rel.StartsWith("props/", StringComparison.Ordinal)))
+                        AddressStage(path, rel.Substring(0, rel.Length - ".json".Length) + "/json");
                     // A new or edited sheet manifest re-slices its color sheet.
                     var color = path.Substring(0, path.Length - ".json".Length) + "_color.png";
                     if (File.Exists(color)) AssetDatabase.ImportAsset(color, ImportAssetOptions.ForceUpdate);

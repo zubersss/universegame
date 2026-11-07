@@ -7,7 +7,7 @@ namespace Meridian.Tests
 {
     /// <summary>
     /// U-113 (EditMode, D-117): the six camp props' sheets, once B-131's export is in, carry the frame sizes, pivots and clip sets
-    /// of BLENDER's hand-off (pad 128×48 tiling at 2 m, wall 64×176 at 1 m, door 88×176 open 6, smelter 112×192 working 8,
+    /// of BLENDER's hand-off (pad 128×48 tiling at 2 m, wall 64×64 tiling at 1 m in x and y (D-125), door 88×176 open 6, smelter 112×192 working 8,
     /// crate 80×72, lamp 64×160 flicker 4; ground line 10 px up); SheetProp's fit rules are pure. Until the export the sheet
     /// assertions are skipped with the reason (the glb props still stand).
     /// </summary>
@@ -21,7 +21,7 @@ namespace Meridian.Tests
         static readonly (string key, int w, int h, float module, bool interactable, (string name, int length, bool loop)? clip)[] Expected =
         {
             ("landing_pad", 128, 48, 2f, false, null),
-            ("shelter_wall", 64, 176, 1f, false, null),
+            ("shelter_wall", 64, 64, 1f, false, null),   // D-125: a 1 × 1 m tile in x and y (was 64×176 before the ruling)
             ("shelter_door", 88, 176, 0f, true, ("open", 6, false)),
             ("smelter", 112, 192, 0f, true, ("working", 8, true)),
             ("storage_crate", 80, 72, 0f, true, null),
@@ -46,9 +46,13 @@ namespace Meridian.Tests
                 Assert.AreEqual(e.module > 0f, s.tile, $"{e.key} tile flag");
                 if (e.module > 0f) Assert.AreEqual(e.module, s.module_m, 1e-4f, $"{e.key} module");
                 Assert.AreEqual(e.interactable, s.interactable, $"{e.key} interactable");
-                Assert.AreEqual(10, s.ground_line_px, $"{e.key}: the ground line 10 px above the frame bottom");
+                Assert.AreEqual(e.key == "shelter_wall" ? 0 : 10, s.ground_line_px, $"{e.key}: the ground line 10 px above the frame bottom"); // D-125: the wall tile has no ground-line margin
                 Assert.NotNull(s.pivot); Assert.AreEqual(2, s.pivot.Length);
-                Assert.AreEqual(10f / e.h, s.pivot[1], 1e-3f, $"{e.key}: the pivot on the ground line");
+                Assert.AreEqual((e.key == "shelter_wall" ? 0f : 10f) / e.h, s.pivot[1], 1e-3f, $"{e.key}: the pivot on the ground line"); // D-125: the wall tile's pivot is its bottom edge
+                // U-113: the sidecar is addressed at <key>/json (ModelSwap probes it for the sheet path); the sheet's controller at <key>/animator when it has clips.
+                var jsonEntry = Meridian.EditorTools.ArtImporter.Settings.FindAssetEntry(UnityEditor.AssetDatabase.AssetPathToGUID(json));
+                Assert.NotNull(jsonEntry, $"props/common/{e.key}.json is addressed");
+                Assert.AreEqual($"props/common/{e.key}/json", jsonEntry.address, $"{e.key}: the sidecar's address");
                 if (e.clip.HasValue)
                 {
                     var c = System.Array.Find(s.animations ?? new Clip[0], a => a.name == e.clip.Value.name);

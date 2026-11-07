@@ -110,6 +110,7 @@ namespace Meridian.Tests
         {
             yield return BootEarth();
             side.dayNight.Override = 0.5f;
+            creatures.autoSpawn = false; creatures.DespawnAll(); // D-132: the cartoon path's own spawns (gulls) must not take the pool's slots
             float px = player.transform.position.x;
             var spawned = new List<Creature>();
             for (int i = 0; i < CreatureDirector.MaxCreatures; i++)
@@ -161,6 +162,7 @@ namespace Meridian.Tests
         {
             yield return BootEarth();
             side.dayNight.Override = 0.0f; // night: wolves hunt, stags flee
+            creatures.autoSpawn = false; creatures.DespawnAll(); // D-132: an empty pool for the 20-creature count
             float px = player.transform.position.x;
             for (int i = 0; i < CreatureDirector.MaxCreatures; i++)
             {

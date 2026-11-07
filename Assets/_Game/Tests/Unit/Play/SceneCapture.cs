@@ -413,8 +413,26 @@ namespace Meridian.Tests
                 until = Time.realtimeSinceStartup + 10f;
                 while (topView != null && topView.UsesRig && !topView.RigReady && Time.realtimeSinceStartup < until) yield return null;
                 Debug.Log($"[MERIDIAN] space pilgrim: {(topView != null && topView.RigReady ? $"rig fit {topView.FitScale:F3}, playing {topView.Rig.Playing}" : "legacy sprite")}");
+                // D-128: a disc in the ship view is magnified far past its far frame; the nearest body should be on its near frame.
+                Meridian.Space.DiscSprite nearest = null; float best = float.MaxValue;
+                foreach (var d in world.Discs)
+                {
+                    if (d == null) continue;
+                    float dist = ((Vector2)d.transform.position - (Vector2)cam.transform.position).magnitude;
+                    if (dist < best) { best = dist; nearest = d; }
+                }
                 parkedShip.intent = new Meridian.Space.ShipIntent { thrust = 1f };
                 for (int i = 0; i < 6; i++) yield return null;
+                if (nearest != null)
+                {
+                    // The ship view's zoom (the 6_pilgrim shot's): the nearest disc asks for its near frame; wait for it, then shoot on it.
+                    Meridian.CameraRig.SideView.SetHalfHeight(cam, 6f);
+                    cam.transform.position = new Vector3(parkedShip.Position.x, parkedShip.Position.y, cam.transform.position.z);
+                    yield return null; yield return null;
+                    until = Time.realtimeSinceStartup + 10f;
+                    while (Meridian.Space.DiscSprite.WantsNear(nearest.LastMagnification, nearest.UsingNear) && !nearest.UsingNear && Time.realtimeSinceStartup < until) { Meridian.CameraRig.SideView.SetHalfHeight(cam, 6f); yield return null; }
+                    Debug.Log($"[MERIDIAN] space disc near: {nearest.Key} at {nearest.LastMagnification:F1} px/texel, near frame {(nearest.NearSprite != null ? nearest.NearSprite.name : "none")}, using near {nearest.UsingNear}");
+                }
                 yield return Shot("6_pilgrim", parkedShip.Position, 6f);
                 parkedShip.intent = default;
             }
@@ -976,6 +994,7 @@ namespace Meridian.Tests
             if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
             if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
                 Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
             Meridian.View2D.CartoonStage.Enabled = true;
             try
             {
@@ -1020,7 +1039,7 @@ namespace Meridian.Tests
                 }
                 side.dayNight.Override = null;
             }
-            finally { Meridian.View2D.CartoonStage.Enabled = false; }
+            finally { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
         }
 
         /// <summary>U-096 evidence: a 6-frame strip of the iris-out on the surveyor (t = 0 … 0.35 s), 320×180 each, in reports/unity/c0_&lt;date&gt;/iris_strip.png.</summary>
@@ -1031,6 +1050,7 @@ namespace Meridian.Tests
             if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
             if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
                 Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
             Meridian.View2D.CartoonStage.Enabled = true;
             try
             {
@@ -1088,7 +1108,7 @@ namespace Meridian.Tests
                 }
                 side.dayNight.Override = null;
             }
-            finally { Meridian.View2D.CartoonStage.Enabled = false; }
+            finally { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
         }
 
         /// <summary>
@@ -1102,6 +1122,7 @@ namespace Meridian.Tests
             if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
             if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
                 Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
             Meridian.View2D.CartoonStage.Enabled = true;
             try
             {
@@ -1170,7 +1191,7 @@ namespace Meridian.Tests
                 }
                 side.dayNight.Override = null;
             }
-            finally { Meridian.View2D.CartoonStage.Enabled = false; }
+            finally { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
         }
 
         /// <summary>
@@ -1184,6 +1205,7 @@ namespace Meridian.Tests
             if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
             if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
                 Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
             Meridian.View2D.CartoonStage.Enabled = true;
             bool film = Meridian.Core.GameSettings.FilmEffects;
             try
@@ -1289,7 +1311,7 @@ namespace Meridian.Tests
             finally
             {
                 Meridian.Core.GameSettings.FilmEffects = film;
-                Meridian.View2D.CartoonStage.Enabled = false;
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
             }
         }
 
@@ -1310,6 +1332,7 @@ namespace Meridian.Tests
             if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
             if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
                 Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
             Meridian.View2D.CartoonStage.Enabled = true;
             bool film = Meridian.Core.GameSettings.FilmEffects;
             try
@@ -1469,7 +1492,7 @@ namespace Meridian.Tests
             finally
             {
                 Meridian.Core.GameSettings.FilmEffects = film;
-                Meridian.View2D.CartoonStage.Enabled = false;
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
             }
         }
 
@@ -1728,6 +1751,7 @@ namespace Meridian.Tests
             if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
             if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
                 Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
             Meridian.View2D.CartoonStage.Enabled = true;
             try
             {
@@ -1797,7 +1821,7 @@ namespace Meridian.Tests
             }
             finally
             {
-                Meridian.View2D.CartoonStage.Enabled = false;
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
             }
         }
 
@@ -1813,6 +1837,7 @@ namespace Meridian.Tests
             if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
             if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
                 Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
             Meridian.View2D.CartoonStage.Enabled = true;
             var canvases = new System.Collections.Generic.List<Canvas>();
             try
@@ -1872,7 +1897,7 @@ namespace Meridian.Tests
             finally
             {
                 foreach (var c in canvases) if (c != null) { c.renderMode = RenderMode.ScreenSpaceOverlay; c.worldCamera = null; }
-                Meridian.View2D.CartoonStage.Enabled = false;
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
             }
         }
 
@@ -1889,6 +1914,7 @@ namespace Meridian.Tests
             if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
             if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
                 Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
             Meridian.View2D.CartoonStage.Enabled = true;
             const int Max = 40, Cols = 6, Rows = 7, W = 320, H = 180;
             var sheet = new Texture2D(W * Cols, H * Rows, TextureFormat.RGB24, false);
@@ -2025,7 +2051,131 @@ namespace Meridian.Tests
             finally
             {
                 UnityEngine.Object.Destroy(sheet); UnityEngine.Object.Destroy(still); full.Release(); small.Release();
-                Meridian.View2D.CartoonStage.Enabled = false;
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+            }
+        }
+
+        /// <summary>
+        /// U-114 evidence: stag, wolf and bear on their B-132 sheets at 1x beside the surveyor on the plains (creatures_1x), then the
+        /// nearest pool with pike / shark / squid spawned by the natural rule (swimmers_1x; skipped with a log line when the plains
+        /// have no water deep enough within 400 columns). Writes reports/unity/u114/.
+        /// </summary>
+        [UnityTest, Timeout(240000)]
+        public IEnumerator CaptureU114Creatures()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false;
+                foreach (var c in side.creatures.All) if (c.Alive) side.creatures.Despawn(c);
+                for (int i = 0; i < 30; i++) yield return new WaitForFixedUpdate();
+                var cam = side.sideCamera;
+                var dir = "coordination/reports/unity/u114";
+                Directory.CreateDirectory(dir);
+                var creatures = side.creatures;
+
+                IEnumerator Shot(string label)
+                {
+                    yield return null;
+                    yield return Save(cam, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                }
+                Meridian.Creatures.Creature PutOnGround(Meridian.Creatures.Species sp, float x)
+                {
+                    int tx = Mathf.FloorToInt(x);
+                    int s = side.terrain.TopSolidY(tx);
+                    return creatures.Spawn(sp, new Vector2(tx + 0.5f, s + 1f + Meridian.Creatures.SpeciesSpec.Get(sp).size.y * 0.5f + 0.05f));
+                }
+                IEnumerator SheetsIn(Meridian.Creatures.Creature[] cs)
+                {
+                    float until = Time.realtimeSinceStartup + 15f;
+                    while (Time.realtimeSinceStartup < until)
+                    {
+                        bool all = true;
+                        foreach (var c in cs) if (c != null && c.Alive && (c.View == null || c.View.sprite == null || c.View.sprite.name.StartsWith("ph_", StringComparison.Ordinal))) all = false;
+                        if (all) break;
+                        yield return null;
+                    }
+                }
+                string Line(Meridian.Creatures.Creature c) => c == null ? "none" : $"{c.Spec.artKey.Substring(c.Spec.artKey.LastIndexOf('/') + 1)} {(c.View != null && c.View.sprite != null ? c.View.sprite.name : "no sprite")} {c.View.bounds.size.x:F2} x {c.View.bounds.size.y:F2} m at ({c.Body.position.x:F1}, {c.Body.position.y:F1})";
+
+                // 1. Land: stag, wolf, bear beside the surveyor.
+                float px = side.player.transform.position.x;
+                var stag = PutOnGround(Meridian.Creatures.Species.Stag, px - 7f);
+                var wolf = PutOnGround(Meridian.Creatures.Species.GreyWolf, px - 3.5f);
+                var bear = PutOnGround(Meridian.Creatures.Species.BrownBear, px + 4.5f);
+                yield return SheetsIn(new[] { stag, wolf, bear });
+                for (int i = 0; i < 6; i++) yield return new WaitForFixedUpdate();
+                TestContext.Out.WriteLine($"[MERIDIAN] u114 land: {Line(stag)}; {Line(wolf)}; {Line(bear)}; bear temper {Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.BrownBear).temper}");
+                yield return Shot("creatures_1x");
+
+                // 2. Water: the nearest column with a pool deep enough for the pike; the surveyor steps to its shore so the camera follows.
+                int found = int.MinValue, foundDepth = 0;
+                for (int d = 0; d < 400 && found == int.MinValue; d++)
+                    foreach (int tx in new[] { Mathf.FloorToInt(px) + d, Mathf.FloorToInt(px) - d })
+                    {
+                        var site = creatures.SiteAt(tx, side.player.transform.position.y);
+                        if (site.aboveTile == Meridian.Terrain.TileId.Water && site.waterDepth >= 2) { found = tx; foundDepth = site.waterDepth; break; }
+                    }
+                if (found == int.MinValue)
+                {
+                    TestContext.Out.WriteLine("[MERIDIAN] u114 water: no pool at least 2 m deep within 400 columns of the camp; the swimmers' frame is skipped");
+                }
+                else
+                {
+                    // Walk the pool to its widest deep column (within 24 of the first), so the big swimmers have room.
+                    int best = found, bestDepth = foundDepth;
+                    for (int tx = found - 24; tx <= found + 24; tx++)
+                    {
+                        var site = creatures.SiteAt(tx, side.player.transform.position.y);
+                        if (site.aboveTile == Meridian.Terrain.TileId.Water && site.waterDepth > bestDepth) { best = tx; bestDepth = site.waterDepth; }
+                    }
+                    // The surveyor to the shore first (the camera follows, the pool's collision chunks stream in), then the spawns by the natural rule.
+                    int shore = best;
+                    while (creatures.SiteAt(shore, side.player.transform.position.y).aboveTile == Meridian.Terrain.TileId.Water && shore > best - 60) shore--;
+                    int shoreTop = side.terrain.TopSolidY(shore - 1);
+                    side.player.Body.position = new Vector2(shore - 0.5f, shoreTop + 1.1f);
+                    side.player.transform.position = side.player.Body.position;
+                    side.player.Body.linearVelocity = Vector2.zero;
+                    var follow = cam.GetComponent<Meridian.Player.CameraFollow>();
+                    if (follow != null) follow.SnapToTarget();
+                    float ready = Time.realtimeSinceStartup + 10f;
+                    while (!(side.terrain.IsCollisionReady(best - 2, floorAt(best - 2)) && side.terrain.IsCollisionReady(best + 6, floorAt(best + 6))) && Time.realtimeSinceStartup < ready) yield return null;
+                    int floorAt(int tx) => side.terrain.TopSolidY(tx);
+                    var pike = creatures.SpawnAt(Meridian.Creatures.Species.Pike, best - 2, side.player.transform.position.y);
+                    var shark = creatures.SpawnAt(Meridian.Creatures.Species.Shark, best + 2, side.player.transform.position.y);
+                    var squid = creatures.SpawnAt(Meridian.Creatures.Species.Squid, best + 6, side.player.transform.position.y);
+                    yield return SheetsIn(new[] { pike, shark, squid });
+                    for (int i = 0; i < 12; i++) yield return new WaitForFixedUpdate();
+                    int floor = side.terrain.TopSolidY(best);
+                    // The camera over the pool itself (the follow keeps the surveyor centred and the pool under the frame's bottom edge).
+                    if (follow != null) follow.enabled = false;
+                    cam.transform.position = new Vector3(best + 1f, floor + 1f + bestDepth * 0.5f + 1.5f, cam.transform.position.z);
+                    yield return null;
+                    TestContext.Out.WriteLine($"[MERIDIAN] u114 water: pool at column {best}, floor y {floor}, depth {bestDepth} m; {Line(pike)}; {Line(shark)}; {Line(squid)}; clearances {(pike != null ? pike.Body.position.y - (floor + 1f) - pike.Spec.size.y * 0.5f : -1f):F2} / {(shark != null ? shark.Body.position.y - (floor + 1f) - shark.Spec.size.y * 0.5f : -1f):F2} / {(squid != null ? squid.Body.position.y - (floor + 1f) - squid.Spec.size.y * 0.5f : -1f):F2} m");
+                    yield return Shot("swimmers_1x");
+                    if (follow != null) { follow.enabled = true; follow.SnapToTarget(); }
+                }
+                side.dayNight.Override = null;
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
             }
         }
 
@@ -2035,6 +2185,7 @@ namespace Meridian.Tests
             if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
             if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
                 Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
             Meridian.View2D.CartoonStage.Enabled = true;
             try
             {
@@ -2099,7 +2250,7 @@ namespace Meridian.Tests
             }
             finally
             {
-                Meridian.View2D.CartoonStage.Enabled = false;
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
             }
         }
     }

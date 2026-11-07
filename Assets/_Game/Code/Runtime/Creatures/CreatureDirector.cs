@@ -189,6 +189,7 @@ namespace Meridian.Creatures
             var site = new SpawnSite
             {
                 x = terrain.WrapX(tx), surfaceY = surface, surfaceTile = terrain.GetTile(tx, surface),
+                aboveTile = terrain.GetTile(tx, surface + 1), waterDepth = WaterDepthAbove(tx, surface), // U-114: the pool over the floor, if any
                 datumY = Planet.datumY, worldWidth = Planet.worldWidth, planet = Planet.id, playerY = playerY,
             };
             if (Planet.id == PlanetId.Mercury)
@@ -228,6 +229,8 @@ namespace Meridian.Creatures
                 if (!terrain.IsCollisionReady(tx, site.surfaceY)) return null;
                 at = spec.habitat == Habitat.Air
                     ? new Vector2(tx + 0.5f, site.surfaceY + 1f + Mathf.Lerp(spec.hoverMin, spec.hoverMax, Hash01(serial, 6)))
+                    : spec.habitat == Habitat.Water
+                    ? new Vector2(tx + 0.5f, site.surfaceY + 1f + spec.floorClearance + spec.size.y * 0.5f) // U-114: its clearance over the pool floor
                     : new Vector2(tx + 0.5f, site.surfaceY + 1f + spec.size.y * 0.5f + 0.05f);
             }
             return Spawn(species, at);
@@ -344,6 +347,8 @@ namespace Meridian.Creatures
                 // U-108: a flier's contact is the tile under its feet alone (no gravity, so no velocity test: a flier steered
                 // back to its band still counts as landed while its feet touch). One GetTile: within the 0.5 ms AI budget.
                 grounded = TileId.IsSolid(terrain.GetTile(tx, ty));
+                // U-114: a swimmer turns at the pool's wall or shore (the tile ahead is not water) instead of leaving the water.
+                if (spec.habitat == Habitat.Water && c.State != CreatureState.Chase && terrain.GetTile(tx + c.dir, ty) != TileId.Water) c.dir = -c.dir;
                 // 2D: chase straight at the surveyor; otherwise hold the altitude chosen at the last think.
                 Vector2 want;
                 if (c.State == CreatureState.Chase)
@@ -484,7 +489,23 @@ namespace Meridian.Creatures
             if (spec.habitat == Habitat.Deck)
                 return VenusLandforms.DeckY + (wobble - 0.5f) * 2f * (VenusLandforms.DeckHalfBand - 10f);
             int ground = terrain.TopSolidY(Mathf.FloorToInt(c.Body.position.x));
+            if (spec.habitat == Habitat.Water)
+            {
+                // U-114: between the floor clearance and the surface of the pool it is in (a swimmer that finds no water holds its floor height).
+                int depth = WaterDepthAbove(Mathf.FloorToInt(c.Body.position.x), ground);
+                float lo = ground + 1f + spec.floorClearance + spec.size.y * 0.5f;
+                float hi = Mathf.Max(lo, ground + 1f + depth - spec.size.y * 0.5f);
+                return Mathf.Lerp(lo, hi, wobble);
+            }
             return ground + 1f + Mathf.Lerp(spec.hoverMin, spec.hoverMax, wobble);
+        }
+
+        /// <summary>U-114: water tiles standing on the floor at `floorY` in column tx (0 on dry ground); at most 64 looked at.</summary>
+        int WaterDepthAbove(int tx, int floorY)
+        {
+            int depth = 0;
+            for (int y = floorY + 1; y < floorY + 65 && y < Planet.worldHeight && terrain.GetTile(tx, y) == TileId.Water; y++) depth++;
+            return depth;
         }
 
         float Hash01(int k, int salt) => (float)Meridian.Planet.Weather.DustStormSchedule.Hash01(seed, k, salt + 40);

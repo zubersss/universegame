@@ -162,5 +162,43 @@ namespace Meridian.Tests
             }
             for (int i = 0; i < 4; i++) Assert.IsTrue(File.Exists($"Assets/_Game/Art/backgrounds/space/starfield/layer{i}_color.png"), "layer" + i);
         }
+            /// <summary>U-117 (2) / D-128: the near frame shows above 6 screen px per far texel and leaves below 5; the ship view sits far above, the far view far below.</summary>
+        [Test]
+        public void NearFrameSwapsAboveSixScreenPixelsPerTexelWithHysteresis()
+        {
+            Assert.AreEqual(6f, DiscSprite.NearAbove); Assert.AreEqual(5f, DiscSprite.NearBelow);
+            Assert.AreEqual(1f, DiscSprite.Magnification(1080f, 180f, 3f), 1e-4f, "the far view: 1080 px over 360 units at 3 px/unit = 1 px per texel");
+            Assert.AreEqual(32f, DiscSprite.Magnification(1080f, 5.625f, 3f), 1e-3f, "the ship view: 11.25 units tall = 32 px per texel");
+            Assert.AreEqual(0f, DiscSprite.Magnification(1080f, 0f, 3f), "no camera height: no swap");
+            Assert.IsFalse(DiscSprite.WantsNear(1f, false));
+            Assert.IsFalse(DiscSprite.WantsNear(5.9f, false), "under the up threshold");
+            Assert.IsTrue(DiscSprite.WantsNear(6f, false), "at it");
+            Assert.IsTrue(DiscSprite.WantsNear(32f, false));
+            Assert.IsTrue(DiscSprite.WantsNear(5.5f, true), "stays near until the down threshold");
+            Assert.IsFalse(DiscSprite.WantsNear(4.9f, true), "and leaves under it");
+            Assert.AreEqual("_near", DiscSprite.NearSuffix);
+        }
+
+        /// <summary>B-143 (D-128): the five near sidecars point at their far key, scale radius_px by scale_vs_far and import at space_ppu × k, one static frame.</summary>
+        [Test]
+        public void TheNearFramesPointAtTheirFarDiscAtTheirScale()
+        {
+            foreach (var far in new[] { "planets/mercury/disc", "planets/venus/disc", "planets/earth/disc", "planets/mars/disc", "planets/earth/luna" })
+            {
+                string nearPath = "Assets/_Game/Art/" + far + DiscSprite.NearSuffix + ".json";
+                Assert.IsTrue(File.Exists(nearPath), nearPath);
+                var near = JsonUtility.FromJson<DiscSprite.Sidecar>(File.ReadAllText(nearPath));
+                var farJson = JsonUtility.FromJson<DiscSprite.Sidecar>(File.ReadAllText("Assets/_Game/Art/" + far + ".json"));
+                Assert.AreEqual(far, near.near_of, "near_of");
+                Assert.AreEqual(1, near.frames, "one static frame");
+                Assert.Greater(near.scale_vs_far, 1f, "larger than the far frame");
+                Assert.AreEqual(farJson.radius_u, near.radius_u, 1e-4f, "the same world radius: the transform scale is shared");
+                Assert.AreEqual(farJson.space_ppu * near.scale_vs_far, near.space_ppu, 1e-3f, "ppu scales with the frame");
+                Assert.AreEqual(near.space_ppu, near.ppu, 1e-4f);
+                Assert.AreEqual(farJson.radius_px * near.scale_vs_far, near.radius_px, 0.6f, "radius_px scales with the frame");
+                Assert.IsTrue(File.Exists("Assets/_Game/Art/" + far + DiscSprite.NearSuffix + "_color.png"), "the near colour map");
+            }
+        }
+
     }
 }

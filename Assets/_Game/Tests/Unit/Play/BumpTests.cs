@@ -99,8 +99,11 @@ namespace Meridian.Tests
             Assert.Greater(player.BumpCount, bumps, "the wolf reached the surveyor and bumped them");
             var view = player.GetComponentInChildren<PlayerView>();
             yield return null;
-            if (view != null)
-                Assert.IsTrue(view.Clip == SurveyorAnim.Bump || view.Clip == SurveyorAnim.Hurt, $"the bump clip (or its stand-in), got {view.Clip}");
+            // D-132: on the cartoon path the drawn surveyor (SpriteCharacterView) plays the clip; PlayerView is the 3D path's.
+            var drawn = side.cartoon != null && side.cartoon.Active ? side.cartoon.Surveyor : null;
+            string clip = drawn != null ? drawn.Clip : view != null ? view.Clip : null;
+            if (clip != null)
+                Assert.IsTrue(clip == SurveyorAnim.Bump || clip == SurveyorAnim.Hurt, $"the bump clip (or its stand-in), got {clip}");
             for (int i = 0; i < 120; i++) yield return null; // more contact, more bumps: still no meter moves
             AssertUnchanged(before, Read());
             Assert.IsFalse(vitals.Dead);

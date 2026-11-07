@@ -20,6 +20,10 @@ namespace Meridian.Tests
     public class HazardV2PlayTests
     {
         const string CorePath = "Assets/_Game/Scenes/Core.unity";
+        bool wasCartoon = true;
+        // D-132: the Envirosuit tier sheets (characters/surveyor/base, mk2) are the 3D path's surveyor; the cartoon surveyor has no tier sheets yet; the game runs Earth on the cartoon path, so this class switches it off for its run and restores it.
+        [SetUp] public void ThreeDPath() { wasCartoon = Meridian.View2D.CartoonStage.Enabled; Meridian.View2D.CartoonStage.Enabled = false; }
+        [TearDown] public void RestoreCartoon() { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
         PlanetSideRoot side;
         HazardSystem hazards;
         PlayerVitals vitals;

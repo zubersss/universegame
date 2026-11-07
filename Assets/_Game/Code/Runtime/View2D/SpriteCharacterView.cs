@@ -39,7 +39,8 @@ namespace Meridian.View2D
         ArtClipSet clips;
         ArtClip current;
         bool hasCurrent;
-        float clipTime, sinceLand = 99f, sinceBump = 99f, sinceJump = 99f, landSpeed;
+        float clipTime, sinceLand = 99f, sinceBump = 99f, sinceJump = 99f, sinceDig = 99f, landSpeed;
+        Meridian.Rig.RigTools rig;
         int facing = 1;
         bool hooked;
 
@@ -127,7 +128,10 @@ namespace Meridian.View2D
             player.Landed += OnLanded;
             player.Jumped += OnJumped;
             player.Bumped += OnBumped;
+            rig = player.GetComponentInChildren<Meridian.Rig.RigTools>(true);
+            if (rig != null) rig.Dug += OnDug; // U-121: the drawn surveyor digs like PlayerView does (side_b's dig clip, U-115)
         }
+        void OnDug(Vector2 at) => sinceDig = 0f;
 
         void OnLanded(float speed) { sinceLand = 0f; landSpeed = speed; Squash.Land(speed); }
         void OnJumped() { sinceJump = 0f; Squash.TakeOff(); }
@@ -139,13 +143,13 @@ namespace Meridian.View2D
             if (player != null)
             {
                 Hook();
-                sinceLand += dt; sinceBump += dt; sinceJump += dt;
+                sinceLand += dt; sinceBump += dt; sinceJump += dt; sinceDig += dt;
                 var v = player.Body != null ? player.Body.linearVelocity : Vector2.zero;
                 var vitals = player.Vitals;
                 var input = new AnimInputs
                 {
                     dead = vitals != null && vitals.Dead, grounded = player.Grounded, vx = v.x, vy = v.y,
-                    sinceBuild = 99f, sinceSurprise = 99f, sinceHurt = 99f, sinceLand = sinceLand, sinceDig = 99f, sinceBump = sinceBump, sinceJump = sinceJump,
+                    sinceBuild = 99f, sinceSurprise = 99f, sinceHurt = 99f, sinceLand = sinceLand, sinceDig = sinceDig, sinceBump = sinceBump, sinceJump = sinceJump,
                     landSpeed = landSpeed, dashing = player.Dash.Active, jetpacking = player.Jetpack != null && player.Jetpack.Firing,
                 };
                 Play(overrideClip != null && Time.time < overrideUntil ? overrideClip : SurveyorAnim.Pick(input));
@@ -178,7 +182,7 @@ namespace Meridian.View2D
 
         void OnDestroy()
         {
-            if (hooked && player != null) { player.Landed -= OnLanded; player.Jumped -= OnJumped; player.Bumped -= OnBumped; }
+            if (hooked && player != null) { player.Landed -= OnLanded; if (rig != null) rig.Dug -= OnDug; player.Jumped -= OnJumped; player.Bumped -= OnBumped; }
             Release();
         }
     }

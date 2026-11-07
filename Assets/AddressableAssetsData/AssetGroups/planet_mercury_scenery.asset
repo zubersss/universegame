@@ -40,8 +40,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4f913e7479e80294ca967327d665bccd
+    m_Address: props/mercury_scenery/glass_shard_b/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 52db1f86be58af14193b3fb7748a12cd
+    m_Address: props/mercury_scenery/boulder_c/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 55045ba6b95668845bcf69940435ede0
     m_Address: props/mercury_scenery/glass_shard_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 557df92b848283444b1f5d7e37e20856
+    m_Address: props/mercury_scenery/boulder_b/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -65,6 +80,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 97234ab5814a7cd48a7efc80e983776a
+    m_Address: props/mercury_scenery/boulder_a/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a9482e6cbd265e54487fc5608e79340c
+    m_Address: props/mercury_scenery/rim_rock/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: aded1320e50b45d419b3369b5fabbf84
     m_Address: props/mercury_scenery/solarite_outcrop
     m_ReadOnly: 0
@@ -80,6 +105,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bf4447631a4b67f489c46183266088b1
+    m_Address: props/mercury_scenery/glass_shard_a/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cd2b5455818b78143a1f8fc8fe1dcfce
     m_Address: props/mercury_scenery/boulder_b
     m_ReadOnly: 0
@@ -87,6 +117,16 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d500a8f39d27f534c898aaadafb037b8
     m_Address: props/mercury_scenery/boulder_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f2a92943833b9cb4f96389fa85bcdfc0
+    m_Address: props/mercury_scenery/solarite_outcrop/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f3cc946e32686334b8f8e5f51ffdc246
+    m_Address: props/mercury_scenery/ice_pocket/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

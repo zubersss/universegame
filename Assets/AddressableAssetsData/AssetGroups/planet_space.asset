@@ -25,6 +25,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 18676541931991845917ca6dd1dfb219
+    m_Address: props/space/asteroid_01/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 18d80c803727ca04aac17d62eae8047b
+    m_Address: props/space/asteroid_03/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2091631661b27df4da797506aed9910e
     m_Address: props/space/asteroid_05
     m_ReadOnly: 0
@@ -75,6 +85,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 55505b26fa3b7234f8f84726dfe2232b
+    m_Address: props/space/waystation/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5a62d49eea45dad4db5a5acc130acb80
     m_Address: props/space/asteroid_02
     m_ReadOnly: 0
@@ -95,6 +110,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7276cb2787d60674ebfddb43bdc1c95d
+    m_Address: props/space/asteroid_06/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 75f424c6ff430bf4dac836b89b74950d
     m_Address: props/space/waystation_mars
     m_ReadOnly: 0
@@ -102,6 +122,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7613519530edaf048b78c354d07b56e1
     m_Address: props/space/waystation
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 769459fc02b5f974baae89bb5d481997
+    m_Address: props/space/waystation_mars/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -125,8 +150,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8f08ddf42192e9445a74a06a1b1b1c8e
+    m_Address: props/space/asteroid_04/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 902f384d96a06544eb68178ca8c350be
     m_Address: props/space/ring_ice_03
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 93d7dde82130ac844a449dcbb9a6f95e
+    m_Address: props/space/asteroid_05/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -147,6 +182,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bea53695c4d21b64583e4adce2c68cd0
     m_Address: props/space/asteroid_02
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c76184b6969826549b0f5011547a5021
+    m_Address: props/space/asteroid_02/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

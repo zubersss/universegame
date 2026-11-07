@@ -45,6 +45,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 129d91122fd7ce844911f0f57b789a59
+    m_Address: props/mercury/meridian_beacon/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 12fc45d20e3b49b4985f1e8ab96cbd55
     m_Address: props/mercury/shelter_door
     m_ReadOnly: 0
@@ -115,6 +120,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4d3b11cfba86a6a4d90ae51d67362321
+    m_Address: props/mercury/solarite_cut/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4f028203dbe973a41b193cc94bc8352e
     m_Address: props/mercury/flare_shelter
     m_ReadOnly: 0
@@ -127,6 +137,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4fcc32fbae4ffd94b9dae1bff8d2a162
     m_Address: props/mercury/solarite_cut
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 54affbd175cbe3d418915e94190af820
+    m_Address: props/mercury/flare_shelter/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -185,6 +200,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 874e75a7e03ee7e4896dedc1301f1c6c
+    m_Address: props/mercury/warden_vault_gate/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 896bdf025e7e7b941a0f7b870dbebda9
     m_Address: terrain/mercury/regolith
     m_ReadOnly: 0
@@ -195,6 +215,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8c94d4769384c3a4e983a5d0ebc5e0e8
+    m_Address: props/mercury/shelter_door/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8f8b0f42307a2f545b2874b9740cdca8
     m_Address: props/mercury/solarite_crusted
     m_ReadOnly: 0
@@ -202,6 +227,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9761f11241e126840b05572478e2eb25
     m_Address: terrain/mercury/ice
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a9918f9aad13c39499c2de6e30742b19
+    m_Address: props/mercury/solarite_cluster/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -225,6 +255,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b16fefbd466d29c4892a977d2b514d26
+    m_Address: props/mercury/equipment_locker/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b7df9063282463b4c9fc8485ae349c04
     m_Address: props/mercury/solarite_cluster
     m_ReadOnly: 0
@@ -237,6 +272,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bf277628c52a67a47b56b42244b04132
     m_Address: creatures/mercury/cinderhulk_day
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c4b417391d8666a4eb98804d94ef9fb8
+    m_Address: props/mercury/solarite_crusted/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

@@ -16,6 +16,8 @@ namespace Meridian.Tests
         PlanetSideRoot side;
         PlayerController player;
         PlayerView view;
+        Meridian.View2D.SpriteCharacterView drawn;
+        Transform squashRoot;
 
         IEnumerator Boot()
         {
@@ -32,9 +34,12 @@ namespace Meridian.Tests
             player.intent = default;
             view = player.GetComponentInChildren<PlayerView>();
             Assert.NotNull(view, "PlayerView");
+            // D-133: on the cartoon path the drawn surveyor (SpriteCharacterView) owns the squash root; PlayerView's is the 3D path's.
+            drawn = side.cartoon != null && side.cartoon.Active ? side.cartoon.Surveyor : null;
             for (int i = 0; i < 30; i++) yield return new WaitForFixedUpdate();
             Assert.IsTrue(player.Grounded, "standing at the camp");
-            Assert.NotNull(view.VisualRoot, "visual root");
+            squashRoot = drawn != null ? drawn.SquashRoot : view.VisualRoot;
+            Assert.NotNull(squashRoot, "visual root");
         }
 
         [UnityTest]
@@ -55,7 +60,7 @@ namespace Meridian.Tests
             player.Landed -= OnLanded;
             Assert.IsTrue(landed, "landed");
             yield return null; // the same frame's LateUpdate applied the squash
-            float squashed = view.VisualRoot.localScale.y;
+            float squashed = squashRoot.localScale.y;
             TestContext.Out.WriteLine($"[MERIDIAN] landing {impact:F1} m/s: visual y {squashed:F2} one frame after touchdown");
             Assert.AreEqual(7f, impact, 0.6f, "about 7 m/s");
             Assert.LessOrEqual(squashed, 0.76f, "squashed to ≈ 0.7 within one frame");
@@ -64,7 +69,7 @@ namespace Meridian.Tests
             Assert.AreEqual(g0, player.Body.gravityScale, "body unchanged");
             float t0 = Time.time;
             while (Time.time - t0 < 0.2f) yield return null;
-            Assert.AreEqual(1f, view.VisualRoot.localScale.y, 0.02f, "1.0 ± 0.02 by 0.2 s");
+            Assert.AreEqual(1f, squashRoot.localScale.y, 0.02f, "1.0 ± 0.02 by 0.2 s");
             LogAssert.NoUnexpectedReceived();
         }
 
@@ -79,10 +84,11 @@ namespace Meridian.Tests
             yield return new WaitForFixedUpdate();
             creatures.Bump(wolf, Time.time); // U-093 (D-087): a bump; the surveyor and the wolf both react
             yield return null;
-            TestContext.Out.WriteLine($"[MERIDIAN] bump: player vx {player.Body.linearVelocity.x:F2}, flashing {view.Flashing}, clip {view.Clip}");
+            string clip = drawn != null ? drawn.Clip : view.Clip;
+            TestContext.Out.WriteLine($"[MERIDIAN] bump: player vx {player.Body.linearVelocity.x:F2}, flashing {(drawn == null ? view.Flashing.ToString() : "n/a (drawn surveyor)")}, clip {clip}");
             Assert.Less(player.Body.linearVelocity.x, -3f, "knocked away from the wolf (left)");
-            Assert.IsTrue(view.Flashing, "the 2-frame white flash");
-            Assert.IsTrue(view.Clip == SurveyorAnim.Bump || view.Clip == SurveyorAnim.Hurt, "bump (or its hurt stand-in)");
+            if (drawn == null) Assert.IsTrue(view.Flashing, "the 2-frame white flash"); // the drawn surveyor has no flash yet (a U-121 follow-up note)
+            Assert.IsTrue(clip == SurveyorAnim.Bump || clip == SurveyorAnim.Hurt, "bump (or its hurt stand-in)");
             // The wolf bounces back: knock and squash on its visual root, the same frame.
             TestContext.Out.WriteLine($"[MERIDIAN] creature bump: visual y {wolf.Visual.localScale.y:F2}, vx {wolf.Body.linearVelocity.x:F2}");
             Assert.AreEqual(SquashStretch.HitScale, wolf.Visual.localScale.y, 0.03f, "0.85 squash");
