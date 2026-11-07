@@ -10,8 +10,8 @@ designs before any Mercury card is written. Nothing here is exported.
 
 | Item | State | File |
 |---|---|---|
-| Palette | proposed; the check passes (the Mars checks + Mercury's family: violet twilight, near-neutral regolith, a cool slate) | blender/scripts/build_c2_mercury_palette.py |
-| Five plants | designed below; `(d, M, pose)` drawing functions + a 1x preview next | blender/scripts/build_c2_mercury_plants.py (next) |
+| Palette | ACCEPTED (D-130); the check passes (the Mars checks + Mercury's family: violet twilight, near-neutral regolith, a cool slate) | blender/scripts/build_c2_mercury_palette.py |
+| Five plants | drawn (build_c2_mercury_plants.py); review_b145_mercury_plants_preview.png at 1x on a Mercury stand-in beside the surveyor (ink 2.00-3.00 / 1.00-1.50, palette 100 %) | blender/scripts/build_c2_mercury_plants.py |
 | Creatures | the re-ink list below (all five have v2 models in Art: `replaces_v2`) | - |
 | Backdrops | study notes below (FFT washes: a BLENDER slot) | - |
 | Props | the ones that differ, below | - |
@@ -53,7 +53,7 @@ All faceless (D-101): personality through motion; ink, mid + deep tones, interio
 |---|---|---|---|---|
 | 1 | Sunfan | a fan of stiff sun-gold blades on a short ember stem, seams down each blade | the fan tilts edge-on to the Sun on the beat (swap open / edge); react: snaps shut like a folding fan, reopens | day plains |
 | 2 | Embercap | a squat ember cap with a cracked crust and a gold underside (a drawn tone), on a stubby sage foot | the crust breathes (squash); react: a little puff of spark dust, settles | day plains, flare fields |
-| 3 | Glassreed | a cluster of tall violet-teal blades with off-white glints (drawn, no translucency) | blades sway out of phase (a bone cascade), glints swap; react: the blades clack together and ring still | the twilight band |
+| 3 | Glassreed | a cluster of tall cold-teal blades with a violet edge and off-white glints (teal so they read on the violet twilight band; drawn, no translucency) | blades sway out of phase (a bone cascade), glints swap; react: the blades clack together and ring still | the twilight band |
 | 4 | Shadebloom | a violet bud on a coiled stem, frost-tipped petals | opens only in shadow: a slow open / close cycle (swap); react: shuts tight | night side, crater shadows |
 | 5 | Coilwort | a sage coil-spring stem with a teal ice bead on top | bounces on the beat; react: compresses, then springs up with an overshoot | polar cold traps |
 

@@ -5,7 +5,8 @@ Design previews only; the rig parts and bones follow after LEAD accepts (one Mer
 
   sunfan      a fan of stiff sun-gold blades on a short ember stem; tilts edge-on on the beat; react: snaps shut, reopens
   embercap    a squat ember cap with a cracked crust and a gold underside on a stubby sage foot; breathes; react: spark dust
-  glassreed   violet blades with a teal edge and off-white glints; sway out of phase; react: the blades clack together
+  glassreed   cold-teal blades with a violet edge and off-white glints (teal so they read on the violet twilight band);
+              sway out of phase; react: the blades clack together
   shadebloom  a frost-tipped violet bud on a coiled sage stem; opens and closes slowly; react: shuts tight
   coilwort    a sage coil-spring stem with a teal ice bead; bounces on the beat; react: compresses, springs, settles
 
@@ -122,10 +123,10 @@ def glassreed(d, M, p):
     for j, (x, L, deg) in enumerate(sorted(REEDS, key=lambda r: -r[1])):
         lean = math.radians(deg) + a0 * (1 + 0.3 * j) * math.sin(j * 1.3 + 1) - clack * (math.radians(deg) - math.pi / 2) * 0.85
         bl = blade((x, 0.04), lean, L, 0.05, tip=0.2)
-        G.stroke(d, bl, M["violet_f"], 0.0, cyclic=True)
+        G.stroke(d, bl, M["ice_f"], 0.0, cyclic=True)                                                   # teal blades: they live on the
         edge = [(x + 0.012 * math.cos(lean + math.pi / 2) + t * L * math.cos(lean), 0.04 + 0.012 * math.sin(lean + math.pi / 2) + t * L * math.sin(lean))
                 for t in (0.05, 0.9)]
-        G.stroke(d, G.hose_outline(edge, 0.016), M["ice_f"], 0.0, cyclic=True)                              # the teal edge
+        G.stroke(d, G.hose_outline(edge, 0.016), M["violet_sh"], 0.0, cyclic=True)                          # violet twilight band, a violet edge
         t = 0.45 + 0.25 * ((k + j) % 3) / 2                                                                  # the glint walks up
         G.stroke(d, G.lumpy_ellipse(x + t * L * math.cos(lean) - 0.006, 0.04 + t * L * math.sin(lean), 0.012, 0.03, n=8, seed=40 + j,
                                     rot=lean - math.pi / 2), M["white_f"], 0.0, cyclic=True)
