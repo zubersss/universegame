@@ -183,14 +183,14 @@ Goal: Ship and space on v3 sprites: the **upright, faceless** Pilgrim (D-101, D-
 Accept: SpaceArtTests: every planet key resolves to a disc sprite (placeholders count) at its D-098 size; the exhaust loop runs at 12 fps from the tail socket; thrust stretch 1.15 / cut squash 0.9 along the ship's up axis (EditMode); a Space capture with every disc visible and a side capture of the upright ship on the pad and tilted in flight.
 Files: Code/Runtime/Ship/, Code/Runtime/Space/, Placeholders/space/, Placeholders/ships/, Tests/
 Depends: U-094, U-107
-Lead notes: Cycle 238. Code on placeholders now; art swaps by key. Cycle 240: BLENDER's keys (contract §11.5, D-098): `planets/<planet>/disc` (sheet + json with `space_ppu: 3`, `radius_u`, idle clip 9 or 12 frames), Luna at `planets/earth/luna`, Saturn's rings as two static parts `planets/saturn/rings_back` / `rings_front` drawn behind / in front of the body with the wobble from `planets/saturn/disc_rig.json`; the starfield at `space/starfield` + 3 cards under `space/nebula/` with `starfield.json` parallax factors. Size the disc sprite from `radius_u` × PlanetConfig.visualRadius so a wrong scale is a test failure, not a look.
+Lead notes: Cycle 238. Code on placeholders now; art swaps by key. Cycle 240: BLENDER's keys (contract §11.5, D-098): `planets/<planet>/disc` (sheet + json with `space_ppu: 3`, `radius_u`, idle clip 9 or 12 frames), Luna at `planets/earth/luna`, Saturn's rings as two static parts `planets/saturn/rings_back` / `rings_front` drawn behind / in front of the body with the wobble from `planets/saturn/disc_rig.json`; the starfield at `space/starfield` + 3 cards under `space/nebula/` with `starfield.json` parallax factors. Size the disc sprite from `radius_u` × PlanetConfig.visualRadius so a wrong scale is a test failure, not a look. Cycle 243 (BLENDER review fixes, a89f057; D-108): the starfield is the scene `backgrounds/space/starfield` with `layer0` a 2048×1024 tile repeating in x and y and `layer1..3` the nebula cards, `starfield.json` in the SceneLayout schema; SpaceBackdrop loads that scene (today it loads `backgrounds/space/layer{i}`). Saturn's `rings_back` / `rings_front` carry v3 sidecars (`space_ppu: 3`, pivot centre) so they import at the disc scale, not PPU 128: assert it in SpaceArtTests.
 
 ### U-104 · UNITY · Ready · C1
 Goal: Cartoon HUD: Suit power, oxygen and the gravity readout as BLENDER's gauge sprites (B-121; placeholder dials until then), needles stepped at 12 Hz, a wobble on change; the ship HUD shows altitude, vertical speed, tilt and thrust-to-weight (no fuel anywhere, D-103); the Escape Line as the hand-painted dotted line with its little sign (B-121) replacing the band; fonts per D-090 (Limelight titles, Patrick Hand HUD, OFL.txt beside each, credited).
 Accept: MenuHudTests: the three gauges track their meters within 1 % at the 12 Hz step; no HUD element, panel or string mentions fuel (test greps the UI prefabs and strings); the Escape Line sign sits at the line's altitude; fonts load from the project (test); a HUD capture at 1080p.
 Files: Code/Runtime/UI/HUD/, Assets/_Game/Fonts/, docs/credits/unity.md
 Depends: U-094
-Lead notes: Cycle 238. The current HUD stays until the swap is complete; one commit.
+Lead notes: Cycle 238. The current HUD stays until the swap is complete; one commit. Cycle 243 (BLENDER handoffs, a89f057): (a) ArtImporter ignores a single image's sidecar `pivot`; `ui/hud/escape_sign` needs `[0.5, 0]`, so honour the sidecar pivot for single sprites (importer test); (b) `ui/hud/gauges` is one sheet with `parts` (rects bottom-left + pivots, rig-set style) and `needles` `{min_deg, max_deg, hub, danger_below}`: slice it into its 6 sprites with the rig-set slicer and drive each needle from its json range; `escape_line.json` carries `"tile": true`.
 
 ### U-105 · UNITY · Ready · C1
 Goal: Surveyor full Animator at 12 fps: every clip on `characters/surveyor/side` (incl. B-116's and the C1 dig, build, surprise, jetpack, climb_in once BLENDER adds them) wired to the controller states with stand-ins for the missing ones; eye-pop (surprise) and smear hooks (dash) as animation events; the SpriteCharacterView flip and squash root unchanged.
@@ -212,6 +212,13 @@ Accept: `FlightTests` (EditMode): hover at thrust = g on all 8 planets within 1 
 Files: Code/Runtime/Ship/SideShip.cs, ShipLegsView.cs, ShipHud.cs, Code/Runtime/Transitions/, Code/Runtime/Planets/PlanetConfig.cs, Archive/Fuel~/, Tests/Unit/FlightTests.cs, Tests/Play/FlightPlayTests.cs, Tests/LeadQA/M1LoopTests.cs (LEAD's file: send the diff in your status; LEAD applies it)
 Depends: U-096
 Lead notes: Cycle 242. First C1 card: it is the owner's gameplay change. Keep the top-down flight model as is (§4.4). The side camera follows the ship with the §5.1 rules; look-ahead points along the velocity. One batched check at hand-off; a side capture of the ship on the pad, tilted mid-climb, and at the Escape Line.
+
+### U-108 · UNITY · Ready · C1
+Goal: Rig sets v3.1 and the re-inked C0 set in the scene: `RigSet` reads BLENDER's B-126 schema additions (`replaces_part` swap slots that substitute a part, and an idle `swap_cycle` that steps a swap on the beat) so the faceless snoozle opens and shuts its head and lifts its leaves; import the v3.1 re-inks as they land (surveyor B-125, gull B-127 with `fly` wired to the gull's airborne state, snoozle B-126, calibration); re-shoot the nine C0 stills into `reports/unity/c0_<date>/v41/` for the owner's second look-over.
+Accept: RigSetTests cover `replaces_part` and `swap_cycle` (a swap steps once per beat, a replaced part is hidden); the snoozle v2 loads with no importer error and 48 instances run in the C0 scene; the gull plays `fly` while airborne (test); the nine v4.1 stills + README; CartoonSmokeTests green; the Earth C0 perf rows still green.
+Files: Code/Runtime/Flora/RigSet.cs, FloraRigs.cs, Code/Editor/RigSetBuilder.cs, Creatures/, reports/unity/c0_<date>/v41/
+Depends: U-107, B-126
+Lead notes: Cycle 243. After U-107's check and before U-091: the owner is waiting on these pictures. The surveyor and gull sheets keep their indices, so only the rig schema needs code.
 
 
 > **R1 (D-062).** 2D tasks U-061..U-071 are Superseded (their code and sources stay in the tree and
@@ -929,14 +936,14 @@ Goal: The eight planet discs for the space view (§9.3, contract §11.5): painte
 Accept: §9.7 per disc; a review sheet with all eight side by side at the space scale plus 2× detail; originality line per disc.
 Files: blender/scripts/build_discs_v3.py, Assets/_Game/Art/planets/<planet>/ (contract §11.5: `disc_color.png` + json; Luna at `planets/earth/luna`; Saturn adds `rings_back`, `rings_front` + `disc_rig.json`)
 Depends: B-110
-Lead notes: Cycle 240: PREVIEW ACCEPTED (3bae88f, review_b119_discs_preview.png 19:0x): all eight read as the real planets (§9.3) in watercolour with paper grain, a night crescent and a 5 px jittered ink line; personality idles as listed (Neptune scowl + blink, Jupiter bands + spot, Earth clouds at two speeds). Rulings: (1) space scale 3 px per space unit from PlanetConfig.visualRadius → D-098 (json `space_ppu: 3`, `radius_u`); Jupiter and the Saturn body at 9-frame idles on 3×3 sheets ≤ 2048, the rest 12. (2) Paths follow the contract, not the card's shorthand (fixed above). Export after the C0 sign-off (D-097); Done on UNITY's Space capture (U-103). Cycle 242 (D-101): no faces or expressions on any disc: Neptune's scowl and blink go; its character is the dark storm wandering and the band drift. Ink per v3.1 (2–3 px at the disc scale, interior band lines 1–1.5 px). Re-preview before the export.
+Lead notes: Cycle 240: PREVIEW ACCEPTED (3bae88f, review_b119_discs_preview.png 19:0x): all eight read as the real planets (§9.3) in watercolour with paper grain, a night crescent and a 5 px jittered ink line; personality idles as listed (Neptune scowl + blink, Jupiter bands + spot, Earth clouds at two speeds). Rulings: (1) space scale 3 px per space unit from PlanetConfig.visualRadius → D-098 (json `space_ppu: 3`, `radius_u`); Jupiter and the Saturn body at 9-frame idles on 3×3 sheets ≤ 2048, the rest 12. (2) Paths follow the contract, not the card's shorthand (fixed above). Export after the C0 sign-off (D-097); Done on UNITY's Space capture (U-103). Cycle 242 (D-101): no faces or expressions on any disc: Neptune's scowl and blink go; its character is the dark storm wandering and the band drift. Ink per v3.1 (2–3 px at the disc scale, interior band lines 1–1.5 px). Re-preview before the export. Cycle 243: a89f057 noted (Neptune's face gone: dark storm + trailing bright cloud; v3.1 ink with night-side hatching and band-edge fragments; Saturn ring sidecars at space_ppu 3; the disc review shows every frame of every disc with a per-disc panel). Export on your turn; LEAD reviews the stamped disc sheet.
 
 ### B-120 · BLENDER · Ready · C1
 Goal: Painted starfield (2048² tileable, paper grain, soft ink stars of 3 sizes, no seam) + 3 nebula cards (≤ 1024², alpha, soft bleed) for the Space parallax (contract §11.4), Earth-palette night tones.
 Accept: 2× tiled preview with no seam; ≤ 4 MB per PNG; json with parallax factors.
 Files: blender/scripts/gen_painted_bg.py, Assets/_Game/Art/space/starfield/, Assets/_Game/Art/space/nebula/
 Depends: B-110
-Lead notes: Cycle 240: PREVIEW ACCEPTED (208eb1b, review_b120_starfield_preview.png): paper-grain night wash, inked cartoon stars in three sizes, three nebula cards (rust, slate, olive) with soft bleed; no seam at the marked crossing. Export after the C0 sign-off; Done on the Space capture (U-103) with the 2× seam check on the exported PNGs.
+Lead notes: Cycle 240: PREVIEW ACCEPTED (208eb1b, review_b120_starfield_preview.png): paper-grain night wash, inked cartoon stars in three sizes, three nebula cards (rust, slate, olive) with soft bleed; no seam at the marked crossing. Export after the C0 sign-off; Done on the Space capture (U-103) with the 2× seam check on the exported PNGs. Cycle 243 (D-108): the layer scheme from a89f057 is the contract now (§11.4 v3.1): `backgrounds/space/starfield/layer0` 2048×1024 tiling in x and y (seams 1.01 / 1.12 measured) + `layer1..3` nebula cards + `starfield.json`. Export on your turn.
 
 ### B-121 · BLENDER · Ready · C1
 Goal: Cartoon HUD art (§9.3): three gauges (Suit power, oxygen, gravity readout) as dial faces + needles on one 1024² sheet with ink and paper, the Escape Line as a hand-painted dotted line tile (512×64) with its little sign (≤ 256²); Patrick Hand lettering on the sign only (D-090).
@@ -952,39 +959,40 @@ Files: blender/scripts/build_pilgrim_v3.py, Assets/_Game/Art/ships/pilgrim/
 Depends: B-123, B-124
 Lead notes: Cycle 242: rewritten for D-101/D-102 (the 18:58 sources were the horizontal faced rocket; keep what transfers: fins, puffs, palette).
 
-### B-123 · BLENDER · Ready · C1
+### B-123 · BLENDER · Done · C1
 Goal: The Pilgrim redesigned upright and faceless (D-101, D-102; §9.3 v4.1): a bendy vintage rocket standing on its tail with three or four fins as legs, a porthole, panel seams and rivets as drawn detail, the teal/mustard/red palette kept, round puffs; no eyes, mouth or face-like arrangement. Step 1 only: a design sheet (standing on the pad, tilted ±35° in flight, thrust stretch, cut squash, top view) at preview size with the "what makes it ours" line, for LEAD's review.
 Accept: the §9.7 boxes that apply to a design sheet (ink v3.1, two shadow tones, palette, original, no face); readable at 1x beside the surveyor (the ship is ≈ 12 m tall = 768 px, so draw the sheet at 0.5x with a 1x detail crop).
 Files: blender/scripts/build_pilgrim_v3.py, blender/sources/ships/pilgrim_v3_design.blend
 Depends: B-124
-Lead notes: Cycle 242. Light (preview only). Supersedes B-117's design (Done, kept for history).
+Lead notes: Cycle 242. Light (preview only). Supersedes B-117's design (Done, kept for history). Cycle 243: STEP 1 OK → DONE (36f33a0, review_b123_pilgrim_design_preview.png 20:43). §9.8 pass: a teal cigar hull on three mustard fin-legs with brown pads and red toes, mustard nose with a red knob, ONE off-centre brass porthole, off-white riveted band, panel seams, rivet rows, hatching on the shadow flank; nothing face-like (D-101 pass). Thrust stretch along the axis and cut squash read; the ±35° tilts carry the puffs along the ship's own axis. Keep as drawn. B-122 released; its review sheet must show the ship at 1x = 768 px tall beside the surveyor so the 12 m scale is checked there.
 
-### B-124 · BLENDER · Ready · C1
+### B-124 · BLENDER · Done · C1
 Goal: Pipeline v4.1 (D-100; contract v3.1 §11.1): `gp_raster` / `render.py` draw the outer silhouette at 2–3 px and interior lines at 1–1.5 px (±20 % jitter kept), support a second shadow tone per colour (mid + deep) in the palette check, and add an interior-detail layer per asset (seams, folds, veins, rivets, hatch and dot texture marks) that the review sheet shows in a 2× detail crop with measured widths. Prove it on `characters/calibration_v3/side` re-rendered: the blob gains seam lines, a few hatch marks and two shadow tones.
 Accept: review sheet measures outer 2–3 px / interior 1–1.5 px; palette check passes with two shadow tones; json still validates (§11.2); the ten §9.7 boxes on the sheet; log OK; peak RAM in the status.
 Files: blender/render.py, blender/review.py, blender/scripts/gp_*.py, Assets/_Game/Art/characters/calibration_v3/
 Depends: —
-Lead notes: Cycle 242. First: every re-ink and every C1 export runs through it. Light previews until the gate; one heavy export.
+Lead notes: Cycle 242. First: every re-ink and every C1 export runs through it. Light previews until the gate; one heavy export. Cycle 243: DONE (d9ace05 + the 20:59:35 export, log OK: calibration_v3/side 1964×324, ink outer 2.0–3.0 / interior 1.0–1.5 px measured, 40 interior strokes per frame, palette with mid + deep tones 100 %, ten-box sheet with the 2× detail crop; the blob still pops off the painted plains at 1x). The ten-box review sheet is the §11.7 standard from here.
 
 ### B-125 · BLENDER · Ready · C1
 Goal: Surveyor re-ink (D-100): `characters/surveyor/side` (all 98 frames, same indices) and the design sheet redrawn at v3.1 ink with interior detail (helmet ring seams and rivets, glove and boot seams, pack straps and buckle, hose ribs, stripe stitching, a few hatch marks on the pack) and two shadow tones; design, poses and clips unchanged.
 Accept: ten §9.7 boxes; widths measured on the sheet; the face reads at 1x on the plains through the glass; json indices unchanged (UNITY needs no change); sheet ≤ 2048.
 Files: blender/scripts/build_surveyor_v3.py, Assets/_Game/Art/characters/surveyor/
 Depends: B-124
-Lead notes: Cycle 242. One heavy export under the gate and D-091.
+Lead notes: Cycle 242. One heavy export under the gate and D-091. Cycle 243: PREVIEW ACCEPTED (88a1764, review_b111_surveyor_design_preview.png 20:25: helmet-ring rivets and seams, glove and boot stitching, strap and buckle, hose ribs, hatch on the pack, mid + deep tones; 75 interior strokes per frame; the face reads through the glass at 1x). Done on the side export (98 frames, same indices, log OK).
 
 ### B-126 · BLENDER · Ready · C1
 Goal: Snoozle v2, no face (D-101, D-100): `flora/earth/rigset` redrawn as a dandelion clock with no eyes or mouth; personality through motion: sway idle on the beat, a head that opens and shuts (swaps `head_open` / `head_half` / `head_closed`), leaves that lift (`leaves_rest` / `leaves_up`), react = turn and bounce with the head opening; v3.1 ink with seed-head detail lines, stem ribs, leaf veins, two shadow tones; ≤ 6 bones, one texture.
 Accept: ten §9.7 boxes; the assembled 12-frame loop on the review sheet at 1x on the plains; json validates against contract v3.1 §11.3 (no face parts); UNITY's RigSet reads it with no code change (same part/bone/swap schema).
 Files: blender/sources/flora/earth_rigset.blend, Assets/_Game/Art/flora/earth/
 Depends: B-124
-Lead notes: Cycle 242. The biggest visible change for the owner; after B-124.
+Lead notes: Cycle 242. The biggest visible change for the owner; after B-124. Cycle 243: ART ACCEPTED (5fd7d91 + the 20:59:54 export, review_b126_earth_rigset.png: a dandelion clock with seed rays and no face, head open → half → bud → open again, leaves lift, stem ribs and leaf veins, mid + deep tones, 7 parts on 216×84, assembled loop at 1x on the plains reads as a plant with character). Schema note: the json adds `replaces_part` swap slots and an idle `swap_cycle`; UNITY reads them in U-108. Done on UNITY's earth_c0 re-shoot with it.
 
 ### B-127 · BLENDER · Ready · C1
 Goal: Gus re-ink (D-100): `creatures/earth/gull` at v3.1 ink with feather marks on wings and tail, crest detail, foot webbing lines, two shadow tones; clips, frames and indices unchanged; add `fly` (8–10 frames loop, wings beating) since the game flies the gull.
 Accept: ten §9.7 boxes; widths measured; json valid; indices of idle/walk/react/bump unchanged, fly appended.
 Files: blender/sources/creatures/earth_gull_v3.blend, Assets/_Game/Art/creatures/earth/gull/
 Depends: B-124
+Lead notes: Cycle 243: PREVIEW ACCEPTED (1db52ef, review_b113_earth_gull_preview.png 20:27: feather shafts, web lines, chest specks, deep tone; fly = two wingbeats with the crest dragging; indices 0–39 unchanged, fly 40–51). Deviation accepted: fly is 12 frames, not the card's 8–10; the contract (§11.2: a flier's walk, 12–16) and ArtRules.ClipCap rule, the card was wrong. Done on the export.
 
 
 > **R1 (D-062).** 2D tasks B-056..B-076 are Superseded; their `.blend` sources (rigs, props,

@@ -273,8 +273,11 @@ same format under `props/<planet>/rigset`.
 **11.4 Backgrounds.** `backgrounds/<planet>/<scene>/layer<N>_color.png`, N = 0 (farthest) … 4,
 3–5 layers per surface scene, painted watercolour with paper texture, **no ink outline**,
 horizontally tileable (2× tiled preview in the review sheet), height ≤ 1024, width ≤ 2048, plus
-`<scene>.json`: `{"layers": [{"n": 0, "parallax": 0.1, "y_m": 4.0}, ...]}`. Space:
-`backgrounds/space/starfield/` (tileable 2048² starfield + up to 3 nebula cards ≤ 1024²).
+`<scene>.json`: `{"layers": [{"n": 0, "parallax": 0.1, "y_m": 4.0}, ...]}`. Space (v3.1, D-108):
+the scene `backgrounds/space/starfield/`: `layer0_color.png` = the starfield, 2048×1024, tileable
+in x **and** y (`"tile": true` on its layer entry), `layer1..3_color.png` = up to three nebula
+cards ≤ 1024², `starfield.json` in the same SceneLayout schema (n, parallax, y_m, tile flags); no
+other key shape (the importer accepts 4-segment keys only as `layer<N>`).
 
 **11.5 Planet discs (space view).** `planets/<planet>/disc_color.png`, watercolour fill + ink
 outline, ≤ 1024² (Saturn with rings ≤ 2048×1024); **no faces or expressions** (D-101): a character idle from bands, storms, caps and rings as a sheet ≤ 12 frames
