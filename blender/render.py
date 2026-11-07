@@ -1022,7 +1022,31 @@ def do_hud(entry, preview):
              + f" | escape_line {seam} | lettering pending (Patrick Hand) | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
 
 
+def do_icon_set(entry, preview):
+    """B-128: v3.1 tile-item icons (icons/<item>/base, 64x64) drawn with fakegp + numpy (no scene);
+    the preview sheet doubles as the review."""
+    import build_icons_v3 as IC
+    t0 = time.time()
+    if preview:
+        raise AssetError(f"{entry['key']}: the icon set has no preview mode (python build_icons_v3.py <png>)")
+    try:
+        out = IC.export(ART, entry.get("items"))
+    finally:
+        from meridian import fakegp
+        fakegp.restore()
+    IC.preview(os.path.join(PREVIEW, f"review_{entry.get('review_name', 'b128_icons')}.png"))
+    from meridian import fakegp
+    fakegp.restore()
+    for k, _n, _w in out:
+        mark_stale(f"icons/{k}/base", False)
+    mark_stale(entry["key"], False)
+    log_line(f"OK {entry['key']} | " + ", ".join(f"icons/{k} 64x64 {n // 1024}KB" for k, n, _w in out)
+             + f" | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
+
+
 def do_asset(entry, preview):
+    if entry.get("icon_set"):           # v3.1 tile-item icons (B-128)
+        return do_icon_set(entry, preview)
     if entry.get("disc_set"):           # v3 §11.5 planet discs (B-119, D-098)
         return do_disc_set(entry, preview)
     if entry.get("space_starfield"):    # v3 §11.4 space starfield + nebula cards (B-120)
