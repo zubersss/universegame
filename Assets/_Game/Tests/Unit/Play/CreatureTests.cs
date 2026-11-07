@@ -98,7 +98,7 @@ namespace Meridian.Tests
             for (int i = 0; i < 10; i++) yield return null;
             foreach (var c in creatures.All)
                 if (c.Alive && c.Spec.id == Species.GreyWolf)
-                    Assert.Less(Mathf.Abs(c.Body.position.x - player.Body.position.x), 22f, "only on-screen wolves stay after dawn");
+                    Assert.LessOrEqual(Mathf.Abs(c.Body.position.x - player.Body.position.x), 22f, "only on-screen wolves stay after dawn (the director leaves beyond 22 m)");
             LogAssert.NoUnexpectedReceived();
         }
 
