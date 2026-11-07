@@ -62,7 +62,7 @@ namespace Meridian.Tests
             int bodies = 0;
             foreach (var b in SpaceLayout.Build(catalog))
             {
-                if (b.isSun) continue; // the Sun keeps its lit spheroid and glow (no disc sheet, B-119)
+                if (b.isSun) continue; // U-116 (D-123): the Sun is a rig, not a disc sheet: TheSunResolvesToItsRigWithPartsAndSockets
                 var json = b.parent != null ? Sidecar(b.parent, b.name) : Sidecar(b.name, "disc"); // a moon's sheet lives under its parent (D-098)
                 if (b.parent != null && !File.Exists(json)) { TestContext.Out.WriteLine($"[MERIDIAN] moon {b.name}: no disc sheet yet ({json}); it keeps its spheroid"); continue; }
                 Assert.IsTrue(File.Exists(json), $"{b.name}: {json} (art or placeholder)");
@@ -85,6 +85,44 @@ namespace Meridian.Tests
                 bodies++;
             }
             Assert.GreaterOrEqual(bodies, 8, "the eight planets at least");
+        }
+
+        /// <summary>U-116 (D-123, B-137): the Sun key resolves to its rig: five parts, the 14-tongue ring, two prominences at their angles, the corona; the sheet sliced at the import ppu and addressed with its json; the pure clock.</summary>
+        [Test]
+        public void TheSunResolvesToItsRigWithPartsAndSockets()
+        {
+            const string json = "Assets/_Game/Art/planets/sun/disc_rig.json";
+            Assert.IsTrue(File.Exists(json), json);
+            var rig = Meridian.Space.SunView.Parse(File.ReadAllText(json));
+            Assert.AreEqual(Meridian.Space.SunView.Key, rig.key);
+            Assert.AreEqual(5, rig.parts.Length);
+            foreach (var n in new[] { "body", "tongue", "prominence_a", "prominence_b", "corona" }) Assert.NotNull(System.Array.Find(rig.parts, p => p.name == n), n);
+            Assert.AreEqual(14, rig.ring.count); Assert.AreEqual("tongue", rig.ring.part); Assert.AreEqual(0.97f, rig.ring.base_r, 1e-4f); Assert.AreEqual(12f, rig.ring.stepped_hz, 1e-4f);
+            Assert.AreEqual(2, rig.ring.alt_scale.Length); Assert.AreEqual(0.62f, rig.ring.alt_scale[1], 1e-4f);
+            Assert.AreEqual(1.42f, rig.corona.radius_r, 1e-4f); Assert.AreEqual("corona", rig.corona.part);
+            Assert.AreEqual(2, rig.prominences.Length); Assert.AreEqual(100f, rig.prominences[0].angle_deg, 1e-3f); Assert.AreEqual(280f, rig.prominences[1].angle_deg, 1e-3f);
+            // The sheet: sliced into the five parts at the import ppu; one sheet px draws draw_scale / space_ppu u, so the 928 px body spans 2 × R (309 u: R 300 + the flame bases).
+            const string png = "Assets/_Game/Art/planets/sun/disc_rig_color.png";
+            var ti = AssetImporter.GetAtPath(png) as TextureImporter;
+            Assert.NotNull(ti, png); Assert.AreEqual(SpriteImportMode.Multiple, ti.spriteImportMode, "sliced into parts");
+            var sprites = AssetDatabase.LoadAllAssetRepresentationsAtPath(png).OfType<Sprite>().ToList();
+            Assert.AreEqual(5, sprites.Count, "five part sprites");
+            var body = sprites.First(s => s.name == "body");
+            float scale = Meridian.Space.SunView.PartScale(rig, body.pixelsPerUnit);
+            Assert.AreEqual(928f * 2f / 3f, body.rect.width / body.pixelsPerUnit * scale, 0.5f, "the body's drawn width in Space units");
+            float coronaWidth = 512f / body.pixelsPerUnit;
+            Assert.AreEqual(2f * 1.42f * 300f, Meridian.Space.SunView.CoronaScale(rig, 300f, coronaWidth) * coronaWidth, 0.5f, "the corona spans 2 × 1.42 R");
+            // The addresses the runtime probes: the sheet at the key, the json at key/json.
+            var sheetEntry = ArtImporter.Settings.FindAssetEntry(AssetDatabase.AssetPathToGUID(png));
+            Assert.NotNull(sheetEntry, "the Sun sheet is addressed"); Assert.AreEqual(Meridian.Space.SunView.Key, sheetEntry.address);
+            var jsonEntry = ArtImporter.Settings.FindAssetEntry(AssetDatabase.AssetPathToGUID(json));
+            Assert.NotNull(jsonEntry, "the Sun rig json is addressed"); Assert.AreEqual(Meridian.Space.SunView.Key + "/json", jsonEntry.address);
+            // The clock: stepped at 12 Hz, the ring a slow spin, the pulse ± 8 % on the beat, the tongues evenly round the rim.
+            Assert.AreEqual(Meridian.Space.SunView.Step(1.04f, 12f), Meridian.Space.SunView.Step(1.08f, 12f), 1e-6f, "one 12 Hz step");
+            Assert.AreNotEqual(Meridian.Space.SunView.Step(1.04f, 12f), Meridian.Space.SunView.Step(1.13f, 12f));
+            Assert.AreEqual(180f + 2f * 10f, Meridian.Space.SunView.TongueAngle(7, 14, 2f, 10f), 1e-4f);
+            Assert.AreEqual(1.08f, Meridian.Space.SunView.Pulse(60f / 110f * 0.25f, 110f, 0.08f), 1e-4f, "the pulse peaks a quarter beat in");
+            Assert.AreEqual(1f, Meridian.Space.SunView.Breathe(0f, 110f, 0.03f), 1e-6f);
         }
 
         [Test]

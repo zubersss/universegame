@@ -70,9 +70,23 @@ namespace Meridian.Tests
                 Assert.AreEqual(SpaceWorld.DiscKey(b), d.Key, b.name + " key");
                 Assert.Greater(d.FrameCount, 8, b.name + " idle frames (9 or 12)");
             }
-            var sunDisc = world.transform.Find("sun/Disc");
-            Assert.NotNull(sunDisc, "the Sun's spheroid");
-            Assert.NotNull(sunDisc.GetComponent<MeshFilter>(), "the Sun keeps its lit spheroid (no disc sheet, B-119)");
+            // U-116 (D-123): where planets/sun/disc_rig exists the painted rig replaces the Sun's spheroid (SpaceWorld.ProbeSunRig); the glow and the light stay.
+            float sunUntil = Time.realtimeSinceStartup + 10f;
+            while ((world.Sun == null || !world.Sun.Built) && Time.realtimeSinceStartup < sunUntil) yield return null;
+            if (world.Sun != null && world.Sun.Built)
+            {
+                Assert.IsNull(world.transform.Find("sun/Disc"), "the rig replaced the Sun's spheroid");
+                Assert.AreEqual(14, world.Sun.Tongues.Count, "the 14-tongue flame ring");
+                Assert.AreEqual(2, world.Sun.Prominences.Count, "two prominences on the limb");
+                Assert.NotNull(world.Sun.CoronaRenderer, "the corona wash");
+                TestContext.Out.WriteLine($"[MERIDIAN] space sun: rig built, body scale {world.Sun.Body.transform.localScale.x:F2}, tongues {world.Sun.Tongues.Count}, step {world.Sun.LastStep:F3}");
+            }
+            else
+            {
+                var sunDisc = world.transform.Find("sun/Disc");
+                Assert.NotNull(sunDisc, "the Sun's spheroid (no rig sheet in the catalog)");
+                Assert.NotNull(sunDisc.GetComponent<MeshFilter>(), "the Sun keeps its lit spheroid without the rig sheet");
+            }
 
             // Saturn's painted rings: behind and in front of the disc at its scale, breathing per disc_rig.json; the B-090 mesh retired.
             Assert.NotNull(world.RingsBack, "rings_back"); Assert.NotNull(world.RingsFront, "rings_front");

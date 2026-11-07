@@ -158,17 +158,53 @@ namespace Meridian.Flora
             Populate(p.count, p.spacing, p.aroundX, p.seed);
         }
 
-        /// <summary>`count` plants every `spacing` m (jittered ± 40 %) around `aroundX`, feet on the terrain's top solid tile; runs once the set is Ready.</summary>
+        /// <summary>The planet the set belongs to (its biome bands pick the plants); null = no biome filter.</summary>
+        public Meridian.Planets.PlanetId? planet;
+        readonly Dictionary<string, RigSet.Plant[]> byBiome = new Dictionary<string, RigSet.Plant[]>(8);
+
+        /// <summary>U-110: the biome name a column belongs to, in the rig set's vocabulary (Earth: the band at x; the ocean band's land is the coast). Pure.</summary>
+        public static string BiomeNameAt(Meridian.Planets.PlanetId? planet, int x)
+        {
+            if (planet != Meridian.Planets.PlanetId.Earth) return null;
+            var b = Meridian.Terrain.EarthBiomes.At(x);
+            return b == Meridian.Terrain.Biome.Ocean ? "coast" : b.ToString().ToLowerInvariant();
+        }
+
+        /// <summary>
+        /// U-110: the plants of `set` whose `biomes` list names `biome` (one kind is a kind: the desert is all Shiverbarrel); the whole set only when
+        /// the biome is unknown or null, or no plant lists it. Pure.
+        /// </summary>
+        public static RigSet.Plant[] PlantsFor(RigSet set, string biome)
+        {
+            if (set == null || set.plants == null) return System.Array.Empty<RigSet.Plant>();
+            if (string.IsNullOrEmpty(biome)) return set.plants;
+            var list = new List<RigSet.Plant>(set.plants.Length);
+            foreach (var p in set.plants)
+                if (p.biomes != null && System.Array.IndexOf(p.biomes, biome) >= 0) list.Add(p);
+            return list.Count >= 1 ? list.ToArray() : set.plants;
+        }
+
+        RigSet.Plant[] CandidatesAt(int tx)
+        {
+            string biome = BiomeNameAt(planet, tx) ?? "";
+            if (!byBiome.TryGetValue(biome, out var list)) { list = PlantsFor(Set, biome); byBiome[biome] = list; }
+            return list;
+        }
+
+        /// <summary>`count` plants every `spacing` m (jittered ± 40 %) around `aroundX`, feet on the terrain's top solid tile, each kind from its
+        /// column's biome (U-110); runs once the set is Ready.</summary>
         public void Populate(int count, float spacing, float aroundX, int seed)
         {
             if (!Ready) { pendingPopulate = (count, spacing, aroundX, seed); return; }
+            byBiome.Clear();
             float x0 = aroundX - count * spacing * 0.5f;
             for (int i = 0; i < count; i++)
             {
                 float x = x0 + i * spacing + (Hash01(seed, i * 3 + 1) - 0.5f) * spacing * 0.8f;
                 int tx = Mathf.FloorToInt(x);
                 float y = terrain != null ? terrain.TopSolidY(tx) + 1f : 0f;
-                var def = Set.plants[Mathf.FloorToInt(Hash01(seed, i * 3 + 2) * Set.plants.Length) % Set.plants.Length];
+                var pool = CandidatesAt(tx);
+                var def = pool[Mathf.FloorToInt(Hash01(seed, i * 3 + 2) * pool.Length) % pool.Length];
                 Spawn(def, new Vector2(x, y), seed * 977 + i);
             }
         }

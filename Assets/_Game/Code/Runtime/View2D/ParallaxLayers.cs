@@ -76,6 +76,10 @@ namespace Meridian.View2D
         readonly List<AsyncOperationHandle> handles = new List<AsyncOperationHandle>(6);
         static Sprite white;
 
+        /// <summary>U-122 (D-135): the camera height the layers follow: the camera from the anchor up, the anchor itself below it (a dig, a pool, a
+        /// trench), so the layers never cross — the ground hides them there anyway. Pure.</summary>
+        public static float FollowY(float cameraY, float anchorY) => Mathf.Max(cameraY, anchorY);
+
         /// <summary>Builds the layers of backgrounds/&lt;planet&gt;/&lt;scene&gt; (placeholders at once, art as it loads).</summary>
         public void ConfigureFor(string planet, string scene, float surfaceDatum)
         {
@@ -161,7 +165,7 @@ namespace Meridian.View2D
                 float x = ParallaxMath.LayerX(c.x, l.parallax);
                 // Keep the 3-wide strip centred on the camera: shift by whole tile widths (tileable art, no seam).
                 if (w > 0f) x += Mathf.Round((c.x - x) / w) * w;
-                sr.transform.position = new Vector3(x, ParallaxMath.LayerY(c.y, anchorY, datumY, l.y_m, l.parallax), 0f);
+                sr.transform.position = new Vector3(x, ParallaxMath.LayerY(FollowY(c.y, anchorY), anchorY, datumY, l.y_m, l.parallax), 0f); // U-122: under the anchor the painting holds its datum pose
             }
         }
 

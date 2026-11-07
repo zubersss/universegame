@@ -85,10 +85,12 @@ namespace Meridian.Tests
             creatures.Bump(wolf, Time.time); // U-093 (D-087): a bump; the surveyor and the wolf both react
             yield return null;
             string clip = drawn != null ? drawn.Clip : view.Clip;
-            TestContext.Out.WriteLine($"[MERIDIAN] bump: player vx {player.Body.linearVelocity.x:F2}, flashing {(drawn == null ? view.Flashing.ToString() : "n/a (drawn surveyor)")}, clip {clip}");
-            Assert.Less(player.Body.linearVelocity.x, -3f, "knocked away from the wolf (left)");
-            if (drawn == null) Assert.IsTrue(view.Flashing, "the 2-frame white flash"); // the drawn surveyor has no flash yet (a U-121 follow-up note)
+            bool flashing = drawn != null ? drawn.Flashing : view.Flashing;
+            Assert.IsTrue(flashing, "the 2-frame white flash (U-122: on the drawn surveyor too)");
             Assert.IsTrue(clip == SurveyorAnim.Bump || clip == SurveyorAnim.Hurt, "bump (or its hurt stand-in)");
+            yield return new WaitForFixedUpdate(); // the knock velocity lands in the fixed step (a fast frame may hold none)
+            TestContext.Out.WriteLine($"[MERIDIAN] bump: player vx {player.Body.linearVelocity.x:F2} after the fixed step, flashing {flashing}, clip {clip}");
+            Assert.Less(player.Body.linearVelocity.x, -3f, "knocked away from the wolf (left)");
             // The wolf bounces back: knock and squash on its visual root, the same frame.
             TestContext.Out.WriteLine($"[MERIDIAN] creature bump: visual y {wolf.Visual.localScale.y:F2}, vx {wolf.Body.linearVelocity.x:F2}");
             Assert.AreEqual(SquashStretch.HitScale, wolf.Visual.localScale.y, 0.03f, "0.85 squash");

@@ -21,8 +21,19 @@ namespace Meridian.View2D
 
         public const string SurveyorKey = "characters/surveyor/side";
         public const string EarthScene = "plains";
+
+        /// <summary>U-110 (B-133): the painted scene set for an Earth biome: plains, forest or coast (the ocean band's shore); the biomes without a set yet take the plains. Pure.</summary>
+        public static string SceneFor(Meridian.Terrain.Biome biome) => biome switch
+        {
+            Meridian.Terrain.Biome.Forest => "forest",
+            Meridian.Terrain.Biome.Ocean => "coast",
+            _ => EarthScene,
+        };
+
+        /// <summary>The scene set in use (U-110: set from the spawn column's biome at ConfigureFor).</summary>
+        public string Scene { get; private set; } = EarthScene;
         /// <summary>Rigged plants around the camp in C0 (every FloraSpacing m, jittered).</summary>
-        public const int FloraCount = 48;
+        public const int FloraCount = 42; // D-136 (2): was 48; the camp's density is the animated-object lever (the gate read 42 Animators against 40)
         public const float FloraSpacing = 2.5f;
         /// <summary>U-101 / B-113: gulls over the camp in C0.</summary>
         public const int GullCount = 1;
@@ -66,7 +77,8 @@ namespace Meridian.View2D
             }
             Layers.gameObject.SetActive(true);
             Layers.view = cam;
-            Layers.ConfigureFor(config.id.ToString().ToLowerInvariant(), EarthScene, surfaceDatum);
+            Scene = config.id == Meridian.Planets.PlanetId.Earth ? SceneFor(Meridian.Terrain.EarthBiomes.At(side.spawnX)) : EarthScene; // U-110: the spawn's biome picks the set
+            Layers.ConfigureFor(config.id.ToString().ToLowerInvariant(), Scene, surfaceDatum);
             // U-109: the climb sky behind the painted layers, measured against layer0's top edge every frame.
             if (Sky == null) { var sgo = new GameObject("CartoonClimbSky"); sgo.transform.SetParent(transform, false); Sky = sgo.AddComponent<ClimbSky>(); }
             Sky.gameObject.SetActive(true);
@@ -74,7 +86,10 @@ namespace Meridian.View2D
             Sky.ConfigureFor(config, surfaceDatum);
             if (Flora == null) { var fgo = new GameObject("CartoonFlora"); fgo.transform.SetParent(transform, false); Flora = fgo.AddComponent<Meridian.Flora.FloraRigs>(); }
             Flora.view = cam; Flora.player = side.player != null ? side.player.transform : null; Flora.terrain = side.terrain;
-            Flora.Reserved = 1 + GullCount; // the surveyor and the critters (Bible §9.6: ≤ 40 animated objects in all)
+            Flora.planet = config.id; // U-110: the biome bands pick the plants
+            // Bible §9.6: ≤ 40 animated objects in all. The reserve is what the gate counts besides the flora: the drawn surveyor, the ship's legs rig and its
+            // puff sheet, one more for a prop or critter Animator in flight (D-136 (2): the 08:46 gate read 38 flora + 4 = 42).
+            Flora.Reserved = 4 + GullCount;
             Flora.Load("flora/" + config.id.ToString().ToLowerInvariant() + "/rigset");
             Flora.Populate(FloraCount, FloraSpacing, side.spawnX + 0.5f, config.id.GetHashCode() * 31 + 7);
             if (Ground == null) { var ggo = new GameObject("CartoonGround"); ggo.transform.SetParent(transform, false); Ground = ggo.AddComponent<GroundStrip>(); }
@@ -92,6 +107,7 @@ namespace Meridian.View2D
                 var view = side.player.GetComponentInChildren<PlayerView>(true);
                 if (view != null) view.enabled = false;
                 foreach (var r in side.player.GetComponentsInChildren<Renderer>(true)) r.enabled = false;
+                foreach (var a in side.player.GetComponentsInChildren<Animator>(true)) a.enabled = false; // D-136 (2): the hidden 3D / sheet views drive nothing on the cartoon path (and count as animated objects while enabled)
                 var go = new GameObject("CartoonSurveyor");
                 go.transform.SetParent(side.player.transform, false);
                 Surveyor = go.AddComponent<SpriteCharacterView>();

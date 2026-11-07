@@ -38,6 +38,14 @@ namespace Meridian.Terrain
         /// frame before the first Update read as settled and released the surveyor into empty space (the C0 smoke "fall").
         /// </summary>
         public bool IsSettled => started && firstPass && tileSet.IsReady && pending.Count == 0 && ready.IsEmpty && inProgress == null;
+
+        /// <summary>U-120: the per-frame apply budget while the first window fills after Begin (behind the boot cover or the entry fade), in ms.
+        /// The cold first boot spent ~5 s of its 6–8 s settling the terrain at TerrainConstants.ApplyPlanMs (1 ms) with nothing on screen.</summary>
+        public const double FirstFillPlanMs = 12.0;
+        /// <summary>True once the streamer has settled since Begin; the apply budget is FirstFillPlanMs before, ApplyPlanMs after.</summary>
+        public bool FirstFillDone { get; private set; }
+        /// <summary>The apply budget for a frame: the first fill's wide window until the first settle, the streaming budget after. Pure.</summary>
+        public static double PlanMs(bool firstFillDone) => firstFillDone ? TerrainConstants.ApplyPlanMs : FirstFillPlanMs;
         bool firstPass;
 
         readonly Dictionary<long, TerrainChunk> resident = new Dictionary<long, TerrainChunk>(32);
@@ -109,6 +117,7 @@ namespace Meridian.Terrain
             foreach (var c in resident.Values) c.UseBlocks(this, blockMaterial);
             started = true;
             firstPass = false;
+            FirstFillDone = false; // U-120: a fresh window fills under the wide budget
         }
 
         // ---------- U-073: the world as the block mesher sees it ----------
@@ -194,6 +203,7 @@ namespace Meridian.Terrain
             }
             ApplyReady();
             firstPass = true;
+            if (!FirstFillDone && IsSettled) FirstFillDone = true; // U-120: from here the streaming budget rules
         }
 
         bool Wanted(int cx, int cy) =>
@@ -235,7 +245,8 @@ namespace Meridian.Terrain
             // Start another band only if the slowest recent band still fits in the budget;
             // always do at least one so streaming can't stall.
             bool first = true;
-            while (first || watch.Elapsed.TotalMilliseconds + step < TerrainConstants.ApplyPlanMs)
+            double plan = PlanMs(FirstFillDone); // U-120: the first fill behind the cover takes a wide window
+            while (first || watch.Elapsed.TotalMilliseconds + step < plan)
             {
                 first = false;
                 if (inProgress == null && !StartNext()) break;

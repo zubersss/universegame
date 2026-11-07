@@ -86,13 +86,31 @@ namespace Meridian.Flora
             }
         }
 
-        [System.Serializable] public sealed class Idle { public string type = "sway"; public float amplitude_deg = 10f; public float beat_bpm = 110f; public float squash = 0.08f; public SwapCycle swap_cycle; }
+        [System.Serializable]
+        public sealed class Idle
+        {
+            public string type = "sway"; public float amplitude_deg = 10f; public float beat_bpm = 110f; public float squash = 0.08f; public SwapCycle swap_cycle;
+            /// <summary>v3.2 (D-127): one swing of the sway spans this many beats (default 1: a swing per beat, the whole sway two beats, as every plant before it).</summary>
+            public int cycle_beats = 1;
+            /// <summary>v3.2 (B-136): the phase each bone trails its parent by, in radians of the sway (default 0.35, the whip every plant had).</summary>
+            public float lag = DefaultLag;
+            public const float DefaultLag = 0.35f;
+            /// <summary>v3.2 (B-136): `amplitude_deg` as a bone → degrees object instead of one number; filled by Parse, null when the json gives a number.</summary>
+            [System.NonSerialized] public Dictionary<string, float> amplitude_by_bone;
+            public bool HasBoneAmplitudes => amplitude_by_bone != null && amplitude_by_bone.Count > 0;
+            /// <summary>Seconds of one whole sway (two swings): 2 × cycle_beats beats. Pure.</summary>
+            public float SwaySeconds => 2f * Mathf.Max(1, cycle_beats) * 60f / Mathf.Max(1f, beat_bpm);
+            /// <summary>The bone's own amplitude from the map (0 for a bone the map leaves out: it stays still), or −1 when there is no map (the builder shares `amplitude_deg` down the chain).</summary>
+            public float AmplitudeFor(string bone) => HasBoneAmplitudes ? (amplitude_by_bone.TryGetValue(bone, out var a) ? a : 0f) : -1f;
+        }
         [System.Serializable]
         public sealed class React
         {
             public float radius_m = 3f;
             public string action = "turn_look";
             public string swap;
+            /// <summary>v3.2 (B-136) `jaw_open`: the jaw bone's angle while reacting and the whole rig's tilt (degrees).</summary>
+            public float jaw_deg = -20f, head_deg = 0f;
             /// <summary>v3.1 `also`: slot → the part it shows while reacting (the snoozle: leaves → leaves_up); filled by Parse from the json's `also` object.</summary>
             [System.NonSerialized] public Dictionary<string, string> also = new Dictionary<string, string>();
         }
@@ -100,6 +118,8 @@ namespace Meridian.Flora
         public sealed class Plant
         {
             public string name;
+            /// <summary>U-110 (B-129): the biomes this plant grows in, in EarthBiomes' lower-case names (the ocean band's shore is "coast"); null or empty = anywhere.</summary>
+            public string[] biomes;
             public Bone[] bones;
             public Slot[] slots;
             public Idle idle = new Idle();
@@ -185,6 +205,12 @@ namespace Meridian.Flora
                 if (plant.idle == null) plant.idle = new Idle();
                 if (plant.react == null) plant.react = new React();
                 plant.swaps = ReadSwaps(json, plant.name);
+                // v3.2 (D-127, B-136): amplitude_deg as a bone → degrees object, cycle_beats ≥ 1.
+                plant.idle.amplitude_by_bone = ReadAmplitudes(json, plant.name);
+                if (plant.idle.amplitude_by_bone != null)
+                    foreach (var kv in plant.idle.amplitude_by_bone)
+                        if (plant.BoneIndex(kv.Key) < 0) { error = $"plant '{plant.name}': amplitude_deg names an unknown bone '{kv.Key}'"; return null; }
+                if (plant.idle.cycle_beats < 1) { error = $"plant '{plant.name}': idle.cycle_beats must be at least 1 (got {plant.idle.cycle_beats})"; return null; }
                 foreach (var kv in plant.swaps)
                     foreach (var partName in kv.Value)
                         if (set.FindPart(partName) == null) { error = $"plant '{plant.name}': swap '{kv.Key}' names a missing part '{partName}'"; return null; }
@@ -214,6 +240,8 @@ namespace Meridian.Flora
                         if (beat < 1) { error = $"plant '{plant.name}': swap_cycle beats must be at least 1 (got {beat})"; return null; }
                 }
                 plant.react.also = ReadAlso(json, plant.name);
+                if (string.IsNullOrEmpty(plant.react.swap))
+                    foreach (var kv in ReadReactSwapObject(json, plant.name)) plant.react.also[kv.Key] = kv.Value; // B-136 writes the react's `swap` as a slot → part object
                 foreach (var kv in plant.react.also)
                 {
                     if (!plant.swaps.TryGetValue(kv.Key, out var states)) { error = $"plant '{plant.name}': react also names '{kv.Key}', not a swap slot"; return null; }
@@ -293,6 +321,46 @@ namespace Meridian.Flora
                 result[m.Groups[1].Value] = names.ToArray();
             }
             return result;
+        }
+
+        /// <summary>v3.2 (B-136): `"idle": { "amplitude_deg": { "head": 2, ... } }` of the plant — bone → degrees; null when amplitude_deg is a number or absent.</summary>
+        static Dictionary<string, float> ReadAmplitudes(string json, string plant)
+        {
+            if (!PlantSpan(json, plant, out int start, out int end)) return null;
+            int idleAt = json.IndexOf("\"idle\"", start, System.StringComparison.Ordinal);
+            if (idleAt < 0 || idleAt >= end) return null;
+            var body = ObjectBodyAfter(json, "amplitude_deg", idleAt, end);
+            if (body == null) return null;
+            var result = new Dictionary<string, float>();
+            foreach (Match m in Regex.Matches(body, "\"([^\"]+)\"\\s*:\\s*(-?[0-9]+(?:\\.[0-9]+)?)"))
+                if (float.TryParse(m.Groups[2].Value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float v)) result[m.Groups[1].Value] = v;
+            return result.Count > 0 ? result : null;
+        }
+
+        /// <summary>v3.2 (B-136): the react's `"swap": { "slot": "part" }` object of the plant (empty when `swap` is a string or absent).</summary>
+        static Dictionary<string, string> ReadReactSwapObject(string json, string plant)
+        {
+            var result = new Dictionary<string, string>();
+            if (!PlantSpan(json, plant, out int start, out int end)) return result;
+            int reactAt = json.IndexOf("\"react\"", start, System.StringComparison.Ordinal);
+            if (reactAt < 0 || reactAt >= end) return result;
+            var body = ObjectBodyAfter(json, "swap", reactAt, end);
+            if (body == null) return result;
+            foreach (Match m in Regex.Matches(body, "\"([^\"]+)\"\\s*:\\s*\"([^\"]+)\"")) result[m.Groups[1].Value] = m.Groups[2].Value;
+            return result;
+        }
+
+        /// <summary>The body of `"key": { ... }` at the first `key` in [from, end) whose value is a flat object (a number or string value → null).</summary>
+        static string ObjectBodyAfter(string json, string key, int from, int end)
+        {
+            int at = json.IndexOf("\"" + key + "\"", from, System.StringComparison.Ordinal);
+            if (at < 0 || at >= end) return null;
+            int i = at + key.Length + 2;
+            while (i < end && (char.IsWhiteSpace(json[i]) || json[i] == ':')) i++;
+            if (i >= end || json[i] != '{') return null;
+            int close = json.IndexOf('}', i);
+            if (close < 0 || close > end) return null;
+            return json.Substring(i + 1, close - i - 1);
         }
 
         /// <summary>U-103: reads `"sockets": { "name": [x, y], ... }` of the plant object named `plant` (metres from the rig origin).</summary>

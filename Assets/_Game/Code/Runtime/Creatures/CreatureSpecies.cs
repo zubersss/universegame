@@ -17,6 +17,8 @@ namespace Meridian.Creatures
         BrownBear,
         // U-114 (B-135, cycle 259): the Earth swimmers, Water habitat; appended so every older index stays.
         Pike, Shark, Squid,
+        // U-119 (B-136, D-127): the Hadal Maw, a rig-set creature of the coast deep; appended so every older index stays.
+        HadalMaw,
     }
 
     /// <summary>What a creature does about the player.</summary>
@@ -84,6 +86,12 @@ namespace Meridian.Creatures
         public bool apex;
         /// <summary>Drawn scale over the sheet's true size (ppu kept). The Veil Serpent is drawn 3× so the apex dominates the deck (LEAD, U-055 review).</summary>
         public float artScale = 1f;
+        /// <summary>U-119: a rig-set creature (a contract §11.3 json under artKey): the view is RigBuild's rig, not a frame sheet; the director loads no sheet for it.</summary>
+        public bool rig;
+        /// <summary>U-119 (D-087): a hunter that keeps this distance (m) from the surveyor instead of bumping them (0 = none): the Maw follows and startles.</summary>
+        public float followDistance;
+        /// <summary>U-119: the rig's react (the jaw opens, the lure flares) within this many metres of the surveyor (0 = never).</summary>
+        public float reactRadius;
 
         public bool Flies => habitat != Habitat.Ground;
 
@@ -154,6 +162,11 @@ namespace Meridian.Creatures
             new SpeciesSpec { id = Species.Squid, planet = PlanetId.Earth, artKey = "creatures/earth/squid", size = new Vector2(5.0f, 2.25f), floorClearance = 0.70f,
                 wanderSpeed = 0.9f, runSpeed = 4.5f, temper = Temper.Flees, senseRange = 6f, time = ActiveTime.Any, habitat = Habitat.Water,
                 packMin = 1, packMax = 1, maxAlive = 2, placeholder = new Color(0.8f, 0.5f, 0.55f) },
+            // U-119 (B-136, D-127): the Hadal Maw — ~34 m of rig in the coast deep (Bible §7.1: a set piece over two screens). It hunts only in the
+            // sense of following: it holds 14 m off and startles with its react (D-087: no attack); the water it needs (5 + 15 m) keeps it out of the camp's pools.
+            new SpeciesSpec { id = Species.HadalMaw, planet = PlanetId.Earth, artKey = "creatures/earth/hadal_maw", rig = true, size = new Vector2(16f, 5f), floorClearance = 15f,
+                wanderSpeed = 1.5f, runSpeed = 3.5f, temper = Temper.Hunts, senseRange = 40f, followDistance = 14f, reactRadius = 12f, time = ActiveTime.Any, habitat = Habitat.Water,
+                packMin = 1, packMax = 1, maxAlive = 1, placeholder = new Color(0.12f, 0.2f, 0.26f) },
         };
 
         public static SpeciesSpec Get(Species s) => All[(int)s];
@@ -171,7 +184,7 @@ namespace Meridian.Creatures
             Species.BrownBear => s.surfaceTile == TileId.Grass,                  // U-114: forest floor and meadows, like the stag
             Species.Gull => s.surfaceTile == TileId.Grass || s.surfaceTile == TileId.Sand,
             // U-114: a swimmer wants water over the floor at least as deep as its own height plus its floor clearance.
-            Species.Pike or Species.Shark or Species.Squid => s.aboveTile == TileId.Water && s.waterDepth >= WaterDepthNeeded,
+            Species.Pike or Species.Shark or Species.Squid or Species.HadalMaw => s.aboveTile == TileId.Water && s.waterDepth >= WaterDepthNeeded,
             Species.Dustskater => s.surfaceTile == TileId.Regolith,
             Species.ScreeStalker => s.surfaceTile == TileId.Regolith && s.surfaceY <= s.datumY - 12, // low ground: canyon floors
             Species.Glassback => s.zone == MercuryZone.Twilight && !InColdTrap(s),

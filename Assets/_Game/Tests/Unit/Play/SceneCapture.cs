@@ -2179,6 +2179,345 @@ namespace Meridian.Tests
             }
         }
 
+        // ---------------- C2 batch B captures ----------------
+
+        /// <summary>
+        /// U-122 (D-135): the painted layers at 15 m and 40 m under the datum hold their datum pose (sky over hills over near; the
+        /// swimmers' frame at −9 m had the hills over the sky) → coordination/reports/unity/u122/. The camera parks over the nearest pool.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator CaptureU122Pool()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false;
+                foreach (var c in side.creatures.All) if (c.Alive) side.creatures.Despawn(c);
+                var cam = side.sideCamera;
+                var layers = side.cartoon.Layers;
+                var dir = "coordination/reports/unity/u122";
+                Directory.CreateDirectory(dir);
+                timeout = Time.realtimeSinceStartup + 15f;
+                while (layers.placeholders.Contains(true) && Time.realtimeSinceStartup < timeout) yield return null;
+                for (int i = 0; i < 30; i++) yield return new WaitForFixedUpdate();
+                string Tops()
+                {
+                    var sb = new System.Text.StringBuilder();
+                    for (int i = 0; i < layers.renderers.Count; i++) sb.Append(i > 0 ? ", " : "").Append($"layer{i} top {layers.renderers[i].bounds.max.y:F1} (y {layers.renderers[i].transform.position.y:F1})");
+                    return sb.ToString();
+                }
+                void AssertInOrder(string where)
+                {
+                    for (int i = 0; i + 1 < layers.renderers.Count; i++)
+                        Assert.GreaterOrEqual(layers.renderers[i].bounds.max.y + 0.01f, layers.renderers[i + 1].bounds.max.y, $"layer{i} over layer{i + 1} {where}: {Tops()}");
+                }
+                IEnumerator Shot(string label)
+                {
+                    yield return null;
+                    yield return Save(cam, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u122 {label}: camera y {cam.transform.position.y:F1}, datum {layers.datumY:F1}, anchor {layers.anchorY:F1}; {Tops()}");
+                }
+                // 1. The camp at the datum: the reference pose.
+                yield return Shot("1_datum");
+                AssertInOrder("at the datum");
+                // 2. The nearest pool (U-114's search): the surveyor on its shore so its chunks stream in, the camera parked 15 m under the datum over it.
+                int px = Mathf.FloorToInt(side.player.transform.position.x), found = int.MinValue;
+                for (int d = 0; d < 400 && found == int.MinValue; d++)
+                    foreach (int tx in new[] { px + d, px - d })
+                    {
+                        var site = side.creatures.SiteAt(tx, side.player.transform.position.y);
+                        if (site.aboveTile == Meridian.Terrain.TileId.Water && site.waterDepth >= 2) { found = tx; break; }
+                    }
+                float over = found == int.MinValue ? px + 0.5f : found + 0.5f;
+                if (found != int.MinValue)
+                {
+                    int shore = found;
+                    while (side.creatures.SiteAt(shore, side.player.transform.position.y).aboveTile == Meridian.Terrain.TileId.Water && shore > found - 60) shore--;
+                    var stand = new Vector2(shore - 0.5f, side.terrain.TopSolidY(shore - 1) + 1.1f);
+                    side.player.Body.position = stand; side.player.transform.position = stand; side.player.Body.linearVelocity = Vector2.zero;
+                }
+                else TestContext.Out.WriteLine("[MERIDIAN] u122: no pool within 400 columns of the camp; the frames park under the camp instead (a dig looks the same to the layers)");
+                var follow = cam.GetComponent<Meridian.Player.CameraFollow>();
+                if (follow != null) { follow.SnapToTarget(); follow.enabled = false; }
+                float until = Time.realtimeSinceStartup + 10f;
+                while (!side.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                float datum = layers.datumY;
+                cam.transform.position = new Vector3(over, datum - 15f, cam.transform.position.z);
+                yield return null; yield return null;
+                yield return Shot("2_pool_minus15");
+                Assert.Less(cam.transform.position.y, datum - 10f, "the camera 10 m or more under the datum (the D-135 case)");
+                AssertInOrder("15 m under the datum");
+                // 3. A deep dig: 40 m under; the pose is the same.
+                cam.transform.position = new Vector3(over, datum - 40f, cam.transform.position.z);
+                yield return null; yield return null;
+                yield return Shot("3_minus40");
+                AssertInOrder("40 m under the datum");
+                if (follow != null) follow.enabled = true;
+                side.dayNight.Override = null;
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+            }
+        }
+
+        /// <summary>
+        /// U-110 (B-129 / B-133): the camp as its biome paints it (the spawn's band picks the scene set and the plant kinds), then the
+        /// other two Earth sets on the same camp → coordination/reports/unity/u110/.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator CaptureU110Scenes()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false;
+                foreach (var c in side.creatures.All) if (c.Alive) side.creatures.Despawn(c);
+                var stage = side.cartoon;
+                var layers = stage.Layers;
+                var cam = side.sideCamera;
+                var dir = "coordination/reports/unity/u110";
+                Directory.CreateDirectory(dir);
+                timeout = Time.realtimeSinceStartup + 15f;
+                while ((layers.placeholders.Contains(true) || !stage.Flora.Ready) && Time.realtimeSinceStartup < timeout) yield return null;
+                for (int i = 0; i < 30; i++) yield return new WaitForFixedUpdate();
+                IEnumerator Shot(string label)
+                {
+                    yield return null;
+                    yield return Save(cam, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                }
+                string Kinds()
+                {
+                    var tally = new System.Collections.Generic.SortedDictionary<string, int>();
+                    foreach (Transform t in stage.Flora.transform) { tally.TryGetValue(t.name, out int n); tally[t.name] = n + 1; }
+                    var sb = new System.Text.StringBuilder();
+                    foreach (var kv in tally) sb.Append(sb.Length > 0 ? ", " : "").Append($"{kv.Key} ×{kv.Value}");
+                    return sb.Length > 0 ? sb.ToString() : "none";
+                }
+                string biome = Meridian.Flora.FloraRigs.BiomeNameAt(Meridian.Planets.PlanetId.Earth, side.spawnX);
+                TestContext.Out.WriteLine($"[MERIDIAN] u110 camp x {side.spawnX}: biome {biome}, scene {stage.Scene} ({layers.SceneKey}), plants {Kinds()}");
+                Assert.AreEqual(Meridian.View2D.CartoonStage.SceneFor(Meridian.Terrain.EarthBiomes.At(side.spawnX)), stage.Scene, "the scene set follows the spawn's biome");
+                // Every plant at the camp is a kind its biome lists (or the whole set when the biome lists fewer than two).
+                var allowed = Meridian.Flora.FloraRigs.PlantsFor(stage.Flora.Set, biome);
+                var names = new System.Collections.Generic.HashSet<string>();
+                foreach (var p in allowed) names.Add(p.name);
+                foreach (Transform t in stage.Flora.transform) Assert.IsTrue(names.Contains(t.name), $"{t.name} grows in the {biome}");
+                yield return Shot($"1_camp_{stage.Scene}");
+                float surface = side.terrain.TopSolidY(side.spawnX) + 1f;
+                int shot = 2;
+                foreach (var scene in new[] { "plains", "forest", "coast" })
+                {
+                    if (scene == stage.Scene) continue;
+                    layers.ConfigureFor("earth", scene, surface);
+                    timeout = Time.realtimeSinceStartup + 15f;
+                    while (layers.placeholders.Contains(true) && Time.realtimeSinceStartup < timeout) yield return null;
+                    for (int i = 0; i < 3; i++) yield return null;
+                    TestContext.Out.WriteLine($"[MERIDIAN] u110 {scene}: {layers.SceneKey}, {layers.renderers.Count} layers, placeholders {layers.placeholders.Contains(true)}");
+                    yield return Shot($"{shot++}_{scene}");
+                }
+                layers.ConfigureFor("earth", stage.Scene, surface); // the camp's own set back
+                side.dayNight.Override = null;
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+            }
+        }
+
+        /// <summary>
+        /// U-116 (D-123, B-137): the painted Sun rig in Space — close (the corona in frame) and with Earth and Mars at one scale →
+        /// coordination/reports/unity/u116/. The ship parks outside Earth's well as in CaptureSpaceArt.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator CaptureU116Sun()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
+            director.SetView(ViewMode.Space);
+            var world = UnityEngine.Object.FindAnyObjectByType<Meridian.Space.SpaceWorld>();
+            var parkedShip = director.Space.GetComponentInChildren<Meridian.Space.SpaceShip>();
+            if (parkedShip != null)
+            {
+                parkedShip.externalInput = true;
+                parkedShip.intent = default;
+                var earthBody = parkedShip.world != null ? parkedShip.world.Find("earth") : null;
+                if (earthBody.HasValue) { parkedShip.Position = earthBody.Value.position + new Vector2(0f, earthBody.Value.WellRadius + 50f); parkedShip.Velocity = Vector2.zero; }
+            }
+            var cam = director.Space.GetComponentInChildren<Camera>();
+            var follow = cam.GetComponent<Meridian.Space.SpaceCamera>();
+            if (follow != null) follow.enabled = false;
+            float until = Time.realtimeSinceStartup + 15f;
+            while ((world.Sun == null || !world.Sun.Built) && Time.realtimeSinceStartup < until) yield return null;
+            Assert.NotNull(world.Sun, "the Sun rig (planets/sun/disc_rig found)");
+            Assert.IsTrue(world.Sun.Built, "the Sun rig built from its sheet and json");
+            for (int i = 0; i < 30; i++) yield return null;
+            var dir = "coordination/reports/unity/u116";
+            Directory.CreateDirectory(dir);
+            IEnumerator Shot(string label, Vector2 at, float size)
+            {
+                Meridian.CameraRig.SideView.SetHalfHeight(cam, size);
+                cam.transform.position = new Vector3(at.x, at.y, cam.transform.position.z);
+                for (int i = 0; i < 3; i++) yield return null;
+                yield return Save(cam, $"{name}_{label}");
+                File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+            }
+            var sun = world.Find("sun");
+            Assert.IsTrue(sun.HasValue, "the Sun body");
+            var S = world.Sun;
+            TestContext.Out.WriteLine($"[MERIDIAN] u116 sun: R {sun.Value.radius:F0} u, body scale {S.Body.transform.localScale.x:F2} ({S.Body.sprite.rect.width} px → {S.Body.sprite.rect.width / S.Body.sprite.pixelsPerUnit * S.Body.transform.localScale.x:F0} u), tongues {S.Tongues.Count} at r {(S.Tongues.Count > 0 ? S.Tongues[0].localPosition.magnitude : 0f):F0} u, prominences {S.Prominences.Count}, corona scale {(S.CoronaRenderer != null ? S.CoronaRenderer.transform.localScale.x : 0f):F1}, step {S.LastStep:F3}, spin {S.Json.ring.spin_deg_per_s}°/s, pulse {S.Json.ring.pulse}, {S.Json.ring.stepped_hz} Hz");
+            Assert.AreEqual(14, S.Tongues.Count, "the 14-tongue ring");
+            Assert.AreEqual(2, S.Prominences.Count, "two prominences");
+            Assert.NotNull(S.CoronaRenderer, "the corona wash");
+            Assert.AreEqual(sun.Value.radius * 0.97f, S.Tongues[0].localPosition.magnitude, 0.5f, "tongues at base_r R");
+            // 1. Close: the corona (1.42 R) fills the frame's height.
+            yield return Shot("1_sun", sun.Value.position, sun.Value.radius * 1.6f);
+            // 2. The Sun, Earth and Mars at one scale: the camera midway to Mars.
+            var earth = world.Find("earth"); var mars = world.Find("mars");
+            Assert.IsTrue(earth.HasValue && mars.HasValue);
+            var mid = (sun.Value.position + mars.Value.position) * 0.5f;
+            yield return Shot("2_sun_earth_mars", mid, (mars.Value.position - sun.Value.position).magnitude * 0.62f);
+            TestContext.Out.WriteLine($"[MERIDIAN] u116 ratio: Sun R {sun.Value.radius:F0}, Earth R {earth.Value.radius:F1}, Mars R {mars.Value.radius:F1} (true ratio, one camera)");
+            // 3. A 12 Hz step holds between frames closer than 1/12 s.
+            float step = S.LastStep;
+            yield return null;
+            Assert.IsTrue(S.LastStep == step || S.LastStep - step >= 1f / 12f - 1e-3f, "poses change in 1/12 s steps");
+            LogAssert.NoUnexpectedReceived();
+        }
+
+        /// <summary>
+        /// U-119 (B-136): the Hadal Maw in the coast deep with a shark and the surveyor at 1x → coordination/reports/unity/u119/: the shore,
+        /// the Maw's head, and its react (jaw open, lure flaring) with the surveyor inside 12 m.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator CaptureU119Maw()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false;
+                foreach (var c in side.creatures.All) if (c.Alive) side.creatures.Despawn(c);
+                var cam = side.sideCamera;
+                var creatures = side.creatures;
+                var dir = "coordination/reports/unity/u119";
+                Directory.CreateDirectory(dir);
+                IEnumerator Shot(string label)
+                {
+                    yield return null;
+                    yield return Save(cam, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                }
+                var spec = Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.HadalMaw);
+                Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Ocean, out int start, out int len);
+                float y = side.player.Body.position.y;
+                int shore = start;
+                while (shore < start + len && creatures.SiteAt(shore, y).aboveTile != Meridian.Terrain.TileId.Water) shore++;
+                int deep = shore;
+                while (deep < shore + 400 && creatures.SiteAt(deep, y).waterDepth < spec.WaterDepthNeeded) deep++;
+                Assert.Less(deep, shore + 400, "deep water within 400 columns of the shore");
+                int land = shore - 1;
+                var stand = new Vector2(land + 0.5f, side.terrain.TopSolidY(land) + 1.1f);
+                side.player.Body.position = stand; side.player.transform.position = stand; side.player.Body.linearVelocity = Vector2.zero;
+                var follow = cam.GetComponent<Meridian.Player.CameraFollow>();
+                if (follow != null) follow.SnapToTarget();
+                float until = Time.realtimeSinceStartup + 25f;
+                while (!(side.terrain.IsSettled && side.terrain.IsCollisionReady(deep, side.terrain.TopSolidY(deep))) && Time.realtimeSinceStartup < until) yield return null;
+                float py = side.player.Body.position.y;
+                var maw = creatures.SpawnAt(Meridian.Creatures.Species.HadalMaw, deep, py);
+                int sharkAt = deep - 10 > shore + 2 ? deep - 10 : deep + 10;
+                var shark = creatures.SpawnAt(Meridian.Creatures.Species.Shark, sharkAt, py);
+                Assert.NotNull(maw, "the Maw spawns in the deep");
+                until = Time.realtimeSinceStartup + 15f;
+                while ((maw.Rig == null || (shark != null && shark.Alive && (shark.View.sprite == null || shark.View.sprite.name.StartsWith("CreaturePlaceholder", StringComparison.Ordinal)))) && Time.realtimeSinceStartup < until) yield return null;
+                Assert.NotNull(maw.Rig, "the Maw's rig built");
+                // It follows: a few seconds for the Maw to come toward the shore and hold its distance.
+                for (int i = 0; i < 200; i++) yield return new WaitForFixedUpdate();
+                if (follow != null) follow.enabled = false;
+                float z = cam.transform.position.z;
+                TestContext.Out.WriteLine($"[MERIDIAN] u119: ocean {start}+{len}, shore {shore}, deep {deep} ({creatures.SiteAt(deep, y).waterDepth} m), maw at {maw.Body.position} ({maw.Rig.Bones.Length} bones, state {maw.State}, reacting {maw.RigReacting}), shark {(shark != null ? shark.Body.position.ToString() : "none")}, surveyor {side.player.Body.position}");
+                // 1. The shore at 1x: the surveyor on the sand, the deep opening to the right.
+                cam.transform.position = new Vector3(shore + 7f, side.terrain.TopSolidY(land) - 1f, z);
+                yield return Shot("1_shore");
+                // 2. The Maw at 1x: the camera on its head (it is ~34 m long: a set piece over two screens).
+                cam.transform.position = new Vector3(maw.Body.position.x, maw.Body.position.y, z);
+                yield return Shot("2_maw_1x");
+                // 3. The react: the surveyor's body held still inside 12 m over the water.
+                side.player.Body.simulated = false;
+                var near = maw.Body.position + new Vector2(7f, 2.5f);
+                side.player.transform.position = near; side.player.Body.position = near;
+                for (float t = 0f; t < 0.8f; t += Time.deltaTime) yield return null;
+                cam.transform.position = new Vector3(maw.Body.position.x + 4f, maw.Body.position.y + 1f, z);
+                yield return Shot("3_react");
+                var jaw = maw.Rig.Bone("jaw");
+                TestContext.Out.WriteLine($"[MERIDIAN] u119 react: reacting {maw.RigReacting}, jaw {(jaw != null ? Quaternion.Angle(Quaternion.identity, jaw.localRotation) : 0f):F1}°, lure {(maw.Rig.Slots.TryGetValue("lure", out var lure) && lure.sprite != null ? lure.sprite.name : "none")}, bumps {creatures.Bumps}");
+                Assert.IsTrue(maw.RigReacting, "inside the react radius");
+                Assert.AreEqual(0, creatures.Bumps, "D-087: no bump");
+                side.player.Body.simulated = true;
+                if (follow != null) follow.enabled = true;
+                creatures.DespawnAll();
+                side.dayNight.Override = null;
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+            }
+        }
+
         IEnumerator CaptureShip(string folder)
         {
             var name = Environment.GetEnvironmentVariable(Variable);

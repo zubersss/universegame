@@ -16,6 +16,12 @@ namespace Meridian.View2D
     public sealed class GroundStrip : MonoBehaviour
     {
         public const string Key = "terrain/earth/ground_strip";
+        /// <summary>U-111 (B-130): the strips by material: grass over soil, bare soil where dug, stone where the block is stone, sand on the coast.</summary>
+        public static readonly string[] Keys = { Key, Key + "_soil", Key + "_stone", Key + "_sand" };
+        public const int Grass = 0, Soil = 1, Stone = 2, Sand = 3;
+
+        /// <summary>The strip a column draws from its top solid tile: grass, sand and stone their own, every other tile (soil, snow, a dug face) the soil. Pure.</summary>
+        public static int MaterialFor(byte topTile) => topTile == TileId.Grass ? Grass : topTile == TileId.Sand ? Sand : topTile == TileId.Stone ? Stone : Soil;
         public const float Z = -0.01f, StripHeight = 2f, FillDepth = 20f, EdgeWidth = 0.09f;
         public const int Order = 1;
         static readonly Color Ink = new Color(0.33f, 0.39f, 0.5f); // × the dirt tone ≈ #1E1A17
@@ -24,12 +30,21 @@ namespace Meridian.View2D
         public TerrainStreamer terrain;
         public Camera view;
 
+        /// <summary>Ready once the grass strip is in; the other materials fall back to it until theirs arrive.</summary>
         public bool Ready => frames != null;
         public int Columns => count;
+        /// <summary>U-111: how many of the four material sheets are in (tests and captures).</summary>
+        public int MaterialsLoaded { get { int n = 0; for (int i = 0; i < framesBy.Length; i++) if (framesBy[i] != null) n++; return n; } }
+        /// <summary>The material index drawn at column x on the last pass (−1: not in view). Tests read it.</summary>
+        public int MaterialAt(int x) { int i = x - firstColumn; return i >= 0 && i < count && i < materialAt.Count ? materialAt[i] : -1; }
 
-        Sprite[] frames;
+        Sprite[] frames; // the grass strip: the fallback
         Sprite dirt;
+        readonly Sprite[][] framesBy = new Sprite[4][];
+        readonly Sprite[] fillBy = new Sprite[4];
+        readonly List<int> materialAt = new List<int>(64);
         AsyncOperationHandle<IList<Sprite>> handle;
+        readonly AsyncOperationHandle<IList<Sprite>>[] handles = new AsyncOperationHandle<IList<Sprite>>[4];
         readonly List<SpriteRenderer> tops = new List<SpriteRenderer>(64), fills = new List<SpriteRenderer>(64), edges = new List<SpriteRenderer>(64), backs = new List<SpriteRenderer>(64);
         int firstColumn = int.MinValue, lastColumn = int.MinValue, count;
         bool dirty = true;
@@ -41,17 +56,26 @@ namespace Meridian.View2D
         {
             if (terrain != null) { terrain.TileChanged -= OnTile; terrain.TileChanged += OnTile; }
             if (handle.IsValid()) ArtLoad.Release(handle); // U-121: a second Load (re-configure) must not orphan the first handle (ResidencyTests' lone planet_earth holder)
-            handle = ArtLoad.Asset<IList<Sprite>>(Key);
-            handle.Completed += op =>
+            for (int m = 0; m < handles.Length; m++) if (handles[m].IsValid()) ArtLoad.Release(handles[m]);
+            for (int m = 0; m < Keys.Length; m++)
             {
-                if (this == null || op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;
-                frames = new Sprite[op.Result.Count];
-                op.Result.CopyTo(frames, 0);
-                // A flat dirt tile: the bottom 8 px of the first slice (1 m × 1/8 m), tiled for the fills and the edges.
-                var r = frames[0].rect;
-                dirt = Sprite.Create(frames[0].texture, new Rect(r.x, r.y, r.width, 8f), new Vector2(0.5f, 1f), frames[0].pixelsPerUnit, 0, SpriteMeshType.FullRect);
-                dirty = true;
-            };
+                int material = m;
+                var h = ArtLoad.Asset<IList<Sprite>>(Keys[m]);
+                handles[m] = h;
+                if (m == Grass) handle = h;
+                h.Completed += op =>
+                {
+                    if (this == null || op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;
+                    var fr = new Sprite[op.Result.Count];
+                    op.Result.CopyTo(fr, 0);
+                    // A flat fill tile: the bottom 8 px of the sheet's first slice (1 m × 1/8 m), tiled for the fills and the edges.
+                    var r = fr[0].rect;
+                    var fill = Sprite.Create(fr[0].texture, new Rect(r.x, r.y, r.width, 8f), new Vector2(0.5f, 1f), fr[0].pixelsPerUnit, 0, SpriteMeshType.FullRect);
+                    framesBy[material] = fr; fillBy[material] = fill;
+                    if (material == Grass) { frames = fr; dirt = fill; }
+                    dirty = true;
+                };
+            }
         }
 
         void OnTile(int x, int y, byte old, byte now) { if (x >= firstColumn - 1 && x <= lastColumn + 1) dirty = true; }
@@ -65,6 +89,7 @@ namespace Meridian.View2D
             firstColumn = first; lastColumn = last; dirty = false;
             count = last - first + 1;
             while (tops.Count < count) { tops.Add(Make("Strip", Order, null)); fills.Add(Make("Fill", Order - 1, dirt)); edges.Add(Make("Edge", Order + 1, dirt)); backs.Add(Make("Back", Order - 2, dirt)); }
+            while (materialAt.Count < tops.Count) materialAt.Add(-1);
             float prevTop = terrain.TopSolidY(first - 1) + 1f;
             for (int i = 0; i < tops.Count; i++)
             {
@@ -72,11 +97,18 @@ namespace Meridian.View2D
                 tops[i].enabled = on; fills[i].enabled = on;
                 if (!on) { edges[i].enabled = false; backs[i].enabled = false; continue; }
                 int x = first + i;
-                float top = terrain.TopSolidY(x) + 1f; // the ground line
+                int topY = terrain.TopSolidY(x);
+                float top = topY + 1f; // the ground line
+                // U-111: the column's material from its top solid tile; a sheet not in yet falls back to the grass strip.
+                int material = MaterialFor(terrain.GetTile(x, topY));
+                var set = framesBy[material] ?? frames;
+                var fillTile = fillBy[material] ?? dirt;
+                materialAt[i] = framesBy[material] != null ? material : Grass;
                 var t = tops[i];
-                t.sprite = frames[((x % frames.Length) + frames.Length) % frames.Length];
+                t.sprite = set[((x % set.Length) + set.Length) % set.Length];
                 t.transform.position = new Vector3(x + 0.5f, top, Z);
                 var f = fills[i];
+                if (f.sprite != fillTile) f.sprite = fillTile;
                 f.transform.position = new Vector3(x + 0.5f, top - StripHeight, Z);
                 f.size = new Vector2(1f, FillDepth);
                 // A step between this column and the one before: an ink edge down the wall.
@@ -108,7 +140,7 @@ namespace Meridian.View2D
         void OnDestroy()
         {
             if (terrain != null) terrain.TileChanged -= OnTile;
-            if (handle.IsValid()) ArtLoad.Release(handle);
+            for (int m = 0; m < handles.Length; m++) if (handles[m].IsValid()) ArtLoad.Release(handles[m]); // U-111: the four strips (the grass handle is handles[Grass])
         }
     }
 }

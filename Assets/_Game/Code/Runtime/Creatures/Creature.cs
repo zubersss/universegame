@@ -1,6 +1,9 @@
+using System.Collections.Generic;
+using Meridian.Flora;
 using Meridian.Rendering;
 using Meridian.Terrain;
 using UnityEngine;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace Meridian.Creatures
 {
@@ -27,6 +30,23 @@ namespace Meridian.Creatures
         static readonly Color FlashTint = new Color(1.6f, 1.6f, 1.6f, 1f);
         /// <summary>U-075: the species' 3D model (B-082 …), Ready once loaded; until then (or without a model) the sprite draws.</summary>
         public Meridian.Art.ModelView Model { get; private set; }
+        /// <summary>U-119: a rig-set creature's rig (RigBuild under Visual), null until its json, parts sheet and controller are in.</summary>
+        public RigInstance Rig { get; private set; }
+        /// <summary>U-119: the surveyor is inside the species' react radius (the director sets it): the jaw opens, the lure flares.</summary>
+        public bool RigReacting { get; private set; }
+        public const float RigReactEase = 0.25f;
+        Transform rigPivot, rigJaw;
+        SpriteRenderer rigLureSlot;
+        RigSet.SwapCycle rigCycle;
+        Sprite[] rigCycleSprites;
+        Sprite rigReactSprite;
+        Dictionary<string, Sprite> rigSprites;
+        TextAsset rigJson;
+        RuntimeAnimatorController rigController;
+        string rigKey;
+        int rigPending;
+        float rigReactK, rigCyclePhase;
+        readonly List<AsyncOperationHandle> rigHandles = new List<AsyncOperationHandle>();
         static readonly string[] ModelClips = { "idle", "walk", "attack", "hurt" }; // same order as the sheet clips
         public CreatureState State { get; internal set; }
         /// <summary>Held: its chunk isn't loaded with collision, so the body is paused in place.</summary>
@@ -147,7 +167,9 @@ namespace Meridian.Creatures
             State = CreatureState.Wander;
             Held = false;
             dir = (serial & 1) == 0 ? 1 : -1;
-            nextThink = 0f;
+            // Batch B (the InnerCreatureTests worst frame): the first think is staggered by serial, so a pack spawned in one frame never
+            // thinks in one frame again (every Think() then keeps its own phase: nextThink = now + ThinkInterval).
+            nextThink = Time.time + (serial & 7) * (CreatureDirector.ThinkInterval / 8f);
             biteReady = 0f;
             hurtFor = attackFor = chillFor = anim = knockFor = flashFor = blockedFor = keepDirUntil = blockAnchorT = waitUntil = nextHuff = 0f;
             blockAnchorX = position.x;
@@ -180,6 +202,7 @@ namespace Meridian.Creatures
             baseColor = View.color;
             View.enabled = true;
             EnsureModel(spec);
+            EnsureRig(spec);
             transform.position = position;
             gameObject.SetActive(true);
             Body.gravityScale = spec.Flies ? 0f : 1f;
@@ -187,6 +210,95 @@ namespace Meridian.Creatures
             Body.position = position;
             Body.linearVelocity = Vector2.zero;
         }
+
+        /// <summary>U-119: a rig-set species builds its rig once its three assets are in (the json at key/json, the parts sheet at key, the controller at key/animator); a pooled body coming back as another species drops the old rig.</summary>
+        void EnsureRig(SpeciesSpec spec)
+        {
+            if (!spec.rig) { if (Rig != null || rigPending > 0) DropRig(); return; }
+            if (rigKey == spec.artKey && (Rig != null || rigPending > 0)) return;
+            DropRig();
+            rigKey = spec.artKey;
+            rigPending = 3;
+            FetchRig<TextAsset>(rigKey + FloraRigs.JsonSuffix, a => rigJson = a);
+            FetchRig<IList<Sprite>>(rigKey, a => rigSprites = RigBuild.ByName(a));
+            FetchRig<RuntimeAnimatorController>(rigKey + FloraRigs.AnimatorSuffix, a => rigController = a);
+        }
+
+        void FetchRig<T>(string address, System.Action<T> set) where T : class
+        {
+            var h = global::Meridian.Art.ArtLoad.Asset<T>(address);
+            rigHandles.Add(h);
+            h.Completed += op =>
+            {
+                if (this == null) return;
+                if (op.Status == AsyncOperationStatus.Succeeded && op.Result != null) set(op.Result);
+                else Debug.LogWarning($"[MERIDIAN] Creature: {address} failed to load (run CheckSetup).");
+                if (--rigPending == 0) BuildRig();
+            };
+        }
+
+        void BuildRig()
+        {
+            if (Spec == null || !Spec.rig || rigJson == null || rigSprites == null || rigSprites.Count == 0) return;
+            var set = RigSet.Parse(rigJson.text, out var error);
+            var def = set != null && set.plants != null && set.plants.Length > 0 ? set.plants[0] : null;
+            if (def == null) { Debug.LogError($"[MERIDIAN] Creature: {rigKey}: {error ?? "no plants"}."); return; }
+            // The rig under a pivot at the body's centre: the pivot flips with the facing, the rig inside it is shifted so its drawing is centred on the body.
+            var pgo = new GameObject("RigPivot");
+            pgo.transform.SetParent(Visual, false);
+            rigPivot = pgo.transform;
+            Rig = RigBuild.Build(def, rigSprites, rigPivot, rigController, View.sortingLayerID, View.sortingOrder, ArtMaterials.MaterialFor(rigKey));
+            bool any = false; var all = new Bounds();
+            foreach (var r in Rig.Parts) if (r != null) { if (!any) { all = r.bounds; any = true; } else all.Encapsulate(r.bounds); }
+            foreach (var r in Rig.Slots.Values) if (r != null) { if (!any) { all = r.bounds; any = true; } else all.Encapsulate(r.bounds); }
+            if (any) { var centre = rigPivot.InverseTransformPoint(all.center); Rig.Root.localPosition = new Vector3(-centre.x, -centre.y, 0f); }
+            rigJaw = Rig.Bone("jaw");
+            rigCycle = def.Cycle;
+            rigLureSlot = null; rigCycleSprites = null; rigReactSprite = null;
+            if (rigCycle != null && Rig.Slots.TryGetValue(rigCycle.slot, out rigLureSlot))
+            {
+                rigCycleSprites = new Sprite[rigCycle.sequence.Length];
+                for (int i = 0; i < rigCycleSprites.Length; i++) rigSprites.TryGetValue(rigCycle.sequence[i], out rigCycleSprites[i]);
+            }
+            foreach (var kv in def.react.also)
+                if (Rig.Slots.TryGetValue(kv.Key, out var slotRenderer) && rigSprites.TryGetValue(kv.Value, out var reactSprite)) { if (rigLureSlot == null) rigLureSlot = slotRenderer; if (slotRenderer == rigLureSlot) rigReactSprite = reactSprite; break; }
+            rigCyclePhase = Time.time;
+            rigReactK = 0f;
+            View.enabled = false; // the placeholder box hides behind the rig
+        }
+
+        void DropRig()
+        {
+            if (rigPivot != null) Destroy(rigPivot.gameObject);
+            rigPivot = null; Rig = null; rigJaw = null; rigLureSlot = null; rigCycle = null; rigCycleSprites = null; rigReactSprite = null;
+            rigJson = null; rigSprites = null; rigController = null; rigKey = null; rigPending = 0; rigReactK = 0f; RigReacting = false;
+            foreach (var h in rigHandles) if (h.IsValid()) global::Meridian.Art.ArtLoad.Release(h);
+            rigHandles.Clear();
+        }
+
+        internal void SetRigReacting(bool on) => RigReacting = on;
+        internal void SetRigFacing(bool right) { if (rigPivot != null) { var s = rigPivot.localScale; s.x = right ? 1f : -1f; rigPivot.localScale = s; } }
+
+        /// <summary>U-119: the rig's frame: the Animator sways the bones; here the react eases the jaw to jaw_deg and tilts the rig head_deg, and the lure shows the react's part or the idle swap cycle's entry on the beat.</summary>
+        void AnimateRig(float dt)
+        {
+            if (View.enabled) View.enabled = false;
+            if (hurtFor > 0f) hurtFor -= dt;
+            if (attackFor > 0f) attackFor -= dt;
+            if (flashFor > 0f) flashFor -= dt;
+            var react = Rig.Def.react;
+            rigReactK = Mathf.MoveTowards(rigReactK, RigReacting ? 1f : 0f, dt / RigReactEase);
+            if (rigJaw != null) rigJaw.localRotation = Quaternion.Euler(0f, 0f, react.jaw_deg * rigReactK);
+            if (react.head_deg != 0f) Rig.Root.localRotation = Quaternion.Euler(0f, 0f, react.head_deg * rigReactK);
+            if (rigLureSlot != null)
+            {
+                Sprite want = RigReacting && rigReactSprite != null ? rigReactSprite
+                    : rigCycle != null && rigCycleSprites != null ? rigCycleSprites[rigCycle.IndexAt((Time.time - rigCyclePhase) * Rig.Def.idle.beat_bpm / 60f)] : null;
+                if (want != null && rigLureSlot.sprite != want) rigLureSlot.sprite = want;
+            }
+        }
+
+        void OnDestroy() => DropRig();
 
         /// <summary>U-075: one model view per creature, swapped when a pooled body comes back as another species.</summary>
         void EnsureModel(SpeciesSpec spec)
@@ -224,6 +336,7 @@ namespace Meridian.Creatures
             if (grounded) { groundFor += dt; airFor = 0f; if (groundFor >= LandAfter) Airborne = false; }
             else { airFor += dt; groundFor = 0f; if (airFor >= FlyAfter) Airborne = true; }
             if (Visual != null) Visual.localScale = Squash.Step(dt); // U-089: visual root only
+            if (Rig != null) { AnimateRig(dt); return; } // U-119: a rig-set creature
             if (Model != null && Model.Ready)
             {
                 // U-075: the model plays the same clip choice by name; the sheet stays hidden.

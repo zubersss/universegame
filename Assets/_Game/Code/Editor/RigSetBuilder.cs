@@ -47,16 +47,22 @@ namespace Meridian.EditorTools
         }
 
         /// <summary>Two beats of sway (period 120 / bpm s) sampled stepped at 12 Hz: the bone's z angle, deeper bones a little later (a whip).</summary>
-        public static AnimationCurve SwayCurve(float amplitudeDeg, float bpm, int depth, int chainLength)
+        public static AnimationCurve SwayCurve(float amplitudeDeg, float bpm, int depth, int chainLength) => SwayCurve(amplitudeDeg, bpm, depth, chainLength, 1, RigSet.Idle.DefaultLag, true);
+
+        /// <summary>
+        /// v3.2 (D-127, B-136): the sway over 2 × cycleBeats beats (a swing per cycleBeats beats) stepped at 12 Hz. `shared`: amplitudeDeg is the
+        /// plant's one number, split down the chain; else the bone's own degrees from the amplitude map. `lag`: radians each depth trails by.
+        /// </summary>
+        public static AnimationCurve SwayCurve(float amplitudeDeg, float bpm, int depth, int chainLength, int cycleBeats, float lag, bool shared)
         {
-            float period = 120f / Mathf.Max(1f, bpm);
+            float period = 2f * Mathf.Max(1, cycleBeats) * 60f / Mathf.Max(1f, bpm);
             int n = Mathf.Max(1, Mathf.RoundToInt(period * Fps));
-            float share = amplitudeDeg / Mathf.Max(1, chainLength);
+            float share = shared ? amplitudeDeg / Mathf.Max(1, chainLength) : amplitudeDeg;
             var keys = new Keyframe[n + 1];
             for (int i = 0; i <= n; i++)
             {
                 float t = i / (float)Fps;
-                float angle = share * Mathf.Sin(2f * Mathf.PI * (t / period) - depth * 0.35f);
+                float angle = share * Mathf.Sin(2f * Mathf.PI * (t / period) - depth * lag);
                 keys[i] = new Keyframe(t, angle);
             }
             keys[n].value = keys[0].value; // seamless loop
@@ -334,15 +340,23 @@ namespace Meridian.EditorTools
                     continue;
                 }
                 var clip = new AnimationClip { name = plant.name, frameRate = Fps };
+                int cycleBeats = Mathf.Max(1, plant.idle.cycle_beats);
                 foreach (var bone in plant.bones)
                 {
                     var bonePath = BonePath(plant, bone);
-                    AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(bonePath, typeof(Transform), "localEulerAnglesRaw.z"),
-                        SwayCurve(plant.idle.amplitude_deg, plant.idle.beat_bpm, Depth(plant, bone), plant.BoneCount));
+                    // v3.2 (B-136): a per-bone amplitude map gives each bone its own degrees (a bone it leaves out stays still: the Maw's jaw is the react's); else the one number is shared down the chain.
+                    float own = plant.idle.AmplitudeFor(bone.name);
+                    bool shared = own < 0f;
+                    float amplitude = shared ? plant.idle.amplitude_deg : own;
+                    if (amplitude > 0f)
+                        AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(bonePath, typeof(Transform), "localEulerAnglesRaw.z"),
+                            SwayCurve(amplitude, plant.idle.beat_bpm, Depth(plant, bone), plant.BoneCount, cycleBeats, plant.idle.lag, shared));
                     if (string.IsNullOrEmpty(bone.parent) && plant.idle.squash > 0f)
                     {
-                        AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(bonePath, typeof(Transform), "m_LocalScale.y"), SquashCurve(plant.idle.squash, plant.idle.beat_bpm, true));
-                        AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(bonePath, typeof(Transform), "m_LocalScale.x"), SquashCurve(plant.idle.squash, plant.idle.beat_bpm, false));
+                        // One squash per swing (per beat for a 1-beat plant), over the sway's whole length so the loop stays seamless.
+                        float squashBpm = plant.idle.beat_bpm / cycleBeats;
+                        AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(bonePath, typeof(Transform), "m_LocalScale.y"), SquashCurve(plant.idle.squash, squashBpm, true));
+                        AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(bonePath, typeof(Transform), "m_LocalScale.x"), SquashCurve(plant.idle.squash, squashBpm, false));
                     }
                 }
                 var settings = AnimationUtility.GetAnimationClipSettings(clip);

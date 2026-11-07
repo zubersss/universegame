@@ -121,6 +121,7 @@ namespace Meridian.Space
         void AddSphere(Transform parent, BodyInfo b)
         {
             ProbeDisc(parent, b); // U-103 (D-098): where the painted disc exists it replaces the spheroid, its shells and Saturn's ring mesh
+            if (b.isSun) ProbeSunRig(parent, b); // U-116 (D-123): the painted Sun rig replaces the lit spheroid where its sheet exists
             var mr = AddShell(parent, "Disc", 2f * b.radius, 10, out var block);
             block.SetFloat(Emissive, b.isSun ? 1f : 0f);
             block.SetFloat(Ambient, 0.06f);
@@ -192,6 +193,32 @@ namespace Meridian.Space
 
         /// <summary>The disc sheet key of a body: planets/&lt;name&gt;/disc, or planets/&lt;parent&gt;/&lt;name&gt; for a moon (D-098).</summary>
         public static string DiscKey(BodyInfo b) => b.parent != null ? $"planets/{b.parent}/{b.name}" : $"planets/{b.name}/disc";
+
+        /// <summary>U-116: the Sun's rig once planets/sun/disc_rig is found (null before, and where the sheet is missing).</summary>
+        public SunView Sun { get; private set; }
+
+        /// <summary>U-116 (D-123): where planets/sun/disc_rig exists the rig replaces the Sun's spheroid (the glow and the light stay).</summary>
+        void ProbeSunRig(Transform parent, BodyInfo b)
+        {
+            var locations = Addressables.LoadResourceLocationsAsync(SunView.Key);
+            locations.Completed += loc =>
+            {
+                bool exists = loc.Status == AsyncOperationStatus.Succeeded && loc.Result != null && loc.Result.Count > 0;
+                global::Meridian.Art.ArtLoad.Release(loc);
+                if (!exists || parent == null || this == null) return;
+                var old = parent.Find("Disc");
+                if (old != null)
+                {
+                    var mr = old.GetComponent<MeshRenderer>();
+                    if (mr != null) Shells.Remove(mr);
+                    Destroy(old.gameObject);
+                }
+                var go = new GameObject("SunRig");
+                go.transform.SetParent(parent, false);
+                Sun = go.AddComponent<SunView>();
+                Sun.Load(SunView.Key, b.radius, 10);
+            };
+        }
 
         /// <summary>Where planets/&lt;name&gt;/disc exists (art or placeholder), the disc sprite replaces the spheroid and its shells.</summary>
         void ProbeDisc(Transform parent, BodyInfo b)

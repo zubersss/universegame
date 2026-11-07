@@ -20,10 +20,8 @@ namespace Meridian.Tests
     public class HazardV2PlayTests
     {
         const string CorePath = "Assets/_Game/Scenes/Core.unity";
-        bool wasCartoon = true;
-        // D-132: the Envirosuit tier sheets (characters/surveyor/base, mk2) are the 3D path's surveyor; the cartoon surveyor has no tier sheets yet; the game runs Earth on the cartoon path, so this class switches it off for its run and restores it.
-        [SetUp] public void ThreeDPath() { wasCartoon = Meridian.View2D.CartoonStage.Enabled; Meridian.View2D.CartoonStage.Enabled = false; }
-        [TearDown] public void RestoreCartoon() { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
+        // U-122 (D-135): this class runs on the game's path (the cartoon stage on Earth): an Envirosuit tier is a tint and a badge on the drawn
+        // surveyor (SpriteCharacterView.SetSuitTier), the sheet swap stays the 3D path's; the hazards themselves are the same either way.
         PlanetSideRoot side;
         HazardSystem hazards;
         PlayerVitals vitals;
@@ -106,19 +104,36 @@ namespace Meridian.Tests
         {
             yield return Boot();
             var view = side.player.GetComponent<PlayerView>();
-            Assert.AreEqual("characters/surveyor/base", view.SheetKey);
+            var drawn = side.cartoon != null ? side.cartoon.Surveyor : null; // U-122: the drawn surveyor on the cartoon path
+            if (drawn == null) Assert.AreEqual("characters/surveyor/base", view.SheetKey);
+            else { Assert.AreEqual(GameState.Instance.suitTier, drawn.SuitTier, "the drawn surveyor starts at the saved tier"); }
             OnMercury(MercuryZone.Day);
             Assert.AreEqual(3, hazards.EffectiveLevel, "Thermal 3 on the day side");
             hazards.Equip(2);
             Assert.AreEqual(1, hazards.EffectiveLevel, "Mk2: Thermal 3 → 1 (§7.3)");
             Assert.AreEqual(2, GameState.Instance.suitTier);
-            Assert.AreEqual("characters/surveyor/mk2", view.SheetKey, "sheet swaps at equip");
-            float until = Time.realtimeSinceStartup + 10f;
-            while (Time.realtimeSinceStartup < until && (view.view.sprite == null || !view.view.sprite.name.StartsWith("mk2"))) yield return null;
-            Assert.That(view.view.sprite.name, Does.StartWith("mk2"), "the Mk2 sheet is drawn");
+            if (drawn != null)
+            {
+                // D-135: a tier is a palette tint and a badge on the pack, no new sheet.
+                yield return null;
+                Assert.AreEqual(2, drawn.SuitTier, "the drawn surveyor hears the equip");
+                Assert.AreEqual(Meridian.View2D.SpriteCharacterView.TintFor(2), drawn.Renderer.color, "the Mk2 tint");
+                Assert.IsTrue(drawn.BadgeShown, "the Mk2 badge on the pack");
+                Assert.AreEqual(Meridian.View2D.SpriteCharacterView.BadgeFor(2), drawn.Badge.color);
+                Assert.AreNotEqual(Meridian.View2D.SpriteCharacterView.TintFor(2), Meridian.View2D.SpriteCharacterView.TintFor(3), "each tier its own tint");
+            }
+            else
+            {
+                Assert.AreEqual("characters/surveyor/mk2", view.SheetKey, "sheet swaps at equip");
+                float until = Time.realtimeSinceStartup + 10f;
+                while (Time.realtimeSinceStartup < until && (view.view.sprite == null || !view.view.sprite.name.StartsWith("mk2"))) yield return null;
+                Assert.That(view.view.sprite.name, Does.StartWith("mk2"), "the Mk2 sheet is drawn");
+            }
             hazards.Equip(3);
             Assert.AreEqual(0, hazards.EffectiveLevel, "Mk3 → 0");
+            if (drawn != null) { yield return null; Assert.AreEqual(3, drawn.SuitTier); Assert.AreEqual(Meridian.View2D.SpriteCharacterView.TintFor(3), drawn.Renderer.color, "the Mk3 tint"); Assert.AreEqual(Meridian.View2D.SpriteCharacterView.BadgeFor(3), drawn.Badge.color, "the Mk3 badge"); }
             hazards.Equip(0);
+            if (drawn != null) { yield return null; Assert.AreEqual(0, drawn.SuitTier); Assert.AreEqual(Color.white, drawn.Renderer.color, "no tint at tier 0"); Assert.IsFalse(drawn.BadgeShown, "no badge at tier 0"); }
             LogAssert.NoUnexpectedReceived();
         }
 

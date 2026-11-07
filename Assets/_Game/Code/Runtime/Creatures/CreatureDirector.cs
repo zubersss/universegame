@@ -28,7 +28,8 @@ namespace Meridian.Creatures
         public const int MaxCreatures = 20;
         public const float SpawnInterval = 1.5f;
         public const float SpawnMin = 24f, SpawnMax = 40f, DespawnDistance = 64f;
-        const float ThinkInterval = 0.25f, Accel = 30f, FlyAccel = 12f;
+        internal const float ThinkInterval = 0.25f;
+        const float Accel = 30f, FlyAccel = 12f;
 
         public TerrainStreamer terrain;
         public PlayerController player;
@@ -86,6 +87,7 @@ namespace Meridian.Creatures
                 // U-060: the PlanetSide scene is reused across planets; drop other planets' creature sheets
                 // (they stayed loaded until destroy and the dev-build texture memory grew with every planet).
                 if (spec.planet != planet.id) { ReleaseArt(s); continue; }
+                if (spec.rig) continue; // U-119: a rig-set creature loads its own json, parts and controller (Creature.EnsureRig)
                 if (art[s] == null && !artHandles[s].IsValid()) LoadArt(s, spec.artKey, false);
                 if (spec.nightArtKey != null && nightFrames[s] == null && !nightHandles[s].IsValid()) LoadArt(s, spec.nightArtKey, true);
             }
@@ -372,6 +374,7 @@ namespace Meridian.Creatures
                 {
                     var to = new Vector2(dx, dy + 0.6f);
                     want = to.sqrMagnitude > 1e-4f ? to.normalized * speed : Vector2.zero;
+                    if (HoldsOff(spec.followDistance, to.magnitude)) want = Vector2.zero; // U-119 (D-087): the Maw follows at a distance
                 }
                 else want = new Vector2(c.dir * speed, Mathf.Clamp((c.altitude - pos.y) * 1.5f, -speed - 1f, speed + 1f));
                 v = Vector2.MoveTowards(v, want, FlyAccel * dt);
@@ -414,11 +417,16 @@ namespace Meridian.Creatures
             c.Body.linearVelocity = v;
             if (c.View != null) c.View.flipX = (spec.Flies ? (v.x != 0f ? Mathf.Sign(v.x) : c.dir) : c.dir) < 0;
             if (c.Model != null && c.Model.Ready && c.View != null) c.Model.SetFacing(!c.View.flipX); // U-075: the model faces like the sprite
+            if (c.Rig != null)
+            {
+                c.SetRigFacing(!c.View.flipX); // U-119: the rig faces like the sprite
+                if (spec.reactRadius > 0f) c.SetRigReacting(vitals != null && !vitals.Dead && dx * dx + dy * dy < spec.reactRadius * spec.reactRadius);
+            }
 
             // U-093 (D-087): a chasing creature that reaches the surveyor bumps them (no damage).
             bool hunting = c.State == CreatureState.Chase;
             float reachX = spec.size.x * 0.5f + 0.6f, reachY = spec.Flies ? spec.size.y * 0.5f + 1.2f : 1.4f;
-            if (hunting && vitals != null && !vitals.Dead && adx < reachX && Mathf.Abs(dy) < reachY && now >= c.biteReady) Bump(c, now);
+            if (hunting && spec.followDistance <= 0f && vitals != null && !vitals.Dead && adx < reachX && Mathf.Abs(dy) < reachY && now >= c.biteReady) Bump(c, now); // U-119: a follower never bumps
             c.Animate(dt, Mathf.Abs(v.x) + (spec.Flies ? Mathf.Abs(v.y) : 0f), grounded);
         }
 
@@ -437,6 +445,9 @@ namespace Meridian.Creatures
             c.React(from - player.Body.position);
             Bumps++;
         }
+
+        /// <summary>U-119 (D-087): a hunter with a follow distance stops short of it (the Maw keeps 14 m off the surveyor). Pure.</summary>
+        public static bool HoldsOff(float followDistance, float distance) => followDistance > 0f && distance < followDistance;
 
         /// <summary>Seconds between two bumps by one creature.</summary>
         public const float BumpEvery = 1.2f;
