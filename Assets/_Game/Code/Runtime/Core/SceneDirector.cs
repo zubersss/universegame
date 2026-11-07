@@ -152,7 +152,7 @@ namespace Meridian.Core
             var op = SceneManager.UnloadSceneAsync(scene);
             // U-060 / U-091: a planet's bundle now closes with its last handle (no session preload); UnloadUnusedAssets still
             // frees released common-bundle art once the scene is gone.
-            if (op != null) op.completed += _ => Resources.UnloadUnusedAssets();
+            if (op != null) op.completed += _ => { Meridian.Terrain.TerrainBlockPalette.ReleaseAll(); Resources.UnloadUnusedAssets(); }; // U-112: the block arrays go with the planet (84 MB stayed in Space)
             return op;
         }
 

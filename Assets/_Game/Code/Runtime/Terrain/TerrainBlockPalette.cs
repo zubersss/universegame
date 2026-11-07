@@ -77,6 +77,9 @@ namespace Meridian.Terrain
             return new Arrays { color = For(planet) };
         }
 
+        /// <summary>U-112 (D-139): the 0.4.2 probe showed the last planet's three 512² arrays (84 MB) resident in Space; SceneDirector releases them with the planet scene. They rebuild (GPU copies) on the next entry.</summary>
+        public static void ReleaseAll() => Release();
+
         static void Release()
         {
             if (realArrays.color != null) Object.Destroy(realArrays.color);

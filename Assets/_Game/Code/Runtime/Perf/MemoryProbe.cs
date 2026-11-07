@@ -83,6 +83,10 @@ namespace Meridian.Perf
                 ("Space after Mars", "planet_mars", "mercury", "Mercury", "planet_mercury"),
                 ("Space after Mercury", "planet_mercury", "venus", "Venus", "planet_venus"),
                 ("Space after Venus", "planet_venus", "earth", "Earth again", "planet_earth"),
+                // U-112 (D-139): a second loop over Mars and Earth separates a one-time first-visit cost (shader programs, driver pools) from a per-visit creep:
+                // the Creep row keeps D-116's four visits to Earth again; the second-loop row is (Earth again 2 − Earth again) / 2.
+                ("Space after Earth again", "planet_earth", "mars", "Mars again", "planet_mars"),
+                ("Space after Mars again", "planet_mars", "earth", "Earth again 2", "planet_earth"),
             };
             foreach (var (spaceLeg, prevGroup, body, planetLeg, ownGroup) in hops)
             {
@@ -177,6 +181,12 @@ namespace Meridian.Perf
             long allocMB = UnityEngine.Profiling.Profiler.GetTotalAllocatedMemoryLong() >> 20, reservedMB = UnityEngine.Profiling.Profiler.GetTotalReservedMemoryLong() >> 20;
             long unusedMB = UnityEngine.Profiling.Profiler.GetTotalUnusedReservedMemoryLong() >> 20;
             int handlesHeld = Residency.Total;
+            // U-112 (D-139): what the allocators do not count — the graphics driver's memory — and the loaded textures / meshes / shaders / materials by count and size, and the sets held.
+            long gfxMB = UnityEngine.Profiling.Profiler.GetAllocatedMemoryForGraphicsDriver() >> 20;
+            CountAndSize<Texture>(out int texCount, out long texSizeMB);
+            CountAndSize<Mesh>(out int meshCount, out long meshSizeMB);
+            int shaders = Resources.FindObjectsOfTypeAll<Shader>().Length, materials = Resources.FindObjectsOfTypeAll<Material>().Length, animClips = Resources.FindObjectsOfTypeAll<AnimationClip>().Length;
+            string held = Residency.HeldKeys().Replace("\"", "'");
             int gameObjects = Resources.FindObjectsOfTypeAll<GameObject>().Length;
             int tmpObjects = Resources.FindObjectsOfTypeAll<TMPro.TMP_Text>().Length;
             int audioSources = Resources.FindObjectsOfTypeAll<AudioSource>().Length;
@@ -190,9 +200,20 @@ namespace Meridian.Perf
                              $"\"nonStreamingMB\":{(long)(Texture.nonStreamingTextureMemory / 1048576UL)},\"desiredMB\":{(long)(Texture.desiredTextureMemory / 1048576UL)},\"targetMB\":{(long)(Texture.targetTextureMemory / 1048576UL)}," +
                              $"\"monoUsedMB\":{monoUsedMB},\"monoHeapMB\":{monoHeapMB},\"allocMB\":{allocMB},\"reservedMB\":{reservedMB},\"unusedReservedMB\":{unusedMB}," +
                              $"\"handlesHeld\":{handlesHeld},\"gameObjects\":{gameObjects},\"tmpObjects\":{tmpObjects},\"audioSources\":{audioSources}," +
+                             $"\"gfxMB\":{gfxMB},\"texCount\":{texCount},\"texSizeMB\":{texSizeMB},\"meshCount\":{meshCount},\"meshSizeMB\":{meshSizeMB},\"shaders\":{shaders},\"materials\":{materials},\"animClips\":{animClips},\"held\":\"{held}\"," +
                              $"\"bundles\":\"{Bundles()}\"}}");
             TopTextures(where, 15);
             if (where == "Earth") yield return FilmGpu(where); // U-095: the film pass's GPU cost at 1080p
+        }
+
+        /// <summary>U-112: the loaded objects of a type and their runtime memory in MB (Profiler.GetRuntimeMemorySizeLong; reports only: allocates).</summary>
+        static void CountAndSize<T>(out int count, out long sizeMB) where T : UnityEngine.Object
+        {
+            var all = Resources.FindObjectsOfTypeAll<T>();
+            long bytes = 0;
+            foreach (var o in all) bytes += UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(o);
+            count = all.Length;
+            sizeMB = bytes >> 20;
         }
 
         /// <summary>

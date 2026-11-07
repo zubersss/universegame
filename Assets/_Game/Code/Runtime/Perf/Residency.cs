@@ -46,6 +46,18 @@ namespace Meridian.Perf
             return parts.Count == 0 ? "none" : string.Join(", ", parts);
         }
 
+        /// <summary>U-112 (D-139): every key held right now, with counts, sorted (reports only: allocates) — the scene sets, the near disc frames, the Sun rig, the creature sheets a leg keeps.</summary>
+        public static string HeldKeys()
+        {
+            Prune();
+            var counts = new Dictionary<string, int>();
+            foreach (var e in entries) counts[e.key] = counts.TryGetValue(e.key, out var n) ? n + 1 : 1;
+            var parts = new List<string>(counts.Count);
+            foreach (var kv in counts) parts.Add(kv.Value > 1 ? kv.Key + " x" + kv.Value : kv.Key);
+            parts.Sort(string.CompareOrdinal);
+            return parts.Count == 0 ? "none" : string.Join(", ", parts);
+        }
+
         /// <summary>Live handles into `group` ("planet_earth", "common", …).</summary>
         public static int Count(string group)
         {

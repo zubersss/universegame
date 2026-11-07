@@ -61,7 +61,7 @@ $le = [char]0x2264; $ar = [char]0x2192; $times = [char]0x00D7; $sec = [char]0x00
 $limit = "< 2.0 GB working set (warn 1.7), $le 512 MB textures, $le 150 MB audio"
 if ($runProbe) {
     $rows = @('', '## Memory in the development player (U-041, D-036; limits v4, D-089)', '',
-        "The route Earth $ar launch $ar Space $ar entry $ar Earth (warm, D-114) $ar launch $ar Space $ar entry $ar Mars $ar launch $ar Space $ar entry $ar Mercury $ar launch $ar Space $ar entry $ar Venus $ar launch $ar Space $ar entry $ar Earth again (nine legs, real launches and entries, U-091) in Build/MERIDIAN_<version>/MERIDIAN.exe (development build), 1920${times}1080 windowed; counters read after GC + UnloadUnusedAssets and 120 frames per leg. Working set and private commit from the OS (ProcessMemory); the Editor rows above stay as an upper bound. Meshes are printed, not judged.", '',
+        "The route Earth $ar launch $ar Space $ar entry $ar Earth (warm, D-114) $ar launch $ar Space $ar entry $ar Mars $ar launch $ar Space $ar entry $ar Mercury $ar launch $ar Space $ar entry $ar Venus $ar launch $ar Space $ar entry $ar Earth again, then a second loop $ar Mars again $ar Earth again 2 (U-112 / D-139: a one-time first-visit cost against a per-visit creep) (thirteen legs, real launches and entries, U-091) in Build/MERIDIAN_<version>/MERIDIAN.exe (development build), 1920${times}1080 windowed; counters read after GC + UnloadUnusedAssets and 120 frames per leg. Working set and private commit from the OS (ProcessMemory); the Editor rows above stay as an upper bound. Meshes are printed, not judged.", '',
         "| Row | Budget (${sec}11.1 v4) | Measured | Status |", '|---|---|---|---|')
     $legs = @()
     if ($buildOk -and (Test-Path $probeOut)) { $legs = @(Get-Content $probeOut | Where-Object { $_.Trim() } | ForEach-Object { $_ | ConvertFrom-Json } | Where-Object { $null -ne $_.systemMB }) }
@@ -119,7 +119,12 @@ if ($runProbe) {
         }
         if ($null -ne $l.monoUsedMB) {
             # U-112 (D-116): the heap and the counts that can grow per visit, per leg (info; the creep row takes their per-visit deltas).
-            $rows += "| Heap $dot $($l.leg) (dev build) | info (U-112): Mono used / heap, native allocated / reserved (unused), Addressable handles held, loaded GameObjects, TMP texts, AudioSources | mono $($l.monoUsedMB) / $($l.monoHeapMB) MB, native $($l.allocMB) / $($l.reservedMB) MB ($($l.unusedReservedMB) unused), handles $($l.handlesHeld), objects $($l.gameObjects), tmp $($l.tmpObjects), audio $($l.audioSources) | info |"
+            $gfxText = if ($null -ne $l.gfxMB) { "; gfx driver $($l.gfxMB) MB; textures $($l.texCount) ($($l.texSizeMB) MB), meshes $($l.meshCount) ($($l.meshSizeMB) MB), shaders $($l.shaders), materials $($l.materials), clips $($l.animClips)" } else { '' }
+            $rows += "| Heap $dot $($l.leg) (dev build) | info (U-112): Mono used / heap, native allocated / reserved (unused), Addressable handles held, loaded GameObjects, TMP texts, AudioSources; D-139: the graphics driver's memory and the loaded textures / meshes / shaders / materials | mono $($l.monoUsedMB) / $($l.monoHeapMB) MB, native $($l.allocMB) / $($l.reservedMB) MB ($($l.unusedReservedMB) unused), handles $($l.handlesHeld), objects $($l.gameObjects), tmp $($l.tmpObjects), audio $($l.audioSources)$gfxText | info |"
+        }
+        if ($null -ne $l.held) {
+            # D-139: the sets a leg keeps (Residency's held keys with counts): the biome layer sets, the near disc frames, the Sun rig, the creature sheets.
+            $rows += "| Resident sets $dot $($l.leg) (dev build) | info (U-112 / D-139): the Addressable keys held after the settle | $($l.held) | info |"
         }
     }
     # D-114: the boot -> warm Earth delta is the Space scene's resident set (belt, discs, waystations, starfield): its own row, <= 150 MB.
@@ -153,19 +158,30 @@ if ($runProbe) {
         $rows += "| Return $dot $($pair[0]) (dev build) | private commit within 10 % of $($pair[1]) (D-089 / D-116) | $measured | $(if ($rok) { 'green' } else { 'red' }) |"
     }
     # D-116: the per-visit creep, (private at the last leg - private at Earth (warm)) / planet visits after the warm leg; info through C1, a budget row (<= 10 MB) from C2.
-    $warmLeg = $byLeg['Earth (warm)']; $lastLeg = $legs | Select-Object -Last 1
+    $warmLeg = $byLeg['Earth (warm)']; $lastLeg = if ($null -ne $byLeg['Earth again']) { $byLeg['Earth again'] } else { $legs | Select-Object -Last 1 } # D-116: the four visits to Earth again; the second loop has its own row
     if ($null -ne $warmLeg -and $null -ne $lastLeg -and $null -ne $warmLeg.privateMB -and $null -ne $lastLeg.privateMB) {
         $warmIndex = [array]::IndexOf(@($legs | ForEach-Object { [string]$_.leg }), 'Earth (warm)')
-        $visits = @($legs | Select-Object -Skip ($warmIndex + 1) | Where-Object { [string]$_.leg -notlike 'Space*' }).Count
+        $lastIndex = [array]::IndexOf(@($legs | ForEach-Object { [string]$_.leg }), [string]$lastLeg.leg)
+        $visits = @($legs | Select-Object -Skip ($warmIndex + 1) -First ($lastIndex - $warmIndex) | Where-Object { [string]$_.leg -notlike 'Space*' }).Count
         if ($visits -gt 0) {
             $creep = [math]::Round(([double]$lastLeg.privateMB - [double]$warmLeg.privateMB) / $visits, 1)
             # U-112: the same delta per visit for the heap counters the probe prints per leg, so the hunt starts from the report.
             $extra = ''
             if ($null -ne $warmLeg.monoUsedMB -and $null -ne $lastLeg.monoUsedMB) {
                 $extra = "; per visit: mono $([math]::Round(([double]$lastLeg.monoUsedMB - [double]$warmLeg.monoUsedMB) / $visits, 1)) MB, native allocated $([math]::Round(([double]$lastLeg.allocMB - [double]$warmLeg.allocMB) / $visits, 1)) MB, reserved $([math]::Round(([double]$lastLeg.reservedMB - [double]$warmLeg.reservedMB) / $visits, 1)) MB, handles $([math]::Round(([double]$lastLeg.handlesHeld - [double]$warmLeg.handlesHeld) / $visits, 1)), objects $([math]::Round(([double]$lastLeg.gameObjects - [double]$warmLeg.gameObjects) / $visits, 0)), tmp $([math]::Round(([double]$lastLeg.tmpObjects - [double]$warmLeg.tmpObjects) / $visits, 1)), audio $([math]::Round(([double]$lastLeg.audioSources - [double]$warmLeg.audioSources) / $visits, 1))"
+                if ($null -ne $warmLeg.gfxMB -and $null -ne $lastLeg.gfxMB) { $extra += "; gfx driver $([math]::Round(([double]$lastLeg.gfxMB - [double]$warmLeg.gfxMB) / $visits, 1)) MB, textures $([math]::Round(([double]$lastLeg.texSizeMB - [double]$warmLeg.texSizeMB) / $visits, 1)) MB ($([math]::Round(([double]$lastLeg.texCount - [double]$warmLeg.texCount) / $visits, 1))), meshes $([math]::Round(([double]$lastLeg.meshSizeMB - [double]$warmLeg.meshSizeMB) / $visits, 1)) MB, shaders $([math]::Round(([double]$lastLeg.shaders - [double]$warmLeg.shaders) / $visits, 1)), materials $([math]::Round(([double]$lastLeg.materials - [double]$warmLeg.materials) / $visits, 1))" }
             }
             $rows += "| Creep per visit (dev build) | info through C1, $le 10 MB from C2 (D-116): (private at $($lastLeg.leg) $ar private at Earth (warm)) / $visits planet visits | $creep MB per visit (private $($warmLeg.privateMB) $ar $($lastLeg.privateMB) MB)$extra | info |"
         }
+    }
+    # U-112 (D-139): the second loop — Mars again, Earth again 2 — against Earth again: a per-visit creep repeats here, a one-time first-visit cost does not.
+    $again = $byLeg['Earth again']; $again2 = $byLeg['Earth again 2']
+    if ($null -ne $again -and $null -ne $again2 -and $null -ne $again.privateMB -and $null -ne $again2.privateMB) {
+        $creep2 = [math]::Round(([double]$again2.privateMB - [double]$again.privateMB) / 2, 1)
+        $extra2 = ''
+        if ($null -ne $again.gfxMB -and $null -ne $again2.gfxMB) { $extra2 = "; per visit: gfx driver $([math]::Round(([double]$again2.gfxMB - [double]$again.gfxMB) / 2, 1)) MB, native allocated $([math]::Round(([double]$again2.allocMB - [double]$again.allocMB) / 2, 1)) MB, textures $([math]::Round(([double]$again2.texSizeMB - [double]$again.texSizeMB) / 2, 1)) MB, meshes $([math]::Round(([double]$again2.meshSizeMB - [double]$again.meshSizeMB) / 2, 1)) MB, shaders $([math]::Round(([double]$again2.shaders - [double]$again.shaders) / 2, 1)), handles $([math]::Round(([double]$again2.handlesHeld - [double]$again.handlesHeld) / 2, 1))" }
+        $pct2 = [math]::Round(([double]$again2.privateMB / [double]$again.privateMB - 1.0) * 100.0, 1)
+        $rows += "| Creep $dot second loop (dev build) | info (U-112 / D-139): (private at Earth again 2 $ar private at Earth again) / 2 planet visits | $creep2 MB per visit (private $($again.privateMB) $ar $($again2.privateMB) MB, $(if ($pct2 -ge 0) { '+' })$pct2 %)$extra2 | info |"
     }
     $mip = $legs | Where-Object { $null -ne $_.mipActive } | Select-Object -First 1
     if ($null -ne $mip) {
