@@ -10,11 +10,12 @@ D-127). The B-139 / B-145 pattern: LEAD accepts these designs before any Venus c
 
 | Item | State | File |
 |---|---|---|
-| Palette | proposed; the check passes (the Mars checks + the Venus family: an apricot haze, a sulphur yellow, a dark glassy basalt) | blender/scripts/build_c2_venus_palette.py |
-| Five plants | designed below; drawings + a 1x preview on a Venus stand-in next (when RAM allows) | build_c2_venus_plants.py (next) |
-| Creatures | the re-ink list below (all five have v2 models in Art: `replaces_v2`) | - |
-| Backdrops | study notes below (FFT washes: a BLENDER slot) | - |
-| Props | the ones that differ, below | - |
+| Palette | ACCEPTED (D-134): in `meridian.v3.PALETTES["venus"]` + the ui/palettes/venus row | blender/scripts/build_c2_venus_palette.py |
+| Five plants | ACCEPTED (cycle 265; ddbdcb32, drawn 1.6x): review_b147_venus_plants_preview.png | build_c2_venus_plants.py |
+| Rig set | source + dry run clean (7102e14d: 33 parts on 508x188, bones 2 / 5 / 4 / 6 / 3, json valid); export B-153 | build_c2_venus_rigs.py |
+| Creatures 1-4 + the vent mouth | ACCEPTED (cycle 265; 6d5f7337, d8ac7e69): four reviews + the den review; export B-154 | build_creatures_venus_v3.py, build_props_venus_v3.py |
+| Backdrops | surface ACCEPTED (cycle 266); deck re-run 09:00 (cumulus towers, the airship station; accepted on sight); export B-152 | build_backdrop_v3.py (venus_deck, venus_surface) |
+| Veil Serpent, props | later (a rig set like the Maw; the props that differ, section 5) | - |
 
 ## 1. Palette (proposed; checked by blender/scripts/build_c2_venus_palette.py)
 

@@ -17,11 +17,13 @@ cloud-column pattern Saturn, Uranus and Neptune reuse.
 | Item | State | File |
 |---|---|---|
 | Palette | ACCEPTED (D-137): in `meridian.v3.PALETTES["jupiter"]` + the ui/palettes/jupiter row (exports with the first Jupiter slot) | blender/scripts/build_c2_jupiter_palette.py |
-| Five flora (floe forms + float-cell forms) | designed below; drawings + a 1x preview on a Jupiter stand-in next (when RAM allows) | build_c2_jupiter_plants.py (next) |
-| Floe strips | designed below; caps RULED (D-137: 8 tiles + cap_left + cap_right, 10 frames; UNITY wires the caps, U-126) | build_c2_jupiter_floes.py (next) |
-| Cloud-deck backdrops | study notes below (FFT washes: a BLENDER slot) | build_backdrop_v3.py (next) |
-| Creatures | the re-ink list below (four v2 models in Art: `replaces_v2`; the apex a rig set) | - |
-| Props | the ones that differ, below | - |
+| Five flora (floe forms + float-cell forms) | source (f9205793, 1.6x since 7eee59fd): key poses checked, palette 100 %; the full preview waits for a free gap | build_c2_jupiter_plants.py |
+| Floe strips | source + checks (a7c4c38a: 4 kinds x 10 frames per D-137, joins <= 0.86/255, caps the same, palette 100 %); review_b155_jupiter_floes_preview.png | build_c2_jupiter_floes.py |
+| Cloud-deck backdrops | source (11169afd: deck1 / deck2 / deck3 / deep with the CRUSH band / spot = the Red Spot overlay); studies need slots | build_backdrop_v3.py (jupiter_scene) |
+| Creatures 1-4 | source (a4a75e39): every frame in bounds; the reviews wait for a free gap | build_creatures_jupiter_v3.py |
+| Vortex Whale | rig-set source (72753c0d, 6 bones); size (~48 m at 1x) asked | build_vortex_whale_v3.py |
+| Aerostat kit (B-156) | source (fcf4c22e): deck, strut, cell, two packs, hook; the review waits for a free gap | build_props_aerostat_v3.py |
+| Props that differ | later (section 6: the husk, derelict, vault) | - |
 
 ## 1. Palette (ACCEPTED, D-137; checked by blender/scripts/build_c2_jupiter_palette.py)
 
