@@ -39,6 +39,13 @@ PALETTES = {
         "offwhite": "#E9E2D4", "red": "#A85A41", "mustard": "#D8B566", "teal": "#5E8B91",
         "green": "#8B9471", "sky": "#8D7AA0", "brown": "#3E3848", "ink": "#1E1A17",
     },
+    # D-134, LEAD cycle 262: the Venus palette (B-147; checked by scripts/build_c2_venus_palette.py). offwhite cream haze,
+    # red vent orange, mustard sulphur yellow, teal sea-glass (Vitriol Glass), green dusty olive, sky apricot haze, brown
+    # glassy basalt (the shadow mix colour).
+    "venus": {
+        "offwhite": "#F0E2C8", "red": "#B8583A", "mustard": "#D8B04E", "teal": "#6F9A88",
+        "green": "#8E9A5E", "sky": "#E0A57A", "brown": "#45352F", "ink": "#1E1A17",
+    },
 }
 PALETTE_ORDER = ["offwhite", "red", "mustard", "teal", "green", "sky", "brown", "ink"]
 
