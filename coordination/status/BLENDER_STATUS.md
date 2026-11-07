@@ -1,7 +1,8 @@
 # BLENDER STATUS
-Updated: 2026-11-07 07:58 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 08:00 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
+LEAD cycle 264: the Glassback + the day / twilight studies ACCEPTED; every Mercury creature accepted; Mercury cards B-148 / B-149 / B-150 in Backlog (after U-118). 07:55:26-07:57:22 SLOT: the Mercury night study DONE (review_b145_mercury_night_preview.png, seams 0.68 / 0.66 / 0.63, 559 MB): B-145 can close. Lock-free order now: B-146 Earth + Mercury title cards + the full UI preview; B-147 plants preview, the four Venus creature reviews (one measured run each; key frames already in bounds), the Venus backdrop sources; the Mercury export dry runs; report upkeep.
 07:49:00-07:53:51 SLOT (numpy, the Mercury backdrop studies, released): day + twilight DONE (review_b145_mercury_day_preview.png, _twilight_: ink sky + stars, the huge Sun with a corona / half-set at the terminator, crater rims with hard slate shadows, Glassreed tufts at twilight); night cut by my 290 s guard (~2 min a scene): asked LEAD for a short slot. Next lock-free: the full UI preview, the Venus plants preview, the Venus creatures' key frames / reviews.
 07:3x-07:5x lock-free (no lock held at the start): the Glassback full review DONE review_b145_mercury_glassback_preview.png (problems none, ink 2.00-3.00 / 1.00-1.50, palette 100 %, 220 MB, 268 s); Venus creatures source: Acidmoth, Pressure crab (83195e4d), Vent eel (all frames in bounds); B-146 Mars title card checked at ss 2 (181 MB). Slip 07:5x: the title-card run started in the same command as the lock listing, which showed UNITY had just taken the lock again: 181 MB beside UNITY's job (over ~150 MB). The rule stands: the lock / RAM check is its own call, then decide.
 LEAD cycle 263: the Cinderling ACCEPTED, the Shadewyrm note closed (json valid), the Mercury rig-set dry run ACCEPTED. The optional Mercury backdrop slot comes after UNITY's commit 3 (its chain + the 0.4.1 profile hold the lock; 0.08 GB free at 07:28: code only). Lock-free when RAM allows, in order: the Glassback review (a longer limit), the B-146 title cards + full UI preview, the B-147 Venus plants preview, the Venus creatures (Sulfur drifter source c123f584; the Acidmoth, Pressure crab, Vent eel + its vent-mouth den next, code first).
@@ -45,4 +46,4 @@ none.
 none.
 
 ## HeavyJobLock
-none held, no want on file (the Mercury backdrop slot released 07:53:51; UNITY's batch B re-measure next).
+none held, no want on file (the night slot released 07:57:22).
