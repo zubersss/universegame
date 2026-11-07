@@ -1680,8 +1680,12 @@ def neptune_scene(seed, deck="deck1"):
         cloud_bank(bank, line, rng, 46, 100, 18)
         bank = shear(bank, 1.3, 420)
         body = {"deck1": BG._mix(pal["sky"], pal["offwhite"], 0.3), "deck2": BG._mix(pal["sky"], pal["teal"], 0.25),
-                "deck3": BG._mix(pal["brown"], pal["sky"], 0.5), "deep": BG._mix(pal["brown"], pal["sky"], 0.2)}[deck]
-        stack.append(tint(rng, H, lining(bank, 6, 4), BG._mix(body, pal["offwhite"], 0.5), 0.8, var=0.03, edge_dark=0.03, bleed=2.5))
+                "deck3": BG._rgb(v3.shadow_of(v3.PALETTES["neptune"]["sky"], "neptune")),   # LEAD 17:3x: one step lighter than the sky
+                "deep": BG._mix(pal["brown"], pal["sky"], 0.2)}[deck]
+        if deck in ("deck3", "deep"):                                                      # LEAD 17:3x: a 2-3 px wisp-white crest rim (the dark decks)
+            stack.append(tint(rng, H, lining(bank, 3, 2), pal["offwhite"], 0.95, var=0.03, edge_dark=0.03, bleed=1.2))
+        else:                                                                              # decks 1-2 as accepted (17:3x)
+            stack.append(tint(rng, H, lining(bank, 6, 4), BG._mix(body, pal["offwhite"], 0.5), 0.8, var=0.03, edge_dark=0.03, bleed=2.5))
         stack.append(wash32(rng, H, bank, body, var=0.05, edge_dark=0.07, bleed=2.5))
         if deck in ("deck1", "deck2", "deck3"):                                           # bright cirrus high above, their shadows on the tops
             ci = np.zeros((H, W), np.float32)
