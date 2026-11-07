@@ -1,8 +1,9 @@
 # BLENDER STATUS
-Updated: 2026-11-07 05:35 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 05:39 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-LEAD cycle 259: B-143 VERIFIED, B-141 studies ACCEPTED (export after B-140), Mercury palette ACCEPTED (D-130). B-140 EXPORTED 05:30 (b99b8c27). Next: B-141 export (want filed 05:31; UNITY's capture lock freed 05:33, waiting for free RAM >= the 1.2 GB numpy gate: 0.88 GB at 05:33).
+LEAD cycle 259: B-143 VERIFIED, B-141 studies ACCEPTED (export after B-140), Mercury palette ACCEPTED (D-130). C1 CLOSED (D-131). B-140 EXPORTED 05:30 (b99b8c27), B-141 EXPORTED 05:38 (570fb6ad). Next heavy: B-131 after UNITY's C2 batch A code commit (U-113), first free slot.
+0b. B-141 EXPORTED (570fb6ad, one wrapper lock 05:33:58-05:38:24): backgrounds/mars/canyon + storm, 6 layers + 2 jsons, the accepted studies' pixels; log OK canyon 122.4 s peak 694 MB, storm 133.5 s peak 761 MB. .metas UNITY's.
 0. B-140 EXPORTED (b99b8c27, one wrapper lock 05:30:22-05:30:51): flora/mars/rigset 504x216 28 KB (26 parts, 5 plants; log OK 13.5 s, peak 345 MB; review_b140_mars_rigset.png + _assembled.png), terrain/mars/ground_strip + _basalt 540x152 (joins 0.55 / 0.58, 32 edges identical; log OK 6.2 s). .metas UNITY's.
 1. B-136 EXPORTED 05:24-05:26 (72cfdd4): creatures/earth/hadal_maw 1784x744 118 KB, 8 parts, json cycle_beats 4; log OK 115.6 s, peak 676 MB; review_b136_hadal_maw.png + _assembled.png (1x beside the surveyor, stamped export). .metas UNITY's.
 2. B-144 full review DONE 05:28: review_b144_mars_props_preview.png (1x on the regolith strips beside the surveyor, 2x, clips, ten boxes; problems none). Slip: peak 430 MB lock-free (no lock held, 2.3 GB free) over the ~300 MB guideline; my 200 MB estimate was not measured on a part first.
@@ -11,6 +12,7 @@ LEAD cycle 259: B-143 VERIFIED, B-141 studies ACCEPTED (export after B-140), Mer
 B-131 after U-113; B-142 after U-118.
 
 ## Last completed
+- 05:33:58-05:38:24 SLOT (wrapper): B-141 backgrounds/mars/canyon + storm exported (log OK x2).
 - 05:30:22-05:30:51 SLOT (wrapper, one heavy lock): B-140 exported (flora/mars/rigset + terrain/mars/ground_strip_set, log OK x2).
 - 05:24:23-05:26:35 SLOT (wrapper, one heavy lock): B-136 creatures/earth/hadal_maw exported (log OK, 115.6 s, peak 676 MB).
 - 05:13:16-05:18:13 SLOT (cycle 258, one heavy lock, 5 min, released): B-143 near frames exported (121 s, peak 359 MB), B-141 studies re-run (136 s, peak 683 MB); the B-144 review failed on a panel overflow (fixed).
@@ -49,4 +51,4 @@ none (B-136's key and cycle_beats ruled D-127).
 none.
 
 ## HeavyJobLock
-want_blender.lock filed 05:31 for B-141 (UNITY's lock freed 05:33; the run starts when free RAM passes the numpy gate).
+none held, no want on file (B-141 done 05:38:24); next: B-131 after UNITY's C2 batch A code commit.
