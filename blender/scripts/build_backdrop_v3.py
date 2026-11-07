@@ -644,11 +644,153 @@ def mercury_night(seed):
     return mercury_scene(seed, "night")
 
 
+# ---------------------------------------------------------------- Venus (B-147, D-134 palette): the cloud deck and the surface dive
+
+def cloud_tower(mask, cx, base, h, w, rng):
+    """A tall cumulus tower: stacked lumps narrowing upward, flat-ish base."""
+    n = max(3, int(h / (w * 0.6)))
+    for k in range(n):
+        t = k / max(n - 1, 1)
+        ww = w * (1.0 - 0.45 * t) * rng.uniform(0.85, 1.1)
+        ell(mask, cx + rng.uniform(-0.15, 0.15) * w, base - t * h, ww, ww * 0.8, cut=0.7 if k == 0 else None)
+
+
+def venus_deck(seed):
+    rng = np.random.default_rng(seed)
+    pal = _pal("venus")
+    out = []
+    # layer0: the apricot sky over cream, drifting sulphur-haze bands, backlit cloud towers far off
+    H = 1024
+    yy = (np.arange(H) / H)[:, None, None]
+    sky = BG._mix(pal["sky"], pal["offwhite"], np.clip(yy * 1.1, 0, 1) * 0.55) * (1 + 0.03 * BG.periodic_noise(rng, H, 160, 90)[..., None])
+    stack = Stack([(np.broadcast_to(sky, (H, W, 3)).astype(np.float32), np.ones((H, W), np.float32))])
+    bands = np.zeros((H, W), np.float32)
+    for k in range(6):
+        y0 = 120 + 120 * k + rng.uniform(-20, 20)
+        line = BG.ridge(rng, [(2, 0.6), (5, 0.4)], base=y0, amp=10)
+        y = np.arange(H)[:, None] + 0.5
+        bands = np.maximum(bands, ((y > line[None, :]) & (y < line[None, :] + rng.uniform(14, 30))).astype(np.float32))
+    stack.append(tint(rng, H, bands, BG._mix(pal["mustard"], pal["sky"], 0.5), 0.35, var=0.04, edge_dark=0.0, bleed=8.0))
+    towers, rims = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
+    for _k in range(7):
+        cx = rng.uniform(0, W)
+        base, h, w = rng.uniform(780, 900), rng.uniform(260, 460), rng.uniform(70, 120)
+        cloud_tower(towers, cx, base, h, w, rng)
+        cloud_tower(rims, cx + 6, base - 6, h, w * 1.04, rng)
+    stack.append(tint(rng, H, rims, pal["offwhite"], 0.85, var=0.03, edge_dark=0.03, bleed=3.0))   # the backlit cream edges
+    stack.append(wash32(rng, H, towers, BG._mix(pal["sky"], pal["red"], 0.15), var=0.05, edge_dark=0.06, bleed=3.0))
+    out.append(finish(stack, rng, H))
+    # layer1: nearer towers and a floating station's silhouette
+    H = 640
+    stack = Stack()
+    near, nrim = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
+    for _k in range(5):
+        cx = rng.uniform(0, W)
+        base, h, w = rng.uniform(560, 620), rng.uniform(220, 380), rng.uniform(90, 150)
+        cloud_tower(near, cx, base, h, w, rng)
+        cloud_tower(nrim, cx + 8, base - 8, h, w * 1.04, rng)
+    stack.append(tint(rng, H, nrim, pal["offwhite"], 0.9, var=0.03, edge_dark=0.03, bleed=2.5))
+    stack.append(wash32(rng, H, near, BG._mix(pal["sky"], pal["mustard"], 0.2), var=0.05, edge_dark=0.07, bleed=2.5))
+    station = np.zeros((H, W), np.float32)
+    sx = rng.uniform(300, 1700)
+    ell(station, sx, 300, 120, 46)                                                        # the gasbag
+    rect(station, sx - 70, sx + 70, 350, 382)                                             # the deck
+    for k in range(5):
+        rect(station, sx - 60 + 30 * k, sx - 58 + 30 * k, 336, 352)                       # the rigging
+    stack.append(wash32(rng, H, station, BG._mix(pal["brown"], pal["sky"], 0.45), var=0.03, edge_dark=0.05, bleed=1.4))
+    out.append(finish(stack, rng, H))
+    # layer2: cloud tops near the deck with gaps showing the dark surface far below and its tiny vent glows
+    H = 384
+    stack = Stack()
+    floor = np.zeros((H, W), np.float32)
+    rect(floor, 0, W, 210, H)
+    stack.append(wash32(rng, H, floor, BG._mix(pal["brown"], pal["sky"], 0.25), var=0.05, edge_dark=0.0, bleed=4.0))
+    glows = np.zeros((H, W), np.float32)
+    for _k in range(30):
+        ell(glows, rng.uniform(0, W), rng.uniform(230, 360), rng.uniform(3, 7), rng.uniform(2, 4))
+    stack.append(tint(rng, H, glows, pal["red"], 0.9, var=0.03, edge_dark=0.0, bleed=1.5))
+    tops = np.zeros((H, W), np.float32)
+    for _k in range(26):
+        cx = rng.uniform(0, W)
+        for j in range(3):
+            ell(tops, cx + rng.uniform(-90, 90), rng.uniform(150, 260), rng.uniform(70, 150), rng.uniform(40, 70))
+    stack.append(wash32(rng, H, tops, BG._mix(pal["offwhite"], pal["sky"], 0.35), var=0.05, edge_dark=0.05, bleed=4.0))
+    out.append(finish(stack, rng, H))
+    return out, [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0},
+                 {"n": 2, "parallax": 0.6, "y_m": -0.5}]
+
+
+def venus_surface(seed):
+    rng = np.random.default_rng(seed)
+    pal = _pal("venus")
+    out = []
+    # layer0: the orange-cream haze ceiling over a dark basalt horizon
+    H = 1024
+    yy = (np.arange(H) / H)[:, None, None]
+    sky = BG._mix(BG._mix(pal["sky"], pal["red"], 0.25), pal["offwhite"], np.clip(1 - yy * 1.3, 0, 1) * 0.35)
+    stack = Stack([(np.broadcast_to(sky, (H, W, 3)).astype(np.float32), np.ones((H, W), np.float32))])
+    haze = np.zeros((H, W), np.float32)
+    for k in range(5):
+        line = BG.ridge(rng, [(2, 0.6), (4, 0.4)], base=150 + 140 * k, amp=16)
+        y = np.arange(H)[:, None] + 0.5
+        haze = np.maximum(haze, ((y > line[None, :]) & (y < line[None, :] + 40)).astype(np.float32))
+    stack.append(tint(rng, H, haze, pal["offwhite"], 0.25, var=0.04, edge_dark=0.0, bleed=10.0))
+    far = BG.ridge(rng, [(2, 0.5), (5, 0.3), (11, 0.2)], base=840, amp=30)
+    stack.append(wash32(rng, H, BG._ridge_mask(H, far), BG._mix(pal["brown"], pal["sky"], 0.35), var=0.04, edge_dark=0.05, bleed=2.0))
+    out.append(finish(stack, rng, H))
+    # layer1: black glassy basalt plains and tesserae ridges, lit from below by vent glows
+    H = 640
+    stack = Stack()
+    ridge = terrace(BG.ridge(rng, [(2, 0.45), (6, 0.35), (13, 0.2)], base=340, amp=44), 16)
+    land = BG._ridge_mask(H, ridge)
+    stack.append(wash32(rng, H, land, pal["brown"], var=0.05, edge_dark=0.06, bleed=1.8))
+    glows, cores, glints = (np.zeros((H, W), np.float32) for _ in range(3))
+    for _k in range(9):
+        cx = rng.uniform(0, W)
+        cy = ridge[int(cx) % W] + rng.uniform(40, 200)
+        ell(glows, cx, cy, rng.uniform(60, 120), rng.uniform(30, 50))
+        ell(cores, cx, cy + 6, rng.uniform(10, 18), rng.uniform(5, 8))
+    for _k in range(40):
+        cx = rng.uniform(0, W)
+        ell(glints, cx, ridge[int(cx) % W] + rng.uniform(10, 260), rng.uniform(8, 20), rng.uniform(1.5, 3))
+    stack.append(tint(rng, H, glows * land, pal["red"], 0.45, var=0.03, edge_dark=0.0, bleed=14.0))   # vent glow (a tone)
+    stack.append(wash32(rng, H, cores * land, BG._mix(pal["red"], pal["mustard"], 0.5), var=0.03, edge_dark=0.05, bleed=1.2))
+    stack.append(tint(rng, H, glints * land, pal["offwhite"], 0.55, var=0.0, edge_dark=0.0, bleed=1.0))  # glassy sheen
+    out.append(finish(stack, rng, H))
+    # layer2: near basalt with glassy highlights, heat shimmer, acid-rain streaks that stop mid-air
+    H = 384
+    stack = Stack()
+    line = BG.ridge(rng, [(3, 0.5), (7, 0.3), (15, 0.2)], base=220, amp=20)
+    ground = BG._ridge_mask(H, line)
+    stack.append(wash32(rng, H, ground, BG._mix(pal["brown"], pal["sky"], 0.08), var=0.06, edge_dark=0.07))
+    rocks, sheen = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
+    for _k in range(26):
+        cx = rng.uniform(0, W)
+        b = line[int(cx) % W] + rng.uniform(10, 130)
+        rx, ry = rng.uniform(16, 46), rng.uniform(10, 28)
+        ell(rocks, cx, b - ry * 0.6, rx, ry, cut=0.6)
+        ell(sheen, cx - rx * 0.25, b - ry * 0.95, rx * 0.4, ry * 0.18)
+    stack.append(wash32(rng, H, rocks, BG._mix(pal["brown"], pal["sky"], 0.15), var=0.05, edge_dark=0.12, bleed=1.2))
+    stack.append(tint(rng, H, sheen * rocks, pal["offwhite"], 0.6, var=0.0, edge_dark=0.0, bleed=0.8))
+    rain = np.zeros((H, W), np.float32)
+    for _k in range(60):
+        cx, cy = rng.uniform(0, W), rng.uniform(10, 140)
+        for t in range(int(rng.uniform(10, 26))):
+            rain[min(int(cy + t), H - 1), int(cx + 0.3 * t) % W] = 1.0
+    stack.append(tint(rng, H, rain, BG._mix(pal["teal"], pal["offwhite"], 0.4), 0.5, var=0.0, edge_dark=0.0, bleed=0.6))
+    out.append(finish(stack, rng, H))
+    return out, [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0},
+                 {"n": 2, "parallax": 0.6, "y_m": -0.5}]
+
+
 SCENES = {("earth", "forest"): earth_forest, ("earth", "coast"): earth_coast,
           ("mars", "canyon"): mars_canyon, ("mars", "storm"): mars_storm,
-          ("mercury", "day"): mercury_day, ("mercury", "twilight"): mercury_twilight, ("mercury", "night"): mercury_night}
-SEEDS = {"forest": 13301, "coast": 13302, "canyon": 14101, "storm": 14102, "day": 14501, "twilight": 14502, "night": 14503}
-PLANET_OF = {"forest": "earth", "coast": "earth", "canyon": "mars", "storm": "mars", "day": "mercury", "twilight": "mercury", "night": "mercury"}
+          ("mercury", "day"): mercury_day, ("mercury", "twilight"): mercury_twilight, ("mercury", "night"): mercury_night,
+          ("venus", "deck"): venus_deck, ("venus", "surface"): venus_surface}
+SEEDS = {"forest": 13301, "coast": 13302, "canyon": 14101, "storm": 14102, "day": 14501, "twilight": 14502, "night": 14503,
+         "deck": 14701, "surface": 14702}
+PLANET_OF = {"forest": "earth", "coast": "earth", "canyon": "mars", "storm": "mars", "day": "mercury", "twilight": "mercury", "night": "mercury",
+             "deck": "venus", "surface": "venus"}
 
 
 # ---------------------------------------------------------------- lock-free preview: 1080p composite at 1x + the 2x seam check
@@ -664,7 +806,7 @@ def preview(out_dir, scenes=("forest", "coast"), from_png=False):
     import preview_c2_earth_rigs as PR
     for scene in scenes:
         planet = PLANET_OF[scene]
-        tag = {"earth": "b133", "mars": "b141", "mercury": "b145"}[planet]
+        tag = {"earth": "b133", "mars": "b141", "mercury": "b145", "venus": "b147"}[planet]
         d = os.path.join(out_dir, tag, scene)
         os.makedirs(d, exist_ok=True)
         u8, info = [], []
@@ -701,7 +843,7 @@ def preview(out_dir, scenes=("forest", "coast"), from_png=False):
             import build_c2_mars_ground as MG
             S, _w = GS.sheets(("regolith",), MG.mats)
             strip = "regolith"
-        elif planet == "mercury":                                 # no Mercury strip yet: the Earth stone recipe stands in
+        elif planet in ("mercury", "venus"):                      # no strip yet: the Earth stone recipe stands in
             S, _w = GS.sheets(("stone",))
             strip = "stone"
         else:
