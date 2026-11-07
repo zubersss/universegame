@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Meridian.Art;
 using Meridian.Terrain;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace Meridian.View2D
@@ -75,12 +76,21 @@ namespace Meridian.View2D
             keys = KeysFor(planet);
             framesBy = new Sprite[keys.Length][]; fillBy = new Sprite[keys.Length]; handles = new AsyncOperationHandle<IList<Sprite>>[keys.Length];
             frames = null; dirt = null; dirty = true;
+            var loadKeys = keys;
             for (int m = 0; m < keys.Length; m++)
             {
                 int material = m;
-                var h = ArtLoad.Asset<IList<Sprite>>(keys[m]);
-                handles[m] = h;
-                if (m == Grass) handle = h;
+                string key = keys[m];
+                // D-143: a strip kind not exported yet (the Mars frost strip) is probed, never loaded blind — a missing key logs an Addressables exception; the first key's strip stands in.
+                var probe = Addressables.LoadResourceLocationsAsync(key);
+                probe.Completed += loc =>
+                {
+                    bool exists = loc.Status == AsyncOperationStatus.Succeeded && loc.Result != null && loc.Result.Count > 0;
+                    ArtLoad.Release(loc);
+                    if (!exists || this == null || !ReferenceEquals(loadKeys, keys)) return; // gone, or re-configured for another planet meanwhile
+                    var h = ArtLoad.Asset<IList<Sprite>>(key);
+                    handles[material] = h;
+                    if (material == 0) handle = h;
                 h.Completed += op =>
                 {
                     if (this == null || op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;
@@ -90,8 +100,9 @@ namespace Meridian.View2D
                     var r = fr[0].rect;
                     var fill = Sprite.Create(fr[0].texture, new Rect(r.x, r.y, r.width, 8f), new Vector2(0.5f, 1f), fr[0].pixelsPerUnit, 0, SpriteMeshType.FullRect);
                     framesBy[material] = fr; fillBy[material] = fill;
-                    if (material == Grass) { frames = fr; dirt = fill; }
+                    if (material == 0) { frames = fr; dirt = fill; }
                     dirty = true;
+                };
                 };
             }
         }
