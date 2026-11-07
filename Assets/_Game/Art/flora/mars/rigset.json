@@ -1,0 +1,782 @@
+{
+  "key": "flora/mars/rigset",
+  "style": "v3",
+  "ppu": 64,
+  "rect_origin": "bottom_left",
+  "parts": [
+    {
+      "name": "frostcurl_c_curled",
+      "rect": [
+        276,
+        148,
+        60,
+        68
+      ],
+      "pivot": [
+        0.193,
+        0.1171
+      ]
+    },
+    {
+      "name": "frostcurl_c_open",
+      "rect": [
+        56,
+        136,
+        52,
+        80
+      ],
+      "pivot": [
+        0.2279,
+        0.0995
+      ]
+    },
+    {
+      "name": "frostcurl_crown",
+      "rect": [
+        280,
+        20,
+        36,
+        24
+      ],
+      "pivot": [
+        0.4904,
+        0.3008
+      ]
+    },
+    {
+      "name": "frostcurl_l_curled",
+      "rect": [
+        460,
+        156,
+        44,
+        60
+      ],
+      "pivot": [
+        0.4512,
+        0.1326
+      ]
+    },
+    {
+      "name": "frostcurl_l_open",
+      "rect": [
+        140,
+        144,
+        32,
+        72
+      ],
+      "pivot": [
+        0.6458,
+        0.1105
+      ]
+    },
+    {
+      "name": "frostcurl_r_curled",
+      "rect": [
+        0,
+        48,
+        44,
+        60
+      ],
+      "pivot": [
+        0.4916,
+        0.1324
+      ]
+    },
+    {
+      "name": "frostcurl_r_open",
+      "rect": [
+        176,
+        144,
+        32,
+        72
+      ],
+      "pivot": [
+        0.2686,
+        0.1104
+      ]
+    },
+    {
+      "name": "pipereed_mound",
+      "rect": [
+        320,
+        20,
+        44,
+        24
+      ],
+      "pivot": [
+        0.4702,
+        0.3141
+      ]
+    },
+    {
+      "name": "pipereed_pipe_a",
+      "rect": [
+        112,
+        140,
+        24,
+        76
+      ],
+      "pivot": [
+        0.4233,
+        0.0732
+      ]
+    },
+    {
+      "name": "pipereed_pipe_a_squash",
+      "rect": [
+        48,
+        48,
+        24,
+        60
+      ],
+      "pivot": [
+        0.4233,
+        0.0927
+      ]
+    },
+    {
+      "name": "pipereed_pipe_b",
+      "rect": [
+        0,
+        112,
+        24,
+        104
+      ],
+      "pivot": [
+        0.4433,
+        0.0535
+      ]
+    },
+    {
+      "name": "pipereed_pipe_b_squash",
+      "rect": [
+        28,
+        132,
+        24,
+        84
+      ],
+      "pivot": [
+        0.4433,
+        0.0662
+      ]
+    },
+    {
+      "name": "pipereed_pipe_c",
+      "rect": [
+        76,
+        48,
+        20,
+        60
+      ],
+      "pivot": [
+        0.4839,
+        0.0927
+      ]
+    },
+    {
+      "name": "pipereed_pipe_c_squash",
+      "rect": [
+        160,
+        56,
+        20,
+        52
+      ],
+      "pivot": [
+        0.4839,
+        0.107
+      ]
+    },
+    {
+      "name": "puffpod_neck",
+      "rect": [
+        296,
+        64,
+        48,
+        44
+      ],
+      "pivot": [
+        0.5023,
+        0.2021
+      ]
+    },
+    {
+      "name": "puffpod_pod",
+      "rect": [
+        184,
+        56,
+        56,
+        52
+      ],
+      "pivot": [
+        0.4714,
+        0.0967
+      ]
+    },
+    {
+      "name": "puffpod_pod_big",
+      "rect": [
+        100,
+        52,
+        56,
+        56
+      ],
+      "pivot": [
+        0.4863,
+        0.0894
+      ]
+    },
+    {
+      "name": "puffpod_pod_flat",
+      "rect": [
+        212,
+        144,
+        60,
+        72
+      ],
+      "pivot": [
+        0.4803,
+        0.0693
+      ]
+    },
+    {
+      "name": "rustbell_bell_open",
+      "rect": [
+        348,
+        64,
+        44,
+        44
+      ],
+      "pivot": [
+        0.5981,
+        0.813
+      ]
+    },
+    {
+      "name": "rustbell_bell_shut",
+      "rect": [
+        244,
+        60,
+        48,
+        48
+      ],
+      "pivot": [
+        0.2219,
+        0.6986
+      ]
+    },
+    {
+      "name": "rustbell_stem_lower",
+      "rect": [
+        340,
+        152,
+        64,
+        64
+      ],
+      "pivot": [
+        0.4948,
+        0.1319
+      ]
+    },
+    {
+      "name": "rustbell_stem_upper",
+      "rect": [
+        408,
+        152,
+        48,
+        64
+      ],
+      "pivot": [
+        0.1754,
+        0.1766
+      ]
+    },
+    {
+      "name": "scree_creeper_pads_a",
+      "rect": [
+        96,
+        4,
+        88,
+        40
+      ],
+      "pivot": [
+        0.5019,
+        0.6467
+      ]
+    },
+    {
+      "name": "scree_creeper_pads_b",
+      "rect": [
+        188,
+        4,
+        88,
+        40
+      ],
+      "pivot": [
+        0.5019,
+        0.6728
+      ]
+    },
+    {
+      "name": "scree_creeper_pads_flat",
+      "rect": [
+        396,
+        64,
+        88,
+        44
+      ],
+      "pivot": [
+        0.4863,
+        0.6493
+      ]
+    },
+    {
+      "name": "scree_creeper_rock",
+      "rect": [
+        0,
+        0,
+        92,
+        44
+      ],
+      "pivot": [
+        0.4932,
+        0.1264
+      ]
+    }
+  ],
+  "plants": [
+    {
+      "name": "rustbell",
+      "biomes": [
+        "plains",
+        "canyon"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "rustbell_stem_lower",
+          "parent": null,
+          "length": 0.675,
+          "order": 0
+        },
+        {
+          "name": "stem2",
+          "part": "rustbell_stem_upper",
+          "parent": "root",
+          "length": 0.675,
+          "offset_m": [
+            -0.015,
+            0.675
+          ],
+          "order": 1
+        },
+        {
+          "name": "bell",
+          "part": "rustbell_bell_open",
+          "parent": "stem2",
+          "length": 0.375,
+          "offset_m": [
+            0.465,
+            0.615
+          ],
+          "order": 2
+        }
+      ],
+      "swaps": {
+        "bell": [
+          "rustbell_bell_open",
+          "rustbell_bell_shut"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "bell",
+          "bone": "bell",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 2,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 12,
+        "beat_bpm": 110,
+        "squash": 0.03
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "rustbell_bell_shut"
+      }
+    },
+    {
+      "name": "puffpod",
+      "biomes": [
+        "dunes",
+        "plains"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "puffpod_neck",
+          "parent": null,
+          "length": 0.33,
+          "order": 0
+        },
+        {
+          "name": "pod",
+          "part": "puffpod_pod",
+          "parent": "root",
+          "length": 0.63,
+          "offset_m": [
+            0.0,
+            0.33
+          ],
+          "order": 1
+        }
+      ],
+      "swaps": {
+        "pod": [
+          "puffpod_pod",
+          "puffpod_pod_big",
+          "puffpod_pod_flat"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "pod",
+          "bone": "pod",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 4,
+        "beat_bpm": 110,
+        "squash": 0.05,
+        "swap_cycle": {
+          "slot": "pod",
+          "sequence": [
+            "puffpod_pod",
+            "puffpod_pod_big"
+          ],
+          "beats": [
+            1,
+            1
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "puffpod_pod_flat"
+      }
+    },
+    {
+      "name": "frostcurl",
+      "biomes": [
+        "polar",
+        "highlands"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "frostcurl_crown",
+          "parent": null,
+          "length": 0.075,
+          "order": 0
+        },
+        {
+          "name": "frond_l",
+          "part": "frostcurl_l_open",
+          "parent": "root",
+          "length": 0.93,
+          "offset_m": [
+            -0.075,
+            0.075
+          ],
+          "order": 1
+        },
+        {
+          "name": "frond_c",
+          "part": "frostcurl_c_open",
+          "parent": "root",
+          "length": 1.2,
+          "offset_m": [
+            0.0,
+            0.075
+          ],
+          "order": 2
+        },
+        {
+          "name": "frond_r",
+          "part": "frostcurl_r_open",
+          "parent": "root",
+          "length": 0.93,
+          "offset_m": [
+            0.075,
+            0.075
+          ],
+          "order": 3
+        }
+      ],
+      "swaps": {
+        "fl": [
+          "frostcurl_l_open",
+          "frostcurl_l_curled"
+        ],
+        "fc": [
+          "frostcurl_c_open",
+          "frostcurl_c_curled"
+        ],
+        "fr": [
+          "frostcurl_r_open",
+          "frostcurl_r_curled"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "fl",
+          "bone": "frond_l",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        },
+        {
+          "slot": "fc",
+          "bone": "frond_c",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 2,
+          "replaces_part": true
+        },
+        {
+          "slot": "fr",
+          "bone": "frond_r",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 3,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 10,
+        "beat_bpm": 110,
+        "squash": 0.02,
+        "swap_cycle": {
+          "slot": "fc",
+          "sequence": [
+            "frostcurl_c_open",
+            "frostcurl_c_curled"
+          ],
+          "beats": [
+            7,
+            1
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "frostcurl_c_curled",
+        "also": {
+          "fl": "frostcurl_l_curled",
+          "fr": "frostcurl_r_curled"
+        }
+      }
+    },
+    {
+      "name": "pipereed",
+      "biomes": [
+        "canyon",
+        "scree"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "pipereed_mound",
+          "parent": null,
+          "length": 0.06,
+          "order": 0
+        },
+        {
+          "name": "pipe_a",
+          "part": "pipereed_pipe_a",
+          "parent": "root",
+          "length": 0.93,
+          "offset_m": [
+            -0.165,
+            0.06
+          ],
+          "order": 1
+        },
+        {
+          "name": "pipe_b",
+          "part": "pipereed_pipe_b",
+          "parent": "root",
+          "length": 1.38,
+          "offset_m": [
+            0.0,
+            0.06
+          ],
+          "order": 2
+        },
+        {
+          "name": "pipe_c",
+          "part": "pipereed_pipe_c",
+          "parent": "root",
+          "length": 0.72,
+          "offset_m": [
+            0.165,
+            0.06
+          ],
+          "order": 3
+        }
+      ],
+      "swaps": {
+        "pa": [
+          "pipereed_pipe_a",
+          "pipereed_pipe_a_squash"
+        ],
+        "pb": [
+          "pipereed_pipe_b",
+          "pipereed_pipe_b_squash"
+        ],
+        "pc": [
+          "pipereed_pipe_c",
+          "pipereed_pipe_c_squash"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "pa",
+          "bone": "pipe_a",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        },
+        {
+          "slot": "pb",
+          "bone": "pipe_b",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 2,
+          "replaces_part": true
+        },
+        {
+          "slot": "pc",
+          "bone": "pipe_c",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 3,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 8,
+        "beat_bpm": 110,
+        "squash": 0.03
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "pipereed_pipe_b_squash",
+        "also": {
+          "pa": "pipereed_pipe_a_squash",
+          "pc": "pipereed_pipe_c_squash"
+        }
+      }
+    },
+    {
+      "name": "scree_creeper",
+      "biomes": [
+        "scree",
+        "lava_tubes"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "scree_creeper_rock",
+          "parent": null,
+          "length": 0.54,
+          "order": 0
+        },
+        {
+          "name": "pads",
+          "part": "scree_creeper_pads_a",
+          "parent": "root",
+          "length": 0.15,
+          "offset_m": [
+            0.0,
+            0.45
+          ],
+          "order": 1
+        }
+      ],
+      "swaps": {
+        "pads": [
+          "scree_creeper_pads_a",
+          "scree_creeper_pads_b",
+          "scree_creeper_pads_flat"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "pads",
+          "bone": "pads",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 0,
+        "beat_bpm": 110,
+        "squash": 0.0,
+        "swap_cycle": {
+          "slot": "pads",
+          "sequence": [
+            "scree_creeper_pads_a",
+            "scree_creeper_pads_b"
+          ],
+          "beats": [
+            1,
+            1
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "scree_creeper_pads_flat"
+      }
+    }
+  ]
+}
