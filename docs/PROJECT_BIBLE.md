@@ -726,7 +726,7 @@ away); each set is one Addressable label `stage_<planet>_<region>`. Layer textur
 | GC allocation (steady state)  | ≤ 1 KB per 300 frames; zero per-frame allocations in gameplay code |
 | Chunk generation              | ≤ 2 ms main-thread per frame; no hitch > 33 ms during streaming or at a region border |
 | Planet load                   | ≤ 5 s; space ↔ planet transition ≤ 1.5 s; hit stop never > 90 ms  |
-| Textures                      | BC7 (colour), BC5 (normals), mips on every world texture; atlases ≤ 2048²; per-layer caps in contract §10; mip streaming on with a 1.5 GB budget |
+| Textures                      | BC7 (colour), BC5 (normals); mips on every 3D world texture; v4 cartoon assets (sidecar `style: v3`: sheets, rig sets, painted layers, discs, overlays, palette strips) import without mips (contract §11.8) and are counted apart; atlases ≤ 2048², ≤ 8 sprite atlases per planet, ≤ 512 MB textures per planet (D-089); mip streaming on with a 512 MB budget |
 | Animation                     | surveyor and apexes 60 fps clips, others 30 fps; ≤ 2 ms skinning per frame with 20 creatures |
 | Audio                         | Vorbis, streamed for music, compressed in memory for SFX          |
 | Asset size caps               | Per the contract (§4, §9, §10 there); the importer rejects oversize files |
