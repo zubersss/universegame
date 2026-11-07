@@ -9,7 +9,7 @@ TextureImporter:
   serializedVersion: 13
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 1
+    enableMipMap: 0
     sRGBTexture: 1
     linearTexture: 0
     fadeOut: 0
@@ -25,7 +25,7 @@ TextureImporter:
     normalMapFilter: 0
     flipGreenChannel: 0
   isReadable: 0
-  streamingMipmaps: 1
+  streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
   ignoreMipmapLimit: 0
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 2
+    filterMode: 1
     aniso: 2
     mipBias: 0
     wrapU: 1
@@ -46,20 +46,20 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 9
-  spritePivot: {x: 0.5, y: 0.0078125}
-  spritePixelsToUnits: 128
+  spritePivot: {x: 0.5, y: 0.046296}
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
-  alphaIsTransparency: 0
+  alphaIsTransparency: 1
   spriteTessellationMethod: 0
   spriteTessellationDetail: -1
   spriteGeometrySubdivision: -1
-  textureType: 0
+  textureType: 8
   textureShape: 1
   singleChannelComponent: 0
   flipbookRows: 1
@@ -115,23 +115,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: station_hull_b_color_0
+      name: station_hull_b_0
       rect:
         serializedVersion: 2
-        x: 11
-        y: 8
-        width: 466
-        height: 388
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 244
+        height: 216
+      alignment: 9
+      pivot: {x: 0.5, y: 0.046296}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: b8a01905d05d890f0800000000000000
-      internalID: -1109903054983853429
+      spriteID: 84b50bdef0d7e4c479d103a69f8cbbc9
+      internalID: -236235899
       vertices: []
       indices: 
       edges: []
@@ -146,16 +146,11 @@ TextureImporter:
     indices: 
     edges: []
     weights: []
-    secondaryTextures:
-    - texture: {fileID: 2800000, guid: cd1ff1ab97561464d8a303c01d01bb3d, type: 3}
-      name: _NormalMap
-    - texture: {fileID: 2800000, guid: b1f130280ed37224cbb0933fedf34cf9, type: 3}
-      name: _EmissionMap
-    - texture: {fileID: 2800000, guid: 8881e7ddbadbbe84b8f511354419551d, type: 3}
-      name: _MaskTex
+    secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      station_hull_b_0: -236235899
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
