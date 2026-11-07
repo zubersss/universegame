@@ -729,6 +729,64 @@ SPECIES = {
 }
 
 
+SOURCES = os.path.join(os.path.dirname(HERE), "sources", "creatures")
+REPLACES_V2 = ("dustskater", "scree_stalker")           # v2 models in Art under these keys (D-117 / D-119 type change)
+
+
+def build(name, out=None):
+    """The source .blend for one Mars creature (B-142 export path, inside Blender): one GP object, one drawing per
+    frame, clip markers; the same drawing functions the lock-free preview runs through fakegp."""
+    import bpy
+    sp = SPECIES[name]
+    out = out or os.path.join(SOURCES, f"mars_{name}_v3.blend")
+    scene = G.new_scene()
+    coll = G.collection(name)
+    ob, gp = G.gp_object(name, coll)
+    M = sp["mats"](gp, name)
+    layer = gp.layers.new("art")
+    for f, pose in enumerate(sp["poses"]()):
+        sp["draw"](G.drawing(layer, f + 1), M, pose, seed=5 * f)
+    G.mark_clips(scene, [(c, n) for c, n, _l in sp["clips"]])
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    bpy.ops.wm.save_as_mainfile(filepath=out)
+    return out
+
+
+def build_dustskater(out=None):          # manifest build_fn: render.py passes the source path
+    return build("dustskater", out)
+
+
+def build_scree_stalker(out=None):
+    return build("scree_stalker", out)
+
+
+def build_tube_lurker(out=None):
+    return build("tube_lurker", out)
+
+
+def build_polar_crawler(out=None):
+    return build("polar_crawler", out)
+
+
+def entry_for(name):
+    """The manifest row of one Mars creature (the preview reviews with the same dict the export reads)."""
+    sp = SPECIES[name]
+    e = {"key": f"creatures/mars/{name}", "style": "v3", "source": f"sources/creatures/mars_{name}_v3.blend",
+         "build": "scripts/build_creatures_mars_v3.py", "build_fn": f"build_{name}", "collection": name,
+         "frame": list(sp["frame"]), "pivot": [0.5, 0.0], "facing": "right", "squash_root": True, "planet": "mars",
+         "seed": sp["seed"], "bg_scene": "canyon", "beside": "characters/surveyor/side", "review_name": f"b142_mars_{name}",
+         "clips": [{"name": c, "frames": n, "loop": lp} for c, n, lp in sp["clips"]],
+         "self_check": dict(sp["self_check"], style="the B-132 kit (Gus's construction); LEAD judges"), "ours": sp["ours"],
+         "note": "B-142: v3.1 Mars creature sheet in the D-125 palette, faces kept (D-101), no teeth (D-087)"}
+    if name in REPLACES_V2:
+        e["replaces_v2"] = True
+        e["note"] += "; replaces the v2 model under this key (.glb + normal / mask / emission removed on export; the .meta files are UNITY's)"
+    if sp.get("den"):
+        e["den"] = sp["den"]
+        e["note"] += f"; D-126: idles and reacts behind its den prop {sp['den']} (drawn in front by UNITY on the same pivot)"
+    return e
+
+
 def preview(out_dir, name="dustskater"):
     """The export's own review layout (render.py v3_sheet_review) from exact frames, on a Mars stand-in (not the Earth plains)."""
     import json
@@ -781,8 +839,7 @@ def preview(out_dir, name="dustskater"):
     stats = {"outer_px": (min(w[1] for w in outer), max(w[2] for w in outer)), "inner_px": (min(w[1] for w in inner), max(w[2] for w in inner)),
              "inner_n": len(inner), "palette": v3.palette_hits(sheet, "mars"), "problems": problems,
              "sheet_wh": (sheet.shape[1], sheet.shape[0]), "png_kb": nb // 1024}
-    entry = {"key": meta["key"], "planet": "mars", "bg_scene": "-", "beside": "characters/surveyor/side",
-             "self_check": dict(sp["self_check"], style="the B-132 kit (Gus's construction); LEAD judges"), "ours": sp["ours"]}
+    entry = entry_for(name)
     out = os.path.join(out_dir, f"review_b139_mars_{name}_preview.png")
     boxes = review.v3_sheet_review(entry, meta, frames, png, out, stats)
     print(name, f"sheet {sheet.shape[1]}x{sheet.shape[0]} {nb // 1024} KB, ink {stats['outer_px'][0]:.2f}-{stats['outer_px'][1]:.2f} / "
