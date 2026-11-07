@@ -179,8 +179,11 @@ RIG = {
         {"name": "lure", "part": "lure_lit", "parent": "head", "offset_m": [6.0, 2.6], "order": 5},
     ],
     "swaps": {"lure": ["lure_lit", "lure_dim", "lure_flare"]},
-    "idle": {"type": "sway", "beat_bpm": 60, "amplitude_deg": {"head": 2, "body1": 4, "body2": 6, "tail": 9, "lure": 8},
-             "lag": 0.8, "swap_cycle": {"lure": ["lure_lit"] * 6 + ["lure_dim"] * 2}},
+    "slots": [{"slot": "lure", "bone": "lure", "offset_m": [0.0, 0.0], "order": 5, "replaces_part": True}],
+    # Bible §9.2 beats are 100-120 bpm (validate_rigset): the giant sways once per 4 beats at 110 bpm (2.18 s, the accepted
+    # design's slow 2 s sway); cycle_beats is new for U-119 (plants sway once per 2 beats).
+    "idle": {"type": "sway", "beat_bpm": 110, "cycle_beats": 4, "amplitude_deg": {"head": 2, "body1": 4, "body2": 6, "tail": 9, "lure": 8},
+             "lag": 0.8, "swap_cycle": {"slot": "lure", "sequence": ["lure_lit", "lure_dim"], "beats": [6, 2]}},
     "react": {"radius_m": 12.0, "action": "jaw_open", "jaw_deg": -24, "head_deg": 4, "swap": {"lure": "lure_flare"}},
 }
 
@@ -243,14 +246,40 @@ def render_pose(rot_deg, swaps, scale=1.0, ss=1, seed=3):
     return GR.render_frame(fakegp.strokes_of(d, gp, as_object=("hadal_maw", "art")), W_, H_, 64 * scale, piv, ss=ss, seed=seed)
 
 
-def preview(out_dir):
+SRC = os.path.join(os.path.dirname(HERE), "sources", "creatures")
+
+
+def build(out=os.path.join(SRC, "earth_hadal_maw_rigset.blend")):
+    """Blender (B-136 export): one GP object per part around its pivot (the bone origin), the rig on scene["rig_plants"]
+    (render.py's do_v3_rigset packs the parts and writes the json's plants from it)."""
+    import json as _json
+    import bpy
+    scene = G.new_scene()
+    scene["rig_plants"] = _json.dumps([RIG])
+    coll = G.collection("parts")
+    for name, fn in PARTS.items():
+        ob, gp = G.gp_object("part_" + name, coll)
+        layer = gp.layers.new("art")
+        fn(G.drawing(layer, 1), mats(gp))
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    bpy.ops.wm.save_as_mainfile(filepath=out)
+    return out
+
+
+def main(out):
+    """render.py review_script (B-136 accept): the assembled creature at 1x beside the surveyor (1x), the loops, stamped."""
+    preview(os.path.dirname(out), scale=1.0, path=out, stamp="export")
+    return []
+
+
+def preview(out_dir, scale=0.5, path=None, stamp="preview (not exported)"):
     import numpy as np
     sys.path.insert(0, os.path.dirname(HERE))
     import review
     import preview_c2_earth_rigs as PR
     from meridian import v3
-    img, widths = render_pose(*pose_idle(0), scale=0.5, ss=2)      # 0.5x here (memory); the 1x stamped review comes with the export
-    widths = [(a * 2, b * 2, c * 2) for a, b, c in widths]          # reported at 1x
+    img, widths = render_pose(*pose_idle(0), scale=scale, ss=2)    # 0.5x for the lock-free design look; 1x (ss 2) in the export slot
+    widths = [(a / scale, b / scale, c / scale) for a, b, c in widths]   # reported at 1x
     W = img.shape[1] + 260
     rows = []
     head = np.tile(review.PAPER, (30, W, 1)).astype(np.float32)
@@ -263,13 +292,13 @@ def preview(out_dir):
     review._over(deep, img, 10, 30)
     try:
         fr, piv = PR.surveyor_frame()
-        fr = fr[::2, ::2]
+        fr = fr[::2, ::2] if scale == 0.5 else fr
         review._over(deep, fr, img.shape[1] + 40, deep.shape[0] - fr.shape[0] - 30)
     except Exception:  # noqa: BLE001
         pass
-    review._label(deep, "0.5x in trench water beside the surveyor (2 m, also 0.5x): ~34 m long, over two screens wide at 1x", 6, 6)
+    review._label(deep, f"{scale:g}x in trench water beside the surveyor (2 m, also {scale:g}x): ~34 m long, over two screens wide at 1x", 6, 6)
     rows.append(deep)
-    for title, poses in (("idle 8 (a sway travelling down the bones on 60 bpm; the lure bobs, dims on 6-7)", [pose_idle(i) for i in range(8)]),
+    for title, poses in (("idle 8 (a sway travelling down the bones, once per 4 beats at 110 bpm; the lure bobs, dims on 6-7)", [pose_idle(i) for i in range(8)]),
                          ("react 8 (the jaw opens to 24 deg on a cavern + tongue, the head lifts, the lure flares, settle)", [pose_react(i) for i in range(8)])):
         frames = [render_pose(r, s, scale=0.25, ss=2, seed=9 + k)[0] for k, (r, s) in enumerate(poses)]
         fw, fh = frames[0].shape[1], frames[0].shape[0]
@@ -289,8 +318,8 @@ def preview(out_dir):
     review._label(foot, "faces: one pie eye, a soft brow, a closed smile; open jaw = a dark cavern with a tongue, no teeth (d-087); glow = drawn tones", 6, 28)
     rows.append(foot)
     out = np.vstack(rows)
-    review._label(out, __import__("time").strftime("%m-%d %H:%M") + " preview (not exported)", 2, out.shape[0] - 16)
-    path = os.path.join(out_dir, "review_b136_hadal_maw_preview.png")
+    review._label(out, __import__("time").strftime("%m-%d %H:%M") + " " + stamp, 2, out.shape[0] - 16)
+    path = path or os.path.join(out_dir, "review_b136_hadal_maw_preview.png")
     review.write(path, out)
     print("written", path, f"1x frame {img.shape[1]}x{img.shape[0]}")
 
