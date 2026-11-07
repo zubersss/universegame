@@ -265,7 +265,7 @@ namespace Meridian.Tests
                 long ws = r.workingSetMB > 0 ? r.workingSetMB : r.systemMemoryMB;
                 Row("Working set · Earth C0 (v4, D-089)", "< 2.0 GB (warn 1.7)", $"{ws} MB (Editor process: an upper bound of the build){(ws >= 1741 && ws < 2048 ? ", above the 1.7 GB warning line" : "")}", ws < 2048);
                 int animated = 0;
-                foreach (var a in UnityEngine.Object.FindObjectsByType<Animator>(FindObjectsSortMode.None)) if (a.isActiveAndEnabled && a.runtimeAnimatorController != null) animated++;
+                foreach (var a in UnityEngine.Object.FindObjectsByType<Animator>(FindObjectsInactive.Exclude)) if (a.isActiveAndEnabled && a.runtimeAnimatorController != null) animated++;
                 var flora = side.cartoon.Flora;
                 Row("Animated objects · Earth C0", "≤ 40 on screen (Bible §9.6)", $"{animated} Animators running (flora full rate {(flora != null ? flora.FullRateCount : 0)}, cheap idle {(flora != null ? flora.CheapCount : 0)}, plants {(flora != null ? flora.Plants.Count : 0)})", animated <= 40);
                 int atlases = AtlasFilesFor("earth");
@@ -280,6 +280,21 @@ namespace Meridian.Tests
         }
 
         /// <summary>Import-time rows (textures, audio, size caps) read from the importers.</summary>
+        /// <summary>U-101: the planet's sprite atlases on disk (Settings/Atlases/planet_&lt;planet&gt;*.spriteatlasv2); -1 outside the Editor.</summary>
+        static int AtlasFilesFor(string planet)
+        {
+#if UNITY_EDITOR
+            const string dir = "Assets/_Game/Settings/Atlases";
+            if (!System.IO.Directory.Exists(dir)) return 0;
+            int n = 0;
+            foreach (var f in System.IO.Directory.GetFiles(dir, "*.spriteatlasv2"))
+                if (System.IO.Path.GetFileNameWithoutExtension(f).StartsWith("planet_" + planet, StringComparison.Ordinal)) n++;
+            return n;
+#else
+            return -1;
+#endif
+        }
+
         void StaticRows()
         {
 #if UNITY_EDITOR
