@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Meridian.EditorTools;
 using Meridian.Items;
 using Meridian.Save;
 using Meridian.Terrain;
@@ -150,5 +151,29 @@ namespace Meridian.Tests
             Assert.AreEqual(100f, m.player.suit, "full suit");
             Assert.AreEqual(64f, m.player.health, "health kept");
         }
+            /// <summary>B-128 / cycle 257: every item icon the registry names is an Addressables entry (icons/&lt;key&gt;/base in Art or Placeholders, or the prop key whose sprite is the icon), so no slot can draw the tile stand-in by accident.</summary>
+        [Test]
+        public void EveryItemIconResolvesToAnAddress()
+        {
+            var addresses = new HashSet<string>();
+            foreach (var g in ArtImporter.Settings.groups)
+            {
+                if (g == null) continue;
+                foreach (var e in g.entries) if (e != null && e.address != null) addresses.Add(e.address);
+            }
+            Assert.Greater(addresses.Count, 0, "the Addressables settings have entries");
+            var missing = new List<string>();
+            int withIcon = 0;
+            foreach (var d in ItemRegistry.All)
+            {
+                if (string.IsNullOrEmpty(d.icon)) continue;
+                withIcon++;
+                // icons/<key>/base for most items; a prop key (props/common/shelter_wall) when the prop's own sprite is the icon.
+                if (!addresses.Contains(d.icon)) missing.Add($"{d.key} -> {d.icon}");
+            }
+            Assert.Greater(withIcon, 20, "most items carry an icon");
+            Assert.IsEmpty(missing, "icons without an address: " + string.Join(", ", missing));
+        }
+
     }
 }

@@ -46,7 +46,8 @@ namespace Meridian.Tests
                 Assert.NotNull(sky, "CartoonStage builds the ClimbSky");
                 Assert.NotNull(sky.Gradient, "the gradient strip exists");
                 Assert.NotNull(sky.Stars, "the star renderer exists");
-                Assert.AreEqual(ParallaxLayers.BackOrder - 2, sky.Gradient.sortingOrder, "the gradient draws behind the painted layers");
+                Assert.AreEqual(ParallaxLayers.BackOrder - 3, sky.Gradient.sortingOrder, "the flat gradient draws behind everything");
+                Assert.NotNull(sky.Overlay, "the overlay strip exists");
                 Assert.AreEqual(ParallaxLayers.BackOrder - 1, sky.Stars.sortingOrder, "the stars sit between the gradient and the painting");
                 Assert.AreEqual(side.sideCamera.transform, sky.Gradient.transform.parent, "the gradient rides the side camera");
                 Assert.AreEqual(side.Config.EscapeLineY, sky.escapeY, 1e-4f, "the Escape Line from PlanetConfig");
@@ -56,10 +57,11 @@ namespace Meridian.Tests
                 while (sky.layers.placeholders.Count > 0 && sky.layers.placeholders[0] && Time.realtimeSinceStartup < until) yield return null;
                 Assert.IsTrue(sky.layers.placeholders.Count > 0 && !sky.layers.placeholders[0], "backgrounds/earth/plains/layer0 loaded");
                 yield return null;
-                Assert.IsTrue(sky.Textured, "the strip continues layer0's own top band (no flat join)");
-                var mpb = new MaterialPropertyBlock();
-                sky.Gradient.GetPropertyBlock(mpb);
-                Assert.AreSame(sky.layers.renderers[0].sprite.texture, mpb.GetTexture("_MainTex"), "the strip samples layer0's sheet");
+                Assert.IsTrue(sky.Textured, "the overlay fades layer0's own painting into the sky (no flat join)");
+                Assert.IsTrue(sky.Overlay.enabled, "the overlay is on once the art is in");
+                Assert.AreEqual(ParallaxLayers.BackOrder + sky.layers.Layout.layers.Length, sky.Overlay.sortingOrder, "the overlay draws in front of every painted layer");
+                Assert.Less(sky.Overlay.sortingOrder, 0, "and behind the terrain");
+                Assert.IsTrue(sky.TopMeasured, "the edge colour is measured from layer0's top band");
 
                 // On the pad: the camera at rest sees painted sky up to the frame top; every visible row of the gradient is the top colour.
                 sky.Place(sky.anchorY);

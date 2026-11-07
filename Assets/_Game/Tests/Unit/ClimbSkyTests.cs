@@ -71,20 +71,26 @@ namespace Meridian.Tests
         }
 
         [Test]
-        public void TheBandTintIsWhiteAtTheEdgeAndDarkAtTheSpan()
+        public void TheOverlayFadesThePaintingsGrainIntoTheSkyUnderTheEdge()
         {
-            var white = ClimbSkyMath.BandTint(Top, 0f, 40f);
-            Assert.AreEqual(1f, white.r, 1e-5f); Assert.AreEqual(1f, white.g, 1e-5f); Assert.AreEqual(1f, white.b, 1e-5f);
-            var below = ClimbSkyMath.BandTint(Top, -10f, 40f);
-            Assert.AreEqual(1f, below.g, 1e-5f, "the painting shows as painted at and under its edge");
-            var dark = ClimbSkyMath.BandTint(Top, 40f, 40f);
-            Assert.Less(dark.r, 0.05f); Assert.Less(dark.g, 0.05f); Assert.Less(dark.b, 0.05f);
-            float last = 1f;
-            for (int i = 1; i <= 40; i++) { float g = ClimbSkyMath.BandTint(Top, i, 40f).g; Assert.LessOrEqual(g, last + 1e-6f, $"darker with every metre ({i})"); last = g; }
-            var mid = ClimbSkyMath.BandTint(Top, 20f, 40f);
-            var shade = ClimbSkyMath.Shade(Top, 20f, 40f).linear;
-            Assert.AreEqual(shade.g, mid.g * Top.linear.g, 1e-5f, "tint × the band's mean = the shade");
-            Assert.AreEqual(1f, ClimbSky.BandM, 1e-6f, "a 1 m band at PPU 64");
+            float f = ClimbSky.FadeM;
+            Assert.AreEqual(0f, ClimbSkyMath.OverlayAlpha(0f, f), 1e-6f, "clear at the edge: above it the gradient is the sky");
+            Assert.AreEqual(0f, ClimbSkyMath.OverlayAlpha(5f, f), 1e-6f, "clear above the edge (the stars show through)");
+            Assert.AreEqual(1f, ClimbSkyMath.OverlayAlpha(-1e-4f, f), 1e-3f, "opaque just under the edge");
+            Assert.AreEqual(0f, ClimbSkyMath.OverlayAlpha(-f, f), 1e-6f, "gone FadeM under it");
+            Assert.AreEqual(0f, ClimbSkyMath.OverlayAlpha(-40f, f), 1e-6f, "and below (the hills keep their paint)");
+            float last = 0f;
+            for (int i = 1; i <= 15; i++)
+            {
+                float a = ClimbSkyMath.OverlayAlpha(-f + i * f / 16f, f);
+                Assert.GreaterOrEqual(a, last - 1e-6f, $"rising toward the edge ({i})");
+                last = a;
+            }
+            Assert.Greater(ClimbSkyMath.OverlayAlpha(-f * 0.5f, f), 0.4f);
+            Assert.Less(ClimbSkyMath.OverlayAlpha(-f * 0.5f, f), 0.6f, "half-way through the fade at half strength");
+            Assert.GreaterOrEqual(f, 1f, "at least a metre of fade (one strip row)");
+            Assert.LessOrEqual(f, 2f, "under the painted clouds' tops (layer0's top 90 px are plain sky)");
+            Assert.AreEqual(1f, ClimbSky.BandM, 1e-6f, "1 m rows at PPU 64");
             Assert.GreaterOrEqual(ClimbSky.Rows * ClimbSky.BandM, 16.875f * 1.04f + 2f * ClimbSky.BandM, "the rows cover the cartoon frame with a spare row either side");
         }
 

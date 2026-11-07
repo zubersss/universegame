@@ -19,6 +19,7 @@ MonoBehaviour:
   meshLitEmissive: {fileID: 2100000, guid: e9084edb029bd244893010700efc7f0d, type: 2}
   terrainBlocks: {fileID: 2100000, guid: be7a751b1d75b894583b11ad32ea7065, type: 2}
   cartoon: {fileID: 2100000, guid: bd7db89ae8ba1634c816e9a4045db5ac, type: 2}
+  disc: {fileID: 2100000, guid: 97d70ffb38d52334d90b23bb0bfdf9a4, type: 2}
   blockTextures:
   - planet: earth
     material: grass

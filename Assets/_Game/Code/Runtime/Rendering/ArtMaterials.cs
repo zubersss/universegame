@@ -24,6 +24,8 @@ namespace Meridian.Rendering
         public Material terrainBlocks;
         /// <summary>U-100: the flat ink-outlined silhouette every 3D model wears on the cartoon path (MERIDIAN/CartoonSilhouette).</summary>
         public Material cartoon;
+        /// <summary>U-117: MERIDIAN/Sprite_LitDisc for the painted planet discs and moons (planets/*/disc, luna): the limb resolved at the sampled alpha's iso-line, so the 64-px frames' hard edge is a smooth contour at the near-range zoom, not texel stairs.</summary>
+        public Material disc;
         /// <summary>U-073 / B-080: block material textures per planet (ArtImporter fills it; the arrays are built at runtime).</summary>
         public List<BlockTexture> blockTextures = new List<BlockTexture>();
 
@@ -65,11 +67,17 @@ namespace Meridian.Rendering
             return lookup.Contains(key);
         }
 
+        /// <summary>U-117: a painted disc or moon key (planets/&lt;name&gt;/disc, planets/&lt;name&gt;/luna); rings and rig sets keep the plain lit material.</summary>
+        public static bool IsDiscKey(string key) =>
+            key != null && key.StartsWith("planets/", System.StringComparison.Ordinal)
+            && (key.EndsWith("/disc", System.StringComparison.Ordinal) || key.EndsWith("/luna", System.StringComparison.Ordinal));
+
         /// <summary>The material for a key, or null when the registry is missing (renderer keeps its default).</summary>
         public static Material MaterialFor(string key)
         {
             var a = Active;
             if (a == null) return null;
+            if (a.disc != null && IsDiscKey(key)) return a.disc;
             return a.IsEmissive(key) && a.litEmissive != null ? a.litEmissive : a.lit;
         }
 

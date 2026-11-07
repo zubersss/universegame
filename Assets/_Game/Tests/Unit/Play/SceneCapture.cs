@@ -1777,7 +1777,7 @@ namespace Meridian.Tests
                 float low = ship.Body.position.y + 28f;
                 while (ship.Body.position.y < low && Time.realtimeSinceStartup < timeout) yield return new WaitForFixedUpdate();
                 yield return Shot("2_climb_28m");
-                Assert.IsTrue(sky.Textured, "the strip continues layer0's own top band at the join (no flat band)");
+                Assert.IsTrue(sky.Textured, "the overlay fades layer0's own painting into the sky at the join (no flat band)");
                 // 3. Half-way: straight up under full thrust.
                 while (ship.Body.position.y < half && Time.realtimeSinceStartup < timeout) yield return new WaitForFixedUpdate();
                 yield return Shot("3_halfway");

@@ -45,8 +45,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 161ed32ad6bb8574eab78dea16ce86d1
+    m_Address: planets/mercury/disc_near/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 19d8e29726953b24f881f44b967191df
     m_Address: planets/luna/surface
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1f002e805d9104f4dadb1e33752a70b7
+    m_Address: planets/mars/disc_near
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -130,6 +140,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5498b0bbffc7ecd4491abd7d4b83bcef
+    m_Address: planets/venus/disc_near/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 57dbd7c65ac387e4ea52c1d1946cd97e
     m_Address: planets/jupiter/surface
     m_ReadOnly: 0
@@ -142,6 +157,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5f85f35b8fcf20e438e799403d23a8c1
     m_Address: planets/sun/disc_rig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5f97585e0dfd9b84f96d8069cc9f83d0
+    m_Address: planets/earth/luna_near/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -205,8 +225,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 84b79bdef96f445418bbb97ac7c0e887
+    m_Address: planets/mars/disc_near/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8a6bd4ef227afc94ba0a13379722722a
     m_Address: planets/jupiter/disc/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8f19cabd67e75e34db8b6a86bca9e39f
+    m_Address: planets/earth/disc_near/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -235,8 +265,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9c37f6399d3cdc14db0bc8673c3d142c
+    m_Address: planets/mercury/disc_near
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9c72bc141aeaed04ea417a03e5c2a1a3
     m_Address: planets/venus/surface
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9cc2f87be4b7db441ac347c22c770a65
+    m_Address: planets/venus/disc_near
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a23192c459598884580569d3f6f6d39a
+    m_Address: planets/earth/luna_near
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -272,6 +317,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ae5041d9c0005c04da4bd3d52f7d6c18
     m_Address: planets/venus/glow
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b72c80e7ffe010c4187dda32ed83bfff
+    m_Address: planets/earth/disc_near
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

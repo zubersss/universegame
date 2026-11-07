@@ -16,7 +16,7 @@ namespace Meridian.Ship
         public const float AmberLine = 1.2f;
         public static readonly Color Amber = new Color(1f, 0.72f, 0.2f, 1f);
         /// <summary>U-104: the block sits under the gauges and the suit rows of SideHud.</summary>
-        public const float RowLabelY = -286f, RowValueY = -310f, WarningY = -348f;
+        public const float RowLabelY = -316f, RowValueY = -340f, WarningY = -380f;
 
         public enum TwrState { Ok, Amber, CannotClimb }
 

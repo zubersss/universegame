@@ -53,7 +53,14 @@ namespace Meridian.UI
             // U-104 (D-090): Patrick Hand carries every HUD, panel and menu string (bold is synthetic on the one face); JetBrains Mono until the theme has it.
             t.font = theme.hudTtf != null ? theme.HudFace : bold ? theme.Bold : theme.Regular;
             t.fontStyle = bold && theme.hudTtf != null ? FontStyle.Bold : FontStyle.Normal;
-            if (theme.hudTtf != null) fontSize = Mathf.RoundToInt(fontSize * HudFaceScale); // the handwritten face sits a third smaller than the monospace at the same size
+            if (theme.hudTtf != null)
+            {
+                fontSize = Mathf.RoundToInt(fontSize * HudFaceScale); // the handwritten face sits a third smaller than the monospace at the same size
+                var ink = t.gameObject.AddComponent<Outline>();     // an ink rim: the light strings read over Earth's bright sky too (the 1080p capture)
+                ink.effectColor = new Color(0.03f, 0.04f, 0.07f, 1f);   // full-strength: a 0.7 rim at 1 px still washed out on Earth's sky (05:02 frame)
+                ink.effectDistance = new Vector2(1.5f, -1.5f);
+                ink.useGraphicAlpha = false;                         // the rim keeps its own alpha: the theme's 0.6-alpha labels still read on a light sky
+            }
             t.fontSize = fontSize;
             t.alignment = align;
             t.color = color ?? theme.text;

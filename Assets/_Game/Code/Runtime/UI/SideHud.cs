@@ -93,13 +93,13 @@ namespace Meridian.UI
             OxygenFill = UiKit.Bar(root, "Oxygen", tl, new Vector2(24f, -98f), new Vector2(220f, 6f), theme.oxygen);
             OxygenText = UiKit.Text(root, "OxygenValue", tl, new Vector2(252f, -88f), new Vector2(80f, 24f), 18, false, TextAnchor.MiddleLeft, theme.label);
             OxygenText.text = "100"; // placeholder until the Envirosuit oxygen system (M3)
-            // U-104: the suit rows sit under the dials (y −216 … −258); the ship block (ShipHud) follows under them.
-            HazardLabel = UiKit.Text(root, "HazardKind", new Vector2(0f, 1f), new Vector2(24f, -216f), new Vector2(200f, 18f), 13, false, TextAnchor.MiddleLeft, UiTheme.Active.label);
+            // U-104: the suit rows sit under the dials and their numbers (y −246 … −288); the ship block (ShipHud) follows under them.
+            HazardLabel = UiKit.Text(root, "HazardKind", new Vector2(0f, 1f), new Vector2(24f, -246f), new Vector2(200f, 18f), 13, false, TextAnchor.MiddleLeft, UiTheme.Active.label);
             HazardLabel.text = KindNames[(int)Meridian.Hazards.HazardKind.Cryo];
-            CryoText = UiKit.Text(root, "CryoLevel", tl, new Vector2(110f, -216f), new Vector2(30f, 18f), 13, true, TextAnchor.MiddleLeft, new Color(0.6f, 0.85f, 1f, 1f));
-            Label(root, "SUIT", -236f);
-            SuitFill = UiKit.Bar(root, "Suit", tl, new Vector2(24f, -258f), new Vector2(220f, 6f), new Color(0.6f, 0.85f, 1f, 1f));
-            SuitRateText = UiKit.Text(root, "SuitRate", tl, new Vector2(252f, -248f), new Vector2(120f, 24f), 16);
+            CryoText = UiKit.Text(root, "CryoLevel", tl, new Vector2(130f, -246f), new Vector2(30f, 18f), 13, true, TextAnchor.MiddleLeft, new Color(0.6f, 0.85f, 1f, 1f));
+            Label(root, "SUIT", -266f);
+            SuitFill = UiKit.Bar(root, "Suit", tl, new Vector2(24f, -288f), new Vector2(220f, 6f), new Color(0.6f, 0.85f, 1f, 1f));
+            SuitRateText = UiKit.Text(root, "SuitRate", tl, new Vector2(252f, -278f), new Vector2(120f, 24f), 16);
             SuitRateText.text = "";
             BuildGauges(root);
 
