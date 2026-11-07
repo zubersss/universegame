@@ -1,4 +1,4 @@
-# C2 Mercury — U-123 (Mercury on the cartoon stage) — UNITY hand-off (2026-11-07, in progress)
+# C2 Mercury — U-123 (Mercury on the cartoon stage) — UNITY hand-off (2026-11-07 14:5x: ready for review with U-131)
 
 Decisions applied: D-146 (the camp on the plain; the band datum from the generator's surface), D-118 (the climb sky on the cartoon path), D-124 / D-133 (no 3D-path Mercury test left to retire), D-126 (den species), D-130 (the Mercury palette). Art: B-148 (the Mercury rig set, the regolith / slate strips), B-149 (the day / twilight / night sets), B-150 (the four creature sheets + `props/mercury/ice_burrow`) — exported after the code (D-119's order: the code binds by key the moment they land).
 
@@ -32,14 +32,36 @@ Decisions applied: D-146 (the camp on the plain; the band datum from the generat
   4. **BudgetGate 14:07–14:08 green** (every Editor row; perf_2026-11-07.md): Earth avg 6.42 / p99 14.44 ms, 131 draw calls; Space 3.10 / 5.72 ms; Mars 4.61 / 8.13; dust storm 4.60 / 7.82; FX peak 5.15 / 10.72; launch 0.89 s; chunk streaming p99 1.16 ms, 0/400 over 2 ms; Mars entry 1.35 s (Editor, info); GC 0 B per 300 frames everywhere.
   5. P-48 (LEAD yes): the strip sheets import Repeat in u, Clamp in v (228687c0; with Repeat in v each frame's bottom row sampled the sheet's transparent top row: a faint line 2 m under every ground line). B-165's RGBA gutter re-export (e0f476c7, 14:10) re-imported with it at the build; the nine metas at wrapV 1 in 9b213611.
   6. **Build/MERIDIAN_0.4.4 (development) BUILD OK 14:15, 550 MB, 75 s**: the Mercury code + D-146 + the fill fix + P-48 + the RGBA strips. A dev build; Build/MERIDIAN_0.4.3 stays the owner's (D-144).
-- Owed, one short lock when the memory gate opens (free RAM 0.65 GB at 14:37 with no Unity or Blender running): the 13-leg probe on 0.4.4 (the Mercury legs, the Creep second loop with the Mono heap and the native reserve per visit) and U-131 (one night Mercury frame on the RGBA strips, the per-column brightness along the strip band: the max dip at the 64 px joins, 12.7 levels before).
+  7. **One lock 14:51:06–14:55:25 (4.3 min, after BLENDER's Uranus slot): the 13-leg probe on 0.4.4 — BUILD MEMORY GREEN** (below) — and CaptureU123Mercury for U-131 (the three frames in u123/ re-shot 14:55 on the RGBA strips with P-48; the capture compiled the tree with U-102 in it: clean).
 
-## Captures (u123/, 14:04–14:06, 1920×1080)
+## The 13-leg probe (Build/MERIDIAN_0.4.4, development, 14:51–14:52; the 0.4.3 run of 11:40 in brackets)
+| Row | Value |
+|---|---|
+| Planet load · Mercury | 0.75 s (tile sheets 221 ms; terrain settled 0.71 s; the rig set, strips and props done 0.04 s after) [0.75 s on the 3D path] — green |
+| Memory · Mercury | working set 922 MB, private 1256 MB, textures 315 MB, meshes 4 MB [935 / 1260 / 319] — the cartoon path costs no more than the 3D one; handles 50 own, 155 held |
+| Transition · Mercury entry | 1.01 s, worst iris-in frame 33.3 ms — green |
+| Return · Space after Mercury | private 1203 MB vs the first Space 1092; planet_mercury handles 0 after 0.0 s — released |
+| Planet load · Earth at boot / warm / again / again 2 | 1.51 s cold (tile sheets 1099 ms) / 0.75 / 0.76 / 0.64 s [1.37 cold] — green |
+| Planet load · Mars / Mars again / Venus | 0.63 / 0.67 / 0.72 s — green |
+| Memory, every leg | working set 772–954 MB, private 1092–1282 MB, textures ≤ 324 MB (Venus) — green |
+| Return · Space after Mars / Earth again | private +8.9 % / +2.3 % [+8.6 / +2.6] — green |
+| Boot → warm · Earth | working set +56 MB, private +60 MB (≤ 150) — green |
+| First-visit cost per planet (D-143, info) | 7.2 MB per planet [8] |
+| **Creep per visit (the second loop, ≤ 10 MB)** | **7 MB per visit (+1.1 %) [7.5] — green**. Per visit the Mono heap 0 MB (used 0), native allocated 0, native reserved 0, gfx driver 0, textures / meshes / shaders / handles 0: no Unity-side counter grows, so the 7 MB is process commit outside Unity's allocators and the Mono heap (the driver or the OS). A watch row: it held at 7–7.5 over 0.4.3 and 0.4.4. |
+| Film pass GPU · Earth | on 11.04 ms, off 11.15 ms: the pass costs nothing measurable at 1080p — green |
+| Mip streaming | active, 512 MB budget — green |
+
+## U-131: the 64 px strip joins on the RGBA re-export (B-165 e0f476c7 + P-48)
+The night frame's strip band (y 790–860, x 740–1430): each column's brightness against the mean of its ±2..4 neighbours, folded by x mod 64 (a join repeats at one phase, the drawing does not).
+- 14:06 frame (B-165's first export, colour-only gutters at alpha 0): the join phase (x ≡ 12) dips **10.9 levels on average, 12.8 at most**, at 10 of its 11 columns (x 780, 844, 908 … 1356); every other phase averages −0.1.
+- **14:55 frame (RGBA gutters + Clamp in v): no phase repeats a dip.** The worst phase (x ≡ 60) averages 1.8; its three 6.3 columns (x 764, 956, 1276) are the drawing itself (764 and 1276 are one strip period, 512 px, apart), the other eight read −1.3..2.0. The band reads continuous at 2× (scratch crop), and the fill below it is flat. → B-165's joins are gone.
+
+## Captures (u123/, re-shot 14:55 on the RGBA strips; the 14:04–14:06 takes LEAD passed are in 9b213611; 1920×1080)
 | Frame | What it shows | LEAD |
 |---|---|---|
 | 1_day_1x | The camp on the plain at noon under the huge low Sun, a Glassback, embercap ×24 + sunfan ×18; the regolith strip, the fill flat | passes (cycle 271) |
 | 2_twilight_1x | The dawn line at the camp, the half-set Sun under the violet band, a Flarewing over the surveyor, glassreed ×42 | passes |
-| 3_night_burrow | The first cold trap: the night set meeting the trap's floor at datum 279, the Shadewyrm peeking from its burrow, coilwort ×4 + shadebloom ×2; the slate strip | passes; the 64 px joins re-measured by U-131 on the RGBA strips |
+| 3_night_burrow | The first cold trap: the night set meeting the trap's floor at datum 279, the Shadewyrm peeking from its burrow, coilwort ×4 + shadebloom ×2; the slate strip, continuous (U-131) | passes; joins gone (U-131) |
 
 ## Open
 - The Shadewyrm's temper (Hunts in the table, shy in B-145's re-ink list) — a decision if LEAD wants it changed.
