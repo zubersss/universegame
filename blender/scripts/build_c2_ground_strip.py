@@ -48,7 +48,10 @@ def _mix(a, b, t):
 
 DIRT = _mix(P["brown"], P["mustard"], 0.38)
 STONE = _mix(P["sky"], P["brown"], 0.40)
-KEYS = {"grass": "terrain/earth/ground_strip", "soil": "terrain/earth/ground_strip_soil", "stone": "terrain/earth/ground_strip_stone"}
+SAND = _mix(P["mustard"], P["offwhite"], 0.55)       # the B-133 coast dunes' sand
+KEYS = {"grass": "terrain/earth/ground_strip", "soil": "terrain/earth/ground_strip_soil", "stone": "terrain/earth/ground_strip_stone",
+        "sand": "terrain/earth/ground_strip_sand"}  # sand: the coast (LEAD cycle 252), the same frame contract
+KINDS = tuple(KEYS)
 
 
 def mats(gp):
@@ -62,6 +65,11 @@ def mats(gp):
         "grass": G.mat(gp, "grass", fill=P["green"], ink=False),
         "grass_sh": G.mat(gp, "grass_mid", fill=G.shadow_of(P["green"]), ink=False),
         "tuft": G.mat(gp, "tuft", fill=P["green"], behind=True),
+        "sand": G.mat(gp, "sand", fill=SAND, ink=False),
+        "sand_sh": G.mat(gp, "sand_mid", fill=G.shadow_of(SAND), ink=False),
+        "sand_dp": G.mat(gp, "sand_deep", fill=G.deep_of(SAND), ink=False),
+        "shell": G.mat(gp, "shell", fill=P["offwhite"]),
+        "weed": G.mat(gp, "weed", fill=_mix(P["green"], P["teal"], 0.4), behind=True),
         "pebble": G.mat(gp, "pebble", fill=G.shadow_of(P["offwhite"])),
         "lichen": G.mat(gp, "lichen", fill=P["mustard"]),
         "ink": G.mat(gp, "ink", fill=None, ink=True),
@@ -83,6 +91,8 @@ def silhouette(kind, k, n=33):
     if kind == "soil":                       # crumbly clods
         ph = [rnd.uniform(0, 6.28) for _ in range(2)]
         return [(x, SURF + LIP + win(x) * (0.012 * math.sin(23 * x + ph[0]) + 0.010 * math.sin(41 * x + ph[1]) - 0.006)) for x in xs]
+    if kind == "sand":                       # low wind ripples
+        return [(x, SURF + LIP + win(x) * (0.011 * math.sin(math.pi * (x + 0.5) * (5 + k % 2) + k) - 0.003)) for x in xs]
     knobs = [(rnd.uniform(-0.3, 0.3), rnd.uniform(0.04, 0.07), rnd.uniform(0.10, 0.18)) for _ in range(2)]
     return [(x, SURF + LIP + win(x) * (sum(h * math.exp(-((x - c) / w) ** 2) for c, h, w in knobs) - 0.01)) for x in xs]
 
@@ -94,7 +104,7 @@ def _top_z(top, x, r=0.04):
 def frame(d, M, kind, k):
     rnd = random.Random(1000 + 31 * k + 7 * len(kind))
     L, R = -0.5, 0.5
-    body = "stone" if kind == "stone" else "dirt"
+    body = {"stone": "stone", "sand": "sand"}.get(kind, "dirt")
     top = silhouette(kind, k)
     G.stroke(d, [(L, 0.0), (R, 0.0)] + top[::-1], M[body], 0.0, cyclic=True)            # the body up to the silhouette
     band = [(x, z - 0.18 - 0.03 * win(x) * math.sin(9 * x + k)) for x, z in top]        # mid-tone band under the top
@@ -127,6 +137,21 @@ def frame(d, M, kind, k):
             wx = rnd.uniform(L + EDGE + 0.15, R - EDGE - 0.15)
             G.seam(d, [(wx + 0.05 * math.sin(i * 1.3), SURF - 0.30 - 0.06 * i) for i in range(7)], M["ink"])
             G.stroke(d, G.lumpy_ellipse(wx + 0.05 * math.sin(7.8), SURF - 0.72, 0.035, 0.03, n=10, seed=k), M["dirt_dp"], 0.0, cyclic=True)
+    elif kind == "sand":                                                                 # ripple marks, shells, a strand of weed
+        for c in range(3):
+            zz = SURF - 0.16 - 0.13 * c - rnd.uniform(0.0, 0.04)
+            x0 = rnd.uniform(L + EDGE + 0.04, -0.15)
+            G.seam(d, [(x0 + 0.05 * i, zz + 0.012 * math.sin(i * 1.7 + c)) for i in range(int((rnd.uniform(0.25, 0.45)) / 0.05))], M["ink"])
+        for c in range(1 + k % 2):
+            sx, sz = rnd.uniform(L + EDGE + 0.08, R - EDGE - 0.08), rnd.uniform(0.55, SURF - 0.45)
+            fan = [(sx, sz)] + [(sx + 0.055 * math.cos(a), sz + 0.045 * math.sin(a)) for a in [0.25 + 0.33 * j for j in range(9)]]
+            G.stroke(d, fan, M["shell"], I, cyclic=True)
+            for a in (1.0, 1.6, 2.2):
+                G.seam(d, [(sx, sz), (sx + 0.045 * math.cos(a), sz + 0.037 * math.sin(a))], M["ink"])
+        if k % 3 == 0:
+            wx = rnd.uniform(L + EDGE + 0.15, R - EDGE - 0.25)
+            G.stroke(d, G.hose_outline(G.bezier((wx, _top_z(top, wx) - 0.035), (wx + 0.08, _top_z(top, wx) - 0.0), (wx + 0.18, _top_z(top, wx) - 0.04), n=8), 0.025),
+                     M["weed"], I, cyclic=True)
     else:                                                                                # stone: blocks, cracks, lichen
         for c in range(2):
             y0 = rnd.uniform(0.55, SURF - 0.35)
@@ -150,7 +175,7 @@ def frame(d, M, kind, k):
             G.stroke(d, G.lumpy_ellipse(px, pz, r * 1.3, r, n=14, lump=0.08, seed=k * 10 + p), M["pebble"], I, cyclic=True)
             G.seam(d, [(px - r * 0.6, pz - r * 0.2), (px + r * 0.5, pz - r * 0.45)], M["ink"])
         G.stroke(d, G.lumpy_ellipse(rnd.uniform(L + EDGE + 0.1, R - EDGE - 0.1), rnd.uniform(0.7, 1.2), 0.06, 0.035, n=12, seed=k + 50),
-                 M["dirt_dp"], 0.0, cyclic=True)                                         # a darker clod
+                 M[body + "_dp"], 0.0, cyclic=True)                                      # a darker clod
     hx, hz = rnd.uniform(L + EDGE + 0.12, R - EDGE - 0.12), rnd.uniform(0.6, 1.15)
     G.hatch(d, hx, hz, M["ink"], n=3, length=0.09, spacing=0.03, angle_deg=rnd.choice((15, 165)), seed=k)
     G.specks(d, [(rnd.uniform(L + EDGE, R - EDGE), rnd.uniform(0.45, SURF - 0.25)) for _ in range(4)], M["ink"])
@@ -190,7 +215,7 @@ def sheets():
     """{kind: [8 frames HxWx4 uint8]} and the measured ink widths."""
     import numpy as np
     out, allw = {}, []
-    for kind in ("grass", "soil", "stone"):
+    for kind in KINDS:
         gp = fakegp.FakeGP()
         M = mats(gp)
         frames = []
@@ -200,7 +225,7 @@ def sheets():
             st = fakegp.strokes_of(d, gp)
             steady_ends(st[-1], seed=k + 1)          # the silhouette is the last stroke
             img, w = GR.render_frame(st, FW, FH, 64, (0.5, 0.0), ss=4, seed=k + 1)
-            rgb = np.clip(img[..., :3].astype(np.float32) * paper_grain(k)[..., None], 0, 255)
+            rgb = np.clip(img[..., :3].astype(np.float32) * paper_grain(k, 0.02 if kind == "sand" else 0.035)[..., None], 0, 255)   # sand is brighter: the same grain contrast
             frames.append(np.dstack([np.rint(rgb).astype(np.uint8), img[..., 3]]))
             allw += w
         out[kind] = frames
@@ -238,7 +263,7 @@ def export(art, S=None):
     if problems:
         raise ValueError("ground strips fail the B-130 checks: " + "; ".join(problems))
     out = []
-    for kind in ("grass", "soil", "stone"):
+    for kind in KINDS:
         key = KEYS[kind]
         W = 8 * FW + 7 * GUTTER
         sheet = np.zeros((FH, W, 4), np.uint8)
@@ -287,10 +312,10 @@ def main(out, S=None, allw=None, footnote="sources + preview"):
     W = 1920 + 16
     rows = []
     head = np.tile(paper, (28, W, 1)).astype(np.float32)
-    review._label(head, "b-130 earth ground strips v3.1 (groundstrip.cs: 8 frames 64x152 per material, pivot on the ground line, 2 m below + 0.375 m above; grass / soil / stone; drawn grass lip; paper grain fill)", 6, 8)
+    review._label(head, "b-130 earth ground strips v3.1 (groundstrip.cs: 8 frames 64x152 per material, pivot on the ground line, 2 m below + 0.375 m above; grass / soil / stone / sand (the coast); drawn grass lip; paper grain fill)", 6, 8)
     rows.append(head)
     # (1) every frame at 3x per material
-    for kind in ("grass", "soil", "stone"):
+    for kind in KINDS:
         r = np.tile(np.array([0.62, 0.72, 0.72], np.float32), (FH * 3 + 26, W, 1))
         review._label(r, f"{KEYS[kind]}  ({kind})", 6, 4)
         for j, im in enumerate(S[kind]):

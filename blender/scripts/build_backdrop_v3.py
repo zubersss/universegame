@@ -392,12 +392,13 @@ def preview(out_dir, scenes=("forest", "coast"), from_png=False):
             src = img[max(0, -y_top):h - max(0, y_bot - 1080), :1920]
             review._over(F, src, 0, max(0, y_top))
         S, _w = GS.sheets()
+        strip = "sand" if scene == "coast" else "grass"          # the coast stands on the B-130 sand variant
         rnd = np.random.default_rng(5)
         for c in range(30):
-            im = S["grass"][int(rnd.integers(0, 8))]
+            im = S[strip][int(rnd.integers(0, 8))]
             y0 = gl - (GS.FH - int(round(GS.SURF * 64)))
             review._over(F, im[:max(0, min(GS.FH, 1080 - y0))], c * 64, y0)
-            F[min(y0 + GS.FH, 1080):, c * 64:c * 64 + 64] = np.array(S["grass"][0][-4, 30, :3], np.float32) / 255
+            F[min(y0 + GS.FH, 1080):, c * 64:c * 64 + 64] = np.array(S[strip][0][-4, 30, :3], np.float32) / 255
         try:
             fr, piv = PR.surveyor_frame()
             review._over(F, fr, 860, gl - fr.shape[0] + int(round(piv[1] * fr.shape[0])))
