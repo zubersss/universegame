@@ -1,55 +1,52 @@
 # BLENDER STATUS
-Updated: 2026-11-07 01:2x · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 02:0x · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-While-waiting list (LEAD cycle 250), lock-free, top first; free RAM ~0.5-2.0 GB, UNITY's want on file, so no blender.exe:
-1. B-131 export wiring DONE 01:1x (5650912), see Last completed.
-2. B-132 stag / wolf / bear design previews DONE 01:2x (dcaee7d), see Ready for review.
-3. B-133 forest + coast layer studies: SOURCES WRITTEN 01:2x (blender/scripts/build_backdrop_v3.py at backgrounds/earth/{forest,coast}/, the ParallaxLayers shape; the card said earth_forest/, the archived DepthBands names); the preview (FFT washes, 2048x1024 layers, can pass 300 MB) waits until UNITY's 01:15 check releases: 0.41 GB free.
-4. Painted Sun disc design, preview only.
-5. pycache untracked DONE (b93eb1f).
-6. README_v4.md refresh DONE (8febad2): sections 7 (lock-free sheet previews) and 8 (creature kit), D-117 type changes, biome backdrops.
-Heavy queue: #5 B-131 export, only after UNITY's status says the U-113 code is committed (D-117); no want on file until then.
+LEAD cycle 251 order, lock-free unless noted:
+1. Wolf review fix + replaces_v2 dry run: DONE 01:4x (4dcf83d).
+2. B-132 export + B-133 previews in the queue #2 slot: DONE 01:45-01:54 (0f9e0ab export, 265ebc7 B-133 sources), see Last completed.
+3. B-134 surveyor side_b previews: DONE 02:0x (265ebc7), see Ready for review.
+4. B-135 pike / shark / squid design previews (swim 12-16 as the travel clip): NEXT.
+5. Sun disc design: source written (blender/scripts/build_sun_v3.py, uncommitted until it runs: ~250 MB, so with the gate open or in a slot). Proposal in its header: the game's Sun is r 900 px at SPACE_PPU 3, too big for a 12-frame sheet, so export it as a rig (static body at 0.5x + flame ring + corona + prominence sockets, like Saturn's rings).
+Owed in my next slot (> 300 MB): rebuild the two B-133 review images from the rolled layers (`build_backdrop_v3.py <preview> forest,coast --from-png`, no FFT).
+Heavy queue: #5 B-131 export after UNITY's U-113 code commit (D-117); #6 B-133 export after acceptance; B-134 export after acceptance (ranks above the C2 exports, D-121). No want on file now (UNITY holds the lock for its captures).
 
 ## Last completed
-- 01:1x-01:2x B-132 DESIGN PREVIEWS (dcaee7d, lock-free fakegp, ~3 min, no blender.exe): stag, grey wolf, brown bear in blender/scripts/build_creatures_earth_v3.py, built like Gus on one quadruped kit (posed body: squash about the ground, pitch, lean; rubber-hose legs; hooves / paws / claws; pie eyes in 3/4 with dizzy spirals; heads drawn 1.15-1.3x for era proportions). Reviews (render.py's own v3_sheet_review layout, 1x on the plains beside the surveyor, every clip numbered, ink zoom, ten boxes): blender/preview/review_b132_earth_{stag,wolf,bear}_preview.png + review_b132_earth_lineup_preview.png (all three with the surveyor and Gus at 1x, key poses 2x). Details in Ready for review.
-- 00:5x-01:1x B-131 EXPORT WIRING (5650912, lock-free, no blender.exe): `render.py` handler `do_prop_sheet_set` for the new manifest row `props/common/camp_set` (style v3 = a heavy job in the wrapper) exports all six + review_b131_props.png; each prop row (`prop_sheet`) can export alone. The six rows switched from `model: true` to sheet rows. Per prop: `<prop>_color.png` + `<prop>.json` (style v3, fps 12, pivot on the ground line, `ground_line_px` 10, `squash_root` false; `tile` + `module_m` on pad 2.0 / wall 1.0; `interactable` on door, smelter, crate; clips door open 6 once, smelter working 8 loop, lamp flicker 4 loop; static props carry 1 frame and no clip, like the ground strips). Sheets packed to the smallest fit <= 512^2: pad 128x48, wall 64x176, door 272x356 (3 cols), smelter 460x388 (4), crate 80x72, lamp 132x324 (2). The export deletes the 24 v2 files beside the keys ({prop}.glb, _normal, _mask, _emission; the .meta files are UNITY's, D-016) and the review stamps every PNG. Dry run into a scratch tree (bundled python, 41 s, ~0.5 GB): every check passes, joins 0.0/255, ink 2.0-3.0 / 1.0-1.5 px, palette 100 % per prop.
-  Two fixes the new 2 px edge check found (the accepted preview never measured edges): the smelter's side lever crossed the right frame edge by 1-2 px (lever 0.08 m shorter, knob at 0.74 m); the lamp's pivot had a sign bug (comment: pole left of centre; code: right of it), so the halo was cut off on the right at every flicker frame: the pole now sits 0.18 m left of centre, json pivot [0.32, 0.0625] (was 0.56). Frame sizes unchanged.
+- 01:45:53-01:54:10 QUEUE #2 SLOT (one heavy lock, 8.3 min, released; UNITY's want was on file and yielded per D-112):
+  - B-132 EXPORTED (0f9e0ab; log OK x3, peak 519 MB): creatures/earth/stag 1956x1076 (52 x 192x176, 140 s), wolf 1964x788 (66 x 160x128, 85 s), bear 2048x1144 (56 x 224x160, 165 s, new key); ink 2.0-3.0 / 1.0-1.5 px, palette 100 %; `replaces_v2` removed the eight stag / wolf v2 files (.glb, _normal, _mask, _emission) exactly as dry-run; sources sources/creatures/earth_{stag,wolf,bear}_v3.blend; reviews review_b132_earth_{stag,wolf,bear}.png stamped, the surveyor beside each.
+  - B-133 PREVIEWS (numpy, the FFT washes): forest + coast at backgrounds/earth/{forest,coast}/ (LEAD cycle 251 accepted the paths). Layers: forest 2048x1024 2.3 MB / 2048x640 1.0 MB / 2048x384 0.6 MB; coast 2048x1024 2.3 MB / 2048x512 0.7 MB / 2048x384 0.6 MB (<= 4 MB each). Seam scores 0.80-1.03 except forest layer1 at 2.70 (limit 2.0): not a seam (alpha 252 -> 239 -> 200 -> 134 -> 70 across the wrap is one soft edge that sat on column 0). Fix in finish(): each periodic layer is rolled so the wrap sits on its quietest column (computed on the 8-bit image, so the export picks the same offset): every seam now 0.43-0.87, measured on the preview PNGs. Review images (review_b133_earth_{forest,coast}_preview.png) still show the unrolled layers until the --from-png rebuild.
+- 01:3x-01:4x Wolf review fix (4dcf83d): the 1x panel grows to the beside frame's height (the 192 px surveyor beside the 128 px wolf raised a swallowed ValueError). v2 removal moved to meridian.v3.remove_v2 and dry-run on a scratch copy: 8 files out, bear none, every colour map / json / .meta kept.
+- 01:1x-01:2x B-132 design previews (dcaee7d), accepted cycle 251 (D-119).
+- 00:5x-01:1x B-131 export wiring (5650912): see Ready for review.
 
 ## Ready for review
-- B-129 (558976a): Assets/_Game/Art/flora/earth/rigset_color.png 504x212 + rigset.json (6 plants, biomes on each; snoozle parts pixel-identical to B-126). Sources blender/scripts/build_c2_earth_rigs.py -> sources/flora/earth_rigset_c2.blend. Reviews blender/preview/review_b129_earth_rigset.png, review_b129_earth_rigset_assembled.png.
-- B-130 (558976a): Assets/_Game/Art/terrain/earth/ground_strip{,_soil,_stone}_color.png 540x152 + .json (tile true, pivot on the ground line). Source blender/scripts/build_c2_ground_strip.py. Review blender/preview/review_b130_ground_strips.png.
-- B-131 export wiring (5650912): see Last completed; export waits for U-113's code commit (D-117, queue #5).
-- B-132 PREVIEWS (dcaee7d), for acceptance before one export batch:
-  - stag 192x176 frames, sheet 1956x1076: golden coat (mustard mid, deep shadow, brown mane), off-white muzzle / rump patch / flag tail, off-white antlers (far one in the mid tone) that drag and overshoot; idle 10, walk 12, react 8 (head up, ears swivel, eye-pop, tail flag), bump 10 (dizzy stars, no X eyes), flee 12 (two bounds: airborne extension, folded front legs when gathered, tail flag up). ~2.0 m to the antler tips (the surveyor's height at 1x).
-  - wolf 160x128, sheet 1964x788: grey (sky mid, sky-deep saddle), cream bib and cheek ruff, bushy brown-tipped tail; idle 10, walk 12, react 8 (ears up, sniff), bump 10, flee 14, follow 12 (nose-down trot, tail wagging high). Neutral face, mouth closed (no teeth anywhere).
-  - bear 224x160, sheet 2048x1144 (9 cols x 7 rows: exactly the 2048 cap, the card's check): chestnut (red deep, brown shadow), shoulder hump, tan muzzle, small oval ears (never round black ears, §9.8), off-white claws; idle 12 (breathing sway), walk 12, react 10 (rears halfway, sniffs, huffs a round puff, thumps down: squash 0.86), bump 10, flee 12.
-  - all: ink 2.0-3.0 / 1.0-1.5 px, palette 100 %, no frame touches the 2 px edge, nothing below the ground line, json valid; open boxes are my self-checks (motion, original, style) + LEAD's.
-  - CLIP INDICES: idle 0, walk 1, react 2, bump 3 = Gus's order (Creature.cs plays 0/1, 2 on contact, 3); flee 4 and the wolf's follow 5 are new and found by name.
-  - Deviation: one .blend per creature (sources/creatures/earth_{stag,wolf,bear}_v3.blend, contract §11.1 "one asset per .blend") instead of the card's single earth_v3.blend.
-  - Manifest: stag and wolf rows switched from v2 model rows to v3 sheet rows, bear added. Like D-117, creatures/earth/stag and wolf still have a .glb + v2 maps in Art (8 files), so the rows carry `replaces_v2` and render.py's v3 export deletes them after writing the sheet (the 8 .meta files are UNITY's). -> LEAD: same order as D-117? The creature path already plays sheets (Gus), so I expect no U-113-style code, but UNITY should confirm stag/wolf fall back to the sheet once the .glb is gone.
-(B-121, B-122, B-128 verified cycle 247.)
+- B-129 (558976a), B-130 (558976a): exported; Done on UNITY's import / U-111 capture per cycle 249.
+- B-131 export wiring (5650912): `props/common/camp_set` exports the six props (<= 512^2 each, colour + json, D-117) and removes their 24 v2 files; dry run passed (joins 0.0/255, ink 2.0-3.0 / 1.0-1.5, palette 100 %). The new 2 px edge check fixed a smelter lever 1-2 px over the edge and a lamp pivot sign bug that cut the halo: lamp json pivot [0.32, 0.0625]. Waits for U-113.
+- B-132 (0f9e0ab): exported, see Last completed. Clip indices idle 0, walk 1, react 2, bump 3 (Gus's order), flee 4, the wolf's follow 5 by name.
+- B-133 previews (265ebc7): forest (sky, two tree-fringed far ridges / the tree line: trunks, round crowns, tiered firs, shaded understorey, sun dapples / undergrowth: bushes, fern fronds, a stump and a log, bluebells) and coast (sea to the horizon, a pale headland, sparkle dabs / nearer sea with foam rows, a grassy cliff, two sea stacks / dunes with marram, pebbles, shells, driftwood). Scene jsons parallax 0.1 / 0.35 / 0.6, y_m -2 / -1 / -0.5 like the plains. Review images rebuilt in my next slot (see Current task).
+- B-134 PREVIEW (265ebc7): blender/preview/review_b134_surveyor_side_b_preview.png (the export's layout, side's idle frame at 1x beside): characters/surveyor/side_b 1956x1172, 56 frames 192x192, pivot [0.5, 0], PPU 64, seed 5. dig 10 loop (two-hand pick: wind-up, smear, the point bites, chips from the impact point), build 10 loop (hammer on a mustard plate that hangs askew and snaps flat, then a rivet driven), surprise 12 once (eye-pop 1.4x, the helmet lifts 0.11 m off the collar as the card's "hat lift"), jetpack 10 loop (red / mustard flame from a nozzle under the float pack, puffs rolling down and along the ground), climb_in 14 once (0-7 hand over hand in place: UNITY moves the root up the fin-leg; 8-9 lean to the hatch; 10-11 a stretched zip with speed lines; 12-13 only a puff: the surveyor is hidden). Every frame carries a `hatch` socket at (1.0, 1.05) m from the pivot (render.py's B-122 sockets path): put the Pilgrim's door socket there. Ink 2.0-3.0 / 1.0-1.5 px, palette 100 %, no clipped frame, nothing below ground, clip names unique vs side. Open boxes: motion / original / style self-checks + "idle" (the idle loop lives on side). Deviation: no scarf (the B-125 surveyor has none); the hose and plumb bob stream instead. draw_surveyor gained shift / helmet_dz / eye_pop; side's 98 drawings are stroke-identical (hash b3926709 before and after).
 
 ## Handoffs (unrouted only)
--> UNITY (C2, routed to U-110 by LEAD cycle 249): every plant carries "biomes" (nodbell plains/forest, shiverbarrel desert, curlfrond forest/taiga, whiptuft plains/coast, thriftcushion coast/tundra; JsonUtility ignores it today). FloraRigs picks Set.plants at random, so a desert cactus would spawn on the plains until placement filters by biome.
--> UNITY (B-128, on import): set def.icon = "icons/<key>/base" in ItemRegistry for soil, grass, regolith, snow, mercury_regolith, mercury_basalt, sulfide, tessera (they pass null today).
--> UNITY (U-113, D-117, for the tests): the B-131 jsons as they will export: frames pad 128x48 / wall 64x176 / door 88x176 / smelter 112x192 / crate 80x72 / lamp 64x160 at PPU 64; pivots [0.5, 0.208333], [0.5, 0.056818], [0.5, 0.056818], [0.5, 0.052083], [0.5, 0.138889], lamp [0.32, 0.0625] (the pole, not the frame centre); sheets door 3 cols x 2 rows, smelter 4 x 2, lamp 2 x 2, the rest 1 frame with "animations": []; extra fields tile, module_m (2.0 / 1.0), interactable, ground_line_px, squash_root false. My export commit deletes the 24 v2 files; the 24 .meta files beside them are yours to delete in the same window.
--> UNITY (B-132, after export): creatures/earth/bear is new (no SpeciesSpec yet: Bible §7.1 "Brown bear (territorial)"; under D-087 its react clip is the rear-up + huff, flee when pushed). Stag and wolf SpeciesSpec sizes (1.9x1.6, 1.5x0.9) came from the v2 models; the sheets are drawn about 1.5 m long x 2.0 m tall (stag), 1.2 x 1.0 m (wolf), 2.1 x 1.3 m (bear) at PPU 64.
--> UNITY (B-122, on import): ships/pilgrim/side_a..e and top_a..b were never exported (superseded by D-111; manifest preview_only). Sockets in rig.json, metres from the root: tail_exhaust, leg_l, leg_c, leg_r, door, attitude_l (-1.5, 2.6), attitude_r (1.5, 2.6). The ±35 flight tilt is the root transform.
+-> UNITY (B-132, exported 0f9e0ab): delete the eight .meta files of the removed stag / wolf v2 files (stag.glb, stag_normal/_mask/_emission.png, same for wolf); creatures/earth/bear is a new key (no SpeciesSpec yet: Bible §7.1 "Brown bear (territorial)"; under D-087 its react is the rear-up + huff). The sheets are drawn about 1.5 m long x 2.0 m tall (stag), 1.2 x 1.0 m (wolf), 2.1 x 1.3 m (bear); the v2 SpeciesSpec sizes were 1.9x1.6 and 1.5x0.9.
+-> UNITY (U-113, D-117, for the tests): B-131 jsons as they will export: frames pad 128x48 / wall 64x176 / door 88x176 / smelter 112x192 / crate 80x72 / lamp 64x160 at PPU 64; pivots [0.5, 0.208333], [0.5, 0.056818], [0.5, 0.056818], [0.5, 0.052083], [0.5, 0.138889], lamp [0.32, 0.0625]; door 3 cols x 2 rows, smelter 4 x 2, lamp 2 x 2, the rest 1 frame with "animations": []; extra fields tile, module_m (2.0 / 1.0), interactable, ground_line_px, squash_root false. The 24 .meta files beside the removed v2 files are yours.
+-> UNITY (U-115, B-134): side_b's clips by name (dig, build, surprise, jetpack, climb_in); the `hatch` socket per frame for climb_in's placement.
+-> UNITY (C2, routed to U-110): every Earth plant carries "biomes".
+-> UNITY (B-128, on import): def.icon = "icons/<key>/base" for soil, grass, regolith, snow, mercury_regolith, mercury_basalt, sulfide, tessera.
 
 ## Blockers
 none.
 
 ## Proposals (undecided only)
-- -> LEAD (C2, from coordination/reports/blender/c2_earth_creature_reink.md): (1) a "swim" clip cap = walk/fly (12-16) in contract §11.2 + ArtRules.ClipCap; (2) Hadal Maw as a §11.3 rig set (too big for one sheet); (3) a shared Earth creature atlas, because the Earth scene with the ship landed is near the D-089 eight-texture budget.
+- -> LEAD (Sun disc, C2 candidate): export as a rig, not a sheet (r 900 px in space); details in build_sun_v3.py's header, preview to follow.
 
 ## Rules I keep (from slips this session)
-- A lock check is its own call; Blender starts only in a later call after reading a clear result (D-073; two slips, 15:09 and 17:12).
-- A want is filed only after the other role takes the lock (D-039); a rank is live only while a want or lock is on file (D-112): a free lock with no live rank ahead is mine to take.
-- Light work while a heavy job runs: ≤ 300 MB extra (D-109). Lock-free previews use meridian.fakegp in Blender's bundled python (~100-200 MB).
+- A lock check is its own call; Blender starts only in a later call after reading a clear result (D-073).
+- A want is filed only after the other role takes the lock (D-039); a rank is live only while a want or lock is on file (D-112).
+- Light work while another role's heavy job runs: <= 300 MB extra (D-109). fakegp sheet previews ~100-200 MB; FFT backdrops and full review rebuilds ~250-300 MB go in my slot.
+- Measure every new export path's frames against the 2 px edge before the export (the B-131 lamp and B-134 dig/zip frames failed it).
 
 ## For USER_ACTIONS
 none.
 
 ## HeavyJobLock
-none held, no want filed (B-129/B-130 batch done 00:22).
+none held (queue #2 slot 01:45:53-01:54:10 released); no want on file.
