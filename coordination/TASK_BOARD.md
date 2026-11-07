@@ -22,11 +22,12 @@ When the lock frees, the highest pending job here goes next, even if the other r
 older (D-037 alternation applies only between equal ranks). A rank is live only while its role
 has a want on file or holds the lock (D-112): if the top rank has no want when the lock frees,
 the next live rank runs now and the skipped role goes next after it files. A role below the top
-keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 271 (13:5x, hourly tick; UNITY's U-123 re-run is in its capture locks (the slice + M3Inner 23/23 at 13:39; the three Mercury frames shot 13:47 against the straight-alpha sets; the fill-tile fix 9a6e31d5 re-shoots them); 1.5 GB free under the Editor). A role files its want only when the queue says it is next after the running job:
-1. UNITY · the capture locks (U123 Mercury re-shot with the fill fix, U118 den, U110 scenes) → BudgetGate → Build 0.4.4 (a dev build; 0.4.3 untouched) + the 13-leg probe with the Mercury legs and the Creep second-loop breakdown → the hand-off commit (c2_mercury README, perf + tests, status) → U-123, B-148, B-149, B-150 Done.
-2. BLENDER · between UNITY's locks (file the want while its lock is on): B-162 the Earth sets straight (plains / forest / coast + the climb sky set where its near layers carry alpha; one slot; a before / after review) → then the Mars sets (one slot) → then Uranus decks 2 / 3 / deep ×4 in budgeted slots.
-3. UNITY · after the hand-off: C3 UI (U-124 + U-102 + B-151): the code lock-free and committed ahead of its check; B-151's export (a real slot at the gate for the cards) behind it; then the check + captures.
-4. Then Venus (U-125 + B-152..B-154), Jupiter (U-126 / U-127 + B-159 / B-160), Saturn (U-129 + B-163 / B-164), Uranus (U-130 + B-158's exports).
+keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 272 (14:4x, the LEAD resume after the ~14:17 restart of all three windows; free RAM 0.65 GB with ChatGPT and Edge open → USER-28; no heavy job until the gate clears; UNITY's Build 0.4.4 written 14:15; BLENDER's want for the Uranus decks on file since 14:11). A role files its want only when the queue says it is next after the running job:
+1. UNITY · when the gate clears: the 13-leg probe on Build 0.4.4 (the Mercury legs; the Creep second-loop row with the Mono heap and native reserve) in one short lock, with U-131's dip measurement on the RGBA strips in the same lock → the hand-off commit (c2_mercury README, perf + tests, the u110 / u118 / u123 frames, status) → U-123, B-148, B-149, B-150 Done. The hand-off's files that need no Editor (perf_2026-11-07.md, the re-shot frames, the README) go in now, lock-free.
+2. BLENDER · after UNITY's probe lock: Uranus decks 2 / 3 / deep ×4 in budgeted slots (≤ 6 min each; --uranus-check after each deck) → deck1 again → B-158 Done.
+3. UNITY · after the hand-off: C3 UI (U-124 + U-102): the code lock-free, committed ahead of its check; then B-151's export (BLENDER, one slot); then UNITY's check + captures.
+4. BLENDER · the Venus deck study re-run straight (B-152, ~80 s) in any free gap; the Venus exports (B-152 / B-153) once U-123 is Done; B-154 behind U-125's code.
+5. Then Venus (U-125), Jupiter (U-126 / U-127 + B-159 / B-160 + B-156), Saturn (U-129 + B-163 / B-164), Uranus (U-130 + B-166), Neptune (B-161 prep first).
 
 
 
@@ -61,10 +62,11 @@ Rules: nothing here needs the lock; it stays under ~300 MB of extra RAM; no Unit
 did in your status before the next poll. LEAD tops each list up to ≥ 3 items every cycle.
 
 **UNITY**
-- UNITY_STATUS current after each lock (at the tick it read 13:26 and still said "no want until the owner says re-run"; D-046 covers the one re-run, and your want is on): the re-run's steps, the 0.4.4 rows, the hand-off.
-- The C3 UI code (U-124 + U-102) lock-free after the Mercury hand-off: the 9-slice panels by their `slice` json, the settings panel, the title cards as the intertitle slide-in on entry, the Film switch on its toggle, Limelight + Patrick Hand, keyboard reach; committed ahead of its check so B-151 exports behind it.
-- A later short lock: the 16:9 re-shoots of the older frames (u118/2_canyon, 3_lurker_den, 4_storm; u110's three) once B-162 Mars lands, so the record shows the straight-alpha sets.
-- The Creep second loop: 7.5 MB on 0.4.3 with every allocator flat; read 0.4.4's figure with the Mono / native breakdown; a watch row, not a card, unless it exceeds 10.
+- Now, lock-free: commit what the hand-off already has on disk (perf_2026-11-07.md from the 14:08 BudgetGate, the re-shot u110 / u118 / u123 frames, the c2_mercury README with the 0.4.4 build line, this status); the probe rows follow in a second commit after the lock.
+- UNITY_STATUS current (at 14:4x it still read 13:58; add the 14:0x captures, BudgetGate, P-48, Build 0.4.4, the restart and the gate wait).
+- The C3 UI code (U-124 + U-102) lock-free while the gate is shut: the 9-slice panels by their `slice` json, the settings panel, the title cards as the intertitle slide-in on entry, the Film switch on its toggle, Limelight + Patrick Hand, keyboard reach; committed ahead of its check so B-151 exports behind it.
+- U-131's measurement ready to run in the probe lock (no extra lock): the per-column brightness along the strip band on the night Mercury frame against the RGBA strips; the dip in levels at the 64 px joins (12.7 before).
+- The Creep second loop: read 0.4.4's figure with the Mono / native breakdown; a watch row, not a card, unless it exceeds 10 MB per visit.
 - `docs/credits/unity.md` upkeep; the icon-coverage assert stays.
 Then one batched check per hand-off when your turn in the queue comes (compile + EditMode as one lock, PlayMode A / B as two, D-122).
 
@@ -76,31 +78,11 @@ Then one batched check per hand-off when your turn in the queue comes (compile +
 
 
 **BLENDER** (numpy / scripts only while UNITY holds the lock or a want; bpy only under your own lock; under 0.3 GB free, code only; otherwise only pre-measured ≤ 150 MB jobs beside another role's lock; the lock / RAM check is its own call)
-- B-162 in the gaps between UNITY's locks: the Earth sets straight (one slot, before / after review), then the Mars sets (one slot); layer0s byte-identical by md5 each time.
-- Uranus decks 2 / 3 / deep ×4 in budgeted slots after B-162 (skip, never overrun); B-158 Done on them.
-- Export readiness: the Jupiter rows (B-159 backdrops + floes + flora + props, B-160 creatures + the whale), the Saturn rows (B-163 / B-164: the five decks re-rendered straight, floes, rig set, creatures, the Hydra, props), the Uranus rows; a scratch dry run each; the Venus and Jupiter studies re-rendered straight before their exports.
-- B-161 Neptune design prep (C2 order 8; Bible §7.9 the dark storm world): the palette with the Mars checks, the deck notes (the Great Dark Spot, supersonic wind streaks, diamond rain), floes and five faceless flora, the creature list with the apex as a Grand rig; `coordination/reports/blender/c2_neptune_designs.md`; previews when RAM allows.
-- BLENDER_STATUS: the Ready-for-review lines name only what LEAD has not judged (B-148 / B-149 / B-150 and the Uranus props + rig are verified or accepted; drop them); reports and README upkeep (D-145's gate, D-147's straight finish, the Grand-rig flag).
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+- B-161 Neptune design prep (its card below): the palette with the Mars checks, the deck notes, floes, five faceless flora, the creature list with the apex as a Grand rig; `coordination/reports/blender/c2_neptune_designs.md`; previews only when RAM allows (none under 0.3 GB free).
+- The Uranus decks want stays filed and refreshed each poll (D-075); when the gate clears it runs after UNITY's probe lock.
+- B-151's dry run lock-free (the five 9-slice panels with `slice` in the json, the three title cards, the film switch): rows ready so the export is one slot once U-124's code is committed.
+- Export readiness: the Venus rows (B-152 deck re-run straight, B-153 rig set + strips, B-154 creatures + vent den), the Jupiter rows (B-159 / B-160 / B-156), the Saturn rows (B-163 / B-164), the Uranus rows (B-166); a scratch dry run each; studies re-rendered straight before export.
+- BLENDER_STATUS trim (D-113): Ready for review carries only unjudged items (none right now; B-162 Mars is Done); reports and README upkeep (D-145's gate, D-147's straight finish, the Grand-rig flag).
 
 **LEAD**
 - The charter idle list, plus: the C1 LeadQA scenario draft (pad → Escape Line → space → entry → touchdown under scripted input), the C1_REPORT skeleton, the owner's v4.1 look-over page, Bible gap closure, credits audit, a status-size check each cycle (D-113).
@@ -1275,26 +1257,26 @@ Files: blender/scripts/build_creatures_mercury_v3.py, build_props_mercury_v3.py,
 Depends: B-145, U-123
 Lead notes: Cycle 264. The export waits for U-123's code where it replaces Mercury models under live keys (D-119's order). Cycle 269 close: PROMOTED; the export in one slot right after U-123's code commit (the rows are dry-run ready). 12:5x: EXPORTED AND VERIFIED (cca20f60; log 12:45–12:49 OK ×5: glassback 1976×576 / 52 frames, cinderling 2012×200 / 50, flarewing 2044×508 / 52 with flare_dance, shadewyrm 1964×416 / 50 with idle_open last, props/mercury/ice_burrow 112×40; ink 2.0–3.0 / 1.0–1.5 px, palette 100 %; 16 v2 files removed under replaces_v2; LFS; the gate line logged: 1200 MB from the polar crawler's 446). review_b145_mercury_glassback.png on the day set: a pale grazer with cold-teal crystal shards that ring on the react; review_b145_mercury_shadewyrm.png on the night set: the frost-capped wyrm humping along, idle_open last; review_b150_ice_burrow.png: the wyrm peeking behind its burrow on one pivot, ducking on the react. Done on U-123's Mercury captures.
 
-### B-151 · BLENDER · Backlog · C3
+### B-151 · BLENDER · Ready · C3
 Goal: C3 UI export from the accepted B-146 designs: `ui/panels/{pause,settings,inventory,sign,scroll}` as 9-slice sheets with `slice` in the json (contract §11.6), `ui/titlecards/{earth,mars,mercury}` ≤ 1920×540, `ui/hud/film_switch` (two frames); the Venus and later cards follow their planets.
 Accept: log OK; the slice margins in each json; UNITY's panels stretch with clean edges (U-124's capture); the cards at 1x in the intertitle slide.
 Files: blender/scripts/build_ui_v3.py, Assets/_Game/Art/ui/
 Depends: B-146, U-124
-Lead notes: Cycle 265. One slot when U-124 opens (after U-118).
+Lead notes: Cycle 265. One slot when U-124 opens (after U-118). Cycle 272: READY: the dry run lock-free now; the export in one slot once U-124's code is committed (D-119's order).
 
-### B-152 · BLENDER · Backlog · C2
+### B-152 · BLENDER · Ready · C2
 Goal: Venus backdrops: the cloud-deck set (`backgrounds/venus/deck`: the apricot haze, far cloud towers, the aerostat deck strip near) and the surface set (`backgrounds/venus/surface`: glassy basalt, vent glow, the sulphur crust), three layers each, 2048 × ≤ 1024 tiling in x, scene jsons; the studies first (one ≤ 5 min slot), LEAD accepts, then the export.
 Accept: the 2× seam check with no seam; ≤ 4 MB per PNG; a 1080p composite per set at 1x with the surveyor; UNITY's ParallaxLayers loads them by key.
 Files: blender/scripts/build_backdrop_v3.py, Assets/_Game/Art/backgrounds/venus/
 Depends: B-147
-Lead notes: Cycle 265. The studies may run now in a free slot; the export after U-123. Cycle 266: SURFACE STUDY ACCEPTED (the 08:28 slot; review_b147_venus_surface_preview.png: a banded apricot haze ceiling with acid-rain streaks that stop mid-air, terraced black tesserae ridges lit from below by vent glows, glassy glints; seams 0.89 / 0.56 / 0.56; layers ≤ 2.2 MB). The deck study's first pass had the towers as stacked lumps and the station hidden behind the near clouds; both fixed in code (88ccee89: cumulus towers with a following lining, the station as an airship above the cloud tops); its ~80 s re-run goes in the gap after UNITY's lock and is accepted on sight. Export after U-123.
+Lead notes: Cycle 265. The studies may run now in a free slot; the export after U-123. Cycle 266: SURFACE STUDY ACCEPTED (the 08:28 slot; review_b147_venus_surface_preview.png: a banded apricot haze ceiling with acid-rain streaks that stop mid-air, terraced black tesserae ridges lit from below by vent glows, glassy glints; seams 0.89 / 0.56 / 0.56; layers ≤ 2.2 MB). The deck study's first pass had the towers as stacked lumps and the station hidden behind the near clouds; both fixed in code (88ccee89: cumulus towers with a following lining, the station as an airship above the cloud tops); its ~80 s re-run goes in the gap after UNITY's lock and is accepted on sight. Export after U-123. Cycle 272: READY: the deck study re-run straight (D-147, ~80 s) in any free gap, accepted on sight; the export (both sets straight) in one slot once U-123 is Done.
 
-### B-153 · BLENDER · Backlog · C2
+### B-153 · BLENDER · Ready · C2
 Goal: Venus flora + ground export: `flora/venus/rigset` (the five accepted plants, deck and surface forms, ≤ 6 bones, swaps, `biomes`), the Venus ground strips (the deck planks, the basalt crust) in the B-130 contract, `ui/palettes/venus/strip` (D-134).
 Accept: log OK; rigset.json valid with `biomes`; the strips' joins ≤ 1/255; the ten boxes per plant on the stamped assembled review at 1x beside the surveyor.
 Files: blender/scripts/build_c2_venus_rigs.py, build_c2_venus_ground.py, Assets/_Game/Art/flora/venus/, terrain/venus/, ui/palettes/venus/
 Depends: B-147
-Lead notes: Cycle 265. One slot when promoted (after U-123).
+Lead notes: Cycle 265. One slot when promoted (after U-123). Cycle 272: READY; one slot once U-123 is Done, after B-152.
 
 ### B-154 · BLENDER · Backlog · C2
 Goal: Venus creatures re-inked from the accepted B-147 designs: the Sulfur drifter (drift at index 1), the Acidmoth (fly at index 1), the Pressure crab, the Vent eel with its den `props/venus/vent_mouth` (D-126; `idle_open`); faces kept (no teeth); one sheet ≤ 2048² each; `replaces_v2` on any Venus model under the same key.
@@ -1329,7 +1311,7 @@ Goal: C2 Uranus design prep (Bible §12 C2 order 7; §7.8 the sideways winter): 
 Accept: one review per group at 1x on a Uranus stand-in beside the surveyor; the ten boxes self-checked; nothing exported.
 Files: blender/scripts/build_c2_uranus_*.py, coordination/reports/blender/c2_uranus_designs.md
 Depends: B-157
-Lead notes: Cycle 268. The same shape as B-155 / B-157 on the cloud-column pattern; previews only when RAM allows; after the Saturn previews and deck studies. Cycle 268 (11:0x): PALETTE ACCEPTED (ef1553ae: cyan fog, cold white, one warm accent in ember amber, cold slate; every check passing, dimmer than Saturn) → PALETTES["uranus"]; the report (52c52ee5: Sunturner, Fogbell, Hailcatch, Embermoss, Prismfern; floes; deck notes; the Diamondback Colossus as a Grand rig; props) noted. D-142: each deck ships as sun_left / sun_right / night sets + a survey layer0; UNITY crossfades by the season clock (U-130). Cycle 268 (11:4x): PLANTS, FLOES, COLOSSUS, CREATURES ACCEPTED (review_b158_uranus_plants_preview.png: sunturner, fogbell, hailcatch, embermoss with its ember glow, prismfern, faceless; review_b158_uranus_floes_preview.png: methane ice + the dark half with caps, joins 0.89 / 0.44; review_b158_diamondback_preview.png: a Grand rig at 0.25x, ~24 m across, crystal plates on a slate body, the ember joint shown on the reach, no teeth; the four creatures: an ice-white frostwisp with an ember heart, a methane-cyan ray as the stormglider's cousin, a slate hail crab with diamonds on its shell as the pressure crab's cousin, an ice-white tiltbird that flies leaning sideways). Pending: the props review, the 16-set smoke test, deck1 in its four lights (one slot ≤ 5 min after UNITY's chain) to judge the sideways-light idea before the other decks. Cycle 270: PROPS + RIG DRY RUN ACCEPTED (review_b158_uranus_props_preview.png 12:40: the umbrella platform as a diamond-rain catcher, the tilted derelict beacon hull with its ember lamp, at 1x on an ice floe beside the surveyor; review_b158_uranus_rigset_dryrun.png: the five plants, the sunturner's left / right heads). Left: deck1 in its four lights (the next slot), then decks 2 / 3 / deep. 13:0x: deck1 sun_left / sun_right (13:03–13:04) share one geometry (the crossfade will not morph a cloud) but the two lights are indistinguishable, so the sideways-light idea is not judged yet; the fix in code (a4a18ca1: a small bright sun low on its side in a warm haze, the warmth fading across, lit / shaded bands on every lobe) plus LEAD's addition (long soft shadows leaning away from the sun across the cloud-bank and floe tops, told apart at a glance at 1x) in the next slot with night and survey. 13:2x: THE SIDEWAYS-LIGHT IDEA PASSES on deck1 (review_b158_uranus_udeck1_{sun_left,sun_right,night,survey}_preview.png 13:11–13:14: the small sun and its warm haze swap sides and every lobe's shaded face flips; the night a dark slate with the ember on the horizon only; the survey with the methane bands lifted; one geometry across the four). One pass still owed: the long leaning shadows vanish among the banks' shared grey streaks at 1x (lighten the streaks, lengthen and darken the shadows); folded into the same slot as decks 2 / 3 / deep. Decks 2 / 3 / deep are cleared for their slot. 13:3x: DECK1 ×4 ACCEPTED straight + long shadows (review_b158_uranus_udeck1_*_preview.png 13:28–13:31: pale fog, long slate shadows from each lobe's peak leaning away from the sun, the sun and haze swapping sides, one geometry). Left: decks 2 / 3 / deep (the next gaps), then B-158 Done. 14:0x: BLENDER found the per-light roll bug (finish() rolled each layer to the quietest column of the finished image, so each light got its own shift and the season crossfade would have slid the clouds; deck1 matched by luck): fixed with a light-independent roll from the shared geometry; deck2 ×4 and deck3 sun_left re-render, deck1 re-renders before export; LEAD asked for an alpha-mask md5 check across the four lights in the deck review. Twelve scenes left, about three budgeted slots.
+Lead notes: Cycle 268. The same shape as B-155 / B-157 on the cloud-column pattern; previews only when RAM allows; after the Saturn previews and deck studies. Cycle 268 (11:0x): PALETTE ACCEPTED (ef1553ae: cyan fog, cold white, one warm accent in ember amber, cold slate; every check passing, dimmer than Saturn) → PALETTES["uranus"]; the report (52c52ee5: Sunturner, Fogbell, Hailcatch, Embermoss, Prismfern; floes; deck notes; the Diamondback Colossus as a Grand rig; props) noted. D-142: each deck ships as sun_left / sun_right / night sets + a survey layer0; UNITY crossfades by the season clock (U-130). Cycle 268 (11:4x): PLANTS, FLOES, COLOSSUS, CREATURES ACCEPTED (review_b158_uranus_plants_preview.png: sunturner, fogbell, hailcatch, embermoss with its ember glow, prismfern, faceless; review_b158_uranus_floes_preview.png: methane ice + the dark half with caps, joins 0.89 / 0.44; review_b158_diamondback_preview.png: a Grand rig at 0.25x, ~24 m across, crystal plates on a slate body, the ember joint shown on the reach, no teeth; the four creatures: an ice-white frostwisp with an ember heart, a methane-cyan ray as the stormglider's cousin, a slate hail crab with diamonds on its shell as the pressure crab's cousin, an ice-white tiltbird that flies leaning sideways). Pending: the props review, the 16-set smoke test, deck1 in its four lights (one slot ≤ 5 min after UNITY's chain) to judge the sideways-light idea before the other decks. Cycle 270: PROPS + RIG DRY RUN ACCEPTED (review_b158_uranus_props_preview.png 12:40: the umbrella platform as a diamond-rain catcher, the tilted derelict beacon hull with its ember lamp, at 1x on an ice floe beside the surveyor; review_b158_uranus_rigset_dryrun.png: the five plants, the sunturner's left / right heads). Left: deck1 in its four lights (the next slot), then decks 2 / 3 / deep. 13:0x: deck1 sun_left / sun_right (13:03–13:04) share one geometry (the crossfade will not morph a cloud) but the two lights are indistinguishable, so the sideways-light idea is not judged yet; the fix in code (a4a18ca1: a small bright sun low on its side in a warm haze, the warmth fading across, lit / shaded bands on every lobe) plus LEAD's addition (long soft shadows leaning away from the sun across the cloud-bank and floe tops, told apart at a glance at 1x) in the next slot with night and survey. 13:2x: THE SIDEWAYS-LIGHT IDEA PASSES on deck1 (review_b158_uranus_udeck1_{sun_left,sun_right,night,survey}_preview.png 13:11–13:14: the small sun and its warm haze swap sides and every lobe's shaded face flips; the night a dark slate with the ember on the horizon only; the survey with the methane bands lifted; one geometry across the four). One pass still owed: the long leaning shadows vanish among the banks' shared grey streaks at 1x (lighten the streaks, lengthen and darken the shadows); folded into the same slot as decks 2 / 3 / deep. Decks 2 / 3 / deep are cleared for their slot. 13:3x: DECK1 ×4 ACCEPTED straight + long shadows (review_b158_uranus_udeck1_*_preview.png 13:28–13:31: pale fog, long slate shadows from each lobe's peak leaning away from the sun, the sun and haze swapping sides, one geometry). Left: decks 2 / 3 / deep (the next gaps), then B-158 Done. 14:0x: BLENDER found the per-light roll bug (finish() rolled each layer to the quietest column of the finished image, so each light got its own shift and the season crossfade would have slid the clouds; deck1 matched by luck): fixed with a light-independent roll from the shared geometry; deck2 ×4 and deck3 sun_left re-render, deck1 re-renders before export; LEAD asked for an alpha-mask md5 check across the four lights in the deck review. Twelve scenes left, about three budgeted slots. Cycle 272 (14:4x): the Stack.paint alpha fix and --uranus-check are in (697d5a40); the decks slot waits on the RAM gate (USER-28) behind UNITY's probe lock; deck2 ×4 first, the check after each deck; the four-light review per deck judged on the stamped previews + the check line.
 
 ### B-162 · BLENDER · Done · C2
 Goal: Straight-alpha re-export of the premultiplied near layers (D-147): the Earth sets (backgrounds/earth/plains, forest, coast; the climb sky set where its near layers carry alpha) and the Mars sets (plains, canyon, storm), layer1 / layer2 only through finish(straight=True); layer0s byte-identical; the scene jsons unchanged; one wrapper slot per planet.
@@ -1343,7 +1325,49 @@ Goal: Strip sheets without gutter bleed: the strip exporter extrudes each 64 px 
 Accept: log OK ×9; a stamped review at 1x of a long run of each strip with no 64 px join; UNITY's next strip capture shows none.
 Files: blender/scripts/build_ground_strips_v3.py (shared sheets()), Assets/_Game/Art/terrain/
 Depends: B-162
-Lead notes: Cycle 271 (UNITY's u123 night frame: faint 64 px joins inside the strip art band; the fill had the same bleed, fixed on UNITY's side by a one-texel inset). After B-162 Mars; before the Uranus decks only if the slot is free. 14:0x: DONE (code 42cbd6f0, exports 7988769b; log 13:57 OK ×4 covering the nine strips in 36 s; the eight frame rects of every strip md5-identical to the previous exports, the gutters carrying the edge colour at alpha 0, the jsons and joins unchanged; D-145's overshoot rule fired for the first time (522 vs a 347 estimate, Earth renders four strips to Mercury's two) and reset the category gate to default, 2.8 GB free). UNITY confirms on its next night-frame capture; the fill inset stays. 14:1x: REOPENED: UNITY's re-measured night frame still dips ~12.7 levels at every 64 px; the colour-only extrusion leaves the gutters at alpha 0, so straight-alpha bilinear halves the edge pixel. Extrude RGBA (alpha too); one ~36 s re-run in the next gap; UNITY's dip measurement is the acceptance test. Done when it reads flat.
+Lead notes: Cycle 271 (UNITY's u123 night frame: faint 64 px joins inside the strip art band; the fill had the same bleed, fixed on UNITY's side by a one-texel inset). After B-162 Mars; before the Uranus decks only if the slot is free. 14:0x: DONE (code 42cbd6f0, exports 7988769b; log 13:57 OK ×4 covering the nine strips in 36 s; the eight frame rects of every strip md5-identical to the previous exports, the gutters carrying the edge colour at alpha 0, the jsons and joins unchanged; D-145's overshoot rule fired for the first time (522 vs a 347 estimate, Earth renders four strips to Mercury's two) and reset the category gate to default, 2.8 GB free). UNITY confirms on its next night-frame capture; the fill inset stays. 14:1x: REOPENED: UNITY's re-measured night frame still dips ~12.7 levels at every 64 px; the colour-only extrusion leaves the gutters at alpha 0, so straight-alpha bilinear halves the edge pixel. Extrude RGBA (alpha too); one ~36 s re-run in the next gap; UNITY's dip measurement is the acceptance test. Done when it reads flat. Cycle 272: RE-EXPORTED RGBA (code 1c575843, exports e0f476c7; log 14:10 OK ×4, the frame rects md5-identical in all nine, the jsons unchanged, peak 525 MB). Awaiting UNITY's measurement (U-131) in the 0.4.4 probe lock.
+
+### B-161 · BLENDER · Ready · C2
+Goal: C2 Neptune design prep (Bible §12 C2 order 8; §7.9 the dark storm world): the Neptune palette proposal with the Mars checks (a deep-blue family with one pale accent), the deck layer study notes (the Great Dark Spot, supersonic wind streaks, diamond rain on layer2 per the near-layer rule), floes and five faceless flora, the creature re-ink list (faces kept, no teeth) with the apex as a Grand rig, the props that differ; `coordination/reports/blender/c2_neptune_designs.md`.
+Accept: one review per group at 1x on a Neptune stand-in beside the surveyor; the ten boxes self-checked; nothing exported.
+Files: blender/scripts/build_c2_neptune_*.py, coordination/reports/blender/c2_neptune_designs.md
+Depends: B-158
+Lead notes: Cycle 272. The same shape as B-155 / B-157 / B-158 on the cloud-column pattern; source and the report lock-free now (BLENDER started it 14:3x while the gate is shut); previews only when RAM allows, after the Uranus decks.
+
+### B-159 · BLENDER · Backlog · C2
+Goal: Jupiter export from the accepted B-155 designs: `backgrounds/jupiter/{deck1,deck2,deck3,deep}` + the Red Spot overlay with the straight finish (D-147); the four floe strips with cap_left + cap_right (D-137); `flora/jupiter/rigset`; the Jupiter props; `ui/palettes/jupiter/strip`.
+Accept: log OK per key; the 2× seam check with no seam; ≤ 4 MB per PNG; the floe joins ≤ 1/255; rigset.json valid with `biomes`; one stamped review per group at 1x.
+Files: blender/scripts/build_backdrop_v3.py, build_c2_jupiter_*.py, Assets/_Game/Art/backgrounds/jupiter/, terrain/jupiter/, flora/jupiter/, props/jupiter/, ui/palettes/jupiter/
+Depends: B-155, U-127
+Lead notes: Cycle 272. Two slots when U-127's code is committed (D-119's order); B-156's kit rides the first.
+
+### B-160 · BLENDER · Backlog · C2
+Goal: Jupiter creatures from the accepted B-155 designs: the Stormglider (fly at index 1), the Lightning eel, the Belt wasp, the Ballast tortoise, one sheet ≤ 2048² each; the Vortex Whale as a §11.3 rig set (D-138); `replaces_v2` on any Jupiter model under the same key.
+Accept: the ten boxes per creature on a stamped review (1x on a Jupiter floe beside the surveyor); json valid; clip indices 0–3 in Gus's order, the rest by name; the whale's rig json valid with six bones.
+Files: blender/scripts/build_creatures_jupiter_v3.py, build_vortex_whale_v3.py, Assets/_Game/Art/creatures/jupiter/
+Depends: B-155, U-127
+Lead notes: Cycle 272. One slot after B-159.
+
+### B-163 · BLENDER · Backlog · C2
+Goal: Saturn export from the accepted B-157 designs: `backgrounds/saturn/{sdeck1,sdeck2,sdeck3,sdeep}` + the Hexagon overlay re-rendered straight (D-147), the ice and ring-rock floes with caps, `flora/saturn/rigset`, the ring-mining props, `ui/palettes/saturn/strip` (D-141: PALETTES["saturn"] without the setdefault).
+Accept: as B-159.
+Files: blender/scripts/build_backdrop_v3.py, build_c2_saturn_*.py, Assets/_Game/Art/backgrounds/saturn/, terrain/saturn/, flora/saturn/, props/saturn/, ui/palettes/saturn/
+Depends: B-157, U-129
+Lead notes: Cycle 272. Two slots when U-129's code is committed.
+
+### B-164 · BLENDER · Backlog · C2
+Goal: Saturn creatures from the accepted B-157 designs: the Helium jelly, the Hex drake (fly at index 1), the Floe moth, the Ringmite, one sheet ≤ 2048² each; the Polar Hydra as a Grand rig set (D-140: 7 bones, the lost-head swap dissolving to a puff); `replaces_v2`.
+Accept: as B-160.
+Files: blender/scripts/build_creatures_saturn_v3.py, build_polar_hydra_v3.py, Assets/_Game/Art/creatures/saturn/
+Depends: B-157, U-129
+Lead notes: Cycle 272. One slot after B-163.
+
+### B-166 · BLENDER · Backlog · C2
+Goal: Uranus export from the accepted B-158 designs: each deck as sun_left / sun_right / night sets + the survey layer0 (D-142) with the straight finish, the alpha masks identical across the lights (--uranus-check); the methane-ice floes with caps; `flora/uranus/rigset`; the four creatures and the Diamondback Colossus as a Grand rig set; the props; `ui/palettes/uranus/strip`.
+Accept: as B-159 + B-160, plus a --uranus-check PASS line per deck in the log.
+Files: blender/scripts/build_backdrop_v3.py, build_c2_uranus_*.py, Assets/_Game/Art/backgrounds/uranus/, terrain/uranus/, flora/uranus/, creatures/uranus/, props/uranus/, ui/palettes/uranus/
+Depends: B-158, U-130
+Lead notes: Cycle 272. Three slots when U-130's code is committed.
 
 > **R1 (D-062).** 2D tasks B-056..B-076 are Superseded; their `.blend` sources (rigs, props,
 > terrain recipes) are the starting point for the models. Contract v2 §9 is the rule set.
@@ -2125,12 +2149,12 @@ Cryo meter (U), `PlanetDisc` shader with real textures (U). (POI prop sets promo
 R3 (drafted cycle 207): U-085 Mercury and Venus in 3D (the R3 counterpart of U-081: B-091 block arrays, B-092 bands incl. the translucent Venus deck strip and the day/twilight/night Mercury skydomes, B-093/B-096 creatures and Wardens through ModelView, B-095 props and station modules via ModelSwap, B-101 scenery; the cinderhulk emission float driven by the day side; the veil serpent chained from veil_serpent_tail + n×body + head, each module's clip offset by J×0.07 cycles for J bones behind it; M3InnerTests + the M3 smoke set re-shot with the depth preset). Promote when U-081 is Done.
 S1 → every planet (drafted cycle 220, D-076): the stage layer sets for the giants ride on B-097/B-100 (decks + wisps + stage.json); U-081 and U-085 gain 'stage layers resident and the §11.1 v3 rows green on that planet' as acceptance when promoted; S1 report `coordination/reviews/S1_REPORT.md` + milestone page after U-092 and the owner's playtest.
 
-### U-102 · UNITY · Backlog · C1
+### U-102 · UNITY · Ready · C1
 Goal: Settings panel (P-39): one panel reachable from the pause menu and the title screen: Film effects (moves the FILM EFFECTS button here), master/music/SFX volume, key rebinding read-only list, language placeholder; saved through GameSettings; cartoon frame per contract §11 UI once B-1xx UI art exists (placeholder frame until then).
 Accept: MenuHudTests cover open/close and the film toggle round trip; settings persist across a restart (test); clean console.
 Files: Assets/_Game/Code/Runtime/UI/Settings/
 Depends: U-095
-Lead notes: Cycle 236. Promoted with the C1 cards.
+Lead notes: Cycle 236. Promoted with the C1 cards. Cycle 272: READY with U-124 (the code lock-free while the gate is shut; one check with U-124 after the Mercury hand-off).
 
 ### U-110 · UNITY · Done · C2
 Goal: Biome-aware flora placement: FloraRigs picks plants whose `biomes` list contains the spawn biome (JsonUtility reads the new field from B-129's rig set), weighted so every biome has at least two kinds; the C2 Earth rig set imports with no schema change; the 300-plant loop p99 unchanged.
@@ -2210,22 +2234,22 @@ Goal: Mercury on the cartoon stage (Bible §12 C2 order 3; §7.3): Mercury runs 
 Accept: Mercury captures at 1x (day plains with plants and a Glassback, the twilight band with a Flarewing, the night side with the Shadewyrm at its burrow) matching the accepted B-145 composites; TransitionTests green; the BudgetGate Mercury rows green; StageLayers' Mercury tests retired per D-124.
 Files: Code/Runtime/View2D/CartoonStage.cs, Code/Runtime/Planet/, Code/Runtime/Creatures/CreatureSpecies.cs, Tests/
 Depends: U-118, B-148, B-149
-Lead notes: Cycle 264. Promoted when U-118 Mars is Done. Cycle 269 close: PROMOTED (U-118 Done). Code lock-free now, committed ahead of the check so B-148 / B-149 / B-150 export behind it (D-119's order); the Creep second-loop probe rides the check chain. 13:1x: lock 1 GREEN (12:54–12:59: compile 0 / 0, CheckSetup imported the three exports, the 10-class slice 16/16); lock 2: M3Inner 5/7 with one red in LEAD's own Step4 (fixed e201d1e1, re-run owed); CaptureU123Mercury 13:08: all real art draws (the three sets by zone, both strips, the rig plants, the Glassback, the Flarewing, the Shadewyrm in a true peek) but the camp sits in a seeded crater and the cold trap's datum floats ~3 m over its floor → D-146 (no small craters within ±40 columns of the pad; the datum from the generator's surface); the three Mercury frames re-shoot in the next lock with the den / scene re-shoots, Build 0.4.4 + the probe and M3Inner. The Shadewyrm frame passes. Cycle 271 (13:5x): the re-run's step 1 GREEN in the foreground (13:39–13:43: PlayMode 23/23 = the Mercury slice 16/16 on D-146 with the pad's ground = the datum 317.0, LeadQA M3Inner 7/7 with LEAD's Step4 fix). The three Mercury frames shot 13:47 against the straight-alpha B-149 PASS for their scenes (1_day_1x: the camp on the plain with a Glassback, embercaps and sunfans under the huge low Sun; 2_twilight_1x: the half-set Sun under the violet band, the Flarewing, glassreeds; 3_night_burrow: the cold trap's set meeting its floor, the Shadewyrm peeking at its burrow, coilwort and shadebloom). The horizontal hairlines in the strip fill below are the fill-tile bleed fixed at 13:48 (9a6e31d5); the running want re-shoots them with the den and scene frames, then BudgetGate, Build 0.4.4 + the probe, the hand-off. Done on the hand-off.
+Lead notes: Cycle 264. Promoted when U-118 Mars is Done. Cycle 269 close: PROMOTED (U-118 Done). Code lock-free now, committed ahead of the check so B-148 / B-149 / B-150 export behind it (D-119's order); the Creep second-loop probe rides the check chain. 13:1x: lock 1 GREEN (12:54–12:59: compile 0 / 0, CheckSetup imported the three exports, the 10-class slice 16/16); lock 2: M3Inner 5/7 with one red in LEAD's own Step4 (fixed e201d1e1, re-run owed); CaptureU123Mercury 13:08: all real art draws (the three sets by zone, both strips, the rig plants, the Glassback, the Flarewing, the Shadewyrm in a true peek) but the camp sits in a seeded crater and the cold trap's datum floats ~3 m over its floor → D-146 (no small craters within ±40 columns of the pad; the datum from the generator's surface); the three Mercury frames re-shoot in the next lock with the den / scene re-shoots, Build 0.4.4 + the probe and M3Inner. The Shadewyrm frame passes. Cycle 271 (13:5x): the re-run's step 1 GREEN in the foreground (13:39–13:43: PlayMode 23/23 = the Mercury slice 16/16 on D-146 with the pad's ground = the datum 317.0, LeadQA M3Inner 7/7 with LEAD's Step4 fix). The three Mercury frames shot 13:47 against the straight-alpha B-149 PASS for their scenes (1_day_1x: the camp on the plain with a Glassback, embercaps and sunfans under the huge low Sun; 2_twilight_1x: the half-set Sun under the violet band, the Flarewing, glassreeds; 3_night_burrow: the cold trap's set meeting its floor, the Shadewyrm peeking at its burrow, coilwort and shadebloom). The horizontal hairlines in the strip fill below are the fill-tile bleed fixed at 13:48 (9a6e31d5); the running want re-shoots them with the den and scene frames, then BudgetGate, Build 0.4.4 + the probe, the hand-off. Done on the hand-off. Cycle 272 (14:4x): the chain reached Build 0.4.4 (written 14:15, 550 MB) through the re-shot frames (14:05–14:06), BudgetGate 14:08 and P-48 (228687c0); the 13-leg probe and the hand-off commit are left, held by the RAM gate (0.65 GB free after the owner reopened ChatGPT and Edge; USER-28). The disk-only parts of the hand-off (perf, frames, README) commit now; U-131's dip measurement rides the probe lock.
 
 
-### U-124 · UNITY · Backlog · C3
+### U-124 · UNITY · Ready · C3
 Goal: C3 UI in: the paper panels (B-151) on the pause menu, the settings panel (U-102), the inventory and the sign / scroll frames with 9-slice; the planet title cards as the intertitle slide-in on entry (Bible C3), the Film-effects switch art on its toggle; Limelight + Patrick Hand throughout; every menu reachable by keyboard; the toggle persists in the save.
 Accept: MenuHudTests cover each panel's open / close and the keyboard path; a title card capture per planet on entry; the settings round trip; clean console.
 Files: Code/Runtime/UI/, Tests/
 Depends: U-102, B-151
-Lead notes: Cycle 265. Promoted after U-118 Mars; U-102 (the settings panel) rides with it.
+Lead notes: Cycle 265. Promoted after U-118 Mars; U-102 (the settings panel) rides with it. Cycle 272: READY: the code lock-free now (the gate is shut anyway); the check after the Mercury hand-off; B-151 exports behind the committed code, the captures after that export.
 
-### U-125 · UNITY · Backlog · C2
+### U-125 · UNITY · Ready · C2
 Goal: Venus on the cartoon stage (Bible §12 C2 order 4; §7.4 the dive world): the deck and surface scenes (B-152) picked by altitude, the B-153 rig set and strips (deck planks, basalt crust), the climb sky per D-118 from the apricot haze, the Venus creatures on sheets (B-154; the Vent eel a den species per D-126; the drifter and moth fliers); the M3 Venus gameplay tests unchanged; the Venus perf rows green (the 3D path's textures row was the red one, D-089).
 Accept: Venus captures at 1x (the deck with the aerostat strip and a drifter, the surface with a crab at a vent) matching the accepted B-147 composites; TransitionTests green; the BudgetGate Venus rows green.
 Files: Code/Runtime/View2D/CartoonStage.cs, Code/Runtime/Planet/, Code/Runtime/Creatures/CreatureSpecies.cs, Tests/
 Depends: U-123, B-152, B-153
-Lead notes: Cycle 265. Promoted when U-123 Mercury is Done.
+Lead notes: Cycle 265. Promoted when U-123 Mercury is Done. Cycle 272: READY, start after the U-123 hand-off commit and the C3 UI code (the Venus studies are accepted; B-152 / B-153 export once U-123 is Done, B-154 behind this card's code).
 
 
 ### U-126 · UNITY · Backlog · C2
@@ -2256,3 +2280,17 @@ Accept: Saturn captures at 1x (a floe lane with the rings edge-on and a ringmite
 Files: Code/Runtime/View2D/CartoonStage.cs, Code/Runtime/Planet/, Code/Runtime/Creatures/, Tests/
 Depends: U-127, B-157
 Lead notes: Cycle 268. Promoted when U-127 Jupiter is Done.
+
+### U-130 · UNITY · Backlog · C2
+Goal: Uranus on the cartoon stage (Bible §12 C2 order 7; §7.8 the sideways winter): the B-158 deck sets as sun_left / sun_right / night + the survey layer0 (D-142), crossfaded by the season clock; the methane-ice floes with caps (U-126); the Uranus creatures on sheets and the Diamondback Colossus as a Grand rig set piece; the Uranus palette strip; the M4 Uranus tests unchanged; the Uranus perf rows green.
+Accept: Uranus captures at 1x (a floe lane under sun_left, the same under sun_right with the shadows turned, the night with the ember horizon, the Colossus in passing) matching the accepted B-158 composites; a crossfade test (the geometry identical across the lights, nothing slides); TransitionTests green; the BudgetGate Uranus rows green.
+Files: Code/Runtime/View2D/CartoonStage.cs, Code/Runtime/Planet/, Code/Runtime/Creatures/, Tests/
+Depends: U-129, B-166
+Lead notes: Cycle 272. Promoted when U-129 Saturn is Done.
+
+### U-131 · UNITY · Ready · C2
+Goal: B-165's acceptance measurement: on the night Mercury frame (and one Earth strip run) against the RGBA-gutter strips (e0f476c7; re-imported with P-48's Clamp in v), the per-column brightness along the strip art band shows no dip at the 64 px joins (≤ 2 levels) and no line 2 m under the ground line; the numbers in the c2_mercury README.
+Accept: the measurement in UNITY_STATUS (the max dip in levels at the joins; 12.7 before); the frame in reports/unity/u123/; no extra lock: shot in the 0.4.4 probe lock.
+Files: coordination/reports/unity/u123/, coordination/reports/unity/c2_mercury/README.md, Tests/ (GroundStripTests keeps the P-48 assert)
+Depends: B-165, U-123
+Lead notes: Cycle 272. Rides the probe lock; B-165 goes Done on a flat reading, back to BLENDER on a dip.
