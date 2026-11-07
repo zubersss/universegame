@@ -57,5 +57,52 @@ def read_png(path):
         bpy.data.images.remove(img)
 
 
+def read_png_np(path):
+    """Read an 8-bit RGBA PNG with numpy only (no bpy): HxWx4 uint8, row 0 = top. Handles all five
+    PNG filter types (our writer uses None/Sub/Up). For lock-free reviews of exported sheets."""
+    data = open(path, "rb").read()
+    if data[:8] != b"\x89PNG\r\n\x1a\n":
+        raise ValueError(f"{path}: not a PNG")
+    pos, idat, w, h = 8, b"", None, None
+    while pos < len(data):
+        n = struct.unpack(">I", data[pos:pos + 4])[0]
+        tag, body = data[pos + 4:pos + 8], data[pos + 8:pos + 8 + n]
+        if tag == b"IHDR":
+            w, h, bd, ct = struct.unpack(">IIBB", body[:10])
+            if bd != 8 or ct != 6:
+                raise ValueError(f"{path}: only 8-bit RGBA is supported (bit depth {bd}, colour type {ct})")
+        elif tag == b"IDAT":
+            idat += body
+        pos += 12 + n
+    raw = zlib.decompress(idat)
+    stride = w * 4
+    out = np.zeros((h, stride), np.uint8)
+    prev = np.zeros(stride, np.int32)
+    for y in range(h):
+        f = raw[y * (stride + 1)]
+        cur = np.frombuffer(raw, np.uint8, stride, y * (stride + 1) + 1).astype(np.int32)
+        if f == 1:
+            cur = cur.copy()
+            for x in range(4, stride):
+                cur[x] = (cur[x] + cur[x - 4]) & 255
+        elif f == 2:
+            cur = (cur + prev) & 255
+        elif f in (3, 4):
+            cur = cur.copy()
+            for x in range(stride):
+                a = int(cur[x - 4]) if x >= 4 else 0
+                b = int(prev[x])
+                c = int(prev[x - 4]) if x >= 4 else 0
+                if f == 3:
+                    cur[x] = (cur[x] + (a + b) // 2) & 255
+                else:
+                    p = a + b - c
+                    pa, pb, pc = abs(p - a), abs(p - b), abs(p - c)
+                    cur[x] = (cur[x] + (a if pa <= pb and pa <= pc else b if pb <= pc else c)) & 255
+        out[y] = cur
+        prev = cur
+    return out.reshape(h, w, 4)
+
+
 def to_u8(a):
     return np.clip(np.rint(a * 255.0), 0, 255).astype(np.uint8)

@@ -400,7 +400,8 @@ def up_xf(p):
 
 # B-122 sockets (local metres, before the pose): where the game attaches things
 UP_SOCKETS = {"tail_exhaust": (0.0, UP_Z0 - 0.75), "leg_l": (-2.25, 0.16), "leg_c": (0.0, 0.16),
-              "leg_r": (2.25, 0.16), "door": (-0.05, 2.35)}
+              "leg_r": (2.25, 0.16), "door": (-0.05, 2.35),
+              "attitude_l": (-1.5, 2.6), "attitude_r": (1.5, 2.6)}      # UNITY's attitude puffs at the leg roots
 
 
 def up_sockets(pose):
@@ -488,13 +489,13 @@ def draw_upright(d, M, pose=None, seed=0):
 def draw_top_v2(d, M, pose=None, seed=0):
     """Space view, seen from above, nose to +x: hull, band, nose cone, three fins (two spread, one
     as a ridge), ONE porthole on the upper hull; no face (D-101)."""
-    p = dict(sx=1.0, sz=1.0, fin=0.0, cz=4.0)
+    p = dict(sx=1.0, sz=1.0, fin=0.0, cz=4.0, fins=True)
     p.update(pose or {})
 
     def TL(pts):
         return [(x * p["sx"], p["cz"] + z * p["sz"]) for x, z in pts]
     D = G.Xf(d, TL)
-    for s in (-1, 1):
+    for s in ((-1, 1) if p["fins"] else ()):
         a = p["fin"] * s
         bx = -4.3
         tipx, tipz = bx - 1.6 + 0.4 * math.sin(a), s * (radius_at(bx / L2) * 0.85 + 1.7 + 0.25 * math.cos(a))
@@ -627,6 +628,211 @@ def build_design_up(out=OUT):
         kind = pose.pop("kind")
         (draw_upright if kind == "up" else draw_top_v2)(G.drawing(layer, i + 1), M, pose, seed=10 * i)
     G.mark_clips(scene, [("design", len(DESIGN_UP))])
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    bpy.ops.wm.save_as_mainfile(filepath=out)
+    return out
+
+
+
+
+# ======================================================================== B-122 as a rig set (D-111)
+# ships/pilgrim/rig: the upright ship as parts + bones + sockets on one sheet (contract §11.3 widened),
+# bone clips sampled at 12 Hz; thrust stretch, cut squash and the +-35 deg tilt are UNITY's root
+# transforms (U-107), never drawn. Two rigs: "pilgrim_side" (6 bones: root hull, nose, three
+# fin-legs with their pads, hatch; bell and porthole as static slots) and "pilgrim_top" (3 bones).
+# Every part is drawn in ship-local metres and shifted so its pivot is the part object's origin.
+
+def _shift(px, pz):
+    return lambda pts: [(x - px, z - pz) for x, z in pts]
+
+
+def rp_hull(D, M, seed=0):
+    zs = [UP_Z0 + (UP_Z1 - UP_Z0) * i / 60 for i in range(61)]
+    zs = [z for z in zs if z <= 9.3]                       # up to the nose seam (the nose is its own part)
+    right = [(up_radius(z), z) for z in zs]
+    left = [(-up_radius(z), z) for z in zs[::-1]]
+    hull = right + left[1:-1]
+    G.stroke(D, hull, M["hull"], 0.0, cyclic=True)
+    G.stroke(D, [(-up_radius(z), z) for z in zs] + [(-up_radius(z) * 0.45, z) for z in zs[::-1]], M["hull_sh"], 0.0, cyclic=True)
+    G.stroke(D, [(-up_radius(z), z) for z in zs] + [(-up_radius(z) * 0.80, z) for z in zs[::-1]], M["hull_dp"], 0.0, cyclic=True)
+    band = [(up_radius(z), z) for z in (5.0, 5.15, 5.3, 5.45, 5.6)] + [(-up_radius(z), z) for z in (5.6, 5.45, 5.3, 5.15, 5.0)]
+    G.stroke(D, band, M["band"], I, cyclic=True)
+    G.rivets(D, [(x, 5.3) for x in (-1.05, -0.6, -0.15, 0.3, 0.75, 1.15)], M["ink"])
+    for zz in (3.3, 8.2):
+        r = up_radius(zz)
+        G.seam(D, G.bowed_line((-r * 0.97, zz), (r * 0.97, zz), bow=-0.03, n=8), M["ink"])
+        G.rivets(D, [(x * r, zz + 0.16) for x in (-0.7, -0.35, 0.0, 0.35, 0.7)], M["ink"])
+    G.seam(D, [(0.62 * up_radius(z), z) for z in [2.0 + 0.4 * i for i in range(8)]], M["ink"])
+    G.seam(D, [(-0.55 * up_radius(z), z) for z in [5.8 + 0.3 * i for i in range(9)]], M["ink"])
+    G.hatch(D, -1.0, 4.2, M["ink"], n=4, length=0.45, spacing=0.14, angle_deg=72, seed=seed + 3)
+    G.hatch(D, -0.95, 7.0, M["ink"], n=3, length=0.4, spacing=0.14, angle_deg=72, seed=seed + 4)
+    G.specks(D, [(0.9, 6.4), (1.0, 6.6), (0.85, 6.9), (-0.2, 2.6)], M["ink"])
+    # the dark doorway the hatch covers at rest (shows while the hatch swings open)
+    way = G.bezier((-0.40, 2.38), (-0.43, 3.4), (-0.29, 4.0), n=8) + G.bezier((-0.29, 4.0), (-0.05, 4.2), (0.19, 4.0), n=6)[1:] + \
+        G.bezier((0.19, 4.0), (0.31, 3.4), (0.30, 2.38), n=8)[1:]
+    G.stroke(D, way, M["bell_dp"], I, cyclic=True)
+    G.stroke(D, hull, M["ink"], O, cyclic=True)
+
+
+def rp_nose(D, M, seed=0):
+    nz = 9.2
+    cone = [(up_radius(z), z) for z in [nz + (UP_Z1 - nz) * i / 20 for i in range(21)]] + \
+        [(-up_radius(z), z) for z in [UP_Z1 - (UP_Z1 - nz) * i / 20 for i in range(21)]][1:]
+    G.stroke(D, cone, M["nose"], 0.0, cyclic=True)
+    G.stroke(D, [(-up_radius(z), z) for z in [nz + (UP_Z1 - nz) * i / 20 for i in range(21)]] +
+             [(-up_radius(z) * 0.5, z) for z in [UP_Z1 - (UP_Z1 - nz) * i / 20 for i in range(21)]], M["nose_sh"], 0.0, cyclic=True)
+    G.stitches(D, [(0.0, nz + 0.25), (0.0, UP_Z1 - 0.5)], M["ink"], every=0.25, length=0.12)
+    G.stroke(D, cone, M["ink"], O, cyclic=True)
+    G.stroke(D, G.lumpy_ellipse(0.0, UP_Z1 + 0.12, 0.2, 0.17, n=16, seed=seed + 5), M["tip"], O, cyclic=True)
+
+
+def rp_bell(D, M, seed=0):
+    bell = G.bezier((-0.70, UP_Z0 + 0.25), (-0.80, UP_Z0 - 0.3), (-0.95, UP_Z0 - 0.75), n=6) + \
+        [(0.95, UP_Z0 - 0.75)] + G.bezier((0.95, UP_Z0 - 0.75), (0.80, UP_Z0 - 0.3), (0.70, UP_Z0 + 0.25), n=6)[1:]
+    G.stroke(D, bell, M["bell"], 0.0, cyclic=True)
+    G.stroke(D, [q for q in bell if q[0] < -0.3], M["bell_dp"], 0.0, cyclic=True)
+    for zz in (UP_Z0 - 0.25, UP_Z0 - 0.5):
+        G.seam(D, G.bowed_line((-0.85, zz), (0.85, zz), bow=-0.04, n=6), M["ink"])
+    G.stroke(D, bell, M["ink"], O, cyclic=True)
+
+
+def rp_fin(side):
+    def fn(D, M, seed=0):
+        up_fin(D, M, side, 0.0)
+    return fn
+
+
+def rp_fin_c(D, M, seed=0):
+    cf = [(-0.22, 3.0), (0.22, 3.0), (0.16, 0.45), (-0.16, 0.45)]
+    G.stroke(D, cf, M["fin"], 0.0, cyclic=True)
+    G.stroke(D, [(-0.22, 3.0), (-0.05, 3.0), (-0.04, 0.45), (-0.16, 0.45)], M["fin_sh"], 0.0, cyclic=True)
+    G.seam(D, [(0.0, 2.8), (0.0, 0.7)], M["ink"])
+    G.stroke(D, cf, M["ink"], O, cyclic=True)
+    G.stroke(D, G.lumpy_ellipse(0.0, 0.16 + O * 1.25, 0.34, 0.15, n=20, seed=seed + 8), M["foot"], O, cyclic=True)
+
+
+def rp_hatch(D, M, seed=0):
+    door = G.bezier((-0.42, 2.35), (-0.45, 3.4), (-0.30, 4.05), n=8) + G.bezier((-0.30, 4.05), (-0.05, 4.25), (0.20, 4.05), n=6)[1:] + \
+        G.bezier((0.20, 4.05), (0.33, 3.4), (0.32, 2.35), n=8)[1:]
+    G.stroke(D, door, M["hull"], 0.0, cyclic=True)
+    G.stroke(D, [q for q in door if q[0] < -0.2] + [(-0.2, 2.4)], M["hull_sh"], 0.0, cyclic=True)
+    G.rivets(D, [(-0.36, 2.6), (-0.39, 3.2), (-0.37, 3.8), (0.26, 2.6), (0.28, 3.2), (0.26, 3.8)], M["ink"])
+    G.seam(D, [(-0.42, 3.0), (-0.52, 3.0)], M["ink"])
+    G.seam(D, [(-0.43, 3.6), (-0.53, 3.6)], M["ink"])
+    G.stroke(D, G.lumpy_ellipse(0.17, 3.15, 0.05, 0.05, n=10, seed=seed + 9), M["brass"], I, cyclic=True)
+    G.stroke(D, door, M["ink"], I, cyclic=True)
+
+
+def rp_porthole(D, M, seed=0):
+    px, pz = 0.38, 7.25
+    G.stroke(D, G.lumpy_ellipse(px, pz, 0.62, 0.62, n=30, seed=seed + 6), M["brass"], O, cyclic=True)
+    G.stroke(D, G.lumpy_ellipse(px, pz, 0.44, 0.44, n=26, seed=seed + 7), M["port_glass"], 0.0, cyclic=True)
+    G.stroke(D, G.lumpy_ellipse(px, pz, 0.44, 0.44, n=26, seed=seed + 7), M["ink"], I, cyclic=True)
+    G.stroke(D, [(px + 0.30 * math.cos(a), pz + 0.30 * math.sin(a)) for a in [1.9 + 0.13 * k for k in range(8)]], M["glint"], I)
+    G.rivets(D, [(px + 0.53 * math.cos(a), pz + 0.53 * math.sin(a)) for a in [2 * math.pi * k / 8 + 0.2 for k in range(8)]], M["ink"])
+
+
+def rp_top_hull(D, M, seed=0):
+    draw_top_v2(D, M, {"cz": 0.0, "fins": False}, seed=seed)
+
+
+def rp_top_fin(side):
+    def fn(D, M, seed=0):
+        s, bx = side, -4.3
+        tipx, tipz = bx - 1.6, s * (radius_at(bx / L2) * 0.85 + 1.7 + 0.25)
+        pts = G.bezier((bx + 1.3, s * 0.9), (bx + 0.2, s * 1.8), (tipx, tipz), n=10) + \
+            G.bezier((tipx, tipz), (bx - 1.2, s * 1.5), (bx - 0.6, s * 0.9), n=10)[1:]
+        G.stroke(D, pts, M["fin"], 0.0, cyclic=True)
+        G.seam(D, G.bezier((bx + 0.9, s * 1.0), (bx - 0.4, s * 1.6), (tipx * 0.98, tipz * 0.9), n=6), M["ink"])
+        G.stroke(D, pts, M["ink"], O, cyclic=True)
+        G.stroke(D, G.lumpy_ellipse(tipx + 0.05, tipz - s * 0.15, 0.30, 0.24, n=18, seed=seed + 60 + s), M["tip"], O, cyclic=True)
+    return fn
+
+
+# (part name, draw fn, pivot in ship-local metres)
+_FIN_TOP = (up_radius(3.6) * 0.92, 3.6)
+RIG_PARTS = [
+    ("hull", rp_hull, (0.0, UP_Z0)),
+    ("nose", rp_nose, (0.0, 9.2)),
+    ("bell", rp_bell, (0.0, UP_Z0)),
+    ("fin_l", rp_fin(-1), (-_FIN_TOP[0], _FIN_TOP[1])),
+    ("fin_r", rp_fin(1), (_FIN_TOP[0], _FIN_TOP[1])),
+    ("fin_c", rp_fin_c, (0.0, 3.0)),
+    ("hatch", rp_hatch, (-0.42, 3.2)),
+    ("porthole", rp_porthole, (0.38, 7.25)),
+    ("top_hull", rp_top_hull, (0.0, 0.0)),
+    ("top_fin_l", rp_top_fin(-1), (-3.0, -0.9)),
+    ("top_fin_r", rp_top_fin(1), (-3.0, 0.9)),
+]
+_PIV = {n: pv for n, _f, pv in RIG_PARTS}
+
+
+def _off(child, parent):
+    return [round(_PIV[child][0] - _PIV[parent][0], 4), round(_PIV[child][1] - _PIV[parent][1], 4)]
+
+
+TAU8 = [2 * math.pi * i / 8 for i in range(8)]
+PILGRIM_RIGS = [
+    {"name": "pilgrim_side",
+     "bones": [{"name": "root", "part": "hull", "parent": None, "length": 7.6, "offset_m": [0.0, UP_Z0], "order": 3},
+               {"name": "fin_l", "part": "fin_l", "parent": "root", "length": 3.4, "offset_m": _off("fin_l", "hull"), "order": 0},
+               {"name": "fin_c", "part": "fin_c", "parent": "root", "length": 2.8, "offset_m": _off("fin_c", "hull"), "order": 1},
+               {"name": "nose", "part": "nose", "parent": "root", "length": 2.2, "offset_m": _off("nose", "hull"), "order": 6},
+               {"name": "hatch", "part": "hatch", "parent": "root", "length": 1.0, "offset_m": _off("hatch", "hull"), "order": 5},
+               {"name": "fin_r", "part": "fin_r", "parent": "root", "length": 3.4, "offset_m": _off("fin_r", "hull"), "order": 7}],
+     "swaps": {"bell": ["bell"], "porthole": ["porthole"]},
+     "slots": [{"slot": "bell", "bone": "root", "offset_m": [0.0, 0.0], "order": 2, "replaces_part": False},
+               {"slot": "porthole", "bone": "root", "offset_m": _off("porthole", "hull"), "order": 4, "replaces_part": False}],
+     "sockets": {k: [round(v[0], 4), round(v[1], 4)] for k, v in UP_SOCKETS.items()},
+     "sockets_units": "metres from the rig origin (the landing pads' ground line, ship centre)",
+     "root_transforms": "thrust stretch, cut squash and the +-35 deg tilt are UNITY's root transforms (D-111, U-107); tilt pivot = centre of mass at 6.2 m",
+     "clips": [
+         {"name": "fin_wobble", "fps": 12, "loop": True, "frames": 8,
+          "tracks": {"fin_l": {"rot_deg": [round(3.0 * math.sin(p), 2) for p in TAU8]},
+                     "fin_r": {"rot_deg": [round(-3.0 * math.sin(p - 0.6), 2) for p in TAU8]},
+                     "fin_c": {"scale": [[1.0, round(1 + 0.02 * math.sin(p - 1.2), 3)] for p in TAU8]}}},
+         {"name": "leg_flex", "fps": 12, "loop": False, "frames": 8,
+          "tracks": {"fin_l": {"rot_deg": [0, -3, -7, -9, -4, 1.5, -0.5, 0]},
+                     "fin_r": {"rot_deg": [0, 3, 7, 9, 4, -1.5, 0.5, 0]},
+                     "fin_c": {"scale": [[1, 1], [1, 0.97], [1, 0.92], [1, 0.90], [1, 0.96], [1, 1.02], [1, 0.995], [1, 1]]}}},
+         {"name": "hatch_open", "fps": 12, "loop": False, "frames": 6,
+          "tracks": {"hatch": {"scale": [[1, 1], [0.82, 1], [0.58, 1.01], [0.34, 1.02], [0.16, 1.01], [0.10, 1.0]]}}}]},
+    {"name": "pilgrim_top",
+     "bones": [{"name": "root", "part": "top_hull", "parent": None, "length": 12.0, "order": 2},
+               {"name": "fin_l", "part": "top_fin_l", "parent": "root", "length": 2.5, "offset_m": _off("top_fin_l", "top_hull"), "order": 0},
+               {"name": "fin_r", "part": "top_fin_r", "parent": "root", "length": 2.5, "offset_m": _off("top_fin_r", "top_hull"), "order": 1}],
+     "swaps": {},
+     "clips": [{"name": "fin_wobble", "fps": 12, "loop": True, "frames": 8,
+                "tracks": {"fin_l": {"rot_deg": [round(-4.0 * math.sin(p), 2) for p in TAU8]},
+                           "fin_r": {"rot_deg": [round(4.0 * math.sin(p - 0.6), 2) for p in TAU8]}}}]},
+]
+RIG_OUT = os.path.join(os.path.dirname(HERE), "sources", "ships", "pilgrim_v3_rig.blend")
+
+
+def draw_rig_part(d, M, name, seed=0):
+    """Draw one part with its pivot at the origin (used by the rig build and the fakegp preview)."""
+    fn, pv = next((f, p) for n, f, p in RIG_PARTS if n == name)
+    fn(G.Xf(d, _shift(*pv)), M, seed=seed)
+
+
+def build_rig(out=RIG_OUT):
+    """B-122 rig set source: one GP object per part (`part_<name>`, origin = pivot); the rigs
+    (bones, slots, sockets, 12 Hz bone clips) stored on the scene for render.py's rig json."""
+    import json
+    scene = G.new_scene()
+    scene["rig_plants"] = json.dumps(PILGRIM_RIGS)
+    coll = G.collection("parts")
+    for name, _fn, _pv in RIG_PARTS:
+        ob, gp = G.gp_object("part_" + name, coll)
+        layer = gp.layers.new("art")
+        draw_rig_part(G.drawing(layer, 1), materials_v2(gp), name)
+    pc = G.collection("puff")                            # ships/pilgrim/puff lives in the same source
+    pob, pgp = G.gp_object("puff", pc)
+    PM = materials_v2(pgp)
+    play = pgp.layers.new("art")
+    for i in range(8):
+        draw_up_puff(G.drawing(play, 2 + i), PM, i)
+    G.mark_clips(scene, [("rest", 1), ("puff", 8)])
     os.makedirs(os.path.dirname(out), exist_ok=True)
     bpy.ops.wm.save_as_mainfile(filepath=out)
     return out

@@ -20,6 +20,8 @@ import zlib
 
 import numpy as np
 
+_REAL_MAT = None
+
 
 class _Pt:
     __slots__ = ("position", "radius", "opacity")
@@ -62,8 +64,20 @@ def install():
         gp.materials.append({"name": name, "fill": fill, "ink": ink_hex if ink else None,
                              "behind": bool(behind), "fill_alpha": float(fill_alpha)})
         return len(gp.materials) - 1
+    global _REAL_MAT
+    if _REAL_MAT is None:
+        _REAL_MAT = G.mat
     G.mat = mat
     return G
+
+
+def restore():
+    """Undo install()'s gp_draw.mat patch (render.py calls lock-free review scripts mid-batch)."""
+    global _REAL_MAT
+    import gp_draw as G
+    if _REAL_MAT is not None:
+        G.mat = _REAL_MAT
+        _REAL_MAT = None
 
 
 def _rgb(h):

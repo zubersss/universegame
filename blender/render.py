@@ -870,6 +870,14 @@ def do_v3_rigset(entry, preview):
                                 tuple(le.get("pivot", [0.5, 0.0])), ss=ss, seed=int(le.get("seed", 1)) * 1000 + mk[c0["name"]] + k)[0]
                 for k in range(int(c0["frames"]))]
     review.v3_rigset_review(entry, meta, sheet, png, out, imgs, {"problems": problems, "png_kb": n // 1024, "loop": loop})
+    if entry.get("review_script"):                # e.g. the assembled Pilgrim rig (B-122): rig + bones + clips at 1x
+        spec = importlib.util.spec_from_file_location("meridian_review_script", os.path.join(HERE, entry["review_script"]))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        out2 = os.path.join(PREVIEW, f"review_{task}_assembled{'_preview' if preview else ''}.png")
+        extra = mod.main(out2)
+        if extra:
+            problems = list(problems) + list(extra)
     if not preview:
         mark_stale(key, False)
     log_line(f"{'PREVIEW' if preview else 'OK'} {key} | v3 rig set {W}x{H} {n // 1024}KB, {len(part_meta)} parts, "
