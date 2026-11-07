@@ -50,6 +50,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9a5bf9a46a696ff43ad9e86930839e78
+    m_Address: ui/palettes/mercury/strip
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9a8e67fcbd4da614290573c13944e083
     m_Address: ui/palettes/mars/strip
     m_ReadOnly: 0

@@ -90,7 +90,7 @@ TextureImporter:
   serializedVersion: 13
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 1
+    enableMipMap: 0
     sRGBTexture: 1
     linearTexture: 0
     fadeOut: 0
@@ -106,7 +106,7 @@ TextureImporter:
     normalMapFilter: 0
     flipGreenChannel: 0
   isReadable: 0
-  streamingMipmaps: 1
+  streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
   ignoreMipmapLimit: 0
@@ -118,7 +118,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 2
+    filterMode: 1
     aniso: 2
     mipBias: 0
     wrapU: 1
@@ -127,20 +127,20 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 9
-  spritePivot: {x: 0.5, y: 0.0078125}
-  spritePixelsToUnits: 128
+  spritePivot: {x: 0.5, y: 0}
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
-  alphaIsTransparency: 0
+  alphaIsTransparency: 1
   spriteTessellationMethod: 0
   spriteTessellationDetail: -1
   spriteGeometrySubdivision: -1
-  textureType: 0
+  textureType: 8
   textureShape: 1
   singleChannelComponent: 0
   flipbookRows: 1
@@ -200,11 +200,11 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 1296
-        width: 320
-        height: 320
+        y: 336
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -221,12 +221,12 @@ TextureImporter:
       name: shadewyrm_1
       rect:
         serializedVersion: 2
-        x: 324
-        y: 1296
-        width: 320
-        height: 320
+        x: 164
+        y: 336
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -243,12 +243,12 @@ TextureImporter:
       name: shadewyrm_2
       rect:
         serializedVersion: 2
-        x: 648
-        y: 1296
-        width: 320
-        height: 320
+        x: 328
+        y: 336
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -265,12 +265,12 @@ TextureImporter:
       name: shadewyrm_3
       rect:
         serializedVersion: 2
-        x: 972
-        y: 1296
-        width: 320
-        height: 320
+        x: 492
+        y: 336
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -287,12 +287,12 @@ TextureImporter:
       name: shadewyrm_4
       rect:
         serializedVersion: 2
-        x: 1296
-        y: 1296
-        width: 320
-        height: 320
+        x: 656
+        y: 336
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -309,12 +309,12 @@ TextureImporter:
       name: shadewyrm_5
       rect:
         serializedVersion: 2
-        x: 1620
-        y: 1296
-        width: 320
-        height: 320
+        x: 820
+        y: 336
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -331,12 +331,12 @@ TextureImporter:
       name: shadewyrm_6
       rect:
         serializedVersion: 2
-        x: 0
-        y: 972
-        width: 320
-        height: 320
+        x: 984
+        y: 336
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -353,12 +353,12 @@ TextureImporter:
       name: shadewyrm_7
       rect:
         serializedVersion: 2
-        x: 324
-        y: 972
-        width: 320
-        height: 320
+        x: 1148
+        y: 336
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -375,12 +375,12 @@ TextureImporter:
       name: shadewyrm_8
       rect:
         serializedVersion: 2
-        x: 648
-        y: 972
-        width: 320
-        height: 320
+        x: 1312
+        y: 336
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -397,12 +397,12 @@ TextureImporter:
       name: shadewyrm_9
       rect:
         serializedVersion: 2
-        x: 972
-        y: 972
-        width: 320
-        height: 320
+        x: 1476
+        y: 336
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -419,12 +419,12 @@ TextureImporter:
       name: shadewyrm_10
       rect:
         serializedVersion: 2
-        x: 1296
-        y: 972
-        width: 320
-        height: 320
+        x: 1640
+        y: 336
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -441,12 +441,12 @@ TextureImporter:
       name: shadewyrm_11
       rect:
         serializedVersion: 2
-        x: 1620
-        y: 972
-        width: 320
-        height: 320
+        x: 1804
+        y: 336
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -464,11 +464,11 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 648
-        width: 320
-        height: 320
+        y: 252
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -485,12 +485,12 @@ TextureImporter:
       name: shadewyrm_13
       rect:
         serializedVersion: 2
-        x: 324
-        y: 648
-        width: 320
-        height: 320
+        x: 164
+        y: 252
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -507,12 +507,12 @@ TextureImporter:
       name: shadewyrm_14
       rect:
         serializedVersion: 2
-        x: 648
-        y: 648
-        width: 320
-        height: 320
+        x: 328
+        y: 252
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -529,12 +529,12 @@ TextureImporter:
       name: shadewyrm_15
       rect:
         serializedVersion: 2
-        x: 972
-        y: 648
-        width: 320
-        height: 320
+        x: 492
+        y: 252
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -551,12 +551,12 @@ TextureImporter:
       name: shadewyrm_16
       rect:
         serializedVersion: 2
-        x: 1296
-        y: 648
-        width: 320
-        height: 320
+        x: 656
+        y: 252
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -573,12 +573,12 @@ TextureImporter:
       name: shadewyrm_17
       rect:
         serializedVersion: 2
-        x: 1620
-        y: 648
-        width: 320
-        height: 320
+        x: 820
+        y: 252
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -595,12 +595,12 @@ TextureImporter:
       name: shadewyrm_18
       rect:
         serializedVersion: 2
-        x: 0
-        y: 324
-        width: 320
-        height: 320
+        x: 984
+        y: 252
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -617,12 +617,12 @@ TextureImporter:
       name: shadewyrm_19
       rect:
         serializedVersion: 2
-        x: 324
-        y: 324
-        width: 320
-        height: 320
+        x: 1148
+        y: 252
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -639,12 +639,12 @@ TextureImporter:
       name: shadewyrm_20
       rect:
         serializedVersion: 2
-        x: 648
-        y: 324
-        width: 320
-        height: 320
+        x: 1312
+        y: 252
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -661,12 +661,12 @@ TextureImporter:
       name: shadewyrm_21
       rect:
         serializedVersion: 2
-        x: 972
-        y: 324
-        width: 320
-        height: 320
+        x: 1476
+        y: 252
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -683,12 +683,12 @@ TextureImporter:
       name: shadewyrm_22
       rect:
         serializedVersion: 2
-        x: 1296
-        y: 324
-        width: 320
-        height: 320
+        x: 1640
+        y: 252
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -705,12 +705,12 @@ TextureImporter:
       name: shadewyrm_23
       rect:
         serializedVersion: 2
-        x: 1620
-        y: 324
-        width: 320
-        height: 320
+        x: 1804
+        y: 252
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -728,11 +728,11 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
-        width: 320
-        height: 320
+        y: 168
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -749,12 +749,12 @@ TextureImporter:
       name: shadewyrm_25
       rect:
         serializedVersion: 2
-        x: 324
-        y: 0
-        width: 320
-        height: 320
+        x: 164
+        y: 168
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -771,12 +771,12 @@ TextureImporter:
       name: shadewyrm_26
       rect:
         serializedVersion: 2
-        x: 648
-        y: 0
-        width: 320
-        height: 320
+        x: 328
+        y: 168
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -793,12 +793,12 @@ TextureImporter:
       name: shadewyrm_27
       rect:
         serializedVersion: 2
-        x: 972
-        y: 0
-        width: 320
-        height: 320
+        x: 492
+        y: 168
+        width: 160
+        height: 80
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -807,6 +807,490 @@ TextureImporter:
       bones: []
       spriteID: 4cae6c5baa1663a4a998044462b1a7b0
       internalID: -1207784054
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_28
+      rect:
+        serializedVersion: 2
+        x: 656
+        y: 168
+        width: 160
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3075da32097f5c34597e9f15ebcac2d4
+      internalID: -2058938632
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_29
+      rect:
+        serializedVersion: 2
+        x: 820
+        y: 168
+        width: 160
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5d03380bfb55f19468d590b1ba2cb861
+      internalID: 1105057531
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_30
+      rect:
+        serializedVersion: 2
+        x: 984
+        y: 168
+        width: 160
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 99eff1b8696085f4b9c6cca1e9baadc5
+      internalID: -123615966
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_31
+      rect:
+        serializedVersion: 2
+        x: 1148
+        y: 168
+        width: 160
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: af4c5324628713f48b444e31cb0c4dfb
+      internalID: 662837680
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_32
+      rect:
+        serializedVersion: 2
+        x: 1312
+        y: 168
+        width: 160
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0574add4f822b2e4a855ec4f54facf63
+      internalID: 582606720
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_33
+      rect:
+        serializedVersion: 2
+        x: 1476
+        y: 168
+        width: 160
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c182fcfb3db446949aadb6154d36c1b7
+      internalID: 677815046
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_34
+      rect:
+        serializedVersion: 2
+        x: 1640
+        y: 168
+        width: 160
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e39b60290a277174c983ffdcb33fbca4
+      internalID: 923519505
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_35
+      rect:
+        serializedVersion: 2
+        x: 1804
+        y: 168
+        width: 160
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9e7d791c5b17642429a37228c99ae868
+      internalID: -2070975274
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_36
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 84
+        width: 160
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 212eb7337a267494aa06b0c5d2f97685
+      internalID: 1960195914
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_37
+      rect:
+        serializedVersion: 2
+        x: 164
+        y: 84
+        width: 160
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: af18bc4a0072deb42846c52a17fdaa13
+      internalID: -1667952999
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_38
+      rect:
+        serializedVersion: 2
+        x: 328
+        y: 84
+        width: 160
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ba37f4cba5aa6294b80dae45aefbb407
+      internalID: -1542504104
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_39
+      rect:
+        serializedVersion: 2
+        x: 492
+        y: 84
+        width: 160
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 135c8b485f36e5545b010606f0753cb7
+      internalID: -1780801866
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_40
+      rect:
+        serializedVersion: 2
+        x: 656
+        y: 84
+        width: 160
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c850057582073284ab950e924ede635c
+      internalID: -350293918
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_41
+      rect:
+        serializedVersion: 2
+        x: 820
+        y: 84
+        width: 160
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 889ab0a876e83d84495ef566fce2a0ed
+      internalID: -2003345628
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_42
+      rect:
+        serializedVersion: 2
+        x: 984
+        y: 84
+        width: 160
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 02dc0ff691b917d4db1bb2e4d469d77d
+      internalID: 1434962997
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_43
+      rect:
+        serializedVersion: 2
+        x: 1148
+        y: 84
+        width: 160
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a0326e7aa85c60842bed47e35a82b3f1
+      internalID: -113171529
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_44
+      rect:
+        serializedVersion: 2
+        x: 1312
+        y: 84
+        width: 160
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1675cc6213724424fbcd55e6630bf5e8
+      internalID: -384234175
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_45
+      rect:
+        serializedVersion: 2
+        x: 1476
+        y: 84
+        width: 160
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ef1b19b83f4640e47b5dc9475ce1a55c
+      internalID: 982000427
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_46
+      rect:
+        serializedVersion: 2
+        x: 1640
+        y: 84
+        width: 160
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8ed9057fac522e54ba03e447a12483e2
+      internalID: -36866969
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_47
+      rect:
+        serializedVersion: 2
+        x: 1804
+        y: 84
+        width: 160
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 48e91747132e1ea41a892b4b2fbfef3e
+      internalID: 1401696914
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_48
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 160
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e76de3f7e54ce7841b5c66f603209bd4
+      internalID: 799878885
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadewyrm_49
+      rect:
+        serializedVersion: 2
+        x: 164
+        y: 0
+        width: 160
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cdf46269b755d63448b317b10d0720fd
+      internalID: 1116193011
       vertices: []
       indices: 
       edges: []
@@ -821,11 +1305,7 @@ TextureImporter:
     indices: 
     edges: []
     weights: []
-    secondaryTextures:
-    - texture: {fileID: 2800000, guid: 7077a1ce3fbdc2d489ec7aa133ea05b3, type: 3}
-      name: _NormalMap
-    - texture: {fileID: 2800000, guid: fcbdccd19d7457448aecfb9b4c01a7bf, type: 3}
-      name: _EmissionMap
+    secondaryTextures: []
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
@@ -850,8 +1330,30 @@ TextureImporter:
       shadewyrm_25: 201559755
       shadewyrm_26: 1182900330
       shadewyrm_27: -1207784054
+      shadewyrm_28: -2058938632
+      shadewyrm_29: 1105057531
       shadewyrm_3: -1243456451
+      shadewyrm_30: -123615966
+      shadewyrm_31: 662837680
+      shadewyrm_32: 582606720
+      shadewyrm_33: 677815046
+      shadewyrm_34: 923519505
+      shadewyrm_35: -2070975274
+      shadewyrm_36: 1960195914
+      shadewyrm_37: -1667952999
+      shadewyrm_38: -1542504104
+      shadewyrm_39: -1780801866
       shadewyrm_4: -241713928
+      shadewyrm_40: -350293918
+      shadewyrm_41: -2003345628
+      shadewyrm_42: 1434962997
+      shadewyrm_43: -113171529
+      shadewyrm_44: -384234175
+      shadewyrm_45: 982000427
+      shadewyrm_46: -36866969
+      shadewyrm_47: 1401696914
+      shadewyrm_48: 799878885
+      shadewyrm_49: 1116193011
       shadewyrm_5: -1181638720
       shadewyrm_6: 2042280055
       shadewyrm_7: -9643016

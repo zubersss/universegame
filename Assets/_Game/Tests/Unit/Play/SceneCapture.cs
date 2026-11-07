@@ -2524,6 +2524,14 @@ namespace Meridian.Tests
         }
 
         /// <summary>
+        /// A den creature caught in its peek: standing still at its mound (the director's Idle, not a wander turn, whose one slow
+        /// frame also draws the idle clip) with at least 0.8 s of the director's 2 s wander window left, so the shot a few frames
+        /// later still has it (CreatureDirector.Think re-rolls Idle / Wander on floor(Time.time × 0.5)).
+        /// </summary>
+        static bool Peeking(Meridian.Creatures.Creature c) =>
+            c.AtDen && c.State == Meridian.Creatures.CreatureState.Idle && c.CurrentClip == "idle" && Mathf.Repeat(Time.time, 2f) <= 1.2f;
+
+        /// <summary>
         /// U-118: Mars on the cartoon stage → coordination/reports/unity/u118/: the spawn's set at 1x with the B-140 plants and a dustskater,
         /// the canyon floor after the border crossfade, a tube lurker at its mound (D-126), and the storm set's veil at full intensity.
         /// </summary>
@@ -2613,8 +2621,8 @@ namespace Meridian.Tests
                 var skater2 = creatures.SpawnAt(Meridian.Creatures.Species.Dustskater, lurkerX - 6, side.player.Body.position.y);
                 art = Time.realtimeSinceStartup + 10f;
                 while (((lurker != null && lurker.Alive && lurker.IsPlaceholder) || (skater2 != null && skater2.Alive && skater2.IsPlaceholder)) && Time.realtimeSinceStartup < art) yield return null;
-                art = Time.realtimeSinceStartup + 20f;
-                while (lurker != null && lurker.Alive && !(lurker.AtDen && lurker.CurrentClip == "idle") && Time.realtimeSinceStartup < art) yield return null; // the peek at the den (take 4 timed out at 10 s mid-walk)
+                art = Time.realtimeSinceStartup + 30f;
+                while (lurker != null && lurker.Alive && !Peeking(lurker) && Time.realtimeSinceStartup < art) yield return null; // the peek at the den (take 4 timed out at 10 s mid-walk; the 11:29 / 11:47 takes stopped on a turn's one idle frame)
                 var denSprite = creatures.Dens.Count > 0 ? creatures.Dens[0].GetComponent<SpriteRenderer>() : null;
                 art = Time.realtimeSinceStartup + 10f;
                 while (denSprite != null && (denSprite.sprite == null || !denSprite.enabled) && Time.realtimeSinceStartup < art) yield return null; // the mound's sheet
@@ -2926,8 +2934,8 @@ namespace Meridian.Tests
                 while (!side.terrain.IsCollisionReady(trapX, side.terrain.TopSolidY(trapX)) && Time.realtimeSinceStartup < ready) yield return null;
                 var wyrm = creatures.SpawnAt(Meridian.Creatures.Species.Shadewyrm, trapX, side.terrain.TopSolidY(trapX) + 1.35f);
                 yield return WaitArt(wyrm);
-                float art = Time.realtimeSinceStartup + 20f;
-                while (wyrm != null && wyrm.Alive && !(wyrm.AtDen && wyrm.CurrentClip == "idle") && Time.realtimeSinceStartup < art) yield return null; // the peek from the burrow
+                float art = Time.realtimeSinceStartup + 30f;
+                while (wyrm != null && wyrm.Alive && !Peeking(wyrm) && Time.realtimeSinceStartup < art) yield return null; // the peek from the burrow
                 var denSprite = creatures.Dens.Count > 0 ? creatures.Dens[0].GetComponent<SpriteRenderer>() : null;
                 art = Time.realtimeSinceStartup + 10f;
                 while (denSprite != null && (denSprite.sprite == null || !denSprite.enabled) && Time.realtimeSinceStartup < art) yield return null; // the burrow's sheet

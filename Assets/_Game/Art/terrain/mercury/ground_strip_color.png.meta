@@ -1,0 +1,340 @@
+fileFormatVersion: 2
+guid: 54a786a9cacbbbc419537a11a4496102
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 4852529590709922303
+    second: ground_strip_color_0
+  - first:
+      213: 3477295346462634484
+    second: ground_strip_color_1
+  - first:
+      213: 618472918911989934
+    second: ground_strip_color_2
+  - first:
+      213: -8222449334065671601
+    second: ground_strip_color_3
+  - first:
+      213: 8871257429155236050
+    second: ground_strip_color_4
+  - first:
+      213: 5195371564039432720
+    second: ground_strip_color_5
+  - first:
+      213: -1062593579904998153
+    second: ground_strip_color_6
+  - first:
+      213: 3463926761418104335
+    second: ground_strip_color_7
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 0
+    wrapV: 0
+    wrapW: 0
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.842105}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: ground_strip_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 64
+        height: 152
+      alignment: 9
+      pivot: {x: 0.5, y: 0.842105}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ebfee7656dabec94ba92984ac04961c6
+      internalID: 1957062355
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ground_strip_1
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 0
+        width: 64
+        height: 152
+      alignment: 9
+      pivot: {x: 0.5, y: 0.842105}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6d3f592cc94303949b721af2706d5201
+      internalID: -581177088
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ground_strip_2
+      rect:
+        serializedVersion: 2
+        x: 136
+        y: 0
+        width: 64
+        height: 152
+      alignment: 9
+      pivot: {x: 0.5, y: 0.842105}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5776fd1d07159664080d8fe6c225a8db
+      internalID: -1343707131
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ground_strip_3
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 0
+        width: 64
+        height: 152
+      alignment: 9
+      pivot: {x: 0.5, y: 0.842105}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 85d6b0995e516c54bad41852b337f74f
+      internalID: 1862882449
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ground_strip_4
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 0
+        width: 64
+        height: 152
+      alignment: 9
+      pivot: {x: 0.5, y: 0.842105}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2fa06eecb5435d9449c4d5252403b4e6
+      internalID: 1684048631
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ground_strip_5
+      rect:
+        serializedVersion: 2
+        x: 340
+        y: 0
+        width: 64
+        height: 152
+      alignment: 9
+      pivot: {x: 0.5, y: 0.842105}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a0dd340624bf12b4fab30e24d0fdbf6a
+      internalID: -862931922
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ground_strip_6
+      rect:
+        serializedVersion: 2
+        x: 408
+        y: 0
+        width: 64
+        height: 152
+      alignment: 9
+      pivot: {x: 0.5, y: 0.842105}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7b8d4215c9ef856439f6ee63c44d856c
+      internalID: 1021791828
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ground_strip_7
+      rect:
+        serializedVersion: 2
+        x: 476
+        y: 0
+        width: 64
+        height: 152
+      alignment: 9
+      pivot: {x: 0.5, y: 0.842105}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8f854b37a9885e1448dc7aec6cc3a09d
+      internalID: 671377344
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 3d073e5e93cb8e140a4cf9263c6ebcb1
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      ground_strip_0: 1957062355
+      ground_strip_1: -581177088
+      ground_strip_2: -1343707131
+      ground_strip_3: 1862882449
+      ground_strip_4: 1684048631
+      ground_strip_5: -862931922
+      ground_strip_6: 1021791828
+      ground_strip_7: 671377344
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

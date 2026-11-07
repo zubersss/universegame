@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: planet_mercury
   m_GUID: 8ef8665429d416c49b30c435d47c6f6a
   m_SerializeEntries:
+  - m_GUID: 037ff26894fab3c4782826e76b11e477
+    m_Address: backgrounds/mercury/night/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 075228937130f81469a18deddeafaca9
     m_Address: backgrounds/mercury/layer0_nosun
     m_ReadOnly: 0
@@ -25,18 +30,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 0aa92a0c5fe1d7941a62723897204f35
-    m_Address: creatures/mercury/shadewyrm
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0fed9741fe114ef4ea4f923fce5ba229
     m_Address: creatures/mercury/cinderling
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 10ca2000fdda1604a85534730132ef7a
-    m_Address: creatures/mercury/glassback
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -75,13 +70,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 21f19c03c83e4d147894b5725f4ffa62
-    m_Address: creatures/mercury/glassback
+  - m_GUID: 24fc1dc74d26acf46b23ad9734bf8d43
+    m_Address: backgrounds/mercury/day/layer2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 28054e3a81105394f96a2f8a62c7f2f2
-    m_Address: creatures/mercury/cinderling
+  - m_GUID: 31bdb1949da354b40bbbd65ac6d73e4d
+    m_Address: backgrounds/mercury/day/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 34d78276efc98f5459082298eeee1664
+    m_Address: backgrounds/mercury/night/layer2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -95,8 +95,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3bfc5ef0a322e404fb339da7ae20de50
+    m_Address: backgrounds/mercury/night
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3d39a8f33a9e333428898ef65505dce4
     m_Address: backgrounds/mercury/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3f2d37d6c49f0284c950a77afb720e52
+    m_Address: terrain/mercury/ground_strip_slate
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3f85875d36b2a8c4e8176a4e71e320ef
+    m_Address: flora/mercury/rigset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -140,13 +155,33 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 53733458a7a5afb4f860006307e22bb4
+    m_Address: backgrounds/mercury/twilight/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 54a786a9cacbbbc419537a11a4496102
+    m_Address: terrain/mercury/ground_strip
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 54affbd175cbe3d418915e94190af820
     m_Address: props/mercury/flare_shelter/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5b4c41b7ab47d2844b680324815b9e47
+    m_Address: backgrounds/mercury/twilight
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6114434e886c1b449b3de6497678e6b4
     m_Address: props/mercury/solarite_cut
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 65da60ff8cbbf4a439d2e423fb31661a
+    m_Address: creatures/mercury/cinderling/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -170,6 +205,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6e5722c3c091d284fb5b2a30737b25f4
+    m_Address: flora/mercury/rigset/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 73054ba25d086a24dbad37ce96d93397
     m_Address: props/mercury/meridian_beacon
     m_ReadOnly: 0
@@ -180,8 +220,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 7cfb3d3bddc7b1e48a132a97619604cb
-    m_Address: creatures/mercury/flarewing
+  - m_GUID: 7fe151b55f54aca4b8c1b2657316fda3
+    m_Address: flora/mercury/rigset/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -210,6 +250,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 89903fd589c69d64b979cf7f59cf559b
+    m_Address: creatures/mercury/flarewing/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8b6abf7cc21b25f44b7162b88a7a5731
     m_Address: props/mercury/solarite_cluster
     m_ReadOnly: 0
@@ -217,6 +262,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8c94d4769384c3a4e983a5d0ebc5e0e8
     m_Address: props/mercury/shelter_door/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8d1c050972b6a3a4fac8c919c01d1b62
+    m_Address: creatures/mercury/cinderling
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -230,13 +280,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a9918f9aad13c39499c2de6e30742b19
-    m_Address: props/mercury/solarite_cluster/json
+  - m_GUID: a8b16e2cc115fc44daf8735e6bf10cf3
+    m_Address: backgrounds/mercury/day/layer1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: aafb55ab9fc73474bba418653e7f9e75
-    m_Address: creatures/mercury/cinderling
+  - m_GUID: a9918f9aad13c39499c2de6e30742b19
+    m_Address: props/mercury/solarite_cluster/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -245,18 +295,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b01b2666d5a81754284d38f50d97b51c
-    m_Address: creatures/mercury/shadewyrm
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b0658ba40162d694eb598c7cf1c09cc9
     m_Address: props/mercury/warden_vault_gate
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b112ade754b03f849a72bbbab66e87dc
+    m_Address: creatures/mercury/glassback/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b16fefbd466d29c4892a977d2b514d26
     m_Address: props/mercury/equipment_locker/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b6266e708297d2c4e98db6b8c057c0d1
+    m_Address: backgrounds/mercury/day
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b7428646caad7464288a08a9c05b46e4
+    m_Address: props/mercury/ice_burrow/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -272,6 +332,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bf277628c52a67a47b56b42244b04132
     m_Address: creatures/mercury/cinderhulk_day
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c04260463b745a3479c3a2cbeaed88f5
+    m_Address: creatures/mercury/shadewyrm/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -295,11 +360,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d25e9d6c998b4a5469c19fe201b57e62
-    m_Address: creatures/mercury/flarewing
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d48c7ac8a9333d548909970b0204c1e5
     m_Address: terrain/mercury/sulfide
     m_ReadOnly: 0
@@ -312,6 +372,41 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: dd2998aabee1fba41b0584d3818269de
     m_Address: props/mercury/flare_shelter
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e0a04c2f04dd89647afa7d6074599c02
+    m_Address: creatures/mercury/flarewing
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e53e2981cb4c5cf4e96c846e5ecc6706
+    m_Address: backgrounds/mercury/twilight/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e97a2a044107f6245ae875147dcbe0f4
+    m_Address: backgrounds/mercury/night/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f075c7686cc646446adabd1605db7294
+    m_Address: creatures/mercury/glassback
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f96df61d5f9f88448b4c97d33f257413
+    m_Address: creatures/mercury/shadewyrm
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fe3c87f23b8fdec4d9855bab5ae3f187
+    m_Address: props/mercury/ice_burrow
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fe5a8028b46b88e488640e46f54d40e0
+    m_Address: backgrounds/mercury/twilight/layer0
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

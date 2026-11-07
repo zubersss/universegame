@@ -302,10 +302,6 @@ MonoBehaviour:
   - creatures/mercury/cinderhulk
   - creatures/mercury/cinderhulk_day
   - creatures/mercury/cinderhulk_night
-  - creatures/mercury/cinderling
-  - creatures/mercury/flarewing
-  - creatures/mercury/glassback
-  - creatures/mercury/shadewyrm
   - creatures/space/ringmite
   - creatures/venus/acidmoth
   - creatures/venus/pressure_crab
@@ -1000,6 +996,98 @@ MonoBehaviour:
       start: 21
       length: 4
       loop: 0
+  - key: creatures/mercury/cinderling
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 8
+      loop: 1
+    - name: walk
+      start: 8
+      length: 12
+      loop: 1
+    - name: react
+      start: 20
+      length: 8
+      loop: 0
+    - name: bump
+      start: 28
+      length: 10
+      loop: 0
+    - name: flee
+      start: 38
+      length: 12
+      loop: 1
+  - key: creatures/mercury/flarewing
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 10
+      loop: 1
+    - name: fly
+      start: 10
+      length: 12
+      loop: 1
+    - name: react
+      start: 22
+      length: 8
+      loop: 0
+    - name: bump
+      start: 30
+      length: 10
+      loop: 0
+    - name: flare_dance
+      start: 40
+      length: 12
+      loop: 1
+  - key: creatures/mercury/glassback
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 10
+      loop: 1
+    - name: walk
+      start: 10
+      length: 12
+      loop: 1
+    - name: react
+      start: 22
+      length: 8
+      loop: 0
+    - name: bump
+      start: 30
+      length: 10
+      loop: 0
+    - name: flee
+      start: 40
+      length: 12
+      loop: 1
+  - key: creatures/mercury/shadewyrm
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 10
+      loop: 1
+    - name: walk
+      start: 10
+      length: 12
+      loop: 1
+    - name: react
+      start: 22
+      length: 8
+      loop: 0
+    - name: bump
+      start: 30
+      length: 10
+      loop: 0
+    - name: idle_open
+      start: 40
+      length: 10
+      loop: 1
   - key: creatures/space/ringmite
     fps: 10
     clips:
