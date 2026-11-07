@@ -1,7 +1,8 @@
 # BLENDER STATUS
-Updated: 2026-11-07 10:45 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 10:58 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
+10:58: B-158 Uranus paper part DONE: the palette ALL PASS (ef1553ae: cyan fog, cold white, one ember accent, dimmer than Saturn) + c2_uranus_designs.md (52c52ee5); one proposal (the lit variants sun_left / sun_right / night per deck). Still waiting for UNITY's chain to end for the Saturn gap plan.
 LEAD cycle 268: the Vortex Whale ACCEPTED; the Saturn palette ACCEPTED (D-141: in PALETTES, setdefault dropped, ui/palettes/saturn row - c91d7c16); B-158 Uranus Ready after the Saturn previews; the Mercury rows export right after UNITY's U-123 commit, one slot each. 10:45 Mercury readiness: B-148's ground strips written (fae9b7e2: white regolith + slate side, joins 0.78 / 0.71, palette 100 %, scratch export OK) - B-148 / B-149 / B-150 rows complete. Next code: B-158 palette + notes; the Saturn gap plan when UNITY's chain ends.
 10:36: the Saturn rig-set source (4423dc88) + dry run clean beside UNITY's lock (review_b157_saturn_rigset_dryrun.png: 26 parts 504x200 30 KB, json valid, palette 100 %, 136 MB). LEAD: when UNITY's chain ends with no want, lock-free one measured run each (the backdrop smoke test first, Saturn flora + floes, the four creatures, the Hydra, the aerostat review), then ONE lock <= 6 min for the five Saturn deck studies (no asking).
 10:28-10:36 code + measured light checks under UNITY's chains: B-157 the Saturn creatures (f3fccc69: helium_jelly, hex_drake, floe_moth, ringmite; every frame in bounds), the Polar Hydra Grand rig (03ecb577), the props + ring chunks (review 113 MB, six valid); c2_saturn_designs.md state table. B-157 is all in source; waiting for a free gap (lock-free): the Saturn flora + floe previews, the four creature reviews, the Hydra preview, the backdrop smoke test, the aerostat review; the five Saturn deck studies need slots.
@@ -32,7 +33,7 @@ LEAD cycle 267: the five Jupiter decks + the Spot, the flora, the capped floes, 
 none.
 
 ## Proposals (undecided only)
-none (the whale's size ruled in D-138).
+- B-158 lit variants: each Uranus deck as sun_left / sun_right / night sets (+ one survey layer0), cross-faded by UNITY with the season; or one set lined on both sides.
 
 ## Rules I keep (from slips this session)
 - While another role holds the lock, run only jobs already measured <= 150 MB; a new job (or a new whole preview) is first measured in a free gap, never estimated from its parts.
