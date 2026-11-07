@@ -1,0 +1,110 @@
+{
+  "key": "planets/sun/disc_rig",
+  "style": "v3",
+  "space_ppu": 3.0,
+  "sheet": "planets/sun/disc_rig",
+  "rect_origin": "bottom_left",
+  "export_scale": 0.5,
+  "draw_scale": 2.0,
+  "parts": [
+    {
+      "name": "body",
+      "rect": [
+        0,
+        0,
+        928,
+        928
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "order": 3
+    },
+    {
+      "name": "tongue",
+      "rect": [
+        1448,
+        780,
+        216,
+        148
+      ],
+      "pivot": [
+        0.5,
+        0.1791
+      ],
+      "order": 1
+    },
+    {
+      "name": "prominence_a",
+      "rect": [
+        1668,
+        788,
+        128,
+        140
+      ],
+      "pivot": [
+        0.5,
+        0.0286
+      ],
+      "order": 2
+    },
+    {
+      "name": "prominence_b",
+      "rect": [
+        1800,
+        824,
+        100,
+        104
+      ],
+      "pivot": [
+        0.5,
+        0.0385
+      ],
+      "order": 2
+    },
+    {
+      "name": "corona",
+      "rect": [
+        932,
+        416,
+        512,
+        512
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "order": 0
+    }
+  ],
+  "corona": {
+    "part": "corona",
+    "radius_r": 1.42,
+    "breathe": 0.03
+  },
+  "ring": {
+    "count": 14,
+    "alt_scale": [
+      1.0,
+      0.62
+    ],
+    "base_r": 0.97,
+    "spin_deg_per_s": 2.0,
+    "pulse": 0.08,
+    "beat_bpm": 110,
+    "stepped_hz": 12,
+    "part": "tongue"
+  },
+  "prominences": [
+    {
+      "part": "prominence_a",
+      "angle_deg": 100.0
+    },
+    {
+      "part": "prominence_b",
+      "angle_deg": 280.0
+    }
+  ],
+  "note": "B-137 (D-123): Unity draws every part at draw_scale, instances the tongue round the rim (spin + pulse, stepped at 12 Hz), puts each prominence on the rim at its angle and breathes the corona"
+}

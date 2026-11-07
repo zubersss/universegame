@@ -1,0 +1,47 @@
+{
+  "key": "ui/palettes/mars/strip",
+  "style": "v3",
+  "palette": true,
+  "colors": [
+    {
+      "name": "offwhite",
+      "hex": "#EEDCC2",
+      "shadow": "#C2AB95"
+    },
+    {
+      "name": "red",
+      "hex": "#B0502D",
+      "shadow": "#97492C"
+    },
+    {
+      "name": "mustard",
+      "hex": "#D6A266",
+      "shadow": "#B18354"
+    },
+    {
+      "name": "teal",
+      "hex": "#6E9C9A",
+      "shadow": "#697F79"
+    },
+    {
+      "name": "green",
+      "hex": "#8C8E55",
+      "shadow": "#7E7548"
+    },
+    {
+      "name": "sky",
+      "hex": "#D9907A",
+      "shadow": "#B37662"
+    },
+    {
+      "name": "brown",
+      "hex": "#5C3A2B",
+      "shadow": "#5C3A2B"
+    },
+    {
+      "name": "ink",
+      "hex": "#1E1A17",
+      "shadow": null
+    }
+  ]
+}

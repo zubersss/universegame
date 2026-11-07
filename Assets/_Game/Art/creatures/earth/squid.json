@@ -1,0 +1,52 @@
+{
+  "key": "creatures/earth/squid",
+  "style": "v3",
+  "frame_width": 320,
+  "frame_height": 144,
+  "columns": 6,
+  "gutter": 4,
+  "frames": 56,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [
+    {
+      "name": "idle",
+      "start": 0,
+      "length": 12,
+      "loop": true,
+      "loop_from": 0
+    },
+    {
+      "name": "swim",
+      "start": 12,
+      "length": 12,
+      "loop": true,
+      "loop_from": 0
+    },
+    {
+      "name": "react",
+      "start": 24,
+      "length": 10,
+      "loop": false
+    },
+    {
+      "name": "bump",
+      "start": 34,
+      "length": 10,
+      "loop": false
+    },
+    {
+      "name": "flee",
+      "start": 44,
+      "length": 12,
+      "loop": true,
+      "loop_from": 0
+    }
+  ],
+  "squash_root": true
+}

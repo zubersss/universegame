@@ -1111,7 +1111,29 @@ def do_prop_sheet_set(entry, preview):
              + f" | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
 
 
+def do_sun_rig(entry, preview):
+    """B-137 (D-123): planets/sun/disc_rig_color.png (body, one flame tongue, corona, two prominences at 0.5x) +
+    disc_rig.json, numpy only (build_sun_v3.export); review = the Sun assembled at the game's size, stamped."""
+    t0 = time.time()
+    if preview:
+        raise AssetError(f"{entry['key']}: no preview mode (python build_sun_v3.py <dir> --parts)")
+    import build_sun_v3 as SUN
+    out = os.path.join(PREVIEW, f"review_{entry.get('review_name', 'b137_sun_rig')}.png")
+    try:
+        info = SUN.export(ART, out)
+    except Exception:
+        mark_stale(entry["key"], True)
+        raise
+    mark_stale(entry["key"], False)
+    log_line(f"OK {entry['key']} | sheet {info['sheet'][0]}x{info['sheet'][1]} {info['bytes'] // 1024}KB | parts "
+             + ", ".join(f"{k} {w}x{h}" for k, (w, h) in info["parts"].items())
+             + f" | ink on screen outer {info['ink'][0][0]:.1f}-{info['ink'][0][1]:.1f} inner {info['ink'][1][0]:.1f}-{info['ink'][1][1]:.1f}px"
+             + f" | review {os.path.basename(out)} | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
+
+
 def do_asset(entry, preview):
+    if entry.get("sun_rig"):            # the painted Sun as parts (B-137, D-123)
+        return do_sun_rig(entry, preview)
     if entry.get("prop_sheet_set") or entry.get("prop_sheet"):   # v3.1 camp props (B-131, D-117)
         return do_prop_sheet_set(entry, preview)
     if entry.get("ground_strip_set"):   # v3.1 Earth ground strips (B-130)

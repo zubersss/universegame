@@ -301,7 +301,7 @@ def corona_part(size=CORONA_PX):
     yy, xx = (np.mgrid[0:size, 0:size] + 0.5 - size / 2) / (size / 2)
     r = np.hypot(xx, yy)
     a = np.arctan2(yy, xx)
-    edge = 0.97 + 0.03 * np.sin(7 * a) + 0.02 * np.sin(11 * a + 1.0)
+    edge = 0.92 + 0.03 * np.sin(7 * a) + 0.02 * np.sin(11 * a + 1.0)        # max 0.97: the wash fades out inside its image
     alpha = 0.24 * np.clip((edge - r) / 0.18, 0, 1)
     rgb = np.broadcast_to(D.mix(PAL["offwhite"], PAL["mustard"], 0.3), (size, size, 3))
     return np.clip(np.rint(np.dstack([rgb, alpha]) * 255), 0, 255).astype(np.uint8), (0.5, 0.5)
@@ -464,6 +464,73 @@ def parts_preview(out_dir, scale=0.18):
     out = os.path.join(out_dir, "review_b137_sun_parts_preview.png")
     review.write(out, img)
     print("written", out, "| sheet at export ~", est, "| parts at export", at_export, "| edges", {k: v for k, v in edge.items() if v} or "clear")
+
+
+
+
+def _upscale(img, k):
+    iy = (np.arange(int(img.shape[0] * k)) / k).astype(int).clip(0, img.shape[0] - 1)
+    ix = (np.arange(int(img.shape[1] * k)) / k).astype(int).clip(0, img.shape[1] - 1)
+    return img[iy][:, ix]
+
+
+def export(art, review_out):
+    """B-137 export (D-123): planets/sun/disc_rig_color.png (the parts on one sheet at EXPORT_SCALE) + disc_rig.json, and
+    the stamped review at the game's size (parts drawn at draw_scale as Unity does) on the B-120 starfield beside the
+    Earth disc at the true ratio. Raises before writing if a part touches its 2 px edge or the sheet is over 2048."""
+    import json
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    from meridian import pngio
+    D.WIDTHS.clear()
+    ps = parts(EXPORT_SCALE)
+    sheet, meta = pack(ps)
+    meta["sheet"] = "planets/sun/disc_rig"                      # disc_rig_color.png beside disc_rig.json (the rig-set pairing)
+    m = v3.EDGE_MARGIN
+    problems = [f"{k} touches its {m} px edge" for k, (im, _p) in ps.items()
+                if im[:m, :, 3].any() or im[-m:, :, 3].any() or im[:, :m, 3].any() or im[:, -m:, 3].any()]
+    if sheet.shape[0] > v3.MAX_SHEET or sheet.shape[1] > v3.MAX_SHEET:
+        problems.append(f"sheet {sheet.shape[1]}x{sheet.shape[0]} over {v3.MAX_SHEET}")
+    if problems:
+        raise ValueError("B-137: " + "; ".join(problems))
+    d = os.path.join(art, "planets", "sun")
+    os.makedirs(d, exist_ok=True)
+    png = os.path.join(d, "disc_rig_color.png")
+    nbytes = pngio.write_png(png, sheet)
+    with open(os.path.join(d, "disc_rig.json"), "w", encoding="utf-8", newline="\n") as f:
+        json.dump(meta, f, indent=2)
+        f.write("\n")
+    ow = [w for w in D.WIDTHS if w[0] >= 1.0]
+    iw = [w for w in D.WIDTHS if w[0] < 1.0]
+    ink = ((min(w[1] for w in ow) * 2, max(w[2] for w in ow) * 2) if ow else (0, 0),
+           (min(w[1] for w in iw) * 2, max(w[2] for w in iw) * 2) if iw else (0, 0))     # on screen (drawn 2x)
+    # the review at the game's size: every part drawn 2x (nearest, Unity filters), assembled as Unity does
+    big = {k: (_upscale(im, meta["draw_scale"]) if k != "corona" else im, pv) for k, (im, pv) in ps.items()}
+    sun = assemble(big, 1.0)
+    del big
+    W = sun.shape[1] + 420
+    bg = np.zeros((sun.shape[0] + 60, W, 3), np.float32)
+    star = os.path.join(review.ART, "backgrounds", "space", "starfield", "layer0_color.png")
+    if os.path.isfile(star):
+        sf = review._read(star)
+        bg[:] = np.tile(sf[..., :3], (-(-bg.shape[0] // sf.shape[0]), -(-bg.shape[1] // sf.shape[1]), 1))[:bg.shape[0], :bg.shape[1]]
+    review._over(bg, sun, 20, 40)
+    del sun
+    try:
+        mj = json.load(open(os.path.join(review.ART, "planets", "earth", "disc.json"), encoding="utf-8"))
+        em = pngio.read_png_np(os.path.join(review.ART, "planets", "earth", "disc_color.png"))[:mj["frame_height"], :mj["frame_width"]]
+        review._over(bg, em, W - 300, bg.shape[0] // 2)
+        review._label(bg, "earth disc at its game size (true ratio)", W - 400, bg.shape[0] // 2 - 30)
+    except Exception:  # noqa: BLE001
+        pass
+    review._label(bg, f"planets/sun/disc_rig at the game's size (r {GAME_R} px at space_ppu 3): corona, {RING['count']} tongues, two "
+                      f"prominences, body; parts exported {EXPORT_SCALE}x, drawn {meta['draw_scale']:g}x", 6, 6)
+    review._label(bg, f"sheet {sheet.shape[1]}x{sheet.shape[0]} {nbytes // 1024} kb; parts " +
+                  ", ".join(f"{k} {im.shape[1]}x{im.shape[0]}" for k, (im, _p) in ps.items()) +
+                  f"; ink on screen outer {ink[0][0]:.1f}-{ink[0][1]:.1f} / interior {ink[1][0]:.1f}-{ink[1][1]:.1f} px; no face (d-101)", 6, 26)
+    review.stamp(bg, png, review.stale_keys())
+    review.write(review_out, bg)
+    return {"sheet": sheet.shape[1::-1], "bytes": nbytes, "parts": {k: im.shape[1::-1] for k, (im, _p) in ps.items()}, "ink": ink}
 
 
 if __name__ == "__main__":

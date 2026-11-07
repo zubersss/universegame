@@ -25,6 +25,13 @@ PALETTES = {
         "offwhite": "#F2E6CF", "red": "#C8553D", "mustard": "#D9A93F", "teal": "#3E8A86",
         "green": "#7A9A5B", "sky": "#9FB7B9", "brown": "#5B4636", "ink": "#1E1A17",
     },
+    # D-125 (2), LEAD cycle 254: the Mars palette (B-139; checked by scripts/build_c2_mars_palette.py). Slots keep
+    # Earth's roles: offwhite dust white, red rust, mustard butterscotch, teal ice, green lichen olive, sky salmon haze,
+    # brown umber (the shadow mix colour).
+    "mars": {
+        "offwhite": "#EEDCC2", "red": "#B0502D", "mustard": "#D6A266", "teal": "#6E9C9A",
+        "green": "#8C8E55", "sky": "#D9907A", "brown": "#5C3A2B", "ink": "#1E1A17",
+    },
 }
 PALETTE_ORDER = ["offwhite", "red", "mustard", "teal", "green", "sky", "brown", "ink"]
 
