@@ -187,6 +187,16 @@ namespace Meridian.Flora
         public const string VenusVents = "vent_fields", VenusPlains = "surface_plains", VenusDeck = "cloud_deck", VenusRails = "station_rails";
         public static string VenusBiomeFor(int x) => Meridian.Terrain.VenusLandforms.At(x) == Meridian.Terrain.VenusFeature.VentField ? VenusVents : VenusPlains;
 
+        /// <summary>U-127 (B-155): Jupiter's biome names for its rig set — "red_spot" inside the Great Red Spot, else the floe's deck ("deck1",
+        /// "deck2", "deck3"; the deep grows nothing). Pure.</summary>
+        public static string JupiterBiomeFor(int x, float surfaceY)
+        {
+            if (Meridian.Terrain.CloudColumn.CloudLayout.InRedSpot(x)) return "red_spot";
+            var band = Meridian.Terrain.CloudColumn.CloudLayout.BandAt(surfaceY);
+            return band == Meridian.Terrain.CloudColumn.CloudBand.Deck2 ? "deck2" : band == Meridian.Terrain.CloudColumn.CloudBand.Deck3 ? "deck3"
+                : band == Meridian.Terrain.CloudColumn.CloudBand.Deck1 || band == Meridian.Terrain.CloudColumn.CloudBand.Sky ? "deck1" : null;
+        }
+
         /// <summary>U-123 (B-148): Mercury's biome names for its rig set — "polar" in a cold trap, else the terminator's zone at that clock: "day", "twilight", "night". Pure.</summary>
         public static string MercuryBiomeFor(int x, double realSeconds, int width)
         {

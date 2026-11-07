@@ -40,7 +40,13 @@ namespace Meridian.View2D
         public void Invalidate() => dirty = true;
         /// <summary>The planet's strip keys (Earth's four, Mars's two; other planets Earth's until their strips exist). Pure.</summary>
         public static string[] KeysFor(Meridian.Planets.PlanetId planet) => planet == Meridian.Planets.PlanetId.Mars ? MarsKeys : planet == Meridian.Planets.PlanetId.Mercury ? MercuryKeys
-            : planet == Meridian.Planets.PlanetId.Venus ? VenusKeys : Keys;
+            : planet == Meridian.Planets.PlanetId.Venus ? VenusKeys : planet == Meridian.Planets.PlanetId.Jupiter ? JupiterKeys : Keys;
+        /// <summary>U-127 (B-155, D-137): Jupiter's floe strips, 10 frames each (8 tiles + the two caps): the ammonia ice skin, the hardened core,
+        /// the derelicts' plating (their POIs, later), the Red Spot's brick phosphorus ice.</summary>
+        public static readonly string[] JupiterKeys = { "terrain/jupiter/floe_strip_ice", "terrain/jupiter/floe_strip_core", "terrain/jupiter/floe_strip_derelict", "terrain/jupiter/floe_strip_spot" };
+        public const int FloeIce = 0, FloeCore = 1, FloeDerelict = 2, FloeSpot = 3;
+        /// <summary>U-127: a Jupiter floe column's strip: the spot kind inside the Red Spot, the core where the core shows on top, else the ice. Pure.</summary>
+        public static int JupiterStripFor(int x, byte topTile) => Meridian.Terrain.CloudColumn.CloudLayout.InRedSpot(x) ? FloeSpot : topTile == TileId.FloeCore ? FloeCore : FloeIce;
         /// <summary>U-126 (D-137): a giant's floe strip is 8 tiles + cap_left (frame 8) + cap_right (frame 9) on the B-130 contract; Earth's,
         /// Mars's, Mercury's and Venus's are 8 frames and never cap. A column ends a floe where the ground beside it falls away by more than
         /// FloeEdgeDrop (the gap to the next floe); the caps hang in the air columns just outside, so a floe reads cap + n tiles + cap at any n ≥ 1.</summary>

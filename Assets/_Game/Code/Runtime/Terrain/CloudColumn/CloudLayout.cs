@@ -25,6 +25,13 @@ namespace Meridian.Terrain.CloudColumn
     {
         public const int Width = 4096, Height = 2000;
         public const int Datum = 1100, Deck1Bottom = 900, Deck2Bottom = 600, Deck3Bottom = 300, CrushLine = 100;
+        /// <summary>U-127 (Bible §7.6): the Great Red Spot, a 600 m zone of the column (x RedSpotCentre ± RedSpotHalfWidth, every band): its floes
+        /// draw the brick spot strip, its plants are the red_spot kinds, and the stage lays B-155's spot overlay over the deck set there (the wind
+        /// push and the floe spin are a gameplay card of their own).</summary>
+        public const int RedSpotCentre = 3072, RedSpotHalfWidth = 300;
+        public static int RedSpotOffset(int x) { int d = ((x - RedSpotCentre) % Width + Width) % Width; return d > Width / 2 ? d - Width : d; }
+        public static bool InRedSpot(int x) => Mathf.Abs(RedSpotOffset(x)) <= RedSpotHalfWidth;
+
         /// <summary>Space edge above the Escape Line (the planet config owns the Escape Line itself).</summary>
         public const int SpaceEdge = 1700;
         public const int SlotW = 32, SlotH = 24;
