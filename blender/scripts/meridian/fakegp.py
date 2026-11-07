@@ -85,9 +85,13 @@ def _rgb(h):
     return np.array([int(h[i:i + 2], 16) for i in (0, 2, 4)], np.float32) / 255.0
 
 
-def strokes_of(d, gp, xf=None):
-    """FakeDrawing -> the stroke dicts gp_raster.render_frame expects (same as gp_raster.collect)."""
+def strokes_of(d, gp, xf=None, as_object=None):
+    """FakeDrawing -> the stroke dicts gp_raster.render_frame expects (same as gp_raster.collect).
+    as_object=(object name, layer name): stroke ids as gp_raster.collect makes them in Blender, so the per-stroke ink
+    jitter (and anything touching a frame edge) matches the export exactly (B-135: a squid frame passed the preview's
+    edge check and failed the export's). Default: the old "fake|i" ids, unchanged for existing previews."""
     out = []
+    tag = f"{as_object[0]}|{as_object[1]}" if as_object else "fake"
     for si, s in enumerate(d.strokes):
         m = gp.materials[s.material_index]
         xz = np.array([(p.position[0], p.position[2]) for p in s.points], np.float64)
@@ -96,7 +100,7 @@ def strokes_of(d, gp, xf=None):
         out.append({"xz": xz, "radius": np.array([p.radius for p in s.points], np.float32),
                     "cyclic": bool(s.cyclic), "fill": _rgb(m["fill"]) if m["fill"] else None,
                     "ink": _rgb(m["ink"]) if m["ink"] else None, "behind": m["behind"],
-                    "fill_alpha": m["fill_alpha"], "id": zlib.crc32(f"fake|{si}".encode()) & 0xFFFFFF})
+                    "fill_alpha": m["fill_alpha"], "id": zlib.crc32(f"{tag}|{si}".encode()) & 0xFFFFFF})
     return out
 
 

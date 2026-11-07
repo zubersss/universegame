@@ -836,7 +836,7 @@ def squid_poses():
     for i in range(12):                                              # flee: fast jets, three per loop, speed lines
         t = (i % 4) / 4
         squeeze = math.cos(TAU * t)
-        out.append(dict(ph=TAU * i / 12, mantle=1.0 + 0.20 * squeeze, stretch=1.05 - 0.12 * squeeze, arms=0.5 * max(0.0, squeeze),
+        out.append(dict(ph=TAU * i / 12, mantle=1.0 + 0.20 * squeeze, stretch=1.02 - 0.10 * squeeze,   # max 1.12: export jitter headroom arms=0.5 * max(0.0, squeeze),
                         shift=0.08 * math.sin(TAU * t), fin=0.7 * math.sin(TAU * t), speed=0.8, look=(0.9, 0.0)))
     return out
 
@@ -1127,7 +1127,7 @@ def render_frames(name, ss=2, scale=1):
         M = mats(gp, name)
         d = fakegp.FakeDrawing()
         sp["draw"](d, M, pose, seed=5 * f)
-        st = fakegp.strokes_of(d, gp)
+        st = fakegp.strokes_of(d, gp, as_object=(name, "art"))          # the export's stroke ids: the same jitter
         zmin = min(float((s["xz"][:, 1] - s["radius"] * (1 + GR.JITTER)).min()) for s in st)
         if piv[1] == 0 and zmin * PPU < -2.0:
             below.append(f)
