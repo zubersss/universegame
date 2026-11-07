@@ -1,12 +1,12 @@
 # BLENDER STATUS
-Updated: 2026-11-07 02:3x · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 02:4x · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
 LEAD cycle 253 order (lock-free; UNITY's PlayMode halves + captures hold the lock; I file my want when UNITY takes the lock for half B, D-039; under ~100 MB while its Editor runs):
 1. B-138 edge audit: DONE 02:3x (836f558): coordination/reports/blender/edge_audit_2026-11-07.md, tool blender/scripts/edge_audit.py (read-only, 55 MB, 4 s). 20 sheets, 0 offenders; rig parts (flora 44, Pilgrim 11, gauges 6) none cut; 11 single images clear (a base pivot leaves the bottom to its line: the escape sign's post). No re-export needed.
 2. B-135 + sand dry run: DONE 02:3x. The ground strip set with sand into a scratch tree: grass / soil / stone PNG and json byte-identical to Art, sand new (540x152, 63 KB); joins 0.63 / 0.62 / 0.81 / 0.67, silhouette identical on 64 edges. B-135 rows vs render.py: build_pike / _shark / _squid, pivot [0.5, 0.5], swim cap 12-16, review on the exported coast sea layers 0-1.
-3. B-137 Sun parts preview: NEXT (memory-measured first; the r 160 design run peaked at 325 MB, so the parts preview runs at a smaller design scale lock-free or waits for my slot).
-4. B-139 Mars design prep (palette check, five faceless plants, canyon + storm backdrop studies, creature re-ink list; previews only when free RAM allows).
+3. B-137 Sun parts preview DONE 02:4x (88ceb01; measured first: 0.1x, 141 MB, 9 s): blender/preview/review_b137_sun_parts_preview.png. Parts: static body, ONE flame tongue instanced 14x round the rim (neighbours overlap into the ring), corona 512^2 (radius 1.42 R, breathes), two prominences on limb sockets; one sheet at the 0.5x export 2048x960 (body 960^2, tongue 260x180, prominences 160x180 / 140x140, corona 512^2), planets/sun/disc_rig.json with order + ring / corona / prominence params, draw_scale 2, ink at half width. Deviations from D-123 for LEAD: the ring is one tongue part instanced, not one ring part (a full ring at 0.5x is ~1220 px and cannot share the sheet with the body); the body is static (no room for 12 frames). Export + the stamped game-size review in a slot after B-135.
+4. B-139 Mars design prep: IN PROGRESS from 02:4x (palette check + creature re-ink list + camp-prop differences first, no memory; then the five plants in fakegp when RAM allows; the canyon / storm backdrops in a slot).
 5. B-136 Hadal Maw design (rig set).
 Next slot (queue #2 after UNITY's captures, <= 15 min): `tools/blender_render.ps1 creatures/earth/pike,creatures/earth/shark,creatures/earth/squid,terrain/earth/ground_strip_set`.
 
@@ -55,4 +55,4 @@ none.
 none.
 
 ## HeavyJobLock
-none held (queue #2 slot 02:15:20-02:21:08 released); no want on file until UNITY's PlayMode halves A and B have run (D-039).
+none held; want_blender.lock filed 02:32 after UNITY took the lock for PlayMode half B (02:32, D-039): queue #2 = B-135 + the strip set with sand, after UNITY's captures. Refreshed on each poll (D-075).
