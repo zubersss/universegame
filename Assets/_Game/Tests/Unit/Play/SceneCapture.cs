@@ -3001,7 +3001,7 @@ namespace Meridian.Tests
 
                 void Overlays(Camera cam)
                 {
-                    foreach (var c in UnityEngine.Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                    foreach (var c in UnityEngine.Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include))
                     {
                         if (c.renderMode == RenderMode.ScreenSpaceOverlay) { canvases.Add(c); c.renderMode = RenderMode.ScreenSpaceCamera; c.planeDistance = 1f; }
                         if (canvases.Contains(c)) c.worldCamera = cam;
