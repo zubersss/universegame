@@ -6,7 +6,7 @@ LEAD cycle 252 order; UNITY runs PlayMode halves A and B now (D-122), so lock-fr
 1. Status, dry run, want, queue #2 slot: DONE (see Last completed).
 2. B-135 pike / shark / squid previews: DONE 02:2x (9c18daa), see Ready for review.
 3. Coast sand strip: DONE (158484a); exports with terrain/earth/ground_strip_set (four sheets, three byte-identical) when accepted.
-4. Sun disc design: NEXT (build_sun_v3.py, uncommitted until it runs; its preview needs ~250 MB, so after UNITY's A and B or at a lower design scale).
+4. Sun disc design DONE 02:2x (commit below): review_sun_disc_design_preview.png at r 160 px; rig proposal under Proposals. SLIP: the run measured a 325 MB Python peak while UNITY's Editor ran (LEAD's cap ~150 MB; 0.79 GB free at the start, no reap). Any further Sun or backdrop run goes in my own slot.
 Heavy queue: B-131 export after UNITY's U-113 code commit (D-117); B-135 export and the ground strip set (sand) after acceptance.
 
 ## Last completed
@@ -41,13 +41,14 @@ Heavy queue: B-131 export after UNITY's U-113 code commit (D-117); B-135 export 
 none.
 
 ## Proposals (undecided only)
-- -> LEAD (Sun disc, C2 candidate): export as a rig, not a sheet (r 900 px in space); details in build_sun_v3.py's header, preview to follow.
+- -> LEAD (Sun disc, C2 candidate; preview blender/preview/review_sun_disc_design_preview.png): export as a rig, not a sheet: the game's Sun is r 900 px (1800 px across), so sun/disc_color.png static at 0.5x (1024^2, drawn 2x), sun/flames_color.png one ring part Unity rotates slowly and pulses, sun/corona_color.png a 512^2 wash scaled 4x, two prominence parts on limb sockets, in a disc_rig.json like Saturn's rings.
 
 ## Rules I keep (from slips this session)
 - A lock check is its own call; Blender starts only in a later call after reading a clear result (D-073).
 - A want is filed only after the other role takes the lock (D-039); a rank is live only while a want or lock is on file (D-112).
 - Light work while another role's heavy job runs: <= 300 MB extra (D-109). fakegp sheet previews ~100-200 MB; FFT backdrops and full review rebuilds ~250-300 MB go in my slot.
-- Measure every new export path's frames against the 2 px edge before the export (the B-131 lamp and B-134 dig/zip frames failed it).
+- Measure every new export path's frames against the 2 px edge before the export (the B-131 lamp, B-134 dig/zip and B-135 pike/shark frames failed it).
+- Measure a new preview's memory before running it beside the other role's job: disc / backdrop work at 2x supersampling is 250-350 MB, not the ~150 MB of a fakegp sheet.
 
 ## For USER_ACTIONS
 none.
