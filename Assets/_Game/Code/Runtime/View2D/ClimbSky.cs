@@ -128,6 +128,7 @@ namespace Meridian.View2D
         bool starsRequested;
         AsyncOperationHandle<Sprite> starsHandle;
         Texture2D measuredFrom;
+        static readonly int MainTexId = Shader.PropertyToID("_MainTex");
 
         /// <summary>Called by CartoonStage after the layers: the planet's numbers and the frame's resting anchor.</summary>
         public void ConfigureFor(PlanetConfig config, float surfaceDatum)
@@ -152,6 +153,12 @@ namespace Meridian.View2D
                 // (its order follows the layer count in Place), fading the painting's top metres into the shade's colour.
                 gradient = BuildStrip("ClimbGradient", ParallaxLayers.BackOrder - 3, out mesh, out colours, out _);
                 overlay = BuildStrip("ClimbOverlay", ParallaxLayers.BackOrder + 3, out overlayMesh, out overlayColours, out _);
+                // Both strips share the painted layers' lit material, whose main texture is whatever sprite bound last; bind a white
+                // texel so the vertex colours draw flat (the 05:21 frame showed layer0's top texel row stretched into vertical streaks).
+                var white = new MaterialPropertyBlock();
+                white.SetTexture(MainTexId, Texture2D.whiteTexture);
+                gradient.SetPropertyBlock(white);
+                overlay.SetPropertyBlock(white);
             }
             if (stars == null)
             {
