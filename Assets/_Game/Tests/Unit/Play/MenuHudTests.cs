@@ -101,6 +101,85 @@ namespace Meridian.Tests
             Assert.AreEqual(1f, Time.timeScale);
         }
 
+        /// <summary>U-102: SETTINGS opens the panel from the title screen and the pause menu, BACK returns to the opener; the
+        /// film toggle round-trips; the volume steps reach the listener and the ambient bed and persist like a restart.</summary>
+        [UnityTest]
+        public IEnumerator SettingsOpenFromBothMenusAndRoundTripTheFilmAndVolumes()
+        {
+            bool film = GameSettings.FilmEffects;
+            float master = GameSettings.MasterVolume, music = GameSettings.MusicVolume, sfx = GameSettings.SfxVolume;
+            MenuController.ShowOnBootOverride = true;
+            SceneDirector director = null;
+            yield return Boot(d => director = d);
+            var menu = MenuController.Instance;
+            try
+            {
+                GameSettings.MasterVolume = 1f; GameSettings.MusicVolume = 1f; GameSettings.SfxVolume = 1f;
+                Assert.IsTrue(menu.MainMenuOpen, "main menu on boot");
+                menu.SettingsButton.onClick.Invoke();
+                var panel = menu.Settings;
+                Assert.IsTrue(menu.SettingsOpen, "SETTINGS on the title screen opens the panel");
+                Assert.IsFalse(menu.MainMenuOpen, "the title menu hides behind it");
+                Assert.IsTrue(menu.Blocking, "still blocking: time stays stopped");
+                Assert.AreEqual(0f, Time.timeScale);
+                var es = UnityEngine.EventSystems.EventSystem.current;
+                Assert.NotNull(es, "an EventSystem for the keyboard");
+                Assert.AreEqual(panel.FilmButton.gameObject, es.currentSelectedGameObject, "the keyboard starts on the film row");
+                Assert.AreEqual(panel.MasterDown, panel.FilmButton.navigation.selectOnDown, "down walks to the volume rows");
+
+                bool before = GameSettings.FilmEffects;
+                panel.FilmButton.onClick.Invoke();
+                Assert.AreEqual(!before, GameSettings.FilmEffects, "the film toggle flips the setting");
+                StringAssert.Contains(GameSettings.FilmEffects ? "ON" : "OFF", panel.FilmButton.GetComponentInChildren<UnityEngine.UI.Text>().text, "and its label");
+                panel.FilmButton.onClick.Invoke();
+                Assert.AreEqual(before, GameSettings.FilmEffects, "the film toggle round-trips");
+
+                for (int i = 0; i < 3; i++) panel.MasterDown.onClick.Invoke();
+                Assert.AreEqual(0.7f, GameSettings.MasterVolume, 1e-5f, "three presses: 70 %");
+                Assert.AreEqual(0.7f, AudioListener.volume, 1e-5f, "master drives the listener");
+                StringAssert.Contains("70%", panel.MasterLabel.text);
+                for (int i = 0; i < 5; i++) panel.MusicDown.onClick.Invoke();
+                Assert.AreEqual(0.5f, GameSettings.MusicVolume, 1e-5f);
+                var audio = Meridian.Audio.AudioDirector.Instance;
+                Assert.NotNull(audio, "the AudioDirector in Core");
+                Assert.AreEqual(audio.ambientVolume * 0.5f, audio.AmbientLevel, 1e-5f, "music scales the ambient bed");
+                Assert.IsFalse(panel.SfxUp.interactable, "SFX at 100 %: + is off");
+                panel.SfxDown.onClick.Invoke();
+                Assert.AreEqual(audio.sfxVolume * 0.9f, audio.SfxLevel, 1e-5f, "SFX scales the one-shots");
+                Assert.IsTrue(panel.SfxUp.interactable, "and + comes back");
+
+                panel.BackButton.onClick.Invoke();
+                Assert.IsFalse(menu.SettingsOpen, "BACK closes the panel");
+                Assert.IsTrue(menu.MainMenuOpen, "BACK returns to the title menu");
+
+                menu.NewButton.onClick.Invoke();
+                Assert.AreEqual(1f, Time.timeScale);
+                menu.OpenPause();
+                menu.PauseSettingsButton.onClick.Invoke();
+                Assert.IsTrue(menu.SettingsOpen, "SETTINGS on the pause menu opens the panel");
+                Assert.IsFalse(menu.PauseOpen, "the pause menu hides behind it");
+                Assert.AreEqual(menu.FilmButton, panel.FilmButton, "the Film effects toggle lives on the settings panel now");
+                menu.CloseSettings(); // the Esc path
+                Assert.IsTrue(menu.PauseOpen, "Esc / BACK returns to the pause menu");
+                Assert.AreEqual(0f, Time.timeScale, "still paused");
+                menu.ResumeButton.onClick.Invoke();
+                Assert.AreEqual(1f, Time.timeScale, "resumed");
+                Assert.IsTrue(director.PlanetSide.player.actions.FindActionMap(MeridianInput.OnFoot).enabled, "gameplay input back after the settings round trip (Block() kept its paused maps)");
+
+                GameSettings.Reload(); // a restart reads PlayerPrefs again
+                Assert.AreEqual(0.7f, GameSettings.MasterVolume, 1e-5f, "master persists");
+                Assert.AreEqual(0.5f, GameSettings.MusicVolume, 1e-5f, "music persists");
+                Assert.AreEqual(0.9f, GameSettings.SfxVolume, 1e-5f, "SFX persists");
+                yield return null;
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                GameSettings.FilmEffects = film;
+                GameSettings.MasterVolume = master; GameSettings.MusicVolume = music; GameSettings.SfxVolume = sfx;
+            }
+        }
+
         [UnityTest]
         public IEnumerator SideHudShowsHealthAndEscapeLine()
         {

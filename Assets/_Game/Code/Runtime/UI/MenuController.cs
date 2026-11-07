@@ -27,7 +27,13 @@ namespace Meridian.UI
 
         public bool MainMenuOpen => mainPanel != null && mainPanel.activeSelf;
         public bool PauseOpen => pausePanel != null && pausePanel.activeSelf;
-        public bool Blocking => MainMenuOpen || PauseOpen;
+        /// <summary>U-102: the settings panel, opened from the title screen or the pause menu (BACK or Esc returns there).</summary>
+        public bool SettingsOpen => Settings != null && Settings.IsOpen;
+        public bool Blocking => MainMenuOpen || PauseOpen || SettingsOpen;
+        public SettingsPanel Settings { get; private set; }
+        /// <summary>SETTINGS on the title screen and on the pause menu.</summary>
+        public Button SettingsButton { get; private set; }
+        public Button PauseSettingsButton { get; private set; }
         /// <summary>HUDs hide while the main menu or pause menu is open (U-031: nothing draws through the menu).</summary>
         public static bool HudHidden => Instance != null && Instance.Blocking;
         public Button NewButton { get; private set; }
@@ -73,9 +79,10 @@ namespace Meridian.UI
                 foreach (var map in actions.actionMaps)
                     if (map.enabled && map.name != MeridianInput.Always) { map.Disable(); if (!pausedMaps.Contains(map)) pausedMaps.Add(map); }
 
-            if (pause != null && pause.WasPressedThisFrame() && !MainMenuOpen)
+            if (pause != null && pause.WasPressedThisFrame())
             {
-                if (PauseOpen) Resume(); else OpenPause();
+                if (SettingsOpen) CloseSettings(); // Esc backs out of the settings to the menu that opened them
+                else if (!MainMenuOpen) { if (PauseOpen) Resume(); else OpenPause(); }
             }
         }
 
@@ -85,8 +92,10 @@ namespace Meridian.UI
         {
             Block();
             pausePanel.SetActive(false);
+            Settings.Close();
             mainPanel.SetActive(true);
             ContinueButton.interactable = save != null && save.HasSave;
+            Select(NewButton);
         }
 
         public void NewGame()
@@ -117,11 +126,43 @@ namespace Meridian.UI
         {
             Block();
             mainPanel.SetActive(false);
+            Settings.Close();
             pausePanel.SetActive(true);
             freshBoot = false;
+            Select(ResumeButton);
         }
 
         public void Resume() => Close();
+
+        GameObject settingsOpener;
+
+        /// <summary>U-102: the settings over the menu that opened them; that menu hides until BACK.</summary>
+        public void OpenSettings()
+        {
+            Block();
+            settingsOpener = MainMenuOpen ? mainPanel : PauseOpen ? pausePanel : null;
+            mainPanel.SetActive(false);
+            pausePanel.SetActive(false);
+            Settings.Open();
+        }
+
+        public void CloseSettings()
+        {
+            var opener = settingsOpener;
+            settingsOpener = null;
+            // The opener comes back before the panel goes, so Blocking never drops in between: Block() would otherwise run
+            // again and forget the gameplay maps it paused (Resume would leave the controls off).
+            if (opener != null) opener.SetActive(true);
+            if (opener == mainPanel) OpenMain();
+            else if (opener == pausePanel) OpenPause();
+            else Close();
+        }
+
+        /// <summary>The keyboard starts on a menu's first button (arrows walk the rest, Enter presses).</summary>
+        static void Select(Selectable s)
+        {
+            if (s != null && EventSystem.current != null) EventSystem.current.SetSelectedGameObject(s.gameObject);
+        }
 
         public void SaveNow()
         {
@@ -156,6 +197,7 @@ namespace Meridian.UI
         {
             mainPanel.SetActive(false);
             pausePanel.SetActive(false);
+            Settings.Close();
             Time.timeScale = 1f;
             foreach (var map in pausedMaps) map.Enable();
             pausedMaps.Clear();
@@ -195,7 +237,8 @@ namespace Meridian.UI
             sub.text = "a survey of the real solar system";
             NewButton = UiKit.Button(mainPanel.transform, "NEW", new Vector2(MenuX, 20f), NewGame);
             ContinueButton = UiKit.Button(mainPanel.transform, "CONTINUE", new Vector2(MenuX, -60f), Continue);
-            QuitButton = UiKit.Button(mainPanel.transform, "QUIT", new Vector2(MenuX, -140f), Quit);
+            SettingsButton = UiKit.Button(mainPanel.transform, "SETTINGS", new Vector2(MenuX, -140f), OpenSettings); // U-102
+            QuitButton = UiKit.Button(mainPanel.transform, "QUIT", new Vector2(MenuX, -220f), Quit);
             mainPanel.SetActive(false);
 
             pausePanel = UiKit.Panel(canvas.transform, "Pause", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(4000f, 4000f), theme.panel).gameObject;
@@ -203,19 +246,15 @@ namespace Meridian.UI
             paused.text = "PAUSED";
             ResumeButton = UiKit.Button(pausePanel.transform, "RESUME", new Vector2(0f, 40f), Resume);
             SaveButton = UiKit.Button(pausePanel.transform, "SAVE", new Vector2(0f, -40f), SaveNow);
-            MainMenuButton = UiKit.Button(pausePanel.transform, "MAIN MENU", new Vector2(0f, -120f), ToMainMenu);
-            FilmButton = UiKit.Button(pausePanel.transform, FilmLabel(), new Vector2(0f, -200f), ToggleFilm); // U-095: the Film effects setting
+            PauseSettingsButton = UiKit.Button(pausePanel.transform, "SETTINGS", new Vector2(0f, -120f), OpenSettings); // U-102: the Film effects toggle moved in there
+            MainMenuButton = UiKit.Button(pausePanel.transform, "MAIN MENU", new Vector2(0f, -200f), ToMainMenu);
             pausePanel.SetActive(false);
+
+            Settings = SettingsPanel.Build(canvas.transform, actions, CloseSettings);
         }
 
-        public UnityEngine.UI.Button FilmButton { get; private set; }
-        static string FilmLabel() => Meridian.Core.GameSettings.FilmEffects ? "FILM EFFECTS: ON" : "FILM EFFECTS: OFF";
-        void ToggleFilm()
-        {
-            Meridian.Core.GameSettings.FilmEffects = !Meridian.Core.GameSettings.FilmEffects;
-            var t = FilmButton != null ? FilmButton.GetComponentInChildren<Text>() : null;
-            if (t != null) t.text = FilmLabel();
-        }
+        /// <summary>U-095's Film effects toggle, now on the settings panel (U-102).</summary>
+        public Button FilmButton => Settings != null ? Settings.FilmButton : null;
 
         /// <summary>Title art is optional: if the key isn't there, the themed text title stays.</summary>
         void LoadTitleArt(string key, Image target, Text replaces)

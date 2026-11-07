@@ -44,8 +44,22 @@ namespace Meridian.Audio
             thrustSource.clip = thrust;
             ambientSource = Source("Ambient", true);
             ambientSource.clip = ambient;
-            ambientSource.volume = ambientVolume;
+            ApplySettings();
+            GameSettings.Changed += ApplySettings;
         }
+
+        /// <summary>U-102: the settings panel's volumes. Master is the listener (everything); music scales the ambient bed;
+        /// SFX scales the one-shots and the thrust loop on top of the mix levels above.</summary>
+        void ApplySettings()
+        {
+            AudioListener.volume = GameSettings.MasterVolume;
+            if (ambientSource != null) ambientSource.volume = ambientVolume * GameSettings.MusicVolume;
+        }
+
+        /// <summary>The one-shot level after the SFX setting (tests read it).</summary>
+        public float SfxLevel => sfxVolume * GameSettings.SfxVolume;
+        /// <summary>The ambient bed's level after the music setting (tests read it).</summary>
+        public float AmbientLevel => ambientSource != null ? ambientSource.volume : ambientVolume * GameSettings.MusicVolume;
 
         AudioSource Source(string name, bool loop)
         {
@@ -92,6 +106,7 @@ namespace Meridian.Audio
         void OnDestroy()
         {
             Unhook();
+            GameSettings.Changed -= ApplySettings;
             if (scenes != null) { scenes.Ready -= Hook; scenes.PlanetSideLoaded -= Hook; }
             if (Instance == this) Instance = null;
         }
@@ -111,7 +126,7 @@ namespace Meridian.Audio
             if (clip == null) return;
             var v = voices[nextVoice];
             nextVoice = (nextVoice + 1) % Voices;
-            v.PlayOneShot(clip, volume * sfxVolume);
+            v.PlayOneShot(clip, volume * SfxLevel);
         }
 
         void Update()
@@ -122,7 +137,7 @@ namespace Meridian.Audio
                 ThrustOn = thrusting;
                 if (thrusting && thrust != null) thrustSource.Play(); else thrustSource.Stop();
             }
-            if (thrusting) thrustSource.volume = sfxVolume * (ship.intent.boost ? 1f : 0.7f);
+            if (thrusting) thrustSource.volume = SfxLevel * (ship.intent.boost ? 1f : 0.7f);
         }
     }
 }
