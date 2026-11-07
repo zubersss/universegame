@@ -5,7 +5,7 @@
   "frame_height": 96,
   "columns": 17,
   "gutter": 4,
-  "frames": 40,
+  "frames": 52,
   "fps": 12,
   "pivot": [
     0.5,
@@ -39,6 +39,13 @@
       "start": 30,
       "length": 10,
       "loop": false
+    },
+    {
+      "name": "fly",
+      "start": 40,
+      "length": 12,
+      "loop": true,
+      "loop_from": 0
     }
   ],
   "squash_root": true

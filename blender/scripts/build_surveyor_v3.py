@@ -401,10 +401,10 @@ CONK = [dict(expr="dizzy", star_rot=0.0, lean=0.08, sz=1.02, arms=(0.3, -0.2), b
         dict(expr="dizzy", star_rot=3.5, sz=0.86, bob=-0.08, legs=((0.06, 0.0), (0.10, 0.0)), arms=(0.2, 0.1), bob_tip=0.06, pack_dz=0.04),
         dict(expr="dizzy", star_rot=4.2, sz=0.74, bob=-0.18, lean=-0.06, legs=((0.12, 0.0), (0.18, 0.0)), arms=(-0.2, -0.1), bob_tip=0.10, pack_dz=0.06, hose_lag=0.05),
         dict(expr="dizzy", star_rot=4.9, sz=0.64, bob=-0.28, lean=-0.14, legs=((0.20, 0.0), (0.26, 0.0)), arms=(-0.5, -0.3), bob_tip=0.12, pack_dz=0.03, hose_lag=0.06, puff=0.2),
-        dict(expr="dizzy", star_rot=5.6, sz=0.60, bob=-0.33, lean=-0.18, legs=((0.24, 0.0), (0.30, 0.0)), arms=(-0.6, -0.4), bob_tip=0.06, pack_dz=-0.02, hose_lag=0.02, puff=0.5),
-        dict(expr="dizzy", star_rot=6.3, sz=0.62, bob=-0.33, lean=-0.17, legs=((0.24, 0.0), (0.30, 0.0)), arms=(-0.6, -0.4), bob_tip=-0.03, puff=0.8),
-        dict(expr="dizzy", star_rot=7.0, sz=0.61, bob=-0.33, lean=-0.18, legs=((0.24, 0.0), (0.30, 0.0)), arms=(-0.6, -0.4), bob_tip=0.01, puff=1.0),
-        dict(expr="dizzy", star_rot=7.7, sz=0.61, bob=-0.33, lean=-0.18, legs=((0.24, 0.0), (0.30, 0.0)), arms=(-0.6, -0.4), blink=0.6)]
+        dict(expr="dizzy", star_rot=5.6, sz=0.60, bob=-0.33, lean=-0.18, legs=((0.24, 0.0), (0.30, 0.0)), arms=(-0.95, -0.8), bob_tip=0.06, pack_dz=-0.02, hose_lag=0.02, puff=0.5),
+        dict(expr="dizzy", star_rot=6.3, sz=0.62, bob=-0.33, lean=-0.17, legs=((0.24, 0.0), (0.30, 0.0)), arms=(-0.95, -0.8), bob_tip=-0.03, puff=0.8),
+        dict(expr="dizzy", star_rot=7.0, sz=0.61, bob=-0.33, lean=-0.18, legs=((0.24, 0.0), (0.30, 0.0)), arms=(-0.95, -0.8), bob_tip=0.01, puff=1.0),
+        dict(expr="dizzy", star_rot=7.7, sz=0.61, bob=-0.33, lean=-0.18, legs=((0.24, 0.0), (0.30, 0.0)), arms=(-0.95, -0.8), blink=0.6)]
 
 
 def run_pose(i):
