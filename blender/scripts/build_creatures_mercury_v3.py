@@ -1,6 +1,9 @@
 """B-145 (C2 Mercury design prep): Mercury creature design previews on the B-132 kit (build_creatures_earth_v3: posed body,
 pie eyes, dizzy stars), in the Mercury palette (D-130). Faces kept, friendly or neutral, no teeth (D-087 / D-101).
 
+  shadewyrm  160x80, a shy ice burrower of the polar craters (see its section): idle peeks over its den
+             props/mercury/ice_burrow (D-126, drawn by UNITY in front on the same pivot), walk 12, react 8 (ducks), bump 10,
+             idle_open 10.
   flarewing  124x124, a flyer that feeds on flares ("aggressive" becomes excited, D-087): a violet moth-bat with ember
              belly, membrane wings on drawn ribs, gold flare-catching vanes at the wing tips and a forked gold-tipped
              tail. Pivot at the body centre (the B-135 swimmers' rule for creatures that leave the ground); clips idle 10
@@ -145,6 +148,111 @@ def flarewing_poses():
     return out
 
 
+# ---------------------------------------------------------------- shadewyrm (ice burrower, polar craters; D-126 den)
+# A shy segmented ice wyrm: frost-capped teal segments tapering to the tail, a slate underside, a big round head with
+# pie eyes, a frost brow plate and two frost nubs; no legs: it humps along like a caterpillar. Idle peeks over its den,
+# props/mercury/ice_burrow (a faceted ice-block mound, build_props_mercury_v3), which UNITY draws IN FRONT on the same
+# pivot (D-126: creature art never contains terrain or props); react ducks; idle_open is the whole-body pause in the open.
+
+WYRM_N = 6
+DEN_TOP = [(-0.62, 0.0), (-0.52, 0.16), (-0.30, 0.24), (-0.16, 0.20), (0.02, 0.31), (0.22, 0.27), (0.36, 0.18), (0.54, 0.12), (0.62, 0.0)]
+
+
+def den_top(x):
+    """The ice burrow's top line above x (piecewise linear through DEN_TOP; 0 outside)."""
+    for (x0, z0), (x1, z1) in zip(DEN_TOP, DEN_TOP[1:]):
+        if x0 <= x <= x1:
+            return z0 + (z1 - z0) * (x - x0) / (x1 - x0)
+    return 0.0
+
+
+def wyrm_segment(d, M, cx, cz, r, k, seed):
+    seg = G.lumpy_ellipse(cx, cz, r, r * 0.92, n=20, lump=0.03, seed=seed + k)
+    G.stroke(d, seg, M["ice_f"], 0.0, cyclic=True)
+    G.stroke(d, [q for q in seg if q[1] < cz - 0.35 * r] + [(cx, cz - 0.35 * r)], M["slate_sh"], 0.0, cyclic=True)     # slate underside
+    cap = [q for q in seg if q[1] > cz + 0.25 * r]
+    if len(cap) > 2:                                                                     # the frost cap, a scalloped edge
+        edge = [(cx + r * 0.8 * math.cos(a), cz + 0.25 * r + 0.04 * r * math.sin(5 * a + k)) for a in [math.pi * (1 - t / 8) for t in range(9)]]
+        G.stroke(d, cap + edge[::-1], M["white_f"], 0.0, cyclic=True)
+        G.seam(d, edge, M["ink"])
+    G.specks(d, [(cx - 0.3 * r, cz - 0.05 * r), (cx + 0.25 * r, cz + 0.05 * r)], M["ink"])
+    G.stroke(d, seg, M["ink"], O, cyclic=True)
+
+
+def wyrm_head(d, M, hx, hz, p, seed):
+    def R(dx, dz):
+        return (hx + dx, hz + dz)
+    for k in (0, 1):                                                                     # frost nubs
+        G.stroke(d, G.lumpy_ellipse(*R(-0.06 + 0.08 * k, 0.17), 0.03, 0.045, n=10, seed=seed + 60 + k, rot=0.3 - 0.6 * k), M["white"], I, cyclic=True)
+    head = G.lumpy_ellipse(hx, hz, 0.19, 0.17, n=32, lump=0.03, seed=seed + 2)
+    G.stroke(d, head, M["ice_f"], 0.0, cyclic=True)
+    G.stroke(d, [q for q in head if q[1] < hz - 0.07] + [R(0.0, -0.07)], M["slate_sh"], 0.0, cyclic=True)
+    brow = [q for q in G.lumpy_ellipse(hx - 0.01, hz + 0.02, 0.19, 0.16, n=32, lump=0.04, seed=seed + 3) if q[1] > hz + 0.08]
+    G.stroke(d, brow + [R(0.12, 0.08), R(-0.15, 0.08)], M["white_f"], 0.0, cyclic=True)               # the frost brow plate
+    G.seam(d, [R(-0.15, 0.08), R(0.12, 0.08)], M["ink"])
+    G.stroke(d, head, M["ink"], O, cyclic=True)
+    if p["mouth"] > 0.05:
+        G.stroke(d, G.lumpy_ellipse(*R(0.10, -0.08), 0.015 + 0.01 * p["mouth"], 0.01 + 0.012 * p["mouth"], n=10, seed=seed + 4), M["mouth"], I, cyclic=True)
+    else:
+        G.seam(d, G.bezier(R(0.15, -0.06), R(0.10, -0.085), R(0.04, -0.075), n=5), M["ink"])
+    K.eyes(d, M, *R(0.02, 0.0), 0.04, 0.052, 0.075, p, seed)
+    if p["stars"] is not None:
+        K.stars(d, M, hx, hz + 0.3, 0.16, p["stars"])
+
+
+def draw_shadewyrm(d, M, pose=None, seed=0):
+    p = K.base_pose()
+    p.update(dict(hole=None, hump=0.0, curl=0.0))
+    p.update(pose or {})
+    e = p["hole"]
+    if e is not None:                                                                    # at the den: segments rise behind its top
+        hx, hz = 0.10 + 0.04 * e, 0.22 + 0.42 * e + p["bob"]
+        spine = G.bezier((-0.06, 0.17), (-0.04, 0.20 + 0.15 * e), (hx - 0.06, max(hz - 0.18, 0.17)), n=5)     # its base and its end stay above the ground
+        for k, (x, z) in enumerate(spine[:-1]):
+            wyrm_segment(d, M, x, z, 0.15 + 0.01 * k, k, seed)
+        dk = G.Xf(d, K.turn((hx - 0.1, hz - 0.08), p["head_rot"], (0.0, 0.0), K.scale_about((hx, hz), 1.15)))
+        wyrm_head(dk, M, hx, hz, p, seed)
+        return
+    B = K.Body(p, (0.0, 0.2))
+    db = G.Xf(d, B)
+    xs = [-0.86 + 0.27 * k for k in range(WYRM_N)]
+    for k, x in enumerate(xs):                                                           # tail first, so each overlaps the one behind
+        r = 0.09 + 0.09 * k / (WYRM_N - 1)
+        z = r + 0.015 + 0.07 * max(0.0, math.sin(p["hump"] - 0.9 * k)) + 0.08 * p["curl"] * (WYRM_N - k) / WYRM_N
+        wyrm_segment(db, M, x, z, r, k, seed)
+    hx, hz = 0.74, 0.24 + 0.05 * max(0.0, math.sin(p["hump"] - 0.9 * WYRM_N))
+    H = K.turn((0.58, 0.2), p["head_rot"], p["head"], B)
+    dk = G.Xf(G.Xf(d, H), K.scale_about((hx, hz), 1.15))
+    wyrm_head(dk, M, hx, hz, p, seed)
+
+
+def shadewyrm_poses():
+    out = []
+    for i in range(10):                                                                  # idle at the den: peek, look about, blink
+        ph = TAU * i / 10
+        out.append(dict(hole=1.0 + 0.03 * math.sin(ph), bob=0.01 * math.sin(ph), head_rot=0.06 * math.sin(ph - 0.6),
+                        look=(0.8, 0.0) if i < 4 else ((-0.6, 0.1) if i in (6, 7, 8) else (0.2, 0.0)), blink={4: 0.6, 5: 1.0}.get(i, 0.0)))
+    for i in range(12):                                                                  # walk: a hump travels tail to head
+        ph = TAU * i / 12
+        out.append(dict(hump=ph * 1.0 + 1.5, bob=0.0, sz=1 + 0.015 * math.cos(2 * ph), head_rot=0.05 * math.sin(ph), look=(0.9, -0.1)))
+    out += [dict(hole=1.0, eye_pop=1.3, look=(0.9, 0.0)),                              # react: startle, then duck behind the burrow
+            dict(hole=1.1, eye_pop=1.6, mouth=0.5, head_rot=0.06),
+            dict(hole=0.7, eye_pop=1.3, mouth=0.3),
+            dict(hole=0.35, eye_pop=1.2),
+            dict(hole=0.12, eye_pop=1.35, look=(0.6, 0.0)),
+            dict(hole=0.12, look=(0.9, 0.0)),
+            dict(hole=0.1, blink=1.0),
+            dict(hole=0.15, look=(0.3, 0.0))]
+    out += [dict(q, curl=0.4 * q.get("tail", 0.0), rock=0.4 * q.get("rock", 0.0)) for q in K.bump_clip()]   # a long body: a softer pitch
+    for i in range(10):                                                                  # idle_open: a whole-body pause in the open
+        ph = TAU * i / 10
+        _ph, q = K.idle_common(i, 10)
+        q.update(hump=1.5 + 0.4 * math.sin(ph), curl=0.3 + 0.2 * math.sin(ph - 1.0), head_rot=0.05 * math.sin(ph - 0.6),
+                 look=(0.8, 0.0) if i < 5 else (-0.5, 0.1), blink={7: 0.6, 8: 1.0}.get(i, 0.0))
+        out.append(q)
+    return out
+
+
 SPECIES = {
     "flarewing": dict(draw=draw_flarewing, poses=flarewing_poses, mats=mats, frame=(124, 124), seed=41, pivot=(0.5, 0.5), flyer=True,
                       clips=[("idle", 10, True), ("fly", 12, True), ("react", 8, False), ("bump", 10, False), ("flare_dance", 12, True)],
@@ -152,6 +260,12 @@ SPECIES = {
                                   "motion": "flaps on the beat, the far wing a step behind, the forked tail streams, feelers drag; react loops; flare_dance glows",
                                   "original": "our own flare-feeder: a violet moth-bat with an ember belly and gold vanes; excited, never aggressive (D-087), no teeth"},
                       ours="a violet moth-bat that hovers on gold-vaned wings and loops for joy when a flare lights its vanes"),
+    "shadewyrm": dict(draw=draw_shadewyrm, poses=shadewyrm_poses, mats=mats, frame=(160, 80), seed=42, den="props/mercury/ice_burrow",
+                      clips=[("idle", 10, True), ("walk", 12, True), ("react", 8, False), ("bump", 10, False), ("idle_open", 10, True)],
+                      self_check={"ink": "frost caps with scalloped seams, segment specks, the brow seam, a mouth seam",
+                                  "motion": "idle peeks over its ice burrow and looks about; walk humps tail to head; react ducks; idle_open breathes and curls",
+                                  "original": "our own ice wyrm: frost-capped teal segments, a big round head; shy, never an ambusher (D-087), no teeth"},
+                      ours="a shy frost-capped wyrm that peeks over its ice burrow and humps along the crater floor like a caterpillar"),
 }
 
 
@@ -177,13 +291,16 @@ def preview(out_dir, name="flarewing"):
     sp = SPECIES[name]
     fw, fh = sp["frame"]
     piv = sp.get("pivot", (0.5, 0.0))
-    frames, widths = [], []
+    frames, widths, below = [], [], []
     for f, pose in enumerate(sp["poses"]()):
         gp = fakegp.FakeGP()
         M = mats(gp, name)
         d = fakegp.FakeDrawing()
         sp["draw"](d, M, pose, seed=5 * f)
-        img, w = GR.render_frame(fakegp.strokes_of(d, gp, as_object=(name, "art")), fw, fh, 64, piv, ss=4, seed=sp["seed"] * 1000 + f + 1)
+        st = fakegp.strokes_of(d, gp, as_object=(name, "art"))
+        if piv[1] == 0.0 and min(float((s_["xz"][:, 1] - s_["radius"] * 1.2).min()) for s_ in st) * 64 < -2.0:
+            below.append(f)                                                            # feet-pivot creatures: the ground-line check
+        img, w = GR.render_frame(st, fw, fh, 64, piv, ss=4, seed=sp["seed"] * 1000 + f + 1)
         frames.append(img)
         widths += w
     cols = v3.columns_for(fw, len(frames))
@@ -199,9 +316,12 @@ def preview(out_dir, name="flarewing"):
     meta = {"key": f"creatures/mercury/{name}", "style": "v3", "frame_width": fw, "frame_height": fh, "columns": cols, "gutter": 4,
             "frames": len(frames), "fps": 12, "pivot": list(piv), "facing": "right", "ppu": 64, "animations": anims, "squash_root": True}
     problems = v3.validate_sheet(meta, sheet.shape)
-    clipped = [i for i, im in enumerate(frames) if im[:2, :, 3].any() or im[-2:, :, 3].any() or im[:, :2, 3].any() or im[:, -2:, 3].any()]
+    bottom = piv[1] != 0.0                                                             # flyers: all four edges; walkers: sides + top
+    clipped = [i for i, im in enumerate(frames) if im[:2, :, 3].any() or (bottom and im[-2:, :, 3].any()) or im[:, :2, 3].any() or im[:, -2:, 3].any()]
     if clipped:
         problems.append(f"frames {clipped[:8]} touch the 2 px edge")
+    if below:
+        problems.append(f"frames {below[:8]} below the ground line")
     dd = os.path.join(out_dir, "b145_mercury")
     os.makedirs(dd, exist_ok=True)
     png = os.path.join(dd, f"{name}_color.png")
