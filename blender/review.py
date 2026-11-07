@@ -230,12 +230,15 @@ def _label(img, text, x, y, scale=2, color=(1.0, 0.97, 0.85)):
     draw(img, text, x, y, color, scale)
 
 
-def planet_background(planet, scene, W, H):
+def planet_background(planet, scene, W, H, d=None, only=None):
     """The planet's painted layers when B-114 has exported them (tiled to W), else a flat
-    placeholder in the planet palette (sky over a ground band) so the asset can be judged."""
+    placeholder in the planet palette (sky over a ground band) so the asset can be judged.
+    d: another folder of layers (a preview's); only: the layer numbers to stack (B-135 swimmers: the sea layers)."""
     from meridian import v3
-    d = os.path.join(ART, "backgrounds", planet, scene)
+    d = d or os.path.join(ART, "backgrounds", planet, scene)
     layers = sorted(f for f in os.listdir(d) if f.startswith("layer") and f.endswith("_color.png")) if os.path.isdir(d) else []
+    if only is not None:
+        layers = [f for f in layers if int(f[5:].split("_")[0]) in only]
     pal = v3.PALETTES[planet]
     bg = np.empty((H, W, 3), np.float32)
     bg[:] = _hexf(pal["sky"])
@@ -317,7 +320,7 @@ def v3_sheet_review(entry, meta, frames, sheet_path, out, stats, stale=None):
             bh = max(bh, int(sm["frame_height"]) + 48)
         except (OSError, KeyError, ValueError):
             pass
-    bg, bg_note = planet_background(planet, entry.get("bg_scene", "plains"), W, bh)
+    bg, bg_note = planet_background(planet, entry.get("bg_scene", "plains"), W, bh, entry.get("bg_dir"), entry.get("bg_layers"))
     x = 16
     for c in clips:
         for k in sorted({0, c["length"] // 2}):
@@ -340,7 +343,8 @@ def v3_sheet_review(entry, meta, frames, sheet_path, out, stats, stale=None):
             sh = pngio.to_u8(_read(os.path.join(sd, sk.split("/")[2] + "_color.png")))
             sfw, sfh = sm["frame_width"], sm["frame_height"]
             fr = sh[:sfh, :sfw]
-            _over(bg, fr, min(x, W - sfw - 8), ground - sfh + int(round(sm["pivot"][1] * sfh)))
+            gl = ground if meta["pivot"][1] == 0 else bh - 8          # swimmers (centre pivot): the surveyor stands on the panel floor
+            _over(bg, fr, min(x, W - sfw - 8), gl - sfh + int(round(sm["pivot"][1] * sfh)))
             _label(bg, f"beside: {sk} frame 0 at 1x", min(x, W - sfw - 8), 22)
         except (OSError, KeyError, ValueError) as e:
             _label(bg, f"beside {entry['beside']} unavailable: {type(e).__name__}", 6, 22)

@@ -73,6 +73,7 @@ def mats(gp, sp):
         "dark": m("dark", fill=C["dark"]),
         "dark_b": m("dark_behind", fill=C["dark"], behind=True),
         "dark_f": m("dark_f", fill=C["dark"], ink=False),
+        "spot": m("spot", fill=C.get("spot", C["light"]), ink=False),
         "horn": m("horn", fill=P["offwhite"], behind=True),
         "horn_far": m("horn_far", fill=SH(P["offwhite"]), behind=True),
         "claw": m("claw", fill=P["offwhite"], behind=True),
@@ -507,6 +508,339 @@ def draw_bear(d, M, pose=None, seed=0):
         stars(dk, M, *R(0.0, 0.33), 0.25, p["stars"])
 
 
+# ---------------------------------------------------------------- water creatures (B-135, D-119): pivot at the body centre
+
+WATER_COLOURS = {
+    "pike": dict(coat=P["green"], coat_sh=SH(P["green"]), coat_dp=DP(P["green"]), light=P["offwhite"], spot=P["mustard"],
+                 light_sh=SH(P["offwhite"]), dark=P["brown"]),
+    "shark": dict(coat=SH(P["sky"]), coat_sh=DP(P["sky"]), coat_dp=P["brown"], light=P["offwhite"],
+                  light_sh=SH(P["offwhite"]), dark=P["brown"]),
+    "squid": dict(coat=P["red"], coat_sh=SH(P["red"]), coat_dp=DP(P["red"]), light=SH(P["offwhite"]),
+                  light_sh=DP(P["offwhite"]), dark=P["brown"]),
+}
+COLOURS.update(WATER_COLOURS)
+
+
+def water_pose():
+    return dict(bob=0.0, shift=0.0, tilt=0.0, stretch=1.0, ph=0.0, amp=0.03, tail=0.0, fin=0.0, eye_pop=1.0, blink=0.0,
+                look=(0.6, 0.0), stars=None, mouth=0.0, speed=0.0, puff=None, arms=0.0, mantle=1.0)
+
+
+def water_xf(p, ox=0.0):
+    """Local -> drawing: stretch along the body (x by k, z by 1/k), pitch tilt, then shift / bob; ox centres the frame."""
+    k = p["stretch"]
+    c, s = math.cos(p["tilt"]), math.sin(p["tilt"])
+
+    def f(pts):
+        out = []
+        for x, z in pts:
+            x, z = (x + ox) * k, z / k
+            out.append((x * c - z * s + p["shift"], x * s + z * c + p["bob"]))
+        return out
+    return f
+
+
+def spine(L, p, n=24):
+    """Nose (s 0, x +L/2) to tail base (s 1): a vertical S-wave growing toward the tail. Returns [(x, z)], normals (up)."""
+    pts = [(L / 2 - L * i / n, p["amp"] * math.sin(TAU * 0.75 * i / n - p["ph"]) * (i / n) ** 1.5) for i in range(n + 1)]
+    nrm = []
+    for i in range(n + 1):
+        a, b = pts[max(i - 1, 0)], pts[min(i + 1, n)]
+        dx, dz = b[0] - a[0], b[1] - a[1]
+        ln = math.hypot(dx, dz) or 1.0
+        nrm.append((dz / ln, -dx / ln))
+    return pts, nrm
+
+
+def fish(d, M, p, L, prof, snout, seed, tail_len, tail_low, dorsal, anal, pect, spots=(), rays=True, gill=0.22, smile=False):
+    """One fish in local metres (nose +x). prof(s) = half-height; snout = the nose cap's forward stretch."""
+    sp, nr = spine(L, p)
+    n = len(sp) - 1
+    hs = [prof(i / n) for i in range(n + 1)]
+    top = [(x + nx * h, z + nz * h) for (x, z), (nx, nz), h in zip(sp, nr, hs)]
+    bot = [(x - nx * h, z - nz * h) for (x, z), (nx, nz), h in zip(sp, nr, hs)]
+
+    def at(s, v):                                    # a point on the body: s along, v in -1..1 across
+        i = min(int(s * n), n - 1)
+        t = s * n - i
+        x = sp[i][0] + (sp[i + 1][0] - sp[i][0]) * t
+        z = sp[i][1] + (sp[i + 1][1] - sp[i][1]) * t
+        h = hs[i] + (hs[i + 1] - hs[i]) * t
+        return (x + nr[i][0] * h * v, z + nr[i][1] * h * v)
+    fwd = (-(sp[1][0] - sp[0][0]), -(sp[1][1] - sp[0][1]))
+    fl = math.hypot(*fwd) or 1.0
+    fwd = (fwd[0] / fl, fwd[1] / fl)
+    cap = [(sp[0][0] + hs[0] * (snout * math.cos(a) * fwd[0] + math.sin(a) * nr[0][0]),
+            sp[0][1] + hs[0] * (snout * math.cos(a) * fwd[1] + math.sin(a) * nr[0][1])) for a in [-math.pi / 2 + math.pi * k / 10 for k in range(11)]]
+    outline = cap + top[1:] + bot[::-1][:-1]
+    # tail (behind the body): a forked fin swinging with the wave's slope + p['tail']
+    tb = sp[n]
+    tdir = (sp[n][0] - sp[n - 1][0], sp[n][1] - sp[n - 1][1])
+    tl = math.hypot(*tdir) or 1.0
+    ang = math.atan2(tdir[1], tdir[0]) + p["tail"]
+    u = (math.cos(ang), math.sin(ang))
+    nn = (-u[1], u[0])
+    up_tip = (tb[0] + u[0] * tail_len + nn[0] * tail_len * 0.8, tb[1] + u[1] * tail_len + nn[1] * tail_len * 0.8)
+    lo_tip = (tb[0] + u[0] * tail_len * tail_low - nn[0] * tail_len * 0.7 * tail_low, tb[1] + u[1] * tail_len * tail_low - nn[1] * tail_len * 0.7 * tail_low)
+    notch = (tb[0] + u[0] * tail_len * 0.42, tb[1] + u[1] * tail_len * 0.42)
+    tail = [top[n], G.bezier(top[n], (tb[0] + u[0] * tail_len * 0.4 + nn[0] * tail_len * 0.5, tb[1] + u[1] * tail_len * 0.4 + nn[1] * tail_len * 0.5), up_tip, n=6)[3],
+            up_tip, notch, lo_tip, bot[n]]
+    G.stroke(d, tail, M["far"], O, cyclic=True)
+    if rays:
+        for tip in (up_tip, lo_tip, notch):
+            G.seam(d, [tb, ((tb[0] + tip[0]) / 2 + 0.01, (tb[1] + tip[1]) / 2)], M["ink"])
+    # dorsal / anal fins (behind the body)
+    for (s0, s1, hgt, sweep), side in ((dorsal, 1), (anal, -1)):
+        if hgt <= 0:
+            continue
+        a, b = at(s0, side * 0.92), at(s1, side * 0.92)
+        mid = at((s0 + s1) / 2, side * 1.0)
+        i = int((s0 + s1) / 2 * n)
+        apex = (mid[0] + nr[i][0] * hgt * side + sweep, mid[1] + nr[i][1] * hgt * side)
+        fin = [a, G.bezier(a, (apex[0] + 0.02, apex[1] - 0.01 * side), apex, n=5)[2], apex, b]
+        G.stroke(d, fin, M["far"], O, cyclic=True)
+        if rays:
+            for t in (0.3, 0.6):
+                q = (a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)
+                G.seam(d, [q, (q[0] + (apex[0] - q[0]) * 0.75, q[1] + (apex[1] - q[1]) * 0.75)], M["ink"])
+    # the body: colour, back tone, pale belly, shadow under it, spots, lateral line, gill, eye, mouth, pectoral fin
+    G.stroke(d, outline, M["coat_i"], 0.0, cyclic=True)
+    back = [at(s / 20, 1.0) for s in range(1, 19)] + [at(s / 20, 0.42) for s in range(18, 0, -1)]
+    G.stroke(d, back, M["sh"], 0.0, cyclic=True)
+    belly = [at(s / 20, -0.12) for s in range(1, 18)] + [at(s / 20, -1.0) for s in range(17, 0, -1)]
+    G.stroke(d, belly, M["light_f"], 0.0, cyclic=True)
+    G.stroke(d, [at(s / 20, -0.62) for s in range(2, 17)] + [at(s / 20, -1.0) for s in range(16, 1, -1)], M["light_sh"], 0.0, cyclic=True)
+    G.seam(d, [at(s / 20, -0.12) for s in range(2, 17)], M["ink"])
+    for k, (s, v, r) in enumerate(spots):
+        q = at(s, v)
+        G.stroke(d, G.lumpy_ellipse(q[0], q[1], r * 1.4, r, n=10, lump=0.08, seed=seed + 60 + k), M["spot"], 0.0, cyclic=True)
+    if rays:
+        for s in (0.30, 0.42, 0.54, 0.66, 0.78):
+            G.seam(d, [at(s, 0.08), at(s + 0.07, 0.10)], M["ink"])                           # lateral line dashes
+    G.seam(d, [at(gill, 0.62), at(gill + 0.035, 0.0), at(gill, -0.62)], M["ink"])
+    if smile:                                                                           # shark gill slits
+        for k in range(1, 4):
+            G.seam(d, [at(gill + 0.035 * k, 0.45), at(gill + 0.035 * k + 0.01, -0.15)], M["ink"])
+    G.hatch(d, *at(0.6, 0.55), M["ink"], n=3, length=0.05, spacing=0.02, angle_deg=70, seed=seed + 9)
+    G.stroke(d, outline, M["ink"], O, cyclic=True)
+    e = at(0.10, 0.30)
+    if p["stars"] is not None:
+        G.stroke(d, [(e[0] + 0.05 * (j / 24) * math.cos(9.4 * j / 24), e[1] + 0.05 * (j / 24) * math.sin(9.4 * j / 24)) for j in range(25)], M["ink"], I)
+    else:
+        G.pie_eye(d, e[0], e[1], 0.042 * p["eye_pop"], 0.05 * p["eye_pop"], M["pupil"], M["eye"], look=p["look"], seed=seed + 31,
+                  closed=p["blink"], m_lid=M["ink"])
+    if p["mouth"] > 0.05:
+        q = at(0.035, -0.35)
+        G.stroke(d, G.lumpy_ellipse(q[0], q[1], 0.02 + 0.015 * p["mouth"], 0.012 + 0.018 * p["mouth"], n=12, seed=seed + 7), M["mouth"], I, cyclic=True)
+    elif smile:
+        G.seam(d, G.bezier(at(0.04, -0.62), at(0.10, -0.80), at(0.16, -0.55), n=6), M["ink"])
+    else:
+        G.seam(d, [at(0.0, -0.25), at(0.07, -0.28), at(0.12, -0.22)], M["ink"])
+    pb = at(pect[0], -0.35)
+    G.stroke(d, feather(pb, math.pi + pect[1] + p["fin"], pect[2], pect[2] * 0.32), M["coat"], O, cyclic=True)
+    G.seam(d, [pb, (pb[0] - pect[2] * 0.6 * math.cos(pect[1] + p["fin"]), pb[1] - pect[2] * 0.6 * math.sin(pect[1] + p["fin"]))], M["ink"])
+    return at
+
+
+def speed_lines(d, M, x0, zs, k):
+    for j, z in enumerate(zs):
+        G.stroke(d, G.bowed_line((x0 - 0.04 * j, z), (x0 - 0.04 * j - 0.25 * k, z + 0.01), bow=0.04, n=6), M["ink"], I)
+
+
+def draw_pike(d, M, pose=None, seed=0):
+    p = water_pose()
+    p.update(pose or {})
+    D = G.Xf(d, water_xf(p, ox=0.05))
+    prof = lambda s: 0.115 * (math.sin(math.pi * (0.10 + 0.82 * s))) ** 0.6 * (1 - 0.45 * s * s) + 0.012   # noqa: E731
+    at = fish(D, M, p, 0.80, prof, snout=2.1, seed=seed, tail_len=0.17, tail_low=1.0, dorsal=(0.66, 0.84, 0.10, -0.03),
+              anal=(0.68, 0.84, 0.08, -0.03), pect=(0.24, 0.55, 0.10),
+              spots=[(0.30, 0.45, 0.018), (0.40, -0.05, 0.016), (0.50, 0.50, 0.02), (0.58, 0.05, 0.016), (0.68, 0.45, 0.017), (0.36, 0.20, 0.014)])
+    if p["speed"] > 0:
+        speed_lines(D, M, -0.58, (-0.06, 0.04), p["speed"])
+    if p["stars"] is not None:
+        q = at(0.10, 0.3)
+        stars(D, M, q[0], q[1] + 0.22, 0.14, p["stars"])
+
+
+def draw_shark(d, M, pose=None, seed=0):
+    p = water_pose()
+    p.update(pose or {})
+    D = G.Xf(d, water_xf(p, ox=0.20))
+    prof = lambda s: 0.27 * (math.sin(math.pi * (0.10 + 0.82 * s))) ** 0.55 * (1 - 0.5 * s * s) + 0.02   # noqa: E731
+    at = fish(D, M, p, 2.0, prof, snout=1.45, seed=seed, tail_len=0.50, tail_low=0.55, dorsal=(0.30, 0.48, 0.34, -0.10),
+              anal=(0.72, 0.82, 0.08, -0.04), pect=(0.28, 0.65, 0.34), rays=False, gill=0.20, smile=True)
+    if p["speed"] > 0:
+        speed_lines(D, M, -1.30, (-0.15, 0.0, 0.15), p["speed"])
+    if p["stars"] is not None:
+        q = at(0.10, 0.3)
+        stars(D, M, q[0], q[1] + 0.32, 0.22, p["stars"])
+
+
+def draw_squid(d, M, pose=None, seed=0):
+    """Mantle first (+x), fins at the tip, the head with one big eye, eight rubber-hose arms and two club tentacles
+    trailing (-x); jets squash and stretch the mantle; react puffs a round cloud of ink from the funnel."""
+    p = water_pose()
+    p.update(pose or {})
+    ox = 0.55
+    D = G.Xf(d, water_xf(p, ox=ox))
+    m = p["mantle"]                                                  # mantle girth: < 1 squeezed (jet), > 1 filled
+    if p["puff"] is not None:                                        # behind everything: an ink cloud from the funnel
+        t = p["puff"]
+        for k, (dx, dz, rr) in enumerate(((-0.55, -0.22, 0.20), (-0.80, -0.10, 0.15), (-0.70, -0.40, 0.13))):
+            r = rr * (0.4 + 0.8 * t)
+            G.stroke(D, G.lumpy_ellipse(dx - 0.25 * t, dz - 0.05 * t, r * 1.1, r, n=18, lump=0.12, seed=seed + 70 + k), M["dark"], O, cyclic=True)
+    arms = []
+    for k in range(10):                                              # far arms first (mid tone), tentacles longest
+        tent = k in (2, 7)
+        z0 = -0.10 + 0.20 * (k % 5) / 4
+        L = 1.35 + (0.65 if tent else 0.0) - 0.08 * (k % 3)
+        ph = p["ph"] + 0.7 * k
+        curl = p["arms"]
+        c1 = (-0.65 - 0.3 * L, z0 * 1.6 + 0.10 * math.sin(ph))
+        c2 = (-0.65 - 0.7 * L, z0 * 2.4 + 0.14 * math.sin(ph + 1.2) - 0.25 * curl * (1 if k % 2 else -1))
+        end = (-0.65 - L * (1 - 0.25 * curl), z0 * 2.8 + 0.12 * math.sin(ph + 2.2) + 0.35 * curl * (1 if k % 2 else -1))
+        arms.append((k, tent, G.bezier((-0.50, z0), c1, c2, end, n=14)))
+    for far in (True, False):
+        for k, tent, cl in arms:
+            if (k < 5) != far:
+                continue
+            w = 0.05 if not tent else 0.035
+            G.stroke(D, G.hose_outline(cl, w), M["leg_far"] if far else M["leg"], O, cyclic=True)
+            if tent:
+                G.stroke(D, G.lumpy_ellipse(cl[-1][0], cl[-1][1], 0.07, 0.04, n=12, seed=seed + 40 + k), M["far"] if far else M["coat"], O, cyclic=True)
+            if not far:
+                G.specks(D, cl[3:-1:2], M["ink"])                    # sucker dots
+    top = G.bezier((0.95, 0.0), (0.62, 0.24 * m), (-0.28, 0.20 * m), n=14)
+    bot = G.bezier((-0.28, -0.19 * m), (0.62, -0.23 * m), (0.95, 0.0), n=14)
+    fl = p["fin"]
+    for side in (1, -1):                                             # the two fins at the tip
+        G.stroke(D, [(0.95, 0.0), (0.58, side * 0.14 * m), (0.68, side * (0.33 + 0.06 * fl)), (0.88, side * 0.12)], M["far"], O, cyclic=True)
+    mantle = top + bot[1:-1]
+    G.stroke(D, mantle, M["coat_i"], 0.0, cyclic=True)
+    G.stroke(D, bot + [(0.3, -0.10 * m), (-0.2, -0.10 * m)], M["sh"], 0.0, cyclic=True)
+    for k, (x, z, r) in enumerate(((0.55, 0.06, 0.035), (0.30, 0.10, 0.03), (0.10, -0.02, 0.028), (0.70, -0.05, 0.025), (0.0, 0.11, 0.03))):
+        G.stroke(D, G.lumpy_ellipse(x, z * m, r * 1.3, r, n=10, lump=0.1, seed=seed + 80 + k), M["dp"], 0.0, cyclic=True)
+    G.specks(D, [(0.45, 0.13 * m), (0.20, -0.06 * m), (0.62, 0.12 * m), (-0.05, 0.02), (0.38, -0.14 * m), (0.78, 0.07 * m)], M["ink"])
+    G.seam(D, [(0.78, 0.10 * m), (0.20, 0.13 * m), (-0.20, 0.11 * m)], M["ink"])                       # mantle ridge
+    G.stroke(D, mantle, M["ink"], O, cyclic=True)
+    G.seam(D, G.bezier((-0.24, 0.18 * m), (-0.29, 0.0), (-0.24, -0.17 * m), n=6), M["ink"])           # the collar
+    head = G.lumpy_ellipse(-0.40, 0.0, 0.17, 0.18, n=28, lump=0.03, seed=seed + 2)
+    G.stroke(D, head, M["coat"], O, cyclic=True)
+    G.stroke(D, [(-0.52, -0.15), (-0.30, -0.16), (-0.24, -0.05), (-0.45, -0.06)], M["sh"], 0.0, cyclic=True)
+    if p["stars"] is not None:
+        G.stroke(D, [(-0.40 + 0.07 * (j / 24) * math.cos(9.4 * j / 24), 0.03 + 0.07 * (j / 24) * math.sin(9.4 * j / 24)) for j in range(25)], M["ink"], I)
+        stars(D, M, -0.40, 0.42, 0.20, p["stars"])
+    else:
+        G.pie_eye(D, -0.40, 0.03, 0.075 * p["eye_pop"], 0.095 * p["eye_pop"], M["pupil"], M["eye"], look=p["look"], seed=seed + 31,
+                  closed=p["blink"], m_lid=M["ink"])
+    if p["speed"] > 0:
+        speed_lines(D, M, -0.70, (0.25, 0.32), p["speed"])
+
+
+def pike_poses():
+    out = []
+    for i in range(8):                                               # idle: hover, fin ripple, gill breathing, blink
+        ph = TAU * i / 8
+        out.append(dict(ph=ph, amp=0.015, bob=0.012 * math.sin(ph), fin=0.25 * math.sin(ph), tail=0.08 * math.sin(ph - 1.0),
+                        stretch=1.0 + 0.015 * math.cos(ph), blink={5: 0.6, 6: 1.0}.get(i, 0.0)))
+    for i in range(12):                                              # swim: the body wave runs to the tail
+        ph = TAU * i / 6
+        out.append(dict(ph=ph, amp=0.045, tail=0.30 * math.sin(ph - 1.2), fin=0.35 * math.sin(ph), bob=0.01 * math.sin(2 * ph),
+                        stretch=1.0 + 0.03 * math.cos(2 * ph), tilt=0.02 * math.sin(ph)))
+    out += [dict(stretch=0.92, tail=0.2), dict(stretch=0.85, tail=0.35, fin=0.4),                      # react: dart + eye-pop
+            dict(stretch=1.25, shift=0.10, eye_pop=1.6, mouth=0.7, tail=-0.4, speed=1.0, amp=0.02),
+            dict(stretch=1.18, shift=0.16, eye_pop=1.7, mouth=0.6, tail=-0.3, speed=1.2),
+            dict(stretch=1.05, shift=0.14, eye_pop=1.4, mouth=0.3, tail=0.2, speed=0.5),
+            dict(stretch=0.96, shift=0.10, eye_pop=1.2, tail=0.15, look=(-0.6, 0.0)),
+            dict(stretch=1.0, shift=0.06, eye_pop=1.05, look=(0.9, 0.1)),
+            dict(stretch=1.0, shift=0.02)]
+    out += [dict(stretch=0.80, shift=-0.10, tilt=0.20, eye_pop=1.4, mouth=0.5, tail=0.5),            # bump
+            dict(stretch=0.88, shift=-0.08, tilt=0.12, stars=0.0, tail=0.3),
+            dict(stretch=1.08, shift=-0.05, tilt=-0.08, stars=0.8, tail=-0.2),
+            dict(stretch=0.98, tilt=0.06, stars=1.6, tail=0.15),
+            dict(stretch=1.02, tilt=-0.05, stars=2.4, tail=-0.1),
+            dict(stretch=1.0, tilt=0.03, stars=3.2),
+            dict(stretch=1.0, blink=1.0),
+            dict(stretch=1.0)]
+    for i in range(12):                                              # flee: a fast wave, stretched, speed lines
+        ph = TAU * i / 4
+        out.append(dict(ph=ph, amp=0.06, tail=0.45 * math.sin(ph - 1.2), fin=-0.3, stretch=1.10 + 0.04 * math.cos(2 * ph),
+                        tilt=0.03 * math.sin(ph), speed=0.8, look=(0.9, 0.0)))
+    return out
+
+
+def shark_poses():
+    out = []
+    for i in range(10):                                              # idle: a slow glide in place
+        ph = TAU * i / 10
+        out.append(dict(ph=ph, amp=0.03, tail=0.12 * math.sin(ph - 1.0), fin=0.12 * math.sin(ph), bob=0.02 * math.sin(ph),
+                        tilt=0.02 * math.sin(ph - 0.5), blink={7: 0.6, 8: 1.0}.get(i, 0.0)))
+    for i in range(14):                                              # swim
+        ph = TAU * i / 7
+        out.append(dict(ph=ph, amp=0.07, tail=0.30 * math.sin(ph - 1.2), fin=0.15 * math.sin(ph), stretch=1.0 + 0.025 * math.cos(2 * ph),
+                        bob=0.015 * math.sin(2 * ph), tilt=0.02 * math.sin(ph)))
+    out += [dict(tilt=0.04, look=(0.9, 0.0)), dict(tilt=0.08, eye_pop=1.3, stretch=0.94, tail=0.3),     # react: turn away
+            dict(tilt=0.12, eye_pop=1.6, mouth=0.6, stretch=0.9, tail=0.5, look=(-0.8, 0.2)),
+            dict(tilt=0.07, eye_pop=1.5, mouth=0.5, stretch=1.1, shift=-0.08, tail=-0.4, speed=0.8),
+            dict(tilt=0.02, eye_pop=1.3, stretch=1.08, shift=-0.12, tail=-0.2, speed=0.5),
+            dict(tilt=-0.04, eye_pop=1.1, shift=-0.10, tail=0.1),
+            dict(tilt=-0.02, shift=-0.06, look=(0.6, 0.0)),
+            dict(shift=-0.02)]
+    out += [dict(stretch=0.82, shift=-0.12, tilt=0.10, eye_pop=1.4, mouth=0.5, tail=0.5),            # bump
+            dict(stretch=0.88, shift=-0.10, tilt=0.07, stars=0.0, tail=0.3),
+            dict(stretch=1.06, shift=-0.06, tilt=-0.05, stars=0.6, tail=-0.2),
+            dict(stretch=0.98, shift=-0.03, tilt=0.04, stars=1.2, tail=0.15),
+            dict(stretch=1.02, tilt=-0.04, stars=1.8, tail=-0.1),
+            dict(stretch=1.0, tilt=0.03, stars=2.4),
+            dict(stretch=1.0, tilt=-0.02, stars=3.0),
+            dict(stretch=1.0, stars=3.6),
+            dict(stretch=1.0, blink=1.0),
+            dict(stretch=1.0)]
+    for i in range(12):                                              # flee
+        ph = TAU * i / 4
+        out.append(dict(ph=ph, amp=0.09, tail=0.40 * math.sin(ph - 1.2), fin=-0.2, stretch=1.08 + 0.03 * math.cos(2 * ph),
+                        tilt=0.02 * math.sin(ph), speed=0.8, look=(0.9, 0.0)))
+    return out
+
+
+def squid_poses():
+    out = []
+    for i in range(12):                                              # idle: the arms curl in a travelling wave, fins ripple
+        ph = TAU * i / 12
+        out.append(dict(ph=ph, arms=0.25 + 0.20 * math.sin(ph), fin=0.5 * math.sin(2 * ph), bob=0.03 * math.sin(ph),
+                        mantle=1.0 + 0.04 * math.cos(ph), blink={9: 0.6, 10: 1.0}.get(i, 0.0)))
+    for i in range(12):                                              # swim: two jet pulses (squeeze + shoot, arms trail)
+        t = (i % 6) / 6
+        squeeze = math.cos(TAU * t)
+        out.append(dict(ph=TAU * i / 12, mantle=1.0 + 0.18 * squeeze, stretch=1.0 - 0.10 * squeeze, arms=0.45 * max(0.0, squeeze),
+                        shift=0.06 * math.sin(TAU * t), fin=0.6 * math.sin(TAU * t), look=(0.9, 0.0)))
+    out += [dict(mantle=1.12, arms=0.4, look=(0.8, 0.0)), dict(mantle=1.2, arms=0.6, eye_pop=1.3),     # react: ink puff + eye-pop
+            dict(mantle=0.80, stretch=1.15, eye_pop=1.7, puff=0.2, arms=-0.1, shift=0.06),
+            dict(mantle=0.82, stretch=1.12, eye_pop=1.8, puff=0.5, arms=-0.2, shift=0.10),
+            dict(mantle=0.92, stretch=1.05, eye_pop=1.5, puff=0.8, shift=0.12),
+            dict(mantle=1.0, eye_pop=1.3, puff=1.0, shift=0.12, look=(-0.7, 0.0)),
+            dict(mantle=1.02, eye_pop=1.15, puff=1.15, shift=0.10, look=(0.4, 0.2)),
+            dict(mantle=1.0, eye_pop=1.05, puff=1.3, shift=0.08),
+            dict(mantle=1.0, shift=0.05, blink=0.6),
+            dict(mantle=1.0, shift=0.02)]
+    out += [dict(mantle=0.85, stretch=0.85, shift=-0.12, tilt=0.15, eye_pop=1.4, arms=0.7),          # bump
+            dict(mantle=0.92, stretch=0.9, shift=-0.10, tilt=0.10, stars=0.0, arms=0.5),
+            dict(mantle=1.08, stretch=1.05, shift=-0.06, tilt=-0.06, stars=0.6, arms=0.2),
+            dict(mantle=0.98, shift=-0.03, tilt=0.05, stars=1.2, arms=0.35),
+            dict(mantle=1.02, tilt=-0.04, stars=1.8, arms=0.25),
+            dict(mantle=1.0, tilt=0.03, stars=2.4, arms=0.3),
+            dict(mantle=1.0, tilt=-0.02, stars=3.0, arms=0.28),
+            dict(mantle=1.0, stars=3.6, arms=0.26),
+            dict(mantle=1.0, blink=1.0, arms=0.25),
+            dict(mantle=1.0, arms=0.25)]
+    for i in range(12):                                              # flee: fast jets, three per loop, speed lines
+        t = (i % 4) / 4
+        squeeze = math.cos(TAU * t)
+        out.append(dict(ph=TAU * i / 12, mantle=1.0 + 0.20 * squeeze, stretch=1.05 - 0.12 * squeeze, arms=0.5 * max(0.0, squeeze),
+                        shift=0.08 * math.sin(TAU * t), fin=0.7 * math.sin(TAU * t), speed=0.8, look=(0.9, 0.0)))
+    return out
+
+
 # ---------------------------------------------------------------- clips (12 fps, on twos)
 
 def idle_common(i, n, amp=1.0):
@@ -671,7 +1005,15 @@ SPECIES = {
                         ("follow", 12, True)]),
     "bear": dict(draw=draw_bear, poses=bear_poses, frame=(224, 160), seed=13,
                  clips=[("idle", 12, True), ("walk", 12, True), ("react", 10, False), ("bump", 10, False), ("flee", 12, True)]),
+    # B-135 swimmers (D-119): swim is the travel clip at index 1 (Creature.cs's walk slot), pivot at the body centre
+    "pike": dict(draw=draw_pike, poses=pike_poses, frame=(128, 80), seed=21, pivot=(0.5, 0.5), water=True,
+                 clips=[("idle", 8, True), ("swim", 12, True), ("react", 8, False), ("bump", 8, False), ("flee", 12, True)]),
+    "shark": dict(draw=draw_shark, poses=shark_poses, frame=(224, 128), seed=22, pivot=(0.5, 0.5), water=True,
+                  clips=[("idle", 10, True), ("swim", 14, True), ("react", 8, False), ("bump", 10, False), ("flee", 12, True)]),
+    "squid": dict(draw=draw_squid, poses=squid_poses, frame=(320, 144), seed=23, pivot=(0.5, 0.5), water=True,
+                  clips=[("idle", 12, True), ("swim", 12, True), ("react", 10, False), ("bump", 10, False), ("flee", 12, True)]),
 }
+LAND = ("stag", "wolf", "bear")
 
 
 def build(name, out=None):
@@ -703,6 +1045,18 @@ def build_bear(out=None):
     return build("bear", out)
 
 
+def build_pike(out=None):
+    return build("pike", out)
+
+
+def build_shark(out=None):
+    return build("shark", out)
+
+
+def build_squid(out=None):
+    return build("squid", out)
+
+
 SELF_CHECK = {
     "stag": {"ink": "lumpy bean body, bowed haunch and shoulder seams, chest tufts, flank hatch, hoof splits, antler burrs",
              "motion": "squash 0.92-1.08 on the beat, hose legs, antlers / ears / flag tail drag and overshoot; flee stretches and gathers",
@@ -716,8 +1070,23 @@ SELF_CHECK = {
              "motion": "breathing sway, heavy hose legs, rear-up with a thump squash 0.86 and a round huff puff; ears and stub tail follow",
              "original": "our own bear: chestnut with a hump, tan muzzle, small oval ears (not round black ears, §9.8), no teeth",
              "style": "built like Gus (B-127); LEAD judges"},
+    "pike": {"ink": "lumpy spine-built body, fin rays, lateral-line dashes, gill seam, belly line, back hatch",
+             "motion": "the body wave runs to the tail, tail and pectoral fins drag, react darts with a stretch 1.25 and speed lines",
+             "original": "our own pike: a green duck-bill fish with golden spots; closed mouth, no teeth (D-087)",
+             "style": "built like Gus (B-127): one pie eye, mid + deep tones; LEAD judges"},
+    "shark": {"ink": "gill slits, fin seams, belly countershade line, back hatch",
+              "motion": "slow glide wave, tail swings, react turns away with a stretch and speed lines, bump wobbles",
+              "original": "our own reef shark: round grey body, closed smile, round pie eye; friendly-neutral (D-087)",
+              "style": "built like Gus (B-127); LEAD judges"},
+    "squid": {"ink": "mantle ridge and collar seams, chromatophore specks, sucker dots, deep-tone spots",
+              "motion": "jet pulses squash 0.82 / stretch 1.18 the mantle, rubber-hose arms curl and trail, fins flap, the ink puff grows",
+              "original": "our own giant squid: soft red mantle, one big pie eye, a round cartoon ink cloud",
+              "style": "built like Gus (B-127); LEAD judges"},
 }
 OURS = {
+    "pike": "a green duck-bill pike with golden spots whose whole body waves into the tail and that darts off with an eye-pop",
+    "shark": "a round grey reef shark with a closed smile that turns away shyly, tail swinging",
+    "squid": "a soft red giant squid that jets in squash-and-stretch pulses with rubber-hose arms and puffs a round ink cloud",
     "stag": "a golden stag with a shaggy brown mane, a white flag tail that pops up on alarm and swept antlers that wobble behind every stop",
     "wolf": "a round grey wolf with a cream bib, a cheek ruff and a brown-tipped bushy tail that wags while it trots after you, nose down",
     "bear": "a chestnut bear with a shoulder hump and white claws that rears up halfway to sniff and huffs a round cloud",
@@ -727,22 +1096,32 @@ OURS = {
 def entry_for(name):
     """The manifest row of one creature (the preview uses the same dict the export reads)."""
     sp = SPECIES[name]
-    return {"key": f"creatures/earth/{name}", "style": "v3", "source": f"sources/creatures/earth_{name}_v3.blend",
-            "build": "scripts/build_creatures_earth_v3.py", "build_fn": f"build_{name}", "collection": name,
-            "frame": list(sp["frame"]), "pivot": [0.5, 0.0], "facing": "right", "squash_root": True, "planet": "earth",
-            "seed": sp["seed"], "beside": "characters/surveyor/side", "review_name": f"b132_earth_{name}",
-            "clips": [{"name": c, "frames": n, "loop": lp} for c, n, lp in sp["clips"]],
-            "self_check": SELF_CHECK[name], "ours": OURS[name],
-            "note": "B-132: v3.1 sheet (D-086/D-100), faces kept (D-101), no bared teeth (D-087)"}
+    e = {"key": f"creatures/earth/{name}", "style": "v3", "source": f"sources/creatures/earth_{name}_v3.blend",
+         "build": "scripts/build_creatures_earth_v3.py", "build_fn": f"build_{name}", "collection": name,
+         "frame": list(sp["frame"]), "pivot": list(sp.get("pivot", (0.5, 0.0))), "facing": "right", "squash_root": True, "planet": "earth",
+         "seed": sp["seed"], "beside": "characters/surveyor/side", "review_name": f"{'b135' if sp.get('water') else 'b132'}_earth_{name}",
+         "clips": [{"name": c, "frames": n, "loop": lp} for c, n, lp in sp["clips"]],
+         "self_check": SELF_CHECK[name], "ours": OURS[name],
+         "note": "B-132: v3.1 sheet (D-086/D-100), faces kept (D-101), no bared teeth (D-087)"}
+    if sp.get("water"):                  # reviewed 1x in the coast sea (B-133 layers 0-1), beside the surveyor
+        e.update(bg_scene="coast", bg_layers=[0, 1],
+                 note="B-135 (D-119): v3.1 swimmer, swim 12-16 is the travel clip at index 1, pivot at the body centre; faces kept, no teeth")
+    return e
 
 
 # ---------------------------------------------------------------- lock-free preview (fakegp; same strokes, same rasterizer)
 
+FLOOR = {}                               # swimmers: the deepest ink below the pivot (m) over all frames (the water-floor check)
+
+
 def render_frames(name, ss=2, scale=1):
-    """Every frame in sheet order -> (frames RGBA uint8, widths, frames drawing > 2 px below the ground)."""
+    """Every frame in sheet order -> (frames RGBA uint8, widths, frames drawing > 2 px below the ground). Swimmers
+    (pivot above the frame bottom) have no ground: FLOOR[name] records how far below the pivot their ink reaches."""
     sp = SPECIES[name]
     fw, fh = sp["frame"]
+    piv = tuple(sp.get("pivot", (0.5, 0.0)))
     frames, widths, below = [], [], []
+    deepest = 0.0
     for f, pose in enumerate(sp["poses"]()):
         gp = fakegp.FakeGP()
         M = mats(gp, name)
@@ -750,11 +1129,14 @@ def render_frames(name, ss=2, scale=1):
         sp["draw"](d, M, pose, seed=5 * f)
         st = fakegp.strokes_of(d, gp)
         zmin = min(float((s["xz"][:, 1] - s["radius"] * (1 + GR.JITTER)).min()) for s in st)
-        if zmin * PPU < -2.0:
+        if piv[1] == 0 and zmin * PPU < -2.0:
             below.append(f)
-        img, w = GR.render_frame(st, fw * scale, fh * scale, PPU * scale, (0.5, 0.0), ss=ss, seed=sp["seed"] * 1000 + f + 1)
+        deepest = max(deepest, -zmin)
+        img, w = GR.render_frame(st, fw * scale, fh * scale, PPU * scale, piv, ss=ss, seed=sp["seed"] * 1000 + f + 1)
         frames.append(img)
         widths += [(a / scale, b / scale, c / scale) for a, b, c in w]
+    if piv[1] > 0:
+        FLOOR[name] = round(deepest, 3)
     return frames, widths, below
 
 
@@ -778,11 +1160,13 @@ def sheet_of(name, frames):
             clips[-1]["loop_from"] = 0
         s += n
     meta = {"key": f"creatures/earth/{name}", "style": "v3", "frame_width": fw, "frame_height": fh, "columns": cols,
-            "gutter": g, "frames": len(frames), "fps": v3.FPS, "pivot": [0.5, 0.0], "facing": "right", "ppu": PPU,
+            "gutter": g, "frames": len(frames), "fps": v3.FPS, "pivot": list(sp.get("pivot", (0.5, 0.0))), "facing": "right", "ppu": PPU,
             "animations": clips, "squash_root": True}
     problems = v3.validate_sheet(meta, sheet.shape)
     m = v3.EDGE_MARGIN
-    clipped = [i for i, im in enumerate(frames) if im[:m, :, 3].any() or im[:, :m, 3].any() or im[:, -m:, 3].any()]
+    low = meta["pivot"][1] > 0                                   # no ground line: the bottom edge counts too
+    clipped = [i for i, im in enumerate(frames) if im[:m, :, 3].any() or im[:, :m, 3].any() or im[:, -m:, 3].any()
+               or (low and im[-m:, :, 3].any())]
     if clipped:
         problems.append(f"frames {clipped[:8]} touch the {m} px frame edge (drawing clipped)")
     return sheet, meta, problems
@@ -816,14 +1200,18 @@ def preview(out_dir, names=None):
         rng = lambda ws: (min(w[1] for w in ws), max(w[2] for w in ws)) if ws else (0, 0)   # noqa: E731
         stats = {"outer_px": rng(outer), "inner_px": rng(inner), "inner_n": len(inner), "palette": v3.palette_hits(sheet, "earth"),
                  "problems": problems, "sheet_wh": (sheet.shape[1], sheet.shape[0]), "png_kb": n // 1024}
-        out = os.path.join(out_dir, f"review_b132_earth_{name}_preview.png")
-        boxes = review.v3_sheet_review(entry_for(name), meta, frames, png, out, stats)
+        entry = entry_for(name)
+        out = os.path.join(out_dir, f"review_{entry['review_name']}_preview.png")
+        if entry.get("bg_scene") == "coast" and not os.path.isdir(os.path.join(review.ART, "backgrounds", "earth", "coast")):
+            entry["bg_dir"] = os.path.join(out_dir, "b133", "coast")          # the accepted B-133 preview layers until exported
+        boxes = review.v3_sheet_review(entry, meta, frames, png, out, stats)
         print(name, f"sheet {sheet.shape[1]}x{sheet.shape[0]} {n // 1024} KB, {len(frames)} frames,",
               f"ink {stats['outer_px'][0]:.2f}-{stats['outer_px'][1]:.2f} / {stats['inner_px'][0]:.2f}-{stats['inner_px'][1]:.2f} px,",
               f"palette {stats['palette'][0] * 100:.1f}% {stats['palette'][1]}, problems {problems or '-'},",
+              (f"floor clearance {FLOOR[name]:.2f} m below the pivot," if name in FLOOR else ""),
               "boxes not x:", ",".join(k for k, (mk, _n) in boxes.items() if mk != "x") or "-")
         firsts[name] = (frames, meta)
-    if len(firsts) == len(SPECIES):
+    if all(k in firsts for k in LAND):
         lineup(out_dir, firsts)
     fakegp.restore()
 

@@ -29,7 +29,7 @@ PALETTES = {
 PALETTE_ORDER = ["offwhite", "red", "mustard", "teal", "green", "sky", "brown", "ink"]
 
 # §11.2 frame caps per clip (min, max); anything else is a one-off special (<= 16).
-CAPS = {"idle": (8, 12), "walk": (12, 16), "run": (12, 16), "fly": (12, 16),
+CAPS = {"idle": (8, 12), "walk": (12, 16), "run": (12, 16), "fly": (12, 16), "swim": (12, 16),
         "jump": (8, 10), "land": (8, 10)}
 SPECIAL_MAX = 16
 MAX_BONES = 6
