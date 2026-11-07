@@ -74,7 +74,7 @@ def sheet_size(meta):
     return c * meta["frame_width"] + (c - 1) * g, rows * meta["frame_height"] + (rows - 1) * g
 
 
-def validate_sheet(meta, png_shape=None):
+def validate_sheet(meta, png_shape=None, ppu=PPU):
     """Problems with a §11.2 sheet json (and the PNG's HxW if given); [] = valid."""
     p = []
     need = ["key", "style", "frame_width", "frame_height", "columns", "frames", "fps", "pivot",
@@ -88,8 +88,8 @@ def validate_sheet(meta, png_shape=None):
         p.append("style must be 'v3'")
     if meta["fps"] != FPS:
         p.append(f"fps {meta['fps']} (must be {FPS})")
-    if meta["ppu"] != PPU:
-        p.append(f"ppu {meta['ppu']} (must be {PPU})")
+    if meta["ppu"] != ppu:
+        p.append(f"ppu {meta['ppu']} (must be {ppu})")
     if meta["facing"] not in ("right", "left"):
         p.append("facing must be right or left")
     fw, fh = meta["frame_width"], meta["frame_height"]

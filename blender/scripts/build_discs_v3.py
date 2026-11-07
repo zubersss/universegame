@@ -281,6 +281,59 @@ def sheet_meta(key, frames, R_px, name):
 ORDER = ["mercury", "venus", "earth", "mars", "jupiter", "saturn", "uranus", "neptune"]
 
 
+def export(art, preview_dir, stamp=None):
+    """D-098 / contract §11.5: planets/<planet>/disc_color.png + disc.json (Luna: planets/earth/
+    luna_*), Saturn's rings_back / rings_front + disc_rig.json; validated; then the review sheet
+    (built from the same frames). Returns [(key, w, h, frames, kb)]."""
+    import json as _json
+    out = []
+    tiles = {}
+    for name in ORDER + ["luna"]:
+        frames, R = build_disc(name)
+        tiles[name] = (frames, R)
+        planet, variant = ("earth", "luna") if name == "luna" else (name, "disc")
+        key = f"planets/{planet}/{variant}"
+        meta = sheet_meta(key, frames, R, name)
+        sheet = pack(frames, meta["columns"])
+        probs = v3.validate_sheet(meta, sheet.shape, ppu=SPACE_PPU)
+        if probs:
+            raise ValueError(f"{key}: " + "; ".join(probs))
+        d = os.path.join(art, "planets", planet)
+        os.makedirs(d, exist_ok=True)
+        n = pngio.write_png(os.path.join(d, f"{variant}_color.png"), sheet)
+        if n > v3.MAX_FILE_BYTES:
+            raise ValueError(f"{key}: {n / 2**20:.1f} MB over 4 MB")
+        with open(os.path.join(d, f"{variant}.json"), "w", encoding="utf-8", newline="\n") as f:
+            _json.dump(meta, f, indent=2)
+            f.write("\n")
+        out.append((key, sheet.shape[1], sheet.shape[0], len(frames), n // 1024))
+    back, front = saturn_rings(RADIUS_U["saturn"] * SPACE_PPU)
+    d = os.path.join(art, "planets", "saturn")
+    for nm, im in (("rings_back", back), ("rings_front", front)):
+        n = pngio.write_png(os.path.join(d, f"{nm}_color.png"), im)
+        out.append((f"planets/saturn/{nm}", im.shape[1], im.shape[0], 1, n // 1024))
+    rig = {"key": "planets/saturn/disc_rig", "style": "v3", "space_ppu": SPACE_PPU,
+           "parts": [{"name": "rings_back", "order": 0, "pivot": [0.5, 0.5]}, {"name": "disc", "order": 1},
+                     {"name": "rings_front", "order": 2, "pivot": [0.5, 0.5]}],
+           "wobble": {"parts": ["rings_back", "rings_front"], "scale_y": 0.04, "rotate_deg": 1.5, "beat_bpm": 110,
+                      "stepped_hz": 12}}
+    with open(os.path.join(d, "disc_rig.json"), "w", encoding="utf-8", newline="\n") as f:
+        _json.dump(rig, f, indent=2)
+        f.write("\n")
+    return out, tiles
+
+
+def pack(frames, cols, gutter=v3.GUTTER):
+    fh, fw = frames[0].shape[:2]
+    rows = -(-len(frames) // cols)
+    c = min(cols, len(frames))
+    s = np.zeros((rows * fh + (rows - 1) * gutter, c * fw + (c - 1) * gutter, 4), np.uint8)
+    for i, f in enumerate(frames):
+        r, k = divmod(i, cols)
+        s[r * (fh + gutter):r * (fh + gutter) + fh, k * (fw + gutter):k * (fw + gutter) + fw] = f
+    return s
+
+
 def preview(out_dir):
     """All eight side by side at the space scale (+ Luna, Saturn's rings) + 2x detail of frame 0."""
     import time
