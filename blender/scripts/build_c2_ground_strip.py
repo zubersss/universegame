@@ -254,16 +254,17 @@ def checks(S):
 
 
 def extrude_gutters(sheet, fw=FW, gutter=GUTTER, frames=8):
-    """B-165: bilinear sampling at a frame's edge reads half a texel of the gutter; a transparent-black gutter
-    pulls the edge colour toward black (faint joins every 64 px in UNITY's night frame). Each gutter takes its
-    neighbours' edge columns: the left half repeats the left frame's last column, the right half the right
-    frame's first column - colour only, alpha stays 0. The frame rects are untouched."""
+    """B-165: bilinear sampling at a frame's edge reads half a texel of the gutter. A transparent-black gutter
+    pulled the edge toward black, and (straight alpha) a colour-only gutter at alpha 0 still halved the edge
+    pixel's alpha, so what lies behind showed through every 64 px (UNITY, 14:06 night frame, a ~12.7 dip). Each
+    gutter copies its neighbours' edge columns in full RGBA: the left half repeats the left frame's last column,
+    the right half the right frame's first column (opaque where the edge is opaque, clear above the silhouette).
+    The sprite rects exclude the gutters, so nothing draws them; the frame rects are untouched."""
     half = gutter // 2
     for j in range(frames - 1):
         x0 = j * (fw + gutter) + fw                           # the gutter's first column
-        sheet[:, x0:x0 + half, :3] = sheet[:, x0 - 1:x0, :3]
-        sheet[:, x0 + half:x0 + gutter, :3] = sheet[:, x0 + gutter:x0 + gutter + 1, :3]
-        sheet[:, x0:x0 + gutter, 3] = 0
+        sheet[:, x0:x0 + half] = sheet[:, x0 - 1:x0]
+        sheet[:, x0 + half:x0 + gutter] = sheet[:, x0 + gutter:x0 + gutter + 1]
     return sheet
 
 
