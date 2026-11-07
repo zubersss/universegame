@@ -50,6 +50,7 @@ def materials(gp):
         "ink": G.mat(gp, "ink_line", fill=None, ink=True),
         "glint": G.mat(gp, "glint", fill=None, ink=True, ink_hex=P["offwhite"]),
         "star": G.mat(gp, "star", fill=P["mustard"]),
+        "glass": G.mat(gp, "helmet_glass", fill=P["sky"], ink=False, fill_alpha=0.25),
     }
 
 
@@ -244,6 +245,7 @@ def draw_surveyor(d, M, pose=None, seed=0):
                  M["ink"], I)
     # the glass: ink ring (the silhouette), two glints
     ring = G.lumpy_ellipse(hc[0], hc[1], hr, hr * 0.98, n=64, lump=0.015, seed=seed + 5)
+    G.stroke(d, ring, M["glass"], 0.0, cyclic=True)        # D-096: flat 25 % sky glass over the face
     G.stroke(d, ring, M["ink"], O, cyclic=True)
     gl = [(hc[0] + hr * 0.78 * math.cos(a), hc[1] + hr * 0.78 * math.sin(a)) for a in [2.0 + 0.09 * k for k in range(9)]]
     G.stroke(d, gl, M["glint"], I)

@@ -750,7 +750,7 @@ def do_v3_sheet(entry, preview):
         json.dump(meta, fh_, indent=2)
         fh_.write("\n")
     outer, inner = _v3_ink_stats(widths)
-    stats = {"outer_px": outer, "inner_px": inner, "palette": v3.palette_hits(sheet, entry.get("planet", "earth")),
+    stats = {"outer_px": outer, "inner_px": inner, "palette": v3.palette_hits(sheet, entry.get("planet", "earth"), tints=[tuple(t) for t in entry.get("palette_tints", [])]),
              "problems": problems, "sheet_wh": (sheet.shape[1], sheet.shape[0]), "png_kb": n // 1024}
     task = entry.get("review_name", key.replace("/", "_"))
     out = os.path.join(PREVIEW, f"review_{task}{'_preview' if preview else ''}.png")
@@ -834,7 +834,20 @@ def do_v3_rigset(entry, preview):
         fh_.write("\n")
     task = entry.get("review_name", key.replace("/", "_"))
     out = os.path.join(PREVIEW, f"review_{task}{'_preview' if preview else ''}.png")
-    review.v3_rigset_review(entry, meta, sheet, png, out, imgs, {"problems": problems, "png_kb": n // 1024})
+    loop = None
+    if entry.get("loop"):                       # §11.7 (B-118): the assembled preview loop on the review
+        _m, assets = load_manifest()
+        le = next((a for a in assets if a["key"] == entry["loop"]), None)
+        if le is None:
+            raise AssetError(f"{key}: loop entry '{entry['loop']}' not in the manifest")
+        lscene, lobjs = open_source(le, True)
+        mk = {m.name: m.frame for m in lscene.timeline_markers}
+        c0 = le["clips"][0]
+        lfw, lfh = le["frame"]
+        loop = [GR.render_frame(GR.collect(lscene, lobjs, mk[c0["name"]] + k), lfw, lfh, v3.PPU,
+                                tuple(le.get("pivot", [0.5, 0.0])), ss=ss, seed=int(le.get("seed", 1)) * 1000 + mk[c0["name"]] + k)[0]
+                for k in range(int(c0["frames"]))]
+    review.v3_rigset_review(entry, meta, sheet, png, out, imgs, {"problems": problems, "png_kb": n // 1024, "loop": loop})
     if not preview:
         mark_stale(key, False)
     log_line(f"{'PREVIEW' if preview else 'OK'} {key} | v3 rig set {W}x{H} {n // 1024}KB, {len(part_meta)} parts, "

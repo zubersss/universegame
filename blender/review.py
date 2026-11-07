@@ -385,6 +385,21 @@ def v3_rigset_review(entry, meta, sheet, sheet_path, out, part_imgs, stats):
         canvas[max(cy - 4, 0):cy + 5, max(cx - 1, 0):cx + 2] = (0.85, 0.1, 0.1)
     _label(canvas, f"json {'valid' if not stats['problems'] else 'INVALID: ' + '; '.join(stats['problems'])[:120]}",
            6, H + 38)
+    loop = stats.get("loop")                          # §11.7 (B-118): the assembled preview loop, 1x and 2x
+    if loop:
+        fh, fw = loop[0].shape[:2]
+        Wc = max(canvas.shape[1], 16 + len(loop) * (fw * 2 + 8))
+        if Wc > canvas.shape[1]:
+            canvas = np.hstack([canvas, np.tile(PAPER, (canvas.shape[0], Wc - canvas.shape[1], 1))])
+        bg, note = planet_background(entry.get("planet", "earth"), entry.get("bg_scene", "plains"), Wc, fh + 40)
+        for i, im in enumerate(loop):
+            _over(bg, im, 8 + i * (fw + 8), 30)
+        _label(bg, f"assembled loop at 1x ({len(loop)} frames, 12 fps) on {note}", 6, 4)
+        big = np.tile(PAPER, (fh * 2 + 30, Wc, 1))
+        for i, im in enumerate(loop):
+            _over(big, np.repeat(np.repeat(im, 2, 0), 2, 1), 8 + i * (fw * 2 + 8), 24)
+            _label(big, str(i), 10 + i * (fw * 2 + 8), 6)
+        canvas = np.vstack([canvas, bg, big])
     if os.path.normpath(sheet_path).startswith(ART):
         stamp(canvas, sheet_path, stale)
     else:

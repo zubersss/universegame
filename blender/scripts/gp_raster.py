@@ -84,6 +84,7 @@ def collect(scene, objects, frame):
                     "xz": pos[a:b][:, [0, 2]], "radius": rad[a:b] * scale,
                     "cyclic": bool(s.cyclic), "fill": fill, "ink": ink,
                     "behind": bool(data.materials[mi].get("ink_behind", False)),
+                    "fill_alpha": float(data.materials[mi].get("fill_alpha", 1.0)),
                     "id": zlib.crc32(f"{ob.name}|{layer.name}|{si}".encode()) & 0xFFFFFF,
                 })
     return out
@@ -166,8 +167,8 @@ def render_frame(strokes, fw, fh, ppu, pivot=(0.5, 0.0), ss=4, seed=0, origin_x=
     acc = np.zeros((H, W, 4), np.float32)         # premultiplied
     widths = []
 
-    def over(mask, rgb):
-        a = mask.astype(np.float32)[..., None]
+    def over(mask, rgb, alpha=1.0):
+        a = mask.astype(np.float32)[..., None] * alpha
         acc[..., :3] = rgb * a + acc[..., :3] * (1 - a)
         acc[..., 3:] = a + acc[..., 3:] * (1 - a)
     k = ppu * ss
@@ -178,7 +179,7 @@ def render_frame(strokes, fw, fh, ppu, pivot=(0.5, 0.0), ss=4, seed=0, origin_x=
         has_fill = st["fill"] is not None and st["cyclic"] and len(xz) >= 3
         behind = bool(st.get("behind")) and has_fill
         if has_fill and not behind:
-            over(_poly_mask(px, py, H, W), st["fill"])
+            over(_poly_mask(px, py, H, W), st["fill"], st.get("fill_alpha", 1.0))
         if st["ink"] is not None:
             r_m = jittered_radius(xz, st["radius"].astype(np.float64), seed * 7919 + st["id"], ppu)
             r = r_m * k
@@ -189,7 +190,7 @@ def render_frame(strokes, fw, fh, ppu, pivot=(0.5, 0.0), ss=4, seed=0, origin_x=
                 nom = float(np.median(st["radius"])) * ppu * 2
                 widths.append((round(nom, 2), float(r_m.min() * ppu * 2), float(r_m.max() * ppu * 2)))
         if behind:
-            over(_poly_mask(px, py, H, W), st["fill"])
+            over(_poly_mask(px, py, H, W), st["fill"], st.get("fill_alpha", 1.0))
     small = acc.reshape(fh, ss, fw, ss, 4).mean(axis=(1, 3))
     a = small[..., 3:4]
     rgb = np.where(a > 1e-6, small[..., :3] / np.maximum(a, 1e-6), 0.0)

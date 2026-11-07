@@ -191,7 +191,7 @@ def shelf_pack(sizes, gutter=GUTTER):
     raise ValueError("rig parts do not fit one 2048 sheet")
 
 
-def palette_hits(rgba, planet="earth", tol=6):
+def palette_hits(rgba, planet="earth", tol=6, tints=()):
     """Share of solid interior pixels (alpha 255, 3x3 uniform) that are palette colours or their
     one shadow tone, and the off-palette colours found (most common first)."""
     a = rgba[..., 3] == 255
@@ -205,6 +205,9 @@ def palette_hits(rgba, planet="earth", tol=6):
     if len(px) == 0:
         return 1.0, []
     pal = np.array([hex_rgb(v) for v in palette_with_shadows(planet).values()], np.int32)
+    for name, alpha in tints:                 # flat translucent washes (D-096 glass): colour x (1-a) + tint x a
+        t = np.array(hex_rgb(PALETTES[planet][name]), np.float64)
+        pal = np.vstack([pal, np.rint(pal * (1 - alpha) + t * alpha).astype(np.int32)])
     d = np.abs(px[:, None, :] - pal[None, :, :]).max(-1).min(-1)
     bad = px[d > tol]
     off = []

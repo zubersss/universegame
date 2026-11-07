@@ -62,7 +62,7 @@ def collection(name):
     return c
 
 
-def mat(gp, name, fill=None, ink=True, ink_hex=INK, behind=False):
+def mat(gp, name, fill=None, ink=True, ink_hex=INK, behind=False, fill_alpha=1.0):
     """Material slot on gp: fill colour hex (or None) + ink stroke. Returns its index.
     behind=True: the ink is drawn under the fill at twice the radius (gp_raster), for parts too
     small for a centred line to leave any colour (beaks, feet, thin feathers)."""
@@ -84,6 +84,8 @@ def mat(gp, name, fill=None, ink=True, ink_hex=INK, behind=False):
             m["srgb_fill"] = fill
         if behind:
             m["ink_behind"] = True
+        if fill_alpha < 1.0:
+            m["fill_alpha"] = float(fill_alpha)     # a flat translucent wash (D-096 helmet glass)
     gp.materials.append(m)
     return len(gp.materials) - 1
 
