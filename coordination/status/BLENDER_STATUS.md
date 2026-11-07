@@ -1,15 +1,14 @@
 # BLENDER STATUS
-Updated: 2026-11-07 15:40 · Session: 8 (resumed 14:3x after the ~14:17 machine restart; C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 15:52 · Session: 8 (resumed 14:3x after the ~14:17 machine restart; C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-Yielding to UNITY's U-132 Build 0.4.5 (queue rank 2 > my rank 3, D-109). Its want (15:34:56) sat unstarted beside my older one, a likely mutual yield, so I withdrew mine at 15:38:46 (LEAD told) and re-file when UNITY's lock appears (D-039). My next turn: (1) the B-161 stamped previews (plants, floes, rig dry run, the four creatures; a measured run first); (2) B-152 export (backgrounds/venus/deck + surface, straight); (3) B-153 export (flora/venus/rigset, terrain/venus/ground_strip_set, ui/palettes/venus). B-154 waits for U-125's code.
-B-161 source, lock-free: the four creatures (5e4970d0: windrider, shadow_shoal, pressure_phantom, anchor_worm; all 162 frames smoke-clean at 90 MB). Earlier: palette D-148, flora a1924873, floes 5de84381, rig set 994e266c, the deck scenes (in build_backdrop_v3). Left: the Umbral Leviathan (Grand rig, 8 bones), the props (wind_anchor + meridian_wreck x3 at ~7.5 m, D-148), the stamped reviews, the deck studies in slots.
-B-152: the Venus deck study straight ACCEPTED (LEAD 15:3x); both sets cleared for export. B-158 DONE; B-151 exported (611c0c81).
-Open from UNITY (look only, to LEAD): the sign 9-slice's plank lines stretch into dark bars over the crafting panel; offered a plain-board centre re-draw (one short export) - LEAD's call.
+Behind UNITY's U-132 build chain (rank 1; its lock since 15:42:22, ~25 min); want_blender filed 15:43:00 (rank 2). My next turn: (1) the B-161 stamped reviews in one driver run (plants, floes, rig dry run, the four creatures, the props, the Leviathan; it stops if UNITY files a want); then, re-filed after UNITY's next lock, (2) B-152 export (backgrounds/venus/deck + surface, straight); (3) B-153 export (flora/venus/rigset, terrain/venus/ground_strip_set, ui/palettes/venus). B-154 waits for U-125's code.
+B-161 Neptune SOURCE COMPLETE (lock-free): palette D-148 (decf9ad0), flora a1924873 + rig set 994e266c, floes 5de84381, deck scenes (build_backdrop_v3), creatures (windrider, shadow_shoal, pressure_phantom, anchor_worm), props 170d4db0 (wind_anchor + the Meridian wreck in three ~7.5 m segments, D-148), the Umbral Leviathan 64bfe144 (a Grand rig, 8 bones, validate_rigset valid; the bands dim / lit as the Survey puzzle). Every piece smoke-clean lock-free (ink in range, palette >= 99.7 %, inside its frame). Left: the stamped reviews (my next slot), then the deck studies in slots.
+Done meanwhile: B-158 Uranus DONE as designs; B-151 exported (611c0c81); B-152 deck study ACCEPTED straight; D-149: no sign redraw (crafting moves onto the inventory paper).
 
 ## Last completed
-- 15:3x B-161 Neptune creatures source (5e4970d0; 90 MB smoke, 162 frames clean).
-- 15:3x B-161 Neptune deck scenes in code + the preview stands on the Venus / Neptune strips.
+- 15:4x-15:5x B-161 props (170d4db0) + the Umbral Leviathan (64bfe144), lock-free.
+- 15:3x B-161 creatures + deck scenes, lock-free.
 - 15:28:31-15:29:16 SLOT: B-152 Venus deck re-run straight (40 s, 598 MB; ACCEPTED).
 - 15:2x B-153 / B-152 readiness: build_c2_venus_ground.py + four Venus manifest rows (2a15f6c3).
 - 15:18:20-15:22:50 SLOT: B-158 udeck1 x4 on the roll fix, check PASS. B-158 DONE.
@@ -37,9 +36,10 @@ none (B-161's three ruled in D-148).
 - Short jobs run in the foreground; no background waiters (the harness reaps them under memory pressure): check the locks folder each turn.
 - All three sessions share one working tree: a push can race another role's; fetch + merge (never rebase) and push again.
 - A stroke's line is drawn in its material's ink_hex: a coloured line needs its own line material (fill=None, ink_hex=colour); a fill-only material on an open stroke draws nothing.
+- RAM is read in its own call BEFORE a lock-free run, never in the same call (15:5x: a 92 MB Leviathan smoke started at 0.24 GB free beside UNITY's build, under the 0.3 GB code-only line).
 
 ## For USER_ACTIONS
 none (USER-28, closing ChatGPT + Edge for RAM, is LEAD's).
 
 ## HeavyJobLock
-none held; no want on file (withdrawn 15:38:46 so UNITY's higher-rank Build 0.4.5 can start; re-filed when its lock appears, D-039).
+none held; want_blender filed 15:43:00 behind UNITY's U-132 build chain (rank 1).
