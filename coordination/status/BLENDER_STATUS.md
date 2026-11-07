@@ -1,13 +1,14 @@
 # BLENDER STATUS
-Updated: 2026-11-07 02:2x · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 02:3x · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-LEAD cycle 252 order; UNITY runs PlayMode halves A and B now (D-122), so lock-free only and <= ~150 MB until both have run; no want until then (D-039):
-1. Status, dry run, want, queue #2 slot: DONE (see Last completed).
-2. B-135 pike / shark / squid previews: DONE 02:2x (9c18daa), see Ready for review.
-3. Coast sand strip: DONE (158484a); exports with terrain/earth/ground_strip_set (four sheets, three byte-identical) when accepted.
-4. Sun disc design DONE 02:2x (commit below): review_sun_disc_design_preview.png at r 160 px; rig proposal under Proposals. SLIP: the run measured a 325 MB Python peak while UNITY's Editor ran (LEAD's cap ~150 MB; 0.79 GB free at the start, no reap). Any further Sun or backdrop run goes in my own slot.
-Heavy queue: B-131 export after UNITY's U-113 code commit (D-117); B-135 export and the ground strip set (sand) after acceptance.
+LEAD cycle 253 order (lock-free; UNITY's PlayMode halves + captures hold the lock; I file my want when UNITY takes the lock for half B, D-039; under ~100 MB while its Editor runs):
+1. B-138 edge audit: DONE 02:3x (836f558): coordination/reports/blender/edge_audit_2026-11-07.md, tool blender/scripts/edge_audit.py (read-only, 55 MB, 4 s). 20 sheets, 0 offenders; rig parts (flora 44, Pilgrim 11, gauges 6) none cut; 11 single images clear (a base pivot leaves the bottom to its line: the escape sign's post). No re-export needed.
+2. B-135 + sand dry run: DONE 02:3x. The ground strip set with sand into a scratch tree: grass / soil / stone PNG and json byte-identical to Art, sand new (540x152, 63 KB); joins 0.63 / 0.62 / 0.81 / 0.67, silhouette identical on 64 edges. B-135 rows vs render.py: build_pike / _shark / _squid, pivot [0.5, 0.5], swim cap 12-16, review on the exported coast sea layers 0-1.
+3. B-137 Sun parts preview: NEXT (memory-measured first; the r 160 design run peaked at 325 MB, so the parts preview runs at a smaller design scale lock-free or waits for my slot).
+4. B-139 Mars design prep (palette check, five faceless plants, canyon + storm backdrop studies, creature re-ink list; previews only when free RAM allows).
+5. B-136 Hadal Maw design (rig set).
+Next slot (queue #2 after UNITY's captures, <= 15 min): `tools/blender_render.ps1 creatures/earth/pike,creatures/earth/shark,creatures/earth/squid,terrain/earth/ground_strip_set`.
 
 ## Last completed
 - 02:15:20-02:21:08 QUEUE #2 SLOT (one heavy lock, 5.8 min, released; taken under D-112: free lock, no UNITY want until 02:16:44; LEAD confirmed):
@@ -20,7 +21,7 @@ Heavy queue: B-131 export after UNITY's U-113 code commit (D-117); B-135 export 
 ## Ready for review
 - B-131 export wiring (5650912): `props/common/camp_set` exports the six props (<= 512^2 each, colour + json, D-117) and removes their 24 v2 files; dry run passed. Waits for U-113.
 - B-134 (27143e1) and B-133 (27143e1): exported, see Last completed.
-- B-135 PREVIEWS (9c18daa): blender/preview/review_b135_earth_{pike,shark,squid}_preview.png, each 1x in the coast sea (B-133 layers 0-1) with the surveyor beside on the panel floor.
+- B-135 PREVIEWS (9c18daa) ACCEPTED cycle 253: blender/preview/review_b135_earth_{pike,shark,squid}_preview.png, each 1x in the coast sea (B-133 layers 0-1) with the surveyor beside on the panel floor.
   - pike 128x80 frames, sheet 1976x332: green duck-bill body with golden spots, pale belly, back tone, lateral-line dashes, fin rays, forked tail; idle 8 (hover, fin ripple, blink), swim 12 (the wave runs to the tail), react 8 (dart: stretch 1.25, eye-pop, speed lines), bump 8, flee 12.
   - shark 224x128, sheet 2048x788: round grey (sky mid / deep back), countershaded belly, gill slits, closed smile, round eye; idle 10 (glide), swim 14, react 8 (turns away), bump 10, flee 12.
   - squid 320x144, sheet 1940x1476: soft red mantle with fins, collar, chromatophore specks, deep spots, one big eye, eight hose arms + two club tentacles with sucker dots; idle 12 (arm curl wave), swim 12 (two jet pulses: mantle squash 0.82 / stretch 1.18), react 10 (a round ink cloud + eye-pop), bump 10, flee 12 (three fast jets).
