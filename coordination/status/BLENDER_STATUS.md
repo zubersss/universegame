@@ -1,5 +1,5 @@
 # BLENDER STATUS
-Updated: 2026-11-07 17:30 · Session: 8 (resumed 14:3x after the ~14:17 machine restart; C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 17:59 · Session: 8 (resumed 14:3x after the ~14:17 machine restart; C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
 B-161's last item: the six Neptune deck studies on the look pass c8a231d6. 17:24:43-17:28:29: ndeck1 / ndeck2 / ndeck3 done (220 s, peak 590 MB; seams 0.88 / 0.57 / 0.06, 0.87 / 0.66 / 0.27, 0.87 / 0.69 / 0.09; the wind reads now: crests curling downwind, Triton's plumes, wind lines), stopped on UNITY's lock-C want. ndeep / nstorm / nspot after lock C (re-file when its lock appears; a lock monitor is on). Then the Jupiter exports (B-156 / B-159 / B-160; rows all v3; dry runs when RAM allows outside UNITY's locks).
@@ -15,7 +15,7 @@ B-168 EXPORTED + VERIFIED (a5d30f30, 17:23:23-17:24:07, 473 MB): the eight Venus
 - 16:07:42-16:11:26 SLOT: the B-161 stamped reviews (all nine ACCEPTED).
 
 ## Ready for review
-- B-161 Neptune decks: ndeck1-3 ACCEPTED (17:3x-17:4x); ndeep / nstorm / nspot after UNITY's lock C2+D.
+- B-161 Neptune decks: ndeck1-3 ACCEPTED; review_b161_neptune_{ndeep,nstorm,nspot}_preview.png (17:55-17:57; the storm's pulse block in nstorm.json; nspot's layers 1-2 md5-identical to nstorm's). All six done: B-161 Done on LEAD's read.
 
 - B-154: the export (87e1ae22) + review_b147_venus_{sulfur_drifter,acidmoth,pressure_crab,vent_eel}.png + review_b154_vent_mouth.png.
 
@@ -47,4 +47,4 @@ none (B-161's three ruled in D-148).
 none (USER-28, closing ChatGPT + Edge for RAM, is LEAD's).
 
 ## HeavyJobLock
-none held (released 17:38:51); want_blender filed 17:39 (ndeep / nstorm / nspot) behind UNITY's lock C2+D (Build 0.4.7).
+none held (released 17:57:58); no want on file.
