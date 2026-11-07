@@ -1,5 +1,5 @@
 # LEAD STATUS
-Updated: 2026-11-07 09:0x · Session: 7 · Review cycle: 266 · Cadence: every 30 min (owner; session cron d058c952 at :13 / :43, re-created at resume)
+Updated: 2026-11-07 09:0x · Session: 7 · Review cycle: 266 · Cadence: every hour (owner, 09:0x; session cron at :43, replaces the 30-min cron d058c952)
 Cycle 266 (tick): UNITY's batch B check on the lock since 08:34 (EditMode 348/349, PlayMode A 52/56, B 59/63, a re-run at 08:55; five reds named); UNITY's status stale since 08:0x and no commit since 07:47 → nudged to commit code + green runs before the fix pass. B-152 Venus surface study ACCEPTED; D-137 (floe caps, the shared aerostat kit, the Jupiter palette) at 08:4x. Nothing Done this cycle.
 Cycle 265 (tick): B-146 C3 UI designs + B-147 Venus designs DONE; cards B-151..B-154, U-124, U-125 (Backlog); B-155 Jupiter prep Ready.
 Cycle 264 (tick + 08:1x): B-145 Mercury design prep DONE; the Mercury cards B-148 / B-149 / B-150 + U-123 (Backlog until U-118).
