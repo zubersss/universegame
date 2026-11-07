@@ -1261,7 +1261,7 @@ Goal: Mercury backdrops from the accepted studies: `backgrounds/mercury/day`, `b
 Accept: the 2× seam check with no seam; ≤ 4 MB per PNG; a 1080p composite per set at 1x with the surveyor on the Mercury strips; UNITY's ParallaxLayers loads them by key.
 Files: blender/scripts/build_backdrop_v3.py, Assets/_Game/Art/backgrounds/mercury/
 Depends: B-145
-Lead notes: Cycle 264. One export batch when promoted with B-148. Cycle 269 close: PROMOTED; the export in one slot right after U-123's code commit (the rows are dry-run ready).
+Lead notes: Cycle 264. One export batch when promoted with B-148. Cycle 269 close: PROMOTED; the export in one slot right after U-123's code commit (the rows are dry-run ready). 12:3x: EXPORTED AND VERIFIED (1e99fcc4; log 12:25–12:28 OK ×3: day / twilight / night, each 2048×1024 + 640 + 384, seams 0.52–0.77, jsons; nine PNGs in LFS; one wrapper job 313 s, peak 673 MB). review_b149_mercury_twilight.png: the pale Sun half-set behind grey cratered hills under a violet band, stars above, seam-free at 2×; review_b149_mercury_night.png: the blue-grey cratered dark under a star field. Done on U-123's Mercury captures.
 
 ### B-150 · BLENDER · Ready · C2
 Goal: Mercury creatures re-inked from the accepted B-145 designs: the Flarewing (fly at index 1), the Shadewyrm with its den `props/mercury/ice_burrow` (D-126; `idle_open` away from the den), the Glassback, the Cinderling; faces kept (pie eyes, no teeth); one sheet ≤ 2048² each; `replaces_v2` on any Mercury model under the same key.
