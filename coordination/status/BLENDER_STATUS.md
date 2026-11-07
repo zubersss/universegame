@@ -1,23 +1,23 @@
 # BLENDER STATUS
-Updated: 2026-11-07 15:27 · Session: 8 (resumed 14:3x after the ~14:17 machine restart; C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 15:31 · Session: 8 (resumed 14:3x after the ~14:17 machine restart; C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-Venus exports next (B-152 / B-153 cleared: U-123 Done), each one slot in my turns behind UNITY's wants. Want filed 15:25 (UNITY's U-124 lock since 15:22:59; 0.23 GB free under the Editor: code only meanwhile). Order: (1) the Venus deck study re-run straight (~80 s, D-147; accepted on sight); (2) the B-161 stamped previews (plants, floes, rig dry run) in a free gap; (3) B-152 export (backgrounds/venus/deck + surface, straight); (4) B-153 export (flora/venus/rigset - its dry run passed 09:03, 33 parts, json valid -, terrain/venus/ground_strip_set, ui/palettes/venus). B-154 waits for U-125's code.
-B-153 readiness DONE lock-free (2a15f6c3): build_c2_venus_ground.py - terrain/venus/ground_strip (the basalt crust) + ground_strip_deck (the aerostat planks, a new kind); smoke 61 MB: joins 0.54 / 0.68, silhouette identical in all 32 edges, palette 100 % (the basalt brown kept off the edges: it sits inside the edge check's 40-level ink tolerance). Manifest rows added for terrain/venus/ground_strip_set, flora/venus/rigset, backgrounds/venus/deck + surface.
-B-158 Uranus DONE as designs (LEAD 15:2x): deck1 x4 re-run on the roll fix 15:18:20-15:22:50 (258 s, 673 MB, --uranus-check deck1 PASS); all four decks pass in every light; exports as B-166 with U-130.
-B-151 EXPORTED 611c0c81 (15:07-15:09, 942 MB); UNITY imports it in its U-124 lock.
-B-161 Neptune source complete (palette D-148, flora a1924873, floes 5de84381, rig set 994e266c); left: the three stamped reviews, then deck studies in slots, creatures, props, the Leviathan.
+Venus exports + B-161 reviews, each in my turns behind UNITY's wants (UNITY's U-124 lock since 15:29:26; my want filed 15:29:45). Order: (1) the B-161 stamped previews (plants, floes, rig dry run; <= 3 min, skipped at 15:29 when UNITY's want arrived mid-slot); (2) B-152 export (backgrounds/venus/deck + surface, straight); (3) B-153 export (flora/venus/rigset, terrain/venus/ground_strip_set, ui/palettes/venus). B-154 waits for U-125's code.
+15:28:31-15:29:16 SLOT: B-152 Venus deck study re-run straight (40 s, 598 MB; seams 0.84 / 0.00 / 0.28; review_b147_venus_deck_preview.png 15:29, now on the B-153 deck planks). Released on UNITY's 15:29:07 want (D-037).
+B-161 Neptune deck scenes in code (pushed with the re-run): build_backdrop_v3.neptune_scene deck1 / deck2 / deck3 / deep / storm / spot (preview names ndeck1..nspot, seeds 15101-15105); the storm's rim + companion clouds alone on layer1 with the D-148 pulse block (pivot_uv 0.5 / 0.5, roll=0); spot = storm + the Meridian (its own rng: layers 1-2 identical to storm's). The studies run in slots after the Venus exports.
+B-153 readiness: build_c2_venus_ground.py (2a15f6c3) + the four Venus manifest rows; the rig dry run passed 09:03.
+B-158 Uranus DONE as designs; B-151 exported (611c0c81); B-161 source: palette D-148, flora a1924873, floes 5de84381, rig set 994e266c.
 
 ## Last completed
-- 15:2x B-153 / B-152 readiness: build_c2_venus_ground.py + four Venus manifest rows (2a15f6c3; lock-free, 61 MB smoke).
-- 15:18:20-15:22:50 SLOT (bundled python): B-158 udeck1 x4 on the roll fix, --uranus-check deck1 PASS (258 s, 673 MB). B-158 DONE.
-- 15:10:03-15:14:45 SLOT: B-158 udeep x4, --uranus-check deep PASS (277 s, 673 MB; ACCEPTED).
+- 15:3x B-161 Neptune deck scenes (code; registered, 31 MB import check) + the preview stands on the Venus / Neptune strips.
+- 15:28:31-15:29:16 SLOT: B-152 Venus deck re-run straight (40 s, 598 MB).
+- 15:2x B-153 / B-152 readiness: build_c2_venus_ground.py + four Venus manifest rows (2a15f6c3; 61 MB smoke).
+- 15:18:20-15:22:50 SLOT: B-158 udeck1 x4 on the roll fix, check PASS (258 s, 673 MB). B-158 DONE.
 - 15:07:55-15:09:03 SLOT (wrapper): B-151 C3 UI export (log OK, 942 MB; 611c0c81).
-- 15:0x B-161 floes (5de84381) + rig set (994e266c) sources (88 / 46 MB checks).
-- 14:46-15:01 SLOTS: B-158 udeck2 / udeck3 x4, checks PASS (ACCEPTED).
 
 ## Ready for review
 - B-151: the 18 exports (611c0c81) + review_b151_ui.png (exported 15:08).
+- B-152: review_b147_venus_deck_preview.png (15:29, straight; accepted on sight per the card).
 
 ## Handoffs (unrouted only)
 -> UNITY (B-150, cca20f60): drop the .meta of the removed Mercury v2 files (glassback / cinderling / flarewing / shadewyrm .glb, _normal, _mask, _emission); props/mercury/ice_burrow is den_for creatures/mercury/shadewyrm (D-126: drawn in front).
@@ -44,4 +44,4 @@ none (B-161's three ruled in D-148).
 none (USER-28, closing ChatGPT + Edge for RAM, is LEAD's).
 
 ## HeavyJobLock
-none held (deck1 slot released 15:22:50); want_blender filed 15:25:04 (the Venus deck re-run, then the B-161 reviews) behind UNITY's U-124 lock.
+none held (the Venus re-run slot released 15:29:16); want_blender filed 15:29:45 (the B-161 reviews, then B-152) behind UNITY's U-124 lock.
