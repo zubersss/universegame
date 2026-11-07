@@ -290,7 +290,7 @@ def preview(out_dir, scale=0.5, path=None, stamp="preview (not exported)"):
     rows = []
     head = np.tile(review.PAPER, (30, W, 1)).astype(np.float32)
     review._label(head, "b-136 hadal maw (grand creature, d-087 friendly-neutral, no teeth): a 3.11 rig set, 6 bones (head, body1, body2, tail, jaw, lure), "
-                        "lure swaps lit / dim / flare; design preview", 6, 8)
+                        f"lure swaps lit / dim / flare; {'the exported rig set' if stamp == 'export' else 'design preview'}", 6, 8)
     rows.append(head)
     deep = np.empty((img.shape[0] + 40, W, 3), np.float32)
     t = (np.arange(deep.shape[0]) / deep.shape[0])[:, None, None]

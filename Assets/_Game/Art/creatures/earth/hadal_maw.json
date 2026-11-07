@@ -1,0 +1,232 @@
+{
+  "key": "creatures/earth/hadal_maw",
+  "style": "v3",
+  "ppu": 64,
+  "rect_origin": "bottom_left",
+  "parts": [
+    {
+      "name": "body1",
+      "rect": [
+        0,
+        292,
+        628,
+        452
+      ],
+      "pivot": [
+        0.9261,
+        0.5078
+      ]
+    },
+    {
+      "name": "body2",
+      "rect": [
+        0,
+        0,
+        564,
+        288
+      ],
+      "pivot": [
+        0.9177,
+        0.4404
+      ]
+    },
+    {
+      "name": "head",
+      "rect": [
+        632,
+        316,
+        560,
+        428
+      ],
+      "pivot": [
+        0.0785,
+        0.4693
+      ]
+    },
+    {
+      "name": "jaw",
+      "rect": [
+        1408,
+        144,
+        308,
+        144
+      ],
+      "pivot": [
+        0.0181,
+        0.7942
+      ]
+    },
+    {
+      "name": "lure_dim",
+      "rect": [
+        1164,
+        96,
+        240,
+        192
+      ],
+      "pivot": [
+        0.0439,
+        0.0549
+      ]
+    },
+    {
+      "name": "lure_flare",
+      "rect": [
+        568,
+        36,
+        304,
+        252
+      ],
+      "pivot": [
+        0.0347,
+        0.0418
+      ]
+    },
+    {
+      "name": "lure_lit",
+      "rect": [
+        876,
+        60,
+        284,
+        228
+      ],
+      "pivot": [
+        0.0371,
+        0.0462
+      ]
+    },
+    {
+      "name": "tail",
+      "rect": [
+        1196,
+        320,
+        588,
+        424
+      ],
+      "pivot": [
+        0.9237,
+        0.4659
+      ]
+    }
+  ],
+  "plants": [
+    {
+      "name": "hadal_maw",
+      "scale_note": "about 34 m long at 1x (Bible 40 m: a set piece over two screens)",
+      "bones": [
+        {
+          "name": "head",
+          "part": "head",
+          "parent": null,
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 3
+        },
+        {
+          "name": "body1",
+          "part": "body1",
+          "parent": "head",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 2
+        },
+        {
+          "name": "body2",
+          "part": "body2",
+          "parent": "body1",
+          "offset_m": [
+            -9.0,
+            0.0
+          ],
+          "order": 1
+        },
+        {
+          "name": "tail",
+          "part": "tail",
+          "parent": "body2",
+          "offset_m": [
+            -8.0,
+            0.0
+          ],
+          "order": 0
+        },
+        {
+          "name": "jaw",
+          "part": "jaw",
+          "parent": "head",
+          "offset_m": [
+            3.3,
+            -1.0
+          ],
+          "order": 4
+        },
+        {
+          "name": "lure",
+          "part": "lure_lit",
+          "parent": "head",
+          "offset_m": [
+            6.0,
+            2.6
+          ],
+          "order": 5
+        }
+      ],
+      "swaps": {
+        "lure": [
+          "lure_lit",
+          "lure_dim",
+          "lure_flare"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "lure",
+          "bone": "lure",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 5,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "beat_bpm": 110,
+        "cycle_beats": 4,
+        "amplitude_deg": {
+          "head": 2,
+          "body1": 4,
+          "body2": 6,
+          "tail": 9,
+          "lure": 8
+        },
+        "lag": 0.8,
+        "swap_cycle": {
+          "slot": "lure",
+          "sequence": [
+            "lure_lit",
+            "lure_dim"
+          ],
+          "beats": [
+            6,
+            2
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 12.0,
+        "action": "jaw_open",
+        "jaw_deg": -24,
+        "head_deg": 4,
+        "swap": {
+          "lure": "lure_flare"
+        }
+      }
+    }
+  ]
+}
