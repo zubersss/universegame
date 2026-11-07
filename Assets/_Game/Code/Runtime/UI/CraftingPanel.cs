@@ -20,6 +20,8 @@ namespace Meridian.UI
         public PlayerController player;
         public static bool AnyOpen { get; private set; }
         public bool IsOpen => root != null && root.activeSelf;
+        /// <summary>U-124: true once the panel's paper drew, false when its key is absent (null while the probe runs).</summary>
+        public bool? Paper { get; private set; }
 
         /// <summary>Tree nodes by blueprint id (tests and captures read them).</summary>
         public readonly Dictionary<string, Image> Nodes = new Dictionary<string, Image>();
@@ -79,7 +81,7 @@ namespace Meridian.UI
             root.SetActive(open);
             AnyOpen = open;
             enabled = open;
-            if (open) { FillIcons(); Refresh(); }
+            if (open) { FillIcons(); Refresh(); UiKit.SelectFirst(root.transform); } // U-124: keyboard reach, the first craftable button takes the keys
         }
 
         void Update()
@@ -99,6 +101,7 @@ namespace Meridian.UI
             var theme = UiTheme.Active;
             var canvas = UiKit.Canvas(transform, "CraftingCanvas", 111);
             var back = UiKit.ModalPanel(canvas.transform, "Crafting", new Vector2(1840f, 900f), out root);
+            UiPaper.ApplyModal(back, Meridian.Art.ArtKeys.Ui.PanelSign, ok => Paper = ok); // U-124 (B-151): the workbench on the painted wooden sign (P-50); flat until the art is on disk
             var tl = new Vector2(0f, 1f);
             UiKit.Text(back.transform, "TreeTitle", tl, new Vector2(28f, -32f), new Vector2(400f, 28f), 20, true, TextAnchor.MiddleLeft, theme.label).text = "BLUEPRINT TREE";
             UiKit.Text(back.transform, "RecipeTitle", tl, new Vector2(860f, -32f), new Vector2(400f, 28f), 20, true, TextAnchor.MiddleLeft, theme.label).text = "RECIPES";

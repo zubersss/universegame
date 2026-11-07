@@ -24,6 +24,9 @@ namespace Meridian.UI
         public Inventory inventory;
 
         public bool IsOpen => root != null && root.activeSelf;
+        /// <summary>U-124: true once the panel's paper drew, false when its key is absent (null while the probe runs).</summary>
+        public bool? Paper { get; private set; }
+
         /// <summary>True while any inventory panel is open: rig clicks pass to the panel, not the world.</summary>
         public static bool AnyOpen { get; private set; }
         public Image[] Icons { get; private set; }
@@ -80,6 +83,7 @@ namespace Meridian.UI
             var size = new Vector2(Columns * Cell + (Columns + 1) * Gap, rows * Cell + (rows + 1) * Gap + 56f);
             var center = new Vector2(0.5f, 0.5f);
             var back = UiKit.ModalPanel(canvas.transform, "Inventory", size, out root); // U-058: opaque, over a scrim
+            UiPaper.ApplyModal(back, Meridian.Art.ArtKeys.Ui.PanelInventory, ok => Paper = ok); // U-124 (B-151): inventory paper; flat until the art is on disk
             var title = UiKit.Text(back.transform, "Title", new Vector2(0f, 1f), new Vector2(Gap + 4f, -28f), new Vector2(300f, 28f), 20, true, TextAnchor.MiddleLeft, theme.label);
             title.text = "INVENTORY";
             SelectedName = UiKit.Text(back.transform, "Selected", new Vector2(1f, 1f), new Vector2(-Gap - 4f, -28f), new Vector2(420f, 28f), 18, false, TextAnchor.MiddleRight, theme.text);

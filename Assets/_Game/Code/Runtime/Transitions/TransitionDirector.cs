@@ -38,6 +38,8 @@ namespace Meridian.Transitions
         public bool Busy { get; private set; }
         /// <summary>Raised when a launch or entry finishes (SaveSystem autosaves here, Bible §10.7).</summary>
         public event System.Action Completed;
+        /// <summary>U-124: the transition that last ran (and raised Completed) was an entry onto a planet, not a launch.</summary>
+        public bool LastWasEntry { get; private set; }
         public float LastLaunchSeconds { get; private set; }
         public float LastEntrySeconds { get; private set; }
         public float LastLaunchAngle { get; private set; }
@@ -128,6 +130,7 @@ namespace Meridian.Transitions
         IEnumerator Launch()
         {
             Busy = true;
+            LastWasEntry = false;
             float t0 = Time.realtimeSinceStartup;
             var side = scenes.PlanetSide;
             var planet = side.Config;
@@ -196,6 +199,7 @@ namespace Meridian.Transitions
         IEnumerator Enter(BodyInfo body)
         {
             Busy = true;
+            LastWasEntry = true;
             float t0 = Time.realtimeSinceStartup;
             // U-091: the destination is known here: its terrain sheets (and bundle) load while the camera pushes in and the iris closes.
             Meridian.Terrain.TerrainTileSet.Prefetch(Meridian.Terrain.TerrainStreamer.MaterialsFor(body.planet));

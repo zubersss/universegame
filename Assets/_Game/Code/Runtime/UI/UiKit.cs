@@ -98,6 +98,18 @@ namespace Meridian.UI
         public static readonly Color ActionOn = new Color(0.25f, 0.55f, 0.85f, 1f), ActionOff = new Color(0.14f, 0.15f, 0.17f, 1f);
         public static readonly Color ActionTextOn = Color.white, ActionTextOff = new Color(1f, 1f, 1f, 0.28f);
 
+        /// <summary>U-124 (keyboard reach): selects `preferred` when it can act, else the first interactable control under `root`, so
+        /// the arrows walk a panel the moment it opens and Enter presses. Runs on open only (the search allocates).</summary>
+        public static Selectable SelectFirst(Transform root, Selectable preferred = null)
+        {
+            var es = UnityEngine.EventSystems.EventSystem.current;
+            if (es == null || root == null) return null;
+            if (preferred != null && preferred.isActiveAndEnabled && preferred.IsInteractable()) { es.SetSelectedGameObject(preferred.gameObject); return preferred; }
+            foreach (var s in root.GetComponentsInChildren<Selectable>(false))
+                if (s.IsInteractable()) { es.SetSelectedGameObject(s.gameObject); return s; }
+            return null;
+        }
+
         /// <summary>A full-screen scrim (blocks clicks to the world) with an opaque, framed panel centred on it. Returns the panel.</summary>
         public static Image ModalPanel(Transform canvas, string name, Vector2 size, out GameObject root)
         {

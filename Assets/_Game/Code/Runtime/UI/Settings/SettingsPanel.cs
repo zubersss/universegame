@@ -32,6 +32,11 @@ namespace Meridian.UI
         public Text MasterLabel { get; private set; }
         public Text MusicLabel { get; private set; }
         public Text SfxLabel { get; private set; }
+        /// <summary>U-124: true once the settings paper drew, false when its key is absent (null while the probe runs).</summary>
+        public bool? Paper { get; private set; }
+        /// <summary>U-124: B-151's Film switch left of the FILM EFFECTS row (hidden until `ui/hud/film_switch` loads).</summary>
+        public Image FilmSwitch { get; private set; }
+        Sprite switchOff, switchOn;
 
         /// <summary>The panel's size at 1080p (the 9-slice frame stretches to it when it arrives).</summary>
         public static readonly Vector2 Size = new Vector2(1180f, 860f);
@@ -64,6 +69,26 @@ namespace Meridian.UI
             p.KeysText = UiKit.Text(t, "Keys", new Vector2(0.5f, 0.5f), new Vector2(0f, -205f), new Vector2(1080f, 170f), 15, false, TextAnchor.UpperCenter, theme.text);
             p.KeysText.horizontalOverflow = HorizontalWrapMode.Wrap; // OnFoot alone is a long line
             p.KeysText.text = KeyList(actions);
+
+            // U-124 (B-151): the settings paper (its teal header band in the top slice: the title moves into it) and the Film switch's
+            // brass lever left of its row, `off` / `on` with the setting. Both probe their keys: absent, the flat panel stays.
+            UiPaper.ApplyModal(panel, Meridian.Art.ArtKeys.Ui.PanelSettings, ok =>
+            {
+                p.Paper = ok;
+                var frame = panel.transform.parent != null ? panel.transform.parent.GetComponent<Image>() : null;
+                if (!ok || frame == null || frame.sprite == null) return;
+                float top = frame.sprite.border.w;
+                title.rectTransform.anchoredPosition = new Vector2(0f, Size.y * 0.5f + top * UiPaper.BorderReach - top * 0.5f);
+            });
+            p.FilmSwitch = UiKit.Panel(p.FilmButton.transform, "FilmSwitch", new Vector2(0f, 0.5f), new Vector2(-48f, 0f), new Vector2(48f, 72f), Color.white);
+            p.FilmSwitch.preserveAspect = true;
+            p.FilmSwitch.enabled = false;
+            UiPaper.LoadParts(p.FilmSwitch, Meridian.Art.ArtKeys.Ui.FilmSwitch, parts =>
+            {
+                parts.TryGetValue("off", out p.switchOff);
+                parts.TryGetValue("on", out p.switchOn);
+                p.Refresh();
+            });
 
             p.BackButton = UiKit.Button(t, "BACK", new Vector2(0f, -360f), back);
             Chain(p.FilmButton, p.MasterDown, p.MasterUp, p.MusicDown, p.MusicUp, p.SfxDown, p.SfxUp, p.BackButton);
@@ -116,6 +141,8 @@ namespace Meridian.UI
         {
             var ft = FilmButton.GetComponentInChildren<Text>();
             if (ft != null) ft.text = FilmLabel();
+            var lever = GameSettings.FilmEffects ? switchOn : switchOff; // U-124: the lever follows the setting
+            if (FilmSwitch != null) { FilmSwitch.sprite = lever; FilmSwitch.enabled = lever != null; }
             MasterLabel.text = "MASTER VOLUME   " + GameSettings.Percent(GameSettings.MasterVolume);
             MusicLabel.text = "MUSIC VOLUME   " + GameSettings.Percent(GameSettings.MusicVolume);
             SfxLabel.text = "SFX VOLUME   " + GameSettings.Percent(GameSettings.SfxVolume);

@@ -61,6 +61,9 @@ namespace Meridian.EditorTools
             /// <summary>U-104 (B-121): a sheet of named parts (rects bottom-left + pivots, rig-set style: ui/hud/gauges) sliced by RigSetBuilder.SliceIfParts.</summary>
             public Meridian.Flora.RigSet.Part[] parts;
             public bool HasParts => parts != null && parts.Length > 0;
+            /// <summary>U-124 (contract §11.6, B-151): a 9-slice panel's margins, `"slice": [l, t, r, b]` px in from each edge.</summary>
+            public int[] slice;
+            public bool HasSlice => slice != null && slice.Length == 4;
             public bool IsV3 => style == "v3";
             /// <summary>A frame sheet (frames &gt; 0); a v3 sidecar without frames describes a single image.</summary>
             public bool IsSheet => frames > 0 && frame_width > 0 && frame_height > 0 && columns > 0;
@@ -310,10 +313,22 @@ namespace Meridian.EditorTools
             s.spriteMeshType = tiles || disc ? SpriteMeshType.FullRect : SpriteMeshType.Tight;
             s.spriteAlignment = (int)SpriteAlignment.Custom;
             s.spritePivot = pivot;
+            // U-124 (contract §11.6): a 9-slice panel's border from the json's "slice": [l, t, r, b] (a single image only; a sheet's
+            // frames keep zero borders). A sliced sprite takes the full-rect mesh: a tight mesh cannot stretch its centre.
+            s.spriteBorder = !multiple && sheet != null && sheet.HasSlice ? BorderFromSlice(sheet.slice) : Vector4.zero;
+            if (!multiple && sheet != null && sheet.HasSlice) s.spriteMeshType = SpriteMeshType.FullRect;
             s.spriteMode = multiple ? (int)SpriteImportMode.Multiple : (int)SpriteImportMode.Single;
             ti.SetTextureSettings(s);
             ti.spriteImportMode = multiple ? SpriteImportMode.Multiple : SpriteImportMode.Single;
             return true;
+        }
+
+        /// <summary>U-124: contract §11.6's `"slice": [left, top, right, bottom]` (px in from each edge) as Unity's Sprite.border
+        /// (left, bottom, right, top); zero for a missing or malformed slice. Pure.</summary>
+        public static Vector4 BorderFromSlice(int[] slice)
+        {
+            if (slice == null || slice.Length != 4) return Vector4.zero;
+            return new Vector4(Mathf.Max(0, slice[0]), Mathf.Max(0, slice[3]), Mathf.Max(0, slice[2]), Mathf.Max(0, slice[1]));
         }
 
         /// <summary>P-48: a frame sheet that tiles (`"tile": true` with frames: the ground and floe strips) repeats in x only. Pure.</summary>

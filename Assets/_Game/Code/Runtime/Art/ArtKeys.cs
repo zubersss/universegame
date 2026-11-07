@@ -42,6 +42,13 @@ namespace Meridian.Art
             public const string HudGauges = "ui/hud/gauges";
             public const string EscapeLine = "ui/hud/escape_line";
             public const string EscapeSign = "ui/hud/escape_sign";
+            /// <summary>U-124 (B-151, contract §11.6): the paper and sign panels as 9-slice sprites ("slice" in the json).</summary>
+            public const string PanelPause = "ui/panels/pause", PanelSettings = "ui/panels/settings", PanelInventory = "ui/panels/inventory",
+                PanelSign = "ui/panels/sign", PanelScroll = "ui/panels/scroll";
+            /// <summary>U-124: the Film-effects switch, a parts sheet with `off` and `on`.</summary>
+            public const string FilmSwitch = "ui/hud/film_switch";
+            /// <summary>U-124: a planet's intertitle card (≤ 1920×540), e.g. ui/titlecards/mercury.</summary>
+            public static string TitleCard(Meridian.Planets.PlanetId planet) => "ui/titlecards/" + planet.ToString().ToLowerInvariant();
         }
 
         public static class Terrain

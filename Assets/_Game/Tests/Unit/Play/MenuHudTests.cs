@@ -180,6 +180,117 @@ namespace Meridian.Tests
             }
         }
 
+        static IEnumerator Tap(UnityEngine.InputSystem.Keyboard keys, UnityEngine.InputSystem.Key key)
+        {
+            UnityEngine.InputSystem.InputSystem.QueueStateEvent(keys, new UnityEngine.InputSystem.LowLevel.KeyboardState(key));
+            yield return null;
+            UnityEngine.InputSystem.InputSystem.QueueStateEvent(keys, new UnityEngine.InputSystem.LowLevel.KeyboardState());
+            yield return null;
+        }
+
+        /// <summary>U-124: Esc / Tab / N / B open and close the pause menu, the inventory, the catalogue and the crafting panel from a
+        /// keyboard; each menu starts the keys on its first control; the paper draws 9-sliced exactly when B-151's file is on disk
+        /// (until then the flat fill stays and nothing is logged); a title card asked for a planet shows only when its art exists and
+        /// leaves after its 2.4 s.</summary>
+        [UnityTest]
+        public IEnumerator PaperPanelsOpenAndCloseFromTheKeyboard()
+        {
+            MenuController.ShowOnBootOverride = true;
+            SceneDirector director = null;
+            yield return Boot(d => director = d);
+            var menu = MenuController.Instance;
+            var keys = UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>("U124Keys");
+            try
+            {
+                var es = UnityEngine.EventSystems.EventSystem.current;
+                Assert.NotNull(es, "an EventSystem for the keyboard");
+                Assert.AreEqual(menu.NewButton.gameObject, es.currentSelectedGameObject, "the title menu starts the keys on NEW");
+                menu.NewButton.onClick.Invoke();
+                yield return null;
+
+                yield return Tap(keys, UnityEngine.InputSystem.Key.Escape);
+                Assert.IsTrue(menu.PauseOpen, "Esc pauses");
+                Assert.AreEqual(menu.ResumeButton.gameObject, es.currentSelectedGameObject, "the pause menu starts on RESUME");
+                Assert.AreEqual(menu.PauseCard.transform, menu.ResumeButton.transform.parent, "the pause buttons sit on the paper card");
+                yield return Tap(keys, UnityEngine.InputSystem.Key.Escape);
+                Assert.IsFalse(menu.PauseOpen, "Esc again resumes");
+                Assert.AreEqual(1f, Time.timeScale);
+
+                var inventory = Object.FindAnyObjectByType<InventoryPanel>();
+                var catalogue = Object.FindAnyObjectByType<CataloguePanel>();
+                var crafting = Object.FindAnyObjectByType<CraftingPanel>();
+                Assert.NotNull(inventory, "the inventory panel in the game");
+                Assert.NotNull(catalogue, "the catalogue panel in the game");
+                Assert.NotNull(crafting, "the crafting panel in the game");
+                yield return Tap(keys, UnityEngine.InputSystem.Key.Tab);
+                Assert.IsTrue(inventory.IsOpen, "Tab opens the inventory");
+                yield return Tap(keys, UnityEngine.InputSystem.Key.Tab);
+                Assert.IsFalse(inventory.IsOpen, "Tab closes it");
+                yield return Tap(keys, UnityEngine.InputSystem.Key.N);
+                Assert.IsTrue(catalogue.IsOpen, "N opens the catalogue");
+                var picked = es.currentSelectedGameObject;
+                Assert.NotNull(picked, "the catalogue starts the keys on a planet");
+                Assert.NotNull(picked.GetComponent<UnityEngine.UI.Selectable>());
+                yield return Tap(keys, UnityEngine.InputSystem.Key.N);
+                Assert.IsFalse(catalogue.IsOpen, "N closes it");
+                yield return Tap(keys, UnityEngine.InputSystem.Key.B);
+                Assert.IsTrue(crafting.IsOpen, "B opens the crafting panel");
+                yield return Tap(keys, UnityEngine.InputSystem.Key.B);
+                Assert.IsFalse(crafting.IsOpen, "B closes it");
+
+                // The paper: every probe answers, and it draws exactly when the art is on disk.
+                float until = Time.realtimeSinceStartup + 10f;
+                while ((!menu.PausePaper.HasValue || !menu.Settings.Paper.HasValue || !inventory.Paper.HasValue || !catalogue.Paper.HasValue || !crafting.Paper.HasValue)
+                       && Time.realtimeSinceStartup < until) yield return null;
+                void Paper(string what, bool? drew, string key)
+                {
+                    bool onDisk = File.Exists($"Assets/_Game/Art/{key}_color.png");
+                    Assert.IsTrue(drew.HasValue, $"{what}: the probe for {key} answered");
+                    Assert.AreEqual(onDisk, drew.Value, $"{what}: the paper draws exactly when {key} is on disk");
+                }
+                Paper("pause", menu.PausePaper, Meridian.Art.ArtKeys.Ui.PanelPause);
+                Paper("settings", menu.Settings.Paper, Meridian.Art.ArtKeys.Ui.PanelSettings);
+                Paper("inventory", inventory.Paper, Meridian.Art.ArtKeys.Ui.PanelInventory);
+                Paper("catalogue", catalogue.Paper, Meridian.Art.ArtKeys.Ui.PanelScroll);
+                Paper("crafting", crafting.Paper, Meridian.Art.ArtKeys.Ui.PanelSign);
+                if (menu.PausePaper == true)
+                {
+                    Assert.AreEqual(UnityEngine.UI.Image.Type.Sliced, menu.PauseCard.type, "the pause card 9-slices");
+                    Assert.AreNotEqual(Vector4.zero, menu.PauseCard.sprite.border, "with the json's border");
+                }
+                else Assert.AreEqual(Color.clear, menu.PauseCard.color, "no art: the pause card stays clear over the flat fill");
+
+                // A title card: shown only when its art exists, gone after its 2.4 s.
+                var cards = menu.TitleCards;
+                Assert.NotNull(cards, "the title cards ride with the menus");
+                cards.Show(Meridian.Planets.PlanetId.Mercury);
+                string cardKey = Meridian.Art.ArtKeys.Ui.TitleCard(Meridian.Planets.PlanetId.Mercury);
+                bool cardOnDisk = File.Exists($"Assets/_Game/Art/{cardKey}_color.png");
+                until = Time.realtimeSinceStartup + 5f;
+                while (cardOnDisk && cards.Showing == null && Time.realtimeSinceStartup < until) yield return null;
+                Assert.AreEqual(cardKey, cards.LastAsked);
+                if (cardOnDisk)
+                {
+                    Assert.AreEqual(cardKey, cards.Showing, "the Mercury card slides in");
+                    until = Time.realtimeSinceStartup + TitleCard.TotalSeconds + 2f;
+                    while (cards.Showing != null && Time.realtimeSinceStartup < until) yield return null;
+                    Assert.IsNull(cards.Showing, "and leaves after its slide");
+                    Assert.IsFalse(cards.Card.enabled);
+                }
+                else
+                {
+                    yield return null; yield return null;
+                    Assert.IsNull(cards.Showing, "no card art: nothing shows");
+                }
+                yield return null;
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                if (keys != null) UnityEngine.InputSystem.InputSystem.RemoveDevice(keys);
+            }
+        }
+
         [UnityTest]
         public IEnumerator SideHudShowsHealthAndEscapeLine()
         {

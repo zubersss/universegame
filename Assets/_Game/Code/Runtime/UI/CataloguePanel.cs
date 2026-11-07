@@ -22,6 +22,8 @@ namespace Meridian.UI
         public PlayerController player;
         public static bool AnyOpen { get; private set; }
         public bool IsOpen => root != null && root.activeSelf;
+        /// <summary>U-124: true once the panel's paper drew, false when its key is absent (null while the probe runs).</summary>
+        public bool? Paper { get; private set; }
         public PlanetId Shown { get; private set; } = PlanetId.Earth;
 
         /// <summary>Planet completion labels and the entry name labels (tests and captures read them).</summary>
@@ -75,6 +77,7 @@ namespace Meridian.UI
                 var here = FindAnyObjectByType<PlanetSideRoot>();
                 if (here != null && here.Config != null) Shown = here.Config.id;
                 Redraw();
+                UiKit.SelectFirst(root.transform, planetButtons.TryGetValue(Shown, out var shownButton) ? shownButton : null); // U-124: keyboard reach, the arrows walk the planets
             }
             else ReleaseCreatureIcons();
         }
@@ -101,6 +104,7 @@ namespace Meridian.UI
             var theme = UiTheme.Active;
             var canvas = UiKit.Canvas(transform, "CatalogueCanvas", 113);
             var back = UiKit.ModalPanel(canvas.transform, "Catalogue", new Vector2(1500f, 860f), out root);
+            UiPaper.ApplyModal(back, Meridian.Art.ArtKeys.Ui.PanelScroll, ok => Paper = ok); // U-124 (B-151): the survey record on the parchment scroll (P-50); flat until the art is on disk
             var tl = new Vector2(0f, 1f);
             header = UiKit.Text(back.transform, "Header", tl, new Vector2(28f, -32f), new Vector2(1200f, 28f), 20, true, TextAnchor.MiddleLeft, theme.text);
 

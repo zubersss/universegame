@@ -42,6 +42,13 @@ namespace Meridian.UI
         public Button ResumeButton { get; private set; }
         public Button SaveButton { get; private set; }
         public Button MainMenuButton { get; private set; }
+        /// <summary>U-124: the paper card behind the pause menu's title and buttons (clear until B-151's ui/panels/pause is on disk).</summary>
+        public Image PauseCard { get; private set; }
+        public static readonly Vector2 PauseCardSize = new Vector2(640f, 520f);
+        /// <summary>U-124: true once the pause paper drew, false when its key is absent (null while the probe runs).</summary>
+        public bool? PausePaper { get; private set; }
+        /// <summary>U-124: the planet title cards (the intertitle slide-in after each entry).</summary>
+        public TitleCard TitleCards { get; private set; }
 
         GameObject mainPanel, pausePanel;
         InputAction pause;
@@ -54,6 +61,8 @@ namespace Meridian.UI
             if (actions == null) actions = MeridianInput.Build();
             EnsureEventSystem();
             Build();
+            TitleCards = GetComponent<TitleCard>();
+            if (TitleCards == null) TitleCards = gameObject.AddComponent<TitleCard>(); // U-124: it finds the TransitionDirector in Start
         }
 
         void OnDestroy()
@@ -242,13 +251,18 @@ namespace Meridian.UI
             mainPanel.SetActive(false);
 
             pausePanel = UiKit.Panel(canvas.transform, "Pause", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(4000f, 4000f), theme.panel).gameObject;
-            var paused = UiKit.Text(pausePanel.transform, "Title", new Vector2(0.5f, 0.5f), new Vector2(0f, 160f), new Vector2(900f, 90f), 56, true, TextAnchor.MiddleCenter);
+            // U-124: the pause menu sits on a paper card (B-151's ui/panels/pause, 9-slice) once the art is on disk; clear until then.
+            PauseCard = UiKit.Panel(pausePanel.transform, "PauseCard", new Vector2(0.5f, 0.5f), new Vector2(0f, -20f), PauseCardSize, Color.clear);
+            var card = PauseCard.transform;
+            var paused = UiKit.Text(card, "Title", new Vector2(0.5f, 0.5f), new Vector2(0f, 180f), new Vector2(560f, 90f), 56, true, TextAnchor.MiddleCenter);
             paused.text = "PAUSED";
-            ResumeButton = UiKit.Button(pausePanel.transform, "RESUME", new Vector2(0f, 40f), Resume);
-            SaveButton = UiKit.Button(pausePanel.transform, "SAVE", new Vector2(0f, -40f), SaveNow);
-            PauseSettingsButton = UiKit.Button(pausePanel.transform, "SETTINGS", new Vector2(0f, -120f), OpenSettings); // U-102: the Film effects toggle moved in there
-            MainMenuButton = UiKit.Button(pausePanel.transform, "MAIN MENU", new Vector2(0f, -200f), ToMainMenu);
+            paused.font = theme.TitleFace; paused.fontStyle = FontStyle.Normal; // U-124: titles in Limelight (D-090)
+            ResumeButton = UiKit.Button(card, "RESUME", new Vector2(0f, 60f), Resume);
+            SaveButton = UiKit.Button(card, "SAVE", new Vector2(0f, -20f), SaveNow);
+            PauseSettingsButton = UiKit.Button(card, "SETTINGS", new Vector2(0f, -100f), OpenSettings); // U-102: the Film effects toggle moved in there
+            MainMenuButton = UiKit.Button(card, "MAIN MENU", new Vector2(0f, -180f), ToMainMenu);
             pausePanel.SetActive(false);
+            UiPaper.Apply(PauseCard, Meridian.Art.ArtKeys.Ui.PanelPause, ok => PausePaper = ok);
 
             Settings = SettingsPanel.Build(canvas.transform, actions, CloseSettings);
         }

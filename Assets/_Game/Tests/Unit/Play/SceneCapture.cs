@@ -2968,5 +2968,100 @@ namespace Meridian.Tests
                 Meridian.View2D.CartoonStage.Enabled = wasCartoon;
             }
         }
+
+        /// <summary>
+        /// U-124 (B-151): the C3 UI at 1080p in reports/unity/u124/: each planet's title card over its own surface, held centred
+        /// (titlecard_mars, titlecard_mercury, titlecard_earth), then on Earth the pause card, the settings paper with the Film switch,
+        /// the inventory paper, the catalogue on the scroll and the crafting panel on the sign. The overlay canvases draw through the
+        /// side camera (a camera render never includes a screen-space overlay canvas).
+        /// </summary>
+        [UnityTest, Timeout(240000)]
+        public IEnumerator CaptureU124Ui()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            var canvases = new System.Collections.Generic.List<Canvas>();
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
+                var menu = Meridian.UI.MenuController.Instance;
+                Assert.NotNull(menu, "the menus in Core");
+                var dir = "coordination/reports/unity/u124";
+                Directory.CreateDirectory(dir);
+
+                void Overlays(Camera cam)
+                {
+                    foreach (var c in UnityEngine.Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                    {
+                        if (c.renderMode == RenderMode.ScreenSpaceOverlay) { canvases.Add(c); c.renderMode = RenderMode.ScreenSpaceCamera; c.planeDistance = 1f; }
+                        if (canvases.Contains(c)) c.worldCamera = cam;
+                    }
+                }
+                IEnumerator Shot(Camera cam, string label)
+                {
+                    Overlays(cam);
+                    yield return null;
+                    yield return Save(cam, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                }
+
+                var cards = menu.TitleCards;
+                foreach (var p in new[] { Meridian.Planets.PlanetId.Mars, Meridian.Planets.PlanetId.Mercury, Meridian.Planets.PlanetId.Earth })
+                {
+                    yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(p));
+                    var side = director.PlanetSide;
+                    timeout = Time.realtimeSinceStartup + 20f;
+                    while (!side.terrain.IsSettled && Time.realtimeSinceStartup < timeout) yield return null;
+                    side.creatures.autoSpawn = false;
+                    side.creatures.DespawnAll();
+                    if (side.hazards != null) side.hazards.enabled = false;
+                    timeout = Time.realtimeSinceStartup + 8f;
+                    while (side.cartoon != null && side.cartoon.Layers != null && side.cartoon.Layers.placeholders.Contains(true) && Time.realtimeSinceStartup < timeout) yield return null;
+                    cards.Show(p);
+                    timeout = Time.realtimeSinceStartup + 5f;
+                    while (cards.Showing == null && Time.realtimeSinceStartup < timeout) yield return null;
+                    cards.Seek(Meridian.UI.TitleCard.SlideSeconds); // the held frame, centred
+                    var label = "titlecard_" + p.ToString().ToLowerInvariant();
+                    yield return Shot(side.sideCamera, label);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u124 {label}: showing {cards.Showing ?? "none (no card art)"}, size {cards.Card.rectTransform.sizeDelta}, x {cards.Card.rectTransform.anchoredPosition.x:F0}");
+                }
+
+                var earth = director.PlanetSide;
+                var cam = earth.sideCamera;
+                var inventory = UnityEngine.Object.FindAnyObjectByType<Meridian.UI.InventoryPanel>();
+                var catalogue = UnityEngine.Object.FindAnyObjectByType<Meridian.UI.CataloguePanel>();
+                var crafting = UnityEngine.Object.FindAnyObjectByType<Meridian.UI.CraftingPanel>();
+                timeout = Time.realtimeSinceStartup + 10f;
+                while ((!menu.PausePaper.HasValue || !menu.Settings.Paper.HasValue || (inventory != null && !inventory.Paper.HasValue)
+                        || (catalogue != null && !catalogue.Paper.HasValue) || (crafting != null && !crafting.Paper.HasValue)) && Time.realtimeSinceStartup < timeout) yield return null;
+                TestContext.Out.WriteLine($"[MERIDIAN] u124 paper: pause {menu.PausePaper}, settings {menu.Settings.Paper}, inventory {inventory?.Paper}, scroll {catalogue?.Paper}, sign {crafting?.Paper}; film switch {(menu.Settings.FilmSwitch.enabled ? menu.Settings.FilmSwitch.sprite.name : "none")}");
+
+                menu.OpenPause();
+                yield return Shot(cam, "pause");
+                menu.OpenSettings();
+                yield return Shot(cam, "settings");
+                menu.CloseSettings();
+                menu.Resume();
+                if (inventory != null) { inventory.SetOpen(true); yield return Shot(cam, "inventory"); inventory.SetOpen(false); }
+                if (catalogue != null) { catalogue.SetOpen(true); yield return Shot(cam, "catalogue_scroll"); catalogue.SetOpen(false); }
+                if (crafting != null) { crafting.SetOpen(true); yield return Shot(cam, "crafting_sign"); crafting.SetOpen(false); }
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                foreach (var c in canvases) if (c != null) { c.renderMode = RenderMode.ScreenSpaceOverlay; c.worldCamera = null; }
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+            }
+        }
     }
 }
