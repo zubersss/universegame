@@ -27,6 +27,8 @@ namespace Meridian.View2D
         public ParallaxLayers Layers { get; private set; }
         /// <summary>U-097: the planet's rigged flora (placeholder set until B-112).</summary>
         public Meridian.Flora.FloraRigs Flora { get; private set; }
+        /// <summary>U-100: the cartoon ground placeholder over the block faces.</summary>
+        public GroundStrip Ground { get; private set; }
         public SpriteCharacterView Surveyor { get; private set; }
         public bool Active { get; private set; }
 
@@ -34,6 +36,9 @@ namespace Meridian.View2D
         public void ConfigureFor(PlanetSideRoot side, Meridian.Planets.PlanetConfig config, float surfaceDatum)
         {
             Active = Enabled && config != null && Converted(config.id);
+            // U-100: every 3D model (props, the Pilgrim) wears the flat silhouette on the cartoon path; off, their own materials.
+            Meridian.Art.ModelView.CartoonMaterial = Active && Meridian.Rendering.ArtMaterials.Active != null ? Meridian.Rendering.ArtMaterials.Active.cartoon : null;
+            if (Ground != null) Ground.gameObject.SetActive(Active);
             // The 3D scenery (stage layers, depth bands, sky backdrop) runs only off the cartoon path; each has its own object.
             SetActive(side.stage, !Active, side);
             SetActive(side.depthBands, !Active, side);
@@ -61,6 +66,11 @@ namespace Meridian.View2D
             Flora.view = cam; Flora.player = side.player != null ? side.player.transform : null; Flora.terrain = side.terrain;
             Flora.Load("flora/" + config.id.ToString().ToLowerInvariant() + "/rigset");
             Flora.Populate(FloraCount, FloraSpacing, side.spawnX + 0.5f, config.id.GetHashCode() * 31 + 7);
+            if (Ground == null) { var ggo = new GameObject("CartoonGround"); ggo.transform.SetParent(transform, false); Ground = ggo.AddComponent<GroundStrip>(); }
+            Ground.gameObject.SetActive(true);
+            Ground.view = cam; Ground.terrain = side.terrain;
+            Ground.Load();
+            if (Meridian.Art.ModelView.CartoonMaterial != null) foreach (var mv in side.GetComponentsInChildren<Meridian.Art.ModelView>(true)) mv.Wear(Meridian.Art.ModelView.CartoonMaterial);
 
             if (side.player != null && Surveyor == null)
             {

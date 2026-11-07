@@ -1,0 +1,6 @@
+{
+  "key": "terrain/earth/ground_strip", "style": "v3",
+  "frame_width": 64, "frame_height": 128, "columns": 8, "frames": 8, "gutter": 0,
+  "fps": 12, "pivot": [0.5, 1.0], "ppu": 64,
+  "animations": []
+}

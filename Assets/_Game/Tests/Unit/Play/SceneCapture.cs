@@ -976,6 +976,17 @@ namespace Meridian.Tests
                 yield return Save(side.sideCamera, $"{name}_earth_c0_film_on");
                 File.Copy($"logs/capture_{name}_earth_c0_film_on.png", $"{dir}/earth_c0_film_on.png", true);
                 Meridian.Core.GameSettings.FilmEffects = film;
+                // U-100: the cartoon ground after two digs beside the surveyor: the strip follows the dug column heights.
+                if (side.rig != null && side.player != null)
+                {
+                    var p = side.player.transform.position;
+                    side.rig.Dig(new Vector2(p.x - 2.5f, p.y - 0.5f));
+                    side.rig.Dig(new Vector2(p.x - 2.5f, p.y - 1.5f));
+                    for (int i = 0; i < 20; i++) yield return null;
+                    Debug.Log($"[MERIDIAN] c0 ground: strip ready {(side.cartoon != null && side.cartoon.Ground != null && side.cartoon.Ground.Ready)}, columns {(side.cartoon != null && side.cartoon.Ground != null ? side.cartoon.Ground.Columns : 0)}");
+                    yield return Save(side.sideCamera, $"{name}_earth_c0_ground");
+                    File.Copy($"logs/capture_{name}_earth_c0_ground.png", $"{dir}/earth_c0_ground.png", true);
+                }
                 side.dayNight.Override = null;
             }
             finally { Meridian.View2D.CartoonStage.Enabled = false; }

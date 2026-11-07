@@ -22,6 +22,8 @@ namespace Meridian.Rendering
         public Material meshLitEmissive;
         /// <summary>U-073: MERIDIAN/TerrainBlocks (block mesh, Texture2DArray per planet); referenced here so builds keep the shader.</summary>
         public Material terrainBlocks;
+        /// <summary>U-100: the flat ink-outlined silhouette every 3D model wears on the cartoon path (MERIDIAN/CartoonSilhouette).</summary>
+        public Material cartoon;
         /// <summary>U-073 / B-080: block material textures per planet (ArtImporter fills it; the arrays are built at runtime).</summary>
         public List<BlockTexture> blockTextures = new List<BlockTexture>();
 

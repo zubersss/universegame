@@ -98,7 +98,8 @@ namespace Meridian.Art
             Instance = Instantiate(prefab, transform, false);
             Instance.transform.localPosition = Vector3.zero;
             renderers = Instance.GetComponentsInChildren<Renderer>();
-            if (material != null) foreach (var r in renderers) r.sharedMaterial = material;
+            var wear = CartoonMaterial != null ? CartoonMaterial : material; // U-100: the cartoon path dresses every model in one silhouette material
+            if (wear != null) foreach (var r in renderers) r.sharedMaterial = wear;
             block = new MaterialPropertyBlock();
             SetUpLods();
             if (clips != null && clips.Count > 0) BuildGraph(); // static props: no animator, no graph
@@ -208,6 +209,16 @@ namespace Meridian.Art
         Color tint = Color.white;
         bool shadows = true;
         static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+
+        /// <summary>U-100: set while the cartoon path is on: every model loads with this material instead of its own (CartoonStage).</summary>
+        public static Material CartoonMaterial;
+
+        /// <summary>U-100: swaps every renderer's material now (models that loaded before the switch).</summary>
+        public void Wear(Material m)
+        {
+            if (renderers == null || m == null) return;
+            foreach (var r in renderers) r.sharedMaterial = m;
+        }
 
         /// <summary>U-090: a colour multiplier on every renderer (the stage haze tint); kept through the hit flash.</summary>
         public void SetTint(Color c)
