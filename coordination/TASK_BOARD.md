@@ -141,11 +141,12 @@ Files: Assets/_Game/Shaders/IrisWipe.shader, Code/Runtime/Transitions/
 Depends: —
 Lead notes: Cycle 237: DONE (d577013; check 16:52–16:55: compile 0/0, EditMode 275/275 incl. IrisTests, PlayMode 0 failed; TransitionTests launch 1.00 s / entry 1.07 s with the iris, the v3 white fades retired; iris_strip.png: 6 frames closing on the surveyor, 4 px soft edge; ConkOut uses it).
 
-### U-097 · UNITY · Ready · C0
+### U-097 · UNITY · Done · C0
 Goal: Rubber-hose rig path for flora and props (contract §11.3): build sprite bones + skinning (Unity 2D Animation) from `rigset.json`; one texture and one animator controller per planet's set; sway idle on the planet beat, sampled stepped at 12 Hz; staggered start phases; face swaps (blink, yawn, giggle); react within 3 m (turn to look); the 40-animated-object cap with distant flora falling back to a 3-frame idle or a static frame.
 Accept: RigFloraTests: 300 plants share 1 texture + 1 controller; ≤ 40 animate at full rate; phases differ; the react fires within 3 m; CPU ≤ 1.0 ms for 300 plants in the profile.
 Files: Code/Runtime/Flora/, Packages/manifest.json (com.unity.2d.animation, pinned, logged), Tests/
 Depends: —
+Lead notes: Cycle 238: DONE (b71d396; check 17:55–17:59 compile 0/0, EditMode 279/279 incl. RigSetTests 4, PlayMode 15/15; RigFloraTests: 300 plants on 1 sheet + 1 controller, 40 full / 160 cheap, phases differ, react within 3 m, loop p99 0.74 ms ≤ 1.0; the C0 capture shows 48 B-112 snoozles around the camp; com.unity.2d.animation 16.0.1 pinned and credited). Two importer fixes on the way (slicer wiped rig parts; typed sprite-list probe) noted.
 
 ### U-098 · UNITY · Ready · C0
 Goal: Assemble the C0 style-test scene with BLENDER's art (B-111..B-115): the surveyor, one face plant (several instances), one critter, the painted 3-layer Earth background, the film pass, the iris transition from space; a 20 s capture video-strip and stills; profile it.
@@ -153,12 +154,12 @@ Accept: `reports/unity/c0_<date>/` with stills (idle, walk, jump/land, plant rea
 Files: Scenes/, reports/unity/c0_<date>/
 Depends: U-094, U-095, U-096, U-097, B-111, B-112, B-113, B-114, B-115
 
-### U-099 · UNITY · Ready · C0
+### U-099 · UNITY · Done · C0
 Goal: P-38 (U-093 check 3): a fleeing or chasing creature that meets a wall it cannot climb (camp props, a cliff face) stops dead with its legs still running. In `CreatureDirector.Tick`: Flee turns away along the wall or hops a 1-tile step (reuse the Wander cliff turn); Chase waits at the wall and never bumps through it; the legs stop when the body does.
 Accept: PlayMode `CreatureWallTests`: a wolf fleeing into the camp's crate stack turns or hops within 0.5 s and keeps moving; a chasing wolf blocked by a 2-tile wall stays put with a still idle; CreatureTests + WardenPlayTests unchanged (one check; note the Warden flake count).
 Files: Assets/_Game/Code/Runtime/Creatures/CreatureDirector.cs, Tests/Play/CreatureWallTests.cs
 Depends: —
-Lead notes: Cycle 235. Lock-free after U-095; small. Report the WardenPlayTests result of every check until it passes 5 in a row.
+Lead notes: Cycle 235. Lock-free after U-095; small. Report the WardenPlayTests result of every check until it passes 5 in a row. Cycle 238: DONE (b71d396; CreatureWallTests 17:56 green: fleeing stag turns in 0.32 s at the smelter, blocked chasing wolf idles with no bump; the 17:52 red was the stuck timer read from velocity, fixed 63f7f1e to position-over-time). The Warden flake was a real bug (sentinels moved by MovePosition from Update), fixed 1120920 → D-095; keep the 5-in-a-row count going (2 so far).
 
 ### U-100 · UNITY · Ready · C0
 Goal: Cartoon ground placeholder for the C0 scene so the style test reads cartoon edge to edge: a flat Earth-palette dirt strip with a thick ink top line and a one-tone grass lip (`Placeholders/terrain/earth/ground_strip.png`, 512×128 tile, PPU 64) drawn over the 3D terrain blocks on Earth while `CartoonStage.Enabled` (the blocks stay for collision and dig; the strip follows the dug column heights at 1 m steps). The camp props and the Pilgrim get a flat ink-outlined silhouette tint (one material swap, `ArtMaterials.Cartoon`), no new art.
@@ -834,23 +835,26 @@ Files: blender/sources/characters/surveyor_v3.blend, Assets/_Game/Art/characters
 Depends: B-110 (step 2 only)
 Lead notes: Cycle 233: STEP 1 OK (7915b76, review_b111_surveyor_design_preview.png 12:02). §9.8 pass: fishbowl helmet + plumb-bob antenna + meridian stripe + compass badge + float pack with air hose is ours; pie-cut eyes, gloves and hose limbs are era conventions; nothing from the forbidden list. §9.7 pass on ink, cel, palette, sheet, json. Expressions read at 1x (eye-pop and dizzy stars best). Keep every design choice as drawn. Go to step 2 now: idle 10, walk 12, jump 8, land 8, look_camera ≤ 12 at 12 fps; body ≈ 128 px to the helmet top at 1x (the antenna may add up to 16 px); the float pack must swing behind every move and the air hose must lag it (the secondary motion the sheet promises). Step 2 is a heavy render: gate 1.5 GB, no Editor (D-091). Cycle 234: STEP 2 ART ACCEPTED (b5b1d29, review_b111_surveyor_side.png 15:27): idle 10 / walk 12 / jump 8 / land 8 / look_camera 12, all within caps at 12 fps; squash 0.70–1.28 with smoke puffs on land; float pack swings and the hose lags in every clip; ink 4–6 / 1.8–2.6 px; palette 100 %; sheet 1956×976. Done on UNITY's earth_c0 capture with this sheet, where LEAD checks the 128 px body height against the 16.875 m frame. Cycle 235: DONE (capture reports/unity/c0_2026-11-06/earth_c0_placeholder.png: body ≈ 128 px + antenna on the 1080 px frame, idle plays at 12 fps, imports clean under v13). The clips the sheet lacks (bump, conk_out, run, fall, dash) are B-116.
 
-### B-112 · BLENDER · Ready · C0
+### B-112 · BLENDER · Done · C0
 Goal: One Earth plant with a face (original design, e.g. a yawning meadow flower with leaf hands) as a simple rig: `flora/earth/rigset` per contract §11.3, ≤ 6 bones, swaps for blink / yawn / giggle, sway idle on a 110 bpm beat with 8 % squash, react = turn to look within 3 m. Plus a 12-frame preview loop of the rig in Blender for the review sheet.
 Accept: §9.7 boxes; one texture ≤ 2048 holds every part; json validates.
 Files: blender/sources/flora/earth_rigset.blend, Assets/_Game/Art/flora/earth/
 Depends: B-110
+Lead notes: Cycle 238: DONE (2aa0303; "snoozle": a dandelion clock with a face, hose stem, mitten leaves; 10 parts on a 236×76 sheet, 5 bones ≤ 6, blink/yawn/giggle swaps, sway 12° at 110 bpm with 8 % squash, react turn_look at 3 m; json valid with the offset_m/order/slots UNITY reads). Evidence: 48 instances in reports/unity/c0_2026-11-06/earth_c0_placeholder.png (17:59) read as one family, ink consistent with the surveyor. Pipeline note (no reopen): the rig-set review sheet shows parts only; from B-118 on, put the 12-frame assembled preview loop on the review sheet too (§11.7).
 
 ### B-113 · BLENDER · Ready · C0
 Goal: One small friendly Earth critter from §7.1's roster (BLENDER picks the smallest; redraw in the style): frame-by-frame sheet `creatures/earth/<name>` with idle (8–12, rhythmic bob), walk (12), react (eye-pop, ≤ 10), bump (dizzy stars, ≤ 10). Pie-cut eyes, rubber-hose legs, ears/tail with follow-through.
 Accept: §9.7 boxes; caps; 12 fps; sheet ≤ 2048.
 Files: blender/sources/creatures/earth_<name>_v3.blend, Assets/_Game/Art/creatures/earth/<name>/
 Depends: B-110
+Lead notes: Cycle 238: ART ACCEPTED (27693eb, review_b113_earth_gull.png 17:31): "Gus", a stout egg-bodied gull with a three-feather crest, red-spotted mustard beak, hose legs; original (§9.8 pass: not any studio bird). idle 10 / walk 12 / react 8 (eye-pop) / bump 10 (dizzy spirals + stars, no X eyes) within caps at 12 fps; 54 px tall at 1x, reads; ink-behind on the small parts keeps the colour. Done on UNITY's first capture with the gull in the scene (U-098 or U-101).
 
-### B-114 · BLENDER · Ready · C0
+### B-114 · BLENDER · Done · C0
 Goal: The painted Earth plains background in 3 layers (`backgrounds/earth/plains/layer0..2`, contract §11.4: watercolour, paper texture, soft bleed, no ink, tileable, ≤ 2048×1024) + `plains.json` parallax factors, and the Earth palette strip `ui/palettes/earth/strip` (the 8 Bible §9.1 colours).
 Accept: 2× tiled preview with no seam; the surveyor placeholder pops off it at 1x (review sheet); ≤ 4 MB per PNG.
 Files: blender/sources/backgrounds/earth_plains_v3.blend (or a painted-texture script), Assets/_Game/Art/backgrounds/earth/plains/, Assets/_Game/Art/ui/palettes/earth/
 Depends: —
+Lead notes: Cycle 238: DONE (27693eb; review_b114_earth_plains.png 17:32: three watercolour layers with paper grain and soft bleed, no ink, 2× tiled with no visible seam at the centre, 2.3 / 0.6 / 0.5 MB ≤ 4 MB; the surveyor pops off the wash at 1x; plains.json + the 8-colour palette strip). In the game: the layers replaced UNITY's strips by key with no code change (earth_c0_placeholder.png 17:59). Helmet-reads-green note → D-096 / B-118.
 
 ### B-115 · BLENDER · Done · C0
 Goal: Film overlays `fx/film/grain`, `dust`, `scratches`: 512×512, seamless tile, greyscale + alpha (contract §11.6), subtle (dust ≤ 8 specks per tile, 1–2 hairline scratches).
@@ -859,12 +863,12 @@ Files: blender/scripts/gen_film_overlays.py, Assets/_Game/Art/fx/film/
 Depends: —
 Lead notes: Cycle 232: ART ACCEPTED (af18479, review_b115_film.png stamped 11:55-11:56): three 512² tiles, no visible seam at the 2×2 crossings, grain fine and even, dust 7 specks + 1 fibre, 2 scratch hairlines with breaks; reads subtle at game strength. Done on UNITY's U-095 1080p capture. Cycle 236: DONE (earth_c0_film_on.png 16:32: the three overlays tile at 1:1 with no seam, grain and dust read faint at 1080p, as specified).
 
-### B-116 · BLENDER · Ready · C0
+### B-116 · BLENDER · Done · C0
 Goal: The surveyor's missing gameplay clips on `characters/surveyor/side` (same sheet key, re-export; UNITY handoff 16:1x): `bump` (≤ 10: 0.8 m knock-back pose, dizzy stars over the helmet, settle), `conk_out` (≤ 12: wobble, eyes to spirals, slump; the iris-out starts on its last frame), then `run` (12, bigger stride and lean than walk), `fall` (8 loop, arms up, hose streaming), `dash` (6, horizontal stretch with speed lines). Bump and conk_out first: they are the two calls the game makes now.
 Accept: §9.7 boxes on the review sheet; every clip within its cap at 12 fps; sheet still ≤ 2048 (split to `side_b` with a second json if it overflows: tell UNITY in your status); json valid; peak RAM in the status.
 Files: blender/scripts/build_surveyor_v3.py, Assets/_Game/Art/characters/surveyor/
 Depends: B-111
-Lead notes: Cycle 235. After B-112 and B-113 (the plant and the critter are what C0 proves); heavy export under the gate and D-091.
+Lead notes: Cycle 235. After B-112 and B-113 (the plant and the critter are what C0 proves); heavy export under the gate and D-091. Cycle 238: DONE (27693eb; review_b111_surveyor_side.png 17:35: bump 10 with stars, conk_out 12 ending slumped with spirals, run 12 with a wider stride and lean, fall 8 loop, dash 6 with stretch and speed lines; 98 frames on one 1956×1956 sheet, new clips at 50/60/72/84/92, first 50 indices unchanged; UNITY's 17:59 capture set plays them). The 1x row on the painted layers shows the helmet reading green → D-096, B-118.
 
 ### B-117 · BLENDER · Ready · C0
 Goal: The Pilgrim ship redesigned for the style (§9.3): a bendy vintage rocket with a face-like front (porthole eyes, a grille mouth), fins that wobble, round cartoon exhaust puffs; original, not any film or game rocket. Step 1 only: a design sheet (side, 3/4, front; thrust stretch and cut-thrust squash poses; one puff set) at preview size with the "what makes it ours" line, for LEAD's review. No sheet export until LEAD's OK in these notes.
@@ -872,6 +876,13 @@ Accept: §9.7 boxes that apply to a design sheet (ink, cel, palette, original); 
 Files: blender/scripts/build_pilgrim_v3.py, blender/sources/ships/pilgrim_v3_design.blend
 Depends: —
 Lead notes: Cycle 235. Light (preview only). Last in your queue; take it when the gate is shut and you are out of lock-free work.
+
+### B-118 · BLENDER · Ready · C0
+Goal: Helmet glass readability (D-096): give the surveyor's fishbowl a faint flat glass fill (the Earth palette's sky tone at ≈ 25 % over the face layer, plus the existing highlight) so the helmet reads as glass against the green meadow and any later background; re-export `characters/surveyor/side` (all 98 frames, same indices) and refresh the design sheet. From this card on, every rig-set review sheet also shows the assembled 12-frame preview loop (§11.7).
+Accept: the review sheet at 1x on the B-114 plains (not the flat placeholder) shows the helmet as glass with the face readable; ink and palette boxes unchanged; sheet ≤ 2048; json valid, clip indices unchanged (UNITY needs no change).
+Files: blender/scripts/build_surveyor_v3.py, blender/review.py, Assets/_Game/Art/characters/surveyor/
+Depends: B-116
+Lead notes: Cycle 238. Before B-117. One heavy export under the gate and D-091.
 
 
 > **R1 (D-062).** 2D tasks B-056..B-076 are Superseded; their `.blend` sources (rigs, props,
