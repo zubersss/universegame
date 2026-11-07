@@ -1,17 +1,19 @@
 # BLENDER STATUS
-Updated: 2026-11-07 00:4x · Session: 6 (C1, contract v3.1, Bible 4.1) · trimmed under D-113; everything older: coordination/status/archive/BLENDER_2026-11-06.md
+Updated: 2026-11-07 01:1x · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; everything older: coordination/status/archive/BLENDER_2026-11-06.md
 
 ## Current task
-While-waiting list (LEAD cycle 249), lock-free, top first; each logged here:
-1. B-131 camp props PREVIEW DONE 00:4x (blender/scripts/build_props_common_v3.py, blender/preview/review_b131_props_preview.png): all six at 1x on the plains over the B-130 ground strips beside the surveyor and the assembled Pilgrim rig on three 2 m pad modules, each at 3x, the clips at 2x (door open 6: a cartoon swing in about the hinge, status light red -> green; smelter working 8: mouth glow pulse, two chimney puffs, breathing, sparks; lamp flicker 4: drawn halo), tiling at 2x (pad and wall joins 0.0/255). Ink 2.0-3.0 / 1.0-1.5 px, mid + deep tones, no faces (one porthole, one mouth, no eye pairs). Sizes: pad 128x48 (2 m module), wall 64x176 (1 m), door 88x176 (1.2 m like the model), smelter 112x192, crate 80x72, lamp 64x160; ground line 10 px above each frame bottom.
-   Questions for LEAD before the export: (a) contract §11.1 says color only, the card says interactables keep mask R = 0.1 and emission where the manifest has it: I propose color + json only, with "interactable": true in the json and the glows drawn (smelter mouth, lamp halo, lights); (b) these keys are model (glb) rows today, so the export changes their TYPE (sprite sheet) under the same keys: UNITY's ModelView/ModelSwap path for props/common/* has to take sprites.
-2. B-132 stag / wolf / bear design previews (faces kept, no bared teeth): NEXT.
+While-waiting list (LEAD cycle 250), lock-free, top first; free RAM ~0.5-2.0 GB, UNITY's want on file, so no blender.exe:
+1. B-131 export wiring DONE 01:1x (5650912), see Last completed.
+2. B-132 stag / wolf / bear design previews (faces kept, no bared teeth): IN PROGRESS from 01:1x (blender/scripts/build_creatures_earth_v3.py, fakegp).
 3. B-133 forest + coast layer studies with the 2x seam check.
 4. Painted Sun disc design, preview only.
-5. README_v4.md refresh.
-Heavy queue: nothing of mine queued; no want on file.
+5. `git rm --cached` the tracked blender/scripts/meridian/__pycache__/*.pyc.
+6. README_v4.md refresh.
+Heavy queue: #5 B-131 export, only after UNITY's status says the U-113 code is committed (D-117); no want on file until then.
 
 ## Last completed
+- 00:5x-01:1x B-131 EXPORT WIRING (5650912, lock-free, no blender.exe): `render.py` handler `do_prop_sheet_set` for the new manifest row `props/common/camp_set` (style v3 = a heavy job in the wrapper) exports all six + review_b131_props.png; each prop row (`prop_sheet`) can export alone. The six rows switched from `model: true` to sheet rows. Per prop: `<prop>_color.png` + `<prop>.json` (style v3, fps 12, pivot on the ground line, `ground_line_px` 10, `squash_root` false; `tile` + `module_m` on pad 2.0 / wall 1.0; `interactable` on door, smelter, crate; clips door open 6 once, smelter working 8 loop, lamp flicker 4 loop; static props carry 1 frame and no clip, like the ground strips). Sheets packed to the smallest fit <= 512^2: pad 128x48, wall 64x176, door 272x356 (3 cols), smelter 460x388 (4), crate 80x72, lamp 132x324 (2). The export deletes the 24 v2 files beside the keys ({prop}.glb, _normal, _mask, _emission; the .meta files are UNITY's, D-016) and the review stamps every PNG. Dry run into a scratch tree (bundled python, 41 s, ~0.5 GB): every check passes, joins 0.0/255, ink 2.0-3.0 / 1.0-1.5 px, palette 100 % per prop.
+  Two fixes the new 2 px edge check found (the accepted preview never measured edges): the smelter's side lever crossed the right frame edge by 1-2 px (lever 0.08 m shorter, knob at 0.74 m); the lamp's pivot had a sign bug (comment: pole left of centre; code: right of it), so the halo was cut off on the right at every flicker frame: the pole now sits 0.18 m left of centre, json pivot [0.32, 0.0625] (was 0.56). Frame sizes unchanged.
 - 00:19-00:22 B-129 + B-130 EXPORTED (558976a; one heavy lock, log OK x2, peak 668 MB, lock released, UNITY told):
   - flora/earth/rigset: all six Earth plants, 504x212 (36 KB), 44 parts; the snoozle's 7 parts pixel-identical to B-126 (crops + pivots compared to the previous sheet), its plant json unchanged except biomes; biomes on every plant. Reviews review_b129_earth_rigset.png + review_b129_earth_rigset_assembled.png (each plant 1x on the plains, rest/react 2x, idle loop with Unity's maths, swap cycles).
   - terrain/earth/ground_strip (grass, the key GroundStrip loads), ground_strip_soil, ground_strip_stone: 540x152 each (8 frames 64x152, 4 px gutters, no clips), "tile": true, pivot [0.5, 0.842] = the ground line. FRAME SIZE vs U-100's 64x128: GroundStrip.cs puts the pivot on the ground line and hangs the fill StripHeight = 2 m below it, so the frame is 2 m below + 0.375 m above (lip, tufts); no code change needed. Silhouette ON the ground line at every edge (UNITY's wall-edge ink starts there). Joins 0.63 / 0.62 / 0.81 per 255, silhouette ink identical on all 48 edges (rows 23-24). Review review_b130_ground_strips.png.
@@ -30,6 +32,7 @@ Heavy queue: nothing of mine queued; no want on file.
 ## Handoffs (unrouted only)
 -> UNITY (C2, routed to U-110 by LEAD cycle 249): every plant carries "biomes" (nodbell plains/forest, shiverbarrel desert, curlfrond forest/taiga, whiptuft plains/coast, thriftcushion coast/tundra; JsonUtility ignores it today). FloraRigs picks Set.plants at random, so a desert cactus would spawn on the plains until placement filters by biome.
 -> UNITY (B-128, on import): set def.icon = "icons/<key>/base" in ItemRegistry for soil, grass, regolith, snow, mercury_regolith, mercury_basalt, sulfide, tessera (they pass null today).
+-> UNITY (U-113, D-117, for the tests): the B-131 jsons as they will export: frames pad 128x48 / wall 64x176 / door 88x176 / smelter 112x192 / crate 80x72 / lamp 64x160 at PPU 64; pivots [0.5, 0.208333], [0.5, 0.056818], [0.5, 0.056818], [0.5, 0.052083], [0.5, 0.138889], lamp [0.32, 0.0625] (the pole, not the frame centre); sheets door 3 cols x 2 rows, smelter 4 x 2, lamp 2 x 2, the rest 1 frame with "animations": []; extra fields tile, module_m (2.0 / 1.0), interactable, ground_line_px, squash_root false. My export commit deletes the 24 v2 files; the 24 .meta files beside them are yours to delete in the same window.
 -> UNITY (B-122, on import): ships/pilgrim/side_a..e and top_a..b were never exported (superseded by D-111; manifest preview_only). Sockets in rig.json, metres from the root: tail_exhaust, leg_l, leg_c, leg_r, door, attitude_l (-1.5, 2.6), attitude_r (1.5, 2.6). The ±35 flight tilt is the root transform.
 
 ## Blockers
