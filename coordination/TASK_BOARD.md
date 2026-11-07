@@ -20,11 +20,11 @@ Lead notes: …
 
 When the lock frees, the highest pending job here goes next, even if the other role's want is
 older (D-037 alternation applies only between equal ranks). A role below the top keeps its want
-filed and refreshed (D-075) and works its `## While waiting` list. Cycle 244 (21:2x):
-1. BLENDER · B-125 + B-127 side exports (running under heavy_blender 20:58; finish, release).
-2. UNITY · U-107 check (manual flight: the owner's gameplay change; unblocks U-108).
-3. UNITY · U-108 check + the nine v4.1 stills (the owner's second look-over).
-4. BLENDER · B-119 discs + B-120 starfield exports (one batch).
+filed and refreshed (D-075) and works its `## While waiting` list. Cycle 244 (21:4x; B-124/B-126/B-127 exported 21:13, U-107 check ran 21:1x–21:3x, hand-off pending):
+1. BLENDER · B-125 surveyor re-export (the pose fix; ≈ 2 min; U-108's stills need it).
+2. UNITY · U-108 check + the nine v4.1 stills (the owner's second look-over).
+3. BLENDER · B-119 discs + B-120 starfield exports (one batch).
+4. UNITY · any U-107 re-check its hand-off still owes (if none, skip).
 5. UNITY · U-091 check.
 6. BLENDER · B-121 HUD export, then B-122 Pilgrim sheets.
 7. UNITY · U-103 / U-105 / U-104 checks, batched as they are written.
@@ -1019,7 +1019,7 @@ Goal: Surveyor re-ink (D-100): `characters/surveyor/side` (all 98 frames, same i
 Accept: ten §9.7 boxes; widths measured on the sheet; the face reads at 1x on the plains through the glass; json indices unchanged (UNITY needs no change); sheet ≤ 2048.
 Files: blender/scripts/build_surveyor_v3.py, Assets/_Game/Art/characters/surveyor/
 Depends: B-124
-Lead notes: Cycle 242. One heavy export under the gate and D-091. Cycle 243: PREVIEW ACCEPTED (88a1764, review_b111_surveyor_design_preview.png 20:25: helmet-ring rivets and seams, glove and boot stitching, strap and buckle, hose ribs, hatch on the pack, mid + deep tones; 75 interior strokes per frame; the face reads through the glass at 1x). Done on the side export (98 frames, same indices, log OK).
+Lead notes: Cycle 242. One heavy export under the gate and D-091. Cycle 243: PREVIEW ACCEPTED (88a1764, review_b111_surveyor_design_preview.png 20:25: helmet-ring rivets and seams, glove and boot stitching, strap and buckle, hose ribs, hatch on the pack, mid + deep tones; 75 interior strokes per frame; the face reads through the glass at 1x). Done on the side export (98 frames, same indices, log OK). Cycle 244: the 21:11 export FAILED the new below-ground check (conk_out frames 68–71: the gloves sat under the ground line; the check did its job); BLENDER fixed the pose, re-export is #1 in the heavy job queue (short job) because U-108's stills need this sheet.
 
 ### B-126 · BLENDER · Ready · C1
 Goal: Snoozle v2, no face (D-101, D-100): `flora/earth/rigset` redrawn as a dandelion clock with no eyes or mouth; personality through motion: sway idle on the beat, a head that opens and shuts (swaps `head_open` / `head_half` / `head_closed`), leaves that lift (`leaves_rest` / `leaves_up`), react = turn and bounce with the head opening; v3.1 ink with seed-head detail lines, stem ribs, leaf veins, two shadow tones; ≤ 6 bones, one texture.
@@ -1028,12 +1028,12 @@ Files: blender/sources/flora/earth_rigset.blend, Assets/_Game/Art/flora/earth/
 Depends: B-124
 Lead notes: Cycle 242. The biggest visible change for the owner; after B-124. Cycle 243: ART ACCEPTED (5fd7d91 + the 20:59:54 export, review_b126_earth_rigset.png: a dandelion clock with seed rays and no face, head open → half → bud → open again, leaves lift, stem ribs and leaf veins, mid + deep tones, 7 parts on 216×84, assembled loop at 1x on the plains reads as a plant with character). Schema note: the json adds `replaces_part` swap slots and an idle `swap_cycle`; UNITY reads them in U-108. Done on UNITY's earth_c0 re-shoot with it.
 
-### B-127 · BLENDER · Ready · C1
+### B-127 · BLENDER · Done · C1
 Goal: Gus re-ink (D-100): `creatures/earth/gull` at v3.1 ink with feather marks on wings and tail, crest detail, foot webbing lines, two shadow tones; clips, frames and indices unchanged; add `fly` (8–10 frames loop, wings beating) since the game flies the gull.
 Accept: ten §9.7 boxes; widths measured; json valid; indices of idle/walk/react/bump unchanged, fly appended.
 Files: blender/sources/creatures/earth_gull_v3.blend, Assets/_Game/Art/creatures/earth/gull/
 Depends: B-124
-Lead notes: Cycle 243: PREVIEW ACCEPTED (1db52ef, review_b113_earth_gull_preview.png 20:27: feather shafts, web lines, chest specks, deep tone; fly = two wingbeats with the crest dragging; indices 0–39 unchanged, fly 40–51). Deviation accepted: fly is 12 frames, not the card's 8–10; the contract (§11.2: a flier's walk, 12–16) and ArtRules.ClipCap rule, the card was wrong. Done on the export.
+Lead notes: Cycle 243: PREVIEW ACCEPTED (1db52ef, review_b113_earth_gull_preview.png 20:27: feather shafts, web lines, chest specks, deep tone; fly = two wingbeats with the crest dragging; indices 0–39 unchanged, fly 40–51). Deviation accepted: fly is 12 frames, not the card's 8–10; the contract (§11.2: a flier's walk, 12–16) and ArtRules.ClipCap rule, the card was wrong. Done on the export. Cycle 244: DONE (2235cf6; log 21:13:13 OK: 1968×396, 52 frames, idle 0–9 / walk 10–21 / react 22–29 / bump 30–39 / fly 40–51, ink 2.0–3.0 / 1.0–1.5 px, peak 675 MB). UNITY wires `fly` in U-108.
 
 
 > **R1 (D-062).** 2D tasks B-056..B-076 are Superseded; their `.blend` sources (rigs, props,
