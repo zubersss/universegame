@@ -1338,6 +1338,13 @@ Files: blender/scripts/build_backdrop_v3.py, Assets/_Game/Art/backgrounds/earth/
 Depends: B-149 re-run
 Lead notes: Cycle 270 (D-147). After the Mercury re-run and the Saturn / Uranus studies slot; Earth first (the owner's first view), then Mars. 13:5x: EARTH VERIFIED (c9221393; log 13:48–13:49 OK ×3: plains / forest / coast, layer1 / layer2 only, the layer0s byte-identical by md5, the jsons unchanged; the D-145 gate 1399 MB; review_b162_earth_straight_before_after.png: the dark rims along the plains hilltop, the forest canopies and the coast's dune line gone, the rest unchanged). Mars running (13:51:50); the planet closes on its review.
 
+### B-165 · BLENDER · Ready · C2
+Goal: Strip sheets without gutter bleed: the strip exporter extrudes each 64 px frame's edge columns into its 4 px transparent gutters (colour only; alpha stays 0) so a frame's edge texel no longer samples the gutter under bilinear filtering; re-export the nine strips (terrain/earth ground_strip ×4, terrain/mars regolith / basalt / frost, terrain/mercury regolith / slate) in one slot; the frame rects pixel-identical (md5), the joins unchanged, the jsons unchanged.
+Accept: log OK ×9; a stamped review at 1x of a long run of each strip with no 64 px join; UNITY's next strip capture shows none.
+Files: blender/scripts/build_ground_strips_v3.py (shared sheets()), Assets/_Game/Art/terrain/
+Depends: B-162
+Lead notes: Cycle 271 (UNITY's u123 night frame: faint 64 px joins inside the strip art band; the fill had the same bleed, fixed on UNITY's side by a one-texel inset). After B-162 Mars; before the Uranus decks only if the slot is free.
+
 > **R1 (D-062).** 2D tasks B-056..B-076 are Superseded; their `.blend` sources (rigs, props,
 > terrain recipes) are the starting point for the models. Contract v2 §9 is the rule set.
 
