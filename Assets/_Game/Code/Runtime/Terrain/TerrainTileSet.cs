@@ -21,21 +21,38 @@ namespace Meridian.Terrain
 
         public bool IsReady => pending == 0;
 
-        static readonly List<AsyncOperationHandle<IList<Sprite>>> kept = new List<AsyncOperationHandle<IList<Sprite>>>();
-        static readonly HashSet<byte> keptIds = new HashSet<byte>();
+        static readonly Dictionary<byte, AsyncOperationHandle<IList<Sprite>>> prefetched = new Dictionary<byte, AsyncOperationHandle<IList<Sprite>>>(8);
 
         /// <summary>
-        /// Loads these materials' sheets once and keeps them for the session (U-039 fix: every planet load
-        /// re-fetched them, ~140 ms of each entry). Later Load calls then complete at once.
+        /// U-091 (D-089): loads these materials' sheets ahead of a planet visit (the boot planet at SceneDirector.Start, an
+        /// entry's planet under the iris-out in TransitionDirector.Enter), each tracked under its own group. The planet's
+        /// set takes the handles over in Load, so a visit holds one handle per sheet and the planet's bundle closes with
+        /// the last one. Replaces the U-039 session preload, which kept every inner planet's bundle open all run.
         /// </summary>
-        public static void Preload(IEnumerable<byte> ids)
+        public static void Prefetch(IEnumerable<byte> ids)
         {
+            ReleasePrefetch();
             foreach (var id in ids)
             {
                 var key = TileId.ArtKey(id);
-                if (key == null || !keptIds.Add(id)) continue;
-                kept.Add(ArtLoad.Session<IList<Sprite>>(key));
+                if (key == null || prefetched.ContainsKey(id)) continue;
+                prefetched[id] = ArtLoad.Asset<IList<Sprite>>(key);
             }
+        }
+
+        /// <summary>Drops the prefetched sheets nobody took over (another planet's, or materials this set does not use).</summary>
+        public static void ReleasePrefetch()
+        {
+            foreach (var h in prefetched.Values) ArtLoad.Release(h);
+            prefetched.Clear();
+        }
+
+        public static int PrefetchedCount => prefetched.Count;
+
+        /// <summary>True when every prefetched sheet has finished loading (tests).</summary>
+        public static bool PrefetchDone
+        {
+            get { foreach (var h in prefetched.Values) if (!h.IsDone) return false; return true; }
         }
 
         public void Load(IEnumerable<byte> ids)
@@ -46,19 +63,24 @@ namespace Meridian.Terrain
                 if (key == null || tiles[id] != null) continue;
                 pending++;
                 byte captured = id;
-                var h = ArtLoad.Asset<IList<Sprite>>(key);
+                if (prefetched.TryGetValue(id, out var h)) prefetched.Remove(id); // taken over: one handle, one Residency entry
+                else h = ArtLoad.Asset<IList<Sprite>>(key);
                 handles.Add(h);
-                h.Completed += op =>
-                {
-                    pending--;
-                    if (op.Status != AsyncOperationStatus.Succeeded || op.Result == null)
-                    {
-                        Debug.LogError($"[Terrain] Could not load tile sheet '{key}'.");
-                        return;
-                    }
-                    LoadFromSprites(captured, op.Result);
-                };
+                if (h.IsDone) Finish(captured, key, h);
+                else h.Completed += op => Finish(captured, key, op);
             }
+            ReleasePrefetch();
+        }
+
+        void Finish(byte id, string key, AsyncOperationHandle<IList<Sprite>> op)
+        {
+            pending--;
+            if (op.Status != AsyncOperationStatus.Succeeded || op.Result == null)
+            {
+                Debug.LogError($"[Terrain] Could not load tile sheet '{key}'.");
+                return;
+            }
+            LoadFromSprites(id, op.Result);
         }
 
         /// <summary>Builds a material's tiles from its sliced sprites (named &lt;material&gt;_&lt;cell&gt;). Tests call it directly.</summary>

@@ -9,10 +9,10 @@ EditorBuildSettings:
     path: Assets/_Game/Scenes/Core.unity
     guid: 00dc7ebb5e67ec949bf36762d4f44b02
   - enabled: 1
-    path: Assets/_Game/Scenes/Space.unity
-    guid: 9f111704677d00b448afd7560bf519f0
-  - enabled: 1
     path: Assets/_Game/Scenes/PlanetSide.unity
     guid: 468a0e433cbb0c24bbc010d32a9058b1
+  - enabled: 1
+    path: Assets/_Game/Scenes/Space.unity
+    guid: 9f111704677d00b448afd7560bf519f0
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: 94e1fe7f83d45ad449be2bc29877be5b, type: 2}

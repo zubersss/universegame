@@ -8,7 +8,11 @@ using UnityEngine.ResourceManagement.ResourceLocations;
 
 namespace Meridian.Flora
 {
-    /// <summary>One rigged plant: bone Transforms carrying part sprites, an Animator on the shared controller, face swaps.</summary>
+    /// <summary>
+    /// One rigged plant: bone Transforms carrying part sprites, an Animator on the shared controller, swap slots. U-108
+    /// (v3.1, B-126): a `replaces_part` slot drives its bone's own renderer (Parts[bone]); the legacy "eyes"/"mouth" slots
+    /// of the placeholder set keep their extra renderers (Mouth, Eyes). Everything a frame needs is resolved at Spawn.
+    /// </summary>
     public sealed class RigPlant
     {
         public RigSet.Plant Def;
@@ -22,8 +26,37 @@ namespace Meridian.Flora
         public bool FullRate;
         public bool Reacting;
         public int Facing = 1;
+        /// <summary>The replaced-part slots (Def.slots with replaces_part, in order) and the bone renderer each one swaps (null when the bone has no part).</summary>
+        public string[] SlotNames = System.Array.Empty<string>();
+        public SpriteRenderer[] SlotRenderers = System.Array.Empty<SpriteRenderer>();
+        /// <summary>The swap cycle's sequence index this plant shows (-1: no cycle). Tests read it; FloraRigs writes it.</summary>
+        public int CycleIndex = -1;
         internal float reactUntil, blinkAt, blinkUntil, nextCheapPose;
         internal int cheapPose;
+        // Swap cycle (idle.swap_cycle), resolved at Spawn: the renderer it drives, its sprites, its beat counts, the beat clock.
+        internal SpriteRenderer cycleRenderer;
+        internal Sprite[] cycleSprites;
+        internal int[] cycleBeats;
+        internal int cycleTotal, cycleSlot = -1;
+        internal float cycleBeatRate, cyclePhaseBeats;
+        internal bool cycleReactHolds;
+        // Per replaced slot: the resting part (the bone's own) and the part shown while reacting (null: the react leaves it alone).
+        internal Sprite[] slotRest = System.Array.Empty<Sprite>(), slotReact = System.Array.Empty<Sprite>();
+
+        /// <summary>The renderer a swap slot drives: a replaced part's bone renderer (v3.1), else the eyes/mouth extra renderer, else null. String lookup: Spawn and tests, not per frame.</summary>
+        public SpriteRenderer SlotRenderer(string slot)
+        {
+            int i = System.Array.IndexOf(SlotNames, slot);
+            if (i >= 0) return SlotRenderers[i];
+            return slot == "eyes" ? Eyes : slot == "mouth" ? Mouth : null;
+        }
+
+        /// <summary>The part a swap slot shows right now (its sprite's name), or null when the slot drives nothing.</summary>
+        public string SlotSpriteName(string slot)
+        {
+            var r = SlotRenderer(slot);
+            return r != null && r.sprite != null ? r.sprite.name : null;
+        }
     }
 
     /// <summary>
@@ -31,11 +64,20 @@ namespace Meridian.Flora
     /// plant is a ≤ 6-bone Transform chain with part sprites; the sway idle is the set's 12 Hz stepped clip started at a
     /// staggered phase. One loop per frame ranks the plants by distance to the camera: the nearest FullRateCap animate at
     /// full rate, the next band falls back to a 3-pose cheap idle at CheapRateHz, the rest stand still (Bible §9.6).
-    /// Within a plant's react radius the surveyor is looked at (a flip) and the react face shows; eyes blink on their own.
-    /// No allocation per frame after Populate.
+    /// Within a plant's react radius the surveyor is looked at (a flip) and the react swap shows.
+    /// U-108 (contract v3.1, B-126 snoozle, D-101 no faces): a `replaces_part` slot swaps its bone's own sprite, never an
+    /// extra renderer; the idle's `swap_cycle` steps that slot on the plant's beat (60 / bpm s per beat, offset by the plant's
+    /// phase so a field never opens in unison), every frame at full rate and at CheapRateHz in the cheap band; a react shows
+    /// `react.swap` on its slot and each `react.also` part, then returns to the cycle's current entry / the resting part. The
+    /// placeholder's "eyes"/"mouth" slots keep their extra renderers (blink timer, react mouth). Sprite swaps never fight the
+    /// Animator: the sway clip binds only Transform rotation and scale (RigSetBuilder).
+    /// No allocation per frame after Populate: sprites, renderers and beat counts are resolved at Spawn.
     /// </summary>
     public sealed class FloraRigs : MonoBehaviour
     {
+        /// <summary>Seconds added to the swap-cycle clock (0 in the game). Tests advance it to step a cycle deterministically instead of waiting out beats.</summary>
+        public float CycleClockOffset;
+        float CycleClock => Time.time + CycleClockOffset;
         public const int FullRateCap = 40, CheapBand = 160;
         /// <summary>Animated objects that are not flora (the surveyor, critters): the flora's full-rate share is FullRateCap minus this (Bible §9.6: ≤ 40 on screen in all).</summary>
         public int Reserved;
@@ -149,15 +191,18 @@ namespace Meridian.Flora
                     plant.Parts[i] = sr;
                 }
             }
-            // Face swaps: on the slot's bone at its offset (B-112 json), else on the last bone's tip (the head).
+            plant.Phase = Hash01(seed, 5);
+            // Legacy face swaps (the placeholder daisy; never a replaced part): extra renderers on the slot's bone at its offset
+            // (B-112 json), else on the last bone's tip (the head). Absent from a v3.1 set (D-101): both stay null.
             var head = plant.Bones[def.bones.Length - 1];
             float headUp = def.bones[def.bones.Length - 1].length * 0.5f;
-            plant.Eyes = Swap(plant, SlotBone(plant, "eyes", head), "eyes", SlotOffset(def, "eyes", new Vector3(0f, headUp + 0.08f, 0f)), SlotOrder(def, "eyes", def.bones.Length + 1));
-            plant.Mouth = Swap(plant, SlotBone(plant, "mouth", head), "mouth", SlotOffset(def, "mouth", new Vector3(0f, headUp - 0.12f, 0f)), SlotOrder(def, "mouth", def.bones.Length + 2));
+            if (!IsReplacedPart(def, "eyes")) plant.Eyes = Swap(plant, SlotBone(plant, "eyes", head), "eyes", SlotOffset(def, "eyes", new Vector3(0f, headUp + 0.08f, 0f)), SlotOrder(def, "eyes", def.bones.Length + 1));
+            if (!IsReplacedPart(def, "mouth")) plant.Mouth = Swap(plant, SlotBone(plant, "mouth", head), "mouth", SlotOffset(def, "mouth", new Vector3(0f, headUp - 0.12f, 0f)), SlotOrder(def, "mouth", def.bones.Length + 2));
+            // v3.1 replaced-part slots and the swap cycle (U-108): resolved once here, read without lookups per frame.
+            ResolveSlots(plant);
             plant.Animator = go.AddComponent<Animator>();
             plant.Animator.runtimeAnimatorController = Controller;
             plant.Animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
-            plant.Phase = Hash01(seed, 5);
             plant.Animator.Play(Animator.StringToHash(def.name), 0, plant.Phase);
             plant.blinkAt = Time.time + 2f + Hash01(seed, 6) * 4f;
             plant.FullRate = true;
@@ -165,12 +210,68 @@ namespace Meridian.Flora
             return plant;
         }
 
-        static RigSet.Slot FindSlot(RigSet.Plant def, string slot)
+        static RigSet.Slot FindSlot(RigSet.Plant def, string slot) => def.FindSlot(slot);
+
+        static bool IsReplacedPart(RigSet.Plant def, string slot)
         {
-            if (def.slots == null) return null;
-            foreach (var s in def.slots) if (s.slot == slot) return s;
-            return null;
+            var s = def.FindSlot(slot);
+            return s != null && s.replaces_part;
         }
+
+        Sprite SpriteOf(string part) => !string.IsNullOrEmpty(part) && sprites.TryGetValue(part, out var s) ? s : null;
+
+        /// <summary>
+        /// U-108: fills the plant's replaced-part slots (each one's bone renderer, resting part, react part) and its swap
+        /// cycle (renderer, sprites, beat counts, phase offset), and shows the cycle's entry for this instant. The react part
+        /// of a slot is `react.swap` when that names one of the slot's swaps, else the slot's `react.also` part, else none.
+        /// A slot whose bone has no renderer, or a cycle with a missing sprite, is left inert rather than drawing nothing.
+        /// </summary>
+        void ResolveSlots(RigPlant plant)
+        {
+            var def = plant.Def;
+            int n = 0;
+            if (def.slots != null) foreach (var s in def.slots) if (s != null && s.replaces_part) n++;
+            if (n > 0)
+            {
+                plant.SlotNames = new string[n];
+                plant.SlotRenderers = new SpriteRenderer[n];
+                plant.slotRest = new Sprite[n];
+                plant.slotReact = new Sprite[n];
+                int k = 0;
+                foreach (var s in def.slots)
+                {
+                    if (s == null || !s.replaces_part) continue;
+                    int bi = def.BoneIndex(s.bone);
+                    def.swaps.TryGetValue(s.slot, out var states);
+                    plant.SlotNames[k] = s.slot;
+                    plant.SlotRenderers[k] = bi >= 0 ? plant.Parts[bi] : null;
+                    plant.slotRest[k] = SpriteOf(bi >= 0 ? def.bones[bi].part : null) ?? (states != null && states.Length > 0 ? SpriteOf(states[0]) : null);
+                    string reactPart = states != null && !string.IsNullOrEmpty(def.react.swap) && System.Array.IndexOf(states, def.react.swap) >= 0 ? def.react.swap : null;
+                    if (reactPart == null && def.react.also != null && def.react.also.TryGetValue(s.slot, out var alsoPart)) reactPart = alsoPart;
+                    plant.slotReact[k] = plant.SlotRenderers[k] != null && plant.slotRest[k] != null ? SpriteOf(reactPart) : null;
+                    k++;
+                }
+            }
+            var cycle = def.Cycle;
+            if (cycle == null) return;
+            var renderer = plant.SlotRenderer(cycle.slot);
+            if (renderer == null) return;
+            var cycleSprites = new Sprite[cycle.sequence.Length];
+            for (int i = 0; i < cycleSprites.Length; i++) { cycleSprites[i] = SpriteOf(cycle.sequence[i]); if (cycleSprites[i] == null) return; }
+            plant.cycleRenderer = renderer;
+            plant.cycleSprites = cycleSprites;
+            plant.cycleSlot = System.Array.IndexOf(plant.SlotNames, cycle.slot);
+            plant.cycleBeats = cycle.beats;
+            plant.cycleTotal = cycle.TotalBeats;
+            plant.cycleBeatRate = def.idle.beat_bpm / 60f;
+            plant.cyclePhaseBeats = plant.Phase * plant.cycleTotal;
+            plant.cycleReactHolds = plant.cycleSlot >= 0 && plant.slotReact[plant.cycleSlot] != null;
+            plant.CycleIndex = RigSet.SwapCycle.IndexAt(CycleClock * plant.cycleBeatRate + plant.cyclePhaseBeats, plant.cycleBeats, plant.cycleTotal);
+            renderer.sprite = cycleSprites[plant.CycleIndex];
+        }
+
+        /// <summary>Where the plant's swap cycle stands now, in beats into its loop [0, total) (phase and CycleClockOffset included); 0 without a cycle. Tests.</summary>
+        public float CycleBeats(RigPlant plant) => plant.cycleRenderer != null ? Mathf.Repeat(CycleClock * plant.cycleBeatRate + plant.cyclePhaseBeats, plant.cycleTotal) : 0f;
 
         static Transform SlotBone(RigPlant plant, string slot, Transform fallback)
         {
@@ -240,6 +341,7 @@ namespace Meridian.Flora
             }
             Vector2 who = player != null ? (Vector2)player.position : eye;
             float dt = Time.deltaTime;
+            float cycleNow = CycleClock;
             foreach (var p in Plants)
             {
                 // React: the surveyor within the radius: look at them, show the react face for ReactSeconds after they leave.
@@ -260,6 +362,14 @@ namespace Meridian.Flora
                         string want = reacting && !string.IsNullOrEmpty(p.Def.react.swap) ? p.Def.react.swap : mouths[0];
                         if (sprites.TryGetValue(want, out var ms)) p.Mouth.sprite = ms;
                     }
+                    // v3.1 replaced parts (U-108): react.swap on its slot and every react.also part while reacting; back to the
+                    // cycle's current entry (the cycle slot) or the bone's resting part when it ends.
+                    for (int i = 0; i < p.SlotRenderers.Length; i++)
+                    {
+                        var reactSprite = p.slotReact[i];
+                        if (reactSprite == null) continue;
+                        p.SlotRenderers[i].sprite = reacting ? reactSprite : i == p.cycleSlot ? p.cycleSprites[p.CycleIndex] : p.slotRest[i];
+                    }
                 }
                 // Blink.
                 if (p.Eyes != null && p.Def.swaps.TryGetValue("eyes", out var eyes) && eyes.Length > 1)
@@ -268,12 +378,25 @@ namespace Meridian.Flora
                     else if (p.blinkUntil > 0f && now >= p.blinkUntil) { p.blinkUntil = 0f; if (sprites.TryGetValue(eyes[0], out var open)) p.Eyes.sprite = open; }
                 }
                 // Cheap idle: three poses at CheapRateHz for the band past the full-rate cap; beyond it the pose holds.
+                bool cheapTick = false;
                 if (!p.FullRate && p.Rank < FullRateCap + CheapBand && now >= p.nextCheapPose)
                 {
+                    cheapTick = true;
                     p.nextCheapPose = now + 1f / CheapRateHz;
                     p.cheapPose = (p.cheapPose + 1) % 3;
                     float angle = p.Def.idle.amplitude_deg / Mathf.Max(1, p.Def.BoneCount) * Mathf.Sin(p.cheapPose * 2f * Mathf.PI / 3f + p.Phase * 6.28f);
                     for (int i = 0; i < p.Bones.Length; i++) p.Bones[i].localRotation = Quaternion.Euler(0f, 0f, angle);
+                }
+                // Swap cycle (v3.1, U-108): the entry for this beat, written only when the index changes; held by the react swap
+                // while reacting (re-applied on the react's falling edge above). Full rate every frame, the cheap band on its tick.
+                if (p.cycleRenderer != null && (p.FullRate || cheapTick))
+                {
+                    int idx = RigSet.SwapCycle.IndexAt(cycleNow * p.cycleBeatRate + p.cyclePhaseBeats, p.cycleBeats, p.cycleTotal);
+                    if (idx != p.CycleIndex)
+                    {
+                        p.CycleIndex = idx;
+                        if (!(p.Reacting && p.cycleReactHolds)) p.cycleRenderer.sprite = p.cycleSprites[idx];
+                    }
                 }
             }
             watch.Stop();

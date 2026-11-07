@@ -11,8 +11,12 @@ namespace Meridian.View2D
     [System.Serializable]
     public sealed class SceneLayout
     {
-        [System.Serializable] public sealed class Layer { public int n; public float parallax; public float y_m; }
+        /// <summary>One layer: U-103 (D-108) adds `tile` / `tile_y` (a repeating tile in x / and y), `height_px` and `role` (starfield, nebula) for the Space scene; the side scenes ignore them.</summary>
+        [System.Serializable] public sealed class Layer { public int n; public float parallax; public float y_m; public bool tile, tile_y; public int height_px; public string role; }
         public Layer[] layers;
+        /// <summary>U-103: the scene's pixels per unit and anchor ("center" for the Space sky) from the json; 0 / null when the json omits them.</summary>
+        public float ppu;
+        public string anchor;
 
         /// <summary>Three layers (far, mid, near) when a scene has no json yet.</summary>
         public static SceneLayout Default() => new SceneLayout

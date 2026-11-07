@@ -6,8 +6,9 @@ namespace Meridian.Perf
     /// <summary>
     /// U-086 (Bible §11.1 v3, Residency row): which Addressable groups hold live handles. Every asset load goes
     /// through ArtLoad, which registers (group, handle); a handle counts while it IsValid (a released handle's
-    /// operation is destroyed). GroupOf mirrors ArtRules.GroupFor (Editor) at runtime. "session" holds what the
-    /// game keeps on purpose for the whole run (TerrainTileSet.Preload) and is reported, not judged.
+    /// operation is destroyed). The group table is ArtKeys.GroupOf (U-091: one table with ArtRules.GroupFor at import).
+    /// "session" holds what the game keeps on purpose for the whole run (the film overlays, FilmFeature) and is reported,
+    /// not judged; terrain sheets are per visit since U-091 (TerrainTileSet.Prefetch, taken over by the planet's set).
     /// </summary>
     public static class Residency
     {
@@ -82,15 +83,22 @@ namespace Meridian.Perf
             return true;
         }
 
-        /// <summary>"planet_<name>" when `group` belongs to a planet (its own group or a suffixed one), else null.</summary>
+        static readonly string[] planetGroups = BuildPlanetGroups();
+
+        static string[] BuildPlanetGroups()
+        {
+            var ids = (Meridian.Planets.PlanetId[])System.Enum.GetValues(typeof(Meridian.Planets.PlanetId));
+            var g = new string[ids.Length];
+            for (int i = 0; i < ids.Length; i++) g[i] = PlanetGroup(ids[i]);
+            return g;
+        }
+
+        /// <summary>"planet_<name>" when `group` belongs to a planet (its own group or a suffixed one), else null. No allocation (U-091: per-frame callers).</summary>
         public static string PlanetOf(string group)
         {
             if (group == null || !group.StartsWith("planet_", System.StringComparison.Ordinal)) return null;
-            foreach (Meridian.Planets.PlanetId id in System.Enum.GetValues(typeof(Meridian.Planets.PlanetId)))
-            {
-                var g = PlanetGroup(id);
-                if (group == g || group.StartsWith(g + "_", System.StringComparison.Ordinal)) return g;
-            }
+            foreach (var g in planetGroups)
+                if (group == g || (group.Length > g.Length && group[g.Length] == '_' && group.StartsWith(g, System.StringComparison.Ordinal))) return g;
             return null;
         }
 
@@ -103,28 +111,19 @@ namespace Meridian.Perf
             return n;
         }
 
+        /// <summary>Loads into a planet's groups still in flight (U-091: the planet-load watch in SceneDirector). No allocation.</summary>
+        public static int PendingPlanet(string planetGroup)
+        {
+            Prune();
+            int n = 0;
+            foreach (var e in entries) if (!e.handle.IsDone && PlanetOf(e.group) == planetGroup) n++;
+            return n;
+        }
+
         public static string PlanetGroup(Meridian.Planets.PlanetId id) => "planet_" + id.ToString().ToLowerInvariant();
 
-        /// <summary>Addressables group of a key (Bible §10.3; the same table as ArtRules.GroupFor).</summary>
-        public static string GroupOf(string key)
-        {
-            if (string.IsNullOrEmpty(key)) return "common";
-            int a = key.IndexOf('/');
-            string category = a < 0 ? key : key.Substring(0, a);
-            int b = a < 0 ? -1 : key.IndexOf('/', a + 1);
-            string second = a < 0 ? "" : b < 0 ? key.Substring(a + 1) : key.Substring(a + 1, b - a - 1);
-            switch (category)
-            {
-                case "terrain":
-                case "creatures": return "planet_" + second;
-                case "props": return second == "common" ? "common" : "planet_" + second;
-                case "backgrounds": return second == "space" ? "space" : "planet_" + second;
-                case "planets": return "space";
-                case "icons": return "icons";
-                case "ui": return "ui";
-                default: return "common"; // ships, characters, fx
-            }
-        }
+        /// <summary>Addressables group of a key: the one table is ArtKeys.GroupOf (U-091).</summary>
+        public static string GroupOf(string key) => Meridian.Art.ArtKeys.GroupOf(key);
 
         static void Prune()
         {

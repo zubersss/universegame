@@ -27,11 +27,9 @@ namespace Meridian.Core
         IEnumerator Start()
         {
             if (gameState == null) gameState = GameState.Instance;
-            // Terrain sheets of the landable planets stay loaded for the session: entries don't re-fetch them (U-039 fix).
-            Meridian.Terrain.TerrainTileSet.Preload(Meridian.Terrain.TerrainStreamer.MaterialsFor(Meridian.Planets.PlanetId.Earth));
-            Meridian.Terrain.TerrainTileSet.Preload(Meridian.Terrain.TerrainStreamer.MaterialsFor(Meridian.Planets.PlanetId.Mars));
-            Meridian.Terrain.TerrainTileSet.Preload(Meridian.Terrain.TerrainStreamer.MaterialsFor(Meridian.Planets.PlanetId.Mercury));
-            Meridian.Terrain.TerrainTileSet.Preload(Meridian.Terrain.TerrainStreamer.MaterialsFor(Meridian.Planets.PlanetId.Venus));
+            // U-091 (D-089): only the boot planet's sheets, overlapping the Space scene load; an entry prefetches its planet's
+            // under the iris-out (TransitionDirector.Enter). The U-039 session preload is gone: a planet's bundle closes with its visit.
+            Meridian.Terrain.TerrainTileSet.Prefetch(Meridian.Terrain.TerrainStreamer.MaterialsFor(gameState.currentPlanet));
 
             if (!SceneManager.GetSceneByName(SpaceScene).isLoaded)
                 yield return SceneManager.LoadSceneAsync(SpaceScene, LoadSceneMode.Additive);
@@ -74,7 +72,7 @@ namespace Meridian.Core
         public float LastPlanetWarmupMs { get; private set; }
 
         /// <summary>Loads PlanetSide with a planet. entryX ≥ 0 = arriving from orbit over that column (Bible §5.3).</summary>
-        public IEnumerator LoadPlanetSide(PlanetConfig config, int entryX = -1)
+        public IEnumerator LoadPlanetSide(PlanetConfig config, int entryX = -1, float startedAt = -1f)
         {
             if (config == null)
             {
@@ -82,6 +80,9 @@ namespace Meridian.Core
                 yield break;
             }
             float p0 = Time.realtimeSinceStartup;
+            float origin = startedAt >= 0f ? startedAt : p0; // U-091: the planet-load clock starts at the request (the entry start)
+            int gen = ++loadGeneration;
+            LastPlanetLoadSeconds = -1f;
             var scene = SceneManager.GetSceneByName(PlanetSideScene);
             if (!scene.isLoaded)
                 yield return SceneManager.LoadSceneAsync(PlanetSideScene, LoadSceneMode.Additive);
@@ -93,14 +94,40 @@ namespace Meridian.Core
                 else PlanetSide.Configure(config);
                 float p2 = Time.realtimeSinceStartup;
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(PlanetSideScene));
+                // U-091: one frame behind the closed iris after Configure (the frame the deferred sheet callbacks used to give):
+                // the planet's heavy first frame stays black and the iris-in starts on a normal frame.
+                yield return null;
                 // Warm-up behind the boot cover or the entry fade (U-028): wait for the tile sheets, then render once off-screen.
                 float until = Time.realtimeSinceStartup + 1f;
                 while (!PlanetSide.terrain.TileSet.IsReady && Time.realtimeSinceStartup < until) yield return null;
                 float p3 = Time.realtimeSinceStartup;
                 LastPlanetWarmupMs = RenderWarmup.WarmUp(PlanetSide.sideCamera, PlanetSide.terrain.TileSet);
                 LastLoadBreakdown = $"scene load {(p1 - p0) * 1000f:F0} ms, configure {(p2 - p1) * 1000f:F0} ms, tile sheets {(p3 - p2) * 1000f:F0} ms, warm-up {LastPlanetWarmupMs:F0} ms";
+                LastLoadBreakdown += $", total {(Time.realtimeSinceStartup - p0) * 1000f:F0} ms";
+                StartCoroutine(WatchPlanetLoad(gen, origin, PlanetSide, Meridian.Perf.Residency.PlanetGroup(config.id)));
             }
             PlanetSideLoaded?.Invoke();
+        }
+
+        int loadGeneration;
+
+        /// <summary>
+        /// U-091 (D-089 "planet load"): seconds from the request (the entry start, or the boot LoadPlanetSide) until the
+        /// terrain is settled and no load into the planet's groups is pending; -1 while loading.
+        /// </summary>
+        public float LastPlanetLoadSeconds { get; private set; } = -1f;
+
+        IEnumerator WatchPlanetLoad(int gen, float origin, PlanetSideRoot side, string group)
+        {
+            float firstDone = -1f, deadline = origin + 30f;
+            while (gen == loadGeneration && side != null)
+            {
+                bool done = side.terrain != null && side.terrain.IsSettled && Meridian.Perf.Residency.PendingPlanet(group) == 0;
+                if (done && firstDone >= 0f) { LastPlanetLoadSeconds = firstDone - origin; yield break; } // confirmed on the next frame
+                firstDone = done ? Time.realtimeSinceStartup : -1f; // a chained load (the stage-set probe) gets one frame to start
+                if (Time.realtimeSinceStartup > deadline) { LastPlanetLoadSeconds = Time.realtimeSinceStartup - origin; yield break; } // a slow load fails with a number
+                yield return null;
+            }
         }
 
         /// <summary>Unloads PlanetSide (launch, Bible §5.2). Terrain edits live on in GameState.</summary>
@@ -108,10 +135,11 @@ namespace Meridian.Core
         {
             var scene = SceneManager.GetSceneByName(PlanetSideScene);
             PlanetSide = null;
+            loadGeneration++;
             if (!scene.isLoaded) return null;
             var op = SceneManager.UnloadSceneAsync(scene);
-            // U-060: released planet art (creatures, backdrops, props) stays in memory while its bundle is still
-            // open (the terrain sheets keep every inner planet's bundle loaded); free it once the scene is gone.
+            // U-060 / U-091: a planet's bundle now closes with its last handle (no session preload); UnloadUnusedAssets still
+            // frees released common-bundle art once the scene is gone.
             if (op != null) op.completed += _ => Resources.UnloadUnusedAssets();
             return op;
         }

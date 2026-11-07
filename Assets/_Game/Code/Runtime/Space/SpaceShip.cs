@@ -107,6 +107,21 @@ namespace Meridian.Space
             if (!externalInput) PlaceAtWaystation("earth");
         }
 
+        /// <summary>U-103 (D-100): thrust stretch 1.15 / cut squash 0.9 along the nose (the view's local x), on top of AddressableSprite's width fit.</summary>
+        public Meridian.Ship.SquashStretch Squash { get; } = new Meridian.Ship.SquashStretch();
+        Transform view;
+        float viewBase = 1f;
+        Vector3 viewApplied;
+
+        void LateUpdate()
+        {
+            if (view == null) { view = transform.Find("View"); if (view == null) return; viewApplied = view.localScale; viewBase = view.localScale.x; }
+            if (view.localScale != viewApplied) viewBase = view.localScale.x; // the sprite loader re-fitted the width: take the new base
+            Squash.Step(!Destroyed && intent.thrust > 0.05f, Time.deltaTime);
+            viewApplied = new Vector3(viewBase * Squash.Along, viewBase * Squash.Across, 1f);
+            view.localScale = viewApplied;
+        }
+
         void FixedUpdate() => Step(Time.fixedDeltaTime);
 
         public void Step(float dt)

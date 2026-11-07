@@ -36,9 +36,13 @@ namespace Meridian.EditorTools
 
             Directory.CreateDirectory(Folder(key));
             var path = ControllerPath(key);
-            if (AssetDatabase.LoadAssetAtPath<AnimatorController>(path) != null) AssetDatabase.DeleteAsset(path);
-            foreach (var stale in Directory.GetFiles(Folder(key), "*.anim")) AssetDatabase.DeleteAsset(stale.Replace('\\', '/')); // clips of a previous sheet
-            var controller = AnimatorController.CreateAnimatorControllerAtPath(path);
+            // U-108: never delete-and-recreate the controller: Addressables' post-processor handles the deleted path by its CURRENT
+            // guid, i.e. the re-created asset, and drops the <key>/animator entry CreateOrMoveEntry just re-added (the gull, surveyor
+            // and calibration entries vanished that way). Load it and empty its base layer instead (RigSetBuilder.ClearStates).
+            var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(path);
+            if (controller != null) RigSetBuilder.ClearStates(controller);
+            else controller = AnimatorController.CreateAnimatorControllerAtPath(path);
+            foreach (var stale in Directory.GetFiles(Folder(key), "*.anim")) AssetDatabase.DeleteAsset(stale.Replace('\\', '/')); // clips of a previous sheet (no address: safe)
             var machine = controller.layers[0].stateMachine;
 
             var binding = EditorCurveBinding.PPtrCurve("", typeof(SpriteRenderer), "m_Sprite");
@@ -55,6 +59,9 @@ namespace Meridian.EditorTools
                 }
                 var clip = new AnimationClip { name = c.name, frameRate = Meridian.EditorTools.ArtRules.V3Fps };
                 AnimationUtility.SetObjectReferenceCurve(clip, binding, keys);
+                var events = EventsFor(c.name, c.length); // U-105: eye-pop and smear hooks as animation events
+                if (events.Length > 0)
+                    AnimationUtility.SetAnimationEvents(clip, events.Select(e => new AnimationEvent { functionName = e.function, time = e.frame * step }).ToArray());
                 var settings = AnimationUtility.GetAnimationClipSettings(clip);
                 settings.loopTime = c.loop;
                 AnimationUtility.SetAnimationClipSettings(clip, settings);
@@ -77,6 +84,21 @@ namespace Meridian.EditorTools
             }
             AssetDatabase.SaveAssets(); // the address must reach disk before the Editor quits (an -ExecuteMethod run)
             return controller;
+        }
+
+        /// <summary>
+        /// U-105: the animation events a clip carries, by frame: `surprise` pops the eyes on its first drawing (OnEyePop);
+        /// `dash` smears from its first drawing to its last (OnSmear, OnSmearEnd). Pure: SurveyorAnimTests checks the frames.
+        /// </summary>
+        public static (string function, int frame)[] EventsFor(string clip, int length)
+        {
+            if (length <= 0) return System.Array.Empty<(string, int)>();
+            switch (clip)
+            {
+                case "surprise": return new[] { ("OnEyePop", 0) };
+                case "dash": return new[] { ("OnSmear", 0), ("OnSmearEnd", length - 1) };
+                default: return System.Array.Empty<(string, int)>();
+            }
         }
 
         /// <summary>

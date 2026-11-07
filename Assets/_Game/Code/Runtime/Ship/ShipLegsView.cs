@@ -33,7 +33,13 @@ namespace Meridian.Ship
             // Pilgrim (B-123) lands, art wider than tall is the old level hull, stood on its stern as a stand-in.
             if (ship != null && target != null)
             {
-                Model = ModelSwap.Attach(target, ArtKeys.Ships.PilgrimModel, ship.transform, Vector3.zero);
+                // U-103 (D-100): the squash root carries the cartoon stretch/squash along the ship's up axis (its local y, since it
+                // never rotates against the hull); the sprite view and the model hang under it.
+                var root = new GameObject("SquashRoot");
+                root.transform.SetParent(ship.transform, false);
+                SquashRoot = root.transform;
+                target.transform.SetParent(SquashRoot, false);
+                Model = ModelSwap.Attach(target, ArtKeys.Ships.PilgrimModel, SquashRoot, Vector3.zero);
                 Model.Swapped += s =>
                 {
                     var b = ModelSwap.ModelBounds(s.Views[0].Instance);
@@ -64,6 +70,10 @@ namespace Meridian.Ship
             }
         }
 
+        /// <summary>U-103: thrust stretch 1.15 / cut squash 0.9 along the up axis (pure solver), applied to SquashRoot each frame.</summary>
+        public SquashStretch Squash { get; } = new SquashStretch();
+        public Transform SquashRoot { get; private set; }
+
         /// <summary>U-076: the Pilgrim's 3D model view.</summary>
         public ModelSwap Model { get; private set; }
 
@@ -82,6 +92,11 @@ namespace Meridian.Ship
         void LateUpdate()
         {
             if (ship == null || target == null) return;
+            if (SquashRoot != null)
+            {
+                Squash.Step(ship.intent.thrust > 0.05f, Time.deltaTime);
+                SquashRoot.localScale = Squash.LocalScale;
+            }
             bool legs = ship.LegsDeployed;
             if (applied && legs == ShowingLegs) return;
             var sprite = legs ? (Deployed ?? Retracted) : (Retracted ?? Deployed);

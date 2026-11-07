@@ -30,18 +30,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 82317d64251e44e4eabc403b98efd612
-    m_Address: terrain/jupiter/floe_core
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9fc391061677f6a4391a1973086ccd0b
     m_Address: props/jupiter/derelict_pod
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f7d91bce11d23ce4584098da20a2d830
-    m_Address: terrain/jupiter/floe_ice
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

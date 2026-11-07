@@ -124,16 +124,22 @@ namespace Meridian.Transitions
         }
 
         /// <summary>Iris-in from `centre` over `seconds`; the quad switches off when the circle covers the screen.</summary>
+        /// <summary>U-091: the worst frame (ms) of the last Open, logged by the gate and the probe (a jumped iris-in shows here).</summary>
+        public float LastOpenWorstMs { get; private set; }
+
         public IEnumerator Open(Vector2 centre, float seconds = IrisMath.Seconds)
         {
             Busy = true;
             Quad.enabled = true;
             float cover = IrisMath.CoverRadius(centre, Aspect);
+            float worst = 0f;
             for (float t = 0f; t < seconds; t += Time.unscaledDeltaTime)
             {
+                worst = Mathf.Max(worst, Time.unscaledDeltaTime);
                 Apply(centre, IrisMath.Radius(t, seconds, false, cover));
                 yield return null;
             }
+            LastOpenWorstMs = worst * 1000f;
             Apply(centre, cover);
             Closed = false;
             Quad.enabled = false;

@@ -113,8 +113,8 @@ namespace Meridian.Tests
             Row($"GC per 300 frames · {where}", "≤ 1 KB (main-thread managed allocations; P-16)",
                 $"{gc.gcBytesLast300} B (Unity GC counter incl. Editor: {gc.gcProfilerBytes / 1024} KB)", gc.gcBytesLast300 <= BudgetMonitor.GcBytesPer300);
             // D-036/D-058: memory is judged in the development build (unity_profile -Build); the Editor row is info only.
-            bool memOk = Within(r.workingSetMB, BudgetMonitor.RamMB) && Within(r.textureMemoryMB, BudgetMonitor.TexturesMB) && Within(r.meshMemoryMB, BudgetMonitor.MeshesMB) && Within(r.audioMemoryMB, BudgetMonitor.AudioMB);
-            Info($"Memory · {where} (Editor)", "≤ 4.5 GB working set (warn 4.0), ≤ 2.0 GB textures, ≤ 600 MB meshes, ≤ 150 MB audio (v3, D-077)",
+            bool memOk = Within(r.workingSetMB, BudgetMonitor.WorkingSetMB) && Within(r.textureMemoryMB, BudgetMonitor.TexturesMB) && Within(r.audioMemoryMB, BudgetMonitor.AudioMB);
+            Info($"Memory · {where} (Editor)", "< 2.0 GB working set (warn 1.7), ≤ 512 MB textures, ≤ 150 MB audio; meshes reported (v4, D-089)",
                 $"working set {Mb(r.workingSetMB)}, system {Mb(r.systemMemoryMB)}, textures {Mb(r.textureMemoryMB)}, meshes {Mb(r.meshMemoryMB)}, audio {Mb(r.audioMemoryMB)} (Editor process: upper bound)",
                 memOk ? "info (within)" : "info (over; the dev-build row decides, D-058)");
         }
@@ -215,7 +215,7 @@ namespace Meridian.Tests
             Assert.AreEqual(Meridian.Planets.PlanetId.Mars, side.Config.id);
             while (!side.terrain.IsSettled) yield return null;
             // U-086 (Bible §11.1 v3 Residency): the previous planet's groups release within 5 s of the transition; only the
-            // current planet's groups (+ common, ui, icons, space; "session" = TerrainTileSet.Preload) stay resident.
+            // current planet's groups (+ common, ui, icons, space; "session" = the film overlays, U-091) stay resident.
             float resT0 = Time.realtimeSinceStartup;
             int earthHandles = Residency.CountPlanet("planet_earth");
             while (earthHandles > 0 && Time.realtimeSinceStartup - resT0 < 5f) { yield return null; earthHandles = Residency.CountPlanet("planet_earth"); }

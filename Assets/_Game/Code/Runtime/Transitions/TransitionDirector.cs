@@ -27,6 +27,8 @@ namespace Meridian.Transitions
         public const float RingOutwardSpeed = 20f;
         public const float InvulnerableSeconds = 1f;
         public const float EnterHoldSeconds = 0.5f;
+        /// <summary>U-091: the worst frame of the last iris-in (ms), evidence that the planet's first frame stayed behind the iris.</summary>
+        public float LastIrisInWorstMs => iris != null ? iris.LastOpenWorstMs : 0f;
         public const float SpaceDefaultSize = 60f, SpacePushIn = 20f;
 
         public SceneDirector scenes;
@@ -195,6 +197,8 @@ namespace Meridian.Transitions
         {
             Busy = true;
             float t0 = Time.realtimeSinceStartup;
+            // U-091: the destination is known here: its terrain sheets (and bundle) load while the camera pushes in and the iris closes.
+            Meridian.Terrain.TerrainTileSet.Prefetch(Meridian.Terrain.TerrainStreamer.MaterialsFor(body.planet));
             var spaceCam = scenes.Space.GetComponentInChildren<Camera>();
             float startSize = spaceCam != null ? spaceCam.orthographicSize : SpaceDefaultSize;
             var offset = spaceShip.Position - body.position;
@@ -218,7 +222,7 @@ namespace Meridian.Transitions
             State.view = ViewMode.PlanetSide;
             scenes.Space.gameObject.SetActive(false); // before PlanetSide loads: one global 2D light at a time
             if (spaceCam != null) spaceCam.orthographicSize = SpaceDefaultSize;
-            yield return scenes.LoadPlanetSide(config, x);
+            yield return scenes.LoadPlanetSide(config, x, t0); // the planet-load clock runs from the entry start (D-089)
 
             var sideNow = scenes.PlanetSide;
             var landed = sideNow != null && sideNow.ship != null ? sideNow.ship.transform.position : (sideNow != null && sideNow.player != null ? sideNow.player.transform.position : Vector3.zero);

@@ -95,6 +95,13 @@ namespace Meridian.View2D
         static void SetActive(Component c, bool on, PlanetSideRoot side)
         {
             if (c == null || c.gameObject == side.gameObject) return;
+            // U-107: PlanetBackdrop lives on the side camera's object; switching that object off silenced CameraFollow (the ship
+            // flew out of frame in the C0 stage). A component on the camera is muted by `enabled` (its OnDisable hides its quads).
+            if (side.sideCamera != null && c.gameObject == side.sideCamera.gameObject)
+            {
+                if (c is Behaviour b && b.enabled != on) b.enabled = on;
+                return;
+            }
             if (c.gameObject.activeSelf != on) c.gameObject.SetActive(on);
         }
     }

@@ -108,8 +108,33 @@ namespace Meridian.EditorTools
             if (entry.address != address) entry.SetAddress(address, true);
         }
 
+        /// <summary>
+        /// U-104 (B-121 handoff): a v3 sheet whose sidecar lists `parts` (ui/hud/gauges: dials and needles) is sliced like a
+        /// rig set's parts and its json addressed at &lt;key&gt;/json, so the HUD reads the needle ranges from it. Rig sets go
+        /// through BuildIfRigSet. Returns true when the sheet was (re)sliced; the re-import comes back through here.
+        /// </summary>
+        public static bool SliceIfParts(string colorPath, string key)
+        {
+            if (IsRigSet(key)) return false;
+            bool placeholder = colorPath.StartsWith(ArtImporter.Active.placeholders, System.StringComparison.Ordinal);
+            if (placeholder && File.Exists(ArtImporter.ArtColorPath(key))) return false;
+            var sheet = ArtImporter.SheetFor(colorPath, key);
+            if (sheet == null || !sheet.IsV3 || !sheet.HasParts) return false;
+            foreach (var p in sheet.parts)
+                if (string.IsNullOrEmpty(p.name) || p.rect == null || p.rect.Length != 4)
+                {
+                    Debug.LogError($"[ArtImporter] Rejected {JsonPath(colorPath)}: every part needs a name and a 4-number rect (contract §11.3).");
+                    return false;
+                }
+            if (SliceParts(colorPath, sheet.parts)) return true;
+            AddressJson(JsonPath(colorPath), key, placeholder);
+            return false;
+        }
+
         /// <summary>Slices the sheet into the set's parts (rects from the json, bottom-left origin); true when the rects changed (a re-import follows).</summary>
-        static bool SliceParts(string colorPath, RigSet set)
+        static bool SliceParts(string colorPath, RigSet set) => SliceParts(colorPath, set.parts);
+
+        static bool SliceParts(string colorPath, RigSet.Part[] parts)
         {
             var ti = AssetImporter.GetAtPath(colorPath) as TextureImporter;
             if (ti == null) return false;
@@ -122,11 +147,11 @@ namespace Meridian.EditorTools
             // The provider hands the rects back in its own order: compare by name, so an already-sliced sheet is left alone
             // (an ordered compare re-sliced and re-imported BLENDER's sheet on every pass).
             var byName = current.GroupBy(r => r.name).ToDictionary(g => g.Key, g => g.First());
-            var rects = new SpriteRect[set.parts.Length];
+            var rects = new SpriteRect[parts.Length];
             bool same = current.Length == rects.Length;
-            for (int i = 0; i < set.parts.Length; i++)
+            for (int i = 0; i < parts.Length; i++)
             {
-                var p = set.parts[i];
+                var p = parts[i];
                 var rect = new Rect(p.rect[0], p.rect[1], p.rect[2], p.rect[3]);
                 var pivot = p.pivot != null && p.pivot.Length == 2 ? new Vector2(p.pivot[0], p.pivot[1]) : new Vector2(0.5f, 0f);
                 byName.TryGetValue(p.name, out var have);
@@ -165,7 +190,23 @@ namespace Meridian.EditorTools
             return built;
         }
 
-        /// <summary>Builds (or rebuilds) the set's parts and controller when `colorPath` is a rig-set sheet; returns the controller, else null.</summary>
+        /// <summary>
+        /// U-108: empties the controller's base layer (every state and sub-machine) so BuildIfRigSet can refill it in place. The
+        /// asset, its guid and its Addressables entry survive; `states`/`stateMachines` hand back copies, so removing while
+        /// iterating is safe.
+        /// </summary>
+        internal static void ClearStates(AnimatorController controller)
+        {
+            if (controller.layers.Length == 0) controller.AddLayer("Base Layer");
+            var machine = controller.layers[0].stateMachine;
+            foreach (var child in machine.states) machine.RemoveState(child.state);
+            foreach (var child in machine.stateMachines) machine.RemoveStateMachine(child.stateMachine);
+        }
+
+        /// <summary>
+        /// Builds (or rebuilds, in place) the set's parts and controller when `colorPath` is a rig-set sheet; returns the
+        /// controller, else null. The controller asset is never deleted: see the U-108 note in the body.
+        /// </summary>
         public static AnimatorController BuildIfRigSet(string colorPath, string key)
         {
             if (!IsRigSet(key)) return null;
@@ -180,9 +221,15 @@ namespace Meridian.EditorTools
 
             Directory.CreateDirectory(Folder(key));
             var path = ControllerPath(key);
-            if (AssetDatabase.LoadAssetAtPath<AnimatorController>(path) != null) AssetDatabase.DeleteAsset(path);
+            // U-108: an existing controller is emptied and refilled, never deleted and re-created. Addressables' post-processor
+            // (AddressableAssetSettings.OnPostprocessAllAssets) removes the entry of every deleted path by that path's CURRENT
+            // guid, and the deletion is reported after this method has re-created the asset at the same path (same guid) and
+            // re-added its entry, so a delete/re-create dropped "<key>/animator" from the planet's group: FloraRigs.Ready never
+            // turned true and the C0 snoozles never spawned. The clips below carry no address, so deleting them is harmless.
+            var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(path);
+            if (controller == null) controller = AnimatorController.CreateAnimatorControllerAtPath(path);
+            else ClearStates(controller);
             foreach (var stale in Directory.GetFiles(Folder(key), "*.anim")) AssetDatabase.DeleteAsset(stale.Replace('\\', '/'));
-            var controller = AnimatorController.CreateAnimatorControllerAtPath(path);
             var machine = controller.layers[0].stateMachine;
             foreach (var plant in set.plants)
             {

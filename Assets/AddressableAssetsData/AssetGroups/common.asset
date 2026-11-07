@@ -20,6 +20,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 033a0d3ce11c2064db3f88605022e09e
+    m_Address: terrain/earth/snow
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0cd4cbd96af542244bb9e0580e03361c
     m_Address: ships/waystation_earth/top
     m_ReadOnly: 0
@@ -215,6 +220,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 82317d64251e44e4eabc403b98efd612
+    m_Address: terrain/jupiter/floe_core
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 83a0b18da05a2db44b9624d893bb8164
     m_Address: props/common/aerostat_deck
     m_ReadOnly: 0
@@ -382,6 +392,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f64438931b57dc44d9da0f5976a4d4c4
     m_Address: ships/pilgrim/side_legs
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f7d91bce11d23ce4584098da20a2d830
+    m_Address: terrain/jupiter/floe_ice
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

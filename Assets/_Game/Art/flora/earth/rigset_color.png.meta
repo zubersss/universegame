@@ -142,191 +142,15 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: eyes_blink
-      rect:
-        serializedVersion: 2
-        x: 72
-        y: 8
-        width: 28
-        height: 12
-      alignment: 9
-      pivot: {x: 0.4434, y: 0.5276}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: d234a1bd5f664df4087f7bca1f248697
-      internalID: -1570315283
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: eyes_open
-      rect:
-        serializedVersion: 2
-        x: 208
-        y: 56
-        width: 28
-        height: 20
-      alignment: 9
-      pivot: {x: 0.4459, y: 0.4569}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: df4cc52b445411c40a777d7aca68b526
-      internalID: -558383447
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: head
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 24
-        width: 52
-        height: 52
-      alignment: 9
-      pivot: {x: 0.4876, y: 0.168}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 9d4d6df780cb79f4395379f33ceb4092
-      internalID: -269551055
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: leaf_l
-      rect:
-        serializedVersion: 2
-        x: 120
-        y: 48
-        width: 40
-        height: 28
-      alignment: 9
-      pivot: {x: 0.8031, y: 0.3789}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: b6793225164bbce4495352157cc80373
-      internalID: 1464529149
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: leaf_r
-      rect:
-        serializedVersion: 2
-        x: 164
-        y: 48
-        width: 40
-        height: 28
-      alignment: 9
-      pivot: {x: 0.1781, y: 0.3789}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: b83fe8717b61c754094457c8f887c623
-      internalID: 2146707751
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: mouth_giggle
-      rect:
-        serializedVersion: 2
-        x: 24
-        y: 4
-        width: 20
-        height: 16
-      alignment: 9
-      pivot: {x: 0.4928, y: 0.4544}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 39767c0d645736f40887226aecf59636
-      internalID: -1669860713
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: mouth_smile
-      rect:
-        serializedVersion: 2
-        x: 48
-        y: 4
-        width: 20
-        height: 16
-      alignment: 9
-      pivot: {x: 0.4607, y: 0.3848}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 5ba44eedd01b55f4fa539088b820654d
-      internalID: 224572364
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: mouth_yawn
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 0
-        width: 20
-        height: 20
-      alignment: 9
-      pivot: {x: 0.4199, y: 0.4991}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 2e3aec22f727a23438e0c0762661b198
-      internalID: -1109646280
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
       name: stem_lower
       rect:
         serializedVersion: 2
-        x: 56
-        y: 24
-        width: 28
-        height: 52
+        x: 88
+        y: 36
+        width: 24
+        height: 48
       alignment: 9
-      pivot: {x: 0.4222, y: 0.2273}
+      pivot: {x: 0.4274, y: 0.2137}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -343,12 +167,12 @@ TextureImporter:
       name: stem_upper
       rect:
         serializedVersion: 2
-        x: 88
-        y: 28
-        width: 28
-        height: 48
+        x: 116
+        y: 40
+        width: 24
+        height: 44
       alignment: 9
-      pivot: {x: 0.471, y: 0.2465}
+      pivot: {x: 0.4844, y: 0.2334}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -357,6 +181,116 @@ TextureImporter:
       bones: []
       spriteID: 18907d930ebc2304a8040c7bfc4d50dc
       internalID: 1373968744
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: head_closed
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 52
+        width: 24
+        height: 32
+      alignment: 9
+      pivot: {x: 0.4277, y: 0.1338}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 430589bc1bd877c408b027015456276f
+      internalID: -1162006248
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: head_half
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 32
+        width: 32
+        height: 52
+      alignment: 9
+      pivot: {x: 0.4756, y: 0.1417}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b45c58c2e0b931044afc20f95a8fe703
+      internalID: -174249104
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: head_open
+      rect:
+        serializedVersion: 2
+        x: 36
+        y: 36
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.4817, y: 0.1349}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c4fd06b5e0575954385d60f54e557c81
+      internalID: 146938737
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: leaves_rest
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 64
+        height: 28
+      alignment: 9
+      pivot: {x: 0.4863, y: 0.4473}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 955212624ea82cc4b8a4a6d9c9883357
+      internalID: -269791822
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: leaves_up
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 44
+        width: 44
+        height: 40
+      alignment: 9
+      pivot: {x: 0.4581, y: 0.1905}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f33c00189a5b6094bb38da6b368ad4c1
+      internalID: 1607183158
       vertices: []
       indices: 
       edges: []
@@ -375,14 +309,11 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      eyes_blink: -1570315283
-      eyes_open: -558383447
-      head: -269551055
-      leaf_l: 1464529149
-      leaf_r: 2146707751
-      mouth_giggle: -1669860713
-      mouth_smile: 224572364
-      mouth_yawn: -1109646280
+      head_closed: -1162006248
+      head_half: -174249104
+      head_open: 146938737
+      leaves_rest: -269791822
+      leaves_up: 1607183158
       stem_lower: -998777636
       stem_upper: 1373968744
   mipmapLimitGroupName: 

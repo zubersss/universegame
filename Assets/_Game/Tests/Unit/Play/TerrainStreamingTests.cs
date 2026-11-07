@@ -8,7 +8,7 @@ using UnityEngine.TestTools;
 
 namespace Meridian.Tests
 {
-    /// <summary>U-007: Earth streams from Core with only chunks within 2 resident and the apply budget kept.</summary>
+    /// <summary>U-007: Earth streams from Core with only chunks within ResidentRadius (3) resident and the apply budget kept (U-091: radius 3 since 2c50253).</summary>
     public class TerrainStreamingTests
     {
         const string CorePath = "Assets/_Game/Scenes/Core.unity";
@@ -60,7 +60,8 @@ namespace Meridian.Tests
             while (pv != null && pv.view.sprite == null && Time.realtimeSinceStartup < artTimeout) yield return null;
             for (int i = 0; i < 10; i++) yield return null;
 
-            Assert.AreEqual(25, t.ResidentCount, "5×5 chunks around the camera");
+            int chunkSide = 2 * Meridian.Terrain.TerrainConstants.ResidentRadius + 1;
+            Assert.AreEqual(chunkSide * chunkSide, t.ResidentCount, $"{chunkSide}×{chunkSide} chunks around the camera (radius {Meridian.Terrain.TerrainConstants.ResidentRadius}; Earth's chunk rows hold the camera row ± the radius)");
             Assert.IsTrue(t.AllResidentWithinRadius(out int worst), $"worst distance {worst}");
 
             // Fly right at 30 m/s-equivalent steps (0.5 m per frame) for 400 frames, crossing ~6 chunks.
@@ -96,7 +97,7 @@ namespace Meridian.Tests
             Assert.Less(worstFrame * 1000f, 33f, "no hitch > 33 ms during streaming");
 
             yield return WaitSettled(t, 10f);
-            Assert.AreEqual(25, t.ResidentCount);
+            Assert.AreEqual(chunkSide * chunkSide, t.ResidentCount);
             Assert.IsTrue(t.AllResidentWithinRadius(out worst));
             LogAssert.NoUnexpectedReceived();
         }

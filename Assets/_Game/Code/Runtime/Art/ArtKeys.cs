@@ -54,6 +54,40 @@ namespace Meridian.Art
             // U-061 cloud-column floes (B-048): one sheet each, every giant (Jupiter first).
             public const string JupiterFloeIce = "terrain/jupiter/floe_ice";
             public const string JupiterFloeCore = "terrain/jupiter/floe_core";
+            /// <summary>
+            /// U-091 (D-110): sheets more than one planet's terrain uses: Mars's CO2 frost is Earth's snow, the giants' floes are
+            /// Jupiter's. They live in the `common` group, unpacked, so no planet's bundle stays open for another planet's visit.
+            /// </summary>
+            public static readonly string[] Shared = { EarthSnow, JupiterFloeIce, JupiterFloeCore };
+        }
+
+        /// <summary>U-091: true for a terrain sheet in Terrain.Shared (no allocation).</summary>
+        public static bool IsSharedTerrain(string key) => key != null && System.Array.IndexOf(Terrain.Shared, key) >= 0;
+
+        /// <summary>
+        /// Addressables group of a key (Bible §10.3): the one table, used by ArtRules.GroupFor at import and by Residency at
+        /// run time (U-091: the two used to drift; flora had no runtime case). No Split: IndexOf and Substring only.
+        /// </summary>
+        public static string GroupOf(string key)
+        {
+            if (string.IsNullOrEmpty(key)) return "common";
+            if (IsSharedTerrain(key)) return "common";
+            int a = key.IndexOf('/');
+            string category = a < 0 ? key : key.Substring(0, a);
+            int b = a < 0 ? -1 : key.IndexOf('/', a + 1);
+            string second = a < 0 ? "" : b < 0 ? key.Substring(a + 1) : key.Substring(a + 1, b - a - 1);
+            switch (category)
+            {
+                case "terrain":
+                case "creatures":
+                case "flora": return "planet_" + second;
+                case "props": return second == "common" ? "common" : "planet_" + second;
+                case "backgrounds": return second == "space" ? "space" : "planet_" + second;
+                case "planets": return "space";
+                case "icons": return "icons";
+                case "ui": return "ui";
+                default: return "common"; // ships, characters, fx
+            }
         }
 
         public static class Backgrounds

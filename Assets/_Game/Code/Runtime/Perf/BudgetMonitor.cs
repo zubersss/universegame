@@ -19,6 +19,9 @@ namespace Meridian.Perf
         public long systemMemoryMB, textureMemoryMB, audioMemoryMB; // -1 when the counter is unavailable
         public long meshMemoryMB;         // U-086 (v3): "Mesh Memory" counter
         public long workingSetMB;         // U-086 (v3): the OS working set of the process (ProcessMemory); -1 off Windows
+        public long privateMB;            // U-091 (D-089): private commit (ProcessMemory.PrivateMB); page trimming cannot hide a leak in it
+        public bool mipStreaming;         // U-091: QualitySettings.streamingMipmapsActive
+        public long mipBudgetMB;          // U-091: QualitySettings.streamingMipmapsMemoryBudget
     }
 
     /// <summary>
@@ -36,8 +39,12 @@ namespace Meridian.Perf
         /// <summary>U-077 (Bible §11.1, 3D): geometry per frame.</summary>
         public const long TrianglesCap = 500_000, ShadowCastersCap = 150; // v3 (D-077): 500 k
         public const long GcBytesPer300 = 1024;
-        // U-086 (Bible §11.1 v3, D-077): the built game, Editor closed: working set ≤ 4.5 GB (warning line 4.0), textures ≤ 2.0 GB, meshes ≤ 600 MB, audio ≤ 150 MB.
-        public const long RamMB = 4608, RamWarnMB = 4096, TexturesMB = 2048, MeshesMB = 600, AudioMB = 150;
+        // U-091 (Bible §11.1 v4, D-089): the built game, Editor closed: working set < 2.0 GB (warning line 1.7), textures ≤ 512 MB,
+        // audio ≤ 150 MB, ≤ 8 sprite atlases per planet, mip streaming budget 512 MB, planet load ≤ 5 s, transition ≤ 1.5 s,
+        // no streaming hitch > 33 ms. Meshes are reported, not judged.
+        public const long WorkingSetMB = 2048, WorkingSetWarnMB = 1741, TexturesMB = 512, AudioMB = 150;
+        public const int AtlasesPerPlanet = 8, MipBudgetMB = 512;
+        public const float PlanetLoadSeconds = 5f, TransitionSeconds = 1.5f, HitchMs = 33f;
 
         public static BudgetMonitor Instance { get; private set; }
 
@@ -94,6 +101,23 @@ namespace Meridian.Perf
         public int FramesRecorded => count;
 
         /// <summary>Takes a reading. Light and particle counts search the scene (call it from tests/tools, not per frame).</summary>
+        /// <summary>U-091 (D-089 atlas row): loaded sprite atlases whose name starts with `planetGroup` (reports only: allocates).</summary>
+        public static int LoadedAtlases(string planetGroup)
+        {
+            int n = 0;
+            foreach (var a in Resources.FindObjectsOfTypeAll<UnityEngine.U2D.SpriteAtlas>())
+                if (a != null && a.name.StartsWith(planetGroup, System.StringComparison.Ordinal)) n++;
+            return n;
+        }
+
+        /// <summary>U-091: loaded sprites that are packed in an atlas; 0 while sprite packing is off (reports only: allocates).</summary>
+        public static int PackedSprites()
+        {
+            int n = 0;
+            foreach (var s in Resources.FindObjectsOfTypeAll<Sprite>()) if (s != null && s.packed) n++;
+            return n;
+        }
+
         public BudgetSnapshot Snapshot(Camera view)
         {
             var s = new BudgetSnapshot { frames = count };
@@ -123,6 +147,9 @@ namespace Meridian.Perf
             s.audioMemoryMB = audioMem.Valid ? audioMem.LastValue / (1024 * 1024) : -1;
             s.meshMemoryMB = meshMem.Valid ? meshMem.LastValue / (1024 * 1024) : -1;
             s.workingSetMB = ProcessMemory.WorkingSetMB();
+            s.privateMB = ProcessMemory.PrivateMB();
+            s.mipStreaming = QualitySettings.streamingMipmapsActive;
+            s.mipBudgetMB = (long)QualitySettings.streamingMipmapsMemoryBudget;
             return s;
         }
 

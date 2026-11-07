@@ -169,7 +169,7 @@ namespace Meridian.Planet.Backdrop
             {
                 bool any = l.Status == AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0;
                 global::Meridian.Art.ArtLoad.Release(l);
-                if (this == null) return;
+                if (this == null || !sets.TryGetValue(region, out var liveSet) || liveSet != s) return; // U-091: a set released mid-probe leaves no orphan handle
                 if (!any) { s.manifestChecked = true; return; }
                 s.manifestHandle = ArtLoad.Asset<TextAsset>(manifestKey);
                 s.manifestHandle.Completed += op =>

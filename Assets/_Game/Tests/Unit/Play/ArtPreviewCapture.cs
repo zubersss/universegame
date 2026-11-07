@@ -19,6 +19,16 @@ namespace Meridian.Tests
     /// </summary>
     public class ArtPreviewCapture
     {
+        // U-091 (D-110 (4)): review captures force-load every mip, so streamed model maps are never shot reduced under the
+        // 512 MB mip budget; the smoke shots (BuildSmoke) keep the budget and show what the player sees.
+        bool savedForceAllMips;
+
+        [SetUp]
+        public void ForceAllMipsForTheCapture() { savedForceAllMips = Texture.streamingTextureForceLoadAll; Texture.streamingTextureForceLoadAll = true; }
+
+        [TearDown]
+        public void RestoreMipStreaming() { Texture.streamingTextureForceLoadAll = savedForceAllMips; }
+
         public const string KeyVariable = "MERIDIAN_PREVIEW_KEY";
         const int Size = 1024;
         const float FrameHalf = 1f;

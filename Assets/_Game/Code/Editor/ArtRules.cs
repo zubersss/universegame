@@ -22,7 +22,11 @@ namespace Meridian.EditorTools
         public const int PixelsPerUnit = 128;
         public const int MaxDimension = 2048;
         /// <summary>U-091 (contract §10): a planet's stage-layer textures, all regions, ≤ 700 MB stored (BC7/BC5 with mips).</summary>
-        public const long LayerCapBytes = 700L * 1024L * 1024L;
+        /// <summary>U-091 (D-089): every map of every key in a planet's groups plus its block textures, ≤ 512 MB stored (BC7/BC5 with mips).</summary>
+        public const long PlanetTextureCapBytes = 512L * 1024L * 1024L;
+        /// <summary>Tests only: a smaller cap so a rejection can be provoked in a sandbox.</summary>
+        public static long? PlanetTextureCapOverride;
+        public static long PlanetTextureCap => PlanetTextureCapOverride ?? PlanetTextureCapBytes;
         public const long MaxFileBytes = 4L * 1024 * 1024;
         public const int DefaultPaddingPx = 8;
 
@@ -98,27 +102,13 @@ namespace Meridian.EditorTools
             return i < parts.Length ? parts[i] : "";
         }
 
-        /// <summary>Addressables group (Bible §10.3): planet_&lt;name&gt; loads with the planet, common stays resident.</summary>
-        public static string GroupFor(string key)
-        {
-            var second = Segment(key, 1);
-            switch (ArtKeys.Category(key))
-            {
-                case "terrain":
-                case "creatures": return "planet_" + second;
-                case "props": return second == "common" ? "common" : "planet_" + second;
-                case "flora": return "planet_" + second;
-                case "backgrounds": return second == "space" ? "space" : "planet_" + second;
-                case "planets": return "space";
-                case "icons": return "icons";
-                case "ui": return "ui";
-                default: return "common"; // ships, characters, fx
-            }
-        }
+        /// <summary>Addressables group (Bible §10.3): planet_&lt;name&gt; loads with the planet, common stays resident. U-091: the one table is ArtKeys.GroupOf.</summary>
+        public static string GroupFor(string key) => ArtKeys.GroupOf(key);
 
-        /// <summary>Sprite atlas from contract §4, or null for categories without one.</summary>
+        /// <summary>Sprite atlas from contract §4, or null for categories without one (U-091: a shared terrain sheet stays unpacked).</summary>
         public static string AtlasFor(string key)
         {
+            if (ArtKeys.IsSharedTerrain(key)) return null;
             var second = Segment(key, 1);
             switch (ArtKeys.Category(key))
             {
@@ -178,6 +168,22 @@ namespace Meridian.EditorTools
 
         /// <summary>Stored size of a BC7/BC5 texture with mips: 1 byte per texel × 4/3 (both formats are 8 bits per texel).</summary>
         public static long StoredBytes(int width, int height) => (long)width * height * 4L / 3L;
+
+        /// <summary>
+        /// U-091 (D-089): the planet whose texture budget a PNG under Art/ counts against: a block texture's planet, or the
+        /// planet of the key's group; null for shared sheets, space, warden, waystation, rig, common, ui and icons.
+        /// </summary>
+        public static string PlanetOfTexture(string relativePath)
+        {
+            if (IsBlockTexture(relativePath, out var blockPlanet, out _, out _, out _))
+                return System.Enum.TryParse<Meridian.Planets.PlanetId>(blockPlanet, true, out _) ? blockPlanet.ToLowerInvariant() : null;
+            if (!TryParse(relativePath, out var key, out _)) return null;
+            var group = Meridian.Perf.Residency.PlanetOf(GroupFor(key));
+            return group != null ? group.Substring("planet_".Length) : null;
+        }
+
+        /// <summary>U-091: true when a texture of w × h, stored after `bytesBefore` of the planet's textures, breaks the per-planet cap.</summary>
+        public static bool OverPlanetCap(long bytesBefore, int w, int h) => bytesBefore + StoredBytes(w, h) > PlanetTextureCap;
 
         /// <summary>Default pivot when neither the sheet .json nor blender/manifest.json gives one.</summary>
         public static Vector2 DefaultPivot(string key, int height)

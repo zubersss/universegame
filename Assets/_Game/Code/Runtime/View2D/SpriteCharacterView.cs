@@ -52,7 +52,15 @@ namespace Meridian.View2D
             Renderer.sortingOrder = sortingOrder;
             Animator = root.AddComponent<Animator>();
             Animator.cullingMode = AnimatorCullingMode.AlwaysAnimate; // an empty renderer has no bounds: a culled Animator would never set its first sprite
+            root.AddComponent<AnimationEventRelay>().view = this; // U-105: the clips' events land on the Animator's object
         }
+
+        /// <summary>U-105: the surprise clip's eye-pop frame (an animation event from SheetAnimatorBuilder); FX hook.</summary>
+        public event System.Action EyePop;
+        /// <summary>U-105: the dash clip's smear start and end frames; FX hook.</summary>
+        public event System.Action SmearStart, SmearEnd;
+        internal void RaiseEyePop() => EyePop?.Invoke();
+        internal void RaiseSmear(bool start) { if (start) SmearStart?.Invoke(); else SmearEnd?.Invoke(); }
 
         void Start() { if (!string.IsNullOrEmpty(key)) Load(key); }
 
@@ -103,19 +111,8 @@ namespace Meridian.View2D
         public void SetFacing(int dir) { if (dir != 0) { facing = dir > 0 ? 1 : -1; Renderer.flipX = facing < 0; } }
 
         /// <summary>A v3 sheet has its own clip set (contract §11.2); old names fall back to the closest one it has.</summary>
-        string Resolve(string clip)
-        {
-            if (Has(clip)) return clip;
-            switch (clip)
-            {
-                case SurveyorAnim.LandHard: return Has(SurveyorAnim.Land) ? SurveyorAnim.Land : SurveyorAnim.Idle;
-                case SurveyorAnim.JumpAnticipate: case SurveyorAnim.Dash: case SurveyorAnim.Fall:
-                    return Has(SurveyorAnim.Jump) ? SurveyorAnim.Jump : SurveyorAnim.Idle;
-                case SurveyorAnim.Run: return Has(SurveyorAnim.Walk) ? SurveyorAnim.Walk : SurveyorAnim.Idle;
-                case SurveyorAnim.Hurt: return Has(SurveyorAnim.Bump) ? SurveyorAnim.Bump : SurveyorAnim.Idle;
-                default: return SurveyorAnim.Idle;
-            }
-        }
+        /// <summary>The clip itself, else its named stand-in on this sheet (SurveyorAnim.ResolveOn, U-105), else idle.</summary>
+        string Resolve(string clip) => SurveyorAnim.ResolveOn(clip, Has);
 
         bool Has(string clip)
         {
@@ -148,8 +145,8 @@ namespace Meridian.View2D
                 var input = new AnimInputs
                 {
                     dead = vitals != null && vitals.Dead, grounded = player.Grounded, vx = v.x, vy = v.y,
-                    sinceHurt = 99f, sinceLand = sinceLand, sinceDig = 99f, sinceBump = sinceBump, sinceJump = sinceJump,
-                    landSpeed = landSpeed, dashing = player.Dash.Active,
+                    sinceBuild = 99f, sinceSurprise = 99f, sinceHurt = 99f, sinceLand = sinceLand, sinceDig = 99f, sinceBump = sinceBump, sinceJump = sinceJump,
+                    landSpeed = landSpeed, dashing = player.Dash.Active, jetpacking = player.Jetpack != null && player.Jetpack.Firing,
                 };
                 Play(overrideClip != null && Time.time < overrideUntil ? overrideClip : SurveyorAnim.Pick(input));
                 SetFacing(player.Facing);
@@ -184,5 +181,13 @@ namespace Meridian.View2D
             if (hooked && player != null) { player.Landed -= OnLanded; player.Jumped -= OnJumped; player.Bumped -= OnBumped; }
             Release();
         }
+    }
+    /// <summary>U-105: receives the sheet clips' animation events on the Animator's object and hands them to the view.</summary>
+    public sealed class AnimationEventRelay : MonoBehaviour
+    {
+        public SpriteCharacterView view;
+        void OnEyePop() { if (view != null) view.RaiseEyePop(); }
+        void OnSmear() { if (view != null) view.RaiseSmear(true); }
+        void OnSmearEnd() { if (view != null) view.RaiseSmear(false); }
     }
 }

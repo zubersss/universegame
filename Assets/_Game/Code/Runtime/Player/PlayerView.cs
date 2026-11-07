@@ -151,9 +151,9 @@ namespace Meridian.Player
                 grounded = controller.Grounded,
                 usingRig = usingRig,
                 vx = v.x, vy = v.y,
-                sinceHurt = sinceHurt, sinceLand = sinceLand, sinceDig = sinceDig,
+                sinceHurt = sinceHurt, sinceLand = sinceLand, sinceDig = sinceDig, sinceBuild = 99f, sinceSurprise = 99f, // U-105: the build and surprise sources arrive with C1 (large = never)
                 sinceBump = sinceBump, sinceJump = sinceJump, landSpeed = landSpeed,
-                dashing = controller.Dash.Active,
+                dashing = controller.Dash.Active, jetpacking = controller.Jetpack != null && controller.Jetpack.Firing,
             };
             string clip = Resolve(SurveyorAnim.Pick(input));
             bool changed = !ReferenceEquals(clip, Clip);

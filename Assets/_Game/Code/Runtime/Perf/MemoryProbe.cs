@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Meridian.Core;
@@ -13,10 +14,11 @@ namespace Meridian.Perf
 {
     /// <summary>
     /// U-041 (D-036): memory in a real (development) player. Started only by the command line
-    /// `-meridianMemoryProbe &lt;file&gt;` (tools/unity_profile.ps1 -Build): skips the main menu, runs the
-    /// BudgetGate route (Earth, launch, Space, entry, Mars), writes one JSON line per leg with the
-    /// player's system, texture and audio memory (the same ProfilerRecorder counters BudgetMonitor
-    /// reads in the Editor), then quits. Normal play never creates it.
+    /// `-meridianMemoryProbe &lt;file&gt;` (tools/unity_profile.ps1 -Build): skips the main menu, flies the nine-leg route
+    /// with real launches and entries (U-091, D-089 / D-110: Earth → Space → Mars → Space → Mercury → Space → Venus → Space
+    /// → Earth again), writes one JSON line per leg with the player's memory counters, the residency of the planet
+    /// left behind, the planet-load and transition times, the loaded bundles and the mip-streaming figures, then quits.
+    /// Normal play never creates it. Everything here is report-only and allocates in the probe only.
     /// </summary>
     public sealed class MemoryProbe : MonoBehaviour
     {
@@ -26,6 +28,10 @@ namespace Meridian.Perf
 
         string path;
         readonly StringBuilder lines = new StringBuilder();
+        SceneDirector director;
+        TransitionDirector transitions;
+        Camera spaceCam;
+        SpaceShip spaceShip;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void Boot()
@@ -49,17 +55,42 @@ namespace Meridian.Perf
         IEnumerator Start()
         {
             float deadline = Time.realtimeSinceStartup + 240f;
-            SceneDirector director = null;
             while (director == null && Time.realtimeSinceStartup < deadline) { director = FindAnyObjectByType<SceneDirector>(); yield return null; }
             while (director != null && (!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < deadline) yield return null;
             if (director == null || !director.IsReady) { Finish("boot timed out"); yield break; }
+            transitions = FindAnyObjectByType<TransitionDirector>();
+            spaceCam = director.Space.GetComponentInChildren<Camera>(true);
+            spaceShip = director.Space.GetComponentInChildren<SpaceShip>(true);
+            if (transitions == null || spaceCam == null || spaceShip == null) { Finish("no transitions or space ship"); yield break; }
 
-            // ---- Earth ----
+            // ---- Earth (boot) ----
+            yield return Leg("Earth", director.PlanetSide.sideCamera, null, "planet_earth", -1f);
+
+            // ---- the loop: Mars, Mercury, Venus, back to Earth; a Space leg after every launch ----
+            var hops = new[]
+            {
+                ("Space", "planet_earth", "mars", "Mars", "planet_mars"),
+                ("Space after Mars", "planet_mars", "mercury", "Mercury", "planet_mercury"),
+                ("Space after Mercury", "planet_mercury", "venus", "Venus", "planet_venus"),
+                ("Space after Venus", "planet_venus", "earth", "Earth again", "planet_earth"),
+            };
+            foreach (var (spaceLeg, prevGroup, body, planetLeg, ownGroup) in hops)
+            {
+                yield return LaunchFrom();
+                if (GameState.Instance.view != ViewMode.Space) { Finish($"launch before {spaceLeg} did not reach space"); yield break; }
+                yield return Leg(spaceLeg, spaceCam, prevGroup, null, transitions.LastLaunchSeconds);
+                yield return EnterBody(body);
+                if (director.PlanetSide == null) { Finish($"entry into {body} did not load a planet"); yield break; }
+                yield return Leg(planetLeg, director.PlanetSide.sideCamera, prevGroup, ownGroup, transitions.LastEntrySeconds);
+            }
+            Finish(null);
+        }
+
+        /// <summary>Boards the Pilgrim, climbs through the Escape Line (a real launch), then parks the space ship outside the planet's well.</summary>
+        IEnumerator LaunchFrom()
+        {
             var side = director.PlanetSide;
-            yield return Leg("Earth", side.sideCamera);
-
-            // ---- Launch → Space ----
-            var transitions = FindAnyObjectByType<TransitionDirector>();
+            var planet = GameState.Instance.currentPlanet.ToString().ToLowerInvariant();
             var ship = side.ship;
             ship.GetComponent<ShipBoarding>().ForceAboard();
             ship.externalInput = true;
@@ -67,41 +98,31 @@ namespace Meridian.Perf
             ship.Body.position = p; ship.transform.position = p;
             ship.Body.linearVelocity = new Vector2(0f, 12f);
             yield return BusyCycle(transitions, 15f);
-            var spaceCam = director.Space.GetComponentInChildren<Camera>();
-            var spaceShip = director.Space.GetComponentInChildren<SpaceShip>();
             spaceShip.externalInput = true;
             spaceShip.intent = default;
-            var earth = spaceShip.world.Find("earth").Value;
-            spaceShip.Position = earth.position + new Vector2(0f, earth.WellRadius + 50f);
-            spaceShip.Velocity = Vector2.zero;
-            yield return Leg("Space", spaceCam, "planet_earth");
-
-            // ---- Entry → Mars ----
-            while (spaceShip.Invulnerable) yield return null;
-            var mars = spaceShip.world.Find("mars").Value;
-            spaceShip.Position = mars.position + new Vector2(0f, mars.RingRadius + 0.5f);
-            spaceShip.Velocity = new Vector2(0f, -40f);
-            yield return BusyCycle(transitions, 20f);
-            var marsSide = director.PlanetSide;
-            float until = Time.realtimeSinceStartup + 20f;
-            while (!marsSide.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
-            yield return Leg("Mars", marsSide.sideCamera, "planet_earth");
-
-            // ---- U-060: Mercury and Venus. Switch the way a launch does (the planet side unloads, unused assets
-            // are freed), then load the next planet directly to keep the probe short ----
-            foreach (var id in new[] { Meridian.Planets.PlanetId.Mercury, Meridian.Planets.PlanetId.Venus })
+            var body = spaceShip.world.Find(planet);
+            if (body.HasValue)
             {
-                var unload = director.UnloadPlanetSide();
-                if (unload != null) while (!unload.isDone) yield return null;
-                var unused = Resources.UnloadUnusedAssets();
-                while (!unused.isDone) yield return null;
-                yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(id));
-                var s = director.PlanetSide;
-                until = Time.realtimeSinceStartup + 20f;
-                while (!s.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
-                yield return Leg(id.ToString(), s.sideCamera, id == Meridian.Planets.PlanetId.Mercury ? "planet_mars" : "planet_mercury");
+                spaceShip.Position = body.Value.position + new Vector2(0f, body.Value.WellRadius + 50f);
+                spaceShip.Velocity = Vector2.zero;
             }
-            Finish(null);
+        }
+
+        /// <summary>A real entry into `name` (BeginEntry from just outside its ring), then waits for the planet-load clock to stop.</summary>
+        IEnumerator EnterBody(string name)
+        {
+            while (spaceShip.Invulnerable) yield return null;
+            var body = spaceShip.world.Find(name);
+            if (!body.HasValue) { Finish($"no body {name}"); yield break; }
+            spaceShip.Position = body.Value.position + new Vector2(0f, body.Value.RingRadius + 60f);
+            spaceShip.Velocity = Vector2.zero;
+            transitions.BeginEntry(body.Value);
+            yield return BusyCycle(transitions, 30f);
+            float until = Time.realtimeSinceStartup + 10f;
+            while (director.LastPlanetLoadSeconds < 0f && Time.realtimeSinceStartup < until) yield return null;
+            var side = director.PlanetSide;
+            until = Time.realtimeSinceStartup + 20f;
+            while (side != null && !side.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
         }
 
         static IEnumerator BusyCycle(TransitionDirector t, float seconds)
@@ -111,11 +132,16 @@ namespace Meridian.Perf
             while (t.Busy && Time.realtimeSinceStartup < timeout) yield return null;
         }
 
-        IEnumerator Leg(string where, Camera cam, string prevGroup = null)
+        /// <summary>
+        /// One JSON line: the release wait for the previous planet (≤ 5 s), then GC + UnloadUnusedAssets, 120 frames, the
+        /// counters, the D-089 figures (private commit, free RAM, planet load, transition, worst iris-in frame, own handles,
+        /// atlases, packed sprites, mip streaming, loaded bundles by group).
+        /// </summary>
+        IEnumerator Leg(string where, Camera cam, string prevGroup, string ownGroup, float transitionSec)
         {
             var monitor = BudgetMonitor.Instance;
             if (monitor == null) { lines.AppendLine($"{{\"leg\":\"{where}\",\"error\":\"no BudgetMonitor\"}}"); yield break; }
-            // U-086 (Bible §11.1 v3 Residency): the previous planet's handles should be gone within 5 s of the switch.
+            // U-086 (Bible §11.1 Residency): the previous planet's handles should be gone within 5 s of the switch.
             int prevHandles = -1;
             float prevWait = 0f;
             if (prevGroup != null)
@@ -125,14 +151,67 @@ namespace Meridian.Perf
                 while (prevHandles > 0 && Time.realtimeSinceStartup - t0 < 5f) { yield return null; prevHandles = Residency.CountPlanet(prevGroup); }
                 prevWait = Time.realtimeSinceStartup - t0;
             }
+            GC.Collect();
+            yield return Resources.UnloadUnusedAssets();
             monitor.ResetWindow();
             for (int i = 0; i < SettleFrames; i++) yield return null;
             var s = monitor.Snapshot(cam);
+            var ci = System.Globalization.CultureInfo.InvariantCulture;
+            float loadSec = ownGroup != null ? director.LastPlanetLoadSeconds : -1f;
+            int ownHandles = ownGroup != null ? Residency.CountPlanet(ownGroup) : -1;
+            int atlases = ownGroup != null ? BudgetMonitor.LoadedAtlases(ownGroup) : 0;
+            string holders = prevGroup != null ? Residency.Holders(prevGroup).Replace("\"", "'") : "";
+            string breakdown = (director.LastLoadBreakdown ?? "").Replace("\"", "'");
             lines.AppendLine($"{{\"leg\":\"{where}\",\"systemMB\":{s.systemMemoryMB},\"textureMB\":{s.textureMemoryMB},\"audioMB\":{s.audioMemoryMB}," +
-                             $"\"avgFrameMs\":{s.avgFrameMs.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}," +
-                             $"\"workingSetMB\":{s.workingSetMB},\"meshMB\":{s.meshMemoryMB},\"resident\":\"{Residency.ResidentGroups()}\",\"prevGroup\":\"{prevGroup}\",\"prevHandles\":{prevHandles},\"holders\":\"{(prevGroup != null ? Residency.Holders(prevGroup).Replace("\"", "'") : "")}\",\"prevWait\":{prevWait.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}}}");
+                             $"\"avgFrameMs\":{s.avgFrameMs.ToString("F2", ci)}," +
+                             $"\"workingSetMB\":{s.workingSetMB},\"privateMB\":{s.privateMB},\"freeMB\":{ProcessMemory.FreeSystemMB()},\"meshMB\":{s.meshMemoryMB}," +
+                             $"\"resident\":\"{Residency.ResidentGroups()}\",\"prevGroup\":\"{prevGroup}\",\"prevHandles\":{prevHandles},\"holders\":\"{holders}\",\"prevWait\":{prevWait.ToString("F1", ci)}," +
+                             $"\"ownGroup\":\"{ownGroup}\",\"ownHandles\":{ownHandles},\"loadSec\":{loadSec.ToString("F2", ci)},\"transitionSec\":{transitionSec.ToString("F2", ci)}," +
+                             $"\"irisInWorstMs\":{transitions.LastIrisInWorstMs.ToString("F1", ci)},\"breakdown\":\"{breakdown}\"," +
+                             $"\"atlases\":{atlases},\"packedSprites\":{BudgetMonitor.PackedSprites()},\"mipActive\":{(s.mipStreaming ? 1 : 0)},\"mipBudgetMB\":{s.mipBudgetMB}," +
+                             $"\"nonStreamingMB\":{(long)(Texture.nonStreamingTextureMemory / 1048576UL)},\"desiredMB\":{(long)(Texture.desiredTextureMemory / 1048576UL)},\"targetMB\":{(long)(Texture.targetTextureMemory / 1048576UL)}," +
+                             $"\"bundles\":\"{Bundles()}\"}}");
             TopTextures(where, 15);
             if (where == "Earth") yield return FilmGpu(where); // U-095: the film pass's GPU cost at 1080p
+        }
+
+        /// <summary>
+        /// U-091: the Addressables groups of the loaded bundles (m_InternalBundleIdMode 1 hashes bundle names, so the group
+        /// is recovered from the first art asset inside each bundle; a bundle with no parseable entry reports its own name).
+        /// </summary>
+        static string Bundles()
+        {
+            var groups = new List<string>();
+            foreach (var b in AssetBundle.GetAllLoadedAssetBundles())
+            {
+                string g = null;
+                foreach (var n in b.GetAllAssetNames()) { g = GroupFromAssetName(n); if (g != null) break; }
+                if (g == null) foreach (var n in b.GetAllScenePaths()) { g = GroupFromAssetName(n); if (g != null) break; }
+                g ??= b.name;
+                if (!groups.Contains(g)) groups.Add(g);
+            }
+            groups.Sort(string.CompareOrdinal);
+            return string.Join(", ", groups);
+        }
+
+        static readonly string[] ArtRoots = { "/_game/art/", "/_game/placeholders/" };
+        static readonly string[] MapSuffixes = { "_color", "_normal", "_emission", "_mask" };
+
+        static string GroupFromAssetName(string assetName)
+        {
+            var n = assetName.ToLowerInvariant();
+            foreach (var root in ArtRoots)
+            {
+                int i = n.IndexOf(root, StringComparison.Ordinal);
+                if (i < 0) continue;
+                var rel = n.Substring(i + root.Length);
+                int dot = rel.LastIndexOf('.');
+                if (dot > 0) rel = rel.Substring(0, dot);
+                foreach (var suffix in MapSuffixes)
+                    if (rel.EndsWith(suffix, StringComparison.Ordinal)) { rel = rel.Substring(0, rel.Length - suffix.Length); break; }
+                return Meridian.Art.ArtKeys.GroupOf(rel);
+            }
+            return null;
         }
 
         /// <summary>

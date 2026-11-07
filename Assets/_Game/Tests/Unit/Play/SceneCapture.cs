@@ -15,6 +15,16 @@ namespace Meridian.Tests
     /// </summary>
     public class SceneCapture
     {
+        // U-091 (D-110 (4)): review captures force-load every mip, so streamed model maps are never shot reduced under the
+        // 512 MB mip budget; the smoke shots (BuildSmoke) keep the budget and show what the player sees.
+        bool savedForceAllMips;
+
+        [SetUp]
+        public void ForceAllMipsForTheCapture() { savedForceAllMips = Texture.streamingTextureForceLoadAll; Texture.streamingTextureForceLoadAll = true; }
+
+        [TearDown]
+        public void RestoreMipStreaming() { Texture.streamingTextureForceLoadAll = savedForceAllMips; }
+
         public const string Variable = "MERIDIAN_CAPTURE";
         const string CorePath = "Assets/_Game/Scenes/Core.unity";
 
@@ -365,6 +375,15 @@ namespace Meridian.Tests
             while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
             director.SetView(ViewMode.Space);
             var world = UnityEngine.Object.FindAnyObjectByType<Meridian.Space.SpaceWorld>();
+            // U-103: park the ship outside Earth's well for the shots; left at the Waystation it drifts into the Atmosphere Ring and an entry fires mid-capture.
+            var parkedShip = director.Space.GetComponentInChildren<Meridian.Space.SpaceShip>();
+            if (parkedShip != null)
+            {
+                parkedShip.externalInput = true;
+                parkedShip.intent = default;
+                var earthBody = parkedShip.world != null ? parkedShip.world.Find("earth") : null;
+                if (earthBody.HasValue) { parkedShip.Position = earthBody.Value.position + new Vector2(0f, earthBody.Value.WellRadius + 50f); parkedShip.Velocity = Vector2.zero; }
+            }
             var cam = director.Space.GetComponentInChildren<Camera>();
             var follow = cam.GetComponent<Meridian.Space.SpaceCamera>();
             if (follow != null) follow.enabled = false;
@@ -1262,6 +1281,235 @@ namespace Meridian.Tests
             }
         }
 
+        /// <summary>
+        /// U-108: the C0 v4.1 re-shoot into reports/unity/c0_&lt;date&gt;/v41/: CaptureC0Set's nine shots (U-098 numbering and labels)
+        /// with BLENDER's v3.1 re-inks in the scene (D-100 thinner ink, D-101 the faceless snoozle, D-102 the upright Pilgrim):
+        /// B-125 surveyor, B-126 snoozle rig set (replaces_part head/leaves, swap_cycle on the beat; Bible §9.4), B-127 gull
+        /// (52 frames, fly 40–51). Every shot logs the U-098 facts plus the nearest snoozle's head sprite (its swap_cycle / react
+        /// position; 'n/a' when the live set has no head bone) and, for the gull, its sheet frame and the clip that frame belongs
+        /// to. The stage's load-time gull is despawned at boot (it kept the placeholder frames it was spawned with) and shot 6
+        /// waits for the gull sheet. Afterwards the test writes v41/README.md: the date, a shot table and the sheets in play with
+        /// their sidecar sizes. CaptureC0Set and CaptureU107Ship are untouched.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator CaptureV41Set()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            Meridian.View2D.CartoonStage.Enabled = true;
+            bool film = Meridian.Core.GameSettings.FilmEffects;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false;
+                // The stage's load-time gull (CartoonStage.ConfigureFor) is spawned before its sheet arrives and Creature.Setup keeps
+                // the frames it was given, so it drew as a white quad in the U-107 captures: clear the stage; shot 6 spawns its own.
+                foreach (var c in side.creatures.All)
+                    if (c.Alive) { TestContext.Out.WriteLine($"[MERIDIAN] v41 despawning {c.Spec.id} at {c.Body.position} (view {SpriteName(c.View)})"); side.creatures.Despawn(c); }
+                var player = side.player;
+                player.externalInput = true; player.intent = default;
+                var view = side.cartoon.Surveyor;
+                var flora = side.cartoon.Flora;
+                timeout = Time.realtimeSinceStartup + 15f;
+                while ((!view.Ready || flora == null || !flora.Ready) && Time.realtimeSinceStartup < timeout) yield return null;
+                string floraState = flora != null
+                    ? $"json {flora.Set != null} (parse error: {flora.ParseError ?? "none"}), parts {flora.SpriteCount}, controller {flora.Controller != null}; nothing found at: {flora.Missing}"
+                    : "no FloraRigs (cartoon stage off?)";
+                Assert.IsTrue(view.Ready && flora != null && flora.Ready, $"surveyor sheet and flora loaded: surveyor {view.Ready}, flora {floraState}");
+                Assert.AreEqual(Meridian.View2D.CartoonStage.FloraCount, flora.Plants.Count, "the C0 flora: 48 rigged instances (U-108 accept)");
+                for (int i = 0; i < 60; i++) yield return null;
+                Meridian.Core.GameSettings.FilmEffects = true;
+                var cam = side.sideCamera;
+                var dir = $"coordination/reports/unity/c0_{DateTime.Now:yyyy-MM-dd}/v41";
+                Directory.CreateDirectory(dir);
+                var rows = new System.Text.StringBuilder();
+                int shots = 0;
+
+                IEnumerator Shot(string label, string shows, string facts)
+                {
+                    yield return Save(cam, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    TestContext.Out.WriteLine($"[MERIDIAN] v41 {label}: {shows}; {facts}");
+                    rows.AppendLine($"| {++shots} | {label}.png | {shows} | {facts} |");
+                }
+
+                Meridian.Flora.RigPlant Nearest(float x)
+                {
+                    Meridian.Flora.RigPlant best = null;
+                    foreach (var p in flora.Plants)
+                        if (best == null || Mathf.Abs(p.Root.position.x - x) < Mathf.Abs(best.Root.position.x - x)) best = p;
+                    return best;
+                }
+
+                // The head and leaves bones' own renderers carry the replaces_part swaps (B-126); the mouth is the daisy fallback (none for the snoozle, D-101).
+                string PlantFacts(Meridian.Flora.RigPlant p) => p == null ? "no plant"
+                    : $"{p.Def.name} head {BonePart(p, "head")}, leaves {BonePart(p, "leaves")}, mouth {SpriteName(p.Mouth)}, swaps [{string.Join(" ", p.Def.swaps.Keys)}], beat {60f / Mathf.Max(1f, p.Def.idle.beat_bpm):F3} s";
+
+                // 1. idle
+                for (int i = 0; i < 24; i++) yield return null;
+                yield return Shot("1_idle", "the surveyor idle among the snoozles",
+                    $"clip {view.Clip}, plants {flora.Plants.Count} (full rate {flora.FullRateCount}, cheap {flora.CheapCount}), set {flora.Set.style} {flora.Key}, nearest {PlantFacts(Nearest(player.Body.position.x))}");
+
+                // 2. walk (right, mid-stride)
+                player.intent = new Meridian.Player.PlayerIntent { move = 1f };
+                for (int i = 0; i < 35; i++) yield return new WaitForFixedUpdate();
+                yield return Shot("2_walk", "walking right, mid-stride", $"clip {view.Clip}, vx {player.Body.linearVelocity.x:F1} m/s, nearest {PlantFacts(Nearest(player.Body.position.x))}");
+                player.intent = default;
+                for (int i = 0; i < 25; i++) yield return new WaitForFixedUpdate();
+
+                // 3. jump (rising) and 4. land (the frame after touchdown)
+                player.PressJump();
+                float until = Time.realtimeSinceStartup + 3f;
+                while (player.Grounded && Time.realtimeSinceStartup < until) yield return new WaitForFixedUpdate();
+                for (int i = 0; i < 8; i++) yield return new WaitForFixedUpdate();
+                yield return Shot("3_jump", "the jump, rising", $"clip {view.Clip}, vy {player.Body.linearVelocity.y:F1} m/s, nearest {PlantFacts(Nearest(player.Body.position.x))}");
+                until = Time.realtimeSinceStartup + 4f;
+                while (!player.Grounded && Time.realtimeSinceStartup < until) yield return new WaitForFixedUpdate();
+                yield return null;
+                yield return Shot("4_land", "the frame after touchdown (squash)",
+                    $"clip {view.Clip}, impact {player.LastImpactSpeed:F1} m/s, squash y {view.SquashRoot.localScale.y:F2}, nearest {PlantFacts(Nearest(player.Body.position.x))}");
+                for (int i = 0; i < 40; i++) yield return null;
+
+                // 5. plant react: stand 1.5 m right of the nearest plant on the left (inside its 3 m radius)
+                Meridian.Flora.RigPlant plant = null;
+                float px = player.Body.position.x;
+                foreach (var p in flora.Plants)
+                    if (p.Root.position.x < px - 2f && (plant == null || p.Root.position.x > plant.Root.position.x)) plant = p;
+                Assert.NotNull(plant, "a plant to the left of the surveyor");
+                var stand = new Vector2(plant.Root.position.x + 1.5f, side.terrain.TopSolidY(Mathf.FloorToInt(plant.Root.position.x + 1.5f)) + 1.05f);
+                player.Body.position = stand; player.transform.position = stand; player.Body.linearVelocity = Vector2.zero;
+                for (int i = 0; i < 12; i++) yield return null;
+                yield return Shot("5_plant_react", "the nearest snoozle reacting to the surveyor (turned, react swap on the head, leaves up)",
+                    $"reacting {plant.Reacting}, facing {plant.Facing}, {PlantFacts(plant)}, react action {plant.Def.react.action} swap {plant.Def.react.swap ?? "none"}");
+                Assert.IsTrue(plant.Reacting, "the plant reacts within its radius");
+
+                // 6. critter: one gull 8 m off (outside its 6 m flee range), framed on purpose, from the B-127 sheet
+                foreach (var c in side.creatures.All) if (c.Alive) side.creatures.Despawn(c);
+                until = Time.realtimeSinceStartup + 10f;
+                while (!side.creatures.ArtReady(Meridian.Creatures.Species.Gull) && Time.realtimeSinceStartup < until) yield return null;
+                Assert.IsTrue(side.creatures.ArtReady(Meridian.Creatures.Species.Gull), "the gull sheet (creatures/earth/gull, B-127) loaded: a placeholder quad is not the v4.1 evidence");
+                var gullAt = player.Body.position + new Vector2(8f, 3f);
+                var gull = side.creatures.Spawn(Meridian.Creatures.Species.Gull, gullAt);
+                Assert.NotNull(gull, "a gull");
+                // U-108: spawned in the air it lifts into `fly` after its airborne hysteresis; the still waits for that drawing.
+                until = Time.realtimeSinceStartup + 3f;
+                while (gull.CurrentClip != "fly" && Time.realtimeSinceStartup < until) yield return null;
+                for (int i = 0; i < 3; i++) yield return null;
+                var vp = cam.WorldToViewportPoint(gull.Body.position);
+                float ground = side.terrain.TopSolidY(Mathf.FloorToInt(gull.Body.position.x)) + 1f;
+                yield return Shot("6_critter_gull", "one gull framed on purpose, 8 m off (outside its 6 m flee range), airborne",
+                    $"gull at {gull.Body.position}, viewport ({vp.x:F2}, {vp.y:F2}), {gull.Body.position.y - ground:F1} m over the ground, state {gull.State}, pick {gull.LastPick}, flies {gull.Spec.Flies}, sprite {SpriteName(gull.View)}, clip {ClipOf(gull)}");
+                Assert.IsTrue(vp.x > 0.05f && vp.x < 0.95f && vp.y > 0.05f && vp.y < 0.95f, "the gull is in the frame");
+
+                // 7. iris mid-wipe (0.175 s into the 0.35 s close, on the surveyor)
+                var iris = Meridian.Transitions.IrisWipe.Instance;
+                Assert.NotNull(iris);
+                var canvas = iris.GetComponentInParent<Canvas>();
+                var mode = canvas.renderMode;
+                canvas.renderMode = RenderMode.ScreenSpaceCamera; canvas.worldCamera = cam; canvas.planeDistance = 1f;
+                iris.Preview(Meridian.Transitions.IrisWipe.ScreenCentre(cam, player.Body.position + new Vector2(0f, 0.9f)), Meridian.Transitions.IrisMath.Seconds * 0.5f, true);
+                yield return null;
+                yield return Shot("7_iris_mid", "the iris 0.175 s into its 0.35 s close, centred on the surveyor", $"radius {iris.Radius:F3} screen heights");
+                iris.SetOpen();
+                canvas.renderMode = mode;
+                yield return null;
+
+                // 8. film off / 9. film on (the same frame)
+                Meridian.Core.GameSettings.FilmEffects = false;
+                for (int i = 0; i < 3; i++) yield return null;
+                yield return Shot("8_film_off", "the same frame without the film pass", "film effects off");
+                Meridian.Core.GameSettings.FilmEffects = true;
+                for (int i = 0; i < 3; i++) yield return null;
+                yield return Shot("9_film_on", "the same frame with the film pass (B-115 grain, vignette, dust, scratches)", "film effects on");
+
+                // The README beside the stills: what each shows and the sheets (sidecar sizes) in play.
+                var sb = new System.Text.StringBuilder();
+                sb.AppendLine($"# C0 v4.1 re-shoot · U-108 · {DateTime.Now:yyyy-MM-dd HH:mm}");
+                sb.AppendLine();
+                sb.AppendLine("v4.1 (D-100/D-101/D-102: thinner ink, faceless snoozle, upright Pilgrim). `SceneCapture.CaptureV41Set` via " +
+                              "`tools/unity_capture.ps1 -Name v41 -Test CaptureV41Set`; the film pass is on in every still but 8. Art in the scene: " +
+                              "B-125 surveyor, B-126 snoozle rig set v3.1 (`replaces_part` head/leaves, `swap_cycle` on the beat), B-127 gull " +
+                              "(52 frames, fly 40–51), B-114 plains layers, B-115 film overlays.");
+                sb.AppendLine();
+                sb.AppendLine($"Run: plants {flora.Plants.Count} (full rate {flora.FullRateCount}, cheap {flora.CheapCount}), rig set style {flora.Set.style}, daylight override 0.45, 1920×1080.");
+                sb.AppendLine();
+                sb.AppendLine("| Shot | File | What it shows | Logged facts |");
+                sb.AppendLine("|---|---|---|---|");
+                sb.Append(rows);
+                sb.AppendLine();
+                sb.AppendLine("Sheets in play: " + SidecarSize("characters/surveyor/side", false) + ", " + SidecarSize("creatures/earth/gull", false) + ", "
+                              + SidecarSize("flora/earth/rigset", true) + ", " + SidecarSize("characters/calibration_v3/side", false) + ".");
+                File.WriteAllText($"{dir}/README.md", sb.ToString());
+                TestContext.Out.WriteLine($"[MERIDIAN] v41 README: {dir}/README.md ({shots} shots)");
+                side.dayNight.Override = null;
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Meridian.Core.GameSettings.FilmEffects = film;
+                Meridian.View2D.CartoonStage.Enabled = false;
+            }
+        }
+
+        static string SpriteName(SpriteRenderer r) => r != null && r.sprite != null ? r.sprite.name : "none";
+
+        /// <summary>U-108: the sprite the bone named `bone` draws (sliced part names equal sprite names, so a replaces_part swap shows here), or 'n/a' without such a bone.</summary>
+        static string BonePart(Meridian.Flora.RigPlant plant, string bone)
+        {
+            if (plant == null || plant.Def == null || plant.Def.bones == null || plant.Parts == null) return "n/a";
+            for (int i = 0; i < plant.Def.bones.Length && i < plant.Parts.Length; i++)
+                if (plant.Def.bones[i].name == bone)
+                    return plant.Parts[i] != null && plant.Parts[i].sprite != null ? plant.Parts[i].sprite.name : "n/a";
+            return "n/a";
+        }
+
+        /// <summary>U-108: the clip a creature's current sheet frame (`&lt;sheet&gt;_N`) belongs to, by the sheet's registered clips (ArtMaterials); 'n/a' off a sheet.</summary>
+        static string ClipOf(Meridian.Creatures.Creature c)
+        {
+            if (c == null || c.Spec == null || c.View == null || c.View.sprite == null) return "n/a";
+            var set = Meridian.Rendering.ArtMaterials.ClipsFor(c.Spec.artKey);
+            string sprite = c.View.sprite.name;
+            int u = sprite.LastIndexOf('_');
+            if (set == null || u < 0 || !int.TryParse(sprite.Substring(u + 1), out int frame)) return "n/a";
+            foreach (var clip in set.clips)
+                if (frame >= clip.start && frame < clip.start + clip.length) return $"{clip.name} ({clip.start}-{clip.start + clip.length - 1})";
+            return $"frame {frame} in no clip";
+        }
+
+        [System.Serializable] sealed class SheetMeta { public int frame_width, frame_height, frames; }
+        [System.Serializable] sealed class RigMeta { public RigPartMeta[] parts; public RigPlantMeta[] plants; }
+        [System.Serializable] sealed class RigPartMeta { public string name; }
+        [System.Serializable] sealed class RigPlantMeta { public string name; }
+
+        /// <summary>U-108: "key W×H×frames" from a sheet's sidecar json, or the rig set's part and plant counts; read from disk (Assets/_Game/Art/&lt;key&gt;.json).</summary>
+        static string SidecarSize(string key, bool rigSet)
+        {
+            var path = $"Assets/_Game/Art/{key}.json";
+            if (!File.Exists(path)) return $"{key} (no sidecar)";
+            try
+            {
+                var json = File.ReadAllText(path);
+                if (rigSet)
+                {
+                    var r = JsonUtility.FromJson<RigMeta>(json);
+                    return $"{key} {(r != null && r.parts != null ? r.parts.Length : 0)} parts, {(r != null && r.plants != null ? r.plants.Length : 0)} plant(s)";
+                }
+                var s = JsonUtility.FromJson<SheetMeta>(json);
+                return s != null ? $"{key} {s.frame_width}×{s.frame_height}×{s.frames}" : $"{key} (unreadable)";
+            }
+            catch (Exception e) { return $"{key} (unreadable: {e.Message})"; }
+        }
+
         static IEnumerator Save(Camera cam, string name)
         {
             var rt = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);
@@ -1472,7 +1720,7 @@ namespace Meridian.Tests
                 while ((legs == null || legs.Model == null || !legs.Model.Ready) && Time.realtimeSinceStartup < timeout) yield return null;
                 // Clean shots: whatever the stage spawned at load is logged, then despawned.
                 foreach (var c in side.creatures.All)
-                    if (c.Alive) { TestContext.Out.WriteLine($"[MERIDIAN] u107 despawning {c.Species} at {c.Body.position} (view {(c.View != null && c.View.sprite != null ? c.View.sprite.name : "none")})"); side.creatures.Despawn(c); }
+                    if (c.Alive) { TestContext.Out.WriteLine($"[MERIDIAN] u107 despawning {c.Spec.id} at {c.Body.position} (view {(c.View != null && c.View.sprite != null ? c.View.sprite.name : "none")})"); side.creatures.Despawn(c); }
                 ship.GetComponent<Meridian.Ship.ShipBoarding>().ForceAboard();
                 ship.externalInput = true;
                 ship.intent = default;
@@ -1489,7 +1737,7 @@ namespace Meridian.Tests
                     yield return Save(cam, $"{name}_{label}");
                     File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
                     var lead = (Vector2)cam.transform.position - ship.Body.position;
-                    TestContext.Out.WriteLine($"[MERIDIAN] u107 {label}: tilt {ship.Tilt:F1}°, v ({ship.Body.linearVelocity.x:F1}, {ship.Body.linearVelocity.y:F1}) m/s, T/W {ship.ThrustToWeight:F2}, alt {ship.AltitudeAboveGround:F1} m, camera − hull ({lead.x:F1}, {lead.y:F1}), stage ({(follow != null ? follow.Stage.X : 0f):F1}, {(follow != null ? follow.Stage.Y : 0f):F1}) vs cam ({cam.transform.position.x:F1}, {cam.transform.position.y:F1}), follow {(follow != null && follow.enabled)}, vehicle {(follow != null && follow.Vehicle != null)}, stand-in {(legs != null && legs.StandIn)}");
+                    TestContext.Out.WriteLine($"[MERIDIAN] u107 {label}: tilt {ship.Tilt:F1}°, v ({ship.Body.linearVelocity.x:F1}, {ship.Body.linearVelocity.y:F1}) m/s, T/W {ship.ThrustToWeight:F2}, alt {ship.AltitudeAboveGround:F1} m, camera − hull ({lead.x:F1}, {lead.y:F1}), stage ({(follow != null ? follow.Stage.X : 0f):F1}, {(follow != null ? follow.Stage.Y : 0f):F1}) vs cam ({cam.transform.position.x:F1}, {cam.transform.position.y:F1}), follow {(follow != null && follow.enabled)}/{(follow != null && follow.isActiveAndEnabled)}/{(follow != null && follow.gameObject.activeInHierarchy)}, entries {(follow != null ? follow.Entries : -1)}, steps {(follow != null ? follow.StepsApplied : -1)}, dt {Time.deltaTime:F4}, scale {Time.timeScale}, camGO {cam.gameObject.activeInHierarchy}/{cam.enabled}, vehicle {(follow != null && follow.Vehicle != null)}, stand-in {(legs != null && legs.StandIn)}");
                 }
 
                 // 1. On the pad, aboard, at rest.

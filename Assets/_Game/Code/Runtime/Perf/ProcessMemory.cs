@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Meridian.Perf
 {
-    /// <summary>U-086 (Bible §11.1 v3 "RAM (built game)"): the process working set from the OS on Windows; -1 elsewhere.</summary>
+    /// <summary>U-086 (Bible §11.1 "working set", U-091 private commit): process memory from the OS on Windows; -1 elsewhere.</summary>
     public static class ProcessMemory
     {
         [StructLayout(LayoutKind.Sequential)]
@@ -65,6 +65,20 @@ namespace Meridian.Perf
             {
                 if (GetProcessMemoryInfo(GetCurrentProcess(), out var c, (uint)Marshal.SizeOf<Counters>()))
                     return (long)(ulong)c.WorkingSetSize / (1024L * 1024L);
+            }
+            catch (Exception) { }
+#endif
+            return -1;
+        }
+
+        /// <summary>U-091 (D-089): private commit (PagefileUsage) in MB: page trimming cannot hide a leak in it; -1 off Windows.</summary>
+        public static long PrivateMB()
+        {
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+            try
+            {
+                if (GetProcessMemoryInfo(GetCurrentProcess(), out var c, (uint)Marshal.SizeOf<Counters>()))
+                    return (long)(ulong)c.PagefileUsage / (1024L * 1024L);
             }
             catch (Exception) { }
 #endif

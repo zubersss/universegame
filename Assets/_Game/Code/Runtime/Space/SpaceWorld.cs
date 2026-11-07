@@ -120,6 +120,7 @@ namespace Meridian.Space
         /// </summary>
         void AddSphere(Transform parent, BodyInfo b)
         {
+            ProbeDisc(parent, b); // U-103 (D-098): where the painted disc exists it replaces the spheroid, its shells and Saturn's ring mesh
             var mr = AddShell(parent, "Disc", 2f * b.radius, 10, out var block);
             block.SetFloat(Emissive, b.isSun ? 1f : 0f);
             block.SetFloat(Ambient, 0.06f);
@@ -177,6 +178,95 @@ namespace Meridian.Space
             });
         }
 
+        // ---------- painted discs (U-103, D-098, B-119) ----------
+
+        /// <summary>The bodies drawn as disc sprites (tests and captures).</summary>
+        public readonly List<DiscSprite> Discs = new List<DiscSprite>();
+        public SpriteRenderer RingsBack { get; private set; }
+        public SpriteRenderer RingsFront { get; private set; }
+        /// <summary>Saturn's ring wobble from planets/saturn/disc_rig.json (null until it loads).</summary>
+        public RingWobble.Wobble SaturnWobble { get; private set; }
+        readonly HashSet<string> discBodies = new HashSet<string>();
+        DiscSprite ringDisc;
+        AsyncOperationHandle<TextAsset> rigHandle;
+
+        /// <summary>The disc sheet key of a body: planets/&lt;name&gt;/disc, or planets/&lt;parent&gt;/&lt;name&gt; for a moon (D-098).</summary>
+        public static string DiscKey(BodyInfo b) => b.parent != null ? $"planets/{b.parent}/{b.name}" : $"planets/{b.name}/disc";
+
+        /// <summary>Where planets/&lt;name&gt;/disc exists (art or placeholder), the disc sprite replaces the spheroid and its shells.</summary>
+        void ProbeDisc(Transform parent, BodyInfo b)
+        {
+            var key = DiscKey(b); // a moon's sheet lives under its parent (planets/earth/luna, D-098); a planet's at planets/<name>/disc
+            var locations = Addressables.LoadResourceLocationsAsync(key);
+            locations.Completed += loc =>
+            {
+                bool exists = loc.Status == AsyncOperationStatus.Succeeded && loc.Result != null && loc.Result.Count > 0;
+                global::Meridian.Art.ArtLoad.Release(loc);
+                if (!exists || parent == null) return;
+                discBodies.Add(b.name);
+                foreach (var n in new[] { "Disc", "Atmo", "Clouds", "Rings" })
+                {
+                    var old = parent.Find(n);
+                    if (old == null) continue;
+                    var mr = old.GetComponent<MeshRenderer>();
+                    if (mr != null) Shells.Remove(mr);
+                    if (n == "Rings") { Rings = null; RingsReady = false; }
+                    if (n == "Clouds" && cloudShell != null && cloudShell.transform == old) cloudShell = null;
+                    Destroy(old.gameObject);
+                }
+                var go = new GameObject("Disc");
+                go.transform.SetParent(parent, false);
+                var disc = go.AddComponent<DiscSprite>();
+                disc.Load(key, b.radius, 10);
+                Discs.Add(disc);
+                if (b.name == "saturn") AddRingSprites(parent, disc);
+            };
+        }
+
+        /// <summary>Saturn's painted rings: rings_back behind the disc, rings_front in front, both at the disc's scale, breathing per disc_rig.json.</summary>
+        void AddRingSprites(Transform parent, DiscSprite disc)
+        {
+            ringDisc = disc;
+            RingsBack = RingSprite(parent, "planets/saturn/rings_back", 9);
+            RingsFront = RingSprite(parent, "planets/saturn/rings_front", 11);
+            rigHandle = ArtLoad.Asset<TextAsset>("planets/saturn/disc_rig/json");
+            rigHandle.Completed += op =>
+            {
+                if (this == null || op.Status != AsyncOperationStatus.Succeeded || op.Result == null) return;
+                SaturnWobble = RingWobble.Parse(op.Result.text)?.wobble;
+            };
+        }
+
+        SpriteRenderer RingSprite(Transform parent, string key, int order)
+        {
+            var go = new GameObject(key.Substring(key.LastIndexOf('/') + 1));
+            go.transform.SetParent(parent, false);
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sortingOrder = order;
+            var mat = Meridian.Rendering.ArtMaterials.MaterialFor(key);
+            if (mat != null) sr.sharedMaterial = mat;
+            var h = ArtLoad.Asset<IList<Sprite>>(key);
+            spriteHandles.Add(h);
+            h.Completed += op =>
+            {
+                if (sr == null || op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;
+                sr.sprite = op.Result[0];
+                if (RingsBack != null && RingsFront != null && RingsBack.sprite != null && RingsFront.sprite != null) RingsReady = true; // U-103: both painted rings in
+            };
+            return sr;
+        }
+
+        void StepRings()
+        {
+            if (ringDisc == null || !ringDisc.Ready || RingsBack == null || RingsFront == null) return;
+            var (sy, rot) = RingWobble.At(Time.time, SaturnWobble);
+            float s = ringDisc.Scale;
+            var scale = new Vector3(s, s * sy, 1f);
+            var q = Quaternion.Euler(0f, 0f, rot);
+            RingsBack.transform.localScale = scale; RingsBack.transform.localRotation = q;
+            RingsFront.transform.localScale = scale; RingsFront.transform.localRotation = q;
+        }
+
         /// <summary>Atmosphere and cloud shells, for tests and captures.</summary>
         public readonly List<MeshRenderer> Shells = new List<MeshRenderer>();
 
@@ -203,6 +293,7 @@ namespace Meridian.Space
                 cloudBlock.SetFloat(Rotation, cloudTurn);
                 cloudShell.SetPropertyBlock(cloudBlock);
             }
+            StepRings(); // U-103: Saturn's painted rings breathe on the beat
             if (beltReady && SystemInfo.graphicsDeviceType != GraphicsDeviceType.Null) DrawBelt(); // no device under -nographics tests
         }
 
@@ -225,7 +316,7 @@ namespace Meridian.Space
                 go.transform.SetParent(parent, false);
                 var sr = go.AddComponent<SpriteRenderer>();
                 sr.sharedMaterial = lineMaterial; // unlit: a glow isn't lit by the scene
-                sr.sortingOrder = 9;               // just behind the disc
+                sr.sortingOrder = 8;               // behind the disc and, on Saturn, behind rings_back (U-103)
                 glows.Add(sr);
                 var h = ArtLoad.Asset<IList<Sprite>>(key);
                 h.Completed += op =>
@@ -318,7 +409,7 @@ namespace Meridian.Space
         {
             LoadModelIfExists("planets/saturn/ring_mesh", prefab =>
             {
-                if (prefab == null || parent == null) return;
+                if (prefab == null || parent == null || discBodies.Contains(b.name)) return; // U-103: the painted rings took over
                 var go = Instantiate(prefab, parent, false);
                 go.name = "Rings";
                 go.transform.localPosition = Vector3.zero;
@@ -559,6 +650,7 @@ namespace Meridian.Space
             foreach (var h in spriteHandles) if (h.IsValid()) global::Meridian.Art.ArtLoad.Release(h);
             foreach (var h in prefabHandles) if (h.IsValid()) global::Meridian.Art.ArtLoad.Release(h);
             foreach (var h in materialHandles) if (h.IsValid()) global::Meridian.Art.ArtLoad.Release(h);
+            if (rigHandle.IsValid()) global::Meridian.Art.ArtLoad.Release(rigHandle);
         }
     }
 }

@@ -11,7 +11,7 @@ namespace Meridian.Terrain
 {
     /// <summary>
     /// Streams chunks around the camera (Bible §10.4): generation on a worker thread, apply on
-    /// the main thread within 2 ms per frame, only chunks within 2 of the camera resident, others
+    /// the main thread within 2 ms per frame, chunks within ResidentRadius (3) of the camera resident, others
     /// pooled. The world wraps in x.
     /// </summary>
     public sealed class TerrainStreamer : MonoBehaviour, TerrainChunk.IBlockWorld
@@ -32,7 +32,13 @@ namespace Meridian.Terrain
         public double LastApplyMs { get; private set; }
         public double MaxApplyMs { get; private set; }
         public double MaxBandMs { get; private set; }
-        public bool IsSettled => started && tileSet.IsReady && pending.Count == 0 && ready.IsEmpty && inProgress == null;
+        /// <summary>
+        /// Settled: the sheets are in, the first streaming pass has queued the chunks around the target, and none is pending or
+        /// mid-apply. U-091: with prefetched sheets the tile set is ready the instant Begin returns, so without `firstPass` the
+        /// frame before the first Update read as settled and released the surveyor into empty space (the C0 smoke "fall").
+        /// </summary>
+        public bool IsSettled => started && firstPass && tileSet.IsReady && pending.Count == 0 && ready.IsEmpty && inProgress == null;
+        bool firstPass;
 
         readonly Dictionary<long, TerrainChunk> resident = new Dictionary<long, TerrainChunk>(32);
         readonly HashSet<long> pending = new HashSet<long>();
@@ -102,6 +108,7 @@ namespace Meridian.Terrain
             foreach (var c in pool) c.UseBlocks(this, blockMaterial);
             foreach (var c in resident.Values) c.UseBlocks(this, blockMaterial);
             started = true;
+            firstPass = false;
         }
 
         // ---------- U-073: the world as the block mesher sees it ----------
@@ -186,6 +193,7 @@ namespace Meridian.Terrain
                 Retarget(ccx, ccy);
             }
             ApplyReady();
+            firstPass = true;
         }
 
         bool Wanted(int cx, int cy) =>
@@ -404,6 +412,7 @@ namespace Meridian.Terrain
         void Stop()
         {
             started = false;
+            firstPass = false;
             inbox?.CompleteAdding();
             worker?.Join(1000);
             worker = null;

@@ -82,8 +82,13 @@ namespace Meridian.Player
             SnapToTarget();
         }
 
+        /// <summary>Diagnostics (tests): LateUpdate entries and stage steps applied since load.</summary>
+        public int Entries { get; private set; }
+        public int StepsApplied { get; private set; }
+
         void LateUpdate()
         {
+            Entries++;
             if (target == null) return;
             if (haveLast && (target.position - lastTarget).sqrMagnitude > Teleport * Teleport) SnapToTarget();
             lastTarget = target.position; haveLast = true;
@@ -106,6 +111,7 @@ namespace Meridian.Player
             Hook();
             Stage.Step(BuildInput(Time.deltaTime));
             Apply();
+            StepsApplied++;
         }
 
         void Apply()

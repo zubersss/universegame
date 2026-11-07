@@ -50,12 +50,17 @@ namespace Meridian.EditorTools
             public string facing = "right";
             /// <summary>Optional pixels per metre for this sheet (D-031/D-034: creature sheets); 0 = the 128 default.</summary>
             public float ppu;
+            /// <summary>U-103 (contract §11.5, D-098): space art: pixels per unit in the top-down view (3) and the drawn radius in units; the sidecar is addressed at &lt;key&gt;/json so the runtime scales the disc from radius_u.</summary>
+            public float space_ppu, radius_u;
             /// <summary>Animation clips (contract §5); recorded in the runtime registry for U-032.</summary>
             public SheetClip[] animations;
             /// <summary>Contract v3.0 §11: "v3" routes the asset to the cartoon rules (ArtImporter v13).</summary>
             public string style;
             /// <summary>§11.6 film overlay / tileable image (no frames).</summary>
             public bool overlay, tile, squash_root;
+            /// <summary>U-104 (B-121): a sheet of named parts (rects bottom-left + pivots, rig-set style: ui/hud/gauges) sliced by RigSetBuilder.SliceIfParts.</summary>
+            public Meridian.Flora.RigSet.Part[] parts;
+            public bool HasParts => parts != null && parts.Length > 0;
             public bool IsV3 => style == "v3";
             /// <summary>A frame sheet (frames &gt; 0); a v3 sidecar without frames describes a single image.</summary>
             public bool IsSheet => frames > 0 && frame_width > 0 && frame_height > 0 && columns > 0;
@@ -155,6 +160,14 @@ namespace Meridian.EditorTools
             if (kind == RootKind.None || !rel.EndsWith(".png", StringComparison.Ordinal)) return;
             var ti = (TextureImporter)assetImporter;
 
+            // U-091 (D-089): every texture of a planet (sheets, v3 assets, block textures, model maps) stays under 512 MB stored.
+            // Order-stable: the planet's files are taken in path order, so the same last files are rejected whatever the import order.
+            if (kind == RootKind.Art && OverPlanetCap(assetPath, rel, out var capPlanet, out var capStored))
+            {
+                Debug.LogError($"[ArtImporter] Rejected {assetPath}: {capPlanet}'s textures up to this file (path order) would store {capStored / 1048576} MB, over the {ArtRules.PlanetTextureCap / 1048576} MB per-planet cap (D-089).");
+                return;
+            }
+
             // U-073 / B-080: block material textures are plain repeat-wrapped textures for the block arrays.
             if (kind == RootKind.Art && ArtRules.IsBlockTexture(rel, out _, out _, out _, out var blockMap))
             {
@@ -178,16 +191,6 @@ namespace Meridian.EditorTools
             // U-094 (contract v3.0 §11, v13): cartoon assets take their own rules and skip the v2 lit/model paths.
             if (map == ArtMap.Color && ConfigureV3(ti, key, w, h)) return;
 
-            // U-091 (contract §10): a planet's stage-layer textures stay under 700 MB stored; the newest layer over the cap is rejected.
-            if (kind == RootKind.Art && ArtRules.IsStageLayer(key, out var layerPlanet))
-            {
-                long stored = StageLayerBytes(layerPlanet, assetPath) + ArtRules.StoredBytes(w, h);
-                if (stored > ArtRules.LayerCapBytes)
-                {
-                    Debug.LogError($"[ArtImporter] Rejected {assetPath}: {layerPlanet}'s stage layers would store {stored / 1048576} MB, over the 700 MB cap (contract §10).");
-                    return;
-                }
-            }
             var rule = ArtRules.RuleFor(key);
             // U-060 (ArtCompressionProbe): Unity stores a non-power-of-two texture with mipmaps UNCOMPRESSED
             // (RGBA32/RGB24, ~4× the memory) whatever the BC7/BC5 setting, because its smaller mips stop being
@@ -287,8 +290,9 @@ namespace Meridian.EditorTools
             SetStandaloneFormat(ti, TextureImporterFormat.BC7);
 
             bool frames = sheet != null && sheet.IsSheet;
-            bool multiple = frames || RigSetBuilder.IsRigSet(key); // a rig set's parts are sliced by RigSetBuilder and must stay Multiple
-            var pivot = frames && sheet.pivot != null && sheet.pivot.Length == 2 ? new Vector2(sheet.pivot[0], sheet.pivot[1])
+            bool multiple = frames || RigSetBuilder.IsRigSet(key) || (sheet != null && sheet.HasParts); // rig-set and parts sheets are sliced by RigSetBuilder and must stay Multiple
+            // U-104: the sidecar pivot applies to single images too (ui/hud/escape_sign wants [0.5, 0]), not only to frame sheets.
+            var pivot = sheet != null && sheet.pivot != null && sheet.pivot.Length == 2 ? new Vector2(sheet.pivot[0], sheet.pivot[1])
                 : ArtRules.SceneKeyOf(key) != null ? new Vector2(0.5f, 0f) : new Vector2(0.5f, 0.5f); // layers stand on their y_m line
             var s = new TextureImporterSettings();
             ti.ReadTextureSettings(s);
@@ -367,6 +371,7 @@ namespace Meridian.EditorTools
             {
                 Classify(path, out var rel);
                 if (!ArtRules.IsBlockTexture(rel, out var planet, out var material, out var face, out var map)) continue;
+                if (OverPlanetCap(path, rel, out _, out _)) continue; // U-091: a block texture over its planet's cap is not registered
                 var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
                 if (tex == null) continue;
                 var e = reg.FindBlock(planet, material, face);
@@ -382,23 +387,95 @@ namespace Meridian.EditorTools
             if (dirty) { EditorUtility.SetDirty(reg); AssetDatabase.SaveAssetIfDirty(reg); }
         }
 
-        /// <summary>U-091: stored bytes of every stage-layer PNG of `planet` already in Art/ (IHDR dimensions), `except` one path.</summary>
-        public static long StageLayerBytes(string planet, string except)
+        /// <summary>U-091 (D-089): stored bytes (IHDR sizes) of every PNG of `planet` under Art/, `except` one path (tests and reports; uncached).</summary>
+        public static long PlanetTextureBytes(string planet, string except)
         {
             long sum = 0;
-            foreach (var root in new[] { Active.art + "backgrounds", Active.art + "props" })
+            var ex = ArtRules.Normalize(except ?? "");
+            foreach (var (path, bytes) in PlanetFiles(planet, false)) if (path != ex) sum += bytes;
+            return sum;
+        }
+
+        static readonly string[] PlanetTextureRoots = { "terrain", "creatures", "flora", "props", "backgrounds" };
+        /// <summary>Per import batch: a planet's PNGs sorted by path with their stored bytes (cleared at the end of OnPostprocessAllAssets).</summary>
+        static readonly Dictionary<string, List<(string path, long bytes)>> planetFiles = new Dictionary<string, List<(string path, long bytes)>>();
+
+        static List<(string path, long bytes)> PlanetFiles(string planet, bool cached)
+        {
+            if (cached && planetFiles.TryGetValue(planet, out var hit)) return hit;
+            var list = new List<(string path, long bytes)>();
+            foreach (var cat in PlanetTextureRoots)
             {
+                var root = Active.art + cat;
                 if (!Directory.Exists(root)) continue;
                 foreach (var file in Directory.GetFiles(root, "*.png", SearchOption.AllDirectories))
                 {
                     var path = ArtRules.Normalize(file);
-                    if (path == ArtRules.Normalize(except)) continue;
-                    if (Classify(path, out var rel) != RootKind.Art || !ArtRules.TryParse(rel, out var k, out _)) continue;
-                    if (!ArtRules.IsStageLayer(k, out var p) || p != planet) continue;
-                    if (PngSize(path, out int pw, out int ph)) sum += ArtRules.StoredBytes(pw, ph);
+                    if (Classify(path, out var rel) != RootKind.Art || ArtRules.PlanetOfTexture(rel) != planet) continue;
+                    if (PngSize(path, out int pw, out int ph)) list.Add((path, ArtRules.StoredBytes(pw, ph)));
                 }
             }
-            return sum;
+            list.Sort((a, b) => string.CompareOrdinal(a.path, b.path));
+            if (cached) planetFiles[planet] = list;
+            return list;
+        }
+
+        /// <summary>
+        /// U-091 (D-089): true when `path` (an Art/ PNG) breaks its planet's 512 MB cap: the stored bytes of the planet's files
+        /// before it in path order plus its own. The same files are rejected whatever the import order (Reimport All, a fresh Library).
+        /// </summary>
+        static bool OverPlanetCap(string path, string rel, out string planet, out long stored)
+        {
+            stored = 0;
+            planet = ArtRules.PlanetOfTexture(rel);
+            if (planet == null) return false;
+            var norm = ArtRules.Normalize(path);
+            long before = 0, own = -1;
+            foreach (var (p, bytes) in PlanetFiles(planet, true))
+            {
+                if (p == norm) { own = bytes; break; }
+                if (string.CompareOrdinal(p, norm) < 0) before += bytes;
+            }
+            if (own < 0) { if (!PngSize(norm, out int w, out int h)) return false; own = ArtRules.StoredBytes(w, h); }
+            stored = before + own;
+            return stored > ArtRules.PlanetTextureCap;
+        }
+
+        /// <summary>U-103: addresses every planets/* sidecar already on disk at &lt;key&gt;/json (one-time: -ExecuteMethod Meridian.EditorTools.ArtImporter.AddressPlanetSidecars).</summary>
+        public static int AddressPlanetSidecars()
+        {
+            int n = 0;
+            var root = Active.art + "planets";
+            if (Directory.Exists(root))
+                foreach (var file in Directory.GetFiles(root, "*.json", SearchOption.AllDirectories))
+                {
+                    var path = ArtRules.Normalize(file);
+                    if (Classify(path, out var rel) != RootKind.Art) continue;
+                    AddressStage(path, rel.Substring(0, rel.Length - ".json".Length) + "/json");
+                    n++;
+                }
+            AssetDatabase.SaveAssets();
+            Debug.Log($"[ArtImporter] AddressPlanetSidecars: {n} sidecars addressed.");
+            return n;
+        }
+
+        /// <summary>
+        /// U-091 (D-110): re-registers the shared terrain sheets (ArtKeys.Terrain.Shared) so they move to `common` and leave their
+        /// planet atlases. Run once: -ExecuteMethod Meridian.EditorTools.ArtImporter.RegisterSharedTerrain (an -ExecuteMethod run quits
+        /// before the auto-save, hence SaveAssets).
+        /// </summary>
+        public static void RegisterSharedTerrain()
+        {
+            int n = 0;
+            foreach (var key in ArtKeys.Terrain.Shared)
+            {
+                var colorPath = ArtColorPath(key);
+                if (!File.Exists(colorPath)) continue;
+                Register(colorPath, key);
+                n++;
+            }
+            AssetDatabase.SaveAssets();
+            Debug.Log($"[ArtImporter] RegisterSharedTerrain: {n} shared sheets in common, out of their planet atlases.");
         }
 
         /// <summary>Width and height from a PNG's IHDR chunk (no decode).</summary>
@@ -610,6 +687,8 @@ namespace Meridian.EditorTools
                 if (sceneJson != null) { AddressStage(path, sceneJson); continue; }
                 if (rel.EndsWith(".json", StringComparison.Ordinal))
                 {
+                    // U-103 (D-098): planets/* sidecars (disc, luna, rings, disc_rig) are TextAssets at <key>/json: the runtime reads radius_u and the wobble.
+                    if (kind == RootKind.Art && rel.StartsWith("planets/", StringComparison.Ordinal)) AddressStage(path, rel.Substring(0, rel.Length - ".json".Length) + "/json");
                     // A new or edited sheet manifest re-slices its color sheet.
                     var color = path.Substring(0, path.Length - ".json".Length) + "_color.png";
                     if (File.Exists(color)) AssetDatabase.ImportAsset(color, ImportAssetOptions.ForceUpdate);
@@ -657,6 +736,7 @@ namespace Meridian.EditorTools
                 SliceIfNeeded(colorPath, key);
                 SheetAnimatorBuilder.BuildIfV3(colorPath, key); // U-094: Animator clips at 12 fps + one controller per sheet
                 RigSetBuilder.BuildIfRigSet(colorPath, key);  // U-097: part rects + one sway controller per rig set
+                RigSetBuilder.SliceIfParts(colorPath, key);  // U-104: a sheet with parts (ui/hud/gauges) is sliced like a rig set, its json addressed
                 LinkSecondaries(colorPath, key);
                 materialKeys.Add(key);
                 bool isArt = colorPath.StartsWith(Active.art, StringComparison.Ordinal);
@@ -689,6 +769,7 @@ namespace Meridian.EditorTools
             var modelKeys = new HashSet<string>();
             CollectModelKeys(imported.Concat(moved), modelKeys);
             GenerateModels(modelKeys);
+            planetFiles.Clear(); // U-091: the per-batch planet file cache
         }
 
         // ---------- material registry (U-019) ----------
@@ -761,6 +842,7 @@ namespace Meridian.EditorTools
             if (ti == null) return false;
             ti.GetSourceTextureWidthAndHeight(out int w, out int h);
             if (ArtRules.Validate(ArtRules.FileBytes(colorPath), w, h) != null) return false;
+            if (Classify(colorPath, out var relCap) == RootKind.Art && OverPlanetCap(colorPath, relCap, out _, out _)) return false; // U-091: over the planet cap, never addressed
             // U-094: a rejected v3 asset is never addressed.
             Classify(colorPath, out var rel);
             if (!ArtRules.TryParse(rel, out var key, out _)) return true;
@@ -818,6 +900,7 @@ namespace Meridian.EditorTools
             StageLabel(entry, key);
             var atlas = ArtRules.AtlasFor(key);
             if (atlas != null) AddToAtlas(atlas, colorPath);
+            else if (ArtKeys.IsSharedTerrain(key)) RemoveFromAtlas("planet_" + key.Split('/')[1], colorPath); // U-091: a shared sheet leaves its old planet atlas
         }
 
         /// <summary>U-090 (Bible §10.10): every asset of a region's set carries the label stage_<planet>_<region> (backgrounds/<planet>_<region>/…).</summary>

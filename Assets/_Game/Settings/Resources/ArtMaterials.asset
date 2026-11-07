@@ -954,6 +954,69 @@ MonoBehaviour:
       start: 0
       length: 8
       loop: 1
+  - key: planets/earth/disc
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 12
+      loop: 1
+  - key: planets/earth/luna
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 12
+      loop: 1
+  - key: planets/jupiter/disc
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 9
+      loop: 1
+  - key: planets/mars/disc
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 12
+      loop: 1
+  - key: planets/mercury/disc
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 12
+      loop: 1
+  - key: planets/neptune/disc
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 12
+      loop: 1
+  - key: planets/saturn/disc
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 9
+      loop: 1
+  - key: planets/uranus/disc
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 12
+      loop: 1
+  - key: planets/venus/disc
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 12
+      loop: 1
   modelClipSets:
   - key: characters/calibration/base
     fps: 30

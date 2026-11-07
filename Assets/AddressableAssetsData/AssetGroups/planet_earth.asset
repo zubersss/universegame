@@ -25,11 +25,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 033a0d3ce11c2064db3f88605022e09e
-    m_Address: terrain/earth/snow
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 057ab4e1b65d75a419195a32984bc053
     m_Address: props/earth/launch_gantry
     m_ReadOnly: 0

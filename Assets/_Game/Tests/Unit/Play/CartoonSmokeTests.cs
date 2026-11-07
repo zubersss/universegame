@@ -70,6 +70,7 @@ namespace Meridian.Tests
             player.externalInput = true;
             player.intent = new PlayerIntent { move = 1f };
             for (int i = 0; i < 30; i++) yield return new WaitForFixedUpdate();
+            TestContext.Out.WriteLine($"[MERIDIAN] smoke walk probe: clip {view.Clip}, grounded {player.Grounded}, v {player.Body.linearVelocity}, at {player.Body.position}, jetpack {(player.Jetpack != null && player.Jetpack.Firing)}, dash {player.Dash.Active}");
             Assert.AreEqual(SurveyorAnim.Walk, view.Clip, "walking");
             if (view.UsesAnimator)
             {

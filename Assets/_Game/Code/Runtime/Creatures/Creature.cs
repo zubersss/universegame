@@ -10,6 +10,9 @@ namespace Meridian.Creatures
     /// One creature (U-027): a dynamic Rigidbody2D under the planet's real gravity (fliers: none), a box
     /// collider and a sprite. It has no Update of its own: CreatureDirector thinks, steers and animates for
     /// all creatures in one loop (so the AI cost is one measured number). Pooled.
+    /// U-108 (B-127 gull): a sheet whose clips include `fly` plays it while the creature is airborne (ground contact
+    /// reported by the director each tick, with hysteresis so a hop or a bump never flickers it); species without a
+    /// fly clip are untouched.
     /// </summary>
     public sealed class Creature : MonoBehaviour
     {
@@ -32,8 +35,21 @@ namespace Meridian.Creatures
         internal float knockFor, knockVx, flashFor;
         /// <summary>U-099: seconds the body has stood still while wanting to move (a wall the terrain check cannot see: props, pieces).</summary>
         internal float blockedFor, keepDirUntil, blockAnchorX, blockAnchorT, waitUntil;
-        /// <summary>U-099: the clip picked last frame (0 idle, 1 walk, 2 attack/bump, 3 hurt); tests read it.</summary>
+        /// <summary>
+        /// U-099: the clip picked last frame (0 idle, 1 walk, 2 attack/bump, 3 hurt); tests read it.
+        /// U-108: while Airborne on a sheet with a `fly` clip it is that clip's index (4 on the B-127 gull's v3 sheet).
+        /// </summary>
         public int LastPick { get; private set; }
+        /// <summary>U-108: the name of the sheet clip drawn now ("idle", "walk", "fly" …); null before the first animated frame or without a sheet. Tests read it.</summary>
+        public string CurrentClip => clips != null && lastClip >= 0 && lastClip < clips.clips.Count ? clips.clips[lastClip].name : null;
+        /// <summary>
+        /// U-108: off the ground by hysteresis: FlyAfter seconds without ground contact to lift off, LandAfter seconds of
+        /// contact to land, so a one-tile hop or a bump never flickers the fly clip. The director reports contact each tick.
+        /// </summary>
+        public bool Airborne { get; private set; }
+        public const float FlyAfter = 0.12f, LandAfter = 0.06f;
+        /// <summary>U-108: the sheet clip a flier plays while airborne (B-127 gull: frames 40–51, loop).</summary>
+        public const string FlyClip = "fly";
         Color baseColor = Color.white;
         internal CreatureDirector director;
 
@@ -51,6 +67,9 @@ namespace Meridian.Creatures
         internal Sprite[] frames, nightFrames;
         internal ArtClipSet clips;
         internal int lastClip = -1;
+        /// <summary>U-108: index of the sheet's `fly` clip, resolved once at Setup (−1 when the sheet has none); seconds without / with ground contact.</summary>
+        internal int flyClip = -1;
+        internal float airFor, groundFor;
 
         static PhysicsMaterial2D slick;
 
@@ -77,6 +96,26 @@ namespace Meridian.Creatures
             return c;
         }
 
+        /// <summary>U-108: true while the body shows the director's placeholder box (its sheet was not loaded when it spawned).</summary>
+        public bool IsPlaceholder => View != null && View.sprite != null && View.sprite.name.StartsWith("CreaturePlaceholder", System.StringComparison.Ordinal);
+
+        /// <summary>U-108: the species' sheet arrived after this body spawned (the stage's load-time gull): swap the box for the art in place.</summary>
+        internal void ApplyArt(Sprite sprite, Sprite[] frames, Sprite[] nightFrames, ArtClipSet clips)
+        {
+            if (sprite == null || Spec == null) return;
+            this.frames = frames;
+            this.nightFrames = nightFrames;
+            this.clips = clips;
+            flyClip = -1;
+            if (clips != null) for (int i = 0; i < clips.clips.Count; i++) if (clips.clips[i].name == FlyClip) { flyClip = i; break; }
+            lastClip = -1;
+            View.sprite = sprite;
+            View.transform.localScale = Vector3.one * Spec.artScale;
+            View.transform.localPosition = Vector3.zero;
+            View.color = Color.white;
+            baseColor = View.color;
+        }
+
         internal void Setup(SpeciesSpec spec, Vector2 position, Sprite sprite, int serial) => Setup(spec, position, sprite, null, null, null, serial);
 
         internal void Setup(SpeciesSpec spec, Vector2 position, Sprite sprite, Sprite[] frames, Sprite[] nightFrames, ArtClipSet clips, int serial)
@@ -86,6 +125,11 @@ namespace Meridian.Creatures
             this.frames = frames;
             this.nightFrames = nightFrames;
             this.clips = clips;
+            // U-108: the fly clip by name, once per spawn (a pooled body comes back as another species: reset when the sheet has none).
+            flyClip = -1;
+            if (clips != null) for (int i = 0; i < clips.clips.Count; i++) if (clips.clips[i].name == FlyClip) { flyClip = i; break; }
+            airFor = groundFor = 0f;
+            Airborne = false;
             State = CreatureState.Wander;
             Held = false;
             dir = (serial & 1) == 0 ? 1 : -1;
@@ -153,8 +197,15 @@ namespace Meridian.Creatures
             else flashFor = Meridian.Player.PlayerView.FlashSeconds;
         }
 
-        internal void Animate(float dt, float speed)
+        /// <summary>
+        /// One frame of animation (the director calls it once per tick). `grounded`: ground contact this tick (walkers: still and
+        /// a solid tile under the feet; fliers: a solid tile under the feet), feeding the U-108 airborne hysteresis.
+        /// </summary>
+        internal void Animate(float dt, float speed, bool grounded)
         {
+            // U-108: airborne by hysteresis (FlyAfter off the ground, LandAfter on it); no allocation.
+            if (grounded) { groundFor += dt; airFor = 0f; if (groundFor >= LandAfter) Airborne = false; }
+            else { airFor += dt; groundFor = 0f; if (airFor >= FlyAfter) Airborne = true; }
             if (Visual != null) Visual.localScale = Squash.Step(dt); // U-089: visual root only
             if (Model != null && Model.Ready)
             {
@@ -181,8 +232,9 @@ namespace Meridian.Creatures
             }
             var sheet = nightFrames != null && Zone == MercuryZone.Night ? nightFrames : frames;
             if (sheet == null || clips == null || clips.clips.Count == 0) return;
-            // Clip order in every B-0xx creature sheet: idle, walk, attack, hurt, death.
-            int want = hurtFor > 0f ? 3 : attackFor > 0f ? 2 : speed > 0.3f ? 1 : 0;
+            // Clip order in every B-0xx creature sheet: idle, walk, attack, hurt, death. U-108: a sheet with a `fly` clip
+            // (B-127 gull: idle, walk, react, bump, fly) plays it while airborne, under the bump and hurt reactions.
+            int want = hurtFor > 0f ? 3 : attackFor > 0f ? 2 : (Airborne && flyClip >= 0) ? flyClip : speed > 0.3f ? 1 : 0;
             LastPick = want;
             if (want >= clips.clips.Count) want = 0;
             if (want != lastClip) { lastClip = want; anim = 0f; }

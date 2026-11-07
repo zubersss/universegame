@@ -1,9 +1,9 @@
-﻿# BudgetGate profile run (U-014): runs BudgetGateTests with graphics and writes
+# BudgetGate profile run (U-014): runs BudgetGateTests with graphics and writes
 # coordination/reports/unity/perf_<date>.md with every Bible section 11.1 row. Owner: UNITY.
 # -Build (U-041, D-036): also builds the development player and runs its memory probe
-# (Earth, Space, Mars, Mercury, Venus) under the same lock, adding "dev build" rows to the report.
+# (nine legs: Earth, Space, Mars, Space, Mercury, Space, Venus, Space, Earth again; U-091) under the same lock, adding "dev build" rows to the report.
 # -Probe (U-086): runs the probe on the player already in Build/ without rebuilding it.
-# The Editor's memory rows stay as an upper bound. Limits are Bible 11.1 v3 (D-077).
+# The Editor's memory rows stay as an upper bound. Limits are Bible 11.1 v4 (D-089).
 # Usage: tools/unity_profile.ps1 [-Build | -Probe] [-SkipGate]
 param([switch]$Build, [switch]$Probe, [switch]$SkipGate)
 . (Join-Path $PSScriptRoot 'unity_common.ps1')
@@ -45,7 +45,7 @@ try {
             $playerLog = Join-Path $LogDir "memory_probe_$stamp.log"
             $p = Start-Process -FilePath $exe -PassThru -ArgumentList @('-meridianMemoryProbe', "`"$probeOut`"",
                 '-screen-fullscreen', '0', '-screen-width', '1920', '-screen-height', '1080', '-logFile', "`"$playerLog`"")
-            if (-not $p.WaitForExit(300000)) { Stop-Process -Id $p.Id -Force; Write-Host 'PROBE TIMED OUT (5 min)'; $buildOk = $false }
+            if (-not $p.WaitForExit(480000)) { Stop-Process -Id $p.Id -Force; Write-Host 'PROBE TIMED OUT (8 min)'; $buildOk = $false }
             Write-Host "Player log: $playerLog"
         }
     }
@@ -54,33 +54,90 @@ try {
     Exit-HeavyJobLock
 }
 
-# ---- dev-build rows (U-041; v3 limits U-086, D-077) ----
+# ---- dev-build rows (U-041; v4 limits U-091, D-089) ----
 $memRed = $false
 # Report symbols as code points (tools/*.ps1 stay ASCII).
 $le = [char]0x2264; $ar = [char]0x2192; $times = [char]0x00D7; $sec = [char]0x00A7; $dot = [char]0x00B7
-$limit = "$le 4.5 GB working set (warn 4.0), $le 2.0 GB textures, $le 600 MB meshes, $le 150 MB audio"
+$limit = "< 2.0 GB working set (warn 1.7), $le 512 MB textures, $le 150 MB audio"
 if ($runProbe) {
-    $rows = @('', '## Memory in the development player (U-041, D-036; limits v3, D-077)', '',
-        "The route Earth $ar launch $ar Space $ar entry $ar Mars, then Mercury and Venus loaded directly (U-060), in Build/MERIDIAN_<version>/MERIDIAN.exe (development build), 1920${times}1080 windowed; counters read after 120 frames per leg. Working set from the OS (ProcessMemory); the Editor rows above stay as an upper bound.", '',
-        "| Row | Budget (${sec}11.1 v3) | Measured | Status |", '|---|---|---|---|')
+    $rows = @('', '## Memory in the development player (U-041, D-036; limits v4, D-089)', '',
+        "The route Earth $ar launch $ar Space $ar entry $ar Mars $ar launch $ar Space $ar entry $ar Mercury $ar launch $ar Space $ar entry $ar Venus $ar launch $ar Space $ar entry $ar Earth again (nine legs, real launches and entries, U-091) in Build/MERIDIAN_<version>/MERIDIAN.exe (development build), 1920${times}1080 windowed; counters read after GC + UnloadUnusedAssets and 120 frames per leg. Working set and private commit from the OS (ProcessMemory); the Editor rows above stay as an upper bound. Meshes are printed, not judged.", '',
+        "| Row | Budget (${sec}11.1 v4) | Measured | Status |", '|---|---|---|---|')
     $legs = @()
     if ($buildOk -and (Test-Path $probeOut)) { $legs = @(Get-Content $probeOut | Where-Object { $_.Trim() } | ForEach-Object { $_ | ConvertFrom-Json } | Where-Object { $null -ne $_.systemMB }) }
     if ($legs.Count -eq 0) { $rows += "| Memory $dot dev build | $limit | no probe result (build or probe failed) | red |"; $memRed = $true }
+    $byLeg = @{}
     foreach ($l in $legs) {
         if ($l.error) { $rows += "| Memory $dot dev build | | probe error: $($l.error) | red |"; $memRed = $true; continue }
+        $byLeg[[string]$l.leg] = $l
         $ws = if ($l.workingSetMB -gt 0) { [long]$l.workingSetMB } else { [long]$l.systemMB }
-        $meshOk = ($null -eq $l.meshMB) -or ($l.meshMB -lt 0) -or ($l.meshMB -le 600)
-        $ok = ($ws -ge 0) -and ($ws -le 4608) -and ($l.textureMB -le 2048) -and $meshOk -and ($l.audioMB -le 150)
+        $tex = if ($null -ne $l.textureMB) { [long]$l.textureMB } else { -1 }
+        $ok = ($ws -ge 0) -and ($ws -lt 2048) -and ($tex -ge 0) -and ($tex -le 512) -and ($l.audioMB -le 150)
         if (-not $ok) { $memRed = $true }
-        $status = if (-not $ok) { 'red' } elseif ($ws -gt 4096) { 'green (above the 4.0 GB warning line)' } else { 'green' }
+        $status = if (-not $ok) { 'red' } elseif ($ws -ge 1741) { 'green (above the 1.7 GB warning line)' } else { 'green' }
         $wsText = if ($l.workingSetMB -gt 0) { "working set $($l.workingSetMB) MB, system $($l.systemMB) MB" } else { "system $($l.systemMB) MB (working set n/a: judged on system memory)" }
-        $meshText = if ($null -ne $l.meshMB -and $l.meshMB -ge 0) { ", meshes $($l.meshMB) MB" } else { ", meshes n/a (old player)" }
-        $rows += "| Memory $dot $($l.leg) (dev build) | $limit | $wsText, textures $($l.textureMB) MB$meshText, audio $($l.audioMB) MB | $status |"
+        $privText = if ($null -ne $l.privateMB -and $l.privateMB -ge 0) { ", private $($l.privateMB) MB" } else { '' }
+        $meshText = if ($null -ne $l.meshMB -and $l.meshMB -ge 0) { ", meshes $($l.meshMB) MB" } else { '' }
+        $texText = if ($tex -ge 0) { "textures $tex MB" } else { 'textures n/a (red)' }
+        $rows += "| Memory $dot $($l.leg) (dev build) | $limit | $wsText$privText, $texText$meshText, audio $($l.audioMB) MB | $status |"
         if ($l.prevGroup) {
             $resOk = ([int]$l.prevHandles -eq 0)
+            $ownText = ''
+            if ($l.ownGroup) {
+                $own = if ($null -ne $l.ownHandles) { [int]$l.ownHandles } else { -1 }
+                if ($own -gt 0) { $ownText = "; own $($l.ownGroup) handles $own" } else { $ownText = "; own $($l.ownGroup) handles $own (nothing tracked)"; $resOk = $false }
+            }
             if (-not $resOk) { $memRed = $true }
-            $rows += "| Residency $dot $($l.leg) (dev build) | previous planet released within 5 s (v3) | $($l.prevGroup) handles $($l.prevHandles) after $($l.prevWait) s (holders: $($l.holders)); resident: $($l.resident) | $(if ($resOk) { 'green' } else { 'red' }) |"
+            $rows += "| Residency $dot $($l.leg) (dev build) | previous planet released within 5 s; the planet's own handles tracked (v4) | $($l.prevGroup) handles $($l.prevHandles) after $($l.prevWait) s (holders: $($l.holders))$ownText; resident: $($l.resident) | $(if ($resOk) { 'green' } else { 'red' }) |"
         }
+        if ($l.ownGroup) {
+            if ($null -eq $l.loadSec) { $rows += "| Planet load $dot $($l.leg) (dev build) | $le 5 s (D-089) | old player: rebuild (no loadSec) | red |"; $memRed = $true }
+            elseif ([double]$l.loadSec -ge 0) {
+                $lok = ([double]$l.loadSec -le 5)
+                if (-not $lok) { $memRed = $true }
+                $rows += "| Planet load $dot $($l.leg) (dev build) | $le 5 s: entry start $ar terrain settled + no pending load (D-089) | $($l.loadSec) s ($($l.breakdown)) | $(if ($lok) { 'green' } else { 'red' }) |"
+            }
+            if ($null -ne $l.packedSprites -and [int]$l.packedSprites -eq 0) { $rows += "| Sprite atlases $dot $($l.leg) (dev build) | $le 8 per planet (D-089) | n/a: sprite packing is off (0 packed sprites) | n/a (LEAD) |" }
+            elseif ($null -ne $l.atlases) { $atl = [int]$l.atlases; $aok = ($atl -le 8); if (-not $aok) { $memRed = $true }; $rows += "| Sprite atlases $dot $($l.leg) (dev build) | $le 8 per planet (D-089) | $atl loaded | $(if ($aok) { 'green' } else { 'red' }) |" }
+        }
+        if ($null -ne $l.transitionSec -and [double]$l.transitionSec -ge 0) {
+            $tok = ([double]$l.transitionSec -le 1.5)
+            if (-not $tok) { $memRed = $true }
+            $rows += "| Transition $dot $($l.leg) (dev build) | $le 1.5 s (D-089) | $($l.transitionSec) s, worst iris-in frame $($l.irisInWorstMs) ms | $(if ($tok) { 'green' } else { 'red' }) |"
+        }
+        if ($null -ne $l.bundles) {
+            $planetBundles = @([string]$l.bundles -split ', ' | Where-Object { $_ -like 'planet_*' -and $_ -notlike 'planet_space*' -and $_ -notlike 'planet_warden*' -and $_ -notlike 'planet_waystation*' -and $_ -notlike 'planet_rig*' })
+            $foreign = @($planetBundles | Where-Object { (-not $l.ownGroup) -or (($_ -ne $l.ownGroup) -and ($_ -notlike "$($l.ownGroup)_*")) })
+            $bok = ($foreign.Count -eq 0)
+            if (-not $bok) { $memRed = $true }
+            $rows += "| Bundles $dot $($l.leg) (dev build) | only the leg's own planet among the loaded planet bundles (none in Space) | $($l.bundles) | $(if ($bok) { 'green' } else { 'red' }) |"
+        }
+        if ($null -ne $l.nonStreamingMB) {
+            $sum = [long]$l.nonStreamingMB + [long]$l.desiredMB
+            $warn = if ($sum -gt [long]$l.mipBudgetMB) { ' (warn: streamed model maps reduced)' } else { '' }
+            $rows += "| Mip streaming $dot $($l.leg) (dev build) | info | non-streaming $($l.nonStreamingMB) MB + desired $($l.desiredMB) MB vs $($l.mipBudgetMB) MB budget$warn | info |"
+        }
+    }
+    # Return rows (D-089): a second visit stays within 10 % of the first, working set and private commit.
+    foreach ($pair in @(@('Space after Mars', 'Space'), @('Earth again', 'Earth'))) {
+        $again = $byLeg[$pair[0]]; $first = $byLeg[$pair[1]]
+        if ($null -eq $again -or $null -eq $first) { continue }
+        $wsA = if ($again.workingSetMB -gt 0) { [long]$again.workingSetMB } else { [long]$again.systemMB }
+        $wsF = if ($first.workingSetMB -gt 0) { [long]$first.workingSetMB } else { [long]$first.systemMB }
+        $rok = ($wsF -gt 0) -and ($wsA -le [long]($wsF * 1.10))
+        $privPart = ''
+        if ($null -ne $again.privateMB -and $null -ne $first.privateMB -and [long]$first.privateMB -gt 0) {
+            $rok = $rok -and ([long]$again.privateMB -le [long]([long]$first.privateMB * 1.10))
+            $privPart = ", private $($again.privateMB) vs $($first.privateMB) MB"
+        }
+        if (-not $rok) { $memRed = $true }
+        $rows += "| Return $dot $($pair[0]) (dev build) | within 10 % of $($pair[1]) (D-089) | working set $wsA vs $wsF MB$privPart | $(if ($rok) { 'green' } else { 'red' }) |"
+    }
+    $mip = $legs | Where-Object { $null -ne $_.mipActive } | Select-Object -First 1
+    if ($null -ne $mip) {
+        $mok = ([int]$mip.mipActive -eq 1) -and ([long]$mip.mipBudgetMB -eq 512)
+        if (-not $mok) { $memRed = $true }
+        $rows += "| Mip streaming (dev build) | on, 512 MB budget (D-089) | active $($mip.mipActive), budget $($mip.mipBudgetMB) MB | $(if ($mok) { 'green' } else { 'red' }) |"
     }
     # U-095: the film pass's GPU cost at 1080p (FrameTimingManager in the player: frame GPU time with the pass on minus off).
     $film = @()
@@ -101,7 +158,7 @@ if ($runProbe) {
     } else {
         Set-Content -Path $report -Value (($rows -join "`n") + "`n") -Encoding UTF8 -NoNewline
     }
-    $rows | Where-Object { $_ -like '| Memory*' -or $_ -like '| Residency*' -or $_ -like '| Film*' } | ForEach-Object { Write-Host $_ }
+    $rows | Where-Object { $_ -like '| Memory*' -or $_ -like '| Residency*' -or $_ -like '| Film*' -or $_ -like '| Planet load*' -or $_ -like '| Transition*' -or $_ -like '| Bundles*' -or $_ -like '| Sprite atlases*' -or $_ -like '| Return*' -or $_ -like '| Mip*' } | ForEach-Object { Write-Host $_ }
 }
 
 if ($SkipGate) { if ($memRed) { Write-Host 'BUILD MEMORY RED'; exit 1 } else { Write-Host 'BUILD MEMORY GREEN'; exit 0 } }

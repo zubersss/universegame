@@ -126,7 +126,7 @@ namespace Meridian.Planet
                 block.SetVector(LayerQ[i], new Vector4(Haze[i], ContentBase[i], 0f, Follow[i])); // y: cut below the layer's own ground line
             }
             quad.SetPropertyBlock(block);
-            quad.enabled = true;
+            quad.enabled = isActiveAndEnabled; // U-107: a backdrop muted by CartoonStage (component disabled) stays hidden
             baseSet = planet.id.ToString().ToLowerInvariant();
             mainSet = null;
             ShowMain(baseSet);
@@ -650,8 +650,21 @@ namespace Meridian.Planet
             tintQuad.transform.localScale = new Vector3(w, h, 1f);
         }
 
-        void OnEnable() => Meridian.Core.RenderWarmup.Warming += OnWarming;
-        void OnDisable() => Meridian.Core.RenderWarmup.Warming -= OnWarming;
+        // U-107: this component lives on the side camera's object, so CartoonStage mutes it by `enabled`, never by switching the
+        // object off (that silenced CameraFollow); a muted backdrop hides its quads and shows them again when re-enabled.
+        void OnEnable()
+        {
+            Meridian.Core.RenderWarmup.Warming += OnWarming;
+            if (quad != null && baseSet != null) quad.enabled = true;
+        }
+
+        void OnDisable()
+        {
+            Meridian.Core.RenderWarmup.Warming -= OnWarming;
+            if (quad != null) quad.enabled = false;
+            if (overlay != null) overlay.enabled = false;
+            if (tintQuad != null) tintQuad.enabled = false;
+        }
 
         /// <summary>The underwater overlay joins the load warm-up render so the first sea view doesn't stall.</summary>
         void OnWarming(Camera cam, bool on)

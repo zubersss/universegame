@@ -210,6 +210,69 @@ namespace Meridian.Tests
                 Importer(c).secondarySpriteTextures.First(t => t.name == "_NormalMap").texture);
         }
 
+        // ---------- U-104 (B-121 handoffs): single-image pivots, parts sheets, the tile flag ----------
+
+        [Test]
+        public void SingleImageHonoursItsSidecarPivot()
+        {
+            // (a) ui/hud/escape_sign wants [0.5, 0]: a v3 sidecar pivot applies to a single image, not only to frame sheets.
+            var json = Art("ui/hud/escape_sign.json");
+            Directory.CreateDirectory(Path.GetDirectoryName(json));
+            File.WriteAllText(json, "{\"key\":\"ui/hud/escape_sign\",\"style\":\"v3\",\"pivot\":[0.5,0.0]}");
+            var c = Png(Art("ui/hud/escape_sign_color.png"), 64, 32);
+            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+            Import(c);
+            Assert.AreEqual(SpriteImportMode.Single, Importer(c).spriteImportMode);
+            Assert.AreEqual(new Vector2(0.5f, 0f), Importer(c).spritePivot, "the sidecar pivot, bottom centre");
+            var plain = Png(Art("ui/hud/plain_color.png"), 32, 32);
+            File.WriteAllText(Art("ui/hud/plain.json"), "{\"key\":\"ui/hud/plain\",\"style\":\"v3\"}");
+            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+            Import(plain);
+            Assert.AreEqual(new Vector2(0.5f, 0.5f), Importer(plain).spritePivot, "no sidecar pivot: the centre");
+        }
+
+        [Test]
+        public void PartsSheetIsSlicedLikeARigSetAndItsJsonAddressed()
+        {
+            // (b) ui/hud/gauges: one sheet with `parts` (rects bottom-left + pivots) and `needles`; sliced into its sprites, the json addressed for the HUD.
+            var json = Art("ui/hud/gauges.json");
+            Directory.CreateDirectory(Path.GetDirectoryName(json));
+            File.WriteAllText(json, "{\"key\":\"ui/hud/gauges\",\"style\":\"v3\",\"parts\":[" +
+                "{\"name\":\"suit_dial\",\"rect\":[0,0,64,64],\"pivot\":[0.5,0.5]}," +
+                "{\"name\":\"suit_needle\",\"rect\":[64,0,16,48],\"pivot\":[0.5,0.2]}," +
+                "{\"name\":\"oxygen_dial\",\"rect\":[80,0,48,48],\"pivot\":[0.5,0.5]}]," +
+                "\"needles\":[{\"part\":\"suit_needle\",\"min_deg\":-120,\"max_deg\":120,\"hub\":[32,20],\"danger_below\":0.2}]}");
+            var c = Png(Art("ui/hud/gauges_color.png"), 128, 64);
+            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+            Import(c);
+            Assert.AreEqual(SpriteImportMode.Multiple, Importer(c).spriteImportMode);
+            var sprites = AssetDatabase.LoadAllAssetsAtPath(c).OfType<Sprite>().OrderBy(s => s.name).ToArray();
+            CollectionAssert.AreEquivalent(new[] { "oxygen_dial", "suit_dial", "suit_needle" }, sprites.Select(s => s.name).ToArray());
+            var needle = sprites.First(s => s.name == "suit_needle");
+            Assert.AreEqual(new Rect(64, 0, 16, 48), needle.rect, "rect from the json, bottom-left origin");
+            Assert.That(needle.pivot.x / needle.rect.width, Is.EqualTo(0.5f).Within(1e-3f));
+            Assert.That(needle.pivot.y / needle.rect.height, Is.EqualTo(0.2f).Within(1e-3f), "the part's own pivot");
+            var entry = ArtImporter.Settings.FindAssetEntry(AssetDatabase.AssetPathToGUID(json));
+            Assert.NotNull(entry, "the json is addressed (the HUD reads the needle ranges from it)");
+            Assert.AreEqual("ui/hud/gauges/json", entry.address);
+        }
+
+        [Test]
+        public void TileFlagMakesASingleImageRepeat()
+        {
+            // (c) escape_line.json carries "tile": true: the dotted line repeats along the Escape Line.
+            var json = Art("ui/hud/escape_line.json");
+            Directory.CreateDirectory(Path.GetDirectoryName(json));
+            File.WriteAllText(json, "{\"key\":\"ui/hud/escape_line\",\"style\":\"v3\",\"tile\":true}");
+            var c = Png(Art("ui/hud/escape_line_color.png"), 64, 16);
+            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+            Import(c);
+            Assert.AreEqual(TextureWrapMode.Repeat, Importer(c).wrapMode, "tile: true repeats");
+            var settings = new TextureImporterSettings();
+            Importer(c).ReadTextureSettings(settings);
+            Assert.AreEqual(SpriteMeshType.FullRect, settings.spriteMeshType, "a tiled sprite keeps its full rect");
+        }
+
         // ---------- §5 frame sheets ----------
 
         [Test]
@@ -340,6 +403,13 @@ namespace Meridian.Tests
             Assert.AreEqual("space", ArtRules.GroupFor("planets/earth/surface"));
             Assert.AreEqual("common", ArtRules.GroupFor("props/common/calibration"));
             Assert.AreEqual("icons", ArtRules.GroupFor("icons/iron/base"));
+            // U-091 (D-110): a sheet more than one planet uses lives in common, unpacked; import and run time share one table.
+            Assert.AreEqual("common", ArtRules.GroupFor("terrain/earth/snow"), "a shared terrain sheet lives in common");
+            Assert.AreEqual("common", ArtRules.GroupFor("terrain/jupiter/floe_ice"));
+            Assert.IsNull(ArtRules.AtlasFor("terrain/earth/snow"), "and stays unpacked");
+            Assert.AreEqual("planet_earth", ArtRules.GroupFor("flora/earth/rigset"), "flora follows its planet");
+            foreach (var key in new[] { "terrain/earth/snow", "flora/earth/rigset", "creatures/mars/skitter", "props/common/calibration", "backgrounds/space/layer0", "ui/hud/gauges" })
+                Assert.AreEqual(ArtRules.GroupFor(key), Meridian.Perf.Residency.GroupOf(key), key + ": one group table");
             Assert.IsNull(ArtRules.AtlasFor("planets/earth/surface"));
             Assert.IsNull(ArtRules.AtlasFor("backgrounds/earth/layer1"));
             Assert.AreEqual("planet_earth", ArtRules.AtlasFor("creatures/earth/stag"));
@@ -455,19 +525,52 @@ namespace Meridian.Tests
         }
 
         [Test]
-        public void StageLayersAreCappedAt700MegabytesStoredPerPlanet()
+        public void PlanetTexturesAreCappedAt512MegabytesStoredPerPlanet()
         {
-            // U-091 (contract §10): which keys count as a planet's stage layers, and how their stored size is estimated.
+            // U-091 (D-089): which keys are a planet's stage layers (labels), which planet a texture counts against, the stored estimate, the cap.
             Assert.IsTrue(ArtRules.IsStageLayer("backgrounds/earth_forest/ridge_mid", out var p) && p == "earth", "a region band");
             Assert.IsTrue(ArtRules.IsStageLayer("backgrounds/earth/clouds", out p) && p == "earth", "the planet's cloud strip");
             Assert.IsTrue(ArtRules.IsStageLayer("props/mars_foreground/atlas", out p) && p == "mars", "the foreground atlas");
             Assert.IsFalse(ArtRules.IsStageLayer("backgrounds/space/layer0", out _), "space is not a planet");
             Assert.IsFalse(ArtRules.IsStageLayer("props/earth_flora/tree_oak", out _), "flora is not a layer");
             Assert.AreEqual(2048L * 2048L * 4L / 3L, ArtRules.StoredBytes(2048, 2048), "BC7/BC5 with mips: 1 byte per texel × 4/3");
-            Assert.AreEqual(700L * 1024L * 1024L, ArtRules.LayerCapBytes);
-            // The sandbox has no layers: the sum is 0 and a first 2048² layer passes.
-            Assert.AreEqual(0L, ArtImporter.StageLayerBytes("earth", ""));
-            Assert.Less(ArtRules.StoredBytes(2048, 2048), ArtRules.LayerCapBytes);
+            Assert.AreEqual(512L * 1024L * 1024L, ArtRules.PlanetTextureCapBytes);
+            Assert.AreEqual("earth", ArtRules.PlanetOfTexture("terrain/earth/soil_color.png"));
+            Assert.AreEqual("mars", ArtRules.PlanetOfTexture("props/mars_flora/cactus_normal.png"), "a suffixed planet group counts for its planet");
+            Assert.AreEqual("earth", ArtRules.PlanetOfTexture("backgrounds/earth_forest/ridge_mid_color.png"));
+            Assert.IsNull(ArtRules.PlanetOfTexture("terrain/earth/snow_color.png"), "a shared sheet counts for no planet (common)");
+            Assert.IsNull(ArtRules.PlanetOfTexture("backgrounds/space/layer0_color.png"));
+            Assert.IsNull(ArtRules.PlanetOfTexture("ships/pilgrim/side_color.png"));
+            Assert.IsNull(ArtRules.PlanetOfTexture("icons/iron/base_color.png"));
+            // The sandbox has no planet textures: the sum is 0 and a first 2048² sheet passes; the last kilobyte does not.
+            Assert.AreEqual(0L, ArtImporter.PlanetTextureBytes("earth", ""));
+            Assert.IsFalse(ArtRules.OverPlanetCap(0L, 2048, 2048));
+            Assert.IsTrue(ArtRules.OverPlanetCap(ArtRules.PlanetTextureCapBytes - 1024L, 64, 64));
+            Assert.IsFalse(ArtRules.OverPlanetCap(ArtRules.PlanetTextureCapBytes - ArtRules.StoredBytes(64, 64), 64, 64), "exactly at the cap passes");
+        }
+
+        [Test]
+        public void OverCapTexturesAreRejectedAndNeverAddressed()
+        {
+            // U-091 (D-089): with the cap lowered to two 64² sheets, the third Earth sheet BY PATH is rejected whatever the
+            // import order, and a rejected texture is never addressed.
+            long one = ArtRules.StoredBytes(64, 64);
+            ArtRules.PlanetTextureCapOverride = one * 2;
+            try
+            {
+                var a = Png(Art("props/earth_flora/aa_color.png"), 64, 64);
+                var b = Png(Art("props/earth_flora/bb_color.png"), 64, 64);
+                var c = Png(Art("props/earth_flora/cc_color.png"), 64, 64);
+                LogAssert.Expect(LogType.Error, new Regex(@"\[ArtImporter\] Rejected .*cc_color\.png: earth's textures up to this file \(path order\) would store"));
+                Import(c, a, b); // the last file by path is the one over the cap, not the last one imported
+                Assert.NotNull(ArtImporter.Settings.FindAssetEntry(AssetDatabase.AssetPathToGUID(a)), "aa addressed");
+                Assert.NotNull(ArtImporter.Settings.FindAssetEntry(AssetDatabase.AssetPathToGUID(b)), "bb addressed");
+                Assert.IsNull(ArtImporter.Settings.FindAssetEntry(AssetDatabase.AssetPathToGUID(c)), "cc over the cap: never addressed");
+                Assert.AreEqual(one * 3, ArtImporter.PlanetTextureBytes("earth", ""), "the three sheets on disk count");
+                Assert.AreEqual(one * 2, ArtImporter.PlanetTextureBytes("earth", c), "except one path");
+                Assert.AreEqual(0L, ArtImporter.PlanetTextureBytes("mars", ""), "Earth's sheets count for Earth only");
+            }
+            finally { ArtRules.PlanetTextureCapOverride = null; }
         }
 
         [Test]

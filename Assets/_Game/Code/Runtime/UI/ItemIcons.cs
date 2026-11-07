@@ -8,9 +8,10 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 namespace Meridian.UI
 {
     /// <summary>
-    /// U-058: one icon cache for every panel (inventory, crafting, market). An item's B-013/B-042 icon, or for
-    /// tile items without one the tile's own sprite; loaded once, kept for the session. `Loaded` fires when an
-    /// icon arrives so open panels can redraw.
+    /// U-058: one icon cache for every panel (inventory, crafting, market). An item's B-013/B-042 icon, loaded once and
+    /// kept for the session; a tile item without an icon shows its sheet's sprite only while that sheet is loaded (its own
+    /// planet, U-091: a sprite destroyed with its planet's bundle falls through to the live TileSet, or to null, which the
+    /// panels hide). `Loaded` fires when an icon arrives so open panels can redraw.
     /// </summary>
     public static class ItemIcons
     {
@@ -21,7 +22,7 @@ namespace Meridian.UI
         /// <summary>The icon now (null while it loads or when the item has none; then Loaded fires later).</summary>
         public static Sprite Get(int itemId, Meridian.Terrain.TerrainStreamer terrain = null)
         {
-            if (icons.TryGetValue(itemId, out var sp)) return sp;
+            if (icons.TryGetValue(itemId, out var sp) && sp != null) return sp; // U-091: a destroyed tile sprite is looked up again
             var def = ItemRegistry.Get(itemId);
             if (def == null) return null;
             if (def.icon == null)
@@ -46,6 +47,12 @@ namespace Meridian.UI
 
         static readonly Dictionary<string, Sprite> named = new Dictionary<string, Sprite>();
         static readonly HashSet<string> namedRequested = new HashSet<string>();
+
+        /// <summary>U-091 (tests): forgets every cached icon and request.</summary>
+        public static void ClearCache()
+        {
+            icons.Clear(); requested.Clear(); named.Clear(); namedRequested.Clear();
+        }
 
         /// <summary>An icon by its art name (icons/&lt;name&gt;/base): blueprint nodes, which are not items (B-051).</summary>
         public static Sprite GetNamed(string name)

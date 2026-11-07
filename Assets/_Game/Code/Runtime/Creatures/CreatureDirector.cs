@@ -21,6 +21,7 @@ namespace Meridian.Creatures
     /// U-055: fliers (a hover band over the ground, or Venus's cloud deck) steer in 2D without gravity;
     /// spawn rules see Mercury's zones and Venus's features; creatures animate from their sheets
     /// (idle/walk/attack/hurt); the Cinderhulk wears its night sheet past the terminator and tracks nightfall.
+    /// U-108: each tick reports ground contact to Creature.Animate, so a sheet with a `fly` clip (B-127 gull) plays it while airborne.
     /// </summary>
     public sealed class CreatureDirector : MonoBehaviour
     {
@@ -113,6 +114,11 @@ namespace Meridian.Creatures
                     if (night) { nightFrames[s] = list; return; }
                     frames[s] = list;
                     art[s] = list[0];
+                    // U-108: bodies that spawned before the sheet (the stage's load-time gull) take it now instead of keeping the placeholder box.
+                    var arrived = SpeciesSpec.Get((Species)s);
+                    foreach (var live in pool)
+                        if (live.Alive && live.Spec != null && live.Spec.id == (Species)s && live.IsPlaceholder)
+                            live.ApplyArt(list[0], list, nightFrames[s], ArtMaterials.ClipsFor(arrived.artKey));
                 };
             };
         }
@@ -332,8 +338,12 @@ namespace Meridian.Creatures
                 _ => 0f,
             };
             var v = c.Body.linearVelocity;
+            bool grounded; // U-108: ground contact this tick, for the fly clip (Creature.Animate keeps the hysteresis)
             if (spec.Flies)
             {
+                // U-108: a flier's contact is the tile under its feet alone (no gravity, so no velocity test: a flier steered
+                // back to its band still counts as landed while its feet touch). One GetTile: within the 0.5 ms AI budget.
+                grounded = TileId.IsSolid(terrain.GetTile(tx, ty));
                 // 2D: chase straight at the surveyor; otherwise hold the altitude chosen at the last think.
                 Vector2 want;
                 if (c.State == CreatureState.Chase)
@@ -347,7 +357,7 @@ namespace Meridian.Creatures
             else
             {
                 bool quiet = Mathf.Abs(v.y) < 1.0f; // not airborne (a body pressed into a prop jitters a little)
-                bool grounded = quiet && TileId.IsSolid(terrain.GetTile(tx, ty));
+                grounded = quiet && TileId.IsSolid(terrain.GetTile(tx, ty));
                 // U-099: a wall the tiles cannot show (a crate stack, a base piece, the pad): the body has not moved for BlockedSeconds
                 // while it wanted to run, whatever it stands on. Judged on position over time, never on the velocity: between two
                 // physics steps an Update reads back the velocity it set the frame before.
@@ -387,7 +397,7 @@ namespace Meridian.Creatures
             bool hunting = c.State == CreatureState.Chase;
             float reachX = spec.size.x * 0.5f + 0.6f, reachY = spec.Flies ? spec.size.y * 0.5f + 1.2f : 1.4f;
             if (hunting && vitals != null && !vitals.Dead && adx < reachX && Mathf.Abs(dy) < reachY && now >= c.biteReady) Bump(c, now);
-            c.Animate(dt, Mathf.Abs(v.x) + (spec.Flies ? Mathf.Abs(v.y) : 0f));
+            c.Animate(dt, Mathf.Abs(v.x) + (spec.Flies ? Mathf.Abs(v.y) : 0f), grounded);
         }
 
         /// <summary>
