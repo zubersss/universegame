@@ -200,11 +200,12 @@ def _star(cx, cy, r, H, rot=0.0):
 
 
 def space_starfield(seed):
-    """2048^2 tileable night sky (Earth palette night tones) with soft dabbed stars of three
-    sizes, the big ones as inked cartoon stars; plus 3 nebula cards (<= 1024^2, alpha)."""
+    """2048x1024 night sky tiling in x AND y (ArtImporter caps background layers at 1024 tall;
+    a 2048x1024 tile repeated vertically covers any view) with soft dabbed stars of three sizes,
+    the big ones as inked cartoon stars; plus 3 nebula cards (<= 1024^2, alpha)."""
     rng = np.random.default_rng(seed)
     pal = {k: _rgb(v) for k, v in v3.PALETTES["earth"].items()}
-    H = 2048
+    H = 1024
     night = _mix(pal["ink"], pal["teal"], 0.22)
     sky = np.broadcast_to(night, (H, W, 3)).copy()
     sky *= (1 + 0.10 * periodic_noise(rng, H, 160) + 0.04 * periodic_noise(rng, H, 25))[..., None]
@@ -212,12 +213,12 @@ def space_starfield(seed):
     acc = [(sky, np.ones((H, W), np.float32))]
     yy, xx = np.mgrid[0:H, 0:W]
     small = np.zeros((H, W), np.float32)
-    for _ in range(900):                                   # tiny specks: 1-2 px soft dabs
+    for _ in range(450):                                   # tiny specks: 1-2 px soft dabs
         x, y = rng.integers(0, W), rng.integers(0, H)
         small[y, x] = max(small[y, x], rng.uniform(0.35, 0.9))
     small = np.clip(blur_xy(small, 0.6) * 4, 0, 1)
     mid = np.zeros((H, W), np.float32)
-    for _ in range(140):                                   # medium: 3-5 px lumpy dots
+    for _ in range(70):                                    # medium: 3-5 px lumpy dots
         cx, cy, r = rng.uniform(0, W), rng.uniform(0, H), rng.uniform(1.5, 2.6)
         dx = np.minimum(np.abs(xx - cx), W - np.abs(xx - cx))
         dy = np.minimum(np.abs(yy - cy), H - np.abs(yy - cy))
@@ -227,7 +228,7 @@ def space_starfield(seed):
     acc.append((np.broadcast_to(pal["offwhite"], (H, W, 3)), mid))
     big_fill = np.zeros((H, W), bool)
     big_ink = np.zeros((H, W), bool)
-    for k in range(22):                                    # big: inked 5-point cartoon stars
+    for k in range(11):                                    # big: inked 5-point cartoon stars
         cx, cy, r, rot = rng.uniform(0, W), rng.uniform(0, H), rng.uniform(7, 12), rng.uniform(-0.3, 0.3)
         outer = _star(cx, cy, r + 2.5, H, rot)
         inner = _star(cx, cy, r, H, rot)
@@ -267,29 +268,33 @@ def blur_xy(a, s):
 
 
 def export_space(entry, art):
-    """backgrounds/space/starfield: starfield_color.png 2048^2 + nebula_<k>_color.png <= 1024^2 +
-    starfield.json (parallax per layer). Same folder (contract §11.4)."""
+    """backgrounds/space/starfield (contract §11.4 space, in the key form ArtImporter v13 accepts:
+    backgrounds/<planet>/<scene>/layer<N>): layer0 = the starfield 2048x1024 (tiles in x and y),
+    layer1..3 = the nebula cards 1024^2, + starfield.json in the SceneLayout schema (n, parallax,
+    y_m) with tile flags. Returns ([(path, img, bytes, seam_x, seam_y)], meta)."""
     layers, cards = space_starfield(int(entry.get("seed", 1)))
     d = os.path.join(art, "backgrounds", "space", "starfield")
     os.makedirs(d, exist_ok=True)
     info = []
     img = to_u8(*layers[0])
-    p = os.path.join(d, "starfield_color.png")
+    p = os.path.join(d, "layer0_color.png")
     n = pngio.write_png(p, img)
     info.append((p, img, n, seam(img), seam(np.ascontiguousarray(img.transpose(1, 0, 2)))))
     for k, (col, al) in enumerate(cards):
         im = to_u8(col, al)
-        pk = os.path.join(d, f"nebula_{k}_color.png")
+        pk = os.path.join(d, f"layer{k + 1}_color.png")
         nk = pngio.write_png(pk, im)
         info.append((pk, im, nk, None, None))
     for p_, im, n_, _sx, _sy in info:
         if n_ > v3.MAX_FILE_BYTES:
             raise ValueError(f"{os.path.basename(p_)} {n_ / 2**20:.1f} MB over 4 MB")
-    meta = {"key": "backgrounds/space/starfield", "style": "v3", "tile": True,
-            "layers": [{"name": "starfield", "parallax": 0.05, "tile": True},
-                       {"name": "nebula_0", "parallax": 0.12, "tile": False},
-                       {"name": "nebula_1", "parallax": 0.18, "tile": False},
-                       {"name": "nebula_2", "parallax": 0.25, "tile": False}]}
+        if im.shape[0] > 1024 or im.shape[1] > 2048:
+            raise ValueError(f"{os.path.basename(p_)} {im.shape[1]}x{im.shape[0]} over the 2048x1024 layer cap")
+    meta = {"key": "backgrounds/space/starfield", "style": "v3", "ppu": v3.PPU, "anchor": "center",
+            "layers": [{"n": 0, "parallax": 0.05, "y_m": 0.0, "height_px": 1024, "tile": True, "tile_y": True, "role": "starfield"},
+                       {"n": 1, "parallax": 0.12, "y_m": 0.0, "height_px": 1024, "tile": False, "role": "nebula"},
+                       {"n": 2, "parallax": 0.18, "y_m": 0.0, "height_px": 1024, "tile": False, "role": "nebula"},
+                       {"n": 3, "parallax": 0.25, "y_m": 0.0, "height_px": 1024, "tile": False, "role": "nebula"}]}
     with open(os.path.join(d, "starfield.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(meta, f, indent=2)
         f.write("\n")

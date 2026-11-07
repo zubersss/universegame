@@ -718,6 +718,7 @@ def do_v3_sheet(entry, preview):
         raise AssetError(f"{key}: ppu_scale is for preview-only design sheets")
     markers = {m.name: m.frame for m in scene.timeline_markers}
     frames, clips, widths = [], [], []
+    below = []
     for c in entry["clips"]:
         mname = c.get("marker", c["name"])     # a clip may read another marker (B-122: top_idle -> idle)
         if mname not in markers:
@@ -728,7 +729,12 @@ def do_v3_sheet(entry, preview):
             clips[-1]["loop_from"] = int(c.get("loop_from", 0))
         for k in range(int(c["frames"])):
             f = markers[mname] + k
-            img, w = GR.render_frame(GR.collect(scene, objs, f), fw, fh, v3.PPU * scale, pivot, ss=ss,
+            strokes = GR.collect(scene, objs, f)
+            if pivot[1] == 0 and strokes:
+                zmin = min(float((s_["xz"][:, 1] - s_["radius"] * (1 + GR.JITTER)).min()) for s_ in strokes)
+                if zmin * v3.PPU * scale < -2.0:
+                    below.append(len(frames))
+            img, w = GR.render_frame(strokes, fw, fh, v3.PPU * scale, pivot, ss=ss,
                                      seed=int(entry.get("seed", 1)) * 1000 + f)
             frames.append(img)
             widths += [(nm / scale, lo / scale, hi / scale) for nm, lo, hi in w]   # reported at 1x
@@ -744,6 +750,8 @@ def do_v3_sheet(entry, preview):
     problems = v3.validate_sheet(meta, sheet.shape)
     if clipped:
         problems.append(f"frames {clipped[:8]} touch the {m} px frame edge (drawing clipped)")
+    if below:
+        problems.append(f"frames {below[:8]} draw more than 2 px below the ground line (clipped at the pivot edge)")
     dest = _v3_dest(entry, preview)
     os.makedirs(dest, exist_ok=True)
     png = os.path.join(dest, f"{variant}_color.png")
@@ -929,11 +937,18 @@ def do_disc_set(entry, preview):
     t0 = time.time()
     if preview:
         raise AssetError(f"{entry['key']}: the disc set has no preview mode (python build_discs_v3.py <dir>)")
-    out, tiles = DS.export(ART, PREVIEW)
+    members = [f"planets/{p_}/disc" for p_ in DS.ORDER] + ["planets/earth/luna", "planets/saturn/rings_back", "planets/saturn/rings_front"]
+    try:
+        out, tiles = DS.export(ART, PREVIEW)
+    except Exception:
+        for k in members:
+            mark_stale(k, True)
+        raise
     stamps = [os.path.join(ART, *k.split("/")[:2], k.split("/")[2] + "_color.png") for k, *_r in out]
     DS.preview(PREVIEW, tiles=tiles, out_name=f"review_{entry.get('review_name', 'b119_discs')}.png", stamp_paths=stamps)
     for k, *_r in out:
         mark_stale(k, False)
+    mark_stale(entry["key"], False)
     log_line(f"OK {entry['key']} | " + ", ".join(f"{k.split('/')[1]}/{k.split('/')[2]} {w}x{h} {nf}f {kb}KB" for k, w, h, nf, kb in out)
              + f" | space_ppu {DS.SPACE_PPU:g} | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
 
@@ -953,18 +968,19 @@ def do_space_starfield(entry, preview):
     if sx > lim or sy > lim:
         raise AssetError(f"{entry['key']}: tile check failed: seam_x {sx:.2f} seam_y {sy:.2f} (limit {lim})")
     sf = img0.astype(np.float32) / 255.0
-    big = np.tile(sf[..., :3], (2, 2, 1))[1024:3072, 1024:3072].copy()
+    Hs, Ws = sf.shape[:2]
+    big = np.tile(sf[..., :3], (2, 2, 1))[Hs // 2:Hs // 2 + Hs, Ws // 2:Ws // 2 + Ws].copy()   # the 4-tile seam crossing at the centre
     for k, (pk, im, _n, _a, _b) in enumerate(info[1:]):
-        review._over(big, np.ascontiguousarray(im[::2, ::2]), 60 + k * 660, 1200)
-    big[1022:1026, :12] = (0.85, 0.1, 0.1)
-    big[:12, 1022:1026] = (0.85, 0.1, 0.1)
+        review._over(big, np.ascontiguousarray(im[::2, ::2]), 60 + k * 660, Hs - 560)
+    big[Hs // 2 - 2:Hs // 2 + 2, :12] = (0.85, 0.1, 0.1)
+    big[:12, Ws // 2 - 2:Ws // 2 + 2] = (0.85, 0.1, 0.1)
     half = big[::2, ::2].copy()
     for i, (pk, *_r) in enumerate(info):
         review.draw(half, os.path.basename(pk) + " " + review.stamp_text(pk), 4, 4 + 18 * i, (1.0, 1.0, 0.85))
     out = os.path.join(PREVIEW, f"review_{entry.get('review_name', 'b120_starfield')}.png")
     review.write(out, half)
     mark_stale(entry["key"], False)
-    log_line(f"OK {entry['key']} | starfield 2048x2048 {n0 // 1024}KB seam_x {sx:.2f} seam_y {sy:.2f}, "
+    log_line(f"OK {entry['key']} | layer0 starfield {img0.shape[1]}x{img0.shape[0]} {n0 // 1024}KB seam_x {sx:.2f} seam_y {sy:.2f}, "
              + ", ".join(f"{os.path.basename(pk)[:-10]} {im.shape[1]}x{im.shape[0]} {n // 1024}KB" for pk, im, n, _a, _b in info[1:])
              + f" + starfield.json | review {os.path.basename(out)} | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
 

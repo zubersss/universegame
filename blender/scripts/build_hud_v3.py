@@ -25,7 +25,7 @@ from meridian import pngio, v3  # noqa: E402
 
 SS = 4
 PAL = {k: np.array(v3.hex_rgb(h), np.float32) / 255 for k, h in v3.PALETTES["earth"].items()}
-OUT_W, IN_W = 5.0, 2.2
+OUT_W, IN_W = 2.5, 1.25              # v3.1 (D-100): outer 2.0-3.0, interior 1.0-1.5 px after jitter
 
 
 def mix(a, b, t):
@@ -107,7 +107,7 @@ def dial(name, colour, icon, seed):
         a = a0 + (a1 - a0) * k / 10
         r0 = 70 if k % 5 == 0 else 78
         c.ink([(cx + r0 * math.cos(a), cy - r0 * math.sin(a)), (cx + 88 * math.cos(a), cy - 88 * math.sin(a))],
-              IN_W + (0.6 if k % 5 == 0 else 0))
+              IN_W)                                                     # major ticks are longer, not thicker (v3.1)
     ix, iy = cx, cy + 58                                                                        # icon below the hub
     if icon == "bolt":
         c.shape([(ix + 6, iy - 30), (ix - 14, iy + 2), (ix - 1, iy + 2), (ix - 8, iy + 30), (ix + 15, iy - 6), (ix + 2, iy - 6)],
@@ -120,6 +120,13 @@ def dial(name, colour, icon, seed):
         c.ink([(ix, iy - 21), (ix + 4, iy - 30)], IN_W)
         c.ink([(ix - 24, iy - 16), (ix - 24, iy + 22)], IN_W)
         c.ink([(ix - 31, iy + 13), (ix - 24, iy + 23), (ix - 17, iy + 13)], IN_W)
+    for a in (0.785, 2.356, 3.927, 5.498):                       # bezel screws with their slots
+        sx_, sy_ = cx + 137 * math.cos(a), cy + 137 * math.sin(a)
+        c.shape(circle(sx_, sy_, 5, n=12, seed=int(a * 10)), mix(PAL['mustard'], PAL['offwhite'], 0.3), IN_W)
+        c.ink([(sx_ - 3 * math.cos(a + 1.2), sy_ - 3 * math.sin(a + 1.2)), (sx_ + 3 * math.cos(a + 1.2), sy_ + 3 * math.sin(a + 1.2))], IN_W)
+    for j in range(3):                                          # hatch in the shadow crescent
+        hx, hy = cx + 70 + 9 * j, cy + 78 - 9 * j
+        c.ink([(hx - 7, hy + 7), (hx + 7, hy - 7)], IN_W)
     c.ink(circle(cx, cy, 150, seed=seed), OUT_W, cyclic=True)
     return c.image()
 
@@ -128,8 +135,9 @@ def needle(seed):
     """Needle part 48x150, pivot at the hub (pointing up); red with an ink outline + brass hub."""
     c = Canvas(48, 150)
     cx, hy = 24, 124
-    c.shape([(cx - 6, hy), (cx - 2, 18), (cx, 10), (cx + 2, 18), (cx + 6, hy)], PAL["red"], 3.4)
-    c.shape(circle(cx, hy, 14, n=28, seed=seed), PAL["mustard"], 3.4)
+    c.shape([(cx - 6, hy), (cx - 2, 18), (cx, 10), (cx + 2, 18), (cx + 6, hy)], PAL["red"], OUT_W)
+    c.ink([(cx, hy - 20), (cx, 30)], IN_W)                     # the needle's centre ridge
+    c.shape(circle(cx, hy, 14, n=28, seed=seed), PAL["mustard"], OUT_W)
     c.ink(circle(cx, hy, 4, n=12, seed=seed + 1), IN_W, cyclic=True)
     return c.image(), (cx / 48, 1 - hy / 150)
 
@@ -141,7 +149,7 @@ def escape_line():
     rng = np.random.default_rng(3)
     for k in range(8):
         r = rng.uniform(9, 12)
-        c.shape(circle(32 + 64 * k, 32 + rng.uniform(-2, 2), r, n=24, lump=0.06, seed=k), PAL["mustard"], 3.6)
+        c.shape(circle(32 + 64 * k, 32 + rng.uniform(-2, 2), r, n=24, lump=0.06, seed=k), PAL["mustard"], OUT_W)
     return c.image()
 
 
@@ -149,9 +157,13 @@ def escape_sign():
     """<= 256^2 sign: a brown post with a slightly crooked off-white board; lettering pending."""
     c = Canvas(192, 224)
     c.shape([(88, 222), (86, 120), (104, 118), (106, 222)], PAL["brown"])
+    for gx in (92, 99):                                         # post grain
+        c.ink([(gx, 214), (gx + 1, 180), (gx - 1, 150), (gx, 128)], IN_W)
     board = [(14, 46), (176, 34), (182, 120), (20, 130)]
     c.shape(board, PAL["offwhite"])
     c.fill([(20, 112), (180, 102), (182, 120), (20, 130)], shade(PAL["offwhite"]))
+    for gy, b in ((62, 0.0), (80, 2.0), (98, -1.5)):            # board grain, slightly bowed
+        c.ink([(28, gy + b), (90, gy - 2 + b), (168, gy - 6 + b)], IN_W)
     c.ink(board, OUT_W, cyclic=True)
     for nx, ny in ((30, 56), (166, 46)):
         c.shape(circle(nx, ny, 5, n=12, seed=nx), PAL["brown"], IN_W)
@@ -186,7 +198,7 @@ def build(out, art=False):
     with open(os.path.join(d, "gauges.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(meta, f, indent=2)
         f.write("\n")
-    for fn, extra in (("escape_line.json", {"tile_x": True, "period_px": 64}),
+    for fn, extra in (("escape_line.json", {"tile": True, "tile_x": True, "period_px": 64}),
                       ("escape_sign.json", {"pivot": [0.5, 0.0], "lettering": "pending Patrick Hand (D-090)"})):
         with open(os.path.join(d, fn), "w", encoding="utf-8", newline="\n") as f:
             json.dump({"key": "ui/hud/" + fn[:-5], "style": "v3", "ppu": v3.PPU, **extra}, f, indent=2)

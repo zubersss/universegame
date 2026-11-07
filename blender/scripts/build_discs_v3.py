@@ -9,7 +9,8 @@ the body) whose wobble Unity plays from disc_rig.json.
 Look: flat washes with pigment variation and paper grain (gen_painted_bg), one shadow tone on
 the night side (light from the upper right, as the Sun sits screen-left of most views is NOT
 assumed: the space view lights discs from the Sun at runtime is not v4; the crescent is drawn),
-ink only on the outline and on drawn features (Neptune's face, ring edges).
+ink on the outline, ring edges and a few interior marks (night-side hatching, band-edge fragments);
+no faces or expressions on any planet (D-101): Neptune's character is its wandering dark storm.
 
   python build_discs_v3.py <out_dir>      writes every disc + a review sheet (preview)
 """
@@ -30,8 +31,9 @@ RADIUS_U = {"mercury": 14, "venus": 24, "earth": 25, "mars": 17, "jupiter": 106,
             "uranus": 57, "neptune": 56, "luna": 7}
 FRAMES = {"jupiter": 9, "saturn": 9}
 SS = 2
-OUT_PX = 5.0                     # outline width (px at 1x), jitter +-20 %
-IN_PX = 2.2
+OUT_PX = 2.5                     # v3.1 (D-100): outline 2.5 px nominal -> 2.0-3.0 with the +-20 % jitter
+IN_PX = 1.25                     # interior marks 1.25 px -> 1.0-1.5
+WIDTHS = []                      # (nominal, min, max) px of every ink stroke drawn (review measurement)
 PAL = {k: np.array(v3.hex_rgb(h), np.float32) / 255 for k, h in v3.PALETTES["earth"].items()}
 
 
@@ -98,6 +100,7 @@ def finish(d, rgb, extra_ink=(), extra_rgba=()):
     for i, (sx, sy, w, cyc) in enumerate(strokes):
         xz = np.c_[sx, -sy] / (SS * 64.0)        # jitter along arclength in "metres" at 64 px/m
         r = GR.jittered_radius(xz, np.full(len(sx), w / 2 / 64.0), 977 * i + len(sx), 64.0) * 64.0 * SS
+        WIDTHS.append((w, float(r.min()) * 2 / SS, float(r.max()) * 2 / SS))
         m = GR._ink_mask(sx, sy, r, cyc, n, n).astype(np.float32)[..., None]
         acc[..., :3] = ink * m + acc[..., :3] * (1 - m)
         acc[..., 3:] = m + acc[..., 3:] * (1 - m)
@@ -200,23 +203,40 @@ def paint(name, d, f, nf):
         rgb = bands(d, [(1.1, PAL["teal"]), (0.35, mix(PAL["teal"], PAL["sky"], 0.4)), (-0.1, PAL["teal"]),
                         (-0.5, mix(PAL["teal"], PAL["brown"], 0.25))], 2 * np.pi * t, wob=0.03)
         rgb[blobs(d, [(0.22, -0.25, 0.12)], sphere_u(d, t * 0.4))] = shade(PAL["teal"])
-        # the grumpy face (Bible §9.3): low heavy brows, half-lidded eyes, a pout; a slow blink
-        k, c = d.R * SS, d.size * SS / 2
-        blink = 1.0 if f in (7, 8) else 0.55
-        for s in (-1, 1):
-            ex, ez = s * 0.30, 0.22
-            pts = [(c + (ex + 0.13 * math.cos(a)) * k, c - (ez + 0.10 * math.sin(a) * (1 - blink)) * k)
-                   for a in np.linspace(math.pi, 2 * math.pi, 12)]
-            extra_ink.append((np.array(pts), IN_PX))
-            brow = [(c + (ex - 0.17 * s) * k, c - (ez + 0.05) * k), (c + (ex + 0.17 * s) * k, c - (ez + 0.17) * k)]   # V: inner ends low = a scowl
-            lid = [(c + (ex - 0.13) * k, c - (ez + 0.005) * k), (c + (ex + 0.13) * k, c - (ez + 0.005) * k)]
-            extra_ink.append((np.array(lid), IN_PX))
-            extra_ink.append((np.array(brow), IN_PX + 0.6))
-        mouth = [(c + (x) * k, c - (-0.22 + 0.05 * math.cos(x / 0.18 * math.pi / 2)) * k) for x in np.linspace(-0.18, 0.18, 10)]
-        extra_ink.append((np.array(mouth), IN_PX))
+        # no face (D-101): a bright companion cloud trails the dark storm as both drift
+        rgb[blobs(d, [(0.30 + 0.011 * j, -0.12 + 0.004 * j, 0.032) for j in range(-8, 9)], sphere_u(d, t * 0.4))] = \
+            mix(PAL["offwhite"], PAL["sky"], 0.3)
     rgb = np.asarray(rgb, np.float32)
     rgb[nightm] = shade(rgb[nightm])
+    extra_ink = list(extra_ink) + interior_marks(name, d, f, nf)
     return rgb, extra_ink, extra_rgba
+
+
+BAND_EDGES = {"jupiter": (0.62, 0.42, 0.18, -0.05, -0.25, -0.52), "saturn": (0.5, 0.15, -0.2),
+              "uranus": (0.3, -0.3), "neptune": (0.35, -0.1)}
+
+
+def interior_marks(name, d, f, nf):
+    """v3.1 (D-100) interior line work: two small hatch groups in the night crescent, and on the
+    giants a few short band-edge fragments that drift with the bands (in px at SS)."""
+    k, c = d.R * SS, d.size * SS / 2
+    marks = []
+    L = max(0.10, 6.0 / d.R)                  # at least ~6 px long on the small discs
+    for (u0, v0) in ((-0.62, -0.42), (-0.30, -0.80)):
+        for j in range(3):
+            uu, vv = u0 + 0.06 * j, v0 + 0.06 * j
+            if uu * uu + vv * vv > 0.86:
+                continue
+            marks.append((np.array([(c + (uu - L / 2) * k, c - (vv - L / 2) * k), (c + (uu + L / 2) * k, c - (vv + L / 2) * k)]), IN_PX))
+    ph = 2 * np.pi * f / nf
+    for vb in BAND_EDGES.get(name, ()):
+        for u0 in (-0.35, 0.25):
+            uu = u0 + 0.05 * math.sin(ph + vb * 7)
+            if (abs(uu) + 0.22) ** 2 + vb * vb > 0.9:
+                continue
+            pts = [(c + (uu + t_) * k, c - (vb + 0.04 * math.sin(4.0 * (uu + t_) + ph)) * k) for t_ in np.linspace(0, 0.22, 6)]
+            marks.append((np.array(pts), IN_PX))
+    return marks
 
 
 def saturn_rings(R, tilt=0.30):
@@ -245,6 +265,7 @@ def saturn_rings(R, tilt=0.30):
         xz = np.c_[px, -py] / (SS * 64.0)
         w = OUT_PX if i == 0 else IN_PX
         r = GR.jittered_radius(xz, np.full(len(px), w / 2 / 64.0), 31 + i, 64.0) * 64.0 * SS
+        WIDTHS.append((w, float(r.min()) * 2 / SS, float(r.max()) * 2 / SS))
         m = GR._ink_mask(px, py, r, True, n_h, n_w).astype(np.float32)[..., None]
         acc[..., :3] = PAL["ink"] * m + acc[..., :3] * (1 - m)
         acc[..., 3:] = m + acc[..., 3:] * (1 - m)
@@ -311,6 +332,10 @@ def export(art, preview_dir, stamp=None):
     d = os.path.join(art, "planets", "saturn")
     for nm, im in (("rings_back", back), ("rings_front", front)):
         n = pngio.write_png(os.path.join(d, f"{nm}_color.png"), im)
+        with open(os.path.join(d, f"{nm}.json"), "w", encoding="utf-8", newline="\n") as f:
+            _json.dump({"key": f"planets/saturn/{nm}", "style": "v3", "ppu": SPACE_PPU, "space_ppu": SPACE_PPU,
+                        "radius_u": RADIUS_U["saturn"], "pivot": [0.5, 0.5]}, f, indent=2)
+            f.write("\n")
         out.append((f"planets/saturn/{nm}", im.shape[1], im.shape[0], 1, n // 1024))
     rig = {"key": "planets/saturn/disc_rig", "style": "v3", "space_ppu": SPACE_PPU,
            "parts": [{"name": "rings_back", "order": 0, "pivot": [0.5, 0.5]}, {"name": "disc", "order": 1},
@@ -334,10 +359,24 @@ def pack(frames, cols, gutter=v3.GUTTER):
     return s
 
 
+OURS = {
+    "mercury": "a pocked grey-brown pebble turning slowly, craters drawn with rims",
+    "venus": "cream-and-mustard chevron cloud bands drifting across a hidden world",
+    "earth": "teal seas, dusty-green land and streaky clouds turning at two speeds, Luna at its shoulder",
+    "mars": "rust-red with darker plains and a white polar cap, turning",
+    "jupiter": "wavy mustard, cream and brown bands that swirl, the red spot drifting",
+    "saturn": "pale banded body inside two-piece rings that wobble on the beat",
+    "uranus": "soft sky-teal bands, quiet and pale",
+    "neptune": "deep teal bands with a dark storm wandering and a bright cloud trailing it",
+}
+
+
 def preview(out_dir, tiles=None, out_name="review_b119_discs_preview.png", stamp_paths=()):
-    """All eight side by side at the space scale (+ Luna, Saturn's rings) + 2x detail of frame 0.
-    tiles: reuse frames already built by export() (render.py); stamp_paths: exported PNGs whose
-    time + hash are printed on the sheet (review.stamp_text)."""
+    """Contract §11.7 review for the disc set: (1) all eight at the space scale (+ Luna, Saturn's
+    two ring parts, sized so the rings never overlap a neighbour), (2) every frame of every disc as
+    a numbered strip (2x for the small discs, 1x for Jupiter and Saturn, wrapped), (3) a panel with
+    the palette (colour, mid, deep), the measured ink widths, the ten §9.7 boxes and one "ours" line
+    per disc. tiles: frames already built by export(); stamp_paths: exported PNGs to stamp."""
     import time
     sys.path.insert(0, os.path.dirname(HERE))
     import review
@@ -350,14 +389,19 @@ def preview(out_dir, tiles=None, out_name="review_b119_discs_preview.png", stamp
             tiles[name] = (frames, R)
             print(name, len(frames), frames[0].shape, f"{time.time() - t0:.1f}s", flush=True)
     back, front = saturn_rings(RADIUS_U["saturn"] * SPACE_PPU)
-    H = 760
-    W = 16 + sum(tiles[n][0][0].shape[1] + 24 for n in ORDER) + 700
+    bg = mix(PAL["ink"], PAL["teal"], 0.18)
+    sw = tiles["saturn"][0][0].shape[1]
+    ov = max(0, back.shape[1] // 2 - sw // 2)          # ring overhang on each side of Saturn's frame
+    H = max(760, back.shape[0] + 80, max(tiles[n][0][0].shape[0] for n in ORDER) + 80)
+    W = 16 + sum(tiles[n][0][0].shape[1] + 24 for n in ORDER) + 2 * ov + 16
     canvas = np.zeros((H, W, 3), np.float32)
-    canvas[:] = mix(PAL["ink"], PAL["teal"], 0.18)
+    canvas[:] = bg
     x = 16
     for n in ORDER:
         fr = tiles[n][0][0]
         h, w = fr.shape[:2]
+        if n == "saturn":
+            x += ov
         y = H // 2 - h // 2
         if n == "saturn":
             bh, bw = back.shape[:2]
@@ -367,29 +411,67 @@ def preview(out_dir, tiles=None, out_name="review_b119_discs_preview.png", stamp
             review._over(canvas, front, x + w // 2 - bw // 2, H // 2 - bh // 2)
         if n == "earth":
             lf = tiles["luna"][0][0]
-            review._over(canvas, lf, x + w - 10, y - lf.shape[0] // 2)
+            review._over(canvas, lf, x + w - 10, max(0, y - lf.shape[0] // 2))
         review.draw(canvas, n, x, 8, (1.0, 0.97, 0.85))
-        x += w + 24 + (420 if n == "saturn" else 0)
-    review.draw(canvas, f"planet discs at the space scale ({SPACE_PPU:g} px per unit), frame 0 each; sky = placeholder", 8, H - 18, (1.0, 0.97, 0.85))
-    # 2x detail row: every frame of Earth and the Neptune face
+        x += w + 24 + (ov if n == "saturn" else 0)
+    review.draw(canvas, f"planet discs at the space scale ({SPACE_PPU:g} px per unit, D-098), frame 0 each; sky = placeholder",
+                8, H - 18, (1.0, 0.97, 0.85))
     rows = [canvas]
-    for n in ("earth", "neptune", "jupiter"):
+    # every frame of every clip, numbered (contract §11.7), wrapped
+    for n in ORDER + ["luna"]:
         frs = tiles[n][0]
         fh, fw = frs[0].shape[:2]
-        sc = 2 if n != "jupiter" else 1
+        sc = 1 if n in ("jupiter", "saturn") else 2
         per = max(1, (W - 16) // (fw * sc + 8))
-        row = np.tile(mix(PAL["ink"], PAL["teal"], 0.18), (fh * sc + 30, W, 1)).astype(np.float32)
-        for i, fr in enumerate(frs[:per]):
-            big = np.repeat(np.repeat(fr, sc, 0), sc, 1)
-            review._over(row, big, 8 + i * (fw * sc + 8), 26)
-            review.draw(row, f"{n} {i}", 8 + i * (fw * sc + 8), 6, (1.0, 0.97, 0.85))
-        rows.append(row)
+        for r0 in range(0, len(frs), per):
+            row = np.tile(bg, (fh * sc + 30, W, 1)).astype(np.float32)
+            for j, fr in enumerate(frs[r0:r0 + per]):
+                xx = 8 + j * (fw * sc + 8)
+                review._over(row, np.repeat(np.repeat(fr, sc, 0), sc, 1), xx, 26)
+                review.draw(row, f"{n} idle {r0 + j}", xx, 6, (1.0, 0.97, 0.85))
+            rows.append(row)
+    # panel: palette, measured widths, ten boxes, ours per disc
+    from meridian import v3
+    panel = np.tile(review.PAPER, (420, W, 1)).astype(np.float32)
+    pal = v3.PALETTES["earth"]
+    review._label(panel, "palette earth (space discs): colour, mid shadow, deep shadow", 8, 6)
+    for i, kname in enumerate(v3.PALETTE_ORDER):
+        xx = 8 + i * 46
+        panel[26:62, xx:xx + 40] = review._hexf(pal[kname])
+        if kname != "ink":
+            panel[64:80, xx:xx + 40] = review._hexf(v3.shadow_of(pal[kname]))
+            panel[82:98, xx:xx + 40] = review._hexf(v3.deep_of(pal[kname]))
+    outer = [w for w in WIDTHS if w[0] >= v3.OUTER_SPLIT]
+    inner = [w for w in WIDTHS if w[0] < v3.OUTER_SPLIT]
+    ow = (min(w[1] for w in outer), max(w[2] for w in outer)) if outer else (0, 0)
+    iw = (min(w[1] for w in inner), max(w[2] for w in inner)) if inner else (0, 0)
+    ink_ok = bool(outer) and bool(inner) and v3.OUTER_PX[0] - 0.05 <= ow[0] and ow[1] <= v3.OUTER_PX[1] + 0.05 \
+        and v3.INNER_PX[0] - 0.05 <= iw[0] and iw[1] <= v3.INNER_PX[1] + 0.05
+    review._label(panel, f"measured ink: outer {ow[0]:.1f}-{ow[1]:.1f} px (2-3), interior {iw[0]:.1f}-{iw[1]:.1f} px (1-1.5), "
+                         f"{len(inner)} interior marks over all frames", 8, 108)
+    res = {"ink": ("x" if ink_ok else "!", "measured; night-side hatching + band-edge fragments"),
+           "cel": ("s", "watercolour fill per contract §11.5 (bands, caps, spots), one night tone"),
+           "face": ("s", "no faces or expressions on any planet (D-101)"),
+           "twos": ("x", "12 fps; 12 frames, Jupiter and Saturn 9 (D-098)"),
+           "motion": ("s", "bands swirl, clouds and storms drift, Saturn's rings wobble via disc_rig.json"),
+           "idle": ("x", "every disc loops an idle"),
+           "original": ("s", "the real planets, painted; no existing character"),
+           "sheet": ("x", "sheets + disc.json validated (space_ppu 3), ring parts with v3 sidecars"),
+           "budget": ("x", "every sheet <= 2048, <= 4 MB"),
+           "style": ("s", "C1 space art; LEAD judges against the C0 reference")}
+    review._label(panel, "bible 4.1 9.7 ten-box checklist", 8, 132)
+    for i, (key, text) in enumerate(review.BOXES):
+        mark, note = res[key]
+        review._label(panel, f"[{mark}] {text}  -  {note}"[:150], 8, 150 + i * 16)
+    for i, n in enumerate(ORDER):
+        review._label(panel, f"ours, {n}: {OURS[n]}"[:150], 8 + (i % 2) * (W // 2), 320 + (i // 2) * 16)
+    rows.append(panel)
     img = np.vstack(rows)
     for i, p in enumerate(stamp_paths):              # one stamp per exported sheet, stacked from the bottom
         review.draw(img, os.path.relpath(p, review.ART).replace("\\", "/") + " " + review.stamp_text(p), 4,
                     img.shape[0] - 18 * (len(stamp_paths) - i), (1.0, 1.0, 0.85))
     review.write(os.path.join(out_dir, out_name), img)
-    print("review written", img.shape, f"{time.time() - t0:.1f}s")
+    print("review written", img.shape, f"{time.time() - t0:.1f}s", "ink", ow, iw, len(inner))
 
 
 if __name__ == "__main__":
