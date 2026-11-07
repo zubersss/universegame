@@ -107,6 +107,13 @@ Exports are stamped (file time + hash); STALE.txt marks keys whose last render f
 - A builder imports gp_draw through the real Blender when `bpy.data` exists, else through `meridian.fakegp`
   (`fakegp.install()` makes `import bpy` succeed and patches `gp_draw.mat`). The same drawing functions then run
   in Blender's bundled python: `"C:/Program Files/Blender Foundation/Blender 5.2/5.2/python/bin/python.exe" -I`.
+- **Exact previews (the rule since B-135).** gp_raster jitters each stroke's ink width by a noise seeded from the
+  stroke's id, and in Blender that id is `crc32("<object>|<layer>|<stroke index>")`. Give fakegp the same id with
+  `fakegp.strokes_of(d, gp, as_object=(<object name>, <layer name>))` (the builder's `gp_object` name and layer, e.g.
+  `("squid", "art")`), render at the export's supersampling (`ss=4`) and seed (`entry seed * 1000 + frame number`,
+  1-based), and the preview IS the export: the 48 pike frames came out pixel-identical. Without `as_object` the ids
+  are `fake|i`, the jitter differs, and a frame that clears the 2 px edge in preview can touch it in the export (the
+  squid's flee frame 10 did). Measure edges, ink widths and palette on such exact frames before a slot.
 - Match the export exactly: one FakeDrawing per frame, `gp_raster.render_frame(strokes, fw, fh, 64, pivot, ss,
   seed=entry_seed * 1000 + frame_number)` with 1-based frame numbers (the timeline), ss 2 for previews, 4 for exports.
 - `review.v3_sheet_review(entry, meta, frames, sheet_png, out, stats)` builds the export's own review from a
