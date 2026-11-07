@@ -39,11 +39,26 @@ namespace Meridian.View2D
         /// <summary>Lays the columns out again on the next LateUpdate (the terminator crept, a rule changed).</summary>
         public void Invalidate() => dirty = true;
         /// <summary>The planet's strip keys (Earth's four, Mars's two; other planets Earth's until their strips exist). Pure.</summary>
-        public static string[] KeysFor(Meridian.Planets.PlanetId planet) => planet == Meridian.Planets.PlanetId.Mars ? MarsKeys : planet == Meridian.Planets.PlanetId.Mercury ? MercuryKeys : Keys;
+        public static string[] KeysFor(Meridian.Planets.PlanetId planet) => planet == Meridian.Planets.PlanetId.Mars ? MarsKeys : planet == Meridian.Planets.PlanetId.Mercury ? MercuryKeys
+            : planet == Meridian.Planets.PlanetId.Venus ? VenusKeys : Keys;
+        /// <summary>U-125 (B-153): Venus's two kinds: the basalt crust on every ground column (vents, tesserae and sulphur patches read as crust on the
+        /// drawn strip) and the deck planks, laid along the floating station's deck (SetDecks), never on a terrain column.</summary>
+        public static readonly string[] VenusKeys = { "terrain/venus/ground_strip", "terrain/venus/ground_strip_deck" };
+        public const int VenusCrust = 0, VenusDeck = 1;
+        /// <summary>U-125: the planet's floating decks as (x0, x1, deck top y): Venus's stations from PoiCatalog (the aerostat decks' top at floatY + DeckTop). Pure.</summary>
+        public static List<Vector3> DecksFor(Meridian.Planets.PlanetId planet)
+        {
+            var runs = new List<Vector3>(2);
+            if (planet != Meridian.Planets.PlanetId.Venus) return runs;
+            foreach (var poi in Meridian.Planet.POI.PoiCatalog.For(planet))
+                if (poi.Floating) runs.Add(new Vector3(poi.x, poi.x + poi.floatWidth, poi.floatY + Meridian.Planet.POI.PoiCatalog.DeckTop));
+            return runs;
+        }
         /// <summary>The strip a column draws on `planet` from its top solid tile. Pure.</summary>
         public static int MaterialFor(Meridian.Planets.PlanetId planet, byte topTile) => planet == Meridian.Planets.PlanetId.Mars
             ? (topTile == TileId.Basalt ? Basalt : (topTile == TileId.Snow || topTile == TileId.Ice) ? Frost : Regolith)
             : planet == Meridian.Planets.PlanetId.Mercury ? MercuryRegolith // U-123: the shadow (slate) is the clock's rule, materialRule
+            : planet == Meridian.Planets.PlanetId.Venus ? VenusCrust // U-125: the deck planks are the station's, never a column's
             : MaterialFor(topTile);
 
         /// <summary>The strip a column draws from its top solid tile: grass, sand and stone their own, every other tile (soil, snow, a dug face) the soil. Pure.</summary>
@@ -77,6 +92,21 @@ namespace Meridian.View2D
         readonly List<SpriteRenderer> tops = new List<SpriteRenderer>(64), fills = new List<SpriteRenderer>(64), edges = new List<SpriteRenderer>(64), backs = new List<SpriteRenderer>(64);
         int firstColumn = int.MinValue, lastColumn = int.MinValue, count;
         bool dirty = true;
+        // U-125: the floating decks (x0, x1, deck top y) and the strip kind laid along them.
+        readonly List<Vector3> deckRuns = new List<Vector3>(2);
+        readonly List<SpriteRenderer> deckTops = new List<SpriteRenderer>(32);
+        int deckMaterial = -1;
+        /// <summary>U-125: how many deck-plank frames drew on the last pass (tests and captures).</summary>
+        public int DeckFramesShown { get; private set; }
+
+        /// <summary>U-125: the runs (x0, x1, deck top y) to lay the `material` kind along, one frame per metre; empty clears them.</summary>
+        public void SetDecks(List<Vector3> runs, int material)
+        {
+            deckRuns.Clear();
+            if (runs != null) deckRuns.AddRange(runs);
+            deckMaterial = deckRuns.Count > 0 ? material : -1;
+            dirty = true;
+        }
 
         void OnEnable() { if (terrain != null) terrain.TileChanged += OnTile; }
         void OnDisable() { if (terrain != null) terrain.TileChanged -= OnTile; }
@@ -173,6 +203,30 @@ namespace Meridian.View2D
                 if (bk.enabled) { bk.transform.position = new Vector3(x + 0.5f, rim, Z + 0.001f); bk.size = new Vector2(1f, rim - top); }
                 prevTop = top;
             }
+            LayDecks(first, last);
+        }
+
+        /// <summary>U-125: the deck kind along each floating deck in view (no fill: the hull below is the station's props); hidden until its sheet is in.</summary>
+        void LayDecks(int first, int last)
+        {
+            int n = 0;
+            var set = deckMaterial >= 0 && deckMaterial < framesBy.Length ? framesBy[deckMaterial] : null;
+            if (set != null)
+                for (int r = 0; r < deckRuns.Count; r++)
+                {
+                    var run = deckRuns[r];
+                    int x0 = Mathf.Max(first, Mathf.FloorToInt(run.x)), x1 = Mathf.Min(last, Mathf.CeilToInt(run.y) - 1);
+                    for (int x = x0; x <= x1; x++)
+                    {
+                        if (n == deckTops.Count) deckTops.Add(Make("Deck", Order, null));
+                        var t = deckTops[n++];
+                        t.enabled = true;
+                        t.sprite = set[((x % set.Length) + set.Length) % set.Length];
+                        t.transform.position = new Vector3(x + 0.5f, run.z, Z);
+                    }
+                }
+            for (int i = n; i < deckTops.Count; i++) deckTops[i].enabled = false;
+            DeckFramesShown = n;
         }
 
         /// <summary>D-146: the fill tile inside a strip's frame 0 — rows 1–6 of its bottom 8, one texel in from every side, so bilinear filtering

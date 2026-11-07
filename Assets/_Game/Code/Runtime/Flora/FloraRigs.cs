@@ -178,8 +178,14 @@ namespace Meridian.Flora
                 var r = Meridian.Planet.Backdrop.StageRegions.At(Meridian.Planets.PlanetId.Mars, x);
                 return r == "mars_tharsis" ? "highlands" : r.StartsWith("mars_", System.StringComparison.Ordinal) ? r.Substring(5) : r;
             }
+            if (planet == Meridian.Planets.PlanetId.Venus) return VenusBiomeFor(x); // U-125 (B-153)
             return null; // Mercury: the zone moves with the clock — MercuryBiomeFor through biomeRule
         }
+
+        /// <summary>U-125 (B-153): Venus's ground biomes in the rig set's vocabulary — "vent_fields" over a vent field, "surface_plains" elsewhere (the
+        /// tesserae included); "cloud_deck" and "station_rails" are the floating station's, never a terrain column's. Pure.</summary>
+        public const string VenusVents = "vent_fields", VenusPlains = "surface_plains", VenusDeck = "cloud_deck", VenusRails = "station_rails";
+        public static string VenusBiomeFor(int x) => Meridian.Terrain.VenusLandforms.At(x) == Meridian.Terrain.VenusFeature.VentField ? VenusVents : VenusPlains;
 
         /// <summary>U-123 (B-148): Mercury's biome names for its rig set — "polar" in a cold trap, else the terminator's zone at that clock: "day", "twilight", "night". Pure.</summary>
         public static string MercuryBiomeFor(int x, double realSeconds, int width)

@@ -253,7 +253,7 @@ namespace Meridian.Planet.POI
         // ---------- Venus (U-050, B-045) ----------
 
         /// <summary>Deck surface above a deck prop's base (art row 62 of 336, railings above).</summary>
-        const float DeckTop = (336f - 62f) / 128f;
+        public const float DeckTop = (336f - 62f) / 128f; // U-125: GroundStrip lays the deck planks at floatY + DeckTop
 
         /// <summary>The Meridian station (Venus beacon, Warden origin) floating on the cloud deck: five deck pieces, hull modules, the door, buoyancy cells and balloons.</summary>
         public static readonly PoiDef MeridianStation = new PoiDef

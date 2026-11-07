@@ -145,7 +145,7 @@ namespace Meridian.Creatures
             new SpeciesSpec { id = Species.PressureCrab, planet = PlanetId.Venus, artKey = "creatures/venus/pressure_crab", size = new Vector2(1.9f, 1.2f),
                 wanderSpeed = 0.7f, runSpeed = 2.2f, jumpSpeed = 4f, temper = Temper.Hunts, senseRange = 5f, time = ActiveTime.Any,
                 packMin = 1, packMax = 2, maxAlive = 4, placeholder = new Color(0.4f, 0.3f, 0.3f) },
-            new SpeciesSpec { id = Species.VentEel, planet = PlanetId.Venus, artKey = "creatures/venus/vent_eel", size = new Vector2(2.0f, 0.55f),
+            new SpeciesSpec { id = Species.VentEel, planet = PlanetId.Venus, artKey = "creatures/venus/vent_eel", den = "props/venus/vent_mouth", size = new Vector2(2.0f, 0.55f), // U-125 (D-126): it peeks from its vent, a separate prop (B-154)
                 wanderSpeed = 1.6f, runSpeed = 6f, jumpSpeed = 5f, temper = Temper.Hunts, senseRange = 10f, time = ActiveTime.Any,
                 packMin = 1, packMax = 3, maxAlive = 5, placeholder = new Color(0.8f, 0.35f, 0.2f) },
             new SpeciesSpec { id = Species.VeilSerpent, planet = PlanetId.Venus, artKey = "creatures/venus/veil_serpent", size = new Vector2(9.8f, 2.3f), artScale = 3f,
