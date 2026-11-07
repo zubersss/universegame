@@ -1,0 +1,21 @@
+{
+  "key": "props/mars/tube_mound",
+  "style": "v3",
+  "frame_width": 104,
+  "frame_height": 32,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.3125
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [],
+  "squash_root": false,
+  "ground_line_px": 10,
+  "note": "one static frame (no clip); the pivot sits on the ground line; D-126: drawn in front of creatures/mars/tube_lurker on the same pivot (the creature peeks over its top line)",
+  "den_for": "creatures/mars/tube_lurker"
+}

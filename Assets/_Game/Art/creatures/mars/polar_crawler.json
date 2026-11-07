@@ -1,0 +1,45 @@
+{
+  "key": "creatures/mars/polar_crawler",
+  "style": "v3",
+  "frame_width": 144,
+  "frame_height": 64,
+  "columns": 13,
+  "gutter": 4,
+  "frames": 46,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.0
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [
+    {
+      "name": "idle",
+      "start": 0,
+      "length": 12,
+      "loop": true,
+      "loop_from": 0
+    },
+    {
+      "name": "walk",
+      "start": 12,
+      "length": 14,
+      "loop": true,
+      "loop_from": 0
+    },
+    {
+      "name": "react",
+      "start": 26,
+      "length": 10,
+      "loop": false
+    },
+    {
+      "name": "bump",
+      "start": 36,
+      "length": 10,
+      "loop": false
+    }
+  ],
+  "squash_root": true
+}
