@@ -15,7 +15,7 @@ B-168 EXPORTED + VERIFIED (a5d30f30, 17:23:23-17:24:07, 473 MB): the eight Venus
 - 16:07:42-16:11:26 SLOT: the B-161 stamped reviews (all nine ACCEPTED).
 
 ## Ready for review
-- B-161 Neptune decks: review_b161_neptune_ndeck{1,2,3}_preview.png (17:25-17:28; ndeep / nstorm / nspot to follow).
+- B-161 Neptune decks: ndeck1 + ndeck2 ACCEPTED (17:3x); review_b161_neptune_ndeck3_preview.png (17:38, the rim pass); ndeep / nstorm / nspot to follow.
 
 - B-154: the export (87e1ae22) + review_b147_venus_{sulfur_drifter,acidmoth,pressure_crab,vent_eel}.png + review_b154_vent_mouth.png.
 
@@ -47,4 +47,4 @@ none (B-161's three ruled in D-148).
 none (USER-28, closing ChatGPT + Edge for RAM, is LEAD's).
 
 ## HeavyJobLock
-none held (released 17:28:29); no want on file: UNITY's lock C goes next; I re-file for ndeep / nstorm / nspot when its lock appears (D-039).
+none held (released 17:38:51); want_blender filed 17:39 (ndeep / nstorm / nspot) behind UNITY's lock C2+D (Build 0.4.7).
