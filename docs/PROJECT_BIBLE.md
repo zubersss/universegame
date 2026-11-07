@@ -183,7 +183,7 @@ untouched, and `FeelTests` proves every planet's jump height to ± 1 cm.
 | Jump cut | releasing Space while rising caps the remaining upward speed to 40 % (variable height; the maximum height is unchanged) |
 | Air dash | Shift tapped while airborne: 9 m/s in the facing direction for 0.18 s (1.62 m on every planet); vertical speed held at 0 for those 0.18 s, then real g resumes at once; one per airtime, refreshed by landing or a successful parry; 0.35 s cooldown; no invulnerability |
 | Parry | C: active window 0.12 s, whiff recovery 0.40 s (no cancel), on the ground and in the air. A parried melee attack does 0 damage and staggers the attacker for 1.2 s; a parried projectile (Warden bolt, thrown shard, spit) is reflected along the aim; a parry refreshes the air dash and gives 0.3 s of flash |
-| Hit stop | the game clock pauses 50 ms when the player is hit, 33 ms when the player lands a Lance or parry hit; never more than 90 ms in any chain |
+| Hit stop | none (D-087). Bumps and conk-outs never pause the clock; the squash on the visual root is the whole reaction |
 | Hit reaction (player) | knocked 0.8 m away from the hit over 0.12 s, a 2-frame white flash, the `hit_react` clip; `hurt` stays for environmental damage |
 | Hit reaction (creature) | knocked 0.5 m, flash, squash 0.85 for 0.12 s, `hit_react` clip; a staggered creature plays `stagger` |
 | Squash and stretch (visual root only, volume-preserving: width = 1/√height) | crouch anticipation 0.8 tall over the first 0.06 s of the jump (the body leaves the ground on the input frame; the crouch is drawn over the first frames of the rise, never as an input delay, D-084); take-off stretch 1.25 for the next 0.08 s; landing squash 0.7 at ≥ 6 m/s impact (scaled linearly from 1.0 at 2 m/s) recovering in 0.18 s with one overshoot to 1.05; dash stretch 1.3 along the dash; hit squash 0.85. Colliders, the Rigidbody and gravity never scale |
@@ -237,7 +237,7 @@ smoothly and holds its height; the player moves within the frame, not the frame 
 | Horizontal follow | dead zone ± 1.5 m around the frame centre; outside it the camera eases with a 0.25 s critically damped follow; look-ahead 2 m in the facing direction eased over 0.6 s; camera speed never exceeds player speed + 2 m/s |
 | Vertical hold | the frame bottom sits 3 m below the *stage floor*: the ground height under the player, sampled from the terrain and smoothed over 0.8 s. Jumps (≤ 6.6 m) and jetpack hops never move the camera. The camera moves vertically only when the player leaves the middle 60 % of the frame, at ≤ 6 m/s; a fall longer than 10 m switches to a 0.4 s follow until landing |
 | Fight zoom | ≥ 2 hostile creatures within 14 m, or an apex within 25 m: the frame grows to 22 m tall (apex: 26 m) over 1.0 s and returns over 2.0 s after 3 s of calm; the stage-floor rule holds throughout |
-| Impact | a hit on the player: 0.15 m shake for 0.10 s (position only, never rotation); a kill: 0.08 m. Hit stop per §4.2 Feel |
+| Impact | a hit on the player: 0.15 m shake for 0.10 s (position only, never rotation); no other shake (no kills, no hit stop, D-087) |
 | Digging and building | unchanged: the frame holds while the player digs down until the 60 % rule moves it |
 | Photo mode | `P` orbit (U-080) unchanged |
 
@@ -399,7 +399,7 @@ in bold) · **Creatures** (roster; **apex**) · **Activities and points of inter
 - **Creatures.** Sulfur drifter (gasbag filter feeder), Acidmoth (swarms near lights),
   Pressure crab (surface, armored, slow), Vent eel (surface, heat-seeking). **Apex: Veil
   Serpent** — a 300 m ribbon that swims the acid haze and wraps stations; it flees from
-  cold, so Cryo-charged Lance rounds (made from Mercury ice) are its counter.
+  cold, so a Cryo lantern (made from Mercury ice) keeps it at a distance (D-087: no weapons).
 - **Activities / POIs.** Aerostat building (buoyancy budget), timed surface dives for
   Vitriol Glass, the *Meridian* station (Venus beacon; Warden origin), vent-field mining
   under Thermal pressure, Red Hollow smugglers hiding in the clouds.
@@ -495,7 +495,7 @@ recovery fee).
 - **Creatures.** Windrider (sail-finned floater), Shadow shoal (dark, fast, hunts in
   storms), Pressure phantom (translucent, Deck 3), Anchor worm (holds floes against wind).
   **Apex: Umbral Leviathan** — lives in the Great Dark Spot around the *Meridian* herself;
-  the final fight uses every system (anchors, Float cells, Lance, ship support).
+  the final encounter, a full Survey of the Grand creature (D-087), uses every system (anchors, Float cells, Grapple, ship support).
 - **Activities / POIs.** Reaching the *Meridian* (final beacon, ending choice), storm
   running, Triton in the sky with its geysers, the hardest Warden tier.
 - **Only here.** Superionic Ice; the ending; Leviathan Core (best ship shield).
@@ -511,12 +511,12 @@ recovery fee).
 | Survival  | Life support                                         | **Envirosuit** oxygen + power; refill from oxygen, ice, or any base | M3 (meter), M5 (full) |
 |           | Hazard protection (heat, cold, radiation, toxic, pressure) | Thermal / Cryo / Radiation / Toxic / Pressure modules Mk1–Mk3 | M3 inner, M4 giants |
 |           | Shields                                              | Suit shield (recharges), hull shield (ship)                    | M3 / M5   |
-| Tools     | Multitool: mining beam, scanner, weapons, upgrades   | **Rig** with modules **Beam** (mine/dig), **Lance** (weapon), **Survey** (scan), **Builder**, **Grapple** (M4) | M1 Beam/Builder, M3 rest |
+| Tools     | Multitool: mining beam, scanner, grapple, upgrades   | **Rig** with modules **Beam** (mine/dig), **Grapple** (slot 2, D-087), **Survey** (scan), **Builder** | M1 Beam/Builder, M3 rest |
 |           | Terrain digging and building                         | 1 m tiles; dig with Beam; place blocks and modules with Builder | M1        |
 | Economy   | Resources, refining, crafting, tech tree             | Resources (§7); **Smelter** and **Refinery** stations; **Blueprint Tree** | M3        |
 |           | Inventory upgrades, trading                          | Slot-based suit/ship/cargo; **Scrip** currency; vendors at **Waystations** | M3        |
 | Ship      | Manual flight, landing, fast travel                  | No fuel of any kind (D-103, D-105); thruster classes and landing rules §4.3; **Skip Drive** (spool + cool-down, M4) | C1 flight, M4 Skip Drive |
-|           | Shields, weapons, cargo, upgrades, multiple ships    | Hull shield, Pulse cannon, cargo bays; ships **Pilgrim** (start), **Dray** (hauler), **Shrike** (fighter), **Vagabond** (deep-range) | M5        |
+|           | Cargo, upgrades, multiple ships (no shields or weapons, D-087) | Cargo bays, thruster and hull upgrades; ships **Pilgrim** (start), **Dray** (hauler), **Vagabond** (deep-range) | M5        |
 | Space     | Top-down flight and combat, pirates                  | Red Hollow raiders, bounties                                   | M1 flight, M5 combat |
 |           | Space stations with vendors                          | **Waystations** (Earth, Mars, Belt, Saturn)                     | M3        |
 |           | Asteroid mining                                      | Belt and Saturn's rings; Ring Mites                             | M4        |
@@ -733,7 +733,7 @@ away); each set is one Addressable label `stage_<planet>_<region>`. Layer textur
 | Particles alive               | ≤ 1500; every emitter pooled                                      |
 | GC allocation (steady state)  | ≤ 1 KB per 300 frames; zero per-frame allocations in gameplay code |
 | Chunk generation              | ≤ 2 ms main-thread per frame; no hitch > 33 ms during streaming or at a region border |
-| Planet load                   | ≤ 5 s; space ↔ planet transition ≤ 1.5 s; hit stop never > 90 ms  |
+| Planet load                   | ≤ 5 s; space ↔ planet transition ≤ 1.5 s (no input lock inside it, D-103) |
 | Textures                      | BC7 (colour), BC5 (normals); mips on every 3D world texture; v4 cartoon assets (sidecar `style: v3`: sheets, rig sets, painted layers, discs, overlays, palette strips) import without mips (contract §11.8) and are counted apart; atlases ≤ 2048², ≤ 8 sprite atlases per planet, ≤ 512 MB textures per planet (D-089); mip streaming on with a 512 MB budget |
 | Animation                     | surveyor and apexes 60 fps clips, others 30 fps; ≤ 2 ms skinning per frame with 20 creatures |
 | Audio                         | Vorbis, streamed for music, compressed in memory for SFX          |
@@ -810,7 +810,7 @@ If the laptop's RAM is upgraded, LEAD raises only this section and logs the deci
 - **HeavyJobLock** — the lock-file protocol serializing heavy jobs (§11.2).
 - **PlanetConfig** — the ScriptableObject holding one planet's numbers.
 - **Placeholder** — a UNITY-made stand-in under `Assets/_Game/Placeholders/` with the real asset key.
-- **Rig** — the hand tool; modules Beam, Lance, Survey, Builder, Grapple.
+- **Rig** — the hand tool; modules Beam, Grapple, Survey, Builder (the Lance was cancelled, D-087).
 - **Skip Drive** — fast in-system travel.
 - **The Sowing** — the engineered life seeded by the *Meridian* crew.
 - **Task ID** — `L-###`, `U-###`, `B-###` on the task board.
