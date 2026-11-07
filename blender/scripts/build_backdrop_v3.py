@@ -998,7 +998,7 @@ def jupiter_scene(seed, deck="deck1"):
             for _k in range(3):
                 ax = rng.uniform(0, W)
                 cloud_tower(anv, ax, 330, 220, 90, rng)
-                poly(anv, [(ax - 70, 150), (ax - 40, 108), (ax + 340, 92), (ax + 380, 104), (ax + 120, 132), (ax + 40, 160)])   # the anvil, sheared downwind
+                poly(anv, [(ax - 120, 152), (ax - 90, 100), (ax + 230, 90), (ax + 262, 112), (ax + 160, 142), (ax + 70, 166)])   # a broad anvil, sheared downwind (a thin long wedge read as a beak)
             stack.append(wash32(rng, H, anv, BG._mix(pal["brown"], pal["sky"], 0.35), var=0.05, edge_dark=0.06, bleed=2.0))
             gl = np.zeros((H, W), np.float32)                                            # a Stormglider's shadow (no face)
             gx, gy = rng.uniform(300, 1700), 230
