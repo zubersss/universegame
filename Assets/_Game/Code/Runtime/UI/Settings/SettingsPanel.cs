@@ -70,16 +70,10 @@ namespace Meridian.UI
             p.KeysText.horizontalOverflow = HorizontalWrapMode.Wrap; // OnFoot alone is a long line
             p.KeysText.text = KeyList(actions);
 
-            // U-124 (B-151): the settings paper (its teal header band in the top slice: the title moves into it) and the Film switch's
-            // brass lever left of its row, `off` / `on` with the setting. Both probe their keys: absent, the flat panel stays.
-            UiPaper.ApplyModal(panel, Meridian.Art.ArtKeys.Ui.PanelSettings, ok =>
-            {
-                p.Paper = ok;
-                var frame = panel.transform.parent != null ? panel.transform.parent.GetComponent<Image>() : null;
-                if (!ok || frame == null || frame.sprite == null) return;
-                float top = frame.sprite.border.w;
-                title.rectTransform.anchoredPosition = new Vector2(0f, Size.y * 0.5f + top * UiPaper.BorderReach - top * 0.5f);
-            });
+            // U-124 (B-151): the settings paper (its teal header band rides above the title, which keeps its row: moved into the band it sat on the
+            // paper's top edge in the 15:26 capture) and the Film switch's brass lever left of its row, `off` / `on` with the setting. Both probe
+            // their keys: absent, the flat panel stays.
+            UiPaper.ApplyModal(panel, Meridian.Art.ArtKeys.Ui.PanelSettings, ok => p.Paper = ok);
             p.FilmSwitch = UiKit.Panel(p.FilmButton.transform, "FilmSwitch", new Vector2(0f, 0.5f), new Vector2(-48f, 0f), new Vector2(48f, 72f), Color.white);
             p.FilmSwitch.preserveAspect = true;
             p.FilmSwitch.enabled = false;

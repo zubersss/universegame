@@ -3029,13 +3029,15 @@ namespace Meridian.Tests
                     while (side.cartoon != null && side.cartoon.Layers != null && side.cartoon.Layers.placeholders.Contains(true) && Time.realtimeSinceStartup < timeout) yield return null;
                     cards.Show(p);
                     timeout = Time.realtimeSinceStartup + 5f;
-                    while (cards.Showing == null && Time.realtimeSinceStartup < timeout) yield return null;
+                    var cardKey = Meridian.Art.ArtKeys.Ui.TitleCard(p);
+                    while (cards.Showing != cardKey && Time.realtimeSinceStartup < timeout) yield return null; // this planet's card, not the last one still sliding out
                     cards.Seek(Meridian.UI.TitleCard.SlideSeconds); // the held frame, centred
                     var label = "titlecard_" + p.ToString().ToLowerInvariant();
                     yield return Shot(side.sideCamera, label);
                     TestContext.Out.WriteLine($"[MERIDIAN] u124 {label}: showing {cards.Showing ?? "none (no card art)"}, size {cards.Card.rectTransform.sizeDelta}, x {cards.Card.rectTransform.anchoredPosition.x:F0}");
                 }
 
+                cards.Hide(); // the panels are shot without the last card over them
                 var earth = director.PlanetSide;
                 var cam = earth.sideCamera;
                 var inventory = UnityEngine.Object.FindAnyObjectByType<Meridian.UI.InventoryPanel>();

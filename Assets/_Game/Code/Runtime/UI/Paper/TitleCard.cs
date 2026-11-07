@@ -88,18 +88,19 @@ namespace Meridian.UI
         {
             string key = ArtKeys.Ui.TitleCard(planet);
             LastAsked = key;
+            Hide(); // a new planet's card replaces the one up now at once (the 15:26 capture showed the previous card while the next one loaded)
             var probe = Addressables.LoadResourceLocationsAsync(key);
             probe.Completed += l =>
             {
                 bool exists = l.Status == AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0;
                 ArtLoad.Release(l);
-                if (!exists || this == null) return;
+                if (!exists || this == null || LastAsked != key) return; // a newer card was asked for meanwhile
                 ReleaseCard();
                 var h = ArtLoad.Asset<IList<Sprite>>(key);
                 handle = h;
                 h.Completed += op =>
                 {
-                    if (this == null || op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0 || op.Result[0] == null) return;
+                    if (this == null || LastAsked != key || op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0 || op.Result[0] == null) return;
                     var sprite = op.Result[0];
                     Card.sprite = sprite;
                     rect.sizeDelta = sprite.rect.size; // 1:1 at 1080p (the art is ≤ 1920×540)
@@ -118,8 +119,14 @@ namespace Meridian.UI
             T += Time.unscaledDeltaTime; // the card plays over a paused game too
             rect.anchoredPosition = new Vector2(SlideX(T), CardY);
             if (T < TotalSeconds) return;
+            Hide();
+        }
+
+        /// <summary>Takes the card down now and releases its art (the end of the slide, a newer card, a capture that wants the screen).</summary>
+        public void Hide()
+        {
             T = -1f;
-            Card.enabled = false;
+            if (Card != null) Card.enabled = false;
             Showing = null;
             ReleaseCard();
             enabled = false;

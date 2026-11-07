@@ -56,8 +56,15 @@ namespace Meridian.Tests
                 var caption = new GameObject("Caption", typeof(RectTransform), typeof(Text));
                 caption.transform.SetParent(button.transform, false);
                 caption.GetComponent<Text>().color = Color.white;
+                var menuButton = new GameObject("MenuButton", typeof(RectTransform), typeof(Image), typeof(Button)); // UiKit.Button: a 0.08 white fill
+                menuButton.transform.SetParent(panel.transform, false);
+                menuButton.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0.08f);
+                var menuLabel = new GameObject("MenuLabel", typeof(RectTransform), typeof(Text));
+                menuLabel.transform.SetParent(menuButton.transform, false);
+                menuLabel.GetComponent<Text>().color = Color.white;
 
-                Assert.AreEqual(2, UiPaper.InkTexts(panel.transform), "the title and the grouped label");
+                Assert.AreEqual(3, UiPaper.InkTexts(panel.transform), "the title, the grouped label and the clear-filled menu button's label");
+                Assert.AreEqual(UiPaper.Ink, menuLabel.GetComponent<Text>().color, "a near-clear fill lets the paper show: its label inks (the 15:26 capture's light labels on cream)");
                 Assert.AreEqual(UiPaper.Ink, title.GetComponent<Text>().color);
                 Assert.IsFalse(title.GetComponent<Outline>().enabled, "the light rim for the dark fill goes");
                 Assert.AreEqual(UiPaper.Ink, label.GetComponent<Text>().color);

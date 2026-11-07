@@ -87,10 +87,17 @@ namespace Meridian.UI
             return n;
         }
 
+        /// <summary>A fill this opaque is the text's own ground (a cell, an action button); a fainter one (the menu buttons' 0.08 white) lets the paper
+        /// show through, so its label takes ink like the rest (the 15:26 capture: light labels on cream).</summary>
+        public const float OwnGroundAlpha = 0.35f;
+
         static bool UnderOtherImage(Transform t, Transform panel)
         {
             for (var p = t.parent; p != null && p != panel; p = p.parent)
-                if (p.GetComponent<Image>() != null) return true;
+            {
+                var img = p.GetComponent<Image>();
+                if (img != null && img.color.a >= OwnGroundAlpha) return true;
+            }
             return false;
         }
 
