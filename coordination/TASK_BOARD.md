@@ -1288,7 +1288,7 @@ Goal: C2 Jupiter design prep (Bible §12 C2 order 5; §7.5–7.6 the cloud-colum
 Accept: one review per group at 1x on a Jupiter stand-in beside the surveyor; the ten boxes self-checked; nothing exported.
 Files: blender/scripts/build_c2_jupiter_*.py, coordination/reports/blender/c2_jupiter_designs.md
 Depends: B-147
-Lead notes: Cycle 265. The same shape as B-139 / B-145 / B-147; previews only when RAM allows. The first giant sets the cloud-column pattern for Saturn, Uranus and Neptune.
+Lead notes: Cycle 265. The same shape as B-139 / B-145 / B-147; previews only when RAM allows. The first giant sets the cloud-column pattern for Saturn, Uranus and Neptune. Cycle 265 (08:5x, D-137): PALETTE ACCEPTED (67816d87; cream / brick / rust / festoon blue-grey / sage / tan / umber, every check passing) → PALETTES["jupiter"]; the report (five faceless flora, four floe strips, four deck backdrops + a Red Spot overlay with lightning and the CRUSH band on layer2, the creature list with the stingless Belt wasp and the Vortex Whale as a rig set, the props) noted. Rulings: floe strips export with cap_left + cap_right after the 8 tiles (U-126 places them); the aerostat kit (aerostat deck / strut / cell, float cell packs, grapple hook) is re-inked once in the Earth palette for all four giants (B-156, with the Jupiter cards). Previews of the flora, floes and the first deck study are reviewed on hand-off.
 
 > **R1 (D-062).** 2D tasks B-056..B-076 are Superseded; their `.blend` sources (rigs, props,
 > terrain recipes) are the starting point for the models. Contract v2 §9 is the rule set.
