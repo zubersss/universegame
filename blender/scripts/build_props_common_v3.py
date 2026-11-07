@@ -20,6 +20,7 @@ import math
 import os
 import random
 import sys
+import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -238,8 +239,8 @@ def smelter(d, M, k=0):
         G.stroke(d, [(x, mz - 0.17), (x, mz + 0.16 - 0.04 * abs(i - 2))], M["ink"], I)
     G.stroke(d, mouth, M["ink"], O, cyclic=True)
     G.stroke(d, G.lumpy_ellipse(mx, mz + 0.3, 0.3, 0.05, n=16, seed=37), M["halo2"], 0.0, cyclic=True)    # glow on the iron above
-    G.stroke(d, [(0.62, 0.95), (0.8, 1.12)], M["off"], O)                                          # a lever on the side
-    G.stroke(d, G.lumpy_ellipse(0.82, 1.14, 0.045, 0.045, n=12, seed=38), M["red"], I, cyclic=True)
+    G.stroke(d, [(0.62, 0.95), (0.72, 1.08)], M["off"], O)                                         # a lever on the side (inside the 2 px margin)
+    G.stroke(d, G.lumpy_ellipse(0.74, 1.10, 0.045, 0.045, n=12, seed=38), M["red"], I, cyclic=True)
     for j in range(2):                                                                                   # smoke puffs, born 4 frames apart
         t = ((k + 4 * j) % 8) / 8.0
         px, pz = 0.38 + 0.12 * t + 0.03 * math.sin(6 * t), 2.27 + 0.42 * t
@@ -318,7 +319,7 @@ PROPS = {
     "storage_crate": (storage_crate, 80, 72, None, 1, False),
     "lamp": (lamp, 64, 160, "flicker", 4, False),
 }
-LAMP_X = -0.06                       # the lamp's pole sits left of centre so the halo fits
+LAMP_X = -0.18                       # the pole sits 0.18 m left of the frame centre so the halo (bulb 0.24 m right of it) fits
 
 
 def steady_edges(strokes, xl, xr, seed, band=5 / 64.0):
@@ -333,6 +334,12 @@ def steady_edges(strokes, xl, xr, seed, band=5 / 64.0):
         st["radius"] = (st["radius"] * (1.0 - e + e / (1.0 + GR.JITTER * nz))).astype(np.float32)
 
 
+def pivot_of(name):
+    """The drawing origin in the frame (x from the left, y from the bottom): the ground line 10 px up; the lamp's pole."""
+    _fn, fw, fh, _clip, _n, _tiles = PROPS[name]
+    return (0.5 + (LAMP_X * PPU / fw if name == "lamp" else 0.0), GROUND_PX / fh)
+
+
 def render_prop(name, k=0, seed=7):
     fn, fw, fh, _clip, _n, tiles = PROPS[name]
     gp = fakegp.FakeGP()
@@ -343,14 +350,136 @@ def render_prop(name, k=0, seed=7):
     if tiles:
         half = fw / 2 / PPU
         steady_edges(st, -half, half, seed)
-    piv = (0.5 - (LAMP_X * PPU / fw if name == "lamp" else 0.0), GROUND_PX / fh)
-    img, w = GR.render_frame(st, fw, fh, PPU, piv, ss=4, seed=seed)
+    img, w = GR.render_frame(st, fw, fh, PPU, pivot_of(name), ss=4, seed=seed)
     if tiles:                           # the module's right edge column = its left one: a module seam is always the same 2 px
         img[:, -1] = img[:, 0]
     return img, w
 
 
-def main(out):
+# ---------------------------------------------------------------- export (D-117: colour + json only, replaces the v2 models)
+
+KEY = "props/common/{}"
+INTERACTABLE = ("shelter_door", "smelter", "storage_crate")     # the props the player uses: open, craft, store
+LOOPS = {"open": False, "working": True, "flicker": True}       # door open 6 once, smelter working 8 loop, lamp flicker 4 loop
+SHEET_CAP = 512                                                 # B-131: one sheet per prop <= 512^2
+V2_SUFFIXES = (".glb", "_normal.png", "_mask.png", "_emission.png")   # the v2 model + maps each key loses (D-117); .meta = UNITY's
+
+
+def v2_leftovers(art, names=None):
+    """The v2 model files beside the keys (ArtImporter un-addresses a colour map next to a .glb, IsModelKey)."""
+    d = os.path.join(art, "props", "common")
+    return [os.path.join(d, name + s) for name in (names or PROPS) for s in V2_SUFFIXES if os.path.isfile(os.path.join(d, name + s))]
+
+
+def render_all():
+    """Every frame of the six props (export quality, ss 4) -> {name: [RGBA]}, {name: [(nominal, lo, hi) px]}."""
+    imgs, widths = {}, {}
+    for name, (_fn, _fw, _fh, _clip, n, _tiles) in PROPS.items():
+        imgs[name], widths[name] = [], []
+        for k in range(n):
+            img, w = render_prop(name, k)
+            imgs[name].append(img)
+            widths[name] += w
+    return imgs, widths
+
+
+def columns_within(fw, fh, n, cap=SHEET_CAP, gutter=4):
+    """The column count with the smallest sheet that fits cap x cap (ties: fewer rows)."""
+    best = None
+    for c in range(n, 0, -1):
+        r = -(-n // c)
+        w, h = c * fw + (c - 1) * gutter, r * fh + (r - 1) * gutter
+        if w <= cap and h <= cap and (best is None or w * h < best[0]):
+            best = (w * h, c)
+    return best[1] if best else 1
+
+
+def sheet_meta(name, frames):
+    """One prop -> (sheet RGBA uint8, §11.2 json dict, problems)."""
+    import numpy as np
+    from meridian import v3
+    _fn, fw, fh, clip, n, tiles = PROPS[name]
+    g = v3.GUTTER
+    cols = columns_within(fw, fh, n)
+    rows = -(-n // cols)
+    sheet = np.zeros((rows * fh + (rows - 1) * g, min(cols, n) * fw + (min(cols, n) - 1) * g, 4), np.uint8)
+    for i, im in enumerate(frames):
+        r, c = divmod(i, cols)
+        sheet[r * (fh + g):r * (fh + g) + fh, c * (fw + g):c * (fw + g) + fw] = im
+    px, py = pivot_of(name)
+    anims = []
+    if clip:
+        anims.append({"name": clip, "start": 0, "length": n, "loop": LOOPS[clip]})
+        if LOOPS[clip]:
+            anims[-1]["loop_from"] = 0
+    meta = {"key": KEY.format(name), "style": "v3", "frame_width": fw, "frame_height": fh, "columns": cols, "gutter": g,
+            "frames": n, "fps": v3.FPS, "pivot": [round(px, 6), round(py, 6)], "facing": "right", "ppu": PPU,
+            "animations": anims, "squash_root": False, "ground_line_px": GROUND_PX}
+    if tiles:
+        meta["tile"] = True
+        meta["module_m"] = fw / PPU
+    if name in INTERACTABLE:
+        meta["interactable"] = True
+    if not clip:
+        meta["note"] = "one static frame (no clip); the pivot sits on the ground line"
+    elif name == "shelter_door":
+        meta["note"] = "frame 0 = shut; open plays once and holds its last frame"
+    else:
+        meta["note"] = f"frame 0 = at rest; {clip} loops while the prop is busy"
+    problems = [p for p in v3.validate_sheet(meta, sheet.shape) if not (not clip and "sum of clip lengths" in p)]
+    if sheet.shape[0] > SHEET_CAP or sheet.shape[1] > SHEET_CAP:
+        problems.append(f"sheet {sheet.shape[1]}x{sheet.shape[0]} over {SHEET_CAP}^2")
+    m = v3.EDGE_MARGIN
+    for i, im in enumerate(frames):
+        a = im[..., 3]
+        if a[:m].any() or a[-m:].any() or (not tiles and (a[:, :m].any() or a[:, -m:].any())):
+            problems.append(f"frame {i} touches the {m} px frame edge")
+    return sheet, meta, problems
+
+
+def joins(imgs):
+    """Mean |right column - left column| per tiling module (B-131 preview: 0.0/255)."""
+    import numpy as np
+    return {nm: float(np.abs(imgs[nm][0][:, -1, :].astype(np.int32) - imgs[nm][0][:, 0, :].astype(np.int32)).mean())
+            for nm, spec in PROPS.items() if spec[5]}
+
+
+def export(art, imgs=None, names=None):
+    """Writes props/common/<prop>_color.png + <prop>.json for the six (or `names`) and removes their v2 model
+    files (.glb + normal/mask/emission). Raises before writing anything if a check fails.
+    Returns [(key, w, h, bytes)], joins, removed paths."""
+    import json
+    from meridian import pngio
+    names = list(names or PROPS)
+    if imgs is None:
+        imgs, _w = render_all()
+    built, problems = [], []
+    for name in names:
+        sheet, meta, p = sheet_meta(name, imgs[name])
+        problems += [f"{name}: {x}" for x in p]
+        built.append((name, sheet, meta))
+    jn = joins(imgs)
+    problems += [f"{nm}: tiling join {v:.2f}/255 > 1" for nm, v in jn.items() if v > 1.0 and nm in names]
+    if problems:
+        raise ValueError("B-131 export checks: " + "; ".join(problems))
+    d = os.path.join(art, "props", "common")
+    os.makedirs(d, exist_ok=True)
+    out = []
+    for name, sheet, meta in built:
+        n = pngio.write_png(os.path.join(d, name + "_color.png"), sheet)
+        with open(os.path.join(d, name + ".json"), "w", encoding="utf-8", newline="\n") as f:
+            json.dump(meta, f, indent=2)
+            f.write("\n")
+        out.append((meta["key"], sheet.shape[1], sheet.shape[0], n))
+    removed = v2_leftovers(art, names)
+    for p in removed:
+        os.remove(p)
+    return out, jn, removed
+
+
+def main(out, imgs=None, widths=None, stamp_paths=()):
+    """The B-131 review: the camp at 1x on the plains, each prop at 3x, the clips at 2x, the tiling joins, the
+    ten §9.7 boxes per prop. stamp_paths (export): the written PNGs, stamped with file time + hash."""
     import numpy as np
     sys.path.insert(0, os.path.dirname(HERE))
     import review
@@ -358,18 +487,14 @@ def main(out):
     import build_c2_ground_strip as GS
     import preview_c2_earth_rigs as PR
     import preview_pilgrim_rig as PP
-    allw = []
-    imgs = {}
-    for name, (fn, fw, fh, clip, n, tiles) in PROPS.items():
-        imgs[name] = []
-        for k in range(n):
-            img, w = render_prop(name, k)
-            imgs[name].append(img)
-            allw += w
+    if imgs is None:
+        imgs, widths = render_all()
+    allw = [w for ws in widths.values() for w in ws]
     W = 1936
     rows = []
     head = np.tile(review.PAPER, (28, W, 1)).astype(np.float32)
-    review._label(head, "b-131 earth camp props v3.1 (no faces): landing pad, shelter wall, shelter door, smelter, storage crate, lamp; lock-free fakegp preview", 6, 8)
+    review._label(head, "b-131 earth camp props v3.1 (no faces): landing pad, shelter wall, shelter door, smelter, storage crate, lamp; "
+                        + ("exported sheets (render.py props/common/camp_set)" if stamp_paths else "lock-free fakegp preview"), 6, 8)
     rows.append(head)
     # (1) the camp at 1x on the plains: ground strips, the Pilgrim rig on three pad modules, the shelter, the props, the surveyor
     MH = 1000
@@ -410,7 +535,7 @@ def main(out):
     stand(imgs["storage_crate"][0], sx0 + 650, 72)
     stand(imgs["storage_crate"][0], sx0 + 718, 72)
     review._over(scene, imgs["storage_crate"][0], int(sx0 + 684 - 40), base - (72 - GROUND_PX) - 51)
-    stand(imgs["lamp"][0], sx0 + 820, 160, piv_x=0.5 - LAMP_X * PPU / 64)
+    stand(imgs["lamp"][0], sx0 + 820, 160, piv_x=pivot_of("lamp")[0])
     review._label(scene, f"1x on the b-114 plains over the b-130 ground strips ({note}): the pilgrim rig on three 2 m pad modules, "
                          "the shelter (wall x4 + door), the surveyor, smelter, crates, lamp", 6, 6)
     rows.append(scene)
@@ -449,11 +574,75 @@ def main(out):
     review._label(foot, f"ink outer {min(w[1] for w in outer):.1f}-{max(w[2] for w in outer):.1f} px, interior {min(w[1] for w in inner):.1f}-"
                         f"{max(w[2] for w in inner):.1f} px; tiling joins (mean |right - left|): pad {join(imgs['landing_pad'][0], imgs['landing_pad'][0]):.1f}, "
                         f"wall {join(imgs['shelter_wall'][0], imgs['shelter_wall'][0]):.1f} /255; ground line 10 px above each frame's bottom", 6, 8)
-    review._label(foot, "sheets (export later): pad 128x48, wall 64x176, door 6 x 88x176, smelter 8 x 112x192, crate 80x72, lamp 4 x 64x160; each <= 512^2", 6, 28)
+    sizes = []
+    for name in PROPS:
+        sh, _m, _p = sheet_meta(name, imgs[name])
+        sizes.append(f"{name} {sh.shape[1]}x{sh.shape[0]}")
+    review._label(foot, "sheets (<= 512^2, colour + json only, D-117): " + ", ".join(sizes), 6, 28)
     rows.append(foot)
-    review.write(out, np.vstack(rows))
+    rows.append(boxes_panel(imgs, widths, W))
+    if stamp_paths:
+        st = np.tile(review.PAPER, (20 + 16 * len(stamp_paths), W, 1)).astype(np.float32)
+        review._label(st, "exported files (time + hash):", 6, 4, scale=1)
+        for i, p in enumerate(stamp_paths):
+            review._label(st, f"{review.stamp_text(p)}  {os.path.relpath(p, review.ART)}".replace("\\", "/"), 6, 18 + 16 * i, scale=1)
+        rows.append(st)
+    img = np.vstack(rows)
+    if not stamp_paths:
+        review._label(img, time.strftime("%m-%d %H:%M") + " preview (not exported)", 2, img.shape[0] - 16)
+    review.write(out, img)
     fakegp.restore()
     print("written", out)
+
+
+SELF = {   # BLENDER's self-checks per prop for the motion and idle boxes (the rest are measured)
+    "landing_pad": ("static module (the card gives the pad no clip); the ship's land puff and UNITY's root bob carry it", "static by the card"),
+    "shelter_wall": ("static module (no clip on the card); tiles at 1 m", "static by the card"),
+    "shelter_door": ("open 6: a cartoon swing in about the hinge with an overshoot, status light red -> green", "frame 0 shut; open once on use"),
+    "smelter": ("working 8: belly breathes (squash), mouth glow pulses, two chimney puffs, sparks", "working loops while crafting"),
+    "storage_crate": ("static (no clip on the card); stacks", "static by the card"),
+    "lamp": ("flicker 4: drawn halo grows and shrinks, bulb tone steps", "flicker loops at night"),
+}
+
+
+def boxes_panel(imgs, widths, W):
+    """The ten §9.7 boxes per prop: x measured, s BLENDER's self-check, blank = LEAD's to tick."""
+    import numpy as np
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    from meridian import v3
+    lines = []
+    for name in PROPS:
+        ws = widths[name]
+        outer = [w for w in ws if w[0] >= v3.OUTER_SPLIT]
+        inner = [w for w in ws if w[0] < v3.OUTER_SPLIT]
+        ow = (min(w[1] for w in outer), max(w[2] for w in outer)) if outer else (0, 0)
+        iw = (min(w[1] for w in inner), max(w[2] for w in inner)) if inner else (0, 0)
+        ink_ok = v3.OUTER_PX[0] - 0.05 <= ow[0] and ow[1] <= v3.OUTER_PX[1] + 0.05 and inner and \
+            v3.INNER_PX[0] - 0.05 <= iw[0] and iw[1] <= v3.INNER_PX[1] + 0.05
+        sh, _meta, probs = sheet_meta(name, imgs[name])
+        pal, off = v3.palette_hits(sh, "earth", tints=[("offwhite", 0.30), ("mustard", 0.22)])
+        mot, idl = SELF[name]
+        marks = [("ink", "x" if ink_ok else "!", f"{ow[0]:.1f}-{ow[1]:.1f} / {iw[0]:.1f}-{iw[1]:.1f} px, {len(inner) // max(len(imgs[name]), 1)} interior strokes per frame"),
+                 ("cel", "x" if pal >= 0.98 else "!", f"{pal * 100:.1f}% palette (+ mid, deep; halo washes)"),
+                 ("face", "s", "an object: no eyes, no mouth"),
+                 ("twos", "x" if not probs else "!", "fps 12, caps" if not probs else probs[0][:40]),
+                 ("motion", "s", mot), ("idle", "s", idl), ("original", "s", "our camp kit, no studio prop"),
+                 ("sheet", "x" if not probs else "!", "png + json, <= 512^2"), ("budget", "x", "one small sheet; UNITY confirms"),
+                 ("style", " ", "LEAD, against the C0 style test")]
+        lines.append((name, marks))
+    h = 24 + len(lines) * (18 + 11 * 15)
+    p = np.tile(review.PAPER, (h, W, 1)).astype(np.float32)
+    review._label(p, "bible 4.1 9.7 ten boxes per prop  (x measured  s self-check  ! fails  blank: lead's)", 6, 4)
+    y = 24
+    for name, marks in lines:
+        review._label(p, name, 6, y, scale=1)
+        y += 14
+        for (k, mk, note), (_k, text) in zip(marks, review.BOXES):
+            review._label(p, f"[{mk}] {text} - {note}"[:200], 18, y, scale=1)
+            y += 15
+        y += 4
+    return p[:y + 4]
 
 
 if __name__ == "__main__":

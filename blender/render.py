@@ -1074,7 +1074,44 @@ def do_ground_strip_set(entry, preview):
              + f" | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
 
 
+def do_prop_sheet_set(entry, preview):
+    """B-131 (D-117): props/common/{landing_pad, shelter_wall, shelter_door, smelter, storage_crate, lamp} as v3.1
+    sheets (colour + json only, one sheet <= 512^2 each), drawn with fakegp + numpy. The export removes each key's v2
+    model files (.glb + normal/mask/emission; UNITY deletes the .meta files, D-016). The set entry exports all six +
+    review_b131_props.png; a single prop row (`prop_sheet`) exports that prop only."""
+    from meridian import fakegp
+    t0 = time.time()
+    if preview:
+        raise AssetError(f"{entry['key']}: no preview mode (python build_props_common_v3.py <png>)")
+    import build_props_common_v3 as PC
+    names = [entry["key"].split("/")[2]] if entry.get("prop_sheet") else list(PC.PROPS)
+    keys = [PC.KEY.format(n) for n in names]
+    fakegp.install()                    # an earlier review script in this batch may have restored gp_draw.mat
+    try:
+        imgs, widths = PC.render_all()
+        try:
+            out, jn, removed = PC.export(ART, imgs, names)
+        except Exception:
+            for k in keys:
+                mark_stale(k, True)
+            raise
+        if entry.get("prop_sheet_set"):
+            stamps = [os.path.join(ART, "props", "common", n + "_color.png") for n in names]
+            PC.main(os.path.join(PREVIEW, f"review_{entry.get('review_name', 'b131_props')}.png"), imgs, widths, stamp_paths=stamps)
+    finally:
+        fakegp.restore()
+    for k in keys:
+        mark_stale(k, False)
+    mark_stale(entry["key"], False)
+    log_line(f"OK {entry['key']} | " + ", ".join(f"{k.split('/')[2]} {w}x{h} {n // 1024}KB" for k, w, h, n in out)
+             + " | joins " + ", ".join(f"{k} {v:.2f}" for k, v in jn.items()) + "/255"
+             + f" | removed {len(removed)} v2 files ({', '.join(sorted({os.path.basename(p) for p in removed})) or '-'})"
+             + f" | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
+
+
 def do_asset(entry, preview):
+    if entry.get("prop_sheet_set") or entry.get("prop_sheet"):   # v3.1 camp props (B-131, D-117)
+        return do_prop_sheet_set(entry, preview)
     if entry.get("ground_strip_set"):   # v3.1 Earth ground strips (B-130)
         return do_ground_strip_set(entry, preview)
     if entry.get("icon_set"):           # v3.1 tile-item icons (B-128)
