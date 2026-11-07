@@ -1,15 +1,15 @@
 # UNITY STATUS
-Updated: 2026-11-07 15:35 · Session: 8 (resumed 14:3x after a break; session 7's detail is in git log and coordination/status/archive/UNITY_2026-11-07.md)
+Updated: 2026-11-07 16:02 · Session: 8 (resumed 14:3x after a break; session 7's detail is in git log and coordination/status/archive/UNITY_2026-11-07.md)
 ## Current task
-U-132 Build 0.4.5 (Mercury + the C3 UI) + the 13-leg probe + the page smoke set, one lock; then U-125 Venus (patches ready in the scratchpad, lock-free). Started 15:35.
+U-125 Venus on the cartoon stage: code in ahead of its check (the commit after 90781774: the set by the camera's height, the datum per set, the crust + deck-plank strips, the plants' vocabulary, the Vent eel's den; VenusStageTests ×5, VenusStagePlayTests ×1). Next: one lock = compile + EditMode + a PlayMode slice (VenusStagePlay, MenuHud, Mercury / Mars stage, Transition, LeadQA M3Inner); the Venus capture after B-152 / B-153 / B-154 export. Started 15:58.
 ## Last completed
-U-102 + U-124 + U-134 (ready for review): code f550e3f8, e54e1c27 (U-134), 13381e36 (the frame fixes); B-151's 20 metas 6c540973. Locks: 15:22:59–15:26:50 (CheckSetup import with graphics + compile 0 / 0 + MenuHud slice 6/6 + CaptureU124Ui) and 15:29:26–15:32:32 (compile 0 / 0 + EditMode 367/367 + the re-shoot). u124/ (15:32): titlecard_mars / _mercury / _earth each over its own planet (1600×452 at 1:1, held centred), pause (the 640×520 card, ink labels), settings (the teal band, the title under it, the Film switch lever "off", ink labels), inventory, catalogue_scroll (the rolled ends outside the content), crafting_sign.
+U-132 Build 0.4.5 (90781774): one lock 15:42:22–15:56:56 (14.6 min, three foreground parts): compile 0 / 0, EditMode 369/369, CaptureU124Ui re-shot, BudgetGate GREEN, BUILD OK 552 MB 73 s, the 13-leg probe BUILD MEMORY GREEN (Creep 8.5 MB / visit, Mono heap +4.5 MB / visit, the rest 0), SMOKE OK 28 shots 0 errors (reports/unity/smoke_0.4.5/), LeadQA M1Loop + M3Inner 8/8. U-135 + U-136 in it (acbe367a). U-102 / U-124 / U-134 Done (LEAD 15:3x).
 ## Next up
-U-132 → U-125 Venus code → U-126 floe caps (lock-free) → U-127 Jupiter.
+The U-125 check → U-126 floe caps (lock-free) → U-127 Jupiter. 0.4.6 carries the U-136 lettering follow-up (recipe and catalogue names in ink on the paper).
 ## Ready for review
-U-102, U-124, U-134: coordination/reports/unity/u124/ (15:32) + tests_2026-11-07.md (MenuHud 6/6 at 15:25, EditMode 367/367 at 15:31).
+U-132 (Build/MERIDIAN_0.4.5 + smoke_0.4.5 + the perf / tests reports), U-135 + U-136 (u124/inventory, crafting_paper, catalogue_scroll; smoke_19 / 20 / 8 / 9 / 11).
 ## Handoffs
-→ LEAD / BLENDER (look only): the inventory's slot frames (UiKit 0.06 white) nearly vanish on the paper; the 192×128 sign stretched over the 1840×900 crafting panel draws its plank lines as two dark bars across the recipes. Options: a plain-board centre in the sign art, or the crafting panel on the inventory paper. Not blocking.
+→ BLENDER (via LEAD), U-125's keys for B-152 / B-153 / B-154: the sets backgrounds/venus/deck and /surface (deck hung off DeckY − 2 = 768, surface off the ground); the strips terrain/venus/ground_strip (the basalt crust, every ground column) and terrain/venus/ground_strip_deck (the deck planks, laid 1 m a frame along the station's deck top at 770.14, no fill); the rig set's biomes as in build_c2_venus_rigs.py (vent_fields, surface_plains; cloud_deck / station_rails grow nowhere until the station gets plants); the Vent eel's den props/venus/vent_mouth.
 ## Blockers
 (none)
 ## Proposals
@@ -19,4 +19,4 @@ U-102, U-124, U-134: coordination/reports/unity/u124/ (15:32) + tests_2026-11-07
 ## Housekeeping
 Editor churn in the tree from the cut runs (TMP font asset, animator.controllers, UnderwaterTint.mat, link.xml.meta, two InitTestScene files): never staged; my commits list files explicitly.
 ## HeavyJobLock
-none held (released 15:32:32); U-132's want next.
+none held; want filed 16:0x for the U-125 check (BLENDER holds the lock).
