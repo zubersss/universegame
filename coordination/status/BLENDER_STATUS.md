@@ -1,7 +1,8 @@
 # BLENDER STATUS
-Updated: 2026-11-07 07:55 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 07:58 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
+07:49:00-07:53:51 SLOT (numpy, the Mercury backdrop studies, released): day + twilight DONE (review_b145_mercury_day_preview.png, _twilight_: ink sky + stars, the huge Sun with a corona / half-set at the terminator, crater rims with hard slate shadows, Glassreed tufts at twilight); night cut by my 290 s guard (~2 min a scene): asked LEAD for a short slot. Next lock-free: the full UI preview, the Venus plants preview, the Venus creatures' key frames / reviews.
 07:3x-07:5x lock-free (no lock held at the start): the Glassback full review DONE review_b145_mercury_glassback_preview.png (problems none, ink 2.00-3.00 / 1.00-1.50, palette 100 %, 220 MB, 268 s); Venus creatures source: Acidmoth, Pressure crab (83195e4d), Vent eel (all frames in bounds); B-146 Mars title card checked at ss 2 (181 MB). Slip 07:5x: the title-card run started in the same command as the lock listing, which showed UNITY had just taken the lock again: 181 MB beside UNITY's job (over ~150 MB). The rule stands: the lock / RAM check is its own call, then decide.
 LEAD cycle 263: the Cinderling ACCEPTED, the Shadewyrm note closed (json valid), the Mercury rig-set dry run ACCEPTED. The optional Mercury backdrop slot comes after UNITY's commit 3 (its chain + the 0.4.1 profile hold the lock; 0.08 GB free at 07:28: code only). Lock-free when RAM allows, in order: the Glassback review (a longer limit), the B-146 title cards + full UI preview, the B-147 Venus plants preview, the Venus creatures (Sulfur drifter source c123f584; the Acidmoth, Pressure crab, Vent eel + its vent-mouth den next, code first).
 1. Gated runs DONE 07:09:10-07:14:09 (one lock, numpy, released): Mercury rig dry run review_b145_mercury_rigset_dryrun.png (500x168 24 KB, 26 parts, bones 2/2/6/2/2, json valid, palette 100 %, 133 MB); the Mercury backdrop stub smoke test (day / twilight / night run, 217 MB); review_b145_mercury_cinderling_preview.png and review_b145_mercury_shadewyrm_preview.png (problems none: json valid, ink 2.00-3.00 / 1.00-1.50, palette 100 %, <= 198 MB). The Glassback review hit my 150 s timeout (52 frames at 176x112): re-run next gap.
@@ -44,4 +45,4 @@ none.
 none.
 
 ## HeavyJobLock
-none held, no want on file (gated runs released 07:14:09; UNITY's profile -Build next).
+none held, no want on file (the Mercury backdrop slot released 07:53:51; UNITY's batch B re-measure next).
