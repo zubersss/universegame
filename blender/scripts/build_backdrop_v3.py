@@ -1597,7 +1597,7 @@ def neptune_scene(seed, deck="deck1"):
     sky = sky * (1 + 0.03 * BG.periodic_noise(rng, H, 160, 60)[..., None])
     stack = Stack([(np.broadcast_to(sky, (H, W, 3)).astype(np.float32), np.ones((H, W), np.float32))])
     if deck == "deck1":                                                                   # Triton: a pale disc, a violet terminator, plumes bent downwind
-        tx, ty, tr = 1520, 150, 30
+        tx, ty, tr = 1520, 150, 36
         moon(stack, rng, H, tx, ty, tr, pal["offwhite"], pal["mustard"], 4)
         term = np.zeros((H, W), np.float32)
         ell(term, tx + tr * 0.55, ty, tr * 0.6, tr * 0.98)
@@ -1608,14 +1608,14 @@ def neptune_scene(seed, deck="deck1"):
         for k, dx in enumerate((-10, 8)):
             x, y = tx + dx, ty - tr + 4
             for j in range(9):                                                            # up, then bending +x with the wind
-                dab(plume, x, y, 9, 0.25 + 0.17 * j, w=1)
+                dab(plume, x, y, 9, 0.25 + 0.17 * j, w=2)
                 x, y = x + 9 * math.sin(0.25 + 0.17 * j), y - 9 * math.cos(0.25 + 0.17 * j)
-        stack.append(tint(rng, H, plume, BG._mix(pal["brown"], pal["sky"], 0.3), 0.6, var=0.0, edge_dark=0.0, bleed=1.2))
+        stack.append(tint(rng, H, plume, BG._mix(pal["brown"], ink, 0.2), 0.85, var=0.0, edge_dark=0.0, bleed=1.0))
     if not storm:
         far = BG.ridge(rng, [(2, 0.5), (5, 0.3), (11, 0.2)], base=770, amp=34)
         wall = np.zeros((H, W), np.float32)
         cloud_bank(wall, far, rng, 36, 80, 24)
-        wall = shear(wall, 0.45, 800)
+        wall = shear(wall, 1.1, 800)
         far_c = {"deck1": BG._mix(pal["sky"], pal["offwhite"], 0.35), "deck2": BG._mix(pal["sky"], pal["teal"], 0.3),
                  "deck3": BG._mix(pal["brown"], pal["sky"], 0.55), "deep": BG._mix(pal["brown"], pal["sky"], 0.25)}[deck]
         stack.append(tint(rng, H, lining(wall, 5, 3), BG._mix(far_c, pal["offwhite"], 0.45), 0.7, var=0.03, edge_dark=0.03, bleed=3.0))
@@ -1678,7 +1678,7 @@ def neptune_scene(seed, deck="deck1"):
         line = BG.ridge(rng, [(2, 0.45), (6, 0.35), (13, 0.2)], base=380, amp=46)
         bank = np.zeros((H, W), np.float32)
         cloud_bank(bank, line, rng, 46, 100, 18)
-        bank = shear(bank, 0.55, 420)
+        bank = shear(bank, 1.3, 420)
         body = {"deck1": BG._mix(pal["sky"], pal["offwhite"], 0.3), "deck2": BG._mix(pal["sky"], pal["teal"], 0.25),
                 "deck3": BG._mix(pal["brown"], pal["sky"], 0.5), "deep": BG._mix(pal["brown"], pal["sky"], 0.2)}[deck]
         stack.append(tint(rng, H, lining(bank, 6, 4), BG._mix(body, pal["offwhite"], 0.5), 0.8, var=0.03, edge_dark=0.03, bleed=2.5))
@@ -1690,7 +1690,7 @@ def neptune_scene(seed, deck="deck1"):
                 for j in range(3):
                     ell(ci, cx_ + 120 * j, cy_ + rng.uniform(-3, 3), rng.uniform(140, 260), rng.uniform(4, 8))
             shadow = np.roll(ci, (150, 90), (0, 1))                                       # cast down and downwind onto the banks
-            stack.paint(tint(rng, H, shadow, BG._mix(pal["brown"], body, 0.4), 0.55, var=0.0, edge_dark=0.0, bleed=3.0))
+            stack.paint(tint(rng, H, shadow, BG._mix(pal["brown"], body, 0.25), 0.8, var=0.0, edge_dark=0.0, bleed=2.5))
             stack.append(tint(rng, H, ci, pal["offwhite"], 0.7 if deck != "deck3" else 0.45, var=0.02, edge_dark=0.0, bleed=2.0))
         if deck == "deck2":                                                               # one storm-violet branched flash under the banks
             glow, bolts = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
@@ -1708,11 +1708,12 @@ def neptune_scene(seed, deck="deck1"):
         for _k in range(40):                                                              # arcs bending down toward the eye
             x, y, a = rng.uniform(0, W), rng.uniform(30, 260), math.pi / 2 + rng.uniform(-0.05, 0.05)
             for j in range(int(rng.integers(6, 12))):
-                dab(wind, x, y, 26, a, w=0)
+                dab(wind, x, y, 26, a, w=1)
                 x, y, a = x + 26 * math.sin(a), y - 26 * math.cos(a), a + 0.035
     else:
-        streaks(wind, rng, 46 if deck != "deep" else 18, 20, 330, 120, 380)
-    stack.append(tint(rng, H, wind, pal["offwhite"], 0.5 if deck in ("deck1", "deck2", "storm", "spot") else 0.3, var=0.0, edge_dark=0.0, bleed=1.8))
+        streaks(wind, rng, 40 if deck != "deep" else 16, 20, 330, 160, 460, w=1)               # long thin wind lines
+        streaks(wind, rng, 8 if deck != "deep" else 3, 40, 300, 260, 620, w=2)                # a few bold cartoon speed lines
+    stack.append(tint(rng, H, wind, pal["offwhite"], 0.75 if deck in ("deck1", "deck2", "storm", "spot") else 0.5, var=0.0, edge_dark=0.0, bleed=1.2))
     if deck in ("deck3", "deep"):
         glints = np.zeros((H, W), np.float32)
         sparkle_field(glints, rng, 30 if deck == "deck3" else 70, 30, 260 if deck == "deep" else 340, 3)
