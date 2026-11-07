@@ -1,8 +1,8 @@
 # BLENDER STATUS
-Updated: 2026-11-07 05:05 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 05:12 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-LEAD cycle 258: stalker / lurker / crawler / mound ACCEPTED, B-139 DONE. Slot unchanged (when UNITY's last U-106 lock frees): B-143 near frames (5) + the B-141 re-run, <= 8 min; then B-136, then B-140. Lock-free order: lurker idle_open DONE 05:0x (8a2f6bb: 10 whole-body frames, sniff + nose pulse; 50 frames, clear of edge / ground); B-144 Mars camp prop designs NEXT; B-145 Mercury design prep; the slot script dry run; report + README.
+LEAD cycle 258: stalker / lurker / crawler / mound ACCEPTED, B-139 DONE. Slot unchanged (when UNITY's last U-106 lock frees): B-143 near frames (5) + the B-141 re-run, <= 8 min; then B-136, then B-140. Lock-free order: lurker idle_open DONE 05:0x (8a2f6bb: 10 whole-body frames, sniff + nose pulse; 50 frames, clear of edge / ground); B-144 source DONE 05:1x (024462f, 56ed56e): drill rig / beacon / hauler hull a + b / cargo / warden pylon, the drill rig checked (508x508, ink 2.01-2.98 / 1.01-1.50, palette 100 %), the other previews wait for RAM (0.04 GB free during UNITY's profile build); B-145 Mercury prep NEXT (doc + code only until RAM); B-145 Mercury design prep; the slot script dry run; report + README.
 1. B-143 redirected by D-128 (+ amendment): the soft limb shelved (3f9bef4, never run). Near frames code DONE 04:5x (c43c8da): planets/<planet>/disc_near + planets/earth/luna_near, the far frame 0 at k x (the same rng fields, resampled), k = min(8x, fits 512^2), only where >= 2x: luna 8x, mercury 5.86x, mars 4.82x, venus 3.42x, earth 3.28x (none for the giants: a later card); far discs proven byte-identical before writing; review_b143_near_frames.png (far at 33x beside near at 33/k x). Light test Luna 356^2 + Mercury 512^2 ok (slip: 196 MB beside UNITY's job, over ~150 MB; Luna alone 99 MB).
 2. B-141 fixes DONE (88e0d85): the far canyon wall above layer1's tiers; the storm veil fades in (no hard edge), tint() ends the speckle; re-run in the slot before LEAD judges.
 3. B-136 export readiness DONE 04:41 (dde7d5e): build / main(out) review_script, row creatures/earth/hadal_maw; D-127: the key confirmed, cycle_beats 4 at 110 bpm accepted (contract v3.2 idle field, default 1), the 99.9 % palette (the lure's drawn translucent glow) accepted. Pack dry run: 8 parts 1784x744, json valid, palette 99.9 % (the lure's translucent halos), peak 341 MB (slip: over ~300 MB lock-free, measured in-run, not on one part first).
@@ -45,4 +45,4 @@ none (B-136's key and cycle_beats ruled D-127).
 none.
 
 ## HeavyJobLock
-none held, no want on file (held through U-106 by agreement with UNITY); file on UNITY's ping or take the slot when its last U-106 lock frees.
+want_blender.lock filed 05:04:55 (UNITY's last U-106 lock started 05:04:43, frees ~05:25; my slot right after: B-143 near frames + B-141 re-run, <= 8 min).
