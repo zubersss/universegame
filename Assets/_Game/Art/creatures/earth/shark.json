@@ -1,0 +1,52 @@
+{
+  "key": "creatures/earth/shark",
+  "style": "v3",
+  "frame_width": 224,
+  "frame_height": 128,
+  "columns": 9,
+  "gutter": 4,
+  "frames": 54,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [
+    {
+      "name": "idle",
+      "start": 0,
+      "length": 10,
+      "loop": true,
+      "loop_from": 0
+    },
+    {
+      "name": "swim",
+      "start": 10,
+      "length": 14,
+      "loop": true,
+      "loop_from": 0
+    },
+    {
+      "name": "react",
+      "start": 24,
+      "length": 8,
+      "loop": false
+    },
+    {
+      "name": "bump",
+      "start": 32,
+      "length": 10,
+      "loop": false
+    },
+    {
+      "name": "flee",
+      "start": 42,
+      "length": 12,
+      "loop": true,
+      "loop_from": 0
+    }
+  ],
+  "squash_root": true
+}
