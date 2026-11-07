@@ -135,6 +135,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 72d4cb47ed01b7f458622749e92e733f
+    m_Address: terrain/earth/ground_strip
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 75f5a553cd896ab42b881dc3a77ce6bd
     m_Address: props/earth/archive_terminal
     m_ReadOnly: 0
