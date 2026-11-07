@@ -1,21 +1,29 @@
 {
- "key": "props/common/smelter",
- "format": "glb",
- "contract": "v2.2",
- "facing": "+X in Unity (exported facing glTF -X, D-065)",
- "up": "+Y",
- "units": "m",
- "origin": "base",
- "triangles": 1000,
- "lod1_triangles": null,
- "texture": 1024,
- "maps": [
-  "color",
-  "normal",
-  "mask",
-  "emission"
- ],
- "fps": 30,
- "clips": [],
- "sockets": []
+  "key": "props/common/smelter",
+  "style": "v3",
+  "frame_width": 112,
+  "frame_height": 192,
+  "columns": 4,
+  "gutter": 4,
+  "frames": 8,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.052083
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [
+    {
+      "name": "working",
+      "start": 0,
+      "length": 8,
+      "loop": true,
+      "loop_from": 0
+    }
+  ],
+  "squash_root": false,
+  "ground_line_px": 10,
+  "interactable": true,
+  "note": "frame 0 = at rest; working loops while the prop is busy"
 }

@@ -1,23 +1,28 @@
 {
- "key": "props/common/lamp",
- "format": "glb",
- "contract": "v2.2",
- "facing": "+X in Unity (exported facing glTF -X, D-065)",
- "up": "+Y",
- "units": "m",
- "origin": "base",
- "triangles": 948,
- "lod1_triangles": null,
- "texture": 1024,
- "maps": [
-  "color",
-  "normal",
-  "mask",
-  "emission"
- ],
- "fps": 30,
- "clips": [],
- "sockets": [
-  "light"
- ]
+  "key": "props/common/lamp",
+  "style": "v3",
+  "frame_width": 64,
+  "frame_height": 160,
+  "columns": 2,
+  "gutter": 4,
+  "frames": 4,
+  "fps": 12,
+  "pivot": [
+    0.32,
+    0.0625
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [
+    {
+      "name": "flicker",
+      "start": 0,
+      "length": 4,
+      "loop": true,
+      "loop_from": 0
+    }
+  ],
+  "squash_root": false,
+  "ground_line_px": 10,
+  "note": "frame 0 = at rest; flicker loops while the prop is busy"
 }
