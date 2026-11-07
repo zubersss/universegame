@@ -92,6 +92,16 @@ def _composite(layers):
     return rgb, a
 
 
+def straighten(rgb, a):
+    """D-147: a layer composited over a transparent base holds colour x alpha, but the contract (§3) and
+    ParallaxLayer.shader read straight alpha, so translucent pixels must have the alpha divided back out (else
+    fog reads grey and soft edges get dark rims). Opaque pixels (a >= 0.999) are left exactly as they are, so an
+    opaque layer (every layer0) stays byte-identical."""
+    a3 = a[..., None]
+    fix = (a3 > 1e-4) & (a3 < 0.999)
+    return np.where(fix, rgb / np.maximum(a3, 1e-4), rgb).astype(rgb.dtype)
+
+
 def _ridge_mask(H, line, soft=1.5):
     y = np.arange(H)[:, None] + 0.5
     return np.clip((y - line[None, :]) / soft + 0.5, 0, 1)
@@ -125,6 +135,7 @@ def earth_plains(seed):
     far = ridge(rng, [(1, 0.5), (3, 0.35), (7, 0.15)], base=820, amp=60)
     stack.append(wash(rng, H, _ridge_mask(H, far), _mix(pal["teal"], pal["sky"], 0.55), var=0.05, edge_dark=0.06, bleed=3.0))
     rgb, a = _composite(stack)
+    rgb = straighten(rgb, a)                                  # D-147
     out.append((rgb * paper(rng, H)[..., None], a))
 
     # layer1: 2048 x 512, rolling green hills + tree blobs, transparent sky
@@ -142,6 +153,7 @@ def earth_plains(seed):
     stack = [wash(rng, H, hm, _mix(pal["green"], pal["sky"], 0.30), var=0.06, edge_dark=0.08),
              wash(rng, H, tm, _mix(pal["green"], pal["teal"], 0.45), var=0.07, edge_dark=0.10, bleed=2.0)]
     rgb, a = _composite(stack)
+    rgb = straighten(rgb, a)                                  # D-147
     out.append((rgb * paper(rng, H)[..., None], a))
 
     # layer2: 2048 x 384, near meadow: deeper green, dabbed grass, mustard and red flower dots
@@ -172,6 +184,7 @@ def earth_plains(seed):
              wash(rng, H, fm["mustard"] * mm, pal["mustard"], var=0.05, edge_dark=0.10, bleed=1.2),
              wash(rng, H, fm["red"] * mm, pal["red"], var=0.05, edge_dark=0.10, bleed=1.2)]
     rgb, a = _composite(stack)
+    rgb = straighten(rgb, a)                                  # D-147
     out.append((rgb * paper(rng, H)[..., None], a))
 
     layers = [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0},
