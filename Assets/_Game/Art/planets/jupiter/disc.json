@@ -1,0 +1,28 @@
+{
+  "key": "planets/jupiter/disc",
+  "style": "v3",
+  "frame_width": 656,
+  "frame_height": 656,
+  "columns": 3,
+  "gutter": 4,
+  "frames": 9,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "ppu": 3.0,
+  "space_ppu": 3.0,
+  "radius_u": 106,
+  "radius_px": 318.0,
+  "animations": [
+    {
+      "name": "idle",
+      "start": 0,
+      "length": 9,
+      "loop": true,
+      "loop_from": 0
+    }
+  ]
+}

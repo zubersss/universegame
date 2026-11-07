@@ -1,0 +1,28 @@
+{
+  "key": "planets/uranus/disc",
+  "style": "v3",
+  "frame_width": 364,
+  "frame_height": 364,
+  "columns": 5,
+  "gutter": 4,
+  "frames": 12,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "ppu": 3.0,
+  "space_ppu": 3.0,
+  "radius_u": 57,
+  "radius_px": 171.0,
+  "animations": [
+    {
+      "name": "idle",
+      "start": 0,
+      "length": 12,
+      "loop": true,
+      "loop_from": 0
+    }
+  ]
+}

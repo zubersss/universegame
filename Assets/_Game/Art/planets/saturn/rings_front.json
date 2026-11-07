@@ -1,0 +1,11 @@
+{
+  "key": "planets/saturn/rings_front",
+  "style": "v3",
+  "ppu": 3.0,
+  "space_ppu": 3.0,
+  "radius_u": 96,
+  "pivot": [
+    0.5,
+    0.5
+  ]
+}

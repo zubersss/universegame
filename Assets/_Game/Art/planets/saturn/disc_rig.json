@@ -1,0 +1,37 @@
+{
+  "key": "planets/saturn/disc_rig",
+  "style": "v3",
+  "space_ppu": 3.0,
+  "parts": [
+    {
+      "name": "rings_back",
+      "order": 0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "name": "disc",
+      "order": 1
+    },
+    {
+      "name": "rings_front",
+      "order": 2,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    }
+  ],
+  "wobble": {
+    "parts": [
+      "rings_back",
+      "rings_front"
+    ],
+    "scale_y": 0.04,
+    "rotate_deg": 1.5,
+    "beat_bpm": 110,
+    "stepped_hz": 12
+  }
+}

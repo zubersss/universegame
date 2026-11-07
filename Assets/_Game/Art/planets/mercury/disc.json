@@ -1,0 +1,28 @@
+{
+  "key": "planets/mercury/disc",
+  "style": "v3",
+  "frame_width": 104,
+  "frame_height": 104,
+  "columns": 12,
+  "gutter": 4,
+  "frames": 12,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "ppu": 3.0,
+  "space_ppu": 3.0,
+  "radius_u": 14,
+  "radius_px": 42.0,
+  "animations": [
+    {
+      "name": "idle",
+      "start": 0,
+      "length": 12,
+      "loop": true,
+      "loop_from": 0
+    }
+  ]
+}

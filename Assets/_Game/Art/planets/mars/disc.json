@@ -1,0 +1,28 @@
+{
+  "key": "planets/mars/disc",
+  "style": "v3",
+  "frame_width": 124,
+  "frame_height": 124,
+  "columns": 12,
+  "gutter": 4,
+  "frames": 12,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "ppu": 3.0,
+  "space_ppu": 3.0,
+  "radius_u": 17,
+  "radius_px": 51.0,
+  "animations": [
+    {
+      "name": "idle",
+      "start": 0,
+      "length": 12,
+      "loop": true,
+      "loop_from": 0
+    }
+  ]
+}

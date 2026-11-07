@@ -1,0 +1,28 @@
+{
+  "key": "planets/neptune/disc",
+  "style": "v3",
+  "frame_width": 356,
+  "frame_height": 356,
+  "columns": 5,
+  "gutter": 4,
+  "frames": 12,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "ppu": 3.0,
+  "space_ppu": 3.0,
+  "radius_u": 56,
+  "radius_px": 168.0,
+  "animations": [
+    {
+      "name": "idle",
+      "start": 0,
+      "length": 12,
+      "loop": true,
+      "loop_from": 0
+    }
+  ]
+}
