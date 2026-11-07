@@ -464,15 +464,25 @@ SPECIES = {
 }
 
 
+HABITAT = {"shadewyrm": "night", "glassback": "twilight", "cinderling": "day", "flarewing": "day"}   # the review's backdrop (B-149)
+
+
 def entry_for(name):
+    """The manifest row of one Mercury creature (the preview reviews with the same dict the export reads)."""
     sp = SPECIES[name]
-    return {"key": f"creatures/mercury/{name}", "style": "v3", "source": f"sources/creatures/mercury_{name}_v3.blend",
+    e = {"key": f"creatures/mercury/{name}", "style": "v3", "source": f"sources/creatures/mercury_{name}_v3.blend",
             "build": "scripts/build_creatures_mercury_v3.py", "build_fn": f"build_{name}", "collection": name,
             "frame": list(sp["frame"]), "pivot": list(sp.get("pivot", (0.5, 0.0))), "facing": "right", "squash_root": True,
-            "planet": "mercury", "seed": sp["seed"], "bg_scene": "-", "beside": "characters/surveyor/side",
+            "planet": "mercury", "seed": sp["seed"], "bg_scene": HABITAT[name], "beside": "characters/surveyor/side",
             "review_name": f"b145_mercury_{name}", "clips": [{"name": c, "frames": n, "loop": lp} for c, n, lp in sp["clips"]],
             "self_check": dict(sp["self_check"], style="the B-132 kit (Gus's construction); LEAD judges"), "ours": sp["ours"],
-            "replaces_v2": True, "note": "B-145 design (Mercury creature re-ink); a flyer's travel clip sits at index 1 like the swimmers' swim"}
+            "replaces_v2": True, "note": "B-150 (designs accepted under B-145): v3.1 Mercury creature sheet in the D-130 palette, faces kept "
+                                         "(D-101), no teeth (D-087); replaces the v2 model under this key (.glb + normal / mask / emission "
+                                         "removed on export; the .meta files are UNITY's); a flyer's travel clip sits at index 1"}
+    if sp.get("den"):
+        e["den"] = sp["den"]
+        e["note"] += f"; D-126: idles and reacts behind its den prop {sp['den']} (drawn in front by UNITY on the same pivot)"
+    return e
 
 
 def preview(out_dir, name="flarewing"):
