@@ -1,33 +1,28 @@
 # BLENDER STATUS
-Updated: 2026-11-07 02:4x · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 03:1x · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-LEAD cycle 253 order (lock-free; UNITY's PlayMode halves + captures hold the lock; I file my want when UNITY takes the lock for half B, D-039; under ~100 MB while its Editor runs):
-1. B-138 edge audit: DONE 02:3x (836f558): coordination/reports/blender/edge_audit_2026-11-07.md, tool blender/scripts/edge_audit.py (read-only, 55 MB, 4 s). 20 sheets, 0 offenders; rig parts (flora 44, Pilgrim 11, gauges 6) none cut; 11 single images clear (a base pivot leaves the bottom to its line: the escape sign's post). No re-export needed.
-2. B-135 + sand dry run: DONE 02:3x. The ground strip set with sand into a scratch tree: grass / soil / stone PNG and json byte-identical to Art, sand new (540x152, 63 KB); joins 0.63 / 0.62 / 0.81 / 0.67, silhouette identical on 64 edges. B-135 rows vs render.py: build_pike / _shark / _squid, pivot [0.5, 0.5], swim cap 12-16, review on the exported coast sea layers 0-1.
-3. B-137 Sun parts preview DONE 02:4x (88ceb01; measured first: 0.1x, 141 MB, 9 s): blender/preview/review_b137_sun_parts_preview.png. Parts: static body, ONE flame tongue instanced 14x round the rim (neighbours overlap into the ring), corona 512^2 (radius 1.42 R, breathes), two prominences on limb sockets; one sheet at the 0.5x export 2048x960 (body 960^2, tongue 260x180, prominences 160x180 / 140x140, corona 512^2), planets/sun/disc_rig.json with order + ring / corona / prominence params, draw_scale 2, ink at half width. Deviations from D-123 for LEAD: the ring is one tongue part instanced, not one ring part (a full ring at 0.5x is ~1220 px and cannot share the sheet with the body); the body is static (no room for 12 frames). Export + the stamped game-size review in a slot after B-135.
-4. B-139 Mars design prep: IN PROGRESS from 02:4x (palette check + creature re-ink list + camp-prop differences first, no memory; then the five plants in fakegp when RAM allows; the canyon / storm backdrops in a slot).
-5. B-136 Hadal Maw design (rig set).
-Next slot (queue #2 after UNITY's captures, <= 15 min): `tools/blender_render.ps1 creatures/earth/pike,creatures/earth/shark,creatures/earth/squid,terrain/earth/ground_strip_set`.
+LEAD cycle 254 order (lock-free now; UNITY's C1 batch holds the queue):
+1. Slot (queue #1): DONE 03:06:23-03:09:39 (c4225fd), see Last completed.
+2. D-125 shelter wall redraw (P-45): a stackable 1 x 1 m tile, 64x64, pivot bottom-centre, tile in x and y, no ground-line margin; preview stacked 2 and 3 high beside the door: NEXT.
+3. B-139 parts 2-5: the plants preview is drawn (review_b139_mars_plants_preview.png, 8c69536; hand-off after a last look), then the canyon / storm backdrops (slot), the Mars ground strip kind, creature and prop notes are in c2_mars_designs.md.
+4. B-136 Hadal Maw rig set design.
+B-131 export: after UNITY's U-113 code, which now follows U-106 (D-115 / D-117).
 
 ## Last completed
-- 02:15:20-02:21:08 QUEUE #2 SLOT (one heavy lock, 5.8 min, released; taken under D-112: free lock, no UNITY want until 02:16:44; LEAD confirmed):
-  - B-134 EXPORTED (27143e1): log "OK characters/surveyor/side_b | v3 sheet 1956x1172 396KB, 56 frames 192x192 @12fps (dig 10, build 10, surprise 12, jetpack 10, climb_in 14) | ink outer 2.0-3.0px inner 1.0-1.5px | palette 100.0% | boxes not x: motion,idle,original,style | 232.8s | peak 535MB". json: pivot [0.5, 0], 10 columns, a `hatch` socket on all 56 frames. Source sources/characters/surveyor_side_b.blend. Review review_b134_surveyor_side_b.png.
-  - B-133 EXPORTED (27143e1): "OK backgrounds/earth/forest | layer0 2048x1024 2324KB seam 0.87, layer1 2048x640 1025KB seam 0.43, layer2 2048x384 561KB seam 0.52 + forest.json | 33.9s | peak 755MB"; "OK backgrounds/earth/coast | layer0 2048x1024 2313KB seam 0.85, layer1 2048x512 703KB seam 0.63, layer2 2048x384 571KB seam 0.50 + coast.json | 30.8s | peak 792MB". All six layers pixel-identical to the accepted previews rolled to their quiet column. Reviews review_b133_earth_{forest,coast}.png (export) + review_b133_earth_{forest,coast}_preview.png rebuilt from the rolled layers (1080p at 1x; the coast now on sand).
+- 03:06:23-03:09:39 SLOT (one heavy lock, 3.3 min, released; LEAD cycle 254 queue #1): squid re-exported 1940x1476 (155 s, peak 632 MB; flee stretch 1.12, inside the 2 px edge); B-137 planets/sun/disc_rig_color.png 1900x928 + disc_rig.json (36 s, peak 1009 MB; ink on screen 2.0-3.0 / 1.0-1.5; review_b137_sun_rig.png at the game's size); ui/palettes/mars/strip (D-125 (2)). Log: "OK creatures/earth/squid ... 155.4s | peak 632MB", "OK planets/sun/disc_rig | sheet 1900x928 944KB | parts body 928x928, tongue 216x148, prominence_a 128x140, prominence_b 100x104, corona 512x512 ... 36.3s | peak 1009MB", "OK ui/palettes/mars | strip 8x1".
+- 02:41:14-02:45:04 SLOT: pike + shark + the sand strip exported (af83541, verified cycle 254); the squid failed the export's edge check (fakegp's stroke ids gave a different ink jitter than Blender's; fakegp.strokes_of(as_object=...) now matches the export pixel for pixel, 8c69536).
+- 02:2x-02:4x B-138 edge audit (836f558, DONE cycle 254), B-137 parts preview (88ceb01, accepted), B-139 part 1 palette + report (cb88c5f; palette ACCEPTED D-125), part 2 plant designs (8c69536).
 - 01:45:53-01:54:10 B-132 EXPORTED (0f9e0ab; log OK x3, peak 519 MB; eight stag / wolf v2 files removed as dry-run); verified cycle 252.
 - 02:0x-02:1x B-133 / B-134 dry run (stub-layer export path; side_b row vs the sheet / socket path); coast sand strip (158484a).
 - 00:5x-01:1x B-131 export wiring (5650912): see Ready for review.
 
 ## Ready for review
-- B-131 export wiring (5650912): `props/common/camp_set` exports the six props (<= 512^2 each, colour + json, D-117) and removes their 24 v2 files; dry run passed. Waits for U-113.
-- B-134 (27143e1) and B-133 (27143e1): exported, see Last completed.
-- B-135 PREVIEWS (9c18daa) ACCEPTED cycle 253: blender/preview/review_b135_earth_{pike,shark,squid}_preview.png, each 1x in the coast sea (B-133 layers 0-1) with the surveyor beside on the panel floor.
-  - pike 128x80 frames, sheet 1976x332: green duck-bill body with golden spots, pale belly, back tone, lateral-line dashes, fin rays, forked tail; idle 8 (hover, fin ripple, blink), swim 12 (the wave runs to the tail), react 8 (dart: stretch 1.25, eye-pop, speed lines), bump 8, flee 12.
-  - shark 224x128, sheet 2048x788: round grey (sky mid / deep back), countershaded belly, gill slits, closed smile, round eye; idle 10 (glide), swim 14, react 8 (turns away), bump 10, flee 12.
-  - squid 320x144, sheet 1940x1476: soft red mantle with fins, collar, chromatophore specks, deep spots, one big eye, eight hose arms + two club tentacles with sucker dots; idle 12 (arm curl wave), swim 12 (two jet pulses: mantle squash 0.82 / stretch 1.18), react 10 (a round ink cloud + eye-pop), bump 10, flee 12 (three fast jets).
-  - all: pivot [0.5, 0.5]; swim 12-16 at index 1 (Creature.cs's walk slot), react 2, bump 3, flee 4 by name; ink 2.0-3.0 / 1.0-1.5 px, palette 100 %, no frame touches the 2 px edge (bottom included); closed mouths or a round "o", no teeth.
-  - Water-floor check (the card's replacement for the ground check): deepest ink below the pivot over all frames: pike 0.38 m, shark 0.87 m, squid 0.70 m. UNITY keeps the pivot at least that far above the sea floor.
-  - Fixed on the way: the pike's dart speed lines and the shark's turn-away / bump tilts crossed the frame edge (lines start nearer, tilts softened a third, shark frame 112 -> 128 tall).
+- B-131 export wiring (5650912): `props/common/camp_set` exports the six props (<= 512^2 each, colour + json, D-117) and removes their 24 v2 files; dry run passed. Waits for U-113 (after U-106). D-125's shelter-wall tile redraw comes first (Current task 2).
+- B-135 squid (c4225fd): re-exported, inside the 2 px edge (pike + shark verified cycle 254).
+- B-137 (c4225fd): planets/sun/disc_rig_color.png 1900x928 + disc_rig.json; review blender/preview/review_b137_sun_rig.png at the game's size on the B-120 starfield with the Earth disc at true ratio; every part inside its 2 px edge; sheet <= 2048^2; log OK. Parts: corona (order 0, radius 1.42 R, breathe 0.03), tongue (order 1; ring: 14 instances, alt scale 1.0 / 0.62, base 0.97 R, spin 2 deg/s, pulse 0.08, 110 bpm, stepped 12 Hz), prominence_a / _b (order 2, at 100 / 280 deg on the rim), body (order 3); draw_scale 2.
+- ui/palettes/mars/strip (c4225fd): the accepted Mars palette (D-125 (2)), also in meridian.v3.PALETTES["mars"].
+- B-139 part 2 preview (8c69536): blender/preview/review_b139_mars_plants_preview.png, five faceless Mars plants at 1x on a Mars stand-in beside the surveyor, idle 8 + react 4 each at 2x; ink 2.0-3.0 / 1.0-1.5 px, Mars palette 100 % per plant; drawn 1.5x for 0.38 g.
 
 ## Handoffs (unrouted only)
 -> UNITY (B-132, exported 0f9e0ab): delete the eight .meta files of the removed stag / wolf v2 files (stag.glb, stag_normal/_mask/_emission.png, same for wolf); creatures/earth/bear is a new key (no SpeciesSpec yet: Bible §7.1 "Brown bear (territorial)"; under D-087 its react is the rear-up + huff). The sheets are drawn about 1.5 m long x 2.0 m tall (stag), 1.2 x 1.0 m (wolf), 2.1 x 1.3 m (bear); the v2 SpeciesSpec sizes were 1.9x1.6 and 1.5x0.9.
@@ -42,7 +37,7 @@ Next slot (queue #2 after UNITY's captures, <= 15 min): `tools/blender_render.ps
 none.
 
 ## Proposals (undecided only)
-- -> LEAD (Sun disc, C2 candidate; preview blender/preview/review_sun_disc_design_preview.png): export as a rig, not a sheet: the game's Sun is r 900 px (1800 px across), so sun/disc_color.png static at 0.5x (1024^2, drawn 2x), sun/flames_color.png one ring part Unity rotates slowly and pulses, sun/corona_color.png a 512^2 wash scaled 4x, two prominence parts on limb sockets, in a disc_rig.json like Saturn's rings.
+none (the Sun rig was ruled D-123).
 
 ## Rules I keep (from slips this session)
 - A lock check is its own call; Blender starts only in a later call after reading a clear result (D-073).
@@ -55,4 +50,4 @@ none.
 none.
 
 ## HeavyJobLock
-none held; want_blender.lock filed 02:32 after UNITY took the lock for PlayMode half B (02:32, D-039): queue #2 = B-135 + the strip set with sand, after UNITY's captures. Refreshed on each poll (D-075).
+none held (slot 03:06:23-03:09:39 released); no want on file (UNITY's C1 batch is next).
