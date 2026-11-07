@@ -80,3 +80,27 @@ stay 3D until U-100.
   sprite atlases 1 planet_earth* (≤ 8). The textures row now counts v3 assets apart (no mips by contract §11.8).
 - One gull (Species.Gull, B-113) is spawned over the camp on the cartoon path; it is small and flees, so it is not
   guaranteed to be inside every frame.
+
+## U-098 · the C0 style-test set (18:56 stills, 18:57 contact sheet, 18:4x profile)
+
+`u098/` (SceneCapture.CaptureC0Set, all with the film on except 8): the scene is BLENDER's art throughout: B-111/B-116/B-118
+surveyor (helmet glass), B-112 snoozles, B-113 gull, B-114 plains layers, B-115 film overlays; the props and the Pilgrim
+are U-100's flat silhouettes and the ground is U-100's strip (both placeholders by design until their C1 cards).
+
+| still | what it shows (logged) |
+|---|---|
+| 1_idle | clip idle |
+| 2_walk | clip walk, 4.0 m/s |
+| 3_jump | clip jump, rising 5.3 m/s |
+| 4_land | clip land, impact 6.8 m/s, squash 0.70 |
+| 5_plant_react | the nearest snoozle reacting: turned to look, mouth_giggle |
+| 6_critter_gull | one gull framed on purpose (viewport 0.92, 0.40), idle wander, sheet frame gull_10 |
+| 7_iris_mid | the iris 0.175 s into its close, radius 0.807 screen heights |
+| 8_film_off / 9_film_on | the same frame without and with the film pass |
+
+- Contact sheet: `strip/contact_sheet.png` + 40 stills (18:57), 20 s at 2 stills/s.
+- Profile (perf_2026-11-06.md, 18:4x gate run, BUDGETGATE GREEN; the same scene and art, only a capture test changed since):
+  Earth C0 working set 763 MB (< 2.0 GB), frame time avg 5.23 / p99 9.62 ms (≤ 16.6), 38 animated objects (≤ 40),
+  155 draw calls, 1 Earth atlas.
+- PlayMode smoke (18:5x check, after the sheet controllers were rebuilt with B-118's sheet): CartoonSmokeTests,
+  RigFloraTests and LeadQA SmokeTests green; compile 0/0, EditMode 279/279.

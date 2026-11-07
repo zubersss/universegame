@@ -40,6 +40,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0ec496b5e0700f7499bd09b7d8c4ce10
+    m_Address: creatures/earth/gull/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 13e95768f5d36994b9be282380e68945
     m_Address: creatures/earth/wolf
     m_ReadOnly: 0
