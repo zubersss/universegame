@@ -267,8 +267,14 @@ def build(out=os.path.join(SRC, "earth_hadal_maw_rigset.blend")):
 
 
 def main(out):
-    """render.py review_script (B-136 accept): the assembled creature at 1x beside the surveyor (1x), the loops, stamped."""
-    preview(os.path.dirname(out), scale=1.0, path=out, stamp="export")
+    """render.py review_script (B-136 accept): the assembled creature at 1x beside the surveyor (1x), the loops, stamped.
+    Inside Blender gp_draw is real: fakegp's mat goes in for the fake drawings and is restored after (a later job in the
+    same batch gets the real one back)."""
+    fakegp.install()
+    try:
+        preview(os.path.dirname(out), scale=1.0, path=out, stamp="export")
+    finally:
+        fakegp.restore()
     return []
 
 

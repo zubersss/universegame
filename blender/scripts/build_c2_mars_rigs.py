@@ -328,10 +328,15 @@ def main(out):
     import numpy as np
     sys.path.insert(0, os.path.dirname(HERE))
     import review
+    from meridian import fakegp
     W = 1900
     head = np.tile(review.PAPER, (28, W, 1)).astype(np.float32)
     review._label(head, f"b-140 flora/mars/rigset assembled: {len(PLANTS)} plants, idle (unity's maths) | react, drawn 1.5x for 0.38 g", 6, 8)
-    img = np.vstack([head] + plant_rows(W))
+    fakegp.install()                    # inside Blender: fakegp's mat for the fake drawings, the real one back after
+    try:
+        img = np.vstack([head] + plant_rows(W))
+    finally:
+        fakegp.restore()
     review._label(img, __import__("time").strftime("%m-%d %H:%M") + " export", 2, img.shape[0] - 16)
     review.write(out, img)
     return []
