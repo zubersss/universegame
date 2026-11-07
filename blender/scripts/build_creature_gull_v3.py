@@ -22,7 +22,7 @@ import gp_draw as G  # noqa: E402
 DEFAULT_OUT = os.path.join(os.path.dirname(HERE), "sources", "creatures", "earth_gull_v3.blend")
 P = G.PALETTES["earth"]
 O, I = G.OUTER, G.INNER
-CLIPS = [("idle", 10), ("walk", 12), ("react", 8), ("bump", 10)]
+CLIPS = [("idle", 10), ("walk", 12), ("react", 8), ("bump", 10), ("fly", 12)]   # B-127: fly appended
 TAU = 2 * math.pi
 
 
@@ -30,6 +30,7 @@ def materials(gp):
     return {
         "body": G.mat(gp, "gull_body", fill=P["offwhite"]),
         "body_sh": G.mat(gp, "gull_body_shadow", fill=G.shadow_of(P["offwhite"]), ink=False),
+        "body_dp": G.mat(gp, "gull_body_deep", fill=G.deep_of(P["offwhite"]), ink=False),
         "wing": G.mat(gp, "gull_wing", fill=P["sky"], behind=True),
         "wing_sh": G.mat(gp, "gull_wing_shadow", fill=G.shadow_of(P["sky"]), behind=True),
         "beak": G.mat(gp, "gull_beak", fill=P["mustard"], behind=True),
@@ -59,9 +60,17 @@ def feather(base, ang, length, width):
     return a + b
 
 
+def vein(base, ang, length, frac=0.8, off=0.0):
+    """A feather's shaft line from near the base towards the tip (offset sideways by off)."""
+    ca, sa = math.cos(ang), math.sin(ang)
+    nx, nz = -sa, ca
+    return G.bowed_line((base[0] + ca * length * 0.12 + nx * off, base[1] + sa * length * 0.12 + nz * off),
+                        (base[0] + ca * length * frac + nx * off * 0.4, base[1] + sa * length * frac + nz * off * 0.4), bow=0.04, n=6)
+
+
 def draw_gull(d, M, pose=None, seed=0):
     p = dict(bob=0.0, sz=1.0, lean=0.0, head=(0.0, 0.0), legs=((0.0, 0.0), (0.0, 0.0)), wing=0.0, tail=0.0,
-             tuft=0.0, eye_pop=1.0, blink=0.0, beak_open=0.0, stars=None, look=(0.5, 0.0), rock=0.0)
+             tuft=0.0, eye_pop=1.0, blink=0.0, beak_open=0.0, stars=None, look=(0.5, 0.0), rock=0.0, fly_wing=None)
     p.update(pose or {})
     sz = p["sz"]
     sx = 1 / math.sqrt(sz)
@@ -91,11 +100,22 @@ def draw_gull(d, M, pose=None, seed=0):
                (fx + 0.11, fz - 0.025), (fx + 0.05, fz - 0.06), (fx, fz - 0.035), (fx - 0.07, fz - 0.05)]
         web = [(x, z + O * 1.25 + 0.06) for x, z in web]
         G.stroke(d, web, M["leg"], O, cyclic=True)
+        wz = fz + O * 1.25 + 0.06
+        G.seam(d, [(fx + 0.02, wz + 0.02), (fx + 0.15, wz - 0.03)], M["ink"])
+        G.seam(d, [(fx + 0.02, wz + 0.02), (fx + 0.19, wz - 0.004)], M["ink"])
     leg(0)
     # tail feathers (behind the body), wag by p['tail']
     tb = X1(-0.24, 0.47)
     for k, (a, L) in enumerate(((2.70, 0.30), (2.95, 0.34), (3.20, 0.28))):
         G.stroke(d, feather(tb, a + p["tail"], L, 0.085), M["wing"] if k != 1 else M["wing_sh"], O, cyclic=True)
+        G.seam(d, vein(tb, a + p["tail"], L), M["ink"])
+    if p["fly_wing"] is not None:                   # flight: the far wing, behind the body
+        fw = p["fly_wing"]
+        sb = X1(0.02, 0.62)
+        fa = 2.95 - 0.9 * fw + 0.15
+        G.stroke(d, feather(sb, fa, 0.48, 0.15), M["wing_sh"], O, cyclic=True)
+        for o in (-0.035, 0.0, 0.035):
+            G.seam(d, vein(sb, fa, 0.48, 0.75, o), M["ink"])
     leg(1)
     # body: an egg with one shadow tone
     body = X(G.lumpy_ellipse(0.0, 0.47, 0.28, 0.23, n=48, lump=0.03, seed=seed + 1))
@@ -104,15 +124,31 @@ def draw_gull(d, M, pose=None, seed=0):
     lo = [body[i] for i in range(n) if math.sin(TAU * i / n) < -0.3]
     cx, cz = X1(0.0, 0.47)
     G.stroke(d, lo + [(cx + (x - cx) * 0.78 + 0.02, cz + (z - cz) * 0.55 + 0.02) for x, z in lo][::-1], M["body_sh"], 0.0, cyclic=True)
+    dlo = [body[i] for i in range(n) if math.sin(TAU * i / n) < -0.62]
+    if len(dlo) > 3:
+        G.stroke(d, dlo + [(cx + (x - cx) * 0.88 + 0.01, cz + (z - cz) * 0.78 + 0.02) for x, z in dlo][::-1], M["body_dp"], 0.0, cyclic=True)
+    G.specks(d, X([(0.16, 0.42), (0.20, 0.38), (0.13, 0.36), (0.22, 0.44)]), M["ink"])
+    G.hatch(d, *X1(-0.12, 0.33), M["ink"], n=3, length=0.06, spacing=0.025, angle_deg=35, seed=seed + 9)
     G.stroke(d, body, M["ink"], O, cyclic=True)
     # wing on the body side, lifts by p['wing']
     wb = X1(0.10, 0.56)
-    G.stroke(d, feather(wb, math.pi + 0.35 - p["wing"], 0.34, 0.12), M["wing"], I, cyclic=True)   # inside the body: interior ink
+    if p["fly_wing"] is None:
+        wa = math.pi + 0.35 - p["wing"]
+        G.stroke(d, feather(wb, wa, 0.34, 0.12), M["wing"], I, cyclic=True)   # inside the body: interior ink
+        for o in (-0.03, 0.03):
+            G.seam(d, vein(wb, wa, 0.34, 0.8, o), M["ink"])
+    else:                                           # flight: the near wing, in front, a silhouette
+        na = 2.95 - 0.9 * p["fly_wing"]
+        sb = X1(0.06, 0.60)
+        G.stroke(d, feather(sb, na, 0.52, 0.16), M["wing"], O, cyclic=True)
+        for o in (-0.04, 0.0, 0.04):
+            G.seam(d, vein(sb, na, 0.52, 0.78, o), M["ink"])
     # head + crest tuft
     hx, hz = X1(0.17 + p["head"][0], 0.76 + p["head"][1])
     for k in range(3):
         G.stroke(d, feather((hx - 0.03 + 0.04 * k, hz + 0.11), 1.9 + 0.30 * k + p["tuft"], 0.17 - 0.02 * k, 0.055),
                  M["wing"], O, cyclic=True)
+        G.seam(d, vein((hx - 0.03 + 0.04 * k, hz + 0.11), 1.9 + 0.30 * k + p["tuft"], 0.17 - 0.02 * k, 0.7), M["ink"])
     head = G.lumpy_ellipse(hx, hz, 0.16, 0.15, n=36, lump=0.03, seed=seed + 2)
     G.stroke(d, head, M["body"], O, cyclic=True)
     # beak: upper and lower bill, red spot on the lower; opens by p['beak_open']
@@ -177,13 +213,23 @@ BUMP = [dict(sz=0.75, lean=-0.18, bob=-0.03, head=(-0.06, -0.04), eye_pop=1.4, t
         dict(sz=1.0, tuft=0.02)]
 
 
+def fly_pose(i):
+    """12 frames = two wingbeats (on twos): wings up -> down, body lifts on the downstroke, legs
+    tucked, tail counters, crest drags; a beak-closed glide face looking ahead."""
+    ph = TAU * i / 6
+    w = math.cos(ph)
+    return dict(fly_wing=w, bob=0.03 * math.sin(ph) + 0.02, sz=1.0 + 0.04 * w, legs=((-0.10, 0.17), (-0.05, 0.19)),
+                tail=-0.12 * w, tuft=0.35 * math.cos(ph - 1.2), head=(0.02, 0.015 * math.sin(ph - 0.6)), lean=0.08,
+                look=(0.7, 0.0))
+
+
 def build(out=DEFAULT_OUT):
     scene = G.new_scene()
     coll = G.collection("gull")
     ob, gp = G.gp_object("gull", coll)
     M = materials(gp)
     layer = gp.layers.new("art")
-    poses = [idle_pose(i) for i in range(10)] + [walk_pose(i) for i in range(12)] + REACT + BUMP
+    poses = [idle_pose(i) for i in range(10)] + [walk_pose(i) for i in range(12)] + REACT + BUMP + [fly_pose(i) for i in range(12)]
     for f, pose in enumerate(poses):
         draw_gull(G.drawing(layer, f + 1), M, pose, seed=5 * f)
     G.mark_clips(scene, CLIPS)
