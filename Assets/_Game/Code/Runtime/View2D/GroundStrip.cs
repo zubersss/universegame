@@ -41,6 +41,27 @@ namespace Meridian.View2D
         /// <summary>The planet's strip keys (Earth's four, Mars's two; other planets Earth's until their strips exist). Pure.</summary>
         public static string[] KeysFor(Meridian.Planets.PlanetId planet) => planet == Meridian.Planets.PlanetId.Mars ? MarsKeys : planet == Meridian.Planets.PlanetId.Mercury ? MercuryKeys
             : planet == Meridian.Planets.PlanetId.Venus ? VenusKeys : Keys;
+        /// <summary>U-126 (D-137): a giant's floe strip is 8 tiles + cap_left (frame 8) + cap_right (frame 9) on the B-130 contract; Earth's,
+        /// Mars's, Mercury's and Venus's are 8 frames and never cap. A column ends a floe where the ground beside it falls away by more than
+        /// FloeEdgeDrop (the gap to the next floe); the caps hang in the air columns just outside, so a floe reads cap + n tiles + cap at any n ≥ 1.</summary>
+        public const int TileFrames = 8, CapLeft = 8, CapRight = 9;
+        public const float FloeEdgeDrop = 3f;
+        public static bool HasCaps(int frames) => frames > CapRight;
+        public static int TileFrame(int x) => ((x % TileFrames) + TileFrames) % TileFrames;
+        public static bool FloeEnd(float top, float besideTop) => besideTop < top - FloeEdgeDrop;
+        /// <summary>U-126: a floe of `length` tiles from column x0 as (column, frame) pairs: cap_left just outside, the tiles, cap_right just outside. Pure.</summary>
+        public static void FloeFrames(int x0, int length, List<Vector2Int> into)
+        {
+            into.Clear();
+            if (length < 1) return;
+            into.Add(new Vector2Int(x0 - 1, CapLeft));
+            for (int i = 0; i < length; i++) into.Add(new Vector2Int(x0 + i, TileFrame(x0 + i)));
+            into.Add(new Vector2Int(x0 + length, CapRight));
+        }
+        /// <summary>U-126: how many floe caps drew on the last pass (tests and captures).</summary>
+        public int CapsShown { get; private set; }
+        readonly List<SpriteRenderer> caps = new List<SpriteRenderer>(8);
+
         /// <summary>U-125 (B-153): Venus's two kinds: the basalt crust on every ground column (vents, tesserae and sulphur patches read as crust on the
         /// drawn strip) and the deck planks, laid along the floating station's deck (SetDecks), never on a terrain column.</summary>
         public static readonly string[] VenusKeys = { "terrain/venus/ground_strip", "terrain/venus/ground_strip_deck" };
@@ -169,6 +190,7 @@ namespace Meridian.View2D
             while (tops.Count < count) { tops.Add(Make("Strip", Order, null)); fills.Add(Make("Fill", Order - 1, dirt)); edges.Add(Make("Edge", Order + 1, dirt)); backs.Add(Make("Back", Order - 2, dirt)); }
             while (materialAt.Count < tops.Count) materialAt.Add(-1);
             float prevTop = terrain.TopSolidY(first - 1) + 1f;
+            int capCount = 0;
             for (int i = 0; i < tops.Count; i++)
             {
                 bool on = i < count;
@@ -185,7 +207,7 @@ namespace Meridian.View2D
                 var fillTile = fillBy[material] ?? dirt;
                 materialAt[i] = framesBy[material] != null ? material : 0;
                 var t = tops[i];
-                t.sprite = set[((x % set.Length) + set.Length) % set.Length];
+                t.sprite = set[HasCaps(set.Length) ? TileFrame(x) : ((x % set.Length) + set.Length) % set.Length]; // U-126: a capped sheet tiles its first 8 frames only
                 t.transform.position = new Vector3(x + 0.5f, top, Z);
                 var f = fills[i];
                 if (f.sprite != fillTile) f.sprite = fillTile;
@@ -201,9 +223,27 @@ namespace Meridian.View2D
                 var bk = backs[i];
                 bk.enabled = rim > top + 0.01f;
                 if (bk.enabled) { bk.transform.position = new Vector3(x + 0.5f, rim, Z + 0.001f); bk.size = new Vector2(1f, rim - top); }
+                // U-126: a floe's ends take its caps in the air columns just outside (a capped sheet only).
+                if (HasCaps(set.Length))
+                {
+                    float nextTop = terrain.TopSolidY(x + 1) + 1f;
+                    if (FloeEnd(top, prevTop)) PlaceCap(ref capCount, set[CapLeft], x - 1, top);
+                    if (FloeEnd(top, nextTop)) PlaceCap(ref capCount, set[CapRight], x + 1, top);
+                }
                 prevTop = top;
             }
+            for (int i = capCount; i < caps.Count; i++) caps[i].enabled = false;
+            CapsShown = capCount;
             LayDecks(first, last);
+        }
+
+        void PlaceCap(ref int n, Sprite frame, int column, float top)
+        {
+            if (n == caps.Count) caps.Add(Make("Cap", Order, null));
+            var c = caps[n++];
+            c.enabled = true;
+            c.sprite = frame;
+            c.transform.position = new Vector3(column + 0.5f, top, Z);
         }
 
         /// <summary>U-125: the deck kind along each floating deck in view (no fill: the hull below is the station's props); hidden until its sheet is in.</summary>

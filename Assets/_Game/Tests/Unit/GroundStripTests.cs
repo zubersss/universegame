@@ -86,5 +86,34 @@ namespace Meridian.Tests
                 }
             Assert.GreaterOrEqual(checkedSheets, 9, "the nine strips (Earth 4, Mars 3, Mercury 2) are on disk");
         }
+
+        /// <summary>U-126 (D-137): a giant's floe is cap + n tiles + cap at any n ≥ 1 — cap_left (frame 8) in the air column just left of the floe,
+        /// cap_right (frame 9) just right, the tiles cycling frames 0–7 in between, never a cap inside; an 8-frame strip (Earth, Mars, Mercury,
+        /// Venus) never caps; a column ends a floe where the ground beside it falls away.</summary>
+        [Test]
+        public void AFloeIsCapTilesCapAtAnyLength()
+        {
+            var frames = new System.Collections.Generic.List<Vector2Int>();
+            foreach (int n in new[] { 1, 2, 8 })
+            {
+                GroundStrip.FloeFrames(100, n, frames);
+                Assert.AreEqual(n + 2, frames.Count, $"{n}-tile floe: cap + {n} + cap");
+                Assert.AreEqual(new Vector2Int(99, GroundStrip.CapLeft), frames[0], "cap_left just outside the left end");
+                Assert.AreEqual(new Vector2Int(100 + n, GroundStrip.CapRight), frames[n + 1], "cap_right just outside the right end");
+                for (int i = 1; i <= n; i++)
+                {
+                    Assert.AreEqual(100 + i - 1, frames[i].x, "the tiles on the floe's own columns");
+                    Assert.Less(frames[i].y, GroundStrip.TileFrames, $"{n}-tile floe: no cap inside (column {frames[i].x})");
+                }
+            }
+            GroundStrip.FloeFrames(100, 0, frames);
+            Assert.AreEqual(0, frames.Count, "no floe, no caps");
+            Assert.AreEqual(0, GroundStrip.TileFrame(8)); Assert.AreEqual(7, GroundStrip.TileFrame(-1)); Assert.AreEqual(3, GroundStrip.TileFrame(11));
+            Assert.IsFalse(GroundStrip.HasCaps(8), "Earth's, Mars's, Mercury's and Venus's 8-frame strips never cap");
+            Assert.IsTrue(GroundStrip.HasCaps(10), "a giant's 10-frame floe strip does");
+            Assert.IsTrue(GroundStrip.FloeEnd(400f, 380f), "the gap beside a floe: an end");
+            Assert.IsFalse(GroundStrip.FloeEnd(400f, 399f), "a 1 m step on the same floe: not an end");
+            Assert.IsFalse(GroundStrip.FloeEnd(400f, 402f), "higher ground beside: not an end");
+        }
     }
 }
