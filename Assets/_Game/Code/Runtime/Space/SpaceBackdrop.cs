@@ -144,6 +144,12 @@ namespace Meridian.Space
             }
         }
 
+        /// <summary>
+        /// U-117 (LEAD, space_1_saturn): the painted tile's world period: its native height at the flight zoom, and never less than half
+        /// the frame when the camera zooms out, so the sky never reads as a repeating column pattern. Pure.
+        /// </summary>
+        public static float TilePeriod(float nativeHeight, float frameHeight) => Mathf.Max(nativeHeight, frameHeight * 0.5f);
+
         void LateUpdate()
         {
             if (view == null) return;
@@ -156,7 +162,7 @@ namespace Meridian.Space
                 // The tile keeps its painted size (height_px / ppu units) and scrolls at its parallax: UV offset = camera motion × parallax / tile size.
                 var t = tiles[i].transform;
                 t.localScale = new Vector3(w, h, 1f);
-                float tileH = tileHeights[i], tileW = tileH * 2f; // 2048 × 1024
+                float tileH = TilePeriod(tileHeights[i], h), tileW = tileH * 2f; // 2048 × 1024; U-117: the period grows with the zoom
                 var scale = new Vector4(w / tileW, h / tileH, 0f, 0f);
                 var offset = new Vector4(cam.x * tileParallax[i] / tileW, cam.y * tileParallax[i] / tileH, 0f, 0f);
                 tiles[i].GetPropertyBlock(block);

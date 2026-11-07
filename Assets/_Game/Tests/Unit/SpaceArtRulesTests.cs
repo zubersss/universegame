@@ -19,6 +19,35 @@ namespace Meridian.Tests
     /// </summary>
     public class SpaceArtRulesTests
     {
+        [Test]
+        public void TheStarfieldTileNeverCoversLessThanHalfTheFrame()
+        {
+            // U-117: 16 u native (1024 px at 64); at the flight zoom (frame 20 u) it keeps its size, at the Saturn shot's 120 u frame it grows to 60 u.
+            Assert.AreEqual(16f, Meridian.Space.SpaceBackdrop.TilePeriod(16f, 20f), 1e-5f);
+            Assert.AreEqual(16f, Meridian.Space.SpaceBackdrop.TilePeriod(16f, 32f), 1e-5f, "exactly two repeats still");
+            Assert.AreEqual(60f, Meridian.Space.SpaceBackdrop.TilePeriod(16f, 120f), 1e-5f);
+            Assert.LessOrEqual(120f / Meridian.Space.SpaceBackdrop.TilePeriod(16f, 120f), 2f, "never more than two repeats across the frame");
+        }
+
+        [Test]
+        public void PlanetDiscsImportBilinearOnAFullRectMesh()
+        {
+            // U-117: the discs' texture is bilinear and its sprite mesh the full rect (a tight mesh cut the bilinear alpha edge into texel stairs at 10x).
+            int seen = 0;
+            foreach (var path in new[] { "Assets/_Game/Art/planets/earth/luna_color.png", "Assets/_Game/Art/planets/saturn/disc_color.png", "Assets/_Game/Art/planets/mars/disc_color.png" })
+            {
+                var ti = UnityEditor.AssetImporter.GetAtPath(path) as UnityEditor.TextureImporter;
+                if (ti == null) continue;
+                seen++;
+                Assert.AreEqual(FilterMode.Bilinear, ti.filterMode, path);
+                var s = new UnityEditor.TextureImporterSettings();
+                ti.ReadTextureSettings(s);
+                Assert.AreEqual(SpriteMeshType.FullRect, s.spriteMeshType, path + ": full rect (U-117)");
+                Assert.AreEqual(3f, ti.spritePixelsPerUnit, 1e-4f, path + ": PPU 3 (D-098)");
+            }
+            Assert.Greater(seen, 0, "B-119 discs in the project");
+        }
+
         static string Sidecar(string body, string name)
         {
             var art = $"Assets/_Game/Art/planets/{body}/{name}.json";

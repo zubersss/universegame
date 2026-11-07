@@ -81,6 +81,16 @@ namespace Meridian.Tests
             yield return null; yield return null;
             Assert.IsTrue(target.Reacting, "within 3 m: reacting");
             Assert.AreEqual(1, target.Facing, "turned to look (the surveyor is on its right)");
+            // U-108: a turn_bounce react squashes the root for 0.15 s (area kept), then it stands tall again.
+            if (target.Def.react.action == FloraRigs.TurnBounce)
+            {
+                Assert.AreEqual(FloraRigs.BounceAmount, target.BouncePeak, 1e-4f, "the full squash pop on the react's first frame (a batch frame may already be past the window)");
+                float bounceUntil = Time.time + FloraRigs.BounceSeconds + 0.1f;
+                while (Time.time < bounceUntil) yield return null;
+                Assert.AreEqual(1f, target.Root.localScale.y, 1e-4f, "back to its height after the bounce");
+                Assert.AreEqual(1f, Mathf.Abs(target.Root.localScale.x), 1e-4f);
+                Assert.IsTrue(target.Reacting, "still reacting (the look holds 0.6 s past the leave)");
+            }
             if (target.Mouth != null && target.Def.swaps.ContainsKey("mouth")) Assert.AreEqual(target.Def.react.swap, target.Mouth.sprite.name, "the react face");
             // v3.1 (U-108): the react swap on its replaced slot's own renderer and every react.also part (the snoozle: head_open, leaves_up).
             foreach (var name in target.SlotNames)

@@ -263,7 +263,7 @@ namespace Meridian.Tests
                 yield return Measure("Earth C0 (cartoon)", side.sideCamera, BudgetMonitor.DrawCallsSide, (a, b) => { gc = a; r = b; });
                 Judge("Earth C0 (cartoon)", gc, r, BudgetMonitor.DrawCallsSide);
                 long ws = r.workingSetMB > 0 ? r.workingSetMB : r.systemMemoryMB;
-                Row("Working set · Earth C0 (v4, D-089)", "< 2.0 GB (warn 1.7)", $"{ws} MB (Editor process: an upper bound of the build){(ws >= 1741 && ws < 2048 ? ", above the 1.7 GB warning line" : "")}", ws < 2048);
+                Info("Working set · Earth C0 (v4, D-089)", "< 2.0 GB (warn 1.7); the dev-build probe rows decide (D-114 / D-116, P-28 / D-120)", $"{ws} MB (Editor process: an upper bound of the build){(ws >= 1741 && ws < 2048 ? ", above the 1.7 GB warning line" : "")}", ws < 2048 ? "info (within)" : "info (over; the dev-build row decides)");
                 int animated = 0;
                 foreach (var a in UnityEngine.Object.FindObjectsByType<Animator>(FindObjectsInactive.Exclude)) if (a.isActiveAndEnabled && a.runtimeAnimatorController != null) animated++;
                 var flora = side.cartoon.Flora;

@@ -8,6 +8,8 @@ namespace Meridian.UI
     /// <summary>Builds the HUD/menu pieces in code with the theme (no prefabs to keep in sync).</summary>
     public static class UiKit
     {
+        /// <summary>U-104: Patrick Hand's x-height is small; HUD and menu strings draw this much larger than their JetBrains Mono sizes (the 1080p capture).</summary>
+        public const float HudFaceScale = 1.35f;
         public static Canvas Canvas(Transform parent, string name, int sortingOrder)
         {
             var go = new GameObject(name);
@@ -48,7 +50,10 @@ namespace Meridian.UI
         {
             var t = Rect(parent, name, anchor, pos, size).gameObject.AddComponent<Text>();
             var theme = UiTheme.Active;
-            t.font = bold ? theme.Bold : theme.Regular;
+            // U-104 (D-090): Patrick Hand carries every HUD, panel and menu string (bold is synthetic on the one face); JetBrains Mono until the theme has it.
+            t.font = theme.hudTtf != null ? theme.HudFace : bold ? theme.Bold : theme.Regular;
+            t.fontStyle = bold && theme.hudTtf != null ? FontStyle.Bold : FontStyle.Normal;
+            if (theme.hudTtf != null) fontSize = Mathf.RoundToInt(fontSize * HudFaceScale); // the handwritten face sits a third smaller than the monospace at the same size
             t.fontSize = fontSize;
             t.alignment = align;
             t.color = color ?? theme.text;

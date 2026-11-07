@@ -66,6 +66,7 @@ namespace Meridian.Tests
         }
 
         [UnityTest]
+        [Ignore("D-124: the S1 seven-slot stage was cancelled by D-086; Earth runs the cartoon ParallaxLayers path since C0")]
         public IEnumerator EveryEarthRegionResolvesSevenSlotsAtTheirDepths()
         {
             yield return Boot();

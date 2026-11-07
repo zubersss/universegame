@@ -1771,20 +1771,25 @@ namespace Meridian.Tests
                 yield return Shot("1_ground");
                 Assert.AreEqual(0f, sky.StarAlpha, 1e-4f, "no stars on the ground");
 
-                // 2. Half-way: straight up under full thrust.
+                // 2. Low in the climb (~28 m, LEAD cycle 254): layer0's top edge is still in the frame, the strip continues it.
                 ship.intent = new Meridian.Ship.ShipSideIntent { thrust = 1f };
                 timeout = Time.realtimeSinceStartup + 120f;
+                float low = ship.Body.position.y + 28f;
+                while (ship.Body.position.y < low && Time.realtimeSinceStartup < timeout) yield return new WaitForFixedUpdate();
+                yield return Shot("2_climb_28m");
+                Assert.IsTrue(sky.Textured, "the strip continues layer0's own top band at the join (no flat band)");
+                // 3. Half-way: straight up under full thrust.
                 while (ship.Body.position.y < half && Time.realtimeSinceStartup < timeout) yield return new WaitForFixedUpdate();
-                yield return Shot("2_halfway");
+                yield return Shot("3_halfway");
                 Assert.Less(Meridian.View2D.ClimbSkyMath.Luma(sky.FrameTop), Meridian.View2D.ClimbSkyMath.Luma(sky.FrameBottom), "darker at the top of the frame half-way up");
 
-                // 3. Just under the Escape Line (the next metres launch).
+                // 4. Just under the Escape Line (the next metres launch).
                 while (ship.Body.position.y < line - 2f && Time.realtimeSinceStartup < timeout) yield return new WaitForFixedUpdate();
                 ship.intent = default;
                 Assert.Less(ship.Body.position.y, line, "still under the Escape Line");
                 float until = Time.realtimeSinceStartup + 10f;
                 while (!sky.StarsReady && Time.realtimeSinceStartup < until) yield return null;
-                yield return Shot("3_escape_line");
+                yield return Shot("4_escape_line");
                 Assert.IsTrue(sky.StarsReady && sky.Stars.enabled, "stars visible at the Escape Line");
                 Assert.Greater(sky.StarAlpha, 0.4f, "the starfield near its full alpha at the line");
                 side.dayNight.Override = null;
@@ -1792,6 +1797,234 @@ namespace Meridian.Tests
             }
             finally
             {
+                Meridian.View2D.CartoonStage.Enabled = false;
+            }
+        }
+
+        /// <summary>
+        /// U-104: the cartoon HUD at 1080p → coordination/reports/unity/u104/: on foot beside the ship (the three dials, the
+        /// suit rows, the markers, every string in Patrick Hand) and aboard just under the Escape Line (the ship rows, the
+        /// painted dotted line with its lettered sign). The overlay canvases draw through the side camera for the shots.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator CaptureU104Hud()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            Meridian.View2D.CartoonStage.Enabled = true;
+            var canvases = new System.Collections.Generic.List<Canvas>();
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false;
+                var ship = side.ship;
+                var legs = ship.GetComponent<Meridian.Ship.ShipLegsView>();
+                var hud = side.sideHud;
+                var band = side.escapeBand;
+                timeout = Time.realtimeSinceStartup + 20f;
+                while ((legs == null || !legs.Ready || !hud.GaugesReady || !band.UsesArt || band.Sign == null || band.Sign.sprite == null) && Time.realtimeSinceStartup < timeout) yield return null;
+                TestContext.Out.WriteLine($"[MERIDIAN] u104 art: gauges {hud.GaugesReady}, line {band.UsesArt}, sign {(band.Sign != null && band.Sign.sprite != null)}, ship {(legs != null && legs.Ready)}");
+                foreach (var c in side.creatures.All) if (c.Alive) side.creatures.Despawn(c);
+                var cam = side.sideCamera;
+                var dir = "coordination/reports/unity/u104";
+                Directory.CreateDirectory(dir);
+                // A camera render never includes a screen-space overlay canvas: draw the HUD canvases through the side camera.
+                foreach (var c in side.GetComponentsInChildren<Canvas>(true))
+                    if (c.renderMode == RenderMode.ScreenSpaceOverlay) { canvases.Add(c); c.renderMode = RenderMode.ScreenSpaceCamera; c.worldCamera = cam; c.planeDistance = 1f; }
+
+                IEnumerator Shot(string label)
+                {
+                    yield return null;
+                    yield return Save(cam, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u104 {label}: suit {hud.SuitGauge.Motion.Shown:F2}, o2 {hud.OxygenGauge.Motion.Shown:F2}, g {hud.GravityGauge.Motion.Shown:F2} (dials {hud.SuitGauge.Size:F0} px), sign y {band.SignY:F1} lettered '{band.SignLettering}', face {hud.HealthText.font.name}, ship rows {(side.shipHud != null && side.shipHud.VerticalSpeed.gameObject.activeInHierarchy ? $"V/S {side.shipHud.VerticalSpeed.text} T/W {side.shipHud.ThrustToWeight.text} AGL {side.shipHud.Altitude.text} TILT {side.shipHud.Tilt.text}" : "hidden (on foot)")}");
+                }
+
+                // 1. On foot beside the ship: the dials and the suit rows.
+                float tickUntil = Time.time + 0.3f;
+                while (Time.time < tickUntil) yield return null;
+                yield return Shot("hud_1080p");
+
+                // 2. Aboard, just under the Escape Line: the ship rows, the painted line and its sign.
+                ship.GetComponent<Meridian.Ship.ShipBoarding>().ForceAboard();
+                ship.externalInput = true;
+                ship.intent = new Meridian.Ship.ShipSideIntent { thrust = 1f };
+                float line = side.Config.EscapeLineY;
+                timeout = Time.realtimeSinceStartup + 120f;
+                while (ship.Body.position.y < line - 75f && Time.realtimeSinceStartup < timeout) yield return new WaitForFixedUpdate();
+                ship.intent = default; // coast: at T/W 1.22 the climb's 36 m/s bleeds off in ~67 m, so the apex sits a few metres under the line (a 0.3 s batch frame under thrust would climb 12 m past the shot)
+                while (ship.Body.linearVelocity.y > 4f && ship.Body.position.y < line - 3f && Time.realtimeSinceStartup < timeout) yield return new WaitForFixedUpdate();
+                yield return Shot("hud_escape_line");
+                Assert.Less(ship.Body.position.y, line, "still under the Escape Line");
+                side.dayNight.Override = null;
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                foreach (var c in canvases) if (c != null) { c.renderMode = RenderMode.ScreenSpaceOverlay; c.worldCamera = null; }
+                Meridian.View2D.CartoonStage.Enabled = false;
+            }
+        }
+
+        /// <summary>
+        /// U-106: the C1 flight strip. The whole loop under scripted input (pad → climb → Escape Line → Space → entry → descent →
+        /// touchdown), sampled into at most 40 stills of 320 × 180 that favour the moments (2 Hz within 2.5 s of a phase change,
+        /// one still every 2.5 s through the long climb and descent) and a 6 × 7 contact sheet, in
+        /// reports/unity/c1_&lt;date&gt;/flight_strip/ with stills.md naming each still's phase, time, height and speed.
+        /// </summary>
+        [UnityTest, Timeout(360000)]
+        public IEnumerator CaptureC1FlightStrip()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            Meridian.View2D.CartoonStage.Enabled = true;
+            const int Max = 40, Cols = 6, Rows = 7, W = 320, H = 180;
+            var sheet = new Texture2D(W * Cols, H * Rows, TextureFormat.RGB24, false);
+            var full = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);
+            var small = new RenderTexture(W, H, 0, RenderTextureFormat.ARGB32);
+            var still = new Texture2D(W, H, TextureFormat.RGB24, false);
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var state = Meridian.Core.GameState.Instance;
+                var transitions = UnityEngine.Object.FindAnyObjectByType<Meridian.Transitions.TransitionDirector>();
+                var side = director.PlanetSide;
+                side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false;
+                var ship = side.ship;
+                var legs = ship.GetComponent<Meridian.Ship.ShipLegsView>();
+                timeout = Time.realtimeSinceStartup + 15f;
+                while ((legs == null || !legs.Ready) && Time.realtimeSinceStartup < timeout) yield return null;
+                foreach (var c in side.creatures.All) if (c.Alive) side.creatures.Despawn(c);
+                var space = director.Space.GetComponentInChildren<Meridian.Space.SpaceShip>(true);
+                space.externalInput = true; space.intent = default;
+                ship.GetComponent<Meridian.Ship.ShipBoarding>().ForceAboard();
+                ship.externalInput = true; ship.intent = default;
+                for (int i = 0; i < 30; i++) yield return null;
+
+                var dir = $"coordination/reports/unity/c1_{DateTime.Now:yyyy-MM-dd}/flight_strip";
+                Directory.CreateDirectory(dir);
+                var lines = new System.Collections.Generic.List<string> { "# C1 flight strip (U-106)", "", "| still | t (s) | phase |", "|---|---|---|" };
+                int count = 0;
+                float t0 = Time.time, lastStill = -10f, phaseAt = Time.time;
+                string phase = "pad";
+                float datum = side.Config.datumY, line = side.Config.EscapeLineY;
+
+                Camera Cam() => state.view == Meridian.Core.ViewMode.Space
+                    ? director.Space.GetComponentInChildren<Camera>()
+                    : director.PlanetSide != null ? director.PlanetSide.sideCamera : null;
+                void Still(string label)
+                {
+                    if (count >= Max) return;
+                    var cam = Cam();
+                    if (cam == null) return;
+                    cam.targetTexture = full; cam.Render(); cam.targetTexture = null;
+                    Graphics.Blit(full, small);
+                    var prev = RenderTexture.active;
+                    RenderTexture.active = small;
+                    still.ReadPixels(new Rect(0, 0, W, H), 0, 0); still.Apply();
+                    int cx = count % Cols, cy = Rows - 1 - count / Cols;
+                    sheet.SetPixels(cx * W, cy * H, W, H, still.GetPixels());
+                    RenderTexture.active = prev;
+                    File.WriteAllBytes($"{dir}/still_{count:D2}.png", still.EncodeToPNG());
+                    lines.Add($"| {count:D2} | {Time.time - t0:F1} | {label} |");
+                    count++;
+                    lastStill = Time.time;
+                }
+                void SetPhase(string p) { if (p != phase) { phase = p; phaseAt = Time.time; } }
+                bool Due() => Time.time - lastStill >= (Time.time - phaseAt < 2.5f ? 0.5f : 2.5f) - 1e-3f;
+
+                // 1. On the pad, aboard.
+                Still("pad, aboard, drawn Pilgrim at rest");
+                while (Time.time - lastStill < 0.5f) yield return null;
+                Still("pad");
+
+                // 2. The climb under held thrust, through the Escape Line and the launch iris into Space.
+                ship.intent = new Meridian.Ship.ShipSideIntent { thrust = 1f };
+                SetPhase("climb");
+                float guard = Time.time + 150f;
+                while (!(state.view == Meridian.Core.ViewMode.Space && !transitions.Busy) && Time.time < guard)
+                {
+                    yield return null;
+                    var s = director.PlanetSide != null ? director.PlanetSide.ship : null;
+                    if (transitions.Busy) SetPhase("launch (iris)");
+                    else if (state.view != Meridian.Core.ViewMode.Space && s != null && s.Body.position.y > line - 40f) SetPhase("escape line");
+                    if (Due()) Still(s != null && state.view != Meridian.Core.ViewMode.Space ? $"{phase}: alt {s.Body.position.y - datum:F0} m, v {s.Body.linearVelocity.y:F0} m/s, tilt {s.Tilt:F0}°" : phase);
+                }
+                Assert.AreEqual(Meridian.Core.ViewMode.Space, state.view, "launched through the Escape Line");
+
+                // 3. Space: thrust on for a second past the invulnerability, then the entry back to Earth.
+                SetPhase("space");
+                space.intent = new Meridian.Space.ShipIntent { thrust = 1f };
+                for (int i = 0; i < 70; i++)
+                {
+                    yield return new WaitForFixedUpdate();
+                    if (Due()) Still($"space: v {space.Velocity.magnitude:F0} u/s, well {space.InWellOf ?? "none"}");
+                }
+                var earth = space.world.Find("earth").Value;
+                transitions.BeginEntry(earth);
+                SetPhase("entry (iris)");
+                Meridian.Ship.SideShip landing = null;
+                guard = Time.time + 30f;
+                while (transitions.Busy && Time.time < guard)
+                {
+                    yield return null;
+                    var ps = director.PlanetSide;
+                    if (landing == null && ps != null && ps.gameObject.activeInHierarchy && ps.ship != null) { landing = ps.ship; landing.externalInput = true; landing.intent = new Meridian.Ship.ShipSideIntent { thrust = 1f }; }
+                    if (Due()) Still(phase);
+                }
+                Assert.NotNull(landing, "the side ship after the entry");
+                space.intent = default;
+
+                // 4. The descent on FlightPlayTests' key profile (thrust while falling faster than √(2·1.2·AGL), 2.5–15 m/s) to a clean touchdown.
+                SetPhase("descent");
+                guard = Time.time + 150f;
+                while (!landing.Grounded && Time.time < guard)
+                {
+                    float alt = landing.AltitudeAboveGround;
+                    float target = -Mathf.Clamp(Mathf.Sqrt(2f * 1.2f * Mathf.Max(0f, alt)), 2.5f, 15f);
+                    landing.intent = new Meridian.Ship.ShipSideIntent { thrust = landing.Body.linearVelocity.y < target ? 1f : 0f };
+                    yield return new WaitForFixedUpdate();
+                    if (alt < 25f) SetPhase("touchdown");
+                    if (Due()) Still($"{phase}: AGL {alt:F0} m, v {landing.Body.linearVelocity.y:F1} m/s, tilt {landing.Tilt:F0}°");
+                }
+                landing.intent = default;
+                yield return null;
+                Still($"down: {landing.LastTouchdownSpeed:F1} m/s, legs flexed");
+                Assert.IsTrue(landing.Grounded, "touched down");
+                Assert.LessOrEqual(landing.LastTouchdownSpeed, Meridian.Ship.SideShip.CleanTouchdown, "a clean touchdown on the profile");
+
+                sheet.Apply();
+                File.WriteAllBytes($"{dir}/contact_sheet.png", sheet.EncodeToPNG());
+                Directory.CreateDirectory("logs");
+                File.WriteAllBytes($"logs/capture_{name}_contact_sheet.png", sheet.EncodeToPNG());
+                lines.Add(""); lines.Add($"{count} stills over {Time.time - t0:F1} s; launch {transitions.LastLaunchSeconds:F2} s, entry {transitions.LastEntrySeconds:F2} s, touchdown {landing.LastTouchdownSpeed:F2} m/s.");
+                File.WriteAllLines($"{dir}/stills.md", lines);
+                TestContext.Out.WriteLine($"[MERIDIAN] CAPTURE OK: logs/capture_{name}_contact_sheet.png ({count} stills in {dir}; {Time.time - t0:F1} s of flight; launch {transitions.LastLaunchSeconds:F2} s, entry {transitions.LastEntrySeconds:F2} s, touchdown {landing.LastTouchdownSpeed:F2} m/s)");
+                if (director.PlanetSide != null && director.PlanetSide.dayNight != null) director.PlanetSide.dayNight.Override = null;
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                UnityEngine.Object.Destroy(sheet); UnityEngine.Object.Destroy(still); full.Release(); small.Release();
                 Meridian.View2D.CartoonStage.Enabled = false;
             }
         }

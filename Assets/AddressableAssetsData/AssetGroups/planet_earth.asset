@@ -90,8 +90,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2cdc0623f790a96498dbcdd6841cdb3d
+    m_Address: creatures/earth/shark/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2f262404424c1804bb951474634c1148
     m_Address: flora/earth/rigset/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3192d6888bd44e4408dc26d9557b14ca
+    m_Address: creatures/earth/pike/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -190,6 +200,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 870497325de772c4c9a8d4f5030c41d7
+    m_Address: creatures/earth/shark
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 909800c90eb027b47b63ebf49071d6cf
     m_Address: backgrounds/earth/forest/layer2
     m_ReadOnly: 0
@@ -210,6 +225,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9a8e4ad6f768bbb4ca066213c87f3bc0
+    m_Address: creatures/earth/squid/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a2c7605046078c846b7764e16c5c5a2c
+    m_Address: terrain/earth/ground_strip_sand
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a3468a34c27e26441a47c4f0271773cf
     m_Address: terrain/earth/ground_strip
     m_ReadOnly: 0
@@ -217,6 +242,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a7fbf5f2adf441042a4e7f67a2ac4e9b
     m_Address: props/earth/launch_tower_ruin
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a9ea9fa0951184140841bb9abcbed650
+    m_Address: creatures/earth/pike
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -277,6 +307,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f28d79f8716ccb74cb0df6fa44a37173
     m_Address: terrain/earth/grass
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f34315fbdf8462c4984ca345f6d98664
+    m_Address: creatures/earth/squid
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

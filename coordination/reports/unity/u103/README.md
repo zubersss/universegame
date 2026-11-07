@@ -11,3 +11,5 @@ Shot by `tools/unity_capture.ps1 -Test CaptureU103Ship -Name u103_ship` (log uni
 | `space_6_pilgrim.png` | the top-down Pilgrim from the rig's `pilgrim_top` (nose right, fin_wobble) parked outside Earth's well, thrusting | `space pilgrim: rig fit 0.299, playing fin_wobble` |
 
 Note for U-109's review: the flat strip above layer0's grainy top edge in `2_tilted_climb.png` is the first ClimbSky (a flat colour from the measured top row); it is being replaced by layer0's own top metre continued upward and shaded, and `u109/` will be re-shot.
+
+Re-shot 2026-11-07 03:56–03:58 under U-117 (unity_capture_20261107_035637.log): space_1 … space_6 with the discs on a FullRect sprite mesh (no texel stairs on the limb at 10× in space_6_pilgrim) and the starfield's tile period growing with the zoom (no visible repeat across the far frame in space_1_saturn). The 1-px line across the sky in 2_tilted_climb.png predates the wrap-in-y import fix (u109/README.md); u109/2_climb_28m.png is the same altitude after it.

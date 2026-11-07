@@ -32,6 +32,10 @@ namespace Meridian.Flora
         /// <summary>The swap cycle's sequence index this plant shows (-1: no cycle). Tests read it; FloraRigs writes it.</summary>
         public int CycleIndex = -1;
         internal float reactUntil, blinkAt, blinkUntil, nextCheapPose;
+        /// <summary>U-108: Time.time the last react began (the turn_bounce squash runs BounceSeconds from it); far in the past before the first.</summary>
+        internal float bounceAt = -10f;
+        /// <summary>U-108: the deepest squash applied since the last react began (tests: a frame of any length sees the pop).</summary>
+        public float BouncePeak { get; internal set; }
         internal int cheapPose;
         // Swap cycle (idle.swap_cycle), resolved at Spawn: the renderer it drives, its sprites, its beat counts, the beat clock.
         internal SpriteRenderer cycleRenderer;
@@ -76,12 +80,21 @@ namespace Meridian.Flora
     public sealed class FloraRigs : MonoBehaviour
     {
         /// <summary>Seconds added to the swap-cycle clock (0 in the game). Tests advance it to step a cycle deterministically instead of waiting out beats.</summary>
-        [System.NonSerialized] public float CycleClockOffset;
+        [System.NonSerialized] internal float CycleClockOffset; // U-108: tests only (InternalsVisibleTo), never a tuning knob
         float CycleClock => Time.time + CycleClockOffset;
         public const int FullRateCap = 40, CheapBand = 160;
         /// <summary>Animated objects that are not flora (the surveyor, critters): the flora's full-rate share is FullRateCap minus this (Bible §9.6: ≤ 40 on screen in all).</summary>
         public int Reserved;
         public const float CheapRateHz = 4f, RankEvery = 0.25f, ReactSeconds = 0.6f, BlinkSeconds = 0.12f;
+        /// <summary>U-108 (Bible §9.3 v4): a `turn_bounce` react squashes the plant root for BounceSeconds, BounceAmount deep, area-preserving.</summary>
+        public const float BounceSeconds = 0.15f, BounceAmount = 0.12f;
+        public const string TurnBounce = "turn_bounce";
+
+        /// <summary>The squash depth `age` seconds into a bounce: the full BounceAmount pop on the react's first frame, easing back to 0 by BounceSeconds (a quarter cosine), 0 outside it. Pure.</summary>
+        public static float BounceK(float age) => age < 0f || age >= BounceSeconds ? 0f : BounceAmount * Mathf.Cos(age / BounceSeconds * Mathf.PI * 0.5f);
+
+        /// <summary>The root's local scale for a facing (±1) and a bounce depth k: squashed down by k, widened by k (area kept).</summary>
+        public static Vector3 BounceScale(int facing, float k) => new Vector3(facing * (1f + k), 1f - k, 1f);
         public const int SortingOrder = 3;
         public const string JsonSuffix = "/json", AnimatorSuffix = "/animator";
 
@@ -357,6 +370,7 @@ namespace Meridian.Flora
                 if (reacting != p.Reacting)
                 {
                     p.Reacting = reacting;
+                    if (reacting && p.Def.react.action == TurnBounce) { p.bounceAt = now; p.BouncePeak = 0f; } // U-108: the bounce starts on the react's rising edge
                     if (p.Mouth != null && p.Def.swaps.TryGetValue("mouth", out var mouths) && mouths.Length > 0)
                     {
                         string want = reacting && !string.IsNullOrEmpty(p.Def.react.swap) ? p.Def.react.swap : mouths[0];
@@ -370,6 +384,14 @@ namespace Meridian.Flora
                         if (reactSprite == null) continue;
                         p.SlotRenderers[i].sprite = reacting ? reactSprite : i == p.cycleSlot ? p.cycleSprites[p.CycleIndex] : p.slotRest[i];
                     }
+                }
+                // U-108: the turn_bounce squash on the plant root (the facing sign rides along; the bones' sway is untouched).
+                if (now - p.bounceAt <= BounceSeconds + dt)
+                {
+                    float k = BounceK(now - p.bounceAt);
+                    if (k > p.BouncePeak) p.BouncePeak = k;
+                    var want = BounceScale(p.Facing, k);
+                    if (p.Root.localScale != want) p.Root.localScale = want;
                 }
                 // Blink.
                 if (p.Eyes != null && p.Def.swaps.TryGetValue("eyes", out var eyes) && eyes.Length > 1)

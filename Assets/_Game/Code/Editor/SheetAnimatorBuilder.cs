@@ -45,32 +45,24 @@ namespace Meridian.EditorTools
             foreach (var stale in Directory.GetFiles(Folder(key), "*.anim")) AssetDatabase.DeleteAsset(stale.Replace('\\', '/')); // clips of a previous sheet (no address: safe)
             var machine = controller.layers[0].stateMachine;
 
-            var binding = EditorCurveBinding.PPtrCurve("", typeof(SpriteRenderer), "m_Sprite");
-            float step = 1f / Meridian.EditorTools.ArtRules.V3Fps;
+            var have = new System.Collections.Generic.HashSet<string>();
             foreach (var c in sheet.animations)
+                if (have.Add(c.name)) AddClipState(machine, key, variant, c, sprites);
+            // U-115 (D-121): a `side` sheet's controller also takes the clips of its sibling `side_b` (B-134: dig, build, surprise,
+            // jetpack, climb_in; a stand-in placeholder until it lands). Those clips bind side_b's drawings, so the one SpriteRenderer
+            // swaps texture with the clip and SurveyorAnim.ResolveOn finds the five as real states. A name `side` already has wins.
+            if (variant == "side")
             {
-                // One key per drawing; Unity holds a sprite curve's last key for one more frame (1/12 s), so a clip of n lasts n/12 s.
-                var keys = new ObjectReferenceKeyframe[c.length];
-                for (int i = 0; i < c.length; i++)
+                string bKey = key + "_b";
+                string bColor = File.Exists(ArtImporter.ArtColorPath(bKey)) ? ArtImporter.ArtColorPath(bKey) : ArtImporter.PlaceholderColorPath(bKey);
+                var bSheet = File.Exists(bColor) ? ArtImporter.SheetFor(bColor, bKey) : null;
+                if (bSheet != null && bSheet.IsV3 && bSheet.IsSheet && bSheet.animations != null)
                 {
-                    int frame = c.start + i;
-                    sprites.TryGetValue($"{variant}_{frame}", out var sprite);
-                    keys[i] = new ObjectReferenceKeyframe { time = i * step, value = sprite };
+                    var bSprites = AssetDatabase.LoadAllAssetsAtPath(bColor).OfType<Sprite>().GroupBy(sp => sp.name).ToDictionary(g => g.Key, g => g.First());
+                    if (bSprites.Count > 0)
+                        foreach (var c in bSheet.animations)
+                            if (have.Add(c.name)) AddClipState(machine, key, variant + "_b", c, bSprites);
                 }
-                var clip = new AnimationClip { name = c.name, frameRate = Meridian.EditorTools.ArtRules.V3Fps };
-                AnimationUtility.SetObjectReferenceCurve(clip, binding, keys);
-                var events = EventsFor(c.name, c.length); // U-105: eye-pop and smear hooks as animation events
-                if (events.Length > 0)
-                    AnimationUtility.SetAnimationEvents(clip, events.Select(e => new AnimationEvent { functionName = e.function, time = e.frame * step }).ToArray());
-                var settings = AnimationUtility.GetAnimationClipSettings(clip);
-                settings.loopTime = c.loop;
-                AnimationUtility.SetAnimationClipSettings(clip, settings);
-                var clipPath = ClipPath(key, c.name);
-                if (File.Exists(clipPath)) AssetDatabase.DeleteAsset(clipPath);
-                AssetDatabase.CreateAsset(clip, clipPath);
-                var state = machine.AddState(c.name);
-                state.motion = clip;
-                if (c.name == "idle") machine.defaultState = state;
             }
             EditorUtility.SetDirty(controller);
             AssetDatabase.SaveAssets();
@@ -83,7 +75,43 @@ namespace Meridian.EditorTools
                 if (entry.address != address) entry.SetAddress(address, true);
             }
             AssetDatabase.SaveAssets(); // the address must reach disk before the Editor quits (an -ExecuteMethod run)
+            // U-115: when the second sheet (re)imports, the `side` controller that carries its clips is rebuilt with the new drawings.
+            if (variant == "side_b")
+            {
+                string sideKey = key.Substring(0, key.Length - 2);
+                string sideColor = File.Exists(ArtImporter.ArtColorPath(sideKey)) ? ArtImporter.ArtColorPath(sideKey) : ArtImporter.PlaceholderColorPath(sideKey);
+                if (File.Exists(sideColor)) BuildIfV3(sideColor, sideKey);
+            }
             return controller;
+        }
+
+        /// <summary>One clip state: one key per drawing (`&lt;variant&gt;_&lt;frame&gt;` of `sprites`), the U-105 events, loop per the json; idle is the default state.</summary>
+        static void AddClipState(AnimatorStateMachine machine, string key, string variant, ArtImporter.SheetClip c, System.Collections.Generic.Dictionary<string, Sprite> sprites)
+        {
+            var binding = EditorCurveBinding.PPtrCurve("", typeof(SpriteRenderer), "m_Sprite");
+            float step = 1f / Meridian.EditorTools.ArtRules.V3Fps;
+            // One key per drawing; Unity holds a sprite curve's last key for one more frame (1/12 s), so a clip of n lasts n/12 s.
+            var keys = new ObjectReferenceKeyframe[c.length];
+            for (int i = 0; i < c.length; i++)
+            {
+                int frame = c.start + i;
+                sprites.TryGetValue($"{variant}_{frame}", out var sprite);
+                keys[i] = new ObjectReferenceKeyframe { time = i * step, value = sprite };
+            }
+            var clip = new AnimationClip { name = c.name, frameRate = Meridian.EditorTools.ArtRules.V3Fps };
+            AnimationUtility.SetObjectReferenceCurve(clip, binding, keys);
+            var events = EventsFor(c.name, c.length); // U-105: eye-pop and smear hooks as animation events
+            if (events.Length > 0)
+                AnimationUtility.SetAnimationEvents(clip, events.Select(e => new AnimationEvent { functionName = e.function, time = e.frame * step }).ToArray());
+            var settings = AnimationUtility.GetAnimationClipSettings(clip);
+            settings.loopTime = c.loop;
+            AnimationUtility.SetAnimationClipSettings(clip, settings);
+            var clipPath = ClipPath(key, c.name);
+            if (File.Exists(clipPath)) AssetDatabase.DeleteAsset(clipPath);
+            AssetDatabase.CreateAsset(clip, clipPath);
+            var state = machine.AddState(c.name);
+            state.motion = clip;
+            if (c.name == "idle") machine.defaultState = state;
         }
 
         /// <summary>

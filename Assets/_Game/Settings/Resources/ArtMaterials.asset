@@ -802,6 +802,29 @@ MonoBehaviour:
       start: 42
       length: 12
       loop: 1
+  - key: creatures/earth/squid
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 12
+      loop: 1
+    - name: swim
+      start: 12
+      length: 12
+      loop: 1
+    - name: react
+      start: 24
+      length: 10
+      loop: 0
+    - name: bump
+      start: 34
+      length: 10
+      loop: 0
+    - name: flee
+      start: 44
+      length: 12
+      loop: 1
   - key: creatures/earth/stag
     fps: 12
     clips:

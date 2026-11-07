@@ -139,6 +139,32 @@ namespace Meridian.Tests
             Assert.AreEqual(ShipHud.TwrState.Ok, shipHud.State, "T/W 1.22 is not amber");
             Assert.AreNotEqual(ShipHud.Amber, shipHud.ThrustToWeight.color);
             Assert.IsFalse(shipHud.Warning.enabled);
+
+            // U-104 (B-121, D-090, D-103): the dials track their meters at the 12 Hz step, the painted Escape Line carries its
+            // lettered sign on the line, the ship block shows the four rows, every HUD string draws in the HUD face.
+            float until = Time.realtimeSinceStartup + 15f;
+            while (!hud.GaugesReady && Time.realtimeSinceStartup < until) yield return null;
+            Assert.IsTrue(hud.GaugesReady, "ui/hud/gauges armed the three dials");
+            float tickUntil = Time.time + 0.3f;
+            while (Time.time < tickUntil) yield return null; // past a 12 Hz tick
+            Assert.AreEqual(0.82f, hud.SuitGauge.Motion.Shown, 0.01f, "suit power dial within 1 % of its meter");
+            Assert.AreEqual(1f, hud.OxygenGauge.Motion.Shown, 0.01f, "oxygen dial full (placeholder meter)");
+            Assert.AreEqual(1f / SideHud.GravityFullScale, hud.GravityGauge.Motion.Shown, 0.01f, "Earth: 1 g on the 3 g dial");
+            float z = hud.SuitGauge.Needle.rectTransform.localEulerAngles.z; if (z > 180f) z -= 360f;
+            Assert.AreEqual(hud.SuitGauge.Spec.Angle(0.82f), z, GaugeNeedle.WobbleDeg + 0.5f, "the needle on its sweep (a wobble allowed)");
+            Assert.IsFalse(hud.HealthFill.transform.parent.gameObject.activeSelf, "the bar stepped aside for the dial");
+            Assert.NotNull(UiTheme.Active.hudTtf, "Patrick Hand in the theme (D-090)");
+            StringAssert.Contains("PatrickHand", hud.HealthText.font.name, "HUD numerals in the HUD face");
+            var band = side.escapeBand;
+            until = Time.realtimeSinceStartup + 15f;
+            while (!(band.UsesArt && band.Sign != null && band.Sign.sprite != null) && Time.realtimeSinceStartup < until) yield return null;
+            Assert.IsTrue(band.UsesArt, "ui/hud/escape_line drawn");
+            yield return null;
+            Assert.AreEqual((float)side.Config.EscapeLineY, band.SignY, 0.01f, "the sign stands on the Escape Line");
+            Assert.AreEqual(EscapeLineBand.Lettering, band.SignLettering, "lettered ESCAPE LINE at runtime");
+            Assert.IsFalse(band.band.enabled, "the old band is off");
+            Assert.AreEqual("0", shipHud.Tilt.text, "level on the pad");
+            Assert.IsTrue(int.TryParse(shipHud.Altitude.text, out int agl) && agl >= 0 && agl <= 3, $"skids on the pad: AGL {shipHud.Altitude.text}");
             LogAssert.NoUnexpectedReceived();
         }
 

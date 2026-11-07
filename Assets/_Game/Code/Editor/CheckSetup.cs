@@ -18,10 +18,13 @@ namespace Meridian.EditorTools
             int sidecars = ArtImporter.AddressPlanetSidecars();
             int sheets = SheetAnimatorBuilder.RebuildAll();
             int rigs = RigSetBuilder.RebuildAll();
+            int discs = ArtImporter.ReimportSpaceDiscs(); // U-117: the discs' full-rect mesh reaches the metas
+            int sceneLayers = ArtImporter.ReimportSceneLayers(); // U-109: the side-scene layers clamp in y (the climb frames' thin line)
+            if (sceneLayers > 0) Debug.Log($"[CheckSetup] re-imported {sceneLayers} scene layer(s): wrap-in-y per U-109.");
             var theme = AssetDatabase.LoadAssetAtPath<Meridian.UI.UiTheme>(SceneAuthoring.UiThemePath);
             if (theme != null) { FontAuthoring.EnsureHudFonts(theme); EditorUtility.SetDirty(theme); } // U-104 (D-090) fonts
             AssetDatabase.SaveAssets();
-            Debug.Log($"[MERIDIAN] CheckSetup: {sidecars} planet sidecars, {sheets} sheet animators, {rigs} rig sets.");
+            Debug.Log($"[MERIDIAN] CheckSetup: {sidecars} planet sidecars, {sheets} sheet animators, {rigs} rig sets, {discs} space discs re-imported.");
         }
     }
 }

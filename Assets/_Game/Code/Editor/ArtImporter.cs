@@ -284,6 +284,10 @@ namespace Meridian.EditorTools
             ti.filterMode = FilterMode.Bilinear;
             bool tiles = ArtRules.IsOverlayKey(key) || ArtRules.SceneKeyOf(key) != null || (sheet != null && sheet.tile);
             ti.wrapMode = tiles ? TextureWrapMode.Repeat : TextureWrapMode.Clamp;
+            // U-109 (the climb frames' thin line): a side-scene layer tiles in x only. Repeat in y let its top texel row bilinear-blend with
+            // its bottom row (ground colour) along the sprite's top edge: a 1-px dark line across the sky wherever a hills layer ends.
+            // The starfield (tile_y) keeps both axes for SpaceBackdrop's UV tiling.
+            if (ArtRules.SceneKeyOf(key) != null && !LayerTilesY(assetPath, key)) ti.wrapModeV = TextureWrapMode.Clamp;
             ti.maxTextureSize = ArtRules.MaxDimension;
             ti.textureCompression = TextureImporterCompression.CompressedHQ;
             ti.spritePixelsPerUnit = sheet != null && sheet.ppu > 0f ? sheet.ppu : ArtRules.V3PixelsPerUnit;
@@ -296,7 +300,11 @@ namespace Meridian.EditorTools
                 : ArtRules.SceneKeyOf(key) != null ? new Vector2(0.5f, 0f) : new Vector2(0.5f, 0.5f); // layers stand on their y_m line
             var s = new TextureImporterSettings();
             ti.ReadTextureSettings(s);
-            s.spriteMeshType = tiles ? SpriteMeshType.FullRect : SpriteMeshType.Tight;
+            // U-117: a space disc (planets/*, space_ppu) keeps the full rect: a tight mesh follows the alpha at texel steps, and at a 10x zoom
+            // (space_6_pilgrim) the limb read as point-filtered stairs although the texture is bilinear; the full rect lets the bilinear
+            // alpha edge draw. Frame sheets stay tight.
+            bool disc = sheet != null && sheet.space_ppu > 0f && key.StartsWith("planets/", StringComparison.Ordinal);
+            s.spriteMeshType = tiles || disc ? SpriteMeshType.FullRect : SpriteMeshType.Tight;
             s.spriteAlignment = (int)SpriteAlignment.Custom;
             s.spritePivot = pivot;
             s.spriteMode = multiple ? (int)SpriteImportMode.Multiple : (int)SpriteImportMode.Single;
@@ -510,6 +518,82 @@ namespace Meridian.EditorTools
         /// The frame layout for a color file: its .json, or for terrain the fixed 47-tile grid
         /// (128 px tiles, 8 columns, no gutters; contract §4).
         /// </summary>
+        /// <summary>
+        /// U-117: re-imports every planets/* disc colour map whose sprite mesh is still Tight (the rule changed to FullRect after their
+        /// first import); returns how many. Called by CheckSetup, so a rule change reaches the metas without a project-wide re-import.
+        /// </summary>
+        [Serializable] class SceneLayerEntry { public int n; public bool tile_y; }
+        [Serializable] class SceneLayoutJson { public SceneLayerEntry[] layers; }
+
+        /// <summary>U-109: whether a scene layer's entry in its scene json carries `tile_y` (the starfield's does; the side scenes' layers tile in x only).</summary>
+        public static bool LayerTilesY(string colorPath, string key)
+        {
+            var scene = ArtRules.SceneKeyOf(key);
+            if (scene == null) return false;
+            var leaf = key.Substring(key.LastIndexOf('/') + 1);
+            if (!leaf.StartsWith("layer", StringComparison.Ordinal) || !int.TryParse(leaf.Substring(5), out int n)) return false;
+            var jsonPath = ArtRules.Normalize(Path.GetDirectoryName(colorPath)) + "/" + scene.Substring(scene.LastIndexOf('/') + 1) + ".json";
+            if (!File.Exists(jsonPath)) return false;
+            try
+            {
+                var layout = JsonUtility.FromJson<SceneLayoutJson>(File.ReadAllText(jsonPath));
+                if (layout == null || layout.layers == null) return false;
+                foreach (var l in layout.layers) if (l != null && l.n == n) return l.tile_y;
+            }
+            catch (Exception) { }
+            return false;
+        }
+
+        /// <summary>U-109: re-imports the scene layers whose wrap-in-y disagrees with LayerTilesY (the rule reached the metas after their import). Returns the count.</summary>
+        public static int ReimportSceneLayers()
+        {
+            int count = 0;
+            foreach (var root in new[] { Active.art, Active.placeholders })
+            {
+                var dir = root + "backgrounds";
+                if (!Directory.Exists(dir)) continue;
+                foreach (var file in Directory.GetFiles(dir, "layer*_color.png", SearchOption.AllDirectories))
+                {
+                    var path = ArtRules.Normalize(file);
+                    var rel = path.Substring(root.Length);
+                    if (!ArtRules.TryParse(rel, out var key, out var map) || map != ArtMap.Color || ArtRules.SceneKeyOf(key) == null) continue;
+                    var ti = AssetImporter.GetAtPath(path) as TextureImporter;
+                    if (ti == null) continue;
+                    var want = LayerTilesY(path, key) ? TextureWrapMode.Repeat : TextureWrapMode.Clamp;
+                    if (ti.wrapModeV == want) continue;
+                    AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        public static int ReimportSpaceDiscs()
+        {
+            int count = 0;
+            foreach (var root in new[] { Active.art, Active.placeholders })
+            {
+                var dir = root + "planets";
+                if (!Directory.Exists(dir)) continue;
+                foreach (var file in Directory.GetFiles(dir, "*_color.png", SearchOption.AllDirectories))
+                {
+                    var path = file.Replace('\\', '/');
+                    var rel = path.Substring(root.Length);
+                    if (!ArtRules.TryParse(rel, out var key, out var map) || map != ArtMap.Color) continue;
+                    var sheet = SheetFor(path, key);
+                    if (sheet == null || sheet.space_ppu <= 0f) continue;
+                    var ti = AssetImporter.GetAtPath(path) as TextureImporter;
+                    if (ti == null) continue;
+                    var s = new TextureImporterSettings();
+                    ti.ReadTextureSettings(s);
+                    if (s.spriteMeshType == SpriteMeshType.FullRect && ti.filterMode == FilterMode.Bilinear) continue;
+                    AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+                    count++;
+                }
+            }
+            return count;
+        }
+
         public static SheetManifest SheetFor(string colorPath, string key)
         {
             var json = LoadSheet(ArtRules.SheetJsonPath(colorPath));

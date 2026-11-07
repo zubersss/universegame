@@ -250,7 +250,7 @@ namespace Meridian.EditorTools
             switch (clip)
             {
                 case "idle": min = 8; max = 12; return;
-                case "walk": case "run": case "fly": min = 12; max = 16; return;
+                case "walk": case "run": case "fly": case "swim": min = 12; max = 16; return; // D-119: a swimmer's travel clip is its walk
                 case "jump": case "land": min = 8; max = 10; return;
                 default: min = 1; max = 16; return;
             }

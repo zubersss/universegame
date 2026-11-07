@@ -1,8 +1,11 @@
 using System.IO;
+using System.Linq;
 using Meridian.Art;
 using Meridian.Player;
 using Meridian.Rendering;
 using NUnit.Framework;
+using UnityEditor;
+using UnityEditor.Animations;
 using UnityEngine;
 
 namespace Meridian.Tests
@@ -69,6 +72,45 @@ namespace Meridian.Tests
             TestContext.Out.WriteLine($"[MERIDIAN] U-105: {SurveyorAnim.AllClips.Length - standIns} real clips, {standIns} named stand-ins on {sheet.key} ({real.Count} drawings)");
             Assert.AreEqual(SurveyorAnim.LookCamera, SurveyorAnim.ResolveOn(SurveyorAnim.Surprise, real.Contains), "surprise stands in as look_camera until B-116's C1 clip");
             Assert.AreEqual(SurveyorAnim.Jump, SurveyorAnim.ResolveOn(SurveyorAnim.Jetpack, real.Contains));
+        }
+
+        [Test]
+        public void TheSecondSheetCarriesTheFiveC1ClipsIntoTheOneController()
+        {
+            // U-115 (D-121): side.json + side_b.json (B-134's art, else the stand-in under Placeholders) cover dig, build, surprise,
+            // jetpack and climb_in with no stand-in; the five share side's frame size, pivot and PPU; the side controller's states for
+            // them bind side_b's drawings (the renderer swaps texture with the clip).
+            var side = JsonUtility.FromJson<Meridian.EditorTools.ArtImporter.SheetManifest>(File.ReadAllText("Assets/_Game/Art/characters/surveyor/side.json"));
+            string bArt = "Assets/_Game/Art/characters/surveyor/side_b.json", bPlaceholder = "Assets/_Game/Placeholders/characters/surveyor/side_b.json";
+            string bPath = File.Exists(bArt) ? bArt : bPlaceholder;
+            Assert.IsTrue(File.Exists(bPath), "a side_b sheet (B-134 or the stand-in)");
+            var sideB = JsonUtility.FromJson<Meridian.EditorTools.ArtImporter.SheetManifest>(File.ReadAllText(bPath));
+            Assert.IsTrue(sideB.IsV3 && sideB.IsSheet, "side_b is a v3 frame sheet");
+            Assert.AreEqual(side.frame_width, sideB.frame_width); Assert.AreEqual(side.frame_height, sideB.frame_height);
+            Assert.AreEqual(side.ppu, sideB.ppu, 1e-4f); CollectionAssert.AreEqual(side.pivot, sideB.pivot, "the same pivot");
+            var names = new System.Collections.Generic.HashSet<string>(side.animations.Select(a => a.name));
+            foreach (var c in sideB.animations) Assert.IsTrue(names.Add(c.name), $"'{c.name}' is drawn on one sheet only (D-121)");
+            var five = new[] { SurveyorAnim.Dig, SurveyorAnim.Build, SurveyorAnim.Surprise, SurveyorAnim.Jetpack, SurveyorAnim.ClimbIn };
+            foreach (var clip in five) Assert.AreEqual(clip, SurveyorAnim.ResolveOn(clip, names.Contains), $"{clip} is a real clip with side_b");
+            int standIns = SurveyorAnim.AllClips.Count(clip => SurveyorAnim.ResolveOn(clip, names.Contains) != clip);
+            TestContext.Out.WriteLine($"[MERIDIAN] U-115: {standIns} named stand-ins across side + side_b ({bPath})");
+            var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(Meridian.EditorTools.SheetAnimatorBuilder.ControllerPath(ArtKeys.Characters.SurveyorSide));
+            Assert.NotNull(controller, "the side controller (SheetAnimatorBuilder)");
+            var states = controller.layers[0].stateMachine.states;
+            var binding = EditorCurveBinding.PPtrCurve("", typeof(SpriteRenderer), "m_Sprite");
+            foreach (var clip in five)
+            {
+                var st = System.Array.Find(states, s => s.state.name == clip);
+                Assert.NotNull(st.state, $"state '{clip}' on the side controller");
+                var curve = AnimationUtility.GetObjectReferenceCurve((AnimationClip)st.state.motion, binding);
+                Assert.IsTrue(curve != null && curve.Length > 0, $"{clip} has drawings");
+                foreach (var k in curve)
+                {
+                    var sprite = k.value as Sprite;
+                    Assert.NotNull(sprite, $"{clip}: every key holds a drawing");
+                    StringAssert.StartsWith("side_b_", sprite.name, $"{clip} plays its own frames from side_b");
+                }
+            }
         }
 
         [Test]

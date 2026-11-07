@@ -48,7 +48,17 @@ namespace Meridian.Tests
             for (int i = 0; i < 90 && !player.Grounded; i++) yield return new WaitForFixedUpdate();
         }
 
-        float Deck => Meridian.Planet.POI.PoiCatalog.MeridianStation.floatY + (336f - 62f) / 128f;
+        /// <summary>D-124: the deck is the station prop's declared collider top (R1's rule keeps the declared box when the card's aspect is off), not the old card's pixel rows.</summary>
+        float Deck
+        {
+            get
+            {
+                var station = Meridian.Planet.POI.PoiCatalog.MeridianStation;
+                float top = float.NegativeInfinity;
+                foreach (var c in side.pois.Solids) if (c != null && Mathf.Abs(c.bounds.center.x - (station.x + 10f)) < 40f) top = Mathf.Max(top, c.bounds.max.y);
+                return top;
+            }
+        }
 
         [UnityTest]
         public IEnumerator StandOnTheFloatingStationInToxicHaze()

@@ -17,6 +17,8 @@ namespace Meridian.Art
         public static class Characters
         {
             public const string Surveyor = "characters/surveyor/base";
+            /// <summary>U-115 (D-121): the v3 surveyor sheet (B-125) and its second sheet (B-134: dig, build, surprise, jetpack, climb_in); one controller takes both.</summary>
+            public const string SurveyorSide = "characters/surveyor/side", SurveyorSideB = "characters/surveyor/side_b";
             /// <summary>U-049: the surveyor sheet per Envirosuit tier (0 = base, 1–3 = B-041 mk1–mk3).</summary>
             public static string SurveyorSheet(int tier) => tier <= 0 ? Surveyor : "characters/surveyor/mk" + System.Math.Clamp(tier, 1, 3);
         }
@@ -32,6 +34,14 @@ namespace Meridian.Art
             /// <summary>U-103 (B-122, D-111): the drawn Pilgrim rig (parts sheet + json with the side and top plants) and its exhaust puff loop.</summary>
             public const string PilgrimRig = "ships/pilgrim/rig";
             public const string PilgrimPuff = "ships/pilgrim/puff";
+        }
+
+        /// <summary>U-104 (B-121): the three HUD dials + needles on one parts sheet (its json at /json), the dotted Escape Line tile and its blank sign.</summary>
+        public static class Ui
+        {
+            public const string HudGauges = "ui/hud/gauges";
+            public const string EscapeLine = "ui/hud/escape_line";
+            public const string EscapeSign = "ui/hud/escape_sign";
         }
 
         public static class Terrain

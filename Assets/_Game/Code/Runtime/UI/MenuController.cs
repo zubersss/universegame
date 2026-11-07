@@ -185,6 +185,7 @@ namespace Meridian.UI
             background.enabled = false;
             var title = UiKit.Text(mainPanel.transform, "Title", new Vector2(0.5f, 0.5f), new Vector2(MenuX, 220f), new Vector2(900f, 120f), 96, true, TextAnchor.MiddleCenter);
             title.text = "MERIDIAN";
+            title.font = UiTheme.Active.TitleFace; title.fontStyle = FontStyle.Normal; // U-104 (D-090): titles in Limelight
             var logo = UiKit.Panel(mainPanel.transform, "TitleLogo", new Vector2(0.5f, 0.5f), new Vector2(MenuX, 230f), new Vector2(560f, 140f), Color.white);
             logo.preserveAspect = true;
             logo.enabled = false;

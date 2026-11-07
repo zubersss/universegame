@@ -172,6 +172,14 @@ namespace Meridian.Perf
             int atlases = ownGroup != null ? BudgetMonitor.LoadedAtlases(ownGroup) : 0;
             string holders = prevGroup != null ? Residency.Holders(prevGroup).Replace("\"", "'") : "";
             string breakdown = (director.LastLoadBreakdown ?? "").Replace("\"", "'");
+            // U-112 (D-116): where a per-visit creep can live: the Mono heap, the native allocator, and the counts that grow per visit.
+            long monoUsedMB = UnityEngine.Profiling.Profiler.GetMonoUsedSizeLong() >> 20, monoHeapMB = UnityEngine.Profiling.Profiler.GetMonoHeapSizeLong() >> 20;
+            long allocMB = UnityEngine.Profiling.Profiler.GetTotalAllocatedMemoryLong() >> 20, reservedMB = UnityEngine.Profiling.Profiler.GetTotalReservedMemoryLong() >> 20;
+            long unusedMB = UnityEngine.Profiling.Profiler.GetTotalUnusedReservedMemoryLong() >> 20;
+            int handlesHeld = Residency.Total;
+            int gameObjects = Resources.FindObjectsOfTypeAll<GameObject>().Length;
+            int tmpObjects = Resources.FindObjectsOfTypeAll<TMPro.TMP_Text>().Length;
+            int audioSources = Resources.FindObjectsOfTypeAll<AudioSource>().Length;
             lines.AppendLine($"{{\"leg\":\"{where}\",\"systemMB\":{s.systemMemoryMB},\"textureMB\":{s.textureMemoryMB},\"audioMB\":{s.audioMemoryMB}," +
                              $"\"avgFrameMs\":{s.avgFrameMs.ToString("F2", ci)}," +
                              $"\"workingSetMB\":{s.workingSetMB},\"privateMB\":{s.privateMB},\"freeMB\":{ProcessMemory.FreeSystemMB()},\"meshMB\":{s.meshMemoryMB}," +
@@ -180,6 +188,8 @@ namespace Meridian.Perf
                              $"\"irisInWorstMs\":{transitions.LastIrisInWorstMs.ToString("F1", ci)},\"breakdown\":\"{breakdown}\"," +
                              $"\"atlases\":{atlases},\"packedSprites\":{BudgetMonitor.PackedSprites()},\"mipActive\":{(s.mipStreaming ? 1 : 0)},\"mipBudgetMB\":{s.mipBudgetMB}," +
                              $"\"nonStreamingMB\":{(long)(Texture.nonStreamingTextureMemory / 1048576UL)},\"desiredMB\":{(long)(Texture.desiredTextureMemory / 1048576UL)},\"targetMB\":{(long)(Texture.targetTextureMemory / 1048576UL)}," +
+                             $"\"monoUsedMB\":{monoUsedMB},\"monoHeapMB\":{monoHeapMB},\"allocMB\":{allocMB},\"reservedMB\":{reservedMB},\"unusedReservedMB\":{unusedMB}," +
+                             $"\"handlesHeld\":{handlesHeld},\"gameObjects\":{gameObjects},\"tmpObjects\":{tmpObjects},\"audioSources\":{audioSources}," +
                              $"\"bundles\":\"{Bundles()}\"}}");
             TopTextures(where, 15);
             if (where == "Earth") yield return FilmGpu(where); // U-095: the film pass's GPU cost at 1080p

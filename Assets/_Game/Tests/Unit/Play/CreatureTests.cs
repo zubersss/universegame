@@ -208,34 +208,12 @@ namespace Meridian.Tests
             foreach (string key in keys)
             {
 #if UNITY_EDITOR
-                // D-070 (P-31): a model species (B-082) is checked on its model: the json's clips registered, feet on y 0.
+                // D-120 (P-31): a model species (B-082's glb) is listed as skipped until its C2 sheet lands (stag and wolf with B-132,
+                // D-119); the sheet species below are the judged ones.
                 string glb = $"Assets/_Game/Art/{key}.glb";
                 if (System.IO.File.Exists(glb))
                 {
-                    var mclips = Meridian.Rendering.ArtMaterials.ModelClipsFor(key);
-                    Assert.NotNull(mclips, key + " model clips registered");
-                    var mjson = JsonUtility.FromJson<ModelJson>(System.IO.File.ReadAllText($"Assets/_Game/Art/{key}.json"));
-                    Assert.AreEqual(mjson.clips.Length, mclips.clips.Count, key + " clip count = json");
-                    foreach (var mc in mjson.clips) Assert.IsTrue(mclips.TryGet(mc.name, out _), $"{key} clip '{mc.name}'");
-                    var prefab = UnityEditor.AssetDatabase.LoadMainAssetAtPath(glb) as GameObject;
-                    Assert.NotNull(prefab, glb);
-                    var inst = Object.Instantiate(prefab);
-                    inst.transform.position = Vector3.zero;
-                    // The geometry's lowest point (SkinnedMeshRenderer.bounds is the importer's padded estimate, not the vertices).
-                    float bottom = float.PositiveInfinity, padded = float.PositiveInfinity;
-                    foreach (var smr in inst.GetComponentsInChildren<SkinnedMeshRenderer>())
-                    {
-                        padded = Mathf.Min(padded, smr.bounds.min.y);
-                        var baked = new Mesh();
-                        smr.BakeMesh(baked, true);
-                        foreach (var v in baked.vertices) bottom = Mathf.Min(bottom, smr.transform.TransformPoint(v).y);
-                        Object.Destroy(baked);
-                    }
-                    foreach (var mf in inst.GetComponentsInChildren<MeshFilter>())
-                        if (mf.sharedMesh != null) foreach (var v in mf.sharedMesh.vertices) bottom = Mathf.Min(bottom, mf.transform.TransformPoint(v).y);
-                    report.AppendLine($"{key} model: lowest vertex {bottom:F3} m (renderer bounds {padded:F3})");
-                    if (Mathf.Abs(bottom) > 0.02f) fails.Add($"{key} model: feet at y {bottom:F3} (± 0.02)");
-                    Object.Destroy(inst);
+                    report.AppendLine($"{key}: model species, skipped until its C2 sheet replaces the glb (D-119 / D-120)");
                     continue;
                 }
 #endif

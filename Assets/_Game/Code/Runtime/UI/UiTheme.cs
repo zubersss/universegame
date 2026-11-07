@@ -38,6 +38,9 @@ namespace Meridian.UI
 
         public Font Regular => regular != null ? regular : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         public Font Bold => bold != null ? bold : Regular;
+        /// <summary>U-104 (D-090): the HUD face (Patrick Hand) for every HUD, panel and menu string and the title face (Limelight), once FontAuthoring set them; JetBrains Mono until then.</summary>
+        public Font HudFace => hudTtf != null ? hudTtf : Regular;
+        public Font TitleFace => titleTtf != null ? titleTtf : Bold;
 
         /// <summary>Planet-tinted accent (Bible §9 palettes).</summary>
         public static Color Accent(PlanetId? planet) => planet switch

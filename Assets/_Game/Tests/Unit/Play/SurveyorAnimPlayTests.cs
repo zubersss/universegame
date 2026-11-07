@@ -83,6 +83,11 @@ namespace Meridian.Tests
 
             player.intent.move = -1f; // left: the landed Pilgrim stands ~4 m to the right of spawn
             yield return Steps(25);
+            // D-124 (P-32): a step down on the way lands the surveyor and `land` holds for LandTime; settle grounded, then past it.
+            for (int i = 0; i < 120 && !player.Grounded; i++) yield return new WaitForFixedUpdate();
+            float settleUntil = Time.time + SurveyorAnim.LandTime + 0.05f;
+            while (Time.time < settleUntil) { yield return new WaitForFixedUpdate(); if (!player.Grounded) settleUntil = Time.time + SurveyorAnim.LandTime + 0.05f; }
+            yield return Frames(1);
             AssertClip(SurveyorAnim.Walk);
 
             player.intent.sprint = true;

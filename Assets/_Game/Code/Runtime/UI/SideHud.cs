@@ -1,8 +1,12 @@
+using System.Collections.Generic;
+using Meridian.Art;
 using Meridian.Core;
 using Meridian.Planets;
 using Meridian.Player;
 using Meridian.Ship;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UI;
 
 namespace Meridian.UI
@@ -25,6 +29,20 @@ namespace Meridian.UI
 
         public Image HealthFill { get; private set; }
         public Image OxygenFill { get; private set; }
+        /// <summary>U-104 (B-121): the three dials (Suit power, oxygen, the gravity readout); the bars stay the fallback, and keep their fill amounts, until the sheet is in.</summary>
+        public HudGauge SuitGauge { get; private set; }
+        public HudGauge OxygenGauge { get; private set; }
+        public HudGauge GravityGauge { get; private set; }
+        public bool GaugesReady => SuitGauge != null && SuitGauge.Ready && OxygenGauge.Ready && GravityGauge.Ready;
+        /// <summary>B-121 draws the dials 320 px at 1x; the HUD shows them at this scale, three across the top-left at 1080p.</summary>
+        public const float DialScale = 0.5f;
+        /// <summary>The gravity dial's full scale in g (Jupiter's 2.5 g sits inside it; Earth reads a third).</summary>
+        public const float GravityFullScale = 3f;
+        public Text OxygenText { get; private set; }
+        Text suitPowerLabel, o2Label;
+        IList<Sprite> gaugeSprites;
+        TextAsset gaugeJson;
+        readonly List<AsyncOperationHandle> gaugeHandles = new List<AsyncOperationHandle>(2);
         public RectTransform EscapeMarker { get; private set; }
         public RectTransform YouMarker { get; private set; }
         public Text HealthText { get; private set; }
@@ -68,20 +86,22 @@ namespace Meridian.UI
             var tl = new Vector2(0f, 1f);
 
             accentLine = UiKit.Panel(root, "Accent", tl, new Vector2(24f, -20f), new Vector2(220f, 2f), UiTheme.Accent(null));
-            Label(root, "SUIT POWER", -36f); // U-093 (D-087): no health; the suit's integrity + reserve as one gauge
+            suitPowerLabel = Label(root, "SUIT POWER", -36f); // U-093 (D-087): no health; the suit's integrity + reserve as one gauge
             HealthFill = UiKit.Bar(root, "Health", tl, new Vector2(24f, -58f), new Vector2(220f, 6f), theme.health);
             HealthText = UiKit.Text(root, "HealthValue", tl, new Vector2(252f, -48f), new Vector2(80f, 24f), 18);
-            Label(root, "O2", -76f);
+            o2Label = Label(root, "O2", -76f);
             OxygenFill = UiKit.Bar(root, "Oxygen", tl, new Vector2(24f, -98f), new Vector2(220f, 6f), theme.oxygen);
-            var o2 = UiKit.Text(root, "OxygenValue", tl, new Vector2(252f, -88f), new Vector2(80f, 24f), 18, false, TextAnchor.MiddleLeft, theme.label);
-            o2.text = "100"; // placeholder until the Envirosuit oxygen system (M3)
-            HazardLabel = UiKit.Text(root, "HazardKind", new Vector2(0f, 1f), new Vector2(24f, -156f), new Vector2(200f, 18f), 13, false, TextAnchor.MiddleLeft, UiTheme.Active.label);
+            OxygenText = UiKit.Text(root, "OxygenValue", tl, new Vector2(252f, -88f), new Vector2(80f, 24f), 18, false, TextAnchor.MiddleLeft, theme.label);
+            OxygenText.text = "100"; // placeholder until the Envirosuit oxygen system (M3)
+            // U-104: the suit rows sit under the dials (y −216 … −258); the ship block (ShipHud) follows under them.
+            HazardLabel = UiKit.Text(root, "HazardKind", new Vector2(0f, 1f), new Vector2(24f, -216f), new Vector2(200f, 18f), 13, false, TextAnchor.MiddleLeft, UiTheme.Active.label);
             HazardLabel.text = KindNames[(int)Meridian.Hazards.HazardKind.Cryo];
-            CryoText = UiKit.Text(root, "CryoLevel", tl, new Vector2(110f, -156f), new Vector2(30f, 18f), 13, true, TextAnchor.MiddleLeft, new Color(0.6f, 0.85f, 1f, 1f));
-            Label(root, "SUIT", -176f);
-            SuitFill = UiKit.Bar(root, "Suit", tl, new Vector2(24f, -198f), new Vector2(220f, 6f), new Color(0.6f, 0.85f, 1f, 1f));
-            SuitRateText = UiKit.Text(root, "SuitRate", tl, new Vector2(252f, -188f), new Vector2(120f, 24f), 16);
+            CryoText = UiKit.Text(root, "CryoLevel", tl, new Vector2(110f, -216f), new Vector2(30f, 18f), 13, true, TextAnchor.MiddleLeft, new Color(0.6f, 0.85f, 1f, 1f));
+            Label(root, "SUIT", -236f);
+            SuitFill = UiKit.Bar(root, "Suit", tl, new Vector2(24f, -258f), new Vector2(220f, 6f), new Color(0.6f, 0.85f, 1f, 1f));
+            SuitRateText = UiKit.Text(root, "SuitRate", tl, new Vector2(252f, -248f), new Vector2(120f, 24f), 16);
             SuitRateText.text = "";
+            BuildGauges(root);
 
             // Altitude bar on the right edge: world bottom → world top, Escape Line marked.
             var right = new Vector2(1f, 0.5f);
@@ -207,8 +227,69 @@ namespace Meridian.UI
             StormText.text = code < 0 ? "" : code == 61 ? StormNow : stormWarnings[code];
         }
 
-        void Label(Transform root, string text, float y) =>
-            UiKit.Text(root, text, new Vector2(0f, 1f), new Vector2(24f, y), new Vector2(200f, 18f), 13, false, TextAnchor.MiddleLeft, UiTheme.Active.label).text = text;
+        Text Label(Transform root, string text, float y)
+        {
+            var t = UiKit.Text(root, text, new Vector2(0f, 1f), new Vector2(24f, y), new Vector2(200f, 18f), 13, false, TextAnchor.MiddleLeft, UiTheme.Active.label);
+            t.text = text;
+            return t;
+        }
+
+        /// <summary>
+        /// U-104 (B-121): the three dials across the top-left, built hidden; `ui/hud/gauges` (six parts) and its json arm them
+        /// when the sheet is in the catalog, and the bars step aside. The needles step on the 12 Hz ticks in LateUpdate.
+        /// </summary>
+        void BuildGauges(Transform root)
+        {
+            float d = 320f * DialScale, x = 24f, y = -24f, gap = 16f;
+            SuitGauge = new HudGauge(root, "suit_power", new Vector2(x, y), d, "SUIT POWER");
+            OxygenGauge = new HudGauge(root, "oxygen", new Vector2(x + d + gap, y), d, "OXYGEN");
+            GravityGauge = new HudGauge(root, "gravity", new Vector2(x + 2f * (d + gap), y), d, "GRAVITY") { DangerTint = false };
+            var probe = Addressables.LoadResourceLocationsAsync(ArtKeys.Ui.HudGauges + "/json", typeof(TextAsset));
+            probe.Completed += loc =>
+            {
+                bool exists = loc.Status == AsyncOperationStatus.Succeeded && loc.Result != null && loc.Result.Count > 0;
+                ArtLoad.Release(loc);
+                if (this == null || !exists) return;
+                var sprites = ArtLoad.Asset<IList<Sprite>>(ArtKeys.Ui.HudGauges);
+                gaugeHandles.Add(sprites);
+                sprites.Completed += op => { if (this == null) return; if (op.Status == AsyncOperationStatus.Succeeded && op.Result != null && op.Result.Count > 0) gaugeSprites = op.Result; OnGaugeArt(); };
+                var json = ArtLoad.Asset<TextAsset>(ArtKeys.Ui.HudGauges + "/json");
+                gaugeHandles.Add(json);
+                json.Completed += op => { if (this == null) return; if (op.Status == AsyncOperationStatus.Succeeded && op.Result != null) gaugeJson = op.Result; OnGaugeArt(); };
+            };
+        }
+
+        void OnGaugeArt()
+        {
+            if (gaugeSprites == null || gaugeJson == null || GaugesReady) return;
+            var specs = GaugeSheet.Parse(gaugeJson.text);
+            var byName = new Dictionary<string, Sprite>(gaugeSprites.Count);
+            foreach (var s in gaugeSprites) if (s != null) byName[s.name] = s;
+            foreach (var g in new[] { SuitGauge, OxygenGauge, GravityGauge })
+                if (specs.TryGetValue(g.Name, out var spec)) g.Arm(spec, byName, DialScale);
+            if (!GaugesReady) { Debug.LogWarning($"[MERIDIAN] SideHud: {ArtKeys.Ui.HudGauges} lacks a dial or a needle part; the bars stay."); return; }
+            // The bars step aside (their fill amounts keep updating: tests read them); the numbers move under their dials.
+            HealthFill.transform.parent.gameObject.SetActive(false);
+            OxygenFill.transform.parent.gameObject.SetActive(false);
+            suitPowerLabel.enabled = false;
+            o2Label.enabled = false;
+            Under(HealthText, SuitGauge);
+            Under(OxygenText, OxygenGauge);
+        }
+
+        static void Under(Text t, HudGauge g)
+        {
+            var rt = t.rectTransform;
+            rt.pivot = new Vector2(0.5f, 1f);
+            rt.anchoredPosition = g.Dial.rectTransform.anchoredPosition + new Vector2(g.Dial.rectTransform.sizeDelta.x * 0.5f, -g.Size - 22f);
+            rt.sizeDelta = new Vector2(g.Dial.rectTransform.sizeDelta.x, 24f);
+            t.alignment = TextAnchor.MiddleCenter;
+        }
+
+        void OnDestroy()
+        {
+            foreach (var h in gaugeHandles) if (h.IsValid()) ArtLoad.Release(h);
+        }
 
         public void ConfigureFor(PlanetConfig p)
         {
@@ -232,6 +313,16 @@ namespace Meridian.UI
                 float power = (suit + vitals.health) / Mathf.Max(1f, suitMax + vitals.maxHealth);
                 int h = Mathf.CeilToInt(power * 100f - 1e-3f);
                 if (h != lastHealth) { lastHealth = h; HealthText.text = numbers[h]; HealthFill.fillAmount = power; }
+                if (SuitGauge != null) SuitGauge.Target = power;
+            }
+            if (SuitGauge != null)
+            {
+                // U-104: the dials follow their meters on the 12 Hz ticks (a wobble on change); gravity reads the planet's g.
+                OxygenGauge.Target = OxygenFill.fillAmount;
+                GravityGauge.Target = planet != null ? planet.GravityRatio / GravityFullScale : 0f;
+                float now = Time.time;
+                var danger = UiTheme.Active.warning;
+                SuitGauge.Step(now, danger); OxygenGauge.Step(now, danger); GravityGauge.Step(now, danger);
             }
             UpdateStorm();
             UpdateHazards();

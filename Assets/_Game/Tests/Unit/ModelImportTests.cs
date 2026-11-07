@@ -60,27 +60,26 @@ namespace Meridian.Tests
         }
 
         [Test]
-        public void SurveyorClipsMatchItsJsonAndEveryClipTheCodeUses()
+        public void SurveyorClipsMatchItsSheetJsonAndEveryClipTheCodeUses()
         {
-            // D-069: names, count and lengths from base.json; every clip name SurveyorAnim picks must exist.
-            var json = Json(ArtKeys.Characters.Surveyor);
-            var set = ArtMaterials.ModelClipsFor(ArtKeys.Characters.Surveyor);
-            Assert.NotNull(set, "registry has the surveyor model's clips");
-            Assert.AreEqual(json.fps, set.fps);
-            Assert.AreEqual(json.clips.Length, set.clips.Count, "clip count");
-            foreach (var c in json.clips)
+            // D-120 (P-30 / P-32): the surveyor is a frame sheet again (B-125): names and lengths from side.json within the §11.2 caps,
+            // one generated clip per drawing set, and every clip SurveyorAnim picks resolves to a drawing the sheet has (U-105).
+            var path = "Assets/_Game/Art/characters/surveyor/side.json";
+            Assert.IsTrue(File.Exists(path), "the live surveyor sheet sidecar");
+            var sheet = JsonUtility.FromJson<Meridian.EditorTools.ArtImporter.SheetManifest>(File.ReadAllText(path));
+            Assert.IsTrue(sheet.IsV3 && sheet.IsSheet, "a v3 frame sheet");
+            Assert.AreEqual(12, sheet.fps, "on twos");
+            var names = new System.Collections.Generic.HashSet<string>();
+            foreach (var c in sheet.animations)
             {
-                Assert.IsTrue(set.TryGet(c.name, out var r), c.name);
-                Assert.AreEqual(c.frames, r.length, $"{c.name} frames");
-                Assert.AreEqual(c.loop, r.loop, $"{c.name} loop");
+                Assert.IsTrue(names.Add(c.name), $"clip '{c.name}' listed once");
+                Meridian.EditorTools.ArtRules.ClipCap(c.name, out int min, out int max);
+                Assert.IsTrue(c.length >= 1 && c.length <= max, $"{c.name}: {c.length} frames within its cap of {max}");
+                var clipPath = Meridian.EditorTools.SheetAnimatorBuilder.ClipPath(Meridian.View2D.CartoonStage.SurveyorKey, c.name);
+                Assert.IsTrue(File.Exists(clipPath), $"generated clip {clipPath}");
             }
-            var modelClips = AssetDatabase.LoadAllAssetsAtPath($"Assets/_Game/Art/{ArtKeys.Characters.Surveyor}.glb").OfType<AnimationClip>().Select(c => c.name).ToList();
-            foreach (var name in new[] { SurveyorAnim.Idle, SurveyorAnim.Walk, SurveyorAnim.Run, SurveyorAnim.Jump, SurveyorAnim.Fall,
-                                         SurveyorAnim.Land, SurveyorAnim.Dig, SurveyorAnim.Aim, SurveyorAnim.Hurt, SurveyorAnim.Death })
-            {
-                Assert.IsTrue(set.TryGet(name, out _), $"json has '{name}'");
-                CollectionAssert.Contains(modelClips, name, $"the model carries '{name}'");
-            }
+            foreach (var name in SurveyorAnim.AllClips)
+                Assert.IsTrue(names.Contains(SurveyorAnim.ResolveOn(name, names.Contains)), $"'{name}' resolves to a drawing the sheet has");
         }
     }
 }

@@ -1,0 +1,1398 @@
+fileFormatVersion: 2
+guid: a9ea9fa0951184140841bb9abcbed650
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 4062654929383430622
+    second: pike_color_0
+  - first:
+      213: 6263704102432221878
+    second: pike_color_1
+  - first:
+      213: -636537921526120968
+    second: pike_color_2
+  - first:
+      213: -8436959455109967788
+    second: pike_color_3
+  - first:
+      213: -7050375330162487113
+    second: pike_color_4
+  - first:
+      213: 8863192880501130690
+    second: pike_color_5
+  - first:
+      213: -1680689497044675326
+    second: pike_color_6
+  - first:
+      213: 8531611804745264964
+    second: pike_color_7
+  - first:
+      213: 7980165109147254209
+    second: pike_color_8
+  - first:
+      213: 6613943121343132381
+    second: pike_color_9
+  - first:
+      213: -9003343546297183121
+    second: pike_color_10
+  - first:
+      213: -5043372207906114468
+    second: pike_color_11
+  - first:
+      213: 8029762834943179073
+    second: pike_color_12
+  - first:
+      213: -465888136261527170
+    second: pike_color_13
+  - first:
+      213: 8632700802652425616
+    second: pike_color_14
+  - first:
+      213: 7117822950938353147
+    second: pike_color_15
+  - first:
+      213: 6616180602623830820
+    second: pike_color_16
+  - first:
+      213: -2087830487579754350
+    second: pike_color_17
+  - first:
+      213: -6819302137077462493
+    second: pike_color_18
+  - first:
+      213: -7244434488649663252
+    second: pike_color_19
+  - first:
+      213: 4968578319273589499
+    second: pike_color_20
+  - first:
+      213: -2138130028922441915
+    second: pike_color_21
+  - first:
+      213: 2955653945086594599
+    second: pike_color_22
+  - first:
+      213: -6699127852833033052
+    second: pike_color_23
+  - first:
+      213: -7447148741080995750
+    second: pike_color_24
+  - first:
+      213: 1409041389409617144
+    second: pike_color_25
+  - first:
+      213: -5889349402865518355
+    second: pike_color_26
+  - first:
+      213: 530877742516071492
+    second: pike_color_27
+  - first:
+      213: 1310946633431557577
+    second: pike_color_28
+  - first:
+      213: -6743282631813697347
+    second: pike_color_29
+  - first:
+      213: 997977642227423592
+    second: pike_color_30
+  - first:
+      213: 1841572103977264920
+    second: pike_color_31
+  - first:
+      213: 7890342858283537843
+    second: pike_color_32
+  - first:
+      213: -6596299108566160186
+    second: pike_color_33
+  - first:
+      213: 5816236789092688918
+    second: pike_color_34
+  - first:
+      213: 173090745948805186
+    second: pike_color_35
+  - first:
+      213: 1270482962113652448
+    second: pike_color_36
+  - first:
+      213: -810178919767869995
+    second: pike_color_37
+  - first:
+      213: 2184919799366767812
+    second: pike_color_38
+  - first:
+      213: 8734374038444692665
+    second: pike_color_39
+  - first:
+      213: 4264015806723989631
+    second: pike_color_40
+  - first:
+      213: 1357980387705917316
+    second: pike_color_41
+  - first:
+      213: -8114099916957912213
+    second: pike_color_42
+  - first:
+      213: -4617064061411593606
+    second: pike_color_43
+  - first:
+      213: 405835421907612691
+    second: pike_color_44
+  - first:
+      213: 7674071702685536031
+    second: pike_color_45
+  - first:
+      213: 4148129897195608365
+    second: pike_color_46
+  - first:
+      213: -6490540854297867893
+    second: pike_color_47
+  - first:
+      213: 8766847832702367987
+    second: pike_color_48
+  - first:
+      213: 3570881071920081558
+    second: pike_color_49
+  - first:
+      213: 5809513876213398225
+    second: pike_color_50
+  - first:
+      213: -8836858404792633721
+    second: pike_color_51
+  - first:
+      213: 5026903544437294007
+    second: pike_color_52
+  - first:
+      213: -6530260496545118330
+    second: pike_color_53
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: pike_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 252
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cc0c618722671f34d95dc8251f09f958
+      internalID: 1945814478
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_1
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 252
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fd2dc139337f35e4ebbcd5a60d709686
+      internalID: 2078948246
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_2
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 252
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 58932d77d315e88438fb9943227542b3
+      internalID: 1747277089
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_3
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 252
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8beeccfea9c88174f94da8bef5c422ef
+      internalID: 1554167390
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_4
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 252
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1744ec9ff20bd5b48b4ef3d0827dfdf4
+      internalID: -1601689086
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_5
+      rect:
+        serializedVersion: 2
+        x: 660
+        y: 252
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a684fa107ad5ae142878c215ec6cf052
+      internalID: 1875263337
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_6
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 252
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ebe95fa5b52d07847913b0a87ad1519b
+      internalID: 1169723345
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_7
+      rect:
+        serializedVersion: 2
+        x: 924
+        y: 252
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bfee82ec89466c648b8870977e58ecf7
+      internalID: 223692032
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_8
+      rect:
+        serializedVersion: 2
+        x: 1056
+        y: 252
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f2738311f7eeac74788bc3db60ee2b4e
+      internalID: 1330414057
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_9
+      rect:
+        serializedVersion: 2
+        x: 1188
+        y: 252
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ca3b67deb9f093547974f0f8b3773c7a
+      internalID: -406959673
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_10
+      rect:
+        serializedVersion: 2
+        x: 1320
+        y: 252
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ae0d7db7a52c9e448bddfb904616e53d
+      internalID: 863371780
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_11
+      rect:
+        serializedVersion: 2
+        x: 1452
+        y: 252
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 868666b322d915b42a7ad069237f6c0f
+      internalID: 1842609138
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_12
+      rect:
+        serializedVersion: 2
+        x: 1584
+        y: 252
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0ffe40b2761072d42b9fcbe346e7f5c9
+      internalID: -657801887
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_13
+      rect:
+        serializedVersion: 2
+        x: 1716
+        y: 252
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bb3ce60f35abfba4c82c22bd4c700606
+      internalID: -1461735500
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_14
+      rect:
+        serializedVersion: 2
+        x: 1848
+        y: 252
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3739633449538c54db6bfea9488f48f9
+      internalID: 1643837078
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_15
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8ff92d52815d13145ac110aaa9c3018c
+      internalID: 1626693115
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_16
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 78c11e544d9f06c4cb1c9743e67343b1
+      internalID: 1877058461
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_17
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7547d2937f88b5b4ab8aea8452f50bae
+      internalID: -935384069
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_18
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ee3d6d1cb58f94d44b4d1b883a643ac5
+      internalID: -2038740198
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_19
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e41a9813c1460004f86c6c2783f8c390
+      internalID: -2033850063
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_20
+      rect:
+        serializedVersion: 2
+        x: 660
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bee29a1c217d97d41b6a4c17d2a5e34c
+      internalID: 1833328485
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_21
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3af5f47b8b3810e40beae04f05fcc550
+      internalID: 1928417975
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_22
+      rect:
+        serializedVersion: 2
+        x: 924
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7f919b755aaa1794da0a0f5fc81ca781
+      internalID: -1430576077
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_23
+      rect:
+        serializedVersion: 2
+        x: 1056
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9f45fc86c765cc54797cd94b164ad01c
+      internalID: -583762165
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_24
+      rect:
+        serializedVersion: 2
+        x: 1188
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 89e05b23ad31d1640ba07d0f51bc3641
+      internalID: 900033239
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_25
+      rect:
+        serializedVersion: 2
+        x: 1320
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: df72ce491ea36124db47a35420095d0a
+      internalID: -315330269
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_26
+      rect:
+        serializedVersion: 2
+        x: 1452
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2902607da1e617f42ac55393f4c5e966
+      internalID: 1436307621
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_27
+      rect:
+        serializedVersion: 2
+        x: 1584
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d4c8fb300649c3e4f827a3103363fd57
+      internalID: 1961933057
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_28
+      rect:
+        serializedVersion: 2
+        x: 1716
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4eaa0502ac469aa40ad483cba371dece
+      internalID: -1469629420
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_29
+      rect:
+        serializedVersion: 2
+        x: 1848
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f67e76638055136408dfb6548fda25fe
+      internalID: -762877925
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_30
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 53f7c3cf78f59f646a1fda884623bb91
+      internalID: 1583044316
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_31
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d4540e1e1d056674886d3653bd207de6
+      internalID: -247588021
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_32
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3b1c60155f354d04489060a541ff03f9
+      internalID: 821609330
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_33
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 09f1ccf1cb0e0ab4cadf8932b7fb0987
+      internalID: 868589931
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_34
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5bbe029d060943842b41dde9477e782c
+      internalID: 1666033943
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_35
+      rect:
+        serializedVersion: 2
+        x: 660
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f5cd11754b5e6394984c8b77b63bba50
+      internalID: -27421855
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_36
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f05de126ae23edc41878a5d746dec87c
+      internalID: -1595664928
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_37
+      rect:
+        serializedVersion: 2
+        x: 924
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b1b6ba7bb32dd4f49b9cbd079d0dc589
+      internalID: 660961040
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_38
+      rect:
+        serializedVersion: 2
+        x: 1056
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0b3ddef8d6d63c54ea970348e757f56c
+      internalID: -196363243
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_39
+      rect:
+        serializedVersion: 2
+        x: 1188
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dc48cf0cbc613614d9e36721646baf0b
+      internalID: 1223257917
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_40
+      rect:
+        serializedVersion: 2
+        x: 1320
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 47219f0da7363fa49b61e7585e3f3b88
+      internalID: 1553130198
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_41
+      rect:
+        serializedVersion: 2
+        x: 1452
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f793bfe0095701246bb274c4809b4c4a
+      internalID: 1272862965
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_42
+      rect:
+        serializedVersion: 2
+        x: 1584
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1aac56745d225fa4786577736d718b62
+      internalID: 1534762053
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_43
+      rect:
+        serializedVersion: 2
+        x: 1716
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 819c737afe1e3c84b8ac438731b1d6ae
+      internalID: -1116818829
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_44
+      rect:
+        serializedVersion: 2
+        x: 1848
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 86f51dceb5128e04ba056dede22f1b4c
+      internalID: -824932094
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_45
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bab2f2c12736f27409f998420f58f631
+      internalID: 280916965
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_46
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 0
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ab79007b1448cb24091d21843981e4e6
+      internalID: 2143281352
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pike_47
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 0
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 318df2202ac99a749a1e7ae160e47211
+      internalID: -1012070242
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: a95b6f2dfe6e00045aa2bfafba9cb11f
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      pike_0: 1945814478
+      pike_1: 2078948246
+      pike_10: 863371780
+      pike_11: 1842609138
+      pike_12: -657801887
+      pike_13: -1461735500
+      pike_14: 1643837078
+      pike_15: 1626693115
+      pike_16: 1877058461
+      pike_17: -935384069
+      pike_18: -2038740198
+      pike_19: -2033850063
+      pike_2: 1747277089
+      pike_20: 1833328485
+      pike_21: 1928417975
+      pike_22: -1430576077
+      pike_23: -583762165
+      pike_24: 900033239
+      pike_25: -315330269
+      pike_26: 1436307621
+      pike_27: 1961933057
+      pike_28: -1469629420
+      pike_29: -762877925
+      pike_3: 1554167390
+      pike_30: 1583044316
+      pike_31: -247588021
+      pike_32: 821609330
+      pike_33: 868589931
+      pike_34: 1666033943
+      pike_35: -27421855
+      pike_36: -1595664928
+      pike_37: 660961040
+      pike_38: -196363243
+      pike_39: 1223257917
+      pike_4: -1601689086
+      pike_40: 1553130198
+      pike_41: 1272862965
+      pike_42: 1534762053
+      pike_43: -1116818829
+      pike_44: -824932094
+      pike_45: 280916965
+      pike_46: 2143281352
+      pike_47: -1012070242
+      pike_5: 1875263337
+      pike_6: 1169723345
+      pike_7: 223692032
+      pike_8: 1330414057
+      pike_9: -406959673
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

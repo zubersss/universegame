@@ -1,0 +1,55 @@
+{
+  "key": "characters/surveyor/side_b",
+  "style": "v3",
+  "frame_width": 192,
+  "frame_height": 192,
+  "columns": 10,
+  "frames": 42,
+  "gutter": 4,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.0
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [
+    {
+      "name": "dig",
+      "start": 0,
+      "length": 8,
+      "loop": true,
+      "loop_from": 0
+    },
+    {
+      "name": "build",
+      "start": 8,
+      "length": 8,
+      "loop": false,
+      "loop_from": 0
+    },
+    {
+      "name": "surprise",
+      "start": 16,
+      "length": 8,
+      "loop": false,
+      "loop_from": 0
+    },
+    {
+      "name": "jetpack",
+      "start": 24,
+      "length": 10,
+      "loop": true,
+      "loop_from": 0
+    },
+    {
+      "name": "climb_in",
+      "start": 34,
+      "length": 8,
+      "loop": false,
+      "loop_from": 0
+    }
+  ],
+  "squash_root": true,
+  "note": "UNITY stand-in (U-115, D-121) until B-134 draws dig, build, surprise, jetpack, climb_in; same frame size, pivot and PPU as side"
+}

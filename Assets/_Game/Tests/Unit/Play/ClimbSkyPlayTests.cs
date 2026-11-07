@@ -56,6 +56,10 @@ namespace Meridian.Tests
                 while (sky.layers.placeholders.Count > 0 && sky.layers.placeholders[0] && Time.realtimeSinceStartup < until) yield return null;
                 Assert.IsTrue(sky.layers.placeholders.Count > 0 && !sky.layers.placeholders[0], "backgrounds/earth/plains/layer0 loaded");
                 yield return null;
+                Assert.IsTrue(sky.Textured, "the strip continues layer0's own top band (no flat join)");
+                var mpb = new MaterialPropertyBlock();
+                sky.Gradient.GetPropertyBlock(mpb);
+                Assert.AreSame(sky.layers.renderers[0].sprite.texture, mpb.GetTexture("_MainTex"), "the strip samples layer0's sheet");
 
                 // On the pad: the camera at rest sees painted sky up to the frame top; every visible row of the gradient is the top colour.
                 sky.Place(sky.anchorY);

@@ -56,6 +56,18 @@ namespace Meridian.View2D
 
         /// <summary>Perceived brightness (gamma), for the tests' ordering checks.</summary>
         public static float Luma(Color c) => 0.299f * c.r + 0.587f * c.g + 0.114f * c.b;
+
+        /// <summary>
+        /// The vertex tint (linear) that turns layer0's own top band, whose mean is `top`, into Shade(top, d, span): white at the
+        /// painted edge, toward black at the span. Multiplied onto the sampled painting, so the grain continues and the join is the
+        /// painting itself. Pure.
+        /// </summary>
+        public static Color BandTint(Color top, float d, float span)
+        {
+            var s = Shade(top, d, span).linear;
+            var t = top.linear;
+            return new Color(t.r > 1e-4f ? Mathf.Min(1f, s.r / t.r) : s.r, t.g > 1e-4f ? Mathf.Min(1f, s.g / t.g) : s.g, t.b > 1e-4f ? Mathf.Min(1f, s.b / t.b) : s.b, 1f);
+        }
     }
 
     /// <summary>
@@ -71,8 +83,11 @@ namespace Meridian.View2D
         public const string StarsKey = "backgrounds/space/starfield/layer0";
         /// <summary>The starfield's scroll factor (its Space-scene parallax, starfield.json).</summary>
         public const float StarsParallax = 0.05f;
-        /// <summary>Strips in the gradient mesh (the shade curve is smooth, so rows interpolate without banding).</summary>
-        public const int Rows = 16;
+        /// <summary>Rows of the strip mesh, each BandM tall: the frame plus a spare row above and below (a taller frame stretches them).</summary>
+        public const int Rows = 20;
+        /// <summary>The top band of layer0 the strip continues upward: its top BandPx rows (1 m at PPU 64), mirrored row by row.</summary>
+        public const int BandPx = 64;
+        public const float BandM = BandPx / 64f;
         /// <summary>The climb fraction at which the starfield loads (before it is ever visible, after the boot rows are measured).</summary>
         public const float LoadStarsAt = 0.5f;
 
@@ -81,6 +96,8 @@ namespace Meridian.View2D
         public PlanetId planet;
         public float datumY, escapeY, anchorY;
 
+        /// <summary>True while the strip samples layer0's own top band (the art is in); false on the flat fallback.</summary>
+        public bool Textured { get; private set; }
         /// <summary>The colour at the painted edge (gamma): layer0's measured top row, else the planet's sky colour.</summary>
         public Color TopColour { get; private set; }
         public bool TopMeasured { get; private set; }
@@ -104,6 +121,11 @@ namespace Meridian.View2D
         bool starsRequested;
         AsyncOperationHandle<Sprite> starsHandle;
         Texture2D measuredFrom;
+        MaterialPropertyBlock block;
+        Vector2[] uvs;
+        Texture2D bandTexture;
+        float bandV0 = 0f, bandV1 = 1f;
+        static readonly int MainTexId = Shader.PropertyToID("_MainTex");
 
         /// <summary>Called by CartoonStage after the layers: the planet's numbers and the frame's resting anchor.</summary>
         public void ConfigureFor(PlanetConfig config, float surfaceDatum)
@@ -128,16 +150,16 @@ namespace Meridian.View2D
                 go.transform.SetParent(view.transform, false);
                 mesh = new Mesh { name = "ClimbGradient" };
                 var verts = new Vector3[(Rows + 1) * 2];
-                var uv = new Vector2[verts.Length];
+                uvs = new Vector2[verts.Length];
                 colours = new Color[verts.Length];
                 var tris = new int[Rows * 6];
                 for (int r = 0; r <= Rows; r++)
                 {
-                    float f = r / (float)Rows;
-                    verts[2 * r] = new Vector3(-0.5f, f - 0.5f, 0f);
-                    verts[2 * r + 1] = new Vector3(0.5f, f - 0.5f, 0f);
-                    uv[2 * r] = new Vector2(0f, f);
-                    uv[2 * r + 1] = new Vector2(1f, f);
+                    // x spans the frame (scaled to its width); y counts BandM-metre rows from the mesh's foot (unscaled metres).
+                    verts[2 * r] = new Vector3(-0.5f, r * BandM, 0f);
+                    verts[2 * r + 1] = new Vector3(0.5f, r * BandM, 0f);
+                    uvs[2 * r] = new Vector2(0f, 1f);
+                    uvs[2 * r + 1] = new Vector2(1f, 1f);
                     colours[2 * r] = colours[2 * r + 1] = Color.white;
                 }
                 for (int r = 0; r < Rows; r++)
@@ -146,7 +168,8 @@ namespace Meridian.View2D
                     tris[t] = a; tris[t + 1] = c; tris[t + 2] = b;      // clockwise toward the camera, like SpaceWorld.Quad
                     tris[t + 3] = b; tris[t + 4] = c; tris[t + 5] = d;
                 }
-                mesh.vertices = verts; mesh.uv = uv; mesh.colors = colours; mesh.triangles = tris;
+                mesh.MarkDynamic();
+                mesh.vertices = verts; mesh.uv = uvs; mesh.colors = colours; mesh.triangles = tris;
                 mesh.RecalculateBounds();
                 go.AddComponent<MeshFilter>().sharedMesh = mesh;
                 gradient = go.AddComponent<MeshRenderer>();
@@ -213,18 +236,32 @@ namespace Meridian.View2D
             float halfH = SideView.HalfHeight(view);
             Span = ClimbSkyMath.Span(p0, escapeY, anchorY, EdgeRestY, halfH);
 
-            // The strip mesh fills the frame (any aspect) just behind the painted layers; rows are coloured by their world height.
+            // The strip fills the frame (any aspect) just behind the painted layers. Its rows are BandM tall and in phase with layer0's
+            // top edge (a row boundary sits on it); each row shows the painting's top band, mirrored row by row so the grain never
+            // jumps, tinted by the shade curve: the join is the painting itself. Without art the rows are flat shade colours.
             float depth = SideView.BackdropDepth(view);
             float h = SideView.HalfHeightAtDepth(view, depth) * 2f * 1.04f, w = h * Mathf.Max(view.aspect, 2.5f);
             var t = gradient.transform;
-            t.localPosition = new Vector3(0f, 0f, depth);
-            t.localScale = new Vector3(w, h, 1f);
             float bottom = cameraY - h * 0.5f;
+            float first = EdgeY + Mathf.Floor((bottom - EdgeY) / BandM) * BandM; // the row boundary at or under the frame bottom, in phase with the edge
+            float needed = Mathf.Ceil((cameraY + h * 0.5f - first) / BandM) + 1f;
+            float rowM = needed > Rows ? BandM * needed / Rows : BandM;          // a taller frame (a perspective rail) stretches the rows rather than leaving a gap
+            t.localPosition = new Vector3(0f, first - cameraY, depth);
+            t.localScale = new Vector3(w, rowM / BandM, 1f);
+            SetBandTexture(far, painted);
+            float tileW = painted ? Mathf.Max(0.01f, far.sprite.bounds.size.x) : 32f;
+            float lx = far != null ? far.transform.position.x : 0f;
+            float uLeft = (view.transform.position.x - w * 0.5f - lx) / tileW + 0.5f, uRight = uLeft + w / tileW;
             for (int r = 0; r <= Rows; r++)
             {
-                var c = ClimbSkyMath.Shade(TopColour, bottom + h * (r / (float)Rows) - EdgeY, Span).linear; // vertex colours go to the GPU raw: linear
+                float y = first + r * rowM;
+                int k = Mathf.RoundToInt((y - EdgeY) / rowM);          // row boundary index counted from the edge
+                float v = (k & 1) == 0 ? bandV1 : bandV0;              // even boundaries carry the painting's top row (the edge itself), odd its lower row
+                uvs[2 * r] = new Vector2(uLeft, v); uvs[2 * r + 1] = new Vector2(uRight, v);
+                var c = Textured ? ClimbSkyMath.BandTint(TopColour, y - EdgeY, Span) : ClimbSkyMath.Shade(TopColour, y - EdgeY, Span).linear; // vertex colours go to the GPU raw: linear
                 colours[2 * r] = c; colours[2 * r + 1] = c;
             }
+            mesh.SetUVs(0, uvs);
             mesh.SetColors(colours);
             FrameBottom = ClimbSkyMath.Shade(TopColour, cameraY - halfH - EdgeY, Span);
             FrameTop = ClimbSkyMath.Shade(TopColour, cameraY + halfH - EdgeY, Span);
@@ -239,6 +276,26 @@ namespace Meridian.View2D
             if (!show) return;
             stars.color = new Color(1f, 1f, 1f, StarAlpha);
             PlaceStars(view.transform.position.x, cameraY);
+        }
+
+        /// <summary>The strip's texture: layer0's sheet (its top BandPx rows as the band) once the art is in, a white texel otherwise.</summary>
+        void SetBandTexture(SpriteRenderer far, bool painted)
+        {
+            var tex = painted ? far.sprite.texture : null;
+            if (tex == bandTexture && (tex != null) == Textured) return;
+            bandTexture = tex;
+            Textured = tex != null;
+            if (block == null) block = new MaterialPropertyBlock();
+            gradient.GetPropertyBlock(block);
+            block.SetTexture(MainTexId, tex != null ? tex : Texture2D.whiteTexture);
+            gradient.SetPropertyBlock(block);
+            if (tex != null)
+            {
+                var r = far.sprite.textureRect;
+                bandV1 = (r.yMax - 2f) / tex.height;                                   // under the painting's top two texel rows (its edge pixels)
+                bandV0 = (r.yMax - 2f - Mathf.Min(BandPx, r.height - 2f)) / tex.height;
+            }
+            else { bandV0 = 0f; bandV1 = 1f; }
         }
 
         /// <summary>A 3 × 3 tile block of the starfield kept within half a tile of the camera, scrolling at StarsParallax in both axes.</summary>

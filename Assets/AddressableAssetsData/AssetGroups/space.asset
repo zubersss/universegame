@@ -140,6 +140,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5f85f35b8fcf20e438e799403d23a8c1
+    m_Address: planets/sun/disc_rig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6cc59233d18e7dd4faa01c0e715fce4e
     m_Address: planets/earth/luna/json
     m_ReadOnly: 0
@@ -207,6 +212,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9441d7f69961df24aa5f3fcd3e75ae53
     m_Address: backgrounds/space/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9653f8850af586a448345dd666b13047
+    m_Address: planets/sun/disc_rig/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

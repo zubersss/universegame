@@ -29,7 +29,8 @@ namespace Meridian.Tests
 
             yield return WaitLayers(backdrop);
             Assert.AreEqual(PlanetId.Earth, backdrop.Planet);
-            Assert.AreEqual(3, backdrop.LayersLoaded, "Earth layer0..2");
+            Assert.IsTrue(backdrop.SetReady(backdrop.MainSet), $"Earth layer0..2 loaded ({backdrop.MainSet})");
+            Assert.AreEqual(backdrop.DepthBandsOn ? 1 : 3, backdrop.LayersLoaded, "drawn layers: the sky only under the depth bands (U-076), else all three");
             Assert.AreEqual(PlanetBackdrop.Tinted(PlanetBackdrop.SkyColor(PlanetId.Earth), backdrop.Tint), director.PlanetSide.sideCamera.backgroundColor, "sky color × day/night tint");
             AssertLayersTileInX(backdrop);
 
@@ -37,7 +38,8 @@ namespace Meridian.Tests
             yield return director.LoadPlanetSide(mars);
             yield return WaitLayers(backdrop);
             Assert.AreEqual(PlanetId.Mars, backdrop.Planet);
-            Assert.AreEqual(3, backdrop.LayersLoaded, "Mars layer0..2");
+            Assert.IsTrue(backdrop.SetReady(backdrop.MainSet), $"Mars layer0..2 loaded ({backdrop.MainSet})");
+            Assert.AreEqual(backdrop.DepthBandsOn ? 1 : 3, backdrop.LayersLoaded, "drawn layers per the depth bands (U-076)");
             Assert.AreEqual(PlanetBackdrop.Tinted(PlanetBackdrop.SkyColor(PlanetId.Mars), backdrop.Tint), director.PlanetSide.sideCamera.backgroundColor, "sky color × day/night tint");
             AssertLayersTileInX(backdrop);
             LogAssert.NoUnexpectedReceived();
@@ -78,7 +80,7 @@ namespace Meridian.Tests
             cam.transform.position = new Vector3(border - 50f, y, cam.transform.position.z);
             float until = Time.realtimeSinceStartup + 10f;
             yield return null;
-            while (Time.realtimeSinceStartup < until && !(b.MainSet == "earth" && b.LayersLoaded == 3)) yield return null;
+            while (Time.realtimeSinceStartup < until && !(b.MainSet == "earth" && b.SetReady("earth"))) yield return null;
             until = Time.realtimeSinceStartup + 10f;
             while (!b.SetReady("earth_desert") && Time.realtimeSinceStartup < until) yield return null; // preloaded ≤ 60 m ahead
             Assert.IsTrue(b.SetReady("earth_desert"), "the desert set is loaded before the border");
@@ -101,7 +103,8 @@ namespace Meridian.Tests
             yield return null;
             Assert.AreEqual("earth_desert", b.MainSet, "past the window the desert set is the backdrop");
             Assert.IsNull(b.OverlaySet);
-            Assert.AreEqual(3, b.LayersLoaded, "already loaded: no pop-in");
+            Assert.IsTrue(b.SetReady("earth_desert"), "already loaded: no pop-in");
+            Assert.AreEqual(b.DepthBandsOn ? 1 : 3, b.LayersLoaded, "drawn layers per the depth bands (U-076)");
             LogAssert.NoUnexpectedReceived();
         }
 
@@ -117,7 +120,7 @@ namespace Meridian.Tests
         static IEnumerator WaitLayers(PlanetBackdrop b)
         {
             float timeout = Time.realtimeSinceStartup + 10f;
-            while (b.LayersLoaded < 3 && Time.realtimeSinceStartup < timeout) yield return null;
+            while (!(b.MainSet != null && b.SetReady(b.MainSet)) && Time.realtimeSinceStartup < timeout) yield return null;
         }
 
         static void AssertLayersTileInX(PlanetBackdrop b)
@@ -125,7 +128,8 @@ namespace Meridian.Tests
             int quads = 0;
             foreach (var mr in b.GetComponentsInChildren<MeshRenderer>(true)) if (mr.name.StartsWith("Backdrop")) quads++;
             Assert.AreEqual(1, quads, "one quad, one pass for sky + 3 layers");
-            for (int i = 0; i < 3; i++)
+            // U-076: under the depth bands only the sky layer is applied to the quad (layers 1–2 are meshes); D-124.
+            for (int i = 0; i < (b.DepthBandsOn ? 1 : 3); i++)
             {
                 var tex = b.LayerTexture(i);
                 Assert.NotNull(tex, $"layer{i}");
