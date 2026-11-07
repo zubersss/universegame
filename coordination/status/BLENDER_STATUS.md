@@ -1,7 +1,8 @@
 # BLENDER STATUS
-Updated: 2026-11-07 08:29 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 08:35 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
+LEAD cycle 265: B-146 + B-147 DONE as designs; cards B-151 (UI export) / B-152 (Venus backdrops, studies in a free <= 5 min slot) / B-153 / B-154 in Backlog; B-155 Jupiter design prep Ready. 08:28:49-08:31:26 SLOT (numpy, B-152 Venus studies, released, 157 s, 559 MB): surface DONE (review_b147_venus_surface_preview.png: haze bands, terraced tesserae lit by vent glows, glassy glints, rain that stops mid-air); deck studied, then fixed in code (88ccee89: cumulus towers with a following cream lining, the airship station above the cloud tops) - its ~80 s re-run waits for a free slot (no want filed). 08:34: UNITY holds the lock, 0.25 GB free: code only (the Venus rig-set source, B-146 export readiness code, the Mercury export rows, B-155 notes).
 08:19-08:28 lock-free (no lock held): B-147 the four Venus creature reviews DONE (6d5f7337: drifter, acidmoth, crab, eel; problems none, ink 2.00-3.00 / 1.00-1.50, palette 100 %, <= 198 MB; crab crust + rim + bigger claws, eel thicker, eel bump head drop damped) - ready for LEAD; props/venus/vent_mouth DONE (d8ac7e69: 96x40 den on VENT_TOP, den review json valid, palette 100 %, 108 MB) - ready for LEAD; the Venus backdrop stub smoke test DONE (deck + surface build, 233 MB). Next: the Mercury export dry runs, report upkeep.
 08:0x-08:1x lock-free: B-146 full UI preview DONE (3715aa62: review_b146_ui_preview.png, the five 9-slice panels at 1x + stretched with Patrick Hand text, the switch, the Earth / Mars / Mercury title cards at 1x; 247 MB) - ready for LEAD; B-147 Venus plants preview DONE (review_b147_venus_plants_preview.png, drawn 1.6x, palette 100 %; 301 MB) - ready for LEAD. Next: the four Venus creature reviews (one measured run each), the Venus backdrop stub smoke test, the Mercury export dry runs.
 LEAD cycle 264: the Glassback + the day / twilight studies ACCEPTED; every Mercury creature accepted; Mercury cards B-148 / B-149 / B-150 in Backlog (after U-118). 07:55:26-07:57:22 SLOT: the Mercury night study DONE (review_b145_mercury_night_preview.png, seams 0.68 / 0.66 / 0.63, 559 MB): B-145 can close. Lock-free order now: B-146 Earth + Mercury title cards + the full UI preview; B-147 plants preview, the four Venus creature reviews (one measured run each; key frames already in bounds); the Venus backdrop sources DONE (1d646544: deck + surface, code; the stub smoke test waits for RAM); the Mercury export dry runs; report upkeep. 07:59: UNITY holds the lock (batch B re-measure), 0.29 GB free: code only.
@@ -48,4 +49,4 @@ none.
 none.
 
 ## HeavyJobLock
-none held, no want on file (the night slot released 07:57:22).
+none held, no want on file (the Venus studies slot released 08:31:26; UNITY holds the lock at 08:34).
