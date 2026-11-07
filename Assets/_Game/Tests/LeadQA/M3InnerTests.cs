@@ -231,7 +231,7 @@ namespace Meridian.Tests.LeadQA
 
             // Fly the Pilgrim over the Meridian station and hold it there while the deck loads.
             var station = PoiCatalog.MeridianStation;
-            float deck = station.floatY + (336f - 62f) / 128f; // as VenusPlayTests.Deck
+            float deck = station.floatY + (336f - 62f) / 128f; // the old card's rows: a hover estimate only; the real deck is read from the colliders below (D-124)
             var ship = side.ship;
             ship.externalInput = true;
             ship.intent = default;
@@ -243,6 +243,12 @@ namespace Meridian.Tests.LeadQA
                 yield return new WaitForFixedUpdate();
             } while ((side.pois.Solids.Count < 5 || !side.terrain.IsSettled) && Time.realtimeSinceStartup < timeout);
             Assert.GreaterOrEqual(side.pois.Solids.Count, 5, "station deck colliders loaded");
+
+            // D-124 / R1: the deck is the station prop's declared collider top, as VenusPlayTests.Deck.
+            float deckTop = float.NegativeInfinity;
+            foreach (var c in side.pois.Solids) if (c != null && Mathf.Abs(c.bounds.center.x - (station.x + 10f)) < 40f) deckTop = Mathf.Max(deckTop, c.bounds.max.y);
+            Assert.Greater(deckTop, float.NegativeInfinity, "a station collider within 40 m of the hover column");
+            deck = deckTop;
 
             // Powered landing onto the deck: no docking bay, no clamp.
             float? touchdown = null;
