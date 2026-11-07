@@ -1,6 +1,6 @@
 # LEAD STATUS
 Updated: 2026-11-06 18:1x · Session: 6 · Review cycle: 238
-Cycle 238: five cards Done (U-097, U-099, B-112, B-114, B-116), B-113 art accepted, D-095/D-096, B-118 added. C0 close path: U-100 → U-101 → U-098 (assembly + profile) with B-118 and the gull in; then LEAD runs §9.7 per asset, writes C0_STYLE_REFERENCE.md, posts the owner look-over.
+Cycle 238: five cards Done (U-097, U-099, B-112, B-114, B-116), B-113 art accepted, D-095/D-096, B-118 added. C0 close path: U-100 → U-101 → U-098 (assembly + profile) with B-118 and the gull in; then LEAD runs §9.7 per asset, writes C0_STYLE_REFERENCE.md, posts the owner look-over. C1 promoted (D-097): code/sources now, exports after C0 sign-off.
 Cycle 237: U-095, U-096 Done; U-100, U-101 added. C0 now waits mostly on BLENDER art (B-112, B-113, B-114). Next review: B-112 face plant sheet.
 Cycle 236: B-115 Done; U-095 accepted, Done owed on a tests entry with the final code (rides on U-096 check); D-094 contention ruling; P-39 settings panel to Backlog. Next: B-112 face plant review; U-096 iris strip.
 Cycle 235: U-093, U-094, B-111 Done on check 7 + the earth_c0 capture; D-092/D-093; U-099, B-116, B-117 added. Next review items: B-112 face plant, U-095 film pass capture (closes B-115).

@@ -175,6 +175,36 @@ Files: Assets/_Game/Code/Editor/SceneCapture.cs, tools/unity_profile.ps1, Code/R
 Depends: U-094
 Lead notes: Cycle 237. Lock-free code; one capture + profile when the lock is free.
 
+> **C1 (D-097, cycle 238): code and sources may start now, lock-free; exports, captures and Done wait for the C0 approval (U-098 + LEAD's §9.7 pass).** Order: U-091, U-103, U-105, U-104, U-106.
+
+### U-103 · UNITY · Ready · C1
+Goal: Ship and space on v3 sprites: the Pilgrim side and top views from BLENDER's sheets (B-122; placeholder blobs until then) with thrust = stretch, cut thrust = squash (SquashStretch on the ship root), round puff exhaust as a 12 fps sprite FX loop (no particles); the eight planet discs (B-119) as sprites with their personality idle clips, the painted starfield + nebula cards (B-120) as parallax layers in the Space scene; the camera and physics untouched (§3, §5).
+Accept: SpaceArtTests: every planet key resolves to a disc sprite (placeholders count) at its §3 size; the exhaust loop runs at 12 fps; thrust stretch 1.15 / cut squash 0.9 on the ship root (EditMode); M1LoopTests unchanged; a Space capture with every disc visible.
+Files: Code/Runtime/Ship/, Code/Runtime/Space/, Placeholders/space/, Tests/
+Depends: U-094
+Lead notes: Cycle 238. Code on placeholders now; art swaps by key.
+
+### U-104 · UNITY · Ready · C1
+Goal: Cartoon HUD: Suit power, oxygen and the gravity readout as BLENDER's gauge sprites (B-121; placeholder dials until then), needles stepped at 12 Hz, a wobble on change; the Escape Line as the hand-painted dotted line with its little sign (B-121) replacing the band; fonts per D-090 (Limelight titles, Patrick Hand HUD, OFL.txt beside each, credited).
+Accept: MenuHudTests: the three gauges track their meters within 1 % at the 12 Hz step; the Escape Line sign sits at the line's altitude; fonts load from the project (test); a HUD capture at 1080p.
+Files: Code/Runtime/UI/HUD/, Assets/_Game/Fonts/, docs/credits/unity.md
+Depends: U-094
+Lead notes: Cycle 238. The current HUD stays until the swap is complete; one commit.
+
+### U-105 · UNITY · Ready · C1
+Goal: Surveyor full Animator at 12 fps: every clip on `characters/surveyor/side` (incl. B-116's and the C1 dig, build, surprise, jetpack, climb_in once BLENDER adds them) wired to the controller states with stand-ins for the missing ones; eye-pop (surprise) and smear hooks (dash) as animation events; the SpriteCharacterView flip and squash root unchanged.
+Accept: SurveyorAnimTests: each controller state resolves to a real clip or a named stand-in (listed in the report); events fire on the right frames (EditMode); CartoonSmokeTests green.
+Files: Code/Runtime/View2D/SpriteCharacterView.cs, Code/Editor/SheetAnimatorBuilder.cs, Tests/
+Depends: U-094
+Lead notes: Cycle 238. Small; the builder already does most of it.
+
+### U-106 · UNITY · Ready · C1
+Goal: C1 exit measurement: the Space scene and the Earth → Space → Mars loop on the new art profiled against D-089 (working set < 2.0 GB, warn 1.7; textures ≤ 512 MB; ≤ 8 atlases per planet; ≤ 40 animated objects); `M1LoopTests` pass with the v3 art; `reports/unity/c1_<date>/` with the Space capture set.
+Accept: perf rows green for Space, Earth, Mars; M1LoopTests 2 runs green; the report.
+Files: reports/unity/c1_<date>/, tools/unity_profile.ps1
+Depends: U-091, U-103, U-104, U-105, B-119, B-120, B-121, B-122
+Lead notes: Cycle 238. Last C1 card; LEAD writes C1_REPORT.md on it.
+
 
 > **R1 (D-062).** 2D tasks U-061..U-071 are Superseded (their code and sources stay in the tree and
 > get reused). R-tasks below rebuild Earth in 3D while keeping every system.
@@ -259,7 +289,7 @@ Lead notes: Cycle 220. Build it on placeholders first; B-104/B-105 swap in throu
 
 ### U-091 · UNITY · Ready · C1
 Goal: Residency and streaming for budgets v3: `TerrainStreamer` keeps chunks within 3 of the camera (was 2); per-planet Addressable groups verified exclusive (the current planet + `common` + `ui` + `space` only; the previous planet's groups and stage sets released within 5 s of a transition); texture mip streaming on with a 1.5 GB budget; `BudgetMonitor` Residency row from handle counts and the streaming budget; audio ≤ 150 MB with music streamed; `ArtImporter` rejects a planet's newest layer when the planet's layer textures exceed 700 MB stored (contract §10).
-Accept: PlayMode `ResidencyTests`: Earth → Space → Mars → Space → Earth: after each hop the released planet's handles are 0 within 5 s and the working set returns to within 10 % of the first visit; perf rows for all five scenes: working set ≤ 4.5 GB, textures ≤ 2.0 GB; planet load ≤ 5 s; transition ≤ 1.5 s; no hitch > 33 ms while streaming at run speed with radius 3.
+Accept: PlayMode `ResidencyTests`: Earth → Space → Mars → Space → Earth: after each hop the released planet's handles are 0 within 5 s and the working set returns to within 10 % of the first visit; perf rows for all five scenes per D-089: working set < 2.0 GB (warn 1.7), textures ≤ 512 MB, ≤ 8 atlases per planet; planet load ≤ 5 s; transition ≤ 1.5 s; no hitch > 33 ms while streaming at run speed with radius 3. (Rewritten cycle 238; the Goal's v3 numbers (1.5 GB mip budget, 700 MB stored) are superseded by D-089: mip streaming stays on with a 512 MB budget; the importer cap becomes 512 MB of textures per planet.)
 Files: Assets/_Game/Code/Runtime/Terrain/TerrainStreamer.cs, Assets/_Game/Code/Runtime/Perf/BudgetMonitor.cs, Assets/_Game/Code/Editor/ArtImporter.cs, Assets/AddressableAssetsData/, Assets/_Game/Tests/Play/ResidencyTests.cs
 Depends: U-086
 Lead notes: Cycle 220. Lock-free coding; its measurement joins U-090's check. Cycle 225: first evidence from U-086's probe (perf_2026-11-06.md 10:42, Residency row): after Mars entry planet_earth still holds 7 handles at 5.0 s and the resident list is common, planet_earth, planet_mars, planet_mars_flora, planet_mars_plains, planet_space, planet_warden, planet_waystation, session, space, ui. Find the 7 holders first (ArtLoad wraps every load; log the keys); the fix is release on transition, not a longer timeout. Cycle 231: when this card is promoted for C1, its memory rows follow D-089 (working set < 2.0 GB, textures ≤ 512 MB), not the v3 numbers above; LEAD rewrites the Accept line at promotion.
@@ -883,6 +913,32 @@ Accept: the review sheet at 1x on the B-114 plains (not the flat placeholder) sh
 Files: blender/scripts/build_surveyor_v3.py, blender/review.py, Assets/_Game/Art/characters/surveyor/
 Depends: B-116
 Lead notes: Cycle 238. Before B-117. One heavy export under the gate and D-091.
+
+> **C1 (D-097, cycle 238): sources may start now, lock-free; exports and Done wait for the C0 approval (U-098 + LEAD's §9.7 pass).** Order: B-118, B-117, B-122, B-119, B-120, B-121.
+
+### B-119 · BLENDER · Ready · C1
+Goal: The eight planet discs for the space view (§9.3, contract §11.5): painted watercolour discs with ink outlines that still read as the real planets (bands, rings, caps, Earth's Luna beside it), each with a subtle personality idle (≤ 12 frames at 12 fps, e.g. Jupiter's bands swirl, Saturn's rings wobble, Neptune frowns); one sheet per planet ≤ 2048, sizes per §3 at the space camera's PPU.
+Accept: §9.7 per disc; a review sheet with all eight side by side at the space scale plus 2× detail; originality line per disc.
+Files: blender/scripts/build_discs_v3.py, Assets/_Game/Art/space/discs/<planet>/
+Depends: B-110
+
+### B-120 · BLENDER · Ready · C1
+Goal: Painted starfield (2048² tileable, paper grain, soft ink stars of 3 sizes, no seam) + 3 nebula cards (≤ 1024², alpha, soft bleed) for the Space parallax (contract §11.4), Earth-palette night tones.
+Accept: 2× tiled preview with no seam; ≤ 4 MB per PNG; json with parallax factors.
+Files: blender/scripts/gen_painted_bg.py, Assets/_Game/Art/space/starfield/, Assets/_Game/Art/space/nebula/
+Depends: B-110
+
+### B-121 · BLENDER · Ready · C1
+Goal: Cartoon HUD art (§9.3): three gauges (Suit power, oxygen, gravity readout) as dial faces + needles on one 1024² sheet with ink and paper, the Escape Line as a hand-painted dotted line tile (512×64) with its little sign (≤ 256²); Patrick Hand lettering on the sign only (D-090).
+Accept: §9.7 (ink, cel, palette, original); the review sheet composes the HUD at 1080p over the B-114 plains.
+Files: blender/scripts/build_hud_v3.py, Assets/_Game/Art/ui/hud/
+Depends: B-110
+
+### B-122 · BLENDER · Ready · C1
+Goal: B-117 step 2 (after LEAD's OK on the design sheet): the Pilgrim side sheet (idle 8 with fin wobble, thrust 8 stretch, cut 6 squash, land 8) and top sheet (idle 8, thrust 8) at 12 fps, plus the exhaust puff loop (8 frames, ≤ 128²); ≈ 12 m long = 768 px at PPU 64, so the side sheet may split to `side_a/side_b` (tell UNITY in your status).
+Accept: §9.7 per sheet; clips within caps; json valid; review sheet at 1x beside the surveyor on the plains.
+Files: blender/scripts/build_pilgrim_v3.py, Assets/_Game/Art/ships/pilgrim/
+Depends: B-117
 
 
 > **R1 (D-062).** 2D tasks B-056..B-076 are Superseded; their `.blend` sources (rigs, props,
@@ -1658,8 +1714,7 @@ Lead notes: Done 554e14f (cycle 24): hauler hulls/cargo, Warden pylon, Meridian 
 ## Backlog (not yet Ready; LEAD promotes)
 
 > **C1 (Step 2, D-086): promoted when LEAD approves the C0 style test.** All Depends: C0 approval.
-- B-116 surveyor full clip set (run, fall, dig, build, bump, surprise, conk_out, jetpack, climb_in) · B-117 Pilgrim side + top sheets (face front, wobbling fins, puff exhaust; thrust stretch / cut squash) · B-118 eight planet discs with personality idles (§11.5) · B-119 painted starfield + 3 nebula cards · B-120 HUD gauges (Suit power, oxygen, gravity) + Escape Line dotted line and sign.
-- U-099 ship and space view on v3 sprites (discs, starfield parallax, puff exhaust FX) · U-100 cartoon HUD gauges + Escape Line sign · U-101 surveyor full Animator at 12 fps with smear/eye-pop hooks · U-102 Space profile < 2 GB and M1LoopTests with the new art · U-091 (whole-planet unload: the Residency leak) is the first C1 card.
+- Promoted cycle 238 (D-097) with fresh numbers: B-119 discs, B-120 starfield, B-121 HUD art, B-122 Pilgrim sheets; U-103 ship + space, U-104 HUD, U-105 surveyor Animator, U-106 C1 measurement; U-091 first. Still Backlog for C1: surveyor dig/build/surprise/jetpack/climb_in clips (B-12x after B-122).
 M2: Earth/Mars POIs, day/night lighting pass (U), Mars dust storm (U), creature AI v1 (U),
 Cryo meter (U), `PlanetDisc` shader with real textures (U). (POI prop sets promoted to B-020, B-021 in cycle 5.)
 R3 (drafted cycle 207): U-085 Mercury and Venus in 3D (the R3 counterpart of U-081: B-091 block arrays, B-092 bands incl. the translucent Venus deck strip and the day/twilight/night Mercury skydomes, B-093/B-096 creatures and Wardens through ModelView, B-095 props and station modules via ModelSwap, B-101 scenery; the cinderhulk emission float driven by the day side; the veil serpent chained from veil_serpent_tail + n×body + head, each module's clip offset by J×0.07 cycles for J bones behind it; M3InnerTests + the M3 smoke set re-shot with the depth preset). Promote when U-081 is Done.
