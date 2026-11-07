@@ -1,20 +1,22 @@
 """B-146 (C3 UI art designs; contract v3.1 §11.6): paper panels as 9-slice sheets ("slice": [l, t, r, b] in the json), the
 planet title cards ui/titlecards/<planet> (<= 1920x540, the name lettered in Limelight as drawn ink, one painted vignette,
 intertitle style) and the Film-effects toggle's switch. Earth palette for the paper, each planet's palette for its card.
-Previews only; nothing exports until a C3 export card.
+export() writes them for B-151 (render.py's ui_set row); nothing exports until that card opens.
 
   ui/panels/pause      192x192  slice 48 48 48 48  cream paper, a mustard rule inside the ink edge, corner curls
   ui/panels/settings   192x224  slice 48 80 48 48  the same paper with a teal header band (U-102's settings)
   ui/panels/inventory  192x192  slice 48 48 48 48  a darker card paper with an umber rule and stitched corners
   ui/panels/sign       192x128  slice 40 40 40 40  a hand-painted wooden sign: mustard boards, umber grain, four nails
   ui/panels/scroll     256x160  slice 64 28 64 28  a parchment with rolled ends (the rolls live in the l / r slices)
-  ui/titlecards/<earth|mars|mercury>  1600x450  an ornate double ink border, a painted oval vignette, the name in Limelight
-  ui/hud/film_switch   64x96 x2  the Film-effects toggle: a brass lever on a round plate, frame 0 off, frame 1 on
+  ui/titlecards/<earth|mars|mercury>  1600x450 (exported 1600x452: one transparent row top + bottom for BC7) an ornate
+                                      double ink border, a painted oval vignette, the name in Limelight
+  ui/hud/film_switch   64x96 x2  the Film-effects toggle: a brass lever on a round plate; one 132x96 sheet, parts off / on
 
 Lettering: Limelight and Patrick Hand are read straight from their TTFs (a minimal TrueType reader: cmap 4, loca, glyf,
 hmtx; quadratic curves flattened; contours filled even-odd), then drawn as ink with a slight hand wobble.
 
-  python -I build_ui_v3.py <preview png>       lock-free preview
+  python -I build_ui_v3.py <preview png>                    lock-free preview
+  python -I build_ui_v3.py --export <art dir> [--ss N]      the export into a scratch tree (the dry run)
 """
 import math
 import os
@@ -489,8 +491,103 @@ def film_switch(on):
     return c.render(47 + int(on))
 
 
+# ---------------------------------------------------------------- the export (B-151; contract §11.6)
+CARDS = ("earth", "mars", "mercury")
+SWITCH_KEY = "ui/hud/film_switch"
+SWITCH_PIVOT = [0.5, 0.375]          # the lever's hub on the plate (32, 60 px from the top of 64x96)
+
+
+def keys(cards=CARDS):
+    return [f"ui/panels/{n}" for n in PANELS] + [f"ui/titlecards/{p}" for p in cards] + [SWITCH_KEY]
+
+
+def pad4(img):
+    """Transparent rows / columns split around the image so both sides are multiples of 4 (BC7 blocks)."""
+    h, w = img.shape[:2]
+    ph, pw = -h % 4, -w % 4
+    return np.pad(img, ((ph // 2, ph - ph // 2), (pw // 2, pw - pw // 2), (0, 0)))
+
+
+def panel_meta(name, img):
+    pw, ph, sl, _fn = PANELS[name]
+    meta = {"key": f"ui/panels/{name}", "style": "v3", "ppu": PPU, "pivot": [0.5, 0.5], "width": pw, "height": ph, "slice": list(sl),
+            "slice_order": "[left, top, right, bottom] px in from each edge (contract 11.6); Unity's Sprite.border is (left, bottom, right, top)",
+            "lettering": "runtime", "lettering_note": "blank panel; UNITY letters it in Patrick Hand"}
+    p = []
+    l_, t_, r_, b_ = sl
+    if img.shape[:2] != (ph, pw):
+        p.append(f"png {img.shape[1]}x{img.shape[0]} is not {pw}x{ph}")
+    if pw % 4 or ph % 4:
+        p.append(f"{pw}x{ph} not a multiple of 4")
+    if l_ + r_ >= pw or t_ + b_ >= ph:
+        p.append(f"slice {sl} leaves no stretchable centre in {pw}x{ph}")
+    return meta, p
+
+
+def card_meta(planet, img):
+    h, w = img.shape[:2]
+    meta = {"key": f"ui/titlecards/{planet}", "style": "v3", "ppu": PPU, "pivot": [0.5, 0.5], "width": w, "height": h, "palette": planet,
+            "lettering": "baked", "lettering_note": f"{planet.upper()} in Limelight + the subtitle in Patrick Hand, drawn as ink (B-146)",
+            "note": f"designed {CARD_W}x{CARD_H}; padded with transparent rows to {w}x{h} (BC7 blocks)"}
+    p = []
+    if w > 1920 or h > 540:
+        p.append(f"{w}x{h} over 1920x540")
+    if w % 4 or h % 4:
+        p.append(f"{w}x{h} not a multiple of 4")
+    return meta, p
+
+
+def switch_sheet():
+    """The two switch frames side by side (gutter 4) + a parts json in the gauges.json manner (rects bottom-left)."""
+    frames = [film_switch(on)[0] for on in (False, True)]
+    fh, fw = frames[0].shape[:2]
+    g = v3.GUTTER
+    sheet = np.zeros((fh, 2 * fw + g, 4), np.uint8)
+    sheet[:, :fw] = frames[0]
+    sheet[:, fw + g:] = frames[1]
+    meta = {"key": SWITCH_KEY, "style": "v3", "ppu": PPU, "rect_origin": "bottom_left",
+            "parts": [{"name": "off", "rect": [0, 0, fw, fh], "pivot": SWITCH_PIVOT}, {"name": "on", "rect": [fw + g, 0, fw, fh], "pivot": SWITCH_PIVOT}],
+            "note": "the Film-effects toggle: off = the lever down-left with an umber knob, on = up-right with a red knob; swap the part on toggle"}
+    p = [] if sheet.shape[1] % 4 == 0 and fh % 4 == 0 else [f"switch sheet {sheet.shape[1]}x{fh} not a multiple of 4"]
+    return sheet, meta, p
+
+
+def export(art, ss_card=4, cards=CARDS):
+    """Writes ui/panels/<name>, ui/titlecards/<planet>, ui/hud/film_switch (_color.png + .json) under `art`; raises on any
+    check before writing anything. -> [(key, w, h, bytes)]"""
+    import json
+    from meridian import pngio
+    built, problems = [], []
+    for name, (pw, ph, sl, fn) in PANELS.items():
+        img, _w = fn(pw, ph, sl)
+        meta, p = panel_meta(name, img)
+        built.append((meta["key"], img, meta))
+        problems += [f"{name}: {x}" for x in p]
+    for planet in cards:
+        img, _w = title_card(planet, ss=ss_card)
+        img = pad4(img)
+        meta, p = card_meta(planet, img)
+        built.append((meta["key"], img, meta))
+        problems += [f"{planet} card: {x}" for x in p]
+    sheet, meta, p = switch_sheet()
+    built.append((SWITCH_KEY, sheet, meta))
+    problems += [f"film_switch: {x}" for x in p]
+    if problems:
+        raise ValueError("UI export checks: " + "; ".join(problems))
+    out = []
+    for key, img, meta in built:
+        base = os.path.join(art, *key.split("/"))
+        os.makedirs(os.path.dirname(base), exist_ok=True)
+        n = pngio.write_png(base + "_color.png", img)
+        with open(base + ".json", "w", encoding="utf-8", newline="\n") as f:
+            json.dump(meta, f, indent=2)
+            f.write("\n")
+        out.append((key, img.shape[1], img.shape[0], n))
+    return out
+
+
 # ---------------------------------------------------------------- the lock-free preview
-def preview(out):
+def preview(out, note="preview (not exported)"):
     sys.path.insert(0, os.path.dirname(HERE))
     import review
     widths = []
@@ -535,10 +632,15 @@ def preview(out):
                         f"{max(w[2] for w in inner):.1f} px; lettering read from the ttfs (limelight, patrick hand); no faces", 6, 8)
     rows.append(foot)
     img = np.vstack(rows)
-    review._label(img, __import__("time").strftime("%m-%d %H:%M") + " preview (not exported)", 2, img.shape[0] - 16)
+    review._label(img, __import__("time").strftime("%m-%d %H:%M") + " " + note, 2, img.shape[0] - 16)
     review.write(out, img)
     print("written", out, img.shape)
 
 
 if __name__ == "__main__":
-    preview(sys.argv[1])
+    if sys.argv[1] == "--export":
+        _ss = int(sys.argv[sys.argv.index("--ss") + 1]) if "--ss" in sys.argv else 4
+        for _k, _w, _h, _n in export(sys.argv[2], ss_card=_ss):
+            print(f"{_k} {_w}x{_h} {_n // 1024} KB")
+    else:
+        preview(sys.argv[1])

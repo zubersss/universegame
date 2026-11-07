@@ -1024,6 +1024,33 @@ def do_hud(entry, preview):
              + f" | escape_line {seam} | sign blank (lettered at runtime, U-104) | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
 
 
+def do_ui_set(entry, preview):
+    """B-151 (from B-146; contract 11.6): ui/panels/{pause,settings,inventory,sign,scroll} as 9-slice PNGs with "slice" in
+    the json, ui/titlecards/{earth,mars,mercury} (<= 1920x540), ui/hud/film_switch (parts off / on), fakegp + numpy;
+    the checks raise inside export() before anything is written; the review re-renders the preview, stamped."""
+    from meridian import fakegp
+    t0 = time.time()
+    if preview:
+        raise AssetError(f"{entry['key']}: no preview mode (python build_ui_v3.py <png>)")
+    import build_ui_v3 as UI
+    fakegp.install()                    # an earlier review script in this batch may have restored gp_draw.mat
+    try:
+        try:
+            out = UI.export(ART, ss_card=int(entry.get("card_ss", 4)))
+        except Exception:
+            for k in UI.keys():
+                mark_stale(k, True)
+            raise
+        UI.preview(os.path.join(PREVIEW, f"review_{entry.get('review_name', 'b151_ui')}.png"), note=f"exported {time.strftime('%m-%d %H:%M')}")
+    finally:
+        fakegp.restore()
+    for k, _w, _h, _n in out:
+        mark_stale(k, False)
+    mark_stale(entry["key"], False)
+    log_line(f"OK {entry['key']} | " + ", ".join(f"{k.split('/', 1)[1]} {w}x{h} {n // 1024}KB" for k, w, h, n in out)
+             + f" | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
+
+
 def do_icon_set(entry, preview):
     """B-128: v3.1 tile-item icons (icons/<item>/base, 64x64) drawn with fakegp + numpy (no scene);
     the preview sheet doubles as the review."""
@@ -1145,6 +1172,8 @@ def do_asset(entry, preview):
         return do_ground_strip_set(entry, preview)
     if entry.get("icon_set"):           # v3.1 tile-item icons (B-128)
         return do_icon_set(entry, preview)
+    if entry.get("ui_set"):             # v3.1 C3 UI: panels, title cards, the film switch (B-151)
+        return do_ui_set(entry, preview)
     if entry.get("disc_set"):           # v3 §11.5 planet discs (B-119, D-098)
         return do_disc_set(entry, preview)
     if entry.get("space_starfield"):    # v3 §11.4 space starfield + nebula cards (B-120)
