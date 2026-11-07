@@ -98,13 +98,14 @@ def puffpod(d, M, p):
     lo = [q for q in ball if q[1] < cz - 0.25 * rz]
     G.stroke(S, lo + [(0.0, cz - 0.25 * rz)], M["olive_sh"], 0.0, cyclic=True)
     G.stroke(S, [q for q in ball if q[1] < cz - 0.75 * rz and q[0] > -0.05] + [(0.05, cz - 0.75 * rz)], M["olive_dp"], 0.0, cyclic=True)
-    for k, (x, z) in enumerate(((-0.10, 0.10), (0.06, 0.14), (0.12, 0.02), (-0.04, -0.02), (0.02, 0.07), (-0.13, -0.05))):
+    for k, (x, z) in enumerate(((-0.13, -0.03), (0.11, -0.09), (-0.03, -0.13), (0.15, 0.07), (-0.07, 0.03), (0.04, -0.03))):   # irregular, mostly low: no flanking pair (D-101)
         G.stroke(S, G.lumpy_ellipse(x * rx / 0.22, cz + z * rz / 0.21, 0.016, 0.013, n=8, seed=90 + k), M["umber_f"], 0.0, cyclic=True)
     if df > 0.2:                                                     # wrinkles while deflated
         for k in range(3):
             x = -0.10 + 0.10 * k
             G.seam(S, [(x - 0.02, cz + 0.05), (x + 0.01, cz), (x - 0.01, cz - 0.05)], M["ink"])
-    G.seam(S, G.bezier((-0.16, cz + 0.06), (0.0, cz + 0.13), (0.15, cz + 0.05), n=6), M["ink"])
+    G.seam(S, G.bezier((-0.19, cz - 0.01), (-0.15, cz + 0.08), (-0.07, cz + 0.13), n=6), M["ink"])        # two short pod seams, off-centre and offset
+    G.seam(S, G.bezier((0.09, cz - 0.12), (0.15, cz - 0.07), (0.18, cz + 0.01), n=6), M["ink"])        # (one centred arc between two dots read as an eye, D-101)
     G.stroke(S, ball, M["ink"], O, cyclic=True)
     t = p.get("puff")
     if t is not None:                                                # a round dust puff out of the top
@@ -238,6 +239,38 @@ def mars_strip(W, H):
     return bg, H - 40
 
 
+def preview_one(out_dir, name):
+    """One plant only (a D-101 fix re-preview): 1x on the Mars stand-in beside the surveyor, idle + react at 2x."""
+    import numpy as np
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    import preview_c2_earth_rigs as PR
+    W = 1960
+    scene, ground = mars_strip(W, 300)
+    img, w = render(name, poses(name)[0][0])
+    review._over(scene, img, 40, ground - FH + 8)
+    try:
+        fr, piv = PR.surveyor_frame()
+        review._over(scene, fr, 220, ground - fr.shape[0] + int(round(piv[1] * fr.shape[0])) + 8)
+    except Exception:  # noqa: BLE001
+        pass
+    review._label(scene, f"{name} at 1x beside the surveyor (re-preview after the d-101 change)", 6, 6)
+    idle, react = poses(name)
+    r = np.tile(review.PAPER, (FH * 2 + 30, W, 1)).astype(np.float32)
+    for j, pz in enumerate(idle + react):
+        im, _w = render(name, pz, scale=2, seed=11 + j)
+        xx = 8 + j * (FW * 2 - 100) + (24 if j >= 8 else 0)
+        if xx + FW * 2 <= W:
+            review._over(r, im, xx, 24)
+    review._label(r, f"{name}: idle 8 | react 4 at 2x", 6, 4)
+    out = np.vstack([scene, r])
+    review._label(out, __import__("time").strftime("%m-%d %H:%M") + " preview (not exported)", 2, out.shape[0] - 16)
+    path = os.path.join(out_dir, f"review_b139_mars_{name}_preview.png")
+    review.write(path, out)
+    hits, off = v3.palette_hits(img, "mars")
+    print("written", path, f"palette {hits * 100:.1f}%")
+
+
 def preview(out_dir):
     import numpy as np
     sys.path.insert(0, os.path.dirname(HERE))
@@ -297,4 +330,7 @@ def preview(out_dir):
 
 
 if __name__ == "__main__":
-    preview(sys.argv[1])
+    if len(sys.argv) > 2:
+        preview_one(sys.argv[1], sys.argv[2])
+    else:
+        preview(sys.argv[1])
