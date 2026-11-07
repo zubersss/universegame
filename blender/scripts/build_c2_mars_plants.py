@@ -90,29 +90,35 @@ def puffpod(d, M, p):
     hose_stem(S, M, G.bezier((0.0, 0.0), (0.02, 0.12), (0.0, 0.22), n=6), 0.07, rib_every=0.1)
     leaf(S, M, (0.0, 0.05), math.radians(165), 0.20, 0.06, veins=1)
     leaf(S, M, (0.0, 0.07), math.radians(15), 0.18, 0.055, veins=1)
+    puffpod_pod(S, M, p, base=0.22)
+
+
+def puffpod_pod(d, M, p, base=0.22):
+    """The pod above the neck top at z = base (a rig part uses base 0 at its pivot)."""
+    b, df, sq = p.get("breathe", 0.0), p.get("react", 0.0), p.get("squash", 1.0)
     rx = 0.22 * (1 + 0.04 * b) * (1 + 0.12 * df)
     rz = 0.21 * (1 + 0.04 * b) * (1 - 0.40 * df) * sq
-    cz = 0.22 + rz
+    cz = base + rz
     ball = G.lumpy_ellipse(0.0, cz, rx, rz, n=40, lump=0.04 + 0.05 * df, seed=81)
-    G.stroke(S, ball, M["olive_f"], 0.0, cyclic=True)
+    G.stroke(d, ball, M["olive_f"], 0.0, cyclic=True)
     lo = [q for q in ball if q[1] < cz - 0.25 * rz]
-    G.stroke(S, lo + [(0.0, cz - 0.25 * rz)], M["olive_sh"], 0.0, cyclic=True)
-    G.stroke(S, [q for q in ball if q[1] < cz - 0.75 * rz and q[0] > -0.05] + [(0.05, cz - 0.75 * rz)], M["olive_dp"], 0.0, cyclic=True)
+    G.stroke(d, lo + [(0.0, cz - 0.25 * rz)], M["olive_sh"], 0.0, cyclic=True)
+    G.stroke(d, [q for q in ball if q[1] < cz - 0.75 * rz and q[0] > -0.05] + [(0.05, cz - 0.75 * rz)], M["olive_dp"], 0.0, cyclic=True)
     for k, (x, z) in enumerate(((-0.13, -0.03), (0.11, -0.09), (-0.03, -0.13), (0.15, 0.07), (-0.07, 0.03), (0.04, -0.03))):   # irregular, mostly low: no flanking pair (D-101)
-        G.stroke(S, G.lumpy_ellipse(x * rx / 0.22, cz + z * rz / 0.21, 0.016, 0.013, n=8, seed=90 + k), M["umber_f"], 0.0, cyclic=True)
+        G.stroke(d, G.lumpy_ellipse(x * rx / 0.22, cz + z * rz / 0.21, 0.016, 0.013, n=8, seed=90 + k), M["umber_f"], 0.0, cyclic=True)
     if df > 0.2:                                                     # wrinkles while deflated
         for k in range(3):
             x = -0.10 + 0.10 * k
-            G.seam(S, [(x - 0.02, cz + 0.05), (x + 0.01, cz), (x - 0.01, cz - 0.05)], M["ink"])
-    G.seam(S, G.bezier((-0.19, cz - 0.01), (-0.15, cz + 0.08), (-0.07, cz + 0.13), n=6), M["ink"])        # two short pod seams, off-centre and offset
-    G.seam(S, G.bezier((0.09, cz - 0.12), (0.15, cz - 0.07), (0.18, cz + 0.01), n=6), M["ink"])        # (one centred arc between two dots read as an eye, D-101)
-    G.stroke(S, ball, M["ink"], O, cyclic=True)
+            G.seam(d, [(x - 0.02, cz + 0.05), (x + 0.01, cz), (x - 0.01, cz - 0.05)], M["ink"])
+    G.seam(d, G.bezier((-0.19, cz - 0.01), (-0.15, cz + 0.08), (-0.07, cz + 0.13), n=6), M["ink"])        # two short pod seams, off-centre and offset
+    G.seam(d, G.bezier((0.09, cz - 0.12), (0.15, cz - 0.07), (0.18, cz + 0.01), n=6), M["ink"])        # (one centred arc between two dots read as an eye, D-101)
+    G.stroke(d, ball, M["ink"], O, cyclic=True)
     t = p.get("puff")
     if t is not None:                                                # a round dust puff out of the top
         r = 0.06 + 0.07 * t
         blob = G.lumpy_ellipse(0.04 * t, cz + rz + 0.06 + 0.25 * t, r * 1.15, r, n=16, lump=0.12, seed=95)
-        G.stroke(S, blob, M["dust"], I, cyclic=True)
-        G.stroke(S, [q for q in blob if q[1] < cz + rz + 0.06 + 0.25 * t - 0.3 * r], M["dust_sh"], 0.0, cyclic=True)
+        G.stroke(d, blob, M["dust"], I, cyclic=True)
+        G.stroke(d, [q for q in blob if q[1] < cz + rz + 0.06 + 0.25 * t - 0.3 * r], M["dust_sh"], 0.0, cyclic=True)
 
 
 def _frond(d, M, base, lean, curl, L, seed):
@@ -156,23 +162,33 @@ def pipereed(d, M, p):
     S = G.Xf(d, lambda pts: _sway(pts, a))
     G.stroke(S, G.lumpy_ellipse(0.0, 0.03, 0.16, 0.05, n=16, seed=5), M["umber"], O, cyclic=True)
     for k, (x, h, w, slit) in enumerate(((-0.11, 0.62, 0.09, 0.44), (0.0, 0.92, 0.10, 0.62), (0.11, 0.48, 0.08, 0.28))):
-        top = 0.04 + h * sq + 0.03 * math.sin(ph + 2.1 * k)
-        body = G.bezier((x - w / 2, 0.04), (x - w / 2 - 0.006, top * 0.5), (x - w / 2, top), n=6) + \
-            G.lumpy_ellipse(x, top, w / 2, 0.025, n=16, seed=20 + k)[8:16] + G.bezier((x + w / 2, top), (x + w / 2 + 0.006, top * 0.5), (x + w / 2, 0.04), n=6)
-        G.stroke(S, body, M["olive_f"], 0.0, cyclic=True)
-        G.stroke(S, [(x + w * 0.15, 0.04), (x + w / 2, 0.04), (x + w / 2, top), (x + w * 0.15, top)], M["olive_sh"], 0.0, cyclic=True)
-        for rz in (0.25, 0.55, 0.85):                                 # butterscotch rings
-            zz = 0.04 + (top - 0.04) * rz
-            G.stroke(S, [(x - w / 2, zz - 0.018), (x + w / 2, zz - 0.018), (x + w / 2, zz + 0.018), (x - w / 2, zz + 0.018)], M["butter"], I, cyclic=True)
-        sz_ = 0.04 + (top - 0.04) * slit                              # ONE sound slit per pipe (never paired)
-        G.stroke(S, [(x - w * 0.28, sz_), (x + w * 0.28, sz_ - 0.01), (x + w * 0.24, sz_ - 0.035), (x - w * 0.24, sz_ - 0.03)], M["umber_f"], 0.0, cyclic=True)
-        G.seam(S, [(x - w * 0.28, sz_), (x + w * 0.28, sz_ - 0.01)], M["ink"])
-        G.stroke(S, G.lumpy_ellipse(x, top, w / 2, 0.025, n=16, seed=20 + k), M["umber_f"], I, cyclic=True)   # the open top
-        G.stroke(S, body, M["ink"], O, cyclic=True)
+        pipe(S, M, x, h * sq + 0.03 * math.sin(ph + 2.1 * k), w, slit, 20 + k)
+
+
+def pipe(d, M, x, h, w, slit, seed, z0=0.04):
+    """One pipe from z0 to z0 + h at x: olive body, butterscotch rings, ONE sound slit (never paired, D-101), the open top."""
+    top = z0 + h
+    body = G.bezier((x - w / 2, z0), (x - w / 2 - 0.006, top * 0.5), (x - w / 2, top), n=6) + \
+        G.lumpy_ellipse(x, top, w / 2, 0.025, n=16, seed=seed)[8:16] + G.bezier((x + w / 2, top), (x + w / 2 + 0.006, top * 0.5), (x + w / 2, z0), n=6)
+    G.stroke(d, body, M["olive_f"], 0.0, cyclic=True)
+    G.stroke(d, [(x + w * 0.15, 0.04), (x + w / 2, z0), (x + w / 2, top), (x + w * 0.15, top)], M["olive_sh"], 0.0, cyclic=True)
+    for rz in (0.25, 0.55, 0.85):                                 # butterscotch rings
+        zz = z0 + (top - z0) * rz
+        G.stroke(d, [(x - w / 2, zz - 0.018), (x + w / 2, zz - 0.018), (x + w / 2, zz + 0.018), (x - w / 2, zz + 0.018)], M["butter"], I, cyclic=True)
+    sz_ = z0 + (top - z0) * slit                              # ONE sound slit per pipe (never paired)
+    G.stroke(d, [(x - w * 0.28, sz_), (x + w * 0.28, sz_ - 0.01), (x + w * 0.24, sz_ - 0.035), (x - w * 0.24, sz_ - 0.03)], M["umber_f"], 0.0, cyclic=True)
+    G.seam(d, [(x - w * 0.28, sz_), (x + w * 0.28, sz_ - 0.01)], M["ink"])
+    G.stroke(d, G.lumpy_ellipse(x, top, w / 2, 0.025, n=16, seed=seed), M["umber_f"], I, cyclic=True)   # the open top
+    G.stroke(d, body, M["ink"], O, cyclic=True)
 
 
 def scree_creeper(d, M, p):
-    rip, lift = p.get("phase", 0.0), p.get("react", 0.0)
+    scree_rock_vine(d, M)
+    scree_pads(d, M, p.get("phase", 0.0), p.get("react", 0.0))
+
+
+def scree_rock_vine(d, M):
+    """The salmon rock and the olive vine (the rig's root part)."""
     rock = G.lumpy_ellipse(0.0, 0.16, 0.34, 0.18, n=36, lump=0.06, seed=31)
     rock = [(x, max(z, 0.0)) for x, z in rock]
     G.stroke(d, rock, M["rock_f"], 0.0, cyclic=True)
@@ -183,6 +199,11 @@ def scree_creeper(d, M, p):
     G.stroke(d, rock, M["ink"], O, cyclic=True)
     vine = G.bezier((-0.40, 0.02), (-0.30, 0.38), (0.10, 0.36), (0.40, 0.04), n=16)
     G.stroke(d, G.hose_outline(vine, 0.03), M["olive"], O, cyclic=True)
+
+
+def scree_pads(d, M, rip, lift):
+    """The lichen pads along the vine: rip = ripple phase, lift = 0 rest .. 1 lifted and flattened."""
+    vine = G.bezier((-0.40, 0.02), (-0.30, 0.38), (0.10, 0.36), (0.40, 0.04), n=16)
     for k in range(7):
         x, z = vine[2 + 2 * k]
         r = 0.045 * (1 + 0.15 * math.sin(rip + 0.9 * k)) * (1 - 0.3 * lift)
