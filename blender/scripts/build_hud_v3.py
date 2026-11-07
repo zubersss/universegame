@@ -215,7 +215,7 @@ def review_sheet(out, files, meta_dir=None, out_name="review_b121_hud_preview.pn
     imgs, _l = B.earth_plains(11401)
     Hs, Ws = 1080, 1920
     can = np.zeros((Hs, Ws, 3), np.float32)
-    can[:] = imgs[0][0][0, 0]                       # sky colour above layer0's 1024 px
+    can[:] = imgs[0][0][0:1, :Ws]                    # continue the sky's top row above layer0's 1024 px
     for (rgb, a), off in zip(imgs, (0, 90, 0)):
         h = rgb.shape[0]
         y0 = Hs - h - off

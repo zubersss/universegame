@@ -466,6 +466,18 @@ def preview(out_dir, tiles=None, out_name="review_b119_discs_preview.png", stamp
     for i, n in enumerate(ORDER):
         review._label(panel, f"ours, {n}: {OURS[n]}"[:150], 8 + (i % 2) * (W // 2), 320 + (i // 2) * 16)
     rows.append(panel)
+    # per-disc ten-box table: one row per disc, one column per §9.7 box (x measured, s self-check)
+    tbl = np.tile(review.PAPER, (40 + 18 * (len(ORDER) + 1), W, 1)).astype(np.float32)
+    keys = [k for k, _t in review.BOXES]
+    review._label(tbl, "per-disc ten-box table   " + "  ".join(f"{i + 1}:{k}" for i, k in enumerate(keys)), 8, 6)
+    for r, n in enumerate(ORDER + ["luna"]):
+        nf = len(tiles[n][0])
+        fw_ = tiles[n][0][0].shape[1]
+        marks = {"ink": res["ink"][0], "cel": "s", "face": "s", "twos": "x" if nf <= 12 else "!", "motion": "s",
+                 "idle": "x", "original": "s", "sheet": "x", "budget": "x" if fw_ * min(nf, 3) <= 2048 else "!", "style": "s"}
+        cells = "".join(f"[{marks[k]}]" for k in keys)
+        review._label(tbl, f"{n:8s} {cells}  {nf} frames {fw_}px  no face; " + OURS.get(n, "Earth's moon, slowly turning")[:70], 8, 26 + 18 * r)
+    rows.append(tbl)
     img = np.vstack(rows)
     for i, p in enumerate(stamp_paths):              # one stamp per exported sheet, stacked from the bottom
         review.draw(img, os.path.relpath(p, review.ART).replace("\\", "/") + " " + review.stamp_text(p), 4,
