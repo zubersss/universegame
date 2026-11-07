@@ -43,8 +43,15 @@ def draw_blob(d, M, bob=0.0, sz=1.0, lean=0.0, legs=((0.0, 0.0), (0.0, 0.0)), ar
         knee = ((hip[0] + foot[0]) / 2 + 0.10, (hip[1] + foot[1]) / 2)
         c = G.bezier(hip, knee, foot, n=10)
         G.stroke(d, G.hose_outline(c, 0.075), M["leg"], G.OUTER, cyclic=True)
+        G.ribs(d, c[1:-1], 0.075, M["ink"], every=0.07)
         shoe = G.lumpy_ellipse(foot[0] + 0.07, foot[1] - 0.07 + 0.07 * 1.04 + G.OUTER * 1.25, 0.13, 0.07, n=24, lump=0.04, seed=seed + 11 + k)
-        G.stroke(d, shoe, M["shoe"], G.OUTER, cyclic=True)
+        G.stroke(d, shoe, M["shoe"], 0.0, cyclic=True)
+        zmin = min(q[1] for q in shoe)
+        sole = [q for q in shoe if q[1] < zmin + 0.035]
+        if len(sole) > 3:
+            G.stroke(d, sole, M["shoe_deep"], 0.0, cyclic=True)
+            G.seam(d, G.bowed_line((min(q[0] for q in sole) + 0.01, zmin + 0.035), (max(q[0] for q in sole) - 0.01, zmin + 0.035), bow=0.03, n=6), M["ink"])
+        G.stroke(d, shoe, M["ink"], G.OUTER, cyclic=True)
 
     # back arm
     def arm(side, ang):
@@ -55,6 +62,8 @@ def draw_blob(d, M, bob=0.0, sz=1.0, lean=0.0, legs=((0.0, 0.0), (0.0, 0.0)), ar
         G.stroke(d, G.hose_outline(G.bezier(sh, mid, hand, n=10), 0.06), M["leg"], G.OUTER, cyclic=True)
         G.stroke(d, G.lumpy_ellipse(hand[0], hand[1], 0.085, 0.08, n=20, lump=0.05, seed=seed + 21 + side),
                  M["glove"], G.OUTER, cyclic=True)
+        for j in (-1, 1):
+            G.seam(d, G.bowed_line((hand[0] + j * 0.025, hand[1] - 0.005), (hand[0] + j * 0.03, hand[1] - 0.06), bow=0.1, n=4), M["ink"])
     arm(-1, arms[0])
 
     # body: fill, one shadow tone (lower crescent), then the ink outline on top
@@ -66,6 +75,16 @@ def draw_blob(d, M, bob=0.0, sz=1.0, lean=0.0, legs=((0.0, 0.0), (0.0, 0.0)), ar
     outer_arc = [outline[i] for i in lo]
     inner_arc = [(cx + (x - cx) * 0.80 + 0.03, cz + (z - cz) * 0.62 + 0.02) for x, z in outer_arc][::-1]
     G.stroke(d, outer_arc + inner_arc, M["body_shadow"], 0.0, cyclic=True)
+    deep = [outline[i] for i in range(n) if math.sin(6.283185 * i / n) < -0.45 and math.cos(6.283185 * i / n) < 0.35]
+    if len(deep) > 3:
+        deep_in = [(cx + (x - cx) * 0.88 + 0.02, cz + (z - cz) * 0.80 + 0.03) for x, z in deep][::-1]
+        G.stroke(d, deep + deep_in, M["body_deep"], 0.0, cyclic=True)
+    belly = body_xf(G.bezier((-0.40, 0.80), (0.0, 0.64), (0.41, 0.80), n=14))
+    G.seam(d, belly, M["ink"])
+    G.stitches(d, body_xf(G.bezier((-0.36, 0.765), (0.0, 0.615), (0.37, 0.765), n=14)), M["ink"], every=0.07, length=0.025)
+    hx_, hz_ = body_xf([(-0.27, 0.72)])[0]
+    G.hatch(d, hx_, hz_, M["ink"], n=3, length=0.08, spacing=0.03, angle_deg=60, seed=seed + 5)
+    G.specks(d, body_xf([(0.30, 1.20), (0.35, 1.14), (0.26, 1.13), (-0.30, 1.16)]), M["ink"])
     G.stroke(d, outline, M["ink"], G.OUTER, cyclic=True)
 
     # face: two pie-cut eyes and a smile (interior lines)
@@ -85,6 +104,8 @@ def build(out=DEFAULT_OUT):
     M = {
         "body": G.mat(gp, "blob_body", fill=P["red"], ink=False),
         "body_shadow": G.mat(gp, "blob_body_shadow", fill=G.shadow_of(P["red"]), ink=False),
+        "body_deep": G.mat(gp, "blob_body_deep", fill=G.deep_of(P["red"]), ink=False),
+        "shoe_deep": G.mat(gp, "shoe_brown_deep", fill=G.deep_of(P["brown"]), ink=False),
         "ink": G.mat(gp, "ink_line", fill=None, ink=True),
         "leg": G.mat(gp, "hose_teal", fill=P["teal"]),
         "shoe": G.mat(gp, "shoe_brown", fill=P["brown"]),

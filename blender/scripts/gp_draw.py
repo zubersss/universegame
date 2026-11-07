@@ -17,11 +17,13 @@ import random
 
 import bpy
 
-from meridian.v3 import (INK, PALETTE_ORDER, PALETTES, PPU, hex_rgb,  # noqa: F401,E402
+from meridian.v3 import (INK, PALETTE_ORDER, PALETTES, PPU, deep_of, hex_rgb,  # noqa: F401,E402
                          palette_with_shadows, rgb_hex, shadow_of)
 
-OUTER = 2.5 / PPU          # radius (half width) of the outer silhouette: 5 px
-INNER = 1.1 / PPU          # interior lines: 2.2 px
+# v3.1 (D-100): half the v3.0 weight. Nominal widths sit mid-range so +-20 % jitter stays inside
+# the contract (outer 2.5 px -> 2.0-3.0; interior 1.25 px -> 1.0-1.5).
+OUTER = 1.25 / PPU         # radius (half width) of the outer silhouette: 2.5 px
+INNER = 0.625 / PPU        # interior lines and detail: 1.25 px
 
 
 def _lin(c8):
@@ -215,3 +217,71 @@ def mark_clips(scene, clips):
         scene.timeline_markers.new(name, frame=f)
         f += n
     scene.frame_end = f - 1
+
+
+# ---------------------------------------------------------------- v3.1 interior detail (D-100)
+# Required on every drawn asset: seams, folds, veins, rivets, plus a few texture marks (hatching,
+# dots, scuffs) so things read as drawn, not as stickers. All at interior weight (INNER).
+
+def seam(d, pts, m_ink, radius=None):
+    """A seam / fold / vein: one interior line along pts."""
+    stroke(d, pts, m_ink, INNER if radius is None else radius)
+
+
+def stitches(d, path, m_ink, every=0.06, length=0.03):
+    """Short stitch ticks across a path (stripe stitching, glove seams)."""
+    acc, nxt = 0.0, every / 2
+    for (x0, z0), (x1, z1) in zip(path[:-1], path[1:]):
+        L = math.hypot(x1 - x0, z1 - z0)
+        if L == 0:
+            continue
+        nx, nz = -(z1 - z0) / L, (x1 - x0) / L
+        while nxt <= acc + L:
+            t = (nxt - acc) / L
+            x, z = x0 + (x1 - x0) * t, z0 + (z1 - z0) * t
+            stroke(d, [(x - nx * length / 2, z - nz * length / 2), (x + nx * length / 2, z + nz * length / 2)], m_ink, INNER)
+            nxt += every
+        acc += L
+
+
+def rivets(d, pts, m_ink, size=0.018):
+    """Rivets / buttons: tiny inked dots (a 2-point stroke so the capsule reads round)."""
+    for x, z in pts:
+        stroke(d, [(x - size / 2, z), (x + size / 2, z)], m_ink, INNER)
+
+
+def hatch(d, cx, cz, m_ink, n=3, length=0.09, spacing=0.035, angle_deg=55.0, seed=0, bow=0.12):
+    """A small group of parallel hatch strokes centred on (cx, cz) (shadow sides, scuffs)."""
+    rnd = random.Random(seed)
+    a = math.radians(angle_deg)
+    ux, uz = math.cos(a), math.sin(a)
+    px, pz = -uz, ux
+    for k in range(n):
+        off = (k - (n - 1) / 2) * spacing
+        L = length * rnd.uniform(0.75, 1.1)
+        sx, sz = cx + px * off + rnd.uniform(-0.006, 0.006), cz + pz * off + rnd.uniform(-0.006, 0.006)
+        stroke(d, bowed_line((sx - ux * L / 2, sz - uz * L / 2), (sx + ux * L / 2, sz + uz * L / 2), bow=bow, n=5),
+               m_ink, INNER)
+
+
+def specks(d, pts, m_ink):
+    """Texture dots (pores, seeds, grit): single tiny ink dots."""
+    for x, z in pts:
+        stroke(d, [(x, z), (x + 0.004, z)], m_ink, INNER)
+
+
+def ribs(d, center, width, m_ink, every=0.07, frac=0.8):
+    """Hose ribs / stem rings: short lines across a tube of `width` along its centre polyline."""
+    acc, nxt = 0.0, every / 2
+    for (x0, z0), (x1, z1) in zip(center[:-1], center[1:]):
+        L = math.hypot(x1 - x0, z1 - z0)
+        if L == 0:
+            continue
+        nx, nz = -(z1 - z0) / L, (x1 - x0) / L
+        while nxt <= acc + L:
+            t = (nxt - acc) / L
+            x, z = x0 + (x1 - x0) * t, z0 + (z1 - z0) * t
+            h = width * frac / 2
+            stroke(d, bowed_line((x - nx * h, z - nz * h), (x + nx * h, z + nz * h), bow=0.15, n=4), m_ink, INNER)
+            nxt += every
+        acc += L

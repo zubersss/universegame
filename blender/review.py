@@ -186,9 +186,10 @@ def sprites(out, paths):
 
 # ---------------------------------------------------------------- v3 cartoon review (contract §11.7)
 
-BOXES = [
-    ("ink", "thick hand-inked outline, no perfect geometry"),
-    ("cel", "flat cel colour, one shadow tone, muted aged palette"),
+BOXES = [                     # Bible 4.1 §9.7, the ten-box list (D-100, D-101)
+    ("ink", "ink 2-3 px outer / 1-1.5 px interior, jitter, interior detail + texture marks"),
+    ("cel", "flat cel colour, up to two shadow tones, muted aged palette"),
+    ("face", "faces only on people and animals (D-101)"),
     ("twos", "animated on twos (12 fps), within the frame caps"),
     ("motion", "squash + stretch, rubber-hose limbs, secondary motion"),
     ("idle", "has an idle loop (nothing sits still)"),
@@ -242,11 +243,11 @@ def planet_background(planet, scene, W, H):
     return bg, f"{len(layers)} painted layers"
 
 
-def ink_zoom(frame_u8, box=64):
-    """2x nearest zoom of the box with the most ink in a frame."""
-    from meridian import v3
-    ink = np.array(v3.hex_rgb(v3.INK), np.int32)
-    m = ((np.abs(frame_u8[..., :3].astype(np.int32) - ink).max(-1) < 24) & (frame_u8[..., 3] > 200)).astype(np.int32)
+def ink_zoom(frame_u8, box=96):
+    """2x nearest zoom of the box with the most line work in a frame (v3.1: the 2x detail crop).
+    Dark pixels count, not exact ink, because 1-1.5 px lines are mostly anti-aliased."""
+    lum = frame_u8[..., :3].astype(np.float32) @ np.array([0.299, 0.587, 0.114], np.float32) / 255.0
+    m = ((lum < 0.35) & (frame_u8[..., 3] > 128)).astype(np.int32)
     H, W = m.shape
     box = min(box, H, W)
     ii = np.pad(m.cumsum(0).cumsum(1), ((1, 0), (1, 0)))
@@ -302,35 +303,47 @@ def v3_sheet_review(entry, meta, frames, sheet_path, out, stats, stale=None):
         rows.append(strip)
 
     # bottom: ink zoom, palette strip, checklist
-    bot_h = 380
+    bot_h = 430
     bot = np.tile(PAPER, (bot_h, W, 1))
     z = ink_zoom(frames[0])
     _over(bot, z, 8, 26)
-    _label(bot, "ink 2x", 8, 6)
+    _label(bot, "detail 2x (most line work)", 8, 6)
     pal = v3.PALETTES[planet]
     px0 = 8 + z.shape[1] + 24
-    _label(bot, f"palette {planet} + one shadow tone each", px0, 6)
+    _label(bot, f"palette {planet}: colour, mid shadow, deep shadow", px0, 6)
     for i, k in enumerate(v3.PALETTE_ORDER):
         xx = px0 + i * 46
-        bot[26:66, xx:xx + 40] = _hexf(pal[k])
+        bot[26:62, xx:xx + 40] = _hexf(pal[k])
         if k != "ink":
-            bot[70:90, xx:xx + 40] = _hexf(v3.shadow_of(pal[k], planet))
-        _label(bot, pal[k][1:], xx, 94, scale=1)
+            bot[64:80, xx:xx + 40] = _hexf(v3.shadow_of(pal[k], planet))
+            bot[82:98, xx:xx + 40] = _hexf(v3.deep_of(pal[k], planet))
+        _label(bot, pal[k][1:], xx, 102, scale=1)
     ow, iw = stats["outer_px"], stats["inner_px"]
+    n_in = stats.get("inner_n", 0)
     lines = [
-        f"outer ink {ow[0]:.1f}-{ow[1]:.1f} px (4-6)  interior {iw[0]:.1f}-{iw[1]:.1f} px (1.5-3)  jitter +-20%",
+        f"outer ink {ow[0]:.1f}-{ow[1]:.1f} px ({v3.OUTER_PX[0]:g}-{v3.OUTER_PX[1]:g})  interior {iw[0]:.1f}-{iw[1]:.1f} px "
+        f"({v3.INNER_PX[0]:g}-{v3.INNER_PX[1]:g})  jitter +-20%  interior strokes {n_in / max(len(frames), 1):.0f} per frame",
         f"palette hits {stats['palette'][0] * 100:.1f}% of solid pixels" + (f"  off: {' '.join(stats['palette'][1])}" if stats['palette'][1] else ""),
         f"json {'valid' if not stats['problems'] else 'INVALID: ' + '; '.join(stats['problems'])[:120]}",
     ]
     for i, ln in enumerate(lines):
-        _label(bot, ln, px0, 112 + i * 18)
+        _label(bot, ln, px0, 118 + i * 18)
 
     sc = entry.get("self_check", {})
     ink_ok = v3.OUTER_PX[0] - 0.05 <= ow[0] and ow[1] <= v3.OUTER_PX[1] + 0.05 and \
-        (iw == (0, 0) or (v3.INNER_PX[0] - 0.05 <= iw[0] and iw[1] <= v3.INNER_PX[1] + 0.05))
+        iw != (0, 0) and v3.INNER_PX[0] - 0.05 <= iw[0] and iw[1] <= v3.INNER_PX[1] + 0.05
+    cat = entry["key"].split("/")[0]
+    if cat in ("characters", "creatures"):
+        face = ("x", "a person / animal: a face is allowed")
+    elif "face" in sc:
+        face = ("s", sc["face"])
+    else:
+        face = (" ", "BLENDER did not self-check (object, plant, ship or planet)")
     res = {
-        "ink": ("x" if ink_ok else "!", "measured widths" + ("; " + sc["ink"] if "ink" in sc else "")),
-        "cel": ("x" if stats["palette"][0] >= 0.98 else "!", f"{stats['palette'][0] * 100:.1f}% palette"),
+        "ink": ("x" if ink_ok else "!", "measured widths, interior detail present" + ("; " + sc["ink"] if "ink" in sc else "")
+                if ink_ok else ("no interior detail" if iw == (0, 0) else "widths outside v3.1")),
+        "cel": ("x" if stats["palette"][0] >= 0.98 else "!", f"{stats['palette'][0] * 100:.1f}% palette (+ mid, deep)"),
+        "face": face,
         "twos": ("x" if not stats["problems"] else "!", "fps 12, caps"),
         "motion": ("s", sc["motion"]) if "motion" in sc else (" ", "BLENDER did not self-check"),
         "idle": ("x", "idle loops") if any(c["name"] == "idle" and c["loop"] for c in clips) else ("!", "no looping idle"),
@@ -340,10 +353,10 @@ def v3_sheet_review(entry, meta, frames, sheet_path, out, stats, stale=None):
                    "sheet side; UNITY confirms after import"),
         "style": ("s", sc["style"]) if "style" in sc else (" ", "LEAD, against the C0 style test"),
     }
-    _label(bot, "bible 9.7 checklist  (x checked  s self-check  ! fails  blank: not mine to tick)", px0, 170)
+    _label(bot, "bible 4.1 9.7 ten-box checklist  (x checked  s self-check  ! fails  blank: not mine to tick)", px0, 180)
     for i, (k, text) in enumerate(BOXES):
         mark, note = res[k]
-        _label(bot, f"[{mark}] {text}  -  {note}"[:135], px0, 188 + i * 16)
+        _label(bot, f"[{mark}] {text}  -  {note}"[:135], px0, 198 + i * 16)
     ours = entry.get("ours")
     if ours:
         _label(bot, f"what makes it ours: {ours}"[:160], 8, bot_h - 40)

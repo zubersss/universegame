@@ -754,7 +754,7 @@ def do_v3_sheet(entry, preview):
         json.dump(meta, fh_, indent=2)
         fh_.write("\n")
     outer, inner = _v3_ink_stats(widths)
-    stats = {"outer_px": outer, "inner_px": inner, "palette": v3.palette_hits(sheet, entry.get("planet", "earth"), tints=[tuple(t) for t in entry.get("palette_tints", [])]),
+    stats = {"outer_px": outer, "inner_px": inner, "inner_n": sum(1 for w in widths if w[0] < v3.OUTER_SPLIT), "palette": v3.palette_hits(sheet, entry.get("planet", "earth"), tints=[tuple(t) for t in entry.get("palette_tints", [])]),
              "problems": problems, "sheet_wh": (sheet.shape[1], sheet.shape[0]), "png_kb": n // 1024}
     task = entry.get("review_name", key.replace("/", "_"))
     out = os.path.join(PREVIEW, f"review_{task}{'_preview' if preview else ''}.png")

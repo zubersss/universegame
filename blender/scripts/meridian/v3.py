@@ -13,9 +13,9 @@ GUTTER = 4
 MAX_SHEET = 2048
 MAX_FILE_BYTES = 4 * 1024 * 1024
 INK = "#1E1A17"
-OUTER_PX = (4.0, 6.0)          # outer silhouette width at 1x
-INNER_PX = (1.5, 3.0)          # interior lines
-OUTER_SPLIT = 3.5              # a stroke nominally >= this wide is silhouette ink
+OUTER_PX = (2.0, 3.0)          # outer silhouette width at 1x (v3.1, D-100; v3.0 was 4-6)
+INNER_PX = (1.0, 1.5)          # interior lines (v3.1; v3.0 was 1.5-3)
+OUTER_SPLIT = 1.9              # a stroke nominally >= this wide is silhouette ink (nominal 2.5 vs 1.25)
 EDGE_MARGIN = 2                # px kept clear at each frame edge (nothing clipped)
 
 # Bible §9.1 planet palettes (8 colours, strip order). ui/palettes/<planet>/strip is exported from these.
@@ -44,9 +44,15 @@ def rgb_hex(c):
 
 
 def shadow_of(h, planet="earth"):
-    """The one shadow tone allowed per colour: 70 % colour + 30 % the planet's shadow brown."""
+    """The mid shadow tone of a colour: 70 % colour + 30 % the planet's shadow brown (v3.0's one tone)."""
     a, b = hex_rgb(h), hex_rgb(PALETTES[planet]["brown"])
     return rgb_hex([0.7 * x + 0.3 * y for x, y in zip(a, b)])
+
+
+def deep_of(h, planet="earth"):
+    """The deep shadow tone (v3.1, D-100: up to two shadow tones per colour): 45 % colour + 55 % brown."""
+    a, b = hex_rgb(h), hex_rgb(PALETTES[planet]["brown"])
+    return rgb_hex([0.45 * x + 0.55 * y for x, y in zip(a, b)])
 
 
 def palette_with_shadows(planet="earth"):
@@ -55,6 +61,7 @@ def palette_with_shadows(planet="earth"):
     for k, v in pal.items():
         if k != "ink":
             out[k + "_shadow"] = shadow_of(v, planet)
+            out[k + "_deep"] = deep_of(v, planet)
     return out
 
 
