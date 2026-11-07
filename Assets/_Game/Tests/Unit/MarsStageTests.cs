@@ -60,8 +60,8 @@ namespace Meridian.Tests
             Assert.AreEqual(GroundStrip.Regolith, GroundStrip.MaterialFor(PlanetId.Mars, TileId.Hematite), "no hematite strip yet: regolith");
             Assert.AreEqual(GroundStrip.Frost, GroundStrip.MaterialFor(PlanetId.Mars, TileId.Ice), "D-143: ice takes the frost strip");
             Assert.AreEqual(GroundStrip.Frost, GroundStrip.MaterialFor(PlanetId.Mars, TileId.Snow), "D-143: the cap's CO₂ frost too");
-            Assert.AreEqual(TileId.Regolith, Meridian.Planet.Poi.PoiStamp.CellTile('#', PlanetId.Mars), "D-143 (2): the Mars pad stamps regolith");
-            Assert.AreEqual(TileId.Stone, Meridian.Planet.Poi.PoiStamp.CellTile('#', PlanetId.Earth));
+            Assert.AreEqual(TileId.Regolith, Meridian.Planet.POI.PoiStamp.CellTile('#', PlanetId.Mars), "D-143 (2): the Mars pad stamps regolith");
+            Assert.AreEqual(TileId.Stone, Meridian.Planet.POI.PoiStamp.CellTile('#', PlanetId.Earth));
             Assert.AreEqual(GroundStrip.Sand, GroundStrip.MaterialFor(PlanetId.Earth, TileId.Sand), "Earth keeps its four");
             Assert.AreSame(GroundStrip.Keys, GroundStrip.KeysFor(PlanetId.Earth));
             foreach (var k in keys)
