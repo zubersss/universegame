@@ -51,18 +51,23 @@ namespace Meridian.Tests
         public void TheMarsStripsAndPlantsFollowTheColumn()
         {
             var keys = GroundStrip.KeysFor(PlanetId.Mars);
-            Assert.AreEqual(2, keys.Length, "B-140: regolith + basalt strips");
+            Assert.AreEqual(3, keys.Length, "B-140: regolith + basalt strips, and the frost strip's key (D-143; the sheet falls back to regolith until it lands)");
             Assert.AreEqual("terrain/mars/ground_strip", keys[GroundStrip.Regolith]);
             Assert.AreEqual("terrain/mars/ground_strip_basalt", keys[GroundStrip.Basalt]);
+            Assert.AreEqual("terrain/mars/ground_strip_frost", keys[GroundStrip.Frost]);
             Assert.AreEqual(GroundStrip.Basalt, GroundStrip.MaterialFor(PlanetId.Mars, TileId.Basalt));
             Assert.AreEqual(GroundStrip.Regolith, GroundStrip.MaterialFor(PlanetId.Mars, TileId.Regolith));
             Assert.AreEqual(GroundStrip.Regolith, GroundStrip.MaterialFor(PlanetId.Mars, TileId.Hematite), "no hematite strip yet: regolith");
-            Assert.AreEqual(GroundStrip.Regolith, GroundStrip.MaterialFor(PlanetId.Mars, TileId.Ice), "no ice strip yet: regolith");
+            Assert.AreEqual(GroundStrip.Frost, GroundStrip.MaterialFor(PlanetId.Mars, TileId.Ice), "D-143: ice takes the frost strip");
+            Assert.AreEqual(GroundStrip.Frost, GroundStrip.MaterialFor(PlanetId.Mars, TileId.Snow), "D-143: the cap's CO₂ frost too");
+            Assert.AreEqual(TileId.Regolith, Meridian.Planet.Poi.PoiStamp.CellTile('#', PlanetId.Mars), "D-143 (2): the Mars pad stamps regolith");
+            Assert.AreEqual(TileId.Stone, Meridian.Planet.Poi.PoiStamp.CellTile('#', PlanetId.Earth));
             Assert.AreEqual(GroundStrip.Sand, GroundStrip.MaterialFor(PlanetId.Earth, TileId.Sand), "Earth keeps its four");
             Assert.AreSame(GroundStrip.Keys, GroundStrip.KeysFor(PlanetId.Earth));
             foreach (var k in keys)
             {
                 string json = "Assets/_Game/Art/" + k + ".json";
+                if (k.EndsWith("_frost") && !File.Exists(json)) { TestContext.Out.WriteLine("[MERIDIAN] " + k + ": not exported yet (D-143: BLENDER's B-140 kind); the regolith strip stands in"); continue; }
                 Assert.IsTrue(File.Exists(json), json);
                 var s = JsonUtility.FromJson<GroundStripTests.Sheet>(File.ReadAllText(json));
                 Assert.AreEqual(64, s.frame_width); Assert.AreEqual(152, s.frame_height); Assert.AreEqual(128, s.ground_line_px); Assert.AreEqual(8, s.frames);

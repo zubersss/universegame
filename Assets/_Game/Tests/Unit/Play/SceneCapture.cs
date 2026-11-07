@@ -2602,20 +2602,23 @@ namespace Meridian.Tests
                 // 3. A tube lurker at its mound over the first lava tube (the surveyor and the camera on the surface past the skylight shaft, not down it), a dustskater on the plains beside it.
                 var tube = Meridian.Terrain.MarsLandforms.Tubes[0];
                 int lurkerX = tube.x0 + Meridian.Terrain.MarsLandforms.SkylightInset + Meridian.Terrain.MarsLandforms.SkylightWidth + 8;
-                yield return CarryTo(lurkerX + 6);
+                yield return CarryTo(lurkerX + 12); // outside the lurker's 6 m sense range: it peeks instead of fleeing
                 float ready = Time.realtimeSinceStartup + 10f;
                 while (!side.terrain.IsCollisionReady(lurkerX, side.terrain.TopSolidY(lurkerX)) && Time.realtimeSinceStartup < ready) yield return null;
                 var lurker = creatures.SpawnAt(Meridian.Creatures.Species.TubeLurker, lurkerX, side.player.Body.position.y);
                 var skater2 = creatures.SpawnAt(Meridian.Creatures.Species.Dustskater, lurkerX - 6, side.player.Body.position.y);
                 art = Time.realtimeSinceStartup + 10f;
                 while (((lurker != null && lurker.Alive && lurker.IsPlaceholder) || (skater2 != null && skater2.Alive && skater2.IsPlaceholder)) && Time.realtimeSinceStartup < art) yield return null;
-                art = Time.realtimeSinceStartup + 8f;
-                while (lurker != null && lurker.Alive && lurker.CurrentClip != "idle" && Time.realtimeSinceStartup < art) yield return null; // the peek at the den
+                art = Time.realtimeSinceStartup + 10f;
+                while (lurker != null && lurker.Alive && !(lurker.AtDen && lurker.CurrentClip == "idle") && Time.realtimeSinceStartup < art) yield return null; // the peek at the den
+                var denSprite = creatures.Dens.Count > 0 ? creatures.Dens[0].GetComponent<SpriteRenderer>() : null;
+                art = Time.realtimeSinceStartup + 10f;
+                while (denSprite != null && (denSprite.sprite == null || !denSprite.enabled) && Time.realtimeSinceStartup < art) yield return null; // the mound's sheet
                 var follow3 = cam.GetComponent<Meridian.Player.CameraFollow>();
                 if (follow3 != null) follow3.enabled = false;
                 if (lurker != null) cam.transform.position = new Vector3(lurker.Body.position.x, lurker.Body.position.y + 3f, cam.transform.position.z);
                 yield return null;
-                TestContext.Out.WriteLine($"[MERIDIAN] u118 lurker at {lurkerX}: {(lurker == null ? "no spawn" : $"at den {lurker.AtDen}, clip {lurker.CurrentClip ?? "none"}, {(lurker.IsPlaceholder ? "placeholder" : "sheet")}")}, dens {creatures.Dens.Count}, dustskater {(skater2 == null ? "none" : skater2.IsPlaceholder ? "placeholder" : "sheet")}");
+                TestContext.Out.WriteLine($"[MERIDIAN] u118 lurker at {lurkerX}: {(lurker == null ? "no spawn" : $"at den {lurker.AtDen}, clip {lurker.CurrentClip ?? "none"}, {(lurker.IsPlaceholder ? "placeholder" : "sheet")}, state {lurker.State}")}, dens {creatures.Dens.Count} (mound sprite {(denSprite != null && denSprite.sprite != null ? denSprite.sprite.name + (denSprite.enabled ? "" : " (renderer off)") : "none")}), dustskater {(skater2 == null ? "none" : skater2.IsPlaceholder ? "placeholder" : "sheet")}");
                 yield return Shot("3_lurker_den");
                 // 4. The storm: forced, the veil at full intensity over the base set.
                 var storm = side.dustStorm;

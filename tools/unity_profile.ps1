@@ -171,7 +171,7 @@ if ($runProbe) {
                 $extra = "; per visit: mono $([math]::Round(([double]$lastLeg.monoUsedMB - [double]$warmLeg.monoUsedMB) / $visits, 1)) MB, native allocated $([math]::Round(([double]$lastLeg.allocMB - [double]$warmLeg.allocMB) / $visits, 1)) MB, reserved $([math]::Round(([double]$lastLeg.reservedMB - [double]$warmLeg.reservedMB) / $visits, 1)) MB, handles $([math]::Round(([double]$lastLeg.handlesHeld - [double]$warmLeg.handlesHeld) / $visits, 1)), objects $([math]::Round(([double]$lastLeg.gameObjects - [double]$warmLeg.gameObjects) / $visits, 0)), tmp $([math]::Round(([double]$lastLeg.tmpObjects - [double]$warmLeg.tmpObjects) / $visits, 1)), audio $([math]::Round(([double]$lastLeg.audioSources - [double]$warmLeg.audioSources) / $visits, 1))"
                 if ($null -ne $warmLeg.gfxMB -and $null -ne $lastLeg.gfxMB) { $extra += "; gfx driver $([math]::Round(([double]$lastLeg.gfxMB - [double]$warmLeg.gfxMB) / $visits, 1)) MB, textures $([math]::Round(([double]$lastLeg.texSizeMB - [double]$warmLeg.texSizeMB) / $visits, 1)) MB ($([math]::Round(([double]$lastLeg.texCount - [double]$warmLeg.texCount) / $visits, 1))), meshes $([math]::Round(([double]$lastLeg.meshSizeMB - [double]$warmLeg.meshSizeMB) / $visits, 1)) MB, shaders $([math]::Round(([double]$lastLeg.shaders - [double]$warmLeg.shaders) / $visits, 1)), materials $([math]::Round(([double]$lastLeg.materials - [double]$warmLeg.materials) / $visits, 1))" }
             }
-            $rows += "| Creep per visit (dev build) | info through C1, $le 10 MB from C2 (D-116): (private at $($lastLeg.leg) $ar private at Earth (warm)) / $visits planet visits | $creep MB per visit (private $($warmLeg.privateMB) $ar $($lastLeg.privateMB) MB)$extra | info |"
+            $rows += "| First-visit cost per planet (dev build) | info (D-143): (private at $($lastLeg.leg) $ar private at Earth (warm)) / $visits first visits - what a planet's own content costs the first time; the Creep row judges the second loop | $creep MB per planet (private $($warmLeg.privateMB) $ar $($lastLeg.privateMB) MB)$extra | info |"
         }
     }
     # U-112 (D-139): the second loop — Mars again, Earth again 2 — against Earth again: a per-visit creep repeats here, a one-time first-visit cost does not.
@@ -181,7 +181,9 @@ if ($runProbe) {
         $extra2 = ''
         if ($null -ne $again.gfxMB -and $null -ne $again2.gfxMB) { $extra2 = "; per visit: gfx driver $([math]::Round(([double]$again2.gfxMB - [double]$again.gfxMB) / 2, 1)) MB, native allocated $([math]::Round(([double]$again2.allocMB - [double]$again.allocMB) / 2, 1)) MB, textures $([math]::Round(([double]$again2.texSizeMB - [double]$again.texSizeMB) / 2, 1)) MB, meshes $([math]::Round(([double]$again2.meshSizeMB - [double]$again.meshSizeMB) / 2, 1)) MB, shaders $([math]::Round(([double]$again2.shaders - [double]$again.shaders) / 2, 1)), handles $([math]::Round(([double]$again2.handlesHeld - [double]$again.handlesHeld) / 2, 1))" }
         $pct2 = [math]::Round(([double]$again2.privateMB / [double]$again.privateMB - 1.0) * 100.0, 1)
-        $rows += "| Creep $dot second loop (dev build) | info (U-112 / D-139): (private at Earth again 2 $ar private at Earth again) / 2 planet visits | $creep2 MB per visit (private $($again.privateMB) $ar $($again2.privateMB) MB, $(if ($pct2 -ge 0) { '+' })$pct2 %)$extra2 | info |"
+        $cok = ($creep2 -le 10)
+        if (-not $cok) { $memRed = $true }
+        $rows += "| Creep per visit (dev build) | $le 10 MB from C2 (D-116 / D-143): the second loop, (private at Earth again 2 $ar private at Earth again) / 2 planet visits | $creep2 MB per visit (private $($again.privateMB) $ar $($again2.privateMB) MB, $(if ($pct2 -ge 0) { '+' })$pct2 %)$extra2 | $(if ($cok) { 'green' } else { 'red' }) |"
     }
     $mip = $legs | Where-Object { $null -ne $_.mipActive } | Select-Object -First 1
     if ($null -ne $mip) {

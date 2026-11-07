@@ -19,13 +19,15 @@ namespace Meridian.View2D
         /// <summary>U-111 (B-130): the strips by material: grass over soil, bare soil where dug, stone where the block is stone, sand on the coast.</summary>
         public static readonly string[] Keys = { Key, Key + "_soil", Key + "_stone", Key + "_sand" };
         public const int Grass = 0, Soil = 1, Stone = 2, Sand = 3;
-        /// <summary>U-118 (B-140): Mars draws the regolith strip, basalt where the block is basalt; hematite and ice read regolith until their strips land.</summary>
-        public static readonly string[] MarsKeys = { "terrain/mars/ground_strip", "terrain/mars/ground_strip_basalt" };
-        public const int Regolith = 0, Basalt = 1;
+        /// <summary>U-118 (B-140): Mars draws the regolith strip, basalt where the block is basalt, and (D-143) the frost strip over snow and ice once BLENDER adds it — until then a missing sheet falls back to the regolith strip; hematite reads regolith.</summary>
+        public static readonly string[] MarsKeys = { "terrain/mars/ground_strip", "terrain/mars/ground_strip_basalt", "terrain/mars/ground_strip_frost" };
+        public const int Regolith = 0, Basalt = 1, Frost = 2;
         /// <summary>The planet's strip keys (Earth's four, Mars's two; other planets Earth's until their strips exist). Pure.</summary>
         public static string[] KeysFor(Meridian.Planets.PlanetId planet) => planet == Meridian.Planets.PlanetId.Mars ? MarsKeys : Keys;
         /// <summary>The strip a column draws on `planet` from its top solid tile. Pure.</summary>
-        public static int MaterialFor(Meridian.Planets.PlanetId planet, byte topTile) => planet == Meridian.Planets.PlanetId.Mars ? (topTile == TileId.Basalt ? Basalt : Regolith) : MaterialFor(topTile);
+        public static int MaterialFor(Meridian.Planets.PlanetId planet, byte topTile) => planet == Meridian.Planets.PlanetId.Mars
+            ? (topTile == TileId.Basalt ? Basalt : (topTile == TileId.Snow || topTile == TileId.Ice) ? Frost : Regolith)
+            : MaterialFor(topTile);
 
         /// <summary>The strip a column draws from its top solid tile: grass, sand and stone their own, every other tile (soil, snow, a dug face) the soil. Pure.</summary>
         public static int MaterialFor(byte topTile) => topTile == TileId.Grass ? Grass : topTile == TileId.Sand ? Sand : topTile == TileId.Stone ? Stone : Soil;
