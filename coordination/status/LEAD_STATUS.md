@@ -20,6 +20,6 @@ USER-25 (close ChatGPT, Copilot, Edge, Chrome: the memory gate). USER-24 (round 
 ## Loop / stall watch
 Gate, not stall: no heavy job can start at 0.5 GB free. Watch at the next tick: a worker with no commit since its 00:4x resume while its lock-free list is full. UNITY's wiring batch is four cards; it must still hand off per card with one lock ≤ 20 min each.
 ## Session addresses (ListAgents, 11-07 00:4x)
-This session: zuber-32. Peers zuber-ff and zuber-c2 (which is UNITY and which BLENDER: asked at 00:5x; the old zuber-ac / zuber-ec are gone with the restart).
+This session: zuber-32. zuber-c2 = BLENDER (confirmed 00:5x: on the B-131 export wiring, no want on file). zuber-ff = UNITY (by elimination; its reply pending). The old zuber-ac / zuber-ec are gone with the restart.
 ## HeavyJobLock
 none (LEAD runs no heavy jobs while a worker holds the lock)
