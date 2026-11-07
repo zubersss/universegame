@@ -95,6 +95,10 @@ Exports are stamped (file time + hash); STALE.txt marks keys whose last render f
   lock or a want: no `blender.exe` at all (D-073); work the `## While waiting` list (numpy and
   scripts only, ≤ ~300 MB extra RAM). Check locks in one call and start Blender only in a later
   call after reading a clear result.
+- Low RAM (LEAD cycle 256): under 0.3 GB free, code only, no rendering at all; while UNITY holds the lock or a want, keep
+  a new preview under ~150 MB and measure its peak first (tracemalloc on a few exact frames). Read the free RAM in its own
+  call and decide on the result; never print it and run in the same command. The harness kills background shells under
+  memory pressure, so short jobs run in the foreground.
 - numpy-only scripts run without Blender:
   `"C:/Program Files/Blender Foundation/Blender 5.2/5.2/python/bin/python.exe" -I <script> <out_dir>`
   (build_discs_v3.py, build_hud_v3.py, gen_painted_bg.py all have a preview `__main__`).
