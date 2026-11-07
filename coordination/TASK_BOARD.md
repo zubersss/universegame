@@ -1332,7 +1332,7 @@ Goal: C2 Neptune design prep (Bible §12 C2 order 8; §7.9 the dark storm world)
 Accept: one review per group at 1x on a Neptune stand-in beside the surveyor; the ten boxes self-checked; nothing exported.
 Files: blender/scripts/build_c2_neptune_*.py, coordination/reports/blender/c2_neptune_designs.md
 Depends: B-158
-Lead notes: Cycle 272. The same shape as B-155 / B-157 / B-158 on the cloud-column pattern; source and the report lock-free now (BLENDER started it 14:3x while the gate is shut); previews only when RAM allows, after the Uranus decks.
+Lead notes: Cycle 272. The same shape as B-155 / B-157 / B-158 on the cloud-column pattern; source and the report lock-free now (BLENDER started it 14:3x while the gate is shut); previews only when RAM allows, after the Uranus decks. 14:5x (D-148): PALETTE ACCEPTED (e4ef46b2 + 05a4e3a4, eleven checks ALL PASS) → PALETTES["neptune"]; the three proposals all yes (wind lean on the root bone and the pulsed storm layer are UNITY's on the Neptune stage card; the Meridian's segments at ~7.5 m). The report (five flora, two floe strips, the deck + storm notes, the Umbral Leviathan as an 8-bone Grand rig per D-140, the props) noted. Next in source: the floe strips, the five flora (previews + the rig dry run), then the deck studies in slots after the Uranus decks.
 
 ### B-159 · BLENDER · Backlog · C2
 Goal: Jupiter export from the accepted B-155 designs: `backgrounds/jupiter/{deck1,deck2,deck3,deep}` + the Red Spot overlay with the straight finish (D-147); the four floe strips with cap_left + cap_right (D-137); `flora/jupiter/rigset`; the Jupiter props; `ui/palettes/jupiter/strip`.
