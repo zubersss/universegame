@@ -1,10 +1,10 @@
 # BLENDER STATUS
-Updated: 2026-11-07 04:08 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 04:17 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
 LEAD cycle 256 order (lock-free until my slot). Slot = #2 after UNITY's captures: file the want ONLY on UNITY's "captures done" (ETA 04:12; their wrapper yields to any older want), then <= 8 min: B-141 canyon + storm studies, the stalker / lurker review images, the stalker re-check (already passed lock-free 04:0x).
 1. D-126 split: DONE 04:07 (c1d1377): props/mars/tube_mound (build_props_mars_v3, 104x32 static, den_for tube_lurker, drawn IN FRONT of the creature on the same pivot) + a hole-less tube_lurker (idle peeks, react startles + ducks to the eyes over the rim, paws on the mound's top line); render.py prop rows import their generator; manifest row (B-142). Checks: mound ink 2.14-2.91 / 1.01-1.48, palette 100 %, json valid; lurker 40/40 + stalker 64/64 frames json valid, no edge / ground hits, ink 2.00-3.00 / 1.00-1.50, palette 100 %. Den review: review_b142_tube_mound_preview.png.
-2. Polar crawler code (list order 4): NEXT.
+2. Polar crawler DONE 04:17 (design only, new key creatures/mars/polar_crawler): an olive pill-bug of eight frost-capped plates, 144x64, idle 12 plates breathe / walk 14 leg ripple / react 10 curls into a ball and uncurls / bump 10; all 46 exact frames json valid, no edge / ground hits (after fixes), ink 2.00-3.00 / 1.00-1.50, palette 100 %, 43 MB. B-141 canyon + storm scene code DONE (9cb766f; the FFT run + reviews in the slot, script ready).
 3. B-140 / B-141 / B-142 export readiness (rig set + strips rows, backdrop rows, creature rows with replaces_v2 on dustskater + scree_stalker, mound row done).
 4. Mars report (c2_mars_designs.md) to the accepted state; 5. README.
 Accepted cycle 256: B-136 Hadal Maw design (export in one slot after U-106, new key), Puffpod fix, Mars rig-set dry run, Dustskater. B-131 export after U-113 (after U-106). Under 0.3 GB free: code only.

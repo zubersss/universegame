@@ -539,6 +539,167 @@ def lurker_poses():
     return out
 
 
+# ---------------------------------------------------------------- polar crawler (list order 4)
+# A slow armoured crawler of the ice caps: a pill-bug of eight olive shell plates with frost caps along each ridge,
+# teal ice specks, a small face under the front plate, two knobbed antennae, two little tail prongs and a ripple of
+# short hose legs. It curls into a ball when startled (react) and uncurls. ~1.4 x 0.8 m. The shell is an arc whose
+# curvature `curl` takes from a low arch (0) to a closed ball (1).
+
+CRAWL_N = 8                                                              # shell plates
+
+
+def mats_crawler(gp, sp="polar_crawler"):
+    def m(name, **kw):
+        return G.mat(gp, f"{sp}_{name}", **kw)
+    C_ = P["green"]
+    return {
+        "shell": m("shell", fill=C_), "shell_f": m("shell_f", fill=C_, ink=False),
+        "sh": m("shell_mid", fill=SH(C_), ink=False), "dp": m("shell_deep", fill=DP(C_), ink=False),
+        "frost": m("frost", fill=P["offwhite"], ink=False), "frost_sh": m("frost_mid", fill=SH(P["offwhite"]), ink=False),
+        "ice": m("ice", fill=P["teal"], ink=False),
+        "leg": m("leg", fill=P["brown"], behind=True), "leg_far": m("leg_far", fill=DP(C_), behind=True),
+        "head": m("head", fill=SH(P["sky"])), "belly": m("belly", fill=SH(P["mustard"])),
+        "knob": m("knob", fill=P["teal"]), "nose": m("nose", fill=P["brown"]),
+        "ink": m("ink", fill=None), "pupil": m("pupil", fill=G.INK, ink=False), "eye": m("eye_white", fill=P["offwhite"]),
+        "mouth": m("mouth", fill=DP(P["red"])), "star": m("star", fill=P["mustard"]),
+        "puff": m("puff", fill=P["offwhite"]), "puff_sh": m("puff_mid", fill=SH(P["offwhite"]), ink=False),
+    }
+
+
+def crawler_shell(curl, breathe=0.0):
+    """The shell arc for a curl: (inner pts, outer pts, normals, angles) from the tail (s 0) to the head (s 1), placed so
+    the lowest outline point sits at the clearance (0.12 m on its legs .. 0 as a ball). Clockwise over the top."""
+    c = curl * curl * (3 - 2 * curl)                                     # smoothstep
+    theta = 1.5 + (6.2 - 1.5) * c
+    R = math.exp(math.log(0.87) + (math.log(0.05) - math.log(0.87)) * c)
+    T = (0.30 + (0.32 - 0.30) * c) * (1 + 0.04 * breathe)
+    n = 49
+    inner, outer, norm, ang = [], [], [], []
+    for i in range(n):
+        s = i / (n - 1)
+        phi = math.pi / 2 + theta / 2 - theta * s
+        t = T * (0.55 + 0.45 * math.sin(math.pi * min(1.0, 0.15 + 0.85 * s)) ** 0.6) * (0.85 if s > 0.9 else 1.0)
+        bump = 0.022 * abs(math.sin(math.pi * s * CRAWL_N))                # scalloped plate ridges
+        nx, nz = math.cos(phi), math.sin(phi)
+        inner.append((R * nx, R * nz))
+        outer.append(((R + t + bump) * nx, (R + t + bump) * nz))
+        norm.append((nx, nz))
+        ang.append(phi)
+    zend = inner[0][1]                                                   # unrolled, the belly is nearly flat (short legs):
+    inner = [(x, z - (z - zend) * 0.85 * (1 - c)) for x, z in inner]     # the inner arc is pulled to its chord
+    zmin = min(z for _x, z in inner + outer)
+    clear = 0.12 * (1 - c) + 0.015 * c                                   # a ball keeps its ink above the ground line
+    dz = clear - zmin
+    xs = [x for x, _z in inner + outer]
+    dx = -(min(xs) + max(xs)) / 2
+    mv = lambda pts: [(x + dx, z + dz) for x, z in pts]      # noqa: E731
+    return mv(inner), mv(outer), norm, ang, c
+
+
+def draw_polar_crawler(d, M, pose=None, seed=0):
+    p = K.base_pose()
+    p.update(dict(curl=0.0, breathe=0.0, gait=0.0, antenna=0.0, wobble=0.0))
+    p.update(pose or {})
+    inner, outer, norm, ang, c = crawler_shell(p["curl"], p["breathe"])
+    rot = p["wobble"]                                                    # a rolled ball rocks about its centre
+    cx = sum(x for x, _z in outer) / len(outer)
+    cz = sum(z for _x, z in outer) / len(outer)
+    B = K.Body(p, (0.0, 0.3))
+
+    def W_(pts):
+        cr, sr = math.cos(rot), math.sin(rot)
+        return B([(cx + (x - cx) * cr - (z - cz) * sr, cz + (x - cx) * sr + (z - cz) * cr) for x, z in pts])
+    dw = G.Xf(d, W_)
+    n = len(inner)
+    legs_on = c < 0.55
+    if legs_on:                                                          # far legs (behind), then near legs after the shell
+        lift = 1 - c / 0.55
+
+    def legs(far):
+        for k in range(5):
+            s = 0.18 + 0.15 * k
+            i = int(s * (n - 1))
+            hip = inner[i]
+            ph = p["gait"] - 0.9 * k + (math.pi if far else 0.0)
+            fx = hip[0] + (0.02 if far else -0.02) + 0.06 * math.sin(ph)
+            fz = 0.018 + max(0.0, 0.035 * math.cos(ph))                    # the hose's round end cap sits on the ground
+            L = hip[1] - fz
+            foot = (hip[0] + (fx - hip[0]) * lift, hip[1] - L * lift)
+            G.stroke(dw, G.hose_outline(G.bezier(hip, (hip[0] + 0.03, (hip[1] + foot[1]) / 2), foot, n=6), 0.032),
+                     M["leg_far" if far else "leg"], I, cyclic=True)
+    if legs_on:
+        legs(True)
+    for k in range(2 if c < 0.7 else 0):                                 # antennae (behind the head), forward and up
+        base = inner[-3]
+        a = 0.30 + 0.50 * k + p["antenna"] * (1 if k else 0.6)
+        tip = (base[0] + 0.24 * math.cos(a), base[1] + 0.24 * math.sin(a) + 0.06)
+        G.stroke(dw, G.hose_outline(G.bezier(base, ((base[0] + tip[0]) / 2, max(base[1], tip[1]) + 0.05), tip, n=6), 0.018), M["leg"], I, cyclic=True)
+        G.stroke(dw, G.lumpy_ellipse(tip[0], tip[1], 0.025, 0.025, n=10, seed=60 + k), M["knob"], I, cyclic=True)
+    for k in (0, 1):                                                     # tail prongs at the back end
+        b = inner[1]
+        a = ang[0] + math.pi / 2 + 0.15 + 0.35 * k
+        G.stroke(dw, G.hose_outline([b, (b[0] + 0.10 * math.cos(a), b[1] + 0.10 * math.sin(a))], 0.03), M["leg_far"], I, cyclic=True)
+    tx, tz = norm[-1][1], -norm[-1][0]                                   # the shell's forward tangent at the head end
+    hx, hz = inner[-1][0] + 0.09 * tx + 0.08 * norm[-1][0], max(inner[-1][1] + 0.09 * tz + 0.08 * norm[-1][1] + 0.03, 0.135)   # under the front plate, never in the ground
+    if c < 0.85:
+        G.stroke(dw, G.lumpy_ellipse(hx, hz, 0.13, 0.105, n=26, lump=0.03, seed=seed + 2), M["head"], O, cyclic=True)
+        G.stroke(dw, G.lumpy_ellipse(hx + 0.08 * math.cos(ang[-1] - math.pi / 2), hz - 0.02, 0.025, 0.02, n=10, seed=seed + 6), M["nose"], I, cyclic=True)
+        if p["mouth"] > 0.05:
+            G.stroke(dw, G.lumpy_ellipse(hx + 0.05, hz - 0.055, 0.012 + 0.008 * p["mouth"], 0.008 + 0.01 * p["mouth"], n=10, seed=seed + 7), M["mouth"], I, cyclic=True)
+        else:
+            G.seam(dw, G.bezier((hx + 0.075, hz - 0.05), (hx + 0.04, hz - 0.06), (hx + 0.0, hz - 0.045), n=5), M["ink"])
+        K.eyes(dw, M, hx - 0.01, hz + 0.02, 0.022, 0.03, 0.04, p, seed)
+    shell = outer + inner[::-1]
+    G.stroke(dw, shell, M["shell_f"], 0.0, cyclic=True)
+    if c > 0.6:                                                          # curled: the tucked belly fills the core
+        core = (sum(x for x, _z in inner) / n, sum(z for _x, z in inner) / n)
+        G.stroke(dw, G.lumpy_ellipse(core[0], core[1], 0.10 * c, 0.10 * c, n=16, seed=seed + 9), M["belly"], I, cyclic=True)
+    band = [((xo * 0.7 + xi * 0.3), (zo * 0.7 + zi * 0.3)) for (xo, zo), (xi, zi) in zip(outer, inner)]
+    G.stroke(dw, band[::-1] + inner, M["sh"], 0.0, cyclic=True)                          # the inner (belly-side) band
+    lowq = [i for i in range(n) if i < n * 0.35]
+    G.stroke(dw, [band[i] for i in lowq][::-1] + [inner[i] for i in lowq], M["dp"], 0.0, cyclic=True)
+    cap = [((xo - 0.06 * nx), (zo - 0.06 * nz)) for (xo, zo), (nx, nz) in zip(outer, norm)]
+    for k in range(CRAWL_N):                                             # frost caps along each plate's ridge
+        a_, b_ = int(k * (n - 1) / CRAWL_N), int((k + 1) * (n - 1) / CRAWL_N)
+        drip = [(x - 0.012 * norm[a_ + j][0] * (1 + math.sin(7 * j + k)), z - 0.012 * norm[a_ + j][1] * (1 + math.sin(7 * j + k)))
+                for j, (x, z) in enumerate(cap[a_:b_ + 1])]
+        G.stroke(dw, outer[a_:b_ + 1] + drip[::-1], M["frost"], 0.0, cyclic=True)
+        if k:
+            G.seam(dw, [inner[a_], band[a_], outer[a_]], M["ink"])
+        mid = (a_ + b_) // 2
+        G.specks(dw, [((cap[mid][0] + band[mid][0]) / 2, (cap[mid][1] + band[mid][1]) / 2)], M["ink"])
+        G.stroke(dw, G.lumpy_ellipse(cap[mid][0] - 0.03 * norm[mid][0], cap[mid][1] - 0.03 * norm[mid][1], 0.012, 0.01, n=8, seed=k), M["ice"], 0.0, cyclic=True)
+    G.stroke(dw, shell, M["ink"], O, cyclic=True)
+    if legs_on:
+        legs(False)
+    if p["stars"] is not None:
+        K.stars(dw, M, hx - 0.05, max(z for _x, z in outer) + 0.08, 0.16, p["stars"])
+
+
+def crawler_poses():
+    out = []
+    for i in range(12):                                                  # idle: the plates breathe, antennae wave, a blink
+        ph = TAU * i / 12
+        out.append(dict(breathe=math.sin(ph), antenna=0.25 * math.sin(ph - 1.0), sz=1 + 0.015 * math.cos(ph),
+                        blink={8: 0.6, 9: 1.0}.get(i, 0.0), look=(0.6, -0.2)))
+    for i in range(14):                                                  # walk: slow, a leg ripple runs front to back
+        ph = TAU * i / 14
+        out.append(dict(gait=2 * ph, bob=0.006 * math.cos(4 * ph), sz=1 + 0.01 * math.cos(4 * ph), antenna=0.2 * math.sin(2 * ph),
+                        breathe=0.3 * math.sin(ph), look=(0.8, -0.2)))
+    out += [dict(eye_pop=1.5, antenna=-0.5, mouth=0.4, sz=1.04),        # react: startle, curl into a ball, wobble, uncurl
+            dict(curl=0.3, eye_pop=1.3, antenna=-0.6, sz=0.97),
+            dict(curl=0.62, antenna=-0.7),
+            dict(curl=0.9),
+            dict(curl=1.0, sz=0.94),
+            dict(curl=1.0, wobble=0.10, sz=1.02),
+            dict(curl=1.0, wobble=-0.07),
+            dict(curl=0.86, wobble=0.02),
+            dict(curl=0.5, eye_pop=1.2, look=(0.9, 0.0)),
+            dict(curl=0.15, look=(0.5, 0.0))]
+    out += [dict(q, antenna=q.get("ears", 0.0)) for q in K.bump_clip()]
+    return out
+
+
 SPECIES = {
     "dustskater": dict(draw=draw_dustskater, poses=poses, mats=mats, frame=(128, 80), seed=31,
                        clips=[("idle", 10, True), ("walk", 12, True), ("react", 8, False), ("bump", 10, False), ("flee", 12, True)],
@@ -559,6 +720,12 @@ SPECIES = {
                                     "motion": "idle peeks over its den mound and looks about, react startles and ducks (eyes over the rim), walk scuttles with a tail wag",
                                     "original": "our own tube dweller: a rock-plated mole-thing with a red nose bulb and glow-ringed eyes; shy, never an ambusher (D-087), no teeth"},
                         ours="a shy rock-plated tube dweller that peeks over its den mound and ducks, leaving two glowing eyes over the rim", den="props/mars/tube_mound"),
+    "polar_crawler": dict(draw=draw_polar_crawler, poses=crawler_poses, mats=mats_crawler, frame=(144, 64), seed=34,
+                          clips=[("idle", 12, True), ("walk", 14, True), ("react", 10, False), ("bump", 10, False)],
+                          self_check={"ink": "plate seams, frost caps with drips, ice specks, rivet specks, tail prongs, antenna knobs, a mouth seam",
+                                      "motion": "the plates breathe, a slow leg ripple, the antennae wave; react curls into a ball, wobbles and uncurls",
+                                      "original": "our own ice-cap pill-bug: olive plates with frost caps and teal ice; slow and harmless (D-087), no teeth"},
+                          ours="a slow olive pill-bug from the ice caps with frost on every plate that rolls itself into a ball when startled"),
 }
 
 
