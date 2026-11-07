@@ -211,7 +211,7 @@ def steady_ends(sil, seed):
     sil["radius"] = (sil["radius"] * (1.0 - e + e / (1.0 + GR.JITTER * nz))).astype(np.float32)
 
 
-def sheets(kinds=None, mats_fn=None):
+def sheets(kinds=None, mats_fn=None, grain=None):
     """{kind: [8 frames HxWx4 uint8]} and the measured ink widths."""
     import numpy as np
     out, allw = {}, []
@@ -225,7 +225,8 @@ def sheets(kinds=None, mats_fn=None):
             st = fakegp.strokes_of(d, gp)
             steady_ends(st[-1], seed=k + 1)          # the silhouette is the last stroke
             img, w = GR.render_frame(st, FW, FH, 64, (0.5, 0.0), ss=4, seed=k + 1)
-            rgb = np.clip(img[..., :3].astype(np.float32) * paper_grain(k, 0.02 if kind == "sand" else 0.035)[..., None], 0, 255)   # sand is brighter: the same grain contrast
+            amp = (grain or {}).get(kind, 0.02 if kind == "sand" else 0.035)       # bright kinds (sand, Mercury's white regolith): 0.02
+            rgb = np.clip(img[..., :3].astype(np.float32) * paper_grain(k, amp)[..., None], 0, 255)   # the same grain contrast
             frames.append(np.dstack([np.rint(rgb).astype(np.uint8), img[..., 3]]))
             allw += w
         out[kind] = frames
