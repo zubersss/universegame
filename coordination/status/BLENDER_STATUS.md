@@ -1,11 +1,13 @@
 # BLENDER STATUS
-Updated: 2026-11-07 13:48 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 13:52 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
+13:47:56-13:49:32 B-162 EARTH RE-EXPORT, straight alpha (D-147): backgrounds/earth/plains | forest | coast layer1 + layer2 re-written, layer0s byte-identical (md5), jsons unchanged; wrapper log OK x3, D-145 gate 1399 MB (free 2737), peak 830 MB (+19 %, within 25 %), 96 s; review_b162_earth_straight_before_after.png (13:49: the dark rims along the near ridges, canopies, dune line gone). Slip: that before / after review peaked at 207 MB while UNITY's lock was on (measured 144 MB with two rows; the third row grew it) - over my 150 MB beside-a-lock line. Next: B-162 Mars (plains, canyon, storm) in the next free gap, then Uranus decks 2 / 3 / deep.
 13:43:22-13:45:46 B-149 RE-EXPORT, straight alpha (D-147; a9b61653): backgrounds/mercury/day | twilight | night layer1 + layer2 re-written, the three layer0s byte-identical (md5 vs the 12:28 export), jsons unchanged; wrapper log OK x3, D-145 gate 1373 MB (free 1421), peak 699 MB (within 25 %), 144 s; reviews review_b149_mercury_*.png + review_b149_straight_before_after.png (13:46, day + night: the dark rim lines along the near ridges gone). UNITY's captures (lock 13:45) shoot the corrected sets. Next: B-162 Earth sets in the next free gap (one slot per planet, before / after review), then Uranus decks 2 / 3 / deep.
 13:25:54-13:31:21 studies slot 3 (327 s, peak 560 MB, released): sdeck2 (60 s, the inked ring like sdeck1 - closes B-157's studies; rendered before the D-147 default, so its fog is still the old grey: it re-renders straight before export), udeck1 sun_left / sun_right / night / survey (73 / 72 / 51 / 70 s) straight + the long shadows: fog reads pale, the long slate shadows run from each lobe's peak away from the sun, so left / right differ in the clouds themselves. Skipped by the budget: udeck2 / udeck3 / udeep x4 (the next gaps). The grey streaks were an exporter alpha bug (premultiplied colour read as straight) -> D-147 (LEAD): 96c21c80 makes straight alpha the default (BG.straighten, opaque pixels untouched so layer0s stay byte-identical; earth_plains too). Next (LEAD): UNITY's PlayMode slice + M3Inner, then my B-149 re-export straight (want filed when UNITY's lock is on; layer0 md5s recorded), then UNITY's captures, then B-162 Earth / Mars re-exports with before / after reviews.
 13:10:12-13:15:48 studies slot 2 (after UNITY's 13:08 capture; 336 s, peak 560 MB, released): udeck1 sun_left / sun_right / night / survey (71 / 72 / 53 / 72 s) with the stronger light (a4a18ca1) + the long shadows (47f83d21); sdeck1 (66 s) with the inked ring. Reads: the ring is now an inked stroke at 1x (1 px ink / 4 px bright / 3 px underside); Uranus left / right tell apart at a glance (the sun + warm haze swap sides, every lobe's shaded face flips), night dark slate with the ember only as a low haze, survey with the methane bands; the long shadows are there but partly lost among the grey streaks inside the banks (the same in every light). Skipped: sdeck2 (9 s left) - the next gap.
 ## Last completed
+- 13:47:56-13:49:32 SLOT (wrapper, D-145 gate 1399): B-162 Earth sets re-exported straight (D-147), layer0s byte-identical (log OK x3, peak 830 MB).
 - 13:43:22-13:45:46 SLOT (wrapper, D-145 gate 1373): B-149 re-exported straight (D-147), layer0s byte-identical (log OK x3, peak 699 MB; a9b61653).
 - 12:45:47-12:49:08 SLOT (wrapper, D-145 gate 1200): B-150 creatures/mercury x4 + props/mercury/ice_burrow exported (log OK x5, peak 389 MB; cca20f60).
 - 12:44:31-12:45:14 SLOT (wrapper, D-145 gate 1200): B-148 flora/mercury/rigset + terrain/mercury/ground_strip(_slate) + ui/palettes/mercury exported (log OK x3, peak 347 MB; 70c40e1e).
@@ -29,6 +31,7 @@ none.
 none (the lit variants ruled in D-142).
 
 ## Rules I keep (from slips this session)
+- A review grows with its rows: beside another role's lock, re-measure or cut it to the measured size (13:50: the 3-row before / after hit 207 MB vs 144 MB measured for 2 rows).
 - While another role holds the lock, run only jobs already measured <= 150 MB; a new job (or a new whole preview) is first measured in a free gap, never estimated from its parts.
 - A lock check is its own call; Blender starts only in a later call after reading a clear result (D-073). The same for RAM: read it in its own call, then decide.
 - A want is filed only when the queue says I am next after the running job; never while the other role's multi-lock job is between locks.
@@ -40,4 +43,4 @@ none (the lit variants ruled in D-142).
 none.
 
 ## HeavyJobLock
-none held (B-149 re-export released 13:45:46); UNITY's capture lock on; my next want (B-162 Earth) after it.
+none held (B-162 Earth released 13:49:32); UNITY's lock on; B-162 Mars want after it.
