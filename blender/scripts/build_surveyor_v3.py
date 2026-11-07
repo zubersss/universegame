@@ -73,7 +73,8 @@ def spiral(cx, cz, r, turns=2.2, n=40):
 
 def draw_surveyor(d, M, pose=None, seed=0):
     p = dict(view="side", expr="happy", bob=0.0, sz=1.0, lean=0.0, legs=((0.0, 0.0), (0.0, 0.0)),
-             arms=(0.0, 0.0), look=None, blink=0.0, bob_tip=0.0, pack_swing=0.0, pack_dz=0.0, hose_lag=0.0, puff=0.0, star_rot=0.6, speed=0.0)
+             arms=(0.0, 0.0), look=None, blink=0.0, bob_tip=0.0, pack_swing=0.0, pack_dz=0.0, hose_lag=0.0, puff=0.0, star_rot=0.6, speed=0.0,
+             shift=0.0, helmet_dz=0.0, eye_pop=1.0)       # B-134 side_b keys; their defaults leave `side` stroke-identical
     p.update(pose or {})
     view, expr = p["view"], p["expr"]
     face_dir = {"side": 1.0, "tq": 0.55, "front": 0.0}[view]
@@ -81,7 +82,7 @@ def draw_surveyor(d, M, pose=None, seed=0):
     sx = 1.0 / math.sqrt(sz)
 
     def X(pts, pivot_z=0.55):                       # the visual root: squash about the hips, bob, lean
-        return [((x * sx) + p["lean"] * (z - pivot_z), pivot_z + (z - pivot_z) * sz + p["bob"]) for x, z in pts]
+        return [((x * sx) + p["lean"] * (z - pivot_z) + p["shift"], pivot_z + (z - pivot_z) * sz + p["bob"]) for x, z in pts]
 
     def X1(x, z):
         return X([(x, z)])[0]
@@ -234,7 +235,7 @@ def draw_surveyor(d, M, pose=None, seed=0):
     G.stroke(d, collar, M["mustard"], O, cyclic=True)
     G.seam(d, X(G.bowed_line((-0.22, 1.125), (0.22, 1.125), bow=-0.04, n=8)), M["ink"])
     G.rivets(d, X([(-0.16, 1.10), (-0.05, 1.095), (0.06, 1.095), (0.17, 1.10)]), M["ink"])
-    hc = X1(0.0, 1.52)
+    hc = X1(0.0, 1.52 + p["helmet_dz"])             # B-134: the helmet lifts off the collar on surprise
     hr = 0.42
     # head inside the glass
     fx = hc[0] + 0.10 * face_dir
@@ -263,7 +264,7 @@ def draw_surveyor(d, M, pose=None, seed=0):
         er = (0.055, 0.085)
         lid = p["blink"]
         if expr == "surprised":
-            er = (0.08, 0.125)
+            er = (0.08 * p["eye_pop"], 0.125 * p["eye_pop"])
             ez += 0.03
         if expr == "determined":
             lid = max(lid, 0.45)

@@ -317,7 +317,11 @@ def seam(img):
 
 def export_background(entry, art):
     _cat, planet, scene = entry["key"].split("/")
-    imgs, layers = SCENES[(planet, scene)](int(entry.get("seed", 1)))
+    fn = SCENES.get((planet, scene))
+    if fn is None:                       # B-133: the Earth biome sets live in build_backdrop_v3 (same helpers)
+        import build_backdrop_v3 as BB
+        fn = BB.SCENES[(planet, scene)]
+    imgs, layers = fn(int(entry.get("seed", 1)))
     d = os.path.join(art, "backgrounds", planet, scene)
     os.makedirs(d, exist_ok=True)
     info = []
