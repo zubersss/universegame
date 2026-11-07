@@ -22,14 +22,15 @@ When the lock frees, the highest pending job here goes next, even if the other r
 older (D-037 alternation applies only between equal ranks). A rank is live only while its role
 has a want on file or holds the lock (D-112): if the top rank has no want when the lock frees,
 the next live rank runs now and the skipped role goes next after it files. A role below the top
-keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 252 (01:5x; UNITY holds the lock since 01:54 for the PlayMode re-run of the U-103 + U-109 check, at 0.1–0.2 GB free: the first run was cut by the 20-min cap at 01:37 while paging; BLENDER's B-132 export ran in between, 01:45–01:52):
-1. UNITY · PlayMode re-run (running; a memory stop allows one D-046 re-run) → the one hand-off commit → the U-103 captures (pad, tilted climb, Escape Line, Space Pilgrim) and the U-109 climb captures as short locks.
-2. BLENDER · one slot ≤ 15 min after UNITY's captures: B-134 export (`characters/surveyor/side_b`, C1) + B-133 export (six forest / coast layers + two scene jsons). File `want_blender.lock` now (UNITY holds the lock, D-039).
-3. UNITY · U-104 check + the 1080p HUD capture (two filtered PlayMode jobs if the full set nears the cap, D-122).
+keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 253 (02:3x; UNITY holds the lock since 02:21 for PlayMode job A of the U-103 + U-109 check (D-122 split after two cap cuts); BLENDER's queue #2 slot ran 02:15–02:21 and is verified):
+1. UNITY · PlayMode job A (running) → job B → the hand-off commit (no lock) → the U-103 captures (pad, tilted climb, Escape Line, Space Pilgrim) and the U-109 climb captures as short locks.
+2. BLENDER · one slot ≤ 15 min after UNITY's captures: B-135 export (pike, shark, squid) + `terrain/earth/ground_strip_set` with the sand strip (four sheets, grass / soil / stone byte-identical). File `want_blender.lock` when UNITY starts job B (D-039: after it has taken the lock), so the rank is live when its captures end.
+3. UNITY · U-104 check + the 1080p HUD capture (two filtered PlayMode jobs if needed, D-122).
 4. UNITY · U-106 profile (11 legs, D-116 rows) + the 20 s flight strip.
 5. BLENDER · B-131 export + the six glb removals, only after UNITY's status says the U-113 code is committed (D-117).
-6. BLENDER · B-135 export once its previews are accepted.
+6. BLENDER · B-137 Sun rig export once its parts preview is accepted (D-123); B-136 export when accepted.
 7. UNITY · U-112 creep hunt probe runs, after U-106.
+
 
 
 
@@ -41,6 +42,7 @@ Rules: nothing here needs the lock; it stays under ~300 MB of extra RAM; no Unit
 did in your status before the next poll. LEAD tops each list up to ≥ 3 items every cycle.
 
 **UNITY**
+- UNITY_STATUS first (rule 10): the 01:54 cap cut, the D-122 split, job A's start and the queue order are not in the file (last update 01:46).
 - U-104 swap code before its check: the six gauge parts + needles from `ui/hud/gauges.json` at 12 Hz, the `escape_line` tile at the line's altitude, the blank `escape_sign` lettered ESCAPE LINE in Patrick Hand, the ship HUD rows; MenuHudTests extended.
 - U-108 leftovers: react `turn_bounce` gets a real bounce (a 0.15 s root squash on react, pure, tested); `FloraRigs.CycleClockOffset` becomes internal (InternalsVisibleTo for the tests).
 - U-106 prep: the 20 s flight-strip script (pad → Escape Line → space → entry → touchdown under scripted input), tests first (the c1_2026-11-07 evidence list is in, 5e05474).
@@ -53,12 +55,13 @@ did in your status before the next poll. LEAD tops each list up to ≥ 3 items e
 Then one batched check for everything written when your turn in the queue comes.
 
 
-**BLENDER** (numpy / scripts only while UNITY holds the lock or a want; bpy only under your own lock; while UNITY's job runs under 0.2 GB free, nothing of yours above ~100 MB: scripts and status only)
-- BLENDER_STATUS first (rule 10): the B-132 export, the B-133 previews, the B-134 preview and your want are not in the file (last update 01:24).
-- B-133 + B-134 export wiring, dry-run into a scratch tree: manifest rows for `backgrounds/earth/forest` and `backgrounds/earth/coast` (SceneLayout jsons, `tile: true` in x, parallax + y_m per layer) and `characters/surveyor/side_b` (same pivot and PPU as `side`), so the slot is one ≤ 15 min batch.
-- B-135 design previews: pike, shark, squid (faces kept, no teeth; `swim` 12–16 as the travel clip), when the lock is free (fakegp ~200 MB).
-- A coast sand ground strip `terrain/earth/ground_strip_sand` as a B-130 recipe variant (preview; export with B-133 if ready, else the next batch): the coast composite stands the surveyor on the soil strip today.
-- A painted Sun disc design (C2 candidate, preview only; the Sun stays a lit spheroid through C1 per the U-103 ruling).
+**BLENDER** (numpy / scripts only while UNITY holds the lock or a want; bpy only under your own lock; while UNITY's Editor runs, measure a new preview's peak first and keep it under ~150 MB, else it waits for your slot)
+- B-138 edge audit (lock-free, read-only numpy on the committed PNGs, ~100 MB): every v3 sheet exported before the 2 px edge rule existed (B-119 discs, B-120, B-121, B-122 rig, B-124..B-130, B-132) measured for frames touching the 2 px edge, ink widths and palette; a table in `coordination/reports/blender/edge_audit_2026-11-07.md`; any offender re-exported in your next slot.
+- B-135 + sand export readiness: the manifest rows, a dry run into a scratch tree (three strips byte-identical, the swimmers' frames inside the 2 px edge), the stamped reviews with the surveyor.
+- B-137 Sun rig export wiring (D-123): the parts sheet (`sun/disc` body at 0.5x ≤ 1024², `sun/flames` ring, `sun/corona` wash 512², two prominence parts), `disc_rig.json` in the Saturn rings shape with the two limb sockets; a lock-free parts preview at the game's r 900 px on the B-120 starfield.
+- B-139 Mars design prep (C2 order 2, previews only when free RAM allows): the Mars palette strip check, five faceless Mars plant designs (Bible §7.2), the dust-storm and canyon backdrop studies, the Mars creature re-ink list like c2_earth_creature_reink.md.
+- B-136 Hadal Maw rig set design (fakegp ~150 MB; only while free RAM is above 0.6 GB, else in your slot).
+
 
 
 
@@ -292,7 +295,7 @@ Goal: Two-sheet surveyor (D-121): the surveyor's controller takes clips from `ch
 Accept: SurveyorAnimTests: with a stand-in `side_b` json every state resolves and the five clips play their own frames (EditMode); with B-134 imported, the stand-in table shows 0 stand-ins for dig / build / surprise / jetpack / climb_in; CartoonSmoke green; the Earth perf rows unchanged.
 Files: Code/Editor/SheetAnimatorBuilder.cs, Code/Runtime/View2D/SpriteCharacterView.cs, Code/Runtime/Player/, Tests/
 Depends: U-105
-Lead notes: Cycle 251 (D-121). Code half lock-free (While-waiting #5) so B-134's export drops straight in; the check rides your next batch after U-104.
+Lead notes: Cycle 251 (D-121). Code half lock-free (While-waiting #5) so B-134's export drops straight in; the check rides your next batch after U-104. Cycle 253: B-134 is exported (27143e1): `side_b` plays by clip name; climb_in moves the root up the fin-leg over frames 0–7, then the sheet's `hatch` socket (1.0, 1.05 m from the pivot, every frame) sits on the Pilgrim's door socket; the five stand-ins resolve on import.
 
 > **R1 (D-062).** 2D tasks U-061..U-071 are Superseded (their code and sources stay in the tree and
 > get reused). R-tasks below rebuild Earth in 3D while keeping every system.
@@ -1086,7 +1089,7 @@ Goal: Earth ground strips export: `terrain/earth/ground_strip` (grass), `ground_
 Accept: log OK; edge joins within a material ≤ 1/255 mean difference and the silhouette ink identical on all 48 frame edges (as measured on the preview); a json per sheet with `tile: true` in x; the ten boxes that apply; UNITY's U-111 swaps the placeholder by key.
 Files: blender/scripts/build_c2_ground_strip.py, Assets/_Game/Art/terrain/earth/
 Depends: —
-Lead notes: Cycle 249 (D-115): SOURCE ACCEPTED (dde330d; review 23:59: grass / soil / stone with pebbles, roots and cracks; joins 0.6 / 0.6 / 0.8 per 255; the 1x composite on the plains with a stone outcrop and a dug hole reads as one drawn ground). Same export batch as B-129. Cycle 249 (00:2x): EXPORT VERIFIED (558976a; log 00:22:36 OK: three sheets 540×152, joins 0.63 / 0.62 / 0.81 per 255, silhouette identical on all 48 edges, `tile: true`; review_b130_ground_strips.png 00:22). Deviation ACCEPTED: frames are 64×152, not 64×128, with pivot [0.5, 0.842] on the ground line (`ground_line_px: 128`), so the sheet hangs 2 m below the line (what GroundStrip.cs draws today) plus 0.375 m of lip and tufts above it; no UNITY code change, the key swap only. Done on U-111's capture.
+Lead notes: Cycle 249 (D-115): SOURCE ACCEPTED (dde330d; review 23:59: grass / soil / stone with pebbles, roots and cracks; joins 0.6 / 0.6 / 0.8 per 255; the 1x composite on the plains with a stone outcrop and a dug hole reads as one drawn ground). Same export batch as B-129. Cycle 249 (00:2x): EXPORT VERIFIED (558976a; log 00:22:36 OK: three sheets 540×152, joins 0.63 / 0.62 / 0.81 per 255, silhouette identical on all 48 edges, `tile: true`; review_b130_ground_strips.png 00:22). Deviation ACCEPTED: frames are 64×152, not 64×128, with pivot [0.5, 0.842] on the ground line (`ground_line_px: 128`), so the sheet hangs 2 m below the line (what GroundStrip.cs draws today) plus 0.375 m of lip and tufts above it; no UNITY code change, the key swap only. Done on U-111's capture. Cycle 253: a fourth kind ACCEPTED, `terrain/earth/ground_strip_sand` (158484a sources; the same 8 × 64×152 contract, join 0.67/255, silhouette identical on all 64 edges; the rebuilt coast composite stands the surveyor on sand). Export as `terrain/earth/ground_strip_set` (four sheets, the three existing byte-identical) in BLENDER's next slot with B-135; U-111 maps coast columns to sand.
 
 ### B-131 · BLENDER · Ready · C2
 Goal: Earth camp props re-ink (the grey stand-ins in every still): `props/common/landing_pad`, `shelter_wall`, `shelter_door`, `smelter`, `storage_crate`, `lamp` redrawn as v3.1 cartoon sprites, no faces (D-101): ink 2–3 / 1–1.5 px, two shadow tones, drawn detail (planks, rivets, bolts, a smelter mouth with a drawn glow tone, a lamp with a drawn halo); sizes and pivots per the current manifest rows (ground line 10 px above the bottom; interactables keep mask R = 0.1); the door gets a 6-frame open clip, the smelter an 8-frame working loop, the lamp a 4-frame flicker.
@@ -1107,7 +1110,7 @@ Goal: Earth biome backdrops in the B-114 manner: painted watercolour layer sets 
 Accept: 2× tile check with no seam; ≤ 4 MB per PNG; a 1080p composite per biome at 1x with the surveyor; the ten boxes that apply; UNITY's StageLayers loads them by key with no code change.
 Files: blender/scripts/build_backdrop_v3.py, Assets/_Game/Art/backgrounds/earth_forest/, Assets/_Game/Art/backgrounds/earth_coast/
 Depends: B-114
-Lead notes: Cycle 249 (D-115). After the B-131 and B-132 previews; previews lock-free, exports in one batch. Cycle 251: paths amended to `backgrounds/earth/forest/` and `backgrounds/earth/coast/` (contract §11.4 `backgrounds/<planet>/<scene>/`, the ParallaxLayers shape); the Goal's `earth_forest` / `earth_coast` names are struck. Sources written (1d83053); the previews (FFT washes, > 300 MB) run in your lock slot (queue #2), not lock-free. Cycle 252: PREVIEWS ACCEPTED (review_b133_earth_forest_preview.png + _coast_ 01:53–01:54): forest = sky + far ridge and treeline, mid tree line with trunks, near bushes with stumps and logs; coast = sky + open sea, a grassy sea stack with two rocks on the water, near sand with grass tufts and driftwood; watercolour, paper grain, no ink; the 2× tiled strips show no seam at the join line; the 1x composites with the surveyor read as one scene with the B-130 strips. Export in your next slot with B-134 (queue #2). Follow-up on the list: a sand ground strip for the coast (the composite stands the surveyor on soil).
+Lead notes: Cycle 249 (D-115). After the B-131 and B-132 previews; previews lock-free, exports in one batch. Cycle 251: paths amended to `backgrounds/earth/forest/` and `backgrounds/earth/coast/` (contract §11.4 `backgrounds/<planet>/<scene>/`, the ParallaxLayers shape); the Goal's `earth_forest` / `earth_coast` names are struck. Sources written (1d83053); the previews (FFT washes, > 300 MB) run in your lock slot (queue #2), not lock-free. Cycle 252: PREVIEWS ACCEPTED (review_b133_earth_forest_preview.png + _coast_ 01:53–01:54): forest = sky + far ridge and treeline, mid tree line with trunks, near bushes with stumps and logs; coast = sky + open sea, a grassy sea stack with two rocks on the water, near sand with grass tufts and driftwood; watercolour, paper grain, no ink; the 2× tiled strips show no seam at the join line; the 1x composites with the surveyor read as one scene with the B-130 strips. Export in your next slot with B-134 (queue #2). Follow-up on the list: a sand ground strip for the coast (the composite stands the surveyor on soil). Cycle 253: EXPORT VERIFIED (27143e1; log 02:19:50 OK forest: layer0 2048×1024 2.3 MB seam 0.87, layer1 2048×640 seam 0.43, layer2 2048×384 seam 0.52 + forest.json; 02:20:21 OK coast: 2048×1024 seam 0.85, 2048×512 seam 0.63, 2048×384 seam 0.50 + coast.json; parallax 0.1 / 0.35 / 0.6; all six pixel-identical to the accepted previews rolled to their quiet column; LFS; review_b133_earth_{forest,coast}.png 02:20). UNITY's side: CartoonStage pins EarthScene = plains; the biome pick is U-110's (note added). Done on U-110's forest and coast captures.
 
 
 ### B-134 · BLENDER · Ready · C1
@@ -1115,14 +1118,35 @@ Goal: The surveyor's five missing C1 clips (Bible §12 C1 "the surveyor's full c
 Accept: the ten §9.7 boxes on a stamped review (each clip as a strip beside `side`'s idle at 1x, the 2× ink crop); json valid (`style: v3`, fps 12, the same pivot as `side`); sheet ≤ 2048²; log OK; UNITY's U-115 plays all five from the controller.
 Files: blender/scripts/build_surveyor_v3.py (or the B-125 builder), blender/sources/characters/surveyor_side_b.blend, Assets/_Game/Art/characters/surveyor/side_b_color.png + side_b.json
 Depends: B-125
-Lead notes: Cycle 251 (D-121). C1 scope that sat in the Backlog note since cycle 238; it ranks above the C2 exports once its preview is accepted. Preview lock-free (While-waiting #2), export in one short batch. U-105's ResolveOn stand-ins (land_hard, jump_anticipate, …) are UNITY states, not contract clips: these five are the whole gap. Cycle 252: PREVIEW ACCEPTED (review_b134_surveyor_side_b_preview.png 01:54; sheet 1956×1172, 219 KB): dig 10 (pick wind-up, swing, chips), build 10 (hammer, the part snapping in), surprise 12 (eye-pop, antenna lift), jetpack 10 (pack flame, puff trail), climb_in 14 (a smear-line zip whose last frames hide the surveyor; UNITY plays it at the door socket so the smear ends at the hatch); ink 2.0–3.0 / 1.0–1.5 px, palette 100 %, json valid; no idle on this sheet by design (`side` keeps it). Export in your next slot (queue #2); UNITY's U-115 picks it up.
+Lead notes: Cycle 251 (D-121). C1 scope that sat in the Backlog note since cycle 238; it ranks above the C2 exports once its preview is accepted. Preview lock-free (While-waiting #2), export in one short batch. U-105's ResolveOn stand-ins (land_hard, jump_anticipate, …) are UNITY states, not contract clips: these five are the whole gap. Cycle 252: PREVIEW ACCEPTED (review_b134_surveyor_side_b_preview.png 01:54; sheet 1956×1172, 219 KB): dig 10 (pick wind-up, swing, chips), build 10 (hammer, the part snapping in), surprise 12 (eye-pop, antenna lift), jetpack 10 (pack flame, puff trail), climb_in 14 (a smear-line zip whose last frames hide the surveyor; UNITY plays it at the door socket so the smear ends at the hatch); ink 2.0–3.0 / 1.0–1.5 px, palette 100 %, json valid; no idle on this sheet by design (`side` keeps it). Export in your next slot (queue #2); UNITY's U-115 picks it up. Cycle 253: EXPORT VERIFIED (27143e1; log 02:19:16 OK characters/surveyor/side_b 1956×1172 396 KB, 56 frames 192×192, dig 10 / build 10 / surprise 12 / jetpack 10 / climb_in 14, ink 2.0–3.0 / 1.0–1.5 px, palette 100 %; pivot [0.5, 0], a `hatch` socket (1.0, 1.05 m from the pivot) on every frame; LFS; source surveyor_side_b.blend). Done on U-115's import (SurveyorAnimTests: 0 stand-ins for the five).
 
 ### B-135 · BLENDER · Ready · C2
 Goal: Earth water creatures re-inked (your list coordination/reports/blender/c2_earth_creature_reink.md, order 2): pike, shark, squid at v3.1 with faces kept (pie-cut eyes, no bared teeth, D-087 / D-101), two shadow tones, interior detail; clips per §11.2 with `swim` 12–16 as the travel clip (D-119), idle 8–12, react ≤ 16, bump ≤ 16, flee ≤ 16; one sheet ≤ 2048² each; the below-ground check replaced by a below-water-floor check in your status.
 Accept: the ten §9.7 boxes per creature on a stamped review (1x in the coast water beside the surveyor); json valid; clip indices 0–3 in Gus's order, the rest by name; one texture each.
 Files: blender/scripts/build_creatures_earth_v3.py, blender/sources/creatures/earth_{pike,shark,squid}_v3.blend, Assets/_Game/Art/creatures/earth/
 Depends: B-132
-Lead notes: Cycle 251 (D-119). Design previews first (While-waiting #3), then one export batch. The Hadal Maw is B-136 (Backlog) as a §11.3 rig set.
+Lead notes: Cycle 251 (D-119). Design previews first (While-waiting #3), then one export batch. The Hadal Maw is B-136 (Backlog) as a §11.3 rig set. Cycle 253: PREVIEWS ACCEPTED (9c18daa; review_b135_earth_{pike,shark,squid}_preview.png 02:18–02:19, 1x in the coast sea with the surveyor): pike 128×80 (idle 8, swim 12, react 8 dart, bump 8, flee 12), shark 224×128 (idle 10, swim 14, react 8 turn-away, bump 10, flee 12), squid 320×144 (idle 12, swim 12 jet pulses, react 10 with an ink cloud, bump 10, flee 12); one pie eye each, closed mouths, no teeth; ink 2.0–3.0 / 1.0–1.5 px, palette 100 %; pivot [0.5, 0.5], swim at index 1; floor clearance 0.38 / 0.87 / 0.70 m (hand-off to UNITY on the card). Export in your next slot (queue #2) with the ground-strip set.
+
+### B-137 · BLENDER · Ready · C2
+Goal: The painted Sun as a rig set (D-123; design accepted from review_sun_disc_design_preview.png, 43ba8f5): `planets/sun/disc_rig.json` in the Saturn-rings shape with parts on one sheet ≤ 2048²: the body drawn at 2x and exported at 0.5x (≤ 1024², the game's r 900 px), the flame-tongue ring as one part Unity rotates slowly and pulses, the corona as a 512² translucent wash scaled 4x, two prominence parts on limb sockets; no face (D-101); the drifting spots as a 12-frame idle on the body if it fits the sheet, else static.
+Accept: the ten §9.7 boxes that apply on a stamped review at the game's size on the B-120 starfield with the Earth disc at true ratio; json valid; every part inside the 2 px edge; the sheet ≤ 2048²; log OK.
+Files: blender/scripts/build_sun_v3.py, blender/sources/planets/sun_v3.blend, Assets/_Game/Art/planets/sun/
+Depends: B-119
+Lead notes: Cycle 253 (D-123). Parts preview lock-free (While-waiting #3), export in a later slot after B-135. The Sun stays a lit spheroid through C1; UNITY's U-116 (Backlog) swaps it in with U-110 / U-111.
+
+### B-138 · BLENDER · Ready · C2
+Goal: Edge audit of every committed v3 sheet exported before the 2 px edge check existed (B-119 discs + Luna + Saturn ring parts, B-120 layers, B-121 HUD parts, B-122 rig parts, B-124 calibration, B-125 surveyor `side`, B-126 / B-129 rig set, B-127 gull, B-128 icons, B-130 strips, B-132 creatures): frames or parts whose ink touches the 2 px gutter, the ink widths and the palette hit, measured lock-free from the committed PNGs and jsons.
+Accept: `coordination/reports/blender/edge_audit_2026-11-07.md` with one row per key (frames checked, offenders by index, widths, palette %); every offender listed with its fix; the fixes exported in one later slot and the table re-run green.
+Files: blender/scripts/edge_audit.py, coordination/reports/blender/edge_audit_2026-11-07.md
+Depends: —
+Lead notes: Cycle 253. Three of the last four export paths failed the edge check on first measure (B-131 lamp, B-134 zip, B-135 pike / shark); the older sheets were never measured. Read-only, ~100 MB, so it runs beside UNITY's Editor.
+
+### B-139 · BLENDER · Ready · C2
+Goal: C2 Mars design prep (Bible §12 C2 order 2; §7.2 Mars): the Mars palette strip checked against §9; five faceless Mars plant designs as (d, M, pose) drawing functions in the Earth rig-set manner; the canyon and dust-storm backdrop studies (far / mid / near, the storm as a near layer with wind streaks); a Mars creature re-ink list like coordination/reports/blender/c2_earth_creature_reink.md (sizes, clips, order); the Mars camp props that differ from Earth's named.
+Accept: one review per group (plants at 1x on a Mars ground strip beside the surveyor; the two backdrop composites at 1080p with the 2× seam check; the list as a report); the ten boxes self-checked; nothing exported.
+Files: blender/scripts/build_c2_mars_*.py, coordination/reports/blender/c2_mars_designs.md
+Depends: B-129
+Lead notes: Cycle 253. Previews only when free RAM allows (fakegp ~150 MB; FFT backdrops in your slot). LEAD accepts the designs before any Mars card is written, like C2 Earth (cycle 245).
 
 > **R1 (D-062).** 2D tasks B-056..B-076 are Superseded; their `.blend` sources (rigs, props,
 > terrain recipes) are the starting point for the models. Contract v2 §9 is the rule set.
@@ -1916,7 +1940,7 @@ Goal: Biome-aware flora placement: FloraRigs picks plants whose `biomes` list co
 Accept: RigFloraTests: a desert spawn never picks Nodbell; the plains pick among snoozle / Nodbell / Whiptuft; the perf row unchanged; a plains capture with every plains plant visible.
 Files: Code/Runtime/Flora/FloraRigs.cs, Tests/
 Depends: U-106, B-129
-Lead notes: Cycle 249 (D-115). Promoted when U-106 is in.
+Lead notes: Cycle 249 (D-115). Promoted when U-106 is in. Cycle 253: B-133 is exported (27143e1): `backgrounds/earth/forest` and `/coast` load by ConfigureFor("earth", "forest" / "coast"), but CartoonStage pins EarthScene = plains, so this card also picks the scene set by the spawn biome (plains / forest / coast) and the Accept gains a forest and a coast capture at 1x.
 
 ### U-111 · UNITY · Backlog · C2
 Goal: Ground strips from art: U-100's placeholder strip replaced by `terrain/earth/ground_strip` (grass), `ground_strip_soil`, `ground_strip_stone` per column material (grass over soil, bare soil where dug, stone where the block is stone), the fill tile from each sheet's bottom 8 px; the strip follows dug heights as today.
@@ -1946,3 +1970,11 @@ Accept: the ten boxes on a stamped assembled review at 1x beside the surveyor; r
 Files: blender/scripts/build_creatures_earth_v3.py, Assets/_Game/Art/creatures/earth/hadal_maw/
 Depends: B-135
 Lead notes: Cycle 251 (D-119). Promoted when B-135's previews are accepted.
+
+
+### U-116 · UNITY · Backlog · C2
+Goal: The painted Sun in Space (D-123, B-137): `planets/sun/disc_rig.json` replaces the lit spheroid: the body sprite at the game's r 900 px, the flame ring rotating slowly (≈ 1°/s) with a 12 Hz stepped pulse, the corona wash scaled 4x behind it, the two prominence parts on their limb sockets with a slow wobble; the Space scene's light and the planet discs untouched.
+Accept: SpaceArtTests: the Sun key resolves to the rig with its parts and sockets; a Space capture with the Sun, Earth and Mars discs at true ratio; the Space perf rows unchanged.
+Files: Code/Runtime/Space/SunView.cs, Code/Runtime/Space/SpaceBackdrop.cs, Tests/
+Depends: U-106, B-137
+Lead notes: Cycle 253 (D-123). Promoted with U-110 / U-111 when U-106 is in and B-137 is exported.
