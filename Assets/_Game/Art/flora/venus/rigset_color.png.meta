@@ -1,0 +1,990 @@
+fileFormatVersion: 2
+guid: 3179d7307c94c534e9fc95b3e82d5a70
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -9015811064428591007
+    second: rigset_color_0
+  - first:
+      213: -4646942707658281257
+    second: rigset_color_1
+  - first:
+      213: -367356044595573682
+    second: rigset_color_2
+  - first:
+      213: 4347448135749056951
+    second: rigset_color_3
+  - first:
+      213: -3315201752533947720
+    second: rigset_color_4
+  - first:
+      213: -8837342657336079748
+    second: rigset_color_5
+  - first:
+      213: -8765935735186961322
+    second: rigset_color_6
+  - first:
+      213: -8242980493334989995
+    second: rigset_color_7
+  - first:
+      213: -1429384369043599060
+    second: rigset_color_8
+  - first:
+      213: -1655417677226936628
+    second: rigset_color_9
+  - first:
+      213: -7864364231028489733
+    second: rigset_color_10
+  - first:
+      213: 4632427809600995280
+    second: rigset_color_11
+  - first:
+      213: -4947251109637937645
+    second: rigset_color_12
+  - first:
+      213: -8883380907211250912
+    second: rigset_color_13
+  - first:
+      213: -6618969852247736515
+    second: rigset_color_14
+  - first:
+      213: 8310072760055638085
+    second: rigset_color_15
+  - first:
+      213: -8941757950970621053
+    second: rigset_color_16
+  - first:
+      213: 2079164303080992741
+    second: rigset_color_17
+  - first:
+      213: 1490004103099028332
+    second: rigset_color_18
+  - first:
+      213: -6538976570956593336
+    second: rigset_color_19
+  - first:
+      213: 2518108490744669611
+    second: rigset_color_20
+  - first:
+      213: 1930681069225236888
+    second: rigset_color_21
+  - first:
+      213: 4284336572379364787
+    second: rigset_color_22
+  - first:
+      213: -1021163703781780209
+    second: rigset_color_23
+  - first:
+      213: 2261661250419273690
+    second: rigset_color_24
+  - first:
+      213: 8611791281861866047
+    second: rigset_color_25
+  - first:
+      213: 5035489299039453197
+    second: rigset_color_26
+  - first:
+      213: -3106851909171929053
+    second: rigset_color_27
+  - first:
+      213: 5097005251657540171
+    second: rigset_color_28
+  - first:
+      213: 5351260868189590685
+    second: rigset_color_29
+  - first:
+      213: 1478904169744634567
+    second: rigset_color_30
+  - first:
+      213: 8667334026266046935
+    second: rigset_color_31
+  - first:
+      213: 3708508014823357698
+    second: rigset_color_32
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: glasscoral_foot_bright
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 64
+        height: 36
+      alignment: 9
+      pivot: {x: 0.5052, y: 0.3379}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 94df481dd1f8a00478bc506262c55c21
+      internalID: 879893989
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glasscoral_foot_dim
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 4
+        width: 60
+        height: 32
+      alignment: 9
+      pivot: {x: 0.4831, y: 0.3305}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bac0832ee97eec54d8f0f02cb5d75e0d
+      internalID: -841972117
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glasscoral_spike0_full
+      rect:
+        serializedVersion: 2
+        x: 140
+        y: 48
+        width: 28
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5443, y: 0.1381}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8db5e6961310802458a495fdba2f29ad
+      internalID: -1458987557
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glasscoral_spike0_short
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 4
+        width: 28
+        height: 32
+      alignment: 9
+      pivot: {x: 0.4665, y: 0.2072}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8ddfbca20a57d3641bb4ef4842208f0f
+      internalID: 880402065
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glasscoral_spike1_full
+      rect:
+        serializedVersion: 2
+        x: 156
+        y: 120
+        width: 28
+        height: 64
+      alignment: 9
+      pivot: {x: 0.4758, y: 0.0936}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 808acd15aa6bfbd47815c1ccc2890a50
+      internalID: -535772395
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glasscoral_spike1_short
+      rect:
+        serializedVersion: 2
+        x: 468
+        y: 56
+        width: 24
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5016, y: 0.1498}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e03a221c9efdae54f8755b3b3f065372
+      internalID: -1360161
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glasscoral_spike2_full
+      rect:
+        serializedVersion: 2
+        x: 312
+        y: 128
+        width: 28
+        height: 56
+      alignment: 9
+      pivot: {x: 0.4176, y: 0.107}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 11f3109a5ae6a8445b81d3d773e03f80
+      internalID: 1082496766
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glasscoral_spike2_short
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 0
+        width: 24
+        height: 36
+      alignment: 9
+      pivot: {x: 0.4871, y: 0.1664}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ff65f668077d5744281ce039d1de3f67
+      internalID: -436910724
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glasscoral_spike3_full
+      rect:
+        serializedVersion: 2
+        x: 336
+        y: 52
+        width: 32
+        height: 44
+      alignment: 9
+      pivot: {x: 0.3584, y: 0.1649}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a6c7fca13ccc7264f9e97bce48bdec95
+      internalID: 1748989710
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glasscoral_spike3_short
+      rect:
+        serializedVersion: 2
+        x: 340
+        y: 8
+        width: 28
+        height: 28
+      alignment: 9
+      pivot: {x: 0.4096, y: 0.2591}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cdc1e45f81981b646b81b49327fb6312
+      internalID: 756204696
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glasscoral_spike4_full
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 0
+        width: 32
+        height: 36
+      alignment: 9
+      pivot: {x: 0.5884, y: 0.2398}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fca8530896e0ba946a8fafc903adb387
+      internalID: -1849296188
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: glasscoral_spike4_short
+      rect:
+        serializedVersion: 2
+        x: 372
+        y: 8
+        width: 28
+        height: 28
+      alignment: 9
+      pivot: {x: 0.5277, y: 0.3084}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f50a1e17ae0215d4887f7fa32a182fb7
+      internalID: 196584107
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hazefern_frond0_mid
+      rect:
+        serializedVersion: 2
+        x: 40
+        y: 44
+        width: 56
+        height: 52
+      alignment: 9
+      pivot: {x: 0.2209, y: 0.1551}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4854d7c275f127a42864a55c4fe34852
+      internalID: 978162869
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hazefern_frond0_open
+      rect:
+        serializedVersion: 2
+        x: 188
+        y: 124
+        width: 52
+        height: 60
+      alignment: 9
+      pivot: {x: 0.2383, y: 0.1344}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8b3d5652369c99644bc66483e53d8ba8
+      internalID: 8864145
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hazefern_frond0_tight
+      rect:
+        serializedVersion: 2
+        x: 172
+        y: 48
+        width: 56
+        height: 48
+      alignment: 9
+      pivot: {x: 0.2204, y: 0.1681}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 07aade44362b54549960a8c980a85fb8
+      internalID: -1352076834
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hazefern_frond1_mid
+      rect:
+        serializedVersion: 2
+        x: 244
+        y: 124
+        width: 64
+        height: 60
+      alignment: 9
+      pivot: {x: 0.1858, y: 0.1344}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: efff870d6fcf23446a47a6186cc599f0
+      internalID: 311782968
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hazefern_frond1_open
+      rect:
+        serializedVersion: 2
+        x: 88
+        y: 116
+        width: 64
+        height: 68
+      alignment: 9
+      pivot: {x: 0.1861, y: 0.1186}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: edf24669d57138945939d6da25e83093
+      internalID: 919502480
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hazefern_frond1_tight
+      rect:
+        serializedVersion: 2
+        x: 344
+        y: 128
+        width: 64
+        height: 56
+      alignment: 9
+      pivot: {x: 0.1854, y: 0.144}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 02c8a03c6085290489dd0aa004e16b64
+      internalID: -640934338
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hazefern_frond2_mid
+      rect:
+        serializedVersion: 2
+        x: 232
+        y: 48
+        width: 52
+        height: 48
+      alignment: 9
+      pivot: {x: 0.2426, y: 0.1681}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8125e9360ab8a2e4ca478f024ce81dae
+      internalID: -232144704
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hazefern_frond2_open
+      rect:
+        serializedVersion: 2
+        x: 412
+        y: 128
+        width: 48
+        height: 56
+      alignment: 9
+      pivot: {x: 0.2632, y: 0.144}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1e2c0871cb82abc42873429417f80384
+      internalID: -137667742
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hazefern_frond2_tight
+      rect:
+        serializedVersion: 2
+        x: 372
+        y: 52
+        width: 52
+        height: 44
+      alignment: 9
+      pivot: {x: 0.242, y: 0.1833}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c5f743c810b37794a959de0c52760ba2
+      internalID: -241184494
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hazefern_tuft
+      rect:
+        serializedVersion: 2
+        x: 440
+        y: 20
+        width: 28
+        height: 16
+      alignment: 9
+      pivot: {x: 0.4778, y: 0.354}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4ffb07a7bbf45cc48b78300eeef206ea
+      internalID: 818595329
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: puffsail_sail_full
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 128
+        width: 44
+        height: 56
+      alignment: 9
+      pivot: {x: 0.3752, y: 0.0993}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7839bdf98b570414687cc49845511378
+      internalID: -1220183207
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: puffsail_sail_sag
+      rect:
+        serializedVersion: 2
+        x: 428
+        y: 52
+        width: 36
+        height: 44
+      alignment: 9
+      pivot: {x: 0.391, y: 0.1264}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c70dacfbd60833745b0b34e2b8805374
+      internalID: -516994509
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: puffsail_stem
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 40
+        width: 36
+        height: 56
+      alignment: 9
+      pivot: {x: 0.4872, y: 0.1448}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 20d1153fcc74bd3448c79333ad205609
+      internalID: 530402120
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sulphurbell_bell_open
+      rect:
+        serializedVersion: 2
+        x: 228
+        y: 4
+        width: 28
+        height: 32
+      alignment: 9
+      pivot: {x: 0.5154, y: 0.7498}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ecb75654dfc615845bf6766efedcfaba
+      internalID: -2045943267
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sulphurbell_bell_shut
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 4
+        width: 20
+        height: 32
+      alignment: 9
+      pivot: {x: 0.5441, y: 0.7498}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9348354e344dee3438649d5001c5c066
+      internalID: -1980706535
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sulphurbell_vine
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 100
+        width: 84
+        height: 84
+      alignment: 9
+      pivot: {x: 0.2293, y: 0.0936}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: aca4338c963340244bb6316b9e688b57
+      internalID: 1766600758
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ventcap_chimney
+      rect:
+        serializedVersion: 2
+        x: 288
+        y: 48
+        width: 44
+        height: 48
+      alignment: 9
+      pivot: {x: 0.4988, y: 0.1159}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9e96c862f49e56945891dc4e8e7c0ab4
+      internalID: -595687293
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ventcap_lid_open
+      rect:
+        serializedVersion: 2
+        x: 284
+        y: 4
+        width: 20
+        height: 32
+      alignment: 9
+      pivot: {x: 0.6525, y: 0.2086}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0098ab1b16df90e4088fe88499aa41f0
+      internalID: 970823440
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ventcap_lid_shut
+      rect:
+        serializedVersion: 2
+        x: 404
+        y: 16
+        width: 32
+        height: 20
+      alignment: 9
+      pivot: {x: 0.206, y: 0.3338}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 279065a8cdee89d4d9dd8e6d5a563557
+      internalID: -668409214
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ventcap_puff_high
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 44
+        width: 36
+        height: 52
+      alignment: 9
+      pivot: {x: 0.4629, y: 0.0919}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 571a3889bccdb3d4b9f19ccf60722794
+      internalID: -2060203693
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ventcap_puff_low
+      rect:
+        serializedVersion: 2
+        x: 308
+        y: 4
+        width: 28
+        height: 32
+      alignment: 9
+      pivot: {x: 0.4575, y: 0.1494}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 445145bcb02c4ca4fbedd5eceb2a662b
+      internalID: -1259442846
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 7d940ca446450284195d60752c4f8736
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      glasscoral_foot_bright: 879893989
+      glasscoral_foot_dim: -841972117
+      glasscoral_spike0_full: -1458987557
+      glasscoral_spike0_short: 880402065
+      glasscoral_spike1_full: -535772395
+      glasscoral_spike1_short: -1360161
+      glasscoral_spike2_full: 1082496766
+      glasscoral_spike2_short: -436910724
+      glasscoral_spike3_full: 1748989710
+      glasscoral_spike3_short: 756204696
+      glasscoral_spike4_full: -1849296188
+      glasscoral_spike4_short: 196584107
+      hazefern_frond0_mid: 978162869
+      hazefern_frond0_open: 8864145
+      hazefern_frond0_tight: -1352076834
+      hazefern_frond1_mid: 311782968
+      hazefern_frond1_open: 919502480
+      hazefern_frond1_tight: -640934338
+      hazefern_frond2_mid: -232144704
+      hazefern_frond2_open: -137667742
+      hazefern_frond2_tight: -241184494
+      hazefern_tuft: 818595329
+      puffsail_sail_full: -1220183207
+      puffsail_sail_sag: -516994509
+      puffsail_stem: 530402120
+      sulphurbell_bell_open: -2045943267
+      sulphurbell_bell_shut: -1980706535
+      sulphurbell_vine: 1766600758
+      ventcap_chimney: -595687293
+      ventcap_lid_open: 970823440
+      ventcap_lid_shut: -668409214
+      ventcap_puff_high: -2060203693
+      ventcap_puff_low: -1259442846
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
