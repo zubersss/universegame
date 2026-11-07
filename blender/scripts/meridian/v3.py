@@ -46,6 +46,13 @@ PALETTES = {
         "offwhite": "#F0E2C8", "red": "#B8583A", "mustard": "#D8B04E", "teal": "#6F9A88",
         "green": "#8E9A5E", "sky": "#E0A57A", "brown": "#45352F", "ink": "#1E1A17",
     },
+    # D-137, LEAD: the Jupiter palette (B-155; checked by scripts/build_c2_jupiter_palette.py). offwhite ammonia cream,
+    # red Red Spot brick, mustard belt rust, teal festoon blue-grey (lightning tones, the one cool accent), green lichen
+    # sage (flora), sky zone tan, brown deep umber (the shadow mix colour).
+    "jupiter": {
+        "offwhite": "#EEE2CB", "red": "#A8503A", "mustard": "#C48A4E", "teal": "#6F8A97",
+        "green": "#8F9A6A", "sky": "#D8BC94", "brown": "#4B3B34", "ink": "#1E1A17",
+    },
 }
 PALETTE_ORDER = ["offwhite", "red", "mustard", "teal", "green", "sky", "brown", "ink"]
 

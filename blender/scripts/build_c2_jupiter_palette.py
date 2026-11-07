@@ -1,7 +1,7 @@
 """B-155 (C2 Jupiter design prep): the proposed Jupiter palette strip and its check against Bible §9.1 (muted, slightly aged;
 one 6-8 colour palette per planet) and §7.6 Jupiter ("cream, rust, and brick bands rolling past; lightning under the
 floor; a sky that cycles every 8 minutes"). Same slot names and order as the other strips (v3.PALETTE_ORDER), so
-gp_draw's tones and palette_hits work once LEAD accepts it into meridian.v3.PALETTES. The Mars checks
+gp_draw's tones and palette_hits work (ACCEPTED, D-137: in meridian.v3.PALETTES["jupiter"]). The Mars checks
 (build_c2_mars_palette) plus Jupiter's family: a cream zone, a rust belt and a brick Red Spot that stay apart, a cool
 festoon blue-grey (the one cool accent: lightning glow tones, the deep water decks), a deep umber under the floor.
 The first giant sets the cloud-column pattern Saturn, Uranus and Neptune reuse (their checks swap the family rows).

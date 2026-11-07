@@ -16,14 +16,14 @@ cloud-column pattern Saturn, Uranus and Neptune reuse.
 
 | Item | State | File |
 |---|---|---|
-| Palette | proposed; the check (the Mars checks + the Jupiter family) below | blender/scripts/build_c2_jupiter_palette.py |
+| Palette | ACCEPTED (D-137): in `meridian.v3.PALETTES["jupiter"]` + the ui/palettes/jupiter row (exports with the first Jupiter slot) | blender/scripts/build_c2_jupiter_palette.py |
 | Five flora (floe forms + float-cell forms) | designed below; drawings + a 1x preview on a Jupiter stand-in next (when RAM allows) | build_c2_jupiter_plants.py (next) |
-| Floe strips | designed below (the B-130 strip contract + floe edge caps: a proposal) | build_c2_jupiter_floes.py (next) |
+| Floe strips | designed below; caps RULED (D-137: 8 tiles + cap_left + cap_right, 10 frames; UNITY wires the caps, U-126) | build_c2_jupiter_floes.py (next) |
 | Cloud-deck backdrops | study notes below (FFT washes: a BLENDER slot) | build_backdrop_v3.py (next) |
 | Creatures | the re-ink list below (four v2 models in Art: `replaces_v2`; the apex a rig set) | - |
 | Props | the ones that differ, below | - |
 
-## 1. Palette (proposed; checked by blender/scripts/build_c2_jupiter_palette.py)
+## 1. Palette (ACCEPTED, D-137; checked by blender/scripts/build_c2_jupiter_palette.py)
 
 | slot | hex | role | mid | deep | contrast vs ink | chroma |
 |---|---|---|---|---|---|---|
@@ -81,10 +81,10 @@ line, `"tile": true`), one strip per floe kind:
 - `terrain/jupiter/floe_strip_derelict`: rust plating with rivets and a torn edge (the *Meridian* expedition's derelicts).
 - `terrain/jupiter/floe_strip_spot`: brick phosphorus ice with swirl marks (the Red Spot's floes).
 
-**Proposal (needs a ruling):** a floe is finite, so each strip needs its two ends. I propose two extra frames per strip
-(`cap_left`, `cap_right`, the same 64 x 152 cell and pivot, after the 8 tile frames: 10 frames), drawn so a floe of any
-length is cap + n tiles + cap. GroundStrip.cs places tiles only today, so this is a UNITY change (the caps at the
-floe's first and last column). The sublimation (30-90 s) re-inks `fx/floe_sublimate` in the v3 style: cream puffs
+**Ruled (D-137): caps yes.** A floe is finite, so each giant's floe strip has two extra frames (`cap_left`,
+`cap_right`, the same 64 x 152 cell and pivot, after the 8 tile frames: 10 frames on the B-130 frame contract), drawn so
+a floe of any length is cap + n tiles + cap. GroundStrip's cap placement is UNITY's card U-126 (with Jupiter's wiring);
+the Earth and Mars strips stay 8 frames. The sublimation (30-90 s) re-inks `fx/floe_sublimate` in the v3 style: cream puffs
 peeling off the floe's edge, 8 frames.
 
 ## 4. Cloud-deck backdrop studies (painted, the B-141 / B-145 / B-147 manner; FFT washes, so they run in a BLENDER slot)
@@ -125,7 +125,7 @@ with a standable top line like the dens, D-126's shared-top-line idea), `derelic
 plating, a cream gasbag patch, one round window), `beacon_vault` (the radiation-fried vault around the Jupiter beacon:
 scorched plating, a hatch, a festoon-tinted interior glow drawn as a tone). The aerostat kit is shared by all four giants
 and lives in `props/common` (`aerostat_deck`, `aerostat_strut`, `aerostat_cell`, `float_cell_pack_mk1` / `mk2`,
-`grapple_hook`): I propose re-inking it once, here, in the giants' style (it inherits each planet's paper only through
+`grapple_hook`): RULED (D-137, B-156): re-inked once in the giants' style (it inherits each planet's paper only through
 the backdrop, so one palette: Earth's, like the camp set), so Saturn -> Neptune need no aerostat work.
 
 ## 7. Order of work after LEAD's acceptance
