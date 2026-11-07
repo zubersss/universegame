@@ -182,7 +182,7 @@ Goal: Ship and space on v3 sprites: the Pilgrim side and top views from BLENDER'
 Accept: SpaceArtTests: every planet key resolves to a disc sprite (placeholders count) at its §3 size; the exhaust loop runs at 12 fps; thrust stretch 1.15 / cut squash 0.9 on the ship root (EditMode); M1LoopTests unchanged; a Space capture with every disc visible.
 Files: Code/Runtime/Ship/, Code/Runtime/Space/, Placeholders/space/, Tests/
 Depends: U-094
-Lead notes: Cycle 238. Code on placeholders now; art swaps by key.
+Lead notes: Cycle 238. Code on placeholders now; art swaps by key. Cycle 240: BLENDER's keys (contract §11.5, D-098): `planets/<planet>/disc` (sheet + json with `space_ppu: 3`, `radius_u`, idle clip 9 or 12 frames), Luna at `planets/earth/luna`, Saturn's rings as two static parts `planets/saturn/rings_back` / `rings_front` drawn behind / in front of the body with the wobble from `planets/saturn/disc_rig.json`; the starfield at `space/starfield` + 3 cards under `space/nebula/` with `starfield.json` parallax factors. Size the disc sprite from `radius_u` × PlanetConfig.visualRadius so a wrong scale is a test failure, not a look.
 
 ### U-104 · UNITY · Ready · C1
 Goal: Cartoon HUD: Suit power, oxygen and the gravity readout as BLENDER's gauge sprites (B-121; placeholder dials until then), needles stepped at 12 Hz, a wobble on change; the Escape Line as the hand-painted dotted line with its little sign (B-121) replacing the band; fonts per D-090 (Limelight titles, Patrick Hand HUD, OFL.txt beside each, credited).
@@ -919,14 +919,16 @@ Lead notes: Cycle 238. Before B-117. One heavy export under the gate and D-091. 
 ### B-119 · BLENDER · Ready · C1
 Goal: The eight planet discs for the space view (§9.3, contract §11.5): painted watercolour discs with ink outlines that still read as the real planets (bands, rings, caps, Earth's Luna beside it), each with a subtle personality idle (≤ 12 frames at 12 fps, e.g. Jupiter's bands swirl, Saturn's rings wobble, Neptune frowns); one sheet per planet ≤ 2048, sizes per §3 at the space camera's PPU.
 Accept: §9.7 per disc; a review sheet with all eight side by side at the space scale plus 2× detail; originality line per disc.
-Files: blender/scripts/build_discs_v3.py, Assets/_Game/Art/space/discs/<planet>/
+Files: blender/scripts/build_discs_v3.py, Assets/_Game/Art/planets/<planet>/ (contract §11.5: `disc_color.png` + json; Luna at `planets/earth/luna`; Saturn adds `rings_back`, `rings_front` + `disc_rig.json`)
 Depends: B-110
+Lead notes: Cycle 240: PREVIEW ACCEPTED (3bae88f, review_b119_discs_preview.png 19:0x): all eight read as the real planets (§9.3) in watercolour with paper grain, a night crescent and a 5 px jittered ink line; personality idles as listed (Neptune scowl + blink, Jupiter bands + spot, Earth clouds at two speeds). Rulings: (1) space scale 3 px per space unit from PlanetConfig.visualRadius → D-098 (json `space_ppu: 3`, `radius_u`); Jupiter and the Saturn body at 9-frame idles on 3×3 sheets ≤ 2048, the rest 12. (2) Paths follow the contract, not the card's shorthand (fixed above). Export after the C0 sign-off (D-097); Done on UNITY's Space capture (U-103).
 
 ### B-120 · BLENDER · Ready · C1
 Goal: Painted starfield (2048² tileable, paper grain, soft ink stars of 3 sizes, no seam) + 3 nebula cards (≤ 1024², alpha, soft bleed) for the Space parallax (contract §11.4), Earth-palette night tones.
 Accept: 2× tiled preview with no seam; ≤ 4 MB per PNG; json with parallax factors.
 Files: blender/scripts/gen_painted_bg.py, Assets/_Game/Art/space/starfield/, Assets/_Game/Art/space/nebula/
 Depends: B-110
+Lead notes: Cycle 240: PREVIEW ACCEPTED (208eb1b, review_b120_starfield_preview.png): paper-grain night wash, inked cartoon stars in three sizes, three nebula cards (rust, slate, olive) with soft bleed; no seam at the marked crossing. Export after the C0 sign-off; Done on the Space capture (U-103) with the 2× seam check on the exported PNGs.
 
 ### B-121 · BLENDER · Ready · C1
 Goal: Cartoon HUD art (§9.3): three gauges (Suit power, oxygen, gravity readout) as dial faces + needles on one 1024² sheet with ink and paper, the Escape Line as a hand-painted dotted line tile (512×64) with its little sign (≤ 256²); Patrick Hand lettering on the sign only (D-090).
