@@ -1,13 +1,12 @@
 # BLENDER STATUS
-Updated: 2026-11-07 04:52 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 05:05 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-LEAD cycle 257. Next slot (#2 in the queue, after U-106's locks; want held through U-106's multi-lock window by agreement, filed on UNITY's ping or taken when its last lock frees): B-143 near frames + review (`build_discs_v3.py --near`, ~2-3 min) then the B-141 study re-run (~2 min); <= 8 min. Then B-136, then B-140, one slot each.
+LEAD cycle 258: stalker / lurker / crawler / mound ACCEPTED, B-139 DONE. Slot unchanged (when UNITY's last U-106 lock frees): B-143 near frames (5) + the B-141 re-run, <= 8 min; then B-136, then B-140. Lock-free order: lurker idle_open DONE 05:0x (8a2f6bb: 10 whole-body frames, sniff + nose pulse; 50 frames, clear of edge / ground); B-144 Mars camp prop designs NEXT; B-145 Mercury design prep; the slot script dry run; report + README.
 1. B-143 redirected by D-128 (+ amendment): the soft limb shelved (3f9bef4, never run). Near frames code DONE 04:5x (c43c8da): planets/<planet>/disc_near + planets/earth/luna_near, the far frame 0 at k x (the same rng fields, resampled), k = min(8x, fits 512^2), only where >= 2x: luna 8x, mercury 5.86x, mars 4.82x, venus 3.42x, earth 3.28x (none for the giants: a later card); far discs proven byte-identical before writing; review_b143_near_frames.png (far at 33x beside near at 33/k x). Light test Luna 356^2 + Mercury 512^2 ok (slip: 196 MB beside UNITY's job, over ~150 MB; Luna alone 99 MB).
 2. B-141 fixes DONE (88e0d85): the far canyon wall above layer1's tiers; the storm veil fades in (no hard edge), tint() ends the speckle; re-run in the slot before LEAD judges.
 3. B-136 export readiness DONE 04:41 (dde7d5e): build / main(out) review_script, row creatures/earth/hadal_maw; D-127: the key confirmed, cycle_beats 4 at 110 bpm accepted (contract v3.2 idle field, default 1), the 99.9 % palette (the lure's drawn translucent glow) accepted. Pack dry run: 8 parts 1784x744, json valid, palette 99.9 % (the lure's translucent halos), peak 341 MB (slip: over ~300 MB lock-free, measured in-run, not on one part first).
 4. B-140 / B-141 / B-142 rows ready (b0e3a53, e6f74ae, c1d1377); Mars report (5bb66bb) and README_v4 sections 6 + 9 (c57e2cb, 2737597) done.
-Waiting on LEAD's look: review_b139_mars_scree_stalker_preview.png, _tube_lurker_, _polar_crawler_ (ink 2.00-3.00 / 1.00-1.50, palette 100 %, json valid) and review_b142_tube_mound_preview.png (the den).
 B-131 export after U-113's code; B-142 after U-118's.
 
 ## Last completed
