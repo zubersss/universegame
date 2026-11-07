@@ -207,6 +207,18 @@ def _hexf(h):
     return np.array([int(h[i:i + 2], 16) for i in (0, 2, 4)], np.float32) / 255.0
 
 
+def _read(path):
+    """HxWx4 float 0..1: through bpy inside Blender; numpy only (our 8-bit RGBA writer's files) in the bundled
+    python, so lock-free previews (fakegp) can build the same review without blender.exe."""
+    try:
+        import bpy
+        if hasattr(bpy, "data"):
+            return pngio.read_png(path)
+    except ImportError:
+        pass
+    return pngio.read_png_np(path).astype(np.float32) / 255.0
+
+
 def _over(dst, rgba_u8, x, y):
     f = rgba_u8.astype(np.float32) / 255.0
     h, w = f.shape[:2]
@@ -231,7 +243,7 @@ def planet_background(planet, scene, W, H):
         bg[int(H * 0.72):] = _hexf(pal["green"])
         return bg, "placeholder (no painted layers yet)"
     for f in layers:
-        img = pngio.read_png(os.path.join(d, f))
+        img = _read(os.path.join(d, f))
         lh, lw = img.shape[:2]
         reps = -(-W // lw)
         img = np.tile(img, (1, reps, 1))[:, :W]
@@ -318,7 +330,7 @@ def v3_sheet_review(entry, meta, frames, sheet_path, out, stats, stale=None):
             sk = entry["beside"]
             sd = os.path.join(ART, *sk.split("/")[:2])
             sm = json.load(open(os.path.join(sd, sk.split("/")[2] + ".json"), encoding="utf-8"))
-            sh = pngio.to_u8(pngio.read_png(os.path.join(sd, sk.split("/")[2] + "_color.png")))
+            sh = pngio.to_u8(_read(os.path.join(sd, sk.split("/")[2] + "_color.png")))
             sfw, sfh = sm["frame_width"], sm["frame_height"]
             fr = sh[:sfh, :sfw]
             _over(bg, fr, min(x, W - sfw - 8), ground - sfh + int(round(sm["pivot"][1] * sfh)))

@@ -771,6 +771,13 @@ def do_v3_sheet(entry, preview):
     with open(os.path.join(dest, f"{variant}.json"), "w", encoding="utf-8", newline="\n") as fh_:
         json.dump(meta, fh_, indent=2)
         fh_.write("\n")
+    removed = []
+    if entry.get("replaces_v2") and not preview:    # D-117's rule: a sheet cannot sit beside a .glb under one key (IsModelKey)
+        for suffix in (".glb", "_normal.png", "_mask.png", "_emission.png"):
+            old = os.path.join(dest, variant + suffix)
+            if os.path.isfile(old):
+                os.remove(old)                         # the .meta beside it is UNITY's to delete (D-016)
+                removed.append(os.path.basename(old))
     outer, inner = _v3_ink_stats(widths)
     stats = {"outer_px": outer, "inner_px": inner, "inner_n": sum(1 for w in widths if w[0] < v3.OUTER_SPLIT), "palette": v3.palette_hits(sheet, entry.get("planet", "earth"), tints=[tuple(t) for t in entry.get("palette_tints", [])]),
              "problems": problems, "sheet_wh": (sheet.shape[1], sheet.shape[0]), "png_kb": n // 1024}
@@ -790,6 +797,7 @@ def do_v3_sheet(entry, preview):
              f"| ink outer {outer[0]:.1f}-{outer[1]:.1f}px inner {inner[0]:.1f}-{inner[1]:.1f}px "
              f"| palette {stats['palette'][0] * 100:.1f}% | boxes not x: {','.join(open_boxes) or '-'} "
              f"| review {os.path.basename(out)} | {time.time() - t0:.1f}s | peak {peak_mb()}MB"
+             + (f" | removed v2 {', '.join(removed)}" if removed else "")
              + (f" | PROBLEMS {'; '.join(problems)}" if problems else ""))
     if problems:
         raise AssetError(f"{key}: " + "; ".join(problems))
