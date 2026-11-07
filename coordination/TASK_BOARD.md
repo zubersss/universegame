@@ -22,10 +22,11 @@ When the lock frees, the highest pending job here goes next, even if the other r
 older (D-037 alternation applies only between equal ranks). A rank is live only while its role
 has a want on file or holds the lock (D-112): if the top rank has no want when the lock frees,
 the next live rank runs now and the skipped role goes next after it files. A role below the top
-keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 273 (15:4x: U-102 / U-124 / U-134 DONE; U-135 + U-136 code in (acbe367a); a four-minute mutual yield at 15:35–15:39 (UNITY's wrapper yielded to BLENDER's older want by age, BLENDER yielded to UNITY's rank): the ranks below are explicit and the top rank's role takes the free lock without waiting on age). A role files its want only when the queue says it is next after the running job:
+keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 273 (16:0x: Build 0.4.5 Done as a DEV build (D-150: the owner's build is 0.4.6); U-125 Venus code in; BLENDER's B-161 plants preview in, the rest of its reviews pending; UNITY's want for the Venus check on file, BLENDER released 15:59:59). A role files its want only when the queue says it is next after the running job:
 1. BLENDER · now: B-151 the C3 UI export in one slot (the five 9-slice panels with `slice` [l, t, r, b] in each json, the three title cards ≤ 1920×540 drawn 1:1, `ui/hud/film_switch` with parts `off` / `on` by name); it unblocks the owner build.
-2. UNITY · NOW (rank 1 while it holds): one lock = compile + EditMode + the re-shoots (inventory grid, crafting_paper, the paper-card tabs) + Build 0.4.5 + the 13-leg probe + the smoke set + M1Loop / M3Inner (U-132, with U-135 + U-136 inside).
-3. BLENDER · after UNITY's lock (re-file when heavy_unity.lock appears): the B-161 previews (≤ 3 min) → the B-152 export (deck + surface straight, one slot) → B-153 (rig set, two strip kinds, the palette strip), one slot each, alternating with UNITY's wants.
+2. UNITY · now (its want is the only one): the U-125 check = compile + EditMode + the PlayMode slice (VenusStagePlay, MenuHud, the Mercury / Mars stage, Transition, LeadQA M3Inner); U-139 and U-138's spawn half written lock-free before or after it.
+3. BLENDER · after UNITY's lock: the rest of the B-161 previews (≤ 3 min) → the B-152 export (deck + surface straight) → B-153 (rig set, the two strip kinds, the palette strip) → B-154 (the Venus creatures + vent_mouth) → B-167 (the Mercury props), one slot each, alternating with UNITY's wants; B-167's source lock-free in between.
+4. UNITY · 0.4.6 = the owner's build (D-150): after B-167 and the Venus exports, one lock = compile + EditMode + the Mercury re-shots (U-139 / U-138) + the Venus captures (U-125) + Build + the probe + the smoke set; LEAD's Mercury + Venus + C3 page from it.
 4. UNITY · U-125 Venus code lock-free now; its check behind the Venus exports; U-126 floe caps as lock-free code any time.
 5. Then Jupiter (U-127 + B-159 / B-160 + B-156), Saturn (U-129 + B-163 / B-164), Uranus (U-130 + B-166), Neptune (U-133 + B-161's exports).
 
@@ -1268,21 +1269,21 @@ Goal: Venus backdrops: the cloud-deck set (`backgrounds/venus/deck`: the apricot
 Accept: the 2× seam check with no seam; ≤ 4 MB per PNG; a 1080p composite per set at 1x with the surveyor; UNITY's ParallaxLayers loads them by key.
 Files: blender/scripts/build_backdrop_v3.py, Assets/_Game/Art/backgrounds/venus/
 Depends: B-147
-Lead notes: Cycle 265. The studies may run now in a free slot; the export after U-123. Cycle 266: SURFACE STUDY ACCEPTED (the 08:28 slot; review_b147_venus_surface_preview.png: a banded apricot haze ceiling with acid-rain streaks that stop mid-air, terraced black tesserae ridges lit from below by vent glows, glassy glints; seams 0.89 / 0.56 / 0.56; layers ≤ 2.2 MB). The deck study's first pass had the towers as stacked lumps and the station hidden behind the near clouds; both fixed in code (88ccee89: cumulus towers with a following lining, the station as an airship above the cloud tops); its ~80 s re-run goes in the gap after UNITY's lock and is accepted on sight. Export after U-123. Cycle 272: READY: the deck study re-run straight (D-147, ~80 s) in any free gap, accepted on sight; the export (both sets straight) in one slot once U-123 is Done. 15:3x: DECK STUDY ACCEPTED straight (review_b147_venus_deck_preview.png 15:29; the 15:28 slot, 40 s, peak 598 MB; seams 0.84 / 0.00 / 0.28): the apricot haze with cumulus towers, the airship station above the cloud tops on layer1, the cream cloud deck with its dark underside and ember glints on layer2, standing on B-153's aerostat planks (brass fascia, X-braced truss). Both Venus sets are cleared for export: one slot (deck + surface straight) in BLENDER's next turn after the B-161 previews.
+Lead notes: Cycle 265. The studies may run now in a free slot; the export after U-123. Cycle 266: SURFACE STUDY ACCEPTED (the 08:28 slot; review_b147_venus_surface_preview.png: a banded apricot haze ceiling with acid-rain streaks that stop mid-air, terraced black tesserae ridges lit from below by vent glows, glassy glints; seams 0.89 / 0.56 / 0.56; layers ≤ 2.2 MB). The deck study's first pass had the towers as stacked lumps and the station hidden behind the near clouds; both fixed in code (88ccee89: cumulus towers with a following lining, the station as an airship above the cloud tops); its ~80 s re-run goes in the gap after UNITY's lock and is accepted on sight. Export after U-123. Cycle 272: READY: the deck study re-run straight (D-147, ~80 s) in any free gap, accepted on sight; the export (both sets straight) in one slot once U-123 is Done. 15:3x: DECK STUDY ACCEPTED straight (review_b147_venus_deck_preview.png 15:29; the 15:28 slot, 40 s, peak 598 MB; seams 0.84 / 0.00 / 0.28): the apricot haze with cumulus towers, the airship station above the cloud tops on layer1, the cream cloud deck with its dark underside and ember glints on layer2, standing on B-153's aerostat planks (brass fascia, X-braced truss). Both Venus sets are cleared for export: one slot (deck + surface straight) in BLENDER's next turn after the B-161 previews. 16:0x (UNITY's handoff, U-125 code bf406324): the keys are backgrounds/venus/deck and backgrounds/venus/surface; the deck set hangs off DeckY − 2 = 768 and shows at camera height ≥ 700 m, the surface set off the ground's band datum at ≤ 640 m, the set in view held between the two.
 
 ### B-153 · BLENDER · Ready · C2
 Goal: Venus flora + ground export: `flora/venus/rigset` (the five accepted plants, deck and surface forms, ≤ 6 bones, swaps, `biomes`), the Venus ground strips (the deck planks, the basalt crust) in the B-130 contract, `ui/palettes/venus/strip` (D-134).
 Accept: log OK; rigset.json valid with `biomes`; the strips' joins ≤ 1/255; the ten boxes per plant on the stamped assembled review at 1x beside the surveyor.
 Files: blender/scripts/build_c2_venus_rigs.py, build_c2_venus_ground.py, Assets/_Game/Art/flora/venus/, terrain/venus/, ui/palettes/venus/
 Depends: B-147
-Lead notes: Cycle 265. One slot when promoted (after U-123). Cycle 272: READY; one slot once U-123 is Done, after B-152.
+Lead notes: Cycle 265. One slot when promoted (after U-123). Cycle 272: READY; one slot once U-123 is Done, after B-152. 16:0x (UNITY's handoff): terrain/venus/ground_strip is the basalt crust on every ground column (plains, tesserae, vents, sulphur); terrain/venus/ground_strip_deck is laid one frame per metre along the station's deck top (y 770.14, x 2000–2020), no fill; the plants' biomes vent_fields and surface_plains grow on the ground, cloud_deck and station_rails nowhere yet.
 
-### B-154 · BLENDER · Backlog · C2
+### B-154 · BLENDER · Ready · C2
 Goal: Venus creatures re-inked from the accepted B-147 designs: the Sulfur drifter (drift at index 1), the Acidmoth (fly at index 1), the Pressure crab, the Vent eel with its den `props/venus/vent_mouth` (D-126; `idle_open`); faces kept (no teeth); one sheet ≤ 2048² each; `replaces_v2` on any Venus model under the same key.
 Accept: the ten boxes per creature on a stamped review (1x on the Venus strips beside the surveyor); json valid; clip indices 0–3 in Gus's order, the rest by name; the eel draws behind its vent at the den in UNITY's capture.
 Files: blender/scripts/build_creatures_venus_v3.py, build_props_venus_v3.py, Assets/_Game/Art/creatures/venus/, props/venus/
 Depends: B-147, U-125
-Lead notes: Cycle 265. The export waits for U-125's code where it replaces Venus models under live keys (D-119's order).
+Lead notes: Cycle 265. The export waits for U-125's code where it replaces Venus models under live keys (D-119's order). 16:0x: U-125's code is in (bf406324); the Vent eel's den key is props/venus/vent_mouth (D-126). READY after B-153.
 
 ### B-155 · BLENDER · Done · C2
 Goal: C2 Jupiter design prep (Bible §12 C2 order 5; §7.5–7.6 the cloud-column world): the Jupiter palette proposal with the Mars checks, the cloud-deck layer study notes (decks, wisps, the storm and the Crush band on the near layer per the backdrop near-layer rule), floe and float-cell forms as faceless flora / props, the creature re-ink list (faces kept, no teeth), the aerostat and derelict props that differ; `coordination/reports/blender/c2_jupiter_designs.md`.
@@ -1367,6 +1368,13 @@ Accept: as B-159 + B-160, plus a --uranus-check PASS line per deck in the log.
 Files: blender/scripts/build_backdrop_v3.py, build_c2_uranus_*.py, Assets/_Game/Art/backgrounds/uranus/, terrain/uranus/, flora/uranus/, creatures/uranus/, props/uranus/, ui/palettes/uranus/
 Depends: B-158, U-130
 Lead notes: Cycle 272. Three slots when U-130's code is committed.
+
+### B-167 · BLENDER · Ready · C2
+Goal: Mercury props re-inked from the B-145 design language (the gap in C2's Mercury set, D-150): `props/mercury/flare_shelter` (the dome with its door and vent), `meridian_beacon`, `solarite_cluster` (the mineable crystal, 2 states), `warden_vault_gate`, `shelter_door` (open / closed), `equipment_locker`; the Mercury palette, faces on none, `replaces_v2` on each key (removes the .glb, _normal, _mask, _emission; never a .meta); sheets ≤ 512² each; pivots and frame counts as the v2 jsons so UNITY's placement holds.
+Accept: the ten §9.7 boxes per prop on a stamped preview at 1x beside the surveyor on the Mercury regolith strip; json valid with the v2 pivots; log OK; UNITY's re-shot smoke_14 shows the inked shelter.
+Files: blender/scripts/build_props_mercury_v3.py, Assets/_Game/Art/props/mercury/
+Depends: B-150
+Lead notes: Cycle 273 (16:0x, the 0.4.5 smoke review). Source lock-free now (the v2 jsons give the frames and pivots); the preview on hand-off; the export in one slot after B-153. 0.4.6 (the owner's build) waits for it.
 
 > **R1 (D-062).** 2D tasks B-056..B-076 are Superseded; their `.blend` sources (rigs, props,
 > terrain recipes) are the starting point for the models. Contract v2 §9 is the rule set.
@@ -2294,12 +2302,12 @@ Files: coordination/reports/unity/u123/, coordination/reports/unity/c2_mercury/R
 Depends: B-165, U-123
 Lead notes: Cycle 272. Rides the probe lock; B-165 goes Done on a flat reading, back to BLENDER on a dip. 15:0x: DONE (bff29043; the night frame re-shot 14:55 on e0f476c7 with P-48's Clamp v: the column dips folded by x mod 64 show no repeating phase, the worst phase averages 1.8 levels (was 10.9 average / 12.8 max at the old join phase); the remaining 6.3 columns are the drawing one 512 px strip period apart; u123/u131_band_2x.png flat by eye, the fill flat).
 
-### U-132 · UNITY · Ready · C3
+### U-132 · UNITY · Done · C3
 Goal: Build 0.4.5, the owner's next build (D-144's successor): Mercury's cartoon stage + the C3 UI (U-124 / U-102 / B-151) on 0.4.4's code; the 13-leg probe BUILD MEMORY GREEN; the smoke set for the owner's page (Mercury day / twilight / night at 1x, each paper panel open, a title card per planet) in reports/unity/smoke_0.4.5/.
 Accept: BUILD OK; the probe's 13 legs green with the Creep row ≤ 10 MB; the smoke frames on disk; M1Loop + M3Inner green on the build's code; GameInfo 0.4.5.
 Files: Build/MERIDIAN_0.4.5/, coordination/reports/unity/smoke_0.4.5/, perf + tests reports
 Depends: U-124, B-151
-Lead notes: Cycle 273. One lock after the U-124 captures; LEAD writes the Mercury + C3 page and the owner's playtest item from it. 15:4x: after U-135 (the inventory slots and the crafting paper, D-149) so the owner's build shows a usable inventory; U-136 (paper buttons) may follow in 0.4.6 if it is not in by the build lock.
+Lead notes: Cycle 273. One lock after the U-124 captures; LEAD writes the Mercury + C3 page and the owner's playtest item from it. 15:4x: after U-135 (the inventory slots and the crafting paper, D-149) so the owner's build shows a usable inventory; U-136 (paper buttons) may follow in 0.4.6 if it is not in by the build lock. 16:0x: DONE (90781774; one lock 15:42–15:56, no memory stop: compile 0 / 0, EditMode 369/369, BudgetGate green, BUILD OK Build/MERIDIAN_0.4.5 552 MB, the 13-leg probe BUILD MEMORY GREEN (Mercury working set 930 / private 1272 / textures 315 MB, load 0.72 s; Creep 8.5 MB per visit ≤ 10, the Mono heap +4.5 per visit from the new UI: a watch row), SMOKE OK 28 shots in smoke_0.4.5/, LeadQA M1Loop + M3Inner 8/8). The smoke frames reviewed by LEAD: the UI shots pass; the Mercury shots away from the pad expose two gaps → D-150: 0.4.5 is a dev build; the owner's build is 0.4.6 after U-139 (the set follows the stamped surface), U-138 (the Cinderhulk retired, the v2 props dropped) and B-167 (the Mercury props re-inked).
 
 ### U-133 · UNITY · Backlog · C2
 Goal: Neptune on the cartoon stage (Bible §12 C2 order 8; §7.9 the dark storm world): the B-161 deck sets with the storm set's rim layer pulsed by its `pulse` block (D-148), the floes with caps, the Neptune rig set with the wind lean on the root bone (0° at calm to ~25° at 35 m/s, mirrored for −x wind, a stepped shiver in gusts; one controller, D-110), the Neptune creatures on sheets and the Umbral Leviathan as a Grand rig set piece, the Meridian wreck at ~7.5 m segments; the Neptune tests unchanged; the perf rows green.
@@ -2308,6 +2316,20 @@ Files: Code/Runtime/View2D/CartoonStage.cs, ParallaxLayers.cs, Code/Runtime/Plan
 Depends: U-130, B-161's exports
 Lead notes: Cycle 273 (D-148). Promoted when U-130 Uranus is Done.
 
+### U-138 · UNITY · Ready · C2
+Goal: Mercury's v2 leftovers out of the cartoon stage (D-150): the Cinderhulk species leaves Mercury's spawn table and the smoke (the Cinderling is its B-145 re-ink; the night smoke shot shows the Shadewyrm at a burrow instead); the Mercury props draw from B-167's sheets when they land (`props/mercury/{flare_shelter,meridian_beacon,solarite_cluster,warden_vault_gate,shelter_door,equipment_locker}`), their v2 .glb / _normal / _mask / _emission metas dropped with the files (D-016); the M3 Mercury gameplay tests stay green (the flare window and shelter logic unchanged).
+Accept: no grey 3D silhouette in any Mercury smoke shot; MercuryStageTests cover the spawn table (no Cinderhulk) and the prop keys; the inner-creature tests pass; clean console.
+Files: Code/Runtime/Creatures/CreatureSpecies.cs, Code/Runtime/Core/BuildSmoke.cs, Code/Runtime/Planet/, Tests/
+Depends: U-123, B-167
+Lead notes: Cycle 273 (16:0x, the 0.4.5 smoke review: smoke_14 / 15 show the flare shelter and its pillar as flat grey 3D silhouettes and the Cinderhulk as a v2 lava-textured model beside the inked Mercury set). The spawn-table half is lock-free now; the prop half when B-167 exports.
+
+### U-139 · UNITY · Ready · C2
+Goal: The painted set follows the stamped surface everywhere (the 0.4.5 smoke finding): the stage datum at a column is the FINAL surface height (after landforms, cold traps and POI stamps), smoothed across ±48 columns like the band blend, so the set's ground line sits within 1 m of the walking surface at the solarite field, the flare shelter and every POI, not only at the pad; below the set's bottom edge the stage paints the planet's ground colour (no black band when the camera drops into a dip); the pad frames unchanged.
+Accept: smoke_13_mercury_day re-shot: the set's ground line at the terrace the surveyor stands on, no grey bar or black band; smoke_14 re-shot: the set behind the flare shelter's plateau at its surface, the crater field and sun visible over the whole width; u123's three pad frames unchanged by md5 or by eye; LayerFollowTests cover a stamped plateau and a terrace; TransitionTests and the Mercury perf rows unchanged.
+Files: Code/Runtime/View2D/BandDatum.cs, CartoonStage.cs, ParallaxLayers.cs, Tests/
+Depends: U-123
+Lead notes: Cycle 273 (16:0x). smoke_13 (the solarite field): the set ends ~3 m above the terrace in a grey bar with black under it; smoke_14 / 15 (the flare shelter): the set sits ~6 m below the shelter's plateau and shows only in the dip to the right. D-146 took the datum from the generator's surface without small craters; the POI stamps and the field's terraces move the real surface off it. Code lock-free now; its check and the two re-shots in the 0.4.6 build lock.
+
 ### U-134 · UNITY · Done · C3
 Goal: An open in-game panel (inventory, catalogue, crafting, settings from the pause menu) holds the surveyor still: the gameplay action maps are disabled while a panel is open and re-enabled on close, so Navigate's A / D move the selection, not the walk; the pause menu already does this.
 Accept: MenuHudTests: with the inventory open, A / D held for 1 s leaves the surveyor's x unchanged and moves the selection; closing restores the walk; clean console.
@@ -2315,17 +2337,17 @@ Files: Code/Runtime/UI/, Tests/
 Depends: U-124
 Lead notes: Cycle 273 (UNITY's note 15:08). A small card: ride U-124's PlayMode lock if the code is in by then, else the next one. A panel that walks you off a ledge is a playtest finding waiting to happen.
 
-### U-135 · UNITY · Ready · C3
+### U-135 · UNITY · Done · C3
 Goal: Inventory slots and the crafting panel readable on paper (D-149): each inventory slot is an ink-line box (a 2 px ink rectangle with a faint paper-darkening fill, the selected slot with a gold band) so an empty inventory still shows its grid; the crafting panel moves from the sign to the inventory paper (`ui/panels/inventory`), the sign art kept for the short in-world labels it was drawn for.
 Accept: u124/inventory.png re-shot shows the slot grid on the paper at 1x; u124/crafting_sign.png re-shot (renamed crafting_paper.png) shows the blueprint tree and recipes on paper with no plank bars; PaperUiTests cover the slot frame and the crafting panel's paper key; clean console.
 Files: Code/Runtime/UI/, Tests/
 Depends: U-124
-Lead notes: Cycle 273 (15:4x, the u124 review). Before U-132's build lock: the code lock-free now, the re-shoot inside U-132's lock.
+Lead notes: Cycle 273 (15:4x, the u124 review). Before U-132's build lock: the code lock-free now, the re-shoot inside U-132's lock. 16:0x: DONE (acbe367a in 90781774's lock; u124/inventory.png: a 4×10 ink-box grid with the gold band under the selected slot; u124/crafting_paper.png: the blueprint tree and recipes on paper, no plank bars; PaperUiTests in EditMode 369/369).
 
-### U-136 · UNITY · Ready · C3
+### U-136 · UNITY · Done · C3
 Goal: Buttons, tabs and tiles as paper cards (D-149): the catalogue's planet tabs, the blueprint tiles, the CRAFT buttons and every other opaque-filled UI button become cream paper cards with ink lettering and a 1 px ink edge; state by a band, not a fill (selected / known = a gold band, locked = a greyed card with the ink at 50 %); the old navy and light-blue fills go.
 Accept: re-shot catalogue_scroll and crafting frames at 1x with no navy or blue fill; MenuHudTests unchanged and green; clean console.
 Files: Code/Runtime/UI/, Tests/
 Depends: U-135
-Lead notes: Cycle 273 (15:4x). Rides 0.4.5 if the code is in by its lock, else 0.4.6 with Venus.
+Lead notes: Cycle 273 (15:4x). Rides 0.4.5 if the code is in by its lock, else 0.4.6 with Venus. 16:0x: DONE (acbe367a in 90781774's lock; u124/catalogue_scroll.png: the planet tabs as cream cards with EARTH on a gold band; crafting_paper.png: the blueprint tiles as cards, gold = known, grey = locked, the CRAFT buttons grey cards; no navy or blue fill left). One follow-up UNITY found and is fixing lock-free for 0.4.6: the crafting recipe names and the catalogue entry lines are recoloured near-white after the ink pass; they take ink / faded ink (judged on 0.4.6's smoke).
  15:2x: code in; its MenuHud asserts green in the 15:24 slice (Move and Jump held behind the open inventory, D does not walk, the keys back on close). Done with U-124 on the re-shoot. 15:4x: DONE (8c60fe62).
