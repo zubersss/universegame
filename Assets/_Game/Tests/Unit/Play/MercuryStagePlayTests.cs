@@ -62,7 +62,7 @@ namespace Meridian.Tests
             Assert.NotNull(stage, "CartoonStage on PlanetSide");
             Assert.IsTrue(stage.Active, "Mercury runs the cartoon path (U-123)");
             Assert.IsTrue(side.stage == null || !side.stage.gameObject.activeSelf, "the 3D stage layers are off");
-            Assert.IsTrue(side.backdrop == null || !side.backdrop.enabled, "the 3D backdrop (its Sun sprite with it) is off");
+            Assert.IsTrue(side.backdrop == null || !side.backdrop.enabled || !side.backdrop.gameObject.activeInHierarchy, "the 3D backdrop (its Sun sprite with it) is off");
             var layers = stage.Layers;
             Assert.NotNull(layers);
             StringAssert.StartsWith("backgrounds/mercury/", layers.SceneKey, "a Mercury set");
