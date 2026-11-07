@@ -1,7 +1,7 @@
 """B-158 (C2 Uranus design prep): the proposed Uranus palette strip and its check against Bible §9.1 (muted, slightly aged;
 one 6-8 colour palette per planet) and §7.8 Uranus ("featureless cyan fog that reveals bands only with the Survey module;
 dim; crystalline sparkle below"; the sideways winter). Same slot names and order as the other strips (v3.PALETTE_ORDER), so
-gp_draw's tones and palette_hits work once LEAD accepts it into meridian.v3.PALETTES. The Mars checks
+gp_draw's tones and palette_hits work (ACCEPTED, D-142: in meridian.v3.PALETTES["uranus"]). The Mars checks
 (build_c2_mars_palette) plus Uranus' family: a cyan fog sky, a cold white, exactly one warm accent, dimmer than Saturn
 (D-141), a cold blue-slate shadow.
 

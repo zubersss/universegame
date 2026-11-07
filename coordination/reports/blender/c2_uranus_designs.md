@@ -12,14 +12,14 @@ column scene builder, the capped floe strips (D-137), the shared aerostat kit (B
 
 | Item | State | File |
 |---|---|---|
-| Palette | proposed; the check (the Mars checks + Uranus' family) passes, below | blender/scripts/build_c2_uranus_palette.py |
+| Palette | ACCEPTED (D-142): in `meridian.v3.PALETTES["uranus"]` + the ui/palettes/uranus row (exports with the first Uranus slot) | blender/scripts/build_c2_uranus_palette.py |
 | Five flora | designed below; drawings next | build_c2_uranus_plants.py (next) |
 | Floe strips | designed below (D-137's 10-frame contract) | build_c2_uranus_floes.py (next) |
 | Deck backdrops | study notes below (FFT washes: a BLENDER slot) | build_backdrop_v3.py (next) |
 | Creatures | the re-ink list below (four v2 models: `replaces_v2`; the apex a Grand rig set) | - |
 | Props | the ones that differ, below | - |
 
-## 1. Palette (proposed; checked by blender/scripts/build_c2_uranus_palette.py)
+## 1. Palette (ACCEPTED, D-142; checked by blender/scripts/build_c2_uranus_palette.py)
 
 | slot | hex | role | mid | deep | contrast vs ink | chroma |
 |---|---|---|---|---|---|---|
@@ -105,12 +105,12 @@ The v2 models in Art, each `replaces_v2` at export: `props/uranus/umbrella_platf
 ice-white canopy on a brass mast over a float) and `tilted_derelict` (the Uranus beacon on a tilted *Meridian* hull, an
 ember beacon lamp). New: ice geyser vents for the Miranda-facing decks are sky art (backdrop), not props.
 
-## 8. Proposals (need a ruling)
+## 8. Rulings
 
-1. **Lit variants per scene:** each Uranus deck exports as `sun_left`, `sun_right` and `night` sets (three times the
-   backdrop files of a Jupiter deck; ~2 MB each), plus one `survey` layer0 per deck; UNITY cross-fades them with the
-   season. The alternative is one set with the lining on both sides (cheaper, but the sideways light is the planet's
-   whole idea).
+1. **Lit variants (D-142): the three-set approach.** Each Uranus deck ships as `sun_left` / `sun_right` / `night` sets lit
+   from one side plus one shared `survey` layer0 with the methane bands; UNITY cross-fades them by the season clock across
+   the 6 game days (the U-128 machinery: only one set and its fade partner resident). Floes, props and creatures take
+   UNITY's tint, not three drawings.
 
 ## 9. Order of work after LEAD's acceptance
 

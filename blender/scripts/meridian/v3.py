@@ -60,6 +60,13 @@ PALETTES = {
         "offwhite": "#F1E9D2", "red": "#B7735C", "mustard": "#D4B46E", "teal": "#7F98A4",
         "green": "#97A27C", "sky": "#E3CFA4", "brown": "#4A4542", "ink": "#1E1A17",
     },
+    # D-142, LEAD: the Uranus palette (B-158; checked by scripts/build_c2_uranus_palette.py). offwhite ice white, red ember
+    # amber (the one warm accent), mustard methane sage, teal methane cyan, green frost mint (flora), sky cyan fog, brown
+    # night slate (the shadow mix colour).
+    "uranus": {
+        "offwhite": "#E3ECE9", "red": "#C27A4A", "mustard": "#ABAF86", "teal": "#5E9FA5",
+        "green": "#7E9A80", "sky": "#9CC2C2", "brown": "#2E3D47", "ink": "#1E1A17",
+    },
 }
 PALETTE_ORDER = ["offwhite", "red", "mustard", "teal", "green", "sky", "brown", "ink"]
 
