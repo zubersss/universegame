@@ -6,17 +6,14 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-27 — Play the Earth and Mars build 0.4.3 and look at its page (15 min)
-Open https://claude.ai/artifact/3FkYSjxX9bwjf34tapwDZU (the C2 Earth and Mars page: the stills, the numbers,
-what changed since the flight, what comes next). Build 0.4.3 has both planets drawn (12:00; D-144).
-Then play: double-click `C:devNiversegameBuildMERIDIAN_0.4.3MERIDIAN.exe`. The first launch now takes
-about a second before you stand on the ground. On Earth walk left from the camp into the forest and right to
-the coast; the Hadal Maw waits in the deep water past the beach. Board with F, fly to Mars as before (W or
-Space to thrust, A / D to tilt; come down under 6 m/s), land, and walk until the canyon walls rise; stay a
-while and a dust storm will find you. Fifteen minutes is enough. Tell the Lead "C2 reads" or what bothered
-you, planet by planet. This replaces USER-26 (the C1 playtest): 0.4.3 contains everything 0.4.1 had.
-
-
+### USER-30 — Play Build 0.4.7: Mercury, Venus and the paper menus (20 min)
+Open the Mercury, Venus and menus page (the Lead posts the link in the chat) for the stills and the numbers, then play:
+double-click `C:\dev\universegame\Build\MERIDIAN_0.4.7\MERIDIAN.exe`. On Earth press Esc for the paper pause menu,
+Tab for the inventory, N for the catalogue scroll and B for the crafting paper (Esc closes). Board with F and fly to
+Mercury: land on the day side, walk toward the twilight band and on into the night; find the flare shelter and the
+Shadewyrm's burrow. Then fly to Venus: you land on the floating Meridian station's deck; walk its planks, then drop to
+the surface for the vents and the crab. Tell the Lead "0.4.7 reads" or what bothered you, planet by planet. This
+replaces USER-27 (0.4.3): 0.4.7 contains everything it had.
 
 ### USER-08 — Optional: let the team run PowerShell commands without prompts (2 min)
 On Windows, Claude Code runs commands through PowerShell as well as Bash, and the
@@ -26,6 +23,7 @@ If you get too many "allow this command?" prompts, tell the Lead "approve PowerS
 allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
 
 ## Done
+- 2026-11-07 17:5x · USER-27 folded into USER-30 (Build 0.4.7 has Earth, Mars, Mercury, Venus and the paper menus).
 - 2026-11-07 16:0x · USER-29 retired by LEAD: the build finished at 15:56 without a memory stop and free RAM is back at 2.2 GB with Edge and Chrome still open; nothing to do.
 - 2026-11-07 15:0x · USER-28 retired by LEAD: free memory cleared the gate on its own at 14:46 (1.76 GB) and held through UNITY's probe and BLENDER's Uranus slot with ChatGPT and Edge still open; nothing to do.
 - 2026-11-07 12:0x · USER-26 folded into USER-27 (Build 0.4.3 has both planets; the C2 page replaces the C1 ask).
