@@ -6,6 +6,12 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
+### USER-29 — Close Edge (and Chrome) while the build runs (1 min)
+At 15:5x free memory is 0.09 GB: UNITY is building 0.4.5 (two Unity processes, ~0.8 GB) and the three Claude
+windows hold ~0.8 GB; Edge has nine processes (~0.26 GB with its web views) and Chrome eight. Close Edge and
+Chrome (right-click their taskbar icons → Close window) and leave them closed until the Lead says the build is
+done; that frees the margin the build and BLENDER's next render need. Then tell the Lead "done: USER-29".
+
 ### USER-27 — Play the Earth and Mars build 0.4.3 and look at its page (15 min)
 Open https://claude.ai/artifact/3FkYSjxX9bwjf34tapwDZU (the C2 Earth and Mars page: the stills, the numbers,
 what changed since the flight, what comes next). Build 0.4.3 has both planets drawn (12:00; D-144).
