@@ -1,0 +1,1172 @@
+fileFormatVersion: 2
+guid: 25c79e29f799cc14e93e579bfc806963
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -3593299167531860457
+    second: gull_color_0
+  - first:
+      213: -5221510450276078869
+    second: gull_color_1
+  - first:
+      213: -701676406029429918
+    second: gull_color_2
+  - first:
+      213: 8568298721897906497
+    second: gull_color_3
+  - first:
+      213: 2207080770824266040
+    second: gull_color_4
+  - first:
+      213: -2276786476194910252
+    second: gull_color_5
+  - first:
+      213: -8284903480283087045
+    second: gull_color_6
+  - first:
+      213: -7881018014332009779
+    second: gull_color_7
+  - first:
+      213: -2420647490918000568
+    second: gull_color_8
+  - first:
+      213: 4495459808287619928
+    second: gull_color_9
+  - first:
+      213: -6319655980597554859
+    second: gull_color_10
+  - first:
+      213: -8044195302797148512
+    second: gull_color_11
+  - first:
+      213: -8942133823848803828
+    second: gull_color_12
+  - first:
+      213: -356631098851993488
+    second: gull_color_13
+  - first:
+      213: 6085073459746843661
+    second: gull_color_14
+  - first:
+      213: -7111013190589082784
+    second: gull_color_15
+  - first:
+      213: 5811823501961682156
+    second: gull_color_16
+  - first:
+      213: -9075243201747102343
+    second: gull_color_17
+  - first:
+      213: -6578957161882027737
+    second: gull_color_18
+  - first:
+      213: -5895594298418535010
+    second: gull_color_19
+  - first:
+      213: -3267551817779362242
+    second: gull_color_20
+  - first:
+      213: -2247141512067428479
+    second: gull_color_21
+  - first:
+      213: -945597703681450040
+    second: gull_color_22
+  - first:
+      213: -3925678467831054183
+    second: gull_color_23
+  - first:
+      213: -578194444384887130
+    second: gull_color_24
+  - first:
+      213: -7497221099824671277
+    second: gull_color_25
+  - first:
+      213: 9050485087972446393
+    second: gull_color_26
+  - first:
+      213: 5896399540287853892
+    second: gull_color_27
+  - first:
+      213: 3902698022549576873
+    second: gull_color_28
+  - first:
+      213: 892442145739750282
+    second: gull_color_29
+  - first:
+      213: -1801233977503898297
+    second: gull_color_30
+  - first:
+      213: 1411021361930243755
+    second: gull_color_31
+  - first:
+      213: -985131069307214232
+    second: gull_color_32
+  - first:
+      213: -433505537003042233
+    second: gull_color_33
+  - first:
+      213: -6468722152675022260
+    second: gull_color_34
+  - first:
+      213: 890000490928941234
+    second: gull_color_35
+  - first:
+      213: 6808792821763396938
+    second: gull_color_36
+  - first:
+      213: 6972312923038650585
+    second: gull_color_37
+  - first:
+      213: 5973988994336277541
+    second: gull_color_38
+  - first:
+      213: 2330419284638824904
+    second: gull_color_39
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: gull_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 200
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2e5df9fb723732e45ae7b1c61d1507f5
+      internalID: -1985045955
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_1
+      rect:
+        serializedVersion: 2
+        x: 116
+        y: 200
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9ec4ef9416769c84f88f4c5fd2b18663
+      internalID: -1304914046
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_2
+      rect:
+        serializedVersion: 2
+        x: 232
+        y: 200
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b33d32bcb89fedf488fd2625644a6e60
+      internalID: 1418334138
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_3
+      rect:
+        serializedVersion: 2
+        x: 348
+        y: 200
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0615affa548ef8441a389957bbdd6ab4
+      internalID: 631432187
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_4
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 200
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f3cd7dcf8f4959a4e919c9b4d5f0d7ef
+      internalID: 1784988480
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_5
+      rect:
+        serializedVersion: 2
+        x: 580
+        y: 200
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f72946fe293b8c242bdceda4921766e8
+      internalID: -558546182
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_6
+      rect:
+        serializedVersion: 2
+        x: 696
+        y: 200
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8d2fc1bc7b956964aa77e13cce4ea42e
+      internalID: -2134193287
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_7
+      rect:
+        serializedVersion: 2
+        x: 812
+        y: 200
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d02064e0e786e5b4f9aa8553468bd557
+      internalID: -210574976
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_8
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 200
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 52b7a0de3068a024fbae450e8408b61e
+      internalID: 1865061961
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_9
+      rect:
+        serializedVersion: 2
+        x: 1044
+        y: 200
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 55120832604867b4383e764be2df35dd
+      internalID: -90329882
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_10
+      rect:
+        serializedVersion: 2
+        x: 1160
+        y: 200
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f1386b6f78c137349bd0f6cb09686ac6
+      internalID: -517585655
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_11
+      rect:
+        serializedVersion: 2
+        x: 1276
+        y: 200
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eef15f642d7c0494ba87d4c705f45e79
+      internalID: 2028234243
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_12
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 200
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 44458a4d95d1f85409b003821949133d
+      internalID: 745219220
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_13
+      rect:
+        serializedVersion: 2
+        x: 1508
+        y: 200
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 199428699af762648bdf58430fc450c8
+      internalID: -1564009892
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_14
+      rect:
+        serializedVersion: 2
+        x: 1624
+        y: 200
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 94592d39656b30744a7e004d930b7117
+      internalID: -1840842626
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_15
+      rect:
+        serializedVersion: 2
+        x: 1740
+        y: 200
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6bdfdf1f466b28e428eade958d425387
+      internalID: -10783224
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_16
+      rect:
+        serializedVersion: 2
+        x: 1856
+        y: 200
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eeccdfba52246e14791bbd8986dbba6a
+      internalID: 1969565928
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_17
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 100
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5a6808a867c77f741936aaa7c16cc002
+      internalID: 509055598
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_18
+      rect:
+        serializedVersion: 2
+        x: 116
+        y: 100
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f7dd2aa24ff590d49a423fa7c4aa311e
+      internalID: -931349882
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_19
+      rect:
+        serializedVersion: 2
+        x: 232
+        y: 100
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e3bcd64ce98793d40981fab14e6897d3
+      internalID: -2065071924
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_20
+      rect:
+        serializedVersion: 2
+        x: 348
+        y: 100
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 724b1ad9fd7e1a246860ceeabbf0156d
+      internalID: 1299617553
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_21
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 100
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3aad36a975e9cd34d8e3b448ae0a7a6c
+      internalID: -1222962349
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_22
+      rect:
+        serializedVersion: 2
+        x: 580
+        y: 100
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8a632dbeace30b4439fae0630645b822
+      internalID: -1111431979
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_23
+      rect:
+        serializedVersion: 2
+        x: 696
+        y: 100
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5b0ae35cbff44d44cae7887df33cbf82
+      internalID: 1458901673
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_24
+      rect:
+        serializedVersion: 2
+        x: 812
+        y: 100
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 94a607f9076a7364685601f0b4659320
+      internalID: 1969414160
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_25
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 100
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cd73de5e72a4f7647af6f0653613c701
+      internalID: -867188245
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_26
+      rect:
+        serializedVersion: 2
+        x: 1044
+        y: 100
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6af5289a309834e46b71db6f8667989c
+      internalID: 1575415643
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_27
+      rect:
+        serializedVersion: 2
+        x: 1160
+        y: 100
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bb435ba0cbc17ef449182d693a627784
+      internalID: -351822348
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_28
+      rect:
+        serializedVersion: 2
+        x: 1276
+        y: 100
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 86a7949a06220de40a0dbb84c3a56b3c
+      internalID: -1066276428
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_29
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 100
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 568c03a2887ad10449c2fa2d8e8c07ae
+      internalID: 1371876197
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_30
+      rect:
+        serializedVersion: 2
+        x: 1508
+        y: 100
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4b5864c258481044fabadc8c4fa938f8
+      internalID: -782457874
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_31
+      rect:
+        serializedVersion: 2
+        x: 1624
+        y: 100
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4f87dbafe8536ea478ffe47cd38843d4
+      internalID: 1738270364
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_32
+      rect:
+        serializedVersion: 2
+        x: 1740
+        y: 100
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 106a92dac0f7e894d99ac5310d04e6a4
+      internalID: -669279104
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_33
+      rect:
+        serializedVersion: 2
+        x: 1856
+        y: 100
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 63f8af50a3daa924d88069bcbc244c16
+      internalID: -1887634002
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_34
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5f73cda8ae1185d44a36b175c45455d9
+      internalID: 698780915
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_35
+      rect:
+        serializedVersion: 2
+        x: 116
+        y: 0
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ae175cd05b91ef245b5fe06b500b10a7
+      internalID: -870013245
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_36
+      rect:
+        serializedVersion: 2
+        x: 232
+        y: 0
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 375c56beb30a4b542a6e734c8d1d2488
+      internalID: -368991842
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_37
+      rect:
+        serializedVersion: 2
+        x: 348
+        y: 0
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9f819eb13e6ac114bb80c69e8ae75fd3
+      internalID: -1936769767
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_38
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 0
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fa09bbf19d8e7d444b0af024d1a00a39
+      internalID: -744191981
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gull_39
+      rect:
+        serializedVersion: 2
+        x: 580
+        y: 0
+        width: 112
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c9999bfeebb4d9241901e28351ec32be
+      internalID: -584251414
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: e9d3b60f15d402c4d96f8701d163f0fa
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      gull_0: -1985045955
+      gull_1: -1304914046
+      gull_10: -517585655
+      gull_11: 2028234243
+      gull_12: 745219220
+      gull_13: -1564009892
+      gull_14: -1840842626
+      gull_15: -10783224
+      gull_16: 1969565928
+      gull_17: 509055598
+      gull_18: -931349882
+      gull_19: -2065071924
+      gull_2: 1418334138
+      gull_20: 1299617553
+      gull_21: -1222962349
+      gull_22: -1111431979
+      gull_23: 1458901673
+      gull_24: 1969414160
+      gull_25: -867188245
+      gull_26: 1575415643
+      gull_27: -351822348
+      gull_28: -1066276428
+      gull_29: 1371876197
+      gull_3: 631432187
+      gull_30: -782457874
+      gull_31: 1738270364
+      gull_32: -669279104
+      gull_33: -1887634002
+      gull_34: 698780915
+      gull_35: -870013245
+      gull_36: -368991842
+      gull_37: -1936769767
+      gull_38: -744191981
+      gull_39: -584251414
+      gull_4: 1784988480
+      gull_5: -558546182
+      gull_6: -2134193287
+      gull_7: -210574976
+      gull_8: 1865061961
+      gull_9: -90329882
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: planet_earth
   m_GUID: 8847b45c4754a2c41a2553ef143456b0
   m_SerializeEntries:
+  - m_GUID: 004d16bea9300bc4a8a53751409eae48
+    m_Address: backgrounds/earth/plains/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 01882444839121d4fb012ba45dad3514
     m_Address: creatures/earth/stag
     m_ReadOnly: 0
@@ -35,11 +40,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 0b5d6a3f9d7b2744ca44c6799074a6b6
-    m_Address: flora/earth/rigset/json
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 13e95768f5d36994b9be282380e68945
     m_Address: creatures/earth/wolf
     m_ReadOnly: 0
@@ -57,6 +57,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2276fb019b071b04ea999b842f1ac11c
     m_Address: props/earth/archive_terminal
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 25c79e29f799cc14e93e579bfc806963
+    m_Address: creatures/earth/gull
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -105,6 +110,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 604bddbdc95de8d478355c77b488a37b
+    m_Address: backgrounds/earth/plains
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 60c2fa003aecf484da9562643a48fd4b
     m_Address: props/earth/archive_door
     m_ReadOnly: 0
@@ -130,6 +140,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 76bb9c614436b4b41ab771976c4c86c7
+    m_Address: backgrounds/earth/plains/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 940e36a08c81371468b4fb6687459f93
     m_Address: props/earth/archive_door
     m_ReadOnly: 0
@@ -137,6 +152,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 96ee6454ceab3924e99afd195d35caf9
     m_Address: props/earth/launch_tower_ruin
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 99a9c52df7ad5dd47a33991fe1c817da
+    m_Address: backgrounds/earth/plains/layer1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

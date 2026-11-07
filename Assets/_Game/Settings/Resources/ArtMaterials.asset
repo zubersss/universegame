@@ -668,6 +668,45 @@ MonoBehaviour:
       start: 38
       length: 12
       loop: 0
+    - name: bump
+      start: 50
+      length: 10
+      loop: 0
+    - name: conk_out
+      start: 60
+      length: 12
+      loop: 0
+    - name: run
+      start: 72
+      length: 12
+      loop: 1
+    - name: fall
+      start: 84
+      length: 8
+      loop: 1
+    - name: dash
+      start: 92
+      length: 6
+      loop: 0
+  - key: creatures/earth/gull
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 10
+      loop: 1
+    - name: walk
+      start: 10
+      length: 12
+      loop: 1
+    - name: react
+      start: 22
+      length: 8
+      loop: 0
+    - name: bump
+      start: 30
+      length: 10
+      loop: 0
   - key: creatures/mercury/cinderhulk_day
     fps: 10
     clips:

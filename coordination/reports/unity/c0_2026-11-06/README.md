@@ -44,3 +44,26 @@ One full-screen quad on the transition canvas with MERIDIAN/IrisWipe (a circle c
   corner, 0.35 s close to 0 / mirrored open, shader present; FilmTests 4), PlayMode 7/8, 0 failed, 1 skipped (the
   Editor GPU-cost test ignores itself: the number is the probe's); filter TransitionTests|WardenPlayTests|ConkOutTests|
   FilmPlayTests|CartoonSmokeTests.
+
+## U-097 · rigged flora, U-099 · creatures at a wall (17:55–17:59 check, 17:58 capture)
+
+`earth_c0_placeholder.png` / `earth_c0_film_off.png` / `earth_c0_film_on.png` re-shot: B-114's painted plains layers
+(layer0..2 + plains.json) replaced the tinted strips by key, B-116's clips drive the surveyor, and B-112's `snoozle`
+face plants stand along the ground from `flora/earth/rigset` (48 around the camp in C0). The 3D props and the Pilgrim
+stay 3D until U-100.
+
+- Rig sets (contract §11.3): `RigSetBuilder` slices the set's parts by their json rects and generates one
+  AnimatorController per set (a sway clip per plant: every bone's z rotation sampled stepped at 12 Hz over two beats of
+  the plant's bpm, the beat squash on the root); `FloraRigs` builds each plant as a ≤ 6-bone Transform chain with part
+  sprites and an Animator on the shared controller at a hashed phase; one loop ranks by camera distance: 40 at full
+  rate, the next 160 on a 3-pose idle at 4 Hz, the rest still; turn-to-look + react face within the radius; blinks.
+- `RigFloraTests` (300 plants): 1 texture, 1 controller, 40 at full rate / 160 cheap, phases differ, a plant reacts
+  within 3 m, manager loop median 0.059 ms / p99 0.740 ms (limit 1.0; Animator evaluation of the 40 is Unity's, outside
+  the loop; the profile rows come with U-101).
+- `CreatureWallTests`: a stag fleeing into the smelter turns within 0.32 s and runs 19.6 m (2 turns); a wolf chasing
+  behind a 2-tile wall stays put (x unchanged, vx 0) with a still idle and never bumps through.
+- Check (17:55–17:59): compile 0/0, EditMode 279/279 (RigSetTests 4), PlayMode 15/15 on
+  RigFloraTests|CreatureWallTests|CreatureTests|WardenPlayTests|CartoonSmokeTests|ConkOutTests.
+- WardenPlayTests' flake found and fixed on the way: the sentinel was moved by `MovePosition` from Update, which at high
+  Editor frame rates re-aimed the same step every frame (the body position changes only at physics steps); it now
+  steers through a kinematic velocity.

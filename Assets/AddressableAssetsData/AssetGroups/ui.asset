@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: ui
   m_GUID: 4cbbf4054ed9b0c49bfd39905f5cefe6
   m_SerializeEntries:
+  - m_GUID: 11d2683dcad545c4491199b2462bf550
+    m_Address: ui/palettes/earth/strip
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 332b192afb7007c46b518282ad1646ea
     m_Address: ui/app/icon_32
     m_ReadOnly: 0
