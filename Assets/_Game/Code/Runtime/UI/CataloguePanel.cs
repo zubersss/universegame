@@ -185,7 +185,7 @@ namespace Meridian.UI
                 bool known = state.catalogue.Contains(e.id);
                 name.text = known ? e.name : "?";
                 info.text = known ? $"{e.kind.ToString().ToUpperInvariant()}  ·  {e.Datacores} DC" : e.kind.ToString().ToUpperInvariant() + "  ·  not yet surveyed";
-                name.color = known ? UiTheme.Active.text : new Color(1f, 1f, 1f, 0.35f);
+                name.color = UiKit.Letter(Paper, known); // D-149: ink on the paper
                 // Scanned: the icon. Unscanned: the same icon as a dark silhouette — a shape to look for.
                 var sp = IconOf(e);
                 icon.sprite = sp;

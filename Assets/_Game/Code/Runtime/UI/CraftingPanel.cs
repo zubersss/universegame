@@ -219,9 +219,9 @@ namespace Meridian.UI
             {
                 var check = CraftingSystem.Check(book, row.recipe, inventory, flags, Here);
                 bool unlocked = check != CraftingSystem.Result.Locked;
-                row.name.color = unlocked ? UiTheme.Active.text : new Color(1f, 1f, 1f, 0.3f);
+                row.name.color = UiKit.Letter(Paper, unlocked); // D-149: ink on the paper (the 0.4.5 smoke: near-white names on cream)
                 bool stationHere = check != CraftingSystem.Result.NoStation && check != CraftingSystem.Result.Locked;
-                row.station.color = stationHere ? UiTheme.Accent(null) : UiTheme.Active.label;
+                row.station.color = Paper == true ? (stationHere ? UiKit.Ink : UiKit.InkFaded) : stationHere ? UiTheme.Accent(null) : UiTheme.Active.label;
                 UiKit.SetAction(CraftButtons[row.recipe.id], check == CraftingSystem.Result.Crafted);
             }
         }

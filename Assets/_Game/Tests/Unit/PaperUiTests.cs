@@ -174,6 +174,12 @@ namespace Meridian.Tests
                 UiKit.SetCard(craftFill, UiKit.Card.Locked);
                 Assert.IsFalse(band.enabled, "a locked card has no band");
                 Assert.AreEqual(UiKit.Greyed, craftFill.color);
+
+                // A refreshed panel text (a recipe name, a catalogue entry): ink on the paper, faded when locked; light on the flat fallback.
+                Assert.AreEqual(UiKit.Ink, UiKit.Letter(true, true));
+                Assert.AreEqual(UiKit.InkFaded, UiKit.Letter(true, false));
+                Assert.AreEqual(UiTheme.Active.text, UiKit.Letter(false, true), "no paper: the theme's light text");
+                Assert.AreEqual(UiTheme.Active.text, UiKit.Letter(null, true), "the probe still out: light");
             }
             finally { Object.DestroyImmediate(root); }
         }

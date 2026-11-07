@@ -144,6 +144,9 @@ namespace Meridian.UI
             return img;
         }
 
+        /// <summary>D-149: a panel text a refresh recolours — on the paper ink (faded when locked / unknown), on the flat fallback panel the theme's light text. Pure.</summary>
+        public static Color Letter(bool? paper, bool on) => paper == true ? (on ? Ink : InkFaded) : on ? UiTheme.Active.text : new Color(1f, 1f, 1f, 0.3f);
+
         /// <summary>D-149: dresses a control's fill as a paper card: cream, a 1 px ink edge, its own lettering in ink (the light rim off), the gold band
         /// ready. Built once per control.</summary>
         public static void PaperCard(Image fill)
