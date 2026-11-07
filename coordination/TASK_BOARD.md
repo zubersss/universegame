@@ -22,10 +22,10 @@ When the lock frees, the highest pending job here goes next, even if the other r
 older (D-037 alternation applies only between equal ranks). A rank is live only while its role
 has a want on file or holds the lock (D-112): if the top rank has no want when the lock frees,
 the next live rank runs now and the skipped role goes next after it files. A role below the top
-keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 273 (15:4x: U-102 / U-124 / U-134 DONE on 8c60fe62; B-158 Done as designs; BLENDER's want for the B-161 previews then the Venus exports; UNITY on U-135 lock-free, then U-132's build lock). A role files its want only when the queue says it is next after the running job:
+keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 273 (15:4x: U-102 / U-124 / U-134 DONE; U-135 + U-136 code in (acbe367a); a four-minute mutual yield at 15:35–15:39 (UNITY's wrapper yielded to BLENDER's older want by age, BLENDER yielded to UNITY's rank): the ranks below are explicit and the top rank's role takes the free lock without waiting on age). A role files its want only when the queue says it is next after the running job:
 1. BLENDER · now: B-151 the C3 UI export in one slot (the five 9-slice panels with `slice` [l, t, r, b] in each json, the three title cards ≤ 1920×540 drawn 1:1, `ui/hud/film_switch` with parts `off` / `on` by name); it unblocks the owner build.
-2. BLENDER · now (its want is first): the B-161 previews (≤ 3 min) → the B-152 export (deck + surface straight, one slot) → B-153 (rig set, two strip kinds, the palette strip), one slot each, alternating with UNITY's wants.
-3. UNITY · U-135 code lock-free (the inventory slot ink boxes, the crafting panel on the inventory paper), then one lock = compile + EditMode + the two re-shoots + GameInfo 0.4.5 + Build + the 13-leg probe + the smoke set (U-132); U-136 rides it if its code is in, else 0.4.6.
+2. UNITY · NOW (rank 1 while it holds): one lock = compile + EditMode + the re-shoots (inventory grid, crafting_paper, the paper-card tabs) + Build 0.4.5 + the 13-leg probe + the smoke set + M1Loop / M3Inner (U-132, with U-135 + U-136 inside).
+3. BLENDER · after UNITY's lock (re-file when heavy_unity.lock appears): the B-161 previews (≤ 3 min) → the B-152 export (deck + surface straight, one slot) → B-153 (rig set, two strip kinds, the palette strip), one slot each, alternating with UNITY's wants.
 4. UNITY · U-125 Venus code lock-free now; its check behind the Venus exports; U-126 floe caps as lock-free code any time.
 5. Then Jupiter (U-127 + B-159 / B-160 + B-156), Saturn (U-129 + B-163 / B-164), Uranus (U-130 + B-166), Neptune (U-133 + B-161's exports).
 
