@@ -1,14 +1,16 @@
 # BLENDER STATUS
-Updated: 2026-11-07 05:22 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 05:31 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-LEAD cycle 258. Slot DONE 05:13:16-05:18:13 (released). Next slot: B-136 Hadal Maw export (after U-106's last job per the queue) + the B-144 review (fixed tile overflow); then B-140.
-1. B-143 EXPORTED (d3af1e5): disc_near mercury / venus / earth / mars 512^2 (k 5.86 / 3.42 / 3.28 / 4.82), luna_near 356^2 (8x); far discs proven byte-identical first; log OK 121 s, peak 359 MB; review_b143_near_frames.png. .metas UNITY's.
-2. B-141 re-run DONE in the slot: canyon seams 0.88 / 0.68 / 0.53, storm 0.87 / 0.78 / 0.47, peak 683 MB; review_b141_mars_canyon_preview.png / _storm_ for LEAD's look.
-3. Lurker idle_open DONE (8a2f6bb). B-144 previews DONE (024462f, 172ae6e; the full review crashed on a tile overflow, fixed, renders next slot). B-145 part 1 DONE (37ed2ab: palette ALL PASS + c2_mercury_designs.md); part 2 source DONE (5f4c131: the five plants), its preview waits for RAM (0.03 GB free 05:21).
-4. B-136 export-ready (dde7d5e, D-127); B-140 / B-141 / B-142 rows ready. B-131 after U-113; B-142 after U-118.
+LEAD cycle 259: B-143 VERIFIED, B-141 studies ACCEPTED (export after B-140), Mercury palette ACCEPTED (D-130). Next slot: B-140 (want filed 05:28 behind UNITY's short 05:33 lock), then B-141 export.
+1. B-136 EXPORTED 05:24-05:26 (72cfdd4): creatures/earth/hadal_maw 1784x744 118 KB, 8 parts, json cycle_beats 4; log OK 115.6 s, peak 676 MB; review_b136_hadal_maw.png + _assembled.png (1x beside the surveyor, stamped export). .metas UNITY's.
+2. B-144 full review DONE 05:28: review_b144_mars_props_preview.png (1x on the regolith strips beside the surveyor, 2x, clips, ten boxes; problems none). Slip: peak 430 MB lock-free (no lock held, 2.3 GB free) over the ~300 MB guideline; my 200 MB estimate was not measured on a part first.
+3. D-130 DONE (7a1eeecc): PALETTES['mercury'] + the ui/palettes/mercury row (exports with B-145's first slot).
+4. Lock-free next: B-145 plants preview (RAM), the Mercury creature designs (Flarewing fly at index 1; the Shadewyrm's ice-burrow den, D-126), B-144 + B-141 export rows + dry runs, the B-140 slot dry run, report upkeep.
+B-131 after U-113; B-142 after U-118.
 
 ## Last completed
+- 05:24:23-05:26:35 SLOT (wrapper, one heavy lock): B-136 creatures/earth/hadal_maw exported (log OK, 115.6 s, peak 676 MB).
 - 05:13:16-05:18:13 SLOT (cycle 258, one heavy lock, 5 min, released): B-143 near frames exported (121 s, peak 359 MB), B-141 studies re-run (136 s, peak 683 MB); the B-144 review failed on a panel overflow (fixed).
 - 04:0x-04:41 LEAD cycle 256 items 1-5 + more: D-126 split (c1d1377), Polar crawler (e15fb30), B-140 / B-141 / B-142 readiness, Mars report, README, B-143 code, B-136 readiness. Slip 04:19: a B-140 smoke test ran at 0.25 GB free (106 MB peak); RAM is now read in its own call before any run.
 - 04:22:29-04:28:47 SLOT (cycle 256 queue #2, one heavy lock, 6.3 min, released): B-141 first studies (127 s, peak 677 MB; seams 0.86 / 0.76 / 0.60 and 0.88 / 0.77 / 0.58) + the stalker / lurker / crawler review images (251 s, peak 246 MB); nothing exported to Assets.
@@ -45,4 +47,4 @@ none (B-136's key and cycle_beats ruled D-127).
 none.
 
 ## HeavyJobLock
-none held, no want on file (slot done 05:18:13); the next want is filed when the queue says I am next after the running job.
+want_blender.lock filed 05:28:28 for B-140 (UNITY's short lock 05:33 frees ~05:37; nothing of UNITY's queued after).
