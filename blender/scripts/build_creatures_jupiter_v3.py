@@ -391,6 +391,45 @@ SPECIES = {
 HABITAT = {"stormglider": "deck1", "lightning_eel": "deck2", "belt_wasp": "deck1", "ballast_tortoise": "deck3"}
 
 
+SOURCES = os.path.join(os.path.dirname(HERE), "sources", "creatures")
+
+
+def build(name, out=None):
+    """The source .blend for one Jupiter creature (the export path, inside Blender): one GP object, one drawing
+    per frame, clip markers; the same drawing functions the lock-free preview runs through fakegp (build_creatures_mars_v3's
+    manner; the manifest rows name build_<name>)."""
+    import bpy
+    sp = SPECIES[name]
+    out = out or os.path.join(SOURCES, f"jupiter_{name}_v3.blend")
+    scene = G.new_scene()
+    coll = G.collection(name)
+    ob, gp = G.gp_object(name, coll)
+    M = sp["mats"](gp, name)
+    layer = gp.layers.new("art")
+    for f, pose in enumerate(sp["poses"]()):
+        sp["draw"](G.drawing(layer, f + 1), M, pose, seed=5 * f)
+    G.mark_clips(scene, [(c, n) for c, n, _l in sp["clips"]])
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    bpy.ops.wm.save_as_mainfile(filepath=out)
+    return out
+
+
+def build_stormglider(out=None):          # manifest build_fn: render.py passes the source path
+    return build("stormglider", out)
+
+
+def build_lightning_eel(out=None):          # manifest build_fn: render.py passes the source path
+    return build("lightning_eel", out)
+
+
+def build_belt_wasp(out=None):          # manifest build_fn: render.py passes the source path
+    return build("belt_wasp", out)
+
+
+def build_ballast_tortoise(out=None):          # manifest build_fn: render.py passes the source path
+    return build("ballast_tortoise", out)
+
+
 def entry_for(name):
     sp = SPECIES[name]
     return {"key": f"creatures/jupiter/{name}", "style": "v3", "source": f"sources/creatures/jupiter_{name}_v3.blend",

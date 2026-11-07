@@ -380,6 +380,45 @@ SPECIES = {
 }
 
 
+SOURCES = os.path.join(os.path.dirname(HERE), "sources", "creatures")
+
+
+def build(name, out=None):
+    """The source .blend for one Venus creature (the export path, inside Blender): one GP object, one drawing
+    per frame, clip markers; the same drawing functions the lock-free preview runs through fakegp (build_creatures_mars_v3's
+    manner; the manifest rows name build_<name>)."""
+    import bpy
+    sp = SPECIES[name]
+    out = out or os.path.join(SOURCES, f"venus_{name}_v3.blend")
+    scene = G.new_scene()
+    coll = G.collection(name)
+    ob, gp = G.gp_object(name, coll)
+    M = sp["mats"](gp, name)
+    layer = gp.layers.new("art")
+    for f, pose in enumerate(sp["poses"]()):
+        sp["draw"](G.drawing(layer, f + 1), M, pose, seed=5 * f)
+    G.mark_clips(scene, [(c, n) for c, n, _l in sp["clips"]])
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    bpy.ops.wm.save_as_mainfile(filepath=out)
+    return out
+
+
+def build_sulfur_drifter(out=None):          # manifest build_fn: render.py passes the source path
+    return build("sulfur_drifter", out)
+
+
+def build_acidmoth(out=None):          # manifest build_fn: render.py passes the source path
+    return build("acidmoth", out)
+
+
+def build_pressure_crab(out=None):          # manifest build_fn: render.py passes the source path
+    return build("pressure_crab", out)
+
+
+def build_vent_eel(out=None):          # manifest build_fn: render.py passes the source path
+    return build("vent_eel", out)
+
+
 def entry_for(name):
     sp = SPECIES[name]
     return {"key": f"creatures/venus/{name}", "style": "v3", "source": f"sources/creatures/venus_{name}_v3.blend",

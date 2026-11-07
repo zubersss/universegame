@@ -467,6 +467,45 @@ SPECIES = {
 HABITAT = {"shadewyrm": "night", "glassback": "twilight", "cinderling": "day", "flarewing": "day"}   # the review's backdrop (B-149)
 
 
+SOURCES = os.path.join(os.path.dirname(HERE), "sources", "creatures")
+
+
+def build(name, out=None):
+    """The source .blend for one Mercury creature (the export path, inside Blender): one GP object, one drawing
+    per frame, clip markers; the same drawing functions the lock-free preview runs through fakegp (build_creatures_mars_v3's
+    manner; the manifest rows name build_<name>)."""
+    import bpy
+    sp = SPECIES[name]
+    out = out or os.path.join(SOURCES, f"mercury_{name}_v3.blend")
+    scene = G.new_scene()
+    coll = G.collection(name)
+    ob, gp = G.gp_object(name, coll)
+    M = sp["mats"](gp, name)
+    layer = gp.layers.new("art")
+    for f, pose in enumerate(sp["poses"]()):
+        sp["draw"](G.drawing(layer, f + 1), M, pose, seed=5 * f)
+    G.mark_clips(scene, [(c, n) for c, n, _l in sp["clips"]])
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    bpy.ops.wm.save_as_mainfile(filepath=out)
+    return out
+
+
+def build_shadewyrm(out=None):          # manifest build_fn: render.py passes the source path
+    return build("shadewyrm", out)
+
+
+def build_glassback(out=None):          # manifest build_fn: render.py passes the source path
+    return build("glassback", out)
+
+
+def build_cinderling(out=None):          # manifest build_fn: render.py passes the source path
+    return build("cinderling", out)
+
+
+def build_flarewing(out=None):          # manifest build_fn: render.py passes the source path
+    return build("flarewing", out)
+
+
 def entry_for(name):
     """The manifest row of one Mercury creature (the preview reviews with the same dict the export reads)."""
     sp = SPECIES[name]
