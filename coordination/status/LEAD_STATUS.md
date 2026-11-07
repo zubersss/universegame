@@ -1,5 +1,6 @@
 # LEAD STATUS
-Updated: 2026-11-06 18:5x · Session: 6 · Review cycle: 240
+Updated: 2026-11-06 19:0x · Session: 6 · Review cycle: 241
+Cycle 241: C0 CLOSED (D-099): U-098, B-113 Done; C0_STYLE_REFERENCE.md + C0_REPORT.md; USER-23 look-over; C1 exports open. Now: the C0 milestone page (Artifact), then C1 reviews (B-121 HUD preview, B-122 Pilgrim sheets, U-091).
 Cycle 240: U-100, U-101, B-117 Done; B-122 released; Bible §11.1 textures row v4. C0 waits only on U-098. Next: review B-119/B-120 previews; then the U-098 hand-off → §9.7 pass per asset, C0_STYLE_REFERENCE.md, owner look-over item, C0 milestone page.
 Cycle 239: B-118 Done (helmet glass); U-100 back with one fix (flat dirt fill under the strip); U-101 check owed. Next: B-117 Pilgrim design sheet review; U-100 re-shoot; U-101 contact sheet + gate; then U-098.
 Cycle 238: five cards Done (U-097, U-099, B-112, B-114, B-116), B-113 art accepted, D-095/D-096, B-118 added. C0 close path: U-100 → U-101 → U-098 (assembly + profile) with B-118 and the gull in; then LEAD runs §9.7 per asset, writes C0_STYLE_REFERENCE.md, posts the owner look-over. C1 promoted (D-097): code/sources now, exports after C0 sign-off.

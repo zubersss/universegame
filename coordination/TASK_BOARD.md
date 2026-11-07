@@ -148,11 +148,12 @@ Files: Code/Runtime/Flora/, Packages/manifest.json (com.unity.2d.animation, pinn
 Depends: —
 Lead notes: Cycle 238: DONE (b71d396; check 17:55–17:59 compile 0/0, EditMode 279/279 incl. RigSetTests 4, PlayMode 15/15; RigFloraTests: 300 plants on 1 sheet + 1 controller, 40 full / 160 cheap, phases differ, react within 3 m, loop p99 0.74 ms ≤ 1.0; the C0 capture shows 48 B-112 snoozles around the camp; com.unity.2d.animation 16.0.1 pinned and credited). Two importer fixes on the way (slicer wiped rig parts; typed sprite-list probe) noted.
 
-### U-098 · UNITY · Ready · C0
+### U-098 · UNITY · Done · C0
 Goal: Assemble the C0 style-test scene with BLENDER's art (B-111..B-115): the surveyor, one face plant (several instances), one critter, the painted 3-layer Earth background, the film pass, the iris transition from space; a 20 s capture video-strip and stills; profile it.
 Accept: `reports/unity/c0_<date>/` with stills (idle, walk, jump/land, plant react, critter idle, iris mid-wipe, film on/off) and the profile: working set < 2.0 GB, 60 fps p99 ≤ 16.6 ms; PlayMode smoke green. LEAD then runs the §9.7 checklist per asset.
 Files: Scenes/, reports/unity/c0_<date>/
 Depends: U-094, U-095, U-096, U-097, B-111, B-112, B-113, B-114, B-115
+Lead notes: Cycle 241: DONE (c114d7d; reports/unity/c0_2026-11-06/u098/ nine stills with logged facts, strip/contact_sheet.png, README; profile = the 18:4x gate run, Earth C0 rows green (763 MB, p99 9.62 ms, 38 Animators, 1 atlas); 18:5x check compile 0/0, EditMode 279/279, PlayMode 3/3 incl. LeadQA SmokeTests after the B-118 controller rebuild). LEAD's §9.7 pass per asset is in coordination/reviews/C0_STYLE_REFERENCE.md → C0 approved (D-099).
 
 ### U-099 · UNITY · Done · C0
 Goal: P-38 (U-093 check 3): a fleeing or chasing creature that meets a wall it cannot climb (camp props, a cliff face) stops dead with its legs still running. In `CreatureDirector.Tick`: Flee turns away along the wall or hops a 1-tile step (reuse the Wander cliff turn); Chase waits at the wall and never bumps through it; the legs stop when the body does.
@@ -872,12 +873,12 @@ Files: blender/sources/flora/earth_rigset.blend, Assets/_Game/Art/flora/earth/
 Depends: B-110
 Lead notes: Cycle 238: DONE (2aa0303; "snoozle": a dandelion clock with a face, hose stem, mitten leaves; 10 parts on a 236×76 sheet, 5 bones ≤ 6, blink/yawn/giggle swaps, sway 12° at 110 bpm with 8 % squash, react turn_look at 3 m; json valid with the offset_m/order/slots UNITY reads). Evidence: 48 instances in reports/unity/c0_2026-11-06/earth_c0_placeholder.png (17:59) read as one family, ink consistent with the surveyor. Pipeline note (no reopen): the rig-set review sheet shows parts only; from B-118 on, put the 12-frame assembled preview loop on the review sheet too (§11.7).
 
-### B-113 · BLENDER · Ready · C0
+### B-113 · BLENDER · Done · C0
 Goal: One small friendly Earth critter from §7.1's roster (BLENDER picks the smallest; redraw in the style): frame-by-frame sheet `creatures/earth/<name>` with idle (8–12, rhythmic bob), walk (12), react (eye-pop, ≤ 10), bump (dizzy stars, ≤ 10). Pie-cut eyes, rubber-hose legs, ears/tail with follow-through.
 Accept: §9.7 boxes; caps; 12 fps; sheet ≤ 2048.
 Files: blender/sources/creatures/earth_<name>_v3.blend, Assets/_Game/Art/creatures/earth/<name>/
 Depends: B-110
-Lead notes: Cycle 238: ART ACCEPTED (27693eb, review_b113_earth_gull.png 17:31): "Gus", a stout egg-bodied gull with a three-feather crest, red-spotted mustard beak, hose legs; original (§9.8 pass: not any studio bird). idle 10 / walk 12 / react 8 (eye-pop) / bump 10 (dizzy spirals + stars, no X eyes) within caps at 12 fps; 54 px tall at 1x, reads; ink-behind on the small parts keeps the colour. Done on UNITY's first capture with the gull in the scene (U-098 or U-101).
+Lead notes: Cycle 238: ART ACCEPTED (27693eb, review_b113_earth_gull.png 17:31): "Gus", a stout egg-bodied gull with a three-feather crest, red-spotted mustard beak, hose legs; original (§9.8 pass: not any studio bird). idle 10 / walk 12 / react 8 (eye-pop) / bump 10 (dizzy spirals + stars, no X eyes) within caps at 12 fps; 54 px tall at 1x, reads; ink-behind on the small parts keeps the colour. Done on UNITY's first capture with the gull in the scene (U-098 or U-101). Cycle 241: DONE (u098/6_critter_gull.png: Gus framed over the camp, reads at 1x with the crest and red-spotted beak). Note for C2 Earth: the gull flies in the game but the sheet has no fly clip (walk/idle frames play in the air); a `fly` loop (8–10 frames) joins the C2 Earth creature card.
 
 ### B-114 · BLENDER · Done · C0
 Goal: The painted Earth plains background in 3 layers (`backgrounds/earth/plains/layer0..2`, contract §11.4: watercolour, paper texture, soft bleed, no ink, tileable, ≤ 2048×1024) + `plains.json` parallax factors, and the Earth palette strip `ui/palettes/earth/strip` (the 8 Bible §9.1 colours).

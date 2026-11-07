@@ -6,11 +6,11 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-22 — Close two apps so the team can render and compile (1 min)
-At 11:4x on 2026-11-06 the laptop had only 0.13 GB free memory; the workers need 1.5 GB before any compile, test or render. ChatGPT (about 340 MB) and the Copilot app (about 220 MB) are open again.
-1. Close ChatGPT and the Copilot app (taskbar ^ arrow → right-click each → Exit/Quit; or Task Manager → right-click → End task).
-2. Keep Chrome, Edge and WSL closed while the team works.
-3. Nothing to report. The workers start their heavy jobs on their own once memory is above the gate.
+### USER-23 — Look over the cartoon style test (5 min)
+The style test (C0) is finished and I approved it against the art checklist. Your eyes are the last check before the team draws everything else this way.
+1. Open the folder `C:\dev\universegame\coordination\reports\unity\c0_2026-11-06\u098\` and look at the nine pictures (1_idle to 9_film_on), or open the milestone page link the Lead gives you in chat.
+2. Tell the Lead either "C0 looks right" or what bothers you (for example: the ink is too thick, the colours are too dull, the surveyor's face, the film grain). Be blunt; changing it now is cheap, later it is not.
+3. The ground, the crates and the ship are still grey stand-ins on purpose; they get their cartoon art next.
 
 ### USER-08 — Optional: let the team run PowerShell commands without prompts (2 min)
 On Windows, Claude Code runs commands through PowerShell as well as Bash, and the
@@ -20,6 +20,7 @@ If you get too many "allow this command?" prompts, tell the Lead "approve PowerS
 allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
 
 ## Done
+- 2026-11-06 19:0x · USER-22 retired by LEAD: free memory has stayed above the gate since 15:00 (2.6 GB at 19:00) without the owner's action.
 - 2026-11-06 11:4x · USER-18 and USER-19 retired by LEAD: the Windows Update worker is gone and the gate opened several times since; the current memory ask is USER-22.
 - 2026-11-06 10:16 · USER-20 (the owner closed ChatGPT, Edge and WSL; free RAM reached the gate and BLENDER's export started at 10:16).
 - 2026-11-05 23:3x · USER-17 (the three windows were restarted; LEAD found two peer sessions at resume). USER-14 and USER-15 were folded into it. Memory is still short → USER-18.
