@@ -22,10 +22,14 @@ When the lock frees, the highest pending job here goes next, even if the other r
 older (D-037 alternation applies only between equal ranks). A rank is live only while its role
 has a want on file or holds the lock (D-112): if the top rank has no want when the lock frees,
 the next live rank runs now and the skipped role goes next after it files. A role below the top
-keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 247 (23:4x; both batches landed: UNITY's check 22:45–23:33 → U-107, U-108, U-105 Done, U-091 one red row; BLENDER's export batch 23:33–23:38 → B-121, B-122, B-128 exported; lock free):
-1. UNITY · the C1 wiring batch: U-103 drawn rig + Space and side captures; U-104 HUD swap + 1080p capture; U-091 warm-leg re-run (D-114) + the def.icon keys; U-109 climb sky. One check per hand-off, each lock ≤ 20 min; file the want when the first piece is ready.
-2. UNITY · U-106 profile + the 20 s flight strip, once 1 is in.
-3. BLENDER · nothing heavy pending. The disc-review peak measure (uint8 panels; was 2289 MB) rides on the next disc run; C2 exports open when the C2 cards are promoted (after U-106).
+keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 249 (00:1x; UNITY holds the lock since 00:12 for the D-114 re-run with 0.2–0.4 GB free while the dev build runs: nothing else heavy starts until it releases):
+1. UNITY · RUNNING · U-091 warm-leg re-run (dev build probe, D-114).
+2. UNITY · U-103 check + captures with the drawn rig.
+3. UNITY · U-104 check + the 1080p HUD capture.
+4. UNITY · U-109 check + the three climb captures.
+5. BLENDER · B-129 + B-130 exports, one batch ≤ 10 min, with the disc-review peak measure in the same lock. Slot it between UNITY's checks: when UNITY releases with no want on file, this rank runs (D-112); otherwise UNITY's next card goes first.
+6. UNITY · U-106 profile + the 20 s flight strip.
+7. BLENDER · B-131 / B-132 / B-133 exports as their previews are accepted, one batch each.
 
 ## While waiting (lock-free work; CLAUDE.md rule 3, D-109)
 
@@ -37,16 +41,17 @@ did in your status before the next poll. LEAD tops each list up to ≥ 3 items e
 - U-109 climb-sky code and its capture test written before the check (a code-built gradient or a vertex-coloured quad; no texture).
 - U-108 leftovers: react `turn_bounce` gets a real bounce (a 0.15 s root squash on react, pure, tested); `FloraRigs.CycleClockOffset` becomes internal (InternalsVisibleTo for the tests).
 - U-106 prep: the `reports/unity/c1_<date>/` capture list and the 20 s flight-strip script (pad → Escape Line → space → entry → touchdown under scripted input), tests first.
-- The warm-leg probe (D-114): `MemoryProbe` gains `Earth (warm)` after the first launch + re-entry; `unity_profile.ps1` v4 rows compare the Return rows against it and add the boot → warm info row (cap 150 MB).
+- U-104 swap code written before its check: the six gauge parts + needles from `ui/hud/gauges.json` at 12 Hz, the `escape_line` tile at the line's altitude, the blank `escape_sign` lettered ESCAPE LINE in Patrick Hand, the ship HUD rows; MenuHudTests extended.
 - `docs/credits/unity.md` audit (Limelight / Patrick Hand + OFL arrive with U-104); ArtImporter ignores the sign's `lettering` fields without a warning (assert).
 Then one batched check for everything written when your turn in the queue comes.
 
 **BLENDER** (numpy / scripts only while UNITY holds the lock or a want; bpy only under your own lock)
-- C2 Earth plant rig sources ahead of promotion (fakegp previews only, no export): Nodbell, Shiverbarrel, Curlfrond (mustard tips), Whiptuft, Thriftcushion as §11.3 rig sets with no face parts; one assembled 1x preview on the plains per plant.
-- C2 Earth ground strip source (replaces U-100's placeholder dirt): the grass / soil / stone terrain sheets re-inked at v3.1 with paper fill and a drawn 1 m grass lip, fakegp preview assembled on the plains; no export until the C2 cards are promoted.
-- The disc-review peak after the uint8 fix: one disc preview run (numpy, no Blender) with the peak logged in your status and renders_2026-11-06.md; under your own lock if it could exceed 300 MB.
+- B-131 camp prop previews (landing pad, shelter wall and door, smelter, storage crate, lamp at v3.1, no faces; door open 6, smelter loop 8, lamp flicker 4), all six at 1x on the plains beside the surveyor and the rig.
+- B-132 design previews: stag, grey wolf, brown bear (faces kept, pie-cut eyes, no bared teeth), poses and clip tables per your list; the bear's frame size checked against the 2048 cap.
+- B-133 layer studies: forest and coast far / mid / near layers as fakegp previews with the 2× seam check.
 - A painted Sun disc design (C2 candidate, preview only; the Sun stays a lit spheroid through C1 per the U-103 ruling).
 - `blender/README_v4.md`: how a v4.1 sheet is drawn, measured and reviewed, so a fresh session resumes without reading the code.
+(The disc-review peak measure runs inside the B-129 + B-130 export lock, not lock-free.)
 
 **LEAD**
 - The charter idle list, plus: the C1 LeadQA scenario draft (pad → Escape Line → space → entry → touchdown under scripted input), the C1_REPORT skeleton, the owner's v4.1 look-over page, Bible gap closure, credits audit, a status-size check each cycle (D-113).
@@ -1045,6 +1050,41 @@ Lead notes: Cycle 245 (D-110 answer 3). Small; a while-waiting item (numpy previ
 
 Lead notes: Cycle 243: PREVIEW ACCEPTED (1db52ef, review_b113_earth_gull_preview.png 20:27: feather shafts, web lines, chest specks, deep tone; fly = two wingbeats with the crest dragging; indices 0–39 unchanged, fly 40–51). Deviation accepted: fly is 12 frames, not the card's 8–10; the contract (§11.2: a flier's walk, 12–16) and ArtRules.ClipCap rule, the card was wrong. Done on the export. Cycle 244: DONE (2235cf6; log 21:13:13 OK: 1968×396, 52 frames, idle 0–9 / walk 10–21 / react 22–29 / bump 30–39 / fly 40–51, ink 2.0–3.0 / 1.0–1.5 px, peak 675 MB). UNITY wires `fly` in U-108.
 
+### B-129 · BLENDER · Ready · C2
+Goal: Earth flora rig set export: `flora/earth/rigset` holding all six Earth plants (snoozle v2 + Nodbell, Shiverbarrel, Curlfrond, Whiptuft, Thriftcushion; 44 parts on one sheet ≤ 512², ≤ 6 bones each, no face parts, a `biomes` list per plant) from the approved sources (5cdca3b, review_c2_earth_rigs_preview.png); the snoozle's part names, swaps and clips unchanged so UNITY's scene keeps working the moment it re-imports.
+Accept: log OK; json valid §11.3 with `biomes` on every plant; the ten §9.7 boxes per plant on the stamped review (assembled at 1x beside the surveyor on the plains, the sway and react loops); sheet ≤ 512², one texture; the snoozle's parts pixel-identical to B-126's export.
+Files: blender/scripts/build_c2_earth_rigs.py, Assets/_Game/Art/flora/earth/
+Depends: B-126
+Lead notes: Cycle 249 (D-115): SOURCES ACCEPTED (5cdca3b; review_c2_earth_rigs_preview.png 23:59: five faceless plants, bone cascades for the out-of-phase motion, bones 4 / 2 / 4 / 4 / 6, 44 parts on 500×212, ink 2.0–3.0 / 1.0–1.5 px). Export in one batch with B-130 (≤ 10 min) in your queue slot between UNITY's C1 checks. UNITY's biome placement is U-110 (Backlog until U-106); until then any plant may spawn on the plains, which is fine for the C1 build.
+
+### B-130 · BLENDER · Ready · C2
+Goal: Earth ground strips export: `terrain/earth/ground_strip` (grass), `ground_strip_soil`, `ground_strip_stone` in U-100's contract (8 frames of 64×128 per material = 1 × 2 m at PPU 64; the bottom 8 px of frame 0 is the fill tile), drawn 1 m grass lip, paper-grain fill, v3.1 ink; from the approved source (dde330d, review_c2_earth_ground_preview.png).
+Accept: log OK; edge joins within a material ≤ 1/255 mean difference and the silhouette ink identical on all 48 frame edges (as measured on the preview); a json per sheet with `tile: true` in x; the ten boxes that apply; UNITY's U-111 swaps the placeholder by key.
+Files: blender/scripts/build_c2_ground_strip.py, Assets/_Game/Art/terrain/earth/
+Depends: —
+Lead notes: Cycle 249 (D-115): SOURCE ACCEPTED (dde330d; review 23:59: grass / soil / stone with pebbles, roots and cracks; joins 0.6 / 0.6 / 0.8 per 255; the 1x composite on the plains with a stone outcrop and a dug hole reads as one drawn ground). Same export batch as B-129.
+
+### B-131 · BLENDER · Ready · C2
+Goal: Earth camp props re-ink (the grey stand-ins in every still): `props/common/landing_pad`, `shelter_wall`, `shelter_door`, `smelter`, `storage_crate`, `lamp` redrawn as v3.1 cartoon sprites, no faces (D-101): ink 2–3 / 1–1.5 px, two shadow tones, drawn detail (planks, rivets, bolts, a smelter mouth with a drawn glow tone, a lamp with a drawn halo); sizes and pivots per the current manifest rows (ground line 10 px above the bottom; interactables keep mask R = 0.1); the door gets a 6-frame open clip, the smelter an 8-frame working loop, the lamp a 4-frame flicker.
+Accept: the ten §9.7 boxes per prop on a stamped review (all six at 1x on the plains beside the surveyor and the Pilgrim rig); every file per the contract (color + json; emission only where the manifest has it); one sheet per prop ≤ 512²; UNITY imports with no key change.
+Files: blender/scripts/build_props_common_v3.py, blender/sources/props/common_v3.blend, Assets/_Game/Art/props/common/
+Depends: B-124
+Lead notes: Cycle 249 (D-115). Previews first (lock-free), export in a later batch. These six sit in the owner's first frame every time; after the ship they are the most visible grey left.
+
+### B-132 · BLENDER · Ready · C2
+Goal: Earth land creatures re-inked (your list coordination/reports/blender/c2_earth_creature_reink.md, order 1): stag, grey wolf, brown bear at v3.1 ink with faces kept (animals may have faces, D-101: pie-cut eyes, friendly or neutral, no bared teeth per D-087), interior detail and two shadow tones; clips per contract §11.2 (idle 8–12, walk 12–16, run / flee, react ≤ 16, bump ≤ 16; follow for the wolf); frames ≤ 192 px (bear ≤ 224 × 160); one sheet ≤ 2048² each; the below-ground check passing.
+Accept: the ten §9.7 boxes per creature on a stamped review (1x on the plains beside the surveyor); json valid; where UNITY already binds a stag or wolf clip by index, the index is preserved or the change is in your status; one texture each.
+Files: blender/scripts/build_creatures_earth_v3.py, blender/sources/creatures/earth_v3.blend, Assets/_Game/Art/creatures/earth/
+Depends: B-124
+Lead notes: Cycle 249 (D-115). Gus (B-127) is the reference. Design previews first, then one export batch for the three. The water creatures (pike, shark, squid) and the Hadal Maw rig follow as B-13x once these are in.
+
+### B-133 · BLENDER · Ready · C2
+Goal: Earth biome backdrops in the B-114 manner: painted watercolour layer sets for forest and coast (three layers each: far ridge, mid tree line or sea, near; 2048 × ≤ 1024 tiling in x; paper grain; Earth palette; nothing face-like), `backgrounds/earth_forest/layer0..2` and `backgrounds/earth_coast/layer0..2` with their scene jsons in the SceneLayout schema; the plains set stays as it is.
+Accept: 2× tile check with no seam; ≤ 4 MB per PNG; a 1080p composite per biome at 1x with the surveyor; the ten boxes that apply; UNITY's StageLayers loads them by key with no code change.
+Files: blender/scripts/build_backdrop_v3.py, Assets/_Game/Art/backgrounds/earth_forest/, Assets/_Game/Art/backgrounds/earth_coast/
+Depends: B-114
+Lead notes: Cycle 249 (D-115). After the B-131 and B-132 previews; previews lock-free, exports in one batch.
+
 
 > **R1 (D-062).** 2D tasks B-056..B-076 are Superseded; their `.blend` sources (rigs, props,
 > terrain recipes) are the starting point for the models. Contract v2 §9 is the rule set.
@@ -1820,7 +1860,7 @@ Lead notes: Done 554e14f (cycle 24): hauler hulls/cargo, Warden pylon, Meridian 
 
 > **C1 (Step 2, D-086): promoted when LEAD approves the C0 style test.** All Depends: C0 approval.
 - Promoted cycle 238 (D-097) with fresh numbers: B-119 discs, B-120 starfield, B-121 HUD art, B-122 Pilgrim sheets; U-103 ship + space, U-104 HUD, U-105 surveyor Animator, U-106 C1 measurement; U-091 first. Still Backlog for C1: surveyor dig/build/surprise/jetpack/climb_in clips (B-12x after B-122).
-- **C2 Earth flora, designs approved cycle 245** (review_c2_earth_plants_preview.png, df1121f): Nodbell (plains/forest), Shiverbarrel (desert), Curlfrond (forest/taiga; lighter frond tone or mustard tips owed), Whiptuft (plains/coast), Thriftcushion (coast/tundra) + snoozle v2 (plains): one `flora/earth/rigset` holding all six per contract §11.3, ≤ 6 bones each, swaps for the react states; the cartoon Earth ground strip (0191af7, in U-100's contract) and the creature re-ink list (coordination/reports/blender/c2_earth_creature_reink.md: swim cap 12–16 accepted into §11.2; Hadal Maw as a rig set accepted in principle) are the other C2 Earth cards. Promoted when C1's exit (U-106) is in sight.
+- **C2 Earth flora, designs approved cycle 245** (review_c2_earth_plants_preview.png, df1121f): Nodbell (plains/forest), Shiverbarrel (desert), Curlfrond (forest/taiga; lighter frond tone or mustard tips owed), Whiptuft (plains/coast), Thriftcushion (coast/tundra) + snoozle v2 (plains): one `flora/earth/rigset` holding all six per contract §11.3, ≤ 6 bones each, swaps for the react states; the cartoon Earth ground strip (0191af7, in U-100's contract) and the creature re-ink list (coordination/reports/blender/c2_earth_creature_reink.md: swim cap 12–16 accepted into §11.2; Hadal Maw as a rig set accepted in principle) are the other C2 Earth cards. Cycle 249 (D-115): BLENDER's C2 Earth cards promoted on the approved sources (B-129 flora rig set export, B-130 ground strips, B-131 camp props, B-132 land creatures, B-133 forest + coast backdrops); UNITY's U-110 (biome placement) and U-111 (ground strips in) below stay Backlog until U-106.
 M2: Earth/Mars POIs, day/night lighting pass (U), Mars dust storm (U), creature AI v1 (U),
 Cryo meter (U), `PlanetDisc` shader with real textures (U). (POI prop sets promoted to B-020, B-021 in cycle 5.)
 R3 (drafted cycle 207): U-085 Mercury and Venus in 3D (the R3 counterpart of U-081: B-091 block arrays, B-092 bands incl. the translucent Venus deck strip and the day/twilight/night Mercury skydomes, B-093/B-096 creatures and Wardens through ModelView, B-095 props and station modules via ModelSwap, B-101 scenery; the cinderhulk emission float driven by the day side; the veil serpent chained from veil_serpent_tail + n×body + head, each module's clip offset by J×0.07 cycles for J bones behind it; M3InnerTests + the M3 smoke set re-shot with the depth preset). Promote when U-081 is Done.
@@ -1832,3 +1872,17 @@ Accept: MenuHudTests cover open/close and the film toggle round trip; settings p
 Files: Assets/_Game/Code/Runtime/UI/Settings/
 Depends: U-095
 Lead notes: Cycle 236. Promoted with the C1 cards.
+
+### U-110 · UNITY · Backlog · C2
+Goal: Biome-aware flora placement: FloraRigs picks plants whose `biomes` list contains the spawn biome (JsonUtility reads the new field from B-129's rig set), weighted so every biome has at least two kinds; the C2 Earth rig set imports with no schema change; the 300-plant loop p99 unchanged.
+Accept: RigFloraTests: a desert spawn never picks Nodbell; the plains pick among snoozle / Nodbell / Whiptuft; the perf row unchanged; a plains capture with every plains plant visible.
+Files: Code/Runtime/Flora/FloraRigs.cs, Tests/
+Depends: U-106, B-129
+Lead notes: Cycle 249 (D-115). Promoted when U-106 is in.
+
+### U-111 · UNITY · Backlog · C2
+Goal: Ground strips from art: U-100's placeholder strip replaced by `terrain/earth/ground_strip` (grass), `ground_strip_soil`, `ground_strip_stone` per column material (grass over soil, bare soil where dug, stone where the block is stone), the fill tile from each sheet's bottom 8 px; the strip follows dug heights as today.
+Accept: an earth_c0_ground-style capture showing the three materials and a dug hole; TerrainTests unchanged; frame time unchanged.
+Files: Code/Runtime/Planet/, Placeholders/terrain/earth/, Tests/
+Depends: U-106, B-130
+Lead notes: Cycle 249 (D-115). Promoted when U-106 is in.
