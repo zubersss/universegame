@@ -76,11 +76,13 @@ def sunfan(d, M, p):
     kx = 1.0 - 0.55 * edge                                                   # tilting edge-on to the Sun: the fan narrows
     F = G.Xf(S, lambda pts: [(hub[0] + (x - hub[0]) * kx, z) for x, z in pts])
     spread = 1.0 - 0.85 * shut
-    for k in range(7):                                                       # back blades first (mid tone), front last
-        a = math.pi / 2 + (k - 3) * math.radians(22) * spread
-        bl = blade(hub, a, 0.30 - 0.02 * abs(k - 3), 0.075)
-        G.stroke(F, bl, M["gold_f"] if k % 2 else M["gold_sh"], 0.0, cyclic=True)
-        G.seam(F, [(hub[0] + 0.05 * math.cos(a), hub[1] + 0.05 * math.sin(a)), (hub[0] + 0.24 * math.cos(a), hub[1] + 0.24 * math.sin(a))], M["ink"])
+    for k in (0, 4, 1, 3, 2):                                                # five broad blades, the outer ones behind
+        a = math.pi / 2 + (k - 2) * math.radians(30) * spread
+        L = 0.30 - 0.03 * abs(k - 2)
+        bl = blade(hub, a, L, 0.17)
+        G.stroke(F, bl, M["gold_f"], 0.0, cyclic=True)
+        G.stroke(F, blade(hub, a, L * 0.38, 0.17), M["gold_sh"], 0.0, cyclic=True)                       # the mid tone at the base
+        G.seam(F, [(hub[0] + 0.07 * math.cos(a), hub[1] + 0.07 * math.sin(a)), (hub[0] + 0.19 * math.cos(a), hub[1] + 0.19 * math.sin(a))], M["ink"])
         G.stroke(F, bl, M["ink"], O, cyclic=True)
     G.stroke(F, G.lumpy_ellipse(hub[0], hub[1], 0.045, 0.04, n=12, seed=5), M["ember"], I, cyclic=True)
 
@@ -153,11 +155,10 @@ def shadebloom(d, M, p):
 def coilwort(d, M, p):
     h = p.get("height", 0.36)
     G.stroke(d, G.lumpy_ellipse(0.0, 0.02, 0.07, 0.03, n=12, seed=61), M["slate"], I, cyclic=True)
-    spring = [(0.06 * math.sin(t * TAU * 3.5) * (1 - 0.3 * t), 0.03 + t * h) for t in [i / 48 for i in range(49)]]
-    G.stroke(d, G.hose_outline(spring, 0.035), M["sage"], O, cyclic=True)
-    for t in (0.25, 0.55, 0.85):                                                                            # front loops in the mid tone
-        i = int(t * 48)
-        G.seam(d, spring[i - 2:i + 3], M["ink"])
+    spring = [(0.085 * math.sin(t * TAU * 2.5) * (1 - 0.25 * t), 0.03 + t * h) for t in [i / 48 for i in range(49)]]
+    G.stroke(d, G.hose_outline(spring, 0.055), M["sage"], O, cyclic=True)
+    G.stroke(d, G.hose_outline([(x + 0.012, z) for x, z in spring], 0.02), M["sage_sh"], 0.0, cyclic=True)    # the shaded side
+    G.seam(d, spring[22:27], M["ink"])
     bx, bz = spring[-1][0], spring[-1][1] + 0.06
     G.stroke(d, G.lumpy_ellipse(bx, bz, 0.07, 0.065, n=16, lump=0.02, seed=62), M["ice"], O, cyclic=True)   # the ice bead
     G.stroke(d, [q for q in G.lumpy_ellipse(bx, bz, 0.07, 0.065, n=16, lump=0.02, seed=62) if q[0] > bx + 0.01] + [(bx + 0.01, bz)],
