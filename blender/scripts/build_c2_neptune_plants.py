@@ -150,42 +150,61 @@ def pipereed_reed(d, M, h, w):
     G.stroke(d, mouth, M["ink"], I, cyclic=True)
 
 
+def pipereed_base(d, M):
+    """The sage clump the reeds stand in, with its two leaves (the rig's root part; the reeds draw over it)."""
+    base = [(x, max(z, 0.0)) for x, z in G.lumpy_ellipse(0.0, 0.0, 0.25, 0.05, n=20, lump=0.08, seed=61)]
+    G.stroke(d, base, M["sage_f"], 0.0, cyclic=True)
+    for k in (-1, 1):
+        leaf(d, M, (0.2 * k, 0.03), math.radians(90 - 60 * k), 0.12, 0.03, veins=1)
+    G.stroke(d, base, M["ink"], O, cyclic=True)
+
+
+DUCK = math.radians(72)
+
+
 def pipereed(d, M, p):
     s = xf(d, 1.0, p.get("squash", 1.0))
     duck = p.get("duck", 0.0)
-    base = [(x, max(z, 0.0)) for x, z in G.lumpy_ellipse(0.0, 0.0, 0.25, 0.05, n=20, lump=0.08, seed=61)]
-    G.stroke(s, base, M["sage_f"], 0.0, cyclic=True)
+    pipereed_base(s, M)
     for k, (bx, h, w) in enumerate(REEDS):
-        a = -(0.12 * math.sin(p.get("phase", 0.0) - 0.9 * k)) * (1 - duck) - math.radians(72) * min(1.0, max(0.0, duck * 1.6 - 0.2 * k))
+        a = -(0.12 * math.sin(p.get("phase", 0.0) - 0.9 * k)) * (1 - duck) - DUCK * min(1.0, max(0.0, duck * 1.6 - 0.2 * k))
         pipereed_reed(G.Xf(s, lambda pts, bx=bx, a=a: [(bx + q[0], q[1]) for q in rot(pts, a)]), M, h, w)
-    for k in (-1, 1):
-        leaf(s, M, (0.2 * k, 0.03), math.radians(90 - 60 * k), 0.12, 0.03, veins=1)
-    G.stroke(s, base, M["ink"], O, cyclic=True)
 
 
 # ---------------------------------------------------------------- stormlantern (the storm, deck 3)
+LANTERN_H = 0.36                     # the stem's height at rest (the bulb bone's offset)
+
+
+def stormlantern_stem(d, M, h=LANTERN_H):
+    stem = G.bezier((0.0, 0.0), (-0.10, h * 0.45), (0.08, h * 0.7), (0.0, h), n=12)
+    hose_stem(d, M, stem, 0.042, rib_every=0.12)
+    leaf(d, M, (0.0, 0.05), math.radians(160), 0.13, 0.035, veins=1)
+    leaf(d, M, (0.0, 0.05), math.radians(25), 0.11, 0.03, veins=1)
+
+
+def stormlantern_bulb(d, M, g=1.0):
+    """The bulb above the stem's top at (0, 0): the glow halo (a tone, g 0..1), the storm-violet bulb, its hood."""
+    bz = 0.1
+    halo = G.lumpy_ellipse(0.0, bz, 0.10 + 0.05 * g, 0.12 + 0.05 * g, n=20, lump=0.06, seed=71)
+    G.stroke(d, halo, M["violet_sh"], 0.0, cyclic=True)                                      # the glow (a tone)
+    bulb = G.lumpy_ellipse(0.0, bz, 0.09, 0.11, n=22, lump=0.05, seed=72)
+    G.stroke(d, bulb, M["violet_f"], 0.0, cyclic=True)
+    G.stroke(d, [q for q in bulb if q[0] > 0.02] + [(0.02, bz)], M["violet_sh"], 0.0, cyclic=True)
+    G.stroke(d, G.lumpy_ellipse(-0.015, bz + 0.01, 0.02 + 0.025 * g, 0.03 + 0.03 * g, n=12, seed=73), M["wisp_f"], 0.0, cyclic=True)
+    for k in (-1, 1):                                                                       # the bulb's two seams
+        G.seam(d, G.bezier((0.04 * k, bz + 0.1), (0.07 * k, bz), (0.04 * k, bz - 0.1), n=8), M["ink"])
+    hood = [(-0.07, bz + 0.08), (0.0, bz + 0.15), (0.07, bz + 0.08), (0.0, bz + 0.11)]       # a sage leaf hood
+    G.stroke(d, hood, M["sage_f"], 0.0, cyclic=True)
+    G.stroke(d, hood, M["ink"], I, cyclic=True)
+    G.stroke(d, bulb, M["ink"], O, cyclic=True)
+
+
 def stormlantern(d, M, p):
     draw_in, glow = p.get("draw_in", 0.0), p.get("glow", 1.0)
     s = xf(d, 1.0, p.get("squash", 1.0))
-    h = 0.36 * (1 - 0.4 * draw_in)
-    stem = G.bezier((0.0, 0.0), (-0.10, h * 0.45), (0.08, h * 0.7), (0.0, h), n=12)
-    hose_stem(s, M, stem, 0.042, rib_every=0.12)
-    leaf(s, M, (0.0, 0.05), math.radians(160), 0.13, 0.035, veins=1)
-    leaf(s, M, (0.0, 0.05), math.radians(25), 0.11, 0.03, veins=1)
-    g = glow * (1 - 0.7 * draw_in)
-    bz = h + 0.1
-    halo = G.lumpy_ellipse(0.0, bz, 0.10 + 0.05 * g, 0.12 + 0.05 * g, n=20, lump=0.06, seed=71)
-    G.stroke(s, halo, M["violet_sh"], 0.0, cyclic=True)                                      # the glow (a tone)
-    bulb = G.lumpy_ellipse(0.0, bz, 0.09, 0.11, n=22, lump=0.05, seed=72)
-    G.stroke(s, bulb, M["violet_f"], 0.0, cyclic=True)
-    G.stroke(s, [q for q in bulb if q[0] > 0.02] + [(0.02, bz)], M["violet_sh"], 0.0, cyclic=True)
-    G.stroke(s, G.lumpy_ellipse(-0.015, bz + 0.01, 0.02 + 0.025 * g, 0.03 + 0.03 * g, n=12, seed=73), M["wisp_f"], 0.0, cyclic=True)
-    for k in (-1, 1):                                                                       # the bulb's two seams
-        G.seam(s, G.bezier((0.04 * k, bz + 0.1), (0.07 * k, bz), (0.04 * k, bz - 0.1), n=8), M["ink"])
-    hood = [(-0.07, bz + 0.08), (0.0, bz + 0.15), (0.07, bz + 0.08), (0.0, bz + 0.11)]       # a sage leaf hood
-    G.stroke(s, hood, M["sage_f"], 0.0, cyclic=True)
-    G.stroke(s, hood, M["ink"], I, cyclic=True)
-    G.stroke(s, bulb, M["ink"], O, cyclic=True)
+    h = LANTERN_H * (1 - 0.4 * draw_in)
+    stormlantern_stem(s, M, h)
+    stormlantern_bulb(xf(s, 1.0, 1.0, 0.0, h), M, glow * (1 - 0.7 * draw_in))
 
 
 # ---------------------------------------------------------------- rimecomb (the deep, on Superionic floes)
