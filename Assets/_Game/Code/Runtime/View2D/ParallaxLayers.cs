@@ -210,7 +210,14 @@ namespace Meridian.View2D
             float width = view.orthographic ? view.orthographicSize * view.aspect * 2f + 4f : 200f;
             FillTop = bottom + 0.05f; // a hair over the set's edge: no seam between them
             fill.transform.position = new Vector3(c.x, FillTop, 0f);
-            if (groundTile != null) { fill.transform.localScale = Vector3.one; fill.size = new Vector2(width, FillDepth); } // the tile's pivot is its top edge (GroundStrip.FillRect)
+            if (groundTile != null)
+            {
+                // Tiled across the width only, the uniform band stretched down: tiling a 0.1 m tile 200 m deep asked for ~80 k quads ("Cannot generate
+                // 9 slice", the 17:35 capture). The tile's pivot is its top edge (GroundStrip.FillRect), so the stretch grows downward.
+                float th = Mathf.Max(0.01f, groundTile.bounds.size.y);
+                fill.size = new Vector2(width, th);
+                fill.transform.localScale = new Vector3(1f, FillDepth / th, 1f);
+            }
             else fill.transform.localScale = new Vector3(width, FillDepth, 1f);
             fill.enabled = true;
         }

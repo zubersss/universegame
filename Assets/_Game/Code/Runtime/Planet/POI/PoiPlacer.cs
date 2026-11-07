@@ -194,11 +194,10 @@ namespace Meridian.Planet.POI
                         global::Meridian.Art.ArtLoad.Release(jloc);
                         if (!jsonThere || sr == null) return;
                         var jh = ArtLoad.Asset<TextAsset>(key + "/json");
-                        handles.Add(jh);
                         jh.Completed += jop =>
                         {
-                            if (jop.Status != AsyncOperationStatus.Succeeded || jop.Result == null) return;
-                            int own = StandRow(jop.Result.text);
+                            int own = jop.Status == AsyncOperationStatus.Succeeded && jop.Result != null ? StandRow(jop.Result.text) : -1;
+                            global::Meridian.Art.ArtLoad.Release(jh); // read once: the json is not kept
                             if (own > 0) { rows = own; Lay(); }
                         };
                     };
