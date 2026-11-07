@@ -160,6 +160,8 @@ namespace Meridian.Flora
 
         /// <summary>The planet the set belongs to (its biome bands pick the plants); null = no biome filter.</summary>
         public Meridian.Planets.PlanetId? planet;
+        /// <summary>U-123: a per-column biome rule that overrides BiomeNameAt while set (Mercury: the terminator's zone when the plants are placed; they stay where they grew as the band creeps).</summary>
+        public System.Func<int, string> biomeRule;
         readonly Dictionary<string, RigSet.Plant[]> byBiome = new Dictionary<string, RigSet.Plant[]>(8);
 
         /// <summary>U-110: the biome name a column belongs to, in the rig set's vocabulary (Earth: the band at x; the ocean band's land is the coast). Pure.</summary>
@@ -176,7 +178,15 @@ namespace Meridian.Flora
                 var r = Meridian.Planet.Backdrop.StageRegions.At(Meridian.Planets.PlanetId.Mars, x);
                 return r == "mars_tharsis" ? "highlands" : r.StartsWith("mars_", System.StringComparison.Ordinal) ? r.Substring(5) : r;
             }
-            return null;
+            return null; // Mercury: the zone moves with the clock — MercuryBiomeFor through biomeRule
+        }
+
+        /// <summary>U-123 (B-148): Mercury's biome names for its rig set — "polar" in a cold trap, else the terminator's zone at that clock: "day", "twilight", "night". Pure.</summary>
+        public static string MercuryBiomeFor(int x, double realSeconds, int width)
+        {
+            if (width <= 0) return null;
+            if (Meridian.Terrain.MercuryLandforms.InColdTrap(x, width)) return "polar";
+            return Meridian.Terrain.MercuryTerminator.ZoneAt(x, realSeconds, width).ToString().ToLowerInvariant();
         }
 
         /// <summary>
@@ -195,7 +205,7 @@ namespace Meridian.Flora
 
         RigSet.Plant[] CandidatesAt(int tx)
         {
-            string biome = BiomeNameAt(planet, tx) ?? "";
+            string biome = (biomeRule != null ? biomeRule(tx) : BiomeNameAt(planet, tx)) ?? "";
             if (!byBiome.TryGetValue(biome, out var list)) { list = PlantsFor(Set, biome); byBiome[biome] = list; }
             return list;
         }

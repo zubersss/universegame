@@ -128,7 +128,7 @@ namespace Meridian.Creatures
                 wanderSpeed = 3f, runSpeed = 9f, temper = Temper.Flees, senseRange = 9f, time = ActiveTime.Any, habitat = Habitat.Air,
                 hoverMin = 4f, hoverMax = 9f, huntsDuringFlare = true,
                 packMin = 1, packMax = 2, maxAlive = 4, placeholder = new Color(1f, 0.85f, 0.4f) },
-            new SpeciesSpec { id = Species.Shadewyrm, planet = PlanetId.Mercury, artKey = "creatures/mercury/shadewyrm", size = new Vector2(2.3f, 0.7f),
+            new SpeciesSpec { id = Species.Shadewyrm, planet = PlanetId.Mercury, artKey = "creatures/mercury/shadewyrm", den = "props/mercury/ice_burrow", size = new Vector2(2.3f, 0.7f), // U-123 (D-126): it peeks from its burrow, a separate prop (B-150)
                 wanderSpeed = 1.2f, runSpeed = 6f, jumpSpeed = 4f, temper = Temper.Hunts, senseRange = 11f, time = ActiveTime.Any,
                 packMin = 1, packMax = 2, maxAlive = 3, placeholder = new Color(0.55f, 0.65f, 0.8f) },
             new SpeciesSpec { id = Species.Cinderhulk, planet = PlanetId.Mercury, artKey = "creatures/mercury/cinderhulk_day", nightArtKey = "creatures/mercury/cinderhulk_night",

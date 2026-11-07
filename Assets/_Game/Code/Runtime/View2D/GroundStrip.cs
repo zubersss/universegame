@@ -23,11 +23,27 @@ namespace Meridian.View2D
         /// <summary>U-118 (B-140): Mars draws the regolith strip, basalt where the block is basalt, and (D-143) the frost strip over snow and ice once BLENDER adds it — until then a missing sheet falls back to the regolith strip; hematite reads regolith.</summary>
         public static readonly string[] MarsKeys = { "terrain/mars/ground_strip", "terrain/mars/ground_strip_basalt", "terrain/mars/ground_strip_frost" };
         public const int Regolith = 0, Basalt = 1, Frost = 2;
+        /// <summary>U-123 (B-148): Mercury draws the blinding regolith strip, and the slate kind where the column is in shadow — the night side and a cold trap's permanent
+        /// shadow. The shadow moves with the terminator, so the rule needs its clock: CartoonStage sets materialRule; the pure MaterialFor reads regolith.</summary>
+        public static readonly string[] MercuryKeys = { "terrain/mercury/ground_strip", "terrain/mercury/ground_strip_slate" };
+        public const int MercuryRegolith = 0, Slate = 1;
+        /// <summary>U-123: a per-column rule (column, top tile → material index) that overrides MaterialFor while set; Invalidate lays the columns out again.</summary>
+        public System.Func<int, byte, int> materialRule;
+        /// <summary>The Mercury strip at column x for the terminator's clock: slate in the night zone and on a cold trap's floor (permanent shadow), regolith in the sun. Pure.</summary>
+        public static int MercuryStripFor(int x, double realSeconds, int width)
+        {
+            if (width <= 0) return MercuryRegolith;
+            if (Meridian.Terrain.MercuryLandforms.PermanentShadow(x, width)) return Slate;
+            return Meridian.Terrain.MercuryTerminator.ZoneAt(x, realSeconds, width) == Meridian.Terrain.MercuryZone.Night ? Slate : MercuryRegolith;
+        }
+        /// <summary>Lays the columns out again on the next LateUpdate (the terminator crept, a rule changed).</summary>
+        public void Invalidate() => dirty = true;
         /// <summary>The planet's strip keys (Earth's four, Mars's two; other planets Earth's until their strips exist). Pure.</summary>
-        public static string[] KeysFor(Meridian.Planets.PlanetId planet) => planet == Meridian.Planets.PlanetId.Mars ? MarsKeys : Keys;
+        public static string[] KeysFor(Meridian.Planets.PlanetId planet) => planet == Meridian.Planets.PlanetId.Mars ? MarsKeys : planet == Meridian.Planets.PlanetId.Mercury ? MercuryKeys : Keys;
         /// <summary>The strip a column draws on `planet` from its top solid tile. Pure.</summary>
         public static int MaterialFor(Meridian.Planets.PlanetId planet, byte topTile) => planet == Meridian.Planets.PlanetId.Mars
             ? (topTile == TileId.Basalt ? Basalt : (topTile == TileId.Snow || topTile == TileId.Ice) ? Frost : Regolith)
+            : planet == Meridian.Planets.PlanetId.Mercury ? MercuryRegolith // U-123: the shadow (slate) is the clock's rule, materialRule
             : MaterialFor(topTile);
 
         /// <summary>The strip a column draws from its top solid tile: grass, sand and stone their own, every other tile (soil, snow, a dug face) the soil. Pure.</summary>
@@ -130,7 +146,9 @@ namespace Meridian.View2D
                 int topY = terrain.TopSolidY(x);
                 float top = topY + 1f; // the ground line
                 // U-111: the column's material from its top solid tile; a sheet not in yet falls back to the grass strip.
-                int material = MaterialFor(planet, terrain.GetTile(x, topY));
+                byte tile = terrain.GetTile(x, topY);
+                int material = materialRule != null ? materialRule(x, tile) : MaterialFor(planet, tile);
+                if (material < 0 || material >= framesBy.Length) material = 0;
                 var set = framesBy[material] ?? frames;
                 var fillTile = fillBy[material] ?? dirt;
                 materialAt[i] = framesBy[material] != null ? material : 0;

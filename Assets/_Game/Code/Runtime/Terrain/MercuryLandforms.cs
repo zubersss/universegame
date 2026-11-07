@@ -32,6 +32,17 @@ namespace Meridian.Terrain
 
         public static bool InColdTrap(int x, int width) => InColdTrap(x, width, out _);
 
+        /// <summary>U-123: column x's signed offset from cold trap i's centre (wrapped). Pure.</summary>
+        public static int ColdTrapOffset(int x, int i, int width) => Wrapped(x - ColdTrapCentre(i, width), width);
+
+        /// <summary>U-123: the cold-trap bowls' height alone (no fbm, no small craters) at column x: the painted stage's datum follows it into the craters. Pure.</summary>
+        public static float ColdTrapProfile(int x, int width)
+        {
+            float h = 0f;
+            for (int i = 0; i < ColdTrapAt.Length; i++) h += Crater(Wrapped(x - ColdTrapCentre(i, width), width), ColdTrapHalfWidth, ColdTrapDepth, RimHeight);
+            return h;
+        }
+
         /// <summary>The crater floor is in permanent shadow: no sun reaches it on any side of the terminator.</summary>
         public static bool PermanentShadow(int x, int width)
         {

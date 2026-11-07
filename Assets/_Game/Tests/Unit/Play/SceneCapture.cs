@@ -2819,5 +2819,133 @@ namespace Meridian.Tests
                 Meridian.View2D.CartoonStage.Enabled = wasCartoon;
             }
         }
+
+        /// <summary>
+        /// U-123: Mercury on the cartoon stage → coordination/reports/unity/u123/: the camp at noon (the day set, the Mercury plants, a Glassback beside the
+        /// surveyor — spawned on the band, which is its rule, before the clock turns to noon), the dawn line at the camp (the twilight set, a Flarewing over the
+        /// surveyor), and the first cold trap's floor at night with the Shadewyrm peeking from its burrow. Shot once B-148 / B-149 / B-150 are in.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator CaptureU123Mercury()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
+                yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(Meridian.Planets.PlanetId.Mercury));
+                var side = director.PlanetSide;
+                timeout = Time.realtimeSinceStartup + 20f;
+                while (!side.terrain.IsSettled && Time.realtimeSinceStartup < timeout) yield return null;
+                side.hazards.enabled = false;
+                if (side.wardens != null) side.wardens.enabled = false;
+                var creatures = side.creatures;
+                creatures.autoSpawn = false;
+                foreach (var c in creatures.All) if (c.Alive) creatures.Despawn(c);
+                var stage = side.cartoon;
+                var cam = side.sideCamera;
+                int w = side.Config.worldWidth;
+                var dir = "coordination/reports/unity/u123";
+                Directory.CreateDirectory(dir);
+                // The dawn line sits where LocalTime = 0.25: dawn = x + (localTime − 0.25) × W; the hazards' offset moves the clock the stage, the creatures and the flares share.
+                IEnumerator Clock(float x, float localTime)
+                {
+                    side.hazards.mercuryClockOffset = 0;
+                    float dawn = Meridian.Terrain.MercuryTerminator.Dawn(stage.MercuryClock, w);
+                    float wantDawn = Mathf.Repeat(x + (localTime - 0.25f) * w, w);
+                    side.hazards.mercuryClockOffset = Mathf.Repeat(wantDawn - dawn, w) * Meridian.Terrain.MercuryTerminator.CreepSecondsPerMetre;
+                    yield return null; yield return null;
+                    float until = Time.realtimeSinceStartup + 8f;
+                    while ((stage.Fading || stage.Layers.placeholders.Contains(true)) && Time.realtimeSinceStartup < until) yield return null;
+                }
+                IEnumerator CarryTo(int tx)
+                {
+                    var stand = new Vector2(tx + 0.5f, side.terrain.TopSolidY(tx) + 1.1f);
+                    side.player.Body.position = stand; side.player.transform.position = stand; side.player.Body.linearVelocity = Vector2.zero;
+                    var follow = cam.GetComponent<Meridian.Player.CameraFollow>();
+                    if (follow != null) follow.SnapToTarget();
+                    float until = Time.realtimeSinceStartup + 20f;
+                    while (!side.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                    until = Time.realtimeSinceStartup + 6f;
+                    yield return null; yield return null;
+                    while ((stage.Fading || stage.Layers.placeholders.Contains(true)) && Time.realtimeSinceStartup < until) yield return null;
+                }
+                string Kinds()
+                {
+                    var tally = new System.Collections.Generic.SortedDictionary<string, int>();
+                    foreach (Transform t in stage.Flora.transform) { tally.TryGetValue(t.name, out int n); tally[t.name] = n + 1; }
+                    var sb = new System.Text.StringBuilder();
+                    foreach (var kv in tally) sb.Append(sb.Length > 0 ? ", " : "").Append($"{kv.Key} ×{kv.Value}");
+                    return sb.Length > 0 ? sb.ToString() : "none";
+                }
+                IEnumerator Shot(string label)
+                {
+                    yield return null;
+                    yield return Save(cam, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    int cx = Mathf.FloorToInt(cam.transform.position.x);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u123 {label}: x {cx}, zone {Meridian.Terrain.MercuryTerminator.ZoneAt(cx, stage.MercuryClock, w)}, local time {Meridian.Terrain.MercuryTerminator.LocalTime(cx, stage.MercuryClock, w):F2}, scene {stage.Scene} ({stage.Layers.SceneKey}, fallback {stage.Layers.UsedFallback}), datum {stage.Datum.At(cx):F1}, placeholders {stage.Layers.placeholders.Contains(true)}, strip {stage.Ground.MaterialAt(cx)} ({stage.Ground.MaterialsLoaded} in), plants {Kinds()}");
+                }
+                IEnumerator WaitArt(Meridian.Creatures.Creature c)
+                {
+                    float art = Time.realtimeSinceStartup + 10f;
+                    while (c != null && c.Alive && c.IsPlaceholder && !(c.Model != null && c.Model.Ready) && Time.realtimeSinceStartup < art) yield return null;
+                }
+                // 1. The camp at noon: the day set and the plants, a Glassback beside the surveyor (spawned on the band — its rule — then the clock turns to noon).
+                int px = Mathf.FloorToInt(side.player.transform.position.x);
+                yield return Clock(px + 0.5f, 0.25f);
+                timeout = Time.realtimeSinceStartup + 15f;
+                while ((stage.Layers.placeholders.Contains(true) || !stage.Flora.Ready || !stage.Ground.Ready) && Time.realtimeSinceStartup < timeout) yield return null;
+                for (int i = 0; i < 30; i++) yield return new WaitForFixedUpdate();
+                var glassback = creatures.SpawnAt(Meridian.Creatures.Species.Glassback, px + 3, side.player.Body.position.y);
+                yield return WaitArt(glassback);
+                yield return Clock(px + 0.5f, 0.5f);
+                TestContext.Out.WriteLine($"[MERIDIAN] u123 camp x {px}: glassback {(glassback == null ? "none" : glassback.IsPlaceholder ? "placeholder" : "sheet")}{(glassback != null && !glassback.Alive ? " (gone)" : "")}");
+                yield return Shot("1_day_1x");
+                // 2. The dawn line at the camp: the twilight set, a Flarewing over the surveyor.
+                yield return Clock(px + 0.5f, 0.25f);
+                var wing = creatures.SpawnAt(Meridian.Creatures.Species.Flarewing, px - 3, side.player.Body.position.y + 5f);
+                yield return WaitArt(wing);
+                TestContext.Out.WriteLine($"[MERIDIAN] u123 dawn line x {px}: flarewing {(wing == null ? "none" : wing.IsPlaceholder ? "placeholder" : "sheet")}, glassback {(glassback != null && glassback.Alive ? "alive" : "gone")}");
+                yield return Shot("2_twilight_1x");
+                // 3. The night side: the first cold trap's floor, the Shadewyrm peeking from its burrow (the surveyor 14 m off: it hunts inside its 11 m sense range).
+                int trapX = Meridian.Terrain.MercuryLandforms.ColdTrapCentre(0, w);
+                yield return CarryTo(trapX + 14);
+                yield return Clock(trapX, 0f);
+                float ready = Time.realtimeSinceStartup + 10f;
+                while (!side.terrain.IsCollisionReady(trapX, side.terrain.TopSolidY(trapX)) && Time.realtimeSinceStartup < ready) yield return null;
+                var wyrm = creatures.SpawnAt(Meridian.Creatures.Species.Shadewyrm, trapX, side.terrain.TopSolidY(trapX) + 1.35f);
+                yield return WaitArt(wyrm);
+                float art = Time.realtimeSinceStartup + 20f;
+                while (wyrm != null && wyrm.Alive && !(wyrm.AtDen && wyrm.CurrentClip == "idle") && Time.realtimeSinceStartup < art) yield return null; // the peek from the burrow
+                var denSprite = creatures.Dens.Count > 0 ? creatures.Dens[0].GetComponent<SpriteRenderer>() : null;
+                art = Time.realtimeSinceStartup + 10f;
+                while (denSprite != null && (denSprite.sprite == null || !denSprite.enabled) && Time.realtimeSinceStartup < art) yield return null; // the burrow's sheet
+                var follow3 = cam.GetComponent<Meridian.Player.CameraFollow>();
+                if (follow3 != null) follow3.enabled = false;
+                if (wyrm != null) cam.transform.position = new Vector3(wyrm.Body.position.x, wyrm.Body.position.y + 3f, cam.transform.position.z);
+                yield return null;
+                TestContext.Out.WriteLine($"[MERIDIAN] u123 shadewyrm at {trapX}: {(wyrm == null ? "no spawn" : $"at den {wyrm.AtDen}, clip {wyrm.CurrentClip ?? "none"}, {(wyrm.IsPlaceholder ? "placeholder" : "sheet")}, state {wyrm.State}")}, dens {creatures.Dens.Count} (burrow sprite {(denSprite != null && denSprite.sprite != null ? denSprite.sprite.name : "none")})");
+                yield return Shot("3_night_burrow");
+                if (follow3 != null) follow3.enabled = true;
+                creatures.DespawnAll();
+                side.hazards.mercuryClockOffset = 0;
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+            }
+        }
     }
 }

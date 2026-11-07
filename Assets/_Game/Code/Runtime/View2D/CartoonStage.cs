@@ -17,7 +17,7 @@ namespace Meridian.View2D
         /// <summary>P-48 (D-086 / D-099): the v4 cartoon path is the game's path on converted planets; on by default. Tests of the 3D path on Earth switch it off for their run and restore it.</summary>
         public static bool Enabled = true;
         /// <summary>The planets whose v4 art path is on when Enabled (C0: Earth).</summary>
-        public static bool Converted(Meridian.Planets.PlanetId id) => id == Meridian.Planets.PlanetId.Earth || id == Meridian.Planets.PlanetId.Mars; // U-118: Mars joins Earth
+        public static bool Converted(Meridian.Planets.PlanetId id) => id == Meridian.Planets.PlanetId.Earth || id == Meridian.Planets.PlanetId.Mars || id == Meridian.Planets.PlanetId.Mercury; // U-118: Mars joins Earth; U-123: Mercury
 
         public const string SurveyorKey = "characters/surveyor/side";
         public const string EarthScene = "plains";
@@ -47,6 +47,27 @@ namespace Meridian.View2D
         }
         /// <summary>The storm veil's alpha for a dust storm's intensity (a smooth step: the wall arrives late and lands fully). Pure.</summary>
         public static float StormAlpha(float intensity) { float t = Mathf.Clamp01(intensity); return t * t * (3f - 2f * t); }
+        /// <summary>U-123 (B-149): Mercury's three sets — day, twilight, night — by the terminator's zone at the camera column; a cold trap is the night set on either side
+        /// (permanent shadow). The twilight set (the band the player runs through) stands in for a set not exported yet.</summary>
+        public const string MercuryDayScene = "day", MercuryTwilightScene = "twilight", MercuryNightScene = "night", MercuryFallbackScene = MercuryTwilightScene;
+        /// <summary>The Mercury set at column x for the terminator's clock (real seconds, MercuryClock) and the world width. Pure.</summary>
+        public static string MercurySceneFor(int x, double realSeconds, int width)
+        {
+            if (width <= 0) return MercuryDayScene;
+            if (Meridian.Terrain.MercuryLandforms.InColdTrap(x, width)) return MercuryNightScene;
+            switch (Meridian.Terrain.MercuryTerminator.ZoneAt(x, realSeconds, width))
+            {
+                case Meridian.Terrain.MercuryZone.Night: return MercuryNightScene;
+                case Meridian.Terrain.MercuryZone.Twilight: return MercuryTwilightScene;
+                default: return MercuryDayScene;
+            }
+        }
+        /// <summary>The set a planet falls back to while a set is not exported yet (Mars: the canyon; Mercury: the twilight); null: the placeholder tints. Pure.</summary>
+        public static string FallbackFor(Meridian.Planets.PlanetId planet) => planet == Meridian.Planets.PlanetId.Mars ? MarsFallbackScene : planet == Meridian.Planets.PlanetId.Mercury ? MercuryFallbackScene : null;
+        /// <summary>Mercury's clock for the stage: the terminator's real seconds plus the hazards' offset — the clock the creatures and the flares read, so the painted band is theirs.</summary>
+        public double MercuryClock => Meridian.Terrain.MercuryTerminator.Now(clock != null ? clock.GameSeconds : 0) + (hazards != null ? hazards.mercuryClockOffset : 0);
+        /// <summary>The set wanted at column x now: Earth by its band, Mars by its region, Mercury by the terminator's clock.</summary>
+        string SceneNow(int x) => planetId == Meridian.Planets.PlanetId.Mercury ? MercurySceneFor(x, MercuryClock, worldWidth) : SceneFor(planetId, x);
         /// <summary>U-118: the B-141 storm set over the base layers on Mars; its alpha follows the dust storm, its scroll the wind.</summary>
         public ParallaxLayers StormLayers { get; private set; }
         Meridian.Planet.Weather.DustStorm storm;
@@ -66,6 +87,9 @@ namespace Meridian.View2D
         Meridian.Planets.PlanetId planetId;
         string planetName, incomingScene;
         float fadeT;
+        int worldWidth, lastDawn = int.MinValue; // U-123: Mercury's clock
+        TimeSystem clock;
+        Meridian.Hazards.HazardSystem hazards;
         /// <summary>Rigged plants around the camp in C0 (every FloraSpacing m, jittered).</summary>
         public const int FloraCount = 42; // D-136 (2): was 48; the camp's density is the animated-object lever (the gate read 42 Animators against 40)
         public const float FloraSpacing = 2.5f;
@@ -111,13 +135,14 @@ namespace Meridian.View2D
             }
             Layers.gameObject.SetActive(true);
             Layers.view = cam;
-            Scene = SceneFor(config.id, side.spawnX); // U-110 / U-118: the spawn's band (Earth) or region (Mars) picks the set
+            planetId = config.id; planetName = config.id.ToString().ToLowerInvariant();
+            worldWidth = config.worldWidth; clock = FindAnyObjectByType<TimeSystem>(); hazards = side.hazards; lastDawn = int.MinValue; // U-123: Mercury's set and strips follow the terminator's clock
+            Scene = SceneNow(side.spawnX); // U-110 / U-118 / U-123: the spawn's band (Earth), region (Mars) or terminator zone (Mercury) picks the set
             Layers.SetOrderOffset(0);
             Layers.alpha = 1f;
-            Layers.ConfigureFor(config.id.ToString().ToLowerInvariant(), Scene, surfaceDatum, config.id == Meridian.Planets.PlanetId.Mars ? MarsFallbackScene : null);
+            Layers.ConfigureFor(planetName, Scene, surfaceDatum, FallbackFor(config.id));
             // U-128: from here the datum and the set follow the camera's band (FollowBand); the spawn's band keeps this surface, so the camp frames do not move.
-            planetId = config.id; planetName = config.id.ToString().ToLowerInvariant();
-            Datum = new BandDatum(config.id, config.datumY, side.spawnX, surfaceDatum);
+            Datum = new BandDatum(config.id, config.datumY, side.spawnX, surfaceDatum, config.worldWidth);
             Fading = false; Crossfades = 0;
             if (Incoming != null) { Incoming.Release(); Incoming.gameObject.SetActive(false); }
             // U-118: Mars draws the dust storm as the B-141 storm set's veil over the base layers (alpha = the storm's intensity, the wind scrolls it).
@@ -140,6 +165,7 @@ namespace Meridian.View2D
             if (Flora == null) { var fgo = new GameObject("CartoonFlora"); fgo.transform.SetParent(transform, false); Flora = fgo.AddComponent<Meridian.Flora.FloraRigs>(); }
             Flora.view = cam; Flora.player = side.player != null ? side.player.transform : null; Flora.terrain = side.terrain;
             Flora.planet = config.id; // U-110: the biome bands pick the plants
+            Flora.biomeRule = config.id == Meridian.Planets.PlanetId.Mercury ? (System.Func<int, string>)(x => Meridian.Flora.FloraRigs.MercuryBiomeFor(x, MercuryClock, worldWidth)) : null; // U-123: by the terminator's zone when placed
             // Bible §9.6: ≤ 40 animated objects in all. The reserve is what the gate counts besides the flora: the drawn surveyor, the ship's legs rig and its
             // puff sheet, one more for a prop or critter Animator in flight (D-136 (2): the 08:46 gate read 38 flora + 4 = 42).
             Flora.Reserved = 4 + GullCount;
@@ -148,7 +174,8 @@ namespace Meridian.View2D
             if (Ground == null) { var ggo = new GameObject("CartoonGround"); ggo.transform.SetParent(transform, false); Ground = ggo.AddComponent<GroundStrip>(); }
             Ground.gameObject.SetActive(true);
             Ground.view = cam; Ground.terrain = side.terrain;
-            Ground.Load(config.id); // U-118: the planet's strips (Earth's four, Mars's regolith + basalt)
+            Ground.Load(config.id); // U-118: the planet's strips (Earth's four, Mars's regolith + basalt + frost, Mercury's regolith + slate)
+            Ground.materialRule = config.id == Meridian.Planets.PlanetId.Mercury ? (System.Func<int, byte, int>)((x, tile) => GroundStrip.MercuryStripFor(x, MercuryClock, worldWidth)) : null; // U-123: slate in the shadow
             if (Meridian.Art.ModelView.CartoonMaterial != null) foreach (var mv in side.GetComponentsInChildren<Meridian.Art.ModelView>(true)) mv.Wear(Meridian.Art.ModelView.CartoonMaterial);
             // U-101: one gull (B-113) over the camp; the director keeps it (it flees and bumps like any critter).
             if (side.creatures != null && side.player != null && side.creatures.CountOf(Meridian.Creatures.Species.Gull) < GullCount)
@@ -172,6 +199,12 @@ namespace Meridian.View2D
         void LateUpdate()
         {
             if (Active && Layers != null && Layers.view != null && Datum != null) FollowBand(Layers.view.transform.position.x);
+            if (Active && planetId == Meridian.Planets.PlanetId.Mercury && Ground != null && worldWidth > 0)
+            {
+                // U-123: the terminator creeps 1 m per 6 s; when its dawn column moves, the strips lay out again (slate ↔ regolith at the band's edges; ~35 columns, no allocation).
+                int dawn = Mathf.FloorToInt(Meridian.Terrain.MercuryTerminator.Dawn(MercuryClock, worldWidth));
+                if (dawn != lastDawn) { lastDawn = dawn; Ground.Invalidate(); }
+            }
             if (StormLayers == null || storm == null || !StormLayers.gameObject.activeSelf) return;
             StormLayers.alpha = StormAlpha(storm.Intensity);
             if (storm.Intensity > 0f) StormLayers.scrollX += storm.Intensity * StormWind * Time.deltaTime; // the wind carries the wall
@@ -186,7 +219,7 @@ namespace Meridian.View2D
             if (Incoming != null && Incoming.gameObject.activeSelf) SetDatum(Incoming, d);
             if (StormLayers != null && StormLayers.gameObject.activeSelf) SetDatum(StormLayers, d);
             if (Sky != null) Sky.anchorY = ParallaxMath.AnchorY(d);
-            string want = SceneFor(planetId, x);
+            string want = SceneNow(x);
             if (!Fading && want != Scene)
             {
                 if (Incoming == null) { var igo = new GameObject("CartoonParallaxIncoming"); igo.transform.SetParent(transform, false); Incoming = igo.AddComponent<ParallaxLayers>(); }
@@ -194,7 +227,7 @@ namespace Meridian.View2D
                 Incoming.view = Layers.view;
                 Incoming.orderOffset = IncomingOrder;
                 Incoming.alpha = 0f;
-                Incoming.ConfigureFor(planetName, want, d, planetId == Meridian.Planets.PlanetId.Mars ? MarsFallbackScene : null);
+                Incoming.ConfigureFor(planetName, want, d, FallbackFor(planetId));
                 incomingScene = want; fadeT = 0f; Fading = true;
             }
             if (!Fading) return;
