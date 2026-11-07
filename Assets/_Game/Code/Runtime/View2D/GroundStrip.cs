@@ -19,6 +19,7 @@ namespace Meridian.View2D
         public const float Z = -0.01f, StripHeight = 2f, FillDepth = 20f, EdgeWidth = 0.09f;
         public const int Order = 1;
         static readonly Color Ink = new Color(0.33f, 0.39f, 0.5f); // × the dirt tone ≈ #1E1A17
+        static readonly Color Back = new Color(0.62f, 0.62f, 0.66f); // a dug hole's back wall: the dirt tone, shaded
 
         public TerrainStreamer terrain;
         public Camera view;
@@ -29,7 +30,7 @@ namespace Meridian.View2D
         Sprite[] frames;
         Sprite dirt;
         AsyncOperationHandle<IList<Sprite>> handle;
-        readonly List<SpriteRenderer> tops = new List<SpriteRenderer>(64), fills = new List<SpriteRenderer>(64), edges = new List<SpriteRenderer>(64);
+        readonly List<SpriteRenderer> tops = new List<SpriteRenderer>(64), fills = new List<SpriteRenderer>(64), edges = new List<SpriteRenderer>(64), backs = new List<SpriteRenderer>(64);
         int firstColumn = int.MinValue, lastColumn = int.MinValue, count;
         bool dirty = true;
 
@@ -62,13 +63,13 @@ namespace Meridian.View2D
             if (!dirty && first == firstColumn && last == lastColumn) return;
             firstColumn = first; lastColumn = last; dirty = false;
             count = last - first + 1;
-            while (tops.Count < count) { tops.Add(Make("Strip", Order, null)); fills.Add(Make("Fill", Order - 1, dirt)); edges.Add(Make("Edge", Order + 1, dirt)); }
+            while (tops.Count < count) { tops.Add(Make("Strip", Order, null)); fills.Add(Make("Fill", Order - 1, dirt)); edges.Add(Make("Edge", Order + 1, dirt)); backs.Add(Make("Back", Order - 2, dirt)); }
             float prevTop = terrain.TopSolidY(first - 1) + 1f;
             for (int i = 0; i < tops.Count; i++)
             {
                 bool on = i < count;
                 tops[i].enabled = on; fills[i].enabled = on;
-                if (!on) { edges[i].enabled = false; continue; }
+                if (!on) { edges[i].enabled = false; backs[i].enabled = false; continue; }
                 int x = first + i;
                 float top = terrain.TopSolidY(x) + 1f; // the ground line
                 var t = tops[i];
@@ -82,6 +83,11 @@ namespace Meridian.View2D
                 var e = edges[i];
                 e.enabled = step > 0.01f;
                 if (e.enabled) { e.transform.position = new Vector3(x, Mathf.Max(top, prevTop), Z - 0.001f); e.size = new Vector2(EdgeWidth, step); }
+                // A dug column (lower than both neighbours' lowest): a shaded back wall up to that line, so no block face shows in the hole.
+                float rim = Mathf.Min(prevTop, terrain.TopSolidY(x + 1) + 1f);
+                var bk = backs[i];
+                bk.enabled = rim > top + 0.01f;
+                if (bk.enabled) { bk.transform.position = new Vector3(x + 0.5f, rim, Z + 0.001f); bk.size = new Vector2(1f, rim - top); }
                 prevTop = top;
             }
         }
@@ -94,6 +100,7 @@ namespace Meridian.View2D
             sr.sortingOrder = order;
             if (tile != null) { sr.sprite = tile; sr.drawMode = SpriteDrawMode.Tiled; sr.tileMode = SpriteTileMode.Continuous; }
             if (name == "Edge") sr.color = Ink;
+            else if (name == "Back") sr.color = Back;
             return sr;
         }
 
