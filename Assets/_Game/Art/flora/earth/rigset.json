@@ -5,9 +5,113 @@
   "rect_origin": "bottom_left",
   "parts": [
     {
+      "name": "curlfrond_base",
+      "rect": [
+        264,
+        12,
+        32,
+        20
+      ],
+      "pivot": [
+        0.484,
+        0.2781
+      ]
+    },
+    {
+      "name": "curlfrond_c_curled",
+      "rect": [
+        412,
+        160,
+        40,
+        52
+      ],
+      "pivot": [
+        0.3308,
+        0.1716
+      ]
+    },
+    {
+      "name": "curlfrond_c_half",
+      "rect": [
+        456,
+        160,
+        44,
+        52
+      ],
+      "pivot": [
+        0.3023,
+        0.1716
+      ]
+    },
+    {
+      "name": "curlfrond_c_open",
+      "rect": [
+        24,
+        148,
+        48,
+        64
+      ],
+      "pivot": [
+        0.2785,
+        0.1394
+      ]
+    },
+    {
+      "name": "curlfrond_l_curled",
+      "rect": [
+        0,
+        88,
+        36,
+        52
+      ],
+      "pivot": [
+        0.4769,
+        0.1704
+      ]
+    },
+    {
+      "name": "curlfrond_l_open",
+      "rect": [
+        76,
+        148,
+        36,
+        64
+      ],
+      "pivot": [
+        0.5395,
+        0.1383
+      ]
+    },
+    {
+      "name": "curlfrond_r_curled",
+      "rect": [
+        40,
+        88,
+        36,
+        52
+      ],
+      "pivot": [
+        0.4532,
+        0.1706
+      ]
+    },
+    {
+      "name": "curlfrond_r_open",
+      "rect": [
+        116,
+        148,
+        36,
+        64
+      ],
+      "pivot": [
+        0.4628,
+        0.1385
+      ]
+    },
+    {
       "name": "head_closed",
       "rect": [
-        192,
+        400,
         52,
         24,
         32
@@ -20,8 +124,8 @@
     {
       "name": "head_half",
       "rect": [
-        0,
-        32,
+        80,
+        88,
         32,
         52
       ],
@@ -33,8 +137,8 @@
     {
       "name": "head_open",
       "rect": [
-        36,
-        36,
+        228,
+        92,
         48,
         48
       ],
@@ -46,8 +150,8 @@
     {
       "name": "leaves_rest",
       "rect": [
-        0,
-        0,
+        52,
+        4,
         64,
         28
       ],
@@ -59,7 +163,7 @@
     {
       "name": "leaves_up",
       "rect": [
-        144,
+        296,
         44,
         44,
         40
@@ -70,10 +174,140 @@
       ]
     },
     {
+      "name": "nodbell_arch",
+      "rect": [
+        120,
+        8,
+        44,
+        24
+      ],
+      "pivot": [
+        0.2058,
+        0.4305
+      ]
+    },
+    {
+      "name": "nodbell_bells_hang",
+      "rect": [
+        428,
+        52,
+        44,
+        32
+      ],
+      "pivot": [
+        0.4308,
+        0.7642
+      ]
+    },
+    {
+      "name": "nodbell_bells_nod",
+      "rect": [
+        0,
+        0,
+        48,
+        32
+      ],
+      "pivot": [
+        0.337,
+        0.7842
+      ]
+    },
+    {
+      "name": "nodbell_stem_lower",
+      "rect": [
+        280,
+        92,
+        48,
+        48
+      ],
+      "pivot": [
+        0.5085,
+        0.1626
+      ]
+    },
+    {
+      "name": "nodbell_stem_upper",
+      "rect": [
+        312,
+        156,
+        36,
+        56
+      ],
+      "pivot": [
+        0.2165,
+        0.1734
+      ]
+    },
+    {
+      "name": "shiverbarrel_body",
+      "rect": [
+        116,
+        88,
+        52,
+        52
+      ],
+      "pivot": [
+        0.4971,
+        0.0824
+      ]
+    },
+    {
+      "name": "shiverbarrel_body_shiver_a",
+      "rect": [
+        332,
+        92,
+        56,
+        48
+      ],
+      "pivot": [
+        0.4968,
+        0.0758
+      ]
+    },
+    {
+      "name": "shiverbarrel_body_shiver_b",
+      "rect": [
+        392,
+        92,
+        56,
+        48
+      ],
+      "pivot": [
+        0.4991,
+        0.0758
+      ]
+    },
+    {
+      "name": "shiverbarrel_crown_half",
+      "rect": [
+        300,
+        12,
+        28,
+        20
+      ],
+      "pivot": [
+        0.4476,
+        0.2141
+      ]
+    },
+    {
+      "name": "shiverbarrel_crown_open",
+      "rect": [
+        168,
+        8,
+        36,
+        24
+      ],
+      "pivot": [
+        0.4614,
+        0.1784
+      ]
+    },
+    {
       "name": "stem_lower",
       "rect": [
-        88,
-        36,
+        452,
+        92,
         24,
         48
       ],
@@ -85,7 +319,7 @@
     {
       "name": "stem_upper",
       "rect": [
-        116,
+        156,
         40,
         24,
         44
@@ -93,6 +327,253 @@
       "pivot": [
         0.4844,
         0.2334
+      ]
+    },
+    {
+      "name": "thriftcushion_cushion",
+      "rect": [
+        208,
+        8,
+        52,
+        24
+      ],
+      "pivot": [
+        0.4841,
+        0.2318
+      ]
+    },
+    {
+      "name": "thriftcushion_pom_a",
+      "rect": [
+        344,
+        44,
+        24,
+        40
+      ],
+      "pivot": [
+        0.4316,
+        0.1871
+      ]
+    },
+    {
+      "name": "thriftcushion_pom_a_up",
+      "rect": [
+        480,
+        92,
+        24,
+        48
+      ],
+      "pivot": [
+        0.4316,
+        0.1559
+      ]
+    },
+    {
+      "name": "thriftcushion_pom_b",
+      "rect": [
+        0,
+        36,
+        24,
+        48
+      ],
+      "pivot": [
+        0.3628,
+        0.1559
+      ]
+    },
+    {
+      "name": "thriftcushion_pom_b_up",
+      "rect": [
+        352,
+        156,
+        24,
+        56
+      ],
+      "pivot": [
+        0.3628,
+        0.1336
+      ]
+    },
+    {
+      "name": "thriftcushion_pom_c",
+      "rect": [
+        184,
+        40,
+        24,
+        44
+      ],
+      "pivot": [
+        0.5177,
+        0.1701
+      ]
+    },
+    {
+      "name": "thriftcushion_pom_c_up",
+      "rect": [
+        172,
+        88,
+        24,
+        52
+      ],
+      "pivot": [
+        0.5177,
+        0.1439
+      ]
+    },
+    {
+      "name": "thriftcushion_pom_d",
+      "rect": [
+        200,
+        88,
+        24,
+        52
+      ],
+      "pivot": [
+        0.4214,
+        0.1439
+      ]
+    },
+    {
+      "name": "thriftcushion_pom_d_up",
+      "rect": [
+        256,
+        152,
+        24,
+        60
+      ],
+      "pivot": [
+        0.4214,
+        0.1247
+      ]
+    },
+    {
+      "name": "thriftcushion_pom_e",
+      "rect": [
+        372,
+        44,
+        24,
+        40
+      ],
+      "pivot": [
+        0.3377,
+        0.1871
+      ]
+    },
+    {
+      "name": "thriftcushion_pom_e_up",
+      "rect": [
+        28,
+        36,
+        24,
+        48
+      ],
+      "pivot": [
+        0.3377,
+        0.1559
+      ]
+    },
+    {
+      "name": "whiptuft_clump",
+      "rect": [
+        156,
+        148,
+        60,
+        64
+      ],
+      "pivot": [
+        0.4492,
+        0.1069
+      ]
+    },
+    {
+      "name": "whiptuft_clump_flat",
+      "rect": [
+        56,
+        36,
+        96,
+        48
+      ],
+      "pivot": [
+        0.4432,
+        0.1426
+      ]
+    },
+    {
+      "name": "whiptuft_whip_a",
+      "rect": [
+        284,
+        152,
+        24,
+        60
+      ],
+      "pivot": [
+        0.6595,
+        0.114
+      ]
+    },
+    {
+      "name": "whiptuft_whip_a_flat",
+      "rect": [
+        212,
+        40,
+        32,
+        44
+      ],
+      "pivot": [
+        0.7943,
+        0.1555
+      ]
+    },
+    {
+      "name": "whiptuft_whip_b",
+      "rect": [
+        0,
+        144,
+        20,
+        68
+      ],
+      "pivot": [
+        0.3613,
+        0.1006
+      ]
+    },
+    {
+      "name": "whiptuft_whip_b_flat",
+      "rect": [
+        380,
+        156,
+        28,
+        56
+      ],
+      "pivot": [
+        0.2581,
+        0.1222
+      ]
+    },
+    {
+      "name": "whiptuft_whip_c",
+      "rect": [
+        220,
+        148,
+        32,
+        64
+      ],
+      "pivot": [
+        0.2258,
+        0.1069
+      ]
+    },
+    {
+      "name": "whiptuft_whip_c_flat",
+      "rect": [
+        248,
+        40,
+        44,
+        44
+      ],
+      "pivot": [
+        0.1642,
+        0.1555
       ]
     }
   ],
@@ -193,6 +674,598 @@
         "swap": "head_open",
         "also": {
           "leaves": "leaves_up"
+        }
+      },
+      "biomes": [
+        "plains"
+      ]
+    },
+    {
+      "name": "nodbell",
+      "biomes": [
+        "plains",
+        "forest"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "nodbell_stem_lower",
+          "parent": null,
+          "length": 0.45,
+          "order": 0
+        },
+        {
+          "name": "stem2",
+          "part": "nodbell_stem_upper",
+          "parent": "root",
+          "length": 0.65,
+          "offset_m": [
+            0.02,
+            0.45
+          ],
+          "order": 1
+        },
+        {
+          "name": "arch",
+          "part": "nodbell_arch",
+          "parent": "stem2",
+          "length": 0.42,
+          "offset_m": [
+            0.28,
+            0.6
+          ],
+          "order": 2
+        },
+        {
+          "name": "bells",
+          "part": "nodbell_bells_hang",
+          "parent": "arch",
+          "length": 0.2,
+          "offset_m": [
+            0.2064,
+            0.0494
+          ],
+          "order": 3
+        }
+      ],
+      "swaps": {
+        "bells": [
+          "nodbell_bells_hang",
+          "nodbell_bells_nod"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "bells",
+          "bone": "bells",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 3,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 14,
+        "beat_bpm": 100,
+        "squash": 0.04,
+        "swap_cycle": {
+          "slot": "bells",
+          "sequence": [
+            "nodbell_bells_hang",
+            "nodbell_bells_nod"
+          ],
+          "beats": [
+            7,
+            1
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "nodbell_bells_nod"
+      }
+    },
+    {
+      "name": "shiverbarrel",
+      "biomes": [
+        "desert"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "shiverbarrel_body",
+          "parent": null,
+          "length": 0.56,
+          "order": 0
+        },
+        {
+          "name": "crown",
+          "part": "shiverbarrel_crown_half",
+          "parent": "root",
+          "length": 0.18,
+          "offset_m": [
+            0.0,
+            0.56
+          ],
+          "order": 1
+        }
+      ],
+      "swaps": {
+        "body": [
+          "shiverbarrel_body",
+          "shiverbarrel_body_shiver_a",
+          "shiverbarrel_body_shiver_b"
+        ],
+        "crown": [
+          "shiverbarrel_crown_half",
+          "shiverbarrel_crown_open"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "body",
+          "bone": "root",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 0,
+          "replaces_part": true
+        },
+        {
+          "slot": "crown",
+          "bone": "crown",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 3,
+        "beat_bpm": 120,
+        "squash": 0.07,
+        "swap_cycle": {
+          "slot": "body",
+          "beats": [
+            6,
+            1,
+            1,
+            1,
+            1
+          ],
+          "sequence": [
+            "shiverbarrel_body",
+            "shiverbarrel_body_shiver_a",
+            "shiverbarrel_body_shiver_b",
+            "shiverbarrel_body_shiver_a",
+            "shiverbarrel_body_shiver_b"
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "shiverbarrel_crown_open"
+      }
+    },
+    {
+      "name": "curlfrond",
+      "biomes": [
+        "forest",
+        "taiga"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "curlfrond_base",
+          "parent": null,
+          "length": 0.06,
+          "order": 3
+        },
+        {
+          "name": "frond_l",
+          "part": "curlfrond_l_open",
+          "parent": "root",
+          "length": 0.8,
+          "offset_m": [
+            -0.08,
+            0.03
+          ],
+          "order": 0
+        },
+        {
+          "name": "frond_c",
+          "part": "curlfrond_c_open",
+          "parent": "frond_l",
+          "length": 0.9,
+          "offset_m": [
+            0.08,
+            0.0
+          ],
+          "order": 1
+        },
+        {
+          "name": "frond_r",
+          "part": "curlfrond_r_open",
+          "parent": "frond_c",
+          "length": 0.8,
+          "offset_m": [
+            0.09,
+            0.0
+          ],
+          "order": 2
+        }
+      ],
+      "swaps": {
+        "frond_l": [
+          "curlfrond_l_open",
+          "curlfrond_l_curled"
+        ],
+        "frond_c": [
+          "curlfrond_c_open",
+          "curlfrond_c_half",
+          "curlfrond_c_curled"
+        ],
+        "frond_r": [
+          "curlfrond_r_open",
+          "curlfrond_r_curled"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "frond_l",
+          "bone": "frond_l",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 0,
+          "replaces_part": true
+        },
+        {
+          "slot": "frond_c",
+          "bone": "frond_c",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        },
+        {
+          "slot": "frond_r",
+          "bone": "frond_r",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 2,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 10,
+        "beat_bpm": 100,
+        "squash": 0.03,
+        "swap_cycle": {
+          "slot": "frond_c",
+          "beats": [
+            4,
+            2,
+            4,
+            2
+          ],
+          "sequence": [
+            "curlfrond_c_open",
+            "curlfrond_c_half",
+            "curlfrond_c_curled",
+            "curlfrond_c_half"
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "curlfrond_c_curled",
+        "also": {
+          "frond_l": "curlfrond_l_curled",
+          "frond_r": "curlfrond_r_curled"
+        }
+      }
+    },
+    {
+      "name": "whiptuft",
+      "biomes": [
+        "plains",
+        "coast"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "whiptuft_clump",
+          "parent": null,
+          "length": 0.6,
+          "order": 3
+        },
+        {
+          "name": "whip_a",
+          "part": "whiptuft_whip_a",
+          "parent": "root",
+          "length": 0.8,
+          "offset_m": [
+            -0.06,
+            0.0
+          ],
+          "order": 0
+        },
+        {
+          "name": "whip_b",
+          "part": "whiptuft_whip_b",
+          "parent": "whip_a",
+          "length": 0.8,
+          "offset_m": [
+            0.09,
+            0.0
+          ],
+          "order": 1
+        },
+        {
+          "name": "whip_c",
+          "part": "whiptuft_whip_c",
+          "parent": "whip_b",
+          "length": 0.8,
+          "offset_m": [
+            0.06,
+            0.0
+          ],
+          "order": 2
+        }
+      ],
+      "swaps": {
+        "clump": [
+          "whiptuft_clump",
+          "whiptuft_clump_flat"
+        ],
+        "whip_a": [
+          "whiptuft_whip_a",
+          "whiptuft_whip_a_flat"
+        ],
+        "whip_b": [
+          "whiptuft_whip_b",
+          "whiptuft_whip_b_flat"
+        ],
+        "whip_c": [
+          "whiptuft_whip_c",
+          "whiptuft_whip_c_flat"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "clump",
+          "bone": "root",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 3,
+          "replaces_part": true
+        },
+        {
+          "slot": "whip_a",
+          "bone": "whip_a",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 0,
+          "replaces_part": true
+        },
+        {
+          "slot": "whip_b",
+          "bone": "whip_b",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        },
+        {
+          "slot": "whip_c",
+          "bone": "whip_c",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 2,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 18,
+        "beat_bpm": 100,
+        "squash": 0.03
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "whiptuft_clump_flat",
+        "also": {
+          "whip_a": "whiptuft_whip_a_flat",
+          "whip_b": "whiptuft_whip_b_flat",
+          "whip_c": "whiptuft_whip_c_flat"
+        }
+      }
+    },
+    {
+      "name": "thriftcushion",
+      "biomes": [
+        "coast",
+        "tundra"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "thriftcushion_cushion",
+          "parent": null,
+          "length": 0.17,
+          "order": 5
+        },
+        {
+          "name": "pom_a",
+          "part": "thriftcushion_pom_a",
+          "parent": "root",
+          "length": 0.5,
+          "offset_m": [
+            -0.18,
+            0.08
+          ],
+          "order": 0
+        },
+        {
+          "name": "pom_b",
+          "part": "thriftcushion_pom_b",
+          "parent": "pom_a",
+          "length": 0.5,
+          "offset_m": [
+            0.1,
+            0.0
+          ],
+          "order": 1
+        },
+        {
+          "name": "pom_c",
+          "part": "thriftcushion_pom_c",
+          "parent": "pom_b",
+          "length": 0.5,
+          "offset_m": [
+            0.1,
+            0.0
+          ],
+          "order": 2
+        },
+        {
+          "name": "pom_d",
+          "part": "thriftcushion_pom_d",
+          "parent": "pom_c",
+          "length": 0.5,
+          "offset_m": [
+            0.1,
+            0.0
+          ],
+          "order": 3
+        },
+        {
+          "name": "pom_e",
+          "part": "thriftcushion_pom_e",
+          "parent": "pom_d",
+          "length": 0.5,
+          "offset_m": [
+            0.09,
+            0.0
+          ],
+          "order": 4
+        }
+      ],
+      "swaps": {
+        "pom_a": [
+          "thriftcushion_pom_a",
+          "thriftcushion_pom_a_up"
+        ],
+        "pom_b": [
+          "thriftcushion_pom_b",
+          "thriftcushion_pom_b_up"
+        ],
+        "pom_c": [
+          "thriftcushion_pom_c",
+          "thriftcushion_pom_c_up"
+        ],
+        "pom_d": [
+          "thriftcushion_pom_d",
+          "thriftcushion_pom_d_up"
+        ],
+        "pom_e": [
+          "thriftcushion_pom_e",
+          "thriftcushion_pom_e_up"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "pom_a",
+          "bone": "pom_a",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 0,
+          "replaces_part": true
+        },
+        {
+          "slot": "pom_b",
+          "bone": "pom_b",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        },
+        {
+          "slot": "pom_c",
+          "bone": "pom_c",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 2,
+          "replaces_part": true
+        },
+        {
+          "slot": "pom_d",
+          "bone": "pom_d",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 3,
+          "replaces_part": true
+        },
+        {
+          "slot": "pom_e",
+          "bone": "pom_e",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 4,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 12,
+        "beat_bpm": 110,
+        "squash": 0.05
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "thriftcushion_pom_c_up",
+        "also": {
+          "pom_a": "thriftcushion_pom_a_up",
+          "pom_b": "thriftcushion_pom_b_up",
+          "pom_d": "thriftcushion_pom_d_up",
+          "pom_e": "thriftcushion_pom_e_up"
         }
       }
     }
