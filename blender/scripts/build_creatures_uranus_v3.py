@@ -104,9 +104,9 @@ def wisp_poses():
         ph = TAU * i / 6
         out.append(dict(flicker=ph * 2, bob=0.02 * math.sin(ph), trail=0.6, rock=-0.15, look=(0.9, 0.0)))
     for i in range(8):                                                                     # react: darts away (UNITY moves it)
-        out.append(dict(flicker=3 * i, trail=1.0 - 0.1 * i, rock=0.25 if i < 4 else 0.05, shift=-0.02 * min(i, 4), eye_pop=1.5 if i < 3 else 1.1,
+        out.append(dict(flicker=3 * i, trail=1.0 - 0.1 * i, rock=0.25 if i < 4 else 0.05, shift=-0.01 * min(i, 4), eye_pop=1.5 if i < 3 else 1.1,
                         mouth=0.5 if i in (1, 2) else 0.0))
-    out += [dict(q, shift=0.4 * q.get("shift", 0.0), head=(0.0, 0.3 * q.get("head", (0.0, 0.0))[1])) for q in K.bump_clip()]
+    out += [dict(q, shift=0.0, sz=1 + 0.5 * (q.get("sz", 1.0) - 1), head=(0.0, 0.3 * q.get("head", (0.0, 0.0))[1])) for q in K.bump_clip()]   # the tail fits
     return out
 
 
