@@ -406,6 +406,18 @@ namespace Meridian.Tests
             Debug.Log($"[MERIDIAN] fallback belt enabled {(fb != null ? fb.GetComponent<MeshRenderer>().enabled.ToString() : "none")}");
             yield return Shot("4_belt", belt, Meridian.Transitions.TransitionDirector.SpaceDefaultSize);
             yield return Shot("5_earth_luna", world.Find("earth").Value.position + new Vector2(60f, 60f), 120f);
+            // U-103 (B-122): the drawn top-down Pilgrim (pilgrim_top, fin_wobble) parked outside Earth's well.
+            if (parkedShip != null)
+            {
+                var topView = parkedShip.GetComponent<Meridian.Space.ShipTopView>();
+                until = Time.realtimeSinceStartup + 10f;
+                while (topView != null && topView.UsesRig && !topView.RigReady && Time.realtimeSinceStartup < until) yield return null;
+                Debug.Log($"[MERIDIAN] space pilgrim: {(topView != null && topView.RigReady ? $"rig fit {topView.FitScale:F3}, playing {topView.Rig.Playing}" : "legacy sprite")}");
+                parkedShip.intent = new Meridian.Space.ShipIntent { thrust = 1f };
+                for (int i = 0; i < 6; i++) yield return null;
+                yield return Shot("6_pilgrim", parkedShip.Position, 6f);
+                parkedShip.intent = default;
+            }
         }
 
         /// <summary>U-090 evidence: the Earth camp stage stack from the rail and in the depth preset, and a wide frame at the forest/plains border.</summary>
@@ -1622,7 +1634,7 @@ namespace Meridian.Tests
                 bool all = side.depthBands != null && side.depthBands.RidgeReady && side.depthBands.SkylineReady;
                 foreach (var s in side.pois.ModelSwaps) all &= s.Ready;
                 var legs = side.ship.GetComponentInChildren<Meridian.Ship.ShipLegsView>();
-                all &= legs != null && legs.Model != null && legs.Model.Ready;
+                all &= legs != null && legs.Ready;
                 if (all) break;
                 yield return null;
             }
@@ -1695,7 +1707,96 @@ namespace Meridian.Tests
         /// vertical speed, T/W and the camera's lead on the hull.
         /// </summary>
         [UnityTest]
-        public IEnumerator CaptureU107Ship()
+        public IEnumerator CaptureU107Ship() => CaptureShip("u107");
+
+        /// <summary>
+        /// U-103 (D-111, B-122): the same three ship frames with the drawn Pilgrim rig (fin_wobble in the climb, the puff loop at the
+        /// tail_exhaust socket, the attitude puffs while tilting) → coordination/reports/unity/u103/.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator CaptureU103Ship() => CaptureShip("u103");
+
+        /// <summary>
+        /// U-109: the climb sky. Three frames of the straight climb: on the pad, half-way to the Escape Line and just under it
+        /// → coordination/reports/unity/u109/; the log carries the measured top-row colour, the edge, the span, the frame-top and
+        /// frame-bottom shades and the starfield's alpha per frame.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator CaptureU109Climb()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false;
+                var ship = side.ship;
+                var legs = ship.GetComponent<Meridian.Ship.ShipLegsView>();
+                var sky = side.cartoon != null ? side.cartoon.Sky : null;
+                Assert.NotNull(sky, "ClimbSky on the cartoon stage");
+                timeout = Time.realtimeSinceStartup + 15f;
+                while ((legs == null || !legs.Ready || (sky.layers != null && sky.layers.placeholders.Count > 0 && sky.layers.placeholders[0])) && Time.realtimeSinceStartup < timeout) yield return null;
+                foreach (var c in side.creatures.All) if (c.Alive) side.creatures.Despawn(c);
+                ship.GetComponent<Meridian.Ship.ShipBoarding>().ForceAboard();
+                ship.externalInput = true;
+                ship.intent = default;
+                for (int i = 0; i < 60; i++) yield return new WaitForFixedUpdate();
+                var cam = side.sideCamera;
+                var dir = "coordination/reports/unity/u109";
+                Directory.CreateDirectory(dir);
+                float line = side.Config.EscapeLineY;
+                float half = side.Config.datumY + side.Config.escapeAltitude * 0.5f;
+
+                string Hex(Color c) => $"#{(int)(c.r * 255f):X2}{(int)(c.g * 255f):X2}{(int)(c.b * 255f):X2}";
+                IEnumerator Shot(string label)
+                {
+                    yield return null;
+                    yield return Save(cam, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u109 {label}: ship alt {ship.AltitudeAboveGround:F1} m, camera y {cam.transform.position.y:F1}, edge {sky.EdgeY:F1} (rest {sky.EdgeRestY:F1}), span {sky.Span:F1} m, top {(sky.TopMeasured ? "measured" : "sky colour")} {Hex(sky.TopColour)}, frame bottom {Hex(sky.FrameBottom)} top {Hex(sky.FrameTop)}, stars {(sky.StarsReady ? "loaded" : "not loaded")} alpha {sky.StarAlpha:F2} shown {(sky.Stars != null && sky.Stars.enabled)}");
+                }
+
+                // 1. On the pad: the painted sky fills the frame; the gradient starts above its top row.
+                yield return Shot("1_ground");
+                Assert.AreEqual(0f, sky.StarAlpha, 1e-4f, "no stars on the ground");
+
+                // 2. Half-way: straight up under full thrust.
+                ship.intent = new Meridian.Ship.ShipSideIntent { thrust = 1f };
+                timeout = Time.realtimeSinceStartup + 120f;
+                while (ship.Body.position.y < half && Time.realtimeSinceStartup < timeout) yield return new WaitForFixedUpdate();
+                yield return Shot("2_halfway");
+                Assert.Less(Meridian.View2D.ClimbSkyMath.Luma(sky.FrameTop), Meridian.View2D.ClimbSkyMath.Luma(sky.FrameBottom), "darker at the top of the frame half-way up");
+
+                // 3. Just under the Escape Line (the next metres launch).
+                while (ship.Body.position.y < line - 2f && Time.realtimeSinceStartup < timeout) yield return new WaitForFixedUpdate();
+                ship.intent = default;
+                Assert.Less(ship.Body.position.y, line, "still under the Escape Line");
+                float until = Time.realtimeSinceStartup + 10f;
+                while (!sky.StarsReady && Time.realtimeSinceStartup < until) yield return null;
+                yield return Shot("3_escape_line");
+                Assert.IsTrue(sky.StarsReady && sky.Stars.enabled, "stars visible at the Escape Line");
+                Assert.Greater(sky.StarAlpha, 0.4f, "the starfield near its full alpha at the line");
+                side.dayNight.Override = null;
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Meridian.View2D.CartoonStage.Enabled = false;
+            }
+        }
+
+        IEnumerator CaptureShip(string folder)
         {
             var name = Environment.GetEnvironmentVariable(Variable);
             if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
@@ -1717,18 +1818,20 @@ namespace Meridian.Tests
                 var ship = side.ship;
                 var legs = ship.GetComponent<Meridian.Ship.ShipLegsView>();
                 timeout = Time.realtimeSinceStartup + 15f;
-                while ((legs == null || legs.Model == null || !legs.Model.Ready) && Time.realtimeSinceStartup < timeout) yield return null;
+                while ((legs == null || !legs.Ready) && Time.realtimeSinceStartup < timeout) yield return null;
+                var fx = ship.GetComponent<Meridian.FX.ShipFx>();
+                TestContext.Out.WriteLine($"[MERIDIAN] {folder} ship art: {(legs != null && legs.RigReady ? $"rig ({legs.Rig.Bones.Length} bones, playing {legs.Rig.Playing}, animator {(legs.Rig.Animator != null ? "on" : "missing")})" : legs != null && legs.Model != null && legs.Model.Ready ? "legacy model" : "none")}, fx on rig {(fx != null && fx.OnRig)}");
                 // Clean shots: whatever the stage spawned at load is logged, then despawned.
                 foreach (var c in side.creatures.All)
-                    if (c.Alive) { TestContext.Out.WriteLine($"[MERIDIAN] u107 despawning {c.Spec.id} at {c.Body.position} (view {(c.View != null && c.View.sprite != null ? c.View.sprite.name : "none")})"); side.creatures.Despawn(c); }
+                    if (c.Alive) { TestContext.Out.WriteLine($"[MERIDIAN] {folder} despawning {c.Spec.id} at {c.Body.position} (view {(c.View != null && c.View.sprite != null ? c.View.sprite.name : "none")})"); side.creatures.Despawn(c); }
                 ship.GetComponent<Meridian.Ship.ShipBoarding>().ForceAboard();
                 ship.externalInput = true;
                 ship.intent = default;
                 for (int i = 0; i < 60; i++) yield return new WaitForFixedUpdate();
                 var cam = side.sideCamera;
                 var follow = cam.GetComponent<Meridian.Player.CameraFollow>();
-                TestContext.Out.WriteLine($"[MERIDIAN] u107 camera: follow {(follow != null ? follow.enabled.ToString() : "none")}, target {(follow != null && follow.target != null ? follow.target.name : "none")}, vehicle {(follow != null && follow.Vehicle != null)}, cartoon {(follow != null && follow.Cartoon)}");
-                var dir = "coordination/reports/unity/u107";
+                TestContext.Out.WriteLine($"[MERIDIAN] {folder} camera: follow {(follow != null ? follow.enabled.ToString() : "none")}, target {(follow != null && follow.target != null ? follow.target.name : "none")}, vehicle {(follow != null && follow.Vehicle != null)}, cartoon {(follow != null && follow.Cartoon)}");
+                var dir = "coordination/reports/unity/" + folder;
                 Directory.CreateDirectory(dir);
 
                 IEnumerator Shot(string label)
@@ -1737,7 +1840,7 @@ namespace Meridian.Tests
                     yield return Save(cam, $"{name}_{label}");
                     File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
                     var lead = (Vector2)cam.transform.position - ship.Body.position;
-                    TestContext.Out.WriteLine($"[MERIDIAN] u107 {label}: tilt {ship.Tilt:F1}°, v ({ship.Body.linearVelocity.x:F1}, {ship.Body.linearVelocity.y:F1}) m/s, T/W {ship.ThrustToWeight:F2}, alt {ship.AltitudeAboveGround:F1} m, camera − hull ({lead.x:F1}, {lead.y:F1}), stage ({(follow != null ? follow.Stage.X : 0f):F1}, {(follow != null ? follow.Stage.Y : 0f):F1}) vs cam ({cam.transform.position.x:F1}, {cam.transform.position.y:F1}), follow {(follow != null && follow.enabled)}/{(follow != null && follow.isActiveAndEnabled)}/{(follow != null && follow.gameObject.activeInHierarchy)}, entries {(follow != null ? follow.Entries : -1)}, steps {(follow != null ? follow.StepsApplied : -1)}, dt {Time.deltaTime:F4}, scale {Time.timeScale}, camGO {cam.gameObject.activeInHierarchy}/{cam.enabled}, vehicle {(follow != null && follow.Vehicle != null)}, stand-in {(legs != null && legs.StandIn)}");
+                    TestContext.Out.WriteLine($"[MERIDIAN] {folder} {label}: tilt {ship.Tilt:F1}°, v ({ship.Body.linearVelocity.x:F1}, {ship.Body.linearVelocity.y:F1}) m/s, T/W {ship.ThrustToWeight:F2}, alt {ship.AltitudeAboveGround:F1} m, camera − hull ({lead.x:F1}, {lead.y:F1}), stage ({(follow != null ? follow.Stage.X : 0f):F1}, {(follow != null ? follow.Stage.Y : 0f):F1}) vs cam ({cam.transform.position.x:F1}, {cam.transform.position.y:F1}), follow {(follow != null && follow.enabled)}/{(follow != null && follow.isActiveAndEnabled)}/{(follow != null && follow.gameObject.activeInHierarchy)}, entries {(follow != null ? follow.Entries : -1)}, steps {(follow != null ? follow.StepsApplied : -1)}, dt {Time.deltaTime:F4}, scale {Time.timeScale}, camGO {cam.gameObject.activeInHierarchy}/{cam.enabled}, vehicle {(follow != null && follow.Vehicle != null)}, stand-in {(legs != null && legs.StandIn)}");
                 }
 
                 // 1. On the pad, aboard, at rest.

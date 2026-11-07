@@ -27,6 +27,27 @@ namespace Meridian.Flora
         [System.Serializable] public sealed class Slot { public string slot; public string bone; public float[] offset_m; public int order = -1; public bool replaces_part; }
 
         /// <summary>
+        /// U-103 (B-122, D-111): an authored keyframe clip, `frames` at `fps` stepped (12), per-bone `tracks`: `rot_deg`
+        /// (local z degrees per frame, + = counter-clockwise) and `scale` ([x, y] per frame on the bone's local scale).
+        /// A looping clip wraps to frame 0; a one-shot holds its last frame. Read with a small reader (JsonUtility has no maps).
+        /// </summary>
+        [System.Serializable]
+        public sealed class Clip
+        {
+            public string name;
+            public float fps = 12f;
+            public bool loop;
+            public int frames;
+            [System.NonSerialized] public Dictionary<string, Track> tracks = new Dictionary<string, Track>();
+            public float Seconds => frames / Mathf.Max(1f, fps);
+        }
+
+        public sealed class Track { public float[] rot_deg; public Vector2[] scale; }
+
+        /// <summary>The Animator state of an authored clip: `&lt;plant&gt;_&lt;clip&gt;` (a sway-only plant's state is the plant's name).</summary>
+        public static string StateName(string plant, string clip) => plant + "_" + clip;
+
+        /// <summary>
         /// v3.1 `idle.swap_cycle` (B-126, U-108): `slot` steps through `sequence` on the plant's beat (60 / beat_bpm s), each
         /// entry held for its `beats` count, looping (the snoozle: head_open 8, head_half 1, head_closed 3, head_half 1 = 13 beats).
         /// </summary>
@@ -83,6 +104,17 @@ namespace Meridian.Flora
             public Slot[] slots;
             public Idle idle = new Idle();
             public React react = new React();
+            /// <summary>U-103: authored clips (fin_wobble / leg_flex / hatch_open); null or empty for a sway-only plant.</summary>
+            public Clip[] clips;
+            /// <summary>U-103: named points in metres from the rig origin (the ground line under the pads, ship centre); they follow the root transform, not the clips. Filled by Parse from `sockets`.</summary>
+            [System.NonSerialized] public Dictionary<string, Vector2> sockets = new Dictionary<string, Vector2>();
+            public bool HasClips => clips != null && clips.Length > 0;
+            public Clip FindClip(string name)
+            {
+                if (clips == null) return null;
+                foreach (var c in clips) if (c != null && c.name == name) return c;
+                return null;
+            }
             /// <summary>Swap slots → part names (first = the resting state); filled by Parse from the json's `swaps` object.</summary>
             [System.NonSerialized] public Dictionary<string, string[]> swaps = new Dictionary<string, string[]>();
             public int BoneCount => bones != null ? bones.Length : 0;
@@ -187,6 +219,23 @@ namespace Meridian.Flora
                     if (!plant.swaps.TryGetValue(kv.Key, out var states)) { error = $"plant '{plant.name}': react also names '{kv.Key}', not a swap slot"; return null; }
                     if (System.Array.IndexOf(states, kv.Value) < 0) { error = $"plant '{plant.name}': react also shows '{kv.Value}', not a '{kv.Key}' swap"; return null; }
                 }
+
+                // U-103 (B-122): sockets and authored clips.
+                plant.sockets = ReadSockets(json, plant.name);
+                if (plant.clips != null)
+                    foreach (var c in plant.clips)
+                    {
+                        if (c == null || string.IsNullOrEmpty(c.name)) { error = $"plant '{plant.name}': a clip needs a name"; return null; }
+                        if (c.frames < 1) { error = $"plant '{plant.name}': clip '{c.name}' needs frames ≥ 1"; return null; }
+                        if (c.fps <= 0f) c.fps = 12f;
+                        c.tracks = ReadTracks(json, plant.name, c.name);
+                        foreach (var kv in c.tracks)
+                        {
+                            if (plant.BoneIndex(kv.Key) < 0) { error = $"plant '{plant.name}': clip '{c.name}' drives an unknown bone '{kv.Key}'"; return null; }
+                            var t = kv.Value;
+                            if ((t.rot_deg == null || t.rot_deg.Length == 0) && (t.scale == null || t.scale.Length == 0)) { error = $"plant '{plant.name}': clip '{c.name}' track '{kv.Key}' has neither rot_deg nor scale"; return null; }
+                        }
+                    }
             }
             return set;
         }
@@ -197,13 +246,25 @@ namespace Meridian.Flora
         /// </summary>
         static bool PlantSpan(string json, string plant, out int start, out int end)
         {
+            // U-109 check fix (B-129): the plant object is found by its exact name inside `plants` whatever its key order (B-129
+            // writes `biomes` before `bones`) and spans its own braces, so a part named `<plant>_<x>` in `parts` never matches.
             start = end = -1;
             if (string.IsNullOrEmpty(plant)) return false;
-            var nameMatch = Regex.Match(json, "\"name\"\\s*:\\s*\"" + Regex.Escape(plant) + "\"\\s*,\\s*\"bones\"");
+            int plantsAt = json.IndexOf("\"plants\"", System.StringComparison.Ordinal);
+            int from = plantsAt >= 0 ? plantsAt : 0;
+            var nameMatch = Regex.Match(json.Substring(from), "\"name\"\\s*:\\s*\"" + Regex.Escape(plant) + "\"");
             if (!nameMatch.Success) return false;
-            start = nameMatch.Index;
-            int nextPlant = json.IndexOf("\"bones\"", nameMatch.Index + nameMatch.Length, System.StringComparison.Ordinal);
-            end = nextPlant >= 0 ? nextPlant : json.Length;
+            int at = from + nameMatch.Index;
+            int open = -1, depth = 0;
+            for (int i = at; i >= 0; i--)
+            {
+                if (json[i] == '}') depth++;
+                else if (json[i] == '{') { if (depth == 0) { open = i; break; } depth--; }
+            }
+            int close = open >= 0 ? Matching(json, open, '{', '}') : -1;
+            if (close < 0) return false;
+            start = open;
+            end = close + 1;
             return true;
         }
 
@@ -232,6 +293,94 @@ namespace Meridian.Flora
                 result[m.Groups[1].Value] = names.ToArray();
             }
             return result;
+        }
+
+        /// <summary>U-103: reads `"sockets": { "name": [x, y], ... }` of the plant object named `plant` (metres from the rig origin).</summary>
+        static Dictionary<string, Vector2> ReadSockets(string json, string plant)
+        {
+            var result = new Dictionary<string, Vector2>();
+            if (!PlantSpan(json, plant, out int start, out int end)) return result;
+            var body = FlatObjectBody(json, "sockets", start, end);
+            if (body == null) return result;
+            foreach (Match m in Regex.Matches(body, "\"([^\"]+)\"\\s*:\\s*\\[([^\\]]*)\\]"))
+            {
+                var v = Floats(m.Groups[2].Value);
+                if (v.Length == 2) result[m.Groups[1].Value] = new Vector2(v[0], v[1]);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// U-103: reads `"tracks": { "bone": { "rot_deg": [...], "scale": [[x, y], ...] }, ... }` of the clip named `clip` inside
+        /// the `clips` array of the plant object named `plant`. Braces and brackets are matched by counting (no string holds one).
+        /// </summary>
+        static Dictionary<string, Track> ReadTracks(string json, string plant, string clip)
+        {
+            var result = new Dictionary<string, Track>();
+            if (!PlantSpan(json, plant, out int start, out int end)) return result;
+            int clipsAt = json.IndexOf("\"clips\"", start, System.StringComparison.Ordinal);
+            if (clipsAt < 0 || clipsAt >= end) return result;
+            var nameMatch = Regex.Match(json.Substring(clipsAt, end - clipsAt), "\"name\"\\s*:\\s*\"" + Regex.Escape(clip) + "\"");
+            if (!nameMatch.Success) return result;
+            int tracksAt = json.IndexOf("\"tracks\"", clipsAt + nameMatch.Index, System.StringComparison.Ordinal);
+            if (tracksAt < 0 || tracksAt >= end) return result;
+            int open = json.IndexOf('{', tracksAt);
+            int close = Matching(json, open, '{', '}');
+            if (open < 0 || close < 0) return result;
+            int i = open + 1;
+            while (i < close)
+            {
+                var bm = Regex.Match(json.Substring(i, close - i), "\"([^\"]+)\"\\s*:\\s*\\{");
+                if (!bm.Success) break;
+                int bOpen = i + bm.Index + bm.Length - 1;
+                int bClose = Matching(json, bOpen, '{', '}');
+                if (bClose < 0) break;
+                var body = json.Substring(bOpen + 1, bClose - bOpen - 1);
+                var t = new Track();
+                var rot = Regex.Match(body, "\"rot_deg\"\\s*:\\s*\\[([^\\]]*)\\]");
+                if (rot.Success) t.rot_deg = Floats(rot.Groups[1].Value);
+                int scaleAt = body.IndexOf("\"scale\"", System.StringComparison.Ordinal);
+                if (scaleAt >= 0)
+                {
+                    int sOpen = body.IndexOf('[', scaleAt);
+                    int sClose = Matching(body, sOpen, '[', ']');
+                    if (sOpen >= 0 && sClose > sOpen)
+                    {
+                        var pairs = new List<Vector2>();
+                        foreach (Match pm in Regex.Matches(body.Substring(sOpen + 1, sClose - sOpen - 1), "\\[([^\\]]*)\\]"))
+                        {
+                            var v = Floats(pm.Groups[1].Value);
+                            pairs.Add(v.Length >= 2 ? new Vector2(v[0], v[1]) : v.Length == 1 ? new Vector2(v[0], v[0]) : Vector2.one);
+                        }
+                        t.scale = pairs.ToArray();
+                    }
+                }
+                result[bm.Groups[1].Value] = t;
+                i = bClose + 1;
+            }
+            return result;
+        }
+
+        /// <summary>Index of the `close` matching the `open` at `at` (depth counting), or -1.</summary>
+        static int Matching(string s, int at, char open, char close)
+        {
+            if (at < 0 || at >= s.Length || s[at] != open) return -1;
+            int depth = 0;
+            for (int i = at; i < s.Length; i++)
+            {
+                if (s[i] == open) depth++;
+                else if (s[i] == close && --depth == 0) return i;
+            }
+            return -1;
+        }
+
+        static float[] Floats(string list)
+        {
+            var parts = list.Split(new[] { ',' }, System.StringSplitOptions.RemoveEmptyEntries);
+            var result = new List<float>(parts.Length);
+            foreach (var p in parts)
+                if (float.TryParse(p.Trim(), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float f)) result.Add(f);
+            return result.ToArray();
         }
 
         /// <summary>U-108: reads `"react": { ..., "also": { "slot": "part", ... } }` of the plant object named `plant` (v3.1; flat string → string).</summary>

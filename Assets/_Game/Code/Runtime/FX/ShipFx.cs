@@ -22,6 +22,9 @@ namespace Meridian.FX
         public FxLoop PodFore { get; private set; }
         public FxLoop PodAft { get; private set; }
         public FxLoop Shimmer { get; private set; }
+        /// <summary>U-103 (B-122): true once the loops sit on the drawn rig's sockets (tail_exhaust, attitude_l / attitude_r) with the puff sheet.</summary>
+        public bool OnRig { get; private set; }
+        Meridian.Ship.ShipLegsView legsView;
 
         void Awake()
         {
@@ -58,10 +61,42 @@ namespace Meridian.FX
             return loop;
         }
 
+        /// <summary>
+        /// U-103 (B-122, D-111): with the drawn rig the main flame becomes the puff loop hanging from the tail_exhaust socket
+        /// (the puff's pivot is its top centre) and the attitude puffs sit at attitude_l / attitude_r blowing outward, all under
+        /// the squash root so they stretch with the hull; sockets are metres from the rig origin on the skid line and never move
+        /// with the clips. The entry shimmer stays where it was.
+        /// </summary>
+        void PlaceOnRig()
+        {
+            if (legsView == null) legsView = side.GetComponentInChildren<Meridian.Ship.ShipLegsView>();
+            if (legsView == null || !legsView.RigReady) return;
+            OnRig = true;
+            var rig = legsView.Rig;
+            var origin = new Vector2(0f, -SideShip.SkidDrop);
+            int layer = legsView.target != null ? legsView.target.sortingLayerID : 0;
+            int behind = (legsView.target != null ? legsView.target.sortingOrder : 0) - 1;
+            Move(Main, ArtKeys.Ships.PilgrimPuff, origin + rig.Socket("tail_exhaust", new Vector2(0f, 0.85f)), 0f, new Vector2(1.3f, 1.3f), legsView.SquashRoot, layer, behind);
+            Move(PodAft, ArtKeys.Ships.PilgrimPuff, origin + rig.Socket("attitude_l", new Vector2(-1.5f, 2.6f)), -90f, new Vector2(0.45f, 0.45f), legsView.SquashRoot, layer, behind);
+            Move(PodFore, ArtKeys.Ships.PilgrimPuff, origin + rig.Socket("attitude_r", new Vector2(1.5f, 2.6f)), 90f, new Vector2(0.45f, 0.45f), legsView.SquashRoot, layer, behind);
+        }
+
+        static void Move(FxLoop loop, string key, Vector2 local, float rot, Vector2 scale, Transform parent, int layer, int order)
+        {
+            if (parent != null) loop.transform.SetParent(parent, false);
+            loop.transform.localPosition = local;
+            loop.transform.localRotation = Quaternion.Euler(0f, 0f, rot);
+            loop.transform.localScale = new Vector3(scale.x, scale.y, 1f);
+            loop.target.sortingLayerID = layer;
+            loop.target.sortingOrder = order;
+            loop.SetKey(key);
+        }
+
         void LateUpdate()
         {
             if (side != null)
             {
+                if (!OnRig) PlaceOnRig();
                 bool flying = side.piloted && !side.Grounded;
                 bool lift = side.piloted && side.intent.thrust > 0.05f;
                 Main.active = lift;

@@ -30,6 +30,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 12a4d8babd8a6c342b4f5d2f9de47b29
+    m_Address: ships/pilgrim/rig/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 14b8ab36c53ccad4b8cb3e0a6ba716cb
     m_Address: props/common/shelter_door
     m_ReadOnly: 0
@@ -305,6 +310,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a55c51cf9a54cbc4ea1397644529b9dd
+    m_Address: characters/surveyor/side_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a73a2fa04abd32d4aab12c5b39621655
     m_Address: props/common/float_cell_pack_mk1
     m_ReadOnly: 0
@@ -362,6 +372,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cb0c972db7128f7448300d9e933174b8
     m_Address: ships/pilgrim/rig/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cba10469c095cfe4b96333b563769e1a
+    m_Address: characters/surveyor/side_b/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

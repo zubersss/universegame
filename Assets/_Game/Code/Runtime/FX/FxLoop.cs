@@ -36,7 +36,17 @@ namespace Meridian.FX
 
         void Start()
         {
+            if (sheet == null) sheet = FxSheet.Get(key);
+        }
+
+        /// <summary>U-103: switches the loop to another sheet (the Pilgrim's puff) and takes the current transform scale as the flicker base.</summary>
+        public void SetKey(string newKey)
+        {
+            key = newKey;
             sheet = FxSheet.Get(key);
+            shown = -1;
+            t = 0f;
+            baseScale = transform.localScale;
         }
 
         void Update()

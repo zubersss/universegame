@@ -87,7 +87,7 @@ namespace Meridian.Tests
                     Assert.IsTrue(l.z >= lo - 0.01f && l.z <= hi + 0.01f, $"{region} {l.slot} ({l.key}) at z {l.z:F1} within {lo}..{hi}");
                     seen.Add(l.slot);
                 }
-                Debug.Log($"[MERIDIAN] stage {region}: {slots} slots drawn: {sb}");
+                TestContext.Out.WriteLine($"[MERIDIAN] stage {region}: {slots} slots drawn: {sb}");
                 Assert.GreaterOrEqual(slots, 7, $"{region}: at least 7 distinct slots drawn (placeholders count): {sb}");
             }
             LogAssert.NoUnexpectedReceived();
@@ -111,7 +111,7 @@ namespace Meridian.Tests
                     Assert.IsFalse(side.pois.StampGroundAt(side.terrain.WrapX(x + d), out _), $"piece {key} at x {x} is within 6 m of a POI stamp");
                 Assert.IsTrue(z >= -3f && z <= -1.5f, "foreground depth −3…−1.5");
             }
-            Debug.Log($"[MERIDIAN] foreground around the camp: {placed} pieces in {checkedSlots} slots, none within 6 m of the spawn or a POI");
+            TestContext.Out.WriteLine($"[MERIDIAN] foreground around the camp: {placed} pieces in {checkedSlots} slots, none within 6 m of the spawn or a POI");
             Assert.Greater(placed, 0, "pieces exist away from the camp");
             LogAssert.NoUnexpectedReceived();
         }
@@ -137,7 +137,7 @@ namespace Meridian.Tests
                 if (frames > 5) worst = Mathf.Max(worst, Time.unscaledDeltaTime * 1000f);
                 if (cam.transform.position.x < border && stage.IsSetResident("earth_plains")) residentBeforeArrival = true;
             }
-            Debug.Log($"[MERIDIAN] border crossing: worst frame {worst:F1} ms, plains set resident before arrival {residentBeforeArrival}, region now {stage.Region}, forest set held {stage.IsSetHeld("earth_forest")}");
+            TestContext.Out.WriteLine($"[MERIDIAN] border crossing: worst frame {worst:F1} ms, plains set resident before arrival {residentBeforeArrival}, region now {stage.Region}, forest set held {stage.IsSetHeld("earth_forest")}");
             Assert.Less(worst, 33f, "no hitch > 33 ms at the border");
             Assert.IsTrue(residentBeforeArrival, "the next set was resident before arrival");
             Assert.AreEqual("earth_plains", stage.Region);

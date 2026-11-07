@@ -70,7 +70,10 @@ namespace Meridian.Tests
         {
             var set = RigSet.Parse(ArtJson(), out var error);
             Assert.IsNull(error, error);
-            Assert.AreEqual(7, set.parts.Length, "B-126: seven parts on one sheet");
+            // B-126 drew the snoozle alone (7 parts); B-129 added the five C2 plants to the same sheet (44 parts): the seven stay.
+            Assert.GreaterOrEqual(set.parts.Length, 7, "the snoozle's seven parts on the sheet (B-126), more with the C2 plants (B-129)");
+            foreach (var part in new[] { "head_closed", "head_half", "head_open", "leaves_rest", "leaves_up", "stem_lower", "stem_upper" })
+                Assert.IsTrue(System.Array.Exists(set.parts, p => p.name == part), $"snoozle part {part} on the sheet");
             var plant = set.FindPlant("snoozle");
             Assert.NotNull(plant, "the snoozle (B-126)");
             Assert.AreEqual(4, plant.BoneCount, "root, leaves, stem2, head");

@@ -117,6 +117,10 @@ if ($runProbe) {
             $warn = if ($sum -gt [long]$l.mipBudgetMB) { ' (warn: streamed model maps reduced)' } else { '' }
             $rows += "| Mip streaming $dot $($l.leg) (dev build) | info | non-streaming $($l.nonStreamingMB) MB + desired $($l.desiredMB) MB vs $($l.mipBudgetMB) MB budget$warn | info |"
         }
+        if ($null -ne $l.monoUsedMB) {
+            # U-112 (D-116): the heap and the counts that can grow per visit, per leg (info; the creep row takes their per-visit deltas).
+            $rows += "| Heap $dot $($l.leg) (dev build) | info (U-112): Mono used / heap, native allocated / reserved (unused), Addressable handles held, loaded GameObjects, TMP texts, AudioSources | mono $($l.monoUsedMB) / $($l.monoHeapMB) MB, native $($l.allocMB) / $($l.reservedMB) MB ($($l.unusedReservedMB) unused), handles $($l.handlesHeld), objects $($l.gameObjects), tmp $($l.tmpObjects), audio $($l.audioSources) | info |"
+        }
     }
     # D-114: the boot -> warm Earth delta is the Space scene's resident set (belt, discs, waystations, starfield): its own row, <= 150 MB.
     $warm = $byLeg['Earth (warm)']; $boot = $byLeg['Earth']
@@ -135,14 +139,33 @@ if ($runProbe) {
         if ($null -eq $again -or $null -eq $first) { continue }
         $wsA = if ($again.workingSetMB -gt 0) { [long]$again.workingSetMB } else { [long]$again.systemMB }
         $wsF = if ($first.workingSetMB -gt 0) { [long]$first.workingSetMB } else { [long]$first.systemMB }
-        $rok = ($wsF -gt 0) -and ($wsA -le [long]($wsF * 1.10))
-        $privPart = ''
-        if ($null -ne $again.privateMB -and $null -ne $first.privateMB -and [long]$first.privateMB -gt 0) {
-            $rok = $rok -and ([long]$again.privateMB -le [long]([long]$first.privateMB * 1.10))
-            $privPart = ", private $($again.privateMB) vs $($first.privateMB) MB"
+        # D-116: the row judges private commit; working set is info. Without a private figure (an old probe) it falls back to working set.
+        $hasPriv = ($null -ne $again.privateMB -and $null -ne $first.privateMB -and [long]$first.privateMB -gt 0)
+        if ($hasPriv) {
+            $rok = [long]$again.privateMB -le [long]([long]$first.privateMB * 1.10)
+            $pct = [math]::Round(([double]$again.privateMB / [double]$first.privateMB - 1.0) * 100.0, 1)
+            $measured = "private $($again.privateMB) vs $($first.privateMB) MB ($(if ($pct -ge 0) { '+' })$pct %); working set $wsA vs $wsF MB (info)"
+        } else {
+            $rok = ($wsF -gt 0) -and ($wsA -le [long]($wsF * 1.10))
+            $measured = "working set $wsA vs $wsF MB (no private figure)"
         }
         if (-not $rok) { $memRed = $true }
-        $rows += "| Return $dot $($pair[0]) (dev build) | within 10 % of $($pair[1]) (D-089) | working set $wsA vs $wsF MB$privPart | $(if ($rok) { 'green' } else { 'red' }) |"
+        $rows += "| Return $dot $($pair[0]) (dev build) | private commit within 10 % of $($pair[1]) (D-089 / D-116) | $measured | $(if ($rok) { 'green' } else { 'red' }) |"
+    }
+    # D-116: the per-visit creep, (private at the last leg - private at Earth (warm)) / planet visits after the warm leg; info through C1, a budget row (<= 10 MB) from C2.
+    $warmLeg = $byLeg['Earth (warm)']; $lastLeg = $legs | Select-Object -Last 1
+    if ($null -ne $warmLeg -and $null -ne $lastLeg -and $null -ne $warmLeg.privateMB -and $null -ne $lastLeg.privateMB) {
+        $warmIndex = [array]::IndexOf(@($legs | ForEach-Object { [string]$_.leg }), 'Earth (warm)')
+        $visits = @($legs | Select-Object -Skip ($warmIndex + 1) | Where-Object { [string]$_.leg -notlike 'Space*' }).Count
+        if ($visits -gt 0) {
+            $creep = [math]::Round(([double]$lastLeg.privateMB - [double]$warmLeg.privateMB) / $visits, 1)
+            # U-112: the same delta per visit for the heap counters the probe prints per leg, so the hunt starts from the report.
+            $extra = ''
+            if ($null -ne $warmLeg.monoUsedMB -and $null -ne $lastLeg.monoUsedMB) {
+                $extra = "; per visit: mono $([math]::Round(([double]$lastLeg.monoUsedMB - [double]$warmLeg.monoUsedMB) / $visits, 1)) MB, native allocated $([math]::Round(([double]$lastLeg.allocMB - [double]$warmLeg.allocMB) / $visits, 1)) MB, reserved $([math]::Round(([double]$lastLeg.reservedMB - [double]$warmLeg.reservedMB) / $visits, 1)) MB, handles $([math]::Round(([double]$lastLeg.handlesHeld - [double]$warmLeg.handlesHeld) / $visits, 1)), objects $([math]::Round(([double]$lastLeg.gameObjects - [double]$warmLeg.gameObjects) / $visits, 0)), tmp $([math]::Round(([double]$lastLeg.tmpObjects - [double]$warmLeg.tmpObjects) / $visits, 1)), audio $([math]::Round(([double]$lastLeg.audioSources - [double]$warmLeg.audioSources) / $visits, 1))"
+            }
+            $rows += "| Creep per visit (dev build) | info through C1, $le 10 MB from C2 (D-116): (private at $($lastLeg.leg) $ar private at Earth (warm)) / $visits planet visits | $creep MB per visit (private $($warmLeg.privateMB) $ar $($lastLeg.privateMB) MB)$extra | info |"
+        }
     }
     $mip = $legs | Where-Object { $null -ne $_.mipActive } | Select-Object -First 1
     if ($null -ne $mip) {
@@ -169,7 +192,7 @@ if ($runProbe) {
     } else {
         Set-Content -Path $report -Value (($rows -join "`n") + "`n") -Encoding UTF8 -NoNewline
     }
-    $rows | Where-Object { $_ -like '| Memory*' -or $_ -like '| Residency*' -or $_ -like '| Film*' -or $_ -like '| Planet load*' -or $_ -like '| Transition*' -or $_ -like '| Bundles*' -or $_ -like '| Sprite atlases*' -or $_ -like '| Return*' -or $_ -like '| Mip*' -or $_ -like '| Boot*' } | ForEach-Object { Write-Host $_ }
+    $rows | Where-Object { $_ -like '| Memory*' -or $_ -like '| Residency*' -or $_ -like '| Film*' -or $_ -like '| Planet load*' -or $_ -like '| Transition*' -or $_ -like '| Bundles*' -or $_ -like '| Sprite atlases*' -or $_ -like '| Return*' -or $_ -like '| Mip*' -or $_ -like '| Boot*' -or $_ -like '| Creep*' -or $_ -like '| Heap*' } | ForEach-Object { Write-Host $_ }
 }
 
 if ($SkipGate) { if ($memRed) { Write-Host 'BUILD MEMORY RED'; exit 1 } else { Write-Host 'BUILD MEMORY GREEN'; exit 0 } }

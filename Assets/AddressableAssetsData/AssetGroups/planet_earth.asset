@@ -40,8 +40,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 13e95768f5d36994b9be282380e68945
-    m_Address: creatures/earth/wolf
+  - m_GUID: 138a1143fe4f5044789970e8a27bf8f1
+    m_Address: backgrounds/earth/coast/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 15c50d0d9b20785478b109a8c63ced35
+    m_Address: backgrounds/earth/coast/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 181c8c251d537d04c9ecfc1b131fa63e
+    m_Address: backgrounds/earth/forest
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -85,8 +95,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 39b4eac07bf93ee43a7c6f594a382767
-    m_Address: creatures/earth/stag
+  - m_GUID: 344cf575b08142549bc89344b2ad7695
+    m_Address: terrain/earth/ground_strip_soil
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 35830f12702fb6446b1c5e8ff3c0ad6b
+    m_Address: backgrounds/earth/forest/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 37e234b279732d84094d257c983e9a8b
+    m_Address: creatures/earth/wolf
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -110,6 +130,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5231d4afa4756d4478b86f814ab06356
+    m_Address: creatures/earth/bear
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 604bddbdc95de8d478355c77b488a37b
     m_Address: backgrounds/earth/plains
     m_ReadOnly: 0
@@ -125,6 +150,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 63e1e5ba8555e7e4bb54945380744369
+    m_Address: creatures/earth/wolf/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 64b77ccf7f3695a40a9a3a7d409f1bf0
     m_Address: flora/earth/rigset/json
     m_ReadOnly: 0
@@ -135,8 +165,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 72d4cb47ed01b7f458622749e92e733f
-    m_Address: terrain/earth/ground_strip
+  - m_GUID: 6ca3de721568b514ba1b50571db07a0f
+    m_Address: terrain/earth/ground_strip_stone
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 70b17f6f7135b6f4bb9f8b669ebb073f
+    m_Address: backgrounds/earth/coast/layer1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -147,6 +182,16 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 76bb9c614436b4b41ab771976c4c86c7
     m_Address: backgrounds/earth/plains/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 776d74aa5e717f2459cf79e0cfee4c35
+    m_Address: creatures/earth/bear/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 909800c90eb027b47b63ebf49071d6cf
+    m_Address: backgrounds/earth/forest/layer2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -165,6 +210,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a3468a34c27e26441a47c4f0271773cf
+    m_Address: terrain/earth/ground_strip
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a7fbf5f2adf441042a4e7f67a2ac4e9b
     m_Address: props/earth/launch_tower_ruin
     m_ReadOnly: 0
@@ -175,13 +225,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b5d8e227c977a0f42b786521b6c4ed58
+    m_Address: backgrounds/earth/forest/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c8c957f1ff696b94b868b574e10aa181
+    m_Address: creatures/earth/stag
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cd6cc1d67cd22e847a0085bf204414ac
     m_Address: terrain/earth/sand
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d02fba3882d4e9f48b4d7464a1af668b
-    m_Address: creatures/earth/stag
+  - m_GUID: ce1706036be12064dbaae2edf123e12b
+    m_Address: creatures/earth/stag/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -200,11 +260,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e03b24e3785bba94caff70b43465de90
-    m_Address: creatures/earth/wolf
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e0ac4c0f0bbd26149a10ebd3e1cd78d2
     m_Address: props/earth/archive_terminal
     m_ReadOnly: 0
@@ -212,6 +267,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e72e0bd045d609a46a6c558451807c55
     m_Address: terrain/earth/water
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f0d503a30094ebd4ca1f7dd25b71ca41
+    m_Address: backgrounds/earth/coast
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

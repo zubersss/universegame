@@ -219,7 +219,7 @@ TextureImporter:
   serializedVersion: 13
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 1
+    enableMipMap: 0
     sRGBTexture: 1
     linearTexture: 0
     fadeOut: 0
@@ -235,7 +235,7 @@ TextureImporter:
     normalMapFilter: 0
     flipGreenChannel: 0
   isReadable: 0
-  streamingMipmaps: 1
+  streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
   ignoreMipmapLimit: 0
@@ -247,7 +247,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 2
+    filterMode: 1
     aniso: 2
     mipBias: 0
     wrapU: 1
@@ -256,20 +256,20 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 9
-  spritePivot: {x: 0.5, y: 0.0078125}
-  spritePixelsToUnits: 128
+  spritePivot: {x: 0.5, y: 0}
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
-  alphaIsTransparency: 0
+  alphaIsTransparency: 1
   spriteTessellationMethod: 0
   spriteTessellationDetail: -1
   spriteGeometrySubdivision: -1
-  textureType: 0
+  textureType: 8
   textureShape: 1
   singleChannelComponent: 0
   flipbookRows: 1
@@ -329,11 +329,11 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 1296
-        width: 320
-        height: 320
+        y: 900
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -350,12 +350,12 @@ TextureImporter:
       name: stag_1
       rect:
         serializedVersion: 2
-        x: 324
-        y: 1296
-        width: 320
-        height: 320
+        x: 196
+        y: 900
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -372,12 +372,12 @@ TextureImporter:
       name: stag_2
       rect:
         serializedVersion: 2
-        x: 648
-        y: 1296
-        width: 320
-        height: 320
+        x: 392
+        y: 900
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -394,12 +394,12 @@ TextureImporter:
       name: stag_3
       rect:
         serializedVersion: 2
-        x: 972
-        y: 1296
-        width: 320
-        height: 320
+        x: 588
+        y: 900
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -416,12 +416,12 @@ TextureImporter:
       name: stag_4
       rect:
         serializedVersion: 2
-        x: 1296
-        y: 1296
-        width: 320
-        height: 320
+        x: 784
+        y: 900
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -438,12 +438,12 @@ TextureImporter:
       name: stag_5
       rect:
         serializedVersion: 2
-        x: 1620
-        y: 1296
-        width: 320
-        height: 320
+        x: 980
+        y: 900
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -460,12 +460,12 @@ TextureImporter:
       name: stag_6
       rect:
         serializedVersion: 2
-        x: 0
-        y: 972
-        width: 320
-        height: 320
+        x: 1176
+        y: 900
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -482,12 +482,12 @@ TextureImporter:
       name: stag_7
       rect:
         serializedVersion: 2
-        x: 324
-        y: 972
-        width: 320
-        height: 320
+        x: 1372
+        y: 900
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -504,12 +504,12 @@ TextureImporter:
       name: stag_8
       rect:
         serializedVersion: 2
-        x: 648
-        y: 972
-        width: 320
-        height: 320
+        x: 1568
+        y: 900
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -526,12 +526,12 @@ TextureImporter:
       name: stag_9
       rect:
         serializedVersion: 2
-        x: 972
-        y: 972
-        width: 320
-        height: 320
+        x: 1764
+        y: 900
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -548,12 +548,12 @@ TextureImporter:
       name: stag_10
       rect:
         serializedVersion: 2
-        x: 1296
-        y: 972
-        width: 320
-        height: 320
+        x: 0
+        y: 720
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -570,12 +570,12 @@ TextureImporter:
       name: stag_11
       rect:
         serializedVersion: 2
-        x: 1620
-        y: 972
-        width: 320
-        height: 320
+        x: 196
+        y: 720
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -592,12 +592,12 @@ TextureImporter:
       name: stag_12
       rect:
         serializedVersion: 2
-        x: 0
-        y: 648
-        width: 320
-        height: 320
+        x: 392
+        y: 720
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -614,12 +614,12 @@ TextureImporter:
       name: stag_13
       rect:
         serializedVersion: 2
-        x: 324
-        y: 648
-        width: 320
-        height: 320
+        x: 588
+        y: 720
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -636,12 +636,12 @@ TextureImporter:
       name: stag_14
       rect:
         serializedVersion: 2
-        x: 648
-        y: 648
-        width: 320
-        height: 320
+        x: 784
+        y: 720
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -658,12 +658,12 @@ TextureImporter:
       name: stag_15
       rect:
         serializedVersion: 2
-        x: 972
-        y: 648
-        width: 320
-        height: 320
+        x: 980
+        y: 720
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -680,12 +680,12 @@ TextureImporter:
       name: stag_16
       rect:
         serializedVersion: 2
-        x: 1296
-        y: 648
-        width: 320
-        height: 320
+        x: 1176
+        y: 720
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -702,12 +702,12 @@ TextureImporter:
       name: stag_17
       rect:
         serializedVersion: 2
-        x: 1620
-        y: 648
-        width: 320
-        height: 320
+        x: 1372
+        y: 720
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -724,12 +724,12 @@ TextureImporter:
       name: stag_18
       rect:
         serializedVersion: 2
-        x: 0
-        y: 324
-        width: 320
-        height: 320
+        x: 1568
+        y: 720
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -746,12 +746,12 @@ TextureImporter:
       name: stag_19
       rect:
         serializedVersion: 2
-        x: 324
-        y: 324
-        width: 320
-        height: 320
+        x: 1764
+        y: 720
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -768,12 +768,12 @@ TextureImporter:
       name: stag_20
       rect:
         serializedVersion: 2
-        x: 648
-        y: 324
-        width: 320
-        height: 320
+        x: 0
+        y: 540
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -790,12 +790,12 @@ TextureImporter:
       name: stag_21
       rect:
         serializedVersion: 2
-        x: 972
-        y: 324
-        width: 320
-        height: 320
+        x: 196
+        y: 540
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -812,12 +812,12 @@ TextureImporter:
       name: stag_22
       rect:
         serializedVersion: 2
-        x: 1296
-        y: 324
-        width: 320
-        height: 320
+        x: 392
+        y: 540
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -834,12 +834,12 @@ TextureImporter:
       name: stag_23
       rect:
         serializedVersion: 2
-        x: 1620
-        y: 324
-        width: 320
-        height: 320
+        x: 588
+        y: 540
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -856,12 +856,12 @@ TextureImporter:
       name: stag_24
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 320
-        height: 320
+        x: 784
+        y: 540
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -878,12 +878,12 @@ TextureImporter:
       name: stag_25
       rect:
         serializedVersion: 2
-        x: 324
-        y: 0
-        width: 320
-        height: 320
+        x: 980
+        y: 540
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -900,12 +900,12 @@ TextureImporter:
       name: stag_26
       rect:
         serializedVersion: 2
-        x: 648
-        y: 0
-        width: 320
-        height: 320
+        x: 1176
+        y: 540
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -922,12 +922,12 @@ TextureImporter:
       name: stag_27
       rect:
         serializedVersion: 2
-        x: 972
-        y: 0
-        width: 320
-        height: 320
+        x: 1372
+        y: 540
+        width: 192
+        height: 176
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -936,6 +936,534 @@ TextureImporter:
       bones: []
       spriteID: 736e294412688d048873e67af997927b
       internalID: -606376579
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_28
+      rect:
+        serializedVersion: 2
+        x: 1568
+        y: 540
+        width: 192
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 65cc7e0e2d2093947b4b7b7cebd077b1
+      internalID: -217628527
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_29
+      rect:
+        serializedVersion: 2
+        x: 1764
+        y: 540
+        width: 192
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b93c0f4791bda6c4cb6b71e1fedaeb76
+      internalID: -1192763803
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_30
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 360
+        width: 192
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ce160bdffafe2e04a91e8f8ce6c43ee7
+      internalID: 1902647719
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_31
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 360
+        width: 192
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4d87439f196dba948a53f69e534160e3
+      internalID: -1998713968
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_32
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 360
+        width: 192
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 40157da45dac6b147b3ff50fd2554654
+      internalID: 775565503
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_33
+      rect:
+        serializedVersion: 2
+        x: 588
+        y: 360
+        width: 192
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 04da92306f8db6d4bb7ec015ef0b41f9
+      internalID: 449651647
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_34
+      rect:
+        serializedVersion: 2
+        x: 784
+        y: 360
+        width: 192
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 51b577efa826a2f4fa1581a89b879f8e
+      internalID: -1349469175
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_35
+      rect:
+        serializedVersion: 2
+        x: 980
+        y: 360
+        width: 192
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 88e7f761c2f2a1d45a27344cb2efdcec
+      internalID: -124322890
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_36
+      rect:
+        serializedVersion: 2
+        x: 1176
+        y: 360
+        width: 192
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a71c98e56ef15064c979f573e3064f09
+      internalID: 1366236742
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_37
+      rect:
+        serializedVersion: 2
+        x: 1372
+        y: 360
+        width: 192
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 04f785e67f9c5c54184e449d1ff52b6e
+      internalID: -1678742733
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_38
+      rect:
+        serializedVersion: 2
+        x: 1568
+        y: 360
+        width: 192
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0ba88f86da6139943ba4ad2ef2003251
+      internalID: -1268380627
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_39
+      rect:
+        serializedVersion: 2
+        x: 1764
+        y: 360
+        width: 192
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: de8040af3aff8a04282437482005e149
+      internalID: 141317922
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_40
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 180
+        width: 192
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e4f0bb15df1742a45a1119a2a81c10fd
+      internalID: -812605400
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_41
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 180
+        width: 192
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1622a13e604ef274a81bf86fc2704983
+      internalID: 538882957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_42
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 180
+        width: 192
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: af47b4ce958353e4da8a042b344c9488
+      internalID: 621286297
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_43
+      rect:
+        serializedVersion: 2
+        x: 588
+        y: 180
+        width: 192
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4fce3f3e6dd20ab449adc93cac510e09
+      internalID: -1653973044
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_44
+      rect:
+        serializedVersion: 2
+        x: 784
+        y: 180
+        width: 192
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d144badb7028bf649ab67dd598213bb8
+      internalID: 1595117578
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_45
+      rect:
+        serializedVersion: 2
+        x: 980
+        y: 180
+        width: 192
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fbc3bb71a4666254693e2883881d3c65
+      internalID: -531215201
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_46
+      rect:
+        serializedVersion: 2
+        x: 1176
+        y: 180
+        width: 192
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dabf8f2cb09b2344cbe9c3d16d94b535
+      internalID: -313461896
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_47
+      rect:
+        serializedVersion: 2
+        x: 1372
+        y: 180
+        width: 192
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 89ba1692461f2814cb7877070d965abc
+      internalID: 1985523584
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_48
+      rect:
+        serializedVersion: 2
+        x: 1568
+        y: 180
+        width: 192
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 712174fe524ad694c9f3df9c0d891310
+      internalID: -2016352910
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_49
+      rect:
+        serializedVersion: 2
+        x: 1764
+        y: 180
+        width: 192
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d194a3cab13c10b4bbb16fd4b43e4569
+      internalID: 2056827142
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_50
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 192
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 60cd9d6fc0d3a4a46a6298fa72afc1c4
+      internalID: 1118221547
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stag_51
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 0
+        width: 192
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4dcce8e44be16a44fb03f4bd701d57a8
+      internalID: 764685124
       vertices: []
       indices: 
       edges: []
@@ -950,9 +1478,7 @@ TextureImporter:
     indices: 
     edges: []
     weights: []
-    secondaryTextures:
-    - texture: {fileID: 2800000, guid: e1e2cbb0622da544cbfb62b1c7474cb4, type: 3}
-      name: _NormalMap
+    secondaryTextures: []
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
@@ -977,9 +1503,33 @@ TextureImporter:
       stag_25: -50307776
       stag_26: 895349269
       stag_27: -606376579
+      stag_28: -217628527
+      stag_29: -1192763803
       stag_3: 1834728130
+      stag_30: 1902647719
+      stag_31: -1998713968
+      stag_32: 775565503
+      stag_33: 449651647
+      stag_34: -1349469175
+      stag_35: -124322890
+      stag_36: 1366236742
+      stag_37: -1678742733
+      stag_38: -1268380627
+      stag_39: 141317922
       stag_4: 2064094944
+      stag_40: -812605400
+      stag_41: 538882957
+      stag_42: 621286297
+      stag_43: -1653973044
+      stag_44: 1595117578
+      stag_45: -531215201
+      stag_46: -313461896
+      stag_47: 1985523584
+      stag_48: -2016352910
+      stag_49: 2056827142
       stag_5: -1381035038
+      stag_50: 1118221547
+      stag_51: 764685124
       stag_6: 1783873045
       stag_7: -115818189
       stag_8: -1106625752

@@ -176,6 +176,26 @@ namespace Meridian.Tests
             view.ship = s;
             view.target = viewGo.AddComponent<SpriteRenderer>();
             float timeout = Time.realtimeSinceStartup + 10f;
+            while (view.Probing && Time.realtimeSinceStartup < timeout) yield return null;
+            if (view.UsesRig)
+            {
+                // U-103 (D-111): the drawn rig replaces the two sprites; the fins are the legs, always drawn, flexed on touchdown.
+                while (!view.RigReady && Time.realtimeSinceStartup < timeout) yield return null;
+                Assert.IsTrue(view.RigReady, "ships/pilgrim/rig built");
+                Assert.AreEqual(6, view.Rig.Bones.Length, "pilgrim_side has six bones");
+                Assert.AreEqual(-SideShip.SkidDrop, view.Rig.Root.localPosition.y, 1e-4f, "the rig origin sits on the skid line");
+                Assert.AreEqual(new Vector2(0f, 0.85f), view.Rig.Socket("tail_exhaust", Vector2.zero), "tail_exhaust socket from the json");
+                Assert.AreEqual(ShipLegsView.FinWobble, view.Rig.Playing, "fins wobble in flight");
+                Assert.IsFalse(view.target.enabled, "the legacy sprite renderer is off");
+                yield return new WaitForFixedUpdate(); yield return null;
+                Assert.Greater(s.AltitudeAboveGround, 10f);
+                Assert.IsFalse(view.ShowingLegs, "above 10 m: LegsDeployed false");
+                for (int i = 0; i < 400 && s.AltitudeAboveGround > 10f; i++) yield return new WaitForFixedUpdate();
+                yield return null;
+                Assert.IsTrue(view.ShowingLegs, "at or below 10 m: LegsDeployed true");
+                LogAssert.NoUnexpectedReceived();
+                yield break;
+            }
             while ((view.Retracted == null || view.Deployed == null) && Time.realtimeSinceStartup < timeout) yield return null;
             Assert.NotNull(view.Retracted, "ships/pilgrim/side loaded");
             Assert.NotNull(view.Deployed, "ships/pilgrim/side_legs loaded");

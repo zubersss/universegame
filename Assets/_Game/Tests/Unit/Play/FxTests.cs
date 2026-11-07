@@ -87,12 +87,23 @@ namespace Meridian.Tests
             side.ship.externalInput = true;
             side.ship.intent.thrust = 1f;
             for (int i = 0; i < 3; i++) yield return null;
-            Assert.IsTrue(fx.Main.active && fx.PodFore.active && fx.PodAft.active, "main engine and both pods while thrusting");
-            Assert.IsTrue(fx.PodFore.target.enabled, "drawn");
-            Assert.AreSame(ArtMaterials.Active.litEmissive, fx.PodFore.target.sharedMaterial, "flames glow (emissive)");
-            side.ship.intent.thrust = 0f;
+            // U-107: the main engine burns with the throttle; the two attitude puffs fire only while tilting in flight (ShipFx).
+            Assert.IsTrue(fx.Main.active, "main engine while thrusting");
+            Assert.IsFalse(fx.PodFore.active || fx.PodAft.active, "no attitude puffs without a tilt");
+            // The flame draws once its sheet is in: on the drawn Pilgrim (U-103) the loops moved to the puff sheet at the tail socket.
+            float until = Time.realtimeSinceStartup + 8f;
+            while (!fx.Main.target.enabled && Time.realtimeSinceStartup < until) yield return null;
+            Assert.IsTrue(fx.Main.target.enabled, "drawn");
+            if (fx.OnRig) Assert.AreEqual(ArtKeys.Ships.PilgrimPuff, fx.Main.key, "the puff loop hangs from the tail_exhaust socket (U-103)");
+            else Assert.AreSame(ArtMaterials.Active.litEmissive, fx.Main.target.sharedMaterial, "flames glow (emissive)");
+            // Tilting in the climb: both attitude puffs.
+            side.ship.intent.lateral = 1f;
+            until = Time.realtimeSinceStartup + 8f;
+            while (!(fx.PodFore.active && fx.PodAft.active) && Time.realtimeSinceStartup < until) yield return new WaitForFixedUpdate();
+            Assert.IsTrue(fx.PodFore.active && fx.PodAft.active, "both attitude puffs while tilting off the pad");
+            side.ship.intent = default;
             for (int i = 0; i < 3; i++) yield return null;
-            Assert.IsFalse(fx.PodFore.active, "off with the throttle");
+            Assert.IsFalse(fx.Main.active || fx.PodFore.active, "off with the throttle");
             LogAssert.NoUnexpectedReceived();
         }
     }

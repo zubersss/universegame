@@ -29,6 +29,9 @@ namespace Meridian.Art
             public const string PilgrimSideLegs = "ships/pilgrim/side_legs";
             /// <summary>U-076: the Pilgrim's 3D model (B-079), centre-of-mass origin.</summary>
             public const string PilgrimModel = "ships/pilgrim/base";
+            /// <summary>U-103 (B-122, D-111): the drawn Pilgrim rig (parts sheet + json with the side and top plants) and its exhaust puff loop.</summary>
+            public const string PilgrimRig = "ships/pilgrim/rig";
+            public const string PilgrimPuff = "ships/pilgrim/puff";
         }
 
         public static class Terrain

@@ -49,7 +49,7 @@ namespace Meridian.Tests
                 travel = Mathf.Max(travel, Mathf.Abs(cam.transform.position.y - y0));
             }
             for (int i = 0; i < 10; i++) { yield return null; travel = Mathf.Max(travel, Mathf.Abs(cam.transform.position.y - y0)); }
-            Debug.Log($"[MERIDIAN] stage camera: jump {peak - start:F2} m, camera y moved {travel:F3} m, rotation {cam.transform.rotation.eulerAngles}");
+            TestContext.Out.WriteLine($"[MERIDIAN] stage camera: jump {peak - start:F2} m, camera y moved {travel:F3} m, rotation {cam.transform.rotation.eulerAngles}");
             Assert.Greater(peak - start, 1.5f, "a real jump");
             Assert.AreEqual(0f, travel, 0.01f, "camera y unchanged by the jump");
             Assert.AreEqual(Quaternion.identity, cam.transform.rotation, "the camera never rotates");

@@ -54,6 +54,7 @@ namespace Meridian.Space
         void Awake()
         {
             if (externalInput) return;
+            if (GetComponent<ShipTopView>() == null) gameObject.AddComponent<ShipTopView>(); // U-103: the drawn top-down Pilgrim when the rig is in the catalog
             if (actions == null) actions = MeridianInput.Build();
             var map = actions.FindActionMap(MeridianInput.ShipTop, true);
             thrustA = map.FindAction("Thrust"); retroA = map.FindAction("Retro");
@@ -112,12 +113,21 @@ namespace Meridian.Space
         Transform view;
         float viewBase = 1f;
         Vector3 viewApplied;
+        ShipTopView topView;
 
         void LateUpdate()
         {
+            Squash.Step(!Destroyed && intent.thrust > 0.05f, Time.deltaTime);
+            if (topView == null) topView = GetComponent<ShipTopView>();
+            if (topView != null && topView.RigReady)
+            {
+                // U-103: the rig root carries the fit scale and the stretch along the nose (its local x).
+                float s = topView.FitScale;
+                topView.Rig.Root.localScale = new Vector3(s * Squash.Along, s * Squash.Across, 1f);
+                return;
+            }
             if (view == null) { view = transform.Find("View"); if (view == null) return; viewApplied = view.localScale; viewBase = view.localScale.x; }
             if (view.localScale != viewApplied) viewBase = view.localScale.x; // the sprite loader re-fitted the width: take the new base
-            Squash.Step(!Destroyed && intent.thrust > 0.05f, Time.deltaTime);
             viewApplied = new Vector3(viewBase * Squash.Along, viewBase * Squash.Across, 1f);
             view.localScale = viewApplied;
         }

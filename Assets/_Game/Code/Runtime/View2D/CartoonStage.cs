@@ -27,6 +27,8 @@ namespace Meridian.View2D
         public const int GullCount = 1;
 
         public ParallaxLayers Layers { get; private set; }
+        /// <summary>U-109: the sky above the painted layers (the gradient to space black and the starfield over the last third of the climb).</summary>
+        public ClimbSky Sky { get; private set; }
         /// <summary>U-097: the planet's rigged flora (placeholder set until B-112).</summary>
         public Meridian.Flora.FloraRigs Flora { get; private set; }
         /// <summary>U-100: the cartoon ground placeholder over the block faces.</summary>
@@ -45,7 +47,7 @@ namespace Meridian.View2D
             SetActive(side.stage, !Active, side);
             SetActive(side.depthBands, !Active, side);
             SetActive(side.backdrop, !Active, side);
-            if (!Active) { if (Layers != null) Layers.gameObject.SetActive(false); return; }
+            if (!Active) { if (Layers != null) Layers.gameObject.SetActive(false); if (Sky != null) Sky.gameObject.SetActive(false); return; }
 
             var cam = side.sideCamera;
             var follow = cam != null ? cam.GetComponent<CameraFollow>() : null;
@@ -64,6 +66,11 @@ namespace Meridian.View2D
             Layers.gameObject.SetActive(true);
             Layers.view = cam;
             Layers.ConfigureFor(config.id.ToString().ToLowerInvariant(), EarthScene, surfaceDatum);
+            // U-109: the climb sky behind the painted layers, measured against layer0's top edge every frame.
+            if (Sky == null) { var sgo = new GameObject("CartoonClimbSky"); sgo.transform.SetParent(transform, false); Sky = sgo.AddComponent<ClimbSky>(); }
+            Sky.gameObject.SetActive(true);
+            Sky.view = cam; Sky.layers = Layers;
+            Sky.ConfigureFor(config, surfaceDatum);
             if (Flora == null) { var fgo = new GameObject("CartoonFlora"); fgo.transform.SetParent(transform, false); Flora = fgo.AddComponent<Meridian.Flora.FloraRigs>(); }
             Flora.view = cam; Flora.player = side.player != null ? side.player.transform : null; Flora.terrain = side.terrain;
             Flora.Reserved = 1 + GullCount; // the surveyor and the critters (Bible §9.6: ≤ 40 animated objects in all)

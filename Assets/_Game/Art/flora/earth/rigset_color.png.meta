@@ -145,8 +145,8 @@ TextureImporter:
       name: stem_lower
       rect:
         serializedVersion: 2
-        x: 88
-        y: 36
+        x: 452
+        y: 92
         width: 24
         height: 48
       alignment: 9
@@ -167,7 +167,7 @@ TextureImporter:
       name: stem_upper
       rect:
         serializedVersion: 2
-        x: 116
+        x: 156
         y: 40
         width: 24
         height: 44
@@ -189,7 +189,7 @@ TextureImporter:
       name: head_closed
       rect:
         serializedVersion: 2
-        x: 192
+        x: 400
         y: 52
         width: 24
         height: 32
@@ -211,8 +211,8 @@ TextureImporter:
       name: head_half
       rect:
         serializedVersion: 2
-        x: 0
-        y: 32
+        x: 80
+        y: 88
         width: 32
         height: 52
       alignment: 9
@@ -233,8 +233,8 @@ TextureImporter:
       name: head_open
       rect:
         serializedVersion: 2
-        x: 36
-        y: 36
+        x: 228
+        y: 92
         width: 48
         height: 48
       alignment: 9
@@ -255,8 +255,8 @@ TextureImporter:
       name: leaves_rest
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
+        x: 52
+        y: 4
         width: 64
         height: 28
       alignment: 9
@@ -277,7 +277,7 @@ TextureImporter:
       name: leaves_up
       rect:
         serializedVersion: 2
-        x: 144
+        x: 296
         y: 44
         width: 44
         height: 40
@@ -291,6 +291,820 @@ TextureImporter:
       bones: []
       spriteID: f33c00189a5b6094bb38da6b368ad4c1
       internalID: 1607183158
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: curlfrond_base
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 12
+        width: 32
+        height: 20
+      alignment: 9
+      pivot: {x: 0.484, y: 0.2781}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e0cc80b511b837c488873e56173d14dd
+      internalID: -1080500954
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: curlfrond_c_curled
+      rect:
+        serializedVersion: 2
+        x: 412
+        y: 160
+        width: 40
+        height: 52
+      alignment: 9
+      pivot: {x: 0.3308, y: 0.1716}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6dff4c2a0f0b0a749ab2d05a2b9afa15
+      internalID: 386580673
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: curlfrond_c_half
+      rect:
+        serializedVersion: 2
+        x: 456
+        y: 160
+        width: 44
+        height: 52
+      alignment: 9
+      pivot: {x: 0.3023, y: 0.1716}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4f4f2e1209ce8a64eb0014aa4ec997d9
+      internalID: -758834442
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: curlfrond_c_open
+      rect:
+        serializedVersion: 2
+        x: 24
+        y: 148
+        width: 48
+        height: 64
+      alignment: 9
+      pivot: {x: 0.2785, y: 0.1394}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b79138a353aa2f14da5b4c157bddb5d7
+      internalID: -828733228
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: curlfrond_l_curled
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 88
+        width: 36
+        height: 52
+      alignment: 9
+      pivot: {x: 0.4769, y: 0.1704}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5287983347a45984e8cefd323e914971
+      internalID: 1124450032
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: curlfrond_l_open
+      rect:
+        serializedVersion: 2
+        x: 76
+        y: 148
+        width: 36
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5395, y: 0.1383}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f9a04a5d42a5d774d9fb5fb7eaa60bbb
+      internalID: -1286107664
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: curlfrond_r_curled
+      rect:
+        serializedVersion: 2
+        x: 40
+        y: 88
+        width: 36
+        height: 52
+      alignment: 9
+      pivot: {x: 0.4532, y: 0.1706}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9fe9a805bd37621418d9fd3471047637
+      internalID: -1147391828
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: curlfrond_r_open
+      rect:
+        serializedVersion: 2
+        x: 116
+        y: 148
+        width: 36
+        height: 64
+      alignment: 9
+      pivot: {x: 0.4628, y: 0.1385}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: afac7a9a74f24e84e934edcd5cb57a0f
+      internalID: 1572694502
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: nodbell_arch
+      rect:
+        serializedVersion: 2
+        x: 120
+        y: 8
+        width: 44
+        height: 24
+      alignment: 9
+      pivot: {x: 0.2058, y: 0.4305}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 46d26cab59d48e74ea57ba1fda91f99e
+      internalID: -228254358
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: nodbell_bells_hang
+      rect:
+        serializedVersion: 2
+        x: 428
+        y: 52
+        width: 44
+        height: 32
+      alignment: 9
+      pivot: {x: 0.4308, y: 0.7642}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e79abababe18ade40b371c529dffeb52
+      internalID: 733486364
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: nodbell_bells_nod
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 48
+        height: 32
+      alignment: 9
+      pivot: {x: 0.337, y: 0.7842}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 82fb95a7a3a3da346856779c65643517
+      internalID: 486175178
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: nodbell_stem_lower
+      rect:
+        serializedVersion: 2
+        x: 280
+        y: 92
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5085, y: 0.1626}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 651ca6651074da949bfcbeaca7cc4c6b
+      internalID: 2028443032
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: nodbell_stem_upper
+      rect:
+        serializedVersion: 2
+        x: 312
+        y: 156
+        width: 36
+        height: 56
+      alignment: 9
+      pivot: {x: 0.2165, y: 0.1734}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8b4bc399997e8ca4ea96d283521462a4
+      internalID: -846540510
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shiverbarrel_body
+      rect:
+        serializedVersion: 2
+        x: 116
+        y: 88
+        width: 52
+        height: 52
+      alignment: 9
+      pivot: {x: 0.4971, y: 0.0824}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e607cc8596f25694db235716ca0ef105
+      internalID: -2132584998
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shiverbarrel_body_shiver_a
+      rect:
+        serializedVersion: 2
+        x: 332
+        y: 92
+        width: 56
+        height: 48
+      alignment: 9
+      pivot: {x: 0.4968, y: 0.0758}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2454d02bd36f8c9458a007cddf7bf07f
+      internalID: 2091483
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shiverbarrel_body_shiver_b
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 92
+        width: 56
+        height: 48
+      alignment: 9
+      pivot: {x: 0.4991, y: 0.0758}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1548d9d744301934f91b713f7532d847
+      internalID: -890162171
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shiverbarrel_crown_half
+      rect:
+        serializedVersion: 2
+        x: 300
+        y: 12
+        width: 28
+        height: 20
+      alignment: 9
+      pivot: {x: 0.4476, y: 0.2141}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 97f89ccf2c8647c469bdfeddfa18faaa
+      internalID: -519572890
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shiverbarrel_crown_open
+      rect:
+        serializedVersion: 2
+        x: 168
+        y: 8
+        width: 36
+        height: 24
+      alignment: 9
+      pivot: {x: 0.4614, y: 0.1784}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: af94a6a1a27b10b44b79fb76ea3a5f94
+      internalID: -922135502
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thriftcushion_cushion
+      rect:
+        serializedVersion: 2
+        x: 208
+        y: 8
+        width: 52
+        height: 24
+      alignment: 9
+      pivot: {x: 0.4841, y: 0.2318}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8df2873e40a03584d8579985acdb7634
+      internalID: 930261255
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thriftcushion_pom_a
+      rect:
+        serializedVersion: 2
+        x: 344
+        y: 44
+        width: 24
+        height: 40
+      alignment: 9
+      pivot: {x: 0.4316, y: 0.1871}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4f26f7aeb240a7f458323cedbb41a7b9
+      internalID: -1312101643
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thriftcushion_pom_a_up
+      rect:
+        serializedVersion: 2
+        x: 480
+        y: 92
+        width: 24
+        height: 48
+      alignment: 9
+      pivot: {x: 0.4316, y: 0.1559}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a3ecd26ccd410744c965c2ffcdb60052
+      internalID: -1892859234
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thriftcushion_pom_b
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 36
+        width: 24
+        height: 48
+      alignment: 9
+      pivot: {x: 0.3628, y: 0.1559}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6bb349f427f149242af6921899ed14ea
+      internalID: 1895571967
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thriftcushion_pom_b_up
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 156
+        width: 24
+        height: 56
+      alignment: 9
+      pivot: {x: 0.3628, y: 0.1336}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 52013d6ca194fe749b803fd6d1729d0f
+      internalID: 1640472659
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thriftcushion_pom_c
+      rect:
+        serializedVersion: 2
+        x: 184
+        y: 40
+        width: 24
+        height: 44
+      alignment: 9
+      pivot: {x: 0.5177, y: 0.1701}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 57d694a198aa7ca45bd6e98c84086f42
+      internalID: 1407064705
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thriftcushion_pom_c_up
+      rect:
+        serializedVersion: 2
+        x: 172
+        y: 88
+        width: 24
+        height: 52
+      alignment: 9
+      pivot: {x: 0.5177, y: 0.1439}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c43fd7ceebfb41a4098912af69c70df4
+      internalID: 1388076788
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thriftcushion_pom_d
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 88
+        width: 24
+        height: 52
+      alignment: 9
+      pivot: {x: 0.4214, y: 0.1439}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0129c6e7c41d3354a86e6e832a46f557
+      internalID: 313192588
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thriftcushion_pom_d_up
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 152
+        width: 24
+        height: 60
+      alignment: 9
+      pivot: {x: 0.4214, y: 0.1247}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 61d4d6200cc67844ca5d5f25b45a5adf
+      internalID: -1331864151
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thriftcushion_pom_e
+      rect:
+        serializedVersion: 2
+        x: 372
+        y: 44
+        width: 24
+        height: 40
+      alignment: 9
+      pivot: {x: 0.3377, y: 0.1871}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8928008dfbcd533419d4ed1e4876b39d
+      internalID: -57234618
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thriftcushion_pom_e_up
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 36
+        width: 24
+        height: 48
+      alignment: 9
+      pivot: {x: 0.3377, y: 0.1559}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c7a14e4eb42cdbc47a310de17105e62b
+      internalID: -917412517
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiptuft_clump
+      rect:
+        serializedVersion: 2
+        x: 156
+        y: 148
+        width: 60
+        height: 64
+      alignment: 9
+      pivot: {x: 0.4492, y: 0.1069}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4e416cf0d27242149b751d04091e940f
+      internalID: 1500024892
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiptuft_clump_flat
+      rect:
+        serializedVersion: 2
+        x: 56
+        y: 36
+        width: 96
+        height: 48
+      alignment: 9
+      pivot: {x: 0.4432, y: 0.1426}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6bec8268bacf4594888056afc73f04c1
+      internalID: 1570975545
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiptuft_whip_a
+      rect:
+        serializedVersion: 2
+        x: 284
+        y: 152
+        width: 24
+        height: 60
+      alignment: 9
+      pivot: {x: 0.6595, y: 0.114}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 143ba3c91ef232a439270a294ea384cb
+      internalID: -375424121
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiptuft_whip_a_flat
+      rect:
+        serializedVersion: 2
+        x: 212
+        y: 40
+        width: 32
+        height: 44
+      alignment: 9
+      pivot: {x: 0.7943, y: 0.1555}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bd8617c0e1792c7408f26bf4eddc2b34
+      internalID: -1386879881
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiptuft_whip_b
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 144
+        width: 20
+        height: 68
+      alignment: 9
+      pivot: {x: 0.3613, y: 0.1006}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 77f798af319302042b7defd6c4f3019f
+      internalID: -1450666290
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiptuft_whip_b_flat
+      rect:
+        serializedVersion: 2
+        x: 380
+        y: 156
+        width: 28
+        height: 56
+      alignment: 9
+      pivot: {x: 0.2581, y: 0.1222}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ee232d8ab4ba4e54ab9f38ec8aba7566
+      internalID: 959347599
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiptuft_whip_c
+      rect:
+        serializedVersion: 2
+        x: 220
+        y: 148
+        width: 32
+        height: 64
+      alignment: 9
+      pivot: {x: 0.2258, y: 0.1069}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0217402a0d9e48748bbef28b88b1fd37
+      internalID: 272959712
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: whiptuft_whip_c_flat
+      rect:
+        serializedVersion: 2
+        x: 248
+        y: 40
+        width: 44
+        height: 44
+      alignment: 9
+      pivot: {x: 0.1642, y: 0.1555}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0e4b2a013ce606747883bafa98f1fd98
+      internalID: -460075063
       vertices: []
       indices: 
       edges: []
@@ -309,13 +1123,50 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
+      curlfrond_base: -1080500954
+      curlfrond_c_curled: 386580673
+      curlfrond_c_half: -758834442
+      curlfrond_c_open: -828733228
+      curlfrond_l_curled: 1124450032
+      curlfrond_l_open: -1286107664
+      curlfrond_r_curled: -1147391828
+      curlfrond_r_open: 1572694502
       head_closed: -1162006248
       head_half: -174249104
       head_open: 146938737
       leaves_rest: -269791822
       leaves_up: 1607183158
+      nodbell_arch: -228254358
+      nodbell_bells_hang: 733486364
+      nodbell_bells_nod: 486175178
+      nodbell_stem_lower: 2028443032
+      nodbell_stem_upper: -846540510
+      shiverbarrel_body: -2132584998
+      shiverbarrel_body_shiver_a: 2091483
+      shiverbarrel_body_shiver_b: -890162171
+      shiverbarrel_crown_half: -519572890
+      shiverbarrel_crown_open: -922135502
       stem_lower: -998777636
       stem_upper: 1373968744
+      thriftcushion_cushion: 930261255
+      thriftcushion_pom_a: -1312101643
+      thriftcushion_pom_a_up: -1892859234
+      thriftcushion_pom_b: 1895571967
+      thriftcushion_pom_b_up: 1640472659
+      thriftcushion_pom_c: 1407064705
+      thriftcushion_pom_c_up: 1388076788
+      thriftcushion_pom_d: 313192588
+      thriftcushion_pom_d_up: -1331864151
+      thriftcushion_pom_e: -57234618
+      thriftcushion_pom_e_up: -917412517
+      whiptuft_clump: 1500024892
+      whiptuft_clump_flat: 1570975545
+      whiptuft_whip_a: -375424121
+      whiptuft_whip_a_flat: -1386879881
+      whiptuft_whip_b: -1450666290
+      whiptuft_whip_b_flat: 959347599
+      whiptuft_whip_c: 272959712
+      whiptuft_whip_c_flat: -460075063
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

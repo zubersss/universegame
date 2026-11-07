@@ -38,11 +38,10 @@ namespace Meridian.Tests
 
             var legs = side.ship.GetComponentInChildren<ShipLegsView>();
             Assert.NotNull(legs, "ship legs view");
-            Assert.NotNull(legs.Model, "the Pilgrim has a model swap");
             float until = Time.realtimeSinceStartup + 30f;
             while (Time.realtimeSinceStartup < until)
             {
-                bool all = legs.Model.Ready && side.depthBands != null && side.depthBands.RidgeReady && side.depthBands.SkylineReady;
+                bool all = legs.Ready && side.depthBands != null && side.depthBands.RidgeReady && side.depthBands.SkylineReady;
                 foreach (var s in side.pois.ModelSwaps) all &= s.Ready;
                 if (all) break;
                 yield return null;
@@ -64,14 +63,23 @@ namespace Meridian.Tests
             float padTop = padBox.bounds.max.y;
             var padBounds = ModelSwap.ModelBounds(pad.Views[0].Instance);
             Assert.AreEqual(padTop, pad.transform.position.y + padBounds.max.y, 0.05f, "collider top = the module's deck");
-            Assert.IsTrue(legs.Model.Ready, "Pilgrim model loaded");
-            var shipB = ModelSwap.ModelBounds(legs.Model.Views[0].Instance);
-            // U-107: the level stand-in hull stands on its stern (rotated 90°), so take the lowest corner in world space.
             float skidLine = float.MaxValue;
-            for (int k = 0; k < 8; k++)
+            if (legs.UsesRig)
             {
-                var corner = shipB.center + Vector3.Scale(shipB.extents, new Vector3((k & 1) == 0 ? -1 : 1, (k & 2) == 0 ? -1 : 1, (k & 4) == 0 ? -1 : 1));
-                skidLine = Mathf.Min(skidLine, legs.Model.Views[0].Instance.transform.TransformPoint(corner).y);
+                // U-103 (D-111): the drawn rig's origin is the ground line under the pads.
+                Assert.IsTrue(legs.RigReady, "Pilgrim rig built");
+                skidLine = legs.Rig.Root.position.y;
+            }
+            else
+            {
+                Assert.IsTrue(legs.Model.Ready, "Pilgrim model loaded");
+                var shipB = ModelSwap.ModelBounds(legs.Model.Views[0].Instance);
+                // U-107: the level stand-in hull stands on its stern (rotated 90°), so take the lowest corner in world space.
+                for (int k = 0; k < 8; k++)
+                {
+                    var corner = shipB.center + Vector3.Scale(shipB.extents, new Vector3((k & 1) == 0 ? -1 : 1, (k & 2) == 0 ? -1 : 1, (k & 4) == 0 ? -1 : 1));
+                    skidLine = Mathf.Min(skidLine, legs.Model.Views[0].Instance.transform.TransformPoint(corner).y);
+                }
             }
             Assert.AreEqual(side.ship.Body.position.y - SideShip.SkidDrop, skidLine, 0.05f, "the model's lowest point is on the skid line");
             Assert.AreEqual(padTop, skidLine, 0.15f, "skids on the pad");
