@@ -5,7 +5,7 @@ removed on export; the .meta files are UNITY's). Sizes follow the build grid (1 
 
   props/common/aerostat_deck        128x64   a 2 m deck module: wooden planks on a steel truss; tiles in x
   props/common/aerostat_strut       64x128   a 1 x 2 m riveted lattice strut; tiles in y (stacked struts)
-  props/common/aerostat_cell        72x136   a lift cell: a cream gasbag in a brass cage with netting and a teal valve;
+  props/common/aerostat_cell        72x152   a lift cell: a cream gasbag in a brass cage with netting and a teal valve;
                                              breathe 4 (a gentle swell, loops)
   props/common/float_cell_pack_mk1  72x88    a backpack float cell: one cream canister on a brass frame (v2 frame + pivot)
   props/common/float_cell_pack_mk2  72x88    two canisters, teal trim
@@ -111,27 +111,29 @@ def float_pack(d, M, mk):
 
 
 def grapple_hook(d, M, k=0):
-    """Three rounded prongs (no points) on a steel shank, a rope eye on the left at the origin."""
+    """Three rounded prongs (no points) on a steel shank, a rope eye on the left at the origin; drawn 0.9x so it fits its
+    76x52 frame at the v2 pivot, the prongs wide enough for the steel to show at 1x."""
+    d = G.Xf(d, lambda pts: [(x * 0.9, z * 0.9) for x, z in pts])
     G.stroke(d, G.lumpy_ellipse(0.0, 0.0, 0.07, 0.06, n=14, seed=80), M["steel"], O, cyclic=True)        # the eye
     G.stroke(d, G.lumpy_ellipse(0.0, 0.0, 0.03, 0.025, n=10, seed=81), M["hole"], 0.0, cyclic=True)
-    G.stroke(d, G.hose_outline([(0.06, 0.0), (0.62, 0.0)], 0.045), M["steel"], O, cyclic=True)           # the shank
+    G.stroke(d, G.hose_outline([(0.06, 0.0), (0.62, 0.0)], 0.06), M["steel"], O, cyclic=True)            # the shank
     G.stroke(d, G.hose_outline([(0.08, -0.02), (0.6, -0.02)], 0.015), M["steel_sh"], 0.0, cyclic=True)
     for sg, a0 in ((1, 0.0), (-1, 0.0), (0, 0.0)):                                                       # the prongs, curling back
         if sg == 0:
             pts = [(0.62, 0.0), (0.84, 0.0), (0.9, 0.0)]
         else:
             pts = G.bezier((0.6, 0.0), (0.78, sg * 0.30), (0.62, sg * 0.30), n=8)
-        G.stroke(d, G.hose_outline(pts, 0.035), M["steel"], O, cyclic=True)
+        G.stroke(d, G.hose_outline(pts, 0.05), M["steel"], O, cyclic=True)
         tip = pts[-1]
         G.stroke(d, G.lumpy_ellipse(tip[0], tip[1], 0.04, 0.04, n=10, seed=82 + sg), M["steel"], I, cyclic=True)   # a round tip
-    G.stroke(d, G.hose_outline([(-0.06, 0.0), (-0.26, -0.03)], 0.02), M["wood"], I, cyclic=True)        # a stub of rope
+    G.stroke(d, G.hose_outline([(-0.06, 0.0), (-0.10, -0.01)], 0.02), M["wood"], I, cyclic=True)        # a stub of rope
     G.rivets(d, [(0.4, 0.0)], M["ink"])
 
 
 PROPS = {   # name: (fn, fw, fh, clip, frames, tiles, pivot)
     "aerostat_deck": (aerostat_deck, 128, 64, None, 1, True, (0.5, 0.0)),
     "aerostat_strut": (aerostat_strut, 64, 128, None, 1, False, (0.5, 0.0)),
-    "aerostat_cell": (aerostat_cell, 72, 136, "breathe", 4, False, (0.5, 0.0)),
+    "aerostat_cell": (aerostat_cell, 72, 152, "breathe", 4, False, (0.5, 0.0)),
     "float_cell_pack_mk1": (lambda d, M, k=0: float_pack(d, M, 1), 72, 88, None, 1, False, (0.5, 0.113636)),
     "float_cell_pack_mk2": (lambda d, M, k=0: float_pack(d, M, 2), 72, 88, None, 1, False, (0.5, 0.113636)),
     "grapple_hook": (grapple_hook, 76, 52, None, 1, False, (0.157895, 0.5)),
@@ -240,7 +242,7 @@ def main(out, imgs=None, widths=None, stamp_paths=()):
     review._label(head, "b-156 the giants' aerostat kit (d-137): earth palette, the camp set's look; replaces the v2 models under the same keys", 6, 8)
     rows.append(head)
     bg = np.array(v3.hex_rgb(v3.PALETTES["jupiter"]["sky"]), np.float32) / 255
-    r = np.tile(bg, (2 * 136 + 50, W, 1))
+    r = np.tile(bg, (2 * max(spec[2] for spec in PROPS.values()) + 50, W, 1))
     x = 10
     allw, notes = [], []
     for name in PROPS:
