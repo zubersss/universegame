@@ -154,6 +154,14 @@ namespace Meridian.Planet.POI
             return top;
         }
 
+        [System.Serializable] sealed class StandJson { public int top_row = -1; }
+        /// <summary>B-168: a prop json's standing row ("top_row", pixels below the sprite rect's top); -1 when absent or unreadable. Pure.</summary>
+        public static int StandRow(string json)
+        {
+            if (string.IsNullOrEmpty(json) || !json.Contains("\"top_row\"")) return -1;
+            try { return JsonUtility.FromJson<StandJson>(json).top_row; } catch (System.ArgumentException) { return -1; }
+        }
+
         void LoadArt(SpriteRenderer sr, string key, Vector2 declared, int topRow = 0)
         {
             float width = declared.x;
@@ -163,12 +171,44 @@ namespace Meridian.Planet.POI
                 bool exists = l.Status == AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0;
                 global::Meridian.Art.ArtLoad.Release(l);
                 if (!exists || sr == null) return;
+                // B-168 (LEAD 17:2x): a v3 deck carries its own standing row ("top_row", rows at the sprite's 64 px/m); the catalog's topRow was
+                // counted on the 128 px/m v2 card. Read it before the collider is laid; the catalog's stays the fallback.
+                int rows = topRow;
+                Sprite pick = null;
+                void Lay()
+                {
+                    if (sr == null || pick == null || !colliderOf.TryGetValue(sr, out var box2d) || box2d == null) return;
+                    var b = sr.bounds;
+                    // The standing surface: `rows` pixels below the top of the sprite rect (studs and rails stay walk-through).
+                    float rectTop = sr.transform.TransformPoint(new Vector3(0f, (pick.rect.height - pick.pivot.y) / pick.pixelsPerUnit, 0f)).y;
+                    float top = rows > 0 ? rectTop - rows / pick.pixelsPerUnit * sr.transform.lossyScale.y : b.max.y;
+                    box2d.transform.position = new Vector3(b.center.x, (b.min.y + top) * 0.5f, 0f);
+                    box2d.size = new Vector2(b.size.x, top - b.min.y);
+                }
+                if (topRow > 0)
+                {
+                    var jl = Addressables.LoadResourceLocationsAsync(key + "/json", typeof(TextAsset));
+                    jl.Completed += jloc =>
+                    {
+                        bool jsonThere = jloc.Status == AsyncOperationStatus.Succeeded && jloc.Result != null && jloc.Result.Count > 0;
+                        global::Meridian.Art.ArtLoad.Release(jloc);
+                        if (!jsonThere || sr == null) return;
+                        var jh = ArtLoad.Asset<TextAsset>(key + "/json");
+                        handles.Add(jh);
+                        jh.Completed += jop =>
+                        {
+                            if (jop.Status != AsyncOperationStatus.Succeeded || jop.Result == null) return;
+                            int own = StandRow(jop.Result.text);
+                            if (own > 0) { rows = own; Lay(); }
+                        };
+                    };
+                }
                 var h = ArtLoad.Asset<IList<Sprite>>(key);
                 handles.Add(h);
                 h.Completed += op =>
                 {
                     if (sr == null || op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;
-                    Sprite pick = op.Result[0];
+                    pick = op.Result[0];
                     foreach (var s in op.Result) if (s.name.EndsWith("_0")) pick = s;
                     sr.sprite = pick;
                     sr.color = Color.white;
@@ -187,15 +227,7 @@ namespace Meridian.Planet.POI
                     }
                     sr.transform.localScale = w > 0f ? Vector3.one * (width / w) : Vector3.one;
                     // A solid prop's collider follows the drawn art (the catalog size is only the placeholder's).
-                    if (colliderOf.TryGetValue(sr, out var box2d) && box2d != null)
-                    {
-                        var b = sr.bounds;
-                        // The standing surface: topRow pixels below the top of the sprite rect (studs and rails stay walk-through).
-                        float rectTop = sr.transform.TransformPoint(new Vector3(0f, (pick.rect.height - pick.pivot.y) / pick.pixelsPerUnit, 0f)).y;
-                        float top = topRow > 0 ? rectTop - topRow / pick.pixelsPerUnit * sr.transform.lossyScale.y : b.max.y;
-                        box2d.transform.position = new Vector3(b.center.x, (b.min.y + top) * 0.5f, 0f);
-                        box2d.size = new Vector2(b.size.x, top - b.min.y);
-                    }
+                    Lay();
                 };
             };
         }

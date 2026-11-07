@@ -76,6 +76,10 @@ namespace Meridian.Tests
             Assert.IsFalse(Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.PressureCrab).HasDen, "the crab walks the open plain");
             Assert.AreEqual("creatures/venus/sulfur_drifter", Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.SulfurDrifter).artKey, "the drifter takes its sheet by key");
             Assert.AreEqual("creatures/venus/acidmoth", Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.Acidmoth).artKey);
+            // B-168: a v3 deck carries its standing row in its json; the catalog's 128 px/m row is only the fallback.
+            Assert.AreEqual(37, Meridian.Planet.POI.PoiPlacer.StandRow("{\"key\":\"props/venus/aerostat_deck\",\"top_row\":37,\"stand_line\":2.14}"));
+            Assert.AreEqual(-1, Meridian.Planet.POI.PoiPlacer.StandRow("{\"key\":\"props/venus/station_hull_a\"}"), "no top_row: the catalog's");
+            Assert.AreEqual(-1, Meridian.Planet.POI.PoiPlacer.StandRow(null));
         }
     }
 }

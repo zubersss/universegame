@@ -83,6 +83,10 @@ namespace Meridian.Tests
             var station = Meridian.Planet.POI.PoiCatalog.MeridianStation;
             float deckTop = station.floatY + Meridian.Planet.POI.PoiCatalog.DeckTop;
             yield return Carry(station.x + station.floatWidth * 0.5f, deckTop + 1f);
+            // B-168: the deck's standing surface stays at floatY + DeckTop whatever the art (the json's top_row on the v3 deck, the catalog row before it).
+            var stand = Physics2D.Raycast(new Vector2(station.x + station.floatWidth * 0.5f, deckTop + 3f), Vector2.down, 6f);
+            Assert.IsNotNull(stand.collider, "the deck is solid under the station");
+            Assert.AreEqual(deckTop, stand.point.y, 0.3f, "the surveyor stands on the deck's surface (LEAD's M3Inner tolerance)");
             yield return WaitScene(CartoonStage.VenusDeckScene, 8f);
             Assert.AreEqual(CartoonStage.VenusDeckScene, stage.Scene, "on the station: the deck set after the crossfade");
             StringAssert.StartsWith("backgrounds/venus/", stage.Layers.SceneKey);
