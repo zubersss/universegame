@@ -1,7 +1,7 @@
 # MERIDIAN — Project Bible (single source of truth)
 
 Owner: LEAD. Workers read; only LEAD edits. Changes are logged in `coordination/DECISIONS.md`.
-Version: 4.1 (D-100..D-104, 2026-11-06: owner C0 feedback: thinner, more detailed ink with two shadow tones; faces only on people and animals; the Pilgrim stands upright; fully manual flight with no launch fuel, control never leaves the player). 4.0 = art direction v4 (D-086..D-091); 3.x = stage and feel (D-076..D-085); 2.x = 3D rehaul (D-062). The Lead bumps the version on every edit.
+Version: 4.1 (D-100..D-105, 2026-11-06: owner C0 feedback: thinner, more detailed ink with two shadow tones; faces only on people and animals; the Pilgrim stands upright; fully manual flight with no fuel of any kind (launch or skip), control never leaves the player). 4.0 = art direction v4 (D-086..D-091); 3.x = stage and feel (D-076..D-085); 2.x = 3D rehaul (D-062). The Lead bumps the version on every edit.
 
 > **v4.1 (owner C0 feedback, D-100..D-104).** Keep the look (watercolour meadow, layered clouds, the surveyor). Ink at half the C0 weight with finer interior detail and a second shadow tone (§9.1, §9.7). Faces only on people and animals: plants, rocks, crates, the ship and the planets have none (§9.3). The Pilgrim is an upright rocket on its tail (§4.3). The player flies the ship by hand from the first second to orbit and back, with no fuel requirement and no moment where control is taken away (§4.3, §5.2, §5.3, §6). Gravity ratios stay exact.
 
@@ -80,7 +80,7 @@ difficulty. Each decode is a story chapter and unlocks one blueprint:
 | Mars    | First beacon: the crew began the Sowing deliberately.              | Perchlorate oxidizer       |
 | Mercury | Flare-scarred log: half the crew died testing heat shielding.      | Solarite capacitor         |
 | Venus   | A floating station still running: the Wardens were built here.     | Float cell Mk1             |
-| Saturn  | A ring-mining rig: they refined skip fuel from helium rain.         | Skip Drive Mk2             |
+| Saturn  | A ring-mining rig: they wound Skip Drive coils from helium-rain condensate. | Skip Drive Mk2             |
 | Uranus  | Diamond-rain ballast logs: the crew split over going on.            | Deep-diamond Rig tip       |
 | Jupiter | Radiation-fried vault: the captain's choice to stay with the Sowing. | Thruster Mk3               |
 | Neptune | *Meridian* itself, alive in the Great Dark Spot, broadcasting.       | Ending choice              |
@@ -134,7 +134,7 @@ wells (R 3–8 units, well 3R) and are not landable. Waystations: Earth orbit (s
 orbit, Belt (Red Hollow black market), Saturn orbit (Halcyon).
 
 **Ship speeds (top-down).** Cruise 80 u/s · Boost 160 u/s (no fuel, D-103) · Skip Drive
-1,200 u/s after a 3 s spool, consumes skip fuel per second, disabled inside a Gravity Well.
+1,200 u/s after a 3 s spool, no fuel (D-105: the spool and a 10 s cool-down after each skip are its only limits), disabled inside a Gravity Well.
 Earth → Mars ≈ 7 s cruise; Earth → Neptune ≈ 13 s skip (layout distance / 1,200 u/s; D-054).
 
 ---
@@ -189,7 +189,7 @@ untouched, and `FeelTests` proves every planet's jump height to ± 1 cm.
 | Squash and stretch (visual root only, volume-preserving: width = 1/√height) | crouch anticipation 0.8 tall over the first 0.06 s of the jump (the body leaves the ground on the input frame; the crouch is drawn over the first frames of the rise, never as an input delay, D-084); take-off stretch 1.25 for the next 0.08 s; landing squash 0.7 at ≥ 6 m/s impact (scaled linearly from 1.0 at 2 m/s) recovering in 0.18 s with one overshoot to 1.05; dash stretch 1.3 along the dash; hit squash 0.85. Colliders, the Rigidbody and gravity never scale |
 | Clip timing | surveyor and apex clips at 60 fps, creatures at 30 fps; every action clip has 2–4 frames of anticipation and an overshoot key on the follow-through; a hit reads within 2 frames |
 
-**Jetpack** (thrust in m/s² while fuel lasts; net lift = thrust − g; recharges in 2 s on ground):
+**Jetpack** (thrust in m/s² while its charge lasts; net lift = thrust − g; recharges in 2 s on ground; a charge, not a fuel, D-105):
 
 | Mark | Thrust | Burn | Mercury | Venus | Earth | Mars  | Jupiter | Saturn | Uranus | Neptune |
 |------|--------|------|---------|-------|-------|-------|---------|--------|--------|---------|
@@ -436,7 +436,7 @@ recovery fee).
   wind pushes 12 m/s and floes spin.
 - **Resources.** Hydrogen, helium, ammonia ice, phosphorus pigments (Red Spot floes),
   **Metallic Hydrogen** (Deep only, forms in pressure "veins" of hardened floe cores —
-  the fuel and conductor for every endgame drive and weapon).
+  the conductor for every endgame drive).
 - **Creatures.** Stormglider (manta floater), Lightning eel (electric, Deck 2), Ballast
   tortoise (huge, slow, a walkable husk when killed), Belt wasp (radiation-adapted swarm,
   Deck 1). **Apex: Vortex Whale** — a 500 m floater living in the Great Red Spot; its song
@@ -454,15 +454,15 @@ recovery fee).
   (space) chew hull during ring mining, the **North Polar Hexagon**: a 900 m wide zone of
   six wind-walls that rotate; crossing a wall costs hull/suit integrity; the eye is calm.
 - **Resources.** Ring ice and ring rock (space mining; silicates, water ice, iron), helium,
-  **Helium-3 Condensate** (helium rain collected in Deck 2–3 traps — the only efficient
-  skip fuel; deuterium from water works at one-third efficiency).
+  **Helium-3 Condensate** (helium rain collected in Deck 2–3 traps — the coil material of
+  the Skip Drive Mk2 blueprint; a crafting ingredient, never a fuel, D-105).
 - **Creatures.** Helium jelly (floats up when hit), Hex drake (winged, rides the hexagon
   walls), Ringmite (space, swarms), Floe moth. **Apex: Polar Hydra** — six-headed cloud
   serpent of the Hexagon's eye; each head is destroyed by crossing a different wall with
   its lure; the body drops the Hexacore (Aerostat Mk3 buoyancy core).
 - **Activities / POIs.** Top-down ring mining lanes (density varies with distance; gaps
   are safe), the ring-mining rig with the Saturn beacon, Saturn Waystation (Halcyon's
-  largest market), Titan and Enceladus in the sky, skip-fuel refining.
+  largest market), Titan and Enceladus in the sky, Skip Drive coil crafting.
 - **Only here.** Helium-3 Condensate; ring mining; Skip Drive Mk2 blueprint.
 - **Gate.** Cryo Mk2, Pressure Mk2, Thruster Mk2, Float cell Mk1. **Look.** Pale gold and
   butter bands, the ring plane as a bright line across the sky, soft low sunlight.
@@ -471,7 +471,7 @@ recovery fee).
 - **Hazards.** Cryo 3 (coldest atmosphere, −224 °C: Mk3 required), gravity 0.89×, dim
   light (sunlight 0.25 of the in-game clamp), **seasons**: the lit hemisphere is one half of
   the world's x range and swaps every 6 game days; the dark half has Cryo 3 even with Mk3
-  (needs suit heater fuel), methane hail, **Diamond rain** below Deck 3 (falling 5–20 cm
+  (needs the Mk3 suit heater, which draws Suit power), methane hail, **Diamond rain** below Deck 3 (falling 5–20 cm
   diamonds, 15 damage each, also the resource).
 - **Resources.** Methane ice, ammonia, hydrogen, water, **Deep Diamond** (the hardest
   material; Rig tip Mk3 and the only drill for Neptune's Superionic Ice).
@@ -515,7 +515,7 @@ recovery fee).
 |           | Terrain digging and building                         | 1 m tiles; dig with Beam; place blocks and modules with Builder | M1        |
 | Economy   | Resources, refining, crafting, tech tree             | Resources (§7); **Smelter** and **Refinery** stations; **Blueprint Tree** | M3        |
 |           | Inventory upgrades, trading                          | Slot-based suit/ship/cargo; **Scrip** currency; vendors at **Waystations** | M3        |
-| Ship      | Manual flight, landing, fast travel                  | No launch fuel (D-103); thruster classes and landing rules §4.3; **Skip Drive** (skip fuel, M4) | C1 flight, M4 Skip Drive |
+| Ship      | Manual flight, landing, fast travel                  | No fuel of any kind (D-103, D-105); thruster classes and landing rules §4.3; **Skip Drive** (spool + cool-down, M4) | C1 flight, M4 Skip Drive |
 |           | Shields, weapons, cargo, upgrades, multiple ships    | Hull shield, Pulse cannon, cargo bays; ships **Pilgrim** (start), **Dray** (hauler), **Shrike** (fighter), **Vagabond** (deep-range) | M5        |
 | Space     | Top-down flight and combat, pirates                  | Red Hollow raiders, bounties                                   | M1 flight, M5 combat |
 |           | Space stations with vendors                          | **Waystations** (Earth, Mars, Belt, Saturn)                     | M3        |
@@ -766,7 +766,7 @@ If the laptop's RAM is upgraded, LEAD raises only this section and logs the deci
 | Milestone | Scope                                                                                       | Exit criteria                                                                                                                                      |
 |-----------|---------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
 | **M0 Setup and audit** | Repo verified; old build archived (`archive/meridian-v1`, tag `meridian-v1-final`); versions pinned here; Unity URP-2D project at root compiles clean; `render.py` renders the calibration asset; `ArtImporter` imports it; `.claude/settings.json` verified; ≥ 5 Ready tasks per worker; USER_ACTIONS complete | All of the above confirmed in `REVIEW_LOG.md`                                                                    |
-| **M1 Core loop (placeholders)** | Earth and Mars with placeholder art: walk, jump (real g), dig, place, board **Pilgrim**, launch past the Escape Line with fuel cost, top-down flight, Mars well pulls, entry, manual landing; save/load; tests in §10.9 | Loop playable start to finish twice without console errors; all tests green; BudgetGate green; user playtest |
+| **M1 Core loop (placeholders)** | Earth and Mars with placeholder art: walk, jump (real g), dig, place, board **Pilgrim**, launch past the Escape Line (its fuel cost removed later, D-103), top-down flight, Mars well pulls, entry, manual landing; save/load; tests in §10.9 | Loop playable start to finish twice without console errors; all tests green; BudgetGate green; user playtest |
 | **M2 Earth, Mars, space — final art and feel** | Real terrain materials, parallax, planet discs, Sun, Pilgrim, player, 2 creatures per planet, day/night, Mars dust storm, basic Cryo, placeholder audio | Screenshots match §9; budgets green; 30-minute play without errors                          |
 | **M3 Inner planets complete** | Mercury and Venus full designs; Envirosuit hazards; all Rig modules; Smelter/Refinery/Blueprint Tree; inventory; Waystations and trading; Wardens basic; Catalogue; bases | Each inner planet's "only here" obtainable; apexes killable; tests for hazards and economy |
 | **M4 The giants**       | Cloud-column generator; floes, Float cells, Aerostats, Crush Line; Skip Drive; belt and ring mining; all four giants' hazards, creatures, apexes; Thruster Mk2/Mk3 | Full progression Earth → Neptune completable by LEAD's QA script; budgets green on Jupiter |

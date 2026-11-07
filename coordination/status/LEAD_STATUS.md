@@ -1,6 +1,6 @@
 # LEAD STATUS
 Updated: 2026-11-06 19:3x · Session: 6 · Review cycle: 242
-Cycle 242: owner C0 feedback written in (Bible 4.1, contract v3.1, D-100..D-104): thin detailed ink, faces only on people and animals, upright Pilgrim, manual fuel-free flight. New cards U-107, B-123..B-127. Next reviews: B-124 pipeline proof, U-107 flight hand-off, B-126 snoozle v2.
+Cycle 242: owner C0 feedback written in (Bible 4.1, contract v3.1, D-100..D-104): thin detailed ink, faces only on people and animals, upright Pilgrim, manual fuel-free flight. New cards U-107, B-123..B-127. D-105: no fuel of any kind (skip fuel gone too). Next reviews: B-124 pipeline proof, U-107 flight hand-off, B-126 snoozle v2.
 Cycle 241: C0 CLOSED (D-099): U-098, B-113 Done; C0_STYLE_REFERENCE.md + C0_REPORT.md; USER-23 look-over; C1 exports open. Now: the C0 milestone page (Artifact), then C1 reviews (B-121 HUD preview, B-122 Pilgrim sheets, U-091).
 Cycle 240: U-100, U-101, B-117 Done; B-122 released; Bible §11.1 textures row v4. C0 waits only on U-098. Next: review B-119/B-120 previews; then the U-098 hand-off → §9.7 pass per asset, C0_STYLE_REFERENCE.md, owner look-over item, C0 milestone page.
 Cycle 239: B-118 Done (helmet glass); U-100 back with one fix (flat dirt fill under the strip); U-101 check owed. Next: B-117 Pilgrim design sheet review; U-100 re-shoot; U-101 contact sheet + gate; then U-098.
