@@ -142,7 +142,8 @@ def curlfrond(d, M, pose):
             a -= (0.04 + (2.6 * curl) * t ** 3) * (1 if lean >= 0 else -1) * (0.6 + 0.4 * (1 - curl))
             x, z = pts[-1]
             pts.append((x + step * math.cos(a), z + step * math.sin(a)))
-        hose_stem(d, M, pts, 0.06, rib_every=1.0)
+        frond = G.hose_outline(pts, 0.065)                   # ink-behind: the outer line sits outside, the frond stays green
+        G.stroke(d, frond, M["blade"], O, cyclic=True)
         for i in range(2, len(pts) - 3, 2):                             # leaflets
             (x0, z0), (x1, z1) = pts[i], pts[i + 1]
             ta = math.atan2(z1 - z0, x1 - x0)
@@ -155,6 +156,9 @@ def curlfrond(d, M, pose):
                 mid_ = rot([(L_ * 0.1, 0.0), (L_ * 0.8, 0.0)], ta + s * 1.1)
                 G.seam(d, [(x0 + q[0], z0 + q[1]) for q in mid_], M["ink"])
         G.hatch(d, pts[2][0] - 0.03, pts[2][1] + 0.03, M["ink"], n=2, length=0.04, spacing=0.018, angle_deg=70, seed=k)
+        tx, tz = pts[-1]                                     # LEAD cycle 245: a mustard fiddlehead tip so it pops at 1x
+        G.stroke(d, G.lumpy_ellipse(tx, tz, 0.058, 0.052, n=14, lump=0.08, seed=30 + k), M["mustard"], O, cyclic=True)
+        G.seam(d, [(tx - 0.02, tz), (tx + 0.005, tz + 0.015), (tx + 0.02, tz - 0.005)], M["ink"])
 
 
 # ---------------------------------------------------------------- 4. Whiptuft (plains / coast)
