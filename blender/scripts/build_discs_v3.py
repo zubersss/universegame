@@ -77,6 +77,70 @@ class Disc:
 
 
 
+class NearDisc(Disc):
+    """B-143 (D-128): the far disc's frame-0 drawing at k x its resolution. paint() works in u / v, so the drawing
+    scales; the rim phases and the large-scale grain + pigment noise are the far frame's own (the same rng draws,
+    resampled at each near pixel's u / v), only the 0.8 px paper fibre is drawn fresh at the near size."""
+    def __init__(self, name, R_base, k, pad, seed):
+        self.name, self.R, self.R_base = name, R_base * k, R_base
+        self.size = int(2 * (self.R + pad))
+        self.size += (-self.size) % 4
+        n = self.size * SS
+        c = n / 2
+        yy, xx = np.mgrid[0:n, 0:n] + 0.5
+        self.u = (xx - c) / (self.R * SS)
+        self.v = -(yy - c) / (self.R * SS)
+        rng = np.random.default_rng(seed)                 # the far Disc's draws, in its order
+        ph3, ph5 = rng.uniform(0, 6), rng.uniform(0, 6)
+        nb = Disc(name, R_base, pad, seed).size * SS
+        _fine = noise2(rng, nb, 0.8 * SS)
+        coarse = noise2(rng, nb, 30 * SS)
+        pign = noise2(rng, nb, 60 * SS)
+        ang = np.arctan2(self.v, self.u)
+        self.rim = 1.0 + 0.012 * np.sin(3 * ang + ph3) + 0.008 * np.sin(5 * ang + ph5)
+        self.r = np.hypot(self.u, self.v)
+        self.inside = self.r <= self.rim
+        bx = nb / 2 + self.u * R_base * SS - 0.5          # the far frame's pixel coordinates of each near pixel
+        by = nb / 2 - self.v * R_base * SS - 0.5
+        fine = noise2(np.random.default_rng(seed + 7), n, 0.8 * SS)
+        self.grain = 1 + 0.03 * fine + 0.03 * _bilinear(coarse, bx, by)
+        self.pig = 1 + 0.05 * _bilinear(pign, bx, by)
+        self.rng = rng
+
+
+def _bilinear(f, x, y):
+    """f sampled at float pixel coords (x, y), wrapping (noise2 fields are periodic)."""
+    n = f.shape[0]
+    x0, y0 = np.floor(x).astype(np.int64), np.floor(y).astype(np.int64)
+    fx, fy = (x - x0).astype(np.float32), (y - y0).astype(np.float32)
+    x0, y0 = x0 % n, y0 % n
+    x1, y1 = (x0 + 1) % n, (y0 + 1) % n
+    return (f[y0, x0] * (1 - fx) + f[y0, x1] * fx) * (1 - fy) + (f[y1, x0] * (1 - fx) + f[y1, x1] * fx) * fy
+
+
+NEAR_CAP = 512                   # D-128: each near frame <= 512^2 (and <= 1 MB)
+NEAR_KMAX = 8.0                  # at most 8x the D-098 resolution
+NEAR_PAD = 10                    # px around the disc on the near frame (the ink + its jitter), not scaled
+NEAR_MIN_GAIN = 2.0              # D-128 amended: a near frame only where it is >= 2x the far disc (Luna, Mercury, Mars, Venus, Earth)
+
+
+def near_scale(name, cap=None):
+    """The near frame's scale vs the far disc: min(8x, the largest that fits cap^2); under NEAR_MIN_GAIN, no near frame."""
+    R = RADIUS_U[name] * SPACE_PPU
+    return min(NEAR_KMAX, (((cap or NEAR_CAP) // 4) * 4 / 2 - NEAR_PAD) / R)
+
+
+def build_near(name, cap=None):
+    """-> (frame RGBA uint8, k) or (None, k) when the cap leaves less than NEAR_MIN_GAIN (the giants: a later card)."""
+    k = near_scale(name, cap)
+    if k < NEAR_MIN_GAIN:
+        return None, k
+    R = RADIUS_U[name] * SPACE_PPU
+    d = NearDisc(name, R, k, NEAR_PAD, seed=zlib.crc32(name.encode()) % 1000)
+    rgb, ink, rgba = paint(name, d, 0, FRAMES.get(name, 12))
+    return finish(d, rgb, ink, rgba), k
+
+
 def finish(d, rgb, extra_ink=(), extra_rgba=()):
     """Paint -> premultiplied canvas: disc colour (+ grain), extra rgba layers, outline ink,
     extra ink strokes [(pts_px_at_ss, width_px_1x)]; box-down to 1x straight alpha uint8."""
@@ -89,7 +153,7 @@ def finish(d, rgb, extra_ink=(), extra_rgba=()):
         acc[..., :3] = lay[..., :3] * la + acc[..., :3] * (1 - la)
         acc[..., 3:] = la + acc[..., 3:] * (1 - la)
     ink = PAL["ink"]
-    t = np.linspace(0, 2 * np.pi, 160, endpoint=False)
+    t = np.linspace(0, 2 * np.pi, int(160 * max(1.0, d.R / getattr(d, "R_base", d.R))), endpoint=False)
     ux = np.cos(t)
     vy = np.sin(t)
     k = d.R * SS
@@ -221,7 +285,7 @@ def interior_marks(name, d, f, nf):
     giants a few short band-edge fragments that drift with the bands (in px at SS)."""
     k, c = d.R * SS, d.size * SS / 2
     marks = []
-    L = max(0.10, 6.0 / d.R)                  # at least ~6 px long on the small discs
+    L = max(0.10, 6.0 / getattr(d, "R_base", d.R))   # at least ~6 px long on the small far discs (kept on near frames)
     for (u0, v0) in ((-0.62, -0.42), (-0.30, -0.80)):
         for j in range(3):
             uu, vv = u0 + 0.06 * j, v0 + 0.06 * j
@@ -525,6 +589,107 @@ def preview(out_dir, tiles=None, out_name="review_b119_discs_preview.png", stamp
     print("review written", img.shape, f"{time.time() - t0:.1f}s", "ink", ow, iw, len(inner))
 
 
+def near_export(art, preview_dir, review=None, cap=None, write=True):
+    """B-143 (D-128): planets/<planet>/disc_near_color.png + disc_near.json (Luna: planets/earth/luna_near), one static frame
+    each (frame 0 of the idle at k x), <= cap^2 and <= 1 MB; proves first that the far frames re-render byte-identical
+    to the committed sheets (the far path is untouched); the review shows each near frame beside its far disc at ~33x."""
+    import json as _json
+    out, nears, problems = [], {}, []
+    for name in ORDER + ["luna"]:
+        planet, variant = ("earth", "luna") if name == "luna" else (name, "disc")
+        old = _old_frames(art, planet, variant)
+        far, _R = build_disc(name, limb=False)
+        if not all(o.shape == f.shape and (o == f).all() for o, f in zip(old, far)):
+            problems.append(f"{planet}/{variant}: the far frames no longer re-render byte-identical")
+        im, k = build_near(name, cap)
+        if im is None:
+            out.append((f"planets/{planet}/{variant}_near", 0, 0, 0, k))
+            continue
+        nears[name] = (im, k, old[0])
+        key = f"planets/{planet}/{variant}_near"
+        meta = {"key": key, "style": "v3", "frame_width": im.shape[1], "frame_height": im.shape[0], "columns": 1, "gutter": v3.GUTTER,
+                "frames": 1, "fps": v3.FPS, "pivot": [0.5, 0.5], "facing": "right", "ppu": round(SPACE_PPU * k, 4),
+                "space_ppu": round(SPACE_PPU * k, 4), "radius_u": RADIUS_U[name], "radius_px": round(RADIUS_U[name] * SPACE_PPU * k, 1),
+                "near_of": f"planets/{planet}/{variant}", "scale_vs_far": round(k, 4), "animations": [],
+                "note": f"D-128: the far disc's frame 0 at {k:.2f}x for near-range zoom (DiscSprite swaps above ~6x); a static frame"}
+        bad = [m for m in v3.validate_sheet(meta, im.shape, ppu=meta["ppu"]) if "sum of clip lengths" not in m]
+        if im.shape[0] > (cap or NEAR_CAP) or im.shape[1] > (cap or NEAR_CAP):
+            bad.append(f"{im.shape[1]}x{im.shape[0]} over {cap or NEAR_CAP}^2")
+        problems += [f"{key}: {b}" for b in bad]
+        out.append((key, im.shape[1], im.shape[0], meta, k))
+    if problems:
+        raise ValueError("B-143 near frames: " + "; ".join(problems))
+    rows = []
+    for i, (key, w, h, meta, k) in enumerate(out):
+        if not w:
+            rows.append((key, None, k))
+            continue
+        planet, nm = key.split("/")[1], key.split("/")[2]
+        name = "luna" if nm == "luna_near" else planet
+        dd = os.path.join(art, "planets", planet) if write else os.path.join(preview_dir, "b143_near")
+        os.makedirs(dd, exist_ok=True)
+        n = pngio.write_png(os.path.join(dd, f"{nm}_color.png"), nears[name][0])
+        if n > 1024 * 1024:
+            raise ValueError(f"{key}: {n / 2**20:.2f} MB over 1 MB")
+        with open(os.path.join(dd, f"{nm}.json"), "w", encoding="utf-8", newline="\n") as f:
+            _json.dump(meta, f, indent=2)
+            f.write("\n")
+        rows.append((key, (w, h, n), k))
+    if review:
+        near_review(review, nears, rows, stamp="export" if write else "dry run (not exported)")
+    return rows
+
+
+def _zoom_crop(img, zoom, cx, cy, size):
+    """A size x size window of img magnified `zoom`x with bilinear filtering (a GPU sampler's look), centred on (cx, cy)."""
+    ys, xs = np.mgrid[0:size, 0:size] + 0.5
+    x = cx + (xs - size / 2) / zoom - 0.5
+    y = cy + (ys - size / 2) / zoom - 0.5
+    f = img.astype(np.float32) / 255
+    pm = np.dstack([f[..., :3] * f[..., 3:], f[..., 3:]])
+    H, W = img.shape[:2]
+    x0, y0 = np.clip(np.floor(x).astype(int), 0, W - 1), np.clip(np.floor(y).astype(int), 0, H - 1)
+    x1, y1 = np.clip(x0 + 1, 0, W - 1), np.clip(y0 + 1, 0, H - 1)
+    fx, fy = np.clip(x - np.floor(x), 0, 1)[..., None], np.clip(y - np.floor(y), 0, 1)[..., None]
+    o = (pm[y0, x0] * (1 - fx) + pm[y0, x1] * fx) * (1 - fy) + (pm[y1, x0] * (1 - fx) + pm[y1, x1] * fx) * fy
+    bg = np.array([0.10, 0.10, 0.16], np.float32)
+    return o[..., :3] + bg * (1 - o[..., 3:])
+
+
+def near_review(path, nears, rows, stamp):
+    """Per disc: the far frame 0 and the near frame magnified so the disc is ~33x the far texel size on screen, over the
+    same limb window (upper right, where the light catches the ink), bilinear like the GPU; and the near frame whole."""
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    S = 360
+    W = 8 + S + 12 + S + 12 + 380
+    out = [np.tile(review.PAPER, (30, W, 1)).astype(np.float32)]
+    review._label(out[0], "b-143 (d-128) near frames: far frame 0 at 33x | the near frame at 33/k x (the same screen size) | the near frame whole; bilinear", 6, 8)
+    for key, info, k in rows:
+        name = "luna" if key.endswith("luna_near") else key.split("/")[1]
+        r = np.tile(review.PAPER, (S + 30, W, 1)).astype(np.float32)
+        if info is None:
+            review._label(r, f"{key}: none (the cap leaves {k:.2f}x, under the 2x floor: the giants' close view is a later card)", 6, 6)
+            out.append(r[:40])
+            continue
+        im, k, far = nears[name]
+        R = RADIUS_U[name] * SPACE_PPU
+        a = math.radians(40)
+        fc = (far.shape[1] / 2 + R * math.cos(a), far.shape[0] / 2 - R * math.sin(a))
+        nc = (im.shape[1] / 2 + R * k * math.cos(a), im.shape[0] / 2 - R * k * math.sin(a))
+        r[24:24 + S, 8:8 + S] = _zoom_crop(far, 33.0, fc[0], fc[1], S)
+        r[24:24 + S, 20 + S:20 + 2 * S] = _zoom_crop(im, 33.0 / k, nc[0], nc[1], S)
+        st = -(-im.shape[0] // 340)                     # a whole-frame thumbnail no taller than the 360 px panel
+        th = im[::st, ::st]
+        review._over(r, th, 32 + 2 * S, 24)
+        w, h, n = info
+        review._label(r, f"{key} {w}x{h} at {k:.2f}x ({(n or 0) // 1024} kb): far 33x | near {33 / k:.1f}x | whole", 6, 6)
+        out.append(r)
+    img = np.vstack(out)
+    review._label(img, __import__("time").strftime("%m-%d %H:%M") + " " + stamp, 2, img.shape[0] - 16)
+    review.write(path, img)
+
+
 def _old_frames(art, planet, variant):
     """The committed sheet's frames (B-143's "before")."""
     import json as _json
@@ -598,7 +763,10 @@ def b143(art, preview_dir, report, write=True):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 2 and sys.argv[1] == "--b143":           # build_discs_v3.py --b143 <art> <preview dir> <report> [--dry]
+    if len(sys.argv) > 2 and sys.argv[1] == "--near":            # build_discs_v3.py --near <art> <preview dir> <review png> [--dry]
+        for row in near_export(sys.argv[2], sys.argv[3], review=sys.argv[4], write="--dry" not in sys.argv):
+            print(row[0], row[1] if row[1] else "none", f"k {row[2]:.2f}")
+    elif len(sys.argv) > 2 and sys.argv[1] == "--b143":           # build_discs_v3.py --b143 <art> <preview dir> <report> [--dry]
         print("\n".join(b143(sys.argv[2], sys.argv[3], sys.argv[4], write="--dry" not in sys.argv)[0]))
     else:
         preview(sys.argv[1])
