@@ -129,10 +129,16 @@ class Stack:
         self.a = m + self.a * (1 - m)
 
 
-def finish(stack, rng, H):
+def finish(stack, rng, H, straight=False):
     """Composite + paper grain, then roll the (periodic) layer so the wrap sits on the quietest column: a soft edge
-    that happened to fall on column 0 scored 2.7 on the seam check although the tile is continuous."""
+    that happened to fall on column 0 scored 2.7 on the seam check although the tile is continuous.
+    straight: the composite over a transparent base holds colour x alpha (premultiplied), but the PNG is read as
+    straight alpha (ParallaxLayer.shader: Blend SrcAlpha OneMinusSrcAlpha; review._over), so translucent shapes
+    darken twice (offwhite fog wisps read as grey streaks, soft edges get dark rims). straight=True divides the alpha
+    back out. Uranus only for now (its sideways light needs clean values); every other set stays byte-identical."""
     rgb, a = (stack.rgb, stack.a) if isinstance(stack, Stack) else BG._composite(stack)
+    if straight:
+        rgb = np.where(a[..., None] > 1e-4, rgb / np.maximum(a[..., None], 1e-4), 0.0).astype(np.float32)
     rgb = rgb * BG.paper(rng, H)[..., None]
     k = seam_column(BG.to_u8(rgb, a))
     return np.roll(rgb, -k, axis=1), np.roll(a, -k, axis=1)
@@ -1437,12 +1443,12 @@ def uranus_scene(seed, deck="deck1", light="sun_left"):
         lit, shade = side_faces(wall, sun, 18, 30, 8)
         stack.append(tint(wl, H, lit, BG._mix(pal["offwhite"], pal["red"], 0.15), 0.55, var=0.02, edge_dark=0.0, bleed=5.0))   # the sun-facing upper edges
         stack.append(tint(wl, H, shade, BG._mix(pal["teal"], pal["brown"], 0.3), 0.42, var=0.02, edge_dark=0.0, bleed=7.0))    # the far sides
-        stack.append(tint(wl, H, long_shadows(wall, sun, 200, 4), pal["brown"], 0.35, var=0.0, edge_dark=0.0, bleed=4.0))      # long shadows, leaning away
+        stack.append(tint(wl, H, long_shadows(wall, sun, 300, 5), pal["brown"], 0.5, var=0.0, edge_dark=0.0, bleed=4.0))      # long shadows, leaning away
     else:
         y = np.arange(H)[:, None] + 0.5
         haze = np.broadcast_to(((y > 600) & (y < 780)).astype(np.float32), (H, W)).copy()
         stack.append(tint(wl, H, haze, pal["red"], 0.14, var=0.02, edge_dark=0.0, bleed=40.0))      # night: the ember only as a low haze
-    out.append(finish(stack, wr, H))
+    out.append(finish(stack, wr, H, straight=True))
     # layer1: nearer fog banks, the same light; the deep: slow swirls
     H = 640
     stack = Stack()
@@ -1457,13 +1463,13 @@ def uranus_scene(seed, deck="deck1", light="sun_left"):
         lit, shade = side_faces(bank, sun, 26, 44, 10)
         stack.append(tint(wl, H, lit, BG._mix(pal["offwhite"], pal["red"], 0.15), 0.65, var=0.02, edge_dark=0.0, bleed=6.0))
         stack.append(tint(wl, H, shade, BG._mix(pal["teal"], pal["brown"], 0.35), 0.48, var=0.02, edge_dark=0.0, bleed=8.0))
-        stack.append(tint(wl, H, long_shadows(bank, sun, 320, 6), pal["brown"], 0.42, var=0.0, edge_dark=0.0, bleed=5.0))      # long shadows, leaning away
+        stack.append(tint(wl, H, long_shadows(bank, sun, 480, 8), pal["brown"], 0.6, var=0.0, edge_dark=0.0, bleed=5.0))      # long shadows, leaning away
     if deck == "deep":
         for k in range(3):
             cx, cy, R = rng.uniform(250, W - 250), rng.uniform(120, 300), rng.uniform(90, 140)
             stack.append(tint(wr, H, spiral_mask(H, cx, cy, R, 0, arms=2, thr=0.2, sx=1.8, sz=0.5, wind=2.0, r0=0.15),
                               BG._mix(pal["teal"], pal["brown"], 0.5), 0.35, var=0.03, edge_dark=0.0, bleed=4.0))
-    out.append(finish(stack, wr, H))
+    out.append(finish(stack, wr, H, straight=True))
     # layer2 (near): fog wisps, hail (deck 3), the diamond-rain sparkle + the CRUSH band (deep), night sparkles + ember glows
     H = 384
     stack = Stack()
@@ -1483,7 +1489,7 @@ def uranus_scene(seed, deck="deck1", light="sun_left"):
     stack.append(tint(wr, H, sp, pal["offwhite"], 0.9, var=0.0, edge_dark=0.0, bleed=0.4))
     if deck == "deep":
         crush_band(stack, wr, pal, H)
-    out.append(finish(stack, wr, H))
+    out.append(finish(stack, wr, H, straight=True))
     return out, [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0},
                  {"n": 2, "parallax": 0.6, "y_m": -0.5}]
 
