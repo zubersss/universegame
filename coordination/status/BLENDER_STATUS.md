@@ -1,5 +1,5 @@
 # BLENDER STATUS
-Updated: 2026-11-07 02:1x · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 02:2x · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
 LEAD cycle 252 order (UNITY's Editor at ~0.1 GB free: nothing above ~100 MB until the lock frees):
@@ -7,7 +7,7 @@ LEAD cycle 252 order (UNITY's Editor at ~0.1 GB free: nothing above ~100 MB unti
 2. B-133 / B-134 manifest rows (in 265ebc7) + dry run: DONE 02:1x. B-133: the export path with stub layers (manifest row -> export_background -> build_backdrop_v3 lookup -> six layers + two scene jsons written, sizes and seams checked); B-134: the side_b row against render.py's sheet path (build(out) default build_fn, 56 one-based socket frames, clip names unique vs side, the glass tint kept).
 3. want_blender.lock filed 02:01:10 for queue #2: one batch `tools/blender_render.ps1 characters/surveyor/side_b,backgrounds/earth/forest,backgrounds/earth/coast` + the B-133 review rebuild (`build_backdrop_v3.py blender/preview forest,coast --from-png`) and a pixel compare of the exported layers with the rolled preview PNGs, <= 15 min.
 4. B-135 pike / shark / squid: SOURCES WRITTEN 02:1x in build_creatures_earth_v3.py (fish kit: an undulating spine with a width profile, forked tail, dorsal / anal / pectoral fins; squid: mantle, fins, one big eye, eight hose arms + two club tentacles, a round ink cloud). Pivot [0.5, 0.5] (no ground); swim 12-16 at index 1 (v3.CAPS gains "swim", contract v3.1); the water-floor check = the deepest ink below the pivot per creature (reported) + the bottom 2 px edge; reviews 1x in the coast sea (B-133 layers 0-1) beside the surveyor. Preview runs once the lock frees (~150 MB).
-5. Coast sand strip (a B-130 recipe variant: the coast composite stands the surveyor on soil): next after B-135.
+5. Coast sand strip DONE 02:2x (158484a): terrain/earth/ground_strip_sand, a fourth B-130 kind (same contract; ripples, ripple marks, shells, weed, pebbles; grain 0.02 on the brighter sand); join 0.67/255, silhouette identical on all 64 edges, grass / soil / stone byte-identical to the accepted exports; the B-133 coast composite stands on sand. Exports with terrain/earth/ground_strip_set (four sheets) in a later slot.
 6. Sun disc design (build_sun_v3.py, uncommitted until it runs).
 Heavy queue: #2 my batch above (want on file); B-131 export after UNITY's U-113 code commit (D-117).
 
