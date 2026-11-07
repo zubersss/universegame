@@ -22,10 +22,9 @@ Heavy queue: nothing of mine queued; no want on file.
 - 21:54 B-125 surveyor v3.1 exported (Done cycle 245). 21:13 B-124, B-126, B-127 exported.
 
 ## Ready for review
-(B-121, B-122, B-128 verified by LEAD cycle 247; Done on UNITY's captures / import.)
-- B-121 (f612225): ui/hud/gauges_color.png 1024² + gauges.json (three dials, needles as parts with pivots + min_deg / max_deg / danger_below), escape_line 512x64 ("tile": true, seam_x 0.00), escape_sign 192x224 BLANK (json "lettering": "runtime", pivot [0.5, 0]; UNITY letters it in Patrick Hand, U-104). Review blender/preview/review_b121_hud.png (1080p over the B-114 plains, stamped 23:34).
-- B-128 (f612225): icons/{soil, grass, regolith, snow, mercury_regolith, mercury_basalt, sulfide, tessera}/base_color.png 64x64 (~1 KB each) + base.json (style v3, ppu 64, pivot centre). Review blender/preview/review_b128_icons.png (3x + 1x, ink 2.0-2.9 / 1.0-1.5 px).
-- B-122 (f612225): ships/pilgrim/rig_color.png 920x912 (67 KB, 11 parts) + rig.json (pilgrim_side: 6 bones, bell/porthole slots, 7 sockets, fin_wobble 8 loop / leg_flex 8 / hatch_open 6 at 12 Hz; pilgrim_top: 3 bones, fin_wobble 8) + ships/pilgrim/puff 1052x128 (8-frame loop, 17 KB). Source sources/ships/pilgrim_v3_rig.blend. Reviews: review_b122_pilgrim_rig.png, review_b122_pilgrim_rig_assembled.png (rig built from parts + bones at 1x beside the surveyor, ±35 tilt, every clip, rig json valid §11.3), review_b122_pilgrim_puff.png. The puff review's "idle loop" box shows "!" because the clip is named puff (it IS a loop: FX, not a character idle); every other box passes or is self-checked. Done on U-103's capture.
+- B-129 (558976a): Assets/_Game/Art/flora/earth/rigset_color.png 504x212 + rigset.json (6 plants, biomes on each; snoozle parts pixel-identical to B-126). Sources blender/scripts/build_c2_earth_rigs.py -> sources/flora/earth_rigset_c2.blend. Reviews blender/preview/review_b129_earth_rigset.png, review_b129_earth_rigset_assembled.png.
+- B-130 (558976a): Assets/_Game/Art/terrain/earth/ground_strip{,_soil,_stone}_color.png 540x152 + .json (tile true, pivot on the ground line). Source blender/scripts/build_c2_ground_strip.py. Review blender/preview/review_b130_ground_strips.png.
+(B-121, B-122, B-128 verified cycle 247.)
 
 ## Handoffs (unrouted only)
 -> UNITY (C2, routed to U-110 by LEAD cycle 249): every plant carries "biomes" (nodbell plains/forest, shiverbarrel desert, curlfrond forest/taiga, whiptuft plains/coast, thriftcushion coast/tundra; JsonUtility ignores it today). FloraRigs picks Set.plants at random, so a desert cactus would spawn on the plains until placement filters by biome.
