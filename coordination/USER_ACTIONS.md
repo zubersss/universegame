@@ -6,6 +6,15 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
+### USER-25 — Free the memory gate: close ChatGPT, Copilot, Edge and Chrome (2 min)
+Both workers are stuck behind the 1.5 GB memory gate: at 00:45 the laptop had 0.5 GB free, with
+ChatGPT using 1.1 GB, Copilot 0.4 GB, Edge 0.6 GB and Chrome 0.3 GB. Right-click each one's icon
+in the taskbar and choose "Close window" (ChatGPT also sits in the tray by the clock: right-click
+its icon → Quit). The Xbox app and Phone Link can go too (0.2 GB). The sessions see the free
+memory on their next poll and start their checks by themselves; nothing to paste. If the Lead
+still reports under 1.5 GB free after that, tell it "memory still short".
+
+
 ### USER-24 — Look over round 2 of the cartoon style (5 min)
 Open https://claude.ai/artifact/RpnrBEGMbKM1mSGicBYqZQ (the C0 page, now with a "Round 2" section on top).
 It shows your four changes before and after: thinner, more detailed ink; no faces on plants or

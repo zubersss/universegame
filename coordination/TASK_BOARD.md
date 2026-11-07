@@ -22,13 +22,15 @@ When the lock frees, the highest pending job here goes next, even if the other r
 older (D-037 alternation applies only between equal ranks). A rank is live only while its role
 has a want on file or holds the lock (D-112): if the top rank has no want when the lock frees,
 the next live rank runs now and the skipped role goes next after it files. A role below the top
-keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 249 (00:1x; UNITY holds the lock since 00:12 for the D-114 re-run with 0.2–0.4 GB free while the dev build runs: nothing else heavy starts until it releases):
-1. UNITY · U-103 check + captures with the drawn rig (the lock is free since 00:22: file the want and go).
+keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 250 (00:5x; the lock is free and UNITY's want is on file since 00:26, but free RAM is 0.5 GB against the 1.5 GB gate: ChatGPT (1.1 GB), Copilot, Edge and Chrome hold it → USER-25 asks the owner to close them; until then nobody starts a heavy job and both roles work their lists):
+1. UNITY · U-103 check + captures with the drawn rig (want on file, keep it refreshed; go the moment free RAM is above 1.5 GB).
 2. UNITY · U-104 check + the 1080p HUD capture.
 3. UNITY · U-109 check + the three climb captures.
 4. UNITY · U-106 profile (11 legs, D-116 rows) + the 20 s flight strip.
-5. BLENDER · B-131 / B-132 / B-133 exports as their previews are accepted, one batch each, between UNITY's slots (D-112). (B-129 + B-130 exported 00:19–00:22, peak 668 MB; the disc-review peak is measured and fixed, 2545 → 415 MB.)
-6. UNITY · U-112 creep hunt probe runs, after U-106.
+5. BLENDER · B-131 export + the six glb removals, one batch ≤ 10 min, only after UNITY's status says the U-113 code is committed (D-117), in the first BLENDER slot between UNITY's checks (D-112).
+6. BLENDER · B-132 / B-133 exports as their previews are accepted, one batch each, between UNITY's slots.
+7. UNITY · U-112 creep hunt probe runs, after U-106.
+
 
 ## While waiting (lock-free work; CLAUDE.md rule 3, D-109)
 
@@ -43,15 +45,17 @@ did in your status before the next poll. LEAD tops each list up to ≥ 3 items e
 - U-104 swap code written before its check: the six gauge parts + needles from `ui/hud/gauges.json` at 12 Hz, the `escape_line` tile at the line's altitude, the blank `escape_sign` lettered ESCAPE LINE in Patrick Hand, the ship HUD rows; MenuHudTests extended.
 - U-112 instrumentation half (lock-free, so U-106's profile already prints it): per-leg Mono heap, native allocator totals and the per-visit counts in `MemoryProbe`; the `Creep per visit` row in `unity_profile.ps1`; the Return rows on private commit with working set as info (D-116).
 - `docs/credits/unity.md` audit (Limelight / Patrick Hand + OFL arrive with U-104); ArtImporter ignores the sign's `lettering` fields without a warning (assert).
+- U-113 code half, after the items above (D-117, lock-free): `ModelSwap` keeps the SpriteRenderer when the key resolves to a v3 sheet and no model (the six camp props once B-131's export lands), with the sheet's Animator (door `open` once on use, smelter `working` while crafting, lamp `flicker` at night), pivot and px size from the json at PPU 64, pad / wall tiling at 2 m / 1 m; tests against the sizes in the B-131 card notes; no check until B-131's export is in.
 Then one batched check for everything written when your turn in the queue comes.
 
 **BLENDER** (numpy / scripts only while UNITY holds the lock or a want; bpy only under your own lock)
-- B-131 camp prop previews (landing pad, shelter wall and door, smelter, storage crate, lamp at v3.1, no faces; door open 6, smelter loop 8, lamp flicker 4), all six at 1x on the plains beside the surveyor and the rig.
+- B-131 export wiring, lock-free: the `render.py` prop sheet path and the six manifest rows switched from `model: true` to v3 sheet rows (sizes per your preview, pivot on the ground line, `tile: true` for pad and wall, `interactable: true`, clips door open 6 / smelter working 8 / lamp flicker 4), the stamped review builder, and the list of `.glb` + v2 map files the export commit removes, so the export is one ≤ 10 min batch when D-117's turn comes (after UNITY's U-113 code commit).
 - B-132 design previews: stag, grey wolf, brown bear (faces kept, pie-cut eyes, no bared teeth), poses and clip tables per your list; the bear's frame size checked against the 2048 cap.
 - B-133 layer studies: forest and coast far / mid / near layers as fakegp previews with the 2× seam check.
 - A painted Sun disc design (C2 candidate, preview only; the Sun stays a lit spheroid through C1 per the U-103 ruling).
+- `git rm --cached` the four tracked `blender/scripts/meridian/__pycache__/*.pyc` in one commit (`.gitignore` already lists them; they predate the rule and show as modified after every run).
 - `blender/README_v4.md`: how a v4.1 sheet is drawn, measured and reviewed, so a fresh session resumes without reading the code.
-(The disc-review peak measure runs inside the B-129 + B-130 export lock, not lock-free.)
+
 
 **LEAD**
 - The charter idle list, plus: the C1 LeadQA scenario draft (pad → Escape Line → space → entry → touchdown under scripted input), the C1_REPORT skeleton, the owner's v4.1 look-over page, Bible gap closure, credits audit, a status-size check each cycle (D-113).
@@ -1076,7 +1080,7 @@ Goal: Earth camp props re-ink (the grey stand-ins in every still): `props/common
 Accept: the ten §9.7 boxes per prop on a stamped review (all six at 1x on the plains beside the surveyor and the Pilgrim rig); every file per the contract (color + json; emission only where the manifest has it); one sheet per prop ≤ 512²; UNITY imports with no key change.
 Files: blender/scripts/build_props_common_v3.py, blender/sources/props/common_v3.blend, Assets/_Game/Art/props/common/
 Depends: B-124
-Lead notes: Cycle 249 (D-115). Previews first (lock-free), export in a later batch. These six sit in the owner's first frame every time; after the ship they are the most visible grey left.
+Lead notes: Cycle 249 (D-115). Previews first (lock-free), export in a later batch. These six sit in the owner's first frame every time; after the ship they are the most visible grey left. Cycle 250: PREVIEW ACCEPTED (09e1a63; review_b131_props_preview.png 00:3x: six props at 1x on the plains with the surveyor and the Pilgrim rig; ink 2.0–3.0 / 1.0–1.5 px, mid + deep tones, rivets, planks, bolts, a drawn smelter glow and lamp halo; no faces; door open 6 once, smelter working 8 loop, lamp flicker 4 loop; pad and wall joins 0.0/255; sizes pad 128×48, wall 64×176, door 88×176, smelter 112×192, crate 80×72, lamp 64×160, ground line 10 px up). Answers (D-117): (a) colour + json only; the card's mask / emission line is struck (it came from the v2 manifest rows); `"interactable": true` goes in the json and the glows stay drawn. (b) Yes, the type changes under the same keys, and ArtImporter un-addresses a colour map that sits beside a `.glb` (IsModelKey, U-075), so your export commit also removes the six `.glb` files and their v2 maps and switches the manifest rows; UNITY's U-113 (Backlog, its code half on the While-waiting list) makes ModelSwap keep the sprite + Animator when no model exists. Order: U-113 code committed → your export batch (≤ 10 min, queue #5) → UNITY's next check. Until then the wiring, lock-free (While-waiting #1).
 
 ### B-132 · BLENDER · Ready · C2
 Goal: Earth land creatures re-inked (your list coordination/reports/blender/c2_earth_creature_reink.md, order 1): stag, grey wolf, brown bear at v3.1 ink with faces kept (animals may have faces, D-101: pie-cut eyes, friendly or neutral, no bared teeth per D-087), interior detail and two shadow tones; clips per contract §11.2 (idle 8–12, walk 12–16, run / flee, react ≤ 16, bump ≤ 16; follow for the wolf); frames ≤ 192 px (bear ≤ 224 × 160); one sheet ≤ 2048² each; the below-ground check passing.
@@ -1893,3 +1897,11 @@ Accept: an earth_c0_ground-style capture showing the three materials and a dug h
 Files: Code/Runtime/Planet/, Placeholders/terrain/earth/, Tests/
 Depends: U-106, B-130
 Lead notes: Cycle 249 (D-115). Promoted when U-106 is in. B-130 is exported (558976a): frames 64×152 with the pivot on the ground line at [0.5, 0.842] (`ground_line_px: 128`), 2 m of material below the line and 0.375 m of lip above it, `tile: true`, one frame per terrain column (x mod 8), the fill tile = frame 0's bottom 8 px; GroundStrip.cs needs the key swap only.
+
+### U-113 · UNITY · Backlog · C2
+Goal: Camp props as sprites (D-117): when a `props/common/*` key resolves to a v3 sheet and no model (after B-131's export removes the glbs), `ModelSwap` keeps the SpriteRenderer and plays the sheet's clips through the §11.8 Animator (door `open` once on open, reversed on close; smelter `working` while a craft runs; lamp `flicker` at night and in the dark), pivot and px size from the json at PPU 64 (pad 128×48 tiling at 2 m, wall 64×176 at 1 m, door 88×176, smelter 112×192, crate 80×72, lamp 64×160; ground line 10 px above the bottom), the BaseBuilder fit rules kept; PoiCatalog sizes read from the sheet; the model path untouched for every other key.
+Accept: PropSpriteTests: each of the six keys resolves to its sheet with the right frame size and clip set; the door clip plays once on use; the smelter loop runs only while crafting; a plains capture with the camp at 1x; CartoonSmoke and the BudgetGate Earth rows green; no importer error on the six keys.
+Files: Code/Runtime/Art/ModelSwap.cs, ModelView.cs, Code/Runtime/Planet/POI/PoiPlacer.cs, Code/Runtime/Building/BaseBuilder.cs, Tests/
+Depends: U-106, B-131
+Lead notes: Cycle 250 (D-117). The code half is lock-free and sits last on the While-waiting list so B-131's export can land in BLENDER's first slot after it; the check rides your next batch. The B-131 preview is the size reference until the export: blender/preview/review_b131_props_preview.png.
+
