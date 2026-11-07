@@ -1,0 +1,1026 @@
+{
+  "key": "flora/venus/rigset",
+  "style": "v3",
+  "ppu": 64,
+  "rect_origin": "bottom_left",
+  "parts": [
+    {
+      "name": "glasscoral_foot_bright",
+      "rect": [
+        0,
+        0,
+        64,
+        36
+      ],
+      "pivot": [
+        0.5052,
+        0.3379
+      ]
+    },
+    {
+      "name": "glasscoral_foot_dim",
+      "rect": [
+        132,
+        4,
+        60,
+        32
+      ],
+      "pivot": [
+        0.4831,
+        0.3305
+      ]
+    },
+    {
+      "name": "glasscoral_spike0_full",
+      "rect": [
+        140,
+        48,
+        28,
+        48
+      ],
+      "pivot": [
+        0.5443,
+        0.1381
+      ]
+    },
+    {
+      "name": "glasscoral_spike0_short",
+      "rect": [
+        196,
+        4,
+        28,
+        32
+      ],
+      "pivot": [
+        0.4665,
+        0.2072
+      ]
+    },
+    {
+      "name": "glasscoral_spike1_full",
+      "rect": [
+        156,
+        120,
+        28,
+        64
+      ],
+      "pivot": [
+        0.4758,
+        0.0936
+      ]
+    },
+    {
+      "name": "glasscoral_spike1_short",
+      "rect": [
+        468,
+        56,
+        24,
+        40
+      ],
+      "pivot": [
+        0.5016,
+        0.1498
+      ]
+    },
+    {
+      "name": "glasscoral_spike2_full",
+      "rect": [
+        312,
+        128,
+        28,
+        56
+      ],
+      "pivot": [
+        0.4176,
+        0.107
+      ]
+    },
+    {
+      "name": "glasscoral_spike2_short",
+      "rect": [
+        68,
+        0,
+        24,
+        36
+      ],
+      "pivot": [
+        0.4871,
+        0.1664
+      ]
+    },
+    {
+      "name": "glasscoral_spike3_full",
+      "rect": [
+        336,
+        52,
+        32,
+        44
+      ],
+      "pivot": [
+        0.3584,
+        0.1649
+      ]
+    },
+    {
+      "name": "glasscoral_spike3_short",
+      "rect": [
+        340,
+        8,
+        28,
+        28
+      ],
+      "pivot": [
+        0.4096,
+        0.2591
+      ]
+    },
+    {
+      "name": "glasscoral_spike4_full",
+      "rect": [
+        96,
+        0,
+        32,
+        36
+      ],
+      "pivot": [
+        0.5884,
+        0.2398
+      ]
+    },
+    {
+      "name": "glasscoral_spike4_short",
+      "rect": [
+        372,
+        8,
+        28,
+        28
+      ],
+      "pivot": [
+        0.5277,
+        0.3084
+      ]
+    },
+    {
+      "name": "hazefern_frond0_mid",
+      "rect": [
+        40,
+        44,
+        56,
+        52
+      ],
+      "pivot": [
+        0.2209,
+        0.1551
+      ]
+    },
+    {
+      "name": "hazefern_frond0_open",
+      "rect": [
+        188,
+        124,
+        52,
+        60
+      ],
+      "pivot": [
+        0.2383,
+        0.1344
+      ]
+    },
+    {
+      "name": "hazefern_frond0_tight",
+      "rect": [
+        172,
+        48,
+        56,
+        48
+      ],
+      "pivot": [
+        0.2204,
+        0.1681
+      ]
+    },
+    {
+      "name": "hazefern_frond1_mid",
+      "rect": [
+        244,
+        124,
+        64,
+        60
+      ],
+      "pivot": [
+        0.1858,
+        0.1344
+      ]
+    },
+    {
+      "name": "hazefern_frond1_open",
+      "rect": [
+        88,
+        116,
+        64,
+        68
+      ],
+      "pivot": [
+        0.1861,
+        0.1186
+      ]
+    },
+    {
+      "name": "hazefern_frond1_tight",
+      "rect": [
+        344,
+        128,
+        64,
+        56
+      ],
+      "pivot": [
+        0.1854,
+        0.144
+      ]
+    },
+    {
+      "name": "hazefern_frond2_mid",
+      "rect": [
+        232,
+        48,
+        52,
+        48
+      ],
+      "pivot": [
+        0.2426,
+        0.1681
+      ]
+    },
+    {
+      "name": "hazefern_frond2_open",
+      "rect": [
+        412,
+        128,
+        48,
+        56
+      ],
+      "pivot": [
+        0.2632,
+        0.144
+      ]
+    },
+    {
+      "name": "hazefern_frond2_tight",
+      "rect": [
+        372,
+        52,
+        52,
+        44
+      ],
+      "pivot": [
+        0.242,
+        0.1833
+      ]
+    },
+    {
+      "name": "hazefern_tuft",
+      "rect": [
+        440,
+        20,
+        28,
+        16
+      ],
+      "pivot": [
+        0.4778,
+        0.354
+      ]
+    },
+    {
+      "name": "puffsail_sail_full",
+      "rect": [
+        464,
+        128,
+        44,
+        56
+      ],
+      "pivot": [
+        0.3752,
+        0.0993
+      ]
+    },
+    {
+      "name": "puffsail_sail_sag",
+      "rect": [
+        428,
+        52,
+        36,
+        44
+      ],
+      "pivot": [
+        0.391,
+        0.1264
+      ]
+    },
+    {
+      "name": "puffsail_stem",
+      "rect": [
+        0,
+        40,
+        36,
+        56
+      ],
+      "pivot": [
+        0.4872,
+        0.1448
+      ]
+    },
+    {
+      "name": "sulphurbell_bell_open",
+      "rect": [
+        228,
+        4,
+        28,
+        32
+      ],
+      "pivot": [
+        0.5154,
+        0.7498
+      ]
+    },
+    {
+      "name": "sulphurbell_bell_shut",
+      "rect": [
+        260,
+        4,
+        20,
+        32
+      ],
+      "pivot": [
+        0.5441,
+        0.7498
+      ]
+    },
+    {
+      "name": "sulphurbell_vine",
+      "rect": [
+        0,
+        100,
+        84,
+        84
+      ],
+      "pivot": [
+        0.2293,
+        0.0936
+      ]
+    },
+    {
+      "name": "ventcap_chimney",
+      "rect": [
+        288,
+        48,
+        44,
+        48
+      ],
+      "pivot": [
+        0.4988,
+        0.1159
+      ]
+    },
+    {
+      "name": "ventcap_lid_open",
+      "rect": [
+        284,
+        4,
+        20,
+        32
+      ],
+      "pivot": [
+        0.6525,
+        0.2086
+      ]
+    },
+    {
+      "name": "ventcap_lid_shut",
+      "rect": [
+        404,
+        16,
+        32,
+        20
+      ],
+      "pivot": [
+        0.206,
+        0.3338
+      ]
+    },
+    {
+      "name": "ventcap_puff_high",
+      "rect": [
+        100,
+        44,
+        36,
+        52
+      ],
+      "pivot": [
+        0.4629,
+        0.0919
+      ]
+    },
+    {
+      "name": "ventcap_puff_low",
+      "rect": [
+        308,
+        4,
+        28,
+        32
+      ],
+      "pivot": [
+        0.4575,
+        0.1494
+      ]
+    }
+  ],
+  "plants": [
+    {
+      "name": "puffsail",
+      "biomes": [
+        "cloud_deck"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "puffsail_stem",
+          "parent": null,
+          "length": 0.576,
+          "order": 0
+        },
+        {
+          "name": "sail",
+          "part": "puffsail_sail_full",
+          "parent": "root",
+          "length": 0.672,
+          "offset_m": [
+            0.0691,
+            0.576
+          ],
+          "order": 1
+        }
+      ],
+      "swaps": {
+        "sail": [
+          "puffsail_sail_full",
+          "puffsail_sail_sag"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "sail",
+          "bone": "sail",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 6,
+        "beat_bpm": 110,
+        "squash": 0.04
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "puffsail_sail_sag"
+      }
+    },
+    {
+      "name": "sulphurbell",
+      "biomes": [
+        "cloud_deck",
+        "station_rails"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "sulphurbell_vine",
+          "parent": null,
+          "length": 0.64,
+          "order": 0
+        },
+        {
+          "name": "bell0",
+          "part": "sulphurbell_bell_open",
+          "parent": "root",
+          "length": 0.288,
+          "offset_m": [
+            0.1567,
+            0.6296
+          ],
+          "order": 1
+        },
+        {
+          "name": "bell1",
+          "part": "sulphurbell_bell_open",
+          "parent": "bell0",
+          "length": 0.288,
+          "offset_m": [
+            0.2399,
+            0.2263
+          ],
+          "order": 2
+        },
+        {
+          "name": "bell2",
+          "part": "sulphurbell_bell_open",
+          "parent": "bell1",
+          "length": 0.288,
+          "offset_m": [
+            0.2564,
+            0.0279
+          ],
+          "order": 3
+        },
+        {
+          "name": "bell3",
+          "part": "sulphurbell_bell_open",
+          "parent": "bell2",
+          "length": 0.288,
+          "offset_m": [
+            0.1635,
+            -0.1279
+          ],
+          "order": 4
+        }
+      ],
+      "swaps": {
+        "b0": [
+          "sulphurbell_bell_open",
+          "sulphurbell_bell_shut"
+        ],
+        "b1": [
+          "sulphurbell_bell_open",
+          "sulphurbell_bell_shut"
+        ],
+        "b2": [
+          "sulphurbell_bell_open",
+          "sulphurbell_bell_shut"
+        ],
+        "b3": [
+          "sulphurbell_bell_open",
+          "sulphurbell_bell_shut"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "b0",
+          "bone": "bell0",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        },
+        {
+          "slot": "b1",
+          "bone": "bell1",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 2,
+          "replaces_part": true
+        },
+        {
+          "slot": "b2",
+          "bone": "bell2",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 3,
+          "replaces_part": true
+        },
+        {
+          "slot": "b3",
+          "bone": "bell3",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 4,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 20,
+        "beat_bpm": 110,
+        "squash": 0.0
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "sulphurbell_bell_shut"
+      }
+    },
+    {
+      "name": "hazefern",
+      "biomes": [
+        "cloud_deck"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "hazefern_tuft",
+          "parent": null,
+          "length": 0.064,
+          "order": 0
+        },
+        {
+          "name": "frond0",
+          "part": "hazefern_frond0_mid",
+          "parent": "root",
+          "length": 0.8,
+          "offset_m": [
+            -0.048,
+            0.032
+          ],
+          "order": 1
+        },
+        {
+          "name": "frond1",
+          "part": "hazefern_frond1_mid",
+          "parent": "root",
+          "length": 1.056,
+          "offset_m": [
+            0.0,
+            0.032
+          ],
+          "order": 2
+        },
+        {
+          "name": "frond2",
+          "part": "hazefern_frond2_mid",
+          "parent": "root",
+          "length": 0.672,
+          "offset_m": [
+            0.048,
+            0.032
+          ],
+          "order": 3
+        }
+      ],
+      "swaps": {
+        "f0": [
+          "hazefern_frond0_open",
+          "hazefern_frond0_mid",
+          "hazefern_frond0_tight"
+        ],
+        "f1": [
+          "hazefern_frond1_open",
+          "hazefern_frond1_mid",
+          "hazefern_frond1_tight"
+        ],
+        "f2": [
+          "hazefern_frond2_open",
+          "hazefern_frond2_mid",
+          "hazefern_frond2_tight"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "f0",
+          "bone": "frond0",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        },
+        {
+          "slot": "f1",
+          "bone": "frond1",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 2,
+          "replaces_part": true
+        },
+        {
+          "slot": "f2",
+          "bone": "frond2",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 3,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 8,
+        "beat_bpm": 110,
+        "squash": 0.02,
+        "swap_cycle": {
+          "slot": "f1",
+          "sequence": [
+            "hazefern_frond1_mid",
+            "hazefern_frond1_open"
+          ],
+          "beats": [
+            2,
+            2
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "hazefern_frond1_tight",
+        "also": {
+          "f0": "hazefern_frond0_tight",
+          "f2": "hazefern_frond2_tight"
+        }
+      }
+    },
+    {
+      "name": "glasscoral",
+      "biomes": [
+        "vent_fields"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "glasscoral_foot_dim",
+          "parent": null,
+          "length": 0.064,
+          "order": 0
+        },
+        {
+          "name": "spike0",
+          "part": "glasscoral_spike0_full",
+          "parent": "root",
+          "length": 0.544,
+          "offset_m": [
+            -0.16,
+            0.064
+          ],
+          "order": 1
+        },
+        {
+          "name": "spike1",
+          "part": "glasscoral_spike1_full",
+          "parent": "root",
+          "length": 0.8,
+          "offset_m": [
+            -0.064,
+            0.064
+          ],
+          "order": 2
+        },
+        {
+          "name": "spike2",
+          "part": "glasscoral_spike2_full",
+          "parent": "root",
+          "length": 0.672,
+          "offset_m": [
+            0.048,
+            0.064
+          ],
+          "order": 3
+        },
+        {
+          "name": "spike3",
+          "part": "glasscoral_spike3_full",
+          "parent": "root",
+          "length": 0.448,
+          "offset_m": [
+            0.144,
+            0.064
+          ],
+          "order": 4
+        },
+        {
+          "name": "spike4",
+          "part": "glasscoral_spike4_full",
+          "parent": "root",
+          "length": 0.352,
+          "offset_m": [
+            0.0,
+            0.064
+          ],
+          "order": 5
+        }
+      ],
+      "swaps": {
+        "foot": [
+          "glasscoral_foot_dim",
+          "glasscoral_foot_bright"
+        ],
+        "s0": [
+          "glasscoral_spike0_full",
+          "glasscoral_spike0_short"
+        ],
+        "s1": [
+          "glasscoral_spike1_full",
+          "glasscoral_spike1_short"
+        ],
+        "s2": [
+          "glasscoral_spike2_full",
+          "glasscoral_spike2_short"
+        ],
+        "s3": [
+          "glasscoral_spike3_full",
+          "glasscoral_spike3_short"
+        ],
+        "s4": [
+          "glasscoral_spike4_full",
+          "glasscoral_spike4_short"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "foot",
+          "bone": "root",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 0,
+          "replaces_part": true
+        },
+        {
+          "slot": "s0",
+          "bone": "spike0",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        },
+        {
+          "slot": "s1",
+          "bone": "spike1",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 2,
+          "replaces_part": true
+        },
+        {
+          "slot": "s2",
+          "bone": "spike2",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 3,
+          "replaces_part": true
+        },
+        {
+          "slot": "s3",
+          "bone": "spike3",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 4,
+          "replaces_part": true
+        },
+        {
+          "slot": "s4",
+          "bone": "spike4",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 5,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 4,
+        "beat_bpm": 110,
+        "squash": 0.0,
+        "swap_cycle": {
+          "slot": "foot",
+          "sequence": [
+            "glasscoral_foot_dim",
+            "glasscoral_foot_bright"
+          ],
+          "beats": [
+            1,
+            1
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "glasscoral_spike0_short",
+        "also": {
+          "s1": "glasscoral_spike1_short",
+          "s2": "glasscoral_spike2_short",
+          "s3": "glasscoral_spike3_short",
+          "s4": "glasscoral_spike4_short"
+        }
+      }
+    },
+    {
+      "name": "ventcap",
+      "biomes": [
+        "surface_plains",
+        "vent_fields"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "ventcap_chimney",
+          "parent": null,
+          "length": 0.48,
+          "order": 0
+        },
+        {
+          "name": "lid",
+          "part": "ventcap_lid_open",
+          "parent": "root",
+          "length": 0.32,
+          "offset_m": [
+            -0.16,
+            0.48
+          ],
+          "order": 1
+        },
+        {
+          "name": "puff",
+          "part": "ventcap_puff_low",
+          "parent": "root",
+          "length": 0.48,
+          "offset_m": [
+            0.0,
+            0.48
+          ],
+          "order": 2
+        }
+      ],
+      "swaps": {
+        "lid": [
+          "ventcap_lid_open",
+          "ventcap_lid_shut"
+        ],
+        "puff": [
+          "ventcap_puff_low",
+          "ventcap_puff_high"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "lid",
+          "bone": "lid",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        },
+        {
+          "slot": "puff",
+          "bone": "puff",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 2,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 3,
+        "beat_bpm": 110,
+        "squash": 0.03,
+        "swap_cycle": {
+          "slot": "puff",
+          "sequence": [
+            "ventcap_puff_low",
+            "ventcap_puff_high"
+          ],
+          "beats": [
+            1,
+            1
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "ventcap_lid_shut"
+      }
+    }
+  ]
+}

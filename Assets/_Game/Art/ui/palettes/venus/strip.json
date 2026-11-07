@@ -1,0 +1,47 @@
+{
+  "key": "ui/palettes/venus/strip",
+  "style": "v3",
+  "palette": true,
+  "colors": [
+    {
+      "name": "offwhite",
+      "hex": "#F0E2C8",
+      "shadow": "#BDAE9A"
+    },
+    {
+      "name": "red",
+      "hex": "#B8583A",
+      "shadow": "#954E37"
+    },
+    {
+      "name": "mustard",
+      "hex": "#D8B04E",
+      "shadow": "#AC8B45"
+    },
+    {
+      "name": "teal",
+      "hex": "#6F9A88",
+      "shadow": "#627C6D"
+    },
+    {
+      "name": "green",
+      "hex": "#8E9A5E",
+      "shadow": "#787C50"
+    },
+    {
+      "name": "sky",
+      "hex": "#E0A57A",
+      "shadow": "#B18363"
+    },
+    {
+      "name": "brown",
+      "hex": "#45352F",
+      "shadow": "#45352F"
+    },
+    {
+      "name": "ink",
+      "hex": "#1E1A17",
+      "shadow": null
+    }
+  ]
+}
