@@ -97,6 +97,65 @@ function Get-GateMB($chosen) {
     return 1500
 }
 
+# D-145: the gate is per job from measured peaks. A category is the key's first part + the row's kind
+# (flora:rigset, terrain:ground_strip_set, creatures:v3, props:prop_sheet, ...). render.py logs one line
+# per asset to logs/blender_<date>.log ("<iso> OK <key> | ... | peak <n>MB") and a job line
+# ("<iso> OK <target> | <n> assets"). Peaks are whole-process, so inside one job a later asset inherits
+# the earlier ones' peak: a line counts as its category's own measurement only if it is the job's
+# first or rises above the previous line's peak. The last own peak per category wins; a GATE-RESET
+# line (a job over its estimate by > 25 %) drops the category until it is measured again.
+$logDir = Join-Path $Root 'logs'
+$utf8 = New-Object System.Text.UTF8Encoding($false)
+
+function Get-Category($a) {
+    $kind = 'other'
+    foreach ($f in @('rigset', 'ground_strip_set', 'prop_sheet', 'painted_bg', 'palette_strip', 'ui_set', 'icon_set',
+                     'flora_atlas', 'terrain3d', 'atlas', 'model')) {
+        if ($a.$f) { $kind = $f; break }
+    }
+    if ($kind -eq 'other' -and $a.style -eq 'v3') { $kind = 'v3' }
+    return "$($a.key.Split('/')[0]):$kind"
+}
+
+function Get-MeasuredPeaks {
+    $catOf = @{}
+    foreach ($a in $assets) { $catOf[$a.key] = Get-Category $a }
+    $peaks = @{}
+    $prev = -1
+    foreach ($f in (Get-ChildItem $logDir -Filter 'blender_*.log' -ErrorAction SilentlyContinue | Sort-Object Name)) {
+        foreach ($ln in (Get-Content $f.FullName -Encoding UTF8 -ErrorAction SilentlyContinue)) {
+            if ($ln -match '^\S+ OK \S+ \| \d+ assets?$' -or $ln -match '^\S+ GATE ') { $prev = -1; continue }   # a job boundary
+            if ($ln -match '^\S+ GATE-RESET (\S+)') { $peaks.Remove($Matches[1]); $prev = -1; continue }
+            if ($ln -match '^\S+ OK (\S+) \|.*\| peak (\d+) ?MB') {
+                $k = $Matches[1]; $p = [int]$Matches[2]
+                if ($catOf.ContainsKey($k) -and ($prev -lt 0 -or $p -gt $prev)) { $peaks[$catOf[$k]] = @{ Peak = $p; Key = $k } }
+                $prev = $p
+            }
+        }
+    }
+    return $peaks
+}
+
+function Get-GateInfo($chosen) {
+    # D-145: max(1200, the largest last measured peak among the job's categories + 700) when every category
+    # has one on file; otherwise the gate as before (Get-GateMB: 1200 numpy-only, 2000 big bakes, else 1500).
+    $peaks = Get-MeasuredPeaks
+    $cats = @($chosen | ForEach-Object { Get-Category $_ } | Select-Object -Unique)
+    $missing = @($cats | Where-Object { -not $peaks.ContainsKey($_) })
+    if ($cats.Count -eq 0 -or $missing.Count -gt 0) {
+        return @{ Gate = (Get-GateMB $chosen); Peak = 0; Cats = $cats; Why = "no measured peak on file for $($missing -join ', '): default gate" }
+    }
+    $top = $cats | Sort-Object { $peaks[$_].Peak } -Descending | Select-Object -First 1
+    $p = $peaks[$top].Peak
+    return @{ Gate = [Math]::Max(1200, $p + 700); Peak = $p; Cats = $cats;
+              Why = "D-145: max(1200, $p + 700) from $top (last measured $($peaks[$top].Key), $p MB)" }
+}
+
+function Write-BlenderLog([string]$line) {
+    $path = Join-Path $logDir "blender_$((Get-Date).ToString('yyyy-MM-dd')).log"
+    [System.IO.File]::AppendAllText($path, "$((Get-Date).ToString('s')) $line`n", $utf8)
+}
+
 function Request-Heavy($job) {
     # Returns $null when acquired, else the reason. While refused, want_blender.lock stays.
     $cutoff = (Get-Date).AddHours(-2)
@@ -120,18 +179,43 @@ function Request-Heavy($job) {
         return "turn guard (D-059): $($waiting.Name -join ', ') waiting and BLENDER ran at $((Get-Item $stamp).LastWriteTime.ToString('HH:mm:ss')); their turn"
     }
     $freeMB = [int]((Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1024)
-    $gate = Get-GateMB $job.Chosen
+    $gi = Get-GateInfo $job.Chosen
+    $job.GateInfo = $gi
+    $gate = $gi.Gate
     $reason = $null
     if ($others) { $reason = "HeavyJobLock busy: $($others.Name -join ', ')" }
     elseif ($procs) { $reason = "HeavyJobLock busy: running $(($procs | ForEach-Object { $_.ProcessName }) -join ', ')" }
-    elseif ($freeMB -lt $gate) { $reason = "HeavyJobLock memory gate: $freeMB MB free (< $gate)" }
+    elseif ($freeMB -lt $gate) { $reason = "HeavyJobLock memory gate: $freeMB MB free (< $gate; $($gi.Why))" }
     if ($reason) {
         Set-Content -Path $want -Value "$((Get-Date).ToString('s')) blender waiting: $Target" -Encoding utf8
         return $reason
     }
     if (Test-Path $want) { Remove-Item $want -Force }        # acquired: stop signalling
     Set-Content -Path $lock -Value "$((Get-Date).ToString('s')) blender_render $($job.Name) (gate $gate MB, free $freeMB MB)" -Encoding utf8
+    Write-BlenderLog "GATE $($job.Name) | gate $gate MB, free $freeMB MB | $($gi.Why)"      # D-145: which gate applied, which peak
+    Write-Host "blender_render: gate $gate MB, free $freeMB MB ($($gi.Why))"
     return $null
+}
+
+function Test-Overshoot($job, [datetime]$since) {
+    # D-145: a job whose peak exceeds its estimate by > 25 % resets its categories to the default gate.
+    $gi = $job.GateInfo
+    if (-not $gi -or $gi.Peak -le 0) { return }
+    $peak = 0
+    foreach ($f in (Get-ChildItem $logDir -Filter 'blender_*.log' -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -ge $since })) {
+        foreach ($ln in (Get-Content $f.FullName -Encoding UTF8 -ErrorAction SilentlyContinue)) {
+            if ($ln -match '^(\S+) OK \S+ \|.*\| peak (\d+) ?MB') {
+                $t = [datetime]::MinValue
+                if ([datetime]::TryParse($Matches[1], [ref]$t) -and $t -ge $since.AddSeconds(-1)) { $peak = [Math]::Max($peak, [int]$Matches[2]) }
+            }
+        }
+    }
+    if ($peak -gt 1.25 * $gi.Peak) {
+        foreach ($c in $gi.Cats) { Write-BlenderLog "GATE-RESET $c | job '$($job.Name)' peak $peak MB > 1.25 x estimate $($gi.Peak) MB (D-145): default gate until re-measured" }
+        Write-Host "blender_render: '$($job.Name)' peaked at $peak MB, over 1.25 x its estimate $($gi.Peak) MB: $($gi.Cats -join ', ') back on the default gate (D-145)"
+    } elseif ($peak -gt 0) {
+        Write-Host "blender_render: '$($job.Name)' peaked at $peak MB (estimate $($gi.Peak) MB, within 25 %)"
+    }
 }
 
 $script = Join-Path $Root 'blender/render.py'
@@ -174,6 +258,7 @@ for ($i = 0; $i -lt $jobs.Count; $i++) {
             Set-Content -Path $stamp -Value "$((Get-Date).ToString('s')) $($job.Name)" -Encoding utf8   # D-059 turn guard
         }
     }
+    if ($heavy) { Test-Overshoot $job $t0 }
     $mins = ((Get-Date) - $t0).TotalMinutes
     if ($mins -gt 20) { Write-Host ("blender_render: job '{0}' took {1:N1} min (> 20, D-026); split it further" -f $job.Name, $mins) }
     # Fairness (D-026): after each job, yield to a waiting UNITY if more jobs remain.
