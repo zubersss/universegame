@@ -824,14 +824,257 @@ def venus_surface(seed):
                  {"n": 2, "parallax": 0.6, "y_m": -0.5}]
 
 
+TAU_BG = 2 * math.pi
+
+
+# ---------------------------------------------------------------- Jupiter (B-155, D-137 palette): the cloud column's decks
+# Scenes deck1 / deck2 / deck3 / deep (Bible §7.5's bands of the column) and spot (the Great Red Spot overlay: deck1 with
+# layer1 replaced by the swirl). Overlays that must read through the cloud stack sit on layer2 (the near-layer rule): the
+# lightning under the floor and the CRUSH band. Scene names are plain; when Saturn reuses them, SEEDS / PLANET_OF become
+# (planet, scene) keyed.
+
+def cloud_bank(mask, line, rng, rmin, rmax, n):
+    """A bank of overlapping lumps whose tops follow `line` (a ridge), its body filled down to the layer's bottom."""
+    H = mask.shape[0]
+    for _k in range(n):
+        cx = rng.uniform(0, W)
+        r = rng.uniform(rmin, rmax)
+        ell(mask, cx, line[int(cx) % W] + r * 0.55, r * rng.uniform(1.2, 1.8), r)
+    mask[:] = np.maximum(mask, BG._ridge_mask(H, line + rmax * 0.6))
+
+
+def bands(rng, H, specs, pal):
+    """Horizontal wavy bands (the planet's stripes seen edge-on): [(y0, thickness, colour, opacity)] -> a list of tints."""
+    out = []
+    y = np.arange(H)[:, None] + 0.5
+    for y0, th, col, op in specs:
+        line = BG.ridge(rng, [(2, 0.6), (5, 0.4)], base=y0, amp=th * 0.35)
+        m = ((y > line[None, :]) & (y < line[None, :] + th)).astype(np.float32)
+        out.append(tint(rng, H, m, col, op, var=0.04, edge_dark=0.0, bleed=6.0))
+    return out
+
+
+def moon(stack, rng, H, cx, cy, R, body, marks, n):
+    """A small painted moon disc in the thin sky: a body, n blotches, an ink-dark rim through edge_dark."""
+    disc = np.zeros((H, W), np.float32)
+    ell(disc, cx, cy, R, R)
+    stack.append(wash32(rng, H, disc, body, var=0.05, edge_dark=0.12, bleed=1.0))
+    spots = np.zeros((H, W), np.float32)
+    for _k in range(n):
+        a, r = rng.uniform(0, TAU_BG), rng.uniform(0, R * 0.65)
+        ell(spots, cx + r * math.cos(a), cy + r * math.sin(a), R * rng.uniform(0.12, 0.25), R * rng.uniform(0.08, 0.18))
+    stack.append(tint(rng, H, spots * disc, marks, 0.7, var=0.03, edge_dark=0.0, bleed=0.8))
+
+
+def bolt(mask, rng, x, y, L, depth=0):
+    """A forked lightning bolt downward from (x, y): jagged dabs, one or two forks."""
+    while L > 6:
+        seg = rng.uniform(10, 22)
+        ang = math.pi + rng.uniform(-0.6, 0.6)
+        dab(mask, x, y, seg, ang, w=1 if depth else 2)
+        x, y = x + math.sin(ang) * seg, y - math.cos(ang) * seg
+        L -= seg
+        if depth < 1 and rng.random() < 0.18:
+            bolt(mask, rng, x, y, L * 0.5, depth + 1)
+
+
+def crush_band(stack, rng, pal, H):
+    """Bible §7.5: the Crush Line drawn as a dark band labelled CRUSH: a deep-umber band along layer2's bottom, the label
+    in Limelight (cream with a drawn-ink edge, build_ui_v3's TrueType reader) every 1024 px so the layer tiles."""
+    import build_ui_v3 as UI
+    band = np.zeros((H, W), np.float32)
+    top = BG.ridge(rng, [(4, 0.6), (9, 0.4)], base=H - 78, amp=4)
+    band[:] = BG._ridge_mask(H, top)
+    stack.append(wash32(rng, H, band, BG._mix(pal["brown"], BG._rgb(v3.INK), 0.45), var=0.03, edge_dark=0.15, bleed=1.2))
+    tm = UI.text_mask(UI.LIMELIGHT, "CRUSH", 58, tracking=0.12, wobble=0.5, seed=7)
+    h, w = tm.shape
+    fill, edge = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
+    grow = tm.copy()
+    for dy, dx in ((-2, 0), (2, 0), (0, -2), (0, 2), (-1, -1), (1, 1), (-1, 1), (1, -1)):
+        grow = np.maximum(grow, np.roll(np.roll(tm, dy, 0), dx, 1))
+    y0 = H - 39 - h // 2
+    for x0 in (256 - w // 2, 1280 - w // 2):
+        fill[y0:y0 + h, x0:x0 + w] = np.maximum(fill[y0:y0 + h, x0:x0 + w], tm)
+        edge[y0:y0 + h, x0:x0 + w] = np.maximum(edge[y0:y0 + h, x0:x0 + w], grow)
+    stack.append((np.broadcast_to(BG._rgb(v3.INK), (H, W, 3)).astype(np.float32), edge.astype(np.float32)))
+    stack.append((np.broadcast_to(pal["offwhite"], (H, W, 3)).astype(np.float32), fill.astype(np.float32)))
+
+
+def spot_swirl(stack, rng, pal, H, cx, cy, R):
+    """The Great Red Spot: a brick oval eye inside three interleaved spiral arms (brick, cream, rust-brick) cut from a
+    log-spiral coordinate (angle - 2.4 ln r), tapering out at the rim; UNITY turns it slowly."""
+    x0, x1 = int(cx - 1.7 * R), int(cx + 1.7 * R)
+    y0, y1 = max(int(cy - 0.62 * R), 0), min(int(cy + 0.62 * R), H)
+    X, Y = np.meshgrid(np.arange(x0, x1) + 0.5, np.arange(y0, y1) + 0.5)
+    u, v = (X - cx) / 1.6, (Y - cy) / 0.55
+    r = np.hypot(u, v)
+    sp = np.arctan2(v, u) - 2.4 * np.log(np.maximum(r, 1.0) / R)
+    ring = (r > 0.32 * R) & (r < R * (0.92 + 0.08 * np.sin(5 * np.arctan2(v, u))))
+    for k, col in enumerate((pal["red"], pal["offwhite"], BG._mix(pal["red"], pal["mustard"], 0.5))):
+        arm = np.zeros((H, W), np.float32)
+        band = (np.cos(3 * sp - k * TAU_BG / 3) > 0.35) & ring
+        arm[y0:y1, np.arange(x0, x1) % W] = band.astype(np.float32)
+        stack.append(tint(rng, H, arm, col, 0.8, var=0.04, edge_dark=0.04, bleed=2.0))
+    eye = np.zeros((H, W), np.float32)
+    ell(eye, cx, cy, R * 0.55, R * 0.24)
+    stack.append(wash32(rng, H, eye, pal["red"], var=0.05, edge_dark=0.10, bleed=2.0))
+    core = np.zeros((H, W), np.float32)
+    ell(core, cx - R * 0.08, cy - R * 0.03, R * 0.28, R * 0.1)
+    stack.append(tint(rng, H, core, BG._mix(pal["red"], pal["offwhite"], 0.4), 0.8, var=0.03, edge_dark=0.0, bleed=4.0))
+
+
+def jupiter_scene(seed, deck="deck1"):
+    rng = np.random.default_rng(seed)
+    pal = _pal("jupiter")
+    top_c = {"deck1": pal["sky"], "deck2": BG._mix(pal["sky"], pal["brown"], 0.35), "deck3": BG._mix(pal["brown"], pal["red"], 0.25),
+             "deep": BG._mix(pal["brown"], BG._rgb(v3.INK), 0.35), "spot": pal["sky"]}[deck]
+    low_c = {"deck1": pal["offwhite"], "deck2": pal["sky"], "deck3": BG._mix(pal["brown"], pal["mustard"], 0.3),
+             "deep": pal["brown"], "spot": pal["offwhite"]}[deck]
+    out = []
+    # layer0: the sky gradient, the bands rolling past (decks 1-2), Io + Europa (deck 1), far cloud walls / towers / swirls
+    H = 1024
+    yy = (np.arange(H) / H)[:, None, None]
+    sky = top_c * (1 - yy * 0.8) + low_c * yy * 0.8
+    stack = Stack([(np.broadcast_to(sky, (H, W, 3)).astype(np.float32), np.ones((H, W), np.float32))])
+    if deck in ("deck1", "spot", "deck2"):
+        cream, rust = pal["offwhite"], pal["mustard"]
+        for t in bands(rng, H, [(140, 46, cream, 0.55), (230, 30, rust, 0.5), (300, 54, cream, 0.5), (400, 22, pal["red"], 0.45),
+                                (470, 40, cream, 0.45), (560, 26, rust, 0.4)], pal):
+            stack.append(t)
+    if deck in ("deck1", "spot"):
+        moon(stack, rng, H, 1500, 120, 34, pal["mustard"], pal["red"], 7)                # Io: sulphur and brick blotches
+        moon(stack, rng, H, 560, 90, 26, pal["offwhite"], pal["sky"], 5)                 # Europa: cream with tan streaks
+    far = BG.ridge(rng, [(2, 0.5), (5, 0.3), (11, 0.2)], base=760, amp=40)
+    wall = np.zeros((H, W), np.float32)
+    cloud_bank(wall, far, rng, 40, 90, 22)
+    far_c = {"deck1": BG._mix(pal["offwhite"], pal["sky"], 0.4), "spot": BG._mix(pal["offwhite"], pal["sky"], 0.4),
+             "deck2": BG._mix(pal["sky"], pal["brown"], 0.45), "deck3": BG._mix(pal["brown"], pal["red"], 0.35), "deep": pal["brown"]}[deck]
+    stack.append(tint(rng, H, lining(wall, 6, 4), BG._mix(far_c, pal["offwhite"], 0.5), 0.8, var=0.03, edge_dark=0.03, bleed=3.0))
+    stack.append(wash32(rng, H, wall, far_c, var=0.05, edge_dark=0.05, bleed=3.0))
+    if deck == "deck3":                                                                  # storm towers, lit from below
+        towers = np.zeros((H, W), np.float32)
+        for _k in range(6):
+            cloud_tower(towers, rng.uniform(0, W), rng.uniform(820, 900), rng.uniform(300, 480), rng.uniform(70, 110), rng)
+        glow = np.roll(towers, 8, 0) * (1 - towers)
+        stack.append(tint(rng, H, np.maximum(glow, 0), pal["red"], 0.6, var=0.03, edge_dark=0.0, bleed=3.0))
+        stack.append(wash32(rng, H, towers, BG._mix(pal["brown"], pal["red"], 0.3), var=0.05, edge_dark=0.07, bleed=2.5))
+    if deck == "deep":                                                                   # slow brick-and-umber swirls
+        for k in range(5):
+            sw = np.zeros((H, W), np.float32)
+            cx, cy = rng.uniform(0, W), rng.uniform(300, 700)
+            for t in np.linspace(0, 1, 30):
+                a = 1.8 * TAU_BG * t
+                r = 30 + 160 * t
+                ell(sw, cx + r * math.cos(a) * 1.8, cy + r * math.sin(a) * 0.5, 18 + 20 * t, 10 + 8 * t)
+            stack.append(tint(rng, H, sw, BG._mix(pal["red"], pal["brown"], 0.5), 0.45, var=0.04, edge_dark=0.0, bleed=5.0))
+    out.append(finish(stack, rng, H))
+    # layer1: the nearer banks (frosted tops on deck 1), a station (deck 2), anvils + a Stormglider's shadow (deck 3),
+    # the Red Spot's swirl (spot), heat shimmer (deep)
+    H = 640
+    stack = Stack()
+    if deck == "spot":
+        spot_swirl(stack, rng, pal, H, 1024, 300, 260)
+    else:
+        line = BG.ridge(rng, [(2, 0.45), (6, 0.35), (13, 0.2)], base=360, amp=50)
+        bank = np.zeros((H, W), np.float32)
+        cloud_bank(bank, line, rng, 50, 110, 18)
+        body = {"deck1": pal["offwhite"], "deck2": BG._mix(pal["sky"], pal["brown"], 0.3), "deck3": BG._mix(pal["brown"], pal["mustard"], 0.25),
+                "deep": BG._mix(pal["brown"], pal["red"], 0.2)}[deck]
+        stack.append(tint(rng, H, lining(bank, 7, 5), pal["offwhite"] if deck == "deck1" else BG._mix(body, pal["offwhite"], 0.4), 0.85,
+                          var=0.03, edge_dark=0.03, bleed=2.5))
+        stack.append(wash32(rng, H, bank, body, var=0.05, edge_dark=0.07, bleed=2.5))
+        if deck == "deck2":                                                              # a distant station on its gasbags
+            st = np.zeros((H, W), np.float32)
+            sx = rng.uniform(300, 1700)
+            for k in (-1, 0, 1):
+                ell(st, sx + 70 * k, 150, 42, 30)
+            rect(st, sx - 100, sx + 100, 205, 228)
+            for k in range(6):
+                rect(st, sx - 90 + 36 * k, sx - 88 + 36 * k, 178, 206)
+            stack.append(wash32(rng, H, st, BG._mix(pal["brown"], pal["sky"], 0.4), var=0.03, edge_dark=0.05, bleed=1.2))
+        if deck == "deck3":
+            anv = np.zeros((H, W), np.float32)
+            for _k in range(3):
+                ax = rng.uniform(0, W)
+                cloud_tower(anv, ax, 330, 220, 70, rng)
+                ell(anv, ax, 120, 230, 34)                                               # the flat anvil top
+            stack.append(wash32(rng, H, anv, BG._mix(pal["brown"], pal["sky"], 0.35), var=0.05, edge_dark=0.06, bleed=2.0))
+            gl = np.zeros((H, W), np.float32)                                            # a Stormglider's shadow (no face)
+            gx, gy = rng.uniform(300, 1700), 230
+            ell(gl, gx, gy, 46, 14)
+            for sg in (-1, 1):
+                poly(gl, [(gx - 20, gy), (gx + 30, gy), (gx - 10, gy + sg * 62)])
+            poly(gl, [(gx - 40, gy - 3), (gx - 110, gy - 1), (gx - 40, gy + 3)])
+            stack.append(tint(rng, H, gl, BG._mix(pal["brown"], BG._rgb(v3.INK), 0.3), 0.55, var=0.02, edge_dark=0.0, bleed=1.5))
+        if deck == "deep":
+            sh = np.zeros((H, W), np.float32)
+            for _k in range(30):
+                cx = rng.uniform(0, W)
+                ell(sh, cx, rng.uniform(80, 400), rng.uniform(30, 80), rng.uniform(1.5, 3))
+            stack.append(tint(rng, H, sh, pal["red"], 0.4, var=0.0, edge_dark=0.0, bleed=1.5))
+    out.append(finish(stack, rng, H))
+    # layer2 (near): wisps (decks 1 / spot), lightning under the floor (deck 2), rain curtains (deck 3), the CRUSH band (deep)
+    H = 384
+    stack = Stack()
+    if deck in ("deck1", "spot", "deck2"):
+        wisps = np.zeros((H, W), np.float32)
+        for _k in range(26):
+            cx, cy = rng.uniform(0, W), rng.uniform(40, 300)
+            for j in range(3):
+                ell(wisps, cx + 70 * j, cy + rng.uniform(-4, 4), rng.uniform(60, 140), rng.uniform(3, 7))
+        stack.append(tint(rng, H, wisps, pal["offwhite"] if deck != "deck2" else BG._mix(pal["sky"], pal["offwhite"], 0.4), 0.55,
+                          var=0.03, edge_dark=0.0, bleed=2.5))
+    if deck == "deck2":
+        glow, bolts = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
+        for _k in range(4):
+            bx, by = rng.uniform(0, W), rng.uniform(250, 300)
+            ell(glow, bx, by + 50, 110, 40)
+            bolt(bolts, rng, bx, by, 90)
+        stack.append(tint(rng, H, glow, pal["teal"], 0.35, var=0.03, edge_dark=0.0, bleed=12.0))   # the flash under the floor (a tone)
+        stack.append(tint(rng, H, bolts, pal["offwhite"], 0.95, var=0.0, edge_dark=0.0, bleed=0.6))
+    if deck == "deck3":
+        rain = np.zeros((H, W), np.float32)
+        for _k in range(140):
+            dab(rain, rng.uniform(0, W), rng.uniform(150, 384), rng.uniform(40, 120), 0.18, w=0)
+        stack.append(tint(rng, H, rain, pal["teal"], 0.35, var=0.0, edge_dark=0.0, bleed=0.8))
+    if deck == "deep":
+        crush_band(stack, rng, pal, H)
+    out.append(finish(stack, rng, H))
+    return out, [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0},
+                 {"n": 2, "parallax": 0.6, "y_m": -0.5}]
+
+
+def jupiter_deck1(seed):
+    return jupiter_scene(seed, "deck1")
+
+
+def jupiter_deck2(seed):
+    return jupiter_scene(seed, "deck2")
+
+
+def jupiter_deck3(seed):
+    return jupiter_scene(seed, "deck3")
+
+
+def jupiter_deep(seed):
+    return jupiter_scene(seed, "deep")
+
+
+def jupiter_spot(seed):
+    return jupiter_scene(seed, "spot")
+
+
 SCENES = {("earth", "forest"): earth_forest, ("earth", "coast"): earth_coast,
           ("mars", "canyon"): mars_canyon, ("mars", "storm"): mars_storm,
           ("mercury", "day"): mercury_day, ("mercury", "twilight"): mercury_twilight, ("mercury", "night"): mercury_night,
-          ("venus", "deck"): venus_deck, ("venus", "surface"): venus_surface}
+          ("venus", "deck"): venus_deck, ("venus", "surface"): venus_surface,
+          ("jupiter", "deck1"): jupiter_deck1, ("jupiter", "deck2"): jupiter_deck2, ("jupiter", "deck3"): jupiter_deck3,
+          ("jupiter", "deep"): jupiter_deep, ("jupiter", "spot"): jupiter_spot}
 SEEDS = {"forest": 13301, "coast": 13302, "canyon": 14101, "storm": 14102, "day": 14501, "twilight": 14502, "night": 14503,
-         "deck": 14701, "surface": 14702}
+         "deck": 14701, "surface": 14702, "deck1": 14801, "deck2": 14802, "deck3": 14803, "deep": 14804, "spot": 14805}
 PLANET_OF = {"forest": "earth", "coast": "earth", "canyon": "mars", "storm": "mars", "day": "mercury", "twilight": "mercury", "night": "mercury",
-             "deck": "venus", "surface": "venus"}
+             "deck": "venus", "surface": "venus",
+             "deck1": "jupiter", "deck2": "jupiter", "deck3": "jupiter", "deep": "jupiter", "spot": "jupiter"}
 
 
 # ---------------------------------------------------------------- lock-free preview: 1080p composite at 1x + the 2x seam check
@@ -847,7 +1090,7 @@ def preview(out_dir, scenes=("forest", "coast"), from_png=False):
     import preview_c2_earth_rigs as PR
     for scene in scenes:
         planet = PLANET_OF[scene]
-        tag = {"earth": "b133", "mars": "b141", "mercury": "b145", "venus": "b147"}[planet]
+        tag = {"earth": "b133", "mars": "b141", "mercury": "b145", "venus": "b147", "jupiter": "b155"}[planet]
         d = os.path.join(out_dir, tag, scene)
         os.makedirs(d, exist_ok=True)
         u8, info = [], []
@@ -884,6 +1127,10 @@ def preview(out_dir, scenes=("forest", "coast"), from_png=False):
             import build_c2_mars_ground as MG
             S, _w = GS.sheets(("regolith",), MG.mats)
             strip = "regolith"
+        elif planet == "jupiter":                                 # B-155: a floe of ice (the tiles; D-137's caps unused here)
+            import build_c2_jupiter_floes as JF
+            S, _w = JF.sheets(("ice",))
+            strip = "ice"
         elif planet in ("mercury", "venus"):                      # no strip yet: the Earth stone recipe stands in
             S, _w = GS.sheets(("stone",))
             strip = "stone"
