@@ -239,7 +239,7 @@ def export(art, S=None):
             json.dump(meta, f, indent=2)
             f.write("\n")
         out.append((key, W, FH, n))
-    return out, within, across, caps
+    return out, dict(within, **{f"{k} caps": v for k, v in caps.items()}), across   # render.py's ground-strip row unpacks three
 
 
 def floe(S, kind, n, rnd):
@@ -251,7 +251,12 @@ def floe(S, kind, n, rnd):
     return img.astype(np.uint8)
 
 
-def preview(out_dir, S=None, allw=None):
+def main(out, S=None, allw=None, footnote="sources + preview"):
+    """render.py's review hook (the ground-strip row): the preview layout written to `out`."""
+    return preview(os.path.dirname(out), S=S, allw=allw, out=out, footnote=footnote)
+
+
+def preview(out_dir, S=None, allw=None, out=None, footnote=None):
     import numpy as np
     sys.path.insert(0, os.path.dirname(HERE))
     import review
@@ -306,8 +311,8 @@ def preview(out_dir, S=None, allw=None):
                         f"{max(w[2] for w in inner):.1f} px; jupiter palette {', '.join(f'{k} {v * 100:.1f}%' for k, v in hits.items())}; nothing exported", 6, 48)
     rows.append(foot)
     img = np.vstack(rows)
-    review._label(img, __import__("time").strftime("%m-%d %H:%M") + " preview (not exported)", 2, img.shape[0] - 16)
-    out = os.path.join(out_dir, "review_b155_jupiter_floes_preview.png")
+    review._label(img, __import__("time").strftime("%m-%d %H:%M") + " " + (footnote or "preview (not exported)"), 2, img.shape[0] - 16)
+    out = out or os.path.join(out_dir, "review_b155_jupiter_floes_preview.png")
     review.write(out, img)
     print("written", out, "| tile joins", {k: round(v, 2) for k, v in within.items()}, "| caps", {k: round(v, 2) for k, v in caps.items()},
           "|", across, "| palette", {k: round(v * 100, 1) for k, v in hits.items()}, "| problems", problems or "-")

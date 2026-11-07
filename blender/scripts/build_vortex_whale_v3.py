@@ -276,6 +276,17 @@ def build(out=os.path.join(SRC, "jupiter_vortex_whale_rigset.blend")):
     return out
 
 
+def main(out):
+    """render.py review_script (the Jupiter export): the assembled whale and its loops, stamped. Inside Blender gp_draw is
+    real: fakegp's mat goes in for the fake drawings and is restored after (the Hadal Maw's manner)."""
+    fakegp.install()
+    try:
+        preview(os.path.dirname(out), path=out, stamp="export")
+    finally:
+        fakegp.restore()
+    return []
+
+
 def preview(out_dir, scale=0.25, path=None, stamp="preview (not exported)"):
     import numpy as np
     sys.path.insert(0, os.path.dirname(HERE))
