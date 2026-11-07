@@ -21,8 +21,8 @@ Your role is the word in your kickoff or resume message. Then read:
 | Owner   | Writes                                                                                              |
 |---------|-----------------------------------------------------------------------------------------------------|
 | LEAD    | `docs/`, `coordination/*.md`, `coordination/charters/`, `coordination/reviews/`, `coordination/status/LEAD_STATUS.md`, `Assets/_Game/Tests/LeadQA/`, `tools/paths.json`, `.claude/`, `CLAUDE.md`, `README_START_HERE.md`, `.gitignore`, `.gitattributes`, `docs/credits/lead.md` |
-| UNITY   | `Assets/_Game/` except `Art/`, `Placeholders/`\* and `Tests/LeadQA/`; `Assets/_Game/Placeholders/`\*; `Packages/`, `ProjectSettings/`; `tools/unity_*.ps1`; `coordination/status/UNITY_STATUS.md`; `coordination/reports/unity/`; `docs/credits/unity.md` |
-| BLENDER | `blender/`; `Assets/_Game/Art/`; `tools/blender_*.ps1`; `coordination/status/BLENDER_STATUS.md`; `coordination/reports/blender/`; `docs/credits/blender.md` |
+| UNITY   | `Assets/_Game/` except `Art/`, `Placeholders/`\* and `Tests/LeadQA/`; `Assets/_Game/Placeholders/`\*; `Packages/`, `ProjectSettings/`; `tools/unity_*.ps1`; `coordination/status/UNITY_STATUS.md` + `coordination/status/archive/UNITY_*.md`; `coordination/reports/unity/`; `docs/credits/unity.md` |
+| BLENDER | `blender/`; `Assets/_Game/Art/`; `tools/blender_*.ps1`; `coordination/status/BLENDER_STATUS.md` + `coordination/status/archive/BLENDER_*.md`; `coordination/reports/blender/`; `docs/credits/blender.md` |
 
 \* `Placeholders/` is UNITY's. Nobody else edits another role's folders. Reading is always allowed.
 Exception (D-016): every `.meta` file under `Assets/_Game/Art/` (and `Assets/_Game/Art.meta`)
@@ -87,9 +87,11 @@ ever overwritten.
    **Heavy job queue (D-109).** The board's `## Heavy job queue` (LEAD rewrites it every cycle)
    ranks the pending heavy jobs by importance to the milestone. When the lock frees, the
    highest-ranked pending job goes next even if another role's want is older; D-037's
-   alternation applies only between jobs of equal rank or when the queue is silent. While
-   another role runs its heavy job, your own extra processes stay under ~300 MB (light work
-   only); if your light work needs more than that, it waits for your turn.
+   alternation applies only between jobs of equal rank or when the queue is silent. A rank is
+   live only while its role has a want on file or holds the lock: if the top rank has no want
+   when the lock frees, the next live rank runs now and the skipped role goes next after it
+   files (D-112). While another role runs its heavy job, your own extra processes stay under
+   ~300 MB (light work only); if your light work needs more than that, it waits for your turn.
 7. **Accepted work stays accepted.** Don't re-polish Done tasks unless LEAD reopens them.
 8. **Stay inside the repo.** No system installs, no registry/settings changes; list those
    in your status file for USER_ACTIONS.
@@ -97,3 +99,7 @@ ever overwritten.
    < 2 GB RAM in play (D-089), and the dev workflow must fit 8 GB.
 10. **Status after every task.** Your status file is how the others trust you and how a
     fresh session resumes. Update it when you start a task, finish one, hand off, or block.
+    Keep it to the current session and under 12 KB (D-113): `Ready for review` lists only
+    items not yet Done on the board, `Handoffs` only unrouted ones, `Proposals` only undecided
+    ones; move older entries to `coordination/status/archive/<ROLE>_<date>.md` (yours to
+    write), which nobody needs to read to resume.
