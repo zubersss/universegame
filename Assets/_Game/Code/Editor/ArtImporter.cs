@@ -288,6 +288,9 @@ namespace Meridian.EditorTools
             // its bottom row (ground colour) along the sprite's top edge: a 1-px dark line across the sky wherever a hills layer ends.
             // The starfield (tile_y) keeps both axes for SpaceBackdrop's UV tiling.
             if (ArtRules.SceneKeyOf(key) != null && !LayerTilesY(assetPath, key)) ti.wrapModeV = TextureWrapMode.Clamp;
+            // P-48 (LEAD cycle 271): a tiling frame sheet (the ground and floe strips) tiles in x only too: with Repeat in v, each frame's bottom
+            // texel row bilinear-blended with the sheet's transparent top row — a faint line 2 m under every column's ground line.
+            if (ClampsV(sheet)) ti.wrapModeV = TextureWrapMode.Clamp;
             ti.maxTextureSize = ArtRules.MaxDimension;
             ti.textureCompression = TextureImporterCompression.CompressedHQ;
             ti.spritePixelsPerUnit = sheet != null && sheet.ppu > 0f ? sheet.ppu : ArtRules.V3PixelsPerUnit;
@@ -312,6 +315,9 @@ namespace Meridian.EditorTools
             ti.spriteImportMode = multiple ? SpriteImportMode.Multiple : SpriteImportMode.Single;
             return true;
         }
+
+        /// <summary>P-48: a frame sheet that tiles (`"tile": true` with frames: the ground and floe strips) repeats in x only. Pure.</summary>
+        public static bool ClampsV(SheetManifest sheet) => sheet != null && sheet.tile && sheet.IsSheet;
 
         /// <summary>U-094: "backgrounds/earth/plains/plains.json" → "backgrounds/earth/plains"; null for any other path.</summary>
         public static string V3SceneKey(string relativePath)

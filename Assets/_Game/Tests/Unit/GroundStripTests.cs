@@ -65,5 +65,26 @@ namespace Meridian.Tests
             var frame3 = new Rect(204f, 0f, 64f, 152f);
             Assert.AreEqual(205f, GroundStrip.FillRect(frame3).xMin, "any frame: from its own left edge");
         }
+
+        /// <summary>P-48: every ground strip sheet tiles in x only — Repeat in u, Clamp in v (with Repeat in v each frame's bottom row sampled the
+        /// sheet's transparent top row: a faint line 2 m under every ground line); a plain image and an overlay keep their rules.</summary>
+        [Test]
+        public void TheStripSheetsRepeatInXAndClampInY()
+        {
+            Assert.IsTrue(Meridian.EditorTools.ArtImporter.ClampsV(new Meridian.EditorTools.ArtImporter.SheetManifest { tile = true, frames = 8, frame_width = 64, frame_height = 152, columns = 8 }), "a tiling frame sheet");
+            Assert.IsFalse(Meridian.EditorTools.ArtImporter.ClampsV(new Meridian.EditorTools.ArtImporter.SheetManifest { tile = true }), "a tiling single image (an overlay) keeps v");
+            Assert.IsFalse(Meridian.EditorTools.ArtImporter.ClampsV(null), "no sidecar");
+            int checkedSheets = 0;
+            foreach (var keys in new[] { GroundStrip.Keys, GroundStrip.MarsKeys, GroundStrip.MercuryKeys })
+                foreach (var key in keys)
+                {
+                    var ti = UnityEditor.AssetImporter.GetAtPath($"Assets/_Game/Art/{key}_color.png") as UnityEditor.TextureImporter;
+                    if (ti == null) continue;
+                    Assert.AreEqual(TextureWrapMode.Repeat, ti.wrapModeU, key + ": repeats in x");
+                    Assert.AreEqual(TextureWrapMode.Clamp, ti.wrapModeV, key + ": clamps in y");
+                    checkedSheets++;
+                }
+            Assert.GreaterOrEqual(checkedSheets, 9, "the nine strips (Earth 4, Mars 3, Mercury 2) are on disk");
+        }
     }
 }
