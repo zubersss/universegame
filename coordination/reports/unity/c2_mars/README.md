@@ -19,10 +19,10 @@ compile 0 errors · EditMode 351/353 → 353/353 after two stale asserts of mine
 | u128/2_border_mid | The forest → plains border at x 712: the plains set fading in at alpha 0.35 over the forest; datum 329.5 mid-blend. |
 | u128/3_plains | After the crossfade: the plains set, crossfades 1. |
 | u128/4_shore_coast | The shore at column 2096 with the Maw come in to 14 m: the coast set (dunes, the sea, the stacks) painted at datum 322.2 behind the surveyor — the frame the Maw lacked at B2. **LEAD: passes; U-128 closes.** |
-| u118/1_plains_1x | The Mars entry at x 65 — the polar cap region, so the plains set (no fallback), frostcurl ×42 (the polar list's one kind), the Pilgrim. **Re-shoot owed:** the strip under the plain reads basalt; the spawn column's top tile and strip material print in the re-shoot (the camp plateau is a stamp; the cap's natural top is CO₂ frost over ice). No dustskater: it needs regolith and the cap is ice; it stands beside the lurker on the plains in the re-shoot. |
+| u118/1_plains_1x | The Mars entry at x 65 — the polar cap region, so the plains set (no fallback), frostcurl ×42 (the polar list's one kind), the Pilgrim. The strip under the plain is the regolith sheet (the print: top tile Snow over Ice, strip material 0; pixel mean (105, 58, 43) on the plains = 0.68 of the sheet under the Mars day light, (52, 45, 42) at the cap — the extra dimming at the cap is open). No dustskater here: it needs regolith and the cap is frost; it stands beside the lurker in 3_lurker_den. Snow / ice take BLENDER.s frost strip (D-143) when it lands. |
 | u118/2_canyon_1x | The canyon floor at x 1451 after the border crossfade: the canyon set at datum 160.0 (the floor), the terraces. |
-| u118/3_lurker_den | **Re-shoot owed:** the carry landed the surveyor in the skylight shaft, so the camera looked into the tube while the lurker sat on the surface above (at den true, dens 1). The re-shoot stands past the shaft, parks the camera on the lurker and waits for its peek idle. |
-| u118/4_storm_1x | The storm forced to intensity 0.95: the veil at alpha 0.99, scroll 14.4 m — shot in the tube; the re-shoot takes it on the surface. |
+| u118/3_lurker_den | Re-shot 11:19: the lurker peeks (clip idle) at its mound (props/mars/tube_mound in front at order 6) over the first lava tube at x 322, a dustskater beside it on the plains, the surveyor 12 m off (inside 6 m it flees). |
+| u118/4_storm_1x | Re-shot 11:19 on the surface: the storm forced to intensity 0.95, the B-141 storm set as the veil at alpha 0.99 (scroll 14.4 m) over the plains set, the lurker in the open. |
 
 ## The 13-leg probe (Build/MERIDIAN_0.4.2 rebuilt 10:49, cold cache)
 | Row | Value |
