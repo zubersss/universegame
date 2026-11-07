@@ -23,6 +23,8 @@ namespace Meridian.View2D
         /// <summary>Rigged plants around the camp in C0 (every FloraSpacing m, jittered).</summary>
         public const int FloraCount = 48;
         public const float FloraSpacing = 2.5f;
+        /// <summary>U-101 / B-113: gulls over the camp in C0.</summary>
+        public const int GullCount = 1;
 
         public ParallaxLayers Layers { get; private set; }
         /// <summary>U-097: the planet's rigged flora (placeholder set until B-112).</summary>
@@ -64,6 +66,7 @@ namespace Meridian.View2D
             Layers.ConfigureFor(config.id.ToString().ToLowerInvariant(), EarthScene, surfaceDatum);
             if (Flora == null) { var fgo = new GameObject("CartoonFlora"); fgo.transform.SetParent(transform, false); Flora = fgo.AddComponent<Meridian.Flora.FloraRigs>(); }
             Flora.view = cam; Flora.player = side.player != null ? side.player.transform : null; Flora.terrain = side.terrain;
+            Flora.Reserved = 1 + GullCount; // the surveyor and the critters (Bible §9.6: ≤ 40 animated objects in all)
             Flora.Load("flora/" + config.id.ToString().ToLowerInvariant() + "/rigset");
             Flora.Populate(FloraCount, FloraSpacing, side.spawnX + 0.5f, config.id.GetHashCode() * 31 + 7);
             if (Ground == null) { var ggo = new GameObject("CartoonGround"); ggo.transform.SetParent(transform, false); Ground = ggo.AddComponent<GroundStrip>(); }
@@ -71,6 +74,9 @@ namespace Meridian.View2D
             Ground.view = cam; Ground.terrain = side.terrain;
             Ground.Load();
             if (Meridian.Art.ModelView.CartoonMaterial != null) foreach (var mv in side.GetComponentsInChildren<Meridian.Art.ModelView>(true)) mv.Wear(Meridian.Art.ModelView.CartoonMaterial);
+            // U-101: one gull (B-113) over the camp; the director keeps it (it flees and bumps like any critter).
+            if (side.creatures != null && side.player != null && side.creatures.CountOf(Meridian.Creatures.Species.Gull) < GullCount)
+                side.creatures.Spawn(Meridian.Creatures.Species.Gull, (Vector2)side.player.transform.position + new Vector2(7f, 3.5f));
 
             if (side.player != null && Surveyor == null)
             {

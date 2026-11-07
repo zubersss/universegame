@@ -37,6 +37,8 @@ namespace Meridian.Flora
     public sealed class FloraRigs : MonoBehaviour
     {
         public const int FullRateCap = 40, CheapBand = 160;
+        /// <summary>Animated objects that are not flora (the surveyor, critters): the flora's full-rate share is FullRateCap minus this (Bible §9.6: ≤ 40 on screen in all).</summary>
+        public int Reserved;
         public const float CheapRateHz = 4f, RankEvery = 0.25f, ReactSeconds = 0.6f, BlinkSeconds = 0.12f;
         public const int SortingOrder = 3;
         public const string JsonSuffix = "/json", AnimatorSuffix = "/animator";
@@ -225,7 +227,7 @@ namespace Meridian.Flora
                 {
                     var p = order[i].plant;
                     p.Rank = i;
-                    bool wantFull = i < FullRateCap;
+                    bool wantFull = i < Mathf.Max(0, FullRateCap - Reserved);
                     if (wantFull != p.FullRate)
                     {
                         p.FullRate = wantFull;

@@ -96,6 +96,10 @@ namespace Meridian.View2D
             }
         }
 
+        /// <summary>U-101: plays `clip` for `seconds` whatever the surveyor does (the contact sheet's look_camera); 0 clears it.</summary>
+        public void Override(string clip, float seconds) { overrideClip = clip; overrideUntil = Time.time + seconds; }
+        string overrideClip; float overrideUntil;
+
         public void SetFacing(int dir) { if (dir != 0) { facing = dir > 0 ? 1 : -1; Renderer.flipX = facing < 0; } }
 
         /// <summary>A v3 sheet has its own clip set (contract §11.2); old names fall back to the closest one it has.</summary>
@@ -147,7 +151,7 @@ namespace Meridian.View2D
                     sinceHurt = 99f, sinceLand = sinceLand, sinceDig = 99f, sinceBump = sinceBump, sinceJump = sinceJump,
                     landSpeed = landSpeed, dashing = player.Dash.Active,
                 };
-                Play(SurveyorAnim.Pick(input));
+                Play(overrideClip != null && Time.time < overrideUntil ? overrideClip : SurveyorAnim.Pick(input));
                 SetFacing(player.Facing);
             }
             SquashRoot.localScale = Squash.Step(dt);

@@ -1060,6 +1060,88 @@ namespace Meridian.Tests
             finally { Meridian.View2D.CartoonStage.Enabled = false; }
         }
 
+        /// <summary>
+        /// U-101 (for U-098): 20 s of the C0 scene at 2 stills per second (320×180 into reports/unity/c0_&lt;date&gt;/strip/) and a
+        /// 6 × 7 contact sheet: idle → walk → jump/land → walk back past a plant → look_camera. Runs on whatever art the keys hold.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator CaptureC0Strip()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                side.dayNight.Override = 0.45f;
+                var player = side.player;
+                player.externalInput = true; player.intent = default;
+                var view = side.cartoon != null ? side.cartoon.Surveyor : null;
+                var flora = side.cartoon != null ? side.cartoon.Flora : null;
+                timeout = Time.realtimeSinceStartup + 15f;
+                while (((view != null && !view.Ready) || (flora != null && !flora.Ready)) && Time.realtimeSinceStartup < timeout) yield return null;
+                for (int i = 0; i < 60; i++) yield return null;
+                float startX = player.Body.position.x;
+                // The nearest plant on the surveyor's left: the walk back passes it.
+                float plantX = startX - 6f;
+                if (flora != null) foreach (var p in flora.Plants) if (p.Root.position.x < startX - 2f && p.Root.position.x > plantX) plantX = p.Root.position.x;
+
+                var dir = $"coordination/reports/unity/c0_{DateTime.Now:yyyy-MM-dd}/strip";
+                Directory.CreateDirectory(dir);
+                const int stills = 40, cols = 6, rows = 7, w = 320, h = 180;
+                var sheet = new Texture2D(w * cols, h * rows, TextureFormat.RGB24, false);
+                var full = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);
+                var small = new RenderTexture(w, h, 0, RenderTextureFormat.ARGB32);
+                var still = new Texture2D(w, h, TextureFormat.RGB24, false);
+                var cam = side.sideCamera;
+                float t0 = Time.time;
+                try
+                {
+                    for (int i = 0; i < stills; i++)
+                    {
+                        float t = i * 0.5f;
+                        // The script: 0–3 s idle, 3–8 s walk right, 8 s jump, 10–16 s walk back past the plant, 16–20 s look_camera.
+                        if (t < 3f) player.intent = default;
+                        else if (t < 8f) player.intent = new Meridian.Player.PlayerIntent { move = 1f };
+                        else if (t < 10f) { player.intent = default; if (Mathf.Approximately(t, 8f)) player.PressJump(); }
+                        else if (t < 16f) player.intent = new Meridian.Player.PlayerIntent { move = player.Body.position.x > plantX - 1.5f ? -1f : 0f };
+                        else { player.intent = default; if (view != null && Mathf.Approximately(t, 16f)) view.Override("look_camera", 4f); }
+                        while (Time.time - t0 < t) yield return null;
+                        cam.targetTexture = full; cam.Render(); cam.targetTexture = null;
+                        Graphics.Blit(full, small);
+                        var prev = RenderTexture.active;
+                        RenderTexture.active = small;
+                        still.ReadPixels(new Rect(0, 0, w, h), 0, 0); still.Apply();
+                        int cx = i % cols, cy = rows - 1 - i / cols;
+                        sheet.SetPixels(cx * w, cy * h, w, h, still.GetPixels());
+                        RenderTexture.active = prev;
+                        File.WriteAllBytes($"{dir}/still_{i:D2}.png", still.EncodeToPNG());
+                    }
+                    sheet.Apply();
+                    File.WriteAllBytes($"{dir}/contact_sheet.png", sheet.EncodeToPNG());
+                    Directory.CreateDirectory("logs");
+                    File.WriteAllBytes($"logs/capture_{name}_contact_sheet.png", sheet.EncodeToPNG());
+                    TestContext.Out.WriteLine($"[MERIDIAN] CAPTURE OK: logs/capture_{name}_contact_sheet.png ({stills} stills in {dir}; plant anchor x {plantX:F1}, start x {startX:F1}, end x {player.Body.position.x:F1}, clip {(view != null ? view.Clip : "n/a")})");
+                }
+                finally
+                {
+                    player.intent = default;
+                    UnityEngine.Object.Destroy(sheet); UnityEngine.Object.Destroy(still); full.Release(); small.Release();
+                }
+                side.dayNight.Override = null;
+            }
+            finally { Meridian.View2D.CartoonStage.Enabled = false; }
+        }
+
         static IEnumerator Save(Camera cam, string name)
         {
             var rt = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);

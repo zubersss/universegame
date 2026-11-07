@@ -8,6 +8,8 @@ namespace Meridian.Creatures
     public enum Species
     {
         Stag, GreyWolf, Dustskater, ScreeStalker,
+        /// <summary>U-101 / B-113: the C0 Earth critter, a small gull that flees (v3 sheet creatures/earth/gull).</summary>
+        Gull,
         // U-055 inner planets (Bible §7.3, §7.4)
         Glassback, Cinderling, Flarewing, Shadewyrm, Cinderhulk,
         SulfurDrifter, Acidmoth, PressureCrab, VentEel, VeilSerpent,
@@ -76,6 +78,9 @@ namespace Meridian.Creatures
             new SpeciesSpec { id = Species.Stag, planet = PlanetId.Earth, artKey = "creatures/earth/stag", size = new Vector2(1.9f, 1.6f),
                 wanderSpeed = 1.2f, runSpeed = 9f, jumpSpeed = 6.5f, temper = Temper.Flees, senseRange = 8f, time = ActiveTime.Any,
                 packMin = 1, packMax = 3, maxAlive = 6, placeholder = new Color(0.55f, 0.38f, 0.22f) },
+            new SpeciesSpec { id = Species.Gull, planet = PlanetId.Earth, artKey = "creatures/earth/gull", size = new Vector2(0.7f, 0.5f),
+                wanderSpeed = 2.5f, runSpeed = 7f, temper = Temper.Flees, senseRange = 6f, time = ActiveTime.Day, habitat = Habitat.Air,
+                hoverMin = 2f, hoverMax = 5f, packMin = 1, packMax = 2, maxAlive = 3, placeholder = new Color(0.92f, 0.92f, 0.88f) },
             new SpeciesSpec { id = Species.GreyWolf, planet = PlanetId.Earth, artKey = "creatures/earth/wolf", size = new Vector2(1.5f, 0.9f),
                 wanderSpeed = 1.6f, runSpeed = 7.5f, jumpSpeed = 6f, temper = Temper.Hunts, senseRange = 14f, time = ActiveTime.Night,
                 packMin = 2, packMax = 4, maxAlive = 8, placeholder = new Color(0.45f, 0.47f, 0.5f) },
@@ -134,6 +139,7 @@ namespace Meridian.Creatures
         {
             Species.Stag => s.surfaceTile == TileId.Grass,                       // meadows and forest floor
             Species.GreyWolf => s.surfaceTile == TileId.Grass || s.surfaceTile == TileId.Snow,
+            Species.Gull => s.surfaceTile == TileId.Grass || s.surfaceTile == TileId.Sand,
             Species.Dustskater => s.surfaceTile == TileId.Regolith,
             Species.ScreeStalker => s.surfaceTile == TileId.Regolith && s.surfaceY <= s.datumY - 12, // low ground: canyon floors
             Species.Glassback => s.zone == MercuryZone.Twilight && !InColdTrap(s),

@@ -249,6 +249,30 @@ namespace Meridian.Tests
             Judge("Mars FX peak", gc, r, BudgetMonitor.DrawCallsSide);
             UnityEngine.Object.Destroy(stress.gameObject);
 
+            // ---- Earth on the v4 cartoon path (U-101: the rows U-098 asks for; Bible §9.6, D-089) ----
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+                yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(Meridian.Planets.PlanetId.Earth));
+                side = director.PlanetSide;
+                Assert.IsTrue(side.cartoon != null && side.cartoon.Active, "the cartoon path is on for Earth");
+                while (!side.terrain.IsSettled) yield return null;
+                float c0t0 = Time.realtimeSinceStartup;
+                while (side.cartoon.Flora != null && !side.cartoon.Flora.Ready && Time.realtimeSinceStartup - c0t0 < 15f) yield return null;
+                for (int i = 0; i < 60; i++) yield return null; // plants placed, sheets in
+                yield return Measure("Earth C0 (cartoon)", side.sideCamera, BudgetMonitor.DrawCallsSide, (a, b) => { gc = a; r = b; });
+                Judge("Earth C0 (cartoon)", gc, r, BudgetMonitor.DrawCallsSide);
+                long ws = r.workingSetMB > 0 ? r.workingSetMB : r.systemMemoryMB;
+                Row("Working set · Earth C0 (v4, D-089)", "< 2.0 GB (warn 1.7)", $"{ws} MB (Editor process: an upper bound of the build){(ws >= 1741 && ws < 2048 ? ", above the 1.7 GB warning line" : "")}", ws < 2048);
+                int animated = 0;
+                foreach (var a in UnityEngine.Object.FindObjectsByType<Animator>(FindObjectsSortMode.None)) if (a.isActiveAndEnabled && a.runtimeAnimatorController != null) animated++;
+                var flora = side.cartoon.Flora;
+                Row("Animated objects · Earth C0", "≤ 40 on screen (Bible §9.6)", $"{animated} Animators running (flora full rate {(flora != null ? flora.FullRateCount : 0)}, cheap idle {(flora != null ? flora.CheapCount : 0)}, plants {(flora != null ? flora.Plants.Count : 0)})", animated <= 40);
+                int atlases = AtlasFilesFor("earth");
+                Row("Sprite atlases · Earth", "≤ 8 per planet (contract §11.8)", $"{atlases} planet_earth* atlases on disk", atlases <= 8);
+            }
+            finally { Meridian.View2D.CartoonStage.Enabled = false; }
+
             StaticRows();
             WriteReport();
             Assert.IsEmpty(failures, "budgets over: " + string.Join("; ", failures));
