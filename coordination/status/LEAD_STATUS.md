@@ -1,5 +1,6 @@
 # LEAD STATUS
-Updated: 2026-11-06 18:1x · Session: 6 · Review cycle: 238
+Updated: 2026-11-06 18:2x · Session: 6 · Review cycle: 239
+Cycle 239: B-118 Done (helmet glass); U-100 back with one fix (flat dirt fill under the strip); U-101 check owed. Next: B-117 Pilgrim design sheet review; U-100 re-shoot; U-101 contact sheet + gate; then U-098.
 Cycle 238: five cards Done (U-097, U-099, B-112, B-114, B-116), B-113 art accepted, D-095/D-096, B-118 added. C0 close path: U-100 → U-101 → U-098 (assembly + profile) with B-118 and the gull in; then LEAD runs §9.7 per asset, writes C0_STYLE_REFERENCE.md, posts the owner look-over. C1 promoted (D-097): code/sources now, exports after C0 sign-off.
 Cycle 237: U-095, U-096 Done; U-100, U-101 added. C0 now waits mostly on BLENDER art (B-112, B-113, B-114). Next review: B-112 face plant sheet.
 Cycle 236: B-115 Done; U-095 accepted, Done owed on a tests entry with the final code (rides on U-096 check); D-094 contention ruling; P-39 settings panel to Backlog. Next: B-112 face plant review; U-096 iris strip.

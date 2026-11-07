@@ -166,14 +166,14 @@ Goal: Cartoon ground placeholder for the C0 scene so the style test reads cartoo
 Accept: `earth_c0_ground.png` capture with no 3D texture visible on the ground line; CartoonSmokeTests unchanged and green; TerrainTests (dig/place) unchanged; frame time avg ≤ 12 ms on Earth in the next profile.
 Files: Assets/_Game/Placeholders/terrain/, Code/Runtime/View2D/GroundStrip.cs, Code/Runtime/Art/ArtMaterials.cs
 Depends: U-094
-Lead notes: Cycle 237. Placeholder only (BLENDER's painted terrain is a C1 card); keep it under 150 lines.
+Lead notes: Cycle 237. Placeholder only (BLENDER's painted terrain is a C1 card); keep it under 150 lines. Cycle 239: BACK TO IN PROGRESS, one failing check. Passed: check 18:05–18:08 (compile 0/0, EditMode 279/279, PlayMode 5/5 incl. TerrainTests), GroundStrip 98 lines, the silhouette tint on the props and the Pilgrim (985c4c6). Failing: "no 3D texture visible on the ground line" was meant as no block texture visible anywhere in the frame; earth_c0_ground.png (18:13) still shows the 3D dirt texture across the bottom ≈ 200 px under the 1 m strip. Fix: below each column's strip slice, fill down to the frame bottom with the strip's flat dirt tone (one quad per visible column, or one full-width quad behind the strips at the lowest visible column top, whichever is fewer lines), including dug columns (their walls get the same flat tone with the ink edge). Re-shoot earth_c0_ground.png; TerrainTests unchanged. Stay under 150 lines.
 
 ### U-101 · UNITY · Ready · C0
 Goal: U-098 capture tooling ahead of the art: `SceneCapture.CaptureC0Strip` records the C0 scene for 20 s at 2 stills per second into `reports/unity/c0_<date>/strip/` plus a contact sheet (6 × 7 at 320 px), driving the surveyor through idle → walk → jump/land → walk past a plant anchor → look_camera; the profile gains the rows U-098 asks for (working set, p99 frame time, animated-object count ≤ 40, sprite atlases per planet ≤ 8).
 Accept: the contact sheet and a profile with the four rows in `reports/unity/`; runs on the placeholder plant/critter keys so U-098 only swaps art in.
 Files: Assets/_Game/Code/Editor/SceneCapture.cs, tools/unity_profile.ps1, Code/Runtime/Perf/BudgetMonitor.cs
 Depends: U-094
-Lead notes: Cycle 237. Lock-free code; one capture + profile when the lock is free.
+Lead notes: Cycle 237. Lock-free code; one capture + profile when the lock is free. Cycle 239: code in (8147bcf: CaptureC0Strip, the Earth C0 leg in BudgetGateTests with the four rows, Species.Gull with one gull over the camp); its check, the contact sheet and the gate run are owed and can share the U-100 re-shoot job.
 
 > **C1 (D-097, cycle 238): code and sources may start now, lock-free; exports, captures and Done wait for the C0 approval (U-098 + LEAD's §9.7 pass).** Order: U-091, U-103, U-105, U-104, U-106.
 
@@ -907,12 +907,12 @@ Files: blender/scripts/build_pilgrim_v3.py, blender/sources/ships/pilgrim_v3_des
 Depends: —
 Lead notes: Cycle 235. Light (preview only). Last in your queue; take it when the gate is shut and you are out of lock-free work.
 
-### B-118 · BLENDER · Ready · C0
+### B-118 · BLENDER · Done · C0
 Goal: Helmet glass readability (D-096): give the surveyor's fishbowl a faint flat glass fill (the Earth palette's sky tone at ≈ 25 % over the face layer, plus the existing highlight) so the helmet reads as glass against the green meadow and any later background; re-export `characters/surveyor/side` (all 98 frames, same indices) and refresh the design sheet. From this card on, every rig-set review sheet also shows the assembled 12-frame preview loop (§11.7).
 Accept: the review sheet at 1x on the B-114 plains (not the flat placeholder) shows the helmet as glass with the face readable; ink and palette boxes unchanged; sheet ≤ 2048; json valid, clip indices unchanged (UNITY needs no change).
 Files: blender/scripts/build_surveyor_v3.py, blender/review.py, Assets/_Game/Art/characters/surveyor/
 Depends: B-116
-Lead notes: Cycle 238. Before B-117. One heavy export under the gate and D-091.
+Lead notes: Cycle 238. Before B-117. One heavy export under the gate and D-091. Cycle 239: DONE (7606528; review_b111_surveyor_side.png 18:12: the helmet reads as pale sky glass on the painted plains in every clip, face fully readable, ink and palette boxes unchanged, 98 frames at the same indices, sheet 1956×1956 ≤ 2048; review_b112_earth_rigset.png now carries the assembled 12-frame loop at 1x on the plains + 2×). UNITY picks the new sheet up on its next import; no code change.
 
 > **C1 (D-097, cycle 238): sources may start now, lock-free; exports and Done wait for the C0 approval (U-098 + LEAD's §9.7 pass).** Order: B-118, B-117, B-122, B-119, B-120, B-121.
 
