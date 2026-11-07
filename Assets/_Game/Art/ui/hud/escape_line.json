@@ -1,0 +1,8 @@
+{
+  "key": "ui/hud/escape_line",
+  "style": "v3",
+  "ppu": 64,
+  "tile": true,
+  "tile_x": true,
+  "period_px": 64
+}

@@ -5,8 +5,8 @@ their needles as separate parts (rects bottom-left origin, pivots 0..1, like a r
 are aged paper with ink, one shadow tone, a coloured zone arc, hand-drawn ticks and an icon
 (lightning bolt, three bubbles, a falling apple). gauges.json gives each needle's sweep.
 ui/hud/escape_line: 512x64 tileable hand-painted dotted line (dots repeat every 64 px).
-ui/hud/escape_sign: <= 256^2 little painted sign on a post; the lettering (Patrick Hand,
-D-090) is added once the font is in the repo (json "lettering": "pending").
+ui/hud/escape_sign: <= 256^2 little painted sign on a post; ships BLANK (LEAD cycle 246): UNITY
+letters it in Patrick Hand at runtime (U-104), json "lettering": "runtime".
 
   python build_hud_v3.py <out_dir> [--art]     preview (or export into <out_dir> as Art)
 """
@@ -154,7 +154,7 @@ def escape_line():
 
 
 def escape_sign():
-    """<= 256^2 sign: a brown post with a slightly crooked off-white board; lettering pending."""
+    """<= 256^2 sign: a brown post with a slightly crooked off-white board; ships blank (lettered at runtime)."""
     c = Canvas(192, 224)
     c.shape([(88, 222), (86, 120), (104, 118), (106, 222)], PAL["brown"])
     for gx in (92, 99):                                         # post grain
@@ -199,7 +199,7 @@ def build(out, art=False):
         json.dump(meta, f, indent=2)
         f.write("\n")
     for fn, extra in (("escape_line.json", {"tile": True, "tile_x": True, "period_px": 64}),
-                      ("escape_sign.json", {"pivot": [0.5, 0.0], "lettering": "pending Patrick Hand (D-090)"})):
+                      ("escape_sign.json", {"pivot": [0.5, 0.0], "lettering": "runtime", "lettering_note": "blank board; UNITY letters it in Patrick Hand (U-104)"})):
         with open(os.path.join(d, fn), "w", encoding="utf-8", newline="\n") as f:
             json.dump({"key": "ui/hud/" + fn[:-5], "style": "v3", "ppu": v3.PPU, **extra}, f, indent=2)
             f.write("\n")
@@ -249,7 +249,7 @@ def review_sheet(out, files, meta_dir=None, out_name="review_b121_hud_preview.pn
     for k in range(3):
         review._over(can, line, 200 + k * 512, Hs - 300)
     review._over(can, files["escape_sign_color.png"], 1500, Hs - 300 - 190)
-    review.draw(can, "hud at 1080p over the b-114 plains: suit 30%, oxygen 60%, gravity 90%; escape line + sign (lettering pending)", 8, Hs - 18, (1.0, 0.97, 0.85))
+    review.draw(can, "hud at 1080p over the b-114 plains: suit 30%, oxygen 60%, gravity 90%; escape line + blank sign (lettered at runtime)", 8, Hs - 18, (1.0, 0.97, 0.85))
     for i, p in enumerate(stamp_paths):
         review.draw(can, os.path.basename(p) + " " + review.stamp_text(p), 8, 8 + 18 * i, (1.0, 1.0, 0.85))
     review.write(os.path.join(out, out_name), can)

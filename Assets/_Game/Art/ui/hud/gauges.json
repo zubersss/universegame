@@ -1,0 +1,121 @@
+{
+  "key": "ui/hud/gauges",
+  "style": "v3",
+  "ppu": 64,
+  "rect_origin": "bottom_left",
+  "parts": [
+    {
+      "name": "dial_suit_power",
+      "rect": [
+        0,
+        704,
+        320,
+        320
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "name": "dial_oxygen",
+      "rect": [
+        324,
+        704,
+        320,
+        320
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "name": "dial_gravity",
+      "rect": [
+        648,
+        704,
+        320,
+        320
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "name": "needle_suit_power",
+      "rect": [
+        972,
+        874,
+        48,
+        150
+      ],
+      "pivot": [
+        0.5,
+        0.1733
+      ]
+    },
+    {
+      "name": "needle_oxygen",
+      "rect": [
+        0,
+        550,
+        48,
+        150
+      ],
+      "pivot": [
+        0.5,
+        0.1733
+      ]
+    },
+    {
+      "name": "needle_gravity",
+      "rect": [
+        52,
+        550,
+        48,
+        150
+      ],
+      "pivot": [
+        0.5,
+        0.1733
+      ]
+    }
+  ],
+  "needles": {
+    "suit_power": {
+      "dial": "dial_suit_power",
+      "needle": "needle_suit_power",
+      "hub": [
+        0.5,
+        0.5
+      ],
+      "min_deg": 125.0,
+      "max_deg": -125.0,
+      "danger_below": 0.25
+    },
+    "oxygen": {
+      "dial": "dial_oxygen",
+      "needle": "needle_oxygen",
+      "hub": [
+        0.5,
+        0.5
+      ],
+      "min_deg": 125.0,
+      "max_deg": -125.0,
+      "danger_below": 0.25
+    },
+    "gravity": {
+      "dial": "dial_gravity",
+      "needle": "needle_gravity",
+      "hub": [
+        0.5,
+        0.5
+      ],
+      "min_deg": 125.0,
+      "max_deg": -125.0,
+      "danger_below": 0.25
+    }
+  }
+}

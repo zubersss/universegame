@@ -1019,24 +1019,23 @@ def do_hud(entry, preview):
     HUD.review_sheet(PREVIEW, files, meta_dir=d, out_name=f"review_{entry.get('review_name', 'b121_hud')}.png", stamp_paths=stamps)
     mark_stale(entry["key"], False)
     log_line(f"OK {entry['key']} | " + ", ".join(f"{fn[:-10]} {im.shape[1]}x{im.shape[0]}" for fn, im in files.items())
-             + f" | escape_line {seam} | lettering pending (Patrick Hand) | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
+             + f" | escape_line {seam} | sign blank (lettered at runtime, U-104) | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
 
 
 def do_icon_set(entry, preview):
     """B-128: v3.1 tile-item icons (icons/<item>/base, 64x64) drawn with fakegp + numpy (no scene);
     the preview sheet doubles as the review."""
-    import build_icons_v3 as IC
+    from meridian import fakegp
     t0 = time.time()
     if preview:
         raise AssetError(f"{entry['key']}: the icon set has no preview mode (python build_icons_v3.py <png>)")
+    import build_icons_v3 as IC
+    fakegp.install()                    # again: an earlier review script in this batch may have restored gp_draw.mat
     try:
         out = IC.export(ART, entry.get("items"))
+        IC.preview(os.path.join(PREVIEW, f"review_{entry.get('review_name', 'b128_icons')}.png"))
     finally:
-        from meridian import fakegp
         fakegp.restore()
-    IC.preview(os.path.join(PREVIEW, f"review_{entry.get('review_name', 'b128_icons')}.png"))
-    from meridian import fakegp
-    fakegp.restore()
     for k, _n, _w in out:
         mark_stale(f"icons/{k}/base", False)
     mark_stale(entry["key"], False)

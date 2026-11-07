@@ -1,0 +1,11 @@
+{
+  "key": "ui/hud/escape_sign",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.0
+  ],
+  "lettering": "runtime",
+  "lettering_note": "blank board; UNITY letters it in Patrick Hand (U-104)"
+}

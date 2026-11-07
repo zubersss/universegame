@@ -1,0 +1,529 @@
+{
+  "key": "ships/pilgrim/rig",
+  "style": "v3",
+  "ppu": 64,
+  "rect_origin": "bottom_left",
+  "parts": [
+    {
+      "name": "bell",
+      "rect": [
+        780,
+        96,
+        136,
+        76
+      ],
+      "pivot": [
+        0.488,
+        0.7048
+      ]
+    },
+    {
+      "name": "fin_c",
+      "rect": [
+        860,
+        200,
+        60,
+        204
+      ],
+      "pivot": [
+        0.4729,
+        0.9574
+      ]
+    },
+    {
+      "name": "fin_l",
+      "rect": [
+        232,
+        656,
+        148,
+        256
+      ],
+      "pivot": [
+        0.6683,
+        0.9148
+      ]
+    },
+    {
+      "name": "fin_r",
+      "rect": [
+        384,
+        656,
+        148,
+        256
+      ],
+      "pivot": [
+        0.3153,
+        0.9147
+      ]
+    },
+    {
+      "name": "hatch",
+      "rect": [
+        620,
+        44,
+        64,
+        128
+      ],
+      "pivot": [
+        0.1847,
+        0.4624
+      ]
+    },
+    {
+      "name": "hull",
+      "rect": [
+        0,
+        408,
+        228,
+        504
+      ],
+      "pivot": [
+        0.4992,
+        0.011
+      ]
+    },
+    {
+      "name": "nose",
+      "rect": [
+        0,
+        0,
+        176,
+        172
+      ],
+      "pivot": [
+        0.494,
+        0.0323
+      ]
+    },
+    {
+      "name": "porthole",
+      "rect": [
+        688,
+        76,
+        88,
+        96
+      ],
+      "pivot": [
+        0.508,
+        0.487
+      ]
+    },
+    {
+      "name": "top_fin_l",
+      "rect": [
+        180,
+        24,
+        216,
+        148
+      ],
+      "pivot": [
+        0.9626,
+        0.9489
+      ]
+    },
+    {
+      "name": "top_fin_r",
+      "rect": [
+        400,
+        24,
+        216,
+        148
+      ],
+      "pivot": [
+        0.9588,
+        0.0376
+      ]
+    },
+    {
+      "name": "top_hull",
+      "rect": [
+        0,
+        176,
+        856,
+        228
+      ],
+      "pivot": [
+        0.5224,
+        0.4998
+      ]
+    }
+  ],
+  "plants": [
+    {
+      "name": "pilgrim_side",
+      "bones": [
+        {
+          "name": "root",
+          "part": "hull",
+          "parent": null,
+          "length": 7.6,
+          "offset_m": [
+            0.0,
+            1.6
+          ],
+          "order": 3
+        },
+        {
+          "name": "fin_l",
+          "part": "fin_l",
+          "parent": "root",
+          "length": 3.4,
+          "offset_m": [
+            -1.2279,
+            2.0
+          ],
+          "order": 0
+        },
+        {
+          "name": "fin_c",
+          "part": "fin_c",
+          "parent": "root",
+          "length": 2.8,
+          "offset_m": [
+            0.0,
+            1.4
+          ],
+          "order": 1
+        },
+        {
+          "name": "nose",
+          "part": "nose",
+          "parent": "root",
+          "length": 2.2,
+          "offset_m": [
+            0.0,
+            7.6
+          ],
+          "order": 6
+        },
+        {
+          "name": "hatch",
+          "part": "hatch",
+          "parent": "root",
+          "length": 1.0,
+          "offset_m": [
+            -0.42,
+            1.6
+          ],
+          "order": 5
+        },
+        {
+          "name": "fin_r",
+          "part": "fin_r",
+          "parent": "root",
+          "length": 3.4,
+          "offset_m": [
+            1.2279,
+            2.0
+          ],
+          "order": 7
+        }
+      ],
+      "swaps": {
+        "bell": [
+          "bell"
+        ],
+        "porthole": [
+          "porthole"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "bell",
+          "bone": "root",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 2,
+          "replaces_part": false
+        },
+        {
+          "slot": "porthole",
+          "bone": "root",
+          "offset_m": [
+            0.38,
+            5.65
+          ],
+          "order": 4,
+          "replaces_part": false
+        }
+      ],
+      "sockets": {
+        "tail_exhaust": [
+          0.0,
+          0.85
+        ],
+        "leg_l": [
+          -2.25,
+          0.16
+        ],
+        "leg_c": [
+          0.0,
+          0.16
+        ],
+        "leg_r": [
+          2.25,
+          0.16
+        ],
+        "door": [
+          -0.05,
+          2.35
+        ],
+        "attitude_l": [
+          -1.5,
+          2.6
+        ],
+        "attitude_r": [
+          1.5,
+          2.6
+        ]
+      },
+      "sockets_units": "metres from the rig origin (the landing pads' ground line, ship centre)",
+      "root_transforms": "thrust stretch, cut squash and the +-35 deg tilt are UNITY's root transforms (D-111, U-107); tilt pivot = centre of mass at 6.2 m",
+      "clips": [
+        {
+          "name": "fin_wobble",
+          "fps": 12,
+          "loop": true,
+          "frames": 8,
+          "tracks": {
+            "fin_l": {
+              "rot_deg": [
+                0.0,
+                2.12,
+                3.0,
+                2.12,
+                0.0,
+                -2.12,
+                -3.0,
+                -2.12
+              ]
+            },
+            "fin_r": {
+              "rot_deg": [
+                1.69,
+                -0.55,
+                -2.48,
+                -2.95,
+                -1.69,
+                0.55,
+                2.48,
+                2.95
+              ]
+            },
+            "fin_c": {
+              "scale": [
+                [
+                  1.0,
+                  0.981
+                ],
+                [
+                  1.0,
+                  0.992
+                ],
+                [
+                  1.0,
+                  1.007
+                ],
+                [
+                  1.0,
+                  1.018
+                ],
+                [
+                  1.0,
+                  1.019
+                ],
+                [
+                  1.0,
+                  1.008
+                ],
+                [
+                  1.0,
+                  0.993
+                ],
+                [
+                  1.0,
+                  0.982
+                ]
+              ]
+            }
+          }
+        },
+        {
+          "name": "leg_flex",
+          "fps": 12,
+          "loop": false,
+          "frames": 8,
+          "tracks": {
+            "fin_l": {
+              "rot_deg": [
+                0,
+                -3,
+                -7,
+                -9,
+                -4,
+                1.5,
+                -0.5,
+                0
+              ]
+            },
+            "fin_r": {
+              "rot_deg": [
+                0,
+                3,
+                7,
+                9,
+                4,
+                -1.5,
+                0.5,
+                0
+              ]
+            },
+            "fin_c": {
+              "scale": [
+                [
+                  1,
+                  1
+                ],
+                [
+                  1,
+                  0.97
+                ],
+                [
+                  1,
+                  0.92
+                ],
+                [
+                  1,
+                  0.9
+                ],
+                [
+                  1,
+                  0.96
+                ],
+                [
+                  1,
+                  1.02
+                ],
+                [
+                  1,
+                  0.995
+                ],
+                [
+                  1,
+                  1
+                ]
+              ]
+            }
+          }
+        },
+        {
+          "name": "hatch_open",
+          "fps": 12,
+          "loop": false,
+          "frames": 6,
+          "tracks": {
+            "hatch": {
+              "scale": [
+                [
+                  1,
+                  1
+                ],
+                [
+                  0.82,
+                  1
+                ],
+                [
+                  0.58,
+                  1.01
+                ],
+                [
+                  0.34,
+                  1.02
+                ],
+                [
+                  0.16,
+                  1.01
+                ],
+                [
+                  0.1,
+                  1.0
+                ]
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "pilgrim_top",
+      "bones": [
+        {
+          "name": "root",
+          "part": "top_hull",
+          "parent": null,
+          "length": 12.0,
+          "order": 2
+        },
+        {
+          "name": "fin_l",
+          "part": "top_fin_l",
+          "parent": "root",
+          "length": 2.5,
+          "offset_m": [
+            -3.0,
+            -0.9
+          ],
+          "order": 0
+        },
+        {
+          "name": "fin_r",
+          "part": "top_fin_r",
+          "parent": "root",
+          "length": 2.5,
+          "offset_m": [
+            -3.0,
+            0.9
+          ],
+          "order": 1
+        }
+      ],
+      "swaps": {},
+      "clips": [
+        {
+          "name": "fin_wobble",
+          "fps": 12,
+          "loop": true,
+          "frames": 8,
+          "tracks": {
+            "fin_l": {
+              "rot_deg": [
+                -0.0,
+                -2.83,
+                -4.0,
+                -2.83,
+                -0.0,
+                2.83,
+                4.0,
+                2.83
+              ]
+            },
+            "fin_r": {
+              "rot_deg": [
+                -2.26,
+                0.74,
+                3.3,
+                3.93,
+                2.26,
+                -0.74,
+                -3.3,
+                -3.93
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
