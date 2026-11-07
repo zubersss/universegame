@@ -81,10 +81,8 @@ def read_png_np(path):
     for y in range(h):
         f = raw[y * (stride + 1)]
         cur = np.frombuffer(raw, np.uint8, stride, y * (stride + 1) + 1).astype(np.int32)
-        if f == 1:
-            cur = cur.copy()
-            for x in range(4, stride):
-                cur[x] = (cur[x] + cur[x - 4]) & 255
+        if f == 1:                                       # Sub = a running sum per channel (vectorised)
+            cur = (np.cumsum(cur.reshape(-1, 4), axis=0) & 255).reshape(-1)
         elif f == 2:
             cur = (cur + prev) & 255
         elif f in (3, 4):

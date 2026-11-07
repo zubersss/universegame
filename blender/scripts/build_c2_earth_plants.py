@@ -16,7 +16,13 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from meridian import fakegp  # noqa: E402
 
-G = fakegp.install()
+try:                                    # inside Blender (a rig build): the real gp_draw; else the lock-free fake
+    import bpy  # noqa: F401
+    if not hasattr(bpy, "data"):
+        raise ImportError
+    import gp_draw as G
+except ImportError:
+    G = fakegp.install()
 P = G.PALETTES["earth"]
 O, I = G.OUTER, G.INNER
 
