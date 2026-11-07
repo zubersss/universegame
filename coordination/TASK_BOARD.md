@@ -22,12 +22,12 @@ When the lock frees, the highest pending job here goes next, even if the other r
 older (D-037 alternation applies only between equal ranks). A rank is live only while its role
 has a want on file or holds the lock (D-112): if the top rank has no want when the lock frees,
 the next live rank runs now and the skipped role goes next after it files. A role below the top
-keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 258 (05:0x; UNITY's U-106 window is running its locks (checks 327 / 329 green, re-shoots, the flight strip, M1LoopTests ×2 from 04:53, then a last check + re-shoots and the profile -Build); BLENDER's lock-free list is done and its slot waits behind UNITY's last lock). A role files its want only when the queue says it is next after the running job:
-1. UNITY · U-106 to the end of its window (the profile -Build last; BLENDER pinged when it starts) → the U-106 commit with perf_2026-11-07.md, the c1 folder and the re-shoots → C1 closes (LEAD: C1_REPORT.md + the C1 page); U-109 Done on its 28 m frame.
-2. BLENDER · one slot ≤ 8 min when UNITY's last lock frees: the five B-143 near frames (D-128 amended) + the B-141 canyon / storm re-run.
-3. BLENDER · then one slot each: B-136 Hadal Maw export (new key); B-140 Mars rig set + strips export (new keys); B-141 export once the studies are accepted.
-4. UNITY · U-112 creep hunt probe runs; then the C2 Earth batch (U-110 / U-111 / U-113 / U-114 / U-116 / U-117 (2) / U-119 + the U-115 climb_in follow-up), promoted together when C1 is closed.
-5. BLENDER · B-131 after U-113's code; B-142 after U-118's code.
+keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 259 (05:3x; UNITY's U-106 window has its profile (05:12) and last check (05:18, 330/330) done, with the two re-shoots, the D-129 probe re-run and the commit left; BLENDER holds the lock since 05:24 for the B-136 Hadal Maw export + the B-144 review, ≤ 10 min). A role files its want only when the queue says it is next after the running job:
+1. UNITY · file the want now for: CaptureU109Climb + CaptureU104Hud (two short locks) → profile -Probe -SkipGate once (D-129) → the U-106 commit (code, tests, captures, flight strip, perf + c1 README, status) → C1 CLOSES (LEAD: C1_REPORT.md + the C1 page + USER-26).
+2. BLENDER · after UNITY's probe: B-140 Mars rig set + strips export (one slot); then B-141 export (studies accepted this cycle; one slot).
+3. UNITY · U-112 creep hunt probe runs; then the C2 Earth batch (U-110 / U-111 / U-113 / U-114 / U-116 / U-117 (2) / U-119 / U-120 + the U-115 climb_in follow-up), promoted together at the C1 close.
+4. BLENDER · B-131 after U-113's code; B-142 after U-118's code; the Mercury strip with B-145's first export.
+
 
 
 
@@ -59,12 +59,13 @@ did in your status before the next poll. LEAD tops each list up to ≥ 3 items e
 Then one batched check for everything written when your turn in the queue comes.
 
 
-**BLENDER** (numpy / scripts only while UNITY holds the lock or a want; bpy only under your own lock; under 0.3 GB free, code only; otherwise measure a new preview's peak on one part first and keep it under ~150 MB)
-- B-142: the tube lurker gets a whole-body `idle_open` (8–10 frames: sniffing, nose bulb glow pulse) for pauses away from its den; `idle` stays the den peek; design preview when RAM allows.
-- B-144 Mars camp prop designs (your report §5: the props that differ from Earth's), previews at 1x beside the surveyor on the Mars strips.
-- B-145 Mercury design prep (C2 order 3): the palette proposal with the same checks as Mars, five faceless plants, the creature re-ink list, backdrop study notes; nothing exported.
-- The B-141 / B-143 slot script dry-run (the five near frames at the amended scales, the two study sets) so the slot is one call.
-- `c2_mars_designs.md` and README_v4 kept current (the lurker `idle_open`, the near-frame rule).
+**BLENDER** (numpy / scripts only while UNITY holds the lock or a want; bpy only under your own lock; under 0.3 GB free, code only; otherwise one item per measured run beside the other role's job, under ~150 MB)
+- B-145 part 2 preview (the five Mercury plants) when RAM allows; then the Mercury creature designs in your list's order (the Flarewing with fly at index 1; the Shadewyrm with its D-126 ice-burrow den as a separate prop).
+- B-144 export rows (`replaces_v2` on the Mars props that have v2 models) and a dry run, so the export is one batch when U-118 opens.
+- B-141 export readiness: the six layers + two scene jsons from the accepted studies, dry-run into a scratch tree.
+- B-140 slot script dry-run (rig set + strips in one call) so the slot is ≤ 5 min.
+- `c2_mercury_designs.md` to the accepted state as parts land; README upkeep.
+
 
 
 
@@ -1175,7 +1176,7 @@ Goal: Mars biome backdrops in the B-133 manner: `backgrounds/mars/plains`, `back
 Accept: the 2× seam check with no seam; ≤ 4 MB per PNG; a 1080p composite per set at 1x with the surveyor on the Mars strips; the ten boxes that apply; UNITY's ParallaxLayers loads them by key with no code change.
 Files: blender/scripts/build_backdrop_v3.py, Assets/_Game/Art/backgrounds/mars/
 Depends: B-139
-Lead notes: Cycle 256. Studies first in your next slot (FFT washes), LEAD accepts, then one export batch after U-106. Cycle 257: sources written (9cb766f: canyon layer0 butterscotch sky + far mesas, the storm set with the dust wall as the near layer) and the export rows + dry-run path in (e6f74ae); the FFT studies render in BLENDER's slot from 04:22 and are reviewed next tick.
+Lead notes: Cycle 256. Studies first in your next slot (FFT washes), LEAD accepts, then one export batch after U-106. Cycle 257: sources written (9cb766f: canyon layer0 butterscotch sky + far mesas, the storm set with the dust wall as the near layer) and the export rows + dry-run path in (e6f74ae); the FFT studies render in BLENDER's slot from 04:22 and are reviewed next tick. Cycle 259: STUDIES ACCEPTED (the 05:13 slot re-run; review_b141_mars_canyon_preview.png + _storm_: canyon = butterscotch sky with wind streaks, far mesa wall above the terraced tiers, near boulder field; storm = the same ground under a salmon dust veil that fades in from nothing with wind streaks, the far rims through the haze; seams 0.88 / 0.68 / 0.53 and 0.87 / 0.78 / 0.47, layers ≤ 2.2 MB, the 2× strips clean at the join). Export in one slot after B-140 (queue #2); U-118 loads them by biome.
 
 ### B-142 · BLENDER · Backlog · C2
 Goal: Mars creatures re-inked (c2_mars_designs.md order): dustskater (128×80), scree stalker (192×96, with follow), tube lurker (160×64, hole-less per D-126) with its den prop `props/mars/tube_mound`, polar crawler; faces kept (pie eyes, no teeth, D-087 / D-101); clips per §11.2; one sheet ≤ 2048² each; `replaces_v2` on the dustskater and scree stalker rows (their v2 models go in the export commit).
@@ -1189,21 +1190,21 @@ Goal: Near-range planet discs (D-128, U-117 (2)): a static near frame per disc, 
 Accept: log OK for the nine near frames; each ≤ 512² and ≤ 1 MB; the stamped review shows each near frame beside its far disc at the ship-view zoom (~33×) with no pixel steps; UNITY's U-117 re-shoot of space_6 clean after the DiscSprite swap.
 Files: blender/scripts/build_discs_v3.py, Assets/_Game/Art/planets/
 Depends: B-119
-Lead notes: Cycle 257. BLENDER's own proposal on UNITY's finding (a hard alpha edge in the 64 px source steps at 10× whatever the mesh). Pairs with UNITY's material side (alpha blend, no cutoff). One short slot (≤ 5 min) with the B-141 re-run, before U-117's re-shoot. Cycle 257 (05:1x, D-128): REDIRECTED. UNITY measured a 33× magnification in the ship view (Luna 21 px painted → ~700 px on screen), so the 2-texel soft limb cannot help and its run is dropped (keep the code; it is harmless). The near frames go in your next slot with the B-141 re-run (nine renders ≤ 512², ≤ 8 min together); U-117 (2) swaps to them above ~6×. Cycle 257 (05:2x, D-128 amended): five near frames only, where the gain is ≥ 2×: luna_near 8×, mercury 5.9×, mars 4.8×, venus 3.4×, earth 3.3× (the largest scale that fits 512²); none for Uranus, Neptune, Jupiter, Saturn (their close view is a named limit for a giants card); caps ≤ 512² and ≤ 1 MB stand.
+Lead notes: Cycle 257. BLENDER's own proposal on UNITY's finding (a hard alpha edge in the 64 px source steps at 10× whatever the mesh). Pairs with UNITY's material side (alpha blend, no cutoff). One short slot (≤ 5 min) with the B-141 re-run, before U-117's re-shoot. Cycle 257 (05:1x, D-128): REDIRECTED. UNITY measured a 33× magnification in the ship view (Luna 21 px painted → ~700 px on screen), so the 2-texel soft limb cannot help and its run is dropped (keep the code; it is harmless). The near frames go in your next slot with the B-141 re-run (nine renders ≤ 512², ≤ 8 min together); U-117 (2) swaps to them above ~6×. Cycle 257 (05:2x, D-128 amended): five near frames only, where the gain is ≥ 2×: luna_near 8×, mercury 5.9×, mars 4.8×, venus 3.4×, earth 3.3× (the largest scale that fits 512²); none for Uranus, Neptune, Jupiter, Saturn (their close view is a named limit for a giants card); caps ≤ 512² and ≤ 1 MB stand. Cycle 259: EXPORT VERIFIED (d3af1e5; log 05:15:17 OK: five near frames, 121 s, peak 359 MB; mercury 512² at 5.86×, venus 512² at 3.42×, earth 512² at 3.28×, mars 512² at 4.82×, luna_near 356² at 8×, 124–257 KB each, LFS, `style: v3` + `near_of` sidecars; every far disc proven byte-identical before writing). review_b143_near_frames.png viewed: at the same screen size the far frame's blurry 33× stairs become a crisp inked limb on every near frame. Done on U-117's space_6 re-shoot with the DiscSprite swap.
 
 ### B-144 · BLENDER · Ready · C2
 Goal: Mars camp prop designs (c2_mars_designs.md §5: the props that differ from Earth's camp): the ice drill rig, the hauler hull and cargo, the Meridian beacon and the warden pylon as v3.1 cartoon sprites in the Mars palette (no faces; one porthole or light at most per prop), with the clips that make sense (drill working 8, beacon pulse 4), sizes per the current manifest rows, the ground line 10 px above the bottom, `interactable` where used.
 Accept: the ten §9.7 boxes per prop on a stamped preview at 1x on the Mars strips beside the surveyor; sheets ≤ 512² each; clips within caps; nothing exported until a Mars props export card.
 Files: blender/scripts/build_props_mars_v3.py, blender/sources/props/mars_v3.blend
 Depends: B-139
-Lead notes: Cycle 258. Previews only, like B-131's first pass; the export replaces the v2 Mars prop models under the same keys (D-117's order) when U-118 opens.
+Lead notes: Cycle 258. Previews only, like B-131's first pass; the export replaces the v2 Mars prop models under the same keys (D-117's order) when U-118 opens. Cycle 259: six prop previews drawn and checked one per process (024462f, 172ae6e: ice drill rig 508², beacon 276×452, hull a 232×168, hull b 248×208, cargo 240×112, pylon 164×500; a dent on hull a that read as a smile straightened per D-101; the drill rig redrawn 1.9 × 3.7 m so its 8 frames fit 512²); the full review image renders in the 05:24 slot; reviewed next tick.
 
 ### B-145 · BLENDER · Ready · C2
 Goal: C2 Mercury design prep (Bible §12 C2 order 3; §7.3 "the twilight run"): a Mercury palette proposal with the Mars checks (contrast under the ink, muted, distinct, the plants readable on the ground and sky), five faceless Mercury plants as (d, M, pose) drawing functions (heat-side and shadow-side forms), the Mercury creature re-ink list (sizes, clips, order; faces kept, no teeth), the day / twilight / night backdrop study notes, the station and warden props that differ; `coordination/reports/blender/c2_mercury_designs.md`.
 Accept: one review per group at 1x on a Mercury stand-in beside the surveyor; the ten boxes self-checked; nothing exported.
 Files: blender/scripts/build_c2_mercury_*.py, coordination/reports/blender/c2_mercury_designs.md
 Depends: B-139
-Lead notes: Cycle 258. The same shape as B-139; LEAD accepts the designs before any Mercury card is written. Previews only when free RAM allows.
+Lead notes: Cycle 258. The same shape as B-139; LEAD accepts the designs before any Mercury card is written. Previews only when free RAM allows. Cycle 259: PALETTE ACCEPTED (37ed2ab, c2_mercury_designs.md §1: blinding regolith, ember, sun gold, cold steel teal, dusty sage, violet twilight, night slate; every check passing incl. the violet terminator hue and the near-neutral regolith) → D-130: into `meridian.v3.PALETTES["mercury"]`; the `ui/palettes/mercury/strip` export rides B-145's first export slot. Part 2 (the five plants) is previewed when RAM allows; reviewed on hand-off.
 
 > **R1 (D-062).** 2D tasks B-056..B-076 are Superseded; their `.blend` sources (rigs, props,
 > terrain recipes) are the starting point for the models. Contract v2 §9 is the rule set.
@@ -2026,7 +2027,7 @@ Goal: The Hadal Maw as a §11.3 rig set (`creatures/earth/hadal_maw/rigset`: bod
 Accept: the ten boxes on a stamped assembled review at 1x beside the surveyor; rigset.json valid; sheet ≤ 2048².
 Files: blender/scripts/build_creatures_earth_v3.py, Assets/_Game/Art/creatures/earth/hadal_maw/
 Depends: B-135
-Lead notes: Cycle 251 (D-119). Promoted when B-135's previews are accepted. Cycle 256: DESIGN ACCEPTED and promoted (1fb50b1; review_b136_hadal_maw_preview.png: ~34 m, six bones head / body1 / body2 / tail / jaw / lure, the lure swaps lit / dim / flare, one eye and a closed smile, the open jaw a dark cavern with a tongue and no teeth, bioluminescent dots, the idle a sway travelling down the bones with the lure bobbing, the react a 24° jaw open + head lift + lure flare; ink 2.0–3.0 / 1.0–1.5 px at 1x; parts ~1750×800 at 1x). Export in one BLENDER slot after U-106 (a new key, nothing to replace); UNITY's U-119 drives it as a rig-set creature. Cycle 257 (05:0x, D-127): key = `creatures/earth/hadal_maw` (three segments; the card's `…/rigset` struck); idle at 110 bpm with `cycle_beats: 4` (contract v3.2 field; no validator exception); the 99.9 % palette hit is accepted (the lure's translucent halos). Export-ready (dde7d5e: 8 parts on 1784×744, json valid); one slot after U-106.
+Lead notes: Cycle 251 (D-119). Promoted when B-135's previews are accepted. Cycle 256: DESIGN ACCEPTED and promoted (1fb50b1; review_b136_hadal_maw_preview.png: ~34 m, six bones head / body1 / body2 / tail / jaw / lure, the lure swaps lit / dim / flare, one eye and a closed smile, the open jaw a dark cavern with a tongue and no teeth, bioluminescent dots, the idle a sway travelling down the bones with the lure bobbing, the react a 24° jaw open + head lift + lure flare; ink 2.0–3.0 / 1.0–1.5 px at 1x; parts ~1750×800 at 1x). Export in one BLENDER slot after U-106 (a new key, nothing to replace); UNITY's U-119 drives it as a rig-set creature. Cycle 257 (05:0x, D-127): key = `creatures/earth/hadal_maw` (three segments; the card's `…/rigset` struck); idle at 110 bpm with `cycle_beats: 4` (contract v3.2 field; no validator exception); the 99.9 % palette hit is accepted (the lure's translucent halos). Export-ready (dde7d5e: 8 parts on 1784×744, json valid); one slot after U-106. Cycle 259: export running (heavy_blender.lock 05:24:36, the rig set rebuilt 05:24:39); verified next tick against the log line, the 8-part sheet ≤ 2048², the json with `cycle_beats: 4` and the stamped review.
 
 
 ### U-116 · UNITY · Backlog · C2
