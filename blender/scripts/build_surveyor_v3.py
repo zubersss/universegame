@@ -39,6 +39,9 @@ def materials(gp):
         "mustard": G.mat(gp, "mustard", fill=P["mustard"]),
         "red": G.mat(gp, "red", fill=P["red"]),
         "red_sh": G.mat(gp, "red_shadow", fill=G.shadow_of(P["red"]), ink=False),
+        "red_dp": G.mat(gp, "red_deep", fill=G.deep_of(P["red"]), ink=False),
+        "suit_dp": G.mat(gp, "suit_deep", fill=G.deep_of(P["offwhite"]), ink=False),
+        "boot_dp": G.mat(gp, "boot_deep", fill=G.deep_of(P["brown"]), ink=False),
         "red_flat": G.mat(gp, "cheek", fill=G.shadow_of(P["offwhite"]), ink=False),
         "teal": G.mat(gp, "hose_teal", fill=P["teal"]),
         "boot": G.mat(gp, "boot", fill=P["brown"]),
@@ -92,15 +95,24 @@ def draw_surveyor(d, M, pose=None, seed=0):
         knee = ((hip[0] + foot[0]) / 2 + (0.07 if view != "front" else (0.05 if k else -0.05)),
                 (hip[1] + foot[1]) / 2)
         G.stroke(d, G.hose_outline(G.bezier(hip, knee, foot, n=10), 0.13), M["suit"], O, cyclic=True)
+        G.seam(d, G.bowed_line((knee[0] - 0.045, knee[1] + 0.025), (knee[0] + 0.02, knee[1] - 0.005), bow=0.2, n=4), M["ink"])
+        G.seam(d, G.bowed_line((knee[0] - 0.035, knee[1] - 0.02), (knee[0] + 0.015, knee[1] - 0.04), bow=0.2, n=4), M["ink"])
         toe = 1.0 if view != "front" else (0.55 if k else -0.55)
         bx = foot[0] + 0.08 * toe
         boot = G.lumpy_ellipse(bx, 0.0 + 0.10 * 1.04 + O * 1.25 - 0.10 + lift + 0.075, 0.13 + 0.06 * abs(toe), 0.10,
                                n=28, lump=0.04, seed=seed + 11 + k)
-        G.stroke(d, boot, M["boot"], O, cyclic=True)
-        sole = [(x, z) for x, z in boot if z < min(b[1] for b in boot) + 0.04]
+        G.stroke(d, boot, M["boot"], 0.0, cyclic=True)
+        zb = min(b[1] for b in boot)
+        sole = [(x, z) for x, z in boot if z < zb + 0.04]
         if len(sole) > 3:
             G.stroke(d, sole, M["boot_sh"], 0.0, cyclic=True)
-            G.stroke(d, boot, M["ink"], O, cyclic=True)
+        strip = [(x, z) for x, z in boot if z < zb + 0.015]
+        if len(strip) > 3:
+            G.stroke(d, strip, M["boot_dp"], 0.0, cyclic=True)
+        x0b, x1b = min(q[0] for q in sole), max(q[0] for q in sole)
+        G.seam(d, G.bowed_line((x0b + 0.015, zb + 0.042), (x1b - 0.015, zb + 0.042), bow=0.02, n=6), M["ink"])
+        G.specks(d, [(bx - 0.03 * toe, zb + 0.13), (bx + 0.0, zb + 0.14), (bx + 0.03 * toe, zb + 0.13)], M["ink"])
+        G.stroke(d, boot, M["ink"], O, cyclic=True)
 
     def arm(k, ang):
         side = (-1 if k == 0 else 1)
@@ -117,14 +129,18 @@ def draw_surveyor(d, M, pose=None, seed=0):
             hand = (sh[0] + out, sh[1] - reach * math.cos(ang * 0.6))
             mid = ((sh[0] + hand[0]) / 2 + side * 0.07, (sh[1] + hand[1]) / 2 + 0.03)
         G.stroke(d, G.hose_outline(G.bezier(sh, mid, hand, n=10), 0.11), M["suit"], O, cyclic=True)
+        G.seam(d, G.bowed_line((mid[0] - 0.03, mid[1] + 0.02), (mid[0] + 0.025, mid[1] - 0.01), bow=0.2, n=4), M["ink"])
         cuff = G.lumpy_ellipse(mid[0] * 0.15 + hand[0] * 0.85, mid[1] * 0.15 + hand[1] * 0.85 + 0.01, 0.085, 0.06,
                                n=20, lump=0.05, seed=seed + 41 + k)
         G.stroke(d, cuff, M["mustard"], O, cyclic=True)
+        ccx, ccz = mid[0] * 0.15 + hand[0] * 0.85, mid[1] * 0.15 + hand[1] * 0.85 + 0.01
+        G.stitches(d, [(ccx - 0.06, ccz), (ccx + 0.06, ccz)], M["ink"], every=0.03, length=0.02)
         g = G.lumpy_ellipse(hand[0], hand[1] - 0.04, 0.115, 0.105, n=24, lump=0.06, seed=seed + 21 + k)
         G.stroke(d, g, M["glove"], O, cyclic=True)
         fx = hand[0] + (0.03 if view == "side" else side * 0.02)
         G.stroke(d, G.bezier((fx - 0.05, hand[1] - 0.05), (fx, hand[1] - 0.07), (fx + 0.04, hand[1] - 0.03), n=6),
                  M["ink"], I)
+        G.seam(d, G.bowed_line((fx - 0.03, hand[1] - 0.005), (fx - 0.035, hand[1] - 0.06), bow=0.1, n=4), M["ink"])
 
     legs, arms = p["legs"], p["arms"]
     leg(0, legs[0][0], legs[0][1], True)
@@ -141,17 +157,31 @@ def draw_surveyor(d, M, pose=None, seed=0):
             return [(strap[0] + (x - strap[0]) * cs - (z - strap[1]) * sn, strap[1] + (x - strap[0]) * sn + (z - strap[1]) * cs + pdz)
                     for x, z in pts]
         pack = PK(X(G.lumpy_ellipse(px, 0.92, 0.17, 0.25, n=32, lump=0.04, seed=seed + 51)))
-        G.stroke(d, pack, M["red"], O, cyclic=True)
+        G.stroke(d, pack, M["red"], 0.0, cyclic=True)
         lo = [q for q in pack if q[1] < PK([X1(px, 0.80)])[0][1]]
         if len(lo) > 3:
             G.stroke(d, lo, M["red_sh"], 0.0, cyclic=True)
-            G.stroke(d, pack, M["ink"], O, cyclic=True)
+        dlo = [q for q in pack if q[1] < PK([X1(px, 0.72)])[0][1]]
+        if len(dlo) > 3:
+            G.stroke(d, dlo, M["red_dp"], 0.0, cyclic=True)
+        hq = PK([X1(px + 0.05, 0.84)])[0]
+        G.hatch(d, hq[0], hq[1], M["ink"], n=3, length=0.07, spacing=0.025, angle_deg=65, seed=seed + 53)
+        G.rivets(d, PK(X([(px - 0.12, 1.06), (px - 0.13, 0.92), (px - 0.12, 0.78)])), M["ink"])
+        G.stroke(d, pack, M["ink"], O, cyclic=True)
+        st0, st1 = PK([X1(px + 0.10, 1.08)])[0], X1(-0.06, 1.10)
+        G.seam(d, G.bowed_line(st0, st1, bow=0.08, n=6), M["ink"])
+        bq = ((st0[0] + st1[0]) / 2, (st0[1] + st1[1]) / 2 - 0.01)
+        G.stroke(d, [(bq[0] - 0.03, bq[1] - 0.025), (bq[0] + 0.03, bq[1] - 0.025), (bq[0] + 0.03, bq[1] + 0.025), (bq[0] - 0.03, bq[1] + 0.025)],
+                 M["mustard"], I, cyclic=True)
         dial = PK([X1(px - 0.02, 1.00)])[0]
         G.stroke(d, G.lumpy_ellipse(dial[0], dial[1], 0.055, 0.055, n=18, seed=seed + 52), M["mustard"], I, cyclic=True)
+        G.seam(d, [(dial[0], dial[1]), (dial[0] + 0.03, dial[1] + 0.025)], M["ink"])
         # rubber air hose from the pack top to the helmet back
         a, b = PK([strap])[0], X1(-0.28 if view == "side" else -0.22, 1.30)
         c = ((a[0] + b[0]) / 2 - 0.12 - p["hose_lag"], (a[1] + b[1]) / 2 + 0.02 - 0.5 * abs(p["hose_lag"]))
-        G.stroke(d, G.hose_outline(G.bezier(a, c, b, n=10), 0.06), M["teal"], O, cyclic=True)
+        hose_c = G.bezier(a, c, b, n=10)
+        G.stroke(d, G.hose_outline(hose_c, 0.06), M["teal"], O, cyclic=True)
+        G.ribs(d, hose_c[1:-1], 0.06, M["ink"], every=0.05, frac=0.7)
     leg(1, legs[1][0], legs[1][1], False)
 
     # ---- torso: a round bean with the meridian stripe, belt and badge
@@ -163,6 +193,10 @@ def draw_surveyor(d, M, pose=None, seed=0):
         cxz = X1(0.0, 0.86)
         inner = [(cxz[0] + (x - cxz[0]) * 0.78 + 0.03, cxz[1] + (z - cxz[1]) * 0.80 + 0.03) for x, z in shadow_side][::-1]
         G.stroke(d, shadow_side + inner, M["suit_sh"], 0.0, cyclic=True)
+        deep_side = [body[i] for i in range(n) if math.cos(6.283 * i / n) < -0.6 and math.sin(6.283 * i / n) < 0.2]
+        if len(deep_side) > 3:
+            dinner = [(cxz[0] + (x - cxz[0]) * 0.90 + 0.015, cxz[1] + (z - cxz[1]) * 0.92 + 0.01) for x, z in deep_side][::-1]
+            G.stroke(d, deep_side + dinner, M["suit_dp"], 0.0, cyclic=True)
     so = {"side": 0.13, "tq": 0.10, "front": 0.0}[view]
     sw = {"side": 0.06, "tq": 0.09, "front": 0.10}[view]
     stripe = [(so - sw + 0.02 * math.sin(t * 3.0), 0.55 + 0.62 * t) for t in [k / 11 for k in range(12)]]
@@ -170,8 +204,17 @@ def draw_surveyor(d, M, pose=None, seed=0):
     stripe = [(x * (1 - 0.35 * ((z - 0.86) / 0.34) ** 2 if view == "side" else 1), z) for x, z in stripe]
     stripe = [q for q in stripe if abs(q[1] - 0.86) < 0.31]
     G.stroke(d, X(stripe), M["stripe"], I, cyclic=True)
+    for edge in (-1, 1):
+        ed = [(so + edge * (sw - 0.015) + 0.02 * math.sin(t * 3.0), 0.55 + 0.62 * t) for t in [k / 15 for k in range(16)]]
+        ed = [(x * (1 - 0.35 * ((z - 0.86) / 0.34) ** 2 if view == "side" else 1), z) for x, z in ed if abs(z - 0.86) < 0.27]
+        G.stitches(d, X(ed), M["ink"], every=0.05, length=0.018)
+    G.specks(d, X([(-0.18, 0.70), (-0.14, 0.74), (-0.20, 0.78)]), M["ink"])
     belt = X(G.bowed_line((-0.30 if view != "side" else -0.27, 0.66), (0.30 if view != "side" else 0.27, 0.66), bow=-0.03))
     G.stroke(d, belt, M["ink"], I)
+    if view == "side":
+        bk = X1(0.20, 0.66)
+        G.stroke(d, [(bk[0] - 0.035, bk[1] - 0.03), (bk[0] + 0.035, bk[1] - 0.03), (bk[0] + 0.035, bk[1] + 0.03), (bk[0] - 0.035, bk[1] + 0.03)],
+                 M["mustard"], I, cyclic=True)
     if view != "side":
         bx = X1(so + 0.0, 0.93)
         G.stroke(d, G.lumpy_ellipse(bx[0], bx[1], 0.075, 0.075, n=24, seed=seed + 61), M["mustard"], I, cyclic=True)
@@ -189,6 +232,8 @@ def draw_surveyor(d, M, pose=None, seed=0):
     # ---- collar + helmet + face
     collar = X(G.lumpy_ellipse(0.0, 1.13, 0.27, 0.07, n=32, lump=0.03, seed=seed + 71))
     G.stroke(d, collar, M["mustard"], O, cyclic=True)
+    G.seam(d, X(G.bowed_line((-0.22, 1.125), (0.22, 1.125), bow=-0.04, n=8)), M["ink"])
+    G.rivets(d, X([(-0.16, 1.10), (-0.05, 1.095), (0.06, 1.095), (0.17, 1.10)]), M["ink"])
     hc = X1(0.0, 1.52)
     hr = 0.42
     # head inside the glass
