@@ -49,5 +49,57 @@ namespace Meridian.Tests
             Assert.AreEqual("plains", CartoonStage.SceneFor(Meridian.Planets.PlanetId.Earth, ps + 50));
             Assert.AreEqual("coast", CartoonStage.SceneFor(Meridian.Planets.PlanetId.Earth, os + 16), "the shore at 2096 asks for the coast set");
         }
+
+        const int W = 4096;
+        // A Mercury-like world: the plain at 320 with gentle noise (±5 m), the two cold-trap bowls; a POI stamp at 1000..1019.
+        static float Plain(int x) => 320f + 5f * UnityEngine.Mathf.Sin(x * 0.3f);
+        static float Band(int x) => Plain(x) + Meridian.Terrain.MercuryLandforms.ColdTrapProfile(x, W);
+
+        /// <summary>U-139 (the 0.4.5 smoke: the set 6 m under the flare shelter's plateau): across a stamped plateau the datum is the stamped surface,
+        /// blended back to the plain over the stamp's shoulders; the pad keeps its measured surface; the plain's noise is one gentle line.</summary>
+        [Test]
+        public void TheDatumFollowsAStampedPlateau()
+        {
+            System.Func<int, float> final = x => x >= 1000 && x < 1020 ? 326f : Band(x);
+            var d = new BandDatum(Meridian.Planets.PlanetId.Mercury, 320f, 64, 318f, W, Band, final, new[] { 1000, 20 });
+            Assert.AreEqual(326f, d.At(1010), 1e-3f, "on the plateau: its stamped surface");
+            Assert.AreEqual(326f, d.At(1000), 1e-3f, "its first column");
+            Assert.AreEqual(318f, d.At(64), 1e-3f, "the pad holds its measured surface (the u123 frames)");
+            Assert.AreEqual(318f, d.At(64 + BandDatum.PadHold), 1e-3f, "for PadHold columns");
+            Assert.AreEqual(320f, d.At(3000), 0.6f, "the plain (clear of both traps): its ±5 m noise averaged to one line");
+            Assert.Less(UnityEngine.Mathf.Abs(d.At(1060) - d.At(1061)), 0.5f, "past the shoulders no step");
+        }
+
+        /// <summary>U-139 (the 0.4.5 smoke: the set 3 m over the solarite field's terrace, a grey bar and black under it): a stamp lower than the
+        /// plain pulls the datum down to it.</summary>
+        [Test]
+        public void TheDatumFollowsAStampedTerrace()
+        {
+            System.Func<int, float> final = x => x >= 1800 && x < 1830 ? 317f : Band(x);
+            var d = new BandDatum(Meridian.Planets.PlanetId.Mercury, 320f, 64, 318f, W, Band, final, new[] { 1800, 30 });
+            Assert.AreEqual(317f, d.At(1815), 1e-3f, "on the terrace: within 1 m of the walking surface");
+            Assert.AreEqual(317f, d.At(1829), 1e-3f);
+        }
+
+        /// <summary>U-139 keeps D-146's cold traps: the bowl is added back unsmoothed, so the night set still meets a trap's floor.</summary>
+        [Test]
+        public void TheColdTrapFloorStaysExact()
+        {
+            var d = new BandDatum(Meridian.Planets.PlanetId.Mercury, 320f, 64, 318f, W, Band, Band, new int[0]);
+            int c = Meridian.Terrain.MercuryLandforms.ColdTrapCentre(0, W);
+            Assert.AreEqual(Band(c), d.At(c), 1e-3f, "the trap's floor: D-146's own column from the rim in");
+            Assert.Less(d.At(c), 300f, "and 36 m down");
+        }
+
+        /// <summary>U-139: Venus's surface set follows its tesserae (55 m up) instead of standing at the entry's height.</summary>
+        [Test]
+        public void VenusFollowsItsTesserae()
+        {
+            System.Func<int, float> venus = x => 250f + (x >= 600 && x < 1100 ? 55f : 0f);
+            var d = new BandDatum(Meridian.Planets.PlanetId.Venus, 250f, 64, 250f, W, venus, venus, new int[0]);
+            Assert.AreEqual(305f, d.At(850), 1e-3f, "the tessera's top");
+            Assert.AreEqual(250f, d.At(300), 1e-3f, "the plain");
+            Assert.AreEqual(250f, new BandDatum(Meridian.Planets.PlanetId.Venus, 250f, 64, 250f).At(850), 1e-3f, "without the surfaces (pure tests): the entry's height");
+        }
     }
 }

@@ -161,11 +161,19 @@ namespace Meridian.View2D
                 : SceneNow(side.spawnX); // U-110 / U-118 / U-123: the spawn's band (Earth), region (Mars) or terminator zone (Mercury) picks the set
             Layers.SetOrderOffset(0);
             Layers.alpha = 1f;
+            Layers.groundFill = Meridian.Planet.PlanetBackdrop.GroundColor(config.id); // U-139: ground, not black, under the set's bottom edge
             Layers.ConfigureFor(planetName, Scene, DatumFor(Scene, surfaceDatum), FallbackFor(config.id));
             // U-128: from here the datum and the set follow the camera's band (FollowBand); the spawn's band keeps this surface, so the camp frames do not move.
             // D-146: Mercury's bands take the generator's own surface (noise + the cold-trap bowls, no small craters): the plain by the spawn, each trap per column.
-            var solid = config.id == Meridian.Planets.PlanetId.Mercury && side.terrain != null ? side.terrain.BaseGenerator as Meridian.Terrain.SolidWorldGenerator : null;
-            Datum = new BandDatum(config.id, config.datumY, side.spawnX, surfaceDatum, config.worldWidth, solid != null ? x => solid.BandSurfaceHeight(x) + 1f : (System.Func<int, float>)null);
+            // U-139: Mercury and Venus follow the walking surface — the band surface's noise averaged, the bowls exact, each POI's stamped ground across
+            // its stamp and shoulders (TerrainStreamer.OriginalTop), the pad held at the spawn surface.
+            bool follows = config.id == Meridian.Planets.PlanetId.Mercury || config.id == Meridian.Planets.PlanetId.Venus;
+            var solid = follows && side.terrain != null ? side.terrain.BaseGenerator as Meridian.Terrain.SolidWorldGenerator : null;
+            var streamer = side.terrain;
+            Datum = new BandDatum(config.id, config.datumY, side.spawnX, surfaceDatum, config.worldWidth,
+                solid != null ? x => solid.BandSurfaceHeight(x) + 1f : (System.Func<int, float>)null,
+                solid != null ? x => streamer.OriginalTop(x) + 1f : (System.Func<int, float>)null,
+                solid != null ? BandDatum.StampsOf(config.id) : null);
             Fading = false; Crossfades = 0;
             if (Incoming != null) { Incoming.Release(); Incoming.gameObject.SetActive(false); }
             // U-118: Mars draws the dust storm as the B-141 storm set's veil over the base layers (alpha = the storm's intensity, the wind scrolls it).
@@ -252,6 +260,7 @@ namespace Meridian.View2D
                 Incoming.view = Layers.view;
                 Incoming.orderOffset = IncomingOrder;
                 Incoming.alpha = 0f;
+                Incoming.groundFill = Layers.groundFill; // U-139
                 Incoming.ConfigureFor(planetName, want, DatumFor(want, d), FallbackFor(planetId));
                 incomingScene = want; fadeT = 0f; Fading = true;
             }

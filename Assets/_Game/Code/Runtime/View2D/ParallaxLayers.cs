@@ -170,6 +170,45 @@ namespace Meridian.View2D
             };
         }
 
+        /// <summary>U-139: the planet's ground colour painted under the set's lowest bottom edge, so a camera in a dip or a trench sees ground, not a
+        /// black band; null (the storm veil, tests) paints nothing.</summary>
+        public Color? groundFill;
+        /// <summary>How deep the ground fill reaches under the set (m): past the frame bottom from any dip the camera can drop into.</summary>
+        public const float FillDepth = 200f;
+        SpriteRenderer fill;
+        static Sprite fillSprite;
+        /// <summary>U-139: the fill's top edge on the last frame (NaN when none drew; tests read it).</summary>
+        public float FillTop { get; private set; } = float.NaN;
+
+        void PlaceFill(Vector3 c)
+        {
+            if (!groundFill.HasValue) { if (fill != null && fill.enabled) fill.enabled = false; FillTop = float.NaN; return; }
+            if (fill == null)
+            {
+                if (fillSprite == null)
+                {
+                    var tex = Texture2D.whiteTexture;
+                    fillSprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 1f), tex.width, 0, SpriteMeshType.FullRect);
+                    fillSprite.name = "ParallaxGroundFill";
+                }
+                var go = new GameObject("GroundFill");
+                go.transform.SetParent(transform, false);
+                fill = go.AddComponent<SpriteRenderer>();
+                fill.sprite = fillSprite;
+            }
+            float bottom = float.MaxValue;
+            for (int i = 0; i < renderers.Count; i++) if (renderers[i] != null) bottom = Mathf.Min(bottom, renderers[i].transform.position.y);
+            if (bottom == float.MaxValue) { fill.enabled = false; FillTop = float.NaN; return; }
+            var col = groundFill.Value; col.a *= alpha;
+            if (fill.color != col) fill.color = col;
+            fill.sortingOrder = BackOrder + orderOffset - 1; // behind the far layer
+            float width = view.orthographic ? view.orthographicSize * view.aspect * 2f + 4f : 200f;
+            FillTop = bottom + 0.05f; // a hair over the set's edge: no seam between them
+            fill.transform.position = new Vector3(c.x, FillTop, 0f);
+            fill.transform.localScale = new Vector3(width, FillDepth, 1f);
+            fill.enabled = true;
+        }
+
         void LateUpdate()
         {
             if (view == null) return;
@@ -190,6 +229,7 @@ namespace Meridian.View2D
                 if (w > 0f) x += Mathf.Round((c.x - x) / w) * w;
                 sr.transform.position = new Vector3(x, ParallaxMath.LayerY(FollowY(c.y, anchorY), anchorY, datumY, l.y_m, l.parallax), 0f); // U-122: under the anchor the painting holds its datum pose
             }
+            PlaceFill(c); // U-139: after the layers moved
         }
 
         void Clear()
