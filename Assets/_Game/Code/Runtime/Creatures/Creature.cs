@@ -50,6 +50,18 @@ namespace Meridian.Creatures
         public const float FlyAfter = 0.12f, LandAfter = 0.06f;
         /// <summary>U-108: the sheet clip a flier plays while airborne (B-127 gull: frames 40–51, loop).</summary>
         public const string FlyClip = "fly";
+        /// <summary>U-114 (D-119, B-132): the bolt and the wolf's trot-after, found by name (idle 0, walk 1, react 2, bump 3 stay by index).</summary>
+        public const string FleeClip = "flee", FollowClip = "follow";
+        int fleeClip = -1, followClip = -1;
+        internal float nextHuff;
+
+        /// <summary>The index of a clip by name in a sheet's set, or −1. Pure.</summary>
+        public static int ClipIndex(ArtClipSet clips, string name)
+        {
+            if (clips == null) return -1;
+            for (int i = 0; i < clips.clips.Count; i++) if (clips.clips[i].name == name) return i;
+            return -1;
+        }
         Color baseColor = Color.white;
         internal CreatureDirector director;
 
@@ -108,6 +120,7 @@ namespace Meridian.Creatures
             this.clips = clips;
             flyClip = -1;
             if (clips != null) for (int i = 0; i < clips.clips.Count; i++) if (clips.clips[i].name == FlyClip) { flyClip = i; break; }
+            fleeClip = ClipIndex(clips, FleeClip); followClip = ClipIndex(clips, FollowClip);
             lastClip = -1;
             View.sprite = sprite;
             View.transform.localScale = Vector3.one * Spec.artScale;
@@ -128,6 +141,7 @@ namespace Meridian.Creatures
             // U-108: the fly clip by name, once per spawn (a pooled body comes back as another species: reset when the sheet has none).
             flyClip = -1;
             if (clips != null) for (int i = 0; i < clips.clips.Count; i++) if (clips.clips[i].name == FlyClip) { flyClip = i; break; }
+            fleeClip = ClipIndex(clips, FleeClip); followClip = ClipIndex(clips, FollowClip);
             airFor = groundFor = 0f;
             Airborne = false;
             State = CreatureState.Wander;
@@ -135,7 +149,7 @@ namespace Meridian.Creatures
             dir = (serial & 1) == 0 ? 1 : -1;
             nextThink = 0f;
             biteReady = 0f;
-            hurtFor = attackFor = chillFor = anim = knockFor = flashFor = blockedFor = keepDirUntil = blockAnchorT = waitUntil = 0f;
+            hurtFor = attackFor = chillFor = anim = knockFor = flashFor = blockedFor = keepDirUntil = blockAnchorT = waitUntil = nextHuff = 0f;
             blockAnchorX = position.x;
             fleeUntil = 0f;
             lastClip = -1;
@@ -197,6 +211,9 @@ namespace Meridian.Creatures
             else flashFor = Meridian.Player.PlayerView.FlashSeconds;
         }
 
+        /// <summary>U-114: the territorial rear-up (the react clip for `seconds`), no knock, no flash.</summary>
+        internal void Rear(float seconds) => attackFor = seconds;
+
         /// <summary>
         /// One frame of animation (the director calls it once per tick). `grounded`: ground contact this tick (walkers: still and
         /// a solid tile under the feet; fliers: a solid tile under the feet), feeding the U-108 airborne hysteresis.
@@ -234,7 +251,11 @@ namespace Meridian.Creatures
             if (sheet == null || clips == null || clips.clips.Count == 0) return;
             // Clip order in every B-0xx creature sheet: idle, walk, attack, hurt, death. U-108: a sheet with a `fly` clip
             // (B-127 gull: idle, walk, react, bump, fly) plays it while airborne, under the bump and hurt reactions.
-            int want = hurtFor > 0f ? 3 : attackFor > 0f ? 2 : (Airborne && flyClip >= 0) ? flyClip : speed > 0.3f ? 1 : 0;
+            // U-114: a bolting creature with a `flee` clip runs it, a chasing wolf its `follow`; walk and idle otherwise.
+            int want = hurtFor > 0f ? 3 : attackFor > 0f ? 2 : (Airborne && flyClip >= 0) ? flyClip
+                     : (State == CreatureState.Flee && fleeClip >= 0 && speed > 0.3f) ? fleeClip
+                     : (State == CreatureState.Chase && followClip >= 0 && speed > 0.3f) ? followClip
+                     : speed > 0.3f ? 1 : 0;
             LastPick = want;
             if (want >= clips.clips.Count) want = 0;
             if (want != lastClip) { lastClip = want; anim = 0f; }

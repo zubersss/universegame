@@ -1,0 +1,829 @@
+fileFormatVersion: 2
+guid: ed52e161ea8d55748a176d30bb0cf172
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -9015811064428591007
+    second: rigset_color_0
+  - first:
+      213: -4646942707658281257
+    second: rigset_color_1
+  - first:
+      213: -367356044595573682
+    second: rigset_color_2
+  - first:
+      213: 4347448135749056951
+    second: rigset_color_3
+  - first:
+      213: -3315201752533947720
+    second: rigset_color_4
+  - first:
+      213: -8837342657336079748
+    second: rigset_color_5
+  - first:
+      213: -8765935735186961322
+    second: rigset_color_6
+  - first:
+      213: -8242980493334989995
+    second: rigset_color_7
+  - first:
+      213: -1429384369043599060
+    second: rigset_color_8
+  - first:
+      213: -1655417677226936628
+    second: rigset_color_9
+  - first:
+      213: -7864364231028489733
+    second: rigset_color_10
+  - first:
+      213: 4632427809600995280
+    second: rigset_color_11
+  - first:
+      213: -4947251109637937645
+    second: rigset_color_12
+  - first:
+      213: -8883380907211250912
+    second: rigset_color_13
+  - first:
+      213: -6618969852247736515
+    second: rigset_color_14
+  - first:
+      213: 8310072760055638085
+    second: rigset_color_15
+  - first:
+      213: -8941757950970621053
+    second: rigset_color_16
+  - first:
+      213: 2079164303080992741
+    second: rigset_color_17
+  - first:
+      213: 1490004103099028332
+    second: rigset_color_18
+  - first:
+      213: -6538976570956593336
+    second: rigset_color_19
+  - first:
+      213: 2518108490744669611
+    second: rigset_color_20
+  - first:
+      213: 1930681069225236888
+    second: rigset_color_21
+  - first:
+      213: 4284336572379364787
+    second: rigset_color_22
+  - first:
+      213: -1021163703781780209
+    second: rigset_color_23
+  - first:
+      213: 2261661250419273690
+    second: rigset_color_24
+  - first:
+      213: 8611791281861866047
+    second: rigset_color_25
+  - first:
+      213: 5035489299039453197
+    second: rigset_color_26
+  - first:
+      213: -3106851909171929053
+    second: rigset_color_27
+  - first:
+      213: 5097005251657540171
+    second: rigset_color_28
+  - first:
+      213: 5351260868189590685
+    second: rigset_color_29
+  - first:
+      213: 1478904169744634567
+    second: rigset_color_30
+  - first:
+      213: 8667334026266046935
+    second: rigset_color_31
+  - first:
+      213: 3708508014823357698
+    second: rigset_color_32
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: frostcurl_c_curled
+      rect:
+        serializedVersion: 2
+        x: 276
+        y: 148
+        width: 60
+        height: 68
+      alignment: 9
+      pivot: {x: 0.193, y: 0.1171}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 635cf0b66242fba4bb21053f29b84a96
+      internalID: 347435573
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostcurl_c_open
+      rect:
+        serializedVersion: 2
+        x: 56
+        y: 136
+        width: 52
+        height: 80
+      alignment: 9
+      pivot: {x: 0.2279, y: 0.0995}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8f42c6f38748b4b4f94c6623377f0256
+      internalID: -370304768
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostcurl_crown
+      rect:
+        serializedVersion: 2
+        x: 280
+        y: 20
+        width: 36
+        height: 24
+      alignment: 9
+      pivot: {x: 0.4904, y: 0.3008}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4c202d48560f4ab47a75f20c26fb4913
+      internalID: -561145776
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostcurl_l_curled
+      rect:
+        serializedVersion: 2
+        x: 460
+        y: 156
+        width: 44
+        height: 60
+      alignment: 9
+      pivot: {x: 0.4512, y: 0.1326}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eae11edbbdd7aef4aa47dbb263069514
+      internalID: -421138159
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostcurl_l_open
+      rect:
+        serializedVersion: 2
+        x: 140
+        y: 144
+        width: 32
+        height: 72
+      alignment: 9
+      pivot: {x: 0.6458, y: 0.1105}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 51b0ee54386766d4c89e70206287b59b
+      internalID: 1980967688
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostcurl_r_curled
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 48
+        width: 44
+        height: 60
+      alignment: 9
+      pivot: {x: 0.4916, y: 0.1324}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 06a911d14929a4744b1edc48c2829b74
+      internalID: 1325978172
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostcurl_r_open
+      rect:
+        serializedVersion: 2
+        x: 176
+        y: 144
+        width: 32
+        height: 72
+      alignment: 9
+      pivot: {x: 0.2686, y: 0.1104}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bd6f9908708d55d48a36550a1175ee26
+      internalID: 656304321
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pipereed_mound
+      rect:
+        serializedVersion: 2
+        x: 320
+        y: 20
+        width: 44
+        height: 24
+      alignment: 9
+      pivot: {x: 0.4702, y: 0.3141}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fce80b52cf58603448dff10719fbe6af
+      internalID: 1205418138
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pipereed_pipe_a
+      rect:
+        serializedVersion: 2
+        x: 112
+        y: 140
+        width: 24
+        height: 76
+      alignment: 9
+      pivot: {x: 0.4233, y: 0.0732}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 160aca8fca11a5d458d795520d89ff1d
+      internalID: 1619709432
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pipereed_pipe_a_squash
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 48
+        width: 24
+        height: 60
+      alignment: 9
+      pivot: {x: 0.4233, y: 0.0927}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3b14c93d34d1ccf45af199877ecfdc72
+      internalID: 908531338
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pipereed_pipe_b
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 112
+        width: 24
+        height: 104
+      alignment: 9
+      pivot: {x: 0.4433, y: 0.0535}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e92ab0b8643228a419df9ea53215c6f8
+      internalID: -520745154
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pipereed_pipe_b_squash
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 132
+        width: 24
+        height: 84
+      alignment: 9
+      pivot: {x: 0.4433, y: 0.0662}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 637c8abfc03e9bf45914e42e1496b4ff
+      internalID: -1355666478
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pipereed_pipe_c
+      rect:
+        serializedVersion: 2
+        x: 76
+        y: 48
+        width: 20
+        height: 60
+      alignment: 9
+      pivot: {x: 0.4839, y: 0.0927}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 84c02a2948c27f2458879c96a938d4c7
+      internalID: -1765983617
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pipereed_pipe_c_squash
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 56
+        width: 20
+        height: 52
+      alignment: 9
+      pivot: {x: 0.4839, y: 0.107}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2651531017d1a1842b896f2ebd4b57b0
+      internalID: 645732930
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: puffpod_neck
+      rect:
+        serializedVersion: 2
+        x: 296
+        y: 64
+        width: 48
+        height: 44
+      alignment: 9
+      pivot: {x: 0.5023, y: 0.2021}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6e3c5c8cb38f7c04281c24904f88202a
+      internalID: 823664131
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: puffpod_pod
+      rect:
+        serializedVersion: 2
+        x: 184
+        y: 56
+        width: 56
+        height: 52
+      alignment: 9
+      pivot: {x: 0.4714, y: 0.0967}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2bce4bf5cb92ce0449ac3a340eb3cde9
+      internalID: 543195970
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: puffpod_pod_big
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 52
+        width: 56
+        height: 56
+      alignment: 9
+      pivot: {x: 0.4863, y: 0.0894}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 38903d6d3cc128d4f97d92227b345f18
+      internalID: 594993336
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: puffpod_pod_flat
+      rect:
+        serializedVersion: 2
+        x: 212
+        y: 144
+        width: 60
+        height: 72
+      alignment: 9
+      pivot: {x: 0.4803, y: 0.0693}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8443957688d302545894f86428801825
+      internalID: -1526683677
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: rustbell_bell_open
+      rect:
+        serializedVersion: 2
+        x: 348
+        y: 64
+        width: 44
+        height: 44
+      alignment: 9
+      pivot: {x: 0.5981, y: 0.813}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e33449c5e4a7d0249879954f04492009
+      internalID: -1851990003
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: rustbell_bell_shut
+      rect:
+        serializedVersion: 2
+        x: 244
+        y: 60
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.2219, y: 0.6986}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ce1c31ea80146b34d8c23ef4fbd9a2f6
+      internalID: -630790166
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: rustbell_stem_lower
+      rect:
+        serializedVersion: 2
+        x: 340
+        y: 152
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.4948, y: 0.1319}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c847e184de636c746b8f52476da5768b
+      internalID: 929138649
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: rustbell_stem_upper
+      rect:
+        serializedVersion: 2
+        x: 408
+        y: 152
+        width: 48
+        height: 64
+      alignment: 9
+      pivot: {x: 0.1754, y: 0.1766}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d102c066cbbac0a40aeaff930144abcd
+      internalID: 2080875965
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_creeper_pads_a
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 4
+        width: 88
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5019, y: 0.6467}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 64c3989485ac46e4485d59f92d7191fb
+      internalID: -137618368
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_creeper_pads_b
+      rect:
+        serializedVersion: 2
+        x: 188
+        y: 4
+        width: 88
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5019, y: 0.6728}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 544cc666cfaed634eb7071b6443c0bb4
+      internalID: 1201753983
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_creeper_pads_flat
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 64
+        width: 88
+        height: 44
+      alignment: 9
+      pivot: {x: 0.4863, y: 0.6493}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bba31710d40663a49ba199ccf2f8350a
+      internalID: 2043927992
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_creeper_rock
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 92
+        height: 44
+      alignment: 9
+      pivot: {x: 0.4932, y: 0.1264}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1d11a115706367a439672cded46a22b7
+      internalID: 1785408000
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: ba7dbff72df74874fa2c5c128d92c1d6
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      frostcurl_c_curled: 347435573
+      frostcurl_c_open: -370304768
+      frostcurl_crown: -561145776
+      frostcurl_l_curled: -421138159
+      frostcurl_l_open: 1980967688
+      frostcurl_r_curled: 1325978172
+      frostcurl_r_open: 656304321
+      pipereed_mound: 1205418138
+      pipereed_pipe_a: 1619709432
+      pipereed_pipe_a_squash: 908531338
+      pipereed_pipe_b: -520745154
+      pipereed_pipe_b_squash: -1355666478
+      pipereed_pipe_c: -1765983617
+      pipereed_pipe_c_squash: 645732930
+      puffpod_neck: 823664131
+      puffpod_pod: 543195970
+      puffpod_pod_big: 594993336
+      puffpod_pod_flat: -1526683677
+      rustbell_bell_open: -1851990003
+      rustbell_bell_shut: -630790166
+      rustbell_stem_lower: 929138649
+      rustbell_stem_upper: 2080875965
+      scree_creeper_pads_a: -137618368
+      scree_creeper_pads_b: 1201753983
+      scree_creeper_pads_flat: 2043927992
+      scree_creeper_rock: 1785408000
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

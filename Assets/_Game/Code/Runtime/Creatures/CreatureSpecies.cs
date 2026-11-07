@@ -13,10 +13,13 @@ namespace Meridian.Creatures
         SulfurDrifter, Acidmoth, PressureCrab, VentEel, VeilSerpent,
         /// <summary>U-101 / B-113: the C0 Earth critter, a small gull that flees (v3 sheet creatures/earth/gull). Last: the table is indexed by this value.</summary>
         Gull,
+        // U-114 (D-119, B-132): the brown bear, territorial (Bible §7.1); last so every older index stays.
+        BrownBear,
     }
 
     /// <summary>What a creature does about the player.</summary>
-    public enum Temper { Flees, Hunts }
+    /// <summary>U-114: Territorial holds its ground (faces, rears, huffs) within senseRange and bolts when pushed inside CreatureDirector.PushRange.</summary>
+    public enum Temper { Flees, Hunts, Territorial }
 
     public enum ActiveTime { Any, Day, Night }
 
@@ -75,10 +78,10 @@ namespace Meridian.Creatures
 
         static readonly SpeciesSpec[] All =
         {
-            new SpeciesSpec { id = Species.Stag, planet = PlanetId.Earth, artKey = "creatures/earth/stag", size = new Vector2(1.9f, 1.6f),
+            new SpeciesSpec { id = Species.Stag, planet = PlanetId.Earth, artKey = "creatures/earth/stag", size = new Vector2(1.5f, 2.0f), // U-114: the B-132 sheet, antler tips at 2 m
                 wanderSpeed = 1.2f, runSpeed = 9f, jumpSpeed = 6.5f, temper = Temper.Flees, senseRange = 8f, time = ActiveTime.Any,
                 packMin = 1, packMax = 3, maxAlive = 6, placeholder = new Color(0.55f, 0.38f, 0.22f) },
-            new SpeciesSpec { id = Species.GreyWolf, planet = PlanetId.Earth, artKey = "creatures/earth/wolf", size = new Vector2(1.5f, 0.9f),
+            new SpeciesSpec { id = Species.GreyWolf, planet = PlanetId.Earth, artKey = "creatures/earth/wolf", size = new Vector2(1.2f, 1.0f), // U-114: the B-132 sheet
                 wanderSpeed = 1.6f, runSpeed = 7.5f, jumpSpeed = 6f, temper = Temper.Hunts, senseRange = 14f, time = ActiveTime.Night,
                 packMin = 2, packMax = 4, maxAlive = 8, placeholder = new Color(0.45f, 0.47f, 0.5f) },
             new SpeciesSpec { id = Species.Dustskater, planet = PlanetId.Mars, artKey = "creatures/mars/dustskater", size = new Vector2(0.8f, 0.45f),
@@ -125,6 +128,10 @@ namespace Meridian.Creatures
             new SpeciesSpec { id = Species.Gull, planet = PlanetId.Earth, artKey = "creatures/earth/gull", size = new Vector2(0.7f, 0.5f),
                 wanderSpeed = 2.5f, runSpeed = 7f, temper = Temper.Flees, senseRange = 6f, time = ActiveTime.Day, habitat = Habitat.Air,
                 hoverMin = 2f, hoverMax = 5f, packMin = 1, packMax = 2, maxAlive = 3, placeholder = new Color(0.92f, 0.92f, 0.88f) },
+            // U-114 (D-119, B-132): the brown bear, Bible §7.1 territorial: holds its ground, rears and huffs (react) within 6 m, bolts when pushed (D-087: no bites).
+            new SpeciesSpec { id = Species.BrownBear, planet = PlanetId.Earth, artKey = "creatures/earth/bear", size = new Vector2(2.1f, 1.3f),
+                wanderSpeed = 1.1f, runSpeed = 6.5f, jumpSpeed = 4.5f, temper = Temper.Territorial, senseRange = 6f, time = ActiveTime.Any,
+                packMin = 1, packMax = 1, maxAlive = 2, placeholder = new Color(0.45f, 0.28f, 0.18f) },
         };
 
         public static SpeciesSpec Get(Species s) => All[(int)s];
@@ -139,6 +146,7 @@ namespace Meridian.Creatures
         {
             Species.Stag => s.surfaceTile == TileId.Grass,                       // meadows and forest floor
             Species.GreyWolf => s.surfaceTile == TileId.Grass || s.surfaceTile == TileId.Snow,
+            Species.BrownBear => s.surfaceTile == TileId.Grass,                  // U-114: forest floor and meadows, like the stag
             Species.Gull => s.surfaceTile == TileId.Grass || s.surfaceTile == TileId.Sand,
             Species.Dustskater => s.surfaceTile == TileId.Regolith,
             Species.ScreeStalker => s.surfaceTile == TileId.Regolith && s.surfaceY <= s.datumY - 12, // low ground: canyon floors

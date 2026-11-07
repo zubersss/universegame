@@ -85,6 +85,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2caac7aa606da4e44b293de8be0e65fe
+    m_Address: creatures/earth/hadal_maw/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2cc1b90e4bce8814bb8863465f117e9d
     m_Address: terrain/earth/backwall
     m_ReadOnly: 0
@@ -220,8 +225,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 970c81bbb3a2f2d40ac6deb00a1d14dc
+    m_Address: creatures/earth/hadal_maw
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 99a9c52df7ad5dd47a33991fe1c817da
     m_Address: backgrounds/earth/plains/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9a8ba485af298b5489fa7866ab4be415
+    m_Address: creatures/earth/hadal_maw/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

@@ -438,11 +438,14 @@ namespace Meridian.Building
             {
                 var d = doors[i];
                 if (d.go == null) { doors.RemoveAt(i); continue; }
-                var m = d.model != null && d.model.Ready ? d.model.Views[0] : null;
-                if (m == null) continue;
+                if (d.model == null || !d.model.Ready) continue;
                 bool near = player != null && Mathf.Abs(player.position.x - (d.go.transform.position.x + d.spec.size.x * 0.5f)) < DoorOpenRange
                             && player.position.y > d.go.transform.position.y - 0.5f && player.position.y < d.go.transform.position.y + d.spec.size.y;
                 int want = near ? 1 : -1;
+                // U-113 (D-117): the door drawn from its sheet plays `open` once forward on approach and backward on leaving.
+                if (d.model.UsesSheet) { if (d.model.Sheet.Towards != want) d.model.Sheet.PlayToward(DoorClip, near); continue; }
+                var m = d.model.Views.Count > 0 ? d.model.Views[0] : null;
+                if (m == null) continue;
                 if (m.Towards != want) m.PlayToward(DoorClip, near);
             }
         }

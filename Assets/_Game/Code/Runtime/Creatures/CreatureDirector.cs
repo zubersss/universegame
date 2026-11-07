@@ -422,6 +422,8 @@ namespace Meridian.Creatures
         public const float BlockedSeconds = 0.2f;
         /// <summary>U-099: after a wall turn a fleeing creature keeps its new direction this long before its thinks may re-aim it away from the surveyor.</summary>
         public const float WallTurnSeconds = 1.5f;
+        /// <summary>U-114 (D-119): a territorial creature bolts when the surveyor comes inside PushRange, rears (react) every HuffEvery s while they stand inside senseRange, and runs TerritorialFleeSeconds after a push.</summary>
+        public const float PushRange = 1.6f, HuffEvery = 2.5f, RearSeconds = 0.8f, TerritorialFleeSeconds = 4f;
         /// <summary>Bumps given since load (tests).</summary>
         public int Bumps { get; private set; }
 
@@ -432,6 +434,19 @@ namespace Meridian.Creatures
             if (spec.Flies) c.altitude = AltitudeFor(c);
 
             bool playerAlive = vitals == null || !vitals.Dead;
+            if (spec.temper == Temper.Territorial)
+            {
+                // U-114 (D-119, Bible §7.1): the bear holds its ground. Pushed: it bolts. In range: it stands, faces the surveyor and rears.
+                if (playerAlive && adx < PushRange && Mathf.Abs(dy) < 2f) { c.fleeUntil = now + TerritorialFleeSeconds; c.State = CreatureState.Flee; c.dir = dx > 0f ? -1 : 1; return; }
+                if (now < c.fleeUntil) { c.State = CreatureState.Flee; if (now >= c.keepDirUntil) c.dir = dx > 0f ? -1 : 1; return; }
+                if (playerAlive && adx < spec.senseRange && Mathf.Abs(dy) < 4f)
+                {
+                    c.State = CreatureState.Idle;
+                    c.dir = dx > 0f ? 1 : -1;
+                    if (now >= c.nextHuff) { c.nextHuff = now + HuffEvery; c.Rear(RearSeconds); }
+                    return;
+                }
+            }
             bool hunts = spec.temper == Temper.Hunts || (spec.huntsDuringFlare && flare);
             if (now < c.fleeUntil) hunts = false; // the Veil Serpent recoils from cold
             if (!hunts)

@@ -83,15 +83,17 @@ namespace Meridian.Planet.POI
             sr.color = poi.planet == PlanetId.Earth ? new Color(0.55f, 0.57f, 0.6f, 1f) : new Color(0.5f, 0.38f, 0.3f, 1f);
             go.transform.localScale = new Vector3(prop.size.x, prop.size.y, 1f);
             LoadArt(sr, prop.key, prop.size, prop.topRow);
-            // U-076: the prop's 3D model stands on the same base point and replaces the card once loaded.
-            var swap = Meridian.Art.ModelSwap.Attach(sr, prop.key, root, root.InverseTransformPoint(go.transform.position), prop.tiles, prop.tiles > 1 ? prop.size.x / prop.tiles : 0f);
-            swaps.Add(swap);
             if (prop.craftStation != Meridian.Crafting.Station.Hand)
             {
-                // U-051: the prop is a crafting station (the camp's Smelter).
+                // U-051: the prop is a crafting station (the camp's Smelter). U-113: before the swap, so its sheet finds the station.
                 var st = go.AddComponent<Meridian.Crafting.CraftingStation>();
                 st.kind = prop.craftStation;
             }
+            // U-076: the prop's 3D model stands on the same base point and replaces the card once loaded. U-113 (D-117): a key with a
+            // v3 sheet and no model keeps the card's renderer and draws the sheet on it (a tiled sheet spans the prop's tiles).
+            var swap = Meridian.Art.ModelSwap.Attach(sr, prop.key, root, root.InverseTransformPoint(go.transform.position), prop.tiles, prop.tiles > 1 ? prop.size.x / prop.tiles : 0f,
+                footprint: prop.tiles > 1 ? new Vector2(prop.size.x, 0f) : default);
+            swaps.Add(swap);
             if (prop.shelterRadius > 0f)
             {
                 // U-048: inside the shelter a flare can't reach (D-048).

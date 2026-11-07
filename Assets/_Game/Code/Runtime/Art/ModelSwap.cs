@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace Meridian.Art
 {
@@ -18,8 +20,13 @@ namespace Meridian.Art
         public string Key { get; private set; }
         public bool Ready { get; private set; }
         public readonly List<ModelView> Views = new List<ModelView>();
-        /// <summary>Fires once, when the model replaces the sprite.</summary>
+        /// <summary>Fires once, when the model (or the sheet, U-113) takes over the sprite.</summary>
         public event System.Action<ModelSwap> Swapped;
+        /// <summary>U-113 (D-117): the sheet that draws this key when it has no model (props/common/* after B-131); null on the model path.</summary>
+        public SheetProp Sheet { get; private set; }
+        public bool UsesSheet => Sheet != null;
+        int tiles = 1;
+        float tileStep;
 
         Fit fit;
         Vector2 footprint;
@@ -36,6 +43,7 @@ namespace Meridian.Art
             s.fit = fit;
             s.footprint = footprint;
             tiles = Mathf.Max(1, tiles);
+            s.tiles = tiles; s.tileStep = tileStep;
             for (int i = 0; i < tiles; i++)
             {
                 var t = new GameObject(tiles == 1 ? "View" : "Tile" + i);
@@ -47,6 +55,28 @@ namespace Meridian.Art
                 v.Load(key);
             }
             return s;
+        }
+
+        void Start()
+        {
+            // U-113: no model under the key but a v3 sheet (its json is addressed at <key>/json): the sprite stays and the sheet dresses it.
+            var model = Addressables.LoadResourceLocationsAsync(Key, typeof(GameObject));
+            model.Completed += l =>
+            {
+                bool hasModel = l.Status == AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0;
+                ArtLoad.Release(l);
+                if (this == null || Ready || hasModel || Sprite == null) return;
+                var json = Addressables.LoadResourceLocationsAsync(Key + "/json", typeof(TextAsset));
+                json.Completed += j =>
+                {
+                    bool hasSheet = j.Status == AsyncOperationStatus.Succeeded && j.Result != null && j.Result.Count > 0;
+                    ArtLoad.Release(j);
+                    if (this == null || Ready || !hasSheet || Sprite == null) return;
+                    var fp = footprint.x > 0f ? footprint : new Vector2(tiles * tileStep, 0f); // a tiled POI prop: its tiles' span, no height rule
+                    Sheet = SheetProp.Attach(Sprite, Key, fp, fit == Fit.Stretch, fit == Fit.Height);
+                    Sheet.Loaded += p => { if (this == null || Ready) return; Ready = true; Swapped?.Invoke(this); };
+                };
+            };
         }
 
         void OnLoaded()

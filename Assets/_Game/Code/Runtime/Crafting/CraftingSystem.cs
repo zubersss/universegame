@@ -48,6 +48,7 @@ namespace Meridian.Crafting
         {
             var check = Check(book, r, inv, flags, at);
             if (check != Result.Crafted) return check;
+            if (r.station != Station.Hand) CraftingStation.Worked(r.station, at); // U-113: the station's sheet shows it working
             foreach (var a in r.inputs) inv.Remove(ItemRegistry.Get(a.item).id, a.count);
             int left = inv.Add(ItemRegistry.Get(r.output.item).id, r.output.count);
             if (left > 0)
