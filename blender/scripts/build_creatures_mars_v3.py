@@ -212,7 +212,7 @@ def crest_plates(d, M, p, far=False):
 def stalker_tail(d, M, p, seed):
     base = (-0.33, 0.48)
     up = p["tail"]
-    c, s = math.cos(up), math.sin(up)
+    c, s = math.cos(-up), math.sin(-up)                                     # + raises the tail (it points left)
     curl = p["curl"]
     raw = G.bezier(base, (-0.62, 0.52), (-0.84, 0.12), (-1.0, 0.16 + 0.05 * curl), n=18)
     raw += [(-1.0 - 0.05 * math.cos(a), 0.16 + 0.05 * curl + 0.05 * math.sin(a)) for a in (0.9, 1.6, 2.2)][: 1 + int(2 * curl)]
@@ -353,6 +353,205 @@ def stalker_poses():
     return out
 
 
+# ---------------------------------------------------------------- lava-tube lurker (list order 3)
+# The ambusher of the dark tubes made a shy peeker (D-087): a domed, rock-plated mole-thing with a long snout, a red
+# nose bulb, whiskers, digging claws and big dark-adapted eyes ringed by a mustard glow TONE (no emission). Idle and
+# react happen at its hole: a small rock mound with a tube mouth on top; the mound's front lip hides the sunken body
+# (nothing below the ground line). Walk and bump are out in the open. ~1.2 m long.
+
+LURKER = dict(hips=[(-0.20, 0.24), (0.22, 0.24), (-0.26, 0.22), (0.16, 0.22)], feet=[-0.26, 0.30, -0.33, 0.24],
+              ankle=0.05, leg_w=0.055, bend_hind=-0.25, bend_front=0.15, foot="paw", paw=(0.065, 0.03, 3, 3), dangle=0.2)
+LB = (0.0, 0.31, 0.40, 0.20)                                              # carapace centre x, z, radii
+LURKER_HEAD = 1.2
+HOLE = (0.10, 0.20, 0.30, 0.07)                                           # tube mouth centre x, lip z, radii
+MOUND_RX = 0.62
+
+
+def mats_lurker(gp, sp="tube_lurker"):
+    def m(name, **kw):
+        return G.mat(gp, f"{sp}_{name}", **kw)
+    S_ = P["sky"]
+    return {
+        "coat": m("coat", fill=S_), "coat_i": m("coat_inner", fill=S_), "far": m("far", fill=SH(S_)),
+        "leg": m("leg", fill=S_), "leg_far": m("leg_far", fill=SH(S_)),
+        "sh": m("coat_mid", fill=SH(S_), ink=False), "dp": m("coat_deep", fill=DP(S_), ink=False),
+        "helmet": m("helmet", fill=SH(S_)), "belly": m("belly", fill=P["offwhite"], ink=False),
+        "belly_sh": m("belly_mid", fill=SH(P["offwhite"]), ink=False),
+        "nose": m("nose", fill=P["red"]), "glow": m("glow", fill=P["mustard"], ink=False),
+        "claw": m("claw", fill=P["offwhite"], behind=True),
+        "rock": m("rock", fill=SH(P["red"]), ink=False), "rock_sh": m("rock_mid", fill=DP(P["red"]), ink=False),
+        "hole": m("hole", fill=P["brown"]), "hole_dp": m("hole_deep", fill=G.INK, ink=False),
+        "ink": m("ink", fill=None), "pupil": m("pupil", fill=G.INK, ink=False), "eye": m("eye_white", fill=P["offwhite"]),
+        "mouth": m("mouth", fill=DP(P["red"])), "star": m("star", fill=P["mustard"]),
+        "puff": m("puff", fill=P["offwhite"]), "puff_sh": m("puff_mid", fill=SH(P["offwhite"]), ink=False),
+    }
+
+
+def lurker_eyes(d, M, x, z, rx, rz, gap, p, seed):
+    """The shy eyes inside their mustard glow rings (a tone, not emission)."""
+    ey = z + 0.02 * (p["eye_pop"] - 1)
+    if p["stars"] is None:
+        for k, ex in enumerate((0.0, gap)):
+            G.stroke(d, G.lumpy_ellipse(x + ex, ey, rx * p["eye_pop"] * 1.55, rz * p["eye_pop"] * 1.4, n=16, lump=0.03, seed=seed + 50 + k),
+                     M["glow"], 0.0, cyclic=True)
+    K.eyes(d, M, x, z, rx, rz, gap, p, seed)
+
+
+def lurker_head(d, M, hx, hz, p, seed):
+    def R(dx, dz):
+        return (hx + dx, hz + dz)
+    head = G.lumpy_ellipse(hx, hz, 0.12, 0.105, n=34, lump=0.03, seed=seed + 2)
+    G.stroke(d, head, M["coat"], O, cyclic=True)
+    sn = 0.012 * p["sniff"]
+    snout = G.bezier(R(0.05, 0.05), R(0.15, 0.03), R(0.24, -0.01 + sn), n=8) + G.bezier(R(0.24, -0.045 + sn), R(0.15, -0.065), R(0.04, -0.07), n=8)
+    G.stroke(d, snout, M["coat"], O, cyclic=True)
+    for k in range(2):                                                            # snout wrinkles
+        x = 0.10 + 0.05 * k
+        G.seam(d, [R(x, 0.035 - 0.01 * k), R(x + 0.012, 0.005 - 0.01 * k)], M["ink"])
+    helmet = [q for q in G.lumpy_ellipse(hx - 0.01, hz + 0.012, 0.125, 0.11, n=34, lump=0.04, seed=seed + 3) if q[1] > hz + 0.035]
+    G.stroke(d, helmet + [R(0.10, 0.03), R(-0.12, 0.03)], M["helmet"], O, cyclic=True)                  # the rock helmet plate
+    G.specks(d, [R(-0.04, 0.085), R(0.03, 0.09), R(-0.08, 0.06)], M["ink"])
+    G.stroke(d, G.lumpy_ellipse(*R(0.25, -0.027 + sn), 0.032, 0.027, n=14, seed=seed + 6), M["nose"], I, cyclic=True)
+    for k, a in enumerate((0.35, 0.0, -0.35)):                                    # whiskers
+        x0, z0 = R(0.19, -0.035 + sn)
+        G.stroke(d, [(x0, z0), (x0 + 0.03 * math.cos(a) + 0.01, z0 + 0.03 * math.sin(a) - 0.005), (x0 + 0.075 * math.cos(a), z0 + 0.075 * math.sin(a))], M["ink"], I)
+    if p["mouth"] > 0.05:
+        mo = p["mouth"]
+        G.stroke(d, G.lumpy_ellipse(*R(0.14, -0.072), 0.016 + 0.01 * mo, 0.008 + 0.012 * mo, n=12, seed=seed + 7), M["mouth"], I, cyclic=True)
+    else:
+        G.seam(d, G.bezier(R(0.18, -0.062), R(0.12, -0.072), R(0.07, -0.062), n=5), M["ink"])
+    lurker_eyes(d, M, *R(-0.005, 0.005), 0.034, 0.044, 0.062, p, seed)
+    if p["stars"] is not None:
+        K.stars(d, M, *R(0.0, 0.22), 0.16, p["stars"])
+
+
+def lurker_tail(d, M, p):
+    base = (-0.36, 0.24)
+    c, s = math.cos(-p["tail"]), math.sin(-p["tail"])                     # + raises the tail (it points left)
+    pts = [(base[0] + (x - base[0]) * c - (z - base[1]) * s, base[1] + (x - base[0]) * s + (z - base[1]) * c)
+           for x, z in G.bezier(base, (-0.48, 0.24), (-0.56, 0.16), (-0.60, 0.10), n=10)]
+    G.stroke(d, G.hose_outline(pts, 0.07), M["coat"], O, cyclic=True)
+    for j in (3, 6):
+        a, b = pts[j - 1], pts[j + 1]
+        L = math.hypot(b[0] - a[0], b[1] - a[1]) or 1.0
+        nx, nz = -(b[1] - a[1]) / L, (b[0] - a[0]) / L
+        G.seam(d, [(pts[j][0] + nx * 0.04, pts[j][1] + nz * 0.04), (pts[j][0] - nx * 0.04, pts[j][1] - nz * 0.04)], M["ink"])
+
+
+def lurker_body(d, M, seed):
+    cx, cz, rx, rz = LB
+    body = [(x, max(z, 0.17)) for x, z in K.body_shape(cx, cz, rx, rz, seed + 1, lump=0.035)]
+    G.stroke(d, body, M["coat_i"], 0.0, cyclic=True)
+    rear = [q for q in body if q[0] < -0.14]
+    G.stroke(d, rear + [(-0.14, 0.17)], M["sh"], 0.0, cyclic=True)
+    G.stroke(d, [q for q in body if q[0] < -0.31] + [(-0.31, 0.2)], M["dp"], 0.0, cyclic=True)
+    skirt = [(x, z) for x, z in body if z < 0.215]
+    G.stroke(d, skirt + [(0.36, 0.215), (-0.36, 0.215)], M["belly"], 0.0, cyclic=True)
+    G.stroke(d, [(-0.36, 0.215), (0.36, 0.215)], M["ink"], I)
+    for k in range(1, 5):                                                        # rock plate bands follow the dome
+        x = -rx + 2 * rx * k / 5
+        top = cz + rz * math.sqrt(max(0.0, 1 - (x / rx) ** 2))
+        G.seam(d, G.bezier((x - 0.03, 0.22), (x + 0.02, cz + 0.02), (x - 0.01, top - 0.008), n=6), M["ink"])
+        G.specks(d, [(x - 0.07, cz + 0.06 - 0.01 * k), (x - 0.04, cz - 0.04)], M["ink"])
+    G.hatch(d, -0.30, 0.30, M["ink"], n=3, length=0.05, spacing=0.02, angle_deg=70, seed=seed + 5)
+    G.stroke(d, body, M["ink"], O, cyclic=True)
+
+
+def mound(d, M, front):
+    """The tube mouth on a rock mound. front=False: the back of the mound + the dark mouth; True: the front lip
+    (drawn after the lurker, it hides whatever is below the lip). Ink never runs along the ground."""
+    hx0, lip, hrx, hrz = HOLE
+    dome = [(hx0 + MOUND_RX * math.cos(a), (lip + 0.035) * math.sin(a) ** 0.9 + 0.022 * math.sin(a) * math.sin(5 * a + 0.7))
+            for a in [math.pi * i / 31 for i in range(32)]]                 # a low lumpy boulder, not a stump
+    if not front:
+        G.stroke(d, dome + [(hx0 - MOUND_RX, 0.0)], M["rock"], 0.0, cyclic=True)
+        G.stroke(d, dome, M["ink"], O)
+        G.stroke(d, G.lumpy_ellipse(hx0, lip, hrx, hrz, n=28, lump=0.03, seed=9), M["hole"], I, cyclic=True)
+        G.stroke(d, G.lumpy_ellipse(hx0 + 0.02, lip - 0.008, hrx * 0.78, hrz * 0.6, n=20, lump=0.03, seed=10), M["hole_dp"], 0.0, cyclic=True)
+        return
+    arc = [(hx0 + hrx * math.cos(t), lip + hrz * math.sin(t)) for t in [math.pi + math.pi * i / 16 for i in range(17)]]
+    right = [q for q in dome if q[0] > hx0 + hrx + 0.01]
+    left = [q for q in dome if q[0] < hx0 - hrx - 0.01]
+    face = left[::-1] + arc + right[::-1]
+    G.stroke(d, face, M["rock"], 0.0, cyclic=True)
+    G.stroke(d, [q for q in face if q[0] > hx0 + 0.1 and q[1] < lip - 0.02] + [(hx0 + 0.1, 0.0)], M["rock_sh"], 0.0, cyclic=True)
+    for k, (x, z, dx, dz) in enumerate(((hx0 - 0.30, 0.10, 0.05, -0.06), (hx0 + 0.22, 0.08, -0.03, -0.05), (hx0 - 0.05, 0.06, 0.04, 0.04))):
+        G.seam(d, [(x, z), (x + dx * 0.5 + 0.01, z + dz * 0.5), (x + dx, z + dz)], M["ink"])           # cracks
+    G.specks(d, [(hx0 - 0.40, 0.05), (hx0 + 0.36, 0.12), (hx0 + 0.05, 0.10)], M["ink"])
+    G.stroke(d, left[::-1] + arc + right[::-1], M["ink"], O)
+
+
+def draw_tube_lurker(d, M, pose=None, seed=0):
+    p = K.base_pose()
+    p.update(dict(hole=None, paws=0.0))
+    p.update(pose or {})
+    e = p["hole"]
+    if e is not None:                                                             # at the hole: peek (e 1) .. hidden (e 0)
+        hx0, lip, hrx, hrz = HOLE
+        mound(d, M, front=False)
+        if e > 0.04:
+            hx, hz = hx0 + 0.10 + 0.03 * e, lip + 0.02 + 0.30 * e + p["bob"]
+            torso = G.bezier((hx0 - 0.02, lip - 0.07), (hx0, lip + 0.10 * e), (hx - 0.07, hz - 0.03), n=8)
+
+            def arm(k):                                                           # paws on the lip, claws over the edge
+                px, tap = ((hx0 - 0.04, 0.0), (hx0 + 0.20, p["paws"]))[k]
+                sh_ = (hx - 0.10 + 0.08 * k, hz - 0.11)
+                G.stroke(d, G.hose_outline(G.bezier(sh_, ((sh_[0] + px) / 2 + 0.02, lip + 0.10), (px, lip + 0.02 + tap), n=6), 0.045),
+                         M["leg_far" if k == 0 else "leg"], O, cyclic=True)
+                K.paw(d, M, M["far"] if k == 0 else M["coat"], px, lip + 0.015 + tap, 0.055, 0.028, 3, 3, seed=17 + k)
+            if e > 0.55:
+                arm(0)                                                            # the far arm behind the torso
+            G.stroke(d, G.hose_outline(torso, 0.22), M["coat"], O, cyclic=True)
+            for k in range(2):
+                t = torso[3 + 2 * k]
+                G.seam(d, [(t[0] - 0.11, t[1] + 0.02), (t[0] + 0.0, t[1] + 0.04), (t[0] + 0.11, t[1] + 0.015)], M["ink"])
+            if e > 0.55:
+                arm(1)                                                            # the near arm in front, under the chin
+            J = (hx - 0.08, hz - 0.04)
+            dk = G.Xf(d, K.turn(J, p["head_rot"], (0.0, 0.0), K.scale_about((hx, hz), LURKER_HEAD)))
+            lurker_head(dk, M, hx, hz, p, seed)
+        else:                                                                     # hidden: only the glowing eyes in the dark
+            lurker_eyes(d, M, hx0 + 0.04, lip + 0.006, 0.022, 0.028, 0.045, p, seed)
+        mound(d, M, front=True)
+        return
+    cx, cz, rx, rz = LB
+    B = K.Body(p, (cx, cz))
+    J = (0.34, 0.30)
+    hx, hz = 0.50, 0.31
+    H = K.turn(J, p["head_rot"], p["head"], B)
+    dh, db = G.Xf(d, H), G.Xf(d, B)
+    dk = G.Xf(dh, K.scale_about((hx, hz), LURKER_HEAD))
+    K.legs_pass(d, M, B, LURKER, p, far=True)
+    lurker_tail(db, M, p)
+    lurker_body(db, M, seed)
+    K.legs_pass(d, M, B, LURKER, p, far=False)
+    lurker_head(dk, M, hx, hz, p, seed)
+
+
+def lurker_poses():
+    out = []
+    for i in range(10):                                                           # idle at the hole: peek, look about, sniff, blink
+        ph = TAU * i / 10
+        out.append(dict(hole=1.0 + 0.03 * math.sin(ph), bob=0.008 * math.sin(ph), head_rot=0.05 * math.sin(ph - 0.6),
+                        look=(0.8, 0.0) if i < 4 else ((0.0, 0.0) if i < 6 else (-0.7, 0.1)), blink={4: 0.6, 5: 1.0}.get(i, 0.0),
+                        sniff=1.0 if i in (1, 2, 7) else 0.0, paws=0.02 if i in (2, 7) else 0.0))
+    for i in range(12):                                                           # walk: a low scuttle, the tail wags
+        ph = TAU * i / 12
+        out.append(dict(legs=K.walk_legs(ph, 0.09, 0.045), bob=0.008 * math.cos(2 * ph), sz=1 + 0.025 * math.cos(2 * ph),
+                        rock=0.02 * math.sin(ph), head_rot=0.04 * math.sin(2 * ph - 0.5), tail=0.12 * math.sin(ph - 1.0),
+                        sniff=1.0 if i % 6 < 2 else 0.0, look=(0.8, -0.2)))
+    out += [dict(hole=1.0, eye_pop=1.3, look=(0.9, 0.0)),                         # react: startle, then pop back in
+            dict(hole=1.12, eye_pop=1.6, mouth=0.5, head_rot=0.06, paws=0.03),
+            dict(hole=0.72, eye_pop=1.3, mouth=0.3),
+            dict(hole=0.30, eye_pop=1.2),
+            dict(hole=0.0, eye_pop=1.35, look=(0.6, 0.0)),
+            dict(hole=0.0, eye_pop=1.2, look=(0.9, 0.0)),
+            dict(hole=0.0, blink=1.0),
+            dict(hole=0.0, look=(0.3, 0.0))]
+    out += K.bump_clip()
+    return out
+
+
 SPECIES = {
     "dustskater": dict(draw=draw_dustskater, poses=poses, mats=mats, frame=(128, 80), seed=31,
                        clips=[("idle", 10, True), ("walk", 12, True), ("react", 8, False), ("bump", 10, False), ("flee", 12, True)],
@@ -367,6 +566,12 @@ SPECIES = {
                                       "motion": "squash on the beat, hose legs, the crest ripples and shoots up, the frill flares, the tail swings and curls",
                                       "original": "our own canyon lizard-hound: teal hide, rust spine plates, cheek frill; curious, never a fighter (D-087), no teeth"},
                           ours="a low teal lizard-hound whose rust crest shoots up when it is surprised and who trots after you nose-down, tail swinging"),
+    "tube_lurker": dict(draw=draw_tube_lurker, poses=lurker_poses, mats=mats_lurker, frame=(160, 64), seed=33,
+                        clips=[("idle", 10, True), ("walk", 12, True), ("react", 8, False), ("bump", 10, False)],
+                        self_check={"ink": "rock plate bands, helmet plate, specks, hatch, snout wrinkles, whiskers, toe seams, mound cracks",
+                                    "motion": "idle peeks and looks about at its hole, react startles and pops back in (eyes left glowing), walk scuttles with a tail wag",
+                                    "original": "our own tube dweller: a rock-plated mole-thing with a red nose bulb and glow-ringed eyes; shy, never an ambusher (D-087), no teeth"},
+                        ours="a shy rock-plated tube dweller that peeks out of its hole and pops back in, leaving two glowing eyes in the dark"),
 }
 
 

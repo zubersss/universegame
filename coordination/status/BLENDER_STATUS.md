@@ -1,5 +1,5 @@
 # BLENDER STATUS
-Updated: 2026-11-07 03:50 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 03:56 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
 LEAD cycle 255 order (lock-free; B-139 canyon + storm studies are queue #2 after UNITY's PlayMode B + captures; want withdrawn 03:40 at UNITY's request (their wrapper yields to any older want), re-filed on "captures done"):
@@ -7,7 +7,7 @@ LEAD cycle 255 order (lock-free; B-139 canyon + storm studies are queue #2 after
 2. B-136 Hadal Maw design: DONE before the cycle (1fb50b1), for LEAD's look.
 3. README_v4 exact-preview paragraph: DONE (8c3a165).
 4. Mars rig-set sources DONE 03:3x (a4c9395): build_c2_mars_rigs.py, 5 plants (bones 3 / 2 / 4 / 4 / 2), 26 parts, dry run flora/mars/rigset 504x216 27 KB, json valid, palette 100 %, review_b139_mars_rigset_dryrun.png (idle with Unity's maths + react per plant). build() ready for the Mars cards.
-5. Mars creature previews: Dustskater DONE 03:37 (709a5bb, design only: 128x80, idle 10 / walk 12 skate glide / react 8 / bump 10 / flee 12 with dust, ink 2.00-3.00 / 1.00-1.50, palette 100 %, json valid, review_b139_mars_dustskater_preview.png). Scree stalker drawn 03:49 (design only: 192x96, idle 10 / walk 12 / react 8 crest up / bump 10 / flee 12 / follow 12; all 64 exact frames: json valid, no edge / ground hits, ink 2.00-3.00 / 1.00-1.50, palette 100 %, 86 MB); its review image waits for free RAM (0.5 GB while UNITY's PlayMode B runs). Both Mars creatures have v2 models in Art: export rows need replaces_v2. NEXT: Lava-tube lurker (list order 3).
+5. Mars creature previews: Dustskater DONE 03:37 (709a5bb, design only: 128x80, idle 10 / walk 12 skate glide / react 8 / bump 10 / flee 12 with dust, ink 2.00-3.00 / 1.00-1.50, palette 100 %, json valid, review_b139_mars_dustskater_preview.png). Scree stalker drawn 03:49 (design only: 192x96, idle 10 / walk 12 / react 8 crest up / bump 10 / flee 12 / follow 12; all 64 exact frames: json valid, no edge / ground hits, ink 2.00-3.00 / 1.00-1.50, palette 100 %, 86 MB); its review image waits for free RAM (0.5 GB while UNITY's PlayMode B runs). Both Mars creatures have v2 models in Art: export rows need replaces_v2. Lava-tube lurker drawn 03:55 (new key creatures/mars/tube_lurker, 160x64, idle 10 peeks from a tube mouth in a rock mound / walk 12 / react 8 pops back in, eyes left glowing / bump 10; 14 key frames clear the edge + ground line). PENDING: the all-frame checks (lurker 40, stalker 64 again after a tail-sign fix: + now raises the tail) were stopped for low memory at 03:55 (0.10 GB free while UNITY's PlayMode runs); re-run when RAM recovers. NEXT after that: Polar crawler (list order 4).
 Nothing Mars exports until its cards exist. B-131 export after UNITY's U-113 (after U-106).
 
 ## Last completed
