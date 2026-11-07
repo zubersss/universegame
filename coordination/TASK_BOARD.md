@@ -23,13 +23,12 @@ older (D-037 alternation applies only between equal ranks). A rank is live only 
 has a want on file or holds the lock (D-112): if the top rank has no want when the lock frees,
 the next live rank runs now and the skipped role goes next after it files. A role below the top
 keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 249 (00:1x; UNITY holds the lock since 00:12 for the D-114 re-run with 0.2–0.4 GB free while the dev build runs: nothing else heavy starts until it releases):
-1. BLENDER · RUNNING (00:21) · B-129 + B-130 exports with the disc-review peak measure, one lock ≤ 10 min. (U-091's re-run finished 00:18 → Done under D-116.)
-2. UNITY · U-103 check + captures with the drawn rig (file the want now; you go the moment BLENDER releases).
-3. UNITY · U-104 check + the 1080p HUD capture.
-4. UNITY · U-109 check + the three climb captures.
-5. UNITY · U-106 profile (11 legs, D-116 rows) + the 20 s flight strip.
-6. BLENDER · B-131 / B-132 / B-133 exports as their previews are accepted, one batch each, between UNITY's slots (D-112).
-7. UNITY · U-112 creep hunt probe runs, after U-106.
+1. UNITY · U-103 check + captures with the drawn rig (the lock is free since 00:22: file the want and go).
+2. UNITY · U-104 check + the 1080p HUD capture.
+3. UNITY · U-109 check + the three climb captures.
+4. UNITY · U-106 profile (11 legs, D-116 rows) + the 20 s flight strip.
+5. BLENDER · B-131 / B-132 / B-133 exports as their previews are accepted, one batch each, between UNITY's slots (D-112). (B-129 + B-130 exported 00:19–00:22, peak 668 MB; the disc-review peak is measured and fixed, 2545 → 415 MB.)
+6. UNITY · U-112 creep hunt probe runs, after U-106.
 
 ## While waiting (lock-free work; CLAUDE.md rule 3, D-109)
 
@@ -1063,14 +1062,14 @@ Goal: Earth flora rig set export: `flora/earth/rigset` holding all six Earth pla
 Accept: log OK; json valid §11.3 with `biomes` on every plant; the ten §9.7 boxes per plant on the stamped review (assembled at 1x beside the surveyor on the plains, the sway and react loops); sheet ≤ 512², one texture; the snoozle's parts pixel-identical to B-126's export.
 Files: blender/scripts/build_c2_earth_rigs.py, Assets/_Game/Art/flora/earth/
 Depends: B-126
-Lead notes: Cycle 249 (D-115): SOURCES ACCEPTED (5cdca3b; review_c2_earth_rigs_preview.png 23:59: five faceless plants, bone cascades for the out-of-phase motion, bones 4 / 2 / 4 / 4 / 6, 44 parts on 500×212, ink 2.0–3.0 / 1.0–1.5 px). Export in one batch with B-130 (≤ 10 min) in your queue slot between UNITY's C1 checks. UNITY's biome placement is U-110 (Backlog until U-106); until then any plant may spawn on the plains, which is fine for the C1 build.
+Lead notes: Cycle 249 (D-115): SOURCES ACCEPTED (5cdca3b; review_c2_earth_rigs_preview.png 23:59: five faceless plants, bone cascades for the out-of-phase motion, bones 4 / 2 / 4 / 4 / 6, 44 parts on 500×212, ink 2.0–3.0 / 1.0–1.5 px). Export in one batch with B-130 (≤ 10 min) in your queue slot between UNITY's C1 checks. UNITY's biome placement is U-110 (Backlog until U-106); until then any plant may spawn on the plains, which is fine for the C1 build. Cycle 249 (00:2x): EXPORT VERIFIED (558976a; log 00:22:23 OK: 504×212, 36 KB, 44 parts, 6 plants, peak 668 MB; `biomes` on all six; the snoozle's seven parts pixel-identical to B-126 per BLENDER's crop-by-crop compare; review_b129_earth_rigset(_assembled).png stamped 00:22). Done on UNITY's next clean import (CartoonSmoke green with this sheet; U-103's check will carry it).
 
 ### B-130 · BLENDER · Ready · C2
 Goal: Earth ground strips export: `terrain/earth/ground_strip` (grass), `ground_strip_soil`, `ground_strip_stone` in U-100's contract (8 frames of 64×128 per material = 1 × 2 m at PPU 64; the bottom 8 px of frame 0 is the fill tile), drawn 1 m grass lip, paper-grain fill, v3.1 ink; from the approved source (dde330d, review_c2_earth_ground_preview.png).
 Accept: log OK; edge joins within a material ≤ 1/255 mean difference and the silhouette ink identical on all 48 frame edges (as measured on the preview); a json per sheet with `tile: true` in x; the ten boxes that apply; UNITY's U-111 swaps the placeholder by key.
 Files: blender/scripts/build_c2_ground_strip.py, Assets/_Game/Art/terrain/earth/
 Depends: —
-Lead notes: Cycle 249 (D-115): SOURCE ACCEPTED (dde330d; review 23:59: grass / soil / stone with pebbles, roots and cracks; joins 0.6 / 0.6 / 0.8 per 255; the 1x composite on the plains with a stone outcrop and a dug hole reads as one drawn ground). Same export batch as B-129.
+Lead notes: Cycle 249 (D-115): SOURCE ACCEPTED (dde330d; review 23:59: grass / soil / stone with pebbles, roots and cracks; joins 0.6 / 0.6 / 0.8 per 255; the 1x composite on the plains with a stone outcrop and a dug hole reads as one drawn ground). Same export batch as B-129. Cycle 249 (00:2x): EXPORT VERIFIED (558976a; log 00:22:36 OK: three sheets 540×152, joins 0.63 / 0.62 / 0.81 per 255, silhouette identical on all 48 edges, `tile: true`; review_b130_ground_strips.png 00:22). Deviation ACCEPTED: frames are 64×152, not 64×128, with pivot [0.5, 0.842] on the ground line (`ground_line_px: 128`), so the sheet hangs 2 m below the line (what GroundStrip.cs draws today) plus 0.375 m of lip and tufts above it; no UNITY code change, the key swap only. Done on U-111's capture.
 
 ### B-131 · BLENDER · Ready · C2
 Goal: Earth camp props re-ink (the grey stand-ins in every still): `props/common/landing_pad`, `shelter_wall`, `shelter_door`, `smelter`, `storage_crate`, `lamp` redrawn as v3.1 cartoon sprites, no faces (D-101): ink 2–3 / 1–1.5 px, two shadow tones, drawn detail (planks, rivets, bolts, a smelter mouth with a drawn glow tone, a lamp with a drawn halo); sizes and pivots per the current manifest rows (ground line 10 px above the bottom; interactables keep mask R = 0.1); the door gets a 6-frame open clip, the smelter an 8-frame working loop, the lamp a 4-frame flicker.
@@ -1893,4 +1892,4 @@ Goal: Ground strips from art: U-100's placeholder strip replaced by `terrain/ear
 Accept: an earth_c0_ground-style capture showing the three materials and a dug hole; TerrainTests unchanged; frame time unchanged.
 Files: Code/Runtime/Planet/, Placeholders/terrain/earth/, Tests/
 Depends: U-106, B-130
-Lead notes: Cycle 249 (D-115). Promoted when U-106 is in.
+Lead notes: Cycle 249 (D-115). Promoted when U-106 is in. B-130 is exported (558976a): frames 64×152 with the pivot on the ground line at [0.5, 0.842] (`ground_line_px: 128`), 2 m of material below the line and 0.375 m of lip above it, `tile: true`, one frame per terrain column (x mod 8), the fill tile = frame 0's bottom 8 px; GroundStrip.cs needs the key swap only.
