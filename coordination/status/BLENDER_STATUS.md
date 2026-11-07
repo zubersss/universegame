@@ -15,7 +15,7 @@ B-168 EXPORTED + VERIFIED (a5d30f30, 17:23:23-17:24:07, 473 MB): the eight Venus
 - 16:07:42-16:11:26 SLOT: the B-161 stamped reviews (all nine ACCEPTED).
 
 ## Ready for review
-- B-161 Neptune decks: ndeck1 + ndeck2 ACCEPTED (17:3x); review_b161_neptune_ndeck3_preview.png (17:38, the rim pass); ndeep / nstorm / nspot to follow.
+- B-161 Neptune decks: ndeck1-3 ACCEPTED (17:3x-17:4x); ndeep / nstorm / nspot after UNITY's lock C2+D.
 
 - B-154: the export (87e1ae22) + review_b147_venus_{sulfur_drifter,acidmoth,pressure_crab,vent_eel}.png + review_b154_vent_mouth.png.
 
