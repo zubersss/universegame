@@ -42,6 +42,10 @@ namespace Meridian.Creatures
         public PlanetConfig Planet { get; private set; }
         public int AliveCount { get; private set; }
         public double LastAiMs { get; private set; }
+        /// <summary>U-121: what the last frame over SpikeMs did (spawn tick ms, creature ticks ms and count, holds, despawns, the frame's dt); empty until a spike. Tests print it.</summary>
+        public string LastSpikeNote { get; private set; } = "";
+        public const double SpikeMs = 1.0;
+        int tickHolds, tickDespawns, tickCount;
         public IReadOnlyList<Creature> All => pool;
 
         readonly List<Creature> pool = new List<Creature>(MaxCreatures);
@@ -287,20 +291,32 @@ namespace Meridian.Creatures
         void Update()
         {
             watch.Restart();
+            double spawnMs = 0; tickHolds = tickDespawns = tickCount = 0;
             if (Planet != null && terrain != null && terrain.Generator != null)
             {
-                if (autoSpawn && Time.time >= nextSpawn) { nextSpawn = Time.time + SpawnInterval; SpawnTick(); }
+                if (autoSpawn && Time.time >= nextSpawn)
+                {
+                    UnityEngine.Profiling.Profiler.BeginSample("Creatures.SpawnTick");
+                    nextSpawn = Time.time + SpawnInterval; SpawnTick();
+                    UnityEngine.Profiling.Profiler.EndSample();
+                    spawnMs = watch.Elapsed.TotalMilliseconds;
+                }
                 if (vitals == null && player != null) vitals = player.GetComponent<PlayerVitals>();
                 var p = player != null ? (Vector2)player.transform.position : Vector2.zero;
                 float daylight = Daylight, now = Time.time, dt = Time.deltaTime;
                 bool flare = FlareActive;
+                UnityEngine.Profiling.Profiler.BeginSample("Creatures.Tick");
                 foreach (var c in pool)
                 {
                     if (!c.Alive) continue;
+                    tickCount++;
                     Tick(c, p, daylight, now, dt, flare);
                 }
+                UnityEngine.Profiling.Profiler.EndSample();
             }
             LastAiMs = watch.Elapsed.TotalMilliseconds;
+            if (LastAiMs > SpikeMs) // only then: the string allocates
+                LastSpikeNote = $"{LastAiMs:F2} ms at t {Time.time:F2} (dt {Time.deltaTime * 1000f:F0} ms, frame {Time.frameCount}): spawn tick {spawnMs:F2} ms, {tickCount} ticks {LastAiMs - spawnMs:F2} ms, holds {tickHolds}, despawns {tickDespawns}, GC gen0 {System.GC.CollectionCount(0)}";
         }
 
         void Tick(Creature c, Vector2 player, float daylight, float now, float dt, bool flare)
@@ -309,7 +325,7 @@ namespace Meridian.Creatures
             Vector2 pos = c.Body.position;
             float dx = player.x - pos.x, dy = player.y - pos.y, adx = Mathf.Abs(dx);
 
-            if (adx > DespawnDistance || Mathf.Abs(dy) > DespawnDistance || (!spec.ActiveAt(daylight) && adx > 22f)) { Despawn(c); return; } // night hunters leave at dawn, off-screen
+            if (adx > DespawnDistance || Mathf.Abs(dy) > DespawnDistance || (!spec.ActiveAt(daylight) && adx > 22f)) { tickDespawns++; Despawn(c); return; } // night hunters leave at dawn, off-screen
 
             int tx = Mathf.FloorToInt(pos.x), ty = Mathf.FloorToInt(pos.y - spec.size.y * 0.5f - 0.1f);
             if (!spec.Flies)
@@ -318,6 +334,7 @@ namespace Meridian.Creatures
                 bool ready = terrain.IsCollisionReady(tx, ty) && terrain.IsCollisionReady(tx, ty - 2);
                 if (!ready)
                 {
+                    tickHolds++;
                     if (!c.Held) { c.Held = true; c.Body.simulated = false; }
                     return;
                 }

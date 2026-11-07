@@ -215,7 +215,7 @@ namespace Meridian.Tests
             for (int i = 0; i < 300; i++) { yield return null; samples.Add(creatures.LastAiMs); }
             samples.Sort();
             double median = samples[samples.Count / 2], p99 = samples[(int)(samples.Count * 0.99) - 1], max = samples[samples.Count - 1];
-            TestContext.Out.WriteLine($"[MERIDIAN] AI with 20 Mercury creatures: median {median:F3} ms, p99 {p99:F3} ms, max {max:F3} ms");
+            TestContext.Out.WriteLine($"[MERIDIAN] AI with 20 Mercury creatures: median {median:F3} ms, p99 {p99:F3} ms, max {max:F3} ms; spike note: {(string.IsNullOrEmpty(creatures.LastSpikeNote) ? "none" : creatures.LastSpikeNote)}");
             Assert.LessOrEqual(median, 0.5, "median ≤ 0.5 ms (U-055, D-047)");
             Assert.LessOrEqual(p99, 0.5, "p99 ≤ 0.5 ms (U-055, D-047)");
             Assert.LessOrEqual(max, 1.0, "worst frame ≤ 2 × 0.5 ms (D-047)");

@@ -119,6 +119,7 @@ namespace Meridian.Tests
             var p = player.Body.position;
             Assert.IsTrue(side.rig.Dig(new Vector2(p.x - 2.2f, p.y - 1.2f)), "Beam digs the ground ahead"); // D-133: a full tile ahead, never under the drawn surveyor's own foot (07:05: the dug tile dropped them into `fall`)
             yield return Frames(2);
+            for (int i = 0; i < 12 && !player.Grounded; i++) yield return null; // the dug chunk's collider rebuilds: the ground contact returns within a few frames (07:26: `fall` read at v 0)
             AssertClip(SurveyorAnim.Dig);
 
             samples.Sort();

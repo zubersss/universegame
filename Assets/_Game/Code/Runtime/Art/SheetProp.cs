@@ -148,6 +148,7 @@ namespace Meridian.Art
             if (Animator == null) return false;
             int hash = Animator.StringToHash(clip);
             if (!Animator.HasState(0, hash)) return false;
+            Animator.enabled = true;
             Animator.Play(hash, 0, forward ? 0f : 1f);
             Animator.speed = forward ? 1f : 0f;
             reversing = !forward; reverseHash = hash; reverseT = 1f; reverseLen = 0f;
@@ -161,11 +162,22 @@ namespace Meridian.Art
         /// <summary>The backward one-shot: the state's normalized time runs 1 → 0 at the clip's own length, then holds its first drawing.</summary>
         void StepReverse(float dt)
         {
-            if (!reversing || Animator == null) return;
+            if (Animator == null) return;
+            if (!reversing)
+            {
+                // A forward one-shot that reached its end holds its last drawing with the Animator off (the count); loops keep it on.
+                if (Towards == 1 && Playing != null && Animator.enabled && Animator.speed > 0f)
+                {
+                    var st = Animator.GetCurrentAnimatorStateInfo(0);
+                    if (!st.loop && st.normalizedTime >= 1f) { Animator.Update(0f); Animator.enabled = false; }
+                }
+                return;
+            }
             if (reverseLen <= 0f) { var info = Animator.GetCurrentAnimatorStateInfo(0); reverseLen = info.length > 0f ? info.length : 0.5f; }
             reverseT -= dt / reverseLen;
             if (reverseT <= 0f) { reverseT = 0f; reversing = false; }
             Animator.Play(reverseHash, 0, reverseT);
+            if (!reversing) { Animator.Update(0f); Animator.enabled = false; }
         }
 
         /// <summary>Holds a looping clip on (plays it) or off (back to frame 0, stopped).</summary>
@@ -174,8 +186,8 @@ namespace Meridian.Art
             if (Animator == null) return false;
             int hash = Animator.StringToHash(clip);
             if (!Animator.HasState(0, hash)) return false;
-            if (on && Playing != clip) { Animator.Play(hash, 0, 0f); Animator.speed = 1f; reversing = false; Playing = clip; }
-            else if (!on && Playing == clip) { Animator.Play(hash, 0, 0f); Animator.speed = 0f; Playing = null; }
+            if (on && Playing != clip) { Animator.enabled = true; Animator.Play(hash, 0, 0f); Animator.speed = 1f; reversing = false; Playing = clip; }
+            else if (!on && Playing == clip) { Animator.Play(hash, 0, 0f); Animator.speed = 0f; Playing = null; Animator.Update(0f); Animator.enabled = false; } // off: frame 0 shown, no Animator running (Bible §9.6 count)
             return true;
         }
 

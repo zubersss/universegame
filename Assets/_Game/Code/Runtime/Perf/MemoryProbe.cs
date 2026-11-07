@@ -171,7 +171,7 @@ namespace Meridian.Perf
             int ownHandles = ownGroup != null ? Residency.CountPlanet(ownGroup) : -1;
             int atlases = ownGroup != null ? BudgetMonitor.LoadedAtlases(ownGroup) : 0;
             string holders = prevGroup != null ? Residency.Holders(prevGroup).Replace("\"", "'") : "";
-            string breakdown = (director.LastLoadBreakdown ?? "").Replace("\"", "'");
+            string breakdown = ((director.LastLoadBreakdown ?? "") + (string.IsNullOrEmpty(director.LastLoadPending) ? "" : "; " + director.LastLoadPending)).Replace("\"", "'"); // U-120: what was still loading at the settle
             // U-112 (D-116): where a per-visit creep can live: the Mono heap, the native allocator, and the counts that grow per visit.
             long monoUsedMB = UnityEngine.Profiling.Profiler.GetMonoUsedSizeLong() >> 20, monoHeapMB = UnityEngine.Profiling.Profiler.GetMonoHeapSizeLong() >> 20;
             long allocMB = UnityEngine.Profiling.Profiler.GetTotalAllocatedMemoryLong() >> 20, reservedMB = UnityEngine.Profiling.Profiler.GetTotalReservedMemoryLong() >> 20;

@@ -129,6 +129,8 @@ namespace Meridian.View2D
             player.Jumped += OnJumped;
             player.Bumped += OnBumped;
             rig = player.GetComponentInChildren<Meridian.Rig.RigTools>(true);
+            if (rig == null) rig = player.GetComponentInParent<Meridian.Rig.RigTools>();
+            if (rig == null) rig = FindAnyObjectByType<Meridian.Rig.RigTools>(); // PlanetSideRoot's rig (side.rig), once
             if (rig != null) rig.Dug += OnDug; // U-121: the drawn surveyor digs like PlayerView does (side_b's dig clip, U-115)
         }
         void OnDug(Vector2 at) => sinceDig = 0f;

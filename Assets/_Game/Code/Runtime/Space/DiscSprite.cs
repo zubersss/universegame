@@ -62,6 +62,7 @@ namespace Meridian.Space
         AsyncOperationHandle<TextAsset> json;
         AsyncOperationHandle<IList<Sprite>> nearSheet;
         bool nearProbed;
+        float nextViewProbe;
 
         public void Load(string key, float radius, int sortingOrder)
         {
@@ -130,9 +131,16 @@ namespace Meridian.Space
         void UpdateNear()
         {
             if (Json == null) return;
-            if (view == null) { var sc = FindAnyObjectByType<SpaceCamera>(); view = sc != null ? sc.GetComponent<Camera>() : Camera.main; } // the Space camera, not whichever camera is tagged main while both scenes are loaded
+            if (view == null)
+            {
+                // The Space camera, not whichever camera is tagged main while both scenes are loaded; the scene search runs at most once a second (it allocates and costs ~0.1 ms).
+                if (Time.unscaledTime < nextViewProbe) return;
+                nextViewProbe = Time.unscaledTime + 1f;
+                var sc = FindAnyObjectByType<SpaceCamera>();
+                view = sc != null ? sc.GetComponent<Camera>() : null;
+                if (view == null) return;
+            }
             var cam = view;
-            if (cam == null) return;
             LastMagnification = Magnification(Screen.height, cam.orthographicSize, Json.space_ppu > 0f ? Json.space_ppu : 3f);
             bool want = WantsNear(LastMagnification, UsingNear);
             if (want && !nearProbed) ProbeNear();
