@@ -1,23 +1,28 @@
 {
- "key": "props/venus/meridian_station_door",
- "format": "glb",
- "contract": "v2.2",
- "facing": "+X in Unity (exported facing glTF -X, D-065)",
- "up": "+Y",
- "units": "m",
- "origin": "base",
- "triangles": 1284,
- "lod1_triangles": null,
- "texture": 1024,
- "maps": [
-  "color",
-  "normal",
-  "mask",
-  "emission"
- ],
- "fps": 30,
- "clips": [],
- "atlas": null,
- "vertex_color": null,
- "sockets": []
+  "key": "props/venus/meridian_station_door",
+  "style": "v3",
+  "frame_width": 140,
+  "frame_height": 236,
+  "columns": 3,
+  "gutter": 4,
+  "frames": 6,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.042373
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [
+    {
+      "name": "open",
+      "start": 0,
+      "length": 6,
+      "loop": false
+    }
+  ],
+  "squash_root": false,
+  "ground_line_px": 10,
+  "note": "frame 0 = at rest (closed); open plays once; the pivot sits on its base line",
+  "interactable": true
 }
