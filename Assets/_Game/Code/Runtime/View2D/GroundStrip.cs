@@ -175,8 +175,10 @@ namespace Meridian.View2D
             }
         }
 
-        /// <summary>D-146: the fill tile inside a strip's frame 0 — its bottom 8 rows, one texel in from each side (bilinear never reaches the gutter). Pure.</summary>
-        public static Rect FillRect(Rect frame) => new Rect(frame.x + 1f, frame.y, frame.width - 2f, 8f);
+        /// <summary>D-146: the fill tile inside a strip's frame 0 — rows 1–6 of its bottom 8, one texel in from every side, so bilinear filtering
+        /// only ever blends the band's own uniform texels: not the transparent gutter at the sides, and not (Repeat wraps v) the sheet's
+        /// transparent top row under the bottom edge — the 13:47 frames showed that as horizontal lines once the tile stopped landing on whole pixels. Pure.</summary>
+        public static Rect FillRect(Rect frame) => new Rect(frame.x + 1f, frame.y + 1f, frame.width - 2f, 6f);
         /// <summary>D-146: the fill tile's pixels per unit, so its inset width still spans one column (1 m). Pure.</summary>
         public static float FillPpu(Rect frame, float ppu) => ppu * (frame.width - 2f) / frame.width;
 
