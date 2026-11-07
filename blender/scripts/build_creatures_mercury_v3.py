@@ -6,6 +6,8 @@ pie eyes, dizzy stars), in the Mercury palette (D-130). Faces kept, friendly or 
              idle_open 10.
   glassback  176x112, the silicate grazer riding the twilight band (see its section): idle 10 (grazing), walk 12,
              react 8 (the shards ring up), bump 10, flee 12.
+  cinderling 80x64, small, swarms at dawn (see its section): idle 8, walk 12 (a scurry), react 8 (a hop with a spark
+             puff), bump 10, flee 12.
   flarewing  124x124, a flyer that feeds on flares ("aggressive" becomes excited, D-087): a violet moth-bat with ember
              belly, membrane wings on drawn ribs, gold flare-catching vanes at the wing tips and a forked gold-tipped
              tail. Pivot at the body centre (the B-135 swimmers' rule for creatures that leave the ground); clips idle 10
@@ -359,6 +361,81 @@ def glassback_poses():
     return out
 
 
+# ---------------------------------------------------------------- cinderling (small, swarms at dawn)
+# A small ember beetle: a domed ember shell with crust plates and cracks that show a gold glow tone (no emission), a round
+# head with big pie eyes, two gold spark feelers, stubby hose legs; it scurries, hops with a spark puff when startled.
+# ~0.5 m. Swarms are UNITY's spawner.
+
+CINDER = dict(hips=[(-0.08, 0.13), (0.08, 0.14), (-0.11, 0.12), (0.05, 0.13)], feet=[-0.13, 0.12, -0.16, 0.09],
+              ankle=0.035, leg_w=0.07, bend_hind=-0.10, bend_front=0.05, foot="paw", paw=(0.04, 0.02, 1, 0), dangle=0.1)   # wide enough for the fill to show
+CB = (0.0, 0.19, 0.17, 0.11)
+
+
+def draw_cinderling(d, M, pose=None, seed=0):
+    p = K.base_pose()
+    p.update(dict(spark=None))
+    p.update(pose or {})
+    cx, cz, rx, rz = CB
+    B = K.Body(p, (cx, cz))
+    db = G.Xf(d, B)
+    if p["spark"] is not None:                                                             # a spark puff behind (react, flee)
+        t = p["spark"]
+        r = 0.035 + 0.04 * t
+        blob = G.lumpy_ellipse(-0.18 - 0.12 * t, 0.06 + 0.10 * t, r * 1.2, r, n=12, lump=0.12, seed=seed + 30)
+        G.stroke(d, blob, M["white"], I, cyclic=True)
+        G.specks(d, [(-0.22 - 0.1 * t, 0.16 + 0.08 * t), (-0.10 - 0.08 * t, 0.12 + 0.12 * t)], M["ink"])
+    K.legs_pass(d, M, B, CINDER, p, far=True)
+    shell = [(x, max(z, 0.12)) for x, z in G.lumpy_ellipse(cx, cz, rx, rz, n=28, lump=0.04, seed=seed + 1)]
+    G.stroke(db, shell, M["ember_f"], 0.0, cyclic=True)
+    G.stroke(db, [q for q in shell if q[0] < -0.06] + [(-0.06, 0.13)], M["ember_sh"], 0.0, cyclic=True)
+    for k, (x, z) in enumerate(((-0.08, 0.24), (0.03, 0.27), (0.10, 0.21))):              # crust plates
+        G.stroke(db, G.lumpy_ellipse(x, z, 0.04, 0.03, n=10, lump=0.1, seed=seed + 40 + k), M["ember_dp"], 0.0, cyclic=True)
+    for pts in (((-0.12, 0.18), (-0.05, 0.22), (0.02, 0.20)), ((0.0, 0.16), (0.06, 0.18), (0.12, 0.15))):
+        G.stroke(db, G.hose_outline(list(pts), 0.012), M["gold_f"], 0.0, cyclic=True)    # the glow in the cracks (a tone)
+        G.seam(db, list(pts), M["ink"])
+    G.stroke(db, [(-0.16, 0.13), (0.16, 0.13)], M["ink"], I)
+    G.stroke(db, shell, M["ink"], O, cyclic=True)
+    K.legs_pass(d, M, B, CINDER, p, far=False)
+    hx, hz = 0.18, 0.18
+    H = K.turn((0.12, 0.17), p["head_rot"], p["head"], B)
+    dk = G.Xf(G.Xf(d, H), K.scale_about((hx, hz), 1.55))                                  # a big head for a small beetle
+    for k in (0, 1):                                                                      # gold spark feelers
+        a = math.radians(75 - 30 * k) + p["ears"] * 0.6
+        tip = (hx - 0.01 + 0.025 * k + 0.08 * math.cos(a), hz + 0.05 + 0.08 * math.sin(a))
+        G.stroke(dk, G.hose_outline(G.bezier((hx - 0.01 + 0.025 * k, hz + 0.05), (hx + 0.01 * k, hz + 0.1), tip, n=5), 0.01), M["gold_b"], I, cyclic=True)
+        G.stroke(dk, K.star(tip[0], tip[1], 0.018, rot=a), M["gold"], I, cyclic=True)
+    G.stroke(dk, G.lumpy_ellipse(hx, hz, 0.065, 0.06, n=20, lump=0.03, seed=seed + 2), M["ember"], O, cyclic=True)
+    if p["mouth"] > 0.05:
+        G.stroke(dk, G.lumpy_ellipse(hx + 0.035, hz - 0.035, 0.01 + 0.006 * p["mouth"], 0.006 + 0.008 * p["mouth"], n=8, seed=seed + 3), M["mouth"], I, cyclic=True)
+    else:
+        G.seam(dk, G.bezier((hx + 0.05, hz - 0.03), (hx + 0.03, hz - 0.042), (hx + 0.01, hz - 0.035), n=4), M["ink"])
+    K.eyes(dk, M, hx - 0.005, hz + 0.01, 0.016, 0.022, 0.03, p, seed)
+    if p["stars"] is not None:
+        K.stars(dk, M, hx, hz + 0.13, 0.09, p["stars"])
+
+
+def cinderling_poses():
+    out = []
+    for i in range(8):                                                                    # idle: breathe, feelers twitch, a blink
+        ph, q = K.idle_common(i, 8)
+        q.update(ears=0.3 * math.sin(2 * ph), head_rot=0.04 * math.sin(ph), blink={5: 0.6, 6: 1.0}.get(i, 0.0), look=(0.7, 0.0))
+        out.append(q)
+    for i in range(12):                                                                   # walk: a scurry
+        ph = TAU * i / 6
+        out.append(dict(legs=K.walk_legs(ph, 0.05, 0.03), bob=0.008 * abs(math.sin(ph)), sz=1 + 0.03 * math.cos(2 * ph),
+                        rock=0.04 * math.sin(ph), ears=0.3 * math.sin(2 * ph), look=(0.9, -0.1)))
+    for i, (bob, sz, sp) in enumerate(((0.0, 0.85, None), (0.06, 1.12, 0.0), (0.16, 1.06, 0.3), (0.20, 1.0, 0.55),
+                                       (0.14, 1.0, 0.8), (0.05, 1.04, None), (0.0, 0.88, None), (0.0, 1.0, None))):
+        out.append(dict(bob=bob, sz=sz, spark=sp, eye_pop=1.4 if 1 <= i <= 4 else 1.0, mouth=0.5 if 1 <= i <= 3 else 0.0,
+                        ears=-0.5 if i < 5 else 0.0, legs=((0.0, bob),) * 4))                       # the feet leave the ground with it
+    out += K.bump_clip()
+    for i in range(12):                                                                   # flee: a fast scurry, sparks behind
+        ph = TAU * i / 4
+        out.append(dict(legs=K.walk_legs(ph, 0.07, 0.04), bob=0.01 * abs(math.sin(ph)), sz=0.95, lean=0.08, rock=-0.05,
+                        spark=(i % 4) / 4.0 if i % 2 == 0 else None, ears=0.6, look=(0.9, 0.0)))
+    return out
+
+
 SPECIES = {
     "flarewing": dict(draw=draw_flarewing, poses=flarewing_poses, mats=mats, frame=(124, 124), seed=41, pivot=(0.5, 0.5), flyer=True,
                       clips=[("idle", 10, True), ("fly", 12, True), ("react", 8, False), ("bump", 10, False), ("flare_dance", 12, True)],
@@ -378,6 +455,12 @@ SPECIES = {
                                   "motion": "grazes with the head dipping, glints walk along the shards, an amble; react: the shards ring up and lift",
                                   "original": "our own silicate grazer: a pale hide with cold-teal crystal shards; gentle, no teeth"},
                       ours="a gentle pale grazer whose cold-teal crystal shards ring and lift when it is startled"),
+    "cinderling": dict(draw=draw_cinderling, poses=cinderling_poses, mats=mats, frame=(80, 64), seed=44,
+                       clips=[("idle", 8, True), ("walk", 12, True), ("react", 8, False), ("bump", 10, False), ("flee", 12, True)],
+                       self_check={"ink": "crust plates, crack seams with a gold glow tone, the shell's rim, toe seams, a mouth seam",
+                                   "motion": "breathes, feelers twitch, scurries; react hops with a spark puff; flee leaves sparks",
+                                   "original": "our own ember beetle: a cracked ember shell with gold glow, big eyes; harmless, no teeth"},
+                       ours="a little ember beetle with gold glowing cracks that hops in a puff of sparks when startled"),
 }
 
 
