@@ -2259,12 +2259,12 @@ Depends: U-123, B-152, B-153
 Lead notes: Cycle 265. Promoted when U-123 Mercury is Done. Cycle 272: READY, start after the U-123 hand-off commit and the C3 UI code (the Venus studies are accepted; B-152 / B-153 export once U-123 is Done, B-154 behind this card's code). 15:2x (BLENDER's handoff): the Venus ground strips come as two kinds, terrain/venus/ground_strip (the basalt crust) and terrain/venus/ground_strip_deck (the aerostat planks: brass fascia beam, X-braced truss, a rail post every 4 m), so VenusKeys = {ground_strip, ground_strip_deck}, the deck kind under the aerostat band and the crust kind on the surface. 16:0x: CODE IN AND GREEN (bf406324; one lock 16:00–16:06: compile 0 / 0, EditMode 374/374 incl. VenusStageTests ×5, PlayMode 9/9 incl. VenusStagePlay with two crossfades + 10/10 incl. LeadQA M3Inner 7/7 with Venus on the cartoon path). Venus runs the cartoon path before its art; Done on the captures after B-152 / B-153 / B-154 export (the deck with the aerostat strip and a drifter, the surface with a crab at a vent).
 
 
-### U-126 · UNITY · Ready · C2
+### U-126 · UNITY · In Progress · C2
 Goal: Floe end caps (D-137): GroundStrip places `cap_left` and `cap_right` (frames 8 and 9 of a giant's floe strip) at a floe's two ends, tiles between; Earth and Mars strips unchanged; a floe is cap + n tiles + cap at any length ≥ 1 tile.
 Accept: GroundStripTests cover a 1-, 2- and 8-tile floe (caps at both ends, no cap inside); a Jupiter floe capture at 1x; frame time unchanged.
 Files: Code/Runtime/Planet/GroundStrip.cs, Tests/
 Depends: U-127, B-155
-Lead notes: Cycle 266 (D-137). Rides Jupiter's first batch. Cycle 273: READY as lock-free code (GroundStripTests for the 1-, 2- and 8-tile floes) any time after U-124's code; the Jupiter floe capture lands with U-127.
+Lead notes: Cycle 266 (D-137). Rides Jupiter's first batch. Cycle 273: READY as lock-free code (GroundStripTests for the 1-, 2- and 8-tile floes) any time after U-124's code; the Jupiter floe capture lands with U-127. 16:2x: CODE IN AND GREEN (7aaeb621; unity_check -SkipPlayMode 16:20–16:22: compile 0 / 0, EditMode 381/381 with GroundStripTests +1 for the 1-, 2- and 8-tile floes): a 10-frame strip tiles its first 8 frames and caps each floe end in the air column outside it; a floe ends where the ground beside it drops more than 3 m; 8-frame strips never cap. Done on the Jupiter floe capture with U-127 (B-159's strips).
 
 ### U-127 · UNITY · Ready · C2
 Goal: Jupiter on the cartoon stage (Bible §12 C2 order 5; §7.5–7.6 the cloud-column world): the cloud-column generator's decks as the B-155 layer sets (deck1 / deck2 / deck3 / deep with the CRUSH band on layer2, the Red Spot overlay), the floe strips with caps (U-126), the aerostat kit sheets (B-156), the Jupiter creatures on sheets and the Vortex Whale as a rig-set set piece framed so no shot shows both ends (D-138), the Jupiter palette strip; the M4 Jupiter tests unchanged; the Jupiter perf rows green.
