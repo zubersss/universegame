@@ -298,8 +298,6 @@ MonoBehaviour:
   - characters/surveyor/mk1
   - characters/surveyor/mk2
   - characters/surveyor/mk3
-  - creatures/earth/stag
-  - creatures/earth/wolf
   - creatures/mars/dustskater
   - creatures/mars/scree_stalker
   - creatures/mercury/cinderhulk
@@ -689,6 +687,52 @@ MonoBehaviour:
       start: 92
       length: 6
       loop: 0
+  - key: characters/surveyor/side_b
+    fps: 12
+    clips:
+    - name: dig
+      start: 0
+      length: 10
+      loop: 1
+    - name: build
+      start: 10
+      length: 10
+      loop: 1
+    - name: surprise
+      start: 20
+      length: 12
+      loop: 0
+    - name: jetpack
+      start: 32
+      length: 10
+      loop: 1
+    - name: climb_in
+      start: 42
+      length: 14
+      loop: 0
+  - key: creatures/earth/bear
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 12
+      loop: 1
+    - name: walk
+      start: 12
+      length: 12
+      loop: 1
+    - name: react
+      start: 24
+      length: 10
+      loop: 0
+    - name: bump
+      start: 34
+      length: 10
+      loop: 0
+    - name: flee
+      start: 44
+      length: 12
+      loop: 1
   - key: creatures/earth/gull
     fps: 12
     clips:
@@ -710,6 +754,102 @@ MonoBehaviour:
       loop: 0
     - name: fly
       start: 40
+      length: 12
+      loop: 1
+  - key: creatures/earth/pike
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 8
+      loop: 1
+    - name: swim
+      start: 8
+      length: 12
+      loop: 1
+    - name: react
+      start: 20
+      length: 8
+      loop: 0
+    - name: bump
+      start: 28
+      length: 8
+      loop: 0
+    - name: flee
+      start: 36
+      length: 12
+      loop: 1
+  - key: creatures/earth/shark
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 10
+      loop: 1
+    - name: swim
+      start: 10
+      length: 14
+      loop: 1
+    - name: react
+      start: 24
+      length: 8
+      loop: 0
+    - name: bump
+      start: 32
+      length: 10
+      loop: 0
+    - name: flee
+      start: 42
+      length: 12
+      loop: 1
+  - key: creatures/earth/stag
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 10
+      loop: 1
+    - name: walk
+      start: 10
+      length: 12
+      loop: 1
+    - name: react
+      start: 22
+      length: 8
+      loop: 0
+    - name: bump
+      start: 30
+      length: 10
+      loop: 0
+    - name: flee
+      start: 40
+      length: 12
+      loop: 1
+  - key: creatures/earth/wolf
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 10
+      loop: 1
+    - name: walk
+      start: 10
+      length: 12
+      loop: 1
+    - name: react
+      start: 22
+      length: 8
+      loop: 0
+    - name: bump
+      start: 30
+      length: 10
+      loop: 0
+    - name: flee
+      start: 40
+      length: 14
+      loop: 1
+    - name: follow
+      start: 54
       length: 12
       loop: 1
   - key: creatures/mercury/cinderhulk_day
