@@ -1,11 +1,11 @@
 # BLENDER STATUS
-Updated: 2026-11-07 05:21 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 05:22 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
 LEAD cycle 258. Slot DONE 05:13:16-05:18:13 (released). Next slot: B-136 Hadal Maw export (after U-106's last job per the queue) + the B-144 review (fixed tile overflow); then B-140.
 1. B-143 EXPORTED (d3af1e5): disc_near mercury / venus / earth / mars 512^2 (k 5.86 / 3.42 / 3.28 / 4.82), luna_near 356^2 (8x); far discs proven byte-identical first; log OK 121 s, peak 359 MB; review_b143_near_frames.png. .metas UNITY's.
 2. B-141 re-run DONE in the slot: canyon seams 0.88 / 0.68 / 0.53, storm 0.87 / 0.78 / 0.47, peak 683 MB; review_b141_mars_canyon_preview.png / _storm_ for LEAD's look.
-3. Lurker idle_open DONE (8a2f6bb). B-144 previews DONE (024462f, 172ae6e; the full review crashed on a tile overflow, fixed, renders next slot). B-145 part 1 DONE (37ed2ab: palette ALL PASS + c2_mercury_designs.md); the five plant drawings NEXT (lock-free).
+3. Lurker idle_open DONE (8a2f6bb). B-144 previews DONE (024462f, 172ae6e; the full review crashed on a tile overflow, fixed, renders next slot). B-145 part 1 DONE (37ed2ab: palette ALL PASS + c2_mercury_designs.md); part 2 source DONE (5f4c131: the five plants), its preview waits for RAM (0.03 GB free 05:21).
 4. B-136 export-ready (dde7d5e, D-127); B-140 / B-141 / B-142 rows ready. B-131 after U-113; B-142 after U-118.
 
 ## Last completed
