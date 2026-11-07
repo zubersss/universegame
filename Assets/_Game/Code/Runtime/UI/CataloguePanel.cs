@@ -57,6 +57,7 @@ namespace Meridian.UI
 
         void OnDestroy()
         {
+            PanelInput.Close(this); // U-134
             ItemIcons.Loaded -= MarkDirty;
             if (toggle != null) toggle.performed -= OnToggle;
             foreach (var h in handles) if (h.IsValid()) global::Meridian.Art.ArtLoad.Release(h);
@@ -70,6 +71,7 @@ namespace Meridian.UI
         {
             if (root == null || root.activeSelf == open) return;
             root.SetActive(open);
+            if (open) PanelInput.Open(this, toggle != null ? toggle.actionMap : null); else PanelInput.Close(this); // U-134: the surveyor stands still while a panel is open
             AnyOpen = open;
             enabled = open;
             if (open)
@@ -97,7 +99,7 @@ namespace Meridian.UI
 
         public void Show(PlanetId p) { Shown = p; Redraw(); }
 
-        void Update() { if (dirty) Redraw(); }
+        void Update() { if (toggle != null) PanelInput.Hold(toggle.actionMap); if (dirty) Redraw(); } // U-134: re-held each frame (a resume re-enables whole maps)
 
         void Build()
         {

@@ -56,6 +56,7 @@ namespace Meridian.UI
 
         void OnDestroy()
         {
+            PanelInput.Close(this); // U-134
             if (inventory != null) inventory.Changed -= MarkDirty;
             ItemIcons.Loaded -= MarkDirty;
             if (IsOpen) AnyOpen = false;
@@ -70,6 +71,7 @@ namespace Meridian.UI
         {
             if (root == null || root.activeSelf == open) return;
             root.SetActive(open);
+            if (open) PanelInput.Open(this, toggle != null ? toggle.actionMap : null); else PanelInput.Close(this); // U-134: the surveyor stands still while a panel is open
             AnyOpen = open;
             enabled = open; // closed: no Update at all
             if (open) { dirty = true; Redraw(); }
@@ -117,6 +119,7 @@ namespace Meridian.UI
 
         void Update()
         {
+            if (toggle != null) PanelInput.Hold(toggle.actionMap); // U-134: re-held each frame (a resume re-enables whole maps)
             if (dirty) Redraw();
         }
 

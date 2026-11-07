@@ -66,6 +66,7 @@ namespace Meridian.UI
 
         void OnDestroy()
         {
+            PanelInput.Close(this); // U-134
             if (inventory != null) inventory.Changed -= Refresh;
             ItemIcons.Loaded -= MarkIcons;
             if (toggle != null) toggle.performed -= OnToggle;
@@ -79,6 +80,7 @@ namespace Meridian.UI
         {
             if (root == null || root.activeSelf == open) return;
             root.SetActive(open);
+            if (open) PanelInput.Open(this, toggle != null ? toggle.actionMap : null); else PanelInput.Close(this); // U-134: the surveyor stands still while a panel is open
             AnyOpen = open;
             enabled = open;
             if (open) { FillIcons(); Refresh(); UiKit.SelectFirst(root.transform); } // U-124: keyboard reach, the first craftable button takes the keys
@@ -86,6 +88,7 @@ namespace Meridian.UI
 
         void Update()
         {
+            if (toggle != null) PanelInput.Hold(toggle.actionMap); // U-134: re-held each frame (a resume re-enables whole maps)
             if (iconsDirty) { iconsDirty = false; FillIcons(); }
             // Stations come and go as the surveyor walks: refresh twice a second while open.
             if (Time.unscaledTime < nextRefresh) return;

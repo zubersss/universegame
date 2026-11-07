@@ -222,10 +222,24 @@ namespace Meridian.Tests
                 Assert.NotNull(inventory, "the inventory panel in the game");
                 Assert.NotNull(catalogue, "the catalogue panel in the game");
                 Assert.NotNull(crafting, "the crafting panel in the game");
+                var foot = director.PlanetSide.player.actions.FindActionMap(MeridianInput.OnFoot, true);
+                Assert.IsTrue(foot.FindAction("Move").enabled, "on foot: Move is live");
                 yield return Tap(keys, UnityEngine.InputSystem.Key.Tab);
                 Assert.IsTrue(inventory.IsOpen, "Tab opens the inventory");
+                // U-134: an open panel holds the surveyor still; its own keys stay live.
+                Assert.IsFalse(foot.FindAction("Move").enabled, "U-134: Move held while a panel is open");
+                Assert.IsFalse(foot.FindAction("Jump").enabled, "U-134: Jump held");
+                Assert.IsTrue(foot.FindAction("Inventory").enabled && foot.FindAction("Catalogue").enabled && foot.FindAction("BuildMenu").enabled, "the panel keys stay live");
+                var walker = director.PlanetSide.player.transform;
+                float x0 = walker.position.x;
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(keys, new UnityEngine.InputSystem.LowLevel.KeyboardState(UnityEngine.InputSystem.Key.D));
+                for (int i = 0; i < 20; i++) yield return null;
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(keys, new UnityEngine.InputSystem.LowLevel.KeyboardState());
+                yield return null;
+                Assert.AreEqual(x0, walker.position.x, 0.05f, "U-134: D does not walk the surveyor behind the open inventory");
                 yield return Tap(keys, UnityEngine.InputSystem.Key.Tab);
                 Assert.IsFalse(inventory.IsOpen, "Tab closes it");
+                Assert.IsTrue(foot.FindAction("Move").enabled && foot.FindAction("Jump").enabled, "U-134: the last panel to close gives the keys back");
                 yield return Tap(keys, UnityEngine.InputSystem.Key.N);
                 Assert.IsTrue(catalogue.IsOpen, "N opens the catalogue");
                 var picked = es.currentSelectedGameObject;
@@ -235,8 +249,11 @@ namespace Meridian.Tests
                 Assert.IsFalse(catalogue.IsOpen, "N closes it");
                 yield return Tap(keys, UnityEngine.InputSystem.Key.B);
                 Assert.IsTrue(crafting.IsOpen, "B opens the crafting panel");
+                Assert.IsFalse(foot.FindAction("Move").enabled, "U-134: held under the crafting panel too");
                 yield return Tap(keys, UnityEngine.InputSystem.Key.B);
                 Assert.IsFalse(crafting.IsOpen, "B closes it");
+                Assert.IsTrue(foot.FindAction("Move").enabled, "and given back");
+                Assert.IsFalse(PanelInput.Holding, "no panel holds the surveyor");
 
                 // The paper: every probe answers, and it draws exactly when the art is on disk.
                 float until = Time.realtimeSinceStartup + 10f;
