@@ -129,7 +129,7 @@ class Stack:
         self.a = m + self.a * (1 - m)
 
 
-def finish(stack, rng, H, straight=True):
+def finish(stack, rng, H, straight=True, roll=None):
     """Composite + paper grain, then roll the (periodic) layer so the wrap sits on the quietest column: a soft edge
     that happened to fall on column 0 scored 2.7 on the seam check although the tile is continuous.
     straight: the composite over a transparent base holds colour x alpha (premultiplied), but the PNG is read as
@@ -141,8 +141,15 @@ def finish(stack, rng, H, straight=True):
     if straight:
         rgb = BG.straighten(rgb, a)
     rgb = rgb * BG.paper(rng, H)[..., None]
-    k = seam_column(BG.to_u8(rgb, a))
+    k = seam_column(BG.to_u8(rgb, a)) if roll is None else int(roll) % W      # roll: a fixed wrap (Uranus: one per deck, D-142)
     return np.roll(rgb, -k, axis=1), np.roll(a, -k, axis=1)
+
+
+def geometry_roll(mask):
+    """The wrap column from a light-independent mask (the lit variants of one deck must roll alike, or the season
+    crossfade slides the clouds)."""
+    m = np.repeat(np.clip(mask, 0, 1)[..., None], 3, axis=2)
+    return seam_column(BG.to_u8(m, np.ones(mask.shape, np.float32)))
 
 
 def sky_layer(rng, pal, H=1024, clouds=7):
@@ -1414,10 +1421,19 @@ def uranus_scene(seed, deck="deck1", light="sun_left"):
     band_op = 0.4 if light == "survey" else 0.07
     for t in bands(wr, H, [(y0, th, col, band_op) for y0, th, col in band_specs], pal):
         stack.append(t)
-    sx = {-1: 360.0, 1: 1560.0}[sun]                       # the low sun, on its side of the 1920 frame
+    import copy
+    rp = copy.deepcopy(rng)                                 # replay the far banks' geometry: layer0's roll, the same in every light
+    if deck == "deck1":
+        rp.uniform(300, 1700)
+    wall_p = np.zeros((H, W), np.float32)
+    cloud_bank(wall_p, BG.ridge(rp, [(2, 0.5), (5, 0.3), (11, 0.2)], base=760, amp=34), rp, 40, 90, 20)
+    k0 = geometry_roll(wall_p)
+    del wall_p, rp
+    sx = ({-1: 360.0, 1: 1560.0}[sun] + k0) % W            # the low sun, on its side of the 1920 frame after the roll
     if not night:
         y = np.arange(H)[:, None] + 0.5
-        ramp = np.clip(1 - np.abs(np.arange(W)[None, :] - sx) / 1100.0, 0, 1)            # warm toward the sun's side
+        dxs = np.abs(np.arange(W)[None, :] - sx)
+        ramp = np.clip(1 - np.minimum(dxs, W - dxs) / 1100.0, 0, 1)                      # warm toward the sun's side (wrapped)
         horizon = (((y > 380) & (y < 760)).astype(np.float32) * ramp).astype(np.float32)          # frame y ~344-724: above the near banks
         stack.append(tint(wl, H, horizon, BG._mix(pal["offwhite"], pal["red"], 0.45), 0.4, var=0.02, edge_dark=0.0, bleed=40.0))
         glow = np.zeros((H, W), np.float32)
@@ -1449,7 +1465,7 @@ def uranus_scene(seed, deck="deck1", light="sun_left"):
         y = np.arange(H)[:, None] + 0.5
         haze = np.broadcast_to(((y > 600) & (y < 780)).astype(np.float32), (H, W)).copy()
         stack.append(tint(wl, H, haze, pal["red"], 0.14, var=0.02, edge_dark=0.0, bleed=40.0))      # night: the ember only as a low haze
-    out.append(finish(stack, wr, H))
+    out.append(finish(stack, wr, H, roll=k0))
     # layer1: nearer fog banks, the same light; the deep: slow swirls
     H = 640
     stack = Stack()
@@ -1470,7 +1486,7 @@ def uranus_scene(seed, deck="deck1", light="sun_left"):
             cx, cy, R = rng.uniform(250, W - 250), rng.uniform(120, 300), rng.uniform(90, 140)
             stack.append(tint(wr, H, spiral_mask(H, cx, cy, R, 0, arms=2, thr=0.2, sx=1.8, sz=0.5, wind=2.0, r0=0.15),
                               BG._mix(pal["teal"], pal["brown"], 0.5), 0.35, var=0.03, edge_dark=0.0, bleed=4.0))
-    out.append(finish(stack, wr, H))
+    out.append(finish(stack, wr, H, roll=geometry_roll(bank)))
     # layer2 (near): fog wisps, hail (deck 3), the diamond-rain sparkle + the CRUSH band (deep), night sparkles + ember glows
     H = 384
     stack = Stack()
@@ -1490,7 +1506,7 @@ def uranus_scene(seed, deck="deck1", light="sun_left"):
     stack.append(tint(wr, H, sp, pal["offwhite"], 0.9, var=0.0, edge_dark=0.0, bleed=0.4))
     if deck == "deep":
         crush_band(stack, wr, pal, H)
-    out.append(finish(stack, wr, H))
+    out.append(finish(stack, wr, H, roll=geometry_roll(wisps)))
     return out, [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0},
                  {"n": 2, "parallax": 0.6, "y_m": -0.5}]
 
