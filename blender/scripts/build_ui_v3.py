@@ -499,7 +499,8 @@ def preview(out):
     head = np.tile(review.PAPER, (28, W, 1)).astype(np.float32)
     review._label(head, "b-146 c3 ui art designs (previews only): 9-slice paper panels, the planet title cards (limelight as drawn ink), the film-effects switch", 6, 8)
     rows.append(head)
-    r = np.tile(np.array([0.36, 0.36, 0.40], np.float32), (420, W, 1))                   # the panels at 1x + stretched + sample text
+    mh = max(ph for _pw, ph, _sl, _fn in PANELS.values())
+    r = np.tile(np.array([0.36, 0.36, 0.40], np.float32), (30 + 2 * mh + 64 + 30, W, 1))  # the panels at 1x + stretched + sample text
     x = 12
     for name, (pw, ph, sl, fn) in PANELS.items():
         img, w = fn(pw, ph, sl)
