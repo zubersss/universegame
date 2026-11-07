@@ -1,5 +1,5 @@
 # BLENDER STATUS
-Updated: 2026-11-07 05:47 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 05:56 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
 LEAD cycle 259: B-143 VERIFIED, B-141 studies ACCEPTED (export after B-140), Mercury palette ACCEPTED (D-130). C1 CLOSED (D-131). B-140 (b99b8c27), B-141 (570fb6ad), B-131 (3548c6e7) EXPORTED; their files imported clean in UNITY's 43fe88e9. No heavy job of mine queued now: lock-free Mercury work.
@@ -9,7 +9,7 @@ LEAD cycle 259: B-143 VERIFIED, B-141 studies ACCEPTED (export after B-140), Mer
 1. B-136 EXPORTED 05:24-05:26 (72cfdd4): creatures/earth/hadal_maw 1784x744 118 KB, 8 parts, json cycle_beats 4; log OK 115.6 s, peak 676 MB; review_b136_hadal_maw.png + _assembled.png (1x beside the surveyor, stamped export). .metas UNITY's.
 2. B-144 full review DONE 05:28: review_b144_mars_props_preview.png (1x on the regolith strips beside the surveyor, 2x, clips, ten boxes; problems none). Slip: peak 430 MB lock-free (no lock held, 2.3 GB free) over the ~300 MB guideline; my 200 MB estimate was not measured on a part first.
 3. D-130 DONE (7a1eeecc): PALETTES['mercury'] + the ui/palettes/mercury row (exports with B-145's first slot).
-5. Mercury Flarewing (B-145 creatures): drawn, full review review_b145_mercury_flarewing_preview.png 124x124 (ink 2.00-3.00 / 1.00-1.50, palette 100 %, peak 198 MB); frame 30 (bump) still touches the edge: fixing.
+5. B-145: the Flarewing DONE (4adf12ed: 124x124, fly at index 1, review_b145_mercury_flarewing_preview.png, all 52 frames clean); the plants' full preview DONE (18e602bd: review_b145_mercury_plants_preview.png; the Glassreed recoloured teal to read on the violet twilight; peak 300 MB, no lock held). B-144 export rows DONE: the six v2 props/mars rows -> v3 prop-sheet rows (generator build_props_mars_v3; interactable drill / beacon / cargo); dry-run export into a scratch Art dir: 508x508 36 KB, 276x452 14, 232x168 9, 248x208 11, 240x112 4, 164x500 12 KB, all checks pass (57 MB). Next: the Shadewyrm + its ice-burrow den (D-126), then the Glassback and the Cinderling.
 4. B-145 plants checked one process at a time (e961be22: palette 100 %; the Sunfan's blades broadened, the Coilwort's spring thickened); the full preview when RAM allows. Lock-free next: the Mercury creature designs (Flarewing fly at index 1; the Shadewyrm's ice-burrow den, D-126), B-144 + B-141 export rows + dry runs, the B-140 slot dry run, report upkeep.
 B-131 after U-113; B-142 after U-118.
 
