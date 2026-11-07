@@ -160,6 +160,17 @@ namespace Meridian.Tests
 
         static PlanetConfig LoadConfig(string planet) => UnityEditor.AssetDatabase.LoadAssetAtPath<PlanetConfig>($"Assets/_Game/Settings/Planets/{planet}.asset");
 
+        /// <summary>U-138 (D-150): the Cinderhulk is out of Mercury's spawn table everywhere (day, the band, night, the traps): only the inked species spawn.</summary>
+        [Test]
+        public void TheCinderhulkLeftTheSpawnTable()
+        {
+            var hulk = Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.Cinderhulk);
+            foreach (var zone in new[] { MercuryZone.Day, MercuryZone.Twilight, MercuryZone.Night })
+                for (int x = 0; x < W; x += 97)
+                    Assert.IsFalse(hulk.Allows(new Meridian.Creatures.SpawnSite { x = x, worldWidth = W, planet = PlanetId.Mercury, surfaceTile = TileId.MercuryRegolith, surfaceY = 320, datumY = 320, zone = zone, localTime = 0.25f }),
+                        $"no Cinderhulk at x {x} in {zone}");
+        }
+
         /// <summary>U-123 (D-126, B-150): the Shadewyrm is a den species in the cold traps with props/mercury/ice_burrow as its burrow; the Flarewing flies; the rest of the Mercury table is untouched.</summary>
         [Test]
         public void TheShadewyrmDensInTheColdTrapsAndTheFlarewingFlies()

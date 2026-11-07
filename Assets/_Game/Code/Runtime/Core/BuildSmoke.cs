@@ -250,16 +250,14 @@ namespace Meridian.Core
             yield return Dawn(side, shelter.CenterX);                               // the dawn line through the shelter: violet twilight
             yield return LookAt(side, shelter.CenterX, 4f, 10f);
             yield return Shot(folder, "smoke_14_mercury_twilight_shelter.png");
-            // Both apexes: the Cinderhulk walks the band, then night falls on it.
-            float hx = side.player.Body.position.x + 6f;
-            int ht = Mathf.FloorToInt(hx);
-            side.creatures.Spawn(Meridian.Creatures.Species.Cinderhulk,
-                new Vector2(ht + 0.5f, side.terrain.TopSolidY(ht) + 1f + Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.Cinderhulk).size.y * 0.5f + 0.05f));
-            yield return Wait(0.5f);
-            Meridian.Terrain.MercuryTerminator.ClockOffset -= 400f * Meridian.Terrain.MercuryTerminator.CreepSecondsPerMetre;
-            yield return Wait(1f);
-            yield return Shot(folder, "smoke_15_cinderhulk_night.png");
-            Meridian.Terrain.MercuryTerminator.ClockOffset = 0;
+            // U-138 (D-150): the night shot is the Shadewyrm at its burrow in the first cold trap (the Cinderhulk left the spawn table).
+            side.creatures.DespawnAll();
+            int trapX = Meridian.Terrain.MercuryLandforms.ColdTrapCentre(0, mw);
+            yield return LookAt(side, trapX - 4f, 4f, 9f);
+            float wy = side.terrain.TopSolidY(trapX) + 1f + Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.Shadewyrm).size.y * 0.5f + 0.05f;
+            side.creatures.Spawn(Meridian.Creatures.Species.Shadewyrm, new Vector2(trapX + 0.5f, wy)); // the director stands its burrow in front (D-126)
+            yield return Wait(1.5f);
+            yield return Shot(folder, "smoke_15_shadewyrm_burrow.png");
 
             yield return scenes.LoadPlanetSide(GameState.Instance.catalog.Get(Meridian.Planets.PlanetId.Venus));
             side = scenes.PlanetSide;

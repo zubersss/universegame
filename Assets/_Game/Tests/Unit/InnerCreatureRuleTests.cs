@@ -47,7 +47,7 @@ namespace Meridian.Tests
             Assert.IsFalse(SpeciesSpec.Get(Species.Flarewing).Allows(Mercury(open, MercuryZone.Night, 0f)));
             Assert.IsTrue(SpeciesSpec.Get(Species.Shadewyrm).Allows(Mercury(trap, MercuryZone.Night, 0f)), "shadewyrm in the cold trap");
             Assert.IsFalse(SpeciesSpec.Get(Species.Shadewyrm).Allows(Mercury(open, MercuryZone.Night, 0f)));
-            Assert.IsTrue(SpeciesSpec.Get(Species.Cinderhulk).Allows(Mercury(open, MercuryZone.Twilight, 0.74f)), "the Cinderhulk walks the band");
+            Assert.IsFalse(SpeciesSpec.Get(Species.Cinderhulk).Allows(Mercury(open, MercuryZone.Twilight, 0.74f)), "U-138 (D-150): the Cinderhulk left the spawn table (the Cinderling is its re-ink)");
             Assert.IsFalse(SpeciesSpec.Get(Species.Cinderhulk).Allows(Mercury(trap, MercuryZone.Twilight, 0.25f)));
         }
 

@@ -208,7 +208,7 @@ namespace Meridian.Creatures
             Species.Cinderling => s.zone == MercuryZone.Twilight && s.localTime > 0.15f && s.localTime < 0.35f && !InColdTrap(s),
             Species.Flarewing => s.zone != MercuryZone.Night && !InColdTrap(s),
             Species.Shadewyrm => InColdTrap(s),
-            Species.Cinderhulk => s.zone == MercuryZone.Twilight && !InColdTrap(s),
+            Species.Cinderhulk => false, // U-138 (D-150): out of Mercury's spawn table - a v2 lava model beside the inked set; the Cinderling is its B-145 re-ink
             Species.SulfurDrifter or Species.Acidmoth or Species.VeilSerpent => OnDeck(s.playerY),
             // The real surface, far under the deck stations (whose platforms also count as "top solid").
             Species.PressureCrab => s.surfaceY < VenusLandforms.DeckY - 200f && VenusLandforms.At(s.x) != VenusFeature.VentField,
