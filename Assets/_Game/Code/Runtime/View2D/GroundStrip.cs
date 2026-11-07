@@ -113,9 +113,11 @@ namespace Meridian.View2D
                     if (this == null || op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;
                     var fr = new Sprite[op.Result.Count];
                     op.Result.CopyTo(fr, 0);
-                    // A flat fill tile: the bottom 8 px of the sheet's first slice (1 m × 1/8 m), tiled for the fills and the edges.
+                    // A flat fill tile: the bottom 8 px of the sheet's first slice (1 m wide), tiled for the fills and the edges. D-146: one texel
+                    // in from each side (62 px at a PPU that keeps it 1 m): the sheet's gutters are transparent, and with bilinear filtering the
+                    // full-width tile's edge sampled them — a dark sliver at every column join that fell between pixels (the Mercury night seams).
                     var r = fr[0].rect;
-                    var fill = Sprite.Create(fr[0].texture, new Rect(r.x, r.y, r.width, 8f), new Vector2(0.5f, 1f), fr[0].pixelsPerUnit, 0, SpriteMeshType.FullRect);
+                    var fill = Sprite.Create(fr[0].texture, FillRect(r), new Vector2(0.5f, 1f), FillPpu(r, fr[0].pixelsPerUnit), 0, SpriteMeshType.FullRect);
                     framesBy[material] = fr; fillBy[material] = fill;
                     if (material == 0) { frames = fr; dirt = fill; }
                     dirty = true;
@@ -172,6 +174,11 @@ namespace Meridian.View2D
                 prevTop = top;
             }
         }
+
+        /// <summary>D-146: the fill tile inside a strip's frame 0 — its bottom 8 rows, one texel in from each side (bilinear never reaches the gutter). Pure.</summary>
+        public static Rect FillRect(Rect frame) => new Rect(frame.x + 1f, frame.y, frame.width - 2f, 8f);
+        /// <summary>D-146: the fill tile's pixels per unit, so its inset width still spans one column (1 m). Pure.</summary>
+        public static float FillPpu(Rect frame, float ppu) => ppu * (frame.width - 2f) / frame.width;
 
         SpriteRenderer Make(string name, int order, Sprite tile)
         {

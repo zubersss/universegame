@@ -25,10 +25,17 @@ namespace Meridian.Terrain
             amplitude = planet == PlanetId.Earth ? 28f : planet == PlanetId.Mercury ? 14f : 34f; // Mercury: low rolling plains, craters do the rest
             // The surface profile once per world (U-039 fix: it was recomputed for every tile, ~1.5 s Mars entry).
             surface = new int[width];
+            if (planet == PlanetId.Mercury) band = new int[width]; // D-146: filled beside the surface, read-only after (the chunk thread reads too)
             for (int x = 0; x < width; x++) surface[x] = ComputeSurface(x);
         }
 
         readonly int[] surface;
+        /// <summary>D-146 (Mercury): the band surface per column — the noise and the cold-trap bowls without the seeded small craters.</summary>
+        readonly int[] band;
+
+        /// <summary>D-146: the topmost solid tile's y of the band surface at column x (the painted stage's datum source): Mercury without its
+        /// seeded small craters; every other planet its SurfaceHeight.</summary>
+        public int BandSurfaceHeight(int x) => band != null ? band[((x % width) + width) % width] : SurfaceHeight(x);
 
         System.Func<int, int> surfaceOf;
         System.Func<int, int> SurfaceOf => surfaceOf ??= c => SurfaceHeight(((c % width) + width) % width);
@@ -38,6 +45,7 @@ namespace Meridian.Terrain
         int ComputeSurface(int x)
         {
             float n = WorldNoise.Fbm1D(x, width, seed);
+            if (band != null) band[x] = Clamp(datum + (int)MercuryLandforms.BandHeight(x, width, (n - 0.5f) * 2f * amplitude));
             // Earth: biome bands (U-037); the forest band keeps exactly this old offset and truncation.
             int h = planet == PlanetId.Earth
                 ? datum + (int)(EarthBiomes.Height(x, n, datum) - datum)
@@ -48,8 +56,10 @@ namespace Meridian.Terrain
                         : planet == PlanetId.Venus
                             ? datum + (int)VenusLandforms.Height(x, (n - 0.5f) * 2f * amplitude) // U-050 tesserae + vents
                             : datum + (int)((n - 0.5f) * 2f * amplitude);
-            return h < 1 ? 1 : (h >= height - 1 ? height - 2 : h);
+            return Clamp(h);
         }
+
+        int Clamp(int h) => h < 1 ? 1 : (h >= height - 1 ? height - 2 : h);
 
         public byte TileAt(int x, int y)
         {

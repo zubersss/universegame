@@ -48,5 +48,20 @@ namespace Meridian.Tests
             }
             Assert.AreEqual(2f, GroundStrip.StripHeight, 1e-4f, "the strip reaches 2 m under the line, then the fill tile");
         }
+
+        /// <summary>D-146: the fill tile sits one texel inside frame 0 on both sides (the sheets' 4 px gutters are transparent; a full-width tile
+        /// bled into them under bilinear filtering: the Mercury night frame's 64 px seams) and still spans exactly one 1 m column.</summary>
+        [Test]
+        public void TheFillTileStaysInsideItsFrameAndSpansOneColumn()
+        {
+            var frame0 = new Rect(0f, 0f, 64f, 152f);
+            var r = GroundStrip.FillRect(frame0);
+            Assert.AreEqual(1f, r.xMin, "one texel in from the left (the sheet's far edge wraps there)");
+            Assert.AreEqual(63f, r.xMax, "one texel in from the right (the gutter starts at 64)");
+            Assert.AreEqual(0f, r.yMin); Assert.AreEqual(8f, r.height, "the frame's bottom 8 rows");
+            Assert.AreEqual(1f, r.width / GroundStrip.FillPpu(frame0, 64f), 1e-5f, "one column wide in world units");
+            var frame3 = new Rect(204f, 0f, 64f, 152f);
+            Assert.AreEqual(205f, GroundStrip.FillRect(frame3).xMin, "any frame: from its own left edge");
+        }
     }
 }

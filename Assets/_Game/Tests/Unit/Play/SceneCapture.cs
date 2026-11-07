@@ -2918,10 +2918,19 @@ namespace Meridian.Tests
                 var glassback = creatures.SpawnAt(Meridian.Creatures.Species.Glassback, px + 3, side.player.Body.position.y);
                 yield return WaitArt(glassback);
                 yield return Clock(px + 0.5f, 0.5f);
+                // D-146: the plants grow by the zone of the moment they are placed: grow the camp's again at noon (the day kinds).
+                stage.Flora.ClearPlants();
+                yield return null;
+                stage.Flora.Populate(Meridian.View2D.CartoonStage.FloraCount, Meridian.View2D.CartoonStage.FloraSpacing, side.spawnX + 0.5f, Meridian.Planets.PlanetId.Mercury.GetHashCode() * 31 + 7);
+                yield return null;
                 TestContext.Out.WriteLine($"[MERIDIAN] u123 camp x {px}: glassback {(glassback == null ? "none" : glassback.IsPlaceholder ? "placeholder" : "sheet")}{(glassback != null && !glassback.Alive ? " (gone)" : "")}");
                 yield return Shot("1_day_1x");
                 // 2. The dawn line at the camp: the twilight set, a Flarewing over the surveyor.
                 yield return Clock(px + 0.5f, 0.25f);
+                stage.Flora.ClearPlants(); // D-146: the dawn line's own kinds
+                yield return null;
+                stage.Flora.Populate(Meridian.View2D.CartoonStage.FloraCount, Meridian.View2D.CartoonStage.FloraSpacing, side.spawnX + 0.5f, Meridian.Planets.PlanetId.Mercury.GetHashCode() * 31 + 7);
+                yield return null;
                 var wing = creatures.SpawnAt(Meridian.Creatures.Species.Flarewing, px - 3, side.player.Body.position.y + 5f);
                 yield return WaitArt(wing);
                 TestContext.Out.WriteLine($"[MERIDIAN] u123 dawn line x {px}: flarewing {(wing == null ? "none" : wing.IsPlaceholder ? "placeholder" : "sheet")}, glassback {(glassback != null && glassback.Alive ? "alive" : "gone")}");
@@ -2930,6 +2939,10 @@ namespace Meridian.Tests
                 int trapX = Meridian.Terrain.MercuryLandforms.ColdTrapCentre(0, w);
                 yield return CarryTo(trapX + 14);
                 yield return Clock(trapX, 0f);
+                stage.Flora.ClearPlants(); // D-146: the trap's own plants (the "polar" kinds in a cold trap)
+                yield return null;
+                stage.Flora.Populate(6, 3f, trapX - 10f, Meridian.Planets.PlanetId.Mercury.GetHashCode() * 31 + 7); // six on the wyrm's left (trapX − 19 … − 4): the peek and the burrow stay clear
+                yield return null;
                 float ready = Time.realtimeSinceStartup + 10f;
                 while (!side.terrain.IsCollisionReady(trapX, side.terrain.TopSolidY(trapX)) && Time.realtimeSinceStartup < ready) yield return null;
                 var wyrm = creatures.SpawnAt(Meridian.Creatures.Species.Shadewyrm, trapX, side.terrain.TopSolidY(trapX) + 1.35f);

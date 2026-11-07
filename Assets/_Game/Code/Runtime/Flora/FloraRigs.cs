@@ -480,10 +480,17 @@ namespace Meridian.Flora
             LastMs = (float)watch.Elapsed.TotalMilliseconds;
         }
 
-        public void Clear()
+        /// <summary>D-146 (U-123 capture): the plants go, the rig set stays loaded, so Populate can grow them again at once (Mercury's
+        /// plants take the zone of the moment they are placed).</summary>
+        public void ClearPlants()
         {
             foreach (var p in Plants) if (p.Root != null) Destroy(p.Root.gameObject);
             Plants.Clear();
+        }
+
+        public void Clear()
+        {
+            ClearPlants();
             sprites.Clear();
             Set = null; Controller = null;
             foreach (var h in handles) if (h.IsValid()) ArtLoad.Release(h);

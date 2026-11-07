@@ -15,6 +15,11 @@ namespace Meridian.Terrain
         public const float ColdTrapDepth = 36f, RimHeight = 6f;
         /// <summary>Ice lies this many metres under the crater floor's regolith skin, this thick.</summary>
         public const int IceSkin = 1, IceThickness = 9;
+        /// <summary>D-146: the pad's column (PlanetSideRoot.spawnX's default) and the clear half-width around it: no seeded small crater
+        /// reaches within ±PadClear of the pad (its rim fall-off included), so the camp sits on the plain, not in a 9 m bowl.</summary>
+        public const int PadX = 64, PadClear = 40;
+        /// <summary>A small crater's footprint: its rim falls off out to this many half-widths (Crater's 1.35).</summary>
+        const float RimReach = 1.35f;
 
         public static int ColdTrapCentre(int i, int width) => Mathf.RoundToInt(ColdTrapAt[i] * width);
 
@@ -50,13 +55,15 @@ namespace Meridian.Terrain
             return Mathf.Abs(Wrapped(x - ColdTrapCentre(i, width), width)) <= ColdTrapHalfWidth - 12; // inside the rim walls
         }
 
+        /// <summary>D-146: the band surface — the plain's noise and the cold-trap bowls, without the seeded small craters. The painted stage's
+        /// datum follows it (a small crater is a dip in the ground, not a band). Pure.</summary>
+        public static float BandHeight(int x, int width, float fbm) => fbm + ColdTrapProfile(x, width);
+
         /// <summary>Surface height with the craters cut in (`fbm` is the plain surface at x).</summary>
         public static float Height(int x, int width, float fbm, int seed)
         {
-            float h = fbm;
-            for (int i = 0; i < ColdTrapAt.Length; i++)
-                h += Crater(Wrapped(x - ColdTrapCentre(i, width), width), ColdTrapHalfWidth, ColdTrapDepth, RimHeight);
-            // Smaller impact craters: one every ~160 m, seeded, 12–30 m across.
+            float h = BandHeight(x, width, fbm);
+            // Smaller impact craters: one every ~160 m, seeded, 12–30 m across; none reaches the pad (D-146).
             const int Cell = 160;
             int cell = Mathf.FloorToInt(x / (float)Cell);
             for (int c = cell - 1; c <= cell + 1; c++)
@@ -64,11 +71,15 @@ namespace Meridian.Terrain
                 var r = new System.Random(seed ^ (c * 73856093));
                 int centre = c * Cell + r.Next(20, Cell - 20);
                 int half = r.Next(6, 16);
+                if (ReachesPad(centre, half, width)) continue; // D-146: the camp stays on the plain
                 float depth = half * 0.6f;
                 h += Crater(x - centre, half, depth, depth * 0.25f);
             }
             return h;
         }
+
+        /// <summary>D-146: whether a small crater centred at `centre` (half-width `half`, rim fall-off included) reaches within ±PadClear of the pad. Pure.</summary>
+        public static bool ReachesPad(int centre, int half, int width) => Mathf.Abs(Wrapped(centre - PadX, width)) - half * RimReach < PadClear;
 
         /// <summary>A bowl of half-width `half` and depth `depth` with a raised rim, at offset d from its centre.</summary>
         static float Crater(int d, int half, float depth, float rim)

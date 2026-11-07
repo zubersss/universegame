@@ -114,6 +114,52 @@ namespace Meridian.Tests
             Assert.AreEqual(326f, new BandDatum(PlanetId.Mercury, 320f, 64, 326f).At(trap), 1e-4f, "no world width: the spawn surface everywhere, no division");
         }
 
+        /// <summary>D-146: no seeded small crater reaches within ±40 columns of the pad (the camp sits on the plain, not in a 9 m bowl), and
+        /// Mercury's band datum is the generator's own surface without the small craters: the plain's by the spawn, the bowl's (noise
+        /// included) in a cold trap, so the set meets the trap's floor.</summary>
+        [Test]
+        public void TheCampSitsOnThePlainAndTheBandsFollowTheGeneratorsSurface()
+        {
+            // 1. No small crater by the pad, for any seed; elsewhere they still pock the plain.
+            int pocked = 0;
+            for (int seed = 1; seed <= 60; seed++)
+            {
+                for (int x = MercuryLandforms.PadX - MercuryLandforms.PadClear; x <= MercuryLandforms.PadX + MercuryLandforms.PadClear; x++)
+                    Assert.AreEqual(MercuryLandforms.BandHeight(x, W, 0f), MercuryLandforms.Height(x, W, 0f, seed), 1e-4f, $"seed {seed} x {x}: no small crater within ±{MercuryLandforms.PadClear} of the pad");
+                for (int x = 600; x < 1400; x += 7) if (Mathf.Abs(MercuryLandforms.Height(x, W, 0f, seed) - MercuryLandforms.BandHeight(x, W, 0f)) > 0.5f) { pocked++; break; }
+            }
+            Assert.Greater(pocked, 50, "the small craters still pock the plain away from the pad");
+
+            // 2. The datum through a band surface (a sloping plain + the bowls): the plain by the spawn without a bowl, the trap per column.
+            System.Func<int, float> band = x => 318f + 0.002f * x + MercuryLandforms.ColdTrapProfile(x, W);
+            var d = new BandDatum(PlanetId.Mercury, 320f, 64, 310f, W, band);
+            Assert.AreEqual(band(64), d.mercuryPlain, 1e-4f, "the plain: the band surface at the spawn (the measured 310 was a crater floor)");
+            Assert.AreEqual(d.mercuryPlain, d.At(64), 1e-4f, "the pad");
+            Assert.AreEqual(d.mercuryPlain, d.At(2000), 1e-4f, "the plain is one band");
+            int trap = MercuryLandforms.ColdTrapCentre(0, W);
+            Assert.AreEqual(band(trap), d.At(trap), 1e-4f, "the trap's floor: the band surface there (noise + bowl)");
+            float prev = d.At(trap - MercuryLandforms.ColdTrapHalfWidth - 1);
+            for (int x = trap - MercuryLandforms.ColdTrapHalfWidth; x <= trap; x++) { float v = d.At(x); Assert.LessOrEqual(Mathf.Abs(v - prev), 2.5f, $"x {x}: no step ({prev:F1} → {v:F1})"); prev = v; }
+            var inTrap = new BandDatum(PlanetId.Mercury, 320f, trap, 284f, W, band);
+            Assert.AreEqual(band(trap) - MercuryLandforms.ColdTrapProfile(trap, W), inTrap.At(2000), 1e-3f, "an entry inside a trap: the plain still takes the plain's surface, not the bowl's");
+
+            // 3. The real generator: Mercury's band surface is its surface by the pad, and sits on the floor in each trap.
+            var c = LoadConfig("Mercury");
+            Assert.NotNull(c, "Mercury.asset");
+            var g = new SolidWorldGenerator(c, 1969);
+            for (int x = MercuryLandforms.PadX - MercuryLandforms.PadClear; x <= MercuryLandforms.PadX + MercuryLandforms.PadClear; x++)
+                Assert.AreEqual(g.SurfaceHeight(x), g.BandSurfaceHeight(x), $"x {x}: the pad's ground is the band surface (no small crater)");
+            for (int i = 0; i < MercuryLandforms.ColdTrapAt.Length; i++)
+            {
+                int centre = MercuryLandforms.ColdTrapCentre(i, c.worldWidth);
+                TestContext.Out.WriteLine($"[MERIDIAN] D-146 trap {i} at {centre}: surface {g.SurfaceHeight(centre)}, band {g.BandSurfaceHeight(centre)}, nominal {c.datumY + MercuryLandforms.ColdTrapProfile(centre, c.worldWidth):F1}; pad 64: surface {g.SurfaceHeight(64)}, band {g.BandSurfaceHeight(64)}");
+            }
+            var other = new SolidWorldGenerator(LoadConfig("Mars"), 1969);
+            Assert.AreEqual(other.SurfaceHeight(500), other.BandSurfaceHeight(500), "other planets: the band surface is the surface");
+        }
+
+        static PlanetConfig LoadConfig(string planet) => UnityEditor.AssetDatabase.LoadAssetAtPath<PlanetConfig>($"Assets/_Game/Settings/Planets/{planet}.asset");
+
         /// <summary>U-123 (D-126, B-150): the Shadewyrm is a den species in the cold traps with props/mercury/ice_burrow as its burrow; the Flarewing flies; the rest of the Mercury table is untouched.</summary>
         [Test]
         public void TheShadewyrmDensInTheColdTrapsAndTheFlarewingFlies()

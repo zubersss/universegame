@@ -142,7 +142,9 @@ namespace Meridian.View2D
             Layers.alpha = 1f;
             Layers.ConfigureFor(planetName, Scene, surfaceDatum, FallbackFor(config.id));
             // U-128: from here the datum and the set follow the camera's band (FollowBand); the spawn's band keeps this surface, so the camp frames do not move.
-            Datum = new BandDatum(config.id, config.datumY, side.spawnX, surfaceDatum, config.worldWidth);
+            // D-146: Mercury's bands take the generator's own surface (noise + the cold-trap bowls, no small craters): the plain by the spawn, each trap per column.
+            var solid = config.id == Meridian.Planets.PlanetId.Mercury && side.terrain != null ? side.terrain.BaseGenerator as Meridian.Terrain.SolidWorldGenerator : null;
+            Datum = new BandDatum(config.id, config.datumY, side.spawnX, surfaceDatum, config.worldWidth, solid != null ? x => solid.BandSurfaceHeight(x) + 1f : (System.Func<int, float>)null);
             Fading = false; Crossfades = 0;
             if (Incoming != null) { Incoming.Release(); Incoming.gameObject.SetActive(false); }
             // U-118: Mars draws the dust storm as the B-141 storm set's veil over the base layers (alpha = the storm's intensity, the wind scrolls it).

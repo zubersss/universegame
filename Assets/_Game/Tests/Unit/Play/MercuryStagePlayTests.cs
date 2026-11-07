@@ -71,6 +71,9 @@ namespace Meridian.Tests
             string want = Meridian.View2D.CartoonStage.MercurySceneFor(side.spawnX, stage.MercuryClock, w);
             Assert.AreEqual(want, stage.Scene, "the spawn's zone picks the set");
             Assert.AreEqual(stage.Datum.At(side.spawnX), stage.Datum.At(side.spawnX + 40), 1e-3f, "the plain is one band");
+            float ground = side.terrain.TopSolidY(side.spawnX) + 1f;
+            TestContext.Out.WriteLine($"[MERIDIAN] D-146 pad: ground {ground:F1}, datum {stage.Datum.At(side.spawnX):F1} (Mercury datumY {side.Config.datumY})");
+            Assert.AreEqual(ground, stage.Datum.At(side.spawnX), 2f, "D-146: the camp is on the plain, so the plain's datum is the ground at the pad (no 9 m crater under it)");
             bool sets = File.Exists($"Assets/_Game/Art/backgrounds/mercury/{want}/{want}.json");
             bool strips = File.Exists("Assets/_Game/Art/terrain/mercury/ground_strip.json") && File.Exists("Assets/_Game/Art/terrain/mercury/ground_strip_slate.json");
             bool rig = File.Exists("Assets/_Game/Art/flora/mercury/rigset.json");
