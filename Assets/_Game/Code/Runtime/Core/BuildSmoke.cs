@@ -168,6 +168,22 @@ namespace Meridian.Core
                 hud.Catalogue.SetOpen(false);
             }
 
+            // U-132 (U-124 / U-102): the pause card and the settings paper, then Earth's title card, for the owner's page.
+            var menus = MenuController.Instance;
+            if (menus != null)
+            {
+                menus.OpenPause();
+                yield return Wait(0.6f);
+                yield return Shot(folder, "smoke_19_pause.png");
+                menus.OpenSettings();
+                yield return Wait(0.6f);
+                yield return Shot(folder, "smoke_20_settings.png");
+                menus.CloseSettings();
+                menus.Resume();
+                yield return Wait(0.3f);
+            }
+            yield return Card(folder, Meridian.Planets.PlanetId.Earth);
+
             Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Ocean, out int coast, out _);
             yield return LookAt(side, coast - 10f, 8f);
             yield return Shot(folder, "smoke_4_desert_ocean.png");
@@ -176,6 +192,7 @@ namespace Meridian.Core
             yield return scenes.LoadPlanetSide(mars);
             side = scenes.PlanetSide;
             if (side.dayNight != null) side.dayNight.Override = 0.45f;
+            yield return Card(folder, Meridian.Planets.PlanetId.Mars); // U-132
             // U-053: the Mars Warden outpost, its patrol and a sentinel called by over-mining, hovering beside the surveyor (D-087: it never fires).
             if (side.wardens != null)
             {
@@ -228,6 +245,7 @@ namespace Meridian.Core
             yield return Dawn(side, solarField.CenterX + mw / 4f);                  // the field a quarter world behind the dawn line: full day
             yield return LookAt(side, solarField.CenterX, 4f, 10f);
             yield return Shot(folder, "smoke_13_mercury_day.png");
+            yield return Card(folder, Meridian.Planets.PlanetId.Mercury); // U-132: over the day side
             var shelter = Meridian.Planet.POI.PoiCatalog.FlareShelterPoi;
             yield return Dawn(side, shelter.CenterX);                               // the dawn line through the shelter: violet twilight
             yield return LookAt(side, shelter.CenterX, 4f, 10f);
@@ -348,6 +366,21 @@ namespace Meridian.Core
             float until = Time.realtimeSinceStartup + 15f;
             while (!side.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
             yield return Wait(2f);
+        }
+
+        /// <summary>U-132 (U-124): the planet's title card held centred over its surface; skipped (no shot) when the planet has no card art.</summary>
+        static IEnumerator Card(string folder, Meridian.Planets.PlanetId planet)
+        {
+            var cards = MenuController.Instance != null ? MenuController.Instance.TitleCards : null;
+            if (cards == null) yield break;
+            cards.Show(planet);
+            string key = Meridian.Art.ArtKeys.Ui.TitleCard(planet);
+            float until = Time.realtimeSinceStartup + 4f;
+            while (cards.Showing != key && Time.realtimeSinceStartup < until) yield return null;
+            if (cards.Showing != key) yield break;
+            cards.Seek(TitleCard.SlideSeconds);
+            yield return Shot(folder, "smoke_21_titlecard_" + planet.ToString().ToLowerInvariant() + ".png");
+            cards.Hide();
         }
 
         static IEnumerator Wait(float seconds)
