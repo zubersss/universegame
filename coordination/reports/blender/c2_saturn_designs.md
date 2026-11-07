@@ -12,12 +12,13 @@ scene builder, the capped floe strips (D-137), the shared aerostat kit (B-156). 
 
 | Item | State | File |
 |---|---|---|
-| Palette | proposed; the check (the Mars checks + Saturn's family, measured against Jupiter) passes, below | blender/scripts/build_c2_saturn_palette.py |
-| Five flora | designed below; drawings + a 1x preview next (when RAM allows) | build_c2_saturn_plants.py (next) |
-| Floe strips | designed below (D-137's 10-frame contract: 8 tiles + caps) | build_c2_saturn_floes.py (next) |
-| Deck backdrops | study notes below (FFT washes: a BLENDER slot) | build_backdrop_v3.py (next) |
-| Creatures | the re-ink list below (three v2 models: `replaces_v2`; the Ringmite is space; the apex a rig set) | - |
-| Props | the ones that differ, below | - |
+| Palette | proposed; the check passes (ALL PASS), below; registered with setdefault in the Saturn modules until LEAD accepts it | blender/scripts/build_c2_saturn_palette.py |
+| Five flora | source (1c81b527): key poses checked, palette 100 %; the full preview waits for a free gap | build_c2_saturn_plants.py |
+| Floe strips | source + checks (3bf0b75b: ice + ring rock, 10 frames each, joins <= 0.94/255, palette 100 %) | build_c2_saturn_floes.py |
+| Deck backdrops | source (96b2654b: deck1 / deck2 / deck3 / deep + the Hexagon overlay, the rings edge-on / tilted); studies need slots | build_backdrop_v3.py (saturn_scene) |
+| Creatures 1-4 | source (f3fccc69): every frame in bounds; the reviews wait for a free gap | build_creatures_saturn_v3.py |
+| Polar Hydra | Grand rig-set source (03ecb577, 7 bones, D-140); the preview waits for a free gap | build_polar_hydra_v3.py |
+| Props + ring chunks | source + review (review_b157_saturn_props_preview.png: six json valid, palette 100 %) | build_props_saturn_v3.py |
 
 ## 1. Palette (proposed; checked by blender/scripts/build_c2_saturn_palette.py)
 
