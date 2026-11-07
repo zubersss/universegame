@@ -180,6 +180,8 @@ if ($runProbe) {
         $creep2 = [math]::Round(([double]$again2.privateMB - [double]$again.privateMB) / 2, 1)
         $extra2 = ''
         if ($null -ne $again.gfxMB -and $null -ne $again2.gfxMB) { $extra2 = "; per visit: gfx driver $([math]::Round(([double]$again2.gfxMB - [double]$again.gfxMB) / 2, 1)) MB, native allocated $([math]::Round(([double]$again2.allocMB - [double]$again.allocMB) / 2, 1)) MB, textures $([math]::Round(([double]$again2.texSizeMB - [double]$again.texSizeMB) / 2, 1)) MB, meshes $([math]::Round(([double]$again2.meshSizeMB - [double]$again.meshSizeMB) / 2, 1)) MB, shaders $([math]::Round(([double]$again2.shaders - [double]$again.shaders) / 2, 1)), handles $([math]::Round(([double]$again2.handlesHeld - [double]$again.handlesHeld) / 2, 1))" }
+        # LEAD cycle 270: the Mono heap and the allocator reserve per visit too (the 0.4.3 second loop read 7.5 MB with every attributed counter at 0).
+        if ($null -ne $again.monoHeapMB -and $null -ne $again2.monoHeapMB) { $extra2 += "; Mono heap $([math]::Round(([double]$again2.monoHeapMB - [double]$again.monoHeapMB) / 2, 1)) MB (used $([math]::Round(([double]$again2.monoUsedMB - [double]$again.monoUsedMB) / 2, 1)) MB), native reserved $([math]::Round(([double]$again2.reservedMB - [double]$again.reservedMB) / 2, 1)) MB" }
         $pct2 = [math]::Round(([double]$again2.privateMB / [double]$again.privateMB - 1.0) * 100.0, 1)
         $cok = ($creep2 -le 10)
         if (-not $cok) { $memRed = $true }
