@@ -1,5 +1,7 @@
 # C0 Style Reference (LEAD, cycle 241, 2026-11-06)
 
+> **v4.1 amendments (owner C0 look-over, cycle 242, D-100..D-104).** The owner kept the look (meadow, clouds, surveyor) and changed four things: ink at half the weight with finer interior detail and a second shadow tone; faces only on people and animals (the snoozle loses its face, the Pilgrim and the planets get none); the Pilgrim stands upright; flight is manual and fuel-free from the ground to orbit. The numbers below are the v4.0 reference; the v4.1 re-inks (B-124..B-127) replace this set as the reference when LEAD accepts them on the ten-box list.
+
 C0 is the style test for art direction v4 (Bible 4.0 §9, D-086): one Earth scene drawn and
 animated as a 1930s rubber-hose cartoon. This file records LEAD's §9.7 pass on every C0 asset and
 names the reference set that every later asset (C1 onward) is judged against (§9.7 box 9).

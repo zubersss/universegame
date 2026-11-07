@@ -1,7 +1,9 @@
 # MERIDIAN — Project Bible (single source of truth)
 
 Owner: LEAD. Workers read; only LEAD edits. Changes are logged in `coordination/DECISIONS.md`.
-Version: 4.0 (D-086..D-091, 2026-11-06: owner art direction "1930s rubber-hose cartoon"; §9 rewritten, combat cancelled, C-milestones in §12). 3.x = stage and feel (D-076..D-085); 2.x = 3D rehaul (D-062). The Lead bumps the version on every edit.
+Version: 4.1 (D-100..D-104, 2026-11-06: owner C0 feedback: thinner, more detailed ink with two shadow tones; faces only on people and animals; the Pilgrim stands upright; fully manual flight with no launch fuel, control never leaves the player). 4.0 = art direction v4 (D-086..D-091); 3.x = stage and feel (D-076..D-085); 2.x = 3D rehaul (D-062). The Lead bumps the version on every edit.
+
+> **v4.1 (owner C0 feedback, D-100..D-104).** Keep the look (watercolour meadow, layered clouds, the surveyor). Ink at half the C0 weight with finer interior detail and a second shadow tone (§9.1, §9.7). Faces only on people and animals: plants, rocks, crates, the ship and the planets have none (§9.3). The Pilgrim is an upright rocket on its tail (§4.3). The player flies the ship by hand from the first second to orbit and back, with no fuel requirement and no moment where control is taken away (§4.3, §5.2, §5.3, §6). Gravity ratios stay exact.
 
 Sections: 1 Vision · 2 Setting and story · 3 The solar system in game · 4 Physics and
 numbers · 5 Views and transitions · 6 Controls · 7 The eight planets · 8 Systems →
@@ -44,7 +46,7 @@ physics make it one.
 
 **Pillars** (when two rules conflict, the higher pillar wins):
 1. **Real physics you can feel.** Gravity ratios are exact. A jump on Mars is 2.6× an
-   Earth jump; on Jupiter you need a jetpack to clear a step. Fuel, thrust, heat, cold,
+   Earth jump; on Jupiter you need a jetpack to clear a step. Thrust, heat, cold,
    pressure, and radiation follow the real planet.
 2. **Every world matters.** Each planet has a resource, a creature, and an activity found
    nowhere else, so the player goes everywhere.
@@ -53,7 +55,7 @@ physics make it one.
    Original designs only, never mistakable for any existing cartoon or game.
 4. **Runs on an 8 GB laptop at 60 FPS, under 2 GB in play.** The look comes from technique
    (animating on twos, shared rigs, small tiled overlays, one post pass), never brute force.
-5. **The player is never stuck.** Every hard state (no fuel, stranded on Jupiter, dead on
+5. **The player is never stuck.** Every hard state (a thruster too weak for Jupiter, dead on
    Venus) has a recovery path.
 
 ---
@@ -131,7 +133,7 @@ Moons (Luna, Phobos, Deimos, Io, Europa, Titan, Triton…) are rendered bodies w
 wells (R 3–8 units, well 3R) and are not landable. Waystations: Earth orbit (start), Mars
 orbit, Belt (Red Hollow black market), Saturn orbit (Halcyon).
 
-**Ship speeds (top-down).** Cruise 80 u/s · Boost 160 u/s (uses main fuel) · Skip Drive
+**Ship speeds (top-down).** Cruise 80 u/s · Boost 160 u/s (no fuel, D-103) · Skip Drive
 1,200 u/s after a 3 s spool, consumes skip fuel per second, disabled inside a Gravity Well.
 Earth → Mars ≈ 7 s cruise; Earth → Neptune ≈ 13 s skip (layout distance / 1,200 u/s; D-054).
 
@@ -141,16 +143,16 @@ Earth → Mars ≈ 7 s cruise; Earth → Neptune ≈ 13 s skip (layout distance 
 
 ### 4.1 Gravity (exact ratios; absolute values may be tuned together, never separately)
 
-| Planet  | g (m/s²) | × Earth | Escape velocity (km/s) | Launch fuel cost (% of 100-unit tank) = round(1.5 × v_esc) |
-|---------|----------|---------|------------------------|---------------------------------------------------------------|
-| Mercury | 3.70     | 0.38    | 4.3                    | 6                                                             |
-| Venus   | 8.87     | 0.90    | 10.4                   | 16                                                            |
-| Earth   | 9.81     | 1.00    | 11.2                   | 17                                                            |
-| Mars    | 3.72     | 0.38    | 5.0                    | 8                                                             |
-| Jupiter | 24.79    | 2.53    | 59.5                   | 89                                                            |
-| Saturn  | 10.44    | 1.06    | 35.5                   | 53                                                            |
-| Uranus  | 8.69     | 0.89    | 21.3                   | 32                                                            |
-| Neptune | 11.15    | 1.14    | 23.5                   | 35                                                            |
+| Planet  | g (m/s²) | × Earth | Escape velocity (km/s) | Thruster that climbs (§4.3; no fuel, D-103) |
+|---------|----------|---------|------------------------|---------------------------------------------|
+| Mercury | 3.70     | 0.38    | 4.3                    | Mk1                                         |
+| Venus   | 8.87     | 0.90    | 10.4                   | Mk1                                         |
+| Earth   | 9.81     | 1.00    | 11.2                   | Mk1                                         |
+| Mars    | 3.72     | 0.38    | 5.0                    | Mk1                                         |
+| Jupiter | 24.79    | 2.53    | 59.5                   | Mk3                                         |
+| Saturn  | 10.44    | 1.06    | 35.5                   | Mk2                                         |
+| Uranus  | 8.69     | 0.89    | 21.3                   | Mk1                                         |
+| Neptune | 11.15    | 1.14    | 23.5                   | Mk2                                         |
 
 `PlanetConfig` ScriptableObjects hold these values; an EditMode test asserts every ratio to
 ±0.5%. `Physics2D.gravity` is set per planet on load. Gravity affects the player, creatures,
@@ -205,8 +207,9 @@ usable only below the Datum where the air is dense enough.
 |----------------------|-----------------------------------------------------------------------|
 | Thruster Mk1/Mk2/Mk3 | 12 / 20 / 35 m/s² vertical; lateral 60% of vertical                   |
 | Can launch from      | Mk1: Mercury, Venus, Earth, Mars, Uranus · Mk2: + Saturn, Neptune · Mk3: + Jupiter |
-| Launch burn          | Fuel cost from §4.1 is consumed over the first 3 s of thrust from rest on the surface; flight inside the atmosphere is then free |
-| Tank Mk1/Mk2/Mk3     | 100 / 200 / 400 units of Launch Fuel                                  |
+| Fuel                 | None (D-103). The ship always has thrust; the only limit is thrust-to-weight: it climbs only where the thruster's acceleration exceeds g (Jupiter needs Mk3). Launch Fuel, tanks and the launch burn are removed |
+| Orientation          | Upright (D-102): the rocket stands on its tail on the ground and flies nose-up inside the atmosphere. Thrust acts along the ship's own up axis; **A/D tilt** it up to ±35° for sideways travel; it hovers where thrust = g, climbs above, sinks below. Legs at the tail |
+| Control              | Manual from the first second (D-103): the player presses thrust and lifts off; no auto-launch, no cutscene, no input lock at any point, including both transitions (§5.2, §5.3). Launch and landing are the same flight in opposite directions |
 | Landing              | Legs deploy below 10 m altitude. Touchdown ≤ 6 m/s vertical: clean. 6–15 m/s: hull damage proportional. > 15 m/s: crash (ship survives, 30% hull, cargo intact) |
 | Stranded safeguard   | HUD warns before landing when thrust < g. A Distress Beacon summons Halcyon recovery to the nearest Waystation for 500 Scrip or 10% of cargo |
 
@@ -253,30 +256,34 @@ The world is a horizontal cylinder (wraps). Coordinates are tiles = meters.
 
 The **Escape Line** is drawn in-world as a faint, slowly scrolling band of light with the
 label "ESCAPE" and on the HUD as a marker on the altitude bar. The ship's HUD shows
-altitude, vertical speed, fuel, and thrust-to-weight.
+altitude, vertical speed, tilt, and thrust-to-weight.
 
 ### 5.2 Launch: side → top-down
 
-Trigger: the ship's center crosses the Escape Line with upward velocity.
-1. 0.3 s: input locked, camera eases out, HUD fades.
-2. 0.5 s: fade through white (atmosphere glare). `PlanetSide` scene unloads; `Space` scene
-   is already loaded (Core keeps it resident but inactive) and activates.
+Trigger: the ship's center crosses the Escape Line with upward velocity, under the player's
+own thrust (D-103: there is no auto-launch).
+1. 0.35 s: the iris closes on the ship while the player keeps flying it; input is never
+   locked, the HUD stays until the screen is black.
+2. ≤ 0.5 s black: `PlanetSide` scene unloads; `Space` scene is already loaded (Core keeps it
+   resident but inactive) and activates.
 3. Ship placed on the planet's Atmosphere Ring at the angle matching its longitude
    (longitude = x / width × 360° plus the planet's current rotation), velocity 20 u/s
-   outward, 1 s invulnerability, top-down HUD on.
-Total ≤ 1.5 s; player state (hull, fuel, cargo) is carried in `GameState`, never re-read
-from disk.
+   outward, heading outward, 1 s invulnerability; top-down controls and HUD are live on the
+   first visible frame while the iris opens (0.35 s).
+Total ≤ 1.5 s; player state (hull, cargo) is carried in `GameState`, never re-read from disk.
+The player's held inputs carry across: a held thrust key keeps thrusting in space.
 
 ### 5.3 Entry and landing: top-down → side
 
 Trigger: the ship's center crosses a landable planet's Atmosphere Ring with inward radial
 velocity (or the player holds **F** inside the ring to begin a controlled entry).
-1. 0.8 s: heat shimmer, camera pushes in, fade through white.
-2. `PlanetSide` loads with that planet's `PlanetConfig`; the longitude is the entry angle
-   minus the planet's rotation; the terrain streams around that x.
-3. Ship placed at Escape Line altitude + 20 m, descending at 15 m/s, planet gravity on,
-   fuel unchanged. The player flies down and lands (§4.3). Non-landable bodies have no
-   Atmosphere Ring; the Sun kills.
+1. 0.35 s: the iris closes on the ship while the player keeps steering (no input lock, no
+   fade); the camera may push in behind the iris.
+2. `PlanetSide` loads while the screen is black with that planet's `PlanetConfig`; the
+   longitude is the entry angle minus the planet's rotation; the terrain streams around that x.
+3. Ship placed upright at Escape Line altitude + 20 m, descending at 15 m/s, planet gravity
+   on; side controls live on the first visible frame while the iris opens. The player flies
+   down and lands (§4.3). Non-landable bodies have no Atmosphere Ring; the Sun kills.
 Both transitions are covered by PlayMode tests (§10.9).
 
 ---
@@ -290,14 +297,13 @@ Both transitions are covered by PlayMode tests (§10.9).
 |            | Drop through platform / crouch | S                                     |
 |            | Aim                        | Mouse                                     |
 |            | Rig primary / secondary    | Left click / Right click                  |
-|            | Rig module                 | 1 Beam · 2 Lance · 3 Survey · 4 Builder; Q/E cycle |
+|            | Rig module                 | 1 Beam · 2 Grapple · 3 Survey · 4 Builder; Q/E cycle (D-087) |
 |            | Interact / board ship      | F                                         |
 |            | Build menu / Inventory / Map / Catalogue | B / Tab / M / N              |
 |            | Float cell toggle (giants) | V                                         |
 |            | Air dash                   | Shift (tap while airborne)                |
-|            | Parry                      | C                                         |
-| Ship, side | Main thrust / retro        | W / S                                     |
-|            | Lateral                    | A, D                                      |
+| Ship, side | Thrust (hold)              | W or Space                                |
+|            | Tilt left / right          | A, D (returns to upright when released)   |
 |            | Exit ship (landed)         | F                                         |
 | Ship, top  | Thrust / retro / rotate    | W / S / A, D                              |
 |            | Boost / Skip Drive         | Shift / hold J                            |
@@ -342,8 +348,8 @@ in bold) · **Creatures** (roster; **apex**) · **Activities and points of inter
   penalty), Radiation 1 at the surface (0 in lava tubes), dust storms (visibility 15 m,
   Cryo +1, static discharges, 2–6 min, planet-wide every 4–7 game days with a 60 s warning).
 - **Resources.** Iron oxide (hematite), silica, water ice (poles, subsurface), carbon
-  dioxide (dry ice), sulfur, **Perchlorate** (the cheapest launch oxidizer; halves fuel
-  crafting cost), nickel-iron meteorites.
+  dioxide (dry ice), sulfur, **Perchlorate** (an oxidizer for crafting and a trade good;
+  no launch fuel exists, D-103), nickel-iron meteorites.
 - **Creatures.** Dustskater (small scavenger), Scree stalker (pack hunter in canyons),
   Lava-tube lurker (ambusher), Polar crawler (slow, armored). **Apex: Tharsis Worm** — a
   60 m burrower under Olympus Mons that surfaces during dust storms; its plates are the
@@ -509,7 +515,7 @@ recovery fee).
 |           | Terrain digging and building                         | 1 m tiles; dig with Beam; place blocks and modules with Builder | M1        |
 | Economy   | Resources, refining, crafting, tech tree             | Resources (§7); **Smelter** and **Refinery** stations; **Blueprint Tree** | M3        |
 |           | Inventory upgrades, trading                          | Slot-based suit/ship/cargo; **Scrip** currency; vendors at **Waystations** | M3        |
-| Ship      | Launch fuel, landing, fast travel                    | Launch Fuel (hydrogen + oxidizer); landing rules §4.3; **Skip Drive** | M1 fuel/landing, M4 Skip Drive |
+| Ship      | Manual flight, landing, fast travel                  | No launch fuel (D-103); thruster classes and landing rules §4.3; **Skip Drive** (skip fuel, M4) | C1 flight, M4 Skip Drive |
 |           | Shields, weapons, cargo, upgrades, multiple ships    | Hull shield, Pulse cannon, cargo bays; ships **Pilgrim** (start), **Dray** (hauler), **Shrike** (fighter), **Vagabond** (deep-range) | M5        |
 | Space     | Top-down flight and combat, pirates                  | Red Hollow raiders, bounties                                   | M1 flight, M5 combat |
 |           | Space stations with vendors                          | **Waystations** (Earth, Mars, Belt, Saturn)                     | M3        |
@@ -533,8 +539,8 @@ accepts it, and the approved **style test** (C0, §12) is the reference everythi
 ### 9.1 The look
 | Rule | Specification |
 |------|---------------|
-| Linework | Every character, creature, plant, ship and prop has a thick, slightly wobbly ink outline, as if brushed by hand. Ink colour `#1E1A17`. At 1x: outer silhouette 4–6 px, interior lines 1.5–3 px, thickness jittered ±20 % along the stroke. No perfect geometry: circles a little lumpy, straight lines bow slightly |
-| Colour | Flat cel colour inside the lines, **at most one shadow tone per colour**. No gradients, no realistic lighting, no normal maps, no specular |
+| Linework | Every character, creature, plant, ship and prop has a slightly wobbly ink outline, as if drawn with a fine pen. Ink colour `#1E1A17`. At 1x (v4.1, D-100): outer silhouette **2–3 px**, interior lines **1–1.5 px**, thickness jittered ±20 % along the stroke. **Interior detail is required**: folds, seams, rivets, leaf veins, feather and fur marks, plus small texture marks (a few hatch strokes, dots, scuffs) so things read as drawn, not as stickers. No perfect geometry: circles a little lumpy, straight lines bow slightly |
+| Colour | Flat cel colour inside the lines, **up to two shadow tones per colour** (a mid shadow and a deep shadow, v4.1). No gradients, no realistic lighting, no normal maps, no specular |
 | Palette | Muted and slightly aged: warm off-whites (never `#FFFFFF`), soft reds, mustard yellows, teal, dusty greens. Each planet has its own 6–8 colour palette from this family, written into its first planet task and stored as `ui/palettes/<planet>` (one 8×1 strip). **Earth (C0):** off-white `#F2E6CF`, soft red `#C8553D`, mustard `#D9A93F`, teal `#3E8A86`, dusty green `#7A9A5B`, faded sky `#9FB7B9`, shadow brown `#5B4636`, ink `#1E1A17` |
 | Characters | Era cues: pie-cut eyes (black pupil with a wedge cut out), white gloves, round bodies, big simple expressions |
 | Backgrounds | Painted watercolour: soft edges, visible paper texture, slight colour bleed, **no ink outlines** (characters must pop off them). 3–5 parallax layers per surface scene (replaces the seven-layer stage of v3). Space: a painted starfield with soft hand-painted nebulas |
@@ -555,11 +561,12 @@ accepts it, and the approved **style test** (C0, §12) is the reference everythi
 
 ### 9.3 What gets the style
 - **Player (the surveyor):** an original rubber-hose character: a big round fishbowl helmet with an expressive face inside, gloves, boots, rubber-hose limbs.
-- **Ship (Pilgrim):** a bendy vintage rocket with a face-like front, fins that wobble, exhaust in round cartoon puffs. Thrust = stretch, cut thrust = squash.
-- **Planets (space view):** painted watercolour discs with ink outlines and a subtle personality (Jupiter's bands swirl, Saturn's rings wobble, Neptune looks grumpy). They must still read as the real planets.
-- **Flora (the priority):** each planet has its own original flora with faces and personalities: rubber-hose stems that sway, petals and leaves that act like hands, flowers that yawn, cacti that shiver, vines that curl and uncurl. Plants react when the player passes within 3 m (turn to look, bounce, giggle). Gas-giant cloud layers get cloud-plants and floating puffball flora.
+- **Faces only on people and animals (D-101).** The surveyor, NPCs and creatures have faces. Plants, rocks, crates, tools, the ship, the planets and every other object never get eyes or mouths; their character comes from shape, colour and motion.
+- **Ship (Pilgrim):** a bendy vintage rocket standing upright on its tail (D-102), no face; a porthole, panel seams and rivets for detail, fins that wobble, exhaust in round cartoon puffs. Thrust = stretch, cut thrust = squash.
+- **Planets (space view):** painted watercolour discs with ink outlines; character through colour, bands, storms, caps and rings (Jupiter's bands swirl and its spot drifts, Saturn's rings wobble, Neptune's dark storm wanders). No faces or expressions. They must still read as the real planets.
+- **Flora (the priority):** each planet has its own original flora with personality through motion only: rubber-hose stems that sway, petals and leaves that act like hands, flowers that yawn open and shut, cacti that shiver, vines that curl and uncurl. No eyes or mouths. Plants react when the player passes within 3 m (turn, bounce, shiver, open). Gas-giant cloud layers get cloud-plants and floating puffball flora.
 - **Creatures:** the existing §7 roster redrawn in the style, friendly or neutral (D-087), pie-cut eyes and bouncy idles. Grand creatures (the former apexes) included.
-- **Props and resources:** minerals, crystals, collectibles and tools get faces or wobble idles.
+- **Props and resources:** minerals, crystals, collectibles and tools get wobble idles and drawn detail, never faces.
 - **HUD:** cartoon gauges for Suit power, oxygen and the gravity readout; the Escape Line is a hand-painted dotted line with a little sign on it.
 
 ### 9.4 Pipeline (detail in contract §11)
@@ -583,8 +590,9 @@ surveyor stands about 2.0 m (≈ 128 px) with the helmet. Gameplay numbers in §
 - Workflow: BLENDER never runs a heavy render batch while UNITY has the Editor open with a scene loaded; LEAD schedules render windows (D-091). One asset per `.blend`, no 4K textures.
 
 ### 9.7 Acceptance checklist (LEAD, every asset)
-- [ ] Thick hand-inked outline, no perfect geometry
-- [ ] Flat cel colour, one shadow tone max, muted aged palette
+- [ ] Hand-inked outline 2–3 px outer / 1–1.5 px interior with jitter, finer interior line work and texture marks, no perfect geometry (v4.1)
+- [ ] Flat cel colour, up to two shadow tones, muted aged palette (v4.1)
+- [ ] Faces only on people and animals; no eyes or mouths on plants, objects, the ship or planets (D-101)
 - [ ] Animated on twos, within the frame caps
 - [ ] Visible squash and stretch, rubber-hose limbs, secondary motion
 - [ ] Has an idle loop (nothing sits still)
@@ -593,7 +601,7 @@ surveyor stands about 2.0 m (≈ 128 px) with the helmet. Gameplay numbers in §
 - [ ] Fits the atlas and RAM budget after import
 - [ ] Looks consistent with the approved style test
 
-LEAD records the nine boxes per asset in `REVIEW_LOG.md`; one unchecked box sends it back to In Progress.
+LEAD records the ten boxes per asset in `REVIEW_LOG.md`; one unchecked box sends it back to In Progress. The C0 assets were accepted on the nine-box v4.0 list; their v4.1 re-inks (B-124..B-127) are judged on this list.
 
 ### 9.8 Originality (forbidden)
 Borrow the era (1928–1938 studio cartoons) and its techniques, never a property. Forbidden: any
@@ -679,7 +687,7 @@ rotating backups. Version field; migrations on load.
 Unity and Blender executables and exit non-zero on failure.
 
 ### 10.9 Tests (owned by UNITY unless noted; LEAD adds QA tests in `Tests/LeadQA/`)
-EditMode: gravity ratios, launch fuel formula, well-pull formula, PlanetConfig
+EditMode: gravity ratios, thruster class per planet (no fuel, D-103), well-pull formula, PlanetConfig
 completeness, ArtImporter rules, asset-key ↔ placeholder coverage. PlayMode: jump height
 per planet (±3%), fall damage thresholds, launch transition (state carried, ≤ 1.5 s),
 entry transition, save → load → identical state and terrain, chunk persistence after
@@ -764,7 +772,7 @@ If the laptop's RAM is upgraded, LEAD raises only this section and logs the deci
 | **M4 The giants**       | Cloud-column generator; floes, Float cells, Aerostats, Crush Line; Skip Drive; belt and ring mining; all four giants' hazards, creatures, apexes; Thruster Mk2/Mk3 | Full progression Earth → Neptune completable by LEAD's QA script; budgets green on Jupiter |
 | **R1 3D pipeline proof (Earth)** | The 3D renderer and side-rail camera; block-mesh terrain with PBR materials; Sun + lamps in 3D; the surveyor, the Pilgrim, Earth props batch 1 and two Earth creatures as animated models; sky dome, ridges and near props replace the parallax layers | `M1LoopTests`, `SmokeTests` and the M2/M3 gameplay tests pass unchanged; §11.1 (incl. the geometry row) green on Earth; captures match §9 v2; owner playtest |
 | **C0 Style test (Earth) — v4, first and alone** | One small Earth surface scene: the new surveyor, one plant with a face and a sway idle, one critter, a painted 3-layer background, the film shader, an iris transition | LEAD passes every asset on the §9.7 checklist and the scene against §9; the capture becomes the reference (`coordination/reviews/C0_STYLE_REFERENCE.md`); budgets < 2 GB; owner look-over |
-| **C1 Player, ship, space** | The surveyor's full clip set, the Pilgrim (side + top), planet discs for all 8, the painted starfield, the cartoon HUD gauges and Escape Line sign | §9.7 per asset; M1LoopTests pass with the new art; Space < 2 GB, 60 fps |
+| **C1 Player, ship, space** | The v4.1 re-ink of the C0 set (B-124..B-127); the surveyor's full clip set; the upright faceless Pilgrim (side + top) with fully manual, fuel-free flight from the ground to orbit and back (D-102, D-103); planet discs for all 8 without faces; the painted starfield; the cartoon HUD gauges and Escape Line sign | §9.7 per asset; M1LoopTests pass with the new art; Space < 2 GB, 60 fps |
 | **C2 Planets in cartoon** | In order: Earth, Mars, Mercury, Venus cloud layer, then the gas-giant cloud layers (Jupiter, Saturn), then Uranus and Neptune. Each planet: flora, creatures, props, 3–5 background layers, palette | Per planet: §9.7 on every asset; the planet passes §11.1 v4 (profile after each); gameplay tests unchanged |
 | **C3 UI** | Menus, planet title cards (intertitle slide-in), settings with the Film effects toggle, paper/sign panels, Limelight + Patrick Hand | §9.7; every menu reachable by keyboard; toggle persists in the save |
 | **C4 Profile and playtest build** | Full profile on the laptop, a playtest build | Every planet green on §11.1 v4; owner playtest |

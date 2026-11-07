@@ -6,12 +6,6 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-23 — Look over the cartoon style test (5 min)
-The style test (C0) is finished and I approved it against the art checklist. Your eyes are the last check before the team draws everything else this way.
-1. Open the folder `C:\dev\universegame\coordination\reports\unity\c0_2026-11-06\u098\` and look at the nine pictures (1_idle to 9_film_on), or open the milestone page: https://claude.ai/artifact/RpnrBEGMbKM1mSGicBYqZQ (private to your account).
-2. Tell the Lead either "C0 looks right" or what bothers you (for example: the ink is too thick, the colours are too dull, the surveyor's face, the film grain). Be blunt; changing it now is cheap, later it is not.
-3. The ground, the crates and the ship are still grey stand-ins on purpose; they get their cartoon art next.
-
 ### USER-08 — Optional: let the team run PowerShell commands without prompts (2 min)
 On Windows, Claude Code runs commands through PowerShell as well as Bash, and the
 `Bash(...)` allow rules in `.claude/settings.json` don't cover PowerShell. The Lead added
@@ -20,6 +14,7 @@ If you get too many "allow this command?" prompts, tell the Lead "approve PowerS
 allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
 
 ## Done
+- 2026-11-06 19:3x · USER-23 done: the owner kept the look and asked for four changes (thinner detailed ink, faces only on people and animals, an upright Pilgrim, fully manual fuel-free flight) → D-100..D-104, Bible 4.1, contract v3.1, cards U-107, B-123..B-127. A second look-over follows when the re-inked set lands (C1).
 - 2026-11-06 19:0x · USER-22 retired by LEAD: free memory has stayed above the gate since 15:00 (2.6 GB at 19:00) without the owner's action.
 - 2026-11-06 11:4x · USER-18 and USER-19 retired by LEAD: the Windows Update worker is gone and the gate opened several times since; the current memory ask is USER-22.
 - 2026-11-06 10:16 · USER-20 (the owner closed ChatGPT, Edge and WSL; free RAM reached the gate and BLENDER's export started at 10:16).

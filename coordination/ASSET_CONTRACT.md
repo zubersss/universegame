@@ -1,5 +1,6 @@
-# MERIDIAN — Asset Contract v3.0
+# MERIDIAN — Asset Contract v3.1
 
+> **v3.1 (D-100, D-101, 2026-11-06, owner C0 feedback):** §11.1 ink is half the v3.0 weight (outer 2–3 px, interior 1–1.5 px) with required interior detail and up to two shadow tones; §11.3 flora rigs carry no face parts (swaps are petals/leaves, never eyes or mouths); §11.5 discs have no expressions. Everything else in §11 stands.
 > **v3.0 (D-086, 2026-11-06): the cartoon contract. §11 is the rule set for every new asset.**
 > §9 (3D models) and §10 (stage layers) are frozen: nothing new is made to them, and the files
 > already imported stay until UNITY archives them. §1 keys/folders and §2 Legal/Padding/Edges/
@@ -216,9 +217,11 @@ seam at 1080p.
 
 **11.1 Global (overrides §2 for v3 assets).** PPU **64**, drawn and rendered at 1x for
 1920×1080 (no 4K source in `Assets/`). PNG 8-bit RGBA straight alpha, `color` map only: flat cel
-colour + ink, at most one shadow tone per colour, no normal/mask/emission maps (a glowing part is
-drawn in its colour; UNITY may tint it). Ink `#1E1A17`, outer silhouette 4–6 px, interior
-1.5–3 px, jitter ±20 %. Palette from the planet strip `ui/palettes/<planet>/strip_color.png` (8×1).
+colour + ink, up to two shadow tones per colour (mid and deep, v3.1), no normal/mask/emission maps (a glowing part is
+drawn in its colour; UNITY may tint it). Ink `#1E1A17`, outer silhouette **2–3 px**, interior
+**1–1.5 px**, jitter ±20 % (v3.1, D-100); interior detail lines (seams, folds, veins, rivets) and
+a few texture marks (hatching, dots, scuffs) are required on every drawn asset; the review sheet
+measures the outer and interior widths and shows a 2× detail crop. Palette from the planet strip `ui/palettes/<planet>/strip_color.png` (8×1).
 Sources: one asset per `.blend` (Grease Pencil objects), no texture above 2048, no 4K.
 Every v3 asset's sidecar carries `"style": "v3"` so ArtImporter routes it to the v3 rules.
 
@@ -248,7 +251,7 @@ one-off specials ≤ 16. Facing is a runtime flip; never draw the mirror. Clip s
 
 **11.3 Simple rigs (background flora and props).** One sheet per planet's flora set:
 `flora/<planet>/rigset_color.png` (≤ 2048²) holding every part (stem segments, leaves, petals,
-face pieces, blink/yawn mouth swaps), plus `rigset.json`:
+heads, swap states such as open/closed/curled; **no face parts**, D-101), plus `rigset.json`:
 ```json
 {
   "key": "flora/earth/rigset", "style": "v3", "ppu": 64,
@@ -257,9 +260,9 @@ face pieces, blink/yawn mouth swaps), plus `rigset.json`:
     "name": "daisy",
     "bones": [{"name": "root", "part": "daisy_stem", "parent": null, "length": 0.6},
               {"name": "stem2", "parent": "root", "length": 0.6}],
-    "swaps": {"mouth": ["mouth_smile", "mouth_yawn", "mouth_giggle"], "eyes": ["eyes_open", "eyes_blink"]},
+    "swaps": {"head": ["head_open", "head_half", "head_closed"], "leaves": ["leaves_rest", "leaves_up"]},
     "idle":  {"type": "sway", "amplitude_deg": 12, "beat_bpm": 110, "squash": 0.08},
-    "react": {"radius_m": 3.0, "action": "turn_look", "swap": "mouth_giggle"}
+    "react": {"radius_m": 3.0, "action": "turn_bounce", "swap": "head_open"}
   }]
 }
 ```
@@ -274,7 +277,7 @@ horizontally tileable (2× tiled preview in the review sheet), height ≤ 1024, 
 `backgrounds/space/starfield/` (tileable 2048² starfield + up to 3 nebula cards ≤ 1024²).
 
 **11.5 Planet discs (space view).** `planets/<planet>/disc_color.png`, watercolour fill + ink
-outline, ≤ 1024² (Saturn with rings ≤ 2048×1024); a personality idle as a sheet ≤ 12 frames
+outline, ≤ 1024² (Saturn with rings ≤ 2048×1024); **no faces or expressions** (D-101): a character idle from bands, storms, caps and rings as a sheet ≤ 12 frames
 (`disc.json`, fps 12) or a rig (`disc_rig.json`, e.g. ring wobble, band swirl UV scroll).
 
 **11.6 UI, title cards, film overlays.** `ui/<group>/<name>_color.png` (§5 D-044 rule): paper
