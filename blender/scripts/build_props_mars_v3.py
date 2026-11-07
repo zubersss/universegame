@@ -614,7 +614,7 @@ def main(out, imgs=None, widths=None, stamp_paths=()):
     S, _gw = MG.sheets()
     base = H - 70
     rnd = np.random.default_rng(3)
-    for c in range(31):
+    for c in range(W // 64):                                                          # whole 64 px tiles only (30 on 1936)
         im = S["regolith"][int(rnd.integers(0, 8))]
         y0 = base - (GS.FH - int(round(GS.SURF * 64)))
         review._over(scene, im[:max(0, min(GS.FH, H - y0))], c * 64, y0)

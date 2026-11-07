@@ -1,15 +1,15 @@
 # BLENDER STATUS
-Updated: 2026-11-07 05:13 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 05:21 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-LEAD cycle 258: stalker / lurker / crawler / mound ACCEPTED, B-139 DONE. Slot unchanged (when UNITY's last U-106 lock frees): B-143 near frames (5) + the B-141 re-run, <= 8 min; then B-136, then B-140. Lock-free order: lurker idle_open DONE 05:0x (8a2f6bb: 10 whole-body frames, sniff + nose pulse; 50 frames, clear of edge / ground); B-144 DONE as previews 05:12 (024462f, 172ae6e): six props checked one per process (ink 2.01-2.99 / 1.01-1.50, palette 100 %, sheets <= 512^2, no edge problems; hull a: edge, band overshoot and a smile-like dent fixed); the full review rides the slot. B-145 part 1 DONE (37ed2ab): the Mercury palette (ALL PASS) + c2_mercury_designs.md; the five plants' drawings NEXT; B-145 Mercury design prep; the slot script dry run; report + README.
-1. B-143 redirected by D-128 (+ amendment): the soft limb shelved (3f9bef4, never run). Near frames code DONE 04:5x (c43c8da): planets/<planet>/disc_near + planets/earth/luna_near, the far frame 0 at k x (the same rng fields, resampled), k = min(8x, fits 512^2), only where >= 2x: luna 8x, mercury 5.86x, mars 4.82x, venus 3.42x, earth 3.28x (none for the giants: a later card); far discs proven byte-identical before writing; review_b143_near_frames.png (far at 33x beside near at 33/k x). Light test Luna 356^2 + Mercury 512^2 ok (slip: 196 MB beside UNITY's job, over ~150 MB; Luna alone 99 MB).
-2. B-141 fixes DONE (88e0d85): the far canyon wall above layer1's tiers; the storm veil fades in (no hard edge), tint() ends the speckle; re-run in the slot before LEAD judges.
-3. B-136 export readiness DONE 04:41 (dde7d5e): build / main(out) review_script, row creatures/earth/hadal_maw; D-127: the key confirmed, cycle_beats 4 at 110 bpm accepted (contract v3.2 idle field, default 1), the 99.9 % palette (the lure's drawn translucent glow) accepted. Pack dry run: 8 parts 1784x744, json valid, palette 99.9 % (the lure's translucent halos), peak 341 MB (slip: over ~300 MB lock-free, measured in-run, not on one part first).
-4. B-140 / B-141 / B-142 rows ready (b0e3a53, e6f74ae, c1d1377); Mars report (5bb66bb) and README_v4 sections 6 + 9 (c57e2cb, 2737597) done.
-B-131 export after U-113's code; B-142 after U-118's.
+LEAD cycle 258. Slot DONE 05:13:16-05:18:13 (released). Next slot: B-136 Hadal Maw export (after U-106's last job per the queue) + the B-144 review (fixed tile overflow); then B-140.
+1. B-143 EXPORTED (d3af1e5): disc_near mercury / venus / earth / mars 512^2 (k 5.86 / 3.42 / 3.28 / 4.82), luna_near 356^2 (8x); far discs proven byte-identical first; log OK 121 s, peak 359 MB; review_b143_near_frames.png. .metas UNITY's.
+2. B-141 re-run DONE in the slot: canyon seams 0.88 / 0.68 / 0.53, storm 0.87 / 0.78 / 0.47, peak 683 MB; review_b141_mars_canyon_preview.png / _storm_ for LEAD's look.
+3. Lurker idle_open DONE (8a2f6bb). B-144 previews DONE (024462f, 172ae6e; the full review crashed on a tile overflow, fixed, renders next slot). B-145 part 1 DONE (37ed2ab: palette ALL PASS + c2_mercury_designs.md); the five plant drawings NEXT (lock-free).
+4. B-136 export-ready (dde7d5e, D-127); B-140 / B-141 / B-142 rows ready. B-131 after U-113; B-142 after U-118.
 
 ## Last completed
+- 05:13:16-05:18:13 SLOT (cycle 258, one heavy lock, 5 min, released): B-143 near frames exported (121 s, peak 359 MB), B-141 studies re-run (136 s, peak 683 MB); the B-144 review failed on a panel overflow (fixed).
 - 04:0x-04:41 LEAD cycle 256 items 1-5 + more: D-126 split (c1d1377), Polar crawler (e15fb30), B-140 / B-141 / B-142 readiness, Mars report, README, B-143 code, B-136 readiness. Slip 04:19: a B-140 smoke test ran at 0.25 GB free (106 MB peak); RAM is now read in its own call before any run.
 - 04:22:29-04:28:47 SLOT (cycle 256 queue #2, one heavy lock, 6.3 min, released): B-141 first studies (127 s, peak 677 MB; seams 0.86 / 0.76 / 0.60 and 0.88 / 0.77 / 0.58) + the stalker / lurker / crawler review images (251 s, peak 246 MB); nothing exported to Assets.
 - 03:3x-03:55 cycle 255 items 4-5: Mars rig-set sources + dry run (a4c9395, ACCEPTED 256), Dustskater (709a5bb, ACCEPTED 256), Scree stalker (a3b7222), Lava-tube lurker + the stalker tail-sign fix (fd9f5c8).
@@ -45,4 +45,4 @@ none (B-136's key and cycle_beats ruled D-127).
 none.
 
 ## HeavyJobLock
-want_blender.lock filed 05:04:55 (UNITY's last U-106 lock started 05:04:43, frees ~05:25; my slot right after: B-143 near frames + B-141 re-run, <= 8 min).
+none held, no want on file (slot done 05:18:13); the next want is filed when the queue says I am next after the running job.
