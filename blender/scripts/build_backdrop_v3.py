@@ -1167,6 +1167,8 @@ def ring_line(stack, rng, pal, H, y0):
     stack.append(tint(rng, H, glow, pal["offwhite"], 0.4, var=0.0, edge_dark=0.0, bleed=8.0))
     under = ((y > line + 2) & (y < line + 4.5)).astype(np.float32)                        # the ring's unlit underside
     stack.append(tint(rng, H, under, BG._mix(pal["teal"], pal["brown"], 0.4), 0.6, var=0.0, edge_dark=0.0, bleed=0.5))
+    over = ((y > line - 3.6) & (y < line - 2)).astype(np.float32)                         # an ink line above too: the bright 4 px reads as an inked stroke
+    stack.append(tint(rng, H, over, BG._mix(pal["teal"], pal["brown"], 0.4), 0.55, var=0.0, edge_dark=0.0, bleed=0.5))
     core = ((y > line - 2) & (y < line + 2)).astype(np.float32)                           # 4 px: reads at 1x
     stack.append(tint(rng, H, core, pal["offwhite"], 1.0, var=0.0, edge_dark=0.0, bleed=0.4))
 
@@ -1347,6 +1349,14 @@ def side_lining(mask, dy, dx):
     return np.clip(np.roll(mask, (-dy, dx), (0, 1)) - mask, 0, 1)
 
 
+def side_faces(mask, sun, k_lit, k_shade, dy):
+    """Form light on a bank lit from one side (sun -1 left / +1 right): the lit inner band along each lobe's sun-facing upper
+    edge, and the shaded inner band on the far side (each the mask minus itself shifted, inside the mask)."""
+    lit = mask * (1 - np.roll(mask, (dy, -sun * k_lit), (0, 1)))
+    shade = mask * (1 - np.roll(mask, (0, sun * k_shade), (0, 1)))
+    return np.clip(lit, 0, 1), np.clip(shade, 0, 1)
+
+
 def sparkle_field(mask, rng, n, y0, y1, r):
     """Tiny four-point crystalline sparkles (the diamond rain, frost glints)."""
     for _k in range(n):
@@ -1377,10 +1387,18 @@ def uranus_scene(seed, deck="deck1", light="sun_left"):
     band_op = 0.4 if light == "survey" else 0.07
     for t in bands(wr, H, [(y0, th, col, band_op) for y0, th, col in band_specs], pal):
         stack.append(t)
+    sx = {-1: 360.0, 1: 1560.0}[sun]                       # the low sun, on its side of the 1920 frame
     if not night:
         y = np.arange(H)[:, None] + 0.5
-        horizon = np.broadcast_to(((y > 640) & (y < 860)).astype(np.float32), (H, W)).copy()
-        stack.append(tint(wl, H, horizon, pal["red"], 0.12, var=0.02, edge_dark=0.0, bleed=40.0))   # the low ember sun's warmth
+        ramp = np.clip(1 - np.abs(np.arange(W)[None, :] - sx) / 1100.0, 0, 1)            # warm toward the sun's side
+        horizon = (((y > 380) & (y < 760)).astype(np.float32) * ramp).astype(np.float32)          # frame y ~344-724: above the near banks
+        stack.append(tint(wl, H, horizon, BG._mix(pal["offwhite"], pal["red"], 0.45), 0.4, var=0.02, edge_dark=0.0, bleed=40.0))
+        glow = np.zeros((H, W), np.float32)
+        ell(glow, sx, 470, 150, 110)
+        stack.append(tint(wl, H, glow, BG._mix(pal["offwhite"], pal["red"], 0.2), 0.45, var=0.0, edge_dark=0.0, bleed=45.0))   # its haze
+        disc = np.zeros((H, W), np.float32)
+        ell(disc, sx, 470, 17, 17)                                                      # frame y ~434, clear of the near banks
+        stack.append(tint(wl, H, disc, pal["offwhite"], 1.0, var=0.0, edge_dark=0.0, bleed=1.2))      # the distant sun: small, bright
     if deck == "deck1":
         mx, my = rng.uniform(300, 1700), 140.0
         moon(stack, wr, H, mx, my, 22, BG._mix(pal["offwhite"], pal["sky"], 0.3), pal["teal"], 3)    # Miranda
@@ -1396,7 +1414,9 @@ def uranus_scene(seed, deck="deck1", light="sun_left"):
         stack.append(tint(wl, H, side_lining(wall, 6, 5 * sun), BG._mix(pal["offwhite"], pal["red"], 0.25), 0.85, var=0.02, edge_dark=0.0, bleed=2.5))
     stack.append(wash32(wr, H, wall, far_c, var=0.05, edge_dark=0.05, bleed=3.0))
     if not night:
-        stack.append(tint(wl, H, np.roll(wall, -9 * sun, 1) * wall, pal["teal"], 0.3, var=0.02, edge_dark=0.0, bleed=4.0))   # the shade away from the sun
+        lit, shade = side_faces(wall, sun, 18, 30, 8)
+        stack.append(tint(wl, H, lit, BG._mix(pal["offwhite"], pal["red"], 0.15), 0.55, var=0.02, edge_dark=0.0, bleed=5.0))   # the sun-facing upper edges
+        stack.append(tint(wl, H, shade, BG._mix(pal["teal"], pal["brown"], 0.3), 0.42, var=0.02, edge_dark=0.0, bleed=7.0))    # the far sides
     out.append(finish(stack, wr, H))
     # layer1: nearer fog banks, the same light; the deep: slow swirls
     H = 640
@@ -1406,10 +1426,12 @@ def uranus_scene(seed, deck="deck1", light="sun_left"):
     cloud_bank(bank, line, rng, 50, 110, 18)
     body = BG._mix(BG._mix(pal["offwhite"], pal["sky"], 0.4 + dark), pal["brown"], 0.45 if night else 0.0)
     if not night:
-        stack.append(tint(wl, H, side_lining(bank, 7, 6 * sun), BG._mix(pal["offwhite"], pal["red"], 0.2), 0.9, var=0.02, edge_dark=0.0, bleed=2.0))
+        stack.append(tint(wl, H, side_lining(bank, 8, 9 * sun), BG._mix(pal["offwhite"], pal["red"], 0.2), 1.0, var=0.02, edge_dark=0.0, bleed=2.0))
     stack.append(wash32(wr, H, bank, body, var=0.05, edge_dark=0.07, bleed=2.5))
     if not night:
-        stack.append(tint(wl, H, np.roll(bank, -12 * sun, 1) * bank, pal["teal"], 0.32, var=0.02, edge_dark=0.0, bleed=5.0))
+        lit, shade = side_faces(bank, sun, 26, 44, 10)
+        stack.append(tint(wl, H, lit, BG._mix(pal["offwhite"], pal["red"], 0.15), 0.65, var=0.02, edge_dark=0.0, bleed=6.0))
+        stack.append(tint(wl, H, shade, BG._mix(pal["teal"], pal["brown"], 0.35), 0.48, var=0.02, edge_dark=0.0, bleed=8.0))
     if deck == "deep":
         for k in range(3):
             cx, cy, R = rng.uniform(250, W - 250), rng.uniform(120, 300), rng.uniform(90, 140)
