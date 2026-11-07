@@ -196,12 +196,20 @@ namespace Meridian.Tests
         public IEnumerator PaperPanelsOpenAndCloseFromTheKeyboard()
         {
             MenuController.ShowOnBootOverride = true;
-            SceneDirector director = null;
-            yield return Boot(d => director = d);
-            var menu = MenuController.Instance;
+            // The batch-mode Editor has no focused Game view: route the virtual keyboard to the game regardless of focus (FlightPlayTests' SetUp;
+            // without it the 15:16 run's Esc never reached the menus). The keyboard goes in before the scene, so every map resolves with it.
+            var settings = UnityEngine.InputSystem.InputSystem.settings;
+            var savedEditor = settings.editorInputBehaviorInPlayMode;
+            var savedBackground = settings.backgroundBehavior;
+            settings.editorInputBehaviorInPlayMode = UnityEngine.InputSystem.InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+            settings.backgroundBehavior = UnityEngine.InputSystem.InputSettings.BackgroundBehavior.IgnoreFocus;
             var keys = UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>("U124Keys");
             try
             {
+                SceneDirector director = null;
+                yield return Boot(d => director = d);
+                var menu = MenuController.Instance;
+                yield return null;
                 var es = UnityEngine.EventSystems.EventSystem.current;
                 Assert.NotNull(es, "an EventSystem for the keyboard");
                 Assert.AreEqual(menu.NewButton.gameObject, es.currentSelectedGameObject, "the title menu starts the keys on NEW");
@@ -305,6 +313,8 @@ namespace Meridian.Tests
             finally
             {
                 if (keys != null) UnityEngine.InputSystem.InputSystem.RemoveDevice(keys);
+                settings.editorInputBehaviorInPlayMode = savedEditor;
+                settings.backgroundBehavior = savedBackground;
             }
         }
 

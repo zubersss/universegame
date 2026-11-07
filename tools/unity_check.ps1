@@ -7,11 +7,13 @@ param([string]$ExecuteMethod = '', [string]$PlayFilter = '', [switch]$SkipEditMo
 
 try { Enter-HeavyJobLock 'unity_check (compile + EditMode + PlayMode)' } catch { Write-Host "BLOCKED: $_"; exit 2 }
 $started = Get-Date
+$outerHold = $env:MERIDIAN_LOCK_HELD -eq '1' # a caller holds the lock across several wrappers: keep its hold when this check ends
 $env:MERIDIAN_LOCK_HELD = '1'
 $code = 0
 try {
     Write-Host '== compile'
-    & (Join-Path $PSScriptRoot 'unity_compile.ps1') -ExecuteMethod $ExecuteMethod
+    if ($Graphics) { & (Join-Path $PSScriptRoot 'unity_compile.ps1') -ExecuteMethod $ExecuteMethod -Graphics } # texture imports (CheckSetup) want a graphics device (U-060)
+    else { & (Join-Path $PSScriptRoot 'unity_compile.ps1') -ExecuteMethod $ExecuteMethod }
     $code = $LASTEXITCODE
     if ($code -eq 0 -and -not $SkipEditMode) {
         Write-Host '== EditMode'
@@ -27,8 +29,7 @@ try {
         $code = $LASTEXITCODE
     }
 } finally {
-    Remove-Item Env:\MERIDIAN_LOCK_HELD -ErrorAction SilentlyContinue
-    Exit-HeavyJobLock
+    if (-not $outerHold) { Remove-Item Env:\MERIDIAN_LOCK_HELD -ErrorAction SilentlyContinue; Exit-HeavyJobLock }
 }
 Write-Host ("CHECK {0} in {1:F1} min (one lock)" -f ($(if ($code -eq 0) { 'OK' } else { 'FAILED' })), ((Get-Date) - $started).TotalMinutes)
 exit $code
