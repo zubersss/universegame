@@ -1,49 +1,52 @@
 {
- "key": "creatures/mercury/glassback",
- "format": "glb",
- "contract": "v2.2",
- "facing": "+X in Unity (exported facing glTF -X, D-065)",
- "up": "+Y",
- "units": "m",
- "origin": "feet",
- "triangles": 7600,
- "lod1_triangles": null,
- "texture": 1024,
- "maps": [
-  "color",
-  "normal",
-  "mask",
-  "emission"
- ],
- "fps": 30,
- "clips": [
-  {
-   "name": "idle",
-   "frames": 36,
-   "loop": true
-  },
-  {
-   "name": "walk",
-   "frames": 24,
-   "loop": true
-  },
-  {
-   "name": "attack",
-   "frames": 18,
-   "loop": false
-  },
-  {
-   "name": "hurt",
-   "frames": 8,
-   "loop": false
-  },
-  {
-   "name": "death",
-   "frames": 30,
-   "loop": false
-  }
- ],
- "atlas": null,
- "vertex_color": null,
- "sockets": []
+  "key": "creatures/mercury/glassback",
+  "style": "v3",
+  "frame_width": 176,
+  "frame_height": 112,
+  "columns": 11,
+  "gutter": 4,
+  "frames": 52,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.0
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [
+    {
+      "name": "idle",
+      "start": 0,
+      "length": 10,
+      "loop": true,
+      "loop_from": 0
+    },
+    {
+      "name": "walk",
+      "start": 10,
+      "length": 12,
+      "loop": true,
+      "loop_from": 0
+    },
+    {
+      "name": "react",
+      "start": 22,
+      "length": 8,
+      "loop": false
+    },
+    {
+      "name": "bump",
+      "start": 30,
+      "length": 10,
+      "loop": false
+    },
+    {
+      "name": "flee",
+      "start": 40,
+      "length": 12,
+      "loop": true,
+      "loop_from": 0
+    }
+  ],
+  "squash_root": true
 }

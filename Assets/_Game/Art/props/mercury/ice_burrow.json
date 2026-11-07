@@ -1,0 +1,21 @@
+{
+  "key": "props/mercury/ice_burrow",
+  "style": "v3",
+  "frame_width": 112,
+  "frame_height": 40,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.25
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [],
+  "squash_root": false,
+  "ground_line_px": 10,
+  "note": "one static frame (no clip); the pivot sits on the ground line; D-126: drawn in front of creatures/mercury/shadewyrm on the same pivot",
+  "den_for": "creatures/mercury/shadewyrm"
+}
