@@ -60,6 +60,7 @@ def check():
     sky = lab(pal["sky"])
     wisp = lab(pal["offwhite"])
     brightest = max(names, key=lambda k: lab(pal[k])[0])
+    pale = [k for k in names if lab(pal[k])[0] > 80]
     checks = [
         ("every colour reads under the ink (contrast >= 2.0; the indigo is exempt: it is only a tone and the Deep)",
          all(contrast(pal[k], v3.INK) >= 2.0 for k in names if k != "brown")),
@@ -72,6 +73,7 @@ def check():
          270 <= hue(pal["brown"]) <= 310 and ind[2] < -20 and ind[0] < 30 and 260 <= hue(pal["sky"]) <= 300 and sky[2] < -20),
         (f"cold white wisps, the brightest colour (b* <= 2; {wisp[2]:.1f}; brightest: {brightest})",
          wisp[2] <= 2 and brightest == "offwhite"),
+        (f"a deep-blue family with one pale accent (L > 80: {pale}; the card's B-161 wording)", pale == ["offwhite"]),
         (f"exactly one warm accent (warm + chroma > 20: {warm})", warm == ["red"]),
         (f"dimmer than Uranus (mean L of the lit colours {l_nep:.0f} < Uranus's {l_ura:.0f})", l_nep < l_ura),
         (f"told apart from Uranus (sky vs Uranus's fog dE {de(pal['sky'], ura['sky']):.0f} >= 25; shadow vs Uranus's slate "

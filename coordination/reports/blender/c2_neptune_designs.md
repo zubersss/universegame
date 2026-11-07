@@ -42,12 +42,13 @@ floe strips (D-137), the shared aerostat kit (B-156), straight-alpha layers (D-1
 | plants (abyss sage) read on the blue sky, the wisp white and the indigo (dE >= 20; min 36) | pass |
 | a deep indigo shadow (hue 270-310 deg, b* < -20, L < 30; 294, -28.7, 22) and a Neptune-blue sky (hue 260-300 deg, b* < -20; 283, -33.4) | pass |
 | cold white wisps, the brightest colour (b* <= 2; -3.4; brightest: offwhite) | pass |
+| a deep-blue family with one pale accent (L > 80: ['offwhite']; the card's B-161 wording) | pass |
 | exactly one warm accent (warm + chroma > 20: ['red']) | pass |
 | dimmer than Uranus (mean L of the lit colours 63 < Uranus's 70) | pass |
 | told apart from Uranus (sky vs Uranus's fog dE 44 >= 25; shadow vs Uranus's slate dE 26 >= 12) | pass |
 | the shadow tones stay inside the family (deep tones never black: L > 20) | pass |
 
-All checks pass (ALL PASS). The sky is the darkest deck sky of the eight (L 49; Uranus's fog is L 76), so the ink outline
+All checks pass (ALL PASS). The card asks for "a deep-blue family with one pale accent": the pale accent is the wisp white (the only colour above L 80); beacon coral is the red slot every planet keeps, used only for the *Meridian* and the gear. The sky is the darkest deck sky of the eight (L 49; Uranus's fog is L 76), so the ink outline
 still reads on it (contrast 3.8) and the characters' fills (wisp white, coral) pop hardest of any planet: the endgame is
 the moodiest scene without going muddy.
 
@@ -105,7 +106,9 @@ geometry (fe6ace98) so a mirrored or pulsed layer never slides against its neigh
   (UNITY flashes it: the flash ships as its own small sprite, `fx/neptune/lightning`, if LEAD wants it animated).
 - **deck3:** the banks darken toward the indigo; Pressure-phantom country; the first diamond-rain glints (sparser than
   Uranus's, violet-tinted, on layer2).
-- **deep:** deep indigo, Superionic floe silhouettes far off on layer0, the CRUSH band (the Saturn / Jupiter band).
+- **deep:** deep indigo, Superionic floe silhouettes far off on layer0, the diamond-rain glints densest here on layer2
+  (inside its visible band, above the CRUSH band: the near-layer rule, so layer2's banks never hide them), the CRUSH band
+  (the Saturn / Jupiter band).
 - **storm (the Dark Storm zone, 400 m wide):** layer0 the indigo vortex core spiralling inward (the inward pull drawn as
   curved streaks), layer1 the storm-violet rim with the bright white companion clouds along its edge (UNITY pulses this
   layer), layer2 the near wind streaks curving into the eye. The Great Dark Spot is the same set with the *Meridian*'s
