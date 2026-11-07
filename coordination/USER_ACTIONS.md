@@ -8,7 +8,7 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ### USER-23 — Look over the cartoon style test (5 min)
 The style test (C0) is finished and I approved it against the art checklist. Your eyes are the last check before the team draws everything else this way.
-1. Open the folder `C:\dev\universegame\coordination\reports\unity\c0_2026-11-06\u098\` and look at the nine pictures (1_idle to 9_film_on), or open the milestone page link the Lead gives you in chat.
+1. Open the folder `C:\dev\universegame\coordination\reports\unity\c0_2026-11-06\u098\` and look at the nine pictures (1_idle to 9_film_on), or open the milestone page: https://claude.ai/artifact/RpnrBEGMbKM1mSGicBYqZQ (private to your account).
 2. Tell the Lead either "C0 looks right" or what bothers you (for example: the ink is too thick, the colours are too dull, the surveyor's face, the film grain). Be blunt; changing it now is cheap, later it is not.
 3. The ground, the crates and the ship are still grey stand-ins on purpose; they get their cartoon art next.
 
