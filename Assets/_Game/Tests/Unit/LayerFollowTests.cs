@@ -101,5 +101,18 @@ namespace Meridian.Tests
             Assert.AreEqual(250f, d.At(300), 1e-3f, "the plain");
             Assert.AreEqual(250f, new BandDatum(Meridian.Planets.PlanetId.Venus, 250f, 64, 250f).At(850), 1e-3f, "without the surfaces (pure tests): the entry's height");
         }
+
+        /// <summary>U-139 (LEAD 16:1x): Mars keeps its U-128 bands and takes its ground POIs' stamped surface (the hauler, the outpost, the beacon)
+        /// across each stamp, back over the shoulders; away from the stamps nothing moves.</summary>
+        [Test]
+        public void MarsTakesItsStampsOnItsBands()
+        {
+            System.Func<int, float> final = x => x >= 900 && x < 930 ? 352f : 0f;
+            var d = new BandDatum(Meridian.Planets.PlanetId.Mars, 340f, 64, 341f, W, null, final, new[] { 900, 30 });
+            var bands = new BandDatum(Meridian.Planets.PlanetId.Mars, 340f, 64, 341f, W);
+            Assert.AreEqual(352f, d.At(915), 1e-3f, "on the hauler's stamp: its ground");
+            Assert.AreEqual(bands.At(2000), d.At(2000), 1e-4f, "away from the stamps: the bands as they were");
+            Assert.AreEqual(bands.At(64), d.At(64), 1e-4f, "the camp's frames unchanged");
+        }
     }
 }

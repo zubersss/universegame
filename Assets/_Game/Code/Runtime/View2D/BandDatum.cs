@@ -63,7 +63,7 @@ namespace Meridian.View2D
             switch (planet)
             {
                 case PlanetId.Earth: return EarthBiomes.Blended(x, earth);
-                case PlanetId.Mars: return MarsLandforms.Blended(x, Blend, mars);
+                case PlanetId.Mars: return Stamped(x, MarsLandforms.Blended(x, Blend, mars)); // U-139 (LEAD 16:1x): the hauler, the outpost, the beacon on their stamped ground
                 case PlanetId.Mercury: return finalSurface != null && bandSurface != null && worldWidth > 0 ? Followed(x) : MercuryAt(x);
                 case PlanetId.Venus: return finalSurface != null && bandSurface != null && worldWidth > 0 ? Followed(x) : spawnSurface; // U-139: the tesserae rise 55 m
                 default: return spawnSurface;
@@ -93,6 +93,14 @@ namespace Meridian.View2D
             d = Mathf.Lerp(spawnSurface, d, hold);
             cachedX = x; cachedValue = d;
             return d;
+        }
+
+        /// <summary>U-139: a band datum pulled onto a ground POI's stamped surface across its stamp, back over its shoulders (Mars; Earth untouched).</summary>
+        float Stamped(int x, float d)
+        {
+            if (finalSurface == null) return d;
+            float w = StampWeight(x);
+            return w > 0f ? Mathf.Lerp(d, finalSurface(x), w) : d;
         }
 
         float Bowl(int x) => planet == PlanetId.Mercury ? MercuryLandforms.ColdTrapProfile(x, worldWidth) : 0f;

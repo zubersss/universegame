@@ -170,10 +170,11 @@ namespace Meridian.View2D
             bool follows = config.id == Meridian.Planets.PlanetId.Mercury || config.id == Meridian.Planets.PlanetId.Venus;
             var solid = follows && side.terrain != null ? side.terrain.BaseGenerator as Meridian.Terrain.SolidWorldGenerator : null;
             var streamer = side.terrain;
+            bool stamped = (follows && solid != null) || (config.id == Meridian.Planets.PlanetId.Mars && streamer != null); // Mars: its bands, plus the POI stamps (LEAD 16:1x)
             Datum = new BandDatum(config.id, config.datumY, side.spawnX, surfaceDatum, config.worldWidth,
                 solid != null ? x => solid.BandSurfaceHeight(x) + 1f : (System.Func<int, float>)null,
-                solid != null ? x => streamer.OriginalTop(x) + 1f : (System.Func<int, float>)null,
-                solid != null ? BandDatum.StampsOf(config.id) : null);
+                stamped ? x => streamer.OriginalTop(x) + 1f : (System.Func<int, float>)null,
+                stamped ? BandDatum.StampsOf(config.id) : null);
             Fading = false; Crossfades = 0;
             if (Incoming != null) { Incoming.Release(); Incoming.gameObject.SetActive(false); }
             // U-118: Mars draws the dust storm as the B-141 storm set's veil over the base layers (alpha = the storm's intensity, the wind scrolls it).

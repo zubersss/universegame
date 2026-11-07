@@ -225,6 +225,10 @@ namespace Meridian.Core
                 yield return Shot(folder, "smoke_18_mars_shelter_night_lamp.png");
                 if (side.dayNight != null) side.dayNight.Override = 0.45f;
             }
+            // U-139 (LEAD 16:1x): the Halcyon hauler wreck, a stamped Mars POI: the painted set stands at its stamped ground.
+            var hauler = Meridian.Planet.POI.PoiCatalog.HalcyonHauler;
+            yield return LookAt(side, hauler.CenterX, 4f, 10f);
+            yield return Shot(folder, "smoke_22_mars_hauler.png");
             // On the canyon wall's terraces (as the U-039 capture): wall, ledges and the far rim in one view.
             int canyon = Meridian.Terrain.MarsLandforms.CanyonStart + 60;
             yield return LookAt(side, canyon, 6f, 24f);
@@ -254,8 +258,8 @@ namespace Meridian.Core
             side.creatures.DespawnAll();
             int trapX = Meridian.Terrain.MercuryLandforms.ColdTrapCentre(0, mw);
             yield return LookAt(side, trapX - 4f, 4f, 9f);
-            float wy = side.terrain.TopSolidY(trapX) + 1f + Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.Shadewyrm).size.y * 0.5f + 0.05f;
-            side.creatures.Spawn(Meridian.Creatures.Species.Shadewyrm, new Vector2(trapX + 0.5f, wy)); // the director stands its burrow in front (D-126)
+            float wyrmY = side.terrain.TopSolidY(trapX) + 1f + Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.Shadewyrm).size.y * 0.5f + 0.05f;
+            side.creatures.Spawn(Meridian.Creatures.Species.Shadewyrm, new Vector2(trapX + 0.5f, wyrmY)); // the director stands its burrow in front (D-126)
             yield return Wait(1.5f);
             yield return Shot(folder, "smoke_15_shadewyrm_burrow.png");
 
