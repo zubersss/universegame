@@ -70,7 +70,7 @@ namespace Meridian.Tests
             Assert.Greater(w, 0, "the world width reaches the stage");
             string want = Meridian.View2D.CartoonStage.MercurySceneFor(side.spawnX, stage.MercuryClock, w);
             Assert.AreEqual(want, stage.Scene, "the spawn's zone picks the set");
-            Assert.AreEqual(stage.Datum.At(side.spawnX), stage.Datum.At(side.spawnX + 40), 1e-3f, "the plain is one band");
+            Assert.AreEqual(stage.Datum.At(side.spawnX), stage.Datum.At(side.spawnX + Meridian.View2D.BandDatum.PadHold), 1e-3f, "U-139: the pad holds its surface for PadHold columns (D-146's one-band plain now follows the averaged surface past it)");
             float ground = side.terrain.TopSolidY(side.spawnX) + 1f;
             TestContext.Out.WriteLine($"[MERIDIAN] D-146 pad: ground {ground:F1}, datum {stage.Datum.At(side.spawnX):F1} (Mercury datumY {side.Config.datumY})");
             Assert.AreEqual(ground, stage.Datum.At(side.spawnX), 2f, "D-146: the camp is on the plain, so the plain's datum is the ground at the pad (no 9 m crater under it)");

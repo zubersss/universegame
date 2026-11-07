@@ -90,7 +90,7 @@ TextureImporter:
   serializedVersion: 13
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 1
+    enableMipMap: 0
     sRGBTexture: 1
     linearTexture: 0
     fadeOut: 0
@@ -106,7 +106,7 @@ TextureImporter:
     normalMapFilter: 0
     flipGreenChannel: 0
   isReadable: 0
-  streamingMipmaps: 1
+  streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
   ignoreMipmapLimit: 0
@@ -118,7 +118,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 2
+    filterMode: 1
     aniso: 2
     mipBias: 0
     wrapU: 1
@@ -127,20 +127,20 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 9
-  spritePivot: {x: 0.5, y: 0.0078125}
-  spritePixelsToUnits: 128
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
-  alphaIsTransparency: 0
+  alphaIsTransparency: 1
   spriteTessellationMethod: 0
   spriteTessellationDetail: -1
   spriteGeometrySubdivision: -1
-  textureType: 0
+  textureType: 8
   textureShape: 1
   singleChannelComponent: 0
   flipbookRows: 1
@@ -200,9 +200,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 1296
-        width: 320
-        height: 320
+        y: 396
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -221,10 +221,10 @@ TextureImporter:
       name: sulfur_drifter_1
       rect:
         serializedVersion: 2
-        x: 324
-        y: 1296
-        width: 320
-        height: 320
+        x: 116
+        y: 396
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -243,10 +243,10 @@ TextureImporter:
       name: sulfur_drifter_2
       rect:
         serializedVersion: 2
-        x: 648
-        y: 1296
-        width: 320
-        height: 320
+        x: 232
+        y: 396
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -265,10 +265,10 @@ TextureImporter:
       name: sulfur_drifter_3
       rect:
         serializedVersion: 2
-        x: 972
-        y: 1296
-        width: 320
-        height: 320
+        x: 348
+        y: 396
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -287,10 +287,10 @@ TextureImporter:
       name: sulfur_drifter_4
       rect:
         serializedVersion: 2
-        x: 1296
-        y: 1296
-        width: 320
-        height: 320
+        x: 464
+        y: 396
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -309,10 +309,10 @@ TextureImporter:
       name: sulfur_drifter_5
       rect:
         serializedVersion: 2
-        x: 1620
-        y: 1296
-        width: 320
-        height: 320
+        x: 580
+        y: 396
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -331,10 +331,10 @@ TextureImporter:
       name: sulfur_drifter_6
       rect:
         serializedVersion: 2
-        x: 0
-        y: 972
-        width: 320
-        height: 320
+        x: 696
+        y: 396
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -353,10 +353,10 @@ TextureImporter:
       name: sulfur_drifter_7
       rect:
         serializedVersion: 2
-        x: 324
-        y: 972
-        width: 320
-        height: 320
+        x: 812
+        y: 396
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -375,10 +375,10 @@ TextureImporter:
       name: sulfur_drifter_8
       rect:
         serializedVersion: 2
-        x: 648
-        y: 972
-        width: 320
-        height: 320
+        x: 928
+        y: 396
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -397,10 +397,10 @@ TextureImporter:
       name: sulfur_drifter_9
       rect:
         serializedVersion: 2
-        x: 972
-        y: 972
-        width: 320
-        height: 320
+        x: 1044
+        y: 396
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -419,10 +419,10 @@ TextureImporter:
       name: sulfur_drifter_10
       rect:
         serializedVersion: 2
-        x: 1296
-        y: 972
-        width: 320
-        height: 320
+        x: 1160
+        y: 396
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -441,10 +441,10 @@ TextureImporter:
       name: sulfur_drifter_11
       rect:
         serializedVersion: 2
-        x: 1620
-        y: 972
-        width: 320
-        height: 320
+        x: 1276
+        y: 396
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -463,10 +463,10 @@ TextureImporter:
       name: sulfur_drifter_12
       rect:
         serializedVersion: 2
-        x: 0
-        y: 648
-        width: 320
-        height: 320
+        x: 1392
+        y: 396
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -485,10 +485,10 @@ TextureImporter:
       name: sulfur_drifter_13
       rect:
         serializedVersion: 2
-        x: 324
-        y: 648
-        width: 320
-        height: 320
+        x: 1508
+        y: 396
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -507,10 +507,10 @@ TextureImporter:
       name: sulfur_drifter_14
       rect:
         serializedVersion: 2
-        x: 648
-        y: 648
-        width: 320
-        height: 320
+        x: 1624
+        y: 396
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -529,10 +529,10 @@ TextureImporter:
       name: sulfur_drifter_15
       rect:
         serializedVersion: 2
-        x: 972
-        y: 648
-        width: 320
-        height: 320
+        x: 1740
+        y: 396
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -551,10 +551,10 @@ TextureImporter:
       name: sulfur_drifter_16
       rect:
         serializedVersion: 2
-        x: 1296
-        y: 648
-        width: 320
-        height: 320
+        x: 1856
+        y: 396
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -573,10 +573,10 @@ TextureImporter:
       name: sulfur_drifter_17
       rect:
         serializedVersion: 2
-        x: 1620
-        y: 648
-        width: 320
-        height: 320
+        x: 0
+        y: 264
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -595,10 +595,10 @@ TextureImporter:
       name: sulfur_drifter_18
       rect:
         serializedVersion: 2
-        x: 0
-        y: 324
-        width: 320
-        height: 320
+        x: 116
+        y: 264
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -617,10 +617,10 @@ TextureImporter:
       name: sulfur_drifter_19
       rect:
         serializedVersion: 2
-        x: 324
-        y: 324
-        width: 320
-        height: 320
+        x: 232
+        y: 264
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -639,10 +639,10 @@ TextureImporter:
       name: sulfur_drifter_20
       rect:
         serializedVersion: 2
-        x: 648
-        y: 324
-        width: 320
-        height: 320
+        x: 348
+        y: 264
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -661,10 +661,10 @@ TextureImporter:
       name: sulfur_drifter_21
       rect:
         serializedVersion: 2
-        x: 972
-        y: 324
-        width: 320
-        height: 320
+        x: 464
+        y: 264
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -683,10 +683,10 @@ TextureImporter:
       name: sulfur_drifter_22
       rect:
         serializedVersion: 2
-        x: 1296
-        y: 324
-        width: 320
-        height: 320
+        x: 580
+        y: 264
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -705,10 +705,10 @@ TextureImporter:
       name: sulfur_drifter_23
       rect:
         serializedVersion: 2
-        x: 1620
-        y: 324
-        width: 320
-        height: 320
+        x: 696
+        y: 264
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -727,10 +727,10 @@ TextureImporter:
       name: sulfur_drifter_24
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 320
-        height: 320
+        x: 812
+        y: 264
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -749,10 +749,10 @@ TextureImporter:
       name: sulfur_drifter_25
       rect:
         serializedVersion: 2
-        x: 324
-        y: 0
-        width: 320
-        height: 320
+        x: 928
+        y: 264
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -771,10 +771,10 @@ TextureImporter:
       name: sulfur_drifter_26
       rect:
         serializedVersion: 2
-        x: 648
-        y: 0
-        width: 320
-        height: 320
+        x: 1044
+        y: 264
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -793,10 +793,10 @@ TextureImporter:
       name: sulfur_drifter_27
       rect:
         serializedVersion: 2
-        x: 972
-        y: 0
-        width: 320
-        height: 320
+        x: 1160
+        y: 264
+        width: 112
+        height: 128
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -811,6 +811,534 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: sulfur_drifter_28
+      rect:
+        serializedVersion: 2
+        x: 1276
+        y: 264
+        width: 112
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f7bacc8af90343b4598efde6449e5b44
+      internalID: 1953037841
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sulfur_drifter_29
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 264
+        width: 112
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 10d621e35add0944c8bc4f531a904c04
+      internalID: 1851576085
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sulfur_drifter_30
+      rect:
+        serializedVersion: 2
+        x: 1508
+        y: 264
+        width: 112
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: de57df2ee25474a4095c6c1105eae992
+      internalID: -414237249
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sulfur_drifter_31
+      rect:
+        serializedVersion: 2
+        x: 1624
+        y: 264
+        width: 112
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e9164d454a85ea54086fff514601647a
+      internalID: 856223510
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sulfur_drifter_32
+      rect:
+        serializedVersion: 2
+        x: 1740
+        y: 264
+        width: 112
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 55c8cd554778a9f40bd690f2e4db77fb
+      internalID: -787762477
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sulfur_drifter_33
+      rect:
+        serializedVersion: 2
+        x: 1856
+        y: 264
+        width: 112
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 58d9f28e862bd314d822b0f6526bab9c
+      internalID: 861387037
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sulfur_drifter_34
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 132
+        width: 112
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 202fde7efa49fbe428f66484c28a89f9
+      internalID: 46739771
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sulfur_drifter_35
+      rect:
+        serializedVersion: 2
+        x: 116
+        y: 132
+        width: 112
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 211904f55a3174b4195a97119b2a4e0e
+      internalID: 1054823763
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sulfur_drifter_36
+      rect:
+        serializedVersion: 2
+        x: 232
+        y: 132
+        width: 112
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0b1cd97186f75284caaf6d6b81cb67cd
+      internalID: 694996508
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sulfur_drifter_37
+      rect:
+        serializedVersion: 2
+        x: 348
+        y: 132
+        width: 112
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3336477b2377ca249b2a22973a630b1d
+      internalID: -1648429989
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sulfur_drifter_38
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 132
+        width: 112
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 86d62a96bbe955e4f81cb2e00a291ed3
+      internalID: 1152898008
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sulfur_drifter_39
+      rect:
+        serializedVersion: 2
+        x: 580
+        y: 132
+        width: 112
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c81b9069ff1183740b6a182a5d17f3fa
+      internalID: 1713546526
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sulfur_drifter_40
+      rect:
+        serializedVersion: 2
+        x: 696
+        y: 132
+        width: 112
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ffce8e3d7d604a94abca705cf55b9257
+      internalID: 1958140233
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sulfur_drifter_41
+      rect:
+        serializedVersion: 2
+        x: 812
+        y: 132
+        width: 112
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 42f112fd88a8a2c419bd1b17de76b23a
+      internalID: 707790964
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sulfur_drifter_42
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 132
+        width: 112
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 418225db4db935745a1345e67a850bca
+      internalID: -517562986
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sulfur_drifter_43
+      rect:
+        serializedVersion: 2
+        x: 1044
+        y: 132
+        width: 112
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a872e5e8634ee8b49b4b9abe55316f5c
+      internalID: 972148396
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sulfur_drifter_44
+      rect:
+        serializedVersion: 2
+        x: 1160
+        y: 132
+        width: 112
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fa6e814b4d21b4d4c8ae22f619775ad2
+      internalID: -924547702
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sulfur_drifter_45
+      rect:
+        serializedVersion: 2
+        x: 1276
+        y: 132
+        width: 112
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1dd4f1528cf2dd245b99e50642c1bd7b
+      internalID: -954587472
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sulfur_drifter_46
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 132
+        width: 112
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7bb8afa2cff24644f9826b0fa4c28712
+      internalID: 2116665998
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sulfur_drifter_47
+      rect:
+        serializedVersion: 2
+        x: 1508
+        y: 132
+        width: 112
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d98e67e9ddfecda45b160c2773bc5cea
+      internalID: 2125293786
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sulfur_drifter_48
+      rect:
+        serializedVersion: 2
+        x: 1624
+        y: 132
+        width: 112
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e05d6a6efd470d0419431e18a26be09a
+      internalID: 1984984926
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sulfur_drifter_49
+      rect:
+        serializedVersion: 2
+        x: 1740
+        y: 132
+        width: 112
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 43ab6a6a15d2b3b4382c08ed8d040822
+      internalID: 1052154898
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sulfur_drifter_50
+      rect:
+        serializedVersion: 2
+        x: 1856
+        y: 132
+        width: 112
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5c3672a7da474994bbfced289a87c562
+      internalID: 1032555762
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sulfur_drifter_51
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 112
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1ea3662fa6fad1c4d80f4a7ee36d80e6
+      internalID: 1249089504
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -821,11 +1349,7 @@ TextureImporter:
     indices: 
     edges: []
     weights: []
-    secondaryTextures:
-    - texture: {fileID: 2800000, guid: 4b8196c7143b9b84f91cd7bff9ae5292, type: 3}
-      name: _NormalMap
-    - texture: {fileID: 2800000, guid: dde459af3907ec242b86916919d73a7d, type: 3}
-      name: _EmissionMap
+    secondaryTextures: []
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
@@ -850,9 +1374,33 @@ TextureImporter:
       sulfur_drifter_25: 1394788633
       sulfur_drifter_26: 596819701
       sulfur_drifter_27: 814670735
+      sulfur_drifter_28: 1953037841
+      sulfur_drifter_29: 1851576085
       sulfur_drifter_3: -2146656105
+      sulfur_drifter_30: -414237249
+      sulfur_drifter_31: 856223510
+      sulfur_drifter_32: -787762477
+      sulfur_drifter_33: 861387037
+      sulfur_drifter_34: 46739771
+      sulfur_drifter_35: 1054823763
+      sulfur_drifter_36: 694996508
+      sulfur_drifter_37: -1648429989
+      sulfur_drifter_38: 1152898008
+      sulfur_drifter_39: 1713546526
       sulfur_drifter_4: -371151351
+      sulfur_drifter_40: 1958140233
+      sulfur_drifter_41: 707790964
+      sulfur_drifter_42: -517562986
+      sulfur_drifter_43: 972148396
+      sulfur_drifter_44: -924547702
+      sulfur_drifter_45: -954587472
+      sulfur_drifter_46: 2116665998
+      sulfur_drifter_47: 2125293786
+      sulfur_drifter_48: 1984984926
+      sulfur_drifter_49: 1052154898
       sulfur_drifter_5: 1037645342
+      sulfur_drifter_50: 1032555762
+      sulfur_drifter_51: 1249089504
       sulfur_drifter_6: 1924636863
       sulfur_drifter_7: -1783964136
       sulfur_drifter_8: -559791029

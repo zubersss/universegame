@@ -90,7 +90,7 @@ TextureImporter:
   serializedVersion: 13
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 1
+    enableMipMap: 0
     sRGBTexture: 1
     linearTexture: 0
     fadeOut: 0
@@ -106,7 +106,7 @@ TextureImporter:
     normalMapFilter: 0
     flipGreenChannel: 0
   isReadable: 0
-  streamingMipmaps: 1
+  streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
   ignoreMipmapLimit: 0
@@ -118,7 +118,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 2
+    filterMode: 1
     aniso: 2
     mipBias: 0
     wrapU: 1
@@ -127,20 +127,20 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 9
-  spritePivot: {x: 0.5, y: 0.0078125}
-  spritePixelsToUnits: 128
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
-  alphaIsTransparency: 0
+  alphaIsTransparency: 1
   spriteTessellationMethod: 0
   spriteTessellationDetail: -1
   spriteGeometrySubdivision: -1
-  textureType: 0
+  textureType: 8
   textureShape: 1
   singleChannelComponent: 0
   flipbookRows: 1
@@ -200,9 +200,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 528
-        width: 128
-        height: 128
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -221,10 +221,10 @@ TextureImporter:
       name: acidmoth_1
       rect:
         serializedVersion: 2
-        x: 132
-        y: 528
-        width: 128
-        height: 128
+        x: 68
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -243,10 +243,10 @@ TextureImporter:
       name: acidmoth_2
       rect:
         serializedVersion: 2
-        x: 264
-        y: 528
-        width: 128
-        height: 128
+        x: 136
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -265,10 +265,10 @@ TextureImporter:
       name: acidmoth_3
       rect:
         serializedVersion: 2
-        x: 396
-        y: 528
-        width: 128
-        height: 128
+        x: 204
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -287,10 +287,10 @@ TextureImporter:
       name: acidmoth_4
       rect:
         serializedVersion: 2
-        x: 528
-        y: 528
-        width: 128
-        height: 128
+        x: 272
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -309,10 +309,10 @@ TextureImporter:
       name: acidmoth_5
       rect:
         serializedVersion: 2
-        x: 660
-        y: 528
-        width: 128
-        height: 128
+        x: 340
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -331,10 +331,10 @@ TextureImporter:
       name: acidmoth_6
       rect:
         serializedVersion: 2
-        x: 0
-        y: 396
-        width: 128
-        height: 128
+        x: 408
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -353,10 +353,10 @@ TextureImporter:
       name: acidmoth_7
       rect:
         serializedVersion: 2
-        x: 132
-        y: 396
-        width: 128
-        height: 128
+        x: 476
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -375,10 +375,10 @@ TextureImporter:
       name: acidmoth_8
       rect:
         serializedVersion: 2
-        x: 264
-        y: 396
-        width: 128
-        height: 128
+        x: 544
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -397,10 +397,10 @@ TextureImporter:
       name: acidmoth_9
       rect:
         serializedVersion: 2
-        x: 396
-        y: 396
-        width: 128
-        height: 128
+        x: 612
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -419,10 +419,10 @@ TextureImporter:
       name: acidmoth_10
       rect:
         serializedVersion: 2
-        x: 528
-        y: 396
-        width: 128
-        height: 128
+        x: 680
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -441,10 +441,10 @@ TextureImporter:
       name: acidmoth_11
       rect:
         serializedVersion: 2
-        x: 660
-        y: 396
-        width: 128
-        height: 128
+        x: 748
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -463,10 +463,10 @@ TextureImporter:
       name: acidmoth_12
       rect:
         serializedVersion: 2
-        x: 0
-        y: 264
-        width: 128
-        height: 128
+        x: 816
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -485,10 +485,10 @@ TextureImporter:
       name: acidmoth_13
       rect:
         serializedVersion: 2
-        x: 132
-        y: 264
-        width: 128
-        height: 128
+        x: 884
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -507,10 +507,10 @@ TextureImporter:
       name: acidmoth_14
       rect:
         serializedVersion: 2
-        x: 264
-        y: 264
-        width: 128
-        height: 128
+        x: 952
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -529,10 +529,10 @@ TextureImporter:
       name: acidmoth_15
       rect:
         serializedVersion: 2
-        x: 396
-        y: 264
-        width: 128
-        height: 128
+        x: 1020
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -551,10 +551,10 @@ TextureImporter:
       name: acidmoth_16
       rect:
         serializedVersion: 2
-        x: 528
-        y: 264
-        width: 128
-        height: 128
+        x: 1088
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -573,10 +573,10 @@ TextureImporter:
       name: acidmoth_17
       rect:
         serializedVersion: 2
-        x: 660
-        y: 264
-        width: 128
-        height: 128
+        x: 1156
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -595,10 +595,10 @@ TextureImporter:
       name: acidmoth_18
       rect:
         serializedVersion: 2
-        x: 0
-        y: 132
-        width: 128
-        height: 128
+        x: 1224
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -617,10 +617,10 @@ TextureImporter:
       name: acidmoth_19
       rect:
         serializedVersion: 2
-        x: 132
-        y: 132
-        width: 128
-        height: 128
+        x: 1292
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -639,10 +639,10 @@ TextureImporter:
       name: acidmoth_20
       rect:
         serializedVersion: 2
-        x: 264
-        y: 132
-        width: 128
-        height: 128
+        x: 1360
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -661,10 +661,10 @@ TextureImporter:
       name: acidmoth_21
       rect:
         serializedVersion: 2
-        x: 396
-        y: 132
-        width: 128
-        height: 128
+        x: 1428
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -683,10 +683,10 @@ TextureImporter:
       name: acidmoth_22
       rect:
         serializedVersion: 2
-        x: 528
-        y: 132
-        width: 128
-        height: 128
+        x: 1496
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -705,10 +705,10 @@ TextureImporter:
       name: acidmoth_23
       rect:
         serializedVersion: 2
-        x: 660
-        y: 132
-        width: 128
-        height: 128
+        x: 1564
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -727,10 +727,10 @@ TextureImporter:
       name: acidmoth_24
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 128
-        height: 128
+        x: 1632
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -749,10 +749,10 @@ TextureImporter:
       name: acidmoth_25
       rect:
         serializedVersion: 2
-        x: 132
-        y: 0
-        width: 128
-        height: 128
+        x: 1700
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -771,10 +771,10 @@ TextureImporter:
       name: acidmoth_26
       rect:
         serializedVersion: 2
-        x: 264
-        y: 0
-        width: 128
-        height: 128
+        x: 1768
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -793,10 +793,10 @@ TextureImporter:
       name: acidmoth_27
       rect:
         serializedVersion: 2
-        x: 396
-        y: 0
-        width: 128
-        height: 128
+        x: 1836
+        y: 68
+        width: 64
+        height: 64
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -811,6 +811,182 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: acidmoth_28
+      rect:
+        serializedVersion: 2
+        x: 1904
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9ab90dc3cabd0b141a74738e6899fca9
+      internalID: 395119090
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_29
+      rect:
+        serializedVersion: 2
+        x: 1972
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a48f8a7d5a4417a439bd52e1c446abd6
+      internalID: -14200764
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_30
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: da4e0480ecc18da4ea974b38733f3d08
+      internalID: 559987910
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_31
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 0
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cff86597a607f0545aa582fd0dc97fd9
+      internalID: -623191521
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_32
+      rect:
+        serializedVersion: 2
+        x: 136
+        y: 0
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dcbca1fe64a1d7549a46ec9490b565f4
+      internalID: -364890805
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_33
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 0
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a1aadccd7835e514eae3c8b43184695c
+      internalID: 724189280
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_34
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 0
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cfc9ba867d887154cb53807af3a5fda2
+      internalID: 52622776
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: acidmoth_35
+      rect:
+        serializedVersion: 2
+        x: 340
+        y: 0
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d02c21c84ea144b4cb401848e1e0569d
+      internalID: 2008115919
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -821,11 +997,7 @@ TextureImporter:
     indices: 
     edges: []
     weights: []
-    secondaryTextures:
-    - texture: {fileID: 2800000, guid: 8e9f3eaf5975ced40af502cf8b2f79ca, type: 3}
-      name: _NormalMap
-    - texture: {fileID: 2800000, guid: 1086709c5a945b94e824bd08c9b497c4, type: 3}
-      name: _EmissionMap
+    secondaryTextures: []
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
@@ -850,7 +1022,15 @@ TextureImporter:
       acidmoth_25: 1450216501
       acidmoth_26: -836929575
       acidmoth_27: 660918519
+      acidmoth_28: 395119090
+      acidmoth_29: -14200764
       acidmoth_3: -36137779
+      acidmoth_30: 559987910
+      acidmoth_31: -623191521
+      acidmoth_32: -364890805
+      acidmoth_33: 724189280
+      acidmoth_34: 52622776
+      acidmoth_35: 2008115919
       acidmoth_4: 1167413848
       acidmoth_5: -1737795774
       acidmoth_6: -1094970876

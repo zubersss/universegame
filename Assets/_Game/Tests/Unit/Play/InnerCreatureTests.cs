@@ -132,11 +132,11 @@ namespace Meridian.Tests
             yield return Boot(PlanetId.Mercury);
             var fails = new List<string>();
             var log = new System.Text.StringBuilder();
-            // The twilight band, dawn side, at the surveyor: glassback, cinderlings, flarewing, Cinderhulk.
+            // The twilight band, dawn side, at the surveyor: glassback, cinderlings, flarewing (U-138, D-150: the Cinderhulk left the spawn table).
             float x0 = player.Body.position.x;
             DawnAt(x0 + 40f);
             yield return PutAt(x0 + 40f);
-            foreach (var s in new[] { Species.Glassback, Species.Cinderling, Species.Flarewing, Species.Cinderhulk })
+            foreach (var s in new[] { Species.Glassback, Species.Cinderling, Species.Flarewing })
             {
                 var c = SpawnNear(s);
                 if (c == null) { fails.Add(s + ": rule refused every column near the dawn line"); continue; }
