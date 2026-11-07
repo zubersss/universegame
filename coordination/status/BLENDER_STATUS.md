@@ -1,10 +1,10 @@
 # BLENDER STATUS
-Updated: 2026-11-07 03:1x · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 03:2x · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
 LEAD cycle 254 order (lock-free now; UNITY's C1 batch holds the queue):
 1. Slot (queue #1): DONE 03:06:23-03:09:39 (c4225fd), see Last completed.
-2. D-125 shelter wall redraw (P-45): a stackable 1 x 1 m tile, 64x64, pivot bottom-centre, tile in x and y, no ground-line margin; preview stacked 2 and 3 high beside the door: NEXT.
+2. D-125 shelter wall DONE 03:2x (afcfa68): a 1 x 1 m tile 64x64, pivot [0.5, 0], tile x + y, ground_line_px 0; joins x 0.0 / y 0.0; review_b131_props_preview.png shows it stacked 2 and 3 high round the door fitted to its 1 x 2 cell; the other five props byte-identical.
 3. B-139 parts 2-5: the plants preview is drawn (review_b139_mars_plants_preview.png, 8c69536; hand-off after a last look), then the canyon / storm backdrops (slot), the Mars ground strip kind, creature and prop notes are in c2_mars_designs.md.
 4. B-136 Hadal Maw rig set design.
 B-131 export: after UNITY's U-113 code, which now follows U-106 (D-115 / D-117).
@@ -26,7 +26,7 @@ B-131 export: after UNITY's U-113 code, which now follows U-106 (D-115 / D-117).
 
 ## Handoffs (unrouted only)
 -> UNITY (B-132, exported 0f9e0ab): delete the eight .meta files of the removed stag / wolf v2 files (stag.glb, stag_normal/_mask/_emission.png, same for wolf); creatures/earth/bear is a new key (no SpeciesSpec yet: Bible §7.1 "Brown bear (territorial)"; under D-087 its react is the rear-up + huff). The sheets are drawn about 1.5 m long x 2.0 m tall (stag), 1.2 x 1.0 m (wolf), 2.1 x 1.3 m (bear); the v2 SpeciesSpec sizes were 1.9x1.6 and 1.5x0.9.
--> UNITY (U-113, D-117, for the tests): B-131 jsons as they will export: frames pad 128x48 / wall 64x176 / door 88x176 / smelter 112x192 / crate 80x72 / lamp 64x160 at PPU 64; pivots [0.5, 0.208333], [0.5, 0.056818], [0.5, 0.056818], [0.5, 0.052083], [0.5, 0.138889], lamp [0.32, 0.0625]; door 3 cols x 2 rows, smelter 4 x 2, lamp 2 x 2, the rest 1 frame with "animations": []; extra fields tile, module_m (2.0 / 1.0), interactable, ground_line_px, squash_root false. The 24 .meta files beside the removed v2 files are yours.
+-> UNITY (U-113, D-117, for the tests): B-131 jsons as they will export: frames pad 128x48 / wall 64x64 (D-125: a 1 x 1 m tile, tile x + y, ground_line_px 0) / door 88x176 / smelter 112x192 / crate 80x72 / lamp 64x160 at PPU 64; pivots [0.5, 0.208333], wall [0.5, 0.0], door [0.5, 0.056818], [0.5, 0.052083], [0.5, 0.138889], lamp [0.32, 0.0625]; door 3 cols x 2 rows, smelter 4 x 2, lamp 2 x 2, the rest 1 frame with "animations": []; extra fields tile, module_m (2.0 / 1.0), interactable, ground_line_px, squash_root false. The 24 .meta files beside the removed v2 files are yours.
 -> UNITY (U-115, B-134 exported 27143e1): characters/surveyor/side_b plays by clip name (dig, build, surprise, jetpack, climb_in); climb_in: move the root up the fin-leg over frames 0-7, then put the `hatch` socket (1.0, 1.05 m from the pivot, every frame) on the Pilgrim door socket.
 -> UNITY (B-133 exported 27143e1): backgrounds/earth/forest and /coast load by ConfigureFor("earth", "forest" / "coast"); CartoonStage still pins EarthScene = "plains", so biome selection is yours. Their .meta files are yours.
 -> UNITY (B-135, after export): swimmers have pivot [0.5, 0.5]; the clip at index 1 is swim; keep the pivot >= 0.38 / 0.87 / 0.70 m (pike / shark / squid) above the sea floor; no Water habitat exists in SpeciesSpec yet.
