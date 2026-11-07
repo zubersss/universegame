@@ -310,6 +310,13 @@ def v3_sheet_review(entry, meta, frames, sheet_path, out, stats, stale=None):
 
     # on the planet background at 1x: first frame of each clip + mid walk/idle frames
     bh = fh + 48
+    if entry.get("beside"):              # the panel must hold the frame stood beside (a 192 px surveyor next to a 128 px wolf)
+        try:
+            sk = entry["beside"]
+            sm = json.load(open(os.path.join(ART, *sk.split("/")[:2], sk.split("/")[2] + ".json"), encoding="utf-8"))
+            bh = max(bh, int(sm["frame_height"]) + 48)
+        except (OSError, KeyError, ValueError):
+            pass
     bg, bg_note = planet_background(planet, entry.get("bg_scene", "plains"), W, bh)
     x = 16
     for c in clips:

@@ -771,13 +771,7 @@ def do_v3_sheet(entry, preview):
     with open(os.path.join(dest, f"{variant}.json"), "w", encoding="utf-8", newline="\n") as fh_:
         json.dump(meta, fh_, indent=2)
         fh_.write("\n")
-    removed = []
-    if entry.get("replaces_v2") and not preview:    # D-117's rule: a sheet cannot sit beside a .glb under one key (IsModelKey)
-        for suffix in (".glb", "_normal.png", "_mask.png", "_emission.png"):
-            old = os.path.join(dest, variant + suffix)
-            if os.path.isfile(old):
-                os.remove(old)                         # the .meta beside it is UNITY's to delete (D-016)
-                removed.append(os.path.basename(old))
+    removed = v3.remove_v2(dest, variant) if entry.get("replaces_v2") and not preview else []   # D-117 / D-119
     outer, inner = _v3_ink_stats(widths)
     stats = {"outer_px": outer, "inner_px": inner, "inner_n": sum(1 for w in widths if w[0] < v3.OUTER_SPLIT), "palette": v3.palette_hits(sheet, entry.get("planet", "earth"), tints=[tuple(t) for t in entry.get("palette_tints", [])]),
              "problems": problems, "sheet_wh": (sheet.shape[1], sheet.shape[0]), "png_kb": n // 1024}

@@ -3,6 +3,7 @@
 Change only when coordination/ASSET_CONTRACT.md §11 changes.
 """
 import math
+import os
 
 import numpy as np
 
@@ -53,6 +54,23 @@ def deep_of(h, planet="earth"):
     """The deep shadow tone (v3.1, D-100: up to two shadow tones per colour): 45 % colour + 55 % brown."""
     a, b = hex_rgb(h), hex_rgb(PALETTES[planet]["brown"])
     return rgb_hex([0.45 * x + 0.55 * y for x, y in zip(a, b)])
+
+
+V2_SUFFIXES = (".glb", "_normal.png", "_mask.png", "_emission.png")
+
+
+def remove_v2(dest, variant, dry_run=False):
+    """D-117 / D-119: a v3 sheet replacing a v2 model under one key removes <variant>.glb + its normal/mask/emission
+    maps (ArtImporter un-addresses a colour map beside a .glb, IsModelKey). Never touches the colour map, the json
+    or any .meta (UNITY's, D-016). Returns the basenames removed (or that would be, with dry_run)."""
+    out = []
+    for suffix in V2_SUFFIXES:
+        p = os.path.join(dest, variant + suffix)
+        if os.path.isfile(p):
+            if not dry_run:
+                os.remove(p)
+            out.append(os.path.basename(p))
+    return out
 
 
 def palette_with_shadows(planet="earth"):
