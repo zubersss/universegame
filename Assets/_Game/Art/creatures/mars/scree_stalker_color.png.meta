@@ -90,7 +90,7 @@ TextureImporter:
   serializedVersion: 13
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 1
+    enableMipMap: 0
     sRGBTexture: 1
     linearTexture: 0
     fadeOut: 0
@@ -106,7 +106,7 @@ TextureImporter:
     normalMapFilter: 0
     flipGreenChannel: 0
   isReadable: 0
-  streamingMipmaps: 1
+  streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
   ignoreMipmapLimit: 0
@@ -118,7 +118,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 2
+    filterMode: 1
     aniso: 2
     mipBias: 0
     wrapU: 1
@@ -127,20 +127,20 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 9
-  spritePivot: {x: 0.5, y: 0.0078125}
-  spritePixelsToUnits: 128
+  spritePivot: {x: 0.5, y: 0}
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
-  alphaIsTransparency: 0
+  alphaIsTransparency: 1
   spriteTessellationMethod: 0
   spriteTessellationDetail: -1
   spriteGeometrySubdivision: -1
-  textureType: 0
+  textureType: 8
   textureShape: 1
   singleChannelComponent: 0
   flipbookRows: 1
@@ -200,11 +200,11 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 1296
-        width: 320
-        height: 320
+        y: 600
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -221,12 +221,12 @@ TextureImporter:
       name: scree_stalker_1
       rect:
         serializedVersion: 2
-        x: 324
-        y: 1296
-        width: 320
-        height: 320
+        x: 196
+        y: 600
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -243,12 +243,12 @@ TextureImporter:
       name: scree_stalker_2
       rect:
         serializedVersion: 2
-        x: 648
-        y: 1296
-        width: 320
-        height: 320
+        x: 392
+        y: 600
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -265,12 +265,12 @@ TextureImporter:
       name: scree_stalker_3
       rect:
         serializedVersion: 2
-        x: 972
-        y: 1296
-        width: 320
-        height: 320
+        x: 588
+        y: 600
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -287,12 +287,12 @@ TextureImporter:
       name: scree_stalker_4
       rect:
         serializedVersion: 2
-        x: 1296
-        y: 1296
-        width: 320
-        height: 320
+        x: 784
+        y: 600
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -309,12 +309,12 @@ TextureImporter:
       name: scree_stalker_5
       rect:
         serializedVersion: 2
-        x: 1620
-        y: 1296
-        width: 320
-        height: 320
+        x: 980
+        y: 600
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -331,12 +331,12 @@ TextureImporter:
       name: scree_stalker_6
       rect:
         serializedVersion: 2
-        x: 0
-        y: 972
-        width: 320
-        height: 320
+        x: 1176
+        y: 600
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -353,12 +353,12 @@ TextureImporter:
       name: scree_stalker_7
       rect:
         serializedVersion: 2
-        x: 324
-        y: 972
-        width: 320
-        height: 320
+        x: 1372
+        y: 600
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -375,12 +375,12 @@ TextureImporter:
       name: scree_stalker_8
       rect:
         serializedVersion: 2
-        x: 648
-        y: 972
-        width: 320
-        height: 320
+        x: 1568
+        y: 600
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -397,12 +397,12 @@ TextureImporter:
       name: scree_stalker_9
       rect:
         serializedVersion: 2
-        x: 972
-        y: 972
-        width: 320
-        height: 320
+        x: 1764
+        y: 600
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -419,12 +419,12 @@ TextureImporter:
       name: scree_stalker_10
       rect:
         serializedVersion: 2
-        x: 1296
-        y: 972
-        width: 320
-        height: 320
+        x: 0
+        y: 500
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -441,12 +441,12 @@ TextureImporter:
       name: scree_stalker_11
       rect:
         serializedVersion: 2
-        x: 1620
-        y: 972
-        width: 320
-        height: 320
+        x: 196
+        y: 500
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -463,12 +463,12 @@ TextureImporter:
       name: scree_stalker_12
       rect:
         serializedVersion: 2
-        x: 0
-        y: 648
-        width: 320
-        height: 320
+        x: 392
+        y: 500
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -485,12 +485,12 @@ TextureImporter:
       name: scree_stalker_13
       rect:
         serializedVersion: 2
-        x: 324
-        y: 648
-        width: 320
-        height: 320
+        x: 588
+        y: 500
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -507,12 +507,12 @@ TextureImporter:
       name: scree_stalker_14
       rect:
         serializedVersion: 2
-        x: 648
-        y: 648
-        width: 320
-        height: 320
+        x: 784
+        y: 500
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -529,12 +529,12 @@ TextureImporter:
       name: scree_stalker_15
       rect:
         serializedVersion: 2
-        x: 972
-        y: 648
-        width: 320
-        height: 320
+        x: 980
+        y: 500
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -551,12 +551,12 @@ TextureImporter:
       name: scree_stalker_16
       rect:
         serializedVersion: 2
-        x: 1296
-        y: 648
-        width: 320
-        height: 320
+        x: 1176
+        y: 500
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -573,12 +573,12 @@ TextureImporter:
       name: scree_stalker_17
       rect:
         serializedVersion: 2
-        x: 1620
-        y: 648
-        width: 320
-        height: 320
+        x: 1372
+        y: 500
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -595,12 +595,12 @@ TextureImporter:
       name: scree_stalker_18
       rect:
         serializedVersion: 2
-        x: 0
-        y: 324
-        width: 320
-        height: 320
+        x: 1568
+        y: 500
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -617,12 +617,12 @@ TextureImporter:
       name: scree_stalker_19
       rect:
         serializedVersion: 2
-        x: 324
-        y: 324
-        width: 320
-        height: 320
+        x: 1764
+        y: 500
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -639,12 +639,12 @@ TextureImporter:
       name: scree_stalker_20
       rect:
         serializedVersion: 2
-        x: 648
-        y: 324
-        width: 320
-        height: 320
+        x: 0
+        y: 400
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -661,12 +661,12 @@ TextureImporter:
       name: scree_stalker_21
       rect:
         serializedVersion: 2
-        x: 972
-        y: 324
-        width: 320
-        height: 320
+        x: 196
+        y: 400
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -683,12 +683,12 @@ TextureImporter:
       name: scree_stalker_22
       rect:
         serializedVersion: 2
-        x: 1296
-        y: 324
-        width: 320
-        height: 320
+        x: 392
+        y: 400
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -705,12 +705,12 @@ TextureImporter:
       name: scree_stalker_23
       rect:
         serializedVersion: 2
-        x: 1620
-        y: 324
-        width: 320
-        height: 320
+        x: 588
+        y: 400
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -727,12 +727,12 @@ TextureImporter:
       name: scree_stalker_24
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 320
-        height: 320
+        x: 784
+        y: 400
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -749,12 +749,12 @@ TextureImporter:
       name: scree_stalker_25
       rect:
         serializedVersion: 2
-        x: 324
-        y: 0
-        width: 320
-        height: 320
+        x: 980
+        y: 400
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -771,12 +771,12 @@ TextureImporter:
       name: scree_stalker_26
       rect:
         serializedVersion: 2
-        x: 648
-        y: 0
-        width: 320
-        height: 320
+        x: 1176
+        y: 400
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -793,12 +793,12 @@ TextureImporter:
       name: scree_stalker_27
       rect:
         serializedVersion: 2
-        x: 972
-        y: 0
-        width: 320
-        height: 320
+        x: 1372
+        y: 400
+        width: 192
+        height: 96
       alignment: 9
-      pivot: {x: 0.5, y: 0.03125}
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -807,6 +807,798 @@ TextureImporter:
       bones: []
       spriteID: 2e5cb9258fb53864e8bc2a81f9fa00ae
       internalID: 1621881499
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_28
+      rect:
+        serializedVersion: 2
+        x: 1568
+        y: 400
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 547e37206c9e4e6458ea91bd8c0da99d
+      internalID: 519119694
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_29
+      rect:
+        serializedVersion: 2
+        x: 1764
+        y: 400
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9682e99f3f8cd34489b9f7d613ecd444
+      internalID: 1311233999
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_30
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 300
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 250e00d8dbdcc914da382520d1e2be57
+      internalID: 1698927827
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_31
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 300
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 64e3583a3eb62a94685e65bba545942a
+      internalID: -1736451943
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_32
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 300
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 21d8e505ecad5ec43aa6496e9e947c96
+      internalID: -1215665566
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_33
+      rect:
+        serializedVersion: 2
+        x: 588
+        y: 300
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dd9c7ec6ccd11f44d9cb0e64c16462d0
+      internalID: -2081237280
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_34
+      rect:
+        serializedVersion: 2
+        x: 784
+        y: 300
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8459112e9d24e944187c546a5903e617
+      internalID: -356374247
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_35
+      rect:
+        serializedVersion: 2
+        x: 980
+        y: 300
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1ed80227cdedbe14ca8bb8cdcca4f599
+      internalID: -315626159
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_36
+      rect:
+        serializedVersion: 2
+        x: 1176
+        y: 300
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 06481059088069544ac5606917ad9a45
+      internalID: -284062971
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_37
+      rect:
+        serializedVersion: 2
+        x: 1372
+        y: 300
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ee0d81349ab529947af75f52857dc068
+      internalID: -837701156
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_38
+      rect:
+        serializedVersion: 2
+        x: 1568
+        y: 300
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7891da1ee6943a24a8ff1857d5d71535
+      internalID: -143503710
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_39
+      rect:
+        serializedVersion: 2
+        x: 1764
+        y: 300
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 078821b5777a149469a35cd23d9659b4
+      internalID: -318070278
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_40
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 200
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 65e3d8d6158fbe24b80d6776a031c60c
+      internalID: -936923358
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_41
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 200
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 886b2becbb435bf4d8a2035017b336fb
+      internalID: 1131971715
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_42
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 200
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7f785a75accd5ff48b4016c88785eda6
+      internalID: 875957385
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_43
+      rect:
+        serializedVersion: 2
+        x: 588
+        y: 200
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6d61c7156ebb4564a8dbcbfe356dc08f
+      internalID: 2026262137
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_44
+      rect:
+        serializedVersion: 2
+        x: 784
+        y: 200
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3241dde068f395445a2290ffcf16abfe
+      internalID: 1489972
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_45
+      rect:
+        serializedVersion: 2
+        x: 980
+        y: 200
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2071aa52a8a39584baac224a73ad6d35
+      internalID: 1625374728
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_46
+      rect:
+        serializedVersion: 2
+        x: 1176
+        y: 200
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bcb36efee15461e439d59d654830e0c0
+      internalID: 1313818290
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_47
+      rect:
+        serializedVersion: 2
+        x: 1372
+        y: 200
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: aa50de305a8867841aca1d4b4caaab3e
+      internalID: -799882762
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_48
+      rect:
+        serializedVersion: 2
+        x: 1568
+        y: 200
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 25f937a41d567ea419770da9d6f89c46
+      internalID: 326780859
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_49
+      rect:
+        serializedVersion: 2
+        x: 1764
+        y: 200
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: be93e6a543cea1245918f2dfd44b761c
+      internalID: 428959055
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_50
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 100
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4f5eb12d535842745b913c9fe6b9e0a5
+      internalID: 900926310
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_51
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 100
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f0ad07567ea7c664f8533ce21f0af0de
+      internalID: 1770287982
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_52
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 100
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 46389c6064deb4843b85379f2a0b4781
+      internalID: 1446866919
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_53
+      rect:
+        serializedVersion: 2
+        x: 588
+        y: 100
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e11cd7e8369d96d45993081916a0fade
+      internalID: -806395579
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_54
+      rect:
+        serializedVersion: 2
+        x: 784
+        y: 100
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a82b60a2a24a90d419f88bfbb273e10d
+      internalID: -945704594
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_55
+      rect:
+        serializedVersion: 2
+        x: 980
+        y: 100
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d97201748f692714cb8be4915a9908ce
+      internalID: 1573032920
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_56
+      rect:
+        serializedVersion: 2
+        x: 1176
+        y: 100
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 175335e04f3e0b64f871303de0f2b626
+      internalID: 820388348
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_57
+      rect:
+        serializedVersion: 2
+        x: 1372
+        y: 100
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1bea0f76d047a2d40b27d11b0d8d572b
+      internalID: 279885776
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_58
+      rect:
+        serializedVersion: 2
+        x: 1568
+        y: 100
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bb1c47cf2c09d654dacf3d7c6656cacf
+      internalID: 1050791362
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_59
+      rect:
+        serializedVersion: 2
+        x: 1764
+        y: 100
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4de81d0767bec4941987d677370364a3
+      internalID: 1638275372
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_60
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a9ffc583ca6ac454eaa63f247757550c
+      internalID: -1218007201
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_61
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 0
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b611933516efc7c49b9c839b78a9181d
+      internalID: 1426575428
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_62
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 0
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 97706a59625efac4cb334ee8e77c4f28
+      internalID: 595102241
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scree_stalker_63
+      rect:
+        serializedVersion: 2
+        x: 588
+        y: 0
+        width: 192
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c42bcbd90d0b3df479c5daafe9f40419
+      internalID: -589166191
       vertices: []
       indices: 
       edges: []
@@ -821,9 +1613,7 @@ TextureImporter:
     indices: 
     edges: []
     weights: []
-    secondaryTextures:
-    - texture: {fileID: 2800000, guid: 97a5444935ace464caa0933f06673e8f, type: 3}
-      name: _NormalMap
+    secondaryTextures: []
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
@@ -848,10 +1638,46 @@ TextureImporter:
       scree_stalker_25: 610402539
       scree_stalker_26: -2001582525
       scree_stalker_27: 1621881499
+      scree_stalker_28: 519119694
+      scree_stalker_29: 1311233999
       scree_stalker_3: 1667678584
+      scree_stalker_30: 1698927827
+      scree_stalker_31: -1736451943
+      scree_stalker_32: -1215665566
+      scree_stalker_33: -2081237280
+      scree_stalker_34: -356374247
+      scree_stalker_35: -315626159
+      scree_stalker_36: -284062971
+      scree_stalker_37: -837701156
+      scree_stalker_38: -143503710
+      scree_stalker_39: -318070278
       scree_stalker_4: 1581113577
+      scree_stalker_40: -936923358
+      scree_stalker_41: 1131971715
+      scree_stalker_42: 875957385
+      scree_stalker_43: 2026262137
+      scree_stalker_44: 1489972
+      scree_stalker_45: 1625374728
+      scree_stalker_46: 1313818290
+      scree_stalker_47: -799882762
+      scree_stalker_48: 326780859
+      scree_stalker_49: 428959055
       scree_stalker_5: -678649539
+      scree_stalker_50: 900926310
+      scree_stalker_51: 1770287982
+      scree_stalker_52: 1446866919
+      scree_stalker_53: -806395579
+      scree_stalker_54: -945704594
+      scree_stalker_55: 1573032920
+      scree_stalker_56: 820388348
+      scree_stalker_57: 279885776
+      scree_stalker_58: 1050791362
+      scree_stalker_59: 1638275372
       scree_stalker_6: -773969540
+      scree_stalker_60: -1218007201
+      scree_stalker_61: 1426575428
+      scree_stalker_62: 595102241
+      scree_stalker_63: -589166191
       scree_stalker_7: -77577007
       scree_stalker_8: 2100393800
       scree_stalker_9: -1696215799

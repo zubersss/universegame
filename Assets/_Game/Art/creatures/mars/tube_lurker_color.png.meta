@@ -1,0 +1,1453 @@
+fileFormatVersion: 2
+guid: 97a46c5e8cc47a24f8348e3e8840b6e1
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 7921251600826277981
+    second: tube_lurker_color_0
+  - first:
+      213: -5722604587838257107
+    second: tube_lurker_color_1
+  - first:
+      213: 7756248774498291930
+    second: tube_lurker_color_2
+  - first:
+      213: 6580026278163800277
+    second: tube_lurker_color_3
+  - first:
+      213: -8590435727590888011
+    second: tube_lurker_color_4
+  - first:
+      213: -4765423862798811282
+    second: tube_lurker_color_5
+  - first:
+      213: -3082100011708555315
+    second: tube_lurker_color_6
+  - first:
+      213: -3810486799832433277
+    second: tube_lurker_color_7
+  - first:
+      213: -3364779458213273563
+    second: tube_lurker_color_8
+  - first:
+      213: -401529327747309359
+    second: tube_lurker_color_9
+  - first:
+      213: 2072085756076634816
+    second: tube_lurker_color_10
+  - first:
+      213: 4805455716519904082
+    second: tube_lurker_color_11
+  - first:
+      213: 2716833844804176546
+    second: tube_lurker_color_12
+  - first:
+      213: 3979793197875359585
+    second: tube_lurker_color_13
+  - first:
+      213: -633498741551185589
+    second: tube_lurker_color_14
+  - first:
+      213: -1022858012162921491
+    second: tube_lurker_color_15
+  - first:
+      213: -9117524335092288928
+    second: tube_lurker_color_16
+  - first:
+      213: 7718357490155337417
+    second: tube_lurker_color_17
+  - first:
+      213: -1580348726135930401
+    second: tube_lurker_color_18
+  - first:
+      213: 5519895964296899914
+    second: tube_lurker_color_19
+  - first:
+      213: -4655947891858009845
+    second: tube_lurker_color_20
+  - first:
+      213: -161016769000409656
+    second: tube_lurker_color_21
+  - first:
+      213: -1035949298387099119
+    second: tube_lurker_color_22
+  - first:
+      213: 176607410733036547
+    second: tube_lurker_color_23
+  - first:
+      213: 2649969833583709571
+    second: tube_lurker_color_24
+  - first:
+      213: -2756095292503034059
+    second: tube_lurker_color_25
+  - first:
+      213: -203414283276772420
+    second: tube_lurker_color_26
+  - first:
+      213: -1760633429474916553
+    second: tube_lurker_color_27
+  - first:
+      213: 8455890276784034566
+    second: tube_lurker_color_28
+  - first:
+      213: -2622889056181457644
+    second: tube_lurker_color_29
+  - first:
+      213: -1745446269845373606
+    second: tube_lurker_color_30
+  - first:
+      213: 714240321995320210
+    second: tube_lurker_color_31
+  - first:
+      213: 4571846411457279759
+    second: tube_lurker_color_32
+  - first:
+      213: 5219149399658832096
+    second: tube_lurker_color_33
+  - first:
+      213: 4583011169994158938
+    second: tube_lurker_color_34
+  - first:
+      213: 8306996687969243696
+    second: tube_lurker_color_35
+  - first:
+      213: 5494273173394520520
+    second: tube_lurker_color_36
+  - first:
+      213: 1467614096662610757
+    second: tube_lurker_color_37
+  - first:
+      213: -1429836395547349276
+    second: tube_lurker_color_38
+  - first:
+      213: 4210532318563447603
+    second: tube_lurker_color_39
+  - first:
+      213: 7476719890755593325
+    second: tube_lurker_color_40
+  - first:
+      213: 4071702584543518459
+    second: tube_lurker_color_41
+  - first:
+      213: -5565735875791863228
+    second: tube_lurker_color_42
+  - first:
+      213: 1857126695008457964
+    second: tube_lurker_color_43
+  - first:
+      213: 1673728112623267637
+    second: tube_lurker_color_44
+  - first:
+      213: 237533600612275062
+    second: tube_lurker_color_45
+  - first:
+      213: -7209848897256730300
+    second: tube_lurker_color_46
+  - first:
+      213: -454234441016141032
+    second: tube_lurker_color_47
+  - first:
+      213: 6647250571276242056
+    second: tube_lurker_color_48
+  - first:
+      213: 4373959004432383083
+    second: tube_lurker_color_49
+  - first:
+      213: 3349315291666715773
+    second: tube_lurker_color_50
+  - first:
+      213: 2797028732316786887
+    second: tube_lurker_color_51
+  - first:
+      213: 8955769425247565872
+    second: tube_lurker_color_52
+  - first:
+      213: 3618534799952973977
+    second: tube_lurker_color_53
+  - first:
+      213: -8744623493350570020
+    second: tube_lurker_color_54
+  - first:
+      213: 6477772715290390961
+    second: tube_lurker_color_55
+  - first:
+      213: -7454481205594955843
+    second: tube_lurker_color_56
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: tube_lurker_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 272
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 25b0a75cd668bc34b8c07ea16c2ecf72
+      internalID: -1137372266
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_1
+      rect:
+        serializedVersion: 2
+        x: 164
+        y: 272
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 740a286afb7683a438d4a764e313addc
+      internalID: 100131413
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_2
+      rect:
+        serializedVersion: 2
+        x: 328
+        y: 272
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 633d12c81ce8bb44997f3588d7d51933
+      internalID: 1194899999
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_3
+      rect:
+        serializedVersion: 2
+        x: 492
+        y: 272
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9d3106b2a464aef4bb91c94f03d75aba
+      internalID: -1434421912
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_4
+      rect:
+        serializedVersion: 2
+        x: 656
+        y: 272
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ebad3c8a7faf26445afa770fdd693c89
+      internalID: 1936291845
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_5
+      rect:
+        serializedVersion: 2
+        x: 820
+        y: 272
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 94a5d77f2f0fb3647813405f959b75df
+      internalID: 697934901
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_6
+      rect:
+        serializedVersion: 2
+        x: 984
+        y: 272
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 724e7aff476e52a4486e0e3a24f40f3d
+      internalID: -478673703
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_7
+      rect:
+        serializedVersion: 2
+        x: 1148
+        y: 272
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b87e50e71f801d74a9a4cb7f753e5277
+      internalID: 670775963
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_8
+      rect:
+        serializedVersion: 2
+        x: 1312
+        y: 272
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 28113cdaf42067547b8e0104556b166d
+      internalID: -2042211077
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_9
+      rect:
+        serializedVersion: 2
+        x: 1476
+        y: 272
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a6d10051fe45ce44480ca77ea3f9703a
+      internalID: -18196493
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_10
+      rect:
+        serializedVersion: 2
+        x: 1640
+        y: 272
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 73b63a2edc42a654cbe76708c92bab88
+      internalID: 321421142
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_11
+      rect:
+        serializedVersion: 2
+        x: 1804
+        y: 272
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f832cf72368edc34592a5dbb23035e53
+      internalID: -397826429
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_12
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 204
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bf050221dbb5ab5478e297f3a8cca65c
+      internalID: -518109837
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_13
+      rect:
+        serializedVersion: 2
+        x: 164
+        y: 204
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 47ed91ed725a66a45b1970bf84b34761
+      internalID: -1344360478
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_14
+      rect:
+        serializedVersion: 2
+        x: 328
+        y: 204
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fa91bcdbee1c5774da99791bb02f20ac
+      internalID: 189309503
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_15
+      rect:
+        serializedVersion: 2
+        x: 492
+        y: 204
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 11104362997e6a442834146f1c8671ac
+      internalID: 168925759
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_16
+      rect:
+        serializedVersion: 2
+        x: 656
+        y: 204
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2c75822bc9b7d164d9f7d643bd8dcc8a
+      internalID: -397438804
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_17
+      rect:
+        serializedVersion: 2
+        x: 820
+        y: 204
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0fb7729a5d9c4db4f970f70952c28859
+      internalID: 159399043
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_18
+      rect:
+        serializedVersion: 2
+        x: 984
+        y: 204
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b13aba3688a4f6f49863c8bbfebbbfab
+      internalID: -1887193579
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_19
+      rect:
+        serializedVersion: 2
+        x: 1148
+        y: 204
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0cc64d79a3f070b4088df2942919d816
+      internalID: 2138978072
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_20
+      rect:
+        serializedVersion: 2
+        x: 1312
+        y: 204
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 24c3c78e10af72a418cfd359481248e0
+      internalID: 100486018
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_21
+      rect:
+        serializedVersion: 2
+        x: 1476
+        y: 204
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bc3136883657ed34e8dbbbfc7a364cec
+      internalID: 778589997
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_22
+      rect:
+        serializedVersion: 2
+        x: 1640
+        y: 204
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 47f658373fa594e4e9cb2d0e07c45d2c
+      internalID: -2132069055
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_23
+      rect:
+        serializedVersion: 2
+        x: 1804
+        y: 204
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 82a214188ab702448ad5f98ae7a5765c
+      internalID: -1131508074
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_24
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 136
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e8e73da66c7c357449d5389d5ab7a9f4
+      internalID: 1807138289
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_25
+      rect:
+        serializedVersion: 2
+        x: 164
+        y: 136
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4100715207ec0f74aa91093b73966b8d
+      internalID: -793164607
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_26
+      rect:
+        serializedVersion: 2
+        x: 328
+        y: 136
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a18dc4862df01f7428dbda3b3876f5f8
+      internalID: 230842521
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_27
+      rect:
+        serializedVersion: 2
+        x: 492
+        y: 136
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 09e56817a5db0a740958e37225b5f1e7
+      internalID: -824922440
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_28
+      rect:
+        serializedVersion: 2
+        x: 656
+        y: 136
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ddf7b8e871336194b968a84bbd2b47ec
+      internalID: 1534521010
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_29
+      rect:
+        serializedVersion: 2
+        x: 820
+        y: 136
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e9f40831300aed94590a85241bf4db59
+      internalID: -1104962827
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_30
+      rect:
+        serializedVersion: 2
+        x: 984
+        y: 136
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5ea0bf3aff71dfd4580e3a3d23755108
+      internalID: -259924139
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_31
+      rect:
+        serializedVersion: 2
+        x: 1148
+        y: 136
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 522562a8b075b9d42a64cf9a23a6950e
+      internalID: -478890510
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_32
+      rect:
+        serializedVersion: 2
+        x: 1312
+        y: 136
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3fc087eb8ddc1504f948528ab33f40fb
+      internalID: 1590066711
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_33
+      rect:
+        serializedVersion: 2
+        x: 1476
+        y: 136
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f0dea19ee6f81f94488c730bb6dd13f8
+      internalID: -1314911742
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_34
+      rect:
+        serializedVersion: 2
+        x: 1640
+        y: 136
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f53a5cc964e9d83469ca0cc39f862493
+      internalID: -1040578014
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_35
+      rect:
+        serializedVersion: 2
+        x: 1804
+        y: 136
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2033d2585617f8f459cfa749998132b0
+      internalID: -594986569
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_36
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 68
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2968d01a61b71744d909809a43a62118
+      internalID: 1341275433
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_37
+      rect:
+        serializedVersion: 2
+        x: 164
+        y: 68
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d609c39b5cde5dd4c899b498d7a2a01c
+      internalID: -160371219
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_38
+      rect:
+        serializedVersion: 2
+        x: 328
+        y: 68
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fbd8afe6af7ce814eb75e8163b519b31
+      internalID: -791789892
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_39
+      rect:
+        serializedVersion: 2
+        x: 492
+        y: 68
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ea890ae5d37ecd04885b8172d7e22983
+      internalID: -71732410
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_40
+      rect:
+        serializedVersion: 2
+        x: 656
+        y: 68
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8489249863efb684ebd3fecdcbb29677
+      internalID: 1342772196
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_41
+      rect:
+        serializedVersion: 2
+        x: 820
+        y: 68
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f6934b70bcecfce419c604acf03c73b0
+      internalID: 600910602
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_42
+      rect:
+        serializedVersion: 2
+        x: 984
+        y: 68
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 65a499fc71a83474d8ca880280b3927b
+      internalID: 222732368
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_43
+      rect:
+        serializedVersion: 2
+        x: 1148
+        y: 68
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d863bb5d316cba04282f701a19f835ff
+      internalID: 1438316449
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_44
+      rect:
+        serializedVersion: 2
+        x: 1312
+        y: 68
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8eb628a978454dd49a8373a80cdeae8e
+      internalID: -2051338014
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_45
+      rect:
+        serializedVersion: 2
+        x: 1476
+        y: 68
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 57b15ec83a855eb4cb50a6f2d842e222
+      internalID: -1970449773
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_46
+      rect:
+        serializedVersion: 2
+        x: 1640
+        y: 68
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 40cdc616a65aa594099ee55b5ac82808
+      internalID: -1182934277
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_47
+      rect:
+        serializedVersion: 2
+        x: 1804
+        y: 68
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ae383d356fce60447939b5dce09e8187
+      internalID: -348963847
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_48
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ab6cb3d4295e067488f0308b7846a79a
+      internalID: -1768903601
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tube_lurker_49
+      rect:
+        serializedVersion: 2
+        x: 164
+        y: 0
+        width: 160
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 24e9ee2752a569c45a03e8ec23aaee40
+      internalID: 1964320108
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 9b22ca4023fff6b4dbece8e43a53fd18
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      tube_lurker_0: -1137372266
+      tube_lurker_1: 100131413
+      tube_lurker_10: 321421142
+      tube_lurker_11: -397826429
+      tube_lurker_12: -518109837
+      tube_lurker_13: -1344360478
+      tube_lurker_14: 189309503
+      tube_lurker_15: 168925759
+      tube_lurker_16: -397438804
+      tube_lurker_17: 159399043
+      tube_lurker_18: -1887193579
+      tube_lurker_19: 2138978072
+      tube_lurker_2: 1194899999
+      tube_lurker_20: 100486018
+      tube_lurker_21: 778589997
+      tube_lurker_22: -2132069055
+      tube_lurker_23: -1131508074
+      tube_lurker_24: 1807138289
+      tube_lurker_25: -793164607
+      tube_lurker_26: 230842521
+      tube_lurker_27: -824922440
+      tube_lurker_28: 1534521010
+      tube_lurker_29: -1104962827
+      tube_lurker_3: -1434421912
+      tube_lurker_30: -259924139
+      tube_lurker_31: -478890510
+      tube_lurker_32: 1590066711
+      tube_lurker_33: -1314911742
+      tube_lurker_34: -1040578014
+      tube_lurker_35: -594986569
+      tube_lurker_36: 1341275433
+      tube_lurker_37: -160371219
+      tube_lurker_38: -791789892
+      tube_lurker_39: -71732410
+      tube_lurker_4: 1936291845
+      tube_lurker_40: 1342772196
+      tube_lurker_41: 600910602
+      tube_lurker_42: 222732368
+      tube_lurker_43: 1438316449
+      tube_lurker_44: -2051338014
+      tube_lurker_45: -1970449773
+      tube_lurker_46: -1182934277
+      tube_lurker_47: -348963847
+      tube_lurker_48: -1768903601
+      tube_lurker_49: 1964320108
+      tube_lurker_5: 697934901
+      tube_lurker_6: -478673703
+      tube_lurker_7: 670775963
+      tube_lurker_8: -2042211077
+      tube_lurker_9: -18196493
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

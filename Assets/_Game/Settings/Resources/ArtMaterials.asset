@@ -299,8 +299,6 @@ MonoBehaviour:
   - characters/surveyor/mk1
   - characters/surveyor/mk2
   - characters/surveyor/mk3
-  - creatures/mars/dustskater
-  - creatures/mars/scree_stalker
   - creatures/mercury/cinderhulk
   - creatures/mercury/cinderhulk_day
   - creatures/mercury/cinderhulk_night
@@ -362,12 +360,6 @@ MonoBehaviour:
   - props/jupiter/beacon_vault
   - props/jupiter/derelict_pod
   - props/jupiter/husk_tortoise
-  - props/mars/hauler_cargo
-  - props/mars/hauler_hull_a
-  - props/mars/hauler_hull_b
-  - props/mars/ice_drill_rig
-  - props/mars/meridian_beacon
-  - props/mars/warden_pylon
   - props/mercury/equipment_locker
   - props/mercury/flare_shelter
   - props/mercury/meridian_beacon
@@ -870,6 +862,98 @@ MonoBehaviour:
       start: 54
       length: 12
       loop: 1
+  - key: creatures/mars/dustskater
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 10
+      loop: 1
+    - name: walk
+      start: 10
+      length: 12
+      loop: 1
+    - name: react
+      start: 22
+      length: 8
+      loop: 0
+    - name: bump
+      start: 30
+      length: 10
+      loop: 0
+    - name: flee
+      start: 40
+      length: 12
+      loop: 1
+  - key: creatures/mars/polar_crawler
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 12
+      loop: 1
+    - name: walk
+      start: 12
+      length: 14
+      loop: 1
+    - name: react
+      start: 26
+      length: 10
+      loop: 0
+    - name: bump
+      start: 36
+      length: 10
+      loop: 0
+  - key: creatures/mars/scree_stalker
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 10
+      loop: 1
+    - name: walk
+      start: 10
+      length: 12
+      loop: 1
+    - name: react
+      start: 22
+      length: 8
+      loop: 0
+    - name: bump
+      start: 30
+      length: 10
+      loop: 0
+    - name: flee
+      start: 40
+      length: 12
+      loop: 1
+    - name: follow
+      start: 52
+      length: 12
+      loop: 1
+  - key: creatures/mars/tube_lurker
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 10
+      loop: 1
+    - name: walk
+      start: 10
+      length: 12
+      loop: 1
+    - name: react
+      start: 22
+      length: 8
+      loop: 0
+    - name: bump
+      start: 30
+      length: 10
+      loop: 0
+    - name: idle_open
+      start: 40
+      length: 10
+      loop: 1
   - key: creatures/mercury/cinderhulk_day
     fps: 10
     clips:
@@ -1195,6 +1279,27 @@ MonoBehaviour:
     - name: working
       start: 0
       length: 8
+      loop: 1
+  - key: props/mars/ice_drill_rig
+    fps: 12
+    clips:
+    - name: working
+      start: 0
+      length: 8
+      loop: 1
+  - key: props/mars/meridian_beacon
+    fps: 12
+    clips:
+    - name: pulse
+      start: 0
+      length: 4
+      loop: 1
+  - key: props/mars/warden_pylon
+    fps: 12
+    clips:
+    - name: hum
+      start: 0
+      length: 4
       loop: 1
   - key: ships/pilgrim/puff
     fps: 12

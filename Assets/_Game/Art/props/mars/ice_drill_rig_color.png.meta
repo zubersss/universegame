@@ -9,7 +9,7 @@ TextureImporter:
   serializedVersion: 13
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 1
+    enableMipMap: 0
     sRGBTexture: 1
     linearTexture: 0
     fadeOut: 0
@@ -25,7 +25,7 @@ TextureImporter:
     normalMapFilter: 0
     flipGreenChannel: 0
   isReadable: 0
-  streamingMipmaps: 1
+  streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
   ignoreMipmapLimit: 0
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 2
+    filterMode: 1
     aniso: 2
     mipBias: 0
     wrapU: 1
@@ -46,20 +46,20 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 9
-  spritePivot: {x: 0.5, y: 0.0078125}
-  spritePixelsToUnits: 128
+  spritePivot: {x: 0.5, y: 0.039683}
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
-  alphaIsTransparency: 0
+  alphaIsTransparency: 1
   spriteTessellationMethod: 0
   spriteTessellationDetail: -1
   spriteGeometrySubdivision: -1
-  textureType: 0
+  textureType: 8
   textureShape: 1
   singleChannelComponent: 0
   flipbookRows: 1
@@ -115,23 +115,177 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: ice_drill_rig_color_0
+      name: ice_drill_rig_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
-        width: 1024
-        height: 1024
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        y: 256
+        width: 124
+        height: 252
+      alignment: 9
+      pivot: {x: 0.5, y: 0.039683}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 3413328862042db60800000000000000
-      internalID: 7769342841404469571
+      spriteID: 8881637d4fd41a8438b5258496540157
+      internalID: 2128031434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ice_drill_rig_1
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 256
+        width: 124
+        height: 252
+      alignment: 9
+      pivot: {x: 0.5, y: 0.039683}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 10afaf5f000f36b42bdd60cdda08f0b1
+      internalID: 417600882
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ice_drill_rig_2
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 256
+        width: 124
+        height: 252
+      alignment: 9
+      pivot: {x: 0.5, y: 0.039683}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c3f8b8d78a9d43744ad32dd4989dc6a0
+      internalID: -173202503
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ice_drill_rig_3
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 256
+        width: 124
+        height: 252
+      alignment: 9
+      pivot: {x: 0.5, y: 0.039683}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b640756534f761343b4d73fb7f535054
+      internalID: -1937119564
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ice_drill_rig_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 124
+        height: 252
+      alignment: 9
+      pivot: {x: 0.5, y: 0.039683}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 43cb8b4bc4961c542a07976d92f4973c
+      internalID: 1575723851
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ice_drill_rig_5
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 0
+        width: 124
+        height: 252
+      alignment: 9
+      pivot: {x: 0.5, y: 0.039683}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a3cba853bc5a73244b53523a0e9c78f4
+      internalID: 886195453
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ice_drill_rig_6
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 0
+        width: 124
+        height: 252
+      alignment: 9
+      pivot: {x: 0.5, y: 0.039683}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 465f0c5dbfbc06544a3e4a43c6f8bc95
+      internalID: -1323946057
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ice_drill_rig_7
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 0
+        width: 124
+        height: 252
+      alignment: 9
+      pivot: {x: 0.5, y: 0.039683}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 38dcc8a306627fc4ab38caa1f00a47e3
+      internalID: -1029850974
       vertices: []
       indices: 
       edges: []
@@ -149,7 +303,15 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      ice_drill_rig_0: 2128031434
+      ice_drill_rig_1: 417600882
+      ice_drill_rig_2: -173202503
+      ice_drill_rig_3: -1937119564
+      ice_drill_rig_4: 1575723851
+      ice_drill_rig_5: 886195453
+      ice_drill_rig_6: -1323946057
+      ice_drill_rig_7: -1029850974
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

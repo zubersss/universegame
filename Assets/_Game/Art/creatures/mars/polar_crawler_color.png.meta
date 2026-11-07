@@ -1,0 +1,1376 @@
+fileFormatVersion: 2
+guid: 24463fc6758ef6c47bcc60e7ad447f52
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 8642590464434061948
+    second: polar_crawler_color_0
+  - first:
+      213: -4527901046026597423
+    second: polar_crawler_color_1
+  - first:
+      213: 2857855175821673423
+    second: polar_crawler_color_2
+  - first:
+      213: 7751633220108118538
+    second: polar_crawler_color_3
+  - first:
+      213: 5921321642487580207
+    second: polar_crawler_color_4
+  - first:
+      213: 421409716800684654
+    second: polar_crawler_color_5
+  - first:
+      213: 5535720683543489425
+    second: polar_crawler_color_6
+  - first:
+      213: -1945727329806331066
+    second: polar_crawler_color_7
+  - first:
+      213: -5708215629916229716
+    second: polar_crawler_color_8
+  - first:
+      213: 6288166473131329593
+    second: polar_crawler_color_9
+  - first:
+      213: -8800511202037488505
+    second: polar_crawler_color_10
+  - first:
+      213: -6673152927974172009
+    second: polar_crawler_color_11
+  - first:
+      213: 6944519705810309000
+    second: polar_crawler_color_12
+  - first:
+      213: -3023331841613488111
+    second: polar_crawler_color_13
+  - first:
+      213: 4511578968521428174
+    second: polar_crawler_color_14
+  - first:
+      213: -1438182175950940689
+    second: polar_crawler_color_15
+  - first:
+      213: -4371587539983883346
+    second: polar_crawler_color_16
+  - first:
+      213: -8938667884184911266
+    second: polar_crawler_color_17
+  - first:
+      213: -777191219503546118
+    second: polar_crawler_color_18
+  - first:
+      213: 2804056341925809202
+    second: polar_crawler_color_19
+  - first:
+      213: 8601654223702708295
+    second: polar_crawler_color_20
+  - first:
+      213: -7506758788274140381
+    second: polar_crawler_color_21
+  - first:
+      213: -1507767474641415199
+    second: polar_crawler_color_22
+  - first:
+      213: -298079250500751636
+    second: polar_crawler_color_23
+  - first:
+      213: 426406200696949447
+    second: polar_crawler_color_24
+  - first:
+      213: -7973729920272627499
+    second: polar_crawler_color_25
+  - first:
+      213: 5099329304529666131
+    second: polar_crawler_color_26
+  - first:
+      213: 3124089173986514967
+    second: polar_crawler_color_27
+  - first:
+      213: -1824540331840036626
+    second: polar_crawler_color_28
+  - first:
+      213: 3827275805147094896
+    second: polar_crawler_color_29
+  - first:
+      213: 5758554087173715312
+    second: polar_crawler_color_30
+  - first:
+      213: 1273021336133599855
+    second: polar_crawler_color_31
+  - first:
+      213: -3195566324030045888
+    second: polar_crawler_color_32
+  - first:
+      213: -3242949893234995036
+    second: polar_crawler_color_33
+  - first:
+      213: -1953772831989166518
+    second: polar_crawler_color_34
+  - first:
+      213: -2172068781737280394
+    second: polar_crawler_color_35
+  - first:
+      213: 1195750913083132953
+    second: polar_crawler_color_36
+  - first:
+      213: -6623777121240367138
+    second: polar_crawler_color_37
+  - first:
+      213: -5723958366325082553
+    second: polar_crawler_color_38
+  - first:
+      213: 7727359930472692989
+    second: polar_crawler_color_39
+  - first:
+      213: -6562034376752214830
+    second: polar_crawler_color_40
+  - first:
+      213: -2063296255116329811
+    second: polar_crawler_color_41
+  - first:
+      213: 6993032521082423425
+    second: polar_crawler_color_42
+  - first:
+      213: -5147394317274285161
+    second: polar_crawler_color_43
+  - first:
+      213: 4446099026736761653
+    second: polar_crawler_color_44
+  - first:
+      213: 4831947695828218522
+    second: polar_crawler_color_45
+  - first:
+      213: 2889495800079375402
+    second: polar_crawler_color_46
+  - first:
+      213: -3869774559441029127
+    second: polar_crawler_color_47
+  - first:
+      213: -3338292889972454335
+    second: polar_crawler_color_48
+  - first:
+      213: -314132472400017063
+    second: polar_crawler_color_49
+  - first:
+      213: 5082861820260814049
+    second: polar_crawler_color_50
+  - first:
+      213: 7617145936120461748
+    second: polar_crawler_color_51
+  - first:
+      213: 7533998013286475714
+    second: polar_crawler_color_52
+  - first:
+      213: 4759044365705945208
+    second: polar_crawler_color_53
+  - first:
+      213: 7677339783781039896
+    second: polar_crawler_color_54
+  - first:
+      213: -966894556308938850
+    second: polar_crawler_color_55
+  - first:
+      213: 172460940573122399
+    second: polar_crawler_color_56
+  - first:
+      213: -4741369843465887955
+    second: polar_crawler_color_57
+  - first:
+      213: -2576657024566448752
+    second: polar_crawler_color_58
+  - first:
+      213: -6192047171918772740
+    second: polar_crawler_color_59
+  - first:
+      213: 6550973973829830450
+    second: polar_crawler_color_60
+  - first:
+      213: -7332943805910449772
+    second: polar_crawler_color_61
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: polar_crawler_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 204
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5d72afd583896c04ca754667be636b86
+      internalID: -15670962
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_1
+      rect:
+        serializedVersion: 2
+        x: 148
+        y: 204
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8fb8ba87b6bcefa4a8b49363d4f48888
+      internalID: -1873591180
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_2
+      rect:
+        serializedVersion: 2
+        x: 296
+        y: 204
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 152ecb6b5c27bf04288154f8f786963b
+      internalID: -1900885811
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_3
+      rect:
+        serializedVersion: 2
+        x: 444
+        y: 204
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ababbe7e7478ccf4fa150ef7451f2538
+      internalID: 134738
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_4
+      rect:
+        serializedVersion: 2
+        x: 592
+        y: 204
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d64eb17476480054bb36f510730b31d6
+      internalID: 756478462
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_5
+      rect:
+        serializedVersion: 2
+        x: 740
+        y: 204
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7e2931e1610c8a4479a8b9ca2f48ad0d
+      internalID: -1873436620
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_6
+      rect:
+        serializedVersion: 2
+        x: 888
+        y: 204
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a2b3e828c0199364cae201c8cae50da5
+      internalID: 471571230
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_7
+      rect:
+        serializedVersion: 2
+        x: 1036
+        y: 204
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9ad8ec936c14b38468ae79657bd8bfe2
+      internalID: -1342680886
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_8
+      rect:
+        serializedVersion: 2
+        x: 1184
+        y: 204
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 26d076e7155f65b4a8c07a5a870f725e
+      internalID: 354438553
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_9
+      rect:
+        serializedVersion: 2
+        x: 1332
+        y: 204
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 260937e3373e51c48bdcec5ec0cb42d8
+      internalID: -1936325915
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_10
+      rect:
+        serializedVersion: 2
+        x: 1480
+        y: 204
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d4f278c9b2a7d9e40855cf31f8b29e9e
+      internalID: 1536696989
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_11
+      rect:
+        serializedVersion: 2
+        x: 1628
+        y: 204
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 206d8e599f90bcb488ff087b8fd69edf
+      internalID: -304995013
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_12
+      rect:
+        serializedVersion: 2
+        x: 1776
+        y: 204
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ef1e172330d691b4cabb29938fe7f987
+      internalID: 1139966289
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_13
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 136
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f3d8683fc1639bb46a8344d563813092
+      internalID: 1704616119
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_14
+      rect:
+        serializedVersion: 2
+        x: 148
+        y: 136
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 66b704f764ffce446891952848fe2338
+      internalID: -957352206
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_15
+      rect:
+        serializedVersion: 2
+        x: 296
+        y: 136
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 019bd66b2d286b746a42b165c4be895b
+      internalID: -1105189184
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_16
+      rect:
+        serializedVersion: 2
+        x: 444
+        y: 136
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e0b58762762965b4f87cb5958fb7dc79
+      internalID: -660789102
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_17
+      rect:
+        serializedVersion: 2
+        x: 592
+        y: 136
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 413535985ce7b304b95975dd3fd74a98
+      internalID: 270418989
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_18
+      rect:
+        serializedVersion: 2
+        x: 740
+        y: 136
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 96d4e1f2e5057a8469ef9cb27b93f36d
+      internalID: 924104562
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_19
+      rect:
+        serializedVersion: 2
+        x: 888
+        y: 136
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 493f862580c8633439362e3f978d3bc4
+      internalID: -657053766
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_20
+      rect:
+        serializedVersion: 2
+        x: 1036
+        y: 136
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7ed2af2f7c835624a8375bf67090ce7d
+      internalID: -950612087
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_21
+      rect:
+        serializedVersion: 2
+        x: 1184
+        y: 136
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8da30f1e9edf7b848bb05656eae8d0e2
+      internalID: 244430223
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_22
+      rect:
+        serializedVersion: 2
+        x: 1332
+        y: 136
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8166320d5be44c44bbbcf38a57ef07ce
+      internalID: -776557153
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_23
+      rect:
+        serializedVersion: 2
+        x: 1480
+        y: 136
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2727b3e80051a64439c9e090676307e4
+      internalID: -1705495957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_24
+      rect:
+        serializedVersion: 2
+        x: 1628
+        y: 136
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: faeff2820ca1cbd4088030f630cf1176
+      internalID: 1223714072
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_25
+      rect:
+        serializedVersion: 2
+        x: 1776
+        y: 136
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8b77f80db28b6004fb3fa59f7b344de2
+      internalID: -740694145
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_26
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 68
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1f57525f4042d574c83b25dd79cc0aa9
+      internalID: 892157250
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_27
+      rect:
+        serializedVersion: 2
+        x: 148
+        y: 68
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 394e4aabf4cfc2a4c961c1d006810127
+      internalID: -800081516
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_28
+      rect:
+        serializedVersion: 2
+        x: 296
+        y: 68
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 144197008ce01b843b99a7e0b15ea8ad
+      internalID: 133597649
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_29
+      rect:
+        serializedVersion: 2
+        x: 444
+        y: 68
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6624d7b31665169439880576846506bc
+      internalID: -1939650920
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_30
+      rect:
+        serializedVersion: 2
+        x: 592
+        y: 68
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2ae613641ce0ebb4b80e3036d968df74
+      internalID: -286316103
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_31
+      rect:
+        serializedVersion: 2
+        x: 740
+        y: 68
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3580850de40f9d945b9e876b0194d1ae
+      internalID: 1910628160
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_32
+      rect:
+        serializedVersion: 2
+        x: 888
+        y: 68
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 98e0d94fa4da36c43820d815bf8d850f
+      internalID: 1985038475
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_33
+      rect:
+        serializedVersion: 2
+        x: 1036
+        y: 68
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 22b8914a64add034698e154d5fbdef3f
+      internalID: 2143258983
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_34
+      rect:
+        serializedVersion: 2
+        x: 1184
+        y: 68
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5423ccd3ce534b740b43a2fa8d291160
+      internalID: 1727112637
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_35
+      rect:
+        serializedVersion: 2
+        x: 1332
+        y: 68
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4eccbd3ba744f1f41b05b8fd75ab69be
+      internalID: -1472746836
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_36
+      rect:
+        serializedVersion: 2
+        x: 1480
+        y: 68
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b485279d3e1d93341b5a5795c391939b
+      internalID: -391021803
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_37
+      rect:
+        serializedVersion: 2
+        x: 1628
+        y: 68
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 71715ee236593a545886862ab3e30aed
+      internalID: -1800627342
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_38
+      rect:
+        serializedVersion: 2
+        x: 1776
+        y: 68
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5b87e1559747c754088d7f09d414e159
+      internalID: 1040945093
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_39
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 31842216a558a3c46957a97cb7537875
+      internalID: -1623984600
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_40
+      rect:
+        serializedVersion: 2
+        x: 148
+        y: 0
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d22e8030846ed804da7d37d7382475e2
+      internalID: -962852701
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_41
+      rect:
+        serializedVersion: 2
+        x: 296
+        y: 0
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 01f010c680051d04db3970f8fb061126
+      internalID: 2028110270
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_42
+      rect:
+        serializedVersion: 2
+        x: 444
+        y: 0
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bea05b6910b82db458c0edb968862d12
+      internalID: 341987569
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_43
+      rect:
+        serializedVersion: 2
+        x: 592
+        y: 0
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5dc5744b91fb52f438c3022692820cca
+      internalID: -1137716602
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_44
+      rect:
+        serializedVersion: 2
+        x: 740
+        y: 0
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9bef18204b289c64fabd49bbd6f50f10
+      internalID: 385139431
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: polar_crawler_45
+      rect:
+        serializedVersion: 2
+        x: 888
+        y: 0
+        width: 144
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 001dba9ca2b739c4ab330668d7b6d7de
+      internalID: -186057531
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 6746772e7a3c6084db3e9ee79b68f9a9
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      polar_crawler_0: -15670962
+      polar_crawler_1: -1873591180
+      polar_crawler_10: 1536696989
+      polar_crawler_11: -304995013
+      polar_crawler_12: 1139966289
+      polar_crawler_13: 1704616119
+      polar_crawler_14: -957352206
+      polar_crawler_15: -1105189184
+      polar_crawler_16: -660789102
+      polar_crawler_17: 270418989
+      polar_crawler_18: 924104562
+      polar_crawler_19: -657053766
+      polar_crawler_2: -1900885811
+      polar_crawler_20: -950612087
+      polar_crawler_21: 244430223
+      polar_crawler_22: -776557153
+      polar_crawler_23: -1705495957
+      polar_crawler_24: 1223714072
+      polar_crawler_25: -740694145
+      polar_crawler_26: 892157250
+      polar_crawler_27: -800081516
+      polar_crawler_28: 133597649
+      polar_crawler_29: -1939650920
+      polar_crawler_3: 134738
+      polar_crawler_30: -286316103
+      polar_crawler_31: 1910628160
+      polar_crawler_32: 1985038475
+      polar_crawler_33: 2143258983
+      polar_crawler_34: 1727112637
+      polar_crawler_35: -1472746836
+      polar_crawler_36: -391021803
+      polar_crawler_37: -1800627342
+      polar_crawler_38: 1040945093
+      polar_crawler_39: -1623984600
+      polar_crawler_4: 756478462
+      polar_crawler_40: -962852701
+      polar_crawler_41: 2028110270
+      polar_crawler_42: 341987569
+      polar_crawler_43: -1137716602
+      polar_crawler_44: 385139431
+      polar_crawler_45: -186057531
+      polar_crawler_5: -1873436620
+      polar_crawler_6: 471571230
+      polar_crawler_7: -1342680886
+      polar_crawler_8: 354438553
+      polar_crawler_9: -1936325915
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

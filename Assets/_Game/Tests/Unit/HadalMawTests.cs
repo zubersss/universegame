@@ -33,7 +33,7 @@ namespace Meridian.Tests
             Assert.AreEqual(12f, spec.reactRadius, 1e-4f, "the rig's react radius (B-136)");
             Assert.GreaterOrEqual(spec.WaterDepthNeeded, 18f, "deep water only: never the camp's pools");
             Assert.AreEqual(1, spec.maxAlive);
-            Assert.AreEqual((int)Species.HadalMaw, SpeciesSpec.Count - 1, "appended last: every older index stays");
+            Assert.AreEqual((int)Species.Squid + 1, (int)Species.HadalMaw, "appended after the swimmers: every older index stays");
             var site = new SpawnSite { surfaceTile = TileId.Sand, aboveTile = TileId.Water, waterDepth = 60, surfaceY = 260, datumY = 320, planet = PlanetId.Earth };
             Assert.IsTrue(spec.Allows(site), "the shelf: 60 m of water");
             site.waterDepth = 6;

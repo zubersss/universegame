@@ -73,7 +73,9 @@ namespace Meridian.Tests
             while ((stage.Fading || stage.Scene != "coast") && Time.realtimeSinceStartup < until) yield return null;
             TestContext.Out.WriteLine($"[MERIDIAN] band follow: at x 2096 scene {stage.Scene} ({stage.Layers.SceneKey}), crossfades {stage.Crossfades}, datum {stage.Layers.datumY:F1}, placeholders {stage.Layers.placeholders.Contains(true)}");
             Assert.AreEqual("coast", stage.Scene, "the coast set on the shore (the Maw's frames)");
-            Assert.AreEqual(side.Config.datumY + 1f, stage.Layers.datumY, 1e-3f, "the water line");
+            Assert.AreEqual(stage.Datum.At(2096), stage.Layers.datumY, 1e-3f, "the sampler's datum at the shore (16 columns into the band: still blending down from the desert)");
+            Assert.Greater(stage.Layers.datumY, side.Config.datumY + 1f - 1e-3f); Assert.Less(stage.Layers.datumY, side.Config.datumY + 8f);
+            Assert.AreEqual(side.Config.datumY + 1f, stage.Datum.At(2080 + 60), 1e-3f, "60 columns in: the water line");
             Assert.GreaterOrEqual(stage.Crossfades, 2);
             LogAssert.NoUnexpectedReceived();
         }

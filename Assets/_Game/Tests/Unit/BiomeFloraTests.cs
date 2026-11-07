@@ -50,7 +50,8 @@ namespace Meridian.Tests
             Assert.AreEqual("plains", FloraRigs.BiomeNameAt(PlanetId.Earth, plains + pl / 2));
             Assert.AreEqual("coast", FloraRigs.BiomeNameAt(PlanetId.Earth, ocean + ol / 2), "the ocean band's land is the coast");
             Assert.AreEqual("forest", FloraRigs.BiomeNameAt(PlanetId.Earth, forest + fl / 2));
-            Assert.IsNull(FloraRigs.BiomeNameAt(PlanetId.Mars, 100), "no bands on Mars yet: no filter");
+            Assert.AreEqual("polar", FloraRigs.BiomeNameAt(PlanetId.Mars, 100), "U-118: Mars names its regions (x 100 is the polar cap)");
+            Assert.IsNull(FloraRigs.BiomeNameAt(PlanetId.Mercury, 100), "no bands on Mercury: no filter");
             Assert.IsNull(FloraRigs.BiomeNameAt(null, 100));
             Assert.AreEqual("forest", CartoonStage.SceneFor(Biome.Forest));
             Assert.AreEqual("plains", CartoonStage.SceneFor(Biome.Plains));
