@@ -280,6 +280,15 @@ namespace Meridian.Tests
         }
 
         /// <summary>Import-time rows (textures, audio, size caps) read from the importers.</summary>
+        /// <summary>A v3 cartoon asset (contract §11): its sidecar says "style": "v3", or it is a 4-segment background layer / palette strip.</summary>
+        static bool IsV3Asset(string root, string colorPath)
+        {
+            var json = colorPath.Substring(0, colorPath.Length - "_color.png".Length) + ".json";
+            if (System.IO.File.Exists(json) && System.Text.RegularExpressions.Regex.IsMatch(System.IO.File.ReadAllText(json), "\"style\"\\s*:\\s*\"v3\"")) return true;
+            var rel = colorPath.Substring(root.Length + 1);
+            return rel.Split('/').Length == 4 && (rel.StartsWith("backgrounds/", StringComparison.Ordinal) || rel.StartsWith("ui/palettes/", StringComparison.Ordinal));
+        }
+
         /// <summary>U-101: the planet's sprite atlases on disk (Settings/Atlases/planet_&lt;planet&gt;*.spriteatlasv2); -1 outside the Editor.</summary>
         static int AtlasFilesFor(string planet)
         {
@@ -298,7 +307,7 @@ namespace Meridian.Tests
         void StaticRows()
         {
 #if UNITY_EDITOR
-            int wrongColor = 0, wrongNormal = 0, missingMips = 0, npotNoMips = 0, total = 0;
+            int wrongColor = 0, wrongNormal = 0, missingMips = 0, npotNoMips = 0, v3NoMips = 0, total = 0;
             var wrong = new List<string>();
             foreach (var root in new[] { "Assets/_Game/Art", "Assets/_Game/Placeholders" })
             foreach (var guid in UnityEditor.AssetDatabase.FindAssets("t:Texture2D", new[] { root }))
@@ -313,10 +322,12 @@ namespace Meridian.Tests
                 // D-061: non-power-of-two sheets import without mips (NPOT + mips would be stored uncompressed).
                 ti.GetSourceTextureWidthAndHeight(out int tw, out int th);
                 bool pot = Mathf.IsPowerOfTwo(tw) && Mathf.IsPowerOfTwo(th);
-                if (path.EndsWith("_color.png") && world && !ti.mipmapEnabled) { if (pot) missingMips++; else npotNoMips++; }
+                // Contract v3.0 §11.8 (D-086): v3 cartoon assets import WITHOUT mips by rule; the mips rule here is the v2 one.
+                bool v3 = path.EndsWith("_color.png") && IsV3Asset(root, path);
+                if (path.EndsWith("_color.png") && world && !ti.mipmapEnabled) { if (v3) v3NoMips++; else if (pot) missingMips++; else npotNoMips++; }
             }
             Row("Textures", "BC7 color, BC5 normals, mips on POT world sprites (NPOT: none, D-061)",
-                $"{total} textures: {wrongColor} color not BC7, {wrongNormal} normals not BC5, {missingMips} POT world sprites without mips ({npotNoMips} NPOT without, D-061){(wrong.Count > 0 ? "; off-rule: " + string.Join(", ", wrong.Take(5)) : "")}",
+                $"{total} textures: {wrongColor} color not BC7, {wrongNormal} normals not BC5, {missingMips} POT world sprites without mips ({npotNoMips} NPOT without, D-061; {v3NoMips} v3 without by rule, contract §11.8){(wrong.Count > 0 ? "; off-rule: " + string.Join(", ", wrong.Take(5)) : "")}",
                 wrongColor == 0 && wrongNormal == 0 && missingMips == 0);
 
             int bigAtlas = 0, atlases = 0;
