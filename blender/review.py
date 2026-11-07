@@ -243,6 +243,27 @@ def planet_background(planet, scene, W, H):
     return bg, f"{len(layers)} painted layers"
 
 
+def rotate_about(img_u8, deg, pivot_xy):
+    """Rotate an RGBA frame by deg (+ = clockwise on screen, i.e. leaning right) about a pixel
+    point, nearest sampling, into a canvas large enough to hold it (review panels only)."""
+    h, w = img_u8.shape[:2]
+    a = np.radians(deg)
+    ca, sa = np.cos(a), np.sin(a)
+    D = int(np.ceil(np.hypot(h, w))) + 4
+    yy, xx = np.mgrid[0:D, 0:D].astype(np.float32)
+    cx, cy = D / 2.0, D / 2.0
+    dx, dy = xx - cx, yy - cy
+    sx = ca * dx + sa * dy + pivot_xy[0]
+    sy = -sa * dx + ca * dy + pivot_xy[1]
+    ok = (sx >= 0) & (sx < w) & (sy >= 0) & (sy < h)
+    out = np.zeros((D, D, 4), np.uint8)
+    out[ok] = img_u8[sy[ok].astype(int), sx[ok].astype(int)]
+    ys, xs = np.nonzero(out[..., 3])
+    if len(ys) == 0:
+        return out[:1, :1]
+    return out[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
+
+
 def ink_zoom(frame_u8, box=96):
     """2x nearest zoom of the box with the most line work in a frame (v3.1: the 2x detail crop).
     Dark pixels count, not exact ink, because 1-1.5 px lines are mostly anti-aliased."""
@@ -285,6 +306,25 @@ def v3_sheet_review(entry, meta, frames, sheet_path, out, stats, stale=None):
                 break
             _over(bg, frames[c["start"] + k], x, bh - fh - 8)
             x += fw + 8
+    ground = bh - 8 - int(round(meta["pivot"][1] * fh))      # the pivot line of the frames above, in panel px
+    if entry.get("review_tilt"):                             # the in-flight lean the game applies (D-102: +-35 deg)
+        for deg in (-float(entry["review_tilt"]), float(entry["review_tilt"])):
+            rot = rotate_about(frames[0], deg, (meta["pivot"][0] * fw, fh - meta["pivot"][1] * fh - 6.2 * meta["ppu"]))
+            if x + rot.shape[1] <= W:
+                _over(bg, rot, x, max(0, bh - rot.shape[0] - 8))
+                x += rot.shape[1] + 8
+    if entry.get("beside"):                                  # e.g. the surveyor at 1x on the same ground line
+        try:
+            sk = entry["beside"]
+            sd = os.path.join(ART, *sk.split("/")[:2])
+            sm = json.load(open(os.path.join(sd, sk.split("/")[2] + ".json"), encoding="utf-8"))
+            sh = pngio.to_u8(pngio.read_png(os.path.join(sd, sk.split("/")[2] + "_color.png")))
+            sfw, sfh = sm["frame_width"], sm["frame_height"]
+            fr = sh[:sfh, :sfw]
+            _over(bg, fr, min(x, W - sfw - 8), ground - sfh + int(round(sm["pivot"][1] * sfh)))
+            _label(bg, f"beside: {sk} frame 0 at 1x", min(x, W - sfw - 8), 22)
+        except (OSError, KeyError, ValueError) as e:
+            _label(bg, f"beside {entry['beside']} unavailable: {type(e).__name__}", 6, 22)
     _label(bg, f"at 1x on {planet} background: {bg_note}", 6, 4)
     rows.append(bg)
 

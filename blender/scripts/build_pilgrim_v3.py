@@ -378,19 +378,42 @@ def up_fin(D, M, side, fin):
     G.stroke(D, tipm, M["tip"], O, cyclic=True)
 
 
-def draw_upright(d, M, pose=None, seed=0):
-    p = dict(sx=1.0, sz=1.0, tilt=0.0, lift=0.0, bend=0.0, fin=0.0, puffs=0.0, center_fin=True)
-    p.update(pose or {})
+UP_POSE = dict(sx=1.0, sz=1.0, tilt=0.0, lift=0.0, bend=0.0, lean=0.0, fin=0.0, puffs=0.0, center_fin=True, door=True)
+
+
+def up_xf(p):
+    """The pose transform of the upright ship (local metres -> sprite metres, pivot at the pads):
+    stretch/squash about the centre of mass, a bend, a lean (shear about the CoM: the body leans,
+    the fins drag), a tilt about the CoM, a lift. Shared by the drawing and the sockets."""
     ca, sa = math.cos(math.radians(p["tilt"])), math.sin(math.radians(p["tilt"]))
 
     def TL(pts):
         out = []
         for x, z in pts:
-            x2 = x * p["sx"] + p["bend"] * ((z - UP_ZC) / 5.0) ** 2 * 0.5
+            x2 = x * p["sx"] + p["bend"] * ((z - UP_ZC) / 5.0) ** 2 * 0.5 + p["lean"] * (z - UP_ZC)
             z2 = UP_ZC + (z - UP_ZC) * p["sz"]
             dx, dz = x2, z2 - UP_ZC                  # tilt about the centre of mass (+ = leans right)
             out.append((dx * ca + dz * sa, UP_ZC + (-dx * sa + dz * ca) + p["lift"]))
         return out
+    return TL
+
+
+# B-122 sockets (local metres, before the pose): where the game attaches things
+UP_SOCKETS = {"tail_exhaust": (0.0, UP_Z0 - 0.75), "leg_l": (-2.25, 0.16), "leg_c": (0.0, 0.16),
+              "leg_r": (2.25, 0.16), "door": (-0.05, 2.35)}
+
+
+def up_sockets(pose):
+    p = dict(UP_POSE)
+    p.update(pose or {})
+    TL = up_xf(p)
+    return {k: [round(c, 4) for c in TL([v])[0]] for k, v in UP_SOCKETS.items()}
+
+
+def draw_upright(d, M, pose=None, seed=0):
+    p = dict(UP_POSE)
+    p.update(pose or {})
+    TL = up_xf(p)
     D = G.Xf(d, TL)
     if p["puffs"] > 0:
         up_puffs(D, M, p["puffs"], seed)
@@ -431,6 +454,14 @@ def draw_upright(d, M, pose=None, seed=0):
     G.hatch(D, -1.0, 4.2, M["ink"], n=4, length=0.45, spacing=0.14, angle_deg=72, seed=seed + 3)
     G.hatch(D, -0.95, 7.0, M["ink"], n=3, length=0.4, spacing=0.14, angle_deg=72, seed=seed + 4)
     G.specks(D, [(0.9, 6.4), (1.0, 6.6), (0.85, 6.9), (-0.2, 2.6)], M["ink"])
+    if p["door"]:                                       # the boarding hatch (socket "door" at its sill)
+        door = G.bezier((-0.42, 2.35), (-0.45, 3.4), (-0.30, 4.05), n=8) + G.bezier((-0.30, 4.05), (-0.05, 4.25), (0.20, 4.05), n=6)[1:] + \
+            G.bezier((0.20, 4.05), (0.33, 3.4), (0.32, 2.35), n=8)[1:]
+        G.stroke(D, door, M["hull_sh"], I, cyclic=True)
+        G.rivets(D, [(-0.36, 2.6), (-0.39, 3.2), (-0.37, 3.8), (0.26, 2.6), (0.28, 3.2), (0.26, 3.8)], M["ink"])
+        G.seam(D, [(-0.42, 3.0), (-0.52, 3.0)], M["ink"])                 # hinges
+        G.seam(D, [(-0.43, 3.6), (-0.53, 3.6)], M["ink"])
+        G.stroke(D, G.lumpy_ellipse(0.17, 3.15, 0.05, 0.05, n=10, seed=seed + 9), M["brass"], I, cyclic=True)   # handle
     G.stroke(D, hull, M["ink"], O, cyclic=True)
     # nose cone (mustard) with its seam and a red knob on the tip
     nz = 9.2
@@ -504,6 +535,76 @@ def draw_top_v2(d, M, pose=None, seed=0):
     G.stroke(D, G.lumpy_ellipse(px, pz, 0.5, 0.5, n=26, seed=seed + 6), M["brass"], O, cyclic=True)
     G.stroke(D, G.lumpy_ellipse(px, pz, 0.34, 0.34, n=22, seed=seed + 7), M["port_glass"], I, cyclic=True)
     G.rivets(D, [(px + 0.42 * math.cos(a), pz + 0.42 * math.sin(a)) for a in [2 * math.pi * k / 6 for k in range(6)]], M["ink"])
+
+
+# ---- B-122 upright sheets (clips per the card; the puff loop is its own object)
+TAU = 2 * math.pi
+UP_IDLE = [dict(fin=0.15 * math.sin(TAU * i / 8), sz=1 + 0.015 * math.cos(TAU * i / 8), sx=1 - 0.008 * math.cos(TAU * i / 8))
+           for i in range(8)]
+UP_THRUST = [dict(sz=1.08 + 0.04 * math.sin(TAU * i / 8), sx=0.95 - 0.02 * math.sin(TAU * i / 8),
+                  fin=-0.30 + 0.10 * math.sin(TAU * i / 8 - 1.2)) for i in range(8)]
+UP_CUT = [dict(sx=s_x, sz=s_z, fin=fn) for s_x, s_z, fn in
+          ((1.10, 0.86, 0.35), (1.07, 0.90, 0.25), (0.97, 1.04, -0.15), (1.01, 0.98, 0.08), (0.995, 1.005, -0.03), (1.0, 1.0, 0.0))]
+UP_TILT_L = [dict(lean=l_, bend=b_, fin=f_) for l_, b_, f_ in ((-0.04, -0.1, 0.10), (-0.10, -0.25, 0.25), (-0.13, -0.3, 0.32), (-0.11, -0.25, 0.28))]
+UP_TILT_R = [dict(lean=l_, bend=b_, fin=f_) for l_, b_, f_ in ((0.04, 0.1, -0.10), (0.10, 0.25, -0.25), (0.13, 0.3, -0.32), (0.11, 0.25, -0.28))]
+UP_LAND = [dict(sz=s_z, sx=s_x, fin=fn) for s_z, s_x, fn in
+           ((1.04, 0.97, -0.25), (1.02, 0.98, -0.15), (0.90, 1.06, 0.30), (0.86, 1.08, 0.40), (0.96, 1.02, 0.10),
+            (1.02, 0.99, -0.08), (0.995, 1.0, 0.03), (1.0, 1.0, 0.0))]
+TOP_UP_IDLE = [dict(fin=0.12 * math.sin(TAU * i / 8), sz=1 + 0.015 * math.cos(TAU * i / 8)) for i in range(8)]
+TOP_UP_THRUST = [dict(sx=1.08 + 0.04 * math.sin(TAU * i / 8), sz=0.95 - 0.02 * math.sin(TAU * i / 8),
+                      fin=-0.30 + 0.10 * math.sin(TAU * i / 8 - 1.2)) for i in range(8)]
+UP_CLIPS = [("idle", UP_IDLE, "up"), ("thrust", UP_THRUST, "up"), ("cut", UP_CUT, "up"), ("tilt_left", UP_TILT_L, "up"),
+            ("tilt_right", UP_TILT_R, "up"), ("land", UP_LAND, "up"), ("top_idle", TOP_UP_IDLE, "top"), ("top_thrust", TOP_UP_THRUST, "top")]
+UP_SHEETS_OUT = os.path.join(os.path.dirname(HERE), "sources", "ships", "pilgrim_v3_up.blend")
+
+
+def draw_up_puff(d, M, f, n=8):
+    """Exhaust puff loop from the tail (pivot at the bell, top centre): puffs born at the bell,
+    growing and drifting down, the oldest shrinking away; hot mustard core near the bell."""
+    for k in range(3):
+        t = ((f / n) + k / 3) % 1.0
+        r = 0.16 + 0.40 * math.sin(math.pi * min(t * 1.2, 1.0))
+        z = -0.2 - 1.15 * t
+        x = 0.05 * math.sin(6.28 * t + k)
+        if r > 0.06:
+            G.stroke(d, G.lumpy_ellipse(x, z, r, r * 0.92, n=24, lump=0.07, seed=31 * k + f),
+                     M["puff_hot"] if t < 0.22 else M["puff"], O, cyclic=True)
+            if r > 0.25:
+                G.seam(d, G.bezier((x - r * 0.5, z - r * 0.15), (x, z - r * 0.45), (x + r * 0.45, z - r * 0.2), n=6), M["ink"])
+
+
+def build_sheets_up(out=UP_SHEETS_OUT):
+    """B-122: every upright clip in one source (a marker per clip; the manifest's sheet entries
+    pick theirs), the puff loop as its own object, per-frame sockets on the scene as json."""
+    import json
+    scene = G.new_scene()
+    coll = G.collection("pilgrim")
+    ob, gp = G.gp_object("pilgrim", coll)
+    M = materials_v2(gp)
+    layer = gp.layers.new("art")
+    f = 1
+    clips, sockets = [], {}
+    for name, poses, kind in UP_CLIPS:
+        for i, pose in enumerate(poses):
+            if kind == "up":
+                draw_upright(G.drawing(layer, f), M, pose, seed=7 * f)
+                sockets[str(f)] = up_sockets(pose)
+            else:
+                draw_top_v2(G.drawing(layer, f), M, dict(pose, cz=0.0), seed=7 * f)
+            f += 1
+        clips.append((name, len(poses)))
+    pc = G.collection("puff")
+    pob, pgp = G.gp_object("puff", pc)
+    PM = materials_v2(pgp)
+    play = pgp.layers.new("art")
+    for i in range(8):
+        draw_up_puff(G.drawing(play, f + i), PM, i)
+    clips.append(("puff", 8))
+    G.mark_clips(scene, clips)
+    scene["sockets"] = json.dumps(sockets)
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    bpy.ops.wm.save_as_mainfile(filepath=out)
+    return out
 
 
 DESIGN_UP = [dict(kind="up"), dict(kind="up", tilt=-35, lift=3.4, puffs=0.7, fin=0.3, bend=-0.3),

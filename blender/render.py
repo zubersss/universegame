@@ -716,9 +716,12 @@ def do_v3_sheet(entry, preview):
     scale = float(entry.get("ppu_scale", 1.0))   # preview-only design sheets of big assets (B-117: 0.5x)
     if scale != 1.0 and not entry.get("preview_only"):
         raise AssetError(f"{key}: ppu_scale is for preview-only design sheets")
+    base = int(entry.get("ppu", v3.PPU))       # a big hero may be drawn below PPU 64 only with a LEAD ruling (B-122)
     markers = {m.name: m.frame for m in scene.timeline_markers}
     frames, clips, widths = [], [], []
     below = []
+    sock_src = json.loads(scene.get("sockets", "{}"))   # per drawing: {frame: {socket: [x_m, y_m]}} (B-122)
+    sockets = {}
     for c in entry["clips"]:
         mname = c.get("marker", c["name"])     # a clip may read another marker (B-122: top_idle -> idle)
         if mname not in markers:
@@ -729,12 +732,14 @@ def do_v3_sheet(entry, preview):
             clips[-1]["loop_from"] = int(c.get("loop_from", 0))
         for k in range(int(c["frames"])):
             f = markers[mname] + k
+            for sname, xy in sock_src.get(str(f), {}).items():
+                sockets.setdefault(sname, []).append(xy)
             strokes = GR.collect(scene, objs, f)
             if pivot[1] == 0 and strokes:
                 zmin = min(float((s_["xz"][:, 1] - s_["radius"] * (1 + GR.JITTER)).min()) for s_ in strokes)
-                if zmin * v3.PPU * scale < -2.0:
+                if zmin * base * scale < -2.0:
                     below.append(len(frames))
-            img, w = GR.render_frame(strokes, fw, fh, v3.PPU * scale, pivot, ss=ss,
+            img, w = GR.render_frame(strokes, fw, fh, base * scale, pivot, ss=ss,
                                      seed=int(entry.get("seed", 1)) * 1000 + f)
             frames.append(img)
             widths += [(nm / scale, lo / scale, hi / scale) for nm, lo, hi in w]   # reported at 1x
@@ -745,9 +750,14 @@ def do_v3_sheet(entry, preview):
     sheet = post.pack_sheet(frames, cols, gutter=v3.GUTTER, fill=(0, 0, 0, 0))
     meta = {"key": key, "style": "v3", "frame_width": fw, "frame_height": fh, "columns": cols,
             "gutter": v3.GUTTER, "frames": len(frames), "fps": v3.FPS, "pivot": list(pivot),
-            "facing": entry.get("facing", "right"), "ppu": v3.PPU, "animations": clips,
+            "facing": entry.get("facing", "right"), "ppu": base, "animations": clips,
             "squash_root": bool(entry.get("squash_root", True))}
-    problems = v3.validate_sheet(meta, sheet.shape)
+    if sockets and all(len(v) == len(frames) for v in sockets.values()):
+        meta["sockets"] = sockets
+        meta["sockets_units"] = "metres in sprite space from the pivot, one [x, y] per frame in sheet order"
+    problems = v3.validate_sheet(meta, sheet.shape, ppu=base)
+    if base != v3.PPU and not entry.get("ppu_exception"):
+        problems.append(f"ppu {base} needs a LEAD-approved ppu_exception (contract §11.1: 64)")
     if clipped:
         problems.append(f"frames {clipped[:8]} touch the {m} px frame edge (drawing clipped)")
     if below:
@@ -769,7 +779,7 @@ def do_v3_sheet(entry, preview):
     z = int(entry.get("design_zoom", 0))
     if z:                               # design sheets: every drawing again at z x (same strokes, PPU x z)
         stats["zoom_frames"] = [GR.render_frame(GR.collect(scene, objs, markers[c.get("marker", c["name"])] + k), fw * z, fh * z,
-                                                v3.PPU * scale * z, pivot, ss=2, seed=int(entry.get("seed", 1)) * 1000 + markers[c.get("marker", c["name"])] + k)[0]
+                                                base * scale * z, pivot, ss=2, seed=int(entry.get("seed", 1)) * 1000 + markers[c.get("marker", c["name"])] + k)[0]
                                 for c in entry["clips"] for k in range(int(c["frames"]))]
     boxes = review.v3_sheet_review(entry, meta, frames, png, out, stats)
     if not preview:
