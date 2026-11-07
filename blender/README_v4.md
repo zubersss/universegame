@@ -133,3 +133,25 @@ Exports are stamped (file time + hash); STALE.txt marks keys whose last render f
   landing, gathered with folded front legs, hind push, launch) with the far pair one key behind.
 - Clip order idle 0, walk 1, react 2, bump 3 matches Gus and Creature.cs's indices; anything after (flee,
   follow) is found by name. Faces: closed mouths or a small round "o", never teeth (D-087).
+
+## 9. Mars (C2; B-140 / B-141 / B-142, D-125 palette, D-126 dens)
+
+- Palette: `v3.PALETTES["mars"]`; every builder takes its tones from it (`v3.shadow_of(h, "mars")`, `v3.deep_of(h, "mars")`),
+  and the reviews check `v3.palette_hits(sheet, "mars")`.
+- Generators by row: prop rows (`do_prop_sheet_set`) and strip-set rows (`do_ground_strip_set`) import the module their
+  `generator` names. `build_props_mars_v3` has the `build_props_common_v3` API (PROPS, KEY, render_all, export, main);
+  `build_c2_mars_ground` has sheets / export / main over `build_c2_ground_strip.export(art, S, keys=...)`.
+- Rig set: `build_c2_mars_rigs` (parts drawn 1.5x for 0.38 g; `build()` makes the .blend; `main(out)` is the row's
+  `review_script`, the plants assembled with Unity's maths; `python -I build_c2_mars_rigs.py <dir>` is the lock-free dry run).
+- Creatures: `build_creatures_mars_v3` on the B-132 kit; `SPECIES[name]` carries draw / poses / mats / frame / seed / clips /
+  self_check / ours (/ den); `build_<name>` + `entry_for(name)` like Earth's; `python -I build_creatures_mars_v3.py <dir> <names>`
+  writes the export's own review from exact frames (as_object ids). The dustskater and scree_stalker rows replace v2 models.
+- Dens (D-126): creature art never contains terrain or props. The lurker peeks over `props/mars/tube_mound`, which UNITY draws
+  IN FRONT of it on the same pivot; the mound's top line is `build_creatures_mars_v3.mound_dome` (the paws rest on it).
+  `python -I build_props_mars_v3.py <png>` reviews the den (the idle + react composited behind the mound).
+- Backdrops: `build_backdrop_v3.mars_canyon / mars_storm` (layers 0-1 shared, the storm's layer2 is the translucent near
+  overlay). Mars layers composite each wash as it is added (`Stack`, the same formula and order), and translucent shapes
+  use `tint()` (a full-strength mask, the alpha scaled after) because a fractional mask turns the wash's edge noise into
+  speckle. Previews run in a BLENDER slot (FFT, ~0.7 GB peak): `python -I build_backdrop_v3.py <dir> canyon,storm`.
+- Ground-line and edge checks catch sign slips early: a tail rotated the wrong way, antennae aimed along a shell's tangent,
+  a hose leg's round end cap (it reaches half the hose width past its end point) all failed `below` on exact frames first.
