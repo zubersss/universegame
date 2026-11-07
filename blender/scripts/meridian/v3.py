@@ -32,6 +32,13 @@ PALETTES = {
         "offwhite": "#EEDCC2", "red": "#B0502D", "mustard": "#D6A266", "teal": "#6E9C9A",
         "green": "#8C8E55", "sky": "#D9907A", "brown": "#5C3A2B", "ink": "#1E1A17",
     },
+    # D-130, LEAD cycle 259: the Mercury palette (B-145; checked by scripts/build_c2_mercury_palette.py). offwhite the
+    # blinding regolith, red ember, mustard sun gold, teal cold steel, green dusty sage, sky violet twilight, brown night
+    # slate (the shadow mix colour); the pitch-black day sky is the ink itself.
+    "mercury": {
+        "offwhite": "#E9E2D4", "red": "#A85A41", "mustard": "#D8B566", "teal": "#5E8B91",
+        "green": "#8B9471", "sky": "#8D7AA0", "brown": "#3E3848", "ink": "#1E1A17",
+    },
 }
 PALETTE_ORDER = ["offwhite", "red", "mustard", "teal", "green", "sky", "brown", "ink"]
 
