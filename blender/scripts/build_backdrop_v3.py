@@ -1182,24 +1182,38 @@ def ring_arc(stack, rng, pal, H, cy, R):
 
 
 def hexagon_walls(stack, rng, pal, H):
-    """The North Polar Hexagon: six tall translucent wind-walls converging toward the calm eye (UNITY rotates them)."""
+    """The North Polar Hexagon: six tall translucent wind-walls converging toward the calm eye (UNITY rotates them). Each wall
+    is a curtain of moving air: wavy edges, deep fold lines running down it in perspective, bold cream wind streaks."""
     eye_x, horizon = W / 2, H * 0.32
     for k in range(6):
         x_far = eye_x + (k - 2.5) * 140
         x_near = eye_x + (k - 2.5) * 520
         w_far, w_near = 18, 70
+        n = 24
+        ts = [i / (n - 1) for i in range(n)]
+
+        def edge(sg, k=k):
+            return [(x_far + (x_near - x_far) * t + sg * (w_far + (w_near - w_far) * t) + 7 * t * math.sin(14 * t + k + sg), horizon + (H - horizon) * t)
+                    for t in ts]
         wall = np.zeros((H, W), np.float32)
-        poly(wall, [(x_far - w_far, horizon), (x_far + w_far, horizon), (x_near + w_near, H), (x_near - w_near, H)])
-        stack.append(tint(rng, H, wall, pal["teal"], 0.32, var=0.04, edge_dark=0.02, bleed=4.0))
-        streaks = np.zeros((H, W), np.float32)                                            # wind streaks along the wall (moving air)
-        for _j in range(26):
+        poly(wall, edge(-1) + edge(1)[::-1])                                               # the wavy curtain
+        stack.append(tint(rng, H, wall, pal["teal"], 0.34, var=0.04, edge_dark=0.03, bleed=3.0))
+        folds = np.zeros((H, W), np.float32)
+        for f in (-0.45, 0.0, 0.45):                                                       # fold lines down the curtain
+            for t in np.linspace(0.02, 0.98, 60):
+                xc = x_far + (x_near - x_far) * t + f * (w_far + (w_near - w_far) * t) + 5 * t * math.sin(11 * t + f * 3 + k)
+                y = horizon + (H - horizon) * t
+                ell(folds, xc, y, 1.2 + 1.6 * t, 3.5)
+        stack.append(tint(rng, H, folds * wall, BG._mix(pal["teal"], pal["brown"], 0.45), 0.55, var=0.0, edge_dark=0.0, bleed=1.0))
+        streaks = np.zeros((H, W), np.float32)
+        for _j in range(30):                                                              # bold wind streaks along the wall
             t = rng.uniform(0.05, 0.95)
             y0 = horizon + (H - horizon) * t
             xc = x_far + (x_near - x_far) * t
             half = w_far + (w_near - w_far) * t
-            ell(streaks, xc + rng.uniform(-0.7, 0.7) * half, y0, rng.uniform(10, 26), 1.4)
-        stack.append(tint(rng, H, streaks * wall, pal["offwhite"], 0.7, var=0.0, edge_dark=0.0, bleed=0.8))
-        stack.append(tint(rng, H, lining(wall, 0, 4) * (1 - wall), pal["offwhite"], 0.5, var=0.0, edge_dark=0.0, bleed=1.5))
+            ell(streaks, xc + rng.uniform(-0.7, 0.7) * half, y0, rng.uniform(16, 40) * (0.4 + t), 2.4)
+        stack.append(tint(rng, H, streaks * wall, pal["offwhite"], 0.9, var=0.0, edge_dark=0.0, bleed=0.8))
+        stack.append(tint(rng, H, lining(wall, 0, 4) * (1 - wall), pal["offwhite"], 0.55, var=0.0, edge_dark=0.0, bleed=1.5))
 
 
 def saturn_scene(seed, deck="sdeck1"):
