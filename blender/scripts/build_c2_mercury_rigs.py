@@ -74,14 +74,14 @@ def sway(amp, squash=0.0, cycle=None):
     return i
 
 
-SUNFAN = {"name": "sunfan", "biomes": ["day_plains"],
+SUNFAN = {"name": "sunfan", "biomes": ["day"],
           "bones": [{"name": "root", "part": "sunfan_stem", "parent": None, "length": round(0.32 * S, 4), "order": 0},
                     {"name": "fan", "part": "sunfan_fan_open", "parent": "root", "length": round(0.30 * S, 4), "offset_m": off(0.0, 0.34), "order": 1}],
           "swaps": {"fan": ["sunfan_fan_open", "sunfan_fan_edge", "sunfan_fan_shut"]},
           "slots": [{"slot": "fan", "bone": "fan", "offset_m": [0.0, 0.0], "order": 1, "replaces_part": True}],
           "idle": sway(6, 0.02, {"slot": "fan", "sequence": ["sunfan_fan_open", "sunfan_fan_edge"], "beats": [1, 1]}),
           "react": {"radius_m": 3.0, "action": "turn_bounce", "swap": "sunfan_fan_shut"}}
-EMBERCAP = {"name": "embercap", "biomes": ["day_plains", "flare_fields"],
+EMBERCAP = {"name": "embercap", "biomes": ["day"],
             "bones": [{"name": "root", "part": "embercap_foot", "parent": None, "length": round(0.15 * S, 4), "order": 0},
                       {"name": "cap", "part": "embercap_cap", "parent": "root", "length": round(0.16 * S, 4), "offset_m": off(0.0, 0.15), "order": 1}],
             "swaps": {"cap": ["embercap_cap", "embercap_cap_puff"]},
@@ -97,7 +97,7 @@ GLASSREED = {"name": "glassreed", "biomes": ["twilight"],
              "idle": sway(9, 0.0, {"slot": "r0", "sequence": ["glassreed_reed0_a", "glassreed_reed0_b"], "beats": [3, 1]}),
              "react": {"radius_m": 3.0, "action": "turn_bounce", "swap": "glassreed_reed0_b",
                        "also": {f"r{j}": f"glassreed_reed{j}_b" for j in range(1, len(REEDS))}}}
-SHADEBLOOM = {"name": "shadebloom", "biomes": ["night_side", "crater_shadow"],
+SHADEBLOOM = {"name": "shadebloom", "biomes": ["night", "polar"],
               "bones": [{"name": "root", "part": "shadebloom_stem", "parent": None, "length": round(0.48 * S, 4), "order": 0},
                         {"name": "bloom", "part": "shadebloom_bloom_half", "parent": "root", "length": round(0.18 * S, 4),
                          "offset_m": off(*MPL.SB_TOP), "order": 1}],
@@ -106,7 +106,7 @@ SHADEBLOOM = {"name": "shadebloom", "biomes": ["night_side", "crater_shadow"],
               "idle": sway(5, 0.02, {"slot": "bloom", "sequence": ["shadebloom_bloom_bud", "shadebloom_bloom_half", "shadebloom_bloom_open",
                                                                     "shadebloom_bloom_half"], "beats": [2, 1, 4, 1]}),
               "react": {"radius_m": 3.0, "action": "turn_bounce", "swap": "shadebloom_bloom_bud"}}
-COILWORT = {"name": "coilwort", "biomes": ["polar_craters"],
+COILWORT = {"name": "coilwort", "biomes": ["polar"],
             "bones": [{"name": "root", "part": "coilwort_knob", "parent": None, "length": round(0.03 * S, 4), "order": 0},
                       {"name": "spring", "part": "coilwort_spring_rest", "parent": "root", "length": round(0.36 * S, 4), "offset_m": [0.0, 0.0], "order": 1}],
             "swaps": {"spring": ["coilwort_spring_rest", "coilwort_spring_short", "coilwort_spring_tall"]},
