@@ -6,17 +6,25 @@ regolith, violet twilight"), §9.1 (muted, aged; one 6-8 colour palette per plan
 friendly or neutral, D-087), contract v3.1 §11 (+ v3.2 `cycle_beats`, D-127). The B-139 Mars pattern: LEAD accepts these
 designs before any Mercury card is written. Nothing here is exported.
 
-## 0. State
+## 0. State (LEAD cycle 260, 2026-11-07 06:2x)
 
-| Item | State | File |
+| Item | State | Commit / file |
 |---|---|---|
-| Palette | ACCEPTED (D-130); the check passes (the Mars checks + Mercury's family: violet twilight, near-neutral regolith, a cool slate) | blender/scripts/build_c2_mercury_palette.py |
-| Five plants | drawn (build_c2_mercury_plants.py); review_b145_mercury_plants_preview.png at 1x on a Mercury stand-in beside the surveyor (ink 2.00-3.00 / 1.00-1.50, palette 100 %) | blender/scripts/build_c2_mercury_plants.py |
-| Creatures | the re-ink list below (all five have v2 models in Art: `replaces_v2`) | - |
-| Backdrops | study notes below (FFT washes: a BLENDER slot) | - |
-| Props | the ones that differ, below | - |
+| Palette | ACCEPTED (D-130): `meridian.v3.PALETTES["mercury"]`; the strip exports with B-145's first export slot (`ui/palettes/mercury` row) | 37ed2ab, 7a1eeecc |
+| Five plants | ACCEPTED (cycle 260; the Glassreed recoloured cold teal to read on the violet twilight) | 5f4c131, e961be22, 18e602bd |
+| Rig set `flora/mercury/rigset` | sources written (2 / 2 / 6 / 2 / 2 bones, swaps, slots, biomes); the plants split into parts with every stroke unchanged; the dry run when RAM allows | c16565c5 |
+| Flarewing | ACCEPTED (cycle 260): 124x124, fly at index 1, pivot at the body centre | 4adf12ed |
+| Shadewyrm + `props/mercury/ice_burrow` | drawn (D-126 den: the wyrm peeks over the burrow, UNITY draws the burrow in front); all 50 frames in bounds; den review | 164f6f8d, 2b753f53 |
+| Glassback | drawn: 176x112, grazes, the shards ring up; 52 frames in bounds | e1865227 |
+| Cinderling | drawn: 80x64, a hop with sparks; 50 frames in bounds | 9037f9b3 |
+| Day / twilight / night backdrops | sources written (`build_backdrop_v3.mercury_*`); the studies in an optional BLENDER slot | 7c5cd276 |
+| Cinderhulk rig set | not started (the Hadal Maw's pattern, `cycle_beats`) | - |
+| Mercury props (flare shelter, beacon, vault gate, Solarite nodes, locker, door) | designs not started (section 5) | - |
 
-## 1. Palette (proposed; checked by blender/scripts/build_c2_mercury_palette.py)
+Reviews (blender/preview): review_b145_mercury_plants_preview.png, review_b145_mercury_flarewing_preview.png,
+review_b145_mercury_shadewyrm_preview.png, review_b145_ice_burrow_preview.png.
+
+## 1. Palette (ACCEPTED, D-130; checked by blender/scripts/build_c2_mercury_palette.py)
 
 Same slot names and order as Earth's and Mars' strips, so gp_draw's mid / deep tones (70 / 45 % colour + the "brown" slot)
 and the reviews' palette check work unchanged once LEAD accepts it into `meridian.v3.PALETTES["mercury"]`.
@@ -44,7 +52,7 @@ and the reviews' palette check work unchanged once LEAD accepts it into `meridia
 
 All checks pass (ALL PASS): `python -I blender/scripts/build_c2_mercury_palette.py`. The day sky is the ink itself (pitch black), not a wash.
 
-## 2. Five faceless Mercury plants (heat side, twilight, shadow side)
+## 2. Five faceless Mercury plants (ACCEPTED cycle 260; heat side, twilight, shadow side)
 
 All faceless (D-101): personality through motion; ink, mid + deep tones, interior detail; one Mercury rig set
 (`flora/mercury/rigset`, <= 6 bones each), `biomes` per plant. Mercury's 0.38 g matches Mars: drawn 1.5x like Mars' plants.
