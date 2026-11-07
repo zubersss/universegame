@@ -518,10 +518,137 @@ def mars_storm(seed):
     return mars_canyon(seed, storm=1.0)
 
 
+# ---------------------------------------------------------------- Mercury (B-145, D-130 palette): day / twilight / night
+
+def merc_sky(rng, pal, H, mode):
+    """The day sky is the ink itself with sharp stars; twilight adds a violet band low down; night is ink + more stars."""
+    ink = BG._rgb(v3.INK)
+    yy = (np.arange(H) / H)[:, None, None]
+    if mode == "twilight":
+        band = np.clip((yy - 0.45) / 0.35, 0, 1)
+        sky = ink * (1 - band) + pal["sky"] * band
+    else:
+        sky = np.broadcast_to(ink, (H, 1, 3)) * np.ones_like(yy)
+    stack = Stack([(np.broadcast_to(sky, (H, W, 3)).astype(np.float32), np.ones((H, W), np.float32))])
+    stars = np.zeros((H, W), np.float32)
+    for _k in range({"day": 60, "twilight": 90, "night": 220}[mode]):
+        ell(stars, rng.uniform(0, W), rng.uniform(8, H * (0.55 if mode == "twilight" else 0.8)), rng.uniform(0.9, 2.2), rng.uniform(0.9, 2.2))
+    stack.append(tint(rng, H, stars, pal["offwhite"], 0.9, var=0.0, edge_dark=0.0, bleed=0.6))
+    return stack
+
+
+def huge_sun(stack, rng, pal, H, cx, cy, R):
+    """The huge Sun low in the sky (B-137's look as a painted disc): a gold body, an off-white core, a corona ring."""
+    corona = np.zeros((H, W), np.float32)
+    ell(corona, cx, cy, R * 1.28, R * 1.28)
+    stack.append(tint(rng, H, corona, BG._mix(pal["mustard"], pal["offwhite"], 0.5), 0.35, var=0.03, edge_dark=0.0, bleed=10.0))
+    body = np.zeros((H, W), np.float32)
+    ell(body, cx, cy, R, R)
+    stack.append(wash32(rng, H, body, pal["mustard"], var=0.04, edge_dark=0.06, bleed=2.0))
+    core = np.zeros((H, W), np.float32)
+    ell(core, cx - R * 0.15, cy - R * 0.1, R * 0.55, R * 0.55)
+    stack.append(tint(rng, H, core, pal["offwhite"], 0.7, var=0.02, edge_dark=0.0, bleed=12.0))
+
+
+def crater_field(rng, H, line, n, rmin, rmax, depth):
+    """Bowls along a rim line: (rim mask, bowl mask, shadow mask), the shadows on the bowls' sunward (left) walls."""
+    rim, bowl, shade = (np.zeros((H, W), np.float32) for _ in range(3))
+    for _k in range(n):
+        cx = rng.uniform(0, W)
+        r = rng.uniform(rmin, rmax)
+        cy = line[int(cx) % W] + depth * r
+        ell(rim, cx, cy - r * 0.28, r * 1.18, r * 0.42, cut=0.2)
+        ell(bowl, cx, cy - r * 0.25, r, r * 0.30)
+        ell(shade, cx - r * 0.35, cy - r * 0.26, r * 0.62, r * 0.26)
+    return rim, bowl, shade * bowl
+
+
+def mercury_scene(seed, mode="day"):
+    rng = np.random.default_rng(seed)
+    pal = _pal("mercury")
+    lit = {"day": pal["offwhite"], "twilight": BG._mix(pal["offwhite"], pal["sky"], 0.35), "night": BG._mix(pal["brown"], pal["teal"], 0.25)}[mode]
+    dark = {"day": pal["brown"], "twilight": BG._mix(pal["brown"], pal["sky"], 0.3), "night": pal["brown"]}[mode]
+    out = []
+    # layer0: the sky (ink), the huge Sun (day / twilight), the far crater rims
+    H = 1024
+    stack = merc_sky(rng, pal, H, mode)
+    if mode == "day":
+        huge_sun(stack, rng, pal, H, 420, 610, 230)
+    elif mode == "twilight":
+        huge_sun(stack, rng, pal, H, 1500, 905, 260)                       # half below the horizon: the terminator
+    far = BG.ridge(rng, [(2, 0.5), (5, 0.3), (11, 0.2)], base=860, amp=20)
+    stack.append(wash32(rng, H, BG._ridge_mask(H, far), BG._mix(lit, dark, 0.35), var=0.04, edge_dark=0.05, bleed=2.0))
+    rim, bowl, shade = crater_field(rng, H, far, 9, 30, 70, 0.6)
+    stack.append(wash32(rng, H, rim, BG._mix(lit, dark, 0.25), var=0.04, edge_dark=0.06, bleed=1.6))
+    stack.append(wash32(rng, H, bowl, BG._mix(lit, dark, 0.55), var=0.04, edge_dark=0.04, bleed=1.6))
+    out.append(finish(stack, rng, H))
+    # layer1: nearer crater rims, the blinding regolith with hard shadows
+    H = 640
+    stack = Stack()
+    near = BG.ridge(rng, [(2, 0.45), (6, 0.35), (13, 0.2)], base=360, amp=34)
+    stack.append(wash32(rng, H, BG._ridge_mask(H, near), lit, var=0.05, edge_dark=0.07, bleed=1.8))
+    rim, bowl, shade = crater_field(rng, H, near, 7, 60, 140, 0.9)
+    stack.append(wash32(rng, H, rim, BG._mix(lit, pal["offwhite"], 0.3), var=0.04, edge_dark=0.08, bleed=1.4))
+    stack.append(wash32(rng, H, bowl, BG._mix(lit, dark, 0.35), var=0.04, edge_dark=0.05, bleed=1.4))
+    stack.append(wash32(rng, H, shade, dark, var=0.03, edge_dark=0.02, bleed=1.2))       # hard shadows (no air: crisp)
+    if mode == "night":
+        glint = np.zeros((H, W), np.float32)
+        for _k in range(26):
+            cx = rng.uniform(0, W)
+            ell(glint, cx, near[int(cx) % W] + rng.uniform(60, 220), rng.uniform(4, 10), rng.uniform(2, 4))
+        stack.append(tint(rng, H, glint * BG._ridge_mask(H, near), pal["teal"], 0.9, var=0.03, edge_dark=0.1, bleed=0.8))
+    out.append(finish(stack, rng, H))
+    # layer2: near regolith, rocks with hard shadows; twilight: Glassreed tufts; day: heat-shimmer dabs
+    H = 384
+    stack = Stack()
+    line = BG.ridge(rng, [(3, 0.5), (7, 0.3), (15, 0.2)], base=210, amp=20)
+    ground = BG._ridge_mask(H, line)
+    stack.append(wash32(rng, H, ground, BG._mix(lit, dark, 0.12), var=0.06, edge_dark=0.07))
+    rocks, rshade = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
+    for _k in range(30):
+        cx = rng.uniform(0, W)
+        b = line[int(cx) % W] + rng.uniform(10, 130)
+        rx, ry = rng.uniform(14, 44), rng.uniform(10, 28)
+        ell(rocks, cx, b - ry * 0.6, rx, ry, cut=0.6)
+        ell(rshade, cx - rx * 0.3, b - ry * 0.3, rx * 0.75, ry * 0.5, cut=0.6)
+    stack.append(wash32(rng, H, rocks, BG._mix(lit, pal["offwhite"], 0.2), var=0.05, edge_dark=0.12, bleed=1.2))
+    stack.append(wash32(rng, H, rshade * rocks, dark, var=0.03, edge_dark=0.03, bleed=1.0))
+    if mode == "twilight":
+        reeds = np.zeros((H, W), np.float32)
+        for _k in range(22):
+            cx = rng.uniform(0, W)
+            base = line[int(cx) % W] + rng.uniform(20, 70)
+            for j in range(4):
+                dab(reeds, cx + 6 * j, base, rng.uniform(26, 60), -0.3 + 0.2 * j, w=1)
+        stack.append(wash32(rng, H, reeds * ground, pal["teal"], var=0.04, edge_dark=0.05, bleed=0.8))
+    if mode == "day":
+        shimmer = np.zeros((H, W), np.float32)
+        for _k in range(20):
+            cx = rng.uniform(0, W)
+            ell(shimmer, cx, line[int(cx) % W] - rng.uniform(4, 16), rng.uniform(30, 80), rng.uniform(1.5, 3))
+        stack.append(tint(rng, H, shimmer, pal["offwhite"], 0.35, var=0.0, edge_dark=0.0, bleed=1.5))
+    out.append(finish(stack, rng, H))
+    return out, [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0},
+                 {"n": 2, "parallax": 0.6, "y_m": -0.5}]
+
+
+def mercury_day(seed):
+    return mercury_scene(seed, "day")
+
+
+def mercury_twilight(seed):
+    return mercury_scene(seed, "twilight")
+
+
+def mercury_night(seed):
+    return mercury_scene(seed, "night")
+
+
 SCENES = {("earth", "forest"): earth_forest, ("earth", "coast"): earth_coast,
-          ("mars", "canyon"): mars_canyon, ("mars", "storm"): mars_storm}
-SEEDS = {"forest": 13301, "coast": 13302, "canyon": 14101, "storm": 14102}
-PLANET_OF = {"forest": "earth", "coast": "earth", "canyon": "mars", "storm": "mars"}
+          ("mars", "canyon"): mars_canyon, ("mars", "storm"): mars_storm,
+          ("mercury", "day"): mercury_day, ("mercury", "twilight"): mercury_twilight, ("mercury", "night"): mercury_night}
+SEEDS = {"forest": 13301, "coast": 13302, "canyon": 14101, "storm": 14102, "day": 14501, "twilight": 14502, "night": 14503}
+PLANET_OF = {"forest": "earth", "coast": "earth", "canyon": "mars", "storm": "mars", "day": "mercury", "twilight": "mercury", "night": "mercury"}
 
 
 # ---------------------------------------------------------------- lock-free preview: 1080p composite at 1x + the 2x seam check
@@ -537,7 +664,7 @@ def preview(out_dir, scenes=("forest", "coast"), from_png=False):
     import preview_c2_earth_rigs as PR
     for scene in scenes:
         planet = PLANET_OF[scene]
-        tag = "b133" if planet == "earth" else "b141"
+        tag = {"earth": "b133", "mars": "b141", "mercury": "b145"}[planet]
         d = os.path.join(out_dir, tag, scene)
         os.makedirs(d, exist_ok=True)
         u8, info = [], []
@@ -574,6 +701,9 @@ def preview(out_dir, scenes=("forest", "coast"), from_png=False):
             import build_c2_mars_ground as MG
             S, _w = GS.sheets(("regolith",), MG.mats)
             strip = "regolith"
+        elif planet == "mercury":                                 # no Mercury strip yet: the Earth stone recipe stands in
+            S, _w = GS.sheets(("stone",))
+            strip = "stone"
         else:
             S, _w = GS.sheets()
             strip = "sand" if scene == "coast" else "grass"      # the coast stands on the B-130 sand variant
