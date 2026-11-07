@@ -2,7 +2,7 @@
 
 Decisions applied: D-146 (the camp on the plain; the band datum from the generator's surface), D-118 (the climb sky on the cartoon path), D-124 / D-133 (no 3D-path Mercury test left to retire), D-126 (den species), D-130 (the Mercury palette). Art: B-148 (the Mercury rig set, the regolith / slate strips), B-149 (the day / twilight / night sets), B-150 (the four creature sheets + `props/mercury/ice_burrow`) — exported after the code (D-119's order: the code binds by key the moment they land).
 
-## What is in (commits 6aff1d38, 6aa8e018, 4d531e8b, 1e4c3915; the Mars close 6227cc34 moved every planet's strips in front of the block faces)
+## What is in (commits 6aff1d38, 6aa8e018, 4d531e8b, 1e4c3915, 9a6e31d5, 228687c0, 9b213611; the Mars close 6227cc34 moved every planet's strips in front of the block faces)
 
 | Piece | Rule | Where |
 |---|---|---|
@@ -25,10 +25,21 @@ Decisions applied: D-146 (the camp on the plain; the band datum from the generat
 - **Lock 1 (12:53:52–12:59:17, one `unity_check` call, 5.4 min): compile 0 errors / 0 warnings; CheckSetup imported B-148 / B-149 / B-150** (34 sheet animators and 5 rig sets rebuilt; the 47 Mercury `.meta` files and the v2 models' 16 orphans in 4d531e8b). The four creature sheets re-sliced from their json (Glassback 52, Cinderling 50, Flarewing 52, Shadewyrm 50 frames); the 48 "rect lies outside of texture" lines in the import log are each colour sheet's old v2 `.meta` (24 rects) on the first import, gone after the re-slice.
 - **PlayMode slice 16/16** (`MercuryStagePlay|MercuryEntry|MarsStagePlay|InnerCreature|HazardV2Play|Solarite|WardenPlay|BudgetGate|Transition|BandFollowPlay`): the entry at x 64 is in the Twilight zone → `backgrounds/mercury/twilight` (no fallback, the set on disk), strips 2/2, the rig set 42 plants, datum 310.0; the creep leg 2 crossfades → `backgrounds/mercury/day`, the camp's strip regolith; MercuryEntry 0.81 s; 20 Mercury creatures' AI median 0.035 / p99 0.122 / max 0.207 ms; Warden p99 0.013 ms; the editor BudgetGate (Earth / Space / Mars) green; Transition ×2, BandFollow, MarsStage ×2, HazardV2 ×3, Solarite green.
 - Lock 2 (13:04–13:09): compile 0 / 0; LeadQA M3Inner 5/7 with one red in LEAD's file (Step4's Venus deck from the pre-D-124 pixel rows; LEAD fixed it, e201d1e1); CaptureU123Mercury 13:08 drew all the Mercury art but missed B-145 (above) → D-146; the rest of lock 2 was stopped before it ran.
-- Lock 3 (13:2x): compile + EditMode + the slice + M3Inner, CaptureU123Mercury, CaptureU118Mars, CaptureU110Scenes, BudgetGate + Build/MERIDIAN_0.4.4 (a dev build; 0.4.3 stays the owner's, D-144) + the 13-leg probe (the Mercury perf rows, the Creep second loop with the Mono heap and the native reserve per visit).
+- Lock 3 (13:2x) was stopped for low memory at ~13:25 (EditMode 358/358 done, the PlayMode slice cut). The one re-run (D-046, the owner's yes at 13:3x) went as short foreground locks, each released between:
+  1. **13:39–13:43 PlayMode 23/23** = the Mercury slice 16/16 + LeadQA M3Inner 7/7 (LEAD's Step4 fix): D-146 in play, the pad's ground 317.0 = the datum 317.0 (was the 310 crater floor); MercuryEntry 0.81 s; 20-creature AI p99 0.165 ms.
+  2. CaptureU123Mercury 13:45–13:47 against BLENDER's D-147 straight-alpha sets: LEAD passed the three scenes (cycle 271), but the strip fill showed horizontal lines (at the 1 m PPU the fill tile left whole pixels and its bottom edge sampled the sheet's transparent top row) → 9a6e31d5 (rows 1–6); re-shot 13:49–13:51 and again 14:04–14:06 on B-165's first gutter export: the fill flat.
+  3. CaptureU118Mars 13:54–13:56 on the B-162 straight Mars sets; CaptureU110Scenes 13:58–13:59 on the B-162 Earth sets + the B-165 strips, all at 16:9 (LEAD read them, cycle 271 14:1x).
+  4. **BudgetGate 14:07–14:08 green** (every Editor row; perf_2026-11-07.md): Earth avg 6.42 / p99 14.44 ms, 131 draw calls; Space 3.10 / 5.72 ms; Mars 4.61 / 8.13; dust storm 4.60 / 7.82; FX peak 5.15 / 10.72; launch 0.89 s; chunk streaming p99 1.16 ms, 0/400 over 2 ms; Mars entry 1.35 s (Editor, info); GC 0 B per 300 frames everywhere.
+  5. P-48 (LEAD yes): the strip sheets import Repeat in u, Clamp in v (228687c0; with Repeat in v each frame's bottom row sampled the sheet's transparent top row: a faint line 2 m under every ground line). B-165's RGBA gutter re-export (e0f476c7, 14:10) re-imported with it at the build; the nine metas at wrapV 1 in 9b213611.
+  6. **Build/MERIDIAN_0.4.4 (development) BUILD OK 14:15, 550 MB, 75 s**: the Mercury code + D-146 + the fill fix + P-48 + the RGBA strips. A dev build; Build/MERIDIAN_0.4.3 stays the owner's (D-144).
+- Owed, one short lock when the memory gate opens (free RAM 0.65 GB at 14:37 with no Unity or Blender running): the 13-leg probe on 0.4.4 (the Mercury legs, the Creep second loop with the Mono heap and the native reserve per visit) and U-131 (one night Mercury frame on the RGBA strips, the per-column brightness along the strip band: the max dip at the 64 px joins, 12.7 levels before).
 
-## Captures
-pending B-148 / B-149 / B-150.
+## Captures (u123/, 14:04–14:06, 1920×1080)
+| Frame | What it shows | LEAD |
+|---|---|---|
+| 1_day_1x | The camp on the plain at noon under the huge low Sun, a Glassback, embercap ×24 + sunfan ×18; the regolith strip, the fill flat | passes (cycle 271) |
+| 2_twilight_1x | The dawn line at the camp, the half-set Sun under the violet band, a Flarewing over the surveyor, glassreed ×42 | passes |
+| 3_night_burrow | The first cold trap: the night set meeting the trap's floor at datum 279, the Shadewyrm peeking from its burrow, coilwort ×4 + shadebloom ×2; the slate strip | passes; the 64 px joins re-measured by U-131 on the RGBA strips |
 
 ## Open
 - The Shadewyrm's temper (Hunts in the table, shy in B-145's re-ink list) — a decision if LEAD wants it changed.
