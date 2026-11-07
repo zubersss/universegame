@@ -22,11 +22,13 @@ When the lock frees, the highest pending job here goes next, even if the other r
 older (D-037 alternation applies only between equal ranks). A rank is live only while its role
 has a want on file or holds the lock (D-112): if the top rank has no want when the lock frees,
 the next live rank runs now and the skipped role goes next after it files. A role below the top
-keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 259 (05:3x; UNITY's U-106 window has its profile (05:12) and last check (05:18, 330/330) done, with the two re-shoots, the D-129 probe re-run and the commit left; BLENDER holds the lock since 05:24 for the B-136 Hadal Maw export + the B-144 review, ≤ 10 min). A role files its want only when the queue says it is next after the running job:
-1. UNITY · file the want now for: CaptureU109Climb + CaptureU104Hud (two short locks) → profile -Probe -SkipGate once (D-129) → the U-106 commit (code, tests, captures, flight strip, perf + c1 README, status) → C1 CLOSES (LEAD: C1_REPORT.md + the C1 page + USER-26).
-2. BLENDER · after UNITY's probe: B-140 Mars rig set + strips export (one slot); then B-141 export (studies accepted this cycle; one slot).
-3. UNITY · U-112 creep hunt probe runs; then the C2 Earth batch (U-110 / U-111 / U-113 / U-114 / U-116 / U-117 (2) / U-119 / U-120 + the U-115 climb_in follow-up), promoted together at the C1 close.
-4. BLENDER · B-131 after U-113's code; B-142 after U-118's code; the Mercury strip with B-145's first export.
+keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 259 close (05:4x; C1 CLOSED on U-106's commit 8e9eea0d, D-131; the C2 Earth batch is promoted in two hand-offs; BLENDER's B-136 slot ran 05:24–05:3x). A role files its want only when the queue says it is next after the running job:
+1. UNITY · the small U-109 commit (the streak fix + the 28 m frame, on the lock now) → then lock-free: C2 batch A code (U-120 cold boot first, U-112's hunt, U-113 props, U-114 land + water creatures, U-117 (2) near-disc swap) → one check (compile + EditMode, PlayMode A / B) → hand-off with captures.
+2. BLENDER · B-140 Mars rig set + strips export (one slot ≤ 5 min) as soon as UNITY's U-109 lock frees; then B-141 Mars backdrops export (one slot).
+3. BLENDER · B-131 camp props export + the 24 v2 removals right after UNITY's batch A code commit (D-117 order), before batch A's check if the slot fits, else between its locks.
+4. UNITY · C2 batch B code (U-110 biome placement + scene pick, U-111 ground strips incl. sand, U-116 the Sun rig, U-119 the Hadal Maw rig creature, the U-115 climb_in follow-up) → one check → hand-off; then U-118 Mars is promoted (B-140 / B-141 in by then) and B-142 after it.
+5. BLENDER · B-142 Mars creatures + the mound after U-118's code; B-144 / B-145 previews meanwhile.
+
 
 
 
@@ -45,18 +47,12 @@ Rules: nothing here needs the lock; it stays under ~300 MB of extra RAM; no Unit
 did in your status before the next poll. LEAD tops each list up to ≥ 3 items every cycle.
 
 **UNITY**
-- Batching rule (D-115): the next batch is C1 only (U-104, U-108 leftovers, U-115, U-117 Space polish, the D-120 / D-124 test changes, the U-109 seam fix); the U-113 / U-114 drafts stay outside Assets until U-106 has measured the C1 build, then go in with U-110 / U-111 / U-116 as one C2 batch.
-- U-104 swap code before its check: the six gauge parts + needles from `ui/hud/gauges.json` at 12 Hz, the `escape_line` tile at the line's altitude, the blank `escape_sign` lettered ESCAPE LINE in Patrick Hand, the ship HUD rows; MenuHudTests extended.
-- U-108 leftovers: react `turn_bounce` gets a real bounce (a 0.15 s root squash on react, pure, tested); `FloraRigs.CycleClockOffset` becomes internal (InternalsVisibleTo for the tests).
-- U-106 prep: the 20 s flight-strip script (pad → Escape Line → space → entry → touchdown under scripted input), tests first (the c1_2026-11-07 evidence list is in, 5e05474).
-- U-112 instrumentation half (lock-free, so U-106's profile already prints it): per-leg Mono heap, native allocator totals and the per-visit counts in `MemoryProbe`; the `Creep per visit` row in `unity_profile.ps1`; the Return rows on private commit with working set as info (D-116).
-- U-115 code half (D-121): the surveyor controller takes clips from `characters/surveyor/side` and `side_b` (same frame size, pivot, PPU; clip names unique across the two), `SpriteCharacterView` swaps the texture with the clip; a test with a stand-in `side_b` json.
-- Test rulings (D-120), one commit: `ArtRules.ClipCap` gains `swim` (12–16); FootingTests' cap becomes "every skipped column inside the landed ship's footprint and ≥ 80 columns measured" (P-27); BudgetGateTests' Editor memory rows print as Info (P-28); the base.json surveyor tests read `side.json` or retire per D-120 (P-30, P-32); CreatureTests.PawsOnTheGround judges sheet species and lists model species as skipped until their C2 conversion (P-31).
-- `docs/credits/unity.md` audit (Limelight / Patrick Hand + OFL); ArtImporter ignores the sign's `lettering` fields without a warning (assert); an icon-coverage assert in InventoryTests (every ItemDef's `def.icon` resolves; B-128's Accept named a test that did not exist).
-- U-115 follow-up for the C2 Earth batch: climb_in moves the root up the fin-leg over frames 0–7, then the sheet's `hatch` socket (1.0, 1.05 m) sits on the Pilgrim's door socket (BLENDER's B-134 hand-off).
-- U-113 code half (D-117, lock-free): `ModelSwap` keeps the SpriteRenderer when the key resolves to a v3 sheet and no model (the six camp props once B-131's export lands), with the sheet's Animator (door `open` once on use, smelter `working` while crafting, lamp `flicker` at night), pivot and px size from the json at PPU 64, pad / wall tiling at 2 m / 1 m; tests against the sizes in BLENDER's U-113 hand-off; no check until B-131's export is in.
-- U-114 code half (D-119): stag / wolf SpeciesSpec sizes from the sheets (1.5 × 2.0 m, 1.2 × 1.0 m), the bear (2.1 × 1.3 m, territorial: react = rear-up + huff, flee when pushed), `flee` / `follow` found by name, the P-38 wall rule (Flee turns along a wall it cannot climb or hops a 1-tile step; Chase waits).
-Then one batched check for everything written when your turn in the queue comes.
+- Batch A (C1 → C2 Earth, one hand-off): U-120 cold first boot (the sheet prefetch before the entry clock, or the clock at the scene's first frame), U-112's hunt (the 16 Addressable handles + 22 GameObjects per visit), U-113 camp props as sprites (the D-125 wall tile, B-131's json numbers on the card), U-114 land + water creatures (sizes from the sheets, the bear, swimmers with pivot centre + floor clearance + a Water habitat, flee / follow by name), U-117 (2) the DiscSprite swap to `disc_near` above ~6× (the five frames are in, d3af1e5). Drafts outside Assets until the batch applies; one check.
+- Batch B (one hand-off): U-110 biome placement + the scene set by biome (plains / forest / coast), U-111 ground strips incl. sand, U-116 the Sun rig (`planets/sun/disc_rig`), U-119 the Hadal Maw as a RigSet creature with `cycle_beats`, the U-115 climb_in root move + hatch socket.
+- The C1 build's tracked gaps for the C2 Earth capture set: the near-range disc swap shot (space_6), the camp at 1x with the drawn props, forest and coast scenes, the plains with a stag, wolf and bear, the coast deep with the Maw and a shark.
+- `docs/credits/unity.md` upkeep as fonts and libraries change; the icon-coverage assert stays.
+Then one batched check per hand-off when your turn in the queue comes (compile + EditMode as one lock, PlayMode A / B as two, D-122).
+
 
 
 **BLENDER** (numpy / scripts only while UNITY holds the lock or a want; bpy only under your own lock; under 0.3 GB free, code only; otherwise one item per measured run beside the other role's job, under ~150 MB)
@@ -263,12 +259,12 @@ Files: Code/Runtime/View2D/SpriteCharacterView.cs, Code/Editor/SheetAnimatorBuil
 Depends: U-094
 Lead notes: Cycle 238. Small; the builder already does most of it. Cycle 247: DONE (960af2f): SurveyorAnimTests in EditMode 307/307 (the C1 pick order, the stand-in table logged: 10 real, 10 stand-ins; events on surprise frame 0 and dash 0 / last); CartoonSmoke green 23:04 and 23:32; AnimationEventRelay feeds the EyePop / Smear hooks. The stand-ins resolve to real clips as BLENDER draws them (C2).
 
-### U-106 · UNITY · Ready · C1
+### U-106 · UNITY · Done · C1
 Goal: C1 exit measurement: the Space scene and the Earth → Space → Mars loop on the new art profiled against D-089 (working set < 2.0 GB, warn 1.7; textures ≤ 512 MB; ≤ 8 atlases per planet; ≤ 40 animated objects); `M1LoopTests` pass with the v3 art and the manual, fuel-free flight (U-107); `reports/unity/c1_<date>/` with the Space capture set and a 20 s flight strip (pad → Escape Line → space → entry → touchdown, all under scripted player input).
 Accept: perf rows green for Space, Earth, Mars; M1LoopTests 2 runs green; the report.
 Files: reports/unity/c1_<date>/, tools/unity_profile.ps1
 Depends: U-091, U-103, U-104, U-105, U-107, B-119, B-120, B-121, B-122, B-124, B-125, B-126, B-127
-Lead notes: Cycle 238. Last C1 card; LEAD writes C1_REPORT.md on it. Cycle 242: depends on U-107 and the v4.1 re-inks too. Cycle 249 (D-114, D-116): the profile runs the 11-leg route with the Earth (warm) leg; the Return rows judge private commit within 10 % with working set as info; the `Creep per visit` row is info in this report (U-112 fixes it after); the atlas row prints the resident ≥ 1024² sheet count per planet (D-110 (2)); the worst iris-in frame per transition is listed and the 141–250 ms Earth-entry frames explained (hidden under the closed iris, or not); the boot load breakdown (4.80 s today) stays in. U-091 is Done, so the remaining dependencies are U-103, U-104, U-109 and the C1 art imports.
+Lead notes: Cycle 238. Last C1 card; LEAD writes C1_REPORT.md on it. Cycle 242: depends on U-107 and the v4.1 re-inks too. Cycle 249 (D-114, D-116): the profile runs the 11-leg route with the Earth (warm) leg; the Return rows judge private commit within 10 % with working set as info; the `Creep per visit` row is info in this report (U-112 fixes it after); the atlas row prints the resident ≥ 1024² sheet count per planet (D-110 (2)); the worst iris-in frame per transition is listed and the 141–250 ms Earth-entry frames explained (hidden under the closed iris, or not); the boot load breakdown (4.80 s today) stays in. U-091 is Done, so the remaining dependencies are U-103, U-104, U-109 and the C1 art imports. Cycle 259 (05:4x): DONE (8e9eea0d, 94 files). Build/MERIDIAN_0.4.0 (556 MB, 103 s); perf_2026-11-07.md 158 rows: 104 green, 30 info, 6 n/a, 1 red; frame time p99 Earth 9.82 / Space 6.41 / Mars 7.20 / storm 10.75 / Mars FX 13.08 / Earth C0 13.01 ms; the 11-leg dev-build probe: working set peak 966 MB, private 1314 MB, textures 318 MB (all under 2.0 GB / 512 MB), Return · Space after Mars +8.8 % (re-run +9.8 %), Return · Earth again +8.6 % (+7.3 %) on private commit, Boot → warm +37 / +27 MB, Creep per visit 26 MB (info: 16 handles + 22 GameObjects per visit → U-112), transitions 0.72–1.05 s, planet loads 0.86–1.78 s warm; the red: Planet load · Earth at boot 5.53 s cold and 5.44 s on the D-129 warm re-run (the boot path, not the cache → U-120 first in C2 batch A); M1LoopTests 1/1 twice (04:53, 04:55); the 20 s flight strip (40 stills over 53.6 s, contact sheet viewed: pad → climb → Escape Line → launch iris → Space with the Earth disc → entry iris → descent → touchdown 2.55 m/s); the c1 README with items 1–7 and the near-range limit. C1 CLOSED on it (D-131).
 
 ### U-107 · UNITY · Done · C1
 Goal: Manual, fuel-free flight (D-102, D-103; Bible §4.3, §5.2, §5.3, §6 v4.1). (1) `SideShip` becomes an upright rocket: thrust acts along the ship's up axis (W or Space held), A/D tilt up to ±35° with a spring back to upright on release, real planet gravity pulls it down, so it hovers where thrust = g, climbs above, sinks below; legs at the tail; the Mk class decides the thrust (12/20/35 m/s², §4.3), nothing else limits it. (2) All fuel is removed everywhere (D-103, D-105: launch fuel and skip fuel alike): `PlanetConfig` fuel fields, the launch burn, tanks, HUD fuel, refinery fuel recipes and any skip-fuel item, recipe, icon or string (move to `Assets/_Game/Archive/Fuel~`), the perchlorate "halves fuel" effect; the EditMode fuel-formula test becomes a thruster-class-per-planet test (§4.1 column); a test greps strings and prefab names for "fuel" and finds none outside the Archive. (3) Control never leaves the player: no input lock in §5.2/§5.3, no auto-launch; the iris is cosmetic; held inputs carry across the scene switch (a held thrust key keeps thrusting in space; the top-down controls are live on the first visible frame); the entry places the ship upright at Escape Line + 20 m descending 15 m/s with side controls live at once. (4) Landing rules §4.3 unchanged (≤ 6 m/s clean); the ship tips over if it touches down tilted more than 20° (no damage, it rights itself over 0.5 s with a wobble).
@@ -1993,34 +1989,34 @@ Files: Assets/_Game/Code/Runtime/UI/Settings/
 Depends: U-095
 Lead notes: Cycle 236. Promoted with the C1 cards.
 
-### U-110 · UNITY · Backlog · C2
+### U-110 · UNITY · Ready · C2
 Goal: Biome-aware flora placement: FloraRigs picks plants whose `biomes` list contains the spawn biome (JsonUtility reads the new field from B-129's rig set), weighted so every biome has at least two kinds; the C2 Earth rig set imports with no schema change; the 300-plant loop p99 unchanged.
 Accept: RigFloraTests: a desert spawn never picks Nodbell; the plains pick among snoozle / Nodbell / Whiptuft; the perf row unchanged; a plains capture with every plains plant visible.
 Files: Code/Runtime/Flora/FloraRigs.cs, Tests/
 Depends: U-106, B-129
-Lead notes: Cycle 249 (D-115). Promoted when U-106 is in. Cycle 253: B-133 is exported (27143e1): `backgrounds/earth/forest` and `/coast` load by ConfigureFor("earth", "forest" / "coast"), but CartoonStage pins EarthScene = plains, so this card also picks the scene set by the spawn biome (plains / forest / coast) and the Accept gains a forest and a coast capture at 1x.
+Lead notes: Cycle 249 (D-115). Promoted when U-106 is in. Cycle 253: B-133 is exported (27143e1): `backgrounds/earth/forest` and `/coast` load by ConfigureFor("earth", "forest" / "coast"), but CartoonStage pins EarthScene = plains, so this card also picks the scene set by the spawn biome (plains / forest / coast) and the Accept gains a forest and a coast capture at 1x. Cycle 259: promoted (C2 batch B).
 
-### U-111 · UNITY · Backlog · C2
+### U-111 · UNITY · Ready · C2
 Goal: Ground strips from art: U-100's placeholder strip replaced by `terrain/earth/ground_strip` (grass), `ground_strip_soil`, `ground_strip_stone` per column material (grass over soil, bare soil where dug, stone where the block is stone), the fill tile from each sheet's bottom 8 px; the strip follows dug heights as today.
 Accept: an earth_c0_ground-style capture showing the three materials and a dug hole; TerrainTests unchanged; frame time unchanged.
 Files: Code/Runtime/Planet/, Placeholders/terrain/earth/, Tests/
 Depends: U-106, B-130
-Lead notes: Cycle 249 (D-115). Promoted when U-106 is in. B-130 is exported (558976a): frames 64×152 with the pivot on the ground line at [0.5, 0.842] (`ground_line_px: 128`), 2 m of material below the line and 0.375 m of lip above it, `tile: true`, one frame per terrain column (x mod 8), the fill tile = frame 0's bottom 8 px; GroundStrip.cs needs the key swap only.
+Lead notes: Cycle 249 (D-115). Promoted when U-106 is in. B-130 is exported (558976a): frames 64×152 with the pivot on the ground line at [0.5, 0.842] (`ground_line_px: 128`), 2 m of material below the line and 0.375 m of lip above it, `tile: true`, one frame per terrain column (x mod 8), the fill tile = frame 0's bottom 8 px; GroundStrip.cs needs the key swap only. Cycle 259: promoted (C2 batch B); the sand strip is in (af83541): coast columns map to sand.
 
-### U-113 · UNITY · Backlog · C2
+### U-113 · UNITY · Ready · C2
 Goal: Camp props as sprites (D-117): when a `props/common/*` key resolves to a v3 sheet and no model (after B-131's export removes the glbs), `ModelSwap` keeps the SpriteRenderer and plays the sheet's clips through the §11.8 Animator (door `open` once on open, reversed on close; smelter `working` while a craft runs; lamp `flicker` at night and in the dark), pivot and px size from the json at PPU 64 (pad 128×48 tiling at 2 m, wall 64×176 at 1 m, door 88×176, smelter 112×192, crate 80×72, lamp 64×160; ground line 10 px above the bottom), the BaseBuilder fit rules kept; PoiCatalog sizes read from the sheet; the model path untouched for every other key.
 Accept: PropSpriteTests: each of the six keys resolves to its sheet with the right frame size and clip set; the door clip plays once on use; the smelter loop runs only while crafting; a plains capture with the camp at 1x; CartoonSmoke and the BudgetGate Earth rows green; no importer error on the six keys.
 Files: Code/Runtime/Art/ModelSwap.cs, ModelView.cs, Code/Runtime/Planet/POI/PoiPlacer.cs, Code/Runtime/Building/BaseBuilder.cs, Tests/
 Depends: U-106, B-131
-Lead notes: Cycle 250 (D-117). The code half is lock-free and sits last on the While-waiting list so B-131's export can land in BLENDER's first slot after it; the check rides your next batch. The B-131 preview is the size reference until the export: blender/preview/review_b131_props_preview.png. Cycle 254 (D-125, P-45): the wall keeps its 1 × 1 cell with the stretch rule; BLENDER redraws the wall as a 64×64 tile (1 × 1 m, tiling in x and y), so no BasePieces change; the door's 88×176 scales uniformly into its 1 × 2 cell (Fit.Height). The code half stays outside Assets until U-106 (D-115).
+Lead notes: Cycle 250 (D-117). The code half is lock-free and sits last on the While-waiting list so B-131's export can land in BLENDER's first slot after it; the check rides your next batch. The B-131 preview is the size reference until the export: blender/preview/review_b131_props_preview.png. Cycle 254 (D-125, P-45): the wall keeps its 1 × 1 cell with the stretch rule; BLENDER redraws the wall as a 64×64 tile (1 × 1 m, tiling in x and y), so no BasePieces change; the door's 88×176 scales uniformly into its 1 × 2 cell (Fit.Height). The code half stays outside Assets until U-106 (D-115). Cycle 259: promoted (C2 batch A, D-131); BLENDER's B-131 export lands right after your code commit.
 
 
-### U-114 · UNITY · Backlog · C2
+### U-114 · UNITY · Ready · C2
 Goal: Earth land creatures on v3 sheets (D-119): after B-132's export removes the stag / wolf models, both play their sheets through the existing creature sheet path (as the gull does) with SpeciesSpec sizes from the drawings (stag 1.5 × 2.0 m, wolf 1.2 × 1.0 m); the brown bear gets a SpeciesSpec (`creatures/earth/bear`, 2.1 × 1.3 m, territorial per Bible §7.1: react = rear-up + huff, flee when pushed, no chase); `flee` and the wolf's `follow` are found by name (indices 0–3 stay Gus's order); P-38: a fleeing creature that meets a wall it cannot climb turns along it or hops a 1-tile step, a chasing one waits.
 Accept: CreatureTests: the three species resolve their sheets with no importer error and PawsOnTheGround passes for them; the bear spawns on the plains and rears on contact; a plains capture with stag, wolf and bear at 1x beside the surveyor; the 300-creature loop p99 unchanged.
 Files: Code/Runtime/Creatures/CreatureSpecies.cs, Creature.cs, CreatureBrain.cs, Tests/
 Depends: U-106, B-132
-Lead notes: Cycle 251 (D-119). Code half on the While-waiting list (last); promoted with U-110 / U-111 when U-106 is in. If a stag or wolf still shows the grey model after the export, the Library kept the model address: reimport the two colour maps (D-117's reopen clause).
+Lead notes: Cycle 251 (D-119). Code half on the While-waiting list (last); promoted with U-110 / U-111 when U-106 is in. If a stag or wolf still shows the grey model after the export, the Library kept the model address: reimport the two colour maps (D-117's reopen clause). Cycle 259: promoted (C2 batch A); the swimmers (pike / shark / squid, pivot centre, floor clearance 0.38 / 0.87 / 0.70 m, a Water habitat) join this card.
 
 ### B-136 · BLENDER · Ready · C2
 Goal: The Hadal Maw as a §11.3 rig set (`creatures/earth/hadal_maw/rigset`: body segments, jaw, fins, lure as parts + bones ≤ 6, idle sway and a jaw-open react; no teeth bared, D-087), too big for one frame sheet (your c2_earth_creature_reink.md proposal 2).
@@ -2030,12 +2026,12 @@ Depends: B-135
 Lead notes: Cycle 251 (D-119). Promoted when B-135's previews are accepted. Cycle 256: DESIGN ACCEPTED and promoted (1fb50b1; review_b136_hadal_maw_preview.png: ~34 m, six bones head / body1 / body2 / tail / jaw / lure, the lure swaps lit / dim / flare, one eye and a closed smile, the open jaw a dark cavern with a tongue and no teeth, bioluminescent dots, the idle a sway travelling down the bones with the lure bobbing, the react a 24° jaw open + head lift + lure flare; ink 2.0–3.0 / 1.0–1.5 px at 1x; parts ~1750×800 at 1x). Export in one BLENDER slot after U-106 (a new key, nothing to replace); UNITY's U-119 drives it as a rig-set creature. Cycle 257 (05:0x, D-127): key = `creatures/earth/hadal_maw` (three segments; the card's `…/rigset` struck); idle at 110 bpm with `cycle_beats: 4` (contract v3.2 field; no validator exception); the 99.9 % palette hit is accepted (the lure's translucent halos). Export-ready (dde7d5e: 8 parts on 1784×744, json valid); one slot after U-106. Cycle 259: export running (heavy_blender.lock 05:24:36, the rig set rebuilt 05:24:39); verified next tick against the log line, the 8-part sheet ≤ 2048², the json with `cycle_beats: 4` and the stamped review.
 
 
-### U-116 · UNITY · Backlog · C2
+### U-116 · UNITY · Ready · C2
 Goal: The painted Sun in Space (D-123, B-137): `planets/sun/disc_rig.json` replaces the lit spheroid: the body sprite at the game's r 900 px, the flame ring rotating slowly (≈ 1°/s) with a 12 Hz stepped pulse, the corona wash scaled 4x behind it, the two prominence parts on their limb sockets with a slow wobble; the Space scene's light and the planet discs untouched.
 Accept: SpaceArtTests: the Sun key resolves to the rig with its parts and sockets; a Space capture with the Sun, Earth and Mars discs at true ratio; the Space perf rows unchanged.
 Files: Code/Runtime/Space/SunView.cs, Code/Runtime/Space/SpaceBackdrop.cs, Tests/
 Depends: U-106, B-137
-Lead notes: Cycle 253 (D-123). Promoted with U-110 / U-111 when U-106 is in and B-137 is exported.
+Lead notes: Cycle 253 (D-123). Promoted with U-110 / U-111 when U-106 is in and B-137 is exported. Cycle 259: promoted (C2 batch B); the Sun rig is exported (c4225fd): parts body / tongue ×14 / corona / two prominences, the json carries spin 2°/s, pulse 0.08 at 110 bpm, breathe 0.03.
 
 
 ### U-118 · UNITY · Backlog · C2
@@ -2045,16 +2041,16 @@ Files: Code/Runtime/View2D/CartoonStage.cs, Code/Runtime/Planet/, Code/Runtime/C
 Depends: U-110, U-111, U-114, B-140, B-141
 Lead notes: Cycle 256. The first planet after Earth in C2 (Bible §12 order). Promoted when the C2 Earth batch is Done. Cycle 258: den species play `idle` (the peek) only at their mound and `idle_open` elsewhere (B-142).
 
-### U-119 · UNITY · Backlog · C2
+### U-119 · UNITY · Ready · C2
 Goal: Rig-set creatures: the Hadal Maw (B-136) as a creature whose view is a RigSet (head / body1 / body2 / tail / jaw / lure bones, the lure swaps lit / dim / flare, the idle sway down the bones, the react jaw open), spawning in the coast deep water (a Water habitat in SpeciesSpec from B-135's swimmers), no attack (D-087: it startles the player with its react and follows at a distance).
 Accept: CreatureTests: the Maw resolves its rig set with six bones and plays idle and react; a coast-deep capture with the Maw, a shark and the surveyor at 1x; the Earth perf rows unchanged.
 Files: Code/Runtime/Creatures/, Code/Runtime/Flora/RigSet.cs (shared), Tests/
 Depends: U-114, B-136
-Lead notes: Cycle 256. Promoted with the C2 Earth batch once B-136 is exported. Cycle 257 (D-127): RigSet honours `idle.cycle_beats` (one sway over N beats; default 1) and RigSetBuilder recognises a rig set by the json's `parts` array under the three-segment key `creatures/earth/hadal_maw`.
-### U-120 · UNITY · Backlog · C2
+Lead notes: Cycle 256. Promoted with the C2 Earth batch once B-136 is exported. Cycle 257 (D-127): RigSet honours `idle.cycle_beats` (one sway over N beats; default 1) and RigSetBuilder recognises a rig set by the json's `parts` array under the three-segment key `creatures/earth/hadal_maw`. Cycle 259: promoted (C2 batch B); B-136 exports in BLENDER's 05:24 slot under the key `creatures/earth/hadal_maw` with `cycle_beats: 4` (D-127).
+### U-120 · UNITY · Ready · C2
 Goal: Cold first boot under 5 s (D-129): the boot leg's tile-sheet reads (1067 ms on a cold disk cache in U-106's profile) move ahead of the entry clock with a boot-time sheet prefetch while the title card shows, or the Planet load clock starts at the scene's first rendered frame per Bible §11.1's definition; no change to warm loads.
 Accept: the 11-leg probe's Planet load · Earth at boot ≤ 5 s on a cold cache (run right after a build) and on a warm one; TransitionTests and M1LoopTests unchanged.
 Files: Code/Runtime/Boot/, Code/Runtime/Perf/MemoryProbe.cs, Tests/
 Depends: U-106
-Lead notes: Cycle 258 (D-129). Rides the C2 Earth batch; if U-106's warm re-run also reads ≥ 5 s, it moves to the front of that batch.
+Lead notes: Cycle 258 (D-129). Rides the C2 Earth batch; if U-106's warm re-run also reads ≥ 5 s, it moves to the front of that batch. Cycle 259 (05:4x): PROMOTED to the front of C2 batch A: the D-129 warm re-run read 5.44 s, so the boot path is the cause (tile sheets 889 ms warm, 1067 ms cold).
 

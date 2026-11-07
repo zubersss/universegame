@@ -6,13 +6,15 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
+### USER-26 — Play the C1 build and look at its page (15 min)
+Open https://claude.ai/artifact/N73DUqTkiQvDfEeTTu6HHx (the C1 page: what you can do, the stills,
+the numbers, what comes next). Then play: double-click `C:\dev\universegame\Build\MERIDIAN_0.4.0\MERIDIAN.exe`.
+Walk with A / D, jump with Space, walk up to the rocket and press F to board. Hold W or Space to
+thrust, A / D to tilt; fly up past the dotted Escape Line, find Mars, come down slowly and touch
+the ground under 6 m/s. Ten minutes is enough. Tell the Lead "C1 plays" or what bothered you.
+This replaces USER-24 (the round 2 look-over): the same art is now in the game.
 
-### USER-24 — Look over round 2 of the cartoon style (5 min)
-Open https://claude.ai/artifact/RpnrBEGMbKM1mSGicBYqZQ (the C0 page, now with a "Round 2" section on top).
-It shows your four changes before and after: thinner, more detailed ink; no faces on plants or
-planets; the ship upright; manual, fuel-free flight. The rocket in the stills is a grey stand-in;
-its drawn version is exported and goes into the game next. Tell the Lead "round 2 looks right"
-or what still bothers you.
+
 
 ### USER-08 — Optional: let the team run PowerShell commands without prompts (2 min)
 On Windows, Claude Code runs commands through PowerShell as well as Bash, and the
@@ -22,6 +24,7 @@ If you get too many "allow this command?" prompts, tell the Lead "approve PowerS
 allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
 
 ## Done
+- 2026-11-07 05:4x · USER-24 folded into USER-26 (the round 2 art is in the C1 build and on its page).
 - 2026-11-07 01:04 · USER-25 done: free RAM reached 1.98 GB (ChatGPT, Copilot and Chrome gone); UNITY's U-103 + U-109 check started at 01:06.
 - 2026-11-06 19:3x · USER-23 done: the owner kept the look and asked for four changes (thinner detailed ink, faces only on people and animals, an upright Pilgrim, fully manual fuel-free flight) → D-100..D-104, Bible 4.1, contract v3.1, cards U-107, B-123..B-127. A second look-over follows when the re-inked set lands (C1).
 - 2026-11-06 19:0x · USER-22 retired by LEAD: free memory has stayed above the gate since 15:00 (2.6 GB at 19:00) without the owner's action.
