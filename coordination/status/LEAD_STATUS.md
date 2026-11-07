@@ -1,6 +1,6 @@
 # LEAD STATUS
 Updated: 2026-11-07 07:3x · Session: 7 · Review cycle: 263 · Cadence: every 30 min (owner; session cron d058c952 at :13 / :43, re-created at resume)
-Cycle 263 (tick): B-145 Cinderling + the Shadewyrm re-check + the Mercury rig dry run ACCEPTED (the Glassback review re-runs); U-121's cartoon-path profile recorded (101 green, memory lower than the 3D path, the cold boot 8.35 s → U-120 first in batch B); the queue and UNITY's list rewritten for hand-off 3 → 0.4.1 → batch B. Nothing Done this cycle.
+Cycle 263 (tick + 07:5x): UNITY hand-off 3 a2c5b4df + Build 0.4.1 → U-121, U-114, U-117, B-135, B-143 DONE; D-136 (USER-26 play released; Editor transition row info; U-120 = the terrain first fill). B-145 Cinderling + the Shadewyrm re-check + the Mercury rig dry run ACCEPTED (the Glassback review re-runs); U-121's cartoon-path profile recorded (101 green, memory lower than the 3D path, the cold boot 8.35 s → U-120 first in batch B); the queue and UNITY's list rewritten for hand-off 3 → 0.4.1 → batch B. Nothing Done this cycle.
 Cycle 262 (tick + 07:1x): UNITY hand-off 2 ae7b8cfc → U-113, B-131, B-132 DONE; U-121 / U-114 / U-117 landed; U-122 + D-135; B-147 Venus palette ACCEPTED (D-134); D-133 corrected.
 Cycle 261 (tick): D-133 (the 17 PlayMode reds); B-145 Shadewyrm + den ACCEPTED; B-146 C3 UI art + B-147 Venus prep written.
 Cycle 260 (tick + 06:1x): M1LoopTests green twice on the cartoon path (C1 stands); B-136 / B-140 / B-141 / B-131 EXPORTS VERIFIED; B-144, B-145 plants + Flarewing ACCEPTED.
@@ -16,7 +16,7 @@ Cycle 263 (07:3x): three previews accepted, the profile recorded, queue + lists 
 ## Pending decisions
 none open.
 ## Waiting on the user
-USER-26 (the C1 page now; play 0.4.1 when the Lead says). USER-08 optional.
+USER-26 (play Build 0.4.1 + the C1 page, 15 min; released 07:5x). USER-08 optional.
 ## Loop / stall watch
 UNITY: hand-off 3 is a short chain plus one 20-min profile; commit 3 expected by ~08:00. BLENDER: steady; the Glassback review needs a longer limit.
 ## Session addresses (ListAgents, 11-07 00:4x)
