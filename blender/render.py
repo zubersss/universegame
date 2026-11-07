@@ -719,14 +719,15 @@ def do_v3_sheet(entry, preview):
     markers = {m.name: m.frame for m in scene.timeline_markers}
     frames, clips, widths = [], [], []
     for c in entry["clips"]:
-        if c["name"] not in markers:
-            raise AssetError(f"{key}: no timeline marker '{c['name']}' in {entry['source']}")
+        mname = c.get("marker", c["name"])     # a clip may read another marker (B-122: top_idle -> idle)
+        if mname not in markers:
+            raise AssetError(f"{key}: no timeline marker '{mname}' in {entry['source']}")
         clips.append({"name": c["name"], "start": len(frames), "length": int(c["frames"]),
                       "loop": bool(c.get("loop", False))})
         if c.get("loop"):
             clips[-1]["loop_from"] = int(c.get("loop_from", 0))
         for k in range(int(c["frames"])):
-            f = markers[c["name"]] + k
+            f = markers[mname] + k
             img, w = GR.render_frame(GR.collect(scene, objs, f), fw, fh, v3.PPU * scale, pivot, ss=ss,
                                      seed=int(entry.get("seed", 1)) * 1000 + f)
             frames.append(img)
@@ -759,8 +760,8 @@ def do_v3_sheet(entry, preview):
     out = os.path.join(PREVIEW, f"review_{task}{'_preview' if preview else ''}.png")
     z = int(entry.get("design_zoom", 0))
     if z:                               # design sheets: every drawing again at z x (same strokes, PPU x z)
-        stats["zoom_frames"] = [GR.render_frame(GR.collect(scene, objs, markers[c["name"]] + k), fw * z, fh * z,
-                                                v3.PPU * scale * z, pivot, ss=2, seed=int(entry.get("seed", 1)) * 1000 + markers[c["name"]] + k)[0]
+        stats["zoom_frames"] = [GR.render_frame(GR.collect(scene, objs, markers[c.get("marker", c["name"])] + k), fw * z, fh * z,
+                                                v3.PPU * scale * z, pivot, ss=2, seed=int(entry.get("seed", 1)) * 1000 + markers[c.get("marker", c["name"])] + k)[0]
                                 for c in entry["clips"] for k in range(int(c["frames"]))]
     boxes = review.v3_sheet_review(entry, meta, frames, png, out, stats)
     if not preview:

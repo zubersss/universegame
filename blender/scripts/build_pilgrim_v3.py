@@ -60,6 +60,8 @@ def draw_pilgrim(d, M, pose=None, seed=0):
     view = p["view"]
     if view == "front":
         return draw_front(d, M, p, seed)
+    if view == "top":
+        return draw_top(d, M, p, seed)
     fx = 0.62 if view == "tq" else 1.0            # 3/4: the length foreshortened
 
     def T(x, z):                                   # stretch/squash about the hull centre, bend, foreshorten
@@ -180,6 +182,115 @@ def draw_front(d, M, p, seed):
         x = -0.44 + 0.88 * (k + 1) / 5
         G.stroke(d, [(x, CZ - 0.80), (x, CZ - 0.44)], M["ink"], I)
     G.stroke(d, G.lumpy_ellipse(0, CZ + R + 0.15, 0.18, 0.18, n=16, seed=seed + 3), M["tip"], O, cyclic=True)
+
+
+def draw_top(d, M, p, seed):
+    """Seen from above (Space view, nose to +x): cigar hull with the band, the mustard nose with
+    the two porthole eyes looking ahead, the side fins spread port and starboard, the top fin as
+    a ridge; no legs, no grille (it is under the chin). Centred on z = 0 (pivot 0.5, 0.5)."""
+    sx, sz = p["sx"], p["sz"]
+
+    def T(x, z):
+        return (x * sx, z * sz + p["bend"] * 0.0)
+
+    def TL(pts):
+        return [T(x, z) for x, z in pts]
+    for s in (-1, 1):                                   # side fins, wobbling
+        a = p["fin"] * s
+        bx = -4.3
+        tipx, tipz = bx - 1.6 + 0.4 * math.sin(a), s * (radius_at(bx / L2) * 0.85 + 1.7 + 0.25 * math.cos(a))
+        pts = G.bezier((bx + 1.3, s * 0.9), (bx + 0.2, s * 1.8), (tipx, tipz), n=10) + \
+            G.bezier((tipx, tipz), (bx - 1.2, s * 1.5), (bx - 0.6, s * 0.9), n=10)[1:]
+        G.stroke(d, TL(pts), M["fin"], O, cyclic=True)
+        G.stroke(d, TL(G.lumpy_ellipse(tipx + 0.05, tipz - s * 0.15, 0.32, 0.26, n=18, seed=seed + 60 + s)), M["tip"], O, cyclic=True)
+    bell = [(-L2 + 0.3, 0.75), (-L2 - 0.9, 1.05), (-L2 - 0.9, -1.05), (-L2 + 0.3, -0.75)]
+    G.stroke(d, TL(bell), M["bell"], O, cyclic=True)
+    n = 70
+    top = [(L2 * (2 * i / n - 1), radius_at(2 * i / n - 1)) for i in range(n + 1)]
+    bot = [(L2 * (2 * i / n - 1), -radius_at(2 * i / n - 1)) for i in range(n, -1, -1)]
+    hull = TL(top + bot[1:-1])
+    G.stroke(d, hull, M["hull"], 0.0, cyclic=True)
+    shadow = [(x, z) for x, z in bot[1:-1]]
+    G.stroke(d, TL(shadow + [(x, -radius_at(x / L2) * 0.55) for x, _z in shadow][::-1]), M["hull_sh"], 0.0, cyclic=True)
+    band = [(x, radius_at(x / L2)) for x in [-0.6 + 1.2 * i / 8 for i in range(9)]] + \
+        [(x, -radius_at(x / L2)) for x in [0.6 - 1.2 * i / 8 for i in range(9)]]
+    G.stroke(d, TL(band), M["band"], I, cyclic=True)
+    G.stroke(d, TL([(-3.8, 0.0), (-1.6, 0.0)]), M["ink"], I)          # the top fin as a ridge line
+    G.stroke(d, hull, M["ink"], O, cyclic=True)
+    ntop = [(x, radius_at(x / L2)) for x in [3.2 + (L2 - 3.2) * i / 20 for i in range(21)]]
+    nbot = [(x, -radius_at(x / L2)) for x in [L2 - (L2 - 3.2) * i / 20 for i in range(21)]]
+    seam = G.bezier((3.2, -radius_at(3.2 / L2)), (2.95, 0.0), (3.2, radius_at(3.2 / L2)), n=10)
+    nose = TL(ntop + nbot[1:] + seam[1:-1])
+    G.stroke(d, nose, M["nose"], 0.0, cyclic=True)
+    G.stroke(d, TL(seam), M["ink"], I)
+    G.stroke(d, nose, M["ink"], O, cyclic=True)
+    for k, ez in enumerate((0.48, -0.48)):
+        cx, cz = T(4.6, ez)
+        G.stroke(d, G.lumpy_ellipse(cx, cz, 0.42, 0.42, n=28, seed=seed + 70 + k), M["bell"], I, cyclic=True)
+        G.pie_eye(d, cx, cz, 0.34, 0.34, M["pupil"], M["glass"], look=(0.6, 0.0), seed=seed + 72 + k,
+                  closed=p["blink"], m_lid=M["ink"])
+
+
+def draw_puff(d, M, f, n=8):
+    """The exhaust puff loop (128^2 at 1x, pivot at the bell on the right): three round puffs
+    born at the bell, growing and drifting left, the oldest shrinking away; hot mustard core."""
+    for k in range(3):
+        t = ((f / n) + k / 3) % 1.0
+        r = 0.18 + 0.42 * math.sin(math.pi * min(t * 1.2, 1.0))
+        x = -0.2 - 1.15 * t
+        z = 0.05 * math.sin(6.28 * t + k)
+        if r > 0.06:
+            G.stroke(d, G.lumpy_ellipse(x, z, r, r * 0.92, n=24, lump=0.07, seed=31 * k + f),
+                     M["puff_hot"] if t < 0.22 else M["puff"], O, cyclic=True)
+
+
+# ---- B-122 sheets: clips per contract §11.2 caps (thrust stretch capped at 1.12 so frames fit 1016 px)
+TAU = 2 * math.pi
+SIDE_IDLE = [dict(fin=0.12 * math.sin(TAU * i / 8), sz=1 + 0.02 * math.cos(TAU * i / 8), sx=1 - 0.01 * math.cos(TAU * i / 8),
+                  blink=1.0 if i == 5 else 0.0, look=(0.5, -0.1)) for i in range(8)]
+SIDE_THRUST = [dict(legs=0.0, sx=1.08 + 0.04 * math.sin(TAU * i / 8), sz=0.93 - 0.03 * math.sin(TAU * i / 8),
+                    fin=-0.30 + 0.10 * math.sin(TAU * i / 8 - 1.2), look=(0.8, 0.0), bend=0.45) for i in range(8)]
+SIDE_CUT = [dict(legs=0.0, sx=s_x, sz=s_z, fin=fn, blink=bl) for s_x, s_z, fn, bl in
+            ((0.88, 1.12, 0.35, 0.6), (0.92, 1.09, 0.25, 0.0), (1.04, 0.97, -0.15, 0.0),
+             (0.98, 1.02, 0.08, 0.0), (1.01, 0.99, -0.03, 0.0), (1.0, 1.0, 0.0, 0.0))]
+SIDE_LAND = [dict(legs=lg, sx=s_x, sz=s_z, fin=fn, look=(0.3, -0.5)) for lg, s_x, s_z, fn in
+             ((0.0, 1.0, 1.0, 0.0), (0.35, 1.0, 1.02, -0.05), (0.7, 0.99, 1.03, -0.08), (1.0, 1.0, 1.02, -0.05),
+              (1.0, 1.08, 0.86, 0.30), (1.0, 0.97, 1.05, -0.12), (1.0, 1.01, 0.99, 0.05), (1.0, 1.0, 1.0, 0.0))]
+TOP_IDLE = [dict(view="top", fin=0.12 * math.sin(TAU * i / 8), sz=1 + 0.02 * math.cos(TAU * i / 8), blink=1.0 if i == 5 else 0.0)
+            for i in range(8)]
+TOP_THRUST = [dict(view="top", sx=1.08 + 0.04 * math.sin(TAU * i / 8), sz=0.93 - 0.03 * math.sin(TAU * i / 8),
+                   fin=-0.30 + 0.10 * math.sin(TAU * i / 8 - 1.2)) for i in range(8)]
+SHEET_CLIPS = [("idle", SIDE_IDLE), ("thrust", SIDE_THRUST), ("cut", SIDE_CUT), ("land", SIDE_LAND),
+               ("top_idle", TOP_IDLE), ("top_thrust", TOP_THRUST)]
+SHEETS_OUT = os.path.join(os.path.dirname(HERE), "sources", "ships", "pilgrim_v3.blend")
+
+
+def build_sheets(out=SHEETS_OUT):
+    """All Pilgrim clips in one source (markers per clip); the manifest's side_a..d / top_a..b
+    entries each pick theirs. The puff loop is its own object (collection 'puff')."""
+    scene = G.new_scene()
+    coll = G.collection("pilgrim")
+    ob, gp = G.gp_object("pilgrim", coll)
+    M = materials(gp)
+    layer = gp.layers.new("art")
+    f = 1
+    clips = []
+    for name, poses in SHEET_CLIPS:
+        for i, pose in enumerate(poses):
+            draw_pilgrim(G.drawing(layer, f), M, pose, seed=7 * f)
+            f += 1
+        clips.append((name, len(poses)))
+    pc = G.collection("puff")
+    pob, pgp = G.gp_object("puff", pc)
+    PM = materials(pgp)
+    play = pgp.layers.new("art")
+    for i in range(8):
+        draw_puff(G.drawing(play, f + i), PM, i)
+    clips.append(("puff", 8))
+    G.mark_clips(scene, clips)
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    bpy.ops.wm.save_as_mainfile(filepath=out)
+    return out
 
 
 DESIGN = [dict(view="side"), dict(view="tq"), dict(view="front"),
