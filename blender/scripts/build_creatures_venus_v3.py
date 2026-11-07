@@ -5,6 +5,8 @@ eyes, dizzy stars), in the Venus palette (D-134). Faces kept, friendly or neutra
                   feathery antennae; fly 12 at index 1; idle 8 (a hover), react 8 (a zig-zag scatter), bump 8.
   pressure_crab   128x80, the surface, armoured and slow: a basalt shell, vent-orange claws that wave (never pinch),
                   eye stalks; idle 10, walk 12 (a shuffle), react 8 (into its shell), bump 10.
+  vent_eel        160x80, curious about warmth: a basalt eel with a vent-glow belly; idle peeks over its den
+                  props/venus/vent_mouth (D-126), walk 12 (a slither), react 8 (ducks), bump 10, idle_open 10.
   sulfur_drifter  112x128, a gasbag filter feeder on the deck winds: a sulphur-yellow balloon with a cream filter frill
                   and swaying tendrils below, pie eyes, a small round mouth, two olive paddle fins. Pivot at the body
                   centre (creatures off the ground, B-135's rule); clips idle 10 (a bob), drift 12 at index 1 (the travel
@@ -248,6 +250,102 @@ def crab_poses():
     return out
 
 
+# ---------------------------------------------------------------- vent eel (the surface vents; curious about warmth)
+# A dark basalt eel with a vent-orange belly glow (a tone), a cream dorsal fin frill, a rounded head with pie eyes. Idle
+# peeks over its den, props/venus/vent_mouth (a basalt vent cone, D-126: drawn by UNITY in front on the same pivot); walk
+# slithers along the ground in an S-wave; react ducks; idle_open pauses in the open, curling.
+VENT_TOP = [(-0.56, 0.0), (-0.42, 0.10), (-0.26, 0.24), (-0.14, 0.29), (0.14, 0.29), (0.26, 0.24), (0.42, 0.10), (0.56, 0.0)]
+
+
+def eel_body(d, M, spine, w0, w1, seed):
+    """A tapered body along `spine` (head first): basalt, the vent-glow belly band, a cream dorsal frill, bands."""
+    n = len(spine)
+    left, right = [], []
+    for i, (x, z) in enumerate(spine):
+        t = i / (n - 1)
+        w = w0 * (1 - t) + w1 * t
+        a, b = spine[max(i - 1, 0)], spine[min(i + 1, n - 1)]
+        dx, dz = b[0] - a[0], b[1] - a[1]
+        L = math.hypot(dx, dz) or 1.0
+        nx, nz = -dz / L, dx / L
+        left.append((x + nx * w, z + nz * w))
+        right.append((x - nx * w, z - nz * w))
+    up, down = (left, right) if sum(q[1] for q in left) > sum(q[1] for q in right) else (right, left)
+    for i in range(1, n - 1, 3):                                                         # the dorsal frill (behind)
+        q = up[i]
+        G.stroke(d, G.lumpy_ellipse(q[0], q[1] + 0.02, 0.035, 0.03, n=8, lump=0.1, seed=seed + i), M["cream_sh"], I, cyclic=True)
+    tip = spine[-1]
+    shape = left + [tip] + right[::-1]
+    G.stroke(d, shape, M["basalt_f"], 0.0, cyclic=True)
+    mid = [((u[0] + 2 * v[0]) / 3, (u[1] + 2 * v[1]) / 3) for u, v in zip(up, down)]
+    G.stroke(d, down + mid[::-1], M["vent_f"], 0.0, cyclic=True)                          # the belly glow
+    for i in range(2, n - 2, 3):
+        G.seam(d, [up[i], mid[i]], M["ink"])
+    G.stroke(d, shape, M["ink"], O, cyclic=True)
+
+
+def eel_head(d, M, hx, hz, p, seed):
+    head = G.lumpy_ellipse(hx, hz, 0.11, 0.09, n=26, lump=0.03, seed=seed + 2)
+    G.stroke(d, head, M["basalt_f"], 0.0, cyclic=True)
+    G.stroke(d, [q for q in head if q[1] < hz - 0.03] + [(hx, hz - 0.03)], M["vent_f"], 0.0, cyclic=True)
+    G.stroke(d, head, M["ink"], O, cyclic=True)
+    if p["mouth"] > 0.05:
+        G.stroke(d, G.lumpy_ellipse(hx + 0.07, hz - 0.04, 0.014 + 0.008 * p["mouth"], 0.01 + 0.01 * p["mouth"], n=10, seed=seed + 4), M["mouth"], I, cyclic=True)
+    else:
+        G.seam(d, G.bezier((hx + 0.10, hz - 0.03), (hx + 0.06, hz - 0.05), (hx + 0.02, hz - 0.045), n=4), M["ink"])
+    K.eyes(d, M, hx + 0.005, hz + 0.02, 0.026, 0.034, 0.05, p, seed)
+    if p["stars"] is not None:
+        K.stars(d, M, hx, hz + 0.2, 0.13, p["stars"])
+
+
+def draw_vent_eel(d, M, pose=None, seed=0):
+    p = K.base_pose()
+    p.update(dict(hole=None, wave=0.0, curl=0.0))
+    p.update(pose or {})
+    e = p["hole"]
+    if e is not None:                                                                     # at the vent: rises behind its rim
+        hx, hz = 0.08 + 0.03 * e, max(0.20 + 0.40 * e + p["bob"], 0.18)
+        spine = G.bezier((hx - 0.02, hz - 0.04), (hx - 0.06, hz - 0.2), (0.0, 0.2), (-0.02, 0.10), n=12)
+        eel_body(d, M, spine, 0.075, 0.07, seed)
+        dk = G.Xf(d, K.turn((hx - 0.06, hz - 0.03), p["head_rot"], (0.0, 0.0), K.scale_about((hx, hz), 1.2)))
+        eel_head(dk, M, hx, hz, p, seed)
+        return
+    B = K.Body(p, (0.0, 0.1))
+    db = G.Xf(d, B)
+    spine = []
+    for i in range(20):                                                                   # an S-wave slither along the ground
+        t = i / 19
+        x = 0.62 - 1.45 * t
+        z = 0.09 + 0.05 * max(0.0, math.sin(p["wave"] - 6.0 * t)) * t + 0.12 * p["curl"] * math.sin(math.pi * t)
+        spine.append((x, z))
+    eel_body(db, M, spine, 0.075, 0.025, seed)
+    H = K.turn((0.62, 0.1), p["head_rot"], p["head"], B)
+    hx, hz = 0.70, 0.13
+    dk = G.Xf(G.Xf(d, H), K.scale_about((hx, hz), 1.2))
+    eel_head(dk, M, hx, hz, p, seed)
+
+
+def eel_poses():
+    out = []
+    for i in range(10):                                                                   # idle at the vent: peek, look about
+        ph = TAU * i / 10
+        out.append(dict(hole=1.0 + 0.04 * math.sin(ph), bob=0.01 * math.sin(ph), head_rot=0.07 * math.sin(ph - 0.6),
+                        look=(0.8, 0.1) if i < 5 else (-0.5, 0.2), blink={6: 0.6, 7: 1.0}.get(i, 0.0)))
+    for i in range(12):                                                                   # walk: a slither
+        ph = TAU * i / 12
+        out.append(dict(wave=ph * 2, head_rot=0.05 * math.sin(2 * ph), look=(0.9, 0.0)))
+    out += [dict(hole=1.0, eye_pop=1.3), dict(hole=1.12, eye_pop=1.6, mouth=0.5), dict(hole=0.7, eye_pop=1.3, mouth=0.3),
+            dict(hole=0.35, eye_pop=1.2), dict(hole=0.12, eye_pop=1.35, look=(0.6, 0.0)), dict(hole=0.12, look=(0.9, 0.0)),
+            dict(hole=0.1, blink=1.0), dict(hole=0.15, look=(0.3, 0.0))]                  # react: duck behind the vent rim
+    out += [dict(q, rock=0.4 * q.get("rock", 0.0), shift=0.5 * q.get("shift", 0.0)) for q in K.bump_clip()]
+    for i in range(10):                                                                   # idle_open: a pause in the open, curling
+        ph = TAU * i / 10
+        _ph, q = K.idle_common(i, 10)
+        q.update(wave=1.0 + 0.5 * math.sin(ph), curl=0.3 + 0.25 * math.sin(ph - 1.0), head_rot=0.06 * math.sin(ph), look=(0.7, 0.1))
+        out.append(q)
+    return out
+
+
 SPECIES = {
     "sulfur_drifter": dict(draw=draw_sulfur_drifter, poses=drifter_poses, mats=mats, frame=(112, 128), seed=51, pivot=(0.5, 0.5),
                            clips=[("idle", 10, True), ("drift", 12, True), ("react", 8, False), ("bump", 10, False), ("flee", 12, True)],
@@ -267,6 +365,12 @@ SPECIES = {
                                       "motion": "claws wave slowly, a shuffling walk, eye stalks bob; react: it pulls into its shell",
                                       "original": "our own basalt crab with vent-orange claws that wave, never pinch (D-087)"},
                           ours="a slow basalt-shelled crab with glowing orange claws that waves at you and ducks into its shell"),
+    "vent_eel": dict(draw=draw_vent_eel, poses=eel_poses, mats=mats, frame=(160, 80), seed=54, den="props/venus/vent_mouth",
+                     clips=[("idle", 10, True), ("walk", 12, True), ("react", 8, False), ("bump", 10, False), ("idle_open", 10, True)],
+                     self_check={"ink": "body bands, the frill's lumpy edge, the belly glow line, a mouth seam",
+                                 "motion": "idle peeks over its vent and looks about; walk slithers in an S-wave; react ducks; idle_open curls",
+                                 "original": "our own basalt eel with a vent-glow belly; curious about warmth, never biting (D-087), no teeth"},
+                     ours="a dark basalt eel with a glowing orange belly that peeks out of its vent and slithers off to sun itself by the warm rocks"),
 }
 
 

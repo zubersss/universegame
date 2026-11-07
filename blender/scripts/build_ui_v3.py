@@ -273,8 +273,8 @@ def to_m(pts):
 
 class Canvas:
     """Strokes in pixel coordinates (y down) for one frame of W x H px."""
-    def __init__(self, W, H, planet="earth"):
-        self.W, self.H = W, H
+    def __init__(self, W, H, planet="earth", ss=4):
+        self.W, self.H, self.ss = W, H, ss
         self.gp = fakegp.FakeGP()
         self.M = mats(self.gp, planet)
         self.d = fakegp.FakeDrawing()
@@ -282,7 +282,7 @@ class Canvas:
 
     def render(self, seed=3):
         st = fakegp.strokes_of(self.d, self.gp, as_object=("ui", "art"))
-        return GR.render_frame(st, self.W, self.H, PPU, (0.0, 0.0), ss=4, seed=seed)
+        return GR.render_frame(st, self.W, self.H, PPU, (0.0, 0.0), ss=self.ss, seed=seed)
 
 
 def paper_grain(img, seed, strength=0.035):
@@ -427,11 +427,11 @@ def vignette(planet, w, h, seed):
     return np.clip(img, 0, 1)
 
 
-def title_card(planet, seed=31):
+def title_card(planet, seed=31, ss=2):
     """An intertitle card: the planet's paper, an ornate double ink border with corner flourishes, the painted oval
     vignette left, the name in Limelight (drawn ink, a small wobble), a Patrick Hand subtitle. -> RGBA uint8, widths."""
     W, H = CARD_W, CARD_H
-    c = Canvas(W, H, planet)
+    c = Canvas(W, H, planet, ss=ss)                        # ss 2 for the lock-free preview (a 1600 card at ss 4 is ~0.2 GB)
     d, M = c.dm, c.M
     paper = wavy_rect(10, 10, W - 10, H - 10, 1.5, seed)
     G.stroke(d, paper, M["offwhite_f"], 0.0, cyclic=True)
@@ -452,7 +452,7 @@ def title_card(planet, seed=31):
     y0, x0 = int(oy - ory), int(ox - orx)
     reg = img[y0:y0 + vg.shape[0], x0:x0 + vg.shape[1]]
     reg[..., :3] = np.where(inside[..., None], vg, reg[..., :3])
-    c2 = Canvas(W, H, planet)                                                             # the oval's ink ring over the painting
+    c2 = Canvas(W, H, planet, ss=ss)                                                      # the oval's ink ring over the painting
     G.stroke(c2.dm, oval, c2.M["ink"], O, cyclic=True)
     ring, w2 = c2.render(seed + 1)
     rf = ring.astype(np.float32) / 255
