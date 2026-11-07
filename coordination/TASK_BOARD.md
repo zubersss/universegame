@@ -2008,7 +2008,7 @@ Goal: The Hadal Maw as a §11.3 rig set (`creatures/earth/hadal_maw/rigset`: bod
 Accept: the ten boxes on a stamped assembled review at 1x beside the surveyor; rigset.json valid; sheet ≤ 2048².
 Files: blender/scripts/build_creatures_earth_v3.py, Assets/_Game/Art/creatures/earth/hadal_maw/
 Depends: B-135
-Lead notes: Cycle 251 (D-119). Promoted when B-135's previews are accepted. Cycle 256: DESIGN ACCEPTED and promoted (1fb50b1; review_b136_hadal_maw_preview.png: ~34 m, six bones head / body1 / body2 / tail / jaw / lure, the lure swaps lit / dim / flare, one eye and a closed smile, the open jaw a dark cavern with a tongue and no teeth, bioluminescent dots, the idle a sway travelling down the bones with the lure bobbing, the react a 24° jaw open + head lift + lure flare; ink 2.0–3.0 / 1.0–1.5 px at 1x; parts ~1750×800 at 1x). Export in one BLENDER slot after U-106 (a new key, nothing to replace); UNITY's U-119 drives it as a rig-set creature.
+Lead notes: Cycle 251 (D-119). Promoted when B-135's previews are accepted. Cycle 256: DESIGN ACCEPTED and promoted (1fb50b1; review_b136_hadal_maw_preview.png: ~34 m, six bones head / body1 / body2 / tail / jaw / lure, the lure swaps lit / dim / flare, one eye and a closed smile, the open jaw a dark cavern with a tongue and no teeth, bioluminescent dots, the idle a sway travelling down the bones with the lure bobbing, the react a 24° jaw open + head lift + lure flare; ink 2.0–3.0 / 1.0–1.5 px at 1x; parts ~1750×800 at 1x). Export in one BLENDER slot after U-106 (a new key, nothing to replace); UNITY's U-119 drives it as a rig-set creature. Cycle 257 (05:0x, D-127): key = `creatures/earth/hadal_maw` (three segments; the card's `…/rigset` struck); idle at 110 bpm with `cycle_beats: 4` (contract v3.2 field; no validator exception); the 99.9 % palette hit is accepted (the lure's translucent halos). Export-ready (dde7d5e: 8 parts on 1784×744, json valid); one slot after U-106.
 
 
 ### U-116 · UNITY · Backlog · C2
@@ -2031,4 +2031,4 @@ Goal: Rig-set creatures: the Hadal Maw (B-136) as a creature whose view is a Rig
 Accept: CreatureTests: the Maw resolves its rig set with six bones and plays idle and react; a coast-deep capture with the Maw, a shark and the surveyor at 1x; the Earth perf rows unchanged.
 Files: Code/Runtime/Creatures/, Code/Runtime/Flora/RigSet.cs (shared), Tests/
 Depends: U-114, B-136
-Lead notes: Cycle 256. Promoted with the C2 Earth batch once B-136 is exported.
+Lead notes: Cycle 256. Promoted with the C2 Earth batch once B-136 is exported. Cycle 257 (D-127): RigSet honours `idle.cycle_beats` (one sway over N beats; default 1) and RigSetBuilder recognises a rig set by the json's `parts` array under the three-segment key `creatures/earth/hadal_maw`.

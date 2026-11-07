@@ -266,6 +266,9 @@ heads, swap states such as open/closed/curled; **no face parts**, D-101), plus `
   }]
 }
 ```
+`idle.cycle_beats` (integer, default 1; v3.2, D-127) spans one sway over N beats of the 100–120 bpm grid, so a large
+creature moves slowly and still lands on the beat (the Hadal Maw: 110 bpm, `cycle_beats: 4`). Rig-set creatures use
+the same schema under a three-segment key (`creatures/earth/hadal_maw`); the importer recognises a rig set by its `parts`.
 Unity builds the bones (2D Animation skinning) from this; every plant on a planet shares the
 one texture and one animator controller. ≤ 6 bones per plant. Props with wobble idles use the
 same format under `props/<planet>/rigset`.
