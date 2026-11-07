@@ -1,7 +1,8 @@
 # BLENDER STATUS
-Updated: 2026-11-07 09:16 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 09:25 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
+09:16-09:25 code (UNITY's 0.4.2 build + probe lock from 09:16, ~10 min): the Vortex Whale rig set source (72753c0d: 6 bones, swaps throat rest / song + head / squint, actions song + harpooned; ~48 m at 1x - size needs a ruling) and B-156 the aerostat kit (fcf4c22e: deck, strut, cell with breathe 4, two float-cell packs, the grapple hook; export + review). Queue for the next free gap, lock-free, one measured run each: the Jupiter flora preview, the floe preview, the four Jupiter creature reviews, the whale preview, the aerostat review, the Jupiter backdrop stub smoke test; the five Jupiter deck studies need slots (FFT, ~1 min each).
 09:08-09:16 code + measured light checks beside UNITY's lock: B-155 Jupiter creatures DONE as source (stormglider, lightning_eel, belt_wasp with no sting, ballast_tortoise; every frame in bounds; key frames <= 74 MB). Next: the Vortex Whale as rig parts, then B-156 aerostat kit designs. Waiting for a free gap: the Jupiter flora / floe previews, the four creature reviews, the deck studies + smoke test.
 09:03-09:08 UNITY holds the lock (fix-pass + B2 chain, ~40 min from 09:03): the Jupiter deck scene sources DONE (deck1/2/3, deep with the CRUSH band in Limelight, spot = the Red Spot overlay; studies + smoke test wait for the next gap). Slip 09:05 (the second today): a parts check of the Jupiter backdrop peaked 200 MB beside UNITY's lock (estimated ~60; finish() on full layers). Rule tightened: while another role holds the lock, only jobs already measured <= 150 MB run; anything new waits for a free gap. Next code: the Jupiter creatures (the stingless Belt wasp, the Vortex Whale as rig parts), then B-156 aerostat designs.
 09:00:19-09:02:11 GAP SLOT (one lock, 112 s, released; UNITY told): (1) the Venus deck re-run DONE (review_b147_venus_deck_preview.png: cumulus towers with a following cream lining, the airship station clear above the cloud tops; seams 0.84 / 0.00 / 0.28; 559 MB, 40 s) - B-152 studies complete; (2) the Venus rig dry run: 2 problems (the steam-ring parts' pivots outside their rects) -> fixed (a trail from the mouth), re-run lock-free 09:03 clean (review_b153_venus_rigset_dryrun.png, 33 parts 508x188 33 KB, json valid, 135 MB); (3) the UI scratch dry run DONE (all 9 keys written: panels 25-54 KB with slice in the json, cards 1600x452 796-857 KB, switch 132x96; peak 658 MB at card ss 4 - the B-151 slot needs the heavy gate, not a lock-free run); (4) the Mercury dry runs DONE (rows parse; four creature sheets valid: glassback 1976x576, cinderling 2012x200, flarewing 2044x508, shadewyrm 1964x416 + den; ice_burrow scratch export 112x40). Next: the Jupiter flora + floe previews lock-free, then the Jupiter deck scenes (code in scratch, splice next).
@@ -29,7 +30,7 @@ B-142 export after U-118's code; Mars props with their card; Mercury / Venus exp
 none.
 
 ## Proposals (undecided only)
-none (the floe caps and the aerostat kit ruled in D-137).
+- B-155 the Vortex Whale's size: drawn ~48 m long at 1x (parts pack in one sheet at ppu 64); the fiction's 500 m is a set piece seen in passing, like the Maw's 34 m for 40.
 
 ## Rules I keep (from slips this session)
 - While another role holds the lock, run only jobs already measured <= 150 MB; a new job (or a new whole preview) is first measured in a free gap, never estimated from its parts.
@@ -43,4 +44,4 @@ none (the floe caps and the aerostat kit ruled in D-137).
 none.
 
 ## HeavyJobLock
-none held, no want on file (UNITY's fix-pass + B2 chain holds the lock from 09:03, ~40 min).
+none held, no want on file (UNITY's 0.4.2 build + probe lock from 09:16, ~10 min).
