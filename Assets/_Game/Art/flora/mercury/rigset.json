@@ -1,0 +1,781 @@
+{
+  "key": "flora/mercury/rigset",
+  "style": "v3",
+  "ppu": 64,
+  "rect_origin": "bottom_left",
+  "parts": [
+    {
+      "name": "coilwort_knob",
+      "rect": [
+        468,
+        32,
+        24,
+        16
+      ],
+      "pivot": [
+        0.4784,
+        0.353
+      ]
+    },
+    {
+      "name": "coilwort_spring_rest",
+      "rect": [
+        204,
+        84,
+        32,
+        64
+      ],
+      "pivot": [
+        0.4852,
+        0.0818
+      ]
+    },
+    {
+      "name": "coilwort_spring_short",
+      "rect": [
+        480,
+        100,
+        32,
+        48
+      ],
+      "pivot": [
+        0.478,
+        0.1101
+      ]
+    },
+    {
+      "name": "coilwort_spring_tall",
+      "rect": [
+        104,
+        76,
+        32,
+        72
+      ],
+      "pivot": [
+        0.4875,
+        0.0734
+      ]
+    },
+    {
+      "name": "embercap_cap",
+      "rect": [
+        212,
+        12,
+        64,
+        36
+      ],
+      "pivot": [
+        0.4824,
+        0.2464
+      ]
+    },
+    {
+      "name": "embercap_cap_puff",
+      "rect": [
+        340,
+        92,
+        64,
+        56
+      ],
+      "pivot": [
+        0.4824,
+        0.1584
+      ]
+    },
+    {
+      "name": "embercap_foot",
+      "rect": [
+        180,
+        8,
+        28,
+        40
+      ],
+      "pivot": [
+        0.421,
+        0.2947
+      ]
+    },
+    {
+      "name": "glassreed_base",
+      "rect": [
+        420,
+        28,
+        44,
+        20
+      ],
+      "pivot": [
+        0.4526,
+        0.3546
+      ]
+    },
+    {
+      "name": "glassreed_reed0_a",
+      "rect": [
+        0,
+        52,
+        24,
+        96
+      ],
+      "pivot": [
+        0.5376,
+        0.0592
+      ]
+    },
+    {
+      "name": "glassreed_reed0_b",
+      "rect": [
+        28,
+        52,
+        24,
+        96
+      ],
+      "pivot": [
+        0.5376,
+        0.0592
+      ]
+    },
+    {
+      "name": "glassreed_reed1_a",
+      "rect": [
+        56,
+        64,
+        20,
+        84
+      ],
+      "pivot": [
+        0.3619,
+        0.0676
+      ]
+    },
+    {
+      "name": "glassreed_reed1_b",
+      "rect": [
+        80,
+        64,
+        20,
+        84
+      ],
+      "pivot": [
+        0.3619,
+        0.0676
+      ]
+    },
+    {
+      "name": "glassreed_reed2_a",
+      "rect": [
+        140,
+        76,
+        28,
+        72
+      ],
+      "pivot": [
+        0.6107,
+        0.0813
+      ]
+    },
+    {
+      "name": "glassreed_reed2_b",
+      "rect": [
+        172,
+        76,
+        28,
+        72
+      ],
+      "pivot": [
+        0.6107,
+        0.0813
+      ]
+    },
+    {
+      "name": "glassreed_reed3_a",
+      "rect": [
+        240,
+        84,
+        28,
+        64
+      ],
+      "pivot": [
+        0.2573,
+        0.0924
+      ]
+    },
+    {
+      "name": "glassreed_reed3_b",
+      "rect": [
+        272,
+        84,
+        28,
+        64
+      ],
+      "pivot": [
+        0.2573,
+        0.0924
+      ]
+    },
+    {
+      "name": "glassreed_reed4_a",
+      "rect": [
+        408,
+        96,
+        32,
+        52
+      ],
+      "pivot": [
+        0.6728,
+        0.1191
+      ]
+    },
+    {
+      "name": "glassreed_reed4_b",
+      "rect": [
+        444,
+        96,
+        32,
+        52
+      ],
+      "pivot": [
+        0.6728,
+        0.1191
+      ]
+    },
+    {
+      "name": "shadebloom_bloom_bud",
+      "rect": [
+        336,
+        16,
+        32,
+        32
+      ],
+      "pivot": [
+        0.47,
+        0.2182
+      ]
+    },
+    {
+      "name": "shadebloom_bloom_half",
+      "rect": [
+        372,
+        16,
+        44,
+        32
+      ],
+      "pivot": [
+        0.4703,
+        0.263
+      ]
+    },
+    {
+      "name": "shadebloom_bloom_open",
+      "rect": [
+        280,
+        12,
+        52,
+        36
+      ],
+      "pivot": [
+        0.4706,
+        0.2648
+      ]
+    },
+    {
+      "name": "shadebloom_stem",
+      "rect": [
+        304,
+        88,
+        32,
+        60
+      ],
+      "pivot": [
+        0.5895,
+        0.1314
+      ]
+    },
+    {
+      "name": "sunfan_fan_edge",
+      "rect": [
+        0,
+        0,
+        32,
+        48
+      ],
+      "pivot": [
+        0.4719,
+        0.2189
+      ]
+    },
+    {
+      "name": "sunfan_fan_open",
+      "rect": [
+        36,
+        0,
+        56,
+        48
+      ],
+      "pivot": [
+        0.4779,
+        0.2189
+      ]
+    },
+    {
+      "name": "sunfan_fan_shut",
+      "rect": [
+        144,
+        4,
+        32,
+        44
+      ],
+      "pivot": [
+        0.4876,
+        0.2147
+      ]
+    },
+    {
+      "name": "sunfan_stem",
+      "rect": [
+        96,
+        0,
+        44,
+        48
+      ],
+      "pivot": [
+        0.4955,
+        0.1756
+      ]
+    }
+  ],
+  "plants": [
+    {
+      "name": "sunfan",
+      "biomes": [
+        "day"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "sunfan_stem",
+          "parent": null,
+          "length": 0.48,
+          "order": 0
+        },
+        {
+          "name": "fan",
+          "part": "sunfan_fan_open",
+          "parent": "root",
+          "length": 0.45,
+          "offset_m": [
+            0.0,
+            0.51
+          ],
+          "order": 1
+        }
+      ],
+      "swaps": {
+        "fan": [
+          "sunfan_fan_open",
+          "sunfan_fan_edge",
+          "sunfan_fan_shut"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "fan",
+          "bone": "fan",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 6,
+        "beat_bpm": 110,
+        "squash": 0.02,
+        "swap_cycle": {
+          "slot": "fan",
+          "sequence": [
+            "sunfan_fan_open",
+            "sunfan_fan_edge"
+          ],
+          "beats": [
+            1,
+            1
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "sunfan_fan_shut"
+      }
+    },
+    {
+      "name": "embercap",
+      "biomes": [
+        "day"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "embercap_foot",
+          "parent": null,
+          "length": 0.225,
+          "order": 0
+        },
+        {
+          "name": "cap",
+          "part": "embercap_cap",
+          "parent": "root",
+          "length": 0.24,
+          "offset_m": [
+            0.0,
+            0.225
+          ],
+          "order": 1
+        }
+      ],
+      "swaps": {
+        "cap": [
+          "embercap_cap",
+          "embercap_cap_puff"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "cap",
+          "bone": "cap",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 2,
+        "beat_bpm": 110,
+        "squash": 0.05
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "embercap_cap_puff"
+      }
+    },
+    {
+      "name": "glassreed",
+      "biomes": [
+        "twilight"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "glassreed_base",
+          "parent": null,
+          "length": 0.06,
+          "order": 0
+        },
+        {
+          "name": "reed0",
+          "part": "glassreed_reed0_a",
+          "parent": "root",
+          "length": 1.32,
+          "offset_m": [
+            -0.045,
+            0.06
+          ],
+          "order": 1
+        },
+        {
+          "name": "reed1",
+          "part": "glassreed_reed1_a",
+          "parent": "root",
+          "length": 1.11,
+          "offset_m": [
+            0.045,
+            0.06
+          ],
+          "order": 2
+        },
+        {
+          "name": "reed2",
+          "part": "glassreed_reed2_a",
+          "parent": "root",
+          "length": 0.93,
+          "offset_m": [
+            -0.135,
+            0.06
+          ],
+          "order": 3
+        },
+        {
+          "name": "reed3",
+          "part": "glassreed_reed3_a",
+          "parent": "root",
+          "length": 0.78,
+          "offset_m": [
+            0.12,
+            0.06
+          ],
+          "order": 4
+        },
+        {
+          "name": "reed4",
+          "part": "glassreed_reed4_a",
+          "parent": "root",
+          "length": 0.63,
+          "offset_m": [
+            -0.195,
+            0.06
+          ],
+          "order": 5
+        }
+      ],
+      "swaps": {
+        "r0": [
+          "glassreed_reed0_a",
+          "glassreed_reed0_b"
+        ],
+        "r1": [
+          "glassreed_reed1_a",
+          "glassreed_reed1_b"
+        ],
+        "r2": [
+          "glassreed_reed2_a",
+          "glassreed_reed2_b"
+        ],
+        "r3": [
+          "glassreed_reed3_a",
+          "glassreed_reed3_b"
+        ],
+        "r4": [
+          "glassreed_reed4_a",
+          "glassreed_reed4_b"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "r0",
+          "bone": "reed0",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        },
+        {
+          "slot": "r1",
+          "bone": "reed1",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 2,
+          "replaces_part": true
+        },
+        {
+          "slot": "r2",
+          "bone": "reed2",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 3,
+          "replaces_part": true
+        },
+        {
+          "slot": "r3",
+          "bone": "reed3",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 4,
+          "replaces_part": true
+        },
+        {
+          "slot": "r4",
+          "bone": "reed4",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 5,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 9,
+        "beat_bpm": 110,
+        "squash": 0.0,
+        "swap_cycle": {
+          "slot": "r0",
+          "sequence": [
+            "glassreed_reed0_a",
+            "glassreed_reed0_b"
+          ],
+          "beats": [
+            3,
+            1
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "glassreed_reed0_b",
+        "also": {
+          "r1": "glassreed_reed1_b",
+          "r2": "glassreed_reed2_b",
+          "r3": "glassreed_reed3_b",
+          "r4": "glassreed_reed4_b"
+        }
+      }
+    },
+    {
+      "name": "shadebloom",
+      "biomes": [
+        "night",
+        "polar"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "shadebloom_stem",
+          "parent": null,
+          "length": 0.72,
+          "order": 0
+        },
+        {
+          "name": "bloom",
+          "part": "shadebloom_bloom_half",
+          "parent": "root",
+          "length": 0.27,
+          "offset_m": [
+            -0.0035,
+            0.72
+          ],
+          "order": 1
+        }
+      ],
+      "swaps": {
+        "bloom": [
+          "shadebloom_bloom_bud",
+          "shadebloom_bloom_half",
+          "shadebloom_bloom_open"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "bloom",
+          "bone": "bloom",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 5,
+        "beat_bpm": 110,
+        "squash": 0.02,
+        "swap_cycle": {
+          "slot": "bloom",
+          "sequence": [
+            "shadebloom_bloom_bud",
+            "shadebloom_bloom_half",
+            "shadebloom_bloom_open",
+            "shadebloom_bloom_half"
+          ],
+          "beats": [
+            2,
+            1,
+            4,
+            1
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "shadebloom_bloom_bud"
+      }
+    },
+    {
+      "name": "coilwort",
+      "biomes": [
+        "polar"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "coilwort_knob",
+          "parent": null,
+          "length": 0.045,
+          "order": 0
+        },
+        {
+          "name": "spring",
+          "part": "coilwort_spring_rest",
+          "parent": "root",
+          "length": 0.54,
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1
+        }
+      ],
+      "swaps": {
+        "spring": [
+          "coilwort_spring_rest",
+          "coilwort_spring_short",
+          "coilwort_spring_tall"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "spring",
+          "bone": "spring",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 4,
+        "beat_bpm": 110,
+        "squash": 0.0,
+        "swap_cycle": {
+          "slot": "spring",
+          "sequence": [
+            "coilwort_spring_rest",
+            "coilwort_spring_tall"
+          ],
+          "beats": [
+            1,
+            1
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "coilwort_spring_short"
+      }
+    }
+  ]
+}

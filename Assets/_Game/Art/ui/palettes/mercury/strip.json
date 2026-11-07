@@ -1,0 +1,47 @@
+{
+  "key": "ui/palettes/mercury/strip",
+  "style": "v3",
+  "palette": true,
+  "colors": [
+    {
+      "name": "offwhite",
+      "hex": "#E9E2D4",
+      "shadow": "#B6AFAA"
+    },
+    {
+      "name": "red",
+      "hex": "#A85A41",
+      "shadow": "#885043"
+    },
+    {
+      "name": "mustard",
+      "hex": "#D8B566",
+      "shadow": "#AA905D"
+    },
+    {
+      "name": "teal",
+      "hex": "#5E8B91",
+      "shadow": "#54727B"
+    },
+    {
+      "name": "green",
+      "hex": "#8B9471",
+      "shadow": "#747865"
+    },
+    {
+      "name": "sky",
+      "hex": "#8D7AA0",
+      "shadow": "#756686"
+    },
+    {
+      "name": "brown",
+      "hex": "#3E3848",
+      "shadow": "#3E3848"
+    },
+    {
+      "name": "ink",
+      "hex": "#1E1A17",
+      "shadow": null
+    }
+  ]
+}
