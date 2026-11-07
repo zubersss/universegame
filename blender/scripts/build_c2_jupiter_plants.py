@@ -2,7 +2,7 @@
 (build_c2_earth_plants' hose stems and leaves), in the Jupiter palette (D-137). No faces (D-101): personality through
 motion only. At 2.53 g the floe forms are low and broad (no tall stalks); the float-cell form floats, so gravity reads in
 its tether, drawn taut downward. The wind (12 m/s in the Spot, steady elsewhere) blows to +x. Each plant is built from
-part functions so the rig set can cut it later. Drawn 1.4x so they read beside the 2 m surveyor (checked in the preview).
+part functions so the rig set can cut it later. Drawn 1.6x so they read beside the 2 m surveyor (1.4x read too small).
 
   driftbulb     a float-cell form: a cream gas bulb with a rust band and ribbed seams on a taut sage tether to its floe;
                 bobs with a squash; react: deflates and dips, then refills
@@ -31,7 +31,7 @@ P = v3.PALETTES["jupiter"]
 O, I = G.OUTER, G.INNER
 TAU = 2 * math.pi
 hose_stem, leaf, rot = C.hose_stem, C.leaf, C.rot
-SCALE = 1.4                          # drawn 1.4x so they read beside the 2 m surveyor (Venus needed 1.6x; checked in the preview)
+SCALE = 1.6                          # drawn 1.6x like Venus' (at 1.4x the floe preview showed the Frostrosette barely over the frost lip)
 FW, FH = 160, 192
 
 

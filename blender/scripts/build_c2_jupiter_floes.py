@@ -265,13 +265,13 @@ def preview(out_dir, S=None, allw=None):
     head = np.tile(review.PAPER, (28, W, 1)).astype(np.float32)
     review._label(head, "b-155 jupiter floe strips (d-137: the b-130 frame contract, 8 tiles + cap_left + cap_right): ice, core, derelict, spot", 6, 8)
     rows.append(head)
-    r = np.tile(np.array(v3.hex_rgb(JP["sky"]), np.float32) / 255, (FH * 2 + 30, W, 1))
-    x = 8
-    for kind in KEYS:
-        review._label(r, f"{kind}: cap_l, tiles 0-2, cap_r at 2x", x, 4)
+    rh = FH * 2 + 30
+    r = np.tile(np.array(v3.hex_rgb(JP["sky"]), np.float32) / 255, (2 * rh, W, 1))
+    for i, kind in enumerate(KEYS):                                                       # two kinds a row (5 frames at 2x = 650 px)
+        x, y = 8 + (i % 2) * 720, (i // 2) * rh
+        review._label(r, f"{kind}: cap_l, tiles 0-2, cap_r at 2x", x, y + 4)
         for j, k in enumerate((CAP_LEFT, 0, 1, 2, CAP_RIGHT)):
-            review._over(r, np.repeat(np.repeat(S[kind][k], 2, 0), 2, 1), x + j * (FW * 2 + 2), 24)
-        x += 5 * (FW * 2 + 2) + 30
+            review._over(r, np.repeat(np.repeat(S[kind][k], 2, 0), 2, 1), x + j * (FW * 2 + 2), y + 24)
     rows.append(r)
     H = 460
     sky, _g = JPL.jupiter_strip(W, H + 60)
@@ -284,14 +284,14 @@ def preview(out_dir, S=None, allw=None):
         y0 = base - (FH - int(round(SURF * 64)))
         review._over(scene, img[:max(0, min(FH, H - y0))], x0, y0)
         bases[kind] = (x0, base, (n + 2) * FW)
-    for name, kind, dx in (("frostrosette", "ice", 80), ("driftbulb", "ice", 190), ("bandstreamer", "ice", 300), ("phosphorcup", "spot", 60), ("stormreed", "core", 70)):
+    for name, kind, dx in (("frostrosette", "ice", 30), ("driftbulb", "ice", 130), ("bandstreamer", "ice", 230), ("phosphorcup", "spot", 60), ("stormreed", "core", 70)):
         x0, base, _w = bases[kind]
         img, _w = JPL.render(name, JPL.poses(name)[0][0])
         review._over(scene, img, x0 + dx, base - JPL.FH)
     try:
         fr, piv = PR.surveyor_frame()
         x0, base, wd = bases["ice"]
-        review._over(scene, fr, x0 + wd - 150, base - fr.shape[0] + int(round(piv[1] * fr.shape[0])))
+        review._over(scene, fr, x0 + wd - 110, base - fr.shape[0] + int(round(piv[1] * fr.shape[0])))
     except Exception:  # noqa: BLE001
         pass
     review._label(scene, "1x: four floes (cap + n tiles + cap) in the column, the five jupiter flora and the surveyor on them", 6, 6)

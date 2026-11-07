@@ -58,7 +58,7 @@ LEAD accepts it into `meridian.v3.PALETTES["jupiter"]`. The giants that follow s
 All faceless (D-101): personality through motion; ink, mid + deep tones, interior detail; one Jupiter rig set
 (`flora/jupiter/rigset`, <= 6 bones each), `biomes` per plant (the column's decks, the Red Spot). At 2.53 g the floe
 forms are low and broad (no tall stalks); the float-cell forms float, so gravity reads in their tethers, drawn taut
-downward. Drawn 1.4x so they read beside the 2 m surveyor (checked in the preview; Venus needed 1.6x).
+downward. Drawn 1.6x so they read beside the 2 m surveyor (like Venus; 1.4x read too small in the floe preview).
 
 | # | Plant | Look | Motion (idle on the 110 bpm beat; react within 3 m) | Biomes |
 |---|---|---|---|---|
