@@ -22,12 +22,13 @@ When the lock frees, the highest pending job here goes next, even if the other r
 older (D-037 alternation applies only between equal ranks). A rank is live only while its role
 has a want on file or holds the lock (D-112): if the top rank has no want when the lock frees,
 the next live rank runs now and the skipped role goes next after it files. A role below the top
-keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 255 (03:3x; UNITY holds the lock since 03:16 for PlayMode job A of its C1 batch (EditMode 326/326 at 03:15 on the second run); BLENDER's 03:06 slot is verified and its want for the Mars backdrop studies is on file since 03:20; 0.4 GB free with the Editor up):
-1. UNITY · PlayMode A (running) → B → the captures (HUD 1080p, u109 re-shoot incl. a ~28 m climb frame, space_1 + space_6 re-shoots) → the hand-off commit with tests_2026-11-07.md → U-104, U-108 leftovers, U-115, U-117, U-109 and the D-124 fixes reviewed together.
-2. BLENDER · one slot ≤ 5 min after UNITY's captures (want on file): the B-139 canyon + dust-storm backdrop studies (FFT ~300 MB, preview only).
-3. UNITY · U-106 profile (11 legs, D-116 rows) + the 20 s flight strip → C1 closes → the C2 batch (U-110 / U-111 / U-113 / U-114 / U-116) promoted together.
-4. BLENDER · B-131 export + the six glb removals after UNITY's U-113 code (after U-106, D-115 / D-117); B-136 export when accepted; the Mars rig set + strips exports once their cards are written (after the C2 Earth batch is in).
+keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 256 (04:0x; UNITY's C1 batch passed PlayMode A 50/54 → B 61/63 → the focused re-runs 6/6 at 03:51 (three batch reds fixed on the way) and is shooting its captures (u104 done, u109 on the lock since 03:54 at 0.01 GB free); BLENDER withdrew its want at 03:40 so UNITY's wrapper would start B, and re-files on "captures done"). Rule from now: a role files its want only when the queue says it is next after the running job, so no wrapper yields to a want that the queue ranks lower:
+1. UNITY · the captures (u109 re-shoot incl. a ~28 m frame, space_1 + space_6) → the hand-off commit with tests_2026-11-07.md and the new BLENDER metas → U-104, U-108 leftovers, U-115, U-117, U-109 and the D-124 fixes reviewed together.
+2. BLENDER · one slot ≤ 8 min after UNITY's captures: the B-141 canyon + dust-storm studies (FFT ~300 MB) + the scree stalker and tube lurker review images (~150 MB each) + the stalker's all-frame re-check.
+3. UNITY · U-106 profile (11 legs, D-116 rows) + the 20 s flight strip → C1 closes → the C2 Earth batch (U-110 / U-111 / U-113 / U-114 / U-116 / U-119) promoted together.
+4. BLENDER · after U-106, one slot each: B-136 Hadal Maw export (new key); B-140 Mars rig set + ground strips export (new keys); B-141 backdrops once accepted; B-131 after U-113's code; B-142 Mars creatures after U-118's code (`replaces_v2`).
 5. UNITY · U-112 creep hunt probe runs, after U-106.
+
 
 
 
@@ -55,12 +56,13 @@ did in your status before the next poll. LEAD tops each list up to ≥ 3 items e
 Then one batched check for everything written when your turn in the queue comes.
 
 
-**BLENDER** (numpy / scripts only while UNITY holds the lock or a want; bpy only under your own lock; while UNITY's Editor runs, measure a new preview's peak first and keep it under ~150 MB, else it waits for your slot)
-- B-139 Puffpod seam (D-101): the one curved seam across the upper pod with a dot each side reads as a closed eye at 1x; break it into two offset seams or move it off-centre, re-preview the pod only.
-- B-136 Hadal Maw rig set design (fakegp ~150 MB; only while free RAM is above 0.6 GB, else in your slot).
-- B-139 part 4: the Mars rig-set sources (`flora/mars/rigset` in the Earth manner: the five accepted plants, ≤ 6 bones each, swaps for the react states, `biomes` per plant) written and dry-run so the export is one short batch when the Mars cards open.
-- B-139 part 5: Mars creature design previews in your list's order 1 (two creatures, faces kept, no teeth), when RAM allows.
-- A `blender/README_v4.md` paragraph on the exact-preview rule (fakegp stroke ids = export ids, 8c69536) and the edge check in the preview builder.
+**BLENDER** (numpy / scripts only while UNITY holds the lock or a want; bpy only under your own lock; under 0.3 GB free, code only, no rendering at all; otherwise measure a new preview's peak first and keep it under ~150 MB)
+- D-126 split of the tube lurker: a hole-less `creatures/mars/tube_lurker` (idle = peeking, react = startle + duck, walk / bump in the open) and a separate static `props/mars/tube_mound` (the rock mound with the tube mouth; the lurker draws behind it at the den), code only until RAM allows the preview.
+- Polar crawler (your list order 4) code; the scree stalker's tail-sign fix (fd9f5c8) re-checked in your slot.
+- B-140 / B-141 / B-142 export readiness: manifest rows (`replaces_v2` on the dustskater and scree stalker), dry runs into a scratch tree when RAM allows.
+- The C2 Mars report (`c2_mars_designs.md`) brought to the accepted state: the plants, strips, dustskater, the D-126 den rule, the creature order; one line per open item.
+- `blender/README_v4.md`: the den-prop rule and the low-RAM rule (code only under 0.3 GB free).
+
 
 
 
@@ -247,7 +249,7 @@ Goal: Cartoon HUD: Suit power, oxygen and the gravity readout as BLENDER's gauge
 Accept: MenuHudTests: the three gauges track their meters within 1 % at the 12 Hz step; no HUD element, panel or string mentions fuel (test greps the UI prefabs and strings); the Escape Line sign sits at the line's altitude; fonts load from the project (test); a HUD capture at 1080p.
 Files: Code/Runtime/UI/HUD/, Assets/_Game/Fonts/, docs/credits/unity.md
 Depends: U-094
-Lead notes: Cycle 238. The current HUD stays until the swap is complete; one commit. Cycle 243 (BLENDER handoffs, a89f057): (a) ArtImporter ignores a single image's sidecar `pivot`; `ui/hud/escape_sign` needs `[0.5, 0]`, so honour the sidecar pivot for single sprites (importer test); (b) `ui/hud/gauges` is one sheet with `parts` (rects bottom-left + pivots, rig-set style) and `needles` `{min_deg, max_deg, hub, danger_below}`: slice it into its 6 sprites with the rig-set slicer and drive each needle from its json range; `escape_line.json` carries `"tile": true`. Cycle 246: the Escape Line sign arrives blank from B-121; UNITY draws ESCAPE LINE on it in Patrick Hand (TMP, the D-090 font) so the lettering is runtime text; the importer half (sidecar pivot, parts slicing) is already written per UNITY's 22:4x status. Cycle 247: importer half green (960af2f). B-121 is exported (f612225): do the swap now (the six gauge parts + needles from `ui/hud/gauges.json`, needles stepped at 12 Hz, the dotted `escape_line` tile at the line's altitude, the blank `escape_sign` lettered ESCAPE LINE in Patrick Hand, Limelight + Patrick Hand with OFL.txt and credits), the ship HUD rows (altitude, vertical speed, tilt, thrust-to-weight) with it, and the 1080p capture. DONE on that capture + MenuHudTests. Cycle 255: the C1 batch check is running: compile clean, EditMode 324/326 at 03:10 (HudGaugeTests needle settle, the U-117 FullRect assert) → 326/326 at 03:15; PlayMode A on the lock since 03:16 (0.4 GB free with the Editor at 1.16 GB). Done on the hand-off with the 1080p HUD capture and MenuHudTests green.
+Lead notes: Cycle 238. The current HUD stays until the swap is complete; one commit. Cycle 243 (BLENDER handoffs, a89f057): (a) ArtImporter ignores a single image's sidecar `pivot`; `ui/hud/escape_sign` needs `[0.5, 0]`, so honour the sidecar pivot for single sprites (importer test); (b) `ui/hud/gauges` is one sheet with `parts` (rects bottom-left + pivots, rig-set style) and `needles` `{min_deg, max_deg, hub, danger_below}`: slice it into its 6 sprites with the rig-set slicer and drive each needle from its json range; `escape_line.json` carries `"tile": true`. Cycle 246: the Escape Line sign arrives blank from B-121; UNITY draws ESCAPE LINE on it in Patrick Hand (TMP, the D-090 font) so the lettering is runtime text; the importer half (sidecar pivot, parts slicing) is already written per UNITY's 22:4x status. Cycle 247: importer half green (960af2f). B-121 is exported (f612225): do the swap now (the six gauge parts + needles from `ui/hud/gauges.json`, needles stepped at 12 Hz, the dotted `escape_line` tile at the line's altitude, the blank `escape_sign` lettered ESCAPE LINE in Patrick Hand, Limelight + Patrick Hand with OFL.txt and credits), the ship HUD rows (altitude, vertical speed, tilt, thrust-to-weight) with it, and the 1080p capture. DONE on that capture + MenuHudTests. Cycle 255: the C1 batch check is running: compile clean, EditMode 324/326 at 03:10 (HudGaugeTests needle settle, the U-117 FullRect assert) → 326/326 at 03:15; PlayMode A on the lock since 03:16 (0.4 GB free with the Editor at 1.16 GB). Done on the hand-off with the 1080p HUD capture and MenuHudTests green. Cycle 256: PlayMode A 50/54 (03:16; two batch reds: the BackdropTests layer check under the depth bands, the old Escape Line band left enabled by the painted branch), B 61/63 (03:40; one: the RigFlora react squash on its first frames), the focused re-runs 7/8 (03:48) then 6/6 (03:51): all three fixed in the tree; captures running from 03:53 (u104 HUD shot, u109 re-shoot on the lock 03:54). Done on the hand-off commit with the 1080p HUD capture.
 
 ### U-105 · UNITY · Done · C1
 Goal: Surveyor full Animator at 12 fps: every clip on `characters/surveyor/side` (incl. B-116's and the C1 dig, build, surprise, jetpack, climb_in once BLENDER adds them) wired to the controller states with stand-ins for the missing ones; eye-pop (surprise) and smear hooks (dash) as animation events; the SpriteCharacterView flip and squash root unchanged.
@@ -1155,7 +1157,28 @@ Goal: C2 Mars design prep (Bible §12 C2 order 2; §7.2 Mars): the Mars palette 
 Accept: one review per group (plants at 1x on a Mars ground strip beside the surveyor; the two backdrop composites at 1080p with the 2× seam check; the list as a report); the ten boxes self-checked; nothing exported.
 Files: blender/scripts/build_c2_mars_*.py, coordination/reports/blender/c2_mars_designs.md
 Depends: B-129
-Lead notes: Cycle 253. Previews only when free RAM allows (fakegp ~150 MB; FFT backdrops in your slot). LEAD accepts the designs before any Mars card is written, like C2 Earth (cycle 245). Cycle 254: PALETTE ACCEPTED (cb88c5f, c2_mars_designs.md §1: dust white / rust / butterscotch sky / ice teal / lichen olive / salmon haze / umber, every check passing: contrast ≥ 2 under the ink, chroma ≤ Earth's max, closest pair dE 20, the olive reads on rust and butterscotch) → into `meridian.v3.PALETTES["mars"]` and `ui/palettes/mars/strip` (export in your next slot, D-125 (2)). The five plants' preview (02:47) is reviewed on your hand-off. Cycle 255: PLANTS ACCEPTED (8c69536; review_b139_mars_plants_preview.png: Rustbell, Puffpod, Frostcurl, Pipereed, Scree creeper at 1x on the Mars stand-in beside the surveyor, drawn 1.5× for 0.38 g, idle 8 + react 4, ink 2.0–3.0 / 1.0–1.5 px, Mars palette 100 %) with one change before the rig-set sources: the Puffpod's single curved seam with a dot each side reads as a closed eye at 1x (D-101), split or offset it. Ground strips ACCEPTED on the numbers (81d36d4: regolith + basalt in the B-130 contract, joins 0.55 / 0.58, silhouette identical on 32 edges; viewed with the Mars cards). `ui/palettes/mars/strip` EXPORTED (c4225fd; 8×1 + strip.json). The canyon + dust-storm studies run in your slot (queue #2).
+Lead notes: Cycle 253. Previews only when free RAM allows (fakegp ~150 MB; FFT backdrops in your slot). LEAD accepts the designs before any Mars card is written, like C2 Earth (cycle 245). Cycle 254: PALETTE ACCEPTED (cb88c5f, c2_mars_designs.md §1: dust white / rust / butterscotch sky / ice teal / lichen olive / salmon haze / umber, every check passing: contrast ≥ 2 under the ink, chroma ≤ Earth's max, closest pair dE 20, the olive reads on rust and butterscotch) → into `meridian.v3.PALETTES["mars"]` and `ui/palettes/mars/strip` (export in your next slot, D-125 (2)). The five plants' preview (02:47) is reviewed on your hand-off. Cycle 255: PLANTS ACCEPTED (8c69536; review_b139_mars_plants_preview.png: Rustbell, Puffpod, Frostcurl, Pipereed, Scree creeper at 1x on the Mars stand-in beside the surveyor, drawn 1.5× for 0.38 g, idle 8 + react 4, ink 2.0–3.0 / 1.0–1.5 px, Mars palette 100 %) with one change before the rig-set sources: the Puffpod's single curved seam with a dot each side reads as a closed eye at 1x (D-101), split or offset it. Ground strips ACCEPTED on the numbers (81d36d4: regolith + basalt in the B-130 contract, joins 0.55 / 0.58, silhouette identical on 32 edges; viewed with the Mars cards). `ui/palettes/mars/strip` EXPORTED (c4225fd; 8×1 + strip.json). The canyon + dust-storm studies run in your slot (queue #2). Cycle 256: Puffpod fix ACCEPTED (9e9b06d: two off-centre seams, irregular speckles, no face read). Mars rig-set dry run ACCEPTED (a4c9395: 26 parts on 504×216, bones 3 / 2 / 4 / 4 / 2, biomes per plant, idle with Unity's maths + react per plant; exports as B-140). Dustskater ACCEPTED (709a5bb: 128×80, idle 10 / walk 12 / react 8 / bump 10 / flee 12, a butterscotch dome with rust bands on skate pads, ink and palette measured). Scree stalker (a3b7222, tail sign fixed fd9f5c8) and tube lurker (fd9f5c8) are reviewed when their images render in your slot. D-126 rules the lurker's hole: a separate `props/mars/tube_mound` and a hole-less creature. The Mars work now has its own cards: B-140 (rig set + strips export), B-141 (backdrops), B-142 (creatures + the mound); B-139 goes Done when the backdrop studies and the two pending creature reviews are in.
+
+### B-140 · BLENDER · Ready · C2
+Goal: C2 Mars flora and ground export (the accepted B-139 sources): `flora/mars/rigset` (the five Mars plants as one §11.3 rig set, 26 parts, bones ≤ 4, swaps, `biomes` per plant, the Puffpod D-101 fix in) and `terrain/mars/ground_strip` (regolith) + `ground_strip_basalt` in the B-130 contract (8 × 64×152, pivot on the ground line, `tile: true`).
+Accept: log OK; rigset.json valid with `biomes` on every plant; the strips' joins ≤ 1/255 and the silhouette ink identical on all frame edges; the ten boxes per plant on the stamped assembled review at 1x beside the surveyor on the Mars strips; sheets ≤ 512² (rig set) and 540×152 (strips); UNITY's U-118 imports with no key change.
+Files: blender/scripts/build_c2_mars_rigs.py, build_c2_mars_ground.py, Assets/_Game/Art/flora/mars/, Assets/_Game/Art/terrain/mars/
+Depends: B-139
+Lead notes: Cycle 256. New keys, nothing replaced: export in one BLENDER slot ≤ 10 min after U-106 (D-115: C2 exports below the C1 checks). The Mars 3D path keeps working until U-118 switches the planet.
+
+### B-141 · BLENDER · Ready · C2
+Goal: Mars biome backdrops in the B-133 manner: `backgrounds/mars/plains`, `backgrounds/mars/canyon` and a `backgrounds/mars/storm` layer set (three layers each, 2048 × ≤ 1024 tiling in x; the dust-storm wall as a near layer with wind streaks and a salmon-haze far band; the Mars palette; paper grain; no ink outline; nothing face-like), scene jsons in the SceneLayout schema.
+Accept: the 2× seam check with no seam; ≤ 4 MB per PNG; a 1080p composite per set at 1x with the surveyor on the Mars strips; the ten boxes that apply; UNITY's ParallaxLayers loads them by key with no code change.
+Files: blender/scripts/build_backdrop_v3.py, Assets/_Game/Art/backgrounds/mars/
+Depends: B-139
+Lead notes: Cycle 256. Studies first in your next slot (FFT washes), LEAD accepts, then one export batch after U-106.
+
+### B-142 · BLENDER · Backlog · C2
+Goal: Mars creatures re-inked (c2_mars_designs.md order): dustskater (128×80), scree stalker (192×96, with follow), tube lurker (160×64, hole-less per D-126) with its den prop `props/mars/tube_mound`, polar crawler; faces kept (pie eyes, no teeth, D-087 / D-101); clips per §11.2; one sheet ≤ 2048² each; `replaces_v2` on the dustskater and scree stalker rows (their v2 models go in the export commit).
+Accept: the ten boxes per creature on a stamped review (1x on the Mars strips beside the surveyor); json valid; clip indices 0–3 in Gus's order, the rest by name; the lurker draws behind the mound at its den in UNITY's capture.
+Files: blender/scripts/build_creatures_mars_v3.py, Assets/_Game/Art/creatures/mars/, Assets/_Game/Art/props/mars/
+Depends: B-139, U-118
+Lead notes: Cycle 256. Previews lock-free as RAM allows (design only); the export waits for U-118's code because it replaces the two Mars models under live keys (D-119's order).
 
 > **R1 (D-062).** 2D tasks B-056..B-076 are Superseded; their `.blend` sources (rigs, props,
 > terrain recipes) are the starting point for the models. Contract v2 §9 is the rule set.
@@ -1973,12 +1996,12 @@ Files: Code/Runtime/Creatures/CreatureSpecies.cs, Creature.cs, CreatureBrain.cs,
 Depends: U-106, B-132
 Lead notes: Cycle 251 (D-119). Code half on the While-waiting list (last); promoted with U-110 / U-111 when U-106 is in. If a stag or wolf still shows the grey model after the export, the Library kept the model address: reimport the two colour maps (D-117's reopen clause).
 
-### B-136 · BLENDER · Backlog · C2
+### B-136 · BLENDER · Ready · C2
 Goal: The Hadal Maw as a §11.3 rig set (`creatures/earth/hadal_maw/rigset`: body segments, jaw, fins, lure as parts + bones ≤ 6, idle sway and a jaw-open react; no teeth bared, D-087), too big for one frame sheet (your c2_earth_creature_reink.md proposal 2).
 Accept: the ten boxes on a stamped assembled review at 1x beside the surveyor; rigset.json valid; sheet ≤ 2048².
 Files: blender/scripts/build_creatures_earth_v3.py, Assets/_Game/Art/creatures/earth/hadal_maw/
 Depends: B-135
-Lead notes: Cycle 251 (D-119). Promoted when B-135's previews are accepted.
+Lead notes: Cycle 251 (D-119). Promoted when B-135's previews are accepted. Cycle 256: DESIGN ACCEPTED and promoted (1fb50b1; review_b136_hadal_maw_preview.png: ~34 m, six bones head / body1 / body2 / tail / jaw / lure, the lure swaps lit / dim / flare, one eye and a closed smile, the open jaw a dark cavern with a tongue and no teeth, bioluminescent dots, the idle a sway travelling down the bones with the lure bobbing, the react a 24° jaw open + head lift + lure flare; ink 2.0–3.0 / 1.0–1.5 px at 1x; parts ~1750×800 at 1x). Export in one BLENDER slot after U-106 (a new key, nothing to replace); UNITY's U-119 drives it as a rig-set creature.
 
 
 ### U-116 · UNITY · Backlog · C2
@@ -1987,3 +2010,18 @@ Accept: SpaceArtTests: the Sun key resolves to the rig with its parts and socket
 Files: Code/Runtime/Space/SunView.cs, Code/Runtime/Space/SpaceBackdrop.cs, Tests/
 Depends: U-106, B-137
 Lead notes: Cycle 253 (D-123). Promoted with U-110 / U-111 when U-106 is in and B-137 is exported.
+
+
+### U-118 · UNITY · Backlog · C2
+Goal: Mars on the cartoon stage: Mars runs the cartoon path like Earth (ParallaxLayers with the B-141 plains / canyon / storm sets picked by biome, the B-140 rig set and ground strips, the climb sky per D-118 with the butterscotch top, the dust storm as the near storm layer's alpha + wind), the Mars creatures on sheets (B-142; the two v2 models retired by the export), den creatures per D-126 (a `den` prop key in SpeciesSpec: the creature spawns at its mound, idles and reacts there drawing behind it, walks in the open); M1LoopTests and the Mars gameplay tests unchanged; the Mars perf rows green.
+Accept: Mars captures at 1x (plains with plants and a dustskater, the canyon, the storm) matching the accepted B-139 composites; TransitionTests and M1LoopTests green; the BudgetGate Mars rows green; StageLayers' Mars tests retired per D-124.
+Files: Code/Runtime/View2D/CartoonStage.cs, Code/Runtime/Planet/, Code/Runtime/Creatures/CreatureSpecies.cs, Tests/
+Depends: U-110, U-111, U-114, B-140, B-141
+Lead notes: Cycle 256. The first planet after Earth in C2 (Bible §12 order). Promoted when the C2 Earth batch is Done.
+
+### U-119 · UNITY · Backlog · C2
+Goal: Rig-set creatures: the Hadal Maw (B-136) as a creature whose view is a RigSet (head / body1 / body2 / tail / jaw / lure bones, the lure swaps lit / dim / flare, the idle sway down the bones, the react jaw open), spawning in the coast deep water (a Water habitat in SpeciesSpec from B-135's swimmers), no attack (D-087: it startles the player with its react and follows at a distance).
+Accept: CreatureTests: the Maw resolves its rig set with six bones and plays idle and react; a coast-deep capture with the Maw, a shark and the surveyor at 1x; the Earth perf rows unchanged.
+Files: Code/Runtime/Creatures/, Code/Runtime/Flora/RigSet.cs (shared), Tests/
+Depends: U-114, B-136
+Lead notes: Cycle 256. Promoted with the C2 Earth batch once B-136 is exported.
