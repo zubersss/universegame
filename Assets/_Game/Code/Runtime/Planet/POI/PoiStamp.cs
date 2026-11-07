@@ -29,7 +29,7 @@ namespace Meridian.Planet.POI
         public static byte? CellTile(char c, PlanetId planet) => c switch
         {
             '.' => TileId.Air,
-            '#' => planet == PlanetId.Earth ? TileId.Stone : planet == PlanetId.Mercury ? TileId.MercuryBasalt : planet == PlanetId.Venus ? TileId.VenusBasalt : TileId.Basalt,
+            '#' => planet == PlanetId.Earth ? TileId.Stone : planet == PlanetId.Mercury ? TileId.MercuryBasalt : planet == PlanetId.Venus ? TileId.VenusBasalt : planet == PlanetId.Mars ? TileId.Regolith : TileId.Basalt, // D-143 (2): the Mars pad sits on regolith
             'g' => planet == PlanetId.Earth ? TileId.Grass : planet == PlanetId.Mercury ? TileId.MercuryRegolith : planet == PlanetId.Venus ? TileId.VenusBasalt : TileId.Regolith,
             's' => planet == PlanetId.Earth ? TileId.Soil : planet == PlanetId.Mercury ? TileId.MercuryRegolith : planet == PlanetId.Venus ? TileId.VenusBasalt : TileId.Regolith,
             _ => (byte?)null,

@@ -32,7 +32,8 @@ namespace Meridian.View2D
 
         /// <summary>The strip a column draws from its top solid tile: grass, sand and stone their own, every other tile (soil, snow, a dug face) the soil. Pure.</summary>
         public static int MaterialFor(byte topTile) => topTile == TileId.Grass ? Grass : topTile == TileId.Sand ? Sand : topTile == TileId.Stone ? Stone : Soil;
-        public const float Z = -0.01f, StripHeight = 2f, FillDepth = 20f, EdgeWidth = 0.09f;
+        /// <summary>The strips sit in front of the block mesh front faces (BlockMesher.FrontZ −0.5): the depth test hid their bodies behind the faces (U-118 crops: only the lip above the line showed, the block grain stood in for the painted band).</summary>
+        public const float Z = Meridian.Terrain.BlockMesher.FrontZ - 0.1f, StripHeight = 2f, FillDepth = 20f, EdgeWidth = 0.09f;
         public const int Order = 1;
         static readonly Color Ink = new Color(0.33f, 0.39f, 0.5f); // × the dirt tone ≈ #1E1A17
         static readonly Color Back = new Color(0.62f, 0.62f, 0.66f); // a dug hole's back wall: the dirt tone, shaded

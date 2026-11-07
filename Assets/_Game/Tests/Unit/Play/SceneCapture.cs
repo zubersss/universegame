@@ -1547,6 +1547,10 @@ namespace Meridian.Tests
 
         static IEnumerator Save(Camera cam, string name)
         {
+            // Batch mode: the camera's aspect is the Editor's default screen (4:3) until the 1920x1080 target is set, so the strips and the layer tiling had laid
+            // out for a narrower frame (the leftmost 1.5 m of every 1x frame showed bare block faces). Frame at 16:9 and let one LateUpdate lay out at it first.
+            cam.aspect = 1920f / 1080f;
+            yield return null;
             var rt = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);
             cam.targetTexture = rt;
             cam.Render();
@@ -2609,8 +2613,8 @@ namespace Meridian.Tests
                 var skater2 = creatures.SpawnAt(Meridian.Creatures.Species.Dustskater, lurkerX - 6, side.player.Body.position.y);
                 art = Time.realtimeSinceStartup + 10f;
                 while (((lurker != null && lurker.Alive && lurker.IsPlaceholder) || (skater2 != null && skater2.Alive && skater2.IsPlaceholder)) && Time.realtimeSinceStartup < art) yield return null;
-                art = Time.realtimeSinceStartup + 10f;
-                while (lurker != null && lurker.Alive && !(lurker.AtDen && lurker.CurrentClip == "idle") && Time.realtimeSinceStartup < art) yield return null; // the peek at the den
+                art = Time.realtimeSinceStartup + 20f;
+                while (lurker != null && lurker.Alive && !(lurker.AtDen && lurker.CurrentClip == "idle") && Time.realtimeSinceStartup < art) yield return null; // the peek at the den (take 4 timed out at 10 s mid-walk)
                 var denSprite = creatures.Dens.Count > 0 ? creatures.Dens[0].GetComponent<SpriteRenderer>() : null;
                 art = Time.realtimeSinceStartup + 10f;
                 while (denSprite != null && (denSprite.sprite == null || !denSprite.enabled) && Time.realtimeSinceStartup < art) yield return null; // the mound's sheet

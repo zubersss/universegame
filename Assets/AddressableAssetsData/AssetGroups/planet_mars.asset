@@ -140,6 +140,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6c65559fd20e0954ea06e1ad1c8e17fb
+    m_Address: terrain/mars/ground_strip_frost
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6d05352c278b3d2438bc4bb1c25d5231
     m_Address: backgrounds/mars/plains/layer2
     m_ReadOnly: 0
