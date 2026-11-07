@@ -334,18 +334,21 @@ def pack(frames, cols, gutter=v3.GUTTER):
     return s
 
 
-def preview(out_dir):
-    """All eight side by side at the space scale (+ Luna, Saturn's rings) + 2x detail of frame 0."""
+def preview(out_dir, tiles=None, out_name="review_b119_discs_preview.png", stamp_paths=()):
+    """All eight side by side at the space scale (+ Luna, Saturn's rings) + 2x detail of frame 0.
+    tiles: reuse frames already built by export() (render.py); stamp_paths: exported PNGs whose
+    time + hash are printed on the sheet (review.stamp_text)."""
     import time
     sys.path.insert(0, os.path.dirname(HERE))
     import review
     os.makedirs(out_dir, exist_ok=True)
     t0 = time.time()
-    tiles = {}
-    for name in ORDER + ["luna"]:
-        frames, R = build_disc(name)
-        tiles[name] = (frames, R)
-        print(name, len(frames), frames[0].shape, f"{time.time() - t0:.1f}s", flush=True)
+    if tiles is None:
+        tiles = {}
+        for name in ORDER + ["luna"]:
+            frames, R = build_disc(name)
+            tiles[name] = (frames, R)
+            print(name, len(frames), frames[0].shape, f"{time.time() - t0:.1f}s", flush=True)
     back, front = saturn_rings(RADIUS_U["saturn"] * SPACE_PPU)
     H = 760
     W = 16 + sum(tiles[n][0][0].shape[1] + 24 for n in ORDER) + 700
@@ -382,7 +385,10 @@ def preview(out_dir):
             review.draw(row, f"{n} {i}", 8 + i * (fw * sc + 8), 6, (1.0, 0.97, 0.85))
         rows.append(row)
     img = np.vstack(rows)
-    review.write(os.path.join(out_dir, "review_b119_discs_preview.png"), img)
+    for i, p in enumerate(stamp_paths):              # one stamp per exported sheet, stacked from the bottom
+        review.draw(img, os.path.relpath(p, review.ART).replace("\\", "/") + " " + review.stamp_text(p), 4,
+                    img.shape[0] - 18 * (len(stamp_paths) - i), (1.0, 1.0, 0.85))
+    review.write(os.path.join(out_dir, out_name), img)
     print("review written", img.shape, f"{time.time() - t0:.1f}s")
 
 

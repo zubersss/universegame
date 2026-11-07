@@ -922,7 +922,79 @@ def do_palette_strip(entry, preview):
     log_line(f"OK {entry['key']} | strip {strip.shape[1]}x{strip.shape[0]} + strip.json | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
 
 
+def do_disc_set(entry, preview):
+    """Contract §11.5 + D-098 (B-119): every planet disc sheet + json, Luna, Saturn's ring parts
+    and disc_rig.json in one job (numpy painting); review_b119_discs.png from the same frames."""
+    import build_discs_v3 as DS
+    t0 = time.time()
+    if preview:
+        raise AssetError(f"{entry['key']}: the disc set has no preview mode (python build_discs_v3.py <dir>)")
+    out, tiles = DS.export(ART, PREVIEW)
+    stamps = [os.path.join(ART, *k.split("/")[:2], k.split("/")[2] + "_color.png") for k, *_r in out]
+    DS.preview(PREVIEW, tiles=tiles, out_name=f"review_{entry.get('review_name', 'b119_discs')}.png", stamp_paths=stamps)
+    for k, *_r in out:
+        mark_stale(k, False)
+    log_line(f"OK {entry['key']} | " + ", ".join(f"{k.split('/')[1]}/{k.split('/')[2]} {w}x{h} {nf}f {kb}KB" for k, w, h, nf, kb in out)
+             + f" | space_ppu {DS.SPACE_PPU:g} | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
+
+
+def do_space_starfield(entry, preview):
+    """Contract §11.4 space (B-120): starfield 2048^2 tileable + 3 nebula cards + starfield.json;
+    the 2x2 tile check on the exported starfield in x and y; review_b120_starfield.png."""
+    import gen_painted_bg as BG
+    sys.path.insert(0, HERE)
+    import review
+    t0 = time.time()
+    if preview:
+        raise AssetError(f"{entry['key']}: the starfield has no preview mode")
+    info, meta = BG.export_space(entry, ART)
+    lim = float(entry.get("seam_limit", 2.0))
+    p0, img0, n0, sx, sy = info[0]
+    if sx > lim or sy > lim:
+        raise AssetError(f"{entry['key']}: tile check failed: seam_x {sx:.2f} seam_y {sy:.2f} (limit {lim})")
+    sf = img0.astype(np.float32) / 255.0
+    big = np.tile(sf[..., :3], (2, 2, 1))[1024:3072, 1024:3072].copy()
+    for k, (pk, im, _n, _a, _b) in enumerate(info[1:]):
+        review._over(big, np.ascontiguousarray(im[::2, ::2]), 60 + k * 660, 1200)
+    big[1022:1026, :12] = (0.85, 0.1, 0.1)
+    big[:12, 1022:1026] = (0.85, 0.1, 0.1)
+    half = big[::2, ::2].copy()
+    for i, (pk, *_r) in enumerate(info):
+        review.draw(half, os.path.basename(pk) + " " + review.stamp_text(pk), 4, 4 + 18 * i, (1.0, 1.0, 0.85))
+    out = os.path.join(PREVIEW, f"review_{entry.get('review_name', 'b120_starfield')}.png")
+    review.write(out, half)
+    mark_stale(entry["key"], False)
+    log_line(f"OK {entry['key']} | starfield 2048x2048 {n0 // 1024}KB seam_x {sx:.2f} seam_y {sy:.2f}, "
+             + ", ".join(f"{os.path.basename(pk)[:-10]} {im.shape[1]}x{im.shape[0]} {n // 1024}KB" for pk, im, n, _a, _b in info[1:])
+             + f" + starfield.json | review {os.path.basename(out)} | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
+
+
+def do_hud(entry, preview):
+    """Contract §11.6 (B-121): ui/hud/gauges (1024^2, dials + needles + json), escape_line
+    (512x64 tile), escape_sign; review at 1080p over the B-114 plains (needles at 30/60/90 %)."""
+    import build_hud_v3 as HUD
+    t0 = time.time()
+    if preview:
+        raise AssetError(f"{entry['key']}: the HUD has no preview mode (python build_hud_v3.py <dir>)")
+    files, meta = HUD.build(ART, art=True)
+    d = os.path.join(ART, "ui", "hud")
+    ok, seam = post.check_tileable(files["escape_line_color.png"], "x", float(entry.get("seam_limit", 2.0)))
+    if not ok:
+        raise AssetError(f"{entry['key']}: escape_line tile check failed: {seam}")
+    stamps = [os.path.join(d, fn) for fn in files]
+    HUD.review_sheet(PREVIEW, files, meta_dir=d, out_name=f"review_{entry.get('review_name', 'b121_hud')}.png", stamp_paths=stamps)
+    mark_stale(entry["key"], False)
+    log_line(f"OK {entry['key']} | " + ", ".join(f"{fn[:-10]} {im.shape[1]}x{im.shape[0]}" for fn, im in files.items())
+             + f" | escape_line {seam} | lettering pending (Patrick Hand) | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
+
+
 def do_asset(entry, preview):
+    if entry.get("disc_set"):           # v3 §11.5 planet discs (B-119, D-098)
+        return do_disc_set(entry, preview)
+    if entry.get("space_starfield"):    # v3 §11.4 space starfield + nebula cards (B-120)
+        return do_space_starfield(entry, preview)
+    if entry.get("hud"):                # v3 §11.6 HUD gauges + Escape Line (B-121)
+        return do_hud(entry, preview)
     if entry.get("painted_bg"):         # v3 §11.4 painted layers (B-114)
         return do_painted_bg(entry, preview)
     if entry.get("palette_strip"):
