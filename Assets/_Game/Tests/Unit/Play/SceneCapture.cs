@@ -1142,6 +1142,126 @@ namespace Meridian.Tests
             finally { Meridian.View2D.CartoonStage.Enabled = false; }
         }
 
+        /// <summary>
+        /// U-098: the C0 style-test stills into reports/unity/c0_&lt;date&gt;/u098/: idle, walk, jump, land, plant react, critter
+        /// idle (one gull framed on purpose, B-113), iris mid-wipe, film off / film on. Each shot logs what it shows.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator CaptureC0Set()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            Meridian.View2D.CartoonStage.Enabled = true;
+            bool film = Meridian.Core.GameSettings.FilmEffects;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false;
+                var player = side.player;
+                player.externalInput = true; player.intent = default;
+                var view = side.cartoon.Surveyor;
+                var flora = side.cartoon.Flora;
+                timeout = Time.realtimeSinceStartup + 15f;
+                while ((!view.Ready || flora == null || !flora.Ready) && Time.realtimeSinceStartup < timeout) yield return null;
+                Assert.IsTrue(view.Ready && flora != null && flora.Ready, "surveyor sheet and flora loaded");
+                for (int i = 0; i < 60; i++) yield return null;
+                Meridian.Core.GameSettings.FilmEffects = true;
+                var cam = side.sideCamera;
+                var dir = $"coordination/reports/unity/c0_{DateTime.Now:yyyy-MM-dd}/u098";
+                Directory.CreateDirectory(dir);
+
+                IEnumerator Shot(string label, string what)
+                {
+                    yield return Save(cam, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u098 {label}: {what}");
+                }
+
+                // 1. idle
+                for (int i = 0; i < 24; i++) yield return null;
+                yield return Shot("1_idle", $"clip {view.Clip}");
+
+                // 2. walk (right, mid-stride)
+                player.intent = new Meridian.Player.PlayerIntent { move = 1f };
+                for (int i = 0; i < 35; i++) yield return new WaitForFixedUpdate();
+                yield return Shot("2_walk", $"clip {view.Clip}, vx {player.Body.linearVelocity.x:F1} m/s");
+                player.intent = default;
+                for (int i = 0; i < 25; i++) yield return new WaitForFixedUpdate();
+
+                // 3. jump (rising) and 4. land (the frame after touchdown)
+                player.PressJump();
+                float until = Time.realtimeSinceStartup + 3f;
+                while (player.Grounded && Time.realtimeSinceStartup < until) yield return new WaitForFixedUpdate();
+                for (int i = 0; i < 8; i++) yield return new WaitForFixedUpdate();
+                yield return Shot("3_jump", $"clip {view.Clip}, vy {player.Body.linearVelocity.y:F1} m/s");
+                until = Time.realtimeSinceStartup + 4f;
+                while (!player.Grounded && Time.realtimeSinceStartup < until) yield return new WaitForFixedUpdate();
+                yield return null;
+                yield return Shot("4_land", $"clip {view.Clip}, impact {player.LastImpactSpeed:F1} m/s, squash y {view.SquashRoot.localScale.y:F2}");
+                for (int i = 0; i < 40; i++) yield return null;
+
+                // 5. plant react: stand 1.5 m right of the nearest plant on the left
+                Meridian.Flora.RigPlant plant = null;
+                float px = player.Body.position.x;
+                foreach (var p in flora.Plants)
+                    if (p.Root.position.x < px - 2f && (plant == null || p.Root.position.x > plant.Root.position.x)) plant = p;
+                Assert.NotNull(plant, "a plant to the left of the surveyor");
+                var stand = new Vector2(plant.Root.position.x + 1.5f, side.terrain.TopSolidY(Mathf.FloorToInt(plant.Root.position.x + 1.5f)) + 1.05f);
+                player.Body.position = stand; player.transform.position = stand; player.Body.linearVelocity = Vector2.zero;
+                for (int i = 0; i < 12; i++) yield return null;
+                yield return Shot("5_plant_react", $"reacting {plant.Reacting}, facing {plant.Facing}, mouth {(plant.Mouth != null ? plant.Mouth.sprite.name : "none")}");
+                Assert.IsTrue(plant.Reacting, "the plant reacts within its radius");
+
+                // 6. critter idle: one gull 8 m off (outside its 6 m flee range), framed on purpose
+                foreach (var c in side.creatures.All) if (c.Alive) side.creatures.Despawn(c);
+                var gullAt = player.Body.position + new Vector2(8f, 3f);
+                var gull = side.creatures.Spawn(Meridian.Creatures.Species.Gull, gullAt);
+                Assert.NotNull(gull, "a gull");
+                for (int i = 0; i < 30; i++) yield return null;
+                var vp = cam.WorldToViewportPoint(gull.Body.position);
+                yield return Shot("6_critter_gull", $"gull at {gull.Body.position}, viewport ({vp.x:F2}, {vp.y:F2}), state {gull.State}, model/sheet {(gull.View != null && gull.View.sprite != null ? gull.View.sprite.name : "none")}");
+                Assert.IsTrue(vp.x > 0.05f && vp.x < 0.95f && vp.y > 0.05f && vp.y < 0.95f, "the gull is in the frame");
+
+                // 7. iris mid-wipe (0.175 s into the 0.35 s close, on the surveyor)
+                var iris = Meridian.Transitions.IrisWipe.Instance;
+                Assert.NotNull(iris);
+                var canvas = iris.GetComponentInParent<Canvas>();
+                var mode = canvas.renderMode;
+                canvas.renderMode = RenderMode.ScreenSpaceCamera; canvas.worldCamera = cam; canvas.planeDistance = 1f;
+                iris.Preview(Meridian.Transitions.IrisWipe.ScreenCentre(cam, player.Body.position + new Vector2(0f, 0.9f)), Meridian.Transitions.IrisMath.Seconds * 0.5f, true);
+                yield return null;
+                yield return Shot("7_iris_mid", $"radius {iris.Radius:F3} screen heights");
+                iris.SetOpen();
+                canvas.renderMode = mode;
+                yield return null;
+
+                // 8. film off / 9. film on (the same frame)
+                Meridian.Core.GameSettings.FilmEffects = false;
+                for (int i = 0; i < 3; i++) yield return null;
+                yield return Shot("8_film_off", "film effects off");
+                Meridian.Core.GameSettings.FilmEffects = true;
+                for (int i = 0; i < 3; i++) yield return null;
+                yield return Shot("9_film_on", "film effects on");
+                side.dayNight.Override = null;
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Meridian.Core.GameSettings.FilmEffects = film;
+                Meridian.View2D.CartoonStage.Enabled = false;
+            }
+        }
+
         static IEnumerator Save(Camera cam, string name)
         {
             var rt = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);
