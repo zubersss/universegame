@@ -536,14 +536,19 @@ def mars_plains(seed):
     stack.append(tint(rng, H, streaks, BG._mix(pal["offwhite"], pal["sky"], 0.35), 0.55, var=0.03, edge_dark=0.0, bleed=3.0))
     mesas, tops = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
     for _k in range(6):                                                                   # far flat-topped mesas
-        cx, w, h = rng.uniform(0, W), rng.uniform(140, 300), rng.uniform(70, 150)
-        base = 880.0
+        cx, w, h = rng.uniform(0, W), rng.uniform(140, 300), rng.uniform(80, 170)
+        base = 640.0                                                                      # above layer1's skyline (at 880 they were hidden)
         poly(mesas, [(cx - w * 0.5 - h * 0.6, base), (cx - w * 0.5, base - h), (cx + w * 0.5, base - h), (cx + w * 0.5 + h * 0.6, base)])
         rect(tops, cx - w * 0.5, cx + w * 0.5, base - h, base - h + 10)
     stack.append(wash32(rng, H, mesas, BG._mix(pal["red"], pal["sky"], 0.55), var=0.04, edge_dark=0.05, bleed=2.5))
-    stack.append(wash32(rng, H, strata(H, mesas, rng, 700, 880, 5, (5, 10)), BG._mix(pal["red"], pal["brown"], 0.25), var=0.04, edge_dark=0.03, bleed=3.0))
+    stack.append(wash32(rng, H, strata(H, mesas, rng, 470, 640, 5, (5, 10)), BG._mix(pal["red"], pal["brown"], 0.25), var=0.04, edge_dark=0.03, bleed=3.0))
     stack.append(tint(rng, H, tops * mesas, pal["offwhite"], 0.35, var=0.0, edge_dark=0.0, bleed=1.5))   # the lit caprock
-    edge = BG._ridge_mask(H, BG.ridge(rng, [(3, 0.6), (8, 0.4)], base=870, amp=10))
+    edge = BG._ridge_mask(H, BG.ridge(rng, [(3, 0.6), (8, 0.4)], base=630, amp=10))      # the plain's far edge: the horizon
+    devil = np.zeros((H, W), np.float32)
+    dx = rng.uniform(300, 1700)
+    for t in np.linspace(0, 1, 30):                                                       # a faint dust devil on the opaque sky
+        ell(devil, dx + 14 * math.sin(t * 9), 640 - 300 * t, 8 + 30 * t, 8)               # (over layer1's transparency it went dark)
+    stack.append(tint(rng, H, devil, BG._mix(pal["sky"], pal["offwhite"], 0.55), 0.4, var=0.03, edge_dark=0.0, bleed=5.0))
     stack.append(wash32(rng, H, edge, BG._mix(pal["sky"], pal["mustard"], 0.30), var=0.04, edge_dark=0.03, bleed=6.0))
     out.append(finish(stack, rng, H))
     # layer1: the rolling rust plain
@@ -562,11 +567,6 @@ def mars_plains(seed):
         rx, ry = rng.uniform(12, 30), rng.uniform(8, 18)
         ell(rocks, cx, b - ry * 0.6, rx, ry, cut=0.6)
     stack.append(wash32(rng, H, rocks * plain, BG._mix(pal["red"], pal["brown"], 0.35), var=0.05, edge_dark=0.10, bleed=1.2))
-    devil = np.zeros((H, W), np.float32)
-    dx = rng.uniform(300, 1700)
-    for t in np.linspace(0, 1, 30):                                                       # a faint dust devil, tapering up
-        ell(devil, dx + 18 * math.sin(t * 9), line[int(dx) % W] - 260 * t, 10 + 34 * t, 9)
-    stack.append(tint(rng, H, devil, BG._mix(pal["sky"], pal["offwhite"], 0.3), 0.35, var=0.03, edge_dark=0.0, bleed=5.0))
     out.append(finish(stack, rng, H))
     # layer2: near rust ground, boulders with shade, pebbles, ripple marks, low drifting dust
     H = 384
