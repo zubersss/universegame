@@ -2196,3 +2196,10 @@ Accept: Jupiter captures at 1x (a floe with the kit and a tortoise, the storm de
 Files: Code/Runtime/View2D/CartoonStage.cs, Code/Runtime/Planet/, Code/Runtime/Creatures/, Tests/
 Depends: U-125, B-155, B-156
 Lead notes: Cycle 266. Promoted when U-125 Venus is Done; the first giant sets the pattern for Saturn, Uranus and Neptune.
+
+### U-128 · UNITY · Ready · C2
+Goal: The scene set follows the camera's biome band with a per-band datum (the u119 shore finding): each biome band carries its own datum (the band's mean surface height, blended across the ±48-column border like the heights) so the parallax layers hold their pose around a shore 16 m under the camp's surface instead of sitting above the frame; the layer set switches to the camera's band with a crossfade at the border (U-110 picked the set once from the spawn's band); the coast deep gets the coast set behind the Maw.
+Accept: a shore capture at column 2096 with the coast set painted behind the water and the Maw; the camp frames unchanged; LayerFollowTests cover the per-band datum and the border blend; TransitionTests and the Earth perf rows unchanged.
+Files: Code/Runtime/View2D/CartoonStage.cs, ParallaxLayers.cs, Code/Runtime/Planet/EarthBiomes.cs, Tests/
+Depends: U-110, U-122
+Lead notes: Cycle 266 (09:5x). UNITY's reading: the shore is 16 m under the datum and the set was the spawn's, so nothing paints behind the coast. Slot: after U-112's fix and before U-118's check (Mars has the same bands); about half a lock of code, one check, one capture.
