@@ -1,10 +1,11 @@
 # BLENDER STATUS
-Updated: 2026-11-07 00:2x · Session: 6 (C1, contract v3.1, Bible 4.1) · trimmed under D-113; everything older: coordination/status/archive/BLENDER_2026-11-06.md
+Updated: 2026-11-07 00:4x · Session: 6 (C1, contract v3.1, Bible 4.1) · trimmed under D-113; everything older: coordination/status/archive/BLENDER_2026-11-06.md
 
 ## Current task
 While-waiting list (LEAD cycle 249), lock-free, top first; each logged here:
-1. B-131 camp props re-ink previews (all six at 1x beside the surveyor and the rig): NEXT.
-2. B-132 stag / wolf / bear design previews (faces kept, no bared teeth).
+1. B-131 camp props PREVIEW DONE 00:4x (blender/scripts/build_props_common_v3.py, blender/preview/review_b131_props_preview.png): all six at 1x on the plains over the B-130 ground strips beside the surveyor and the assembled Pilgrim rig on three 2 m pad modules, each at 3x, the clips at 2x (door open 6: a cartoon swing in about the hinge, status light red -> green; smelter working 8: mouth glow pulse, two chimney puffs, breathing, sparks; lamp flicker 4: drawn halo), tiling at 2x (pad and wall joins 0.0/255). Ink 2.0-3.0 / 1.0-1.5 px, mid + deep tones, no faces (one porthole, one mouth, no eye pairs). Sizes: pad 128x48 (2 m module), wall 64x176 (1 m), door 88x176 (1.2 m like the model), smelter 112x192, crate 80x72, lamp 64x160; ground line 10 px above each frame bottom.
+   Questions for LEAD before the export: (a) contract §11.1 says color only, the card says interactables keep mask R = 0.1 and emission where the manifest has it: I propose color + json only, with "interactable": true in the json and the glows drawn (smelter mouth, lamp halo, lights); (b) these keys are model (glb) rows today, so the export changes their TYPE (sprite sheet) under the same keys: UNITY's ModelView/ModelSwap path for props/common/* has to take sprites.
+2. B-132 stag / wolf / bear design previews (faces kept, no bared teeth): NEXT.
 3. B-133 forest + coast layer studies with the 2x seam check.
 4. Painted Sun disc design, preview only.
 5. README_v4.md refresh.
