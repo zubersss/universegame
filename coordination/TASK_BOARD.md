@@ -1336,7 +1336,7 @@ Goal: Straight-alpha re-export of the premultiplied near layers (D-147): the Ear
 Accept: log OK per set; the 2× seam check unchanged; a stamped before / after review per planet at 1x (fog pale, soft edges without the dark rim, the drawn ink intact); UNITY's next capture of each planet confirms.
 Files: blender/scripts/build_backdrop_v3.py, Assets/_Game/Art/backgrounds/earth/, backgrounds/mars/
 Depends: B-149 re-run
-Lead notes: Cycle 270 (D-147). After the Mercury re-run and the Saturn / Uranus studies slot; Earth first (the owner's first view), then Mars.
+Lead notes: Cycle 270 (D-147). After the Mercury re-run and the Saturn / Uranus studies slot; Earth first (the owner's first view), then Mars. 13:5x: EARTH VERIFIED (c9221393; log 13:48–13:49 OK ×3: plains / forest / coast, layer1 / layer2 only, the layer0s byte-identical by md5, the jsons unchanged; the D-145 gate 1399 MB; review_b162_earth_straight_before_after.png: the dark rims along the plains hilltop, the forest canopies and the coast's dune line gone, the rest unchanged). Mars running (13:51:50); the planet closes on its review.
 
 > **R1 (D-062).** 2D tasks B-056..B-076 are Superseded; their `.blend` sources (rigs, props,
 > terrain recipes) are the starting point for the models. Contract v2 §9 is the rule set.
