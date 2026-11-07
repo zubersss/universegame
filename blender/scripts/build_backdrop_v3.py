@@ -520,6 +520,87 @@ def mars_storm(seed):
 
 # ---------------------------------------------------------------- Mercury (B-145, D-130 palette): day / twilight / night
 
+def mars_plains(seed):
+    """B-141's third set (LEAD's catch, cycle 267): the open Martian plain. layer0 the butterscotch sky with wind streaks
+    and far flat-topped mesas with strata, the plain's hazy far edge; layer1 the rolling rust plain with shallow craters,
+    boulders and a faint dust devil; layer2 near rust ground with boulders, pebbles, ripple marks and low drifting dust."""
+    rng = np.random.default_rng(seed)
+    pal = _pal("mars")
+    out = []
+    H = 1024
+    stack = mars_sky(rng, pal, H, 0.0)
+    streaks = np.zeros((H, W), np.float32)
+    for _k in range(14):                                                                  # wind streaks low in the sky
+        cx, cy = rng.uniform(0, W), rng.uniform(520, 760)
+        ell(streaks, cx, cy, rng.uniform(220, 420), rng.uniform(2.5, 5))
+    stack.append(tint(rng, H, streaks, BG._mix(pal["offwhite"], pal["sky"], 0.35), 0.55, var=0.03, edge_dark=0.0, bleed=3.0))
+    mesas, tops = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
+    for _k in range(6):                                                                   # far flat-topped mesas
+        cx, w, h = rng.uniform(0, W), rng.uniform(140, 300), rng.uniform(70, 150)
+        base = 880.0
+        poly(mesas, [(cx - w * 0.5 - h * 0.6, base), (cx - w * 0.5, base - h), (cx + w * 0.5, base - h), (cx + w * 0.5 + h * 0.6, base)])
+        rect(tops, cx - w * 0.5, cx + w * 0.5, base - h, base - h + 10)
+    stack.append(wash32(rng, H, mesas, BG._mix(pal["red"], pal["sky"], 0.55), var=0.04, edge_dark=0.05, bleed=2.5))
+    stack.append(wash32(rng, H, strata(H, mesas, rng, 700, 880, 5, (5, 10)), BG._mix(pal["red"], pal["brown"], 0.25), var=0.04, edge_dark=0.03, bleed=3.0))
+    stack.append(tint(rng, H, tops * mesas, pal["offwhite"], 0.35, var=0.0, edge_dark=0.0, bleed=1.5))   # the lit caprock
+    edge = BG._ridge_mask(H, BG.ridge(rng, [(3, 0.6), (8, 0.4)], base=870, amp=10))
+    stack.append(wash32(rng, H, edge, BG._mix(pal["sky"], pal["mustard"], 0.30), var=0.04, edge_dark=0.03, bleed=6.0))
+    out.append(finish(stack, rng, H))
+    # layer1: the rolling rust plain
+    H = 640
+    stack = Stack()
+    line = BG.ridge(rng, [(2, 0.5), (5, 0.3), (12, 0.2)], base=330, amp=26)
+    plain = BG._ridge_mask(H, line)
+    stack.append(wash32(rng, H, plain, BG._mix(pal["red"], pal["sky"], 0.28), var=0.06, edge_dark=0.07, bleed=2.0))
+    rim, bowl, shade = crater_field(rng, H, line, 6, 30, 70, 1.6)
+    stack.append(wash32(rng, H, rim * plain, BG._mix(pal["red"], pal["sky"], 0.40), var=0.04, edge_dark=0.06, bleed=1.6))
+    stack.append(wash32(rng, H, bowl * plain, BG._mix(pal["red"], pal["brown"], 0.25), var=0.04, edge_dark=0.04, bleed=1.6))
+    rocks = np.zeros((H, W), np.float32)
+    for _k in range(22):
+        cx = rng.uniform(0, W)
+        b = line[int(cx) % W] + rng.uniform(40, 260)
+        rx, ry = rng.uniform(12, 30), rng.uniform(8, 18)
+        ell(rocks, cx, b - ry * 0.6, rx, ry, cut=0.6)
+    stack.append(wash32(rng, H, rocks * plain, BG._mix(pal["red"], pal["brown"], 0.35), var=0.05, edge_dark=0.10, bleed=1.2))
+    devil = np.zeros((H, W), np.float32)
+    dx = rng.uniform(300, 1700)
+    for t in np.linspace(0, 1, 30):                                                       # a faint dust devil, tapering up
+        ell(devil, dx + 18 * math.sin(t * 9), line[int(dx) % W] - 260 * t, 10 + 34 * t, 9)
+    stack.append(tint(rng, H, devil, BG._mix(pal["sky"], pal["offwhite"], 0.3), 0.35, var=0.03, edge_dark=0.0, bleed=5.0))
+    out.append(finish(stack, rng, H))
+    # layer2: near rust ground, boulders with shade, pebbles, ripple marks, low drifting dust
+    H = 384
+    line = BG.ridge(rng, [(3, 0.5), (7, 0.3), (15, 0.2)], base=210, amp=18)
+    ground = BG._ridge_mask(H, line)
+    rocks, shade, pebbles, ripples, dust = (np.zeros((H, W), np.float32) for _ in range(5))
+    for _k in range(18):
+        cx = rng.uniform(0, W)
+        b = line[int(cx) % W] + rng.uniform(10, 120)
+        rx, ry = rng.uniform(20, 54), rng.uniform(14, 34)
+        ell(rocks, cx, b - ry * 0.6, rx, ry, cut=0.6)
+        ell(shade, cx + rx * 0.25, b - ry * 0.35, rx * 0.8, ry * 0.55, cut=0.6)
+    for _k in range(90):
+        cx = rng.uniform(0, W)
+        ell(pebbles, cx, line[int(cx) % W] + rng.uniform(8, 170), rng.uniform(3, 7), rng.uniform(2, 4))
+    for _k in range(40):                                                                  # ripple marks (thin darker arcs)
+        cx, cy = rng.uniform(0, W), 0.0
+        cy = line[int(cx) % W] + rng.uniform(20, 160)
+        ell(ripples, cx, cy, rng.uniform(20, 46), 1.2)
+    for _k in range(10):                                                                  # low drifting dust
+        cx = rng.uniform(0, W)
+        ell(dust, cx, line[int(cx) % W] - rng.uniform(2, 14), rng.uniform(120, 260), rng.uniform(5, 10))
+    stack = Stack()
+    stack.append(wash32(rng, H, ground, BG._mix(pal["red"], pal["brown"], 0.18), var=0.07, edge_dark=0.08))
+    stack.append(wash32(rng, H, ripples * ground, BG._mix(pal["red"], pal["brown"], 0.40), var=0.03, edge_dark=0.0, bleed=0.8))
+    stack.append(wash32(rng, H, rocks, BG._mix(pal["red"], pal["sky"], 0.22), var=0.06, edge_dark=0.12, bleed=1.4))
+    stack.append(wash32(rng, H, shade * rocks, BG._mix(pal["brown"], pal["red"], 0.35), var=0.04, edge_dark=0.04, bleed=2.0))
+    stack.append(wash32(rng, H, pebbles * ground, BG._mix(pal["sky"], pal["brown"], 0.40), var=0.04, edge_dark=0.10, bleed=0.8))
+    stack.append(tint(rng, H, dust, BG._mix(pal["sky"], pal["offwhite"], 0.3), 0.4, var=0.03, edge_dark=0.0, bleed=4.0))
+    out.append(finish(stack, rng, H))
+    return out, [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0},
+                 {"n": 2, "parallax": 0.6, "y_m": -0.5}]
+
+
 def merc_sky(rng, pal, H, mode):
     """The day sky is the ink itself with sharp stars; twilight adds a violet band low down; night is ink + more stars."""
     ink = BG._rgb(v3.INK)
@@ -1069,15 +1150,15 @@ def jupiter_spot(seed):
     return jupiter_scene(seed, "spot")
 
 
-SCENES = {("earth", "forest"): earth_forest, ("earth", "coast"): earth_coast,
+SCENES = {("earth", "forest"): earth_forest, ("earth", "coast"): earth_coast, ("mars", "plains"): mars_plains,
           ("mars", "canyon"): mars_canyon, ("mars", "storm"): mars_storm,
           ("mercury", "day"): mercury_day, ("mercury", "twilight"): mercury_twilight, ("mercury", "night"): mercury_night,
           ("venus", "deck"): venus_deck, ("venus", "surface"): venus_surface,
           ("jupiter", "deck1"): jupiter_deck1, ("jupiter", "deck2"): jupiter_deck2, ("jupiter", "deck3"): jupiter_deck3,
           ("jupiter", "deep"): jupiter_deep, ("jupiter", "spot"): jupiter_spot}
-SEEDS = {"forest": 13301, "coast": 13302, "canyon": 14101, "storm": 14102, "day": 14501, "twilight": 14502, "night": 14503,
+SEEDS = {"forest": 13301, "coast": 13302, "canyon": 14101, "storm": 14102, "plains": 14103, "day": 14501, "twilight": 14502, "night": 14503,
          "deck": 14701, "surface": 14702, "deck1": 14801, "deck2": 14802, "deck3": 14803, "deep": 14804, "spot": 14805}
-PLANET_OF = {"forest": "earth", "coast": "earth", "canyon": "mars", "storm": "mars", "day": "mercury", "twilight": "mercury", "night": "mercury",
+PLANET_OF = {"forest": "earth", "coast": "earth", "canyon": "mars", "storm": "mars", "plains": "mars", "day": "mercury", "twilight": "mercury", "night": "mercury",
              "deck": "venus", "surface": "venus",
              "deck1": "jupiter", "deck2": "jupiter", "deck3": "jupiter", "deep": "jupiter", "spot": "jupiter"}
 
