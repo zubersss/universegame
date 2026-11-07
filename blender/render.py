@@ -1103,7 +1103,8 @@ def do_prop_sheet_set(entry, preview):
             raise
         if entry.get("prop_sheet_set"):
             stamps = [os.path.join(ART, *PC.KEY.format(n).split("/")) + "_color.png" for n in names]
-            PC.main(os.path.join(PREVIEW, f"review_{entry.get('review_name', 'b131_props')}.png"), imgs, widths, stamp_paths=stamps)
+            review_fn = getattr(PC, entry.get("review_fn", "main"))     # e.g. props/mars/tube_mound: den_review (the lurker behind it)
+            review_fn(os.path.join(PREVIEW, f"review_{entry.get('review_name', 'b131_props')}.png"), imgs, widths, stamp_paths=stamps)
     finally:
         fakegp.restore()
     for k in keys:
