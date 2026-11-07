@@ -1,7 +1,7 @@
 """B-157 (C2 Saturn design prep): the proposed Saturn palette strip and its check against Bible §9.1 (muted, slightly aged;
 one 6-8 colour palette per planet) and §7.7 Saturn ("pale gold and butter bands, the ring plane as a bright line across
 the sky, soft low sunlight"). Same slot names and order as the other strips (v3.PALETTE_ORDER), so gp_draw's tones and
-palette_hits work once LEAD accepts it into meridian.v3.PALETTES. The Mars checks (build_c2_mars_palette) plus Saturn's
+palette_hits work (ACCEPTED, D-141: in meridian.v3.PALETTES["saturn"]). The Mars checks (build_c2_mars_palette) plus Saturn's
 family, measured against the accepted Jupiter palette (D-137): paler (a higher mean lightness) and colder (a cooler
 shadow), gold bands, soft banding (the zone / gold / haze colours close together), a cool ring-ice accent.
 

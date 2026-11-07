@@ -1150,7 +1150,7 @@ def jupiter_spot(seed):
     return jupiter_scene(seed, "spot")
 
 
-# ---------------------------------------------------------------- Saturn (B-157, the proposed palette): the ring world's column
+# ---------------------------------------------------------------- Saturn (B-157, the D-141 palette): the ring world's column
 # The Jupiter column's decks with Saturn's rings: seen edge-on from the equatorial decks (a bright cream line across the sky
 # and its shadow band on the cloud tops) and tilted from the polar Hexagon (a wide pale arc with the Cassini gap); soft low
 # sunlight (long warm lining on the cloud tops, cool slate shadows). Scenes sdeck1 / sdeck2 / sdeck3 / sdeep / hexagon
@@ -1195,8 +1195,6 @@ def hexagon_walls(stack, rng, pal, H):
 
 
 def saturn_scene(seed, deck="sdeck1"):
-    import build_c2_saturn_palette as SPAL
-    v3.PALETTES.setdefault("saturn", {k: h for k, (h, _r) in SPAL.SATURN.items()})     # the proposal, until LEAD accepts it
     rng = np.random.default_rng(seed)
     pal = _pal("saturn")
     top_c = {"sdeck1": pal["sky"], "sdeck2": BG._mix(pal["sky"], pal["mustard"], 0.2), "sdeck3": BG._mix(pal["sky"], pal["brown"], 0.35),

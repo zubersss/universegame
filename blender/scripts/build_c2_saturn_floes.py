@@ -1,6 +1,6 @@
 """B-157 (C2 Saturn design prep): Saturn's ring-mining floe strips on D-137's contract (64x152 cells, pivot on the ground
 line, 8 tiles + cap_left + cap_right = 10 frames, the silhouette on the line at the tile edges, paper grain), in the
-proposed Saturn palette (build_c2_saturn_palette; registered with setdefault until LEAD accepts it). Built on
+proposed Saturn palette (build_c2_saturn_palette; D-141: in v3.PALETTES). Built on
 build_c2_jupiter_floes' frame / cap / check / export code with Saturn's two kinds:
 
   terrain/saturn/floe_strip_ice   water ice: a butter-cream frost lip over ring-ice blue-grey ice, facets, trapped bubbles
@@ -17,10 +17,8 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import build_c2_ground_strip as GS  # noqa: E402  (installs fakegp; the B-130 constants, grain, joins)
-import build_c2_saturn_palette as SPAL  # noqa: E402
 from meridian import v3  # noqa: E402
 
-v3.PALETTES.setdefault("saturn", {k: h for k, (h, _r) in SPAL.SATURN.items()})   # the proposal, until LEAD accepts it
 
 G = GS.G
 JP = v3.PALETTES["saturn"]

@@ -53,6 +53,13 @@ PALETTES = {
         "offwhite": "#EEE2CB", "red": "#A8503A", "mustard": "#C48A4E", "teal": "#6F8A97",
         "green": "#8F9A6A", "sky": "#D8BC94", "brown": "#4B3B34", "ink": "#1E1A17",
     },
+    # D-141, LEAD cycle 268: the Saturn palette (B-157; checked by scripts/build_c2_saturn_palette.py). offwhite butter
+    # cream, red dusk salmon, mustard pale gold, teal ring-ice blue-grey (the cool accent), green pale moss (flora), sky
+    # butter haze, brown cold slate (the shadow mix colour).
+    "saturn": {
+        "offwhite": "#F1E9D2", "red": "#B7735C", "mustard": "#D4B46E", "teal": "#7F98A4",
+        "green": "#97A27C", "sky": "#E3CFA4", "brown": "#4A4542", "ink": "#1E1A17",
+    },
 }
 PALETTE_ORDER = ["offwhite", "red", "mustard", "teal", "green", "sky", "brown", "ink"]
 

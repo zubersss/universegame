@@ -27,9 +27,7 @@ try:
 except ImportError:
     G = fakegp.install()
 import gp_raster as GR  # noqa: E402
-import build_c2_saturn_palette as SPAL  # noqa: E402
 
-v3.PALETTES.setdefault("saturn", {k: h for k, (h, _r) in SPAL.SATURN.items()})   # the proposal, until LEAD accepts it
 P = v3.PALETTES["saturn"]
 O, I = G.OUTER, G.INNER
 TAU = 2 * math.pi

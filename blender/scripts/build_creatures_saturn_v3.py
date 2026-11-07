@@ -25,10 +25,8 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import build_creatures_earth_v3 as K  # noqa: E402  (the kit; gp_draw real in Blender, fakegp outside)
-import build_c2_saturn_palette as SPAL  # noqa: E402
 from meridian import v3  # noqa: E402
 
-v3.PALETTES.setdefault("saturn", {k: h for k, (h, _r) in SPAL.SATURN.items()})   # the proposal, until LEAD accepts it
 G = K.G
 P = v3.PALETTES["saturn"]
 O, I = G.OUTER, G.INNER

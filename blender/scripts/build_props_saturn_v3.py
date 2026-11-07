@@ -20,7 +20,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-import build_creatures_saturn_v3 as CS  # noqa: E402  (registers the proposed palette; gp_draw through fakegp outside Blender)
+import build_creatures_saturn_v3 as CS  # noqa: E402  (gp_draw through fakegp outside Blender)
 import build_props_jupiter_v3 as PJ  # noqa: E402  (the sheet / export / review machinery)
 from meridian import fakegp, v3  # noqa: E402
 import gp_raster as GR  # noqa: E402

@@ -12,7 +12,7 @@ scene builder, the capped floe strips (D-137), the shared aerostat kit (B-156). 
 
 | Item | State | File |
 |---|---|---|
-| Palette | proposed; the check passes (ALL PASS), below; registered with setdefault in the Saturn modules until LEAD accepts it | blender/scripts/build_c2_saturn_palette.py |
+| Palette | ACCEPTED (D-141): in `meridian.v3.PALETTES["saturn"]` + the ui/palettes/saturn row (exports with the first Saturn slot) | blender/scripts/build_c2_saturn_palette.py |
 | Five flora | source (1c81b527): key poses checked, palette 100 %; the full preview waits for a free gap | build_c2_saturn_plants.py |
 | Floe strips | source + checks (3bf0b75b: ice + ring rock, 10 frames each, joins <= 0.94/255, palette 100 %) | build_c2_saturn_floes.py |
 | Deck backdrops | source (96b2654b: deck1 / deck2 / deck3 / deep + the Hexagon overlay, the rings edge-on / tilted); studies need slots | build_backdrop_v3.py (saturn_scene) |
@@ -20,7 +20,7 @@ scene builder, the capped floe strips (D-137), the shared aerostat kit (B-156). 
 | Polar Hydra | Grand rig-set source (03ecb577, 7 bones, D-140); the preview waits for a free gap | build_polar_hydra_v3.py |
 | Props + ring chunks | source + review (review_b157_saturn_props_preview.png: six json valid, palette 100 %) | build_props_saturn_v3.py |
 
-## 1. Palette (proposed; checked by blender/scripts/build_c2_saturn_palette.py)
+## 1. Palette (ACCEPTED, D-141; checked by blender/scripts/build_c2_saturn_palette.py)
 
 | slot | hex | role | mid | deep | contrast vs ink | chroma |
 |---|---|---|---|---|---|---|
