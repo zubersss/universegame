@@ -19,7 +19,7 @@ namespace Meridian.Tests
         {
             var ids = new HashSet<int>();
             foreach (var d in ItemRegistry.All) Assert.IsTrue(ids.Add(d.id), "unique item id " + d.id + " " + d.key);
-            foreach (var key in Concat(Raw, Gear, new[] { "helium3_condensate", "deuterium" }))
+            foreach (var key in Concat(Raw, Gear, new[] { "helium3_condensate" }))
             {
                 var d = ItemRegistry.Get(key);
                 Assert.NotNull(d, key);

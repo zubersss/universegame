@@ -14,14 +14,14 @@ namespace Meridian.Tests
         {
             var d = new SaveData { worldSeed = 7, currentPlanet = "Mars", view = "Space" };
             d.player.position = new Vector2(64.5f, 338f); d.player.health = 51f; d.player.aboard = true;
-            d.ship.hull = 73f; d.ship.fuel = 41.5f; d.ship.spacePosition = new Vector2(2550f, 30f); d.ship.spaceHeading = 90f;
+            d.ship.hull = 73f; d.ship.spacePosition = new Vector2(2550f, 30f); d.ship.spaceHeading = 90f;
             d.cargo.Add(new CargoStack { itemId = 3, count = 12 });
             d.timers.gameSeconds = 12345.5; d.terrainFiles.Add("terrain_earth.bin");
             var back = JsonUtility.FromJson<SaveData>(JsonUtility.ToJson(d));
             Assert.AreEqual(SaveData.CurrentVersion, back.version);
             Assert.AreEqual("Mars", back.currentPlanet); Assert.AreEqual("Space", back.view);
             Assert.AreEqual(d.player.position, back.player.position); Assert.IsTrue(back.player.aboard);
-            Assert.AreEqual(73f, back.ship.hull); Assert.AreEqual(41.5f, back.ship.fuel);
+            Assert.AreEqual(73f, back.ship.hull);
             Assert.AreEqual(d.ship.spacePosition, back.ship.spacePosition);
             Assert.AreEqual(12, back.cargo[0].count);
             Assert.AreEqual(12345.5, back.timers.gameSeconds);

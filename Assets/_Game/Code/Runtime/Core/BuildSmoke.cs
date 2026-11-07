@@ -128,7 +128,7 @@ namespace Meridian.Core
                 inv.Add(Meridian.Terrain.TileId.Soil, 64);
                 inv.Add(Meridian.Terrain.TileId.Stone, 999);
                 inv.Add(Meridian.Terrain.TileId.Stone, 210);
-                foreach (var key in new[] { "iron", "copper", "carbon", "silica", "water_ice", "oxygen", "launch_fuel", "wood", "clay" })
+                foreach (var key in new[] { "iron", "copper", "carbon", "silica", "water_ice", "oxygen", "wood", "clay" })
                 {
                     var def = Meridian.Items.ItemRegistry.Get(key);
                     if (def != null) inv.Add(def.id, 3 + key.Length * 7);
@@ -279,14 +279,13 @@ namespace Meridian.Core
             else yield return Wait(3f);
             yield return Shot(folder, "smoke_7_space_saturn.png");
 
-            // U-052: docked at the Earth Waystation, the Halcyon market open (some goods aboard, a thirsty tank).
+            // U-052: docked at the Earth Waystation, the Halcyon market open (some goods aboard, a dented hull).
             var bay = scenes.Space != null ? scenes.Space.GetComponent<Meridian.Trade.DockingBay>() : null;
             if (bay != null && GameState.Instance != null)
             {
                 var st = GameState.Instance;
                 st.inventory.Add(Meridian.Items.ItemRegistry.Get("iron").id, 12);
                 st.inventory.Add(Meridian.Items.ItemRegistry.Get("suit_patch").id, 3);
-                st.fuel = st.tankCapacity * 0.4f;
                 st.hull = 82f;
                 yield return Wait(0.5f);
                 if (bay.Dock("earth"))

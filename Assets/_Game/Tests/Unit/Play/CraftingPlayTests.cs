@@ -92,7 +92,7 @@ namespace Meridian.Tests
             Assert.AreEqual(0, inv.Count(ItemRegistry.Get("smelter_bar_iron").id), "the bars went into it");
 
             // A story blueprint stays locked until its beacon.
-            var perchlorate = book.FindRecipe("refine_fuel_perchlorate");
+            var perchlorate = book.FindRecipe("refine_oxygen_perchlorate");
             Assert.AreEqual(CraftingSystem.Result.Locked, panel.Craft(perchlorate));
             Assert.Greater(panel.Nodes["smelting"].color.b, 0.5f, "Smelting lit in the tree");
             Assert.Less(panel.Nodes["perchlorate_oxidizer"].color.b, 0.5f, "Perchlorate oxidizer dim until the Mars beacon");

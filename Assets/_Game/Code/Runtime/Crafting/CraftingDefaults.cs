@@ -32,20 +32,16 @@ namespace Meridian.Crafting
             R("smelt_iron", Station.Smelter, A("smelter_bar_iron"), "smelting", A("iron", 2)),
             R("smelt_copper", Station.Smelter, A("smelter_bar_copper"), "smelting", A("copper", 2)),
             R("smelt_silica", Station.Smelter, A("silica"), "smelting", A("sand", 4)),
-            // Refinery: fuel, carbon goods, polymers.
-            R("refine_fuel", Station.Refinery, A("launch_fuel", 2), "refining", A("water_ice", 4), A("carbon", 2)),
-            R("refine_fuel_perchlorate", Station.Refinery, A("launch_fuel", 2), "perchlorate_oxidizer", A("water_ice", 2), A("perchlorate")),
+            // Refinery: carbon goods, polymers, oxygen. U-107 (D-103/D-105): no fuel recipes (archived in Archive/Fuel~).
+            R("refine_oxygen_perchlorate", Station.Refinery, A("oxygen", 2), "perchlorate_oxidizer", A("perchlorate")),
             R("refine_graphite", Station.Refinery, A("graphite"), "refining", A("carbon", 3)),
             R("refine_polymer", Station.Refinery, A("polymer", 2), "refining", A("carbon", 2), A("oxygen")),
-            // U-063: skip fuel from water (deuterium, a third as good as Saturn's Helium-3).
-            R("refine_deuterium", Station.Refinery, A("deuterium"), "refining", A("water_ice", 4)),
             // Fabricator: parts and suit kit.
             R("fab_suit_patch", Station.Fabricator, A("suit_patch"), "fabrication", A("smelter_bar_iron", 2)),
             R("fab_circuit", Station.Fabricator, A("circuit_board"), "fabrication", A("smelter_bar_copper"), A("silica", 2)),
             R("fab_radiation_liner", Station.Fabricator, A("radiation_liner"), "fabrication", A("smelter_bar_iron"), A("graphite", 2)),
             R("fab_thermal_pad", Station.Fabricator, A("thermal_pad"), "fabrication", A("smelter_bar_copper"), A("basalt", 4)),
             R("fab_cryo_pad", Station.Fabricator, A("cryo_pad"), "fabrication", A("smelter_bar_copper"), A("water_ice", 3)),
-            R("fab_fuel_cell", Station.Fabricator, A("launch_fuel_cell"), "fabrication", A("launch_fuel", 5), A("smelter_bar_iron")),
             // U-055: Cryo-charged Lance rounds from Mercury's polar ice (Bible §7.4: the Veil Serpent's counter).
             R("fab_cryo_rounds", Station.Fabricator, A("cryo_round", 6), "fabrication", A("polar_ice", 2), A("smelter_bar_iron")),
             // U-056 base pieces.
@@ -65,13 +61,11 @@ namespace Meridian.Crafting
             R("refine_ammonia_polymer", Station.Refinery, A("polymer", 2), "refining", A("ammonia_ice", 2), A("carbon")),
             // Gear: Float cell Mk2 (+12 m/s², §4.2), Jetpack Mk2 (20 m/s², 4.5 s) and Mk3 (30 m/s², 6 s; Uranus beacon, §4.2 note).
             R("fab_float_cell_mk2", Station.Fabricator, A("float_cell_mk2"), "float_cell_mk2", A("float_cell_mk1"), A("polymer", 4), A("helium3_condensate", 2), A("circuit_board")),
-            R("fab_jetpack_mk2", Station.Fabricator, A("jetpack_mk2"), "jetpack_mk2", A("smelter_bar_iron", 4), A("circuit_board", 2), A("launch_fuel_cell", 2)),
+            R("fab_jetpack_mk2", Station.Fabricator, A("jetpack_mk2"), "jetpack_mk2", A("smelter_bar_iron", 4), A("circuit_board", 2), A("polymer", 2)),
             R("fab_jetpack_mk3", Station.Fabricator, A("jetpack_mk3"), "jetpack_mk3", A("jetpack_mk2"), A("deep_diamond", 2), A("solarite_capacitor"), A("helium3_condensate", 4)),
             // U-065 ship upgrades (§4.3; P-26 numbers): installed on the Pilgrim when crafted.
-            R("fab_thruster_mk2", Station.Fabricator, A("thruster_mk2"), "thruster_mk2", A("smelter_bar_iron", 6), A("circuit_board", 2), A("launch_fuel_cell")),
+            R("fab_thruster_mk2", Station.Fabricator, A("thruster_mk2"), "thruster_mk2", A("smelter_bar_iron", 6), A("circuit_board", 2), A("smelter_bar_copper", 2)),
             R("fab_thruster_mk3", Station.Fabricator, A("thruster_mk3"), "thruster_mk3", A("thruster_mk2"), A("metallic_hydrogen", 4), A("solarite_capacitor", 2), A("smelter_bar_copper", 4)),
-            R("fab_tank_mk2", Station.Fabricator, A("tank_mk2"), "tank_mk2", A("smelter_bar_iron", 8), A("polymer", 2)),
-            R("fab_tank_mk3", Station.Fabricator, A("tank_mk3"), "tank_mk3", A("tank_mk2"), A("smelter_bar_iron", 12), A("polymer", 4), A("aluminium", 6)),
         };
 
         static Blueprint B(string id, string name, int tier, string icon, string unlockFlag, params string[] requires) =>
@@ -81,7 +75,7 @@ namespace Meridian.Crafting
         public static List<Blueprint> Blueprints() => new List<Blueprint>
         {
             B("smelting", "Smelting", 0, "smelter_bar_iron", null),
-            B("refining", "Refining", 0, "launch_fuel", null),
+            B("refining", "Refining", 0, "graphite", null),
             B("fabrication", "Fabrication", 1, "circuit_board", null, "smelting"),
             B("survey_module", "Survey module", 1, "survey_module", "beacon:earth"),
             B("perchlorate_oxidizer", "Perchlorate oxidizer", 2, "perchlorate", "beacon:mars", "refining"),
@@ -94,10 +88,8 @@ namespace Meridian.Crafting
             B("jetpack_mk2", "Jetpack Mk2", 2, "jetpack_mk2", null, "fabrication"),
             B("float_cell_mk2", "Float cell Mk2", 3, "float_cell_mk2", null, "float_cell_mk1"),
             B("jetpack_mk3", "Jetpack Mk3", 4, "jetpack_mk3", "beacon:uranus", "jetpack_mk2", "deep_diamond_tip"),
-            // U-065 (P-26): Thruster Mk2 and the tanks are trades; Thruster Mk3 stays the Jupiter beacon's (above).
+            // U-065 (P-26): Thruster Mk2 is a trade; Thruster Mk3 stays the Jupiter beacon's (above). U-107: no tanks.
             B("thruster_mk2", "Thruster Mk2", 2, "thruster_mk2", null, "fabrication"),
-            B("tank_mk2", "Tank Mk2", 2, "tank_mk2", null, "fabrication"),
-            B("tank_mk3", "Tank Mk3", 3, "tank_mk3", null, "tank_mk2"),
         };
     }
 }

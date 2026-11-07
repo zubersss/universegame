@@ -63,7 +63,7 @@ namespace Meridian.Player
         public static float SafeDrop(float gravity) => PlayerTuning.SafeImpact * PlayerTuning.SafeImpact / (2f * gravity);
     }
 
-    /// <summary>Jetpack thrust and fuel (Bible §4.2 table). Burns while held in the air; refills in 2 s on the ground.</summary>
+    /// <summary>Jetpack thrust and charge (Bible §4.2 table; D-105: a charge, not a fuel). Drains while held in the air; recharges in 2 s on the ground.</summary>
     public sealed class Jetpack
     {
         public const float RechargeTime = 2f;

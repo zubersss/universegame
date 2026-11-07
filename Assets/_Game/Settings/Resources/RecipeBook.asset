@@ -49,26 +49,13 @@ MonoBehaviour:
       item: silica
       count: 1
     blueprint: smelting
-  - id: refine_fuel
+  - id: refine_oxygen_perchlorate
     station: 2
     inputs:
-    - item: water_ice
-      count: 4
-    - item: carbon
-      count: 2
-    output:
-      item: launch_fuel
-      count: 2
-    blueprint: refining
-  - id: refine_fuel_perchlorate
-    station: 2
-    inputs:
-    - item: water_ice
-      count: 2
     - item: perchlorate
       count: 1
     output:
-      item: launch_fuel
+      item: oxygen
       count: 2
     blueprint: perchlorate_oxidizer
   - id: refine_graphite
@@ -90,15 +77,6 @@ MonoBehaviour:
     output:
       item: polymer
       count: 2
-    blueprint: refining
-  - id: refine_deuterium
-    station: 2
-    inputs:
-    - item: water_ice
-      count: 4
-    output:
-      item: deuterium
-      count: 1
     blueprint: refining
   - id: fab_suit_patch
     station: 3
@@ -151,17 +129,6 @@ MonoBehaviour:
       count: 3
     output:
       item: cryo_pad
-      count: 1
-    blueprint: fabrication
-  - id: fab_fuel_cell
-    station: 3
-    inputs:
-    - item: launch_fuel
-      count: 5
-    - item: smelter_bar_iron
-      count: 1
-    output:
-      item: launch_fuel_cell
       count: 1
     blueprint: fabrication
   - id: fab_cryo_rounds
@@ -321,7 +288,7 @@ MonoBehaviour:
       count: 4
     - item: circuit_board
       count: 2
-    - item: launch_fuel_cell
+    - item: polymer
       count: 2
     output:
       item: jetpack_mk2
@@ -349,8 +316,8 @@ MonoBehaviour:
       count: 6
     - item: circuit_board
       count: 2
-    - item: launch_fuel_cell
-      count: 1
+    - item: smelter_bar_copper
+      count: 2
     output:
       item: thruster_mk2
       count: 1
@@ -370,32 +337,6 @@ MonoBehaviour:
       item: thruster_mk3
       count: 1
     blueprint: thruster_mk3
-  - id: fab_tank_mk2
-    station: 3
-    inputs:
-    - item: smelter_bar_iron
-      count: 8
-    - item: polymer
-      count: 2
-    output:
-      item: tank_mk2
-      count: 1
-    blueprint: tank_mk2
-  - id: fab_tank_mk3
-    station: 3
-    inputs:
-    - item: tank_mk2
-      count: 1
-    - item: smelter_bar_iron
-      count: 12
-    - item: polymer
-      count: 4
-    - item: aluminium
-      count: 6
-    output:
-      item: tank_mk3
-      count: 1
-    blueprint: tank_mk3
   blueprints:
   - id: smelting
     name: Smelting
@@ -405,7 +346,7 @@ MonoBehaviour:
     tier: 0
   - id: refining
     name: Refining
-    icon: launch_fuel
+    icon: graphite
     requires: []
     unlockFlag: 
     tier: 0
@@ -493,17 +434,3 @@ MonoBehaviour:
     - fabrication
     unlockFlag: 
     tier: 2
-  - id: tank_mk2
-    name: Tank Mk2
-    icon: tank_mk2
-    requires:
-    - fabrication
-    unlockFlag: 
-    tier: 2
-  - id: tank_mk3
-    name: Tank Mk3
-    icon: tank_mk3
-    requires:
-    - tank_mk2
-    unlockFlag: 
-    tier: 3

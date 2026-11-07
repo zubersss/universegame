@@ -40,16 +40,18 @@ namespace Meridian.Player
             Button(foot, "Catalogue", "<Keyboard>/n");
             Button(foot, "FloatCell", "<Keyboard>/v");
 
+            // U-107 (§6 v4.1): the upright rocket: thrust held on W or Space, A/D tilt (springs upright on release). Thrust
+            // and tilt check their keys' state when enabled, so a key held through launch or entry keeps working on the
+            // first frame of the other view (D-103: control never leaves the player).
             var side = asset.AddActionMap(ShipSide);
-            Button(side, "Thrust", "<Keyboard>/w", "<Gamepad>/rightTrigger");
-            Button(side, "Retro", "<Keyboard>/s", "<Gamepad>/leftTrigger");
+            Button(side, "Thrust", "<Keyboard>/w", "<Keyboard>/space", "<Gamepad>/rightTrigger").wantsInitialStateCheck = true;
             side.AddAction("Lateral", InputActionType.Value, expectedControlLayout: "Axis")
                 .AddCompositeBinding("1DAxis").With("Negative", "<Keyboard>/a").With("Positive", "<Keyboard>/d");
             Button(side, "Exit", "<Keyboard>/f", "<Gamepad>/buttonWest");
 
             var top = asset.AddActionMap(ShipTop);
-            Button(top, "Thrust", "<Keyboard>/w", "<Gamepad>/rightTrigger");
-            Button(top, "Retro", "<Keyboard>/s", "<Gamepad>/leftTrigger");
+            Button(top, "Thrust", "<Keyboard>/w", "<Keyboard>/space", "<Gamepad>/rightTrigger").wantsInitialStateCheck = true;
+            Button(top, "Retro", "<Keyboard>/s", "<Gamepad>/leftTrigger").wantsInitialStateCheck = true;
             top.AddAction("Rotate", InputActionType.Value, expectedControlLayout: "Axis")
                 .AddCompositeBinding("1DAxis").With("Negative", "<Keyboard>/d").With("Positive", "<Keyboard>/a");
             Button(top, "Boost", "<Keyboard>/leftShift", "<Gamepad>/leftStickPress");
@@ -66,10 +68,11 @@ namespace Meridian.Player
             return asset;
         }
 
-        static void Button(InputActionMap map, string name, params string[] bindings)
+        static InputAction Button(InputActionMap map, string name, params string[] bindings)
         {
             var a = map.AddAction(name, InputActionType.Button);
             foreach (var b in bindings) a.AddBinding(b);
+            return a;
         }
     }
 }

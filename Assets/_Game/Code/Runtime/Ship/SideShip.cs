@@ -10,27 +10,28 @@ namespace Meridian.Ship
     /// <summary>What the pilot wants this step (Input System or tests).</summary>
     public struct ShipSideIntent
     {
-        public float thrust;  // 0..1, W
-        public float retro;   // 0..1, S
-        public float lateral; // -1..1, A/D
+        public float thrust;  // 0..1, W or Space held (a trigger gives the throttle)
+        public float lateral; // -1..1, A/D: tilt the rocket (A nose left, D nose right); released, it springs upright
     }
 
     /// <summary>
-    /// Pilgrim in side view (Bible §4.3): Mk1 12 m/s² vertical, lateral 60%; the launch fuel cost
-    /// (§4.1) burns over the first 3 s of thrust from rest on the surface; landing damage by
-    /// touchdown speed; EscapeLineCrossed when the ship's center crosses the Escape Line going up.
+    /// The Pilgrim in side view (Bible §4.3 v4.1, U-107): an upright rocket standing on its tail. Thrust (Mk1/2/3: 12 /
+    /// 20 / 35 m/s²) acts along its own up axis; A/D tilt it up to ±35° with a spring back (RocketFlight); the planet's
+    /// real gravity pulls it down, so it hovers where thrust = g, climbs above and sinks below. No fuel, no launch burn,
+    /// no gate: thrust-to-weight is the only limit (D-103, D-106). Landing damage by touchdown speed; a touchdown tilted
+    /// more than 20° tips it, and it rights itself over 0.5 s with a wobble (no damage). EscapeLineCrossed fires when the
+    /// ship's centre crosses the Escape Line going up under the player's own thrust; nothing locks the controls.
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D), typeof(BoxCollider2D))]
     public sealed class SideShip : MonoBehaviour
     {
-        public const float LateralFactor = 0.6f;
-        public const float LaunchBurnSeconds = 3f;
         public const float CleanTouchdown = 6f, CrashTouchdown = 15f;
         public const float CrashHullFraction = 0.30f;
         public const float LegsAltitude = 10f;
-        /// <summary>Skid bottoms sit this far below the ship's pivot (BLENDER B-006 handoff).</summary>
+        /// <summary>The leg feet sit this far below the ship's pivot (the pivot is near the tail).</summary>
         public const float SkidDrop = 1.8f;
-        public const float HullLength = 11.4f, HullHeight = 3.4f;
+        /// <summary>The rocket stands Height tall (≈ 12 m, B-123) on legs spanning Width.</summary>
+        public const float Height = 11.4f, Width = 4f, BodyWidth = 3.4f;
 
         public InputActionAsset actions;
         public bool externalInput;
@@ -40,29 +41,33 @@ namespace Meridian.Ship
         public PlanetConfig planet;
 
         [Header("State when no GameState exists (tests)")]
-        public float localHull = 100f, localFuel = 100f, localTank = 100f;
+        public float localHull = 100f;
 
         public Rigidbody2D Body { get; private set; }
         public bool Grounded { get; private set; }
         public bool AtRest => Grounded && Body.linearVelocity.sqrMagnitude < 0.01f;
-        public float LaunchBurnElapsed { get; private set; } = LaunchBurnSeconds;
         public bool LegsDeployed { get; private set; } = true;
         public float AltitudeAboveGround { get; private set; }
         public float LastTouchdownSpeed { get; private set; }
+        /// <summary>The upright flight model (tilt, spring back, righting).</summary>
+        public RocketFlight Flight { get; } = new RocketFlight();
+        public float Tilt => Flight.Tilt;
+        /// <summary>Input frames the controller read this session (tests: the "no input lock" probe).</summary>
+        public int InputFrames { get; private set; }
 
         /// <summary>Raised once each time the ship's center crosses the Escape Line moving up.</summary>
         public event Action EscapeLineCrossed;
         public event Action<float> TouchedDown;
+        /// <summary>Raised when a tilted touchdown tips the ship (it rights itself over RocketFlight.RightingSeconds).</summary>
+        public event Action TippedOver;
 
         /// <summary>U-065: the fitted Thruster mark (GameState; the serialized field only when there is none, tests).</summary>
         public int ThrusterMark => GameState.Instance != null ? GameState.Instance.thrusterMark : thrusterMark;
         public float Thrust => ShipMarks.Thrust(ThrusterMark);
         public float Gravity => -Physics2D.gravity.y;
-        public bool ThrustBelowGravity => Thrust < Gravity;
-        /// <summary>§4.3 "Can launch from": false where this Thruster mark may not lift off (the HUD says so).</summary>
-        public bool CanLaunchHere => planet == null || ShipMarks.CanLaunch(ThrusterMark, planet.id);
-        /// <summary>True while the pilot asks for lift on the ground where the mark can't launch.</summary>
-        public bool LaunchRefused { get; private set; }
+        public float ThrustToWeight => Thrust / Mathf.Max(0.01f, Gravity);
+        /// <summary>§4.3: true where this mark cannot climb (thrust ≤ g); the HUD warns.</summary>
+        public bool ThrustBelowGravity => !ShipMarks.CanClimb(ThrusterMark, Gravity);
 
         public float Hull
         {
@@ -70,47 +75,43 @@ namespace Meridian.Ship
             set { if (GameState.Instance != null) GameState.Instance.hull = value; else localHull = value; }
         }
 
-        public float Fuel
-        {
-            get => GameState.Instance != null ? GameState.Instance.fuel : localFuel;
-            set { if (GameState.Instance != null) GameState.Instance.fuel = value; else localFuel = value; }
-        }
-
-        public float Tank => GameState.Instance != null ? GameState.Instance.tankCapacity : localTank;
-
         readonly ContactPoint2D[] contacts = new ContactPoint2D[8];
         readonly RaycastHit2D[] hits = new RaycastHit2D[4];
         static readonly ContactFilter2D NoFilter = ContactFilter2D.noFilter;
-        InputAction thrustA, retroA, lateralA;
+        InputAction thrustA, lateralA;
         float fallSpeed;
         float lastY;
 
         void Awake()
         {
             Body = GetComponent<Rigidbody2D>();
-            Body.freezeRotation = true;
             Body.mass = 20f;
+            // The tilt is RocketFlight's: each step sets the spin that reaches it (so the pose interpolates), and a huge
+            // inertia keeps contacts from twisting the hull in between.
+            Body.freezeRotation = false;
+            Body.useAutoMass = false;
+            Body.inertia = 1e5f;
             Body.interpolation = RigidbodyInterpolation2D.Interpolate;
             Body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
             var box = GetComponent<BoxCollider2D>();
-            box.size = new Vector2(HullLength * 0.92f, HullHeight);
-            box.offset = new Vector2(0f, HullHeight * 0.5f - SkidDrop);
-            box.sharedMaterial = new PhysicsMaterial2D("ShipSkids") { friction = 0.8f, bounciness = 0f };
+            box.size = new Vector2(Width, Height);
+            box.offset = new Vector2(0f, Height * 0.5f - SkidDrop);
+            box.sharedMaterial = new PhysicsMaterial2D("ShipFeet") { friction = 0.8f, bounciness = 0f };
             lastY = transform.position.y;
 
             if (externalInput) return;
             if (actions == null) actions = MeridianInput.Build();
             var map = actions.FindActionMap(MeridianInput.ShipSide, true);
-            thrustA = map.FindAction("Thrust"); retroA = map.FindAction("Retro"); lateralA = map.FindAction("Lateral");
+            thrustA = map.FindAction("Thrust"); lateralA = map.FindAction("Lateral");
         }
 
         void Update()
         {
             if (externalInput || thrustA == null) return;
             if (!piloted) { intent = default; return; }
-            intent.thrust = thrustA.IsPressed() ? 1f : 0f;
-            intent.retro = retroA.IsPressed() ? 1f : 0f;
+            intent.thrust = Mathf.Clamp01(thrustA.ReadValue<float>()); // a key gives 1, a trigger its throttle
             intent.lateral = lateralA.ReadValue<float>();
+            InputFrames++;
         }
 
         public void SetPiloted(bool on)
@@ -130,30 +131,11 @@ namespace Meridian.Ship
             if (Grounded && !wasGrounded) Touchdown(fallSpeed);
             fallSpeed = v.y < 0f ? -v.y : 0f;
 
-
-            float up = Mathf.Clamp01(intent.thrust), down = Mathf.Clamp01(intent.retro);
-            // U-065: on the ground, a Thruster mark the table doesn't allow here gives no lift (and no launch burn).
-            LaunchRefused = Grounded && up > 0f && !CanLaunchHere;
-            if (LaunchRefused) up = 0f;
-            bool firing = up > 0f || down > 0f || Mathf.Abs(intent.lateral) > 0.01f;
-            // A new launch burn arms while the ship sits at rest with the throttle released, so a
-            // ship that can't lift (thrust < g) pays the cost once, not every step.
-            if (AtRest && !firing) LaunchBurnElapsed = 0f;
-            if (firing && LaunchBurnElapsed < LaunchBurnSeconds)
-            {
-                // §4.3: the §4.1 launch cost is consumed over the first 3 s of thrust; flight is then free.
-                float cost = planet != null ? planet.LaunchFuelCost : 0f;
-                float step = Mathf.Min(dt, LaunchBurnSeconds - LaunchBurnElapsed);
-                float need = cost * step / LaunchBurnSeconds;
-                if (Fuel <= 0f || Fuel < need * 0.999f) { up = down = 0f; firing = false; } // out of fuel: no thrust
-                else { Fuel = Mathf.Max(0f, Fuel - need); LaunchBurnElapsed += step; }
-            }
-
-            if (firing)
-            {
-                v.y += (up - down) * Thrust * dt;
-                v.x += Mathf.Clamp(intent.lateral, -1f, 1f) * Thrust * LateralFactor * dt;
-            }
+            // The intent is the pilot's (Update clears it when nobody is aboard) or a test's (externalInput).
+            float throttle = Mathf.Clamp01(intent.thrust);
+            Flight.StepTilt(intent.lateral, Grounded && throttle <= 0f, dt);
+            Body.angularVelocity = Mathf.DeltaAngle(Body.rotation, Flight.Tilt) / dt;
+            if (throttle > 0f) v += Flight.ThrustAccel(throttle, Thrust) * dt; // gravity is the Rigidbody's (Physics2D.gravity)
             Body.linearVelocity = v;
 
             // Escape Line: the ship's center crossing upward (Bible §5.2 trigger).
@@ -173,6 +155,7 @@ namespace Meridian.Ship
         {
             LastTouchdownSpeed = speed;
             Hull = HullAfterTouchdown(Hull, speed, 100f);
+            if (Flight.Touchdown()) TippedOver?.Invoke();
             TouchedDown?.Invoke(speed);
         }
 

@@ -29,7 +29,7 @@ namespace Meridian.Tests
                 Assert.IsTrue(ids.Add(d.id), "unique id " + d.id);
             }
             // Every B-013 icon has an item.
-            foreach (var icon in new[] { "aluminium", "carbon", "clay", "copper", "hematite", "iron", "launch_fuel", "living_seed",
+            foreach (var icon in new[] { "aluminium", "carbon", "clay", "copper", "hematite", "iron", "living_seed",
                                          "nickel", "oxygen", "perchlorate", "sand", "silica", "stone", "water_ice", "wood" })
                 Assert.AreEqual($"icons/{icon}/base", ItemRegistry.Get(icon)?.icon, icon);
         }

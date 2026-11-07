@@ -6,7 +6,7 @@ using UnityEngine.UI;
 namespace Meridian.Space
 {
     /// <summary>
-    /// Top-down HUD (U-011, styled in U-015): speed, fuel, and the Gravity Well indicator (which
+    /// Top-down HUD (U-011, styled in U-015; U-107: no fuel, D-103/D-105): speed and the Gravity Well indicator (which
     /// body pulls hardest, and how hard). Precomputed strings: updates allocate nothing.
     /// </summary>
     public sealed class SpaceHud : MonoBehaviour
@@ -14,12 +14,11 @@ namespace Meridian.Space
         public SpaceShip ship;
 
         public Text Speed { get; private set; }
-        public Text Fuel { get; private set; }
         public Text Well { get; private set; }
         public Text WellName { get; private set; }
 
         static UiKit.NumberStrings numbers, tenths;
-        int lastSpeed = -1, lastFuel = -1, lastPull = -1;
+        int lastSpeed = -1, lastPull = -1;
         string lastWellName = "";
 
         void Awake()
@@ -34,11 +33,9 @@ namespace Meridian.Space
             UiKit.Panel(root, "Accent", tl, new Vector2(24f, -20f), new Vector2(560f, 2f), UiTheme.Accent(null));
             Label(root, "SPEED u/s", 0);
             Speed = Value(root, 0);
-            Label(root, "FUEL", 1);
-            Fuel = Value(root, 1);
-            Label(root, "WELL u/s²", 2);
-            Well = Value(root, 2);
-            WellName = UiKit.Text(root, "WellName", tl, new Vector2(24f + 2 * 200f, -98f), new Vector2(180f, 20f), 14, false, TextAnchor.MiddleLeft, theme.label);
+            Label(root, "WELL u/s²", 1);
+            Well = Value(root, 1);
+            WellName = UiKit.Text(root, "WellName", tl, new Vector2(24f + 1 * 200f, -98f), new Vector2(180f, 20f), 14, false, TextAnchor.MiddleLeft, theme.label);
         }
 
         static void Label(Transform root, string text, int column) =>
@@ -58,9 +55,6 @@ namespace Meridian.Space
             int s = Mathf.RoundToInt(ship.Velocity.magnitude);
             if (s != lastSpeed) { lastSpeed = s; Speed.text = numbers[s]; }
 
-            var state = GameState.Instance;
-            int f = state != null ? Mathf.CeilToInt(state.fuel) : 0;
-            if (f != lastFuel) { lastFuel = f; Fuel.text = numbers[f]; }
 
             int p = Mathf.RoundToInt(ship.LastPull.magnitude * 10f);
             string name = ship.InWellOf ?? "";

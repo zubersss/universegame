@@ -1,0 +1,89 @@
+using Meridian.Planets;
+using UnityEngine;
+
+namespace Meridian.Core
+{
+    public enum ViewMode { PlanetSide, Space }
+
+    /// <summary>
+    /// The player's run state, carried across transitions in memory (Bible §5.2); never re-read
+    /// from disk mid-session. Lives in Core.unity.
+    /// </summary>
+    public sealed class GameState : MonoBehaviour
+    {
+        public static GameState Instance { get; private set; }
+
+        public PlanetCatalog catalog;
+        public PlanetId currentPlanet = PlanetId.Earth;
+        public ViewMode view = ViewMode.PlanetSide;
+        public int worldSeed = 1969;
+
+        [Header("Ship")]
+        public float hull = 100f;
+        public float fuel = 100f;
+        public float tankCapacity = 100f;
+        /// <summary>U-065 ship marks (Bible §4.3): Thruster Mk1–Mk3 (thrust, where it can launch) and Tank Mk1–Mk3 (capacity).</summary>
+        public int thrusterMark = 1, tankMark = 1;
+        /// <summary>The surveyor's inventory (U-045, SaveData v2).</summary>
+        public readonly Meridian.Items.Inventory inventory = new Meridian.Items.Inventory();
+        /// <summary>Envirosuit tier (U-049): 0 none, 1–3 Mk1–Mk3; lowers every hazard by its tier.</summary>
+        public int suitTier;
+        /// <summary>Halcyon Scrip (U-052).</summary>
+        public int scrip = Meridian.Trade.Market.StartingScrip;
+        /// <summary>Survey Datacores and the catalogue of scanned entries (U-054).</summary>
+        public int datacores;
+        /// <summary>Skip Drive fuel in the tank (U-063); topped up from Helium-3 Condensate or deuterium in the hold.</summary>
+        public float skipFuel;
+        /// <summary>Bases (U-056): placed pieces and aerostats, every planet.</summary>
+        public readonly System.Collections.Generic.List<Meridian.Building.BasePieceSave> basePieces = new System.Collections.Generic.List<Meridian.Building.BasePieceSave>();
+        public readonly System.Collections.Generic.List<Meridian.Building.AerostatSave> aerostats = new System.Collections.Generic.List<Meridian.Building.AerostatSave>();
+        public readonly System.Collections.Generic.HashSet<string> catalogue = new System.Collections.Generic.HashSet<string>();
+        /// <summary>Accepted Halcyon cargo contracts (U-052; done ones stay for the log).</summary>
+        public readonly System.Collections.Generic.List<Meridian.Trade.Contract> contracts = new System.Collections.Generic.List<Meridian.Trade.Contract>();
+        /// <summary>Items carried in the ship (item id → count).</summary>
+        public System.Collections.Generic.List<CargoStack> cargo = new System.Collections.Generic.List<CargoStack>();
+        /// <summary>Story and world flags (saved as story.flags), e.g. "poi_stamped:survey_archive" (U-030).</summary>
+        public readonly System.Collections.Generic.List<string> storyFlags = new System.Collections.Generic.List<string>();
+        public bool HasFlag(string f) => storyFlags.Contains(f);
+        public void SetFlag(string f) { if (!storyFlags.Contains(f)) storyFlags.Add(f); }
+
+        public PlanetConfig CurrentPlanetConfig => catalog != null ? catalog.Get(currentPlanet) : null;
+
+        readonly System.Collections.Generic.Dictionary<PlanetId, Meridian.Terrain.TerrainEdits> terrainEdits =
+            new System.Collections.Generic.Dictionary<PlanetId, Meridian.Terrain.TerrainEdits>();
+
+        /// <summary>Every planet that has a diff store this session (save writes one file each).</summary>
+        public System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<PlanetId, Meridian.Terrain.TerrainEdits>> AllEdits => terrainEdits;
+
+        /// <summary>Empties every planet's diffs in place (load replaces them from disk).</summary>
+        public void ClearAllEdits() { foreach (var e in terrainEdits.Values) e.Clear(); }
+
+        /// <summary>Player terrain diffs for a planet; created empty on first visit, kept for the session.</summary>
+        public Meridian.Terrain.TerrainEdits EditsFor(PlanetId id)
+        {
+            if (!terrainEdits.TryGetValue(id, out var e)) terrainEdits[id] = e = new Meridian.Terrain.TerrainEdits();
+            return e;
+        }
+
+        void Awake()
+        {
+            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+            Instance = this;
+        }
+
+        void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+        }
+    }
+}
+
+namespace Meridian.Core
+{
+    [System.Serializable]
+    public struct CargoStack
+    {
+        public int itemId;
+        public int count;
+    }
+}

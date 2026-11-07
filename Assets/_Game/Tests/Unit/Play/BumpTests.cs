@@ -12,7 +12,7 @@ namespace Meridian.Tests
 {
     /// <summary>
     /// U-093 (PlayMode, Earth; D-087 no combat): a creature or Warden contact is a bump: the surveyor is knocked
-    /// 0.8 m away from it over 0.12 s with the bump clip, and no meter moves (Suit power, fuel, the pack).
+    /// 0.8 m away from it over 0.12 s with the bump clip, and no meter moves (Suit power, hull, the pack).
     /// </summary>
     public class BumpTests
     {
@@ -42,7 +42,7 @@ namespace Meridian.Tests
             Assert.IsTrue(player.Grounded, "standing at the camp");
         }
 
-        struct Meters { public float reserve, suit, fuel; public int pack; }
+        struct Meters { public float reserve, suit, hull; public int pack; }
 
         Meters Read()
         {
@@ -50,14 +50,14 @@ namespace Meridian.Tests
             int pack = 0;
             if (state != null && state.inventory != null)
                 for (int s = 0; s < Meridian.Items.Inventory.SlotCount; s++) pack += state.inventory[s].count;
-            return new Meters { reserve = vitals.health, suit = side.hazards.SuitIntegrity, fuel = state != null ? state.fuel : 0f, pack = pack };
+            return new Meters { reserve = vitals.health, suit = side.hazards.SuitIntegrity, hull = state != null ? state.hull : 0f, pack = pack };
         }
 
         void AssertUnchanged(Meters a, Meters b)
         {
             Assert.AreEqual(a.reserve, b.reserve, 1e-4f, "Suit power reserve unchanged");
             Assert.AreEqual(a.suit, b.suit, 1e-4f, "suit integrity unchanged");
-            Assert.AreEqual(a.fuel, b.fuel, 1e-4f, "fuel unchanged");
+            Assert.AreEqual(a.hull, b.hull, 1e-4f, "hull unchanged");
             Assert.AreEqual(a.pack, b.pack, "the pack unchanged");
         }
 

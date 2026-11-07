@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace Meridian.Tests
 {
-    /// <summary>U-052 (EditMode): Halcyon prices per station, buy/sell, refuel and repair limited by the purse, cargo contracts.</summary>
+    /// <summary>U-052 (EditMode): Halcyon prices per station, buy/sell, repair limited by the purse (no refuelling since U-107), cargo contracts.</summary>
     public class MarketTests
     {
         static int Id(string key) => ItemRegistry.Get(key).id;
@@ -12,7 +12,7 @@ namespace Meridian.Tests
         [Test]
         public void PricesDifferBetweenEarthAndMars()
         {
-            Assert.Greater(Market.BuyPrice("mars", "launch_fuel"), Market.BuyPrice("earth", "launch_fuel"), "fuel is dear on Mars");
+            Assert.Greater(Market.BuyPrice("mars", "circuit_board"), Market.BuyPrice("earth", "circuit_board"), "goods are dear on Mars");
             Assert.Less(Market.BuyPrice("mars", "perchlorate"), Market.BuyPrice("earth", "perchlorate"), "perchlorate is cheap on Mars");
             Assert.AreNotEqual(Market.BuyPrice("earth", "iron"), Market.BuyPrice("mars", "iron"));
             Assert.Less(Market.SellPrice("earth", "iron"), Market.BuyPrice("earth", "iron"), "Halcyon buys below its price");
@@ -39,19 +39,15 @@ namespace Meridian.Tests
         }
 
         [Test]
-        public void RefuelAndRepairStopAtTheTankAndThePurse()
+        public void RepairStopsAtTheHullAndThePurse()
         {
-            float fuel = 40f; int scrip = 1000;
-            float units = Market.Refuel("earth", ref fuel, 100f, ref scrip);
-            Assert.AreEqual(60f, units); Assert.AreEqual(100f, fuel);
-            Assert.AreEqual(1000 - 60 * Market.FuelPrice("earth"), scrip);
-            fuel = 0f; scrip = 10;
-            Market.Refuel("mars", ref fuel, 100f, ref scrip);
-            Assert.AreEqual(3f, fuel, "10 Scrip buys 3 units at 3 each on Mars");
-            Assert.AreEqual(1, scrip);
-            float hull = 70f; scrip = 1000;
+            float hull = 70f; int scrip = 1000;
             Assert.AreEqual(30f, Market.Repair("earth", ref hull, 100f, ref scrip));
             Assert.AreEqual(100f, hull);
+            hull = 50f; scrip = 10;
+            Market.Repair("mars", ref hull, 100f, ref scrip);
+            Assert.AreEqual(52f, hull, "10 Scrip buys 2 points at 4 each on Mars");
+            Assert.AreEqual(2, scrip);
         }
 
         [Test]

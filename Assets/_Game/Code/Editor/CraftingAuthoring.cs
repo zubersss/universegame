@@ -26,15 +26,28 @@ namespace Meridian.EditorTools
                 book = ScriptableObject.CreateInstance<RecipeBook>();
                 AssetDatabase.CreateAsset(book, Path);
             }
-            if (force || book.recipes.Count == 0 || book.blueprints.Count == 0)
+            var recipes = CraftingDefaults.Recipes();
+            var blueprints = CraftingDefaults.Blueprints();
+            // U-107: a book whose recipe or blueprint ids no longer match the defaults (retired fuel and tank recipes) is rewritten.
+            bool stale = !SameIds(book.recipes.ConvertAll(r => r.id), recipes.ConvertAll(r => r.id))
+                      || !SameIds(book.blueprints.ConvertAll(b => b.id), blueprints.ConvertAll(b => b.id));
+            if (force || stale || book.recipes.Count == 0 || book.blueprints.Count == 0)
             {
-                book.recipes = CraftingDefaults.Recipes();
-                book.blueprints = CraftingDefaults.Blueprints();
+                book.recipes = recipes;
+                book.blueprints = blueprints;
                 EditorUtility.SetDirty(book);
                 AssetDatabase.SaveAssetIfDirty(book);
                 Debug.Log($"[MERIDIAN] RecipeBook: {book.recipes.Count} recipes, {book.blueprints.Count} blueprints written.");
             }
             return book;
+        }
+
+        static bool SameIds(System.Collections.Generic.List<string> a, System.Collections.Generic.List<string> b)
+        {
+            if (a.Count != b.Count) return false;
+            var set = new System.Collections.Generic.HashSet<string>(a);
+            foreach (var id in b) if (!set.Contains(id)) return false;
+            return true;
         }
     }
 }

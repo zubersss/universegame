@@ -18,13 +18,11 @@ namespace Meridian.Space
 
     /// <summary>
     /// Top-down ship (Bible §3, §4.4): thrust Mk1 30 u/s² along the nose, cruise cap 80 u/s,
-    /// boost cap 160 u/s (burns main fuel), every body's Gravity Well pulls, the Sun kills inside 1.2R.
+    /// boost cap 160 u/s (no fuel, D-103), every body's Gravity Well pulls, the Sun kills inside 1.2R.
     /// </summary>
     public sealed class SpaceShip : MonoBehaviour
     {
         public const float RotateSpeedDeg = 180f;
-        /// <summary>Main-fuel use while boosting, units per second (Bible silent; P-11).</summary>
-        public const float BoostFuelPerSecond = 0.5f;
 
         public SpaceWorld world;
         public InputActionAsset actions;
@@ -46,6 +44,8 @@ namespace Meridian.Space
         public event Action SunDeath;
 
         InputAction thrustA, retroA, rotateA, boostA;
+        /// <summary>U-107: frames whose input this ship read (tests: the "no input lock" probe across a launch).</summary>
+        public int InputFrames { get; private set; }
 
         /// <summary>U-065: the fitted Thruster mark is shared with the side view (GameState; the field only without one).</summary>
         int Mark => GameState.Instance != null ? GameState.Instance.thrusterMark : thrusterMark;
@@ -68,6 +68,7 @@ namespace Meridian.Space
             intent.retro = retroA.IsPressed() ? 1f : 0f;
             intent.rotate = rotateA.ReadValue<float>();
             intent.boost = boostA.IsPressed();
+            InputFrames++;
         }
 
         /// <summary>Waystation start (Bible §3: Earth orbit): just outside the planet's Atmosphere Ring, at rest.</summary>
@@ -115,9 +116,7 @@ namespace Meridian.Space
             float h = Heading * Mathf.Deg2Rad;
             var nose = new Vector2(Mathf.Cos(h), Mathf.Sin(h));
 
-            var state = GameState.Instance;
-            bool boosting = intent.boost && intent.thrust > 0f && (state == null || state.fuel > 0f);
-            if (boosting && state != null) state.fuel = Mathf.Max(0f, state.fuel - BoostFuelPerSecond * dt);
+            bool boosting = intent.boost && intent.thrust > 0f; // U-107 (D-103): boost costs nothing
 
             var accel = nose * (Thrust * (intent.thrust - intent.retro));
             int strongest = -1;
@@ -139,7 +138,7 @@ namespace Meridian.Space
             {
                 Destroyed = true;
                 Velocity = Vector2.zero;
-                if (state != null) state.hull = 0f;
+                if (GameState.Instance != null) GameState.Instance.hull = 0f;
                 SunDeath?.Invoke();
             }
         }

@@ -10,15 +10,16 @@ using UnityEngine.TestTools;
 namespace Meridian.Tests
 {
     /// <summary>
-    /// U-065 (PlayMode): on Saturn (g 10.44, launch cost 53) a Thruster Mk1 refuses to lift off and the ship HUD
-    /// says so; a Mk2 lifts off. Stub scene like ShipSideTests (the cloud column itself arrives with U-061).
+    /// U-065, U-107 (PlayMode, D-106): the climb limit is physics alone. Real gravity on a stub pad: Mk1 crawls off Saturn
+    /// (net 1.56 m/s², the HUD amber below T/W 1.2), Mk1 and Mk2 stay on Jupiter's pad (12 and 20 &lt; 24.79, the HUD says it
+    /// cannot climb), Mk3 lifts off Jupiter. No gate refuses anything: the thrust simply loses to g.
     /// </summary>
     public class ShipMarksPlayTests
     {
         const float X = 120000f;
         Scene scene;
         Vector2 savedGravity;
-        PlanetConfig saturn;
+        PlanetConfig planet;
         int savedMark = -1;
 
         [SetUp]
@@ -31,13 +32,10 @@ namespace Meridian.Tests
             var ground = new GameObject("Ground").AddComponent<BoxCollider2D>();
             ground.size = new Vector2(400f, 1f);
             ground.transform.position = new Vector3(X, -0.5f, 0f);
-            saturn = ScriptableObject.CreateInstance<PlanetConfig>();
-            saturn.id = PlanetId.Saturn;
-            saturn.gravity = 10.44f;
-            saturn.escapeVelocityKms = 35.5f;
-            saturn.datumY = 0;
-            saturn.escapeAltitude = 400;
-            saturn.worldHeight = 2000;
+            planet = ScriptableObject.CreateInstance<PlanetConfig>();
+            planet.datumY = 0;
+            planet.escapeAltitude = 400;
+            planet.worldHeight = 2000;
         }
 
         [UnityTearDown]
@@ -45,7 +43,7 @@ namespace Meridian.Tests
         {
             Physics2D.gravity = savedGravity;
             if (GameState.Instance != null && savedMark > 0) GameState.Instance.thrusterMark = savedMark;
-            Object.Destroy(saturn);
+            Object.Destroy(planet);
             yield return SceneManager.UnloadSceneAsync(scene);
         }
 
@@ -55,54 +53,82 @@ namespace Meridian.Tests
             if (GameState.Instance != null) GameState.Instance.thrusterMark = mark;
         }
 
-        SideShip Spawn()
+        SideShip Spawn(PlanetId id, float g, int mark, float xOffset = 0f)
         {
-            Physics2D.gravity = new Vector2(0f, -saturn.gravity);
+            planet.id = id;
+            planet.gravity = g;
+            Physics2D.gravity = new Vector2(0f, -g);
             var go = new GameObject("Pilgrim");
-            go.transform.position = new Vector3(X, SideShip.SkidDrop + 0.02f, 0f);
+            go.transform.position = new Vector3(X + xOffset, SideShip.SkidDrop + 0.02f, 0f);
             go.AddComponent<Rigidbody2D>();
             go.AddComponent<BoxCollider2D>();
             var s = go.AddComponent<SideShip>();
             s.externalInput = true;
-            s.ConfigureFor(saturn);
-            s.Fuel = 100f;
+            s.ConfigureFor(planet);
             s.Hull = 100f;
+            SetMark(s, mark);
             return s;
         }
 
         static IEnumerator Steps(int n) { for (int i = 0; i < n; i++) yield return new WaitForFixedUpdate(); }
 
-        [UnityTest]
-        public IEnumerator Mk1RefusesOnSaturnWithTheHudLineMk2LiftsOff()
+        /// <summary>Holds full thrust for `seconds` from rest on the pad; returns the height climbed through `climbed`.</summary>
+        static IEnumerator Burn(SideShip s, float seconds, System.Action<float> climbed)
         {
-            var s = Spawn();
-            SetMark(s, 1);
+            yield return Steps(30);
+            Assert.IsTrue(s.AtRest, "at rest on the pad");
+            float y0 = s.Body.position.y;
+            s.intent.thrust = 1f;
+            yield return Steps(Mathf.RoundToInt(seconds / Time.fixedDeltaTime));
+            yield return null; // HUD LateUpdate
+            climbed(s.Body.position.y - y0);
+        }
+
+        [UnityTest]
+        public IEnumerator Mk1CrawlsOffSaturnWithTheAmberHud()
+        {
+            var s = Spawn(PlanetId.Saturn, 10.44f, 1);
             var hud = new GameObject("ShipHud").AddComponent<ShipHud>();
             hud.ship = s;
-            yield return Steps(30);
-            Assert.IsTrue(s.AtRest, "landed at rest");
-            Assert.IsFalse(s.CanLaunchHere, "§4.3: Mk1 can't launch from Saturn");
-
-            s.intent.thrust = 1f;
-            yield return Steps(60);
-            yield return null; // HUD LateUpdate
-            Assert.IsTrue(s.LaunchRefused, "lift refused");
-            Assert.Less(s.Body.position.y, SideShip.SkidDrop + 0.2f, "still on the ground");
-            Assert.AreEqual(100f, s.Fuel, 1e-3f, "a refused launch burns nothing");
+            float climbed = 0f;
+            yield return Burn(s, 2f, h => climbed = h);
+            TestContext.Out.WriteLine($"[MERIDIAN] Saturn Mk1: {climbed:F2} m in 2 s (net {12f - 10.44f:F2} m/s²)");
+            Assert.AreEqual(0.5f * 1.56f * 4f, climbed, 0.6f, "a slow climb at net 1.56 m/s²");
+            Assert.IsFalse(s.ThrustBelowGravity);
+            Assert.AreEqual(ShipHud.TwrState.Amber, hud.State, "T/W 1.15 reads amber (D-106)");
             Assert.IsTrue(hud.Warning.enabled);
-            Assert.AreEqual("THRUSTER MK1 CAN'T LIFT OFF HERE", hud.Warning.text);
+            LogAssert.NoUnexpectedReceived();
+        }
 
-            s.intent.thrust = 0f;
-            SetMark(s, 2);
-            yield return Steps(10);
-            Assert.IsTrue(s.CanLaunchHere, "Mk2 can launch from Saturn");
-            s.intent.thrust = 1f;
-            yield return Steps(Mathf.RoundToInt(2f / Time.fixedDeltaTime));
-            yield return null;
-            Assert.IsFalse(s.LaunchRefused);
-            Assert.Greater(s.Body.position.y, SideShip.SkidDrop + 3f, "Mk2 (20 m/s²) climbs against 10.44");
-            Assert.Less(s.Fuel, 100f, "the launch burn is paid");
-            Assert.IsFalse(hud.Warning.enabled && hud.Warning.text.StartsWith("THRUSTER"), "no refusal line in flight");
+        [UnityTest]
+        public IEnumerator Mk1AndMk2StayOnJupitersPadMk3LiftsOff()
+        {
+            var hud = new GameObject("ShipHud").AddComponent<ShipHud>();
+            for (int mark = 1; mark <= 3; mark++)
+            {
+                var s = Spawn(PlanetId.Jupiter, 24.79f, mark, mark * 30f);
+                hud.ship = s;
+                float climbed = 0f;
+                yield return Burn(s, 2f, h => climbed = h);
+                TestContext.Out.WriteLine($"[MERIDIAN] Jupiter Mk{mark}: {climbed:F2} m in 2 s, HUD {hud.State}");
+                if (mark < 3)
+                {
+                    Assert.Less(climbed, 0.05f, $"Mk{mark} ({ShipMarks.Thrust(mark)} m/s²) cannot climb against 24.79");
+                    Assert.IsTrue(s.ThrustBelowGravity);
+                    Assert.AreEqual(ShipHud.TwrState.CannotClimb, hud.State);
+                    Assert.IsTrue(hud.Warning.enabled);
+                }
+                else
+                {
+                    Assert.Greater(climbed, 15f, "Mk3 (35 m/s²) climbs at net 10.21 m/s²");
+                    Assert.IsFalse(s.ThrustBelowGravity);
+                    Assert.AreEqual(ShipHud.TwrState.Ok, hud.State, "T/W 1.41");
+                    Assert.IsFalse(hud.Warning.enabled);
+                }
+                s.intent = default;
+                Object.Destroy(s.gameObject);
+                yield return null;
+            }
             LogAssert.NoUnexpectedReceived();
         }
     }

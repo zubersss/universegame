@@ -100,11 +100,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 58a0212cbe5ca0b4a81078291601e8ea
-    m_Address: icons/launch_fuel_cell/base
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5b2949ccc54b5d04d81a92de70d5e708
     m_Address: icons/phosphorus_pigment/base
     m_ReadOnly: 0
@@ -127,11 +122,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6230df896a31d064e89b24d01b93f368
     m_Address: icons/float_cell_mk1/base
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 62e3d76fa76b14442980dd3d1b672c50
-    m_Address: icons/tank_mk3/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -162,16 +152,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 817be05767d835e46b4a07edd9639022
     m_Address: icons/polymer/base
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 82d632433f931ca448d977783da2c485
-    m_Address: icons/deuterium/base
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 844ac589394303b4392924181a85930b
-    m_Address: icons/tank_mk2/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -282,11 +262,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f27b5962baa15424db77b3fee89c76d9
     m_Address: icons/thruster_mk2/base
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f7fcba5861ddac743baf209bdbadad16
-    m_Address: icons/launch_fuel/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

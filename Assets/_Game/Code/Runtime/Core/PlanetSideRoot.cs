@@ -189,12 +189,12 @@ namespace Meridian.Core
         /// <summary>Skids on the highest ground under the hull's footprint.</summary>
         Vector2 LandedShipPosition(int centerX)
         {
-            int half = Mathf.CeilToInt(SideShip.HullLength * 0.5f);
+            int half = Mathf.CeilToInt(SideShip.Width * 0.5f);
             int top = int.MinValue;
             for (int x = centerX - half; x <= centerX + half; x++)
                 top = Mathf.Max(top, terrain.TopSolidY(x));
             float ground = top + 1f;
-            if (pois != null) ground = Mathf.Max(ground, pois.SolidTopOver(centerX + 0.5f - SideShip.HullLength * 0.5f, centerX + 0.5f + SideShip.HullLength * 0.5f)); // on the pad (U-035)
+            if (pois != null) ground = Mathf.Max(ground, pois.SolidTopOver(centerX + 0.5f - SideShip.Width * 0.5f, centerX + 0.5f + SideShip.Width * 0.5f)); // on the pad (U-035)
             return new Vector2(centerX + 0.5f, ground + SideShip.SkidDrop + 0.05f);
         }
 

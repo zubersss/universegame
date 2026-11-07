@@ -68,7 +68,7 @@ namespace Meridian.Tests
             Assert.IsTrue(t.SetTile(x, y - 1, TileId.Air));
             int placedY = t.TopSolidY(x + 6) + 2; // remembered: the stone itself becomes the column's top
             Assert.IsTrue(t.SetTile(x + 6, placedY, TileId.Stone));
-            state.hull = 73f; state.fuel = 41.5f;
+            state.hull = 73f; state.thrusterMark = 2;
             state.cargo.Add(new CargoStack { itemId = 3, count = 12 });
             time.SetGameSeconds(12345.0);
             var playerAt = side.player.Body.position;
@@ -80,7 +80,7 @@ namespace Meridian.Tests
 
             // Mess everything up, then load.
             Assert.IsTrue(t.SetTile(x - 4, t.TopSolidY(x - 4), TileId.Air));
-            state.hull = 5f; state.fuel = 1f; state.cargo.Clear(); time.SetGameSeconds(0);
+            state.hull = 5f; state.thrusterMark = 1; state.cargo.Clear(); time.SetGameSeconds(0);
             side.player.Body.position += new Vector2(20f, 5f);
 
             float loadStart = Time.realtimeSinceStartup;
@@ -90,7 +90,7 @@ namespace Meridian.Tests
             yield return Settle(t);
 
             Assert.AreEqual(73f, state.hull, 1e-4f, "hull");
-            Assert.AreEqual(41.5f, state.fuel, 1e-4f, "fuel");
+            Assert.AreEqual(2, state.thrusterMark, "thruster mark");
             Assert.AreEqual(1, state.cargo.Count); Assert.AreEqual(12, state.cargo[0].count, "cargo");
             // The clock is restored, then keeps running at 72× while the planet loads and settles.
             double ranSince = (Time.realtimeSinceStartup - loadStart) * TimeSystem.GameSecondsPerRealSecond;

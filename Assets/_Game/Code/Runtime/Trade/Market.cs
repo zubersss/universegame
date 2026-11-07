@@ -15,7 +15,7 @@ namespace Meridian.Trade
     }
 
     /// <summary>
-    /// U-052 Halcyon market (Bible §3, §8): Scrip prices per Waystation, buy/sell, refuel, repair, and cargo
+    /// U-052 Halcyon market (Bible §3, §8): Scrip prices per Waystation, buy/sell, repair, and cargo
     /// contracts. Pure: callers pass the inventory and the wallet (GameState); no Unity objects needed.
     /// </summary>
     public static class Market
@@ -29,12 +29,12 @@ namespace Meridian.Trade
         static readonly Dictionary<string, int> Base = new Dictionary<string, int>
         {
             { "iron", 12 }, { "copper", 16 }, { "hematite", 6 }, { "nickel", 14 }, { "carbon", 5 }, { "silica", 8 },
-            { "water_ice", 4 }, { "perchlorate", 18 }, { "launch_fuel", 10 }, { "smelter_bar_iron", 30 },
+            { "water_ice", 4 }, { "perchlorate", 18 }, { "smelter_bar_iron", 30 },
             { "smelter_bar_copper", 38 }, { "suit_patch", 70 }, { "circuit_board", 90 }, { "graphite", 20 },
             { "solarite", 160 }, { "vitriol_glass", 140 },
         };
 
-        /// <summary>Local factors: Earth makes goods and fuel cheaply, Mars is rich in ore and oxidizer and short of goods.</summary>
+        /// <summary>Local factors: Earth makes goods cheaply, Mars is rich in ore and oxidizer and short of goods.</summary>
         static float Factor(string station, string item)
         {
             if (station == "mars")
@@ -42,13 +42,13 @@ namespace Meridian.Trade
                 switch (item)
                 {
                     case "hematite": case "iron": case "nickel": case "perchlorate": case "water_ice": return 0.7f; // ore-rich
-                    case "launch_fuel": case "suit_patch": case "circuit_board": case "copper": case "smelter_bar_copper": return 1.4f;
+                    case "suit_patch": case "circuit_board": case "copper": case "smelter_bar_copper": return 1.4f;
                     default: return 1.1f;
                 }
             }
             switch (item) // Earth
             {
-                case "launch_fuel": case "suit_patch": case "circuit_board": case "carbon": return 0.85f;
+                case "suit_patch": case "circuit_board": case "carbon": return 0.85f;
                 case "perchlorate": case "hematite": return 1.3f;
                 default: return 1f;
             }
@@ -63,8 +63,7 @@ namespace Meridian.Trade
         /// <summary>What Halcyon pays for one unit here.</summary>
         public static int SellPrice(string station, string item) => Mathf.Max(1, Mathf.FloorToInt(BuyPrice(station, item) * SellShare));
 
-        /// <summary>Fuel (per unit of the tank) and hull repair (per point).</summary>
-        public static int FuelPrice(string station) => station == "mars" ? 3 : 2;
+        /// <summary>Hull repair (per point). U-107 (D-103): no refuelling.</summary>
         public static int RepairPrice(string station) => station == "mars" ? 4 : 3;
 
         public static bool Sell(string station, string item, int count, Inventory inv, ref int scrip)
@@ -84,17 +83,6 @@ namespace Meridian.Trade
             if (left > 0) { inv.Remove(def.id, count - left); return false; } // no room: nothing bought
             scrip -= price;
             return true;
-        }
-
-        /// <summary>Tops the tank up as far as the wallet allows. Returns units bought.</summary>
-        public static float Refuel(string station, ref float fuel, float tank, ref int scrip)
-        {
-            float want = Mathf.Max(0f, tank - fuel);
-            float afford = scrip / (float)FuelPrice(station);
-            float units = Mathf.Floor(Mathf.Min(want, afford));
-            fuel += units;
-            scrip -= Mathf.RoundToInt(units * FuelPrice(station));
-            return units;
         }
 
         /// <summary>Repairs the hull as far as the wallet allows. Returns points repaired.</summary>

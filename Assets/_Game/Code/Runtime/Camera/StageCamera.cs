@@ -12,6 +12,8 @@ namespace Meridian.CameraRig
         public float floorY;            // the stage floor: ground height under the player's feet
         public float baseFrame;         // the player's zoom (frame height, m); 0 = the default 18
         public float dt;
+        /// <summary>U-107: flying the ship. playerX/Y are then the hull's centre and speedX/Y its velocity.</summary>
+        public bool vehicle;
     }
 
     /// <summary>
@@ -34,6 +36,8 @@ namespace Meridian.CameraRig
         public const float DefaultFrame = 18f;
         // Bump shake: position only, never rotation (U-093: a creature or Warden bump; there are no hits or kills).
         public const float BumpShake = 0.15f, ShakeTime = 0.10f;
+        // U-107 (§5.1 rules on the ship): the frame leads the hull along its velocity and keeps it inside the middle band.
+        public const float VehicleLookTime = 0.6f, VehicleFollowTime = 0.25f;
 
         public float X { get; private set; }
         public float Y { get; private set; }
@@ -46,7 +50,7 @@ namespace Meridian.CameraRig
 
         float rel, relVel, look, lookVel;
         float floorS, floorVel, yVel;
-        bool haveFloor, landedFollow;
+        bool haveFloor, landedFollow, wasVehicle;
         float heldFloor; // the floor the frame was last set from: a floor that dropped below it holds the frame
         float fallTop;
         float shakeT, shakeAmp;
@@ -59,7 +63,7 @@ namespace Meridian.CameraRig
             look = 0f; lookVel = 0f; rel = 0f; relVel = 0f;
             X = i.playerX;
             floorS = i.floorY; floorVel = 0f; haveFloor = true; heldFloor = floorS;
-            Y = floorS - FloorBelow + Frame * 0.5f; yVel = 0f;
+            Y = i.vehicle ? i.playerY : floorS - FloorBelow + Frame * 0.5f; yVel = 0f; wasVehicle = i.vehicle;
             FallFollowing = false; landedFollow = false; fallTop = i.playerY;
             Shake = Vector2.zero; shakeT = 0f; shakeAmp = 0f;
         }
@@ -76,9 +80,33 @@ namespace Meridian.CameraRig
             float dt = Mathf.Max(1e-5f, i.dt);
             if (!haveFloor) Snap(i);
             Frame = i.baseFrame > 0f ? i.baseFrame : DefaultFrame;
-            StepHorizontal(i, dt);
-            StepVertical(i, dt);
+            if (i.vehicle != wasVehicle) { relVel = 0f; yVel = 0f; lookVel = 0f; wasVehicle = i.vehicle; }
+            if (i.vehicle) StepVehicle(i, dt);
+            else
+            {
+                StepHorizontal(i, dt);
+                StepVertical(i, dt);
+            }
             StepShake(dt);
+        }
+
+        /// <summary>
+        /// U-107: following the ship. The goal is the hull's centre plus its velocity × VehicleLookTime (look-ahead along the
+        /// velocity), reached with a 0.25 s damped follow; the hull is never let out of the middle band. The stage floor keeps
+        /// smoothing underneath, so stepping out hands back to the walking rules without a jump.
+        /// </summary>
+        void StepVehicle(in StageInput i, float dt)
+        {
+            floorS = Mathf.SmoothDamp(floorS, i.floorY, ref floorVel, FloorSmoothTime, Mathf.Infinity, dt);
+            heldFloor = floorS;
+            float half = MiddleBand * 0.5f * Frame;
+            var goal = new Vector2(i.playerX + i.speedX * VehicleLookTime, i.playerY + i.speedY * VehicleLookTime);
+            X = Mathf.SmoothDamp(X, goal.x, ref relVel, VehicleFollowTime, Mathf.Infinity, dt);
+            Y = Mathf.SmoothDamp(Y, goal.y, ref yVel, VehicleFollowTime, Mathf.Infinity, dt);
+            X = Mathf.Clamp(X, i.playerX - half, i.playerX + half);
+            Y = Mathf.Clamp(Y, i.playerY - half, i.playerY + half);
+            rel = X - i.playerX; look = 0f;
+            FallFollowing = false; landedFollow = false; fallTop = i.playerY;
         }
 
         void StepHorizontal(in StageInput i, float dt)

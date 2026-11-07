@@ -9,7 +9,7 @@ namespace Meridian.UI
 {
     /// <summary>
     /// Side-view HUD (Bible §5.1, §9; U-015): health, oxygen (placeholder until the Envirosuit
-    /// system), ship fuel, and the altitude bar with the Escape Line marker. Thin, planet-tinted,
+    /// system), the altitude bar (U-107: no ship fuel, D-103) with the Escape Line marker. Thin, planet-tinted,
     /// monospace numerals; updates allocate nothing.
     /// </summary>
     public sealed class SideHud : MonoBehaviour
@@ -25,11 +25,9 @@ namespace Meridian.UI
 
         public Image HealthFill { get; private set; }
         public Image OxygenFill { get; private set; }
-        public Image FuelFill { get; private set; }
         public RectTransform EscapeMarker { get; private set; }
         public RectTransform YouMarker { get; private set; }
         public Text HealthText { get; private set; }
-        public Text FuelText { get; private set; }
         public Text AltText { get; private set; }
         /// <summary>U-026: "DUST STORM IN 45 s" during the warning, "DUST STORM" while it blows; empty otherwise.</summary>
         public Text StormText { get; private set; }
@@ -48,7 +46,7 @@ namespace Meridian.UI
         PlayerVitals vitals;
         Image accentLine;
         static UiKit.NumberStrings numbers;
-        int lastHealth = -1, lastFuel = -1, lastAlt = int.MinValue;
+        int lastHealth = -1, lastAlt = int.MinValue;
         int lastStorm = -2;
         int lastCryo = -1, lastSuit = -1, lastRate = int.MinValue;
         static readonly string[] CryoLevels = { "0", "1", "2", "3", "4" };
@@ -77,9 +75,6 @@ namespace Meridian.UI
             OxygenFill = UiKit.Bar(root, "Oxygen", tl, new Vector2(24f, -98f), new Vector2(220f, 6f), theme.oxygen);
             var o2 = UiKit.Text(root, "OxygenValue", tl, new Vector2(252f, -88f), new Vector2(80f, 24f), 18, false, TextAnchor.MiddleLeft, theme.label);
             o2.text = "100"; // placeholder until the Envirosuit oxygen system (M3)
-            Label(root, "SHIP FUEL", -116f);
-            FuelFill = UiKit.Bar(root, "Fuel", tl, new Vector2(24f, -138f), new Vector2(220f, 6f), UiTheme.Accent(null));
-            FuelText = UiKit.Text(root, "FuelValue", tl, new Vector2(252f, -128f), new Vector2(80f, 24f), 18);
             HazardLabel = UiKit.Text(root, "HazardKind", new Vector2(0f, 1f), new Vector2(24f, -156f), new Vector2(200f, 18f), 13, false, TextAnchor.MiddleLeft, UiTheme.Active.label);
             HazardLabel.text = KindNames[(int)Meridian.Hazards.HazardKind.Cryo];
             CryoText = UiKit.Text(root, "CryoLevel", tl, new Vector2(110f, -156f), new Vector2(30f, 18f), 13, true, TextAnchor.MiddleLeft, new Color(0.6f, 0.85f, 1f, 1f));
@@ -220,7 +215,6 @@ namespace Meridian.UI
             planet = p;
             var accent = UiTheme.Accent(p.id);
             accentLine.color = accent;
-            FuelFill.color = accent;
             EscapeMarker.anchoredPosition = new Vector2(0f, (float)p.EscapeLineY / p.worldHeight * BarHeight);
         }
 
@@ -230,7 +224,6 @@ namespace Meridian.UI
         {
             bool hidden = MenuController.HudHidden || InventoryPanel.AnyOpen || CraftingPanel.AnyOpen || CataloguePanel.AnyOpen; // U-058: nothing draws through a full-screen panel
             if (hudCanvas != null && hudCanvas.enabled == hidden) hudCanvas.enabled = !hidden;
-            var state = GameState.Instance;
             if (vitals == null && player != null) vitals = player.GetComponent<PlayerVitals>();
             if (vitals != null)
             {
@@ -239,11 +232,6 @@ namespace Meridian.UI
                 float power = (suit + vitals.health) / Mathf.Max(1f, suitMax + vitals.maxHealth);
                 int h = Mathf.CeilToInt(power * 100f - 1e-3f);
                 if (h != lastHealth) { lastHealth = h; HealthText.text = numbers[h]; HealthFill.fillAmount = power; }
-            }
-            if (state != null)
-            {
-                int f = Mathf.CeilToInt(state.fuel);
-                if (f != lastFuel) { lastFuel = f; FuelText.text = numbers[f]; FuelFill.fillAmount = state.fuel / Mathf.Max(1f, state.tankCapacity); }
             }
             UpdateStorm();
             UpdateHazards();

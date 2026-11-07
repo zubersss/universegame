@@ -77,16 +77,14 @@ namespace Meridian.Tests
             int ex = side.spawnX + 2, ey = side.terrain.TopSolidY(ex);
             Assert.IsTrue(side.rig.Dig(new Vector2(ex + 0.5f, ey + 0.5f)), "dig on Earth");
 
-            // ---- Board and launch from rest: the §4.1 burn (17) over the first 3 s ----
+            // ---- Board and launch from rest: thrust held, no fuel, no lock (U-107, D-103) ----
             var ship = side.ship;
             Assert.IsTrue(ship.AtRest, "Pilgrim landed at rest");
             var boarding = ship.GetComponent<ShipBoarding>();
             boarding.ForceAboard();
             ship.externalInput = true;
-            float fuelAtStart = state.fuel;
             ship.intent.thrust = 1f;
             yield return Until(() => state.view == ViewMode.Space && !transitions.Busy, 60f, "climb to the Escape Line and launch");
-            Assert.AreEqual(fuelAtStart - 17f, state.fuel, 0.05f, "launch fuel 17 from Earth");
             Assert.LessOrEqual(transitions.LastLaunchSeconds, 1.5f);
 
             // ---- Top-down: fly to Mars and cross its Atmosphere Ring ----
@@ -140,7 +138,7 @@ namespace Meridian.Tests
             // ---- Save, then a fresh boot and load ----
             var save = SaveSystem.Instance;
             save.Save();
-            var expectFuel = state.fuel;
+            var expectMark = state.thrusterMark;
             var expectHull = state.hull;
             var expectPlayer = player.Body.position;
             int earthEdits = state.EditsFor(PlanetId.Earth).Count, marsEdits = state.EditsFor(PlanetId.Mars).Count;
@@ -155,7 +153,7 @@ namespace Meridian.Tests
 
             Assert.AreEqual(PlanetId.Mars, state.currentPlanet, "loaded onto Mars");
             Assert.AreEqual(PlanetId.Mars, side.Config.id);
-            Assert.AreEqual(expectFuel, state.fuel, 1e-3f, "fuel");
+            Assert.AreEqual(expectMark, state.thrusterMark, "thruster mark");
             Assert.AreEqual(expectHull, state.hull, 1e-3f, "hull");
             Assert.AreEqual(earthEdits, state.EditsFor(PlanetId.Earth).Count, "Earth diffs");
             Assert.AreEqual(marsEdits, state.EditsFor(PlanetId.Mars).Count, "Mars diffs");

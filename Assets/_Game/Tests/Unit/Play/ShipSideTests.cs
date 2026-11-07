@@ -8,7 +8,10 @@ using UnityEngine.TestTools;
 
 namespace Meridian.Tests
 {
-    /// <summary>U-010 (PlayMode): launch fuel burn, Escape Line event, landing rules (Bible §4.1, §4.3, §5.2).</summary>
+    /// <summary>
+    /// U-010, U-107 (PlayMode): the upright rocket on a stub pad with real physics: lift-off and hover at thrust = g, tilt
+    /// clamp and spring back, the tilted-touchdown tip-over, Escape Line event, landing rules (Bible §4.3 v4.1, §5.2).
+    /// </summary>
     public class ShipSideTests
     {
         const float X = 100000f; // far from any streamed terrain a previous test may have left loaded
@@ -29,7 +32,7 @@ namespace Meridian.Tests
             planet = ScriptableObject.CreateInstance<PlanetConfig>();
             planet.id = PlanetId.Earth;
             planet.gravity = 9.81f;
-            planet.escapeVelocityKms = 11.2f; // launch cost 17
+            planet.escapeVelocityKms = 11.2f;
             planet.datumY = 0;
             planet.escapeAltitude = 20;       // Escape Line at y = 20 for a short test flight
             planet.worldHeight = 800;
@@ -53,7 +56,6 @@ namespace Meridian.Tests
             var s = go.AddComponent<SideShip>();
             s.externalInput = true;
             s.ConfigureFor(planet);
-            s.Fuel = 100f;
             s.Hull = 100f;
             s.Body.linearVelocity = new Vector2(0f, vy);
             return s;
@@ -62,30 +64,69 @@ namespace Meridian.Tests
         static IEnumerator Steps(int n) { for (int i = 0; i < n; i++) yield return new WaitForFixedUpdate(); }
 
         [UnityTest]
-        public IEnumerator LaunchFromEarthCosts17FuelOverFirst3SecondsOfThrust()
+        public IEnumerator LiftsOffEarthThenHoversWhereThrustEqualsG()
         {
             var s = Spawn(9.81f);
             yield return Steps(30);
             Assert.IsTrue(s.AtRest, "landed at rest");
-            Assert.AreEqual(100f, s.Fuel, 1e-4f);
-            s.intent.thrust = 1f;
-            int threeSeconds = Mathf.RoundToInt(3f / Time.fixedDeltaTime);
-            yield return Steps(threeSeconds);
-            TestContext.Out.WriteLine($"[MERIDIAN] after 3 s of thrust: fuel {s.Fuel:F3}, altitude {s.Body.position.y - SideShip.SkidDrop:F1} m");
-            Assert.AreEqual(83f, s.Fuel, 0.05f, "17 units over the first 3 s");
-            Assert.Greater(s.Body.position.y, 5f, "climbing (12 m/s² against 9.81)");
-            yield return Steps(100);
-            Assert.AreEqual(83f, s.Fuel, 0.05f, "atmospheric flight after the burn is free");
+            s.intent.thrust = 1f; // no fuel, no burn window: thrust is simply held (D-103)
+            yield return Steps(Mathf.RoundToInt(2f / Time.fixedDeltaTime));
+            Assert.Greater(s.Body.position.y, SideShip.SkidDrop + 3f, "climbing (12 m/s² against 9.81)");
+            s.intent.thrust = 9.81f / s.Thrust; // throttle so thrust = g
+            yield return Steps(2);
+            float v0 = s.Body.linearVelocity.y;
+            yield return Steps(Mathf.RoundToInt(3f / Time.fixedDeltaTime));
+            float dv = s.Body.linearVelocity.y - v0;
+            TestContext.Out.WriteLine($"[MERIDIAN] hover: Δv {dv:F4} m/s over 3 s at throttle {s.intent.thrust:F3}");
+            Assert.AreEqual(0f, dv, 0.01f * 9.81f * 3f, "hovers: velocity holds within 1 % of g·t");
+            Assert.AreEqual(0f, s.Tilt, 1e-4f, "upright without steering");
         }
 
         [UnityTest]
-        public IEnumerator HalfBurnThenFuelStopsAtTheRightPoint()
+        public IEnumerator TiltClampsAt35SpringsBackAndThrustFollowsTheNose()
         {
-            var s = Spawn(9.81f);
-            yield return Steps(30);
-            s.intent.thrust = 1f;
-            yield return Steps(Mathf.RoundToInt(1.5f / Time.fixedDeltaTime));
-            Assert.AreEqual(100f - 8.5f, s.Fuel, 0.05f, "half the burn → half the cost");
+            var s = Spawn(0f, 20f); // gravity off, well above the ground
+            s.intent = new ShipSideIntent { lateral = 1f }; // D: nose to the right
+            yield return Steps(Mathf.RoundToInt(1f / Time.fixedDeltaTime));
+            Assert.AreEqual(-RocketFlight.MaxTilt, s.Tilt, 1e-3f, "clamped at 35°");
+            Assert.AreEqual(-RocketFlight.MaxTilt, Mathf.DeltaAngle(0f, s.Body.rotation), 1f, "the hull is turned");
+            s.intent = new ShipSideIntent { thrust = 1f, lateral = 1f };
+            yield return Steps(25);
+            Assert.Greater(s.Body.linearVelocity.x, 1f, "thrust along the tilted nose pushes right");
+            s.intent = new ShipSideIntent { lateral = -1f };
+            yield return Steps(Mathf.RoundToInt(1f / Time.fixedDeltaTime));
+            Assert.AreEqual(RocketFlight.MaxTilt, s.Tilt, 1e-3f, "A: clamped at +35°");
+            s.intent = default;
+            yield return Steps(Mathf.RoundToInt(0.6f / Time.fixedDeltaTime));
+            Assert.Less(Mathf.Abs(s.Tilt), 1f, "springs back upright on release");
+            Assert.Less(Mathf.Abs(Mathf.DeltaAngle(0f, s.Body.rotation)), 1.5f, "the hull follows");
+            LogAssert.NoUnexpectedReceived();
+        }
+
+        [UnityTest]
+        public IEnumerator TiltedTouchdownTipsAndRightsInHalfASecondWithoutDamage()
+        {
+            var s = Spawn(3.72f, 3f); // Mars g, 3 m up: a slow, clean drop
+            int tipped = 0;
+            s.TippedOver += () => tipped++;
+            s.intent = new ShipSideIntent { lateral = -1f }; // A: nose left, leaning past 20°
+            for (int k = 0; k < 300 && !s.Grounded; k++) yield return new WaitForFixedUpdate();
+            Assert.IsTrue(s.Grounded, "touched down");
+            s.intent = default;
+            TestContext.Out.WriteLine($"[MERIDIAN] tilted touchdown at {s.LastTouchdownSpeed:F2} m/s, tilt {s.Tilt:F1}°");
+            Assert.AreEqual(1, tipped, "a touchdown past 20° tips the ship");
+            Assert.IsTrue(s.Flight.Righting);
+            bool swungPast = false;
+            int steps = Mathf.CeilToInt(RocketFlight.RightingSeconds / Time.fixedDeltaTime);
+            for (int k = 0; k < steps; k++) { yield return new WaitForFixedUpdate(); if (s.Tilt < -0.5f) swungPast = true; }
+            yield return Steps(2);
+            Assert.IsTrue(swungPast, "it wobbles past upright");
+            Assert.IsFalse(s.Flight.Righting, "righted within 0.5 s");
+            Assert.AreEqual(0f, s.Tilt, 1e-4f);
+            yield return Steps(10);
+            Assert.Less(Mathf.Abs(Mathf.DeltaAngle(0f, s.Body.rotation)), 1f, "standing upright");
+            Assert.AreEqual(100f, s.Hull, 1e-4f, "tipping does no damage");
+            LogAssert.NoUnexpectedReceived();
         }
 
         [UnityTest]
@@ -174,11 +215,11 @@ namespace Meridian.Tests
         }
 
         [UnityTest]
-        public IEnumerator Mk1CannotLiftOffJupiter()
+        public IEnumerator Mk1CannotClimbJupiter()
         {
             var s = Spawn(24.79f);
             yield return Steps(30);
-            Assert.IsTrue(s.ThrustBelowGravity, "HUD warning condition: thrust 12 < g 24.79");
+            Assert.IsTrue(s.ThrustBelowGravity, "HUD condition: thrust 12 < g 24.79 (D-106: physics alone)");
             float y = s.Body.position.y;
             s.intent.thrust = 1f;
             yield return Steps(100);

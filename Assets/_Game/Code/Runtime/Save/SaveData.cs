@@ -29,8 +29,6 @@ namespace Meridian.Save
         public int scrip = Meridian.Trade.Market.StartingScrip;
         /// <summary>v2 (U-054): Survey Datacores (the catalogue ids are in `catalogue`).</summary>
         public int datacores;
-        /// <summary>v2 (U-063): Skip Drive fuel in the tank.</summary>
-        public float skipFuel;
         public List<Meridian.Trade.Contract> contracts = new List<Meridian.Trade.Contract>();
         /// <summary>v2 (U-045): the surveyor's 40 slots in order (empty ones included) and the Builder's slot.</summary>
         public List<Meridian.Items.ItemStack> inventory = new List<Meridian.Items.ItemStack>();
@@ -63,10 +61,8 @@ namespace Meridian.Save
     public sealed class ShipSave
     {
         public float hull = 100f;
-        public float fuel = 100f;
-        public float tankCapacity = 100f;
-        /// <summary>U-065: Thruster and Tank marks (older files read 1, the field defaults).</summary>
-        public int thrusterMark = 1, tankMark = 1;
+        /// <summary>U-065: the Thruster mark (older files read 1, the field default). U-107 (D-103): the fuel, tank and tank-mark fields are gone; older files' values are ignored.</summary>
+        public int thrusterMark = 1;
         public Vector2 sidePosition;
         public Vector2 sideVelocity;
         public Vector2 spacePosition;

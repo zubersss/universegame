@@ -20,10 +20,8 @@ namespace Meridian.Core
 
         [Header("Ship")]
         public float hull = 100f;
-        public float fuel = 100f;
-        public float tankCapacity = 100f;
-        /// <summary>U-065 ship marks (Bible §4.3): Thruster Mk1–Mk3 (thrust, where it can launch) and Tank Mk1–Mk3 (capacity).</summary>
-        public int thrusterMark = 1, tankMark = 1;
+        /// <summary>U-065 ship marks (Bible §4.3 v4.1): Thruster Mk1–Mk3. U-107 (D-103): no launch fuel and no tanks.</summary>
+        public int thrusterMark = 1;
         /// <summary>The surveyor's inventory (U-045, SaveData v2).</summary>
         public readonly Meridian.Items.Inventory inventory = new Meridian.Items.Inventory();
         /// <summary>Envirosuit tier (U-049): 0 none, 1–3 Mk1–Mk3; lowers every hazard by its tier.</summary>
@@ -32,8 +30,6 @@ namespace Meridian.Core
         public int scrip = Meridian.Trade.Market.StartingScrip;
         /// <summary>Survey Datacores and the catalogue of scanned entries (U-054).</summary>
         public int datacores;
-        /// <summary>Skip Drive fuel in the tank (U-063); topped up from Helium-3 Condensate or deuterium in the hold.</summary>
-        public float skipFuel;
         /// <summary>Bases (U-056): placed pieces and aerostats, every planet.</summary>
         public readonly System.Collections.Generic.List<Meridian.Building.BasePieceSave> basePieces = new System.Collections.Generic.List<Meridian.Building.BasePieceSave>();
         public readonly System.Collections.Generic.List<Meridian.Building.AerostatSave> aerostats = new System.Collections.Generic.List<Meridian.Building.AerostatSave>();

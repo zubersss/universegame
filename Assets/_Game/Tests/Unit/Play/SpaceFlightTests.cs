@@ -51,11 +51,11 @@ namespace Meridian.Tests
             ship.intent.thrust = 1f;
             yield return Seconds(4f);
             Assert.AreEqual(80f, ship.Velocity.magnitude, 0.5f, "cruise 80 u/s");
-            float fuelBefore = GameState.Instance.fuel;
+            float hullBefore = GameState.Instance.hull;
             ship.intent.boost = true;
             yield return Seconds(4f);
             Assert.AreEqual(160f, ship.Velocity.magnitude, 0.5f, "boost 160 u/s");
-            Assert.Less(GameState.Instance.fuel, fuelBefore, "boost burns main fuel");
+            Assert.AreEqual(hullBefore, GameState.Instance.hull, 1e-4f, "boost costs nothing (D-103: no fuel)");
             LogAssert.NoUnexpectedReceived();
         }
 

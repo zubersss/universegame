@@ -100,8 +100,15 @@ namespace Meridian.Tests
                               "Module3", "Module4", "ModulePrev", "ModuleNext", "Interact", "BuildMenu", "Inventory", "Map",
                               "Catalogue", "FloatCell", "Dash" };
             foreach (var name in foot) Assert.NotNull(a.FindAction($"{MeridianInput.OnFoot}/{name}"), name);
-            foreach (var name in new[] { "Thrust", "Retro", "Lateral", "Exit" })
+            foreach (var name in new[] { "Thrust", "Lateral", "Exit" })
                 Assert.NotNull(a.FindAction($"{MeridianInput.ShipSide}/{name}"), name);
+            // U-107 (§6 v4.1): the upright rocket thrusts on W or Space, has no retro, and a held key survives a view switch.
+            Assert.IsNull(a.FindAction($"{MeridianInput.ShipSide}/Retro", false), "no side retro (U-107)");
+            Assert.IsTrue(a.FindAction("ShipSide/Thrust").bindings.Any(b => b.path == "<Keyboard>/space"), "side thrust on Space");
+            Assert.IsTrue(a.FindAction("ShipSide/Thrust").bindings.Any(b => b.path == "<Keyboard>/w"), "side thrust on W");
+            Assert.IsTrue(a.FindAction("ShipTop/Thrust").bindings.Any(b => b.path == "<Keyboard>/space"), "a Space held through launch keeps thrusting");
+            Assert.IsTrue(a.FindAction("ShipSide/Thrust").wantsInitialStateCheck, "side thrust reads a key already held");
+            Assert.IsTrue(a.FindAction("ShipTop/Thrust").wantsInitialStateCheck, "top thrust reads a key already held");
             foreach (var name in new[] { "Thrust", "Retro", "Rotate", "Boost", "SkipDrive", "Fire", "Scan", "SystemMap", "Inventory" })
                 Assert.NotNull(a.FindAction($"{MeridianInput.ShipTop}/{name}"), name);
             Assert.NotNull(a.FindAction($"{MeridianInput.Always}/Pause"));

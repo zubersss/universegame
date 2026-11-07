@@ -119,8 +119,33 @@ namespace Meridian.Player
             transform.position = new Vector3(Stage.X + Stage.Shake.x, Stage.Y + Stage.Shake.y, -SideView.DistanceFor(Stage.Frame * 0.5f));
         }
 
+        /// <summary>U-107: the ship this camera follows while it is the target (the side ship aboard), else null.</summary>
+        public Meridian.Ship.SideShip Vehicle
+        {
+            get
+            {
+                if (target != vehicleFor) { vehicleFor = target; vehicle = target != null ? target.GetComponent<Meridian.Ship.SideShip>() : null; }
+                return vehicle;
+            }
+        }
+        Meridian.Ship.SideShip vehicle;
+        Transform vehicleFor;
+
         StageInput BuildInput(float dt)
         {
+            var ship = Vehicle;
+            if (ship != null && ship.Body != null)
+            {
+                // U-107: aboard, the frame follows the hull's centre with look-ahead along its velocity (§5.1 rules).
+                var c = ship.Body.position + Meridian.Ship.RocketFlight.UpAxis(ship.Tilt) * (Meridian.Ship.SideShip.Height * 0.5f - Meridian.Ship.SideShip.SkidDrop);
+                var sv = ship.Body.linearVelocity;
+                return new StageInput
+                {
+                    playerX = c.x, playerY = c.y, facing = sv.x < 0f ? -1 : 1, speedX = sv.x, speedY = sv.y,
+                    grounded = ship.Grounded, floorY = FloorUnder(ship.Body.position + Vector2.down * Meridian.Ship.SideShip.SkidDrop),
+                    baseFrame = BaseFrame, dt = dt, vehicle = true,
+                };
+            }
             var feet = player.Body != null ? player.Body.position : (Vector2)target.position;
             var v = player.Body != null ? player.Body.linearVelocity : Vector2.zero;
             return new StageInput

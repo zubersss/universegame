@@ -12,7 +12,7 @@ using UnityEngine.TestTools;
 
 namespace Meridian.Tests
 {
-    /// <summary>U-052 (PlayMode): dock at the Earth Waystation → sell 10 iron → Scrip rises → buy fuel → undock; Mars prices differ; save/load keeps Scrip and contracts.</summary>
+    /// <summary>U-052 (PlayMode): dock at the Earth Waystation → sell 10 iron → Scrip rises → repair → undock; Mars prices differ; save/load keeps Scrip and contracts.</summary>
     public class WaystationPlayTests
     {
         const string CorePath = "Assets/_Game/Scenes/Core.unity";
@@ -22,7 +22,7 @@ namespace Meridian.Tests
         [TearDown] public void TearDown() { SaveSystem.RootOverride = null; if (Directory.Exists(root)) Directory.Delete(root, true); }
 
         [UnityTest]
-        public IEnumerator DockTradeRefuelUndockAndSave()
+        public IEnumerator DockTradeRepairUndockAndSave()
         {
 #if UNITY_EDITOR
             yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
@@ -58,12 +58,12 @@ namespace Meridian.Tests
             int scrip0 = state.scrip;
             Assert.IsTrue(bay.SellItem("iron", 10), bay.LastMessage);
             Assert.AreEqual(scrip0 + 10 * Market.SellPrice("earth", "iron"), state.scrip, "Scrip rises");
-            // Buy fuel.
-            state.fuel = 50f;
+            // Repair the hull (no refuelling since U-107).
+            state.hull = 80f;
             int scrip1 = state.scrip;
-            Assert.AreEqual(50f, bay.Refuel(), 1e-3f, "topped up");
-            Assert.AreEqual(state.tankCapacity, state.fuel, 1e-3f);
-            Assert.AreEqual(scrip1 - 50 * Market.FuelPrice("earth"), state.scrip);
+            Assert.AreEqual(20f, bay.Repair(), 1e-3f, "patched up");
+            Assert.AreEqual(100f, state.hull, 1e-3f);
+            Assert.AreEqual(scrip1 - 20 * Market.RepairPrice("earth"), state.scrip);
             // A contract to carry to Mars.
             Assert.IsTrue(bay.Accept("earth_mars_patches"));
             bay.Undock();

@@ -9,7 +9,10 @@ using UnityEngine.TestTools;
 
 namespace Meridian.Tests
 {
-    /// <summary>U-063 (PlayMode): Earth → Neptune in ≈ 11 s at skip speed; refuses inside a well; fuel drains per second; the HUD shows the spool.</summary>
+    /// <summary>
+    /// U-063, U-107 (PlayMode, D-105): Earth → Neptune at skip speed; refuses inside a well; consumes nothing (no skip
+    /// fuel of any kind); after a skip the drive cools down for 10 s before it spools again.
+    /// </summary>
     public class SkipDriveTests
     {
         const string CorePath = "Assets/_Game/Scenes/Core.unity";
@@ -33,14 +36,13 @@ namespace Meridian.Tests
             ship.intent = default;
             while (ship.Invulnerable) yield return null;
             var state = GameState.Instance;
-            state.skipFuel = 0f;
             state.inventory.Clear();
 
             // Inside Earth's well: no spool.
             var earth = ship.world.Find("earth").Value;
             ship.Position = earth.position + new Vector2(0f, earth.WellRadius * 0.5f);
             ship.Velocity = Vector2.zero;
-            state.inventory.Add(ItemRegistry.Get("helium3_condensate").id, 3);
+            state.inventory.Add(ItemRegistry.Get("helium3_condensate").id, 3); // a crafting ingredient now: the drive never touches it
             drive.holdOverride = true;
             for (int i = 0; i < 30; i++) yield return new WaitForFixedUpdate();
             Assert.AreEqual(SkipDrive.Mode.Idle, drive.Current, "refuses inside a gravity well");
@@ -62,41 +64,30 @@ namespace Meridian.Tests
             Assert.AreEqual(SkipDrive.Mode.Skipping, drive.Current, "skipping after the spool");
             float t0 = Time.time;
             int he3Before = state.inventory.Count(ItemRegistry.Get("helium3_condensate").id);
-            float fuelAt2s = -1f;
             until = t0 + 30f;
-            while (drive.Current == SkipDrive.Mode.Skipping && Time.time < until)
-            {
-                if (fuelAt2s < 0f && Time.time - t0 >= 2f) fuelAt2s = state.skipFuel;
-                yield return new WaitForFixedUpdate();
-            }
+            while (drive.Current == SkipDrive.Mode.Skipping && Time.time < until) yield return new WaitForFixedUpdate();
             float skipSeconds = Time.time - t0;
             float left = Vector2.Distance(ship.Position, neptune.position);
-            TestContext.Out.WriteLine($"[MERIDIAN] skip Earth → Neptune: {skipSeconds:F1} s, stopped by {(ship.InWellOf ?? "-")}, {left:F0} u from Neptune, He-3 used {he3Before - state.inventory.Count(ItemRegistry.Get("helium3_condensate").id)}");
+            TestContext.Out.WriteLine($"[MERIDIAN] skip Earth → Neptune: {skipSeconds:F1} s, stopped by {(ship.InWellOf ?? "-")}, {left:F0} u from Neptune");
             Assert.AreEqual("neptune", ship.InWellOf, "dropped out of skip at Neptune's well");
             // Bible §3: 1,200 u/s; its "≈ 11 s" assumes Earth and Neptune in line. With the fixed angles of
             // SpaceLayout (P-13: Neptune 110° from Earth) the run is longer (≈ 13.2 s), see P-25.
             float expected = (Vector2.Distance(start, neptune.position) - neptune.WellRadius) / SkipDrive.Speed;
             Assert.AreEqual(expected, skipSeconds, 0.5f, $"skip at {SkipDrive.Speed} u/s over the layout's distance");
             Assert.LessOrEqual(ship.Velocity.magnitude, SpaceLayout.CruiseSpeed + 1f, "back to cruise speed");
-            Assert.Greater(fuelAt2s, -1f);
-            Assert.Less(state.inventory.Count(ItemRegistry.Get("helium3_condensate").id), he3Before + 1, "fuel drawn from the hold");
+            Assert.AreEqual(he3Before, state.inventory.Count(ItemRegistry.Get("helium3_condensate").id), "the skip consumed nothing");
+
+            // Cool-down: out of every well again, J held, the drive refuses for 10 s.
+            Assert.AreEqual(SkipDrive.CooldownSeconds, drive.Cooldown, 0.5f, "a 10 s cool-down after the skip");
+            ship.Position = start; ship.Velocity = Vector2.zero;
+            for (int i = 0; i < 10; i++) yield return new WaitForFixedUpdate();
+            Assert.AreEqual(SkipDrive.Mode.Idle, drive.Current, "no spool while cooling");
+            StringAssert.Contains("COOLING", drive.Refusal);
+            until = Time.time + SkipDrive.CooldownSeconds + 1f;
+            while (drive.Current == SkipDrive.Mode.Idle && Time.time < until) yield return new WaitForFixedUpdate();
+            Assert.AreEqual(SkipDrive.Mode.Spooling, drive.Current, "spools again once cool");
             drive.holdOverride = false;
             LogAssert.NoUnexpectedReceived();
-        }
-
-        [Test]
-        public void FuelDrawsFromTheHoldDeuteriumAtAThird()
-        {
-            var inv = new Inventory();
-            float tank = 0f;
-            inv.Add(ItemRegistry.Get("deuterium").id, 1);
-            Assert.IsTrue(SkipDrive.Draw(inv, ref tank, 1f));
-            Assert.AreEqual(SkipDrive.UnitsPerDeuterium - 1f, tank, 1e-4f, "deuterium is worth a third of He-3");
-            Assert.IsFalse(SkipDrive.Draw(inv, ref tank, 10f), "nothing left in the hold");
-            inv.Add(ItemRegistry.Get("helium3_condensate").id, 1);
-            tank = 0f;
-            Assert.IsTrue(SkipDrive.Draw(inv, ref tank, 4f));
-            Assert.AreEqual(SkipDrive.UnitsPerHelium3 - 4f, tank, 1e-4f, "Helium-3 tops up the tank first");
         }
     }
 }

@@ -52,16 +52,19 @@ namespace Meridian.Items
             foreach (var (key, name) in new[]
             {
                 ("iron", "Iron"), ("copper", "Copper"), ("carbon", "Carbon"), ("silica", "Silica"),
-                ("oxygen", "Oxygen"), ("launch_fuel", "Launch fuel"), ("perchlorate", "Perchlorate"),
+                ("oxygen", "Oxygen"), Retired, ("perchlorate", "Perchlorate"),
                 ("clay", "Clay"), ("aluminium", "Aluminium"), ("living_seed", "Living seed"),
                 ("wood", "Wood"), ("nickel", "Nickel"),
                 // U-051 (B-042 icons): refined and crafted goods, raw finds. Append only: ids never change once shipped.
                 ("smelter_bar_iron", "Iron bar"), ("smelter_bar_copper", "Copper bar"), ("graphite", "Graphite"),
                 ("suit_patch", "Suit patch"), ("circuit_board", "Circuit board"), ("radiation_liner", "Radiation liner"),
-                ("thermal_pad", "Thermal pad"), ("cryo_pad", "Cryo pad"), ("launch_fuel_cell", "Launch fuel cell"),
+                ("thermal_pad", "Thermal pad"), ("cryo_pad", "Cryo pad"), Retired,
                 ("solarite", "Solarite"), ("polar_ice", "Polar ice"), ("deep_core_sample", "Deep core sample"),
             })
+            {
+                if (key == null) { id++; continue; } // U-107 (D-103/D-105): a retired item keeps its id unused
                 Add(new ItemDef { id = id++, key = key, name = name, icon = $"icons/{key}/base" });
+            }
             // B-051 icons.
             foreach (var (key, name) in new[] { ("polymer", "Polymer"), ("solarite_capacitor", "Solarite capacitor"), ("float_cell_mk1", "Float cell Mk1") })
                 Add(new ItemDef { id = id++, key = key, name = name, icon = $"icons/{key}/base" });
@@ -73,9 +76,9 @@ namespace Meridian.Items
             foreach (var (key, name, art) in new[] { ("shelter_wall", "Shelter wall", "props/common/shelter_wall"), ("shelter_door", "Shelter door", "props/common/shelter_door"),
                 ("lamp", "Lamp", "props/common/lamp"), ("storage_crate", "Storage crate", "props/common/storage_crate"), ("aerostat_deck", "Aerostat deck", "props/venus/aerostat_deck") })
                 Add(new ItemDef { id = id++, key = key, name = name, icon = art });
-            // U-063 skip fuel: Helium-3 Condensate (Saturn) and deuterium (refined from water, a third as good).
+            // U-063: Helium-3 Condensate (Saturn), a crafting material. U-107 (D-105): the slot after it is retired (kept unused).
             Add(new ItemDef { id = id++, key = "helium3_condensate", name = "Helium-3 Condensate", icon = "icons/helium3_condensate/base" }); // B-061
-            Add(new ItemDef { id = id++, key = "deuterium", name = "Deuterium", icon = "icons/deuterium/base" });                         // B-061
+            id++;
             // U-069 M4 materials (Bible §7.6–7.9) and gear; icons from B-061 (same keys), placeholders until then.
             foreach (var (key, name) in new[]
             {
@@ -84,10 +87,13 @@ namespace Meridian.Items
                 ("deep_diamond", "Deep Diamond"), ("superionic_ice", "Superionic Ice"),
                 ("float_cell_mk2", "Float cell Mk2"), ("jetpack_mk2", "Jetpack Mk2"), ("jetpack_mk3", "Jetpack Mk3"),
                 // U-065 ship upgrades (Bible §4.3): installed when crafted (ShipMarks.Install).
-                ("thruster_mk2", "Thruster Mk2"), ("thruster_mk3", "Thruster Mk3"), ("tank_mk2", "Tank Mk2"), ("tank_mk3", "Tank Mk3"),
+                ("thruster_mk2", "Thruster Mk2"), ("thruster_mk3", "Thruster Mk3"),
             })
                 Add(new ItemDef { id = id++, key = key, name = name, icon = $"icons/{key}/base" });
         }
+
+        /// <summary>U-107: a retired item's slot in an id-ordered list (its id stays unused so later ids never move).</summary>
+        static readonly (string, string) Retired = (null, null);
 
         static void Tile(byte tile, string key, string name, string icon) =>
             Add(new ItemDef { id = tile, key = key, name = name, icon = icon, placeTile = tile });

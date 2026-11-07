@@ -1441,5 +1441,82 @@ namespace Meridian.Tests
             yield return Save(cam, $"{name}_3_mars_shelter_night");
             side.dayNight.Override = null;
         }
+        /// <summary>
+        /// U-107: the upright Pilgrim in side view, into reports/unity/u107/: on the pad (aboard, at rest), tilted mid-climb
+        /// (D held at full thrust: 35°, drifting right), and just under the Escape Line still climbing. Each shot logs tilt,
+        /// vertical speed, T/W and the camera's lead on the hull.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator CaptureU107Ship()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false;
+                var ship = side.ship;
+                var legs = ship.GetComponent<Meridian.Ship.ShipLegsView>();
+                timeout = Time.realtimeSinceStartup + 15f;
+                while ((legs == null || legs.Model == null || !legs.Model.Ready) && Time.realtimeSinceStartup < timeout) yield return null;
+                // Clean shots: whatever the stage spawned at load is logged, then despawned.
+                foreach (var c in side.creatures.All)
+                    if (c.Alive) { TestContext.Out.WriteLine($"[MERIDIAN] u107 despawning {c.Species} at {c.Body.position} (view {(c.View != null && c.View.sprite != null ? c.View.sprite.name : "none")})"); side.creatures.Despawn(c); }
+                ship.GetComponent<Meridian.Ship.ShipBoarding>().ForceAboard();
+                ship.externalInput = true;
+                ship.intent = default;
+                for (int i = 0; i < 60; i++) yield return new WaitForFixedUpdate();
+                var cam = side.sideCamera;
+                var follow = cam.GetComponent<Meridian.Player.CameraFollow>();
+                TestContext.Out.WriteLine($"[MERIDIAN] u107 camera: follow {(follow != null ? follow.enabled.ToString() : "none")}, target {(follow != null && follow.target != null ? follow.target.name : "none")}, vehicle {(follow != null && follow.Vehicle != null)}, cartoon {(follow != null && follow.Cartoon)}");
+                var dir = "coordination/reports/unity/u107";
+                Directory.CreateDirectory(dir);
+
+                IEnumerator Shot(string label)
+                {
+                    yield return null;
+                    yield return Save(cam, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    var lead = (Vector2)cam.transform.position - ship.Body.position;
+                    TestContext.Out.WriteLine($"[MERIDIAN] u107 {label}: tilt {ship.Tilt:F1}°, v ({ship.Body.linearVelocity.x:F1}, {ship.Body.linearVelocity.y:F1}) m/s, T/W {ship.ThrustToWeight:F2}, alt {ship.AltitudeAboveGround:F1} m, camera − hull ({lead.x:F1}, {lead.y:F1}), stage ({(follow != null ? follow.Stage.X : 0f):F1}, {(follow != null ? follow.Stage.Y : 0f):F1}) vs cam ({cam.transform.position.x:F1}, {cam.transform.position.y:F1}), follow {(follow != null && follow.enabled)}, vehicle {(follow != null && follow.Vehicle != null)}, stand-in {(legs != null && legs.StandIn)}");
+                }
+
+                // 1. On the pad, aboard, at rest.
+                Assert.IsTrue(ship.AtRest, "at rest on the pad");
+                yield return Shot("1_pad");
+
+                // 2. Tilted mid-climb: full thrust, D held (nose right), 3 s.
+                ship.intent = new Meridian.Ship.ShipSideIntent { thrust = 1f, lateral = 1f };
+                for (float t = 0f; t < 3f; t += Time.fixedDeltaTime) yield return new WaitForFixedUpdate();
+                Assert.AreEqual(-Meridian.Ship.RocketFlight.MaxTilt, ship.Tilt, 0.5f, "leaning 35° right");
+                yield return Shot("2_tilted_climb");
+
+                // 3. Upright again, climbing to just under the Escape Line (the next metres launch).
+                ship.intent = new Meridian.Ship.ShipSideIntent { thrust = 1f };
+                float line = side.Config.EscapeLineY;
+                timeout = Time.realtimeSinceStartup + 120f;
+                while (ship.Body.position.y < line - 2f && Time.realtimeSinceStartup < timeout) yield return new WaitForFixedUpdate();
+                ship.intent = default;
+                Assert.Less(ship.Body.position.y, line, "still under the Escape Line");
+                yield return Shot("3_escape_line");
+                side.dayNight.Override = null;
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Meridian.View2D.CartoonStage.Enabled = false;
+            }
+        }
     }
 }

@@ -708,6 +708,10 @@ MonoBehaviour:
       start: 30
       length: 10
       loop: 0
+    - name: fly
+      start: 40
+      length: 12
+      loop: 1
   - key: creatures/mercury/cinderhulk_day
     fps: 10
     clips:

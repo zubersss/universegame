@@ -27,14 +27,15 @@ namespace Meridian.FX
         {
             if (side != null)
             {
-                // Positions on the 11.4 × 3.4 m hull (B-008 side sheet): nozzle at the stern, lift vents under the belly.
-                Main = Make("Main", ArtKeys.Fx.Thruster, new Vector2(-SideShip.HullLength * 0.5f + 0.3f, -0.1f), -90f, new Vector2(2.2f, 2.4f));
-                PodAft = Make("PodAft", ArtKeys.Fx.Thruster, new Vector2(-2.8f, -1.3f), 0f, new Vector2(1.6f, 1.8f));
-                PodFore = Make("PodFore", ArtKeys.Fx.Thruster, new Vector2(2.45f, -1.3f), 0f, new Vector2(1.6f, 1.8f));
+                // U-107 (D-102): the rocket stands upright on its tail: the main nozzle points down out of the tail (below the
+                // pivot by SkidDrop), two small vents at the leg roots. Children of the ship, so they tilt with it.
+                Main = Make("Main", ArtKeys.Fx.Thruster, new Vector2(0f, -SideShip.SkidDrop - 0.9f), 0f, new Vector2(2.2f, 2.4f));
+                PodAft = Make("PodAft", ArtKeys.Fx.Thruster, new Vector2(-1.5f, -SideShip.SkidDrop + 0.4f), 0f, new Vector2(1.0f, 1.2f));
+                PodFore = Make("PodFore", ArtKeys.Fx.Thruster, new Vector2(1.5f, -SideShip.SkidDrop + 0.4f), 0f, new Vector2(1.0f, 1.2f));
                 // B-030 entry heat: a 1 m square frame (ppu 128) with the bow-shock arc low in it and the plasma
                 // trailing up. At 13 m the arc (~85% of the width) spans the 11.4 m hull and sits ~0.7 m under
                 // the belly. Its emission map makes it glow through night and dust (Sprite_LitEmissive).
-                Shimmer = Make("Shimmer", ArtKeys.Fx.HeatShimmer, new Vector2(0.5f, 2.4f), 0f, new Vector2(13f, 13f));
+                Shimmer = Make("Shimmer", ArtKeys.Fx.HeatShimmer, new Vector2(0f, -SideShip.SkidDrop + 1.2f), 0f, new Vector2(7f, 7f)); // the tail leads on the way down
                 Shimmer.flicker = 0f;
             }
             else if (top != null)
@@ -63,8 +64,8 @@ namespace Meridian.FX
             {
                 bool flying = side.piloted && !side.Grounded;
                 bool lift = side.piloted && side.intent.thrust > 0.05f;
-                Main.active = lift || (flying && Mathf.Abs(side.intent.lateral) > 0.05f);
-                PodAft.active = PodFore.active = lift;
+                Main.active = lift;
+                PodAft.active = PodFore.active = flying && Mathf.Abs(side.intent.lateral) > 0.05f; // attitude puffs while tilting
                 var v = side.Body != null ? side.Body.linearVelocity : Vector2.zero;
                 Shimmer.active = v.y < -ShimmerSpeed && side.AltitudeAboveGround > ShimmerAltitude;
             }

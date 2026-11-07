@@ -102,7 +102,7 @@ namespace Meridian.Tests
         }
 
         [UnityTest]
-        public IEnumerator SideHudShowsHealthFuelAndEscapeLine()
+        public IEnumerator SideHudShowsHealthAndEscapeLine()
         {
             SceneDirector director = null;
             yield return Boot(d => director = d);
@@ -113,30 +113,37 @@ namespace Meridian.Tests
             side.hazards.enabled = false;
             side.hazards.RestoreSuit();
             side.player.GetComponent<PlayerVitals>().health = 64f;
-            GameState.Instance.fuel = 41f;
             yield return null; yield return null;
             Assert.AreEqual("82", hud.HealthText.text);
             Assert.AreEqual(0.82f, hud.HealthFill.fillAmount, 1e-3f);
-            Assert.AreEqual("41", hud.FuelText.text);
-            Assert.AreEqual(0.41f, hud.FuelFill.fillAmount, 1e-3f);
             Assert.AreEqual(1f, hud.OxygenFill.fillAmount, "oxygen placeholder full");
             Assert.AreEqual(720f / 800f * SideHud.BarHeight, hud.EscapeMarker.anchoredPosition.y, 0.01f, "Escape Line marker at y 720 of 800");
             float playerY = side.player.Body.position.y;
             Assert.AreEqual(playerY / 800f * SideHud.BarHeight, hud.YouMarker.anchoredPosition.y, 0.5f, "player marker");
             Assert.AreEqual(Mathf.RoundToInt(playerY - 320f).ToString(), hud.AltText.text, "altitude above the Datum");
 
-            // Aboard: the ship block appears; Earth thrust 12 > g 9.81 so no stranded warning.
+            // Aboard: the ship block appears; Earth T/W 12 / 9.81 = 1.22 ≥ 1.2, so white and no warning (D-106).
             side.ship.GetComponent<ShipBoarding>().ForceAboard();
             yield return null; yield return null;
             var shipHud = side.shipHud;
             Assert.IsTrue(shipHud.VerticalSpeed.gameObject.activeInHierarchy, "ship block visible aboard");
             Assert.AreEqual("1.2", shipHud.ThrustToWeight.text, "T/W 12 / 9.81");
             Assert.IsFalse(shipHud.Warning.enabled);
+            Assert.AreEqual(ShipHud.TwrState.Ok, shipHud.State);
+            // D-106: 1.08 (Mk1 on Neptune) reads amber with the slow-climb line; 1.22 back to white.
+            shipHud.Apply(ShipHud.StateFor(12f / 11.15f));
+            Assert.AreEqual(ShipHud.TwrState.Amber, shipHud.State, "T/W 1.08 is amber");
+            Assert.AreEqual(ShipHud.Amber, shipHud.ThrustToWeight.color);
+            Assert.IsTrue(shipHud.Warning.enabled);
+            shipHud.Apply(ShipHud.StateFor(12f / 9.81f));
+            Assert.AreEqual(ShipHud.TwrState.Ok, shipHud.State, "T/W 1.22 is not amber");
+            Assert.AreNotEqual(ShipHud.Amber, shipHud.ThrustToWeight.color);
+            Assert.IsFalse(shipHud.Warning.enabled);
             LogAssert.NoUnexpectedReceived();
         }
 
         [UnityTest]
-        public IEnumerator TopHudShowsSpeedFuelAndWell()
+        public IEnumerator TopHudShowsSpeedAndWell()
         {
             SceneDirector director = null;
             yield return Boot(d => director = d);
@@ -148,12 +155,10 @@ namespace Meridian.Tests
             var earth = ship.world.Find("earth").Value;
             ship.Position = earth.position + new Vector2(0f, 50f); // inside Earth's well (2R)
             ship.Velocity = new Vector2(30f, 0f);
-            GameState.Instance.fuel = 77f;
             for (int i = 0; i < 3; i++) yield return new WaitForFixedUpdate();
             yield return null;
             var hud = director.Space.GetComponentInChildren<SpaceHud>();
             Assert.AreEqual(Mathf.RoundToInt(ship.Velocity.magnitude).ToString(), hud.Speed.text);
-            Assert.AreEqual("77", hud.Fuel.text);
             Assert.AreEqual("earth", hud.WellName.text, "well indicator names the body");
             Assert.AreEqual((Mathf.Round(ship.LastPull.magnitude * 10f) / 10f).ToString("0.0", System.Globalization.CultureInfo.InvariantCulture), hud.Well.text);
             LogAssert.NoUnexpectedReceived();

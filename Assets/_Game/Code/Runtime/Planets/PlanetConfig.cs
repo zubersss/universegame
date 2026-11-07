@@ -48,10 +48,7 @@ namespace Meridian.Planets
         public float AtmosphereRingRadius => 1.2f * visualRadius;
         public float GravityWellRadius => 4f * visualRadius;
 
-        /// <summary>Launch fuel cost in units of a 100-unit tank = round(1.5 × v_esc) (Bible §4.1).</summary>
-        public int LaunchFuelCost => LaunchFuelFor(escapeVelocityKms);
-
-        public static int LaunchFuelFor(float escapeVelocityKms) =>
-            (int)Math.Round(1.5 * escapeVelocityKms, MidpointRounding.AwayFromZero);
+        /// <summary>U-107 (D-103): the lowest thruster mark that climbs here (no launch fuel exists; thrust-to-weight is the only limit).</summary>
+        public int MinThrusterToClimb => Meridian.Ship.ShipMarks.MinThrusterToClimb(gravity);
     }
 }

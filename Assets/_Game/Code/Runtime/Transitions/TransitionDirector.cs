@@ -11,23 +11,23 @@ using UnityEngine.UI;
 namespace Meridian.Transitions
 {
     /// <summary>
-    /// Side ↔ top-down transitions (Bible §5.2, §5.3). Launch: Escape Line crossed going up → input
-    /// lock and camera ease-out (0.3 s), fade through white (0.5 s), PlanetSide unloads, ship on the
-    /// Atmosphere Ring at its longitude + the planet's rotation, 20 u/s outward, 1 s invulnerable.
-    /// Entry: inward ring crossing or F held inside the ring → push in and fade (0.8 s), PlanetSide
-    /// loads at longitude = angle − rotation, ship at Escape Line + 20 m descending 15 m/s.
-    /// Hull, fuel and cargo stay in GameState throughout (never re-read from disk).
+    /// Side ↔ top-down transitions (Bible §5.2, §5.3 v4.1). Launch: the ship's centre crosses the Escape Line going up
+    /// under the player's own thrust → the iris closes on it while the player keeps flying (no input lock, no auto-launch,
+    /// D-103), PlanetSide unloads, the ship goes on the Atmosphere Ring at its longitude + the planet's rotation, 20 u/s
+    /// outward, 1 s invulnerable, and the iris opens with the top-down controls already live (a held key keeps thrusting).
+    /// Entry: inward ring crossing or F held inside the ring → the camera pushes in while the iris closes and the player
+    /// keeps steering; PlanetSide loads while black at longitude = angle − rotation, the ship upright at Escape Line + 20 m
+    /// descending 15 m/s, side controls live on the first visible frame.
+    /// Hull and cargo stay in GameState throughout (never re-read from disk).
     /// </summary>
     public sealed class TransitionDirector : MonoBehaviour
     {
-        public const float LaunchLock = 0.3f, LaunchFade = 0.5f, LaunchReveal = 0.25f; // v3 white fades (unused since U-096: the iris, 0.35 s each way)
-        public const float EntryFade = 0.8f, EntryReveal = 0.3f;
-        /// <summary>U-096 (Bible §9.3 v4): launch = lock 0.3 s + iris-out 0.35 + switch + iris-in 0.35; entry = push-in under the iris-out 0.35 + load + iris-in 0.35.</summary>
+        /// <summary>U-096 / U-107: launch = iris-out 0.35 s (still flying) + switch + iris-in 0.35; entry = push-in under the iris-out 0.35 + load + iris-in 0.35.</summary>
         public const float IrisSeconds = IrisMath.Seconds;
         public const float RingOutwardSpeed = 20f;
         public const float InvulnerableSeconds = 1f;
         public const float EnterHoldSeconds = 0.5f;
-        public const float SideZoomOut = 14f, SpaceDefaultSize = 60f, SpacePushIn = 20f;
+        public const float SpaceDefaultSize = 60f, SpacePushIn = 20f;
 
         public SceneDirector scenes;
         public TimeSystem time;
@@ -130,15 +130,8 @@ namespace Meridian.Transitions
             var side = scenes.PlanetSide;
             var planet = side.Config;
             var cam = side.sideCamera;
-            sideShip.SetPiloted(false); // input locked
-
-            float startSize = Meridian.CameraRig.SideView.HalfHeight(cam);
-            for (float t = 0f; t < LaunchLock; t += Time.unscaledDeltaTime)
-            {
-                Meridian.CameraRig.SideView.SetHalfHeight(cam, Mathf.Lerp(startSize, SideZoomOut, t / LaunchLock));
-                yield return null;
-            }
-            yield return iris.Close(IrisWipe.ScreenCentre(cam, sideShip.Body.position), IrisSeconds); // U-096: iris-out on the ship
+            // U-107 (D-103, §5.2): the player keeps flying through the iris-out; nothing locks the input or moves the camera.
+            yield return iris.Close(IrisWipe.ScreenCentre(cam, sideShip.Body.position), IrisSeconds);
 
             float angle = Longitude(sideShip.Body.position.x, planet.worldWidth) + RotationDegrees(time, planet);
             var body = FindBody(planet.id);
@@ -206,7 +199,7 @@ namespace Meridian.Transitions
             float startSize = spaceCam != null ? spaceCam.orthographicSize : SpaceDefaultSize;
             var offset = spaceShip.Position - body.position;
             float angle = Mathf.Atan2(offset.y, offset.x) * Mathf.Rad2Deg;
-            spaceShip.Velocity = Vector2.zero;
+            // U-107 (D-103, §5.3): the player keeps steering through the iris-out (no freeze, no lock).
 
             // U-096: the camera pushes in on the ship while the iris closes on it (0.35 s); the load runs while the screen is black.
             StartCoroutine(iris.Close(IrisWipe.ScreenCentre(spaceCam, spaceShip.Position), IrisSeconds));

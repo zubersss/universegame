@@ -73,7 +73,7 @@ namespace Meridian.Tests
             yield return Boot(d => director = d);
             var transitions = Object.FindAnyObjectByType<TransitionDirector>();
             var state = GameState.Instance;
-            state.hull = 87f; state.fuel = 64.5f;
+            state.hull = 87f; state.thrusterMark = 2;
             state.cargo.Add(new CargoStack { itemId = 3, count = 12 });
             var side = director.PlanetSide;
             float x = side.ship.Body.position.x;
@@ -102,7 +102,7 @@ namespace Meridian.Tests
             Assert.AreEqual(20f, transitions.LaunchVelocity.magnitude, 0.01f, "purely radial");
 
             Assert.AreEqual(87f, state.hull, 1e-4f, "hull carried");
-            Assert.AreEqual(64.5f, state.fuel, 1e-4f, "fuel carried");
+            Assert.AreEqual(2, state.thrusterMark, "thruster mark carried");
             Assert.AreEqual(1, state.cargo.Count);
             Assert.AreEqual(12, state.cargo[0].count, "cargo carried");
             LogAssert.NoUnexpectedReceived();
@@ -116,7 +116,7 @@ namespace Meridian.Tests
             var transitions = Object.FindAnyObjectByType<TransitionDirector>();
             yield return LaunchFromEarth(director, transitions);
             var state = GameState.Instance;
-            float fuel = state.fuel;
+            float hull = state.hull;
 
             var ship = director.Space.GetComponentInChildren<SpaceShip>();
             ship.externalInput = true;
@@ -141,8 +141,10 @@ namespace Meridian.Tests
             Assert.AreEqual(570f + 20f, arrival.shipPosition.y, 1e-3f, "Escape Line + 20 m");
             Assert.AreEqual(-15f, arrival.shipVelocity.y, 1e-3f, "descending 15 m/s");
             Assert.AreEqual(-3.72f, Physics2D.gravity.y, 1e-4f, "Mars gravity on");
-            Assert.AreEqual(fuel, state.fuel, 1e-4f, "fuel unchanged");
+            Assert.AreEqual(hull, state.hull, 1e-4f, "hull unchanged");
             Assert.IsTrue(side.ship.GetComponent<ShipBoarding>().Aboard, "surveyor aboard");
+            Assert.IsTrue(side.ship.piloted, "side controls live (U-107: no lock)");
+            Assert.AreEqual(0f, side.ship.Tilt, 1e-3f, "upright (D-102)");
             Assert.LessOrEqual(transitions.LastEntrySeconds, 4f, "planet load ≤ 4 s (Bible §11.1)");
 
             // The ship then flies down under Mars gravity (sanity: it is descending, not frozen).

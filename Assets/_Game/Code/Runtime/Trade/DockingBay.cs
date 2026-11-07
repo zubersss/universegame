@@ -16,7 +16,7 @@ namespace Meridian.Trade
     /// <summary>
     /// U-052: docking and the docking-bay interior. Near a Waystation and slow, F docks: the ship holds still
     /// and the bay opens (backgrounds/waystation layers, B-039) with the Halcyon market on the U-058 panel
-    /// style: goods (buy/sell in Scrip at this station's prices), refuel and repair, cargo contracts
+    /// style: goods (buy/sell in Scrip at this station's prices), repair, cargo contracts
     /// (accept here, deliver at the destination), and UNDOCK. Lives on the Space root (off while on a planet).
     /// </summary>
     public sealed class DockingBay : MonoBehaviour
@@ -33,8 +33,8 @@ namespace Meridian.Trade
         readonly List<AsyncOperationHandle<Texture2D>> handles = new List<AsyncOperationHandle<Texture2D>>();
         readonly List<(string item, Text price, Text held, Image icon, Button buy, Button sell)> goods = new List<(string, Text, Text, Image, Button, Button)>();
         readonly List<(Text label, Button button)> contractRows = new List<(Text, Button)>();
-        Button refuel, repair;
-        Text refuelText, repairText;
+        Button repair;
+        Text repairText;
         bool savedExternal;
 
         GameState State => GameState.Instance;
@@ -137,16 +137,6 @@ namespace Meridian.Trade
             return ok;
         }
 
-        public float Refuel()
-        {
-            if (!Docked) return 0f;
-            int scrip = State.scrip; float fuel = State.fuel;
-            float units = Market.Refuel(Station, ref fuel, State.tankCapacity, ref scrip);
-            State.fuel = fuel; State.scrip = scrip;
-            Say(units > 0f ? $"Refuelled {units:F0} units" : "Tank full (or no Scrip)");
-            return units;
-        }
-
         public float Repair()
         {
             if (!Docked) return 0f;
@@ -241,10 +231,8 @@ namespace Meridian.Trade
             }
 
             UiKit.Text(panel.transform, "ServicesTitle", tl, new Vector2(700f, -70f), new Vector2(240f, 22f), 15, true, TextAnchor.MiddleLeft, theme.label).text = "SERVICES";
-            refuel = UiKit.ActionButton(panel.transform, "REFUEL", tl, new Vector2(700f, -100f), new Vector2(236f, 34f), () => Refuel());
-            refuelText = UiKit.Text(panel.transform, "RefuelCost", tl, new Vector2(700f, -138f), new Vector2(236f, 22f), 13, false, TextAnchor.MiddleLeft, theme.label);
-            repair = UiKit.ActionButton(panel.transform, "REPAIR", tl, new Vector2(700f, -168f), new Vector2(236f, 34f), () => Repair());
-            repairText = UiKit.Text(panel.transform, "RepairCost", tl, new Vector2(700f, -206f), new Vector2(236f, 22f), 13, false, TextAnchor.MiddleLeft, theme.label);
+            repair = UiKit.ActionButton(panel.transform, "REPAIR", tl, new Vector2(700f, -100f), new Vector2(236f, 34f), () => Repair());
+            repairText = UiKit.Text(panel.transform, "RepairCost", tl, new Vector2(700f, -138f), new Vector2(236f, 22f), 13, false, TextAnchor.MiddleLeft, theme.label);
             UiKit.Text(panel.transform, "ContractsTitle", tl, new Vector2(700f, -250f), new Vector2(240f, 22f), 15, true, TextAnchor.MiddleLeft, theme.label).text = "CARGO CONTRACTS";
             for (int i = 0; i < 4; i++)
             {
@@ -318,10 +306,8 @@ namespace Meridian.Trade
                 UiKit.SetAction(g.buy, State.scrip >= Market.BuyPrice(Station, g.item));
                 UiKit.SetAction(g.sell, held > 0);
             }
-            float fuelUnits = Mathf.Max(0f, State.tankCapacity - State.fuel), hullPts = Mathf.Max(0f, 100f - State.hull);
-            refuelText.text = $"{fuelUnits:F0} units × {Market.FuelPrice(Station)} Scrip";
+            float hullPts = Mathf.Max(0f, 100f - State.hull);
             repairText.text = $"{hullPts:F0} points × {Market.RepairPrice(Station)} Scrip";
-            UiKit.SetAction(refuel, fuelUnits >= 1f && State.scrip >= Market.FuelPrice(Station));
             UiKit.SetAction(repair, hullPts >= 1f && State.scrip >= Market.RepairPrice(Station));
             BuildContracts();
         }
