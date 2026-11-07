@@ -2,9 +2,9 @@
 (D-142), on build_props_jupiter_v3's machinery (as build_props_saturn_v3 does). The v2 models are replaced under the same
 keys when Uranus's card opens; they take UNITY's season tint (D-142), not three drawings.
 
-  umbrella_platform  192x176  a diamond-rain catcher: a ribbed ice-white canopy on a mast over a float, caught diamonds
+  umbrella_platform  192x192  a diamond-rain catcher: a ribbed ice-white canopy on a mast over a float, caught diamonds
                               glinting on the canopy, a rim gutter
-  tilted_derelict    224x160  the Uranus beacon on a Meridian hull lying tilted like the planet: slate plating, frost on the
+  tilted_derelict    224x192  the Uranus beacon on a Meridian hull lying tilted like the planet: slate plating, frost on the
                               upturned side, a round window, the ember beacon lamp (a tone: the one warm accent)
 
   python -I build_props_uranus_v3.py <review png>      lock-free design review (fakegp + numpy)
@@ -68,7 +68,7 @@ def umbrella_platform(d, M, k=0):
 
 def tilted_derelict(d, M, k=0):
     a = math.radians(-24)                                                                   # the hull lies tilted, like the planet
-    T = G.Xf(d, lambda pts: [(x * math.cos(a) - z * math.sin(a) + 0.2, x * math.sin(a) + z * math.cos(a) + 0.55) for x, z in pts])
+    T = G.Xf(d, lambda pts: [(x * math.cos(a) - z * math.sin(a), x * math.sin(a) + z * math.cos(a) + 0.55) for x, z in pts])
     hull = G.lumpy_ellipse(0.0, 0.3, 1.5, 0.55, n=40, lump=0.01, seed=31)
     G.stroke(T, hull, M["slate_sh"], 0.0, cyclic=True)
     G.stroke(T, [q for q in hull if q[1] > 0.55] + [(0.0, 0.55)], M["ice_f"], 0.0, cyclic=True)           # frost on the upturned side
@@ -83,7 +83,7 @@ def tilted_derelict(d, M, k=0):
     G.stroke(d, G.lumpy_ellipse(0.0, 0.0, 1.5, 0.08, n=20, seed=37), M["fog_sh"], I, cyclic=True)        # its resting frost drift
 
 
-PROPS = {"umbrella_platform": (umbrella_platform, 192, 176), "tilted_derelict": (tilted_derelict, 224, 160)}
+PROPS = {"umbrella_platform": (umbrella_platform, 192, 192), "tilted_derelict": (tilted_derelict, 224, 192)}   # the canopy apex / the beacon lamp need the height
 
 
 def pivot_of(name):
