@@ -1158,15 +1158,17 @@ def jupiter_spot(seed):
 # stay keyed by scene name).
 
 def ring_line(stack, rng, pal, H, y0):
-    """The ring plane edge-on: a bright cream line across the whole sky with a soft glow, its shadow band lower down."""
+    """The ring plane edge-on (Saturn's signature from the equatorial decks, LEAD 11:4x): a bright cream line 4 px thick across
+    the whole sky with a wide soft glow, a thin dark underside under it so it parts from the pale sky. Its shadow falls on the
+    cloud tops (layer1), not on the sky."""
     y = np.arange(H)[:, None] + 0.5
-    line = y0 + 3 * np.sin(np.arange(W)[None, :] / W * TAU_BG)
-    glow = ((y > line - 12) & (y < line + 14)).astype(np.float32)
-    stack.append(tint(rng, H, glow, pal["offwhite"], 0.45, var=0.0, edge_dark=0.0, bleed=7.0))
-    core = ((y > line - 3) & (y < line + 4)).astype(np.float32)                           # thick enough to read at 1x
-    stack.append(tint(rng, H, core, pal["offwhite"], 0.95, var=0.0, edge_dark=0.0, bleed=0.6))
-    shade = ((y > line + 60) & (y < line + 88)).astype(np.float32)
-    stack.append(tint(rng, H, shade, pal["teal"], 0.18, var=0.03, edge_dark=0.0, bleed=8.0))
+    line = y0 + 2 * np.sin(np.arange(W)[None, :] / W * TAU_BG)
+    glow = ((y > line - 16) & (y < line + 16)).astype(np.float32)
+    stack.append(tint(rng, H, glow, pal["offwhite"], 0.4, var=0.0, edge_dark=0.0, bleed=8.0))
+    under = ((y > line + 2) & (y < line + 4.5)).astype(np.float32)                        # the ring's unlit underside
+    stack.append(tint(rng, H, under, BG._mix(pal["teal"], pal["brown"], 0.4), 0.6, var=0.0, edge_dark=0.0, bleed=0.5))
+    core = ((y > line - 2) & (y < line + 2)).astype(np.float32)                           # 4 px: reads at 1x
+    stack.append(tint(rng, H, core, pal["offwhite"], 1.0, var=0.0, edge_dark=0.0, bleed=0.4))
 
 
 def ring_arc(stack, rng, pal, H, cy, R):
@@ -1230,7 +1232,7 @@ def saturn_scene(seed, deck="sdeck1"):
                                 (450, 24, pal["mustard"], 0.35), (520, 40, pal["offwhite"], 0.35)], pal):
             stack.append(t)
     if deck in ("sdeck1", "sdeck2"):
-        ring_line(stack, rng, pal, H, 330)                                                # low enough to cross the visible sky (at 110 it hid at the top)
+        ring_line(stack, rng, pal, H, 252)                                                # frame y ~216 at 1x (layer0 top at y -36): a fifth of the way down
     if deck == "hexagon":
         ring_arc(stack, rng, pal, H, 300, 900)
     if deck in ("sdeck1", "hexagon"):
@@ -1263,10 +1265,11 @@ def saturn_scene(seed, deck="sdeck1"):
                 "sdeep": BG._mix(pal["brown"], pal["red"], 0.15)}[deck]
         stack.append(tint(rng, H, lining(bank, 8, 4), pal["offwhite"], 0.85, var=0.03, edge_dark=0.02, bleed=2.5))
         stack.append(wash32(rng, H, bank, body, var=0.05, edge_dark=0.07, bleed=2.5))
-        if deck in ("sdeck1", "sdeck2"):                                                  # the ring's shadow across the cloud tops
+        if deck in ("sdeck1", "sdeck2"):                                                  # the ring's shadow: one straight band across the cloud tops
             y = np.arange(H)[:, None] + 0.5
-            sh = ((y > line[None, :] + 30) & (y < line[None, :] + 62)).astype(np.float32) * bank
-            stack.append(tint(rng, H, sh, pal["teal"], 0.3, var=0.02, edge_dark=0.0, bleed=6.0))
+            yb = 300 + 4 * np.sin(np.arange(W)[None, :] / W * TAU_BG)                      # frame y ~584-622 at 1x (layer1 top at y 284)
+            sh = ((y > yb) & (y < yb + 38)).astype(np.float32) * bank
+            stack.append(tint(rng, H, sh, BG._mix(pal["teal"], pal["brown"], 0.3), 0.45, var=0.02, edge_dark=0.0, bleed=3.0))
         if deck == "sdeck2":                                                              # a helium trap rig on its gasbag
             st = np.zeros((H, W), np.float32)
             sx = rng.uniform(300, 1700)
