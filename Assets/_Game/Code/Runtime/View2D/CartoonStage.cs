@@ -231,6 +231,13 @@ namespace Meridian.View2D
 
         void LateUpdate()
         {
+            // U-141: the set's under-fill takes the strip's fill tile once it is in (no allocation: a reference compare per frame).
+            if (Active && Ground != null)
+            {
+                var tile = Ground.FillTile;
+                if (Layers != null && Layers.groundTile != tile) Layers.groundTile = tile;
+                if (Incoming != null && Incoming.groundTile != tile) Incoming.groundTile = tile;
+            }
             if (Active && Layers != null && Layers.view != null && Datum != null) FollowBand(Layers.view.transform.position.x);
             if (Active && planetId == Meridian.Planets.PlanetId.Mercury && Ground != null && worldWidth > 0)
             {

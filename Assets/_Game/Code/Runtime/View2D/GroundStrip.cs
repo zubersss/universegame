@@ -95,6 +95,8 @@ namespace Meridian.View2D
 
         /// <summary>Ready once the grass strip is in; the other materials fall back to it until theirs arrive.</summary>
         public bool Ready => frames != null;
+        /// <summary>U-141: the 1 m fill tile under the strips (the planet's dirt; null until the first strip is in): the painted set's under-fill uses it.</summary>
+        public Sprite FillTile => dirt;
         public int Columns => count;
         /// <summary>U-111: how many of the four material sheets are in (tests and captures).</summary>
         public int MaterialsLoaded { get { int n = 0; for (int i = 0; i < framesBy.Length; i++) if (framesBy[i] != null) n++; return n; } }

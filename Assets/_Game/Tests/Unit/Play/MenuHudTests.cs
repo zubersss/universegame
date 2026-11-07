@@ -258,6 +258,17 @@ namespace Meridian.Tests
                 yield return Tap(keys, UnityEngine.InputSystem.Key.B);
                 Assert.IsTrue(crafting.IsOpen, "B opens the crafting panel");
                 Assert.IsFalse(foot.FindAction("Move").enabled, "U-134: held under the crafting panel too");
+                // U-140: the recipes page inside the paper; PageDown / PageUp turn the page, the row count says where.
+                StringAssert.Contains(" of ", crafting.RowCount.text, "the faded-ink row count");
+                if (crafting.Pages > 1)
+                {
+                    Assert.AreEqual(0, crafting.Page);
+                    yield return Tap(keys, UnityEngine.InputSystem.Key.PageDown);
+                    Assert.AreEqual(1, crafting.Page, "PageDown turns the recipes page");
+                    yield return Tap(keys, UnityEngine.InputSystem.Key.PageUp);
+                    Assert.AreEqual(0, crafting.Page, "PageUp turns it back");
+                    Assert.IsFalse(crafting.PrevButton.interactable, "the first page: PREV greyed");
+                }
                 yield return Tap(keys, UnityEngine.InputSystem.Key.B);
                 Assert.IsFalse(crafting.IsOpen, "B closes it");
                 Assert.IsTrue(foot.FindAction("Move").enabled, "and given back");

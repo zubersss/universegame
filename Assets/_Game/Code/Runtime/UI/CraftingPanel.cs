@@ -28,6 +28,40 @@ namespace Meridian.UI
         /// <summary>Tree nodes by blueprint id (tests and captures read them).</summary>
         public readonly Dictionary<string, Image> Nodes = new Dictionary<string, Image>();
         public readonly Dictionary<string, Button> CraftButtons = new Dictionary<string, Button>();
+        /// <summary>U-140 (D-151): the recipes column pages inside the paper (nothing draws past its bottom edge): this many rows a page, PREV / NEXT
+        /// cards, PageUp / PageDown and the wheel, a faded-ink row count.</summary>
+        public const int RecipesPerPage = 17;
+        public int Page { get; private set; }
+        public int Pages => Mathf.Max(1, (rows.Count + RecipesPerPage - 1) / RecipesPerPage);
+        public Button PrevButton { get; private set; }
+        public Button NextButton { get; private set; }
+        public Text RowCount { get; private set; }
+
+        /// <summary>U-140: shows page p of the recipes (clamped): its rows moved up into the first page's slots, the rest hidden.</summary>
+        public void ShowPage(int p)
+        {
+            Page = Mathf.Clamp(p, 0, Pages - 1);
+            float lift = Page * RecipesPerPage * RowH;
+            for (int i = 0; i < rows.Count; i++)
+            {
+                bool on = i / RecipesPerPage == Page;
+                var row = rows[i];
+                for (int k = 0; k < row.parts.Count; k++)
+                {
+                    var part = row.parts[k];
+                    if (part.gameObject.activeSelf != on) part.gameObject.SetActive(on);
+                    if (on) part.anchoredPosition = new Vector2(part.anchoredPosition.x, row.baseY[k] + lift);
+                }
+            }
+            if (RowCount != null)
+            {
+                int first = Page * RecipesPerPage, last = Mathf.Min(rows.Count, first + RecipesPerPage);
+                RowCount.text = rows.Count == 0 ? "" : $"recipes {first + 1}–{last} of {rows.Count}"; // on a page change only
+                RowCount.color = UiKit.Letter(Paper, false);
+            }
+            if (PrevButton != null) UiKit.SetAction(PrevButton, Page > 0);
+            if (NextButton != null) UiKit.SetAction(NextButton, Page < Pages - 1);
+        }
         public string LastMessage { get; private set; } = "";
 
         const float RowH = 42f, Icon = 30f;
@@ -37,6 +71,9 @@ namespace Meridian.UI
             public Recipe recipe;
             public Text name, station;
             public readonly List<(Image icon, int itemId)> icons = new List<(Image, int)>();
+            /// <summary>U-140: every piece the row drew on the panel and its y on the first page.</summary>
+            public readonly List<RectTransform> parts = new List<RectTransform>(12);
+            public readonly List<float> baseY = new List<float>(12);
         }
 
         GameObject root;
@@ -92,6 +129,11 @@ namespace Meridian.UI
             if (toggle != null) PanelInput.Hold(toggle.actionMap); // U-134: re-held each frame (a resume re-enables whole maps)
             if (iconsDirty) { iconsDirty = false; FillIcons(); }
             // Stations come and go as the surveyor walks: refresh twice a second while open.
+            // U-140: PageUp / PageDown and the wheel page the recipes (read only while the panel is open: Update runs only then).
+            var kb = Keyboard.current;
+            if (kb != null) { if (kb.pageDownKey.wasPressedThisFrame) ShowPage(Page + 1); else if (kb.pageUpKey.wasPressedThisFrame) ShowPage(Page - 1); }
+            var mouse = Mouse.current;
+            if (mouse != null) { float wheel = mouse.scroll.ReadValue().y; if (wheel < -0.01f) ShowPage(Page + 1); else if (wheel > 0.01f) ShowPage(Page - 1); }
             if (Time.unscaledTime < nextRefresh) return;
             nextRefresh = Time.unscaledTime + 0.5f;
             Refresh();
@@ -141,6 +183,7 @@ namespace Meridian.UI
                 var r = book.recipes[i];
                 float y = -72f - i * RowH;
                 var row = new Row { recipe = r };
+                int partsFrom = back.transform.childCount; // U-140: what this row draws is paged as one
                 float x = 860f;
                 row.icons.Add((IconAt(back.transform, x, y), ItemRegistry.Get(r.output.item)?.id ?? 0));
                 row.name = UiKit.Text(back.transform, "Out_" + r.id, tl, new Vector2(x + Icon + 8f, y - 4f), new Vector2(250f, Icon), 16, true, TextAnchor.MiddleLeft, theme.text);
@@ -158,8 +201,19 @@ namespace Meridian.UI
                 row.station.text = r.station.ToString().ToUpperInvariant();
                 var recipe = r;
                 CraftButtons[r.id] = UiKit.ActionButton(back.transform, "CRAFT", tl, new Vector2(1680f, y), new Vector2(130f, 34f), () => Craft(recipe));
+                for (int c = partsFrom; c < back.transform.childCount; c++)
+                {
+                    var part = (RectTransform)back.transform.GetChild(c);
+                    row.parts.Add(part);
+                    row.baseY.Add(part.anchoredPosition.y);
+                }
                 rows.Add(row);
             }
+            // U-140: the page cards and the row count along the paper's bottom, clear of the message line.
+            PrevButton = UiKit.ActionButton(back.transform, "PREV", tl, new Vector2(1490f, -832f), new Vector2(150f, 34f), () => ShowPage(Page - 1));
+            NextButton = UiKit.ActionButton(back.transform, "NEXT", tl, new Vector2(1660f, -832f), new Vector2(150f, 34f), () => ShowPage(Page + 1));
+            RowCount = UiKit.Text(back.transform, "RowCount", tl, new Vector2(860f, -836f), new Vector2(560f, 26f), 14, false, TextAnchor.MiddleLeft, theme.label);
+            ShowPage(0);
             root.SetActive(false);
             enabled = false;
         }

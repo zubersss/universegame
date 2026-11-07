@@ -173,6 +173,9 @@ namespace Meridian.View2D
         /// <summary>U-139: the planet's ground colour painted under the set's lowest bottom edge, so a camera in a dip or a trench sees ground, not a
         /// black band; null (the storm veil, tests) paints nothing.</summary>
         public Color? groundFill;
+        /// <summary>U-141: the ground strip's fill tile; when set the under-fill tiles it (the ground the strips stand on, not a flat dark grey), the
+        /// flat groundFill colour the fallback until the strip loads.</summary>
+        public Sprite groundTile;
         /// <summary>How deep the ground fill reaches under the set (m): past the frame bottom from any dip the camera can drop into.</summary>
         public const float FillDepth = 200f;
         SpriteRenderer fill;
@@ -200,12 +203,15 @@ namespace Meridian.View2D
             for (int i = 0; i < renderers.Count; i++) if (renderers[i] != null) bottom = Mathf.Min(bottom, renderers[i].transform.position.y);
             if (bottom == float.MaxValue) { fill.enabled = false; FillTop = float.NaN; return; }
             var col = groundFill.Value; col.a *= alpha;
+            if (groundTile != null) { col = new Color(1f, 1f, 1f, alpha); if (fill.sprite != groundTile) { fill.sprite = groundTile; fill.drawMode = SpriteDrawMode.Tiled; } }
+            else if (fill.sprite != fillSprite) { fill.sprite = fillSprite; fill.drawMode = SpriteDrawMode.Simple; }
             if (fill.color != col) fill.color = col;
             fill.sortingOrder = BackOrder + orderOffset - 1; // behind the far layer
             float width = view.orthographic ? view.orthographicSize * view.aspect * 2f + 4f : 200f;
             FillTop = bottom + 0.05f; // a hair over the set's edge: no seam between them
             fill.transform.position = new Vector3(c.x, FillTop, 0f);
-            fill.transform.localScale = new Vector3(width, FillDepth, 1f);
+            if (groundTile != null) { fill.transform.localScale = Vector3.one; fill.size = new Vector2(width, FillDepth); } // the tile's pivot is its top edge (GroundStrip.FillRect)
+            else fill.transform.localScale = new Vector3(width, FillDepth, 1f);
             fill.enabled = true;
         }
 
