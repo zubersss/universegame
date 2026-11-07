@@ -1,7 +1,7 @@
 """B-147 (C2 Venus design prep): five faceless Venus plant designs as (d, M, pose) drawing functions in the C2 manner
 (build_c2_earth_plants' hose stems and leaves), in the Venus palette (D-134). No faces (D-101): personality through
 motion only. Deck forms lean with the super-rotation wind (to +x); surface forms live by the vents. Each plant is built
-from part functions (stem / head) so the rig set can cut it later. Venus' deck gravity is near Earth's: drawn 1.0x.
+from part functions (stem / head) so the rig set can cut it later. Drawn 1.6x (at 1.0x they read too small at 1x).
 
   puffsail     a cream gas bladder like a little sail on an olive stalk, root threads; bobs and leans; react: sags, refills
   sulphurbell  an arching olive vine hung with four sulphur bells; the bells swing out of phase; react: they close, still
@@ -25,8 +25,8 @@ P = v3.PALETTES["venus"]
 O, I = G.OUTER, G.INNER
 TAU = 2 * math.pi
 hose_stem, leaf, rot = C.hose_stem, C.leaf, C.rot
-SCALE = 1.0
-FW, FH = 128, 192
+SCALE = 1.6                          # drawn 1.6x so they read beside the 2 m surveyor (Mars' are 1.5x; at 1.0x they were 0.5-0.8 m)
+FW, FH = 160, 192
 
 
 def SH(h):
@@ -122,6 +122,18 @@ def sulphurbell(d, M, p):
 
 
 # ---------------------------------------------------------------- hazefern (deck)
+def leaflet(d, M, base, ang, L, W):
+    """A small frond leaflet: olive with an apricot tip, a fine (interior-weight) ink edge so the colour reads at 1x."""
+    c, s_ = math.cos(ang), math.sin(ang)
+
+    def at(u, v):
+        return (base[0] + c * u * L - s_ * v * W, base[1] + s_ * u * L + c * v * W)
+    pts = [at(0, 0), at(0.35, 0.9), at(0.8, 0.6), at(1.0, 0.0), at(0.8, -0.6), at(0.35, -0.9)]
+    G.stroke(d, pts, M["olive_f"], 0.0, cyclic=True)
+    G.stroke(d, [at(0.7, 0.65), at(1.0, 0.0), at(0.7, -0.65)], M["haze_f"], 0.0, cyclic=True)
+    G.stroke(d, pts, M["ink"], I, cyclic=True)
+
+
 def hazefern_frond(d, M, curl, L=0.62, seed=5):
     """A frond from (0, 0) leaning up and into the wind (+x), its curvature growing toward the tip (curl 0 open .. 1 tight)."""
     pts, ang, x, z = [], math.radians(78), 0.0, 0.0
@@ -136,8 +148,8 @@ def hazefern_frond(d, M, curl, L=0.62, seed=5):
         q, nxt = pts[i], pts[i + 1]
         a = math.atan2(nxt[1] - q[1], nxt[0] - q[0])
         for side in (-1, 1):
-            leaf(d, M, q, a + side * 1.1, 0.10 * (1 - 0.5 * i / n), 0.03, veins=0)
-    hose_stem(d, M, pts, 0.035, rib_every=0.2)
+            leaflet(d, M, q, a + side * 1.1, 0.12 * (1 - 0.45 * i / n), 0.04)
+    hose_stem(d, M, pts, 0.05, rib_every=0.2)
     G.stroke(d, G.lumpy_ellipse(pts[-1][0], pts[-1][1], 0.025, 0.025, n=8, seed=seed), M["haze"], I, cyclic=True)
 
 
@@ -165,7 +177,7 @@ def glasscoral_spike(d, M, x, L, deg, k):
     base = (x, 0.04)
 
     def at(u, v):
-        return (base[0] + c * u * L - s * v * 0.035, base[1] + s * u * L + c * v * 0.035)
+        return (base[0] + c * u * L - s * v * 0.06, base[1] + s * u * L + c * v * 0.06)          # wide enough for the glass to show
     sh = [at(0, -1), at(0.8, -0.8), at(1.0, 0.0), at(0.8, 0.8), at(0, 1)]
     G.stroke(d, sh, M["glass_f"], 0.0, cyclic=True)
     G.stroke(d, [at(0, 0.1), at(0.8, 0.1), at(1.0, 0.0), at(0.8, 0.8), at(0, 1)], M["glass_sh"], 0.0, cyclic=True)
