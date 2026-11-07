@@ -150,8 +150,224 @@ def poses():
     return out
 
 
-SPECIES = {"dustskater": dict(draw=draw_dustskater, poses=poses, frame=(128, 80), seed=31,
-                              clips=[("idle", 10, True), ("walk", 12, True), ("react", 8, False), ("bump", 10, False), ("flee", 12, True)])}
+# ---------------------------------------------------------------- scree stalker (list order 2)
+# A canyon pack animal made curious (D-087): a low lizard-hound with a teal hide, scale-ridge rows, rust crest plates
+# along the spine that rise when it is surprised, a cheek frill, a mustard belly, clawed hose legs and a long tail
+# with a curled tip. It trots after the surveyor nose-down (the wolf's follow pattern). ~1.6 m long, ~0.9 m tall.
+
+STALKER = dict(hips=[(-0.22, 0.40), (0.24, 0.42), (-0.28, 0.38), (0.18, 0.40)], feet=[-0.30, 0.34, -0.38, 0.28],
+               ankle=0.06, leg_w=0.062, bend_hind=-0.34, bend_front=0.22, foot="paw", paw=(0.07, 0.035, 3, 2), dangle=0.30)
+STALKER_HEAD = 1.2
+SB = (0.0, 0.44, 0.40, 0.16)                                             # body centre x, z, radii
+CREST = [(-0.26, 0.09), (-0.13, 0.13), (0.01, 0.15), (0.14, 0.13), (0.25, 0.09)]   # plate x, height
+
+
+def mats_stalker(gp, sp="scree_stalker"):
+    def m(name, **kw):
+        return G.mat(gp, f"{sp}_{name}", **kw)
+    T = P["teal"]
+    return {
+        "coat": m("coat", fill=T), "coat_i": m("coat_inner", fill=T), "far": m("far", fill=SH(T)),
+        "leg": m("leg", fill=T), "leg_far": m("leg_far", fill=SH(T)),
+        "sh": m("coat_mid", fill=SH(T), ink=False), "dp": m("coat_deep", fill=DP(T), ink=False),
+        "belly": m("belly", fill=P["mustard"], ink=False), "belly_sh": m("belly_mid", fill=SH(P["mustard"]), ink=False),
+        "crest": m("crest", fill=P["red"]), "crest_far": m("crest_far", fill=SH(P["red"])),
+        "crest_sh": m("crest_mid", fill=SH(P["red"]), ink=False),
+        "nose": m("nose", fill=P["brown"]), "claw": m("claw", fill=P["offwhite"], behind=True),
+        "ink": m("ink", fill=None), "pupil": m("pupil", fill=G.INK, ink=False), "eye": m("eye_white", fill=P["offwhite"]),
+        "mouth": m("mouth", fill=DP(P["red"])), "star": m("star", fill=P["mustard"]),
+        "puff": m("puff", fill=P["offwhite"]), "puff_sh": m("puff_mid", fill=SH(P["offwhite"]), ink=False),
+    }
+
+
+def plate(base, ang, h, w):
+    """A rounded fin standing on `base`, its axis at angle `ang` (rad; pi/2 = straight up)."""
+    ca, sa = math.cos(ang), math.sin(ang)
+    nx, nz = sa, -ca
+
+    def at(u, v):
+        return (base[0] + ca * u * h + nx * v * w, base[1] + sa * u * h + nz * v * w)
+    return G.bezier(at(-0.2, -0.5), at(0.55, -0.55), at(0.95, -0.25), n=7) + \
+        G.bezier(at(1.0, -0.1), at(1.05, 0.15), at(0.85, 0.35), n=5)[1:] + G.bezier(at(0.7, 0.45), at(0.3, 0.55), at(-0.2, 0.5), n=6)[1:]
+
+
+def crest_plates(d, M, p, far=False):
+    """Spine plates on the body top, leaning back; p['crest'] raises (react) or flattens (flee) them, crest_ph ripples."""
+    cx, cz, rx, rz = SB
+    for k, (x, h) in enumerate(CREST):
+        top = cz + rz * math.sqrt(max(0.0, 1 - ((x - cx) / rx) ** 2))
+        normal = math.atan2((top - cz) / rz ** 2, (x - cx) / rx ** 2)
+        H = h * p["crest"] * (1 + 0.10 * math.sin(p["crest_ph"] - 0.9 * k))
+        ang = normal + math.radians(14) + 0.25 * (1 - p["crest"])           # flattened plates lie further back
+        shape = plate((x, top - 0.035), ang, H + 0.035, 0.115)
+        G.stroke(d, shape, M["crest"], O, cyclic=True)
+        n = len(shape)
+        G.stroke(d, shape[-(n // 4):] + [(x - 0.02, top - 0.01)], M["crest_sh"], 0.0, cyclic=True)   # a sliver on the trailing edge
+        tip = (x + math.cos(ang) * (H + 0.035) * 0.7, top - 0.035 + math.sin(ang) * (H + 0.035) * 0.7)
+        if 0 < k < len(CREST) - 1:
+            G.seam(d, [(x + 0.004, top - 0.01), tip], M["ink"])
+        G.stroke(d, shape, M["ink"], O, cyclic=True)
+
+
+def stalker_tail(d, M, p, seed):
+    base = (-0.33, 0.48)
+    up = p["tail"]
+    c, s = math.cos(up), math.sin(up)
+    curl = p["curl"]
+    raw = G.bezier(base, (-0.62, 0.52), (-0.84, 0.12), (-1.0, 0.16 + 0.05 * curl), n=18)
+    raw += [(-1.0 - 0.05 * math.cos(a), 0.16 + 0.05 * curl + 0.05 * math.sin(a)) for a in (0.9, 1.6, 2.2)][: 1 + int(2 * curl)]
+    pts = []
+    for i, (x, z) in enumerate(raw):
+        t = i / (len(raw) - 1)
+        z += p["wave"] * 0.05 * math.sin(math.pi * 1.5 * t) * t
+        pts.append((base[0] + (x - base[0]) * c - (z - base[1]) * s, base[1] + (x - base[0]) * s + (z - base[1]) * c))
+    left, right = [], []
+    for i, (x, z) in enumerate(pts):
+        t = i / (len(pts) - 1)
+        w = 0.095 * (1 - t) + 0.02 * t
+        a, b = pts[max(i - 1, 0)], pts[min(i + 1, len(pts) - 1)]
+        dx, dz = b[0] - a[0], b[1] - a[1]
+        L = math.hypot(dx, dz) or 1.0
+        nx, nz = -dz / L, dx / L
+        left.append((x + nx * w, z + nz * w))                                    # underside (the path runs leftwards)
+        right.append((x - nx * w, z - nz * w))
+    tip = pts[-1]
+    shape = left + [(tip[0] - 0.012, tip[1])] + right[::-1]
+    G.stroke(d, shape, M["coat"], O, cyclic=True)
+    k = int(len(pts) * 0.7)
+    mid = [((lx * 0.55 + x * 0.45), (lz * 0.55 + z * 0.45)) for (lx, lz), (x, z) in zip(left[:k], pts[:k])]
+    G.stroke(d, left[:k] + mid[::-1], M["belly"], 0.0, cyclic=True)              # a mustard underside stripe
+    G.stroke(d, mid, M["ink"], I)
+    for j in range(3, len(pts) - 3, 3):                                          # scale bands
+        G.seam(d, [right[j], ((right[j][0] + left[j][0]) / 2 + 0.01, (right[j][1] + left[j][1]) / 2)], M["ink"])
+    G.stroke(d, shape, M["ink"], O, cyclic=True)
+
+
+def draw_scree_stalker(d, M, pose=None, seed=0):
+    p = K.base_pose()
+    p.update(dict(crest=1.0, crest_ph=0.0, curl=0.5, wave=0.0))
+    p.update(pose or {})
+    cx, cz, rx, rz = SB
+    B = K.Body(p, (cx, cz))
+    J = (0.30, 0.54)
+    hx, hz = 0.58, 0.66
+    H = K.turn(J, p["head_rot"], p["head"], B)
+    dh, db = G.Xf(d, H), G.Xf(d, B)
+    dk = G.Xf(dh, K.scale_about((hx, hz), STALKER_HEAD))
+
+    def R(dx, dz):
+        return (hx + dx, hz + dz)
+    if p["puff"] is not None:
+        K.puff(d, M, -0.75 - 0.3 * p["puff"], 0.08 + 0.05 * p["puff"], 0.05 + 0.04 * p["puff"], seed + 40)
+    K.legs_pass(d, M, B, STALKER, p, far=True)
+    stalker_tail(db, M, p, seed)
+    crest_plates(db, M, p)
+    neck = G.bezier((0.16, 0.56), (0.32, 0.66), (0.48, 0.72), n=8) + G.bezier((0.60, 0.56), (0.50, 0.44), (0.30, 0.32), n=8)
+    G.stroke(dh, neck, M["coat"], O, cyclic=True)
+    G.stroke(dh, G.bezier((0.58, 0.55), (0.50, 0.44), (0.32, 0.33), n=8) + G.bezier((0.30, 0.40), (0.44, 0.48), (0.52, 0.60), n=8),
+             M["belly"], 0.0, cyclic=True)                                       # throat
+    for k in range(3):
+        G.seam(dh, [(0.40 + 0.05 * k, 0.40 + 0.06 * k), (0.45 + 0.05 * k, 0.43 + 0.06 * k)], M["ink"])
+    body = K.body_shape(cx, cz, rx, rz, seed + 1, chest=0.03)
+    G.stroke(db, body, M["coat_i"], 0.0, cyclic=True)
+    n = len(body)
+    low = [body[i] for i in range(n) if math.sin(TAU * i / n) < -0.38]
+    G.stroke(db, low + [(cx + (x - cx) * 0.88, cz + (z - cz) * 0.45) for x, z in low][::-1], M["belly"], 0.0, cyclic=True)
+    deep = [body[i] for i in range(n) if math.sin(TAU * i / n) < -0.75]
+    G.stroke(db, deep + [(cx + (x - cx) * 0.92, cz + (z - cz) * 0.8) for x, z in deep][::-1], M["belly_sh"], 0.0, cyclic=True)
+    G.stroke(db, [(cx + (x - cx) * 0.88, cz + (z - cz) * 0.45) for x, z in low], M["ink"], I)
+    for k in range(5):                                                           # belly plates
+        x = -0.22 + 0.11 * k
+        G.seam(db, [(x, cz - rz * 0.62), (x - 0.012, cz - rz * 0.92)], M["ink"])
+    haunch = G.bezier((-0.10, 0.58), (-0.02, 0.46), (-0.14, 0.33), n=8)
+    rear = [q for q in body if q[0] < -0.12 and q[1] > cz - rz * 0.4]
+    G.stroke(db, rear + haunch[::-1][:4], M["sh"], 0.0, cyclic=True)
+    G.stroke(db, [q for q in body if q[0] < -0.30 and q[1] > cz - rz * 0.3] + [(-0.30, cz + 0.02)], M["dp"], 0.0, cyclic=True)
+    G.seam(db, haunch, M["ink"])
+    for row, (z0, x0, nn) in enumerate(((0.52, -0.02, 3), (0.45, -0.07, 4))):  # scale-ridge rows
+        for k in range(nn):
+            x = x0 + 0.075 * k
+            G.seam(db, G.bezier((x, z0), (x + 0.035, z0 - 0.03), (x + 0.07, z0), n=4), M["ink"])
+    G.stroke(db, body, M["ink"], O, cyclic=True)
+    K.legs_pass(d, M, B, STALKER, p, far=False)
+    flare = 1.0 + 0.7 * max(0.0, -p["ears"])                                     # the cheek frill (ears in the kit's poses)
+    for k, a in enumerate((2.55, 3.05, 3.55)):
+        a2 = a + (a - 3.05) * 0.5 * (flare - 1) + 0.3 * p["ears"]
+        G.stroke(dk, plate(R(-0.06, -0.02), a2, 0.085 * flare, 0.06), M["crest_far" if k != 1 else "crest"], O, cyclic=True)
+    for k, (dx, dz, hh) in enumerate(((-0.07, 0.07, 0.06), (0.01, 0.095, 0.075))):   # head crest
+        G.stroke(dk, plate(R(dx, dz), math.radians(115), hh * (0.6 + 0.4 * p["crest"]), 0.05), M["crest"], O, cyclic=True)
+    G.stroke(dk, G.lumpy_ellipse(hx, hz, 0.13, 0.10, n=36, lump=0.03, seed=seed + 2, rot=-0.08), M["coat"], O, cyclic=True)
+    sn = p["sniff"]
+    snout = G.bezier(R(0.03, 0.06), R(0.14, 0.05), R(0.22, 0.015 + 0.008 * sn), n=8) + \
+        G.bezier(R(0.245, -0.005 + 0.008 * sn), R(0.255, -0.045), R(0.215, -0.065), n=5) + \
+        G.bezier(R(0.19, -0.07), R(0.10, -0.08), R(0.0, -0.06), n=8)
+    G.stroke(dk, snout, M["coat"], O, cyclic=True)
+    G.stroke(dk, G.bezier(R(0.20, -0.062), R(0.12, -0.074), R(0.03, -0.058), n=8) + G.bezier(R(0.04, -0.038), R(0.12, -0.046), R(0.20, -0.044), n=8),
+             M["belly"], 0.0, cyclic=True)                                       # pale lower jaw
+    G.stroke(dk, G.lumpy_ellipse(*R(0.215, 0.005 + 0.008 * sn), 0.016 + 0.004 * sn, 0.012, n=10, seed=seed + 6), M["nose"], I, cyclic=True)
+    if p["mouth"] > 0.05:
+        mo = p["mouth"]
+        G.stroke(dk, G.lumpy_ellipse(*R(0.17, -0.05), 0.018 + 0.012 * mo, 0.008 + 0.014 * mo, n=12, seed=seed + 7), M["mouth"], I, cyclic=True)
+    else:                                                                        # a long closed smile, curled up at the cheek
+        G.seam(dk, G.bezier(R(0.22, -0.045), R(0.13, -0.05), R(0.05, -0.04), R(0.03, -0.018), n=8), M["ink"])
+    G.specks(dk, [R(0.12, 0.02), R(0.15, 0.0), R(0.09, 0.0)], M["ink"])
+    G.seam(dk, G.bezier(R(-0.02, 0.085), R(0.04, 0.10), R(0.10, 0.075), n=5), M["ink"])   # brow ridge
+    K.eyes(dk, M, *R(0.02, 0.03), 0.03, 0.042, 0.058, p, seed)
+    if p["stars"] is not None:
+        K.stars(dk, M, *R(0.0, 0.25), 0.18, p["stars"])
+
+
+def stalker_poses():
+    out = []
+    for i in range(10):                                                          # idle: breathe, crest ripple, tail sway, sniff, blink
+        ph, q = K.idle_common(i, 10)
+        q.update(head_rot=0.03 * math.sin(ph - 0.8), crest_ph=ph, tail=0.04 * math.sin(ph - 1.0), wave=0.6 * math.sin(ph - 0.5),
+                 ears=0.06 * math.sin(ph), sniff=1.0 if i in (2, 3) else 0.0, blink={7: 0.6, 8: 1.0}.get(i, 0.0))
+        out.append(q)
+    for i in range(12):                                                          # walk: low and slinky, the tail swings
+        ph = TAU * i / 12
+        out.append(dict(legs=K.walk_legs(ph, 0.13, 0.05), bob=0.008 * math.cos(2 * ph), sz=1 + 0.02 * math.cos(2 * ph),
+                        rock=0.025 * math.sin(ph), head_rot=0.035 * math.sin(2 * ph - 0.5), crest_ph=2 * ph,
+                        tail=0.05 * math.sin(ph - 1.0), wave=math.sin(ph - 0.8), ears=0.08 * math.sin(2 * ph - 1.2), lean=0.02))
+    out += [dict(sz=0.95, look=(0.7, 0.0), crest=1.1),                           # react: the crest shoots up, frill flares
+            dict(sz=0.92, head_rot=0.05, sniff=1.0, crest=1.0),
+            dict(sz=1.07, head_rot=0.15, head=(0.0, 0.03), eye_pop=1.45, crest=1.55, ears=-0.6, mouth=0.4, tail=0.15, curl=1.0),
+            dict(sz=1.05, head_rot=0.17, head=(0.0, 0.03), eye_pop=1.5, crest=1.6, ears=-0.7, mouth=0.5, tail=0.18, curl=1.0),
+            dict(sz=1.03, head_rot=0.14, eye_pop=1.3, crest=1.45, ears=-0.55, mouth=0.2, tail=0.15, crest_ph=1.5),
+            dict(sz=1.0, head_rot=0.10, eye_pop=1.1, crest=1.3, ears=-0.35, sniff=1.0, tail=0.12, look=(0.9, 0.2), crest_ph=3.0),
+            dict(sz=1.0, head_rot=0.06, crest=1.15, ears=-0.15, tail=0.08, look=(0.3, 0.0)),
+            dict(sz=1.0, head_rot=0.02, crest=1.05, tail=0.04)]
+    out += K.bump_clip(lambda f: dict(crest=1.0 + 1.2 * f.get("antler", 0.0), tail=0.4 * f.get("tail", 0.0), curl=0.5 + 0.5 * f.get("tail", 0.0)))
+    for i in range(12):                                                          # flee: two bounds of 6, crest flat, tail streaming
+        legs, bob, sz, rock = K.gallop(i / 6, A=0.7, lz=0.6)
+        ph = TAU * i / 6
+        out.append(dict(legs=legs, bob=bob, sz=sz, rock=rock, lean=0.06, head_rot=-0.05 + 0.04 * math.cos(ph), crest=0.55,
+                        crest_ph=ph, ears=0.5, tail=0.06 + 0.04 * math.sin(ph - 1.0), wave=0.5 * math.sin(ph - 1.2), curl=0.0,
+                        look=(0.8, 0.0), puff=(i % 6) / 6.0 if i % 3 == 0 else None))
+    for i in range(12):                                                          # follow: a curious nose-down trot, tail up and swaying
+        ph = TAU * i / 6
+        trot = K.walk_legs(ph, 0.10, 0.06, order=(math.pi, 0.0, 0.0, math.pi))
+        out.append(dict(legs=trot, bob=0.01 * abs(math.cos(ph)), sz=1 + 0.02 * math.cos(2 * ph), head_rot=-0.13 + 0.03 * math.sin(2 * ph),
+                        head=(0.02, -0.02), sniff=1.0 if i % 4 < 2 else 0.0, crest=1.15, crest_ph=ph, ears=-0.15 + 0.08 * math.sin(2 * ph),
+                        tail=0.16 + 0.06 * math.sin(TAU * i / 4), wave=0.9 * math.sin(TAU * i / 4), curl=1.0, lean=0.03, look=(0.8, -0.3)))
+    return out
+
+
+SPECIES = {
+    "dustskater": dict(draw=draw_dustskater, poses=poses, mats=mats, frame=(128, 80), seed=31,
+                       clips=[("idle", 10, True), ("walk", 12, True), ("react", 8, False), ("bump", 10, False), ("flee", 12, True)],
+                       self_check={"ink": "shell plate seams, rivet dots, hatch, pad seams, antenna knobs",
+                                   "motion": "squash on the beat, hose legs, the antennae drag and overshoot, skating pads slide; flee kicks dust",
+                                   "original": "our own scavenger: a butterscotch dome with rust bands on skate pads; no teeth"},
+                       ours="a little butterscotch dome on four skate pads that glides over the rust and kicks up dust when it bolts"),
+    "scree_stalker": dict(draw=draw_scree_stalker, poses=stalker_poses, mats=mats_stalker, frame=(192, 96), seed=32,
+                          clips=[("idle", 10, True), ("walk", 12, True), ("react", 8, False), ("bump", 10, False), ("flee", 12, True),
+                                 ("follow", 12, True)],
+                          self_check={"ink": "crest plate ribs, scale-ridge rows, belly plates, haunch seam, tail bands, toe seams, brow ridge",
+                                      "motion": "squash on the beat, hose legs, the crest ripples and shoots up, the frill flares, the tail swings and curls",
+                                      "original": "our own canyon lizard-hound: teal hide, rust spine plates, cheek frill; curious, never a fighter (D-087), no teeth"},
+                          ours="a low teal lizard-hound whose rust crest shoots up when it is surprised and who trots after you nose-down, tail swinging"),
+}
 
 
 def preview(out_dir, name="dustskater"):
@@ -167,7 +383,7 @@ def preview(out_dir, name="dustskater"):
     frames, widths, below = [], [], []
     for f, pose in enumerate(sp["poses"]()):
         gp = fakegp.FakeGP()
-        M = mats(gp, name)
+        M = sp["mats"](gp, name)
         d = fakegp.FakeDrawing()
         sp["draw"](d, M, pose, seed=5 * f)
         st = fakegp.strokes_of(d, gp, as_object=(name, "art"))
@@ -207,11 +423,7 @@ def preview(out_dir, name="dustskater"):
              "inner_n": len(inner), "palette": v3.palette_hits(sheet, "mars"), "problems": problems,
              "sheet_wh": (sheet.shape[1], sheet.shape[0]), "png_kb": nb // 1024}
     entry = {"key": meta["key"], "planet": "mars", "bg_scene": "-", "beside": "characters/surveyor/side",
-             "self_check": {"ink": "shell plate seams, rivet dots, hatch, pad seams, antenna knobs",
-                            "motion": "squash on the beat, hose legs, the antennae drag and overshoot, skating pads slide; flee kicks dust",
-                            "original": "our own scavenger: a butterscotch dome with rust bands on skate pads; no teeth",
-                            "style": "the B-132 kit (Gus's construction); LEAD judges"},
-             "ours": "a little butterscotch dome on four skate pads that glides over the rust and kicks up dust when it bolts"}
+             "self_check": dict(sp["self_check"], style="the B-132 kit (Gus's construction); LEAD judges"), "ours": sp["ours"]}
     out = os.path.join(out_dir, f"review_b139_mars_{name}_preview.png")
     boxes = review.v3_sheet_review(entry, meta, frames, png, out, stats)
     print(name, f"sheet {sheet.shape[1]}x{sheet.shape[0]} {nb // 1024} KB, ink {stats['outer_px'][0]:.2f}-{stats['outer_px'][1]:.2f} / "
@@ -220,4 +432,5 @@ def preview(out_dir, name="dustskater"):
 
 
 if __name__ == "__main__":
-    preview(sys.argv[1])
+    for _n in (sys.argv[2:] or ["dustskater"]):
+        preview(sys.argv[1], _n)

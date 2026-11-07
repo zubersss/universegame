@@ -1,13 +1,13 @@
 # BLENDER STATUS
-Updated: 2026-11-07 03:38 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 03:50 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-LEAD cycle 255 order (lock-free; my want for the B-139 canyon + storm studies is queue #2 after UNITY's PlayMode A / B + captures, ~04:0x, refreshed):
+LEAD cycle 255 order (lock-free; B-139 canyon + storm studies are queue #2 after UNITY's PlayMode B + captures; want withdrawn 03:40 at UNITY's request (their wrapper yields to any older want), re-filed on "captures done"):
 1. Puffpod D-101 fix: DONE 03:4x (9e9b06d): two off-centre seams, irregular low speckles; review_b139_mars_puffpod_preview.png.
 2. B-136 Hadal Maw design: DONE before the cycle (1fb50b1), for LEAD's look.
 3. README_v4 exact-preview paragraph: DONE (8c3a165).
 4. Mars rig-set sources DONE 03:3x (a4c9395): build_c2_mars_rigs.py, 5 plants (bones 3 / 2 / 4 / 4 / 2), 26 parts, dry run flora/mars/rigset 504x216 27 KB, json valid, palette 100 %, review_b139_mars_rigset_dryrun.png (idle with Unity's maths + react per plant). build() ready for the Mars cards.
-5. Mars creature previews: Dustskater DONE 03:37 (709a5bb, design only: 128x80, idle 10 / walk 12 skate glide / react 8 / bump 10 / flee 12 with dust, ink 2.00-3.00 / 1.00-1.50, palette 100 %, json valid, review_b139_mars_dustskater_preview.png). NEXT: Scree stalker (list order 2).
+5. Mars creature previews: Dustskater DONE 03:37 (709a5bb, design only: 128x80, idle 10 / walk 12 skate glide / react 8 / bump 10 / flee 12 with dust, ink 2.00-3.00 / 1.00-1.50, palette 100 %, json valid, review_b139_mars_dustskater_preview.png). Scree stalker drawn 03:49 (design only: 192x96, idle 10 / walk 12 / react 8 crest up / bump 10 / flee 12 / follow 12; all 64 exact frames: json valid, no edge / ground hits, ink 2.00-3.00 / 1.00-1.50, palette 100 %, 86 MB); its review image waits for free RAM (0.5 GB while UNITY's PlayMode B runs). Both Mars creatures have v2 models in Art: export rows need replaces_v2. NEXT: Lava-tube lurker (list order 3).
 Nothing Mars exports until its cards exist. B-131 export after UNITY's U-113 (after U-106).
 
 ## Last completed
@@ -50,4 +50,4 @@ none (the Sun rig was ruled D-123).
 none.
 
 ## HeavyJobLock
-none held; want_blender.lock filed 03:20 for the B-139 canyon + dust-storm backdrop studies (FFT ~300 MB, ~2 min, preview only), rank per LEAD.
+none held, no want on file (withdrawn 03:40 so UNITY's PlayMode B could start, heavy_unity.lock 03:39); re-file for the B-139 canyon + dust-storm studies (FFT ~300 MB, ~2 min, preview only) when UNITY says "captures done".
