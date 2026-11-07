@@ -70,10 +70,18 @@ def blade(base, ang, L, W, tip=0.35):
 def sunfan(d, M, p):
     sq, edge, shut = p.get("squash", 1.0), p.get("edge", 0.0), p.get("react", 0.0)
     S = G.Xf(d, lambda pts: [(x / math.sqrt(sq), z * sq) for x, z in pts])
+    sunfan_stem(S, M)
+    sunfan_fan(S, M, edge, shut)
+
+
+def sunfan_stem(S, M):
     leaf(S, M, (0.0, 0.06), math.radians(160), 0.18, 0.05, veins=1)
     leaf(S, M, (0.0, 0.08), math.radians(22), 0.16, 0.045, veins=1)
     G.stroke(S, G.hose_outline(G.bezier((0.0, 0.0), (0.02, 0.16), (0.0, 0.32), n=6), 0.06), M["ember"], O, cyclic=True)
-    hub = (0.0, 0.34)
+
+
+def sunfan_fan(S, M, edge, shut, hub=(0.0, 0.34)):
+    """The fan about its hub (a rig part uses hub (0, 0))."""
     kx = 1.0 - 0.55 * edge                                                   # tilting edge-on to the Sun: the fan narrows
     F = G.Xf(S, lambda pts: [(hub[0] + (x - hub[0]) * kx, z) for x, z in pts])
     spread = 1.0 - 0.85 * shut
@@ -93,8 +101,17 @@ def embercap(d, M, p):
     b, puff = p.get("breathe", 0.0), p.get("puff")
     sq = p.get("squash", 1.0) * (1 + 0.04 * b)
     S = G.Xf(d, lambda pts: [(x / math.sqrt(sq), z * sq) for x, z in pts])
+    embercap_foot(S, M)
+    embercap_cap(S, M, puff)
+
+
+def embercap_foot(S, M):
     G.stroke(S, G.hose_outline([(0.0, 0.0), (0.01, 0.14)], 0.13), M["sage"], O, cyclic=True)              # the stubby foot
     G.stroke(S, G.hose_outline([(0.03, 0.0), (0.04, 0.14)], 0.05), M["sage_sh"], 0.0, cyclic=True)
+
+
+def embercap_cap(S, M, puff):
+    """The cap, its gold underside, crust, cracks and the spark puff, at its drawn height (the rig shifts it to 0)."""
     cap = [(x, max(z, 0.15)) for x, z in G.lumpy_ellipse(0.0, 0.17, 0.26, 0.15, n=36, lump=0.04, seed=11)]
     under = [(x, z) for x, z in G.lumpy_ellipse(0.0, 0.15, 0.24, 0.035, n=20, lump=0.02, seed=12)]
     G.stroke(S, under, M["gold"], I, cyclic=True)                                                         # the gold underside
@@ -119,28 +136,49 @@ REEDS = [(-0.09, 0.62, 100), (-0.03, 0.88, 94), (0.03, 0.74, 86), (0.08, 0.52, 7
 
 def glassreed(d, M, p):
     a0, clack, k = p.get("sway", 0.0), p.get("react", 0.0), p.get("k", 0)
-    G.stroke(d, G.lumpy_ellipse(0.0, 0.03, 0.15, 0.045, n=16, seed=31), M["slate"], O, cyclic=True)        # the base tuft
+    glassreed_base(d, M)
     for j, (x, L, deg) in enumerate(sorted(REEDS, key=lambda r: -r[1])):
         lean = math.radians(deg) + a0 * (1 + 0.3 * j) * math.sin(j * 1.3 + 1) - clack * (math.radians(deg) - math.pi / 2) * 0.85
-        bl = blade((x, 0.04), lean, L, 0.05, tip=0.2)
-        G.stroke(d, bl, M["ice_f"], 0.0, cyclic=True)                                                   # teal blades: they live on the
-        edge = [(x + 0.012 * math.cos(lean + math.pi / 2) + t * L * math.cos(lean), 0.04 + 0.012 * math.sin(lean + math.pi / 2) + t * L * math.sin(lean))
-                for t in (0.05, 0.9)]
-        G.stroke(d, G.hose_outline(edge, 0.016), M["violet_sh"], 0.0, cyclic=True)                          # violet twilight band, a violet edge
-        t = 0.45 + 0.25 * ((k + j) % 3) / 2                                                                  # the glint walks up
-        G.stroke(d, G.lumpy_ellipse(x + t * L * math.cos(lean) - 0.006, 0.04 + t * L * math.sin(lean), 0.012, 0.03, n=8, seed=40 + j,
-                                    rot=lean - math.pi / 2), M["white_f"], 0.0, cyclic=True)
-        G.stroke(d, bl, M["ink"], O, cyclic=True)
+        glassreed_reed(d, M, j, x, L, lean, k)
+
+
+def glassreed_base(d, M):
+    G.stroke(d, G.lumpy_ellipse(0.0, 0.03, 0.15, 0.045, n=16, seed=31), M["slate"], O, cyclic=True)        # the base tuft
+
+
+def glassreed_reed(d, M, j, x, L, lean, k, z0=0.04):
+    """One reed from (x, z0) along lean: teal blade, violet edge, the glint at step k, ink."""
+    bl = blade((x, z0), lean, L, 0.05, tip=0.2)
+    G.stroke(d, bl, M["ice_f"], 0.0, cyclic=True)                                                   # teal blades: they live on the
+    edge = [(x + 0.012 * math.cos(lean + math.pi / 2) + t * L * math.cos(lean), z0 + 0.012 * math.sin(lean + math.pi / 2) + t * L * math.sin(lean))
+            for t in (0.05, 0.9)]
+    G.stroke(d, G.hose_outline(edge, 0.016), M["violet_sh"], 0.0, cyclic=True)                          # violet twilight band, a violet edge
+    t = 0.45 + 0.25 * ((k + j) % 3) / 2                                                                  # the glint walks up
+    G.stroke(d, G.lumpy_ellipse(x + t * L * math.cos(lean) - 0.006, z0 + t * L * math.sin(lean), 0.012, 0.03, n=8, seed=40 + j,
+                                rot=lean - math.pi / 2), M["white_f"], 0.0, cyclic=True)
+    G.stroke(d, bl, M["ink"], O, cyclic=True)
 
 
 # ---------------------------------------------------------------- shadebloom (shadow side)
 def shadebloom(d, M, p):
     o, sq = p.get("open", 0.5), p.get("squash", 1.0)
     S = G.Xf(d, lambda pts: [(x / math.sqrt(sq), z * sq) for x, z in pts])
-    coil = [(0.04 * math.sin(t * 3.2), t * 0.46) for t in [i / 30 for i in range(31)]]                      # the coiled stem
+    top = shadebloom_stem(S, M)
+    shadebloom_bloom(S, M, o, top)
+
+
+SB_COIL = [(0.04 * math.sin(t * 3.2), t * 0.46) for t in [i / 30 for i in range(31)]]                    # the coiled stem
+SB_TOP = (SB_COIL[-1][0], SB_COIL[-1][1] + 0.02)
+
+
+def shadebloom_stem(S, M):
     leaf(S, M, (0.0, 0.08), math.radians(150), 0.16, 0.045, veins=1)
-    hose_stem(S, M, coil, 0.05, rib_every=0.12)
-    top = (coil[-1][0], coil[-1][1] + 0.02)
+    hose_stem(S, M, SB_COIL, 0.05, rib_every=0.12)
+    return SB_TOP
+
+
+def shadebloom_bloom(S, M, o, top):
+    """The petals about `top` (a rig part uses top (0, 0)): bud (o 0) .. open star (o 1)."""
     for k in range(5):                                                                                      # petals: bud (o 0) .. open star (o 1)
         a = math.pi / 2 + (k - 2) * math.radians(14 + 26 * o)
         pet = blade(top, a, 0.17 + 0.03 * o, 0.09 + 0.03 * o, tip=0.5)
@@ -155,7 +193,16 @@ def shadebloom(d, M, p):
 # ---------------------------------------------------------------- coilwort (cold traps)
 def coilwort(d, M, p):
     h = p.get("height", 0.36)
+    coilwort_knob(d, M)
+    coilwort_spring(d, M, h)
+
+
+def coilwort_knob(d, M):
     G.stroke(d, G.lumpy_ellipse(0.0, 0.02, 0.07, 0.03, n=12, seed=61), M["slate"], I, cyclic=True)
+
+
+def coilwort_spring(d, M, h):
+    """The coil spring from z 0.03 to 0.03 + h and the ice bead on top."""
     spring = [(0.085 * math.sin(t * TAU * 2.5) * (1 - 0.25 * t), 0.03 + t * h) for t in [i / 48 for i in range(49)]]
     G.stroke(d, G.hose_outline(spring, 0.055), M["sage"], O, cyclic=True)
     G.stroke(d, G.hose_outline([(x + 0.012, z) for x, z in spring], 0.02), M["sage_sh"], 0.0, cyclic=True)    # the shaded side
