@@ -1318,7 +1318,7 @@ Goal: C2 Uranus design prep (Bible §12 C2 order 7; §7.8 the sideways winter): 
 Accept: one review per group at 1x on a Uranus stand-in beside the surveyor; the ten boxes self-checked; nothing exported.
 Files: blender/scripts/build_c2_uranus_*.py, coordination/reports/blender/c2_uranus_designs.md
 Depends: B-157
-Lead notes: Cycle 268. The same shape as B-155 / B-157 on the cloud-column pattern; previews only when RAM allows; after the Saturn previews and deck studies.
+Lead notes: Cycle 268. The same shape as B-155 / B-157 on the cloud-column pattern; previews only when RAM allows; after the Saturn previews and deck studies. Cycle 268 (11:0x): PALETTE ACCEPTED (ef1553ae: cyan fog, cold white, one warm accent in ember amber, cold slate; every check passing, dimmer than Saturn) → PALETTES["uranus"]; the report (52c52ee5: Sunturner, Fogbell, Hailcatch, Embermoss, Prismfern; floes; deck notes; the Diamondback Colossus as a Grand rig; props) noted. D-142: each deck ships as sun_left / sun_right / night sets + a survey layer0; UNITY crossfades by the season clock (U-130).
 
 > **R1 (D-062).** 2D tasks B-056..B-076 are Superseded; their `.blend` sources (rigs, props,
 > terrain recipes) are the starting point for the models. Contract v2 §9 is the rule set.
