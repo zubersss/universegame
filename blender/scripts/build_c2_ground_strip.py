@@ -252,7 +252,7 @@ def checks(S):
     return within, across, problems
 
 
-def export(art, S=None):
+def export(art, S=None, keys=None):
     """B-130: terrain/earth/ground_strip{,_soil,_stone}_color.png (8 frames 64x152 in one row, 4 px
     gutters) + <name>.json (style v3, pivot on the ground line, "tile": true, no clips). Raises on a
     failed accept check. Returns [(key, w, h, bytes)], within, across."""
@@ -265,8 +265,9 @@ def export(art, S=None):
     if problems:
         raise ValueError("ground strips fail the B-130 checks: " + "; ".join(problems))
     out = []
-    for kind in KINDS:
-        key = KEYS[kind]
+    keys = keys or KEYS                                       # B-140: build_c2_mars_ground passes the Mars keys
+    for kind in keys:
+        key = keys[kind]
         W = 8 * FW + 7 * GUTTER
         sheet = np.zeros((FH, W, 4), np.uint8)
         for j, im in enumerate(S[kind]):

@@ -1051,9 +1051,10 @@ def do_ground_strip_set(entry, preview):
     review_b130_ground_strips.png = the frames at 3x + the 1x assembled scene on the plains."""
     from meridian import fakegp
     t0 = time.time()
+    mod = os.path.splitext(os.path.basename(entry.get("generator", "scripts/build_c2_ground_strip.py")))[0]
     if preview:
-        raise AssetError(f"{entry['key']}: no preview mode (python build_c2_ground_strip.py <png>)")
-    import build_c2_ground_strip as GS
+        raise AssetError(f"{entry['key']}: no preview mode (python {mod}.py <png>)")
+    GS = __import__(mod)                # build_c2_ground_strip (Earth) or build_c2_mars_ground (B-140): sheets / export / main
     keys = list(GS.KEYS.values())
     fakegp.install()                    # an earlier review script in this batch may have restored gp_draw.mat
     try:

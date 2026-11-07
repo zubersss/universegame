@@ -292,6 +292,22 @@ def dry_run(out_dir):
     sh = np.tile(np.array([0.62, 0.72, 0.72], np.float32), (sheet.shape[0] + 10, W, 1))
     review._over(sh, sheet, 8, 5)
     rows.append(sh)
+    rows += plant_rows(W)
+    img = np.vstack(rows)
+    review._label(img, __import__("time").strftime("%m-%d %H:%M") + " dry run (not exported)", 2, img.shape[0] - 16)
+    out = os.path.join(out_dir, "review_b139_mars_rigset_dryrun.png")
+    review.write(out, img)
+    print("written", out, f"| sheet {sheet.shape[1]}x{sheet.shape[0]} {n // 1024} KB, {len(meta['parts'])} parts,",
+          "bones", {p["name"]: len(p["bones"]) for p in PLANTS}, "| problems", problems or "-", f"| palette {hits * 100:.1f}% {off_[:3]}")
+
+
+def plant_rows(W):
+    """Per plant: the first 6 idle frames with Unity's maths (RigSetBuilder tracks + swap cycle) and its react."""
+    import numpy as np
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    import preview_c2_earth_rigs as PR
+    rows = []
     fw, fh, piv = 200, 200, (0.5, 0.06)
     for plant in PLANTS:
         nfr = PR.idle_frames(plant)
@@ -304,12 +320,21 @@ def dry_run(out_dir):
         review._label(r, f"{plant['name']}: {len(plant['bones'])} bones, idle (unity's maths, {nfr} frames on {plant['idle']['beat_bpm']} bpm; first 6) | react; "
                          f"biomes {', '.join(plant['biomes'])}", 6, 4)
         rows.append(r)
-    img = np.vstack(rows)
-    review._label(img, __import__("time").strftime("%m-%d %H:%M") + " dry run (not exported)", 2, img.shape[0] - 16)
-    out = os.path.join(out_dir, "review_b139_mars_rigset_dryrun.png")
+    return rows
+
+
+def main(out):
+    """render.py review_script (B-140, flora/mars/rigset): every Mars plant assembled with Unity's maths at 1x."""
+    import numpy as np
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    W = 1900
+    head = np.tile(review.PAPER, (28, W, 1)).astype(np.float32)
+    review._label(head, f"b-140 flora/mars/rigset assembled: {len(PLANTS)} plants, idle (unity's maths) | react, drawn 1.5x for 0.38 g", 6, 8)
+    img = np.vstack([head] + plant_rows(W))
+    review._label(img, __import__("time").strftime("%m-%d %H:%M") + " export", 2, img.shape[0] - 16)
     review.write(out, img)
-    print("written", out, f"| sheet {sheet.shape[1]}x{sheet.shape[0]} {n // 1024} KB, {len(meta['parts'])} parts,",
-          "bones", {p["name"]: len(p["bones"]) for p in PLANTS}, "| problems", problems or "-", f"| palette {hits * 100:.1f}% {off_[:3]}")
+    return []
 
 
 if __name__ == "__main__":

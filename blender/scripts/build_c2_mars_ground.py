@@ -36,13 +36,29 @@ def mats(gp):
     }
 
 
-def preview(out_dir):
+def sheets():
+    """{kind: [8 frames]} for regolith + basalt and the measured ink widths (B-130's recipe, Mars materials)."""
+    return GS.sheets(tuple(KEYS), mats)
+
+
+def export(art, S=None):
+    """B-140: terrain/mars/ground_strip (+ _basalt) colour + json in the B-130 contract; raises on a failed check."""
+    return GS.export(art, S if S is not None else sheets()[0], keys=KEYS)
+
+
+def main(out, S=None, allw=None, footnote="sources + preview"):
+    """render.py's review hook: the B-139 layout written to `out`."""
+    return preview(os.path.dirname(out), out=out, S=S, allw=allw, footnote=footnote)
+
+
+def preview(out_dir, out=None, S=None, allw=None, footnote=None):
     import numpy as np
     sys.path.insert(0, os.path.dirname(HERE))
     import review
     import build_c2_mars_plants as MPL
     import preview_c2_earth_rigs as PR
-    S, allw = GS.sheets(tuple(KEYS), mats)
+    if S is None:
+        S, allw = sheets()
     within, across, problems = GS.checks(S)
     W = 1700
     rows = []
@@ -87,8 +103,8 @@ def preview(out_dir):
                         f"{max(w[2] for w in inner):.1f} px; keys {', '.join(KEYS.values())} (export after lead accepts)", 6, 28)
     rows.append(foot)
     img = np.vstack(rows)
-    review._label(img, __import__("time").strftime("%m-%d %H:%M") + " preview (not exported)", 2, img.shape[0] - 16)
-    out = os.path.join(out_dir, "review_b139_mars_ground_preview.png")
+    review._label(img, __import__("time").strftime("%m-%d %H:%M") + " " + (footnote or "preview (not exported)"), 2, img.shape[0] - 16)
+    out = out or os.path.join(out_dir, "review_b139_mars_ground_preview.png")
     review.write(out, img)
     print("written", out, "| joins", {k: round(v, 2) for k, v in within.items()}, "|", across, "| problems", problems or "-")
 
