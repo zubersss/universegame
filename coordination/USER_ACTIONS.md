@@ -6,15 +6,15 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-26 — Play the C1 build 0.4.1 and look at its page (15 min)
-Open https://claude.ai/artifact/N73DUqTkiQvDfEeTTu6HHx (the C1 page: what you can do, the stills,
-the numbers, what comes next). Build 0.4.1 is ready (07:45; it starts Earth on the cartoon look, D-132).
-The very first launch takes 6 to 8 seconds before you stand on the ground; later loads are under two.
-Then play: double-click `C:\dev\universegame\Build\MERIDIAN_0.4.1\MERIDIAN.exe`.
-Walk with A / D, jump with Space, walk up to the rocket and press F to board. Hold W or Space to
-thrust, A / D to tilt; fly up past the dotted Escape Line, find Mars, come down slowly and touch
-the ground under 6 m/s. Ten minutes is enough. Tell the Lead "C1 plays" or what bothered you.
-This replaces USER-24 (the round 2 look-over): the same art is now in the game.
+### USER-27 — Play the Earth and Mars build 0.4.3 and look at its page (15 min)
+Open https://claude.ai/artifact/3FkYSjxX9bwjf34tapwDZU (the C2 Earth and Mars page: the stills, the numbers,
+what changed since the flight, what comes next). Build 0.4.3 has both planets drawn (12:00; D-144).
+Then play: double-click `C:devNiversegameBuildMERIDIAN_0.4.3MERIDIAN.exe`. The first launch now takes
+about a second before you stand on the ground. On Earth walk left from the camp into the forest and right to
+the coast; the Hadal Maw waits in the deep water past the beach. Board with F, fly to Mars as before (W or
+Space to thrust, A / D to tilt; come down under 6 m/s), land, and walk until the canyon walls rise; stay a
+while and a dust storm will find you. Fifteen minutes is enough. Tell the Lead "C2 reads" or what bothered
+you, planet by planet. This replaces USER-26 (the C1 playtest): 0.4.3 contains everything 0.4.1 had.
 
 
 
@@ -26,6 +26,7 @@ If you get too many "allow this command?" prompts, tell the Lead "approve PowerS
 allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
 
 ## Done
+- 2026-11-07 12:0x · USER-26 folded into USER-27 (Build 0.4.3 has both planets; the C2 page replaces the C1 ask).
 - 2026-11-07 05:4x · USER-24 folded into USER-26 (the round 2 art is in the C1 build and on its page).
 - 2026-11-07 01:04 · USER-25 done: free RAM reached 1.98 GB (ChatGPT, Copilot and Chrome gone); UNITY's U-103 + U-109 check started at 01:06.
 - 2026-11-06 19:3x · USER-23 done: the owner kept the look and asked for four changes (thinner detailed ink, faces only on people and animals, an upright Pilgrim, fully manual fuel-free flight) → D-100..D-104, Bible 4.1, contract v3.1, cards U-107, B-123..B-127. A second look-over follows when the re-inked set lands (C1).
