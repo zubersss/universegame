@@ -191,7 +191,7 @@ the rest.
 | Giants: `deck_far.glb`, `deck_mid.glb`, `deck_near.glb`, `props/<planet>_foreground/wisp_*.glb` | per B-097 | 256 m | ≤ 2 k per plane | 2048 × 1024 RGBA per plane |
 
 Per-planet cap: the sum of every layer texture a planet can have resident (all its regions) is
-≤ 700 MB stored (BC7/BC5 with mips); BLENDER reports the sum in its render report and
+≤ 700 MB stored (BC7/BC5 with mips) *(superseded by D-089/D-110: ≤ 512 MB of all textures per planet, every kind, enforced at import; §10 is frozen)*; BLENDER reports the sum in its render report and
 `ArtImporter` (UNITY, U-091) rejects the newest layer of a planet over the cap.
 
 **`stage.json`** (one per region beside `ridge_mid.glb`; authored by BLENDER, read by UNITY):
@@ -241,7 +241,7 @@ Every v3 asset's sidecar carries `"style": "v3"` so ArtImporter routes it to the
   "squash_root": true
 }
 ```
-`fps` is always 12 (on twos). Frame caps per clip: idle 8–12, walk/run 12–16, jump/land 8–10,
+`fps` is always 12 (on twos). Frame caps per clip: idle 8–12, walk/run/fly/swim 12–16 (a flier's or swimmer's travel clip is its walk, v3.1), jump/land 8–10,
 one-off specials ≤ 16. Facing is a runtime flip; never draw the mirror. Clip sets:
 - **surveyor** (hero, full frame-by-frame): idle, walk, run, jump, fall, land, dig, build, bump
   (dizzy stars), look_camera, surprise (eye-pop), conk_out, jetpack, climb_in. No attack/hurt/death.
@@ -249,7 +249,7 @@ one-off specials ≤ 16. Facing is a runtime flip; never draw the mirror. Clip s
   bump, flee or follow. No attack/hurt/death (D-087).
 - **ship** (hero): side idle, thrust (stretch), cut (squash), land_puff; top idle, thrust, turn.
 
-**11.3 Simple rigs (background flora and props).** One sheet per planet's flora set:
+**11.3 Simple rigs (background flora, props, and the Pilgrim, D-111).** Large rigid objects with a few moving parts (the ship: hull, fin-legs, hatch, bell) ship as a rig set of parts + bones + sockets on one sheet, with tilt, stretch and squash left to UNITY's root transforms; frame sheets are for characters and creatures. One sheet per planet's flora set:
 `flora/<planet>/rigset_color.png` (≤ 2048²) holding every part (stem segments, leaves, petals,
 heads, swap states such as open/closed/curled; **no face parts**, D-101), plus `rigset.json`:
 ```json

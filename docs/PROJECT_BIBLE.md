@@ -716,7 +716,7 @@ layer has collision.
 Streaming: the current region's layers and the adjacent region's are resident (the adjacent set
 preloads when the player is within 200 m of the border and unloads 5 s after it is two regions
 away); each set is one Addressable label `stage_<planet>_<region>`. Layer textures per planet
-(all its regions) ≤ 700 MB stored (contract §10).
+(all its regions) ≤ 700 MB stored (contract §10). *Superseded by D-089 / D-110: ≤ 512 MB of all textures per planet, enforced by ArtImporter (U-091); §10.10 is a frozen v3 section.*
 
 ## 11. Performance budgets (requirements, not goals)
 
@@ -733,7 +733,7 @@ away); each set is one Addressable label `stage_<planet>_<region>`. Layer textur
 | Particles alive               | ≤ 1500; every emitter pooled                                      |
 | GC allocation (steady state)  | ≤ 1 KB per 300 frames; zero per-frame allocations in gameplay code |
 | Chunk generation              | ≤ 2 ms main-thread per frame; no hitch > 33 ms during streaming or at a region border |
-| Planet load                   | ≤ 5 s; space ↔ planet transition ≤ 1.5 s (no input lock inside it, D-103) |
+| Planet load                   | ≤ 5 s, measured from the entry start (or the boot load) until the terrain is settled and no load into the planet's Addressables groups is pending (U-091, D-110); space ↔ planet transition ≤ 1.5 s (no input lock inside it, D-103). Resident groups on a planet: that planet's own, `common`, `ui`, `space`, `planet_space`, `planet_warden`, `planet_waystation`, `planet_rig`, `icons`, `session`; the previous planet's groups and bundles close within 5 s. Terrain sheets used by more than one planet live in `common`, unpacked. Sprite packing stays off through C1: the atlas row counts resident sheet textures ≥ 1024² per planet (≤ 8) |
 | Textures                      | BC7 (colour), BC5 (normals); mips on every 3D world texture; v4 cartoon assets (sidecar `style: v3`: sheets, rig sets, painted layers, discs, overlays, palette strips) import without mips (contract §11.8) and are counted apart; atlases ≤ 2048², ≤ 8 sprite atlases per planet, ≤ 512 MB textures per planet (D-089); mip streaming on with a 512 MB budget |
 | Animation                     | surveyor and apexes 60 fps clips, others 30 fps; ≤ 2 ms skinning per frame with 20 creatures |
 | Audio                         | Vorbis, streamed for music, compressed in memory for SFX          |

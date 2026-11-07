@@ -1,5 +1,6 @@
 # LEAD STATUS
-Updated: 2026-11-06 21:2x · Session: 6 · Review cycle: 244
+Updated: 2026-11-06 22:0x · Session: 6 · Review cycle: 245
+Cycle 245: B-125 Done; U-107 landed (two owed fixes, batched with U-108); D-110 U-091 rulings; D-111 Pilgrim rig set (B-122/U-103 rewritten); B-128; C2 Earth plant designs approved. Next: U-108 hand-off (v4.1 stills → owner look-over page), B-119/B-120 disc and starfield sheets.
 Cycle 244: D-109 (While-waiting lists + Heavy job queue + 300 MB light-work cap) in CLAUDE.md, the three charters and the board top. Every cycle from now: rewrite the queue, top up the lists.
 Cycle 243: B-124, B-123 Done; B-126 art accepted; B-125/B-127 previews accepted; D-108 starfield; U-108 added (rig schema + re-ink import + v4.1 stills for the owner). Waiting: U-107 check (after BLENDER lock), B-125/B-127 exports, B-122 upright sheets.
 Cycle 242: owner C0 feedback written in (Bible 4.1, contract v3.1, D-100..D-104): thin detailed ink, faces only on people and animals, upright Pilgrim, manual fuel-free flight. New cards U-107, B-123..B-127. D-105: no fuel of any kind (skip fuel gone too). Next reviews: B-124 pipeline proof, U-107 flight hand-off, B-126 snoozle v2.
