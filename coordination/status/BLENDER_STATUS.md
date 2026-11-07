@@ -1,13 +1,13 @@
 # BLENDER STATUS
-Updated: 2026-11-07 17:20 · Session: 8 (resumed 14:3x after the ~14:17 machine restart; C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 17:30 · Session: 8 (resumed 14:3x after the ~14:17 machine restart; C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-B-168 (D-151, ahead of the Neptune decks; the owner's 0.4.7 waits for it): the eight Venus station props re-inked, source 6d685baa (frames at the catalog widths so PoiPlacer's scale stays 1; the deck top_row 37 at 64 px/m, UNITY's topRow 62 -> 37; per-prop smoke clean). Next slot: its export (props/venus/b168_set + review_b168_venus_station.png), then the six Neptune decks on the look pass. Want rewritten 17:11:15 to that order; a lock monitor watches for UNITY's lock B to release.
-B-161's last item, the six Neptune deck studies. 17:07:45-17:09:20 (the gap between UNITY's 0.4.6 locks A and B, caught by a lock monitor): ndeck1 + ndeck2 (48 / 41 s, peak 590 MB), the driver stopped on UNITY's lock-B want. My read: the wind did not read (layer2's 1 px dabs nearly invisible, the banks barely leaning, faint plumes and cirrus shadows) -> one look pass c8a231d6 (bolder wind + speed lines, crests sheared downwind, darker plumes and shadows); LEAD told not to judge the first two. Next slot: all six on the pass (~4.5 min). Want filed 17:09:56 behind lock B.
-Then: the Jupiter exports (B-156 with B-159's first slot, B-159, B-160; the rows are all v3; scratch dry runs when RAM allows outside UNITY's build chain).
-B-167 VERIFIED (LEAD 16:5x); B-154 exported; B-152 / B-153 verified.
+B-161's last item: the six Neptune deck studies on the look pass c8a231d6. 17:24:43-17:28:29: ndeck1 / ndeck2 / ndeck3 done (220 s, peak 590 MB; seams 0.88 / 0.57 / 0.06, 0.87 / 0.66 / 0.27, 0.87 / 0.69 / 0.09; the wind reads now: crests curling downwind, Triton's plumes, wind lines), stopped on UNITY's lock-C want. ndeep / nstorm / nspot after lock C (re-file when its lock appears; a lock monitor is on). Then the Jupiter exports (B-156 / B-159 / B-160; rows all v3; dry runs when RAM allows outside UNITY's locks).
+B-168 EXPORTED + VERIFIED (a5d30f30, 17:23:23-17:24:07, 473 MB): the eight Venus station props; UNITY's deck topRow 62 -> 37 (json top_row). B-167 VERIFIED; B-154 exported.
 
 ## Last completed
+- 17:24:43-17:28:29 SLOT: B-161 Neptune ndeck1-3 on the look pass (220 s, 590 MB).
+- 17:23:23-17:24:07 SLOT (wrapper): B-168 the eight Venus station props (a5d30f30; VERIFIED).
 - 16:55:43-16:56:06 SLOT (wrapper): B-167 the six Mercury props (243804c3; ice_burrow byte-identical; 24 v2 files removed).
 - 16:18:39-16:19:42 SLOT (wrapper): B-154 the four Venus creatures + props/venus/vent_mouth (87e1ae22; 460 MB) + the missed Mars / Mercury v3 sources committed.
 - 16:14:35-16:15:02 SLOT (wrapper): B-153 (VERIFIED by LEAD).
@@ -15,6 +15,7 @@ B-167 VERIFIED (LEAD 16:5x); B-154 exported; B-152 / B-153 verified.
 - 16:07:42-16:11:26 SLOT: the B-161 stamped reviews (all nine ACCEPTED).
 
 ## Ready for review
+- B-161 Neptune decks: review_b161_neptune_ndeck{1,2,3}_preview.png (17:25-17:28; ndeep / nstorm / nspot to follow).
 
 - B-154: the export (87e1ae22) + review_b147_venus_{sulfur_drifter,acidmoth,pressure_crab,vent_eel}.png + review_b154_vent_mouth.png.
 
@@ -46,4 +47,4 @@ none (B-161's three ruled in D-148).
 none (USER-28, closing ChatGPT + Edge for RAM, is LEAD's).
 
 ## HeavyJobLock
-none held (released 17:09:20); want_blender rewritten 17:11:15 (B-168 export first, then the six Neptune decks) behind UNITY's 0.4.6 lock B.
+none held (released 17:28:29); no want on file: UNITY's lock C goes next; I re-file for ndeep / nstorm / nspot when its lock appears (D-039).
