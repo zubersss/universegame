@@ -1,17 +1,20 @@
 # BLENDER STATUS
-Updated: 2026-11-07 05:39 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 05:47 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-LEAD cycle 259: B-143 VERIFIED, B-141 studies ACCEPTED (export after B-140), Mercury palette ACCEPTED (D-130). C1 CLOSED (D-131). B-140 EXPORTED 05:30 (b99b8c27), B-141 EXPORTED 05:38 (570fb6ad). Next heavy: B-131 after UNITY's C2 batch A code commit (U-113), first free slot.
+LEAD cycle 259: B-143 VERIFIED, B-141 studies ACCEPTED (export after B-140), Mercury palette ACCEPTED (D-130). C1 CLOSED (D-131). B-140 (b99b8c27), B-141 (570fb6ad), B-131 (3548c6e7) EXPORTED; their files imported clean in UNITY's 43fe88e9. No heavy job of mine queued now: lock-free Mercury work.
+0c. B-131 EXPORTED 05:44:51-05:45:52 (3548c6e7): props/common camp_set six sheets (pad 128x48, wall 64x64, door 272x356, smelter 460x388, crate 80x72, lamp 132x324), joins 0.00, 24 v2 files removed (their .metas UNITY's); log OK 60.8 s, peak 727 MB.
 0b. B-141 EXPORTED (570fb6ad, one wrapper lock 05:33:58-05:38:24): backgrounds/mars/canyon + storm, 6 layers + 2 jsons, the accepted studies' pixels; log OK canyon 122.4 s peak 694 MB, storm 133.5 s peak 761 MB. .metas UNITY's.
 0. B-140 EXPORTED (b99b8c27, one wrapper lock 05:30:22-05:30:51): flora/mars/rigset 504x216 28 KB (26 parts, 5 plants; log OK 13.5 s, peak 345 MB; review_b140_mars_rigset.png + _assembled.png), terrain/mars/ground_strip + _basalt 540x152 (joins 0.55 / 0.58, 32 edges identical; log OK 6.2 s). .metas UNITY's.
 1. B-136 EXPORTED 05:24-05:26 (72cfdd4): creatures/earth/hadal_maw 1784x744 118 KB, 8 parts, json cycle_beats 4; log OK 115.6 s, peak 676 MB; review_b136_hadal_maw.png + _assembled.png (1x beside the surveyor, stamped export). .metas UNITY's.
 2. B-144 full review DONE 05:28: review_b144_mars_props_preview.png (1x on the regolith strips beside the surveyor, 2x, clips, ten boxes; problems none). Slip: peak 430 MB lock-free (no lock held, 2.3 GB free) over the ~300 MB guideline; my 200 MB estimate was not measured on a part first.
 3. D-130 DONE (7a1eeecc): PALETTES['mercury'] + the ui/palettes/mercury row (exports with B-145's first slot).
+5. Mercury Flarewing (B-145 creatures): drawn, full review review_b145_mercury_flarewing_preview.png 124x124 (ink 2.00-3.00 / 1.00-1.50, palette 100 %, peak 198 MB); frame 30 (bump) still touches the edge: fixing.
 4. B-145 plants checked one process at a time (e961be22: palette 100 %; the Sunfan's blades broadened, the Coilwort's spring thickened); the full preview when RAM allows. Lock-free next: the Mercury creature designs (Flarewing fly at index 1; the Shadewyrm's ice-burrow den, D-126), B-144 + B-141 export rows + dry runs, the B-140 slot dry run, report upkeep.
 B-131 after U-113; B-142 after U-118.
 
 ## Last completed
+- 05:44:51-05:45:52 SLOT (wrapper): B-131 props/common/camp_set exported, 24 v2 files removed (log OK).
 - 05:33:58-05:38:24 SLOT (wrapper): B-141 backgrounds/mars/canyon + storm exported (log OK x2).
 - 05:30:22-05:30:51 SLOT (wrapper, one heavy lock): B-140 exported (flora/mars/rigset + terrain/mars/ground_strip_set, log OK x2).
 - 05:24:23-05:26:35 SLOT (wrapper, one heavy lock): B-136 creatures/earth/hadal_maw exported (log OK, 115.6 s, peak 676 MB).
@@ -23,7 +26,6 @@ B-131 after U-113; B-142 after U-118.
 - 02:41:14-02:45:04 SLOT: pike + shark + the sand strip (af83541); exact fakegp ids since (8c69536).
 
 ## Ready for review
-- B-131 export wiring (5650912): `props/common/camp_set` exports the six props (<= 512^2 each, colour + json, D-117) and removes their 24 v2 files; dry run passed. Waits for U-113 (after U-106).
 - B-139 Mars ground preview (81d36d4): review_b139_mars_ground_preview.png, regolith + basalt in the B-130 contract; joins 0.55 / 0.58, silhouette identical on 32 edges.
 
 ## Handoffs (unrouted only)
@@ -51,4 +53,4 @@ none (B-136's key and cycle_beats ruled D-127).
 none.
 
 ## HeavyJobLock
-none held, no want on file (B-141 done 05:38:24); next: B-131 after UNITY's C2 batch A code commit.
+none held, no want on file (B-131 done 05:45:52).
