@@ -6,9 +6,11 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-26 — Play the C1 build and look at its page (15 min)
+### USER-26 — Look at the C1 page now; play the build when the Lead says 0.4.1 is ready (15 min)
 Open https://claude.ai/artifact/N73DUqTkiQvDfEeTTu6HHx (the C1 page: what you can do, the stills,
-the numbers, what comes next). Then play: double-click `C:\dev\universegame\Build\MERIDIAN_0.4.0\MERIDIAN.exe`.
+the numbers, what comes next). HOLD the play part: build 0.4.0 starts Earth on the old 3D look by a
+switch that only the tests flipped (D-132); the rebuilt 0.4.1 is about an hour away and the Lead will
+say. Then play: double-click `C:\dev\universegame\Build\MERIDIAN_0.4.1\MERIDIAN.exe`.
 Walk with A / D, jump with Space, walk up to the rocket and press F to board. Hold W or Space to
 thrust, A / D to tilt; fly up past the dotted Escape Line, find Mars, come down slowly and touch
 the ground under 6 m/s. Ten minutes is enough. Tell the Lead "C1 plays" or what bothered you.
