@@ -22,11 +22,12 @@ When the lock frees, the highest pending job here goes next, even if the other r
 older (D-037 alternation applies only between equal ranks). A rank is live only while its role
 has a want on file or holds the lock (D-112): if the top rank has no want when the lock frees,
 the next live rank runs now and the skipped role goes next after it files. A role below the top
-keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 264 (08:0x; C1's correction is complete (0.4.1, D-136) and the owner's playtest is open; UNITY writes C2 batch B off the lock; BLENDER holds a 2-min slot since 07:55 for the Mercury night study). A role files its want only when the queue says it is next after the running job:
-1. BLENDER · the Mercury night study (running) → release; no further heavy job of BLENDER's until the Mercury / Venus cards open (previews lock-free).
-2. UNITY · batch B code (U-120 first: the first-fill window behind the boot cover; U-110, U-111, U-116, U-119, U-122, the U-115 follow-up) → one check (compile + EditMode; PlayMode A / B incl. the surveyor dig re-run and the InnerCreature re-measure at good RAM) → the captures (the coast pool with the layers in order, forest and coast scenes, the plains by biome, the Sun in Space, the coast deep with the Maw) → the hand-off; a profile -Probe for the boot row and the Creep row.
-3. UNITY · U-118 Mars (promoted when batch B is in) → B-142 + B-144 exports after its code → the Mars captures; then the Mercury batch (U-123 + B-148..B-150, Backlog now).
-4. BLENDER · B-146 panels + title cards and B-147 Venus previews lock-free; the Mercury / Venus strips, rig sets and backdrops export when their cards are promoted.
+keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 265 (08:3x; the lock is free, 1.6 GB free; UNITY writes C2 batch B off the lock (four cards in, three to go, then one check); BLENDER has no heavy job queued (its Venus backdrop studies are the one candidate, ≤ 5 min, when the lock is free with no UNITY want)). A role files its want only when the queue says it is next after the running job:
+1. UNITY · batch B code (U-122 (c), U-116, U-119, the U-115 follow-up remaining) → one check (compile + EditMode; PlayMode A / B) → the captures (the coast pool with the layers in order, forest and coast scenes, the plains by biome, the Sun in Space, the coast deep with the Maw) → the hand-off; a profile -Probe for the boot row and the Creep row.
+2. BLENDER · the Venus backdrop studies (deck + surface, ≤ 5 min FFT) in a slot when the lock is free with no UNITY want; otherwise lock-free.
+3. UNITY · U-118 Mars (promoted when batch B is in) → B-142 + B-144 exports after its code → the Mars captures; then the Mercury batch (U-123 + B-148..B-150).
+4. BLENDER · C3 UI export B-151 when U-124 opens (after U-118); the Venus exports (B-152..B-154) after U-123; previews lock-free meanwhile.
+
 
 
 
@@ -61,10 +62,12 @@ Then one batched check per hand-off when your turn in the queue comes (compile +
 
 
 **BLENDER** (numpy / scripts only while UNITY holds the lock or a want; bpy only under your own lock; under 0.3 GB free, code only; otherwise one item per measured run beside the other role's job, under ~150 MB; the lock / RAM check is its own call)
-- B-146: the Earth and Mercury title cards (the Mars card is checked) and the full UI preview (panels with Patrick Hand sample text, the cards at 1x, the Film switch).
-- B-147: the Venus plants preview, then the creature reviews (Sulfur drifter, Acidmoth, Pressure crab, Vent eel + its vent-mouth den), one measured run each; the Venus backdrop sources (the cloud deck with the aerostat strip, the surface glow below).
-- The Mercury rig-set, strips and backdrop export rows dry-run against the accepted studies, so B-148 / B-149 are one slot each when promoted.
-- `c2_venus_designs.md` and README upkeep.
+- B-147: the Venus backdrop stub smoke test (lock-free, measured) and the studies' slot script; the Venus rig-set sources (`flora/venus/rigset`, deck and surface plants, ≤ 6 bones, swaps, `biomes`) + a dry run; the Venus props that differ (the aerostat deck strip, the station modules) as designs.
+- B-146 export readiness: the 9-slice jsons (`slice` margins), the title-card rows, the switch's two frames; a dry run into a scratch tree so B-151 is one slot.
+- The Mercury export dry runs (B-148 / B-149 / B-150 rows) against the accepted studies, one measured run each.
+- B-155 Jupiter design prep (C2 order 5, the first giant; Bible §7.5–7.6 the cloud-column world): the palette with the Mars checks, the cloud-deck layer study notes (decks, wisps, the Crush band on the near layer per the backdrop near-layer rule), floe and float-cell forms, the creature re-ink list; `coordination/reports/blender/c2_jupiter_designs.md`; previews when RAM allows.
+- Reports and README upkeep.
+
 
 
 
@@ -1217,19 +1220,19 @@ Files: blender/scripts/build_c2_mercury_*.py, coordination/reports/blender/c2_me
 Depends: B-139
 Lead notes: Cycle 258. The same shape as B-139; LEAD accepts the designs before any Mercury card is written. Previews only when free RAM allows. Cycle 259: PALETTE ACCEPTED (37ed2ab, c2_mercury_designs.md §1: blinding regolith, ember, sun gold, cold steel teal, dusty sage, violet twilight, night slate; every check passing incl. the violet terminator hue and the near-neutral regolith) → D-130: into `meridian.v3.PALETTES["mercury"]`; the `ui/palettes/mercury/strip` export rides B-145's first export slot. Part 2 (the five plants) is previewed when RAM allows; reviewed on hand-off. Cycle 260: PLANTS ACCEPTED (18e602bd; review_b145_mercury_plants_preview.png: Sunfan, Embercap with its spore puff, Glassreed recoloured to cold teal so it reads on the violet twilight, Shadebloom, Coilwort; faceless; palette 100 %) and the FLAREWING ACCEPTED (4adf12ed; 124×124, idle 10 / fly 12 at index 1 / react 8 / bump 10 / flare_dance 12; a violet moth-bat with an ember belly and gold vanes, one eye, closed mouth). Next: the Shadewyrm + den, the Glassback, the Cinderling; the backdrop studies in a slot. Cycle 261: SHADEWYRM + ICE BURROW ACCEPTED (164f6f8d, 2b753f53; review_b145_mercury_shadewyrm_preview.png 05:58 and review_b145_ice_burrow_preview.png 06:00: a frost-capped teal wyrm with a round head, two eyes and a closed mouth, idle peek / walk hump / react duck / bump / `idle_open`; the 112×40 burrow drawn in front on the shared pivot; the 05:58 review listed six frames below the ground line and an invalid json, fixed per BLENDER's status by 06:22: the re-check line must say json valid). Glassback (e1865227) and Cinderling (9037f9b3) are reviewed when their full reviews render (the `review_glassback.png` / `review_cinderling.png` files are 10-31 model renders). Rig-set sources (c16565c5, bones 2 / 2 / 6 / 2 / 2) and backdrop sources (7c5cd276) noted; the report is at the accepted state (b25eedc7). Cycle 263: CINDERLING ACCEPTED (9037f9b3; review_b145_mercury_cinderling_preview.png 07:12: an 80×64 ember beetle with gold-glowing cracks and big eyes, idle 8 / walk 12 / react 8 hop with a spark puff / bump 10 / flee 12; json valid, ink and palette measured); the SHADEWYRM's re-check reads json valid (07:14; the earlier below-ground frames fixed). The Mercury rig-set dry run ACCEPTED (c16565c5; review_b145_mercury_rigset_dryrun.png: 26 parts on 500×168, bones 2 / 2 / 6 / 2 / 2, the idles with Unity's maths and the reacts, biomes per plant). The Glassback's review timed out at 150 s and re-runs. The backdrop stub smoke test ran (217 MB); the studies render in BLENDER's slot. Done when the Glassback is accepted and the studies are in; the exports go under the Mercury cards. Cycle 264: GLASSBACK ACCEPTED (e1865227; review_b145_mercury_glassback_preview.png 07:35: a pale grazer with cold-teal crystal shards that ring up on react, 176×112, idle 10 / walk 12 / react 8 / bump 10 / flee 12; ink and palette measured, json valid). DAY + TWILIGHT STUDIES ACCEPTED (07:49–07:53 slot; review_b145_mercury_day_preview.png: an ink sky with sharp stars, the huge painted Sun with its corona low on the left, blinding regolith with crater rims and hard slate shadows; _twilight_: the violet band under the ink, the Sun half-set at the terminator, Glassreed tufts near; the 2× strips seam-free; the Earth stone strip stands in under the surveyor until the Mercury strip exports). The night study renders in the 07:55 slot. B-145 is Done when the night study is accepted; the exports are B-148 / B-149 / B-150 (Backlog, promoted after U-118). Cycle 264 (08:1x): DONE. The night study ACCEPTED (07:55–07:57 slot; review_b145_mercury_night_preview.png: an ink sky dense with stars, slate crater rims with crisp shadows, teal ice glints; seams 0.68 / 0.66 / 0.63; layers 1.1 / 0.5 / 0.35 MB). Every part of the Mercury design prep is accepted: the palette (D-130), five plants, the rig-set dry run, four creatures + the ice-burrow den, three backdrop studies, the report. The exports are B-148 / B-149 / B-150 after U-118.
 
-### B-146 · BLENDER · Ready · C3
+### B-146 · BLENDER · Done · C3
 Goal: C3 UI art designs (Bible §12 C3; contract §11.6): paper panels as 9-slice sheets with `slice` in the json (the pause menu, the settings panel for U-102, the inventory, a hand-painted sign, a scroll), the planet title cards `ui/titlecards/<planet>` for Earth, Mars and Mercury (≤ 1920×540, the name lettered in Limelight as drawn ink, one painted vignette each, intertitle style), and the Film-effects toggle's switch; the Earth palette for the paper, each planet's palette for its card; previews only.
 Accept: the ten §9.7 boxes that apply on a stamped preview (each panel at 1x with Patrick Hand sample text, each card at 1x); the 9-slice margins named in the json; nothing exported until a C3 export card.
 Files: blender/scripts/build_ui_v3.py, blender/sources/ui/panels_v3.blend, titlecards_v3.blend
 Depends: B-121
-Lead notes: Cycle 261. Sideways work while UNITY wires C2 Earth: the menus and title cards are the owner's next visible layer after the planets. LEAD accepts the designs before the export card. Cycle 262: source in (a09e660d: a TrueType reader for Limelight + Patrick Hand so the lettering is drawn ink; five 9-slice panels and the Film switch checked at 48 MB, b1626503); the title cards and the full preview wait for a lock-free window; reviewed on hand-off. Cycle 264: the Mars title card checked at ss 2 (07:4x); the Earth and Mercury cards and the full UI preview next; reviewed on hand-off.
+Lead notes: Cycle 261. Sideways work while UNITY wires C2 Earth: the menus and title cards are the owner's next visible layer after the planets. LEAD accepts the designs before the export card. Cycle 262: source in (a09e660d: a TrueType reader for Limelight + Patrick Hand so the lettering is drawn ink; five 9-slice panels and the Film switch checked at 48 MB, b1626503); the title cards and the full preview wait for a lock-free window; reviewed on hand-off. Cycle 264: the Mars title card checked at ss 2 (07:4x); the Earth and Mercury cards and the full UI preview next; reviewed on hand-off. Cycle 265: DONE as designs (3715aa62; review_b146_ui_preview.png 08:08: five 9-slice paper panels (pause, settings with a teal header band, inventory, a plank sign, a scroll) at 1x and stretched with Patrick Hand sample text, corners kept and edges clean; the Film switch off / on; the Earth, Mars and Mercury title cards 1600×450 with the name lettered in Limelight as drawn ink over an aged-paper card with a round painted vignette each; no faces). The export is B-151 (Backlog) when C3's UNITY card U-124 opens.
 
-### B-147 · BLENDER · Ready · C2
+### B-147 · BLENDER · Done · C2
 Goal: C2 Venus design prep (Bible §12 C2 order 4; §7.4 the dive world): the Venus palette proposal with the Mars checks, the cloud-layer backdrop study notes (the aerostat deck strip, the sulphur haze bands, the surface glow below), five faceless plants (deck and surface forms), the creature re-ink list (sizes, clips, order; faces kept, no teeth), the station and aerostat props that differ; `coordination/reports/blender/c2_venus_designs.md`.
 Accept: one review per group at 1x on a Venus stand-in beside the surveyor; the ten boxes self-checked; nothing exported.
 Files: blender/scripts/build_c2_venus_*.py, coordination/reports/blender/c2_venus_designs.md
 Depends: B-145
-Lead notes: Cycle 261. After B-146; previews only when free RAM allows. Cycle 262: PALETTE ACCEPTED (25afcafd, c2_venus_designs.md §1: cream haze, vent orange, sulphur yellow, sea-glass teal, dusty olive, apricot haze, glassy basalt; every check passing) → D-134: into `meridian.v3.PALETTES["venus"]`; the strip exports with B-147's first export slot. Next: the five plants (deck and surface forms), reviewed on hand-off. Cycle 263: the five plants' source (fcec304a) and the first creature, the Sulfur drifter (c123f584), are drawn; their previews wait for RAM and are reviewed on hand-off. Cycle 264: four creature sources are in (the Sulfur drifter c123f584 with drift at index 1, the Acidmoth 83195e4d with fly at index 1 and no eyespots, the Pressure crab whose claws wave and never pinch, the Vent eel 2d9484aa idling behind `props/venus/vent_mouth` per D-126); the plants' and creatures' previews are reviewed on hand-off.
+Lead notes: Cycle 261. After B-146; previews only when free RAM allows. Cycle 262: PALETTE ACCEPTED (25afcafd, c2_venus_designs.md §1: cream haze, vent orange, sulphur yellow, sea-glass teal, dusty olive, apricot haze, glassy basalt; every check passing) → D-134: into `meridian.v3.PALETTES["venus"]`; the strip exports with B-147's first export slot. Next: the five plants (deck and surface forms), reviewed on hand-off. Cycle 263: the five plants' source (fcec304a) and the first creature, the Sulfur drifter (c123f584), are drawn; their previews wait for RAM and are reviewed on hand-off. Cycle 264: four creature sources are in (the Sulfur drifter c123f584 with drift at index 1, the Acidmoth 83195e4d with fly at index 1 and no eyespots, the Pressure crab whose claws wave and never pinch, the Vent eel 2d9484aa idling behind `props/venus/vent_mouth` per D-126); the plants' and creatures' previews are reviewed on hand-off. Cycle 265: DONE as designs. PLANTS ACCEPTED (ddbdcb32; review_b147_venus_plants_preview.png: Puffsail, Sulphurbell, Hazefern on the deck planks, Glasscoral and Ventcap with its steam puff on the surface; faceless; Venus palette 100 %). CREATURES ACCEPTED (6d5f7337; one measured run each): the Sulfur drifter (a sulphur-yellow gasbag with a cream frill and tendrils, drift at index 1), the Acidmoth (a sea-glass moth, fly at index 1, no eyespots), the Pressure crab (a basalt shell with vent-orange claws that wave and never pinch, ducks into its shell), the Vent eel (a dark basalt eel with a vent-glow belly peeking from `props/venus/vent_mouth`, D-126, with `idle_open`); ink 2.0–3.0 / 1.0–1.5 px, palette 100 %, json valid. The palette is D-134; the backdrop studies (deck + surface) run in a slot and are accepted under B-152. The exports are B-152 / B-153 / B-154 (Backlog) after U-123.
 
 ### B-148 · BLENDER · Backlog · C2
 Goal: C2 Mercury flora and ground export (the accepted B-145 sources): `flora/mercury/rigset` (the five Mercury plants as one §11.3 rig set, 26 parts, bones ≤ 6, swaps, `biomes` per plant) and the Mercury ground strips in the B-130 contract (regolith white, and the slate shadow-side kind) plus `ui/palettes/mercury/strip` (D-130).
@@ -1251,6 +1254,41 @@ Accept: the ten boxes per creature on a stamped review (1x on the Mercury strips
 Files: blender/scripts/build_creatures_mercury_v3.py, build_props_mercury_v3.py, Assets/_Game/Art/creatures/mercury/, Assets/_Game/Art/props/mercury/
 Depends: B-145, U-123
 Lead notes: Cycle 264. The export waits for U-123's code where it replaces Mercury models under live keys (D-119's order).
+
+### B-151 · BLENDER · Backlog · C3
+Goal: C3 UI export from the accepted B-146 designs: `ui/panels/{pause,settings,inventory,sign,scroll}` as 9-slice sheets with `slice` in the json (contract §11.6), `ui/titlecards/{earth,mars,mercury}` ≤ 1920×540, `ui/hud/film_switch` (two frames); the Venus and later cards follow their planets.
+Accept: log OK; the slice margins in each json; UNITY's panels stretch with clean edges (U-124's capture); the cards at 1x in the intertitle slide.
+Files: blender/scripts/build_ui_v3.py, Assets/_Game/Art/ui/
+Depends: B-146, U-124
+Lead notes: Cycle 265. One slot when U-124 opens (after U-118).
+
+### B-152 · BLENDER · Backlog · C2
+Goal: Venus backdrops: the cloud-deck set (`backgrounds/venus/deck`: the apricot haze, far cloud towers, the aerostat deck strip near) and the surface set (`backgrounds/venus/surface`: glassy basalt, vent glow, the sulphur crust), three layers each, 2048 × ≤ 1024 tiling in x, scene jsons; the studies first (one ≤ 5 min slot), LEAD accepts, then the export.
+Accept: the 2× seam check with no seam; ≤ 4 MB per PNG; a 1080p composite per set at 1x with the surveyor; UNITY's ParallaxLayers loads them by key.
+Files: blender/scripts/build_backdrop_v3.py, Assets/_Game/Art/backgrounds/venus/
+Depends: B-147
+Lead notes: Cycle 265. The studies may run now in a free slot; the export after U-123.
+
+### B-153 · BLENDER · Backlog · C2
+Goal: Venus flora + ground export: `flora/venus/rigset` (the five accepted plants, deck and surface forms, ≤ 6 bones, swaps, `biomes`), the Venus ground strips (the deck planks, the basalt crust) in the B-130 contract, `ui/palettes/venus/strip` (D-134).
+Accept: log OK; rigset.json valid with `biomes`; the strips' joins ≤ 1/255; the ten boxes per plant on the stamped assembled review at 1x beside the surveyor.
+Files: blender/scripts/build_c2_venus_rigs.py, build_c2_venus_ground.py, Assets/_Game/Art/flora/venus/, terrain/venus/, ui/palettes/venus/
+Depends: B-147
+Lead notes: Cycle 265. One slot when promoted (after U-123).
+
+### B-154 · BLENDER · Backlog · C2
+Goal: Venus creatures re-inked from the accepted B-147 designs: the Sulfur drifter (drift at index 1), the Acidmoth (fly at index 1), the Pressure crab, the Vent eel with its den `props/venus/vent_mouth` (D-126; `idle_open`); faces kept (no teeth); one sheet ≤ 2048² each; `replaces_v2` on any Venus model under the same key.
+Accept: the ten boxes per creature on a stamped review (1x on the Venus strips beside the surveyor); json valid; clip indices 0–3 in Gus's order, the rest by name; the eel draws behind its vent at the den in UNITY's capture.
+Files: blender/scripts/build_creatures_venus_v3.py, build_props_venus_v3.py, Assets/_Game/Art/creatures/venus/, props/venus/
+Depends: B-147, U-125
+Lead notes: Cycle 265. The export waits for U-125's code where it replaces Venus models under live keys (D-119's order).
+
+### B-155 · BLENDER · Ready · C2
+Goal: C2 Jupiter design prep (Bible §12 C2 order 5; §7.5–7.6 the cloud-column world): the Jupiter palette proposal with the Mars checks, the cloud-deck layer study notes (decks, wisps, the storm and the Crush band on the near layer per the backdrop near-layer rule), floe and float-cell forms as faceless flora / props, the creature re-ink list (faces kept, no teeth), the aerostat and derelict props that differ; `coordination/reports/blender/c2_jupiter_designs.md`.
+Accept: one review per group at 1x on a Jupiter stand-in beside the surveyor; the ten boxes self-checked; nothing exported.
+Files: blender/scripts/build_c2_jupiter_*.py, coordination/reports/blender/c2_jupiter_designs.md
+Depends: B-147
+Lead notes: Cycle 265. The same shape as B-139 / B-145 / B-147; previews only when RAM allows. The first giant sets the cloud-column pattern for Saturn, Uranus and Neptune.
 
 > **R1 (D-062).** 2D tasks B-056..B-076 are Superseded; their `.blend` sources (rigs, props,
 > terrain recipes) are the starting point for the models. Contract v2 §9 is the rule set.
@@ -2118,3 +2156,18 @@ Accept: Mercury captures at 1x (day plains with plants and a Glassback, the twil
 Files: Code/Runtime/View2D/CartoonStage.cs, Code/Runtime/Planet/, Code/Runtime/Creatures/CreatureSpecies.cs, Tests/
 Depends: U-118, B-148, B-149
 Lead notes: Cycle 264. Promoted when U-118 Mars is Done.
+
+
+### U-124 · UNITY · Backlog · C3
+Goal: C3 UI in: the paper panels (B-151) on the pause menu, the settings panel (U-102), the inventory and the sign / scroll frames with 9-slice; the planet title cards as the intertitle slide-in on entry (Bible C3), the Film-effects switch art on its toggle; Limelight + Patrick Hand throughout; every menu reachable by keyboard; the toggle persists in the save.
+Accept: MenuHudTests cover each panel's open / close and the keyboard path; a title card capture per planet on entry; the settings round trip; clean console.
+Files: Code/Runtime/UI/, Tests/
+Depends: U-102, B-151
+Lead notes: Cycle 265. Promoted after U-118 Mars; U-102 (the settings panel) rides with it.
+
+### U-125 · UNITY · Backlog · C2
+Goal: Venus on the cartoon stage (Bible §12 C2 order 4; §7.4 the dive world): the deck and surface scenes (B-152) picked by altitude, the B-153 rig set and strips (deck planks, basalt crust), the climb sky per D-118 from the apricot haze, the Venus creatures on sheets (B-154; the Vent eel a den species per D-126; the drifter and moth fliers); the M3 Venus gameplay tests unchanged; the Venus perf rows green (the 3D path's textures row was the red one, D-089).
+Accept: Venus captures at 1x (the deck with the aerostat strip and a drifter, the surface with a crab at a vent) matching the accepted B-147 composites; TransitionTests green; the BudgetGate Venus rows green.
+Files: Code/Runtime/View2D/CartoonStage.cs, Code/Runtime/Planet/, Code/Runtime/Creatures/CreatureSpecies.cs, Tests/
+Depends: U-123, B-152, B-153
+Lead notes: Cycle 265. Promoted when U-123 Mercury is Done.
