@@ -124,7 +124,7 @@ namespace Meridian.Tests
                     if (c.name != UiKit.EdgeName) continue;
                     var e = (RectTransform)c;
                     Assert.AreEqual(UiKit.Ink, c.GetComponent<Image>().color);
-                    Assert.AreEqual(UiKit.SlotEdge, Mathf.Min(Mathf.Abs(e.sizeDelta.x), Mathf.Abs(e.sizeDelta.y)), 1e-4f, "2 px wide");
+                    Assert.AreEqual(UiKit.SlotEdge, Mathf.Max(Mathf.Abs(e.sizeDelta.x), Mathf.Abs(e.sizeDelta.y)), 1e-4f, "2 px wide (the stretched side reads 0)");
                     Assert.IsFalse(c.GetComponent<Image>().raycastTarget, "the edges never take the slot's clicks");
                 }
                 Assert.IsFalse(band.enabled, "the gold band waits for the selection");
