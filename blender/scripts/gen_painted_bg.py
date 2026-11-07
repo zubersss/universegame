@@ -179,6 +179,123 @@ def earth_plains(seed):
     return out, layers
 
 
+def _star(cx, cy, r, H, rot=0.0):
+    """5-point cartoon star polygon mask (wrapped in x and y on the H x W torus)."""
+    m = np.zeros((H, W), bool)
+    pts = [(cx + r * (1.0 if k % 2 == 0 else 0.45) * math.cos(rot - math.pi / 2 + math.pi * k / 5),
+            cy + r * (1.0 if k % 2 == 0 else 0.45) * math.sin(rot - math.pi / 2 + math.pi * k / 5)) for k in range(10)]
+    R = int(r) + 3
+    ys = np.arange(int(cy) - R, int(cy) + R + 1)
+    xs = np.arange(int(cx) - R, int(cx) + R + 1)
+    Y, X = np.meshgrid(ys + 0.5, xs + 0.5, indexing="ij")
+    inside = np.zeros(Y.shape, bool)
+    for i in range(10):
+        (x0, y0), (x1, y1) = pts[i], pts[(i + 1) % 10]
+        cond = (y0 > Y) != (y1 > Y)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            xi = x0 + (Y - y0) * (x1 - x0) / (y1 - y0)
+        inside ^= cond & (X < xi)
+    m[np.ix_(ys % H, xs % W)] |= inside
+    return m
+
+
+def space_starfield(seed):
+    """2048^2 tileable night sky (Earth palette night tones) with soft dabbed stars of three
+    sizes, the big ones as inked cartoon stars; plus 3 nebula cards (<= 1024^2, alpha)."""
+    rng = np.random.default_rng(seed)
+    pal = {k: _rgb(v) for k, v in v3.PALETTES["earth"].items()}
+    H = 2048
+    night = _mix(pal["ink"], pal["teal"], 0.22)
+    sky = np.broadcast_to(night, (H, W, 3)).copy()
+    sky *= (1 + 0.10 * periodic_noise(rng, H, 160) + 0.04 * periodic_noise(rng, H, 25))[..., None]
+    sky = _mix(sky, _mix(pal["ink"], pal["sky"], 0.18), np.clip(0.25 * periodic_noise(rng, H, 300), 0, 1)[..., None])
+    acc = [(sky, np.ones((H, W), np.float32))]
+    yy, xx = np.mgrid[0:H, 0:W]
+    small = np.zeros((H, W), np.float32)
+    for _ in range(900):                                   # tiny specks: 1-2 px soft dabs
+        x, y = rng.integers(0, W), rng.integers(0, H)
+        small[y, x] = max(small[y, x], rng.uniform(0.35, 0.9))
+    small = np.clip(blur_xy(small, 0.6) * 4, 0, 1)
+    mid = np.zeros((H, W), np.float32)
+    for _ in range(140):                                   # medium: 3-5 px lumpy dots
+        cx, cy, r = rng.uniform(0, W), rng.uniform(0, H), rng.uniform(1.5, 2.6)
+        dx = np.minimum(np.abs(xx - cx), W - np.abs(xx - cx))
+        dy = np.minimum(np.abs(yy - cy), H - np.abs(yy - cy))
+        sel = (dx < 5) & (dy < 5)
+        mid[sel] = np.maximum(mid[sel], np.clip(r + 0.5 - np.hypot(dx[sel], dy[sel]), 0, 1))
+    acc.append((np.broadcast_to(_mix(pal["offwhite"], pal["sky"], 0.25), (H, W, 3)), small))
+    acc.append((np.broadcast_to(pal["offwhite"], (H, W, 3)), mid))
+    big_fill = np.zeros((H, W), bool)
+    big_ink = np.zeros((H, W), bool)
+    for k in range(22):                                    # big: inked 5-point cartoon stars
+        cx, cy, r, rot = rng.uniform(0, W), rng.uniform(0, H), rng.uniform(7, 12), rng.uniform(-0.3, 0.3)
+        outer = _star(cx, cy, r + 2.5, H, rot)
+        inner = _star(cx, cy, r, H, rot)
+        big_ink |= outer
+        big_fill |= inner
+    big_ink &= ~big_fill
+    acc.append((np.broadcast_to(pal["ink"], (H, W, 3)), big_ink.astype(np.float32)))
+    acc.append((np.broadcast_to(_mix(pal["mustard"], pal["offwhite"], 0.45), (H, W, 3)), big_fill.astype(np.float32)))
+    rgb, a = _composite(acc)
+    layers = [(rgb * paper(rng, H)[..., None], a)]
+    cards = []
+    for k, (c1, c2) in enumerate(((pal["red"], pal["mustard"]), (pal["teal"], pal["sky"]), (pal["mustard"], pal["green"]))):
+        N = 1024
+        # a soft cloud: blurred blob field, colour mixing across it, alpha <= 0.55, edges bled
+        f = np.zeros((N, N), np.float32)
+        for j in range(14):
+            cx, cy = rng.uniform(260, 764), rng.uniform(280, 744)
+            rx, ry = rng.uniform(150, 300), rng.uniform(90, 200)
+            f = np.maximum(f, ((((np.arange(N)[None, :] - cx) / rx) ** 2 + ((np.arange(N)[:, None] - cy) / ry) ** 2) <= 1).astype(np.float32))
+        f = blur_xy(f, 70)
+        f = np.clip((f - 0.05) / 0.6, 0, 1) * (0.8 + 0.2 * np.clip(blur_xy(rng.standard_normal((N, N)).astype(np.float32), 20) * 14, -1, 1))
+        edge = 1 - np.clip(np.hypot(np.arange(N)[None, :] - N / 2, np.arange(N)[:, None] - N / 2) / (N * 0.48), 0, 1) ** 4
+        alpha = np.clip(f * edge, 0, 1) * 0.55
+        mixk = np.clip(blur_xy(rng.standard_normal((N, N)).astype(np.float32), 60) * 8 + 0.5, 0, 1)[..., None]
+        col = c1 * (1 - mixk) + c2 * mixk
+        col = _mix(col, pal["ink"], 0.35)                  # night-muted
+        cards.append((col, alpha))
+    return layers, cards
+
+
+def blur_xy(a, s):
+    """Gaussian blur periodic in both axes (any shape)."""
+    H_, W_ = a.shape
+    fy, fx = np.fft.fftfreq(H_)[:, None], np.fft.fftfreq(W_)[None, :]
+    g = np.exp(-2 * np.pi ** 2 * s * s * (fx ** 2 + fy ** 2))
+    return np.real(np.fft.ifft2(np.fft.fft2(a) * g)).astype(np.float32)
+
+
+def export_space(entry, art):
+    """backgrounds/space/starfield: starfield_color.png 2048^2 + nebula_<k>_color.png <= 1024^2 +
+    starfield.json (parallax per layer). Same folder (contract §11.4)."""
+    layers, cards = space_starfield(int(entry.get("seed", 1)))
+    d = os.path.join(art, "backgrounds", "space", "starfield")
+    os.makedirs(d, exist_ok=True)
+    info = []
+    img = to_u8(*layers[0])
+    p = os.path.join(d, "starfield_color.png")
+    n = pngio.write_png(p, img)
+    info.append((p, img, n, seam(img), seam(np.ascontiguousarray(img.transpose(1, 0, 2)))))
+    for k, (col, al) in enumerate(cards):
+        im = to_u8(col, al)
+        pk = os.path.join(d, f"nebula_{k}_color.png")
+        nk = pngio.write_png(pk, im)
+        info.append((pk, im, nk, None, None))
+    for p_, im, n_, _sx, _sy in info:
+        if n_ > v3.MAX_FILE_BYTES:
+            raise ValueError(f"{os.path.basename(p_)} {n_ / 2**20:.1f} MB over 4 MB")
+    meta = {"key": "backgrounds/space/starfield", "style": "v3", "tile": True,
+            "layers": [{"name": "starfield", "parallax": 0.05, "tile": True},
+                       {"name": "nebula_0", "parallax": 0.12, "tile": False},
+                       {"name": "nebula_1", "parallax": 0.18, "tile": False},
+                       {"name": "nebula_2", "parallax": 0.25, "tile": False}]}
+    with open(os.path.join(d, "starfield.json"), "w", encoding="utf-8", newline="\n") as f:
+        json.dump(meta, f, indent=2)
+        f.write("\n")
+    return info, meta
+
+
 SCENES = {("earth", "plains"): earth_plains}
 
 
