@@ -22,13 +22,14 @@ namespace Meridian.UI
         public bool IsOpen => root != null && root.activeSelf;
         /// <summary>U-124: true once the panel's paper drew, false when its key is absent (null while the probe runs).</summary>
         public bool? Paper { get; private set; }
+        /// <summary>U-135 (D-149): the crafting panel's paper — the inventory's (the 192×128 sign stretched over 1840×900 drew its plank lines as two bars).</summary>
+        public const string PaperKey = Meridian.Art.ArtKeys.Ui.PanelInventory;
 
         /// <summary>Tree nodes by blueprint id (tests and captures read them).</summary>
         public readonly Dictionary<string, Image> Nodes = new Dictionary<string, Image>();
         public readonly Dictionary<string, Button> CraftButtons = new Dictionary<string, Button>();
         public string LastMessage { get; private set; } = "";
 
-        static readonly Color Lit = new Color(0.25f, 0.55f, 0.85f, 1f), Dim = new Color(0.12f, 0.13f, 0.16f, 1f);
         const float RowH = 42f, Icon = 30f;
 
         sealed class Row
@@ -104,7 +105,7 @@ namespace Meridian.UI
             var theme = UiTheme.Active;
             var canvas = UiKit.Canvas(transform, "CraftingCanvas", 111);
             var back = UiKit.ModalPanel(canvas.transform, "Crafting", new Vector2(1840f, 900f), out root);
-            UiPaper.ApplyModal(back, Meridian.Art.ArtKeys.Ui.PanelSign, ok => Paper = ok); // U-124 (B-151): the workbench on the painted wooden sign (P-50); flat until the art is on disk
+            UiPaper.ApplyModal(back, PaperKey, ok => Paper = ok); // U-135 (D-149): on the inventory paper (the sign stays for short in-world labels); flat until the art is on disk
             var tl = new Vector2(0f, 1f);
             UiKit.Text(back.transform, "TreeTitle", tl, new Vector2(28f, -32f), new Vector2(400f, 28f), 20, true, TextAnchor.MiddleLeft, theme.label).text = "BLUEPRINT TREE";
             UiKit.Text(back.transform, "RecipeTitle", tl, new Vector2(860f, -32f), new Vector2(400f, 28f), 20, true, TextAnchor.MiddleLeft, theme.label).text = "RECIPES";
@@ -120,7 +121,6 @@ namespace Meridian.UI
                 perTier[b.tier] = n + 1;
                 var pos = new Vector2(28f + b.tier * 158f, -72f - n * 96f);
                 var node = UiKit.Rect(back.transform, "Node_" + b.id, tl, pos, new Vector2(148f, 84f), tl).gameObject.AddComponent<Image>();
-                node.color = Dim;
                 Nodes[b.id] = node;
                 var nodeIcon = UiKit.Panel(node.transform, "Icon", new Vector2(1f, 0f), new Vector2(-6f, 6f), new Vector2(30f, 30f), Color.white);
                 nodeIcon.rectTransform.pivot = new Vector2(1f, 0f);
@@ -132,6 +132,7 @@ namespace Meridian.UI
                 t.text = b.name;
                 string needs = string.IsNullOrEmpty(b.unlockFlag) ? (b.requires != null && b.requires.Length > 0 ? "after " + b.requires[0] : "known") : b.unlockFlag.Replace("beacon:", "beacon · ");
                 UiKit.Text(node.transform, "Needs", tl, new Vector2(10f, -62f), new Vector2(132f, 18f), 12, false, TextAnchor.MiddleLeft, theme.label).text = needs;
+                UiKit.PaperCard(node); // D-149 (U-136): a blueprint tile is a paper card; known = the gold band, locked = greyed
             }
 
             // Recipes: icon rows.
@@ -213,7 +214,7 @@ namespace Meridian.UI
             if (!IsOpen || book == null || inventory == null) return;
             var flags = Flags;
             foreach (var b in book.blueprints)
-                if (Nodes.TryGetValue(b.id, out var img)) img.color = CraftingSystem.IsUnlocked(b, flags) ? Lit : Dim;
+                if (Nodes.TryGetValue(b.id, out var img)) UiKit.SetCard(img, CraftingSystem.IsUnlocked(b, flags) ? UiKit.Card.Gold : UiKit.Card.Locked);
             foreach (var row in rows)
             {
                 var check = CraftingSystem.Check(book, row.recipe, inventory, flags, Here);

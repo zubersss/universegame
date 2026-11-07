@@ -76,17 +76,100 @@ namespace Meridian.UI
             var theme = UiTheme.Active;
             var rt = Rect(parent, label, new Vector2(0.5f, 0.5f), pos, new Vector2(360f, 64f));
             var img = rt.gameObject.AddComponent<Image>();
-            img.color = new Color(1f, 1f, 1f, 0.08f);
             var b = rt.gameObject.AddComponent<Button>();
-            var colors = b.colors;
-            colors.highlightedColor = new Color(1f, 1f, 1f, 2.5f);
-            colors.pressedColor = new Color(1f, 1f, 1f, 3.5f);
-            colors.disabledColor = new Color(1f, 1f, 1f, 0.35f);
-            b.colors = colors;
+            b.colors = CardColors();
             b.onClick.AddListener(onClick);
             var t = Text(rt, "Label", new Vector2(0.5f, 0.5f), Vector2.zero, rt.sizeDelta, 26, true, TextAnchor.MiddleCenter, theme.text);
             t.text = label;
+            PaperCard(img); // D-149 (U-136): a cream paper card, ink lettering, a 1 px ink edge
             return b;
+        }
+
+        // ---------- D-149 (U-135 / U-136): paper cards and ink boxes ----------
+
+        /// <summary>The ink of the drawn UI (UiPaper's), its faded form on a locked card, the card cream, the locked grey, the gold band.</summary>
+        public static readonly Color Ink = new Color(0.13f, 0.09f, 0.06f, 1f), InkFaded = new Color(0.13f, 0.09f, 0.06f, 0.45f);
+        public static readonly Color Cream = new Color(0.95f, 0.91f, 0.80f, 1f), Greyed = new Color(0.70f, 0.68f, 0.64f, 1f), Gold = new Color(0.86f, 0.64f, 0.18f, 1f);
+        /// <summary>U-135: an inventory slot's fill, a faint darkening of the paper.</summary>
+        public static readonly Color SlotFill = new Color(0.30f, 0.20f, 0.08f, 0.10f);
+        public const float CardEdge = 1f, SlotEdge = 2f, BandHeight = 5f;
+        public const string BandName = "GoldBand", EdgeName = "InkEdge";
+        /// <summary>A card's state: plain cream; cream with the gold band (selected, known); greyed with faded ink (locked, can't act).</summary>
+        public enum Card { Plain, Gold, Locked }
+
+        /// <summary>The tint a card button takes per state: a warm darkening on hover / keyboard focus, a deeper one pressed (an opaque cream fill
+        /// shows no alpha boost, the old menu buttons' highlight).</summary>
+        public static ColorBlock CardColors()
+        {
+            var c = ColorBlock.defaultColorBlock;
+            c.normalColor = Color.white;
+            c.highlightedColor = new Color(1f, 0.9f, 0.68f, 1f);
+            c.selectedColor = new Color(1f, 0.86f, 0.55f, 1f);
+            c.pressedColor = new Color(0.84f, 0.76f, 0.6f, 1f);
+            c.disabledColor = Color.white; // the state shows through SetCard (the greyed card), not a tint
+            return c;
+        }
+
+        /// <summary>Four ink edges `width` px wide just inside `box` (stretch-anchored children, no raycasts).</summary>
+        public static void InkEdges(RectTransform box, float width, Color ink)
+        {
+            for (int side = 0; side < 4; side++)
+            {
+                var e = new GameObject(EdgeName, typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
+                e.SetParent(box, false);
+                bool horizontal = side < 2;
+                float a = side == 0 || side == 3 ? 1f : 0f; // top, bottom, left, right
+                e.anchorMin = horizontal ? new Vector2(0f, a) : new Vector2(a, 0f);
+                e.anchorMax = horizontal ? new Vector2(1f, a) : new Vector2(a, 1f);
+                e.pivot = horizontal ? new Vector2(0.5f, a) : new Vector2(a, 0.5f);
+                e.anchoredPosition = Vector2.zero;
+                e.sizeDelta = horizontal ? new Vector2(0f, width) : new Vector2(width, 0f);
+                var img = e.GetComponent<Image>();
+                img.color = ink;
+                img.raycastTarget = false;
+            }
+        }
+
+        /// <summary>The gold band along a card's or slot's bottom edge, hidden until the state asks for it.</summary>
+        public static Image GoldBand(RectTransform box)
+        {
+            var band = new GameObject(BandName, typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
+            band.SetParent(box, false);
+            band.anchorMin = new Vector2(0f, 0f); band.anchorMax = new Vector2(1f, 0f); band.pivot = new Vector2(0.5f, 0f);
+            band.anchoredPosition = new Vector2(0f, CardEdge); band.sizeDelta = new Vector2(-2f * CardEdge, BandHeight);
+            var img = band.GetComponent<Image>();
+            img.color = Gold;
+            img.raycastTarget = false;
+            img.enabled = false;
+            return img;
+        }
+
+        /// <summary>D-149: dresses a control's fill as a paper card: cream, a 1 px ink edge, its own lettering in ink (the light rim off), the gold band
+        /// ready. Built once per control.</summary>
+        public static void PaperCard(Image fill)
+        {
+            fill.color = Cream;
+            InkEdges(fill.rectTransform, CardEdge, Ink);
+            GoldBand(fill.rectTransform);
+            foreach (var t in fill.GetComponentsInChildren<Text>(true))
+            {
+                t.color = Ink;
+                var rim = t.GetComponent<Outline>();
+                if (rim != null) rim.enabled = false;
+            }
+        }
+
+        /// <summary>D-149: a card's state — Plain cream, Gold (the band: selected / known), Locked (greyed, faded ink). No allocation (the band by name, the
+        /// first label only), so panels may call it on every refresh.</summary>
+        public static void SetCard(Image fill, Card state)
+        {
+            if (fill == null) return;
+            var want = state == Card.Locked ? Greyed : Cream;
+            if (fill.color != want) fill.color = want;
+            var band = fill.transform.Find(BandName);
+            if (band != null) { var bi = band.GetComponent<Image>(); bool on = state == Card.Gold; if (bi.enabled != on) bi.enabled = on; }
+            var label = fill.GetComponentInChildren<Text>(true);
+            if (label != null) { var ink = state == Card.Locked ? InkFaded : Ink; if (label.color != ink) label.color = ink; }
         }
 
         // ---------- U-058 shared panel style ----------
@@ -95,8 +178,6 @@ namespace Meridian.UI
         public static readonly Color PanelFill = new Color(0.035f, 0.045f, 0.065f, 1f);
         /// <summary>The full-screen dim behind a panel.</summary>
         public static readonly Color ScrimColor = new Color(0f, 0f, 0f, 0.78f); // LEAD, U-059 review: deeper, the world recedes behind every panel
-        public static readonly Color ActionOn = new Color(0.25f, 0.55f, 0.85f, 1f), ActionOff = new Color(0.14f, 0.15f, 0.17f, 1f);
-        public static readonly Color ActionTextOn = Color.white, ActionTextOff = new Color(1f, 1f, 1f, 0.28f);
 
         /// <summary>U-124 (keyboard reach): selects `preferred` when it can act, else the first interactable control under `root`, so
         /// the arrows walk a panel the moment it opens and Enter presses. Runs on open only (the search allocates).</summary>
@@ -128,26 +209,20 @@ namespace Meridian.UI
         {
             var rt = Rect(parent, label, anchor, pos, size, anchor);
             var img = rt.gameObject.AddComponent<Image>();
-            img.color = ActionOn;
             var b = rt.gameObject.AddComponent<Button>();
-            var colors = b.colors;
-            colors.normalColor = Color.white; colors.highlightedColor = new Color(1.15f, 1.15f, 1.15f, 1f); colors.pressedColor = new Color(0.8f, 0.8f, 0.8f, 1f);
-            colors.disabledColor = Color.white; // the state shows through SetAction, not a tint
-            b.colors = colors;
+            b.colors = CardColors(); // the state shows through SetAction's card, not a tint
             b.onClick.AddListener(onClick);
-            var t = Text(rt, "Label", new Vector2(0.5f, 0.5f), Vector2.zero, size, 18, true, TextAnchor.MiddleCenter, ActionTextOn);
+            var t = Text(rt, "Label", new Vector2(0.5f, 0.5f), Vector2.zero, size, 18, true, TextAnchor.MiddleCenter, Ink);
             t.text = label;
+            PaperCard(img); // D-149 (U-136): CRAFT, BUY, SELL and the tabs are paper cards; the navy and blue fills are gone
             return b;
         }
 
-        /// <summary>Shows an action button as available or not (fill, label and interactable together).</summary>
+        /// <summary>Shows an action button as available (a plain cream card) or not (greyed, faded ink), with interactable to match.</summary>
         public static void SetAction(Button b, bool on)
         {
-            if (b.interactable == on && b.targetGraphic != null && ((Image)b.targetGraphic).color == (on ? ActionOn : ActionOff)) return;
-            b.interactable = on;
-            if (b.targetGraphic is Image img) img.color = on ? ActionOn : ActionOff;
-            var t = b.GetComponentInChildren<Text>();
-            if (t != null) t.color = on ? ActionTextOn : ActionTextOff;
+            if (b.interactable != on) b.interactable = on;
+            SetCard(b.targetGraphic as Image, on ? Card.Plain : Card.Locked);
         }
 
         /// <summary>A thin horizontal bar: returns the fill image (set fillAmount 0..1).</summary>

@@ -2972,7 +2972,7 @@ namespace Meridian.Tests
         /// <summary>
         /// U-124 (B-151): the C3 UI at 1080p in reports/unity/u124/: each planet's title card over its own surface, held centred
         /// (titlecard_mars, titlecard_mercury, titlecard_earth), then on Earth the pause card, the settings paper with the Film switch,
-        /// the inventory paper, the catalogue on the scroll and the crafting panel on the sign. The overlay canvases draw through the
+        /// the inventory paper, the catalogue on the scroll and the crafting panel on the inventory paper (D-149). The overlay canvases draw through the
         /// side camera (a camera render never includes a screen-space overlay canvas).
         /// </summary>
         [UnityTest, Timeout(240000)]
@@ -3056,7 +3056,7 @@ namespace Meridian.Tests
                 menu.Resume();
                 if (inventory != null) { inventory.SetOpen(true); yield return Shot(cam, "inventory"); inventory.SetOpen(false); }
                 if (catalogue != null) { catalogue.SetOpen(true); yield return Shot(cam, "catalogue_scroll"); catalogue.SetOpen(false); }
-                if (crafting != null) { crafting.SetOpen(true); yield return Shot(cam, "crafting_sign"); crafting.SetOpen(false); }
+                if (crafting != null) { crafting.SetOpen(true); yield return Shot(cam, "crafting_paper"); crafting.SetOpen(false); }
                 LogAssert.NoUnexpectedReceived();
             }
             finally

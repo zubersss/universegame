@@ -35,6 +35,9 @@ namespace Meridian.UI
 
         GameObject root;
         Image[] frames;
+        /// <summary>U-135: each slot's gold band (on for the selected slot); tests read them.</summary>
+        public Image[] Bands => bands;
+        Image[] bands;
         InputAction toggle;
         bool dirty = true;
         static UiKit.NumberStrings numbers;
@@ -94,6 +97,7 @@ namespace Meridian.UI
             Icons = new Image[Inventory.SlotCount];
             Counts = new Text[Inventory.SlotCount];
             frames = new Image[Inventory.SlotCount];
+            bands = new Image[Inventory.SlotCount];
             var tl = new Vector2(0f, 1f);
             for (int i = 0; i < Inventory.SlotCount; i++)
             {
@@ -101,8 +105,10 @@ namespace Meridian.UI
                 var pos = new Vector2(Gap + col * (Cell + Gap), -56f - row * (Cell + Gap));
                 var cell = UiKit.Rect(back.transform, "Slot" + i, tl, pos, new Vector2(Cell, Cell), tl);
                 var frame = cell.gameObject.AddComponent<Image>();
-                frame.color = new Color(1f, 1f, 1f, 0.06f);
+                frame.color = UiKit.SlotFill; // U-135 (D-149): an ink-line box on a faint darkening of the paper, so an empty inventory shows its grid
                 frames[i] = frame;
+                UiKit.InkEdges(cell, UiKit.SlotEdge, UiKit.Ink);
+                bands[i] = UiKit.GoldBand(cell); // the selected slot's gold band
                 int slot = i;
                 cell.gameObject.AddComponent<Button>().onClick.AddListener(() => { if (inventory != null) inventory.Select(slot); });
                 var icon = UiKit.Panel(cell, "Icon", center, Vector2.zero, new Vector2(Cell - 20f, Cell - 20f), Color.white);
@@ -127,12 +133,11 @@ namespace Meridian.UI
         {
             dirty = false;
             if (inventory == null) return;
-            var accent = UiTheme.Accent(null);
             for (int i = 0; i < Inventory.SlotCount; i++)
             {
                 var s = inventory[i];
                 bool selected = i == inventory.Selected;
-                frames[i].color = selected ? new Color(accent.r, accent.g, accent.b, 0.35f) : new Color(1f, 1f, 1f, 0.06f);
+                if (bands[i].enabled != selected) bands[i].enabled = selected; // U-135: the gold band, not an accent fill
                 if (s.IsEmpty) { Icons[i].enabled = false; Counts[i].text = ""; continue; }
                 var sprite = IconOf(s.itemId);
                 Icons[i].sprite = sprite;

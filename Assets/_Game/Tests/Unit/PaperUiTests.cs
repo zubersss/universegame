@@ -103,5 +103,79 @@ namespace Meridian.Tests
             Assert.AreEqual("ui/panels/scroll", ArtKeys.Ui.PanelScroll);
             Assert.AreEqual("ui/hud/film_switch", ArtKeys.Ui.FilmSwitch);
         }
+
+        static int Count(Transform t, string name) { int n = 0; for (int i = 0; i < t.childCount; i++) if (t.GetChild(i).name == name) n++; return n; }
+
+        /// <summary>U-135 (D-149): an inventory slot is an ink-line box (four 2 px ink edges inside it, a faint paper-darkening fill) with a gold band for
+        /// the selected slot, so an empty inventory shows its grid; the crafting panel sits on the inventory paper, not the stretched sign.</summary>
+        [Test]
+        public void SlotsAreInkBoxesAndCraftingSitsOnTheInventoryPaper()
+        {
+            var slot = new GameObject("Slot", typeof(RectTransform), typeof(Image));
+            try
+            {
+                var rt = slot.GetComponent<RectTransform>();
+                rt.sizeDelta = new Vector2(96f, 96f);
+                UiKit.InkEdges(rt, UiKit.SlotEdge, UiKit.Ink);
+                var band = UiKit.GoldBand(rt);
+                Assert.AreEqual(4, Count(rt, UiKit.EdgeName), "four ink edges");
+                foreach (Transform c in rt)
+                {
+                    if (c.name != UiKit.EdgeName) continue;
+                    var e = (RectTransform)c;
+                    Assert.AreEqual(UiKit.Ink, c.GetComponent<Image>().color);
+                    Assert.AreEqual(UiKit.SlotEdge, Mathf.Min(Mathf.Abs(e.sizeDelta.x), Mathf.Abs(e.sizeDelta.y)), 1e-4f, "2 px wide");
+                    Assert.IsFalse(c.GetComponent<Image>().raycastTarget, "the edges never take the slot's clicks");
+                }
+                Assert.IsFalse(band.enabled, "the gold band waits for the selection");
+                Assert.AreEqual(UiKit.Gold, band.color);
+                Assert.Less(UiKit.SlotFill.a, UiPaper.OwnGroundAlpha, "the slot's fill is the paper's (its count letters in ink)");
+            }
+            finally { Object.DestroyImmediate(slot); }
+            Assert.AreEqual(ArtKeys.Ui.PanelInventory, CraftingPanel.PaperKey, "D-149: crafting moves from the sign to the inventory paper");
+        }
+
+        /// <summary>U-136 (D-149): every button, tab and tile is a cream paper card with ink lettering and a 1 px ink edge; the state shows as the gold band
+        /// (selected / known) or a greyed card with faded ink (locked / can't act); no navy or blue fill.</summary>
+        [Test]
+        public void ButtonsTabsAndTilesArePaperCards()
+        {
+            var root = new GameObject("Root", typeof(RectTransform));
+            try
+            {
+                var menu = UiKit.Button(root.transform, "RESUME", Vector2.zero, () => { });
+                var menuFill = (Image)menu.targetGraphic;
+                var menuLabel = menu.GetComponentInChildren<Text>();
+                Assert.AreEqual(UiKit.Cream, menuFill.color, "a menu button is a cream card");
+                Assert.AreEqual(UiKit.Ink, menuLabel.color, "lettered in ink");
+                Assert.AreEqual(4, Count(menu.transform, UiKit.EdgeName), "a 1 px ink edge");
+                var rim = menuLabel.GetComponent<Outline>();
+                Assert.IsTrue(rim == null || !rim.enabled, "no light rim on the cream");
+                Assert.AreNotEqual(menu.colors.normalColor, menu.colors.selectedColor, "keyboard focus shows on the opaque card");
+
+                var craft = UiKit.ActionButton(root.transform, "CRAFT", new Vector2(0f, 1f), Vector2.zero, new Vector2(130f, 34f), () => { });
+                var craftFill = (Image)craft.targetGraphic;
+                var craftLabel = craft.GetComponentInChildren<Text>();
+                UiKit.SetAction(craft, false);
+                Assert.IsFalse(craft.interactable);
+                Assert.AreEqual(UiKit.Greyed, craftFill.color, "can't act: a greyed card");
+                Assert.AreEqual(UiKit.InkFaded, craftLabel.color, "with faded ink");
+                UiKit.SetAction(craft, true);
+                Assert.IsTrue(craft.interactable);
+                Assert.AreEqual(UiKit.Cream, craftFill.color, "can act: cream, not blue");
+                Assert.AreEqual(UiKit.Ink, craftLabel.color);
+
+                var band = craft.transform.Find(UiKit.BandName).GetComponent<Image>();
+                UiKit.SetCard(craftFill, UiKit.Card.Gold);
+                Assert.IsTrue(band.enabled, "selected / known: the gold band");
+                Assert.AreEqual(UiKit.Cream, craftFill.color);
+                UiKit.SetCard(craftFill, UiKit.Card.Plain);
+                Assert.IsFalse(band.enabled);
+                UiKit.SetCard(craftFill, UiKit.Card.Locked);
+                Assert.IsFalse(band.enabled, "a locked card has no band");
+                Assert.AreEqual(UiKit.Greyed, craftFill.color);
+            }
+            finally { Object.DestroyImmediate(root); }
+        }
     }
 }

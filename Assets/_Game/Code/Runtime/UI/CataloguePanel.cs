@@ -40,7 +40,6 @@ namespace Meridian.UI
         readonly Dictionary<PlanetId, Button> planetButtons = new Dictionary<PlanetId, Button>();
         /// <summary>Unscanned entries: their icon as a dark silhouette (LEAD, U-054 review).</summary>
         static readonly Color Silhouette = new Color(0f, 0f, 0f, 0.7f);
-        static readonly Color PlanetIdle = new Color(0.12f, 0.16f, 0.22f, 1f);
         readonly List<AsyncOperationHandle<IList<Sprite>>> handles = new List<AsyncOperationHandle<IList<Sprite>>>();
         bool dirty;
 
@@ -173,9 +172,7 @@ namespace Meridian.UI
             foreach (var kv in planetButtons)
             {
                 bool on = kv.Key == Shown;
-                if (kv.Value.targetGraphic is Image img) img.color = on ? UiKit.ActionOn : PlanetIdle;
-                var label = kv.Value.GetComponentInChildren<Text>();
-                if (label != null) label.color = on ? UiKit.ActionTextOn : new Color(1f, 1f, 1f, 0.6f);
+                UiKit.SetCard(kv.Value.targetGraphic as Image, on ? UiKit.Card.Gold : UiKit.Card.Plain); // D-149 (U-136): the planet shown wears the gold band
             }
             var entries = Catalogue.For(Shown);
             for (int i = 0; i < cells.Count; i++)

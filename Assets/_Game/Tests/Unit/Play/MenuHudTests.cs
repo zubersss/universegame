@@ -277,7 +277,7 @@ namespace Meridian.Tests
                 Paper("settings", menu.Settings.Paper, Meridian.Art.ArtKeys.Ui.PanelSettings);
                 Paper("inventory", inventory.Paper, Meridian.Art.ArtKeys.Ui.PanelInventory);
                 Paper("catalogue", catalogue.Paper, Meridian.Art.ArtKeys.Ui.PanelScroll);
-                Paper("crafting", crafting.Paper, Meridian.Art.ArtKeys.Ui.PanelSign);
+                Paper("crafting", crafting.Paper, CraftingPanel.PaperKey); // D-149: the inventory paper
                 if (menu.PausePaper == true)
                 {
                     Assert.AreEqual(UnityEngine.UI.Image.Type.Sliced, menu.PauseCard.type, "the pause card 9-slices");
