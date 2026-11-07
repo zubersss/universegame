@@ -1,7 +1,8 @@
 # BLENDER STATUS
-Updated: 2026-11-07 08:40 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 08:44 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
+08:40-08:44 B-155 Jupiter design prep, paper part DONE (67816d87): the palette proposal ALL PASS (build_c2_jupiter_palette.py, 11 MB) + c2_jupiter_designs.md (five faceless flora, floe strips, four deck backdrop notes + the Red Spot overlay, the CRUSH band and lightning on layer2, the creature re-ink list, props). Two proposals need a ruling (Proposals below). Next: the dry runs (Venus rigs, UI scratch, Mercury exports) and the deck re-run when RAM / a slot allows; then the Jupiter flora drawings.
 08:35-08:40 code only (UNITY holds the lock, 0.25-0.42 GB free): B-153 Venus rig-set source DONE (7dd59765: 33 parts, bones 2/5/4/6/3, the bells a chain so they swing out of phase; the dry run waits for RAM); B-146 export readiness code DONE (56671818: build_ui_v3.export, render.py do_ui_set, row ui/c3_set; slice jsons, cards 1600x452 for BC7, switch parts off / on; the scratch dry run waits for RAM). Next: B-155 Jupiter design notes (writing), then the dry runs (Venus rigs, UI scratch, Mercury exports) and the deck re-run slot when free.
 LEAD cycle 265: B-146 + B-147 DONE as designs; cards B-151 (UI export) / B-152 (Venus backdrops, studies in a free <= 5 min slot) / B-153 / B-154 in Backlog; B-155 Jupiter design prep Ready. 08:28:49-08:31:26 SLOT (numpy, B-152 Venus studies, released, 157 s, 559 MB): surface DONE (review_b147_venus_surface_preview.png: haze bands, terraced tesserae lit by vent glows, glassy glints, rain that stops mid-air); deck studied, then fixed in code (88ccee89: cumulus towers with a following cream lining, the airship station above the cloud tops) - its ~80 s re-run waits for a free slot (no want filed). 08:34: UNITY holds the lock, 0.25 GB free: code only (the Venus rig-set source, B-146 export readiness code, the Mercury export rows, B-155 notes).
 08:19-08:28 lock-free (no lock held): B-147 the four Venus creature reviews DONE (6d5f7337: drifter, acidmoth, crab, eel; problems none, ink 2.00-3.00 / 1.00-1.50, palette 100 %, <= 198 MB; crab crust + rim + bigger claws, eel thicker, eel bump head drop damped) - ready for LEAD; props/venus/vent_mouth DONE (d8ac7e69: 96x40 den on VENT_TOP, den review json valid, palette 100 %, 108 MB) - ready for LEAD; the Venus backdrop stub smoke test DONE (deck + surface build, 233 MB). Next: the Mercury export dry runs, report upkeep.
@@ -37,7 +38,8 @@ B-142 export after U-118's code; Mars props with their card; Mercury / Venus exp
 none.
 
 ## Proposals (undecided only)
-none.
+- B-155 floe caps: two extra frames per floe strip (cap_left / cap_right after the 8 tiles, same 64x152 cell + pivot) so a finite floe is cap + n tiles + cap; GroundStrip.cs places tiles only today (a UNITY change).
+- B-155 aerostat kit: re-ink props/common/aerostat_{deck,strut,cell}, float_cell_pack_mk1/2, grapple_hook once for all four giants (Earth palette like the camp set).
 
 ## Rules I keep (from slips this session)
 - A lock check is its own call; Blender starts only in a later call after reading a clear result (D-073). The same for RAM: read it in its own call, then decide.
