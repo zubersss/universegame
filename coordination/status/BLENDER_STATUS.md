@@ -1,9 +1,10 @@
 # BLENDER STATUS
-Updated: 2026-11-07 16:58 · Session: 8 (resumed 14:3x after the ~14:17 machine restart; C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 17:11 · Session: 8 (resumed 14:3x after the ~14:17 machine restart; C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-The owner-build art is all in: B-167 EXPORTED (243804c3, 16:55:43-16:56:06, 390 MB; review_b167_mercury_props.png 16:56). UNITY's 0.4.6 build lock goes next (its want on file); I re-file when its lock appears for B-161's last item: the six Neptune deck studies (ndeck1 / ndeck2 / ndeck3 / ndeep / nstorm / nspot) in budgeted slots (<= 6 min each; not measured yet: the first slot runs one deck and measures it).
-Slip logged (LEAD 16:5x): after filing the B-167 want at 16:20 I ended my turn waiting for a ping; the lock sat free from 16:22 to 16:55. Rule: while a want is on file, keep polling the locks folder each turn (short foreground checks), never end a turn on "waiting for a ping".
+B-161's last item, the six Neptune deck studies. 17:07:45-17:09:20 (the gap between UNITY's 0.4.6 locks A and B, caught by a lock monitor): ndeck1 + ndeck2 (48 / 41 s, peak 590 MB), the driver stopped on UNITY's lock-B want. My read: the wind did not read (layer2's 1 px dabs nearly invisible, the banks barely leaning, faint plumes and cirrus shadows) -> one look pass c8a231d6 (bolder wind + speed lines, crests sheared downwind, darker plumes and shadows); LEAD told not to judge the first two. Next slot: all six on the pass (~4.5 min). Want filed 17:09:56 behind lock B.
+Then: the Jupiter exports (B-156 with B-159's first slot, B-159, B-160; the rows are all v3; scratch dry runs when RAM allows outside UNITY's build chain).
+B-167 VERIFIED (LEAD 16:5x); B-154 exported; B-152 / B-153 verified.
 
 ## Last completed
 - 16:55:43-16:56:06 SLOT (wrapper): B-167 the six Mercury props (243804c3; ice_burrow byte-identical; 24 v2 files removed).
@@ -13,7 +14,7 @@ Slip logged (LEAD 16:5x): after filing the B-167 want at 16:20 I ended my turn w
 - 16:07:42-16:11:26 SLOT: the B-161 stamped reviews (all nine ACCEPTED).
 
 ## Ready for review
-- B-167: the 36-file export (243804c3) + review_b167_mercury_props.png (16:56 export).
+
 - B-154: the export (87e1ae22) + review_b147_venus_{sulfur_drifter,acidmoth,pressure_crab,vent_eel}.png + review_b154_vent_mouth.png.
 
 ## Handoffs (unrouted only)
@@ -44,4 +45,4 @@ none (B-161's three ruled in D-148).
 none (USER-28, closing ChatGPT + Edge for RAM, is LEAD's).
 
 ## HeavyJobLock
-none held (B-167 released 16:56:06); no want on file: UNITY's 0.4.6 build goes next; I re-file for the Neptune deck studies when its lock appears (D-039).
+none held (released 17:09:20); want_blender filed 17:09:56 (the six Neptune deck studies) behind UNITY's 0.4.6 lock B.
