@@ -93,7 +93,9 @@ def puff(t):
     """The cream steam ring at t (0 low .. 1 high), relative to the chimney mouth (0, 0.30)."""
     def draw(d, M):
         r = 0.05 + 0.06 * t
-        G.stroke(d, G.lumpy_ellipse(0.02 * t, 0.12 + 0.30 * t, r * 1.4, r * 0.6, n=16, lump=0.1, seed=24), M["cream"], I, cyclic=True)
+        zb = 0.12 + 0.30 * t - r * 0.5                                                    # a faint steam trail from the mouth to the
+        G.stroke(d, [(-0.014, 0.0), (0.014, 0.0), (0.02 * t + 0.03, zb), (0.02 * t - 0.03, zb)], M["cream_sh"], 0.0, cyclic=True)   # ring (keeps the
+        G.stroke(d, G.lumpy_ellipse(0.02 * t, 0.12 + 0.30 * t, r * 1.4, r * 0.6, n=16, lump=0.1, seed=24), M["cream"], I, cyclic=True)  # pivot in the rect)
         G.stroke(d, G.lumpy_ellipse(0.02 * t, 0.12 + 0.30 * t, r * 0.7, r * 0.25, n=12, seed=25), M["cream_sh"], 0.0, cyclic=True)
     return draw
 
