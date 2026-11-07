@@ -27,7 +27,7 @@ namespace Meridian.Tests
             Assert.AreEqual("terrain/earth/ground_strip_sand", GroundStrip.Keys[GroundStrip.Sand]);
         }
 
-        [System.Serializable] class Sheet { public int frame_width, frame_height, columns, frames, ground_line_px; public float ppu; public float[] pivot; public bool tile; public string material; }
+        [System.Serializable] internal class Sheet { public int frame_width, frame_height, columns, frames, ground_line_px; public float ppu; public float[] pivot; public bool tile; public string material; }
 
         [Test]
         public void TheFourStripsShareTheB130Frame()

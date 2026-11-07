@@ -19,6 +19,13 @@ namespace Meridian.View2D
         /// <summary>U-111 (B-130): the strips by material: grass over soil, bare soil where dug, stone where the block is stone, sand on the coast.</summary>
         public static readonly string[] Keys = { Key, Key + "_soil", Key + "_stone", Key + "_sand" };
         public const int Grass = 0, Soil = 1, Stone = 2, Sand = 3;
+        /// <summary>U-118 (B-140): Mars draws the regolith strip, basalt where the block is basalt; hematite and ice read regolith until their strips land.</summary>
+        public static readonly string[] MarsKeys = { "terrain/mars/ground_strip", "terrain/mars/ground_strip_basalt" };
+        public const int Regolith = 0, Basalt = 1;
+        /// <summary>The planet's strip keys (Earth's four, Mars's two; other planets Earth's until their strips exist). Pure.</summary>
+        public static string[] KeysFor(Meridian.Planets.PlanetId planet) => planet == Meridian.Planets.PlanetId.Mars ? MarsKeys : Keys;
+        /// <summary>The strip a column draws on `planet` from its top solid tile. Pure.</summary>
+        public static int MaterialFor(Meridian.Planets.PlanetId planet, byte topTile) => planet == Meridian.Planets.PlanetId.Mars ? (topTile == TileId.Basalt ? Basalt : Regolith) : MaterialFor(topTile);
 
         /// <summary>The strip a column draws from its top solid tile: grass, sand and stone their own, every other tile (soil, snow, a dug face) the soil. Pure.</summary>
         public static int MaterialFor(byte topTile) => topTile == TileId.Grass ? Grass : topTile == TileId.Sand ? Sand : topTile == TileId.Stone ? Stone : Soil;
@@ -40,11 +47,13 @@ namespace Meridian.View2D
 
         Sprite[] frames; // the grass strip: the fallback
         Sprite dirt;
-        readonly Sprite[][] framesBy = new Sprite[4][];
-        readonly Sprite[] fillBy = new Sprite[4];
+        Sprite[][] framesBy = new Sprite[4][];
+        Sprite[] fillBy = new Sprite[4];
+        string[] keys = Keys;
+        Meridian.Planets.PlanetId planet = Meridian.Planets.PlanetId.Earth;
         readonly List<int> materialAt = new List<int>(64);
         AsyncOperationHandle<IList<Sprite>> handle;
-        readonly AsyncOperationHandle<IList<Sprite>>[] handles = new AsyncOperationHandle<IList<Sprite>>[4];
+        AsyncOperationHandle<IList<Sprite>>[] handles = new AsyncOperationHandle<IList<Sprite>>[4];
         readonly List<SpriteRenderer> tops = new List<SpriteRenderer>(64), fills = new List<SpriteRenderer>(64), edges = new List<SpriteRenderer>(64), backs = new List<SpriteRenderer>(64);
         int firstColumn = int.MinValue, lastColumn = int.MinValue, count;
         bool dirty = true;
@@ -52,15 +61,22 @@ namespace Meridian.View2D
         void OnEnable() { if (terrain != null) terrain.TileChanged += OnTile; }
         void OnDisable() { if (terrain != null) terrain.TileChanged -= OnTile; }
 
-        public void Load()
+        public void Load() => Load(Meridian.Planets.PlanetId.Earth);
+
+        /// <summary>Loads the planet's strips (U-118: KeysFor); a second Load re-configures for another planet.</summary>
+        public void Load(Meridian.Planets.PlanetId planet)
         {
             if (terrain != null) { terrain.TileChanged -= OnTile; terrain.TileChanged += OnTile; }
             if (handle.IsValid()) ArtLoad.Release(handle); // U-121: a second Load (re-configure) must not orphan the first handle (ResidencyTests' lone planet_earth holder)
             for (int m = 0; m < handles.Length; m++) if (handles[m].IsValid()) ArtLoad.Release(handles[m]);
-            for (int m = 0; m < Keys.Length; m++)
+            this.planet = planet;
+            keys = KeysFor(planet);
+            framesBy = new Sprite[keys.Length][]; fillBy = new Sprite[keys.Length]; handles = new AsyncOperationHandle<IList<Sprite>>[keys.Length];
+            frames = null; dirt = null; dirty = true;
+            for (int m = 0; m < keys.Length; m++)
             {
                 int material = m;
-                var h = ArtLoad.Asset<IList<Sprite>>(Keys[m]);
+                var h = ArtLoad.Asset<IList<Sprite>>(keys[m]);
                 handles[m] = h;
                 if (m == Grass) handle = h;
                 h.Completed += op =>
@@ -100,10 +116,10 @@ namespace Meridian.View2D
                 int topY = terrain.TopSolidY(x);
                 float top = topY + 1f; // the ground line
                 // U-111: the column's material from its top solid tile; a sheet not in yet falls back to the grass strip.
-                int material = MaterialFor(terrain.GetTile(x, topY));
+                int material = MaterialFor(planet, terrain.GetTile(x, topY));
                 var set = framesBy[material] ?? frames;
                 var fillTile = fillBy[material] ?? dirt;
-                materialAt[i] = framesBy[material] != null ? material : Grass;
+                materialAt[i] = framesBy[material] != null ? material : 0;
                 var t = tops[i];
                 t.sprite = set[((x % set.Length) + set.Length) % set.Length];
                 t.transform.position = new Vector3(x + 0.5f, top, Z);

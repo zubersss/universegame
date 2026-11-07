@@ -17,7 +17,7 @@ namespace Meridian.View2D
         /// <summary>P-48 (D-086 / D-099): the v4 cartoon path is the game's path on converted planets; on by default. Tests of the 3D path on Earth switch it off for their run and restore it.</summary>
         public static bool Enabled = true;
         /// <summary>The planets whose v4 art path is on when Enabled (C0: Earth).</summary>
-        public static bool Converted(Meridian.Planets.PlanetId id) => id == Meridian.Planets.PlanetId.Earth;
+        public static bool Converted(Meridian.Planets.PlanetId id) => id == Meridian.Planets.PlanetId.Earth || id == Meridian.Planets.PlanetId.Mars; // U-118: Mars joins Earth
 
         public const string SurveyorKey = "characters/surveyor/side";
         public const string EarthScene = "plains";
@@ -32,6 +32,24 @@ namespace Meridian.View2D
 
         /// <summary>The scene set in use (U-110: set from the spawn column's biome at ConfigureFor).</summary>
         public string Scene { get; private set; } = EarthScene;
+
+        /// <summary>U-118 (B-141): Mars sets by region — the canyon its own set, every other region the plains set; until B-141's plains lands, the plains fall back to the canyon set. The storm set is the veil.</summary>
+        public const string MarsFallbackScene = "canyon", StormScene = "storm";
+        /// <summary>U-118: the storm veil's sorting offset over the base set, and its wind scroll per second at full intensity (a quarter of the storm's wind: the wall is far).</summary>
+        public const int StormVeilOrder = 5;
+        public const float StormWind = Meridian.Planet.Weather.DustStorm.WindSpeed * 0.25f;
+        /// <summary>The painted set for a planet at column x: Earth by its biome band, Mars by its region (StageRegions), the plains elsewhere. Pure.</summary>
+        public static string SceneFor(Meridian.Planets.PlanetId planet, int x)
+        {
+            if (planet == Meridian.Planets.PlanetId.Earth) return SceneFor(Meridian.Terrain.EarthBiomes.At(x));
+            if (planet == Meridian.Planets.PlanetId.Mars) return Meridian.Planet.Backdrop.StageRegions.At(planet, x) == "mars_canyon" ? "canyon" : "plains";
+            return EarthScene;
+        }
+        /// <summary>The storm veil's alpha for a dust storm's intensity (a smooth step: the wall arrives late and lands fully). Pure.</summary>
+        public static float StormAlpha(float intensity) { float t = Mathf.Clamp01(intensity); return t * t * (3f - 2f * t); }
+        /// <summary>U-118: the B-141 storm set over the base layers on Mars; its alpha follows the dust storm, its scroll the wind.</summary>
+        public ParallaxLayers StormLayers { get; private set; }
+        Meridian.Planet.Weather.DustStorm storm;
         /// <summary>Rigged plants around the camp in C0 (every FloraSpacing m, jittered).</summary>
         public const int FloraCount = 42; // D-136 (2): was 48; the camp's density is the animated-object lever (the gate read 42 Animators against 40)
         public const float FloraSpacing = 2.5f;
@@ -59,7 +77,7 @@ namespace Meridian.View2D
             SetActive(side.stage, !Active, side);
             SetActive(side.depthBands, !Active, side);
             SetActive(side.backdrop, !Active, side);
-            if (!Active) { if (Layers != null) Layers.gameObject.SetActive(false); if (Sky != null) Sky.gameObject.SetActive(false); return; }
+            if (!Active) { if (Layers != null) Layers.gameObject.SetActive(false); if (Sky != null) Sky.gameObject.SetActive(false); if (StormLayers != null) StormLayers.gameObject.SetActive(false); storm = null; return; }
 
             var cam = side.sideCamera;
             var follow = cam != null ? cam.GetComponent<CameraFollow>() : null;
@@ -77,8 +95,20 @@ namespace Meridian.View2D
             }
             Layers.gameObject.SetActive(true);
             Layers.view = cam;
-            Scene = config.id == Meridian.Planets.PlanetId.Earth ? SceneFor(Meridian.Terrain.EarthBiomes.At(side.spawnX)) : EarthScene; // U-110: the spawn's biome picks the set
-            Layers.ConfigureFor(config.id.ToString().ToLowerInvariant(), Scene, surfaceDatum);
+            Scene = SceneFor(config.id, side.spawnX); // U-110 / U-118: the spawn's band (Earth) or region (Mars) picks the set
+            Layers.ConfigureFor(config.id.ToString().ToLowerInvariant(), Scene, surfaceDatum, config.id == Meridian.Planets.PlanetId.Mars ? MarsFallbackScene : null);
+            // U-118: Mars draws the dust storm as the B-141 storm set's veil over the base layers (alpha = the storm's intensity, the wind scrolls it).
+            if (config.id == Meridian.Planets.PlanetId.Mars)
+            {
+                if (StormLayers == null) { var wgo = new GameObject("CartoonStormVeil"); wgo.transform.SetParent(transform, false); StormLayers = wgo.AddComponent<ParallaxLayers>(); StormLayers.orderOffset = StormVeilOrder; }
+                StormLayers.gameObject.SetActive(true);
+                StormLayers.view = cam;
+                StormLayers.alpha = 0f;
+                StormLayers.scrollX = 0f;
+                StormLayers.ConfigureFor("mars", StormScene, surfaceDatum);
+                storm = side.dustStorm;
+            }
+            else { if (StormLayers != null) StormLayers.gameObject.SetActive(false); storm = null; }
             // U-109: the climb sky behind the painted layers, measured against layer0's top edge every frame.
             if (Sky == null) { var sgo = new GameObject("CartoonClimbSky"); sgo.transform.SetParent(transform, false); Sky = sgo.AddComponent<ClimbSky>(); }
             Sky.gameObject.SetActive(true);
@@ -95,7 +125,7 @@ namespace Meridian.View2D
             if (Ground == null) { var ggo = new GameObject("CartoonGround"); ggo.transform.SetParent(transform, false); Ground = ggo.AddComponent<GroundStrip>(); }
             Ground.gameObject.SetActive(true);
             Ground.view = cam; Ground.terrain = side.terrain;
-            Ground.Load();
+            Ground.Load(config.id); // U-118: the planet's strips (Earth's four, Mars's regolith + basalt)
             if (Meridian.Art.ModelView.CartoonMaterial != null) foreach (var mv in side.GetComponentsInChildren<Meridian.Art.ModelView>(true)) mv.Wear(Meridian.Art.ModelView.CartoonMaterial);
             // U-101: one gull (B-113) over the camp; the director keeps it (it flees and bumps like any critter).
             if (side.creatures != null && side.player != null && side.creatures.CountOf(Meridian.Creatures.Species.Gull) < GullCount)
@@ -114,6 +144,13 @@ namespace Meridian.View2D
                 Surveyor.player = side.player;
                 Surveyor.key = SurveyorKey;
             }
+        }
+
+        void LateUpdate()
+        {
+            if (StormLayers == null || storm == null || !StormLayers.gameObject.activeSelf) return;
+            StormLayers.alpha = StormAlpha(storm.Intensity);
+            if (storm.Intensity > 0f) StormLayers.scrollX += storm.Intensity * StormWind * Time.deltaTime; // the wind carries the wall
         }
 
         static void SetActive(Component c, bool on, PlanetSideRoot side)

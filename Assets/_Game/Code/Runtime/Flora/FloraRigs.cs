@@ -165,9 +165,18 @@ namespace Meridian.Flora
         /// <summary>U-110: the biome name a column belongs to, in the rig set's vocabulary (Earth: the band at x; the ocean band's land is the coast). Pure.</summary>
         public static string BiomeNameAt(Meridian.Planets.PlanetId? planet, int x)
         {
-            if (planet != Meridian.Planets.PlanetId.Earth) return null;
-            var b = Meridian.Terrain.EarthBiomes.At(x);
-            return b == Meridian.Terrain.Biome.Ocean ? "coast" : b.ToString().ToLowerInvariant();
+            if (planet == Meridian.Planets.PlanetId.Earth)
+            {
+                var b = Meridian.Terrain.EarthBiomes.At(x);
+                return b == Meridian.Terrain.Biome.Ocean ? "coast" : b.ToString().ToLowerInvariant();
+            }
+            if (planet == Meridian.Planets.PlanetId.Mars)
+            {
+                // U-118 (B-140): the region names in the rig set's vocabulary — plains / canyon / polar, Tharsis the highlands.
+                var r = Meridian.Planet.Backdrop.StageRegions.At(Meridian.Planets.PlanetId.Mars, x);
+                return r == "mars_tharsis" ? "highlands" : r.StartsWith("mars_", System.StringComparison.Ordinal) ? r.Substring(5) : r;
+            }
+            return null;
         }
 
         /// <summary>

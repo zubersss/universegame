@@ -72,6 +72,15 @@ namespace Meridian.View2D
         public SceneLayout Layout { get; private set; } = SceneLayout.Default();
         public readonly List<SpriteRenderer> renderers = new List<SpriteRenderer>(5);
         public readonly List<bool> placeholders = new List<bool>(5);
+        /// <summary>U-118: the renderers' alpha (the storm veil fades in with the dust storm's intensity); applied in LateUpdate when it changes.</summary>
+        public float alpha = 1f;
+        /// <summary>U-118: a scroll along x added to every layer (the storm's wind), metres.</summary>
+        public float scrollX;
+        /// <summary>U-118: added to the sorting orders (BackOrder + orderOffset + n): the storm veil draws over the base set.</summary>
+        public int orderOffset;
+        /// <summary>U-118: true when the scene asked for had no json and the fallback scene was configured instead (B-141's plains until it lands).</summary>
+        public bool UsedFallback { get; private set; }
+        float appliedAlpha = -1f;
 
         readonly List<AsyncOperationHandle> handles = new List<AsyncOperationHandle>(6);
         static Sprite white;
@@ -81,9 +90,10 @@ namespace Meridian.View2D
         public static float FollowY(float cameraY, float anchorY) => Mathf.Max(cameraY, anchorY);
 
         /// <summary>Builds the layers of backgrounds/&lt;planet&gt;/&lt;scene&gt; (placeholders at once, art as it loads).</summary>
-        public void ConfigureFor(string planet, string scene, float surfaceDatum)
+        public void ConfigureFor(string planet, string scene, float surfaceDatum, string fallbackScene = null)
         {
             Clear();
+            UsedFallback = false;
             datumY = surfaceDatum;
             anchorY = ParallaxMath.AnchorY(surfaceDatum);
             SceneKey = $"backgrounds/{planet}/{scene}";
@@ -92,6 +102,12 @@ namespace Meridian.View2D
             {
                 if (this == null || op.Status != AsyncOperationStatus.Succeeded || op.Result == null) return;
                 Build(SceneLayout.Parse(op.Result.text));
+            }, () =>
+            {
+                // U-118: a set not exported yet (B-141's plains) takes the fallback set rather than the placeholder tints.
+                if (this == null || string.IsNullOrEmpty(fallbackScene) || fallbackScene == scene) return;
+                ConfigureFor(planet, fallbackScene, surfaceDatum);
+                UsedFallback = true;
             });
         }
 
@@ -106,7 +122,7 @@ namespace Meridian.View2D
                 var go = new GameObject("Layer" + l.n);
                 go.transform.SetParent(transform, false);
                 var sr = go.AddComponent<SpriteRenderer>();
-                sr.sortingOrder = BackOrder + l.n;
+                sr.sortingOrder = BackOrder + orderOffset + l.n;
                 SetPlaceholder(sr, l.n);
                 renderers.Add(sr);
                 placeholders.Add(true);
@@ -114,13 +130,14 @@ namespace Meridian.View2D
                 Probe<Sprite>(SceneKey + "/layer" + l.n, h => h.Completed += op =>
                 {
                     if (this == null || index >= renderers.Count || renderers[index] != sr || op.Status != AsyncOperationStatus.Succeeded || op.Result == null) return;
-                    sr.color = Color.white;
+                    sr.color = new Color(1f, 1f, 1f, alpha);
                     sr.drawMode = SpriteDrawMode.Tiled;
                     sr.sprite = op.Result;
                     sr.size = new Vector2(op.Result.bounds.size.x * 3f, op.Result.bounds.size.y);
                     placeholders[index] = false;
                 });
             }
+            appliedAlpha = -1f;
             LateUpdate();
         }
 
@@ -138,14 +155,15 @@ namespace Meridian.View2D
             sr.color = PlaceholderTints[Mathf.Clamp(n, 0, PlaceholderTints.Length - 1)];
         }
 
-        void Probe<T>(string address, System.Action<AsyncOperationHandle<T>> load)
+        void Probe<T>(string address, System.Action<AsyncOperationHandle<T>> load, System.Action missing = null)
         {
             var probe = Addressables.LoadResourceLocationsAsync(address, typeof(T));
             probe.Completed += l =>
             {
                 IResourceLocation loc = l.Status == AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0 ? l.Result[0] : null;
                 ArtLoad.Release(l);
-                if (loc == null || this == null) return;
+                if (loc == null) { if (this != null) missing?.Invoke(); return; }
+                if (this == null) return;
                 var h = ArtLoad.Asset<T>(loc, SceneKey);
                 handles.Add(h);
                 load(h);
@@ -156,13 +174,18 @@ namespace Meridian.View2D
         {
             if (view == null) return;
             var c = view.transform.position;
+            if (alpha != appliedAlpha)
+            {
+                for (int i = 0; i < renderers.Count; i++) { var r = renderers[i]; if (r == null) continue; var col = r.color; col.a = alpha; r.color = col; }
+                appliedAlpha = alpha;
+            }
             for (int i = 0; i < renderers.Count && i < Layout.layers.Length; i++)
             {
                 var l = Layout.layers[i];
                 var sr = renderers[i];
                 if (sr == null) continue;
                 float w = sr.size.x / 3f;
-                float x = ParallaxMath.LayerX(c.x, l.parallax);
+                float x = ParallaxMath.LayerX(c.x, l.parallax) + scrollX; // U-118: the storm's wind
                 // Keep the 3-wide strip centred on the camera: shift by whole tile widths (tileable art, no seam).
                 if (w > 0f) x += Mathf.Round((c.x - x) / w) * w;
                 sr.transform.position = new Vector3(x, ParallaxMath.LayerY(FollowY(c.y, anchorY), anchorY, datumY, l.y_m, l.parallax), 0f); // U-122: under the anchor the painting holds its datum pose
