@@ -73,8 +73,8 @@ def draw_pilgrim(d, M, pose=None, seed=0):
     if p["puffs"] > 0:
         for k in range(5):
             t = p["puffs"]
-            r = (0.45 + 0.28 * k) * (0.6 + 0.5 * t)
-            x = -L2 - 0.9 - 0.8 * k * (0.7 + 0.4 * t) - r * 0.6
+            r = (0.45 + 0.20 * k) * (0.6 + 0.4 * t)
+            x = -L2 - 0.9 - 0.7 * k * (0.7 + 0.4 * t) - r * 0.6
             z = CZ - 0.1 * k + 0.12 * math.sin(k * 1.7 + seed)
             G.stroke(d, TL(G.lumpy_ellipse(x, z, r, r * 0.92, n=28, lump=0.07, seed=seed + 40 + k)),
                      M["puff_hot"] if k == 0 and t > 0.5 else M["puff"], O, cyclic=True)
