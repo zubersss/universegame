@@ -53,7 +53,7 @@ namespace Meridian.Tests.LeadQA
             var transitions = Object.FindAnyObjectByType<TransitionDirector>();
             Assert.AreEqual(PlanetId.Earth, state.currentPlanet, "starts on Earth");
 
-            // 1. Lift off from rest on Earth on full thrust; the launch burn costs 17.
+            // 1. Lift off from rest on Earth on full thrust (U-107, D-103: no fuel; thrust-to-weight is the only limit).
             var side = director.PlanetSide;
             var ship = side.ship;
             ship.GetComponent<ShipBoarding>().ForceAboard();
@@ -61,14 +61,12 @@ namespace Meridian.Tests.LeadQA
             timeout = Time.realtimeSinceStartup + 10f;
             while (!ship.AtRest && Time.realtimeSinceStartup < timeout) yield return new WaitForFixedUpdate();
             Assert.IsTrue(ship.AtRest, "ship starts at rest on the ground");
-            float fuel0 = state.fuel;
             bool escaped = false;
             ship.EscapeLineCrossed += () => escaped = true;
             ship.intent = new ShipSideIntent { thrust = 1f };
             timeout = Time.realtimeSinceStartup + 90f;
             while (!escaped && Time.realtimeSinceStartup < timeout) yield return new WaitForFixedUpdate();
             Assert.IsTrue(escaped, "crossed the Escape Line under Mk1 thrust");
-            Assert.AreEqual(fuel0 - 17f, state.fuel, 0.1f, "Earth launch costs 17 fuel");
             yield return WaitIdle(transitions, 10f);
             Assert.AreEqual(ViewMode.Space, state.view, "in space after launch");
 
@@ -131,15 +129,15 @@ namespace Meridian.Tests.LeadQA
             var save = SaveSystem.Instance;
             save.Save();
             Assert.IsTrue(save.HasSave, "save written");
-            float fuel = state.fuel, hull = state.hull;
+            int mark = state.thrusterMark; float hull = state.hull;
             Vector2 shipPos = ship.Body.position;
-            state.fuel = 1f; state.hull = 1f; // scribble, so the load must restore them
+            state.thrusterMark = 3; state.hull = 1f; // scribble, so the load must restore them
             yield return save.Load();
             timeout = Time.realtimeSinceStartup + 20f;
             while ((save.Loading || director.PlanetSide == null || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
             Assert.AreEqual(PlanetId.Mars, GameState.Instance.currentPlanet, "loaded on Mars");
             Assert.AreEqual(ViewMode.PlanetSide, GameState.Instance.view);
-            Assert.AreEqual(fuel, GameState.Instance.fuel, 1e-3f, "fuel restored");
+            Assert.AreEqual(mark, GameState.Instance.thrusterMark, "thruster mark restored");
             Assert.AreEqual(hull, GameState.Instance.hull, 1e-3f, "hull restored");
             Assert.AreEqual(shipPos.x, director.PlanetSide.ship.Body.position.x, 0.5f, "ship where it landed");
 
