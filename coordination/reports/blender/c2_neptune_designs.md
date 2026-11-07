@@ -15,11 +15,11 @@ floe strips (D-137), the shared aerostat kit (B-156), straight-alpha layers (D-1
 | Item | State | File |
 |---|---|---|
 | Palette | ACCEPTED (D-148): in `meridian.v3.PALETTES["neptune"]` + the ui/palettes/neptune row (exports with the first Neptune slot) | blender/scripts/build_c2_neptune_palette.py |
-| Five flora | drawn (a1924873; drawn upright, D-148) + the rig set (994e266c: 24 parts on 500x176, bones 4 / 1 / 5 / 2 / 1, validate_rigset clean); smoke-clean; stamped review pending | build_c2_neptune_plants.py, build_c2_neptune_rigs.py |
-| Floe strips | drawn (5de84381): ice (rounded windward cap, ragged lee cap) + superionic; joins 0.89 / 0.41, caps joined, silhouette identical; stamped review pending | build_c2_neptune_floes.py |
-| Deck backdrops | in code: build_backdrop_v3.neptune_scene deck1 / deck2 / deck3 / deep / storm / spot (preview names ndeck1..nspot); the studies run in BLENDER slots | build_backdrop_v3.py |
-| Creatures | drawn: windrider 192x112, shadow_shoal 64x48, pressure_phantom 96x112, anchor_worm 256x80 (all new keys); 162 frames smoke-clean; the Umbral Leviathan a Grand rig (64bfe144, 8 bones, valid); stamped reviews pending | build_creatures_neptune_v3.py, build_umbral_leviathan_v3.py |
-| Props | drawn (170d4db0): wind_anchor 128x192 + meridian_wreck_bow / _mid / _stern 512x320 (`replaces_v2` at export); smoke-clean; stamped review pending | build_props_neptune_v3.py |
+| Five flora | drawn (a1924873; drawn upright, D-148) + the rig set (994e266c: 24 parts on 500x176, bones 4 / 1 / 5 / 2 / 1, validate_rigset clean); ACCEPTED (LEAD 16:1x: review_b161_neptune_plants_preview.png + review_b161_neptune_rigset_dryrun.png) | build_c2_neptune_plants.py, build_c2_neptune_rigs.py |
+| Floe strips | drawn (5de84381): ice (rounded windward cap, ragged lee cap) + superionic; joins 0.89 / 0.41, caps joined, silhouette identical; ACCEPTED (review_b161_neptune_floes_preview.png) | build_c2_neptune_floes.py |
+| Deck backdrops | in code: build_backdrop_v3.neptune_scene deck1 / deck2 / deck3 / deep / storm / spot (preview names ndeck1..nspot); the six studies run in BLENDER slots (the last B-161 item) | build_backdrop_v3.py |
+| Creatures | drawn: windrider 192x112, shadow_shoal 64x48, pressure_phantom 96x112, anchor_worm 256x80 (all new keys); 162 frames smoke-clean; the Umbral Leviathan a Grand rig (64bfe144, 8 bones, valid); ACCEPTED (review_b161_neptune_{windrider,shadow_shoal,pressure_phantom,anchor_worm}_preview.png, review_b161_leviathan_preview.png) | build_creatures_neptune_v3.py, build_umbral_leviathan_v3.py |
+| Props | drawn (170d4db0): wind_anchor 128x192 + meridian_wreck_bow / _mid / _stern 512x320 (`replaces_v2` at export); ACCEPTED (review_b161_neptune_props_preview.png) | build_props_neptune_v3.py |
 
 ## 1. Palette (ACCEPTED, D-148; checked by blender/scripts/build_c2_neptune_palette.py)
 
