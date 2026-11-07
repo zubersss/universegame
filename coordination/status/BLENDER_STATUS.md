@@ -1,13 +1,13 @@
 # BLENDER STATUS
-Updated: 2026-11-07 03:5x · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 04:0x · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
 LEAD cycle 255 order (lock-free; my want for the B-139 canyon + storm studies is queue #2 after UNITY's PlayMode A / B + captures, ~04:0x, refreshed):
 1. Puffpod D-101 fix: DONE 03:4x (9e9b06d): two off-centre seams, irregular low speckles; review_b139_mars_puffpod_preview.png.
 2. B-136 Hadal Maw design: DONE before the cycle (1fb50b1), for LEAD's look.
 3. README_v4 exact-preview paragraph: DONE (8c3a165).
-4. Mars rig-set sources (flora/mars/rigset in the Earth manner, <= 6 bones, swaps, biomes) + a lock-free dry run of the pack and json: NEXT.
-5. Mars creature previews (list order 1: Dustskater) when RAM allows.
+4. Mars rig-set sources DONE 03:5x (a4c9395): build_c2_mars_rigs.py, 5 plants (bones 3 / 2 / 4 / 4 / 2), 26 parts, dry run flora/mars/rigset 504x216 27 KB, json valid, palette 100 %, review_b139_mars_rigset_dryrun.png (idle with Unity's maths + react per plant). build() ready for the Mars cards.
+5. Mars creature previews (list order 1: Dustskater): NEXT.
 Nothing Mars exports until its cards exist. B-131 export after UNITY's U-113 (after U-106).
 
 ## Last completed
