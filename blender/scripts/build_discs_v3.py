@@ -416,7 +416,9 @@ def preview(out_dir, tiles=None, out_name="review_b119_discs_preview.png", stamp
         x += w + 24 + (ov if n == "saturn" else 0)
     review.draw(canvas, f"planet discs at the space scale ({SPACE_PPU:g} px per unit, D-098), frame 0 each; sky = placeholder",
                 8, H - 18, (1.0, 0.97, 0.85))
-    rows = [canvas]
+    u8 = lambda a: np.clip(np.rint(a * 255), 0, 255).astype(np.uint8)   # panels go to uint8 as they finish (peak RAM)
+    rows = [u8(canvas)]
+    del canvas
     # every frame of every clip, numbered (contract §11.7), wrapped
     for n in ORDER + ["luna"]:
         frs = tiles[n][0]
@@ -429,7 +431,7 @@ def preview(out_dir, tiles=None, out_name="review_b119_discs_preview.png", stamp
                 xx = 8 + j * (fw * sc + 8)
                 review._over(row, np.repeat(np.repeat(fr, sc, 0), sc, 1), xx, 26)
                 review.draw(row, f"{n} idle {r0 + j}", xx, 6, (1.0, 0.97, 0.85))
-            rows.append(row)
+            rows.append(u8(row))
     # panel: palette, measured widths, ten boxes, ours per disc
     from meridian import v3
     panel = np.tile(review.PAPER, (420, W, 1)).astype(np.float32)
@@ -465,7 +467,7 @@ def preview(out_dir, tiles=None, out_name="review_b119_discs_preview.png", stamp
         review._label(panel, f"[{mark}] {text}  -  {note}"[:150], 8, 150 + i * 16)
     for i, n in enumerate(ORDER):
         review._label(panel, f"ours, {n}: {OURS[n]}"[:150], 8 + (i % 2) * (W // 2), 320 + (i // 2) * 16)
-    rows.append(panel)
+    rows.append(u8(panel))
     # per-disc ten-box table: one row per disc, one column per §9.7 box (x measured, s self-check)
     tbl = np.tile(review.PAPER, (40 + 18 * (len(ORDER) + 1), W, 1)).astype(np.float32)
     keys = [k for k, _t in review.BOXES]
@@ -477,12 +479,15 @@ def preview(out_dir, tiles=None, out_name="review_b119_discs_preview.png", stamp
                  "idle": "x", "original": "s", "sheet": "x", "budget": "x" if fw_ * min(nf, 3) <= 2048 else "!", "style": "s"}
         cells = "".join(f"[{marks[k]}]" for k in keys)
         review._label(tbl, f"{n:8s} {cells}  {nf} frames {fw_}px  no face; " + OURS.get(n, "Earth's moon, slowly turning")[:70], 8, 26 + 18 * r)
-    rows.append(tbl)
+    rows.append(u8(tbl))
+    if stamp_paths:                                  # one stamp per exported sheet in its own small panel
+        sp = np.tile(review.PAPER, (18 * len(stamp_paths) + 4, W, 1)).astype(np.float32)
+        for i, p in enumerate(stamp_paths):
+            review.draw(sp, os.path.relpath(p, review.ART).replace("\\", "/") + " " + review.stamp_text(p), 4, 2 + 18 * i, (1.0, 1.0, 0.85))
+        rows.append(u8(sp))
     img = np.vstack(rows)
-    for i, p in enumerate(stamp_paths):              # one stamp per exported sheet, stacked from the bottom
-        review.draw(img, os.path.relpath(p, review.ART).replace("\\", "/") + " " + review.stamp_text(p), 4,
-                    img.shape[0] - 18 * (len(stamp_paths) - i), (1.0, 1.0, 0.85))
-    review.write(os.path.join(out_dir, out_name), img)
+    del rows
+    pngio.write_png(os.path.join(out_dir, out_name), np.dstack([img, np.full(img.shape[:2], 255, np.uint8)]))
     print("review written", img.shape, f"{time.time() - t0:.1f}s", "ink", ow, iw, len(inner))
 
 
