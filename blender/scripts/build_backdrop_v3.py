@@ -128,6 +128,13 @@ class Stack:
         self.rgb = c * m[..., None] + self.rgb * (1 - m[..., None])
         self.a = m + self.a * (1 - m)
 
+    def paint(self, item):
+        """Paint colour onto the surface already composited, leaving the alpha as it is (the rgb holds colour x
+        alpha, so the paint is scaled by the alpha under it): light-dependent strokes on a Uranus deck must not
+        change a layer's alpha, or the season crossfade morphs a silhouette (D-142)."""
+        c, m = item
+        self.rgb = c * (m * self.a)[..., None] + self.rgb * (1 - m[..., None])
+
 
 def finish(stack, rng, H, straight=True, roll=None):
     """Composite + paper grain, then roll the (periodic) layer so the wrap sits on the quietest column: a soft edge
@@ -1465,6 +1472,9 @@ def uranus_scene(seed, deck="deck1", light="sun_left"):
         y = np.arange(H)[:, None] + 0.5
         haze = np.broadcast_to(((y > 600) & (y < 780)).astype(np.float32), (H, W)).copy()
         stack.append(tint(wl, H, haze, pal["red"], 0.14, var=0.02, edge_dark=0.0, bleed=40.0))      # night: the ember only as a low haze
+        sp0 = np.zeros((H, W), np.float32)
+        sparkle_field(sp0, wl, 40, 80, 620, 3)                                                       # night glints, on the opaque far layer
+        stack.append(tint(wl, H, sp0, pal["offwhite"], 0.85, var=0.0, edge_dark=0.0, bleed=0.4))
     out.append(finish(stack, wr, H, roll=k0))
     # layer1: nearer fog banks, the same light; the deep: slow swirls
     H = 640
@@ -1473,14 +1483,14 @@ def uranus_scene(seed, deck="deck1", light="sun_left"):
     bank = np.zeros((H, W), np.float32)
     cloud_bank(bank, line, rng, 50, 110, 18)
     body = BG._mix(BG._mix(pal["offwhite"], pal["sky"], 0.4 + dark), pal["brown"], 0.45 if night else 0.0)
-    if not night:
-        stack.append(tint(wl, H, side_lining(bank, 8, 9 * sun), BG._mix(pal["offwhite"], pal["red"], 0.2), 1.0, var=0.02, edge_dark=0.0, bleed=2.0))
     stack.append(wash32(wr, H, bank, body, var=0.05, edge_dark=0.07, bleed=2.5))
-    if not night:
+    if not night:                                         # painted onto the bank: the alpha is the same in every light (D-142)
+        rim, _ = side_faces(bank, sun, 7, 1, 8)
+        stack.paint(tint(wl, H, rim, BG._mix(pal["offwhite"], pal["red"], 0.2), 1.0, var=0.02, edge_dark=0.0, bleed=1.5))       # the lit rim, inside
         lit, shade = side_faces(bank, sun, 26, 44, 10)
-        stack.append(tint(wl, H, lit, BG._mix(pal["offwhite"], pal["red"], 0.15), 0.65, var=0.02, edge_dark=0.0, bleed=6.0))
-        stack.append(tint(wl, H, shade, BG._mix(pal["teal"], pal["brown"], 0.35), 0.48, var=0.02, edge_dark=0.0, bleed=8.0))
-        stack.append(tint(wl, H, long_shadows(bank, sun, 480, 8), pal["brown"], 0.6, var=0.0, edge_dark=0.0, bleed=5.0))      # long shadows, leaning away
+        stack.paint(tint(wl, H, lit, BG._mix(pal["offwhite"], pal["red"], 0.15), 0.65, var=0.02, edge_dark=0.0, bleed=6.0))
+        stack.paint(tint(wl, H, shade, BG._mix(pal["teal"], pal["brown"], 0.35), 0.48, var=0.02, edge_dark=0.0, bleed=8.0))
+        stack.paint(tint(wl, H, long_shadows(bank, sun, 480, 8), pal["brown"], 0.6, var=0.0, edge_dark=0.0, bleed=5.0))      # long shadows, leaning away
     if deck == "deep":
         for k in range(3):
             cx, cy, R = rng.uniform(250, W - 250), rng.uniform(120, 300), rng.uniform(90, 140)
@@ -1502,13 +1512,40 @@ def uranus_scene(seed, deck="deck1", light="sun_left"):
             dab(hail, rng.uniform(0, W), rng.uniform(120, 384), rng.uniform(14, 30), 0.25, w=1)
         stack.append(tint(wr, H, hail, pal["offwhite"], 0.55, var=0.0, edge_dark=0.0, bleed=0.6))
     sp = np.zeros((H, W), np.float32)
-    sparkle_field(sp, rng, {"deck1": 0, "deck2": 10, "deck3": 40, "deep": 90}[deck] + (40 if night else 0), 20, 300, 3)
+    sparkle_field(sp, rng, {"deck1": 0, "deck2": 10, "deck3": 40, "deep": 90}[deck], 20, 300, 3)              # the same in every light
     stack.append(tint(wr, H, sp, pal["offwhite"], 0.9, var=0.0, edge_dark=0.0, bleed=0.4))
     if deck == "deep":
         crush_band(stack, wr, pal, H)
     out.append(finish(stack, wr, H, roll=geometry_roll(wisps)))
     return out, [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0},
                  {"n": 2, "parallax": 0.6, "y_m": -0.5}]
+
+
+def uranus_deck_check(out_dir, deck):
+    """D-142 proven, not eyeballed (LEAD): the md5 of every layer's alpha in all four lights of one deck (the preview's
+    layer PNGs under <out_dir>/b158/u<deck>_<light>/); fails if any layer's alpha differs across the lights, if a
+    render is missing, or if a render is older than this file (a stale render from before a code change)."""
+    import hashlib
+    from meridian import pngio
+    code_t = os.path.getmtime(os.path.abspath(__file__))
+    ok = True
+    for n in range(3):
+        sums = {}
+        for light in U_LIGHTS:
+            path = os.path.join(out_dir, "b158", f"u{deck}_{light}", f"layer{n}_color.png")
+            if not os.path.isfile(path):
+                print(f"  {deck} layer{n} {light}: MISSING")
+                ok = False
+                continue
+            if os.path.getmtime(path) < code_t:
+                print(f"  {deck} layer{n} {light}: STALE (rendered before the current code)")
+                ok = False
+            sums[light] = hashlib.md5(pngio.read_png_np(path)[..., 3].tobytes()).hexdigest()
+        same = len(sums) == len(U_LIGHTS) and len(set(sums.values())) == 1
+        ok = ok and same
+        print(f"{deck} layer{n} alpha md5: " + ", ".join(f"{k} {v[:10]}" for k, v in sums.items()) + ("  SAME" if same else "  DIFFER"))
+    print(f"{deck}: {'PASS' if ok else 'FAIL'} (D-142: one alpha per layer across {', '.join(U_LIGHTS)})")
+    return ok
 
 
 def _uranus_fn(deck, light):
@@ -1638,4 +1675,6 @@ def preview(out_dir, scenes=("forest", "coast"), from_png=False):
 
 
 if __name__ == "__main__":
+    if "--uranus-check" in sys.argv:                      # python -I build_backdrop_v3.py <preview dir> --uranus-check deck2
+        sys.exit(0 if uranus_deck_check(sys.argv[1], sys.argv[sys.argv.index("--uranus-check") + 1]) else 1)
     preview(sys.argv[1], tuple(sys.argv[2].split(",")) if len(sys.argv) > 2 else ("forest", "coast"), from_png="--from-png" in sys.argv)
