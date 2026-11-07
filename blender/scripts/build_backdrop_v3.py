@@ -1552,6 +1552,181 @@ def _uranus_fn(deck, light):
     return lambda seed: uranus_scene(seed, deck, light)
 
 
+# ---------------------------------------------------------------- Neptune (B-161, the D-148 palette): the wind world's column
+# The cloud-column decks under a +x wind (D-148): long thin wisp-white streaks, banks sheared into anvils leaning downwind,
+# bright high cirrus with their shadows painted on the bank tops (the Voyager view), Triton with its plumes bent downwind
+# (deck1), one storm-violet flash (deck2), the first diamond-rain glints (deck3), Superionic floes far off and the CRUSH band
+# (deep). The Dark Storm (storm): an indigo vortex core on layer0, its storm-violet rim and bright companion clouds ALONE on
+# layer1 with a `pulse` block (D-148: UNITY breathes it; the layer keeps a fixed wrap so the pivot stays put), streaks
+# curving into the eye on layer2. spot (the Great Dark Spot) = the storm with the Meridian far off on layer0. A -x wind
+# mirrors the layers at runtime. Every layer straight (D-147); one set per deck (no seasons).
+
+N_PULSE = {"scale": [0.97, 1.03], "alpha": [0.85, 1.0], "beats": 8, "bpm": 110, "pivot_uv": [0.5, 0.5],
+           "note": "D-148: the storm breathes; UNITY scales / fades this layer about pivot_uv (origin bottom-left) on the 110 bpm clock"}
+
+
+def shear(mask, k, y_ref):
+    """Lean a mask downwind: row y moves (y_ref - y) * k px to +x (wraps), so tall shapes lean like wind-sheared anvils."""
+    out = np.empty_like(mask)
+    for y in range(mask.shape[0]):
+        out[y] = np.roll(mask[y], int(round((y_ref - y) * k)))
+    return out
+
+
+def streaks(mask, rng, n, y0, y1, L0, L1, tilt=0.02, w=0):
+    """Long thin streaks blowing +x (dabs nearly horizontal)."""
+    for _k in range(n):
+        dab(mask, rng.uniform(0, W), rng.uniform(y0, y1), rng.uniform(L0, L1), math.pi / 2 + rng.uniform(-tilt, tilt), w=w)
+
+
+def neptune_scene(seed, deck="deck1"):
+    rng = np.random.default_rng(seed)
+    pal = _pal("neptune")
+    ink = BG._rgb(v3.INK)
+    storm = deck in ("storm", "spot")
+    top_c = {"deck1": BG._mix(pal["sky"], pal["brown"], 0.3), "deck2": BG._mix(pal["sky"], pal["brown"], 0.45),
+             "deck3": BG._mix(pal["brown"], pal["sky"], 0.4), "deep": BG._mix(pal["brown"], ink, 0.3),
+             "storm": BG._mix(pal["brown"], pal["sky"], 0.3), "spot": BG._mix(pal["brown"], pal["sky"], 0.3)}[deck]
+    low_c = {"deck1": BG._mix(pal["sky"], pal["teal"], 0.35), "deck2": pal["sky"], "deck3": BG._mix(pal["sky"], pal["brown"], 0.35),
+             "deep": pal["brown"], "storm": BG._mix(pal["brown"], pal["mustard"], 0.25), "spot": BG._mix(pal["brown"], pal["mustard"], 0.25)}[deck]
+    out = []
+    # layer0: the sky, Triton (deck1), far sheared banks, Superionic floes far off (deep), the vortex core (storm / spot)
+    H = 1024
+    yy = (np.arange(H) / H)[:, None, None]
+    sky = top_c * (1 - yy * 0.85) + low_c * yy * 0.85
+    sky = sky * (1 + 0.03 * BG.periodic_noise(rng, H, 160, 60)[..., None])
+    stack = Stack([(np.broadcast_to(sky, (H, W, 3)).astype(np.float32), np.ones((H, W), np.float32))])
+    if deck == "deck1":                                                                   # Triton: a pale disc, a violet terminator, plumes bent downwind
+        tx, ty, tr = 1520, 150, 30
+        moon(stack, rng, H, tx, ty, tr, pal["offwhite"], pal["mustard"], 4)
+        term = np.zeros((H, W), np.float32)
+        ell(term, tx + tr * 0.55, ty, tr * 0.6, tr * 0.98)
+        disc = np.zeros((H, W), np.float32)
+        ell(disc, tx, ty, tr, tr)
+        stack.append(tint(rng, H, term * disc, pal["mustard"], 0.55, var=0.02, edge_dark=0.0, bleed=1.0))
+        plume = np.zeros((H, W), np.float32)
+        for k, dx in enumerate((-10, 8)):
+            x, y = tx + dx, ty - tr + 4
+            for j in range(9):                                                            # up, then bending +x with the wind
+                dab(plume, x, y, 9, 0.25 + 0.17 * j, w=1)
+                x, y = x + 9 * math.sin(0.25 + 0.17 * j), y - 9 * math.cos(0.25 + 0.17 * j)
+        stack.append(tint(rng, H, plume, BG._mix(pal["brown"], pal["sky"], 0.3), 0.6, var=0.0, edge_dark=0.0, bleed=1.2))
+    if not storm:
+        far = BG.ridge(rng, [(2, 0.5), (5, 0.3), (11, 0.2)], base=770, amp=34)
+        wall = np.zeros((H, W), np.float32)
+        cloud_bank(wall, far, rng, 36, 80, 24)
+        wall = shear(wall, 0.45, 800)
+        far_c = {"deck1": BG._mix(pal["sky"], pal["offwhite"], 0.35), "deck2": BG._mix(pal["sky"], pal["teal"], 0.3),
+                 "deck3": BG._mix(pal["brown"], pal["sky"], 0.55), "deep": BG._mix(pal["brown"], pal["sky"], 0.25)}[deck]
+        stack.append(tint(rng, H, lining(wall, 5, 3), BG._mix(far_c, pal["offwhite"], 0.45), 0.7, var=0.03, edge_dark=0.03, bleed=3.0))
+        stack.append(wash32(rng, H, wall, far_c, var=0.05, edge_dark=0.05, bleed=3.0))
+        hi = np.zeros((H, W), np.float32)                                                 # high thin streaks in the far sky
+        streaks(hi, rng, 30, 220, 620, 160, 420, w=1)
+        stack.append(tint(rng, H, hi, pal["offwhite"], 0.32 if deck in ("deck1", "deck2") else 0.18, var=0.0, edge_dark=0.0, bleed=2.5))
+    if deck == "deep":                                                                    # Superionic floes far off: dark shards, violet rims
+        fl = np.zeros((H, W), np.float32)
+        for _k in range(7):
+            fx, fy, fw = rng.uniform(0, W), rng.uniform(560, 720), rng.uniform(70, 150)
+            poly(fl, [(fx - fw, fy), (fx - fw * 0.6, fy - 22), (fx + fw * 0.2, fy - 30), (fx + fw, fy - 8), (fx + fw * 0.7, fy + 16), (fx - fw * 0.7, fy + 14)])
+        stack.append(tint(rng, H, lining(fl, 3, 2), pal["mustard"], 0.7, var=0.02, edge_dark=0.0, bleed=1.2))
+        stack.append(wash32(rng, H, fl, BG._mix(pal["brown"], ink, 0.35), var=0.04, edge_dark=0.06, bleed=1.5))
+    if storm:                                                                             # the vortex core spiralling inward
+        cx, cy, R = 1024, 470, 520
+        for k, (col, op) in enumerate(((pal["brown"], 0.7), (BG._mix(pal["sky"], pal["brown"], 0.5), 0.55), (BG._mix(pal["brown"], ink, 0.3), 0.6))):
+            stack.append(tint(rng, H, spiral_mask(H, cx, cy, R, k, arms=3, thr=0.3, sx=1.75, sz=0.42, wind=2.2, r0=0.1), col, op,
+                              var=0.04, edge_dark=0.0, bleed=4.0))
+        eye = np.zeros((H, W), np.float32)
+        ell(eye, cx, cy, R * 0.5, R * 0.16)
+        stack.append(wash32(rng, H, eye, BG._mix(pal["brown"], ink, 0.4), var=0.04, edge_dark=0.06, bleed=4.0))
+        if deck == "spot":                                                                # the Meridian far off in the eye, her beacon lit
+            mrng = np.random.default_rng(seed + 991)                                      # its own rng: layers 1-2 stay byte-identical to storm's
+            mx, my = cx + 60, cy - 6
+            hull = np.zeros((H, W), np.float32)
+            poly(hull, [(mx - 70, my), (mx - 52, my - 14), (mx + 58, my - 14), (mx + 76, my - 4), (mx + 60, my + 9), (mx - 60, my + 9)])
+            rect(hull, mx - 6, mx + 6, my - 40, my - 14)
+            stack.append(wash32(mrng, H, hull, BG._mix(pal["red"], pal["brown"], 0.55), var=0.03, edge_dark=0.08, bleed=1.2))
+            halo, core = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
+            ell(halo, mx, my - 44, 16, 16)
+            ell(core, mx, my - 44, 4, 4)
+            stack.append(tint(mrng, H, halo, pal["red"], 0.45, var=0.0, edge_dark=0.0, bleed=5.0))
+            stack.append(tint(mrng, H, core, pal["red"], 1.0, var=0.0, edge_dark=0.0, bleed=0.5))
+    out.append(finish(stack, rng, H))
+    # layer1: the nearer sheared banks with the bright cirrus and their shadows painted on the tops, one storm-violet flash
+    # (deck2); the storm's rim with its white companion clouds alone (storm / spot: the pulse layer, a fixed wrap)
+    H = 640
+    stack = Stack()
+    layer1 = {"n": 1, "parallax": 0.35, "y_m": -1.0}
+    if storm:
+        cx, cy = 1024, 320
+        rim = np.zeros((H, W), np.float32)
+        ell(rim, cx, cy, 860, 250)
+        hole = np.zeros((H, W), np.float32)
+        ell(hole, cx, cy + 14, 760, 196)
+        ring = np.clip(rim - hole, 0, 1)
+        stack.append(wash32(rng, H, ring, pal["mustard"], var=0.06, edge_dark=0.06, bleed=4.0))
+        puffs = np.zeros((H, W), np.float32)
+        for k in range(14):                                                               # companion clouds riding the lower rim
+            a = math.pi * (0.12 + 0.76 * k / 13)
+            px, py = cx + 840 * math.cos(a) * 0.98, cy + 236 * math.sin(a)
+            for j in range(3):
+                ell(puffs, px + rng.uniform(-30, 30) + 26 * j, py + rng.uniform(-8, 6), rng.uniform(26, 48), rng.uniform(12, 20))
+        stack.append(tint(rng, H, lining(puffs, 3, 2), pal["offwhite"], 0.9, var=0.02, edge_dark=0.0, bleed=1.5))
+        stack.append(wash32(rng, H, puffs, BG._mix(pal["offwhite"], pal["sky"], 0.2), var=0.04, edge_dark=0.05, bleed=1.5))
+        out.append(finish(stack, rng, H, roll=0))                                        # the rim stays centred on the pulse pivot
+        layer1["pulse"] = dict(N_PULSE)
+    else:
+        line = BG.ridge(rng, [(2, 0.45), (6, 0.35), (13, 0.2)], base=380, amp=46)
+        bank = np.zeros((H, W), np.float32)
+        cloud_bank(bank, line, rng, 46, 100, 18)
+        bank = shear(bank, 0.55, 420)
+        body = {"deck1": BG._mix(pal["sky"], pal["offwhite"], 0.3), "deck2": BG._mix(pal["sky"], pal["teal"], 0.25),
+                "deck3": BG._mix(pal["brown"], pal["sky"], 0.5), "deep": BG._mix(pal["brown"], pal["sky"], 0.2)}[deck]
+        stack.append(tint(rng, H, lining(bank, 6, 4), BG._mix(body, pal["offwhite"], 0.5), 0.8, var=0.03, edge_dark=0.03, bleed=2.5))
+        stack.append(wash32(rng, H, bank, body, var=0.05, edge_dark=0.07, bleed=2.5))
+        if deck in ("deck1", "deck2", "deck3"):                                           # bright cirrus high above, their shadows on the tops
+            ci = np.zeros((H, W), np.float32)
+            for _k in range(7):
+                cx_, cy_ = rng.uniform(0, W), rng.uniform(70, 190)
+                for j in range(3):
+                    ell(ci, cx_ + 120 * j, cy_ + rng.uniform(-3, 3), rng.uniform(140, 260), rng.uniform(4, 8))
+            shadow = np.roll(ci, (150, 90), (0, 1))                                       # cast down and downwind onto the banks
+            stack.paint(tint(rng, H, shadow, BG._mix(pal["brown"], body, 0.4), 0.55, var=0.0, edge_dark=0.0, bleed=3.0))
+            stack.append(tint(rng, H, ci, pal["offwhite"], 0.7 if deck != "deck3" else 0.45, var=0.02, edge_dark=0.0, bleed=2.0))
+        if deck == "deck2":                                                               # one storm-violet branched flash under the banks
+            glow, bolts = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
+            bx, by = rng.uniform(300, 1700), 430
+            ell(glow, bx, by + 60, 150, 70)
+            bolt(bolts, rng, bx, by, 150)
+            stack.paint(tint(rng, H, glow, BG._mix(pal["mustard"], pal["offwhite"], 0.4), 0.5, var=0.03, edge_dark=0.0, bleed=12.0))
+            stack.paint(tint(rng, H, bolts, pal["offwhite"], 1.0, var=0.0, edge_dark=0.0, bleed=0.5))
+        out.append(finish(stack, rng, H))
+    # layer2 (near): wind streaks (curving into the eye in the storm), diamond-rain glints (deck3 / deep), the CRUSH band (deep)
+    H = 384
+    stack = Stack()
+    wind = np.zeros((H, W), np.float32)
+    if storm:
+        for _k in range(40):                                                              # arcs bending down toward the eye
+            x, y, a = rng.uniform(0, W), rng.uniform(30, 260), math.pi / 2 + rng.uniform(-0.05, 0.05)
+            for j in range(int(rng.integers(6, 12))):
+                dab(wind, x, y, 26, a, w=0)
+                x, y, a = x + 26 * math.sin(a), y - 26 * math.cos(a), a + 0.035
+    else:
+        streaks(wind, rng, 46 if deck != "deep" else 18, 20, 330, 120, 380)
+    stack.append(tint(rng, H, wind, pal["offwhite"], 0.5 if deck in ("deck1", "deck2", "storm", "spot") else 0.3, var=0.0, edge_dark=0.0, bleed=1.8))
+    if deck in ("deck3", "deep"):
+        glints = np.zeros((H, W), np.float32)
+        sparkle_field(glints, rng, 30 if deck == "deck3" else 70, 30, 260 if deck == "deep" else 340, 3)
+        stack.append(tint(rng, H, glints, BG._mix(pal["offwhite"], pal["mustard"], 0.3), 0.85, var=0.0, edge_dark=0.0, bleed=0.6))
+    if deck == "deep":
+        crush_band(stack, rng, pal, H)
+    out.append(finish(stack, rng, H))
+    return out, [{"n": 0, "parallax": 0.1, "y_m": -2.0}, layer1, {"n": 2, "parallax": 0.6, "y_m": -0.5}]
+
+
+def _neptune_fn(deck):
+    return lambda seed: neptune_scene(seed, deck)
+
+
 SCENES = {("earth", "forest"): earth_forest, ("earth", "coast"): earth_coast, ("mars", "plains"): mars_plains,
           ("mars", "canyon"): mars_canyon, ("mars", "storm"): mars_storm,
           ("mercury", "day"): mercury_day, ("mercury", "twilight"): mercury_twilight, ("mercury", "night"): mercury_night,
@@ -1575,6 +1750,11 @@ for _d, _s0 in (("deck1", 15001), ("deck2", 15002), ("deck3", 15003), ("deep", 1
         SCENES[("uranus", f"u{_d}_{_l}")] = _uranus_fn(_d, _l)                             # the preview name (SEEDS / PLANET_OF are keyed by name)
         SEEDS[f"u{_d}_{_l}"] = _s0                                                         # one seed per deck: the lights share their geometry
         PLANET_OF[f"u{_d}_{_l}"] = "uranus"
+for _d, _s0 in (("deck1", 15101), ("deck2", 15102), ("deck3", 15103), ("deep", 15104), ("storm", 15105), ("spot", 15105)):   # Neptune (B-161)
+    SCENES[("neptune", _d)] = _neptune_fn(_d)                                            # the export key backgrounds/neptune/<deck>
+    SCENES[("neptune", "n" + _d)] = _neptune_fn(_d)                                      # the preview name; spot shares storm's seed (its layers 1-2 identical)
+    SEEDS["n" + _d] = _s0
+    PLANET_OF["n" + _d] = "neptune"
 
 
 # ---------------------------------------------------------------- lock-free preview: 1080p composite at 1x + the 2x seam check
@@ -1590,7 +1770,7 @@ def preview(out_dir, scenes=("forest", "coast"), from_png=False):
     import preview_c2_earth_rigs as PR
     for scene in scenes:
         planet = PLANET_OF[scene]
-        tag = {"earth": "b133", "mars": "b141", "mercury": "b145", "venus": "b147", "jupiter": "b155", "saturn": "b157", "uranus": "b158"}[planet]
+        tag = {"earth": "b133", "mars": "b141", "mercury": "b145", "venus": "b147", "jupiter": "b155", "saturn": "b157", "uranus": "b158", "neptune": "b161"}[planet]
         d = os.path.join(out_dir, tag, scene)
         os.makedirs(d, exist_ok=True)
         u8, info = [], []
@@ -1627,11 +1807,15 @@ def preview(out_dir, scenes=("forest", "coast"), from_png=False):
             import build_c2_mars_ground as MG
             S, _w = GS.sheets(("regolith",), MG.mats)
             strip = "regolith"
-        elif planet in ("jupiter", "saturn", "uranus"):           # B-155 / B-157 / B-158: a floe of ice (the tiles; D-137's caps unused here)
+        elif planet in ("jupiter", "saturn", "uranus", "neptune"):   # B-155 / B-157 / B-158 / B-161: a floe of ice (the tiles; D-137's caps unused here)
             JF = __import__(f"build_c2_{planet}_floes")
             S, _w = JF.sheets(("ice",))
             strip = "ice"
-        elif planet in ("mercury", "venus"):                      # no strip yet: the Earth stone recipe stands in
+        elif planet == "venus":                                   # B-153: the deck planks under the deck, the basalt crust under the surface
+            import build_c2_venus_ground as VG
+            strip = "planks" if scene == "deck" else "basalt"
+            S, _w = VG.sheets((strip,))
+        elif planet == "mercury":                                 # the Earth stone recipe stands in
             S, _w = GS.sheets(("stone",))
             strip = "stone"
         else:
