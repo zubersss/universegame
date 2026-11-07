@@ -1357,6 +1357,26 @@ def side_faces(mask, sun, k_lit, k_shade, dy):
     return np.clip(lit, 0, 1), np.clip(shade, 0, 1)
 
 
+def long_shadows(mask, sun, length, thick, sink=6, win=70, gap=90):
+    """The long shadows that turn (LEAD, D-142): from each lobe's peak on a bank's top profile, a long soft streak lying
+    across the bank tops AWAY from the sun (sun -1: they run right, +1: left), clipped to the bank."""
+    H_, W_ = mask.shape
+    solid = mask > 0.5
+    top = np.where(solid.any(0), solid.argmax(0), H_).astype(np.int32)
+    run = np.full(W_, H_, np.int32)
+    for d in range(-win, win + 1, 5):
+        run = np.minimum(run, np.roll(top, d))
+    out = np.zeros_like(mask)
+    last = -10 ** 6
+    for x in range(W_):
+        if top[x] < H_ and top[x] == run[x] and x - last >= gap:
+            last = x
+            cx = x - sun * length / 2                                                     # starts at the peak, runs away from the sun
+            ell(out, cx, top[x] + sink + thick, length / 2, thick)
+            ell(out, cx - sun * length * 0.15, top[x] + sink + 3.2 * thick, length * 0.32, max(1.0, thick * 0.6))   # a fainter second streak
+    return np.clip(out, 0, 1) * mask
+
+
 def sparkle_field(mask, rng, n, y0, y1, r):
     """Tiny four-point crystalline sparkles (the diamond rain, frost glints)."""
     for _k in range(n):
@@ -1417,6 +1437,11 @@ def uranus_scene(seed, deck="deck1", light="sun_left"):
         lit, shade = side_faces(wall, sun, 18, 30, 8)
         stack.append(tint(wl, H, lit, BG._mix(pal["offwhite"], pal["red"], 0.15), 0.55, var=0.02, edge_dark=0.0, bleed=5.0))   # the sun-facing upper edges
         stack.append(tint(wl, H, shade, BG._mix(pal["teal"], pal["brown"], 0.3), 0.42, var=0.02, edge_dark=0.0, bleed=7.0))    # the far sides
+        stack.append(tint(wl, H, long_shadows(wall, sun, 200, 4), pal["brown"], 0.35, var=0.0, edge_dark=0.0, bleed=4.0))      # long shadows, leaning away
+    else:
+        y = np.arange(H)[:, None] + 0.5
+        haze = np.broadcast_to(((y > 600) & (y < 780)).astype(np.float32), (H, W)).copy()
+        stack.append(tint(wl, H, haze, pal["red"], 0.14, var=0.02, edge_dark=0.0, bleed=40.0))      # night: the ember only as a low haze
     out.append(finish(stack, wr, H))
     # layer1: nearer fog banks, the same light; the deep: slow swirls
     H = 640
@@ -1432,6 +1457,7 @@ def uranus_scene(seed, deck="deck1", light="sun_left"):
         lit, shade = side_faces(bank, sun, 26, 44, 10)
         stack.append(tint(wl, H, lit, BG._mix(pal["offwhite"], pal["red"], 0.15), 0.65, var=0.02, edge_dark=0.0, bleed=6.0))
         stack.append(tint(wl, H, shade, BG._mix(pal["teal"], pal["brown"], 0.35), 0.48, var=0.02, edge_dark=0.0, bleed=8.0))
+        stack.append(tint(wl, H, long_shadows(bank, sun, 320, 6), pal["brown"], 0.42, var=0.0, edge_dark=0.0, bleed=5.0))      # long shadows, leaning away
     if deck == "deep":
         for k in range(3):
             cx, cy, R = rng.uniform(250, W - 250), rng.uniform(120, 300), rng.uniform(90, 140)
@@ -1455,11 +1481,6 @@ def uranus_scene(seed, deck="deck1", light="sun_left"):
     sp = np.zeros((H, W), np.float32)
     sparkle_field(sp, rng, {"deck1": 0, "deck2": 10, "deck3": 40, "deep": 90}[deck] + (40 if night else 0), 20, 300, 3)
     stack.append(tint(wr, H, sp, pal["offwhite"], 0.9, var=0.0, edge_dark=0.0, bleed=0.4))
-    if night:
-        glow = np.zeros((H, W), np.float32)
-        for _k in range(6):
-            ell(glow, wl.uniform(0, W), wl.uniform(220, 340), wl.uniform(20, 40), wl.uniform(8, 14))
-        stack.append(tint(wl, H, glow, pal["red"], 0.4, var=0.02, edge_dark=0.0, bleed=8.0))     # distant Embermoss
     if deck == "deep":
         crush_band(stack, wr, pal, H)
     out.append(finish(stack, wr, H))
