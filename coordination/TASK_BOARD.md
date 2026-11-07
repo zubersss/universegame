@@ -22,12 +22,12 @@ When the lock frees, the highest pending job here goes next, even if the other r
 older (D-037 alternation applies only between equal ranks). A rank is live only while its role
 has a want on file or holds the lock (D-112): if the top rank has no want when the lock frees,
 the next live rank runs now and the skipped role goes next after it files. A role below the top
-keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 273 (15:0x, hourly tick: BLENDER's deck3 slot under its lock since 14:56:51; UNITY's want 14:59:35 for the C3 compile + EditMode check goes next; 2.19 GB free; Mercury Done this hour). A role files its want only when the queue says it is next after the running job:
-1. BLENDER · now (the lock is free): Uranus deck3 ×4 with --uranus-check (budget 672 MB, ≤ 6 min) → the next slot deep ×4 → deck1 again → B-158 Done. The Venus deck study re-run straight (B-152, ~80 s) may ride any gap.
-2. UNITY · lock-free first: the U-124 code (the 9-slice panels on P-50's paper map, the title cards, the Film switch, keyboard reach), committed ahead of its check; then one lock = compile + EditMode (U-102's SettingsTests, U-124's MenuHudTests, P-48's GroundStripTests assert) → B-151's export behind the committed code (BLENDER, one slot) → UNITY's PlayMode slice + the title-card captures → U-102, U-124 Done.
-3. BLENDER · B-151 the C3 UI export (one slot) once U-124's code is committed; the Venus exports (B-152 both sets, B-153) in their slots now that U-123 is Done; B-154 behind U-125's code.
-4. UNITY · U-125 Venus after the C3 code (lock-free code first, the check behind B-152 / B-153).
-5. Then Jupiter (U-126 / U-127 + B-159 / B-160 + B-156), Saturn (U-129 + B-163 / B-164), Uranus (U-130 + B-166), Neptune (B-161 prep first).
+keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 273 (15:1x: UNITY's C3 code is in and green (f550e3f8 + f263fca3; compile 0 errors, EditMode 367/367 at 15:04); the lock free; BLENDER's want on file). A role files its want only when the queue says it is next after the running job:
+1. BLENDER · now: B-151 the C3 UI export in one slot (the five 9-slice panels with `slice` [l, t, r, b] in each json, the three title cards ≤ 1920×540 drawn 1:1, `ui/hud/film_switch` with parts `off` / `on` by name); it unblocks the owner build.
+2. UNITY · behind B-151: one lock = the MenuHud PlayMode slice (U-102 + U-124 tests) + CaptureU124Ui (a title card over each planet, then pause / settings / inventory / the catalogue scroll / the crafting sign) → U-102, U-124 for review → U-132 Build 0.4.5 + the probe + the page smoke set (one more lock).
+3. BLENDER · after UNITY's lock: Uranus deep ×4 with the check, then deck1 again → B-158 Done; the Venus deck study re-run straight (B-152, ~80 s) in any gap; then the Venus exports (B-152 / B-153) ahead of U-125's check.
+4. UNITY · U-125 Venus code lock-free now; its check behind the Venus exports; U-126 floe caps as lock-free code any time.
+5. Then Jupiter (U-127 + B-159 / B-160 + B-156), Saturn (U-129 + B-163 / B-164), Uranus (U-130 + B-166), Neptune (U-133 + B-161's exports).
 
 
 
@@ -2153,7 +2153,7 @@ Goal: Settings panel (P-39): one panel reachable from the pause menu and the tit
 Accept: MenuHudTests cover open/close and the film toggle round trip; settings persist across a restart (test); clean console.
 Files: Assets/_Game/Code/Runtime/UI/Settings/
 Depends: U-095
-Lead notes: Cycle 236. Promoted with the C1 cards. Cycle 272: READY with U-124 (the code lock-free while the gate is shut; one check with U-124 after the Mercury hand-off). 15:0x: IN PROGRESS: the code is in (fba6d92b: SettingsPanel, GameSettings, AudioDirector volumes, MenuController, MenuHudTests + SettingsTests), compiled clean in the capture's Editor run; Done when its tests pass in the C3 check lock with U-124. P-50 YES: the paper map stands (pause = a 640×560 card behind the buttons, settings and inventory as named, the catalogue on the scroll, the crafting panel on the wooden sign; panel text in ink, buttons and cells keep theirs).
+Lead notes: Cycle 236. Promoted with the C1 cards. Cycle 272: READY with U-124 (the code lock-free while the gate is shut; one check with U-124 after the Mercury hand-off). 15:0x: IN PROGRESS: the code is in (fba6d92b: SettingsPanel, GameSettings, AudioDirector volumes, MenuController, MenuHudTests + SettingsTests), compiled clean in the capture's Editor run; Done when its tests pass in the C3 check lock with U-124. 15:1x: SettingsTests ×3 green in EditMode (367/367); the MenuHud PlayMode slice after B-151 closes it. P-50 YES: the paper map stands (pause = a 640×560 card behind the buttons, settings and inventory as named, the catalogue on the scroll, the crafting panel on the wooden sign; panel text in ink, buttons and cells keep theirs).
 
 ### U-110 · UNITY · Done · C2
 Goal: Biome-aware flora placement: FloraRigs picks plants whose `biomes` list contains the spawn biome (JsonUtility reads the new field from B-129's rig set), weighted so every biome has at least two kinds; the C2 Earth rig set imports with no schema change; the 300-plant loop p99 unchanged.
@@ -2241,7 +2241,7 @@ Goal: C3 UI in: the paper panels (B-151) on the pause menu, the settings panel (
 Accept: MenuHudTests cover each panel's open / close and the keyboard path; a title card capture per planet on entry; the settings round trip; clean console.
 Files: Code/Runtime/UI/, Tests/
 Depends: U-102, B-151
-Lead notes: Cycle 265. Promoted after U-118 Mars; U-102 (the settings panel) rides with it. Cycle 272: READY: the code lock-free now (the gate is shut anyway); the check after the Mercury hand-off; B-151 exports behind the committed code, the captures after that export.
+Lead notes: Cycle 265. Promoted after U-118 Mars; U-102 (the settings panel) rides with it. Cycle 272: READY: the code lock-free now (the gate is shut anyway); the check after the Mercury hand-off; B-151 exports behind the committed code, the captures after that export. 15:1x: CODE IN AND GREEN (f550e3f8 + f263fca3: the importer's 9-slice rule from `slice` → Sprite.border + FullRect, UiPaper on P-50's map, TitleCard as the intertitle slide-in, the Film switch parts; one lock 15:03–15:05: compile 0 errors, EditMode 367/367 incl. PaperUiTests ×5); the 15:03 compile log carries 4 warnings against the baseline of 0 (the two CS0618 lines of SceneCapture.cs:3004 logged twice, fixed in f263fca3; the next compile must show the baseline). Done on the PlayMode slice + CaptureU124Ui after B-151 lands.
 
 ### U-125 · UNITY · Ready · C2
 Goal: Venus on the cartoon stage (Bible §12 C2 order 4; §7.4 the dive world): the deck and surface scenes (B-152) picked by altitude, the B-153 rig set and strips (deck planks, basalt crust), the climb sky per D-118 from the apricot haze, the Venus creatures on sheets (B-154; the Vent eel a den species per D-126; the drifter and moth fliers); the M3 Venus gameplay tests unchanged; the Venus perf rows green (the 3D path's textures row was the red one, D-089).
@@ -2307,3 +2307,10 @@ Accept: Neptune captures at 1x (a floe lane in the gale with the flora leaning, 
 Files: Code/Runtime/View2D/CartoonStage.cs, ParallaxLayers.cs, Code/Runtime/Planet/, Code/Runtime/Creatures/, Tests/
 Depends: U-130, B-161's exports
 Lead notes: Cycle 273 (D-148). Promoted when U-130 Uranus is Done.
+
+### U-134 · UNITY · Ready · C3
+Goal: An open in-game panel (inventory, catalogue, crafting, settings from the pause menu) holds the surveyor still: the gameplay action maps are disabled while a panel is open and re-enabled on close, so Navigate's A / D move the selection, not the walk; the pause menu already does this.
+Accept: MenuHudTests: with the inventory open, A / D held for 1 s leaves the surveyor's x unchanged and moves the selection; closing restores the walk; clean console.
+Files: Code/Runtime/UI/, Tests/
+Depends: U-124
+Lead notes: Cycle 273 (UNITY's note 15:08). A small card: ride U-124's PlayMode lock if the code is in by then, else the next one. A panel that walks you off a ledge is a playtest finding waiting to happen.
