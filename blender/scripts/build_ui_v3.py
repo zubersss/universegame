@@ -481,9 +481,8 @@ def film_switch(on):
     G.stroke(d, G.lumpy_ellipse(36, 64, 18, 18, n=24, lump=0.01, seed=42), M["mustard_sh"], 0.0, cyclic=True)
     for a in (0.3, 2.4, 4.5):                                                            # three screws
         G.stroke(d, G.lumpy_ellipse(32 + 20 * math.cos(a), 60 + 20 * math.sin(a), 2.5, 2.5, n=8, seed=43), M["brown"], I, cyclic=True)
-    ang = math.radians(-35 if on else 35)                                                 # the lever: up (on) / down (off)
-    tip = (32 + 40 * math.sin(ang), 60 - 40 * math.cos(ang) if on else 60 + 40 * math.cos(ang) * -1)
-    tip = (32 + 40 * math.sin(ang), 60 - 40 * math.cos(ang)) if on else (32 - 40 * math.sin(ang), 60 + 34 * math.cos(ang) - 70)
+    a = math.radians(35)                                                                  # the lever: up-right (on) / down-left (off)
+    tip = (32 + 34 * math.sin(math.radians(28)), 60 - 34 * math.cos(math.radians(28))) if on else (32 - 30 * math.sin(a), 60 + 30 * math.cos(a))
     G.stroke(d, G.hose_outline([(32, 60), tip], 8), M["offwhite"], O, cyclic=True)
     G.stroke(d, G.lumpy_ellipse(tip[0], tip[1], 8, 8, n=14, seed=44), M["red"] if on else M["brown"], O, cyclic=True)
     G.stroke(d, G.lumpy_ellipse(32, 60, 7, 7, n=12, seed=45), M["brown"], I, cyclic=True)
