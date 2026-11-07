@@ -1150,17 +1150,184 @@ def jupiter_spot(seed):
     return jupiter_scene(seed, "spot")
 
 
+# ---------------------------------------------------------------- Saturn (B-157, the proposed palette): the ring world's column
+# The Jupiter column's decks with Saturn's rings: seen edge-on from the equatorial decks (a bright cream line across the sky
+# and its shadow band on the cloud tops) and tilted from the polar Hexagon (a wide pale arc with the Cassini gap); soft low
+# sunlight (long warm lining on the cloud tops, cool slate shadows). Scenes sdeck1 / sdeck2 / sdeck3 / sdeep / hexagon
+# (Saturn's keys are backgrounds/saturn/<deck1..deep, hexagon>; the scene names carry an s here only so SEEDS / PLANET_OF
+# stay keyed by scene name).
+
+def ring_line(stack, rng, pal, H, y0):
+    """The ring plane edge-on: a bright cream line across the whole sky with a soft glow, its shadow band lower down."""
+    y = np.arange(H)[:, None] + 0.5
+    line = y0 + 3 * np.sin(np.arange(W)[None, :] / W * TAU_BG)
+    glow = ((y > line - 7) & (y < line + 9)).astype(np.float32)
+    stack.append(tint(rng, H, glow, pal["offwhite"], 0.35, var=0.0, edge_dark=0.0, bleed=5.0))
+    core = ((y > line - 1.5) & (y < line + 2.5)).astype(np.float32)
+    stack.append(tint(rng, H, core, pal["offwhite"], 0.95, var=0.0, edge_dark=0.0, bleed=0.6))
+    shade = ((y > line + 60) & (y < line + 88)).astype(np.float32)
+    stack.append(tint(rng, H, shade, pal["teal"], 0.18, var=0.03, edge_dark=0.0, bleed=8.0))
+
+
+def ring_arc(stack, rng, pal, H, cy, R):
+    """The rings tilted (seen from the high decks): a wide pale arc across the sky, the Cassini gap as a darker line."""
+    yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
+    u, v = (xx - W / 2) / (R * 1.0), (yy - cy) / (R * 0.32)
+    r = np.hypot(u, v)
+    upper = yy < cy + R * 0.05
+    band = ((r > 0.78) & (r < 1.0) & upper).astype(np.float32)
+    stack.append(tint(rng, H, band, BG._mix(pal["offwhite"], pal["mustard"], 0.25), 0.7, var=0.03, edge_dark=0.0, bleed=2.5))
+    gap = ((r > 0.885) & (r < 0.9) & upper).astype(np.float32)
+    stack.append(tint(rng, H, gap, pal["teal"], 0.6, var=0.0, edge_dark=0.0, bleed=0.8))
+
+
+def hexagon_walls(stack, rng, pal, H):
+    """The North Polar Hexagon: six tall translucent wind-walls converging toward the calm eye (UNITY rotates them)."""
+    eye_x, horizon = W / 2, H * 0.32
+    for k in range(6):
+        x_far = eye_x + (k - 2.5) * 140
+        x_near = eye_x + (k - 2.5) * 520
+        w_far, w_near = 18, 70
+        wall = np.zeros((H, W), np.float32)
+        poly(wall, [(x_far - w_far, horizon), (x_far + w_far, horizon), (x_near + w_near, H), (x_near - w_near, H)])
+        stack.append(tint(rng, H, wall, pal["teal"], 0.32, var=0.04, edge_dark=0.02, bleed=4.0))
+        stack.append(tint(rng, H, lining(wall, 0, 4) * (1 - wall), pal["offwhite"], 0.5, var=0.0, edge_dark=0.0, bleed=1.5))
+
+
+def saturn_scene(seed, deck="sdeck1"):
+    import build_c2_saturn_palette as SPAL
+    v3.PALETTES.setdefault("saturn", {k: h for k, (h, _r) in SPAL.SATURN.items()})     # the proposal, until LEAD accepts it
+    rng = np.random.default_rng(seed)
+    pal = _pal("saturn")
+    top_c = {"sdeck1": pal["sky"], "sdeck2": BG._mix(pal["sky"], pal["mustard"], 0.2), "sdeck3": BG._mix(pal["sky"], pal["brown"], 0.35),
+             "sdeep": BG._mix(pal["brown"], BG._rgb(v3.INK), 0.3), "hexagon": BG._mix(pal["sky"], pal["teal"], 0.25)}[deck]
+    low_c = {"sdeck1": pal["offwhite"], "sdeck2": pal["offwhite"], "sdeck3": BG._mix(pal["sky"], pal["red"], 0.2),
+             "sdeep": pal["brown"], "hexagon": pal["offwhite"]}[deck]
+    out = []
+    # layer0: the sky, pale gold and butter bands, the rings (edge-on or tilted), Titan + Enceladus, far banks
+    H = 1024
+    yy = (np.arange(H) / H)[:, None, None]
+    sky = top_c * (1 - yy * 0.8) + low_c * yy * 0.8
+    stack = Stack([(np.broadcast_to(sky, (H, W, 3)).astype(np.float32), np.ones((H, W), np.float32))])
+    if deck in ("sdeck1", "sdeck2", "hexagon"):
+        for t in bands(rng, H, [(170, 50, pal["offwhite"], 0.45), (260, 28, pal["mustard"], 0.4), (340, 56, pal["offwhite"], 0.4),
+                                (450, 24, pal["mustard"], 0.35), (520, 40, pal["offwhite"], 0.35)], pal):
+            stack.append(t)
+    if deck in ("sdeck1", "sdeck2"):
+        ring_line(stack, rng, pal, H, 110)
+    if deck == "hexagon":
+        ring_arc(stack, rng, pal, H, 300, 900)
+    if deck in ("sdeck1", "hexagon"):
+        moon(stack, rng, H, 1560, 170, 40, BG._mix(pal["mustard"], pal["red"], 0.35), pal["mustard"], 4)   # Titan: hazy orange-gold
+        moon(stack, rng, H, 420, 60, 16, pal["offwhite"], pal["teal"], 2)                                  # Enceladus: tiny, bright
+    far = BG.ridge(rng, [(2, 0.5), (5, 0.3), (11, 0.2)], base=760, amp=36)
+    wall = np.zeros((H, W), np.float32)
+    cloud_bank(wall, far, rng, 40, 90, 20)
+    far_c = {"sdeck1": BG._mix(pal["offwhite"], pal["sky"], 0.35), "sdeck2": BG._mix(pal["offwhite"], pal["mustard"], 0.3),
+             "sdeck3": BG._mix(pal["sky"], pal["brown"], 0.4), "sdeep": pal["brown"], "hexagon": BG._mix(pal["offwhite"], pal["teal"], 0.2)}[deck]
+    stack.append(tint(rng, H, lining(wall, 7, 3), BG._mix(far_c, pal["offwhite"], 0.6), 0.85, var=0.03, edge_dark=0.02, bleed=3.0))   # low warm sunlight
+    stack.append(wash32(rng, H, wall, far_c, var=0.05, edge_dark=0.05, bleed=3.0))
+    if deck == "sdeep":
+        for k in range(4):
+            cx, cy, R = rng.uniform(250, W - 250), rng.uniform(320, 680), rng.uniform(110, 170)
+            stack.append(tint(rng, H, spiral_mask(H, cx, cy, R, 0, arms=2, thr=0.2, sx=1.8, sz=0.5, wind=2.0, r0=0.15),
+                              BG._mix(pal["red"], pal["brown"], 0.5), 0.4, var=0.04, edge_dark=0.0, bleed=4.0))
+    out.append(finish(stack, rng, H))
+    # layer1: nearer banks (the ring shadow across their tops on the equatorial decks), a helium trap rig (deck 2), soft storm
+    # towers (deck 3), the Hexagon's walls (hexagon)
+    H = 640
+    stack = Stack()
+    if deck == "hexagon":
+        hexagon_walls(stack, rng, pal, H)
+    else:
+        line = BG.ridge(rng, [(2, 0.45), (6, 0.35), (13, 0.2)], base=360, amp=44)
+        bank = np.zeros((H, W), np.float32)
+        cloud_bank(bank, line, rng, 50, 110, 18)
+        body = {"sdeck1": pal["offwhite"], "sdeck2": BG._mix(pal["offwhite"], pal["sky"], 0.4), "sdeck3": BG._mix(pal["sky"], pal["brown"], 0.3),
+                "sdeep": BG._mix(pal["brown"], pal["red"], 0.15)}[deck]
+        stack.append(tint(rng, H, lining(bank, 8, 4), pal["offwhite"], 0.85, var=0.03, edge_dark=0.02, bleed=2.5))
+        stack.append(wash32(rng, H, bank, body, var=0.05, edge_dark=0.07, bleed=2.5))
+        if deck in ("sdeck1", "sdeck2"):                                                  # the ring's shadow across the cloud tops
+            y = np.arange(H)[:, None] + 0.5
+            sh = ((y > line[None, :] + 30) & (y < line[None, :] + 62)).astype(np.float32) * bank
+            stack.append(tint(rng, H, sh, pal["teal"], 0.3, var=0.02, edge_dark=0.0, bleed=6.0))
+        if deck == "sdeck2":                                                              # a helium trap rig on its gasbag
+            st = np.zeros((H, W), np.float32)
+            sx = rng.uniform(300, 1700)
+            ell(st, sx, 150, 70, 36)
+            poly(st, [(sx - 40, 190), (sx + 40, 190), (sx + 12, 250), (sx - 12, 250)])
+            stack.append(wash32(rng, H, st, BG._mix(pal["brown"], pal["sky"], 0.45), var=0.03, edge_dark=0.05, bleed=1.2))
+        if deck == "sdeck3":
+            towers = np.zeros((H, W), np.float32)
+            for _k in range(4):
+                cloud_tower(towers, rng.uniform(0, W), 340, rng.uniform(180, 260), rng.uniform(70, 100), rng)
+            stack.append(tint(rng, H, lining(towers, 6, 4), pal["offwhite"], 0.7, var=0.03, edge_dark=0.02, bleed=2.5))
+            stack.append(wash32(rng, H, towers, BG._mix(pal["sky"], pal["brown"], 0.4), var=0.05, edge_dark=0.06, bleed=2.5))
+    out.append(finish(stack, rng, H))
+    # layer2 (near): wisps (decks 1-2, hexagon), helium-3 condensate drops (deck 2), the CRUSH band (deep)
+    H = 384
+    stack = Stack()
+    if deck in ("sdeck1", "sdeck2", "hexagon"):
+        wisps = np.zeros((H, W), np.float32)
+        for _k in range(24):
+            cx, cy = rng.uniform(0, W), rng.uniform(40, 300)
+            for j in range(3):
+                ell(wisps, cx + 70 * j, cy + rng.uniform(-4, 4), rng.uniform(60, 140), rng.uniform(3, 7))
+        stack.append(tint(rng, H, wisps, pal["offwhite"], 0.5, var=0.03, edge_dark=0.0, bleed=2.5))
+    if deck == "sdeck2":
+        drops = np.zeros((H, W), np.float32)
+        for _k in range(70):
+            ell(drops, rng.uniform(0, W), rng.uniform(20, 300), rng.uniform(2.5, 4), rng.uniform(3.5, 5.5))
+        stack.append(tint(rng, H, drops, pal["offwhite"], 0.8, var=0.0, edge_dark=0.0, bleed=0.8))
+    if deck == "sdeep":
+        crush_band(stack, rng, pal, H)
+    if deck == "sdeck3":
+        rain = np.zeros((H, W), np.float32)
+        for _k in range(120):
+            dab(rain, rng.uniform(0, W), rng.uniform(150, 384), rng.uniform(40, 110), 0.15, w=0)
+        stack.append(tint(rng, H, rain, pal["teal"], 0.3, var=0.0, edge_dark=0.0, bleed=0.8))
+    out.append(finish(stack, rng, H))
+    return out, [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0},
+                 {"n": 2, "parallax": 0.6, "y_m": -0.5}]
+
+
+def saturn_sdeck1(seed):
+    return saturn_scene(seed, "sdeck1")
+
+
+def saturn_sdeck2(seed):
+    return saturn_scene(seed, "sdeck2")
+
+
+def saturn_sdeck3(seed):
+    return saturn_scene(seed, "sdeck3")
+
+
+def saturn_sdeep(seed):
+    return saturn_scene(seed, "sdeep")
+
+
+def saturn_hexagon(seed):
+    return saturn_scene(seed, "hexagon")
+
+
 SCENES = {("earth", "forest"): earth_forest, ("earth", "coast"): earth_coast, ("mars", "plains"): mars_plains,
           ("mars", "canyon"): mars_canyon, ("mars", "storm"): mars_storm,
           ("mercury", "day"): mercury_day, ("mercury", "twilight"): mercury_twilight, ("mercury", "night"): mercury_night,
           ("venus", "deck"): venus_deck, ("venus", "surface"): venus_surface,
           ("jupiter", "deck1"): jupiter_deck1, ("jupiter", "deck2"): jupiter_deck2, ("jupiter", "deck3"): jupiter_deck3,
-          ("jupiter", "deep"): jupiter_deep, ("jupiter", "spot"): jupiter_spot}
+          ("jupiter", "deep"): jupiter_deep, ("jupiter", "spot"): jupiter_spot,
+          ("saturn", "deck1"): saturn_sdeck1, ("saturn", "deck2"): saturn_sdeck2, ("saturn", "deck3"): saturn_sdeck3,   # the export keys
+          ("saturn", "deep"): saturn_sdeep, ("saturn", "hexagon"): saturn_hexagon,
+          ("saturn", "sdeck1"): saturn_sdeck1, ("saturn", "sdeck2"): saturn_sdeck2, ("saturn", "sdeck3"): saturn_sdeck3,   # the preview names
+          ("saturn", "sdeep"): saturn_sdeep}
 SEEDS = {"forest": 13301, "coast": 13302, "canyon": 14101, "storm": 14102, "plains": 14103, "day": 14501, "twilight": 14502, "night": 14503,
-         "deck": 14701, "surface": 14702, "deck1": 14801, "deck2": 14802, "deck3": 14803, "deep": 14804, "spot": 14805}
+         "deck": 14701, "surface": 14702, "deck1": 14801, "deck2": 14802, "deck3": 14803, "deep": 14804, "spot": 14805,
+         "sdeck1": 14901, "sdeck2": 14902, "sdeck3": 14903, "sdeep": 14904, "hexagon": 14905}
 PLANET_OF = {"forest": "earth", "coast": "earth", "canyon": "mars", "storm": "mars", "plains": "mars", "day": "mercury", "twilight": "mercury", "night": "mercury",
              "deck": "venus", "surface": "venus",
-             "deck1": "jupiter", "deck2": "jupiter", "deck3": "jupiter", "deep": "jupiter", "spot": "jupiter"}
+             "deck1": "jupiter", "deck2": "jupiter", "deck3": "jupiter", "deep": "jupiter", "spot": "jupiter",
+             "sdeck1": "saturn", "sdeck2": "saturn", "sdeck3": "saturn", "sdeep": "saturn", "hexagon": "saturn"}
 
 
 # ---------------------------------------------------------------- lock-free preview: 1080p composite at 1x + the 2x seam check
@@ -1176,7 +1343,7 @@ def preview(out_dir, scenes=("forest", "coast"), from_png=False):
     import preview_c2_earth_rigs as PR
     for scene in scenes:
         planet = PLANET_OF[scene]
-        tag = {"earth": "b133", "mars": "b141", "mercury": "b145", "venus": "b147", "jupiter": "b155"}[planet]
+        tag = {"earth": "b133", "mars": "b141", "mercury": "b145", "venus": "b147", "jupiter": "b155", "saturn": "b157"}[planet]
         d = os.path.join(out_dir, tag, scene)
         os.makedirs(d, exist_ok=True)
         u8, info = [], []
@@ -1213,8 +1380,8 @@ def preview(out_dir, scenes=("forest", "coast"), from_png=False):
             import build_c2_mars_ground as MG
             S, _w = GS.sheets(("regolith",), MG.mats)
             strip = "regolith"
-        elif planet == "jupiter":                                 # B-155: a floe of ice (the tiles; D-137's caps unused here)
-            import build_c2_jupiter_floes as JF
+        elif planet in ("jupiter", "saturn"):                     # B-155 / B-157: a floe of ice (the tiles; D-137's caps unused here)
+            JF = __import__("build_c2_jupiter_floes" if planet == "jupiter" else "build_c2_saturn_floes")
             S, _w = JF.sheets(("ice",))
             strip = "ice"
         elif planet in ("mercury", "venus"):                      # no strip yet: the Earth stone recipe stands in
