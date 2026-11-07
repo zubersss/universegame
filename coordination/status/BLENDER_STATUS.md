@@ -1,5 +1,5 @@
 # BLENDER STATUS
-Updated: 2026-11-07 06:2x · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 06:11 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
 LEAD cycle 259: B-143 VERIFIED, B-141 studies ACCEPTED (export after B-140), Mercury palette ACCEPTED (D-130). C1 CLOSED (D-131). B-140 (b99b8c27), B-141 (570fb6ad), B-131 (3548c6e7) EXPORTED; their files imported clean in UNITY's 43fe88e9. No heavy job of mine queued now: lock-free Mercury work.
@@ -53,4 +53,4 @@ none (B-136's key and cycle_beats ruled D-127).
 none.
 
 ## HeavyJobLock
-none held, no want on file (B-131 done 05:45:52).
+none held, no want on file. 06:11: UNITY holds the lock with its Editor up, 0.44 GB free; my background lock watcher was stopped by the harness for low system memory (not restarted). Pending lock-free runs (each > 150 MB, so only with no lock held): the Mercury rig dry run, the backdrop stub smoke test, the Glassback / Cinderling full reviews; then the optional Mercury backdrop slot.
