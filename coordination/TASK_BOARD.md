@@ -2050,3 +2050,10 @@ Accept: CreatureTests: the Maw resolves its rig set with six bones and plays idl
 Files: Code/Runtime/Creatures/, Code/Runtime/Flora/RigSet.cs (shared), Tests/
 Depends: U-114, B-136
 Lead notes: Cycle 256. Promoted with the C2 Earth batch once B-136 is exported. Cycle 257 (D-127): RigSet honours `idle.cycle_beats` (one sway over N beats; default 1) and RigSetBuilder recognises a rig set by the json's `parts` array under the three-segment key `creatures/earth/hadal_maw`.
+### U-120 · UNITY · Backlog · C2
+Goal: Cold first boot under 5 s (D-129): the boot leg's tile-sheet reads (1067 ms on a cold disk cache in U-106's profile) move ahead of the entry clock with a boot-time sheet prefetch while the title card shows, or the Planet load clock starts at the scene's first rendered frame per Bible §11.1's definition; no change to warm loads.
+Accept: the 11-leg probe's Planet load · Earth at boot ≤ 5 s on a cold cache (run right after a build) and on a warm one; TransitionTests and M1LoopTests unchanged.
+Files: Code/Runtime/Boot/, Code/Runtime/Perf/MemoryProbe.cs, Tests/
+Depends: U-106
+Lead notes: Cycle 258 (D-129). Rides the C2 Earth batch; if U-106's warm re-run also reads ≥ 5 s, it moves to the front of that batch.
+
