@@ -149,10 +149,10 @@ Earth → Mars ≈ 7 s cruise; Earth → Neptune ≈ 13 s skip (layout distance 
 | Venus   | 8.87     | 0.90    | 10.4                   | Mk1                                         |
 | Earth   | 9.81     | 1.00    | 11.2                   | Mk1                                         |
 | Mars    | 3.72     | 0.38    | 5.0                    | Mk1                                         |
-| Jupiter | 24.79    | 2.53    | 59.5                   | Mk3                                         |
-| Saturn  | 10.44    | 1.06    | 35.5                   | Mk2                                         |
+| Jupiter | 24.79    | 2.53    | 59.5                   | Mk3 (Mk2's 20 m/s² cannot lift off)         |
+| Saturn  | 10.44    | 1.06    | 35.5                   | Mk1 (net 1.56 m/s², slow; Mk2 comfortable)  |
 | Uranus  | 8.69     | 0.89    | 21.3                   | Mk1                                         |
-| Neptune | 11.15    | 1.14    | 23.5                   | Mk2                                         |
+| Neptune | 11.15    | 1.14    | 23.5                   | Mk1 (net 0.85 m/s², a crawl; Mk2 comfortable) |
 
 `PlanetConfig` ScriptableObjects hold these values; an EditMode test asserts every ratio to
 ±0.5%. `Physics2D.gravity` is set per planet on load. Gravity affects the player, creatures,
@@ -206,7 +206,7 @@ usable only below the Datum where the air is dense enough.
 | Quantity             | Value                                                                 |
 |----------------------|-----------------------------------------------------------------------|
 | Thruster Mk1/Mk2/Mk3 | 12 / 20 / 35 m/s² vertical; lateral 60% of vertical                   |
-| Can launch from      | Mk1: Mercury, Venus, Earth, Mars, Uranus · Mk2: + Saturn, Neptune · Mk3: + Jupiter |
+| Climbs where         | thrust > g, by physics alone (D-106): Mk1 climbs everywhere but Jupiter (a crawl on Neptune and Saturn), Mk2 climbs those two comfortably, Mk3 is the only thruster that lifts off Jupiter. No gate on top of the physics; the HUD shows thrust-to-weight and warns in amber below 1.2 |
 | Fuel                 | None (D-103). The ship always has thrust; the only limit is thrust-to-weight: it climbs only where the thruster's acceleration exceeds g (Jupiter needs Mk3). Launch Fuel, tanks and the launch burn are removed |
 | Orientation          | Upright (D-102): the rocket stands on its tail on the ground and flies nose-up inside the atmosphere. Thrust acts along the ship's own up axis; **A/D tilt** it up to ±35° for sideways travel; it hovers where thrust = g, climbs above, sinks below. Legs at the tail |
 | Control              | Manual from the first second (D-103): the player presses thrust and lifts off; no auto-launch, no cutscene, no input lock at any point, including both transitions (§5.2, §5.3). Launch and landing are the same flight in opposite directions |
