@@ -84,10 +84,11 @@ def box(x0, z0, x1, z1, seed=0, wob=0.005, n=3):
     return pts
 
 
-def rot(pts, deg, cx=0.0, cz=0.0):
+def rot(pts, deg, cx=0.0, cz=0.0, dx=0.0):
+    """Rotate about (cx, cz), then shift dx (a tilted wreck kept inside its frame)."""
     a = math.radians(deg)
     c, s_ = math.cos(a), math.sin(a)
-    return [(cx + (x - cx) * c - (z - cz) * s_, cz + (x - cx) * s_ + (z - cz) * c) for x, z in pts]
+    return [(dx + cx + (x - cx) * c - (z - cz) * s_, cz + (x - cx) * s_ + (z - cz) * c) for x, z in pts]
 
 
 def drift(d, M, x0, x1, humps, seed):
@@ -214,26 +215,27 @@ def hauler_hull_a(d, M, k=0):
     T = 8.0
     torn = jag_edge(-1.55, 0.12, 1.92, 9, 0.07, 50)
     shell = [(-1.55, 0.12), (0.95, 0.12)] + G.bezier((0.95, 0.12), (1.72, 0.25), (1.66, 1.45), (0.90, 1.92), n=14)[1:] + [(-1.55, 1.92)] + torn[1:-1]
-    sh = rot(shell, T, -1.55, 0.12)
-    G.stroke(d, rot([(-1.55, 0.12), (-1.40, 0.12), (-1.40, 1.92), (-1.55, 1.92)], T, -1.55, 0.12), M["umber"], O, cyclic=True)   # the interior
+    sh = rot(shell, T, -1.55, 0.12, 0.12)
+    G.stroke(d, rot([(-1.55, 0.12), (-1.40, 0.12), (-1.40, 1.92), (-1.55, 1.92)], T, -1.55, 0.12, 0.12), M["umber"], O, cyclic=True)   # the interior
     for z in (0.5, 0.95, 1.4):
-        G.stroke(d, rot([(-1.52, z), (-1.42, z)], T, -1.55, 0.12), M["ink"], I)                                          # rib stubs
+        G.stroke(d, rot([(-1.52, z), (-1.42, z)], T, -1.55, 0.12, 0.12), M["ink"], I)                                          # rib stubs
     G.stroke(d, sh, M["mustard_f"], 0.0, cyclic=True)
-    G.stroke(d, rot([(-1.55, 0.95), (1.55, 0.95), (1.62, 1.18), (-1.55, 1.18)], T, -1.55, 0.12), M["off_f"], 0.0, cyclic=True)   # livery stripe
-    G.stroke(d, rot([(-1.55, 0.12), (1.2, 0.12), (1.5, 0.5), (-1.55, 0.5)], T, -1.55, 0.12), M["mustard_sh"], 0.0, cyclic=True)
+    G.stroke(d, rot([(-1.55, 0.95), (1.47, 0.95), (1.44, 1.18), (-1.55, 1.18)], T, -1.55, 0.12, 0.12), M["off_f"], 0.0, cyclic=True)   # livery stripe (inside the nose)
+    G.stroke(d, rot([(-1.55, 0.12), (0.95, 0.12), (1.21, 0.25), (1.39, 0.5), (-1.55, 0.5)], T, -1.55, 0.12, 0.12), M["mustard_sh"], 0.0, cyclic=True)
     for x, z, r in ((-1.1, 1.55, 0.16), (-0.9, 0.35, 0.12), (0.4, 1.65, 0.1)):                                           # rust weathering
-        G.stroke(d, rot(G.lumpy_ellipse(x, z, r * 1.4, r, n=14, lump=0.15, seed=int(x * 10) + 60), T, -1.55, 0.12), M["red_sh"], 0.0, cyclic=True)
+        G.stroke(d, rot(G.lumpy_ellipse(x, z, r * 1.4, r, n=14, lump=0.15, seed=int(x * 10) + 60), T, -1.55, 0.12, 0.12), M["red_sh"], 0.0, cyclic=True)
     for x in (-0.75, 0.05):                                                                                                # panel seams + rivets
-        G.seam(d, rot([(x, 0.14), (x, 1.9)], T, -1.55, 0.12), M["ink"])
-        G.rivets(d, rot([(x + 0.06, z) for z in (0.4, 0.8, 1.3, 1.7)], T, -1.55, 0.12), M["ink"])
-    G.seam(d, rot(G.bezier((-0.4, 1.5), (-0.25, 1.42), (-0.1, 1.52), n=5), T, -1.55, 0.12), M["ink"])                    # a dent
+        G.seam(d, rot([(x, 0.14), (x, 1.9)], T, -1.55, 0.12, 0.12), M["ink"])
+        G.rivets(d, rot([(x + 0.06, z) for z in (0.4, 0.8, 1.3, 1.7)], T, -1.55, 0.12, 0.12), M["ink"])
+    G.seam(d, rot([(-1.25, 1.62), (-1.05, 1.48)], T, -1.55, 0.12, 0.12), M["ink"])                                          # straight creases by
+    G.seam(d, rot([(-1.3, 0.78), (-1.08, 0.86)], T, -1.55, 0.12, 0.12), M["ink"])                                           # the torn edge (no curve: D-101)
     G.stroke(d, sh, M["ink"], O, cyclic=True)
-    px, pz = rot([(0.95, 1.36)], T, -1.55, 0.12)[0]                                                                       # the one porthole
+    px, pz = rot([(0.95, 1.36)], T, -1.55, 0.12, 0.12)[0]                                                                       # the one porthole
     G.stroke(d, G.lumpy_ellipse(px, pz, 0.24, 0.24, n=24, lump=0.01, seed=61), M["off"], O, cyclic=True)
     G.stroke(d, G.lumpy_ellipse(px, pz, 0.16, 0.16, n=20, lump=0.01, seed=62), M["teal"], I, cyclic=True)
     G.seam(d, [(px - 0.10, pz + 0.08), (px - 0.01, pz - 0.01), (px + 0.03, pz - 0.11)], M["ink"])                         # crack
     G.rivets(d, [(px + 0.2 * math.cos(a), pz + 0.2 * math.sin(a)) for a in (0.4, 1.9, 3.4, 4.9)], M["ink"])
-    drift(d, M, -1.75, 1.75, [(-1.2, 0.30, 0.45), (0.5, 0.42, 0.55), (1.5, 0.28, 0.3)], 63)
+    drift(d, M, -1.70, 1.70, [(-1.2, 0.30, 0.45), (0.5, 0.42, 0.55), (1.45, 0.28, 0.3)], 63)
 
 
 def hauler_hull_b(d, M, k=0):
