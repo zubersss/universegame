@@ -2192,7 +2192,7 @@ Goal: Mercury on the cartoon stage (Bible §12 C2 order 3; §7.3): Mercury runs 
 Accept: Mercury captures at 1x (day plains with plants and a Glassback, the twilight band with a Flarewing, the night side with the Shadewyrm at its burrow) matching the accepted B-145 composites; TransitionTests green; the BudgetGate Mercury rows green; StageLayers' Mercury tests retired per D-124.
 Files: Code/Runtime/View2D/CartoonStage.cs, Code/Runtime/Planet/, Code/Runtime/Creatures/CreatureSpecies.cs, Tests/
 Depends: U-118, B-148, B-149
-Lead notes: Cycle 264. Promoted when U-118 Mars is Done. Cycle 269 close: PROMOTED (U-118 Done). Code lock-free now, committed ahead of the check so B-148 / B-149 / B-150 export behind it (D-119's order); the Creep second-loop probe rides the check chain.
+Lead notes: Cycle 264. Promoted when U-118 Mars is Done. Cycle 269 close: PROMOTED (U-118 Done). Code lock-free now, committed ahead of the check so B-148 / B-149 / B-150 export behind it (D-119's order); the Creep second-loop probe rides the check chain. 13:1x: lock 1 GREEN (12:54–12:59: compile 0 / 0, CheckSetup imported the three exports, the 10-class slice 16/16); lock 2: M3Inner 5/7 with one red in LEAD's own Step4 (fixed e201d1e1, re-run owed); CaptureU123Mercury 13:08: all real art draws (the three sets by zone, both strips, the rig plants, the Glassback, the Flarewing, the Shadewyrm in a true peek) but the camp sits in a seeded crater and the cold trap's datum floats ~3 m over its floor → D-146 (no small craters within ±40 columns of the pad; the datum from the generator's surface); the three Mercury frames re-shoot in the next lock with the den / scene re-shoots, Build 0.4.4 + the probe and M3Inner. The Shadewyrm frame passes.
 
 
 ### U-124 · UNITY · Backlog · C3
