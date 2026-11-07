@@ -6,13 +6,6 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-28 — Close ChatGPT and Edge so the team can run again (1 min)
-At 14:3x free memory is 0.65 GB; the team's gate is 1.5 GB. ChatGPT (three processes, about 400 MB) and Edge
-opened at 14:19–14:20 while the three Claude windows restarted. Until memory is back nothing heavy can start:
-UNITY's check of Build 0.4.4 (Mercury) and BLENDER's Uranus renders both wait. Close ChatGPT and Edge
-(right-click their taskbar icons → Close window), then tell the Lead "done: USER-28". Both workers resume on
-their own once memory clears; nothing else to do.
-
 ### USER-27 — Play the Earth and Mars build 0.4.3 and look at its page (15 min)
 Open https://claude.ai/artifact/3FkYSjxX9bwjf34tapwDZU (the C2 Earth and Mars page: the stills, the numbers,
 what changed since the flight, what comes next). Build 0.4.3 has both planets drawn (12:00; D-144).
@@ -33,6 +26,7 @@ If you get too many "allow this command?" prompts, tell the Lead "approve PowerS
 allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
 
 ## Done
+- 2026-11-07 15:0x · USER-28 retired by LEAD: free memory cleared the gate on its own at 14:46 (1.76 GB) and held through UNITY's probe and BLENDER's Uranus slot with ChatGPT and Edge still open; nothing to do.
 - 2026-11-07 12:0x · USER-26 folded into USER-27 (Build 0.4.3 has both planets; the C2 page replaces the C1 ask).
 - 2026-11-07 05:4x · USER-24 folded into USER-26 (the round 2 art is in the C1 build and on its page).
 - 2026-11-07 01:04 · USER-25 done: free RAM reached 1.98 GB (ChatGPT, Copilot and Chrome gone); UNITY's U-103 + U-109 check started at 01:06.
