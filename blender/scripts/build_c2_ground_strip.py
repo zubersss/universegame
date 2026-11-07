@@ -253,6 +253,20 @@ def checks(S):
     return within, across, problems
 
 
+def extrude_gutters(sheet, fw=FW, gutter=GUTTER, frames=8):
+    """B-165: bilinear sampling at a frame's edge reads half a texel of the gutter; a transparent-black gutter
+    pulls the edge colour toward black (faint joins every 64 px in UNITY's night frame). Each gutter takes its
+    neighbours' edge columns: the left half repeats the left frame's last column, the right half the right
+    frame's first column - colour only, alpha stays 0. The frame rects are untouched."""
+    half = gutter // 2
+    for j in range(frames - 1):
+        x0 = j * (fw + gutter) + fw                           # the gutter's first column
+        sheet[:, x0:x0 + half, :3] = sheet[:, x0 - 1:x0, :3]
+        sheet[:, x0 + half:x0 + gutter, :3] = sheet[:, x0 + gutter:x0 + gutter + 1, :3]
+        sheet[:, x0:x0 + gutter, 3] = 0
+    return sheet
+
+
 def export(art, S=None, keys=None):
     """B-130: terrain/earth/ground_strip{,_soil,_stone}_color.png (8 frames 64x152 in one row, 4 px
     gutters) + <name>.json (style v3, pivot on the ground line, "tile": true, no clips). Raises on a
@@ -273,6 +287,7 @@ def export(art, S=None, keys=None):
         sheet = np.zeros((FH, W, 4), np.uint8)
         for j, im in enumerate(S[kind]):
             sheet[:, j * (FW + GUTTER):j * (FW + GUTTER) + FW] = im
+        extrude_gutters(sheet)                                # B-165
         meta = {"key": key, "style": "v3", "frame_width": FW, "frame_height": FH, "columns": 8, "gutter": GUTTER, "frames": 8,
                 "fps": 12, "pivot": [0.5, round(SURF * 64 / FH, 6)], "facing": "right", "ppu": 64, "tile": True, "animations": [],
                 "ground_line_px": int(round(SURF * 64)), "material": kind,
