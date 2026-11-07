@@ -1,21 +1,21 @@
 {
- "key": "props/mars/hauler_cargo",
- "format": "glb",
- "contract": "v2.2",
- "facing": "+X in Unity (exported facing glTF -X, D-065)",
- "up": "+Y",
- "units": "m",
- "origin": "base",
- "triangles": 540,
- "lod1_triangles": 258,
- "texture": 1024,
- "maps": [
-  "color",
-  "normal",
-  "mask",
-  "emission"
- ],
- "fps": 30,
- "clips": [],
- "sockets": []
+  "key": "props/mars/hauler_cargo",
+  "style": "v3",
+  "frame_width": 240,
+  "frame_height": 112,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.089286
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [],
+  "squash_root": false,
+  "ground_line_px": 10,
+  "note": "one static frame (no clip); the pivot sits on the ground line",
+  "interactable": true
 }

@@ -1,21 +1,29 @@
 {
- "key": "props/mars/meridian_beacon",
- "format": "glb",
- "contract": "v2.2",
- "facing": "+X in Unity (exported facing glTF -X, D-065)",
- "up": "+Y",
- "units": "m",
- "origin": "base",
- "triangles": 780,
- "lod1_triangles": null,
- "texture": 1024,
- "maps": [
-  "color",
-  "normal",
-  "mask",
-  "emission"
- ],
- "fps": 30,
- "clips": [],
- "sockets": []
+  "key": "props/mars/meridian_beacon",
+  "style": "v3",
+  "frame_width": 136,
+  "frame_height": 224,
+  "columns": 2,
+  "gutter": 4,
+  "frames": 4,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.044643
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [
+    {
+      "name": "pulse",
+      "start": 0,
+      "length": 4,
+      "loop": true,
+      "loop_from": 0
+    }
+  ],
+  "squash_root": false,
+  "ground_line_px": 10,
+  "note": "frame 0 = at rest; pulse loops",
+  "interactable": true
 }

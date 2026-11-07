@@ -1,21 +1,20 @@
 {
- "key": "props/mars/hauler_hull_b",
- "format": "glb",
- "contract": "v2.2",
- "facing": "+X in Unity (exported facing glTF -X, D-065)",
- "up": "+Y",
- "units": "m",
- "origin": "base",
- "triangles": 712,
- "lod1_triangles": 340,
- "texture": 1024,
- "maps": [
-  "color",
-  "normal",
-  "mask",
-  "emission"
- ],
- "fps": 30,
- "clips": [],
- "sockets": []
+  "key": "props/mars/hauler_hull_b",
+  "style": "v3",
+  "frame_width": 248,
+  "frame_height": 208,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.048077
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [],
+  "squash_root": false,
+  "ground_line_px": 10,
+  "note": "one static frame (no clip); the pivot sits on the ground line"
 }
