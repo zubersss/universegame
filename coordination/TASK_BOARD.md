@@ -22,11 +22,12 @@ When the lock frees, the highest pending job here goes next, even if the other r
 older (D-037 alternation applies only between equal ranks). A rank is live only while its role
 has a want on file or holds the lock (D-112): if the top rank has no want when the lock frees,
 the next live rank runs now and the skipped role goes next after it files. A role below the top
-keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 265 (08:3x; the lock is free, 1.6 GB free; UNITY writes C2 batch B off the lock (four cards in, three to go, then one check); BLENDER has no heavy job queued (its Venus backdrop studies are the one candidate, ≤ 5 min, when the lock is free with no UNITY want)). A role files its want only when the queue says it is next after the running job:
-1. UNITY · batch B code (U-122 (c), U-116, U-119, the U-115 follow-up remaining) → one check (compile + EditMode; PlayMode A / B) → the captures (the coast pool with the layers in order, forest and coast scenes, the plains by biome, the Sun in Space, the coast deep with the Maw) → the hand-off; a profile -Probe for the boot row and the Creep row.
-2. BLENDER · the Venus backdrop studies (deck + surface, ≤ 5 min FFT) in a slot when the lock is free with no UNITY want; otherwise lock-free.
-3. UNITY · U-118 Mars (promoted when batch B is in) → B-142 + B-144 exports after its code → the Mars captures; then the Mercury batch (U-123 + B-148..B-150).
-4. BLENDER · C3 UI export B-151 when U-124 opens (after U-118); the Venus exports (B-152..B-154) after U-123; previews lock-free meanwhile.
+keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 266 (09:0x; UNITY holds the lock since 08:34 for C2 batch B's check: EditMode 348/349 at 08:34 (one BiomeFlora red), PlayMode A 52/56 at 08:36 and B 59/63 at 08:46, a re-run on the lock since 08:55; its status file is stale since 08:0x; BLENDER on code only). A role files its want only when the queue says it is next after the running job:
+1. UNITY · the batch B re-run → the fixes for its reds (the BiomeFlora desert pick, the Sun spheroid test vs the new SunView, the wolf knock distance, the animated-object count with the camp Animators idle-off, the Warden single-frame rule) → the captures (the coast pool with the layers in order, forest and coast scenes, the plains by biome, the Sun in Space, the coast deep with the Maw) → the hand-off with status current; a profile -Probe for the boot row and the Creep row.
+2. BLENDER · the gap after UNITY's lock, one measured run each (≤ 5 min total): the Venus deck re-run (~80 s), the Venus rig dry run, the UI scratch dry run, the Mercury export dry runs; the Jupiter flora preview.
+3. UNITY · U-118 Mars (promoted when batch B is in) → B-142 + B-144 exports after its code → the Mars captures; then the Mercury batch (U-123 + B-148..B-150), C3 UI (U-124 + U-102 + B-151), Venus (U-125 + B-152..B-154).
+4. BLENDER · B-155 Jupiter previews lock-free; B-156 the aerostat kit re-ink (designs) after.
+
 
 
 
@@ -62,11 +63,11 @@ Then one batched check per hand-off when your turn in the queue comes (compile +
 
 
 **BLENDER** (numpy / scripts only while UNITY holds the lock or a want; bpy only under your own lock; under 0.3 GB free, code only; otherwise one item per measured run beside the other role's job, under ~150 MB; the lock / RAM check is its own call)
-- B-147: the Venus backdrop stub smoke test (lock-free, measured) and the studies' slot script; the Venus rig-set sources (`flora/venus/rigset`, deck and surface plants, ≤ 6 bones, swaps, `biomes`) + a dry run; the Venus props that differ (the aerostat deck strip, the station modules) as designs.
-- B-146 export readiness: the 9-slice jsons (`slice` margins), the title-card rows, the switch's two frames; a dry run into a scratch tree so B-151 is one slot.
-- The Mercury export dry runs (B-148 / B-149 / B-150 rows) against the accepted studies, one measured run each.
-- B-155 Jupiter design prep (C2 order 5, the first giant; Bible §7.5–7.6 the cloud-column world): the palette with the Mars checks, the cloud-deck layer study notes (decks, wisps, the Crush band on the near layer per the backdrop near-layer rule), floe and float-cell forms, the creature re-ink list; `coordination/reports/blender/c2_jupiter_designs.md`; previews when RAM allows.
-- Reports and README upkeep.
+- B-155: the first deck study's source (the cloud decks with wisps, the storm, the CRUSH band on layer2 lettered in Limelight), the Red Spot overlay, the creature drawing functions (the Belt wasp without a sting, the Vortex Whale rig-set parts); previews in the gap.
+- B-156 the aerostat kit re-ink designs (aerostat deck / strut / cell, the two float cell packs, the grapple hook; Earth palette, no faces; sizes per the manifest rows; `replaces_v2`), previews when RAM allows.
+- The four pending dry runs' scripts ready as one call each (the Venus deck re-run, the Venus rig, the UI scratch, the Mercury exports) so the gap costs ≤ 5 min.
+- `c2_jupiter_designs.md` and README upkeep (the floe-cap frame layout, the shared kit).
+
 
 
 
@@ -1267,7 +1268,7 @@ Goal: Venus backdrops: the cloud-deck set (`backgrounds/venus/deck`: the apricot
 Accept: the 2× seam check with no seam; ≤ 4 MB per PNG; a 1080p composite per set at 1x with the surveyor; UNITY's ParallaxLayers loads them by key.
 Files: blender/scripts/build_backdrop_v3.py, Assets/_Game/Art/backgrounds/venus/
 Depends: B-147
-Lead notes: Cycle 265. The studies may run now in a free slot; the export after U-123.
+Lead notes: Cycle 265. The studies may run now in a free slot; the export after U-123. Cycle 266: SURFACE STUDY ACCEPTED (the 08:28 slot; review_b147_venus_surface_preview.png: a banded apricot haze ceiling with acid-rain streaks that stop mid-air, terraced black tesserae ridges lit from below by vent glows, glassy glints; seams 0.89 / 0.56 / 0.56; layers ≤ 2.2 MB). The deck study's first pass had the towers as stacked lumps and the station hidden behind the near clouds; both fixed in code (88ccee89: cumulus towers with a following lining, the station as an airship above the cloud tops); its ~80 s re-run goes in the gap after UNITY's lock and is accepted on sight. Export after U-123.
 
 ### B-153 · BLENDER · Backlog · C2
 Goal: Venus flora + ground export: `flora/venus/rigset` (the five accepted plants, deck and surface forms, ≤ 6 bones, swaps, `biomes`), the Venus ground strips (the deck planks, the basalt crust) in the B-130 contract, `ui/palettes/venus/strip` (D-134).
@@ -1288,7 +1289,7 @@ Goal: C2 Jupiter design prep (Bible §12 C2 order 5; §7.5–7.6 the cloud-colum
 Accept: one review per group at 1x on a Jupiter stand-in beside the surveyor; the ten boxes self-checked; nothing exported.
 Files: blender/scripts/build_c2_jupiter_*.py, coordination/reports/blender/c2_jupiter_designs.md
 Depends: B-147
-Lead notes: Cycle 265. The same shape as B-139 / B-145 / B-147; previews only when RAM allows. The first giant sets the cloud-column pattern for Saturn, Uranus and Neptune. Cycle 265 (08:5x, D-137): PALETTE ACCEPTED (67816d87; cream / brick / rust / festoon blue-grey / sage / tan / umber, every check passing) → PALETTES["jupiter"]; the report (five faceless flora, four floe strips, four deck backdrops + a Red Spot overlay with lightning and the CRUSH band on layer2, the creature list with the stingless Belt wasp and the Vortex Whale as a rig set, the props) noted. Rulings: floe strips export with cap_left + cap_right after the 8 tiles (U-126 places them); the aerostat kit (aerostat deck / strut / cell, float cell packs, grapple hook) is re-inked once in the Earth palette for all four giants (B-156, with the Jupiter cards). Previews of the flora, floes and the first deck study are reviewed on hand-off.
+Lead notes: Cycle 265. The same shape as B-139 / B-145 / B-147; previews only when RAM allows. The first giant sets the cloud-column pattern for Saturn, Uranus and Neptune. Cycle 265 (08:5x, D-137): PALETTE ACCEPTED (67816d87; cream / brick / rust / festoon blue-grey / sage / tan / umber, every check passing) → PALETTES["jupiter"]; the report (five faceless flora, four floe strips, four deck backdrops + a Red Spot overlay with lightning and the CRUSH band on layer2, the creature list with the stingless Belt wasp and the Vortex Whale as a rig set, the props) noted. Rulings: floe strips export with cap_left + cap_right after the 8 tiles (U-126 places them); the aerostat kit (aerostat deck / strut / cell, float cell packs, grapple hook) is re-inked once in the Earth palette for all four giants (B-156, with the Jupiter cards). Previews of the flora, floes and the first deck study are reviewed on hand-off. Cycle 266: the flora drawing functions (f9205793) and the floe strips with cap_left + cap_right per D-137 (a7c4c38a) are in as source; their previews run in the gap after UNITY's lock.
 
 > **R1 (D-062).** 2D tasks B-056..B-076 are Superseded; their `.blend` sources (rigs, props,
 > terrain recipes) are the starting point for the models. Contract v2 §9 is the rule set.
@@ -2119,7 +2120,7 @@ Goal: The painted Sun in Space (D-123, B-137): `planets/sun/disc_rig.json` repla
 Accept: SpaceArtTests: the Sun key resolves to the rig with its parts and sockets; a Space capture with the Sun, Earth and Mars discs at true ratio; the Space perf rows unchanged.
 Files: Code/Runtime/Space/SunView.cs, Code/Runtime/Space/SpaceBackdrop.cs, Tests/
 Depends: U-106, B-137
-Lead notes: Cycle 253 (D-123). Promoted with U-110 / U-111 when U-106 is in and B-137 is exported. Cycle 259: promoted (C2 batch B); the Sun rig is exported (c4225fd): parts body / tongue ×14 / corona / two prominences, the json carries spin 2°/s, pulse 0.08 at 110 bpm, breathe 0.03.
+Lead notes: Cycle 253 (D-123). Promoted with U-110 / U-111 when U-106 is in and B-137 is exported. Cycle 259: promoted (C2 batch B); the Sun rig is exported (c4225fd): parts body / tongue ×14 / corona / two prominences, the json carries spin 2°/s, pulse 0.08 at 110 bpm, breathe 0.03. Cycle 266: batch B's check shows SpaceArtTests.SpaceUsesTheRealArt red on "the Sun's spheroid" (08:46): the test still expects the lit spheroid the SunView replaced; rewrite it to the rig (the body sprite, the ring parts, the corona) per this card's Accept.
 
 
 ### U-122 · UNITY · Ready · C2
