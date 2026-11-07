@@ -15,11 +15,11 @@ floe strips (D-137), the shared aerostat kit (B-156), straight-alpha layers (D-1
 | Item | State | File |
 |---|---|---|
 | Palette | ACCEPTED (D-148): in `meridian.v3.PALETTES["neptune"]` + the ui/palettes/neptune row (exports with the first Neptune slot) | blender/scripts/build_c2_neptune_palette.py |
-| Five flora | designed below; drawings after the palette | build_c2_neptune_plants.py (next) |
-| Floe strips | designed below (D-137's 10-frame contract) | build_c2_neptune_floes.py (next) |
-| Deck backdrops | study notes below (FFT washes: a BLENDER slot) | build_backdrop_v3.py (next) |
-| Creatures | the list below (none in Art yet: all new, no `replaces_v2`); the apex a Grand rig set | - |
-| Props | the ones that differ, below (four v2 sprites in Art: `replaces_v2`) | - |
+| Five flora | drawn (a1924873; drawn upright, D-148) + the rig set (994e266c: 24 parts on 500x176, bones 4 / 1 / 5 / 2 / 1, validate_rigset clean); smoke-clean; stamped review pending | build_c2_neptune_plants.py, build_c2_neptune_rigs.py |
+| Floe strips | drawn (5de84381): ice (rounded windward cap, ragged lee cap) + superionic; joins 0.89 / 0.41, caps joined, silhouette identical; stamped review pending | build_c2_neptune_floes.py |
+| Deck backdrops | in code: build_backdrop_v3.neptune_scene deck1 / deck2 / deck3 / deep / storm / spot (preview names ndeck1..nspot); the studies run in BLENDER slots | build_backdrop_v3.py |
+| Creatures | drawn: windrider 192x112, shadow_shoal 64x48, pressure_phantom 96x112, anchor_worm 256x80 (all new keys); 162 frames smoke-clean; the Umbral Leviathan a Grand rig (64bfe144, 8 bones, valid); stamped reviews pending | build_creatures_neptune_v3.py, build_umbral_leviathan_v3.py |
+| Props | drawn (170d4db0): wind_anchor 128x192 + meridian_wreck_bow / _mid / _stern 512x320 (`replaces_v2` at export); smoke-clean; stamped review pending | build_props_neptune_v3.py |
 
 ## 1. Palette (ACCEPTED, D-148; checked by blender/scripts/build_c2_neptune_palette.py)
 
@@ -113,7 +113,7 @@ geometry (fe6ace98) so a mirrored or pulsed layer never slides against its neigh
   curved streaks), layer1 the storm-violet rim with the bright white companion clouds along its edge, alone on its layer
   with a `pulse` block in the scene json (D-148: `{"scale": [0.97, 1.03], "alpha": [0.85, 1.0], "beats": 8, "bpm": 110}`;
   UNITY pulses it), layer2 the near wind streaks curving into the eye. The Great Dark Spot is the same set with the *Meridian*'s
-  silhouette far off on layer0 (one extra layer0 variant, `storm_meridian`).
+  silhouette far off on layer0, its coral lamp lit: the scene `spot`, drawn from its own rng so its layers 1-2 are byte-identical to `storm`'s (UNITY can share them).
 
 ## 6. Neptune creature list (contract §11.2; faces kept, no teeth)
 
@@ -125,15 +125,15 @@ None are in Art yet (`creatures/neptune/` was never exported in v2), so each is 
 | 2 | Shadow shoal | small dark fish that dart in storms | ~0.5 m each (one sprite, UNITY spawns 5-9) | idle 8, swim 12 at index 1, react 8 (scatter), bump 10 | indigo bodies with a wind-cyan rim stroke and big wisp-white eye whites (they read on the dark by their eyes); ours: a shoal that swirls around the surveyor's helmet light, curious, never biting (D-087) |
 | 3 | Pressure phantom | a translucent drifter of Deck 3 | ~1.8 m | idle 10 (a slow pulse), drift 12 at index 1, react 8 (veils wrap round it), bump 10 | wisp-white veils at partial alpha (straight, D-147) round a storm-violet core with the pie eyes inside it; ours: a shy ghost-jelly that hides behind its own veils |
 | 4 | Anchor worm | holds floes against the wind | ~3 m | idle 10, crawl 12, anchored 10 (coiled over a tile, hook set, shivering), react 8 (lets go, recoils), bump 10 | a segmented abyss-sage body with a beacon-coral hook tail, pie eyes on a round head; the ground-line pivot; ours: a worm that lassos floes and digs in its heels against the gale |
-| 5 | Umbral Leviathan (apex) | the Great Dark Spot, circling the *Meridian*; the final encounter is a full Survey (D-087) | a set piece, ~40 m (drawn at 0.25x like the Diamondback) | idle 12 (`cycle_beats` 4), circle 12 (a slow turn round the wreck), survey 12 (it holds and lights its bands one by one: the Survey beats), react 12 | a Grand rig set (D-140, 8 bones, `"grand": true`): head, three body segments, two fin pairs, tail, the band layer; deep indigo with storm-violet bands that breathe with the storm, wisp-white pie eyes, long whiskers that trail downwind, no teeth; ours: a storm-coloured whale-eel whose markings are the Survey puzzle |
+| 5 | Umbral Leviathan (apex) | the Great Dark Spot, circling the *Meridian*; the final encounter is a full Survey (D-087) | a set piece, ~30 m nose to tail (a full screen at 1x; previewed at 0.25x like the Diamondback) | idle 12 (`cycle_beats` 4), circle 12 (a slow turn round the wreck), survey 12 (it holds and lights its bands one by one: the Survey beats), react 12 | a Grand rig set (D-140, 8 bones, `"grand": true`): head, three body segments, two fin pairs, tail, the band layer; deep indigo with storm-violet bands that breathe with the storm, wisp-white pie eyes, long whiskers that trail downwind, no teeth; ours: a storm-coloured whale-eel whose markings are the Survey puzzle |
 
 ## 7. Neptune props that differ
 
 The v2 sprites in Art, each `replaces_v2` at export (removes `_normal`, `_mask`, `_emission`; never a `.meta`, D-016):
-- `props/neptune/wind_anchor`: a brass stake with a beacon-coral cap, three guy lines pegged into the floe, a little wind
+- `props/neptune/wind_anchor`: a steel-indigo stake (the palette has no brass) with a beacon-coral cap, three guy lines pegged into the floe, a little wind
   sock on top (it bends with the wind lean like the plants).
 - `props/neptune/meridian_wreck_bow | _mid | _stern`: the *Meridian* in three segments: a dusty beacon-coral hull with
-  rivet seams, round portholes, a brass name ring on the bow, the beacon lamp on the stern (the final beacon, the ending
+  rivet seams, round portholes, a wisp-white name ring on the bow, the beacon lamp on the stern (the final beacon, the ending
   choice). At PPU 64 a 4.4 m segment is only 282 px; D-148 (3) makes each ~7.5 m (480 px, inside the 512 cap) so the ship
   reads as the expedition vessel, ~22 m whole; the keys unchanged.
 - New: Triton and its geysers are sky art (backdrop), not props; the Superionic Ice drill site reuses the Rig's drill.
