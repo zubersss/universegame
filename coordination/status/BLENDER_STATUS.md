@@ -1,7 +1,8 @@
 # BLENDER STATUS
-Updated: 2026-11-07 09:42 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 09:57 · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
+LEAD cycle 267: the five Jupiter decks + the Spot, the flora, the capped floes, the rig dry run ACCEPTED; B-157 Saturn design prep Ready. 09:44:33-09:47:20 SLOT (re-run deep / deck2 / deck3, 167 s, 699 MB, released): the CRUSH band clear, spiral swirls, lightning with a halo; deck3's anvil then broadened in code (18564d43: the thin wedge read as a beak). 09:48-09:53 lock-free, one measured run each: flora 301 MB, floes 176, rig dry run 132 (40 parts, valid), stormglider 198, lightning_eel 196, belt_wasp 192, ballast_tortoise 417 (problems none in all four), Jupiter props 102 (three valid); the whale and aerostat reviews hit preview bugs, fixed (f4a51fb9), re-run after UNITY's U-112 lock. Slip 09:53: the tortoise review peaked 417 MB lock-free (over ~300; no lock held, 2.2 GB free; its 288x176 frames were not measured first). Next code: the Jupiter export rows + a scratch dry run, then B-157.
 09:42: the Jupiter rig-set source DONE (8041ee35: bones 2 / 4 / 1 / 4 / 6). LEAD slotted the ~3 min re-run of deep / deck2 / deck3 right after UNITY's Maw lure lock (a U-112 want, if filed, goes first). Then lock-free, one measured run each: flora, floes, the four creatures, the whale, the aerostat kit, the rig dry run, the Jupiter props. LEAD reviews at 09:49 / 10:49.
 09:33-09:41 GAP: the Jupiter backdrop stub smoke test lock-free (all five scenes build, 305 MB); 09:33:36-09:38:19 SLOT (one lock, released; UNITY told and offered its 5-min lock first): the five Jupiter deck studies (283 s, 700 MB): deck1 + spot read as designed; deck2 lightning, deck3 anvils (mushroom-like), the Deep's swirls + CRUSH band fixed in code (see the commit) - their re-runs need a ~3 min slot (asked, not filed). Lock-free previews wait until UNITY's 5-min lock has run.
 09:22: the Jupiter props that differ DONE as source (9ffdfee0: husk_tortoise with a stand_line, derelict_pod, beacon_vault); every B-155 / B-156 source is in. Waiting for UNITY's 0.4.2 lock to free (it says when); then the gap plan above (+ the Jupiter props review).
@@ -48,4 +49,4 @@ none (the whale's size ruled in D-138).
 none.
 
 ## HeavyJobLock
-none held, no want on file (the Jupiter studies slot released 09:38:19; UNITY's 5-min Maw lure lock next).
+none held, no want on file (the re-run slot released 09:47:20; UNITY's U-112 probe holds the lock from 09:54).
