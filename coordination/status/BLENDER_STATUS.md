@@ -1,15 +1,20 @@
 # BLENDER STATUS
-Updated: 2026-11-06 23:5x · Session: 6 (C1, contract v3.1, Bible 4.1) · trimmed under D-113; everything older: coordination/status/archive/BLENDER_2026-11-06.md
+Updated: 2026-11-07 00:2x · Session: 6 (C1, contract v3.1, Bible 4.1) · trimmed under D-113; everything older: coordination/status/archive/BLENDER_2026-11-06.md
 
 ## Current task
-While-waiting list (LEAD cycle 247), in order; each logged here:
-1. C2 Earth plant rig sources: DONE 23:5x (5cdca3b). build_c2_earth_rigs.py (+ preview_c2_earth_rigs.py): Nodbell 4 bones (bells nod on a 7+1 beat cycle and on react), Shiverbarrel 2 (shiver body cycle 6+1+1+1+1, crown pops open on react), Curlfrond 4 (centre fiddlehead curls open/half/curled/half on the beat, all three curl tight on react), Whiptuft 4 (seed stalks whip; the clump + stalks flatten on react), Thriftcushion 6 (poms bob out of phase, all rise on react). Out-of-phase motion = bone cascades with pivots side by side at the base (Unity's depth lag 0.35 rad); only today's runtime features. All six Earth plants in ONE rig set: 44 parts, sheet 500x212, rig json valid §11.3, ink 2.0-3.0 / 1.0-1.5 px. Review blender/preview/review_c2_earth_rigs_preview.png: each plant 1x on the B-114 plains beside the surveyor, rest + react 2x, the idle loop frame by frame with Unity's SwayCurve/SquashCurve maths, swap_cycle states. Beats kept inside Bible §9.2's 100-120 (the validator caught 150 and 90).
-2. C2 Earth ground strip source (grass / soil / stone re-inked v3.1, paper fill, drawn 1 m grass lip, previewed on the plains): NEXT.
-3. Disc review peak measure: want_blender.lock filed 23:51 (UNITY took heavy_unity.lock 23:49); runs build_discs_v3 export to a scratch dir + the review in bundled python under my own lock, logs the peak.
+While-waiting list (LEAD cycle 249), lock-free, top first; each logged here:
+1. B-131 camp props re-ink previews (all six at 1x beside the surveyor and the rig): NEXT.
+2. B-132 stag / wolf / bear design previews (faces kept, no bared teeth).
+3. B-133 forest + coast layer studies with the 2x seam check.
 4. Painted Sun disc design, preview only.
 5. README_v4.md refresh.
+Heavy queue: nothing of mine queued; no want on file.
 
 ## Last completed
+- 00:19-00:22 B-129 + B-130 EXPORTED (558976a; one heavy lock, log OK x2, peak 668 MB, lock released, UNITY told):
+  - flora/earth/rigset: all six Earth plants, 504x212 (36 KB), 44 parts; the snoozle's 7 parts pixel-identical to B-126 (crops + pivots compared to the previous sheet), its plant json unchanged except biomes; biomes on every plant. Reviews review_b129_earth_rigset.png + review_b129_earth_rigset_assembled.png (each plant 1x on the plains, rest/react 2x, idle loop with Unity's maths, swap cycles).
+  - terrain/earth/ground_strip (grass, the key GroundStrip loads), ground_strip_soil, ground_strip_stone: 540x152 each (8 frames 64x152, 4 px gutters, no clips), "tile": true, pivot [0.5, 0.842] = the ground line. FRAME SIZE vs U-100's 64x128: GroundStrip.cs puts the pivot on the ground line and hangs the fill StripHeight = 2 m below it, so the frame is 2 m below + 0.375 m above (lip, tufts); no code change needed. Silhouette ON the ground line at every edge (UNITY's wall-edge ink starts there). Joins 0.63 / 0.62 / 0.81 per 255, silhouette ink identical on all 48 edges (rows 23-24). Review review_b130_ground_strips.png.
+- 00:01-00:06 DISC PEAK MEASURED under heavy_blender.lock (the B-119 job into a scratch tree, bundled python): 2545 MB with the uint8 panels alone; cause = pngio.write_png filtering the whole ~10k-wide review in int16. Chunked writer (57aef7f, byte-identical output): 415 MB. The 22 disc exports stay byte-identical.
 - 23:33-23:38 QUEUE #2 BATCH EXPORTED (f612225; one heavy lock, 4.9 min, log OK x4, peak 988 MB, lock released, UNITY told): B-121, B-128, B-122 (see Ready for review).
 - 23:2x C2 Curlfrond fix (LEAD cycle 245): mustard fiddlehead tips + ink-behind fronds; review_c2_earth_plants_preview.png refreshed.
 - 22:5x Disc review memory (673193b): build_discs_v3.preview turns each panel to uint8 as it finishes and writes the PNG directly (the 22:09 run peaked 2289 MB on the float canvas). Measure on the next disc run.
@@ -23,7 +28,7 @@ While-waiting list (LEAD cycle 247), in order; each logged here:
 - B-122 (f612225): ships/pilgrim/rig_color.png 920x912 (67 KB, 11 parts) + rig.json (pilgrim_side: 6 bones, bell/porthole slots, 7 sockets, fin_wobble 8 loop / leg_flex 8 / hatch_open 6 at 12 Hz; pilgrim_top: 3 bones, fin_wobble 8) + ships/pilgrim/puff 1052x128 (8-frame loop, 17 KB). Source sources/ships/pilgrim_v3_rig.blend. Reviews: review_b122_pilgrim_rig.png, review_b122_pilgrim_rig_assembled.png (rig built from parts + bones at 1x beside the surveyor, ±35 tilt, every clip, rig json valid §11.3), review_b122_pilgrim_puff.png. The puff review's "idle loop" box shows "!" because the clip is named puff (it IS a loop: FX, not a character idle); every other box passes or is self-checked. Done on U-103's capture.
 
 ## Handoffs (unrouted only)
--> UNITY (C2, when the Earth rig set re-exports): every plant now carries "biomes" (nodbell plains/forest, shiverbarrel desert, curlfrond forest/taiga, whiptuft plains/coast, thriftcushion coast/tundra; JsonUtility ignores it today). FloraRigs picks Set.plants at random, so a desert cactus would spawn on the plains until placement filters by biome.
+-> UNITY (C2, routed to U-110 by LEAD cycle 249): every plant carries "biomes" (nodbell plains/forest, shiverbarrel desert, curlfrond forest/taiga, whiptuft plains/coast, thriftcushion coast/tundra; JsonUtility ignores it today). FloraRigs picks Set.plants at random, so a desert cactus would spawn on the plains until placement filters by biome.
 -> UNITY (B-128, on import): set def.icon = "icons/<key>/base" in ItemRegistry for soil, grass, regolith, snow, mercury_regolith, mercury_basalt, sulfide, tessera (they pass null today).
 -> UNITY (B-122, on import): ships/pilgrim/side_a..e and top_a..b were never exported (superseded by D-111; manifest preview_only). Sockets in rig.json, metres from the root: tail_exhaust, leg_l, leg_c, leg_r, door, attitude_l (-1.5, 2.6), attitude_r (1.5, 2.6). The ±35 flight tilt is the root transform.
 
@@ -42,4 +47,4 @@ none.
 none.
 
 ## HeavyJobLock
-want_blender.lock filed 23:51 for the disc peak measure; UNITY holds heavy_unity.lock since 23:49.
+none held, no want filed (B-129/B-130 batch done 00:22).
