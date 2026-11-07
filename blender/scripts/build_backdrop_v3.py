@@ -647,12 +647,40 @@ def mercury_night(seed):
 # ---------------------------------------------------------------- Venus (B-147, D-134 palette): the cloud deck and the surface dive
 
 def cloud_tower(mask, cx, base, h, w, rng):
-    """A tall cumulus tower: stacked lumps narrowing upward, flat-ish base."""
-    n = max(3, int(h / (w * 0.6)))
+    """A cumulus tower: a broad flat-bottomed base of three lumps, then tiers of fewer, smaller lumps climbing with a lean
+    to a cauliflower crown (a stack of single balls read as dumplings)."""
+    n = max(3, int(h / (w * 0.6)) + 1)                                                   # tiers overlap (no floating lumps)
+    lean = rng.uniform(-0.3, 0.3) * w
+    ell(mask, cx + 0.5 * lean, base - 0.45 * h, 0.75 * w, 0.5 * h, cut=0.9)              # the core binding the tiers
     for k in range(n):
         t = k / max(n - 1, 1)
-        ww = w * (1.0 - 0.45 * t) * rng.uniform(0.85, 1.1)
-        ell(mask, cx + rng.uniform(-0.15, 0.15) * w, base - t * h, ww, ww * 0.8, cut=0.7 if k == 0 else None)
+        ww = w * (1.0 - 0.4 * t)
+        m = 3 if t < 0.7 else 2
+        for j in range(m):
+            off = ((j - (m - 1) / 2) * 0.75 + rng.uniform(-0.15, 0.15)) * ww
+            r = ww * rng.uniform(0.6, 0.85)
+            ell(mask, cx + lean * t + off, base - t * h - rng.uniform(0.0, 0.2) * r, r, r * 0.8, cut=0.6 if k == 0 else None)
+
+
+def poly(mask, pts, val=1.0):
+    """A filled polygon (even-odd), x wrapping (tileable)."""
+    xs_, ys_ = [q[0] for q in pts], [q[1] for q in pts]
+    y0, y1 = max(int(min(ys_)), 0), min(int(max(ys_)) + 2, mask.shape[0])
+    xa = np.arange(int(min(xs_)) - 1, int(max(xs_)) + 2)
+    X, Y = xa[None, :] + 0.5, np.arange(y0, y1)[:, None] + 0.5
+    inside = np.zeros((y1 - y0, len(xa)), bool)
+    for (ax, ay), (bx, by) in zip(pts, pts[1:] + pts[:1]):
+        if ay == by:
+            continue
+        cross = ((ay > Y) != (by > Y)) & (X < ax + (Y - ay) * (bx - ax) / (by - ay))
+        inside ^= cross
+    cols = xa % W
+    mask[y0:y1, cols] = np.maximum(mask[y0:y1][:, cols], inside * val)
+
+
+def lining(mask, dy, dx):
+    """The backlit cream lining: the mask itself shifted up-left and up-right (it follows the cloud; wraps in x)."""
+    return np.maximum(np.roll(mask, (-dy, dx), (0, 1)), np.roll(mask, (-dy, -dx), (0, 1)))
 
 
 def venus_deck(seed):
@@ -671,33 +699,46 @@ def venus_deck(seed):
         y = np.arange(H)[:, None] + 0.5
         bands = np.maximum(bands, ((y > line[None, :]) & (y < line[None, :] + rng.uniform(14, 30))).astype(np.float32))
     stack.append(tint(rng, H, bands, BG._mix(pal["mustard"], pal["sky"], 0.5), 0.35, var=0.04, edge_dark=0.0, bleed=8.0))
-    towers, rims = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
+    towers = np.zeros((H, W), np.float32)
     for _k in range(7):
         cx = rng.uniform(0, W)
-        base, h, w = rng.uniform(780, 900), rng.uniform(260, 460), rng.uniform(70, 120)
+        base, h, w = rng.uniform(780, 900), rng.uniform(260, 460), rng.uniform(70, 115)
         cloud_tower(towers, cx, base, h, w, rng)
-        cloud_tower(rims, cx + 6, base - 6, h, w * 1.04, rng)
+    rims = lining(towers, 6, 5)
     stack.append(tint(rng, H, rims, pal["offwhite"], 0.85, var=0.03, edge_dark=0.03, bleed=3.0))   # the backlit cream edges
     stack.append(wash32(rng, H, towers, BG._mix(pal["sky"], pal["red"], 0.15), var=0.05, edge_dark=0.06, bleed=3.0))
     out.append(finish(stack, rng, H))
     # layer1: nearer towers and a floating station's silhouette
     H = 640
     stack = Stack()
-    near, nrim = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
+    near = np.zeros((H, W), np.float32)
     for _k in range(5):
         cx = rng.uniform(0, W)
-        base, h, w = rng.uniform(560, 620), rng.uniform(220, 380), rng.uniform(90, 150)
+        base, h, w = rng.uniform(560, 620), rng.uniform(220, 380), rng.uniform(80, 130)
         cloud_tower(near, cx, base, h, w, rng)
-        cloud_tower(nrim, cx + 8, base - 8, h, w * 1.04, rng)
+    nrim = lining(near, 8, 6)
     stack.append(tint(rng, H, nrim, pal["offwhite"], 0.9, var=0.03, edge_dark=0.03, bleed=2.5))
     stack.append(wash32(rng, H, near, BG._mix(pal["sky"], pal["mustard"], 0.2), var=0.05, edge_dark=0.07, bleed=2.5))
-    station = np.zeros((H, W), np.float32)
-    sx = rng.uniform(300, 1700)
-    ell(station, sx, 300, 120, 46)                                                        # the gasbag
-    rect(station, sx - 70, sx + 70, 350, 382)                                             # the deck
+    station, bag, ribs, sheen, wins = (np.zeros((H, W), np.float32) for _ in range(5))
+    sx, sy = rng.uniform(300, 1700), 170                                                  # above the near cloud tops
+    ell(bag, sx, sy, 130, 44)                                                             # the gasbag
+    for sg in (-1, 1):                                                                    # the swept tail fins
+        poly(station, [(sx - 152, sy + sg * 46), (sx - 96, sy + sg * 12), (sx - 140, sy + sg * 6)])
     for k in range(5):
-        rect(station, sx - 60 + 30 * k, sx - 58 + 30 * k, 336, 352)                       # the rigging
-    stack.append(wash32(rng, H, station, BG._mix(pal["brown"], pal["sky"], 0.45), var=0.03, edge_dark=0.05, bleed=1.4))
+        rect(station, sx - 52 + 26 * k, sx - 50 + 26 * k, sy + 38, sy + 78)               # the rigging
+    rect(station, sx - 74, sx + 74, sy + 76, sy + 96)                                     # the deck
+    rect(station, sx - 44, sx + 8, sy + 54, sy + 78)                                      # the deckhouse
+    station = np.maximum(station, bag)
+    for k in range(-3, 4):
+        ell(ribs, sx + 34 * k, sy, 2.5, 44)                                               # the gasbag ribs
+    ell(sheen, sx + 12, sy - 22, 84, 7)
+    for k in range(3):
+        rect(wins, sx - 38 + 16 * k, sx - 30 + 16 * k, sy + 60, sy + 68)                  # warm deckhouse windows
+    body = BG._mix(pal["brown"], pal["sky"], 0.35)
+    stack.append(wash32(rng, H, station, body, var=0.03, edge_dark=0.06, bleed=1.2))
+    stack.append(tint(rng, H, ribs * bag, pal["brown"], 0.55, var=0.0, edge_dark=0.0, bleed=0.8))
+    stack.append(tint(rng, H, sheen * bag, pal["offwhite"], 0.35, var=0.0, edge_dark=0.0, bleed=2.0))
+    stack.append(tint(rng, H, wins, pal["mustard"], 0.95, var=0.0, edge_dark=0.0, bleed=0.6))
     out.append(finish(stack, rng, H))
     # layer2: cloud tops near the deck with gaps showing the dark surface far below and its tiny vent glows
     H = 384
