@@ -1,13 +1,14 @@
 # BLENDER STATUS
-Updated: 2026-11-07 03:4x · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 03:5x · Session: 7 (resumed 00:44 after the restart; C1/C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-LEAD cycle 254 order (lock-free now; UNITY's C1 batch holds the queue):
-1. Slot (queue #1): DONE 03:06:23-03:09:39 (c4225fd), see Last completed.
-2. D-125 shelter wall DONE 03:2x (afcfa68): a 1 x 1 m tile 64x64, pivot [0.5, 0], tile x + y, ground_line_px 0; joins x 0.0 / y 0.0; review_b131_props_preview.png shows it stacked 2 and 3 high round the door fitted to its 1 x 2 cell; the other five props byte-identical.
-3. B-139: plants preview handed off (8c69536, review_b139_mars_plants_preview.png, drawn 1.5x for 0.38 g); Mars ground strips DONE 03:2x (81d36d4, review_b139_mars_ground_preview.png: terrain/mars/ground_strip rust regolith + _basalt on the B-130 recipe; joins 0.55 / 0.58, silhouette identical on 32 edges); creature and prop notes in c2_mars_designs.md. Left: the canyon + dust-storm backdrop studies (FFT, so in a slot: want after UNITY's batch).
-4. B-136 Hadal Maw design preview DONE 03:3x (1fb50b1): review_b136_hadal_maw_preview.png, a 6-bone rig set (head, body1, body2, tail, jaw, lure; lure swaps lit / dim / flare), ~34 m, one big eye + closed smile, the open jaw a cavern + tongue (no teeth), idle 8 travelling sway + react 8 jaw open. SLIP: its first run peaked 277 MB and the second 210 MB with UNITY's Editor up (~0.5-0.66 GB free, cap ~150 MB; nothing reaped); the large view is now 0.5x and further big renders wait for my slot.
-B-131 export: after UNITY's U-113 code, which now follows U-106 (D-115 / D-117).
+LEAD cycle 255 order (lock-free; my want for the B-139 canyon + storm studies is queue #2 after UNITY's PlayMode A / B + captures, ~04:0x, refreshed):
+1. Puffpod D-101 fix: DONE 03:4x (9e9b06d): two off-centre seams, irregular low speckles; review_b139_mars_puffpod_preview.png.
+2. B-136 Hadal Maw design: DONE before the cycle (1fb50b1), for LEAD's look.
+3. README_v4 exact-preview paragraph: DONE (8c3a165).
+4. Mars rig-set sources (flora/mars/rigset in the Earth manner, <= 6 bones, swaps, biomes) + a lock-free dry run of the pack and json: NEXT.
+5. Mars creature previews (list order 1: Dustskater) when RAM allows.
+Nothing Mars exports until its cards exist. B-131 export after UNITY's U-113 (after U-106).
 
 ## Last completed
 - 03:06:23-03:09:39 SLOT (one heavy lock, 3.3 min, released; LEAD cycle 254 queue #1): squid re-exported 1940x1476 (155 s, peak 632 MB; flee stretch 1.12, inside the 2 px edge); B-137 planets/sun/disc_rig_color.png 1900x928 + disc_rig.json (36 s, peak 1009 MB; ink on screen 2.0-3.0 / 1.0-1.5; review_b137_sun_rig.png at the game's size); ui/palettes/mars/strip (D-125 (2)). Log: "OK creatures/earth/squid ... 155.4s | peak 632MB", "OK planets/sun/disc_rig | sheet 1900x928 944KB | parts body 928x928, tongue 216x148, prominence_a 128x140, prominence_b 100x104, corona 512x512 ... 36.3s | peak 1009MB", "OK ui/palettes/mars | strip 8x1".
@@ -19,12 +20,9 @@ B-131 export: after UNITY's U-113 code, which now follows U-106 (D-115 / D-117).
 
 ## Ready for review
 - B-131 export wiring (5650912): `props/common/camp_set` exports the six props (<= 512^2 each, colour + json, D-117) and removes their 24 v2 files; dry run passed. Waits for U-113 (after U-106). D-125's shelter-wall tile redraw comes first (Current task 2).
-- B-135 squid (c4225fd): re-exported, inside the 2 px edge (pike + shark verified cycle 254).
-- B-137 (c4225fd): planets/sun/disc_rig_color.png 1900x928 + disc_rig.json; review blender/preview/review_b137_sun_rig.png at the game's size on the B-120 starfield with the Earth disc at true ratio; every part inside its 2 px edge; sheet <= 2048^2; log OK. Parts: corona (order 0, radius 1.42 R, breathe 0.03), tongue (order 1; ring: 14 instances, alt scale 1.0 / 0.62, base 0.97 R, spin 2 deg/s, pulse 0.08, 110 bpm, stepped 12 Hz), prominence_a / _b (order 2, at 100 / 280 deg on the rim), body (order 3); draw_scale 2.
-- ui/palettes/mars/strip (c4225fd): the accepted Mars palette (D-125 (2)), also in meridian.v3.PALETTES["mars"].
 - B-136 design preview (1fb50b1): blender/preview/review_b136_hadal_maw_preview.png (parts, bones, swaps and the idle / react tables in build_hadal_maw_v3.RIG).
 - B-139 Mars ground preview (81d36d4): blender/preview/review_b139_mars_ground_preview.png, terrain/mars/ground_strip (regolith) + _basalt in the B-130 contract; joins 0.55 / 0.58 per 255, silhouette identical on 32 edges.
-- B-139 part 2 preview (8c69536): blender/preview/review_b139_mars_plants_preview.png, five faceless Mars plants at 1x on a Mars stand-in beside the surveyor, idle 8 + react 4 each at 2x; ink 2.0-3.0 / 1.0-1.5 px, Mars palette 100 % per plant; drawn 1.5x for 0.38 g.
+- B-139 plants ACCEPTED cycle 255 (Puffpod fixed 9e9b06d); part 2 preview (8c69536): blender/preview/review_b139_mars_plants_preview.png, five faceless Mars plants at 1x on a Mars stand-in beside the surveyor, idle 8 + react 4 each at 2x; ink 2.0-3.0 / 1.0-1.5 px, Mars palette 100 % per plant; drawn 1.5x for 0.38 g.
 
 ## Handoffs (unrouted only)
 -> UNITY (B-132, exported 0f9e0ab): delete the eight .meta files of the removed stag / wolf v2 files (stag.glb, stag_normal/_mask/_emission.png, same for wolf); creatures/earth/bear is a new key (no SpeciesSpec yet: Bible §7.1 "Brown bear (territorial)"; under D-087 its react is the rear-up + huff). The sheets are drawn about 1.5 m long x 2.0 m tall (stag), 1.2 x 1.0 m (wolf), 2.1 x 1.3 m (bear); the v2 SpeciesSpec sizes were 1.9x1.6 and 1.5x0.9.
