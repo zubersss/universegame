@@ -1161,9 +1161,9 @@ def ring_line(stack, rng, pal, H, y0):
     """The ring plane edge-on: a bright cream line across the whole sky with a soft glow, its shadow band lower down."""
     y = np.arange(H)[:, None] + 0.5
     line = y0 + 3 * np.sin(np.arange(W)[None, :] / W * TAU_BG)
-    glow = ((y > line - 7) & (y < line + 9)).astype(np.float32)
-    stack.append(tint(rng, H, glow, pal["offwhite"], 0.35, var=0.0, edge_dark=0.0, bleed=5.0))
-    core = ((y > line - 1.5) & (y < line + 2.5)).astype(np.float32)
+    glow = ((y > line - 12) & (y < line + 14)).astype(np.float32)
+    stack.append(tint(rng, H, glow, pal["offwhite"], 0.45, var=0.0, edge_dark=0.0, bleed=7.0))
+    core = ((y > line - 3) & (y < line + 4)).astype(np.float32)                           # thick enough to read at 1x
     stack.append(tint(rng, H, core, pal["offwhite"], 0.95, var=0.0, edge_dark=0.0, bleed=0.6))
     shade = ((y > line + 60) & (y < line + 88)).astype(np.float32)
     stack.append(tint(rng, H, shade, pal["teal"], 0.18, var=0.03, edge_dark=0.0, bleed=8.0))
@@ -1191,6 +1191,14 @@ def hexagon_walls(stack, rng, pal, H):
         wall = np.zeros((H, W), np.float32)
         poly(wall, [(x_far - w_far, horizon), (x_far + w_far, horizon), (x_near + w_near, H), (x_near - w_near, H)])
         stack.append(tint(rng, H, wall, pal["teal"], 0.32, var=0.04, edge_dark=0.02, bleed=4.0))
+        streaks = np.zeros((H, W), np.float32)                                            # wind streaks along the wall (moving air)
+        for _j in range(26):
+            t = rng.uniform(0.05, 0.95)
+            y0 = horizon + (H - horizon) * t
+            xc = x_far + (x_near - x_far) * t
+            half = w_far + (w_near - w_far) * t
+            ell(streaks, xc + rng.uniform(-0.7, 0.7) * half, y0, rng.uniform(10, 26), 1.4)
+        stack.append(tint(rng, H, streaks * wall, pal["offwhite"], 0.7, var=0.0, edge_dark=0.0, bleed=0.8))
         stack.append(tint(rng, H, lining(wall, 0, 4) * (1 - wall), pal["offwhite"], 0.5, var=0.0, edge_dark=0.0, bleed=1.5))
 
 
@@ -1212,7 +1220,7 @@ def saturn_scene(seed, deck="sdeck1"):
                                 (450, 24, pal["mustard"], 0.35), (520, 40, pal["offwhite"], 0.35)], pal):
             stack.append(t)
     if deck in ("sdeck1", "sdeck2"):
-        ring_line(stack, rng, pal, H, 110)
+        ring_line(stack, rng, pal, H, 330)                                                # low enough to cross the visible sky (at 110 it hid at the top)
     if deck == "hexagon":
         ring_arc(stack, rng, pal, H, 300, 900)
     if deck in ("sdeck1", "hexagon"):
