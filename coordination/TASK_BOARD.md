@@ -16,6 +16,47 @@ Lead notes: …
 
 ---
 
+## Heavy job queue (LEAD rewrites it every cycle; D-109)
+
+When the lock frees, the highest pending job here goes next, even if the other role's want is
+older (D-037 alternation applies only between equal ranks). A role below the top keeps its want
+filed and refreshed (D-075) and works its `## While waiting` list. Cycle 244 (21:2x):
+1. BLENDER · B-125 + B-127 side exports (running under heavy_blender 20:58; finish, release).
+2. UNITY · U-107 check (manual flight: the owner's gameplay change; unblocks U-108).
+3. UNITY · U-108 check + the nine v4.1 stills (the owner's second look-over).
+4. BLENDER · B-119 discs + B-120 starfield exports (one batch).
+5. UNITY · U-091 check.
+6. BLENDER · B-121 HUD export, then B-122 Pilgrim sheets.
+7. UNITY · U-103 / U-105 / U-104 checks, batched as they are written.
+
+## While waiting (lock-free work; CLAUDE.md rule 3, D-109)
+
+Rules: nothing here needs the lock; it stays under ~300 MB of extra RAM; no Unity Editor and no
+`blender.exe` while the other role holds the lock or a want; pull from the top; write what you
+did in your status before the next poll. LEAD tops each list up to ≥ 3 items every cycle.
+
+**UNITY**
+- U-108 code: `RigSet` reads `replaces_part` + `swap_cycle`; the gull's `fly` state; the `v41/` capture script (no check yet).
+- U-091 code: key the TileSet session preload by planet and release it on transition; `ResidencyTests` written to the D-089 numbers.
+- U-103 code on placeholders: an upright placeholder rocket sprite, `SpaceBackdrop` loading the `backgrounds/space/starfield` scene, disc sizing from `radius_u`, Saturn's two ring parts; `SpaceArtTests` written.
+- U-104 code: the single-sprite sidecar pivot in `ArtImporter`, gauge-sheet slicing, HUD strings with no fuel; tests written.
+- U-105 code: Animator wiring with the stand-in list; `SurveyorAnimTests`.
+- Tests first for whichever card is next (charter step 3); `docs/credits/unity.md` audit.
+Then one batched check for everything written when your turn in the queue comes.
+
+**BLENDER** (numpy / scripts only while UNITY holds the lock or a want; bpy only under your own lock)
+- B-119 disc previews without faces (the numpy painter needs no Blender) with the per-disc ten-box panels.
+- B-120 starfield + nebula previews (numpy) with the 2× seam check at the marked crossing.
+- B-121 HUD sources and the 1080p composition preview (numpy).
+- B-122 Pilgrim sheet sources: pose scripts, sockets json (tail exhaust, legs, door), the split plan, ready for one batch export.
+- C2 Earth prep for LEAD: design sheets for five faceless Earth plants (personality through motion, §9.3), the Earth creature re-ink list, and a cartoon Earth ground-strip design (to replace U-100's placeholder), all as numpy previews.
+- `blender/README_v4.md`: how a v4.1 sheet is drawn, measured and reviewed, so a fresh session resumes without reading the code.
+
+**LEAD**
+- The charter idle list, plus: the C1 LeadQA scenario draft (pad → Escape Line → space → entry → touchdown under scripted input), the C1_REPORT skeleton, the owner's v4.1 look-over page, Bible gap closure, credits audit.
+
+---
+
 ## LEAD
 
 ### L-001 · LEAD · Done · M0

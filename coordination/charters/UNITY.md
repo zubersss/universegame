@@ -42,7 +42,10 @@ status and reports, or `Tests/LeadQA/`.
    for any key that doesn't exist yet (contract §1) so the real art replaces them by itself.
 5. Verify: `tools/unity_compile.ps1` (zero `error CS`, no new warnings),
    `tools/unity_test.ps1` for the affected mode, and the smoke test that asserts a clean
-   console. Batch jobs follow HeavyJobLock (CLAUDE.md rule 6).
+   console. Batch jobs follow HeavyJobLock (CLAUDE.md rule 6) and the board's
+   `## Heavy job queue` order. While the lock or the gate is not yours, pull from
+   `## While waiting` on the board (rule 3): write the code and tests for the next cards so
+   that one batched check covers several of them; log each item in your status.
 6. Commit only your paths: `git add <paths>` then
    `git commit -m "[unity] U-### <summary>" -- <paths>`, then `git push`.
 7. Update your status: last completed with the commit hash and test counts, "Ready for

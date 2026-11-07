@@ -48,6 +48,10 @@ You never open or edit the Unity project (`Assets/` outside `Art/`, `Packages/`,
 6. Full render under HeavyJobLock (CLAUDE.md rule 6): check `coordination/locks/` and
    `tasklist` for `Unity.exe`; if the Editor is open, keep previewing or switch to modeling
    and render later. Write your lock, render, delete it. Blender exits after each batch.
+   The board's `## Heavy job queue` says whose job goes next. While the lock or the gate is
+   not yours, pull from `## While waiting` on the board (rule 3): numpy-only previews,
+   sources, manifest entries, design sheets and docs; no `blender.exe` while UNITY holds the
+   lock or a want (D-073); log each item in your status.
 7. Verify per contract §7: contact sheet, sizes, tileable check, normal convention (light
    from the upper-right brightens the upper-right), `.json` present for frame sheets.
 8. Commit sources and exports only, via LFS: `git add <paths>` then

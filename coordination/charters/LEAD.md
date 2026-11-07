@@ -43,7 +43,10 @@ Run it after finishing any task of your own and at least every 5 of your tool-he
    a `Lead notes:` line naming the exact failing check and, when you can, the fix.
 4. Loop and stall scan (Anti-loop rules). Act on every signal in this cycle.
 5. Queue check: each worker has ≥ 5 Ready tasks with no unmet dependency. If not, write them
-   now from the current milestone's scope (Bible §8, §12).
+   now from the current milestone's scope (Bible §8, §12). Then rewrite the board's
+   `## Heavy job queue` (pending heavy jobs ranked by importance to the milestone) and top up
+   each role's `## While waiting` list to ≥ 3 lock-free items (D-109). A worker whose status
+   shows a poll with nothing done since the last one is a stall signal (step 4).
 6. Handoffs and proposals in the status files: route each (board task, decision, contract
    change, or `USER_ACTIONS.md` item).
 7. Write one `REVIEW_LOG.md` entry (cycle number, what you checked, what moved, what you

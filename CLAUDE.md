@@ -37,8 +37,13 @@ ever overwritten.
    cycle of only reading or planning is a stall: write a status note and change approach.
 2. **Three strikes.** Three failed attempts at one problem → write a short diagnosis in
    your status file (tried / happened / best guess) and switch approach or task.
-3. **Never wait.** Blocked → log it in your status file, take the next Ready task. UNITY
-   builds against placeholders; BLENDER works the asset list in priority order.
+3. **Never wait, never idle (D-109).** Blocked on the lock, the memory gate or another role →
+   log it in your status file and pull the next item from your role's list under
+   `## While waiting` at the top of `coordination/TASK_BOARD.md` (lock-free work: code,
+   sources, numpy previews, tests, docs; under ~300 MB of extra RAM; no Unity Editor and no
+   Blender while another role holds the lock or a want). UNITY builds against placeholders;
+   BLENDER works the asset list in priority order. A status poll with nothing done since the
+   last one is a stall (rule 1).
 4. **Decide, log, continue.** Don't ask the user anything you can decide from the Bible.
    Human-only steps go to the Lead's `coordination/USER_ACTIONS.md` via your status file.
 5. **Git protocol.** Stage and commit only your own paths:
@@ -79,6 +84,12 @@ ever overwritten.
    **Live wants (D-075).** While you are still waiting, rewrite your `want_<role>.lock` (new ISO
    time) on every poll; a want is "older than 30 min" only when its writer stopped refreshing it.
    Never treat a want as expired while that role's status file says it is polling for the gate.
+   **Heavy job queue (D-109).** The board's `## Heavy job queue` (LEAD rewrites it every cycle)
+   ranks the pending heavy jobs by importance to the milestone. When the lock frees, the
+   highest-ranked pending job goes next even if another role's want is older; D-037's
+   alternation applies only between jobs of equal rank or when the queue is silent. While
+   another role runs its heavy job, your own extra processes stay under ~300 MB (light work
+   only); if your light work needs more than that, it waits for your turn.
 7. **Accepted work stays accepted.** Don't re-polish Done tasks unless LEAD reopens them.
 8. **Stay inside the repo.** No system installs, no registry/settings changes; list those
    in your status file for USER_ACTIONS.
