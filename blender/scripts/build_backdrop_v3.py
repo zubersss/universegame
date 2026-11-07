@@ -1317,6 +1317,125 @@ def saturn_hexagon(seed):
     return saturn_scene(seed, "hexagon")
 
 
+# ---------------------------------------------------------------- Uranus (B-158, D-142): the sideways winter's column
+# Each deck ships as three lit sets that share their geometry (UNITY cross-fades them by the season clock, so the clouds
+# must not morph): sun_left / sun_right (the low ember sun wheels around the horizon: the lining on the sun's side of every
+# cloud, a cool shade on the other, a warm horizon band) and night (the dark half: no lining, sparkles, distant ember glows),
+# plus survey (the lit geometry with the methane-sage bands lifted; UNITY uses its layer0 when the Survey module is on).
+# The geometry draws from rng (seed only), the shared washes from wr (seed only), the light-dependent strokes from wl, so
+# the variants differ only where the light does. A fixed sun disc would repeat across the tiling layers; the light lives in
+# the cloud edges instead.
+
+U_LIGHTS = ("sun_left", "sun_right", "night", "survey")
+
+
+def side_lining(mask, dy, dx):
+    """A rim on one side only: the mask shifted up and toward the sun (dx < 0: the left / dx > 0: the right edges), outside it."""
+    return np.clip(np.roll(mask, (-dy, dx), (0, 1)) - mask, 0, 1)
+
+
+def sparkle_field(mask, rng, n, y0, y1, r):
+    """Tiny four-point crystalline sparkles (the diamond rain, frost glints)."""
+    for _k in range(n):
+        cx, cy = rng.uniform(0, W), rng.uniform(y0, y1)
+        dab(mask, cx, cy + r, 2 * r, 0.0, w=0)
+        dab(mask, cx - r, cy, 2 * r, math.pi / 2, w=0)
+
+
+def uranus_scene(seed, deck="deck1", light="sun_left"):
+    rng = np.random.default_rng(seed)                     # geometry: identical across the lights
+    wr = np.random.default_rng(seed + 1000)               # the shared washes
+    wl = np.random.default_rng(seed + 2000 + U_LIGHTS.index(light))   # light-dependent strokes
+    pal = _pal("uranus")
+    night = light == "night"
+    sun = {"sun_left": -1, "sun_right": 1}.get(light, -1)  # survey: lit from the left
+    dark = {"deck1": 0.0, "deck2": 0.15, "deck3": 0.35, "deep": 0.6}[deck]
+    top_c = BG._mix(pal["sky"], pal["brown"], dark + (0.55 if night else 0.0))
+    low_c = BG._mix(pal["offwhite"], pal["teal"], dark + (0.5 if night else 0.0))
+    if night:
+        low_c = BG._mix(low_c, pal["brown"], 0.4)
+    out = []
+    # layer0: the fog sky, the methane bands (a whisper; lifted in survey), the warm horizon (lit), Miranda (deck 1), far banks
+    H = 1024
+    yy = (np.arange(H) / H)[:, None, None]
+    sky = top_c * (1 - yy * 0.7) + low_c * yy * 0.7
+    stack = Stack([(np.broadcast_to(sky, (H, W, 3)).astype(np.float32), np.ones((H, W), np.float32))])
+    band_specs = [(200, 40, pal["mustard"]), (320, 26, pal["offwhite"]), (430, 50, pal["mustard"]), (560, 30, pal["teal"])]
+    band_op = 0.4 if light == "survey" else 0.07
+    for t in bands(wr, H, [(y0, th, col, band_op) for y0, th, col in band_specs], pal):
+        stack.append(t)
+    if not night:
+        y = np.arange(H)[:, None] + 0.5
+        horizon = np.broadcast_to(((y > 640) & (y < 860)).astype(np.float32), (H, W)).copy()
+        stack.append(tint(wl, H, horizon, pal["red"], 0.12, var=0.02, edge_dark=0.0, bleed=40.0))   # the low ember sun's warmth
+    if deck == "deck1":
+        mx, my = rng.uniform(300, 1700), 140.0
+        moon(stack, wr, H, mx, my, 22, BG._mix(pal["offwhite"], pal["sky"], 0.3), pal["teal"], 3)    # Miranda
+        plume = np.zeros((H, W), np.float32)
+        for t in np.linspace(0, 1, 12):
+            ell(plume, mx + 6 * math.sin(t * 5), my - 22 - 50 * t, 4 + 8 * t, 5)                     # its ice geyser
+        stack.append(tint(wr, H, plume, pal["offwhite"], 0.45, var=0.0, edge_dark=0.0, bleed=3.0))
+    far = BG.ridge(rng, [(2, 0.5), (5, 0.3), (11, 0.2)], base=760, amp=34)
+    wall = np.zeros((H, W), np.float32)
+    cloud_bank(wall, far, rng, 40, 90, 20)
+    far_c = BG._mix(BG._mix(pal["sky"], pal["teal"], 0.3 + dark), pal["brown"], 0.5 if night else 0.0)
+    if not night:
+        stack.append(tint(wl, H, side_lining(wall, 6, 5 * sun), BG._mix(pal["offwhite"], pal["red"], 0.25), 0.85, var=0.02, edge_dark=0.0, bleed=2.5))
+    stack.append(wash32(wr, H, wall, far_c, var=0.05, edge_dark=0.05, bleed=3.0))
+    if not night:
+        stack.append(tint(wl, H, np.roll(wall, -9 * sun, 1) * wall, pal["teal"], 0.3, var=0.02, edge_dark=0.0, bleed=4.0))   # the shade away from the sun
+    out.append(finish(stack, wr, H))
+    # layer1: nearer fog banks, the same light; the deep: slow swirls
+    H = 640
+    stack = Stack()
+    line = BG.ridge(rng, [(2, 0.45), (6, 0.35), (13, 0.2)], base=360, amp=44)
+    bank = np.zeros((H, W), np.float32)
+    cloud_bank(bank, line, rng, 50, 110, 18)
+    body = BG._mix(BG._mix(pal["offwhite"], pal["sky"], 0.4 + dark), pal["brown"], 0.45 if night else 0.0)
+    if not night:
+        stack.append(tint(wl, H, side_lining(bank, 7, 6 * sun), BG._mix(pal["offwhite"], pal["red"], 0.2), 0.9, var=0.02, edge_dark=0.0, bleed=2.0))
+    stack.append(wash32(wr, H, bank, body, var=0.05, edge_dark=0.07, bleed=2.5))
+    if not night:
+        stack.append(tint(wl, H, np.roll(bank, -12 * sun, 1) * bank, pal["teal"], 0.32, var=0.02, edge_dark=0.0, bleed=5.0))
+    if deck == "deep":
+        for k in range(3):
+            cx, cy, R = rng.uniform(250, W - 250), rng.uniform(120, 300), rng.uniform(90, 140)
+            stack.append(tint(wr, H, spiral_mask(H, cx, cy, R, 0, arms=2, thr=0.2, sx=1.8, sz=0.5, wind=2.0, r0=0.15),
+                              BG._mix(pal["teal"], pal["brown"], 0.5), 0.35, var=0.03, edge_dark=0.0, bleed=4.0))
+    out.append(finish(stack, wr, H))
+    # layer2 (near): fog wisps, hail (deck 3), the diamond-rain sparkle + the CRUSH band (deep), night sparkles + ember glows
+    H = 384
+    stack = Stack()
+    wisps = np.zeros((H, W), np.float32)
+    for _k in range(22):
+        cx, cy = rng.uniform(0, W), rng.uniform(40, 280)
+        for j in range(3):
+            ell(wisps, cx + 70 * j, cy + rng.uniform(-4, 4), rng.uniform(60, 140), rng.uniform(3, 7))
+    stack.append(tint(wr, H, wisps, BG._mix(pal["offwhite"], pal["brown"], 0.5 if night else 0.0), 0.45, var=0.03, edge_dark=0.0, bleed=2.5))
+    if deck == "deck3":
+        hail = np.zeros((H, W), np.float32)
+        for _k in range(110):
+            dab(hail, rng.uniform(0, W), rng.uniform(120, 384), rng.uniform(14, 30), 0.25, w=1)
+        stack.append(tint(wr, H, hail, pal["offwhite"], 0.55, var=0.0, edge_dark=0.0, bleed=0.6))
+    sp = np.zeros((H, W), np.float32)
+    sparkle_field(sp, rng, {"deck1": 0, "deck2": 10, "deck3": 40, "deep": 90}[deck] + (40 if night else 0), 20, 300, 3)
+    stack.append(tint(wr, H, sp, pal["offwhite"], 0.9, var=0.0, edge_dark=0.0, bleed=0.4))
+    if night:
+        glow = np.zeros((H, W), np.float32)
+        for _k in range(6):
+            ell(glow, wl.uniform(0, W), wl.uniform(220, 340), wl.uniform(20, 40), wl.uniform(8, 14))
+        stack.append(tint(wl, H, glow, pal["red"], 0.4, var=0.02, edge_dark=0.0, bleed=8.0))     # distant Embermoss
+    if deck == "deep":
+        crush_band(stack, wr, pal, H)
+    out.append(finish(stack, wr, H))
+    return out, [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0},
+                 {"n": 2, "parallax": 0.6, "y_m": -0.5}]
+
+
+def _uranus_fn(deck, light):
+    return lambda seed: uranus_scene(seed, deck, light)
+
+
 SCENES = {("earth", "forest"): earth_forest, ("earth", "coast"): earth_coast, ("mars", "plains"): mars_plains,
           ("mars", "canyon"): mars_canyon, ("mars", "storm"): mars_storm,
           ("mercury", "day"): mercury_day, ("mercury", "twilight"): mercury_twilight, ("mercury", "night"): mercury_night,
@@ -1334,6 +1453,12 @@ PLANET_OF = {"forest": "earth", "coast": "earth", "canyon": "mars", "storm": "ma
              "deck": "venus", "surface": "venus",
              "deck1": "jupiter", "deck2": "jupiter", "deck3": "jupiter", "deep": "jupiter", "spot": "jupiter",
              "sdeck1": "saturn", "sdeck2": "saturn", "sdeck3": "saturn", "sdeep": "saturn", "hexagon": "saturn"}
+for _d, _s0 in (("deck1", 15001), ("deck2", 15002), ("deck3", 15003), ("deep", 15004)):     # Uranus (D-142): four decks x four lights
+    for _l in U_LIGHTS:
+        SCENES[("uranus", f"{_d}_{_l}")] = _uranus_fn(_d, _l)                              # the export key backgrounds/uranus/<deck>_<light>
+        SCENES[("uranus", f"u{_d}_{_l}")] = _uranus_fn(_d, _l)                             # the preview name (SEEDS / PLANET_OF are keyed by name)
+        SEEDS[f"u{_d}_{_l}"] = _s0                                                         # one seed per deck: the lights share their geometry
+        PLANET_OF[f"u{_d}_{_l}"] = "uranus"
 
 
 # ---------------------------------------------------------------- lock-free preview: 1080p composite at 1x + the 2x seam check
@@ -1349,7 +1474,7 @@ def preview(out_dir, scenes=("forest", "coast"), from_png=False):
     import preview_c2_earth_rigs as PR
     for scene in scenes:
         planet = PLANET_OF[scene]
-        tag = {"earth": "b133", "mars": "b141", "mercury": "b145", "venus": "b147", "jupiter": "b155", "saturn": "b157"}[planet]
+        tag = {"earth": "b133", "mars": "b141", "mercury": "b145", "venus": "b147", "jupiter": "b155", "saturn": "b157", "uranus": "b158"}[planet]
         d = os.path.join(out_dir, tag, scene)
         os.makedirs(d, exist_ok=True)
         u8, info = [], []
@@ -1386,8 +1511,8 @@ def preview(out_dir, scenes=("forest", "coast"), from_png=False):
             import build_c2_mars_ground as MG
             S, _w = GS.sheets(("regolith",), MG.mats)
             strip = "regolith"
-        elif planet in ("jupiter", "saturn"):                     # B-155 / B-157: a floe of ice (the tiles; D-137's caps unused here)
-            JF = __import__("build_c2_jupiter_floes" if planet == "jupiter" else "build_c2_saturn_floes")
+        elif planet in ("jupiter", "saturn", "uranus"):           # B-155 / B-157 / B-158: a floe of ice (the tiles; D-137's caps unused here)
+            JF = __import__(f"build_c2_{planet}_floes")
             S, _w = JF.sheets(("ice",))
             strip = "ice"
         elif planet in ("mercury", "venus"):                      # no strip yet: the Earth stone recipe stands in
