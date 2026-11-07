@@ -32,7 +32,7 @@ Material:
     - _Fade: 45
     - _Floor: 0.06
     - _SeaLevel: 321
-    - _WallOrigin: 612
+    - _WallOrigin: -64
     m_Colors:
     - _Tint: {r: 0.54999995, g: 0.78, b: 0.95, a: 1}
   m_BuildTextureStacks: []
