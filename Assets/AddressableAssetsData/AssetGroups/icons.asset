@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: icons
   m_GUID: 2b9ee71490380d1489a3b9317ca715f4
   m_SerializeEntries:
+  - m_GUID: 04cb4009e403ce8409a03e751fed6145
+    m_Address: icons/mercury_basalt/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 10b85a935de85c344ac2489eb9147fed
     m_Address: icons/copper/base
     m_ReadOnly: 0
@@ -70,6 +75,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2f270a98c1529e443be54f7ba0c5dcbf
+    m_Address: icons/grass/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 32e62b433acbfa54d846fddf9a43d97c
     m_Address: icons/silica/base
     m_ReadOnly: 0
@@ -82,6 +92,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 452d8fe3be930b946934ab9fa3edf40c
     m_Address: icons/ring_ice/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 49ce69962ae4794458f58e0a47e1ad89
+    m_Address: icons/regolith/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -130,6 +145,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 63cf43f991e88704a882962bc4350e56
+    m_Address: icons/tessera/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 664827720a9f9ad4487f77e6ee14b163
     m_Address: icons/sulfur/base
     m_ReadOnly: 0
@@ -145,8 +165,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 77bc5991816f07e43ba6ecc77cd53827
+    m_Address: icons/snow/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7da6ad55aea412442b8b32841d9b6bc7
     m_Address: icons/cryo_round/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7f2404929c94bae4b96ec6655136eb21
+    m_Address: icons/mercury_regolith/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -240,6 +270,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e3d7d6af4d1b28e41bb5b210e82c2875
+    m_Address: icons/sulfide/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e414fc209a7343946b1ef02b48e80119
     m_Address: icons/graphite/base
     m_ReadOnly: 0
@@ -262,6 +297,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f27b5962baa15424db77b3fee89c76d9
     m_Address: icons/thruster_mk2/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f5ec467e6931cae40b800e8adbf491e7
+    m_Address: icons/soil/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

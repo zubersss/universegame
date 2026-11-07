@@ -1017,6 +1017,13 @@ MonoBehaviour:
       start: 0
       length: 12
       loop: 1
+  - key: ships/pilgrim/puff
+    fps: 12
+    clips:
+    - name: puff
+      start: 0
+      length: 8
+      loop: 1
   modelClipSets:
   - key: characters/calibration/base
     fps: 30

@@ -2,6 +2,8 @@
     "name": "MERIDIAN.Editor",
     "rootNamespace": "Meridian.EditorTools",
     "references": [
+        "Unity.TextMeshPro",
+        "Unity.TextMeshPro.Editor",
         "MERIDIAN.Runtime",
         "Unity.InputSystem",
         "Unity.Addressables",

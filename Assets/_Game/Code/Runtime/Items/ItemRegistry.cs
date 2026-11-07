@@ -29,22 +29,22 @@ namespace Meridian.Items
         static ItemRegistry()
         {
             // Tile items: digging a tile drops one of its own kind; placing it puts the tile back.
-            Tile(TileId.Soil, "soil", "Soil", null);
-            Tile(TileId.Grass, "grass", "Turf", null);
+            Tile(TileId.Soil, "soil", "Soil", "icons/soil/base"); // U-091 tail (B-128, LEAD cycle 246): a drawn icon instead of the tile sprite
+            Tile(TileId.Grass, "grass", "Turf", "icons/grass/base"); // U-091 tail (B-128, LEAD cycle 246): a drawn icon instead of the tile sprite
             Tile(TileId.Stone, "stone", "Stone", "icons/stone/base");
             Tile(TileId.Sand, "sand", "Sand", "icons/sand/base");
-            Tile(TileId.Snow, "snow", "Snow", null);
-            Tile(TileId.Regolith, "regolith", "Regolith", null);
+            Tile(TileId.Snow, "snow", "Snow", "icons/snow/base"); // U-091 tail (B-128, LEAD cycle 246): a drawn icon instead of the tile sprite
+            Tile(TileId.Regolith, "regolith", "Regolith", "icons/regolith/base"); // U-091 tail (B-128, LEAD cycle 246): a drawn icon instead of the tile sprite
             Tile(TileId.Basalt, "basalt", "Basalt", "icons/basalt/base");
             Tile(TileId.Hematite, "hematite", "Hematite", "icons/hematite/base");
             Tile(TileId.Ice, "water_ice", "Water ice", "icons/water_ice/base");
             // Mercury (U-048): its ice drops the same water ice.
-            Tile(TileId.MercuryRegolith, "mercury_regolith", "Mercury regolith", null);
-            Tile(TileId.MercuryBasalt, "mercury_basalt", "Mercury basalt", null);
-            Tile(TileId.Sulfide, "sulfide", "Sulfide", null);
+            Tile(TileId.MercuryRegolith, "mercury_regolith", "Mercury regolith", "icons/mercury_regolith/base"); // U-091 tail (B-128, LEAD cycle 246): a drawn icon instead of the tile sprite
+            Tile(TileId.MercuryBasalt, "mercury_basalt", "Mercury basalt", "icons/mercury_basalt/base"); // U-091 tail (B-128, LEAD cycle 246): a drawn icon instead of the tile sprite
+            Tile(TileId.Sulfide, "sulfide", "Sulfide", "icons/sulfide/base"); // U-091 tail (B-128, LEAD cycle 246): a drawn icon instead of the tile sprite
             // Venus (U-050): its basalt drops the same basalt; vent glass is Vitriol Glass.
             Tile(TileId.Sulfur, "sulfur", "Sulfur", "icons/sulfur/base");
-            Tile(TileId.Tessera, "tessera", "Tessera", null);
+            Tile(TileId.Tessera, "tessera", "Tessera", "icons/tessera/base"); // U-091 tail (B-128, LEAD cycle 246): a drawn icon instead of the tile sprite
             Tile(TileId.VentGlass, "vitriol_glass", "Vitriol Glass", "icons/vitriol_glass/base");
 
             // Resources (B-013 batch 1); not placeable.

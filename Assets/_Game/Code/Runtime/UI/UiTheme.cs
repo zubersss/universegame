@@ -14,6 +14,9 @@ namespace Meridian.UI
 
         public Font regular;   // JetBrains Mono Regular (OFL 1.1)
         public Font bold;      // JetBrains Mono Bold (OFL 1.1)
+        /// <summary>U-104 (Bible §9 v4, D-090): titles in Limelight, HUD and body in Patrick Hand (both SIL OFL): the TextMeshPro assets and their source faces, set by FontAuthoring. The UGUI HUD keeps JetBrains Mono until the swap.</summary>
+        public TMPro.TMP_FontAsset titleFont, hudFont;
+        public Font titleTtf, hudTtf;
         public Color text = new Color(0.86f, 0.92f, 1f, 0.95f);
         public Color label = new Color(0.86f, 0.92f, 1f, 0.6f);
         public Color panel = new Color(0.03f, 0.05f, 0.08f, 0.82f);

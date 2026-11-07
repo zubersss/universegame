@@ -15,8 +15,8 @@ namespace Meridian.Perf
     /// <summary>
     /// U-041 (D-036): memory in a real (development) player. Started only by the command line
     /// `-meridianMemoryProbe &lt;file&gt;` (tools/unity_profile.ps1 -Build): skips the main menu, flies the nine-leg route
-    /// with real launches and entries (U-091, D-089 / D-110: Earth → Space → Mars → Space → Mercury → Space → Venus → Space
-    /// → Earth again), writes one JSON line per leg with the player's memory counters, the residency of the planet
+    /// with real launches and entries (U-091, D-089 / D-110 / D-114: Earth → Space → Earth (warm) → Space → Mars → Space →
+    /// Mercury → Space → Venus → Space → Earth again), writes one JSON line per leg with the player's memory counters, the residency of the planet
     /// left behind, the planet-load and transition times, the loaded bundles and the mip-streaming figures, then quits.
     /// Normal play never creates it. Everything here is report-only and allocates in the probe only.
     /// </summary>
@@ -66,10 +66,20 @@ namespace Meridian.Perf
             // ---- Earth (boot) ----
             yield return Leg("Earth", director.PlanetSide.sideCamera, null, "planet_earth", -1f);
 
+            // ---- D-114: the warm Earth baseline. One launch and re-entry so the Space scene (belt, discs, waystations, starfield)
+            // is resident as it will be for the rest of the run; "Earth again" is judged against this leg, "Space again" against
+            // the first Space leg, and the boot → warm delta is its own row (≤ 150 MB).
+            yield return LaunchFrom();
+            if (GameState.Instance.view != ViewMode.Space) { Finish("the first launch did not reach space"); yield break; }
+            yield return Leg("Space", spaceCam, "planet_earth", null, transitions.LastLaunchSeconds);
+            yield return EnterBody("earth");
+            if (director.PlanetSide == null) { Finish("re-entry into Earth did not load a planet"); yield break; }
+            yield return Leg("Earth (warm)", director.PlanetSide.sideCamera, null, "planet_earth", transitions.LastEntrySeconds);
+
             // ---- the loop: Mars, Mercury, Venus, back to Earth; a Space leg after every launch ----
             var hops = new[]
             {
-                ("Space", "planet_earth", "mars", "Mars", "planet_mars"),
+                ("Space after Earth", "planet_earth", "mars", "Mars", "planet_mars"),
                 ("Space after Mars", "planet_mars", "mercury", "Mercury", "planet_mercury"),
                 ("Space after Mercury", "planet_mercury", "venus", "Venus", "planet_venus"),
                 ("Space after Venus", "planet_venus", "earth", "Earth again", "planet_earth"),

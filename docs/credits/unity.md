@@ -26,6 +26,10 @@ domain under **CC0 1.0** (https://creativecommons.org/publicdomain/zero/1.0/).
 |------|-----|--------|---------|
 | `Assets/_Game/UI/Fonts/JetBrainsMono-Regular.ttf` | all HUD and menu text, monospace numerals (Bible §9) | JetBrains Mono, https://github.com/JetBrains/JetBrainsMono (master, fonts/ttf, fetched 2026-10-30), © 2020 The JetBrains Mono Project Authors | SIL Open Font License 1.1 (OFL); license text shipped beside it as `JetBrainsMono-OFL.txt` |
 | `Assets/_Game/UI/Fonts/JetBrainsMono-Bold.ttf` | titles, buttons, warnings | same source | SIL Open Font License 1.1 (OFL) |
+| `Assets/_Game/Fonts/Limelight/Limelight-Regular.ttf` | titles and intertitles (Bible §9 v4, D-090; U-104) | Limelight by Eben Sorkin (Sorkin Type), Google Fonts, https://github.com/google/fonts/tree/main/ofl/limelight | SIL Open Font License 1.1 (OFL.txt beside the file) |
+| `Assets/_Game/Fonts/PatrickHand/PatrickHand-Regular.ttf` | HUD and body text, the Escape Line sign lettering (D-090; U-104) | Patrick Hand by Patrick Wagesreiter, Google Fonts, https://github.com/google/fonts/tree/main/ofl/patrickhand | SIL Open Font License 1.1 (OFL.txt beside the file) |
+| `Assets/TextMesh Pro/Fonts/LiberationSans.ttf` (+ `LiberationSans SDF`) | TextMeshPro's default face, imported with the TMP essential resources so the Limelight / Patrick Hand SDF assets can be built; not used for game text | Liberation Fonts, Red Hat / Ascender, via Unity's TextMeshPro package (TMP essential resources) | SIL Open Font License 1.1 (`Assets/TextMesh Pro/Fonts/LiberationSans - OFL.txt`) |
+| `Assets/TextMesh Pro/` (settings, shaders, sprite assets, style sheet) | TextMeshPro essential resources (TMP Settings, Distance Field shaders, default sprite asset) | Unity Technologies, com.unity.ugui 2.6.0 "Import TMP Essential Resources" | Unity Companion License (package content) |
 | Unity built-in `LegacyRuntime.ttf` | fallback only, if the UI theme asset is missing | ships with the Unity Editor | Unity Editor license |
 
 ## Code and packages

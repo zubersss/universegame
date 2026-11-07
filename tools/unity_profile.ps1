@@ -61,7 +61,7 @@ $le = [char]0x2264; $ar = [char]0x2192; $times = [char]0x00D7; $sec = [char]0x00
 $limit = "< 2.0 GB working set (warn 1.7), $le 512 MB textures, $le 150 MB audio"
 if ($runProbe) {
     $rows = @('', '## Memory in the development player (U-041, D-036; limits v4, D-089)', '',
-        "The route Earth $ar launch $ar Space $ar entry $ar Mars $ar launch $ar Space $ar entry $ar Mercury $ar launch $ar Space $ar entry $ar Venus $ar launch $ar Space $ar entry $ar Earth again (nine legs, real launches and entries, U-091) in Build/MERIDIAN_<version>/MERIDIAN.exe (development build), 1920${times}1080 windowed; counters read after GC + UnloadUnusedAssets and 120 frames per leg. Working set and private commit from the OS (ProcessMemory); the Editor rows above stay as an upper bound. Meshes are printed, not judged.", '',
+        "The route Earth $ar launch $ar Space $ar entry $ar Earth (warm, D-114) $ar launch $ar Space $ar entry $ar Mars $ar launch $ar Space $ar entry $ar Mercury $ar launch $ar Space $ar entry $ar Venus $ar launch $ar Space $ar entry $ar Earth again (nine legs, real launches and entries, U-091) in Build/MERIDIAN_<version>/MERIDIAN.exe (development build), 1920${times}1080 windowed; counters read after GC + UnloadUnusedAssets and 120 frames per leg. Working set and private commit from the OS (ProcessMemory); the Editor rows above stay as an upper bound. Meshes are printed, not judged.", '',
         "| Row | Budget (${sec}11.1 v4) | Measured | Status |", '|---|---|---|---|')
     $legs = @()
     if ($buildOk -and (Test-Path $probeOut)) { $legs = @(Get-Content $probeOut | Where-Object { $_.Trim() } | ForEach-Object { $_ | ConvertFrom-Json } | Where-Object { $null -ne $_.systemMB }) }
@@ -118,8 +118,19 @@ if ($runProbe) {
             $rows += "| Mip streaming $dot $($l.leg) (dev build) | info | non-streaming $($l.nonStreamingMB) MB + desired $($l.desiredMB) MB vs $($l.mipBudgetMB) MB budget$warn | info |"
         }
     }
-    # Return rows (D-089): a second visit stays within 10 % of the first, working set and private commit.
-    foreach ($pair in @(@('Space after Mars', 'Space'), @('Earth again', 'Earth'))) {
+    # D-114: the boot -> warm Earth delta is the Space scene's resident set (belt, discs, waystations, starfield): its own row, <= 150 MB.
+    $warm = $byLeg['Earth (warm)']; $boot = $byLeg['Earth']
+    if ($null -ne $warm -and $null -ne $boot) {
+        $wsW = if ($warm.workingSetMB -gt 0) { [long]$warm.workingSetMB } else { [long]$warm.systemMB }
+        $wsB = if ($boot.workingSetMB -gt 0) { [long]$boot.workingSetMB } else { [long]$boot.systemMB }
+        $dWs = $wsW - $wsB
+        $dPriv = if ($null -ne $warm.privateMB -and $null -ne $boot.privateMB) { [long]$warm.privateMB - [long]$boot.privateMB } else { 0 }
+        $dok = ($dWs -le 150) -and ($dPriv -le 150)
+        if (-not $dok) { $memRed = $true }
+        $rows += "| Boot $ar warm $dot Earth (dev build) | $le 150 MB: the Space scene resident after the first launch + re-entry (D-114) | working set +$dWs MB, private +$dPriv MB | $(if ($dok) { 'green' } else { 'red' }) |"
+    }
+    # Return rows (D-089 / D-114): a second visit stays within 10 % of its baseline (Earth: the warm leg; Space: the first Space leg).
+    foreach ($pair in @(@('Space after Mars', 'Space'), @('Earth again', 'Earth (warm)'))) {
         $again = $byLeg[$pair[0]]; $first = $byLeg[$pair[1]]
         if ($null -eq $again -or $null -eq $first) { continue }
         $wsA = if ($again.workingSetMB -gt 0) { [long]$again.workingSetMB } else { [long]$again.systemMB }
@@ -158,7 +169,7 @@ if ($runProbe) {
     } else {
         Set-Content -Path $report -Value (($rows -join "`n") + "`n") -Encoding UTF8 -NoNewline
     }
-    $rows | Where-Object { $_ -like '| Memory*' -or $_ -like '| Residency*' -or $_ -like '| Film*' -or $_ -like '| Planet load*' -or $_ -like '| Transition*' -or $_ -like '| Bundles*' -or $_ -like '| Sprite atlases*' -or $_ -like '| Return*' -or $_ -like '| Mip*' } | ForEach-Object { Write-Host $_ }
+    $rows | Where-Object { $_ -like '| Memory*' -or $_ -like '| Residency*' -or $_ -like '| Film*' -or $_ -like '| Planet load*' -or $_ -like '| Transition*' -or $_ -like '| Bundles*' -or $_ -like '| Sprite atlases*' -or $_ -like '| Return*' -or $_ -like '| Mip*' -or $_ -like '| Boot*' } | ForEach-Object { Write-Host $_ }
 }
 
 if ($SkipGate) { if ($memRed) { Write-Host 'BUILD MEMORY RED'; exit 1 } else { Write-Host 'BUILD MEMORY GREEN'; exit 0 } }

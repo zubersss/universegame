@@ -14,6 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: MERIDIAN.Runtime::Meridian.UI.UiTheme
   regular: {fileID: 12800000, guid: 87828bb660447204e91de72668c70070, type: 3}
   bold: {fileID: 12800000, guid: b1ae421b085817b4fadf5eefc74fdde8, type: 3}
+  titleFont: {fileID: 11400000, guid: c734aa6aa748e834aa6d23c5fc0a01f6, type: 2}
+  hudFont: {fileID: 11400000, guid: f5e7175493d243047a249de666444221, type: 2}
+  titleTtf: {fileID: 12800000, guid: 02764e8779072934b9552a428acd6579, type: 3}
+  hudTtf: {fileID: 12800000, guid: 4abc88879df3c2c488a49c268c98c60d, type: 3}
   text: {r: 0.86, g: 0.92, b: 1, a: 0.95}
   label: {r: 0.86, g: 0.92, b: 1, a: 0.6}
   panel: {r: 0.03, g: 0.05, b: 0.08, a: 0.82}

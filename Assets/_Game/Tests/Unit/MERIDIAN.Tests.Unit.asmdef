@@ -2,6 +2,7 @@
     "name": "MERIDIAN.Tests.Unit",
     "rootNamespace": "Meridian.Tests",
     "references": [
+        "Unity.TextMeshPro",
         "MERIDIAN.Runtime",
         "MERIDIAN.Editor",
         "UnityEngine.TestRunner",

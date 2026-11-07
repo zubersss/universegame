@@ -859,7 +859,7 @@ namespace Meridian.EditorTools
             Add(ArtMap.Emission, "_EmissionMap");
             Add(ArtMap.Mask, "_MaskTex");
 
-            if (ArtRules.RuleFor(key).lit && !File.Exists(ArtRules.SiblingPath(colorPath, ArtMap.Normal)))
+            if (ArtRules.RuleFor(key).lit && !File.Exists(ArtRules.SiblingPath(colorPath, ArtMap.Normal)) && !IsV3(key, SheetFor(colorPath, key))) // v3 cartoon art is unlit (contract §11)
                 Debug.LogWarning($"[ArtImporter] {colorPath}: lit category without a _normal.png (contract §1).");
 
             var current = ti.secondarySpriteTextures ?? Array.Empty<SecondarySpriteTexture>();

@@ -297,6 +297,7 @@ namespace Meridian.EditorTools
             }
             theme.regular = AssetDatabase.LoadAssetAtPath<Font>("Assets/_Game/UI/Fonts/JetBrainsMono-Regular.ttf");
             theme.bold = AssetDatabase.LoadAssetAtPath<Font>("Assets/_Game/UI/Fonts/JetBrainsMono-Bold.ttf");
+            FontAuthoring.EnsureHudFonts(theme); // U-104 (D-090): the Limelight / Patrick Hand TMP assets
             EditorUtility.SetDirty(theme);
             AssetDatabase.SaveAssets();
         }

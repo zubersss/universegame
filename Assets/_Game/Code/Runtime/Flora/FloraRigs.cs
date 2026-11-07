@@ -76,7 +76,7 @@ namespace Meridian.Flora
     public sealed class FloraRigs : MonoBehaviour
     {
         /// <summary>Seconds added to the swap-cycle clock (0 in the game). Tests advance it to step a cycle deterministically instead of waiting out beats.</summary>
-        public float CycleClockOffset;
+        [System.NonSerialized] public float CycleClockOffset;
         float CycleClock => Time.time + CycleClockOffset;
         public const int FullRateCap = 40, CheapBand = 160;
         /// <summary>Animated objects that are not flora (the surveyor, critters): the flora's full-rate share is FullRateCap minus this (Bible §9.6: ≤ 40 on screen in all).</summary>
