@@ -5,10 +5,14 @@ soil and stone ground re-inked at v3.1 in U-100's contract, so GroundStrip.cs ca
   terrain/earth/ground_strip_soil    bare soil (dug or trodden columns)
   terrain/earth/ground_strip_stone   stone outcrop
 
-Each is 8 frames of 64x128 px (1 m wide x 2 m tall at PPU 64), one frame per terrain column.
+Each is 8 frames of 64x152 px, one frame per terrain column (B-130 export: one 540x152 sheet per
+material, 4 px gutters, "tile": true, no clips). GroundStrip.cs puts a frame's PIVOT on the ground line
+and hangs the fill StripHeight = 2 m below it, so a frame is 2 m below the ground line (128 px) plus
+0.375 m above it (24 px) for the lip and tufts: pivot [0.5, 128/152].
 
-Frame anatomy (metres, x -0.5..0.5, z 0..2): the inked SILHOUETTE (outer weight, 2-3 px) runs at
-z = SURF + LIP at both frame edges in every material (flat for the outer 5 px), so any frame joins
+Frame anatomy (metres, x -0.5..0.5, z 0..2.375, ground line z = SURF = 2): the inked SILHOUETTE (outer
+weight, 2-3 px) runs ON the ground line at both frame edges in every material (flat for the outer 5 px;
+UNITY's wall-edge ink starts there), so any frame joins
 any frame of any material; between the edges it bumps (grass waves, soil clods, stone knobs). Under it
 a band in the material's mid tone, then the body; interior detail (pebbles, roots, worm burrows,
 cracks, lichen, strata hatch, specks) stays >= 5 px from the edges and above the bottom 24 px. The
@@ -31,10 +35,11 @@ G = fakegp.install()
 import gp_raster as GR  # noqa: E402
 P = G.PALETTES["earth"]
 O, I = G.OUTER, G.INNER
-SURF = 1.62                        # the ground line inside the 2 m frame (U-100's strip: the tile top)
-LIP = 0.06                         # the silhouette's height above SURF at the frame edges (every material)
+SURF = 2.0                         # the ground line (the tile top) inside the frame: GroundStrip.StripHeight below it
+LIP = 0.0                          # the silhouette's height above the ground line at the frame edges (every material)
 EDGE = 5 / 64.0                    # detail and bumps keep this far from the column edges
-FW, FH = 64, 128
+FW, FH = 64, 152
+GUTTER = 4
 
 
 def _mix(a, b, t):
@@ -202,6 +207,61 @@ def sheets():
     return out, allw
 
 
+def ink_rows(img, col):
+    """Rows where a frame's edge column is ink-dark."""
+    import numpy as np
+    lum = img[:, col, :3].astype(np.float32).mean(axis=1)
+    return tuple(int(r) for r in np.nonzero((lum < 70) & (img[:, col, 3] > 128))[0])
+
+
+def checks(S):
+    """B-130 accept: joins <= 1/255 within a material; identical silhouette ink rows on all 48 edges."""
+    within = {k: edge_join(S[k], S[k]) for k in S}
+    edge_sets = {ink_rows(im, c) for k in S for im in S[k] for c in (0, FW - 1)}
+    same = len(edge_sets) == 1 and bool(min(edge_sets))
+    across = (f"identical in all {sum(len(v) for v in S.values()) * 2} edges, rows {min(edge_sets)[0]}-{min(edge_sets)[-1]}" if same
+              else f"MISMATCH {sorted(edge_sets)[:3]}")
+    problems = [f"{k}: edge join {v:.2f}/255 > 1" for k, v in within.items() if v > 1.0] + ([] if same else [f"silhouette ink {across}"])
+    return within, across, problems
+
+
+def export(art, S=None):
+    """B-130: terrain/earth/ground_strip{,_soil,_stone}_color.png (8 frames 64x152 in one row, 4 px
+    gutters) + <name>.json (style v3, pivot on the ground line, "tile": true, no clips). Raises on a
+    failed accept check. Returns [(key, w, h, bytes)], within, across."""
+    import json
+    import numpy as np
+    from meridian import pngio, v3
+    if S is None:
+        S, _w = sheets()
+    within, across, problems = checks(S)
+    if problems:
+        raise ValueError("ground strips fail the B-130 checks: " + "; ".join(problems))
+    out = []
+    for kind in ("grass", "soil", "stone"):
+        key = KEYS[kind]
+        W = 8 * FW + 7 * GUTTER
+        sheet = np.zeros((FH, W, 4), np.uint8)
+        for j, im in enumerate(S[kind]):
+            sheet[:, j * (FW + GUTTER):j * (FW + GUTTER) + FW] = im
+        meta = {"key": key, "style": "v3", "frame_width": FW, "frame_height": FH, "columns": 8, "gutter": GUTTER, "frames": 8,
+                "fps": 12, "pivot": [0.5, round(SURF * 64 / FH, 6)], "facing": "right", "ppu": 64, "tile": True, "animations": [],
+                "ground_line_px": int(round(SURF * 64)), "material": kind,
+                "note": "one frame per terrain column (x mod 8); pivot = the ground line; 2 m below it, the fill = frame 0's bottom 8 px"}
+        bad = [m for m in v3.validate_sheet(meta, sheet.shape) if "sum of clip lengths" not in m]
+        if bad:
+            raise ValueError(f"{key}: " + "; ".join(bad))
+        d = os.path.join(art, *key.split("/")[:2])
+        os.makedirs(d, exist_ok=True)
+        name = key.split("/")[2]
+        n = pngio.write_png(os.path.join(d, name + "_color.png"), sheet)
+        with open(os.path.join(d, name + ".json"), "w", encoding="utf-8", newline="\n") as f:
+            json.dump(meta, f, indent=2)
+            f.write("\n")
+        out.append((key, W, FH, n))
+    return out, within, across
+
+
 def edge_join(frames_a, frames_b, rows=None):
     import numpy as np
     worst = 0.0
@@ -214,19 +274,20 @@ def edge_join(frames_a, frames_b, rows=None):
     return worst
 
 
-def main(out):
+def main(out, S=None, allw=None, footnote="sources + preview"):
     import json
     import numpy as np
     sys.path.insert(0, os.path.dirname(HERE))
     import review
     from meridian import v3
     import preview_c2_earth_rigs as PR
-    S, allw = sheets()
+    if S is None:
+        S, allw = sheets()
     paper = review.PAPER
     W = 1920 + 16
     rows = []
     head = np.tile(paper, (28, W, 1)).astype(np.float32)
-    review._label(head, "c2 earth ground strips v3.1 (u-100 contract: 8 frames 64x128 = 1x2 m per material; grass / soil / stone; drawn grass lip; paper grain fill); lock-free fakegp", 6, 8)
+    review._label(head, "b-130 earth ground strips v3.1 (groundstrip.cs: 8 frames 64x152 per material, pivot on the ground line, 2 m below + 0.375 m above; grass / soil / stone; drawn grass lip; paper grain fill)", 6, 8)
     rows.append(head)
     # (1) every frame at 3x per material
     for kind in ("grass", "soil", "stone"):
@@ -237,13 +298,13 @@ def main(out):
         rows.append(r)
     # (2) assembled at 1x across a 1080p width on the B-114 plains: a hill with a stone outcrop, a bare
     # soil patch, a dug hole (soil at its bottom), the fill below, the surveyor and some C2 plants
-    MH = 540
+    MH = 560
     keep, PR.PLAINS_H = PR.PLAINS_H, MH                 # the painted plains at the mock's full height
     try:
         mock, note = PR.plains_strip(W)
     finally:
         PR.PLAINS_H = keep
-    base_y = MH - 176                                     # the ground line of the flat columns (a dug column still fits)
+    base_y = MH - 196                                     # the ground line of the flat columns (a dug column still fits)
     heights = [0] * 30
     for c in (11, 12, 13, 14, 15, 16):
         heights[c] = 1
@@ -262,7 +323,7 @@ def main(out):
         x = 8 + c * 64
         gy = base_y - heights[c] * 64
         im = S[kinds[c]][int(rnd.integers(0, 8))]
-        y0 = gy - (FH - int(round(SURF * 64)))           # the frame's ground row sits 24 px below its top
+        y0 = gy - (FH - int(round(SURF * 64)))           # the frame's ground row (its pivot) sits 24 px below its top
         review._over(mock, im, x, y0)
         mock[y0 + FH:, x:x + 64] = fill[kinds[c]]
         tops.append(gy - int(round(LIP * 64)))
@@ -286,7 +347,7 @@ def main(out):
         img, _w = PR.render_plant(plant, PR.R.PARTS, PR.R.mats, {}, {})
         gy = base_y - heights[col] * 64
         review._over(mock, img, 8 + col * 64 + 32 - int(PR.PIV[0] * PR.FW), gy - PR.FH + int(round(PR.PIV[1] * PR.FH)))
-    sn, _w = PR.render_plant(PR.F.PLANT, PR.F.PARTS, PR.F.mats, {}, {})
+    sn, _w = PR.render_plant(PR.R.snoozle_plant(), PR.F.PARTS, PR.F.mats, {}, {})
     review._over(mock, sn, 8 + 22 * 64 + 32 - int(PR.PIV[0] * PR.FW), base_y - PR.FH + int(round(PR.PIV[1] * PR.FH)))
     review._label(mock, f"1x across 1920 px on the b-114 plains ({note}): grass hill with a stone outcrop, bare soil at 20-21, a dug hole at 24, "
                         "the 8 px fill below; surveyor, nodbell, whiptuft, thriftcushion, snoozle, curlfrond", 6, 6)
@@ -294,18 +355,12 @@ def main(out):
     # (3) checks
     outer = [w for w in allw if w[0] >= v3.OUTER_SPLIT]
     inner = [w for w in allw if w[0] < v3.OUTER_SPLIT]
-    within = {k: edge_join(S[k], S[k]) for k in S}
-    def ink_rows(img, col):                              # rows where the edge column is ink-dark
-        lum = img[:, col, :3].astype(np.float32).mean(axis=1)
-        return tuple(int(r) for r in np.nonzero((lum < 70) & (img[:, col, 3] > 128))[0])
-    edge_sets = {ink_rows(im, c) for k in S for im in S[k] for c in (0, FW - 1)}
-    across = "identical in all 48 edges, rows " + (f"{min(edge_sets)[0]}-{min(edge_sets)[-1]}" if len(edge_sets) == 1 and min(edge_sets) else
-                                                     f"MISMATCH {sorted(edge_sets)[:3]}")
+    within, across, _problems = checks(S)
     foot = np.tile(paper, (52, W, 1)).astype(np.float32)
     review._label(foot, f"ink outer {min(w[1] for w in outer):.1f}-{max(w[2] for w in outer):.1f} px, interior {min(w[1] for w in inner):.1f}-"
                         f"{max(w[2] for w in inner):.1f} px; edge join within a material (mean |right - left| over all frame pairs): "
                         + ", ".join(f"{k} {v:.1f}" for k, v in within.items()) + f"/255; silhouette ink at the frame edges across materials: {across}", 6, 8)
-    review._label(foot, f"body {DIRT} (grass, soil) / {STONE} (stone); fill tile = frame 0's bottom 8 px (u-100 cuts it); no export until c2 is promoted", 6, 28)
+    review._label(foot, f"body {DIRT} (grass, soil) / {STONE} (stone); fill tile = frame 0's bottom 8 px (groundstrip cuts it); {footnote}", 6, 28)
     rows.append(foot)
     review.write(out, np.vstack(rows))
     fakegp.restore()

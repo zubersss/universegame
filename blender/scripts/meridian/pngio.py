@@ -11,21 +11,41 @@ def _chunk(tag, data):
     return struct.pack(">I", len(data)) + body + struct.pack(">I", zlib.crc32(body) & 0xFFFFFFFF)
 
 
-def _filter_rows(img):
-    """Per-row adaptive filter (None/Sub/Up), chosen by minimum sum of absolute values."""
+CHUNK_ROWS = 128   # rows filtered at a time: peak ~16 bytes per image byte of one chunk, not of the image
+
+
+def _filter_chunks(img, chunk=CHUNK_ROWS):
+    """Per-row adaptive filter (None/Sub/Up), chosen by minimum sum of absolute values; yields the
+    filtered scanlines chunk by chunk (each row's choice and bytes are the same as a whole-image pass)."""
     h, w, c = img.shape
-    rows = img.reshape(h, w * c).astype(np.int16)
-    prev = np.vstack([np.zeros((1, w * c), np.int16), rows[:-1]])
-    left = np.hstack([np.zeros((h, c), np.int16), rows[:, :-c]])
-    cands = [rows, (rows - left) & 0xFF, (rows - prev) & 0xFF]
-    cost = np.stack([np.where(x > 127, 256 - x, x).sum(axis=1) for x in cands])
-    best = cost.argmin(axis=0)
-    out = np.empty((h, w * c + 1), np.uint8)
-    out[:, 0] = best
-    for f in range(3):
-        sel = best == f
-        out[sel, 1:] = cands[f][sel].astype(np.uint8)
-    return out.tobytes()
+    prev_row = np.zeros((1, w * c), np.int16)
+    for y0 in range(0, h, chunk):
+        rows = img[y0:y0 + chunk].reshape(-1, w * c).astype(np.int16)
+        prev = np.vstack([prev_row, rows[:-1]])
+        left = np.hstack([np.zeros((rows.shape[0], c), np.int16), rows[:, :-c]])
+        cands = [rows, (rows - left) & 0xFF, (rows - prev) & 0xFF]
+        cost = np.stack([np.where(x > 127, 256 - x, x).sum(axis=1) for x in cands])
+        best = cost.argmin(axis=0)
+        out = np.empty((rows.shape[0], w * c + 1), np.uint8)
+        out[:, 0] = best
+        for f in range(3):
+            sel = best == f
+            out[sel, 1:] = cands[f][sel].astype(np.uint8)
+        prev_row = rows[-1:].copy()
+        yield out.tobytes()
+
+
+def _filter_rows(img):
+    return b"".join(_filter_chunks(img))
+
+
+def _deflate(img):
+    """zlib level 9 over the filtered scanlines, fed chunk by chunk (the stream equals zlib.compress of the
+    whole buffer: same bytes, without holding the whole filtered image and its int16 temporaries)."""
+    co = zlib.compressobj(9)
+    parts = [co.compress(b) for b in _filter_chunks(img)]
+    parts.append(co.flush())
+    return b"".join(parts)
 
 
 def write_png(path, img):
@@ -35,7 +55,7 @@ def write_png(path, img):
     h, w, _ = img.shape
     ihdr = struct.pack(">IIBBBBB", w, h, 8, 6, 0, 0, 0)
     data = (b"\x89PNG\r\n\x1a\n" + _chunk(b"IHDR", ihdr)
-            + _chunk(b"IDAT", zlib.compress(_filter_rows(img), 9)) + _chunk(b"IEND", b""))
+            + _chunk(b"IDAT", _deflate(img)) + _chunk(b"IEND", b""))
     with open(path, "wb") as f:
         f.write(data)
     return len(data)

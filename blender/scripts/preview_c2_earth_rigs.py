@@ -152,7 +152,7 @@ def pack_all():
         sheet[ytop:ytop + h_, px_:px_ + w_] = im
         parts.append({"name": name, "rect": [px_, SH - (ytop + h_), w_, h_], "pivot": [round(pv[0], 4), round(pv[1], 4)]})
     meta = {"key": "flora/earth/rigset", "style": "v3", "ppu": PPU, "rect_origin": "bottom_left", "parts": parts,
-            "plants": [F.PLANT] + R.PLANTS}
+            "plants": R.all_plants()}
     return sheet, meta, v3.validate_rigset(meta, sheet.shape)
 
 
@@ -226,7 +226,7 @@ def main(out):
     top = np.tile(paper, (PLAINS_H + 26, W, 1)).astype(np.float32)
     review._label(top, f"c2 earth rig plants: the five c2 plants + the snoozle at 1x on the b-114 plains ({note}), beside the surveyor (frame 0, 1x)", 6, 4)
     lineup = []
-    for plant, fns, mfn in [(F.PLANT, F.PARTS, F.mats)] + plants:
+    for plant, fns, mfn in [(R.snoozle_plant(), F.PARTS, F.mats)] + plants:
         img, w = render_plant(plant, fns, mfn, {}, {})
         lineup.append(img)
     on_plains(top, 8, plains, lineup, surveyor)

@@ -1043,7 +1043,40 @@ def do_icon_set(entry, preview):
              + f" | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
 
 
+def do_ground_strip_set(entry, preview):
+    """B-130: terrain/earth/ground_strip{,_soil,_stone} (GroundStrip.cs: 8 frames 64x152, pivot on the
+    ground line, "tile": true), drawn with fakegp + numpy; the accept checks raise inside export();
+    review_b130_ground_strips.png = the frames at 3x + the 1x assembled scene on the plains."""
+    from meridian import fakegp
+    t0 = time.time()
+    if preview:
+        raise AssetError(f"{entry['key']}: no preview mode (python build_c2_ground_strip.py <png>)")
+    import build_c2_ground_strip as GS
+    keys = list(GS.KEYS.values())
+    fakegp.install()                    # an earlier review script in this batch may have restored gp_draw.mat
+    try:
+        S, allw = GS.sheets()
+        try:
+            out, within, across = GS.export(ART, S)
+        except Exception:
+            for k in keys:
+                mark_stale(k, True)
+            raise
+        GS.main(os.path.join(PREVIEW, f"review_{entry.get('review_name', 'b130_ground_strips')}.png"), S, allw,
+                footnote=f"exported {time.strftime('%m-%d %H:%M')}")
+    finally:
+        fakegp.restore()
+    for k in keys:
+        mark_stale(k, False)
+    mark_stale(entry["key"], False)
+    log_line(f"OK {entry['key']} | " + ", ".join(f"{k.split('/')[2]} {w}x{h} {n // 1024}KB" for k, w, h, n in out)
+             + " | joins " + ", ".join(f"{k} {v:.2f}" for k, v in within.items()) + f"/255 | silhouette {across}"
+             + f" | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
+
+
 def do_asset(entry, preview):
+    if entry.get("ground_strip_set"):   # v3.1 Earth ground strips (B-130)
+        return do_ground_strip_set(entry, preview)
     if entry.get("icon_set"):           # v3.1 tile-item icons (B-128)
         return do_icon_set(entry, preview)
     if entry.get("disc_set"):           # v3 §11.5 planet discs (B-119, D-098)

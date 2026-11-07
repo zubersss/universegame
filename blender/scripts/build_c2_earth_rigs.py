@@ -341,6 +341,16 @@ for _k, (_n, _b, _h) in enumerate(TC_POMS):
 PLANTS = [NODBELL, SHIVERBARREL, CURLFROND, WHIPTUFT, THRIFTCUSHION]
 
 
+def snoozle_plant():
+    """The B-126 snoozle unchanged, plus its biomes (B-129: every plant names its biomes)."""
+    import build_flora_earth_v3 as F
+    return dict(F.PLANT, biomes=["plains"])
+
+
+def all_plants():
+    return [snoozle_plant()] + PLANTS
+
+
 def build(out=os.path.join(SRC, "earth_rigset_c2.blend")):
     """Blender (C2 export, not run yet): the snoozle's parts + these, one GP object per part around its
     pivot, every plant on scene["rig_plants"]. Replaces earth_rigset.blend as flora/earth/rigset's source
@@ -348,7 +358,7 @@ def build(out=os.path.join(SRC, "earth_rigset_c2.blend")):
     import bpy
     import build_flora_earth_v3 as F
     scene = G.new_scene()
-    scene["rig_plants"] = json.dumps([F.PLANT] + PLANTS)
+    scene["rig_plants"] = json.dumps(all_plants())
     coll = G.collection("parts")
     for name, fn in list(F.PARTS.items()) + list(PARTS.items()):
         ob, gp = G.gp_object("part_" + name, coll)
