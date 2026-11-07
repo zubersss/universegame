@@ -121,31 +121,26 @@ def landing_pad(d, M, k=0):
 
 # ---------------------------------------------------------------- shelter wall (1 m module, tiles)
 def shelter_wall(d, M, k=0):
-    L, R = -0.53, 0.53
-    G.stroke(d, [(L, 0.16), (R, 0.16), (R, 2.38), (L, 2.38)], M["steel_f"], 0.0, cyclic=True)              # panel
-    for i in range(8):                                                                                   # corrugation
+    """D-125: a 1 x 1 m tile of corrugated steel (64x64, pivot bottom-centre, tiles in x and y, no ground margin):
+    stripes run edge to edge, a riveted strap is split half / half across the top and bottom edges so stacked tiles
+    form one strap per metre, and every edge line is centred on its edge (half in each neighbour, jitter cancelled)."""
+    L, R, B, T = -0.5, 0.5, 0.0, 1.0
+    G.stroke(d, [(L - 0.02, B - 0.02), (R + 0.02, B - 0.02), (R + 0.02, T + 0.02), (L - 0.02, T + 0.02)], M["steel_f"], 0.0, cyclic=True)
+    for i in range(8):                                                                                   # corrugation, edge to edge
         x = -0.5 + i * 0.125
-        G.stroke(d, [(x + 0.07, 0.16), (x + 0.11, 0.16), (x + 0.11, 2.38), (x + 0.07, 2.38)], M["steel_sh"], 0.0, cyclic=True)
-        G.seam(d, [(x + 0.07, 0.2), (x + 0.07, 2.34)], M["ink"])
-    G.stroke(d, [(L, 2.18), (R, 2.18), (R, 2.38), (L, 2.38)], M["steel_dp"], 0.0, cyclic=True)              # the cap's shadow
-    hline(d, M, L, R, 1.27, r=I)                                                                         # the seam strap
-    hline(d, M, L, R, 1.21, r=I)
-    G.stroke(d, [(L, 1.21), (R, 1.21), (R, 1.27), (L, 1.27)], M["steel_sh"], 0.0, cyclic=True)
-    G.rivets(d, [(x, 1.24) for x in (-0.31, -0.06, 0.19, 0.44)], M["ink"])
-    G.rivets(d, [(-0.4, 2.12), (0.4, 2.12), (-0.4, 0.26), (0.4, 0.26)], M["ink"])
-    G.stroke(d, [(0.22, 1.2), (0.25, 1.0), (0.21, 0.85), (0.235, 0.7)], M["wood_sh"], I)                   # a rust streak
-    G.hatch(d, -0.25, 0.55, M["ink"], n=3, length=0.1, spacing=0.03, angle_deg=60, seed=4)
-    G.specks(d, [(-0.12, 1.7), (0.33, 0.45), (-0.38, 1.0)], M["ink"])
-    G.stroke(d, [(L, 0.0), (R, 0.0), (R, 0.16), (L, 0.16)], M["wood_f"], 0.0, cyclic=True)                  # sill plank
-    G.stroke(d, [(L, 0.0), (R, 0.0), (R, 0.05), (L, 0.05)], M["wood_dp"], 0.0, cyclic=True)
-    G.stroke(d, [(L, 2.38), (R, 2.38), (R, 2.52), (L, 2.52)], M["wood_f"], 0.0, cyclic=True)                # cap plank
-    G.stroke(d, [(L, 2.38), (R, 2.38), (R, 2.42), (L, 2.42)], M["wood_sh"], 0.0, cyclic=True)
-    G.seam(d, [(-0.3, 0.09), (-0.18, 0.1), (-0.05, 0.085)], M["ink"])                                   # grain
-    G.seam(d, [(0.1, 2.46), (0.25, 2.47), (0.36, 2.455)], M["ink"])
-    for z in (0.0, 0.16, 2.38, 2.52):
-        hline(d, M, L, R, z)
-    for x in (-0.5, 0.5):                                                                                # module edges: half a line each
-        G.stroke(d, [(x, 0.16 + 2.22 * i / 40) for i in range(41)], M["ink"], I)   # dense: jitter is cancelled per point
+        G.stroke(d, [(x + 0.07, B - 0.02), (x + 0.11, B - 0.02), (x + 0.11, T + 0.02), (x + 0.07, T + 0.02)], M["steel_sh"], 0.0, cyclic=True)
+        G.stroke(d, [(x + 0.07, B - 0.02 + (T - B + 0.04) * j / 16) for j in range(17)], M["ink"], I)
+    for z0 in (B, T):                                                                                    # the strap: half here, half in the neighbour
+        G.stroke(d, [(L - 0.02, z0 - 0.045), (R + 0.02, z0 - 0.045), (R + 0.02, z0 + 0.045), (L - 0.02, z0 + 0.045)], M["steel_dp"], 0.0, cyclic=True)
+        hline(d, M, L - 0.02, R + 0.02, z0 - 0.045, r=I)
+        hline(d, M, L - 0.02, R + 0.02, z0 + 0.045, r=I)
+    G.rivets(d, [(x, 0.022) for x in (-0.31, -0.06, 0.19, 0.44)], M["ink"])                              # the strap's rivets, inside
+    G.rivets(d, [(x, 0.978) for x in (-0.31, -0.06, 0.19, 0.44)], M["ink"])
+    G.stroke(d, [(0.22, 0.78), (0.25, 0.62), (0.21, 0.48), (0.235, 0.34)], M["wood_sh"], I)                # a rust streak
+    G.hatch(d, -0.25, 0.30, M["ink"], n=3, length=0.1, spacing=0.03, angle_deg=60, seed=4)
+    G.specks(d, [(-0.12, 0.70), (0.33, 0.20), (-0.38, 0.55)], M["ink"])
+    for x in (L, R):                                                                                     # module edges: half a line each
+        G.stroke(d, [(x, B - 0.02 + (T - B + 0.04) * i / 24) for i in range(25)], M["ink"], I)
 
 
 # ---------------------------------------------------------------- shelter door (clip open 6)
@@ -313,17 +308,19 @@ def lamp(d, M, k=0):
 # name -> (fn, frame w, frame h, clip name, frame count, tiles)
 PROPS = {
     "landing_pad": (landing_pad, 128, 48, None, 1, True),
-    "shelter_wall": (shelter_wall, 64, 176, None, 1, True),
+    "shelter_wall": (shelter_wall, 64, 64, None, 1, True),          # D-125: a 1 x 1 m tile
     "shelter_door": (shelter_door, 88, 176, "open", 6, False),
     "smelter": (smelter, 112, 192, "working", 8, False),
     "storage_crate": (storage_crate, 80, 72, None, 1, False),
     "lamp": (lamp, 64, 160, "flicker", 4, False),
 }
+TILE_Y = ("shelter_wall",)            # D-125: tiles in y too (stacked walls); no ground-line margin
 LAMP_X = -0.18                       # the pole sits 0.18 m left of the frame centre so the halo (bulb 0.24 m right of it) fits
 
 
-def steady_edges(strokes, xl, xr, seed, band=5 / 64.0):
-    """Cancel gp_raster's width jitter within `band` of the module edges for every stroke (tiling props)."""
+def steady_edges(strokes, xl, xr, seed, band=5 / 64.0, zl=None, zr=None):
+    """Cancel gp_raster's width jitter within `band` of the module edges for every stroke (tiling props); with zl / zr
+    the bottom and top edges too, in the same pass (the nearer edge wins, so corners are cancelled once)."""
     import numpy as np
     for st in strokes:
         xz = st["xz"]
@@ -331,12 +328,17 @@ def steady_edges(strokes, xl, xr, seed, band=5 / 64.0):
         nz = GR._noise1d(s_, seed * 7919 + st["id"], 0.18)
         x = xz[:, 0]
         e = np.clip(1.0 - np.minimum(np.abs(x - xl), np.abs(xr - x)) / band, 0.0, 1.0)
+        if zl is not None:
+            z = xz[:, 1]
+            e = np.maximum(e, np.clip(1.0 - np.minimum(np.abs(z - zl), np.abs(zr - z)) / band, 0.0, 1.0))
         st["radius"] = (st["radius"] * (1.0 - e + e / (1.0 + GR.JITTER * nz))).astype(np.float32)
 
 
 def pivot_of(name):
     """The drawing origin in the frame (x from the left, y from the bottom): the ground line 10 px up; the lamp's pole."""
     _fn, fw, fh, _clip, _n, _tiles = PROPS[name]
+    if name in TILE_Y:
+        return (0.5, 0.0)
     return (0.5 + (LAMP_X * PPU / fw if name == "lamp" else 0.0), GROUND_PX / fh)
 
 
@@ -349,10 +351,12 @@ def render_prop(name, k=0, seed=7):
     st = fakegp.strokes_of(d, gp)
     if tiles:
         half = fw / 2 / PPU
-        steady_edges(st, -half, half, seed)
+        steady_edges(st, -half, half, seed, **({"zl": 0.0, "zr": fh / PPU} if name in TILE_Y else {}))   # D-125: top / bottom too
     img, w = GR.render_frame(st, fw, fh, PPU, pivot_of(name), ss=4, seed=seed)
     if tiles:                           # the module's right edge column = its left one: a module seam is always the same 2 px
         img[:, -1] = img[:, 0]
+    if name in TILE_Y:                  # and the top row = the bottom row
+        img[0] = img[-1]
     return img, w
 
 
@@ -418,6 +422,9 @@ def sheet_meta(name, frames):
     if tiles:
         meta["tile"] = True
         meta["module_m"] = fw / PPU
+    if name in TILE_Y:
+        meta["tile_y"] = True
+        meta["ground_line_px"] = 0
     if name in INTERACTABLE:
         meta["interactable"] = True
     if not clip:
@@ -432,7 +439,7 @@ def sheet_meta(name, frames):
     m = v3.EDGE_MARGIN
     for i, im in enumerate(frames):
         a = im[..., 3]
-        if a[:m].any() or a[-m:].any() or (not tiles and (a[:, :m].any() or a[:, -m:].any())):
+        if (name not in TILE_Y and (a[:m].any() or a[-m:].any())) or (not tiles and (a[:, :m].any() or a[:, -m:].any())):
             problems.append(f"frame {i} touches the {m} px frame edge")
     return sheet, meta, problems
 
@@ -440,8 +447,11 @@ def sheet_meta(name, frames):
 def joins(imgs):
     """Mean |right column - left column| per tiling module (B-131 preview: 0.0/255)."""
     import numpy as np
-    return {nm: float(np.abs(imgs[nm][0][:, -1, :].astype(np.int32) - imgs[nm][0][:, 0, :].astype(np.int32)).mean())
-            for nm, spec in PROPS.items() if spec[5]}
+    out = {nm: float(np.abs(imgs[nm][0][:, -1, :].astype(np.int32) - imgs[nm][0][:, 0, :].astype(np.int32)).mean())
+           for nm, spec in PROPS.items() if spec[5]}
+    for nm in TILE_Y:                                        # D-125: stacked tiles, the bottom row against the top row
+        out[nm + "_y"] = float(np.abs(imgs[nm][0][-1, :, :].astype(np.int32) - imgs[nm][0][0, :, :].astype(np.int32)).mean())
+    return out
 
 
 def export(art, imgs=None, names=None):
@@ -459,7 +469,7 @@ def export(art, imgs=None, names=None):
         problems += [f"{name}: {x}" for x in p]
         built.append((name, sheet, meta))
     jn = joins(imgs)
-    problems += [f"{nm}: tiling join {v:.2f}/255 > 1" for nm, v in jn.items() if v > 1.0 and nm in names]
+    problems += [f"{nm}: tiling join {v:.2f}/255 > 1" for nm, v in jn.items() if v > 1.0 and nm.removesuffix("_y") in names]
     if problems:
         raise ValueError("B-131 export checks: " + "; ".join(problems))
     d = os.path.join(art, "props", "common")
@@ -522,10 +532,22 @@ def main(out, imgs=None, widths=None, stamp_paths=()):
     ship, w = PP.render(side, {}, 400, 816, (0.5, 12 / 816))
     deck = int(round(0.38 * PPU))
     review._over(scene, ship, pad_x0 + 192 - 200, base - deck - (816 - 12))
-    sx0 = pad_x0 + 384 + 160                                            # the shelter: wall, wall, door, wall, wall
-    for i, nm in enumerate(["shelter_wall", "shelter_wall", "shelter_door", "shelter_wall", "shelter_wall"]):
-        cx = sx0 + (32 if i == 0 else 0) + sum((64 if p != "shelter_door" else 77) for p in ["shelter_wall", "shelter_wall", "shelter_door", "shelter_wall"][:i]) + (38 if nm == "shelter_door" else 32)
-        stand(imgs[nm][0], cx, 176)
+    sx0 = pad_x0 + 384 + 160                                            # D-125: wall tiles stacked in 1 x 1 m cells round the door
+
+    def fit(img, h):                                                    # the door scales uniformly into its 1 x 2 cell (Fit.Height)
+        k = h / img.shape[0]
+        iy = (np.arange(int(round(img.shape[0] * k))) / k).astype(int).clip(0, img.shape[0] - 1)
+        ix = (np.arange(int(round(img.shape[1] * k))) / k).astype(int).clip(0, img.shape[1] - 1)
+        return img[iy][:, ix]
+    cell_x = sx0
+    for col, high in enumerate((2, 2, None, 2, 3)):                     # columns: wall x2, wall x2, the door, wall x2, wall x3
+        if high is None:
+            dr = fit(imgs["shelter_door"][0], 128)
+            review._over(scene, dr, cell_x + 32 - dr.shape[1] // 2, base - 128)
+        else:
+            for h in range(high):
+                review._over(scene, imgs["shelter_wall"][0], cell_x, base - 64 * (h + 1))
+        cell_x += 64
     try:
         fr, piv = PR.surveyor_frame()
         review._over(scene, fr, sx0 + 330, base - fr.shape[0] + int(round(piv[1] * fr.shape[0])))
@@ -537,7 +559,7 @@ def main(out, imgs=None, widths=None, stamp_paths=()):
     review._over(scene, imgs["storage_crate"][0], int(sx0 + 684 - 40), base - (72 - GROUND_PX) - 51)
     stand(imgs["lamp"][0], sx0 + 820, 160, piv_x=pivot_of("lamp")[0])
     review._label(scene, f"1x on the b-114 plains over the b-130 ground strips ({note}): the pilgrim rig on three 2 m pad modules, "
-                         "the shelter (wall x4 + door), the surveyor, smelter, crates, lamp", 6, 6)
+                         "the shelter: 1 x 1 m wall tiles stacked 2 and 3 high round the door, fitted to its 1 x 2 cell (d-125); the surveyor, smelter, crates, lamp", 6, 6)
     rows.append(scene)
     # (2) every prop at 3x (frame 0) and each clip at 2x
     big = np.tile(np.array([0.62, 0.72, 0.72], np.float32), (192 * 3 + 30, W, 1))
@@ -559,11 +581,12 @@ def main(out, imgs=None, widths=None, stamp_paths=()):
             review._label(r, str(k), 10 + k * (fw * 2 + 8), 24, scale=1)
         rows.append(r)
     # (3) tiling: pad and wall modules side by side at 2x (the joins)
-    t = np.tile(np.array([0.62, 0.72, 0.72], np.float32), (176 * 2 + 40, W, 1))
-    review._label(t, "tiling at 2x: three pad modules and three wall modules side by side (edges must join)", 6, 4)
+    t = np.tile(np.array([0.62, 0.72, 0.72], np.float32), (64 * 2 * 3 + 40, W, 1))
+    review._label(t, "tiling at 2x: three pad modules side by side; the wall tile as a 3 x 3 stack (x and y joins must vanish)", 6, 4)
     for m in range(3):
-        review._over(t, np.repeat(np.repeat(imgs["landing_pad"][0], 2, 0), 2, 1), 8 + m * 256, 22 + 176 * 2 - 96)
-        review._over(t, np.repeat(np.repeat(imgs["shelter_wall"][0], 2, 0), 2, 1), 900 + m * 128, 22)
+        review._over(t, np.repeat(np.repeat(imgs["landing_pad"][0], 2, 0), 2, 1), 8 + m * 256, 22 + 64 * 6 - 96)
+        for r_ in range(3):
+            review._over(t, np.repeat(np.repeat(imgs["shelter_wall"][0], 2, 0), 2, 1), 900 + m * 128, 22 + r_ * 128)
     rows.append(t)
 
     def join(a, b):
