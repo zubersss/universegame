@@ -1,24 +1,22 @@
 # UNITY STATUS
-Updated: 2026-11-07 15:08 · Session: 8 (resumed 14:3x after a break; session 7's detail is in git log and coordination/status/archive/UNITY_2026-11-07.md)
+Updated: 2026-11-07 15:35 · Session: 8 (resumed 14:3x after a break; session 7's detail is in git log and coordination/status/archive/UNITY_2026-11-07.md)
 ## Current task
-U-125 Venus on the cartoon stage, lock-free code (LEAD 273 order: after the C3 code). Started 15:08.
-U-124 + U-102 code in and checked: f550e3f8 (+ f263fca3, two CS0618 in the new capture fixed). Lock 15:03:37–15:05:26 (1.8 min, released): compile 0 errors (the two warnings fixed after), EditMode 367/367 (SettingsTests ×3, PaperUiTests ×5, P-48's GroundStrip assert). Owed: B-151's export (BLENDER) → one lock = the PlayMode slice (MenuHudTests incl. PaperPanelsOpenAndCloseFromTheKeyboard + SettingsOpenFromBothMenus…) + CaptureU124Ui (u124/: the three title cards on their planets, pause, settings, inventory, catalogue scroll, crafting sign) → U-102, U-124 to LEAD; then U-132 (Build 0.4.5 + smoke).
+U-132 Build 0.4.5 (Mercury + the C3 UI) + the 13-leg probe + the page smoke set, one lock; then U-125 Venus (patches ready in the scratchpad, lock-free). Started 15:35.
 ## Last completed
-U-123 + U-131 Done (LEAD cycle 272, bff29043): Mercury on the cartoon stage, the 0.4.4 probe green on 13 legs (Creep 7 MB, a watch row), B-165's joins gone.
+U-102 + U-124 + U-134 (ready for review): code f550e3f8, e54e1c27 (U-134), 13381e36 (the frame fixes); B-151's 20 metas 6c540973. Locks: 15:22:59–15:26:50 (CheckSetup import with graphics + compile 0 / 0 + MenuHud slice 6/6 + CaptureU124Ui) and 15:29:26–15:32:32 (compile 0 / 0 + EditMode 367/367 + the re-shoot). u124/ (15:32): titlecard_mars / _mercury / _earth each over its own planet (1600×452 at 1:1, held centred), pause (the 640×520 card, ink labels), settings (the teal band, the title under it, the Film switch lever "off", ink labels), inventory, catalogue_scroll (the rolled ends outside the content), crafting_sign.
 ## Next up
-B-151 → the U-124 PlayMode slice + captures → U-132 Build 0.4.5 + smoke; U-125 Venus code now; U-126 floe caps (lock-free); U-127 Jupiter after U-125.
+U-132 → U-125 Venus code → U-126 floe caps (lock-free) → U-127 Jupiter.
 ## Ready for review
-(none until the U-124 captures)
+U-102, U-124, U-134: coordination/reports/unity/u124/ (15:32) + tests_2026-11-07.md (MenuHud 6/6 at 15:25, EditMode 367/367 at 15:31).
 ## Handoffs
-→ BLENDER (via LEAD): U-124's code is in (f550e3f8): B-151 can export; the importer reads `slice` [l, t, r, b] on a single image; the title cards draw 1:1 (1600×452 fits); the Film switch reads its parts `off` / `on` by name.
+→ LEAD / BLENDER (look only): the inventory's slot frames (UiKit 0.06 white) nearly vanish on the paper; the 192×128 sign stretched over the 1840×900 crafting panel draws its plank lines as two dark bars across the recipes. Options: a plain-board centre in the sign art, or the crafting panel on the inventory paper. Not blocking.
 ## Blockers
 (none)
 ## Proposals
-(none open; P-50 yes, LEAD 272)
-Note: with a panel open the UI's default Navigate also reads A / D, which walk the surveyor; the menus stop the gameplay maps, the in-game panels don't. Harmless (the selection moves with the walk); a later card if LEAD wants the panels to pause the walk.
+(none open; P-50 and its extension yes, LEAD 15:3x)
 ## For USER_ACTIONS
 (none)
 ## Housekeeping
 Editor churn in the tree from the cut runs (TMP font asset, animator.controllers, UnderwaterTint.mat, link.xml.meta, two InitTestScene files): never staged; my commits list files explicitly.
 ## HeavyJobLock
-none held (released 15:05:26); no want on file (BLENDER's want goes next; mine follows B-151's export).
+none held (released 15:32:32); U-132's want next.
