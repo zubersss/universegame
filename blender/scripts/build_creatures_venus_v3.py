@@ -1,6 +1,10 @@
 """B-147 (C2 Venus design prep): Venus creature design previews on the B-132 kit (build_creatures_earth_v3: posed body, pie
 eyes, dizzy stars), in the Venus palette (D-134). Faces kept, friendly or neutral, no teeth (D-087 / D-101).
 
+  acidmoth        64x64, curious, swarms near lights: sea-glass wings with a cream edge (no eyespots), an apricot body,
+                  feathery antennae; fly 12 at index 1; idle 8 (a hover), react 8 (a zig-zag scatter), bump 8.
+  pressure_crab   128x80, the surface, armoured and slow: a basalt shell, vent-orange claws that wave (never pinch),
+                  eye stalks; idle 10, walk 12 (a shuffle), react 8 (into its shell), bump 10.
   sulfur_drifter  112x128, a gasbag filter feeder on the deck winds: a sulphur-yellow balloon with a cream filter frill
                   and swaying tendrils below, pie eyes, a small round mouth, two olive paddle fins. Pivot at the body
                   centre (creatures off the ground, B-135's rule); clips idle 10 (a bob), drift 12 at index 1 (the travel
@@ -47,6 +51,10 @@ def mats(gp, sp):
         out[key + "_sh"] = m(key + "_mid", fill=SH(h), ink=False)
         out[key + "_dp"] = m(key + "_deep", fill=DP(h), ink=False)
         out[key + "_b"] = m(key + "_behind", fill=h, behind=True)
+    legs = {"pressure_crab": "brown"}.get(sp, "sky")                                     # the kit's legs_pass / paw names
+    out["leg"], out["coat"] = m("leg", fill=SH(P[legs])), m("coat", fill=SH(P[legs]))
+    out["leg_far"], out["far"] = m("leg_far", fill=DP(P[legs])), m("far", fill=DP(P[legs]))
+    out["claw"] = m("claw", fill=P["offwhite"], behind=True)
     return out
 
 
@@ -90,8 +98,8 @@ def draw_sulfur_drifter(d, M, pose=None, seed=0):
     if p["streak"] is not None:                                                           # flee: wind streaks behind
         for j in range(3):
             y = cz - 0.2 + 0.18 * j
-            x = -rx - 0.08 - 0.25 * ((p["streak"] + 0.3 * j) % 1.0)
-            G.stroke(db, [(x, y), (x - 0.18, y + 0.01)], M["ink"], I)
+            x = -rx - 0.05 - 0.14 * ((p["streak"] + 0.3 * j) % 1.0)
+            G.stroke(db, [(x, y), (x - 0.12, y + 0.01)], M["ink"], I)
     if p["stars"] is not None:
         K.stars(dh, M, 0.0, cz + rz + 0.12, 0.2, p["stars"])
 
@@ -115,6 +123,131 @@ def drifter_poses():
     return out
 
 
+# ---------------------------------------------------------------- acidmoth (swarms near lights: curious)
+def moth_wing(d, M, root, theta, L, W, far):
+    c, s = math.cos(theta), math.sin(theta)
+    n = (-s, c) if c < 0 else (s, -c)
+
+    def at(t, w):
+        return (root[0] + c * t * L + n[0] * w, root[1] + s * t * L + n[1] * w)
+    shape = [at(0.0, -0.02), at(0.5, -0.05), at(0.95, 0.0)] + [at(1.0 - 0.1 * (1 - math.cos(a)), W * math.sin(a)) for a in [k * math.pi / 8 for k in range(1, 8)]] + \
+        [at(0.4, W * 0.9), at(0.1, W * 0.5)]
+    G.stroke(d, shape, M["glass_sh" if far else "glass_f"], 0.0, cyclic=True)
+    G.stroke(d, [at(0.6, W * 0.75), at(0.95, W * 0.4), at(1.0, W * 0.2), at(0.98, W * 0.6), at(0.7, W * 0.95)], M["cream_f"], 0.0, cyclic=True)   # the cream edge
+    for t, w in ((0.7, 0.5), (0.45, 0.7)):
+        G.seam(d, [at(0.05, 0.02), at(t * 0.7, w * W * 0.6), at(t, w * W)], M["ink"])
+    G.stroke(d, shape, M["ink"], O if not far else I, cyclic=True)
+
+
+def draw_acidmoth(d, M, pose=None, seed=0):
+    p = K.base_pose()
+    p.update(dict(flap=0.0, zig=0.0))
+    p.update(pose or {})
+    B = K.Body(p, (0.0, 0.0))
+    db = G.Xf(d, B)
+    th = math.radians(115 + 55 * math.sin(p["flap"]))
+    moth_wing(db, M, (0.0, 0.02), th + 0.3, 0.22, 0.11, True)                            # the far wing pair
+    body = G.lumpy_ellipse(-0.02, 0.0, 0.10, 0.045, n=20, lump=0.08, seed=seed + 1)        # a fuzzy apricot body
+    G.stroke(db, body, M["haze_f"], 0.0, cyclic=True)
+    for k in range(3):
+        G.stroke(db, [(-0.09 + 0.05 * k, -0.04), (-0.07 + 0.05 * k, -0.04), (-0.065 + 0.05 * k, 0.04), (-0.085 + 0.05 * k, 0.04)], M["olive_f"], 0.0, cyclic=True)
+    G.stroke(db, body, M["ink"], O, cyclic=True)
+    H = K.turn((0.06, 0.0), p["head_rot"], p["head"], B)
+    hx, hz = 0.10, 0.015
+    dh = G.Xf(G.Xf(d, H), K.scale_about((hx, hz), 1.4))
+    for k in (0, 1):                                                                      # feathery antennae
+        a = math.radians(80 - 30 * k) + p["ears"] * 0.6
+        tip = (hx - 0.01 + 0.015 * k + 0.08 * math.cos(a), hz + 0.03 + 0.08 * math.sin(a))
+        G.stroke(dh, [(hx - 0.01 + 0.015 * k, hz + 0.03), tip], M["ink"], I)
+        for t in (0.4, 0.7):
+            q = (hx - 0.01 + 0.015 * k + t * (tip[0] - hx + 0.01 - 0.015 * k), hz + 0.03 + t * (tip[1] - hz - 0.03))
+            G.stroke(dh, [(q[0] - 0.012, q[1] + 0.006), q, (q[0] + 0.012, q[1] + 0.006)], M["ink"], I)
+    G.stroke(dh, G.lumpy_ellipse(hx, hz, 0.04, 0.036, n=16, seed=seed + 2), M["haze"], O, cyclic=True)
+    K.eyes(dh, M, hx - 0.002, hz + 0.004, 0.012, 0.016, 0.022, p, seed)
+    moth_wing(db, M, (-0.02, 0.02), th, 0.25, 0.12, False)                                 # the near wing pair, in front
+    if p["stars"] is not None:
+        K.stars(dh, M, hx, hz + 0.1, 0.07, p["stars"])
+
+
+def acidmoth_poses():
+    out = []
+    for i in range(8):                                                                    # idle: a hover near the light, quick flaps
+        ph = TAU * i / 4
+        out.append(dict(flap=ph, bob=0.015 * math.sin(TAU * i / 8), rock=0.05 * math.sin(TAU * i / 8), ears=0.2 * math.sin(ph),
+                        look=(0.4, 0.4), blink={5: 1.0}.get(i, 0.0)))
+    for i in range(12):                                                                   # fly: forward
+        ph = TAU * i / 4
+        out.append(dict(flap=ph, bob=0.02 * math.sin(ph + 1), rock=-0.12, ears=-0.3, look=(0.9, 0.0)))
+    for i in range(8):                                                                    # react: a startled zig-zag scatter
+        ph = TAU * i / 2
+        out.append(dict(flap=ph, shift=0.06 * (1 if i % 2 else -1), bob=0.03 * (i % 3 - 1), rock=0.3 * (1 if i % 2 else -1),
+                        eye_pop=1.4 if i < 4 else 1.1, mouth=0.4 if i in (1, 2) else 0.0, ears=-0.5))
+    out += [dict(q, flap=0.5, shift=0.4 * q.get("shift", 0.0)) for q in K.bump_clip()[:8]]
+    return out
+
+
+# ---------------------------------------------------------------- pressure crab (the surface; armoured, slow)
+CRAB = dict(hips=[(-0.22, 0.20), (0.18, 0.21), (-0.28, 0.19), (0.12, 0.20)], feet=[-0.44, 0.40, -0.48, 0.34],
+            ankle=0.04, leg_w=0.06, bend_hind=0.30, bend_front=-0.30, foot="paw", paw=(0.03, 0.02, 0, 0), dangle=0.2)
+CRAB_SHELL = (0.0, 0.30, 0.40, 0.20)
+
+
+def draw_pressure_crab(d, M, pose=None, seed=0):
+    p = K.base_pose()
+    p.update(dict(tuck=0.0, wave=0.0))
+    p.update(pose or {})
+    cx, cz, rx, rz = CRAB_SHELL
+    t = p["tuck"]
+    B = K.Body(dict(p, bob=p["bob"] - 0.12 * t), (cx, cz))
+    db = G.Xf(d, B)
+    spec = dict(CRAB, feet=[f * (1 - 0.6 * t) for f in CRAB["feet"]])
+    K.legs_pass(d, M, B, spec, p, far=True)
+    for k, side in enumerate((-1, 1)):                                                    # the eye stalks (retract on tuck)
+        base = (0.14 + 0.07 * k, cz + rz * 0.8)
+        top = (base[0] + 0.03, base[1] + 0.16 * (1 - 0.85 * t))
+        G.stroke(db, G.hose_outline([base, top], 0.03), M["basalt_b"], I, cyclic=True)
+        if k == 0:
+            stalk_top = top
+    shell = [(x, max(z, 0.14)) for x, z in G.lumpy_ellipse(cx, cz, rx, rz, n=40, lump=0.03, seed=seed + 1)]
+    G.stroke(db, shell, M["basalt_f"], 0.0, cyclic=True)
+    G.stroke(db, [q for q in shell if q[0] > 0.12 and q[1] > cz] + [(0.12, cz)], M["basalt_sh"], 0.0, cyclic=True)
+    for k in range(4):                                                                    # shell plate ridges + vent-orange flecks
+        x = -0.28 + 0.18 * k
+        G.seam(db, G.bezier((x, 0.16), (x + 0.04, cz + 0.06), (x + 0.02, cz + rz * 0.95 * math.sqrt(max(0.0, 1 - (x / rx) ** 2))), n=6), M["ink"])
+    G.specks(db, [(-0.2, cz + 0.08), (0.05, cz + 0.12), (0.25, cz + 0.02)], M["ink"])
+    G.stroke(db, [(-0.36, 0.16), (0.36, 0.16)], M["ink"], I)
+    G.stroke(db, shell, M["ink"], O, cyclic=True)
+    K.legs_pass(d, M, B, spec, p, far=False)
+    for k in (0, 1):                                                                      # claws wave (never pinch: D-087)
+        a = math.radians(30 + 25 * math.sin(p["wave"] + k * 1.7)) * (1 - t)
+        root = (0.32 + 0.04 * k, 0.22 - 0.02 * k)
+        el = (root[0] + 0.14 * math.cos(a), root[1] + 0.14 * math.sin(a) * (1 - t))
+        G.stroke(db, G.hose_outline([root, el], 0.05), M["basalt_b"], I, cyclic=True)
+        claw = G.lumpy_ellipse(el[0] + 0.04, el[1] + 0.02, 0.06, 0.04, n=14, lump=0.05, seed=seed + 10 + k, rot=a)
+        G.stroke(db, claw, M["vent"], O, cyclic=True)
+        G.seam(db, [(el[0] + 0.02, el[1] + 0.02), (el[0] + 0.09, el[1] + 0.03)], M["ink"])
+    if t < 0.8:                                                                           # the eyes on the stalks
+        K.eyes(db, M, stalk_top[0], stalk_top[1] + 0.015, 0.024, 0.03, 0.07, p, seed)
+    if p["stars"] is not None:
+        K.stars(db, M, 0.0, cz + rz + 0.25, 0.18, p["stars"])
+
+
+def crab_poses():
+    out = []
+    for i in range(10):                                                                   # idle: the claws wave slowly, a blink
+        ph, q = K.idle_common(i, 10)
+        q.update(wave=ph, blink={6: 0.6, 7: 1.0}.get(i, 0.0), look=(0.7, 0.0))
+        out.append(q)
+    for i in range(12):                                                                   # walk: a slow shuffle
+        ph = TAU * i / 12
+        out.append(dict(legs=K.walk_legs(ph, 0.06, 0.03, order=(0.0, math.pi, math.pi, 0.0)), bob=0.008 * abs(math.sin(2 * ph)),
+                        rock=0.02 * math.sin(2 * ph), wave=ph * 2, look=(0.9, 0.0)))
+    out += [dict(eye_pop=1.4, wave=1.0, look=(0.8, 0.0)), dict(tuck=0.3, eye_pop=1.5), dict(tuck=0.7), dict(tuck=1.0, sz=0.95),   # react: into its shell
+            dict(tuck=1.0, sz=0.97), dict(tuck=0.8), dict(tuck=0.4, look=(0.9, 0.2)), dict(tuck=0.1)]
+    out += K.bump_clip()
+    return out
+
+
 SPECIES = {
     "sulfur_drifter": dict(draw=draw_sulfur_drifter, poses=drifter_poses, mats=mats, frame=(112, 128), seed=51, pivot=(0.5, 0.5),
                            clips=[("idle", 10, True), ("drift", 12, True), ("react", 8, False), ("bump", 10, False), ("flee", 12, True)],
@@ -122,6 +255,18 @@ SPECIES = {
                                        "motion": "bobs and breathes, the tendrils sway and trail in the drift, fins paddle; react puffs up",
                                        "original": "our own sulphur gasbag: a balloon with a cream filter frill and tendrils; gentle, no teeth"},
                            ours="a sulphur-yellow gasbag that drifts on the deck winds, combing the haze with its frill, and puffs up when startled"),
+    "acidmoth": dict(draw=draw_acidmoth, poses=acidmoth_poses, mats=mats, frame=(64, 64), seed=52, pivot=(0.5, 0.5),
+                     clips=[("idle", 8, True), ("fly", 12, True), ("react", 8, False), ("bump", 8, False)],
+                     self_check={"ink": "wing veins, the cream wing edge, body bands, feathery antennae",
+                                 "motion": "quick flaps, the far pair a step behind; react: a zig-zag scatter",
+                                 "original": "our own sea-glass moth: no eyespots (no extra eyes), curious near lights, never biting"},
+                     ours="a little sea-glass moth that circles the station lamps and scatters in a zig-zag when startled"),
+    "pressure_crab": dict(draw=draw_pressure_crab, poses=crab_poses, mats=mats, frame=(128, 80), seed=53,
+                          clips=[("idle", 10, True), ("walk", 12, True), ("react", 8, False), ("bump", 10, False)],
+                          self_check={"ink": "shell plate ridges, specks, the shell's rim line, claw seams, stalk hoses",
+                                      "motion": "claws wave slowly, a shuffling walk, eye stalks bob; react: it pulls into its shell",
+                                      "original": "our own basalt crab with vent-orange claws that wave, never pinch (D-087)"},
+                          ours="a slow basalt-shelled crab with glowing orange claws that waves at you and ducks into its shell"),
 }
 
 
