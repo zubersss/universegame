@@ -104,7 +104,7 @@ def _top_z(top, x, r=0.04):
 def frame(d, M, kind, k):
     rnd = random.Random(1000 + 31 * k + 7 * len(kind))
     L, R = -0.5, 0.5
-    body = {"stone": "stone", "sand": "sand"}.get(kind, "dirt")
+    body = {"stone": "stone", "sand": "sand", "basalt": "stone"}.get(kind, "dirt")      # B-139 Mars: regolith = dirt, basalt = stone
     top = silhouette(kind, k)
     G.stroke(d, [(L, 0.0), (R, 0.0)] + top[::-1], M[body], 0.0, cyclic=True)            # the body up to the silhouette
     band = [(x, z - 0.18 - 0.03 * win(x) * math.sin(9 * x + k)) for x, z in top]        # mid-tone band under the top
@@ -128,12 +128,12 @@ def frame(d, M, kind, k):
             rx = rnd.uniform(L + EDGE + 0.15, R - EDGE - 0.15)
             G.seam(d, G.bezier((rx, SURF - 0.10), (rx + 0.10, SURF - 0.32), (rx - 0.05, SURF - 0.52), n=8), M["ink"])
             G.seam(d, G.bezier((rx + 0.04, SURF - 0.30), (rx + 0.10, SURF - 0.35), (rx + 0.13, SURF - 0.43), n=5), M["ink"])
-    elif kind == "soil":
+    elif kind in ("soil", "regolith"):
         for c in range(3 + k % 2):                                                       # crumbs on the topsoil
             cx = rnd.uniform(L + EDGE + 0.06, R - EDGE - 0.06)
             cz = SURF + LIP - rnd.uniform(0.05, 0.11)
             G.stroke(d, G.lumpy_ellipse(cx, cz, 0.03, 0.02, n=10, lump=0.12, seed=k * 7 + c), M["dirt_dp"], 0.0, cyclic=True)
-        if k % 2 == 1:                                                                   # a worm burrow
+        if kind == "soil" and k % 2 == 1:                                                # a worm burrow (Earth only)
             wx = rnd.uniform(L + EDGE + 0.15, R - EDGE - 0.15)
             G.seam(d, [(wx + 0.05 * math.sin(i * 1.3), SURF - 0.30 - 0.06 * i) for i in range(7)], M["ink"])
             G.stroke(d, G.lumpy_ellipse(wx + 0.05 * math.sin(7.8), SURF - 0.72, 0.035, 0.03, n=10, seed=k), M["dirt_dp"], 0.0, cyclic=True)
@@ -211,13 +211,13 @@ def steady_ends(sil, seed):
     sil["radius"] = (sil["radius"] * (1.0 - e + e / (1.0 + GR.JITTER * nz))).astype(np.float32)
 
 
-def sheets():
+def sheets(kinds=None, mats_fn=None):
     """{kind: [8 frames HxWx4 uint8]} and the measured ink widths."""
     import numpy as np
     out, allw = {}, []
-    for kind in KINDS:
+    for kind in (kinds or KINDS):
         gp = fakegp.FakeGP()
-        M = mats(gp)
+        M = (mats_fn or mats)(gp)
         frames = []
         for k in range(8):
             d = fakegp.FakeDrawing()
@@ -233,10 +233,12 @@ def sheets():
 
 
 def ink_rows(img, col):
-    """Rows where a frame's edge column is ink-dark."""
+    """Rows where a frame's edge column is the ink colour (within 40 of #1E1A17 per channel; B-139: a darker material
+    such as Mars basalt made the anti-aliased row under the line pass a plain darkness test on some edges)."""
     import numpy as np
-    lum = img[:, col, :3].astype(np.float32).mean(axis=1)
-    return tuple(int(r) for r in np.nonzero((lum < 70) & (img[:, col, 3] > 128))[0])
+    ink = np.array(G.hex_rgb(G.INK), np.int32)
+    near = np.abs(img[:, col, :3].astype(np.int32) - ink).max(axis=1) < 40
+    return tuple(int(r) for r in np.nonzero(near & (img[:, col, 3] > 128))[0])
 
 
 def checks(S):
