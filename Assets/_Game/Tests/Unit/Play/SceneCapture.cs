@@ -2590,23 +2590,32 @@ namespace Meridian.Tests
                 var skater = creatures.SpawnAt(Meridian.Creatures.Species.Dustskater, px + 3, side.player.Body.position.y);
                 float art = Time.realtimeSinceStartup + 10f;
                 while (skater != null && skater.Alive && skater.IsPlaceholder && !(skater.Model != null && skater.Model.Ready) && Time.realtimeSinceStartup < art) yield return null;
+                int spawnTop = side.terrain.TopSolidY(side.spawnX);
+                TestContext.Out.WriteLine($"[MERIDIAN] u118 spawn column {side.spawnX}: top solid y {spawnTop} tile {side.terrain.GetTile(side.spawnX, spawnTop)} (ice {Meridian.Terrain.TileId.Ice}, basalt {Meridian.Terrain.TileId.Basalt}, regolith {Meridian.Terrain.TileId.Regolith}), strip material {stage.Ground.MaterialAt(side.spawnX)} (0 regolith, 1 basalt), band {Meridian.Flora.FloraRigs.BiomeNameAt(Meridian.Planets.PlanetId.Mars, side.spawnX)}");
+                { var row = new System.Text.StringBuilder(); foreach (int dx in new[] { -16, -8, -3, 0, 3, 8, 16 }) { int cx = side.spawnX + dx; int ty = side.terrain.TopSolidY(cx); row.Append($" x{cx}: y{ty} t{side.terrain.GetTile(cx, ty)} m{stage.Ground.MaterialAt(cx)};"); } TestContext.Out.WriteLine("[MERIDIAN] u118 spawn row (top solid y, tile, strip material):" + row); }
                 TestContext.Out.WriteLine($"[MERIDIAN] u118 spawn x {side.spawnX}: plants {Kinds()}; dustskater {(skater == null ? "none" : skater.IsPlaceholder ? "placeholder" : skater.View.enabled ? "sheet " + (skater.View.sprite != null ? skater.View.sprite.name : "?") : "model")}");
                 yield return Shot($"1_{stage.Scene}_1x");
                 // 2. The canyon floor: the border crossfade has run by the time the chunks are in.
                 int canyonX = (Meridian.Terrain.MarsLandforms.CanyonStart + Meridian.Terrain.MarsLandforms.CanyonEnd) / 2;
                 yield return CarryTo(canyonX);
                 yield return Shot("2_canyon_1x");
-                // 3. A tube lurker at its mound over the first lava tube.
+                // 3. A tube lurker at its mound over the first lava tube (the surveyor and the camera on the surface past the skylight shaft, not down it), a dustskater on the plains beside it.
                 var tube = Meridian.Terrain.MarsLandforms.Tubes[0];
-                int lurkerX = tube.x0 + Meridian.Terrain.MarsLandforms.SkylightInset + 6;
-                yield return CarryTo(lurkerX - 5);
+                int lurkerX = tube.x0 + Meridian.Terrain.MarsLandforms.SkylightInset + Meridian.Terrain.MarsLandforms.SkylightWidth + 8;
+                yield return CarryTo(lurkerX + 6);
                 float ready = Time.realtimeSinceStartup + 10f;
                 while (!side.terrain.IsCollisionReady(lurkerX, side.terrain.TopSolidY(lurkerX)) && Time.realtimeSinceStartup < ready) yield return null;
                 var lurker = creatures.SpawnAt(Meridian.Creatures.Species.TubeLurker, lurkerX, side.player.Body.position.y);
+                var skater2 = creatures.SpawnAt(Meridian.Creatures.Species.Dustskater, lurkerX - 6, side.player.Body.position.y);
                 art = Time.realtimeSinceStartup + 10f;
-                while (lurker != null && lurker.Alive && lurker.IsPlaceholder && Time.realtimeSinceStartup < art) yield return null;
-                for (int i = 0; i < 12; i++) yield return new WaitForFixedUpdate();
-                TestContext.Out.WriteLine($"[MERIDIAN] u118 lurker at {lurkerX}: {(lurker == null ? "no spawn" : $"at den {lurker.AtDen}, clip {lurker.CurrentClip ?? "none"}, {(lurker.IsPlaceholder ? "placeholder" : "sheet")}")}, dens {creatures.Dens.Count}");
+                while (((lurker != null && lurker.Alive && lurker.IsPlaceholder) || (skater2 != null && skater2.Alive && skater2.IsPlaceholder)) && Time.realtimeSinceStartup < art) yield return null;
+                art = Time.realtimeSinceStartup + 8f;
+                while (lurker != null && lurker.Alive && lurker.CurrentClip != "idle" && Time.realtimeSinceStartup < art) yield return null; // the peek at the den
+                var follow3 = cam.GetComponent<Meridian.Player.CameraFollow>();
+                if (follow3 != null) follow3.enabled = false;
+                if (lurker != null) cam.transform.position = new Vector3(lurker.Body.position.x, lurker.Body.position.y + 3f, cam.transform.position.z);
+                yield return null;
+                TestContext.Out.WriteLine($"[MERIDIAN] u118 lurker at {lurkerX}: {(lurker == null ? "no spawn" : $"at den {lurker.AtDen}, clip {lurker.CurrentClip ?? "none"}, {(lurker.IsPlaceholder ? "placeholder" : "sheet")}")}, dens {creatures.Dens.Count}, dustskater {(skater2 == null ? "none" : skater2.IsPlaceholder ? "placeholder" : "sheet")}");
                 yield return Shot("3_lurker_den");
                 // 4. The storm: forced, the veil at full intensity over the base set.
                 var storm = side.dustStorm;
@@ -2619,6 +2628,7 @@ namespace Meridian.Tests
                     TestContext.Out.WriteLine($"[MERIDIAN] u118 storm: phase {storm.Phase}, intensity {storm.Intensity:F2}, veil alpha {(stage.StormLayers != null ? stage.StormLayers.alpha : 0f):F2}, scroll {(stage.StormLayers != null ? stage.StormLayers.scrollX : 0f):F1} m");
                 }
                 yield return Shot("4_storm_1x");
+                if (follow3 != null) follow3.enabled = true;
                 creatures.DespawnAll();
                 side.dayNight.Override = null;
                 LogAssert.NoUnexpectedReceived();
