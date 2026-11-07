@@ -102,8 +102,10 @@ def draw_plant(d, plant, part_fns, mats_fn, M, tracks, states):
     by_bone_slot = {s["bone"]: s["slot"] for s in plant.get("slots", []) if s.get("replaces_part")}
     world = {}
     items = []
+    lengths = {b["name"]: b.get("length", 0.5) for b in plant["bones"]}
     for i, b in enumerate(plant["bones"]):
-        off = b.get("offset_m", [0.0, 0.0])
+        # contract §11.3: a bone without offset_m starts at its parent's tip (0, parent length)
+        off = b.get("offset_m", [0.0, lengths[b["parent"]]] if b.get("parent") else [0.0, 0.0])
         tr = tracks.get(b["name"], {})
         local = trs(off[0], off[1], tr.get("rot_deg", 0.0), *(tr.get("scale", [1.0, 1.0])))
         world[b["name"]] = local if b.get("parent") is None else compose(world[b["parent"]], local)
