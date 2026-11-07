@@ -27,8 +27,8 @@ from meridian import v3  # noqa: E402
 W = BG.W
 
 
-def _pal():
-    return {k: BG._rgb(v) for k, v in v3.PALETTES["earth"].items()}
+def _pal(planet="earth"):
+    return {k: BG._rgb(v) for k, v in v3.PALETTES[planet].items()}
 
 
 def wash32(rng, H, mask, colour, **kw):
@@ -113,10 +113,26 @@ def seam_column(q):
     return int(np.argmin(step))
 
 
+class Stack:
+    """Composites each wash as it is appended (gen_painted_bg._composite's formula and order), so a layer holds one
+    rgb + alpha instead of six washes: the B-141 Mars sets use it (the Earth sets keep their lists, unchanged)."""
+    def __init__(self, items=()):
+        self.rgb = self.a = None
+        for it in items:
+            self.append(it)
+
+    def append(self, item):
+        c, m = item
+        if self.rgb is None:
+            self.rgb, self.a = np.zeros(c.shape, np.float32), np.zeros(m.shape, np.float32)
+        self.rgb = c * m[..., None] + self.rgb * (1 - m[..., None])
+        self.a = m + self.a * (1 - m)
+
+
 def finish(stack, rng, H):
     """Composite + paper grain, then roll the (periodic) layer so the wrap sits on the quietest column: a soft edge
     that happened to fall on column 0 scored 2.7 on the seam check although the tile is continuous."""
-    rgb, a = BG._composite(stack)
+    rgb, a = (stack.rgb, stack.a) if isinstance(stack, Stack) else BG._composite(stack)
     rgb = rgb * BG.paper(rng, H)[..., None]
     k = seam_column(BG.to_u8(rgb, a))
     return np.roll(rgb, -k, axis=1), np.roll(a, -k, axis=1)
@@ -343,8 +359,160 @@ def earth_coast(seed):
     return out, layers
 
 
-SCENES = {("earth", "forest"): earth_forest, ("earth", "coast"): earth_coast}
-SEEDS = {"forest": 13301, "coast": 13302}
+# ---------------------------------------------------------------- Mars (B-141, the D-125 palette): canyon + dust storm
+
+def notch(line, rng, n, depth, width):
+    """V-shaped dips in a rim line (gullies cut into a plateau edge), wrapped in x."""
+    x = np.arange(W)
+    for _k in range(n):
+        c, d, w = rng.uniform(0, W), rng.uniform(0.5, 1.0) * depth, rng.uniform(0.6, 1.0) * width
+        dx = np.abs((x - c + W / 2) % W - W / 2)
+        line = line + d * np.clip(1 - dx / w, 0, 1) ** 1.5
+    return line
+
+
+def terrace(line, step):
+    """Quantise a rim line into flat steps (mesa ledges), softened so a step is a short slope, not a cliff pixel."""
+    q = np.round(line / step) * step
+    k = np.exp(-0.5 * (np.arange(-12, 13) / 4.0) ** 2)
+    k /= k.sum()
+    return np.convolve(np.concatenate([q[-12:], q, q[:12]]), k, mode="same")[12:-12]
+
+
+def strata(H, wall, rng, y0, y1, n, thick=(8, 16)):
+    """Horizontal sediment bands inside a wall mask, gently waving and periodic in x."""
+    m = np.zeros((H, W), np.float32)
+    y = np.arange(H)[:, None] + 0.5
+    for k in range(n):
+        yk = y0 + (y1 - y0) * (k + rng.uniform(0.2, 0.8)) / n
+        wave = BG.ridge(rng, [(2, 0.6), (5, 0.3), (9, 0.1)], base=yk, amp=rng.uniform(4, 10))
+        t = rng.uniform(*thick)
+        m = np.maximum(m, ((y > wave[None, :]) & (y < wave[None, :] + t)).astype(np.float32))
+    return m * wall
+
+
+def mars_sky(rng, pal, H, storm):
+    yy = (np.arange(H) / H)[:, None, None]
+    top = BG._mix(BG._mix(pal["sky"], pal["mustard"], 0.30), pal["sky"], 0.5 * storm)
+    low = BG._mix(pal["sky"], pal["offwhite"], 0.45 - 0.25 * storm)
+    sky = BG._mix(top, low, np.clip(yy * 1.25, 0, 1)) * (1 + 0.04 * BG.periodic_noise(rng, H, 140, 80)[..., None])
+    stack = Stack([(np.broadcast_to(sky, (H, W, 3)).astype(np.float32), np.ones((H, W), np.float32))])
+    wisp = np.zeros((H, W), np.float32)
+    for _k in range(9):                                        # thin high wisps (Mars has no fat cumulus)
+        cx, cy = rng.uniform(0, W), rng.uniform(90, 420)
+        for _j in range(3):
+            ell(wisp, cx + rng.uniform(-120, 120), cy + rng.uniform(-6, 6), rng.uniform(160, 340), rng.uniform(5, 11), val=0.7)
+    stack.append(wash32(rng, H, wisp, BG._mix(pal["offwhite"], pal["sky"], 0.25 + 0.4 * storm), var=0.03, edge_dark=0.02, bleed=4.0))
+    return stack
+
+
+def mars_canyon(seed, storm=0.0):
+    """Valles Marineris. storm > 0 washes every colour toward the salmon haze (the dust-storm set reuses layers 0-1)."""
+    rng = np.random.default_rng(seed)
+    pal = _pal("mars")
+
+    def hz(c, t=0.0):
+        return BG._mix(c, pal["sky"], min(1.0, t + 0.45 * storm))
+    out = []
+    # layer0: the opposite canyon wall (a flat rim with gullies, strata bands) and its nearer buttresses, in haze
+    H = 1024
+    stack = mars_sky(rng, pal, H, storm)
+    rim = notch(BG.ridge(rng, [(2, 0.5), (5, 0.3), (9, 0.2)], base=560, amp=12), rng, 7, 46, 70)
+    wall = BG._ridge_mask(H, rim)
+    stack.append(wash32(rng, H, wall, hz(BG._mix(pal["red"], pal["sky"], 0.55)), var=0.04, edge_dark=0.05, bleed=2.5))
+    stack.append(wash32(rng, H, strata(H, wall, rng, 600, 900, 6), hz(BG._mix(pal["red"], pal["brown"], 0.25), 0.40), var=0.04, edge_dark=0.03, bleed=3.0))
+    spur = terrace(notch(BG.ridge(rng, [(3, 0.5), (7, 0.35), (13, 0.15)], base=760, amp=40), rng, 5, 50, 90), 22)
+    near = BG._ridge_mask(H, spur)
+    stack.append(wash32(rng, H, near, hz(BG._mix(pal["red"], pal["sky"], 0.32)), var=0.05, edge_dark=0.07, bleed=2.0))
+    stack.append(wash32(rng, H, strata(H, near, rng, 800, 1000, 4, (6, 12)), hz(BG._mix(pal["red"], pal["brown"], 0.30), 0.25), var=0.04, edge_dark=0.03, bleed=2.5))
+    floor = BG._ridge_mask(H, BG.ridge(rng, [(4, 0.6), (9, 0.4)], base=960, amp=8))
+    stack.append(wash32(rng, H, floor, hz(BG._mix(pal["sky"], pal["mustard"], 0.30)), var=0.04, edge_dark=0.03, bleed=6.0))
+    out.append(finish(stack, rng, H))
+
+    # layer1: nearer stepped walls (three terraced tiers), umber ledge shadows, gullies
+    H = 640
+    stack = Stack()
+    for i, (base, amp, col) in enumerate(((150, 50, BG._mix(pal["red"], pal["sky"], 0.22)), (290, 46, pal["red"]),
+                                          (420, 40, BG._mix(pal["red"], pal["brown"], 0.18)))):
+        line = terrace(notch(BG.ridge(rng, [(2, 0.45), (5, 0.35), (11, 0.2)], base=base, amp=amp), rng, 4, 34, 60), 18)
+        m = BG._ridge_mask(H, line)
+        stack.append(wash32(rng, H, m, hz(col), var=0.06, edge_dark=0.09, bleed=1.8))
+        y = np.arange(H)[:, None] + 0.5
+        lens = 26 + 40 * np.clip(BG.ridge(rng, [(3, 0.5), (8, 0.5)], base=0.5, amp=0.5), 0, 1)
+        ledge = ((y > line[None, :] + 6) & (y < line[None, :] + 6 + lens[None, :])).astype(np.float32) * m
+        stack.append(wash32(rng, H, ledge, hz(BG._mix(pal["brown"], pal["red"], 0.30), 0.10), var=0.05, edge_dark=0.04, bleed=4.0))
+        gul = np.zeros((H, W), np.float32)
+        for _k in range(14):
+            cx = rng.uniform(0, W)
+            top = line[int(cx) % W] + 10
+            for t in range(int(rng.uniform(40, 110))):
+                gul[min(int(top + t), H - 1), int(cx + 3 * math.sin(t / 9.0)) % W] = 1.0
+        stack.append(wash32(rng, H, gul * m, hz(BG._mix(pal["brown"], pal["red"], 0.4), 0.05), var=0.03, edge_dark=0.0, bleed=1.2))
+    out.append(finish(stack, rng, H))
+
+    # layer2: near scree slopes with boulders and pebbles (the canyon); the storm replaces it with the dust overlay
+    if storm > 0:
+        out.append(mars_storm_overlay(rng, pal))
+        return out, [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0},
+                     {"n": 2, "parallax": 0.7, "y_m": -0.5}]
+    H = 384
+    line = BG.ridge(rng, [(3, 0.5), (7, 0.3), (15, 0.2)], base=200, amp=26)
+    ground = BG._ridge_mask(H, line)
+    rocks, shade, pebbles, basalt = (np.zeros((H, W), np.float32) for _ in range(4))
+    for _k in range(26):
+        cx = rng.uniform(0, W)
+        b = line[int(cx) % W] + rng.uniform(10, 120)
+        rx, ry = rng.uniform(22, 60), rng.uniform(16, 40)
+        ell(rocks, cx, b - ry * 0.6, rx, ry, cut=0.6)
+        ell(shade, cx + rx * 0.25, b - ry * 0.35, rx * 0.8, ry * 0.55, cut=0.6)
+    for _k in range(110):
+        cx = rng.uniform(0, W)
+        ell(pebbles, cx, line[int(cx) % W] + rng.uniform(8, 170), rng.uniform(3, 7), rng.uniform(2, 4))
+    for _k in range(18):
+        cx = rng.uniform(0, W)
+        ell(basalt, cx, line[int(cx) % W] + rng.uniform(30, 150), rng.uniform(8, 16), rng.uniform(5, 10), cut=0.5)
+    stack = Stack()
+    stack.append(wash32(rng, H, ground, BG._mix(pal["red"], pal["brown"], 0.20), var=0.07, edge_dark=0.08))
+    stack.append(wash32(rng, H, rocks, BG._mix(pal["red"], pal["sky"], 0.20), var=0.06, edge_dark=0.12, bleed=1.4))
+    stack.append(wash32(rng, H, shade * rocks, BG._mix(pal["brown"], pal["red"], 0.35), var=0.04, edge_dark=0.04, bleed=2.0))
+    stack.append(wash32(rng, H, pebbles * ground, BG._mix(pal["sky"], pal["brown"], 0.40), var=0.04, edge_dark=0.10, bleed=0.8))
+    stack.append(wash32(rng, H, basalt * ground, BG._mix(pal["brown"], pal["sky"], 0.25), var=0.04, edge_dark=0.12, bleed=0.9))
+    out.append(finish(stack, rng, H))
+    return out, [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0},
+                 {"n": 2, "parallax": 0.6, "y_m": -0.5}]
+
+
+def mars_storm_overlay(rng, pal, H=768):
+    """The dust storm as the NEAR layer (overlays that must read through the stack go on the nearest layer): a thin
+    veil over everything, rolling billows low down with darker undersides, long drawn wind streaks; translucent."""
+    veil = np.full((H, W), 0.16, np.float32)
+    bill, under, streak = (np.zeros((H, W), np.float32) for _ in range(3))
+    for _k in range(16):
+        cx, cy = rng.uniform(0, W), rng.uniform(430, 700)
+        for _j in range(4):
+            x, y = cx + rng.uniform(-160, 160), cy + rng.uniform(-40, 40)
+            rx, ry = rng.uniform(110, 220), rng.uniform(60, 120)
+            ell(bill, x, y, rx, ry, val=0.55)
+            ell(under, x + rx * 0.1, y + ry * 0.45, rx * 0.85, ry * 0.45, val=0.5)
+    for _k in range(70):
+        ell(streak, rng.uniform(0, W), rng.uniform(60, 740), rng.uniform(150, 420), rng.uniform(2.5, 6), val=0.5)
+    dust = BG._mix(pal["sky"], pal["mustard"], 0.35)
+    stack = Stack()
+    stack.append(wash32(rng, H, veil, BG._mix(pal["sky"], pal["offwhite"], 0.2), var=0.03, edge_dark=0.0, bleed=8.0))
+    stack.append(wash32(rng, H, bill, dust, var=0.05, edge_dark=0.04, bleed=6.0))
+    stack.append(wash32(rng, H, under * bill, BG._mix(pal["sky"], pal["brown"], 0.30), var=0.04, edge_dark=0.02, bleed=8.0))
+    stack.append(wash32(rng, H, streak, BG._mix(pal["offwhite"], pal["sky"], 0.40), var=0.03, edge_dark=0.0, bleed=1.5))
+    return finish(stack, rng, H)
+
+
+def mars_storm(seed):
+    return mars_canyon(seed, storm=1.0)
+
+
+SCENES = {("earth", "forest"): earth_forest, ("earth", "coast"): earth_coast,
+          ("mars", "canyon"): mars_canyon, ("mars", "storm"): mars_storm}
+SEEDS = {"forest": 13301, "coast": 13302, "canyon": 14101, "storm": 14102}
+PLANET_OF = {"forest": "earth", "coast": "earth", "canyon": "mars", "storm": "mars"}
 
 
 # ---------------------------------------------------------------- lock-free preview: 1080p composite at 1x + the 2x seam check
@@ -359,7 +527,9 @@ def preview(out_dir, scenes=("forest", "coast"), from_png=False):
     import build_c2_ground_strip as GS
     import preview_c2_earth_rigs as PR
     for scene in scenes:
-        d = os.path.join(out_dir, "b133", scene)
+        planet = PLANET_OF[scene]
+        tag = "b133" if planet == "earth" else "b141"
+        d = os.path.join(out_dir, tag, scene)
         os.makedirs(d, exist_ok=True)
         u8, info = [], []
         if from_png:
@@ -369,7 +539,7 @@ def preview(out_dir, scenes=("forest", "coast"), from_png=False):
                 q = pngio.read_png_np(os.path.join(d, f"layer{L['n']}_color.png"))
                 imgs.append(np.roll(q, -seam_column(q), axis=1))
         else:
-            gen, layers = SCENES[("earth", scene)](SEEDS[scene])
+            gen, layers = SCENES[(planet, scene)](SEEDS[scene])
             imgs = [BG.to_u8(rgb, a) for rgb, a in gen]
             del gen
         for img, L in zip(imgs, layers):
@@ -380,7 +550,7 @@ def preview(out_dir, scenes=("forest", "coast"), from_png=False):
             info.append((p, n, BG.seam(img)))
         del imgs
         with open(os.path.join(d, f"{scene}.json"), "w", encoding="utf-8", newline="\n") as f:
-            json.dump({"key": f"backgrounds/earth/{scene}", "style": "v3", "ppu": v3.PPU, "anchor": "bottom", "tile_x": True,
+            json.dump({"key": f"backgrounds/{planet}/{scene}", "style": "v3", "ppu": v3.PPU, "anchor": "bottom", "tile_x": True,
                        "layers": layers}, f, indent=2)
         # (1) the 1080p frame at 1x: layers bottom-anchored by y_m, ground strips under the line, the surveyor
         F = np.zeros((1080, 1920, 3), np.float32)
@@ -391,8 +561,13 @@ def preview(out_dir, scenes=("forest", "coast"), from_png=False):
             y_top = y_bot - h
             src = img[max(0, -y_top):h - max(0, y_bot - 1080), :1920]
             review._over(F, src, 0, max(0, y_top))
-        S, _w = GS.sheets()
-        strip = "sand" if scene == "coast" else "grass"          # the coast stands on the B-130 sand variant
+        if planet == "mars":                                      # B-139 regolith strip (build_c2_mars_ground)
+            import build_c2_mars_ground as MG
+            S, _w = GS.sheets(("regolith",), MG.mats)
+            strip = "regolith"
+        else:
+            S, _w = GS.sheets()
+            strip = "sand" if scene == "coast" else "grass"      # the coast stands on the B-130 sand variant
         rnd = np.random.default_rng(5)
         for c in range(30):
             im = S[strip][int(rnd.integers(0, 8))]
@@ -404,7 +579,7 @@ def preview(out_dir, scenes=("forest", "coast"), from_png=False):
             review._over(F, fr, 860, gl - fr.shape[0] + int(round(piv[1] * fr.shape[0])))
         except Exception:  # noqa: BLE001
             pass
-        review._label(F, f"b-133 earth {scene}: 1920x1080 at 1x (ppu 64), layers by y_m, b-130 ground strips, the surveyor (2 m)", 6, 6)
+        review._label(F, f"{tag[0]}-{tag[1:]} {planet} {scene}: 1920x1080 at 1x (ppu 64), layers by y_m, {strip} ground strips, the surveyor (2 m)", 6, 6)
         # (2) each layer tiled 2x (half size), and the seam column at 1x
         rows = [F]
         for (p, n, s), img, L in zip(info, u8, layers):
@@ -425,7 +600,7 @@ def preview(out_dir, scenes=("forest", "coast"), from_png=False):
         Wd = max(r.shape[1] for r in rows)
         img = np.vstack([np.pad(r, ((0, 0), (0, Wd - r.shape[1]), (0, 0)), constant_values=0.91) for r in rows])
         review._label(img, __import__("time").strftime("%m-%d %H:%M") + " preview (not exported)", 2, img.shape[0] - 16)
-        out = os.path.join(out_dir, f"review_b133_earth_{scene}_preview.png")
+        out = os.path.join(out_dir, f"review_{tag}_{planet}_{scene}_preview.png")
         review.write(out, img)
         print(scene, ", ".join(f"layer{i} {u8[i].shape[1]}x{u8[i].shape[0]} {n // 1024} KB seam {s:.2f}" for i, (p, n, s) in enumerate(info)), "->", out)
 
