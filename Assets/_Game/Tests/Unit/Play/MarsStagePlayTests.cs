@@ -68,5 +68,38 @@ namespace Meridian.Tests
             TestContext.Out.WriteLine($"[MERIDIAN] mars storm veil: phase {storm.Phase}, intensity {storm.Intensity:F2}, alpha {stage.StormLayers.alpha:F2}, plants {plants}");
             LogAssert.NoUnexpectedReceived();
         }
+
+        /// <summary>U-118 (D-126): a tube lurker spawned over a lava tube gets its mound (a prop in front, order 6) and counts as at its den; the creatures and the den go with the planet.</summary>
+        [UnityTest]
+        public IEnumerator TheLurkerSpawnsAtItsMound()
+        {
+            yield return Boot();
+            var creatures = side.creatures;
+            creatures.autoSpawn = false;
+            creatures.DespawnAll();
+            var tube = Meridian.Terrain.MarsLandforms.Tubes[0];
+            int tx = tube.x0 + Meridian.Terrain.MarsLandforms.SkylightInset + 6; // over the tube, past the skylight shaft
+            float y = side.player.Body.position.y;
+            var stand = new Vector2(tx - 4 + 0.5f, side.terrain.TopSolidY(tx - 4) + 1.1f);
+            side.player.Body.position = stand; side.player.transform.position = stand; side.player.Body.linearVelocity = Vector2.zero;
+            var follow = Object.FindAnyObjectByType<Meridian.Player.CameraFollow>();
+            if (follow != null) follow.SnapToTarget();
+            float until = Time.realtimeSinceStartup + 25f;
+            while (!(side.terrain.IsSettled && side.terrain.IsCollisionReady(tx, side.terrain.TopSolidY(tx))) && Time.realtimeSinceStartup < until) yield return null;
+            var site = creatures.SiteAt(tx, side.player.Body.position.y);
+            TestContext.Out.WriteLine($"[MERIDIAN] lurker site x {tx}: tile {site.surfaceTile} y {site.surfaceY}, over tube {Meridian.Terrain.MarsLandforms.OverTube(tx)}, allows {Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.TubeLurker).Allows(site)}");
+            var lurker = creatures.SpawnAt(Meridian.Creatures.Species.TubeLurker, tx, side.player.Body.position.y);
+            Assert.NotNull(lurker, "the lurker spawns over the tube");
+            Assert.AreEqual(1, creatures.Dens.Count, "one mound placed");
+            var den = creatures.Dens[0];
+            Assert.AreEqual("props/mars/tube_mound", den.name);
+            Assert.AreEqual(Meridian.Creatures.CreatureDirector.DenOrder, den.GetComponent<SpriteRenderer>().sortingOrder, "the mound draws in front of the creature");
+            Assert.IsTrue(lurker.AtDen, "spawned at its den");
+            Assert.AreEqual(den.position.x, lurker.DenX, 1e-3f);
+            var second = creatures.SpawnAt(Meridian.Creatures.Species.TubeLurker, tx + 2, side.player.Body.position.y);
+            if (second != null) Assert.AreEqual(1, creatures.Dens.Count, "a second lurker within 6 m shares the mound");
+            creatures.DespawnAll();
+            LogAssert.NoUnexpectedReceived();
+        }
     }
 }

@@ -2519,6 +2519,215 @@ namespace Meridian.Tests
             }
         }
 
+        /// <summary>
+        /// U-118: Mars on the cartoon stage → coordination/reports/unity/u118/: the spawn's set at 1x with the B-140 plants and a dustskater,
+        /// the canyon floor after the border crossfade, a tube lurker at its mound (D-126), and the storm set's veil at full intensity.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator CaptureU118Mars()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
+                yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(Meridian.Planets.PlanetId.Mars));
+                var side = director.PlanetSide;
+                timeout = Time.realtimeSinceStartup + 20f;
+                while (!side.terrain.IsSettled && Time.realtimeSinceStartup < timeout) yield return null;
+                side.dayNight.Override = 0.45f;
+                side.hazards.enabled = false;
+                if (side.wardens != null) side.wardens.enabled = false;
+                var creatures = side.creatures;
+                creatures.autoSpawn = false;
+                foreach (var c in creatures.All) if (c.Alive) creatures.Despawn(c);
+                var stage = side.cartoon;
+                var cam = side.sideCamera;
+                var dir = "coordination/reports/unity/u118";
+                Directory.CreateDirectory(dir);
+                timeout = Time.realtimeSinceStartup + 15f;
+                while ((stage.Layers.placeholders.Contains(true) || !stage.Flora.Ready || !stage.Ground.Ready) && Time.realtimeSinceStartup < timeout) yield return null;
+                for (int i = 0; i < 30; i++) yield return new WaitForFixedUpdate();
+                IEnumerator Shot(string label)
+                {
+                    yield return null;
+                    yield return Save(cam, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u118 {label}: x {cam.transform.position.x:F0}, region {Meridian.Planet.Backdrop.StageRegions.At(Meridian.Planets.PlanetId.Mars, Mathf.FloorToInt(cam.transform.position.x))}, scene {stage.Scene} ({stage.Layers.SceneKey}, fallback {stage.Layers.UsedFallback}), datum {stage.Layers.datumY:F1}, placeholders {stage.Layers.placeholders.Contains(true)}, veil alpha {(stage.StormLayers != null ? stage.StormLayers.alpha : 0f):F2}");
+                }
+                IEnumerator CarryTo(int tx)
+                {
+                    var stand = new Vector2(tx + 0.5f, side.terrain.TopSolidY(tx) + 1.1f);
+                    side.player.Body.position = stand; side.player.transform.position = stand; side.player.Body.linearVelocity = Vector2.zero;
+                    var follow = cam.GetComponent<Meridian.Player.CameraFollow>();
+                    if (follow != null) follow.SnapToTarget();
+                    float until = Time.realtimeSinceStartup + 20f;
+                    while (!side.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                    until = Time.realtimeSinceStartup + 6f;
+                    yield return null; yield return null;
+                    while ((stage.Fading || stage.Layers.placeholders.Contains(true)) && Time.realtimeSinceStartup < until) yield return null;
+                }
+                string Kinds()
+                {
+                    var tally = new System.Collections.Generic.SortedDictionary<string, int>();
+                    foreach (Transform t in stage.Flora.transform) { tally.TryGetValue(t.name, out int n); tally[t.name] = n + 1; }
+                    var sb = new System.Text.StringBuilder();
+                    foreach (var kv in tally) sb.Append(sb.Length > 0 ? ", " : "").Append($"{kv.Key} ×{kv.Value}");
+                    return sb.Length > 0 ? sb.ToString() : "none";
+                }
+                // 1. The spawn: the region's set, the B-140 plants, a dustskater beside the surveyor.
+                int px = Mathf.FloorToInt(side.player.transform.position.x);
+                var skater = creatures.SpawnAt(Meridian.Creatures.Species.Dustskater, px + 3, side.player.Body.position.y);
+                float art = Time.realtimeSinceStartup + 10f;
+                while (skater != null && skater.Alive && skater.IsPlaceholder && !(skater.Model != null && skater.Model.Ready) && Time.realtimeSinceStartup < art) yield return null;
+                TestContext.Out.WriteLine($"[MERIDIAN] u118 spawn x {side.spawnX}: plants {Kinds()}; dustskater {(skater == null ? "none" : skater.IsPlaceholder ? "placeholder" : skater.View.enabled ? "sheet " + (skater.View.sprite != null ? skater.View.sprite.name : "?") : "model")}");
+                yield return Shot($"1_{stage.Scene}_1x");
+                // 2. The canyon floor: the border crossfade has run by the time the chunks are in.
+                int canyonX = (Meridian.Terrain.MarsLandforms.CanyonStart + Meridian.Terrain.MarsLandforms.CanyonEnd) / 2;
+                yield return CarryTo(canyonX);
+                yield return Shot("2_canyon_1x");
+                // 3. A tube lurker at its mound over the first lava tube.
+                var tube = Meridian.Terrain.MarsLandforms.Tubes[0];
+                int lurkerX = tube.x0 + Meridian.Terrain.MarsLandforms.SkylightInset + 6;
+                yield return CarryTo(lurkerX - 5);
+                float ready = Time.realtimeSinceStartup + 10f;
+                while (!side.terrain.IsCollisionReady(lurkerX, side.terrain.TopSolidY(lurkerX)) && Time.realtimeSinceStartup < ready) yield return null;
+                var lurker = creatures.SpawnAt(Meridian.Creatures.Species.TubeLurker, lurkerX, side.player.Body.position.y);
+                art = Time.realtimeSinceStartup + 10f;
+                while (lurker != null && lurker.Alive && lurker.IsPlaceholder && Time.realtimeSinceStartup < art) yield return null;
+                for (int i = 0; i < 12; i++) yield return new WaitForFixedUpdate();
+                TestContext.Out.WriteLine($"[MERIDIAN] u118 lurker at {lurkerX}: {(lurker == null ? "no spawn" : $"at den {lurker.AtDen}, clip {lurker.CurrentClip ?? "none"}, {(lurker.IsPlaceholder ? "placeholder" : "sheet")}")}, dens {creatures.Dens.Count}");
+                yield return Shot("3_lurker_den");
+                // 4. The storm: forced, the veil at full intensity over the base set.
+                var storm = side.dustStorm;
+                if (storm != null)
+                {
+                    storm.Force(1f, 120f);
+                    float full = Time.realtimeSinceStartup + 25f;
+                    while (storm.Intensity < 0.95f && Time.realtimeSinceStartup < full) yield return null;
+                    yield return null;
+                    TestContext.Out.WriteLine($"[MERIDIAN] u118 storm: phase {storm.Phase}, intensity {storm.Intensity:F2}, veil alpha {(stage.StormLayers != null ? stage.StormLayers.alpha : 0f):F2}, scroll {(stage.StormLayers != null ? stage.StormLayers.scrollX : 0f):F1} m");
+                }
+                yield return Shot("4_storm_1x");
+                creatures.DespawnAll();
+                side.dayNight.Override = null;
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+            }
+        }
+
+        /// <summary>
+        /// U-128: the camp frame (unchanged), the forest → plains border mid-crossfade, and the shore at column 2096 with the coast set painted at the
+        /// water line behind the Maw → coordination/reports/unity/u128/.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator CaptureU128Shore()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                side.dayNight.Override = 0.45f;
+                var creatures = side.creatures;
+                creatures.autoSpawn = false;
+                foreach (var c in creatures.All) if (c.Alive) creatures.Despawn(c);
+                var stage = side.cartoon;
+                var cam = side.sideCamera;
+                var dir = "coordination/reports/unity/u128";
+                Directory.CreateDirectory(dir);
+                timeout = Time.realtimeSinceStartup + 15f;
+                while ((stage.Layers.placeholders.Contains(true) || !stage.Flora.Ready) && Time.realtimeSinceStartup < timeout) yield return null;
+                for (int i = 0; i < 30; i++) yield return new WaitForFixedUpdate();
+                IEnumerator Shot(string label)
+                {
+                    yield return null;
+                    yield return Save(cam, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u128 {label}: camera ({cam.transform.position.x:F1}, {cam.transform.position.y:F1}), scene {stage.Scene} ({stage.Layers.SceneKey}), datum {stage.Layers.datumY:F1}, anchor {stage.Layers.anchorY:F1}, fading {stage.Fading} (incoming alpha {(stage.Incoming != null && stage.Incoming.gameObject.activeSelf ? stage.Incoming.alpha : 0f):F2}), crossfades {stage.Crossfades}");
+                }
+                void Put(int tx)
+                {
+                    var stand = new Vector2(tx + 0.5f, side.terrain.TopSolidY(tx) + 1.1f);
+                    side.player.Body.position = stand; side.player.transform.position = stand; side.player.Body.linearVelocity = Vector2.zero;
+                    var follow = cam.GetComponent<Meridian.Player.CameraFollow>();
+                    if (follow != null) follow.SnapToTarget();
+                }
+                IEnumerator Settle()
+                {
+                    float until = Time.realtimeSinceStartup + 20f;
+                    while (!side.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                }
+                // 1. The camp: unchanged (the camp band keeps the stamped surface, the forest set).
+                yield return Shot("1_camp");
+                // 2. The forest → plains border at 700: step across and shoot mid-crossfade.
+                Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Plains, out int ps, out int pl);
+                Put(ps - 12); yield return Settle();
+                float wait = Time.realtimeSinceStartup + 6f;
+                while (stage.Fading && Time.realtimeSinceStartup < wait) yield return null; // any fade from the carry settles first
+                Put(ps + 12);
+                wait = Time.realtimeSinceStartup + 6f;
+                while (!(stage.Fading && stage.Incoming != null && stage.Incoming.alpha >= 0.35f) && Time.realtimeSinceStartup < wait) yield return null;
+                yield return Shot("2_border_mid");
+                wait = Time.realtimeSinceStartup + 6f;
+                while (stage.Fading && Time.realtimeSinceStartup < wait) yield return null;
+                yield return Shot("3_plains");
+                // 3. The shore at 2096 with the Maw in the deep: the coast set at the water line.
+                var spec = Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.HadalMaw);
+                Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Ocean, out int os, out int ol);
+                float y = side.player.Body.position.y;
+                int shore = os;
+                while (shore < os + ol && creatures.SiteAt(shore, y).aboveTile != Meridian.Terrain.TileId.Water) shore++;
+                int deep = shore;
+                while (deep < shore + 400 && creatures.SiteAt(deep, y).waterDepth < spec.WaterDepthNeeded) deep++;
+                Put(shore - 1); yield return Settle();
+                wait = Time.realtimeSinceStartup + 10f;
+                while (!(side.terrain.IsCollisionReady(deep, side.terrain.TopSolidY(deep))) && Time.realtimeSinceStartup < wait) yield return null;
+                var maw = creatures.SpawnAt(Meridian.Creatures.Species.HadalMaw, deep, side.player.Body.position.y);
+                wait = Time.realtimeSinceStartup + 15f;
+                while ((maw != null && maw.Rig == null || stage.Fading || stage.Layers.placeholders.Contains(true)) && Time.realtimeSinceStartup < wait) yield return null;
+                for (int i = 0; i < 150; i++) yield return new WaitForFixedUpdate(); // the Maw comes in to hold its distance
+                var follow2 = cam.GetComponent<Meridian.Player.CameraFollow>();
+                if (follow2 != null) follow2.enabled = false;
+                cam.transform.position = new Vector3(shore + 7f, side.terrain.TopSolidY(shore - 1) - 1f, cam.transform.position.z);
+                yield return Shot("4_shore_coast");
+                Assert.AreEqual("coast", stage.Scene, "the coast set on the shore");
+                Assert.IsFalse(stage.Layers.placeholders.Contains(true), "the coast layers painted");
+                if (follow2 != null) follow2.enabled = true;
+                creatures.DespawnAll();
+                side.dayNight.Override = null;
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+            }
+        }
+
         IEnumerator CaptureShip(string folder)
         {
             var name = Environment.GetEnvironmentVariable(Variable);

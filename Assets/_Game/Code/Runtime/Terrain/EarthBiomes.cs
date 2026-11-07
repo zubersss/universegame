@@ -40,6 +40,27 @@ namespace Meridian.Terrain
 
         public static Biome At(int x) => Kinds[Band(x, out _, out _)];
 
+        /// <summary>U-128: the band at x with its distances (columns) to the band's start and end.</summary>
+        public static Biome At(int x, out int fromStart, out int toEnd) => Kinds[Band(x, out fromStart, out toEnd)];
+        /// <summary>U-128: a band's mean surface height (Raw at the noise mean, away from the borders); the Ocean's is its water line (SolidWorldGenerator fills to the datum: the top water row is datum, the line datum + 1). Pure.</summary>
+        public static float MeanSurface(Biome b, float datum) => b switch
+        {
+            Biome.Plains => datum + 6f,
+            Biome.Desert => datum + 8f,
+            Biome.Taiga => datum + 18f,
+            Biome.Tundra => datum + 22f,
+            Biome.Ocean => datum + 1f,
+            _ => datum,
+        };
+        /// <summary>U-128: a per-band value blended across the ±Blend-column borders exactly as Height blends the surface. Pure (the delegate is the caller's).</summary>
+        public static float Blended(int x, System.Func<Biome, float> valueOf)
+        {
+            int i = Band(x, out int fromStart, out int toEnd);
+            float v = valueOf(Kinds[i]);
+            if (fromStart < Blend) v = Mathf.Lerp(valueOf(Kinds[(i + Kinds.Length - 1) % Kinds.Length]), v, Smooth(0.5f + 0.5f * fromStart / Blend));
+            else if (toEnd < Blend) v = Mathf.Lerp(valueOf(Kinds[(i + 1) % Kinds.Length]), v, Smooth(0.5f + 0.5f * toEnd / Blend));
+            return v;
+        }
         /// <summary>First column and length of a biome's band (for tests and captures).</summary>
         public static void Range(Biome b, out int start, out int length)
         {

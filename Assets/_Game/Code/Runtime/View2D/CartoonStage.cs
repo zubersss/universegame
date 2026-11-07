@@ -50,6 +50,22 @@ namespace Meridian.View2D
         /// <summary>U-118: the B-141 storm set over the base layers on Mars; its alpha follows the dust storm, its scroll the wind.</summary>
         public ParallaxLayers StormLayers { get; private set; }
         Meridian.Planet.Weather.DustStorm storm;
+
+        // ---- U-128: the datum and the set follow the camera's band ----
+        /// <summary>The per-band datum sampler (null off the cartoon path); tests and captures read it.</summary>
+        public BandDatum Datum { get; private set; }
+        /// <summary>The set fading in at a band border (its own ParallaxLayers above the base set); null or inactive between borders.</summary>
+        public ParallaxLayers Incoming { get; private set; }
+        public bool Fading { get; private set; }
+        /// <summary>Border crossfades completed since ConfigureFor (tests read it).</summary>
+        public int Crossfades { get; private set; }
+        public const float CrossfadeSeconds = 1.5f;
+        public const int IncomingOrder = 3;
+        /// <summary>The incoming set's alpha `t` seconds into a border crossfade (a smooth step over CrossfadeSeconds). Pure.</summary>
+        public static float CrossfadeAlpha(float t, float seconds) { float k = seconds > 0f ? Mathf.Clamp01(t / seconds) : 1f; return k * k * (3f - 2f * k); }
+        Meridian.Planets.PlanetId planetId;
+        string planetName, incomingScene;
+        float fadeT;
         /// <summary>Rigged plants around the camp in C0 (every FloraSpacing m, jittered).</summary>
         public const int FloraCount = 42; // D-136 (2): was 48; the camp's density is the animated-object lever (the gate read 42 Animators against 40)
         public const float FloraSpacing = 2.5f;
@@ -96,7 +112,14 @@ namespace Meridian.View2D
             Layers.gameObject.SetActive(true);
             Layers.view = cam;
             Scene = SceneFor(config.id, side.spawnX); // U-110 / U-118: the spawn's band (Earth) or region (Mars) picks the set
+            Layers.SetOrderOffset(0);
+            Layers.alpha = 1f;
             Layers.ConfigureFor(config.id.ToString().ToLowerInvariant(), Scene, surfaceDatum, config.id == Meridian.Planets.PlanetId.Mars ? MarsFallbackScene : null);
+            // U-128: from here the datum and the set follow the camera's band (FollowBand); the spawn's band keeps this surface, so the camp frames do not move.
+            planetId = config.id; planetName = config.id.ToString().ToLowerInvariant();
+            Datum = new BandDatum(config.id, config.datumY, side.spawnX, surfaceDatum);
+            Fading = false; Crossfades = 0;
+            if (Incoming != null) { Incoming.Release(); Incoming.gameObject.SetActive(false); }
             // U-118: Mars draws the dust storm as the B-141 storm set's veil over the base layers (alpha = the storm's intensity, the wind scrolls it).
             if (config.id == Meridian.Planets.PlanetId.Mars)
             {
@@ -148,10 +171,51 @@ namespace Meridian.View2D
 
         void LateUpdate()
         {
+            if (Active && Layers != null && Layers.view != null && Datum != null) FollowBand(Layers.view.transform.position.x);
             if (StormLayers == null || storm == null || !StormLayers.gameObject.activeSelf) return;
             StormLayers.alpha = StormAlpha(storm.Intensity);
             if (storm.Intensity > 0f) StormLayers.scrollX += storm.Intensity * StormWind * Time.deltaTime; // the wind carries the wall
         }
+
+        /// <summary>U-128: the datum of the camera's band (blended at the borders) drives every layer slot and the sky's anchor; at a border the band's set fades in over the base set, then takes its place.</summary>
+        void FollowBand(float cameraX)
+        {
+            int x = Mathf.FloorToInt(cameraX);
+            float d = Datum.At(x);
+            SetDatum(Layers, d);
+            if (Incoming != null && Incoming.gameObject.activeSelf) SetDatum(Incoming, d);
+            if (StormLayers != null && StormLayers.gameObject.activeSelf) SetDatum(StormLayers, d);
+            if (Sky != null) Sky.anchorY = ParallaxMath.AnchorY(d);
+            string want = SceneFor(planetId, x);
+            if (!Fading && want != Scene)
+            {
+                if (Incoming == null) { var igo = new GameObject("CartoonParallaxIncoming"); igo.transform.SetParent(transform, false); Incoming = igo.AddComponent<ParallaxLayers>(); }
+                Incoming.gameObject.SetActive(true);
+                Incoming.view = Layers.view;
+                Incoming.orderOffset = IncomingOrder;
+                Incoming.alpha = 0f;
+                Incoming.ConfigureFor(planetName, want, d, planetId == Meridian.Planets.PlanetId.Mars ? MarsFallbackScene : null);
+                incomingScene = want; fadeT = 0f; Fading = true;
+            }
+            if (!Fading) return;
+            fadeT += Time.deltaTime;
+            Incoming.alpha = CrossfadeAlpha(fadeT, CrossfadeSeconds);
+            if (fadeT < CrossfadeSeconds) return;
+            // The incoming set is the base set now; the old one releases its art.
+            var old = Layers;
+            Layers = Incoming;
+            Incoming = old;
+            Layers.SetOrderOffset(0);
+            Layers.alpha = 1f;
+            Incoming.Release();
+            Incoming.gameObject.SetActive(false);
+            Scene = incomingScene;
+            Fading = false;
+            Crossfades++;
+            if (Sky != null) Sky.layers = Layers;
+        }
+
+        static void SetDatum(ParallaxLayers l, float d) { l.datumY = d; l.anchorY = ParallaxMath.AnchorY(d); }
 
         static void SetActive(Component c, bool on, PlanetSideRoot side)
         {

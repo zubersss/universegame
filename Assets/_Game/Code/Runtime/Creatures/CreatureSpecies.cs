@@ -19,6 +19,8 @@ namespace Meridian.Creatures
         Pike, Shark, Squid,
         // U-119 (B-136, D-127): the Hadal Maw, a rig-set creature of the coast deep; appended so every older index stays.
         HadalMaw,
+        // U-118 (B-142, D-126): the Mars lava-tube lurker (a den species) and the polar crawler; appended so every older index stays.
+        TubeLurker, PolarCrawler,
     }
 
     /// <summary>What a creature does about the player.</summary>
@@ -92,6 +94,11 @@ namespace Meridian.Creatures
         public float followDistance;
         /// <summary>U-119: the rig's react (the jaw opens, the lure flares) within this many metres of the surveyor (0 = never).</summary>
         public float reactRadius;
+        /// <summary>U-118 (D-126): a den species' static den prop (props/mars/tube_mound): the creature spawns at one, idles (the peek) and reacts there behind it, walks in the open; null = no den.</summary>
+        public string den;
+        /// <summary>U-118: how far from its den a den species still counts as at it (the peek clip), metres.</summary>
+        public float denRange = 2.5f;
+        public bool HasDen => !string.IsNullOrEmpty(den);
 
         public bool Flies => habitat != Habitat.Ground;
 
@@ -167,6 +174,13 @@ namespace Meridian.Creatures
             new SpeciesSpec { id = Species.HadalMaw, planet = PlanetId.Earth, artKey = "creatures/earth/hadal_maw", rig = true, size = new Vector2(16f, 5f), floorClearance = 15f,
                 wanderSpeed = 1.5f, runSpeed = 3.5f, temper = Temper.Hunts, senseRange = 40f, followDistance = 14f, reactRadius = 12f, time = ActiveTime.Any, habitat = Habitat.Water,
                 packMin = 1, packMax = 1, maxAlive = 1, placeholder = new Color(0.12f, 0.2f, 0.26f) },
+            // U-118 (B-142, D-126): the lava-tube lurker — a shy peeker at its mound over the tubes (idle = the peek at the den, idle_open away from it); the polar crawler — slow and armoured on the ice caps.
+            new SpeciesSpec { id = Species.TubeLurker, planet = PlanetId.Mars, artKey = "creatures/mars/tube_lurker", den = "props/mars/tube_mound", size = new Vector2(1.2f, 0.7f),
+                wanderSpeed = 1.0f, runSpeed = 4.5f, jumpSpeed = 4f, temper = Temper.Flees, senseRange = 6f, time = ActiveTime.Any,
+                packMin = 1, packMax = 1, maxAlive = 2, placeholder = new Color(0.36f, 0.3f, 0.26f) },
+            new SpeciesSpec { id = Species.PolarCrawler, planet = PlanetId.Mars, artKey = "creatures/mars/polar_crawler", size = new Vector2(1.4f, 0.8f),
+                wanderSpeed = 0.6f, runSpeed = 1.6f, jumpSpeed = 2f, temper = Temper.Flees, senseRange = 4f, time = ActiveTime.Any,
+                packMin = 1, packMax = 2, maxAlive = 4, placeholder = new Color(0.55f, 0.6f, 0.45f) },
         };
 
         public static SpeciesSpec Get(Species s) => All[(int)s];
@@ -187,6 +201,8 @@ namespace Meridian.Creatures
             Species.Pike or Species.Shark or Species.Squid or Species.HadalMaw => s.aboveTile == TileId.Water && s.waterDepth >= WaterDepthNeeded,
             Species.Dustskater => s.surfaceTile == TileId.Regolith,
             Species.ScreeStalker => s.surfaceTile == TileId.Regolith && s.surfaceY <= s.datumY - 12, // low ground: canyon floors
+            Species.TubeLurker => (s.surfaceTile == TileId.Regolith || s.surfaceTile == TileId.Basalt) && MarsLandforms.OverTube(s.x), // U-118 (D-126): its dens sit over the lava tubes
+            Species.PolarCrawler => s.surfaceTile == TileId.Ice, // U-118: the ice caps
             Species.Glassback => s.zone == MercuryZone.Twilight && !InColdTrap(s),
             // Dawn side of the band: local time just around the dawn line (0.25).
             Species.Cinderling => s.zone == MercuryZone.Twilight && s.localTime > 0.15f && s.localTime < 0.35f && !InColdTrap(s),

@@ -50,6 +50,11 @@ namespace Meridian.Creatures
         public IReadOnlyList<Creature> All => pool;
 
         readonly List<Creature> pool = new List<Creature>(MaxCreatures);
+        /// <summary>U-118 (D-126): the den props placed for den species (the tube mounds), cleared with the planet.</summary>
+        readonly List<Transform> dens = new List<Transform>(8);
+        public IReadOnlyList<Transform> Dens => dens;
+        public const int DenOrder = 6, MaxDens = 8;
+        public const float DenReuseRange = 6f;
         static readonly int SpeciesCount = SpeciesSpec.Count;
         readonly Sprite[] art = new Sprite[SpeciesCount];
         readonly Sprite[][] frames = new Sprite[SpeciesCount][];
@@ -80,6 +85,7 @@ namespace Meridian.Creatures
             Planet = planet;
             seed = worldSeed;
             DespawnAll();
+            ClearDens();
             nextSpawn = 0f;
             for (int s = 0; s < SpeciesCount; s++)
             {
@@ -254,6 +260,7 @@ namespace Meridian.Creatures
                 c.Setup(spec, position, art[s] != null ? art[s] : placeholder, frames[s], nightFrames[s],
                     art[s] != null ? ArtMaterials.ClipsFor(spec.artKey) : null, ++serial);
                 c.Zone = ZoneAt(position.x);
+                if (spec.HasDen) c.DenX = EnsureDen(spec, position); // U-118 (D-126): spawned at its mound
                 IgnoreBodies(c);
                 AliveCount++;
                 return c;
@@ -280,6 +287,31 @@ namespace Meridian.Creatures
         }
 
         public void DespawnAll() { foreach (var c in pool) Despawn(c); }
+
+        /// <summary>
+        /// U-118 (D-126): the den prop for a den species spawned at `position` (the body centre): an existing den within DenReuseRange is reused, else
+        /// a new one is placed on the ground under the body — a SpriteRenderer in front of the creatures (DenOrder) that ModelSwap fills with the
+        /// prop's sheet (or model). Returns the den's x. Dens stay for the planet's visit and go with it.
+        /// </summary>
+        float EnsureDen(SpeciesSpec spec, Vector2 position)
+        {
+            foreach (var d in dens) if (d != null && d.name == spec.den && Mathf.Abs(d.position.x - position.x) <= DenReuseRange) return d.position.x;
+            if (dens.Count >= MaxDens) { var oldest = dens[0]; dens.RemoveAt(0); if (oldest != null) Destroy(oldest.gameObject); }
+            var go = new GameObject(spec.den);
+            go.transform.SetParent(transform, false);
+            go.transform.position = new Vector3(position.x, position.y - spec.size.y * 0.5f - 0.05f, 0f); // the ground line under the body
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sortingOrder = DenOrder; // in front of the creature (order 5): it peeks from behind the mound
+            Meridian.Art.ModelSwap.Attach(sr, spec.den, go.transform, Vector3.zero);
+            dens.Add(go.transform);
+            return position.x;
+        }
+
+        void ClearDens()
+        {
+            foreach (var d in dens) if (d != null) Destroy(d.gameObject);
+            dens.Clear();
+        }
 
         public int CountOf(Species s)
         {

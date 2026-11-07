@@ -72,6 +72,12 @@ namespace Meridian.Creatures
         public const string FlyClip = "fly";
         /// <summary>U-114 (D-119, B-132): the bolt and the wolf's trot-after, found by name (idle 0, walk 1, react 2, bump 3 stay by index).</summary>
         public const string FleeClip = "flee", FollowClip = "follow";
+        /// <summary>U-118 (D-126): a den species' idle away from its mound (cycle 258: `idle` is the peek at the den, `idle_open` elsewhere).</summary>
+        public const string IdleOpenClip = "idle_open";
+        int idleOpenClip = -1;
+        /// <summary>U-118: the den's x for a den species (NaN without one); the director sets it at spawn.</summary>
+        public float DenX { get; internal set; } = float.NaN;
+        public bool AtDen => !float.IsNaN(DenX) && Spec != null && Mathf.Abs(Body.position.x - DenX) < Spec.denRange;
         int fleeClip = -1, followClip = -1;
         internal float nextHuff;
 
@@ -140,7 +146,7 @@ namespace Meridian.Creatures
             this.clips = clips;
             flyClip = -1;
             if (clips != null) for (int i = 0; i < clips.clips.Count; i++) if (clips.clips[i].name == FlyClip) { flyClip = i; break; }
-            fleeClip = ClipIndex(clips, FleeClip); followClip = ClipIndex(clips, FollowClip);
+            fleeClip = ClipIndex(clips, FleeClip); followClip = ClipIndex(clips, FollowClip); idleOpenClip = ClipIndex(clips, IdleOpenClip);
             lastClip = -1;
             View.sprite = sprite;
             View.transform.localScale = Vector3.one * Spec.artScale;
@@ -161,7 +167,8 @@ namespace Meridian.Creatures
             // U-108: the fly clip by name, once per spawn (a pooled body comes back as another species: reset when the sheet has none).
             flyClip = -1;
             if (clips != null) for (int i = 0; i < clips.clips.Count; i++) if (clips.clips[i].name == FlyClip) { flyClip = i; break; }
-            fleeClip = ClipIndex(clips, FleeClip); followClip = ClipIndex(clips, FollowClip);
+            fleeClip = ClipIndex(clips, FleeClip); followClip = ClipIndex(clips, FollowClip); idleOpenClip = ClipIndex(clips, IdleOpenClip);
+            DenX = float.NaN;
             airFor = groundFor = 0f;
             Airborne = false;
             State = CreatureState.Wander;
@@ -382,7 +389,7 @@ namespace Meridian.Creatures
             int want = hurtFor > 0f ? 3 : attackFor > 0f ? 2 : (Airborne && flyClip >= 0) ? flyClip
                      : (State == CreatureState.Flee && fleeClip >= 0 && speed > 0.3f) ? fleeClip
                      : (State == CreatureState.Chase && followClip >= 0 && speed > 0.3f) ? followClip
-                     : speed > 0.3f ? 1 : 0;
+                     : speed > 0.3f ? 1 : (idleOpenClip >= 0 && !AtDen) ? idleOpenClip : 0; // U-118: a den species peeks only at its mound
             LastPick = want;
             if (want >= clips.clips.Count) want = 0;
             if (want != lastClip) { lastClip = want; anim = 0f; }

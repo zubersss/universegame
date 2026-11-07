@@ -72,6 +72,38 @@ namespace Meridian.Terrain
             return plain;
         }
 
+        /// <summary>U-118 (D-126): true over a lava tube's span (the tube lurker's dens sit on the ground above the tubes). Pure.</summary>
+        public static bool OverTube(int x)
+        {
+            x = Wrap(x);
+            foreach (var t in Tubes) if (x >= t.x0 && x < t.x1) return true;
+            return false;
+        }
+
+        /// <summary>U-128: a feature's mean surface for the painted stage's datum: the plain, the canyon floor, the shield's mid slope, the cap's half rise. Pure.</summary>
+        public static float MeanSurface(MarsFeature f, float plain) => f switch
+        {
+            MarsFeature.Canyon => plain - CanyonDepth,
+            MarsFeature.Olympus => plain + OlympusHeight * 0.5f,
+            MarsFeature.PolarCap => plain + CapRise * 0.5f,
+            _ => plain,
+        };
+
+        /// <summary>U-128: a per-feature value blended over ±blend columns at the feature edges (the canyon rims, the shield's feet, the caps' edges), as EarthBiomes.Blended does for the bands. Pure.</summary>
+        public static float Blended(int x, int blend, System.Func<MarsFeature, float> valueOf)
+        {
+            x = Wrap(x);
+            var f = At(x);
+            float v = valueOf(f);
+            int best = int.MaxValue; MarsFeature across = f;
+            void Edge(int edgeX, MarsFeature left, MarsFeature right) { int d = Mathf.Abs(x - edgeX); if (d < best) { best = d; across = x < edgeX ? right : left; } }
+            Edge(CanyonStart, MarsFeature.Plains, MarsFeature.Canyon); Edge(CanyonEnd, MarsFeature.Canyon, MarsFeature.Plains);
+            Edge(OlympusCenter - OlympusHalfWidth, MarsFeature.Plains, MarsFeature.Olympus); Edge(OlympusCenter + OlympusHalfWidth, MarsFeature.Olympus, MarsFeature.Plains);
+            Edge(CapHalfWidth, MarsFeature.PolarCap, MarsFeature.Plains); Edge(Width - CapHalfWidth, MarsFeature.Plains, MarsFeature.PolarCap);
+            if (best < blend && across != f) v = Mathf.Lerp(valueOf(across), v, Smooth(0.5f + 0.5f * best / blend));
+            return v;
+        }
+
         /// <summary>Whether (x, y) is inside a lava tube (air; Radiation 0 there in M3). `surfaceAtMiddle(x)` gives a column's surface.</summary>
         public static bool InTube(int x, int y, System.Func<int, int> surfaceAt)
         {

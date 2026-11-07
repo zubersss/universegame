@@ -83,5 +83,29 @@ namespace Meridian.Tests
             Assert.AreEqual("canyon", FloraRigs.BiomeNameAt(PlanetId.Mars, FindX("mars_canyon")));
             Assert.AreEqual("highlands", FloraRigs.BiomeNameAt(PlanetId.Mars, FindX("mars_tharsis")), "Tharsis is the rig set's highlands");
         }
+
+        /// <summary>U-118 (B-142, D-126): the tube lurker is a den species over the lava tubes with props/mars/tube_mound as its den; the polar crawler lives on the ice caps; the Earth table is untouched.</summary>
+        [Test]
+        public void TheLurkerDensOverTheTubesAndTheCrawlerKeepsToTheIce()
+        {
+            var lurker = Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.TubeLurker);
+            Assert.AreEqual(PlanetId.Mars, lurker.planet); Assert.AreEqual("creatures/mars/tube_lurker", lurker.artKey);
+            Assert.IsTrue(lurker.HasDen); Assert.AreEqual("props/mars/tube_mound", lurker.den, "D-126: the mound is a separate static prop");
+            Assert.AreEqual(Meridian.Creatures.Temper.Flees, lurker.temper, "a shy peeker (D-087)");
+            var crawler = Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.PolarCrawler);
+            Assert.AreEqual("creatures/mars/polar_crawler", crawler.artKey); Assert.IsFalse(crawler.HasDen);
+            Assert.Less(crawler.wanderSpeed, 1f, "slow");
+            Assert.AreEqual((int)Meridian.Creatures.Species.PolarCrawler, Meridian.Creatures.SpeciesSpec.Count - 1, "appended last");
+            var tube = MarsLandforms.Tubes[0];
+            Assert.IsTrue(MarsLandforms.OverTube(tube.x0 + 20)); Assert.IsFalse(MarsLandforms.OverTube(tube.x0 - 20));
+            var site = new Meridian.Creatures.SpawnSite { x = tube.x0 + 20, surfaceTile = TileId.Regolith, surfaceY = 320, datumY = 320, planet = PlanetId.Mars };
+            Assert.IsTrue(lurker.Allows(site), "over a tube on regolith");
+            site.x = tube.x0 - 20; Assert.IsFalse(lurker.Allows(site), "off the tubes: no den");
+            site.x = tube.x0 + 20; site.surfaceTile = TileId.Ice; Assert.IsFalse(lurker.Allows(site));
+            Assert.IsTrue(crawler.Allows(site), "ice: the crawler");
+            site.surfaceTile = TileId.Regolith; Assert.IsFalse(crawler.Allows(site));
+            Assert.AreEqual("idle_open", Meridian.Creatures.Creature.IdleOpenClip);
+            Assert.Greater(Meridian.Creatures.CreatureDirector.DenOrder, 5, "the mound draws in front of the creatures");
+        }
     }
 }

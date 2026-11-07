@@ -198,6 +198,22 @@ namespace Meridian.View2D
             handles.Clear();
         }
 
+        /// <summary>U-128: moves the live layers to another sorting offset (the incoming set becomes the base set after its crossfade).</summary>
+        public void SetOrderOffset(int offset)
+        {
+            orderOffset = offset;
+            for (int i = 0; i < renderers.Count && i < Layout.layers.Length; i++) if (renderers[i] != null) renderers[i].sortingOrder = BackOrder + offset + Layout.layers[i].n;
+        }
+
+        /// <summary>U-128: drops the art and the renderers (the outgoing set after a crossfade); ConfigureFor builds anew.</summary>
+        public void Release()
+        {
+            Clear();
+            foreach (var r in renderers) if (r != null) Destroy(r.gameObject);
+            renderers.Clear(); placeholders.Clear();
+            SceneKey = null;
+        }
+
         void OnDestroy() => Clear();
     }
 }
