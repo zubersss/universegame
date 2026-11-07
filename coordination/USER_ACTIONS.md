@@ -6,6 +6,13 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
+### USER-24 — Look over round 2 of the cartoon style (5 min)
+Open https://claude.ai/artifact/RpnrBEGMbKM1mSGicBYqZQ (the C0 page, now with a "Round 2" section on top).
+It shows your four changes before and after: thinner, more detailed ink; no faces on plants or
+planets; the ship upright; manual, fuel-free flight. The rocket in the stills is a grey stand-in;
+its drawn version is exported and goes into the game next. Tell the Lead "round 2 looks right"
+or what still bothers you.
+
 ### USER-08 — Optional: let the team run PowerShell commands without prompts (2 min)
 On Windows, Claude Code runs commands through PowerShell as well as Bash, and the
 `Bash(...)` allow rules in `.claude/settings.json` don't cover PowerShell. The Lead added
