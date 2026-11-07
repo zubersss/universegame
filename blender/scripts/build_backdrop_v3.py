@@ -391,6 +391,13 @@ def strata(H, wall, rng, y0, y1, n, thick=(8, 16)):
     return m * wall
 
 
+def tint(rng, H, mask, colour, opacity, **kw):
+    """A wash over a full-strength mask, its alpha scaled afterwards: a translucent shape keeps a clean body (a
+    fractional mask turns the wash's edge noise into speckle over its whole area). opacity: a number or an H x 1 ramp."""
+    rgb, m = wash32(rng, H, mask, colour, **kw)
+    return rgb, (m * opacity).astype(np.float32)
+
+
 def mars_sky(rng, pal, H, storm):
     yy = (np.arange(H) / H)[:, None, None]
     top = BG._mix(BG._mix(pal["sky"], pal["mustard"], 0.30), pal["sky"], 0.5 * storm)
@@ -401,8 +408,8 @@ def mars_sky(rng, pal, H, storm):
     for _k in range(9):                                        # thin high wisps (Mars has no fat cumulus)
         cx, cy = rng.uniform(0, W), rng.uniform(90, 420)
         for _j in range(3):
-            ell(wisp, cx + rng.uniform(-120, 120), cy + rng.uniform(-6, 6), rng.uniform(160, 340), rng.uniform(5, 11), val=0.7)
-    stack.append(wash32(rng, H, wisp, BG._mix(pal["offwhite"], pal["sky"], 0.25 + 0.4 * storm), var=0.03, edge_dark=0.02, bleed=4.0))
+            ell(wisp, cx + rng.uniform(-120, 120), cy + rng.uniform(-6, 6), rng.uniform(160, 340), rng.uniform(5, 11))
+    stack.append(tint(rng, H, wisp, BG._mix(pal["offwhite"], pal["sky"], 0.25 + 0.4 * storm), 0.7, var=0.03, edge_dark=0.02, bleed=4.0))
     return stack
 
 
@@ -417,14 +424,14 @@ def mars_canyon(seed, storm=0.0):
     # layer0: the opposite canyon wall (a flat rim with gullies, strata bands) and its nearer buttresses, in haze
     H = 1024
     stack = mars_sky(rng, pal, H, storm)
-    rim = notch(BG.ridge(rng, [(2, 0.5), (5, 0.3), (9, 0.2)], base=560, amp=12), rng, 7, 46, 70)
+    rim = notch(BG.ridge(rng, [(2, 0.5), (5, 0.3), (9, 0.2)], base=300, amp=12), rng, 7, 46, 70)    # above layer1's tiers
     wall = BG._ridge_mask(H, rim)
     stack.append(wash32(rng, H, wall, hz(BG._mix(pal["red"], pal["sky"], 0.55)), var=0.04, edge_dark=0.05, bleed=2.5))
-    stack.append(wash32(rng, H, strata(H, wall, rng, 600, 900, 6), hz(BG._mix(pal["red"], pal["brown"], 0.25), 0.40), var=0.04, edge_dark=0.03, bleed=3.0))
-    spur = terrace(notch(BG.ridge(rng, [(3, 0.5), (7, 0.35), (13, 0.15)], base=760, amp=40), rng, 5, 50, 90), 22)
+    stack.append(wash32(rng, H, strata(H, wall, rng, 340, 900, 9), hz(BG._mix(pal["red"], pal["brown"], 0.25), 0.40), var=0.04, edge_dark=0.03, bleed=3.0))
+    spur = terrace(notch(BG.ridge(rng, [(3, 0.5), (7, 0.35), (13, 0.15)], base=410, amp=35), rng, 5, 50, 90), 22)
     near = BG._ridge_mask(H, spur)
     stack.append(wash32(rng, H, near, hz(BG._mix(pal["red"], pal["sky"], 0.32)), var=0.05, edge_dark=0.07, bleed=2.0))
-    stack.append(wash32(rng, H, strata(H, near, rng, 800, 1000, 4, (6, 12)), hz(BG._mix(pal["red"], pal["brown"], 0.30), 0.25), var=0.04, edge_dark=0.03, bleed=2.5))
+    stack.append(wash32(rng, H, strata(H, near, rng, 450, 1000, 7, (6, 12)), hz(BG._mix(pal["red"], pal["brown"], 0.30), 0.25), var=0.04, edge_dark=0.03, bleed=2.5))
     floor = BG._ridge_mask(H, BG.ridge(rng, [(4, 0.6), (9, 0.4)], base=960, amp=8))
     stack.append(wash32(rng, H, floor, hz(BG._mix(pal["sky"], pal["mustard"], 0.30)), var=0.04, edge_dark=0.03, bleed=6.0))
     out.append(finish(stack, rng, H))
@@ -485,23 +492,25 @@ def mars_canyon(seed, storm=0.0):
 def mars_storm_overlay(rng, pal, H=768):
     """The dust storm as the NEAR layer (overlays that must read through the stack go on the nearest layer): a thin
     veil over everything, rolling billows low down with darker undersides, long drawn wind streaks; translucent."""
-    veil = np.full((H, W), 0.16, np.float32)
-    bill, under, streak = (np.zeros((H, W), np.float32) for _ in range(3))
+    y = (np.arange(H)[:, None] / H).astype(np.float32)
+    ramp = np.clip((y - 0.05) / 0.45, 0, 1) * 0.18                       # the veil fades in from nothing at the top
+    bill, under = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
     for _k in range(16):
-        cx, cy = rng.uniform(0, W), rng.uniform(430, 700)
+        cx, cy = rng.uniform(0, W), rng.uniform(450, 700)
         for _j in range(4):
-            x, y = cx + rng.uniform(-160, 160), cy + rng.uniform(-40, 40)
+            x, y_ = cx + rng.uniform(-160, 160), cy + rng.uniform(-40, 40)
             rx, ry = rng.uniform(110, 220), rng.uniform(60, 120)
-            ell(bill, x, y, rx, ry, val=0.55)
-            ell(under, x + rx * 0.1, y + ry * 0.45, rx * 0.85, ry * 0.45, val=0.5)
-    for _k in range(70):
-        ell(streak, rng.uniform(0, W), rng.uniform(60, 740), rng.uniform(150, 420), rng.uniform(2.5, 6), val=0.5)
-    dust = BG._mix(pal["sky"], pal["mustard"], 0.35)
+            ell(bill, x, y_, rx, ry)
+            ell(under, x + rx * 0.1, y_ + ry * 0.45, rx * 0.85, ry * 0.45)
+    streaks = [np.zeros((H, W), np.float32) for _ in range(3)]
+    for _k in range(45):
+        ell(streaks[_k % 3], rng.uniform(0, W), rng.uniform(120, 740), rng.uniform(120, 380), rng.uniform(1.5, 4.0))
     stack = Stack()
-    stack.append(wash32(rng, H, veil, BG._mix(pal["sky"], pal["offwhite"], 0.2), var=0.03, edge_dark=0.0, bleed=8.0))
-    stack.append(wash32(rng, H, bill, dust, var=0.05, edge_dark=0.04, bleed=6.0))
-    stack.append(wash32(rng, H, under * bill, BG._mix(pal["sky"], pal["brown"], 0.30), var=0.04, edge_dark=0.02, bleed=8.0))
-    stack.append(wash32(rng, H, streak, BG._mix(pal["offwhite"], pal["sky"], 0.40), var=0.03, edge_dark=0.0, bleed=1.5))
+    stack.append(tint(rng, H, np.ones((H, W), np.float32), BG._mix(pal["sky"], pal["mustard"], 0.25), ramp, var=0.02, edge_dark=0.0, bleed=1.0))
+    stack.append(tint(rng, H, bill, BG._mix(pal["sky"], pal["offwhite"], 0.35), 0.6, var=0.05, edge_dark=0.05, bleed=6.0))
+    stack.append(tint(rng, H, under * bill, BG._mix(pal["sky"], pal["brown"], 0.30), 0.5, var=0.04, edge_dark=0.02, bleed=8.0))
+    for k, op in enumerate((0.2, 0.3, 0.4)):
+        stack.append(tint(rng, H, streaks[k], BG._mix(pal["offwhite"], pal["sky"], 0.55), op, var=0.03, edge_dark=0.0, bleed=1.5))
     return finish(stack, rng, H)
 
 
