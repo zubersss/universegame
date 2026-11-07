@@ -172,7 +172,7 @@ PARTS = {"head": lambda d, M: _head(d, M), "head_squint": lambda d, M: _head(d, 
          "tail": part_tail, "fin": part_fin, "throat_rest": lambda d, M: _throat(d, M), "throat_song": lambda d, M: _throat(d, M, True)}
 
 RIG = {
-    "name": "vortex_whale", "scale_note": "about 48 m long at 1x (the fiction's 500 m is a set piece seen in passing; needs LEAD's ruling)",
+    "name": "vortex_whale", "grand": True, "scale_note": "about 48 m long at 1x (the fiction's 500 m is a set piece seen in passing; needs LEAD's ruling)",
     "bones": [
         {"name": "head", "part": "head", "parent": None, "offset_m": [0.0, 0.0], "order": 3},
         {"name": "body1", "part": "body1", "parent": "head", "offset_m": [0.0, 0.0], "order": 2},

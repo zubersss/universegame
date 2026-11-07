@@ -98,7 +98,7 @@ the Cassini gap as a darker gap line. Soft low sunlight: long warm highlights on
 | 2 | Hex drake | winged; rides the Hexagon's walls | ~2.6 m wingspan | idle 10 (a hover), fly 12 at index 1, react 8 (a wing-shielded turn), bump 10 | `replaces_v2`; pivot at the body centre; a slate-and-salmon drake with a hexagon-patterned crest, no teeth (a beak-less smiling snout) |
 | 3 | Floe moth | Deck 1 floes | ~0.6 m | idle 8, fly 12 at index 1, react 8 (scatter), bump 8 | `replaces_v2`; cream wings with ring-ice edges; no eyespots |
 | 4 | Ringmite | space (ring mining), swarms; chews hull | ~0.4 m | idle 8, fly 12 at index 1, react 8, bump 8 | new key (`creatures/saturn/ringmite`; space-view sheet); a round slate mite with stubby legs, never biting on screen (the hull damage is UNITY's) |
-| 5 | Polar Hydra (apex) | the Hexagon's eye; six heads | a set piece | idle 12 (necks weave, `cycle_beats` 4), react 12 per head, head_lost 8 | a §11.3 rig set; six heads + a body is 7 bones (the plants' cap is 6): **a proposal below** |
+| 5 | Polar Hydra (apex) | the Hexagon's eye; six heads | a set piece | idle 12 (necks weave, `cycle_beats` 4), react 12 per head, head_lost 8 | a Grand §11.3 rig set (D-140): 7 bones, `"grand": true` |
 
 ## 6. Saturn props that differ
 
@@ -106,12 +106,12 @@ The v2 models in Art, each `replaces_v2` at export: `props/saturn/ring_rig` (the
 `helium_trap` (a Deck 2-3 condensate trap: a cream gasbag over a brass cone with a pale-gold drip), `hexagon_wall_marker`
 (a ring-ice blue-grey buoy marking a wall). New: the ring chunks (section 3). The aerostat kit is B-156's (shared).
 
-## 7. Proposals (need a ruling)
+## 7. Rulings
 
-1. **The Polar Hydra's bones:** six heads + a body are 7 bones, over the rig sets' 6 (`validate_rigset`'s MAX_BONES is the
-   plants' cap). I propose the apex as two rig sets on one body pivot (`polar_hydra_left`, `polar_hydra_right`, three
-   necks + heads each, the body drawn once in the left set), so each stays within 6 bones and UNITY plays them together;
-   or a ruling that apex rigs may use up to 8 bones.
+1. **The Polar Hydra's bones (D-140):** a Grand creature (one per scene: the Maw, the whale, the Hydra) may carry up to 8
+   bones, marked `"grand": true` in its rig json (the validator applies the higher cap only there; flora and ordinary rig
+   creatures stay at 6). The Hydra is one Grand rig set of 7 bones: the body (root) and six necks, each neck part carrying
+   its head (swaps per head: rest / lure-struck / lost); the six heads weave on the beat (`cycle_beats` 4).
 
 ## 8. Order of work after LEAD's acceptance
 

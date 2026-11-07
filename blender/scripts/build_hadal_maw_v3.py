@@ -169,7 +169,7 @@ PARTS = {"head": part_head, "jaw": part_jaw, "body1": part_body1, "body2": part_
          "lure_flare": lambda d, M: _lure(d, M, True, True)}
 
 RIG = {
-    "name": "hadal_maw", "scale_note": "about 34 m long at 1x (Bible 40 m: a set piece over two screens)",
+    "name": "hadal_maw", "grand": True, "scale_note": "about 34 m long at 1x (Bible 40 m: a set piece over two screens)",
     "bones": [
         {"name": "head", "part": "head", "parent": None, "offset_m": [0.0, 0.0], "order": 3},
         {"name": "body1", "part": "body1", "parent": "head", "offset_m": [0.0, 0.0], "order": 2},

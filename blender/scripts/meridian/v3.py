@@ -61,6 +61,7 @@ CAPS = {"idle": (8, 12), "walk": (12, 16), "run": (12, 16), "fly": (12, 16), "sw
         "jump": (8, 10), "land": (8, 10)}
 SPECIAL_MAX = 16
 MAX_BONES = 6
+GRAND_MAX_BONES = 8              # D-140: a Grand creature's rig ("grand": true; one per scene: the Maw, the whale, the Hydra)
 
 
 def hex_rgb(h):
@@ -199,8 +200,9 @@ def validate_rigset(meta, png_shape=None):
         names.add(part["name"])
     for pl in meta["plants"]:
         bones = pl.get("bones", [])
-        if not 1 <= len(bones) <= MAX_BONES:
-            p.append(f"plant {pl['name']}: {len(bones)} bones (1-{MAX_BONES})")
+        cap = GRAND_MAX_BONES if pl.get("grand") else MAX_BONES                     # D-140: the higher cap only on a Grand rig
+        if not 1 <= len(bones) <= cap:
+            p.append(f"plant {pl['name']}: {len(bones)} bones (1-{cap})")
         bn = [b["name"] for b in bones]
         roots = [b for b in bones if b.get("parent") is None]
         if len(roots) != 1:
