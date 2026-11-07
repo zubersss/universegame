@@ -80,16 +80,19 @@ namespace Meridian.Tests
             for (float t = 0f; t < 0.7f; t += Time.deltaTime) yield return null;
             Assert.IsTrue(maw.RigReacting, "inside 12 m: reacting");
             float open = Quaternion.Angle(Quaternion.identity, jaw.localRotation);
-            TestContext.Out.WriteLine($"[MERIDIAN] maw: jaw {open:F1}° open, lure {(maw.Rig.Slots.TryGetValue("lure", out var lure) && lure.sprite != null ? lure.sprite.name : "none")}, state {(maw.Rig.Animator.GetCurrentAnimatorStateInfo(0).IsName("hadal_maw") ? "sway" : "other")}");
+            var lure = maw.RigSlotRenderer("lure"); // a replaces_part slot: the lure bone's own renderer
+            TestContext.Out.WriteLine($"[MERIDIAN] maw: jaw {open:F1}° open, lure {(lure != null && lure.sprite != null ? lure.sprite.name : "none")}, state {(maw.Rig.Animator.GetCurrentAnimatorStateInfo(0).IsName("hadal_maw") ? "sway" : "other")}");
             Assert.Greater(open, 15f, "the jaw opens toward −24°");
-            if (lure != null && lure.sprite != null) Assert.AreEqual("lure_flare", lure.sprite.name, "the lure flares");
+            Assert.NotNull(lure, "the lure slot resolves to a renderer");
+            Assert.AreEqual("lure_flare", lure.sprite.name, "the lure flares while reacting");
             Assert.AreEqual(0, creatures.Bumps, "D-087: the Maw never bumps");
             var far = maw.Body.position + new Vector2(40f, 2f);
             side.player.transform.position = far; side.player.Body.position = far;
             for (float t = 0f; t < 0.7f; t += Time.deltaTime) yield return null;
             Assert.IsFalse(maw.RigReacting, "outside 12 m: calm");
             Assert.Less(Quaternion.Angle(Quaternion.identity, jaw.localRotation), 5f, "the jaw closes");
-            if (lure != null && lure.sprite != null) Assert.AreNotEqual("lure_flare", lure.sprite.name, "the lure back on its cycle");
+            Assert.AreNotEqual("lure_flare", lure.sprite.name, "the lure back on its cycle (lit 6 beats / dim 2)");
+            Assert.IsTrue(lure.sprite.name == "lure_lit" || lure.sprite.name == "lure_dim", lure.sprite.name);
             side.player.Body.simulated = true;
             creatures.DespawnAll();
             LogAssert.NoUnexpectedReceived();

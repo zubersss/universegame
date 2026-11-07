@@ -5,6 +5,6 @@ namespace Meridian
     {
         public const string Company = "Zubers";
         public const string Product = "MERIDIAN";
-        public const string Version = "0.4.1";
+        public const string Version = "0.4.2";
     }
 }

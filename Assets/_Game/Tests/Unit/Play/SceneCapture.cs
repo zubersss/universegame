@@ -2503,7 +2503,8 @@ namespace Meridian.Tests
                 cam.transform.position = new Vector3(maw.Body.position.x + 4f, maw.Body.position.y + 1f, z);
                 yield return Shot("3_react");
                 var jaw = maw.Rig.Bone("jaw");
-                TestContext.Out.WriteLine($"[MERIDIAN] u119 react: reacting {maw.RigReacting}, jaw {(jaw != null ? Quaternion.Angle(Quaternion.identity, jaw.localRotation) : 0f):F1}°, lure {(maw.Rig.Slots.TryGetValue("lure", out var lure) && lure.sprite != null ? lure.sprite.name : "none")}, bumps {creatures.Bumps}");
+                var lure = maw.RigSlotRenderer("lure");
+                TestContext.Out.WriteLine($"[MERIDIAN] u119 react: reacting {maw.RigReacting}, jaw {(jaw != null ? Quaternion.Angle(Quaternion.identity, jaw.localRotation) : 0f):F1}°, lure {(lure != null && lure.sprite != null ? lure.sprite.name : "none")}, bumps {creatures.Bumps}");
                 Assert.IsTrue(maw.RigReacting, "inside the react radius");
                 Assert.AreEqual(0, creatures.Bumps, "D-087: no bump");
                 side.player.Body.simulated = true;

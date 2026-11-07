@@ -208,7 +208,7 @@ namespace Meridian.Tests
             spaceShip.Velocity = new Vector2(0f, -40f);
             yield return WaitBusyCycle(transitions, 15f);
             Row("Planet load · Mars entry", "≤ 5 s (v3)", $"{transitions.LastEntrySeconds:F2} s ({director.LastLoadBreakdown})", transitions.LastEntrySeconds <= 5f);
-            Row("Transition · entry (top-down → side)", "≤ 1.5 s", $"{transitions.LastEntrySeconds:F2} s", transitions.LastEntrySeconds <= 1.5f);
+            Info("Transition · entry (top-down → side)", "≤ 1.5 s in the dev-build transition rows (D-136 (2): the Editor transition row is info, like the Editor memory rows)", $"{transitions.LastEntrySeconds:F2} s (Editor)", "info");
 
             side = director.PlanetSide;
             Assert.NotNull(side, "entered a planet");

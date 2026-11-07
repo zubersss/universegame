@@ -255,13 +255,16 @@ namespace Meridian.Creatures
             rigJaw = Rig.Bone("jaw");
             rigCycle = def.Cycle;
             rigLureSlot = null; rigCycleSprites = null; rigReactSprite = null;
-            if (rigCycle != null && Rig.Slots.TryGetValue(rigCycle.slot, out rigLureSlot))
+            if (rigCycle != null && (rigLureSlot = RigSlotRenderer(rigCycle.slot)) != null)
             {
                 rigCycleSprites = new Sprite[rigCycle.sequence.Length];
                 for (int i = 0; i < rigCycleSprites.Length; i++) rigSprites.TryGetValue(rigCycle.sequence[i], out rigCycleSprites[i]);
             }
             foreach (var kv in def.react.also)
-                if (Rig.Slots.TryGetValue(kv.Key, out var slotRenderer) && rigSprites.TryGetValue(kv.Value, out var reactSprite)) { if (rigLureSlot == null) rigLureSlot = slotRenderer; if (slotRenderer == rigLureSlot) rigReactSprite = reactSprite; break; }
+            {
+                var slotRenderer = RigSlotRenderer(kv.Key);
+                if (slotRenderer != null && rigSprites.TryGetValue(kv.Value, out var reactSprite)) { if (rigLureSlot == null) rigLureSlot = slotRenderer; if (slotRenderer == rigLureSlot) rigReactSprite = reactSprite; break; }
+            }
             rigCyclePhase = Time.time;
             rigReactK = 0f;
             View.enabled = false; // the placeholder box hides behind the rig
@@ -274,6 +277,17 @@ namespace Meridian.Creatures
             rigJson = null; rigSprites = null; rigController = null; rigKey = null; rigPending = 0; rigReactK = 0f; RigReacting = false;
             foreach (var h in rigHandles) if (h.IsValid()) global::Meridian.Art.ArtLoad.Release(h);
             rigHandles.Clear();
+        }
+
+        /// <summary>U-119: the renderer a swap slot draws on: RigBuild's own slot renderer, or — for a v3.1 `replaces_part` slot — the bone's part renderer (the Maw's lure). Null without a rig or slot.</summary>
+        public SpriteRenderer RigSlotRenderer(string slot)
+        {
+            if (Rig == null || string.IsNullOrEmpty(slot)) return null;
+            if (Rig.Slots.TryGetValue(slot, out var r)) return r;
+            var s = Rig.Def.FindSlot(slot);
+            if (s == null || !s.replaces_part) return null;
+            int bi = Rig.Def.BoneIndex(s.bone);
+            return bi >= 0 && bi < Rig.Parts.Length ? Rig.Parts[bi] : null;
         }
 
         internal void SetRigReacting(bool on) => RigReacting = on;
