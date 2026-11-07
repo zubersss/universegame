@@ -1,7 +1,7 @@
-"""B-161 (C2 Neptune design prep): the proposed Neptune palette strip and its check against Bible §9.1 (muted, slightly aged;
+"""B-161 (C2 Neptune design prep): the Neptune palette strip and its check against Bible §9.1 (muted, slightly aged;
 one 6-8 colour palette per planet) and §7.9 Neptune ("deep indigo, white wisps streaking, a storm you can see breathing"; the
 endgame, the wind world). Same slot names and order as the other strips (v3.PALETTE_ORDER), so gp_draw's tones and
-palette_hits work once LEAD accepts it into meridian.v3.PALETTES["neptune"]. The Mars checks (build_c2_mars_palette) plus
+palette_hits work (ACCEPTED, D-148: in meridian.v3.PALETTES["neptune"]). The Mars checks (build_c2_mars_palette) plus
 Neptune's family: a deep indigo shadow, a Neptune-blue sky, a cold white for the wisps (the brightest colour), exactly one
 warm accent (the Meridian's beacon coral), dimmer than Uranus (Neptune gets 0.4x Uranus's sunlight), and told apart from
 Uranus at a glance (the two ice giants sit side by side in space).
@@ -41,7 +41,8 @@ def de(a, b):
 
 def check():
     pal = {k: h for k, (h, _r) in NEPTUNE.items()}
-    v3.PALETTES.setdefault("neptune", pal)
+    if v3.PALETTES.get("neptune") != pal:
+        raise ValueError("NEPTUNE here and meridian.v3.PALETTES['neptune'] (D-148) differ: " + str(v3.PALETTES.get("neptune")))
     ura = v3.PALETTES["uranus"]
     rows = ["| slot | hex | role | mid | deep | contrast vs ink | chroma |", "|---|---|---|---|---|---|---|"]
     for k in v3.PALETTE_ORDER:

@@ -67,6 +67,13 @@ PALETTES = {
         "offwhite": "#E3ECE9", "red": "#C27A4A", "mustard": "#ABAF86", "teal": "#5E9FA5",
         "green": "#7E9A80", "sky": "#9CC2C2", "brown": "#2E3D47", "ink": "#1E1A17",
     },
+    # D-148, LEAD cycle 272: the Neptune palette (B-161; checked by scripts/build_c2_neptune_palette.py). offwhite wisp
+    # white, red beacon coral (the one warm accent: the Meridian, heaters, anchor hooks), mustard storm violet, teal wind
+    # cyan, green abyss sage (flora), sky Neptune blue, brown deep indigo (the shadow mix colour).
+    "neptune": {
+        "offwhite": "#E4E8EE", "red": "#C06A55", "mustard": "#9E88B8", "teal": "#5A98B0",
+        "green": "#7C9E86", "sky": "#5E74AE", "brown": "#2C3160", "ink": "#1E1A17",
+    },
 }
 PALETTE_ORDER = ["offwhite", "red", "mustard", "teal", "green", "sky", "brown", "ink"]
 

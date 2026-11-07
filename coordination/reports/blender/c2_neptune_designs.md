@@ -14,14 +14,14 @@ floe strips (D-137), the shared aerostat kit (B-156), straight-alpha layers (D-1
 
 | Item | State | File |
 |---|---|---|
-| Palette | PROPOSED, every check passing (table below) | blender/scripts/build_c2_neptune_palette.py |
+| Palette | ACCEPTED (D-148): in `meridian.v3.PALETTES["neptune"]` + the ui/palettes/neptune row (exports with the first Neptune slot) | blender/scripts/build_c2_neptune_palette.py |
 | Five flora | designed below; drawings after the palette | build_c2_neptune_plants.py (next) |
 | Floe strips | designed below (D-137's 10-frame contract) | build_c2_neptune_floes.py (next) |
 | Deck backdrops | study notes below (FFT washes: a BLENDER slot) | build_backdrop_v3.py (next) |
 | Creatures | the list below (none in Art yet: all new, no `replaces_v2`); the apex a Grand rig set | - |
 | Props | the ones that differ, below (four v2 sprites in Art: `replaces_v2`) | - |
 
-## 1. Palette (PROPOSED; checked by blender/scripts/build_c2_neptune_palette.py)
+## 1. Palette (ACCEPTED, D-148; checked by blender/scripts/build_c2_neptune_palette.py)
 
 | slot | hex | role | mid | deep | contrast vs ink | chroma |
 |---|---|---|---|---|---|---|
@@ -110,8 +110,9 @@ geometry (fe6ace98) so a mirrored or pulsed layer never slides against its neigh
   (inside its visible band, above the CRUSH band: the near-layer rule, so layer2's banks never hide them), the CRUSH band
   (the Saturn / Jupiter band).
 - **storm (the Dark Storm zone, 400 m wide):** layer0 the indigo vortex core spiralling inward (the inward pull drawn as
-  curved streaks), layer1 the storm-violet rim with the bright white companion clouds along its edge (UNITY pulses this
-  layer), layer2 the near wind streaks curving into the eye. The Great Dark Spot is the same set with the *Meridian*'s
+  curved streaks), layer1 the storm-violet rim with the bright white companion clouds along its edge, alone on its layer
+  with a `pulse` block in the scene json (D-148: `{"scale": [0.97, 1.03], "alpha": [0.85, 1.0], "beats": 8, "bpm": 110}`;
+  UNITY pulses it), layer2 the near wind streaks curving into the eye. The Great Dark Spot is the same set with the *Meridian*'s
   silhouette far off on layer0 (one extra layer0 variant, `storm_meridian`).
 
 ## 6. Neptune creature list (contract §11.2; faces kept, no teeth)
@@ -133,18 +134,18 @@ The v2 sprites in Art, each `replaces_v2` at export (removes `_normal`, `_mask`,
   sock on top (it bends with the wind lean like the plants).
 - `props/neptune/meridian_wreck_bow | _mid | _stern`: the *Meridian* in three segments: a dusty beacon-coral hull with
   rivet seams, round portholes, a brass name ring on the bow, the beacon lamp on the stern (the final beacon, the ending
-  choice). At PPU 64 a 4.4 m segment is only 282 px; proposal 3 makes each ~7.5 m (480 px, inside the 512 cap) so the ship
-  reads as the expedition vessel, ~22 m whole.
+  choice). At PPU 64 a 4.4 m segment is only 282 px; D-148 (3) makes each ~7.5 m (480 px, inside the 512 cap) so the ship
+  reads as the expedition vessel, ~22 m whole; the keys unchanged.
 - New: Triton and its geysers are sky art (backdrop), not props; the Superionic Ice drill site reuses the Rig's drill.
 
-## 8. Proposals (for LEAD)
+## 8. Rulings (D-148, LEAD cycle 272: the palette and all three proposals accepted)
 
 1. **Wind lean on the root bone (UNITY).** Neptune flora and the wind anchor's sock are drawn upright; UNITY bends the root
    bone by the local wind (0 at calm to ~25 deg at 35 m/s, a stepped 12 Hz shiver in gusts) and mirrors for -x wind. No
    extra frames; the 300-plant loop keeps one controller (D-110). Cost: a per-planet wind input on RigSetBuilder's driver.
 2. **The breathing storm as a pulsed layer.** The storm set's layer1 (the rim + companion clouds) ships alone so UNITY
    pulses it (scale 0.97-1.03 and alpha 0.85-1.0 over 8 beats at 110 bpm, ~4.4 s); the Stormlantern's glow swap follows
-   the same clock. No animated backdrop frames.
+   the same clock. No animated backdrop frames. The scene json carries it as a `pulse` block on that layer.
 3. **A bigger *Meridian*.** The three wreck segments at ~7.5 m each (480 x ~300 px, PPU 64), so the final beacon reads as
    a ship, not a shed; the keys and the three-part split unchanged.
 
