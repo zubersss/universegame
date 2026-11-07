@@ -22,11 +22,12 @@ When the lock frees, the highest pending job here goes next, even if the other r
 older (D-037 alternation applies only between equal ranks). A rank is live only while its role
 has a want on file or holds the lock (D-112): if the top rank has no want when the lock frees,
 the next live rank runs now and the skipped role goes next after it files. A role below the top
-keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 270 (12:5x, hourly tick; the three Mercury exports are in (B-149 1e99fcc4, B-148 70c40e1e, B-150 cca20f60) under D-145's per-job gate; the lock is free at 1.8 GB; UNITY's session restarted (its address changed), its PlayMode slice is owed). A role files its want only when the queue says it is next after the running job:
-1. UNITY · the U-123 PlayMode slice (the D-122 half with -PlayFilter, ~10 min) against the real Mercury art → release.
-2. BLENDER · ONE budgeted slot right after (345 s, the 75 s start rule): the hexagon curtains, the sdeck1 / sdeck2 ring pass, Uranus deck1 in its four lights; skipped scenes to the next slot.
-3. UNITY · a second short lock: M3Inner, the Mercury captures (day with a Glassback, twilight at the terminator, night with the Shadewyrm at its burrow), the 16:9 re-shoots of the older Mars / Earth frames → the hand-off with the Mercury probe legs and the Creep second-loop reading → U-123 Done → C3 UI promoted (U-124 + U-102 + B-151).
-4. Then Venus (U-125 + B-152..B-154), Jupiter (U-126 / U-127 + B-159 / B-160), Saturn (U-129 + B-157), Uranus (U-130 + B-158); BLENDER's remaining Uranus decks get slots once deck1's lighting is judged.
+keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 271 (13:5x, hourly tick; UNITY's U-123 re-run is in its capture locks (the slice + M3Inner 23/23 at 13:39; the three Mercury frames shot 13:47 against the straight-alpha sets; the fill-tile fix 9a6e31d5 re-shoots them); 1.5 GB free under the Editor). A role files its want only when the queue says it is next after the running job:
+1. UNITY · the capture locks (U123 Mercury re-shot with the fill fix, U118 den, U110 scenes) → BudgetGate → Build 0.4.4 (a dev build; 0.4.3 untouched) + the 13-leg probe with the Mercury legs and the Creep second-loop breakdown → the hand-off commit (c2_mercury README, perf + tests, status) → U-123, B-148, B-149, B-150 Done.
+2. BLENDER · between UNITY's locks (file the want while its lock is on): B-162 the Earth sets straight (plains / forest / coast + the climb sky set where its near layers carry alpha; one slot; a before / after review) → then the Mars sets (one slot) → then Uranus decks 2 / 3 / deep ×4 in budgeted slots.
+3. UNITY · after the hand-off: C3 UI (U-124 + U-102 + B-151): the code lock-free and committed ahead of its check; B-151's export (a real slot at the gate for the cards) behind it; then the check + captures.
+4. Then Venus (U-125 + B-152..B-154), Jupiter (U-126 / U-127 + B-159 / B-160), Saturn (U-129 + B-163 / B-164), Uranus (U-130 + B-158's exports).
+
 
 
 
@@ -60,10 +61,10 @@ Rules: nothing here needs the lock; it stays under ~300 MB of extra RAM; no Unit
 did in your status before the next poll. LEAD tops each list up to ≥ 3 items every cycle.
 
 **UNITY**
-- U-123 Mercury code lock-free (the B-149 day / twilight / night sets picked by the terminator, the B-148 rig set and the regolith / slate strips, the Mercury creatures on sheets with the Shadewyrm a den species at props/mercury/ice_burrow and the Flarewing a flier, the climb sky from an ink-black top), committed ahead of its check so B-148 / B-149 / B-150 export behind it.
-- A later short lock (not before U-123's code commit): re-shoot u118/2_canyon_1x, 3_lurker_den, 4_storm_1x and u110's three frames with the fixed rig (they predate the strip-depth fix and the 16:9 capture fix), for the record and the next page.
-- The C3 UI code (U-124 + U-102) lock-free after Mercury's: the 9-slice panels by their `slice` json, the settings panel, the title cards as the intertitle slide-in, the Film switch on its toggle.
-- The Creep second loop read 7.5 MB on 0.4.3 against 1 MB on 0.4.2 (both green; every attributed counter 0): the next probe rides U-123's check chain; if it reads ≥ 7 again, add the Mono heap and the allocator reserve to the per-leg prints before any fix.
+- UNITY_STATUS current after each lock (at the tick it read 13:26 and still said "no want until the owner says re-run"; D-046 covers the one re-run, and your want is on): the re-run's steps, the 0.4.4 rows, the hand-off.
+- The C3 UI code (U-124 + U-102) lock-free after the Mercury hand-off: the 9-slice panels by their `slice` json, the settings panel, the title cards as the intertitle slide-in on entry, the Film switch on its toggle, Limelight + Patrick Hand, keyboard reach; committed ahead of its check so B-151 exports behind it.
+- A later short lock: the 16:9 re-shoots of the older frames (u118/2_canyon, 3_lurker_den, 4_storm; u110's three) once B-162 Mars lands, so the record shows the straight-alpha sets.
+- The Creep second loop: 7.5 MB on 0.4.3 with every allocator flat; read 0.4.4's figure with the Mono / native breakdown; a watch row, not a card, unless it exceeds 10.
 - `docs/credits/unity.md` upkeep; the icon-coverage assert stays.
 Then one batched check per hand-off when your turn in the queue comes (compile + EditMode as one lock, PlayMode A / B as two, D-122).
 
@@ -73,11 +74,14 @@ Then one batched check per hand-off when your turn in the queue comes (compile +
 
 
 
+
 **BLENDER** (numpy / scripts only while UNITY holds the lock or a want; bpy only under your own lock; under 0.3 GB free, code only; otherwise only pre-measured ≤ 150 MB jobs beside another role's lock; the lock / RAM check is its own call)
-- The budgeted slot (queue item 2) after UNITY's slice; then Uranus decks 2 / 3 / deep in later slots once deck1's lighting is judged; the Hexagon and the ring line close B-157 on that look.
-- Jupiter export readiness for B-159 (backdrops + capped floes + the flora rig set + props) and B-160 (the four creatures + the whale rig set, `replaces_v2`), a scratch dry run; the Saturn and Uranus rows after.
-- B-161 Neptune design prep (C2 order 8; Bible §7.9 the dark storm world): the palette with the Mars checks (a deep blue-black family with one cold-white accent), the deck notes (the Great Dark Spot, supersonic wind streaks, diamond rain), the floe and flora set, the creature re-ink list with the apex as a Grand rig; `coordination/reports/blender/c2_neptune_designs.md`; previews when RAM allows.
-- BLENDER_STATUS current after each item (it read 11:34 at this tick) and the Ready-for-review lines refreshed; reports and README upkeep (D-145's gate line, the lit-set naming for Uranus).
+- B-162 in the gaps between UNITY's locks: the Earth sets straight (one slot, before / after review), then the Mars sets (one slot); layer0s byte-identical by md5 each time.
+- Uranus decks 2 / 3 / deep ×4 in budgeted slots after B-162 (skip, never overrun); B-158 Done on them.
+- Export readiness: the Jupiter rows (B-159 backdrops + floes + flora + props, B-160 creatures + the whale), the Saturn rows (B-163 / B-164: the five decks re-rendered straight, floes, rig set, creatures, the Hydra, props), the Uranus rows; a scratch dry run each; the Venus and Jupiter studies re-rendered straight before their exports.
+- B-161 Neptune design prep (C2 order 8; Bible §7.9 the dark storm world): the palette with the Mars checks, the deck notes (the Great Dark Spot, supersonic wind streaks, diamond rain), floes and five faceless flora, the creature list with the apex as a Grand rig; `coordination/reports/blender/c2_neptune_designs.md`; previews when RAM allows.
+- BLENDER_STATUS: the Ready-for-review lines name only what LEAD has not judged (B-148 / B-149 / B-150 and the Uranus props + rig are verified or accepted; drop them); reports and README upkeep (D-145's gate, D-147's straight finish, the Grand-rig flag).
+
 
 
 
@@ -2199,7 +2203,7 @@ Goal: Mercury on the cartoon stage (Bible §12 C2 order 3; §7.3): Mercury runs 
 Accept: Mercury captures at 1x (day plains with plants and a Glassback, the twilight band with a Flarewing, the night side with the Shadewyrm at its burrow) matching the accepted B-145 composites; TransitionTests green; the BudgetGate Mercury rows green; StageLayers' Mercury tests retired per D-124.
 Files: Code/Runtime/View2D/CartoonStage.cs, Code/Runtime/Planet/, Code/Runtime/Creatures/CreatureSpecies.cs, Tests/
 Depends: U-118, B-148, B-149
-Lead notes: Cycle 264. Promoted when U-118 Mars is Done. Cycle 269 close: PROMOTED (U-118 Done). Code lock-free now, committed ahead of the check so B-148 / B-149 / B-150 export behind it (D-119's order); the Creep second-loop probe rides the check chain. 13:1x: lock 1 GREEN (12:54–12:59: compile 0 / 0, CheckSetup imported the three exports, the 10-class slice 16/16); lock 2: M3Inner 5/7 with one red in LEAD's own Step4 (fixed e201d1e1, re-run owed); CaptureU123Mercury 13:08: all real art draws (the three sets by zone, both strips, the rig plants, the Glassback, the Flarewing, the Shadewyrm in a true peek) but the camp sits in a seeded crater and the cold trap's datum floats ~3 m over its floor → D-146 (no small craters within ±40 columns of the pad; the datum from the generator's surface); the three Mercury frames re-shoot in the next lock with the den / scene re-shoots, Build 0.4.4 + the probe and M3Inner. The Shadewyrm frame passes.
+Lead notes: Cycle 264. Promoted when U-118 Mars is Done. Cycle 269 close: PROMOTED (U-118 Done). Code lock-free now, committed ahead of the check so B-148 / B-149 / B-150 export behind it (D-119's order); the Creep second-loop probe rides the check chain. 13:1x: lock 1 GREEN (12:54–12:59: compile 0 / 0, CheckSetup imported the three exports, the 10-class slice 16/16); lock 2: M3Inner 5/7 with one red in LEAD's own Step4 (fixed e201d1e1, re-run owed); CaptureU123Mercury 13:08: all real art draws (the three sets by zone, both strips, the rig plants, the Glassback, the Flarewing, the Shadewyrm in a true peek) but the camp sits in a seeded crater and the cold trap's datum floats ~3 m over its floor → D-146 (no small craters within ±40 columns of the pad; the datum from the generator's surface); the three Mercury frames re-shoot in the next lock with the den / scene re-shoots, Build 0.4.4 + the probe and M3Inner. The Shadewyrm frame passes. Cycle 271 (13:5x): the re-run's step 1 GREEN in the foreground (13:39–13:43: PlayMode 23/23 = the Mercury slice 16/16 on D-146 with the pad's ground = the datum 317.0, LeadQA M3Inner 7/7 with LEAD's Step4 fix). The three Mercury frames shot 13:47 against the straight-alpha B-149 PASS for their scenes (1_day_1x: the camp on the plain with a Glassback, embercaps and sunfans under the huge low Sun; 2_twilight_1x: the half-set Sun under the violet band, the Flarewing, glassreeds; 3_night_burrow: the cold trap's set meeting its floor, the Shadewyrm peeking at its burrow, coilwort and shadebloom). The horizontal hairlines in the strip fill below are the fill-tile bleed fixed at 13:48 (9a6e31d5); the running want re-shoots them with the den and scene frames, then BudgetGate, Build 0.4.4 + the probe, the hand-off. Done on the hand-off.
 
 
 ### U-124 · UNITY · Backlog · C3
