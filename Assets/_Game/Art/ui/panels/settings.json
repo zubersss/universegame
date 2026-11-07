@@ -1,0 +1,20 @@
+{
+  "key": "ui/panels/settings",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 192,
+  "height": 224,
+  "slice": [
+    48,
+    80,
+    48,
+    48
+  ],
+  "slice_order": "[left, top, right, bottom] px in from each edge (contract 11.6); Unity's Sprite.border is (left, bottom, right, top)",
+  "lettering": "runtime",
+  "lettering_note": "blank panel; UNITY letters it in Patrick Hand"
+}
