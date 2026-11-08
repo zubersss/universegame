@@ -135,6 +135,8 @@ namespace Meridian.View2D
         /// <summary>U-133 (B-161): a sibling set layers 1 and up load from (Neptune's spot shares the storm's rim and near streaks, byte-identical);
         /// null: the set's own. Set before ConfigureFor.</summary>
         public string upperScene;
+        /// <summary>U-146: draw only this layer of the set (the survey pulse's banded layer0 over the view); -1: every layer. Set before ConfigureFor.</summary>
+        public int onlyLayer = -1;
         string LayerKey(int n)
         {
             string prefix = SceneKey != null ? SceneKey.Substring(0, SceneKey.LastIndexOf('/') + 1) : null;
@@ -159,6 +161,7 @@ namespace Meridian.View2D
                 renderers.Add(sr);
                 placeholders.Add(true);
                 int index = i;
+                if (onlyLayer >= 0 && l.n != onlyLayer) { sr.enabled = false; placeholders[index] = false; continue; } // U-146: not drawn, not loaded
                 Probe<Sprite>(LayerKey(l.n), h => h.Completed += op =>
                 {
                     if (this == null || index >= renderers.Count || renderers[index] != sr || op.Status != AsyncOperationStatus.Succeeded || op.Result == null) return;

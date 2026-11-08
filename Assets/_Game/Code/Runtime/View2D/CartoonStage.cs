@@ -210,6 +210,40 @@ namespace Meridian.View2D
         /// <summary>D-154: the Survey view by the active module (no pulse, no ownership gate). Pure.</summary>
         public static bool SurveyViewFor(Meridian.Rig.RigModule active) => active == Meridian.Rig.RigModule.Survey;
         Meridian.Player.PlayerRigInput rigInput;
+        /// <summary>U-146 (D-154's deferred half): a Survey scan pulses the survey bands for SurveyPulseBeats beats at SurveyPulseBpm: up over the
+        /// first beat and down over the last through the U-128 smoothstep, held between. On Uranus the deck's survey layer0 is drawn over the
+        /// view on the veil slot at SurveyPulsePeak × this; the Leviathan's bands (Neptune, D-148) read the same pulse (SurveyPulse).</summary>
+        public const int SurveyPulseBeats = 4;
+        public const float SurveyPulseBpm = 110f, SurveyPulsePeak = 0.55f;
+        public static float SurveyPulseSeconds => SurveyPulseBeats * 60f / SurveyPulseBpm;
+        /// <summary>The pulse's strength (0..1) this long after a scan. Pure.</summary>
+        public static float SurveyPulseAlpha(float sinceScan)
+        {
+            float total = SurveyPulseSeconds, beat = 60f / SurveyPulseBpm;
+            if (sinceScan < 0f || sinceScan >= total) return 0f;
+            if (sinceScan < beat) return CrossfadeAlpha(sinceScan, beat);
+            if (sinceScan > total - beat) return CrossfadeAlpha(total - sinceScan, beat);
+            return 1f;
+        }
+        float lastSurveyScan = float.NegativeInfinity;
+        Meridian.Player.PlayerRigInput surveyedFrom;
+        /// <summary>U-146: the survey pulse now (0 when no scan is fresh): the Leviathan's bands light by it.</summary>
+        public float SurveyPulse => SurveyPulseAlpha(Time.time - lastSurveyScan);
+        void OnSurveyed(Vector2 centre)
+        {
+            lastSurveyScan = Time.time;
+            if (!Active || planetId != Meridian.Planets.PlanetId.Uranus || Layers == null) return;
+            // Uranus: the deck's survey layer0 alone on the veil slot (above the near layers), its alpha the pulse's.
+            if (StormLayers == null) { var wgo = new GameObject("CartoonStormVeil"); wgo.transform.SetParent(transform, false); StormLayers = wgo.AddComponent<ParallaxLayers>(); StormLayers.orderOffset = StormVeilOrder; }
+            StormLayers.gameObject.SetActive(true);
+            StormLayers.view = Layers.view;
+            StormLayers.alpha = 0f;
+            StormLayers.scrollX = 0f;
+            StormLayers.onlyLayer = 0;
+            StormLayers.layer0Scene = null; StormLayers.upperScene = null;
+            StormLayers.ConfigureFor(planetName, DeckOf(Scene) + "_" + Meridian.Planet.UranusSeason.Survey, DatumFor(Scene, Layers.datumY));
+        }
+        void OnDestroy() { if (surveyedFrom != null) surveyedFrom.Surveyed -= OnSurveyed; }
         Meridian.Hazards.HazardSystem hazards;
         /// <summary>Rigged plants around the camp in C0 (every FloraSpacing m, jittered).</summary>
         public const int FloraCount = 42; // D-136 (2): was 48; the camp's density is the animated-object lever (the gate read 42 Animators against 40)
@@ -259,7 +293,9 @@ namespace Meridian.View2D
             planetId = config.id; planetName = config.id.ToString().ToLowerInvariant();
             worldWidth = config.worldWidth; clock = FindAnyObjectByType<TimeSystem>(); hazards = side.hazards; lastDawn = int.MinValue;
             seasonSeconds = Meridian.Planet.UranusSeason.SeasonSeconds(config.dayLengthRealMinutes); lastSeason = long.MinValue; // U-130
-            rigInput = side.player != null ? side.player.GetComponent<Meridian.Player.PlayerRigInput>() : null; // D-154: the Survey view follows the active module // U-123: Mercury's set and strips follow the terminator's clock
+            rigInput = side.player != null ? side.player.GetComponent<Meridian.Player.PlayerRigInput>() : null;
+            if (surveyedFrom != rigInput) { if (surveyedFrom != null) surveyedFrom.Surveyed -= OnSurveyed; surveyedFrom = rigInput; if (rigInput != null) rigInput.Surveyed += OnSurveyed; } // U-146
+            lastSurveyScan = float.NegativeInfinity; // D-154: the Survey view follows the active module // U-123: Mercury's set and strips follow the terminator's clock
             float entryY = side.player != null ? side.player.transform.position.y : surfaceDatum;
             Scene = config.id == Meridian.Planets.PlanetId.Venus ? VenusSceneFor(entryY, null) // U-125: the entry's height (the surface or the deck)
                 : config.id == Meridian.Planets.PlanetId.Neptune ? NeptuneSceneFor(entryY, side.spawnX, worldWidth, GameTime, null) // U-133
@@ -294,6 +330,7 @@ namespace Meridian.View2D
                 StormLayers.view = cam;
                 StormLayers.alpha = 0f;
                 StormLayers.scrollX = 0f;
+                StormLayers.onlyLayer = -1; // U-146: the pulse may have left the slot on one layer
                 StormLayers.ConfigureFor("mars", StormScene, surfaceDatum);
                 storm = side.dustStorm;
             }
@@ -305,6 +342,7 @@ namespace Meridian.View2D
                 StormLayers.view = cam;
                 StormLayers.alpha = 0f;
                 StormLayers.scrollX = 0f;
+                StormLayers.onlyLayer = -1;
                 StormLayers.ConfigureFor(planetName, OverlayFor(config.id), DatumFor(Scene, surfaceDatum));
                 storm = null;
             }
@@ -386,6 +424,13 @@ namespace Meridian.View2D
                     lean = Meridian.Planet.Weather.NeptuneWind.Lean(Meridian.Planet.Weather.NeptuneWind.At(Mathf.FloorToInt(Layers.view.transform.position.x), now), Meridian.Planet.Weather.NeptuneWind.Gusting(now), now);
                 }
                 Flora.leanDegrees = Mathf.Round(lean * 4f) * 0.25f; // quarter-degree steps: the 300 roots are written only when the lean moves a step (the shiver flips at 12 Hz)
+            }
+            if (Active && planetId == Meridian.Planets.PlanetId.Uranus && StormLayers != null && StormLayers.gameObject.activeSelf)
+            {
+                // U-146: the scan pulse rides the veil slot; when it is over the slot lets its art go.
+                if (Time.time - lastSurveyScan < SurveyPulseSeconds)
+                    StormLayers.alpha = StormLayers.placeholders.Count > 0 && !StormLayers.placeholders[0] ? SurveyPulsePeak * SurveyPulse : 0f; // never a flat placeholder (before B-166's survey sets)
+                else { StormLayers.Release(); StormLayers.gameObject.SetActive(false); }
             }
             if (Active && planetId == Meridian.Planets.PlanetId.Uranus && Ground != null && worldWidth > 0)
             {

@@ -114,6 +114,24 @@ namespace Meridian.Tests
                 Assert.IsFalse(CartoonStage.SurveyViewFor(m), m + " selected: the plain fog");
         }
 
+        /// <summary>U-146: a Survey scan pulses the survey bands for 4 beats at 110 bpm (~2.2 s): up over the first beat and down over the last
+        /// through the U-128 smoothstep, held between, nothing before the scan or after the fourth beat.</summary>
+        [Test]
+        public void TheScanPulseLastsFourBeatsAndFades()
+        {
+            float beat = 60f / 110f, total = 4f * beat;
+            Assert.AreEqual(total, CartoonStage.SurveyPulseSeconds, 1e-5f, "4 beats at 110 bpm");
+            Assert.AreEqual(0f, CartoonStage.SurveyPulseAlpha(-0.01f));
+            Assert.AreEqual(0f, CartoonStage.SurveyPulseAlpha(0f), 1e-5f, "it rises from nothing");
+            Assert.AreEqual(0.5f, CartoonStage.SurveyPulseAlpha(beat * 0.5f), 1e-4f, "half the first beat: half up (the crossfade's smoothstep)");
+            Assert.AreEqual(1f, CartoonStage.SurveyPulseAlpha(beat), 1e-4f);
+            Assert.AreEqual(1f, CartoonStage.SurveyPulseAlpha(total * 0.5f), 1e-5f, "held through beats 2-3");
+            Assert.AreEqual(0.5f, CartoonStage.SurveyPulseAlpha(total - beat * 0.5f), 1e-4f, "half the last beat: half down");
+            Assert.AreEqual(0f, CartoonStage.SurveyPulseAlpha(total), 1e-5f, "gone after the fourth beat");
+            Assert.AreEqual(CartoonStage.SurveyPulseAlpha(beat * 0.3f), CartoonStage.SurveyPulseAlpha(total - beat * 0.3f), 1e-5f, "the fade out mirrors the fade in");
+            Assert.Less(CartoonStage.SurveyPulsePeak, 1f, "over the view, never covering it");
+        }
+
         [Test]
         public void TheFloesAreMethaneIceAndTheDarkHalfsSlate()
         {
