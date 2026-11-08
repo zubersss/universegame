@@ -19,4 +19,4 @@ U-125 (u125/ 17:4x frames), U-140 (u124/crafting_paper), U-141 (smoke_0.4.7/smok
 ## Housekeeping
 Editor churn in the tree from the cut runs (TMP font asset, animator.controllers, UnderwaterTint.mat, link.xml.meta, two InitTestScene files): never staged; my commits list files explicitly.
 ## HeavyJobLock
-none held; want filed 17:59 for a compile + EditMode check (the RAM gate: 1.28 GB free).
+none held. 18:05:07 my U-127 compile + EditMode check (unity_when_clear retry in a background shell) was stopped by Claude Code for low system memory while the session sat idle; the Editor went with it; my stale heavy_unity.lock and want removed 18:0x. Not re-run: a re-run of a memory-stopped job waits for the owner in this window (D-046 note: approvals typed here only). U-127 slice 1 is committed but unchecked.
