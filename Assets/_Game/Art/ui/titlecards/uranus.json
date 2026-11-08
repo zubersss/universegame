@@ -1,0 +1,15 @@
+{
+  "key": "ui/titlecards/uranus",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 1600,
+  "height": 452,
+  "palette": "uranus",
+  "lettering": "baked",
+  "lettering_note": "URANUS in Limelight + the subtitle in Patrick Hand, drawn as ink (B-146)",
+  "note": "designed 1600x450; padded with transparent rows to 1600x452 (BC7 blocks)"
+}
