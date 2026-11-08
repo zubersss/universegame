@@ -285,7 +285,7 @@ def preview(out_dir, S=None, allw=None, out=None, footnote=None):
     review._label(foot, f"tile joins {', '.join(f'{k} {v:.2f}' for k, v in within.items())} /255; silhouette {across}", 6, 8)
     review._label(foot, f"cap joins {', '.join(f'{k} {v:.2f}' for k, v in caps.items())} /255; problems {problems or 'none'}", 6, 28)
     review._label(foot, f"ink outer {min(w[1] for w in outer):.1f}-{max(w[2] for w in outer):.1f} px, interior {min(w[1] for w in inner):.1f}-"
-                        f"{max(w[2] for w in inner):.1f} px; uranus palette {', '.join(f'{k} {v * 100:.1f}%' for k, v in hits.items())}; nothing exported", 6, 48)
+                        f"{max(w[2] for w in inner):.1f} px; uranus palette {', '.join(f'{k} {v * 100:.1f}%' for k, v in hits.items())}; " + ("written to Art" if (footnote or "").startswith("exported") else "nothing exported"), 6, 48)
     rows.append(foot)
     img = np.vstack(rows)
     review._label(img, __import__("time").strftime("%m-%d %H:%M") + " " + (footnote or "preview (not exported)"), 2, img.shape[0] - 16)
