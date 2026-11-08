@@ -1,7 +1,7 @@
 # UNITY STATUS
-Updated: 2026-11-08 01:15 · Session: 8 (resumed 01:00 after the owner's pause; session 7's detail is in git log and coordination/status/archive/UNITY_2026-11-07.md)
+Updated: 2026-11-08 01:35 · Session: 9 (all three windows restarted ~01:27; session 8's detail is in git log)
 ## Current task
-The full check, resumed 01:00 (the owner's continue). Lock A done 01:07-01:11: CheckSetup import with graphics (B-159 / B-156 / B-160 incl. the Vortex Whale) + compile 0 errors / 0 warnings in 3.1 min; EditMode 414 / 415 (the one failure a stale MarsStageTests order assert - "PolarCrawler appended last" - pinned to its index 21, fixed and committed; re-run in lock B). The import's output committed by explicit path (184 paths): the Jupiter metas, the new code / test metas, the 30 orphaned v2 prop metas removed (props/common 21, props/jupiter 9; no other orphan metas left on disk), CheckSetup's regenerated controllers, atlases, Addressables groups, ArtMaterials, the TMP font. The Vortex Whale row (Species.VortexWhale, a Grand rig in the Red Spot, Decks 1-2) + its JupiterStageTests test + CaptureU127Jupiter's 5_whale_crossing (D-138) committed before the lock. Lock B (want filed 01:13, behind BLENDER's B-170 per the queue): the MarsStageTests re-run, the Jupiter PlayMode slice (GiantBandsPlay, Transition, InnerCreature, MenuHud, LeadQA M3Inner), CaptureU127Jupiter 1-5. Then Build 0.4.8 (U-143: release + _dev, probe per D-152, smoke on the release).
+Lock B's remainder: CaptureU127Jupiter 1-5 only (LEAD 01:3x: rank 1, no test re-run). Lock B's tests ran green 01:14-01:18 (MarsStageTests 3/3; the Jupiter PlayMode slice 20/20: GiantBandsPlay, Transition, InnerCreature, MenuHud, LeadQA M3Inner), in reports/unity/tests_2026-11-08.md. The restart killed the job before the captures: no u127 frames, and my heavy_unity.lock (01:14) stood with no Editor; I deleted it at 01:29. The lock-B Editor also imported B-170's five title cards: their 10 metas, the ui Addressables group (+5 addresses) and the ui atlas (+5 sprites), committed with this status. Want filed 01:35; free RAM 1.01 GB, under the 1.5 GB gate. After the captures: BLENDER's B-163 slot 1, then my lock C = Build 0.4.8 dev + release (U-142 / U-143) + the 13-leg probe (D-152) + the smoke set with the Jupiter shots.
 ## Last completed
 U-147, U-146, U-144 (+ D-157) code; the D-156 watchdog; U-143; U-133 / U-130 / U-129 slice 1 - all compiled clean in lock A.
 ## Next up
@@ -17,6 +17,6 @@ U-126 floe caps (EditMode; its frame in u127/ next lock), U-127 slices 1–2 (co
 ## For USER_ACTIONS
 (none)
 ## Housekeeping
-Editor churn in the tree from the cut runs (TMP font asset, animator.controllers, UnderwaterTint.mat, link.xml.meta, two InitTestScene files): never staged; my commits list files explicitly.
+Editor churn in the tree (the Generated/Models *.mat _MainTex fills, TMP font asset, animator.controllers, UnderwaterTint.mat, link.xml.meta, two InitTestScene files): never staged; my commits list files explicitly.
 ## HeavyJobLock
-none held; want filed 01:13 for lock B (behind BLENDER's B-170 want 01:12 per the queue). No background waiters.
+none held; want_unity.lock filed 01:35 for CaptureU127Jupiter 1-5 (rank 1 per LEAD 01:3x; BLENDER's B-163 slot 1 want goes after it). Under the RAM gate (1.01 GB). No background waiters.

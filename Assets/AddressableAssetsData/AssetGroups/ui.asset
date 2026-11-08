@@ -95,8 +95,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9b5cd6937bd1e4246926394be5d4bbd3
+    m_Address: ui/titlecards/uranus
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a8f9b9a71fa89094dae3efef44ac6a19
+    m_Address: ui/titlecards/venus
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b33ea718a4d94c24ebd867f13668ba9c
     m_Address: ui/hud/film_switch/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ba824accb082fe1488679d2b9f4b59dd
+    m_Address: ui/titlecards/jupiter
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d1ea0b0b611f7d84ca81f53a03bf0f4d
+    m_Address: ui/titlecards/saturn
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -122,6 +142,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e9663b1e0747a2c4ab3e46b0b47bb9e1
     m_Address: ui/panels/inventory
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f0a4003f83999d744be644790a738635
+    m_Address: ui/titlecards/neptune
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
