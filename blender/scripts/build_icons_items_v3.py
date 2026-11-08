@@ -66,7 +66,8 @@ def faceted(d, M, pts, base, lit, dark, cx, cz, seams=True):
 
 
 def glint(d, M, x, z, s=0.03):
-    G.stroke(d, [(x, z + s), (x + s * 0.4, z), (x, z - s), (x - s * 0.4, z)], M["off_i"], I, cyclic=True)
+    """A highlight without ink (inked, the tiny diamond read as a dark mark at 1x)."""
+    G.stroke(d, [(x, z + s), (x + s * 0.45, z), (x, z - s), (x - s * 0.45, z)], M["off"], 0.0, cyclic=True)
 
 
 def prism(d, M, x0, x1, z0, tip, light, dark, lean=0.0):
