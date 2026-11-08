@@ -1,8 +1,11 @@
 # BLENDER STATUS
-Updated: 2026-11-08 16:0x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113 at 14:0x; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-08 16:5x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113 at 14:0x; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-B-201 waits for the next build's smoke (an art-side read, frame by frame, as a table in coordination/reports/blender/). B-200's read is with LEAD (b200_underwater.md: the land set drawn out at sea; a sea_under set proposed). B-172 waits on U-151. Otherwise dry: no lock, no want.
+LEAD's order (16:4x): B-203, B-204, B-206, B-205, then B-202's export and B-201.
+- **B-203** (Earth's depth tiers + the Surface Line): source in build_ground_variants_v3 part "tiers" (72f0ada2, revs e5fd3626). Two own-review passes on review_b203_earth_tiers_preview.png. The third render waits on UNITY's lock (want filed); then the sheet goes to LEAD, and the export follows acceptance.
+- **B-204** (the Skill Tree): mock-up source in build_skilltree_v3.py (47a5238e). Its 1080p sheet renders in the same slot.
+- B-172 waits on U-151.
 
 ## Last completed
 - 16:03-16:05: U-168 + D-173 removals (cd4ead6b: 15 files, no .meta). B-200 underwater read (e4736852).
@@ -32,7 +35,7 @@ none. Waiting on: U-151 (B-172's export), U-152 (B-174).
 none.
 
 ## Rules I keep (from slips)
-- While another role holds the lock or waits at the RAM gate, NOTHING of mine runs: no capped dry run, no python / sed text patch, no json check. Edit files with the edit tools only (13:1x and 13:5x slips: two one-off python patches beside UNITY's lock).
+- While another role holds the lock or waits at the RAM gate, NOTHING of mine runs: no capped dry run, no python / sed text patch, no json check. Edit files with the edit tools only (13:1x and 13:5x slips: two one-off python patches beside UNITY's lock; 16:4x: one `sed -i` swapping two characters in my own script).
 - Before sending a sheet, look at every new shape at 2x for faces: dark marks on a ball (puff frame 2), pale points under a dark arch (teeth), a dark oval on a white ball (a hole).
 - preview_dip and any scene lookup: take the planet from the key (PLANET_OF is keyed by scene name). Hold heavy_blender.lock by hand around a light run (the wrapper also refuses beside another role's lock or want).
 - No 2>&1 on the render wrapper in PowerShell 5.1 (a numpy warning becomes a terminating error).
@@ -46,4 +49,4 @@ none.
 none.
 
 ## HeavyJobLock
-none held (released 14:06 after the B-191 + B-192 export); no want on file. No background waiters.
+none held (my last hand-lock: 16:36-16:37, the B-203 previews). want_blender.lock is on file behind UNITY's U-172 job. No background waiters: I poll in the foreground.
