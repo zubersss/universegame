@@ -1553,6 +1553,13 @@ Files: blender/scripts/build_rig*.py, Assets/_Game/Art/props/rig/
 Depends: —
 Lead notes: Cycle 284 (16:2x). After B-204's mock-up.
 
+### B-206 · BLENDER · Ready · D1
+Goal: Rank and expedition art (D-175): ten Surveyor Rank insignia (one family, rising: a plain survey pin → a starred brass medallion; readable at the HUD's 48 px), an expedition badge with its number (I–X, then a laurel for more; drawn so UNITY can set the numeral), and the New Expedition panel's art (a paper certificate in UiKit's style with a wax seal, B-151's paper).
+Accept: one stamped sheet (the ten insignia at 1× and 48 px, the badge at I, II, V, X, the certificate) accepted by LEAD before the export; palette 100 %; no faces.
+Files: blender/scripts/ (the UI builder), Assets/_Game/Art/ui/rank/
+Depends: —
+Lead notes: Cycle 284 (16:4x). After B-204's mock-up.
+
 ### B-202 · BLENDER · Ready · G1
 Goal: Earth's underwater set (B-200's finding, b200_underwater.md: below the surface the swimmer sees the coast / plains land set tinted, meadow and flowers filling the water, and at 15 m a flat green-grey with vertical strip streaks, no depth cue): `backgrounds/earth/sea_under` in D-169's format, drawn for below the sea surface: layer0 the water column (light under the surface with soft wavering light shafts, darkening with depth toward the Hadal trench's dark); layer1 far seabed silhouettes in the haze (rock arches, kelp stands); layer2 the near seabed on the sea floor's depth (sand ripples, rocks, kelp, shells), solid to its bottom with a tileable strip (continue_rows 64); a bright wavy band of the surface seen from below on layer0's top, its own json row naming it. Earth's palette with U-040's tint in mind (it multiplies on top), the straight finish, no faces, nothing that reads as a land plant.
 Accept: one stamped preview (the swimmer at 3, 8, 15 and 40 m, with the tint as UnderwaterTint.shader applies it) accepted by LEAD before the export; log OK; seams ≤ 1 /255; ≤ 4 MB per layer.
@@ -2782,6 +2789,13 @@ Accept: SkillTreeTests: buying needs the link and the cost; effects change the s
 Files: Code/Runtime/Progress/ (new), UI/, Save/, Tests/
 Depends: U-174, L-013, B-204
 Lead notes: Cycle 284 (16:2x).
+
+### U-178 · UNITY · Ready · D1
+Goal: Rank and the New Expedition (D-175; Bible 5.3 §8.1; docs/D1_TABLES.md §7): the Surveyor Rank 1–10 from the expedition's Scrip earned (sales only), on the HUD and the tree panel; at Rank 10, topside, a New Expedition button on the tree panel with a plain confirmation in the panel (what is wiped, what is kept, the new multiplier; no system dialog); on confirm: wipe the bought nodes, Scrip, Rank, the pack, the rocket's hold and base storage, keep the Catalogue, story, Datacores, discovered planets and buildings, return to Earth's camp, expedition n + 1; every Skill Tree stat × (1 + 0.25 × (n − 1)) (not the load factor, the stroke cap or prices); the expedition badge (B-206); saved.
+Accept: ExpeditionTests: Rank at each threshold; the button only at Rank 10 and topside; the wipe and keep lists exactly; the multiplier on each stat at expeditions 1, 2, 4; a save mid-expedition 3 loads with its multiplier; no other way to unbuy a node. A capture of the panel's confirmation.
+Files: Code/Runtime/Progress/, UI/, Save/, Tests/
+Depends: U-175
+Lead notes: Cycle 284 (16:4x). The owner's second D1 direction; after U-175.
 
 ### U-176 · UNITY · Ready · D1
 Goal: The ways back up as upgradeable tools (Bible 5.2 §8.1): the jetpack on suit power (no fuel, D-103) with thrust and power use from the tree and lift scaled by load; the Grapple's anchor and reel (length, reel speed, load); the Builder's ladder piece from dug dirt (cost from the tree); climbing speed and grip on carved ramps; later nodes: a winch line from the Surface Line, a one-use recall beacon.
