@@ -1083,6 +1083,34 @@ def do_ui_set(entry, preview):
              + f" | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
 
 
+def do_skilltree_set(entry, preview):
+    """B-204 (D-174): the Skill Tree panel kit ui/skilltree/* (the aged 9-slice panel, the round chart, the hub, six branch
+    emblems, node frames in three states + ring 5's caps, the select ring, tiling links, the cost tag), fakegp + numpy; the
+    checks raise inside export() before anything is written; the review is the 1080p mock-up, stamped."""
+    from meridian import fakegp
+    t0 = time.time()
+    if preview:
+        raise AssetError(f"{entry['key']}: no preview mode (python build_skilltree_v3.py <dir>)")
+    import build_skilltree_v3 as ST
+    fakegp.install()                    # an earlier review script in this batch may have restored gp_draw.mat
+    try:
+        try:
+            out = ST.export(ART)
+        except Exception:
+            for k in ST.keys():
+                mark_stale(k, True)
+            raise
+        ST.preview(PREVIEW, out=os.path.join(PREVIEW, f"review_{entry.get('review_name', 'b204_skilltree')}.png"),
+                   footnote=f"exported {time.strftime('%m-%d %H:%M')}")
+    finally:
+        fakegp.restore()
+    for k, _w, _h, _n in out:
+        mark_stale(k, False)
+    mark_stale(entry["key"], False)
+    log_line(f"OK {entry['key']} | " + ", ".join(f"{k.split('/')[-1]} {w}x{h} {n // 1024}KB" for k, w, h, n in out)
+             + f" | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
+
+
 def do_icon_set(entry, preview):
     """B-128: v3.1 tile-item icons (icons/<item>/base, 64x64) drawn with fakegp + numpy (no scene);
     the preview sheet doubles as the review."""
@@ -1211,6 +1239,8 @@ def do_asset(entry, preview):
         return do_icon_set(entry, preview)
     if entry.get("ui_set"):             # v3.1 C3 UI: panels, title cards, the film switch (B-151)
         return do_ui_set(entry, preview)
+    if entry.get("skilltree_set"):      # the Skill Tree panel kit (B-204)
+        return do_skilltree_set(entry, preview)
     if entry.get("disc_set"):           # v3 §11.5 planet discs (B-119, D-098)
         return do_disc_set(entry, preview)
     if entry.get("space_starfield"):    # v3 §11.4 space starfield + nebula cards (B-120)

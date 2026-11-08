@@ -56,18 +56,18 @@ BCOL = {"dig": "red", "haul": "brown", "ascent": "mustard", "survey": "teal", "e
 # ---------------------------------------------------------------- the tree (docs/D1_TABLES.md §5)
 TREE = {   # per ring, slot order counter-clockwise -> clockwise (a sideways-linked node on its neighbour's side)
     "dig": [["dig_power_1", "dig_brush_1"], ["dig_power_2", "dig_rhythm_1"], ["dig_power_3", "dig_heatsink", "dig_brush_2"],
-            ["dig_power_4", "dig_rhythm_2"], ["dig_core_bit", "dig_power_5"]],
+            ["dig_power_4", "dig_rhythm_2"], ["dig_power_5", "dig_core_bit"]],
     "haul": [["haul_dirt_1", "haul_pack_1"], ["haul_light_1", "haul_pack_2"], ["haul_magnet_1", "haul_sorter", "haul_pack_3"],
-             ["haul_light_2", "haul_pack_4"], ["haul_pack_5", "haul_compact"]],
+             ["haul_light_2", "haul_pack_4"], ["haul_compact", "haul_pack_5"]],
     "ascent": [["asc_grapple_1", "asc_ladder_1"], ["asc_jet_1", "asc_climb_1"], ["asc_jet_2", "asc_grapple_2", "asc_ladder_2"],
-               ["asc_jet_3", "asc_grapple_3"], ["asc_winch", "asc_recall"]],
+               ["asc_jet_3", "asc_grapple_3"], ["asc_recall", "asc_winch"]],
     "survey": [["sur_scan_1", "sur_depth_1"], ["sur_scan_2", "sur_preview_1"], ["sur_scan_3", "sur_rare", "sur_preview_2"],
-               ["sur_scan_4", "sur_vault"], ["sur_cartographer", "sur_deep_eye"]],
+               ["sur_scan_4", "sur_vault"], ["sur_deep_eye", "sur_cartographer"]],
     "endurance": [["end_air_1", "end_fall_1"], ["end_air_2", "end_heat_1"], ["end_air_3", "end_heat_2", "end_fall_2"],
-                  ["end_deep_1", "end_air_4"], ["end_deep_2", "end_suit_mk3"]],
+                  ["end_air_4", "end_deep_1"], ["end_suit_mk3", "end_deep_2"]],
     "voyage": [["voy_hold_1", "voy_price_1"], ["voy_thrust_2", "voy_price_2"], ["voy_hold_2", "voy_skip_1", "voy_price_3"],
-               ["voy_thrust_3", "voy_trader"], ["voy_dray", "voy_skip_2"]],
-}
+               ["voy_thrust_3", "voy_trader"], ["voy_skip_2", "voy_dray"]],
+}   # D1_TABLES §5 as revised 17:1x (5030aafd: the crossing-free links, 0 crossings)
 LINKS = {   # node: the nodes it needs one of (outward); "centre" for ring 1
     "dig_power_2": ["dig_power_1"], "dig_rhythm_1": ["dig_power_1", "dig_brush_1"], "dig_power_3": ["dig_power_2"],
     "dig_heatsink": ["dig_rhythm_1"], "dig_brush_2": ["dig_rhythm_1"], "dig_power_4": ["dig_power_3"],
@@ -82,39 +82,15 @@ LINKS = {   # node: the nodes it needs one of (outward); "centre" for ring 1
     "sur_rare": ["sur_scan_2", "sur_preview_1"], "sur_preview_2": ["sur_preview_1"], "sur_scan_4": ["sur_scan_3"],
     "sur_vault": ["sur_rare", "sur_preview_2"], "sur_deep_eye": ["sur_scan_4"], "sur_cartographer": ["sur_vault"],
     "end_air_2": ["end_air_1"], "end_heat_1": ["end_air_1", "end_fall_1"], "end_air_3": ["end_air_2"],
-    "end_heat_2": ["end_heat_1"], "end_fall_2": ["end_fall_1"], "end_deep_1": ["end_heat_2"],
-    "end_air_4": ["end_air_3", "end_fall_2"], "end_deep_2": ["end_deep_1"], "end_suit_mk3": ["end_air_4"],
+    "end_heat_2": ["end_heat_1"], "end_fall_2": ["end_fall_1"], "end_deep_1": ["end_heat_2", "end_fall_2"],
+    "end_air_4": ["end_air_3"], "end_deep_2": ["end_deep_1"], "end_suit_mk3": ["end_air_4"],
     "voy_thrust_2": ["voy_price_1", "voy_hold_1"], "voy_price_2": ["voy_price_1"], "voy_hold_2": ["voy_thrust_2"],
-    "voy_skip_1": ["voy_thrust_2"], "voy_price_3": ["voy_price_2"], "voy_thrust_3": ["voy_skip_1"],
-    "voy_trader": ["voy_price_3", "voy_hold_2"], "voy_skip_2": ["voy_thrust_3"], "voy_dray": ["voy_trader"],
+    "voy_skip_1": ["voy_thrust_2"], "voy_price_3": ["voy_price_2"], "voy_thrust_3": ["voy_skip_1", "voy_hold_2"],
+    "voy_trader": ["voy_price_3"], "voy_skip_2": ["voy_thrust_3"], "voy_dray": ["voy_trader"],
 }
-SIDEWAYS = [("dig_brush_2", "haul_magnet_1"), ("dig_core_bit", "voy_skip_2"), ("haul_compact", "asc_winch"),
-            ("asc_ladder_2", "sur_scan_2"), ("sur_deep_eye", "end_deep_2"), ("end_fall_2", "voy_hold_2")]
+SIDEWAYS = [("dig_brush_2", "haul_magnet_1"), ("dig_power_5", "voy_dray"), ("haul_pack_5", "asc_recall"),
+            ("asc_ladder_2", "sur_scan_2"), ("sur_cartographer", "end_suit_mk3"), ("end_fall_2", "voy_hold_2")]
 OFFSET = {"end_air_2": -18, "end_heat_1": 4}     # degrees from the branch axis where the default slot would sit on a link
-
-# LEAD 17:0x (a): a crossing-free variant of §5 for the radial chart. Every feed stays except four (Endurance and Voyage, R3 -> R4),
-# and the three ring-5 sideways links move to the ring-5 node on the side its own chain arrives at.
-PROPOSAL = dict(
-    tree={"dig": [None, None, None, None, ["dig_power_5", "dig_core_bit"]], "haul": [None, None, None, None, ["haul_compact", "haul_pack_5"]],
-          "ascent": [None, None, None, None, ["asc_recall", "asc_winch"]], "survey": [None, None, None, None, ["sur_deep_eye", "sur_cartographer"]],
-          "endurance": [None, None, None, ["end_air_4", "end_deep_1"], ["end_suit_mk3", "end_deep_2"]],
-          "voyage": [None, None, None, None, ["voy_skip_2", "voy_dray"]]},
-    links={"end_air_4": ["end_air_3"], "end_deep_1": ["end_heat_2", "end_fall_2"], "voy_thrust_3": ["voy_skip_1", "voy_hold_2"],
-           "voy_trader": ["voy_price_3"]},
-    sideways=[("dig_brush_2", "haul_magnet_1"), ("dig_power_5", "voy_dray"), ("haul_pack_5", "asc_recall"), ("asc_ladder_2", "sur_scan_2"),
-              ("sur_cartographer", "end_suit_mk3"), ("end_fall_2", "voy_hold_2")])
-
-
-def use_proposal():
-    """Swap PROPOSAL into TREE / LINKS / SIDEWAYS / LAYOUT (the check and the mock-up then show the proposed chart)."""
-    global SIDEWAYS, LAYOUT
-    for b, rings in PROPOSAL["tree"].items():
-        for r, ids in enumerate(rings):
-            if ids:
-                TREE[b][r] = ids
-    LINKS.update(PROPOSAL["links"])
-    SIDEWAYS = list(PROPOSAL["sideways"])
-    LAYOUT = layout()
 
 
 def axis_deg(b):
@@ -658,11 +634,80 @@ def preview(out_dir, out=None, footnote=None):
         print(f"ink {min(w[1] for w in widths):.1f}-{max(w[2] for w in widths):.1f} px")
 
 
-if __name__ == "__main__":                       # <preview dir> [--proposal] [--check]: --check prints the crossings only
-    if "--proposal" in sys.argv:
-        use_proposal()
+# ---------------------------------------------------------------- the export (LEAD 17:0x: the mock-up accepted; contract 11.6)
+KIT = "ui/skilltree"
+
+
+def kit():
+    """[(name, rgba, meta extras)] for every sprite of the panel kit."""
+    pan, _w, sl = panel()
+    out = [("panel", pan, {"slice": list(sl), "slice_order": "[left, top, right, bottom] px in from each edge (contract 11.6); Unity's Sprite.border is (left, bottom, right, top)",
+                           "note": "aged chart paper, no grain (it is stretched); the chart sits on it, the node card is UiKit's inventory panel"}),
+           ("chart", chart()[0], {"ring_r_px": {str(k): v for k, v in RING_R.items()}, "dividers_r_px": list(DIVIDERS), "emblem_r_px": EMB_R,
+                                  "branch_axis_deg": {b: axis_deg(b) for b in BRANCHES}, "slots_deg": {"2": [-15, 15], "3": [-20, 0, 20]},
+                                  "angles": "screen degrees from +x, y down (Dig at the top, then clockwise); a node sits at its ring radius, its branch axis + its slot",
+                                  "note": "the round chart: the six branches' colour bands, degree ticks, dotted ring dividers, dashed spokes at the sector borders; "
+                                          "nodes, links, emblems and the hub are laid over it at runtime (D1_TABLES §5's slot order, counter-clockwise first)"}),
+           ("hub", hub()[0], {"note": "the centre (the start): always bought; the ring-1 links run from it"})]
+    for b in BRANCHES:
+        out.append((f"emblem_{b}", emblem(b)[0], {"branch": b, "colour": BCOL[b], "note": f"the {b} branch's plaque, at emblem_r_px on its axis"}))
+    for cap in (False, True):
+        for st in ("locked", "available", "bought"):
+            out.append((f"node_{'cap_' if cap else ''}{st}", node_frame(st, cap)[0],
+                        {"state": st, "ring": "5" if cap else "1-4", "icon_display_px": 40, "icon_alpha": 0.4 if st == "locked" else 1.0,
+                         "note": "a node's frame; its icon (icons/nodes/<id>) is drawn centred over it at icon_display_px, at icon_alpha"}))
+    out.append(("select", select_ring()[0], {"note": "a red pencil loop centred on the selected node"}))
+    for st in ("locked", "open", "bought"):
+        out.append((f"link_{st}", link_tile(st)[0], {"state": st, "tile_x": True, "repeat_px": 64, "line_row": 8,
+                                                      "mapping": "tiled along the link centre to centre (Tiled draw mode), rotated to it, drawn under the frames",
+                                                      "note": "locked: neither end bought; open: one end bought; bought: both ends bought"}))
+    out.append(("cost_tag", cost_tag()[0], {"slice": [48, 16, 20, 16], "stretch": "x only", "lettering": "runtime",
+                                            "note": "the cost (Scrip + materials) lettered in Patrick Hand right of the eyelet"}))
+    return out
+
+
+def export(art):
+    """Writes ui/skilltree/<name>_color.png + .json; every check runs before anything is written. -> [(key, w, h, bytes)]"""
+    import json
+    from meridian import pngio
+    built, problems = [], []
+    for name, img, extra_meta in kit():
+        h, w = img.shape[:2]
+        meta = {"key": f"{KIT}/{name}", "style": "v3", "ppu": U.PPU, "pivot": [0.5, 0.5], "width": w, "height": h, "palette": "earth"}
+        meta.update(extra_meta)
+        hit = v3.palette_hits(img, "earth")[0]
+        m = v3.EDGE_MARGIN
+        tiles = name.startswith("link_")
+        if w % 4 or h % 4:
+            problems.append(f"{name}: {w}x{h} not a multiple of 4")
+        if hit < 0.995:
+            problems.append(f"{name}: palette {hit * 100:.1f}%")
+        if name != "panel" and (img[:m, :, 3].any() or img[-m:, :, 3].any() or (not tiles and (img[:, :m, 3].any() or img[:, -m:, 3].any()))):
+            problems.append(f"{name}: touches the {m} px edge")
+        built.append((meta["key"], img, meta))
+    if problems:
+        raise ValueError("skill tree kit checks: " + "; ".join(problems))
+    out = []
+    for key, img, meta in built:
+        base = os.path.join(art, *key.split("/"))
+        os.makedirs(os.path.dirname(base), exist_ok=True)
+        n = pngio.write_png(base + "_color.png", img)
+        with open(base + ".json", "w", encoding="utf-8", newline="\n") as f:
+            json.dump(meta, f, indent=2)
+            f.write("\n")
+        out.append((key, img.shape[1], img.shape[0], n))
+    return out
+
+
+def keys():
+    return [f"{KIT}/{n}" for n in (["panel", "chart", "hub"] + [f"emblem_{b}" for b in BRANCHES]
+                                   + [f"node_{c}{s}" for c in ("", "cap_") for s in ("locked", "available", "bought")]
+                                   + ["select"] + [f"link_{s}" for s in ("locked", "open", "bought")] + ["cost_tag"])]
+
+
+if __name__ == "__main__":                       # <preview dir> [--check]: --check prints the crossings only
     if "--check" in sys.argv:
         _cr = crossings()
         print("crossings:", len(_cr), _cr)
     else:
-        preview(sys.argv[1], out=os.path.join(sys.argv[1], "review_b204_skilltree_proposal.png") if "--proposal" in sys.argv else None)
+        preview(sys.argv[1])
