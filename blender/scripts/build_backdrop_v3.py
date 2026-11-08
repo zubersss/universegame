@@ -482,11 +482,11 @@ def mars_canyon(seed, storm=0.0):
     # layer0: the opposite canyon wall (a flat rim with gullies, strata bands) and its nearer buttresses, in haze
     H = 1024
     stack = mars_sky(rng, pal, H, storm)
-    rim = notch(BG.ridge(rng, [(2, 0.5), (5, 0.3), (9, 0.2)], base=300, amp=12), rng, 7, 46, 70)    # above layer1's tiers
+    rim = _eroded(rng, 300, 12, 7, 40, 70)                                                    # above layer1's tiers; B-189: rounded gullies
     wall = BG._ridge_mask(H, rim)
     stack.append(wash32(rng, H, wall, hz(BG._mix(pal["red"], pal["sky"], 0.55)), var=0.04, edge_dark=0.05, bleed=2.5))
     stack.append(wash32(rng, H, strata(H, wall, rng, 340, 900, 9), hz(BG._mix(pal["red"], pal["brown"], 0.25), 0.40), var=0.04, edge_dark=0.03, bleed=3.0))
-    spur = terrace(notch(BG.ridge(rng, [(3, 0.5), (7, 0.35), (13, 0.15)], base=410, amp=35), rng, 5, 50, 90), 22)
+    spur = _soft_ledges(_eroded(rng, 410, 35, 5, 44, 90), 22)                                 # B-189: ledges, no right angles
     near = BG._ridge_mask(H, spur)
     stack.append(wash32(rng, H, near, hz(BG._mix(pal["red"], pal["sky"], 0.32)), var=0.05, edge_dark=0.07, bleed=2.0))
     stack.append(wash32(rng, H, strata(H, near, rng, 450, 1000, 7, (6, 12)), hz(BG._mix(pal["red"], pal["brown"], 0.30), 0.25), var=0.04, edge_dark=0.03, bleed=2.5))
@@ -499,7 +499,7 @@ def mars_canyon(seed, storm=0.0):
     stack = Stack()
     for i, (base, amp, col) in enumerate(((150, 50, BG._mix(pal["red"], pal["sky"], 0.22)), (290, 46, pal["red"]),
                                           (420, 40, BG._mix(pal["red"], pal["brown"], 0.18)))):
-        line = terrace(notch(BG.ridge(rng, [(2, 0.45), (5, 0.35), (11, 0.2)], base=base, amp=amp), rng, 4, 34, 60), 18)
+        line = _soft_ledges(_eroded(rng, base, amp, 4, 30, 60), 18)                           # B-189: ledges, no right angles
         m = BG._ridge_mask(H, line)
         stack.append(wash32(rng, H, m, hz(col), var=0.06, edge_dark=0.09, bleed=1.8))
         y = np.arange(H)[:, None] + 0.5
@@ -634,6 +634,15 @@ def _eroded(rng, base, amp, n, depth, width):
         dx = (x - c + W / 2) % W - W / 2
         line = line + d * np.exp(-0.5 * (dx / w) ** 2)
     return line.astype(np.float32)
+
+
+def _soft_ledges(line, step, k=3.0, smooth=5.0):
+    """B-189 (LEAD 12:4x: terrace() steps read as right angles): ledges with rounded corners - the line quantised to `step`
+    through a sigmoid (k: how flat each ledge is), then a periodic gaussian smoothing so no corner is sharp."""
+    t = line / step
+    f = t - np.floor(t)
+    s = f ** k / (f ** k + (1 - f) ** k)
+    return _wrap_smooth((step * (np.floor(t) + s)).astype(np.float32), smooth)
 
 
 def _face_bands(H, line, rng, offsets, weight):
@@ -876,14 +885,16 @@ def mars_plains(seed):
         cx, cy = rng.uniform(0, W), rng.uniform(520, 760)
         ell(streaks, cx, cy, rng.uniform(220, 420), rng.uniform(2.5, 5))
     stack.append(tint(rng, H, streaks, BG._mix(pal["offwhite"], pal["sky"], 0.35), 0.55, var=0.03, edge_dark=0.0, bleed=3.0))
-    mesas, tops = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
-    for _k in range(6):                                                                   # far flat-topped mesas
-        cx, w, h = rng.uniform(0, W), rng.uniform(140, 300), rng.uniform(80, 170)
+    mesas, mshade, mtalus = (np.zeros((H, W), np.float32) for _ in range(3))
+    for _k in range(6):                                                                   # far mesas: B-189, the desert's eroded buttes
+        cx, w, h = rng.uniform(0, W), rng.uniform(140, 300), rng.uniform(80, 170)         # (mesa2), not trapezoids with flat block caps
         base = 640.0                                                                      # above layer1's skyline (at 880 they were hidden)
-        poly(mesas, [(cx - w * 0.5 - h * 0.6, base), (cx - w * 0.5, base - h), (cx + w * 0.5, base - h), (cx + w * 0.5 + h * 0.6, base)])
-        rect(tops, cx - w * 0.5, cx + w * 0.5, base - h, base - h + 10)
+        mesa2(mesas, mshade, mtalus, cx, base, w, h, h * 0.9, rng)
+    first = np.where(mesas.any(axis=0), mesas.argmax(axis=0), H).astype(np.float32)       # each column's top edge
+    tops = (np.arange(H)[:, None] < first[None, :] + 10).astype(np.float32)
     stack.append(wash32(rng, H, mesas, BG._mix(pal["red"], pal["sky"], 0.55), var=0.04, edge_dark=0.05, bleed=2.5))
-    stack.append(wash32(rng, H, strata(H, mesas, rng, 470, 640, 5, (5, 10)), BG._mix(pal["red"], pal["brown"], 0.25), var=0.04, edge_dark=0.03, bleed=3.0))
+    stack.append(wash32(rng, H, strata(H, mesas * (1 - mtalus), rng, 470, 640, 5, (5, 10)), BG._mix(pal["red"], pal["brown"], 0.25), var=0.04, edge_dark=0.03, bleed=3.0))
+    stack.append(tint(rng, H, mshade * mesas, BG._mix(pal["red"], pal["brown"], 0.35), 0.45, var=0.03, edge_dark=0.0, bleed=2.0))   # form shading
     stack.append(tint(rng, H, tops * mesas, pal["offwhite"], 0.35, var=0.0, edge_dark=0.0, bleed=1.5))   # the lit caprock
     edge = BG._ridge_mask(H, BG.ridge(rng, [(3, 0.6), (8, 0.4)], base=630, amp=10))      # the plain's far edge: the horizon
     devil = np.zeros((H, W), np.float32)
@@ -1079,7 +1090,7 @@ def mercury_coldtrap(seed):
     H = 1024
     hz = _gline(H, -2.0)
     stack = merc_sky(rng, pal, H, "night")
-    rim = notch(BG.ridge(rng, [(2, 0.5), (5, 0.3), (11, 0.2)], base=hz - 260, amp=30), rng, 6, 30, 70)
+    rim = _eroded(rng, hz - 260, 30, 6, 28, 70)                                               # B-189: rounded, no V notches
     farm = BG._ridge_mask(H, rim)
     stack.append(wash32(rng, H, farm, BG._mix(wall, pal["sky"], 0.15), var=0.04, edge_dark=0.05, bleed=2.0))
     crest = (farm * (np.arange(H)[:, None] < rim[None, :] + 7)).astype(np.float32)
@@ -1089,7 +1100,7 @@ def mercury_coldtrap(seed):
     out.append(BG.feather_top(*finish(stack, rng, H)))   # B-188: the sky's top edge feathered
     H = 512
     g1 = _gline(H, -1.0)
-    walls = terrace(notch(BG.ridge(rng, [(2, 0.45), (6, 0.35), (13, 0.2)], base=g1 - 190, amp=40), rng, 5, 30, 60), 22)
+    walls = _soft_ledges(_eroded(rng, g1 - 190, 40, 5, 28, 60), 22)                           # B-189: ledges, no right angles
     wm = BG._ridge_mask(H, walls)
     glint = np.zeros((H, W), np.float32)
     for _k in range(30):
@@ -1356,7 +1367,7 @@ def venus_surface(seed):
     # layer1: black glassy basalt plains and tesserae ridges, lit from below by vent glows
     H = 640
     stack = Stack()
-    ridge = terrace(BG.ridge(rng, [(2, 0.45), (6, 0.35), (13, 0.2)], base=340, amp=44), 16)
+    ridge = _soft_ledges(BG.ridge(rng, [(2, 0.45), (6, 0.35), (13, 0.2)], base=340, amp=44), 16)   # B-189: ledges, no right angles
     land = BG._ridge_mask(H, ridge)
     stack.append(wash32(rng, H, land, pal["brown"], var=0.05, edge_dark=0.06, bleed=1.8))
     glows, cores, glints = (np.zeros((H, W), np.float32) for _ in range(3))
