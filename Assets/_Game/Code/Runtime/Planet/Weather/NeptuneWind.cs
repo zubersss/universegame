@@ -3,10 +3,11 @@ using UnityEngine;
 namespace Meridian.Planet.Weather
 {
     /// <summary>
-    /// U-133 (Bible §7.9, D-148): Neptune's wind as the stage reads it. A lateral wind of 8–20 m/s that swells slowly, gusts to 35 m/s in short
-    /// windows, blowing +x (the drawing's direction; the −x zones and their mirrored layers are a later slice). The flora's root bones lean by it
-    /// through one controller (FloraRigs.leanDegrees): 0° at calm to MaxLean at GustPeak, mirrored for −x wind, a stepped shiver at ShiverHz in a gust.
-    /// Pure; t is real seconds. The player's drift and the build gate (wind anchors) are their own cards.
+    /// U-133 (Bible §7.9, D-148): Neptune's wind. A lateral wind of 8–20 m/s that swells slowly and gusts to 35 m/s in short windows, blowing +x
+    /// over the column's first half and −x over its second (U-144: the −x zone mirrors its deck layers, floes and lean). The flora's root bones lean
+    /// by it through one controller (FloraRigs.leanDegrees): 0° at calm to MaxLean at GustPeak, mirrored for −x wind, a stepped shiver at ShiverHz
+    /// in a gust. U-144: the surveyor drifts DriftScale × the wind, nothing in the lee of a solid within ShelterReach or while holding a wind anchor.
+    /// Pure; t is real seconds.
     /// </summary>
     public static class NeptuneWind
     {
@@ -14,8 +15,42 @@ namespace Meridian.Planet.Weather
         public const float SwellSeconds = 97f, GustEvery = 23f, GustSeconds = 4f;
         public const float MaxLean = 25f, ShiverHz = 12f, ShiverDegrees = 1.5f;
 
-        /// <summary>The wind's direction at column x: +1 everywhere for now (the drawing's +x).</summary>
-        public static int Direction(int x) => 1;
+        public const float DriftScale = 0.12f;
+        public const int ShelterReach = 3, ZoneHold = 20;
+
+        /// <summary>U-144: the wind's direction at column x: +1 (the drawing's +x) over the column's first half, −1 over its second.</summary>
+        public static int Direction(int x)
+        {
+            int w = Meridian.Terrain.CloudColumn.CloudLayout.Width;
+            int wx = ((x % w) + w) % w;
+            return wx < w / 2 ? 1 : -1;
+        }
+
+        /// <summary>The direction for a view at column x given the one shown now (0: none): it holds ZoneHold columns past a zone's border.</summary>
+        public static int DirectionFor(int x, int current)
+        {
+            if (current != 0 && (Direction(x - ZoneHold) == current || Direction(x + ZoneHold) == current)) return current;
+            return Direction(x);
+        }
+
+        /// <summary>U-144: the surveyor's drift (m/s, signed) in a signed wind: DriftScale × the wind, none when sheltered or anchored.</summary>
+        public static float Drift(float wind, bool sheltered, bool anchored) => sheltered || anchored ? 0f : DriftScale * wind;
+
+        /// <summary>U-144: in the lee: a solid block at body height (the feet's row or the one above) within ShelterReach columns upwind.</summary>
+        public static bool Sheltered(System.Func<int, int, bool> solid, Vector2 feet, int windDir)
+        {
+            if (windDir == 0 || solid == null) return false;
+            int px = Mathf.FloorToInt(feet.x), py = Mathf.FloorToInt(feet.y);
+            for (int k = 1; k <= ShelterReach; k++)
+            {
+                int x = px - windDir * k;
+                if (solid(x, py) || solid(x, py + 1)) return true;
+            }
+            return false;
+        }
+
+        /// <summary>U-144: seconds until the next gust (0 while one blows): the HUD's warning.</summary>
+        public static float SecondsToGust(double t) => Gusting(t) ? 0f : (float)(GustEvery - Mod(t, GustEvery));
 
         /// <summary>Whether a gust is blowing at t (a GustSeconds window every GustEvery seconds).</summary>
         public static bool Gusting(double t) => Mod(t, GustEvery) < GustSeconds;

@@ -70,6 +70,14 @@ namespace Meridian.View2D
         public static bool HasCaps(int frames) => frames > CapRight;
         public static int TileFrame(int x) => ((x % TileFrames) + TileFrames) % TileFrames;
         public static bool FloeEnd(float top, float besideTop) => besideTop < top - FloeEdgeDrop;
+        /// <summary>U-144 (D-148): a mirrored column (Neptune's −x wind zone) runs its tiles backwards, each flipped, so the joins still meet and the
+        /// facets slope downwind. Pure.</summary>
+        public static int StripFrame(int x, bool mirrored) => TileFrame(mirrored ? -x - 1 : x);
+        /// <summary>U-144: a floe's left / right end frame: mirrored, each end takes the other's cap flipped (the windward end stays rounded). Pure.</summary>
+        public static int LeftCapFrame(bool mirrored) => mirrored ? CapRight : CapLeft;
+        public static int RightCapFrame(bool mirrored) => mirrored ? CapLeft : CapRight;
+        /// <summary>U-144: which columns draw mirrored (null: none); the stage sets it on Neptune.</summary>
+        public System.Func<int, bool> mirrorRule;
         /// <summary>U-126: a floe of `length` tiles from column x0 as (column, frame) pairs: cap_left just outside, the tiles, cap_right just outside. Pure.</summary>
         public static void FloeFrames(int x0, int length, List<Vector2Int> into)
         {
@@ -230,7 +238,9 @@ namespace Meridian.View2D
                 var fillTile = fillBy[material] ?? dirt;
                 materialAt[i] = framesBy[material] != null ? material : 0;
                 var t = tops[i];
-                t.sprite = set[HasCaps(set.Length) ? TileFrame(x) : ((x % set.Length) + set.Length) % set.Length]; // U-126: a capped sheet tiles its first 8 frames only
+                bool mirrored = mirrorRule != null && mirrorRule(x); // U-144
+                t.sprite = set[HasCaps(set.Length) ? StripFrame(x, mirrored) : ((x % set.Length) + set.Length) % set.Length]; // U-126: a capped sheet tiles its first 8 frames only
+                if (t.flipX != mirrored) t.flipX = mirrored;
                 t.transform.position = new Vector3(x + 0.5f, top, Z);
                 var f = fills[i];
                 if (f.sprite != fillTile) f.sprite = fillTile;
@@ -250,8 +260,8 @@ namespace Meridian.View2D
                 if (HasCaps(set.Length))
                 {
                     float nextTop = terrain.TopSolidY(x + 1) + 1f;
-                    if (FloeEnd(top, prevTop)) PlaceCap(ref capCount, set[CapLeft], x - 1, top);
-                    if (FloeEnd(top, nextTop)) PlaceCap(ref capCount, set[CapRight], x + 1, top);
+                    if (FloeEnd(top, prevTop)) PlaceCap(ref capCount, set[LeftCapFrame(mirrored)], x - 1, top, mirrored);
+                    if (FloeEnd(top, nextTop)) PlaceCap(ref capCount, set[RightCapFrame(mirrored)], x + 1, top, mirrored);
                 }
                 prevTop = top;
             }
@@ -260,12 +270,13 @@ namespace Meridian.View2D
             LayDecks(first, last);
         }
 
-        void PlaceCap(ref int n, Sprite frame, int column, float top)
+        void PlaceCap(ref int n, Sprite frame, int column, float top, bool flip = false)
         {
             if (n == caps.Count) caps.Add(Make("Cap", Order, null));
             var c = caps[n++];
             c.enabled = true;
             c.sprite = frame;
+            if (c.flipX != flip) c.flipX = flip;
             c.transform.position = new Vector3(column + 0.5f, top, Z);
         }
 

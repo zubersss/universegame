@@ -137,6 +137,8 @@ namespace Meridian.View2D
         public string upperScene;
         /// <summary>U-146: draw only this layer of the set (the survey pulse's banded layer0 over the view); -1: every layer. Set before ConfigureFor.</summary>
         public int onlyLayer = -1;
+        /// <summary>U-144 (D-148): every layer drawn flipped in x (Neptune's −x wind zone; tileable art stays tileable). Set before ConfigureFor.</summary>
+        public bool mirrorX;
         string LayerKey(int n)
         {
             string prefix = SceneKey != null ? SceneKey.Substring(0, SceneKey.LastIndexOf('/') + 1) : null;
@@ -158,6 +160,7 @@ namespace Meridian.View2D
                 var sr = go.AddComponent<SpriteRenderer>();
                 sr.sortingOrder = BackOrder + orderOffset + l.n;
                 SetPlaceholder(sr, l.n);
+                sr.flipX = mirrorX; // U-144
                 renderers.Add(sr);
                 placeholders.Add(true);
                 int index = i;

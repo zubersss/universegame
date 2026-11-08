@@ -27,6 +27,8 @@ namespace Meridian.Core
         public Meridian.Planet.Weather.DustStorm dustStorm;
         /// <summary>Venus super-rotation (U-050), created at configure.</summary>
         public Meridian.Planet.Weather.VenusWind wind { get; private set; }
+        /// <summary>U-144: Neptune's wind on the surveyor (drift, shelter, the anchor's hold); off elsewhere.</summary>
+        public Meridian.Planet.Weather.NeptuneWindDriver neptuneWind { get; private set; }
         public Meridian.Survey.SurveyScanner scanner { get; private set; }
         public Meridian.Creatures.Wardens.WardenDirector wardens { get; private set; }
         public Meridian.Hazards.SolariteCrystals solarite { get; private set; }
@@ -153,6 +155,9 @@ namespace Meridian.Core
             if (wind == null) wind = gameObject.AddComponent<Meridian.Planet.Weather.VenusWind>();
             wind.player = player;
             wind.enabled = config.id == PlanetId.Venus;
+            if (neptuneWind == null) neptuneWind = gameObject.AddComponent<Meridian.Planet.Weather.NeptuneWindDriver>();
+            neptuneWind.player = player; neptuneWind.terrain = terrain;
+            neptuneWind.enabled = config.id == PlanetId.Neptune; // U-144
             if (dayNight != null) dayNight.ConfigureFor(config);
             if (dustStorm != null) dustStorm.ConfigureFor(config, seed);
             if (creatures != null) { creatures.hazards = hazards; creatures.ConfigureFor(config, seed); }

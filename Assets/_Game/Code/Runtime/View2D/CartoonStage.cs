@@ -111,6 +111,7 @@ namespace Meridian.View2D
         public static string DeckOf(string scene)
         {
             if (string.IsNullOrEmpty(scene)) return scene;
+            scene = scene.TrimEnd('~'); // U-144: a mirrored set ("deck2~") is its deck's
             int at = scene.IndexOf('@'); if (at >= 0) return scene.Substring(at + 1); // U-133: a zone set carries its band: "storm@deck2"
             int i = scene.IndexOfAny(new[] { '_', '+' }); return i < 0 ? scene : scene.Substring(0, i);
         }
@@ -122,7 +123,11 @@ namespace Meridian.View2D
             return i < 0 ? null : set.Substring(i + 1);
         }
         /// <summary>The set whose layers load (the "+survey" ask dropped). Pure.</summary>
-        public static string SetOf(string scene) { if (string.IsNullOrEmpty(scene)) return scene; int i = scene.IndexOfAny(new[] { '+', '@' }); return i < 0 ? scene : scene.Substring(0, i); }
+        public static string SetOf(string scene) { if (string.IsNullOrEmpty(scene)) return scene; int i = scene.IndexOfAny(new[] { '+', '@', '~' }); return i < 0 ? scene : scene.Substring(0, i); }
+        /// <summary>U-144 (D-148): "~" marks a set shown mirrored (Neptune's −x wind zone: its layers flipped, never a second drawing); the U-128
+        /// crossfade turns it like any other change of set.</summary>
+        public const string MirrorSuffix = "~";
+        public static bool MirrorOf(string scene) => !string.IsNullOrEmpty(scene) && scene.EndsWith(MirrorSuffix);
         /// <summary>The sibling set layer0 comes from: the deck's survey set when "+survey" is asked, else null (the set's own). Pure.</summary>
         public static string Layer0Of(string scene) => !string.IsNullOrEmpty(scene) && scene.EndsWith(SurveySuffix) ? DeckOf(scene) + "_" + Meridian.Planet.UranusSeason.Survey : null;
         /// <summary>A decked set's floor (its datum) by its deck, whatever its light: -1 for an unknown set. Pure.</summary>
@@ -139,12 +144,15 @@ namespace Meridian.View2D
         public static string NeptuneSceneFor(float y, int x, int width, double t, string current)
         {
             string deck = JupiterSceneFor(y, DeckOf(current));
-            if (deck == JupiterDeep) return JupiterDeep;
+            // U-144: the −x wind zone shows its set mirrored (held ZoneHold columns past the zone's border).
+            int dir = Meridian.Planet.Weather.NeptuneWind.DirectionFor(x, current == null ? 0 : MirrorOf(current) ? -1 : 1);
+            string mirror = dir < 0 ? MirrorSuffix : "";
+            if (deck == JupiterDeep) return JupiterDeep + mirror;
             string zone = SetOf(current);
             int hold = (int)JupiterBorderHold;
-            if (Meridian.Planet.Weather.NeptuneStorms.InDarkSpot(x, width, zone == NeptuneSpotScene ? hold : 0)) return NeptuneSpotScene + "@" + deck;
-            if (Meridian.Planet.Weather.NeptuneStorms.InStorm(x, t, width, zone == NeptuneStormScene ? hold : 0)) return NeptuneStormScene + "@" + deck;
-            return deck;
+            if (Meridian.Planet.Weather.NeptuneStorms.InDarkSpot(x, width, zone == NeptuneSpotScene ? hold : 0)) return NeptuneSpotScene + "@" + deck + mirror;
+            if (Meridian.Planet.Weather.NeptuneStorms.InStorm(x, t, width, zone == NeptuneStormScene ? hold : 0)) return NeptuneStormScene + "@" + deck + mirror;
+            return deck + mirror;
         }
         public static string UranusSceneFor(float y, int x, int width, double t, double season, string current, bool survey) =>
             JupiterSceneFor(y, DeckOf(current)) + "_" + Meridian.Planet.UranusSeason.LightFor(x, width, t, season, LightOf(current)) + (survey ? SurveySuffix : "");
@@ -239,7 +247,7 @@ namespace Meridian.View2D
             StormLayers.view = Layers.view;
             StormLayers.alpha = 0f;
             StormLayers.scrollX = 0f;
-            StormLayers.onlyLayer = 0;
+            StormLayers.onlyLayer = 0; StormLayers.mirrorX = false;
             StormLayers.layer0Scene = null; StormLayers.upperScene = null;
             StormLayers.ConfigureFor(planetName, DeckOf(Scene) + "_" + Meridian.Planet.UranusSeason.Survey, DatumFor(Scene, Layers.datumY));
         }
@@ -307,6 +315,7 @@ namespace Meridian.View2D
             Layers.groundFill = Meridian.Planet.PlanetBackdrop.GroundColor(config.id); // U-139: ground, not black, under the set's bottom edge
             Layers.layer0Scene = Layer0Of(Scene); // U-130: the survey layer0, else the set's own
             Layers.upperScene = UpperOf(Scene); // U-133: the spot shares the storm's layers 1–2
+            Layers.mirrorX = MirrorOf(Scene); // U-144
             Layers.ConfigureFor(planetName, SetOf(Scene), DatumFor(Scene, surfaceDatum), FallbackFor(config.id));
             // U-128: from here the datum and the set follow the camera's band (FollowBand); the spawn's band keeps this surface, so the camp frames do not move.
             // D-146: Mercury's bands take the generator's own surface (noise + the cold-trap bowls, no small craters): the plain by the spawn, each trap per column.
@@ -330,7 +339,7 @@ namespace Meridian.View2D
                 StormLayers.view = cam;
                 StormLayers.alpha = 0f;
                 StormLayers.scrollX = 0f;
-                StormLayers.onlyLayer = -1; // U-146: the pulse may have left the slot on one layer
+                StormLayers.onlyLayer = -1; StormLayers.mirrorX = false; // U-146: the pulse may have left the slot on one layer
                 StormLayers.ConfigureFor("mars", StormScene, surfaceDatum);
                 storm = side.dustStorm;
             }
@@ -342,7 +351,7 @@ namespace Meridian.View2D
                 StormLayers.view = cam;
                 StormLayers.alpha = 0f;
                 StormLayers.scrollX = 0f;
-                StormLayers.onlyLayer = -1;
+                StormLayers.onlyLayer = -1; StormLayers.mirrorX = false;
                 StormLayers.ConfigureFor(planetName, OverlayFor(config.id), DatumFor(Scene, surfaceDatum));
                 storm = null;
             }
@@ -371,6 +380,7 @@ namespace Meridian.View2D
             if (Ground == null) { var ggo = new GameObject("CartoonGround"); ggo.transform.SetParent(transform, false); Ground = ggo.AddComponent<GroundStrip>(); }
             Ground.gameObject.SetActive(true);
             Ground.view = cam; Ground.terrain = side.terrain;
+            Ground.mirrorRule = config.id == Meridian.Planets.PlanetId.Neptune ? (System.Func<int, bool>)(x => Meridian.Planet.Weather.NeptuneWind.Direction(x) < 0) : null; // U-144: the −x zone's floes mirrored
             Ground.Load(config.id); // U-118: the planet's strips (Earth's four, Mars's regolith + basalt + frost, Mercury's regolith + slate)
             Ground.materialRule = config.id == Meridian.Planets.PlanetId.Mercury ? (System.Func<int, byte, int>)((x, tile) => GroundStrip.MercuryStripFor(x, MercuryClock, worldWidth)) // U-123: slate in the shadow
                 : config.id == Meridian.Planets.PlanetId.Jupiter ? (System.Func<int, byte, int>)((x, tile) => GroundStrip.JupiterStripFor(x, tile))
@@ -469,6 +479,7 @@ namespace Meridian.View2D
                 Incoming.groundFill = Layers.groundFill; // U-139
                 Incoming.layer0Scene = Layer0Of(want);
                 Incoming.upperScene = UpperOf(want);
+                Incoming.mirrorX = MirrorOf(want);
                 Incoming.ConfigureFor(planetName, SetOf(want), DatumFor(want, d), FallbackFor(planetId));
                 incomingScene = want; fadeT = 0f; Fading = true;
             }

@@ -86,6 +86,27 @@ namespace Meridian.UI
         /// <summary>U-049: the name of the hazard shown beside the level (the worst one).</summary>
         public Text HazardLabel { get; private set; }
         static string[] stormWarnings;
+        static string[] gustWarnings;
+        /// <summary>U-144: Neptune's gust warning (hidden elsewhere and between gusts).</summary>
+        public Text GustText { get; private set; }
+        public Image GustTag { get; private set; }
+        int lastGust = -2;
+        /// <summary>U-144: the warning's code: -1 none, 0 a gust blowing, 1..2 seconds to the next (rounded up). Pure.</summary>
+        public static int GustCode(double t)
+        {
+            if (Meridian.Planet.Weather.NeptuneWind.Gusting(t)) return 0;
+            int s = Mathf.CeilToInt(Meridian.Planet.Weather.NeptuneWind.SecondsToGust(t));
+            return s <= 2 ? s : -1;
+        }
+
+        void UpdateGust()
+        {
+            int code = planet != null && planet.id == Meridian.Planets.PlanetId.Neptune ? GustCode(Time.timeSinceLevelLoad) : -1;
+            if (code == lastGust) return;
+            lastGust = code;
+            GustTag.gameObject.SetActive(code >= 0);
+            GustText.text = code >= 0 ? gustWarnings[code] : "";
+        }
         const string StormNow = "DUST STORM";
 
         void Awake()
@@ -144,6 +165,14 @@ namespace Meridian.UI
             }
             StormText = UiKit.Text(root, "Storm", new Vector2(0.5f, 1f), new Vector2(0f, -40f), new Vector2(600f, 28f), 20, true, TextAnchor.MiddleCenter, new Color(1f, 0.72f, 0.45f, 1f));
             StormText.text = "";
+            // U-144: Neptune's gust warning beside the dials, on a paper tag (the warning's ink): GUST IN 2 / 1, then GUST while it blows.
+            float gx = 24f + 3f * (320f * DialScale + 16f);
+            GustText = UiKit.Text(root, "Gust", tl, new Vector2(gx + 8f, -64f), new Vector2(120f, 26f), 18, true, TextAnchor.MiddleLeft, theme.warning);
+            GustText.text = "";
+            var outline = GustText.GetComponent<Outline>(); if (outline != null) outline.enabled = false;
+            GustTag = UiKit.PaperTag(root, "GustTag", tl, new Vector2(gx, -62f), new Vector2(124f, 30f), tl, GustText.transform);
+            GustTag.gameObject.SetActive(false);
+            if (gustWarnings == null) gustWarnings = new[] { "GUST", "GUST IN 1", "GUST IN 2" };
 
             // U-045: the Tab inventory panel lives beside the HUD (built in code, no scene change).
             Inventory = gameObject.AddComponent<InventoryPanel>();
@@ -362,6 +391,7 @@ namespace Meridian.UI
                 SuitGauge.Step(now, danger); OxygenGauge.Step(now, danger); GravityGauge.Step(now, danger);
             }
             UpdateStorm();
+            UpdateGust();
             UpdateHazards();
             UpdateMarkers();
             if (planet == null) return;

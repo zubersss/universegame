@@ -72,14 +72,14 @@ namespace Meridian.Tests
         [Test]
         public void TheSceneIsTheBandOrTheStormOverIt()
         {
-            Assert.AreEqual("spot@deck2", CartoonStage.NeptuneSceneFor(750f, NeptuneStorms.DarkSpotCentre, W, 0, null));
+            Assert.AreEqual("spot@deck2~", CartoonStage.NeptuneSceneFor(750f, NeptuneStorms.DarkSpotCentre, W, 0, null), "the Spot lies in the −x half: mirrored");
             Assert.AreEqual("storm@deck2", CartoonStage.NeptuneSceneFor(750f, NeptuneStorms.StormStart, W, 0, null));
             Assert.AreEqual("storm@deck1", CartoonStage.NeptuneSceneFor(1000f, NeptuneStorms.StormStart, W, 0, null));
             Assert.AreEqual("deck2", CartoonStage.NeptuneSceneFor(750f, 2000, W, 0, null), "between the zones: the deck");
-            Assert.AreEqual("deep", CartoonStage.NeptuneSceneFor(200f, NeptuneStorms.DarkSpotCentre, W, 0, null), "the Deep keeps its set");
+            Assert.AreEqual("deep~", CartoonStage.NeptuneSceneFor(200f, NeptuneStorms.DarkSpotCentre, W, 0, null), "the Deep keeps its set (mirrored in the −x half)");
             int edge = NeptuneStorms.DarkSpotCentre + NeptuneStorms.HalfWidth;
-            Assert.AreEqual("spot@deck2", CartoonStage.NeptuneSceneFor(750f, edge + 10, W, 0, "spot@deck2"), "10 m past the Spot's edge: it holds");
-            Assert.AreEqual("deck2", CartoonStage.NeptuneSceneFor(750f, edge + 30, W, 0, "spot@deck2"), "past the hold: the deck");
+            Assert.AreEqual("spot@deck2~", CartoonStage.NeptuneSceneFor(750f, edge + 10, W, 0, "spot@deck2~"), "10 m past the Spot's edge: it holds");
+            Assert.AreEqual("deck2~", CartoonStage.NeptuneSceneFor(750f, edge + 30, W, 0, "spot@deck2~"), "past the hold: the deck");
             Assert.AreEqual("deck2", CartoonStage.DeckOf("storm@deck2"));
             Assert.AreEqual("storm", CartoonStage.SetOf("storm@deck2"));
             Assert.AreEqual(CloudLayout.Deck2Bottom, CartoonStage.DeckFloor("storm@deck2"), "a zone set hangs off its band's floor");
@@ -106,6 +106,63 @@ namespace Meridian.Tests
             string json = "Assets/_Game/Art/backgrounds/neptune/storm/storm.json";
             if (File.Exists(json))
                 Assert.IsTrue(ParallaxMath.Pulsed(SceneLayout.Parse(File.ReadAllText(json)).layers[1].pulse), "B-169's storm set carries its rim's pulse block");
+        }
+
+        /// <summary>U-144: the column's second half blows −x: its sets show mirrored ("~", through the crossfade, held 20 m past the border), its
+        /// floes run backwards with each end taking the other's cap, and the lean mirrors.</summary>
+        [Test]
+        public void TheWestwardHalfIsMirrored()
+        {
+            Assert.AreEqual(1, NeptuneWind.Direction(500));
+            Assert.AreEqual(-1, NeptuneWind.Direction(3000), "the second half blows −x");
+            Assert.AreEqual(-1, NeptuneWind.Direction(-500), "the column wraps");
+            Assert.Greater(NeptuneWind.Lean(NeptuneWind.At(3000, 10), false, 10), 0f, "−x wind: the tops lean toward −x");
+            Assert.AreEqual(1, NeptuneWind.DirectionFor(W / 2 + 10, 1), "10 m into the −x half: the +x set holds");
+            Assert.AreEqual(-1, NeptuneWind.DirectionFor(W / 2 + 30, 1), "past the hold: mirrored");
+            Assert.AreEqual("deck2~", CartoonStage.NeptuneSceneFor(750f, 2600, W, 0, null));
+            Assert.AreEqual("deck2", CartoonStage.NeptuneSceneFor(750f, 1500, W, 0, null));
+            Assert.IsTrue(CartoonStage.MirrorOf("storm@deck2~")); Assert.IsFalse(CartoonStage.MirrorOf("storm@deck2"));
+            Assert.AreEqual("storm", CartoonStage.SetOf("storm@deck2~"));
+            Assert.AreEqual("deck2", CartoonStage.DeckOf("storm@deck2~"));
+            Assert.AreEqual(CloudLayout.Deck2Bottom, CartoonStage.DeckFloor("deck2~"), "a mirrored set hangs where its deck does");
+            Assert.AreEqual("storm", CartoonStage.UpperOf("spot@deck3~"));
+            Assert.AreEqual(GroundStrip.TileFrame(5), GroundStrip.StripFrame(5, false));
+            Assert.AreEqual(GroundStrip.TileFrame(-6), GroundStrip.StripFrame(5, true), "mirrored: the tiles run backwards");
+            Assert.AreEqual((GroundStrip.StripFrame(6, true) + 1) % GroundStrip.TileFrames, GroundStrip.StripFrame(5, true), "so the next column left continues the run");
+            Assert.AreEqual(GroundStrip.CapRight, GroundStrip.LeftCapFrame(true)); Assert.AreEqual(GroundStrip.CapLeft, GroundStrip.RightCapFrame(true));
+            Assert.AreEqual(GroundStrip.CapLeft, GroundStrip.LeftCapFrame(false));
+        }
+
+        /// <summary>U-144: the surveyor drifts 0.12 × the wind (on foot the ground's grip applies), nothing in the lee of a solid within 3 m upwind
+        /// or while holding an anchor (within 1.5 m).</summary>
+        [Test]
+        public void TheWindDriftsTheSurveyorUnlessShelteredOrAnchored()
+        {
+            Assert.AreEqual(1.2f, NeptuneWind.Drift(10f, false, false), 1e-5f, "10 m/s: 1.2 m/s");
+            Assert.AreEqual(4.2f, NeptuneWind.Drift(35f, false, false), 1e-5f, "a 35 m/s gust: 4.2 m/s");
+            Assert.AreEqual(-2.4f, NeptuneWind.Drift(-20f, false, false), 1e-5f, "−x wind drifts −x");
+            Assert.AreEqual(0f, NeptuneWind.Drift(35f, false, true), "anchored: stands fast");
+            Assert.AreEqual(0f, NeptuneWind.Drift(35f, true, false), "sheltered: no drift");
+            System.Func<int, int, bool> wall = (x, y) => x == 8 && y >= 0 && y <= 5;
+            Assert.IsTrue(NeptuneWind.Sheltered(wall, new Vector2(10.5f, 2f), 1), "a wall 2 m upwind shelters");
+            Assert.IsFalse(NeptuneWind.Sheltered(wall, new Vector2(10.5f, 2f), -1), "the same wall downwind does not");
+            Assert.IsFalse(NeptuneWind.Sheltered(wall, new Vector2(12.5f, 2f), 1), "4 m upwind is too far");
+            Assert.IsFalse(NeptuneWind.Sheltered(wall, new Vector2(10.5f, 7f), 1), "over the wall's top: in the wind");
+            Assert.IsTrue(WindAnchor.WithinReach(new Vector2(3f, 1f), new Vector2(4.2f, 1f)));
+            Assert.IsFalse(WindAnchor.WithinReach(new Vector2(3f, 1f), new Vector2(4.6f, 1f)));
+            Assert.Greater(WindAnchor.LetGo, WindAnchor.Reach, "the hold lets go a little past where it takes");
+        }
+
+        /// <summary>U-144: the HUD's gust warning: GUST IN 2, GUST IN 1, then GUST while it blows; nothing between.</summary>
+        [Test]
+        public void TheHudWarnsOfAGust()
+        {
+            Assert.AreEqual(0f, NeptuneWind.SecondsToGust(1.0), 1e-5f, "a gust blows from t 0 to 4");
+            Assert.AreEqual(13f, NeptuneWind.SecondsToGust(10.0), 1e-4f);
+            Assert.AreEqual(0, Meridian.UI.SideHud.GustCode(1.0));
+            Assert.AreEqual(-1, Meridian.UI.SideHud.GustCode(10.0), "between gusts: nothing");
+            Assert.AreEqual(2, Meridian.UI.SideHud.GustCode(NeptuneWind.GustEvery - 1.5), "1.5 s out: GUST IN 2");
+            Assert.AreEqual(1, Meridian.UI.SideHud.GustCode(NeptuneWind.GustEvery - 0.5));
         }
 
         [Test]
