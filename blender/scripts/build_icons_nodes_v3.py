@@ -253,7 +253,7 @@ def draw_node(d, M, nid):
 
 BATCHES = {1: ["dig_power_1", "dig_brush_1", "haul_pack_1", "haul_dirt_1", "asc_grapple_1", "asc_ladder_1", "sur_scan_1", "sur_depth_1",
                "end_air_1", "end_fall_1", "voy_price_1", "voy_hold_1"]}
-EXPORT_BATCHES = ()                                                                             # only LEAD-accepted batches export
+EXPORT_BATCHES = (1,)                                                                           # only LEAD-accepted batches export (1: 17:3x)
 
 
 def render_node(nid):

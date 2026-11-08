@@ -1111,6 +1111,35 @@ def do_skilltree_set(entry, preview):
              + f" | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
 
 
+def do_node_icon_set(entry, preview):
+    """B-204: the Skill Tree's node icons icons/nodes/<id> (128x128 + json), LEAD-accepted batches only (the row's "batches",
+    default build_icons_nodes_v3.EXPORT_BATCHES); the checks raise before anything is written; the review is each batch's sheet."""
+    from meridian import fakegp
+    t0 = time.time()
+    if preview:
+        raise AssetError(f"{entry['key']}: no preview mode (python build_icons_nodes_v3.py <png> <batch>)")
+    import build_icons_nodes_v3 as NI
+    batches = tuple(entry.get("batches", NI.EXPORT_BATCHES))
+    names = [n for b in batches for n in NI.BATCHES[b]]
+    fakegp.install()                    # an earlier review script in this batch may have restored gp_draw.mat
+    try:
+        try:
+            out = NI.export(ART, names)
+        except Exception:
+            for n in names:
+                mark_stale(NI.KEY.format(n), True)
+            raise
+        for b in batches:
+            NI.preview(os.path.join(PREVIEW, f"review_b204_node_icons_batch{b}.png"), batch=b, footnote=f"exported {time.strftime('%m-%d %H:%M')}")
+    finally:
+        fakegp.restore()
+    for k, _w, _h, _n in out:
+        mark_stale(k, False)
+    mark_stale(entry["key"], False)
+    log_line(f"OK {entry['key']} | " + ", ".join(f"{k.split('/')[-1]} {n // 1024}KB" for k, _w, _h, n in out)
+             + f" | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
+
+
 def do_icon_set(entry, preview):
     """B-128: v3.1 tile-item icons (icons/<item>/base, 64x64) drawn with fakegp + numpy (no scene);
     the preview sheet doubles as the review."""
@@ -1241,6 +1270,8 @@ def do_asset(entry, preview):
         return do_ui_set(entry, preview)
     if entry.get("skilltree_set"):      # the Skill Tree panel kit (B-204)
         return do_skilltree_set(entry, preview)
+    if entry.get("node_icon_set"):      # the Skill Tree's node icons (B-204), by accepted batch
+        return do_node_icon_set(entry, preview)
     if entry.get("disc_set"):           # v3 §11.5 planet discs (B-119, D-098)
         return do_disc_set(entry, preview)
     if entry.get("space_starfield"):    # v3 §11.4 space starfield + nebula cards (B-120)
