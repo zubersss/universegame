@@ -639,22 +639,22 @@ def mars_polar(seed):
     H = 1024
     hz = _gline(H, -2.0)
     stack = mars_sky(rng, pal, H, 0.0)
-    far = terrace(notch(BG.ridge(rng, [(2, 0.5), (5, 0.3), (11, 0.2)], base=hz - 125, amp=40), rng, 5, 30, 70), 24)
+    far = terrace(notch(BG.ridge(rng, [(2, 0.5), (5, 0.3), (11, 0.2)], base=hz - 210, amp=45), rng, 5, 30, 70), 24)   # B-186 rev 1: taller far plateaus
     farm = BG._ridge_mask(H, far)
     stack.append(wash32(rng, H, farm, BG._mix(frost, hazec, 0.35), var=0.03, edge_dark=0.05, bleed=2.5))
-    stack.append(wash32(rng, H, strata(H, farm, rng, hz - 150, hz - 20, 6, (4, 8)), BG._mix(ice, hazec, 0.45), var=0.03, edge_dark=0.02, bleed=2.5))
+    stack.append(wash32(rng, H, strata(H, farm, rng, hz - 170, hz - 20, 5, (3, 6)), BG._mix(ice, hazec, 0.50), var=0.03, edge_dark=0.02, bleed=2.5))
     plain = BG._ridge_mask(H, BG.ridge(rng, [(4, 0.6), (9, 0.4)], base=hz - 8, amp=4))
     stack.append(wash32(rng, H, plain, BG._mix(frost, hazec, 0.15), var=0.03, edge_dark=0.03, bleed=3.0))
     out.append(BG.feather_top(*finish(stack, rng, H)))   # B-188: the sky's top edge feathered
     # layer1: the nearer cap scarp
     H = 512
     g1 = _gline(H, -1.0)
-    top = terrace(notch(BG.ridge(rng, [(1, 0.5), (3, 0.3), (7, 0.2)], base=g1 - 175, amp=45), rng, 5, 40, 80), 20)
+    top = terrace(notch(BG.ridge(rng, [(1, 0.5), (3, 0.3), (7, 0.2)], base=g1 - 270, amp=45), rng, 5, 40, 80), 20)   # B-186 rev 1: a taller scarp (the first read as low stripes)
     scarp = BG._ridge_mask(H, top)
     stack = Stack()
-    stack.append(wash32(rng, H, scarp, BG._mix(ice, pal["sky"], 0.12), var=0.05, edge_dark=0.07, bleed=2.0))
-    stack.append(wash32(rng, H, strata(H, scarp, rng, g1 - 150, g1 - 20, 8, (5, 10)), BG._mix(dust, pal["sky"], 0.10), var=0.04, edge_dark=0.03, bleed=2.0))
-    capm = (scarp * (np.arange(H)[:, None] < top[None, :] + 22)).astype(np.float32)
+    stack.append(wash32(rng, H, scarp, BG._mix(ice, pal["offwhite"], 0.35), var=0.05, edge_dark=0.07, bleed=2.0))
+    stack.append(wash32(rng, H, strata(H, scarp, rng, g1 - 220, g1 - 30, 6, (3, 6)), BG._mix(dust, pal["sky"], 0.10), var=0.04, edge_dark=0.03, bleed=2.0))
+    capm = (scarp * (np.arange(H)[:, None] < top[None, :] + 36)).astype(np.float32)
     stack.append(wash32(rng, H, capm, frost, var=0.03, edge_dark=0.05, bleed=2.0))
     apron = BG._ridge_mask(H, BG.ridge(rng, [(3, 0.5), (8, 0.5)], base=g1 - 28, amp=14))
     stack.append(wash32(rng, H, apron, BG._mix(frost, pal["teal"], 0.10), var=0.04, edge_dark=0.05, bleed=2.5))
@@ -679,7 +679,7 @@ def mars_polar(seed):
     ground = BG._ridge_mask(H, hum)
     trough = np.zeros((H, W), np.float32)
     for a in troughs:                                                                         # soft V shading at each polygon trough
-        ell(trough, a, g2 + 10, 7, 14)
+        ell(trough, a, g2 + 6, 1.6, 7)                                                       # a soft crack (the 7x14 marks read as teal drips)
     trough *= ground
     fans = np.zeros((H, W), np.float32)
     for _k in range(9):                                                                       # dark CO2 vent fans lying flat on the cap
@@ -744,8 +744,8 @@ def mars_tharsis(seed):
     lobes *= flank
     stack = Stack()
     stack.append(wash32(rng, H, flank, BG._mix(rust, pal["sky"], 0.30), var=0.06, edge_dark=0.07, bleed=2.0))
-    stack.append(wash32(rng, H, lobes, BG._mix(basalt, pal["sky"], 0.30), var=0.05, edge_dark=0.08, bleed=1.8))
-    stack.append(wash32(rng, H, lobe_lit * lobes, BG._mix(bas_lit, pal["sky"], 0.30), var=0.04, edge_dark=0.02, bleed=1.5))
+    stack.append(wash32(rng, H, lobes, BG._mix(basalt, pal["sky"], 0.12), var=0.05, edge_dark=0.08, bleed=1.8))
+    stack.append(wash32(rng, H, lobe_lit * lobes, BG._mix(bas_lit, pal["sky"], 0.12), var=0.04, edge_dark=0.02, bleed=1.5))
     out.append(finish(stack, rng, H))
     # layer2: the near lava (480 tall, the line on row 352)
     H = 384 + 160
