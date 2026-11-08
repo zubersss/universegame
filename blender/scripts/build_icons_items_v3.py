@@ -360,20 +360,19 @@ def _ingot(d, M, top_m, front_m, side_m, panel_m):
 
 
 def _drum(d, M, body, body_sh, band, ring):
-    """A cell lying on its side in 3/4: the body, its shaded underside, two bands, the end cap facing right."""
-    L, R, H = -0.3, 0.18, 0.2
-    G.stroke(d, [(L, -H), (R, -H), (R, H), (L, H)], M[body], 0.0, cyclic=True)
-    G.stroke(d, [(L, -H), (R, -H), (R, -H * 0.35), (L, -H * 0.35)], M[body_sh], 0.0, cyclic=True)
-    for x0 in (-0.22, 0.04):
+    """A cell lying on its side: a barrel with domed ends (rev: one open-looking cap read as a tube), its shaded underside,
+    dark end rings, two coloured bands, a highlight along the top."""
+    L, R, H, cap = -0.26, 0.22, 0.2, 0.1
+    shell = ([(L + cap * math.cos(a), H * math.sin(a)) for a in [math.pi / 2 + math.pi * i / 12 for i in range(13)]] +     # left end, top -> bottom
+             [(R + cap * math.cos(a), H * math.sin(a)) for a in [-math.pi / 2 + math.pi * i / 12 for i in range(13)]])     # right end, bottom -> top
+    G.stroke(d, shell, M[body], 0.0, cyclic=True)
+    G.stroke(d, [(x, z) for x, z in shell if z < -H * 0.3] + [(R, -H * 0.3), (L, -H * 0.3)], M[body_sh], 0.0, cyclic=True)
+    for x0 in (L - 0.01, R - 0.03):                                                          # the end rings
+        G.stroke(d, [(x0, -H), (x0 + 0.04, -H), (x0 + 0.04, H), (x0, H)], M[ring + "_i"], I, cyclic=True)
+    for x0 in (-0.15, 0.06):                                                                  # the bands
         G.stroke(d, [(x0, -H), (x0 + 0.07, -H), (x0 + 0.07, H), (x0, H)], M[band], I, cyclic=True)
-    for x0 in (L, R - 0.03):
-        G.stroke(d, [(x0, -H - 0.01), (x0 + 0.04, -H - 0.01), (x0 + 0.04, H + 0.01), (x0, H + 0.01)], M[ring + "_i"], I, cyclic=True)
-    cap = G.lumpy_ellipse(R + 0.02, 0.0, 0.09, H + 0.01, n=20, lump=0.0, seed=150)
-    G.stroke(d, cap, M[body_sh], 0.0, cyclic=True)
-    G.stroke(d, G.lumpy_ellipse(R + 0.03, 0.0, 0.045, H * 0.55, n=16, lump=0.0, seed=151), M[body], 0.0, cyclic=True)
-    G.stroke(d, cap, M["ink"], O, cyclic=True)
-    G.stroke(d, [(L, -H), (R, -H), (R, H), (L, H)], M["ink"], O, cyclic=True)
-    glint(d, M, -0.14, H * 0.6, 0.024)
+    G.stroke(d, [(L + 0.06, H * 0.55), (R - 0.06, H * 0.55), (R - 0.06, H * 0.72), (L + 0.06, H * 0.72)], M["off"], 0.0, cyclic=True)
+    G.stroke(d, shell, M["ink"], O, cyclic=True)
 
 
 def _cylinder(d, M, body, body_sh, top_m, x=0.0, w=0.2, zb=-0.24, zt=0.22):
@@ -440,7 +439,9 @@ def float_cell_mk2(d, M):
 def polymer(d, M):
     top = _cylinder(d, M, "off", "off_sh", "off", x=-0.04, w=0.22, zb=-0.18, zt=0.24)
     G.stroke(d, G.lumpy_ellipse(-0.04, 0.24, 0.07, 0.025, n=14, lump=0.0, seed=180), M["sky_sh_i"], I, cyclic=True)   # the core
-    G.stroke(d, [(0.12, -0.2), (0.34, -0.3), (0.36, -0.24), (0.16, -0.12)], M["off_i"], I, cyclic=True)   # the film's loose end
+    G.stroke(d, [(0.16, 0.02), (0.22, -0.16), (0.3, -0.26), (0.42, -0.3), (0.44, -0.25), (0.33, -0.2), (0.25, -0.1), (0.18, 0.08)],
+             M["off_i"], I, cyclic=True)                                                      # the film draped down (rev: a diagonal flap
+                                                                                              # read as a magnifier's handle)
     for j, (x, z) in enumerate(((-0.24, -0.3), (0.0, -0.33))):
         G.stroke(d, G.lumpy_ellipse(x, z, 0.05, 0.03, n=12, seed=181 + j), M["mustard_i"], I, cyclic=True)   # amber pellets
     glint(d, M, -0.18, 0.12, 0.024)
