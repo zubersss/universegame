@@ -1,5 +1,6 @@
 # LEAD STATUS
-Updated: 2026-11-08 12:3x · Session: 10 (zuber-dc; all three windows restarted ~09:30 after a ~3-hour break) · Review cycle: 282 · Cadence: every 2 hours (owner, 11-07 15:1x; session cron 5ca489ce at :43 on odd hours, next ~13:05) + messages from the workers as they arrive
+Updated: 2026-11-08 13:0x · Session: 10 (zuber-dc; all three windows restarted ~09:30 after a ~3-hour break) · Review cycle: 283 · Cadence: every 2 hours (owner, 11-07 15:1x; session cron 5ca489ce at :43 on odd hours, next ~15:05) + messages from the workers as they arrive
+Cycle 283 (13:05, 2-hour tick): no stall; the board tidied (B-179 / B-183 / B-188 / U-164 / U-165 Done); U-167 (fill_decor) and B-190 (puff variants) written; UNITY's Mars check running; RAM 0.12 GB under it, watched.
 Cycle 282 (11:05–12:3x): BUILD 0.5.0 OUT (Earth on smooth ground, round digging, mounds, ore rocks and buried finds); held twice (round strokes, D-168; the desert / taiga strips, B-188) and respun once; the owner's page https://claude.ai/artifact/CHnmoFrDg2jzUuM42BVi83 and USER-33 posted; U-157 / U-158 / U-163 / U-165 Done; D-170 (yields judged by the owner's play); U-166 (a dry-valley sky line) shipped as known.
 Cycle 281 (09:3x–11:0x): the resume; U-156 / U-161 Done; D-168 / D-169; every 0.5.0 art item exported and verified; B-184..B-188 written.
 (cycles 231–280: coordination/status/archive/LEAD_2026-11-06.md and REVIEW_LOG)
