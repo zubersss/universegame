@@ -90,11 +90,23 @@ def per(x, period, harmonics, seed, amp):
     return amp * sum(a * math.sin(TAU * n * x / period + p) for n, p, a in ph) / tot
 
 
+_CUR = None                         # the drawing render_piece is filling: wrapped() records each element's copies in it
+_GROUPS = []
+
+
 def wrapped(fn, period_x, period_z=None):
-    """Draw fn(dx, dz) at the tile's neighbouring offsets so anything crossing an edge wraps (seamless tiling)."""
+    """Draw fn(dx, dz) at the tile's neighbouring offsets so anything crossing an edge wraps (seamless tiling); the
+    stroke ranges of the copies are recorded so render_piece gives them the centre copy's ids (identical ink jitter)."""
+    ranges, master = [], 0
     for dx in (-period_x, 0.0, period_x):
         for dz in ((-period_z, 0.0, period_z) if period_z else (0.0,)):
+            n0 = len(_CUR.strokes) if _CUR is not None else 0
             fn(dx, dz)
+            ranges.append((n0, len(_CUR.strokes) if _CUR is not None else 0))
+            if dx == 0.0 and dz == 0.0:
+                master = len(ranges) - 1
+    if _CUR is not None:
+        _GROUPS.append((master, ranges))
 
 
 # ---------------------------------------------------------------- the band (x 0..8 m, the surface at z = 0)
@@ -334,16 +346,27 @@ PIECES = {   # name -> (w, h, pivot, frames)
 
 def render_piece(name, planet="earth", k=0, mx=1, mz=1, ss=None):
     """mx / mz: render the drawing mx x mz frames wide / tall (the periodicity check compares the copies)."""
+    global _CUR
     w, h, piv, _n = PIECES[name]
     w, h = w * mx, h * mz
     gp = fakegp.FakeGP()
     M = mats(gp, planet)
     d = fakegp.FakeDrawing()
+    _CUR = d
+    _GROUPS.clear()
     {"ground_band": lambda: draw_band(d, M, planet), "ground_fill": lambda: draw_fill(d, M, planet),
      "ground_decor": lambda: draw_decor(d, M, k), "ground_lip": lambda: draw_lip(d, M), "dig_rim": lambda: draw_rim(d, M),
      "dig_puff": lambda: draw_puff(d, M, k)}[name]()
+    _CUR = None
+    st = fakegp.strokes_of(d, gp)
+    for master, ranges in _GROUPS:                      # a wrapped element's copies share the master's id: the same ink
+        m0, m1 = ranges[master]                         # jitter along the same arc, so the tile's copies are identical
+        for a, b in ranges:
+            if (a, b) != (m0, m1) and b - a == m1 - m0:
+                for i in range(m1 - m0):
+                    st[a + i]["id"] = st[m0 + i]["id"]
     ss = ss or (2 if w * h > 200_000 else 4)              # the 512^2 fill at ss 4 holds a 2048^2 float buffer (> the 300 MB cap)
-    img, wd = GR.render_frame(fakegp.strokes_of(d, gp), w, h, PPU, piv, ss=ss, seed=1750 + k)
+    img, wd = GR.render_frame(st, w, h, PPU, piv, ss=ss, seed=1750 + k)
     return img, wd
 
 
@@ -357,6 +380,131 @@ def render_all(planet="earth"):
             widths += wd
         out[name] = (frames, widths)
     return out
+
+
+# ---------------------------------------------------------------- the export (render.py's ground_strip_set API: KEYS, sheets,
+# export, main; the row's "planet" picks the planet through use_planet)
+
+DECOR = ["tuft_a", "tuft_b", "tuft_c", "stone_a", "stone_b", "flower"]
+PLANET = "earth"
+KEYS = {}
+
+
+def use_planet(planet):
+    global PLANET, KEYS
+    PLANET = planet
+    KEYS = {n: f"terrain/{planet}/{n}" for n in ("ground_band", "ground_fill", "ground_lip", "dig_rim", "dig_puff")}
+    KEYS.update({f"ground_decor_{i + 1}": f"terrain/{planet}/ground_decor_{i + 1}" for i in range(len(DECOR))})
+
+
+use_planet(PLANET)
+
+
+def sheets():
+    """-> ({key name: (frames, widths)}, all widths): one entry per contract §11.9 key (the decor one key per piece)."""
+    S, allw = {}, []
+    for name, (_w, _h, _p, n) in PIECES.items():
+        for k in range(n):
+            img, wd = render_piece(name, PLANET, k)
+            kn = f"ground_decor_{k + 1}" if name == "ground_decor" else name
+            fr, ws = S.get(kn, ([], []))
+            S[kn] = (fr + [img], ws + wd)
+            allw += wd
+    return S, allw
+
+
+def pieces_of(S):
+    """The preview's per-piece view of S (the decor as one 6-frame piece)."""
+    out = {n: S[n] for n in ("ground_band", "ground_fill", "ground_lip", "dig_rim", "dig_puff")}
+    out["ground_decor"] = ([S[f"ground_decor_{i + 1}"][0][0] for i in range(len(DECOR))],
+                           sum((S[f"ground_decor_{i + 1}"][1] for i in range(len(DECOR))), []))
+    return out
+
+
+def copy_diff(name):
+    """Contract §11.9: the drawing rendered two tiles wide (two tall for the fill); p99 of the copies' difference (must be 0)."""
+    import numpy as np
+    w0, h0 = PIECES[name][0], PIECES[name][1]
+    two, _w = render_piece(name, PLANET, 0, mx=2, mz=2 if name == "ground_fill" else 1, ss=1)
+    p = float(np.percentile(np.abs(two[:h0, :w0].astype(np.int32) - two[:h0, w0:2 * w0].astype(np.int32)), 99))
+    if name == "ground_fill":
+        p = max(p, float(np.percentile(np.abs(two[:h0, :w0].astype(np.int32) - two[h0:2 * h0, :w0].astype(np.int32)), 99)))
+    return p
+
+
+def sheet_meta(kn, frames):
+    import numpy as np
+    base = "ground_decor" if kn.startswith("ground_decor_") else kn
+    w, h, piv, _n = PIECES[base]
+    g = v3.GUTTER
+    n = len(frames)
+    sheet = np.zeros((h, n * w + (n - 1) * g, 4), np.uint8)
+    for i, im in enumerate(frames):
+        sheet[:, i * (w + g):i * (w + g) + w] = im
+    meta = {"key": KEYS[kn], "style": "v3", "contract": "v3.2 11.9", "frame_width": w, "frame_height": h, "columns": n, "gutter": g,
+            "frames": n, "fps": v3.FPS, "pivot": [round(piv[0], 6), round(piv[1], 6)], "facing": "right", "ppu": PPU, "animations": []}
+    if kn == "ground_band":
+        meta.update({"tile_x": True, "repeat_px": BAND_W, "surface_row": SURF_ROW, "above_px": SURF_ROW, "below_px": BAND_H - SURF_ROW,
+                     "mapping": "u = world x x 64 mod 512 (continues across chunk seams; UNITY via LEAD 11-08 04:1x); v = 24 - (normal distance from the outline x 64), up = toward row 0; the sprite pivot is ON row 24 (40 px up from the bottom)",
+                     "note": "low scallops only: the art stretches <= 22 % along the band on a 35 deg slope"})
+    elif kn == "ground_fill":
+        meta.update({"tile_x": True, "tile_y": True, "world_space": True, "standalone": True, "wrap": "repeat",
+                     "mapping": "u = x x 64 mod 512, v = -y x 64 mod 512; a standalone texture (outside the atlases, Repeat wrap)"})
+    elif kn == "dig_rim":
+        meta.update({"tile_x": True, "repeat_px": RIM_W, "ink_row": RIM_ROW,
+                     "mapping": "along each carved hole's outline; the rows below the ink lie in the solid (the normal points into the air); the sprite pivot is ON the ink row 4"})
+    elif kn == "ground_lip":
+        meta.update({"brink": True, "note": "drawn for a drop to the right; mirror x for a drop to the left"})
+    elif kn == "dig_puff":
+        meta["animations"] = [{"name": "puff", "start": 0, "length": n, "loop": False}]
+    else:
+        meta.update({"upright": True, "decor": DECOR[int(kn.rsplit("_", 1)[1]) - 1], "note": "scatter along the curve, never rotated"})
+    problems = [p for p in v3.validate_sheet(meta, sheet.shape) if "sum of clip lengths" not in p]
+    if kn not in ("ground_band", "ground_fill", "dig_rim"):
+        m = v3.EDGE_MARGIN
+        for i, im in enumerate(frames):
+            if im[:m, :, 3].any() or im[-m:, :, 3].any() or im[:, :m, 3].any() or im[:, -m:, 3].any():
+                problems.append(f"frame {i} touches the {m} px edge")
+    hit, off = v3.palette_hits(sheet, PLANET)
+    if hit < 0.98:
+        problems.append(f"palette {hit * 100:.1f}% (off {' '.join(off[:3])})")
+    return sheet, meta, problems
+
+
+def export(art, S=None):
+    """-> (out [(key, w, h, bytes)], within {name: p99 copy diff}, across): raises on any contract problem."""
+    import json as _json
+    from meridian import pngio
+    if S is None:
+        S, _w = sheets()
+    built, problems, within = [], [], {}
+    for kn, (frames, _ws) in S.items():
+        sheet, meta, p = sheet_meta(kn, frames)
+        problems += [f"{kn}: {x}" for x in p]
+        built.append((kn, sheet, meta))
+    for kn in ("ground_band", "ground_fill", "dig_rim"):
+        within[kn] = copy_diff(kn)
+        if within[kn] != 0:
+            problems.append(f"{kn}: tiling copies differ (p99 {within[kn]:.0f}; contract 11.9: 0)")
+    if problems:
+        raise ValueError(f"{PLANET} ground set checks: " + "; ".join(problems))
+    d = os.path.join(art, "terrain", PLANET)
+    os.makedirs(d, exist_ok=True)
+    out = []
+    for kn, sheet, meta in built:
+        n = pngio.write_png(os.path.join(d, kn + "_color.png"), sheet)
+        with open(os.path.join(d, kn + ".json"), "w", encoding="utf-8", newline="\n") as f:
+            _json.dump(meta, f, indent=2)
+            f.write("\n")
+        out.append((meta["key"], sheet.shape[1], sheet.shape[0], n))
+    return out, within, f"{len(out)} keys, contract v3.2 11.9"
+
+
+def main(out, S=None, allw=None, footnote=None):
+    """The stamped export review: the curve preview's three panels and pieces, from the exported frames."""
+    if S is None:
+        S, allw = sheets()
+    preview(os.path.dirname(out), PLANET, pieces=pieces_of(S), out=out, footnote=footnote)
 
 
 # ---------------------------------------------------------------- the curve preview
@@ -426,15 +574,18 @@ def bend(tex, surf_row, ys, X, Y, mode):
     return _bilinear(tex, u.astype(np.float32), (surf_row - h).astype(np.float32))
 
 
-def preview(out_dir, planet="earth"):
+def preview(out_dir, planet="earth", pieces=None, out=None, footnote=None):
+    """The curve preview (out=None: lock-free design run, its pieces also written to <out_dir>/b175/) or, with out and
+    footnote, the export's stamped review drawn from the exported frames (main)."""
     import numpy as np
     from meridian import pngio
     sys.path.insert(0, os.path.dirname(HERE))
     import review
-    pieces = render_all(planet)
+    design = pieces is None
+    pieces = pieces or render_all(planet)
     dd = os.path.join(out_dir, "b175")
     os.makedirs(dd, exist_ok=True)
-    for name, (frames, _w) in pieces.items():
+    for name, (frames, _w) in (pieces.items() if design else ()):
         pngio.write_png(os.path.join(dd, f"{planet}_{name}_color.png"), np.concatenate(frames, axis=1) if len(frames) > 1 else frames[0])
     xs, z = profile()
     Wp = len(xs)
@@ -580,9 +731,9 @@ def preview(out_dir, planet="earth"):
         review._label(foot, ln, 6, 6 + 16 * i, scale=1)
     img = np.vstack(img_rows + [P, foot])
     import time
-    review.draw(img, time.strftime("%m-%d %H:%M") + " curve preview (lock-free, fakegp + numpy; test profile 30 m at 1x)", 2,
+    review.draw(img, time.strftime("%m-%d %H:%M") + " " + (footnote or "curve preview (lock-free, fakegp + numpy; test profile 30 m at 1x)"), 2,
                 img.shape[0] - 16, (1.0, 1.0, 0.85))
-    out = os.path.join(out_dir, f"review_b175_{planet}_curve_preview.png")
+    out = out or os.path.join(out_dir, f"review_b175_{planet}_curve_preview.png")
     review.write(out, img)
     print("written", out, img.shape[1], "x", img.shape[0])
     for ln in lines:
