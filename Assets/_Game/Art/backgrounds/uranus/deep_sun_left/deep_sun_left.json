@@ -1,0 +1,27 @@
+{
+  "key": "backgrounds/uranus/deep_sun_left",
+  "style": "v3",
+  "ppu": 64,
+  "anchor": "bottom",
+  "tile_x": true,
+  "layers": [
+    {
+      "n": 0,
+      "parallax": 0.1,
+      "y_m": -2.0,
+      "height_px": 1024
+    },
+    {
+      "n": 1,
+      "parallax": 0.35,
+      "y_m": -1.0,
+      "height_px": 640
+    },
+    {
+      "n": 2,
+      "parallax": 0.6,
+      "y_m": -0.5,
+      "height_px": 384
+    }
+  ]
+}
