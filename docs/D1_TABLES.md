@@ -58,6 +58,8 @@ Mercury's buried solarite has no twilight window (only the surface clusters keep
 
 Six branches, five rings, two nodes per ring (three at ring 3); 66 nodes. A node needs one bought node linked to it (ring 1 links to the centre). "↔" marks a sideways link into the neighbouring branch (the branch order round the circle: Dig · Haul · Ascent · Survey · Endurance · Voyage · back to Dig). Costs: Scrip + materials. Effects stack additively unless marked ×.
 
+**Links (revised 17:1x, B-204)**: laid out for a crossing-free radial chart (BLENDER's check: 0 crossings); each border between neighbouring branches carries exactly one sideways link at ring 3 and one at ring 5; a comma in the links column means any one of them.
+
 **Costs by ring**: R1 60–100 Scrip · R2 250–400 · R3 900–1 300 + 4–6 of a Mars / Mercury material · R4 3 000–4 500 + 3–4 of vitriol_glass, solarite or deep_core_sample · R5 10 000–15 000 + 2 of a giant's find or 1 Datacore.
 
 ### Dig
@@ -72,8 +74,8 @@ Six branches, five rings, two nodes per ring (three at ring 3); 66 nodes. A node
 | dig_brush_2 | 3 | brush radius +0.2 m | 1 000 + sulfide 5 | dig_rhythm_1 ↔ haul_magnet_1 |
 | dig_power_4 | 4 | Beam power +2 | 3 800 + solarite 3 | dig_power_3 |
 | dig_rhythm_2 | 4 | rhythm max −50 % | 4 000 + vitriol_glass 3 | dig_heatsink, dig_brush_2 |
-| dig_power_5 | 5 | Beam power +3 | 12 000 + metallic_hydrogen 2 | dig_power_4 |
-| dig_core_bit | 5 | tier hardness counts one tier lower (T5 as T4) | 15 000 + deep_diamond 2 + Datacore 1 | dig_rhythm_2 ↔ voy_skip_2 |
+| dig_power_5 | 5 | Beam power +3 | 12 000 + metallic_hydrogen 2 | dig_power_4 ↔ voy_dray |
+| dig_core_bit | 5 | tier hardness counts one tier lower (T5 as T4) | 15 000 + deep_diamond 2 + Datacore 1 | dig_rhythm_2 |
 
 ### Haul
 | id | R | effect | cost | links |
@@ -87,8 +89,8 @@ Six branches, five rings, two nodes per ring (three at ring 3); 66 nodes. A node
 | haul_sorter | 3 | the pack auto-drops the lowest-value item when full and a better one comes | 1 300 + perchlorate 5 | haul_light_1 |
 | haul_pack_4 | 4 | pack +60 kg | 3 500 + deep_core_sample 2 | haul_pack_3 |
 | haul_light_2 | 4 | k → 0.2 | 4 200 + vitriol_glass 3 | haul_magnet_1, haul_sorter |
-| haul_pack_5 | 5 | pack +100 kg | 11 000 + helium3_condensate 2 | haul_pack_4 |
-| haul_compact | 5 | ores weigh half | 14 000 + superionic_ice 2 | haul_light_2 ↔ asc_winch |
+| haul_pack_5 | 5 | pack +100 kg | 11 000 + helium3_condensate 2 | haul_pack_4 ↔ asc_recall |
+| haul_compact | 5 | ores weigh half | 14 000 + superionic_ice 2 | haul_light_2 |
 
 ### Ascent
 | id | R | effect | cost | links |
@@ -102,8 +104,8 @@ Six branches, five rings, two nodes per ring (three at ring 3); 66 nodes. A node
 | asc_ladder_2 | 3 | ladders 1 dirt per metre, placed 3 m at once | 900 + sulfide 4 | asc_climb_1 ↔ sur_scan_2 |
 | asc_jet_3 | 4 | thrust ×1.6, power use ×0.5 | 4 000 + solarite 3 | asc_jet_2 |
 | asc_grapple_3 | 4 | line 40 m, reel ×2, two anchors | 3 600 + vitriol_glass 3 | asc_grapple_2, asc_ladder_2 |
-| asc_winch | 5 | a winch line from the Surface Line: reel straight up from any depth | 13 000 + metallic_hydrogen 2 | asc_grapple_3 ↔ haul_compact |
-| asc_recall | 5 | one recall beacon per run (topside in 5 s, pack kept) | 15 000 + Datacore 1 | asc_jet_3 |
+| asc_winch | 5 | a winch line from the Surface Line: reel straight up from any depth | 13 000 + metallic_hydrogen 2 | asc_grapple_3 |
+| asc_recall | 5 | one recall beacon per run (topside in 5 s, pack kept) | 15 000 + Datacore 1 | asc_jet_3 ↔ haul_pack_5 |
 
 ### Survey
 | id | R | effect | cost | links |
@@ -117,8 +119,8 @@ Six branches, five rings, two nodes per ring (three at ring 3); 66 nodes. A node
 | sur_preview_2 | 3 | the next tier's materials too | 900 + perchlorate 4 | sur_preview_1 |
 | sur_scan_4 | 4 | radius +30 m, depth +8 m, scan cool-down ×0.5 | 3 400 + solarite 3 | sur_scan_3 |
 | sur_vault | 4 | Warden vaults and relics show on the map | 4 200 + deep_core_sample 2 | sur_rare, sur_preview_2 |
-| sur_deep_eye | 5 | pockets anywhere on screen show through the ground | 12 000 + superionic_ice 2 | sur_scan_4 ↔ end_deep_2 |
-| sur_cartographer | 5 | dug tunnels stay on the map with their best finds | 10 000 + Datacore 1 | sur_vault |
+| sur_deep_eye | 5 | pockets anywhere on screen show through the ground | 12 000 + superionic_ice 2 | sur_scan_4 |
+| sur_cartographer | 5 | dug tunnels stay on the map with their best finds | 10 000 + Datacore 1 | sur_vault ↔ end_suit_mk3 |
 
 ### Endurance
 | id | R | effect | cost | links |
@@ -130,10 +132,10 @@ Six branches, five rings, two nodes per ring (three at ring 3); 66 nodes. A node
 | end_air_3 | 3 | oxygen +80 % | 1 000 + water_ice 6 | end_air_2 |
 | end_heat_2 | 3 | heat and pressure from depth −50 % | 1 300 + sulfide 5 | end_heat_1 |
 | end_fall_2 | 3 | no fall damage under 15 m | 900 + hematite 5 | end_fall_1 ↔ voy_hold_2 |
-| end_deep_1 | 4 | Venus T4–T5 heat halved | 4 400 + vitriol_glass 4 | end_heat_2 |
-| end_air_4 | 4 | oxygen ×2 | 3 200 + polar_ice 4 | end_air_3, end_fall_2 |
-| end_deep_2 | 5 | no depth hazard on any planet | 14 000 + helium3_condensate 2 | end_deep_1 ↔ sur_deep_eye |
-| end_suit_mk3 | 5 | the Mk3 envirosuit (every hazard −1) | 12 000 + Datacore 1 | end_air_4 |
+| end_deep_1 | 4 | Venus T4–T5 heat halved | 4 400 + vitriol_glass 4 | end_heat_2, end_fall_2 |
+| end_air_4 | 4 | oxygen ×2 | 3 200 + polar_ice 4 | end_air_3 |
+| end_deep_2 | 5 | no depth hazard on any planet | 14 000 + helium3_condensate 2 | end_deep_1 |
+| end_suit_mk3 | 5 | the Mk3 envirosuit (every hazard −1) | 12 000 + Datacore 1 | end_air_4 ↔ sur_cartographer |
 
 ### Voyage
 | id | R | effect | cost | links |
@@ -145,10 +147,10 @@ Six branches, five rings, two nodes per ring (three at ring 3); 66 nodes. A node
 | voy_hold_2 | 3 | hold 300 kg | 1 000 + hematite 5 | voy_thrust_2 ↔ end_fall_2 |
 | voy_skip_1 | 3 | the Skip Drive (spool −30 %) | 1 300 + solarite 2 | voy_thrust_2 |
 | voy_price_3 | 3 | Waystation +35 % | 1 100 + perchlorate 5 | voy_price_2 |
-| voy_thrust_3 | 4 | thruster Mk3 (lifts off the giants) | 4 500 + vitriol_glass 4 | voy_skip_1 |
-| voy_trader | 4 | sell from orbit at the Waystation's price | 3 800 + deep_core_sample 2 | voy_price_3, voy_hold_2 |
-| voy_skip_2 | 5 | Skip Drive spool −70 %, cool-down −50 % | 12 000 + metallic_hydrogen 2 | voy_thrust_3 ↔ dig_core_bit |
-| voy_dray | 5 | the Dray hauler: hold 1 000 kg | 15 000 + Datacore 1 | voy_trader |
+| voy_thrust_3 | 4 | thruster Mk3 (lifts off the giants) | 4 500 + vitriol_glass 4 | voy_skip_1, voy_hold_2 |
+| voy_trader | 4 | sell from orbit at the Waystation's price | 3 800 + deep_core_sample 2 | voy_price_3 |
+| voy_skip_2 | 5 | Skip Drive spool −70 %, cool-down −50 % | 12 000 + metallic_hydrogen 2 | voy_thrust_3 |
+| voy_dray | 5 | the Dray hauler: hold 1 000 kg | 15 000 + Datacore 1 | voy_trader ↔ dig_power_5 |
 
 ## 6. The first hour (Earth, a new player; the check on the numbers)
 
