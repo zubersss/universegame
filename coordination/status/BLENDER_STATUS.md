@@ -20,8 +20,8 @@ B-182: the Mars / Mercury / Venus audits (audit_g1.py, light, my lock) now that 
 - 12:10-12:16: B-188 exported for Build 0.5.0 (e2ddb4cb); B-179 / B-183 / B-188 DONE (LEAD cycle 283).
 
 ## Ready for review
-- B-186: review_b186_mars_{polar,tharsis}.png + _dip.png (60132bdb).
-- B-185 Mars: review_b141_mars_{plains,canyon,storm}_dip.png (4d86cbc3).
+- B-184: review_b175_{mars,mercury,venus}_ground.png (fe58e320).
+- B-189 / B-185: review_b141_mars_{canyon,storm,plains}(_dip).png (9e04de12), review_b152_venus_surface(_dip).png (baa7f1e0), review_b149_mercury_{day,twilight,night}_dip.png (d7fbeace).
 
 ## Handoffs (unrouted only)
 - -> UNITY (U-164 / U-159): a layer2 json entry's "continue_rows": 64 = its bottom 64 rows tile vertically (repeat them under the layer's edge). Two depths: the B-133 / B-114 / B-185 sets 480 tall at y_m -2.0 (their line above the walking surface); the B-179 / B-186 / B-187 sets 544 tall at y_m -3.0 with "ground_row": 352 (the line on the walking surface). The Mars storm's layer2 is a translucent veil (864, y_m -2.0, continue_rows 64), no ground. New Mars sets: backgrounds/mars/polar (MarsFeature.PolarCap), backgrounds/mars/tharsis (Olympus).
