@@ -1,7 +1,7 @@
 # UNITY STATUS
-Updated: 2026-11-08 13:0x · Session: 10 (resumed 09:3x after the ~3-hour break; earlier entries: coordination/status/archive/UNITY_2026-11-08.md)
+Updated: 2026-11-08 13:1x · Session: 10 (resumed 09:3x after the ~3-hour break; earlier entries: coordination/status/archive/UNITY_2026-11-08.md)
 ## Current task
-13:0x, lock-free next: U-159 slice 2 (Mars smooth: GroundField.Smooth for Mars, the backdrop sets by region (polar / tharsis / canyon / plains), the storm veil's own strip continuing like layer2's, MarsStage / M1Loop / M3Inner expectations); its check after BLENDER's B-185 Mars export. Then slice 3 Mercury, slice 4 Venus (the station deck keeps its plank strip), then U-162. U-159 slice 1 is in (82cba57d: SmoothGround's slots per planet, GroundRegionTests).
+13:1x: U-159 slice 2 (Mars) committed as WIP; its EditMode check is red on four MarsLandformTests pending P-57 (below). After LEAD's answer: the Mars PlayMode slice (MarsStage, DustStorm, M1Loop, M3Inner, Base) and the Mars captures (polar, canyon floor / wall, Tharsis slope, plains, the hauler, each beside 0.4.8's). Then U-167 (wire D-165's fill_decor: sparse ~1 per 6 m², seeded per chunk, off the 8 m period, natural ground only, behind the dig outline; a test + its capture with U-159's check), U-152's census (unblocks B-174), U-162.
 
 ## Last completed
 U-166 (D-171) for review, 12:3x-13:0x: commits 70303972, 4f7cd510, b9d553de. On the smooth Earth the sea is the Ocean band's columns reached from the trench while the ground stays under the water line, from the first row whose centre is not under the drawn curve (the streamer's curve, stamps and pads in); an inland basin under the datum is dry ground (the old rule flooded 2810 / 1271 / 4033 tiles on seeds 1969 / 7717 / 31337: smoke_42's valley lake); the water map draws behind the ground mesh on smooth planets. Compile 0 / 0, EditMode 444/444 (SeaOnlyTests 3 seeds: inland 0, under the outline 0; TerrainTests / BiomeTests to D-171). u156 re-shot: 3_valley dry, 9_beach identical, 5_coast's sea unchanged. smoke_42's re-shoot rides the next build.
@@ -17,7 +17,7 @@ U-166 (b9d553de; smoke_42 with the next build). Earlier, still unjudged: U-129 s
 ## Blockers
 (none)
 ## Proposals
-(none open: P-51 / P-53 / P-54 / P-55 decided in D-159..D-167)
+P-57 (U-159 Mars, 13:1x): under the 31° slope limit Olympus's caldera reads 17-18 m (MarsLandformTests ≥ 20) and the canyon 149 m on seed 1969 (≥ 150; 159 / 166 on the others); the averaging radius is not the cause. (a) CalderaHalfWidth 36 → 48 and CanyonDepth 160 → 165 (recommended; the thresholds stay), (b) the thresholds, (c) a caldera exempt from the slope limit. LEAD's call.
 ## For USER_ACTIONS
 (none)
 ## Housekeeping
