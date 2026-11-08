@@ -3161,8 +3161,8 @@ namespace Meridian.Tests
         /// <summary>
         /// U-127 (B-159 / B-160 / B-156): Jupiter on the cartoon stage at 1x in reports/unity/u127/: 1_floe_kit_tortoise (a Deck 2 floe with its capped
         /// strip, the aerostat kit's deck card on it, a Ballast tortoise over it), 2_storm_deck_glider (a Deck 3 floe, a Stormglider), 3_deep_crush (a
-        /// Deep floe, the deep set's CRUSH band on the Crush Line), 4_red_spot (a floe in the Great Red Spot under the spot overlay). The whale's
-        /// crossing joins after its D-153 re-export.
+        /// Deep floe, the deep set's CRUSH band on the Crush Line), 4_red_spot (a floe in the Great Red Spot under the spot overlay), 5_whale_crossing
+        /// (the Vortex Whale in passing, D-138: never both ends).
         /// </summary>
         [UnityTest, Timeout(240000)]
         public IEnumerator CaptureU127Jupiter()
@@ -3285,6 +3285,12 @@ namespace Meridian.Tests
                     yield return Carry(fx + 2.5f, fy + 0.05f);
                     yield return Settle();
                     yield return Shot("4_red_spot");
+                    // 5. D-138: the Vortex Whale crossing the Spot in passing: its centre 14 m ahead so the head and flank cross the frame and the
+                    // flukes stay out (a 36 m whale in a 30 m frame never shows both ends).
+                    creatures.Spawn(Meridian.Creatures.Species.VortexWhale, new Vector2(fx + 16f, fy + 9f));
+                    yield return Settle();
+                    yield return Shot("5_whale_crossing");
+                    creatures.DespawnAll();
                 }
                 else TestContext.Out.WriteLine("[MERIDIAN] u127: no Deck 2 floe found in the Red Spot");
                 if (body != null) body.simulated = true;

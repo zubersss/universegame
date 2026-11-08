@@ -101,5 +101,22 @@ namespace Meridian.Tests
             Assert.IsFalse(tortoise.Allows(At(1000)));
             Assert.AreEqual(1, Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.PolarCrawler).packMin, "the older rows keep their indices");
         }
+
+        /// <summary>U-127 (B-160, D-138 / D-153): the Vortex Whale is a Grand rig set, one at a time, gliding only through the Great Red Spot over Decks 1-2.</summary>
+        [Test]
+        public void TheVortexWhaleKeepsToTheRedSpot()
+        {
+            var whale = Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.VortexWhale);
+            Assert.AreEqual((int)Meridian.Creatures.Species.BallastTortoise + 1, (int)Meridian.Creatures.Species.VortexWhale, "appended: every older index stays");
+            Assert.IsTrue(whale.rig, "a Grand rig set");
+            Assert.AreEqual("creatures/jupiter/vortex_whale", whale.artKey);
+            Assert.IsTrue(whale.Flies);
+            Assert.AreEqual(1, whale.maxAlive);
+            Meridian.Creatures.SpawnSite At(int x, int y) => new Meridian.Creatures.SpawnSite { x = x, surfaceY = y, datumY = CloudLayout.Datum, worldWidth = CloudLayout.Width, planet = PlanetId.Jupiter };
+            Assert.IsTrue(whale.Allows(At(CloudLayout.RedSpotCentre, 750)) && whale.Allows(At(CloudLayout.RedSpotCentre, 1000)), "in the Spot, Decks 1-2");
+            Assert.IsFalse(whale.Allows(At(500, 750)), "not outside the Spot");
+            Assert.IsFalse(whale.Allows(At(CloudLayout.RedSpotCentre, 450)), "not down in Deck 3");
+            Assert.IsTrue(System.IO.File.Exists("Assets/_Game/Art/creatures/jupiter/vortex_whale.json"), "B-160's rig set (D-153 re-export) is in");
+        }
     }
 }

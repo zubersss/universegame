@@ -23,6 +23,8 @@ namespace Meridian.Creatures
         TubeLurker, PolarCrawler,
         // U-127 (B-160, Bible §7.6): Jupiter's floaters of the cloud decks; appended so every older index stays (the Vortex Whale follows with its re-export, D-153).
         Stormglider, LightningEel, BeltWasp, BallastTortoise,
+        // U-127 (B-160, D-138 / D-153): Jupiter's apex, a Grand rig set ~36 m long, appended after the floaters.
+        VortexWhale,
     }
 
     /// <summary>What a creature does about the player.</summary>
@@ -198,6 +200,11 @@ namespace Meridian.Creatures
             new SpeciesSpec { id = Species.BallastTortoise, planet = PlanetId.Jupiter, artKey = "creatures/jupiter/ballast_tortoise", size = new Vector2(4f, 2.5f),
                 wanderSpeed = 0.6f, runSpeed = 1.4f, temper = Temper.Flees, senseRange = 6f, time = ActiveTime.Any, habitat = Habitat.Air,
                 hoverMin = 4f, hoverMax = 9f, packMin = 1, packMax = 1, maxAlive = 2, placeholder = new Color(0.66f, 0.31f, 0.23f) },
+            // U-127 (B-160, Bible §7.6): the Vortex Whale, a Grand rig set (six bones) drawn ~36 m long (D-153) and seen in passing (D-138: no shot
+            // holds both ends); it glides slow through the Great Red Spot over Decks 1-2, one at a time. Its song and the harpoon are their own cards.
+            new SpeciesSpec { id = Species.VortexWhale, planet = PlanetId.Jupiter, artKey = "creatures/jupiter/vortex_whale", rig = true, size = new Vector2(17f, 6f),
+                wanderSpeed = 1.2f, runSpeed = 2.5f, temper = Temper.Flees, senseRange = 30f, reactRadius = 14f, time = ActiveTime.Any, habitat = Habitat.Air,
+                hoverMin = 8f, hoverMax = 18f, packMin = 1, packMax = 1, maxAlive = 1, placeholder = new Color(0.62f, 0.36f, 0.3f) },
         };
 
         public static SpeciesSpec Get(Species s) => All[(int)s];
@@ -223,6 +230,7 @@ namespace Meridian.Creatures
             Species.LightningEel => JupiterBand(s) == Meridian.Terrain.CloudColumn.CloudBand.Deck2,
             Species.BeltWasp => JupiterBand(s) == Meridian.Terrain.CloudColumn.CloudBand.Deck1,
             Species.BallastTortoise => JupiterBand(s) == Meridian.Terrain.CloudColumn.CloudBand.Deck2 || JupiterBand(s) == Meridian.Terrain.CloudColumn.CloudBand.Deck3,
+            Species.VortexWhale => Meridian.Terrain.CloudColumn.CloudLayout.InRedSpot(s.x) && (JupiterBand(s) == Meridian.Terrain.CloudColumn.CloudBand.Deck1 || JupiterBand(s) == Meridian.Terrain.CloudColumn.CloudBand.Deck2), // U-127: the Red Spot's
             Species.TubeLurker => (s.surfaceTile == TileId.Regolith || s.surfaceTile == TileId.Basalt) && MarsLandforms.OverTube(s.x), // U-118 (D-126): its dens sit over the lava tubes
             Species.PolarCrawler => s.surfaceTile == TileId.Ice, // U-118: the ice caps
             Species.Glassback => s.zone == MercuryZone.Twilight && !InColdTrap(s),
