@@ -2707,6 +2707,224 @@ SCENES[("mars", "polar")], SCENES[("mars", "tharsis")] = mars_polar, mars_tharsi
 SCENES[("mercury", "coldtrap")], SCENES[("venus", "tessera")] = mercury_coldtrap, venus_tessera
 SEEDS.update({"polar": 18601, "tharsis": 18602, "coldtrap": 18701, "tessera": 18702})
 PLANET_OF.update({"polar": "mars", "tharsis": "mars", "coldtrap": "mercury", "tessera": "venus"})
+
+
+# ---------------------------------------------------------------- B-202: Earth's sea from below (U-171 draws it under the
+# surface over sea columns, the land set above). U-040's tint multiplies on top (0.55, 0.78, 0.95) x e^(-depth / 45), so the
+# art is painted light; nothing reads as a land plant (kelp is a ribbon with floats: no branches, no leaves); no faces.
+
+SEA_LAYERS = [{"n": 0, "parallax": 1.0, "y_m": -16.0, "continue_rows": BG.CONTINUE_ROWS, "role": "water_column"},
+              {"n": 1, "parallax": 0.35, "y_m": -13.3, "continue_rows": BG.CONTINUE_ROWS, "role": "far_seabed"},
+              {"n": 2, "parallax": 0.7, "y_m": -33.0, "continue_rows": BG.CONTINUE_ROWS, "role": "near_seabed", "ground_row": 352},
+              {"n": 3, "parallax": 1.0, "y_m": -1.0, "role": "surface_from_below"}]
+
+
+def _kelp(mask, floats, rng, cx, base, height, width, sway):
+    """A kelp stalk swaying up from its holdfast: one long ribbon thinning upward, round floats along it."""
+    n = max(int(height / 5), 6)
+    ph = rng.uniform(0, 2 * math.pi)
+    for i in range(n):
+        t = i / n
+        x = cx + sway * math.sin(ph + t * 4.2) * t
+        w = width * (1.0 - 0.45 * t)
+        ell(mask, x, base - height * t, w, 4.5)
+        if floats is not None and i % 6 == 4:
+            ell(floats, x + w * 1.2 * (1 if (i // 6) % 2 else -1), base - height * t, w * 0.6, w * 0.6)
+
+
+def _arch(mask, rng, cx, base, R, h):
+    """A rock arch standing on row base (rev: a hollow half-ellipse read as a half-buried tyre): two lumpy legs and an
+    uneven lintel of overlapping blobs round a smaller opening."""
+    rock, hole = np.zeros_like(mask), np.zeros_like(mask)
+    for s in (-1, 1):
+        ell(rock, cx + s * R * rng.uniform(0.62, 0.78), base - h * 0.32, R * rng.uniform(0.3, 0.4), h * 0.42)
+    for j in range(6):
+        t = j / 5
+        ell(rock, cx + (t - 0.5) * R * 1.55, base - h * (0.78 + 0.1 * math.sin(t * math.pi)) + rng.uniform(-6, 6),
+            R * rng.uniform(0.3, 0.42), h * rng.uniform(0.22, 0.32))
+    ell(hole, cx + rng.uniform(-0.08, 0.08) * R, base, R * 0.44, h * 0.56, cut=0.0)
+    np.maximum(mask, np.clip(rock - hole, 0, 1), out=mask)
+
+
+def earth_sea_under(seed):
+    rng = np.random.default_rng(seed)
+    pal = _pal()
+    out = []
+    water_top = BG._mix(pal["sky"], pal["offwhite"], 0.45)
+    water = BG._mix(pal["sky"], pal["teal"], 0.3)
+    # layer0: the water column, its top on the surface: light near it with wavering shafts and ripples, plain water below
+    H = 1024
+    yy = (np.arange(H) / H)[:, None, None]
+    col = BG._mix(water_top, water, np.clip(yy * 2.2, 0, 1)) * (1 + 0.03 * BG.periodic_noise(rng, H, 160, 90)[..., None])
+    stack = Stack([(np.broadcast_to(col, (H, W, 3)).astype(np.float32), np.ones((H, W), np.float32))])
+    shafts = np.zeros((H, W), np.float32)
+    for _k in range(9):
+        x0, w0, L, lean = rng.uniform(0, W), rng.uniform(30, 90), rng.uniform(380, 700), rng.uniform(0.15, 0.35)
+        for y in range(int(L)):
+            t = y / L
+            half = w0 * (0.6 + 0.6 * t)
+            xs = np.arange(int(x0 + lean * y - half), int(x0 + lean * y + half) + 1) % W
+            shafts[y, xs] = np.maximum(shafts[y, xs], (1 - t) ** 1.5)
+    stack.append(tint(rng, H, shafts, pal["offwhite"], 0.35, var=0.03, edge_dark=0.0, bleed=12.0))
+    ys = np.arange(H)[:, None]
+    rip = np.zeros((H, W), np.float32)
+    for k in range(4):                                                                        # caustic ripples just under the surface
+        rl = BG.ridge(rng, [(9, 0.5), (17, 0.5)], base=18 + 26 * k, amp=5)
+        gate = BG.ridge(rng, [(23, 1.0)], base=0, amp=1) > 0.1
+        rip = np.maximum(rip, ((np.abs(ys - rl[None, :]) < 1.5) & gate[None, :]).astype(np.float32) * (1 - k / 4))
+    stack.append(tint(rng, H, rip, pal["offwhite"], 0.45, var=0.0, edge_dark=0.0, bleed=1.5))
+    out.append(BG.tile_bottom(*finish(stack, rng, H)))
+    del shafts, rip, col
+    # layer1: the far seabed in the haze - rock arches and mounds, kelp stands, the far floor (its strip tiles down)
+    H = 640
+    haze = BG._mix(water, pal["teal"], 0.25)
+    fl = BG.ridge(rng, [(2, 0.5), (5, 0.3), (11, 0.2)], base=H - 150, amp=14)
+    floor = BG._ridge_mask(H, fl)
+    rocks, kelp = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
+    for _k in range(3):
+        cx, R = rng.uniform(0, W), rng.uniform(70, 130)
+        _arch(rocks, rng, cx, float(fl[int(cx) % W]) + 6, R, R * 1.25)
+    for _k in range(6):
+        cx = rng.uniform(0, W)
+        ell(rocks, cx, float(fl[int(cx) % W]) + 4, rng.uniform(40, 110), rng.uniform(30, 70), cut=0.1)
+    for _k in range(16):
+        cx = rng.uniform(0, W)
+        _kelp(kelp, None, rng, cx, float(fl[int(cx) % W]) + 4, rng.uniform(160, 330), rng.uniform(5, 9), rng.uniform(10, 30))
+    stack = Stack()
+    stack.append(wash32(rng, H, kelp, BG._mix(haze, pal["green"], 0.3), var=0.04, edge_dark=0.04, bleed=2.5))
+    stack.append(wash32(rng, H, rocks, BG._mix(haze, pal["brown"], 0.22), var=0.04, edge_dark=0.05, bleed=2.0))
+    stack.append(wash32(rng, H, floor, BG._mix(haze, pal["mustard"], 0.2), var=0.04, edge_dark=0.04, bleed=3.0))
+    out.append(BG.tile_bottom(*finish(stack, rng, H)))
+    del rocks, kelp, floor
+    # layer2: the near seabed (D-169: its line on row 352, plain below 416, the bottom 64 rows tileable)
+    H = 384 + 160
+    hq = H - 2 * BG.CONTINUE_ROWS
+    line = BG.ridge(rng, [(3, 0.5), (8, 0.3), (17, 0.2)], base=352, amp=8)
+    ground = BG._ridge_mask(H, line)
+    ys = np.arange(H)[:, None]
+    ripples = np.zeros((H, W), np.float32)
+    for k in range(4):                                                                        # sand ripples in the floor
+        rl = line + 12 + 12 * k + BG.ridge(rng, [(13, 0.6), (29, 0.4)], base=0, amp=3)
+        ripples = np.maximum(ripples, ((np.abs(ys - rl[None, :]) < 1.3) & (ys < hq - 8)).astype(np.float32))
+    rocks, rshade = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
+    _seated(rocks, rshade, None, line, rng, 9, 14, 34, hq)
+    kelp, floats = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
+    for _k in range(11):
+        cx = rng.uniform(0, W)
+        _kelp(kelp, floats, rng, cx, float(line[int(cx) % W]) + 2, rng.uniform(170, 300), rng.uniform(7, 11), rng.uniform(20, 40))
+    shells, pebbles = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
+    for _k in range(10):
+        cx = rng.uniform(0, W)
+        ell(shells, cx, float(line[int(cx) % W]) + 4, rng.uniform(5, 8), rng.uniform(3.5, 5), cut=0.15)
+    for _k in range(24):
+        cx = rng.uniform(0, W)
+        ell(pebbles, cx, float(line[int(cx) % W]) + rng.uniform(6, 40), rng.uniform(2.5, 4.5), rng.uniform(2, 3))
+    pebbles *= (ys < hq - 6)
+    sand = BG._mix(pal["mustard"], pal["offwhite"], 0.45)
+    stack = Stack()
+    stack.append(wash32(rng, H, kelp, BG._mix(pal["green"], pal["brown"], 0.35), var=0.05, edge_dark=0.06, bleed=1.6))
+    stack.append(wash32(rng, H, floats, BG._mix(pal["mustard"], pal["brown"], 0.3), var=0.03, edge_dark=0.06, bleed=1.0))
+    stack.append(wash32(rng, H, ground, sand, var=0.05, edge_dark=0.05, bleed=2.0))
+    stack.append(tint(rng, H, ripples * ground, BG._mix(pal["mustard"], pal["brown"], 0.3), 0.5, var=0.0, edge_dark=0.0, bleed=1.2))
+    stack.append(wash32(rng, H, pebbles, BG._mix(pal["sky"], pal["brown"], 0.5), var=0.03, edge_dark=0.05, bleed=0.8))
+    stack.append(wash32(rng, H, rocks, BG._mix(pal["sky"], pal["brown"], 0.45), var=0.05, edge_dark=0.08, bleed=1.2))
+    stack.append(wash32(rng, H, rshade * rocks, BG._mix(pal["brown"], pal["sky"], 0.3), var=0.04, edge_dark=0.03, bleed=1.6))
+    stack.append(wash32(rng, H, shells, pal["offwhite"], var=0.02, edge_dark=0.06, bleed=0.8))
+    out.append(BG.tile_bottom(*finish(stack, rng, H)))
+    del kelp, floats, ripples, rocks, rshade, shells, pebbles, ground
+    # layer3: the surface seen from below - a bright wavy line and its glow fading down (transparent above the line)
+    H = 64
+    wav = BG.ridge(rng, [(11, 0.5), (23, 0.3), (41, 0.2)], base=6, amp=3)
+    ys = np.arange(H)[:, None]
+    glow = (np.clip(1 - (ys - wav[None, :]) / 54.0, 0, 1) * (ys >= wav[None, :])) ** 1.3
+    surf = (np.abs(ys - wav[None, :] - 0.5) < 3.0).astype(np.float32)                         # rev: a thicker line (the tint ate a 2 px one)
+    wav2 = wav + 9 + BG.ridge(rng, [(17, 0.6), (31, 0.4)], base=0, amp=2)
+    rip2 = ((np.abs(ys - wav2[None, :]) < 1.2) & (BG.ridge(rng, [(13, 1.0)], base=0, amp=1)[None, :] > -0.2)).astype(np.float32)
+    stack = Stack()
+    stack.append(tint(rng, H, glow.astype(np.float32), BG._mix(pal["offwhite"], pal["sky"], 0.2), 0.75, var=0.02, edge_dark=0.0, bleed=2.0))
+    stack.append(tint(rng, H, rip2, pal["offwhite"], 0.7, var=0.0, edge_dark=0.0, bleed=0.8))
+    stack.append(wash32(rng, H, surf, pal["offwhite"], var=0.02, edge_dark=0.0, bleed=0.8))
+    out.append(finish(stack, rng, H))
+    return out, [dict(L) for L in SEA_LAYERS]
+
+
+SCENES[("earth", "sea_under")] = earth_sea_under
+SEEDS["sea_under"] = 20201
+PLANET_OF["sea_under"] = "earth"
+
+
+def preview_sea_under(out_dir, from_png=False, out=None, footnote=None, depths=(3.0, 8.0, 15.0, 40.0), land="coast"):
+    """B-202's review: the swimmer D m under the sea surface (camera row 732, as the dip reviews), the land set (coast) drawn
+    above the surface only and sea_under below it (U-171), each layer risen by parallax x the camera's drop with its own
+    continue strip below it, then U-040's tint (UnderwaterTint.shader) below the surface. from_png: the exported layers."""
+    import json
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    from meridian import pngio
+    import preview_c2_earth_rigs as PR
+    if from_png:
+        sd = os.path.join(ART_DIR, "backgrounds", "earth", "sea_under")
+        sea_meta = json.load(open(os.path.join(sd, "sea_under.json"), encoding="utf-8"))["layers"]
+        sea = [pngio.read_png_np(os.path.join(sd, f"layer{L['n']}_color.png")) for L in sea_meta]
+    else:
+        gen, sea_meta = earth_sea_under(SEEDS["sea_under"])
+        sea = [BG.to_u8(rgb, a) for rgb, a in gen]
+        del gen
+    ld = os.path.join(ART_DIR, "backgrounds", "earth", land)
+    land_meta = json.load(open(os.path.join(ld, f"{land}.json"), encoding="utf-8"))["layers"]
+    lands = [pngio.read_png_np(os.path.join(ld, f"layer{L['n']}_color.png")) for L in land_meta]
+    try:
+        fr, piv = PR.surveyor_frame()
+    except Exception:  # noqa: BLE001
+        fr = None
+    skyc = np.array(v3.hex_rgb(v3.PALETTES["earth"]["sky"]), np.float32) / 255.0
+    tintc = np.array((0.55, 0.78, 0.95), np.float32)
+    gl, rows = 732, []
+
+    def draw(F, imgs, meta, D, cont="each"):
+        low = None
+        for img, L in zip(imgs, meta):
+            h = img.shape[0]
+            y_bot = gl + int(round(-L["y_m"] * v3.PPU)) - int(round(L["parallax"] * D * v3.PPU))
+            y_top = y_bot - h
+            if y_bot > 0 and y_top < 1080:
+                review._over(F, img[max(0, -y_top):h - max(0, y_bot - 1080), :1920], 0, max(0, y_top))
+            cr = L.get("continue_rows", 0)
+            if cont == "each" and cr and y_bot < 1080:                                       # sea_under: every layer continues
+                review._over(F, np.tile(img[-cr:, :1920], (-(-(1080 - max(0, y_bot)) // cr), 1, 1))[:1080 - max(0, y_bot)], 0, max(0, y_bot))
+            if cont == "near" and (cr or low is None or (y_bot > low[0] and not low[2])):
+                low = (y_bot, img, cr)
+        if cont == "near" and low[0] < 1080:                                                 # the land set: its near layer continues (U-164)
+            strip = low[1][-low[2]:, :1920] if low[2] else low[1][-1:, :1920]
+            s0 = max(0, low[0])
+            review._over(F, np.tile(strip, (-(-(1080 - s0) // strip.shape[0]), 1, 1))[:1080 - s0], 0, s0)
+
+    for D in depths:
+        F = np.empty((1080, 1920, 3), np.float32)
+        F[:] = skyc
+        draw(F, lands, land_meta, D, cont="near")
+        S = np.empty((1080, 1920, 3), np.float32)
+        S[:] = skyc
+        draw(S, sea, sea_meta, D, cont="each")
+        surf = gl - int(round(D * v3.PPU))
+        s0 = min(max(surf, 0), 1080)
+        F[s0:] = S[s0:]                                                                      # U-171: the land above, sea_under below
+        if fr is not None:
+            review._over(F, fr, 960 - fr.shape[1] // 2, gl - fr.shape[0] + int(round(piv[1] * fr.shape[0])))
+        depth = (np.arange(1080, dtype=np.float32) - surf) / v3.PPU
+        k = np.where(depth > 0, np.maximum(0.06, np.exp(-depth / 45.0)), 1.0)[:, None, None]
+        F = np.where((depth > 0)[:, None, None], F * tintc[None, None, :] * k, F)
+        review._label(F, f"earth sea_under at 1x: the swimmer {D:g} m under the surface (" + (f"the surface on row {surf}" if 0 <= surf < 1080 else "the surface above the frame")
+                      + f"); {land} above the surface, sea_under below (U-171); U-040's tint x{float(np.exp(-D / 45.0)):.2f} at the swimmer", 6, 6)
+        rows.append(F)
+    img = np.vstack(rows)
+    review._label(img, __import__("time").strftime("%m-%d %H:%M") + " " + (footnote or "B-202 design preview (not exported)"), 2, img.shape[0] - 16)
+    out = out or os.path.join(out_dir, "review_b202_earth_sea_under_preview.png")
+    review.write(out, img)
+    print("sea_under ->", out)
+    return out
+
+
 ART_DIR = os.path.normpath(os.path.join(HERE, "..", "..", "Assets", "_Game", "Art"))
 
 
@@ -2991,6 +3209,9 @@ def preview_underwater(out_dir, scene, planet="earth", depths=(3.0, 8.0, 15.0), 
 
 
 if __name__ == "__main__":
+    if "--sea-under" in sys.argv:                         # python -I build_backdrop_v3.py <preview dir> --sea-under [--from-png]
+        preview_sea_under(sys.argv[1], from_png="--from-png" in sys.argv)
+        sys.exit(0)
     if "--underwater" in sys.argv:                        # python -I build_backdrop_v3.py <preview dir> coast,plains --underwater
         for sc in sys.argv[2].split(","):
             preview_underwater(sys.argv[1], sc)
