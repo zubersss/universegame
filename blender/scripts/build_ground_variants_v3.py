@@ -54,7 +54,8 @@ def extra_colours():
         return {"ice": P["teal"], "ice_sh": sh("teal"), "ice_lit": P["offwhite"], "floor": dp("sky"), "floor_sh": P["brown"],
                 "rock": sh("sky"), "rock_sh": dp("sky"), "snow": P["offwhite"], "snow_sh": sh("teal")}
     if PLANET == "venus":                       # B-181: the tesserae's warm grey-brown crust; the vents' sulfur, basalt, embers, vitriol glass
-        return {"tess": dp("sky"), "tess_sh": P["brown"], "tess_lit": sh("sky"), "sulfur": P["mustard"], "sulfur_sh": sh("mustard"),
+        return {"tess": sh("offwhite"), "tess_sh": dp("sky"), "tess_lit": P["offwhite"], "tess_dp": P["brown"],   # LEAD 10:2x: a lighter warm grey
+                "sulfur": P["mustard"], "sulfur_sh": sh("mustard"),
                 "black": P["brown"], "ember": P["red"], "ember_core": P["mustard"], "glass": P["green"], "glass_sh": sh("green"),
                 "glint": P["offwhite"], "fume": P["offwhite"], "dust": sh("sky")}
     return {"sand": P["mustard"], "sand_sh": sh("mustard"), "cream": P["offwhite"], "sandstone": sh("offwhite"), "rust": sh("red"),
@@ -651,7 +652,7 @@ def _span_z(edges, ws, hs, x, shape=0.6, floor=0.004):
     x %= L
     for i in range(len(ws)):
         if edges[i] <= x <= edges[i + 1]:
-            return floor + hs[i] * math.sin(math.pi * (x - edges[i]) / ws[i]) ** shape
+            return floor + hs[i] * max(0.0, math.sin(math.pi * (x - edges[i]) / ws[i])) ** shape   # at an edge float error can dip below 0
     return floor
 
 
@@ -908,9 +909,10 @@ def band_tessera(d, M, k=0):
     a warm grey-brown lighter than the plains' black glass, one tilted fold line down each ridge, dust in the grooves, over the
     red-brown topsoil to a ragged edge."""
     rnd = random.Random(2210)
-    ws, edges, hs = _lobes(rnd, 0.25, 0.5, 0.025, 0.06)
+    ws, edges, hs = _lobes(rnd, 0.25, 0.5, 0.035, 0.07)
     xs = [L * i / 640 for i in range(641)]
     top = [(x, _span_z(edges, ws, hs, x, shape=1.4)) for x in xs]                            # narrow crests, wide grooves
+    zt = lambda x: _span_z(edges, ws, hs, x, shape=1.4)  # noqa: E731
     cbot = [(x, -0.17 + B.per(x, L, 3, 2211, 0.025)) for x in xs[::2]]
     rag = _ragged(2212, -0.46)
 
@@ -918,11 +920,18 @@ def band_tessera(d, M, k=0):
         sh = lambda pts: [(x + dx, z) for x, z in pts]  # noqa: E731
         G.stroke(d, sh(cbot + rag[::-1]), M["topsoil"], 0.0, cyclic=True)
         G.stroke(d, sh(top + cbot[::-1]), M["tess"], 0.0, cyclic=True)
-        G.stroke(d, sh(top + [(x, z - 0.026) for x, z in top[::-1]]), M["tess_lit"], 0.0, cyclic=True)
         G.stroke(d, sh([(x, z + 0.035) for x, z in cbot] + cbot[::-1]), M["tess_sh"], 0.0, cyclic=True)
-        G.seam(d, sh(cbot), M["ink"])
-        G.stroke(d, sh(top), M["ink"], O)
     W(body)
+    for i in range(len(ws)):                                                                  # LEAD 10:2x: lit crests, dark grooves
+        e0, w = edges[i], ws[i]
+        crest = [(e0 + w * t, zt(e0 + w * t)) for t in [0.2 + 0.6 * q / 12 for q in range(13)]]
+        W(lambda dx, _dz, crest=crest: G.stroke(d, [(x + dx, z) for x, z in crest] + [(x + dx, z - 0.03) for x, z in crest[::-1]], M["tess_lit"], 0.0, cyclic=True))
+        gx = e0                                                                               # the groove at this ridge's left foot: a dark wedge
+        wedge = [(gx - 0.06, zt(gx - 0.06) - 0.004), (gx, -0.055), (gx + 0.06, zt(gx + 0.06) - 0.004)] + \
+                [(gx + 0.06 * (1 - t), zt(gx + 0.06 * (1 - t)) - 0.002) for t in (0.33, 0.66)] + [(gx, zt(gx))] + \
+                [(gx - 0.06 * t, zt(gx - 0.06 * t) - 0.002) for t in (0.33, 0.66)]
+        W(lambda dx, _dz, wedge=wedge: G.stroke(d, [(x + dx, z) for x, z in wedge], M["tess_dp"], 0.0, cyclic=True))
+    W(lambda dx, _dz: [G.seam(d, [(x + dx, z) for x, z in cbot], M["ink"]), G.stroke(d, [(x + dx, z) for x, z in top], M["ink"], O)])
     for i in range(len(ws)):                                                                  # one fold line per ridge, its tilt and length varied
         cx = edges[i] + ws[i] * rnd.uniform(0.35, 0.6)
         ln, lean = rnd.uniform(0.07, 0.13), rnd.uniform(0.05, 0.11)
@@ -962,9 +971,9 @@ def band_vent(d, M, k=0):
             W(lambda dx, _dz, e=e: G.seam(d, [(e + dx, 0.0), (e + dx + 0.012, -0.04), (e + dx - 0.005, -0.075)], M["ink"]))
             continue
         path = [(e + 0.03 * math.sin(2.1 * q + i), -0.01 - 0.21 * q / 6) for q in range(7)]
-        wid = [0.026 * (1 - 0.55 * q / 6) for q in range(7)]                                 # 3.3 px at the top: the red shows
+        wid = [0.042 * (1 - 0.5 * q / 6) for q in range(7)]                                  # LEAD 10:2x: ~5.4 px at the top, the red-orange 2-3 px inside the ink
         seam_ = [(x - w, z) for (x, z), w in zip(path, wid)] + [(x + w, z) for (x, z), w in zip(path[::-1], wid[::-1])]
-        core = [(x - w * 0.4, z) for (x, z), w in zip(path[:5], wid[:5])] + [(x + w * 0.4, z) for (x, z), w in zip(path[4::-1], wid[4::-1])]
+        core = [(x - w * 0.22, z) for (x, z), w in zip(path[:4], wid[:4])] + [(x + w * 0.22, z) for (x, z), w in zip(path[3::-1], wid[3::-1])]
         W(lambda dx, _dz, seam_=seam_, core=core: [G.stroke(d, [(x + dx, z) for x, z in seam_], M["ember_i"], I, cyclic=True),
                                                     G.stroke(d, [(x + dx, z) for x, z in core], M["ember_core"], 0.0, cyclic=True)])
     for i in range(7):                                                                        # vitriol-glass shards through the crust
