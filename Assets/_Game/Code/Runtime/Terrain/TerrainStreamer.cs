@@ -204,6 +204,12 @@ namespace Meridian.Terrain
             catch (System.Exception e) { Debug.LogException(e); }
         }
 
+        // U-156 / D-165 (a): on a smooth planet a buried body is lifted onto the outline (an edge outline cannot push it out).
+        void FixedUpdate()
+        {
+            if (started && SmoothGround && Config != null) SolidRescue.Tick(this);
+        }
+
         void Update()
         {
             if (!started || follow == null) return;

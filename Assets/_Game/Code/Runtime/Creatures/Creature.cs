@@ -122,6 +122,7 @@ namespace Meridian.Creatures
             go.transform.SetParent(parent, false);
             var c = go.AddComponent<Creature>();
             c.Body = go.AddComponent<Rigidbody2D>();
+            Meridian.Terrain.SolidRescue.Register(c.Body); // U-156 / D-165 (a despawned creature is inactive and skipped)
             c.Body.freezeRotation = true;
             c.Body.interpolation = RigidbodyInterpolation2D.Interpolate;
             c.Body.collisionDetectionMode = CollisionDetectionMode2D.Continuous; // fast runners vs thin ledges

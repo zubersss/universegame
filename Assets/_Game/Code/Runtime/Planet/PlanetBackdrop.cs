@@ -550,6 +550,9 @@ namespace Meridian.Planet
         /// <summary>The original ground line of column x (top solid tile before any digging; stamps included).</summary>
         public int WallTop(int x)
         {
+            // U-156: on a smooth planet the wall stays under the drawn curve (whole tiles never poke above a rounded crest; the joint POI ground
+            // included); the ground's own back wall (SmoothGround) fills the rest under the curve.
+            if (terrain.SmoothGround) return Mathf.FloorToInt(terrain.CurveAt(x)) - 1;
             if (pois != null && pois.StampGroundAt(x, out int stamped)) return stamped;
             return terrain.Generator.SurfaceHeight(terrain.WrapX(x));
         }

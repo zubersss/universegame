@@ -106,6 +106,7 @@ namespace Meridian.Ship
         void Awake()
         {
             Body = GetComponent<Rigidbody2D>();
+            Meridian.Terrain.SolidRescue.Register(Body); // U-156 / D-165
             Body.mass = 20f;
             // The tilt is RocketFlight's: each step sets the spin that reaches it (so the pose interpolates), and a huge
             // inertia keeps contacts from twisting the hull in between.

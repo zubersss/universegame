@@ -59,6 +59,7 @@ namespace Meridian.Tests
             float still = 0f, worst = 0f, moved = 0f;
             Vector2 last = stag.Body.position;
             int turns = 0, dirLast = Mathf.Abs(stag.Body.linearVelocity.x) > 0.1f ? (int)Mathf.Sign(stag.Body.linearVelocity.x) : 0;
+            var trace = new System.Text.StringBuilder(); int step = 0; // U-156: the stag's path (x, y, velocity, state, steering, the grid and the drawn ground under it)
             for (float t = 0f; t < 3f; t += Time.fixedDeltaTime)
             {
                 yield return new WaitForFixedUpdate();
@@ -70,8 +71,14 @@ namespace Meridian.Tests
                 int dir = Mathf.Abs(vx) > 0.1f ? (int)Mathf.Sign(vx) : dirLast;
                 if (dir != dirLast && dirLast != 0) turns++;
                 dirLast = dir;
+                if (step++ % 12 == 0)
+                {
+                    var sp = stag.Body.position; int sx = Mathf.FloorToInt(sp.x);
+                    trace.Append($"
+  t {t:F2}: x {sp.x:F2} y {sp.y:F2} v ({stag.Body.linearVelocity.x:F1}, {stag.Body.linearVelocity.y:F1}) {stag.State} dir {stag.dir} held {stag.Held} grid top {side.terrain.TopSolidY(sx) + 1} curve {(side.terrain.SmoothGround ? side.terrain.CurveAt(sx) : float.NaN):F2} surveyor x {player.Body.position.x:F1}");
+                }
             }
-            TestContext.Out.WriteLine($"[MERIDIAN] fleeing stag at the crates: longest standstill {worst:F2} s, moved {moved:F1} m, turns {turns}");
+            TestContext.Out.WriteLine($"[MERIDIAN] fleeing stag at the crates: longest standstill {worst:F2} s, moved {moved:F1} m, turns {turns}" + trace);
             Assert.LessOrEqual(worst, 0.5f, "turns or hops within 0.5 s of a wall");
             Assert.Greater(moved, 6f, "keeps moving");
             creatures.Despawn(stag);

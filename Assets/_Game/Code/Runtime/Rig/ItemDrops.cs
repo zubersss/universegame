@@ -76,6 +76,7 @@ namespace Meridian.Rig
             d.view = go.AddComponent<SpriteRenderer>();
             d.view.sortingOrder = 5;
             d.body = go.AddComponent<Rigidbody2D>();
+            Meridian.Terrain.SolidRescue.Register(d.body); // U-156 / D-165
             d.body.interpolation = RigidbodyInterpolation2D.Interpolate;
             go.AddComponent<BoxCollider2D>().size = Vector2.one * 0.9f;
             return d;

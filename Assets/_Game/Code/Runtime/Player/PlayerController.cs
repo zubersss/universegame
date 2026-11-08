@@ -76,6 +76,7 @@ namespace Meridian.Player
         void Awake()
         {
             Body = GetComponent<Rigidbody2D>();
+            Meridian.Terrain.SolidRescue.Register(Body); // U-156 / D-165: never lost under a smooth planet's outline
             Body.gravityScale = 1f;
             Body.freezeRotation = true;
             Body.interpolation = RigidbodyInterpolation2D.Interpolate;

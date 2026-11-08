@@ -34,6 +34,22 @@ namespace Meridian.Tests
         }
 
         [Test]
+        public void ASeaCliffBecomesARampAndItsShoreStaysDry()
+        {
+            // U-156: 0.4.8's coast by the launch complex: 29 m of cliff. The seabed ramps up to it; the land sinks no more than the average's
+            // crest rounding (maxSlope × r (r + 1) / (2r + 1)), never by the cliff's height.
+            var raw = new float[512];
+            for (int x = 0; x < raw.Length; x++) raw[x] = x < 256 ? 329f : 300f;
+            var s = GroundField.SmoothSurface(raw, GroundField.SmoothRadius, GroundField.SurfaceSlope);
+            int r = GroundField.SmoothRadius;
+            float rounding = GroundField.SurfaceSlope * r * (r + 1) / (2f * r + 1f);
+            for (int x = 0; x < 256; x++) Assert.GreaterOrEqual(s[x], 329f - rounding - 1e-3f, $"column {x}: the shore is not sunk");
+            for (int x = 0; x < raw.Length; x++)
+                Assert.LessOrEqual(Mathf.Abs(s[(x + 1) % raw.Length] - s[x]), GroundField.SurfaceSlope + 1e-4f, $"column {x}: the ramp stays walkable");
+            Assert.Greater(s[300], 300.5f, "the seabed ramps up to the shore");
+        }
+
+        [Test]
         public void TheHillsStayWalkable()
         {
             var raw = new float[512];

@@ -27,23 +27,34 @@ namespace Meridian.Terrain
         /// <summary>Captures only: the 0.4.8 look (blocks, no hill smoothing) for the before / after frames. Read when a planet loads.</summary>
         public static bool ForceBlocks;
 
-        /// <summary>Rolling hills: a wrapped moving average over ±radius columns, then the slope limited to maxSlope per column by the lower
-        /// Lipschitz envelope (each column at most its neighbour + maxSlope: peaks cut to cones, valleys untouched), two passes each way round
-        /// the ring so the seam holds too. Only ever lowers, so it always converges. Pure.</summary>
+        /// <summary>Rolling hills, land never sunk: the raw surface lifted to its upper Lipschitz envelope (each column at least its neighbour −
+        /// maxSlope: a cliff's foot ramps up to it, a sea cliff becomes a seabed ramp and its shore stays dry), a wrapped moving average over
+        /// ±radius columns (it keeps the slope bound and rounds the crests, lowering a crest by at most maxSlope × radius × (radius + 1) /
+        /// (2 radius + 1)), then the envelope again for the seam. Each envelope is two passes each way round the ring; it only ever raises, so it
+        /// always converges. (U-156: the lower envelope cut a 29 m sea cliff into a ramp by sinking 7 m of coast, the launch complex's included,
+        /// below the backdrop's ground line.) Pure.</summary>
         public static float[] SmoothSurface(float[] raw, int radius, float maxSlope)
         {
             int n = raw.Length;
             var a = new float[n];
             if (n == 0) return a;
+            var lifted = (float[])raw.Clone();
+            Lift(lifted, maxSlope);
             for (int x = 0; x < n; x++)
             {
                 float s = 0f;
-                for (int k = -radius; k <= radius; k++) s += raw[((x + k) % n + n) % n];
+                for (int k = -radius; k <= radius; k++) s += lifted[((x + k) % n + n) % n];
                 a[x] = s / (2 * radius + 1);
             }
-            for (int i = 1; i <= 2 * n; i++) { int x = i % n, p = (i - 1) % n; if (a[x] > a[p] + maxSlope) a[x] = a[p] + maxSlope; }
-            for (int i = 2 * n - 1; i >= 0; i--) { int x = i % n, p = (i + 1) % n; if (a[x] > a[p] + maxSlope) a[x] = a[p] + maxSlope; }
+            Lift(a, maxSlope);
             return a;
+        }
+
+        static void Lift(float[] a, float m)
+        {
+            int n = a.Length;
+            for (int i = 1; i <= 2 * n; i++) { int x = i % n, p = (i - 1) % n; if (a[x] < a[p] - m) a[x] = a[p] - m; }
+            for (int i = 2 * n - 1; i >= 0; i--) { int x = i % n, p = (i + 1) % n; if (a[x] < a[p] - m) a[x] = a[p] - m; }
         }
 
         /// <summary>The surface curve's standing height for column x from the original tops (stamps in, digs out): the tops + 1 through
