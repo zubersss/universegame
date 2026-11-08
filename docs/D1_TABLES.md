@@ -158,6 +158,13 @@ Six branches, five rings, two nodes per ring (three at ring 3); 66 nodes. A node
 - Ring 3 needs Mars or Mercury materials → the player flies on (the starting thruster reaches all four inner planets; the giants need voy_thrust_3 to lift off again).
 - T3 on Earth at power 2.5: stroke 0.4 s, ~12 Scrip a second; the pack (now ~70 kg) ≈ 500 Scrip a run.
 
-## 7. Tuning rules
+## 7. Rank and the New Expedition (D-175)
+
+- **Surveyor Rank** by the Scrip earned (sales only, not spending) in the current expedition: Rank 1 at 0 · 2 at 300 · 3 at 800 · 4 at 1 800 · 5 at 3 500 · 6 at 7 000 · 7 at 14 000 · 8 at 28 000 · 9 at 50 000 · 10 at 80 000 (about a third of the whole tree's cost: Rank 10 comes with rings 1–3 well filled and some of ring 4).
+- **New Expedition**: available topside at Rank 10. Wipes: bought nodes, Scrip, Rank, the pack, the rocket's hold, base storage. Keeps: Catalogue, story chapters, Datacores, discovered planets, buildings. Returns the player to Earth's camp.
+- **Multiplier**: expedition n multiplies every Skill Tree stat by (1 + 0.25 × (n − 1)): Beam power, brush radius, pack limit, dirt store, climb / jetpack / reel speed, scan radius and depth, oxygen, hazard resistance (the load factor k and the stroke cap are not multiplied). Scrip prices are not multiplied.
+- The tree has no other respec.
+
+## 8. Tuning rules
 
 LEAD owns these numbers (D-174). A worker who finds a number that breaks play (a run under 30 s or over 6 min, a ring unreachable) reports it with its measurement; LEAD retunes here, never in code.
