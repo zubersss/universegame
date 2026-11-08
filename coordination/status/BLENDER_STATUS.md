@@ -1,10 +1,11 @@
 # BLENDER STATUS
-Updated: 2026-11-08 05:2x · Session: 9 (zuber-0c; all three windows restarted ~01:27; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-08 05:3x · Session: 9 (zuber-0c; all three windows restarted ~01:27; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-B-177 (D-166 revision): Jupiter's island set reworked so the cloud wraps the slab - island_belly 512x192 (outline row 72, a crown of lit lobes ~1.06 m in front of the strip, sorting above it), island_end_l/_r 160x256 cloud shoulders up to 1.8 m; the haze tiles flat (UNITY's depth tint, accepted). Source in build_islands_v3.py (export API + manifest row terrain/jupiter/island_set ready); the second Jupiter preview runs in the next free gap, then the export, then Saturn / Uranus / Neptune. B-176's export goes first once U-158's keys land (iron / copper / carbon revised in source, 20162f6c). Waiting on: U-158 (B-176), U-151 (B-172's export), U-152 (B-174).
+Free for the next card. B-177 DONE for all four giants (6b95f737 Jupiter, 9c3f2a61 Saturn / Uranus / Neptune; D-166 cloud-wraps-the-slab drawing ACCEPTED 05:3x), awaiting LEAD's verify. Next: B-176's export the moment U-158's keys land (iron / copper / carbon revised in source, 20162f6c). Waiting on: U-158 (B-176), U-151 (B-172's export), U-152 (B-174).
 
 ## Last completed
+- 05:3x SLOTS: B-177 island sets exported - Jupiter (6b95f737, 354 MB), Saturn / Uranus / Neptune in one job (9c3f2a61, 23 s, 360 MB); belly copies p99 0, haze pairs sampled from each deck's backdrop.
 - 05:19 SLOT: B-178 Earth ground variants exported (e454ab6b; 13 keys: ground_band_sand / _stone / _snow, ground_fill_sand, ground_decor_<variant>_1..3; copies p99 0; 429 MB). Design ACCEPTED 05:1x (f814a851).
 - 04:58 SLOT: D-165 the four inner fills re-exported strata-only + fill_decor_1..4 per planet (d8ace45a). VERIFIED.
 - 04:5x-05:07: B-176 Earth node designs (ACCEPTED with iron / copper / carbon revised: 20162f6c); B-177 Jupiter islands first design (a8e881e8).
