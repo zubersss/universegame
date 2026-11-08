@@ -1059,12 +1059,27 @@ B181_FILLS = {"basalt": fill_basalt}
 BAND_PIV = (0.0, (B.BAND_H - B.SURF_ROW) / B.BAND_H)
 PART = "variants"
 
+# B-190 (LEAD 13:0x): dig puffs in each ground's own material - B-175's draw_puff (the face-safe one: clods behind the billows,
+# c8cf185b) with its three roles (the billow fill, its shade, the clods) taken from the variant's materials; 8 frames of 128x128,
+# pivot (0.5, 0.25), clip 'puff', as terrain/<planet>/dig_puff
+PUFF_VARIANTS = {"earth": ("sand", "snow", "stone"), "mars": ("frost", "basalt")}
+PUFF_ROLES = {"sand": ("sand_i", "sand_sh", "sand_sh_i"), "snow": ("snow_i", "sandstone", "snow_sh_i"),
+              "stone": ("rock_lit_i", "rock", "rock_sh_i"), "frost": ("frost_i", "pale", "ice_i"),
+              "basalt": ("bas_lit_i", "basalt", "basalt_sh_i")}
+
+
+def _puff_fn(v):
+    dust_i, dust_sh, clod_i = PUFF_ROLES[v]
+    return lambda d, M, k: B.draw_puff(d, {**M, "dust_i": M[dust_i], "dust_sh": M[dust_sh], "clod_i": M[clod_i]}, k)
+
 
 def _pieces(planet, part="variants"):
     """-> (the planet's pieces {name: (w, h, pivot, frames, draw)}, its tiling pieces). part "lips": B-180's ground_lip_<variant>
     only (their own manifest rows, so the accepted variant exports are not re-written)."""
     if part == "lips":
         return {f"ground_lip_{v}": (128, 96, LIP_PIV, 1, LIPS[v]) for v in PLANET_VARIANTS[planet]}, ()
+    if part == "puffs":                                                                       # B-190: one 8-frame sheet per material
+        return {f"dig_puff_{v}": (128, 128, (0.5, 0.25), 8, _puff_fn(v)) for v in PUFF_VARIANTS[planet]}, ()
     if part == "b181":                                                                        # B-181: the planet's new biome variants, their own row
         P, T = {}, []
         for v in B181_VARIANTS[planet]:
@@ -1125,7 +1140,7 @@ def use_planet(planet, part="variants"):
     """The row's planet: Earth's sand / stone / snow set (B-178) or Mars's polar frost (LEAD 05:3x); part "lips": B-180's lips."""
     global PLANET, VARIANTS, PIECES, TILES, KEYS, PART
     PLANET, PART = planet, part
-    VARIANTS = B181_VARIANTS[planet] if part == "b181" else PLANET_VARIANTS[planet]
+    VARIANTS = B181_VARIANTS[planet] if part == "b181" else PUFF_VARIANTS[planet] if part == "puffs" else PLANET_VARIANTS[planet]
     PIECES, TILES = _pieces(planet, part)
     KEYS = _keys()
 
@@ -1133,6 +1148,15 @@ def use_planet(planet, part="variants"):
 def sheets():
     S, allw = {}, []
     for name, p in PIECES.items():
+        if name.startswith("dig_puff_"):                                                      # B-190: the 8 frames are one key's sheet
+            frames, wds = [], []
+            for k in range(p[3]):
+                img, wd = render_piece(name, k)
+                frames.append(img)
+                wds += wd
+            S[name] = (frames, wds)
+            allw += wds
+            continue
         for k in range(p[3]):
             img, wd = render_piece(name, k)
             S[_kn(name, k)] = ([img], wd)
@@ -1141,7 +1165,7 @@ def sheets():
 
 
 def pieces_of(S):
-    if PART == "lips":
+    if PART in ("lips", "puffs"):
         return dict(S)
     out = {n: S[n] for n in TILES}
     for v in VARIANTS:
@@ -1165,11 +1189,17 @@ def sheet_meta(kn, frames):
     import numpy as np
     base = kn.rsplit("_", 1)[0] if kn.startswith("ground_decor_") else kn
     w, h, piv, _n, _fn = PIECES[base]
-    sheet = np.zeros((h, w, 4), np.uint8)
-    sheet[:] = frames[0]
-    meta = {"key": KEYS[kn], "style": "v3", "contract": "v3.2 11.9", "frame_width": w, "frame_height": h, "columns": 1, "gutter": v3.GUTTER,
-            "frames": 1, "fps": v3.FPS, "pivot": [round(piv[0], 6), round(piv[1], 6)], "facing": "right", "ppu": PPU, "animations": []}
-    if kn.startswith("ground_band_"):
+    n = len(frames)
+    sheet = np.zeros((h, w * n + v3.GUTTER * (n - 1), 4), np.uint8)                          # one row of frames, gutters between (1 frame: as before)
+    for i, f in enumerate(frames):
+        sheet[:, i * (w + v3.GUTTER):i * (w + v3.GUTTER) + w] = f
+    meta = {"key": KEYS[kn], "style": "v3", "contract": "v3.2 11.9", "frame_width": w, "frame_height": h, "columns": n, "gutter": v3.GUTTER,
+            "frames": n, "fps": v3.FPS, "pivot": [round(piv[0], 6), round(piv[1], 6)], "facing": "right", "ppu": PPU, "animations": []}
+    if kn.startswith("dig_puff_"):
+        v = kn.rsplit("_", 1)[1]
+        meta.update({"animations": [{"name": "puff", "start": 0, "length": n, "loop": False}], "variant": v,
+                     "note": f"B-190: the dig puff in the {v} ground's material (as dig_puff: the clods behind the billows, no face)"})
+    elif kn.startswith("ground_band_"):
         v = kn.rsplit("_", 1)[1]
         meta.update({"tile_x": True, "repeat_px": B.BAND_W, "surface_row": B.SURF_ROW, "above_px": B.SURF_ROW, "below_px": B.BAND_H - B.SURF_ROW,
                      "variant": v, "biomes": BIOMES[v], "fill": FILL_OF.get(v, "ground_fill"),
@@ -1191,9 +1221,9 @@ def sheet_meta(kn, frames):
     problems = [p for p in v3.validate_sheet(meta, sheet.shape) if "sum of clip lengths" not in p]
     if kn not in TILES:
         m = v3.EDGE_MARGIN
-        im = frames[0]
-        if im[:m, :, 3].any() or im[-m:, :, 3].any() or im[:, :m, 3].any() or im[:, -m:, 3].any():
-            problems.append(f"touches the {m} px edge")
+        for i, im in enumerate(frames):
+            if im[:m, :, 3].any() or im[-m:, :, 3].any() or im[:, :m, 3].any() or im[:, -m:, 3].any():
+                problems.append(f"frame {i} touches the {m} px edge")
     hit, off = v3.palette_hits(sheet, PLANET)
     if hit < 0.98:
         problems.append(f"palette {hit * 100:.1f}% (off {' '.join(off[:3])})")
@@ -1225,12 +1255,15 @@ def export(art, S=None):
             _json.dump(meta, f, indent=2)
             f.write("\n")
         out.append((meta["key"], sheet.shape[1], sheet.shape[0], n))
-    return out, within, f"{len(out)} keys, contract v3.2 11.9 ({'B-180 lips' if PART == 'lips' else 'B-181 variants' if PART == 'b181' else 'B-178 variants'})"
+    return out, within, f"{len(out)} keys, contract v3.2 11.9 ({'B-180 lips' if PART == 'lips' else 'B-181 variants' if PART == 'b181' else 'B-190 puffs' if PART == 'puffs' else 'B-178 variants'})"
 
 
 def main(out, S=None, allw=None, footnote=None):
     if S is None:
         S, allw = sheets()
+    if PART == "puffs":                                                                       # B-190: the export's review, this planet's rows
+        preview_puffs(os.path.dirname(out), planets=(PLANET,), pieces=pieces_of(S), out=out, footnote=footnote)
+        return
     (preview_lips if PART == "lips" else preview)(os.path.dirname(out), pieces=pieces_of(S), out=out, footnote=footnote)
 
 
@@ -1490,7 +1523,82 @@ def preview_lips(out_dir, pieces=None, out=None, footnote=None):
         print(ln)
 
 
-if __name__ == "__main__":                       # python -I build_ground_variants_v3.py <preview dir> [planet] [lips]
+def preview_puffs(out_dir, planets=("earth", "mars"), pieces=None, out=None, footnote=None):
+    """B-190: per planet, the exported soil dig_puff (read from Art) and then each material's new puff, every row its 8 frames at
+    1x over the planet's sky with its own ground band under the pivot row (the dig's ground line), frame 2 (the old face frame)
+    at 2x on the right; the palette / edge lines under. pieces: this planet's rendered sheets (main()'s export review)."""
+    import numpy as np
+    from meridian import pngio
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    keep = (PLANET, PART)
+    FW, GAP, ROWH = 128, 4, 22 + 256
+    rows, lines = [], []
+    for p in planets:
+        use_planet(p, "puffs")
+        E = os.path.join(ART, "terrain", p)
+        rd = lambda name: pngio.read_png_np(os.path.join(E, name + "_color.png"))  # noqa: E731
+        soil = rd("dig_puff")
+        sets = [(f"{p} soil: dig_puff (exported, for comparison)", [soil[:, i * (FW + GAP):i * (FW + GAP) + FW] for i in range(8)], rd("ground_band"))]
+        for v in PUFF_VARIANTS[p]:
+            name = f"dig_puff_{v}"
+            if pieces is not None and name in pieces:
+                frames = pieces[name][0]
+            else:
+                frames = [render_piece(name, k)[0] for k in range(8)]
+            sets.append((f"{p} {v}: {name} (NEW)", frames, rd(f"ground_band_{v}")))
+            pal = min(v3.palette_hits(f, p)[0] for f in frames) * 100
+            m = v3.EDGE_MARGIN
+            edge = [i for i, f in enumerate(frames) if f[:m, :, 3].any() or f[-m:, :, 3].any() or f[:, :m, 3].any() or f[:, -m:, 3].any()]
+            lines.append(f"{name}: 8 frames 128x128, pivot (0.5, 0.25), palette {pal:.1f}%{'; EDGE ' + str(edge) if edge else '; inside the edge margin'}")
+        sky = np.array(v3.hex_rgb(v3.PALETTES[p]["sky"]), np.float32) / 255.0
+        for title, frames, band in sets:
+            Wr = 8 * (FW + GAP) + 16 + 2 * FW
+            img = np.empty((ROWH, Wr, 3), np.float32)
+            img[:] = review.PAPER
+            review._label(img, title, 4, 6, scale=1)
+            strip = np.empty((FW, 8 * (FW + GAP), 3), np.float32)                             # sky, then the band's surface row on the pivot row 96
+            strip[:] = sky
+            bt = np.tile(band, (1, (strip.shape[1] + band.shape[1] - 1) // band.shape[1], 1))[:, :strip.shape[1]]
+            y0 = FW - int(round(0.25 * FW)) - B.SURF_ROW
+            review._over(strip, bt[:FW - y0], 0, y0)
+            for i, f in enumerate(frames):
+                review._over(strip, f, i * (FW + GAP), 0)
+            img[22 + 64:22 + 64 + FW, :strip.shape[1]] = strip
+            big = np.empty((2 * FW, 2 * FW, 3), np.float32)
+            big[:] = sky
+            review._over(big, np.repeat(np.repeat(bt[:FW - y0, :FW], 2, 0), 2, 1), 0, 2 * y0)
+            review._over(big, np.repeat(np.repeat(frames[1], 2, 0), 2, 1), 0, 0)
+            img[22:22 + 2 * FW, Wr - 2 * FW:] = big
+            rows.append(img)
+    use_planet(*keep)
+    Wt = rows[0].shape[1]
+    head = np.empty((22, Wt, 3), np.float32)
+    head[:] = review.PAPER
+    review._label(head, "B-190 dig puffs in each ground's material (draw_puff, the clods behind the billows): 8 frames at 1x over the band, frame 2 at 2x", 6, 4)
+    foot = np.empty((30 + 16 * len(lines), Wt, 3), np.float32)
+    foot[:] = review.PAPER
+    for i, ln in enumerate(lines):
+        review._label(foot, ln, 6, 6 + 16 * i, scale=1)
+    img = np.vstack([head] + rows + [foot])
+    import time
+    review.draw(img, time.strftime("%m-%d %H:%M") + " " + (footnote or "design preview (lock-free, fakegp + numpy)"), 2, img.shape[0] - 16, (1.0, 1.0, 0.85))
+    out = out or os.path.join(out_dir, "review_b190_dig_puffs_preview.png")
+    np.clip(img, 0.0, 1.0, out=img)
+    u8 = np.empty(img.shape[:2] + (4,), np.uint8)
+    u8[..., :3] = np.rint(img * 255.0)
+    u8[..., 3] = 255
+    pngio.write_png(out, u8)
+    print("written", out, u8.shape[1], "x", u8.shape[0])
+    for ln in lines:
+        print(ln)
+
+
+if __name__ == "__main__":                       # python -I build_ground_variants_v3.py <preview dir> [planet] [lips | b181] | <dir> puffs
+    if len(sys.argv) > 2 and sys.argv[2] == "puffs":
+        preview_puffs(sys.argv[1])
+        fakegp.restore()
+        sys.exit(0)
     if len(sys.argv) > 2:
         use_planet(sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else "variants")
     (preview_lips if PART == "lips" else preview)(sys.argv[1])
