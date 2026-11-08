@@ -1,0 +1,32 @@
+{
+  "key": "props/earth/vault_door",
+  "style": "v3",
+  "frame_width": 128,
+  "frame_height": 128,
+  "columns": 3,
+  "gutter": 4,
+  "frames": 7,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [
+    {
+      "name": "closed",
+      "start": 0,
+      "length": 1,
+      "loop": false
+    },
+    {
+      "name": "open",
+      "start": 1,
+      "length": 6,
+      "loop": false
+    }
+  ],
+  "squash_root": false,
+  "note": "B-176 / U-158: a relic in the cutaway; no faces"
+}

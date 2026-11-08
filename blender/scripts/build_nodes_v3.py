@@ -68,7 +68,7 @@ def colours(planet):
                 "dust": P["offwhite"], "dust_sh": sh("offwhite"), "soil": sh("offwhite"), "cavity": P["brown"], "cavity_sh": dp("red"),
                 "capsule": P["offwhite"], "capsule_sh": sh("offwhite"), "panel": P["teal"], "lamp": P["red"], "lamp_on": P["mustard"],
                 "glint": P["offwhite"], "dark": P["brown"], "ice": P["offwhite"], "ice_sh": P["sky"],
-                "xpale": P["offwhite"], "xpale_sh": sh("offwhite")}
+                "xpale": P["offwhite"], "xpale_sh": sh("offwhite"), "xred": P["red"], "xred_sh": sh("red")}
     if planet == "venus":                       # LEAD 05:3x: vitriol glass, sulfur; an old pressure capsule
         return {"rock": dp("teal"), "rock_sh": P["brown"], "rock_hi": sh("teal"), "glass": P["green"], "glass_sh": sh("green"),
                 "glass_hi": P["offwhite"], "sulfur": P["mustard"], "sulfur_sh": sh("mustard"), "salt_sh": sh("mustard"),
@@ -738,7 +738,7 @@ RELICS = {"earth": {"data_cache": (draw_cache, 96, 80, (0.5, 0.5), [("full", 1, 
                     "scan_x": (draw_x, 64, 64, (0.5, 6 / 64), [("pulse", 8, True)]),
                     "scan_x_pale": (draw_x_pale, 64, 64, (0.5, 6 / 64), [("pulse", 8, True)])}}
 RELIC_AT = {"earth": {"data_cache": (1450, 120), "vault_door": (1700, 250), "scan_x": (660, 2)}, "mars": {"lander_beacon": (1450, 150), "scan_x_pale": (1000, 2)},
-            "mercury": {"sunshade_probe": (1450, 150)},
+            "mercury": {"sunshade_probe": (1450, 150), "scan_x": (1000, 2)},
             "venus": {"pressure_capsule": (1450, 150), "scan_x": (1000, 2), "scan_x_pale": (1150, 2)}}
 _PC = {}
 
@@ -758,8 +758,8 @@ def pieces_for(planet):
 PIECES = pieces_for("earth")
 
 
-def render(name, planet="earth"):
-    fn, fw, fh, piv, clips = pieces_for(planet)[name]
+def render(name, planet="earth", piece=None):
+    fn, fw, fh, piv, clips = piece or pieces_for(planet)[name]
     frames, widths = [], []
     n = sum(c[1] for c in clips)
     for k in range(n):
@@ -773,9 +773,9 @@ def render(name, planet="earth"):
     return frames, widths
 
 
-def sheet_meta(name, frames, planet="earth"):
+def sheet_meta(name, frames, planet="earth", piece=None):
     import numpy as np
-    _fn, fw, fh, piv, clips = pieces_for(planet)[name]
+    _fn, fw, fh, piv, clips = piece or pieces_for(planet)[name]
     g = v3.GUTTER
     n = len(frames)
     cols = max(1, min(n, (512 + g) // (fw + g)))
@@ -802,7 +802,7 @@ def sheet_meta(name, frames, planet="earth"):
     return sheet, meta, problems
 
 
-def preview(out_dir, planet="earth"):
+def preview(out_dir, planet="earth", S=None, out=None, footnote=None):
     """Earth's B-175 ground (band + fill from Art) flat at 1x: the five nodes on the surface beside the surveyor (full,
     harvested), the pockets, the cache and the vault door in the cutaway, the X above a pocket; every clip; the checks."""
     import json
@@ -810,8 +810,8 @@ def preview(out_dir, planet="earth"):
     from meridian import pngio
     sys.path.insert(0, os.path.dirname(HERE))
     import review
-    PC = pieces_for(planet)
-    res = {n: render(n, planet) for n in PC}
+    PC = pieces_export(planet) if S is not None else pieces_for(planet)
+    res = S if S is not None else {n: render(n, planet) for n in PC}
     W = 2000
     band = pngio.read_png_np(os.path.join(ART, "terrain", planet, "ground_band_color.png"))
     fill = pngio.read_png_np(os.path.join(ART, "terrain", planet, "ground_fill_color.png"))
@@ -836,8 +836,13 @@ def preview(out_dir, planet="earth"):
         review._label(img, f"{name}: full | harvested", x - 60, surf - 120)
     for j, name in enumerate(nodes):
         place(res[f"pocket_{name}"][0][0], (0.5, 0.5), 160 + 250 * j, surf + 230)
+    placed = set()
     for name, (x, y) in RELIC_AT[planet].items():
-        place(res[name][0][0], PC[name][3], x, surf + y)
+        nm = name if name in PC else ("scan_x" if name.startswith("scan_x") else None)
+        if nm is None or nm in placed:
+            continue
+        placed.add(nm)
+        place(res[nm][0][0], PC[nm][3], x, surf + y)
     try:
         sm = json.load(open(os.path.join(ART, "characters", "surveyor", "side.json"), encoding="utf-8"))
         shs = pngio.read_png_np(os.path.join(ART, "characters", "surveyor", "side_color.png"))
@@ -845,7 +850,7 @@ def preview(out_dir, planet="earth"):
         review._over(img, fr, 1550, surf - sm["frame_height"] + int(round(sm["pivot"][1] * sm["frame_height"])) + 2)
     except (OSError, KeyError, ValueError):
         pass
-    review._label(img, f"b-176 {planet} nodes at 1x on its b-175 ground (keys provisional, renamed at export): {len(nodes)} nodes full | harvested; "
+    review._label(img, f"b-176 {planet} nodes at 1x on its b-175 ground ({'exported, U-158 keys' if S is not None else 'keys provisional, renamed at export'}): {len(nodes)} nodes full | harvested; "
                        f"their pockets and {', '.join(RELIC_AT[planet])} in the cutaway", 6, 6)
     rows = [img]
     for name, (fn, fw, fh, piv, clips) in PC.items():
@@ -863,7 +868,7 @@ def preview(out_dir, planet="earth"):
     lines = []
     for name in PC:
         frames, widths = res[name]
-        sheet, meta, probs = sheet_meta(name, frames, planet)
+        sheet, meta, probs = sheet_meta(name, frames, planet, PC[name])
         o = [w for w in widths if w[0] >= v3.OUTER_SPLIT]
         n_ = [w for w in widths if w[0] < v3.OUTER_SPLIT]
         rng = lambda q: f"{min(w[1] for w in q):.1f}-{max(w[2] for w in q):.1f}" if q else "-"  # noqa: E731
@@ -877,7 +882,7 @@ def preview(out_dir, planet="earth"):
     out_img = np.vstack(rows + [foot])
     del rows, img
     import time
-    review.draw(out_img, time.strftime("%m-%d %H:%M") + " design preview (lock-free, fakegp)", 2, out_img.shape[0] - 16, (1.0, 1.0, 0.85))
+    review.draw(out_img, time.strftime("%m-%d %H:%M") + " " + (footnote or "design preview (lock-free, fakegp)"), 2, out_img.shape[0] - 16, (1.0, 1.0, 0.85))
     shape = out_img.shape
     np.clip(out_img, 0.0, 1.0, out=out_img)
     out_img *= 255.0
@@ -886,11 +891,88 @@ def preview(out_dir, planet="earth"):
     u8[..., :3] = out_img
     u8[..., 3] = 255
     del out_img
-    out = os.path.join(out_dir, f"review_b176_{planet}_nodes_preview.png")
+    out = out or os.path.join(out_dir, f"review_b176_{planet}_nodes_preview.png")
     pngio.write_png(out, u8)
     print("written", out, shape[1], "x", shape[0])
     for ln in lines:
         print(ln)
+
+
+
+
+# ---------------------------------------------------------------- the export (render.py's ground_strip_set API; U-158's key list,
+# UNITY_STATUS 24eab036: props/<planet>/node_<item>, pocket_<item>, the relics, ONE scan_x per planet)
+
+SCAN_PALE = {"mars", "venus"}           # LEAD 05:5x: the pale X where the red one vanishes on the ground
+
+
+def pieces_export(planet):
+    """U-158's keys for the planet: its nodes, pockets and relics, and ONE scan_x (the pale X for Mars and Venus)."""
+    P = {n: v for n, v in pieces_for(planet).items() if n not in ("scan_x", "scan_x_pale")}
+    P["scan_x"] = (draw_x_pale if planet in SCAN_PALE else draw_x, 64, 64, (0.5, 6 / 64), [("pulse", 8, True)])
+    return P
+
+
+PLANET = "earth"
+KEYS = {}
+PE = {}
+
+
+def use_planet(planet):
+    global PLANET, KEYS, PE
+    PLANET = planet
+    PE = pieces_export(planet)
+    KEYS = {n: f"props/{planet}/{n}" for n in PE}
+
+
+use_planet(PLANET)
+
+
+def sheets():
+    S, allw = {}, []
+    for n, piece in PE.items():
+        fr, wd = render(n, PLANET, piece)
+        S[n] = (fr, wd)
+        allw += wd
+    return S, allw
+
+
+def export(art, S=None):
+    """-> (out [(key, w, h, bytes)], {}, summary): raises on any contract problem before writing."""
+    import json as _json
+    from meridian import pngio
+    if S is None:
+        S, _w = sheets()
+    built, problems = [], []
+    for n, (frames, _w) in S.items():
+        sheet, meta, p = sheet_meta(n, frames, PLANET, PE[n])
+        meta.pop("provisional_key", None)
+        meta["note"] = ("B-176 / U-158: " + ("a resource node, upright on the curve" if n.startswith("node_") else
+                        "a buried find set into the cutaway" if n.startswith("pocket_") else
+                        "the Survey scan's X above a find (pale where red vanishes)" if n == "scan_x" else "a relic in the cutaway") + "; no faces")
+        hit, off = v3.palette_hits(sheet, PLANET)
+        if hit < 0.98:
+            p.append(f"palette {hit * 100:.1f}% (off {' '.join(off[:3])})")
+        problems += [f"{n}: {x}" for x in p]
+        built.append((n, sheet, meta))
+    if problems:
+        raise ValueError(f"{PLANET} nodes checks: " + "; ".join(problems))
+    d = os.path.join(art, "props", PLANET)
+    os.makedirs(d, exist_ok=True)
+    out = []
+    for n, sheet, meta in built:
+        nbytes = pngio.write_png(os.path.join(d, n + "_color.png"), sheet)
+        with open(os.path.join(d, n + ".json"), "w", encoding="utf-8", newline="\n") as f:
+            _json.dump(meta, f, indent=2)
+            f.write("\n")
+        out.append((meta["key"], sheet.shape[1], sheet.shape[0], nbytes))
+    return out, {}, f"{len(out)} keys (U-158)"
+
+
+def main(out, S=None, allw=None, footnote=None):
+    if S is None:
+        S, allw = sheets()
+    preview(os.path.dirname(out), PLANET, S=S, out=out, footnote=footnote)
 
 
 if __name__ == "__main__":

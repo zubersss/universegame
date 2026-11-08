@@ -1,0 +1,33 @@
+{
+  "key": "props/mars/pocket_hematite",
+  "style": "v3",
+  "frame_width": 96,
+  "frame_height": 96,
+  "columns": 5,
+  "gutter": 4,
+  "frames": 9,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [
+    {
+      "name": "full",
+      "start": 0,
+      "length": 1,
+      "loop": false
+    },
+    {
+      "name": "glint",
+      "start": 1,
+      "length": 8,
+      "loop": true,
+      "loop_from": 0
+    }
+  ],
+  "squash_root": false,
+  "note": "B-176 / U-158: a buried find set into the cutaway; no faces"
+}

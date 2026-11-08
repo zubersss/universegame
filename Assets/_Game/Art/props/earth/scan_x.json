@@ -1,0 +1,27 @@
+{
+  "key": "props/earth/scan_x",
+  "style": "v3",
+  "frame_width": 64,
+  "frame_height": 64,
+  "columns": 7,
+  "gutter": 4,
+  "frames": 8,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.09375
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [
+    {
+      "name": "pulse",
+      "start": 0,
+      "length": 8,
+      "loop": true,
+      "loop_from": 0
+    }
+  ],
+  "squash_root": false,
+  "note": "B-176 / U-158: the Survey scan's X above a find (pale where red vanishes); no faces"
+}
