@@ -65,6 +65,8 @@ def arrow(d, M, a, b, w, role, head=2.2):
 
 
 # ---------------------------------------------------------------- the motifs (each takes a level; the chain's steps share one)
+BEAM_TOP_HANDLE = True        # LEAD to rule (18:0x flag): the Beam held by a top carry handle, not a pistol grip (D-087); the
+                              # exported dig_power_1 / _2 still have the grip until re-exported
 BEAM_TONE = {1: ("teal", "off"), 2: ("teal", "mustard"), 3: ("green", "off"), 4: ("mustard_sh", "off"), 5: ("mustard", "off")}   # B-205's
                                                                                                # Mk1-5: the beam warms from teal to gold
 
@@ -80,7 +82,11 @@ def m_beam(d, M, lv=1):
     for a in (2.2, 2.75, 3.5, 4.05):                                                                                   # sparks
         G.stroke(d, G.hose_outline([(0.18 + 0.06 * math.cos(a), 0.04 + 0.06 * math.sin(a)), (0.18 + 0.14 * math.cos(a), 0.04 + 0.14 * math.sin(a))], 0.024),
                  M["mustard"], 0.0, cyclic=True)
-    G.stroke(d, G.hose_outline(R([(-0.22, -0.08), (-0.27, -0.27)]), 0.09), M["brown_i"], I, cyclic=True)           # the grip
+    if not BEAM_TOP_HANDLE:
+        G.stroke(d, G.hose_outline(R([(-0.22, -0.08), (-0.27, -0.27)]), 0.09), M["brown_i"], I, cyclic=True)       # the grip
+    else:                                                                                                               # (rev 18:0x: a pistol
+        G.stroke(d, G.hose_outline(R(arc(-0.19, 0.1, 0.11, math.pi, 0.0, 10)), 0.06), M["brown_i"], I, cyclic=True)  # grip read as a ray
+                                                                                                                         # gun: a carry handle)
     G.stroke(d, R([(-0.34, -0.1), (-0.05, -0.1), (-0.05, 0.1), (-0.34, 0.1)]), M["teal_sh_i"], O, cyclic=True)     # the body
     G.stroke(d, R([(-0.34, 0.02), (-0.05, 0.02), (-0.05, 0.1), (-0.34, 0.1)]), M["teal"], 0.0, cyclic=True)
     G.stroke(d, R([(-0.34, -0.1), (-0.05, -0.1), (-0.05, 0.1), (-0.34, 0.1)]), M["ink"], O, cyclic=True)
@@ -141,7 +147,9 @@ def m_dirt(d, M, lv=1):
 
 
 def m_grapple(d, M, lv=1):
-    """The Grapple: a three-pronged steel hook on a ring, its rope rising up-left in a loop."""
+    """The Grapple: a three-pronged steel hook on a ring, its rope rising up-left in a loop; step 2: a longer line (a coil)."""
+    if lv >= 2:
+        G.stroke(d, G.hose_outline(arc(0.27, 0.3, 0.11, math.radians(-60), math.radians(250), 20), 0.045), M["mustard_sh_i"], I, cyclic=True)
     G.stroke(d, G.hose_outline([(-0.08, 0.12), (-0.2, 0.3), (-0.38, 0.32), (-0.4, 0.16), (-0.26, 0.12)], 0.05), M["mustard_sh_i"], I, cyclic=True)
     G.stroke(d, G.hose_outline([(0.0, 0.18), (0.02, -0.2)], 0.07), M["sky_sh_i"], O, cyclic=True)                      # the shank
     for s in (-1, 1):                                                                                                  # two side prongs
@@ -157,11 +165,14 @@ def m_grapple(d, M, lv=1):
 def m_ladder(d, M, lv=1):
     """A Builder ladder: brown rails and rungs, its feet in a heap of the dirt it is made from."""
     R = rot(0.0, 0.0, -0.18)
-    for u in (-0.15, 0.15):
-        G.stroke(d, G.hose_outline(R([(u, -0.3), (u, 0.4)]), 0.06), M["brown_i"], O, cyclic=True)
-    for k in range(5):
-        v = -0.18 + 0.13 * k
+    top, n, step = (0.4, 5, 0.13) if lv == 1 else (0.44, 6, 0.11)                                                     # step 2: sections
+    for u in (-0.15, 0.15):                                                                                             # clamped, taller
+        G.stroke(d, G.hose_outline(R([(u, -0.3), (u, top)]), 0.06), M["brown_i"], O, cyclic=True)
+    for k in range(n):
+        v = -0.18 + step * k
         G.stroke(d, G.hose_outline(R([(-0.13, v), (0.13, v)]), 0.045), M["mustard_sh_i"], I, cyclic=True)
+    if lv >= 2:
+        G.stroke(d, G.hose_outline(R([(-0.2, 0.09), (0.2, 0.09)]), 0.06), M["sky_sh_i"], I, cyclic=True)
     G.stroke(d, IT.lump(-0.08, -0.33, 0.28, 0.1, 51), M["brown_sh_i"], O, cyclic=True)
     for x in (-0.24, 0.0, 0.12):
         G.stroke(d, IT.lump(x, -0.27, 0.05, 0.035, int(100 * x) + 60, n=6), M["brown_i"], I, cyclic=True)
@@ -231,7 +242,10 @@ def m_fall(d, M, lv=1):
     for k in range(7):
         pts.append((0.16 if k % 2 == 0 else -0.24, -0.2 - 0.03 * k))
     G.stroke(d, G.hose_outline(pts, 0.04), M["sky_i"], I, cyclic=True)
-    G.stroke(d, [(-0.32, -0.4), (0.24, -0.4), (0.24, -0.43), (-0.32, -0.43)], M["sky_sh_i"], I, cyclic=True)
+    if lv >= 2:                                                                                                          # step 2: an airbag
+        G.stroke(d, G.lumpy_ellipse(-0.04, -0.4, 0.32, 0.06, n=20, lump=0.06, seed=91), M["mustard_i"], I, cyclic=True)
+    else:
+        G.stroke(d, [(-0.32, -0.4), (0.24, -0.4), (0.24, -0.43), (-0.32, -0.43)], M["sky_sh_i"], I, cyclic=True)
 
 
 def m_price(d, M, lv=1):
@@ -251,7 +265,10 @@ def m_price(d, M, lv=1):
 
 
 def m_hold(d, M, lv=1):
-    """The rocket's hold: a strapped cargo crate, plank seams, a red stencil band."""
+    """The rocket's hold: a strapped cargo crate, plank seams, a red stencil band; step 2: a second crate stacked behind."""
+    if lv >= 2:
+        G.stroke(d, [(-0.02, 0.14), (0.4, 0.14), (0.4, 0.44), (-0.02, 0.44)], M["mustard_dp_i"], O, cyclic=True)
+        G.seam(d, [(0.0, 0.3), (0.38, 0.3)], M["ink"])
     G.stroke(d, [(-0.36, -0.32), (0.26, -0.32), (0.26, 0.24), (-0.36, 0.24)], M["mustard_sh_i"], O, cyclic=True)
     G.stroke(d, [(0.12, -0.32), (0.26, -0.32), (0.26, 0.24), (0.12, 0.24)], M["mustard_dp"], 0.0, cyclic=True)
     G.stroke(d, [(-0.36, -0.32), (0.26, -0.32), (0.26, 0.24), (-0.36, 0.24)], M["ink"], O, cyclic=True)
@@ -327,39 +344,49 @@ def m_preview(d, M, lv=1):
 
 
 def m_heat(d, M, lv=1):
-    """Heat and pressure kept off: a teal shield before one big flame rising over it (rev 17:5x: two flames either side read as
-    wings); the flame is taller at step 2."""
-    up = 0.03 * (lv - 1)                                                                                                # three tongues
-    G.stroke(d, [(-0.34, -0.36), (0.32, -0.36), (0.3, 0.1), (0.22, 0.36 + up), (0.14, 0.24), (0.04, 0.44 + up), (-0.04, 0.26),
-                 (-0.14, 0.4 + up), (-0.22, 0.2), (-0.32, 0.06)], M["red_i"], I, cyclic=True)                       # over the shield
-    G.stroke(d, [(-0.24, -0.36), (0.22, -0.36), (0.2, 0.12), (0.14, 0.3 + up), (0.08, 0.22), (0.03, 0.36 + up), (-0.03, 0.22),
-                 (-0.1, 0.32 + up), (-0.18, 0.12)], M["mustard"], 0.0, cyclic=True)
-    shield = [(-0.2, 0.3), (0.18, 0.3), (0.18, 0.0), (0.12, -0.2), (-0.01, -0.36), (-0.14, -0.2), (-0.2, 0.0)]
-    G.stroke(d, shield, M["teal_i"], O, cyclic=True)
-    G.stroke(d, [(-0.01, 0.3), (0.18, 0.3), (0.18, 0.0), (0.12, -0.2), (-0.01, -0.36)], M["teal_sh"], 0.0, cyclic=True)
-    G.stroke(d, shield, M["ink"], O, cyclic=True)
-    G.stroke(d, [(-0.12, 0.22), (0.1, 0.22), (0.1, 0.02), (-0.01, -0.22), (-0.12, 0.02)], M["ink"], I, cyclic=True)    # its rim
+    """Heat and pressure kept off, as insulation (rev 18:0x: a kite shield is battle gear, D-087): the thermal pad's quilted
+    panel (B-199's colours: mustard quilt, a red band) standing at the left, a flame on the right bending away from it; a
+    second layer behind it at step 2."""
+    G.stroke(d, [(-0.02, -0.4), (0.38, -0.4), (0.44, -0.16), (0.46, 0.1), (0.36, -0.04), (0.36, 0.26), (0.25, 0.04), (0.2, 0.2),
+                 (0.11, -0.06), (0.0, -0.18)], M["red_i"], I, cyclic=True)                                            # the flame,
+    G.stroke(d, [(0.06, -0.4), (0.32, -0.4), (0.37, -0.18), (0.36, 0.02), (0.28, -0.1), (0.24, 0.06), (0.17, -0.12), (0.08, -0.2)],
+             M["mustard"], 0.0, cyclic=True)                                                                            # leaning away
+    if lv >= 2:                                                                                                         # a second layer
+        G.stroke(d, [(-0.36, -0.34), (0.02, -0.34), (0.02, 0.42), (-0.36, 0.42)], M["mustard_dp_i"], O, cyclic=True)
+    G.stroke(d, [(-0.06, -0.38), (0.0, -0.34), (0.0, 0.4), (-0.06, 0.36)], M["mustard_dp_i"], I, cyclic=True)        # its thickness
+    G.stroke(d, [(-0.42, -0.38), (-0.06, -0.38), (-0.06, 0.36), (-0.42, 0.36)], M["mustard_sh_i"], O, cyclic=True)    # the panel
+    G.stroke(d, [(-0.42, -0.02), (-0.06, -0.02), (-0.06, 0.07), (-0.42, 0.07)], M["red_i"], I, cyclic=True)           # its band
+    G.stroke(d, [(-0.16, -0.02), (-0.06, -0.02), (-0.06, 0.07), (-0.16, 0.07)], M["red_sh"], 0.0, cyclic=True)
+    for seg in ([(-0.24, -0.38), (-0.24, -0.02)], [(-0.24, 0.07), (-0.24, 0.36)], [(-0.42, -0.2), (-0.06, -0.2)], [(-0.42, 0.22), (-0.06, 0.22)]):
+        G.seam(d, seg, M["ink"])                                                                                         # the quilting
 
 
 def m_thrust(d, M, lv=2):
-    """A thruster: a steel bell under its mount, a flame that grows with the Mk (2, 3)."""
-    fl = 0.2 + 0.08 * (lv - 2)
-    G.stroke(d, [(-0.16, -0.12), (0.16, -0.12), (0.0, -0.12 - fl - 0.12)], M["mustard_i"], I, cyclic=True)
-    G.stroke(d, [(-0.08, -0.12), (0.08, -0.12), (0.0, -0.12 - fl)], M["red"], 0.0, cyclic=True)
-    G.stroke(d, [(-0.04, -0.12), (0.04, -0.12), (0.0, -0.12 - fl * 0.5)], M["off"], 0.0, cyclic=True)
-    hw = lambda z: 0.07 + 0.2 * ((0.18 - z) / 0.32) ** 1.8  # noqa: E731   (rev 17:5x: a flared bell; a straight one read as a pen nib)
-    zs = [0.18 - 0.32 * i / 10 for i in range(11)]
+    """A thruster: a flared steel bell (rev 17:5x: a straight one read as a pen nib) under a short teal rocket tail with fins
+    (rev 18:0x: without it the bell read as a spinning top); the flame grows with the Mk (2, 3)."""
+    fl = 0.14 + 0.06 * (lv - 2)
+    zb = -0.2                                                                                                           # the bell's mouth
+    G.stroke(d, [(-0.16, zb + 0.02), (0.16, zb + 0.02), (0.0, zb - fl - 0.08)], M["mustard_i"], I, cyclic=True)
+    G.stroke(d, [(-0.08, zb + 0.02), (0.08, zb + 0.02), (0.0, zb - fl)], M["red"], 0.0, cyclic=True)
+    G.stroke(d, [(-0.04, zb + 0.02), (0.04, zb + 0.02), (0.0, zb - fl * 0.5)], M["off"], 0.0, cyclic=True)
+    hw = lambda z: 0.07 + 0.19 * ((0.08 - z) / 0.28) ** 1.8  # noqa: E731
+    zs = [0.08 - 0.28 * i / 10 for i in range(11)]
     bell = [(-hw(z), z) for z in zs] + [(hw(z), z) for z in reversed(zs)]
     G.stroke(d, bell, M["sky_sh_i"], O, cyclic=True)
     G.stroke(d, [(0.02, z) for z in zs] + [(hw(z), z) for z in reversed(zs)], M["sky_dp"], 0.0, cyclic=True)
     G.stroke(d, bell, M["ink"], O, cyclic=True)
-    for z in (0.06, -0.04):                                                                                             # bands round it
+    for z in (-0.02, -0.11):                                                                                            # bands round it
         G.seam(d, [(-hw(z) + 0.01, z), (hw(z) - 0.01, z)], M["ink"])
-    G.stroke(d, [(-0.16, 0.18), (0.16, 0.18), (0.16, 0.3), (-0.16, 0.3)], M["mustard_i"], I, cyclic=True)            # the mount
-    G.stroke(d, [(-0.06, 0.3), (0.06, 0.3), (0.06, 0.4), (-0.06, 0.4)], M["sky_i"], I, cyclic=True)
     if lv >= 3:                                                                                                          # Mk3: side vanes
         for s in (-1, 1):
-            G.stroke(d, [(s * 0.17, 0.12), (s * 0.34, -0.02), (s * 0.34, -0.12), (s * 0.2, -0.06)], M["red_sh_i"], I, cyclic=True)
+            G.stroke(d, [(s * 0.15, 0.02), (s * 0.32, -0.1), (s * 0.32, -0.2), (s * 0.19, -0.14)], M["red_sh_i"], I, cyclic=True)
+    for s in (-1, 1):                                                                                                    # the tail's fins
+        G.stroke(d, [(s * 0.13, 0.3), (s * 0.3, 0.12), (s * 0.3, 0.06), (s * 0.13, 0.14)], M["mustard_i"], I, cyclic=True)
+    tail = [(-0.14, 0.08), (0.14, 0.08), (0.14, 0.3)] + arc(0.0, 0.3, 0.14, 0.0, math.pi, 12)[1:] + [(-0.14, 0.3)]
+    G.stroke(d, tail, M["teal_i"], O, cyclic=True)                                                                     # the rocket tail
+    G.stroke(d, [(0.04, 0.08), (0.14, 0.08), (0.14, 0.3)] + arc(0.0, 0.3, 0.14, 0.0, 0.8, 5)[1:] + [(0.06, 0.4)], M["teal_sh"], 0.0, cyclic=True)
+    G.stroke(d, tail, M["ink"], O, cyclic=True)
+    G.stroke(d, [(-0.14, 0.12), (0.14, 0.12), (0.14, 0.18), (-0.14, 0.18)], M["off_i"], I, cyclic=True)              # its cream band
 
 
 # ---------------------------------------------------------------- batch 3 (ring 3)
@@ -442,7 +469,7 @@ BATCHES = {1: ["dig_power_1", "dig_brush_1", "haul_pack_1", "haul_dirt_1", "asc_
                "end_air_2", "end_heat_1", "voy_thrust_2", "voy_price_2"],
            3: ["dig_power_3", "dig_heatsink", "dig_brush_2", "haul_magnet_1", "haul_sorter", "haul_pack_3", "asc_jet_2", "asc_grapple_2",
                "asc_ladder_2", "sur_scan_3", "sur_rare", "sur_preview_2", "end_air_3", "end_heat_2", "end_fall_2", "voy_hold_2", "voy_skip_1",
-               "voy_price_3"]}
+               "voy_price_3", "end_heat_1", "voy_thrust_2"]}                       # + batch 2's two redraws (LEAD 18:0x)
 EXPORT_BATCHES = (1,)                                                                           # only LEAD-accepted batches export (1: 17:3x)
 
 
