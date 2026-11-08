@@ -1,8 +1,8 @@
 # Smoke-runs the built player (U-017): screenshots menu / Earth day + night / biome border / Mars canyon storm / Saturn (U-044), then checks
 # the player log for errors; U-132 adds the pause card, the settings paper and a title card per planet, the Mars hauler (29 shots).
 # Output: logs/smoke/*.png + coordination/reports/unity/smoke_<version>/. Owner: UNITY.
-# Usage: tools/unity_smoke.ps1 [-Version 0.1.1]  (default: GameInfo.Version, the build unity_build.ps1 makes)
-param([string]$Version = '')
+# Usage: tools/unity_smoke.ps1 [-Version 0.1.1] [-Dev]  (default: GameInfo.Version; U-143: the release player in Build/MERIDIAN_<v>/, -Dev the development one)
+param([string]$Version = '', [switch]$Dev)
 . (Join-Path $PSScriptRoot 'unity_common.ps1')
 
 if (-not $Version) {
@@ -10,8 +10,9 @@ if (-not $Version) {
     if ($info -match 'Version = "([^"]+)"') { $Version = $Matches[1] } else { Write-Host 'SMOKE FAILED: no Version in GameInfo.cs'; exit 1 }
 }
 Write-Host "Smoke: build $Version"
-$exe = Join-Path $RepoRoot "Build\MERIDIAN_$Version\MERIDIAN.exe"
-if (-not (Test-Path $exe)) { Write-Host "SMOKE FAILED: no build at $exe (run tools/unity_build.ps1)"; exit 1 }
+$exe = Get-PlayerExe $Version -Dev:$Dev
+if (-not (Test-Path $exe)) { Write-Host "SMOKE FAILED: no build at $exe (run tools/unity_profile.ps1 -Build -Release, or tools/unity_build.ps1 [-Release])"; exit 1 }
+Write-Host "Smoke player: $exe"
 $out = Join-Path $LogDir 'smoke'
 if (Test-Path $out) { Remove-Item $out -Recurse -Force }
 New-Item -ItemType Directory -Force $out | Out-Null
@@ -29,7 +30,8 @@ $done = Test-Path (Join-Path $out 'smoke_done.txt')
 $shots = @(Get-ChildItem $out -Filter 'smoke_*.png')
 $errors = @(Select-String -Path $playerLog -Pattern 'Exception|\[Error\]|error CS|NullReference' -ErrorAction SilentlyContinue |
     Where-Object { $_.Line -notmatch 'Crash!!!|UnityShaderCompiler' })
-Write-Host "player exit $($p.ExitCode) | done marker $done | screenshots $($shots.Count) | error lines $($errors.Count)"
+$flavour = if ($done) { ((Get-Content (Join-Path $out 'smoke_done.txt') -Raw).Trim() -split ' ')[2] } else { '?' }   # U-143: release | development
+Write-Host "player exit $($p.ExitCode) | done marker $done ($flavour) | screenshots $($shots.Count) | error lines $($errors.Count)"
 $errors | Select-Object -First 10 | ForEach-Object { Write-Host "  $($_.Line.Trim())" }
 
 $report = Join-Path $RepoRoot ("coordination\reports\unity\smoke_" + $Version) # U-132: one folder per build (was per date)

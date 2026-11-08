@@ -316,7 +316,7 @@ namespace Meridian.Core
                 }
             }
 
-            File.WriteAllText(Path.Combine(folder, "smoke_done.txt"), $"OK {GameInfo.Version} {DateTime.Now:s}");
+            File.WriteAllText(Path.Combine(folder, "smoke_done.txt"), $"OK {GameInfo.Version} {(Debug.isDebugBuild ? "development" : "release")} {DateTime.Now:s}"); // U-143: which player the shots are from
             Application.Quit();
         }
 

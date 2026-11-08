@@ -54,6 +54,17 @@ function Get-OtherWants {
         Where-Object { $_.Name -ne 'want_unity.lock' -and $_.LastWriteTime -gt $cutoff })
 }
 
+# U-143: the game version (GameInfo.Version) and the player folders: the release in Build\MERIDIAN_<v>\, the probed development build in Build\MERIDIAN_<v>_dev\.
+function Get-GameVersion {
+    $m = Select-String -Path (Join-Path $RepoRoot 'Assets\_Game\Code\Runtime\GameInfo.cs') -Pattern 'Version = "([^"]+)"'
+    if (-not $m) { return '' }
+    return $m.Matches[0].Groups[1].Value
+}
+function Get-PlayerExe([string]$Version, [switch]$Dev) {
+    $suffix = if ($Dev) { '_dev' } else { '' }
+    return Join-Path $RepoRoot ("Build\MERIDIAN_{0}{1}\MERIDIAN.exe" -f $Version, $suffix)
+}
+
 function Get-LastRelease {
     if (-not (Test-Path $ReleaseStamp)) { return [datetime]::MinValue }
     try { return [datetime]::Parse((Get-Content $ReleaseStamp -Raw).Trim()) } catch { return [datetime]::MinValue }

@@ -13,7 +13,12 @@ namespace Meridian.EditorTools
     {
         public const string CoreScene = "Assets/_Game/Scenes/Core.unity";
 
+        /// <summary>U-143: the release player (the owner's build, no Development Build watermark).</summary>
         public static string OutputFolder => $"Build/{GameInfo.Product}_{GameInfo.Version}";
+        /// <summary>U-143: the development player sits beside it with this suffix (the memory probe needs its counters).</summary>
+        public const string DevSuffix = "_dev";
+        /// <summary>The folder a build writes: Build/MERIDIAN_&lt;v&gt;/ for the release, Build/MERIDIAN_&lt;v&gt;_dev/ for the development build. Pure.</summary>
+        public static string OutputFolderFor(bool release) => release ? OutputFolder : OutputFolder + DevSuffix;
 
         /// <summary>Core first, then every other scene under Assets/_Game/Scenes (ArtPreview excluded).</summary>
         public static string[] ScenesToBuild()
@@ -86,7 +91,7 @@ namespace Meridian.EditorTools
             var options = new BuildPlayerOptions
             {
                 scenes = scenes,
-                locationPathName = $"{OutputFolder}/{GameInfo.Product}.exe",
+                locationPathName = $"{OutputFolderFor(release)}/{GameInfo.Product}.exe",
                 target = BuildTarget.StandaloneWindows64,
                 options = release ? BuildOptions.None : BuildOptions.Development,
             };
@@ -97,7 +102,7 @@ namespace Meridian.EditorTools
                 Debug.LogError($"[MERIDIAN] BUILD FAILED: {s.result}, {s.totalErrors} errors");
                 return false;
             }
-            Debug.Log($"[MERIDIAN] BUILD OK: {options.locationPathName} · {s.totalSize / (1024 * 1024)} MB · {s.totalTime.TotalSeconds:F0} s");
+            Debug.Log($"[MERIDIAN] BUILD OK: {options.locationPathName} · {(release ? "release" : "development")} · {s.totalSize / (1024 * 1024)} MB · {s.totalTime.TotalSeconds:F0} s");
             return true;
         }
     }

@@ -1,4 +1,5 @@
-# Windows dev build to Build/MERIDIAN_<version>/. Owner: UNITY.
+# Windows build (U-143): the development player to Build/MERIDIAN_<version>_dev/, -Release the release player to Build/MERIDIAN_<version>/.
+# The owner's build in one call with its probe: tools/unity_profile.ps1 -Build -Release (or unity_release.ps1). Owner: UNITY.
 # Usage: tools/unity_build.ps1 [-Release]
 param([switch]$Release)
 . (Join-Path $PSScriptRoot 'unity_common.ps1')

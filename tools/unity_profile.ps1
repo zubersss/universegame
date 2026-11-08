@@ -3,9 +3,11 @@
 # -Build (U-041, D-036): also builds the development player and runs its memory probe
 # (nine legs: Earth, Space, Mars, Space, Mercury, Space, Venus, Space, Earth again; U-091) under the same lock, adding "dev build" rows to the report.
 # -Probe (U-086): runs the probe on the player already in Build/ without rebuilding it.
+# -Release (U-143): after a green probe the same code is built again as the release player in Build/MERIDIAN_<v>/ under the same
+# hold (no Development Build watermark; the owner's build); the probed development player stays in Build/MERIDIAN_<v>_dev/.
 # The Editor's memory rows stay as an upper bound. Limits are Bible 11.1 v4 (D-089).
-# Usage: tools/unity_profile.ps1 [-Build | -Probe] [-SkipGate]
-param([switch]$Build, [switch]$Probe, [switch]$SkipGate)
+# Usage: tools/unity_profile.ps1 [-Build | -Probe] [-SkipGate] [-Release]
+param([switch]$Build, [switch]$Probe, [switch]$SkipGate, [switch]$Release)
 . (Join-Path $PSScriptRoot 'unity_common.ps1')
 
 $date = Get-Date -Format 'yyyy-MM-dd'
@@ -16,7 +18,23 @@ $probeOut = Join-Path $LogDir "memory_probe_$stamp.jsonl"
 $buildOk = $true
 $runProbe = $Build -or $Probe
 
-$jobName = 'unity_profile' + $(if ($Build) { ' + dev build memory probe' } elseif ($Probe) { ' + memory probe (existing build)' } else { '' })
+$jobName = 'unity_profile' + $(if ($Build) { ' + dev build memory probe' } elseif ($Probe) { ' + memory probe (existing build)' } else { '' }) + $(if ($Release -and $runProbe) { ' + release build' } else { '' })
+
+# U-143: the release build after a green probe (0 when not asked or built OK, 1 when it fails). The lock is taken again (a no-op under an outer hold).
+function Complete-Release {
+    if (-not ($Release -and $runProbe)) { return 0 }
+    try { $null = Enter-HeavyJobLock 'unity_profile: the release build after a green probe (U-143)' } catch { Write-Host "RELEASE BUILD BLOCKED: $_"; return 2 }
+    try {
+        $rb = Invoke-UnityBatch @('-quit', '-executeMethod', 'Meridian.EditorTools.BuildTools.BuildFromCommandLine', '-meridianRelease') "unity_build_release_$stamp.log"
+    } finally { $null = Exit-HeavyJobLock }
+    $rline = Select-String -Path $rb.Log -Pattern '\[MERIDIAN\] BUILD (OK|FAILED).*' | Select-Object -Last 1
+    Write-Host "Release build log: $($rb.Log)"
+    if ($rline) { Write-Host $rline.Line.Trim() }
+    $rexe = Get-PlayerExe (Get-GameVersion)
+    if ($rb.ExitCode -ne 0 -or -not $rline -or $rline.Line -notmatch 'BUILD OK' -or -not (Test-Path $rexe)) { Write-Host 'RELEASE BUILD FAILED'; return 1 }
+    Write-Host "RELEASE BUILD OK: $rexe"
+    return 0
+}
 try { Enter-HeavyJobLock $jobName } catch { Write-Host "BLOCKED: $_"; exit 2 }
 try {
     if (-not $SkipGate) {
@@ -38,8 +56,8 @@ try {
     }
     if ($runProbe -and $buildOk) {
         # D-080: the built game runs only after the Editor batch has exited (Invoke-UnityBatch waits for it).
-        $version = (Select-String -Path (Join-Path $RepoRoot 'Assets\_Game\Code\Runtime\GameInfo.cs') -Pattern 'Version = "([^"]+)"').Matches[0].Groups[1].Value
-        $exe = Join-Path $RepoRoot "Build\MERIDIAN_$version\MERIDIAN.exe"
+        $version = Get-GameVersion
+        $exe = Get-PlayerExe $version -Dev   # U-143: the probe runs on the development player (its memory counters)
         if (-not (Test-Path $exe)) { Write-Host "PROBE: no player at $exe (build first)"; $buildOk = $false }
         else {
             $playerLog = Join-Path $LogDir "memory_probe_$stamp.log"
@@ -215,12 +233,12 @@ if ($runProbe) {
     $rows | Where-Object { $_ -like '| Memory*' -or $_ -like '| Residency*' -or $_ -like '| Film*' -or $_ -like '| Planet load*' -or $_ -like '| Transition*' -or $_ -like '| Bundles*' -or $_ -like '| Sprite atlases*' -or $_ -like '| Return*' -or $_ -like '| Mip*' -or $_ -like '| Boot*' -or $_ -like '| Creep*' -or $_ -like '| Heap*' } | ForEach-Object { Write-Host $_ }
 }
 
-if ($SkipGate) { if ($memRed) { Write-Host 'BUILD MEMORY RED'; exit 1 } else { Write-Host 'BUILD MEMORY GREEN'; exit 0 } }
+if ($SkipGate) { if ($memRed -or -not $buildOk) { Write-Host 'BUILD MEMORY RED'; exit 1 } else { Write-Host 'BUILD MEMORY GREEN'; exit (Complete-Release) } }
 if (-not (Test-Path $xml)) { Write-Host 'PROFILE FAILED: no results file'; exit 1 }
 [xml]$doc = Get-Content $xml -Raw
 $passed = $doc.'test-run'.passed -eq '1'
 if (Test-Path $report) { Write-Host "Report: $report" } else { Write-Host 'Report not written (test failed before the end)' }
-if ($passed -and -not $memRed) { Write-Host 'BUDGETGATE GREEN'; exit 0 }
+if ($passed -and -not $memRed -and $buildOk) { Write-Host 'BUDGETGATE GREEN'; exit (Complete-Release) }
 if ($passed) { Write-Host 'BUDGETGATE GREEN, BUILD MEMORY RED'; exit 1 }
 $msg = $doc.SelectSingleNode('//test-case/failure/message')
 Write-Host "BUDGETGATE RED: $($msg.InnerText)"

@@ -31,13 +31,13 @@ try {
     }
     $profileCode = 0
     if ($code -eq 0 -and -not $SkipProfile) {
-        Write-Host '== profile + dev build'
-        & (Join-Path $PSScriptRoot 'unity_profile.ps1') -Build
+        Write-Host '== profile + dev build + (after a green probe) the release build (U-143)'
+        & (Join-Path $PSScriptRoot 'unity_profile.ps1') -Build -Release
         $profileCode = $LASTEXITCODE   # a red BudgetGate row still leaves a build to smoke; reported below
     }
-    $version = (Select-String -Path (Join-Path $RepoRoot 'Assets\_Game\Code\Runtime\GameInfo.cs') -Pattern 'Version = "([^"]+)"').Matches[0].Groups[1].Value
-    if ($code -eq 0 -and -not $SkipSmoke -and (Test-Path (Join-Path $RepoRoot "Build\MERIDIAN_$version\MERIDIAN.exe"))) {
-        Write-Host '== smoke'
+    $version = Get-GameVersion
+    if ($code -eq 0 -and -not $SkipSmoke -and (Test-Path (Get-PlayerExe $version))) {
+        Write-Host '== smoke (the release player, U-143)'
         & (Join-Path $PSScriptRoot 'unity_smoke.ps1')
         $code = $LASTEXITCODE
     }
