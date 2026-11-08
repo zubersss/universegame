@@ -933,9 +933,9 @@ def do_painted_bg(entry, preview):
     dip = ""
     if entry.get("dip_review"):                           # D-169: the set over a 1.5 m and a 3 m valley and a rise, from the exported layers
         import build_backdrop_v3 as BB
-        _c, _planet, scene = entry["key"].split("/")
+        _c, planet, scene = entry["key"].split("/")
         dout = os.path.join(PREVIEW, f"review_{entry.get('review_name', scene)}_dip.png")
-        BB.preview_dip(PREVIEW, scene, from_png=True, out=dout,
+        BB.preview_dip(PREVIEW, scene, from_png=True, out=dout, planet=planet,
                        footnote="exported " + "; ".join(f"layer{i} " + review.stamp_text(p) for i, (p, _img, _n, _s) in enumerate(info)))
         dip = f" + {os.path.basename(dout)}"
     mark_stale(entry["key"], False)

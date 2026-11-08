@@ -2351,7 +2351,7 @@ def preview(out_dir, scenes=("forest", "coast"), from_png=False):
         print(scene, ", ".join(f"layer{i} {u8[i].shape[1]}x{u8[i].shape[0]} {n // 1024} KB seam {s:.2f}" for i, (p, n, s) in enumerate(info)), "->", out)
 
 
-def preview_dip(out_dir, scene, from_png=False, out=None, footnote=None):
+def preview_dip(out_dir, scene, from_png=False, out=None, footnote=None, planet="earth"):
     """B-183 / D-169 (LEAD 10:2x): the Earth set with the walking surface 1.5 m and 3 m BELOW its line (valleys under the set's
     datum: the near layer's body shows above the ground; a layer with continue_rows is continued by repeating that bottom strip,
     as U-164 does; otherwise the lowest layer's last row) and 1.5 m ABOVE it (a rise hides the layers' lower part); B-175's grass
@@ -2362,7 +2362,8 @@ def preview_dip(out_dir, scene, from_png=False, out=None, footnote=None):
     import review
     from meridian import pngio
     import preview_c2_earth_rigs as PR
-    planet = PLANET_OF.get(scene, "earth")
+    # the planet comes from the caller: PLANET_OF is keyed by scene name and "plains" there is MARS's plains (the 10:49 Earth
+    # plains review read backgrounds/mars/plains that way)
     d = os.path.join(out_dir, "b183", scene)
     os.makedirs(d, exist_ok=True)
     if from_png:                                          # True: the exported layers (Art); "preview": this function's last generated ones
@@ -2371,7 +2372,7 @@ def preview_dip(out_dir, scene, from_png=False, out=None, footnote=None):
         imgs = [pngio.read_png_np(os.path.join(src, f"layer{L['n']}_color.png")) for L in layers]
     else:
         fn = SCENES.get((planet, scene)) or BG.SCENES[(planet, scene)]                     # the plains live in gen_painted_bg
-        if scene in SEEDS:
+        if (planet, scene) in SCENES and scene in SEEDS:                                      # SEEDS is keyed by scene name ("plains" = Mars's)
             seed = SEEDS[scene]
         else:                                                                                 # the export row's seed (the plains: 11401)
             assets = json.load(open(os.path.join(os.path.dirname(HERE), "manifest.json"), encoding="utf-8"))["assets"]
@@ -2428,8 +2429,20 @@ def preview_dip(out_dir, scene, from_png=False, out=None, footnote=None):
 if __name__ == "__main__":
     if "--uranus-check" in sys.argv:                      # python -I build_backdrop_v3.py <preview dir> --uranus-check deck2
         sys.exit(0 if uranus_deck_check(sys.argv[1], sys.argv[sys.argv.index("--uranus-check") + 1]) else 1)
-    if "--dip" in sys.argv:                               # python -I build_backdrop_v3.py <preview dir> forest --dip [--from-png]   (B-183)
+    if "--dip" in sys.argv:                               # python -I build_backdrop_v3.py <preview dir> forest --dip [--from-png] [--planet mars] [--stamp]
+        pl = sys.argv[sys.argv.index("--planet") + 1] if "--planet" in sys.argv else "earth"
         for sc in sys.argv[2].split(","):
-            preview_dip(sys.argv[1], sc, from_png="preview" if "--from-preview" in sys.argv else ("--from-png" in sys.argv))
+            kw = {}
+            if "--stamp" in sys.argv:                     # rebuild an export's stamped dip review from its exported layers
+                sys.path.insert(0, os.path.dirname(HERE))
+                import review as _rv
+                import json as _js
+                _d = os.path.join(ART_DIR, "backgrounds", pl, sc)
+                _ls = _js.load(open(os.path.join(_d, f"{sc}.json"), encoding="utf-8"))["layers"]
+                _rn = next(e.get("review_name", sc) for e in _js.load(open(os.path.join(os.path.dirname(HERE), "manifest.json"), encoding="utf-8"))["assets"]
+                           if e.get("key") == f"backgrounds/{pl}/{sc}")
+                kw = {"out": os.path.join(sys.argv[1], f"review_{_rn}_dip.png"),
+                      "footnote": "exported " + "; ".join(f"layer{L['n']} " + _rv.stamp_text(os.path.join(_d, f"layer{L['n']}_color.png")) for L in _ls)}
+            preview_dip(sys.argv[1], sc, from_png="preview" if "--from-preview" in sys.argv else ("--from-png" in sys.argv), planet=pl, **kw)
         sys.exit(0)
     preview(sys.argv[1], tuple(sys.argv[2].split(",")) if len(sys.argv) > 2 else ("forest", "coast"), from_png="--from-png" in sys.argv)
