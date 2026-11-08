@@ -1,8 +1,8 @@
 """B-204 (D-174; LEAD 17:0x): the Skill Tree's node icons, one per node of docs/D1_TABLES.md §5 (as revised 17:1x), in the
 house style of B-199's item icons (128x128, 1 m = 128 px, ink 2-3 / 1-1.5 px, a colour lit top-left with its mid and deep
 shadow, the Earth palette, no faces: never two round marks side by side). Drawn to read at the chart's 40 px (the node frame's
-icon_display_px): one bold silhouette each, and a level meter at the bottom right (five bars, the node's level filled) on the
-nodes that are a step of a chain (dig_power_3 = 3 of 5).
+icon_display_px): one bold silhouette each. A chain's steps (dig_power_1..5) share a motif that changes with the step (the
+Beam warms from teal to gold as B-205's Mk1-5); the json carries "level" / "of".
 
   batch 1  ring 1: dig_power_1, dig_brush_1, haul_pack_1, haul_dirt_1, asc_grapple_1, asc_ladder_1, sur_scan_1, sur_depth_1,
            end_air_1, end_fall_1, voy_price_1, voy_hold_1
@@ -41,14 +41,6 @@ def level_of(nid):
     return None
 
 
-def meter(d, M, n, of):
-    """The level meter, bottom right: `of` bars rising left to right, the first n filled mustard."""
-    for i in range(of):
-        x = 0.42 - 0.052 * (of - i)
-        h = 0.05 + 0.022 * i
-        G.stroke(d, [(x, -0.43), (x + 0.036, -0.43), (x + 0.036, -0.43 + h), (x, -0.43 + h)], M["mustard_i" if i < n else "off_sh_i"], I, cyclic=True)
-
-
 def rot(cx, cz, ang):
     ca, sa = math.cos(ang), math.sin(ang)
     return lambda pts: [(cx + u * ca - v * sa, cz + u * sa + v * ca) for u, v in pts]
@@ -73,20 +65,27 @@ def arrow(d, M, a, b, w, role, head=2.2):
 
 
 # ---------------------------------------------------------------- the motifs (each takes a level; the chain's steps share one)
+BEAM_TONE = {1: ("teal", "off"), 2: ("teal", "mustard"), 3: ("green", "off"), 4: ("mustard_sh", "off"), 5: ("mustard", "off")}   # B-205's
+                                                                                               # Mk1-5: the beam warms from teal to gold
+
+
 def m_beam(d, M, lv=1):
-    """The Rig's Beam firing right: a teal emitter, its grip, the beam with an offwhite core, sparks at the dig face."""
-    R = rot(-0.08, 0.08, 0.22)
-    G.stroke(d, R([(0.02, -0.05), (0.38, -0.12), (0.38, 0.12), (0.02, 0.05)]), M["teal_i"], I, cyclic=True)        # the beam
-    G.stroke(d, G.hose_outline(R([(0.06, 0.0), (0.33, 0.0)]), 0.035), M["off"], 0.0, cyclic=True)
+    """The Rig's Beam: the emitter (left) fires a straight beam into a rock (right), sparks at the dig face (rev 17:2x: a
+    widening beam read as a megaphone). The beam's tone is the Beam Mk of the node's level."""
+    beam, core = BEAM_TONE[lv]
+    IT.faceted(d, M, IT.lump(0.3, 0.02, 0.15, 0.17, 71, n=8), "brown_sh", "brown", "brown_dp", 0.3, 0.02)            # the rock
+    R = rot(-0.08, 0.04, 0.0)
+    G.stroke(d, G.hose_outline(R([(0.03, 0.0), (0.25, 0.0)]), 0.085), M[beam + "_i"], I, cyclic=True)               # the beam
+    G.stroke(d, G.hose_outline(R([(0.05, 0.0), (0.23, 0.0)]), 0.03), M[core], 0.0, cyclic=True)
+    for a in (2.2, 2.75, 3.5, 4.05):                                                                                   # sparks
+        G.stroke(d, G.hose_outline([(0.18 + 0.06 * math.cos(a), 0.04 + 0.06 * math.sin(a)), (0.18 + 0.14 * math.cos(a), 0.04 + 0.14 * math.sin(a))], 0.024),
+                 M["mustard"], 0.0, cyclic=True)
     G.stroke(d, G.hose_outline(R([(-0.22, -0.08), (-0.27, -0.27)]), 0.09), M["brown_i"], I, cyclic=True)           # the grip
     G.stroke(d, R([(-0.34, -0.1), (-0.05, -0.1), (-0.05, 0.1), (-0.34, 0.1)]), M["teal_sh_i"], O, cyclic=True)     # the body
     G.stroke(d, R([(-0.34, 0.02), (-0.05, 0.02), (-0.05, 0.1), (-0.34, 0.1)]), M["teal"], 0.0, cyclic=True)
     G.stroke(d, R([(-0.34, -0.1), (-0.05, -0.1), (-0.05, 0.1), (-0.34, 0.1)]), M["ink"], O, cyclic=True)
     G.seam(d, R([(-0.26, -0.1), (-0.26, 0.1)]), M["ink"])
     G.stroke(d, R([(-0.05, -0.085), (0.04, -0.055), (0.04, 0.055), (-0.05, 0.085)]), M["mustard_i"], I, cyclic=True)  # the nozzle
-    for a in (-0.8, 0.0, 0.8):                                                                                          # sparks
-        G.stroke(d, G.hose_outline(R([(0.41 + 0.02 * math.cos(a), 0.1 * math.sin(a)), (0.47 + 0.03 * math.cos(a), 0.17 * math.sin(a))]), 0.022),
-                 M["mustard"], 0.0, cyclic=True)
 
 
 def m_brush(d, M, lv=1):
@@ -125,8 +124,7 @@ def m_dirt(d, M, lv=1):
         G.seam(d, [(x, -0.28), (x + 0.02, -0.08)], M["ink"])
     G.stroke(d, IT.lump(-0.07, 0.2, 0.25, 0.12, 31), M["brown_i"], O, cyclic=True)                                  # the heap
     G.stroke(d, G.hose_outline([(-0.3, 0.1), (0.16, 0.1)], 0.05), M["red_sh_i"], I, cyclic=True)                       # the tie
-    for x, z, r in ((0.26, 0.3, 0.05), (-0.36, 0.3, 0.04)):
-        G.stroke(d, IT.lump(x, z, r, r * 0.8, int(100 * x) + 40, n=6), M["brown_sh_i"], I, cyclic=True)
+    # rev 17:2x: no clods either side of the heap (a pair at the top read as ears)
 
 
 def m_grapple(d, M, lv=1):
@@ -195,13 +193,19 @@ def m_air(d, M, lv=1):
 
 
 def m_fall(d, M, lv=1):
-    """A boot landing on a coil spring, motion lines above it."""
-    for x in (-0.18, -0.06):
-        G.stroke(d, G.hose_outline([(x, 0.42), (x, 0.3)], 0.025), M["sky_sh"], 0.0, cyclic=True)
-    boot = [(-0.3, 0.02), (0.1, 0.02), (0.22, -0.02), (0.24, -0.1), (-0.3, -0.1)]
-    G.stroke(d, [(-0.3, 0.02), (-0.3, 0.26), (-0.1, 0.26), (-0.1, 0.02)], M["brown_i"], O, cyclic=True)                # the shaft
+    """A work boot landing on a coil spring, motion lines above it (rev 17:2x: a square shaft over a flat foot read as a
+    toilet at 40 px: now a tapered shaft with a cuff and laces, a rounded toe, a heel)."""
+    for x in (-0.22, -0.1):
+        G.stroke(d, G.hose_outline([(x, 0.44), (x, 0.36)], 0.025), M["sky_sh"], 0.0, cyclic=True)
+    toe = arc(0.13, -0.02, 0.1, -math.pi / 2, math.pi / 2, 10)
+    boot = [(-0.3, -0.12), (0.13, -0.12)] + toe[1:] + [(-0.02, 0.08), (-0.06, 0.3), (-0.3, 0.3)]
     G.stroke(d, boot, M["brown_i"], O, cyclic=True)
-    G.stroke(d, [(-0.3, -0.1), (0.24, -0.1), (0.24, -0.14), (-0.3, -0.14)], M["brown_dp_i"], I, cyclic=True)           # the sole
+    G.stroke(d, [(-0.3, 0.22), (-0.06, 0.22), (-0.06, 0.32), (-0.3, 0.32)], M["mustard_i"], I, cyclic=True)              # the cuff
+    for k in range(3):                                                                                                  # laces
+        z = 0.16 - 0.06 * k
+        G.stroke(d, G.hose_outline([(-0.09 + 0.01 * k, z), (-0.01 + 0.025 * k, z - 0.03)], 0.02), M["off"], 0.0, cyclic=True)
+    G.stroke(d, [(-0.3, -0.12), (0.18, -0.12), (0.2, -0.16), (-0.3, -0.16)], M["brown_dp_i"], I, cyclic=True)           # the sole
+    G.stroke(d, [(-0.3, -0.16), (-0.16, -0.16), (-0.17, -0.2), (-0.29, -0.2)], M["brown_dp_i"], I, cyclic=True)        # the heel
     pts = [(-0.24, -0.16)]                                                                                              # the spring
     for k in range(7):
         pts.append((0.16 if k % 2 == 0 else -0.24, -0.2 - 0.03 * k))
@@ -243,9 +247,8 @@ MOTIF = {"dig_power": m_beam, "dig_brush": m_brush, "haul_pack": m_pack, "haul_d
 def draw_node(d, M, nid):
     head, _, tail = nid.rpartition("_")
     lv = level_of(nid)
-    MOTIF[head if tail.isdigit() else nid](d, M, lv[0] if lv else 1)
-    if lv:
-        meter(d, M, *lv)
+    MOTIF[head if tail.isdigit() else nid](d, M, lv[0] if lv else 1)   # rev 17:2x: no level meter (unreadable at 40 px; the
+                                                                        # ring shows the step); a chain's steps vary in the motif
 
 
 BATCHES = {1: ["dig_power_1", "dig_brush_1", "haul_pack_1", "haul_dirt_1", "asc_grapple_1", "asc_ladder_1", "sur_scan_1", "sur_depth_1",

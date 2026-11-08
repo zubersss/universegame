@@ -83,7 +83,8 @@ def tier_colours():
                 "t2_base": P["brown"], "t2_a": dp("red"), "t2_b": sh("mustard"), "t2_c": sh("red"), "t2_ice": P["offwhite"], "t2_ice_sh": sh("teal"),
                 "t2_berry": dp("teal"),
                 "t3_base": dp("teal"), "t3_a": P["brown"], "t3_b": sh("teal"), "t3_vein": P["offwhite"], "t3_glint": sh("offwhite"),
-                "t4_base": dp("red"), "t4_a": P["brown"], "t4_b": dp("brown"), "t4_glow": P["teal"], "t4_core": P["offwhite"], "t4_lens": dp("teal")}
+                "t4_base": dp("brown"), "t4_a": P["brown"], "t4_b": dp("teal"), "t4_glow": P["teal"], "t4_core": P["offwhite"], "t4_lens": dp("teal")}
+                # rev 17:2x: T4 darker and cooler (on dp red it read as the Subsoil's red-brown again)
     if PLANET == "mercury":      # packed breccia with sulfide / grey anorthosite, silica veins / the dark low-reflectance layer,
         return {**line, **core,  # solarite seams / the core
                 "t2_base": sh("offwhite"), "t2_a": sh("sky"), "t2_b": dp("offwhite"), "t2_c": P["offwhite"], "t2_frag": dp("sky"),
@@ -1564,6 +1565,27 @@ def _layers(d, M, Lf, rnd, roles, th, gap, amp, seed, ink_every=3):
     B._strata(d, M, Lf, bands, amp, seed)
 
 
+def _folds(d, M, Lf, rnd, roles, th, gap, amp, seed):
+    """Folded beds that share one fold (B._strata gives each band its own wobble, so thin bands crossed each other: rev 17:2x)."""
+    xs = [Lf * i / 128 for i in range(129)]
+    fold = [B.per(x, Lf, 2, seed, amp) for x in xs]
+    z, j = 0.3, 0
+    while z < Lf - 0.3:
+        t_ = rnd.uniform(*th)
+        z0, role, inked = z + t_ / 2, roles[j % len(roles)], j % 2 == 0
+        up = [(x, z0 + t_ / 2 + f + B.per(x, Lf, 3, seed + 1 + j, 0.02)) for x, f in zip(xs, fold)]
+        lo = [(x, z0 - t_ / 2 + f + B.per(x, Lf, 3, seed + 41 + j, 0.02)) for x, f in zip(xs, fold)]
+
+        def band(dx, dz, up=up, lo=lo, role=role, inked=inked):
+            sh = lambda pts: [(x + dx, q + dz) for x, q in pts]  # noqa: E731
+            G.stroke(d, sh(up + lo[::-1]), M[role], 0.0, cyclic=True)
+            if inked:
+                G.seam(d, sh(up), M["ink"])
+        B.wrapped(band, Lf, Lf)
+        z += t_ + rnd.uniform(*gap)
+        j += 1
+
+
 def _veins(d, M, Lf, rnd, n, mat, w, core=None, cw=0.0, steps=7, step=0.35, dz=0.2, jit=0.05):
     for _q in range(n):
         _vein(d, M, Lf, _zigzag(rnd, rnd.uniform(0, Lf), rnd.uniform(1, Lf - 1), steps, step, dz, jit), w, mat, core=core, cw=cw)
@@ -1618,7 +1640,7 @@ def tier_fill_fn(t):
         if t == 2:
             _base(d, M, Lf, "t2_base")
             if PLANET == "venus":                                                             # tight folds, sulfur veins
-                _layers(d, M, Lf, rnd, ["t2_a", "t2_b", "t2_c", "t2_a", "t2_b"], (0.16, 0.3), (0.08, 0.2), 0.32, seed, ink_every=2)
+                _folds(d, M, Lf, rnd, ["t2_a", "t2_b", "t2_c", "t2_a", "t2_b"], (0.16, 0.3), (0.08, 0.2), 0.35, seed)
                 _veins(d, M, Lf, rnd, 5, "t2_sulf", 0.026, core="t2_sulf_hi", cw=0.008, step=0.3, dz=0.25)
             else:
                 _layers(d, M, Lf, rnd, ["t2_a", "t2_b", "t2_c", "t2_a"], (0.15, 0.4), (0.1, 0.25), 0.05, seed)
@@ -1626,7 +1648,7 @@ def tier_fill_fn(t):
                 _lens_set(d, M, Lf, rnd, 5, "t2_ice", "t2_ice_sh")
                 B._scatter(d, M, Lf, 22, (0.0, Lf), (0.025, 0.04), "t2_berry_i", seed + 1)
             if PLANET == "mercury":                                                           # packed clasts, sulfide nodules
-                _bits(d, M, Lf, rnd, 34, ["t2_frag", "t2_c", "t2_a"], (0.04, 0.09))
+                _bits(d, M, Lf, rnd, 40, ["t2_frag", "t2_c", "t2_a"], (0.05, 0.12))
                 B._scatter(d, M, Lf, 8, (0.0, Lf), (0.04, 0.06), "t2_sulf_i", seed + 1)
             G.specks(d, [(rnd.uniform(0.05, Lf - 0.05), rnd.uniform(0.05, Lf - 0.05)) for _ in range(30)], M["ink"])
         elif t == 3:
@@ -1655,7 +1677,7 @@ def dec(kind, seed, **r):
     def fn(d, M, _k=0):
         rnd = random.Random(seed)
         if kind == "lens":
-            G.stroke(d, G.lumpy_ellipse(0.0, 0.0, 0.5, 0.12, n=24, lump=0.04, seed=seed), M[r["body"] + "_i"], O, cyclic=True)
+            G.stroke(d, G.lumpy_ellipse(0.0, 0.0, 0.46, 0.11, n=24, lump=0.04, seed=seed), M[r["body"] + "_i"], O, cyclic=True)
             for x0 in (-0.25, 0.05):
                 G.stroke(d, G.hose_outline([(x0, 0.045), (x0 + 0.18, 0.06)], 0.018), M[r["sheen"]], 0.0, cyclic=True)
         elif kind == "berries":
@@ -1707,24 +1729,24 @@ def dec(kind, seed, **r):
 _DIAMOND = dict(body="t5_bed", spark="t5_spark", lit="t5_lit", rock="t5_rock")
 _POOL = dict(body="t5_bed", hot="t5_hot", glow="t5_glow", spark="t5_spark")
 TIER_FILLS_P = {p: {t: tier_fill_fn(t) for t in (2, 3, 4, 5)} for p in ("mars", "mercury", "venus")}
-TIER_DECOR_P = {
-    "mars": {2: [("ice_lens", dec("lens", 3301, body="t2_ice", sheen="t2_ice_sh"), 72, 24), ("hematite_berries", dec("berries", 3302, body="t2_berry"), 40, 32),
-                 ("mudstone_chip", dec("chip", 3303, body="t2_b"), 32, 32)],
-             3: [("salt_spray", dec("spray", 3311, a="t3_vein", b="t3_glint"), 40, 40), ("nickel_nugget", dec("nugget", 3312, body="t3_glint", lit="t3_vein"), 32, 24),
+TIER_DECOR_P = {   # frames: lens 72x28, nugget 40x32, chip / shard 40x40, diamond 52x52 (rev 17:2x: the smaller ones touched the edge)
+    "mars": {2: [("ice_lens", dec("lens", 3301, body="t2_ice", sheen="t2_ice_sh"), 72, 28), ("hematite_berries", dec("berries", 3302, body="t2_berry"), 40, 32),
+                 ("mudstone_chip", dec("chip", 3303, body="t2_b"), 40, 40)],
+             3: [("salt_spray", dec("spray", 3311, a="t3_vein", b="t3_glint"), 40, 40), ("nickel_nugget", dec("nugget", 3312, body="t3_glint", lit="t3_vein"), 40, 32),
                  ("salt_geode", dec("geode", 3313, rim="t3_a", a="t3_vein", b="t3_glint"), 48, 40)],
              4: [("phosphor_nodule", dec("nodule", 3321, body="t4_a", glow="t4_glow", core="t4_core"), 40, 40),
-                 ("graphite_lens", dec("lens", 3322, body="t4_lens", sheen="t5_lit"), 72, 24)],
-             5: [("kimberlite_diamond", dec("diamond", 3331, **_DIAMOND), 48, 48), ("magma_pool", dec("pool", 3332, **_POOL), 72, 48)]},
-    "mercury": {2: [("sulfide_nodule", dec("nugget", 3401, body="t2_sulf", lit="t2_sulf_hi"), 32, 24), ("breccia_clast", dec("chip", 3402, body="t2_frag"), 32, 32)],
-                3: [("silica_spray", dec("spray", 3411, a="t3_vein", b="t3_b"), 40, 40), ("nickel_nugget", dec("nugget", 3412, body="t3_b", lit="t3_vein"), 32, 24)],
+                 ("graphite_lens", dec("lens", 3322, body="t4_lens", sheen="t5_lit"), 72, 28)],
+             5: [("kimberlite_diamond", dec("diamond", 3331, **_DIAMOND), 52, 52), ("magma_pool", dec("pool", 3332, **_POOL), 72, 48)]},
+    "mercury": {2: [("sulfide_nodule", dec("nugget", 3401, body="t2_sulf", lit="t2_sulf_hi"), 40, 32), ("breccia_clast", dec("chip", 3402, body="t2_frag"), 40, 40)],
+                3: [("silica_spray", dec("spray", 3411, a="t3_vein", b="t3_b"), 40, 40), ("nickel_nugget", dec("nugget", 3412, body="t3_b", lit="t3_vein"), 40, 32)],
                 4: [("solarite_nodule", dec("nodule", 3421, body="t4_a", glow="t4_glow", core="t4_core"), 40, 40),
-                    ("graphite_lens", dec("lens", 3422, body="t4_lens", sheen="t5_lit"), 72, 24)],
-                5: [("kimberlite_diamond", dec("diamond", 3431, **_DIAMOND), 48, 48), ("magma_pool", dec("pool", 3432, **_POOL), 72, 48)]},
-    "venus": {2: [("sulfur_nodule", dec("nugget", 3501, body="t2_sulf", lit="t2_sulf_hi"), 32, 24), ("fold_chip", dec("chip", 3502, body="t2_c"), 32, 32)],
-              3: [("sulfide_spray", dec("spray", 3511, a="t3_vein", b="t2_sulf_hi"), 40, 40), ("aluminium_nugget", dec("nugget", 3512, body="t3_glint", lit="t3_base"), 32, 24)],
-              4: [("vitriol_shard", dec("shard", 3521, body="t4_glow", face="t4_core"), 32, 32),
+                    ("graphite_lens", dec("lens", 3422, body="t4_lens", sheen="t5_lit"), 72, 28)],
+                5: [("kimberlite_diamond", dec("diamond", 3431, **_DIAMOND), 52, 52), ("magma_pool", dec("pool", 3432, **_POOL), 72, 48)]},
+    "venus": {2: [("sulfur_nodule", dec("nugget", 3501, body="t2_sulf", lit="t2_sulf_hi"), 40, 32), ("fold_chip", dec("chip", 3502, body="t2_c"), 40, 40)],
+              3: [("sulfide_spray", dec("spray", 3511, a="t3_vein", b="t2_sulf_hi"), 40, 40), ("aluminium_nugget", dec("nugget", 3512, body="t3_glint", lit="t3_base"), 40, 32)],
+              4: [("vitriol_shard", dec("shard", 3521, body="t4_glow", face="t4_core"), 40, 40),
                   ("glass_nodule", dec("nodule", 3522, body="t4_a", glow="t4_glow", core="t4_core"), 40, 40)],
-              5: [("kimberlite_diamond", dec("diamond", 3531, **_DIAMOND), 48, 48), ("ember_pool", dec("pool", 3532, **_POOL), 72, 48)]},
+              5: [("kimberlite_diamond", dec("diamond", 3531, **_DIAMOND), 52, 52), ("ember_pool", dec("pool", 3532, **_POOL), 72, 48)]},
 }
 
 
