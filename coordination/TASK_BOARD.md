@@ -22,14 +22,13 @@ When the lock frees, the highest pending job here goes next, even if the other r
 older (D-037 alternation applies only between equal ranks). A rank is live only while its role
 has a want on file or holds the lock (D-112): if the top rank has no want when the lock frees,
 the next live rank runs now and the skipped role goes next after it files. A role below the top
-keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 277 (11-08 01:1x: resumed; the whale in (B-160 complete); UNITY lock A green (import + compile 0 / 0 + EditMode 414/415, the Mars index pin re-runs in B); a mutual yield over B-170 broken by rank). A role files its want only when the queue says it is next after the running job:
-1. BLENDER · now: B-151 the C3 UI export in one slot (the five 9-slice panels with `slice` [l, t, r, b] in each json, the three title cards ≤ 1920×540 drawn 1:1, `ui/hud/film_switch` with parts `off` / `on` by name); it unblocks the owner build.
-2. UNITY · NOW: lock B = the MarsStageTests re-run + the Jupiter PlayMode slice (GiantBandsPlay / Transition / InnerCreature / MenuHud / LeadQA M3Inner) + CaptureU127Jupiter 1–5 (the whale crossing per D-138).
-3. BLENDER · the gap after lock B: the B-170 preview (lock-free) → the B-170 export slot (the five title cards) → the render.py STALE fix compiled; then B-163 slot 1 / slot 2 and B-164 in turn.
-3b. UNITY · lock C after B-170: Build 0.4.8 as the dev + release pair (U-142 / U-143) + the 13-leg probe (D-152) + the smoke set with the Jupiter shots; then the hand-off.
-4. LEAD · the Jupiter page from 0.4.8's smoke set; the owner's USER-30 answer → any 0.4.7 fix card.
-4. UNITY · U-125 Venus code lock-free now; its check behind the Venus exports; U-126 floe caps as lock-free code any time.
-5. Then Jupiter (U-127 + B-159 / B-160 + B-156), Saturn (U-129 + B-163 / B-164), Uranus (U-130 + B-166), Neptune (U-133 + B-161's exports).
+keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 278 (11-08 01:4x: all three windows restarted ~01:27; lock B's tests green (MarsStage 3/3, the Jupiter PlayMode slice 20/20) but its captures died with the restart; B-170 in; THE OWNER'S 0.4.7 PLAYTEST → D-158: the flight overhaul goes first and rides 0.4.8). A role files its want only when the queue says it is next after the running job:
+1. UNITY · next: the lock-B remainder ONLY = CaptureU127Jupiter 1–5 (the tests are green; don't re-run them). Short.
+2. BLENDER · then: B-163 slot 1 (backgrounds/saturn deck1–3, deep, hexagon straight). Its want is on file.
+3. UNITY · then: the flight check = compile + EditMode (FlightModelTests, SoundBarrierTests) + the PlayMode slice (ClimbSmoothPlay, FlightPlay, Transition, M1Loop, LeadQA M3Inner) + the u148 / u150 captures, once U-148 / U-149 / U-150's code is committed. If the code is not in when BLENDER's slot 1 ends, BLENDER's next slot goes first.
+4. BLENDER · B-171 the flight FX export (after LEAD accepts its preview), else B-163 slot 2.
+5. UNITY · lock C = Build 0.4.8 (the flight overhaul + U-147 + Jupiter) as the dev + release pair (U-142 / U-143) + the 13-leg probe with the new Climb leg (D-152) + the smoke set (the climb shots, Jupiter, the Venus / Jupiter cards). LEAD then writes the page and USER-32 (play 0.4.8's flight).
+6. BLENDER · B-163 slot 2 → B-164 → (U-151's code in) B-172; UNITY · the Saturn check + captures after B-163 / B-164; then Uranus (B-166 → U-130 / U-146), Neptune (B-169 → U-133 / U-144).
 
 
 
@@ -64,10 +63,10 @@ Rules: nothing here needs the lock; it stays under ~300 MB of extra RAM; no Unit
 did in your status before the next poll. LEAD tops each list up to ≥ 3 items every cycle.
 
 **UNITY**
-- U-127 slice 2 lock-free now: the four Jupiter creatures on their B-160 sheets, the husk prop, the whale row guarded until D-153's sheet lands, CaptureU127Jupiter (a floe with the kit and a tortoise, the storm deck with a Stormglider, the deep with the CRUSH band, the whale crossing per D-138); committed ahead of its check.
-- UNITY_STATUS current (at the tick it read 18:14 with U-125 / U-140 / U-141 / 0.4.7 still under Ready for review: all Done); the Ready list names only unjudged items.
-- U-142 after the Jupiter captures: Build 0.4.8 + the 13-leg probe + the smoke set with the Jupiter shots; U-143's release build beside it.
-- U-129 Saturn code after U-127 (the ring sets, the Hexagon on layer1, the capped floes, the Hydra as a Grand rig); U-130 Uranus after.
+- U-148 (the camera reads the interpolated pose, the capped look-ahead, the 30 → 45 m ship frame): the owner's playtest, first.
+- U-149 (the throttle spool, the tilt's angular inertia, the air drag by altitude) with FlightModelTests.
+- U-150 (the boost flame / rumble / speed lines while accelerating; the sound barrier with its placeholders) with SoundBarrierTests.
+- Then U-151 (the trade panel and the space readouts on paper; the v3 space-prop path), U-152 (the v2 census, files only), the slice-2 code of U-129 / U-130 / U-133 (the Saturn, Uranus and Neptune creatures + their Grand rigs against B-164 / B-166 / B-169's manifest rows, guarded until the sheets land).
 - The Creep watch row: 3.5 MB per visit on 0.4.7; read 0.4.8's; `docs/credits/unity.md` upkeep.
 Then one batched check per hand-off when your turn in the queue comes (compile + EditMode as one lock, PlayMode A / B as two, D-122).
 
@@ -79,11 +78,11 @@ Then one batched check per hand-off when your turn in the queue comes (compile +
 
 
 **BLENDER** (numpy / scripts only while UNITY holds the lock or a want; bpy only under your own lock; under 0.3 GB free, code only; otherwise only pre-measured ≤ 150 MB jobs beside another role's lock; the lock / RAM check is its own call)
-- Status trim (D-113): Ready for review names only unjudged items (B-154 is Done); the B-148 / B-150 / B-153 handoffs are routed: drop them.
-- B-170 source files-only: the Venus / Jupiter / Saturn / Uranus / Neptune title cards in B-151's style (1600×452, Limelight as ink, the planet medallion, a Patrick Hand subtitle), exported in one slot after the whale.
-- The Uranus v3 manifest rows (B-166) from the generator when nobody waits at the gate (~50 MB).
-- The Saturn exports' final dry runs (B-163 / B-164) stay as they are; the export slots when U-129's code lands.
-- `docs/credits/blender.md` and the design reports' upkeep (D-153's whale scale).
+- B-171 source now (the vapor cone, the shock ring, the speed lines, the boost puff): the owner's flight fix; a numpy preview for LEAD when nobody waits at the gate.
+- B-172 design source (the two Waystations and the six rocks, top-down v3) after B-171's.
+- The Uranus v3 manifest rows (B-166) from the generator when nobody waits at the gate (~50 MB); the Neptune rows (B-169) after.
+- Status trim (D-113): B-160 and B-170 are verified (Done on UNITY's captures); Ready for review lists only unjudged items.
+- `docs/credits/blender.md` and the design reports' upkeep (D-153's whale scale, B-170's subtitles).
 
 **LEAD**
 - The charter idle list, plus: the C1 LeadQA scenario draft (pad → Escape Line → space → entry → touchdown under scripted input), the C1_REPORT skeleton, the owner's v4.1 look-over page, Bible gap closure, credits audit, a status-size check each cycle (D-113).
@@ -1382,7 +1381,21 @@ Goal: The planet title cards for the five remaining planets in B-151's style: `u
 Accept: log OK ×5; the five on one stamped review at 1x beside the Earth / Mars / Mercury cards; the json per card; UNITY's TitleCard shows each on entry (the capture with each planet's stage card).
 Files: blender/scripts/build_ui_v3.py, Assets/_Game/Art/ui/titlecards/
 Depends: B-151
-Lead notes: Cycle 275. Files-only source now; one slot after the whale; the cards land in the planets' builds as they come (Jupiter's in 0.4.8).
+Lead notes: Cycle 275. Files-only source now; one slot after the whale; the cards land in the planets' builds as they come (Jupiter's in 0.4.8). Cycle 278 (01:4x): EXPORTED AND VERIFIED (37c0a43f; one wrapper job 01:13–01:14, peak 945 MB, log OK ×5; review_b170_titlecards.png stamped 01:14 viewed: the eight cards at 1x, the five new ones in B-151's frame with Limelight ink names and Patrick Hand subtitles: Venus the deck rail under a balloon, Jupiter the belts and the Spot, Saturn the ringed world on dark, Uranus lit from the side with its upright rings, Neptune the dark spot with white streaks; no faces). Done on 0.4.8's smoke (the Venus and Jupiter cards on entry); Saturn / Uranus / Neptune's are checked in their planets' captures.
+
+### B-171 · BLENDER · Ready · C1
+Goal: OWNER PLAYTEST FIX (D-158 (4)): the flight effects for U-150 in the cartoon style (§9 v4: thin detailed ink, the 1930s rubber-hose look, no faces): `fx/ship/vapor_cone` (the sound-barrier cloud: a cream-white cone of puffy, ink-lined vapour round the hull's middle, 10 frames, forming and tearing away downward), `fx/ship/shock_ring` (an ink ring with a few cartoon "boom" spikes expanding from the hull, 8 frames, fading), `fx/ship/speed_lines` (frame-edge motion streaks, a 4-frame loop, ink on transparent, drawn to tile along a 1080 px edge), `ships/pilgrim/puff_boost` (the long hard-acceleration flame: the current puff loop's look stretched to ~1.6× its length with a brighter core, same socket and pivot); json per key with frames, fps and pivots per contract §11.
+Accept: one stamped preview at 1x beside the Pilgrim on the Earth sky (the cone and ring at the hull, the boost puff beside the cruise puff, the lines along a frame edge) accepted by LEAD; then log OK ×4, the ten §9.7 boxes per key, sheets ≤ 1024².
+Files: blender/scripts/build_fx_v3.py (or the existing FX builder), Assets/_Game/Art/fx/ship/, Assets/_Game/Art/ships/pilgrim/puff_boost*
+Depends: —
+Lead notes: Cycle 278. Source and a lock-free numpy preview now; the export in one short slot after B-163 slot 1 (U-150 runs on placeholders until then). Sized like the existing fx sheets (skip_streak, thruster).
+
+### B-172 · BLENDER · Ready · C3
+Goal: The space stations and the belt re-inked for the top-down view (the 0.4.7 smoke_10 read: the Earth Waystation is still the grey v2 model with grey crates): `props/space/waystation` (Earth, Halcyon Freight) and `waystation_mars` as v3 top-down sheets (the docking ring, the cargo deck, the crane, a lamp-blink clip; the Earth and Mars palettes in the camp-set look; no faces) and `props/space/asteroid_01..06` as v3 sheets (an 8-frame slow tumble each), at the v2 footprints and pivots so the docking radius and the belt layout hold; `replaces_v2` on each key (the .glb / _normal / _mask / _emission removed; never a .meta).
+Accept: one stamped design preview at 1x (both stations with the Pilgrim docked, the six rocks) accepted by LEAD; then log OK per key, the ten §9.7 boxes, json valid with the v2 pivots; UNITY's re-shot smoke_10 shows the inked station.
+Files: blender/scripts/build_props_space_v3.py, Assets/_Game/Art/props/space/
+Depends: U-151 (the v3 draw path)
+Lead notes: Cycle 278. Design source lock-free after B-171's; the export after U-151's code and after the Saturn slots.
 
 ### B-168 · BLENDER · Done · C2
 Goal: Venus props re-inked from the B-147 design language (D-151; the last grey v2 pieces on the owner's Venus): `props/venus/{station_hull_a,station_hull_b,meridian_station_door,aerostat_balloon,aerostat_deck,buoyancy_cell,railing,vent_harvester}` in the Venus palette, no faces, `replaces_v2` on each key (the .glb / _normal / _mask / _emission removed; never a .meta), pivots and frame counts as the v2 jsons so UNITY's station layout holds; the door with an open clip like Mercury's; sheets ≤ 512² each (the hulls may be two 512 tiles).
@@ -2352,12 +2365,33 @@ Files: Code/Runtime/View2D/ParallaxLayers.cs, Tests/
 Depends: U-139
 Lead notes: Cycle 274 (17:2x, the 0.4.6 smoke_14 read). A few lines; rides lock C. 17:5x: DONE (98903140; smoke_0.4.7/smoke_14: the dip right of the shelter shows the cream strip fill, tiled across and stretched down after the 80k-quad first try; the Earth and Mars frames unchanged).
 
+### U-148 · UNITY · Ready · C1
+Goal: OWNER PLAYTEST FIX, FIRST (D-158 (1), (2)): the climb out of the atmosphere stops stuttering and the ship view zooms out. (a) CameraFollow reads the INTERPOLATED pose: the ship's centre from `ship.transform` (Rigidbody2D Interpolate is on) and its interpolated rotation, not `Body.position` (the 50 Hz physics step, so at 60 fps the frame jumps against the smoothly drawn hull: the judder grows with speed, worst near the Escape Line); the walking player the same (its transform, not `player.Body.position`); SpaceCamera checked the same way. (b) StageCamera.StepVehicle: the look-ahead `speed × VehicleLookTime` capped at 0.2 × the frame (today it is 0.6 s of speed, ~25 m at 42 m/s, so the middle-band clamp engages on every frame of a fast climb and hard-locks the camera to the stepped position); the clamp, if it engages, works on the interpolated centre. (c) The ship frame: on boarding the frame eases from the walking 16.875 m to a 30 m ship frame over ~1 s (back on stepping out), and widens with speed to 45 m at ≥ 60 m/s (SmoothDamp ~0.8 s, never a pop); the wheel ranges 24–60 m aboard; the painted sets, the ground fill and ClimbSky cover the widest frame (scale the layers with the frame or extend them; no set edge, gap or sky seam).
+Accept: ClimbSmoothPlay (new PlayMode): Earth and Mars, pad → Escape Line under scripted full thrust: the hull's screen-space position per rendered frame, its frame-to-frame second difference ≤ 2 px after the first second (report today's number beside it); TransitionTests, FlightPlayTests, M1LoopTests, M3InnerTests pass with their assertions unchanged (their time limits may grow; LEAD allows); captures at 1x in reports/unity/u148/: Earth pad at the 30 m frame, Earth mid-climb at the 45 m frame, Mars mid-climb, no edges; the probe's build gains a `Climb · Earth` leg (p99 frame ≤ 20 ms, no frame > 50 ms outside the iris; the iris's longest frame reported).
+Files: Code/Runtime/Player/CameraFollow.cs, Code/Runtime/Camera/StageCamera.cs, Code/Runtime/Space/SpaceCamera.cs, Code/Runtime/View2D/ParallaxLayers.cs, ClimbSky.cs, Tests/
+Depends: —
+Lead notes: Cycle 278 (11-08 01:4x), the owner's 0.4.7 playtest (USER-30): "laggy and stuttery when leaving the atmosphere, too zoomed in". LEAD's read of the code: CameraFollow.BuildInput takes `ship.Body.position` + `Body.linearVelocity` in LateUpdate with Fixed Timestep 0.02 s; the hull is 11.4 m tall in a 16.875 m frame. Lock-free code now, ahead of every other UNITY card; one check with U-149 / U-150; ships in 0.4.8.
+
+### U-149 · UNITY · Ready · C1
+Goal: OWNER PLAYTEST FIX (D-158 (3)): the Pilgrim flies with weight. In RocketFlight / SideShip: (a) the throttle spools: 0 → 1 over ~0.35 s with an ease-in, 1 → 0 over ~0.2 s (a key still means full thrust, reached smoothly; a trigger's value is the target); (b) the tilt has angular inertia: steering applies angular acceleration up to a 90°/s turn rate reached in ~0.25 s, release returns upright on a damped spring (~0.35 s, overshoot ≤ 3°), replacing the 140°/s linear MoveTowards and the 0.12 s snap; the touchdown righting unchanged; (c) air drag: a = −k·ρ(h)·|v|·v with ρ(h) = ρ_surface·(1 − h/H)² falling to 0 at the Escape Line (h above the Datum, H the Escape Line altitude, Bible §4 table), ρ_surface per planet (placeholders: Mercury 0, Mars 0.15, Earth 1, Venus 3, the four giants 1.5), one k for the hull set so a full-thrust upright Mk1 at Earth's Datum tends to 45 ± 3 m/s; falling gets the same drag. D-106 holds: drag only limits speed, so a thruster still climbs wherever thrust > g. Thrust values (Bible §4.3) unchanged.
+Accept: FlightModelTests (EditMode, pure C#): the spool times (0 → 0.9 within 0.30–0.40 s; 1 → 0.1 within 0.15–0.25 s); full steer reaches 30° in 0.45–0.70 s with no step above 2° per 20 ms step; release from 35° to under 2° within 0.6 s with overshoot ≤ 3°; drag zero on Mercury and at and above the Escape Line on every planet; the Earth Mk1 terminal speed 45 ± 3 m/s; a simulated Mk1 on Neptune (the crawl, net 0.85 m/s²) still reaches its Escape Line within 120 s; the touchdown, Escape Line event and no-input-lock tests pass unchanged (D-103); a table in UNITY_STATUS of the full-thrust climb per planet and mark that climbs (time to the Escape Line and the speed at it, before and after).
+Files: Code/Runtime/Ship/RocketFlight.cs, SideShip.cs, Code/Runtime/Planets/PlanetConfig.cs (ρ_surface), Tests/
+Depends: —
+Lead notes: Cycle 278 (the owner: "make the physics of flying the ship smoother and more physics-based with weight"). Today the throttle is on / off, the tilt snaps at 140°/s, and there is no drag at all, so speed only ever grows. Lock-free code after U-148; ρ_surface and k are placeholders tuned on the captures and reported.
+
+### U-150 · UNITY · Ready · C1
+Goal: OWNER PLAYTEST FIX (D-158 (4)): accelerating feels different from cruising, and you break the sound barrier. (a) While the hull's speed is rising (along-track acceleration > 1.5 m/s²): the long boost flame (B-171's `ships/pilgrim/puff_boost`, the current puff scaled 1.6× in y until it lands), an engine rumble (position-only shake ≤ 0.08 m scaled by throttle × ρ(h)), and speed lines at the frame edges scaled by speed (`fx/ship/speed_lines`); at a steady speed (|acceleration| < 0.5 m/s²) the rumble and lines ease off and the flame returns to the cruise puff. (b) The sound barrier: each planet with air gets a game speed of sound (Earth 30 m/s; placeholders tuned so a full-thrust upright Mk1 on Earth crosses it 40–70 % of the way to the Escape Line, Mars and Venus (from the deck) likewise before their lines, each giant with the mark that climbs it comfortably); crossing it upward where ρ(h) ≥ 0.1 fires once: the vapor cone round the hull for 0.5 s (`fx/ship/vapor_cone`), a shock ring expanding from the hull (`fx/ship/shock_ring`), a camera thump (0.25 m, 0.15 s, position only), a boom through AudioDirector (a placeholder sfx in Assets/_Game/Audio/sfx/ until a real one), a short rise in the engine sound; it re-arms below 0.8 × that speed; never on Mercury (no air). Placeholders (flat white shapes) until B-171's sheets land; drawn from them after, guarded like the whale.
+Accept: SoundBarrierTests (EditMode): fires once on an upward crossing with ρ ≥ 0.1, not below it, not on Mercury, re-arms below 0.8×; a per-planet table in UNITY_STATUS of the crossing altitude for the climbing mark; captures in reports/unity/u150/: Earth accelerating off the pad (the boost flame, speed lines), Earth mid-boom (the vapor cone and the ring), Earth cruising near the Escape Line (calm); clean console.
+Files: Code/Runtime/FX/ShipFx.cs, SideFx.cs, Code/Runtime/Ship/, Code/Runtime/Audio/AudioDirector.cs, Assets/_Game/Audio/sfx/, Tests/
+Depends: U-149 (ρ(h) and the speeds)
+Lead notes: Cycle 278 (the owner: "add a noticeable difference when accelerating versus top speed; you leave a sound barrier break"). Lock-free code after U-149; one check with U-148 / U-149; in 0.4.8 with placeholders if B-171 has not exported by the build lock.
+
 ### U-142 · UNITY · Ready · C2
 Goal: Build 0.4.8, the owner's next build: Jupiter on the cartoon stage (U-127 with the Vortex Whale at D-153's scale, U-126's capped floes, the kit, the Jupiter title card from B-170 if it lands) on 0.4.7's code; the 13-leg probe BUILD MEMORY GREEN (D-152's two-run rule); the smoke set with Jupiter shots (a floe lane with the kit, the storm deck, the deep's CRUSH band, the whale in passing) in reports/unity/smoke_0.4.8/.
 Accept: BUILD OK; the probe's 13 legs green with the Creep row ≤ 10 MB; the smoke frames on disk; M1Loop + M3Inner + the Jupiter slice green on the build's code; GameInfo 0.4.8.
 Files: Build/MERIDIAN_0.4.8/, coordination/reports/unity/smoke_0.4.8/, perf + tests reports
 Depends: U-127, B-160
-Lead notes: Cycle 275. One lock after the U-127 captures; LEAD writes the Jupiter page and the owner's item from it.
+Lead notes: Cycle 275. One lock after the U-127 captures; LEAD writes the Jupiter page and the owner's item from it. Cycle 278 (D-158): 0.4.8 is the owner's answer to the 0.4.7 flight playtest: it carries U-148 / U-149 / U-150 (checked first), U-147's paper HUD, and Jupiter; the smoke set adds the climb (smoke_23_climb_pad at the 30 m frame, smoke_24_climb_boom, smoke_25_climb_cruise) and the Venus + Jupiter title cards on entry (smoke_21_titlecard_venus / _jupiter, B-170's check).
 
 ### U-143 · UNITY · In Progress · C2
 Goal: The owner's build without the Development Build watermark: after the probe passes on the development build, the same code is built once more as a release build (`Build/MERIDIAN_<v>/` the release, `Build/MERIDIAN_<v>_dev/` the probed one), the smoke run once on the release build for the 29 shots; the probe stays on the dev build (its memory counters need it).
@@ -2386,6 +2420,20 @@ Accept: a smoke frame on each of Earth, Mars, Mercury and Venus with no light-bl
 Files: Code/Runtime/UI/Hud/, Tests/
 Depends: U-136
 Lead notes: Cycle 276 (every 0.4.7 smoke frame still shows the blue RADIATION / SUIT / ESCAPE text beside the paper gauges). Lock-free code now; rides U-142's build if in.
+
+### U-151 · UNITY · Ready · C3
+Goal: The last two old-style screens go to paper (D-149, the 0.4.7 smoke read in cycle 278): (a) the Waystation trade panel (smoke_10: a black panel with cream buttons over the grey v2 station) re-laid on UiKit paper: the cream sheet with its ink edge, Patrick Hand ink lettering, BUY / SELL as U-136's paper buttons (a greyed SELL in faded ink), the Scrip in gold ink, the services and cargo contracts as paper tags; same columns, keys and order; (b) the space HUD's SPEED / WELL readouts (smoke_7) on U-147's paper tags; (c) the v3 draw path for `props/space/waystation`, `waystation_mars` and `asteroid_01..06` (a top-down sheet with its json, `"style": "v3"`), the model path kept until B-172 lands, then retired in the same import (D-117's pattern).
+Accept: smoke_10 and smoke_7 re-shot with no black panel and no light-blue lettering; MenuHudTests +1 (the trade panel at 1080p and 720p, every row reachable by keyboard, nothing past the paper); clean console.
+Files: Code/Runtime/Trade/, Code/Runtime/UI/, Code/Runtime/Space/SpaceWorld.cs, Waystation.cs, Tests/
+Depends: U-136, U-147
+Lead notes: Cycle 278. After U-148 / U-149 / U-150 (the owner's flight first); lock-free code; its check with the next UNITY check after the flight one.
+
+### U-152 · UNITY · Ready · C4
+Goal: The v2 model census (files only): for each of the 80 `.glb` still under Assets/_Game/Art/ (props/earth_flora 11, mars_flora 10, space 8, mercury_scenery 8, venus_scenery 6, earth 5, creatures/venus 3, the old backgrounds, ships/pilgrim, characters/surveyor …), whether any runtime path still loads its key (code grep + the Addressables group + the residency lists), as a table in coordination/reports/unity/v2_census.md: key, loaded by (file:line) or orphaned, what a player sees.
+Accept: the table covers all 80; each loaded key names the screen it shows on; LEAD turns the loaded ones into re-ink cards and the orphans into one BLENDER removal + one UNITY meta commit.
+Files: coordination/reports/unity/v2_census.md
+Depends: —
+Lead notes: Cycle 278: the Waystation in smoke_10 is still the grey v2 model, nobody had flagged it; the census finds any others before the C4 playtest build. Lock-free, files only (no Editor): a good item for any wait at the gate.
 
 ### U-138 · UNITY · Done · C2
 Goal: Mercury's v2 leftovers out of the cartoon stage (D-150): the Cinderhulk species leaves Mercury's spawn table and the smoke (the Cinderling is its B-145 re-ink; the night smoke shot shows the Shadewyrm at a burrow instead); the Mercury props draw from B-167's sheets when they land (`props/mercury/{flare_shelter,meridian_beacon,solarite_cluster,warden_vault_gate,shelter_door,equipment_locker}`), their v2 .glb / _normal / _mask / _emission metas dropped with the files (D-016); the M3 Mercury gameplay tests stay green (the flare window and shelter logic unchanged).

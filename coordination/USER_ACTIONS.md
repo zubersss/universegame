@@ -6,15 +6,6 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-30 — Play Build 0.4.7: Mercury, Venus and the paper menus (20 min)
-Open https://claude.ai/artifact/Tgkyg6QXPABeqhxigtRyrq (the Mercury, Venus and menus page: the stills, the numbers, what changed, what comes next), then play:
-double-click `C:\dev\universegame\Build\MERIDIAN_0.4.7\MERIDIAN.exe`. On Earth press Esc for the paper pause menu,
-Tab for the inventory, N for the catalogue scroll and B for the crafting paper (Esc closes). Board with F and fly to
-Mercury: land on the day side, walk toward the twilight band and on into the night; find the flare shelter and the
-Shadewyrm's burrow. Then fly to Venus: you land on the floating Meridian station's deck; walk its planks, then drop to
-the surface for the vents and the crab. Tell the Lead "0.4.7 reads" or what bothered you, planet by planet. This
-replaces USER-27 (0.4.3): 0.4.7 contains everything it had.
-
 ### USER-08 — Optional: let the team run PowerShell commands without prompts (2 min)
 On Windows, Claude Code runs commands through PowerShell as well as Bash, and the
 `Bash(...)` allow rules in `.claude/settings.json` don't cover PowerShell. The Lead added
@@ -23,6 +14,7 @@ If you get too many "allow this command?" prompts, tell the Lead "approve PowerS
 allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
 
 ## Done
+- 2026-11-08 01:3x · USER-30 done: the owner played 0.4.7 and likes it so far; leaving the atmosphere felt laggy and stuttery, the view too zoomed in, and the ship should fly smoother, with weight, a felt difference between accelerating and top speed, and a sound barrier break → D-158, U-148 / U-149 / U-150, B-171; the fix ships in 0.4.8 (the next playtest item comes with it).
 - 2026-11-08 01:0x · USER-31 done: Chrome and Edge are closed, free RAM 2.0 GB; the team resumed on the owner’s "continue work".
 - 2026-11-07 17:5x · USER-27 folded into USER-30 (Build 0.4.7 has Earth, Mars, Mercury, Venus and the paper menus).
 - 2026-11-07 16:0x · USER-29 retired by LEAD: the build finished at 15:56 without a memory stop and free RAM is back at 2.2 GB with Edge and Chrome still open; nothing to do.

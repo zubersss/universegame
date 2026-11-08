@@ -1,31 +1,20 @@
 # LEAD STATUS
-Resumed 2026-11-08 01:0x on the owner’s "continue work" (paused 11-07 21:1x–01:0x); cron 54e64eb1 at :43 on odd hours; 2.00 GB free with the browsers closed, so the normal gates apply (D-156 unspent). Resume order: BLENDER the whale → UNITY’s full check + Jupiter captures → BLENDER B-170, B-163 / B-164 → UNITY Build 0.4.8 (dev + release) → the Jupiter page.
-Updated: 2026-11-07 14:4x · Session: 8 (zuber-76; resumed after the ~14:17 restart of all three windows) · Review cycle: 276 · Cadence: every 2 hours (owner, 11-07 15:1x; session cron 54e64eb1 at :43 on odd hours)
-Cycle 276 (20:5x, 2-hour tick): both workers at the RAM gate since 18:42 (the owner's browsers; USER-31 unanswered); D-156 one-off gates armed; every lock-free card done (Jupiter / Saturn / Uranus / Neptune slice 1, U-143); U-144 / U-146 / U-147 written for UNITY.
-Cycle 275 (18:5x, 2-hour tick): Jupiter's art in except the whale (D-153, at the RAM gate; USER-31); U-127 slice 1 checked, slice 2 owed (UNITY idle 41 min: nudged); U-133 / B-166 / B-169 Ready in order; U-142 (0.4.8), U-143 (release build), B-170 (title cards) written.
-Cycle 274 (17:5x): BUILD 0.4.7 = THE OWNER'S BUILD in and green (Mercury + Venus complete, the C3 UI, D-151): U-125 / U-140 / U-141, B-151..B-154, B-167, B-168 DONE; USER-30 posted with the page https://claude.ai/artifact/Tgkyg6QXPABeqhxigtRyrq; B-161 Neptune DONE as designs (all six decks). Neptune decks 1–3 accepted (deck3 on a rim pass).
-Cycle 274 (16:5x, 2-hour tick): a STALL: BLENDER paused 32 min with the lock free and its B-167 want on file; both workers nudged (BLENDER: run B-167; UNITY: U-127 code meanwhile, take the lock at 17:05 if BLENDER has not). Venus art all exported and verified (B-152..B-154); U-129 / U-130 / B-156 / B-159 / B-160 Ready in order.
-Cycle 273 (16:0x): BUILD 0.4.5 DONE as a dev build (U-132 + U-135 + U-136; green on every number); D-150: the smoke frames show the Mercury set misplaced off the pad and grey v2 props → U-139, U-138, B-167 before 0.4.6 = the owner's build; U-125 Venus code in; B-154 Ready; USER-29 retired.
-Cycle 273 (15:4x): C3 UI IN: U-102 / U-124 / U-134 DONE (8c60fe62); D-149 (paper everywhere: U-135 inventory slots + crafting on paper before 0.4.5, U-136 paper buttons); B-158 Uranus DONE as designs; B-151 verified; the Venus deck straight accepted.
-Cycle 273 (15:0x, hourly): no stall; U-126 / U-127 Ready, U-132 (Build 0.4.5 + page smoke set) and U-133 (Neptune stage) written; B-158 DONE as designs (all four decks × four lights pass; deck3, deep and deck1 accepted this hour); UNITY's C3 check want filed.
-Cycle 272 (15:0x): MERCURY IN: U-123 + U-131 + B-148 / B-149 / B-150 / B-165 DONE on bff29043 (0.4.4 green on 13 legs, Creep 7 MB a watch row, the strip joins gone); U-102 code in (In Progress to the C3 check); P-50 yes; B-158 deck2 ×4 accepted; D-148 (Neptune); USER-28 retired (the gate cleared on its own).
-Cycle 272 (14:4x, resume): context rebuilt from the repo; both workers found and named (zuber-d2 = UNITY, zuber-5a = BLENDER); UNITY's U-123 chain is at Build 0.4.4 (written 14:15) with the probe + hand-off left; BLENDER's B-165 RGBA re-export in (e0f476c7), the Uranus alpha check in (697d5a40), its decks want on file; free RAM 0.65 GB (ChatGPT + Edge reopened) → USER-28; the board stocked (U-102 / U-124 / U-125, B-151..B-153 Ready; U-130, U-131, B-159, B-160, B-161, B-163, B-164, B-166 written); the queue and both lists rewritten.
-Cycle 271 (13:5x): Mercury's art all in (B-148 / B-149 / B-150 verified, B-149 straight per D-147); U-123's check green after a D-046 re-run; the three Mercury frames pass; B-162 Earth / Mars straight DONE; B-165 strips DONE then REOPENED (RGBA gutters); D-145..D-147; B-157 Saturn DONE as designs; B-158 Uranus deck1 ×4 accepted, the per-light roll bug fixed.
-Cycles 269–270: C2 EARTH AND MARS IN (U-118 6227cc34; D-144: 0.4.3 the owner's build; the C2 page https://claude.ai/artifact/3FkYSjxX9bwjf34tapwDZU → USER-27); U-123 + B-148..B-150 promoted; B-155 Jupiter DONE as designs; B-156 kit accepted.
-(cycles 231–268: coordination/status/archive/LEAD_2026-11-06.md and the log)
+Updated: 2026-11-08 01:4x · Session: 9 (zuber-cf; all three windows restarted ~01:27) · Review cycle: 278 · Cadence: every 2 hours (owner, 11-07 15:1x; session cron 9a662184 at :43 on odd hours, first tick ~03:13)
+Cycle 278 (01:4x, resume): context rebuilt from the repo; workers found (zuber-34 = UNITY, zuber-0c = BLENDER); lock B's tests green (MarsStage 3/3, the Jupiter PlayMode slice 20/20) but its captures died with the restart (UNITY removed its stale lock); B-170 VERIFIED; THE OWNER'S 0.4.7 PLAYTEST (USER-30 done) → D-158: the flight overhaul first (U-148 camera + zoom, U-149 weight + drag, U-150 acceleration feel + sound barrier, B-171 its FX) in 0.4.8; from the 0.4.7 smoke read: U-151 (trade panel + space readouts on paper), B-172 (stations + belt re-ink), U-152 (the v2 census); the queue and both lists rewritten.
+(cycles 231–277: coordination/status/archive/LEAD_2026-11-06.md and REVIEW_LOG)
 ## Current task
-Directing C2 (D-131): Mercury, Venus and the C3 UI IN (Build 0.4.7, the owner's build) → the page + USER-30 → Jupiter (U-127 code; B-159 / B-160 / B-156 exports) → Saturn → Uranus (designs done) → Neptune (source done). Old chain: (U-124 + U-102 + B-151) → Venus (U-125 + B-152..B-154) → Jupiter → Saturn → Uranus (B-158's decks first) → Neptune (B-161). USER-30 open. The review cycle every 2 hours (owner, 15:1x); worker messages answered as they arrive.
+Directing the owner's flight fix (D-158) into Build 0.4.8 beside Jupiter, then C2's Saturn → Uranus → Neptune. Heavy order: UNITY's CaptureU127Jupiter (lock-B remainder) → BLENDER B-163 slot 1 → UNITY's flight check → B-171 / B-163 slot 2 → UNITY lock C = 0.4.8 (dev + release, probe with a Climb leg, smoke with the climb shots) → the 0.4.8 page + USER-32 (play the new flight).
 ## Last completed
-Cycle 276 (20:5x): the 2-hour tick; the gate block logged; three lock-free UNITY cards written.
+Cycle 278: the resume; D-158; seven cards written (U-148..U-152, B-171, B-172); B-170 verified.
 ## Next up
-1. BLENDER's deep ×4 and deck1 reviews (the stamped previews + the --uranus-check line each) → B-158 Done; B-151's export once U-124's code lands; the Venus exports. 2. Jupiter: UNITY's U-127 code → BLENDER's B-159 / B-156 / B-160 exports → U-127's check and captures → 0.4.8. 3. Saturn (U-129, B-163 / B-164), Uranus (U-130, B-166), Neptune (U-133, B-169) in order. 3. The owner's USER-27 answer → any C2 fix card. 4. Tick ~22:5x (cron 32299f3c, every 2 h); meanwhile the whale and UNITY's check under D-156 when RAM allows, 0.4.8 and its page as they arrive.
+1. Answer the workers as they report: UNITY's U-148 / U-149 / U-150 code (read the diffs against D-158), the captures' frames (u127 → B-156 / B-159 / B-160 / U-126 / U-127 Done). 2. BLENDER's B-171 numpy preview → accept or fix → its export slot. 3. The flight check's numbers (ClimbSmoothPlay jitter, the per-planet climb and sound-barrier tables) → U-148..U-150 Done. 4. 0.4.8 → the page (Jupiter + the new flight) + USER-32. 5. Tick ~03:13.
 ## Pending decisions
-none open.
+none open (D-158's numbers are placeholders UNITY tunes and reports).
 ## Waiting on the user
-USER-30 (play Build 0.4.7 + the Mercury / Venus / menus page, 20 min; released 17:5x). USER-31 (close one browser; the whale export's gate; 18:4x). USER-08 optional.
+USER-08 optional. Next: USER-32 (play 0.4.8's flight) once the build is in.
 ## Loop / stall watch
-BLENDER: paused 16:22–16:5x with a free lock and its own want (nudged at the tick); if it is still idle at the next event, USER_ACTIONS gets a 'paste Resume MERIDIAN as BLENDER' item. UNITY: status file stale since 13:58 (asked for the refresh with the disk-only hand-off commit); a second memory stop of the probe goes to the owner (D-046). BLENDER: steady; want refreshed each poll; on B-161 lock-free.
-## Session addresses (ListAgents, 11-07 14:3x)
-This session: zuber-76. zuber-d2 = UNITY. zuber-5a = BLENDER (all three restarted ~14:25).
+Free RAM 1.01 GB at 01:3x with three freshly started sessions (no Editor, no Blender, no browsers listed): both heavy jobs wait at their gates; if it stays under 1.5 GB past ~02:30 with nothing else running, consider a D-156-style one-off with kill caps before asking the owner.
+## Session addresses (ListAgents, 11-08 01:3x)
+This session: zuber-cf. zuber-34 = UNITY. zuber-0c = BLENDER.
 ## HeavyJobLock
 none (LEAD runs no heavy jobs while a worker holds the lock or a want)
