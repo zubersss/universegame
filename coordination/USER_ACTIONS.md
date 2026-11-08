@@ -7,7 +7,7 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 ## Open
 
 ### USER-30 — Play Build 0.4.7: Mercury, Venus and the paper menus (20 min)
-Open the Mercury, Venus and menus page (the Lead posts the link in the chat) for the stills and the numbers, then play:
+Open https://claude.ai/artifact/Tgkyg6QXPABeqhxigtRyrq (the Mercury, Venus and menus page: the stills, the numbers, what changed, what comes next), then play:
 double-click `C:\dev\universegame\Build\MERIDIAN_0.4.7\MERIDIAN.exe`. On Earth press Esc for the paper pause menu,
 Tab for the inventory, N for the catalogue scroll and B for the crafting paper (Esc closes). Board with F and fly to
 Mercury: land on the day side, walk toward the twilight band and on into the night; find the flare shelter and the
