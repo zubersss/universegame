@@ -189,7 +189,8 @@ namespace Meridian.Tests
             var t = side.terrain;
             int w = side.Config.worldWidth, ore = 0;
             var oreItems = new System.Collections.Generic.HashSet<int>();
-            foreach (var key in ResourceFinds.ItemsOf(PlanetId.Earth)) { var d = Meridian.Items.ItemRegistry.Get(key); if (d != null) oreItems.Add(d.id); }
+            // 0.4.8's ore on Earth: the tiles that drop an ore item (hematite seams, ice) or a node item; raw iron / copper / carbon / silica had no dig source.
+            foreach (var key in new[] { "hematite", "water_ice", "iron", "copper", "carbon", "silica" }) { var d = Meridian.Items.ItemRegistry.Get(key); if (d != null) oreItems.Add(d.id); }
             for (int x = 0; x < w; x++)
             {
                 int top = t.OriginalTop(x);
