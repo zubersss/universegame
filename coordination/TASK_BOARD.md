@@ -24,10 +24,10 @@ has a want on file or holds the lock (D-112): if the top rank has no want when t
 the next live rank runs now and the skipped role goes next after it files. A role below the top
 keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 278 (11-08 01:4x: all three windows restarted ~01:27; lock B's tests green (MarsStage 3/3, the Jupiter PlayMode slice 20/20) but its captures died with the restart; B-170 in; THE OWNER'S 0.4.7 PLAYTEST → D-158: the flight overhaul goes first and rides 0.4.8). A role files its want only when the queue says it is next after the running job:
 Cycle 281 (11-08 09:4x, the resume: all three windows restarted ~09:30 after a ~3-hour break; no lock, no want; free RAM 0.69 GB at 09:33 while the sessions started, 1.83 GB at 09:4x: the gate is open). Done since 05:1x: U-156 accepted; B-176 exported for the four inner planets; B-177's islands for all four giants; B-178 Earth's bands; B-179's desert and taiga exported, the tundra accepted with one fix; D-167.
-Update 10:2x: UNITY's batched check DONE (b69d80c1, 1fe57806): U-156, U-161 Done; U-158 accepted; U-157 back for two fixes (D-168: round strokes from ¼ m sub-node densities, no emblems in mounds). B-180 exported; B-181's three previews judged.
-1. UNITY · next heavy job: ONE SHORT LOCK after U-157's two fixes (code lock-free now): compile + DigPlace, Harvest, SaveLoad, SolidRescue, InventoryPlay + CaptureU157Brush and u158/4_pocket_dug → LEAD views → then BUILD 0.5.0 (U-163) as its own lock. U-163's smoke list can be written lock-free meanwhile.
-2. BLENDER · next heavy job: B-183's export, forest + coast + plains with layer2 extended (D-169; the forest preview accepted 10:3x), FOR 0.5.0: it yields to UNITY's short lock and goes before U-163's build. UNITY's U-164 (the near layer continues) is code now, tested in the short lock or U-163's.
-3. BLENDER · then the B-181 exports (Mars with the talus block fix, Mercury as drawn, Venus with the two pushes), and B-182's light reads, in free gaps; these yield to every UNITY lock until 0.5.0 is built.
+Cycle 282 (11:0x, 2-hour tick): every 0.5.0 art item is in and verified (B-178 frost, B-179 tundra, B-180 lips, B-181 all, B-183 forest / coast / plains with D-169's layer2, Earth's dig_puff). UNITY's short lock (U-157's D-168 fix + U-164) is in its capture part (11:04); the re-shot u157/1_scoop (a round bowl) and u158/4_pocket_dug (a U-bottomed shaft) viewed at 11:0x.
+1. UNITY · NOW: the short lock's captures → LEAD judges U-157 → then BUILD 0.5.0 (U-163, with U-164's test and re-shots) as its own lock. Nothing else runs heavy until the build is done.
+2. BLENDER · after U-163: B-186's two Mars set previews (~320 MB, its own lock), then B-185's exports one planet per slot (Mars first, the storm veil with no ground), B-182's Earth audit, B-184's puffs, B-187's previews.
+3. UNITY · after 0.5.0 reads with the owner: U-159 (Mars / Mercury / Venus on smooth ground: every art piece is in or queued above), U-160, U-162; the C2 giants' re-shoots in the gaps.
 4. After 0.5.0 reads with the owner: U-159 + B-181 (Mars / Mercury / Venus per-biome ground), U-160 (the giants' islands, art in), U-162 (the stag); the C2 giants' re-shoots (U-127, U-129, U-130, U-133) in the gaps.
 
 
@@ -63,8 +63,8 @@ Rules: nothing here needs the lock; it stays under ~300 MB of extra RAM; no Unit
 did in your status before the next poll. LEAD tops each list up to ≥ 3 items every cycle.
 
 **UNITY**
-- U-157's two fixes as code (D-168): the stroke's density at ¼ m sub-nodes from each stroke's exact disc, DugWallsAreRoundAtAnySize at LEAD's strict bounds; no emblems / fill_decor inside a piled mound.
-- U-163's smoke list and shots written ahead (the new Earth shots; the tunnel framed properly); B-180's variant lips by band variant (ground_lip_<variant>) if cheap.
+- U-159's code ahead, lock-free: the region → band / set map on the board's U-159 card (B-181, B-186, B-187), the storm veil's strip continuation, B-180's variant lips by band variant.
+- U-162 (the stag's stuck-detector hysteresis) as code.
 - U-152 (the v2 census, files only, using B-173's audit lists).
 - Status trim (D-113): U-142 / U-143 / U-147 / U-153 / U-156 / U-161 are Done; Ready for review lists only unjudged items.
 - The Creep watch row (0.4.8's reading); `docs/credits/unity.md` upkeep.
