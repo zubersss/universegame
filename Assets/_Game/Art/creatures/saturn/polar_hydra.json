@@ -1,0 +1,456 @@
+{
+  "key": "creatures/saturn/polar_hydra",
+  "style": "v3",
+  "ppu": 64,
+  "rect_origin": "bottom_left",
+  "parts": [
+    {
+      "name": "body",
+      "rect": [
+        0,
+        0,
+        640,
+        268
+      ],
+      "pivot": [
+        0.5013,
+        0.3236
+      ]
+    },
+    {
+      "name": "neck0_lost",
+      "rect": [
+        192,
+        320,
+        236,
+        476
+      ],
+      "pivot": [
+        0.905,
+        0.0392
+      ]
+    },
+    {
+      "name": "neck0_rest",
+      "rect": [
+        432,
+        324,
+        248,
+        472
+      ],
+      "pivot": [
+        0.8962,
+        0.0395
+      ]
+    },
+    {
+      "name": "neck0_struck",
+      "rect": [
+        1184,
+        344,
+        256,
+        452
+      ],
+      "pivot": [
+        0.9002,
+        0.0413
+      ]
+    },
+    {
+      "name": "neck1_lost",
+      "rect": [
+        1132,
+        848,
+        176,
+        544
+      ],
+      "pivot": [
+        0.8646,
+        0.0349
+      ]
+    },
+    {
+      "name": "neck1_rest",
+      "rect": [
+        1312,
+        848,
+        184,
+        544
+      ],
+      "pivot": [
+        0.8646,
+        0.0349
+      ]
+    },
+    {
+      "name": "neck1_struck",
+      "rect": [
+        1692,
+        868,
+        192,
+        524
+      ],
+      "pivot": [
+        0.8713,
+        0.0362
+      ]
+    },
+    {
+      "name": "neck2_lost",
+      "rect": [
+        0,
+        800,
+        132,
+        592
+      ],
+      "pivot": [
+        0.6603,
+        0.032
+      ]
+    },
+    {
+      "name": "neck2_rest",
+      "rect": [
+        136,
+        804,
+        160,
+        588
+      ],
+      "pivot": [
+        0.6192,
+        0.0322
+      ]
+    },
+    {
+      "name": "neck2_struck",
+      "rect": [
+        608,
+        824,
+        168,
+        568
+      ],
+      "pivot": [
+        0.6384,
+        0.0334
+      ]
+    },
+    {
+      "name": "neck3_lost",
+      "rect": [
+        300,
+        804,
+        140,
+        588
+      ],
+      "pivot": [
+        0.3391,
+        0.0319
+      ]
+    },
+    {
+      "name": "neck3_rest",
+      "rect": [
+        444,
+        804,
+        160,
+        588
+      ],
+      "pivot": [
+        0.301,
+        0.0319
+      ]
+    },
+    {
+      "name": "neck3_struck",
+      "rect": [
+        780,
+        824,
+        168,
+        568
+      ],
+      "pivot": [
+        0.3354,
+        0.033
+      ]
+    },
+    {
+      "name": "neck4_lost",
+      "rect": [
+        952,
+        844,
+        176,
+        548
+      ],
+      "pivot": [
+        0.1066,
+        0.0342
+      ]
+    },
+    {
+      "name": "neck4_rest",
+      "rect": [
+        1500,
+        848,
+        188,
+        544
+      ],
+      "pivot": [
+        0.0998,
+        0.0345
+      ]
+    },
+    {
+      "name": "neck4_struck",
+      "rect": [
+        0,
+        272,
+        188,
+        524
+      ],
+      "pivot": [
+        0.0998,
+        0.0358
+      ]
+    },
+    {
+      "name": "neck5_lost",
+      "rect": [
+        684,
+        324,
+        236,
+        472
+      ],
+      "pivot": [
+        0.0805,
+        0.0403
+      ]
+    },
+    {
+      "name": "neck5_rest",
+      "rect": [
+        924,
+        324,
+        256,
+        472
+      ],
+      "pivot": [
+        0.0742,
+        0.0403
+      ]
+    },
+    {
+      "name": "neck5_struck",
+      "rect": [
+        1444,
+        344,
+        256,
+        452
+      ],
+      "pivot": [
+        0.0742,
+        0.042
+      ]
+    }
+  ],
+  "plants": [
+    {
+      "name": "polar_hydra",
+      "grand": true,
+      "scale_note": "about 18 m wide at 1x: a set piece in the Hexagon's eye (D-140: a Grand rig, 7 bones)",
+      "bones": [
+        {
+          "name": "body",
+          "part": "body",
+          "parent": null,
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 0
+        },
+        {
+          "name": "neck0",
+          "part": "neck0_rest",
+          "parent": "body",
+          "offset_m": [
+            -3.0,
+            1.9
+          ],
+          "order": 1
+        },
+        {
+          "name": "neck1",
+          "part": "neck1_rest",
+          "parent": "body",
+          "offset_m": [
+            -1.8,
+            2.3
+          ],
+          "order": 2
+        },
+        {
+          "name": "neck2",
+          "part": "neck2_rest",
+          "parent": "body",
+          "offset_m": [
+            -0.6,
+            2.5
+          ],
+          "order": 3
+        },
+        {
+          "name": "neck3",
+          "part": "neck3_rest",
+          "parent": "body",
+          "offset_m": [
+            0.6,
+            2.5
+          ],
+          "order": 3
+        },
+        {
+          "name": "neck4",
+          "part": "neck4_rest",
+          "parent": "body",
+          "offset_m": [
+            1.8,
+            2.3
+          ],
+          "order": 2
+        },
+        {
+          "name": "neck5",
+          "part": "neck5_rest",
+          "parent": "body",
+          "offset_m": [
+            3.0,
+            1.9
+          ],
+          "order": 1
+        }
+      ],
+      "swaps": {
+        "neck0": [
+          "neck0_rest",
+          "neck0_struck",
+          "neck0_lost"
+        ],
+        "neck1": [
+          "neck1_rest",
+          "neck1_struck",
+          "neck1_lost"
+        ],
+        "neck2": [
+          "neck2_rest",
+          "neck2_struck",
+          "neck2_lost"
+        ],
+        "neck3": [
+          "neck3_rest",
+          "neck3_struck",
+          "neck3_lost"
+        ],
+        "neck4": [
+          "neck4_rest",
+          "neck4_struck",
+          "neck4_lost"
+        ],
+        "neck5": [
+          "neck5_rest",
+          "neck5_struck",
+          "neck5_lost"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "neck0",
+          "bone": "neck0",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        },
+        {
+          "slot": "neck1",
+          "bone": "neck1",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 2,
+          "replaces_part": true
+        },
+        {
+          "slot": "neck2",
+          "bone": "neck2",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 3,
+          "replaces_part": true
+        },
+        {
+          "slot": "neck3",
+          "bone": "neck3",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 3,
+          "replaces_part": true
+        },
+        {
+          "slot": "neck4",
+          "bone": "neck4",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 2,
+          "replaces_part": true
+        },
+        {
+          "slot": "neck5",
+          "bone": "neck5",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "beat_bpm": 110,
+        "cycle_beats": 4,
+        "amplitude_deg": {
+          "body": 1,
+          "neck0": 7,
+          "neck1": 7,
+          "neck2": 7,
+          "neck3": 7,
+          "neck4": 7,
+          "neck5": 7
+        },
+        "lag": 0.6
+      },
+      "react": {
+        "radius_m": 30.0,
+        "action": "recoil",
+        "per_bone": true,
+        "swap_state": "struck",
+        "neck_deg": -10
+      },
+      "actions": {
+        "head_lost": {
+          "swap_state": "lost",
+          "per_bone": true
+        }
+      }
+    }
+  ]
+}
