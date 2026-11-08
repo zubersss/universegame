@@ -1,0 +1,24 @@
+{
+  "key": "terrain/mars/fill_decor_t4_2",
+  "style": "v3",
+  "contract": "v3.2 11.9",
+  "frame_width": 72,
+  "frame_height": 28,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [],
+  "upright": true,
+  "tier": 4,
+  "tier_name": "Deep",
+  "fill": "ground_fill_t4",
+  "decor": "graphite_lens",
+  "note": "B-203: a buried detail of tier 4 (Deep), D-165's sparse scatter in that tier's cutaway, never rotated; pivot centred"
+}

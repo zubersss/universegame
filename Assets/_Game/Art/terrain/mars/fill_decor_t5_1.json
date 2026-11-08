@@ -1,0 +1,24 @@
+{
+  "key": "terrain/mars/fill_decor_t5_1",
+  "style": "v3",
+  "contract": "v3.2 11.9",
+  "frame_width": 52,
+  "frame_height": 52,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [],
+  "upright": true,
+  "tier": 5,
+  "tier_name": "Core",
+  "fill": "ground_fill_t5",
+  "decor": "kimberlite_diamond",
+  "note": "B-203: a buried detail of tier 5 (Core), D-165's sparse scatter in that tier's cutaway, never rotated; pivot centred"
+}

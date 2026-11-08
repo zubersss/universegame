@@ -1,0 +1,25 @@
+{
+  "key": "terrain/mars/surface_line",
+  "style": "v3",
+  "contract": "v3.2 11.9",
+  "frame_width": 256,
+  "frame_height": 64,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.0,
+    0.375
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [],
+  "tile_x": true,
+  "repeat_px": 256,
+  "line_row": 40,
+  "depth_below_surface_m": 2.0,
+  "peg_every_m": 4.0,
+  "mapping": "along the drawn surface, 2 m under it (the normal's offset): u = world x x 64 mod 256; the pivot is ON the line row 40",
+  "note": "B-203 (Bible 5.2 \u00a78.1): the Surface Line, drawn in the cutaway whenever the camera is below the surface; the pennant on each peg points topside"
+}
