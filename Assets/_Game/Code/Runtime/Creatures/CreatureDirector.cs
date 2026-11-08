@@ -344,6 +344,14 @@ namespace Meridian.Creatures
                 {
                     if (!c.Alive) continue;
                     tickCount++;
+                    if (now < c.StagedUntil)
+                    {
+                        // U-153: a staged shot: still, facing where the shot wants it (the whale head first), no steering or reaction.
+                        if (c.Body != null) c.Body.linearVelocity = Vector2.zero;
+                        if (c.View != null) c.View.flipX = c.StagedFacing < 0;
+                        if (c.Rig != null) c.SetRigFacing(c.StagedFacing > 0);
+                        continue;
+                    }
                     Tick(c, p, daylight, now, dt, flare);
                 }
                 UnityEngine.Profiling.Profiler.EndSample();

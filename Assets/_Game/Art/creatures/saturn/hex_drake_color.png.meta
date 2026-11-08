@@ -1,0 +1,1184 @@
+fileFormatVersion: 2
+guid: 83ed6cf9302fedd4a89fdd8dd282a710
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 7243207201213682521
+    second: hex_drake_color_0
+  - first:
+      213: 1739685028976197031
+    second: hex_drake_color_1
+  - first:
+      213: -37266754887130324
+    second: hex_drake_color_2
+  - first:
+      213: 4526632908147904670
+    second: hex_drake_color_3
+  - first:
+      213: -1388562298890171504
+    second: hex_drake_color_4
+  - first:
+      213: -7635583228249919634
+    second: hex_drake_color_5
+  - first:
+      213: -2209343540146728231
+    second: hex_drake_color_6
+  - first:
+      213: -7594640886812548383
+    second: hex_drake_color_7
+  - first:
+      213: -5164366742773185698
+    second: hex_drake_color_8
+  - first:
+      213: -5369946239618942147
+    second: hex_drake_color_9
+  - first:
+      213: -1839875835272458890
+    second: hex_drake_color_10
+  - first:
+      213: -201813253925861592
+    second: hex_drake_color_11
+  - first:
+      213: 874634405751575995
+    second: hex_drake_color_12
+  - first:
+      213: 187743045721352054
+    second: hex_drake_color_13
+  - first:
+      213: 5910982850748380758
+    second: hex_drake_color_14
+  - first:
+      213: -7750313896416811096
+    second: hex_drake_color_15
+  - first:
+      213: -1164568966356926500
+    second: hex_drake_color_16
+  - first:
+      213: 6285168629919252087
+    second: hex_drake_color_17
+  - first:
+      213: 8554140840499023666
+    second: hex_drake_color_18
+  - first:
+      213: -8140446552371915556
+    second: hex_drake_color_19
+  - first:
+      213: 5489875334714965868
+    second: hex_drake_color_20
+  - first:
+      213: -8922843235011675271
+    second: hex_drake_color_21
+  - first:
+      213: -9120140537386793875
+    second: hex_drake_color_22
+  - first:
+      213: 2000419446686088895
+    second: hex_drake_color_23
+  - first:
+      213: -2565703012619085887
+    second: hex_drake_color_24
+  - first:
+      213: -2411616357012468071
+    second: hex_drake_color_25
+  - first:
+      213: -6856993908955955295
+    second: hex_drake_color_26
+  - first:
+      213: 6138834430078922388
+    second: hex_drake_color_27
+  - first:
+      213: 2604864629593358249
+    second: hex_drake_color_28
+  - first:
+      213: -277014854050098782
+    second: hex_drake_color_29
+  - first:
+      213: 7241333672716571155
+    second: hex_drake_color_30
+  - first:
+      213: 3063737566987675572
+    second: hex_drake_color_31
+  - first:
+      213: -4120067476325543732
+    second: hex_drake_color_32
+  - first:
+      213: -2803430849532888721
+    second: hex_drake_color_33
+  - first:
+      213: -1578062520249050800
+    second: hex_drake_color_34
+  - first:
+      213: 8763217324172487715
+    second: hex_drake_color_35
+  - first:
+      213: -6749911898121326423
+    second: hex_drake_color_36
+  - first:
+      213: -3765549156398653515
+    second: hex_drake_color_37
+  - first:
+      213: 2094931444763961988
+    second: hex_drake_color_38
+  - first:
+      213: 3065345320609406828
+    second: hex_drake_color_39
+  - first:
+      213: 432996665677065786
+    second: hex_drake_color_40
+  - first:
+      213: -6038905613981154165
+    second: hex_drake_color_41
+  - first:
+      213: -2041433640053466988
+    second: hex_drake_color_42
+  - first:
+      213: -6935097213484920396
+    second: hex_drake_color_43
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: hex_drake_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 348
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ed834556a5593e142910927ff3edbdb6
+      internalID: -1845728039
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_1
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 348
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7c66007a285a62f4ebacd04dcf739861
+      internalID: 2040330819
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_2
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 348
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7312023c64d37ad4f8d4670ce4adb53f
+      internalID: 941185312
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_3
+      rect:
+        serializedVersion: 2
+        x: 588
+        y: 348
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 873277a4b61cfa74faf4a8cf73f497d5
+      internalID: 255612591
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_4
+      rect:
+        serializedVersion: 2
+        x: 784
+        y: 348
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f5255f5e64b29ad49b41a06b2a8af3f2
+      internalID: -1526904662
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_5
+      rect:
+        serializedVersion: 2
+        x: 980
+        y: 348
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d6a9ff08888c14f448038276626d6ca9
+      internalID: -1042603693
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_6
+      rect:
+        serializedVersion: 2
+        x: 1176
+        y: 348
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9a88e6712382da546b8e0a6861808ee7
+      internalID: 1455390719
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_7
+      rect:
+        serializedVersion: 2
+        x: 1372
+        y: 348
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5e41940939aa5e443bdbdf19154ecf27
+      internalID: 1399306932
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_8
+      rect:
+        serializedVersion: 2
+        x: 1568
+        y: 348
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 67e4c8fae13dbdb4d80b9172e3858b17
+      internalID: 970198455
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_9
+      rect:
+        serializedVersion: 2
+        x: 1764
+        y: 348
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 79a6db02a30ddda49a42a4dff02c18b3
+      internalID: 1422718571
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_10
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 232
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4f0a71f673a6fe747bdca7519d1931e1
+      internalID: -508213031
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_11
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 232
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 875e043e7bf94d444a0810ec4805b715
+      internalID: 437422879
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_12
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 232
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e61db21406a96c340a8cbd542258c3e2
+      internalID: 766851940
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_13
+      rect:
+        serializedVersion: 2
+        x: 588
+        y: 232
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a814bd289c00ba946984ef7c08377d6e
+      internalID: -1244410747
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_14
+      rect:
+        serializedVersion: 2
+        x: 784
+        y: 232
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 366cac50a80a0924fb69186406d1efd4
+      internalID: -207580930
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_15
+      rect:
+        serializedVersion: 2
+        x: 980
+        y: 232
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 68014c001208f614dabb686c96a699e1
+      internalID: -1657777697
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_16
+      rect:
+        serializedVersion: 2
+        x: 1176
+        y: 232
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7a4d0110ea9a61f4e8227ed088f945d9
+      internalID: 711055579
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_17
+      rect:
+        serializedVersion: 2
+        x: 1372
+        y: 232
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 97c07bfd7799a684aad8402056e86586
+      internalID: 560279653
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_18
+      rect:
+        serializedVersion: 2
+        x: 1568
+        y: 232
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d2e88e411a86dd6419fd834c7a770079
+      internalID: -596337630
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_19
+      rect:
+        serializedVersion: 2
+        x: 1764
+        y: 232
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ae3786689a19adf4d9c27eeaacba58b6
+      internalID: 964585056
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_20
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 116
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fe3e1c6c5d64a8647be94e2f1dd9e678
+      internalID: -1035476508
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_21
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 116
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ecbf1eba916de984689894162996847e
+      internalID: 1653174643
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_22
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 116
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 076f9ba8e992e4145a2a9b78cc8b3f54
+      internalID: 1079207707
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_23
+      rect:
+        serializedVersion: 2
+        x: 588
+        y: 116
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f6ee529eb6e6b03409075cc3afb399fe
+      internalID: -1899540958
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_24
+      rect:
+        serializedVersion: 2
+        x: 784
+        y: 116
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 953790e173557724e8c6c45c0cbca7d3
+      internalID: 1038169332
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_25
+      rect:
+        serializedVersion: 2
+        x: 980
+        y: 116
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 84133d4cbc08d3c459efd54db02740c1
+      internalID: 819951841
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_26
+      rect:
+        serializedVersion: 2
+        x: 1176
+        y: 116
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1dca8720f3443b547b6ea997254456e2
+      internalID: -750104965
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_27
+      rect:
+        serializedVersion: 2
+        x: 1372
+        y: 116
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 80fe6aac2d1b36541b961f49d82486e8
+      internalID: -296389654
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_28
+      rect:
+        serializedVersion: 2
+        x: 1568
+        y: 116
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a09a0277c9de6ed4688d510a5d1e5fff
+      internalID: -1012883755
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_29
+      rect:
+        serializedVersion: 2
+        x: 1764
+        y: 116
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 36517f93711736943b82985982bffc0b
+      internalID: 996001071
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_30
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dba75b88c86b8104eb6ef8d302ca6b75
+      internalID: -926993085
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_31
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 0
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: daf8e74cbd3849a4d84d269539b3f118
+      internalID: -559483992
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_32
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 0
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1695b1599ef637241b1c287c7db2c6ef
+      internalID: -1902842090
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_33
+      rect:
+        serializedVersion: 2
+        x: 588
+        y: 0
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9ddf274a05a1bcd4696dd69e4264361b
+      internalID: 377371071
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_34
+      rect:
+        serializedVersion: 2
+        x: 784
+        y: 0
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4fe8a16cfc564754fa28722d8e2cf246
+      internalID: 513244264
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_35
+      rect:
+        serializedVersion: 2
+        x: 980
+        y: 0
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cb6c553f15472ac4cadfbdf26f831554
+      internalID: -1245513113
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_36
+      rect:
+        serializedVersion: 2
+        x: 1176
+        y: 0
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9a2d644858f7b984fb6d19e954a99ee6
+      internalID: -1798664986
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_37
+      rect:
+        serializedVersion: 2
+        x: 1372
+        y: 0
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6f379725725dfa34c8afa6fbda132ad1
+      internalID: 1770613976
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_38
+      rect:
+        serializedVersion: 2
+        x: 1568
+        y: 0
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 30700c0e3024ec4488d61b23eae67959
+      internalID: 1392101762
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hex_drake_39
+      rect:
+        serializedVersion: 2
+        x: 1764
+        y: 0
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b4693f8eb8374ae48b02c6903f4f4169
+      internalID: 917239087
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: e86ff8159f70b424da63aed75a9f0106
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      hex_drake_0: -1845728039
+      hex_drake_1: 2040330819
+      hex_drake_10: -508213031
+      hex_drake_11: 437422879
+      hex_drake_12: 766851940
+      hex_drake_13: -1244410747
+      hex_drake_14: -207580930
+      hex_drake_15: -1657777697
+      hex_drake_16: 711055579
+      hex_drake_17: 560279653
+      hex_drake_18: -596337630
+      hex_drake_19: 964585056
+      hex_drake_2: 941185312
+      hex_drake_20: -1035476508
+      hex_drake_21: 1653174643
+      hex_drake_22: 1079207707
+      hex_drake_23: -1899540958
+      hex_drake_24: 1038169332
+      hex_drake_25: 819951841
+      hex_drake_26: -750104965
+      hex_drake_27: -296389654
+      hex_drake_28: -1012883755
+      hex_drake_29: 996001071
+      hex_drake_3: 255612591
+      hex_drake_30: -926993085
+      hex_drake_31: -559483992
+      hex_drake_32: -1902842090
+      hex_drake_33: 377371071
+      hex_drake_34: 513244264
+      hex_drake_35: -1245513113
+      hex_drake_36: -1798664986
+      hex_drake_37: 1770613976
+      hex_drake_38: 1392101762
+      hex_drake_39: 917239087
+      hex_drake_4: -1526904662
+      hex_drake_5: -1042603693
+      hex_drake_6: 1455390719
+      hex_drake_7: 1399306932
+      hex_drake_8: 970198455
+      hex_drake_9: 1422718571
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

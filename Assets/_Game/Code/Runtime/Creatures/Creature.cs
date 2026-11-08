@@ -49,6 +49,11 @@ namespace Meridian.Creatures
         readonly List<AsyncOperationHandle> rigHandles = new List<AsyncOperationHandle>();
         static readonly string[] ModelClips = { "idle", "walk", "attack", "hurt" }; // same order as the sheet clips
         public CreatureState State { get; internal set; }
+        /// <summary>U-153: a staged shot (captures, the smoke) holds the creature still, facing StagedFacing (+1 right, −1 left), until
+        /// StagedUntil (Time.time); its steering and reactions (a Flees species turning tail) wait meanwhile.</summary>
+        public float StagedUntil { get; private set; } = float.NegativeInfinity;
+        public int StagedFacing { get; private set; } = 1;
+        public void Stage(int facing, float seconds) { StagedFacing = facing < 0 ? -1 : 1; StagedUntil = Time.time + seconds; }
         /// <summary>Held: its chunk isn't loaded with collision, so the body is paused in place.</summary>
         public bool Held { get; internal set; }
         public bool Alive => gameObject.activeSelf;

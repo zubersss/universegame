@@ -1,0 +1,626 @@
+fileFormatVersion: 2
+guid: 85e9d3361ebe01540813ecd72450961e
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -1830723733605477537
+    second: polar_hydra_color_0
+  - first:
+      213: -5537158606900413279
+    second: polar_hydra_color_1
+  - first:
+      213: 7605410354459528110
+    second: polar_hydra_color_2
+  - first:
+      213: -3301076156101097862
+    second: polar_hydra_color_3
+  - first:
+      213: -8533766341755815806
+    second: polar_hydra_color_4
+  - first:
+      213: -5935589569773559422
+    second: polar_hydra_color_5
+  - first:
+      213: 2592096304216587558
+    second: polar_hydra_color_6
+  - first:
+      213: -8591895790789706578
+    second: polar_hydra_color_7
+  - first:
+      213: 9004432202640912859
+    second: polar_hydra_color_8
+  - first:
+      213: 4328647006888716878
+    second: polar_hydra_color_9
+  - first:
+      213: 168099247543584036
+    second: polar_hydra_color_10
+  - first:
+      213: -8528022868736917008
+    second: polar_hydra_color_11
+  - first:
+      213: -4011860781337577379
+    second: polar_hydra_color_12
+  - first:
+      213: 8035317858476805764
+    second: polar_hydra_color_13
+  - first:
+      213: -4095738858943970531
+    second: polar_hydra_color_14
+  - first:
+      213: 4461012534583343320
+    second: polar_hydra_color_15
+  - first:
+      213: 4119373568549053630
+    second: polar_hydra_color_16
+  - first:
+      213: 8937521126607032452
+    second: polar_hydra_color_17
+  - first:
+      213: -581499508244831954
+    second: polar_hydra_color_18
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: body
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 640
+        height: 268
+      alignment: 9
+      pivot: {x: 0.5013, y: 0.3236}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d9941f8784e630941abb8132b6db92ec
+      internalID: 329332167
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: neck0_lost
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 320
+        width: 236
+        height: 476
+      alignment: 9
+      pivot: {x: 0.905, y: 0.0392}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c8f5484f20dd2dd4ebdb9e064aa57ae6
+      internalID: -721621380
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: neck0_rest
+      rect:
+        serializedVersion: 2
+        x: 432
+        y: 324
+        width: 248
+        height: 472
+      alignment: 9
+      pivot: {x: 0.8962, y: 0.0395}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ecb00c715bafbae40b5b86a8b12a6933
+      internalID: 1278093936
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: neck0_struck
+      rect:
+        serializedVersion: 2
+        x: 1184
+        y: 344
+        width: 256
+        height: 452
+      alignment: 9
+      pivot: {x: 0.9002, y: 0.0413}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3353c16a3c09861408d701c86b207a5e
+      internalID: -1899886398
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: neck1_lost
+      rect:
+        serializedVersion: 2
+        x: 1132
+        y: 848
+        width: 176
+        height: 544
+      alignment: 9
+      pivot: {x: 0.8646, y: 0.0349}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 93e38ef203c16ae4591198b23fe1f1bd
+      internalID: 2011036551
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: neck1_rest
+      rect:
+        serializedVersion: 2
+        x: 1312
+        y: 848
+        width: 184
+        height: 544
+      alignment: 9
+      pivot: {x: 0.8646, y: 0.0349}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 073f83cc800536d40ad9680f7f487cb2
+      internalID: -2141894545
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: neck1_struck
+      rect:
+        serializedVersion: 2
+        x: 1692
+        y: 868
+        width: 192
+        height: 524
+      alignment: 9
+      pivot: {x: 0.8713, y: 0.0362}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7578b863aee050549b803ac391031ed4
+      internalID: 723139773
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: neck2_lost
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 800
+        width: 132
+        height: 592
+      alignment: 9
+      pivot: {x: 0.6603, y: 0.032}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8f43b98fcbe70824ab6319c7812e7d12
+      internalID: 1401356174
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: neck2_rest
+      rect:
+        serializedVersion: 2
+        x: 136
+        y: 804
+        width: 160
+        height: 588
+      alignment: 9
+      pivot: {x: 0.6192, y: 0.0322}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9afb42be53f8b3945a1e3220728b3b3b
+      internalID: 173573606
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: neck2_struck
+      rect:
+        serializedVersion: 2
+        x: 608
+        y: 824
+        width: 168
+        height: 568
+      alignment: 9
+      pivot: {x: 0.6384, y: 0.0334}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 61fbe37e7cbbab248b5be4bb21fbdb69
+      internalID: -2008929653
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: neck3_lost
+      rect:
+        serializedVersion: 2
+        x: 300
+        y: 804
+        width: 140
+        height: 588
+      alignment: 9
+      pivot: {x: 0.3391, y: 0.0319}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d57fd0f7197e5564cbd09923ac973197
+      internalID: 1302655086
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: neck3_rest
+      rect:
+        serializedVersion: 2
+        x: 444
+        y: 804
+        width: 160
+        height: 588
+      alignment: 9
+      pivot: {x: 0.301, y: 0.0319}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8c6ac426fed69f540b303f377baea578
+      internalID: -621687272
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: neck3_struck
+      rect:
+        serializedVersion: 2
+        x: 780
+        y: 824
+        width: 168
+        height: 568
+      alignment: 9
+      pivot: {x: 0.3354, y: 0.033}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3d30b6f5558dfab4eb4e3f19b6768dfb
+      internalID: -951418593
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: neck4_lost
+      rect:
+        serializedVersion: 2
+        x: 952
+        y: 844
+        width: 176
+        height: 548
+      alignment: 9
+      pivot: {x: 0.1066, y: 0.0342}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1171684146a913e49ab2cfe8d83afe45
+      internalID: -1916461103
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: neck4_rest
+      rect:
+        serializedVersion: 2
+        x: 1500
+        y: 848
+        width: 188
+        height: 544
+      alignment: 9
+      pivot: {x: 0.0998, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 068b037cabd799b4f8af7c5b709a3f48
+      internalID: 1785675774
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: neck4_struck
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 272
+        width: 188
+        height: 524
+      alignment: 9
+      pivot: {x: 0.0998, y: 0.0358}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2a325b97d3afaff43aff6477cfb3dfb7
+      internalID: 1312557284
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: neck5_lost
+      rect:
+        serializedVersion: 2
+        x: 684
+        y: 324
+        width: 236
+        height: 472
+      alignment: 9
+      pivot: {x: 0.0805, y: 0.0403}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 65c0b214f97d6bc44b9537efd2af210d
+      internalID: -977254392
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: neck5_rest
+      rect:
+        serializedVersion: 2
+        x: 924
+        y: 324
+        width: 256
+        height: 472
+      alignment: 9
+      pivot: {x: 0.0742, y: 0.0403}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1690c74f2aa45e143908e6659541d1b1
+      internalID: 588153097
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: neck5_struck
+      rect:
+        serializedVersion: 2
+        x: 1444
+        y: 344
+        width: 256
+        height: 452
+      alignment: 9
+      pivot: {x: 0.0742, y: 0.042}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b145a3376913f0442bf98da3134c0d1f
+      internalID: 448311146
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: e8e7ce7c3a6e9fa49b3698d200846f54
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      body: 329332167
+      neck0_lost: -721621380
+      neck0_rest: 1278093936
+      neck0_struck: -1899886398
+      neck1_lost: 2011036551
+      neck1_rest: -2141894545
+      neck1_struck: 723139773
+      neck2_lost: 1401356174
+      neck2_rest: 173573606
+      neck2_struck: -2008929653
+      neck3_lost: 1302655086
+      neck3_rest: -621687272
+      neck3_struck: -951418593
+      neck4_lost: -1916461103
+      neck4_rest: 1785675774
+      neck4_struck: 1312557284
+      neck5_lost: -977254392
+      neck5_rest: 588153097
+      neck5_struck: 448311146
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

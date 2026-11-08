@@ -1,0 +1,1190 @@
+fileFormatVersion: 2
+guid: ad51c96d1e4e9c64492ff76c99c585d1
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 1514144665239629475
+    second: helium_jelly_color_0
+  - first:
+      213: -7953437763800150125
+    second: helium_jelly_color_1
+  - first:
+      213: 2799840256644219904
+    second: helium_jelly_color_2
+  - first:
+      213: -5504436922471522696
+    second: helium_jelly_color_3
+  - first:
+      213: -2574637281937395051
+    second: helium_jelly_color_4
+  - first:
+      213: -4825838752236902415
+    second: helium_jelly_color_5
+  - first:
+      213: 5395810770413988633
+    second: helium_jelly_color_6
+  - first:
+      213: 8768098550284463068
+    second: helium_jelly_color_7
+  - first:
+      213: -362923964314955335
+    second: helium_jelly_color_8
+  - first:
+      213: -4158137735964596641
+    second: helium_jelly_color_9
+  - first:
+      213: -3893817756290293263
+    second: helium_jelly_color_10
+  - first:
+      213: -4581956384766915529
+    second: helium_jelly_color_11
+  - first:
+      213: 3243878264088237861
+    second: helium_jelly_color_12
+  - first:
+      213: 185869058110689980
+    second: helium_jelly_color_13
+  - first:
+      213: 1470514888115196851
+    second: helium_jelly_color_14
+  - first:
+      213: -4182109265861837820
+    second: helium_jelly_color_15
+  - first:
+      213: -4674160278587705974
+    second: helium_jelly_color_16
+  - first:
+      213: 6566734390781730410
+    second: helium_jelly_color_17
+  - first:
+      213: 5630821337574837169
+    second: helium_jelly_color_18
+  - first:
+      213: -3725640304487868516
+    second: helium_jelly_color_19
+  - first:
+      213: 8240560506087964922
+    second: helium_jelly_color_20
+  - first:
+      213: 5789101742811491246
+    second: helium_jelly_color_21
+  - first:
+      213: -4289531167398628086
+    second: helium_jelly_color_22
+  - first:
+      213: -2855958744613127382
+    second: helium_jelly_color_23
+  - first:
+      213: -1907257335915641555
+    second: helium_jelly_color_24
+  - first:
+      213: -6095553041692081959
+    second: helium_jelly_color_25
+  - first:
+      213: -1564712503294686245
+    second: helium_jelly_color_26
+  - first:
+      213: 8488263526080083953
+    second: helium_jelly_color_27
+  - first:
+      213: -145228198938191506
+    second: helium_jelly_color_28
+  - first:
+      213: -7855531219352420775
+    second: helium_jelly_color_29
+  - first:
+      213: -7551894908277730443
+    second: helium_jelly_color_30
+  - first:
+      213: -448338566168944394
+    second: helium_jelly_color_31
+  - first:
+      213: -3868301897813752582
+    second: helium_jelly_color_32
+  - first:
+      213: -325669344453874229
+    second: helium_jelly_color_33
+  - first:
+      213: 3221970121343037335
+    second: helium_jelly_color_34
+  - first:
+      213: 5775616817684606867
+    second: helium_jelly_color_35
+  - first:
+      213: -7972775117937307962
+    second: helium_jelly_color_36
+  - first:
+      213: 1341825538272029460
+    second: helium_jelly_color_37
+  - first:
+      213: 1703519728405216434
+    second: helium_jelly_color_38
+  - first:
+      213: -3450990791715323011
+    second: helium_jelly_color_39
+  - first:
+      213: 3517110382455336437
+    second: helium_jelly_color_40
+  - first:
+      213: -2518045417569933012
+    second: helium_jelly_color_41
+  - first:
+      213: 1847326902647668594
+    second: helium_jelly_color_42
+  - first:
+      213: 8322143365802390590
+    second: helium_jelly_color_43
+  - first:
+      213: -5874920936630286568
+    second: helium_jelly_color_44
+  - first:
+      213: -2662586890376472723
+    second: helium_jelly_color_45
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: helium_jelly_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 116
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cf29fa600879e2f47a885d62dbc9ceb0
+      internalID: 1549502978
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_1
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 116
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b2d6687ecbd6eed4680199ea35fb3cb2
+      internalID: 1546906606
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_2
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 116
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8d1585d48134aa4488ce665ff4a3a869
+      internalID: 1745457287
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_3
+      rect:
+        serializedVersion: 2
+        x: 300
+        y: 116
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2f9f06c324243e245839b5ece3d912c3
+      internalID: 494018999
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_4
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 116
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 32bb16be3c931de408dd13f393996963
+      internalID: -2139645795
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_5
+      rect:
+        serializedVersion: 2
+        x: 500
+        y: 116
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d355e909f08591448a6310ead84f0eac
+      internalID: 789094451
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_6
+      rect:
+        serializedVersion: 2
+        x: 600
+        y: 116
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e068f3c4a3ed0904abd85ba66d62c138
+      internalID: -750497096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_7
+      rect:
+        serializedVersion: 2
+        x: 700
+        y: 116
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7b2d02d0646a9a04f9e21412a0978cdf
+      internalID: -1276203084
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_8
+      rect:
+        serializedVersion: 2
+        x: 800
+        y: 116
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 727ab67424b81134f83554ca57b80f58
+      internalID: 498122391
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_9
+      rect:
+        serializedVersion: 2
+        x: 900
+        y: 116
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 676a5896698fb604995a0804f7565800
+      internalID: 1323231586
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_10
+      rect:
+        serializedVersion: 2
+        x: 1000
+        y: 116
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6c4fc240a7e51ed44a21fb83491378cb
+      internalID: -1764383532
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_11
+      rect:
+        serializedVersion: 2
+        x: 1100
+        y: 116
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: afa4a3153b4e91d4d90ed4505b6e43cd
+      internalID: 1477634149
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_12
+      rect:
+        serializedVersion: 2
+        x: 1200
+        y: 116
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cd9f0d4d6df52ae4ea0269a04d789ab9
+      internalID: 1307875512
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_13
+      rect:
+        serializedVersion: 2
+        x: 1300
+        y: 116
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 46eb9cbdbf8b4b04f9a546fcf98cd60d
+      internalID: -87257453
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_14
+      rect:
+        serializedVersion: 2
+        x: 1400
+        y: 116
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 88913722729ce2641a42c9499cd4fc85
+      internalID: -1155198989
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_15
+      rect:
+        serializedVersion: 2
+        x: 1500
+        y: 116
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 86ac9e23a4da75245b8b9d79f0671da7
+      internalID: -2014795156
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_16
+      rect:
+        serializedVersion: 2
+        x: 1600
+        y: 116
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a7d5b5f07b7140646860020f44b0cb67
+      internalID: -178370849
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_17
+      rect:
+        serializedVersion: 2
+        x: 1700
+        y: 116
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 677e950f1fa033643b4dffad57c75c8f
+      internalID: 589328965
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_18
+      rect:
+        serializedVersion: 2
+        x: 1800
+        y: 116
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5e8ba0058608a8641b1cff6e0d87a9e3
+      internalID: 8171876
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_19
+      rect:
+        serializedVersion: 2
+        x: 1900
+        y: 116
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b0bef878e7ac4a548843f66f1c5f76d0
+      internalID: 1326640240
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_20
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4f4c550a64313284e8cfae9baf64fe10
+      internalID: -875017378
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_21
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 0
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4bd89b2b846fb484c9372b42feaa63cb
+      internalID: -503917681
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_22
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 0
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: de14c0cfdb183fe4188b4cb0364e1ea9
+      internalID: 785625602
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_23
+      rect:
+        serializedVersion: 2
+        x: 300
+        y: 0
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b79945cc74f67bf4db5f8c730de158b7
+      internalID: -1279381327
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_24
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 0
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bf663dd84255cc142ae65e708473c2e4
+      internalID: 1627034001
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_25
+      rect:
+        serializedVersion: 2
+        x: 500
+        y: 0
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 27bcb42ad749d494eaa3e6933e4f8d28
+      internalID: -622364606
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_26
+      rect:
+        serializedVersion: 2
+        x: 600
+        y: 0
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 17a552c6fe624df4883e46e5304d58c8
+      internalID: -421531719
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_27
+      rect:
+        serializedVersion: 2
+        x: 700
+        y: 0
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e55fa7b5cd71cf94580773e82da0ada2
+      internalID: 398100665
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_28
+      rect:
+        serializedVersion: 2
+        x: 800
+        y: 0
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 404a779af759ed64994d59f73dfa3868
+      internalID: -463422195
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_29
+      rect:
+        serializedVersion: 2
+        x: 900
+        y: 0
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4afcc2869b553e5419bad4c7cc52ced8
+      internalID: 1078884596
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_30
+      rect:
+        serializedVersion: 2
+        x: 1000
+        y: 0
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 343c754241862334c900a9bc4cdd1faa
+      internalID: 400949131
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_31
+      rect:
+        serializedVersion: 2
+        x: 1100
+        y: 0
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: aaab437e509de654396b9578fff21500
+      internalID: -2005792073
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_32
+      rect:
+        serializedVersion: 2
+        x: 1200
+        y: 0
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d5a9efa20bc874e499455c5775122564
+      internalID: 1912353451
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_33
+      rect:
+        serializedVersion: 2
+        x: 1300
+        y: 0
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0e130b1d6381b114b8181d05c9558ab0
+      internalID: 2000874445
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_34
+      rect:
+        serializedVersion: 2
+        x: 1400
+        y: 0
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ee4990f2944dd2741a0da2d6ad74e3ca
+      internalID: 1648820368
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_35
+      rect:
+        serializedVersion: 2
+        x: 1500
+        y: 0
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2631c6459a3e3014b8bf1aa764667e9f
+      internalID: -73612982
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_36
+      rect:
+        serializedVersion: 2
+        x: 1600
+        y: 0
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3a1d4b21876b6564e8f03e8c0cc539b5
+      internalID: -469858855
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_37
+      rect:
+        serializedVersion: 2
+        x: 1700
+        y: 0
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b17997edaae3a6348935abbbb38f5f77
+      internalID: 943924590
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_38
+      rect:
+        serializedVersion: 2
+        x: 1800
+        y: 0
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9bea616eeb1017d468fb594058cfceb8
+      internalID: 1545651904
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: helium_jelly_39
+      rect:
+        serializedVersion: 2
+        x: 1900
+        y: 0
+        width: 96
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 64be182beb2d04440a90d160e329df19
+      internalID: 2048299694
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: c8d95d8c5f0c6fa42b2bb8df68b99e38
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      helium_jelly_0: 1549502978
+      helium_jelly_1: 1546906606
+      helium_jelly_10: -1764383532
+      helium_jelly_11: 1477634149
+      helium_jelly_12: 1307875512
+      helium_jelly_13: -87257453
+      helium_jelly_14: -1155198989
+      helium_jelly_15: -2014795156
+      helium_jelly_16: -178370849
+      helium_jelly_17: 589328965
+      helium_jelly_18: 8171876
+      helium_jelly_19: 1326640240
+      helium_jelly_2: 1745457287
+      helium_jelly_20: -875017378
+      helium_jelly_21: -503917681
+      helium_jelly_22: 785625602
+      helium_jelly_23: -1279381327
+      helium_jelly_24: 1627034001
+      helium_jelly_25: -622364606
+      helium_jelly_26: -421531719
+      helium_jelly_27: 398100665
+      helium_jelly_28: -463422195
+      helium_jelly_29: 1078884596
+      helium_jelly_3: 494018999
+      helium_jelly_30: 400949131
+      helium_jelly_31: -2005792073
+      helium_jelly_32: 1912353451
+      helium_jelly_33: 2000874445
+      helium_jelly_34: 1648820368
+      helium_jelly_35: -73612982
+      helium_jelly_36: -469858855
+      helium_jelly_37: 943924590
+      helium_jelly_38: 1545651904
+      helium_jelly_39: 2048299694
+      helium_jelly_4: -2139645795
+      helium_jelly_5: 789094451
+      helium_jelly_6: -750497096
+      helium_jelly_7: -1276203084
+      helium_jelly_8: 498122391
+      helium_jelly_9: 1323231586
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

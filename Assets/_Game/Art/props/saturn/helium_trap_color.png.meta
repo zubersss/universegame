@@ -49,12 +49,12 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 9
-  spritePivot: {x: 0.5, y: 0.02907}
-  spritePixelsToUnits: 128
+  spritePivot: {x: 0.5, y: 0.078125}
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -118,45 +118,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: helium_trap_color_0
+      name: helium_trap_0
       rect:
         serializedVersion: 2
-        x: 13
-        y: 8
-        width: 286
-        height: 180
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 96
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.078125}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 54ccc7c83a70ae0a0800000000000000
-      internalID: -6851655484072735675
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: helium_trap_color_1
-      rect:
-        serializedVersion: 2
-        x: 16
-        y: 135
-        width: 280
-        height: 196
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 845e8c46d8fd0fa10800000000000000
-      internalID: 1941297237770954056
+      spriteID: de7e3c36be07f4245871bc66d1b082ca
+      internalID: -1719442962
       vertices: []
       indices: 
       edges: []
@@ -171,16 +149,11 @@ TextureImporter:
     indices: 
     edges: []
     weights: []
-    secondaryTextures:
-    - texture: {fileID: 2800000, guid: d893bd362d418524a9b70ccdd04213df, type: 3}
-      name: _NormalMap
-    - texture: {fileID: 2800000, guid: 4248ee2296bbe7e4ea4e862a896cacce, type: 3}
-      name: _EmissionMap
-    - texture: {fileID: 2800000, guid: 650505b161fac6b4bbf3e58ef0d24b23, type: 3}
-      name: _MaskTex
+    secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      helium_trap_0: -1719442962
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

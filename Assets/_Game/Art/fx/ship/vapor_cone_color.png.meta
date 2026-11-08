@@ -1,0 +1,449 @@
+fileFormatVersion: 2
+guid: f57130768d03b9b4393239172bcd67ae
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5545769232844916033
+    second: vapor_cone_color_0
+  - first:
+      213: -9000581701812031600
+    second: vapor_cone_color_1
+  - first:
+      213: 5419482390199149433
+    second: vapor_cone_color_2
+  - first:
+      213: 5163869783739854043
+    second: vapor_cone_color_3
+  - first:
+      213: 8595072023339062073
+    second: vapor_cone_color_4
+  - first:
+      213: 123090907415711631
+    second: vapor_cone_color_5
+  - first:
+      213: -8562254438757025155
+    second: vapor_cone_color_6
+  - first:
+      213: 8850099766447900836
+    second: vapor_cone_color_7
+  - first:
+      213: -7317433267720403512
+    second: vapor_cone_color_8
+  - first:
+      213: -3817630283903479921
+    second: vapor_cone_color_9
+  - first:
+      213: 3580728909770897542
+    second: vapor_cone_color_10
+  - first:
+      213: 214364172620523573
+    second: vapor_cone_color_11
+  - first:
+      213: -8182843688954199616
+    second: vapor_cone_color_12
+  - first:
+      213: 4648486752104877306
+    second: vapor_cone_color_13
+  - first:
+      213: -722170280383328585
+    second: vapor_cone_color_14
+  - first:
+      213: -4584259569173522656
+    second: vapor_cone_color_15
+  - first:
+      213: -1554560047741236264
+    second: vapor_cone_color_16
+  - first:
+      213: 4225701345417001873
+    second: vapor_cone_color_17
+  - first:
+      213: 2314902006490547091
+    second: vapor_cone_color_18
+  - first:
+      213: -5735288811184750099
+    second: vapor_cone_color_19
+  - first:
+      213: -1319851489361161068
+    second: vapor_cone_color_20
+  - first:
+      213: -2861305052107707395
+    second: vapor_cone_color_21
+  - first:
+      213: 1679025145461516715
+    second: vapor_cone_color_22
+  - first:
+      213: 2954426075542765660
+    second: vapor_cone_color_23
+  - first:
+      213: 3908479223779089673
+    second: vapor_cone_color_24
+  - first:
+      213: 8246478164777800828
+    second: vapor_cone_color_25
+  - first:
+      213: 4462073138079531442
+    second: vapor_cone_color_26
+  - first:
+      213: -5063815315176960487
+    second: vapor_cone_color_27
+  - first:
+      213: 6254201800873397934
+    second: vapor_cone_color_28
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.85}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: vapor_cone_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 768
+        width: 336
+        height: 252
+      alignment: 9
+      pivot: {x: 0.5, y: 0.85}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a22362c80f59c2243960bdb201e464d8
+      internalID: -462172299
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vapor_cone_1
+      rect:
+        serializedVersion: 2
+        x: 340
+        y: 768
+        width: 336
+        height: 252
+      alignment: 9
+      pivot: {x: 0.5, y: 0.85}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 208f0e421f1c8de4e85d362f3b4dda3f
+      internalID: 2108874590
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vapor_cone_2
+      rect:
+        serializedVersion: 2
+        x: 680
+        y: 768
+        width: 336
+        height: 252
+      alignment: 9
+      pivot: {x: 0.5, y: 0.85}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 91ef741244e10e542868619b45b60740
+      internalID: 1108404887
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vapor_cone_3
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 512
+        width: 336
+        height: 252
+      alignment: 9
+      pivot: {x: 0.5, y: 0.85}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a73447ab39b2f03408a80ff173f78eb4
+      internalID: 997031166
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vapor_cone_4
+      rect:
+        serializedVersion: 2
+        x: 340
+        y: 512
+        width: 336
+        height: 252
+      alignment: 9
+      pivot: {x: 0.5, y: 0.85}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c8f26c8d095b7b64c840fbe542cccbd6
+      internalID: 1525411188
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vapor_cone_5
+      rect:
+        serializedVersion: 2
+        x: 680
+        y: 512
+        width: 336
+        height: 252
+      alignment: 9
+      pivot: {x: 0.5, y: 0.85}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c6389e716929f594480b4196934d7cbc
+      internalID: -387262441
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vapor_cone_6
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 256
+        width: 336
+        height: 252
+      alignment: 9
+      pivot: {x: 0.5, y: 0.85}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bc7d5056462ba0c42a3be43292669e2d
+      internalID: 1976816512
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vapor_cone_7
+      rect:
+        serializedVersion: 2
+        x: 340
+        y: 256
+        width: 336
+        height: 252
+      alignment: 9
+      pivot: {x: 0.5, y: 0.85}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f4d125a4cd92a3f47a8f5559713da097
+      internalID: 336781427
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vapor_cone_8
+      rect:
+        serializedVersion: 2
+        x: 680
+        y: 256
+        width: 336
+        height: 252
+      alignment: 9
+      pivot: {x: 0.5, y: 0.85}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 450508def8f341940a60ad761bac3d8d
+      internalID: -306042990
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: vapor_cone_9
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 336
+        height: 252
+      alignment: 9
+      pivot: {x: 0.5, y: 0.85}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 842c12705ed2e1549b1537933ef9bcd2
+      internalID: 2136263539
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: fd58ce76690a9db48b3b5f3e46c076e0
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      vapor_cone_0: -462172299
+      vapor_cone_1: 2108874590
+      vapor_cone_2: 1108404887
+      vapor_cone_3: 997031166
+      vapor_cone_4: 1525411188
+      vapor_cone_5: -387262441
+      vapor_cone_6: 1976816512
+      vapor_cone_7: 336781427
+      vapor_cone_8: -306042990
+      vapor_cone_9: 2136263539
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

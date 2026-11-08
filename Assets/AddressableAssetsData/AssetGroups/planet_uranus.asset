@@ -20,8 +20,58 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 23f2374f2f74ae645a29c796b830b31e
+    m_Address: backgrounds/uranus/deck1_sun_left/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 27d392c8b604ab845945f014a497ec6a
+    m_Address: backgrounds/uranus/deck1_survey/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 33754efc54c8bc44bafa68d0460cdd92
+    m_Address: backgrounds/uranus/deck1_night/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3769c2f3b505aca40a523d4761df5b31
+    m_Address: backgrounds/uranus/deck1_night/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3e93ca1d053d2ed4a98f58555ed9788c
+    m_Address: backgrounds/uranus/deck1_survey/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 42c0861e3439f1546b0f98cea23aea0a
+    m_Address: backgrounds/uranus/deck1_sun_right/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4b3599be7038efd41a4cc2d341f326e0
     m_Address: terrain/uranus/floe_ice
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 623e6de697311364ea5b5a442f9af73e
+    m_Address: backgrounds/uranus/deck1_sun_right
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 633e5a90fc9d18141bfb8d7e14f3be5e
+    m_Address: backgrounds/uranus/deck1_survey/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6df40949427793643abaaa582a282493
+    m_Address: backgrounds/uranus/deck1_sun_right/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7edcee37d3cc9de4d9514ec539f4d221
+    m_Address: backgrounds/uranus/deck1_night
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -30,8 +80,38 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b2b14b3d08e11434bac17fd9812f0a7a
+    m_Address: backgrounds/uranus/deck1_sun_left/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bac7c431721272644ac53be09938d1b2
     m_Address: terrain/uranus/floe_core
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: be3f23efbe1e7f44a9d91453cb903657
+    m_Address: backgrounds/uranus/deck1_sun_right/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cfb228d4f6b9da04c85eb906513b3ed1
+    m_Address: backgrounds/uranus/deck1_night/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dd119058de912eb469b2cd9584b828da
+    m_Address: backgrounds/uranus/deck1_sun_left/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f137fb61a54fe014a8140703f1229cb1
+    m_Address: backgrounds/uranus/deck1_survey
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ff8be1075d84eff42927b2f9a414ba6a
+    m_Address: backgrounds/uranus/deck1_sun_left
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

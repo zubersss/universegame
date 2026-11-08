@@ -75,6 +75,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8ccfffaa9cd766744a86a8de838a0664
+    m_Address: ui/palettes/saturn/strip
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 943256cba0bafaa46a808f040ce5cb34
     m_Address: ui/panels/scroll
     m_ReadOnly: 0

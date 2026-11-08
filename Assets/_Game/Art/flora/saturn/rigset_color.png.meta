@@ -1,0 +1,820 @@
+fileFormatVersion: 2
+guid: f3374511b2747a245b9e0ab00c727ad9
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -9015811064428591007
+    second: rigset_color_0
+  - first:
+      213: -4646942707658281257
+    second: rigset_color_1
+  - first:
+      213: -367356044595573682
+    second: rigset_color_2
+  - first:
+      213: 4347448135749056951
+    second: rigset_color_3
+  - first:
+      213: -3315201752533947720
+    second: rigset_color_4
+  - first:
+      213: -8837342657336079748
+    second: rigset_color_5
+  - first:
+      213: -8765935735186961322
+    second: rigset_color_6
+  - first:
+      213: -8242980493334989995
+    second: rigset_color_7
+  - first:
+      213: -1429384369043599060
+    second: rigset_color_8
+  - first:
+      213: -1655417677226936628
+    second: rigset_color_9
+  - first:
+      213: -7864364231028489733
+    second: rigset_color_10
+  - first:
+      213: 4632427809600995280
+    second: rigset_color_11
+  - first:
+      213: -4947251109637937645
+    second: rigset_color_12
+  - first:
+      213: -8883380907211250912
+    second: rigset_color_13
+  - first:
+      213: -6618969852247736515
+    second: rigset_color_14
+  - first:
+      213: 8310072760055638085
+    second: rigset_color_15
+  - first:
+      213: -8941757950970621053
+    second: rigset_color_16
+  - first:
+      213: 2079164303080992741
+    second: rigset_color_17
+  - first:
+      213: 1490004103099028332
+    second: rigset_color_18
+  - first:
+      213: -6538976570956593336
+    second: rigset_color_19
+  - first:
+      213: 2518108490744669611
+    second: rigset_color_20
+  - first:
+      213: 1930681069225236888
+    second: rigset_color_21
+  - first:
+      213: 4284336572379364787
+    second: rigset_color_22
+  - first:
+      213: -1021163703781780209
+    second: rigset_color_23
+  - first:
+      213: 2261661250419273690
+    second: rigset_color_24
+  - first:
+      213: 8611791281861866047
+    second: rigset_color_25
+  - first:
+      213: 5035489299039453197
+    second: rigset_color_26
+  - first:
+      213: -3106851909171929053
+    second: rigset_color_27
+  - first:
+      213: 5097005251657540171
+    second: rigset_color_28
+  - first:
+      213: 5351260868189590685
+    second: rigset_color_29
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: butterpuff_rest
+      rect:
+        serializedVersion: 2
+        x: 452
+        y: 140
+        width: 52
+        height: 60
+      alignment: 9
+      pivot: {x: 0.4549, y: 0.1089}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0fa5dec8caf67b3408d959fcff4bdf67
+      internalID: -890015101
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: butterpuff_spores
+      rect:
+        serializedVersion: 2
+        x: 276
+        y: 124
+        width: 52
+        height: 76
+      alignment: 9
+      pivot: {x: 0.4549, y: 0.086}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 29dfbfbcd549a9148b5bc222c95c14dd
+      internalID: 1407673419
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostfan_folded
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 44
+        width: 32
+        height: 56
+      alignment: 9
+      pivot: {x: 0.4522, y: 0.1182}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dba78e7aded7be644a0ae51e67e3ca8a
+      internalID: 658705334
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostfan_mid
+      rect:
+        serializedVersion: 2
+        x: 36
+        y: 44
+        width: 56
+        height: 56
+      alignment: 9
+      pivot: {x: 0.4909, y: 0.1182}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fd41a46cef0b70645a23c9927e6619d7
+      internalID: 1320293787
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostfan_open
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 44
+        width: 68
+        height: 56
+      alignment: 9
+      pivot: {x: 0.4991, y: 0.1182}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1e611e3b682b5014fa86fdd436a96bd7
+      internalID: -997269981
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: heliumbell_bell
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 8
+        width: 36
+        height: 32
+      alignment: 9
+      pivot: {x: 0.4696, y: 0.8129}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b029db3f62de34644890aa79dc089968
+      internalID: -1045209456
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: heliumbell_bell_swell
+      rect:
+        serializedVersion: 2
+        x: 152
+        y: 4
+        width: 40
+        height: 36
+      alignment: 9
+      pivot: {x: 0.4933, y: 0.7951}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fc7f85f1354012d448ee490b8e7b5c3d
+      internalID: -2090692500
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: heliumbell_stem
+      rect:
+        serializedVersion: 2
+        x: 168
+        y: 44
+        width: 32
+        height: 56
+      alignment: 9
+      pivot: {x: 0.5341, y: 0.0993}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 64ebbe4714a994942857adf3a36d5bc2
+      internalID: 668836407
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: heliumbell_stem_long
+      rect:
+        serializedVersion: 2
+        x: 120
+        y: 116
+        width: 32
+        height: 84
+      alignment: 9
+      pivot: {x: 0.5341, y: 0.0656}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a88fbd51a6bcf8241ae62cf61622a5ec
+      internalID: -1002027212
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hexmoss_hunker
+      rect:
+        serializedVersion: 2
+        x: 236
+        y: 8
+        width: 88
+        height: 32
+      alignment: 9
+      pivot: {x: 0.4878, y: 0.1738}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 743206becdbbefa469980b4d257b547f
+      internalID: -680907653
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hexmoss_p0
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 60
+        width: 72
+        height: 40
+      alignment: 9
+      pivot: {x: 0.4957, y: 0.1391}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eb8363b40d8fb0641b6221cbe03ec09e
+      internalID: 1237571469
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hexmoss_p1
+      rect:
+        serializedVersion: 2
+        x: 280
+        y: 60
+        width: 72
+        height: 40
+      alignment: 9
+      pivot: {x: 0.4957, y: 0.1391}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: edd68e4c4ed169b48a15fbf685e9d1aa
+      internalID: -820470222
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hexmoss_p2
+      rect:
+        serializedVersion: 2
+        x: 356
+        y: 60
+        width: 72
+        height: 40
+      alignment: 9
+      pivot: {x: 0.4957, y: 0.1391}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 454428c0e6c0ede448c53e92236337b2
+      internalID: -1534045604
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hexmoss_p3
+      rect:
+        serializedVersion: 2
+        x: 432
+        y: 60
+        width: 72
+        height: 40
+      alignment: 9
+      pivot: {x: 0.4957, y: 0.1391}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a97c4d7de79ceca4791b24ef0b8a8db8
+      internalID: 2044078367
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hexmoss_p4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 72
+        height: 40
+      alignment: 9
+      pivot: {x: 0.4957, y: 0.1391}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f6dd74267f8ec3d4d8e0fd4da81db5dc
+      internalID: -1860553281
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hexmoss_p5
+      rect:
+        serializedVersion: 2
+        x: 76
+        y: 0
+        width: 72
+        height: 40
+      alignment: 9
+      pivot: {x: 0.4957, y: 0.1391}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 701a4a08a5f8e914592002d1d716d71a
+      internalID: 531580101
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ringreed_r0_drop
+      rect:
+        serializedVersion: 2
+        x: 156
+        y: 120
+        width: 36
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5877, y: 0.0981}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8b361a65947ad6b4c9fac2d48609c4c2
+      internalID: 761352485
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ringreed_r0_rest
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 120
+        width: 36
+        height: 80
+      alignment: 9
+      pivot: {x: 0.7255, y: 0.0981}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c51a57116e293594ab9fbaea8eafa7b4
+      internalID: -1706042640
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ringreed_r0_tilt
+      rect:
+        serializedVersion: 2
+        x: 236
+        y: 120
+        width: 36
+        height: 80
+      alignment: 9
+      pivot: {x: 0.7065, y: 0.0981}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ab52666dcf33a9f4ba8d6c909e69ed36
+      internalID: -641233008
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ringreed_r1_drop
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 104
+        width: 36
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5105, y: 0.0819}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9b5379ad733f6534586d8870a379d247
+      internalID: 460502233
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ringreed_r1_rest
+      rect:
+        serializedVersion: 2
+        x: 40
+        y: 104
+        width: 36
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5326, y: 0.0819}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 432bdc39efb69874480ad96957918ea4
+      internalID: -1636879509
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ringreed_r1_tilt
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 104
+        width: 36
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5136, y: 0.0819}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5ba351e065cc73848ada98e217cd699c
+      internalID: -1183468410
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ringreed_r2_drop
+      rect:
+        serializedVersion: 2
+        x: 332
+        y: 128
+        width: 36
+        height: 72
+      alignment: 9
+      pivot: {x: 0.4265, y: 0.109}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 79744d8b07204e842bccc09517af7f1f
+      internalID: 214342200
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ringreed_r2_rest
+      rect:
+        serializedVersion: 2
+        x: 372
+        y: 128
+        width: 36
+        height: 72
+      alignment: 9
+      pivot: {x: 0.3225, y: 0.109}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ca095a1e682389c4cb793a2d51c40cbe
+      internalID: -1026196765
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ringreed_r2_tilt
+      rect:
+        serializedVersion: 2
+        x: 412
+        y: 128
+        width: 36
+        height: 72
+      alignment: 9
+      pivot: {x: 0.3035, y: 0.109}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1312f93279d40984c9a1e12886e5b0b9
+      internalID: 1746129550
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ringreed_tuft
+      rect:
+        serializedVersion: 2
+        x: 328
+        y: 24
+        width: 32
+        height: 16
+      alignment: 9
+      pivot: {x: 0.4608, y: 0.3527}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 114a8910918dccb4aaa9d2c40a8db778
+      internalID: 1303849446
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: cf3adefd7fd1aca449cbec717f2a6ac0
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      butterpuff_rest: -890015101
+      butterpuff_spores: 1407673419
+      frostfan_folded: 658705334
+      frostfan_mid: 1320293787
+      frostfan_open: -997269981
+      heliumbell_bell: -1045209456
+      heliumbell_bell_swell: -2090692500
+      heliumbell_stem: 668836407
+      heliumbell_stem_long: -1002027212
+      hexmoss_hunker: -680907653
+      hexmoss_p0: 1237571469
+      hexmoss_p1: -820470222
+      hexmoss_p2: -1534045604
+      hexmoss_p3: 2044078367
+      hexmoss_p4: -1860553281
+      hexmoss_p5: 531580101
+      ringreed_r0_drop: 761352485
+      ringreed_r0_rest: -1706042640
+      ringreed_r0_tilt: -641233008
+      ringreed_r1_drop: 460502233
+      ringreed_r1_rest: -1636879509
+      ringreed_r1_tilt: -1183468410
+      ringreed_r2_drop: 214342200
+      ringreed_r2_rest: -1026196765
+      ringreed_r2_tilt: 1746129550
+      ringreed_tuft: 1303849446
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

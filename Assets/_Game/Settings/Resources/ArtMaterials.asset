@@ -353,9 +353,6 @@ MonoBehaviour:
   - props/rig/builder
   - props/rig/lance
   - props/rig/survey
-  - props/saturn/helium_trap
-  - props/saturn/hexagon_wall_marker
-  - props/saturn/ring_rig
   - props/space/asteroid_01
   - props/space/asteroid_02
   - props/space/asteroid_03
@@ -1137,6 +1134,82 @@ MonoBehaviour:
       start: 40
       length: 10
       loop: 1
+  - key: creatures/saturn/floe_moth
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 8
+      loop: 1
+    - name: fly
+      start: 8
+      length: 12
+      loop: 1
+    - name: react
+      start: 20
+      length: 8
+      loop: 0
+    - name: bump
+      start: 28
+      length: 8
+      loop: 0
+  - key: creatures/saturn/helium_jelly
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 10
+      loop: 1
+    - name: drift
+      start: 10
+      length: 12
+      loop: 1
+    - name: react
+      start: 22
+      length: 8
+      loop: 0
+    - name: bump
+      start: 30
+      length: 10
+      loop: 0
+  - key: creatures/saturn/hex_drake
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 10
+      loop: 1
+    - name: fly
+      start: 10
+      length: 12
+      loop: 1
+    - name: react
+      start: 22
+      length: 8
+      loop: 0
+    - name: bump
+      start: 30
+      length: 10
+      loop: 0
+  - key: creatures/saturn/ringmite
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 8
+      loop: 1
+    - name: fly
+      start: 8
+      length: 12
+      loop: 1
+    - name: react
+      start: 20
+      length: 8
+      loop: 0
+    - name: bump
+      start: 28
+      length: 8
+      loop: 0
   - key: creatures/space/ringmite
     fps: 10
     clips:
@@ -1375,6 +1448,27 @@ MonoBehaviour:
       start: 0
       length: 8
       loop: 0
+  - key: fx/ship/shock_ring
+    fps: 12
+    clips:
+    - name: burst
+      start: 0
+      length: 8
+      loop: 0
+  - key: fx/ship/speed_lines
+    fps: 12
+    clips:
+    - name: streak
+      start: 0
+      length: 4
+      loop: 1
+  - key: fx/ship/vapor_cone
+    fps: 12
+    clips:
+    - name: form
+      start: 0
+      length: 10
+      loop: 0
   - key: fx/skip_spool/base
     fps: 12
     clips:
@@ -1544,6 +1638,13 @@ MonoBehaviour:
       length: 6
       loop: 0
   - key: ships/pilgrim/puff
+    fps: 12
+    clips:
+    - name: puff
+      start: 0
+      length: 8
+      loop: 1
+  - key: ships/pilgrim/puff_boost
     fps: 12
     clips:
     - name: puff

@@ -55,6 +55,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 18fed079cf14bd440ba3ba7ba9947235
+    m_Address: fx/ship/speed_lines
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1b4963630e3b0a54b9c021156dcb8f8d
     m_Address: fx/dig_sparks/base
     m_ReadOnly: 0
@@ -145,13 +150,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4f5ca74b872b1fc43a4498f577571236
+    m_Address: ships/pilgrim/puff_boost/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 51202e0b6ff5b1e49a2992a59558975f
     m_Address: fx/film/scratches
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 517b5c606663dab45a35c6ddf5100c10
+    m_Address: ships/pilgrim/puff_boost
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 52913a9ed2c763d4f801732247459fb6
     m_Address: characters/surveyor/side
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 533213d4f3caece4c9de7d492355f1c1
+    m_Address: fx/ship/vapor_cone/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -227,6 +247,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 79e8def0cde0e544f91b7706edcf4d29
     m_Address: props/common/shelter_door/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7afe763020cba4c4d836db3025ee540e
+    m_Address: fx/ship/shock_ring/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -360,6 +385,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b4f5ac20e4e4d604d9b55fe9a3b41732
+    m_Address: fx/ship/shock_ring
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: be424f8b3b68d4644b1a391251c0398d
     m_Address: props/common/smelter
     m_ReadOnly: 0
@@ -452,6 +482,16 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f31f033105d464d488291fc041408aad
     m_Address: characters/surveyor/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f57130768d03b9b4393239172bcd67ae
+    m_Address: fx/ship/vapor_cone
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f643787255ba0884090fa61e594fbcb5
+    m_Address: fx/ship/speed_lines/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

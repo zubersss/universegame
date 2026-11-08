@@ -1,0 +1,415 @@
+fileFormatVersion: 2
+guid: b4f5ac20e4e4d604d9b55fe9a3b41732
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -3283280868366529170
+    second: shock_ring_color_0
+  - first:
+      213: 9079376767124276681
+    second: shock_ring_color_1
+  - first:
+      213: -7702041293615397864
+    second: shock_ring_color_2
+  - first:
+      213: 5975373068977827345
+    second: shock_ring_color_3
+  - first:
+      213: -4914660289322121511
+    second: shock_ring_color_4
+  - first:
+      213: 7332257159325262108
+    second: shock_ring_color_5
+  - first:
+      213: 7549074290432142810
+    second: shock_ring_color_6
+  - first:
+      213: -798067197217844137
+    second: shock_ring_color_7
+  - first:
+      213: 5413980737328266352
+    second: shock_ring_color_8
+  - first:
+      213: 6289320485007352834
+    second: shock_ring_color_9
+  - first:
+      213: -6200249286654331470
+    second: shock_ring_color_10
+  - first:
+      213: -4826299334319896363
+    second: shock_ring_color_11
+  - first:
+      213: -3407441446279270919
+    second: shock_ring_color_12
+  - first:
+      213: -8746408709909243453
+    second: shock_ring_color_13
+  - first:
+      213: 7898672537815950831
+    second: shock_ring_color_14
+  - first:
+      213: 3957723763087507611
+    second: shock_ring_color_15
+  - first:
+      213: 5390673396722229168
+    second: shock_ring_color_16
+  - first:
+      213: -5723089460538102232
+    second: shock_ring_color_17
+  - first:
+      213: 2605854976479206115
+    second: shock_ring_color_18
+  - first:
+      213: 3817011477097664139
+    second: shock_ring_color_19
+  - first:
+      213: -1567402859149210526
+    second: shock_ring_color_20
+  - first:
+      213: -374673161820057178
+    second: shock_ring_color_21
+  - first:
+      213: 8306969438440116650
+    second: shock_ring_color_22
+  - first:
+      213: 3137169731095978950
+    second: shock_ring_color_23
+  - first:
+      213: -4758523746613113415
+    second: shock_ring_color_24
+  - first:
+      213: -1757861587975043761
+    second: shock_ring_color_25
+  - first:
+      213: -3235514030449787242
+    second: shock_ring_color_26
+  - first:
+      213: -265565336849172955
+    second: shock_ring_color_27
+  - first:
+      213: 7896672474540351869
+    second: shock_ring_color_28
+  - first:
+      213: 208104525262361904
+    second: shock_ring_color_29
+  - first:
+      213: -6381239409491244469
+    second: shock_ring_color_30
+  - first:
+      213: -4059694570155331935
+    second: shock_ring_color_31
+  - first:
+      213: -3531434009413724624
+    second: shock_ring_color_32
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: shock_ring_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 756
+        width: 504
+        height: 248
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 46f18c267ddf601438bec784912b2f18
+      internalID: 929342861
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shock_ring_1
+      rect:
+        serializedVersion: 2
+        x: 508
+        y: 756
+        width: 504
+        height: 248
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 413b5083c98d6ad4c9f49d8d66e4969b
+      internalID: 347136946
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shock_ring_2
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 504
+        width: 504
+        height: 248
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e8f56476c79a41644885b280b819bb3b
+      internalID: -910347003
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shock_ring_3
+      rect:
+        serializedVersion: 2
+        x: 508
+        y: 504
+        width: 504
+        height: 248
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b475c07137fed20409fc8b49a5bbba85
+      internalID: 1427517622
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shock_ring_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 252
+        width: 504
+        height: 248
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 85b281a626e4aed4b82491d9d6ef336a
+      internalID: -924848664
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shock_ring_5
+      rect:
+        serializedVersion: 2
+        x: 508
+        y: 252
+        width: 504
+        height: 248
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1b59580549ac77b4baadd99174f4176e
+      internalID: 613733025
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shock_ring_6
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 504
+        height: 248
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f58bbb11383fe774a855867566a1d6b9
+      internalID: 412881204
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shock_ring_7
+      rect:
+        serializedVersion: 2
+        x: 508
+        y: 0
+        width: 504
+        height: 248
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: af2a99b6fdfa17d48839573f660fc82d
+      internalID: -2052507541
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 7e122f4047eaa9f4eb5a28b35a745385
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      shock_ring_0: 929342861
+      shock_ring_1: 347136946
+      shock_ring_2: -910347003
+      shock_ring_3: 1427517622
+      shock_ring_4: -924848664
+      shock_ring_5: 613733025
+      shock_ring_6: 412881204
+      shock_ring_7: -2052507541
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
