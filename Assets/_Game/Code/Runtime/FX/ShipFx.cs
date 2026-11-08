@@ -45,6 +45,10 @@ namespace Meridian.FX
         /// <summary>U-150: true while the vapor cone / the shock ring shows.</summary>
         public bool VaporShown => vaporT >= 0f;
         public bool RingShown => ringT >= 0f;
+        /// <summary>U-150: the highest sorting order among the rig's parts on its layer when the cone was placed over them (tests, captures).</summary>
+        public int ConeOrderOverHull { get; private set; } = int.MinValue;
+        /// <summary>U-150: the vapor cone's renderer (tests, captures).</summary>
+        public SpriteRenderer VaporCone => vapor;
         /// <summary>U-150: the flame's key now (the puff, or B-171's boost flame while boosting once it is in).</summary>
         public string FlameKey => Main != null ? Main.key : null;
         Meridian.Ship.ShipLegsView legsView;
@@ -210,8 +214,17 @@ namespace Meridian.FX
             Move(Main, ArtKeys.Ships.PilgrimPuff, origin + rig.Socket("tail_exhaust", new Vector2(0f, 0.85f)), 0f, new Vector2(1.3f, 1.3f), legsView.SquashRoot, layer, behind);
             Move(PodAft, ArtKeys.Ships.PilgrimPuff, origin + rig.Socket("attitude_l", new Vector2(-1.5f, 2.6f)), -90f, new Vector2(0.45f, 0.45f), legsView.SquashRoot, layer, behind);
             Move(PodFore, ArtKeys.Ships.PilgrimPuff, origin + rig.Socket("attitude_r", new Vector2(1.5f, 2.6f)), 90f, new Vector2(0.45f, 0.45f), legsView.SquashRoot, layer, behind);
-            // U-150 (B-171): the vapor cone in front of the hull, the shock ring behind it (and behind the puffs).
-            if (vapor != null) { vapor.sortingLayerID = layer; vapor.sortingOrder = behind + 2; }
+            // U-150 (B-171): the vapor cone in front of the hull, the shock ring behind it (and behind the puffs). 0.4.8's smoke: the rig's
+            // hull parts sort above its base renderer, so the cone goes over the rig's highest part on the layer (the collar covers the hull).
+            if (vapor != null)
+            {
+                int top = behind + 1;
+                foreach (var r in legsView.GetComponentsInChildren<SpriteRenderer>(true)) // once, when the rig is placed
+                    if (r != vapor && r.sortingLayerID == layer && (lines == null || System.Array.IndexOf(lines, r) < 0) && r.sortingOrder > top) top = r.sortingOrder;
+                vapor.sortingLayerID = layer;
+                vapor.sortingOrder = top + 1;
+                ConeOrderOverHull = top;
+            }
             if (ring != null) { ring.sortingLayerID = layer; ring.sortingOrder = behind - 1; }
         }
 

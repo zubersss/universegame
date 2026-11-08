@@ -2002,6 +2002,8 @@ namespace Meridian.Tests
                 while (Time.time < until) yield return null;
                 yield return Shot("2_earth_boom");
                 Assert.IsTrue(fx.VaporShown && fx.RingShown, "the vapor cone and the shock ring show");
+                TestContext.Out.WriteLine($"[MERIDIAN] u150 cone order {fx.VaporCone.sortingOrder} over the rig's highest part {fx.ConeOrderOverHull} (layer {fx.VaporCone.sortingLayerName})");
+                Assert.Greater(fx.VaporCone.sortingOrder, fx.ConeOrderOverHull, "the vapor cone draws over every part of the hull (0.4.8's smoke: it sat behind)");
 
                 // 3. Near the Escape Line, the throttle set each step to hold the speed (thrust = g + drag): calm.
                 float line = side.Config.EscapeLineY, hold = side.Config.datumY + side.Config.escapeAltitude * 0.72f;
