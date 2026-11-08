@@ -22,3 +22,7 @@ Assets not listed here are original work made in Blender from scripts in `blende
 | Asset key(s) | Input | Source / URL | License |
 |--------------|-------|--------------|---------|
 | ui/titlecards/{earth,mars,mercury,venus,jupiter,saturn,uranus,neptune} | the planet name drawn from Limelight Regular's glyph outlines (Eben Sorkin, Sorkin Type) and the subtitle from Patrick Hand Regular's (Patrick Wagesreiter), read from UNITY's committed TTFs `Assets/_Game/Fonts/Limelight/Limelight-Regular.ttf` and `Assets/_Game/Fonts/PatrickHand/PatrickHand-Regular.ttf` by blender/scripts/build_ui_v3.py and baked as ink into each card's color PNG (no font file under Art/) | https://github.com/google/fonts/tree/main/ofl/limelight, https://github.com/google/fonts/tree/main/ofl/patrickhand (logged as files in docs/credits/unity.md) | SIL Open Font License 1.1; images rendered from an OFL font are not Font Software, so the cards carry no OFL condition |
+
+## Upkeep checks
+
+- 2026-11-08 (session 10, B-178 to B-192): every asset exported this session is original, drawn from scripts with no external input (no images, fonts, scans or downloads). Covered: the ground band variants, lips, biome bands and fills (B-178 / B-180 / B-181); the painted backdrops (B-179 / B-183 / B-185 / B-186 / B-187 / B-188 / B-189: blender/scripts/build_backdrop_v3.py, gen_painted_bg.py); the dig puffs (B-184 / B-190 / B-191); the fills' buried details (B-192: build_ground_variants_v3.py). Nothing to add to the tables above.
