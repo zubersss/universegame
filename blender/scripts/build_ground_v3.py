@@ -380,7 +380,8 @@ def band_crust(d, M, planet, k=0):
     xs = [L * i / 640 for i in range(641)]
     bumps = [(L * (i + rnd.random() * 0.6) / 15, rnd.uniform(0.022, 0.055)) for i in range(15)]
     top = _bump_surface(xs, L, bumps)
-    crust_b = [(x, -0.09 + per(x, L, 3, 21, 0.02)) for x in xs[::4]]
+    depth = {"mercury": 0.30}.get(planet, 0.09)           # Mercury: a deep cream regolith over the grey breccia (LEAD 04:1x)
+    crust_b = [(x, -depth + per(x, L, 3, 21, 0.02)) for x in xs[::4]]
     soil_b = [(x, -0.44 + per(x, L, 4, 22, 0.06) + 0.025 * math.sin(TAU * 19 * x / L)) for x in xs[::4]]
 
     def body(dx, _dz):

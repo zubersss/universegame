@@ -1,0 +1,25 @@
+{
+  "key": "terrain/mars/ground_band",
+  "style": "v3",
+  "contract": "v3.2 11.9",
+  "frame_width": 512,
+  "frame_height": 64,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.0,
+    0.625
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [],
+  "tile_x": true,
+  "repeat_px": 512,
+  "surface_row": 24,
+  "above_px": 24,
+  "below_px": 40,
+  "mapping": "u = world x x 64 mod 512 (continues across chunk seams; UNITY via LEAD 11-08 04:1x); v = 24 - (normal distance from the outline x 64), up = toward row 0; the sprite pivot is ON row 24 (40 px up from the bottom)",
+  "note": "low scallops only: the art stretches <= 22 % along the band on a 35 deg slope"
+}

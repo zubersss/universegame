@@ -1,0 +1,22 @@
+{
+  "key": "terrain/mars/dig_rim",
+  "style": "v3",
+  "contract": "v3.2 11.9",
+  "frame_width": 256,
+  "frame_height": 16,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.0,
+    0.75
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [],
+  "tile_x": true,
+  "repeat_px": 256,
+  "ink_row": 4,
+  "mapping": "along each carved hole's outline; the rows below the ink lie in the solid (the normal points into the air); the sprite pivot is ON the ink row 4"
+}

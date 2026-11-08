@@ -1,0 +1,21 @@
+{
+  "key": "terrain/mars/ground_decor_4",
+  "style": "v3",
+  "contract": "v3.2 11.9",
+  "frame_width": 64,
+  "frame_height": 64,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.09375
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [],
+  "upright": true,
+  "decor": "frost_patch",
+  "note": "scatter along the curve, never rotated"
+}
