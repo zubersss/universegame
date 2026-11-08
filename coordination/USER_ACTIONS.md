@@ -6,6 +6,14 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
+### USER-32 — The 0.4.8 feel check: fly the new rocket (15 min)
+Open https://claude.ai/artifact/JZV8VcfbbnpHVSxn4YhMcF (the flight fix and Jupiter: the stills, the numbers, what changed), then
+double-click `C:\dev\universegame\Build\MERIDIAN_0.4.8\MERIDIAN.exe`. This check is about feel only. On Earth walk and jump
+around the camp; board with F, hold W or Space and climb: feel the engine build, watch for the long flame and the speed lines,
+listen for the boom about halfway up; let go of thrust for a moment, tilt with A / D; fly on to Mars and land under 6 m/s.
+Tell the Lead "0.4.8 feels right" or what still feels off (the climb, the zoom, the speed, the landing, the walking).
+The ground is still blocky in this build; the smooth ground with round digging (your 04:0x and 04:1x notes) is Build 0.5.0.
+
 ### USER-08 — Optional: let the team run PowerShell commands without prompts (2 min)
 On Windows, Claude Code runs commands through PowerShell as well as Bash, and the
 `Bash(...)` allow rules in `.claude/settings.json` don't cover PowerShell. The Lead added
