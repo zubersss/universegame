@@ -659,9 +659,9 @@ def lip_basalt(d, M, k=0):
     G.stroke(d, lobed + inner, M["basalt"], 0.0, cyclic=True)
     G.stroke(d, inner2 + inner[::-1], M["basalt_sh"], 0.0, cyclic=True)
     G.stroke(d, [(x, z) for x, z in outer[:12]] + [(x, z - 0.03) for x, z in outer[11::-1]], M["bas_lit"], 0.0, cyclic=True)
-    tng = [(0.37, -0.40), (0.41, -0.47), (0.43, -0.58), (0.42, -0.66), (0.39, -0.69), (0.37, -0.62), (0.355, -0.5)]   # the cooled tongue
-    G.stroke(d, tng, M["basalt_i"], I, cyclic=True)
-    G.seam(d, [(0.39, -0.46), (0.405, -0.58)], M["ink"])
+    toe = [(0.355, -0.40), (0.415, -0.43), (0.445, -0.49), (0.43, -0.55), (0.385, -0.56), (0.35, -0.5)]   # a short lava toe under the
+    G.stroke(d, toe, M["basalt_i"], I, cyclic=True)                                            # lobe (rev: a hanging tongue read as a drip)
+    G.seam(d, [(0.38, -0.44), (0.41, -0.5)], M["ink"])
     G.stroke(d, lobed, M["ink"], O)
     G.seam(d, inner, M["ink"])
     for x0 in (-0.44, -0.24, -0.05):                                                          # ropy folds, bowed toward the brink
@@ -722,17 +722,16 @@ def lip_tessera(d, M, k=0):
     """The tesserae's brink: the warm-grey crust running past the edge as a folded slab - its fold ridges on top, a rounded,
     chipped nose over the face, a lit rim, the shaded underside, dust in the grooves, two flakes falling."""
     top = 0.04
-    outer, inner, rise, chin, xface, zb = _slab(top, 0.15, 0.38, bumps=0.025, seed=5)
+    outer, inner, rise, chin, xface, zb = _slab(top, 0.15, 0.38, bumps=0.01, seed=5)        # rev: 0.025 bumps read as segments
     G.stroke(d, outer + inner[1:], M["tess"], 0.0, cyclic=True)
     G.stroke(d, [(x, z) for x, z in rise] + [(x, z - 0.03) for x, z in rise[::-1]], M["tess_lit"], 0.0, cyclic=True)
     G.stroke(d, chin + [(xface, zb)] + [(xface - 0.02, zb + 0.045), (0.31, zb + 0.05)], M["tess_sh"], 0.0, cyclic=True)
     G.stroke(d, [(-0.60, zb + 0.04), (xface - 0.04, zb + 0.04), (xface, zb), (-0.60, zb)], M["tess_sh"], 0.0, cyclic=True)
     G.stroke(d, outer, M["ink"], O)
     G.seam(d, inner, M["ink"])
-    for i in range(3):                                                                        # the grooves between the folds
-        x = -0.60 + (0.31 + 0.60) * (2 * i + 1) / 6.2
-        G.seam(d, [(x, top - 0.005), (x + 0.02, top - 0.06), (x + 0.01, zb + 0.02)], M["ink"])
-        G.stroke(d, [(x - 0.01, top - 0.02), (x + 0.025, top - 0.02), (x + 0.02, top - 0.05), (x - 0.005, top - 0.05)], M["tess_dp"], 0.0, cyclic=True)
+    for x in (-0.42, -0.12, 0.16):                                                            # fold lines slanting back (rev: vertical
+        G.seam(d, [(x, top - 0.01), (x - 0.05, top - 0.06), (x - 0.09, zb + 0.03)], M["ink"])  # joints read as segments)
+        G.stroke(d, [(x - 0.012, top - 0.02), (x + 0.006, top - 0.02), (x - 0.045, top - 0.075), (x - 0.06, top - 0.07)], M["tess_dp"], 0.0, cyclic=True)
     for j, (x, z, r) in enumerate(((0.47, -0.42, 0.034), (0.51, -0.6, 0.027))):
         G.stroke(d, B._shard(x, z, r, random.Random(2001 + j), sides=5, flat=0.6), M["tess_i"], I, cyclic=True)
 
