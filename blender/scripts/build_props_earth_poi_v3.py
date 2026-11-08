@@ -175,7 +175,8 @@ def archive_terminal(d, M, k=0):
     if k % 2 == 0:                                                                      # the cursor blinks
         G.stroke(d, box(-0.07, 1.402, -0.03, 1.438, seed=215, wob=0.0, n=2), M["glow_core"], 0.0, cyclic=True)
     sz = zb + 0.04 + (zt - zb - 0.08) * SCAN[k]                                        # the scan band sweeps up
-    G.stroke(d, [(-0.31, sz - 0.03), (xr(sz - 0.03), sz - 0.03), (xr(sz + 0.03), sz + 0.03), (-0.31, sz + 0.03)], M["halo"], 0.0, cyclic=True)
+    G.stroke(d, [(-0.31, sz - 0.03), (xr(sz - 0.03), sz - 0.03), (xr(sz + 0.03), sz + 0.03), (-0.31, sz + 0.03)], M["teal_sh"], 0.0, cyclic=True)  # LEAD 14:5x:
+    # a solid palette tone (the 30 % off-white halo over the dark screen blended off the palette: 99.0 %)
     G.stroke(d, scr, M["ink"], I, cyclic=True)
     member(d, M, (0.18, 1.9), (0.22, 1.98), 0.02, "iron")                               # an antenna stub
     G.stroke(d, G.lumpy_ellipse(0.225, 2.0, 0.026, 0.024, n=8, seed=216), M["red"], I, cyclic=True)
