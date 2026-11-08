@@ -1041,19 +1041,27 @@ def do_ui_set(entry, preview):
     if preview:
         raise AssetError(f"{entry['key']}: no preview mode (python build_ui_v3.py <png>)")
     import build_ui_v3 as UI
+    cards = tuple(entry.get("cards", UI.CARDS))          # B-170: a cards-only row ("panels": false) leaves B-151's panels alone
+    panels = bool(entry.get("panels", True))
     fakegp.install()                    # an earlier review script in this batch may have restored gp_draw.mat
     try:
         try:
-            out = UI.export(ART, ss_card=int(entry.get("card_ss", 4)))
+            out = UI.export(ART, ss_card=int(entry.get("card_ss", 4)), cards=cards, panels=panels)
         except Exception:
-            for k in UI.keys():
+            for k in UI.keys(cards, panels):
                 mark_stale(k, True)
             raise
-        UI.preview(os.path.join(PREVIEW, f"review_{entry.get('review_name', 'b151_ui')}.png"), note=f"exported {time.strftime('%m-%d %H:%M')}")
+        note = f"exported {time.strftime('%m-%d %H:%M')}"
+        if panels:
+            UI.preview(os.path.join(PREVIEW, f"review_{entry.get('review_name', 'b151_ui')}.png"), note=note)
+        else:
+            UI.preview_cards(os.path.join(PREVIEW, f"review_{entry.get('review_name', 'b170_titlecards')}.png"), art=ART, cards=cards, note=note)
     finally:
         fakegp.restore()
     for k, _w, _h, _n in out:
         mark_stale(k, False)
+        if not panels:                 # B-170: one OK line per card
+            log_line(f"OK {k} | {_w}x{_h} {_n // 1024}KB + json | peak {peak_mb()}MB")
     mark_stale(entry["key"], False)
     log_line(f"OK {entry['key']} | " + ", ".join(f"{k.split('/', 1)[1]} {w}x{h} {n // 1024}KB" for k, w, h, n in out)
              + f" | {time.time() - t0:.1f}s | peak {peak_mb()}MB")

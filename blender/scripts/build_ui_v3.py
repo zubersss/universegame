@@ -401,6 +401,8 @@ SUBTITLE = {"earth": "home, and the first launch", "mars": "the first off-world 
 def vignette(planet, w, h, seed):
     """The painted oval vignette (numpy washes in the planet's palette): Earth hills under a sky, Mars a butte in a
     canyon under butterscotch, Mercury the huge Sun over crater rims under an ink sky."""
+    if planet in VIGNETTES_C2:                                                             # B-170: the five later cards
+        return VIGNETTES_C2[planet](w, h, np.random.default_rng(seed))
     pal = {k: np.array(v3.hex_rgb(h_), np.float32) / 255 for k, h_ in v3.PALETTES[planet].items()}
     yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
     rng = np.random.default_rng(seed)
@@ -474,6 +476,250 @@ def title_card(planet, seed=31, ss=2):
     return (np.clip(img, 0, 1) * 255).astype(np.uint8), w + w2
 
 
+# ---------------------------------------------------------------- B-170: the five later title cards (B-151's style)
+SUBTITLE.update({"venus": "the station above the acid clouds", "jupiter": "the floating belts and the great spot",
+                 "saturn": "the rings and the hexagon", "uranus": "the sideways seasons", "neptune": "the dark winds at the edge"})
+CARDS_C2 = ("venus", "jupiter", "saturn", "uranus", "neptune")
+
+
+def _col(planet, key, tone=None):
+    """A palette colour (or "ink") as float rgb, optionally its mid ("sh") or deep ("dp") shadow tone."""
+    h_ = v3.INK if key == "ink" else v3.PALETTES[planet][key]
+    if tone == "sh":
+        h_ = v3.shadow_of(h_, planet)
+    elif tone == "dp":
+        h_ = v3.deep_of(h_, planet)
+    return np.array(v3.hex_rgb(h_), np.float32) / 255
+
+
+def _grid(w, h):
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    return yy + 0.5, xx + 0.5
+
+
+def _space(planet, w, h, rng, density=0.0022):
+    """The night sky in the planet's deep brown with a sprinkle of offwhite specks (1-2 px)."""
+    img = np.empty((h, w, 3), np.float32)
+    img[:] = _col(planet, "brown", "dp")
+    s = rng.random((h, w)) < density
+    img[s] = _col(planet, "offwhite")
+    img[np.roll(s, 1, axis=1) & (rng.random((h, w)) < 0.35)] = _col(planet, "offwhite")
+    return img
+
+
+def _ellipse(xx, yy, cx, cy, rx, ry, rot=0.0):
+    """The normalised radius of an (optionally rotated) ellipse: < 1 inside; and its px scale for ink rings."""
+    ca, sa = math.cos(rot), math.sin(rot)
+    u = (xx - cx) * ca + (yy - cy) * sa
+    v = -(xx - cx) * sa + (yy - cy) * ca
+    return np.sqrt((u / rx) ** 2 + (v / ry) ** 2), u, v
+
+
+def _ink(img, e, scale, px=2.0, where=None):
+    """A cartoon ink line px wide just inside the edge e == 1 (scale: the px per unit of e at the thinnest side)."""
+    m = (e < 1.0) & (e >= 1.0 - px / scale)
+    if where is not None:
+        m &= where
+    img[m] = _col("earth", "ink")
+
+
+def _banded_disc(img, planet, xx, yy, cx, cy, r, bands, wobble, light=(-0.3, -0.15), lit_r=1.12, seed_ph=1.3):
+    """A planet disc: latitude bands (palette keys / tones, top to bottom) with a wavy edge, a two-tone terminator
+    (the lit circle offset toward the light; outside it the band's mid shadow), an ink rim. -> the disc mask."""
+    e = np.hypot(xx - cx, yy - cy) / r
+    disc = e < 1.0
+    lat = (yy - cy) / r + wobble * np.sin((xx - cx) / r * 5.0 + seed_ph)
+    idx = np.clip(((lat + 1) / 2 * len(bands)).astype(int), 0, len(bands) - 1)
+    lit = np.hypot(xx - (cx + light[0] * r), yy - (cy + light[1] * r)) < lit_r * r
+    for k, (key, tone) in enumerate(bands):
+        m = disc & (idx == k)
+        img[m & lit] = _col(planet, key, tone)
+        img[m & ~lit] = _col(planet, key, "dp" if tone == "sh" else "sh")
+    _ink(img, e, r)
+    return disc
+
+
+def _vig_venus(w, h, rng):
+    """The apricot deck: an apricot sky over two scalloped cloud banks, the Sun's disc in the haze, a red aerostat balloon
+    with its gondola, the station's plank deck and rail across the bottom."""
+    P = "venus"
+    yy, xx = _grid(w, h)
+    t = (yy / h)[..., None]
+    img = (_col(P, "sky") * (1 - t) + _col(P, "mustard") * t).astype(np.float32)
+    es, _u, _v = _ellipse(xx, yy, w * 0.2, h * 0.28, h * 0.1, h * 0.1)
+    img[es < 1] = _col(P, "offwhite")
+    for base, amp, key, tone, k in ((0.6, 0.05, "offwhite", "sh", 7.0), (0.7, 0.05, "offwhite", None, 11.0)):
+        ph = rng.uniform(0, 6)
+        line = h * (base - amp * np.abs(np.sin(xx[0] / w * k + ph)) + 0.01 * np.sin(xx[0] / w * 31 + ph))
+        img[yy > line[None, :]] = _col(P, key, tone)
+        top = (yy > line[None, :]) & (yy < line[None, :] + 2.0)
+        img[top] = _col(P, key, "sh" if tone is None else "dp")
+    cx, cy, rx, ry = w * 0.66, h * 0.3, w * 0.13, h * 0.19                                      # the balloon
+    eb, u, _v = _ellipse(xx, yy, cx, cy, rx, ry)
+    ball = eb < 1
+    img[ball] = _col(P, "red")
+    img[ball & (np.abs(np.sin(u / rx * math.pi * 1.5)) < 0.1)] = _col(P, "red", "sh")             # the gores
+    img[ball & (u > rx * 0.45)] = _col(P, "red", "sh")
+    eh, _u, _v = _ellipse(xx, yy, cx - rx * 0.4, cy - ry * 0.45, rx * 0.16, ry * 0.12)
+    img[eh < 1] = _col(P, "offwhite")
+    _ink(img, eb, min(rx, ry))
+    gy = cy + ry + 14
+    for sx in (-1, 1):                                                                         # the cables
+        x0, x1 = cx + sx * rx * 0.45, cx + sx * 9
+        for j in range(16):
+            f = j / 15
+            px_, py_ = int(x0 + (x1 - x0) * f), int(cy + ry * 0.88 + (gy - cy - ry * 0.88) * f)
+            img[py_:py_ + 2, px_:px_ + 1] = _col(P, "brown")
+    gond = (np.abs(xx - cx) < 13) & (yy > gy) & (yy < gy + 11)
+    img[gond] = _col(P, "brown")
+    img[gond & (yy < gy + 3)] = _col(P, "mustard", "sh")
+    deck_y, rail_y = h * 0.84, h * 0.75                                                         # the deck and its rail
+    img[(yy > rail_y) & (yy < rail_y + 4)] = _col(P, "brown")
+    for x0 in np.arange(6, w, 34):
+        img[(yy > rail_y) & (yy < deck_y) & (np.abs(xx - x0) < 2)] = _col(P, "brown")
+    deck = yy > deck_y
+    img[deck] = _col(P, "mustard", "sh")
+    img[deck & (yy < deck_y + 3)] = _col(P, "ink")
+    img[deck & ((xx % 28) < 1.6)] = _col(P, "brown")
+    img[deck & (yy > deck_y + 3) & (yy < deck_y + 6)] = _col(P, "mustard")
+    return img
+
+
+def _vig_jupiter(w, h, rng):
+    """The banded giant with the Spot: the disc filling the medallion's lower half, ten wavy belts, the Great Red Spot
+    ringed in offwhite, the terminator crescent, Io in the dark."""
+    P = "jupiter"
+    yy, xx = _grid(w, h)
+    img = _space(P, w, h, rng)
+    cx, cy, r = w * 0.54, h * 0.62, h * 0.55
+    bands = [("offwhite", None), ("mustard", None), ("sky", None), ("red", None), ("offwhite", None), ("mustard", "sh"),
+             ("sky", None), ("red", "sh"), ("offwhite", None), ("mustard", None)]
+    disc = _banded_disc(img, P, xx, yy, cx, cy, r, bands, 0.03)
+    es, _u, _v = _ellipse(xx, yy, cx - r * 0.05, cy + r * 0.3, r * 0.26, r * 0.13)              # the Spot, ringed
+    img[disc & (es < 1.32) & (es >= 1.0)] = _col(P, "offwhite")
+    img[disc & (es < 1.0)] = _col(P, "red")
+    img[disc & (es < 0.55)] = _col(P, "red", "sh")
+    _ink(img, es, r * 0.13, 1.5, disc)
+    ei, _u, _v = _ellipse(xx, yy, w * 0.13, h * 0.2, 11, 11)                                    # Io
+    img[ei < 1] = _col(P, "mustard")
+    img[(ei < 1) & (xx > w * 0.13 + 3)] = _col(P, "mustard", "sh")
+    _ink(img, ei, 11, 1.5)
+    return img
+
+
+def _vig_saturn(w, h, rng):
+    """The ringed world: a soft-banded disc behind and in front of a tilted ring (sky inner ring, a dark gap, an offwhite
+    outer ring), the Hexagon's outline at the north pole."""
+    P = "saturn"
+    yy, xx = _grid(w, h)
+    img = _space(P, w, h, rng)
+    cx, cy, r, tilt = w * 0.5, h * 0.52, h * 0.3, -0.3
+    er, _u, v = _ellipse(xx, yy, cx, cy, r * 2.15, r * 0.52, tilt)
+
+    def ring(where):
+        img[where & (er >= 0.62) & (er < 0.78)] = _col(P, "sky", "sh")
+        img[where & (er >= 0.83) & (er < 1.0)] = _col(P, "offwhite")
+        img[where & (er >= 0.83) & (er < 0.88)] = _col(P, "mustard")
+        _ink(img, er, r * 0.52, 1.5, where)
+        img[where & (er >= 0.62) & (er < 0.62 + 1.5 / (r * 0.52))] = _col(P, "ink")
+    ring(v < 0)                                                                                # the far half, behind
+    bands = [("mustard", None), ("offwhite", None), ("sky", None), ("mustard", None), ("offwhite", None), ("sky", None),
+             ("mustard", "sh"), ("offwhite", None)]
+    disc = _banded_disc(img, P, xx, yy, cx, cy, r, bands, 0.015, light=(-0.35, -0.2))
+    hx, hy, s = cx + r * 0.08, cy - r * 0.8, r * 0.2                                             # the Hexagon (flattened)
+    ax, ay = np.abs(xx - hx), np.abs(yy - hy) / 0.45
+
+    def hexm(sz):
+        return (ay <= sz * 0.866) & (0.866 * ax + 0.5 * ay <= sz * 0.866)
+    img[disc & hexm(s) & ~hexm(s - 2.2)] = _col(P, "brown")
+    ring(v >= 0)                                                                               # the near half, over the disc
+    return img
+
+
+def _vig_uranus(w, h, rng):
+    """The sideways-lit ice giant: the pole turned to the Sun (left), its offwhite cap and ring-shaped seasons around it,
+    the terminator down the disc's right, the thin rings standing near edge-on and upright."""
+    P = "uranus"
+    yy, xx = _grid(w, h)
+    img = _space(P, w, h, rng)
+    cx, cy, r = w * 0.5, h * 0.5, h * 0.36
+    er, u, _v = _ellipse(xx, yy, cx, cy, r * 0.4, r * 1.62)
+
+    def ring(where):
+        for a, b in ((0.9, 0.94), (0.97, 1.0)):
+            img[where & (er >= a) & (er < b)] = _col(P, "offwhite", "sh")
+    ring(u >= 0)
+    e = np.hypot(xx - cx, yy - cy) / r
+    disc = e < 1.0
+    pole = np.hypot(xx - (cx - r * 0.72), yy - cy)
+    img[disc] = np.where(((pole / (r * 0.3)).astype(int) % 2 == 0)[disc][:, None], _col(P, "sky"), _col(P, "teal"))
+    img[disc & (pole < r * 0.36)] = _col(P, "offwhite")
+    term = (xx - cx) / r > 0.25 * np.sqrt(np.clip(1 - ((yy - cy) / r) ** 2, 0, 1))              # a curved terminator
+    img[disc & term] = _col(P, "teal", "sh")
+    img[disc & term & ((xx - cx) / r > 0.7)] = _col(P, "teal", "dp")
+    _ink(img, e, r)
+    ring(u < 0)
+    return img
+
+
+def _vig_neptune(w, h, rng):
+    """The dark storm world: the deep-blue disc with two thin teal belts, the Great Dark Spot and its offwhite cirrus
+    streaks swept downwind, the night side's crescent, Triton small and pink."""
+    P = "neptune"
+    yy, xx = _grid(w, h)
+    img = _space(P, w, h, rng)
+    cx, cy, r = w * 0.47, h * 0.54, h * 0.42
+    bands = [("sky", None), ("teal", "sh"), ("sky", None), ("sky", None), ("teal", None), ("sky", None), ("sky", None),
+             ("teal", "sh"), ("sky", None)]
+    disc = _banded_disc(img, P, xx, yy, cx, cy, r, bands, 0.02, light=(-0.32, -0.18), lit_r=1.1, seed_ph=2.1)
+    es, _u, _v = _ellipse(xx, yy, cx - r * 0.15, cy + r * 0.12, r * 0.3, r * 0.15, 0.08)          # the Great Dark Spot
+    img[disc & (es < 1.2) & (es >= 1.0)] = _col(P, "sky", "sh")
+    img[disc & (es < 1.0)] = _col(P, "brown")
+    lat = (yy - cy) / r
+    for L, x0, x1 in ((0.32, -0.45, 0.25), (0.36, -0.3, 0.05), (-0.25, -0.55, 0.0), (-0.21, -0.2, 0.35)):   # the cirrus
+        k = (xx - cx) / r
+        bow = L - 0.05 * (k - x0) * (k - x1)
+        img[disc & (np.abs(lat - bow) < 0.022) & (k > x0) & (k < x1)] = _col(P, "offwhite")
+    et, _u, _v = _ellipse(xx, yy, w * 0.85, h * 0.2, 9, 9)                                      # Triton
+    img[et < 1] = _col(P, "red")
+    img[(et < 1) & (yy < h * 0.2 - 3)] = _col(P, "offwhite")
+    _ink(img, et, 9, 1.5)
+    return img
+
+
+VIGNETTES_C2 = {"venus": _vig_venus, "jupiter": _vig_jupiter, "saturn": _vig_saturn, "uranus": _vig_uranus, "neptune": _vig_neptune}
+
+
+def preview_cards(out, art=None, cards=CARDS_C2, note="preview (not exported)"):
+    """B-170's review: all eight cards at 1x on one sheet, two columns (Earth / Mars / Mercury from B-151 first). With
+    `art` the cards are read back from the export (what UNITY imports); otherwise rendered here at ss 2 (lock-free)."""
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    from meridian import pngio
+    names = list(CARDS) + list(cards)
+    cw, ch, g = CARD_W, CARD_H + 2, 12
+    W = 2 * cw + 3 * g
+    rows = [np.tile(review.PAPER, (28, W, 1)).astype(np.float32)]
+    review._label(rows[0], "b-170 the planet title cards at 1x (b-151's style: limelight as drawn ink, the painted medallion, a patrick hand "
+                           "subtitle; no faces): earth / mars / mercury (b-151) beside venus / jupiter / saturn / uranus / neptune", 6, 8)
+    for r0 in range(0, len(names), 2):
+        rr = np.tile(review.PAPER, (ch + 30, W, 1)).astype(np.float32)
+        for j, planet in enumerate(names[r0:r0 + 2]):
+            path = os.path.join(art, "ui", "titlecards", f"{planet}_color.png") if art else None
+            if path and os.path.isfile(path):
+                card, src = pngio.read_png_np(path), "exported png"
+            else:
+                card, src = pad4(title_card(planet)[0]), "rendered ss 2"
+            x = g + j * (cw + g)
+            review._over(rr, card, x, 26)
+            review._label(rr, f"ui/titlecards/{planet} {card.shape[1]}x{card.shape[0]} at 1x ({planet} palette; {src})", x, 6)
+        rows.append(rr)
+    img = np.vstack(rows)
+    review._label(img, __import__("time").strftime("%m-%d %H:%M") + " " + note, 2, img.shape[0] - 16)
+    review.write(out, img)
+    print("written", out, img.shape)
+
+
 # ---------------------------------------------------------------- the Film-effects switch (2 frames)
 def film_switch(on):
     c = Canvas(64, 96)
@@ -497,8 +743,9 @@ SWITCH_KEY = "ui/hud/film_switch"
 SWITCH_PIVOT = [0.5, 0.375]          # the lever's hub on the plate (32, 60 px from the top of 64x96)
 
 
-def keys(cards=CARDS):
-    return [f"ui/panels/{n}" for n in PANELS] + [f"ui/titlecards/{p}" for p in cards] + [SWITCH_KEY]
+def keys(cards=CARDS, panels=True):
+    """panels False (B-170): the cards alone; B-151's panels and switch are not rewritten."""
+    return ([f"ui/panels/{n}" for n in PANELS] if panels else []) + [f"ui/titlecards/{p}" for p in cards] + ([SWITCH_KEY] if panels else [])
 
 
 def pad4(img):
@@ -552,13 +799,13 @@ def switch_sheet():
     return sheet, meta, p
 
 
-def export(art, ss_card=4, cards=CARDS):
+def export(art, ss_card=4, cards=CARDS, panels=True):
     """Writes ui/panels/<name>, ui/titlecards/<planet>, ui/hud/film_switch (_color.png + .json) under `art`; raises on any
     check before writing anything. -> [(key, w, h, bytes)]"""
     import json
     from meridian import pngio
     built, problems = [], []
-    for name, (pw, ph, sl, fn) in PANELS.items():
+    for name, (pw, ph, sl, fn) in (PANELS.items() if panels else ()):
         img, _w = fn(pw, ph, sl)
         meta, p = panel_meta(name, img)
         built.append((meta["key"], img, meta))
@@ -569,9 +816,10 @@ def export(art, ss_card=4, cards=CARDS):
         meta, p = card_meta(planet, img)
         built.append((meta["key"], img, meta))
         problems += [f"{planet} card: {x}" for x in p]
-    sheet, meta, p = switch_sheet()
-    built.append((SWITCH_KEY, sheet, meta))
-    problems += [f"film_switch: {x}" for x in p]
+    if panels:
+        sheet, meta, p = switch_sheet()
+        built.append((SWITCH_KEY, sheet, meta))
+        problems += [f"film_switch: {x}" for x in p]
     if problems:
         raise ValueError("UI export checks: " + "; ".join(problems))
     out = []
@@ -638,7 +886,9 @@ def preview(out, note="preview (not exported)"):
 
 
 if __name__ == "__main__":
-    if sys.argv[1] == "--export":
+    if sys.argv[1] == "--cards":                                                     # B-170: the lock-free card preview
+        preview_cards(sys.argv[2])
+    elif sys.argv[1] == "--export":
         _ss = int(sys.argv[sys.argv.index("--ss") + 1]) if "--ss" in sys.argv else 4
         for _k, _w, _h, _n in export(sys.argv[2], ss_card=_ss):
             print(f"{_k} {_w}x{_h} {_n // 1024} KB")
