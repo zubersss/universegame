@@ -55,7 +55,13 @@ def colours(planet):
                 "brass": P["mustard"], "brass_sh": sh("mustard"), "panel": P["teal"], "stone": P["offwhite"], "stone_sh": sh("offwhite"),
                 "lamp": P["red"], "lamp_on": P["offwhite"], "xred": P["red"], "xred_sh": sh("red"), "glint": P["offwhite"],
                 "dark": P["brown"]}
-    raise ValueError(f"B-176: {planet}'s nodes come after Earth's preview")
+    if planet == "mars":                        # LEAD 05:3x: hematite, perchlorate crust, water ice; an old lander beacon
+        return {"rock": dp("sky"), "rock_sh": P["brown"], "rock_hi": sh("sky"), "hem": dp("teal"), "hem_hi": sh("offwhite"),
+                "salt": P["offwhite"], "salt_sh": sh("offwhite"), "ice": P["offwhite"], "ice_sh": sh("teal"), "ice_dp": P["teal"],
+                "dust": P["red"], "dust_sh": sh("red"), "soil": dp("red"), "cavity": P["brown"], "cavity_sh": dp("red"),
+                "capsule": P["offwhite"], "capsule_sh": sh("offwhite"), "stripe": P["red"], "dish": P["teal"],
+                "lamp": P["red"], "lamp_on": P["mustard"], "glint": P["offwhite"], "dark": P["brown"]}
+    raise ValueError(f"B-176: {planet}'s nodes come after Mars's preview")
 
 
 def mats(gp, planet):
@@ -246,13 +252,134 @@ def node_water_ice(d, M, state, k=0):
     return [(0.12, 0.12 + h * 0.75), (-0.25, 0.12 + h * 0.55)] if state != "harvested" else []
 
 
-NODES = {"iron": node_iron, "copper": node_copper, "carbon": node_carbon, "silica": node_silica, "water_ice": node_water_ice}
+# ---------------------------------------------------------------- Mars (LEAD 05:3x: hematite, perchlorate crust, water ice; a relic)
+
+def node_hematite(d, M, state, k=0):
+    """A tall dusty crag studded with kidney-ore hematite (grey botryoidal clusters with bright highlights) and loose
+    'blueberries' at its foot; harvested: a stump with one cluster and chip marks."""
+    rnd = random.Random(31)
+    full = state != "harvested"
+    w, h = (0.84, 1.08) if full else (0.70, 0.52)
+    top_z = crag(d, M, w, h, 21)
+    spots = []
+    clusters = [(-0.38, 0.45, 0.17), (0.12, 0.78, 0.18), (0.42, 0.40, 0.15), (-0.10, 0.28, 0.14), (-0.28, 0.86, 0.13)] if full \
+        else [(-0.10, 0.22, 0.13)]
+    for j, (x, z, r) in enumerate(clusters):
+        z = min(z, top_z(x) - r * 0.75)
+        for q in range(4):
+            a = TAU * q / 4 + j
+            bx, bz, rr = x + r * 0.5 * math.cos(a), z + r * 0.42 * math.sin(a), r * 0.56
+            G.stroke(d, G.lumpy_ellipse(bx, bz, rr, rr * 0.92, n=14, lump=0.04, seed=j * 5 + q), M["hem_i"], I, cyclic=True)
+            G.stroke(d, G.lumpy_ellipse(bx + rr * 0.32, bz + rr * 0.36, rr * 0.24, rr * 0.18, n=8, lump=0.0), M["hem_hi"], 0.0, cyclic=True)
+        spots.append((x + r * 0.3, z + r * 0.4))
+    for q in range(7 if full else 3):                                                        # loose blueberries at the foot
+        x = -0.7 + 1.4 * (q + 0.5) / (7 if full else 3) + rnd.uniform(-0.05, 0.05)
+        G.stroke(d, G.lumpy_ellipse(x, 0.035, 0.04, 0.036, n=10, lump=0.03, seed=40 + q), M["hem_i"], I, cyclic=True)
+        G.stroke(d, G.lumpy_ellipse(x + 0.012, 0.05, 0.012, 0.01, n=6, lump=0.0), M["hem_hi"], 0.0, cyclic=True)
+    if not full:
+        for x in (-0.4, 0.15, 0.42):
+            G.seam(d, [(x - 0.07, top_z(x) - 0.04), (x, top_z(x) - 0.12), (x + 0.07, top_z(x) - 0.04)], M["ink"])
+    return spots
 
 
-def draw_node(item):
+def _rosette(d, M, x, z, s, seed, role="salt_i"):
+    rnd = random.Random(seed)
+    tips = []
+    for b in range(4):                                                                       # chunky white crystal prisms
+        a = math.radians(-48 + 32 * b + rnd.uniform(-6, 6))
+        ln = s * rnd.uniform(0.85, 1.15)
+        ux, uz, w = math.sin(a), math.cos(a), 0.042
+        tx, tz = x + ln * ux, z + ln * uz
+        body = [(x - w * uz, z + w * ux), (tx - w * uz, tz + w * ux), (tx + 0.6 * w * ux, tz + 0.6 * w * uz), (tx + w * uz, tz - w * ux), (x + w * uz, z - w * ux)]
+        G.stroke(d, body, M[role], I, cyclic=True)
+        G.stroke(d, [body[0], body[1], body[2], (x, z)], M['salt_sh'], 0.0, cyclic=True)
+        G.seam(d, [(x, z), (tx, tz), body[2]], M['ink'])
+        tips.append((tx, tz))
+    return tips
+
+
+def node_perchlorate(d, M, state, k=0):
+    """A dusty crag under a thick white perchlorate salt crust (a lumpy, cauliflower underside), salt crystal rosettes on
+    top, salt patches weeping down the face; harvested: a stump with a thin crust remnant."""
+    full = state != "harvested"
+    w, h = (0.82, 0.94) if full else (0.70, 0.50)
+    top_z = crag(d, M, w, h, 22)
+    th = 0.20 if full else 0.08
+    xs = [-w * 0.93 + 1.86 * w * i / 40 for i in range(41)]
+    upper = [(x, top_z(x) + 0.035) for x in xs]
+    lower = [(x, top_z(x) - th - 0.05 * max(0.0, math.sin(11 * x + 0.5)) ** 2) for x in xs]
+    G.stroke(d, upper + lower[::-1], M["salt"], 0.0, cyclic=True)
+    G.stroke(d, [(x, z + 0.045) for x, z in lower] + lower[::-1], M["salt_sh"], 0.0, cyclic=True)
+    G.stroke(d, upper, M["ink"], O)
+    G.stroke(d, lower, M["ink"], I)
+    spots = []
+    if full:
+        for j, x in enumerate((-0.30, 0.05, 0.36)):
+            tips = _rosette(d, M, x, top_z(x) + 0.01, 0.16 if j == 1 else 0.12, 60 + j)
+            spots.append(tips[2])
+        rnd = random.Random(62)
+        for q in range(6):                                                                   # salt weeping down the face
+            x = rnd.uniform(-0.55, 0.55)
+            z = rnd.uniform(0.18, max(0.2, top_z(x) - th - 0.12))
+            G.stroke(d, G.lumpy_ellipse(x, z, 0.05, 0.03, n=10, lump=0.15, seed=q), M["salt_i"], I, cyclic=True)
+    return spots
+
+
+def node_mars_ice(d, M, state, k=0):
+    """An exposed block of buried water ice in a scarp: a tall rounded block, layered with dust bands, under a rust dust cap,
+    teal-shaded, cracked; harvested: a low stub of ice under the dust."""
+    full = state != "harvested"
+    w, h = (0.74, 1.12) if full else (0.66, 0.48)
+    xs = [-w + 2 * w * i / 40 for i in range(41)]
+    top = [(x, h * max(0.0, 1 - (abs(x) / w) ** 3.0) ** 0.45 + 0.02 * math.sin(6 * x)) for x in xs]
+    G.stroke(d, top + [(w, -0.02), (-w, -0.02)], M["ice"], 0.0, cyclic=True)
+    G.stroke(d, [(x, z * 0.85) for x, z in top if x < -0.1] + [(-0.1, -0.02), (-w, -0.02)], M["ice_sh"], 0.0, cyclic=True)
+    for j, f in enumerate((0.30, 0.55, 0.78) if full else (0.45,)):                         # the dust layers in the ice
+        band = [(x, z * f + 0.015 * math.sin(9 * x + j)) for x, z in top[3:-3]]
+        G.stroke(d, band + [(x, z - 0.03) for x, z in band[::-1]], M["dust_sh"], 0.0, cyclic=True)
+    cap = [(x, z + 0.04) for x, z in top[2:-2]]                                               # the rust dust cap
+    G.stroke(d, cap + [(x, z - 0.10 - 0.03 * math.sin(13 * x)) for x, z in top[2:-2][::-1]], M["dust"], 0.0, cyclic=True)
+    G.stroke(d, top, M["ink"], O)
+    G.seam(d, [(x, z - 0.10 - 0.03 * math.sin(13 * x)) for x, z in top[3:-3]], M["ink"])
+    G.seam(d, [(-0.25, h * 0.7), (-0.12, h * 0.48), (-0.2, h * 0.25)], M["ink"])
+    G.seam(d, [(0.22, h * 0.62), (0.3, h * 0.35)], M["ink"])
+    for x in (-0.5, 0.45):                                                                    # meltwater icicles at the foot
+        G.stroke(d, [(x - 0.03, 0.12), (x, 0.02), (x + 0.03, 0.12)], M["ice_dp_i"], I, cyclic=True)
+    return [(0.15, h * 0.7), (-0.3, h * 0.5), (0.35, h * 0.35)] if full else []
+
+
+def draw_beacon(d, M, k):
+    """A half-buried old lander beacon (Mars's relic): a domed capsule with a red stripe, a dish antenna on a bent strut,
+    its lamp blinking on the glint clip."""
+    body = G.lumpy_ellipse(0.0, 0.02, 0.40, 0.33, n=30, lump=0.01, seed=7, rot=-0.25)
+    body = [(x, max(z, -0.18)) for x, z in body]
+    G.stroke(d, body, M["capsule"], 0.0, cyclic=True)
+    G.stroke(d, [(x, z) for x, z in body if x < 0.0] + [(0.0, -0.18)], M["capsule_sh"], 0.0, cyclic=True)
+    G.stroke(d, [(-0.33, 0.02), (0.30, -0.14), (0.31, -0.08), (-0.31, 0.09)], M["stripe"], 0.0, cyclic=True)
+    G.stroke(d, body, M["ink"], O, cyclic=True)
+    G.seam(d, [(-0.33, 0.02), (0.30, -0.14)], M["ink"])
+    G.rivets(d, [(-0.18, 0.15), (0.05, 0.2), (0.2, 0.08)], M["ink"], size=0.03)
+    G.seam(d, [(0.08, 0.24), (0.16, 0.36), (0.26, 0.38)], M["ink"], radius=O)                # the bent strut
+    dish = [(0.16, 0.50), (0.36, 0.30), (0.42, 0.40), (0.26, 0.56)]
+    G.stroke(d, dish, M["dish_i"], O, cyclic=True)
+    G.seam(d, [(0.22, 0.44), (0.35, 0.33)], M["ink"])
+    lit = k > 0 and k % 2 == 1
+    G.stroke(d, G.lumpy_ellipse(-0.12, 0.22, 0.04, 0.04, n=12, lump=0.0), M["lamp_on_i" if lit else "lamp_i"], I, cyclic=True)
+    G.stroke(d, [(-0.5, -0.32), (0.5, -0.36), (0.5, -0.16), (-0.5, -0.10)], M["soil"], 0.0, cyclic=True)
+    G.seam(d, [(-0.5, -0.10), (0.5, -0.16)], M["ink"])
+    if k > 0 and k % 4 == 2:
+        star(d, M, 0.33, 0.45, 0.07)
+
+
+PLANET_NODES = {"earth": {"iron": node_iron, "copper": node_copper, "carbon": node_carbon, "silica": node_silica, "water_ice": node_water_ice},
+                "mars": {"hematite": node_hematite, "perchlorate": node_perchlorate, "water_ice": node_mars_ice}}
+NODES = PLANET_NODES["earth"]
+
+
+def draw_node(item, planet="earth"):
     def fn(d, M, k):
         state = "full" if k == 0 else ("harvested" if k == 1 else "glint")
-        spots = NODES[item](d, M, "harvested" if state == "harvested" else "full", k)
+        spots = PLANET_NODES[planet][item](d, M, "harvested" if state == "harvested" else "full", k)
         if state == "glint":
             g = glint_at(k - 2, spots)
             if g:
@@ -296,6 +423,15 @@ def draw_pocket(item):
                 body = [(bx - nx, bz - nz), (tx - nx, tz - nz), (tx + 0.3 * w * math.sin(a), tz + 0.3 * w * math.cos(a)), (tx + nx, tz + nz), (bx + nx, bz + nz)]
                 G.stroke(d, body, M["crystal_i"], I, cyclic=True)
                 spots.append((tx, tz))
+        elif item == "hematite":                                                             # a nest of hematite spherules
+            for j in range(9):
+                x, z, r = rnd.uniform(-0.34, 0.34), rnd.uniform(-0.24, 0.20), rnd.uniform(0.06, 0.09)
+                G.stroke(d, G.lumpy_ellipse(x, z, r, r * 0.92, n=12, lump=0.04, seed=j), M["hem_i"], I, cyclic=True)
+                G.stroke(d, G.lumpy_ellipse(x + r * 0.3, z + r * 0.35, r * 0.25, r * 0.2, n=8, lump=0.0), M["hem_hi"], 0.0, cyclic=True)
+                spots.append((x + r * 0.3, z + r * 0.35))
+        elif item == "perchlorate":                                                          # salt crystal rosettes
+            for j, (x, z) in enumerate(((-0.25, -0.22), (0.05, -0.26), (0.30, -0.16), (-0.05, 0.04))):
+                spots.append(_rosette(d, M, x, z, 0.16, 70 + j)[2])
         else:                                                                                # an ice lens filling the pocket
             G.stroke(d, G.lumpy_ellipse(0.0, -0.02, 0.46, 0.30, n=24, lump=0.05, seed=9), M["ice_i"], I, cyclic=True)
             G.stroke(d, G.lumpy_ellipse(-0.1, -0.08, 0.28, 0.14, n=16, lump=0.04, seed=10), M["ice_sh"], 0.0, cyclic=True)
@@ -373,17 +509,31 @@ def draw_x(d, M, k):
 
 # ---------------------------------------------------------------- the table
 
-PIECES = {}
-for _it in NODES:
-    PIECES[f"node_{_it}"] = (draw_node(_it), 128, 96, (0.5, 6 / 96), [("full", 1, False), ("harvested", 1, False), ("glint", 8, True)])
-    PIECES[f"pocket_{_it}"] = (draw_pocket(_it), 96, 96, (0.5, 0.5), [("full", 1, False), ("glint", 8, True)])
-PIECES["data_cache"] = (draw_cache, 96, 80, (0.5, 0.5), [("full", 1, False), ("glint", 8, True)])
-PIECES["vault_door"] = (draw_vault, 128, 128, (0.5, 0.5), [("closed", 1, False), ("open", 6, False)])
-PIECES["scan_x"] = (draw_x, 64, 64, (0.5, 6 / 64), [("pulse", 8, True)])
+RELICS = {"earth": {"data_cache": (draw_cache, 96, 80, (0.5, 0.5), [("full", 1, False), ("glint", 8, True)]),
+                    "vault_door": (draw_vault, 128, 128, (0.5, 0.5), [("closed", 1, False), ("open", 6, False)]),
+                    "scan_x": (draw_x, 64, 64, (0.5, 6 / 64), [("pulse", 8, True)])},
+          "mars": {"lander_beacon": (draw_beacon, 96, 96, (0.5, 0.5), [("full", 1, False), ("glint", 8, True)])}}
+RELIC_AT = {"earth": {"data_cache": (1450, 120), "vault_door": (1700, 250), "scan_x": (660, 2)}, "mars": {"lander_beacon": (1450, 150)}}
+_PC = {}
+
+
+def pieces_for(planet):
+    """The planet's keys: node_<item> and pocket_<item> per node, then its relics."""
+    if planet not in _PC:
+        P = {}
+        for it in PLANET_NODES[planet]:
+            P[f"node_{it}"] = (draw_node(it, planet), 128, 96, (0.5, 6 / 96), [("full", 1, False), ("harvested", 1, False), ("glint", 8, True)])
+            P[f"pocket_{it}"] = (draw_pocket(it), 96, 96, (0.5, 0.5), [("full", 1, False), ("glint", 8, True)])
+        P.update(RELICS[planet])
+        _PC[planet] = P
+    return _PC[planet]
+
+
+PIECES = pieces_for("earth")
 
 
 def render(name, planet="earth"):
-    fn, fw, fh, piv, clips = PIECES[name]
+    fn, fw, fh, piv, clips = pieces_for(planet)[name]
     frames, widths = [], []
     n = sum(c[1] for c in clips)
     for k in range(n):
@@ -399,7 +549,7 @@ def render(name, planet="earth"):
 
 def sheet_meta(name, frames, planet="earth"):
     import numpy as np
-    _fn, fw, fh, piv, clips = PIECES[name]
+    _fn, fw, fh, piv, clips = pieces_for(planet)[name]
     g = v3.GUTTER
     n = len(frames)
     cols = max(1, min(n, (512 + g) // (fw + g)))
@@ -434,7 +584,8 @@ def preview(out_dir, planet="earth"):
     from meridian import pngio
     sys.path.insert(0, os.path.dirname(HERE))
     import review
-    res = {n: render(n, planet) for n in PIECES}
+    PC = pieces_for(planet)
+    res = {n: render(n, planet) for n in PC}
     W = 2000
     band = pngio.read_png_np(os.path.join(ART, "terrain", planet, "ground_band_color.png"))
     fill = pngio.read_png_np(os.path.join(ART, "terrain", planet, "ground_fill_color.png"))
@@ -451,16 +602,16 @@ def preview(out_dir, planet="earth"):
     def place(im, piv, x, y):
         h, w = im.shape[:2]
         review._over(img, im, int(x - piv[0] * w), int(y - (1 - piv[1]) * h))
-    xs = [150, 420, 690, 960, 1230]
-    for (name, x) in zip(NODES, xs):
+    nodes = list(PLANET_NODES[planet])
+    xs = [150 + 270 * i for i in range(len(nodes))]
+    for (name, x) in zip(nodes, xs):
         place(res[f"node_{name}"][0][0], (0.5, 6 / 96), x, surf + 2)
         place(res[f"node_{name}"][0][1], (0.5, 6 / 96), x + 140, surf + 2)
-        review._label(img, f"{name}: full | harvested", x - 60, surf - 110)
-    for j, name in enumerate(NODES):
+        review._label(img, f"{name}: full | harvested", x - 60, surf - 120)
+    for j, name in enumerate(nodes):
         place(res[f"pocket_{name}"][0][0], (0.5, 0.5), 160 + 250 * j, surf + 230)
-    place(res["data_cache"][0][0], (0.5, 0.5), 1450, surf + 120)
-    place(res["vault_door"][0][0], (0.5, 0.5), 1700, surf + 250)
-    place(res["scan_x"][0][0], (0.5, 6 / 64), 160 + 250 * 2, surf + 2)
+    for name, (x, y) in RELIC_AT[planet].items():
+        place(res[name][0][0], PC[name][3], x, surf + y)
     try:
         sm = json.load(open(os.path.join(ART, "characters", "surveyor", "side.json"), encoding="utf-8"))
         shs = pngio.read_png_np(os.path.join(ART, "characters", "surveyor", "side_color.png"))
@@ -468,10 +619,10 @@ def preview(out_dir, planet="earth"):
         review._over(img, fr, 1550, surf - sm["frame_height"] + int(round(sm["pivot"][1] * sm["frame_height"])) + 2)
     except (OSError, KeyError, ValueError):
         pass
-    review._label(img, f"b-176 {planet} nodes at 1x on the b-175 ground (keys provisional, renamed at export): five nodes full | harvested; "
-                       "the pockets, the data cache and the warden vault door in the cutaway; the scan's x above the carbon pocket", 6, 6)
+    review._label(img, f"b-176 {planet} nodes at 1x on its b-175 ground (keys provisional, renamed at export): {len(nodes)} nodes full | harvested; "
+                       f"their pockets and {', '.join(RELIC_AT[planet])} in the cutaway", 6, 6)
     rows = [img]
-    for name, (fn, fw, fh, piv, clips) in PIECES.items():
+    for name, (fn, fw, fh, piv, clips) in PC.items():
         frames = res[name][0]
         row = np.empty((fh + 34, W, 3), np.float32)
         row[:] = review.PAPER
@@ -484,7 +635,7 @@ def preview(out_dir, planet="earth"):
         review._label(row, f"{name} {fw}x{fh}: " + ", ".join(f"{c} {n_}" for c, n_, _l in clips), 6, 4)
         rows.append(row)
     lines = []
-    for name in PIECES:
+    for name in PC:
         frames, widths = res[name]
         sheet, meta, probs = sheet_meta(name, frames, planet)
         o = [w for w in widths if w[0] >= v3.OUTER_SPLIT]
