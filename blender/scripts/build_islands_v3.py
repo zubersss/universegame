@@ -1,12 +1,12 @@
 """B-177 (D-161 (4), contract v3.3 11.10; LEAD D-164): the giants' floes as rounded cloud-ice islands. The floe strips'
 tops and caps stay; these keys under terrain/<giant>/ draw the rest (gp_draw via fakegp + numpy; the giant's palette tones):
 
-  island_belly        512x128, tiles in x every 8 m, mapped along a floe's underside outline (u = world x x 64 mod 512,
-                      v = the signed normal distance); the INK EDGE ON ROW 8 = the sprite's pivot; above it a short tuck of fill
-                      under the floe, below it the rounded belly - cream cloud-ice lobes, icicles, wisps - hanging up to
-                      1.875 m, transparent below its ragged edge
-  island_end_l / _r   128x128, pivot on the outline row at the floe's end: the belly's rounded end climbing to meet the
-                      floe strip's cap_left / cap_right
+  island_belly        512x192 (D-166), tiles in x every 8 m, mapped along a floe's underside outline (u = world x x 64 mod
+                      512, v = the signed normal distance); the OUTLINE ON ROW 72 = the sprite's pivot. It sorts ABOVE the floe
+                      strip: its crown of lit cloud lobes rises ~1.06 m in front of the strip's lower half (only the ice cap
+                      shows above it), and the belly hangs ~1.4 m below (lobes, icicles), transparent outside the cloud
+  island_end_l / _r   160x256 (D-166), pivot on the outline row at the floe's end: a rounded cloud shoulder wrapping the strip's
+                      end from the belly up to 1.8 m (just under its top edge), so no vertical slab side shows; above both
   under_haze_<deck>   512x512, its own texture (Repeat), world space below the floe line where the deck's set has no paint
                       (u = x / 8, v = y / 8): soft painted haze in the deck's palette, no ink, no hard edges; the tile is
                       periodic both ways (a gradient inside a repeating tile would band every 8 m), so "darker toward the
@@ -39,7 +39,7 @@ O, I = G.OUTER, G.INNER
 PPU = 64
 TAU = 2 * math.pi
 ART = os.path.normpath(os.path.join(HERE, "..", "..", "Assets", "_Game", "Art"))
-BELLY_W, BELLY_H, OUT_ROW = 512, 128, 8
+BELLY_W, BELLY_H, OUT_ROW = 512, 192, 72               # D-166: the outline on row 72
 DECKS = {"jupiter": ["deck1", "deck2", "deck3", "deep"]}
 
 
@@ -80,25 +80,32 @@ def _hung(c, zc, rx, rz, n=48):
 
 
 def _layout(L):
-    """Two rows of cloud-ice lobes per 8 m: a back row (deeper, in shade) and a front row (shallower, lit), each (c, zc, rx, rz)."""
+    """D-166: the cloud wraps the slab. Four rows of lobes per 8 m, each (c, zc, rx, rz), z up from the underside outline:
+    the crown (lit, rising to <= 1.06 m in front of the strip's lower half), the middle row across the outline (lit, in front),
+    the lower front lobes (lit) and the back hanging row (shade)."""
     rnd = random.Random(1771)
-    back, front = [], []
-    for i in range(5):
-        dep, rx = rnd.uniform(0.95, 1.20), rnd.uniform(0.95, 1.12)
-        back.append((L * (i + 0.5 + rnd.uniform(-0.12, 0.12)) / 5, -dep * 0.38, rx, dep * 0.62))
+    top, mid, low, back = [], [], [], []
     for i in range(6):
-        dep, rx = rnd.uniform(0.55, 0.82), rnd.uniform(0.66, 0.84)
-        front.append((L * (i + rnd.uniform(-0.08, 0.08)) / 6, -dep * 0.40, rx, dep * 0.60))
-    return back, front
+        t, rx, rz = rnd.uniform(0.86, 1.06), rnd.uniform(0.74, 0.92), rnd.uniform(0.50, 0.60)
+        top.append((L * (i + 0.5 + rnd.uniform(-0.12, 0.12)) / 6, t - rz, rx, rz))
+    for i in range(5):
+        mid.append((L * (i + rnd.uniform(-0.08, 0.08)) / 5, rnd.uniform(-0.15, 0.05), rnd.uniform(0.85, 1.0), rnd.uniform(0.50, 0.60)))
+    for i in range(5):
+        back.append((L * (i + 0.5 + rnd.uniform(-0.12, 0.12)) / 5, -0.60, rnd.uniform(0.95, 1.1), rnd.uniform(0.62, 0.72)))
+    for i in range(6):
+        low.append((L * (i + rnd.uniform(-0.08, 0.08)) / 6, rnd.uniform(-0.80, -0.68), rnd.uniform(0.60, 0.78), rnd.uniform(0.40, 0.48)))
+    return top, mid, low, back
 
 
-def _bottom(x, lobes, L):
-    z = 0.0
+def _env(x, lobes, L, up, floor):
+    """The lobes' upper (up) or lower envelope at x, wrapping over the period, never inside `floor`."""
+    z = floor
     for c, zc, rx, rz in lobes:
         for off in (-L, 0.0, L):
             u = (x - c - off) / rx
             if abs(u) < 1:
-                z = min(z, zc - rz * math.sqrt(1 - u * u))
+                h = rz * math.sqrt(1 - u * u)
+                z = max(z, zc + h) if up else min(z, zc - h)
     return z
 
 
@@ -106,41 +113,39 @@ def _crescent(c, zc, rx, rz, a0=math.pi * 1.02, a1=math.pi * 1.62):
     """The lobe's shaded lower-left crescent."""
     outer = _arc(c, zc, rx * 0.985, rz * 0.985, a0, a1, 14)
     inner = _arc(c + rx * 0.10, zc + rz * 0.12, rx * 0.86, rz * 0.80, a0, a1, 14)
-    return [(x, min(z, 0.0)) for x, z in outer + inner[::-1]]
+    return outer + inner[::-1]
+
+
+def _lit_lobe(d, M, c, zc, rx, rz, seed):
+    G.stroke(d, _arc(c, zc, rx, rz, 0.0, TAU, 48), M["cloud"], 0.0, cyclic=True)
+    G.stroke(d, _crescent(c, zc, rx, rz), M["cloud_sh"], 0.0, cyclic=True)
+    G.stroke(d, _arc(c, zc, rx, rz, 0.0, TAU, 48), M["ink"], I, cyclic=True)
+    G.hatch(d, c - rx * 0.45, zc - rz * 0.30, M["ink"], n=3, length=0.07, spacing=0.03, angle_deg=60, seed=seed)
 
 
 def draw_belly(d, M, giant="jupiter", k=0):
     """Each lobe wraps on its own (all copies of lobe i before lobe i + 1), so the stacking is the same at both tile edges."""
     L = BELLY_W / PPU
-    back, front = _layout(L)
-    allb = back + front
+    top, mid, low, back = _layout(L)
     rnd = random.Random(1772)
-    icicles = [(i, rnd.uniform(-0.3, 0.3), rnd.uniform(0.22, 0.32)) for i in (0, 2, 3)]
-    sil = [(L * i / 256, _bottom(L * i / 256, allb, L)) for i in range(257)]
-    for c, zc, rx, rz in back:                                                                   # the back row, in shade
-
-        def bl(dx, _dz, c=c, zc=zc, rx=rx, rz=rz):
-            fill, arc = _hung(c + dx, zc, rx, rz)
-            G.stroke(d, fill, M["cloud_sh"], 0.0, cyclic=True)
-            G.stroke(d, arc, M["ink"], I)
-        wrapped_x(bl, L)
-    for j, (c, zc, rx, rz) in enumerate(front):                                                   # the front row, lit
-
-        def fl(dx, _dz, c=c, zc=zc, rx=rx, rz=rz, j=j):
-            fill, arc = _hung(c + dx, zc, rx, rz)
-            G.stroke(d, fill, M["cloud"], 0.0, cyclic=True)
-            G.stroke(d, _crescent(c + dx, zc, rx, rz), M["cloud_sh"], 0.0, cyclic=True)
-            G.stroke(d, arc, M["ink"], I)
-            G.hatch(d, c + dx - rx * 0.45, zc - rz * 0.30, M["ink"], n=3, length=0.07, spacing=0.03, angle_deg=60, seed=j)
-        wrapped_x(fl, L)
+    xs = [L * i / 256 for i in range(257)]
+    ztop = [(x, _env(x, top, L, True, 0.55)) for x in xs]
+    zbot = [(x, _env(x, back + low, L, False, -0.5)) for x in xs]
+    wrapped_x(lambda dx, _dz: G.stroke(d, [(x + dx, z) for x, z in ztop + zbot[::-1]], M["cloud_sh"], 0.0, cyclic=True), L)
+    for c, zc, rx, rz in back:                                                                   # the back row: its lower arcs
+        wrapped_x(lambda dx, _dz, c=c, zc=zc, rx=rx, rz=rz: G.stroke(d, _arc(c + dx, zc, rx, rz, math.pi * 1.05, math.pi * 1.95, 30),
+                                                                    M["ink"], I), L)
+    for j, lobe in enumerate(low + top + mid):                                                     # lit lobes, back to front
+        wrapped_x(lambda dx, _dz, lobe=lobe, j=j: _lit_lobe(d, M, lobe[0] + dx, lobe[1], lobe[2], lobe[3], j), L)
 
     def edges(dx, _dz):
-        G.stroke(d, [(x + dx, z) for x, z in sil], M["ink"], O)                                   # the silhouette
-        G.stroke(d, [(dx, 0.0), (L + dx, 0.0)], M["ink"], O)                                      # THE INK EDGE on row 8
+        G.stroke(d, [(x + dx, z) for x, z in ztop], M["ink"], O)                                  # the crown in front of the strip
+        G.stroke(d, [(x + dx, z) for x, z in zbot], M["ink"], O)                                  # the hanging silhouette
     wrapped_x(edges, L)
-    for i, off, ln in icicles:                                                                    # icicles under the back row
-        c = back[i][0] + off
-        z = _bottom(c, allb, L) + 0.03
+    for i in (0, 2, 3):                                                                           # icicles under the back row
+        c = back[i][0] + rnd.uniform(-0.3, 0.3)
+        z = _env(c, back + low, L, False, -0.5) + 0.03
+        ln = rnd.uniform(0.22, 0.30)
         wrapped_x(lambda dx, _dz, c=c, z=z, ln=ln: G.stroke(d, [(c + dx - 0.05, z), (c + dx + 0.005, z - ln), (c + dx + 0.05, z)],
                                                            M["ice_i"], I, cyclic=True), L)
 
@@ -161,36 +166,57 @@ def wrapped_x(fn, L):
         _GROUPS.append((_COPIES.index(0), ranges))
 
 
+END_LOBES = [(0.85, -0.35, 0.55, 0.50), (0.80, 0.70, 0.55, 0.48), (0.15, -0.60, 0.75, 0.78), (0.05, 1.27, 0.55, 0.53), (-0.15, 0.45, 0.60, 0.60)]
+
+
+def _inside(x, z, lobes):
+    return any(((x - c) / rx) ** 2 + ((z - zc) / rz) ** 2 <= 1.0 for c, zc, rx, rz in lobes)
+
+
 def draw_end(side):
     def fn(d, M, giant="jupiter", k=0):
-        """The belly's rounded end, drawn over the belly: from the floe's end on the outline (x = 0, z = 0) a short drop, then a
-        cloud lobe bulging out past the floe's side and rounding under it, deep enough to cover the belly's cut at x = 0; a lit
-        front lobe overlapping it. Drawn for the left end, mirrored for the right."""
+        """D-166: a rounded cloud shoulder wrapping the floe's end (x = 0 at the floe's end on the outline, z = 0; x > 0 under
+        the floe): five lobes from the hanging belly up to 1.8 m (just under the strip's top edge at 2 m), bulging ~0.75 m past
+        the floe's side, so no vertical slab side shows; sorts above the strip and the belly. Drawn for the left end, mirrored."""
         s = 1 if side == "l" else -1
         X = lambda pts: [(s * x, z) for x, z in pts]  # noqa: E731
-        c, zc, rx, rz = 0.36, -0.66, 0.72, 0.68
-        top = math.asin(min(1.0, -zc / rz))
-        a_in, a_out = 2.18, TAU + top
-        arc = _arc(c, zc, rx, rz, a_in, a_out, 40)
-        G.stroke(d, X([(0.0, 0.0)] + arc + [(arc[-1][0], 0.0)]), M["cloud"], 0.0, cyclic=True)
-        G.stroke(d, X(_crescent(c, zc, rx, rz, math.pi * 0.85, math.pi * 1.62)), M["cloud_sh"], 0.0, cyclic=True)
-        split = 5.25                                                                              # silhouette ink, then the overlap
-        G.stroke(d, X([(0.0, 0.0)] + _arc(c, zc, rx, rz, a_in, split, 30)), M["ink"], O)
-        G.stroke(d, X(_arc(c, zc, rx, rz, split, a_out, 12)), M["ink"], I)
-        f_c, f_zc, f_rx, f_rz = 0.95, -0.72, 0.40, 0.38                                          # the lit front lobe, lower right,
-        fill, farc = _hung(f_c, f_zc, f_rx, f_rz)                                                 # over the main lobe's overlap ink
-        G.stroke(d, X(fill), M["cloud"], 0.0, cyclic=True)
-        G.stroke(d, X(_crescent(f_c, f_zc, f_rx, f_rz)), M["cloud_sh"], 0.0, cyclic=True)
-        G.stroke(d, X(farc), M["ink"], I)
-        bx = c + 0.10
-        bz = zc - rz * math.sqrt(1 - (0.10 / rx) ** 2) + 0.03
+        for c, zc, rx, rz in END_LOBES:
+            G.stroke(d, X(_arc(c, zc, rx, rz, 0.0, TAU, 48)), M["cloud"], 0.0, cyclic=True)
+            G.stroke(d, X(_crescent(c, zc, rx, rz)), M["cloud_sh"], 0.0, cyclic=True)
+            G.stroke(d, X(_arc(c, zc, rx, rz, 0.0, TAU, 48)), M["ink"], I, cyclic=True)
+        cx, cz = 0.15, 0.25                                                                         # the union's outline, by ray
+        ring = []
+        for i in range(180):
+            t = TAU * i / 180
+            lo, hi = 0.0, 2.6
+            for _ in range(22):
+                m = (lo + hi) / 2
+                if _inside(cx + m * math.cos(t), cz + m * math.sin(t), END_LOBES):
+                    lo = m
+                else:
+                    hi = m
+            ring.append((cx + lo * math.cos(t), cz + lo * math.sin(t)))
+        outer = [(x < 0.55 or z > 0.95) for x, z in ring]                                         # the silhouette, not the belly side
+        start = next(i for i in range(len(ring)) if outer[i] and not outer[i - 1])
+        run = []
+        for q in range(len(ring) + 1):
+            i = (start + q) % len(ring)
+            if outer[i]:
+                run.append(ring[i])
+            elif run:
+                G.stroke(d, X(run), M["ink"], O)
+                run = []
+        if run:
+            G.stroke(d, X(run), M["ink"], O)
+        bx = 0.25
+        bz = -0.60 - 0.78 * math.sqrt(1 - ((bx - 0.15) / 0.75) ** 2) + 0.03
         G.stroke(d, X([(bx - 0.05, bz), (bx + 0.005, bz - 0.28), (bx + 0.05, bz)]), M["ice_i"], I, cyclic=True)
-        G.hatch(d, s * 0.02, -0.80, M["ink"], n=3, length=0.07, spacing=0.03, angle_deg=60 if s > 0 else 120, seed=3)
     return fn
 
 
+END_W, END_H, END_PIV_X = 160, 256, 0.36
 PIECES = {"island_belly": (draw_belly, BELLY_W, BELLY_H, (0.0, (BELLY_H - OUT_ROW) / BELLY_H)),
-          "island_end_l": (draw_end("l"), 128, 128, (0.3, 0.925)), "island_end_r": (draw_end("r"), 128, 128, (0.7, 0.925))}
+          "island_end_l": (draw_end("l"), END_W, END_H, (END_PIV_X, 0.5)), "island_end_r": (draw_end("r"), END_W, END_H, (1 - END_PIV_X, 0.5))}
 
 
 def render_piece(name, giant="jupiter", mx=1, ss=4):
@@ -233,18 +259,20 @@ def haze(giant, deck, size=512, seed=0):
     return out
 
 
-def preview(out_dir, giant="jupiter"):
+def preview(out_dir, giant="jupiter", S=None, out=None, footnote=None):
+    """The design preview (S None), or with S / out / footnote the export's stamped review from the exported frames (main)."""
     import numpy as np
     from meridian import pngio
     sys.path.insert(0, os.path.dirname(HERE))
     import review
-    belly, bw = render_piece("island_belly", giant)
-    two, _w2 = render_piece("island_belly", giant, mx=2, ss=1)
-    copy_p99 = float(np.percentile(np.abs(two[:, :BELLY_W].astype(np.int32) - two[:, BELLY_W:].astype(np.int32)), 99))
-    del two
-    end_l, wl = render_piece("island_end_l", giant)
-    end_r, wr = render_piece("island_end_r", giant)
-    hazes = {dk: haze(giant, dk, seed=i) for i, dk in enumerate(DECKS[giant])}
+    if S is None:
+        S = {n: (lambda r: ([r[0]], r[1]))(render_piece(n, giant)) for n in PIECES}
+        S.update({f"under_haze_{dk}": ([haze(giant, dk, seed=i)], []) for i, dk in enumerate(DECKS[giant])})
+    (belly,), bw = S["island_belly"]
+    (end_l,), wl = S["island_end_l"]
+    (end_r,), wr = S["island_end_r"]
+    hazes = {dk: S[f"under_haze_{dk}"][0][0] for dk in DECKS[giant]}
+    copy_p99 = copy_diff(giant)
     W, H = 1920, 900
     img = np.empty((H, W, 3), np.float32)
     sky_layers, _note = review.planet_background(giant, "deck2", W, H, os.path.join(ART, "backgrounds", giant, "deck2"))
@@ -265,8 +293,8 @@ def preview(out_dir, giant="jupiter"):
     x1 = x0 + 64 * ncol
     bt = np.tile(belly, (1, 3, 1))[:, :x1 - x0]
     review._over(img, bt, x0, floe_line - OUT_ROW)
-    review._over(img, end_l, x0 - int(0.3 * 128), floe_line - int((1 - 0.925) * 128))
-    review._over(img, end_r, x1 - int(0.7 * 128), floe_line - int((1 - 0.925) * 128))
+    review._over(img, end_l, x0 - int(END_PIV_X * END_W), floe_line - END_H // 2)
+    review._over(img, end_r, x1 - int((1 - END_PIV_X) * END_W), floe_line - END_H // 2)
     try:
         import json
         sm = json.load(open(os.path.join(ART, "characters", "surveyor", "side.json"), encoding="utf-8"))
@@ -278,7 +306,7 @@ def preview(out_dir, giant="jupiter"):
     review._label(img, f"b-177 {giant}: a 14 m ice floe (the floe strip + caps) at 1x on deck2 as an island: island_belly under it (ink on row 8), "
                        "island_end_l / _r at its ends, under_haze_deck2 below the floe line; the surveyor", 6, 6)
     rows = [img]
-    P = np.empty((40 + 512 + 30, W, 3), np.float32)
+    P = np.empty((40 + 512 + 40, W, 3), np.float32)
     P[:] = review.PAPER
     x = 8
     for dk, hz in hazes.items():
@@ -288,7 +316,7 @@ def preview(out_dir, giant="jupiter"):
     review._over(P, np.tile(belly, (1, 2, 1)), 8, 340)
     review._label(P, f"island_belly 512x128 tiled x2 (copies p99 {copy_p99:.0f})", 8, 320)
     review._over(P, end_l, x, 40)
-    review._over(P, end_r, x + 150, 40)
+    review._over(P, end_r, x + 180, 40)
     review._label(P, "island_end_l | island_end_r", x, 20)
     rows.append(P)
     lines = []
@@ -307,7 +335,7 @@ def preview(out_dir, giant="jupiter"):
     out_img = np.vstack(rows + [foot])
     del rows, img
     import time
-    review.draw(out_img, time.strftime("%m-%d %H:%M") + " design preview (lock-free, fakegp + numpy)", 2, out_img.shape[0] - 16, (1.0, 1.0, 0.85))
+    review.draw(out_img, time.strftime("%m-%d %H:%M") + " " + (footnote or "design preview (lock-free, fakegp + numpy)"), 2, out_img.shape[0] - 16, (1.0, 1.0, 0.85))
     shape = out_img.shape
     np.clip(out_img, 0.0, 1.0, out=out_img)
     out_img *= 255.0
@@ -316,11 +344,111 @@ def preview(out_dir, giant="jupiter"):
     u8[..., :3] = out_img
     u8[..., 3] = 255
     del out_img
-    out = os.path.join(out_dir, f"review_b177_{giant}_islands_preview.png")
+    out = out or os.path.join(out_dir, f"review_b177_{giant}_islands_preview.png")
     pngio.write_png(out, u8)
     print("written", out, shape[1], "x", shape[0])
     for ln in lines:
         print(ln)
+
+
+# ---------------------------------------------------------------- the export (render.py's ground_strip_set API; the row's
+# "planet" names the giant through use_planet)
+
+GIANT = "jupiter"
+KEYS = {}
+
+
+def use_planet(giant):
+    global GIANT, KEYS
+    colours(giant)                                       # raises for a giant whose tones are not drawn yet
+    GIANT = giant
+    KEYS = {n: f"terrain/{giant}/{n}" for n in list(PIECES) + [f"under_haze_{dk}" for dk in DECKS[giant]]}
+
+
+use_planet(GIANT)
+
+
+def sheets():
+    S, allw = {}, []
+    for n in PIECES:
+        img, wd = render_piece(n, GIANT)
+        S[n] = ([img], wd)
+        allw += wd
+    for i, dk in enumerate(DECKS[GIANT]):
+        S[f"under_haze_{dk}"] = ([haze(GIANT, dk, seed=i)], [])
+    return S, allw
+
+
+def copy_diff(giant=None):
+    """Contract 11.9 / 11.10: the belly drawn two tiles wide; p99 of the copies' difference (must be 0)."""
+    import numpy as np
+    two, _w = render_piece("island_belly", giant or GIANT, mx=2, ss=1)
+    return float(np.percentile(np.abs(two[:, :BELLY_W].astype(np.int32) - two[:, BELLY_W:].astype(np.int32)), 99))
+
+
+def sheet_meta(kn, frames):
+    im = frames[0]
+    h, w = im.shape[:2]
+    piv = PIECES[kn][3] if kn in PIECES else (0.0, 0.0)
+    meta = {"key": KEYS[kn], "style": "v3", "contract": "v3.3 11.10", "frame_width": w, "frame_height": h, "columns": 1, "gutter": v3.GUTTER,
+            "frames": 1, "fps": v3.FPS, "pivot": [round(piv[0], 6), round(piv[1], 6)], "facing": "right", "ppu": PPU, "animations": []}
+    if kn == "island_belly":
+        meta.update({"tile_x": True, "repeat_px": BELLY_W, "outline_row": OUT_ROW, "above_px": OUT_ROW, "below_px": BELLY_H - OUT_ROW,
+                     "mapping": f"along each floe's underside outline: u = world x x 64 mod 512; v = {OUT_ROW} + (the signed distance below the outline along its normal x 64); the sprite pivot is ON row {OUT_ROW}",
+                     "sort": "above the floe strip (its crown covers the strip's lower half; the ice cap's top line stays clear)",
+                     "note": "B-177 / D-166: the cloud wraps the slab - a crown of lit lobes ~1.06 m above the outline, the belly and icicles hanging ~1.4-1.7 m below"})
+    elif kn.startswith("island_end_"):
+        side = "left" if kn.endswith("_l") else "right"
+        meta.update({"end": side, "meets": "floe_strip cap_" + side, "sort": "above the floe strip and island_belly (it covers the band's cut at the floe's end)",
+                     "note": "D-166: pivot on the outline row at the floe's end; the shoulder rises to 1.8 m (under the strip's top edge at 2 m) and bulges ~0.75 m past the floe's side"})
+    else:
+        meta.update({"tile_x": True, "tile_y": True, "world_space": True, "standalone": True, "wrap": "repeat", "painted": True,
+                     "deck": kn[len("under_haze_"):],
+                     "mapping": "u = x / 8, v = y / 8 (world metres) below the floe line where the deck's set has no paint; its own texture, Repeat",
+                     "note": "soft, no ink, periodic both ways; the darkening toward the deck's floor is a depth tint over it (D-164 note)"})
+    problems = [p for p in v3.validate_sheet(meta, im.shape) if "sum of clip lengths" not in p]
+    if kn.startswith("island_end_"):
+        m = v3.EDGE_MARGIN
+        if im[:m, :, 3].any() or im[-m:, :, 3].any() or im[:, :m, 3].any() or im[:, -m:, 3].any():
+            problems.append(f"touches the {m} px edge")
+    if kn in PIECES:
+        hit, off = v3.palette_hits(im, GIANT)
+        if hit < 0.98:
+            problems.append(f"palette {hit * 100:.1f}% (off {' '.join(off[:3])})")
+    return im, meta, problems
+
+
+def export(art, S=None):
+    import json as _json
+    from meridian import pngio
+    if S is None:
+        S, _w = sheets()
+    built, problems = [], []
+    for kn, (frames, _ws) in S.items():
+        sheet, meta, p = sheet_meta(kn, frames)
+        problems += [f"{kn}: {x}" for x in p]
+        built.append((kn, sheet, meta))
+    within = {"island_belly": copy_diff()}
+    if within["island_belly"] != 0:
+        problems.append(f"island_belly: tiling copies differ (p99 {within['island_belly']:.0f}; contract 11.9: 0)")
+    if problems:
+        raise ValueError(f"{GIANT} island set checks: " + "; ".join(problems))
+    d = os.path.join(art, "terrain", GIANT)
+    os.makedirs(d, exist_ok=True)
+    out = []
+    for kn, sheet, meta in built:
+        n = pngio.write_png(os.path.join(d, kn + "_color.png"), sheet)
+        with open(os.path.join(d, kn + ".json"), "w", encoding="utf-8", newline="\n") as f:
+            _json.dump(meta, f, indent=2)
+            f.write("\n")
+        out.append((meta["key"], sheet.shape[1], sheet.shape[0], n))
+    return out, within, f"{len(out)} keys, contract v3.3 11.10"
+
+
+def main(out, S=None, allw=None, footnote=None):
+    if S is None:
+        S, allw = sheets()
+    preview(os.path.dirname(out), GIANT, S=S, out=out, footnote=footnote)
 
 
 if __name__ == "__main__":

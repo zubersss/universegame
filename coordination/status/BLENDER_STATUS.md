@@ -1,10 +1,13 @@
 # BLENDER STATUS
-Updated: 2026-11-08 04:4x · Session: 9 (zuber-0c; all three windows restarted ~01:27; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-08 05:2x · Session: 9 (zuber-0c; all three windows restarted ~01:27; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-B-175 COMPLETE for the inner planets (contract v3.2 11.9): Earth 40a7e179, Mars f9d0696f, Mercury 660c8825 (the fill cream-dominant, 70.7 %), Venus 8a0a487a; all VERIFIED by LEAD, Done on each planet's smooth-ground captures. B-173 DONE as sheets (2a576cd4: eight audit sheets + coordination/reports/blender/audit_c2.md; finding: ui/titlecards/venus 76.9 % palette, a gradient sky, left for LEAD). Waiting on: U-158's key list (B-176), U-160's island format (B-177), U-151's code (B-172's export), U-152's census (B-174). Meanwhile: B-176's design source lock-free against the game's item ids, keys provisional until U-158's list. Each heavy job checks want_unity first.
+B-177 (D-166 revision): Jupiter's island set reworked so the cloud wraps the slab - island_belly 512x192 (outline row 72, a crown of lit lobes ~1.06 m in front of the strip, sorting above it), island_end_l/_r 160x256 cloud shoulders up to 1.8 m; the haze tiles flat (UNITY's depth tint, accepted). Source in build_islands_v3.py (export API + manifest row terrain/jupiter/island_set ready); the second Jupiter preview runs in the next free gap, then the export, then Saturn / Uranus / Neptune. B-176's export goes first once U-158's keys land (iron / copper / carbon revised in source, 20162f6c). Waiting on: U-158 (B-176), U-151 (B-172's export), U-152 (B-174).
 
 ## Last completed
+- 05:19 SLOT: B-178 Earth ground variants exported (e454ab6b; 13 keys: ground_band_sand / _stone / _snow, ground_fill_sand, ground_decor_<variant>_1..3; copies p99 0; 429 MB). Design ACCEPTED 05:1x (f814a851).
+- 04:58 SLOT: D-165 the four inner fills re-exported strata-only + fill_decor_1..4 per planet (d8ace45a). VERIFIED.
+- 04:5x-05:07: B-176 Earth node designs (ACCEPTED with iron / copper / carbon revised: 20162f6c); B-177 Jupiter islands first design (a8e881e8).
 - 04:26-04:42: B-175 Mercury exported (660c8825) and Venus previewed + exported (1fe5d0d0, 8a0a487a); B-173's eight audit sheets and report (2a576cd4; 92-124 MB per planet, lock-free).
 - 04:18-04:23: the Mars preview (ACCEPTED 04:2x) and its export (f9d0696f, 13 s, 577 MB); the Mercury and Venus sources (e0700bfc) and the Mercury preview (8053f887); the curve preview now under 300 MB (in-place write).
 - 04:10-04:11 SLOT (wrapper): B-175 Earth ground set, 11 keys, tiling copies p99 0.00 (40a7e179; 567 MB); the lock-free dry run first (240 MB). The design ACCEPTED by LEAD 04:0x (5037150c), UNITY's details applied (band pivot on row 24, rim pivot on row 4, the fill standalone with Repeat wrap, u by world x).
