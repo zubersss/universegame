@@ -509,6 +509,205 @@ def survey_module(d, M):
     G.stroke(d, G.lumpy_ellipse(fl + 0.08, ft + 0.2, 0.025, 0.025, n=10, seed=201), M["green_i"], I, cyclic=True)
 
 
+# ---------------------------------------------------------------- batch 4: gear and the remaining materials
+
+def _tank(d, M, x, w, zb, zt, body, sh, nozzle="sky_dp"):
+    """An upright tank with a rounded top and a nozzle under it."""
+    top = [(x - w, zt - w)] + [(x + w * math.cos(a), zt - w + w * math.sin(a)) for a in [math.pi - math.pi * i / 10 for i in range(11)]]
+    tank = [(x - w, zb)] + top + [(x + w, zb)]
+    G.stroke(d, tank, M[body], 0.0, cyclic=True)
+    G.stroke(d, [(x + w * 0.35, zb), (x + w * 0.35, zt - w * 0.4), (x + w, zt - w), (x + w, zb)], M[sh], 0.0, cyclic=True)
+    G.stroke(d, [(x - w * 0.55, zt - w * 0.9), (x - w * 0.3, zt - w * 0.9), (x - w * 0.3, zb + 0.04), (x - w * 0.55, zb + 0.04)], M["off"], 0.0, cyclic=True)
+    G.stroke(d, tank, M["ink"], O, cyclic=True)
+    G.stroke(d, [(x - w * 0.7, zb), (x + w * 0.7, zb), (x + w * 0.9, zb - 0.08), (x - w * 0.9, zb - 0.08)], M[nozzle + "_i"], I, cyclic=True)
+
+
+def _heap(d, M, base, sh, cx, cz, w, h, seed):
+    """A heap of powder: a lumpy cone, its shaded right flank, grains."""
+    rnd = random.Random(seed)
+    pts = [(cx - w, cz)] + [(cx + w * (2 * t - 1), cz + h * (1 - abs(2 * t - 1)) ** 0.8 * (1 + rnd.uniform(-0.06, 0.06))) for t in [i / 14 for i in range(1, 14)]] + [(cx + w, cz)]
+    G.stroke(d, pts, M[base], 0.0, cyclic=True)
+    G.stroke(d, [p for p in pts if p[0] >= cx] + [(cx + w * 0.1, cz)], M[sh], 0.0, cyclic=True)
+    G.stroke(d, pts, M["ink"], O, cyclic=True)
+    G.specks(d, [(cx - w * 0.4, cz + h * 0.3), (cx + w * 0.2, cz + h * 0.45), (cx - w * 0.1, cz + h * 0.15)], M["ink"])
+
+
+def jetpack_mk2(d, M):
+    G.stroke(d, [(-0.12, -0.2), (0.28, -0.14), (0.28, 0.24), (-0.12, 0.3)], M["sky_dp_i"], O, cyclic=True)   # the backplate
+    for x in (-0.16, 0.06):
+        _tank(d, M, x, 0.1, -0.22, 0.34, "red", "red_sh")
+    for x in (-0.16, 0.06):                                                                   # a lick of blue under each
+        G.stroke(d, [(x - 0.04, -0.31), (x + 0.04, -0.31), (x, -0.4)], M["teal"], 0.0, cyclic=True)
+
+
+def jetpack_mk3(d, M):
+    for x in (-0.2, 0.0, 0.2):
+        _tank(d, M, x, 0.085, -0.22, 0.34, "sky_dp", "brown_dp", nozzle="brown_dp")
+    for x in (-0.2, 0.0, 0.2):
+        G.stroke(d, [(x - 0.045, -0.31), (x + 0.045, -0.31), (x, -0.42)], M["teal"], 0.0, cyclic=True)
+
+
+def skip_drive_mk2(d, M):
+    """Neptune's palette: the violet core (its 'mustard' slot) in a dark ring on four spokes."""
+    outer = G.lumpy_ellipse(0.0, 0.0, 0.36, 0.36, n=36, lump=0.0, seed=220)
+    inner = G.lumpy_ellipse(0.0, 0.0, 0.25, 0.25, n=36, lump=0.0, seed=221)
+    G.stroke(d, outer, M["sky_dp"], 0.0, cyclic=True)
+    G.stroke(d, [q for q in outer if q[0] + q[1] < 0.0] + [(-0.25, 0.25)], M["sky_sh"], 0.0, cyclic=True)
+    G.stroke(d, inner, M["brown_dp"], 0.0, cyclic=True)
+    for a in (45, 135, 225, 315):
+        t = math.radians(a)
+        G.stroke(d, G.hose_outline([(0.1 * math.cos(t), 0.1 * math.sin(t)), (0.25 * math.cos(t), 0.25 * math.sin(t))], 0.035), M["sky_sh_i"], I, cyclic=True)
+    core = G.lumpy_ellipse(0.0, 0.0, 0.12, 0.12, n=20, lump=0.0, seed=222)
+    G.stroke(d, core, M["mustard"], 0.0, cyclic=True)
+    G.stroke(d, G.lumpy_ellipse(0.025, -0.025, 0.08, 0.08, n=16, lump=0.0, seed=223), M["mustard_sh"], 0.0, cyclic=True)
+    G.stroke(d, core, M["ink"], I, cyclic=True)
+    G.stroke(d, outer, M["ink"], O, cyclic=True)
+    G.stroke(d, inner, M["ink"], I, cyclic=True)
+    glint(d, M, -0.04, 0.04, 0.025)
+
+
+def thruster_mk3(d, M):
+    cone = [(-0.12, 0.14), (0.12, 0.14), (0.3, -0.28), (-0.3, -0.28)]
+    G.stroke(d, G.lumpy_ellipse(0.0, -0.28, 0.3, 0.07, n=24, lump=0.0, seed=230), M["brown_dp"], 0.0, cyclic=True)   # the bell's mouth
+    G.stroke(d, cone, M["sky_dp"], 0.0, cyclic=True)
+    G.stroke(d, [(0.03, 0.14), (0.12, 0.14), (0.3, -0.28), (0.1, -0.28)], M["brown_dp"], 0.0, cyclic=True)
+    G.stroke(d, [(-0.07, 0.1), (-0.03, 0.1), (-0.14, -0.22), (-0.2, -0.22)], M["sky_sh"], 0.0, cyclic=True)
+    G.stroke(d, cone, M["ink"], O, cyclic=True)
+    G.stroke(d, [(-0.14, 0.14), (0.14, 0.14), (0.14, 0.19), (-0.14, 0.19)], M["red_i"], I, cyclic=True)   # the orange collar
+    G.stroke(d, [(-0.11, 0.19), (0.11, 0.19), (0.09, 0.32), (-0.09, 0.32)], M["sky_dp_i"], O, cyclic=True)
+
+
+def basalt(d, M):
+    for x, zt, w in ((-0.14, 0.3, 0.12), (0.12, 0.18, 0.12), (-0.02, 0.06, 0.1)):            # hexagonal columns
+        G.stroke(d, [(x - w, -0.3), (x + w, -0.3), (x + w, zt), (x - w, zt)], M["sky_dp"], 0.0, cyclic=True)
+        G.stroke(d, [(x + w * 0.2, -0.3), (x + w, -0.3), (x + w, zt), (x + w * 0.2, zt)], M["brown_dp"], 0.0, cyclic=True)
+        top = [(x - w, zt), (x - w * 0.5, zt + 0.04), (x + w * 0.5, zt + 0.04), (x + w, zt), (x + w * 0.5, zt - 0.03), (x - w * 0.5, zt - 0.03)]
+        G.stroke(d, top, M["sky_sh"], 0.0, cyclic=True)
+        G.seam(d, [(x + w * 0.2, -0.3), (x + w * 0.2, zt - 0.03)], M["ink"])
+        G.stroke(d, [(x - w, -0.3), (x + w, -0.3), (x + w, zt), (x + w * 0.5, zt + 0.04), (x - w * 0.5, zt + 0.04), (x - w, zt)], M["ink"], O, cyclic=True)
+
+
+def clay(d, M):
+    pts = lump(0.0, -0.06, 0.34, 0.24, 240, n=10, jit=0.1)                                   # a squat, pinched ball (never an egg)
+    pts = [(x, max(z, -0.26)) for x, z in pts]
+    G.stroke(d, pts, M["red_sh"], 0.0, cyclic=True)
+    G.stroke(d, [q for q in pts if q[0] - q[1] > 0.12] + [(0.1, -0.12)], M["red_dp"], 0.0, cyclic=True)
+    G.stroke(d, G.lumpy_ellipse(0.04, 0.04, 0.08, 0.05, n=14, lump=0.05, seed=241), M["red_dp"], 0.0, cyclic=True)   # a thumb dent
+    G.seam(d, [(-0.04, 0.0), (0.04, 0.0), (0.12, 0.03)], M["ink"])
+    G.stroke(d, pts, M["ink"], O, cyclic=True)
+    glint(d, M, -0.18, 0.06, 0.022)
+
+
+def perchlorate(d, M):
+    for cx, cz, s in ((-0.1, -0.14, 0.15), (0.12, -0.08, 0.13), (0.0, 0.1, 0.12)):          # a cluster of pale cubes
+        fl, fr, fb, ft = cx - s, cx + s * 0.6, cz - s, cz + s * 0.6
+        dx, dz = s * 0.5, s * 0.4
+        for poly, m in (([(fl, fb), (fr, fb), (fr, ft), (fl, ft)], "off_sh"), ([(fr, fb), (fr + dx, fb + dz), (fr + dx, ft + dz), (fr, ft)], "mustard_dp"),
+                        ([(fl, ft), (fr, ft), (fr + dx, ft + dz), (fl + dx, ft + dz)], "off")):
+            G.stroke(d, poly, M[m], 0.0, cyclic=True)
+        _box_ink(d, M, fl, fr, fb, ft, dx, dz)
+    glint(d, M, -0.02, 0.2, 0.022)
+
+
+def phosphorus_pigment(d, M):
+    dish = G.lumpy_ellipse(0.0, -0.22, 0.38, 0.1, n=28, lump=0.0, seed=250)
+    G.stroke(d, dish, M["sky_dp_i"], O, cyclic=True)
+    G.stroke(d, G.lumpy_ellipse(0.0, -0.2, 0.3, 0.07, n=24, lump=0.0, seed=251), M["sky_sh"], 0.0, cyclic=True)
+    _heap(d, M, "red", "red_sh", 0.0, -0.21, 0.24, 0.26, 252)
+
+
+def sand(d, M):
+    _heap(d, M, "mustard", "mustard_sh", 0.0, -0.24, 0.36, 0.38, 260)
+
+
+def stone(d, M):
+    pts = lump(0.0, -0.08, 0.36, 0.22, 270, n=10, jit=0.08)                                  # a flat pebble (wider than tall: not an egg)
+    faceted(d, M, pts, "sky_sh", "sky", "sky_dp", 0.0, -0.08, seams=False)
+    G.seam(d, [(-0.12, 0.04), (-0.05, -0.04), (-0.08, -0.14)], M["ink"])
+    G.specks(d, [(0.1, -0.02), (0.18, -0.12), (-0.2, -0.1)], M["ink"])
+    glint(d, M, -0.16, 0.04, 0.022)
+
+
+def sulfur(d, M):
+    pts = lump(0.0, -0.02, 0.33, 0.33, 280, n=9, jit=0.14)
+    faceted(d, M, pts, "mustard", "off", "mustard_sh", 0.0, -0.02)
+    glint(d, M, -0.12, 0.15)
+
+
+def vitriol_glass(d, M):
+    T, Bm, L, R, F = (0.04, 0.36), (-0.02, -0.36), (-0.28, 0.06), (0.28, -0.04), (0.04, 0.0)  # a lime gem, tilted
+    for tri, mat in (((T, L, F), "green"), ((T, F, R), "green_sh"), ((L, F, Bm), "green_sh"), ((F, R, Bm), "green_dp")):
+        G.stroke(d, list(tri), M[mat], 0.0, cyclic=True)
+    for a, b in ((T, F), (L, F), (F, R), (F, Bm)):
+        G.seam(d, [a, b], M["ink"])
+    G.stroke(d, [T, R, Bm, L], M["ink"], O, cyclic=True)
+    glint(d, M, -0.08, 0.14, 0.028)
+
+
+def deep_diamond_tip(d, M):
+    shank = [(-0.08, -0.36), (0.08, -0.36), (0.08, -0.04), (-0.08, -0.04)]
+    G.stroke(d, shank, M["sky_dp"], 0.0, cyclic=True)
+    G.stroke(d, [(0.02, -0.36), (0.08, -0.36), (0.08, -0.04), (0.02, -0.04)], M["brown_dp"], 0.0, cyclic=True)
+    G.stroke(d, shank, M["ink"], O, cyclic=True)
+    G.stroke(d, [(-0.16, -0.06), (0.16, -0.06), (0.16, 0.0), (-0.16, 0.0)], M["sky_sh_i"], I, cyclic=True)   # the collar
+    cone = [(-0.16, 0.0), (0.16, 0.0), (0.0, 0.38)]
+    G.stroke(d, cone, M["sky"], 0.0, cyclic=True)
+    G.stroke(d, [(0.0, 0.0), (0.16, 0.0), (0.0, 0.38)], M["sky_sh"], 0.0, cyclic=True)
+    G.stroke(d, [(-0.1, 0.02), (-0.05, 0.02), (0.0, 0.3)], M["off"], 0.0, cyclic=True)
+    G.stroke(d, cone, M["ink"], O, cyclic=True)
+
+
+def deep_core_sample(d, M):
+    w, zb, zt = 0.16, -0.32, 0.3
+    bands = [(-0.32, -0.18, "brown_dp"), (-0.18, -0.06, "mustard_sh"), (-0.06, 0.04, "brown_sh"), (0.04, 0.16, "mustard_dp"), (0.16, 0.3, "brown_dp")]
+    for z0, z1, m in bands:                                                                   # the strata in the core
+        G.stroke(d, [(-w, z0), (w, z0), (w, z1), (-w, z1)], M[m], 0.0, cyclic=True)
+        G.seam(d, [(-w, z0), (w, z0)], M["ink"])
+    G.stroke(d, [(w * 0.4, zb), (w, zb), (w, zt), (w * 0.4, zt)], M["brown_dp"], 0.0, cyclic=True)
+    top = G.lumpy_ellipse(0.0, zt, w, w * 0.32, n=20, lump=0.0, seed=290)
+    G.stroke(d, top, M["sky_sh"], 0.0, cyclic=True)
+    G.stroke(d, [(-w, zt), (-w, zb), (w, zb), (w, zt)], M["ink"], O)
+    G.stroke(d, top, M["ink"], O, cyclic=True)
+
+
+def ring_rock(d, M):
+    pts = lump(0.0, -0.02, 0.33, 0.31, 300, n=13, jit=0.1)
+    faceted(d, M, pts, "brown_sh", "mustard_sh", "brown_dp", 0.0, -0.02, seams=False)
+    for j, (x, z, r) in enumerate(((-0.12, 0.08, 0.04), (0.1, -0.1, 0.05), (0.14, 0.12, 0.03), (-0.06, -0.16, 0.035))):   # pocks
+        G.stroke(d, G.lumpy_ellipse(x, z, r, r * 0.8, n=10, seed=301 + j), M["brown_dp"], 0.0, cyclic=True)
+        G.seam(d, [(x - r, z + r * 0.4), (x + r * 0.6, z + r * 0.8)], M["ink"])
+    G.specks(d, [(0.0, 0.18), (-0.22, -0.04), (0.22, -0.02)], M["ink"])
+
+
+def living_seed(d, M):
+    seed = G.lumpy_ellipse(0.0, -0.1, 0.24, 0.2, n=24, lump=0.03, seed=310)
+    G.stroke(d, seed, M["brown_sh"], 0.0, cyclic=True)
+    G.stroke(d, [q for q in seed if q[0] - (q[1] + 0.1) > 0.08] + [(0.06, -0.14)], M["brown_dp"], 0.0, cyclic=True)
+    G.seam(d, [(-0.04, 0.08), (0.0, -0.1), (-0.02, -0.26)], M["ink"])
+    G.stroke(d, seed, M["ink"], O, cyclic=True)
+    G.stroke(d, G.hose_outline(G.bezier((0.0, 0.09), (0.0, 0.2), (0.06, 0.28), (0.14, 0.3), n=8), 0.022), M["green_i"], I, cyclic=True)   # the sprout
+    leaf = [(0.12, 0.3), (0.2, 0.38), (0.34, 0.36), (0.28, 0.28)]
+    G.stroke(d, leaf, M["green_i"], I, cyclic=True)
+    G.seam(d, [(0.14, 0.31), (0.3, 0.33)], M["ink"])
+    glint(d, M, -0.12, -0.02, 0.022)
+
+
+def wood(d, M):
+    L, R, H = -0.32, 0.18, 0.2                                                                # a log lying on its side, its cut end right
+    G.stroke(d, [(L, -H), (R, -H), (R, H), (L, H)], M["brown_sh"], 0.0, cyclic=True)
+    G.stroke(d, [(L, -H), (R, -H), (R, -H * 0.3), (L, -H * 0.3)], M["brown_dp"], 0.0, cyclic=True)
+    for z in (-0.1, 0.02, 0.12):                                                              # bark grain
+        G.seam(d, [(L + 0.05, z), (L + 0.2, z + 0.01), (R - 0.12, z - 0.005)], M["ink"])
+    end = G.lumpy_ellipse(R, 0.0, 0.1, H, n=24, lump=0.0, seed=320)
+    G.stroke(d, end, M["mustard_sh"], 0.0, cyclic=True)
+    for k in (0.65, 0.35):                                                                    # the rings
+        G.stroke(d, G.lumpy_ellipse(R + 0.005, 0.0, 0.1 * k, H * k, n=20, lump=0.0, seed=321), M["ink"], I, cyclic=True)
+    G.stroke(d, [(L, -H), (R, -H)], M["ink"], O)
+    G.stroke(d, [(L, H), (R, H)], M["ink"], O)
+    G.stroke(d, [(L, -H), (L - 0.03, 0.0), (L, H)], M["ink"], O)
+    G.stroke(d, end, M["ink"], O, cyclic=True)
+
+
 ITEMS = {"iron": iron, "copper": copper, "nickel": nickel, "aluminium": aluminium, "carbon": carbon, "graphite": graphite,
          "hematite": hematite, "silica": silica, "solarite": solarite, "deep_diamond": deep_diamond,
          "water_ice": water_ice, "methane_ice": methane_ice, "polar_ice": polar_ice, "ring_ice": ring_ice,
@@ -517,14 +716,21 @@ ITEMS = {"iron": iron, "copper": copper, "nickel": nickel, "aluminium": aluminiu
          "circuit_board": circuit_board, "cryo_pad": cryo_pad, "thermal_pad": thermal_pad, "cryo_round": cryo_round,
          "float_cell_mk1": float_cell_mk1, "float_cell_mk2": float_cell_mk2, "polymer": polymer, "radiation_liner": radiation_liner,
          "smelter_bar_copper": smelter_bar_copper, "smelter_bar_iron": smelter_bar_iron, "solarite_capacitor": solarite_capacitor,
-         "suit_patch": suit_patch, "survey_module": survey_module}
+         "suit_patch": suit_patch, "survey_module": survey_module,
+         "jetpack_mk2": jetpack_mk2, "jetpack_mk3": jetpack_mk3, "skip_drive_mk2": skip_drive_mk2, "thruster_mk3": thruster_mk3,
+         "basalt": basalt, "clay": clay, "perchlorate": perchlorate, "phosphorus_pigment": phosphorus_pigment, "sand": sand,
+         "stone": stone, "sulfur": sulfur, "vitriol_glass": vitriol_glass, "deep_diamond_tip": deep_diamond_tip,
+         "deep_core_sample": deep_core_sample, "ring_rock": ring_rock, "living_seed": living_seed, "wood": wood}
 BATCHES = {1: ["iron", "copper", "nickel", "aluminium", "carbon", "graphite", "hematite", "silica", "solarite", "deep_diamond"],
            2: ["water_ice", "methane_ice", "polar_ice", "ring_ice", "superionic_ice", "ammonia_ice", "helium3_condensate",
                "metallic_hydrogen", "oxygen"],
-           3: ["circuit_board", "cryo_pad", "thermal_pad", "cryo_round", "float_cell_mk1", "float_cell_mk2", "polymer",
-               "radiation_liner", "smelter_bar_copper", "smelter_bar_iron", "solarite_capacitor", "suit_patch", "survey_module"]}
-EXPORT_BATCHES = (1, 2)                                                                       # only LEAD-accepted batches export
-ITEM_PLANET = {"superionic_ice": "neptune",                                                   # its violet is Neptune's
+           3: ["circuit_board", "cryo_pad", "thermal_pad", "float_cell_mk1", "float_cell_mk2", "polymer",   # cryo_round retired
+                                                                                              # (D-173: Veil Serpent ammo, combat cancelled D-087)
+               "radiation_liner", "smelter_bar_copper", "smelter_bar_iron", "solarite_capacitor", "suit_patch", "survey_module"],
+           4: ["jetpack_mk2", "jetpack_mk3", "skip_drive_mk2", "thruster_mk3", "basalt", "clay", "perchlorate", "phosphorus_pigment",
+               "sand", "stone", "sulfur", "vitriol_glass", "deep_diamond_tip", "deep_core_sample", "ring_rock", "living_seed", "wood"]}
+EXPORT_BATCHES = (1, 2, 3)                                                                    # only LEAD-accepted batches export
+ITEM_PLANET = {"superionic_ice": "neptune", "skip_drive_mk2": "neptune",                      # the violet is Neptune's (its 'mustard' slot)
                "helium3_condensate": "saturn"}                                                # LEAD 15:3x: its source planet; Saturn's red is
                                                                                               # the dusty rose nearest the v2 pink (Earth's coral
                                                                                               # read as a fire extinguisher)
