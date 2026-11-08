@@ -1,0 +1,44 @@
+{
+  "key": "backgrounds/neptune/spot",
+  "style": "v3",
+  "ppu": 64,
+  "anchor": "bottom",
+  "tile_x": true,
+  "layers": [
+    {
+      "n": 0,
+      "parallax": 0.1,
+      "y_m": -2.0,
+      "height_px": 1024
+    },
+    {
+      "n": 1,
+      "parallax": 0.35,
+      "y_m": -1.0,
+      "pulse": {
+        "scale": [
+          0.97,
+          1.03
+        ],
+        "alpha": [
+          0.85,
+          1.0
+        ],
+        "beats": 8,
+        "bpm": 110,
+        "pivot_uv": [
+          0.5,
+          0.5
+        ],
+        "note": "D-148: the storm breathes; UNITY scales / fades this layer about pivot_uv (origin bottom-left) on the 110 bpm clock"
+      },
+      "height_px": 640
+    },
+    {
+      "n": 2,
+      "parallax": 0.6,
+      "y_m": -0.5,
+      "height_px": 384
+    }
+  ]
+}
