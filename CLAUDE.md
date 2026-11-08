@@ -1,7 +1,8 @@
 # MERIDIAN — Project Rules (read first, every session)
 
 MERIDIAN is a 2D survival-exploration game drawn and animated as a 1930s rubber-hose cartoon (Bible §9 v4, D-086; original designs only, no combat, D-087) set in our real solar
-system: Terraria-style side view on each of the 8 planets, top-down view in space, real
+system: a side view on smooth, drawn cartoon ground on each of the 8 planets (no tiles, no
+digging, no block placement: D-161, Bible 5.0), top-down view in space, real
 gravity ratios everywhere. Unity 6 (URP 2D Renderer) + Blender-rendered art. Three
 Claude Code sessions build it: LEAD (Lead Director), UNITY (Unity Engineer), BLENDER
 (Blender Artist). The user has no development experience and does not edit files.

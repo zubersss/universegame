@@ -23,11 +23,10 @@ older (D-037 alternation applies only between equal ranks). A rank is live only 
 has a want on file or holds the lock (D-112): if the top rank has no want when the lock frees,
 the next live rank runs now and the skipped role goes next after it files. A role below the top
 keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 278 (11-08 01:4x: all three windows restarted ~01:27; lock B's tests green (MarsStage 3/3, the Jupiter PlayMode slice 20/20) but its captures died with the restart; B-170 in; THE OWNER'S 0.4.7 PLAYTEST → D-158: the flight overhaul goes first and rides 0.4.8). A role files its want only when the queue says it is next after the running job:
-Cycle 279 (03:2x, 2-hour tick). Done since: the flight check (green but M1Loop → LEAD's 90 s window); B-171 exported; B-166 slot 1 (the four Uranus decks × four lights); lock C part 1 (02:58–03:1x: M1Loop green, the whale and boom re-shot, 0.4.8 dev built, the probe 121 / 122 green with one Film pass reading over → D-159).
-1. UNITY · NOW (since 03:12): lock C part 2 = the re-probe on the 0.4.8 dev build (D-159) → green: the release build + the smoke set; red twice: stop and look at what U-148's wide-frame tiling feeds the film pass. LEAD then writes the page and USER-32 (the feel check).
-2. BLENDER · after lock C: the B-172 design preview (lock-free) → B-166 slot 2 (floes / rig / props / palette) → slot 3 (the creatures + the Colossus), each yielding to want_unity.
-3. UNITY · after 0.4.8, one lock: the U-127 re-shoot (a Stormglider staged in the storm deck; B-156's deck module on a Deck 2 floe) + U-154's check (with U-129 slice 2's code if in).
-4. Then: the Saturn check + captures (U-129, B-163 / B-164 in game), BLENDER's B-169 Neptune slots, the Uranus check + captures (U-130 / U-146 after B-166), Neptune (U-133 / U-144 after B-169), B-172 after U-151's code.
+Cycle 279 (04:1x). Done since: BUILD 0.4.8 (the respin 03:30–03:47, the owner's build: the flight with weight, the paper HUD, Jupiter); B-166 slot 2; B-172's design accepted. THE OWNER'S DIRECTION (04:0x) → D-161 / Bible 5.0: smooth cartoon ground, no digging or block placement, mining by resource nodes; it goes ahead of everything else.
+1. UNITY · lock-free now: U-156 (Earth's smooth ground) + U-157 (dig / place out) code → one check (compile + EditMode + the PlayMode slice incl. SmoothGround / M1Loop / Transition / SaveLoad + the u156 captures). Then U-158 (Earth's nodes) → Build 0.5.0 (Earth smooth; dig gone everywhere) for the owner.
+2. BLENDER · now: the B-175 Earth curve preview (lock-free) → LEAD; meanwhile B-166 slot 3 (the Uranus creatures + the Colossus) in a free lock; then B-175 Earth's export as soon as LEAD accepts it (it outranks Uranus / Neptune), then B-176 Earth's nodes once U-158's key list is out.
+3. After 0.5.0 reads with the owner: U-159 + B-175 for Mars / Mercury / Venus; then U-160 + B-177 (the giants' islands); the C2 giants' checks (U-127's re-shoot, U-129, U-130, U-133) and B-169 continue in the gaps.
 
 
 
@@ -1396,6 +1395,27 @@ Files: blender/scripts/build_props_space_v3.py, Assets/_Game/Art/props/space/
 Depends: U-151 (the v3 draw path)
 Lead notes: Cycle 278. Design source lock-free after B-171's; the export after U-151's code and after the Saturn slots. Cycle 279 (03:4x): DESIGN ACCEPTED (source b407a9ac + the clip fix 5e37a670; review_b172_space_props_preview.png 03:28 viewed): the Earth Waystation a cream ring with teal panels on four teal spokes, a mustard hub with the red Halcyon band, the cargo deck and crates under a lattice crane to the east, solar wings west, the clamp south with the Pilgrim docked at (0, -7 u), a beacon mast north; the Mars Waystation the same language with a rust hex hub, three spokes, salmon panels and a dish; the six rocks cartoon potatoes with craters in an 8-frame tumble (ochre, pale, rust, a bitten ochre, salmon, an ice-teal contact binary); ink in range, palette 100 %, no faces. The stations' clip is `lamps` (4, loop; eight 896² frames overflow 2048), so U-151 reads clips by name. Export after U-151's v3 path is in (D-117).
 
+### B-175 · BLENDER · Ready · G1
+Goal: OWNER DIRECTION, FIRST (D-161 (1)): ground art that bends. Prove each inner planet's v3 ground strip on a smooth curve: a stamped preview of Earth's grass strip deformed along a test profile (rolling hills, a 30° slope, a valley, a cliff with a rounded lip) at 1x with the surveyor on it. Where a strip doesn't bend cleanly (tufts shearing sideways, ink stretched thick or thin), redraw it as a bendable top band (a horizontally repeating band with the ink edge on its surface row and the tufts and stones drawn upright so they survive the bend) plus a fill texture for the ground's body below, and add a rounded cliff-lip piece. Then Mars, Mercury and Venus's surface the same way.
+Accept: one curve preview per planet accepted by LEAD before its export; per planet log OK, ≤ 2048² sheets, the json stating the band's surface row and height (the format agreed with UNITY's U-156 mesh through LEAD); the ten §9.7 boxes.
+Files: blender/scripts/build_ground_v3.py (or the existing strip builders), Assets/_Game/Art/terrain/<planet>/
+Depends: —
+Lead notes: Cycle 279 (04:1x), the owner's "even out the ground". The Earth preview first, lock-free (numpy), ahead of Uranus slot 3; its export in your next slot after LEAD accepts it.
+
+### B-176 · BLENDER · Ready · G1
+Goal: OWNER DIRECTION (D-161 (3)): resource node art: for each planet, the cartoon nodes U-158 lists (planet, biome, item, key), e.g. iron and copper outcrops, a carbon seam and silica crystals on Earth; hematite, perchlorate crust and water ice on Mars; the Solarite cluster (re-used from props/mercury/solarite_cluster if it reads as a node) and nickel on Mercury; vitriol glass on Venus; each with a full state, a harvested state (chipped, smaller) and an 8-frame idle glint; no faces.
+Accept: one stamped preview per planet at 1x beside the surveyor, accepted by LEAD; log OK per key, json valid, ≤ 512² per node.
+Files: blender/scripts/build_nodes_v3.py, Assets/_Game/Art/props/<planet>/nodes/
+Depends: U-158 (the key list)
+Lead notes: Cycle 279. Earth's nodes first (Build 0.5.0).
+
+### B-177 · BLENDER · Ready · G1
+Goal: OWNER DIRECTION (D-161 (4)): the giants' islands: per giant a rounded cloud-ice island belly that tiles under a floe of any length with rounded ends matching the floe caps (the floe strips' tops stay), plus a painted haze band per deck for everything below the floe line, in each giant's palette, straight finish.
+Accept: one stamped preview per giant (an island at 1x with the surveyor, a camera low under it showing the haze) accepted by LEAD; log OK per key; json valid.
+Files: blender/scripts/build_islands_v3.py, Assets/_Game/Art/terrain/<giant>/
+Depends: U-160's format (through LEAD)
+Lead notes: Cycle 279. After B-175 and the Uranus / Neptune exports.
+
 ### B-173 · BLENDER · Ready · C2
 Goal: The C2 exit audit (Bible §12 C2: "§9.7 on every asset"): one stamped contact sheet per planet (Earth, Mars, Mercury, Venus, Jupiter, Saturn, then Uranus and Neptune as their exports land) read back from Assets/_Game/Art/ at 1x: every v3 key of that planet (sets as a strip, floes, flora rig set assembled, props, creatures at their idle frame, Grand rigs assembled at 0.25x, the palette strip, the title card), each with its measured ink widths and palette hit, and a list of any key under that planet's folders that is still v2 (a .glb or a _normal / _mask map).
 Accept: six sheets now (two more later) in blender/preview/audit_c2_<planet>.png, stamped; a README line per planet in coordination/reports/blender/ with the counts (v3 keys, v2 keys left, any ink or palette outlier); no export.
@@ -2405,6 +2425,41 @@ Accept: u127/1–5 re-shot at 1x: the deck set covers the frame above the floe l
 Files: Code/Runtime/View2D/CartoonStage.cs, BandDatum.cs, ParallaxLayers.cs, GroundStrip.cs, Code/Runtime/Creatures/, Tests/
 Depends: U-127
 Lead notes: Cycle 278 (01:4x): LEAD viewed u127/1_floe_kit_tortoise.png (a flat tan wash behind the Pilgrim and the tortoise, the capped ice strip, block tiles right of it, one vertical ink line from the floe up) and 3_deep_crush.png (dark wash, the set's swirls only at the frame's bottom, a blurry block floe, two vertical lines): UNITY's reading confirmed. Lock-free code right after U-150 (the flight stays first); its re-capture rides the flight check's lock (or the next one); 0.4.8 waits for it, because the owner would otherwise land on a blank Jupiter. A second failed re-capture comes back to LEAD (flight-only 0.4.8 versus waiting). 02:5x: the flight check's re-capture: items 1-3 PASS (u127/1_floe_kit_tortoise.png viewed: the banded Jupiter set over the whole frame above the floe, the ice floe's strip with both caps, the aerostat kit card and a tortoise, no ink lines); item 4 failed a second time (the Vortex Whale is a Flees species and turns tail wherever it spawns) -> LEAD's ruling: the staged head-first fix re-shoots in lock C and 0.4.8 does not wait on it; a third miss becomes its own card after 0.4.8. In lock C if it is a few lines: the flat ~1 m under-fill band under a floating floe on the decked giants (the U-139 ground fill has no ground to match there; extend the set's lowest layer instead), else a follow-up card. Cycle 279 (04:0x): DONE on Build 0.4.8 (the respin 31d98605, one lock 03:30-03:47): compile 0 / 0; the probe BUILD MEMORY GREEN on its first reading (Film pass -0.164 ms; the three readings 0.791 / -0.239 / -0.164 in perf_2026-11-08.md, D-159; Climb Earth p99 16.8 ms, worst 16.8, none over 50 ms; Return +9.4 / +2.5 %; Creep -2 MB per visit); release Build/MERIDIAN_0.4.8 529 MB + _dev; SMOKE OK 37 shots on the release player. smoke_16_venus_station (Venus unchanged) and the u127 re-shoots; the deep space below a floe is now the set's lowest row stretched, which reads as streaks when the camera sits low (smoke_21_titlecard_jupiter) -> U-155 / B-175.
+
+### U-156 · UNITY · Ready · G1
+Goal: OWNER DIRECTION, FIRST (D-161 (1), Bible 5.0): smooth cartoon ground on Earth. The surface becomes one continuous curve: the per-column heights smoothed into rolling hills with no step between neighbouring columns, slopes up to ~35° walkable, a steeper drop a cliff with a rounded lip, the camp / pad / POI plateaus eased in. Collision follows the curve (an edge collider or equivalent replaces the tile colliders for walking). The ground is drawn as a mesh band along the curve: the planet's ground-strip art on top (bending with the slope; B-175 supplies a bendable band if the current strips shear) and the body below drawn in the planet's ground colour or B-175's fill. No tile, block face or stair step is drawn anywhere. The surveyor walks slopes without sliding or bouncing and keeps the flat-ground jump heights exactly; the camera's floor follows the curve; the Pilgrim's pad stays flat.
+Accept: SmoothGroundTests (EditMode): on 10 Earth seeds no neighbouring-column step above the slope limit, the plateaus eased, the cliff lips rounded. PlayMode: jump heights on flat ground per Bible §4.2 unchanged ±1 cm; a walk up and down a 30° slope with no slide or bounce; M1Loop and TransitionTests green. Captures at 1x in reports/unity/u156/: the camp, a hill, a valley, a cliff lip, the coast, and the same five from 0.4.8 beside them; Earth's BudgetGate rows unchanged.
+Files: Code/Runtime/Terrain/, Code/Runtime/View2D/GroundStrip.cs, CartoonStage.cs, BandDatum.cs, Code/Runtime/Player/, Tests/
+Depends: —
+Lead notes: Cycle 279 (04:1x), the owner: "even out the ground and everything; I don't like how everything looks so blocky; more cartoony but still a space game." Ahead of every other UNITY card. Earth only: it sets the pattern for U-159. The tile grid may stay as hidden data (heights, stamps, saves), never drawn. Agree the top band's format (its surface row and height) with B-175 through LEAD before B-175 exports.
+
+### U-157 · UNITY · Ready · G1
+Goal: OWNER DIRECTION (D-161 (2)): digging and block placement leave the game on every planet: the dig / place actions out of the input maps, the controls list, the HUD hints, the hotbar and the surveyor's clips; no block item is craftable or given in a new game (block items already held convert to their base material, or stay as sellable goods: UNITY picks one and logs it); the underground (caves, ore tiles) is no longer generated or drawn; new saves carry no terrain edits; an old save loads with its edits dropped and nothing else lost (a save version bump with a migration). DigPlaceTests, and any test that only exists to draw blocks, retire under D-161.
+Accept: no dig or place input does anything; a test that no block item is craftable or in a new game's inventory; SaveLoadTests: a fixture saved by 0.4.8 loads (planet, inventory, scrip, ship marks kept; the surveyor on the new surface); the smoke without dig shots; every other test green; clean console.
+Files: Code/Runtime/Player/, Rig/, Items/, Crafting/, Terrain/, Save/, UI/, Tests/
+Depends: —
+Lead notes: Cycle 279. Lock-free code alongside U-156; one check together. LEAD rewrites the dig steps in LeadQA M2Soak / M3Inner as harvest steps once U-158's API is named.
+
+### U-158 · UNITY · Ready · G1
+Goal: OWNER DIRECTION (D-161 (3)): mining by resource nodes. Each planet's ores and materials come from cartoon resource nodes on the surface (placed by biome with spacing, each with a harvested state and a regrow timer), worked by the Rig's tools with the same module gates as before (the Beam for Solarite, cut only in Mercury's twilight window), yielding the same item ids at a rate matching the old digging (report items per minute, before and after). Node art from B-176; placeholders until then (existing props such as props/mercury/solarite_cluster).
+Accept: HarvestTests: the yield, the regrow, the module gate, Mercury's window; the economy tables unchanged; a key list of every node (planet, biome, item, key) in UNITY_STATUS for B-176; captures of an Earth node and a Mercury Solarite node at 1x; clean console.
+Files: Code/Runtime/Rig/, Code/Runtime/Planet/, Code/Runtime/Items/, Tests/
+Depends: U-157
+Lead notes: Cycle 279. Lock-free code after U-156 / U-157; Earth's nodes ride Build 0.5.0, the other planets' with U-159.
+
+### U-159 · UNITY · Ready · G1
+Goal: Smooth ground on Mars, Mercury and Venus on U-156's pattern (Venus's station deck stays a flat deck; Venus's surface, Mercury's day / twilight / night bands and Mars's canyons and polar caps become curves), each planet's ground art on the curve, its nodes (U-158) placed.
+Accept: as U-156 per planet (the step test, the slope walk, the planet's jump heights unchanged, its tests green, five captures each beside 0.4.8's), M3Inner green.
+Files: as U-156
+Depends: U-156, U-158, B-175
+Lead notes: Cycle 279. After Build 0.5.0 (Earth) reads with the owner.
+
+### U-160 · UNITY · Ready · G1
+Goal: The giants' floes as rounded cloud-ice islands (D-161 (4)): each floe's collider a curved top with rounded ends; its underside drawn from B-177's island belly (any length, rounded at the caps); below the floe line the deck's painted haze band from B-177, never the stretched lowest row (smoke_21_titlecard_jupiter) or a slab; on Jupiter, Saturn, Uranus and Neptune through the shared decked-giant machinery.
+Accept: the u127 frames re-shot with no flat underside, slab or streaks; a camera low under a floe shows haze; GiantBandsPlay green; the giants' tests unchanged.
+Files: Code/Runtime/Terrain/CloudColumn/, Code/Runtime/View2D/, Tests/
+Depends: U-153, B-177
+Lead notes: Cycle 279 (the streaks in 0.4.8's smoke_21_titlecard_jupiter and the owner's "blocky"). After U-159.
 
 ### U-154 · UNITY · Ready · C2
 Goal: P-51 (UNITY, ruled yes in cycle 279): the Builder's aerostat pieces draw the re-inked kit on the four giants: PieceSpec gains a per-planet art key, so the Deck / Strut / Lift cell pieces draw `props/common/aerostat_{deck,strut,cell}` (B-156) on Jupiter, Saturn, Uranus and Neptune and keep `props/venus/aerostat_deck` on Venus; nothing else about the pieces changes (sizes, costs, saves).
