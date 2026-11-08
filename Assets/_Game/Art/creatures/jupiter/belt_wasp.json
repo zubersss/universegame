@@ -1,0 +1,45 @@
+{
+  "key": "creatures/jupiter/belt_wasp",
+  "style": "v3",
+  "frame_width": 64,
+  "frame_height": 64,
+  "columns": 30,
+  "gutter": 4,
+  "frames": 36,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [
+    {
+      "name": "idle",
+      "start": 0,
+      "length": 8,
+      "loop": true,
+      "loop_from": 0
+    },
+    {
+      "name": "fly",
+      "start": 8,
+      "length": 12,
+      "loop": true,
+      "loop_from": 0
+    },
+    {
+      "name": "react",
+      "start": 20,
+      "length": 8,
+      "loop": false
+    },
+    {
+      "name": "bump",
+      "start": 28,
+      "length": 8,
+      "loop": false
+    }
+  ],
+  "squash_root": true
+}

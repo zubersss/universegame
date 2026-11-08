@@ -1,0 +1,45 @@
+{
+  "key": "creatures/jupiter/stormglider",
+  "style": "v3",
+  "frame_width": 176,
+  "frame_height": 96,
+  "columns": 11,
+  "gutter": 4,
+  "frames": 40,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [
+    {
+      "name": "idle",
+      "start": 0,
+      "length": 10,
+      "loop": true,
+      "loop_from": 0
+    },
+    {
+      "name": "glide",
+      "start": 10,
+      "length": 12,
+      "loop": true,
+      "loop_from": 0
+    },
+    {
+      "name": "react",
+      "start": 22,
+      "length": 8,
+      "loop": false
+    },
+    {
+      "name": "bump",
+      "start": 30,
+      "length": 10,
+      "loop": false
+    }
+  ],
+  "squash_root": true
+}
