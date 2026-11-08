@@ -1,0 +1,21 @@
+{
+  "key": "terrain/mars/fill_decor_4",
+  "style": "v3",
+  "contract": "v3.2 11.9",
+  "frame_width": 48,
+  "frame_height": 48,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [],
+  "upright": true,
+  "decor": "blueberries_b",
+  "note": "D-165: a spot feature of the cross-section; UNITY scatters it in the cutaway by a position seed, never rotated; pivot centred"
+}
