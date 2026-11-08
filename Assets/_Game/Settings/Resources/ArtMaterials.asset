@@ -303,7 +303,6 @@ MonoBehaviour:
   - creatures/mercury/cinderhulk_night
   - creatures/space/ringmite
   - creatures/venus/veil_serpent
-  - creatures/warden/sentinel
   - fx/beam_ray/base
   - fx/builder_ghost/base
   - fx/crush_pulse/base
@@ -333,11 +332,6 @@ MonoBehaviour:
   - planets/uranus/glow
   - planets/venus/glow
   - props/common/calibration
-  - props/earth/archive_door
-  - props/earth/archive_terminal
-  - props/earth/beacon
-  - props/earth/launch_gantry
-  - props/earth/launch_tower_ruin
   - props/rig/beam
   - props/rig/builder
   - props/rig/lance
@@ -1494,6 +1488,21 @@ MonoBehaviour:
       start: 40
       length: 10
       loop: 1
+  - key: creatures/warden/sentinel
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 8
+      loop: 1
+    - name: walk
+      start: 8
+      length: 12
+      loop: 1
+    - name: attack
+      start: 20
+      length: 8
+      loop: 0
   - key: fx/beam_ray/base
     fps: 12
     clips:
@@ -1759,6 +1768,27 @@ MonoBehaviour:
     - name: working
       start: 0
       length: 8
+      loop: 1
+  - key: props/earth/archive_door
+    fps: 12
+    clips:
+    - name: blink
+      start: 0
+      length: 4
+      loop: 1
+  - key: props/earth/archive_terminal
+    fps: 12
+    clips:
+    - name: scan
+      start: 0
+      length: 4
+      loop: 1
+  - key: props/earth/beacon
+    fps: 12
+    clips:
+    - name: blink
+      start: 0
+      length: 4
       loop: 1
   - key: props/earth/data_cache
     fps: 12

@@ -1,0 +1,11 @@
+{
+  "key": "icons/jetpack_mk3/base",
+  "style": "v3",
+  "ppu": 128,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "icon": true,
+  "note": "B-199: re-inked as v3 (replacing the v2 shaded render)"
+}

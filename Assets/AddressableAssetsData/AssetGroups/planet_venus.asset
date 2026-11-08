@@ -25,6 +25,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 11fa5865f38f8ec409e297f8d293f30a
+    m_Address: terrain/venus/ground_lip_tessera
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 14a63693196de1c468796cd8b30f680a
     m_Address: props/venus/meridian_station_door/animator
     m_ReadOnly: 0
@@ -287,6 +292,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 756f7fbce383e6742bd86b1bd03d0cf3
     m_Address: props/venus/aerostat_balloon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 76179fdebf1d21a4497909b5224e6d84
+    m_Address: terrain/venus/ground_lip_vent
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

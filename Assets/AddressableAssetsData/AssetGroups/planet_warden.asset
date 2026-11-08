@@ -20,23 +20,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 474de15462a0595449cc6bdcc187d037
+  - m_GUID: 514bd0b45d5558743890fade4ef9b89f
     m_Address: creatures/warden/sentinel
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 514bd0b45d5558743890fade4ef9b89f
+  - m_GUID: 7486ec0256d33194d97ff2aaf440e9ff
+    m_Address: creatures/warden/sentinel/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a6fbf93c248bcb04897ff7d2cbf2c09e
     m_Address: creatures/warden/sentinel
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ca2c8e6dc692d4e4ea8c994d0ba50aa2
     m_Address: creatures/warden/hunter
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: eca933ba05eb663449c827411867f135
-    m_Address: creatures/warden/sentinel
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

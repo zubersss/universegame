@@ -105,6 +105,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 313b7d7c2a0bb784084b48c450ffa653
+    m_Address: terrain/mercury/ground_lip_ice
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 31bdb1949da354b40bbbd65ac6d73e4d
     m_Address: backgrounds/mercury/day/layer0
     m_ReadOnly: 0

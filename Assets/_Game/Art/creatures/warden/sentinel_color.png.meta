@@ -90,7 +90,7 @@ TextureImporter:
   serializedVersion: 13
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 1
+    enableMipMap: 0
     sRGBTexture: 1
     linearTexture: 0
     fadeOut: 0
@@ -106,7 +106,7 @@ TextureImporter:
     normalMapFilter: 0
     flipGreenChannel: 0
   isReadable: 0
-  streamingMipmaps: 1
+  streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
   ignoreMipmapLimit: 0
@@ -118,7 +118,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 2
+    filterMode: 1
     aniso: 2
     mipBias: 0
     wrapU: 1
@@ -127,20 +127,20 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 9
-  spritePivot: {x: 0.5, y: 0.0078125}
-  spritePixelsToUnits: 128
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
-  alphaIsTransparency: 0
+  alphaIsTransparency: 1
   spriteTessellationMethod: 0
   spriteTessellationDetail: -1
   spriteGeometrySubdivision: -1
-  textureType: 0
+  textureType: 8
   textureShape: 1
   singleChannelComponent: 0
   flipbookRows: 1
@@ -200,9 +200,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 1040
-        width: 256
-        height: 256
+        y: 696
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -221,10 +221,10 @@ TextureImporter:
       name: sentinel_1
       rect:
         serializedVersion: 2
-        x: 260
-        y: 1040
-        width: 256
-        height: 256
+        x: 108
+        y: 696
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -243,10 +243,10 @@ TextureImporter:
       name: sentinel_2
       rect:
         serializedVersion: 2
-        x: 520
-        y: 1040
-        width: 256
-        height: 256
+        x: 216
+        y: 696
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -265,10 +265,10 @@ TextureImporter:
       name: sentinel_3
       rect:
         serializedVersion: 2
-        x: 780
-        y: 1040
-        width: 256
-        height: 256
+        x: 324
+        y: 696
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -287,10 +287,10 @@ TextureImporter:
       name: sentinel_4
       rect:
         serializedVersion: 2
-        x: 1040
-        y: 1040
-        width: 256
-        height: 256
+        x: 0
+        y: 580
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -309,10 +309,10 @@ TextureImporter:
       name: sentinel_5
       rect:
         serializedVersion: 2
-        x: 1300
-        y: 1040
-        width: 256
-        height: 256
+        x: 108
+        y: 580
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -331,10 +331,10 @@ TextureImporter:
       name: sentinel_6
       rect:
         serializedVersion: 2
-        x: 0
-        y: 780
-        width: 256
-        height: 256
+        x: 216
+        y: 580
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -353,10 +353,10 @@ TextureImporter:
       name: sentinel_7
       rect:
         serializedVersion: 2
-        x: 260
-        y: 780
-        width: 256
-        height: 256
+        x: 324
+        y: 580
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -375,10 +375,10 @@ TextureImporter:
       name: sentinel_8
       rect:
         serializedVersion: 2
-        x: 520
-        y: 780
-        width: 256
-        height: 256
+        x: 0
+        y: 464
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -397,10 +397,10 @@ TextureImporter:
       name: sentinel_9
       rect:
         serializedVersion: 2
-        x: 780
-        y: 780
-        width: 256
-        height: 256
+        x: 108
+        y: 464
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -419,10 +419,10 @@ TextureImporter:
       name: sentinel_10
       rect:
         serializedVersion: 2
-        x: 1040
-        y: 780
-        width: 256
-        height: 256
+        x: 216
+        y: 464
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -441,10 +441,10 @@ TextureImporter:
       name: sentinel_11
       rect:
         serializedVersion: 2
-        x: 1300
-        y: 780
-        width: 256
-        height: 256
+        x: 324
+        y: 464
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -464,9 +464,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 520
-        width: 256
-        height: 256
+        y: 348
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -485,10 +485,10 @@ TextureImporter:
       name: sentinel_13
       rect:
         serializedVersion: 2
-        x: 260
-        y: 520
-        width: 256
-        height: 256
+        x: 108
+        y: 348
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -507,10 +507,10 @@ TextureImporter:
       name: sentinel_14
       rect:
         serializedVersion: 2
-        x: 520
-        y: 520
-        width: 256
-        height: 256
+        x: 216
+        y: 348
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -529,10 +529,10 @@ TextureImporter:
       name: sentinel_15
       rect:
         serializedVersion: 2
-        x: 780
-        y: 520
-        width: 256
-        height: 256
+        x: 324
+        y: 348
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -551,10 +551,10 @@ TextureImporter:
       name: sentinel_16
       rect:
         serializedVersion: 2
-        x: 1040
-        y: 520
-        width: 256
-        height: 256
+        x: 0
+        y: 232
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -573,10 +573,10 @@ TextureImporter:
       name: sentinel_17
       rect:
         serializedVersion: 2
-        x: 1300
-        y: 520
-        width: 256
-        height: 256
+        x: 108
+        y: 232
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -595,10 +595,10 @@ TextureImporter:
       name: sentinel_18
       rect:
         serializedVersion: 2
-        x: 0
-        y: 260
-        width: 256
-        height: 256
+        x: 216
+        y: 232
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -617,10 +617,10 @@ TextureImporter:
       name: sentinel_19
       rect:
         serializedVersion: 2
-        x: 260
-        y: 260
-        width: 256
-        height: 256
+        x: 324
+        y: 232
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -639,10 +639,10 @@ TextureImporter:
       name: sentinel_20
       rect:
         serializedVersion: 2
-        x: 520
-        y: 260
-        width: 256
-        height: 256
+        x: 0
+        y: 116
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -661,10 +661,10 @@ TextureImporter:
       name: sentinel_21
       rect:
         serializedVersion: 2
-        x: 780
-        y: 260
-        width: 256
-        height: 256
+        x: 108
+        y: 116
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -683,10 +683,10 @@ TextureImporter:
       name: sentinel_22
       rect:
         serializedVersion: 2
-        x: 1040
-        y: 260
-        width: 256
-        height: 256
+        x: 216
+        y: 116
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -705,10 +705,10 @@ TextureImporter:
       name: sentinel_23
       rect:
         serializedVersion: 2
-        x: 1300
-        y: 260
-        width: 256
-        height: 256
+        x: 324
+        y: 116
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -729,8 +729,8 @@ TextureImporter:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 256
-        height: 256
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -749,10 +749,10 @@ TextureImporter:
       name: sentinel_25
       rect:
         serializedVersion: 2
-        x: 260
+        x: 108
         y: 0
-        width: 256
-        height: 256
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -771,10 +771,10 @@ TextureImporter:
       name: sentinel_26
       rect:
         serializedVersion: 2
-        x: 520
+        x: 216
         y: 0
-        width: 256
-        height: 256
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -793,10 +793,10 @@ TextureImporter:
       name: sentinel_27
       rect:
         serializedVersion: 2
-        x: 780
+        x: 324
         y: 0
-        width: 256
-        height: 256
+        width: 104
+        height: 112
       alignment: 9
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -821,11 +821,7 @@ TextureImporter:
     indices: 
     edges: []
     weights: []
-    secondaryTextures:
-    - texture: {fileID: 2800000, guid: 82e1b25f2c35dba468e44b7a82585dcc, type: 3}
-      name: _NormalMap
-    - texture: {fileID: 2800000, guid: fdba5bde3b6c5694ba2b7523db909eac, type: 3}
-      name: _EmissionMap
+    secondaryTextures: []
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
