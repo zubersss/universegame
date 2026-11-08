@@ -1,23 +1,23 @@
 # BLENDER STATUS
-Updated: 2026-11-08 12:5x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-08 13:1x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-B-189 (LEAD 12:4x) previews in my next slot: venus/surface (its B-185 export folded in: one export, not two), mars/canyon (+ storm, which shares its layers 0-1), mars/plains; each to LEAD, then its export. Then B-182's Earth audit, B-184's puffs, B-187's previews. B-185 Mercury exported (d7fbeace). Files only while UNITY holds the lock.
+B-182: the Mars / Mercury / Venus audits (audit_g1.py, light, my lock) now that B-184 is in; then B-190's exports (terrain/earth/dig_puffs, terrain/mars/dig_puffs; preview ACCEPTED 13:1x); then B-187's previews (mercury/coldtrap, venus/tessera). Files only while UNITY holds or wants the lock.
 
-## B-189 list: every inner set using terrace() / notch() or showing right-angle steps (sources 4876c415)
-- mars/canyon: layer0 rim notch() + spur terrace(notch()), layer1's three tiers terrace(notch()) -> _eroded / _soft_ledges (ledges with rounded corners). REDRAWN, preview pending.
-- mars/storm: shares the canyon's layers 0-1 (fixed with it); its veil has no skyline. Re-export with the canyon.
-- mars/plains: no terrace / notch, but its far mesas were trapezoids with flat block caps -> the desert's eroded buttes (mesa2), form shading, lit caprock. REDRAWN, preview pending.
-- venus/surface: layer1's tesserae ridge terrace() -> _soft_ledges. REDRAWN, preview pending (its B-185 export waits for it).
-- mercury/coldtrap (B-187): rim notch(), walls terrace(notch()) -> _eroded / _soft_ledges. REDRAWN before its first preview.
-- clean (no terrace / notch, no right-angle steps at 1x): mercury/day, twilight, night (ridges and crater ellipses; viewed in their 12:5x dip reviews), venus/tessera (B-187; sigmoid ridges), mars/polar, mars/tharsis (B-186). venus/deck: no terrace / notch in source; to view at 1x in its review before closing B-189.
+## B-189 (DONE in Art): every inner set using terrace() / notch() or showing right-angle steps (sources 4876c415)
+- mars/canyon + storm (layers 0-1 shared): rim, spur and three tiers -> _eroded / _soft_ledges (ledges, rounded corners). Exported 9e04de12.
+- mars/plains: far mesas from trapezoids with flat block caps to eroded buttes (mesa2). Exported 9e04de12.
+- venus/surface: layer1's tesserae ridge -> _soft_ledges. Exported with its B-185 baa7f1e0.
+- mercury/coldtrap (B-187): rim and walls redrawn before its first preview.
+- clean at 1x: mercury/day, twilight, night; venus/deck (viewed review_b152_venus_deck.png: towering clouds, an airship); venus/tessera; mars/polar, tharsis.
 
 ## Last completed
-- 12:43-12:45: B-186 exported (60132bdb): mars/polar (rev 2, accepted) + mars/tharsis (rev 3: two unequal rises, varied flow bands, tongue fronts); stamped dip reviews incl. the camera-5-m frame.
-- 12:37-12:41: B-185 Mars exported (4d86cbc3): plains / canyon layer2 480 (y_m -2.0, continue_rows 64), the storm a translucent veil 864 (no ground, LEAD 11:0x), layer0 tops feathered, layer1 byte-identical.
-- 12:10-12:16: B-188 exported for Build 0.5.0 (e2ddb4cb; DONE in the game): every Earth layer0's top feathered; desert / taiga / tundra layer2 544 at y_m -3.0, plain ground below row 416, continue_rows 64. The forest valley's sky line is not art (UNITY's U-166).
-- 10:38-10:52: D-169 / B-183 forest / coast / plains (7fc7eb06, 69aac68c, 83401c03) and the Earth puff (2c1d7a9a), all verified.
-- 09:3x-10:34: B-179 tundra, B-178 Mars frost, B-180 lips, B-181 (all four planets): exported and verified.
+- 13:16: B-184 exported (fe58e320): terrain/{mars,mercury,venus}/ground_set for the face-safe dig_puff; only the three dig_puff sheets changed.
+- 13:12-13:13: B-182 Earth audit (44 G1 keys, none missing, no outliers; audit_g1_earth.png, reports/blender/audit_g1.md); B-190 preview (review_b190_dig_puffs_preview.png, sources 0c6deb8a), ACCEPTED.
+- 13:08-13:09: B-185 + B-189 Venus surface exported (baa7f1e0). 13:00-13:04: B-189 Mars canyon / storm / plains exported (9e04de12).
+- 12:47-12:51: B-185 Mercury exported (d7fbeace): day / twilight / night, layer2 480 at y_m -2.0, continue_rows 64, layer0 feathered.
+- 12:43-12:45: B-186 exported (60132bdb): mars/polar + mars/tharsis. 12:37-12:41: B-185 Mars (4d86cbc3).
+- 12:10-12:16: B-188 exported for Build 0.5.0 (e2ddb4cb); B-179 / B-183 / B-188 DONE (LEAD cycle 283).
 
 ## Ready for review
 - B-186: review_b186_mars_{polar,tharsis}.png + _dip.png (60132bdb).
