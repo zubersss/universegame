@@ -39,6 +39,8 @@ namespace Meridian.Planet.POI
         public const int MaxStep = 2;
         /// <summary>How far a shoulder may reach from the pad edge before it gives up blending (m).</summary>
         public const int MaxShoulder = 48;
+        /// <summary>U-156: a smooth planet's shoulder grade (metres per column): 1 in 2, under the walkable limit once the curve eases it.</summary>
+        public const float SmoothShoulder = 0.5f;
 
         /// <summary>
         /// U-057: the ground line a column ends up with around a stamped POI: the pad's ground line across
@@ -58,11 +60,14 @@ namespace Meridian.Planet.POI
             if (k > MaxShoulder) return false;
             int edge = dir > 0 ? poi.x + poi.Width - 1 : poi.x;
             int h = gy;
+            // U-156 (D-161): on a smooth planet the shoulder eases at 1 in 2 (the drawn curve stays walkable); else MaxStep per column as before.
+            float slope = world is Meridian.Terrain.SolidWorldGenerator s && s.SmoothGround ? SmoothShoulder : MaxStep;
             for (int i = 1; i <= k; i++)
             {
                 int natural = world.SurfaceHeight(Wrap(edge + dir * i, w));
-                if (natural > h + MaxStep) h += MaxStep;
-                else if (natural < h - MaxStep) h -= MaxStep;
+                int reach = (int)(slope * i);
+                if (natural > gy + reach) h = gy + reach;
+                else if (natural < gy - reach) h = gy - reach;
                 else return false; // blended: the natural surface takes over from here
             }
             ground = h;

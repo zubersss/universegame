@@ -45,15 +45,98 @@ namespace Meridian.Terrain
 
         public byte LocalTile(int lx, int ly) => ids[ly * TerrainConstants.ChunkSize + lx];
 
-        /// <summary>Hooks the chunk to its world and the planet's block material (streamer, on Begin).</summary>
-        public void UseBlocks(IBlockWorld w, Material material)
+        /// <summary>Hooks the chunk to its world and the planet's block material (streamer, on Begin). U-156: on a smooth planet (D-161 / D-162)
+        /// the ground is the traced outline instead: edge colliders and the ground mesh (SmoothGround); the tile collider, the composite, the
+        /// block mesh and the tilemap renderer all stay off; the tiles stay as data.</summary>
+        public void UseBlocks(IBlockWorld w, Material material, bool smoothGround = false)
         {
             world = w;
+            smooth = smoothGround;
             if (blockRenderer != null) blockRenderer.sharedMaterial = material;
             var sr = GetComponent<TilemapRenderer>();
-            bool on = BlocksEnabled && material != null;
-            if (sr != null) sr.enabled = !on;
+            bool on = BlocksEnabled && material != null && !smooth;
+            if (sr != null) sr.enabled = !on && !smooth;
             if (blockRenderer != null) blockRenderer.enabled = on;
+            if (tileCollider != null) tileCollider.enabled = !smooth;
+            if (composite != null) composite.enabled = !smooth;
+            if (!smooth) for (int i = 0; i < edges.Count; i++) edges[i].enabled = false;
+        }
+
+        // ---------- U-156: the smooth ground (D-161 / D-162, Bible 5.0) ----------
+
+        /// <summary>True on a smooth planet: FinishCollision traces the outline (GroundField / GroundContour) into edge colliders.</summary>
+        public bool smooth;
+        readonly GroundContour contour = new GroundContour();
+        /// <summary>The chunk's traced outline and fill (chunk-local metres), for the ground mesh and tests.</summary>
+        public GroundContour Contour => contour;
+        /// <summary>U-156: the natural surface's standing height at this chunk's 33 node columns (tile centres from one left of it): the dug-hole
+        /// back wall is drawn under it. NaN where the column has no surface.</summary>
+        public readonly float[] SurfaceCurve = new float[TerrainConstants.ChunkSize + 1];
+        readonly System.Collections.Generic.List<EdgeCollider2D> edges = new System.Collections.Generic.List<EdgeCollider2D>(4);
+        /// <summary>The edge colliders in use (one per outline).</summary>
+        public int OutlineColliders { get; private set; }
+        static float[] nodes;
+        static int[] tops;
+        static float[] curve;
+        static readonly System.Collections.Generic.List<Vector2> chain = new System.Collections.Generic.List<Vector2>(256);
+        /// <summary>Raised on the main thread after a chunk's outline is rebuilt (SmoothGround rebuilds its mesh from it).</summary>
+        public static event System.Action<TerrainChunk> OutlineBuilt;
+
+        /// <summary>
+        /// U-156: the chunk's field nodes are the tile centres from one tile left of / under it to its last tile (33 × 33): a natural tile (its
+        /// solidity as the original surface left it, OriginalTop) follows its column's curve; a dug or built one is its own solidity. Traced
+        /// at ¼ m, each outline becomes one EdgeCollider2D on the chunk's static body; the mesh follows through OutlineBuilt.
+        /// </summary>
+        void BuildOutline()
+        {
+            const int C = TerrainConstants.ChunkSize;
+            if (!filled || world == null)
+            {
+                for (int i = 0; i < edges.Count; i++) edges[i].enabled = false;
+                OutlineColliders = 0;
+                contour.Build(System.Array.Empty<float>(), 0, Vector2.zero);
+                OutlineBuilt?.Invoke(this);
+                return;
+            }
+            int r = GroundField.CurveKernel.Length / 2;
+            nodes ??= new float[(C + 1) * (C + 1)];
+            tops ??= new int[C + 1 + 2 * r];
+            curve ??= new float[C + 1];
+            int x0 = cx * C, y0 = cy * C, t0 = x0 - 1 - r;
+            for (int k = 0; k < tops.Length; k++) tops[k] = world.WallTop(t0 + k);
+            for (int i = 0; i <= C; i++) curve[i] = GroundField.Curve(x0 - 1 + i, x => tops[x - t0]);
+            for (int i = 0; i <= C; i++) SurfaceCurve[i] = tops[i + r] == int.MinValue ? float.NaN : curve[i];
+            for (int j = 0; j <= C; j++)
+            {
+                int ty = y0 - 1 + j;
+                for (int i = 0; i <= C; i++)
+                {
+                    int tx = x0 - 1 + i;
+                    byte id = tx >= x0 && ty >= y0 ? ids[(ty - y0) * C + (tx - x0)] : world.TileAt(tx, ty);
+                    bool solid = TileId.IsSolid(id);
+                    int top = tops[tx - t0];
+                    bool natural = top != int.MinValue && solid == (ty <= top);
+                    nodes[j * (C + 1) + i] = GroundField.Density(solid, natural, curve[i], ty);
+                }
+            }
+            contour.Build(nodes, C, new Vector2(-0.5f, -0.5f));
+            int lines = contour.Lines;
+            while (edges.Count < lines) edges.Add(gameObject.AddComponent<EdgeCollider2D>());
+            int used = 0;
+            for (int i = 0; i < edges.Count; i++)
+            {
+                var e = edges[i];
+                if (i >= lines || contour.lineCount[i] < 2) { if (e.enabled) e.enabled = false; continue; }
+                chain.Clear();
+                int s = contour.lineStart[i], n = contour.lineCount[i];
+                for (int k = 0; k < n; k++) chain.Add(contour.points[s + k]);
+                if (contour.lineClosed[i]) chain.Add(contour.points[s]);
+                e.SetPoints(chain);
+                if (!e.enabled) e.enabled = true;
+                used++;
+            }
+            OutlineColliders = used;
+            OutlineBuilt?.Invoke(this);
         }
 
         bool filled;
@@ -94,6 +177,7 @@ namespace Meridian.Terrain
         /// <summary>Rebuilds merged collision after the last band; the only collider work per chunk.</summary>
         public void FinishCollision()
         {
+            if (smooth) { BuildOutline(); return; } // U-156: the outline is the collision and the ground mesh's source
             // The tilemap collider applies tile changes lazily; flush them first or the merged
             // collider is built from stale shapes and bodies can fall through fresh ground.
             tileCollider.ProcessTilemapChanges();

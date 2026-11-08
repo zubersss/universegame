@@ -129,6 +129,12 @@ namespace Meridian.View2D
         public int Columns => count;
         /// <summary>U-111: how many of the four material sheets are in (tests and captures).</summary>
         public int MaterialsLoaded { get { int n = 0; for (int i = 0; i < framesBy.Length; i++) if (framesBy[i] != null) n++; return n; } }
+        /// <summary>U-156: a strip kind's frames (null until loaded) and its fill tile: SmoothGround's placeholder band and body.</summary>
+        public Sprite[] FramesOf(int material) => material >= 0 && material < framesBy.Length ? framesBy[material] : null;
+        public Sprite FillOf(int material) => material >= 0 && material < fillBy.Length ? fillBy[material] : null;
+        /// <summary>U-156: on a smooth planet the outline's mesh draws the ground (SmoothGround); the strips stay loaded but draw nothing.</summary>
+        public bool suppressed;
+        bool hiddenForSmooth;
         /// <summary>The material index drawn at column x on the last pass (−1: not in view). Tests read it.</summary>
         public int MaterialAt(int x) { int i = x - firstColumn; return i >= 0 && i < count && i < materialAt.Count ? materialAt[i] : -1; }
 
@@ -232,6 +238,17 @@ namespace Meridian.View2D
         void LateUpdate()
         {
             if (view == null || terrain == null || frames == null) return;
+            if (suppressed)
+            {
+                // U-156: a smooth planet: every strip, fill, edge, cap and deck sprite off once; SmoothGround draws the ground.
+                if (!hiddenForSmooth)
+                {
+                    foreach (var l in new[] { tops, fills, edges, backs, caps, deckTops, floeTops, floeFills }) for (int i = 0; i < l.Count; i++) l[i].enabled = false;
+                    hiddenForSmooth = true; count = 0; CapsShown = 0; FloesShown = 0; FloeColumnsShown = 0;
+                }
+                return;
+            }
+            if (hiddenForSmooth) { hiddenForSmooth = false; dirty = true; firstColumn = int.MinValue; }
             if (cloud != null) { LayFloes(); return; } // U-153: a decked giant's floes
             if (columnsHidden)
             {

@@ -29,6 +29,7 @@ namespace Meridian.Player
 
         /// <summary>How far below the feet the stage floor is looked for (tiles).</summary>
         public const int FloorScan = 64;
+        static readonly RaycastHit2D[] floorHits = new RaycastHit2D[8];
 
         public StageCamera Stage { get; } = new StageCamera();
         /// <summary>The player's own zoom as a frame height (m); the wheel changes it in 1 m steps.</summary>
@@ -192,6 +193,14 @@ namespace Meridian.Player
         public float FloorUnder(Vector2 feet)
         {
             if (terrain == null || terrain.Config == null) return feet.y;
+            if (terrain.SmoothGround)
+            {
+                // U-156 (D-161): the floor is the traced outline under the feet (a hill's curve, a scoop's floor), not a tile top.
+                int hitCount = Physics2D.Raycast(feet + Vector2.up * 0.25f, Vector2.down, ContactFilter2D.noFilter, floorHits, FloorScan);
+                for (int i = 0; i < hitCount; i++)
+                    if (floorHits[i].collider is EdgeCollider2D && floorHits[i].collider.GetComponent<TerrainChunk>() != null) return floorHits[i].point.y;
+                return feet.y;
+            }
             int x = Mathf.FloorToInt(feet.x);
             int y0 = Mathf.FloorToInt(feet.y - 0.05f);
             for (int y = y0; y > y0 - FloorScan && y >= 0; y--)

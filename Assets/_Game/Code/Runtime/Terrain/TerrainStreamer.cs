@@ -38,6 +38,8 @@ namespace Meridian.Terrain
         /// frame before the first Update read as settled and released the surveyor into empty space (the C0 smoke "fall").
         /// </summary>
         public bool IsSettled => started && firstPass && tileSet.IsReady && pending.Count == 0 && ready.IsEmpty && inProgress == null;
+        /// <summary>U-156 (D-161 / D-162): true on a smooth planet: the chunks trace the outline (edge colliders, the ground mesh) instead of tiles and blocks.</summary>
+        public bool SmoothGround { get; private set; }
 
         /// <summary>U-120: the per-frame apply budget while the first window fills after Begin (behind the boot cover or the entry fade), in ms.
         /// The cold first boot spent ~5 s of its 6–8 s settling the terrain at TerrainConstants.ApplyPlanMs (1 ms) with nothing on screen.</summary>
@@ -113,8 +115,9 @@ namespace Meridian.Terrain
                 // D-067: the grass top colour blends down the top ~8 cm of grass side faces.
                 blockMaterial.SetFloat(FringeLayerId, BlockMesher.SideLayer(TileId.Grass));
             }
-            foreach (var c in pool) c.UseBlocks(this, blockMaterial);
-            foreach (var c in resident.Values) c.UseBlocks(this, blockMaterial);
+            SmoothGround = config.worldType == WorldType.Solid && GroundField.Smooth(config.id); // U-156 (D-161 / D-162): the traced outline on a smooth planet
+            foreach (var c in pool) c.UseBlocks(this, blockMaterial, SmoothGround);
+            foreach (var c in resident.Values) c.UseBlocks(this, blockMaterial, SmoothGround);
             started = true;
             firstPass = false;
             FirstFillDone = false; // U-120: a fresh window fills under the wide budget
@@ -160,8 +163,16 @@ namespace Meridian.Terrain
             int top = wallTops[wx];
             if (top != WallUnknown) return top;
             top = BaseGenerator.SurfaceHeight(wx);
+            // U-156: on a smooth planet a stamp's shaped ground IS the column's surface, raised or cut (the curve eases a raised pad too);
+            // elsewhere the back wall keeps the lower of the two, as before.
+            int shaped = int.MaxValue;
             for (int i = 0; i < wallPois.Length; i++)
-                if (Meridian.Planet.POI.PoiStamp.ShapedGround(wallPois[i], BaseGenerator, Config.datumY, wx, out int g, wallPoiPad[i]) && g < top) top = g;
+                if (Meridian.Planet.POI.PoiStamp.ShapedGround(wallPois[i], BaseGenerator, Config.datumY, wx, out int g, wallPoiPad[i]))
+                {
+                    if (SmoothGround) shaped = Mathf.Min(shaped, g);
+                    else if (g < top) top = g;
+                }
+            if (shaped != int.MaxValue) top = shaped;
             wallTops[wx] = top;
             return top;
         }
@@ -289,7 +300,7 @@ namespace Meridian.Terrain
                 pending.Remove(key);
                 if (!Wanted(b.cx, b.cy) || resident.ContainsKey(key)) { ChunkBuffer.Return(b); continue; }
                 if (pool.Count > 0) inProgressChunk = pool.Pop();
-                else { inProgressChunk = TerrainChunk.Create(transform); inProgressChunk.UseBlocks(this, blockMaterial); }
+                else { inProgressChunk = TerrainChunk.Create(transform); inProgressChunk.UseBlocks(this, blockMaterial, SmoothGround); }
                 inProgressChunk.Begin(b);
                 resident[key] = inProgressChunk;
                 inProgress = b;

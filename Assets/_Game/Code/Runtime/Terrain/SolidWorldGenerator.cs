@@ -27,9 +27,22 @@ namespace Meridian.Terrain
             surface = new int[width];
             if (planet == PlanetId.Mercury) band = new int[width]; // D-146: filled beside the surface, read-only after (the chunk thread reads too)
             for (int x = 0; x < width; x++) surface[x] = ComputeSurface(x);
+            smoothGround = GroundField.Smooth(planet);
+            if (smoothGround)
+            {
+                // U-156 (D-161 / D-162): rolling hills: the raw heights averaged and slope-clamped (≤ 31°), so the hidden grid under the drawn
+                // curve never steps more than 1 m between neighbouring columns.
+                var raw = new float[width];
+                for (int x = 0; x < width; x++) raw[x] = EarthBiomes.Height(x, WorldNoise.Fbm1D(x, width, this.seed), datum);
+                var smoothed = GroundField.SmoothSurface(raw, GroundField.SmoothRadius, GroundField.SurfaceSlope);
+                for (int x = 0; x < width; x++) surface[x] = Clamp((int)System.Math.Round(smoothed[x]));
+            }
         }
 
         readonly int[] surface;
+        /// <summary>U-156: a smooth planet (D-161): rolling-hill surface, no noise caves (the underground is the drawn cross-section, opened only by digs).</summary>
+        readonly bool smoothGround;
+        public bool SmoothGround => smoothGround;
         /// <summary>D-146 (Mercury): the band surface per column — the noise and the cold-trap bowls without the seeded small craters.</summary>
         readonly int[] band;
 
@@ -74,7 +87,7 @@ namespace Meridian.Terrain
             int depth = surface - y;
             // Random caves; inside Mars landforms only rare small pockets (U-039 fix: no Swiss-cheese walls).
             float caveCut = planet == PlanetId.Mars && MarsLandforms.At(x) != MarsFeature.Plains ? 0.9f : 0.72f;
-            if (depth > 6 && y > 2 && WorldNoise.Value2D(x, y, 16, width, seed + 101) > caveCut
+            if (!smoothGround && depth > 6 && y > 2 && WorldNoise.Value2D(x, y, 16, width, seed + 101) > caveCut
                 && !(planet == PlanetId.Mars && MarsLandforms.NearTube(x, y, SurfaceOf, 2))
                 && !(planet == PlanetId.Mercury && depth < MercuryLandforms.IceSkin + MercuryLandforms.IceThickness + 1 && MercuryLandforms.PermanentShadow(x, width))) return TileId.Air; // keep cold-trap ice whole
 

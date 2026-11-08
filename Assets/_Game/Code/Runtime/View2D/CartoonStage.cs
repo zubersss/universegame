@@ -290,6 +290,8 @@ namespace Meridian.View2D
         public Meridian.Flora.FloraRigs Flora { get; private set; }
         /// <summary>U-100: the cartoon ground placeholder over the block faces.</summary>
         public GroundStrip Ground { get; private set; }
+        /// <summary>U-156: the smooth ground's mesh builder (a smooth planet only; null before the first).</summary>
+        public SmoothGround Smooth { get; private set; }
         public SpriteCharacterView Surveyor { get; private set; }
         public bool Active { get; private set; }
 
@@ -411,6 +413,11 @@ namespace Meridian.View2D
             Ground.view = cam; Ground.terrain = side.terrain;
             Ground.mirrorRule = config.id == Meridian.Planets.PlanetId.Neptune ? (System.Func<int, bool>)(x => Meridian.Planet.Weather.NeptuneWind.Direction(x) < 0) : null; // U-144: the −x zone's floes mirrored
             Ground.cloud = cloud; // U-153: a decked giant's strips are laid per floe in view
+            // U-156 (D-161 / D-162): a smooth planet's ground is its traced outline's mesh; the strips stay loaded (the placeholder band) but draw nothing.
+            bool smoothGround = config.worldType == Meridian.Planets.WorldType.Solid && Meridian.Terrain.GroundField.Smooth(config.id) && side.terrain != null;
+            Ground.suppressed = smoothGround;
+            if (smoothGround) { if (Smooth == null) Smooth = gameObject.AddComponent<SmoothGround>(); Smooth.Configure(config.id, side.terrain, Ground); }
+            else if (Smooth != null) Smooth.Deactivate();
             Ground.topMaterialRule = config.id == Meridian.Planets.PlanetId.Neptune ? (System.Func<int, byte, float, int>)((x, tile, top) => GroundStrip.NeptuneStripFor(top)) : null; // U-153: the Deep's superionic floes by the floe's own top
             Ground.Load(config.id); // U-118: the planet's strips (Earth's four, Mars's regolith + basalt + frost, Mercury's regolith + slate)
             Ground.materialRule = config.id == Meridian.Planets.PlanetId.Mercury ? (System.Func<int, byte, int>)((x, tile) => GroundStrip.MercuryStripFor(x, MercuryClock, worldWidth)) // U-123: slate in the shadow

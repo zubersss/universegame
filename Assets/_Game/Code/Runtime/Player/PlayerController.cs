@@ -170,7 +170,8 @@ namespace Meridian.Player
             bool dashNow = dashLatched || intent.dashPressed;
             dashLatched = false; intent.dashPressed = false;
             if (dashNow) Dash.TryStart(!Grounded, Facing);
-            if (Dash.Step(dt, Grounded, out float dashShare))
+            bool dashing = Dash.Step(dt, Grounded, out float dashShare);
+            if (dashing)
             {
                 v.x = Dash.Direction * AirDash.Speed * dashShare;
                 v.y = g * dt * dashShare; // physics applies g·dt before moving: this leaves the step's vertical motion at 0
@@ -182,6 +183,17 @@ namespace Meridian.Player
                 knockFor -= dt;
                 v.x = knockVx;
                 if (knockFor <= dt * 0.5f) { knockFor = 0f; knockEnded = true; } // whole steps only: 0.12 s = 6 steps at 50 Hz
+            }
+
+            // U-156 (D-161 / D-162): the smooth ground's slopes. Standing or walking on a slope (not on flat ground, so the flat-ground jump
+            // heights stay exact), the step follows the slope at the walking speed's horizontal pace, this step's gravity is cancelled (no slide
+            // when standing) and a little push into the ground keeps the feet on it over a crest (the solver removes all of it: no drift).
+            if (Grounded && !jumped && !dashing && knockFor <= 0f && groundNormal.y < SlopeFlat)
+            {
+                var along = new Vector2(groundNormal.y, -groundNormal.x);
+                v = along * (v.x / along.x);
+                v.y += g * dt;
+                v -= groundNormal * SlopeStick;
             }
 
             if (v.y < -terminalVelocity) v.y = -terminalVelocity;
@@ -196,12 +208,26 @@ namespace Meridian.Player
             if (Vitals != null) Vitals.TakeFallImpact(impactSpeed);
         }
 
+        /// <summary>U-156: a ground normal at least this upright counts as flat (no slope handling at all).</summary>
+        public const float SlopeFlat = 0.999f;
+        /// <summary>U-156: the push into a slope's ground per step (m/s along its normal), removed by the contact solver.</summary>
+        public const float SlopeStick = 0.6f;
+        /// <summary>U-156: the most upright ground contact's normal on the last step (up when airborne).</summary>
+        public Vector2 GroundNormal => groundNormal;
+        Vector2 groundNormal = Vector2.up;
+
         bool CheckGrounded()
         {
             int n = Body.GetContacts(contacts);
+            bool grounded = false;
+            var best = Vector2.up; float bestY = -1f;
             for (int i = 0; i < n; i++)
-                if (contacts[i].normal.y > 0.7f) return true;
-            return false;
+            {
+                var nn = contacts[i].normal;
+                if (nn.y > 0.7f) { grounded = true; if (nn.y > bestY) { bestY = nn.y; best = nn; } }
+            }
+            groundNormal = grounded ? best : Vector2.up;
+            return grounded;
         }
 
         /// <summary>Apply a planet's movement-related numbers (called on planet load).</summary>
