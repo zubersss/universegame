@@ -272,7 +272,7 @@ namespace Meridian.Tests
                 for (int i = 0; i < 30; i++) yield return new WaitForFixedUpdate();
                 // The box from the body itself (Collider2D.bounds can lag a frame behind a resized, re-pooled box).
                 Vector2 b = c.Body.position + c.Box.offset;
-                float boxBottom = b.y - c.Box.size.y * 0.5f, half = c.Box.size.x * 0.5f;
+                float boxBottom = b.y - c.Box.size.y * 0.5f - c.Box.edgeRadius, half = c.Box.size.x * 0.5f + c.Box.edgeRadius; // U-156: rounded corners
                 float ground = Mathf.Max(side.terrain.TopSolidY(Mathf.FloorToInt(b.x - half + 0.01f)), side.terrain.TopSolidY(Mathf.FloorToInt(b.x + half - 0.01f))) + 1f;
                 // D-070: a model species stands on its model's feet origin; wait for the model to load.
                 for (int i = 0; i < 600 && c.Model != null && !c.Model.Ready; i++) yield return null;

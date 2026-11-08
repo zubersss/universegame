@@ -95,7 +95,8 @@ namespace Meridian.Tests
             TestContext.Out.WriteLine($"[MERIDIAN] creature bump: visual y {wolf.Visual.localScale.y:F2}, vx {wolf.Body.linearVelocity.x:F2}");
             Assert.AreEqual(SquashStretch.HitScale, wolf.Visual.localScale.y, 0.03f, "0.85 squash");
             Assert.Greater(wolf.Body.linearVelocity.x, 2f, "bounced away from the surveyor (right)");
-            Assert.AreEqual(wolf.Spec.size, wolf.Box.size, "the creature's collider never scales");
+            var footprint = wolf.Box.size + Vector2.one * (2f * wolf.Box.edgeRadius); // U-156: rounded corners, the same footprint
+            Assert.AreEqual(wolf.Spec.size.x, footprint.x, 1e-4f, "the creature's collider never scales"); Assert.AreEqual(wolf.Spec.size.y, footprint.y, 1e-4f, "the creature's collider never scales");
             creatures.Despawn(wolf);
             LogAssert.NoUnexpectedReceived();
         }

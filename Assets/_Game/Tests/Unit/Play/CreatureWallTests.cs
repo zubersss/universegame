@@ -44,7 +44,7 @@ namespace Meridian.Tests
             return new Vector2(tx + 0.5f, side.terrain.TopSolidY(tx) + 1f + SpeciesSpec.Get(s).size.y * 0.5f + 0.05f);
         }
 
-        [UnityTest, Ignore("Parked as a known failure on LEAD's ruling (2026-11-08, U-156, attempt 2 of 3): on the smooth ground the stag oscillates in place at x 62.3-62.9 by the camp's chunk seam (x 63.5). Tried, happened, best guess in UNITY_STATUS.")]
+        [UnityTest]
         public IEnumerator AFleeingStagAtTheCampCratesTurnsAndKeepsMoving()
         {
             yield return Boot();

@@ -160,11 +160,65 @@ namespace Meridian.Terrain
                 for (int k = 0; k < n; k++) chain.Add(contour.points[s + k]);
                 if (contour.lineClosed[i]) chain.Add(contour.points[s]);
                 e.SetPoints(chain);
+                // U-156 (LEAD, the stag's attempt 3): an open chain leaves through the chunk's edge and goes on in the neighbour's outline; Box2D's
+                // ghost vertices get that outline's next node, so a box sliding across the seam meets one surface, not a corner.
+                bool open = !contour.lineClosed[i];
+                e.useAdjacentStartPoint = open; e.useAdjacentEndPoint = open;
+                if (open)
+                {
+                    e.adjacentStartPoint = Beyond(chain[0], chain[1], x0, y0);
+                    e.adjacentEndPoint = Beyond(chain[n - 1], chain[n - 2], x0, y0);
+                }
                 if (!e.enabled) e.enabled = true;
                 used++;
             }
             OutlineColliders = used;
             OutlineBuilt?.Invoke(this);
+        }
+
+        /// <summary>U-156: the neighbour outline's node next to a chain's end on this chunk's side (the iso crossing in the neighbour's first ¼ m
+        /// sub-cell, from the same field), or the chain carried on straight where that is ambiguous (a top or bottom edge, a sub-cell corner).</summary>
+        Vector2 Beyond(Vector2 end, Vector2 inner, int x0, int y0)
+        {
+            const int C = TerrainConstants.ChunkSize;
+            const float Sub = 1f / GroundContour.Sub;
+            Vector2 straight = end + (end - inner);
+            bool right = end.x > C - 1f, left = end.x < 0f;
+            if (!right && !left) return straight;
+            float fy = (end.y + 0.5f) / Sub;
+            if (Mathf.Abs(fy - Mathf.Round(fy)) < 1e-3f) return straight;
+            float xa = right ? end.x : end.x - Sub, xb = xa + Sub, far = right ? xb : xa;
+            float ya = -0.5f + Mathf.Floor(fy) * Sub, yb = ya + Sub;
+            float iso = GroundField.Iso;
+            float fa = Field(far, ya, x0, y0) - iso, fb = Field(far, yb, x0, y0) - iso;
+            if (fa * fb < 0f) return new Vector2(far, ya + fa / (fa - fb) * Sub);
+            float ta = Field(xa, yb, x0, y0) - iso, tb = Field(xb, yb, x0, y0) - iso;
+            if (ta * tb < 0f) return new Vector2(xa + ta / (ta - tb) * Sub, yb);
+            float ba = Field(xa, ya, x0, y0) - iso, bb = Field(xb, ya, x0, y0) - iso;
+            if (ba * bb < 0f) return new Vector2(xa + ba / (ba - bb) * Sub, ya);
+            return straight;
+        }
+
+        /// <summary>The field at a chunk-local point: the four tile-centre nodes round it, bilinear (past this chunk's nodes, from the world).</summary>
+        float Field(float lx, float ly, int x0, int y0)
+        {
+            float fi = lx + 0.5f, fj = ly + 0.5f;
+            int i = Mathf.FloorToInt(fi), j = Mathf.FloorToInt(fj);
+            float u = fi - i, v = fj - j;
+            float b = Mathf.Lerp(NodeAt(i, j, x0, y0), NodeAt(i + 1, j, x0, y0), u);
+            float t = Mathf.Lerp(NodeAt(i, j + 1, x0, y0), NodeAt(i + 1, j + 1, x0, y0), u);
+            return Mathf.Lerp(b, t, v);
+        }
+
+        float NodeAt(int i, int j, int x0, int y0)
+        {
+            const int C = TerrainConstants.ChunkSize;
+            if (i >= 0 && i <= C && j >= 0 && j <= C) return nodes[j * (C + 1) + i];
+            int tx = x0 - 1 + i, ty = y0 - 1 + j;
+            bool solid = TileId.IsSolid(world.TileAt(tx, ty));
+            int top = world.WallTop(tx);
+            float curveAt = GroundField.Curve(tx, world.WallTop, world.PadTop);
+            return GroundField.Density(solid, top != int.MinValue && solid == (ty <= top), curveAt, ty);
         }
 
         bool filled;
