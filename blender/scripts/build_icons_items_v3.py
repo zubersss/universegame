@@ -673,7 +673,8 @@ def deep_core_sample(d, M):
 def ring_rock(d, M):
     pts = lump(0.0, -0.02, 0.33, 0.31, 300, n=13, jit=0.1)
     faceted(d, M, pts, "brown_sh", "mustard_sh", "brown_dp", 0.0, -0.02, seams=False)
-    for j, (x, z, r) in enumerate(((-0.12, 0.08, 0.04), (0.1, -0.1, 0.05), (0.14, 0.12, 0.03), (-0.06, -0.16, 0.035))):   # pocks
+    for j, (x, z, r) in enumerate(((-0.14, 0.1, 0.04), (0.06, -0.12, 0.05), (0.18, -0.02, 0.03), (-0.04, -0.2, 0.035))):   # pocks (one high:
+                                                                                              # two side by side up top read as eyes)
         G.stroke(d, G.lumpy_ellipse(x, z, r, r * 0.8, n=10, seed=301 + j), M["brown_dp"], 0.0, cyclic=True)
         G.seam(d, [(x - r, z + r * 0.4), (x + r * 0.6, z + r * 0.8)], M["ink"])
     G.specks(d, [(0.0, 0.18), (-0.22, -0.04), (0.22, -0.02)], M["ink"])
