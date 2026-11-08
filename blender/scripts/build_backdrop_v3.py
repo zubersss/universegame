@@ -2063,6 +2063,30 @@ def earth_taiga(seed):
     return out, [dict(L, ground_row=_gline(rgb.shape[0], L["y_m"])) for L, (rgb, _a) in zip(B179_LAYERS, out)]
 
 
+def _wrap_smooth(v, s):
+    """A periodic 1-D gaussian smoothing (sigma s px) of a W-long row: the tile stays seamless."""
+    f = np.fft.rfftfreq(v.shape[0])
+    return np.fft.irfft(np.fft.rfft(v) * np.exp(-2 * (math.pi * f * s) ** 2), v.shape[0]).astype(np.float32)
+
+
+def tundra_lee(hills, hl, wob):
+    """B-179 tundra, LEAD 06:3x (the first lee washes were flat blue-grey rectangles with vertical sides): a soft,
+    curved shadow on each low hill's unlit side. Light from the upper right (the contract's convention, the desert's
+    shaded left cliffs), so the shade falls on the slopes facing left, where the surface rises toward +x. Its strength
+    follows the smoothed slope, so it fades in from the valley and out at the crest (no vertical side); it starts just
+    under a thin lit snow rim and its depth swells with the slope, so the lower edge is a crescent hugging the hill;
+    every edge is feathered. wob: one periodic noise row (the draw the old mask made, so the rng order is unchanged)."""
+    H = hills.shape[0]
+    g = _wrap_smooth(np.gradient(hl).astype(np.float32), 18)                  # y grows downward: g < 0 = rising to the right
+    up = np.clip(-g / max(float(np.percentile(-g, 97)), 1e-3), 0, 1)
+    a = up * up * (3 - 2 * up)                                                # smoothstep: no hard start at the slope's foot
+    depth = (16 + 74 * a) * (1 + 0.18 * np.clip(wob, -2, 2))                  # deepest on the steepest stretch
+    yy = np.arange(H, dtype=np.float32)[:, None] - hl[None, :]                # rows below the surface
+    top = np.clip((yy - 3) / 8, 0, 1)                                         # a thin lit rim of snow at the crest line
+    bot = np.clip(1 - (yy - 0.45 * depth[None, :]) / (0.55 * depth[None, :]), 0, 1)
+    return (hills * a[None, :] * top * top * (3 - 2 * top) * bot * bot * (3 - 2 * bot) * 0.85).astype(np.float32)
+
+
 def earth_tundra(seed):
     rng = np.random.default_rng(seed)
     pal = _pal()
@@ -2101,8 +2125,7 @@ def earth_tundra(seed):
         for q in range(3):
             ell(scrub, cx + rng.uniform(-10, 10), cy + rng.uniform(-2, 2), rng.uniform(4, 8), rng.uniform(2, 4))
     scrub *= hills
-    lee = hills * (np.arange(H)[:, None] > hl[None, :] + 30 + 12 * BG.periodic_noise(rng, H, 50, 10)).astype(np.float32) \
-        * (np.gradient(hl)[None, :] > 0).astype(np.float32)
+    lee = tundra_lee(hills, hl, BG.periodic_noise(rng, H, 50, 10)[0])   # LEAD 06:3x: soft curved crescents, not flat rectangles
     rocks = np.zeros((H, W), np.float32)
     for k in range(40):
         cx = rng.uniform(0, W)
