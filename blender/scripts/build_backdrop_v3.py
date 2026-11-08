@@ -1521,9 +1521,10 @@ def uranus_scene(seed, deck="deck1", light="sun_left"):
                  {"n": 2, "parallax": 0.6, "y_m": -0.5}]
 
 
-def uranus_deck_check(out_dir, deck):
+def uranus_deck_check(out_dir, deck, art=False):
     """D-142 proven, not eyeballed (LEAD): the md5 of every layer's alpha in all four lights of one deck (the preview's
-    layer PNGs under <out_dir>/b158/u<deck>_<light>/); fails if any layer's alpha differs across the lights, if a
+    layer PNGs under <out_dir>/b158/u<deck>_<light>/, or with art=True the export's under
+    <out_dir>/backgrounds/uranus/<deck>_<light>/, B-166); fails if any layer's alpha differs across the lights, if a
     render is missing, or if a render is older than this file (a stale render from before a code change)."""
     import hashlib
     from meridian import pngio
@@ -1532,7 +1533,8 @@ def uranus_deck_check(out_dir, deck):
     for n in range(3):
         sums = {}
         for light in U_LIGHTS:
-            path = os.path.join(out_dir, "b158", f"u{deck}_{light}", f"layer{n}_color.png")
+            path = (os.path.join(out_dir, "backgrounds", "uranus", f"{deck}_{light}", f"layer{n}_color.png") if art
+                    else os.path.join(out_dir, "b158", f"u{deck}_{light}", f"layer{n}_color.png"))
             if not os.path.isfile(path):
                 print(f"  {deck} layer{n} {light}: MISSING")
                 ok = False

@@ -932,6 +932,14 @@ def do_painted_bg(entry, preview):
     log_line(f"OK {entry['key']} | painted {len(info)} layers "
              + ", ".join(f"layer{i} {img.shape[1]}x{img.shape[0]} {n // 1024}KB seam {s:.2f}" for i, (_p, img, n, s) in enumerate(info))
              + f" + {entry['key'].split('/')[2]}.json | review {os.path.basename(out)} | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
+    parts = entry["key"].split("/")
+    if len(parts) == 3 and parts[1] == "uranus" and parts[2].endswith("_survey"):                  # B-166: a deck's four lights are in (survey last)
+        import build_backdrop_v3 as BB
+        deck = parts[2].rsplit("_", 1)[0]
+        ok = BB.uranus_deck_check(ART, deck, art=True)
+        log_line(f"URANUS-CHECK {deck} {'PASS' if ok else 'FAIL'} (D-142: one alpha per layer across the four lights)")
+        if not ok:
+            raise AssetError(f"{entry['key']}: the uranus check failed for {deck} (the alpha differs across the lights, or a light is missing)")
 
 
 def v3_ppu():
