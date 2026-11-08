@@ -135,6 +135,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4c31028873f44f34db03fb90ac3a924b
+    m_Address: terrain/venus/ground_decor_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4e4c2c74615b2cd4cb0a43712264d1fe
     m_Address: props/venus/station_hull_a/json
     m_ReadOnly: 0
@@ -142,6 +147,16 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 52f7c2b5578451a4ba97454e429b0709
     m_Address: props/venus/railing/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5368aca1f69dce54e9c060ad7bccb604
+    m_Address: terrain/venus/ground_decor_5
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5405730150b3ef9449489a860b26bd20
+    m_Address: terrain/venus/ground_decor_6
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -170,6 +185,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6d35a65d09bfb164298320230dec4ce7
+    m_Address: terrain/venus/ground_band
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6f0abefc5a03a364480e0f68237fd6d7
+    m_Address: terrain/venus/dig_puff/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 703577b919c03de4fac16a1b83f31dd2
     m_Address: backgrounds/venus/deck
     m_ReadOnly: 0
@@ -187,6 +212,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7a6bc6dab9ca974469147e1243eebbce
     m_Address: creatures/venus/veil_serpent_head
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7b38057e87401c740ade31ba6981cb99
+    m_Address: terrain/venus/ground_decor_3
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -215,6 +245,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 88779596a25c711409e1bbe5606e8e20
+    m_Address: terrain/venus/ground_lip
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8b6ebdc079d8e4343be105fecbe67212
     m_Address: terrain/venus/ground_strip
     m_ReadOnly: 0
@@ -225,8 +260,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a9e9999dd2bd55c4bb7322e5a7690a2a
+    m_Address: terrain/venus/ground_decor_4
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a9ee8e9585dd6c3438d458717682dbc5
     m_Address: creatures/venus/veil_serpent_body
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b2eeac8c7bd9f2849a184c6ce319d9dd
+    m_Address: terrain/venus/ground_decor_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b4d48e4d67529134ca6ea55fc0d13b25
+    m_Address: terrain/venus/dig_rim
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -255,6 +305,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bf3710c2c79149a4aad4eb58632a721e
+    m_Address: terrain/venus/ground_fill
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c0bd6641e4e9f9e43923d1dc9b6345ba
     m_Address: props/venus/aerostat_balloon/json
     m_ReadOnly: 0
@@ -277,6 +332,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cb5282d6ed4fc7646ae71d6ea3ea8068
     m_Address: props/venus/meridian_station_door
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cd39e34cc0997134d9f41b138e7c67c2
+    m_Address: terrain/venus/dig_puff
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

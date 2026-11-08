@@ -1822,6 +1822,13 @@ MonoBehaviour:
       start: 0
       length: 8
       loop: 0
+  - key: terrain/venus/dig_puff
+    fps: 12
+    clips:
+    - name: puff
+      start: 0
+      length: 8
+      loop: 0
   modelClipSets:
   - key: characters/calibration/base
     fps: 30
