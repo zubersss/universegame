@@ -25,6 +25,10 @@ the next live rank runs now and the skipped role goes next after it files. A rol
 keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 278 (11-08 01:4x: all three windows restarted ~01:27; lock B's tests green (MarsStage 3/3, the Jupiter PlayMode slice 20/20) but its captures died with the restart; B-170 in; THE OWNER'S 0.4.7 PLAYTEST → D-158: the flight overhaul goes first and rides 0.4.8). A role files its want only when the queue says it is next after the running job:
 Cycle 281 (11-08 09:4x, the resume: all three windows restarted ~09:30 after a ~3-hour break; no lock, no want; free RAM 0.69 GB at 09:33 while the sessions started, 1.83 GB at 09:4x: the gate is open). Done since 05:1x: U-156 accepted; B-176 exported for the four inner planets; B-177's islands for all four giants; B-178 Earth's bands; B-179's desert and taiga exported, the tundra accepted with one fix; D-167.
 Cycle 282 (11:0x, 2-hour tick): every 0.5.0 art item is in and verified (B-178 frost, B-179 tundra, B-180 lips, B-181 all, B-183 forest / coast / plains with D-169's layer2, Earth's dig_puff). UNITY's short lock (U-157's D-168 fix + U-164) is in its capture part (11:04); the re-shot u157/1_scoop (a round bowl) and u158/4_pocket_dug (a U-bottomed shaft) viewed at 11:0x.
+Update 16:2x, THE OWNER'S 0.5.0 PLAYTEST (USER-33) → D-174: a progression digging game (Bible 5.2 §8.1; milestone D1). New order:
+1. UNITY · the PlayMode sweep (running) → U-172 (the downhill walk glitch, the owner's one complaint) → U-173 Build 0.5.1 (the walk fix + Mars smooth + today's fixes) → D1: U-174 (the dig run core on Earth) → U-175 (the Skill Tree) → U-176 (ways back up) → U-177 (the planet ladder, folding in U-159's Mercury / Venus). U-167 / U-171 fold into 0.5.1 if done in the gaps; U-162 / U-160 / U-154 / U-151 wait behind D1.
+2. BLENDER · B-203 (the Surface Line + Earth's five tier fills) → B-204 (the Skill Tree panel art) → B-205 (tool looks by tier) → B-202 (sea_under) → B-201 (the 0.5.1 smoke read).
+3. LEAD · L-013 (docs/D1_TABLES.md) today: it blocks U-174's data, U-175 and B-204's icons.
 Cycle 284 (15:05, 2-hour tick): UNITY holds the lock (15:02:47) for U-169's diagnosis + U-168's test re-points (compile + EditMode + the 3D-path PlayMode classes); BLENDER's want behind it (B-197's icon preview, ~0.15 GB). Free RAM 0.35 GB under UNITY's run.
 1. UNITY · NOW: U-169 → then U-167 → U-159 Mercury / Venus slices → a FULL PlayMode sweep in batches → the next build (Mars / Mercury / Venus on smooth ground, with the Earth POI props, the Warden and the drained valleys).
 2. BLENDER · next: B-197's preview → B-198's lip previews; the U-168 removal (14 files) the moment UNITY's test re-points are committed.
@@ -179,6 +183,13 @@ Accept: passes twice; screenshots checked vs §9; M3_REPORT written; owner playt
 Files: Assets/_Game/Tests/LeadQA/M3InnerTests.cs, coordination/reviews/M3_REPORT.md
 Depends: U-060
 Lead notes: Done (cycle 168): M3InnerTests 738fd43 passed twice (UNITY checks 23:16 and 23:46, 7/7 each); 0.3.0 smoke shots checked; M3_REPORT.md written; milestone page published https://claude.ai/artifact/EfXnC1s4pys8zi3e5WDeQy; USER-16 playtest posted. M3 closes on the owner's playtest.
+
+### L-013 · LEAD · In Progress · D1
+Goal: The D1 tuning tables (Bible 5.2 §8.1): docs/D1_TABLES.md: per planet × tier the materials (existing item ids first; new ids named for BLENDER's icons), drop weights, Scrip values and item weights; the pack's starting limit; the climb's load factors; the Skill Tree's node list (six branches × five rings: id, effect, amount, cost in Scrip and materials, links outward / sideways).
+Accept: every number U-174 / U-175 / U-176 / U-177 need is in the file; one table per planet; the node list complete with ids for B-204's icons; a short "first hour" walk-through showing a new player's income against the first two rings' costs.
+Files: docs/D1_TABLES.md
+Depends: D-174
+Lead notes: Cycle 284 (16:2x). LEAD's own; blocks U-174's data, U-175 and B-204's icons. Today.
 
 ---
 
@@ -1521,6 +1532,27 @@ Files: blender/preview/, blender/scripts/ (dip_review)
 Depends: —
 Lead notes: Cycle 284 (16:0x). Lock-free numpy reads in a free gap; it lets LEAD judge smoke_43 against known art.
 
+### B-203 · BLENDER · Ready · D1
+Goal: The dig run's ground art (Bible 5.2 §8.1, D-174): (1) the **Surface Line**: an inked dashed line with small marker pegs (a peg every 4 m, a tiny topside flag on the pegs), drawn to lie in the cutaway 2 m under the surface, readable over every fill; (2) per-tier fills for Earth, so depth is visible: tier 1 Topsoil (B-175's ground_fill as is), tier 2 Subsoil (denser clay bands, roots thinning), tier 3 Stone (grey-blue rock with crystal veins), tier 4 Deep (dark slate with glowing mineral seams), tier 5 Core (near-black with hot amber cracks and diamond glints), each a §11.9 fill (tileable, strata only, no spot features) with 2–3 fill_decor pieces of its own (D-165's sparse scatter), and a soft 1 m transition between tiers; then the same five for Mars, Mercury and Venus in their palettes.
+Accept: one curve preview for Earth (a cutaway from the surface to 220 m at 1× with the surveyor at each tier and the Surface Line) accepted by LEAD before the export; tiling p99 0; palette 100 %; each tier's json names its tier.
+Files: blender/scripts/build_ground_v3.py (tier rows), Assets/_Game/Art/terrain/<planet>/
+Depends: —
+Lead notes: Cycle 284 (16:2x). BLENDER's top card now (ahead of B-202). Earth first.
+
+### B-204 · BLENDER · Ready · D1
+Goal: The Skill Tree's art (Bible 5.2 §8.1): the paper panel (a round chart on aged paper in UiKit's style, B-151), six branch emblems (Dig: a beam; Haul: a pack; Ascent: a jetpack and a rope; Survey: a lens; Endurance: a helmet; Voyage: the Pilgrim), node frames in three states (locked: greyed ink, available: inked with a warm rim, bought: gold-filled), the ink link lines (outward and sideways), ring dividers, a cost tag; then one icon per node in batches (LEAD's node list in docs/D1_TABLES.md).
+Accept: one stamped mock-up of the panel at 1080p (a few nodes per state, links, emblems) accepted by LEAD before the export; the node icons in batches as B-199; palette 100 %; no faces.
+Files: blender/scripts/ (the UI builder), Assets/_Game/Art/ui/skilltree/, icons/nodes/
+Depends: L-013 (the node list, for the icons only)
+Lead notes: Cycle 284 (16:2x). After B-203's Earth preview.
+
+### B-205 · BLENDER · Ready · D1
+Goal: The tools you upgrade, visible: the Rig's Beam in five looks (Mk1–Mk5: the emitter growing, the beam colour warming from teal to gold), and the jetpack and Grapple in three looks each, matching their Skill Tree rings; on the surveyor's existing sockets (no new rig).
+Accept: one stamped preview of each tool's looks on the surveyor at 1× accepted by LEAD before the export; palette 100 %; no faces.
+Files: blender/scripts/build_rig*.py, Assets/_Game/Art/props/rig/
+Depends: —
+Lead notes: Cycle 284 (16:2x). After B-204's mock-up.
+
 ### B-202 · BLENDER · Ready · G1
 Goal: Earth's underwater set (B-200's finding, b200_underwater.md: below the surface the swimmer sees the coast / plains land set tinted, meadow and flowers filling the water, and at 15 m a flat green-grey with vertical strip streaks, no depth cue): `backgrounds/earth/sea_under` in D-169's format, drawn for below the sea surface: layer0 the water column (light under the surface with soft wavering light shafts, darkening with depth toward the Hadal trench's dark); layer1 far seabed silhouettes in the haze (rock arches, kelp stands); layer2 the near seabed on the sea floor's depth (sand ripples, rocks, kelp, shells), solid to its bottom with a tileable strip (continue_rows 64); a bright wavy band of the surface seen from below on layer0's top, its own json row naming it. Earth's palette with U-040's tint in mind (it multiplies on top), the straight finish, no faces, nothing that reads as a land plant.
 Accept: one stamped preview (the swimmer at 3, 8, 15 and 40 m, with the tint as UnderwaterTint.shader applies it) accepted by LEAD before the export; log OK; seams ≤ 1 /255; ≤ 4 MB per layer.
@@ -2722,6 +2754,48 @@ Accept: smoke_43_earth_sea plus a 3 m, a 10 m and a seabed frame re-shot with no
 Files: Code/Runtime/View2D/ (CartoonStage, ParallaxLayers), Code/Runtime/Planet/PlanetBackdrop.cs, Tests/
 Depends: — (B-202 for the art; the gradient until then)
 Lead notes: Cycle 284 (16:1x). After U-167, lock-free; in the next build if B-202 is exported by then, else the one after (the gradient alone is already better than tinted meadow).
+
+### U-172 · UNITY · Ready · G1
+Goal: OWNER (USER-33, the 0.5.0 playtest): "the walking animation glitches when I'm walking down." On the smooth ground a walk or run down a slope flickers into the fall / land clips (the grounded check loses contact for a frame as the body moves faster sideways than the slope lets it drop; SurveyorAnimPlayTests' "land where run is expected" is the same symptom). Fix it at the cause: keep the surveyor glued to a downward slope while walking or running (a ground snap within the slope limit, or a grounded test with a small down-probe and a coyote window), so walk / run play unbroken; a real step off a ledge still falls and lands.
+Accept: SurveyorAnimPlayTests (or a new test) +1: walking and running down 10°, 20°, 30° slopes, left and right, play only walk / run clips for 3 s each (no fall or land frame); walking off a 2 m drop still plays fall then land; jump heights unchanged (Bible §4.2); a frame-strip capture of a downhill run at 1x in reports/unity/u172/; clean console.
+Files: Code/Runtime/Player/ (the grounded check, the animator driver), Tests/
+Depends: —
+Lead notes: Cycle 284 (16:2x). FIRST, the moment the PlayMode sweep ends: the owner's only complaint.
+
+### U-173 · UNITY · Ready · G1
+Goal: Build 0.5.1 for the owner: the walking fix (U-172), Mars on smooth ground (U-159's Mars slice), the camp shoulder (U-169), the drained valleys (U-166 / D-171), the parked Pilgrim's fixes, the Earth POI props and the Warden in ink (B-195 / B-196), the inventory in ink (B-199), the cryo round retired (U-170), the fill_decor scatter if U-167 is in, the sea gradient if U-171 is in; Mercury and Venus stay as in 0.5.0. The probe (D-152's two-run rule); the smoke with smoke_42, smoke_43 (the sea), the Survey Archive, the Launch Complex, a Warden on Mars, a downhill run, Mars's plains / canyon / polar cap / Olympus Mons / a storm.
+Accept: BUILD OK, SMOKE OK, the probe green; the full PlayMode sweep green on the build's code; GameInfo 0.5.1.
+Files: Build/MERIDIAN_0.5.1/, coordination/reports/unity/smoke_0.5.1/
+Depends: U-172, U-169's sweep
+Lead notes: Cycle 284 (16:2x). A quick build so the owner sees the walk fix while D1 is built; LEAD writes its page and the next playtest item.
+
+### U-174 · UNITY · Ready · D1
+Goal: The dig run's core (Bible 5.2 §8.1, D-174), on Earth: (1) the Surface Line: 2 m under the drawn surface everywhere; a topside state (feet above it); drawn as B-203's dashed line with pegs in the cutaway when the camera is below the surface; the HUD's depth readout (0 at the line) below it; (2) depth tiers 1–5 by depth below the line with hardness ×1 / ×2 / ×4 / ×8 / ×16 on the planet's base; a Beam stroke takes 0.25 s × base × hardness ÷ Beam power, capped at 8 s, no hard gate; each tier draws its own fill (B-203; B-175's fill until then); (3) per-tier drop tables and Scrip values and weights from LEAD's docs/D1_TABLES.md (data, not code: a json / ScriptableObject LEAD can tune); (4) the pack's weight limit (full = no more pickups, a HUD cue) and the load slowing the climb (jetpack lift, reel, climb speed); (5) the Sell panel, topside only, selling the pack for Scrip (paper UI, UiKit).
+Accept: DigRunTests: the Surface Line's depth on 3 seeds; topside toggles at the line; stroke time per tier with Beam power 1 and 4 (and the 8 s cap); a tier-5 stroke possible with the starting Beam; drops follow the tables; the pack refuses past its limit; climb speed falls with load; sell adds the tables' Scrip and empties the pack, refused below the line; save / load keeps pack and Scrip. Captures: the Surface Line in the cutaway, the depth HUD at 50 m, the Sell panel topside.
+Files: Code/Runtime/Mining/, Rig/, Items/, Player/, UI/, Save/, Data/D1 tables, Tests/
+Depends: L-013 (the tables), B-203 (the art; placeholders until then)
+Lead notes: Cycle 284 (16:2x). After U-173. The heart of D1: get one honest dig run working on Earth before the tree.
+
+### U-175 · UNITY · Ready · D1
+Goal: The Skill Tree (Bible 5.2 §8.1): the data model from LEAD's docs/D1_TABLES.md (six branches Dig / Haul / Ascent / Survey / Endurance / Voyage, five rings, nodes with effects, links outward and sideways, costs in Scrip plus materials from ring 3 and a giant's find or a Datacore at ring 5); the panel (topside only; B-204's art; a node shows locked / available / bought, its effect and cost; buying spends and applies); every node's effect wired as a stat modifier (Beam power, brush radius, pack limit, load factor, jetpack thrust / power use, grapple length / reel, climb speed, scan radius / depth, oxygen, heat / pressure resistance, fall softening, Waystation prices, thrust class); saved; it replaces the Blueprint Tree's tool / suit / ship unlocks (old saves keep what they had as bought nodes).
+Accept: SkillTreeTests: buying needs the link and the cost; effects change the stat by the table's amount; a sideways link opens its neighbour; save / load; an old save maps its Blueprint unlocks to nodes. A capture of the panel with a few nodes bought.
+Files: Code/Runtime/Progress/ (new), UI/, Save/, Tests/
+Depends: U-174, L-013, B-204
+Lead notes: Cycle 284 (16:2x).
+
+### U-176 · UNITY · Ready · D1
+Goal: The ways back up as upgradeable tools (Bible 5.2 §8.1): the jetpack on suit power (no fuel, D-103) with thrust and power use from the tree and lift scaled by load; the Grapple's anchor and reel (length, reel speed, load); the Builder's ladder piece from dug dirt (cost from the tree); climbing speed and grip on carved ramps; later nodes: a winch line from the Surface Line, a one-use recall beacon.
+Accept: AscentTests: a full and an empty pack climb 30 m by each way within the tables' times; each Ascent node changes its time by its amount; captures of each way in a shaft.
+Files: Code/Runtime/Player/, Rig/, Building/, Tests/
+Depends: U-174
+Lead notes: Cycle 284 (16:2x).
+
+### U-177 · UNITY · Ready · D1
+Goal: The planet ladder (Bible 5.2 §8.1): base hardness Earth 1, Mars 1.6, Mercury 2.5, Venus 4; each planet's tier tables from docs/D1_TABLES.md; Venus and Mercury's heat and pressure rising with depth (Endurance); the Wardens' extraction meter only within 48 m of a Warden site (D-174 (9), amends D-052); Mercury and Venus on smooth ground first (U-159's remaining slices fold in here).
+Accept: the stroke time per planet × tier; each planet's drops follow its tables; WardenTests updated to the 48 m rule; U-159's Mercury and Venus accepts.
+Files: as U-159 + Mining/, Creatures/Wardens/, Tests/
+Depends: U-174
+Lead notes: Cycle 284 (16:2x).
 
 ### U-154 · UNITY · Ready · C2
 Goal: P-51 (UNITY, ruled yes in cycle 279): the Builder's aerostat pieces draw the re-inked kit on the four giants: PieceSpec gains a per-planet art key, so the Deck / Strut / Lift cell pieces draw `props/common/aerostat_{deck,strut,cell}` (B-156) on Jupiter, Saturn, Uranus and Neptune and keep `props/venus/aerostat_deck` on Venus; nothing else about the pieces changes (sizes, costs, saves).

@@ -5,6 +5,7 @@ Cycle 283 (13:05, 2-hour tick): no stall; the board tidied (B-179 / B-183 / B-18
 Cycle 282 (11:05–12:3x): BUILD 0.5.0 OUT (Earth on smooth ground, round digging, mounds, ore rocks and buried finds); held twice (round strokes, D-168; the desert / taiga strips, B-188) and respun once; the owner's page https://claude.ai/artifact/CHnmoFrDg2jzUuM42BVi83 and USER-33 posted; U-157 / U-158 / U-163 / U-165 Done; D-170 (yields judged by the owner's play); U-166 (a dry-valley sky line) shipped as known.
 Cycle 281 (09:3x–11:0x): the resume; U-156 / U-161 Done; D-168 / D-169; every 0.5.0 art item exported and verified; B-184..B-188 written.
 (cycles 231–280: coordination/status/archive/LEAD_2026-11-06.md and REVIEW_LOG)
+16:2x: THE OWNER'S PLAYTEST → D-174 (a progression digging game, Bible 5.2 §8.1, milestone D1); L-013 (docs/D1_TABLES.md) is LEAD's own task now.
 ## Current task
 After 0.5.0: Mars / Mercury / Venus on smooth ground (U-159 with U-166 and U-162; BLENDER's B-186 sets, B-185 layer2 extensions, B-184 puffs, B-187 sets, B-182 audit), then the giants' islands (U-160). The owner's USER-33 answer goes first if it asks for Earth changes.
 ## Last completed

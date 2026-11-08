@@ -1,7 +1,7 @@
 # MERIDIAN — Project Bible (single source of truth)
 
 Owner: LEAD. Workers read; only LEAD edits. Changes are logged in `coordination/DECISIONS.md`.
-Version: 5.1 (D-162: digging stays, reimagined as round cartoon carving with buried finds). 5.0 (D-161, 2026-11-08: the owner drops the Terraria layer: smooth cartoon ground, mining by resource nodes; D-158: the flight with weight). 4.1 (D-100..D-105, 2026-11-06: owner C0 feedback: thinner, more detailed ink with two shadow tones; faces only on people and animals; the Pilgrim stands upright; fully manual flight with no fuel of any kind (launch or skip), control never leaves the player). 4.0 = art direction v4 (D-086..D-091); 3.x = stage and feel (D-076..D-085); 2.x = 3D rehaul (D-062). The Lead bumps the version on every edit.
+Version: 5.2 (D-174, 2026-11-08, the owner's 0.5.0 playtest: a progression digging game: the dig run, the Surface Line, depth tiers, the planet ladder, the Skill Tree; §8.1). 5.1 (D-162: digging stays, reimagined as round cartoon carving with buried finds). 5.0 (D-161, 2026-11-08: the owner drops the Terraria layer: smooth cartoon ground, mining by resource nodes; D-158: the flight with weight). 4.1 (D-100..D-105, 2026-11-06: owner C0 feedback: thinner, more detailed ink with two shadow tones; faces only on people and animals; the Pilgrim stands upright; fully manual flight with no fuel of any kind (launch or skip), control never leaves the player). 4.0 = art direction v4 (D-086..D-091); 3.x = stage and feel (D-076..D-085); 2.x = 3D rehaul (D-062). The Lead bumps the version on every edit.
 
 > **v5.0 (owner, 2026-11-08, D-161). This block overrides anything below that says otherwise.** MERIDIAN is a cartoon space game, not a block sandbox. (a) The ground on every planet is a smooth, continuous drawn curve: rolling hills, gentle slopes up to ~35° that you walk, cliffs with rounded lips, the ground's body drawn below the surface; no tiles, stair steps or block faces are ever drawn, and collision follows the curve. (b) Digging stays, reimagined (D-162): the hidden grid is drawn and collided as one smoothed outline, so the Rig carves round, ink-rimmed scoops and tunnels (never squares) into a drawn cartoon cross-section (strata, pebbles, roots, ice lenses, fossils), and "place" piles earth back as rounded mounds, ramps and bridges; there is no hotbar of block types and no free-form block building. (c) Resources come from cartoon resource nodes on the surface and from buried finds the Survey scan marks (ore and crystal pockets, ice lenses, relics and data caches, Warden vault doors) that you dig up; item ids, yields and prices are unchanged, and each planet keeps its only-here (Mercury's Solarite is cut by the Beam in the twilight window). (d) Building is placing cartoon camp pieces and the Builder kit on the ground (props). (e) The gas giants' floes are rounded cloud-ice islands with painted haze below. (f) The flight has weight (D-158): a throttle spool, the tilt's inertia, air drag that thins to nothing at the Escape Line, a sound barrier; the ship view is 30 m tall, widening with speed. Gravity ratios stay exact (pillar 1).
 
@@ -530,6 +530,46 @@ recovery fee).
 |           | Missions, main story, side quests, factions          | Survey contracts, Halcyon deliveries, Red Hollow bounties, **The Meridian Line** | M5 |
 |           | Save and load                                        | JSON save, terrain diffs, autosave on transitions               | M1        |
 | Audio     | Music and sound                                      | CC0/royalty-free, sourced by UNITY; licenses in `docs/credits/unity.md` | M2 placeholder, M5 full |
+
+> **v5.2 (owner, 2026-11-08, D-174): §8.1 below is the game's core loop and overrides the table above where they differ** (the Blueprint Tree's tool / suit / ship upgrades become the Skill Tree; Wardens no longer meter general digging).
+
+### 8.1 The dig run (D-174, milestone D1)
+
+**The loop.** Land at a planet's camp, dig down with the Beam, fill your pack with what you dig, climb back above the **Surface Line**, sell the haul for Scrip, spend it in the **Skill Tree**, dig deeper. Deeper ground is harder and holds rarer, more valuable material. Harder planets hold rarer material still.
+
+**The Surface Line.** An inked dashed line with small marker pegs, 2 m under the drawn surface everywhere on a solid planet, drawn in the cutaway whenever the camera is below the surface. With your feet above it you are **topside**: the Sell panel and the Skill Tree open anywhere (no shop to walk to); below it they are closed and the HUD shows your depth (0 at the line). The challenge is getting back up with a full pack.
+
+**Depth tiers** (every solid planet; names shared, materials per planet; depth below the Surface Line):
+
+| Tier | Name     | Depth      | Hardness (× the planet's base) | Material |
+|------|----------|------------|----------------|----------|
+| 1    | Topsoil  | 0–10 m     | × 1            | common: the planet's soil, clay, coal / regolith |
+| 2    | Subsoil  | 10–40 m    | × 2            | the base metals (iron, copper, hematite, nickel) |
+| 3    | Stone    | 40–100 m   | × 4            | crystals and light metals (silica, aluminium, sulfur) |
+| 4    | Deep     | 100–200 m  | × 8            | the rare: graphite, the planet's signature (solarite, vitriol glass, water ice lenses) |
+| 5    | Core     | 200 m to the world floor | × 16 | the rarest: deep diamond, the planet's core sample |
+
+Each tier's fill is drawn differently (colour, texture, the buried details), so you can see how deep you are. Buried pockets (D-162 (5)) carry their tier's rarest items and are worth a detour; Survey reveals them. Surface resource rocks stay as small topside income.
+
+**Digging speed.** A Beam stroke takes 0.25 s × planet base × tier hardness ÷ Beam power, never more than 8 s. There is **no hard gate**: a starting Beam can dig the Core, slowly; upgrades make it fast.
+
+**The planet ladder** (base hardness; rarer materials up the ladder): Earth 1 → Mars 1.6 → Mercury 2.5 → Venus surface 4 (heat and pressure with depth). The giants have no solid ground: their rare finds (metallic hydrogen, helium-3, superionic ice, deep diamond from the floes' cores and the deep) feed the Skill Tree's outer rings.
+
+**Selling.** Every dug material has a Scrip value by planet and tier (rarer and deeper = more); sell topside from the pack. Selling at a Waystation pays a little more (the Voyage branch raises it).
+
+**The pack.** A weight limit (each material has a weight); a full pack takes no more. Weight slows the climb: jetpack lift, grapple reel and climbing speed scale with the load. Haul big or climb fast: your choice.
+
+**Ways back up** (no single right one; each upgradeable, none required): climbing your own carved ramps (≤ 35°); Builder mounds, ramps and ladders from dug dirt; the jetpack (suit power, never fuel, D-103); the Grapple (anchor and reel); later a winch line from the Surface Line and a one-use recall beacon.
+
+**The Skill Tree.** Six branches round a centre, five rings each; every ring has two or three nodes; a node links outward in its own branch and some link sideways into a neighbour, so paths weave and no two players need the same route. Costs: Scrip, and from ring 3 a rare material from further up the planet ladder (ring 5: a giant's find or a Datacore). Every branch keeps getting better to its end; a whole tree costs far more than one planet's early income, so choices matter. No respec in v1. The branches:
+- **Dig** — Beam power (stroke time), brush radius, strike rhythm (consecutive strokes speed up), heat sink.
+- **Haul** — pack weight limit, lighter loads, a magnet that pulls nearby drops in, compacted ore.
+- **Ascent** — jetpack thrust and suit-power use, grapple length and reel speed, climbing speed and grip, cheaper Builder ladders.
+- **Survey** — scan radius and depth, rare-pocket reveal, a preview of the next tier's materials, depth warnings.
+- **Endurance** — oxygen time, heat and pressure resistance with depth, a softer landing from falls.
+- **Voyage** — rocket thrust classes to land on harder planets, Waystation prices, cargo hold, the Skip Drive.
+
+**What stays.** Crafting (consumables, base pieces, ladders and anchors), the Catalogue, Datacores (relic and vault rewards; a few notable nodes need one), no combat (D-087). Wardens meter digging only within 48 m of a Warden site (amends D-052).
 
 ---
 
