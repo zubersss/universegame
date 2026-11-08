@@ -31,10 +31,12 @@ PLANET = "earth"
 PLANET_VARIANTS = {"earth": ("sand", "stone", "snow"), "mars": ("frost",)}     # Mars's polar frost: LEAD 05:3x, for U-159
 VARIANTS = PLANET_VARIANTS[PLANET]
 BIOMES = {"sand": ["desert", "beach"], "stone": ["coast cliffs", "rocky shore"], "snow": ["taiga", "tundra"],
-          "frost": ["polar cap", "polar layered terrain"]}
+          "frost": ["polar cap", "polar layered terrain"],
+          "basalt": ["mars_tharsis"], "talus": ["mars_canyon"]}          # B-181: the code's region names (StageRegions / MarsLandforms)
 DECOR = {"sand": ["dry_tuft", "shells", "sandstone_rock"], "stone": ["lichen_boulder", "shore_pebbles", "thrift"],
-         "snow": ["snowy_shrub", "snow_rock", "dry_stalks"], "frost": ["frost_boulder", "ice_blocks", "frost_vent"]}
-FILL_OF = {"sand": "ground_fill_sand"}                   # a variant's own fill (the rest lie over the planet's ground_fill)
+         "snow": ["snowy_shrub", "snow_rock", "dry_stalks"], "frost": ["frost_boulder", "ice_blocks", "frost_vent"],
+         "basalt": ["vesicular_boulder", "spatter_cone", "tilted_slab"], "talus": ["fallen_block", "scree_fan", "buried_slab"]}
+FILL_OF = {"sand": "ground_fill_sand", "basalt": "ground_fill_basalt"}   # a variant's own fill (the rest lie over the planet's ground_fill)
 
 
 def extra_colours():
@@ -43,7 +45,8 @@ def extra_colours():
     dp = lambda k: v3.deep_of(P[k], PLANET)  # noqa: E731
     if PLANET == "mars":
         return {"frost": P["offwhite"], "frost_sh": sh("teal"), "snow": P["offwhite"], "snow_sh": sh("teal"), "ice": P["teal"], "ice_sh": dp("teal"),
-                "rock": dp("sky"), "rock_sh": P["brown"], "rock_lit": sh("sky"), "dust": dp("red"), "vent": P["brown"], "plume": P["offwhite"]}
+                "rock": dp("sky"), "rock_sh": P["brown"], "rock_lit": sh("sky"), "dust": dp("red"), "vent": P["brown"], "plume": P["offwhite"],
+                "bas_lit": sh("teal"), "pale": sh("offwhite")}          # B-181 (appended: the frost set's materials keep their order)
     return {"sand": P["mustard"], "sand_sh": sh("mustard"), "cream": P["offwhite"], "sandstone": sh("offwhite"), "rust": sh("red"),
             "shell": P["offwhite"], "shell_pink": sh("red"),
             "rock": sh("sky"), "rock_sh": dp("sky"), "rock_lit": sh("offwhite"), "lichen_y": P["mustard"], "lichen_g": P["green"],
@@ -527,33 +530,46 @@ def lip_sand(d, M, k=0):
     G.seam(d, G.bezier((0.05, -0.05), (0.16, -0.03), (0.24, -0.09), n=6), M["ink"])
     for b, a_deg in enumerate((20, 38, 56)):                                                  # a dry tuft at the brink, leaning out
         _blade(d, M["dry_tuft" if b % 2 else "dry_sh_tuft"], -0.10 + 0.025 * b, 0.13 + 0.02 * b, math.radians(a_deg), w=0.014, z0=top - 0.01)
-    r_o = top - LIP_CZ
-    sx, sz = r_o * math.sin(math.radians(76)), LIP_CZ + r_o * math.cos(math.radians(76))
-    left = [(sx - 0.018 + 0.05 * t * t, sz - 0.55 * t) for t in [i / 10 for i in range(11)]]
-    right = [(sx + 0.018 + 0.042 * t * t - 0.012 * t, sz - 0.55 * t) for t in [i / 10 for i in range(11)]]
-    G.stroke(d, left + right[::-1], M["sand_i"], I, cyclic=True)                             # the pour
-    for j, (x, z, r) in enumerate(((0.50, -0.86 + 0.03, 0.016), (0.40, -0.70, 0.012), (0.47, -0.62, 0.010), (0.43, -0.80, 0.013))):
-        G.stroke(d, G.lumpy_ellipse(x, z, r * 1.2, r, n=8, lump=0.1, seed=1860 + j), M["sand_sh_i"], I, cyclic=True)
+    tongue = []                                                                               # a tongue of sand spilling down the face (>= 4 px wide)
+    for i in range(13):
+        t = i / 12
+        z = -0.22 - 0.40 * t
+        xf = math.sqrt(max(0.0, 0.37 ** 2 - (z - LIP_CZ) ** 2)) if z > LIP_CZ else 0.37 + 0.30 * (LIP_CZ - z)   # the face under the corner
+        tongue.append((xf - 0.02, z, xf + 0.02 + 0.075 * (1 - t) ** 0.8 + 0.02))
+    tip = tongue[-1]
+    outline = [(a, z) for a, z, _b in tongue] + [(tip[0] + 0.03, tip[1] - 0.035)] + [(b, z) for _a, z, b in tongue[::-1]]
+    G.stroke(d, outline, M["sand_i"], I, cyclic=True)
+    G.seam(d, [((a + b) / 2 + 0.01, z) for a, z, b in tongue[2:10]], M["ink"])
+    for j, (x, z, r) in enumerate(((0.62, -0.70, 0.026), (0.58, -0.80, 0.022), (0.66, -0.58, 0.020))):
+        G.stroke(d, G.lumpy_ellipse(x, z, r * 1.2, r, n=10, lump=0.1, seed=1860 + j), M["sand_sh_i"], I, cyclic=True)
 
 
 def lip_stone(d, M, k=0):
-    """The rock crust's slab rounding the brink and jutting a little past the face (a rounded ledge, no square corner): a lit
-    rim along its top and corner, the shade along its inner edge, a joint, lichen on the top and the corner."""
-    top = 0.04
-    outer, inner = _hood(top, 0.17, 96)
-    lit_o, lit_i = _hood(top, 0.035, 60)
-    _o2, inner2 = _hood(top, 0.12, 96)
-    G.stroke(d, outer + inner, M["rock"], 0.0, cyclic=True)
-    G.stroke(d, lit_o + lit_i, M["rock_lit"], 0.0, cyclic=True)
-    G.stroke(d, inner2 + inner[::-1], M["rock_sh"], 0.0, cyclic=True)
+    """A capstone ledge (the first draw, the crust wrapped round the corner, read as a bent pipe at 1x): the rock crust's slab
+    runs on flat past the brink and ends in a rounded, slightly chipped nose that juts over the rounded face, sky under it; a lit
+    rim on top, the underside in shade, two joints, lichen, two chips falling."""
+    top, th, nx = 0.04, 0.16, 0.40
+    zb = top - th
+    rise = [(-0.60 + (nx - 0.07 + 0.60) * i / 16, top + 0.004 * math.sin(2.3 * i)) for i in range(17)]
+    nose = [(nx - 0.07 + 0.07 * math.sin(a), top - 0.07 + 0.07 * math.cos(a)) for a in [math.radians(15 * j) for j in range(1, 7)]]
+    chin = [(nx - 0.065 + 0.065 * math.cos(a), zb + 0.065 - 0.065 * math.sin(a)) for a in [math.radians(15 * j) for j in range(0, 7)]]
+    xface = math.sqrt(max(0.0, 0.37 ** 2 - (zb - LIP_CZ) ** 2))                               # where the underside meets the band's rounded face
+    outer = rise + nose + chin + [(xface, zb)]
+    inner = [(xface - 0.6 * (xface + 0.60) * i / 6 - 0.4 * (xface + 0.60) * (i / 6) ** 2, zb) for i in range(7)]
+    G.stroke(d, outer + inner[1:], M["rock"], 0.0, cyclic=True)
+    G.stroke(d, [(x, z) for x, z in rise] + [(x, z - 0.032) for x, z in rise[::-1]], M["rock_lit"], 0.0, cyclic=True)
+    G.stroke(d, chin + [(xface, zb)] + [(xface - 0.02, zb + 0.045), (nx - 0.05, zb + 0.05)], M["rock_sh"], 0.0, cyclic=True)
+    G.stroke(d, [(-0.60, zb + 0.04), (xface - 0.04, zb + 0.04), (xface, zb), (-0.60, zb)], M["rock_sh"], 0.0, cyclic=True)
     G.stroke(d, outer, M["ink"], O)
     G.seam(d, inner, M["ink"])
-    G.seam(d, [outer[-1], inner[0]], M["ink"])
-    G.seam(d, [(-0.32, top), (-0.305, top - 0.07), (-0.325, top - 0.15)], M["ink"])           # a joint
-    G.hatch(d, -0.20, -0.07, M["ink"], n=3, length=0.05, spacing=0.03, angle_deg=60, seed=7)
+    for jx in (-0.30, 0.08):                                                                  # joints
+        G.seam(d, [(jx, top), (jx + 0.015, top - 0.07), (jx - 0.01, zb + 0.01)], M["ink"])
+    G.hatch(d, -0.16, -0.06, M["ink"], n=3, length=0.05, spacing=0.03, angle_deg=60, seed=7)
     rnd = random.Random(1870)
-    for cx, cz in ((-0.46, -0.03), (0.10, -0.06), (0.27, -0.17)):
+    for cx, cz in ((-0.46, -0.02), (0.22, -0.03)):
         _lichen(d, M, cx, cz, rnd, n=5, spread=0.05)
+    for j, (x, z, r) in enumerate(((0.47, -0.40, 0.035), (0.50, -0.58, 0.028))):
+        G.stroke(d, B._shard(x, z, r, random.Random(1875 + j), sides=5, flat=0.8), M["rock_i"], I, cyclic=True)
 
 
 def lip_snow(d, M, k=0):
@@ -565,11 +581,11 @@ def lip_snow(d, M, k=0):
     G.stroke(d, outer + inner, M["snow"], 0.0, cyclic=True)
     G.stroke(d, inner2 + inner[::-1], M["snow_sh"], 0.0, cyclic=True)
     end = [outer[-1], inner[0]]
-    for j, t in enumerate((0.2, 0.5, 0.8)):                                                   # drips under the curl
+    for j, t in enumerate((0.3, 0.75)):                                                       # two fat drips under the curl (>= 4 px: the colour shows)
         x = end[0][0] + (end[1][0] - end[0][0]) * t
         z = end[0][1] + (end[1][1] - end[0][1]) * t
-        ln = (0.07, 0.11, 0.06)[j]
-        G.stroke(d, G.lumpy_ellipse(x, z - ln * 0.45, 0.018, ln * 0.55, n=12, lump=0.04, seed=1880 + j), M["snow_sh_i"], I, cyclic=True)
+        ln = (0.11, 0.075)[j]
+        G.stroke(d, G.lumpy_ellipse(x, z - ln * 0.45, 0.036, ln * 0.6, n=14, lump=0.04, seed=1880 + j), M["snow_sh_i"], I, cyclic=True)
     G.stroke(d, outer + [inner[0]], M["ink"], O)                                               # the curl's underside is in the air: inked
     G.seam(d, inner, M["ink"])
     G.seam(d, G.bezier((-0.50, 0.0), (-0.32, 0.03), (-0.12, -0.01), n=6), M["ink"])
@@ -578,7 +594,7 @@ def lip_snow(d, M, k=0):
         a = math.radians(rnd.uniform(5, 100))
         rr = top - LIP_CZ - 0.07
         G.stroke(d, G.lumpy_ellipse(rr * math.sin(a), LIP_CZ + rr * math.cos(a), 0.016, 0.011, n=8, lump=0.1, seed=i), M["snow_sh"], 0.0, cyclic=True)
-    for j, (x, z, r) in enumerate(((0.56, -0.70, 0.035), (0.50, -0.83, 0.025))):
+    for j, (x, z, r) in enumerate(((0.58, -0.72, 0.045), (0.52, -0.82, 0.034))):
         G.stroke(d, G.lumpy_ellipse(x, z, r * 1.2, r, n=12, lump=0.1, seed=1885 + j), M["snow_i"], I, cyclic=True)
 
 
@@ -608,6 +624,219 @@ LIPS = {"sand": lip_sand, "stone": lip_stone, "snow": lip_snow, "frost": lip_fro
 LIP_PIV = (0.55, 0.6)
 
 
+# ---------------------------------------------------------------- B-181 Mars (LEAD 09:5x, the variant list): Tharsis basalt, the canyon's talus
+
+def _lobes(rnd, lo, hi, hmin, hmax, total=None):
+    """Widths that sum to the band's 8 m, their start edges and a height each (a lobe / slab per span)."""
+    total = total or L
+    ws = []
+    while sum(ws) < total - hi * 0.5:
+        ws.append(rnd.uniform(lo, hi))
+    ws = [w * total / sum(ws) for w in ws]
+    return ws, [sum(ws[:i]) for i in range(len(ws) + 1)], [rnd.uniform(hmin, hmax) for _ in ws]
+
+
+def _span_z(edges, ws, hs, x, shape=0.6, floor=0.004):
+    """The top of a lobed surface at x: each span a rounded hump (sin^shape), the joins at `floor`."""
+    x %= L
+    for i in range(len(ws)):
+        if edges[i] <= x <= edges[i + 1]:
+            return floor + hs[i] * math.sin(math.pi * (x - edges[i]) / ws[i]) ** shape
+    return floor
+
+
+def band_basalt(d, M, k=0):
+    """Tharsis / Olympus Mons: a dark basalt crust in pahoehoe lobes (rounded toes <= 0.05 m, ropy folds on the face, a lit rim,
+    vesicles), rust dust lying in the hollows between lobes, then a rubbly red flow top (clinker) to a ragged edge."""
+    rnd = random.Random(1910)
+    ws, edges, hs = _lobes(rnd, 0.6, 1.3, 0.025, 0.05)
+    xs = [L * i / 640 for i in range(641)]
+    top = [(x, _span_z(edges, ws, hs, x)) for x in xs]
+    cbot = [(x, -0.17 + B.per(x, L, 3, 1911, 0.025)) for x in xs[::2]]
+    rag = _ragged(1912, -0.45)
+
+    def body(dx, _dz):
+        sh = lambda pts: [(x + dx, z) for x, z in pts]  # noqa: E731
+        G.stroke(d, sh(cbot + rag[::-1]), M["redbrown"], 0.0, cyclic=True)
+        G.stroke(d, sh(top + cbot[::-1]), M["basalt"], 0.0, cyclic=True)
+        G.stroke(d, sh(top + [(x, z - 0.028) for x, z in top[::-1]]), M["bas_lit"], 0.0, cyclic=True)
+        G.stroke(d, sh([(x, z + 0.035) for x, z in cbot] + cbot[::-1]), M["basalt_sh"], 0.0, cyclic=True)
+        G.seam(d, sh(cbot), M["ink"])
+    W(body)
+    for i, e in enumerate(edges[:-1]):                                                        # the joins between lobes
+        W(lambda dx, _dz, e=e: G.seam(d, [(e + dx, -0.01), (e + dx - 0.015, -0.07), (e + dx + 0.01, -0.13)], M["ink"]))
+    W(lambda dx, _dz: G.stroke(d, [(x + dx, z) for x, z in top], M["ink"], O))
+    for i, e in enumerate(edges[:-1]):                                                        # rust dust drifted into each hollow, over the line
+        W(lambda dx, _dz, e=e, s=i: G.stroke(d, [(px, max(pz, -0.012)) for px, pz in G.lumpy_ellipse(e + dx, 0.0, 0.14, 0.02, n=16, lump=0.06, seed=1913 + s)],
+                                             M["top_i"], I, cyclic=True))
+    for i in range(len(ws)):                                                                  # ropy folds on each lobe's face
+        cx = edges[i] + ws[i] * rnd.uniform(0.35, 0.65)
+        for j in range(3):
+            z0 = -0.035 - 0.032 * j
+            W(lambda dx, _dz, cx=cx, z0=z0, w=ws[i] * 0.16: G.seam(d, G.bezier((cx + dx - w, z0 - 0.012), (cx + dx, z0 + 0.012), (cx + dx + w, z0 - 0.012), n=7),
+                                                                   M["ink"]))
+    for i in range(40):                                                                       # vesicles
+        x, z, r = L * (i + rnd.random()) / 40, -0.035 - rnd.random() * 0.10, 0.007 + 0.007 * rnd.random()
+        W(lambda dx, _dz, x=x, z=z, r=r, s=i: G.stroke(d, G.lumpy_ellipse(x + dx, z, r * 1.3, r, n=8, lump=0.1, seed=1920 + s), M["basalt_sh"], 0.0, cyclic=True))
+    for i in range(11):                                                                       # clinker in the flow top
+        x, z, r = L * (i + rnd.random()) / 11, -0.22 - rnd.random() * 0.08, 0.03 + 0.025 * rnd.random()   # above the ragged edge's highest point
+        W(lambda dx, _dz, x=x, z=z, r=r, s=i: G.stroke(d, B._shard(x + dx, z, r, random.Random(1930 + s), sides=6, flat=0.7), M["rock_i"], I, cyclic=True))
+
+
+def fill_basalt(d, M, k=0):
+    """Under Tharsis: stacked lava-flow sheets (dark basalt and rose-grey flows, 1.2-1.8 m thick) with columnar joints and a
+    vesicle zone under each top, parted by thin rubbly red flow tops (boles); strata, pebbles and stones only (D-165)."""
+    Lf = B.FILL / PPU
+    rnd = random.Random(1940)
+    W2 = lambda fn: B.wrapped(fn, Lf, Lf)  # noqa: E731
+    W2(lambda dx, dz: G.stroke(d, [(dx - 0.1, dz - 0.1), (dx + Lf + 0.1, dz - 0.1), (dx + Lf + 0.1, dz + Lf + 0.1), (dx - 0.1, dz + Lf + 0.1)],
+                               M["basalt"], 0.0, cyclic=True))
+    boles = [(6.50, 0.20), (4.51, 0.18), (2.89, 0.22), (1.31, 0.18)]
+    B._strata(d, M, Lf, [(6.50, 0.20, "redbrown", True), (5.50, 1.80, "rock", True), (4.51, 0.18, "redbrown", True), (3.71, 1.42, "basalt", True),
+                         (2.89, 0.22, "redbrown", True), (2.09, 1.38, "rock", True), (1.31, 0.18, "redbrown", True)], 0.06, 1941)
+    flows = [(6.40, 4.60), (4.42, 3.00), (2.78, 1.40), (1.22, -1.40)]                         # (top, bottom) of the four flows (the last wraps)
+    for j, (zt, zb) in enumerate(flows):
+        for q in range(7):                                                                    # columnar joints in the core
+            x = Lf * (q + 0.2 + 0.6 * rnd.random()) / 7
+            W2(lambda dx, dz, x=x, zt=zt, zb=zb: G.seam(d, [(x + dx, zb + 0.15 + dz), (x + dx + 0.025, (zt + zb) / 2 + dz), (x + dx - 0.01, zt - 0.40 + dz)],
+                                                        M["ink"]))
+        B._scatter(d, M, Lf, 14, (zt - 0.34, zt - 0.06), (0.010, 0.020), "basalt_sh", 1950 + j)  # the vesicle zone
+    for j, (z, t) in enumerate(boles):                                                        # clinker in the boles
+        B._scatter(d, M, Lf, 9, (z - t * 0.3, z + t * 0.3), (0.025, 0.045), "rock_sh", 1960 + j)
+    B._scatter(d, M, Lf, 12, (0.0, Lf), (0.03, 0.05), "pebble_i", 1970)
+    for i in range(3):                                                                        # stones
+        x, z, r = rnd.uniform(0, Lf), rnd.uniform(0.5, 7.5), rnd.uniform(0.12, 0.18)
+        W2(lambda dx, dz, x=x, z=z, r=r, s=i: [G.stroke(d, B._shard(x + dx, z + dz, r, random.Random(1980 + s), sides=7, flat=0.75), M["bas_lit"], 0.0, cyclic=True),
+                                              G.stroke(d, B._shard(x + dx, z + dz, r, random.Random(1980 + s), sides=7, flat=0.75), M["ink"], O, cyclic=True)])
+    for i in range(10):
+        x, z = rnd.uniform(0, Lf), rnd.uniform(0, Lf)
+        W2(lambda dx, dz, x=x, z=z, s=i: G.hatch(d, x + dx, z + dz, M["ink"], n=3, length=0.08, spacing=0.03, angle_deg=15 if s % 2 else 165, seed=s))
+    G.specks(d, [(rnd.uniform(0.05, Lf - 0.05), rnd.uniform(0.05, Lf - 0.05)) for _ in range(40)], M["ink"])
+
+
+def decor_basalt(d, M, k):
+    if k == 0:                                                                                # a vesicular boulder with dust on its back
+        _boulder(d, M, 0.0, 0.25, 1990, flat=0.8, fill="basalt", shade="basalt_sh", lit="bas_lit")
+        rnd = random.Random(1991)
+        for q in range(9):
+            G.stroke(d, G.lumpy_ellipse(rnd.uniform(-0.2, 0.22), rnd.uniform(0.04, 0.26), 0.014, 0.011, n=8, lump=0.1, seed=q), M["basalt_sh"], 0.0, cyclic=True)
+        G.stroke(d, G.lumpy_ellipse(-0.14, 0.17, 0.12, 0.035, n=14, lump=0.06, seed=1992, rot=0.5), M["top"], 0.0, cyclic=True)
+    elif k == 1:                                                                              # a spatter cone stub: a low rim of welded clots
+        rim = [(-0.34, -0.02), (-0.26, 0.08), (-0.16, 0.20), (-0.09, 0.27), (-0.04, 0.22), (0.04, 0.22), (0.10, 0.28), (0.18, 0.19),
+               (0.27, 0.08), (0.34, -0.02)]
+        G.stroke(d, rim, M["redbrown"], 0.0, cyclic=True)
+        G.stroke(d, rim[:5] + [(-0.05, -0.02)], M["basalt_sh"], 0.0, cyclic=True)
+        for j, (x, z, r) in enumerate(((-0.22, 0.12, 0.05), (-0.11, 0.23, 0.045), (0.12, 0.24, 0.045), (0.24, 0.11, 0.05))):
+            G.stroke(d, G.lumpy_ellipse(x, z, r * 1.1, r, n=12, lump=0.12, seed=2000 + j), M["basalt_i"], I, cyclic=True)
+        G.stroke(d, rim, M["ink"], O, cyclic=True)
+        G.stroke(d, G.lumpy_ellipse(0.0, 0.225, 0.04, 0.012, n=10, lump=0.0), M["basalt_sh"], 0.0, cyclic=True)   # the vent's dark mouth
+    else:                                                                                     # a tilted crust slab (a tumulus plate)
+        slab = _soften([(-0.40, -0.04), (-0.30, 0.07), (0.22, 0.31), (0.30, 0.28), (0.33, 0.20), (0.02, -0.04)])
+        G.stroke(d, slab, M["basalt"], 0.0, cyclic=True)
+        G.stroke(d, _soften([(-0.28, 0.06), (0.21, 0.28), (0.27, 0.25), (-0.24, 0.02)], 1), M["bas_lit"], 0.0, cyclic=True)
+        G.stroke(d, _soften([(0.03, -0.02), (0.31, 0.19), (0.24, 0.19), (-0.02, 0.0)], 1), M["basalt_sh"], 0.0, cyclic=True)
+        G.stroke(d, slab, M["ink"], O, cyclic=True)
+        for j in range(3):
+            t = 0.25 + 0.22 * j
+            G.seam(d, G.bezier((-0.30 + 0.52 * t - 0.04, 0.06 + 0.24 * t - 0.06), (-0.30 + 0.52 * t, 0.06 + 0.24 * t - 0.02),
+                               (-0.30 + 0.52 * t + 0.03, 0.06 + 0.24 * t - 0.07), n=6), M["ink"])
+
+
+def band_talus(d, M, k=0):
+    """Valles Marineris' floor: a dusty ochre scree crust packed with angular wall debris (salmon, rose-grey, rust and pale
+    shards, the biggest poking <= 0.05 m above the surface), over a light-toned layered sediment, then the rust topsoil."""
+    rnd = random.Random(2010)
+    xs = [L * i / 640 for i in range(641)]
+    top = [(x, 0.006 + B.per(x, L, 4, 2011, 0.008)) for x in xs]
+    mbot = [(x, -0.12 + B.per(x, L, 3, 2012, 0.02)) for x in xs[::2]]
+    pbot = [(x, -0.30 + B.per(x, L, 3, 2013, 0.03)) for x in xs[::2]]
+    rag = _ragged(2014, -0.46)
+
+    def body(dx, _dz):
+        sh = lambda pts: [(x + dx, z) for x, z in pts]  # noqa: E731
+        G.stroke(d, sh(pbot + rag[::-1]), M["topsoil"], 0.0, cyclic=True)
+        G.stroke(d, sh(mbot + pbot[::-1]), M["pale"], 0.0, cyclic=True)
+        G.stroke(d, sh(top + mbot[::-1]), M["ochre"], 0.0, cyclic=True)
+        G.stroke(d, sh([(x, z + 0.03) for x, z in mbot] + mbot[::-1]), M["ripple_sh"], 0.0, cyclic=True)
+        G.seam(d, sh(mbot), M["ink"])
+        G.seam(d, sh(pbot), M["ink"])
+        G.stroke(d, sh(top), M["ink"], O)
+    W(body)
+    for j, zl in enumerate((-0.17, -0.215, -0.255)):                                          # laminae in the light-toned sediment
+        line = [(x, zl + B.per(x, L, 3, 2020 + j, 0.012)) for x in xs[::8]]
+        if j == 1:
+            W(lambda dx, _dz, line=line: G.stroke(d, [(x + dx, z) for x, z in line] + [(x + dx, z - 0.014) for x, z in line[::-1]], M["ochre"], 0.0, cyclic=True))
+        else:
+            W(lambda dx, _dz, line=line: G.seam(d, [(x + dx, z) for x, z in line], M["ink"]))
+    roles = ("salmon_i", "rock_i", "top_i", "pale_i", "redbrown_i")
+    for i in range(30):                                                                       # the scree: angular shards in the crust
+        x = L * (i + rnd.random()) / 30
+        r = rnd.uniform(0.035, 0.075)
+        z = rnd.uniform(-0.07, -0.02) if i % 3 else rnd.uniform(0.0, 0.015)                  # one in three pokes up a little
+        role, sides = roles[i % len(roles)], rnd.choice((4, 5, 6))                            # drawn outside the lambda: every tiling copy alike
+        W(lambda dx, _dz, x=x, z=z, r=r, s=i, role=role, sides=sides: G.stroke(d, B._shard(x + dx, z, r, random.Random(2030 + s), sides=sides, flat=0.7),
+                                                                               M[role], I, cyclic=True))
+    for i in range(8):                                                                        # grit specks
+        x, z = L * (i + rnd.random()) / 8, rnd.uniform(-0.04, -0.10)
+        W(lambda dx, _dz, x=x, z=z, s=i: G.specks(d, [(x + dx, z), (x + dx + 0.05, z - 0.02), (x + dx - 0.04, z + 0.01)], M["ink"]))
+    _pebbles(d, M, 6, (-0.36, -0.42), 2040)
+
+
+def _soften(poly, it=2):
+    """Corner-cut a closed outline (Chaikin): straight-edged slabs keep their facets but lose every sharp corner."""
+    for _ in range(it):
+        nxt = []
+        for i in range(len(poly)):
+            (x0, z0), (x1, z1) = poly[i], poly[(i + 1) % len(poly)]
+            nxt += [(0.75 * x0 + 0.25 * x1, 0.75 * z0 + 0.25 * z1), (0.25 * x0 + 0.75 * x1, 0.25 * z0 + 0.75 * z1)]
+        poly = nxt
+    return [(x, max(z, -0.02)) for x, z in poly]
+
+
+def _span_x(poly, z):
+    """The (left, right) x of a convex outline at height z."""
+    xs = []
+    for (x0, z0), (x1, z1) in zip(poly, poly[1:] + poly[:1]):
+        if (z0 - z) * (z1 - z) <= 0 and z0 != z1:
+            xs.append(x0 + (x1 - x0) * (z - z0) / (z1 - z0))
+    return (min(xs), max(xs)) if xs else (0.0, 0.0)
+
+
+def decor_talus(d, M, k):
+    if k == 0:                                                                                # a fallen wall block, its strata tilted
+        blk = _chipped(0.0, 0.17, 0.30, 0.19, 2050, rot=0.12, n=6)
+        blk = [(x, max(z, -0.02)) for x, z in blk]
+        G.stroke(d, blk, M["salmon"], 0.0, cyclic=True)
+        for j, (z, t, role) in enumerate(((0.21, 0.03, "ochre"), (0.12, 0.045, "pale"), (0.04, 0.03, "ochre"))):
+            tilt = 0.02                                                                       # the strata rise to the right; each corner sits inside the outline
+            G.stroke(d, [(_span_x(blk, z)[0] + 0.015, z), (_span_x(blk, z + tilt)[1] - 0.015, z + tilt),
+                         (_span_x(blk, z + t + tilt)[1] - 0.015, z + t + tilt), (_span_x(blk, z + t)[0] + 0.015, z + t)], M[role], 0.0, cyclic=True)
+        G.stroke(d, _arc(blk, 0.0, 0.17, 150, 290), M["redbrown"], 0.0, cyclic=True)
+        G.stroke(d, blk, M["ink"], O, cyclic=True)
+    elif k == 1:                                                                              # a scree fan: shards heaped on a dust apron
+        apron = [(-0.36 + 0.72 * i / 20, 0.05 * math.sin(math.pi * i / 20) ** 0.8) for i in range(21)]
+        G.stroke(d, apron + [(0.36, -0.02), (-0.36, -0.02)], M["ochre"], 0.0, cyclic=True)
+        G.stroke(d, apron, M["ink"], O)
+        rnd = random.Random(2060)
+        for j, (x, z, r, role) in enumerate(((-0.20, 0.06, 0.07, "rock_i"), (0.05, 0.07, 0.085, "salmon_i"), (0.24, 0.05, 0.06, "top_i"),
+                                             (-0.08, 0.16, 0.07, "pale_i"), (0.13, 0.17, 0.06, "redbrown_i"), (0.02, 0.26, 0.055, "salmon_i"))):
+            G.stroke(d, B._shard(x, z, r, rnd, sides=5, flat=0.75), M[role], O if r > 0.065 else I, cyclic=True)
+    else:                                                                                     # a dust-buried slab, an ochre drift on its back
+        slab = _soften([(-0.36, -0.04), (-0.30, 0.11), (0.18, 0.18), (0.33, 0.08), (0.36, -0.04)])
+        G.stroke(d, slab, M["rock"], 0.0, cyclic=True)
+        G.stroke(d, _soften([(-0.32, -0.02), (-0.28, 0.09), (-0.10, 0.12), (-0.14, -0.02)], 1), M["rock_sh"], 0.0, cyclic=True)
+        drift = [(-0.36 + 0.40 * i / 12, 0.05 + 0.07 * math.sin(math.pi * i / 12) ** 1.2) for i in range(13)]
+        G.stroke(d, slab, M["ink"], O, cyclic=True)
+        G.stroke(d, drift + [(0.04, -0.02), (-0.36, -0.02)], M["ochre"], 0.0, cyclic=True)
+        G.stroke(d, drift, M["ink"], O)
+        G.seam(d, [(-0.02, 0.10), (0.10, 0.06), (0.18, 0.09)], M["ink"])
+
+
+B181_VARIANTS = {"mars": ("basalt", "talus")}                                             # Mercury (ice), Venus (tessera, vent) to follow
+B181_DRAW = {"basalt": (band_basalt, decor_basalt), "talus": (band_talus, decor_talus)}
+B181_FILLS = {"basalt": fill_basalt}
+
+
 # ---------------------------------------------------------------- the pieces, the render, the export API (render.py ground_strip_set)
 
 BAND_PIV = (0.0, (B.BAND_H - B.SURF_ROW) / B.BAND_H)
@@ -619,6 +848,17 @@ def _pieces(planet, part="variants"):
     only (their own manifest rows, so the accepted variant exports are not re-written)."""
     if part == "lips":
         return {f"ground_lip_{v}": (128, 96, LIP_PIV, 1, LIPS[v]) for v in PLANET_VARIANTS[planet]}, ()
+    if part == "b181":                                                                        # B-181: the planet's new biome variants, their own row
+        P, T = {}, []
+        for v in B181_VARIANTS[planet]:
+            P[f"ground_band_{v}"] = (B.BAND_W, B.BAND_H, BAND_PIV, 1, B181_DRAW[v][0])
+            T.append(f"ground_band_{v}")
+            if v in B181_FILLS:
+                P[FILL_OF[v]] = (B.FILL, B.FILL, (0.0, 0.0), 1, B181_FILLS[v])
+                T.append(FILL_OF[v])
+        for v in B181_VARIANTS[planet]:
+            P[f"ground_decor_{v}"] = (64, 64, (0.5, 6 / 64), 3, B181_DRAW[v][1])
+        return P, tuple(T)
     if planet == "mars":
         return ({"ground_band_frost": (B.BAND_W, B.BAND_H, BAND_PIV, 1, band_frost), "ground_decor_frost": (64, 64, (0.5, 6 / 64), 3, decor_frost)},
                 ("ground_band_frost",))
@@ -668,7 +908,7 @@ def use_planet(planet, part="variants"):
     """The row's planet: Earth's sand / stone / snow set (B-178) or Mars's polar frost (LEAD 05:3x); part "lips": B-180's lips."""
     global PLANET, VARIANTS, PIECES, TILES, KEYS, PART
     PLANET, PART = planet, part
-    VARIANTS = PLANET_VARIANTS[planet]
+    VARIANTS = B181_VARIANTS[planet] if part == "b181" else PLANET_VARIANTS[planet]
     PIECES, TILES = _pieces(planet, part)
     KEYS = _keys()
 
@@ -696,9 +936,10 @@ def pieces_of(S):
 def copy_diff(name):
     import numpy as np
     w0, h0 = PIECES[name][0], PIECES[name][1]
-    two, _w = render_piece(name, 0, mx=2, mz=2 if name == "ground_fill_sand" else 1, ss=1)
+    fill = name.startswith("ground_fill_")
+    two, _w = render_piece(name, 0, mx=2, mz=2 if fill else 1, ss=1)
     p = float(np.percentile(np.abs(two[:h0, :w0].astype(np.int32) - two[:h0, w0:2 * w0].astype(np.int32)), 99))
-    if name == "ground_fill_sand":
+    if fill:
         p = max(p, float(np.percentile(np.abs(two[:h0, :w0].astype(np.int32) - two[h0:2 * h0, :w0].astype(np.int32)), 99)))
     return p
 
@@ -716,16 +957,17 @@ def sheet_meta(kn, frames):
         meta.update({"tile_x": True, "repeat_px": B.BAND_W, "surface_row": B.SURF_ROW, "above_px": B.SURF_ROW, "below_px": B.BAND_H - B.SURF_ROW,
                      "variant": v, "biomes": BIOMES[v], "fill": FILL_OF.get(v, "ground_fill"),
                      "mapping": "as ground_band: u = world x x 64 mod 512; v = 24 - (normal distance from the outline x 64); the sprite pivot is ON row 24",
-                     "note": f"B-178: {PLANET.capitalize()}'s {v} band ({', '.join(BIOMES[v])}); "
-                             + ("plains and forest keep ground_band" if PLANET == "earth" else "the rest of Mars keeps ground_band (U-159)")
+                     "note": f"{'B-181' if PART == 'b181' else 'B-178'}: {PLANET.capitalize()}'s {v} band ({', '.join(BIOMES[v])}); "
+                             + ("plains and forest keep ground_band" if PLANET == "earth" else f"the rest of {PLANET.capitalize()} keeps ground_band (U-159)")
                              + "; crossfade the two bands at a biome border"})
+    elif kn.startswith("ground_fill_"):
+        v = kn.rsplit("_", 1)[1]
+        meta.update({"tile_x": True, "tile_y": True, "world_space": True, "standalone": True, "wrap": "repeat", "variant": v,
+                     "mapping": "as ground_fill: u = x x 64 mod 512, v = -y x 64 mod 512; a standalone texture (Repeat wrap); strata only (D-165)"})
     elif kn.startswith("ground_lip_"):
         v = kn.rsplit("_", 1)[1]
         meta.update({"brink": True, "variant": v, "biomes": BIOMES[v], "band": f"ground_band_{v}",
                      "note": f"B-180: the {v} band's cliff lip (as ground_lip): drawn for a drop to the right; mirror x for a drop to the left"})
-    elif kn == "ground_fill_sand":
-        meta.update({"tile_x": True, "tile_y": True, "world_space": True, "standalone": True, "wrap": "repeat", "variant": "sand",
-                     "mapping": "as ground_fill: u = x x 64 mod 512, v = -y x 64 mod 512; a standalone texture (Repeat wrap); strata only (D-165)"})
     else:
         v, i = kn.split("_")[2], int(kn.rsplit("_", 1)[1]) - 1
         meta.update({"upright": True, "variant": v, "decor": DECOR[v][i], "note": f"B-178: {PLANET.capitalize()}'s {v} biomes' decor; scatter along the curve, never rotated"})
@@ -869,10 +1111,10 @@ def preview(out_dir, pieces=None, out=None, footnote=None):
         P[40 + 150 * j:40 + 150 * j + 128, 8:8 + 1024] = sky
         review._over(P, np.repeat(np.repeat(b, 2, 0), 2, 1), 8, 40 + 150 * j)
         review._label(P, f"ground_band_{v} 512x64 at 2x (surface row 24): {', '.join(BIOMES[v])}", 8, 20 + 150 * j)
-    if "ground_fill_sand" in pieces:
-        ft = pieces["ground_fill_sand"][0][0]
+    for fname in [n for n in pieces if n.startswith("ground_fill_")][:1]:
+        ft = pieces[fname][0][0]
         review._over(P, np.concatenate([ft, ft], axis=1)[:, :768], 1100, 40)
-        review._label(P, "ground_fill_sand 512x512 tiled in x (the seam at 512)", 1100, 20)
+        review._label(P, f"{fname} 512x512 tiled in x (the seam at 512)", 1100, 20)
     x = 8
     for v in VARIANTS:
         for j, fr in enumerate(pieces[f"ground_decor_{v}"][0]):
@@ -895,7 +1137,8 @@ def preview(out_dir, pieces=None, out=None, footnote=None):
               "ground_fill), its decor upright, the surveyor at 1x",
               "a grass -> sand biome border at 9 m: the two bands, fills and decor crossfaded over 3 m (smoothstep), as UNITY would blend them"] \
         if PLANET == "earth" else \
-        [f"{PLANET}'s {' | '.join(VARIANTS)} band bent along 10 m (hills, a 30 deg slope) over the {PLANET} ground_fill, its decor upright, the surveyor at 1x",
+        [f"{PLANET}'s {' | '.join(VARIANTS)} band bent along 10 m (hills, a 30 deg slope), each over its fill "
+         f"({', '.join(FILL_OF.get(v, 'ground_fill') for v in VARIANTS)}), its decor upright, the surveyor at 1x",
          f"the {PLANET} regolith band -> {VARIANTS[0]} border at 9 m: bands and decor crossfaded over 3 m (smoothstep), as UNITY would blend them"]
     rows = []
     for t, im in zip(titles, (row1, row2)):
@@ -911,7 +1154,7 @@ def preview(out_dir, pieces=None, out=None, footnote=None):
     del rows, row1, row2, side, P, foot
     import time
     review.draw(img, time.strftime("%m-%d %H:%M") + " " + (footnote or "design preview (lock-free, fakegp + numpy)"), 2, img.shape[0] - 16, (1.0, 1.0, 0.85))
-    out = out or os.path.join(out_dir, f"review_b178_{PLANET}_ground_variants_preview.png")
+    out = out or os.path.join(out_dir, f"review_b181_{PLANET}_ground_preview.png" if PART == "b181" else f"review_b178_{PLANET}_ground_variants_preview.png")
     shape = img.shape
     np.clip(img, 0.0, 1.0, out=img)
     img *= 255.0
