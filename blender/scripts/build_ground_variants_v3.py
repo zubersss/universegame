@@ -1068,7 +1068,8 @@ PUFF_ROLES = {"sand": ("sand_i", "sand_sh", "sand_sh_i"), "snow": ("snow_i", "sa
               "stone": ("rock_lit_i", "rock", "rock_sh_i"), "frost": ("frost_i", "pale", "ice_i"),
               "basalt": ("bas_lit_i", "basalt", "basalt_sh_i"),
               "ice": ("ice_i", "ice_sh", "ice_lit_i"),                                     # B-191: teal ice spray, off-white ice chunks
-              "tessera": ("tess_i", "tess_sh", "tess_dp_i"), "vent": ("sulfur_i", "sulfur_sh", "black_i")}
+              "tessera": ("tess_i", "dust", "tess_dp_i"), "vent": ("sulfur_i", "sulfur_sh", "black_i")}   # tessera: the mid dust shade
+                                                                                              # (the deep one read as a hole in the light ball)
 
 
 def _puff_fn(v):
@@ -1134,25 +1135,31 @@ def fs_fulgurite(d, M):
 
 
 def fs_desert_rose(d, M):
-    """A desert rose: a rosette of rounded gypsum blades, rust behind, sand-coloured in front, each front blade's edge-on ridge."""
-    back = [(-0.10, 0.02, 0.15, 0.045, 1.15), (0.09, 0.03, 0.15, 0.045, 0.45), (0.0, 0.08, 0.14, 0.04, 1.6),
-            (-0.16, -0.06, 0.13, 0.04, 0.2), (0.16, -0.07, 0.13, 0.04, 2.9)]
-    front = [(-0.05, -0.06, 0.13, 0.04, 0.75), (0.06, -0.05, 0.12, 0.04, 2.3), (0.0, -0.11, 0.12, 0.035, 0.05)]
+    """A desert rose: a clump of round gypsum discs grown through each other at angles, tan behind, pale in front, each front
+    disc's rim a curved edge line (rev: thin radiating blades read as a red flower)."""
+    back = [(-0.11, 0.04, 0.11, 0.07, 0.5), (0.10, 0.05, 0.12, 0.065, -0.4), (0.0, 0.10, 0.10, 0.06, 0.1), (-0.15, -0.06, 0.10, 0.06, -0.3)]
+    front = [(0.13, -0.05, 0.10, 0.06, 0.6), (-0.04, -0.03, 0.12, 0.07, -0.15), (0.03, -0.11, 0.11, 0.055, 0.25)]
     for i, (cx, cz, rx, rz, a) in enumerate(back):
-        G.stroke(d, _rot_ell(cx, cz, rx, rz, a, seed=10 + i), M["rust_i"], I, cyclic=True)
+        G.stroke(d, _rot_ell(cx, cz, rx, rz, a, n=22, seed=10 + i), M["sand_sh_i"], I, cyclic=True)
     for i, (cx, cz, rx, rz, a) in enumerate(front):
-        G.stroke(d, _rot_ell(cx, cz, rx, rz, a, seed=20 + i), M["sand_sh_i"], I, cyclic=True)
-        G.seam(d, [(cx - 0.5 * rx * math.cos(a), cz - 0.5 * rx * math.sin(a)), (cx + 0.5 * rx * math.cos(a), cz + 0.5 * rx * math.sin(a))], M["ink"])
+        G.stroke(d, _rot_ell(cx, cz, rx, rz, a, n=22, seed=20 + i), M["sandstone_i"], I, cyclic=True)
+        G.seam(d, [(cx + 0.7 * rx * math.cos(t) * math.cos(a) - 0.45 * rz * math.sin(t) * math.sin(a),
+                    cz + 0.7 * rx * math.cos(t) * math.sin(a) + 0.45 * rz * math.sin(t) * math.cos(a)) for t in [math.pi * (0.15 + 0.7 * j / 8) for j in range(9)]], M["ink"])
 
 
 def fs_lava_tube(d, M):
-    """A lava tube in section: a pale chilled rind round an empty dark tube, the last flow's flat floor, lava drips on the roof."""
-    G.stroke(d, G.lumpy_ellipse(0.0, 0.0, 0.80, 0.34, n=40, lump=0.04, seed=1931), M["bas_lit_i"], O, cyclic=True)
-    G.stroke(d, G.lumpy_ellipse(0.0, 0.03, 0.64, 0.24, n=36, lump=0.03, seed=1932), M["basalt_sh_i"], I, cyclic=True)
-    G.stroke(d, G.lumpy_ellipse(0.0, -0.13, 0.42, 0.045, n=24, lump=0.03, seed=1933), M["basalt_i"], I, cyclic=True)
-    for x in (-0.38, -0.2, -0.05, 0.12, 0.3, 0.42):
-        top = 0.03 + 0.24 * math.sqrt(max(0.0, 1 - (x / 0.64) ** 2)) - 0.015
-        G.stroke(d, [(x - 0.022, top), (x + 0.022, top), (x + 0.004, top - 0.06), (x - 0.004, top - 0.06)], M["bas_lit_i"], I, cyclic=True)
+    """A lava tube in section: an arched empty tunnel (dark) in a thin pale chilled rind, its floor the last flow's flat crust
+    (rev: a symmetric ring read as a dish; roof drips read as teeth)."""
+    rnd = random.Random(1931)
+
+    def arch(rx, rz, z0, floor, n=30):
+        top = [(rx * math.cos(math.pi * i / n), z0 + rz * math.sin(math.pi * i / n) * (1 + 0.04 * (rnd.random() - 0.5))) for i in range(n + 1)]
+        return top + [(-rx * 0.96, floor), (rx * 0.96, floor)]
+    G.stroke(d, arch(0.72, 0.36, -0.10, -0.17), M["bas_lit_i"], I, cyclic=True)                # the chilled rind
+    G.stroke(d, arch(0.62, 0.27, -0.08, -0.10), M["basalt_sh_i"], I, cyclic=True)              # the empty tube
+    G.stroke(d, [(-0.60, -0.095), (0.60, -0.095), (0.585, -0.05), (-0.585, -0.05)], M["basalt"], 0.0, cyclic=True)   # the flat floor
+    G.seam(d, [(-0.585, -0.05), (-0.2, -0.045), (0.2, -0.052), (0.585, -0.05)], M["ink"])
+    # no drips on the roof: pale points under a dark arch read as teeth in a mouth (no faces)
 
 
 def fs_vesicles(d, M):
