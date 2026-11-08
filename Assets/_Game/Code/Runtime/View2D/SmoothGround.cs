@@ -25,9 +25,64 @@ namespace Meridian.View2D
         public const int Order = GroundStrip.Order;
         static readonly Color Ink = new Color(0.12f, 0.10f, 0.09f, 1f);
 
-        /// <summary>B-178's ground sets: 0 grass (B-175's ground_band), 1 sand, 2 stone, 3 snow.</summary>
+        /// <summary>B-178's ground sets: 0 grass (B-175's ground_band), 1 sand, 2 stone, 3 snow. U-159: the four slots per planet (VariantKeys);
+        /// slot 1 (Sand) is the one with a fill of its own (AltFillKey), slot 0 the planet's B-175 band.</summary>
         public const int Grass = 0, Sand = 1, Stone = 2, Snow = 3, Variants = 4;
-        static readonly string[] VariantKey = { "ground_band", "ground_band_sand", "ground_band_stone", "ground_band_snow" };
+
+        /// <summary>U-159 (B-178, B-181): each planet's band keys by slot (null: no such set). Pure.</summary>
+        public static string[] VariantKeys(Meridian.Planets.PlanetId id) => id switch
+        {
+            Meridian.Planets.PlanetId.Earth => new[] { "ground_band", "ground_band_sand", "ground_band_stone", "ground_band_snow" },
+            Meridian.Planets.PlanetId.Mars => new[] { "ground_band", "ground_band_basalt", "ground_band_frost", "ground_band_talus" },
+            Meridian.Planets.PlanetId.Mercury => new[] { "ground_band", "ground_band_ice", null, null },
+            Meridian.Planets.PlanetId.Venus => new[] { "ground_band", "ground_band_tessera", "ground_band_vent", null },
+            _ => new[] { "ground_band", null, null, null },
+        };
+
+        /// <summary>U-159: slot 1's own fill (its band json's "fill"), or null when slot 1 shares the planet's ground_fill. Pure.</summary>
+        public static string AltFillKey(Meridian.Planets.PlanetId id) => id switch
+        {
+            Meridian.Planets.PlanetId.Earth => "ground_fill_sand",
+            Meridian.Planets.PlanetId.Mars => "ground_fill_basalt",
+            _ => null,
+        };
+
+        /// <summary>U-159: the slot of column x on a planet by its region (Earth by biome, the Ocean by height; Mars by landform: the polar cap's
+        /// frost, Olympus's basalt, the canyon's talus; Mercury's cold traps' ice; Venus's tesserae and vent fields); 0 elsewhere. `top` is the
+        /// column's original top (Earth's beach test), `width` the world's (Mercury's traps wrap). Pure.</summary>
+        public static int VariantFor(Meridian.Planets.PlanetId id, int x, int top, int datumY, int width)
+        {
+            switch (id)
+            {
+                case Meridian.Planets.PlanetId.Earth:
+                    switch (EarthBiomes.At(x))
+                    {
+                        case Biome.Desert: return Sand;
+                        case Biome.Taiga: case Biome.Tundra: return Snow;
+                        case Biome.Ocean: return top != int.MinValue && top + 1 <= datumY + BeachRise ? Sand : Stone;
+                        default: return Grass;
+                    }
+                case Meridian.Planets.PlanetId.Mars:
+                    switch (MarsLandforms.At(x))
+                    {
+                        case MarsFeature.Olympus: return 1;
+                        case MarsFeature.PolarCap: return 2;
+                        case MarsFeature.Canyon: return 3;
+                        default: return 0;
+                    }
+                case Meridian.Planets.PlanetId.Mercury: return width > 0 && MercuryLandforms.InColdTrap(x, width) ? 1 : 0;
+                case Meridian.Planets.PlanetId.Venus:
+                    switch (VenusLandforms.At(x))
+                    {
+                        case VenusFeature.Tessera: return 1;
+                        case VenusFeature.VentField: return 2;
+                        default: return 0;
+                    }
+                default: return 0;
+            }
+        }
+        string[] variantKey = VariantKeys(Meridian.Planets.PlanetId.Earth);
+        Meridian.Planets.PlanetId planetId;
         /// <summary>U-128's crossfade width at a biome border (m).</summary>
         public const float BiomeFade = 3f;
         /// <summary>An Ocean column whose ground stands at most this far over the water line is beach (sand); higher, rocky shore (stone).</summary>
@@ -85,18 +140,22 @@ namespace Meridian.View2D
             Release();
             EnsureScratch();
             terrain = t; strips = g; planet = id.ToString().ToLowerInvariant();
-            biomes = id == Meridian.Planets.PlanetId.Earth;
+            planetId = id;
+            variantKey = VariantKeys(id);
+            biomes = false;
+            for (int i = 1; i < Variants; i++) biomes |= variantKey[i] != null; // U-159: the planet has region sets
             Active = true;
             TerrainChunk.OutlineBuilt -= OnOutline;
             TerrainChunk.OutlineBuilt += OnOutline;
             for (int i = 0; i < Variants; i++)
             {
-                if (i != Grass && !biomes) continue;
+                if (variantKey[i] == null) continue;
                 int variant = i;
-                Probe($"terrain/{planet}/{VariantKey[i]}", s => { bands[variant] = s; RebuildAll(); });
+                Probe($"terrain/{planet}/{variantKey[i]}", s => { bands[variant] = s; RebuildAll(); });
             }
             Probe($"terrain/{planet}/ground_fill", s => { fill = s; Repeat(s); RebuildAll(); });
-            if (biomes) Probe($"terrain/{planet}/ground_fill_sand", s => { fillSand = s; Repeat(s); RebuildAll(); });
+            string altFill = AltFillKey(id); // U-159: slot 1's own fill (Earth's sand, Mars's basalt)
+            if (altFill != null) Probe($"terrain/{planet}/{altFill}", s => { fillSand = s; Repeat(s); RebuildAll(); });
             Probe($"terrain/{planet}/dig_rim", s => { rim = s; RebuildAll(); });
             RebuildAll();
         }
@@ -177,16 +236,10 @@ namespace Meridian.View2D
         /// <summary>The ground set of column x: Earth's biome (the Ocean split by height into beach and rocky shore); grass elsewhere.</summary>
         public int VariantAt(int x)
         {
-            if (!biomes) return Grass;
-            switch (EarthBiomes.At(x))
-            {
-                case Biome.Desert: return Sand;
-                case Biome.Taiga: case Biome.Tundra: return Snow;
-                case Biome.Ocean:
-                    int top = terrain != null ? terrain.OriginalTop(x) : int.MinValue;
-                    return terrain != null && terrain.Config != null && top + 1 <= terrain.Config.datumY + BeachRise ? Sand : Stone;
-                default: return Grass;
-            }
+            if (!biomes || terrain == null || terrain.Config == null) return Grass;
+            int top = planetId == Meridian.Planets.PlanetId.Earth ? terrain.OriginalTop(x) : int.MinValue;
+            int v = VariantFor(planetId, x, top, terrain.Config.datumY, terrain.Config.worldWidth);
+            return v < Variants && variantKey[v] != null ? v : Grass;
         }
 
         /// <summary>Each set's weight at world x: its share of the BiomeFade window round x, smoothstepped (U-128); they sum to 1.</summary>
