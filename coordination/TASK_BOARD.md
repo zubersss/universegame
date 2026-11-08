@@ -1553,6 +1553,13 @@ Files: blender/scripts/build_rig*.py, Assets/_Game/Art/props/rig/
 Depends: —
 Lead notes: Cycle 284 (16:2x). After B-204's mock-up.
 
+### B-207 · BLENDER · Ready · C2
+Goal: The Venus vent eel's feet on the ground (UNITY's full PlayMode sweep, 16:5x: CreatureTests.PawsOnTheGround finds creatures/venus/vent_eel's idle frames sitting 4 px over the ground contact; the limit is 2): re-seat the idle frames' contact (or the pivot row) so every idle frame touches within 2 px, the other clips checked the same way.
+Accept: a stamped sheet of every clip's contact rows at 1× (measured px over the contact per frame) accepted by LEAD; log OK; UNITY's PawsOnTheGround green on the import.
+Files: blender/scripts/ (the Venus creatures' builder), Assets/_Game/Art/creatures/venus/vent_eel/
+Depends: —
+Lead notes: Cycle 284 (16:5x). Small; any free gap, ahead of B-204.
+
 ### B-206 · BLENDER · Ready · D1
 Goal: Rank and expedition art (D-175): ten Surveyor Rank insignia (one family, rising: a plain survey pin → a starred brass medallion; readable at the HUD's 48 px), an expedition badge with its number (I–X, then a laurel for more; drawn so UNITY can set the numeral), and the New Expedition panel's art (a paper certificate in UiKit's style with a wax seal, B-151's paper).
 Accept: one stamped sheet (the ten insignia at 1× and 48 px, the badge at I, II, V, X, the certificate) accepted by LEAD before the export; palette 100 %; no faces.
@@ -2741,7 +2748,7 @@ Files: Code/Runtime/Player/PlayerView.cs, Ship/ShipLegsView.cs, Space/SpaceWorld
 Depends: —
 Lead notes: Cycle 283 (14:2x). Small, lock-free; its check rides U-159's. Then tell BLENDER to remove the three (B-174's second commit). 14:5x: DONE (5fa45505: the surveyor's model loads lazily on the 3D path only, the Pilgrim's fallback skipped on the cartoon path, Saturn's ring mesh behind the disc probe; ResidencyTests.TheCartoonPathNeverLoadsTheV2Models: 145 keys loaded Earth → space → Saturn, none of the three; 3D-path classes green); the d0c32d8b import committed (49775f73). FOLLOW-UP before BLENDER's second removal commit (BLENDER's flag 15:0x): four tests still name characters/surveyor/base (ArtCompressionTests.cs 19, ArtImporterTests.cs 368, HazardV2PlayTests.cs 108, ModelViewPlayTests.cs 29): re-point them at characters/calibration/base (kept for tests, B-193 (e)) or drop the v2 reliance, commit that first; then BLENDER removes the 14 files (surveyor / Pilgrim base + maps, ring_mesh); never the other way round.
 
-### U-169 · UNITY · Review · G1
+### U-169 · UNITY · Done · G1
 Goal: Diagnose and fix the curve-vs-grid mismatch on Earth's camp west shoulder (UNITY 14:5x: HazardV2PlayTests ×3 put the surveyor at TopSolidY(x) + 1.05 at x 37, 30 m west of the camp, where the drawn curve is 1.66 m ABOVE the tile top (332.66 vs 331.0), so SolidRescue lifts it; SurveyorAnimPlayTests.WalkRunJumpFallLandDig shows "land" where "run" is expected running left from spawn, likely the same spot; both fail identically with today's PoiStamp change off, and were last run on 11-07, before U-156). Decide which is true: (a) the smooth shoulder's curve is drawn above solid tiles it does not fill (a real bug in 0.5.0: a dig, a drop or a spawn there reads the wrong height and the surveyor walks on air over a 1.66 m gap), or (b) the tests' teleport uses the grid top where smooth ground's truth is the curve (a stale test). If (a): make the shoulder's tiles follow its curve (the grid stays the solid truth under the drawn outline everywhere, D-161) and keep the tests; if (b): send LEAD the old vs new truth and the proposed teleport (the curve's height, as gameplay uses) before changing a test.
 Accept: the cause stated with numbers; HazardV2PlayTests ×3 and SurveyorAnimPlayTests green; a check that on 3 Earth seeds the drawn curve never sits more than 0.25 m above the top solid tile at any column (the same as U-156's contact gap rule); a FULL PlayMode sweep in batches (every class, under the 20-min lock cap per part) before U-159's build, listing any other class not run since 11-07.
 Files: Code/Runtime/Terrain/, Code/Runtime/Planet/ (PoiStamp / the shoulders), Tests/
@@ -2762,7 +2769,7 @@ Files: Code/Runtime/View2D/ (CartoonStage, ParallaxLayers), Code/Runtime/Planet/
 Depends: — (B-202 for the art; the gradient until then)
 Lead notes: Cycle 284 (16:1x). After U-167, lock-free; in the next build if B-202 is exported by then, else the one after (the gradient alone is already better than tinted meadow).
 
-### U-172 · UNITY · Ready · G1
+### U-172 · UNITY · Done · G1
 Goal: OWNER (USER-33, the 0.5.0 playtest): "the walking animation glitches when I'm walking down." On the smooth ground a walk or run down a slope flickers into the fall / land clips (the grounded check loses contact for a frame as the body moves faster sideways than the slope lets it drop; SurveyorAnimPlayTests' "land where run is expected" is the same symptom). Fix it at the cause: keep the surveyor glued to a downward slope while walking or running (a ground snap within the slope limit, or a grounded test with a small down-probe and a coyote window), so walk / run play unbroken; a real step off a ledge still falls and lands.
 Accept: SurveyorAnimPlayTests (or a new test) +1: walking and running down 10°, 20°, 30° slopes, left and right, play only walk / run clips for 3 s each (no fall or land frame); walking off a 2 m drop still plays fall then land; jump heights unchanged (Bible §4.2); a frame-strip capture of a downhill run at 1x in reports/unity/u172/; clean console.
 Files: Code/Runtime/Player/ (the grounded check, the animator driver), Tests/
