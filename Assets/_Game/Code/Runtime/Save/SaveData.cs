@@ -42,6 +42,8 @@ namespace Meridian.Save
         public List<Meridian.Building.BasePieceSave> basePieces = new List<Meridian.Building.BasePieceSave>();
         public List<Meridian.Building.AerostatSave> aerostats = new List<Meridian.Building.AerostatSave>();
         public TimerSave timers = new TimerSave();
+        /// <summary>U-158: harvested resource nodes (absent in older files: every node full).</summary>
+        public List<Meridian.Mining.NodeSave> nodes = new List<Meridian.Mining.NodeSave>();
         public List<string> terrainFiles = new List<string>();
     }
 

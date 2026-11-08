@@ -40,6 +40,8 @@ namespace Meridian.Core
         public System.Collections.Generic.List<CargoStack> cargo = new System.Collections.Generic.List<CargoStack>();
         /// <summary>Story and world flags (saved as story.flags), e.g. "poi_stamped:survey_archive" (U-030).</summary>
         public readonly System.Collections.Generic.List<string> storyFlags = new System.Collections.Generic.List<string>();
+        /// <summary>U-158: harvested resource nodes per planet (charges left, when the last was taken), so a node does not regrow by leaving.</summary>
+        public readonly System.Collections.Generic.List<Meridian.Mining.NodeSave> nodeStates = new System.Collections.Generic.List<Meridian.Mining.NodeSave>();
         public bool HasFlag(string f) => storyFlags.Contains(f);
         public void SetFlag(string f) { if (!storyFlags.Contains(f)) storyFlags.Add(f); }
         /// <summary>U-156: drops a world flag (a re-stamp after the ground changed shape; the before / after captures).</summary>

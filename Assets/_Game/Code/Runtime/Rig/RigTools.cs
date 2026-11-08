@@ -68,6 +68,14 @@ namespace Meridian.Rig
                     return h > 0;
                 }
             }
+            // U-158: the planet's resource nodes (and any other harvester) next.
+            for (int i = 0; i < harvesters.Count; i++)
+            {
+                int h = harvesters[i](world);
+                if (h < 0) continue;
+                if (h > 0) Dug?.Invoke(world);
+                return h > 0;
+            }
             if (Brush) return DigBrush(world);
             byte id = terrain.GetTile(t.x, t.y);
             if (!TileId.IsSolid(id)) return false;
@@ -91,6 +99,7 @@ namespace Meridian.Rig
                     dug++;
                     DropFor(id, c.x, c.y);
                 }
+                if (dug > 0) Shape(p, true, null);
             }
             finally { terrain.EndBatch(); }
             if (dug == 0) return false;
@@ -131,6 +140,8 @@ namespace Meridian.Rig
 
         /// <summary>U-059: a harvestable at the Beam's point (set by SolariteCrystals on Mercury).</summary>
         public System.Func<Vector2, int> harvest;
+        /// <summary>U-158: more harvestables at the Beam's point, tried in order after `harvest` (-1 none there, 0 glanced off, 1 harvested).</summary>
+        public readonly System.Collections.Generic.List<System.Func<Vector2, int>> harvesters = new System.Collections.Generic.List<System.Func<Vector2, int>>(2);
         /// <summary>U-056: the Beam on a base piece (BaseBuilder.Dismantle); the Builder with a base-piece item (BaseBuilder.PlaceItem).</summary>
         public System.Func<Vector2, bool> dismantle;
         public System.Func<Vector2, int, bool> placePiece;
@@ -208,17 +219,51 @@ namespace Meridian.Rig
             terrain.BeginBatch();
             try
             {
+                shapeSkip.Clear();
+                foreach (var c in BrushCells(p)) shapeSkip.Add(c); // a cell within the brush keeps its density unless it is piled
                 foreach (var c in moundScratch)
                 {
                     if (filled >= budget) break;
                     if (!terrain.SetTile(c.x, c.y, id)) continue;
                     filled++;
+                    shapeSkip.Remove(c);
                 }
+                if (filled > 0) Shape(p, false, shapeSkip);
             }
             finally { terrain.EndBatch(); }
             if (spend) SpendGroundItems(filled);
             if (filled > 0) Mounded?.Invoke(p);
             return filled;
+        }
+
+        readonly System.Collections.Generic.HashSet<Vector2Int> shapeSkip = new System.Collections.Generic.HashSet<Vector2Int>();
+
+        /// <summary>U-157 (P-54, D-167 (4)): how wide the density ramp round a stroke's circle is (m): one node spacing, so the traced edge lands
+        /// on the circle of BrushRadius.</summary>
+        public const float BrushRamp = 1f;
+
+        /// <summary>
+        /// U-157 (P-54): the stroke's round shape in the field: every tile centre within BrushRadius + BrushRamp / 2 of p takes the density of a
+        /// disc of BrushRadius (carve: the lower of its own and the disc's outside; pile: the higher of its own and the disc's inside), stored as
+        /// its fill level. The tiles flipped already (within BrushRadius) agree with it, so the drawn edge is the circle and the grid stays the
+        /// game's solid / open truth. A mound never raises a cell a body stands in, nor an unpiled cell within the brush (`skip`).
+        /// </summary>
+        void Shape(Vector2 p, bool carve, System.Collections.Generic.HashSet<Vector2Int> skip)
+        {
+            float reach = BrushRadius + BrushRamp * 0.5f;
+            int x0 = Mathf.FloorToInt(p.x - reach), x1 = Mathf.FloorToInt(p.x + reach), y0 = Mathf.FloorToInt(p.y - reach), y1 = Mathf.FloorToInt(p.y + reach);
+            for (int y = y0; y <= y1; y++)
+                for (int x = x0; x <= x1; x++)
+                {
+                    var centre = new Vector2(x + 0.5f, y + 0.5f);
+                    float t = Mathf.Clamp01(((centre - p).magnitude - BrushRadius) / BrushRamp + 0.5f);
+                    if (t >= 1f) continue;
+                    var cell = new Vector2Int(x, y);
+                    if (!carve && (skip != null && skip.Contains(cell) || !Clear(centre))) continue;
+                    float before = terrain.NodeDensity(x, y), after = carve ? Mathf.Min(before, t) : Mathf.Max(before, 1f - t);
+                    if (Mathf.Abs(after - before) < 0.5f / 255f) continue;
+                    terrain.SetLevel(x, y, (byte)Mathf.RoundToInt(after * 255f));
+                }
         }
 
         /// <summary>U-157: the planet's one ground material a mound is made of (its near-surface ground).</summary>

@@ -116,6 +116,7 @@ namespace Meridian.Save
             data.player.suitTier = state.suitTier;
             data.selectedSlot = state.inventory.Selected;
             data.story.flags.AddRange(state.storyFlags);
+            data.nodes.AddRange(state.nodeStates);
             data.timers.gameSeconds = time != null ? time.GameSeconds : 0;
             data.timers.playSeconds = playSeconds;
 
@@ -209,6 +210,8 @@ namespace Meridian.Save
             state.inventory.ReadFrom(data.inventory, data.selectedSlot);
             state.storyFlags.Clear();
             if (data.story != null && data.story.flags != null) state.storyFlags.AddRange(data.story.flags);
+            state.nodeStates.Clear();
+            if (data.nodes != null) state.nodeStates.AddRange(data.nodes);
             if (time != null) time.SetGameSeconds(data.timers.gameSeconds);
             playSeconds = data.timers.playSeconds;
 

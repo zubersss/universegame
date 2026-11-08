@@ -50,6 +50,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2c48df4b132889e40be25c6a4159b226
+    m_Address: terrain/neptune/island_end_l
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 34c8deda0b241d848ae8efe424268863
+    m_Address: terrain/neptune/under_haze_deck3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 37f9292f848772141964cbd91ab67ccc
     m_Address: creatures/neptune/shadow_shoal/animator
     m_ReadOnly: 0
@@ -110,6 +120,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 60526b47222abfb4ca1d57a855887b87
+    m_Address: terrain/neptune/under_haze_deck2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 65b9a2b3b58ad4848923742d8534322b
     m_Address: creatures/neptune/windrider
     m_ReadOnly: 0
@@ -165,6 +180,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8368f0790271ecd49b1d98bd75b4e443
+    m_Address: terrain/neptune/island_end_r
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9a16bf02f8aac154f8ab567737ae72a2
     m_Address: props/neptune/meridian_wreck_stern
     m_ReadOnly: 0
@@ -215,6 +235,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cf2fad1992de0ea48a0c41e770e85482
+    m_Address: terrain/neptune/island_belly
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d37e4bbfdca3c044492d81b21e605a82
     m_Address: backgrounds/neptune/deck3/layer2
     m_ReadOnly: 0
@@ -225,8 +250,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d98222bf730c482489caedb90cb095cb
+    m_Address: terrain/neptune/under_haze_deep
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d992c3c881c5ec24d90f0499106f0718
     m_Address: backgrounds/neptune/storm/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dfa846d01540a424686e74797689e1c6
+    m_Address: terrain/neptune/under_haze_deck1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

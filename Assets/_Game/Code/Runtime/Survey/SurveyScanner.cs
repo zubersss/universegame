@@ -83,6 +83,13 @@ namespace Meridian.Survey
                         Pay(planet, Catalogue.MineralId(solarite.id), state);
             }
 
+            // U-158: buried pockets in reach show in the cutaway (their scan_x on the ground above); each new kind is catalogued.
+            if (side.finds != null && side.finds.Active)
+                foreach (var key in side.finds.Reveal(centre, ScanRadius))
+                {
+                    var def = Meridian.Items.ItemRegistry.Get(key);
+                    if (def != null && seenItems.Add(def.id)) Pay(planet, Catalogue.MineralId(def.id), state);
+                }
             // Sites: a POI whose stamp reaches into the scan.
             if (side.pois != null)
                 foreach (var p in side.pois.placed)

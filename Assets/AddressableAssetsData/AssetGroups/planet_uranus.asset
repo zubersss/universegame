@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: planet_uranus
   m_GUID: 228d135278ddb8047970734d38f19d68
   m_SerializeEntries:
+  - m_GUID: 0877eac488f458c45889c8ee53fa6212
+    m_Address: terrain/uranus/under_haze_deck2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1003d4211c147744da80cf4ebd2b3f9e
     m_Address: backgrounds/uranus/deck2_sun_right/layer1
     m_ReadOnly: 0
@@ -52,6 +57,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2025204a223bdce4d9b93d990d2dddae
     m_Address: backgrounds/uranus/deck3_sun_left/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 20de944a63807fa4ca485824c358d789
+    m_Address: terrain/uranus/under_haze_deck3
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -110,6 +120,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3f468e0e44c49b148a2b6024e7f3b1cb
+    m_Address: terrain/uranus/under_haze_deck1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4003d2f7a25434647b407f15ac9763e8
     m_Address: backgrounds/uranus/deep_sun_right/layer2
     m_ReadOnly: 0
@@ -137,6 +152,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4b3599be7038efd41a4cc2d341f326e0
     m_Address: terrain/uranus/floe_ice
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4bb4cdd0bf9a46243a68b5a8dba81684
+    m_Address: terrain/uranus/island_end_r
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -240,6 +260,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7e534c5f379bd184a924bf94ae27eac6
+    m_Address: terrain/uranus/island_belly
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7edcee37d3cc9de4d9514ec539f4d221
     m_Address: backgrounds/uranus/deck1_night
     m_ReadOnly: 0
@@ -287,6 +312,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 99c3b651cab492546842d8b5c6a9cce5
     m_Address: backgrounds/uranus/deck3_survey/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 99ede88b05627834e9b761a647b2f060
+    m_Address: terrain/uranus/under_haze_deep
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -372,6 +402,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d5444a01372f11c49afb312b71994a1f
     m_Address: backgrounds/uranus/deep_survey/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d6e7ced88125e5349b8bbdf76f23d23c
+    m_Address: terrain/uranus/island_end_l
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

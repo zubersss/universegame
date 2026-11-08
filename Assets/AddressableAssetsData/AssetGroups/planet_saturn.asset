@@ -40,6 +40,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 320b79a1f1f31a4499e41cac5c36f721
+    m_Address: terrain/saturn/island_belly
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 37c0996d862d69f45a2bad148fad71bc
     m_Address: backgrounds/saturn/deck2/layer0
     m_ReadOnly: 0
@@ -75,8 +80,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 524b8d61d2b02e1419ed672a17cb4f8a
+    m_Address: terrain/saturn/under_haze_deck3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 599517e3ae719d34fb2ee7b426f4eac9
     m_Address: backgrounds/saturn/hexagon/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5b68ffb983612ed41962bd196d7b2931
+    m_Address: terrain/saturn/under_haze_deep
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5ea23b18f1e870a4f91ae47ca531dca9
+    m_Address: terrain/saturn/under_haze_deck2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 678b11e64e9800f49a3819ecf799e990
+    m_Address: terrain/saturn/under_haze_deck1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -142,6 +167,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 96cc41f93fdd8b144ae08bb63dcc09f7
     m_Address: props/saturn/ring_rig/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 979c58d4af3d4e340ab5f7df7ac9285b
+    m_Address: terrain/saturn/island_end_l
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -237,6 +267,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ea40925d9ff75ab49aa42a5a5b5f9445
     m_Address: props/saturn/helium_trap
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ed49af371bdb5cd43ad7885848bc3de2
+    m_Address: terrain/saturn/island_end_r
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

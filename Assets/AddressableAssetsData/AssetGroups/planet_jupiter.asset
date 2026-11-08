@@ -135,6 +135,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 846c45510fbfba042ae28fe6ed76108f
+    m_Address: terrain/jupiter/under_haze_deck1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8628e1287e2e55a4197e94b5c21f89e5
     m_Address: backgrounds/jupiter/deep
     m_ReadOnly: 0
@@ -145,8 +150,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 91b34c364e8ca6048ba12144369fc073
+    m_Address: terrain/jupiter/under_haze_deep
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 920ca7fa85c892e4cb9aa55d7cb1a973
     m_Address: creatures/jupiter/stormglider/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9367b305d8709954281282724ae1438c
+    m_Address: terrain/jupiter/under_haze_deck3
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -185,6 +200,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bbcda52c52b9b54458406c4e92a86a53
+    m_Address: terrain/jupiter/under_haze_deck2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bc97e51e644502b419d51a5cbc1b7ec3
     m_Address: backgrounds/jupiter/spot/layer1
     m_ReadOnly: 0
@@ -200,6 +220,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d1ae96a5b171de349821cf59a2bb7c6f
+    m_Address: terrain/jupiter/island_end_l
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d9956cb0a6df3f443a2db0dfbd42b931
     m_Address: backgrounds/jupiter/spot/layer2
     m_ReadOnly: 0
@@ -207,6 +232,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: dcc7184cf85b0f64890e7c8a950c1311
     m_Address: backgrounds/jupiter/deck3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dd59f5f6ff54cf54b967a09c75d4f7a2
+    m_Address: terrain/jupiter/island_belly
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -232,6 +262,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f951796762f26db42bb6027fef0f4c78
     m_Address: backgrounds/jupiter/spot
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: faaacb92f8eb8b44486080dda1e5780d
+    m_Address: terrain/jupiter/island_end_r
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

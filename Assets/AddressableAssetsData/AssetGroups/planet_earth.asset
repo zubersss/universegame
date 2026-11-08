@@ -195,6 +195,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 567af4eb241b4d549b66d9f60571c9a5
+    m_Address: backgrounds/earth/desert/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 604bddbdc95de8d478355c77b488a37b
     m_Address: backgrounds/earth/plains
     m_ReadOnly: 0
@@ -280,6 +285,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 933c31e95ed352240938078b27fac5d4
+    m_Address: backgrounds/earth/desert
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 93812ad0c2e2d6d4d94f0e3be4ba421d
     m_Address: terrain/earth/ground_band
     m_ReadOnly: 0
@@ -342,6 +352,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a8ad9989699f49b4dbbcbd64d71880b2
     m_Address: terrain/earth/dig_puff/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a94644b0d782d8b45ac8859e7017d232
+    m_Address: backgrounds/earth/desert/layer1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -472,6 +487,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e8f9dd2749fa19f4da8ee9a11436e1d7
     m_Address: terrain/earth/ground_decor_snow_3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ee34bc2cf26f4fa4883db82ca3f8d36f
+    m_Address: backgrounds/earth/desert/layer2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

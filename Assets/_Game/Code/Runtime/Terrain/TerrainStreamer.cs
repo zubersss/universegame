@@ -153,6 +153,30 @@ namespace Meridian.Terrain
         /// <summary>U-156: the drawn surface's height over column x's centre on a smooth planet (the outline's line where nothing is dug or built).</summary>
         public float CurveAt(int x) => GroundField.Curve(x, OriginalTop, PadTop);
 
+        /// <summary>U-157 (P-54): a brushed tile's fill level (0-255), if it has one.</summary>
+        public bool TryLevel(int x, int y, out byte level) { level = 0; return Edits != null && Edits.TryGetLevel(WrapX(x), y, out level); }
+
+        /// <summary>U-157: any fill levels in chunk (cx, cy) (cx may be unwrapped).</summary>
+        public bool HasLevels(int cx, int cy) => Edits != null && Config != null && Edits.HasLevels(WorldNoise.FloorDiv(WrapX(cx * C), C), cy);
+
+        /// <summary>U-157 (P-54): sets a tile's fill level and retraces the outlines round it (batched within BeginBatch / EndBatch).</summary>
+        public void SetLevel(int x, int y, byte level)
+        {
+            if (!started || Edits == null || y < 0 || y >= Config.worldHeight) return;
+            Edits.SetLevel(WrapX(x), y, level);
+            RefreshAround(x, y);
+        }
+
+        /// <summary>U-157: the drawn ground's density at tile (x, y)'s centre: its fill level if brushed, else the natural surface's ramp for a
+        /// natural tile, else 1 / 0 for a dug or built one (GroundField.Density).</summary>
+        public float NodeDensity(int x, int y)
+        {
+            if (TryLevel(x, y, out byte l)) return l / 255f;
+            bool solid = TileId.IsSolid(GetTile(x, y));
+            int top = OriginalTop(x);
+            return GroundField.Density(solid, top != int.MinValue && solid == (y <= top), CurveAt(x), y);
+        }
+
         /// <summary>U-156: the drawn outline's height at world x where nothing is dug or built (the curve between column centres, linear, as
         /// the marching squares trace it).</summary>
         public float SurfaceAt(float x)

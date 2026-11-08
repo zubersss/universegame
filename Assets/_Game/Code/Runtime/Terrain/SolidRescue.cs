@@ -67,6 +67,7 @@ namespace Meridian.Terrain
 
         static float Node(TerrainStreamer t, int x, int y, float curve)
         {
+            if (t.TryLevel(x, y, out byte level)) return level / 255f; // U-157: a brushed tile's own density
             bool solid = TileId.IsSolid(t.GetTile(x, y));
             int top = t.OriginalTop(x);
             return GroundField.Density(solid, top != int.MinValue && solid == (y <= top), curve, y);

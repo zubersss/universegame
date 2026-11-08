@@ -28,6 +28,10 @@ namespace Meridian.Terrain
             int WallTop(int x);
             /// <summary>U-156: the pad height where column x lies across a stamped POI on a smooth planet; int.MinValue elsewhere.</summary>
             int PadTop(int x);
+            /// <summary>U-157 (P-54): a brushed tile's fill level (0-255), if it has one.</summary>
+            bool TryLevel(int x, int y, out byte level);
+            /// <summary>U-157: any fill levels in chunk (cx, cy).</summary>
+            bool HasLevels(int cx, int cy);
         }
 
         /// <summary>When true the block mesh renders and the tilemap renderer is off (the 3D view).</summary>
@@ -134,6 +138,7 @@ namespace Meridian.Terrain
             for (int k = 0; k < tops.Length; k++) tops[k] = world.WallTop(t0 + k);
             for (int i = 0; i <= C; i++) curve[i] = GroundField.Curve(x0 - 1 + i, x => tops[x - t0], world.PadTop);
             for (int i = 0; i <= C; i++) SurfaceCurve[i] = tops[i + r] == int.MinValue ? float.NaN : curve[i];
+            bool levelled = world.HasLevels(cx, cy) || world.HasLevels(cx - 1, cy) || world.HasLevels(cx, cy - 1) || world.HasLevels(cx - 1, cy - 1);
             for (int j = 0; j <= C; j++)
             {
                 int ty = y0 - 1 + j;
@@ -144,7 +149,9 @@ namespace Meridian.Terrain
                     bool solid = TileId.IsSolid(id);
                     int top = tops[tx - t0];
                     bool natural = top != int.MinValue && solid == (ty <= top);
-                    nodes[j * (C + 1) + i] = GroundField.Density(solid, natural, curve[i], ty);
+                    float density = GroundField.Density(solid, natural, curve[i], ty);
+                    if (levelled && world.TryLevel(tx, ty, out byte level)) density = level / 255f; // U-157 (P-54): a brushed tile's own density
+                    nodes[j * (C + 1) + i] = density;
                 }
             }
             contour.Build(nodes, C, new Vector2(-0.5f, -0.5f));
@@ -217,6 +224,7 @@ namespace Meridian.Terrain
             int tx = x0 - 1 + i, ty = y0 - 1 + j;
             bool solid = TileId.IsSolid(world.TileAt(tx, ty));
             int top = world.WallTop(tx);
+            if (world.TryLevel(tx, ty, out byte level)) return level / 255f;
             float curveAt = GroundField.Curve(tx, world.WallTop, world.PadTop);
             return GroundField.Density(solid, top != int.MinValue && solid == (ty <= top), curveAt, ty);
         }

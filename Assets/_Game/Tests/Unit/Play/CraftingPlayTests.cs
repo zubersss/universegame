@@ -95,7 +95,11 @@ namespace Meridian.Tests
             var perchlorate = book.FindRecipe("refine_oxygen_perchlorate");
             Assert.AreEqual(CraftingSystem.Result.Locked, panel.Craft(perchlorate));
             Assert.Greater(panel.Nodes["smelting"].color.b, 0.5f, "Smelting lit in the tree");
-            Assert.Less(panel.Nodes["perchlorate_oxidizer"].color.b, 0.5f, "Perchlorate oxidizer dim until the Mars beacon");
+            // D-167 (5): the paper cards (U-135): a locked node is the Locked card (no gold band) in the Locked paper tint.
+            var locked = panel.Nodes["perchlorate_oxidizer"];
+            Assert.AreEqual(0.64f, locked.color.b, 0.05f, "Perchlorate oxidizer on the Locked paper until the Mars beacon");
+            var band = locked.transform.Find(Meridian.UI.UiKit.BandName);
+            if (band != null) Assert.IsFalse(band.GetComponent<UnityEngine.UI.Image>().enabled, "the Locked card: no gold band");
             panel.SetOpen(false);
             LogAssert.NoUnexpectedReceived();
         }

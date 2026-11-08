@@ -35,6 +35,8 @@ namespace Meridian.Core
         public Meridian.Survey.SurveyScanner scanner { get; private set; }
         public Meridian.Creatures.Wardens.WardenDirector wardens { get; private set; }
         public Meridian.Hazards.SolariteCrystals solarite { get; private set; }
+        /// <summary>U-158: the planet's resource nodes and buried finds.</summary>
+        public Meridian.Mining.ResourceFinds finds { get; private set; }
         public Meridian.Building.BaseBuilder bases { get; private set; }
         /// <summary>U-093: Suit power 0 -> conk out, wake at the last base or the ship (created in Configure).</summary>
         public ConkOut conkOut { get; private set; }
@@ -191,6 +193,10 @@ namespace Meridian.Core
             if (solarite == null) { solarite = gameObject.AddComponent<Meridian.Hazards.SolariteCrystals>(); solarite.pois = pois; solarite.rig = rig; }
             solarite.flares = hazards != null ? hazards.flares : null;
             solarite.ConfigureFor(config.id);
+            // U-158: a smooth planet's surface nodes and buried finds (inactive elsewhere).
+            if (finds == null) finds = gameObject.AddComponent<Meridian.Mining.ResourceFinds>();
+            finds.flares = hazards != null ? hazards.flares : null;
+            finds.Configure(config, terrain, rig, GameState.Instance != null ? GameState.Instance.worldSeed : 1969);
             // U-056: this planet's base, rebuilt from the save; the Builder and the Beam work on its pieces.
             if (bases == null) { bases = gameObject.AddComponent<Meridian.Building.BaseBuilder>(); bases.terrain = terrain; bases.rig = rig; bases.player = player != null ? player.transform : null; }
             bases.ConfigureFor(config.id);
