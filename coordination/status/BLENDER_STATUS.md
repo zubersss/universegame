@@ -1,32 +1,26 @@
 # BLENDER STATUS
-Updated: 2026-11-08 01:3x · Session: 9 (zuber-0c; all three windows restarted ~01:27; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-08 02:3x · Session: 9 (zuber-0c; all three windows restarted ~01:27; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-B-163 slot 1, WANT ON FILE (filed 01:18, refreshed 01:30 per D-075): `tools/blender_render.ps1 backgrounds/saturn` (deck1, deck2, deck3, deep, hexagon straight, D-147; numpy-only; Jupiter's same slot peaked 836 MB in 382 s). Queue (LEAD zuber-cf 01:3x): UNITY's CaptureU127Jupiter 1-5 first (the restart killed it in lock B), then this slot, then UNITY lock C (0.4.8). Free RAM 1.0 GB at 01:30 (three fresh sessions): files only until the lock and the gate are mine. Next, in order: (2) B-163 slot 2: terrain/saturn/floe_strip_set, flora/saturn/rigset, props/saturn/props_set, ui/palettes/saturn. (3) B-164: creatures/saturn/helium_jelly, hex_drake, floe_moth, ringmite, polar_hydra. Free gaps only: oneoff/grand_pack.py, oneoff/uranus_rows.py, oneoff/neptune_rows.py.
+UNITY's flight check holds the lock (want 02:30:57, heavy_unity.lock after my B-171 slot): FILES ONLY until it releases. Then, in order: (1) lock-free: `python -I build_fx_ship_v3.py blender/preview --art` = review_b171_flight_fx.png from the exported sheets (stamped; cruise | boost | boom at 0.5625x / 0.375x) -> LEAD. (2) B-166 slot 1b: backgrounds/uranus/deck2_{sun_left,sun_right,night,survey}; 1c deck3; 1d deep (one deck per job, ~210 s each, survey last for URANUS-CHECK; check want_unity before each). (3) B-166 slot 2: terrain/uranus/floe_strip_set, flora/uranus/rigset, props/uranus/props_set, ui/palettes/uranus. (4) B-166 slot 3: creatures/uranus (frostwisp, hailcrab, methane_ray, tiltbird, diamondback_colossus; grand_pack fit 0.18). Then B-169 Neptune (oneoff/neptune_rows.py first), B-172 design source. UNITY's flight check outranks me the moment its want appears (LEAD 02:0x).
 
 ## Last completed
-- 01:13:0x-01:14:09 SLOT (wrapper): B-170 the five title cards venus / jupiter / saturn / uranus / neptune, 1600x452, 637-716 KB each + json (37c0a43f; gate 1642, peak 945 MB; review_b170_titlecards.png: all eight cards at 1x).
-- 01:12 files: render.py's rigset review clears the stale mark before drawing (d41024ae; py_compile clean).
-- 01:02:41-01:03:37 SLOT (wrapper): B-160 the Vortex Whale at D-153 (92830c7f; 623 MB; review_b155_vortex_whale_assembled.png).
-- files (pause): B-170 source fc08fbff, the D-141 palette guards fa039f3b, the resume helpers 391c7cf7 (blender/scripts/oneoff/).
-- 18:22:10-18:27:02 SLOT (wrapper): B-160 stormglider / lightning_eel / belt_wasp / ballast_tortoise (db4d5a53; 658 MB); the whale failed to pack -> D-153.
-- 18:20:58-18:21:37 SLOT (wrapper): B-159 slot 2, floes / flora / props / palette (2b00434b; 393 MB).
-- 18:14:01-18:20:21 SLOT (wrapper): B-159 slot 1, Jupiter deck1-3 / deep / spot straight + the B-156 aerostat kit (ad3d2e98; 836 MB).
-- files: the Saturn v3 rows (81e90b17), the B-166 URANUS-CHECK hook (25a6477e).
-- 17:24:43-17:28:29 SLOT: B-161 Neptune ndeck1-3 on the look pass (220 s, 590 MB).
-- 17:23:23-17:24:07 SLOT (wrapper): B-168 the eight Venus station props (a5d30f30; VERIFIED).
-- 16:55:43-16:56:06 SLOT (wrapper): B-167 the six Mercury props (243804c3; ice_burrow byte-identical; 24 v2 files removed).
-- 16:18:39-16:19:42 SLOT (wrapper): B-154 the four Venus creatures + props/venus/vent_mouth (87e1ae22; 460 MB) + the missed Mars / Mercury v3 sources committed.
-- 16:14:35-16:15:02 SLOT (wrapper): B-153 (VERIFIED by LEAD).
-- 16:11:42-16:12:58 SLOT (wrapper): B-152 (VERIFIED by LEAD).
-- 16:07:42-16:11:26 SLOT: the B-161 stamped reviews (all nine ACCEPTED).
+- 02:30:4x-02:31:5x SLOT (wrapper): B-171 exported, fx/ship vapor_cone / shock_ring / speed_lines + ships/pilgrim/puff_boost (dd3a2bdd; default gate 1500, peak 511 MB, now the fx / ships v3 peak); the boost revised per LEAD 02:2x first (faf3937d: a nozzle-wide flame tongue ~2x the cruise puff, 192x288).
+- 02:21:2x-02:25 SLOT (wrapper): B-166 slot 1a, Uranus deck1 x4 lights + URANUS-CHECK deck1 PASS (77e72d0c; 760 MB); the Uranus v3 rows first (f9c7b20b, oneoff/uranus_rows.py, 30 MB).
+- 02:0x-02:15 files + lock-free: B-171 source + preview (153d7307; previews <= 233 MB under a 300 MB kill cap); LEAD ACCEPTED cone / ring / lines and the two deviations (128x360 tiles; the boost keeps clip / pivot / socket), boost revised.
+- 01:52-01:54 SLOT (wrapper): B-164 the Saturn creatures + the Polar Hydra Grand rig (37ba2e94; 458 MB; grand_pack 0.48 first). VERIFIED by LEAD.
+- 01:51 SLOT (wrapper): B-163 slot 2, Saturn floes / rig set / props / palette (f3d5d294; 387 MB). VERIFIED.
+- 01:39:43-01:43:59 SLOT (wrapper): B-163 slot 1, Saturn deck1-3 / deep / hexagon straight (011b7de4; 803 MB). VERIFIED.
+- 01:3x files: credits (Limelight / Patrick Hand lettering, D-090), renders_2026-11-08.md, the Jupiter design table (b3f24409).
+- 01:13:0x-01:14:09 SLOT (wrapper): B-170 the five title cards (37c0a43f; 945 MB). VERIFIED.
+- 01:02:41-01:03:37 SLOT (wrapper): B-160 the Vortex Whale at D-153 (92830c7f; 623 MB). VERIFIED.
 
 ## Ready for review
-- B-170: the five title cards (37c0a43f) + review_b170_titlecards.png (all eight cards at 1x, Earth / Mars / Mercury beside the five; stamped 11-08 01:14).
-- B-160: the whale (92830c7f; VERIFIED by LEAD 01:0x, Done on U-127's whale capture).
+- B-171: the four exports (dd3a2bdd) + review_b171_{vapor_cone,shock_ring,speed_lines,puff_boost}.png (stamped 02:31); the set review review_b171_flight_fx.png (--art) follows after UNITY's check. The boost review's "beside ships/pilgrim/puff" panel errors (review.py's beside placement assumes a ground pivot; the puff hangs from the top); the set review shows cruise beside boost.
+- B-166 slot 1a: deck1 x4 (77e72d0c) + review_b158_uranus_deck1_{sun_left,sun_right,night,survey}.png; URANUS-CHECK deck1 PASS in the log 02:25.
 
 ## Handoffs (unrouted only)
-none.
+- -> UNITY (U-150), B-171 placement: vapor_cone and shock_ring pivots = the ship's centre of mass (ship-local 0, 6.2 m, the tilt pivot); the cone draws IN FRONT of the hull, the ring BEHIND it. speed_lines: 128x360 tiles, 3 per 1080 px edge (tile i may show frame (f + i) % 4), drawn for the LEFT edge, flip x for the right; pivot (0, 0.5) = the edge. puff_boost: a drop-in for ships/pilgrim/puff (socket tail_exhaust, pivot 0.5 / 0.96, clip 'puff'), now 192x288 frames: no 1.6x y-scale needed.
 
 ## Blockers
 none.
@@ -52,4 +46,4 @@ none (B-161's three ruled in D-148).
 none (USER-28, closing ChatGPT + Edge for RAM, is LEAD's).
 
 ## HeavyJobLock
-none held (released 01:14:09 after B-170); want_blender.lock on file for B-163 slot 1 (01:18, refreshed 01:30; D-075 on every poll). No background waiters.
+none held (released 02:31:5x after B-171); no want (UNITY took the lock after my job: D-039, re-filed only once it releases or per the queue). No background waiters.
