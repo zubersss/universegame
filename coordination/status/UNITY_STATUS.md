@@ -1,17 +1,14 @@
 # UNITY STATUS
-Updated: 2026-11-08 17:2x · Session: 10 (resumed 09:3x; earlier entries: coordination/status/archive/UNITY_2026-11-08.md)
+Updated: 2026-11-08 18:0x · Session: 10 (resumed 09:3x; earlier entries: coordination/status/archive/UNITY_2026-11-08.md)
 ## Current task
-17:2x: U-173 Build 0.5.1 (the walk fix, Mars smooth, today's fixes). Version 0.5.1; smoke list 58 shots (+ the Survey Archive, the Launch Complex, a 4-frame downhill walk strip; smoke_12 shows B-196's Warden lantern). Part 1 (profile + dev build + probe) RED at 17:15: Earth frame time p99 22.6 ms / max 68 ms, chunk generation p99 2.06 ms, Return Space after Mars +11.7 % (D-152: run 2 decides), film pass 2.4 ms. Fixing the frame-time and chunk-generation causes (today's continuation readback and U-169's per-node fill top), then part 1 again, then part 2 (release + smoke).
+18:0x: U-174 (D-174, Bible 5.2 §8.1, docs/D1_TABLES.md as data): the Surface Line, depth tiers and stroke time, pack weight, selling topside. Then U-179 (the first-2-s boot loads behind the title card) beside it.
 
 ## Last completed
-- U-172 DONE (6a30e7e3): the outline's quarter-metre vertices kicked the walking capsule up; grounded feet never rise on flat ground + a 0.3 m ground snap; WalkDownhillPlayTests.
-- The full PlayMode sweep (d77227b1): every class in 6 batches; fixes and stagings; D-176 (ShipMarks after the spool, green).
-- U-169 DONE (07590dff): the grid fills to the drawn curve; CurveOverTilesTests. U-170 DONE (3fdad7f7): cryo_round retired.
-- U-168 DONE (5fa45505). U-159 slice 2 (Mars) ACCEPTED: 6c11e281, 57d46b68, 8f96070f (the skylight funnel).
-- Imports: e68fa896, 49775f73, 1f2924b7, f615b0d8 (tracked metas only from now on, D-016).
+- U-173 Build 0.5.1 (603fe1c3): BUILD OK release 515 MB, SMOKE OK 58 / 0, BUILD MEMORY GREEN, BudgetGate green with D-177 (Boot settle row). Import 3c9966bd (e72a24ff, B-207).
+- U-172 DONE (6a30e7e3), the sweep (d77227b1), D-176 ShipMarks. U-169 / U-170 / U-168 DONE; U-159 slice 2 ACCEPTED.
 
 ## Next up
-U-173 Build 0.5.1 → D1: U-174 (the Surface Line, depth tiers, stroke time, pack weight, selling topside; data from docs/D1_TABLES.md, never constants) → U-175 (the Skill Tree, modifiers that take a global expedition multiplier) → U-178 (prestige, D-175) → U-176 (ways back up) → U-177 (the planet ladder, Mercury / Venus smooth). Parked: U-167 (fill_decor scatter), U-171 (the sea under-set, after B-202), U-162.
+U-174 → U-175 (the Skill Tree; modifiers take a global expedition multiplier) → U-178 (prestige, D-175) → U-176 (ways back up) → U-177 (the planet ladder, Mercury / Venus smooth). U-179 beside U-174. Parked: U-167, U-171 (after B-202), U-162. PawsOnTheGround re-run with the next check (B-207 in).
 
 ## Ready for review
 U-166 (b9d553de; smoke_42 with the next build). Earlier, still unjudged: U-129 slice 1 (SaturnStageTests ×4); U-130 slice 1 (UranusStageTests ×7); U-133 slice 1 (NeptuneStageTests ×8); U-146 (the survey scan pulse; UranusStageTests +1); U-144 (Neptune's -x zones, the drift, the anchor, the gust warning; NeptuneStageTests +3).
