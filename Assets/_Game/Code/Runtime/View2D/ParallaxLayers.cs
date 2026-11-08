@@ -348,9 +348,7 @@ namespace Meridian.View2D
                 if (!nearOpaque) return false;
                 var r = sp.rect;
                 int rows = SceneLayout.ContinueRows(l, Mathf.RoundToInt(r.height));
-                DropMirror();
-                nearFill = MirroredStrip(sp, rows, out nearFillTex) // U-159 (LEAD 15:2x): seamless at every tile edge
-                    ?? Sprite.Create(sp.texture, new Rect(r.x, r.y, r.width, rows), new Vector2(0.5f, 1f), sp.pixelsPerUnit, 0, SpriteMeshType.FullRect);
+                nearFill = Sprite.Create(sp.texture, new Rect(r.x, r.y, r.width, rows), new Vector2(0.5f, 1f), sp.pixelsPerUnit, 0, SpriteMeshType.FullRect);
                 nearFill.name = sp.name + "_continue";
             }
             if (!nearOpaque) return false;
@@ -379,7 +377,6 @@ namespace Meridian.View2D
         // the veil the farther layers' bottom edges showed as straight lines across a deep view (layer1 one metre over the others).
         readonly List<SpriteRenderer> layerFills = new List<SpriteRenderer>(4);
         readonly List<Sprite> layerFillFrom = new List<Sprite>(4), layerFillSprite = new List<Sprite>(4);
-        readonly List<Texture2D> layerFillTex = new List<Texture2D>(4);
         /// <summary>U-159: the farther layers' continuations drawn on the last frame (tests read it).</summary>
         public int OtherFills { get; private set; }
 
@@ -388,7 +385,7 @@ namespace Meridian.View2D
             OtherFills = 0;
             for (int i = 0; i < renderers.Count && i < Layout.layers.Length; i++)
             {
-                while (layerFills.Count <= i) { layerFills.Add(null); layerFillFrom.Add(null); layerFillSprite.Add(null); layerFillTex.Add(null); }
+                while (layerFills.Count <= i) { layerFills.Add(null); layerFillFrom.Add(null); layerFillSprite.Add(null); }
                 var r = renderers[i];
                 var f = layerFills[i];
                 bool want = i != nearIndex && r != null && r.enabled && r.sprite != null && r.sprite != white;
@@ -404,11 +401,10 @@ namespace Meridian.View2D
                 if (layerFillFrom[i] != sp)
                 {
                     layerFillFrom[i] = sp;
-                    if (layerFillTex[i] != null) Destroy(layerFillTex[i]);
                     int rows = SceneLayout.ContinueRows(l, Mathf.RoundToInt(sp.rect.height));
-                    layerFillSprite[i] = MirroredStrip(sp, rows, out var tex)
-                        ?? Sprite.Create(sp.texture, new Rect(sp.rect.x, sp.rect.y, sp.rect.width, rows), new Vector2(0.5f, 1f), sp.pixelsPerUnit, 0, SpriteMeshType.FullRect);
-                    layerFillTex[i] = tex;
+                    // A plain strip, made per sprite change (cheap: an animated layer changes its sprite every few frames; U-173's build gate
+                    // read a mirrored strip's GPU copy per change as +3 ms a frame at Earth's camp).
+                    layerFillSprite[i] = Sprite.Create(sp.texture, new Rect(sp.rect.x, sp.rect.y, sp.rect.width, rows), new Vector2(0.5f, 1f), sp.pixelsPerUnit, 0, SpriteMeshType.FullRect);
                 }
                 var strip = layerFillSprite[i];
                 if (f.sprite != strip) { f.sprite = strip; f.drawMode = SpriteDrawMode.Tiled; }
@@ -433,53 +429,7 @@ namespace Meridian.View2D
 
         void DropOthers()
         {
-            for (int i = 0; i < layerFillTex.Count; i++) { if (layerFillTex[i] != null) Destroy(layerFillTex[i]); layerFillTex[i] = null; layerFillFrom[i] = null; layerFillSprite[i] = null; }
-        }
-
-        Texture2D nearFillTex;
-
-        void DropMirror()
-        {
-            if (nearFillTex == null) return;
-            Destroy(nearFillTex);
-            nearFillTex = null;
-        }
-
-        /// <summary>
-        /// U-159 (LEAD 15:2x): the continuation tile as the strip under its vertical mirror (2 x rows): the tile's top row is the layer's bottom
-        /// row and its bottom row is that row again, so neither the layer's edge nor any tile edge shows (a plain strip's top and bottom rows
-        /// differ, and the deep view into Mars's skylight funnel showed a straight edge every strip). Built once per sprite on the GPU and read
-        /// back (Sprite.Create needs a Texture2D); null without a graphics device (the plain strip then).
-        /// </summary>
-        static Sprite MirroredStrip(Sprite sp, int rows, out Texture2D tex)
-        {
-            tex = null;
-            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null || sp.texture == null) return null;
-            var src = sp.texture;
-            var r = sp.rect;
-            int w = Mathf.RoundToInt(r.width);
-            float u0 = r.x / src.width, v0 = r.y / src.height, uw = r.width / src.width, vh = rows / (float)src.height;
-            var up = RenderTexture.GetTemporary(w, rows, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
-            var down = RenderTexture.GetTemporary(w, rows, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
-            var prev = RenderTexture.active;
-            try
-            {
-                Graphics.Blit(src, up, new Vector2(uw, vh), new Vector2(u0, v0));          // upright: its bottom row is the layer's bottom row
-                Graphics.Blit(src, down, new Vector2(uw, -vh), new Vector2(u0, v0 + vh));  // mirrored: its top row is the layer's bottom row
-                tex = new Texture2D(w, rows * 2, TextureFormat.RGBA32, false, false) { wrapMode = TextureWrapMode.Clamp, filterMode = src.filterMode, name = sp.name + "_continue" };
-                RenderTexture.active = up;
-                tex.ReadPixels(new Rect(0, 0, w, rows), 0, 0, false);
-                RenderTexture.active = down;
-                tex.ReadPixels(new Rect(0, 0, w, rows), 0, rows, false);
-                tex.Apply(false, true); // no CPU copy kept
-            }
-            finally
-            {
-                RenderTexture.active = prev;
-                RenderTexture.ReleaseTemporary(up);
-                RenderTexture.ReleaseTemporary(down);
-            }
-            return Sprite.Create(tex, new Rect(0, 0, w, rows * 2), new Vector2(0.5f, 1f), sp.pixelsPerUnit, 0, SpriteMeshType.FullRect);
+            for (int i = 0; i < layerFillFrom.Count; i++) { layerFillFrom[i] = null; layerFillSprite[i] = null; }
         }
 
         /// <summary>U-164: how far the nearest layer goes on under its bottom edge (m): deeper than any valley the frame shows under it.</summary>
@@ -534,7 +484,6 @@ namespace Meridian.View2D
         {
             foreach (var h in handles) if (h.IsValid()) ArtLoad.Release(h);
             handles.Clear();
-            DropMirror(); // U-159: the continuation's own texture
             nearFillFrom = null; nearFill = null;
             DropOthers();
         }

@@ -147,6 +147,30 @@ namespace Meridian.Tests
 
             // ---- Earth, idle ----
             var side = director.PlanetSide;
+            // D-177 (2): the first 2 s after boot stay measured: every frame rendered at 1080p, max ≤ 50 ms gates; the p99 (≤ 25 ms) is recorded in
+            // 0.5.1 and gates from U-179 on (it traces those loads behind the title card).
+            {
+                var bootFrames = new List<float>(256);
+                yield return null; // the frame that ran the notes' process queries above (D-083) is the gate's own, not the game's
+                float bootUntil = Time.realtimeSinceStartup + 2f;
+                while (Time.realtimeSinceStartup < bootUntil)
+                {
+                    if (graphics) { side.sideCamera.targetTexture = rt; side.sideCamera.Render(); side.sideCamera.targetTexture = null; }
+                    yield return null;
+                    bootFrames.Add(Time.unscaledDeltaTime * 1000f);
+                }
+                bootFrames.Sort();
+                float bootMax = bootFrames.Count > 0 ? bootFrames[bootFrames.Count - 1] : 0f;
+                float bootP99 = bootFrames.Count > 0 ? bootFrames[Mathf.Clamp(Mathf.CeilToInt(bootFrames.Count * 0.99f) - 1, 0, bootFrames.Count - 1)] : 0f;
+                Row("Boot settle · Earth", "the first 2 s after boot: max frame ≤ 50 ms (gates); p99 ≤ 25 ms (recorded in 0.5.1, gates from U-179) (D-177)",
+                    $"{bootFrames.Count} frames: max {bootMax:F1} ms, p99 {bootP99:F1} ms{(bootP99 > 25f ? " (p99 over 25: U-179)" : "")} ({(graphics ? "rendered 1920×1080" : "headless, CPU only")})", bootMax <= 50f);
+            }
+            // D-177 (1): the idle row measures the camp settled, as C0's row does: the flora Ready, then 120 frames.
+            {
+                float ft0 = Time.realtimeSinceStartup;
+                while (side.cartoon != null && side.cartoon.Flora != null && !side.cartoon.Flora.Ready && Time.realtimeSinceStartup - ft0 < 15f) yield return null;
+                for (int i = 0; i < 120; i++) yield return null;
+            }
             BudgetSnapshot gc = default, r = default;
             yield return Measure("Earth", side.sideCamera, BudgetMonitor.DrawCallsSide, (a, b) => { gc = a; r = b; });
             Judge("Earth", gc, r, BudgetMonitor.DrawCallsSide);

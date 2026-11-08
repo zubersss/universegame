@@ -98,6 +98,7 @@ namespace Meridian.Terrain
         static float[] nodes;
         static int[] tops;
         static float[] curve;
+        static int[] naturalTop;
         static readonly System.Collections.Generic.List<Vector2> chain = new System.Collections.Generic.List<Vector2>(256);
         /// <summary>Raised on the main thread after a chunk's outline is rebuilt (SmoothGround rebuilds its mesh from it).</summary>
         public static event System.Action<TerrainChunk> OutlineBuilt;
@@ -152,6 +153,9 @@ namespace Meridian.Terrain
             for (int k = 0; k < tops.Length; k++) tops[k] = world.WallTop(t0 + k);
             for (int i = 0; i <= C; i++) curve[i] = GroundField.Curve(x0 - 1 + i, x => tops[x - t0], world.PadTop);
             for (int i = 0; i <= C; i++) SurfaceCurve[i] = tops[i + r] == int.MinValue ? float.NaN : curve[i];
+            // U-169: each node column's natural top (its fill to the curve), once per column, not per node (the build gate's chunk p99).
+            naturalTop ??= new int[C + 1];
+            for (int i = 0; i <= C; i++) { int tp = tops[i + r]; naturalTop[i] = tp == int.MinValue ? tp : world.FillTop(x0 - 1 + i, tp, curve[i]); }
             bool levelled = world.HasLevels(cx, cy) || world.HasLevels(cx - 1, cy) || world.HasLevels(cx, cy - 1) || world.HasLevels(cx - 1, cy - 1);
             for (int j = 0; j <= C; j++)
             {
@@ -161,8 +165,7 @@ namespace Meridian.Terrain
                     int tx = x0 - 1 + i;
                     byte id = tx >= x0 && ty >= y0 ? ids[(ty - y0) * C + (tx - x0)] : world.TileAt(tx, ty);
                     bool solid = TileId.IsSolid(id);
-                    int top = tops[tx - t0];
-                    if (top != int.MinValue) top = world.FillTop(tx, top, curve[i]); // U-169: natural ground reaches the curve's fill top
+                    int top = naturalTop[i]; // U-169: natural ground reaches the curve's fill top
                     bool natural = top != int.MinValue && solid == (ty <= top);
                     float density = GroundField.Density(solid, natural, curve[i], ty);
                     if (levelled && world.TryLevel(tx, ty, out byte level)) density = level / 255f; // U-157 (P-54): a brushed tile's node density

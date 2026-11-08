@@ -559,6 +559,47 @@ namespace Meridian.Core
                 yield return Staged(side);
                 yield return Shot(folder, "smoke_43_earth_sea.png");
                 Debug.Log($"[MERIDIAN] smoke sea at {swim}: the floor {t.Generator.SurfaceHeight(t.WrapX(swim))}, the water line {datum + 1}");
+
+                // U-173 (B-195): the Earth POI props drawn as v3 sheets (the grey v2 models are gone): the Survey Archive and the Launch Complex.
+                yield return LookAt(side, Meridian.Planet.POI.PoiCatalog.SurveyArchive.CenterX, 3f);
+                yield return Staged(side);
+                yield return Shot(folder, "smoke_44_earth_survey_archive.png");
+                yield return LookAt(side, Meridian.Planet.POI.PoiCatalog.LaunchComplex.CenterX, 4f);
+                yield return Staged(side);
+                yield return Shot(folder, "smoke_45_earth_launch_complex.png");
+
+                // U-173 (U-172, the owner's report): a downhill walk as a strip of four frames 0.3 s apart down a 10 m slope east of the camp:
+                // walk all the way, never fall / land.
+                int hx = -1;
+                for (int x = side.spawnX + 40; x < side.spawnX + 1200 && hx < 0; x++)
+                {
+                    float drop = t.CurveAt(x) - t.CurveAt(x + 10);
+                    if (drop < 2.5f || drop > 6.5f) continue;
+                    bool ok = true;
+                    for (int k = 0; k < 12 && ok; k++) ok = t.PadTop(x + k) == int.MinValue && t.CurveAt(x + k) - t.CurveAt(x + k + 1) >= -0.05f && t.CurveAt(x + k) - t.CurveAt(x + k + 1) <= 0.68f;
+                    if (ok) hx = x;
+                }
+                if (hx >= 0)
+                {
+                    yield return LookAt(side, hx + 5f, 3f);
+                    var walker = side.player;
+                    var wb = walker.Body;
+                    wb.position = new Vector2(hx + 0.5f, t.SurfaceAt(hx + 0.5f) + 0.05f); walker.transform.position = wb.position; wb.linearVelocity = Vector2.zero;
+                    bool ext = walker.externalInput;
+                    walker.externalInput = true; walker.intent = default;
+                    var follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+                    if (follow != null) { follow.enabled = true; follow.SnapToTarget(); }
+                    yield return Wait(0.6f);
+                    walker.intent = new Meridian.Player.PlayerIntent { move = 1f };
+                    for (int f = 0; f < 4; f++)
+                    {
+                        yield return Wait(0.3f);
+                        yield return Shot(folder, $"smoke_46{(char)('a' + f)}_earth_downhill_walk.png");
+                        Debug.Log($"[MERIDIAN] smoke downhill walk frame {f + 1}: x {wb.position.x:F2}, grounded {walker.Grounded}, clip {(side.cartoon != null && side.cartoon.Surveyor != null ? side.cartoon.Surveyor.Clip : "?")}, snaps {walker.Snaps}");
+                    }
+                    walker.intent = default; walker.externalInput = ext;
+                }
+                else Debug.Log("[MERIDIAN] smoke downhill walk: no slope found");
             }
             finally { rig.owner = owner; }
         }

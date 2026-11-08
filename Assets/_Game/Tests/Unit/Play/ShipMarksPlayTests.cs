@@ -75,16 +75,30 @@ namespace Meridian.Tests
 
         static IEnumerator Steps(int n) { for (int i = 0; i < n; i++) yield return new WaitForFixedUpdate(); }
 
-        /// <summary>Holds full thrust for `seconds` from rest on the pad; returns the height climbed through `climbed`.</summary>
-        static IEnumerator Burn(SideShip s, float seconds, System.Action<float> climbed)
+        /// <summary>D-176: a burn's measures. U-149's throttle spools over 0.35 s and air drags (−DragK·ρ·|v|·v), so the net acceleration is
+        /// measured after the spool and judged against the model at the measured mean speed.</summary>
+        struct BurnResult { public float climbed, net, model, speed; }
+
+        /// <summary>Holds full thrust for `seconds` from rest on the pad: the height climbed, the net vertical acceleration from just after the
+        /// spool to the end, and the model's net (thrust − g − drag at the mean speed of that span, in the ship's air).</summary>
+        static IEnumerator Burn(SideShip s, float seconds, float thrust, float g, System.Action<BurnResult> done)
         {
             yield return Steps(30);
             Assert.IsTrue(s.AtRest, "at rest on the pad");
-            float y0 = s.Body.position.y;
+            float y0 = s.Body.position.y, dt = Time.fixedDeltaTime;
             s.intent.thrust = 1f;
-            yield return Steps(Mathf.RoundToInt(seconds / Time.fixedDeltaTime));
+            int total = Mathf.RoundToInt(seconds / dt), from = Mathf.CeilToInt((Meridian.Ship.RocketFlight.SpoolUp + 0.05f) / dt);
+            float va = 0f;
+            for (int i = 1; i <= total; i++) { yield return new WaitForFixedUpdate(); if (i == from) va = s.Body.linearVelocity.y; }
+            float vb = s.Body.linearVelocity.y, span = (total - from) * dt, vmid = 0.5f * (va + vb);
             yield return null; // HUD LateUpdate
-            climbed(s.Body.position.y - y0);
+            done(new BurnResult
+            {
+                climbed = s.Body.position.y - y0,
+                net = (vb - va) / span,
+                model = thrust - g - Meridian.Ship.RocketFlight.DragK * s.AirDensity * vmid * Mathf.Abs(vmid),
+                speed = vmid,
+            });
         }
 
         [UnityTest]
@@ -93,10 +107,11 @@ namespace Meridian.Tests
             var s = Spawn(PlanetId.Saturn, 10.44f, 1);
             var hud = new GameObject("ShipHud").AddComponent<ShipHud>();
             hud.ship = s;
-            float climbed = 0f;
-            yield return Burn(s, 2f, h => climbed = h);
-            TestContext.Out.WriteLine($"[MERIDIAN] Saturn Mk1: {climbed:F2} m in 2 s (net {12f - 10.44f:F2} m/s²)");
-            Assert.AreEqual(0.5f * 1.56f * 4f, climbed, 0.6f, "a slow climb at net 1.56 m/s²");
+            BurnResult r = default;
+            yield return Burn(s, 2f, ShipMarks.Thrust(1), 10.44f, b => r = b);
+            TestContext.Out.WriteLine($"[MERIDIAN] Saturn Mk1: {r.climbed:F2} m in 2 s; net {r.net:F2} m/s² after the spool, the model {r.model:F2} at {r.speed:F2} m/s");
+            Assert.Greater(r.climbed, 0.5f, "Mk1 crawls off Saturn's pad");
+            Assert.AreEqual(r.model, r.net, 0.3f, "D-176: a slow climb at the model's net (12 − 10.44 − drag)");
             Assert.IsFalse(s.ThrustBelowGravity);
             Assert.AreEqual(ShipHud.TwrState.Amber, hud.State, "T/W 1.15 reads amber (D-106)");
             Assert.IsTrue(hud.Warning.enabled);
@@ -111,9 +126,10 @@ namespace Meridian.Tests
             {
                 var s = Spawn(PlanetId.Jupiter, 24.79f, mark, mark * 30f);
                 hud.ship = s;
-                float climbed = 0f;
-                yield return Burn(s, 2f, h => climbed = h);
-                TestContext.Out.WriteLine($"[MERIDIAN] Jupiter Mk{mark}: {climbed:F2} m in 2 s, HUD {hud.State}");
+                BurnResult r = default;
+                yield return Burn(s, 2f, ShipMarks.Thrust(mark), 24.79f, b => r = b);
+                float climbed = r.climbed;
+                TestContext.Out.WriteLine($"[MERIDIAN] Jupiter Mk{mark}: {climbed:F2} m in 2 s, HUD {hud.State}; net {r.net:F2} m/s² after the spool, the model {r.model:F2} at {r.speed:F2} m/s");
                 if (mark < 3)
                 {
                     Assert.Less(climbed, 0.05f, $"Mk{mark} ({ShipMarks.Thrust(mark)} m/s²) cannot climb against 24.79");
@@ -123,7 +139,8 @@ namespace Meridian.Tests
                 }
                 else
                 {
-                    Assert.Greater(climbed, 15f, "Mk3 (35 m/s²) climbs at net 10.21 m/s²");
+                    Assert.GreaterOrEqual(climbed, 12f, "D-176: Mk3 (35 m/s²) climbs at least 12 m in the burn");
+                    Assert.AreEqual(r.model, r.net, 0.3f, "D-176: Mk3's net after the spool (35 − 24.79 − drag)");
                     Assert.IsFalse(s.ThrustBelowGravity);
                     Assert.AreEqual(ShipHud.TwrState.Ok, hud.State, "T/W 1.41");
                     Assert.IsFalse(hud.Warning.enabled);
