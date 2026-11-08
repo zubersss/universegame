@@ -6,11 +6,12 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-31 — Close one of the two browsers (1 min)
-At 18:4x free memory is 1.24 GB and the Blender Artist's next export (the Vortex Whale) needs 1.38 GB to start; nothing
-else heavy is running. Chrome (11 processes) and Edge (7) together hold about 0.7 GB. Keep whichever shows the
-Mercury and Venus page and close the other (right-click its taskbar icon → Close window), then tell the Lead
-"done: USER-31". When you play Build 0.4.7 (USER-30) the team's heavy jobs pause on their own for the game's memory;
+### USER-31 — Close the browsers and Copilot until the team's two jobs run (2 min)
+At 19:2x free memory is 1.16 GB. Both workers are blocked on it: the Blender Artist's Vortex Whale export needs 1.38 GB,
+the Unity Engineer's Jupiter check needs 1.5 GB; nothing else heavy is running. Chrome (11 processes, 0.4 GB), Edge
+(7 + 12 web views, 0.45 GB) and the Copilot app (9 processes, 0.1 GB) hold about 1 GB between them. Close all three
+(right-click each taskbar icon → Close window; the page link is in this file and in the chat, open it again later),
+then tell the Lead "done: USER-31". Ten minutes later the two jobs are through and you can open them again. When you play Build 0.4.7 (USER-30) the team's heavy jobs pause on their own for the game's memory;
 that is expected and nothing to report.
 
 ### USER-30 — Play Build 0.4.7: Mercury, Venus and the paper menus (20 min)
