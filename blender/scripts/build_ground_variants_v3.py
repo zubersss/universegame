@@ -493,11 +493,132 @@ def decor_frost(d, M, k):
             G.stroke(d, G.lumpy_ellipse(x, z, r, r * 0.85, n=14, lump=0.12, seed=j), M["plume_i"], I, cyclic=True)
 
 
+# ---------------------------------------------------------------- B-180: a cliff lip per variant (B-175's lip format: 128x96, pivot (0.55, 0.6)
+# at the brink, drawn for a drop to the right, mirror x for the left; the hood rounds the brink's corner, radius 0.37 m about (0, -0.35))
+
+LIP_CZ = -0.35
+
+
+def _hood(top, thick, a1, bulge=0.0, x0=-0.60):
+    """A lip hood: the crust's flat top at `top` from x0 to the brink, round the corner (centre (0, LIP_CZ)) to a1 degrees, back
+    along the inner edge `thick` deeper. bulge: the outer radius swells by bulge x sin^2 toward the face (a cornice overhang).
+    -> (outer, inner) (outer: x0 -> the arc's end; inner: the arc's end -> x0), so outer + inner closes the hood."""
+    r_o = top - LIP_CZ
+    n = max(6, int(a1 / 6))
+    angs = [math.radians(a1 * j / n) for j in range(n + 1)]
+    outer = [(x0 * (1 - i / 12), top) for i in range(12)] + \
+            [((r_o + bulge * math.sin(a) ** 2) * math.sin(a), LIP_CZ + (r_o + bulge * math.sin(a) ** 2) * math.cos(a)) for a in angs]
+    ri = r_o - thick
+    inner = [(ri * math.sin(a), LIP_CZ + ri * math.cos(a)) for a in angs[::-1]] + [(x0 * (1 - i / 12), top - thick) for i in range(11, -1, -1)]
+    return outer, inner
+
+
+def lip_sand(d, M, k=0):
+    """The dry sand's hood over the brink (the band's dry layer), its damp underside, a ripple, a dry tuft leaning over the
+    edge and a thin stream of sand pouring down the face with a few grains."""
+    top = 0.03
+    outer, inner = _hood(top, 0.15, 84)
+    _o2, inner2 = _hood(top, 0.105, 84)
+    G.stroke(d, outer + inner, M["sand"], 0.0, cyclic=True)
+    G.stroke(d, inner2 + inner[::-1], M["sand_sh"], 0.0, cyclic=True)
+    G.stroke(d, outer, M["ink"], O)
+    G.seam(d, inner, M["ink"])
+    G.seam(d, G.bezier((-0.52, -0.035), (-0.36, -0.008), (-0.20, -0.04), n=6), M["ink"])
+    G.seam(d, G.bezier((0.05, -0.05), (0.16, -0.03), (0.24, -0.09), n=6), M["ink"])
+    for b, a_deg in enumerate((20, 38, 56)):                                                  # a dry tuft at the brink, leaning out
+        _blade(d, M["dry_tuft" if b % 2 else "dry_sh_tuft"], -0.10 + 0.025 * b, 0.13 + 0.02 * b, math.radians(a_deg), w=0.014, z0=top - 0.01)
+    r_o = top - LIP_CZ
+    sx, sz = r_o * math.sin(math.radians(76)), LIP_CZ + r_o * math.cos(math.radians(76))
+    left = [(sx - 0.018 + 0.05 * t * t, sz - 0.55 * t) for t in [i / 10 for i in range(11)]]
+    right = [(sx + 0.018 + 0.042 * t * t - 0.012 * t, sz - 0.55 * t) for t in [i / 10 for i in range(11)]]
+    G.stroke(d, left + right[::-1], M["sand_i"], I, cyclic=True)                             # the pour
+    for j, (x, z, r) in enumerate(((0.50, -0.86 + 0.03, 0.016), (0.40, -0.70, 0.012), (0.47, -0.62, 0.010), (0.43, -0.80, 0.013))):
+        G.stroke(d, G.lumpy_ellipse(x, z, r * 1.2, r, n=8, lump=0.1, seed=1860 + j), M["sand_sh_i"], I, cyclic=True)
+
+
+def lip_stone(d, M, k=0):
+    """The rock crust's slab rounding the brink and jutting a little past the face (a rounded ledge, no square corner): a lit
+    rim along its top and corner, the shade along its inner edge, a joint, lichen on the top and the corner."""
+    top = 0.04
+    outer, inner = _hood(top, 0.17, 96)
+    lit_o, lit_i = _hood(top, 0.035, 60)
+    _o2, inner2 = _hood(top, 0.12, 96)
+    G.stroke(d, outer + inner, M["rock"], 0.0, cyclic=True)
+    G.stroke(d, lit_o + lit_i, M["rock_lit"], 0.0, cyclic=True)
+    G.stroke(d, inner2 + inner[::-1], M["rock_sh"], 0.0, cyclic=True)
+    G.stroke(d, outer, M["ink"], O)
+    G.seam(d, inner, M["ink"])
+    G.seam(d, [outer[-1], inner[0]], M["ink"])
+    G.seam(d, [(-0.32, top), (-0.305, top - 0.07), (-0.325, top - 0.15)], M["ink"])           # a joint
+    G.hatch(d, -0.20, -0.07, M["ink"], n=3, length=0.05, spacing=0.03, angle_deg=60, seed=7)
+    rnd = random.Random(1870)
+    for cx, cz in ((-0.46, -0.03), (0.10, -0.06), (0.27, -0.17)):
+        _lichen(d, M, cx, cz, rnd, n=5, spread=0.05)
+
+
+def lip_snow(d, M, k=0):
+    """A snow cornice: the drift crust's hood swelling past the face and curling under, its blue underside, three rounded drips
+    under the curl, a wind line on top, glints, two clumps falling."""
+    top = 0.06
+    outer, inner = _hood(top, 0.15, 118, bulge=0.07)
+    _o2, inner2 = _hood(top, 0.10, 118)
+    G.stroke(d, outer + inner, M["snow"], 0.0, cyclic=True)
+    G.stroke(d, inner2 + inner[::-1], M["snow_sh"], 0.0, cyclic=True)
+    end = [outer[-1], inner[0]]
+    for j, t in enumerate((0.2, 0.5, 0.8)):                                                   # drips under the curl
+        x = end[0][0] + (end[1][0] - end[0][0]) * t
+        z = end[0][1] + (end[1][1] - end[0][1]) * t
+        ln = (0.07, 0.11, 0.06)[j]
+        G.stroke(d, G.lumpy_ellipse(x, z - ln * 0.45, 0.018, ln * 0.55, n=12, lump=0.04, seed=1880 + j), M["snow_sh_i"], I, cyclic=True)
+    G.stroke(d, outer + [inner[0]], M["ink"], O)                                               # the curl's underside is in the air: inked
+    G.seam(d, inner, M["ink"])
+    G.seam(d, G.bezier((-0.50, 0.0), (-0.32, 0.03), (-0.12, -0.01), n=6), M["ink"])
+    rnd = random.Random(1881)
+    for i in range(6):
+        a = math.radians(rnd.uniform(5, 100))
+        rr = top - LIP_CZ - 0.07
+        G.stroke(d, G.lumpy_ellipse(rr * math.sin(a), LIP_CZ + rr * math.cos(a), 0.016, 0.011, n=8, lump=0.1, seed=i), M["snow_sh"], 0.0, cyclic=True)
+    for j, (x, z, r) in enumerate(((0.56, -0.70, 0.035), (0.50, -0.83, 0.025))):
+        G.stroke(d, G.lumpy_ellipse(x, z, r * 1.2, r, n=12, lump=0.1, seed=1885 + j), M["snow_i"], I, cyclic=True)
+
+
+def lip_frost(d, M, k=0):
+    """Mars's cap at a brink: the cream CO2-frost crust rounding the corner over the layered teal water ice (a dust line in it),
+    both wrapping the edge as the band's layers do; a polygon trough's crack on top, frost flakes falling."""
+    top = 0.04
+    fo, fi = _hood(top, 0.12, 84)
+    io, ii = _hood(top - 0.12, 0.17, 84)
+    do_, di = _hood(top - 0.20, 0.014, 84)
+    _o2, ish = _hood(top - 0.12, 0.13, 84)
+    G.stroke(d, io + ii, M["ice"], 0.0, cyclic=True)
+    G.stroke(d, ish + ii[::-1], M["ice_sh"], 0.0, cyclic=True)
+    G.stroke(d, do_ + di, M["dust"], 0.0, cyclic=True)
+    _o3, fsh = _hood(top, 0.085, 84)
+    G.stroke(d, fo + fi, M["frost"], 0.0, cyclic=True)
+    G.stroke(d, fsh + fi[::-1], M["frost_sh"], 0.0, cyclic=True)
+    G.stroke(d, fo, M["ink"], O)
+    G.seam(d, fi, M["ink"])
+    G.seam(d, ii, M["ink"])
+    G.seam(d, [(-0.35, top), (-0.338, top - 0.05), (-0.356, top - 0.10)], M["ink"])           # a polygon trough's crack
+    for j, (x, z, r) in enumerate(((0.50, -0.52, 0.020), (0.46, -0.66, 0.016), (0.53, -0.79, 0.013))):
+        G.stroke(d, G.lumpy_ellipse(x, z, r * 1.3, r, n=10, lump=0.12, seed=1890 + j), M["frost_i"], I, cyclic=True)
+
+
+LIPS = {"sand": lip_sand, "stone": lip_stone, "snow": lip_snow, "frost": lip_frost}
+LIP_PIV = (0.55, 0.6)
+
+
 # ---------------------------------------------------------------- the pieces, the render, the export API (render.py ground_strip_set)
 
 BAND_PIV = (0.0, (B.BAND_H - B.SURF_ROW) / B.BAND_H)
-def _pieces(planet):
-    """-> (the planet's pieces {name: (w, h, pivot, frames, draw)}, its tiling pieces)."""
+PART = "variants"
+
+
+def _pieces(planet, part="variants"):
+    """-> (the planet's pieces {name: (w, h, pivot, frames, draw)}, its tiling pieces). part "lips": B-180's ground_lip_<variant>
+    only (their own manifest rows, so the accepted variant exports are not re-written)."""
+    if part == "lips":
+        return {f"ground_lip_{v}": (128, 96, LIP_PIV, 1, LIPS[v]) for v in PLANET_VARIANTS[planet]}, ()
     if planet == "mars":
         return ({"ground_band_frost": (B.BAND_W, B.BAND_H, BAND_PIV, 1, band_frost), "ground_decor_frost": (64, 64, (0.5, 6 / 64), 3, decor_frost)},
                 ("ground_band_frost",))
@@ -543,12 +664,12 @@ def _keys():
 KEYS = _keys()
 
 
-def use_planet(planet):
-    """The row's planet: Earth's sand / stone / snow set (B-178) or Mars's polar frost (LEAD 05:3x)."""
-    global PLANET, VARIANTS, PIECES, TILES, KEYS
-    PLANET = planet
+def use_planet(planet, part="variants"):
+    """The row's planet: Earth's sand / stone / snow set (B-178) or Mars's polar frost (LEAD 05:3x); part "lips": B-180's lips."""
+    global PLANET, VARIANTS, PIECES, TILES, KEYS, PART
+    PLANET, PART = planet, part
     VARIANTS = PLANET_VARIANTS[planet]
-    PIECES, TILES = _pieces(planet)
+    PIECES, TILES = _pieces(planet, part)
     KEYS = _keys()
 
 
@@ -563,6 +684,8 @@ def sheets():
 
 
 def pieces_of(S):
+    if PART == "lips":
+        return dict(S)
     out = {n: S[n] for n in TILES}
     for v in VARIANTS:
         ks = [f"ground_decor_{v}_{i + 1}" for i in range(3)]
@@ -596,6 +719,10 @@ def sheet_meta(kn, frames):
                      "note": f"B-178: {PLANET.capitalize()}'s {v} band ({', '.join(BIOMES[v])}); "
                              + ("plains and forest keep ground_band" if PLANET == "earth" else "the rest of Mars keeps ground_band (U-159)")
                              + "; crossfade the two bands at a biome border"})
+    elif kn.startswith("ground_lip_"):
+        v = kn.rsplit("_", 1)[1]
+        meta.update({"brink": True, "variant": v, "biomes": BIOMES[v], "band": f"ground_band_{v}",
+                     "note": f"B-180: the {v} band's cliff lip (as ground_lip): drawn for a drop to the right; mirror x for a drop to the left"})
     elif kn == "ground_fill_sand":
         meta.update({"tile_x": True, "tile_y": True, "world_space": True, "standalone": True, "wrap": "repeat", "variant": "sand",
                      "mapping": "as ground_fill: u = x x 64 mod 512, v = -y x 64 mod 512; a standalone texture (Repeat wrap); strata only (D-165)"})
@@ -639,13 +766,13 @@ def export(art, S=None):
             _json.dump(meta, f, indent=2)
             f.write("\n")
         out.append((meta["key"], sheet.shape[1], sheet.shape[0], n))
-    return out, within, f"{len(out)} keys, contract v3.2 11.9 (B-178 variants)"
+    return out, within, f"{len(out)} keys, contract v3.2 11.9 ({'B-180 lips' if PART == 'lips' else 'B-178 variants'})"
 
 
 def main(out, S=None, allw=None, footnote=None):
     if S is None:
         S, allw = sheets()
-    preview(os.path.dirname(out), pieces=pieces_of(S), out=out, footnote=footnote)
+    (preview_lips if PART == "lips" else preview)(os.path.dirname(out), pieces=pieces_of(S), out=out, footnote=footnote)
 
 
 # ---------------------------------------------------------------- the preview
@@ -799,8 +926,112 @@ def preview(out_dir, pieces=None, out=None, footnote=None):
         print(ln)
 
 
-if __name__ == "__main__":
+def preview_lips(out_dir, pieces=None, out=None, footnote=None):
+    """B-180: each lip on a rounded cliff of its own band at 1x (B-175's test profile from 12.5 to 20.5 m: the 30 deg slope, the
+    plateau, the cliff, the valley) over its fill, two of its decor upright, the surveyor on the plateau and in the valley; beside
+    them the planet's B-175 band with its own lip; then each lip at 2x and the ink / palette / edge lines. The bands, fills and
+    decor are read from the exports (byte-identical to the accepted renders); only the lips are drawn here."""
+    import json
+    import numpy as np
+    from meridian import pngio
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    if pieces is None:
+        pieces = {}
+        for n in PIECES:
+            img, wd = render_piece(n, 0)
+            pieces[n] = ([img], wd)
+    E = os.path.join(ART, "terrain", PLANET)
+    rd = lambda name: pngio.read_png_np(os.path.join(E, name + "_color.png"))  # noqa: E731
+    sets = [(f"{v}: ground_band_{v} + ground_lip_{v} (NEW) over {FILL_OF.get(v, 'ground_fill')}", rd(f"ground_band_{v}"),
+             rd(FILL_OF.get(v, "ground_fill")), pieces[f"ground_lip_{v}"][0][0], [rd(f"ground_decor_{v}_{i + 1}") for i in range(3)])
+            for v in VARIANTS]
+    sets.append((f"for comparison: B-175's ground_band + ground_lip ({'grass' if PLANET == 'earth' else 'crust'})", rd("ground_band"), rd("ground_fill"),
+                 rd("ground_lip"), [rd(f"ground_decor_{i + 1}") for i in (0, 3)]))
+    _xs, z_all = B.profile()
+    x0_m, x1_m, PH = 12.5, 20.5, 512                                                          # the plateau at row 224: the 192 px surveyor fits above it
+    c0 = int(x0_m * PPU)
+    Wp = int(x1_m * PPU) - c0
+    ys = (PH - (z_all[c0:c0 + Wp] + 2.0) * PPU).astype(np.float64)
+    Y, X = np.mgrid[0:PH, 0:Wp]
+    solid = Y > ys[X]
+    slope = np.degrees(np.arctan(np.abs(np.gradient(ys))))
+    s0 = int((15.0 - x0_m) * PPU)
+    brink = s0 + int(np.argmax(slope[s0:] > 25.0))                                            # where the drop passes 25 deg (B-175's rule)
+    sky = np.array(v3.hex_rgb(v3.PALETTES[PLANET]["sky"]), np.float32) / 255.0
+    try:
+        sm = json.load(open(os.path.join(ART, "characters", "surveyor", "side.json"), encoding="utf-8"))
+        sv = pngio.read_png_np(os.path.join(ART, "characters", "surveyor", "side_color.png"))[:sm["frame_height"], :sm["frame_width"]]
+    except (OSError, KeyError, ValueError):
+        sm = sv = None
+    panels = []
+    for title, band, fill, lip, decor in sets:
+        bt, ft = B._premul(band), B._premul(fill)
+        img = np.empty((PH, Wp, 3), np.float32)
+        img[:] = sky
+        fv = B._bilinear(ft, (X + c0).astype(np.float32), np.mod(Y.astype(np.float32), ft.shape[0]))
+        img[solid] = fv[solid][:, :3]
+        bd = B.bend(bt, B.SURF_ROW, ys, X, Y, "normal")
+        img = bd[..., :3] + (1 - bd[..., 3:4]) * img
+        del fv, bd
+        for xm, k in ((13.9, 0), (19.7, 1)):
+            X0 = int((xm - x0_m) * PPU)
+            review._over(img, decor[k], X0 - 32, int(round(ys[X0])) - 64 + 6 + 2)
+        xl = brink - 10
+        review._over(img, lip, xl - int(LIP_PIV[0] * 128), int(round(ys[xl])) - int(round((1 - LIP_PIV[1]) * 96)))
+        if sv is not None:
+            for xm in (15.2, 18.9):
+                X0 = int((xm - x0_m) * PPU)
+                review._over(img, sv, X0 - sm["frame_width"] // 2, int(round(ys[X0])) - sm["frame_height"] + int(round(sm["pivot"][1] * sm["frame_height"])) + 2)
+        lab = np.empty((22, Wp, 3), np.float32)
+        lab[:] = review.PAPER
+        review._label(lab, title[:84], 4, 6, scale=1)
+        panels.append(np.vstack([lab, img]))
+    gap = np.empty((PH + 22, 8, 3), np.float32)
+    gap[:] = review.PAPER
+    row = np.concatenate(sum(([p, gap] for p in panels), [])[:-1], axis=1)
+    Wt = row.shape[1]
+    P = np.empty((260, Wt, 3), np.float32)
+    P[:] = review.PAPER
+    x = 8
+    for name in list(PIECES) + ["ground_lip"]:
+        fr = pieces[name][0][0] if name in pieces else rd("ground_lip")
+        P[40:232, x:x + 256] = sky
+        review._over(P, np.repeat(np.repeat(fr, 2, 0), 2, 1), x, 40)
+        review._label(P, f"{name} 128x96 at 2x", x, 20, scale=1)
+        x += 280
+    lines = []
+    for name, (frames, widths) in pieces.items():
+        o = [w for w in widths if w[0] >= v3.OUTER_SPLIT]
+        n_ = [w for w in widths if w[0] < v3.OUTER_SPLIT]
+        rng = lambda q: f"{min(w[1] for w in q):.1f}-{max(w[2] for w in q):.1f}" if q else "-"  # noqa: E731
+        pal = min(v3.palette_hits(f, PLANET)[0] for f in frames) * 100
+        m = v3.EDGE_MARGIN
+        edge = [i for i, f in enumerate(frames) if f[:m, :, 3].any() or f[-m:, :, 3].any() or f[:, :m, 3].any() or f[:, -m:, 3].any()]
+        lines.append(f"{name}: ink {rng(o)} / {rng(n_)} px, palette {pal:.1f}%{'; EDGE ' + str(edge) if edge else ''}")
+    head = np.empty((22, Wt, 3), np.float32)
+    head[:] = review.PAPER
+    review._label(head, f"B-180 {PLANET} cliff lips at 1x: each on a rounded cliff of its own band (B-175's profile 12.5-20.5 m), the surveyor"[:150], 6, 4)
+    foot = np.empty((30 + 16 * len(lines), Wt, 3), np.float32)
+    foot[:] = review.PAPER
+    for i, ln in enumerate(lines):
+        review._label(foot, ln, 6, 6 + 16 * i, scale=1)
+    img = np.vstack([head, row, P, foot])
+    import time
+    review.draw(img, time.strftime("%m-%d %H:%M") + " " + (footnote or "design preview (lock-free, fakegp + numpy)"), 2, img.shape[0] - 16, (1.0, 1.0, 0.85))
+    out = out or os.path.join(out_dir, f"review_b180_{PLANET}_lips_preview.png")
+    np.clip(img, 0.0, 1.0, out=img)
+    u8 = np.empty(img.shape[:2] + (4,), np.uint8)
+    u8[..., :3] = np.rint(img * 255.0)
+    u8[..., 3] = 255
+    pngio.write_png(out, u8)
+    print("written", out, u8.shape[1], "x", u8.shape[0])
+    for ln in lines:
+        print(ln)
+
+
+if __name__ == "__main__":                       # python -I build_ground_variants_v3.py <preview dir> [planet] [lips]
     if len(sys.argv) > 2:
-        use_planet(sys.argv[2])
-    preview(sys.argv[1])
+        use_planet(sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else "variants")
+    (preview_lips if PART == "lips" else preview)(sys.argv[1])
     fakegp.restore()

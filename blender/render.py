@@ -1101,7 +1101,10 @@ def do_ground_strip_set(entry, preview):
         raise AssetError(f"{entry['key']}: no preview mode (python {mod}.py <png>)")
     GS = __import__(mod)                # build_c2_ground_strip (Earth) or build_c2_mars_ground (B-140): sheets / export / main
     if entry.get("planet") and hasattr(GS, "use_planet"):
-        GS.use_planet(entry["planet"])  # B-175: build_ground_v3 serves every planet's ground set (contract 11.9), one row each
+        if entry.get("part"):           # B-180: build_ground_variants_v3's lips are their own rows (part "lips")
+            GS.use_planet(entry["planet"], entry["part"])
+        else:
+            GS.use_planet(entry["planet"])  # B-175: build_ground_v3 serves every planet's ground set (contract 11.9), one row each
     keys = list(GS.KEYS.values())
     fakegp.install()                    # an earlier review script in this batch may have restored gp_draw.mat
     try:
