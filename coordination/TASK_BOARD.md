@@ -2309,7 +2309,7 @@ Files: Code/Runtime/View2D/CartoonStage.cs, Code/Runtime/Planet/, Code/Runtime/C
 Depends: U-127, B-157
 Lead notes: Cycle 268. Promoted when U-127 Jupiter is Done. Cycle 274: READY in order after U-127 (the code lock-free ahead of B-163 / B-164's exports, D-119).
 
-### U-130 · UNITY · Ready · C2
+### U-130 · UNITY · In Progress · C2
 Goal: Uranus on the cartoon stage (Bible §12 C2 order 7; §7.8 the sideways winter): the B-158 deck sets as sun_left / sun_right / night + the survey layer0 (D-142), crossfaded by the season clock; the methane-ice floes with caps (U-126); the Uranus creatures on sheets and the Diamondback Colossus as a Grand rig set piece; the Uranus palette strip; the M4 Uranus tests unchanged; the Uranus perf rows green.
 Accept: Uranus captures at 1x (a floe lane under sun_left, the same under sun_right with the shadows turned, the night with the ember horizon, the Colossus in passing) matching the accepted B-158 composites; a crossfade test (the geometry identical across the lights, nothing slides); TransitionTests green; the BudgetGate Uranus rows green.
 Files: Code/Runtime/View2D/CartoonStage.cs, Code/Runtime/Planet/, Code/Runtime/Creatures/, Tests/
