@@ -25,6 +25,9 @@ the next live rank runs now and the skipped role goes next after it files. A rol
 keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 278 (11-08 01:4x: all three windows restarted ~01:27; lock B's tests green (MarsStage 3/3, the Jupiter PlayMode slice 20/20) but its captures died with the restart; B-170 in; THE OWNER'S 0.4.7 PLAYTEST → D-158: the flight overhaul goes first and rides 0.4.8). A role files its want only when the queue says it is next after the running job:
 Cycle 281 (11-08 09:4x, the resume: all three windows restarted ~09:30 after a ~3-hour break; no lock, no want; free RAM 0.69 GB at 09:33 while the sessions started, 1.83 GB at 09:4x: the gate is open). Done since 05:1x: U-156 accepted; B-176 exported for the four inner planets; B-177's islands for all four giants; B-178 Earth's bands; B-179's desert and taiga exported, the tundra accepted with one fix; D-167.
 Cycle 282 (11:0x, 2-hour tick): every 0.5.0 art item is in and verified (B-178 frost, B-179 tundra, B-180 lips, B-181 all, B-183 forest / coast / plains with D-169's layer2, Earth's dig_puff). UNITY's short lock (U-157's D-168 fix + U-164) is in its capture part (11:04); the re-shot u157/1_scoop (a round bowl) and u158/4_pocket_dug (a U-bottomed shaft) viewed at 11:0x.
+Cycle 284 (15:05, 2-hour tick): UNITY holds the lock (15:02:47) for U-169's diagnosis + U-168's test re-points (compile + EditMode + the 3D-path PlayMode classes); BLENDER's want behind it (B-197's icon preview, ~0.15 GB). Free RAM 0.35 GB under UNITY's run.
+1. UNITY · NOW: U-169 → then U-167 → U-159 Mercury / Venus slices → a FULL PlayMode sweep in batches → the next build (Mars / Mercury / Venus on smooth ground, with the Earth POI props, the Warden and the drained valleys).
+2. BLENDER · next: B-197's preview → B-198's lip previews; the U-168 removal (14 files) the moment UNITY's test re-points are committed.
 Cycle 283 (13:05, 2-hour tick): Build 0.5.0 out with its page (USER-33 open). Since: U-166 accepted (D-171, inland water drained); B-186 polar + Tharsis, B-185 Mars + Mercury, B-189 Mars exported and verified or exporting; U-164 / U-165 Done. Free RAM 0.12 GB under UNITY's check at 13:04: nothing extra runs beside it.
 1. UNITY · NOW (13:04:22): U-159's Mars check (compile + EditMode + PlayMode).
 2. BLENDER · next (want 13:04:36): B-185 + B-189 Venus surface export (~1 min), then B-182's Earth audit, B-184's puffs, B-187's previews, B-190's puff variants.
@@ -65,8 +68,9 @@ Rules: nothing here needs the lock; it stays under ~300 MB of extra RAM; no Unit
 did in your status before the next poll. LEAD tops each list up to ≥ 3 items every cycle.
 
 **UNITY**
-- U-159's Mercury and Venus slices as code (the region → band / set map on its card; the storm veil's strip; B-180's lips by variant; U-166's smoke_42 + a swim frame for the next build's smoke).
-- U-167 (the fill_decor scatter, D-165's art unused since 04:58) and U-162 (the stag's hysteresis) as code.
+- U-169's fix (the camp shoulder's curve vs grid), then U-167 (the fill_decor scatter incl. B-192's sand / basalt pieces).
+- U-159's Mercury and Venus slices as code (the region → band / set / puff / lip map on its card; the Mars funnel's straight edge at y ≈ 940; the next build's smoke: smoke_42, the swim frame, the Survey Archive, the Launch Complex, a Warden).
+- U-162 (the stag's hysteresis) as code.
 - U-152 (the v2 census, files only, using B-173's audit lists).
 - Status trim (D-113): U-142 / U-143 / U-147 / U-153 / U-156 / U-161 are Done; Ready for review lists only unjudged items.
 - The Creep watch row (0.4.8's reading); `docs/credits/unity.md` upkeep.
@@ -80,9 +84,9 @@ Then one batched check per hand-off when your turn in the queue comes (compile +
 
 
 **BLENDER** (numpy / scripts only while UNITY holds the lock or a want; bpy only under your own lock; under 0.3 GB free, code only; otherwise only pre-measured ≤ 150 MB jobs beside another role's lock; the lock / RAM check is its own call)
-- B-193: the v2 model census (files only, reassigned from U-152) → then B-174's removal.
-- B-194: the giants' G1 audit (light reads in free gaps).
-- The next cards come from the owner's USER-33 answer (Earth) or U-160 (the giants' islands); tell LEAD when the list runs dry.
+- B-197's icon preview → export; B-198's lips for the B-181 variants in source → the previews per planet.
+- The U-168 removal (14 files: surveyor / Pilgrim base + maps, ring_mesh) once UNITY's four test re-points are committed (LEAD says go).
+- The next cards come from the owner's USER-33 answer, the next build's smoke (the seabed under smoke_43's swim frame) or U-160; tell LEAD when the list runs dry.
 - Status trim (D-113): B-173, B-175, B-176, B-177 are judged; Ready for review lists only unjudged items. `docs/credits/blender.md` upkeep.
 
 **LEAD**
@@ -1502,6 +1506,13 @@ Accept: one stamped preview beside the other item icons at 1× accepted by LEAD 
 Files: blender/scripts/ (the icon builder), Assets/_Game/Art/icons/wind_anchor/
 Depends: —
 Lead notes: Cycle 283 (14:3x). Small; any free gap. Then UNITY drops the test's exception.
+
+### B-198 · BLENDER · Ready · G1
+Goal: Cliff lips for B-181's variant grounds (B-180's pattern; 0.5.0's smoke_41 shows a lip at every steep brink): `terrain/mars/ground_lip_{basalt,talus}` (Olympus Mons' caldera rim and flanks, the canyon's edges), `terrain/mercury/ground_lip_ice` (the cold traps' rims) and `terrain/venus/ground_lip_{tessera,vent}`, each matching its band's crust, ink and colours in B-175's lip format (128×96, pivot (0.55, 0.6) at the brink).
+Accept: one curve preview per planet (each lip on a rounded brink of its own band at 1× with the surveyor, beside the planet's soil lip) accepted by LEAD before the export; log OK; palette 100 %; json brink / variant / band.
+Files: blender/scripts/build_ground_variants_v3.py, Assets/_Game/Art/terrain/{mars,mercury,venus}/
+Depends: —
+Lead notes: Cycle 284 (15:0x). B-181's note held these "until a capture shows a cliff"; u159's caldera has a basalt rim and 0.5.0's coast proves lips draw at brinks, so they are needed for U-159's Mercury / Venus / Mars build. After B-197. UNITY picks the lip by band variant (ground_lip_<variant>) as on Earth.
 
 ### B-194 · BLENDER · Done · G1
 Goal: The G1 art audit for the four giants (B-182's pattern, as U-160's evidence): one stamped sheet per giant read back from Art/ at 1× with every G1 key (B-177's island_belly, island_end_l / _r, under_haze_<deck> per deck) beside the floe strips they attach to (the strip's drawn underside on the belly's outline row 72), each with ink widths, palette hit and json fields; plus any key a json names that is missing on disk.
