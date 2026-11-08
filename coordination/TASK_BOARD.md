@@ -22,7 +22,7 @@ When the lock frees, the highest pending job here goes next, even if the other r
 older (D-037 alternation applies only between equal ranks). A rank is live only while its role
 has a want on file or holds the lock (D-112): if the top rank has no want when the lock frees,
 the next live rank runs now and the skipped role goes next after it files. A role below the top
-keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 275 (18:5x, the 2-hour tick: 0.4.7 is the owner's build (USER-30); Jupiter's art in except the whale, which waits at the RAM gate (1.35 GB free vs 1376; USER-31); U-127 slice 1 checked, slice 2 owed (UNITY nudged: no commit since 18:14); Neptune designs Done). A role files its want only when the queue says it is next after the running job:
+keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 276 (20:5x, the 2-hour tick: BOTH WORKERS AT THE RAM GATE since 18:42 (1.10 GB free; the owner's Chrome, Edge and Copilot hold ~1 GB; USER-31 unanswered); D-156's one-off gates armed (the whale 1300 / 900, UNITY's compile + EditMode 1250 / 1000); every lock-free card done: U-127 slice 2, U-129 / U-130 / U-133 slice 1, U-143 committed; B-170 source, the Saturn / Neptune rows written). A role files its want only when the queue says it is next after the running job:
 1. BLENDER · now: B-151 the C3 UI export in one slot (the five 9-slice panels with `slice` [l, t, r, b] in each json, the three title cards ≤ 1920×540 drawn 1:1, `ui/hud/film_switch` with parts `off` / `on` by name); it unblocks the owner build.
 2. BLENDER · the whale re-export (D-153) the moment the gate clears; then B-170 (the five remaining title cards, one slot); the Saturn exports (B-163 / B-164) when U-129's code lands; the Uranus rows (B-166) lock-free.
 3. UNITY · U-127 slice 2 lock-free NOW (the four creatures, the husk, the whale row guarded, CaptureU127Jupiter), committed; then one check lock (compile + EditMode + the Jupiter slice) alternating with BLENDER; then the Jupiter captures; then Build 0.4.8 (U-142) with the probe and the smoke set; U-129 Saturn code after.
@@ -2364,6 +2364,27 @@ Accept: 0.4.8 ships as a release exe with no watermark; SMOKE OK on it; the dev 
 Files: tools/unity_profile.ps1 (or the build wrapper), Code/Runtime/Core/BuildSmoke.cs
 Depends: U-142
 Lead notes: Cycle 275. The owner's first-ever frame of every build has read "Development Build" in its corner; 73 s per build is cheap. Rides U-142's lock if in, else 0.4.9. 19:4x: CODE IN lock-free (the dev player to Build/MERIDIAN_<v>_dev/ for the probe; unity_profile.ps1 -Release builds the release player to Build/MERIDIAN_<v>/ only after a green gate + probe; unity_release.ps1 does both and smokes the release player; tools/unity_build_selftest.ps1 28/28 without the Editor); Bible §15 updated (D-155). Done on 0.4.8's two folders.
+
+### U-144 · UNITY · Ready · C2
+Goal: Neptune's hazards (D-155's deferred half): the −x wind zones with their mirrored layers and flora lean, the player's wind drift on foot and in the air (scaled by wind speed, zero behind a floe cap or an anchor), the wind anchor as a hold (interact at `props/neptune/wind_anchor` to stand fast through a gust), a gust warning on the HUD gauges; the M4 Neptune tests unchanged.
+Accept: NeptuneStageTests: the drift per wind speed, zero when anchored, the mirror in a −x zone; a capture of the surveyor leaning into a gust at an anchor; clean console.
+Files: Code/Runtime/Planet/, Code/Runtime/Player/, Tests/
+Depends: U-133
+Lead notes: Cycle 276. Lock-free code any time; its check with U-133's.
+
+### U-146 · UNITY · Ready · C2
+Goal: The Survey scan pulse on Uranus (D-154's deferred half): a scan with the Survey module flashes the deck's survey bands for 4 beats on top of the module-held view, through the same crossfade; the Leviathan's bands (Neptune) light with the same pulse per D-148.
+Accept: UranusStageTests +1 (the pulse's length and fade); a capture mid-pulse; clean console.
+Files: Code/Runtime/View2D/CartoonStage.cs, Code/Runtime/Creatures/, Tests/
+Depends: U-130
+Lead notes: Cycle 276. Small; lock-free code; its check with U-130's.
+
+### U-147 · UNITY · Ready · C3
+Goal: The HUD's last old-style text goes to paper and ink (D-149): the RADIATION / CRYO value and the SUIT bar, the ESCAPE marker and its altitude number, and the POI distance list at the top right are set in Patrick Hand ink on small paper tags (the gauges' look), the bar an ink-ruled strip with a gold fill; the light-blue text and bars go; nothing moves on screen.
+Accept: a smoke frame on each of Earth, Mars, Mercury and Venus with no light-blue HUD text; HudTests cover the tag layout at 1080p and 720p; clean console.
+Files: Code/Runtime/UI/Hud/, Tests/
+Depends: U-136
+Lead notes: Cycle 276 (every 0.4.7 smoke frame still shows the blue RADIATION / SUIT / ESCAPE text beside the paper gauges). Lock-free code now; rides U-142's build if in.
 
 ### U-138 · UNITY · Done · C2
 Goal: Mercury's v2 leftovers out of the cartoon stage (D-150): the Cinderhulk species leaves Mercury's spawn table and the smoke (the Cinderling is its B-145 re-ink; the night smoke shot shows the Shadewyrm at a burrow instead); the Mercury props draw from B-167's sheets when they land (`props/mercury/{flare_shelter,meridian_beacon,solarite_cluster,warden_vault_gate,shelter_door,equipment_locker}`), their v2 .glb / _normal / _mask / _emission metas dropped with the files (D-016); the M3 Mercury gameplay tests stay green (the flare window and shelter logic unchanged).
