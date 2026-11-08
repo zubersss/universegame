@@ -1482,6 +1482,20 @@ Files: coordination/reports/blender/v2_census.md
 Depends: —
 Lead notes: Cycle 283 (14:1x). Reading code is allowed to everyone (CLAUDE.md); write only your report. When unsure whether a path loads a key at runtime, mark it "loaded (unsure)" with the file:line; LEAD or UNITY rules. Then B-174.
 
+### B-195 · BLENDER · Ready · C4
+Goal: The last grey v2 models a player sees on Earth (B-193's census: PoiCatalog.cs 83–85 / 109–110 → PoiPlacer.cs 94 → ModelSwap, on the cartoon path too): `props/earth/archive_door`, `archive_terminal`, `beacon` (the Survey Archive) and `launch_gantry`, `launch_tower_ruin` (the Launch Complex; the dark scaffold behind the HUD in 0.5.0's smoke_41) re-inked as v3 sheets in the C2 Earth props' style (B-131's camp props: ink, paper, palette, no faces), each sized from its v2 model's bounds so its footprint on the POI stays, with a small idle clip where it fits (the terminal's screen blink, the beacon's lamp); the export removes each .glb and its v2 maps in the same commit (D-117, B-131's pattern; never a .meta).
+Accept: one stamped design preview (the five at 1× on Earth's ground band beside the surveyor, the Survey Archive and the Launch Complex assembled as the POI places them) accepted by LEAD before the export; log OK per key; palette 100 %; UNITY's next import and a smoke frame at each POI show the sheets, no grey model.
+Files: blender/scripts/build_props_earth_v3.py (or the C2 props builder), Assets/_Game/Art/props/earth/
+Depends: —
+Lead notes: Cycle 283 (14:2x). The owner sees both POIs in 0.5.0, so this goes before B-196 and B-194. Space's asteroids and waystations are B-172's (waiting on U-151).
+
+### B-196 · BLENDER · Ready · C4
+Goal: The Warden sentinel as a v3 sheet (B-193's finding (d): Sentinel.cs 44 loads creatures/warden/sentinel as a sheet, but the .glb makes it a model key, so the warden draws a 2D placeholder in play): a faceless Warden machine sentinel in the C2 style (D-087 no combat, D-101 no face: a lens or a lamp, not eyes), with the clips Sentinel.cs plays (read them there: idle, the alert / scan swap as found), sized from the v2 bounds; the export replaces the .glb and its v2 maps in one commit.
+Accept: one stamped design preview at 1× beside the surveyor, with each clip's frames, accepted by LEAD before the export; log OK; palette 100 %; UNITY's next import shows the sheet in play.
+Files: blender/scripts/build_creatures_v3.py (or the Warden's builder), Assets/_Game/Art/creatures/warden/
+Depends: —
+Lead notes: Cycle 283 (14:2x). After B-174 and B-195.
+
 ### B-194 · BLENDER · Ready · G1
 Goal: The G1 art audit for the four giants (B-182's pattern, as U-160's evidence): one stamped sheet per giant read back from Art/ at 1× with every G1 key (B-177's island_belly, island_end_l / _r, under_haze_<deck> per deck) beside the floe strips they attach to (the strip's drawn underside on the belly's outline row 72), each with ink widths, palette hit and json fields; plus any key a json names that is missing on disk.
 Accept: four sheets blender/preview/audit_g1_<giant>.png, stamped; audit_g1.md extended with the counts and any outlier; no export.
@@ -1550,7 +1564,7 @@ Goal: The orphaned v2 models out of Art/: every key U-152's census marks orphane
 Accept: the census's orphan list and the commit's file list match (git show --stat); UNITY's next import removes the orphaned metas; no runtime key breaks (UNITY's next check green).
 Files: Assets/_Game/Art/ (removals only)
 Depends: B-193 (the census, was U-152)
-Lead notes: Cycle 279. Files only; after U-152's table lands.
+Lead notes: Cycle 279. Files only; after U-152's table lands. Cycle 283 (14:2x): THE CENSUS IS IN (B-193, 7271c251: 80 .glb; 13 loaded and seen, 37 used only by the 3D path's tests, 25 orphaned, 5 for ruling). GO NOW on the 25 orphans: mercury_scenery ×8, venus_scenery ×6, mars_flora ice_a / ice_b / stalactite / stalagmite, solarite_crusted / _cut, warden/hunter, mercury/cinderhulk (bare), veil_serpent_head / _body / _tail: each .glb with its v2 maps and json, a folder's atlas_* only when its last .glb goes (mercury_scenery and venus_scenery empty out, mars_flora does not); never a .meta (UNITY's next import commits their removal, D-016); one commit, git show --stat checked against the list. Rulings on the five: (a) characters/surveyor/base, (b) ships/pilgrim/base, (c) planets/saturn/ring_mesh: loaded but never shown → U-168 stops the loads, then remove them in a second commit; (d) creatures/warden/sentinel: Sentinel.cs loads it as a sheet and the .glb makes it a model key, so the warden draws its 2D placeholder in play → B-196 draws its v3 sheet, and that export replaces the v2 files (never delete them alone); (e) characters/calibration/base: keep (editor and tests). The 37 3D-path-only models stay until the 3D path and its tests are retired (Backlog, C4).
 
 ### B-168 · BLENDER · Done · C2
 Goal: Venus props re-inked from the B-147 design language (D-151; the last grey v2 pieces on the owner's Venus): `props/venus/{station_hull_a,station_hull_b,meridian_station_door,aerostat_balloon,aerostat_deck,buoyancy_cell,railing,vent_harvester}` in the Venus palette, no faces, `replaces_v2` on each key (the .glb / _normal / _mask / _emission removed; never a .meta), pivots and frame counts as the v2 jsons so UNITY's station layout holds; the door with an open clip like Mercury's; sheets ≤ 512² each (the hulls may be two 512 tiles).
@@ -2338,6 +2352,8 @@ Lead notes: Done 554e14f (cycle 24): hauler hulls/cargo, Warden pylon, Meridian 
 
 ## Backlog (not yet Ready; LEAD promotes)
 
+- (C4, from B-193's census 14:2x) Retire the 3D path: CartoonStage.Enabled is true on all eight planets and PlanetSideRoot skips DepthBands / StageLayers there; 37 v2 models (ridge_mid ×15, skyline_far ×5, earth_flora ×11, mars_flora ×6) live only for BackdropTests, StageLayerTests, U076SceneTests and the DepthBands / ArtImporter / Residency mapping tests. A UNITY card to drop or re-base those tests, then a BLENDER removal of the 37; before the C4 playtest build.
+
 > **C1 (Step 2, D-086): promoted when LEAD approves the C0 style test.** All Depends: C0 approval.
 - Promoted cycle 238 (D-097) with fresh numbers: B-119 discs, B-120 starfield, B-121 HUD art, B-122 Pilgrim sheets; U-103 ship + space, U-104 HUD, U-105 surveyor Animator, U-106 C1 measurement; U-091 first. Still Backlog for C1: surveyor dig/build/surprise/jetpack/climb_in clips (B-12x after B-122).
 - **C2 Earth flora, designs approved cycle 245** (review_c2_earth_plants_preview.png, df1121f): Nodbell (plains/forest), Shiverbarrel (desert), Curlfrond (forest/taiga; lighter frond tone or mustard tips owed), Whiptuft (plains/coast), Thriftcushion (coast/tundra) + snoozle v2 (plains): one `flora/earth/rigset` holding all six per contract §11.3, ≤ 6 bones each, swaps for the react states; the cartoon Earth ground strip (0191af7, in U-100's contract) and the creature re-ink list (coordination/reports/blender/c2_earth_creature_reink.md: swim cap 12–16 accepted into §11.2; Hadal Maw as a rig set accepted in principle) are the other C2 Earth cards. Cycle 249 (D-115): BLENDER's C2 Earth cards promoted on the approved sources (B-129 flora rig set export, B-130 ground strips, B-131 camp props, B-132 land creatures, B-133 forest + coast backdrops); UNITY's U-110 (biome placement) and U-111 (ground strips in) below stay Backlog until U-106.
@@ -2631,6 +2647,13 @@ Accept: a test +1 (the density within 20 % of 1 per 6 m² on 3 seeds; none in pi
 Files: Code/Runtime/Terrain/, Code/Runtime/View2D/, Tests/
 Depends: —
 Lead notes: Cycle 283 (13:0x). Lock-free code beside U-159; its capture rides U-159's check. Earth first (the owner's 0.5.0 cutaway is plain strata today).
+
+### U-168 · UNITY · Ready · C4
+Goal: Stop loading v2 models the cartoon path never shows (B-193's census (a)–(c)): PlayerView.cs 67 loads characters/surveyor/base in Start before or after CartoonStage.cs 457 disables PlayerView; ShipLegsView.cs 70 / 83 keeps a legacy fallback to ships/pilgrim/base for a missing rig json that is never missing; SpaceWorld.cs 437 loads planets/saturn/ring_mesh and throws it away at 439 (Saturn is a painted disc). Skip each load on the cartoon path (keep the tests' 3D path working), so BLENDER's B-174 can remove the three models and the boot does not pay for them.
+Accept: a test or log check that none of the three keys is loaded in a cartoon-path boot through Earth → space → Saturn; the residency / memory rows unchanged or lower; clean console.
+Files: Code/Runtime/Player/PlayerView.cs, Ship/ShipLegsView.cs, Space/SpaceWorld.cs, Tests/
+Depends: —
+Lead notes: Cycle 283 (14:2x). Small, lock-free; its check rides U-159's. Then tell BLENDER to remove the three (B-174's second commit).
 
 ### U-154 · UNITY · Ready · C2
 Goal: P-51 (UNITY, ruled yes in cycle 279): the Builder's aerostat pieces draw the re-inked kit on the four giants: PieceSpec gains a per-planet art key, so the Deck / Strut / Lift cell pieces draw `props/common/aerostat_{deck,strut,cell}` (B-156) on Jupiter, Saturn, Uranus and Neptune and keep `props/venus/aerostat_deck` on Venus; nothing else about the pieces changes (sizes, costs, saves).
