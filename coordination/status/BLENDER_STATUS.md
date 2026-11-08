@@ -1,10 +1,10 @@
 # BLENDER STATUS
-Updated: 2026-11-08 09:5x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-08 10:0x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-B-181: the variant list below is posted for LEAD's ruling. While it waits: B-180's lips (sand / stone / snow / frost) in source + the curve preview, lock-free. Then B-182 Earth's audit sheet in a free gap with no want on file. UNITY's batched check (queue rank 1) outranks every BLENDER job; bpy only under my own lock.
+Files only while UNITY's batched check (queue rank 1: compile + EditMode, PlayMode A / B slices) runs between its locks; no want filed until its last part releases (LEAD 09:5x). Then, in my slot: (1) the B-180 lips export (ACCEPTED 09:59; rows terrain/earth/ground_lips, terrain/mars/ground_lip_frost) - after U-163's build if UNITY files that want; (2) the B-181 Mars preview re-run (measured 205 MB lock-free) to LEAD, then Mercury and Venus previews (sources in: 2da9e970); (3) B-182 Earth audit (audit_g1.py in source), one planet per run.
 
-## B-181 variant list (Mars / Mercury / Venus per-biome ground; for LEAD, then U-159)
+## B-181 variant list (ACCEPTED by LEAD 09:4x as posted; U-159's card has the region-to-band map)
 Keyed by the regions the code already has (MarsLandforms / StageRegions, MercuryLandforms.InColdTrap, VenusLandforms.At), so U-159 needs no new region. A variant only where the ground reads clearly different at 1x.
 - Mars plains (mars_plains) -> ground_band + ground_fill (B-175, in). No new key.
 - Mars polar cap (mars_polar) -> ground_band_frost + ground_fill (B-178, in, 2090cb3c). No new key.
@@ -19,11 +19,12 @@ Keyed by the regions the code already has (MarsLandforms / StageRegions, Mercury
 New keys: 5 bands, 1 fill, 15 decor. Each band json's "biomes" names the code region (e.g. ["mars_tharsis"]) and its "fill". Lips for the new variants would be a follow-up to B-180, not in this card. Mars first: its preview after LEAD rules on this list.
 
 ## Last completed
+- 09:50-10:05 (files, beside UNITY's check): B-180 lips in source and previewed lock-free in free gaps (904487ab, bba720be, b0237f9a; review_b180_earth_lips_preview.png 09:58, review_b180_mars_lips_preview.png 10:0x) - ACCEPTED as drawn 09:59; B-181 Mars source (bba720be; ed0fdf34 after its 09:59 measuring preview: 205 MB, tiles p99 0, palette 100 %; fixes: no rope "grilles", bigger scree, a faceted block); B-181 Mercury + Venus sources (2da9e970); B-182 audit_g1.py (01638ac1).
 - 09:4x: B-178 Mars frost: ground_decor_frost_2 redrawn as rounded, chipped ice lumps (source f0b6e35b); export 2090cb3c (log OK 09:42:15, 4 keys, peak 346 MB, join 0.00/255, palette 100 %). VERIFIED by LEAD. The first wrapper run (09:41) wrote the files, then stopped in the review step on a numpy NaN warning: the Mars preview padded with np.empty * 0. Fixed with np.full and re-ran clean.
 - 09:3x: B-179 tundra: layer1's lee shading redrawn as soft, curved, feathered crescents on each hill's unlit (left-facing) slope (build_backdrop_v3.tundra_lee; the rng order kept); export d060f226 (log OK 09:36:52, 42.7 s, peak 850 MB, seams 0.87 / 0.65 / 0.37). VERIFIED by LEAD. All three B-179 sets are in for 0.5.0.
 
 ## Ready for review
-none (B-179 and B-178 Mars frost verified 09:4x-09:5x).
+none yet (B-180 accepted, its export waits for my slot; B-181 Mars's revised preview goes to LEAD after its re-run).
 
 ## Handoffs (unrouted only)
 - -> UNITY (U-159): terrain/mars/ground_band_frost is in (2090cb3c): pivot on surface row 24, json "fill": "ground_fill", "biomes": ["polar cap", "polar layered terrain"] (the region in code is mars_polar). backgrounds/earth/tundra is in (d060f226) for U-161.
@@ -33,7 +34,7 @@ none (B-179 and B-178 Mars frost verified 09:4x-09:5x).
 none. Waiting on: U-151 (B-172's export), U-152 (B-174).
 
 ## Proposals (undecided only)
-- B-181's variant list above.
+none (B-181's list accepted 09:4x).
 
 ## Rules I keep (from slips)
 - No 2>&1 on the render wrapper in PowerShell 5.1: a numpy warning on Blender's stderr becomes a terminating error under the wrapper's ErrorActionPreference Stop (09:41).
@@ -54,4 +55,4 @@ none. Waiting on: U-151 (B-172's export), U-152 (B-174).
 none.
 
 ## HeavyJobLock
-none held (released 09:42:15 after the Mars frost export); no want. No background waiters.
+none held (released 09:42:15 after the Mars frost export); no want (UNITY's multi-part check is between locks: I file only after its last part). No background waiters.
