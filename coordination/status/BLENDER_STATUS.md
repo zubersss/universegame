@@ -1,11 +1,12 @@
 # BLENDER STATUS
-Updated: 2026-11-08 01:0x · Session: 8 (resumed 14:3x after the ~14:17 machine restart; C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-08 01:3x · Session: 9 (zuber-0c; all three windows restarted ~01:27; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-RESUMED (owner via LEAD 01:0x). B-160 COMPLETE: the Vortex Whale exported 01:03 (92830c7f; normal wrapper, gate 1376, peak 623 MB; D-156 unspent). Now UNITY's turn (its full check + Build 0.4.8). Next, in order: (1) B-170: the lock-free card preview (`python -I build_ui_v3.py --cards <png>`) when nobody waits, then the export slot (ui/c2/titlecards_set); want filed when UNITY's lock appears (D-039). (2) B-163 slot 1: backgrounds/saturn/deck1,deck2,deck3,deep,hexagon. (3) B-163 slot 2: terrain/saturn/floe_strip_set, flora/saturn/rigset, props/saturn/props_set, ui/palettes/saturn. (4) B-164: creatures/saturn/helium_jelly, hex_drake, floe_moth, ringmite, polar_hydra. Free gaps only: oneoff/grand_pack.py, oneoff/uranus_rows.py, oneoff/neptune_rows.py.
-Uncommitted until my next slot's py_compile: render.py's rigset review clears the stale mark before drawing (the whale's parts review got a false STALE banner; STALE.txt is clear).
+B-163 slot 1, WANT ON FILE (filed 01:18, refreshed 01:30 per D-075): `tools/blender_render.ps1 backgrounds/saturn` (deck1, deck2, deck3, deep, hexagon straight, D-147; numpy-only; Jupiter's same slot peaked 836 MB in 382 s). Queue (LEAD zuber-cf 01:3x): UNITY's CaptureU127Jupiter 1-5 first (the restart killed it in lock B), then this slot, then UNITY lock C (0.4.8). Free RAM 1.0 GB at 01:30 (three fresh sessions): files only until the lock and the gate are mine. Next, in order: (2) B-163 slot 2: terrain/saturn/floe_strip_set, flora/saturn/rigset, props/saturn/props_set, ui/palettes/saturn. (3) B-164: creatures/saturn/helium_jelly, hex_drake, floe_moth, ringmite, polar_hydra. Free gaps only: oneoff/grand_pack.py, oneoff/uranus_rows.py, oneoff/neptune_rows.py.
 
 ## Last completed
+- 01:13:0x-01:14:09 SLOT (wrapper): B-170 the five title cards venus / jupiter / saturn / uranus / neptune, 1600x452, 637-716 KB each + json (37c0a43f; gate 1642, peak 945 MB; review_b170_titlecards.png: all eight cards at 1x).
+- 01:12 files: render.py's rigset review clears the stale mark before drawing (d41024ae; py_compile clean).
 - 01:02:41-01:03:37 SLOT (wrapper): B-160 the Vortex Whale at D-153 (92830c7f; 623 MB; review_b155_vortex_whale_assembled.png).
 - files (pause): B-170 source fc08fbff, the D-141 palette guards fa039f3b, the resume helpers 391c7cf7 (blender/scripts/oneoff/).
 - 18:22:10-18:27:02 SLOT (wrapper): B-160 stormglider / lightning_eel / belt_wasp / ballast_tortoise (db4d5a53; 658 MB); the whale failed to pack -> D-153.
@@ -21,7 +22,8 @@ Uncommitted until my next slot's py_compile: render.py's rigset review clears th
 - 16:07:42-16:11:26 SLOT: the B-161 stamped reviews (all nine ACCEPTED).
 
 ## Ready for review
-- B-160: the whale (92830c7f) + review_b155_vortex_whale_assembled.png (0.25x beside the surveyor, ~36 m).
+- B-170: the five title cards (37c0a43f) + review_b170_titlecards.png (all eight cards at 1x, Earth / Mars / Mercury beside the five; stamped 11-08 01:14).
+- B-160: the whale (92830c7f; VERIFIED by LEAD 01:0x, Done on U-127's whale capture).
 
 ## Handoffs (unrouted only)
 none.
@@ -50,4 +52,4 @@ none (B-161's three ruled in D-148).
 none (USER-28, closing ChatGPT + Edge for RAM, is LEAD's).
 
 ## HeavyJobLock
-none held (released 01:03:37); no want (UNITY's turn; re-filed when its lock appears, D-039).
+none held (released 01:14:09 after B-170); want_blender.lock on file for B-163 slot 1 (01:18, refreshed 01:30; D-075 on every poll). No background waiters.
