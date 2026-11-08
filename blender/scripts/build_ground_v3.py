@@ -65,6 +65,12 @@ def colours(planet):
                 "soil": dp("mustard"), "soil_sh": dp("red"), "soil_dp": P["brown"], "clay": sh("mustard"), "red": sh("red"),
                 "stone": sh("sky"), "stone_sh": dp("sky"), "pebble": sh("offwhite"), "bone": P["offwhite"], "lens": P["teal"],
                 "flower": P["mustard"], "petal": P["offwhite"], "dust": sh("mustard"), "dust_sh": dp("mustard"), "clod": P["brown"]}
+    if planet == "mars":                        # D-163 cross-section (LEAD 04:1x): rust dust crust, Gale layering, hematite, basalt, ice
+        return {"top": P["red"], "top_sh": sh("red"), "topsoil": dp("red"), "speck": P["offwhite"],
+                "soil": sh("sky"), "soil_sh": dp("red"), "soil_dp": P["brown"], "ochre": sh("mustard"), "redbrown": dp("red"), "salmon": P["sky"],
+                "basalt": dp("teal"), "basalt_sh": P["brown"], "hem": P["brown"], "hem_hi": sh("offwhite"), "ice": P["offwhite"], "ice_sh": sh("teal"),
+                "rock": dp("sky"), "rock_sh": P["brown"], "pebble": sh("offwhite"), "frost": P["offwhite"], "frost_sh": P["teal"],
+                "ripple": P["sky"], "ripple_sh": sh("sky"), "dust": P["sky"], "dust_sh": sh("sky"), "clod": dp("red")}
     raise ValueError(f"B-175: {planet}'s ground colours come after Earth's preview is accepted")
 
 
@@ -332,6 +338,219 @@ def draw_rim(d, M):
         wrapped(lambda dx, _dz, x=x: G.seam(d, [(x + dx, -0.02), (x + dx + 0.03, -0.06), (x + dx + 0.01, -0.10)], M["ink"]), L)
 
 
+# ---------------------------------------------------------------- the crust planets (Mars; Mercury and Venus to follow):
+# their own band / fill / decor / lip; the rim and the puff are the shared role-based drawings above. Earth's functions above
+# stay as exported (40a7e179).
+
+def _bump_surface(xs, L, bumps):
+    """The surface height at xs: flat, with low rounded pebble scallops (wrapping over the tile's period)."""
+    out = []
+    for x in xs:
+        z = 0.0
+        for c, r in bumps:
+            for off in (-L, 0.0, L):
+                u = (x - c - off) / r
+                if abs(u) < 1:
+                    z = max(z, r * 0.7 * math.sqrt(1 - u * u))
+        out.append((x, z))
+    return out
+
+
+def band_crust(d, M, planet, k=0):
+    """A crust band (no turf): the ink edge on the surface row with low pebble scallops, a thin crust over the topsoil,
+    speckle in the crust, small rocks sitting in it, cracks and pebbles below; transparent under a ragged edge."""
+    L = BAND_W / PPU
+    rnd = random.Random({"mars": 2751, "mercury": 2752, "venus": 2753}[planet])
+    xs = [L * i / 640 for i in range(641)]
+    bumps = [(L * (i + rnd.random() * 0.6) / 15, rnd.uniform(0.022, 0.055)) for i in range(15)]
+    top = _bump_surface(xs, L, bumps)
+    crust_b = [(x, -0.09 + per(x, L, 3, 21, 0.02)) for x in xs[::4]]
+    soil_b = [(x, -0.44 + per(x, L, 4, 22, 0.06) + 0.025 * math.sin(TAU * 19 * x / L)) for x in xs[::4]]
+
+    def body(dx, _dz):
+        sh = lambda pts: [(x + dx, z) for x, z in pts]  # noqa: E731
+        G.stroke(d, sh(crust_b + soil_b[::-1]), M["topsoil"], 0.0, cyclic=True)
+        G.stroke(d, sh(top + crust_b[::-1]), M["top"], 0.0, cyclic=True)
+        G.stroke(d, sh([(x, z - 0.035) for x, z in crust_b] + crust_b[::-1]), M["top_sh"], 0.0, cyclic=True)
+        G.seam(d, sh(crust_b), M["ink"])
+        G.stroke(d, sh(top), M["ink"], O)
+    wrapped(body, L)
+    for i in range(46):                                                                       # the crust's speckle
+        x, z, r = L * (i + rnd.random()) / 46, -0.02 - rnd.random() * 0.055, 0.010 + 0.008 * rnd.random()
+        wrapped(lambda dx, _dz, x=x, z=z, r=r, s=i: G.stroke(d, G.lumpy_ellipse(x + dx, z, r * 1.4, r, n=8, lump=0.1, seed=s),
+                                                             M["speck"], 0.0, cyclic=True), L)
+    for i in range(4):                                                                        # the odd small rock in the crust
+        x, r = L * (i + 0.3 + 0.4 * rnd.random()) / 4, 0.06 + 0.03 * rnd.random()
+
+        def rock(dx, _dz, x=x, r=r, s=i):
+            pts = [(px, max(pz, -0.06)) for px, pz in G.lumpy_ellipse(x + dx, 0.005, r * 1.35, r * 0.75, n=18, lump=0.1, seed=30 + s)]
+            G.stroke(d, pts, M["rock"], 0.0, cyclic=True)
+            G.stroke(d, G.lumpy_ellipse(x + dx - r * 0.35, -0.01, r * 0.6, r * 0.3, n=10, lump=0.05, seed=40 + s), M["rock_sh"], 0.0, cyclic=True)
+            G.stroke(d, pts, M["ink"], I, cyclic=True)
+        wrapped(rock, L)
+    for i in range(9):                                                                        # cracks in the topsoil
+        x = L * (i + 0.2 + 0.6 * rnd.random()) / 9
+        wrapped(lambda dx, _dz, x=x: G.seam(d, [(x + dx, -0.12), (x + dx + 0.03, -0.20), (x + dx - 0.01, -0.27), (x + dx + 0.02, -0.33)],
+                                            M["ink"]), L)
+    for i in range(8):                                                                        # pebbles in the topsoil
+        x, z, r = L * (i + rnd.random()) / 8, -0.22 - rnd.random() * 0.12, 0.024 + 0.016 * rnd.random()
+        wrapped(lambda dx, _dz, x=x, z=z, r=r, s=i: G.stroke(d, G.lumpy_ellipse(x + dx, z, r * 1.3, r, n=12, lump=0.08, seed=60 + s),
+                                                                M["pebble_i"], I, cyclic=True), L)
+    for i in range(5):
+        x = L * (i + rnd.random()) / 5
+        wrapped(lambda dx, _dz, x=x, s=i: G.hatch(d, x + dx, -0.30, M["ink"], n=3, length=0.07, spacing=0.03, angle_deg=160, seed=s), L)
+
+
+def _strata(d, M, L, strata, amp, seed):
+    xs = [L * i / 128 for i in range(129)]
+    for j, (z0, th, mat, inked) in enumerate(strata):
+        upper = [(x, z0 + th / 2 + per(x, L, 3, seed + j, amp)) for x in xs]
+        lower = [(x, z0 - th / 2 + per(x, L, 3, seed + 40 + j, amp * 0.85)) for x in xs]
+
+        def band(dx, dz, upper=upper, lower=lower, mat=mat, inked=inked):
+            sh = lambda pts: [(x + dx, z + dz) for x, z in pts]  # noqa: E731
+            G.stroke(d, sh(upper + lower[::-1]), M[mat], 0.0, cyclic=True)
+            if inked:
+                G.seam(d, sh(upper), M["ink"])
+        wrapped(band, L, L)
+
+
+def _lens(d, M, L, x, z, rx, rz, seed):
+    def lens(dx, dz):
+        pts = G.lumpy_ellipse(x + dx, z + dz, rx, rz, n=24, lump=0.05, seed=seed)
+        G.stroke(d, pts, M["ice_i"], O, cyclic=True)
+        G.stroke(d, G.lumpy_ellipse(x + dx - rx * 0.25, z + dz - rz * 0.3, rx * 0.55, rz * 0.35, n=14, lump=0.04, seed=seed + 1),
+                 M["ice_sh"], 0.0, cyclic=True)
+        G.seam(d, [(x + dx + rx * 0.1, z + dz + rz * 0.45), (x + dx + rx * 0.55, z + dz + rz * 0.3)], M["ink"])
+    wrapped(lens, L, L)
+
+
+def _scatter(d, M, L, n, zr, rr, role, seed, glint=None):
+    rnd = random.Random(seed)
+    for i in range(n):
+        x, z, r = rnd.uniform(0, L), rnd.uniform(*zr), rnd.uniform(*rr)
+
+        def one(dx, dz, x=x, z=z, r=r, s=i):
+            G.stroke(d, G.lumpy_ellipse(x + dx, z + dz, r * 1.1, r, n=12, lump=0.05, seed=s + seed), M[role], I, cyclic=True)
+            if glint:
+                G.stroke(d, G.lumpy_ellipse(x + dx + r * 0.3, z + dz + r * 0.3, r * 0.3, r * 0.3, n=8, lump=0.0), M[glint], 0.0, cyclic=True)
+        wrapped(one, L, L)
+
+
+def fill_mars(d, M, k=0):
+    """Gale-crater layering: thin ochre / red-brown / salmon sandstone bands with cross-bedding, one band full of dark
+    hematite spherules, a grey basalt layer with joints and vesicles deeper, white water-ice lenses at depth."""
+    L = FILL / PPU
+    rnd = random.Random(2761)
+    wrapped(lambda dx, dz: G.stroke(d, [(dx - 0.1, dz - 0.1), (dx + L + 0.1, dz - 0.1), (dx + L + 0.1, dz + L + 0.1), (dx - 0.1, dz + L + 0.1)],
+                                    M["soil"], 0.0, cyclic=True), L, L)
+    _strata(d, M, L, [(7.62, 0.34, "ochre", True), (7.18, 0.22, "redbrown", False), (6.74, 0.42, "salmon", True), (6.26, 0.24, "ochre", False),
+                      (5.80, 0.40, "redbrown", True), (5.20, 0.56, "ochre", True), (4.62, 0.30, "salmon", False), (4.12, 0.40, "redbrown", True),
+                      (3.52, 0.50, "ochre", True), (2.98, 0.24, "salmon", False), (1.75, 1.10, "basalt", True), (0.45, 0.30, "redbrown", True)],
+            0.05, 70)
+    for i in range(14):                                                                       # cross-bedding in the sandstone
+        x, z = rnd.uniform(0, L), rnd.choice((7.62, 6.74, 5.80, 4.12, 3.52)) + rnd.uniform(-0.08, 0.08)
+        wrapped(lambda dx, dz, x=x, z=z: [G.seam(d, [(x + dx + 0.07 * j, z + dz + 0.10), (x + dx + 0.07 * j + 0.16, z + dz - 0.10)], M["ink"])
+                                          for j in range(3)], L, L)
+    _scatter(d, M, L, 40, (5.02, 5.40), (0.026, 0.042), "hem_i", 2771, glint="hem_hi")   # the 'blueberries'
+    for i in range(7):                                                                        # basalt joints and vesicles
+        x = L * (i + rnd.random() * 0.5) / 7
+        wrapped(lambda dx, dz, x=x: G.seam(d, [(x + dx, 1.26 + dz), (x + dx + 0.03, 1.75 + dz), (x + dx - 0.01, 2.22 + dz)], M["ink"]), L, L)
+    _scatter(d, M, L, 22, (1.3, 2.2), (0.012, 0.022), "basalt_sh", 2781)
+    _lens(d, M, L, 2.4, 0.95, 0.55, 0.15, 2791)
+    _lens(d, M, L, 6.1, 2.45, 0.38, 0.11, 2793)
+    _scatter(d, M, L, 16, (0.0, L), (0.03, 0.06), "pebble_i", 2795)
+    for i in range(3):                                                                        # stones
+        x, z, r = rnd.uniform(0, L), rnd.uniform(3.0, 7.8), rnd.uniform(0.12, 0.2)
+
+        def stone(dx, dz, x=x, z=z, r=r, s=i):
+            pts = G.lumpy_ellipse(x + dx, z + dz, r * 1.35, r, n=18, lump=0.1, seed=80 + s)
+            G.stroke(d, pts, M["rock"], 0.0, cyclic=True)
+            G.stroke(d, G.lumpy_ellipse(x + dx - r * 0.3, z + dz - r * 0.25, r * 0.7, r * 0.45, n=12, lump=0.06, seed=90 + s), M["rock_sh"], 0.0, cyclic=True)
+            G.stroke(d, pts, M["ink"], O, cyclic=True)
+        wrapped(stone, L, L)
+    for i in range(10):
+        x, z = rnd.uniform(0, L), rnd.uniform(0, L)
+        wrapped(lambda dx, dz, x=x, z=z, s=i: G.hatch(d, x + dx, z + dz, M["ink"], n=3, length=0.08, spacing=0.03,
+                                                      angle_deg=15 if s % 2 else 165, seed=s), L, L)
+    G.specks(d, [(rnd.uniform(0.05, L - 0.05), rnd.uniform(0.05, L - 0.05)) for _ in range(40)], M["ink"])
+
+
+DECOR_NAMES = {"earth": ["tuft_a", "tuft_b", "tuft_c", "stone_a", "stone_b", "flower"],
+               "mars": ["rock_a", "ventifact", "dust_ripple", "frost_patch", "pebbles", "rock_b"]}
+
+
+def _rock(d, M, x, r, seed, flat=0.75, speck=False):
+    pts = [(px, max(pz, -0.02)) for px, pz in G.lumpy_ellipse(x, 0.02, r * 1.3, r * flat, n=22, lump=0.1, seed=seed)]
+    G.stroke(d, pts, M["rock"], 0.0, cyclic=True)
+    G.stroke(d, [(px, pz) for px, pz in G.lumpy_ellipse(x - r * 0.35, 0.0, r * 0.8, r * 0.5 * flat, n=14, lump=0.05, seed=seed + 9) if pz >= -0.02]
+             or [(0, 0)], M["rock_sh"], 0.0, cyclic=True)
+    G.stroke(d, pts, M["ink"], O, cyclic=True)
+    G.seam(d, [(x - r * 0.4, r * 0.5 * flat), (x + r * 0.25, r * 0.2 * flat)], M["ink"])
+    if speck:
+        G.specks(d, [(x + r * 0.3, r * 0.45 * flat), (x - r * 0.1, r * 0.6 * flat)], M["ink"])
+
+
+def decor_mars(d, M, k=0):
+    if k == 0:
+        _rock(d, M, 0.0, 0.20, 301)
+    elif k == 1:                                                                              # a ventifact: faceted, wind-grooved
+        pts = [(-0.30, -0.02), (-0.24, 0.16), (-0.05, 0.30), (0.20, 0.24), (0.31, 0.06), (0.28, -0.02)]
+        G.stroke(d, pts, M["rock"], 0.0, cyclic=True)
+        G.stroke(d, [(-0.30, -0.02), (-0.24, 0.16), (-0.05, 0.30), (-0.02, 0.12), (0.0, -0.02)], M["rock_sh"], 0.0, cyclic=True)
+        G.stroke(d, pts, M["ink"], O, cyclic=True)
+        G.seam(d, [(-0.05, 0.30), (-0.02, 0.12), (0.0, -0.02)], M["ink"])
+        for j in range(3):
+            G.seam(d, [(0.04 + 0.07 * j, 0.22 - 0.03 * j), (0.12 + 0.07 * j, 0.05)], M["ink"])
+    elif k == 2:                                                                              # a wind ripple of dust
+        xs = [-0.42 + 0.84 * i / 30 for i in range(31)]
+        top = [(x, 0.10 * math.exp(-((x + 0.05) / 0.22) ** 2) + 0.05 * math.exp(-((x - 0.25) / 0.12) ** 2)) for x in xs]
+        G.stroke(d, top + [(0.42, -0.01), (-0.42, -0.01)], M["ripple"], 0.0, cyclic=True)
+        G.stroke(d, [(x, z * 0.45) for x, z in top] + [(0.42, -0.01), (-0.42, -0.01)], M["ripple_sh"], 0.0, cyclic=True)
+        G.stroke(d, top, M["ink"], O)
+        for j in range(3):
+            G.seam(d, [(-0.25 + 0.15 * j, 0.03), (-0.17 + 0.15 * j, 0.065), (-0.10 + 0.15 * j, 0.03)], M["ink"])
+    elif k == 3:                                                                              # a frost patch, lying low
+        pts = [(x, 0.035 * math.sin(math.pi * (x + 0.38) / 0.76) + 0.008 * math.sin(23 * x)) for x in [-0.38 + 0.76 * i / 24 for i in range(25)]]
+        G.stroke(d, pts + [(0.38, -0.01), (-0.38, -0.01)], M["frost"], 0.0, cyclic=True)
+        G.stroke(d, [(x, z * 0.4) for x, z in pts] + [(0.38, -0.01), (-0.38, -0.01)], M["frost_sh"], 0.0, cyclic=True)
+        G.stroke(d, pts, M["ink"], O)
+        for x in (-0.2, 0.05, 0.22):                                                           # a glint
+            G.seam(d, [(x - 0.03, 0.07), (x + 0.03, 0.07)], M["ink"])
+            G.seam(d, [(x, 0.04), (x, 0.10)], M["ink"])
+    elif k == 4:
+        for j, (x, r) in enumerate(((-0.22, 0.08), (0.02, 0.11), (0.24, 0.07))):
+            _rock(d, M, x, r, 320 + j)
+    else:
+        _rock(d, M, 0.0, 0.26, 331, flat=0.85, speck=True)
+
+
+def lip_crust(d, M, k=0):
+    """The crust's hood over a rounded brink: the crust and its speckle round the corner, grit trickling over the drop."""
+    R, cz = 0.37, -0.35
+    outer = [(-0.60 + 0.60 * i / 12, 0.02) for i in range(12)] + \
+            [((R + 0.02) * math.sin(a), cz + (R + 0.02) * math.cos(a)) for a in [math.radians(6 * j) for j in range(15)]]
+    inner = [((R - 0.08) * math.sin(a), cz + (R - 0.08) * math.cos(a)) for a in [math.radians(6 * j) for j in range(14, -1, -1)]] + \
+            [(-0.60 + 0.60 * i / 12, 0.02 - 0.10) for i in range(11, -1, -1)]
+    G.stroke(d, outer + inner, M["top"], 0.0, cyclic=True)
+    G.stroke(d, [((R - 0.04) * math.sin(a), cz + (R - 0.04) * math.cos(a)) for a in [math.radians(6 * j) for j in range(15)]] + inner[:15],
+             M["top_sh"], 0.0, cyclic=True)
+    G.stroke(d, outer, M["ink"], O)
+    G.seam(d, inner, M["ink"])
+    rnd = random.Random(341)
+    for j in range(10):
+        a = math.radians(rnd.uniform(5, 80))
+        rr = R - 0.05 + rnd.uniform(-0.02, 0.02)
+        G.stroke(d, G.lumpy_ellipse(rr * math.sin(a), cz + rr * math.cos(a), 0.012, 0.009, n=8, lump=0.1, seed=j), M["speck"], 0.0, cyclic=True)
+    for j, (x, z, r) in enumerate(((0.47, -0.42, 0.030), (0.52, -0.58, 0.022), (0.46, -0.71, 0.018), (0.55, -0.30, 0.020))):
+        G.stroke(d, G.lumpy_ellipse(x, z, r * 1.2, r, n=10, lump=0.1, seed=350 + j), M["pebble_i"], I, cyclic=True)
+    G.seam(d, [(0.40, -0.36), (0.44, -0.47)], M["ink"])
+
+
+PLANET_DRAW = {"mars": {"ground_band": lambda d, M, k: band_crust(d, M, "mars", k), "ground_fill": fill_mars,
+                        "ground_decor": decor_mars, "ground_lip": lip_crust}}
+
+
 # ---------------------------------------------------------------- render the pieces
 
 PIECES = {   # name -> (w, h, pivot, frames)
@@ -354,9 +573,13 @@ def render_piece(name, planet="earth", k=0, mx=1, mz=1, ss=None):
     d = fakegp.FakeDrawing()
     _CUR = d
     _GROUPS.clear()
-    {"ground_band": lambda: draw_band(d, M, planet), "ground_fill": lambda: draw_fill(d, M, planet),
-     "ground_decor": lambda: draw_decor(d, M, k), "ground_lip": lambda: draw_lip(d, M), "dig_rim": lambda: draw_rim(d, M),
-     "dig_puff": lambda: draw_puff(d, M, k)}[name]()
+    own = PLANET_DRAW.get(planet, {}).get(name)
+    if own:
+        own(d, M, k)
+    else:
+        {"ground_band": lambda: draw_band(d, M, planet), "ground_fill": lambda: draw_fill(d, M, planet),
+         "ground_decor": lambda: draw_decor(d, M, k), "ground_lip": lambda: draw_lip(d, M), "dig_rim": lambda: draw_rim(d, M),
+         "dig_puff": lambda: draw_puff(d, M, k)}[name]()
     _CUR = None
     st = fakegp.strokes_of(d, gp)
     for master, ranges in _GROUPS:                      # a wrapped element's copies share the master's id: the same ink
@@ -391,8 +614,9 @@ KEYS = {}
 
 
 def use_planet(planet):
-    global PLANET, KEYS
+    global PLANET, KEYS, DECOR
     PLANET = planet
+    DECOR = DECOR_NAMES.get(planet, DECOR_NAMES["earth"])
     KEYS = {n: f"terrain/{planet}/{n}" for n in ("ground_band", "ground_fill", "ground_lip", "dig_rim", "dig_puff")}
     KEYS.update({f"ground_decor_{i + 1}": f"terrain/{planet}/ground_decor_{i + 1}" for i in range(len(DECOR))})
 
@@ -618,7 +842,7 @@ def preview(out_dir, planet="earth", pieces=None, out=None, footnote=None):
             b[hole] = 0
         img = b[..., :3] + (1 - b[..., 3:4]) * img
         return img
-    strip = pngio.read_png_np(os.path.join(ART, "terrain", "earth", "ground_strip_color.png"))
+    strip = pngio.read_png_np(os.path.join(ART, "terrain", planet, "ground_strip_color.png"))
     strip_tex = _premul(np.concatenate([strip[:, i * 68:i * 68 + 64] for i in range(8)], axis=1))
     band_tex = _premul(pieces["ground_band"][0][0])
     fill_tex = _premul(pieces["ground_fill"][0][0])
