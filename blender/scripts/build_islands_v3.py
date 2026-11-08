@@ -85,15 +85,15 @@ def _layout(L):
     the lower front lobes (lit) and the back hanging row (shade)."""
     rnd = random.Random(1771)
     top, mid, low, back = [], [], [], []
-    for i in range(6):
-        t, rx, rz = rnd.uniform(0.86, 1.06), rnd.uniform(0.74, 0.92), rnd.uniform(0.50, 0.60)
-        top.append((L * (i + 0.5 + rnd.uniform(-0.12, 0.12)) / 6, t - rz, rx, rz))
     for i in range(5):
-        mid.append((L * (i + rnd.uniform(-0.08, 0.08)) / 5, rnd.uniform(-0.15, 0.05), rnd.uniform(0.85, 1.0), rnd.uniform(0.50, 0.60)))
+        t, rx, rz = rnd.uniform(0.88, 1.06), rnd.uniform(0.92, 1.10), rnd.uniform(0.55, 0.65)
+        top.append((L * (i + 0.5 + rnd.uniform(-0.12, 0.12)) / 5, t - rz, rx, rz))
+    for i in range(4):
+        mid.append((L * (i + rnd.uniform(-0.08, 0.08)) / 4, rnd.uniform(-0.20, 0.0), rnd.uniform(1.10, 1.25), rnd.uniform(0.55, 0.65)))
+    for i in range(4):
+        back.append((L * (i + 0.5 + rnd.uniform(-0.12, 0.12)) / 4, -0.60, rnd.uniform(1.15, 1.30), rnd.uniform(0.62, 0.72)))
     for i in range(5):
-        back.append((L * (i + 0.5 + rnd.uniform(-0.12, 0.12)) / 5, -0.60, rnd.uniform(0.95, 1.1), rnd.uniform(0.62, 0.72)))
-    for i in range(6):
-        low.append((L * (i + rnd.uniform(-0.08, 0.08)) / 6, rnd.uniform(-0.80, -0.68), rnd.uniform(0.60, 0.78), rnd.uniform(0.40, 0.48)))
+        low.append((L * (i + rnd.uniform(-0.08, 0.08)) / 5, rnd.uniform(-0.82, -0.70), rnd.uniform(0.80, 0.95), rnd.uniform(0.42, 0.50)))
     return top, mid, low, back
 
 
@@ -116,10 +116,12 @@ def _crescent(c, zc, rx, rz, a0=math.pi * 1.02, a1=math.pi * 1.62):
     return outer + inner[::-1]
 
 
-def _lit_lobe(d, M, c, zc, rx, rz, seed):
+def _lit_lobe(d, M, c, zc, rx, rz, seed, arc=(0.08, 0.92)):
+    """A lit lobe: its fill, the shaded lower-left crescent, and ink only along its exposed arc (in half-turns: the upper
+    scallop (0.08, 0.92), or the lower one (1.08, 1.92) for a hanging lobe) so it merges into its neighbours."""
     G.stroke(d, _arc(c, zc, rx, rz, 0.0, TAU, 48), M["cloud"], 0.0, cyclic=True)
     G.stroke(d, _crescent(c, zc, rx, rz), M["cloud_sh"], 0.0, cyclic=True)
-    G.stroke(d, _arc(c, zc, rx, rz, 0.0, TAU, 48), M["ink"], I, cyclic=True)
+    G.stroke(d, _arc(c, zc, rx, rz, math.pi * arc[0], math.pi * arc[1], 28), M["ink"], I)
     G.hatch(d, c - rx * 0.45, zc - rz * 0.30, M["ink"], n=3, length=0.07, spacing=0.03, angle_deg=60, seed=seed)
 
 
@@ -135,8 +137,9 @@ def draw_belly(d, M, giant="jupiter", k=0):
     for c, zc, rx, rz in back:                                                                   # the back row: its lower arcs
         wrapped_x(lambda dx, _dz, c=c, zc=zc, rx=rx, rz=rz: G.stroke(d, _arc(c + dx, zc, rx, rz, math.pi * 1.05, math.pi * 1.95, 30),
                                                                     M["ink"], I), L)
-    for j, lobe in enumerate(low + top + mid):                                                     # lit lobes, back to front
-        wrapped_x(lambda dx, _dz, lobe=lobe, j=j: _lit_lobe(d, M, lobe[0] + dx, lobe[1], lobe[2], lobe[3], j), L)
+    rows = [(lb, (1.08, 1.92)) for lb in low] + [(lb, (0.08, 0.92)) for lb in top + mid]
+    for j, (lobe, arc) in enumerate(rows):                                                        # lit lobes, back to front
+        wrapped_x(lambda dx, _dz, lobe=lobe, j=j, arc=arc: _lit_lobe(d, M, lobe[0] + dx, lobe[1], lobe[2], lobe[3], j, arc), L)
 
     def edges(dx, _dz):
         G.stroke(d, [(x + dx, z) for x, z in ztop], M["ink"], O)                                  # the crown in front of the strip
@@ -166,7 +169,7 @@ def wrapped_x(fn, L):
         _GROUPS.append((_COPIES.index(0), ranges))
 
 
-END_LOBES = [(0.85, -0.35, 0.55, 0.50), (0.80, 0.70, 0.55, 0.48), (0.15, -0.60, 0.75, 0.78), (0.05, 1.27, 0.55, 0.53), (-0.15, 0.45, 0.60, 0.60)]
+END_LOBES = [(0.80, 0.70, 0.55, 0.48), (0.85, -0.35, 0.55, 0.50), (0.05, 1.27, 0.55, 0.53), (-0.15, 0.45, 0.60, 0.60), (0.15, -0.60, 0.75, 0.78)]
 
 
 def _inside(x, z, lobes):
@@ -180,10 +183,11 @@ def draw_end(side):
         the floe's side, so no vertical slab side shows; sorts above the strip and the belly. Drawn for the left end, mirrored."""
         s = 1 if side == "l" else -1
         X = lambda pts: [(s * x, z) for x, z in pts]  # noqa: E731
-        for c, zc, rx, rz in END_LOBES:
+        for j, (c, zc, rx, rz) in enumerate(END_LOBES):                                            # back to front, the lower in front
             G.stroke(d, X(_arc(c, zc, rx, rz, 0.0, TAU, 48)), M["cloud"], 0.0, cyclic=True)
             G.stroke(d, X(_crescent(c, zc, rx, rz)), M["cloud_sh"], 0.0, cyclic=True)
-            G.stroke(d, X(_arc(c, zc, rx, rz, 0.0, TAU, 48)), M["ink"], I, cyclic=True)
+            G.stroke(d, X(_arc(c, zc, rx, rz, math.pi * 0.10, math.pi * 0.90, 28)), M["ink"], I)
+            G.hatch(d, s * (c - rx * 0.45), zc - rz * 0.30, M["ink"], n=3, length=0.07, spacing=0.03, angle_deg=60 if s > 0 else 120, seed=j)
         cx, cz = 0.15, 0.25                                                                         # the union's outline, by ray
         ring = []
         for i in range(180):
@@ -303,8 +307,8 @@ def preview(out_dir, giant="jupiter", S=None, out=None, footnote=None):
         review._over(img, f0, x0 + 300, ground - sm["frame_height"] + int(round(sm["pivot"][1] * sm["frame_height"])))
     except (OSError, KeyError, ValueError):
         pass
-    review._label(img, f"b-177 {giant}: a 14 m ice floe (the floe strip + caps) at 1x on deck2 as an island: island_belly under it (ink on row 8), "
-                       "island_end_l / _r at its ends, under_haze_deck2 below the floe line; the surveyor", 6, 6)
+    review._label(img, f"b-177 {giant}: a 14 m ice floe (the floe strip + caps) at 1x on deck2 as an island: island_belly over its lower half (outline row 72), "
+                       "island_end_l / _r shoulders at its ends, under_haze_deck2 below; the surveyor", 6, 6)
     rows = [img]
     P = np.empty((40 + 512 + 40, W, 3), np.float32)
     P[:] = review.PAPER
@@ -314,7 +318,7 @@ def preview(out_dir, giant="jupiter", S=None, out=None, footnote=None):
         review._label(P, f"under_haze_{dk} (0.5x)", x, 20)
         x += 256 + 16
     review._over(P, np.tile(belly, (1, 2, 1)), 8, 340)
-    review._label(P, f"island_belly 512x128 tiled x2 (copies p99 {copy_p99:.0f})", 8, 320)
+    review._label(P, f"island_belly 512x192 tiled x2 (copies p99 {copy_p99:.0f})", 8, 320)
     review._over(P, end_l, x, 40)
     review._over(P, end_r, x + 180, 40)
     review._label(P, "island_end_l | island_end_r", x, 20)
