@@ -18,7 +18,7 @@ namespace Meridian.Tests
     public class SolidRescueTests
     {
         const string CorePath = "Assets/_Game/Scenes/Core.unity";
-        const float Depth = 3f, OnSurface = 0.1f; // on the outline, not under it: a round foot on a 35° slope rides 6.6 cm over the line at its centre
+        const float Depth = 3f, OnSurface = 0.05f; // the body's collider to the outline's, along the normal (a flat box on a slope rests on a corner)
         PlanetSideRoot side;
         PlayerController player;
 
@@ -50,6 +50,21 @@ namespace Meridian.Tests
             return float.NaN;
         }
 
+        /// <summary>The body's own distance to the outline (its colliders to the chunks' edge colliders round it, along the normal).</summary>
+        static float Gap(Rigidbody2D b)
+        {
+            var list = new System.Collections.Generic.List<Collider2D>();
+            b.GetAttachedColliders(list);
+            float gap = float.PositiveInfinity;
+            foreach (var c in list)
+            {
+                if (c.isTrigger) continue;
+                foreach (var e in Physics2D.OverlapBoxAll(c.bounds.center, (Vector2)c.bounds.size + Vector2.one, 0f))
+                    if (e is EdgeCollider2D && e.GetComponent<TerrainChunk>() != null) gap = Mathf.Min(gap, Mathf.Abs(Physics2D.Distance(c, e).distance));
+            }
+            return gap;
+        }
+
         static float Bottom(Rigidbody2D b)
         {
             var list = new System.Collections.Generic.List<Collider2D>();
@@ -76,8 +91,10 @@ namespace Meridian.Tests
             Assert.Greater(SolidRescue.Rescues, rescuesBefore, $"{who}: lifted");
             for (int i = 0; i < settle; i++) yield return new WaitForFixedUpdate();
             float bottom = Bottom(body), ex = body.position.x, under = Surface(ex); // where it stands now (a creature may have walked on)
-            TestContext.Out.WriteLine($"[MERIDIAN] u156 rescue {who}: buried at x {x:F1} to {surface - Depth:F2} (outline {surface:F2}); ends at x {ex:F2}, feet {bottom:F2}, outline there {under:F2}");
-            Assert.AreEqual(under, bottom, OnSurface, $"{who}: ends on the surface");
+            float gap = Gap(body);
+            TestContext.Out.WriteLine($"[MERIDIAN] u156 rescue {who}: buried at x {x:F1} to {surface - Depth:F2} (outline {surface:F2}); ends at x {ex:F2}, feet {bottom:F2}, outline there {under:F2}, gap to the outline {gap:F3} m");
+            Assert.Less(gap, OnSurface, $"{who}: ends on the surface");
+            Assert.Greater(bottom, under - 0.5f, $"{who}: above the outline, not under it");
         }
 
         [UnityTest]

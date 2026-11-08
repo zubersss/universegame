@@ -83,6 +83,11 @@ namespace Meridian.Terrain
                 if (!Inside(t, centre)) continue;
                 float surface = SurfaceAbove(t, centre);
                 if (float.IsNaN(surface)) continue;
+                // A wide body (the ship; a creature on a slope) clears the ground under its whole footprint, not just its centre column.
+                float inset = Mathf.Min(0.05f, box.extents.x);
+                float left = SurfaceAbove(t, new Vector2(box.min.x + inset, centre.y)), right = SurfaceAbove(t, new Vector2(box.max.x - inset, centre.y));
+                if (!float.IsNaN(left)) surface = Mathf.Max(surface, left);
+                if (!float.IsNaN(right)) surface = Mathf.Max(surface, right);
                 float rise = surface + Clearance - box.min.y;
                 if (rise <= 0f) continue;
                 b.position += new Vector2(0f, rise);

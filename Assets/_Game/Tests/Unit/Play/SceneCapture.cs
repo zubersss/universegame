@@ -2054,7 +2054,7 @@ namespace Meridian.Tests
                 while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
                 var dir = "coordination/reports/unity/u156";
                 Directory.CreateDirectory(dir);
-                string[] spots = { "1_camp", "2_hill", "3_valley", "4_lip", "5_coast" };
+                string[] spots = { "1_camp", "2_hill", "3_valley", "4_lip", "5_coast", "6_desert", "7_desert_edge", "8_snow", "9_beach" }; // 6-9: B-178's sets by biome
                 var xs = new int[spots.Length];
                 for (int pass = 0; pass < 2; pass++)
                 {
@@ -2087,7 +2087,20 @@ namespace Meridian.Tests
                         xs[1] = hi; xs[2] = lo; xs[3] = steep;
                         Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Ocean, out int coast, out _);
                         xs[4] = coast - 10;
-                        TestContext.Out.WriteLine($"[MERIDIAN] u156 spots: camp {xs[0]}, hill {xs[1]} (top {hiY}), valley {xs[2]} (top {loY}), lip {xs[3]} (curve step {steepS:F2}), coast {xs[4]}");
+                        // B-178: the desert's middle and its first column (the crossfade), the taiga's middle, a beach (the first dry Ocean column within
+                        // BeachRise of the water line).
+                        Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Desert, out int ds, out int dl);
+                        xs[5] = ds + dl / 2; xs[6] = ds;
+                        Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Taiga, out int ts, out int tl);
+                        xs[7] = ts + tl / 2;
+                        Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Ocean, out int os, out int ol);
+                        xs[8] = coast;
+                        for (int ox = os; ox < os + ol; ox++)
+                        {
+                            int g = t.OriginalTop(ox) + 1;
+                            if (g > side.Config.datumY + 1 && g <= side.Config.datumY + Meridian.View2D.SmoothGround.BeachRise) { xs[8] = ox; break; }
+                        }
+                        TestContext.Out.WriteLine($"[MERIDIAN] u156 spots: camp {xs[0]}, hill {xs[1]} (top {hiY}), valley {xs[2]} (top {loY}), lip {xs[3]} (curve step {steepS:F2}), coast {xs[4]}, desert {xs[5]}, desert edge {xs[6]}, snow {xs[7]}, beach {xs[8]}");
                     }
                     var cam = side.sideCamera;
                     var follow = cam.GetComponent<Meridian.Player.CameraFollow>();
@@ -2109,8 +2122,28 @@ namespace Meridian.Tests
                         yield return Save(cam, $"{name}_{label}");
                         File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
                         var smooth = side.cartoon != null ? side.cartoon.Smooth : null;
-                        TestContext.Out.WriteLine($"[MERIDIAN] u156 {label}: x {x}, feet {side.player.Body.position.y:F2} (grid top {t.TopSolidY(x) + 1}), grounded {side.player.Grounded}, slope normal {side.player.GroundNormal}, smooth {t.SmoothGround}, band art {(smooth != null && smooth.BandArt)}, fill art {(smooth != null && smooth.FillArt)}, band quads {(smooth != null ? smooth.LastBandQuads : 0)}");
+                        TestContext.Out.WriteLine($"[MERIDIAN] u156 {label}: x {x}, feet {side.player.Body.position.y:F2} (grid top {t.TopSolidY(x) + 1}), grounded {side.player.Grounded}, slope normal {side.player.GroundNormal}, smooth {t.SmoothGround}, band art {(smooth != null && smooth.BandArt)}, fill art {(smooth != null && smooth.FillArt)}, band quads {(smooth != null ? smooth.LastBandQuads : 0)}, variant {(smooth != null ? smooth.VariantAt(x) : -1)} (art sand {(smooth != null && smooth.VariantArt(1))} stone {(smooth != null && smooth.VariantArt(2))} snow {(smooth != null && smooth.VariantArt(3))})");
                         if (pass == 0) Assert.IsTrue(side.player.Grounded, $"{label}: the surveyor stands on the traced ground");
+                        if (pass == 0 && i == 3)
+                        {
+                            // Which renderers draw the whole-tile steps over the rounded crest (between the outline and the grid tops)?
+                            for (int dx = -10; dx <= 10; dx++)
+                            {
+                                int cx = x + dx; float s = t.SurfaceAt(cx + 0.5f), g = t.TopSolidY(cx) + 1f;
+                                if (g - s < 0.35f) continue;
+                                var p = new Vector3(cx + 0.5f, s + 0.15f, 0f);
+                                var hits = new System.Text.StringBuilder();
+                                foreach (var r in UnityEngine.Object.FindObjectsByType<Renderer>(FindObjectsSortMode.None))
+                                {
+                                    if (!r.enabled || !r.gameObject.activeInHierarchy) continue;
+                                    var b = r.bounds;
+                                    if (p.x < b.min.x || p.x > b.max.x || p.y < b.min.y || p.y > b.max.y) continue;
+                                    hits.Append($" | {r.GetType().Name} {(r.transform.parent != null ? r.transform.parent.name + "/" : "")}{r.name} order {r.sortingOrder} z {r.transform.position.z:F2}");
+                                }
+                                TestContext.Out.WriteLine($"[MERIDIAN] u156 step at column {cx}: outline {s:F2}, grid top {g:F0}, renderers over ({p.x:F1}, {p.y:F2}):{hits}");
+                                break;
+                            }
+                        }
                     }
                 }
                 LogAssert.NoUnexpectedReceived();
