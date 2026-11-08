@@ -434,6 +434,36 @@ def band_frost(d, M, k=0):
     _pebbles(d, M, 6, (-0.36, -0.42), 1841)
 
 
+def _chipped(cx, cz, rx, rz, seed, rot=0.0, n=8):
+    """A chipped, rounded lump: n corners at jittered angles and radii (the chips), corner-cut twice (Chaikin), so its
+    facets stay flat-ish but every corner is soft: no flat top, no vertical side, nothing that reads as a cube."""
+    rnd = random.Random(seed)
+    poly = []
+    for i in range(n):
+        a = TAU * (i + rnd.uniform(-0.3, 0.3)) / n
+        q = rnd.uniform(0.88, 1.06)
+        poly.append((rx * q * math.cos(a), rz * q * math.sin(a)))
+    for _ in range(2):
+        nxt = []
+        for i in range(len(poly)):
+            (x0, z0), (x1, z1) = poly[i], poly[(i + 1) % len(poly)]
+            nxt += [(0.75 * x0 + 0.25 * x1, 0.75 * z0 + 0.25 * z1), (0.25 * x0 + 0.75 * x1, 0.25 * z0 + 0.75 * z1)]
+        poly = nxt
+    c, s = math.cos(rot), math.sin(rot)
+    return [(cx + px * c - pz * s, cz + px * s + pz * c) for px, pz in poly]
+
+
+def _arc(out, cx, cz, a0, a1):
+    """The outline's points seen from (cx, cz) between a0 and a1 degrees (in outline order), closed by their chord: a facet
+    chipped off the lump's rim, always inside the outline."""
+    sel = [i for i, (px, pz) in enumerate(out) if a0 <= math.degrees(math.atan2(pz - cz, px - cx)) % 360 <= a1]
+    if len(sel) < 3:
+        return [(cx, cz)] * 3
+    gaps = [(sel[(i + 1) % len(sel)] - sel[i]) % len(out) for i in range(len(sel))]
+    start = (gaps.index(max(gaps)) + 1) % len(sel)                                            # begin after the one gap (the arc may wrap index 0)
+    return [out[sel[(start + i) % len(sel)]] for i in range(len(sel))]
+
+
 def decor_frost(d, M, k):
     rnd = random.Random(1850 + k)
     if k == 0:                                                                                # a frost-capped boulder
@@ -441,16 +471,16 @@ def decor_frost(d, M, k):
         G.seam(d, [(0.10, 0.10), (0.04, 0.02)], M["ink"])
         topline = sorted([(x, z) for x, z in pts if z > 0.12 and abs(x) < 0.30], key=lambda p: p[0])
         _snowcap(d, M, topline, thick=0.06)
-    elif k == 1:                                                                              # blocks of water ice
-        for j, (x, w, h, tilt) in enumerate(((-0.22, 0.13, 0.20, -0.15), (0.06, 0.17, 0.30, 0.05), (0.28, 0.11, 0.15, 0.2))):
-            c, s_ = math.cos(tilt), math.sin(tilt)
-            R = lambda px, pz: (x + px * c - pz * s_, pz * c + px * s_ + 0.0)  # noqa: E731
-            blk = [R(-w, 0.0), R(-w * 0.95, h), R(w * 0.9, h * 1.05), R(w, 0.0)]
-            G.stroke(d, blk, M["ice"], 0.0, cyclic=True)
-            G.stroke(d, [R(-w, 0.0), R(-w * 0.95, h), R(-w * 0.2, h * 0.9), R(-w * 0.25, 0.0)], M["ice_sh"], 0.0, cyclic=True)
-            G.stroke(d, [R(-w * 0.95, h), R(w * 0.9, h * 1.05), R(w * 0.8, h * 0.88), R(-w * 0.85, h * 0.85)], M["frost"], 0.0, cyclic=True)
-            G.stroke(d, blk, M["ink"], O, cyclic=True)
-            G.seam(d, [R(-w * 0.2, h * 0.9), R(-w * 0.25, 0.05)], M["ink"])
+    elif k == 1:                                                                              # chipped lumps of water ice (LEAD 09:4x: the blocks read as cubes)
+        for j, (x, r, h, rot) in enumerate(((-0.22, 0.14, 0.17, -0.30), (0.05, 0.18, 0.25, 0.12), (0.29, 0.11, 0.13, 0.40))):
+            cz = h * 0.47
+            out = [(px, max(pz, -0.02)) for px, pz in _chipped(x, cz, r, h * 0.55, 1852 + j, rot)]
+            G.stroke(d, out, M["ice"], 0.0, cyclic=True)
+            G.stroke(d, _arc(out, x, cz, 150, 285), M["ice_sh"], 0.0, cyclic=True)              # the unlit chip on the lower left
+            ox, oz = r * 0.30, h * 0.55 * 0.32                                               # the lit chip: a glassy facet up and right, inside the rim
+            G.stroke(d, _chipped(x + ox * math.cos(rot) - oz * math.sin(rot), cz + ox * math.sin(rot) + oz * math.cos(rot),
+                                 r * 0.36, h * 0.55 * 0.26, 1872 + j, rot + 0.35, n=5), M["frost"], 0.0, cyclic=True)
+            G.stroke(d, out, M["ink"], O, cyclic=True)
     else:                                                                                     # a CO2 vent: a dark fan, a plume
         fan = [(-0.04, 0.0), (0.40, 0.035), (0.44, -0.01), (0.04, -0.015)]
         G.stroke(d, fan, M["vent"], 0.0, cyclic=True)
