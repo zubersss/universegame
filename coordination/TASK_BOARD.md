@@ -184,7 +184,7 @@ Files: Assets/_Game/Tests/LeadQA/M3InnerTests.cs, coordination/reviews/M3_REPORT
 Depends: U-060
 Lead notes: Done (cycle 168): M3InnerTests 738fd43 passed twice (UNITY checks 23:16 and 23:46, 7/7 each); 0.3.0 smoke shots checked; M3_REPORT.md written; milestone page published https://claude.ai/artifact/EfXnC1s4pys8zi3e5WDeQy; USER-16 playtest posted. M3 closes on the owner's playtest.
 
-### L-013 · LEAD · In Progress · D1
+### L-013 · LEAD · Done · D1
 Goal: The D1 tuning tables (Bible 5.2 §8.1): docs/D1_TABLES.md: per planet × tier the materials (existing item ids first; new ids named for BLENDER's icons), drop weights, Scrip values and item weights; the pack's starting limit; the climb's load factors; the Skill Tree's node list (six branches × five rings: id, effect, amount, cost in Scrip and materials, links outward / sideways).
 Accept: every number U-174 / U-175 / U-176 / U-177 need is in the file; one table per planet; the node list complete with ids for B-204's icons; a short "first hour" walk-through showing a new player's income against the first two rings' costs.
 Files: docs/D1_TABLES.md
