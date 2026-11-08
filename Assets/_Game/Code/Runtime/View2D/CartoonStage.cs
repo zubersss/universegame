@@ -16,6 +16,8 @@ namespace Meridian.View2D
         /// <summary>Master switch (tests, the C0 style-test entry). Off by default until LEAD converts a planet.</summary>
         /// <summary>P-48 (D-086 / D-099): the v4 cartoon path is the game's path on converted planets; on by default. Tests of the 3D path on Earth switch it off for their run and restore it.</summary>
         public static bool Enabled = true;
+        /// <summary>U-168: the cartoon path draws the current planet (GameState's), so the v2 models it never shows are not loaded.</summary>
+        public static bool DrawsCurrentPlanet => Enabled && Meridian.Core.GameState.Instance != null && Converted(Meridian.Core.GameState.Instance.currentPlanet);
         /// <summary>The planets whose v4 art path is on when Enabled (C0: Earth).</summary>
         public static bool Converted(Meridian.Planets.PlanetId id) => id == Meridian.Planets.PlanetId.Earth || id == Meridian.Planets.PlanetId.Mars || id == Meridian.Planets.PlanetId.Mercury || id == Meridian.Planets.PlanetId.Venus || id == Meridian.Planets.PlanetId.Jupiter || id == Meridian.Planets.PlanetId.Saturn || id == Meridian.Planets.PlanetId.Uranus || id == Meridian.Planets.PlanetId.Neptune; // U-118: Mars joins Earth; U-123: Mercury; U-125: Venus; U-127: Jupiter; U-129: Saturn; U-130: Uranus; U-133: Neptune
 

@@ -20,8 +20,13 @@ namespace Meridian.Perf
 
         public static void Track(string key, AsyncOperationHandle handle) => Track(handle, GroupOf(key), key);
 
+        /// <summary>U-168 (tests): while on, every key loaded through ArtLoad is recorded in Requested (a load census; off in the game).</summary>
+        public static bool RecordRequests;
+        public static readonly HashSet<string> Requested = new HashSet<string>();
+
         public static void Track(AsyncOperationHandle handle, string group, string key = null)
         {
+            if (RecordRequests) Requested.Add(key ?? group);
             if (!handle.IsValid()) return;
             entries.Add(new Entry { group = group, key = key ?? group, handle = handle });
         }

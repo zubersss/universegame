@@ -60,13 +60,21 @@ namespace Meridian.Player
             VisualRoot.localPosition = Vector3.zero;
             var viewLocal = view.transform.localPosition;
             if (view.transform != VisualRoot.parent) { view.transform.SetParent(VisualRoot, false); view.transform.localPosition = viewLocal; }
-            var modelGo = new GameObject("Model");
-            modelGo.transform.SetParent(VisualRoot, false);
-            modelGo.transform.localPosition = viewLocal;
-            Model = modelGo.AddComponent<Meridian.Art.ModelView>();
-            Model.Load(ArtKeys.Characters.Surveyor);
+            EnsureModel();
             Meridian.Hazards.HazardSystem.SuitEquipped += OnSuitEquipped;
             Hook();
+        }
+
+        /// <summary>U-075: the surveyor's 3D model under the visual root. U-168: never on the cartoon path (it draws its own surveyor and
+        /// this view steps aside): the model loads on the 3D path only, the first time this view runs there.</summary>
+        void EnsureModel()
+        {
+            if (Model != null || VisualRoot == null || Meridian.View2D.CartoonStage.DrawsCurrentPlanet) return;
+            var modelGo = new GameObject("Model");
+            modelGo.transform.SetParent(VisualRoot, false);
+            modelGo.transform.localPosition = view.transform.localPosition;
+            Model = modelGo.AddComponent<Meridian.Art.ModelView>();
+            Model.Load(ArtKeys.Characters.Surveyor);
         }
 
         /// <summary>The loaded sheet's key (U-049: base, mk1, mk2, mk3).</summary>
@@ -136,6 +144,7 @@ namespace Meridian.Player
         {
             watch.Restart();
             if (controller == null) return;
+            if (Model == null) EnsureModel(); // U-168: the 3D path (a planet the cartoon path does not draw, or a test with it off)
             if (!hooked) Hook();
             float dt = Time.deltaTime;
             sinceHurt += dt; sinceLand += dt; sinceDig += dt;

@@ -135,6 +135,38 @@ namespace Meridian.Tests
             Assert.Less(r.worstMs, 33f, $"no hitch > 33 ms while streaming on {planet}");
         }
 
+        /// <summary>U-168: a cartoon boot through Earth, space and Saturn never loads the three v2 models the cartoon path never shows: the
+        /// surveyor's (characters/surveyor/base), the Pilgrim's fallback (ships/pilgrim/base) and Saturn's ring mesh (planets/saturn/ring_mesh,
+        /// which the painted rings replace). Residency.RecordRequests sees every key loaded through ArtLoad.</summary>
+        [UnityTest, Timeout(300000)]
+        public IEnumerator TheCartoonPathNeverLoadsTheV2Models()
+        {
+            Assert.IsTrue(Meridian.View2D.CartoonStage.Enabled, "the cartoon path is on");
+            Residency.Requested.Clear();
+            Residency.RecordRequests = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 20f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var transitions = Object.FindAnyObjectByType<TransitionDirector>();
+                for (int i = 0; i < 120; i++) yield return null; // the views' first frames and their loads
+                yield return Launch(director, transitions, PlanetId.Earth);
+                for (int i = 0; i < 120; i++) yield return null; // space: the disc probes resolve
+                yield return Enter(director, transitions, "saturn");
+                for (int i = 0; i < 120; i++) yield return null;
+                Log($"U-168 census: {Residency.Requested.Count} keys loaded through Earth, space and Saturn");
+                Assert.Greater(Residency.Requested.Count, 20, "the census saw the boot's loads");
+                foreach (var k in new[] { "characters/surveyor/base", "ships/pilgrim/base", "planets/saturn/ring_mesh" })
+                    Assert.IsFalse(Residency.Requested.Contains(k), $"{k} loaded on the cartoon path");
+            }
+            finally { Residency.RecordRequests = false; Residency.Requested.Clear(); }
+        }
+
         [UnityTest, Timeout(300000)]
         public IEnumerator PlanetsReleaseOnTransitionAndMemoryReturns()
         {

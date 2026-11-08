@@ -142,8 +142,7 @@ namespace Meridian.Space
                 });
                 return;
             }
-            AddGlow(parent, b);
-            if (b.name == "saturn") AddRings(parent, b);
+            AddGlow(parent, b); // U-168: Saturn's ring mesh waits for the disc probe (ProbeDisc): only a body without its painted disc loads it
             var h = ArtLoad.Asset<Texture2D>($"planets/{b.name}/surface");
             handles.Add(h);
             h.Completed += op =>
@@ -229,7 +228,7 @@ namespace Meridian.Space
             {
                 bool exists = loc.Status == AsyncOperationStatus.Succeeded && loc.Result != null && loc.Result.Count > 0;
                 global::Meridian.Art.ArtLoad.Release(loc);
-                if (!exists || parent == null) return;
+                if (!exists || parent == null) { if (!exists && parent != null && b.name == "saturn" && b.parent == null) AddRings(parent, b); return; }
                 discBodies.Add(b.name);
                 foreach (var n in new[] { "Disc", "Atmo", "Clouds", "Rings" })
                 {

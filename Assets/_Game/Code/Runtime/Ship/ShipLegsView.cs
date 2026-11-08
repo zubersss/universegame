@@ -78,7 +78,8 @@ namespace Meridian.Ship
             // U-076: the Pilgrim's model (B-079) replaces the side sprites once loaded. Its origin is the centre of mass, so its
             // lowest point is set on the skid line, SkidDrop below the body. U-107 (D-102): art wider than tall is the old level
             // hull, stood on its stern as a stand-in.
-            if (ship != null && target != null && SquashRoot != null && Model == null)
+            // U-168: not on the cartoon path, which never shows the model (the side sprites stay as the fallback there).
+            if (ship != null && target != null && SquashRoot != null && Model == null && !Meridian.View2D.CartoonStage.DrawsCurrentPlanet)
             {
                 Model = ModelSwap.Attach(target, ArtKeys.Ships.PilgrimModel, SquashRoot, Vector3.zero);
                 Model.Swapped += s =>
