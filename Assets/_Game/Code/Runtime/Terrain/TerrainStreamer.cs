@@ -297,7 +297,7 @@ namespace Meridian.Terrain
         // otherwise sank through its unstreamed pad once the surveyor walked ~500 m away.
         void FixedUpdate()
         {
-            if (started && Config != null) SolidRescue.Tick(this, SmoothGround);
+            if (started && Config != null && Config.worldType == WorldType.Solid) SolidRescue.Tick(this, SmoothGround); // U-159: not over a giant's cloud column (its empty chunks are not unloaded ground: the Pilgrim froze over Jupiter's deck)
         }
 
         void Update()

@@ -42,7 +42,10 @@ namespace Meridian.Tests
             var rig = player.GetComponent<PlayerRigInput>();
             Assert.NotNull(side.scanner, "SurveyScanner on PlanetSide");
 
-            // A stag 4 m away, then a Survey pulse.
+            // A stag 4 m away, then a Survey pulse. U-169: no other creature about (the camp's gull or a spawned critter walking into the
+            // rescan's reach was a new entry, paid as it should be, not a repeat).
+            side.creatures.autoSpawn = false;
+            side.creatures.DespawnAll();
             int sx = Mathf.FloorToInt(player.Body.position.x) - 4;
             var spec = SpeciesSpec.Get(Species.Stag);
             var stag = side.creatures.Spawn(Species.Stag, new Vector2(sx + 0.5f, side.terrain.TopSolidY(sx) + 1f + spec.size.y * 0.5f + 0.05f));
@@ -66,7 +69,7 @@ namespace Meridian.Tests
             int before = state.datacores;
             yield return new WaitForSeconds(PlayerRigInput.SurveyCooldown + 0.1f);
             side.scanner.Scan(player.Body.position + new Vector2(0f, 0.9f));
-            Assert.AreEqual(0, side.scanner.LastPaid, "rescans pay nothing");
+            Assert.AreEqual(0, side.scanner.LastPaid, $"rescans pay nothing (new: {string.Join(", ", side.scanner.LastNew)})");
             Assert.AreEqual(before, state.datacores);
 
             // The panel shows the entry and Earth's completion.

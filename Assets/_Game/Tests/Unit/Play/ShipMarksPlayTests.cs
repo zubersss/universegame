@@ -64,6 +64,9 @@ namespace Meridian.Tests
             go.AddComponent<BoxCollider2D>();
             var s = go.AddComponent<SideShip>();
             s.externalInput = true;
+            // U-169: a leftover Core scene's streamer ticks the static SolidRescue; it would park this synthetic ship over "unloaded ground"
+            // (as ShipSideTests).
+            Meridian.Terrain.SolidRescue.Unregister(s.Body);
             s.ConfigureFor(planet);
             s.Hull = 100f;
             SetMark(s, mark);

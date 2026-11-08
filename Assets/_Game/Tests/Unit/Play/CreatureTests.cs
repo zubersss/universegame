@@ -127,6 +127,9 @@ namespace Meridian.Tests
             var cam = side.sideCamera;
             cam.GetComponent<CameraFollow>().enabled = false;
             var home = cam.transform.position;
+            // U-169 (as BudgetGate / StageLayer): the camera travels alone and streams the camp out under the surveyor; hold it meanwhile.
+            bool playerSim = player.Body.simulated;
+            player.Body.simulated = false;
             cam.transform.position = home + new Vector3(300f, 0f, 0f);
             float until = Time.realtimeSinceStartup + 10f;
             while (!side.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
@@ -139,6 +142,8 @@ namespace Meridian.Tests
             yield return null;
             until = Time.realtimeSinceStartup + 10f;
             while (!side.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+            yield return new WaitForFixedUpdate();
+            player.Body.simulated = playerSim; // the camp is back under it
             for (int i = 0; i < 120; i++) yield return new WaitForFixedUpdate();
 
             int checkedCount = 0;

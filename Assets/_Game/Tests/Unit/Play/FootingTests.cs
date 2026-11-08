@@ -63,7 +63,9 @@ namespace Meridian.Tests
                     float until = Time.realtimeSinceStartup + 10f;
                     while (!t.IsSettled && Time.realtimeSinceStartup < until) yield return null;
                     int top = t.TopSolidY(x);
-                    var feet = new Vector2(x + 0.5f, top + 1.05f);
+                    // U-169: on a smooth planet the grid fills to the drawn curve, so the top tile can stand up to 0.75 m over the outline; the
+                    // surveyor is set on the outline itself (a drop from the tile top took Mars's low gravity longer than the settle below).
+                    var feet = new Vector2(x + 0.5f, t.SmoothGround && top == t.NaturalTop(x) ? t.SurfaceAt(x + 0.5f) + 0.05f : top + 1.05f);
                     // A solid body already standing there (the landed Pilgrim's hull on Mars, x 72–76) makes the
                     // spot unstandable: placing the surveyor inside it only measures depenetration. Skip and log.
                     // D-057: every skipped column must lie within the landed ship's footprint (|x − ship x| ≤ 4).
@@ -80,6 +82,7 @@ namespace Meridian.Tests
                     }
                     side.player.Body.position = feet; side.player.transform.position = feet; side.player.Body.linearVelocity = Vector2.zero;
                     for (int i = 0; i < 25; i++) yield return new WaitForFixedUpdate();
+                    for (int i = 0; i < 75 && !side.player.Grounded; i++) yield return new WaitForFixedUpdate(); // U-169: settled, whatever the gravity
                     float y = side.player.Body.position.y, ground = top + 1f;
                     if (t.SmoothGround)
                     {

@@ -109,6 +109,7 @@ namespace Meridian.Art
                 Animator.runtimeAnimatorController = controller;
                 Animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
                 Animator.speed = 0f; // frame 0 until a clip is asked for
+                Animator.enabled = false; // U-159 (BudgetGate): an idle sheet holds its first drawing with no Animator running (PlayToward turns it on); B-195's three Earth POI sheets had put Earth C0 at 42 against 40
             }
             Ready = true;
             Loaded?.Invoke(this);
