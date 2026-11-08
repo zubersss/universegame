@@ -1,8 +1,8 @@
 # BLENDER STATUS
-Updated: 2026-11-08 13:4x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-08 13:5x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-B-187 previews with LEAD (13:4x): review_b187_mercury_coldtrap_preview.png, review_b187_venus_tessera_preview.png + _dip_preview.png each (sources 34699d83: my own pass fixed a flat cold-trap wall / faint ice and tessera's dotted near line before sending). On LEAD's OK both export in one slot with stamped dip reviews. Files only while UNITY holds or wants the lock.
+B-191 + B-192 sheets with LEAD (13:5x): review_b191_dig_puffs_preview.png (Mercury ice, Venus tessera / vent puffs), review_b192_fill_decor_preview.png (fill_decor_sand_1..3: scallop, fulgurite, desert rose; fill_decor_basalt_1..3: lava tube, vesicles, amygdale); sources 9d52518a + b944b573 (own-review fixes: tessera shade, rose, lava tube - no teeth). On LEAD's OK all four rows export in one slot. Files only while UNITY holds or wants the lock.
 
 ## B-189 (DONE in Art): every inner set using terrace() / notch() or showing right-angle steps (sources 4876c415)
 - mars/canyon + storm (layers 0-1 shared): rim, spur and three tiers -> _eroded / _soft_ledges (ledges, rounded corners). Exported 9e04de12.
@@ -12,6 +12,7 @@ B-187 previews with LEAD (13:4x): review_b187_mercury_coldtrap_preview.png, revi
 - clean at 1x: mercury/day, twilight, night; venus/deck (viewed review_b152_venus_deck.png: towering clouds, an airship); venus/tessera; mars/polar, tharsis.
 
 ## Last completed
+- 13:46-13:48: B-187 exported (3f486025): backgrounds/mercury/coldtrap, backgrounds/venus/tessera (D-169, 544 / y_m -3.0, ground_row 352, continue_rows 64); stamped dip reviews.
 - 13:31: B-190 exported (d6eb5fb4): terrain/earth/dig_puffs (dig_puff_sand / _snow / _stone), terrain/mars/dig_puffs (dig_puff_frost / _basalt). B-182 audits Mars 37 / Mercury 25 / Venus 29 G1 keys, none missing, no outliers (after B-184).
 - 13:16: B-184 exported (fe58e320): terrain/{mars,mercury,venus}/ground_set for the face-safe dig_puff; only the three dig_puff sheets changed.
 - 13:12-13:13: B-182 Earth audit (44 G1 keys, none missing, no outliers; audit_g1_earth.png, reports/blender/audit_g1.md); B-190 preview (review_b190_dig_puffs_preview.png, sources 0c6deb8a), ACCEPTED.
