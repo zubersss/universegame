@@ -1,4 +1,6 @@
-# MERIDIAN — Asset Contract v3.2
+# MERIDIAN — Asset Contract v3.3
+
+> **v3.3 (D-164, 2026-11-08):** §11.10, the giants' island set: a rounded belly mapped under each floe and a painted haze fill below the floe line, on §11.9's mapping.
 
 > **v3.2 (D-163, 2026-11-08, the owner's smooth ground, D-161 / D-162):** §11.9, the ground band set: the smoothed ground is drawn from a bendable band, a world-space fill, upright decor, a brink lip, a dig rim and a dig puff per planet.
 
@@ -313,3 +315,8 @@ an fps other than 12, an overlay that is not 512².
 - `dig_rim` 256×16 mapped along each carved hole's outline, ink on row 4 with the sprite's pivot on that row, the rows below it lying in the solid (its normal points into the air).
 - `dig_puff` an 8-frame one-shot at 12 fps, pivot at the dig point.
 Tiling is checked before export by rendering two tiles side by side (p99 copy difference 0). A planet without diggable ground (the giants' islands, B-177) gets its own island set instead.
+
+**11.10 Island set (giants, v3.3, D-161 (4) / D-164).** Each giant's floes are rounded cloud-ice islands; their tops keep the floe strips with caps, and these keys under `terrain/<giant>/` draw the rest, on §11.9's mapping:
+- `island_belly` 512×128 at PPU 64, tiling in x every 8 m, mapped along a floe's underside outline: u = world x × 64 mod 512; v = the signed normal distance from the underside outline, its ink edge on row 8 (the sprite's pivot on that row), the rounded belly (cloud-ice lobes, icicles, wisps) hanging up to 1.875 m below it, transparent below its ragged edge.
+- `island_end_l` / `island_end_r` the belly's rounded ends, meeting the floe strip's cap_left / cap_right, pivot on the outline row at the floe's end.
+- `under_haze_<deck>` 512×512, its own texture (Repeat, never in an atlas), in world space below the floe line wherever the deck's set has no paint: u = x / 8, v = y / 8; soft painted haze in the deck's palette, no ink lines and no hard edges, darker toward the deck's floor.
