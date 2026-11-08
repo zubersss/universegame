@@ -783,19 +783,31 @@ def mars_tharsis(seed):
     # layer1: the nearer flank with stacked lava-flow lobes
     H = 512
     g1 = _gline(H, -1.0)
-    flank_l = g1 - 150 + 70 * np.cos(2 * np.pi * (xx - c) / W) + BG.ridge(rng, [(4, 0.6), (9, 0.4)], base=0, amp=8)
+    # B-186 rev 3 (LEAD 12:4x: one dome of even stripes repeating every 32 m): two unequal rises; flow bands of varied weight,
+    # two running the whole tile and four ending part-way down in tongue-shaped lobate fronts
+    c2 = c + W * rng.uniform(0.35, 0.45)
+    flank_l = (g1 - 150 + 55 * np.cos(2 * np.pi * (xx - c) / W) + 28 * np.cos(4 * np.pi * (xx - c2) / W)
+               + BG.ridge(rng, [(4, 0.6), (9, 0.4)], base=0, amp=8))
     flank = BG._ridge_mask(H, flank_l)
-    # B-186 rev 2 (the floating ellipses read as grey puddles): the flows as stacked dark bands that follow the flank, each
-    # with a scalloped lobate front (its lower edge) and a thin lit rim, rust dust between them
     lobes, lobe_lit = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
     yy1 = np.arange(H)[:, None].astype(np.float32)
-    for k, (d0, t0, lam) in enumerate(((22, 26, W / 14), (70, 30, W / 11), (124, 34, W / 9), (184, 38, W / 12))):   # whole periods per tile
+    for k, (d0, t0, lam, span) in enumerate(((16, 12, W / 16, None), (46, 30, W / 11, (0.42, 0.95)), (96, 18, W / 13, None),
+                                             (122, 40, W / 9, (0.30, 0.70)), (178, 24, W / 12, (0.25, 0.55)), (206, 34, W / 10, (0.55, 0.85)))):
         ph = rng.uniform(0, 2 * np.pi)
         upper = flank_l + d0 + BG.ridge(rng, [(6, 0.6), (13, 0.4)], base=0, amp=3)
-        lower = upper + t0 + 9 * np.abs(np.sin(np.pi * xx / lam + ph)) ** 0.5                 # the lobes' rounded toes
-        band = ((yy1 > upper[None, :]) & (yy1 < lower[None, :])).astype(np.float32)
+        thick = np.full(W, float(t0), np.float32)
+        if span:                                                                              # a tongue: x-range on the tile (wrapped)
+            a0 = rng.uniform(0, W)
+            length = W * rng.uniform(*span)
+            u = ((xx - a0) % W) / length                                                      # 0..1 along the tongue, >1 outside it
+            inside = u <= 1.0
+            thick = np.where(inside, t0 * np.sqrt(np.clip(1 - np.abs(2 * u - 1) ** 6, 0, 1)), 0.0).astype(np.float32)
+            end = a0 + length                                                                 # the lobate front: a bulbous toe at the end
+            ell(lobes, end - t0 * 0.4, float(upper[int(end) % W]) + t0 * 0.55, t0 * 0.9, t0 * 0.7)
+        lower = upper + thick + np.where(thick > 0, 7 * np.abs(np.sin(np.pi * xx / lam + ph)) ** 0.5, 0)   # scalloped toes
+        band = ((yy1 > upper[None, :]) & (yy1 < lower[None, :]) & (thick[None, :] > 0)).astype(np.float32)
         lobes = np.maximum(lobes, band)
-        lobe_lit = np.maximum(lobe_lit, ((yy1 > upper[None, :]) & (yy1 < upper[None, :] + 4)).astype(np.float32))
+        lobe_lit = np.maximum(lobe_lit, ((yy1 > upper[None, :]) & (yy1 < upper[None, :] + 3) & (thick[None, :] > 2)).astype(np.float32))
     lobes *= flank
     lobe_lit *= flank
     stack = Stack()
