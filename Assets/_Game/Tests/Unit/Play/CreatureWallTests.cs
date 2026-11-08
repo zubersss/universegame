@@ -74,8 +74,7 @@ namespace Meridian.Tests
                 if (step++ % 12 == 0)
                 {
                     var sp = stag.Body.position; int sx = Mathf.FloorToInt(sp.x);
-                    trace.Append($"
-  t {t:F2}: x {sp.x:F2} y {sp.y:F2} v ({stag.Body.linearVelocity.x:F1}, {stag.Body.linearVelocity.y:F1}) {stag.State} dir {stag.dir} held {stag.Held} grid top {side.terrain.TopSolidY(sx) + 1} curve {(side.terrain.SmoothGround ? side.terrain.CurveAt(sx) : float.NaN):F2} surveyor x {player.Body.position.x:F1}");
+                    trace.Append($"\n  t {t:F2}: x {sp.x:F2} y {sp.y:F2} v ({stag.Body.linearVelocity.x:F1}, {stag.Body.linearVelocity.y:F1}) {stag.State} dir {stag.dir} held {stag.Held} grid top {side.terrain.TopSolidY(sx) + 1} curve {(side.terrain.SmoothGround ? side.terrain.CurveAt(sx) : float.NaN):F2} surveyor x {player.Body.position.x:F1}");
                 }
             }
             TestContext.Out.WriteLine($"[MERIDIAN] fleeing stag at the crates: longest standstill {worst:F2} s, moved {moved:F1} m, turns {turns}" + trace);
