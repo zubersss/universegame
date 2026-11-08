@@ -307,7 +307,25 @@ def curl(d, M, cx, cy, s, flip_x=1, flip_y=1):
     G.stroke(d, pts, M["ink"], I)
 
 
-def panel_paper(W, H, sl, paper="offwhite", rule="mustard", header=None, stitch=False, seed=1):
+GRAIN_KEY, GRAIN_PX = "ui/panels/grain", 128
+
+
+def grain_tile(size=GRAIN_PX, seed=5, strength=0.035):
+    """B-208: paper_grain's noise as a tileable overlay (the same blur, wrapped, so the tile is periodic), ink at a low alpha:
+    UNITY tiles it at 1 texel = 1 screen px over a flat panel, masked by the panel's alpha; mean darkening ~ strength."""
+    rng = np.random.default_rng(seed)
+    n = rng.standard_normal((size, size)).astype(np.float32)
+    k = np.array([1, 4, 6, 4, 1], np.float32) / 16
+    for ax in (0, 1):
+        n = np.apply_along_axis(lambda r: np.convolve(np.concatenate([r[-2:], r, r[:2]]), k, mode="valid"), ax, n)
+    n /= max(float(n.std()), 1e-3)
+    out = np.zeros((size, size, 4), np.uint8)
+    out[..., :3] = v3.hex_rgb(v3.INK)
+    out[..., 3] = np.rint(np.clip(strength * (n + 1.5), 0.0, 0.16) * 255)
+    return out
+
+
+def panel_paper(W, H, sl, paper="offwhite", rule="mustard", header=None, stitch=False, seed=1, grain=True):
     c = Canvas(W, H)
     d, M = c.dm, c.M
     l_, t_, r_, b_ = sl
@@ -328,10 +346,10 @@ def panel_paper(W, H, sl, paper="offwhite", rule="mustard", header=None, stitch=
             curl(d, M, cx + fx * 6, cy + fy * 6, 8, fx, fy)
     G.stroke(d, outer, M["ink"], O, cyclic=True)
     img, w = c.render(seed)
-    return paper_grain(img, seed), w
+    return (paper_grain(img, seed) if grain else img), w            # B-208: flat for the 9-slice, the grain an overlay
 
 
-def panel_sign(W, H, sl, seed=11):
+def panel_sign(W, H, sl, seed=11, grain=True):
     c = Canvas(W, H)
     d, M = c.dm, c.M
     board = wavy_rect(6, 6, W - 6, H - 6, 0.8, seed)
@@ -348,10 +366,10 @@ def panel_sign(W, H, sl, seed=11):
         G.stroke(d, G.lumpy_ellipse(x, y, 4, 4, n=10, seed=seed + int(x)), M["brown"], I, cyclic=True)
     G.stroke(d, board, M["ink"], O, cyclic=True)
     img, w = c.render(seed)
-    return paper_grain(img, seed, 0.03), w
+    return (paper_grain(img, seed, 0.03) if grain else img), w
 
 
-def panel_scroll(W, H, sl, seed=21):
+def panel_scroll(W, H, sl, seed=21, grain=True):
     c = Canvas(W, H)
     d, M = c.dm, c.M
     l_, t_, r_, b_ = sl
@@ -372,13 +390,13 @@ def panel_scroll(W, H, sl, seed=21):
             G.stroke(d, G.lumpy_ellipse((x0 + x1) / 2, yy, (x1 - x0) * 0.32, 5, n=12, seed=seed + 7 + side), M["brown"], I, cyclic=True)
         G.stroke(d, roll, M["ink"], O, cyclic=True)
     img, w = c.render(seed)
-    return paper_grain(img, seed, 0.03), w
+    return (paper_grain(img, seed, 0.03) if grain else img), w
 
 
-PANELS = {   # name: (W, H, slice [l, t, r, b], builder)
-    "pause": (192, 192, [48, 48, 48, 48], lambda W, H, sl: panel_paper(W, H, sl, seed=1)),
-    "settings": (192, 224, [48, 80, 48, 48], lambda W, H, sl: panel_paper(W, H, sl, header="teal", seed=2)),
-    "inventory": (192, 192, [48, 48, 48, 48], lambda W, H, sl: panel_paper(W, H, sl, paper="offwhite", rule="brown", stitch=True, seed=3)),
+PANELS = {   # name: (W, H, slice [l, t, r, b], builder(W, H, sl, grain=True))
+    "pause": (192, 192, [48, 48, 48, 48], lambda W, H, sl, **kw: panel_paper(W, H, sl, seed=1, **kw)),
+    "settings": (192, 224, [48, 80, 48, 48], lambda W, H, sl, **kw: panel_paper(W, H, sl, header="teal", seed=2, **kw)),
+    "inventory": (192, 192, [48, 48, 48, 48], lambda W, H, sl, **kw: panel_paper(W, H, sl, paper="offwhite", rule="brown", stitch=True, seed=3, **kw)),
     "sign": (192, 128, [40, 40, 40, 40], panel_sign),
     "scroll": (256, 160, [64, 28, 64, 28], panel_scroll),
 }
@@ -748,9 +766,10 @@ SWITCH_KEY = "ui/hud/film_switch"
 SWITCH_PIVOT = [0.5, 0.375]          # the lever's hub on the plate (32, 60 px from the top of 64x96)
 
 
-def keys(cards=CARDS, panels=True):
-    """panels False (B-170): the cards alone; B-151's panels and switch are not rewritten."""
-    return ([f"ui/panels/{n}" for n in PANELS] if panels else []) + [f"ui/titlecards/{p}" for p in cards] + ([SWITCH_KEY] if panels else [])
+def keys(cards=CARDS, panels=True, flat=False):
+    """panels False (B-170): the cards alone; B-151's panels and switch are not rewritten. flat (B-208): + the grain overlay."""
+    return (([f"ui/panels/{n}" for n in PANELS] if panels else []) + [f"ui/titlecards/{p}" for p in cards] + ([SWITCH_KEY] if panels else [])
+            + ([GRAIN_KEY] if flat else []))
 
 
 def pad4(img):
@@ -804,17 +823,28 @@ def switch_sheet():
     return sheet, meta, p
 
 
-def export(art, ss_card=4, cards=CARDS, panels=True):
+def export(art, ss_card=4, cards=CARDS, panels=True, flat=False):
     """Writes ui/panels/<name>, ui/titlecards/<planet>, ui/hud/film_switch (_color.png + .json) under `art`; raises on any
-    check before writing anything. -> [(key, w, h, bytes)]"""
+    check before writing anything. flat (B-208): the panels without baked grain + ui/panels/grain, the tiling overlay.
+    -> [(key, w, h, bytes)]"""
     import json
     from meridian import pngio
     built, problems = [], []
     for name, (pw, ph, sl, fn) in (PANELS.items() if panels else ()):
-        img, _w = fn(pw, ph, sl)
+        img, _w = fn(pw, ph, sl, grain=not flat)
         meta, p = panel_meta(name, img)
+        if flat:
+            meta.update({"grain": GRAIN_KEY, "grain_note": "B-208: flat paper for the 9-slice; tile ui/panels/grain over it at 1 texel = 1 px, masked by this panel's alpha"})
+        if v3.palette_hits(img, "earth")[0] < 0.995:
+            p.append(f"palette {v3.palette_hits(img, 'earth')[0] * 100:.1f}%")
         built.append((meta["key"], img, meta))
         problems += [f"{name}: {x}" for x in p]
+    if flat:
+        g = grain_tile()
+        built.append((GRAIN_KEY, g, {"key": GRAIN_KEY, "style": "v3", "ppu": PPU, "pivot": [0.5, 0.5], "width": GRAIN_PX, "height": GRAIN_PX,
+                                     "tile_x": True, "tile_y": True, "repeat_px": GRAIN_PX, "texel_px": 1, "wrap": "repeat",
+                                     "blend": "alpha over the panel (ink at alpha 0-0.16, mean ~0.05), masked by the panel's alpha (a UGUI Mask)",
+                                     "note": "B-208: B-151's paper grain, no longer baked into the stretched panels; tiled, never stretched"}))
     for planet in cards:
         img, _w = title_card(planet, ss=ss_card)
         img = pad4(img)
@@ -890,8 +920,62 @@ def preview(out, note="preview (not exported)"):
     print("written", out, img.shape)
 
 
+def preview_flat(out, note="design preview (lock-free, fakegp + numpy)"):
+    """B-208: each panel flat with the grain overlay tiled over it (masked by the panel's alpha) at 1x, 4x and an 8:1 strip,
+    and the inventory panel's old baked grain stretched 4x for the comparison."""
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    g = grain_tile().astype(np.float32) / 255.0
+    ink = g[0, 0, :3]
+
+    def grained(img):
+        """The panel composited the way UNITY draws it: the flat 9-sliced panel, the grain tiled at 1 texel = 1 px on top,
+        inside the panel's alpha."""
+        h, w = img.shape[:2]
+        t = np.tile(g, (h // GRAIN_PX + 1, w // GRAIN_PX + 1, 1))[:h, :w]
+        f = img.astype(np.float32) / 255.0
+        a = t[..., 3:4] * (f[..., 3:4] > 0)
+        f[..., :3] = f[..., :3] * (1 - a) + ink * a
+        return np.rint(f * 255).astype(np.uint8)
+    bg = np.array([0.36, 0.36, 0.40], np.float32)
+    rows, W = [], 2480
+    head = np.tile(review.PAPER, (28, W, 1)).astype(np.float32)
+    review._label(head, "B-208 B-151's panels flat for the 9-slice + the grain as a tiled overlay (1 texel = 1 px): 1x | 4x | an 8:1 strip", 6, 8)
+    rows.append(head)
+    for name, (pw, ph, sl, fn) in PANELS.items():
+        flat, _w = fn(pw, ph, sl, grain=False)
+        tiles = [("1x", grained(flat)), ("4x", grained(nine_slice(flat, sl, 4 * pw, 4 * ph))),
+                 ("8:1 strip", grained(nine_slice(flat, sl, 1024, 128)))]
+        h = max(t.shape[0] for _l, t in tiles) + 40
+        r = np.tile(bg, (h, W, 1)).astype(np.float32)
+        x = 12
+        for lab, t in tiles:
+            review._over(r, t, x, 28)
+            review._label(r, f"{name} {lab} ({t.shape[1]}x{t.shape[0]})", x, 8, scale=1)
+            x += t.shape[1] + 30
+        rows.append(r)
+    old, _w = PANELS["inventory"][3](192, 192, [48, 48, 48, 48])
+    r = np.tile(bg, (4 * 192 + 40, W, 1)).astype(np.float32)
+    review._over(r, nine_slice(old, [48, 48, 48, 48], 768, 768), 12, 28)
+    review._over(r, grained(nine_slice(PANELS["inventory"][3](192, 192, [48, 48, 48, 48], grain=False)[0], [48, 48, 48, 48], 768, 768)), 810, 28)
+    review._label(r, "inventory at 4x: BEFORE (B-151's baked grain stretched) | AFTER (flat + the tiled overlay)", 12, 8, scale=1)
+    rows.append(r)
+    gr = np.tile(review.PAPER, (4 * GRAIN_PX + 40, W, 1)).astype(np.float32)
+    gt = np.tile(g, (2, 4, 1))
+    gp = np.array(review.PAPER, np.float32) * (1 - gt[..., 3:4]) + ink * gt[..., 3:4]
+    gr[28:28 + gp.shape[0], 12:12 + gp.shape[1]] = gp
+    review._label(gr, f"{GRAIN_KEY} {GRAIN_PX}x{GRAIN_PX} tiled 4x2 over paper (seams must not show)", 12, 8, scale=1)
+    rows.append(gr)
+    img = np.vstack(rows)
+    review._label(img, __import__("time").strftime("%m-%d %H:%M") + " " + note, 2, img.shape[0] - 16)
+    review.write(out, img)
+    print("written", out, img.shape)
+
+
 if __name__ == "__main__":
-    if sys.argv[1] == "--cards":                                                     # B-170: the lock-free card preview
+    if sys.argv[1] == "--flat":                                                      # B-208: the lock-free flat-panel preview
+        preview_flat(sys.argv[2])
+    elif sys.argv[1] == "--cards":                                                   # B-170: the lock-free card preview
         preview_cards(sys.argv[2])
     elif sys.argv[1] == "--export":
         _ss = int(sys.argv[sys.argv.index("--ss") + 1]) if "--ss" in sys.argv else 4

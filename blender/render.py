@@ -1059,16 +1059,19 @@ def do_ui_set(entry, preview):
     import build_ui_v3 as UI
     cards = tuple(entry.get("cards", UI.CARDS))          # B-170: a cards-only row ("panels": false) leaves B-151's panels alone
     panels = bool(entry.get("panels", True))
+    flat = bool(entry.get("flat", False))                # B-208: flat panels + ui/panels/grain
     fakegp.install()                    # an earlier review script in this batch may have restored gp_draw.mat
     try:
         try:
-            out = UI.export(ART, ss_card=int(entry.get("card_ss", 4)), cards=cards, panels=panels)
+            out = UI.export(ART, ss_card=int(entry.get("card_ss", 4)), cards=cards, panels=panels, flat=flat)
         except Exception:
-            for k in UI.keys(cards, panels):
+            for k in UI.keys(cards, panels, flat):
                 mark_stale(k, True)
             raise
         note = f"exported {time.strftime('%m-%d %H:%M')}"
-        if panels:
+        if flat:
+            UI.preview_flat(os.path.join(PREVIEW, f"review_{entry.get('review_name', 'b208_panels_flat')}.png"), note=note)
+        elif panels:
             UI.preview(os.path.join(PREVIEW, f"review_{entry.get('review_name', 'b151_ui')}.png"), note=note)
         else:
             UI.preview_cards(os.path.join(PREVIEW, f"review_{entry.get('review_name', 'b170_titlecards')}.png"), art=ART, cards=cards, note=note)
