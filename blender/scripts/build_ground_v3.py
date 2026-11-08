@@ -1,0 +1,595 @@
+"""B-175 (D-161 (1), D-162 (1)-(4); the owner: "even out the ground ... more cartoony"): ground art that bends. The ground
+is one smoothed cartoon curve (UNITY's U-156 mesh band along it), digging carves round ink-rimmed scoops, and under the
+surface is a drawn cross-section. Per planet (Earth first), drawn with gp_draw (fakegp + numpy outside Blender):
+
+  terrain/<p>/ground_band   512x64, tiles in x (8 m)   the bendable top band: the turf (Earth) with its INK EDGE ON THE
+                            SURFACE ROW (row 24 from the top), only low rounded scallops above it (they survive any bend),
+                            the topsoil under it to a ragged edge with a few roots; transparent below (the fill shows)
+  terrain/<p>/ground_fill   512x512, tiles both ways   the cartoon cross-section digging reveals: strata bands, pebbles,
+                            stones, a water lens, a fossil, burrows; world-space, under the band
+  terrain/<p>/ground_decor  64x64 x6, pivot at the base the things that must stay UPRIGHT on a slope (UNITY scatters them
+                            along the curve, never rotated): three grass tufts, two stones, a flower
+  terrain/<p>/ground_lip    128x96, pivot at the brink  a rounded grassy overhang for a cliff's lip (drawn for a drop to the
+                            right; mirror x for the left)
+  terrain/<p>/dig_rim       256x16, tiles in x (4 m)    the ink line round a carved scoop's wall: the ink on row 4, a deep-tone
+                            band into the solid below it, transparent on the air side (map it along the hole's outline,
+                            solid side down)
+  terrain/<p>/dig_puff      128x128, puff 8 (once)      the dirt puff a dig throws: round dirt clouds and flying clods
+
+  python -I build_ground_v3.py <preview dir> [planet]   lock-free curve preview: review_b175_<planet>_curve_preview.png
+                                                        (the current strip on a test profile two ways, then the new band +
+                                                        fill + upright decor + lip + a dug scoop, the surveyor at 1x, the
+                                                        pieces) + the pieces' sheets in <preview dir>/b175/
+"""
+import json
+import math
+import os
+import random
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+from meridian import fakegp, v3  # noqa: E402
+
+try:                                    # inside Blender: the real gp_draw (not needed: every piece is numpy-only)
+    import bpy
+    if not hasattr(bpy, "data"):
+        raise ImportError
+    import gp_draw as G
+except ImportError:
+    bpy = None
+    G = fakegp.install()
+import gp_raster as GR  # noqa: E402
+
+O, I = G.OUTER, G.INNER
+PPU = 64
+ART = os.path.normpath(os.path.join(HERE, "..", "..", "Assets", "_Game", "Art"))
+TAU = 2 * math.pi
+
+BAND_W, BAND_H, SURF_ROW = 512, 64, 24          # the band: 8 m repeat, the surface 24 px from the top
+FILL = 512                                       # the fill tile: 8 m x 8 m
+RIM_W, RIM_H, RIM_ROW = 256, 16, 4
+
+
+def _mix(a, b, t):
+    return v3.rgb_hex([x * (1 - t) + y * t for x, y in zip(v3.hex_rgb(a), v3.hex_rgb(b))])
+
+
+def colours(planet):
+    """Every role is ONE palette tone (a colour, its mid shadow or its deep shadow, §9 v4), so the cel box reads 100 %."""
+    P = v3.PALETTES[planet]
+    sh = lambda k: v3.shadow_of(P[k], planet)  # noqa: E731
+    dp = lambda k: v3.deep_of(P[k], planet)  # noqa: E731
+    if planet == "earth":
+        return {"top": P["green"], "top_sh": sh("green"), "topsoil": P["brown"],
+                "soil": dp("mustard"), "soil_sh": dp("red"), "soil_dp": P["brown"], "clay": sh("mustard"), "red": sh("red"),
+                "stone": sh("sky"), "stone_sh": dp("sky"), "pebble": sh("offwhite"), "bone": P["offwhite"], "lens": P["teal"],
+                "flower": P["mustard"], "petal": P["offwhite"], "dust": sh("mustard"), "dust_sh": dp("mustard"), "clod": P["brown"]}
+    raise ValueError(f"B-175: {planet}'s ground colours come after Earth's preview is accepted")
+
+
+def mats(gp, planet):
+    """M[role] = the flat fill (no ink), M[role + '_i'] = the fill with its ink line; 'ink' a line only; 'tuft' inked behind."""
+    C = colours(planet)
+
+    def m(name, fill=None, ink=True, behind=False):
+        return G.mat(gp, f"gr_{planet}_{name}", fill=fill, ink=ink, behind=behind)
+    M = {"ink": m("ink", None, True)}
+    for k, h in C.items():
+        M[k] = m(k, h, ink=False)
+        M[k + "_i"] = m(k + "_i", h)
+    M["tuft"] = m("tuft", C["top"], behind=True)
+    return M
+
+
+def per(x, period, harmonics, seed, amp):
+    """A smooth periodic wobble (whole cycles over `period`, so the ends match)."""
+    rnd = random.Random(seed)
+    ph = [(rnd.randint(1, 4 + 2 * h), rnd.uniform(0, TAU), rnd.uniform(0.5, 1.0)) for h in range(harmonics)]
+    tot = sum(a for _n, _p, a in ph)
+    return amp * sum(a * math.sin(TAU * n * x / period + p) for n, p, a in ph) / tot
+
+
+def wrapped(fn, period_x, period_z=None):
+    """Draw fn(dx, dz) at the tile's neighbouring offsets so anything crossing an edge wraps (seamless tiling)."""
+    for dx in (-period_x, 0.0, period_x):
+        for dz in ((-period_z, 0.0, period_z) if period_z else (0.0,)):
+            fn(dx, dz)
+
+
+# ---------------------------------------------------------------- the band (x 0..8 m, the surface at z = 0)
+
+def draw_band(d, M, planet="earth"):
+    L = BAND_W / PPU
+    n = 257
+    xs = [L * i / (n - 1) for i in range(n)]
+    top = [(x, max(0.0, 0.07 * math.sin(TAU * 16 * x / L) ** 2 * (0.6 + 0.4 * math.sin(TAU * 3 * x / L + 1.0)))) for x in xs]
+    turf_b = [(x, -0.15 + per(x, L, 3, 11, 0.035)) for x in xs]
+    soil_b = [(x, -0.46 + per(x, L, 4, 12, 0.07) + 0.03 * math.sin(TAU * 21 * x / L)) for x in xs]
+
+    def body(dx, _dz):
+        sh = lambda pts: [(x + dx, z) for x, z in pts]  # noqa: E731
+        G.stroke(d, sh(turf_b + soil_b[::-1]), M["topsoil"], 0.0, cyclic=True)               # the topsoil to its ragged edge
+        G.stroke(d, sh(top + turf_b[::-1]), M["top"], 0.0, cyclic=True)                 # the turf
+        G.stroke(d, sh([(x, z - 0.05) for x, z in turf_b] + turf_b[::-1]), M["top_sh"], 0.0, cyclic=True)
+        G.seam(d, sh(turf_b), M["ink"])                                                      # turf meets soil
+        G.stroke(d, sh(top), M["ink"], O)                                                     # THE INK EDGE on the surface row
+    wrapped(body, L)
+    rnd = random.Random(175)
+    for i in range(22):                                                                       # blade marks in the turf
+        x = L * (i + rnd.random() * 0.6) / 22
+        wrapped(lambda dx, _dz, x=x: G.seam(d, [(x + dx, -0.09), (x + dx + 0.012, -0.035)], M["ink"]), L)
+    for i in range(7):                                                                        # roots below the topsoil
+        x = L * (i + 0.3 + rnd.random() * 0.4) / 7
+        z0 = -0.40
+
+        def root(dx, _dz, x=x, z0=z0, s=rnd.random()):
+            G.seam(d, G.bezier((x + dx, z0), (x + dx + 0.06 + 0.05 * s, z0 - 0.07), (x + dx - 0.03, z0 - 0.15), n=6), M["ink"])
+        wrapped(root, L)
+    for i in range(9):                                                                        # pebbles in the topsoil
+        x, z, r = L * (i + rnd.random()) / 9, -0.27 - rnd.random() * 0.1, 0.028 + 0.018 * rnd.random()
+        wrapped(lambda dx, _dz, x=x, z=z, r=r, s=i: G.stroke(d, G.lumpy_ellipse(x + dx, z, r * 1.3, r, n=12, lump=0.08, seed=s),
+                                                                M["pebble_i"], I, cyclic=True), L)
+    for i in range(6):
+        x = L * (i + rnd.random()) / 6
+        wrapped(lambda dx, _dz, x=x, s=i: G.hatch(d, x + dx, -0.30, M["ink"], n=3, length=0.07, spacing=0.03, angle_deg=160, seed=s), L)
+
+
+# ---------------------------------------------------------------- the fill (x, z 0..8 m, tiles both ways)
+
+def draw_fill(d, M, planet="earth"):
+    L = FILL / PPU
+    rnd = random.Random(1751)
+    wrapped(lambda dx, dz: G.stroke(d, [(dx - 0.1, dz - 0.1), (dx + L + 0.1, dz - 0.1), (dx + L + 0.1, dz + L + 0.1), (dx - 0.1, dz + L + 0.1)],
+                                    M["soil"], 0.0, cyclic=True), L, L)
+    xs = [L * i / 128 for i in range(129)]
+    strata = [(7.3, 0.55, "soil_sh", True), (6.1, 0.30, "clay", False), (4.9, 0.75, "soil_sh", True), (3.6, 0.22, "red", True),
+              (2.6, 0.55, "stone", True), (1.3, 0.35, "soil_dp", False), (0.4, 0.28, "clay", True)]
+    for j, (z0, th, mat, inked) in enumerate(strata):
+        upper = [(x, z0 + th / 2 + per(x, L, 3, 30 + j, 0.12)) for x in xs]
+        lower = [(x, z0 - th / 2 + per(x, L, 3, 50 + j, 0.10)) for x in xs]
+
+        def band(dx, dz, upper=upper, lower=lower, mat=mat, inked=inked):
+            sh = lambda pts: [(x + dx, z + dz) for x, z in pts]  # noqa: E731
+            G.stroke(d, sh(upper + lower[::-1]), M[mat], 0.0, cyclic=True)
+            if inked:
+                G.seam(d, sh(upper), M["ink"])
+        wrapped(band, L, L)
+    for i in range(26):                                                                       # pebbles
+        x, z, r = rnd.uniform(0, L), rnd.uniform(0, L), rnd.uniform(0.03, 0.07)
+
+        def peb(dx, dz, x=x, z=z, r=r, s=i):
+            G.stroke(d, G.lumpy_ellipse(x + dx, z + dz, r * 1.3, r, n=14, lump=0.08, seed=s), M["pebble_i"], I, cyclic=True)
+            G.seam(d, [(x + dx - r * 0.6, z + dz - r * 0.2), (x + dx + r * 0.5, z + dz - r * 0.45)], M["ink"])
+        wrapped(peb, L, L)
+    for i in range(4):                                                                        # stones
+        x, z, r = rnd.uniform(0, L), rnd.uniform(0, L), rnd.uniform(0.14, 0.24)
+
+        def stone(dx, dz, x=x, z=z, r=r, s=i):
+            pts = G.lumpy_ellipse(x + dx, z + dz, r * 1.35, r, n=18, lump=0.10, seed=40 + s)
+            G.stroke(d, pts, M["stone"], I, cyclic=True)
+            G.stroke(d, G.lumpy_ellipse(x + dx - r * 0.3, z + dz - r * 0.25, r * 0.7, r * 0.45, n=12, lump=0.06, seed=60 + s),
+                     M["stone_sh"], 0.0, cyclic=True)
+            G.stroke(d, pts, M["ink"], O, cyclic=True)
+            G.seam(d, [(x + dx - r * 0.5, z + dz + r * 0.1), (x + dx + r * 0.3, z + dz - r * 0.3)], M["ink"])
+        wrapped(stone, L, L)
+
+    def lens(dx, dz, x=5.6, z=5.4):                                                           # a water lens
+        pts = G.lumpy_ellipse(x + dx, z + dz, 0.45, 0.14, n=24, lump=0.05, seed=77)
+        G.stroke(d, pts, M["lens_i"], O, cyclic=True)
+        G.stroke(d, G.lumpy_ellipse(x + dx + 0.12, z + dz + 0.04, 0.22, 0.05, n=14, lump=0.03, seed=78), M["petal_i"], I, cyclic=True)
+    wrapped(lens, L, L)
+
+    def fossil(dx, dz, x=2.2, z=4.4):                                                         # an ammonite
+        G.stroke(d, G.lumpy_ellipse(x + dx, z + dz, 0.28, 0.26, n=28, lump=0.02, seed=81), M["bone_i"], O, cyclic=True)
+        spiral = [(x + dx + 0.25 * (1 - t) ** 1.2 * math.cos(TAU * 2.2 * t), z + dz + 0.23 * (1 - t) ** 1.2 * math.sin(TAU * 2.2 * t))
+                  for t in [i / 40 for i in range(40)]]
+        G.seam(d, spiral, M["ink"])
+        for k in range(10):
+            a = TAU * k / 10
+            G.seam(d, [(x + dx + 0.14 * math.cos(a), z + dz + 0.13 * math.sin(a)), (x + dx + 0.25 * math.cos(a), z + dz + 0.23 * math.sin(a))], M["ink"])
+    wrapped(fossil, L, L)
+
+    def bone(dx, dz, x=6.6, z=1.9):                                                           # a little bone
+        G.stroke(d, [(x + dx - 0.22, z + dz - 0.03), (x + dx + 0.22, z + dz - 0.03), (x + dx + 0.22, z + dz + 0.03), (x + dx - 0.22, z + dz + 0.03)],
+                 M["bone_i"], I, cyclic=True)
+        for sx in (-0.24, 0.24):
+            for sz in (-0.045, 0.045):
+                G.stroke(d, G.lumpy_ellipse(x + dx + sx, z + dz + sz, 0.05, 0.045, n=10, lump=0.0), M["bone_i"], I, cyclic=True)
+    wrapped(bone, L, L)
+    for i in range(5):                                                                        # burrows
+        x, z = rnd.uniform(0, L), rnd.uniform(0, L)
+        wrapped(lambda dx, dz, x=x, z=z, s=i: G.seam(d, [(x + dx + 0.05 * math.sin(k * 1.3 + s), z + dz - 0.06 * k) for k in range(7)], M["ink"]), L, L)
+    for i in range(12):
+        x, z = rnd.uniform(0, L), rnd.uniform(0, L)
+        wrapped(lambda dx, dz, x=x, z=z, s=i: G.hatch(d, x + dx, z + dz, M["ink"], n=3, length=0.08, spacing=0.03,
+                                                      angle_deg=15 if s % 2 else 165, seed=s), L, L)
+    G.specks(d, [(rnd.uniform(0.05, L - 0.05), rnd.uniform(0.05, L - 0.05)) for _ in range(40)], M["ink"])
+
+
+# ---------------------------------------------------------------- upright decor (pivot at the base, z = 0)
+
+def draw_decor(d, M, k):
+    rnd = random.Random(900 + k)
+    if k < 3:                                                                                 # tufts
+        for b in range(4 + k):
+            a = math.radians(-34 + 68 * b / (3 + k) + rnd.uniform(-6, 6))
+            h = rnd.uniform(0.26, 0.42) * (1.0 if k != 2 else 1.25)
+            bx = rnd.uniform(-0.05, 0.05)
+            G.stroke(d, [(bx - 0.03, 0.0), (bx + h * math.sin(a), h * math.cos(a)), (bx + 0.03, 0.0)], M["tuft"], I, cyclic=True)
+    elif k < 5:                                                                               # stones half sunk
+        r = 0.20 if k == 3 else 0.28
+        pts = [(x, max(z, -0.02)) for x, z in G.lumpy_ellipse(0.0, 0.02, r * 1.3, r, n=22, lump=0.1, seed=k)]
+        G.stroke(d, pts, M["stone"], 0.0, cyclic=True)
+        G.stroke(d, [(x, z) for x, z in G.lumpy_ellipse(-r * 0.35, 0.0, r * 0.8, r * 0.5, n=14, lump=0.05, seed=k + 9) if z >= -0.02] or [(0, 0)],
+                 M["stone_sh"], 0.0, cyclic=True)
+        G.stroke(d, pts, M["ink"], O, cyclic=True)
+        G.seam(d, [(-r * 0.4, r * 0.55), (r * 0.25, r * 0.2)], M["ink"])
+    else:                                                                                     # a flower
+        G.seam(d, G.bezier((0.0, 0.0), (0.05, 0.22), (-0.02, 0.42), n=8), M["ink"], radius=O)
+        for j in range(5):
+            a = TAU * j / 5 + 0.3
+            G.stroke(d, G.lumpy_ellipse(-0.02 + 0.09 * math.cos(a), 0.46 + 0.09 * math.sin(a), 0.06, 0.05, n=12, lump=0.04, seed=j,
+                                        rot=a), M["petal_i"], I, cyclic=True)
+        G.stroke(d, G.lumpy_ellipse(-0.02, 0.46, 0.05, 0.05, n=12, lump=0.02, seed=7), M["flower_i"], I, cyclic=True)
+        G.stroke(d, [(0.0, 0.12), (0.12, 0.2), (0.02, 0.17)], M["tuft"], I, cyclic=True)
+
+
+# ---------------------------------------------------------------- the cliff lip (pivot at the brink; a drop to the right)
+
+def draw_lip(d, M):
+    """A turf hood wrapping the brink's rounded corner (the band bends there too; this drapes over it): flat on top, then
+    round the corner (radius 0.37 m) and down the face, long blades drooping over the drop, two roots dangling under it."""
+    R, cz = 0.37, -0.35
+    outer = [(-0.60 + 0.60 * i / 12, 0.03) for i in range(12)] + \
+            [((R + 0.03) * math.sin(a), cz + (R + 0.03) * math.cos(a)) for a in [math.radians(6 * j) for j in range(15)]]
+    inner = [((R - 0.10) * math.sin(a), cz + (R - 0.10) * math.cos(a)) for a in [math.radians(6 * j) for j in range(14, -1, -1)]] + \
+            [(-0.60 + 0.60 * i / 12, 0.03 - 0.13) for i in range(11, -1, -1)]
+    hood = outer + inner
+    G.stroke(d, hood, M["top"], 0.0, cyclic=True)
+    G.stroke(d, [((R - 0.03) * math.sin(a), cz + (R - 0.03) * math.cos(a)) for a in [math.radians(6 * j) for j in range(15)]] +
+             inner[:15], M["top_sh"], 0.0, cyclic=True)
+    G.stroke(d, outer, M["ink"], O)
+    G.seam(d, inner, M["ink"])
+    for j in range(6):                                                                        # blades drooping over the drop
+        a = math.radians(18 + 13 * j)
+        bx, bz = (R + 0.02) * math.sin(a), cz + (R + 0.02) * math.cos(a)
+        ln = 0.16 + 0.05 * (j % 3)
+        G.stroke(d, [(bx - 0.02, bz + 0.02), (bx + 0.07 + 0.02 * (j % 2), bz - ln), (bx + 0.03, bz + 0.01)], M["tuft"], I, cyclic=True)
+    for j, (a_deg, ln) in enumerate(((60, 0.42), (82, 0.30))):                                # roots dangling down the face
+        a = math.radians(a_deg)
+        rx, rz = (R - 0.12) * math.sin(a), cz + (R - 0.12) * math.cos(a)
+        G.seam(d, G.bezier((rx, rz), (rx + 0.08, rz - ln * 0.45), (rx - 0.02, rz - ln), n=8), M["ink"])
+    for j in range(5):
+        x = -0.52 + 0.11 * j
+        G.seam(d, [(x, -0.07), (x + 0.012, -0.025)], M["ink"])
+
+
+PUFF_BILLOWS = [(84, 0.00, 1.00), (48, 0.62, 0.66), (128, 0.46, 0.80), (24, 1.00, 0.46), (156, 0.86, 0.52), (104, 0.95, 0.50),
+                (66, 1.18, 0.36)]                       # asymmetric: no pair of 'ears' over the central billow (no faces, D-101)
+
+
+def draw_puff(d, M, k):
+    """A billowing dust cluster: a big central billow and satellites drifting out and up, swelling then thinning and
+    shrinking away; dark clods flying on their arcs. Drawn far satellites first, the central billow last."""
+    t = k / 7.0
+    grow = math.sin(math.pi * (0.15 + 0.80 * t)) ** 0.6           # swells to t 0.43, lingers, thins
+    R = 0.30 * (0.35 + 0.65 * grow) * (1.0 if t < 0.72 else 1.0 - 1.4 * (t - 0.72))
+    D = 0.15 + 0.45 * (1 - (1 - t) ** 2)
+    rise = 0.12 + 0.28 * t
+    for j, (a_deg, df, sf) in sorted(enumerate(PUFF_BILLOWS), key=lambda e: -e[1][1]):
+        a = math.radians(a_deg)
+        r = R * sf
+        if r < 0.03:
+            continue
+        x, z = D * df * math.cos(a), rise + D * df * math.sin(a) * 0.75
+        pts = G.lumpy_ellipse(x, z, r, r * 0.9, n=20, lump=0.07, seed=j + 10 * k)
+        G.stroke(d, pts, M["dust_i"], O, cyclic=True)
+        G.stroke(d, G.lumpy_ellipse(x - r * 0.28, z - r * 0.25, r * 0.55, r * 0.42, n=12, lump=0.05, seed=j + 3), M["dust_sh"], 0.0, cyclic=True)
+        if r > 0.12:                                    # a short billow fold on the upper right (not a smile: no faces)
+            G.seam(d, G.bezier((x + r * 0.15, z + r * 0.62), (x + r * 0.55, z + r * 0.55), (x + r * 0.68, z + r * 0.18), n=6), M["ink"])
+    for j in range(5):                                                                        # flying clods on their arcs
+        a = math.radians(40 + 100 * j / 4)
+        v = 1.25 + 0.25 * (j % 3)
+        x = v * t * math.cos(a) * 0.7
+        z = 0.1 + v * t * math.sin(a) * 0.75 - 1.5 * t * t
+        if z > -0.2 and t > 0.05:
+            G.stroke(d, G.lumpy_ellipse(x, z, 0.045, 0.035, n=10, lump=0.15, seed=j), M["clod_i"], I, cyclic=True)
+
+
+# ---------------------------------------------------------------- the dig rim (x 0..4 m; the ink at z = 0, the solid below)
+
+def draw_rim(d, M):
+    L = RIM_W / PPU
+    xs = [L * i / 96 for i in range(97)]
+    line = [(x, per(x, L, 3, 91, 0.012)) for x in xs]
+    low = [(x, -0.13 + per(x, L, 4, 92, 0.025)) for x in xs]
+
+    def body(dx, _dz):
+        sh = lambda pts: [(x + dx, z) for x, z in pts]  # noqa: E731
+        G.stroke(d, sh(line + low[::-1]), M["soil_dp"], 0.0, cyclic=True)
+        G.stroke(d, sh(line), M["ink"], O)
+    wrapped(body, L)
+    rnd = random.Random(93)
+    for i in range(8):
+        x = L * (i + rnd.random()) / 8
+        wrapped(lambda dx, _dz, x=x, s=i: G.stroke(d, G.lumpy_ellipse(x + dx, -0.075, 0.025, 0.018, n=10, lump=0.1, seed=s),
+                                                   M["soil_sh"], 0.0, cyclic=True), L)
+    for i in range(6):                                                                        # cracks in the wall (interior detail)
+        x = L * (i + 0.2 + 0.6 * rnd.random()) / 6
+        wrapped(lambda dx, _dz, x=x: G.seam(d, [(x + dx, -0.02), (x + dx + 0.03, -0.06), (x + dx + 0.01, -0.10)], M["ink"]), L)
+
+
+# ---------------------------------------------------------------- render the pieces
+
+PIECES = {   # name -> (w, h, pivot, frames)
+    "ground_band": (BAND_W, BAND_H, (0.0, (BAND_H - SURF_ROW) / BAND_H), 1),
+    "ground_fill": (FILL, FILL, (0.0, 0.0), 1),
+    "ground_decor": (64, 64, (0.5, 6 / 64), 6),
+    "ground_lip": (128, 96, (0.55, 0.6), 1),
+    "dig_rim": (RIM_W, RIM_H, (0.0, (RIM_H - RIM_ROW) / RIM_H), 1),
+    "dig_puff": (128, 128, (0.5, 0.25), 8),
+}
+
+
+def render_piece(name, planet="earth", k=0, mx=1, mz=1, ss=None):
+    """mx / mz: render the drawing mx x mz frames wide / tall (the periodicity check compares the copies)."""
+    w, h, piv, _n = PIECES[name]
+    w, h = w * mx, h * mz
+    gp = fakegp.FakeGP()
+    M = mats(gp, planet)
+    d = fakegp.FakeDrawing()
+    {"ground_band": lambda: draw_band(d, M, planet), "ground_fill": lambda: draw_fill(d, M, planet),
+     "ground_decor": lambda: draw_decor(d, M, k), "ground_lip": lambda: draw_lip(d, M), "dig_rim": lambda: draw_rim(d, M),
+     "dig_puff": lambda: draw_puff(d, M, k)}[name]()
+    ss = ss or (2 if w * h > 200_000 else 4)              # the 512^2 fill at ss 4 holds a 2048^2 float buffer (> the 300 MB cap)
+    img, wd = GR.render_frame(fakegp.strokes_of(d, gp), w, h, PPU, piv, ss=ss, seed=1750 + k)
+    return img, wd
+
+
+def render_all(planet="earth"):
+    out = {}
+    for name, (_w, _h, _p, n) in PIECES.items():
+        frames, widths = [], []
+        for k in range(n):
+            img, wd = render_piece(name, planet, k)
+            frames.append(img)
+            widths += wd
+        out[name] = (frames, widths)
+    return out
+
+
+# ---------------------------------------------------------------- the curve preview
+
+def profile(W_m=30.0):
+    """The test profile (metres): flat, rolling hills, a 30 deg slope, a plateau, a rounded cliff lip, a valley, a rise.
+    -> z(x) sampled at 1 px (64 per m), smoothed (a Gaussian, sigma 0.35 m) so every lip and foot is round."""
+    import numpy as np
+    pts = [(0, 0.0), (4, 0.0), (5.5, 0.45), (7, 0.0), (8.5, 0.55), (10, 0.2), (14, 0.2 + 4 * math.tan(math.radians(30))),
+           (16.6, 2.5), (17.7, -0.4), (19.5, -0.85), (22.0, -0.45), (26, 0.35), (W_m + 1, 0.6)]
+    xs = np.arange(int(W_m * PPU)) / PPU
+    z = np.interp(xs, [p[0] for p in pts], [p[1] for p in pts])
+    s = int(0.35 * PPU)
+    k = np.exp(-0.5 * (np.arange(-3 * s, 3 * s + 1) / s) ** 2)
+    k /= k.sum()
+    zp = np.pad(z, 3 * s, mode="edge")
+    return xs, np.convolve(zp, k, mode="valid")
+
+
+def _bilinear(tex, u, v):
+    """tex HxWx4 float premultiplied; u wraps in x, v clamps (outside rows -> transparent)."""
+    import numpy as np
+    H, Wt = tex.shape[:2]
+    u = np.mod(u, Wt)
+    u0 = np.floor(u).astype(np.int32)
+    v0 = np.floor(v).astype(np.int32)
+    fu, fv = (u - u0)[..., None], (v - v0)[..., None]
+    u1 = (u0 + 1) % Wt
+    out = np.zeros(u.shape + (4,), np.float32)
+    for dv, wv in ((0, 1 - fv), (1, fv)):
+        vv = v0 + dv
+        ok = (vv >= 0) & (vv < H)
+        vc = np.clip(vv, 0, H - 1)
+        out += wv * ok[..., None] * ((1 - fu) * tex[vc, u0] + fu * tex[vc, u1])
+    return out
+
+
+def _premul(img):
+    import numpy as np
+    f = img.astype(np.float32) / 255.0
+    f[..., :3] *= f[..., 3:4]
+    return f
+
+
+def bend(tex, surf_row, ys, X, Y, mode):
+    """Sample a band texture along the curve for pixels (X, Y) (image coords, y down; ys = the surface row per column).
+    mode 'normal': u = arc length at the nearest curve point, v = surf_row - the signed normal distance (a mesh band);
+    mode 'shear': u = X, v = surf_row + (Y - ys[X]) (each column dropped vertically, today's GroundStrip)."""
+    import numpy as np
+    Wc = len(ys)
+    if mode == "shear":
+        return _bilinear(tex, X.astype(np.float32), (surf_row + (Y - ys[np.clip(X, 0, Wc - 1)])).astype(np.float32))
+    dy = np.gradient(ys)
+    S = np.concatenate([[0.0], np.cumsum(np.sqrt(1 + ((ys[1:] - ys[:-1]) ** 2)))])
+    xc = X.astype(np.float64)
+    for _ in range(5):                                  # project (X, Y) onto the curve (Newton on the tangent)
+        yc = np.interp(xc, np.arange(Wc), ys)
+        g = np.interp(xc, np.arange(Wc), dy)
+        n = np.sqrt(1 + g * g)
+        tx, ty = 1 / n, g / n
+        xc = np.clip(xc + ((X - xc) * tx + (Y - yc) * ty) * tx, 0, Wc - 1)
+    yc = np.interp(xc, np.arange(Wc), ys)
+    g = np.interp(xc, np.arange(Wc), dy)
+    n = np.sqrt(1 + g * g)
+    h = ((X - xc) * (g / n) - (Y - yc) * (1 / n))      # + = above the surface (the normal pointing up-screen)
+    u = np.interp(xc, np.arange(Wc), S)
+    return _bilinear(tex, u.astype(np.float32), (surf_row - h).astype(np.float32))
+
+
+def preview(out_dir, planet="earth"):
+    import numpy as np
+    from meridian import pngio
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    pieces = render_all(planet)
+    dd = os.path.join(out_dir, "b175")
+    os.makedirs(dd, exist_ok=True)
+    for name, (frames, _w) in pieces.items():
+        pngio.write_png(os.path.join(dd, f"{planet}_{name}_color.png"), np.concatenate(frames, axis=1) if len(frames) > 1 else frames[0])
+    xs, z = profile()
+    Wp = len(xs)
+    PH = 512                                             # 8 m: z from -3.0 (bottom) to +5.0 (top)
+    ys = (PH - (z + 3.0) * PPU).astype(np.float64)       # the surface row per column
+    Y, X = np.mgrid[0:PH, 0:Wp]
+    sky = np.array(v3.hex_rgb(v3.PALETTES[planet]["sky"]), np.float32) / 255.0
+    C = colours(planet)
+    soil = np.array(v3.hex_rgb(C["soil"]), np.float32) / 255.0
+    solid = Y > ys[X]
+
+    def compose(band_tex, surf, mode, fill_tex=None, scoop=None):
+        img = np.empty((PH, Wp, 3), np.float32)
+        img[:] = sky
+        if fill_tex is None:
+            img[solid] = soil
+        else:
+            fv = _bilinear(fill_tex, X.astype(np.float32), np.mod(Y.astype(np.float32), fill_tex.shape[0]))
+            img[solid] = fv[solid][:, :3] + (1 - fv[solid][:, 3:4]) * soil
+        if scoop is not None:
+            cx, cz, r = scoop
+            hole = ((X - cx) ** 2 + (Y - cz) ** 2 <= r * r) & solid
+            back = img[hole] * 0.55                       # the scoop shows the cross-section's back wall, darker
+            img[hole] = back
+        b = np.zeros((PH, Wp, 4), np.float32)
+        for c0 in range(0, Wp, 480):                       # in column chunks (memory)
+            sl = slice(c0, min(Wp, c0 + 480))
+            b[:, sl] = bend(band_tex, surf, ys, X[:, sl], Y[:, sl], mode)
+        if scoop is not None:
+            b[hole] = 0
+        img = b[..., :3] + (1 - b[..., 3:4]) * img
+        return img
+    strip = pngio.read_png_np(os.path.join(ART, "terrain", "earth", "ground_strip_color.png"))
+    strip_tex = _premul(np.concatenate([strip[:, i * 68:i * 68 + 64] for i in range(8)], axis=1))
+    band_tex = _premul(pieces["ground_band"][0][0])
+    fill_tex = _premul(pieces["ground_fill"][0][0])
+    rows = []
+
+    def surveyor_at(img, xm):
+        try:
+            sm = json.load(open(os.path.join(ART, "characters", "surveyor", "side.json"), encoding="utf-8"))
+            sh = pngio.read_png_np(os.path.join(ART, "characters", "surveyor", "side_color.png"))
+            fr = sh[:sm["frame_height"], :sm["frame_width"]]
+            X0 = int(xm * PPU)
+            gy = int(round(ys[X0]))
+            review._over(img, fr, X0 - sm["frame_width"] // 2, gy - sm["frame_height"] + int(round(sm["pivot"][1] * sm["frame_height"])) + 2)
+        except (OSError, KeyError, ValueError):
+            pass
+    A = compose(strip_tex, 24, "shear")
+    surveyor_at(A, 2.0), surveyor_at(A, 12.0), surveyor_at(A, 20.5)
+    rows.append(("today's terrain/earth/ground_strip per column (vertical shear, as GroundStrip draws it): on the 30 deg slope and the "
+                 "lip the tufts tilt, the blades and the ink edge thin", A))
+    B = compose(strip_tex, 24, "normal")
+    surveyor_at(B, 2.0), surveyor_at(B, 12.0), surveyor_at(B, 20.5)
+    rows.append(("the same strip bent along the curve (a mesh band, u = arc length): the 1 m tufts lean with the slope and splay on the "
+                 "lip; its 2 m soil body bends too", B))
+    scoop = (int(8.6 * PPU), int(round(ys[int(8.6 * PPU)])) + 20, 62)
+    Cimg = compose(band_tex, SURF_ROW, "normal", fill_tex, scoop)
+    # the dig rim round the scoop's wall (the band's own mapping on a circle), the decor upright, the lip, a puff
+    cx, cy, r = scoop
+    ang = np.arctan2(Y - cy, X - cx)
+    dist = np.sqrt((X - cx) ** 2 + (Y - cy) ** 2)
+    near = (np.abs(dist - r) < RIM_H) & solid & (dist >= r - 1)
+    rim_tex = _premul(pieces["dig_rim"][0][0])
+    rv = _bilinear(rim_tex, ((ang + math.pi) * r).astype(np.float32), (RIM_ROW + (dist - r)).astype(np.float32))
+    rv[~near] = 0
+    Cimg = rv[..., :3] + (1 - rv[..., 3:4]) * Cimg
+    slope = np.degrees(np.arctan(np.abs(np.gradient(ys))))
+    brink = int(15 * PPU) + int(np.argmax(slope[int(15 * PPU):] > 25.0))     # the cliff's brink: where the drop passes 25 deg
+    decor = pieces["ground_decor"][0]
+    rnd = random.Random(5)
+    xm = 0.6
+    while xm < 29.5:
+        X0 = int(xm * PPU)
+        if slope[max(0, X0 - 20):X0 + 20].max() < 33.0 and abs(X0 - cx) > r + 20 and abs(X0 - brink) > 60:
+            k = rnd.choice((0, 0, 1, 1, 2, 3, 4, 5))
+            fr = decor[k]
+            review._over(Cimg, fr, X0 - 32, int(round(ys[X0])) - 64 + 6 + 2)
+        xm += rnd.uniform(0.7, 1.6)
+    lip = pieces["ground_lip"][0][0]
+    xl = brink - 10
+    review._over(Cimg, lip, xl - int(0.55 * 128), int(round(ys[xl])) - int((1 - 0.6) * 96))
+    puff = pieces["dig_puff"][0][3]
+    review._over(Cimg, puff, cx - 64 + 40, int(round(ys[cx])) - 96 - 10)
+    surveyor_at(Cimg, 2.0), surveyor_at(Cimg, 12.0), surveyor_at(Cimg, 20.5)
+    rows.append(("NEW: ground_band bent along the curve (the ink edge on the surface row, only low scallops above it) over ground_fill "
+                 "(world space), ground_decor upright, ground_lip on the brink, a dug scoop with dig_rim and dig_puff 3", Cimg))
+    # the pieces
+    PW = Wp
+    piece_h = 512 + 60
+    P = np.empty((piece_h, PW, 3), np.float32)
+    P[:] = review.PAPER
+    x = 8
+    review._over(P, pieces["ground_band"][0][0], x, 40)
+    review._label(P, "ground_band 512x64 (surface row 24)", x, 20)
+    review._over(P, pieces["dig_rim"][0][0], x, 140)
+    review._label(P, "dig_rim 256x16 (ink row 4)", x, 120)
+    for j, fr in enumerate(pieces["ground_decor"][0]):
+        P[200:264, x + j * 72:x + j * 72 + 64] = sky
+        review._over(P, fr, x + j * 72, 200)
+    review._label(P, "ground_decor x6 (upright)", x, 180)
+    P[300:396, x:x + 128] = sky
+    review._over(P, lip, x, 300)
+    review._label(P, "ground_lip 128x96", x, 280)
+    for j, fr in enumerate(pieces["dig_puff"][0]):
+        P[430:558, x + j * 132:x + j * 132 + 128] = sky
+        review._over(P, fr, x + j * 132, 430)
+    review._label(P, "dig_puff 8 frames", x, 412)
+    fx0 = 1100
+    ft = pieces["ground_fill"][0][0]
+    tiled = np.concatenate([np.concatenate([ft, ft], axis=1)] * 1, axis=0)[:, :768]
+    review._over(P, tiled, fx0, 40)
+    review._label(P, "ground_fill 512x512, tiled in x (the seam at 512)", fx0, 20)
+    lines = []
+    for name, (frames, widths) in pieces.items():
+        o = [w for w in widths if w[0] >= v3.OUTER_SPLIT]
+        n_ = [w for w in widths if w[0] < v3.OUTER_SPLIT]
+        rng = lambda q: f"{min(w[1] for w in q):.1f}-{max(w[2] for w in q):.1f}" if q else "-"  # noqa: E731
+        pal = v3.palette_hits(frames[0], planet)[0] * 100
+        m = v3.EDGE_MARGIN
+        tiles = name in ("ground_band", "ground_fill", "dig_rim")
+        edge = [i for i, f in enumerate(frames) if not tiles and (f[:m, :, 3].any() or f[-m:, :, 3].any() or f[:, :m, 3].any() or f[:, -m:, 3].any())]
+        seam = ""
+        if tiles:                                         # periodicity: the drawing rendered 2 tiles wide (2 tall for the fill), the copies compared
+            w0, h0 = PIECES[name][0], PIECES[name][1]
+            two, _w2 = render_piece(name, planet, 0, mx=2, mz=2 if name == "ground_fill" else 1, ss=1)
+            dx_ = np.abs(two[:h0, :w0].astype(np.int32) - two[:h0, w0:2 * w0].astype(np.int32))
+            seam = f"; tiles: copy diff mean {dx_.mean():.2f} p99 {np.percentile(dx_, 99):.0f} (x)"
+            if name == "ground_fill":
+                dz_ = np.abs(two[:h0, :w0].astype(np.int32) - two[h0:2 * h0, :w0].astype(np.int32))
+                seam += f", mean {dz_.mean():.2f} p99 {np.percentile(dz_, 99):.0f} (z)"
+            del two
+        lines.append(f"{name}: ink {rng(o)} / {rng(n_)} px, palette {pal:.1f}%{seam}{'; EDGE ' + str(edge) if edge else ''}")
+    img_rows = []
+    for title, im in rows:
+        lab = np.empty((22, Wp, 3), np.float32)
+        lab[:] = review.PAPER
+        review._label(lab, title[:235], 6, 4)
+        img_rows += [lab, im]
+    foot = np.empty((30 + 16 * len(lines), Wp, 3), np.float32)
+    foot[:] = review.PAPER
+    for i, ln in enumerate(lines):
+        review._label(foot, ln, 6, 6 + 16 * i, scale=1)
+    img = np.vstack(img_rows + [P, foot])
+    import time
+    review.draw(img, time.strftime("%m-%d %H:%M") + " curve preview (lock-free, fakegp + numpy; test profile 30 m at 1x)", 2,
+                img.shape[0] - 16, (1.0, 1.0, 0.85))
+    out = os.path.join(out_dir, f"review_b175_{planet}_curve_preview.png")
+    review.write(out, img)
+    print("written", out, img.shape[1], "x", img.shape[0])
+    for ln in lines:
+        print(ln)
+
+
+if __name__ == "__main__":
+    import numpy as np  # noqa: F401
+    preview(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else "earth")
+    fakegp.restore()
