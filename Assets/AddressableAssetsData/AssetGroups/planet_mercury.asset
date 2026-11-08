@@ -80,6 +80,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1fe6eb93c4d63a142acbc06fe36712b4
+    m_Address: terrain/mercury/ground_decor_ice_3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 204d2320f5b329443906e22e30d688e5
     m_Address: terrain/mercury/ground_decor_3
     m_ReadOnly: 0
@@ -102,6 +107,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 31bdb1949da354b40bbbd65ac6d73e4d
     m_Address: backgrounds/mercury/day/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 31f560cf18186ac48b8721ba0db801f4
+    m_Address: terrain/mercury/ground_decor_ice_2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -315,6 +325,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9000452e68b4cb54dbc891b80c04d754
+    m_Address: terrain/mercury/ground_band_ice
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 90403d62d283cee4fa208d92e81a704b
     m_Address: props/mercury/node_nickel/json
     m_ReadOnly: 0
@@ -447,6 +462,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c27da67c88b432645a78c8568d1ae7f1
     m_Address: props/mercury/pocket_nickel/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c397eefa66b4c58439f400431d514bce
+    m_Address: terrain/mercury/ground_decor_ice_1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

@@ -85,6 +85,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2ed27479e0cc9dd468ee1de14b1a7993
+    m_Address: terrain/venus/ground_band_tessera
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2fa24b5041e05dd4690ee46dd13b59b5
     m_Address: creatures/venus/pressure_crab/animator
     m_ReadOnly: 0
@@ -205,6 +210,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5c68b13f094aa3f4d98723aab09e3f2e
+    m_Address: terrain/venus/ground_decor_vent_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 65f50e08024d80447b9844ec33a9766e
     m_Address: creatures/venus/veil_serpent_tail
     m_ReadOnly: 0
@@ -247,6 +257,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 703577b919c03de4fac16a1b83f31dd2
     m_Address: backgrounds/venus/deck
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7422388deb6806d46bc90b2bd6488af0
+    m_Address: terrain/venus/ground_decor_tessera_2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -335,6 +350,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a862b11c757fc0a42bfc09249a92e8bf
+    m_Address: terrain/venus/ground_decor_tessera_3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a9e9999dd2bd55c4bb7322e5a7690a2a
     m_Address: terrain/venus/ground_decor_4
     m_ReadOnly: 0
@@ -347,6 +367,16 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: acca7e4ad0efa0845ac2aced3aca6bf5
     m_Address: props/venus/pocket_sulfur/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: acffbd4741ce1e64cb5f61cda81a42db
+    m_Address: terrain/venus/ground_decor_vent_3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b2a35b74d8b50734faedd7b43a6bc3b2
+    m_Address: terrain/venus/ground_band_vent
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -397,6 +427,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c1d68e11f0b1aa748a9c4ac8edaf46da
     m_Address: terrain/venus/fill_decor_4
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c3caa7439fe333b428cd8ba5f87bf5aa
+    m_Address: terrain/venus/ground_decor_vent_1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -452,6 +487,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: dbff001fc36f3274cbdfae609805b4d7
     m_Address: props/venus/node_sulfur
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dd84c28cf90e10e459b772c6cec9d490
+    m_Address: terrain/venus/ground_decor_tessera_1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

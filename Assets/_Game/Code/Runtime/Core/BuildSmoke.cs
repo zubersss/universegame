@@ -462,7 +462,7 @@ namespace Meridian.Core
                 yield return LookAt(side, bx + 0.5f, 1f);
                 int sx = bx + 4;
                 float sy = t.SurfaceAt(sx + 0.5f);
-                bool scooped = rig.Dig(new Vector2(sx + 0.5f, sy + 0.1f));
+                bool scooped = rig.Dig(new Vector2(sx + 0.5f, sy - 0.25f)); // D-168: aimed into the ground (0.1 m above it nothing was in reach where the drawn surface stands over the grid top)
                 yield return Wait(0.8f);
                 yield return Shot(folder, "smoke_31_earth_scoop.png");
                 int strokes = 0;
