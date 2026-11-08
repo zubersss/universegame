@@ -369,7 +369,10 @@ namespace Meridian.Creatures
 
             if (adx > DespawnDistance || Mathf.Abs(dy) > DespawnDistance || (!spec.ActiveAt(daylight) && adx > 22f)) { tickDespawns++; Despawn(c); return; } // night hunters leave at dawn, off-screen
 
-            int tx = Mathf.FloorToInt(pos.x), ty = Mathf.FloorToInt(pos.y - spec.size.y * 0.5f - 0.1f);
+            float feetY = pos.y - spec.size.y * 0.5f;
+            // U-156 (D-161): on a smooth planet the feet ride the traced outline, up to ½ m off the hidden grid's tops: the tile under them is the
+            // one whose top is nearest the feet; elsewhere the tile just under the feet, as before.
+            int tx = Mathf.FloorToInt(pos.x), ty = terrain.SmoothGround ? Mathf.RoundToInt(feetY) - 1 : Mathf.FloorToInt(feetY - 0.1f);
             if (!spec.Flies)
             {
                 // Hold bodies whose ground isn't there yet (streamed chunk not resident or still building).
@@ -441,11 +444,13 @@ namespace Meridian.Creatures
                 {
                     int ahead = Mathf.FloorToInt(pos.x + c.dir * (spec.size.x * 0.5f + 0.3f));
                     int feet = ty + 1;
-                    bool wall = grounded && TileId.IsSolid(terrain.GetTile(ahead, feet));
+                    // U-156 (D-161): on the traced outline a 1-tile step is a slope the body walks up; only 2 tiles is a wall (no hop needed).
+                    int rise = terrain.SmoothGround ? 1 : 0;
+                    bool wall = grounded && TileId.IsSolid(terrain.GetTile(ahead, feet + rise));
                     if (wall || stuck)
                     {
                         // A 1-tile step is hopped (air above it and headroom); anything taller is a wall (U-099: a 2-tile wall stops a chase).
-                        bool climbable = wall && !TileId.IsSolid(terrain.GetTile(ahead, feet + 1)) && !TileId.IsSolid(terrain.GetTile(tx, feet + Mathf.CeilToInt(spec.size.y) + 1));
+                        bool climbable = wall && rise == 0 && !TileId.IsSolid(terrain.GetTile(ahead, feet + 1)) && !TileId.IsSolid(terrain.GetTile(tx, feet + Mathf.CeilToInt(spec.size.y) + 1));
                         if (climbable) v.y = spec.jumpSpeed;
                         else if (c.State == CreatureState.Chase) { speed = 0f; if (stuck) c.waitUntil = now + BlockedSeconds; } // waits at the wall, never bumps through it; the legs stop with the body
                         else { c.dir = -c.dir; c.keepDirUntil = now + WallTurnSeconds; c.blockAnchorX = pos.x; c.blockAnchorT = now; } // Wander and Flee turn and move on along the wall

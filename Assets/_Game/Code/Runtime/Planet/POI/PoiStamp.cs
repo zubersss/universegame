@@ -138,6 +138,27 @@ namespace Meridian.Planet.POI
         static PoiDef[] jointPois;
         static int[] jointPads;
 
+        static void Joint(IWorldGenerator world, int datumY, Meridian.Planets.PlanetId planet)
+        {
+            if (ReferenceEquals(jointWorld, world)) return;
+            var list = new System.Collections.Generic.List<PoiDef>();
+            foreach (var p in PoiCatalog.For(planet)) if (!p.Floating && p.stamp != null) list.Add(p);
+            jointPois = list.ToArray();
+            jointPads = new int[jointPois.Length];
+            for (int i = 0; i < jointPois.Length; i++) jointPads[i] = GroundY(jointPois[i], world, datumY);
+            jointWorld = world;
+        }
+
+        /// <summary>U-156: the pad height (the stamp's ground row) where column x lies across a stamped POI; int.MinValue elsewhere. The drawn
+        /// curve holds pad + 1 across the whole stamp (GroundField.Curve), so its props never stand over the shoulders' easing.</summary>
+        public static int PadAt(IWorldGenerator world, int datumY, Meridian.Planets.PlanetId planet, int x)
+        {
+            Joint(world, datumY, planet);
+            int w = world.Width;
+            for (int i = 0; i < jointPois.Length; i++) if (Wrap(x - jointPois[i].x, w) < jointPois[i].Width) return jointPads[i];
+            return int.MinValue;
+        }
+
         /// <summary>
         /// U-156 (D-161): on a smooth planet the ground round its stamped POIs is joint, so neighbouring shoulders meet without a step: across a
         /// stamp its own pad; elsewhere the natural surface clamped into every reaching POI's cone (its pad height ± SmoothShoulder per column off
@@ -146,15 +167,7 @@ namespace Meridian.Planet.POI
         /// </summary>
         public static bool JointGround(IWorldGenerator world, int datumY, Meridian.Planets.PlanetId planet, int x, out int ground)
         {
-            if (!ReferenceEquals(jointWorld, world))
-            {
-                var list = new System.Collections.Generic.List<PoiDef>();
-                foreach (var p in PoiCatalog.For(planet)) if (!p.Floating && p.stamp != null) list.Add(p);
-                jointPois = list.ToArray();
-                jointPads = new int[jointPois.Length];
-                for (int i = 0; i < jointPois.Length; i++) jointPads[i] = GroundY(jointPois[i], world, datumY);
-                jointWorld = world;
-            }
+            Joint(world, datumY, planet);
             int w = world.Width;
             x = Wrap(x, w);
             int natural = world.SurfaceHeight(x);

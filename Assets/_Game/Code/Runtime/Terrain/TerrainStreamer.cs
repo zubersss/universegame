@@ -146,6 +146,13 @@ namespace Meridian.Terrain
         /// <summary>U-076: the column's original surface row (POI-shaped ground included, player digs not): the ground behind the play plane.</summary>
         public int OriginalTop(int x) => ((TerrainChunk.IBlockWorld)this).WallTop(x);
 
+        /// <summary>U-156: the pad height across a stamped POI on a smooth planet (the drawn curve holds it flat to the stamp's ends); int.MinValue
+        /// elsewhere and on every other planet.</summary>
+        public int PadTop(int x) => SmoothGround && Config != null ? Meridian.Planet.POI.PoiStamp.PadAt(BaseGenerator, Config.datumY, Config.id, x) : int.MinValue;
+
+        /// <summary>U-156: the drawn surface's height over column x's centre on a smooth planet (the outline's line where nothing is dug or built).</summary>
+        public float CurveAt(int x) => GroundField.Curve(x, OriginalTop, PadTop);
+
         int TerrainChunk.IBlockWorld.WallTop(int x)
         {
             if (Config == null || Config.worldType != WorldType.Solid) return int.MinValue;

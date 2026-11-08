@@ -105,8 +105,13 @@ namespace Meridian.Tests
         public IEnumerator AThirtyDegreeRampIsWalkedWithoutSlideOrBounce()
         {
             float rise = 20f * Mathf.Tan(30f * Mathf.Deg2Rad);
-            Edge("Ramp", new Vector2(-30f, 0f), new Vector2(0f, 0f), new Vector2(20f, rise), new Vector2(50f, rise));
+            var ramp = Edge("Ramp", new Vector2(-30f, 0f), new Vector2(0f, 0f), new Vector2(20f, rise), new Vector2(50f, rise)).GetComponent<EdgeCollider2D>();
             var p = Spawn(new Vector2(-6f, 0.05f));
+            var foot = p.GetComponent<CapsuleCollider2D>();
+            float tan = Mathf.Tan(30f * Mathf.Deg2Rad);
+            // The gap is the capsule's own distance to the line along its normal (Physics2D.Distance), not its pivot's height over the line: a
+            // round foot touching a 30° line holds its pivot r(sec θ − 1) = 4.6 cm above it (logged as "pivot"), with no gap at all.
+            float pivotRide = PlayerTuning.Width * 0.5f * (1f / Mathf.Cos(30f * Mathf.Deg2Rad) - 1f), upPivot = 0f, downPivot = 0f, upSum = 0f, downSum = 0f;
             yield return Fixed(15);
             Assert.IsTrue(p.Grounded);
 
@@ -121,7 +126,9 @@ namespace Meridian.Tests
                 {
                     upSteps++;
                     if (!p.Grounded) upAir++;
-                    upGap = Mathf.Max(upGap, Mathf.Abs(p.Body.position.y - x * Mathf.Tan(30f * Mathf.Deg2Rad)));
+                    float g = Mathf.Abs(Physics2D.Distance(foot, ramp).distance);
+                    upGap = Mathf.Max(upGap, g); upSum += g;
+                    upPivot = Mathf.Max(upPivot, Mathf.Abs(p.Body.position.y - x * tan));
                 }
             }
             Assert.Greater(upSteps, 20, "walked the ramp up");
@@ -144,11 +151,13 @@ namespace Meridian.Tests
                 {
                     downSteps++;
                     if (!p.Grounded) downAir++;
-                    downGap = Mathf.Max(downGap, Mathf.Abs(p.Body.position.y - x * Mathf.Tan(30f * Mathf.Deg2Rad)));
+                    float g = Mathf.Abs(Physics2D.Distance(foot, ramp).distance);
+                    downGap = Mathf.Max(downGap, g); downSum += g;
+                    downPivot = Mathf.Max(downPivot, Mathf.Abs(p.Body.position.y - x * tan));
                 }
             }
             p.intent.move = 0f;
-            TestContext.Out.WriteLine($"[MERIDIAN] u156 ramp 30°: up {upSteps} steps, {upAir} airborne, gap {upGap:F3} m; standing slide {slide:F4} m over 2 s; down {downSteps} steps, {downAir} airborne, gap {downGap:F3} m");
+            TestContext.Out.WriteLine($"[MERIDIAN] u156 ramp 30°: up {upSteps} steps, {upAir} airborne, contact gap max {upGap:F4} mean {upSum / Mathf.Max(1, upSteps):F4} m, pivot over the line max {upPivot:F4} m (round-foot geometry {pivotRide:F4}); standing slide {slide:F4} m over 2 s; down {downSteps} steps, {downAir} airborne, contact gap max {downGap:F4} mean {downSum / Mathf.Max(1, downSteps):F4} m, pivot max {downPivot:F4} m");
             Assert.AreEqual(0, upAir, "no bounce walking up");
             Assert.Less(upGap, 0.05f, "the feet stay on the slope walking up");
             Assert.Less(slide, 0.01f, "no slide standing on the slope");

@@ -42,6 +42,8 @@ namespace Meridian.Core
         public readonly System.Collections.Generic.List<string> storyFlags = new System.Collections.Generic.List<string>();
         public bool HasFlag(string f) => storyFlags.Contains(f);
         public void SetFlag(string f) { if (!storyFlags.Contains(f)) storyFlags.Add(f); }
+        /// <summary>U-156: drops a world flag (a re-stamp after the ground changed shape; the before / after captures).</summary>
+        public void ClearFlag(string f) => storyFlags.Remove(f);
 
         public PlanetConfig CurrentPlanetConfig => catalog != null ? catalog.Get(currentPlanet) : null;
 

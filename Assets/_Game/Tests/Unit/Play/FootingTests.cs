@@ -81,6 +81,13 @@ namespace Meridian.Tests
                     side.player.Body.position = feet; side.player.transform.position = feet; side.player.Body.linearVelocity = Vector2.zero;
                     for (int i = 0; i < 25; i++) yield return new WaitForFixedUpdate();
                     float y = side.player.Body.position.y, ground = top + 1f;
+                    if (t.SmoothGround)
+                    {
+                        // D-161 re-base (U-156, LEAD ruling): on a smooth planet "ground" is the traced outline's collider surface under the feet
+                        // (up to ½ m off the hidden tile tops), not the top tile's top. The tolerance is unchanged.
+                        foreach (var h in Physics2D.RaycastAll(new Vector2(side.player.Body.position.x, top + 3f), Vector2.down, 6f))
+                            if (h.collider is EdgeCollider2D && h.collider.GetComponent<TerrainChunk>() != null) { ground = h.point.y; break; }
+                    }
                     // A solid prop (pad deck) over the column carries the surveyor higher: only "not below" applies.
                     bool prop = false;
                     foreach (var c in Physics2D.OverlapPointAll(new Vector2(x + 0.5f, ground + 0.6f)))
@@ -92,7 +99,7 @@ namespace Meridian.Tests
                         var hits = new System.Text.StringBuilder();
                         foreach (var h in Physics2D.RaycastAll(new Vector2(x + 0.5f, ground + 3f), Vector2.down, 6f))
                             if (h.rigidbody != side.player.Body) hits.Append($" {h.collider.name}@{h.point.y:F2}");
-                        string line = $"{planet} {where} x {x}: feet {y:F2}, ground {ground:F0} (top tile {t.GetTile(x, top)}, collision {t.IsCollisionReady(x, top)}, prop {prop})";
+                        string line = $"{planet} {where} x {x}: feet {y:F2}, ground {ground:F2} (top tile {t.GetTile(x, top)}, collision {t.IsCollisionReady(x, top)}, prop {prop})";
                         line += " hits:" + hits;
                         fails.Add(line);
                         log.AppendLine(line);

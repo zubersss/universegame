@@ -26,6 +26,8 @@ namespace Meridian.Terrain
             byte TileAt(int x, int y);
             /// <summary>Highest world y that gets back wall in column x (the original surface); int.MinValue = none.</summary>
             int WallTop(int x);
+            /// <summary>U-156: the pad height where column x lies across a stamped POI on a smooth planet; int.MinValue elsewhere.</summary>
+            int PadTop(int x);
         }
 
         /// <summary>When true the block mesh renders and the tilemap renderer is off (the 3D view).</summary>
@@ -104,7 +106,7 @@ namespace Meridian.Terrain
             curve ??= new float[C + 1];
             int x0 = cx * C, y0 = cy * C, t0 = x0 - 1 - r;
             for (int k = 0; k < tops.Length; k++) tops[k] = world.WallTop(t0 + k);
-            for (int i = 0; i <= C; i++) curve[i] = GroundField.Curve(x0 - 1 + i, x => tops[x - t0]);
+            for (int i = 0; i <= C; i++) curve[i] = GroundField.Curve(x0 - 1 + i, x => tops[x - t0], world.PadTop);
             for (int i = 0; i <= C; i++) SurfaceCurve[i] = tops[i + r] == int.MinValue ? float.NaN : curve[i];
             for (int j = 0; j <= C; j++)
             {

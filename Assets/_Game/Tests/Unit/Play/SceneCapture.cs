@@ -2059,6 +2059,9 @@ namespace Meridian.Tests
                 for (int pass = 0; pass < 2; pass++)
                 {
                     Meridian.Terrain.GroundField.ForceBlocks = pass == 1;
+                    // Each pass stamps Earth afresh: the stamps' edits outlive a load (once per save), and each look cuts its own shoulders.
+                    GameState.Instance.EditsFor(Meridian.Planets.PlanetId.Earth).Clear();
+                    foreach (var poi in Meridian.Planet.POI.PoiCatalog.For(Meridian.Planets.PlanetId.Earth)) GameState.Instance.ClearFlag(poi.StampedFlag);
                     yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(Meridian.Planets.PlanetId.Earth));
                     var side = director.PlanetSide;
                     timeout = Time.realtimeSinceStartup + 20f;
@@ -2078,7 +2081,7 @@ namespace Meridian.Tests
                             int top = t.OriginalTop(x);
                             if (top > hiY) { hiY = top; hi = x; }
                             if (top < loY && top > side.Config.datumY + 1) { loY = top; lo = x; }
-                            float s = Mathf.Abs(Meridian.Terrain.GroundField.Curve(x + 1, t.OriginalTop) - Meridian.Terrain.GroundField.Curve(x, t.OriginalTop));
+                            float s = Mathf.Abs(t.CurveAt(x + 1) - t.CurveAt(x));
                             if (s > steepS) { steepS = s; steep = x; }
                         }
                         xs[1] = hi; xs[2] = lo; xs[3] = steep;
@@ -2092,7 +2095,7 @@ namespace Meridian.Tests
                     for (int i = 0; i < spots.Length; i++)
                     {
                         int x = xs[i];
-                        float feet = t.Generator.SurfaceHeight(t.WrapX(x)) + 1.05f;
+                        float feet = t.TopSolidY(x) + 2f; // from the hidden grid's top (the stamped pad, not the natural surface): an edge outline has no inside to push a buried body out
                         body.simulated = false;
                         body.position = new Vector2(x + 0.5f, feet + 0.5f); side.player.transform.position = body.position;
                         yield return null;

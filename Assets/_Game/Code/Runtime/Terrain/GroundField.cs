@@ -56,6 +56,14 @@ namespace Meridian.Terrain
             return s / CurveKernelSum;
         }
 
+        /// <summary>U-156: the curve with the stamped POIs' pads held flat to their ends (pad(x) is the pad height across a stamp, int.MinValue
+        /// elsewhere): the easing happens on the shoulders, never under a pad's props.</summary>
+        public static float Curve(int x, System.Func<int, int> top, System.Func<int, int> pad)
+        {
+            int p = pad(x);
+            return p != int.MinValue ? p + 1f : Curve(x, top);
+        }
+
         /// <summary>The curve's density ramp: ±FieldBand / 2 m round the surface stays unclamped, so any walkable slope traces exactly.</summary>
         public const float FieldBand = 4f;
 

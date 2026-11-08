@@ -12,7 +12,7 @@ namespace Meridian.Tests
     /// <summary>
     /// U-156 (EditMode, D-161 / D-162): Earth's drawn ground stays walkable. On ten seeds, with every stamped POI's shaping in (the pad raised
     /// or cut, its shoulders eased at 0.65, joint where two POIs' shoulders meet), the surface curve the outline follows never steps more than tan 35° between neighbouring columns,
-    /// the hidden grid never more than one tile, and each pad's middle stays flat (the Pilgrim's pad, the camp).
+    /// the hidden grid never more than one tile, and each pad stays flat to its ends (the Pilgrim's pad, the camp, the crates at its edge).
     /// </summary>
     public class SmoothGroundTests
     {
@@ -37,10 +37,11 @@ namespace Meridian.Tests
                     tops[x] = PoiStamp.JointGround(gen, cfg.datumY, PlanetId.Earth, x, out int g) ? g : gen.SurfaceHeight(x); // TerrainStreamer.WallTop on a smooth planet
                 }
                 System.Func<int, int> top = x => tops[((x % w) + w) % w];
+                System.Func<int, int> pad = x => PoiStamp.PadAt(gen, cfg.datumY, PlanetId.Earth, x); // TerrainStreamer.PadTop
                 float worst = 0f; int at = 0, worstStep = 0;
                 for (int x = 0; x < w; x++)
                 {
-                    float s = Mathf.Abs(GroundField.Curve(x + 1, top) - GroundField.Curve(x, top));
+                    float s = Mathf.Abs(GroundField.Curve(x + 1, top, pad) - GroundField.Curve(x, top, pad));
                     if (s > worst) { worst = s; at = x; }
                     worstStep = Mathf.Max(worstStep, Mathf.Abs(top(x + 1) - top(x)));
                 }
@@ -50,9 +51,8 @@ namespace Meridian.Tests
                 for (int i = 0; i < pois.Count; i++)
                 {
                     var poi = pois[i];
-                    int r = GroundField.CurveKernel.Length / 2;
-                    for (int x = poi.x + r; x < poi.x + poi.Width - r; x++)
-                        Assert.AreEqual(pads[i] + 1f, GroundField.Curve(x, top), 1e-4f, $"seed {seed}: the pad at x {poi.x}: its middle stays flat at column {x}");
+                    for (int x = poi.x; x < poi.x + poi.Width; x++) // the whole stamp: its props never stand over the easing
+                        Assert.AreEqual(pads[i] + 1f, GroundField.Curve(x, top, pad), 1e-4f, $"seed {seed}: the pad at x {poi.x} stays flat to its ends: column {x}");
                 }
             }
         }
