@@ -207,7 +207,9 @@ namespace Meridian.Save
             if (data.aerostats != null) state.aerostats.AddRange(data.aerostats);
             state.contracts.Clear();
             if (data.contracts != null) state.contracts.AddRange(data.contracts);
+            int cryoBatches = Meridian.Items.RetiredItems.TakeCryoRoundBatches(data.inventory); // U-170 (D-173)
             state.inventory.ReadFrom(data.inventory, data.selectedSlot);
+            Meridian.Items.RetiredItems.Refund(state.inventory, cryoBatches);
             state.storyFlags.Clear();
             if (data.story != null && data.story.flags != null) state.storyFlags.AddRange(data.story.flags);
             state.nodeStates.Clear();

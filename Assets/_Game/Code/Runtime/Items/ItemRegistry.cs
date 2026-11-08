@@ -69,7 +69,8 @@ namespace Meridian.Items
             foreach (var (key, name) in new[] { ("polymer", "Polymer"), ("solarite_capacitor", "Solarite capacitor"), ("float_cell_mk1", "Float cell Mk1") })
                 Add(new ItemDef { id = id++, key = key, name = name, icon = $"icons/{key}/base" });
             // U-055: Lance ammunition, the Veil Serpent's counter (icon B-054).
-            Add(new ItemDef { id = id++, key = "cryo_round", name = "Cryo round", icon = "icons/cryo_round/base" });
+            // U-170 (D-173): cryo_round retired (the Veil Serpent's ammunition, unused since D-087): its id stays unused so later ids never move.
+            CryoRoundRetiredId = id++;
             // U-059: the Tharsis Worm's plate (M4+): registered, no source yet.
             Add(new ItemDef { id = id++, key = "wormplate", name = "Wormplate" });
             // U-056 base pieces (B-014, B-045): their art is their icon. The float cell (B-051) is the aerostat's lift.
@@ -93,8 +94,11 @@ namespace Meridian.Items
             })
                 Add(new ItemDef { id = id++, key = key, name = name, icon = $"icons/{key}/base" });
             // D-157 (b): Neptune's wind anchor, a base piece (its prop art is its icon); appended so every older id stays.
-            Add(new ItemDef { id = id++, key = "wind_anchor", name = "Wind anchor", icon = "props/neptune/wind_anchor" });
+            Add(new ItemDef { id = id++, key = "wind_anchor", name = "Wind anchor", icon = "icons/wind_anchor/base" }); // B-197: a shared icon (U-159 Residency)
         }
+
+        /// <summary>U-170 (D-173): the retired cryo_round's id (no item has it; a save's cryo rounds convert on load, RetiredItems).</summary>
+        public static int CryoRoundRetiredId { get; private set; } = -1;
 
         /// <summary>U-107: a retired item's slot in an id-ordered list (its id stays unused so later ids never move).</summary>
         static readonly (string, string) Retired = (null, null);

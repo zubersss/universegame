@@ -40,10 +40,31 @@ namespace Meridian.Tests
         [Test]
         public void ItemIconsAreSharedArt()
         {
-            // Pending: the wind anchor has only Neptune's prop (B-161); its shared icon is asked of LEAD (U-159 report, 2026-11-08).
-            var pending = new HashSet<string> { "wind_anchor" };
             foreach (var d in ItemRegistry.All)
-                if (d.icon != null && !pending.Contains(d.key)) Assert.IsTrue(d.icon.StartsWith("icons/") || d.icon.StartsWith("props/common/"), $"{d.key}: icon {d.icon}");
+                if (d.icon != null) Assert.IsTrue(d.icon.StartsWith("icons/") || d.icon.StartsWith("props/common/"), $"{d.key}: icon {d.icon}");
+        }
+
+        /// <summary>U-170 (D-173): cryo_round is retired: no item, no recipe, its id kept (the next item's id unmoved), and a save's rounds come
+        /// back as 2 polar ice + 1 iron bar per 6, rounded down (13 rounds: 4 ice, 2 bars; the stacks emptied).</summary>
+        [Test]
+        public void CryoRoundsRetireAndRefundOnLoad()
+        {
+            Assert.IsNull(ItemRegistry.Get("cryo_round"), "no cryo_round item");
+            int rid = ItemRegistry.CryoRoundRetiredId;
+            Assert.Greater(rid, 0);
+            Assert.IsNull(ItemRegistry.Get(rid), "its id unused");
+            Assert.AreEqual(rid + 1, ItemRegistry.Get("wormplate").id, "the next item keeps its id");
+            foreach (var r in Meridian.Crafting.CraftingDefaults.Recipes())
+                Assert.AreNotEqual("fab_cryo_rounds", r.id, "no Fabricator recipe");
+            var list = new List<ItemStack> { new ItemStack { itemId = rid, count = 7 }, new ItemStack { itemId = ItemRegistry.Get("iron").id, count = 3 }, new ItemStack { itemId = rid, count = 6 } };
+            int batches = RetiredItems.TakeCryoRoundBatches(list);
+            Assert.AreEqual(2, batches, "13 rounds: 2 batches");
+            Assert.IsTrue(list[0].IsEmpty && list[2].IsEmpty && list[1].count == 3, "the rounds' stacks emptied, the rest kept");
+            var inv = new Inventory();
+            inv.ReadFrom(list, 0);
+            RetiredItems.Refund(inv, batches);
+            Assert.AreEqual(4, inv.Count(ItemRegistry.Get("polar_ice").id), "2 polar ice per batch");
+            Assert.AreEqual(2, inv.Count(ItemRegistry.Get("smelter_bar_iron").id), "1 iron bar per batch");
         }
 
         [Test]

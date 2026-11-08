@@ -43,7 +43,6 @@ namespace Meridian.Crafting
             R("fab_thermal_pad", Station.Fabricator, A("thermal_pad"), "fabrication", A("smelter_bar_copper"), A("basalt", 4)),
             R("fab_cryo_pad", Station.Fabricator, A("cryo_pad"), "fabrication", A("smelter_bar_copper"), A("water_ice", 3)),
             // U-055: Cryo-charged Lance rounds from Mercury's polar ice (Bible §7.4: the Veil Serpent's counter).
-            R("fab_cryo_rounds", Station.Fabricator, A("cryo_round", 6), "fabrication", A("polar_ice", 2), A("smelter_bar_iron")),
             // U-056 base pieces.
             R("fab_shelter_wall", Station.Fabricator, A("shelter_wall", 4), "fabrication", A("smelter_bar_iron", 2)),
             R("fab_shelter_door", Station.Fabricator, A("shelter_door"), "fabrication", A("smelter_bar_iron", 2), A("circuit_board")),
