@@ -1,8 +1,8 @@
 # BLENDER STATUS
-Updated: 2026-11-07 18:47 · Session: 8 (resumed 14:3x after the ~14:17 machine restart; C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 18:5x · Session: 8 (resumed 14:3x after the ~14:17 machine restart; C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-B-160's last item: creatures/jupiter/vortex_whale re-export at D-153 (WHALE_SCALE 0.75, ~36 m; code a9bae628; the parts pack 46 % of one 2048 sheet). Waiting at the wrapper's RAM gate (18:42: 1301 MB free < 1376); want_blender.lock on file, a RAM/locks monitor armed. After it: the Uranus manifest rows (B-166, generator written) when nobody waits; B-163 / B-164 exports when U-129's code lands.
+B-160's last item: creatures/jupiter/vortex_whale re-export at D-153 (WHALE_SCALE 0.75, ~36 m; code a9bae628; the parts pack 46 % of one 2048 sheet). Waiting at the wrapper's RAM gate (18:42: 1301 MB free < 1376); want_blender.lock on file, a RAM/locks monitor armed. After it (rank 2): B-170 the five title cards, one slot (source written 19:0x: build_ui_v3 five painted medallions + subtitles, a cards-only export mode, preview_cards; render.py do_ui_set "cards" / "panels"; the row ui/c2/titlecards_set; py_compile + JSON check at the start of my next slot, then committed). Then the Uranus rows (B-166) when nobody waits; B-163 / B-164 exports when U-129's code lands. UNITY's want (U-127 slice 2 check, rank 3, 18:58:33) goes after my slot.
 B-159 EXPORTED + VERIFIED (ad3d2e98 slot 1: the five Jupiter backdrops straight + the B-156 kit; 2b00434b slot 2: floes, flora, props, palette). B-160 four of five VERIFIED (db4d5a53).
 
 ## Last completed
@@ -19,12 +19,10 @@ B-159 EXPORTED + VERIFIED (ad3d2e98 slot 1: the five Jupiter backdrops straight 
 - 16:07:42-16:11:26 SLOT: the B-161 stamped reviews (all nine ACCEPTED).
 
 ## Ready for review
-- B-154: the export (87e1ae22) + review_b147_venus_{sulfur_drifter,acidmoth,pressure_crab,vent_eel}.png + review_b154_vent_mouth.png.
+none (the whale lands with its slot).
 
 ## Handoffs (unrouted only)
--> UNITY (B-150, cca20f60): drop the .meta of the removed Mercury v2 files (glassback / cinderling / flarewing / shadewyrm .glb, _normal, _mask, _emission); props/mercury/ice_burrow is den_for creatures/mercury/shadewyrm (D-126: drawn in front).
--> UNITY (B-148, 70c40e1e): flora/mercury/rigset biomes are day / twilight / night / polar (shadebloom night + polar).
--> UNITY (B-153): VenusKeys = terrain/venus/ground_strip (the basalt crust) + ground_strip_deck (the aerostat planks); routed by LEAD to U-125.
+none.
 
 ## Blockers
 none.
@@ -50,4 +48,4 @@ none (B-161's three ruled in D-148).
 none (USER-28, closing ChatGPT + Edge for RAM, is LEAD's).
 
 ## HeavyJobLock
-want_blender.lock filed 18:42:51 by the wrapper (creatures/jupiter/vortex_whale, the RAM gate); none held.
+want_blender.lock filed 18:42:51 by the wrapper (creatures/jupiter/vortex_whale, the RAM gate; rank 2); want_unity.lock 18:58:33 (rank 3); none held.
