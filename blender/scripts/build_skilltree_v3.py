@@ -92,6 +92,30 @@ SIDEWAYS = [("dig_brush_2", "haul_magnet_1"), ("dig_core_bit", "voy_skip_2"), ("
             ("asc_ladder_2", "sur_scan_2"), ("sur_deep_eye", "end_deep_2"), ("end_fall_2", "voy_hold_2")]
 OFFSET = {"end_air_2": -18, "end_heat_1": 4}     # degrees from the branch axis where the default slot would sit on a link
 
+# LEAD 17:0x (a): a crossing-free variant of §5 for the radial chart. Every feed stays except four (Endurance and Voyage, R3 -> R4),
+# and the three ring-5 sideways links move to the ring-5 node on the side its own chain arrives at.
+PROPOSAL = dict(
+    tree={"dig": [None, None, None, None, ["dig_power_5", "dig_core_bit"]], "haul": [None, None, None, None, ["haul_compact", "haul_pack_5"]],
+          "ascent": [None, None, None, None, ["asc_recall", "asc_winch"]], "survey": [None, None, None, None, ["sur_deep_eye", "sur_cartographer"]],
+          "endurance": [None, None, None, ["end_air_4", "end_deep_1"], ["end_suit_mk3", "end_deep_2"]],
+          "voyage": [None, None, None, None, ["voy_skip_2", "voy_dray"]]},
+    links={"end_air_4": ["end_air_3"], "end_deep_1": ["end_heat_2", "end_fall_2"], "voy_thrust_3": ["voy_skip_1", "voy_hold_2"],
+           "voy_trader": ["voy_price_3"]},
+    sideways=[("dig_brush_2", "haul_magnet_1"), ("dig_power_5", "voy_dray"), ("haul_pack_5", "asc_recall"), ("asc_ladder_2", "sur_scan_2"),
+              ("sur_cartographer", "end_suit_mk3"), ("end_fall_2", "voy_hold_2")])
+
+
+def use_proposal():
+    """Swap PROPOSAL into TREE / LINKS / SIDEWAYS / LAYOUT (the check and the mock-up then show the proposed chart)."""
+    global SIDEWAYS, LAYOUT
+    for b, rings in PROPOSAL["tree"].items():
+        for r, ids in enumerate(rings):
+            if ids:
+                TREE[b][r] = ids
+    LINKS.update(PROPOSAL["links"])
+    SIDEWAYS = list(PROPOSAL["sideways"])
+    LAYOUT = layout()
+
 
 def axis_deg(b):
     return -90 + 60 * BRANCHES.index(b)           # screen degrees (y down): Dig at the top, then clockwise
@@ -634,5 +658,11 @@ def preview(out_dir, out=None, footnote=None):
         print(f"ink {min(w[1] for w in widths):.1f}-{max(w[2] for w in widths):.1f} px")
 
 
-if __name__ == "__main__":
-    preview(sys.argv[1])
+if __name__ == "__main__":                       # <preview dir> [--proposal] [--check]: --check prints the crossings only
+    if "--proposal" in sys.argv:
+        use_proposal()
+    if "--check" in sys.argv:
+        _cr = crossings()
+        print("crossings:", len(_cr), _cr)
+    else:
+        preview(sys.argv[1], out=os.path.join(sys.argv[1], "review_b204_skilltree_proposal.png") if "--proposal" in sys.argv else None)

@@ -303,6 +303,10 @@ def eel_head(d, M, hx, hz, p, seed):
         K.stars(d, M, hx, hz + 0.2, 0.13, p["stars"])
 
 
+EEL_TAIL_Z = 0.035      # B-207: the body's end at the vent sits on the ground (it was 0.10: the idle / react frames' lowest ink
+                        # 4 px over the contact; CreatureTests.PawsOnTheGround allows 2); the vent_mouth prop hides it in play
+
+
 def draw_vent_eel(d, M, pose=None, seed=0):
     p = K.base_pose()
     p.update(dict(hole=None, wave=0.0, curl=0.0))
@@ -310,7 +314,7 @@ def draw_vent_eel(d, M, pose=None, seed=0):
     e = p["hole"]
     if e is not None:                                                                     # at the vent: rises behind its rim
         hx, hz = 0.08 + 0.03 * e, max(0.20 + 0.40 * e + p["bob"], 0.18)
-        spine = G.bezier((hx - 0.02, hz - 0.04), (hx - 0.06, hz - 0.2), (0.0, 0.2), (-0.02, 0.10), n=12)
+        spine = G.bezier((hx - 0.02, hz - 0.04), (hx - 0.06, hz - 0.2), (0.0, 0.2), (-0.02, EEL_TAIL_Z), n=12)
         eel_body(d, M, spine, 0.11, 0.10, seed)
         dk = G.Xf(d, K.turn((hx - 0.06, hz - 0.03), p["head_rot"], (0.0, 0.0), K.scale_about((hx, hz), 1.45)))
         eel_head(dk, M, hx, hz, p, seed)
@@ -492,6 +496,89 @@ def preview(out_dir, name="sulfur_drifter"):
               f"problems {problems or '-'}, boxes not x: {','.join(k for k, (mk, _n) in boxes.items() if mk != 'x') or '-'}")
 
 
+def contact_sheet(out_dir, name="vent_eel", footnote=None):
+    """B-207: every clip's ground contact, measured as CreatureTests.PawsOnTheGround does (the lowest row with alpha > 127,
+    from the frame's bottom, minus the pivot row; within 2 px passes). Each frame at 1x over the contact line (red), a 4x zoom of
+    its bottom 10 rows round the lowest pixel, the exported sheet's value -> this source's value."""
+    import json
+    import time
+    import numpy as np
+    from meridian import fakegp, pngio
+    import gp_raster as GR
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    sp = SPECIES[name]
+    fw, fh = sp["frame"]
+    piv = sp.get("pivot", (0.5, 0.0))
+    piv_px = piv[1] * fh
+    art = os.path.join(os.path.dirname(os.path.dirname(HERE)), "Assets", "_Game", "Art", "creatures", "venus")
+    old = pngio.read_png_np(os.path.join(art, name + "_color.png"))
+    om = json.load(open(os.path.join(art, name + ".json"), encoding="utf-8"))
+
+    def old_frame(i):
+        r, c = divmod(i, om["columns"])
+        return old[r * (fh + om["gutter"]):r * (fh + om["gutter"]) + fh, c * (fw + om["gutter"]):c * (fw + om["gutter"]) + fw]
+
+    def lowest(im):
+        rows = np.where((im[..., 3] > 127).any(axis=1))[0]
+        return None if len(rows) == 0 else float(fh - 1 - rows.max()) - piv_px
+    new = []
+    for f, pose in enumerate(sp["poses"]()):
+        gp = fakegp.FakeGP()
+        M = mats(gp, name)
+        d = fakegp.FakeDrawing()
+        sp["draw"](d, M, pose, seed=5 * f)
+        st = fakegp.strokes_of(d, gp, as_object=(name, "art"))
+        new.append(GR.render_frame(st, fw, fh, 64, piv, ss=4, seed=sp["seed"] * 1000 + f + 1)[0])
+    paper = np.array(review.PAPER, np.float32)
+    TW, rows_, lines, fails = fw + 8, [], [], []
+    clipped = [i for i, im in enumerate(new) if im[:2, :, 3].any() or im[:, :2, 3].any() or im[:, -2:, 3].any()]
+    s0 = 0
+    for clip, n, _lp in sp["clips"]:
+        R = np.empty((22 + fh + 4 + 40 + 20, 12 * TW + 8, 3), np.float32)
+        R[:] = paper
+        review._label(R, f"{clip} (frames {s0}-{s0 + n - 1})" + ("  [the test's clip]" if clip in ("idle", "walk", "death") else ""), 4, 4, scale=1)
+        for k in range(n):
+            i = s0 + k
+            im, was, now = new[i], lowest(old_frame(i)), lowest(new[i])
+            x = 4 + k * TW
+            review._over(R, im, x, 22)
+            R[22 + fh, x:x + fw] = (0.85, 0.2, 0.15)                                       # the contact (pivot row)
+            ys, xs = np.where(im[..., 3] > 127)
+            cx = int(xs[ys == ys.max()].mean()) if len(xs) else fw // 2
+            x0 = min(max(cx - 20, 0), fw - 40)
+            z = np.repeat(np.repeat(im[fh - 10:, x0:x0 + 40], 4, axis=0), 4, axis=1)
+            Z = np.empty((40, 160, 3), np.float32)
+            Z[:] = paper
+            review._over(Z, z, 0, 0)
+            R[22 + fh + 4:22 + fh + 44, x:x + 160] = Z
+            ok = now is not None and abs(now) <= 2.0
+            review._label(R, f"{was:.0f} -> {now:.0f} px" if was is not None and now is not None else "empty", x, 22 + fh + 48, scale=1,
+                          color=(0.2, 0.55, 0.25) if ok else (0.85, 0.2, 0.15))
+            lines.append(f"{clip} {i}: {was} -> {now}")
+            if not ok:
+                fails.append(f"{clip} {i}: {now}")
+        rows_.append(R)
+        s0 += n
+    head = np.empty((26, rows_[0].shape[1], 3), np.float32)
+    head[:] = paper
+    review._label(head, f"B-207 creatures/venus/{name}: the ground contact per frame (exported -> fixed source), as PawsOnTheGround", 4, 6)
+    foot = np.empty((40, rows_[0].shape[1], 3), np.float32)
+    foot[:] = paper
+    review._label(foot, f"fails (|px| > 2): {', '.join(fails) or 'none'}; frames touching the side / top 2 px: {clipped or 'none'}", 4, 6, scale=1)
+    img = np.vstack([head] + rows_ + [foot])
+    review.draw(img, time.strftime("%m-%d %H:%M") + " " + (footnote or "design preview (lock-free, fakegp + numpy)"), 2, img.shape[0] - 14, (1.0, 1.0, 0.85))
+    out = os.path.join(out_dir, f"review_b207_{name}_contact.png")
+    review.write(out, img)
+    print("written", out, img.shape[1], "x", img.shape[0])
+    print("fails:", fails or "none", "| clipped:", clipped or "none")
+    for ln in lines:
+        print(ln)
+
+
 if __name__ == "__main__":
+    if len(sys.argv) > 2 and sys.argv[2] == "--contact":                                  # B-207: python -I ... <dir> --contact [name]
+        contact_sheet(sys.argv[1], *(sys.argv[3:4] or ["vent_eel"]))
+        sys.exit(0)
     for _n in (sys.argv[2:] or list(SPECIES)):
         preview(sys.argv[1], _n)
