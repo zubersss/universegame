@@ -42,6 +42,7 @@ none (B-161's three ruled in D-148).
 - A stroke's line is drawn in its material's ink_hex: a coloured line needs its own line material (fill=None, ink_hex=colour); a fill-only material on an open stroke draws nothing.
 - While a want is on file, poll the locks each turn; never end a turn waiting for a ping (16:20-16:55: the lock sat free 33 min).
 - RAM is read in its own call BEFORE a lock-free run, never in the same call (15:5x: a 92 MB Leviathan smoke started at 0.24 GB free beside UNITY's build, under the 0.3 GB code-only line).
+- While another role holds the lock or waits at the RAM gate, NOTHING of mine runs, not even a capped dry run (LEAD 18:1x; D-037: my idle time is what frees the memory); lock-free work is then files only (rows, sources, reports).
 
 ## For USER_ACTIONS
 none (USER-28, closing ChatGPT + Edge for RAM, is LEAD's).
