@@ -22,36 +22,36 @@ G = NP.G
 O, I = NP.O, NP.I
 KEY = "icons/wind_anchor/{}"
 SIZE = 128
-PPU = 57                                        # the anchor (1.58 x 1.95 m) in ~90 x 111 px of the 128 frame
-CX, CZ = 0.13, 0.98                             # the drawing's centre (m), set on the frame centre
+PPU = 55                                        # the anchor (-0.08 .. 2.05 m with the stake's end cap and ink) in ~117 px of 128
+CX, CZ = 0.21, 0.985                            # the drawing's centre (m), set on the frame centre (measured 15:1x: rows 4-126 at 57 / 1.01)
 
 
 def icon(d, M, k=0):
-    for x0 in (-0.6, 0.52):                                                               # guy lines to two pegs
-        G.stroke(d, G.bowed_line((0.0, 1.35), (x0, 0.07), bow=0.02, n=8), M["ink"], I)
-        G.stroke(d, [(x0 - 0.06, 0.0), (x0 + 0.06, 0.0), (x0 + 0.02, 0.15), (x0 - 0.02, 0.15)], M["coral"], I, cyclic=True)
-    G.stroke(d, G.bowed_line((0.0, 1.35), (0.18, 0.07), bow=0.01, n=6), M["blue_ln"], I)
+    for x0 in (-0.48, 0.44):                                                              # guy lines to two pegs (closer, bigger:
+        G.stroke(d, G.bowed_line((0.0, 1.35), (x0, 0.08), bow=0.02, n=8), M["ink"], I)   # the 32 px slot, rev 15:0x)
+        G.stroke(d, [(x0 - 0.08, 0.0), (x0 + 0.08, 0.0), (x0 + 0.03, 0.18), (x0 - 0.03, 0.18)], M["coral"], I, cyclic=True)
+    G.stroke(d, G.bowed_line((0.0, 1.35), (0.16, 0.08), bow=0.01, n=6), M["blue_ln"], I)
     stake = [(0.0, 0.0), (0.01, 0.9), (0.0, 1.8)]
-    G.stroke(d, G.hose_outline(stake, 0.09), M["blue_dp"], 0.0, cyclic=True)              # the stake (a touch bolder)
-    G.stroke(d, G.hose_outline([(0.025, 0.05), (0.035, 0.9), (0.025, 1.75)], 0.026), M["blue_sh"], 0.0, cyclic=True)
-    G.stroke(d, G.hose_outline(stake, 0.09), M["ink"], O, cyclic=True)
+    G.stroke(d, G.hose_outline(stake, 0.13), M["blue_dp"], 0.0, cyclic=True)              # the stake (bolder than the prop's)
+    G.stroke(d, G.hose_outline([(0.035, 0.05), (0.045, 0.9), (0.035, 1.75)], 0.036), M["blue_sh"], 0.0, cyclic=True)
+    G.stroke(d, G.hose_outline(stake, 0.13), M["ink"], O, cyclic=True)
     for z in (0.35, 0.8, 1.25):
-        G.seam(d, [(-0.055, z), (0.065, z + 0.01)], M["ink"])
-    G.stroke(d, [(-0.14, 0.0), (0.14, 0.0), (0.07, 0.13), (-0.07, 0.13)], M["indigo_sh"], I, cyclic=True)   # the foot plate
-    top = G.bezier((0.06, 1.86), (0.35, 1.9), (0.62, 1.82), (0.92, 1.66), n=10)            # the sock, full of wind
-    bot = G.bezier((0.92, 1.56), (0.62, 1.6), (0.35, 1.58), (0.06, 1.62), n=10)
+        G.seam(d, [(-0.07, z), (0.08, z + 0.01)], M["ink"])
+    G.stroke(d, [(-0.17, 0.0), (0.17, 0.0), (0.09, 0.15), (-0.09, 0.15)], M["indigo_sh"], I, cyclic=True)   # the foot plate
+    top = G.bezier((0.07, 1.96), (0.38, 1.98), (0.68, 1.88), (0.98, 1.72), n=10)          # the sock, full of wind (fuller)
+    bot = G.bezier((0.98, 1.5), (0.68, 1.54), (0.38, 1.52), (0.07, 1.56), n=10)
     sock = top + bot
     G.stroke(d, sock, M["wisp_f"], 0.0, cyclic=True)
-    G.stroke(d, [(x, z) for x, z in bot] + [(0.06, 1.66), (0.92, 1.6)], M["wisp_sh"], 0.0, cyclic=True)
+    G.stroke(d, [(x, z) for x, z in bot] + [(0.07, 1.62), (0.98, 1.56)], M["wisp_sh"], 0.0, cyclic=True)
     for t0, t1 in ((0.3, 0.42), (0.6, 0.72)):                                              # two coral bands
         a, b = top[int(t0 * 10)], top[int(t1 * 10)]
         c, e = bot[10 - int(t1 * 10)], bot[10 - int(t0 * 10)]
         G.stroke(d, [a, b, c, e], M["coral_f"], 0.0, cyclic=True)
     G.stroke(d, sock, M["ink"], O, cyclic=True)
-    G.stroke(d, G.lumpy_ellipse(0.06, 1.74, 0.03, 0.115, n=12, seed=43), M["wisp"], I, cyclic=True)   # the hoop at its mouth
-    cap = G.lumpy_ellipse(0.0, 1.88, 0.11, 0.1, n=16, seed=41)
+    G.stroke(d, G.lumpy_ellipse(0.07, 1.76, 0.035, 0.2, n=12, seed=43), M["wisp"], I, cyclic=True)    # the hoop at its mouth
+    cap = G.lumpy_ellipse(0.0, 1.9, 0.14, 0.13, n=16, seed=41)
     G.stroke(d, cap, M["coral_f"], 0.0, cyclic=True)
-    G.stroke(d, [q for q in cap if q[0] > 0.03] + [(0.03, 1.88)], M["coral_sh"], 0.0, cyclic=True)
+    G.stroke(d, [q for q in cap if q[0] > 0.04] + [(0.04, 1.9)], M["coral_sh"], 0.0, cyclic=True)
     G.stroke(d, cap, M["ink"], O, cyclic=True)
 
 
