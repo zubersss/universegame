@@ -1,0 +1,27 @@
+{
+  "key": "terrain/jupiter/under_haze_deep",
+  "style": "v3",
+  "contract": "v3.3 11.10",
+  "frame_width": 512,
+  "frame_height": 512,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.0,
+    0.0
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [],
+  "tile_x": true,
+  "tile_y": true,
+  "world_space": true,
+  "standalone": true,
+  "wrap": "repeat",
+  "painted": true,
+  "deck": "deep",
+  "mapping": "u = x / 8, v = y / 8 (world metres) below the floe line where the deck's set has no paint; its own texture, Repeat",
+  "note": "soft, no ink, periodic both ways; the darkening toward the deck's floor is a depth tint over it (D-164 note)"
+}
