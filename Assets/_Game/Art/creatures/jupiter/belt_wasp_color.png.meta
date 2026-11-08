@@ -1,0 +1,1068 @@
+fileFormatVersion: 2
+guid: fd4151339892bfa45814b01e845ffd83
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5584760093982731040
+    second: belt_wasp_color_0
+  - first:
+      213: 7317462645372303010
+    second: belt_wasp_color_1
+  - first:
+      213: -132549480318298219
+    second: belt_wasp_color_2
+  - first:
+      213: -1753847609157516867
+    second: belt_wasp_color_3
+  - first:
+      213: -1254679785805339012
+    second: belt_wasp_color_4
+  - first:
+      213: -9176939607792409436
+    second: belt_wasp_color_5
+  - first:
+      213: -2551243061935731036
+    second: belt_wasp_color_6
+  - first:
+      213: -3350856494461137437
+    second: belt_wasp_color_7
+  - first:
+      213: 8604087792671094318
+    second: belt_wasp_color_8
+  - first:
+      213: -7113941817269080243
+    second: belt_wasp_color_9
+  - first:
+      213: 3177982357897427099
+    second: belt_wasp_color_10
+  - first:
+      213: -4319252272283258878
+    second: belt_wasp_color_11
+  - first:
+      213: 6297175062946728617
+    second: belt_wasp_color_12
+  - first:
+      213: 5001150615671260388
+    second: belt_wasp_color_13
+  - first:
+      213: -6536344156386851607
+    second: belt_wasp_color_14
+  - first:
+      213: 2108583976349353108
+    second: belt_wasp_color_15
+  - first:
+      213: -6229604665531416639
+    second: belt_wasp_color_16
+  - first:
+      213: -7934308810686532314
+    second: belt_wasp_color_17
+  - first:
+      213: -7284463284503739605
+    second: belt_wasp_color_18
+  - first:
+      213: -5100279343451102670
+    second: belt_wasp_color_19
+  - first:
+      213: 3960207780072667688
+    second: belt_wasp_color_20
+  - first:
+      213: 1974287661309015949
+    second: belt_wasp_color_21
+  - first:
+      213: -3224365194980182136
+    second: belt_wasp_color_22
+  - first:
+      213: 2173375185331253398
+    second: belt_wasp_color_23
+  - first:
+      213: 2224872777659717020
+    second: belt_wasp_color_24
+  - first:
+      213: -3387829540585479353
+    second: belt_wasp_color_25
+  - first:
+      213: -1474540242068876861
+    second: belt_wasp_color_26
+  - first:
+      213: 8450783912613591653
+    second: belt_wasp_color_27
+  - first:
+      213: -2645720928764878329
+    second: belt_wasp_color_28
+  - first:
+      213: 2538832088554603452
+    second: belt_wasp_color_29
+  - first:
+      213: 3209735067938133686
+    second: belt_wasp_color_30
+  - first:
+      213: -3340413803816835134
+    second: belt_wasp_color_31
+  - first:
+      213: -405547649635348365
+    second: belt_wasp_color_32
+  - first:
+      213: -4189975273461373383
+    second: belt_wasp_color_33
+  - first:
+      213: -4319999378817550969
+    second: belt_wasp_color_34
+  - first:
+      213: 6024615804611662731
+    second: belt_wasp_color_35
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: belt_wasp_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0fc809b57d97d5b429c23aa3a2d16bae
+      internalID: 738143295
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_1
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b4937a98cf02a614fb04f167ea7a169d
+      internalID: 2125060006
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_2
+      rect:
+        serializedVersion: 2
+        x: 136
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 17c4544f95c7b5449900ef63af72b301
+      internalID: -164073645
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_3
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 478fd24db4e952140a4346468fc773b0
+      internalID: 338824863
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_4
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e6b7fb701d0a7c84e9fd3306f68cc5fe
+      internalID: -2008722898
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_5
+      rect:
+        serializedVersion: 2
+        x: 340
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f4e77eafbc03a0e4fb5097c1ab1b0060
+      internalID: -631872495
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_6
+      rect:
+        serializedVersion: 2
+        x: 408
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0745ab6fdcdfa2648a8596171c13259f
+      internalID: -1909833220
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_7
+      rect:
+        serializedVersion: 2
+        x: 476
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c23e84e10ee02744f896208b7271de47
+      internalID: -1700546336
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_8
+      rect:
+        serializedVersion: 2
+        x: 544
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f8ab355b64cbf6e4c9f5d621cc7d517f
+      internalID: -149954699
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_9
+      rect:
+        serializedVersion: 2
+        x: 612
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bd9828ea3388ecb45a136765ff83bb84
+      internalID: 465755450
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_10
+      rect:
+        serializedVersion: 2
+        x: 680
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e612c96c545cd7d47ab7c0f9ac066d24
+      internalID: 1921302938
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_11
+      rect:
+        serializedVersion: 2
+        x: 748
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 99bca1cc289a5054aa7b7f150d94ebc8
+      internalID: -399942611
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_12
+      rect:
+        serializedVersion: 2
+        x: 816
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0e554e01c75f7dd4fae132345ca83afb
+      internalID: -1416393054
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_13
+      rect:
+        serializedVersion: 2
+        x: 884
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ec5269be47919b941a62aba54685cfcb
+      internalID: -725495909
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_14
+      rect:
+        serializedVersion: 2
+        x: 952
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ea2b7fe89817acf4daff25029082c04c
+      internalID: -234387473
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_15
+      rect:
+        serializedVersion: 2
+        x: 1020
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2ade3256cb21d5d469cb6208dc551234
+      internalID: 2146234549
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_16
+      rect:
+        serializedVersion: 2
+        x: 1088
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f29865c99adb70e42993e232a29c9bb0
+      internalID: 37618234
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_17
+      rect:
+        serializedVersion: 2
+        x: 1156
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e34c6b594aaa2264cb103fd04e1876ec
+      internalID: 1652068618
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_18
+      rect:
+        serializedVersion: 2
+        x: 1224
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f1fa5d6177f09a547bce496ac0788b4e
+      internalID: 486894795
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_19
+      rect:
+        serializedVersion: 2
+        x: 1292
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cd467c14e83453049a09a31a7508c036
+      internalID: 134548640
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_20
+      rect:
+        serializedVersion: 2
+        x: 1360
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 66db751047c865c4980da00436e55f54
+      internalID: 474441148
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_21
+      rect:
+        serializedVersion: 2
+        x: 1428
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d9122082a0b3a2f42a397d508b3176bf
+      internalID: 272533065
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_22
+      rect:
+        serializedVersion: 2
+        x: 1496
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0028e4425906f7c40880f8869e84c3c6
+      internalID: -1483934412
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_23
+      rect:
+        serializedVersion: 2
+        x: 1564
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d3ce2649e94a5e5459c2c724b01bbc7e
+      internalID: 2139100669
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_24
+      rect:
+        serializedVersion: 2
+        x: 1632
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7c15a0029e15bb946ab9c447878d1bb8
+      internalID: 1706692100
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_25
+      rect:
+        serializedVersion: 2
+        x: 1700
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 58643df4103b0f741aaeec101e405f89
+      internalID: 518085644
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_26
+      rect:
+        serializedVersion: 2
+        x: 1768
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 40bbf63d8f486f847af7628f0edfd5aa
+      internalID: 616480479
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_27
+      rect:
+        serializedVersion: 2
+        x: 1836
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 331122c67afed664d847f347192bbf9b
+      internalID: -1083286968
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_28
+      rect:
+        serializedVersion: 2
+        x: 1904
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 67aaeeae0b5cf2741b69ed615c80e83b
+      internalID: 729293278
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_29
+      rect:
+        serializedVersion: 2
+        x: 1972
+        y: 68
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f964b61d83ed77d4494eaedf29e86b17
+      internalID: -1990878611
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_30
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c9e45a0864a8cbb419cd3b6d82f8f503
+      internalID: -671865793
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_31
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 0
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ff2ba5ce30c415541954e845d826b743
+      internalID: 1224662176
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_32
+      rect:
+        serializedVersion: 2
+        x: 136
+        y: 0
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3cfec9b2875bc5b45b00eec7a60fb5d3
+      internalID: -998406908
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_33
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 0
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0a5276a0bd3b72c4f91274d353100c8f
+      internalID: 2143979285
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_34
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 0
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e817d9e525fbc7742b16086b8643472c
+      internalID: -1305641722
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: belt_wasp_35
+      rect:
+        serializedVersion: 2
+        x: 340
+        y: 0
+        width: 64
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5ddd902189d9a4b45964fc14661f882a
+      internalID: -775159354
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: c53621aec9c6476468d7da12b9e4911b
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      belt_wasp_0: 738143295
+      belt_wasp_1: 2125060006
+      belt_wasp_10: 1921302938
+      belt_wasp_11: -399942611
+      belt_wasp_12: -1416393054
+      belt_wasp_13: -725495909
+      belt_wasp_14: -234387473
+      belt_wasp_15: 2146234549
+      belt_wasp_16: 37618234
+      belt_wasp_17: 1652068618
+      belt_wasp_18: 486894795
+      belt_wasp_19: 134548640
+      belt_wasp_2: -164073645
+      belt_wasp_20: 474441148
+      belt_wasp_21: 272533065
+      belt_wasp_22: -1483934412
+      belt_wasp_23: 2139100669
+      belt_wasp_24: 1706692100
+      belt_wasp_25: 518085644
+      belt_wasp_26: 616480479
+      belt_wasp_27: -1083286968
+      belt_wasp_28: 729293278
+      belt_wasp_29: -1990878611
+      belt_wasp_3: 338824863
+      belt_wasp_30: -671865793
+      belt_wasp_31: 1224662176
+      belt_wasp_32: -998406908
+      belt_wasp_33: 2143979285
+      belt_wasp_34: -1305641722
+      belt_wasp_35: -775159354
+      belt_wasp_4: -2008722898
+      belt_wasp_5: -631872495
+      belt_wasp_6: -1909833220
+      belt_wasp_7: -1700546336
+      belt_wasp_8: -149954699
+      belt_wasp_9: 465755450
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

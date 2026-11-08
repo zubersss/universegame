@@ -45,18 +45,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 12fc45d20e3b49b4985f1e8ab96cbd55
-    m_Address: props/mercury/shelter_door
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1616e0c441cbc3c42b11bc7d563c13b3
     m_Address: backgrounds/mercury/skyline_far
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 1a608291bbd266e45907b48896d6a869
-    m_Address: props/mercury/shelter_door
+  - m_GUID: 1a5b4b07d6163da438e56c1b5f9c130e
+    m_Address: props/mercury/meridian_beacon
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -65,8 +60,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 200bee08d96517a4995137ad94cd6262
-    m_Address: props/mercury/warden_vault_gate
+  - m_GUID: 23e2db1aa31e8e04199e714e93f76587
+    m_Address: props/mercury/flare_shelter
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -85,13 +80,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 3545e02955b5d304f8a4cf268c425ade
-    m_Address: backgrounds/mercury/skyline_far
+  - m_GUID: 35105424c57f6ec4a99be2725e446b2c
+    m_Address: props/mercury/shelter_door
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 3ba060b30506f2041adc76526805f9b4
-    m_Address: props/mercury/flare_shelter
+  - m_GUID: 3545e02955b5d304f8a4cf268c425ade
+    m_Address: backgrounds/mercury/skyline_far
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -120,11 +115,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 461ba09c49ff5a84b859baa437aa4295
-    m_Address: props/mercury/equipment_locker
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 478571dd85299fc4d81bf230b296f943
     m_Address: terrain/mercury/basalt
     m_ReadOnly: 0
@@ -142,11 +132,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4f028203dbe973a41b193cc94bc8352e
     m_Address: props/mercury/flare_shelter
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 4f1cb62af3798364781dddca41f06934
-    m_Address: props/mercury/meridian_beacon
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -200,18 +185,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 6b24416d74b18ed4b99f614160072c71
-    m_Address: props/mercury/equipment_locker
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6e5722c3c091d284fb5b2a30737b25f4
     m_Address: flora/mercury/rigset/json
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 73054ba25d086a24dbad37ce96d93397
-    m_Address: props/mercury/meridian_beacon
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -255,11 +230,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8b6abf7cc21b25f44b7162b88a7a5731
-    m_Address: props/mercury/solarite_cluster
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8c94d4769384c3a4e983a5d0ebc5e0e8
     m_Address: props/mercury/shelter_door/json
     m_ReadOnly: 0
@@ -290,8 +260,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: aa202bc5ed49e884b837af93ee2b2da2
+    m_Address: props/mercury/warden_vault_gate
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ad19d4db1c901754faeacf43a11e41bb
     m_Address: props/mercury/meridian_beacon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b01a49eff81360c4fb31a6c2c92c5d0f
+    m_Address: props/mercury/equipment_locker
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -307,6 +287,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b16fefbd466d29c4892a977d2b514d26
     m_Address: props/mercury/equipment_locker/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b24cc8088e94a68418d6ecb33d3516db
+    m_Address: props/mercury/solarite_cluster
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -350,13 +335,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c7e660d36c0f88b499ed2a480a3f9dd5
-    m_Address: props/mercury/solarite_cluster
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: cc44b747795a37b42b93056932741d16
-    m_Address: props/mercury/warden_vault_gate
+  - m_GUID: d112edb040dc9d44dbad294c6476d949
+    m_Address: props/mercury/shelter_door/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -367,11 +347,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d6bf760c63001ba4794fa547f62cd7f9
     m_Address: creatures/mercury/glassback
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: dd2998aabee1fba41b0584d3818269de
-    m_Address: props/mercury/flare_shelter
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

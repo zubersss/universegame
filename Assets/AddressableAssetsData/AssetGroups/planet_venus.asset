@@ -15,8 +15,13 @@ MonoBehaviour:
   m_GroupName: planet_venus
   m_GUID: 41723de805471664aae7da0b639ba7b6
   m_SerializeEntries:
-  - m_GUID: 083e5aea6a707b64088b00a133fba926
-    m_Address: creatures/venus/vent_eel
+  - m_GUID: 056b97ab68c266944bd9441051576e72
+    m_Address: terrain/venus/ground_strip_deck
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 11353fa12fac92848a74c75395700f2d
+    m_Address: creatures/venus/acidmoth/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -25,13 +30,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 1c1c280d4ccfc654b978ecd372bec5a2
+  - m_GUID: 14a63693196de1c468796cd8b30f680a
+    m_Address: props/venus/meridian_station_door/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 16e50df9e447a0149a3871469a580b35
+    m_Address: props/venus/station_hull_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1a96ff525ab9bc640a1bcb20990b6ec2
     m_Address: creatures/venus/acidmoth
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 1c3f69e84eeb5fc46983d473f785d0ad
-    m_Address: creatures/venus/sulfur_drifter
+  - m_GUID: 1e931841007d0f14d82deaf13b335d31
+    m_Address: props/venus/aerostat_deck
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -50,18 +65,43 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 2d67f0f010f0474498422715087b6d9f
-    m_Address: creatures/venus/acidmoth
+  - m_GUID: 29afb2a092e7d4849b45e7bc1c87acf0
+    m_Address: backgrounds/venus/surface/layer2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 3149a0366dc0fc143adb357453b8a55d
-    m_Address: creatures/venus/pressure_crab
+  - m_GUID: 2d6ee4a3fdc41bf40b9a8c94f989aa34
+    m_Address: props/venus/aerostat_balloon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2fa24b5041e05dd4690ee46dd13b59b5
+    m_Address: creatures/venus/pressure_crab/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 316c125a7e9bacf40862f808c02f92ca
+    m_Address: creatures/venus/sulfur_drifter/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3179d7307c94c534e9fc95b3e82d5a70
+    m_Address: flora/venus/rigset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 31ae2d02e28196b4ca0099f0099835fb
     m_Address: creatures/venus/pressure_crab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 33718de5a226f2949a7f285d45223171
+    m_Address: backgrounds/venus/surface/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 362edc90b52e2cf4b836642a66d9e4b3
+    m_Address: props/venus/station_hull_b
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -75,8 +115,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 402f531ffaeb81f4a898dc8c030f7b32
-    m_Address: props/venus/vent_harvester
+  - m_GUID: 450088f85df65b74391bf9aac9cdf1fb
+    m_Address: creatures/venus/pressure_crab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4547789cddb20c54ab0ece7925708306
+    m_Address: backgrounds/venus/deck/layer2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -85,13 +130,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 4cd20a4b30b97664ba9d74adfccc59e4
-    m_Address: props/venus/vent_harvester
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 4cf0be9af05239c499da21300e9d7327
-    m_Address: props/venus/meridian_station_door
+  - m_GUID: 47b48055ddd916b4fb968acec2fa9685
+    m_Address: props/venus/vent_mouth/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -105,6 +145,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 59d5528d1a300f045a78e85cfbafeb91
+    m_Address: props/venus/buoyancy_cell
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5b443f0673a432c4f99f705ce3649978
     m_Address: props/venus/buoyancy_cell
     m_ReadOnly: 0
@@ -112,11 +157,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 65f50e08024d80447b9844ec33a9766e
     m_Address: creatures/venus/veil_serpent_tail
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 663bbc840833d4c44bef9aa77ade4568
-    m_Address: props/venus/meridian_station_door
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -130,8 +170,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 6d831178619ac654dba9712087cafe4f
-    m_Address: props/venus/aerostat_balloon
+  - m_GUID: 703577b919c03de4fac16a1b83f31dd2
+    m_Address: backgrounds/venus/deck
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -150,8 +190,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7c96ee0cefffacf4980de4b16444e38c
+    m_Address: creatures/venus/vent_eel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7e7faf64851497740a23074faa96e0ff
     m_Address: creatures/venus/veil_serpent
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7e8e03837fd43164385e35a9311e122d
+    m_Address: props/venus/railing
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -160,8 +210,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8c3b13ccfdd73784098499ea0765558c
-    m_Address: props/venus/aerostat_balloon
+  - m_GUID: 873e5c593ce0b954a8d128ef674a3b82
+    m_Address: flora/venus/rigset/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8b6ebdc079d8e4343be105fecbe67212
+    m_Address: terrain/venus/ground_strip
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -170,33 +225,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 9e038b4d804940545a644a88174c964d
-    m_Address: props/venus/station_hull_a
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 9f0b7219f6dca0149a395b822b848faa
-    m_Address: props/venus/station_hull_b
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 9fdb838a64ebb3548ace8946274196b5
-    m_Address: props/venus/station_hull_b
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a646208def30aeb4ca68278adae36f6b
-    m_Address: creatures/venus/vent_eel
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a9ee8e9585dd6c3438d458717682dbc5
     m_Address: creatures/venus/veil_serpent_body
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: ab46a4e15c0a8e843aa4f7fe7235ac73
-    m_Address: creatures/venus/pressure_crab
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -210,13 +240,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c0bd6641e4e9f9e43923d1dc9b6345ba
-    m_Address: props/venus/aerostat_balloon/json
+  - m_GUID: bccafb00c0995a24cb3eaa24530fb4ff
+    m_Address: props/venus/vent_mouth
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c372f3f1062b77a48a00f6a7339924c8
-    m_Address: props/venus/buoyancy_cell
+  - m_GUID: bd603005d0994754badca6d75532f764
+    m_Address: flora/venus/rigset/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: be46ac34d173f9b469da40a7f846bae6
+    m_Address: props/venus/vent_harvester
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c0bd6641e4e9f9e43923d1dc9b6345ba
+    m_Address: props/venus/aerostat_balloon/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -230,17 +270,7 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c751e324df5666e438a530a08f0f2b7d
-    m_Address: props/venus/buoyancy_cell
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c9104b02a1615b248b9cd535208e85f7
-    m_Address: props/venus/station_hull_a
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: cab264dc922f68144870b818d96e57fa
     m_Address: props/venus/station_hull_a
     m_ReadOnly: 0
     m_SerializedLabels: []
@@ -250,7 +280,7 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: cd9f0a668875a1048a59b656e8564004
+  - m_GUID: d00082c381e657a4d933aced51dc3b76
     m_Address: creatures/venus/sulfur_drifter
     m_ReadOnly: 0
     m_SerializedLabels: []
@@ -260,18 +290,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: dc43b7b8f9c71da4599abef5ce597d29
-    m_Address: props/venus/aerostat_deck
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: de0e159c8d0bc254fb6eb21738804852
-    m_Address: props/venus/railing
+  - m_GUID: db5fc34a1e1075243af886b51ab12f18
+    m_Address: creatures/venus/vent_eel/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: de81802b5eaf6c14b83a03d1566c78d7
     m_Address: terrain/venus/tessera
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e3433963486ede94e9fa4b4c4eb1dd15
+    m_Address: props/venus/meridian_station_door
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -310,13 +340,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f9454be098eb8294b8afb89caa860b40
-    m_Address: props/venus/railing
+  - m_GUID: f629ab426067c7d4589d3b71ef8618d3
+    m_Address: backgrounds/venus/surface
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: febad97a3d2519846a7048976cf52e33
-    m_Address: props/venus/aerostat_deck
+  - m_GUID: f7a5e6cc9d3d3f242873583d2bdff931
+    m_Address: backgrounds/venus/deck/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f7cc288d769f9444bb38b538d1d0e7e2
+    m_Address: backgrounds/venus/surface/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fd39af64f5e2f474c89b107f63c74e14
+    m_Address: backgrounds/venus/deck/layer1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

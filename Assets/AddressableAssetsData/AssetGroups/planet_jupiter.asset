@@ -20,8 +20,48 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 07f7a9d53037b014a8052f333b7c0cef
+    m_Address: creatures/jupiter/lightning_eel/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0ee7a2ec393d728438788450cc2a4e18
+    m_Address: backgrounds/jupiter/deck2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 12713dea73749354dba5494947a4c8fe
+    m_Address: backgrounds/jupiter/deck3/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1d0c320fe98d10b47a36eb8a5b5649a4
+    m_Address: creatures/jupiter/ballast_tortoise
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 26ef7f0483933814f9dae7cfa9bb4e55
+    m_Address: creatures/jupiter/vortex_whale/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 326047f908b75bf4486880162ce63faa
+    m_Address: backgrounds/jupiter/spot/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 41e502030a7bfd642a5fa183f21212d6
     m_Address: terrain/jupiter/floe_derelict
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 471e2454a8bb7c34085eb428fea3424c
+    m_Address: backgrounds/jupiter/deck2/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4e4189651f3336c4da80dbdc6c8330b2
+    m_Address: creatures/jupiter/belt_wasp/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -30,8 +70,173 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 54ae91bd5e4531941a74385594f3f710
+    m_Address: creatures/jupiter/vortex_whale/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5847e88989a0f914db1b3b7dd957d924
+    m_Address: backgrounds/jupiter/deep/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5b5b72e53b031b848b60cdae90545d3d
+    m_Address: creatures/jupiter/lightning_eel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5b6512f776c30a34395d91457383c1da
+    m_Address: terrain/jupiter/floe_strip_spot
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5c32026bbb06aa040b9ff7eb6a0c75c9
+    m_Address: backgrounds/jupiter/deck1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5f30c26ebcac5a44abae5d6f8b34bcb5
+    m_Address: backgrounds/jupiter/deck1/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5f48cb898a2564345a33b2dd8b18f988
+    m_Address: creatures/jupiter/stormglider
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 65a50646b601c504c92fca88df37855d
+    m_Address: backgrounds/jupiter/deep/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 74b39798e3ea85e45b4891458fe499ca
+    m_Address: props/jupiter/beacon_vault/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 750d11e9ed3f4c34685c6c49ffbb1b64
+    m_Address: backgrounds/jupiter/deck3/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 79b822defbbc37446921d5ef6113e2db
+    m_Address: props/jupiter/derelict_pod/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7afe1db1f89343d4fbbf38bbb8c0cfa2
+    m_Address: backgrounds/jupiter/deck1/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7df288848a2269b4fafd62dc1f283155
+    m_Address: terrain/jupiter/floe_strip_core
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8628e1287e2e55a4197e94b5c21f89e5
+    m_Address: backgrounds/jupiter/deep
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 86d5e4a77f49271498c9b8bbf0b6e5c9
+    m_Address: terrain/jupiter/floe_strip_derelict
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 920ca7fa85c892e4cb9aa55d7cb1a973
+    m_Address: creatures/jupiter/stormglider/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9561720abd101b2429e45a5c731090a1
+    m_Address: flora/jupiter/rigset/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9c4bd6be1e14fb249af880fe5aee8a85
+    m_Address: flora/jupiter/rigset/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9e34af9873a2c3948a68eae6f15c6ab4
+    m_Address: backgrounds/jupiter/deck1/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9fc391061677f6a4391a1973086ccd0b
     m_Address: props/jupiter/derelict_pod
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a6da09b755fdc1f40b6b269f4202e27b
+    m_Address: backgrounds/jupiter/deck2/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a825c411837238f47b4ecb653d0eb86b
+    m_Address: flora/jupiter/rigset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ac633b6a8ebed1d4099cdcd3e8dc1971
+    m_Address: creatures/jupiter/vortex_whale
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bc97e51e644502b419d51a5cbc1b7ec3
+    m_Address: backgrounds/jupiter/spot/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c0b62265ebad77147b0d54153b9cdff9
+    m_Address: creatures/jupiter/ballast_tortoise/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cfbbab9979db4cc4fb5cc0fac749a839
+    m_Address: backgrounds/jupiter/deep/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d9956cb0a6df3f443a2db0dfbd42b931
+    m_Address: backgrounds/jupiter/spot/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dcc7184cf85b0f64890e7c8a950c1311
+    m_Address: backgrounds/jupiter/deck3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e74de6fee138fee49a11d979da337bb2
+    m_Address: terrain/jupiter/floe_strip_ice
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e9e149741bfc18246bd203acbc3d53e7
+    m_Address: backgrounds/jupiter/deck2/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: eca7ed6ab2d2bdb42bf25808bdf54f85
+    m_Address: props/jupiter/husk_tortoise/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: edfb5670a52d0a446a8635140fe311bb
+    m_Address: backgrounds/jupiter/deck3/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f951796762f26db42bb6027fef0f4c78
+    m_Address: backgrounds/jupiter/spot
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fd4151339892bfa45814b01e845ffd83
+    m_Address: creatures/jupiter/belt_wasp
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

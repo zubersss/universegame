@@ -46,12 +46,12 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 9
-  spritePivot: {x: 0.5, y: 0.041666668}
-  spritePixelsToUnits: 128
+  spritePivot: {x: 0.5, y: 0.089286}
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -115,23 +115,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: husk_tortoise_color_0
+      name: husk_tortoise_0
       rect:
         serializedVersion: 2
-        x: 47
-        y: 11
-        width: 441
-        height: 134
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 176
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.089286}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 801300a7e88ec9d50800000000000000
-      internalID: 6745522040523993352
+      spriteID: 7be35cf5e6a26ac4b825d802efc3127e
+      internalID: 309202076
       vertices: []
       indices: 
       edges: []
@@ -146,16 +146,11 @@ TextureImporter:
     indices: 
     edges: []
     weights: []
-    secondaryTextures:
-    - texture: {fileID: 2800000, guid: 723b0ab4b06361740971ba00cda0ea75, type: 3}
-      name: _NormalMap
-    - texture: {fileID: 2800000, guid: 48a77c99000cc19458d02d8ea52d2c60, type: 3}
-      name: _EmissionMap
-    - texture: {fileID: 2800000, guid: 587602adfaa8d664c8679f12850f8d4f, type: 3}
-      name: _MaskTex
+    secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      husk_tortoise_0: 309202076
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

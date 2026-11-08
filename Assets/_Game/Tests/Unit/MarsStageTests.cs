@@ -102,7 +102,7 @@ namespace Meridian.Tests
             var crawler = Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.PolarCrawler);
             Assert.AreEqual("creatures/mars/polar_crawler", crawler.artKey); Assert.IsFalse(crawler.HasDen);
             Assert.Less(crawler.wanderSpeed, 1f, "slow");
-            Assert.AreEqual((int)Meridian.Creatures.Species.PolarCrawler, Meridian.Creatures.SpeciesSpec.Count - 1, "appended last");
+            Assert.AreEqual(21, (int)Meridian.Creatures.Species.PolarCrawler, "appended after the Mars lurker; its index never moves (later species append after it)");
             var tube = MarsLandforms.Tubes[0];
             Assert.IsTrue(MarsLandforms.OverTube(tube.x0 + 20)); Assert.IsFalse(MarsLandforms.OverTube(tube.x0 - 20));
             var site = new Meridian.Creatures.SpawnSite { x = tube.x0 + 20, surfaceTile = TileId.Regolith, surfaceY = 320, datumY = 320, planet = PlanetId.Mars };

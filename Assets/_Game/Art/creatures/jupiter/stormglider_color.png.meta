@@ -1,0 +1,1172 @@
+fileFormatVersion: 2
+guid: 5f48cb898a2564345a33b2dd8b18f988
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -267355382458308945
+    second: stormglider_color_0
+  - first:
+      213: -7558303190253334088
+    second: stormglider_color_1
+  - first:
+      213: -4277683853242279322
+    second: stormglider_color_2
+  - first:
+      213: 7975122069107944552
+    second: stormglider_color_3
+  - first:
+      213: 5910974380725679312
+    second: stormglider_color_4
+  - first:
+      213: 1062463661750064814
+    second: stormglider_color_5
+  - first:
+      213: -8000783885367069233
+    second: stormglider_color_6
+  - first:
+      213: 2112806177489613595
+    second: stormglider_color_7
+  - first:
+      213: 8432744579067660846
+    second: stormglider_color_8
+  - first:
+      213: 279674504348127949
+    second: stormglider_color_9
+  - first:
+      213: -6441592447797133022
+    second: stormglider_color_10
+  - first:
+      213: 1047048158284233465
+    second: stormglider_color_11
+  - first:
+      213: -6109128906554355709
+    second: stormglider_color_12
+  - first:
+      213: -5910773499271287188
+    second: stormglider_color_13
+  - first:
+      213: -4280222125649128859
+    second: stormglider_color_14
+  - first:
+      213: -5724411946505368679
+    second: stormglider_color_15
+  - first:
+      213: 4973277239785000213
+    second: stormglider_color_16
+  - first:
+      213: -4420423104731857991
+    second: stormglider_color_17
+  - first:
+      213: 7495044910946950964
+    second: stormglider_color_18
+  - first:
+      213: 6876053736577872111
+    second: stormglider_color_19
+  - first:
+      213: 4632849085943340204
+    second: stormglider_color_20
+  - first:
+      213: 3987614738525816029
+    second: stormglider_color_21
+  - first:
+      213: -2275228293579985875
+    second: stormglider_color_22
+  - first:
+      213: 5785516086642186355
+    second: stormglider_color_23
+  - first:
+      213: 259458647878520856
+    second: stormglider_color_24
+  - first:
+      213: 8295229401566903329
+    second: stormglider_color_25
+  - first:
+      213: 4643439865161317025
+    second: stormglider_color_26
+  - first:
+      213: -1136863080108368759
+    second: stormglider_color_27
+  - first:
+      213: -4231709164816007292
+    second: stormglider_color_28
+  - first:
+      213: -2509306778538969678
+    second: stormglider_color_29
+  - first:
+      213: 1109982461342317060
+    second: stormglider_color_30
+  - first:
+      213: -804282964533159699
+    second: stormglider_color_31
+  - first:
+      213: -720418402930029499
+    second: stormglider_color_32
+  - first:
+      213: 4222789088779696835
+    second: stormglider_color_33
+  - first:
+      213: 6771487390047973330
+    second: stormglider_color_34
+  - first:
+      213: -2029312108757123907
+    second: stormglider_color_35
+  - first:
+      213: 167406605844068067
+    second: stormglider_color_36
+  - first:
+      213: -2580254330366784988
+    second: stormglider_color_37
+  - first:
+      213: 1557740685432410606
+    second: stormglider_color_38
+  - first:
+      213: 5825778973788708960
+    second: stormglider_color_39
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: stormglider_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 300
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 39a1c2330fe5f1c4393ab6809dd8c44f
+      internalID: -262894479
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_1
+      rect:
+        serializedVersion: 2
+        x: 180
+        y: 300
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8d9fb9166179b244abb25ce38a19f06b
+      internalID: -1106317036
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_2
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 300
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d14030613887a6d4da7daa872820e435
+      internalID: -723930607
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_3
+      rect:
+        serializedVersion: 2
+        x: 540
+        y: 300
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 48a48b8622f3c334f92abf01d90ca7e7
+      internalID: -1271964656
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_4
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 300
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3ff7cb6bc3678494fb587b83a031547a
+      internalID: 1591914906
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_5
+      rect:
+        serializedVersion: 2
+        x: 900
+        y: 300
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 32f7ffa9a1a1aae4087601ad43d61105
+      internalID: 523154385
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_6
+      rect:
+        serializedVersion: 2
+        x: 1080
+        y: 300
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3b63154236b45894489032a61e4bbbb3
+      internalID: 2115858049
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_7
+      rect:
+        serializedVersion: 2
+        x: 1260
+        y: 300
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5128e55f2d166064c8e2acace9911ecb
+      internalID: 1275376753
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_8
+      rect:
+        serializedVersion: 2
+        x: 1440
+        y: 300
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cd7ecc259dbc93d45a291305046805b4
+      internalID: 1712942084
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_9
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 300
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f0c95e5bdeca7d34b9e7ee0bc312c3a1
+      internalID: 130288725
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_10
+      rect:
+        serializedVersion: 2
+        x: 1800
+        y: 300
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d8696d4d78c2f554f92014364855359d
+      internalID: -590874319
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_11
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 200
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 365376056206d064088a0504768e9a5a
+      internalID: -1636911954
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_12
+      rect:
+        serializedVersion: 2
+        x: 180
+        y: 200
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f6a870f15a0b2e14696c80f9de94b798
+      internalID: -998164843
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_13
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 200
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8bfaf0d3c9267984d84420464d924aee
+      internalID: -408326799
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_14
+      rect:
+        serializedVersion: 2
+        x: 540
+        y: 200
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dd7d78a6628b4794a9c42b77764f2ce7
+      internalID: 774540434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_15
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 200
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: afb2353ae67bd6042a2e996cdde02695
+      internalID: -864366869
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_16
+      rect:
+        serializedVersion: 2
+        x: 900
+        y: 200
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 57c85ab94509b634e82fd1e8145152e8
+      internalID: -1876179998
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_17
+      rect:
+        serializedVersion: 2
+        x: 1080
+        y: 200
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a601b08e5457e454190a3aa60f2a8ce6
+      internalID: 1460182290
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_18
+      rect:
+        serializedVersion: 2
+        x: 1260
+        y: 200
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a43d9de7ca42b6049b88369be2560f57
+      internalID: -1863023923
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_19
+      rect:
+        serializedVersion: 2
+        x: 1440
+        y: 200
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b30ecd829e15f9044af2f70014240e0a
+      internalID: -1301333837
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_20
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 200
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d796ffc79c05f76489ebf2f6eaf0ec96
+      internalID: -676780026
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_21
+      rect:
+        serializedVersion: 2
+        x: 1800
+        y: 200
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b867cfb75f2d2d145af58ec1a9563da0
+      internalID: -760815439
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_22
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 100
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6ebcdb36cb7972042880c789524a4924
+      internalID: 324073581
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_23
+      rect:
+        serializedVersion: 2
+        x: 180
+        y: 100
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 16528df75ad5af84bba8f390bacd26e3
+      internalID: -1305816740
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_24
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 100
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3bec447ca06ab854bb27bb316319af30
+      internalID: 1918907372
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_25
+      rect:
+        serializedVersion: 2
+        x: 540
+        y: 100
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 40e58650b3542234d9dab80e45ec693e
+      internalID: 1098533650
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_26
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 100
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ff55b63f5547b4e41a11f8b8918166a7
+      internalID: -528406118
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_27
+      rect:
+        serializedVersion: 2
+        x: 900
+        y: 100
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8bead2eb15d28f04e985a970c0921c6c
+      internalID: 1082105315
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_28
+      rect:
+        serializedVersion: 2
+        x: 1080
+        y: 100
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4148142bc9ff4eb40b19b294933264ad
+      internalID: -66229935
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_29
+      rect:
+        serializedVersion: 2
+        x: 1260
+        y: 100
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2c7c40c919252ce43b1eb5be88c84101
+      internalID: -1341057468
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_30
+      rect:
+        serializedVersion: 2
+        x: 1440
+        y: 100
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bf4ab7a0c2097a544abe31344425856a
+      internalID: -723943821
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_31
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 100
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 137d1cdc4ba2672408bec3807ba3ba8e
+      internalID: 191785990
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_32
+      rect:
+        serializedVersion: 2
+        x: 1800
+        y: 100
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b9981bb9bae16f94aaa42be5f24b0f7e
+      internalID: 1171333721
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_33
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 93326cc0594140740a4ab9ab1b0d425b
+      internalID: -38204703
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_34
+      rect:
+        serializedVersion: 2
+        x: 180
+        y: 0
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5ae3c28b8f35b7541bdf222e0c2053b2
+      internalID: -61261276
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_35
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 0
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3691d2a7a7ddfa44381c2526c58f650c
+      internalID: -314437554
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_36
+      rect:
+        serializedVersion: 2
+        x: 540
+        y: 0
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8036be7e5e649ab42a7e9589c0b0fde1
+      internalID: 557213187
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_37
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 0
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 53891656fd859d54db2ced5ec8a9f67f
+      internalID: -1363241821
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_38
+      rect:
+        serializedVersion: 2
+        x: 900
+        y: 0
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0562809a4f81dab49907a43b03e5301d
+      internalID: -716935911
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stormglider_39
+      rect:
+        serializedVersion: 2
+        x: 1080
+        y: 0
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b4894e368e430b84cb68413ecca86e8f
+      internalID: 911962327
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 0fc77929fef985145bade70662ddaf09
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      stormglider_0: -262894479
+      stormglider_1: -1106317036
+      stormglider_10: -590874319
+      stormglider_11: -1636911954
+      stormglider_12: -998164843
+      stormglider_13: -408326799
+      stormglider_14: 774540434
+      stormglider_15: -864366869
+      stormglider_16: -1876179998
+      stormglider_17: 1460182290
+      stormglider_18: -1863023923
+      stormglider_19: -1301333837
+      stormglider_2: -723930607
+      stormglider_20: -676780026
+      stormglider_21: -760815439
+      stormglider_22: 324073581
+      stormglider_23: -1305816740
+      stormglider_24: 1918907372
+      stormglider_25: 1098533650
+      stormglider_26: -528406118
+      stormglider_27: 1082105315
+      stormglider_28: -66229935
+      stormglider_29: -1341057468
+      stormglider_3: -1271964656
+      stormglider_30: -723943821
+      stormglider_31: 191785990
+      stormglider_32: 1171333721
+      stormglider_33: -38204703
+      stormglider_34: -61261276
+      stormglider_35: -314437554
+      stormglider_36: 557213187
+      stormglider_37: -1363241821
+      stormglider_38: -716935911
+      stormglider_39: 911962327
+      stormglider_4: 1591914906
+      stormglider_5: 523154385
+      stormglider_6: 2115858049
+      stormglider_7: 1275376753
+      stormglider_8: 1712942084
+      stormglider_9: 130288725
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

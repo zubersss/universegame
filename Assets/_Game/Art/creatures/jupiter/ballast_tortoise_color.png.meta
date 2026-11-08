@@ -1,0 +1,1328 @@
+fileFormatVersion: 2
+guid: 1d0c320fe98d10b47a36eb8a5b5649a4
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 8593175573179536937
+    second: ballast_tortoise_color_0
+  - first:
+      213: -4044293687992319638
+    second: ballast_tortoise_color_1
+  - first:
+      213: 8993095602090225360
+    second: ballast_tortoise_color_2
+  - first:
+      213: 8563003136868868437
+    second: ballast_tortoise_color_3
+  - first:
+      213: 6836037005375437459
+    second: ballast_tortoise_color_4
+  - first:
+      213: -2639859765976648367
+    second: ballast_tortoise_color_5
+  - first:
+      213: 7819977478042344740
+    second: ballast_tortoise_color_6
+  - first:
+      213: -6261268007887427364
+    second: ballast_tortoise_color_7
+  - first:
+      213: -1200725268330601451
+    second: ballast_tortoise_color_8
+  - first:
+      213: 690903848529815606
+    second: ballast_tortoise_color_9
+  - first:
+      213: 2890198673016236555
+    second: ballast_tortoise_color_10
+  - first:
+      213: -2832296086416826476
+    second: ballast_tortoise_color_11
+  - first:
+      213: -691706447403175177
+    second: ballast_tortoise_color_12
+  - first:
+      213: 2872164857525984706
+    second: ballast_tortoise_color_13
+  - first:
+      213: -49399472691237275
+    second: ballast_tortoise_color_14
+  - first:
+      213: 6535203077732068918
+    second: ballast_tortoise_color_15
+  - first:
+      213: 1258344185601788510
+    second: ballast_tortoise_color_16
+  - first:
+      213: -4142788944296794605
+    second: ballast_tortoise_color_17
+  - first:
+      213: -568615435534025224
+    second: ballast_tortoise_color_18
+  - first:
+      213: -2259010157225445343
+    second: ballast_tortoise_color_19
+  - first:
+      213: -4832885116771108501
+    second: ballast_tortoise_color_20
+  - first:
+      213: 4911693215797605491
+    second: ballast_tortoise_color_21
+  - first:
+      213: -8610690969095808117
+    second: ballast_tortoise_color_22
+  - first:
+      213: -3534164249411169956
+    second: ballast_tortoise_color_23
+  - first:
+      213: -8640008034729555519
+    second: ballast_tortoise_color_24
+  - first:
+      213: -8565529200160856508
+    second: ballast_tortoise_color_25
+  - first:
+      213: 8996831597423179897
+    second: ballast_tortoise_color_26
+  - first:
+      213: -7797897211087651460
+    second: ballast_tortoise_color_27
+  - first:
+      213: 6574956713419603965
+    second: ballast_tortoise_color_28
+  - first:
+      213: -7220912835800828196
+    second: ballast_tortoise_color_29
+  - first:
+      213: 3095174227531383732
+    second: ballast_tortoise_color_30
+  - first:
+      213: 4532805888449048122
+    second: ballast_tortoise_color_31
+  - first:
+      213: 9005023823037229734
+    second: ballast_tortoise_color_32
+  - first:
+      213: 8348398990456673519
+    second: ballast_tortoise_color_33
+  - first:
+      213: -2183944919353910501
+    second: ballast_tortoise_color_34
+  - first:
+      213: 633584204519465343
+    second: ballast_tortoise_color_35
+  - first:
+      213: 8659100703259441240
+    second: ballast_tortoise_color_36
+  - first:
+      213: -3615958017806743783
+    second: ballast_tortoise_color_37
+  - first:
+      213: 6541970503602082615
+    second: ballast_tortoise_color_38
+  - first:
+      213: -6982410384829408656
+    second: ballast_tortoise_color_39
+  - first:
+      213: -2388473136373570802
+    second: ballast_tortoise_color_40
+  - first:
+      213: -3815459404401280546
+    second: ballast_tortoise_color_41
+  - first:
+      213: -9164570697448972952
+    second: ballast_tortoise_color_42
+  - first:
+      213: 8110398791918015088
+    second: ballast_tortoise_color_43
+  - first:
+      213: 7374339571463097864
+    second: ballast_tortoise_color_44
+  - first:
+      213: -2354598027035669700
+    second: ballast_tortoise_color_45
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: ballast_tortoise_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1080
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3b43ee858db9d074d803ff458e08328f
+      internalID: 258853214
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_1
+      rect:
+        serializedVersion: 2
+        x: 292
+        y: 1080
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1454cfded99979a41b53f6c951d19808
+      internalID: 1633931192
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_2
+      rect:
+        serializedVersion: 2
+        x: 584
+        y: 1080
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5c71bfe77d5a3b7499c29df10ad44935
+      internalID: 344969019
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_3
+      rect:
+        serializedVersion: 2
+        x: 876
+        y: 1080
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9abd65f446ca83446aea854dcf944b7c
+      internalID: 420232099
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_4
+      rect:
+        serializedVersion: 2
+        x: 1168
+        y: 1080
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7c93442041e8fd649a64401dc3433f75
+      internalID: -1154404770
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_5
+      rect:
+        serializedVersion: 2
+        x: 1460
+        y: 1080
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d8545c5f2447adb46bd6d7e5cc5a3791
+      internalID: -1193267383
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_6
+      rect:
+        serializedVersion: 2
+        x: 1752
+        y: 1080
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1cbe83fde5292294c8e2ab1ab5a9e079
+      internalID: 233647716
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_7
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 900
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d7dbffaf020eaf74393bb79d81ef35e5
+      internalID: -2099754202
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_8
+      rect:
+        serializedVersion: 2
+        x: 292
+        y: 900
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 80964ba3ef2680146b7b9a2fbbb895ca
+      internalID: 332733875
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_9
+      rect:
+        serializedVersion: 2
+        x: 584
+        y: 900
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 16eacebf7949f7c4f94c79a591f3057c
+      internalID: 960374736
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_10
+      rect:
+        serializedVersion: 2
+        x: 876
+        y: 900
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 73ebd3348bd42244c97c9521e964a5b7
+      internalID: -775751727
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_11
+      rect:
+        serializedVersion: 2
+        x: 1168
+        y: 900
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0147d657fe4dab645babb864adb58c47
+      internalID: -1746265196
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_12
+      rect:
+        serializedVersion: 2
+        x: 1460
+        y: 900
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8d55beea980289649a659bef32bc8e3a
+      internalID: -1562099033
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_13
+      rect:
+        serializedVersion: 2
+        x: 1752
+        y: 900
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c74376bb69cbf4d4f9ca61a40740180f
+      internalID: -921465639
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_14
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 720
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c69b81fc10474f648ae54eae541180c1
+      internalID: -976249992
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_15
+      rect:
+        serializedVersion: 2
+        x: 292
+        y: 720
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c29920cd7f8a57541a56668eec697402
+      internalID: -2130947496
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_16
+      rect:
+        serializedVersion: 2
+        x: 584
+        y: 720
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ac7fb57918fd5b7418a204569a44bfaa
+      internalID: 1077943047
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_17
+      rect:
+        serializedVersion: 2
+        x: 876
+        y: 720
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fba38f840d62f094bb1b4a9a2c8d8721
+      internalID: 83166286
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_18
+      rect:
+        serializedVersion: 2
+        x: 1168
+        y: 720
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4b67b30ca49c8d845b4545fbcc31f590
+      internalID: 2061157259
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_19
+      rect:
+        serializedVersion: 2
+        x: 1460
+        y: 720
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7c1f124349ff937449d87c5d0a066512
+      internalID: 1465052619
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_20
+      rect:
+        serializedVersion: 2
+        x: 1752
+        y: 720
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6350cba2320a01f4c965db2b95405a18
+      internalID: -1996082056
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_21
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 540
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d534c631b14490c4f8bae95f15867d9d
+      internalID: 809425504
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_22
+      rect:
+        serializedVersion: 2
+        x: 292
+        y: 540
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a473a849f0e409d4fa54de7f24d42864
+      internalID: -644594484
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_23
+      rect:
+        serializedVersion: 2
+        x: 584
+        y: 540
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3f9e700bc3959c74aa5426cd167a18e4
+      internalID: 410535392
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_24
+      rect:
+        serializedVersion: 2
+        x: 876
+        y: 540
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: af74b0a5c815bf845828f3d89d4d863a
+      internalID: 505298206
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_25
+      rect:
+        serializedVersion: 2
+        x: 1168
+        y: 540
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1d56732324af1c144b36e5cd1949eb6d
+      internalID: -533761110
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_26
+      rect:
+        serializedVersion: 2
+        x: 1460
+        y: 540
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 330d01b4fa7b677449054baadddcce5c
+      internalID: -410935167
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_27
+      rect:
+        serializedVersion: 2
+        x: 1752
+        y: 540
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 07758ff6aaa5956458b8859f1407ce4b
+      internalID: 1378923050
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_28
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 360
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a814f42dcd3d14f4680d94c8daf25242
+      internalID: -1529082259
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_29
+      rect:
+        serializedVersion: 2
+        x: 292
+        y: 360
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 05e3883fbbc0d304b8391e10b840c42a
+      internalID: -1741627681
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_30
+      rect:
+        serializedVersion: 2
+        x: 584
+        y: 360
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0ced690c874c5d848a2905fc76133af7
+      internalID: 276728663
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_31
+      rect:
+        serializedVersion: 2
+        x: 876
+        y: 360
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 59e514ca208648343806f52ff3a9b729
+      internalID: -113903013
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_32
+      rect:
+        serializedVersion: 2
+        x: 1168
+        y: 360
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: af08532222c7f1a438e45210df85e5a1
+      internalID: -904959030
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_33
+      rect:
+        serializedVersion: 2
+        x: 1460
+        y: 360
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 47da0ffb3fb83da4598dfe2de2789264
+      internalID: -1930241784
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_34
+      rect:
+        serializedVersion: 2
+        x: 1752
+        y: 360
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 45d94b3487888de49bc734c8eca10e5a
+      internalID: -1386915201
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_35
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 180
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d665eb85026df404abe250a69056b7fd
+      internalID: -1000572950
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_36
+      rect:
+        serializedVersion: 2
+        x: 292
+        y: 180
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a15b5e612d52def48b571ef2a068a934
+      internalID: 915544018
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_37
+      rect:
+        serializedVersion: 2
+        x: 584
+        y: 180
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 03d02de4774d245409d229cb865d41ee
+      internalID: -1016878809
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_38
+      rect:
+        serializedVersion: 2
+        x: 876
+        y: 180
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3d8a4803af3df214b8d5373a373c7e2f
+      internalID: -1179109239
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_39
+      rect:
+        serializedVersion: 2
+        x: 1168
+        y: 180
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7ee5a559f9abc3f4d8280f6e13c38692
+      internalID: -174200140
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_40
+      rect:
+        serializedVersion: 2
+        x: 1460
+        y: 180
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ab783dc57a384a440bdd3144def88cf7
+      internalID: 1243643904
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_41
+      rect:
+        serializedVersion: 2
+        x: 1752
+        y: 180
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e9597638ceb4dc440872fadc51ef3724
+      internalID: 1280574959
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_42
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1f5ddebdaa8a8d945846cac93182387d
+      internalID: -759551931
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_43
+      rect:
+        serializedVersion: 2
+        x: 292
+        y: 0
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2c085ad59a53daa4a99f63540b7b1175
+      internalID: 1793016921
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_44
+      rect:
+        serializedVersion: 2
+        x: 584
+        y: 0
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bb470afb8b582334fac208049cbd65e8
+      internalID: -496227603
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ballast_tortoise_45
+      rect:
+        serializedVersion: 2
+        x: 876
+        y: 0
+        width: 288
+        height: 176
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 686a90b15bc1eba488a329c037298fe7
+      internalID: 437182520
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 6dc08bbe216005048ba5dc00b566a96b
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      ballast_tortoise_0: 258853214
+      ballast_tortoise_1: 1633931192
+      ballast_tortoise_10: -775751727
+      ballast_tortoise_11: -1746265196
+      ballast_tortoise_12: -1562099033
+      ballast_tortoise_13: -921465639
+      ballast_tortoise_14: -976249992
+      ballast_tortoise_15: -2130947496
+      ballast_tortoise_16: 1077943047
+      ballast_tortoise_17: 83166286
+      ballast_tortoise_18: 2061157259
+      ballast_tortoise_19: 1465052619
+      ballast_tortoise_2: 344969019
+      ballast_tortoise_20: -1996082056
+      ballast_tortoise_21: 809425504
+      ballast_tortoise_22: -644594484
+      ballast_tortoise_23: 410535392
+      ballast_tortoise_24: 505298206
+      ballast_tortoise_25: -533761110
+      ballast_tortoise_26: -410935167
+      ballast_tortoise_27: 1378923050
+      ballast_tortoise_28: -1529082259
+      ballast_tortoise_29: -1741627681
+      ballast_tortoise_3: 420232099
+      ballast_tortoise_30: 276728663
+      ballast_tortoise_31: -113903013
+      ballast_tortoise_32: -904959030
+      ballast_tortoise_33: -1930241784
+      ballast_tortoise_34: -1386915201
+      ballast_tortoise_35: -1000572950
+      ballast_tortoise_36: 915544018
+      ballast_tortoise_37: -1016878809
+      ballast_tortoise_38: -1179109239
+      ballast_tortoise_39: -174200140
+      ballast_tortoise_4: -1154404770
+      ballast_tortoise_40: 1243643904
+      ballast_tortoise_41: 1280574959
+      ballast_tortoise_42: -759551931
+      ballast_tortoise_43: 1793016921
+      ballast_tortoise_44: -496227603
+      ballast_tortoise_45: 437182520
+      ballast_tortoise_5: -1193267383
+      ballast_tortoise_6: 233647716
+      ballast_tortoise_7: -2099754202
+      ballast_tortoise_8: 332733875
+      ballast_tortoise_9: 960374736
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

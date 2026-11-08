@@ -303,14 +303,10 @@ MonoBehaviour:
   - creatures/mercury/cinderhulk_day
   - creatures/mercury/cinderhulk_night
   - creatures/space/ringmite
-  - creatures/venus/acidmoth
-  - creatures/venus/pressure_crab
-  - creatures/venus/sulfur_drifter
   - creatures/venus/veil_serpent
   - creatures/venus/veil_serpent_body
   - creatures/venus/veil_serpent_head
   - creatures/venus/veil_serpent_tail
-  - creatures/venus/vent_eel
   - creatures/warden/hunter
   - creatures/warden/sentinel
   - fx/beam_ray/base
@@ -341,29 +337,14 @@ MonoBehaviour:
   - planets/triton/glow
   - planets/uranus/glow
   - planets/venus/glow
-  - props/common/aerostat_cell
-  - props/common/aerostat_deck
-  - props/common/aerostat_strut
   - props/common/calibration
-  - props/common/float_cell_pack_mk1
-  - props/common/float_cell_pack_mk2
-  - props/common/grapple_hook
   - props/earth/archive_door
   - props/earth/archive_terminal
   - props/earth/beacon
   - props/earth/launch_gantry
   - props/earth/launch_tower_ruin
-  - props/jupiter/beacon_vault
-  - props/jupiter/derelict_pod
-  - props/jupiter/husk_tortoise
-  - props/mercury/equipment_locker
-  - props/mercury/flare_shelter
-  - props/mercury/meridian_beacon
-  - props/mercury/shelter_door
-  - props/mercury/solarite_cluster
   - props/mercury/solarite_crusted
   - props/mercury/solarite_cut
-  - props/mercury/warden_vault_gate
   - props/neptune/meridian_wreck_bow
   - props/neptune/meridian_wreck_mid
   - props/neptune/meridian_wreck_stern
@@ -385,14 +366,6 @@ MonoBehaviour:
   - props/space/waystation_mars
   - props/uranus/tilted_derelict
   - props/uranus/umbrella_platform
-  - props/venus/aerostat_balloon
-  - props/venus/aerostat_deck
-  - props/venus/buoyancy_cell
-  - props/venus/meridian_station_door
-  - props/venus/railing
-  - props/venus/station_hull_a
-  - props/venus/station_hull_b
-  - props/venus/vent_harvester
   - props/venus_scenery/atlas
   - ships/pilgrim/base
   - ships/pilgrim/side
@@ -858,6 +831,82 @@ MonoBehaviour:
       start: 54
       length: 12
       loop: 1
+  - key: creatures/jupiter/ballast_tortoise
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 12
+      loop: 1
+    - name: swim
+      start: 12
+      length: 14
+      loop: 1
+    - name: react
+      start: 26
+      length: 10
+      loop: 0
+    - name: bump
+      start: 36
+      length: 10
+      loop: 0
+  - key: creatures/jupiter/belt_wasp
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 8
+      loop: 1
+    - name: fly
+      start: 8
+      length: 12
+      loop: 1
+    - name: react
+      start: 20
+      length: 8
+      loop: 0
+    - name: bump
+      start: 28
+      length: 8
+      loop: 0
+  - key: creatures/jupiter/lightning_eel
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 10
+      loop: 1
+    - name: swim
+      start: 10
+      length: 12
+      loop: 1
+    - name: react
+      start: 22
+      length: 8
+      loop: 0
+    - name: bump
+      start: 30
+      length: 10
+      loop: 0
+  - key: creatures/jupiter/stormglider
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 10
+      loop: 1
+    - name: glide
+      start: 10
+      length: 12
+      loop: 1
+    - name: react
+      start: 22
+      length: 8
+      loop: 0
+    - name: bump
+      start: 30
+      length: 10
+      loop: 0
   - key: creatures/mars/dustskater
     fps: 12
     clips:
@@ -1107,6 +1156,67 @@ MonoBehaviour:
       start: 10
       length: 4
       loop: 0
+  - key: creatures/venus/acidmoth
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 8
+      loop: 1
+    - name: fly
+      start: 8
+      length: 12
+      loop: 1
+    - name: react
+      start: 20
+      length: 8
+      loop: 0
+    - name: bump
+      start: 28
+      length: 8
+      loop: 0
+  - key: creatures/venus/pressure_crab
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 10
+      loop: 1
+    - name: walk
+      start: 10
+      length: 12
+      loop: 1
+    - name: react
+      start: 22
+      length: 8
+      loop: 0
+    - name: bump
+      start: 30
+      length: 10
+      loop: 0
+  - key: creatures/venus/sulfur_drifter
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 10
+      loop: 1
+    - name: drift
+      start: 10
+      length: 12
+      loop: 1
+    - name: react
+      start: 22
+      length: 8
+      loop: 0
+    - name: bump
+      start: 30
+      length: 10
+      loop: 0
+    - name: flee
+      start: 40
+      length: 12
+      loop: 1
   - key: creatures/venus/veil_serpent
     fps: 10
     clips:
@@ -1130,6 +1240,29 @@ MonoBehaviour:
       start: 21
       length: 4
       loop: 0
+  - key: creatures/venus/vent_eel
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 10
+      loop: 1
+    - name: walk
+      start: 10
+      length: 12
+      loop: 1
+    - name: react
+      start: 22
+      length: 8
+      loop: 0
+    - name: bump
+      start: 30
+      length: 10
+      loop: 0
+    - name: idle_open
+      start: 40
+      length: 10
+      loop: 1
   - key: fx/beam_ray/base
     fps: 12
     clips:
@@ -1347,6 +1480,13 @@ MonoBehaviour:
       start: 0
       length: 12
       loop: 1
+  - key: props/common/aerostat_cell
+    fps: 12
+    clips:
+    - name: breathe
+      start: 0
+      length: 4
+      loop: 1
   - key: props/common/lamp
     fps: 12
     clips:
@@ -1389,6 +1529,20 @@ MonoBehaviour:
       start: 0
       length: 4
       loop: 1
+  - key: props/mercury/shelter_door
+    fps: 12
+    clips:
+    - name: open
+      start: 0
+      length: 6
+      loop: 0
+  - key: props/venus/meridian_station_door
+    fps: 12
+    clips:
+    - name: open
+      start: 0
+      length: 6
+      loop: 0
   - key: ships/pilgrim/puff
     fps: 12
     clips:
