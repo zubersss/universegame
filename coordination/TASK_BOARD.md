@@ -23,10 +23,11 @@ older (D-037 alternation applies only between equal ranks). A rank is live only 
 has a want on file or holds the lock (D-112): if the top rank has no want when the lock frees,
 the next live rank runs now and the skipped role goes next after it files. A role below the top
 keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 278 (11-08 01:4x: all three windows restarted ~01:27; lock B's tests green (MarsStage 3/3, the Jupiter PlayMode slice 20/20) but its captures died with the restart; B-170 in; THE OWNER'S 0.4.7 PLAYTEST → D-158: the flight overhaul goes first and rides 0.4.8). A role files its want only when the queue says it is next after the running job:
-Cycle 279 (04:1x). Done since: BUILD 0.4.8 (the respin 03:30–03:47, the owner's build: the flight with weight, the paper HUD, Jupiter); B-166 slot 2; B-172's design accepted. THE OWNER'S DIRECTION (04:0x) → D-161 / Bible 5.0: smooth cartoon ground, no digging or block placement, mining by resource nodes; it goes ahead of everything else.
-1. UNITY · lock-free now: U-156 (Earth's smooth ground on one smoothed field) + U-157 (round digging and mounds on it, D-162) code → one check (compile + EditMode + the PlayMode slice incl. SmoothGround / DigPlace / M1Loop / Transition / SaveLoad + the u156 / u157 captures). Then U-158 (Earth's nodes and buried finds) → Build 0.5.0 (Earth smooth with round digging) for the owner.
-2. BLENDER · now: the B-175 Earth curve preview (lock-free) → LEAD; meanwhile B-166 slot 3 (the Uranus creatures + the Colossus) in a free lock; then B-175 Earth's export as soon as LEAD accepts it (it outranks Uranus / Neptune), then B-176 Earth's nodes once U-158's key list is out.
-3. After 0.5.0 reads with the owner: U-159 + B-175 for Mars / Mercury / Venus; then U-160 + B-177 (the giants' islands); the C2 giants' checks (U-127's re-shoot, U-129, U-130, U-133) and B-169 continue in the gaps.
+Cycle 280 (05:1x, 2-hour tick). Done since 03:1x: Build 0.4.8 out with its page and USER-32; D-161 / D-162 (smooth ground, round digging); B-175 for all four inner planets + the D-165 fill_decor; B-166 / B-169 (every C2 export in); B-173's audit; B-170's Venus card fixed; U-156's code + its first check and fixes.
+1. UNITY · NOW (since 05:09): the U-156 re-check (compile + EditMode, the terrain / flight PlayMode slice incl. SolidRescue and the coast re-shoot, CaptureU156Ground).
+2. BLENDER · lock-free now: the B-178 preview (Earth's sand / stone / snow bands) → its export in the next free slot; then B-176's export with U-158's keys; then the B-177 Jupiter island preview (§11.10).
+3. UNITY · after the re-check: U-157 (the round brush, mounds, the 0.4.8 migration) + U-158 (nodes and finds; post the key list for B-176) + the per-biome band pick (B-178) as code → one check (DigPlace, SaveLoad, Harvest, SolidRescue, the u157 / u158 captures) → BUILD 0.5.0 (Earth on smooth ground, dev + release, the probe, the smoke with the new Earth shots) for the owner.
+4. After 0.5.0 reads with the owner: U-159 + B-175's sets for Mars / Mercury / Venus; then U-160 + B-177 (the giants' islands); the C2 giants' checks (U-127's re-shoot, U-129, U-130, U-133) in the gaps.
 
 
 
@@ -61,10 +62,10 @@ Rules: nothing here needs the lock; it stays under ~300 MB of extra RAM; no Unit
 did in your status before the next poll. LEAD tops each list up to ≥ 3 items every cycle.
 
 **UNITY**
-- U-154 (P-51: the Deck piece draws the re-inked kit on the four giants) and the U-127 re-shoot's staging (a Stormglider in the storm deck, the kit's deck module on a Deck 2 floe).
-- U-129 slice 2 (the Saturn creatures + the Polar Hydra Grand rig: B-164's sheets are exported, so no guard), then U-130 slice 2 (B-166's creatures + the Colossus, guarded until slot 3 lands), U-133 slice 2.
-- U-152 (the v2 census, files only: a good item beside any lock); U-151 (the trade panel and the space readouts on paper; the v3 space-prop path for B-172).
-- If the owner's feel check asks for a felt top speed: P-53's alternative (ρ linear in h, or k × 2) ready as a one-constant change (D-160).
+- U-157 code (the round dig brush, mounds that never cover a body, the 0.4.8 stamp migration) and U-158 code (surface nodes + buried finds; the key list in your status for B-176).
+- The per-biome ground band pick by the column's biome with the U-128 crossfade (B-178's keys; placeholders until they land) and the fill_decor scatter (D-165, already exported).
+- The stag's stall: diagnose from the traced path (attempt 2 of 3; a third miss is written up and parked on LEAD's ruling); U-152 (the v2 census, files only, using B-173's audit lists).
+- Status trim (D-113): U-142 / U-143 / U-147 / U-153 are Done; Ready for review lists only unjudged items.
 - The Creep watch row: 3.5 MB per visit on 0.4.7; read 0.4.8's; `docs/credits/unity.md` upkeep.
 Then one batched check per hand-off when your turn in the queue comes (compile + EditMode as one lock, PlayMode A / B as two, D-122).
 
@@ -76,10 +77,10 @@ Then one batched check per hand-off when your turn in the queue comes (compile +
 
 
 **BLENDER** (numpy / scripts only while UNITY holds the lock or a want; bpy only under your own lock; under 0.3 GB free, code only; otherwise only pre-measured ≤ 150 MB jobs beside another role's lock; the lock / RAM check is its own call)
-- The B-172 design preview (both Waystations with the Pilgrim docked, the six rocks) to LEAD once lock C releases.
-- The Neptune v3 rows and dry runs for B-169 (files / numpy only while UNITY holds the lock).
-- B-173 source (the per-planet §9.7 audit sheets for the C2 exit and C4).
-- Status trim (D-113): B-166 slot 1 is verified; Ready for review lists only unjudged items.
+- The B-178 preview (Earth's sand / stone / snow bands, the sand fill, their decor) to LEAD.
+- B-176's bolder iron / copper / carbon nodes in source (exported with U-158's keys).
+- B-177 Jupiter's island belly, ends and haze (contract v3.3 §11.10) in source; its preview after B-176's export.
+- Status trim (D-113): B-173 is Done; Ready for review lists only unjudged items.
 - `docs/credits/blender.md` and the design reports' upkeep (D-153's whale scale, B-170's subtitles).
 
 **LEAD**
@@ -1423,7 +1424,7 @@ Files: blender/scripts/build_islands_v3.py, Assets/_Game/Art/terrain/<giant>/
 Depends: U-160's format (through LEAD)
 Lead notes: Cycle 279. After B-175 and the Uranus / Neptune exports. 05:5x: the format is contract v3.3 §11.10 (D-164: island_belly on the underside outline, island_end_l / _r, under_haze_<deck>); design previews per giant to LEAD after B-176 Earth's preview, Jupiter first.
 
-### B-173 · BLENDER · Ready · C2
+### B-173 · BLENDER · Done · C2
 Goal: The C2 exit audit (Bible §12 C2: "§9.7 on every asset"): one stamped contact sheet per planet (Earth, Mars, Mercury, Venus, Jupiter, Saturn, then Uranus and Neptune as their exports land) read back from Assets/_Game/Art/ at 1x: every v3 key of that planet (sets as a strip, floes, flora rig set assembled, props, creatures at their idle frame, Grand rigs assembled at 0.25x, the palette strip, the title card), each with its measured ink widths and palette hit, and a list of any key under that planet's folders that is still v2 (a .glb or a _normal / _mask map).
 Accept: six sheets now (two more later) in blender/preview/audit_c2_<planet>.png, stamped; a README line per planet in coordination/reports/blender/ with the counts (v3 keys, v2 keys left, any ink or palette outlier); no export.
 Files: blender/scripts/audit_c2.py, blender/preview/, coordination/reports/blender/
