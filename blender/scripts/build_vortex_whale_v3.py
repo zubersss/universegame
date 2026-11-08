@@ -168,11 +168,22 @@ def _throat(d, M, song=False):
     G.stroke(d, pouch, M["ink"], O, cyclic=True)
 
 
-PARTS = {"head": lambda d, M: _head(d, M), "head_squint": lambda d, M: _head(d, M, True), "body1": part_body1, "body2": part_body2,
-         "tail": part_tail, "fin": part_fin, "throat_rest": lambda d, M: _throat(d, M), "throat_song": lambda d, M: _throat(d, M, True)}
+WHALE_SCALE = 0.75                     # D-153: drawn at 0.75 (~36 m) so the eight parts pack one 2048 sheet at 64 px/m
+
+
+def _scaled(fn):
+    """A part drawn at WHALE_SCALE about its bone origin (the ink widths stay in px)."""
+    def part(d, M):
+        fn(G.Xf(d, lambda pts: [(x * WHALE_SCALE, z * WHALE_SCALE) for x, z in pts]), M)
+    return part
+
+
+RAW_PARTS = {"head": lambda d, M: _head(d, M), "head_squint": lambda d, M: _head(d, M, True), "body1": part_body1, "body2": part_body2,
+             "tail": part_tail, "fin": part_fin, "throat_rest": lambda d, M: _throat(d, M), "throat_song": lambda d, M: _throat(d, M, True)}
+PARTS = {k: _scaled(f) for k, f in RAW_PARTS.items()}
 
 RIG = {
-    "name": "vortex_whale", "grand": True, "scale_note": "about 48 m long at 1x (the fiction's 500 m is a set piece seen in passing; needs LEAD's ruling)",
+    "name": "vortex_whale", "grand": True, "scale_note": "about 36 m long at 1x (D-153: drawn at 0.75 of the 48 m design so the rig packs one 2048 sheet; the fiction's 500 m is a set piece seen in passing)",
     "bones": [
         {"name": "head", "part": "head", "parent": None, "offset_m": [0.0, 0.0], "order": 3},
         {"name": "body1", "part": "body1", "parent": "head", "offset_m": [0.0, 0.0], "order": 2},
@@ -190,6 +201,8 @@ RIG = {
     "actions": {"song": {"beats": 4, "swap": {"throat": "throat_song"}, "head_deg": 3},
                 "harpooned": {"swap": {"head": "head_squint"}, "tail_deg": 14, "head_deg": -4}},
 }
+for _b in RIG["bones"]:                                          # D-153: the bone offsets scale with the parts
+    _b["offset_m"] = [round(v * WHALE_SCALE, 4) for v in _b["offset_m"]]
 
 
 def pose_idle(i, n=8):
@@ -243,7 +256,7 @@ def draw_pose(d, M, rot_deg, swaps):
         PARTS[part](G.Xf(d, xf[b["name"]]), M)
 
 
-SPAN_W, SPAN_H, PIV = 52.0, 16.0, (36.5 / 52.0, 7.6 / 16.0)     # the frame (m) and the head joint inside it
+SPAN_W, SPAN_H, PIV = 52.0 * WHALE_SCALE, 16.0 * WHALE_SCALE, (36.5 / 52.0, 7.6 / 16.0)     # the frame (m, D-153 scaled) and the head joint inside it
 
 
 def render_pose(rot_deg, swaps, scale=0.25, ss=2, seed=3):
@@ -315,7 +328,7 @@ def preview(out_dir, scale=0.25, path=None, stamp="preview (not exported)"):
         review._over(sky, fr, img.shape[1] + 40, sky.shape[0] - fr.shape[0] - 30)
     except Exception:  # noqa: BLE001
         pass
-    review._label(sky, f"{scale:g}x in the red spot's haze beside the surveyor (2 m, also {scale:g}x): ~48 m long", 6, 6)
+    review._label(sky, f"{scale:g}x in the red spot's haze beside the surveyor (2 m, also {scale:g}x): ~{48 * WHALE_SCALE:g} m long (D-153)", 6, 6)
     rows.append(sky)
     for title, poses in (("idle 8 (a rolling glide: the sway travels down the bones, once per 4 beats; the fin rows)", [pose_idle(i) for i in range(8)]),
                          ("song 8 (the throat swells, rings ripple out as tones)", [pose_song(i) for i in range(8)]),
