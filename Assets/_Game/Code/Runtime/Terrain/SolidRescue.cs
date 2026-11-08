@@ -20,14 +20,14 @@ namespace Meridian.Terrain
         public const float MaxLift = 96f;
 
         static readonly List<Rigidbody2D> bodies = new List<Rigidbody2D>();
-        static readonly HashSet<int> logged = new HashSet<int>();
+        static readonly HashSet<Rigidbody2D> logged = new HashSet<Rigidbody2D>();
         static readonly List<Collider2D> shapes = new List<Collider2D>();
 
         /// <summary>Lifts so far (tests and the profiler's log).</summary>
         public static int Rescues { get; private set; }
 
         public static void Register(Rigidbody2D body) { if (body != null && !bodies.Contains(body)) bodies.Add(body); }
-        public static void Unregister(Rigidbody2D body) { if (body != null) { bodies.Remove(body); logged.Remove(body.GetInstanceID()); } }
+        public static void Unregister(Rigidbody2D body) { if (body != null) { bodies.Remove(body); logged.Remove(body); } }
 
         /// <summary>The drawn ground's density at p (the outline is its iso, GroundField.Iso): the four tile-centre nodes round p, bilinear.</summary>
         public static float Density(TerrainStreamer t, Vector2 p)
@@ -89,7 +89,7 @@ namespace Meridian.Terrain
                 b.transform.position += new Vector3(0f, rise, 0f);
                 var v = b.linearVelocity; if (v.y < 0f) b.linearVelocity = new Vector2(v.x, 0f);
                 lifted++; Rescues++;
-                if (logged.Add(b.GetInstanceID()))
+                if (logged.Add(b))
                     Debug.Log($"[MERIDIAN] solid rescue: {b.name} buried at ({centre.x:F1}, {centre.y:F1}), lifted {rise:F2} m onto the ground at {surface:F2}");
             }
             return lifted;
