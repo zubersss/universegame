@@ -1840,26 +1840,29 @@ def mesa2(mask, shade, talus, cx, base, top_w, h, slope, rng, val=1.0):
 
 
 def spruce(mask, snow, cx, base, h, w, rng, tiers=4):
-    """A snowy spruce: drooping tiers with ragged hems of branch tips, snow clumps on each tier's shoulders under the tier
-    above, a snow cap on the leader."""
-    prev_bot = None
+    """A snowy spruce: drooping tiers with ragged hems of branch tips; the snow lies along each tier's hem (an uneven,
+    off-centre band with a drip or two - never paired dots, which read as eyes, D-101) and caps the leader."""
+    H = mask.shape[0]
     for k in range(tiers):
         top = base - h + h * 0.21 * k
         bot = base - h * (0.60 - 0.17 * k) if k < tiers - 1 else base - h * 0.03
         hw = w * (0.42 + 0.2 * k)
         tri(mask, cx, top, bot, hw, droop=0.16)
-        n = max(3, int(hw / 8))
-        for i in range(n):
-            ell(mask, cx - hw + 2 * hw * (i + 0.5) / n + rng.uniform(-2, 2), bot + rng.uniform(1, 4), rng.uniform(3.5, 5.5), rng.uniform(5, 8))
-        if snow is not None:
-            if k == 0:
-                ell(snow, cx, top + h * 0.06, max(3.0, hw * 0.16), max(3.0, h * 0.045))
-            else:
-                yb = prev_bot + 3
-                hh = hw * min(1.0, max(0.1, (yb - top) / max(bot - top, 1)))
-                for side in (-1, 1):
-                    ell(snow, cx + side * hh * rng.uniform(0.45, 0.7), yb + rng.uniform(-1, 2), hh * rng.uniform(0.28, 0.42), rng.uniform(3.5, 5.5))
-        prev_bot = bot
+        for i in range(max(4, int(hw / 5))):
+            ell(mask, cx + rng.uniform(-0.95, 0.95) * hw, bot + rng.uniform(0, 4), rng.uniform(3, 5), rng.uniform(4, 7))
+        if snow is None:
+            continue
+        if k == 0:
+            ell(snow, cx + rng.uniform(-1, 1), top + h * 0.05, max(3.0, hw * 0.14), max(3.0, h * 0.04))
+        if k < tiers - 1 or rng.uniform() < 0.5:
+            xl, xr = cx - hw * rng.uniform(0.35, 0.9), cx + hw * rng.uniform(0.25, 0.85)
+            t, ph = rng.uniform(4, 7), rng.uniform(0, 6.3)
+            for x in range(int(xl), int(xr) + 1):
+                y1 = bot - 1 + 1.5 * math.sin(x * 0.9 + ph)
+                y0 = y1 - t * (0.7 + 0.3 * math.sin(x * 0.23 + ph))
+                snow[max(int(y0), 0):min(int(y1), H), x % W] = 1.0
+            for j in range(int(rng.integers(0, 3))):
+                ell(snow, rng.uniform(xl, xr), bot + rng.uniform(0, 3), rng.uniform(2, 3.5), rng.uniform(3, 5))
 
 
 def barrel_stack(body, hi, cx, base, n, r, rng):
@@ -2068,36 +2071,47 @@ def earth_tundra(seed):
     # layer0: a pale sky with soft aurora curtains, far low hills, the snow plain below the horizon
     H = 1024
     hz = _gline(H, -2.0)
-    stack = tinted_sky(rng, H, BG._mix(pal["sky"], pal["teal"], 0.30), BG._mix(pal["offwhite"], pal["sky"], 0.45), hz,
-                       clouds=2, cloud_col=pal["offwhite"], flat=True)
+    stack = tinted_sky(rng, H, BG._mix(pal["teal"], pal["sky"], 0.40), BG._mix(pal["sky"], pal["offwhite"], 0.22), hz,
+                       clouds=2, cloud_col=pal["offwhite"], flat=True)       # LEAD 06:1x: a bluer horizon so the white hills read
     yy = np.arange(H)[:, None].astype(np.float32)
     xx = np.arange(W)[None, :] / W
-    for j, (base, amp, length, col) in enumerate(((150, 50, 220, BG._mix(pal["green"], pal["teal"], 0.45)),
-                                                  (250, 40, 170, BG._mix(pal["teal"], pal["sky"], 0.35)),
-                                                  (120, 30, 140, BG._mix(pal["green"], pal["offwhite"], 0.35)))):
-        c = base + amp * np.sin(2 * np.pi * (2 + j) * xx + rng.uniform(0, 6.3)) + 0.4 * amp * np.sin(2 * np.pi * (5 + j) * xx + rng.uniform(0, 6.3))
-        hang = np.clip(1 - (yy - c) / length, 0, 1) * (yy >= c) * np.clip((yy - c) / 12 + 0.2, 0, 1)
-        streak = np.clip(0.55 + 0.45 * BG.periodic_noise(rng, H, 4, 120), 0, 1)
-        stack.append(wash32(rng, H, (hang * streak * 0.42).astype(np.float32), col, var=0.03, edge_dark=0.0, bleed=4.0))
-    hills = BG._ridge_mask(H, BG.ridge(rng, [(1, 0.5), (3, 0.35), (7, 0.15)], base=hz - 30, amp=26))
-    stack += [wash32(rng, H, hills, BG._mix(pal["offwhite"], pal["sky"], 0.40), var=0.04, edge_dark=0.04, bleed=3.0),
+    for j, (base, amp, length, col) in enumerate(((300, 45, 230, BG._mix(pal["green"], pal["offwhite"], 0.30)),
+                                                  (380, 35, 170, BG._mix(BG._mix(pal["green"], pal["teal"], 0.5), pal["offwhite"], 0.35)))):
+        # an aurora curtain: a soft bright lower hem, its rays fading upward (LEAD 06:1x preview: the first, hanging smears read as stains)
+        c = base + amp * np.sin(2 * np.pi * (2 + j) * xx + rng.uniform(0, 6.3)) + 0.35 * amp * np.sin(2 * np.pi * (5 + j) * xx + rng.uniform(0, 6.3))
+        rays = np.clip(1 - (c - yy) / length, 0, 1) * (yy <= c) + np.clip(1 - (yy - c) / 8, 0, 1) * (yy > c)
+        streak = np.clip(0.5 + 0.5 * BG.periodic_noise(rng, H, 7, 320), 0, 1)               # long vertical rays
+        stack.append(wash32(rng, H, (rays ** 1.2 * streak * 0.62).astype(np.float32), col, var=0.02, edge_dark=0.0, bleed=3.0))
+    hills = BG._ridge_mask(H, BG.ridge(rng, [(1, 0.5), (3, 0.35), (7, 0.15)], base=hz - 44, amp=34))
+    stack += [wash32(rng, H, hills, BG._mix(pal["offwhite"], pal["sky"], 0.30), var=0.04, edge_dark=0.14, bleed=2.5),
               wash32(rng, H, BG._ridge_mask(H, BG.ridge(rng, [(4, 0.5)], base=hz + 2, amp=4)), snow, var=0.03, edge_dark=0.02, bleed=2.0)]
     out.append(finish(stack, rng, H))
 
     # layer1: the open snow plain in low hills, their lee sides shaded, a scatter of dark rocks
     H = 512
     gl = _gline(H, -1.0)
+    far_hl = BG.ridge(rng, [(1, 0.5), (3, 0.3), (6, 0.2)], base=gl - 150, amp=40)
+    far_hills = BG._ridge_mask(H, far_hl)
     hl = BG.ridge(rng, [(1, 0.45), (2, 0.35), (5, 0.2)], base=gl - 70, amp=45)
     hills = BG._ridge_mask(H, hl)
+    scrub = np.zeros((H, W), np.float32)
+    for k in range(26):                                                                    # willow scrub along the hills
+        cx = rng.uniform(0, W)
+        cy = hl[int(cx) % W] + rng.uniform(4, 60)
+        for q in range(3):
+            ell(scrub, cx + rng.uniform(-10, 10), cy + rng.uniform(-2, 2), rng.uniform(4, 8), rng.uniform(2, 4))
+    scrub *= hills
     lee = hills * (np.arange(H)[:, None] > hl[None, :] + 30 + 12 * BG.periodic_noise(rng, H, 50, 10)).astype(np.float32) \
         * (np.gradient(hl)[None, :] > 0).astype(np.float32)
     rocks = np.zeros((H, W), np.float32)
-    for k in range(26):
+    for k in range(40):
         cx = rng.uniform(0, W)
         ell(rocks, cx, max(hl[int(cx) % W] + rng.uniform(8, 90), 0), rng.uniform(4, 10), rng.uniform(3, 6))
     rocks *= hills
-    stack = [wash32(rng, H, hills, snow, var=0.04, edge_dark=0.05, bleed=2.5),
-             wash32(rng, H, lee, BG._mix(pal["sky"], pal["offwhite"], 0.40), var=0.03, edge_dark=0.02, bleed=6.0),
+    stack = [wash32(rng, H, far_hills, BG._mix(pal["offwhite"], pal["sky"], 0.38), var=0.04, edge_dark=0.16, bleed=2.5),
+             wash32(rng, H, hills, snow, var=0.04, edge_dark=0.16, bleed=2.5),
+             wash32(rng, H, lee, BG._mix(BG._mix(pal["sky"], pal["teal"], 0.15), pal["offwhite"], 0.25), var=0.03, edge_dark=0.02, bleed=6.0),
+             wash32(rng, H, scrub, BG._mix(BG._mix(pal["brown"], pal["teal"], 0.35), pal["offwhite"], 0.35), var=0.05, edge_dark=0.04, bleed=1.2),
              wash32(rng, H, rocks, BG._mix(pal["teal"], pal["brown"], 0.5), var=0.04, edge_dark=0.06, bleed=1.0)]
     out.append(finish(stack, rng, H))
 
