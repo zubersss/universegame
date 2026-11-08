@@ -1,0 +1,20 @@
+{
+  "key": "props/saturn/helium_trap",
+  "style": "v3",
+  "frame_width": 96,
+  "frame_height": 128,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.078125
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [],
+  "squash_root": false,
+  "ground_line_px": 10,
+  "note": "one static frame (no clip); the pivot sits on its base line"
+}

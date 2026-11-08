@@ -1,0 +1,723 @@
+{
+  "key": "flora/saturn/rigset",
+  "style": "v3",
+  "ppu": 64,
+  "rect_origin": "bottom_left",
+  "parts": [
+    {
+      "name": "butterpuff_rest",
+      "rect": [
+        452,
+        140,
+        52,
+        60
+      ],
+      "pivot": [
+        0.4549,
+        0.1089
+      ]
+    },
+    {
+      "name": "butterpuff_spores",
+      "rect": [
+        276,
+        124,
+        52,
+        76
+      ],
+      "pivot": [
+        0.4549,
+        0.086
+      ]
+    },
+    {
+      "name": "frostfan_folded",
+      "rect": [
+        0,
+        44,
+        32,
+        56
+      ],
+      "pivot": [
+        0.4522,
+        0.1182
+      ]
+    },
+    {
+      "name": "frostfan_mid",
+      "rect": [
+        36,
+        44,
+        56,
+        56
+      ],
+      "pivot": [
+        0.4909,
+        0.1182
+      ]
+    },
+    {
+      "name": "frostfan_open",
+      "rect": [
+        96,
+        44,
+        68,
+        56
+      ],
+      "pivot": [
+        0.4991,
+        0.1182
+      ]
+    },
+    {
+      "name": "heliumbell_bell",
+      "rect": [
+        196,
+        8,
+        36,
+        32
+      ],
+      "pivot": [
+        0.4696,
+        0.8129
+      ]
+    },
+    {
+      "name": "heliumbell_bell_swell",
+      "rect": [
+        152,
+        4,
+        40,
+        36
+      ],
+      "pivot": [
+        0.4933,
+        0.7951
+      ]
+    },
+    {
+      "name": "heliumbell_stem",
+      "rect": [
+        168,
+        44,
+        32,
+        56
+      ],
+      "pivot": [
+        0.5341,
+        0.0993
+      ]
+    },
+    {
+      "name": "heliumbell_stem_long",
+      "rect": [
+        120,
+        116,
+        32,
+        84
+      ],
+      "pivot": [
+        0.5341,
+        0.0656
+      ]
+    },
+    {
+      "name": "hexmoss_hunker",
+      "rect": [
+        236,
+        8,
+        88,
+        32
+      ],
+      "pivot": [
+        0.4878,
+        0.1738
+      ]
+    },
+    {
+      "name": "hexmoss_p0",
+      "rect": [
+        204,
+        60,
+        72,
+        40
+      ],
+      "pivot": [
+        0.4957,
+        0.1391
+      ]
+    },
+    {
+      "name": "hexmoss_p1",
+      "rect": [
+        280,
+        60,
+        72,
+        40
+      ],
+      "pivot": [
+        0.4957,
+        0.1391
+      ]
+    },
+    {
+      "name": "hexmoss_p2",
+      "rect": [
+        356,
+        60,
+        72,
+        40
+      ],
+      "pivot": [
+        0.4957,
+        0.1391
+      ]
+    },
+    {
+      "name": "hexmoss_p3",
+      "rect": [
+        432,
+        60,
+        72,
+        40
+      ],
+      "pivot": [
+        0.4957,
+        0.1391
+      ]
+    },
+    {
+      "name": "hexmoss_p4",
+      "rect": [
+        0,
+        0,
+        72,
+        40
+      ],
+      "pivot": [
+        0.4957,
+        0.1391
+      ]
+    },
+    {
+      "name": "hexmoss_p5",
+      "rect": [
+        76,
+        0,
+        72,
+        40
+      ],
+      "pivot": [
+        0.4957,
+        0.1391
+      ]
+    },
+    {
+      "name": "ringreed_r0_drop",
+      "rect": [
+        156,
+        120,
+        36,
+        80
+      ],
+      "pivot": [
+        0.5877,
+        0.0981
+      ]
+    },
+    {
+      "name": "ringreed_r0_rest",
+      "rect": [
+        196,
+        120,
+        36,
+        80
+      ],
+      "pivot": [
+        0.7255,
+        0.0981
+      ]
+    },
+    {
+      "name": "ringreed_r0_tilt",
+      "rect": [
+        236,
+        120,
+        36,
+        80
+      ],
+      "pivot": [
+        0.7065,
+        0.0981
+      ]
+    },
+    {
+      "name": "ringreed_r1_drop",
+      "rect": [
+        0,
+        104,
+        36,
+        96
+      ],
+      "pivot": [
+        0.5105,
+        0.0819
+      ]
+    },
+    {
+      "name": "ringreed_r1_rest",
+      "rect": [
+        40,
+        104,
+        36,
+        96
+      ],
+      "pivot": [
+        0.5326,
+        0.0819
+      ]
+    },
+    {
+      "name": "ringreed_r1_tilt",
+      "rect": [
+        80,
+        104,
+        36,
+        96
+      ],
+      "pivot": [
+        0.5136,
+        0.0819
+      ]
+    },
+    {
+      "name": "ringreed_r2_drop",
+      "rect": [
+        332,
+        128,
+        36,
+        72
+      ],
+      "pivot": [
+        0.4265,
+        0.109
+      ]
+    },
+    {
+      "name": "ringreed_r2_rest",
+      "rect": [
+        372,
+        128,
+        36,
+        72
+      ],
+      "pivot": [
+        0.3225,
+        0.109
+      ]
+    },
+    {
+      "name": "ringreed_r2_tilt",
+      "rect": [
+        412,
+        128,
+        36,
+        72
+      ],
+      "pivot": [
+        0.3035,
+        0.109
+      ]
+    },
+    {
+      "name": "ringreed_tuft",
+      "rect": [
+        328,
+        24,
+        32,
+        16
+      ],
+      "pivot": [
+        0.4608,
+        0.3527
+      ]
+    }
+  ],
+  "plants": [
+    {
+      "name": "ringreed",
+      "biomes": [
+        "deck1",
+        "deck2"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "ringreed_tuft",
+          "parent": null,
+          "length": 0.048,
+          "order": 0
+        },
+        {
+          "name": "r0",
+          "part": "ringreed_r0_rest",
+          "parent": "root",
+          "length": 0.928,
+          "offset_m": [
+            -0.112,
+            0.032
+          ],
+          "order": 1
+        },
+        {
+          "name": "r1",
+          "part": "ringreed_r1_rest",
+          "parent": "root",
+          "length": 1.184,
+          "offset_m": [
+            0.0,
+            0.032
+          ],
+          "order": 2
+        },
+        {
+          "name": "r2",
+          "part": "ringreed_r2_rest",
+          "parent": "root",
+          "length": 0.8,
+          "offset_m": [
+            0.112,
+            0.032
+          ],
+          "order": 3
+        }
+      ],
+      "swaps": {
+        "r0": [
+          "ringreed_r0_rest",
+          "ringreed_r0_tilt",
+          "ringreed_r0_drop"
+        ],
+        "r1": [
+          "ringreed_r1_rest",
+          "ringreed_r1_tilt",
+          "ringreed_r1_drop"
+        ],
+        "r2": [
+          "ringreed_r2_rest",
+          "ringreed_r2_tilt",
+          "ringreed_r2_drop"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "r0",
+          "bone": "r0",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        },
+        {
+          "slot": "r1",
+          "bone": "r1",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 2,
+          "replaces_part": true
+        },
+        {
+          "slot": "r2",
+          "bone": "r2",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 3,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 5,
+        "beat_bpm": 110,
+        "squash": 0.02,
+        "swap_cycle": {
+          "slot": "r1",
+          "sequence": [
+            "ringreed_r1_rest",
+            "ringreed_r1_tilt"
+          ],
+          "beats": [
+            1,
+            1
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "ringreed_r1_drop",
+        "also": {
+          "r0": "ringreed_r0_drop",
+          "r2": "ringreed_r2_drop"
+        }
+      }
+    },
+    {
+      "name": "heliumbell",
+      "biomes": [
+        "deck2",
+        "deck3"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "heliumbell_stem",
+          "parent": null,
+          "length": 0.608,
+          "order": 0
+        },
+        {
+          "name": "bell",
+          "part": "heliumbell_bell",
+          "parent": "root",
+          "length": 0.32,
+          "offset_m": [
+            0.0,
+            0.64
+          ],
+          "order": 1
+        }
+      ],
+      "swaps": {
+        "bell": [
+          "heliumbell_bell",
+          "heliumbell_bell_swell"
+        ],
+        "stem": [
+          "heliumbell_stem",
+          "heliumbell_stem_long"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "bell",
+          "bone": "bell",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        },
+        {
+          "slot": "stem",
+          "bone": "root",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 0,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 4,
+        "beat_bpm": 110,
+        "squash": 0.03,
+        "swap_cycle": {
+          "slot": "bell",
+          "sequence": [
+            "heliumbell_bell",
+            "heliumbell_bell_swell"
+          ],
+          "beats": [
+            2,
+            2
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "heliumbell_bell_swell",
+        "note": "the rise is UNITY's: the bell bone lifts 0.29 m (1.6x) while the stem swaps to heliumbell_stem_long"
+      }
+    },
+    {
+      "name": "frostfan",
+      "biomes": [
+        "deck1"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "frostfan_open",
+          "parent": null,
+          "length": 0.64,
+          "order": 0
+        }
+      ],
+      "swaps": {
+        "fan": [
+          "frostfan_open",
+          "frostfan_mid",
+          "frostfan_folded"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "fan",
+          "bone": "root",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 0,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 2,
+        "beat_bpm": 110,
+        "squash": 0.02,
+        "swap_cycle": {
+          "slot": "fan",
+          "sequence": [
+            "frostfan_open",
+            "frostfan_mid"
+          ],
+          "beats": [
+            2,
+            2
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "frostfan_folded"
+      }
+    },
+    {
+      "name": "hexmoss",
+      "biomes": [
+        "hexagon"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "hexmoss_p0",
+          "parent": null,
+          "length": 0.4,
+          "order": 0
+        }
+      ],
+      "swaps": {
+        "moss": [
+          "hexmoss_p0",
+          "hexmoss_p1",
+          "hexmoss_p2",
+          "hexmoss_p3",
+          "hexmoss_p4",
+          "hexmoss_p5",
+          "hexmoss_hunker"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "moss",
+          "bone": "root",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 0,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 1,
+        "beat_bpm": 110,
+        "squash": 0.02,
+        "swap_cycle": {
+          "slot": "moss",
+          "sequence": [
+            "hexmoss_p0",
+            "hexmoss_p1",
+            "hexmoss_p2",
+            "hexmoss_p3",
+            "hexmoss_p4",
+            "hexmoss_p5"
+          ],
+          "beats": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "hexmoss_hunker"
+      }
+    },
+    {
+      "name": "butterpuff",
+      "biomes": [
+        "deck1",
+        "deck2"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "butterpuff_rest",
+          "parent": null,
+          "length": 0.56,
+          "order": 0
+        }
+      ],
+      "swaps": {
+        "puffs": [
+          "butterpuff_rest",
+          "butterpuff_spores"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "puffs",
+          "bone": "root",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 0,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 3,
+        "beat_bpm": 110,
+        "squash": 0.04
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "butterpuff_spores"
+      }
+    }
+  ]
+}

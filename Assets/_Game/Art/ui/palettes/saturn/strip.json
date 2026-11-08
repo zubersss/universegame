@@ -1,0 +1,47 @@
+{
+  "key": "ui/palettes/saturn/strip",
+  "style": "v3",
+  "palette": true,
+  "colors": [
+    {
+      "name": "offwhite",
+      "hex": "#F1E9D2",
+      "shadow": "#BFB8A7"
+    },
+    {
+      "name": "red",
+      "hex": "#B7735C",
+      "shadow": "#966554"
+    },
+    {
+      "name": "mustard",
+      "hex": "#D4B46E",
+      "shadow": "#AB9361"
+    },
+    {
+      "name": "teal",
+      "hex": "#7F98A4",
+      "shadow": "#6F7F87"
+    },
+    {
+      "name": "green",
+      "hex": "#97A27C",
+      "shadow": "#80866B"
+    },
+    {
+      "name": "sky",
+      "hex": "#E3CFA4",
+      "shadow": "#B5A687"
+    },
+    {
+      "name": "brown",
+      "hex": "#4A4542",
+      "shadow": "#4A4542"
+    },
+    {
+      "name": "ink",
+      "hex": "#1E1A17",
+      "shadow": null
+    }
+  ]
+}

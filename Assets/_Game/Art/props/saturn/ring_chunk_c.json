@@ -1,0 +1,20 @@
+{
+  "key": "props/saturn/ring_chunk_c",
+  "style": "v3",
+  "frame_width": 64,
+  "frame_height": 56,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [],
+  "squash_root": false,
+  "ground_line_px": 0,
+  "note": "one static frame; floats (space view / the ring lanes): the pivot at the centre"
+}
