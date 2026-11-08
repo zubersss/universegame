@@ -1,22 +1,22 @@
 # BLENDER STATUS
-Updated: 2026-11-08 11:0x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-08 12:4x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-Waiting for U-163's build (it outranks everything, LEAD 10:5x); files only while UNITY holds the lock. Sources in for B-186 (bc8145f9: mars/polar, mars/tharsis), B-185 (60994988: D-169 on Mars plains / canyon / storm, Mercury day / twilight / night, Venus surface; the storm's dust overlay now over hazed canyon scree) and B-187 (7be57df1: mercury/coldtrap, venus/tessera). A painted-set preview peaks ~320 MB (polar killed at the 300 MB cap 11:03), so the previews need my own lock. After U-163, in order: B-186 previews -> LEAD -> exports; B-185 one planet per slot, Mars first; B-182 Earth audit (audit_g1.py, 01638ac1); B-184 puffs (Mars / Mercury / Venus); B-187 previews. B-178 / B-179 / B-180 / B-181 / B-183 + D-169 all exported (below).
+B-185 exports, one planet per slot: Mercury (day / twilight / night) next, then Venus surface; then B-182's Earth audit (audit_g1.py), B-184's puffs (Mars / Mercury / Venus ground_set re-exports, only dig_puff changing), B-187's previews (mercury/coldtrap, venus/tessera: sources in, now 544 / y_m -3.0 too). Files only while UNITY holds the lock; my want beside its lock, withdrawn between the parts of a multi-lock job.
 
 ## Last completed
-- 10:38-10:52: D-169 / B-183: forest (7fc7eb06; the stump and log on scrub banks), coast (69aac68c; the driftwood gone) and plains (83401c03): layer2 2048x480 at y_m -2.0 (solid painted ground to 2 m under the line), the last 64 rows vertically tileable (gen_painted_bg.tile_bottom), "continue_rows": 64 in each layer2 json entry; layer0 / layer1 byte-identical. Stamped dip reviews review_b133_earth_forest_dip.png, review_b133_earth_coast_dip.png, review_b114_earth_plains_dip.png (1.5 m and 3 m valleys + a rise: no teal). Forest + coast VERIFIED. Two slips, both fixed: the first forest run failed in its new dip review (the 3 m frame overran); the plains dip review first showed MARS's plains (planet looked up by scene name).
-- 10:52: B-182 Earth dig_puff re-exported for 0.5.0 (2c1d7a9a; source c8cf185b): the clods behind the billows, frames 1-2 no longer a face. Mars / Mercury / Venus puffs ride U-159.
-- 10:1x-10:34: B-181 all four planets exported and VERIFIED: Mars 6b097cb4 (the talus block redrawn as a laminated wall piece), Mercury + Venus c2a2e298 (Venus with the hot embers and the warm-grey ridged tessera).
-- 10:08-10:10: B-180 lips exported and VERIFIED (d9a1eb38, 6220a954). SLIP: the Earth run took the wrapper's light path into UNITY's 10:08:03 lock; the wrapper now refuses light jobs beside another role's lock or want.
-- 09:3x-09:4x: B-179 tundra (d060f226) and B-178 Mars frost (2090cb3c) exported and VERIFIED.
+- 12:43-12:45: B-186 exported (60132bdb): mars/polar (rev 2, accepted) + mars/tharsis (rev 3: two unequal rises, varied flow bands, tongue fronts); stamped dip reviews incl. the camera-5-m frame.
+- 12:37-12:41: B-185 Mars exported (4d86cbc3): plains / canyon layer2 480 (y_m -2.0, continue_rows 64), the storm a translucent veil 864 (no ground, LEAD 11:0x), layer0 tops feathered, layer1 byte-identical.
+- 12:10-12:16: B-188 exported for Build 0.5.0 (e2ddb4cb; DONE in the game): every Earth layer0's top feathered; desert / taiga / tundra layer2 544 at y_m -3.0, plain ground below row 416, continue_rows 64. The forest valley's sky line is not art (UNITY's U-166).
+- 10:38-10:52: D-169 / B-183 forest / coast / plains (7fc7eb06, 69aac68c, 83401c03) and the Earth puff (2c1d7a9a), all verified.
+- 09:3x-10:34: B-179 tundra, B-178 Mars frost, B-180 lips, B-181 (all four planets): exported and verified.
 
 ## Ready for review
-- D-169 plains: backgrounds/earth/plains (83401c03), review_b114_earth_plains_dip.png (rebuilt 10:52 from the export).
-- B-182 Earth puff: terrain/earth/dig_puff (2c1d7a9a), review_b175_earth_ground.png.
+- B-186: review_b186_mars_{polar,tharsis}.png + _dip.png (60132bdb).
+- B-185 Mars: review_b141_mars_{plains,canyon,storm}_dip.png (4d86cbc3).
 
 ## Handoffs (unrouted only)
-- -> UNITY (U-164, D-169): backgrounds/earth/{forest,coast,plains}/<scene>.json: layer2 "y_m": -2.0, "height_px": 480, "continue_rows": 64 = its bottom 64 rows tile vertically (row 0 follows the painting above; repeat the strip under the layer's bottom edge, never a stretched row). B-179's desert / taiga / tundra keep their ground_row fields (no continue_rows).
+- -> UNITY (U-164 / U-159): a layer2 json entry's "continue_rows": 64 = its bottom 64 rows tile vertically (repeat them under the layer's edge). Two depths: the B-133 / B-114 / B-185 sets 480 tall at y_m -2.0 (their line above the walking surface); the B-179 / B-186 / B-187 sets 544 tall at y_m -3.0 with "ground_row": 352 (the line on the walking surface). The Mars storm's layer2 is a translucent veil (864, y_m -2.0, continue_rows 64), no ground. New Mars sets: backgrounds/mars/polar (MarsFeature.PolarCap), backgrounds/mars/tharsis (Olympus).
 - -> UNITY (U-159): Mars / Mercury / Venus variant keys: ground_band_{frost,basalt,talus} (Mars), ground_band_ice (Mercury), ground_band_{tessera,vent} (Venus); ground_fill_basalt for basalt (json "fill"); each band json's "biomes" names the code region (mars_tharsis, mars_canyon, mercury_cold_trap, venus_tessera, venus_vent_field); lips: terrain/earth/ground_lip_{sand,stone,snow}, terrain/mars/ground_lip_frost ("band" names the band).
 - -> UNITY (U-150), B-171 placement: vapor_cone and shock_ring pivots = the ship's centre of mass (ship-local 0, 6.2 m, the tilt pivot); the cone draws IN FRONT of the hull, the ring BEHIND it. speed_lines: 128x360 tiles, 3 per 1080 px edge (tile i may show frame (f + i) % 4), drawn for the LEFT edge, flip x for the right; pivot (0, 0.5) = the edge. puff_boost: a drop-in for ships/pilgrim/puff (socket tail_exhaust, pivot 0.5 / 0.96, clip 'puff'), now 192x288 frames: no 1.6x y-scale needed.
 
@@ -46,4 +46,4 @@ none (B-181's list accepted 09:4x).
 none.
 
 ## HeavyJobLock
-none held (released 10:52:10 after the Earth puff re-export); no want. No background waiters.
+none held (released 12:45 after the B-186 export); my want beside UNITY's lock for B-185 Mercury. No background waiters.
