@@ -254,12 +254,38 @@ def earth_forest(seed):
     wood = np.zeros((H, W), np.float32)
     rings = np.zeros((H, W), np.float32)
     sx = rng.uniform(300, 700)
-    sb = line[int(sx) % W] + 40
-    rect(wood, sx - 34, sx + 34, sb - 70, sb + 10)                 # a stump with a flat cut top
-    ell(rings, sx, sb - 70, 32, 9)
     lx = sx + 1000
-    lb = line[int(lx) % W] + 55
-    rect(wood, lx - 130, lx + 120, lb - 38, lb)                    # a fallen log, end grain to the right
+    # B-183 (LEAD 10:2x, u157 / u158 frames): the stump and the log sat in the flat meadow wash below the bush line and floated
+    # there whenever the walking surface dipped below the set's line. Each now sits on a scrub bank: a rounded hummock rising a
+    # little above the line, spreading as it runs down to the layer's bottom edge, the prop sunk into its top, fronds in front.
+    # The new strokes and washes draw from their own rng, so the rest of the layer keeps its accepted look.
+    rng_b = np.random.default_rng(seed + 183)
+    yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
+    bank = np.zeros((H, W), np.float32)
+    front = np.zeros((H, W), np.float32)
+    seats = []
+    for c, hw0, lift in ((sx, 80.0, 16.0), (lx, 170.0, 12.0)):
+        ytop = float(line[int(c) % W]) - lift
+        dx = (xx - c + W / 2) % W - W / 2
+        hw = hw0 + 0.9 * np.maximum(yy - ytop, 0.0)
+        cap = ytop + 20.0 * np.minimum(np.abs(dx) / hw0, 1.6) ** 2
+        bank = np.maximum(bank, np.clip((1.0 - np.abs(dx) / hw) * 5.0, 0, 1) * np.clip((yy - cap) / 2.0 + 0.5, 0, 1))
+        seats.append(ytop)
+        for j in range(5):                                                                   # fronds rooted on the bank's crown, in front
+            fx = c + rng_b.uniform(-0.8, 0.8) * hw0
+            frond(front, fx, ytop + 8 + 20.0 * min(abs(fx - c) / hw0, 1.6) ** 2 + rng_b.uniform(2, 8),
+                  rng_b.uniform(30, 52), rng_b.uniform(-0.9, 0.9), bend=rng_b.choice((-0.7, 0.7)))
+        for j in range(26):                                                                  # grass dabs over the bank's face
+            fx = c + rng_b.uniform(-1.0, 1.0) * hw0
+            fy = ytop + rng_b.uniform(20, H - ytop - 8)
+            dab(front, fx, fy, rng_b.uniform(10, 18), rng_b.uniform(-0.5, 0.5))
+    front *= bank
+    del yy, xx
+    sb = seats[0] + 12                                                                        # a stump with a flat cut top, sunk in the bank
+    rect(wood, sx - 34, sx + 34, sb - 80, sb)
+    ell(rings, sx, sb - 80, 32, 9)
+    lb = seats[1] + 14                                                                        # a fallen log, end grain to the right
+    rect(wood, lx - 130, lx + 120, lb - 38, lb)
     ell(rings, lx + 120, lb - 19, 13, 19)
     bells = np.zeros((H, W), np.float32)
     for k in range(60):
@@ -268,8 +294,10 @@ def earth_forest(seed):
     stack = [wash32(rng, H, ground, BG._mix(pal["green"], pal["brown"], 0.30), var=0.07, edge_dark=0.08),
              wash32(rng, H, bush * np.maximum(ground, 0.0) + bush * (1 - ground), BG._mix(pal["green"], pal["teal"], 0.30), var=0.07, edge_dark=0.10, bleed=2.0),
              wash32(rng, H, fern, BG._mix(pal["green"], pal["mustard"], 0.25), var=0.06, edge_dark=0.05, bleed=0.9),
+             wash32(rng_b, H, bank, BG._mix(BG._mix(pal["green"], pal["brown"], 0.38), pal["teal"], 0.12), var=0.06, edge_dark=0.08, bleed=3.0),
              wash32(rng, H, wood, BG._mix(pal["brown"], pal["mustard"], 0.25), var=0.06, edge_dark=0.14, bleed=1.2),
              wash32(rng, H, rings, BG._mix(pal["mustard"], pal["offwhite"], 0.4), var=0.04, edge_dark=0.18, bleed=1.0),
+             wash32(rng_b, H, front, BG._mix(pal["green"], pal["mustard"], 0.25), var=0.06, edge_dark=0.05, bleed=0.9),
              wash32(rng, H, bells * ground, BG._mix(pal["sky"], pal["teal"], 0.35), var=0.05, edge_dark=0.10, bleed=1.0)]
     out.append(finish(stack, rng, H))
     layers = [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0},
@@ -362,11 +390,9 @@ def earth_coast(seed):
             ell(bits["pebble"], cx, cy, rng.uniform(3, 6), rng.uniform(2, 4))
         else:
             ell(bits["shell"], cx, cy, rng.uniform(3, 5), rng.uniform(2.5, 4), cut=0.3)
-    for k in range(2):
-        cx = rng.uniform(0, W)
+    for k in range(2):                                    # B-183 (LEAD 10:2x): the two thin driftwood planks floated on the dune face
+        cx = rng.uniform(0, W)                            # (read as a bench / a sign); removed, their draws kept so the rng order holds
         cy = line[int(cx) % W] + rng.uniform(60, 110)
-        rect(bits["wood"], cx - 70, cx + 70, cy, cy + 9)
-        rect(bits["wood"], cx + 30, cx + 36, cy - 16, cy + 2)
     sand = BG._mix(pal["mustard"], pal["offwhite"], 0.55)
     stack = [wash32(rng, H, dune, sand, var=0.05, edge_dark=0.07),
              wash32(rng, H, flank, BG._mix(sand, pal["brown"], 0.18), var=0.04, edge_dark=0.03, bleed=6.0),
@@ -2314,7 +2340,70 @@ def preview(out_dir, scenes=("forest", "coast"), from_png=False):
         print(scene, ", ".join(f"layer{i} {u8[i].shape[1]}x{u8[i].shape[0]} {n // 1024} KB seam {s:.2f}" for i, (p, n, s) in enumerate(info)), "->", out)
 
 
+def preview_dip(out_dir, scene, from_png=False):
+    """B-183 (LEAD 10:2x): the Earth set with the walking surface 1.5 m BELOW its line (a valley under the set's datum: the near
+    layer's body shows above the ground) and 1.5 m ABOVE it (a rise hides the layers' lower part); B-175's grass band and fill
+    as the ground, the surveyor on it. from_png: the layers a previous preview / export wrote (no generation)."""
+    import json
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    from meridian import pngio
+    import preview_c2_earth_rigs as PR
+    planet = PLANET_OF[scene]
+    d = os.path.join(out_dir, "b183", scene)
+    os.makedirs(d, exist_ok=True)
+    if from_png:                                          # True: the exported layers (Art); "preview": this function's last generated ones
+        src = d if from_png == "preview" else os.path.join(ART_DIR, "backgrounds", planet, scene)
+        layers = json.load(open(os.path.join(ART_DIR, "backgrounds", planet, scene, f"{scene}.json"), encoding="utf-8"))["layers"]
+        imgs = [pngio.read_png_np(os.path.join(src, f"layer{L['n']}_color.png")) for L in layers]
+    else:
+        gen, layers = SCENES[(planet, scene)](SEEDS[scene])
+        imgs = [BG.to_u8(rgb, a) for rgb, a in gen]
+        del gen
+        for img, L in zip(imgs, layers):
+            pngio.write_png(os.path.join(d, f"layer{L['n']}_color.png"), img)
+    E = os.path.join(ART_DIR, "terrain", "earth")
+    band = pngio.read_png_np(os.path.join(E, "ground_band_color.png"))
+    fill = pngio.read_png_np(os.path.join(E, "ground_fill_color.png"))
+    try:
+        fr, piv = PR.surveyor_frame()
+    except Exception:  # noqa: BLE001
+        fr = None
+    rows = []
+    gl = 860
+    for off_m, what in ((1.5, "the walking surface 1.5 m BELOW the set's line (a valley)"), (-1.5, "the walking surface 1.5 m ABOVE the set's line (a rise)")):
+        F = np.zeros((1080, 1920, 3), np.float32)
+        low = None
+        for img, L in zip(imgs, layers):
+            h = img.shape[0]
+            y_bot = gl + int(round(-L["y_m"] * v3.PPU))
+            y_top = y_bot - h
+            review._over(F, img[max(0, -y_top):h - max(0, y_bot - 1080), :1920], 0, max(0, y_top))
+            if low is None or y_bot > low[0]:
+                low = (y_bot, img)
+        if low[0] < 1080:                                 # U-161: the set's lowest layer continues below its bottom edge
+            review._over(F, np.repeat(low[1][-1:, :1920], 1080 - low[0], axis=0), 0, low[0])
+        ys = gl + int(round(off_m * v3.PPU))
+        F[ys:] = np.tile(fill, (3, 4, 1))[:1080 - ys, :1920, :3].astype(np.float32) / 255.0
+        review._over(F, np.tile(band, (1, 4, 1))[:, :1920], 0, ys - 24)
+        if fr is not None:
+            for x in (420, 1300):
+                review._over(F, fr, x, ys - fr.shape[0] + int(round(piv[1] * fr.shape[0])))
+        F[gl, :, :] = (0.8, 0.2, 0.2)                                                         # the set's line (its datum), a red rule
+        review._label(F, f"b-183 earth {scene} at 1x: {what}; the red rule is the set's line (layers by y_m), B-175 grass band + fill", 6, 6)
+        rows.append(F[240:])
+    img = np.vstack(rows)
+    review._label(img, __import__("time").strftime("%m-%d %H:%M") + " preview (not exported)", 2, img.shape[0] - 16)
+    out = os.path.join(out_dir, f"review_b183_{planet}_{scene}_dip_preview.png")
+    review.write(out, img)
+    print(scene, "->", out)
+
+
 if __name__ == "__main__":
     if "--uranus-check" in sys.argv:                      # python -I build_backdrop_v3.py <preview dir> --uranus-check deck2
         sys.exit(0 if uranus_deck_check(sys.argv[1], sys.argv[sys.argv.index("--uranus-check") + 1]) else 1)
+    if "--dip" in sys.argv:                               # python -I build_backdrop_v3.py <preview dir> forest --dip [--from-png]   (B-183)
+        for sc in sys.argv[2].split(","):
+            preview_dip(sys.argv[1], sc, from_png="preview" if "--from-preview" in sys.argv else ("--from-png" in sys.argv))
+        sys.exit(0)
     preview(sys.argv[1], tuple(sys.argv[2].split(",")) if len(sys.argv) > 2 else ("forest", "coast"), from_png="--from-png" in sys.argv)
