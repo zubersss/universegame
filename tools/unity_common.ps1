@@ -32,7 +32,7 @@ $script:WantFile = Join-Path $LockDir 'want_unity.lock'
 $script:ReleaseStamp = Join-Path $LogDir 'unity_last_release.txt'
 $script:MinFreeGB = 1.5
 # D-156 (one-off gates, LEAD-ruled): MERIDIAN_RAM_GATE_MB lowers the gate for one run; MERIDIAN_WATCH_CAP_MB stops the Editor if its working
-# set passes the cap (MERIDIAN_WATCH_FLOOR_MB: or free RAM falls under the floor); the peak is logged to logs/unity_peaks.log. Unset: unchanged.
+# set summed with every worker it spawned (import, bee) passes the cap (MERIDIAN_WATCH_FLOOR_MB: or free RAM falls under the floor); the peak is logged to logs/unity_peaks.log. Unset: unchanged.
 if ($env:MERIDIAN_RAM_GATE_MB) { $script:MinFreeGB = [math]::Round([double]$env:MERIDIAN_RAM_GATE_MB / 1024, 2) }
 # D-037 replaced the 2-minute yield window: UNITY waits for every older request (see Enter-HeavyJobLock).
 $script:WantMaxAgeMinutes = 30      # want files older than this are ignored
@@ -113,6 +113,22 @@ function Exit-HeavyJobLock {
 # Gives up waiting: drops want_unity.lock so other roles aren't held back by a stale request.
 function Clear-HeavyJobWant { Remove-Item $WantFile -Force -ErrorAction SilentlyContinue }
 
+# D-156: a process and every descendant (one CIM snapshot): the root's working set, the tree's summed, and the descendants (to stop them).
+function Get-ProcessTree([int]$RootId) {
+    $procs = @(Get-CimInstance Win32_Process -Property ProcessId, ParentProcessId, WorkingSetSize -ErrorAction SilentlyContinue)
+    $root = $procs | Where-Object { $_.ProcessId -eq $RootId } | Select-Object -First 1
+    $kids = New-Object System.Collections.Generic.List[object]
+    $frontier = @($RootId)
+    while ($frontier.Count -gt 0 -and $kids.Count -le 64) {
+        $next = @($procs | Where-Object { $frontier -contains $_.ParentProcessId -and $_.ProcessId -ne $RootId })
+        foreach ($k in $next) { $kids.Add($k) }
+        $frontier = @($next | ForEach-Object { $_.ProcessId })
+    }
+    $rootMB = if ($root) { [int]($root.WorkingSetSize / 1MB) } else { 0 }
+    $treeMB = $rootMB + [int](($kids | Measure-Object -Property WorkingSetSize -Sum).Sum / 1MB)
+    return [pscustomobject]@{ RootMB = $rootMB; TreeMB = $treeMB; Kids = $kids }
+}
+
 function Invoke-UnityBatch([string[]]$UnityArgs, [string]$LogName, [switch]$Graphics) {
     $exe = Get-UnityExe
     $log = Join-Path $LogDir $LogName
@@ -122,19 +138,18 @@ function Invoke-UnityBatch([string[]]$UnityArgs, [string]$LogName, [switch]$Grap
     $p = Start-Process -FilePath $exe -ArgumentList $all -PassThru -NoNewWindow
     $null = $p.Handle # cache the handle, or ExitCode reads back empty after WaitForExit
     if ($env:MERIDIAN_WATCH_CAP_MB) {
-        # D-156 watchdog: poll each second; stop the Editor (and its workers) over the cap or under the free-RAM floor; log the peaks.
+        # D-156 watchdog (LEAD 20:5x): poll each second; stop the Editor and its workers when the WHOLE tree (the Editor + every descendant,
+        # summed) passes the cap or free RAM falls under the floor; log the peaks.
         $cap = [int]$env:MERIDIAN_WATCH_CAP_MB
         $floor = if ($env:MERIDIAN_WATCH_FLOOR_MB) { [int]$env:MERIDIAN_WATCH_FLOOR_MB } else { 0 }
         $peak = 0; $treePeak = 0; $minFree = [int]::MaxValue; $why = $null
         $until = (Get-Date).AddMinutes($MaxJobMinutes)
         while (-not $p.WaitForExit(1000)) {
-            $p.Refresh()
-            $ws = [int]($p.WorkingSet64 / 1MB)
-            $kids = @(Get-CimInstance Win32_Process -Filter "ParentProcessId=$($p.Id)" -ErrorAction SilentlyContinue)
-            $tree = $ws + [int](($kids | Measure-Object -Property WorkingSetSize -Sum).Sum / 1MB)
+            $t = Get-ProcessTree $p.Id
+            $ws = $t.RootMB; $tree = $t.TreeMB; $kids = $t.Kids
             $free = [int]((Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1024)
             if ($ws -gt $peak) { $peak = $ws }; if ($tree -gt $treePeak) { $treePeak = $tree }; if ($free -lt $minFree) { $minFree = $free }
-            if ($ws -gt $cap) { $why = "the Editor at $ws MB passed the $cap MB cap" }
+            if ($tree -gt $cap) { $why = "the Editor with its workers at $tree MB (the Editor $ws MB) passed the $cap MB cap" }
             elseif ($floor -gt 0 -and $free -lt $floor) { $why = "free RAM fell to $free MB (< $floor MB)" }
             elseif ((Get-Date) -gt $until) { $why = "over $MaxJobMinutes min (D-026)" }
             if ($why) {
@@ -143,7 +158,7 @@ function Invoke-UnityBatch([string[]]$UnityArgs, [string]$LogName, [switch]$Grap
                 break
             }
         }
-        $line = "{0} {1} | Editor peak {2} MB, with its workers {3} MB, min free {4} MB | cap {5} MB{6}" -f (Get-Date).ToString("s"), $LogName, $peak, $treePeak, $minFree, $cap, $(if ($why) { " | STOPPED: $why" } else { "" })
+        $line = "{0} {1} | Editor peak {2} MB, with its workers {3} MB, min free {4} MB | tree cap {5} MB{6}" -f (Get-Date).ToString("s"), $LogName, $peak, $treePeak, $minFree, $cap, $(if ($why) { " | STOPPED: $why" } else { "" })
         Add-Content -Path (Join-Path $LogDir "unity_peaks.log") -Value $line
         Write-Host "[watchdog] $line"
         if ($why) { Write-Host "WATCHDOG STOP (D-156): $why"; return [pscustomobject]@{ ExitCode = 137; Log = $log } }
