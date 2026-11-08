@@ -199,7 +199,9 @@ namespace Meridian.Core
                     int booms = 0;
                     System.Action onBoom = () => booms++;
                     pilgrim.SoundBarrierBroken += onBoom;
-                    pilgrim.GetComponent<Meridian.Ship.ShipBoarding>().ForceAboard();
+                    var boarding = pilgrim.GetComponent<Meridian.Ship.ShipBoarding>();
+                    var pad = pilgrim.Body.position;
+                    boarding.ForceAboard();
                     follow.enabled = true; // LookAt froze it
                     follow.SnapToTarget();
                     pilgrim.externalInput = true;
@@ -212,6 +214,15 @@ namespace Meridian.Core
                     else Debug.Log("[MERIDIAN] smoke: the climb broke no sound barrier");
                     pilgrim.intent = default;
                     pilgrim.SoundBarrierBroken -= onBoom;
+                    // 0.4.8's smoke finding: the surveyor stayed aboard into every later planet (no surveyor, the ship's HUD rows). Back on the
+                    // pad and out of the ship, so Mars, Mercury, Venus and Jupiter are walked as before.
+                    pilgrim.Body.linearVelocity = Vector2.zero;
+                    pilgrim.Body.position = pad; pilgrim.transform.position = pad;
+                    float settle = Time.realtimeSinceStartup + 5f;
+                    while (!pilgrim.Grounded && Time.realtimeSinceStartup < settle) yield return null;
+                    yield return Wait(0.3f);
+                    if (!boarding.TryExit()) Debug.Log("[MERIDIAN] smoke: the surveyor could not step out after the climb");
+                    yield return Wait(0.5f);
                 }
             }
 
