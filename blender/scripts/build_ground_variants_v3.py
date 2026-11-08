@@ -616,7 +616,7 @@ def lip_frost(d, M, k=0):
     G.seam(d, fi, M["ink"])
     G.seam(d, ii, M["ink"])
     G.seam(d, [(-0.35, top), (-0.338, top - 0.05), (-0.356, top - 0.10)], M["ink"])           # a polygon trough's crack
-    for j, (x, z, r) in enumerate(((0.50, -0.52, 0.020), (0.46, -0.66, 0.016), (0.53, -0.79, 0.013))):
+    for j, (x, z, r) in enumerate(((0.52, -0.52, 0.032), (0.47, -0.66, 0.027), (0.55, -0.79, 0.023))):   # >= 3 px so the cream shows
         G.stroke(d, G.lumpy_ellipse(x, z, r * 1.3, r, n=10, lump=0.12, seed=1890 + j), M["frost_i"], I, cyclic=True)
 
 
