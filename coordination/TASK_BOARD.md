@@ -1537,14 +1537,21 @@ Goal: The dig run's ground art (Bible 5.2 §8.1, D-174): (1) the **Surface Line*
 Accept: one curve preview for Earth (a cutaway from the surface to 220 m at 1× with the surveyor at each tier and the Surface Line) accepted by LEAD before the export; tiling p99 0; palette 100 %; each tier's json names its tier.
 Files: blender/scripts/build_ground_v3.py (tier rows), Assets/_Game/Art/terrain/<planet>/
 Depends: —
-Lead notes: Cycle 284 (16:2x). BLENDER's top card now (ahead of B-202). Earth first.
+Lead notes: Cycle 284 (16:2x). BLENDER's top card now (ahead of B-202). Earth first. 17:0x: EARTH PREVIEW ACCEPTED AS DRAWN (review_b203_earth_tiers_preview.png 17:00, source 6f8b2702: the cutaway to 222 m; T2 dark-brown subsoil with thin red / mustard bands and root threads, T3 grey-blue stone with teal and white crystal veins, T4 flat dark-teal slate with glowing mustard seams, T5 near-black core with amber cracks and diamond glints; each tier's details (root knot, concretion, nodule; geode, quartz spray, mica; glowing nodule, graphite lens, obsidian; kimberlite with a diamond, a flat magma pool, the eye-like ovals removed); the 1 m crossfades soft; the Surface Line's dashes and pegged flags reading on all five fills; palette 100 %). Export with the 72 px magma frame's edge re-check passing (its EDGE flag cleared); then Mars, Mercury and Venus in their palettes, a preview each.
 
 ### B-204 · BLENDER · Ready · D1
 Goal: The Skill Tree's art (Bible 5.2 §8.1): the paper panel (a round chart on aged paper in UiKit's style, B-151), six branch emblems (Dig: a beam; Haul: a pack; Ascent: a jetpack and a rope; Survey: a lens; Endurance: a helmet; Voyage: the Pilgrim), node frames in three states (locked: greyed ink, available: inked with a warm rim, bought: gold-filled), the ink link lines (outward and sideways), ring dividers, a cost tag; then one icon per node in batches (LEAD's node list in docs/D1_TABLES.md).
 Accept: one stamped mock-up of the panel at 1080p (a few nodes per state, links, emblems) accepted by LEAD before the export; the node icons in batches as B-199; palette 100 %; no faces.
 Files: blender/scripts/ (the UI builder), Assets/_Game/Art/ui/skilltree/, icons/nodes/
 Depends: L-013 (the node list, for the icons only)
-Lead notes: Cycle 284 (16:2x). After B-203's Earth preview.
+Lead notes: Cycle 284 (16:2x). After B-203's Earth preview. 17:0x: MOCK-UP ACCEPTED (review_b204_skilltree_mockup.png 17:00: the round chart with branch colour bands, ring dividers and spokes, the compass-rose hub, six brass emblems (beam, pack, jetpack, lens, helmet, Pilgrim), node frames in three states and a ring-5 cap, the red pencil select ring, grey-dashed / ink / gold links, the node card and cost tag; palette 100 %): export the panel kit; then the 66 node icons in batches (B-199's pattern). (a) BLENDER's finding: D1_TABLES §5's links force 7 crossings in a radial layout (each ring-5 sideways node must sit on its neighbour's side, its inward link crossing the other chain) → BLENDER sends the exact link swaps (which ring-4 node feeds which ring-5 node per branch) and LEAD rewrites §5's links; U-175 lays the chart from the revised links. (b) B-151's panels blotch when stretched ~4× (the grain scales) → B-208.
+
+### B-208 · BLENDER · Ready · C3
+Goal: B-151's paper panels stretch cleanly (B-204's finding: the inventory / node-card panel blotches at ~4× because its grain stretches with it): re-export B-151's panel sprites with a flat paper base for 9-slicing and the grain as a separate tileable overlay (repeat, not stretched; UNITY tiles it at a fixed texel size), the borders and corners unchanged.
+Accept: one stamped preview of each panel at 1×, 4× and a long 8:1 strip with the grain overlay tiled, accepted by LEAD before the export; log OK; palette 100 %; UNITY's next import draws the overlay (a UiKit card for UNITY if it needs a code change: say so).
+Files: blender/scripts/ (B-151's builder), Assets/_Game/Art/ui/
+Depends: —
+Lead notes: Cycle 284 (17:0x). After B-204's node icons batch 1.
 
 ### B-205 · BLENDER · Ready · D1
 Goal: The tools you upgrade, visible: the Rig's Beam in five looks (Mk1–Mk5: the emitter growing, the beam colour warming from teal to gold), and the jetpack and Grapple in three looks each, matching their Skill Tree rings; on the surveyor's existing sockets (no new rig).
