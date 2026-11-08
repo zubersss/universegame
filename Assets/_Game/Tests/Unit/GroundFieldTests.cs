@@ -53,7 +53,7 @@ namespace Meridian.Tests
             Assert.AreEqual(11f, GroundField.Curve(5, top), 1e-5f, "flat left of the edge, standing on top + 1");
             Assert.AreEqual(15f, GroundField.Curve(40, top), 1e-5f, "flat on the plateau");
             for (int x = 10; x < 30; x++)
-                Assert.LessOrEqual(GroundField.Curve(x + 1, top) - GroundField.Curve(x, top), 4f * 4f / GroundField.CurveKernelSum + 1e-4f, "the edge eased over the kernel");
+                Assert.LessOrEqual(GroundField.Curve(x + 1, top) - GroundField.Curve(x, top), 4f * 5f / GroundField.CurveKernelSum + 1e-4f, "the edge eased over the kernel (its largest weight)");
         }
 
         [Test]

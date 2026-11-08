@@ -19,8 +19,8 @@ namespace Meridian.Terrain
         /// <summary>The generator's rolling-hill smoothing: a moving average over ±SmoothRadius columns before the slope clamp.</summary>
         public const int SmoothRadius = 4;
         /// <summary>The surface curve: the original column tops (stamps included) through this kernel, so plateaus stay flat and their edges ease.</summary>
-        public static readonly float[] CurveKernel = { 1f, 2f, 3f, 4f, 3f, 2f, 1f };
-        public const float CurveKernelSum = 16f;
+        public static readonly float[] CurveKernel = { 1f, 2f, 3f, 4f, 5f, 4f, 3f, 2f, 1f }; // 9 taps: integer ramps up to 0.65 stay under 0.68 per m
+        public const float CurveKernelSum = 25f;
 
         /// <summary>The planets whose ground is the smooth outline (Earth first, D-161 (6)); the others keep the blocks until U-159.</summary>
         public static bool Smooth(Meridian.Planets.PlanetId p) => !ForceBlocks && p == Meridian.Planets.PlanetId.Earth;

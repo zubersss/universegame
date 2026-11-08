@@ -39,10 +39,10 @@ namespace Meridian.Planet.POI
         public const int MaxStep = 2;
         /// <summary>How far a shoulder may reach from the pad edge before it gives up blending (m).</summary>
         public const int MaxShoulder = 48;
-        /// <summary>U-156: a smooth planet's shoulder grade (metres per column): 1 in 2, under the walkable limit once the curve eases it.</summary>
-        public const float SmoothShoulder = 0.5f;
-        /// <summary>U-156: how far a smooth planet's shoulder may reach (columns): 1 in 2 over 160 columns blends 80 m.</summary>
-        public const int SmoothMaxShoulder = 160;
+        /// <summary>U-156: a smooth planet's shoulder grade (metres per column): under the walkable limit (tan 35°) once the curve eases it.</summary>
+        public const float SmoothShoulder = 0.65f; // steeper than the natural hills' 0.6 (GroundField.SurfaceSlope), so a shoulder always meets them
+        /// <summary>U-156: how far a smooth planet's shoulder may reach (columns): 0.65 over 240 columns blends 156 m.</summary>
+        public const int SmoothMaxShoulder = 240;
 
         /// <summary>
         /// U-057: the ground line a column ends up with around a stamped POI: the pad's ground line across
