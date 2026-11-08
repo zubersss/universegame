@@ -1,0 +1,25 @@
+{
+  "key": "terrain/mars/ground_lip_basalt",
+  "style": "v3",
+  "contract": "v3.2 11.9",
+  "frame_width": 128,
+  "frame_height": 96,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.55,
+    0.6
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [],
+  "brink": true,
+  "variant": "basalt",
+  "biomes": [
+    "mars_tharsis"
+  ],
+  "band": "ground_band_basalt",
+  "note": "B-198: the basalt band's cliff lip (as ground_lip): drawn for a drop to the right; mirror x for a drop to the left"
+}
