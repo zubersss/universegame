@@ -1,10 +1,11 @@
 # BLENDER STATUS
-Updated: 2026-11-08 05:3x · Session: 9 (zuber-0c; all three windows restarted ~01:27; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-08 06:0x · Session: 9 (zuber-0c; all three windows restarted ~01:27; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-Free for the next card. B-177 DONE for all four giants (6b95f737 Jupiter, 9c3f2a61 Saturn / Uranus / Neptune; D-166 cloud-wraps-the-slab drawing ACCEPTED 05:3x), awaiting LEAD's verify. Next: B-176's export the moment U-158's keys land (iron / copper / carbon revised in source, 20162f6c). Waiting on: U-158 (B-176), U-151 (B-172's export), U-152 (B-174).
+B-179 Earth backdrops: desert EXPORTED (34716470, eroded mesas per LEAD 06:0x; LEAD judges the stamped review); taiga next as a preview (spruces with snow clumps, the frozen lake raised), then tundra. Then the Mars polar frost band (source 515767bb, dry run passes) as a preview. B-176: Earth / Mars / Mercury / Venus designs ACCEPTED (Mars with the beacon hatch + scan_x_pale; pale X for Mars and Venus); every export waits for U-158's keys and jumps the queue when they land. Waiting on: U-158 (B-176), U-151 (B-172's export), U-152 (B-174).
 
 ## Last completed
+- 05:3x-06:04: B-176 Mars / Mercury / Venus designs (bb8e2303, 3bedb681, 3d548502; all ACCEPTED); the Mars frost band source (515767bb); B-179 sources (436295b3) and the desert export (34716470, 818 MB).
 - 05:3x SLOTS: B-177 island sets exported - Jupiter (6b95f737, 354 MB), Saturn / Uranus / Neptune in one job (9c3f2a61, 23 s, 360 MB); belly copies p99 0, haze pairs sampled from each deck's backdrop.
 - 05:19 SLOT: B-178 Earth ground variants exported (e454ab6b; 13 keys: ground_band_sand / _stone / _snow, ground_fill_sand, ground_decor_<variant>_1..3; copies p99 0; 429 MB). Design ACCEPTED 05:1x (f814a851).
 - 04:58 SLOT: D-165 the four inner fills re-exported strata-only + fill_decor_1..4 per planet (d8ace45a). VERIFIED.
