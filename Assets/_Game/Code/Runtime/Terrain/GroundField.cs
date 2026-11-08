@@ -23,10 +23,13 @@ namespace Meridian.Terrain
         public const float CurveKernelSum = 16f;
 
         /// <summary>The planets whose ground is the smooth outline (Earth first, D-161 (6)); the others keep the blocks until U-159.</summary>
-        public static bool Smooth(Meridian.Planets.PlanetId p) => p == Meridian.Planets.PlanetId.Earth;
+        public static bool Smooth(Meridian.Planets.PlanetId p) => !ForceBlocks && p == Meridian.Planets.PlanetId.Earth;
+        /// <summary>Captures only: the 0.4.8 look (blocks, no hill smoothing) for the before / after frames. Read when a planet loads.</summary>
+        public static bool ForceBlocks;
 
-        /// <summary>Rolling hills: a wrapped moving average over ±radius columns, then the column-to-column slope clamped to maxSlope (forward and
-        /// backward passes, wrapped, until stable). Pure.</summary>
+        /// <summary>Rolling hills: a wrapped moving average over ±radius columns, then the slope limited to maxSlope per column by the lower
+        /// Lipschitz envelope (each column at most its neighbour + maxSlope: peaks cut to cones, valleys untouched), two passes each way round
+        /// the ring so the seam holds too. Only ever lowers, so it always converges. Pure.</summary>
         public static float[] SmoothSurface(float[] raw, int radius, float maxSlope)
         {
             int n = raw.Length;
@@ -38,21 +41,9 @@ namespace Meridian.Terrain
                 for (int k = -radius; k <= radius; k++) s += raw[((x + k) % n + n) % n];
                 a[x] = s / (2 * radius + 1);
             }
-            for (int pass = 0; pass < 16; pass++)
-            {
-                bool changed = false;
-                for (int x = 1; x <= n; x++) changed |= Clamp(a, x % n, x - 1, maxSlope);
-                for (int x = n - 2; x >= -1; x--) changed |= Clamp(a, (x % n + n) % n, (x + 1) % n, maxSlope);
-                if (!changed) break;
-            }
+            for (int i = 1; i <= 2 * n; i++) { int x = i % n, p = (i - 1) % n; if (a[x] > a[p] + maxSlope) a[x] = a[p] + maxSlope; }
+            for (int i = 2 * n - 1; i >= 0; i--) { int x = i % n, p = (i + 1) % n; if (a[x] > a[p] + maxSlope) a[x] = a[p] + maxSlope; }
             return a;
-        }
-
-        static bool Clamp(float[] a, int i, int j, float m)
-        {
-            if (a[i] > a[j] + m) { a[i] = a[j] + m; return true; }
-            if (a[i] < a[j] - m) { a[i] = a[j] - m; return true; }
-            return false;
         }
 
         /// <summary>The surface curve's standing height for column x from the original tops (stamps in, digs out): the tops + 1 through

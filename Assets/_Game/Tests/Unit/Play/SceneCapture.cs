@@ -2029,6 +2029,97 @@ namespace Meridian.Tests
         }
 
         /// <summary>
+        /// U-156 (D-161 / D-162): Earth's smooth ground beside 0.4.8's blocks → coordination/reports/unity/u156/: the camp, a hill (the highest
+        /// ground away from the POIs), a valley (the lowest dry ground there), the steepest stretch (a lip) and the coast, each as
+        /// &lt;n&gt;_&lt;spot&gt;_050 (the traced outline, the band, the body) and &lt;n&gt;_&lt;spot&gt;_048 (GroundField.ForceBlocks: the old blocks and
+        /// strips), at the same columns. The spots are chosen on the smooth pass and reused.
+        /// </summary>
+        [UnityTest, Timeout(360000)]
+        public IEnumerator CaptureU156Ground()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
+                var dir = "coordination/reports/unity/u156";
+                Directory.CreateDirectory(dir);
+                string[] spots = { "1_camp", "2_hill", "3_valley", "4_lip", "5_coast" };
+                var xs = new int[spots.Length];
+                for (int pass = 0; pass < 2; pass++)
+                {
+                    Meridian.Terrain.GroundField.ForceBlocks = pass == 1;
+                    yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(Meridian.Planets.PlanetId.Earth));
+                    var side = director.PlanetSide;
+                    timeout = Time.realtimeSinceStartup + 20f;
+                    while (!side.terrain.IsSettled && Time.realtimeSinceStartup < timeout) yield return null;
+                    if (side.hazards != null) side.hazards.enabled = false;
+                    if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                    side.creatures.autoSpawn = false;
+                    side.creatures.DespawnAll();
+                    var t = side.terrain;
+                    if (pass == 0)
+                    {
+                        Assert.IsTrue(t.SmoothGround, "Earth's ground is the traced outline");
+                        xs[0] = side.spawnX + 6;
+                        int hi = 600, lo = 600, steep = 600; float hiY = float.MinValue, loY = float.MaxValue, steepS = 0f;
+                        for (int x = 400; x < 1900; x++)
+                        {
+                            int top = t.OriginalTop(x);
+                            if (top > hiY) { hiY = top; hi = x; }
+                            if (top < loY && top > side.Config.datumY + 1) { loY = top; lo = x; }
+                            float s = Mathf.Abs(Meridian.Terrain.GroundField.Curve(x + 1, t.OriginalTop) - Meridian.Terrain.GroundField.Curve(x, t.OriginalTop));
+                            if (s > steepS) { steepS = s; steep = x; }
+                        }
+                        xs[1] = hi; xs[2] = lo; xs[3] = steep;
+                        Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Ocean, out int coast, out _);
+                        xs[4] = coast - 10;
+                        TestContext.Out.WriteLine($"[MERIDIAN] u156 spots: camp {xs[0]}, hill {xs[1]} (top {hiY}), valley {xs[2]} (top {loY}), lip {xs[3]} (curve step {steepS:F2}), coast {xs[4]}");
+                    }
+                    var cam = side.sideCamera;
+                    var follow = cam.GetComponent<Meridian.Player.CameraFollow>();
+                    var body = side.player.Body;
+                    for (int i = 0; i < spots.Length; i++)
+                    {
+                        int x = xs[i];
+                        float feet = t.Generator.SurfaceHeight(t.WrapX(x)) + 1.05f;
+                        body.simulated = false;
+                        body.position = new Vector2(x + 0.5f, feet + 0.5f); side.player.transform.position = body.position;
+                        yield return null;
+                        timeout = Time.realtimeSinceStartup + 15f;
+                        while (!t.IsSettled && Time.realtimeSinceStartup < timeout) yield return null;
+                        body.simulated = true;
+                        for (int k = 0; k < 60; k++) yield return new WaitForFixedUpdate(); // the surveyor settles onto the ground
+                        if (follow != null) follow.SnapToTarget();
+                        for (int k = 0; k < 30; k++) yield return null;
+                        string label = $"{spots[i]}_{(pass == 0 ? "050" : "048")}";
+                        yield return Save(cam, $"{name}_{label}");
+                        File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                        var smooth = side.cartoon != null ? side.cartoon.Smooth : null;
+                        TestContext.Out.WriteLine($"[MERIDIAN] u156 {label}: x {x}, feet {side.player.Body.position.y:F2} (grid top {t.TopSolidY(x) + 1}), grounded {side.player.Grounded}, slope normal {side.player.GroundNormal}, smooth {t.SmoothGround}, band art {(smooth != null && smooth.BandArt)}, fill art {(smooth != null && smooth.FillArt)}, band quads {(smooth != null ? smooth.LastBandQuads : 0)}");
+                        if (pass == 0) Assert.IsTrue(side.player.Grounded, $"{label}: the surveyor stands on the traced ground");
+                    }
+                }
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Meridian.Terrain.GroundField.ForceBlocks = false;
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+            }
+        }
+
+        /// <summary>
         /// U-104: the cartoon HUD at 1080p → coordination/reports/unity/u104/: on foot beside the ship (the three dials, the
         /// suit rows, the markers, every string in Patrick Hand) and aboard just under the Escape Line (the ship rows, the
         /// painted dotted line with its lettered sign). The overlay canvases draw through the side camera for the shots.

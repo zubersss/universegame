@@ -41,6 +41,8 @@ namespace Meridian.Planet.POI
         public const int MaxShoulder = 48;
         /// <summary>U-156: a smooth planet's shoulder grade (metres per column): 1 in 2, under the walkable limit once the curve eases it.</summary>
         public const float SmoothShoulder = 0.5f;
+        /// <summary>U-156: how far a smooth planet's shoulder may reach (columns): 1 in 2 over 160 columns blends 80 m.</summary>
+        public const int SmoothMaxShoulder = 160;
 
         /// <summary>
         /// U-057: the ground line a column ends up with around a stamped POI: the pad's ground line across
@@ -57,11 +59,13 @@ namespace Meridian.Planet.POI
             // Right shoulder: d - Width + 1 columns past the right edge; left: w - d columns before the left edge.
             int right = d - poi.Width + 1, left = w - d;
             int k = right <= left ? right : left, dir = right <= left ? 1 : -1;
-            if (k > MaxShoulder) return false;
+            // U-156 (D-161): on a smooth planet the shoulder eases at 1 in 2 (the drawn curve stays walkable) and may run SmoothMaxShoulder
+            // columns (80 m of height) so it always meets the natural surface; else MaxStep per column over MaxShoulder as before.
+            bool smoothShoulder = world is Meridian.Terrain.SolidWorldGenerator s && s.SmoothGround;
+            if (k > (smoothShoulder ? SmoothMaxShoulder : MaxShoulder)) return false;
             int edge = dir > 0 ? poi.x + poi.Width - 1 : poi.x;
             int h = gy;
-            // U-156 (D-161): on a smooth planet the shoulder eases at 1 in 2 (the drawn curve stays walkable); else MaxStep per column as before.
-            float slope = world is Meridian.Terrain.SolidWorldGenerator s && s.SmoothGround ? SmoothShoulder : MaxStep;
+            float slope = smoothShoulder ? SmoothShoulder : MaxStep;
             for (int i = 1; i <= k; i++)
             {
                 int natural = world.SurfaceHeight(Wrap(edge + dir * i, w));
@@ -81,7 +85,8 @@ namespace Meridian.Planet.POI
             if (poi.stamp == null) return gy; // floating POIs have no terrain stamp
             byte rock = CellTile('#', poi.planet).Value, top = CellTile('g', poi.planet).Value;
             int bottomRow = RowY(poi, poi.stamp.Length - 1, gy);
-            for (int col = -MaxShoulder; col < poi.Width + MaxShoulder; col++)
+            int reachCols = baseWorld is Meridian.Terrain.SolidWorldGenerator sg && sg.SmoothGround ? SmoothMaxShoulder : MaxShoulder; // U-156: the smooth shoulders' longer reach
+            for (int col = -reachCols; col < poi.Width + reachCols; col++)
             {
                 int x = Wrap(poi.x + col, baseWorld.Width);
                 int natural = baseWorld.SurfaceHeight(x);
