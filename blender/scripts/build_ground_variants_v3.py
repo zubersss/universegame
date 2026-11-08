@@ -32,10 +32,13 @@ PLANET_VARIANTS = {"earth": ("sand", "stone", "snow"), "mars": ("frost",)}     #
 VARIANTS = PLANET_VARIANTS[PLANET]
 BIOMES = {"sand": ["desert", "beach"], "stone": ["coast cliffs", "rocky shore"], "snow": ["taiga", "tundra"],
           "frost": ["polar cap", "polar layered terrain"],
-          "basalt": ["mars_tharsis"], "talus": ["mars_canyon"]}          # B-181: the code's region names (StageRegions / MarsLandforms)
+          "basalt": ["mars_tharsis"], "talus": ["mars_canyon"],           # B-181: the code's region names (StageRegions / MarsLandforms)
+          "ice": ["mercury_cold_trap"], "tessera": ["venus_tessera"], "vent": ["venus_vent_field"]}   # MercuryLandforms.InColdTrap, VenusFeature
 DECOR = {"sand": ["dry_tuft", "shells", "sandstone_rock"], "stone": ["lichen_boulder", "shore_pebbles", "thrift"],
          "snow": ["snowy_shrub", "snow_rock", "dry_stalks"], "frost": ["frost_boulder", "ice_blocks", "frost_vent"],
-         "basalt": ["vesicular_boulder", "spatter_cone", "tilted_slab"], "talus": ["fallen_block", "scree_fan", "buried_slab"]}
+         "basalt": ["vesicular_boulder", "spatter_cone", "tilted_slab"], "talus": ["fallen_block", "scree_fan", "buried_slab"],
+         "ice": ["ice_glazed_rock", "ice_ridge", "frosted_pebbles"], "tessera": ["ridge_slab", "grooved_block", "fold_chips"],
+         "vent": ["fumarole", "sulfur_rosettes", "vitriol_cluster"]}
 FILL_OF = {"sand": "ground_fill_sand", "basalt": "ground_fill_basalt"}   # a variant's own fill (the rest lie over the planet's ground_fill)
 
 
@@ -47,6 +50,13 @@ def extra_colours():
         return {"frost": P["offwhite"], "frost_sh": sh("teal"), "snow": P["offwhite"], "snow_sh": sh("teal"), "ice": P["teal"], "ice_sh": dp("teal"),
                 "rock": dp("sky"), "rock_sh": P["brown"], "rock_lit": sh("sky"), "dust": dp("red"), "vent": P["brown"], "plume": P["offwhite"],
                 "bas_lit": sh("teal"), "pale": sh("offwhite")}          # B-181 (appended: the frost set's materials keep their order)
+    if PLANET == "mercury":                     # B-181: the cold traps' ice (cold-steel teal, an offwhite rim) over the dark shadowed floor
+        return {"ice": P["teal"], "ice_sh": sh("teal"), "ice_lit": P["offwhite"], "floor": dp("sky"), "floor_sh": P["brown"],
+                "rock": sh("sky"), "rock_sh": dp("sky"), "snow": P["offwhite"], "snow_sh": sh("teal")}
+    if PLANET == "venus":                       # B-181: the tesserae's warm grey-brown crust; the vents' sulfur, basalt, embers, vitriol glass
+        return {"tess": dp("sky"), "tess_sh": P["brown"], "tess_lit": sh("sky"), "sulfur": P["mustard"], "sulfur_sh": sh("mustard"),
+                "black": P["brown"], "ember": P["red"], "ember_core": P["mustard"], "glass": P["green"], "glass_sh": sh("green"),
+                "glint": P["offwhite"], "fume": P["offwhite"], "dust": sh("sky")}
     return {"sand": P["mustard"], "sand_sh": sh("mustard"), "cream": P["offwhite"], "sandstone": sh("offwhite"), "rust": sh("red"),
             "shell": P["offwhite"], "shell_pink": sh("red"),
             "rock": sh("sky"), "rock_sh": dp("sky"), "rock_lit": sh("offwhite"), "lichen_y": P["mustard"], "lichen_g": P["green"],
@@ -828,8 +838,203 @@ def decor_talus(d, M, k):
         G.seam(d, [(-0.02, 0.10), (0.10, 0.06), (0.18, 0.09)], M["ink"])
 
 
-B181_VARIANTS = {"mars": ("basalt", "talus")}                                             # Mercury (ice), Venus (tessera, vent) to follow
-B181_DRAW = {"basalt": (band_basalt, decor_basalt), "talus": (band_talus, decor_talus)}
+# ---------------------------------------------------------------- B-181 Mercury (the polar cold traps' ice) and Venus (tesserae, vent fields)
+
+def band_ice(d, M, k=0):
+    """Mercury's polar cold traps (MercuryLandforms.InColdTrap): a smooth water-ice skin in long low swells with a pale lit rim,
+    star glints, hairline cracks and dark grains frozen in, over the dark shadowed crater-floor regolith to a ragged edge."""
+    rnd = random.Random(2110)
+    xs = [L * i / 640 for i in range(641)]
+    top = [(x, 0.014 + 0.012 * math.sin(TAU * 3 * x / L + 0.4) + 0.006 * math.sin(TAU * 11 * x / L + 1.3)) for x in xs]
+    ibot = [(x, -0.16 + B.per(x, L, 3, 2111, 0.03)) for x in xs[::2]]
+    rag = _ragged(2112, -0.46)
+
+    def body(dx, _dz):
+        sh = lambda pts: [(x + dx, z) for x, z in pts]  # noqa: E731
+        G.stroke(d, sh(ibot + rag[::-1]), M["floor"], 0.0, cyclic=True)
+        G.stroke(d, sh(ibot + [(x, z - 0.05) for x, z in ibot[::-1]]), M["floor_sh"], 0.0, cyclic=True)
+        G.stroke(d, sh(top + ibot[::-1]), M["ice"], 0.0, cyclic=True)
+        G.stroke(d, sh(top + [(x, z - 0.03) for x, z in top[::-1]]), M["ice_lit"], 0.0, cyclic=True)
+        G.stroke(d, sh([(x, z + 0.035) for x, z in ibot] + ibot[::-1]), M["ice_sh"], 0.0, cyclic=True)
+        G.seam(d, sh(ibot), M["ink"])
+        G.stroke(d, sh(top), M["ink"], O)
+    W(body)
+    for i in range(9):                                                                        # hairline cracks in the ice
+        x = L * (i + 0.2 + 0.6 * rnd.random()) / 9
+        W(lambda dx, _dz, x=x: G.seam(d, [(x + dx, -0.035), (x + dx + 0.02, -0.08), (x + dx - 0.005, -0.125)], M["ink"]))
+    for i in range(20):                                                                       # dark grains frozen in
+        x, z, r = L * (i + rnd.random()) / 20, -0.05 - rnd.random() * 0.08, 0.008 + 0.006 * rnd.random()
+        W(lambda dx, _dz, x=x, z=z, r=r, s=i: G.stroke(d, G.lumpy_ellipse(x + dx, z, r * 1.3, r, n=8, lump=0.1, seed=2114 + s), M["floor_sh"], 0.0, cyclic=True))
+    for i in range(7):                                                                        # four-point glints in the ice (>= 4 px)
+        x, z, r = L * (i + rnd.random()) / 7, -0.075 - rnd.random() * 0.03, 0.032
+        star = [(x + r * (1.0 if q % 2 == 0 else 0.3) * math.cos(TAU * q / 8 + 0.2), z + r * (1.0 if q % 2 == 0 else 0.3) * math.sin(TAU * q / 8 + 0.2))
+                for q in range(8)]
+        W(lambda dx, _dz, star=star: G.stroke(d, [(px + dx, pz) for px, pz in star], M["ice_lit"], 0.0, cyclic=True))
+    _pebbles(d, M, 6, (-0.28, -0.38), 2113)
+
+
+def decor_ice(d, M, k):
+    if k == 0:                                                                                # a dark rock glazed with ice
+        pts = _boulder(d, M, 0.0, 0.25, 2120, flat=0.8, fill="floor", shade="floor_sh", lit=None)
+        topline = sorted([(x, z) for x, z in pts if z > 0.11 and abs(x) < 0.29], key=lambda p: p[0])
+        _snowcap(d, {**M, "snow": M["ice"], "snow_sh": M["ice_sh"]}, topline, thick=0.05)
+        G.stroke(d, G.lumpy_ellipse(0.10, 0.27, 0.035, 0.014, n=10, lump=0.05, seed=2121, rot=-0.3), M["ice_lit"], 0.0, cyclic=True)
+    elif k == 1:                                                                              # a low ridge of ice, chipped and rounded
+        out = [(px, max(pz, -0.02)) for px, pz in _chipped(0.0, 0.05, 0.36, 0.17, 2125, n=7)]
+        G.stroke(d, out, M["ice"], 0.0, cyclic=True)
+        G.stroke(d, _arc(out, 0.0, 0.05, 150, 285), M["ice_sh"], 0.0, cyclic=True)
+        G.stroke(d, _chipped(0.11, 0.13, 0.12, 0.04, 2126, rot=-0.15, n=5), M["ice_lit"], 0.0, cyclic=True)
+        G.stroke(d, out, M["ink"], O, cyclic=True)
+        G.seam(d, [(-0.06, 0.18), (-0.03, 0.10), (-0.07, 0.03)], M["ink"])
+    else:                                                                                     # dark pebbles with frost rims
+        for j, (x, r) in enumerate(((-0.24, 0.08), (0.02, 0.11), (0.25, 0.075))):
+            pts = [(px, max(pz, -0.02)) for px, pz in G.lumpy_ellipse(x, r * 0.55, r * 1.25, r * 0.7, n=18, lump=0.06, seed=2130 + j)]
+            G.stroke(d, pts, M["floor"], 0.0, cyclic=True)
+            G.stroke(d, pts, M["ink"], O if r > 0.08 else I, cyclic=True)
+            topline = sorted([(px, pz) for px, pz in pts if pz > r * 0.85], key=lambda p: p[0])
+            if len(topline) >= 3:
+                _snowcap(d, {**M, "snow": M["ice_lit"], "snow_sh": M["ice"]}, topline, thick=0.03)
+
+
+def band_tessera(d, M, k=0):
+    """Venus's tesserae highlands: a crumpled crust of tight ridges and grooves (rounded crests <= 0.06 m, one every 0.25-0.5 m),
+    a warm grey-brown lighter than the plains' black glass, one tilted fold line down each ridge, dust in the grooves, over the
+    red-brown topsoil to a ragged edge."""
+    rnd = random.Random(2210)
+    ws, edges, hs = _lobes(rnd, 0.25, 0.5, 0.025, 0.06)
+    xs = [L * i / 640 for i in range(641)]
+    top = [(x, _span_z(edges, ws, hs, x, shape=1.4)) for x in xs]                            # narrow crests, wide grooves
+    cbot = [(x, -0.17 + B.per(x, L, 3, 2211, 0.025)) for x in xs[::2]]
+    rag = _ragged(2212, -0.46)
+
+    def body(dx, _dz):
+        sh = lambda pts: [(x + dx, z) for x, z in pts]  # noqa: E731
+        G.stroke(d, sh(cbot + rag[::-1]), M["topsoil"], 0.0, cyclic=True)
+        G.stroke(d, sh(top + cbot[::-1]), M["tess"], 0.0, cyclic=True)
+        G.stroke(d, sh(top + [(x, z - 0.026) for x, z in top[::-1]]), M["tess_lit"], 0.0, cyclic=True)
+        G.stroke(d, sh([(x, z + 0.035) for x, z in cbot] + cbot[::-1]), M["tess_sh"], 0.0, cyclic=True)
+        G.seam(d, sh(cbot), M["ink"])
+        G.stroke(d, sh(top), M["ink"], O)
+    W(body)
+    for i in range(len(ws)):                                                                  # one fold line per ridge, its tilt and length varied
+        cx = edges[i] + ws[i] * rnd.uniform(0.35, 0.6)
+        ln, lean = rnd.uniform(0.07, 0.13), rnd.uniform(0.05, 0.11)
+        W(lambda dx, _dz, cx=cx, ln=ln, lean=lean: G.seam(d, G.bezier((cx + dx, -0.015), (cx + dx - lean * 0.4, -0.015 - ln * 0.6), (cx + dx - lean, -0.015 - ln), n=6),
+                                                          M["ink"]))
+    for i, e in enumerate(edges[:-1]):                                                        # dust lying in the grooves
+        if i % 2:
+            continue
+        W(lambda dx, _dz, e=e, s=i: G.stroke(d, [(px, max(pz, -0.01)) for px, pz in G.lumpy_ellipse(e + dx, 0.004, 0.07, 0.016, n=12, lump=0.06, seed=2214 + s)],
+                                             M["dust_i"], I, cyclic=True))
+    _pebbles(d, M, 6, (-0.28, -0.38), 2213)
+
+
+def band_vent(d, M, k=0):
+    """Venus's active vent fields: a cracked yellow sulfur crust in low flat plates over black basalt, glowing ember seams running
+    down through some of the cracks, green vitriol-glass shards poking through, over the red-brown topsoil to a ragged edge."""
+    rnd = random.Random(2310)
+    ws, edges, hs = _lobes(rnd, 0.5, 1.1, 0.012, 0.035)
+    xs = [L * i / 640 for i in range(641)]
+    top = [(x, _span_z(edges, ws, hs, x, shape=0.35)) for x in xs]                           # flat-topped plates
+    sbot = [(x, -0.075 + B.per(x, L, 3, 2311, 0.015)) for x in xs[::2]]
+    bbot = [(x, -0.26 + B.per(x, L, 3, 2312, 0.03)) for x in xs[::2]]
+    rag = _ragged(2313, -0.46)
+
+    def body(dx, _dz):
+        sh = lambda pts: [(x + dx, z) for x, z in pts]  # noqa: E731
+        G.stroke(d, sh(bbot + rag[::-1]), M["topsoil"], 0.0, cyclic=True)
+        G.stroke(d, sh(sbot + bbot[::-1]), M["black"], 0.0, cyclic=True)
+        G.stroke(d, sh(top + sbot[::-1]), M["sulfur"], 0.0, cyclic=True)
+        G.stroke(d, sh([(x, z + 0.022) for x, z in sbot] + sbot[::-1]), M["sulfur_sh"], 0.0, cyclic=True)
+        G.seam(d, sh(sbot), M["ink"])
+        G.seam(d, sh(bbot), M["ink"])
+        G.stroke(d, sh(top), M["ink"], O)
+    W(body)
+    for i, e in enumerate(edges[:-1]):                                                        # the cracks between plates; every other one glows
+        if i % 2:
+            W(lambda dx, _dz, e=e: G.seam(d, [(e + dx, 0.0), (e + dx + 0.012, -0.04), (e + dx - 0.005, -0.075)], M["ink"]))
+            continue
+        path = [(e + 0.03 * math.sin(2.1 * q + i), -0.01 - 0.21 * q / 6) for q in range(7)]
+        wid = [0.026 * (1 - 0.55 * q / 6) for q in range(7)]                                 # 3.3 px at the top: the red shows
+        seam_ = [(x - w, z) for (x, z), w in zip(path, wid)] + [(x + w, z) for (x, z), w in zip(path[::-1], wid[::-1])]
+        core = [(x - w * 0.4, z) for (x, z), w in zip(path[:5], wid[:5])] + [(x + w * 0.4, z) for (x, z), w in zip(path[4::-1], wid[4::-1])]
+        W(lambda dx, _dz, seam_=seam_, core=core: [G.stroke(d, [(x + dx, z) for x, z in seam_], M["ember_i"], I, cyclic=True),
+                                                    G.stroke(d, [(x + dx, z) for x, z in core], M["ember_core"], 0.0, cyclic=True)])
+    for i in range(7):                                                                        # vitriol-glass shards through the crust
+        x, r = L * (i + 0.25 + 0.5 * rnd.random()) / 7, rnd.uniform(0.045, 0.07)
+        tilt = rnd.uniform(-0.35, 0.35)
+        c, s = math.cos(tilt), math.sin(tilt)
+        R = lambda px, pz, x=x, c=c, s=s: (x + px * c - pz * s, -0.03 + px * s + pz * c)  # noqa: E731
+        shard = [R(-r * 0.5, 0.0), R(-r * 0.55, r * 1.1), R(-r * 0.05, r * 1.45), R(r * 0.5, r * 1.15), R(r * 0.5, 0.0)]
+        lit = [R(r * 0.05, r * 1.25), R(r * 0.35, r * 1.05), R(r * 0.3, r * 0.6), R(r * 0.1, r * 0.75)]
+        W(lambda dx, _dz, shard=shard, lit=lit: [G.stroke(d, [(px + dx, pz) for px, pz in shard], M["glass"], 0.0, cyclic=True),
+                                                  G.stroke(d, [(px + dx, pz) for px, pz in lit], M["glint"], 0.0, cyclic=True),
+                                                  G.stroke(d, [(px + dx, pz) for px, pz in shard], M["ink"], I, cyclic=True)])
+    _pebbles(d, M, 6, (-0.32, -0.40), 2314)
+
+
+def decor_tessera(d, M, k):
+    if k == 0:                                                                                # a tilted ridge slab with its fold lines
+        slab = _soften([(-0.38, -0.04), (-0.33, 0.06), (0.16, 0.27), (0.27, 0.26), (0.32, 0.17), (0.04, -0.04)])
+        G.stroke(d, slab, M["tess"], 0.0, cyclic=True)
+        G.stroke(d, _soften([(-0.30, 0.05), (0.15, 0.24), (0.24, 0.23), (-0.26, 0.01)], 1), M["tess_lit"], 0.0, cyclic=True)
+        G.stroke(d, _soften([(0.05, -0.02), (0.30, 0.16), (0.22, 0.17), (0.0, 0.0)], 1), M["tess_sh"], 0.0, cyclic=True)
+        G.stroke(d, slab, M["ink"], O, cyclic=True)
+        for t, ln in ((0.35, 0.10), (0.65, 0.07)):
+            x0, z0 = -0.33 + 0.49 * t, 0.06 + 0.21 * t
+            G.seam(d, G.bezier((x0, z0 - 0.02), (x0 + 0.02, z0 - 0.02 - ln * 0.5), (x0 + 0.06, z0 - 0.02 - ln), n=6), M["ink"])
+    elif k == 1:                                                                              # a grooved block, corner-cut once
+        blk = [(px, max(pz, -0.02)) for px, pz in _chipped(0.0, 0.15, 0.27, 0.17, 2230, rot=-0.1, n=6, cuts=1)]
+        G.stroke(d, blk, M["tess"], 0.0, cyclic=True)
+        G.stroke(d, _arc(blk, 0.0, 0.15, 150, 290), M["tess_sh"], 0.0, cyclic=True)
+        G.stroke(d, _arc(blk, 0.0, 0.15, 25, 95), M["tess_lit"], 0.0, cyclic=True)
+        G.stroke(d, blk, M["ink"], O, cyclic=True)
+        for j, (x0, ln) in enumerate(((-0.08, 0.16), (0.08, 0.12))):
+            G.seam(d, G.bezier((x0, 0.27 - 0.03 * j), (x0 - 0.03, 0.18), (x0 + 0.01, 0.27 - 0.03 * j - ln), n=6), M["ink"])
+    else:                                                                                     # a scree of folded chips on a dust apron
+        apron = [(-0.34 + 0.68 * i / 18, 0.04 * math.sin(math.pi * i / 18) ** 0.8) for i in range(19)]
+        G.stroke(d, apron + [(0.34, -0.02), (-0.34, -0.02)], M["dust"], 0.0, cyclic=True)
+        G.stroke(d, apron, M["ink"], O)
+        rnd = random.Random(2240)
+        for j, (x, z, r, role) in enumerate(((-0.18, 0.06, 0.08, "tess_i"), (0.06, 0.07, 0.09, "tess_lit_i"), (0.24, 0.05, 0.065, "tess_sh_i"),
+                                             (-0.04, 0.17, 0.07, "tess_i"))):
+            G.stroke(d, B._shard(x, z, r, rnd, sides=5, flat=0.7), M[role], O if r > 0.075 else I, cyclic=True)
+
+
+def decor_vent(d, M, k):
+    if k == 0:                                                                                # a small fumarole cone breathing a fume
+        cone = [(-0.30, -0.02), (-0.20, 0.06), (-0.08, 0.17), (-0.03, 0.15), (0.03, 0.15), (0.09, 0.18), (0.21, 0.07), (0.30, -0.02)]
+        G.stroke(d, cone, M["sulfur"], 0.0, cyclic=True)
+        G.stroke(d, cone[:4] + [(-0.06, -0.02)], M["sulfur_sh"], 0.0, cyclic=True)
+        G.stroke(d, cone, M["ink"], O, cyclic=True)
+        G.stroke(d, G.lumpy_ellipse(0.0, 0.155, 0.035, 0.012, n=10, lump=0.0), M["black"], 0.0, cyclic=True)
+        for j, (x, z, r) in enumerate(((0.02, 0.27, 0.06), (0.07, 0.41, 0.075), (0.13, 0.56, 0.08), (0.20, 0.69, 0.06))):
+            G.stroke(d, G.lumpy_ellipse(x, z, r, r * 0.85, n=14, lump=0.12, seed=2250 + j), M["fume_i"], I, cyclic=True)
+    elif k == 1:                                                                              # sulfur rosettes on a black stone
+        _boulder(d, M, 0.0, 0.17, 2260, flat=0.6, fill="black", shade="tess_sh", lit=None)
+        for j, (cx, cz, s) in enumerate(((-0.10, 0.16, 1.0), (0.12, 0.13, 0.8))):
+            for q in range(7):
+                a = math.radians(15 + 150 * q / 6)
+                tip = (cx + 0.10 * s * math.cos(a), cz + 0.10 * s * math.sin(a))
+                side = (0.022 * s * math.sin(a), -0.022 * s * math.cos(a))
+                G.stroke(d, [(cx - side[0], cz - side[1]), tip, (cx + side[0], cz + side[1])], M["sulfur_i" if q % 2 else "sulfur_sh_i"], I, cyclic=True)
+            G.stroke(d, G.lumpy_ellipse(cx, cz, 0.03 * s, 0.026 * s, n=10, lump=0.05, seed=2262 + j), M["sulfur_i"], I, cyclic=True)
+    else:                                                                                     # a vitriol-glass cluster on basalt
+        _boulder(d, M, 0.0, 0.19, 2270, flat=0.5, fill="black", shade="tess_sh", lit=None)
+        for j, (x, w, h, tilt) in enumerate(((-0.12, 0.09, 0.30, 0.30), (0.03, 0.11, 0.42, -0.05), (0.16, 0.08, 0.26, -0.40))):
+            c, s = math.cos(tilt), math.sin(tilt)
+            R = lambda px, pz, x=x, c=c, s=s: (x + px * c - pz * s, 0.05 + px * s + pz * c)  # noqa: E731
+            xt = [R(-w / 2, 0.0), R(-w / 2, h * 0.82), R(w * 0.15, h), R(w / 2, h * 0.86), R(w / 2, 0.0)]
+            G.stroke(d, xt, M["glass"], 0.0, cyclic=True)
+            G.stroke(d, [R(-w / 2, 0.0), R(-w / 2, h * 0.82), R(-w * 0.1, h * 0.8), R(-w * 0.1, 0.0)], M["glass_sh"], 0.0, cyclic=True)
+            G.stroke(d, [R(w * 0.18, h * 0.9), R(w * 0.36, h * 0.8), R(w * 0.3, h * 0.55), R(w * 0.14, h * 0.62)], M["glint"], 0.0, cyclic=True)
+            G.stroke(d, xt, M["ink"], O, cyclic=True)
+            G.seam(d, [R(-w * 0.1, h * 0.8), R(w * 0.15, h)], M["ink"])
+
+
+B181_VARIANTS = {"mars": ("basalt", "talus"), "mercury": ("ice",), "venus": ("tessera", "vent")}
+B181_DRAW = {"basalt": (band_basalt, decor_basalt), "talus": (band_talus, decor_talus), "ice": (band_ice, decor_ice),
+             "tessera": (band_tessera, decor_tessera), "vent": (band_vent, decor_vent)}
 B181_FILLS = {"basalt": fill_basalt}
 
 
