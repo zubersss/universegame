@@ -2565,6 +2565,25 @@ namespace Meridian.Tests
                 yield return new WaitForSeconds(6f);
                 yield return Shot("7_storm_plains");
                 TestContext.Out.WriteLine($"[MERIDIAN] u159 7_storm_plains: intensity {side.dustStorm.Intensity:F2}, veil fill layer {(side.cartoon != null && side.cartoon.StormLayers != null ? side.cartoon.StormLayers.FillLayer : -1)}");
+                {
+                    // U-159 (LEAD 15:2x): where each parallax set ends and what its fill draws, in screen rows, to place any straight edge.
+                    var cam2 = side.sideCamera;
+                    System.Func<float, int> row = wy => Mathf.RoundToInt((cam2.pixelHeight - cam2.WorldToScreenPoint(new Vector3(cam2.transform.position.x, wy, 0f)).y) * 1080f / cam2.pixelHeight); // the layers' plane, in the shot's 1080 rows
+                    TestContext.Out.WriteLine($"[MERIDIAN] u159 edges camera: z {cam2.transform.position.z:F2}, y {cam2.transform.position.y:F2}, ortho {cam2.orthographic}, pixel height {cam2.pixelHeight}, fov {cam2.fieldOfView:F1}");
+                    foreach (var (tag, p) in new[] { ("layers", side.cartoon?.Layers), ("incoming", side.cartoon?.Incoming), ("storm", side.cartoon?.StormLayers) })
+                    {
+                        if (p == null) { TestContext.Out.WriteLine($"[MERIDIAN] u159 edges {tag}: none"); continue; }
+                        var sb = new System.Text.StringBuilder();
+                        for (int i = 0; i < p.renderers.Count; i++)
+                        {
+                            var r = p.renderers[i];
+                            if (r == null || !r.enabled) continue;
+                            sb.Append($" [{i} {(r.sprite != null ? r.sprite.name : "-")} bottom y {r.bounds.min.y:F2} row {row(r.bounds.min.y)} order {r.sortingOrder} a {r.color.a:F2}]");
+                        }
+                        var f = p.Fill;
+                        TestContext.Out.WriteLine($"[MERIDIAN] u159 edges {tag} ({p.SceneKey}, alpha {p.alpha:F2}): fill layer {p.FillLayer}, fill top {p.FillTop:F2} row {(float.IsNaN(p.FillTop) ? -1 : row(p.FillTop))}, fill {(f != null && f.enabled ? (f.sprite != null ? f.sprite.name + " " + f.sprite.rect.width + "x" + f.sprite.rect.height : "-") + " " + f.drawMode + " order " + f.sortingOrder + " size " + f.size + " bottom row " + row(f.bounds.min.y) : "off")};{sb}");
+                    }
+                }
                 LogAssert.NoUnexpectedReceived();
             }
             finally

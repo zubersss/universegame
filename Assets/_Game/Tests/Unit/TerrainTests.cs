@@ -74,7 +74,8 @@ namespace Meridian.Tests
                 var top = g.TileAt(x, h);
                 Assert.That(new[] { TileId.Grass, TileId.Sand, TileId.Snow }, Has.Member(top), $"top tile at x={x}");
                 // U-166 (D-171): on the smooth Earth only the sea holds water; an inland basin under the datum is dry ground.
-                if (h < c.datumY) { Assert.AreEqual(g.SeaAt(x) ? TileId.Water : TileId.Air, g.TileAt(x, c.datumY), $"x={x}"); if (g.SeaAt(x)) water++; }
+                // U-169: where the grid fills up to the drawn curve (a pad's shoulder over the datum) the datum row is ground.
+                if (System.Math.Max(h, g.FillTopAt(x)) < c.datumY) { Assert.AreEqual(g.SeaAt(x) ? TileId.Water : TileId.Air, g.TileAt(x, c.datumY), $"x={x}"); if (g.SeaAt(x)) water++; }
                 Assert.AreEqual(TileId.Air, g.TileAt(x, c.datumY + 60));
             }
             Assert.Greater(water, 0, "some ocean exists");

@@ -52,7 +52,8 @@ namespace Meridian.Player
         void Start()
         {
             var tier = Meridian.Core.GameState.Instance != null ? Meridian.Core.GameState.Instance.suitTier : 0;
-            LoadSheet(ArtKeys.Characters.SurveyorSheet(tier));
+            wantSheet = ArtKeys.Characters.SurveyorSheet(tier);
+            if (!Meridian.View2D.CartoonStage.DrawsCurrentPlanet) LoadSheet(wantSheet); // U-169: the cartoon path never shows this view's sheet
             // U-075: the surveyor's 3D model (B-078) replaces the sheet once it has loaded.
             // U-089: a visual root (scaled by SquashStretch about the feet) holds the sheet and the model; the collider and body never scale.
             VisualRoot = new GameObject("Visual").transform;
@@ -80,7 +81,13 @@ namespace Meridian.Player
         /// <summary>The loaded sheet's key (U-049: base, mk1, mk2, mk3).</summary>
         public string SheetKey { get; private set; }
 
-        void OnSuitEquipped(int tier) => LoadSheet(ArtKeys.Characters.SurveyorSheet(tier));
+        string wantSheet;
+
+        void OnSuitEquipped(int tier)
+        {
+            wantSheet = ArtKeys.Characters.SurveyorSheet(tier);
+            if (!Meridian.View2D.CartoonStage.DrawsCurrentPlanet) LoadSheet(wantSheet);
+        }
 
         /// <summary>Loads a surveyor sheet (all share the clip layout); the old one is released once the new one shows.</summary>
         void LoadSheet(string key)
@@ -145,6 +152,7 @@ namespace Meridian.Player
             watch.Restart();
             if (controller == null) return;
             if (Model == null) EnsureModel(); // U-168: the 3D path (a planet the cartoon path does not draw, or a test with it off)
+            if (wantSheet != null && wantSheet != SheetKey && !Meridian.View2D.CartoonStage.DrawsCurrentPlanet) LoadSheet(wantSheet); // U-169
             if (!hooked) Hook();
             float dt = Time.deltaTime;
             sinceHurt += dt; sinceLand += dt; sinceDig += dt;

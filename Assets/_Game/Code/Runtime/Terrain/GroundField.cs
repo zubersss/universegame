@@ -77,6 +77,12 @@ namespace Meridian.Terrain
             return p != int.MinValue ? p + 1f : Curve(x, top);
         }
 
+        /// <summary>U-169: the hidden grid follows the drawn curve: natural ground is solid up to FillTop(curve), so the top solid tile's top
+        /// stands at most FillSlack (0.25 m) under the curve (the 9-tap curve over a V-notch, e.g. a POI's shoulder cone meeting rising ground,
+        /// stood 1.66 m over air tiles: digs, drops and TopSolidY spawns read the ground too low).</summary>
+        public const float FillSlack = 0.25f;
+        public static int FillTop(float curve) => (int)System.Math.Ceiling(curve - 1f - FillSlack);
+
         /// <summary>The curve's density ramp: ±FieldBand / 2 m round the surface stays unclamped, so any walkable slope traces exactly.</summary>
         public const float FieldBand = 4f;
 

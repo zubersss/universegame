@@ -20,7 +20,9 @@ namespace Meridian.Art
             /// <summary>U-115 (D-121): the v3 surveyor sheet (B-125) and its second sheet (B-134: dig, build, surprise, jetpack, climb_in); one controller takes both.</summary>
             public const string SurveyorSide = "characters/surveyor/side", SurveyorSideB = "characters/surveyor/side_b";
             /// <summary>U-049: the surveyor sheet per Envirosuit tier (0 = base, 1–3 = B-041 mk1–mk3).</summary>
-            public static string SurveyorSheet(int tier) => tier <= 0 ? Surveyor : "characters/surveyor/mk" + System.Math.Clamp(tier, 1, 3);
+            /// <summary>PlayerView's sheet on the 3D path (tests only: every planet is drawn by the cartoon path). U-169: tier 0 is the drawn
+            /// surveyor's v3 sheet, not the retired v2 base (B-174 removes characters/surveyor/base).</summary>
+            public static string SurveyorSheet(int tier) => tier <= 0 ? "characters/surveyor/side" : "characters/surveyor/mk" + System.Math.Clamp(tier, 1, 3);
         }
 
         public static class Ships

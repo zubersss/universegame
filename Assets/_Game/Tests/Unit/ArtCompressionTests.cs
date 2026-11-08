@@ -16,7 +16,7 @@ namespace Meridian.Tests
         {
             "Assets/_Game/Art/creatures/earth/stag_color.png",
             "Assets/_Game/Art/creatures/earth/stag_normal.png",
-            "Assets/_Game/Art/characters/surveyor/base_color.png",
+            "Assets/_Game/Art/characters/calibration/base_color.png", // U-169: the v2 surveyor retires (B-174); calibration is kept for tests
         };
 
         [Test]

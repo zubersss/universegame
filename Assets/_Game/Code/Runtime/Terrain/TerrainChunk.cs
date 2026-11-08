@@ -28,6 +28,9 @@ namespace Meridian.Terrain
             int WallTop(int x);
             /// <summary>U-156: the pad height where column x lies across a stamped POI on a smooth planet; int.MinValue elsewhere.</summary>
             int PadTop(int x);
+            /// <summary>U-169: column x's top natural row given its wall top and drawn curve (the generator's fill to the curve; a Mars skylight
+            /// stays open).</summary>
+            int FillTop(int x, int wallTop, float curve);
             /// <summary>U-157 (P-54): a brushed tile's fill level (0-255), if it has one.</summary>
             bool TryLevel(int x, int y, out byte level);
             /// <summary>U-157: any density blocks in chunk (cx, cy).</summary>
@@ -159,6 +162,7 @@ namespace Meridian.Terrain
                     byte id = tx >= x0 && ty >= y0 ? ids[(ty - y0) * C + (tx - x0)] : world.TileAt(tx, ty);
                     bool solid = TileId.IsSolid(id);
                     int top = tops[tx - t0];
+                    if (top != int.MinValue) top = world.FillTop(tx, top, curve[i]); // U-169: natural ground reaches the curve's fill top
                     bool natural = top != int.MinValue && solid == (ty <= top);
                     float density = GroundField.Density(solid, natural, curve[i], ty);
                     if (levelled && world.TryLevel(tx, ty, out byte level)) density = level / 255f; // U-157 (P-54): a brushed tile's node density
@@ -278,6 +282,7 @@ namespace Meridian.Terrain
             int top = world.WallTop(tx);
             if (world.TryLevel(tx, ty, out byte level)) return level / 255f;
             float curveAt = GroundField.Curve(tx, world.WallTop, world.PadTop);
+            if (top != int.MinValue) top = world.FillTop(tx, top, curveAt); // U-169
             return GroundField.Density(solid, top != int.MinValue && solid == (ty <= top), curveAt, ty);
         }
 

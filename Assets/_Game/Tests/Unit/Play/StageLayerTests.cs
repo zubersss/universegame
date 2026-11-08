@@ -42,6 +42,8 @@ namespace Meridian.Tests
             Assert.NotNull(stage, "StageLayers on PlanetSide");
             cam = side.sideCamera;
             cam.GetComponent<Meridian.Player.CameraFollow>().enabled = false;
+            // U-169 (as U-165's BudgetGate): the camera travels alone here, streaming the camp out under the surveyor; hold it still meanwhile.
+            side.player.Body.simulated = false;
         }
 
         IEnumerator MoveCameraTo(float x)

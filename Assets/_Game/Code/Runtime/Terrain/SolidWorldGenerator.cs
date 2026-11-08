@@ -43,6 +43,15 @@ namespace Meridian.Terrain
                 if (planet == PlanetId.Mars) MarsLandforms.RoundSkylights(raw); // U-159 (D-162 (1)): a skylight's mouth is a rounded funnel
                 var smoothed = GroundField.SmoothSurface(raw, GroundField.SmoothRadiusFor(planet), GroundField.SurfaceSlope);
                 for (int x = 0; x < width; x++) surface[x] = Clamp((int)System.Math.Round(smoothed[x]));
+                {
+                    // U-169: the grid fills up to the drawn curve (0.25 m slack), but never closes a Mars skylight's shaft.
+                    fillTop = new int[width];
+                    System.Func<int, int> ctop = c => Meridian.Planet.POI.PoiStamp.JointGround(this, datum, planet, c, out int g) ? g : surface[((c % width) + width) % width];
+                    System.Func<int, int> cpad = c => Meridian.Planet.POI.PoiStamp.PadAt(this, datum, planet, c);
+                    for (int x = 0; x < width; x++)
+                        fillTop[x] = planet == PlanetId.Mars && MarsLandforms.InSkylightColumn(x) ? int.MinValue
+                            : GroundField.FillTop(GroundField.Curve(x, ctop, cpad));
+                }
                 if (planet == PlanetId.Earth)
                 {
                     sea = SeaColumns(); // U-166 (D-171)
@@ -53,7 +62,7 @@ namespace Meridian.Terrain
                     System.Func<int, int> top = c => Meridian.Planet.POI.PoiStamp.JointGround(this, datum, planet, c, out int g) ? g : surface[((c % width) + width) % width];
                     System.Func<int, int> pad = c => Meridian.Planet.POI.PoiStamp.PadAt(this, datum, planet, c);
                     for (int x = 0; x < width; x++)
-                        seaFrom[x] = sea[x] ? System.Math.Max(surface[x] + 1, (int)System.Math.Ceiling(GroundField.Curve(x, top, pad) - 0.5f)) : int.MaxValue;
+                        seaFrom[x] = sea[x] ? System.Math.Max(System.Math.Max(surface[x], fillTop[x]) + 1, (int)System.Math.Ceiling(GroundField.Curve(x, top, pad) - 0.5f)) : int.MaxValue; // U-169: over the filled seabed
                 }
             }
         }
@@ -85,6 +94,12 @@ namespace Meridian.Terrain
         public bool SeaAt(int x) => sea == null || sea[((x % width) + width) % width];
 
         readonly int[] surface;
+        /// <summary>U-169: on a smooth planet the row the grid fills up to under the drawn curve, GroundField.FillTop(the curve as
+        /// TerrainStreamer.CurveAt traces it: the POIs' joint ground and pads in); int.MinValue in a Mars skylight's shaft. Rows over the surface
+        /// up to it are the surface's material. Null on a block planet.</summary>
+        readonly int[] fillTop;
+        /// <summary>U-169: the curve's fill row of column x (int.MinValue on a block planet or in a skylight's shaft).</summary>
+        public int FillTopAt(int x) => fillTop != null ? fillTop[((x % width) + width) % width] : int.MinValue;
         /// <summary>U-156: a smooth planet (D-161): rolling-hill surface, no noise caves (the underground is the drawn cross-section, opened only by digs).</summary>
         readonly bool smoothGround;
         public bool SmoothGround => smoothGround;
@@ -125,6 +140,8 @@ namespace Meridian.Terrain
             if (y < 0) return planet == PlanetId.Earth ? TileId.Stone : planet == PlanetId.Mercury ? TileId.MercuryBasalt : planet == PlanetId.Venus ? TileId.VenusBasalt : TileId.Basalt;
 
             int surface = SurfaceHeight(x);
+            if (y > surface && fillTop != null && y <= fillTop[((x % width) + width) % width]) // U-169: the grid under the curve
+                return planet == PlanetId.Mars && MarsLandforms.InTube(x, y, SurfaceOf) ? TileId.Air : FillMaterial(x, surface); // a tube's open end stays open
             if (y > surface)
                 return planet == PlanetId.Earth && y <= datum && SeaAt(x) && (seaFrom == null || y >= seaFrom[((x % width) + width) % width]) ? TileId.Water : TileId.Air; // U-166: no inland lakes, no water under the outline
 
@@ -141,6 +158,12 @@ namespace Meridian.Terrain
             if (planet == PlanetId.Venus) return VenusLandforms.Material(x, depth, WorldNoise.Value2D(x, y, 6, width, seed + 401));
             return planet == PlanetId.Mars ? MarsMaterial(x, y, depth) : RockyMaterial(x, y, depth);
         }
+
+        /// <summary>U-169: the material of the rows filled up to the curve: the column's surface material.</summary>
+        byte FillMaterial(int x, int surface) => planet == PlanetId.Earth ? EarthMaterial(x, surface, surface, 0)
+            : planet == PlanetId.Mercury ? MercuryMaterial(x, surface, 0)
+            : planet == PlanetId.Venus ? VenusLandforms.Material(x, 0, WorldNoise.Value2D(x, surface, 6, width, seed + 401))
+            : planet == PlanetId.Mars ? MarsMaterial(x, surface, 0) : RockyMaterial(x, surface, 0);
 
         byte EarthMaterial(int x, int y, int surface, int depth)
         {

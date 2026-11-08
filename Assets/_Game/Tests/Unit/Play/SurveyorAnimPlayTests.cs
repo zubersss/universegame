@@ -97,7 +97,13 @@ namespace Meridian.Tests
             AssertClip(SurveyorAnim.Walk);
 
             player.intent.sprint = true;
-            yield return Steps(30);
+            // U-169: the run clip is judged on the ground at sprint speed in the sprint's first 0.8 s, before the camp's crates (x ≈ 55, solid)
+            // stop the surveyor; a fixed step count could land it on a dip of the smooth ground (U-156) or against the crates.
+            for (int i = 0; i < 40; i++)
+            {
+                yield return Steps(1);
+                if (i >= 3 && player.Grounded && CurrentClip == SurveyorAnim.Run) break;
+            }
             AssertClip(SurveyorAnim.Run);
 
             player.intent.move = 0f; player.intent.sprint = false;

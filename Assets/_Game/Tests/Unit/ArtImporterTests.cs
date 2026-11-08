@@ -365,7 +365,7 @@ namespace Meridian.Tests
         [Test]
         public void SheetCategoryWithoutJsonLogsClearError()
         {
-            var c = Png(Art("characters/surveyor/base_color.png"), 64, 64);
+            var c = Png(Art("characters/calibration/base_color.png"), 64, 64); // U-169: any characters/ sheet in the test root (no v2 surveyor)
             LogAssert.Expect(LogType.Error, new Regex(@"frame sheet has no base\.json"));
             Import(c);
         }

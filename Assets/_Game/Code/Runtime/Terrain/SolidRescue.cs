@@ -71,6 +71,7 @@ namespace Meridian.Terrain
             if (t.TryLevel(x, y, out byte level)) return level / 255f; // U-157: a brushed tile's node density
             bool solid = TileId.IsSolid(t.GetTile(x, y));
             int top = t.OriginalTop(x);
+            if (top != int.MinValue) top = ((TerrainChunk.IBlockWorld)t).FillTop(x, top, curve); // U-169: natural to the curve's fill row
             return GroundField.Density(solid, top != int.MinValue && solid == (y <= top), curve, y);
         }
 
@@ -105,7 +106,12 @@ namespace Meridian.Terrain
             {
                 var b = bodies[k];
                 if (b == null) { bodies.RemoveAt(k); continue; }
-                if (parked.Contains(b)) { if (GroundReady(t, b)) { b.simulated = true; parked.Remove(b); } continue; }
+                if (parked.Contains(b))
+                {
+                    if (GroundReady(t, b)) { b.simulated = true; parked.Remove(b); }
+                    else if (b.simulated) b.simulated = false; // U-159: held until its own ground is back (a load's HoldUntilGroundLoads let the Pilgrim go mid-park, and it sank 47 m)
+                    continue;
+                }
                 if (parks.Contains(b) && b.simulated && !GroundReady(t, b)) { b.simulated = false; parked.Add(b); continue; }
                 if (!rescue) continue;
                 if (!b.simulated || b.bodyType != RigidbodyType2D.Dynamic || !b.gameObject.activeInHierarchy || b.IsSleeping()) continue;

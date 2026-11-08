@@ -20,18 +20,18 @@ namespace Meridian.Tests
         }
 
         [UnityTest]
-        public IEnumerator SurveyorModelPlaysEveryClipTheCodeUses()
+        public IEnumerator TheCalibrationModelPlaysItsClips()
         {
             var go = new GameObject("ModelViewTest");
             try
             {
                 var view = go.AddComponent<ModelView>();
-                view.Load(ArtKeys.Characters.Surveyor);
+                // U-169: the v2 surveyor retires (B-174); the calibration model (kept for tests) carries the 3D path's clips, idle and walk.
+                view.Load("characters/calibration/base");
                 yield return WaitReady(view, 20f);
-                Assert.IsTrue(view.Ready, "the surveyor model loaded");
+                Assert.IsTrue(view.Ready, "the calibration model loaded");
                 Assert.NotNull(view.Instance);
-                foreach (var name in new[] { SurveyorAnim.Idle, SurveyorAnim.Walk, SurveyorAnim.Run, SurveyorAnim.Jump, SurveyorAnim.Fall,
-                                             SurveyorAnim.Land, SurveyorAnim.Dig, SurveyorAnim.Aim, SurveyorAnim.Hurt, SurveyorAnim.Death })
+                foreach (var name in new[] { SurveyorAnim.Idle, SurveyorAnim.Walk })
                 {
                     Assert.IsTrue(view.Play(name), $"plays '{name}'");
                     Assert.AreEqual(name, view.Current);
@@ -39,8 +39,9 @@ namespace Meridian.Tests
                 }
                 var r = view.Instance.GetComponentInChildren<Renderer>();
                 Assert.NotNull(r, "a renderer");
-                StringAssert.DoesNotContain("glTF", r.sharedMaterial.shader.name, "the generated URP/Lit material, not glTFast's own");
-                StringAssert.Contains("Universal Render Pipeline/Lit", r.sharedMaterial.shader.name);
+                StringAssert.DoesNotContain("glTF", r.sharedMaterial.shader.name, "the importer's generated material, not glTFast's own");
+                // U-169: the calibration model draws with the project's generated material (URP/Lit, or the cartoon silhouette D-136 gives v2 models).
+                Assert.IsTrue(r.sharedMaterial.shader.name.Contains("Universal Render Pipeline/Lit") || r.sharedMaterial.shader.name.StartsWith("MERIDIAN/"), r.sharedMaterial.shader.name);
                 view.SetFacing(false);
                 Assert.AreEqual(180f, view.Instance.transform.localEulerAngles.y, 0.01f, "left = 180° yaw");
                 view.SetFacing(true);

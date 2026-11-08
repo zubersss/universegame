@@ -140,6 +140,14 @@ namespace Meridian.Terrain
             return false;
         }
 
+        /// <summary>U-169: column x (wrapped) is a skylight's shaft (the grid's fill to the curve leaves it open).</summary>
+        public static bool InSkylightColumn(int x)
+        {
+            x = Wrap(x);
+            foreach (var t in Tubes) if (x >= t.x0 + SkylightInset && x < t.x0 + SkylightInset + SkylightWidth) return true;
+            return false;
+        }
+
         /// <summary>Within `margin` tiles of a tube's walls: random caves keep out, so tubes stay whole shelters.</summary>
         public static bool NearTube(int x, int y, System.Func<int, int> surfaceAt, int margin)
         {

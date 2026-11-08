@@ -105,7 +105,7 @@ namespace Meridian.Tests
             yield return Boot();
             var view = side.player.GetComponent<PlayerView>();
             var drawn = side.cartoon != null ? side.cartoon.Surveyor : null; // U-122: the drawn surveyor on the cartoon path
-            if (drawn == null) Assert.AreEqual("characters/surveyor/base", view.SheetKey);
+            if (drawn == null) Assert.AreEqual(Meridian.Art.ArtKeys.Characters.SurveyorSheet(GameState.Instance.suitTier), view.SheetKey); // U-169: no v2 key
             else { Assert.AreEqual(GameState.Instance.suitTier, drawn.SuitTier, "the drawn surveyor starts at the saved tier"); }
             OnMercury(MercuryZone.Day);
             Assert.AreEqual(3, hazards.EffectiveLevel, "Thermal 3 on the day side");

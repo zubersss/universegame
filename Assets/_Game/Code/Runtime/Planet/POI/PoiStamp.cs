@@ -119,7 +119,8 @@ namespace Meridian.Planet.POI
                 {
                     // Shoulder: a surface tile on its ground line, open air above it up to the natural surface.
                     edits.Set(x, ground, top, baseWorld.TileAt(x, ground)); // raised or cut: a surface tile on top
-                    for (int y = ground + 1; y <= natural; y++) edits.Set(x, y, TileId.Air, baseWorld.TileAt(x, y));
+                    int keep = baseWorld is Meridian.Terrain.SolidWorldGenerator fg && fg.FillTopAt(x) > ground ? fg.FillTopAt(x) : ground; // U-169: the rows under the curve stay
+                    for (int y = keep + 1; y <= natural; y++) edits.Set(x, y, TileId.Air, baseWorld.TileAt(x, y));
                 }
                 else
                 {

@@ -146,6 +146,14 @@ namespace Meridian.Terrain
         /// <summary>U-076: the column's original surface row (POI-shaped ground included, player digs not): the ground behind the play plane.</summary>
         public int OriginalTop(int x) => ((TerrainChunk.IBlockWorld)this).WallTop(x);
 
+        /// <summary>U-169: column x's top natural row: the original top, or the curve's fill row where the grid fills up to the drawn curve.
+        /// The natural-tile rule (GroundField.Density) and "undug ground" checks read this, never OriginalTop.</summary>
+        public int NaturalTop(int x)
+        {
+            int top = OriginalTop(x);
+            return top == int.MinValue ? top : ((TerrainChunk.IBlockWorld)this).FillTop(x, top, CurveAt(x));
+        }
+
         /// <summary>U-156: the pad height across a stamped POI on a smooth planet (the drawn curve holds it flat to the stamp's ends); int.MinValue
         /// elsewhere and on every other planet.</summary>
         public int PadTop(int x) => SmoothGround && Config != null ? Meridian.Planet.POI.PoiStamp.PadAt(BaseGenerator, Config.datumY, Config.id, x) : int.MinValue;
@@ -211,7 +219,7 @@ namespace Meridian.Terrain
         {
             if (TryLevel(x, y, out byte l)) return l / 255f;
             bool solid = TileId.IsSolid(GetTile(x, y));
-            int top = OriginalTop(x);
+            int top = NaturalTop(x); // U-169
             return GroundField.Density(solid, top != int.MinValue && solid == (y <= top), CurveAt(x), y);
         }
 
@@ -222,6 +230,15 @@ namespace Meridian.Terrain
             float fx = x - 0.5f;
             int i = Mathf.FloorToInt(fx);
             return Mathf.Lerp(CurveAt(i), CurveAt(i + 1), fx - i);
+        }
+
+        /// <summary>U-169: natural ground reaches the curve's fill row (the generator fills its grid to it); a Mars skylight's shaft stays open.</summary>
+        int TerrainChunk.IBlockWorld.FillTop(int x, int wallTop, float curve)
+        {
+            if (!SmoothGround || Config == null) return wallTop;
+            if (Config.id == PlanetId.Mars && MarsLandforms.InSkylightColumn(x)) return wallTop;
+            int f = GroundField.FillTop(curve);
+            return f > wallTop ? f : wallTop;
         }
 
         int TerrainChunk.IBlockWorld.WallTop(int x)
