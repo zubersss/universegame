@@ -1,0 +1,1065 @@
+{
+  "key": "flora/jupiter/rigset",
+  "style": "v3",
+  "ppu": 64,
+  "rect_origin": "bottom_left",
+  "parts": [
+    {
+      "name": "bandstreamer_holdfast",
+      "rect": [
+        376,
+        72,
+        40,
+        28
+      ],
+      "pivot": [
+        0.4534,
+        0.1987
+      ]
+    },
+    {
+      "name": "bandstreamer_s0_a",
+      "rect": [
+        420,
+        72,
+        80,
+        28
+      ],
+      "pivot": [
+        0.0788,
+        0.2251
+      ]
+    },
+    {
+      "name": "bandstreamer_s0_b",
+      "rect": [
+        0,
+        0,
+        80,
+        20
+      ],
+      "pivot": [
+        0.0786,
+        0.3145
+      ]
+    },
+    {
+      "name": "bandstreamer_s0_wrap",
+      "rect": [
+        64,
+        64,
+        36,
+        36
+      ],
+      "pivot": [
+        0.5897,
+        0.6472
+      ]
+    },
+    {
+      "name": "bandstreamer_s1_a",
+      "rect": [
+        0,
+        24,
+        64,
+        28
+      ],
+      "pivot": [
+        0.0979,
+        0.2238
+      ]
+    },
+    {
+      "name": "bandstreamer_s1_wrap",
+      "rect": [
+        104,
+        64,
+        36,
+        36
+      ],
+      "pivot": [
+        0.6466,
+        0.5618
+      ]
+    },
+    {
+      "name": "bandstreamer_s2_a",
+      "rect": [
+        148,
+        28,
+        60,
+        24
+      ],
+      "pivot": [
+        0.1048,
+        0.2619
+      ]
+    },
+    {
+      "name": "bandstreamer_s2_wrap",
+      "rect": [
+        144,
+        64,
+        36,
+        36
+      ],
+      "pivot": [
+        0.5328,
+        0.7041
+      ]
+    },
+    {
+      "name": "driftbulb_bulb_full",
+      "rect": [
+        244,
+        112,
+        44,
+        52
+      ],
+      "pivot": [
+        0.477,
+        0.1004
+      ]
+    },
+    {
+      "name": "driftbulb_bulb_sag",
+      "rect": [
+        460,
+        120,
+        40,
+        44
+      ],
+      "pivot": [
+        0.474,
+        0.1187
+      ]
+    },
+    {
+      "name": "driftbulb_tether",
+      "rect": [
+        160,
+        108,
+        24,
+        56
+      ],
+      "pivot": [
+        0.4854,
+        0.1112
+      ]
+    },
+    {
+      "name": "frostrosette_fold",
+      "rect": [
+        184,
+        64,
+        32,
+        36
+      ],
+      "pivot": [
+        0.484,
+        0.1722
+      ]
+    },
+    {
+      "name": "frostrosette_glint",
+      "rect": [
+        188,
+        108,
+        52,
+        56
+      ],
+      "pivot": [
+        0.4577,
+        0.1564
+      ]
+    },
+    {
+      "name": "frostrosette_open",
+      "rect": [
+        292,
+        112,
+        52,
+        52
+      ],
+      "pivot": [
+        0.4577,
+        0.1685
+      ]
+    },
+    {
+      "name": "phosphorcup_c0_closed",
+      "rect": [
+        212,
+        28,
+        20,
+        24
+      ],
+      "pivot": [
+        0.6566,
+        0.2592
+      ]
+    },
+    {
+      "name": "phosphorcup_c0_half",
+      "rect": [
+        236,
+        28,
+        24,
+        24
+      ],
+      "pivot": [
+        0.676,
+        0.2781
+      ]
+    },
+    {
+      "name": "phosphorcup_c0_open",
+      "rect": [
+        68,
+        24,
+        28,
+        28
+      ],
+      "pivot": [
+        0.6309,
+        0.2847
+      ]
+    },
+    {
+      "name": "phosphorcup_c1_closed",
+      "rect": [
+        264,
+        28,
+        20,
+        24
+      ],
+      "pivot": [
+        0.4288,
+        0.2355
+      ]
+    },
+    {
+      "name": "phosphorcup_c1_half",
+      "rect": [
+        288,
+        28,
+        24,
+        24
+      ],
+      "pivot": [
+        0.5211,
+        0.2355
+      ]
+    },
+    {
+      "name": "phosphorcup_c1_open",
+      "rect": [
+        316,
+        28,
+        32,
+        24
+      ],
+      "pivot": [
+        0.4706,
+        0.2355
+      ]
+    },
+    {
+      "name": "phosphorcup_c2_closed",
+      "rect": [
+        352,
+        28,
+        20,
+        24
+      ],
+      "pivot": [
+        0.4089,
+        0.2318
+      ]
+    },
+    {
+      "name": "phosphorcup_c2_half",
+      "rect": [
+        376,
+        28,
+        24,
+        24
+      ],
+      "pivot": [
+        0.4961,
+        0.2318
+      ]
+    },
+    {
+      "name": "phosphorcup_c2_open",
+      "rect": [
+        404,
+        28,
+        32,
+        24
+      ],
+      "pivot": [
+        0.4543,
+        0.2318
+      ]
+    },
+    {
+      "name": "phosphorcup_stem",
+      "rect": [
+        0,
+        104,
+        44,
+        60
+      ],
+      "pivot": [
+        0.4115,
+        0.092
+      ]
+    },
+    {
+      "name": "stormreed_r0_flat",
+      "rect": [
+        100,
+        24,
+        44,
+        28
+      ],
+      "pivot": [
+        0.7358,
+        0.2788
+      ]
+    },
+    {
+      "name": "stormreed_r0_lit",
+      "rect": [
+        396,
+        116,
+        28,
+        48
+      ],
+      "pivot": [
+        0.5813,
+        0.1629
+      ]
+    },
+    {
+      "name": "stormreed_r0_rest",
+      "rect": [
+        428,
+        116,
+        28,
+        48
+      ],
+      "pivot": [
+        0.5813,
+        0.1629
+      ]
+    },
+    {
+      "name": "stormreed_r1_flat",
+      "rect": [
+        268,
+        68,
+        48,
+        32
+      ],
+      "pivot": [
+        0.8315,
+        0.2452
+      ]
+    },
+    {
+      "name": "stormreed_r1_lit",
+      "rect": [
+        48,
+        104,
+        24,
+        60
+      ],
+      "pivot": [
+        0.5596,
+        0.131
+      ]
+    },
+    {
+      "name": "stormreed_r1_rest",
+      "rect": [
+        76,
+        104,
+        24,
+        60
+      ],
+      "pivot": [
+        0.5596,
+        0.131
+      ]
+    },
+    {
+      "name": "stormreed_r2_flat",
+      "rect": [
+        220,
+        64,
+        44,
+        36
+      ],
+      "pivot": [
+        0.7473,
+        0.2185
+      ]
+    },
+    {
+      "name": "stormreed_r2_lit",
+      "rect": [
+        348,
+        112,
+        20,
+        52
+      ],
+      "pivot": [
+        0.3933,
+        0.1511
+      ]
+    },
+    {
+      "name": "stormreed_r2_rest",
+      "rect": [
+        372,
+        112,
+        20,
+        52
+      ],
+      "pivot": [
+        0.3933,
+        0.1511
+      ]
+    },
+    {
+      "name": "stormreed_r3_flat",
+      "rect": [
+        320,
+        68,
+        52,
+        32
+      ],
+      "pivot": [
+        0.1503,
+        0.2443
+      ]
+    },
+    {
+      "name": "stormreed_r3_lit",
+      "rect": [
+        104,
+        104,
+        24,
+        60
+      ],
+      "pivot": [
+        0.3257,
+        0.1303
+      ]
+    },
+    {
+      "name": "stormreed_r3_rest",
+      "rect": [
+        132,
+        104,
+        24,
+        60
+      ],
+      "pivot": [
+        0.3257,
+        0.1303
+      ]
+    },
+    {
+      "name": "stormreed_r4_flat",
+      "rect": [
+        440,
+        28,
+        40,
+        24
+      ],
+      "pivot": [
+        0.1962,
+        0.327
+      ]
+    },
+    {
+      "name": "stormreed_r4_lit",
+      "rect": [
+        0,
+        56,
+        28,
+        44
+      ],
+      "pivot": [
+        0.2805,
+        0.1785
+      ]
+    },
+    {
+      "name": "stormreed_r4_rest",
+      "rect": [
+        32,
+        56,
+        28,
+        44
+      ],
+      "pivot": [
+        0.2805,
+        0.1785
+      ]
+    },
+    {
+      "name": "stormreed_tuft",
+      "rect": [
+        84,
+        0,
+        40,
+        20
+      ],
+      "pivot": [
+        0.4876,
+        0.3056
+      ]
+    }
+  ],
+  "plants": [
+    {
+      "name": "driftbulb",
+      "biomes": [
+        "deck1",
+        "deck2"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "driftbulb_tether",
+          "parent": null,
+          "length": 0.64,
+          "order": 0
+        },
+        {
+          "name": "bulb",
+          "part": "driftbulb_bulb_full",
+          "parent": "root",
+          "length": 0.544,
+          "offset_m": [
+            0.032,
+            0.64
+          ],
+          "order": 1
+        }
+      ],
+      "swaps": {
+        "bulb": [
+          "driftbulb_bulb_full",
+          "driftbulb_bulb_sag"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "bulb",
+          "bone": "bulb",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 6,
+        "beat_bpm": 110,
+        "squash": 0.04
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "driftbulb_bulb_sag"
+      }
+    },
+    {
+      "name": "bandstreamer",
+      "biomes": [
+        "deck1"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "bandstreamer_holdfast",
+          "parent": null,
+          "length": 0.192,
+          "order": 2
+        },
+        {
+          "name": "s0",
+          "part": "bandstreamer_s0_a",
+          "parent": "root",
+          "length": 0.992,
+          "offset_m": [
+            0.064,
+            0.208
+          ],
+          "order": 3
+        },
+        {
+          "name": "s1",
+          "part": "bandstreamer_s1_a",
+          "parent": "root",
+          "length": 0.8,
+          "offset_m": [
+            0.096,
+            0.16
+          ],
+          "order": 1
+        },
+        {
+          "name": "s2",
+          "part": "bandstreamer_s2_a",
+          "parent": "root",
+          "length": 0.704,
+          "offset_m": [
+            0.032,
+            0.24
+          ],
+          "order": 1
+        }
+      ],
+      "swaps": {
+        "s0": [
+          "bandstreamer_s0_a",
+          "bandstreamer_s0_b",
+          "bandstreamer_s0_wrap"
+        ],
+        "s1": [
+          "bandstreamer_s1_a",
+          "bandstreamer_s1_wrap"
+        ],
+        "s2": [
+          "bandstreamer_s2_a",
+          "bandstreamer_s2_wrap"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "s0",
+          "bone": "s0",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 3,
+          "replaces_part": true
+        },
+        {
+          "slot": "s1",
+          "bone": "s1",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        },
+        {
+          "slot": "s2",
+          "bone": "s2",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 10,
+        "beat_bpm": 110,
+        "squash": 0.0,
+        "swap_cycle": {
+          "slot": "s0",
+          "sequence": [
+            "bandstreamer_s0_a",
+            "bandstreamer_s0_b"
+          ],
+          "beats": [
+            1,
+            1
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "bandstreamer_s0_wrap",
+        "also": {
+          "s1": "bandstreamer_s1_wrap",
+          "s2": "bandstreamer_s2_wrap"
+        }
+      }
+    },
+    {
+      "name": "frostrosette",
+      "biomes": [
+        "deck1"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "frostrosette_open",
+          "parent": null,
+          "length": 0.48,
+          "order": 0
+        }
+      ],
+      "swaps": {
+        "rosette": [
+          "frostrosette_open",
+          "frostrosette_glint",
+          "frostrosette_fold"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "rosette",
+          "bone": "root",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 0,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 2,
+        "beat_bpm": 110,
+        "squash": 0.02,
+        "swap_cycle": {
+          "slot": "rosette",
+          "sequence": [
+            "frostrosette_open",
+            "frostrosette_glint"
+          ],
+          "beats": [
+            3,
+            1
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "frostrosette_fold"
+      }
+    },
+    {
+      "name": "phosphorcup",
+      "biomes": [
+        "red_spot"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "phosphorcup_stem",
+          "parent": null,
+          "length": 0.528,
+          "order": 0
+        },
+        {
+          "name": "c0",
+          "part": "phosphorcup_c0_open",
+          "parent": "root",
+          "length": 0.16,
+          "offset_m": [
+            -0.16,
+            0.576
+          ],
+          "order": 1
+        },
+        {
+          "name": "c1",
+          "part": "phosphorcup_c1_open",
+          "parent": "root",
+          "length": 0.16,
+          "offset_m": [
+            0.096,
+            0.672
+          ],
+          "order": 2
+        },
+        {
+          "name": "c2",
+          "part": "phosphorcup_c2_open",
+          "parent": "root",
+          "length": 0.16,
+          "offset_m": [
+            0.224,
+            0.48
+          ],
+          "order": 3
+        }
+      ],
+      "swaps": {
+        "c0": [
+          "phosphorcup_c0_open",
+          "phosphorcup_c0_half",
+          "phosphorcup_c0_closed"
+        ],
+        "c1": [
+          "phosphorcup_c1_open",
+          "phosphorcup_c1_half",
+          "phosphorcup_c1_closed"
+        ],
+        "c2": [
+          "phosphorcup_c2_open",
+          "phosphorcup_c2_half",
+          "phosphorcup_c2_closed"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "c0",
+          "bone": "c0",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        },
+        {
+          "slot": "c1",
+          "bone": "c1",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 2,
+          "replaces_part": true
+        },
+        {
+          "slot": "c2",
+          "bone": "c2",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 3,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 4,
+        "beat_bpm": 110,
+        "squash": 0.02,
+        "swap_cycle": {
+          "slot": "c1",
+          "sequence": [
+            "phosphorcup_c1_open",
+            "phosphorcup_c1_half"
+          ],
+          "beats": [
+            2,
+            2
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "phosphorcup_c0_closed",
+        "also": {
+          "c1": "phosphorcup_c1_closed",
+          "c2": "phosphorcup_c2_closed"
+        },
+        "note": "the one spin is UNITY's (a flip of the root)"
+      }
+    },
+    {
+      "name": "stormreed",
+      "biomes": [
+        "deck2",
+        "deck3"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "stormreed_tuft",
+          "parent": null,
+          "length": 0.048,
+          "order": 0
+        },
+        {
+          "name": "r0",
+          "part": "stormreed_r0_rest",
+          "parent": "root",
+          "length": 0.416,
+          "offset_m": [
+            -0.176,
+            0.032
+          ],
+          "order": 1
+        },
+        {
+          "name": "r1",
+          "part": "stormreed_r1_rest",
+          "parent": "root",
+          "length": 0.576,
+          "offset_m": [
+            -0.08,
+            0.032
+          ],
+          "order": 2
+        },
+        {
+          "name": "r2",
+          "part": "stormreed_r2_rest",
+          "parent": "root",
+          "length": 0.48,
+          "offset_m": [
+            0.0,
+            0.032
+          ],
+          "order": 3
+        },
+        {
+          "name": "r3",
+          "part": "stormreed_r3_rest",
+          "parent": "root",
+          "length": 0.64,
+          "offset_m": [
+            0.096,
+            0.032
+          ],
+          "order": 4
+        },
+        {
+          "name": "r4",
+          "part": "stormreed_r4_rest",
+          "parent": "root",
+          "length": 0.384,
+          "offset_m": [
+            0.176,
+            0.032
+          ],
+          "order": 5
+        }
+      ],
+      "swaps": {
+        "r0": [
+          "stormreed_r0_rest",
+          "stormreed_r0_lit",
+          "stormreed_r0_flat"
+        ],
+        "r1": [
+          "stormreed_r1_rest",
+          "stormreed_r1_lit",
+          "stormreed_r1_flat"
+        ],
+        "r2": [
+          "stormreed_r2_rest",
+          "stormreed_r2_lit",
+          "stormreed_r2_flat"
+        ],
+        "r3": [
+          "stormreed_r3_rest",
+          "stormreed_r3_lit",
+          "stormreed_r3_flat"
+        ],
+        "r4": [
+          "stormreed_r4_rest",
+          "stormreed_r4_lit",
+          "stormreed_r4_flat"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "r0",
+          "bone": "r0",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        },
+        {
+          "slot": "r1",
+          "bone": "r1",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 2,
+          "replaces_part": true
+        },
+        {
+          "slot": "r2",
+          "bone": "r2",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 3,
+          "replaces_part": true
+        },
+        {
+          "slot": "r3",
+          "bone": "r3",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 4,
+          "replaces_part": true
+        },
+        {
+          "slot": "r4",
+          "bone": "r4",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 5,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 5,
+        "beat_bpm": 110,
+        "squash": 0.0,
+        "swap_cycle": {
+          "slot": "r1",
+          "sequence": [
+            "stormreed_r1_rest",
+            "stormreed_r1_lit"
+          ],
+          "beats": [
+            3,
+            1
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "stormreed_r0_flat",
+        "also": {
+          "r1": "stormreed_r1_flat",
+          "r2": "stormreed_r2_flat",
+          "r3": "stormreed_r3_flat",
+          "r4": "stormreed_r4_flat"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "key": "props/jupiter/derelict_pod",
+  "style": "v3",
+  "frame_width": 128,
+  "frame_height": 112,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.089286
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [],
+  "squash_root": false,
+  "ground_line_px": 10,
+  "note": "one static frame (no clip); the pivot sits on its base line"
+}

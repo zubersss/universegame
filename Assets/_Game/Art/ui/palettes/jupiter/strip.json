@@ -1,0 +1,47 @@
+{
+  "key": "ui/palettes/jupiter/strip",
+  "style": "v3",
+  "palette": true,
+  "colors": [
+    {
+      "name": "offwhite",
+      "hex": "#EEE2CB",
+      "shadow": "#BDB09E"
+    },
+    {
+      "name": "red",
+      "hex": "#A8503A",
+      "shadow": "#8C4A38"
+    },
+    {
+      "name": "mustard",
+      "hex": "#C48A4E",
+      "shadow": "#A07246"
+    },
+    {
+      "name": "teal",
+      "hex": "#6F8A97",
+      "shadow": "#647279"
+    },
+    {
+      "name": "green",
+      "hex": "#8F9A6A",
+      "shadow": "#7B7E5A"
+    },
+    {
+      "name": "sky",
+      "hex": "#D8BC94",
+      "shadow": "#AE9577"
+    },
+    {
+      "name": "brown",
+      "hex": "#4B3B34",
+      "shadow": "#4B3B34"
+    },
+    {
+      "name": "ink",
+      "hex": "#1E1A17",
+      "shadow": null
+    }
+  ]
+}
