@@ -1506,11 +1506,13 @@ def fd_t5(k):
             for tri_, m in (((T, L_, F), "spark"), ((T, F, R), "rock_lit"), ((L_, F, Bm), "rock_lit"), ((F, R, Bm), "rock")):
                 G.stroke(d, list(tri_), M[m], 0.0, cyclic=True)
             G.stroke(d, [T, R, Bm, L_], M["ink"], I, cyclic=True)
-        else:                                                                                 # a pocket of molten rock
-            G.stroke(d, G.lumpy_ellipse(0.0, 0.0, 0.42, 0.28, n=22, lump=0.08, seed=2401), M["core_sh_i"], O, cyclic=True)
-            G.stroke(d, G.lumpy_ellipse(0.02, -0.02, 0.32, 0.2, n=20, lump=0.08, seed=2402), M["hot"], 0.0, cyclic=True)
-            G.stroke(d, G.lumpy_ellipse(0.04, -0.04, 0.18, 0.1, n=16, lump=0.08, seed=2403), M["glow"], 0.0, cyclic=True)
-            G.stroke(d, G.lumpy_ellipse(0.06, -0.05, 0.07, 0.035, n=12, lump=0.06, seed=2404), M["spark"], 0.0, cyclic=True)
+        else:                                                                 # a pocket of molten rock: a flat pool in a lens of
+            xs = [-0.36 + 0.72 * i / 16 for i in range(17)]                   # rock, its glowing skin a wavy streak along the top
+            G.stroke(d, G.lumpy_ellipse(0.0, 0.0, 0.46, 0.24, n=22, lump=0.06, seed=2401), M["core_sh_i"], O, cyclic=True)
+            pool = [(x, 0.04 + 0.012 * math.sin(9 * x)) for x in xs] + [(x, -0.16 * math.sqrt(max(0.0, 1 - (x / 0.37) ** 2)) + 0.03) for x in reversed(xs)]
+            G.stroke(d, pool, M["hot"], 0.0, cyclic=True)
+            G.stroke(d, G.hose_outline([(x, 0.035 + 0.012 * math.sin(9 * x)) for x in xs[1:-1]], 0.04), M["glow"], 0.0, cyclic=True)
+            G.stroke(d, G.hose_outline([(x, 0.04 + 0.012 * math.sin(9 * x)) for x in xs[4:-4]], 0.012), M["spark"], 0.0, cyclic=True)
     return fn
 
 
@@ -1518,7 +1520,7 @@ TIER_FILLS = {2: fill_t2, 3: fill_t3, 4: fill_t4, 5: fill_t5}
 TIER_DECOR = {2: [("root_knot", fd_t2(0), 48, 40), ("clay_concretion", fd_t2(1), 40, 32), ("rusty_nodule", fd_t2(2), 32, 32)],
               3: [("geode", fd_t3(0), 48, 40), ("crystal_spray", fd_t3(1), 40, 40), ("mica_book", fd_t3(2), 40, 24)],
               4: [("glow_nodule", fd_t4(0), 40, 40), ("graphite_lens", fd_t4(1), 72, 24), ("obsidian_shard", fd_t4(2), 32, 32)],
-              5: [("kimberlite_diamond", fd_t5(0), 48, 48), ("magma_pocket", fd_t5(1), 64, 48)]}
+              5: [("kimberlite_diamond", fd_t5(0), 48, 48), ("magma_pocket", fd_t5(1), 72, 48)]}
 SL_W, SL_H, SL_ROW = 256, 64, 40                                                              # the Surface Line strip: 4 m, its line on row 40
 
 
@@ -2282,6 +2284,12 @@ def preview_tiers(out_dir, pieces=None, out=None, footnote=None):
     for t, a, _b in bounds[1:]:                                                             # the borders
         Bd = column(Wr, a + 2.0 - 1.5, a + 2.0 + 1.5)
         rows.append((f"the border tier {t - 1} -> {t} at {int(a)} m: the 1 m crossfade above it", Bd))
+    Ln = np.empty((2 * PPU, Wr, 3), np.float32)                                             # the line's read over every fill
+    for t, a, _b in bounds:
+        x0 = (t - 1) * (Wr // 5)
+        Ln[:, x0:x0 + Wr // 5] = column(Wr // 5, a + 2.0 + 1.0, a + 2.0 + 3.0)
+    review._over(Ln, np.tile(line, (1, 4, 1))[:, :Wr], 0, PPU - SL_ROW)
+    rows.append(("the Surface Line over each tier's fill (T1..T5, left to right): it must read on every one", Ln))
     right = []
     for title, img in rows:
         lab = np.empty((22, Wr, 3), np.float32)

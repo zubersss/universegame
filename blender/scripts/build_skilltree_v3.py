@@ -213,20 +213,20 @@ def g_haul(d, M, cx, cy, s):
 
 
 def g_ascent(d, M, cx, cy, s):
-    """A jetpack (two red tanks, a mustard harness band, two flames) over a coiled rope."""
+    """A jetpack (two red tanks, a mustard harness band, two flames), a coil of rope hung at its right with a small hook
+    (rev 16:5x: a coil round the whole pack read as a scribble)."""
     P = lambda pts: [(cx + s * u, cy + s * v) for u, v in pts]  # noqa: E731
-    for r in (24, 19):                                                                                    # the rope coil
-        G.stroke(d, G.hose_outline(P(arc(0, -2, r, -2.6, 3.1, 30)), 4 * s), M["mustard_sh"], I, cyclic=True)
-    for k in range(10):
-        a = -2.4 + 0.55 * k
-        G.stroke(d, P([((24 - 2) * math.cos(a), -2 + (24 - 2) * math.sin(a)), ((24 + 2) * math.cos(a + 0.12), -2 + (24 + 2) * math.sin(a + 0.12))]), M["ink"], I * 0.8)
-    G.stroke(d, G.hose_outline(P([(22, 8), (25, 18), (21, 27)]), 4 * s), M["mustard_sh"], I, cyclic=True)   # its free end
-    for x in (-8, 8):
+    for k, x0 in enumerate((19, 15.5, 12)):                                                              # three laps, back to front
+        lap = [(x0 + 6.5 * math.cos(a), 1 + 13 * math.sin(a)) for a in np.linspace(math.radians(-70), math.radians(255), 26)]
+        G.stroke(d, G.hose_outline(P(lap), 3.4 * s), M["mustard_sh"], I, cyclic=True)
+    G.stroke(d, G.hose_outline(P([(12, 14), (13, 20), (17, 24)]), 3.4 * s), M["mustard_sh"], I, cyclic=True)   # its free end
+    G.stroke(d, G.hose_outline(P([(17, 24), (21, 25), (23, 22), (22, 19)]), 2.8 * s), M["sky"], I, cyclic=True)    # the hook
+    for x in (-13, 1):
         G.stroke(d, P([(x - 4, 14), (x + 4, 14), (x, 27)]), M["mustard"], I, cyclic=True)                 # flames
         G.stroke(d, P([(x - 2, 14), (x + 2, 14), (x, 21)]), M["offwhite_f"], 0.0, cyclic=True)
         G.stroke(d, P([(x - 4, 9), (x + 4, 9), (x + 3, 14), (x - 3, 14)]), M["mustard_sh"], I, cyclic=True)   # nozzles
         G.stroke(d, G.hose_outline(P([(x, -15), (x, 6)]), 11 * s), M["red"], O * s, cyclic=True)           # the tanks
-    G.stroke(d, P([(-15, -6), (15, -6), (15, -1), (-15, -1)]), M["mustard"], I, cyclic=True)             # the harness band
+    G.stroke(d, P([(-20, -6), (8, -6), (8, -1), (-20, -1)]), M["mustard"], I, cyclic=True)               # the harness band
 
 
 def g_survey(d, M, cx, cy, s):
@@ -407,7 +407,7 @@ def panel(seed=100):
             t = a0 + (a1 if fx > 0 else -a1) * k / 4
             G.stroke(d, [(cx + 20 * math.cos(t), cy + 20 * math.sin(t)), (cx + 24 * math.cos(t), cy + 24 * math.sin(t))], M["ln_brown"], I * 0.7)
     G.stroke(d, U.wavy_rect(6, 6, S - 6, S - 6, 1.0, seed), M["ink"], O, cyclic=True)
-    img, w = done(c, seed, 0.03)
+    img, w = done(c, seed)                                    # no grain: a 9-slice centre is stretched, and stretched grain blotches
     return img, w, [sl] * 4
 
 
