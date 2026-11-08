@@ -2156,6 +2156,122 @@ namespace Meridian.Tests
         }
 
         /// <summary>
+        /// U-157 (D-162 (2)-(4)): the round brush on Earth's smooth ground → coordination/reports/unity/u157/: 1_scoop_puff (one Beam stroke and
+        /// B-175's dirt puff), 1_scoop (settled: the ink-rimmed rounded scoop), 2_tunnel (a run of strokes down into the cross-section: strata,
+        /// the back wall), 3_mound (strokes piling a rounded hill of the ground material), 4_bridge (a span of strokes in the air over a dug gap,
+        /// the surveyor on it). Natural ground east of the camp; the Rig's reach is lifted for the staging (owner cleared), mounds spend nothing.
+        /// </summary>
+        [UnityTest, Timeout(300000)]
+        public IEnumerator CaptureU157Brush()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            Transform owner = null;
+            Meridian.Rig.RigTools rig = null;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                timeout = Time.realtimeSinceStartup + 20f;
+                while (!side.terrain.IsSettled && Time.realtimeSinceStartup < timeout) yield return null;
+                if (side.hazards != null) side.hazards.enabled = false;
+                if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false;
+                side.creatures.DespawnAll();
+                var t = side.terrain;
+                rig = side.rig;
+                Assert.IsTrue(rig.Brush, "Earth's Rig works the round brush");
+                owner = rig.owner; rig.owner = null; // staging: no reach limit
+                var dir = "coordination/reports/unity/u157";
+                Directory.CreateDirectory(dir);
+                var cam = side.sideCamera;
+                var follow = cam.GetComponent<Meridian.Player.CameraFollow>();
+                var body = side.player.Body;
+                // A stretch of gentle natural ground east of the camp.
+                int bx = side.spawnX + 30;
+                for (int x = side.spawnX + 30; x < side.spawnX + 200; x++)
+                {
+                    bool flat = true;
+                    for (int k = 0; k < 24 && flat; k++) flat = Mathf.Abs(t.OriginalTop(x + k + 1) - t.OriginalTop(x + k)) <= 1 && Mathf.Abs(t.OriginalTop(x + k) - t.OriginalTop(x)) <= 2;
+                    if (flat) { bx = x; break; }
+                }
+
+                IEnumerator Stand(float x)
+                {
+                    body.simulated = false;
+                    body.position = new Vector2(x, t.TopSolidY(Mathf.FloorToInt(x)) + 2f); side.player.transform.position = body.position;
+                    yield return null;
+                    timeout = Time.realtimeSinceStartup + 15f;
+                    while (!t.IsSettled && Time.realtimeSinceStartup < timeout) yield return null;
+                    body.simulated = true;
+                    for (int k = 0; k < 50; k++) yield return new WaitForFixedUpdate();
+                    if (follow != null) follow.SnapToTarget();
+                }
+
+                IEnumerator Shot(string label)
+                {
+                    yield return Save(cam, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                }
+
+                // 1: one stroke, its puff, then the settled scoop.
+                yield return Stand(bx + 0.5f);
+                int sx = bx + 4, stop = t.TopSolidY(sx);
+                bool dug = rig.Dig(new Vector2(sx, stop + 0.2f));
+                for (int k = 0; k < 4; k++) yield return null;
+                yield return Shot("1_scoop_puff");
+                for (int k = 0; k < 60; k++) yield return null;
+                yield return Shot("1_scoop");
+                TestContext.Out.WriteLine($"[MERIDIAN] u157 1_scoop: at ({sx}, {stop + 0.2f:F1}), dug {dug}, ground {bx}..{bx + 24}");
+
+                // 2: a tunnel, stroke by stroke down and along into the cross-section.
+                int strokes = 0;
+                for (int k = 0; k < 14; k++)
+                {
+                    var p = new Vector2(sx + 2f + k * 0.7f, stop - 0.4f - Mathf.Min(k, 6) * 0.55f);
+                    if (rig.Dig(p)) strokes++;
+                }
+                for (int k = 0; k < 30; k++) yield return null;
+                yield return Shot("2_tunnel");
+                TestContext.Out.WriteLine($"[MERIDIAN] u157 2_tunnel: {strokes} of 14 strokes carved");
+
+                // 3: a mound, piled stroke by stroke.
+                int mx = bx + 18, mtop = t.TopSolidY(mx), piled = 0;
+                yield return Stand(mx - 5.5f);
+                for (int row = 0; row < 3; row++)
+                    for (int k = -3 + row; k <= 3 - row; k++)
+                        piled += rig.Mound(new Vector2(mx + k * 0.8f, t.TopSolidY(Mathf.FloorToInt(mx + k * 0.8f)) + 1.2f), rig.GroundMaterial, false);
+                for (int k = 0; k < 30; k++) yield return null;
+                yield return Shot("3_mound");
+                TestContext.Out.WriteLine($"[MERIDIAN] u157 3_mound: {piled} tiles piled at {mx} (ground {mtop})");
+
+                // 4: a bridge over a dug gap, the surveyor standing on it.
+                int gx = bx + 10, gtop = t.TopSolidY(gx), spanned = 0;
+                for (int k = 0; k < 5; k++) for (int d = 0; d < 3; d++) rig.Dig(new Vector2(gx + k * 0.8f, gtop + 0.4f - d * 0.8f));
+                for (int k = -2; k < 9; k++) spanned += rig.Mound(new Vector2(gx + k * 0.6f, gtop + 1.5f), rig.GroundMaterial, false);
+                yield return Stand(gx + 1.5f);
+                yield return Shot("4_bridge");
+                TestContext.Out.WriteLine($"[MERIDIAN] u157 4_bridge: {spanned} tiles spanned at {gx}; the surveyor at ({body.position.x:F1}, {body.position.y:F2}), grounded {side.player.Grounded}");
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                if (rig != null) rig.owner = owner;
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+            }
+        }
+
+        /// <summary>
         /// U-104: the cartoon HUD at 1080p → coordination/reports/unity/u104/: on foot beside the ship (the three dials, the
         /// suit rows, the markers, every string in Patrick Hand) and aboard just under the Escape Line (the ship rows, the
         /// painted dotted line with its lettered sign). The overlay canvases draw through the side camera for the shots.

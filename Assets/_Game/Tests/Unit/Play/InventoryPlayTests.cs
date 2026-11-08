@@ -78,13 +78,21 @@ namespace Meridian.Tests
             int px = x + 3, py = t.TopSolidY(px) + 3;
             Assert.AreEqual(TileId.Air, t.GetTile(px, py));
             Assert.IsTrue(rig.Place(new Vector2(px + 0.5f, py + 0.5f)), "Builder places from the inventory");
-            Assert.AreEqual(ItemRegistry.Get(item).placeTile, t.GetTile(px, py));
+            // U-157 (D-162 (3)): on Earth's smooth ground the Builder piles the planet's one ground material, spending a carried ground item.
+            Assert.AreEqual(rig.Brush ? rig.GroundMaterial : ItemRegistry.Get(item).placeTile, t.GetTile(px, py));
             Assert.AreEqual(4, inv.Count(item), "count falls");
 
             // A non-placeable selection places nothing.
             inv.Add(ItemRegistry.Get("iron").id, 7);
             for (int i = 0; i < Inventory.SlotCount; i++) if (inv[i].itemId == ItemRegistry.Get("iron").id) inv.Select(i);
-            Assert.IsFalse(rig.Place(new Vector2(px + 0.5f, py + 1.5f)), "iron isn't a tile");
+            if (rig.Brush)
+            {
+                // U-157: no block is chosen (no hotbar of blocks): with iron selected the mound still piles from the ground items carried,
+                // and the iron is never spent.
+                Assert.IsTrue(rig.Place(new Vector2(px + 0.5f, py + 1.5f)), "the mound piles from the ground items, whatever is selected");
+                Assert.AreEqual(3, inv.Count(item), "a ground item spent");
+            }
+            else Assert.IsFalse(rig.Place(new Vector2(px + 0.5f, py + 1.5f)), "iron isn't a tile");
             Assert.AreEqual(7, inv.Count(ItemRegistry.Get("iron").id));
 
             // Save → change → load: identical.

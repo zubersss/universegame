@@ -411,7 +411,22 @@ namespace Meridian.Terrain
                 chunk.SetTileLocal(tx - cx * C, ty - cy * C, t, tile);
                 if (!touched.Contains(chunk)) touched.Add(chunk);
             }
+            if (batching > 0) { foreach (var c in touched) batchTouched.Add(c); return; }
             foreach (var c in touched) c.FinishCollision();
+        }
+
+        // U-157: a brush stroke sets several tiles; each touched chunk rebuilds its collision and outline once, at EndBatch.
+        int batching;
+        readonly HashSet<TerrainChunk> batchTouched = new HashSet<TerrainChunk>();
+
+        /// <summary>U-157: defers the collision / outline rebuilds of the SetTile calls that follow until EndBatch (nestable).</summary>
+        public void BeginBatch() => batching++;
+
+        public void EndBatch()
+        {
+            if (batching <= 0 || --batching > 0) return;
+            foreach (var c in batchTouched) if (c != null) c.FinishCollision();
+            batchTouched.Clear();
         }
 
         int MaskAt(int x, int y, byte id)

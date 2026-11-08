@@ -2,6 +2,7 @@ using System.Collections;
 using System.IO;
 using Meridian.Core;
 using Meridian.Planets;
+using Meridian.Rig;
 using Meridian.Terrain;
 using NUnit.Framework;
 using UnityEngine;
@@ -10,7 +11,11 @@ using UnityEngine.TestTools;
 
 namespace Meridian.Tests
 {
-    /// <summary>U-008: Beam digs (item drops), Builder places, diffs persist through save → load.</summary>
+    /// <summary>
+    /// U-008, rewritten for U-157 (D-162 (2), (3), (6); D-165): on Earth's smooth ground the Beam carves a round scoop (every solid tile within
+    /// the brush, each dropping its item; the traced outline sinks into a rounded hole) and the Builder piles a round mound of the planet's
+    /// ground material, spending one carried ground item per tile with no block chosen, and never over a body; both persist through save → load.
+    /// </summary>
     public class DigPlaceTests
     {
         const string CorePath = "Assets/_Game/Scenes/Core.unity";
@@ -38,56 +43,89 @@ namespace Meridian.Tests
             Assert.IsTrue(t.IsSettled, "terrain settled");
         }
 
+        /// <summary>The outline's height under world x (the chunks' edge colliders), from `from` down.</summary>
+        static float Outline(float x, float from)
+        {
+            foreach (var h in Physics2D.RaycastAll(new Vector2(x, from), Vector2.down, 20f))
+                if (h.collider is EdgeCollider2D && h.collider.GetComponent<TerrainChunk>() != null) return h.point.y;
+            return float.NaN;
+        }
+
         [UnityTest]
-        public IEnumerator DigPlaceSaveLoadKeepsTheChanges()
+        public IEnumerator TheBrushDigsARoundScoopPilesAMoundAndBothPersist()
         {
             PlanetSideRoot side = null;
             yield return Boot(s => side = s);
             var t = side.terrain;
             var rig = side.rig;
             Assert.NotNull(rig, "Rig on PlanetSide");
+            Assert.IsTrue(rig.Brush, "Earth's Rig works the round brush (D-162)");
+            side.creatures.autoSpawn = false;
+            side.creatures.DespawnAll();
 
-            // Dig the surface tile under the spawn column.
-            int x = side.spawnX, y = t.TopSolidY(x);
-            byte before = t.GetTile(x, y);
-            Assert.IsTrue(TileId.IsSolid(before), "surface tile is solid");
-            int diffsBefore = t.Edits.Count; // a new world already holds POI stamp diffs (U-030)
-            Assert.IsTrue(rig.Dig(new Vector2(x + 0.5f, y + 0.5f)), "Beam digs");
-            Assert.AreEqual(TileId.Air, t.GetTile(x, y));
-            Assert.IsNull(t.RenderedTile(x, y), "tile gone from the tilemap");
-            // The tile's own item; the spawn column's turf may also yield a Living Seed (U-059 bonus).
-            int own = Meridian.Items.ItemRegistry.DropOf(before);
-            var (_, bonus) = Meridian.Items.OnlyHere.DropAt(side.Config.id, before, t.WrapX(x), y, 0);
-            Assert.AreEqual(1, System.Linq.Enumerable.Count(rig.drops.Live, d => d.itemId == own), "item dropped");
-            Assert.AreEqual(bonus != 0 ? 2 : 1, rig.drops.Live.Count, "plus the only-here bonus when there is one");
-            Assert.AreEqual(before, rig.drops.Live[0].itemId, "drop is the dug material");
+            // The scoop: a stroke on a column seam just under the ground, 3 m from the surveyor (four tiles in the brush).
+            int x = side.spawnX - 3, top = t.TopSolidY(x);
+            var p = new Vector2(x, top - 0.1f); // on the seam of two columns: their top two tiles are all within the brush
+            var cells = RigTools.BrushCells(p);
+            int solid = 0;
+            foreach (var c in cells) if (TileId.IsSolid(t.GetTile(c.x, c.y))) solid++;
+            Assert.Greater(solid, 1, "the stroke covers more than one solid tile");
+            float before = Outline(x, top + 4f);
+            int drops = rig.drops.Live.Count;
+            Assert.IsTrue(rig.Dig(p), "the Beam carves");
+            foreach (var c in cells) Assert.AreEqual(TileId.Air, t.GetTile(c.x, c.y), $"tile {c} carved");
+            Assert.GreaterOrEqual(rig.drops.Live.Count - drops, solid, "one item per carved tile (plus any only-here bonus)");
+            yield return new WaitForFixedUpdate();
+            float after = Outline(x, top + 4f);
+            TestContext.Out.WriteLine($"[MERIDIAN] u157 scoop: {cells.Count} tiles in the brush, {solid} carved, outline {before:F2} → {after:F2}");
+            Assert.Less(after, before - 0.5f, "the traced ground sinks into the scoop");
 
-            // Place a tile in open air two columns over.
-            int px = x + 3, py = t.TopSolidY(px) + 3;
-            Assert.AreEqual(TileId.Air, t.GetTile(px, py));
-            Assert.IsTrue(rig.Place(new Vector2(px + 0.5f, py + 0.5f), TileId.Stone), "Builder places");
-            Assert.AreEqual(TileId.Stone, t.GetTile(px, py));
-            Assert.NotNull(t.RenderedTile(px, py));
-            // Both changes are recorded as diffs (on stamped camp ground a dig can replace a stamp diff, so check the cells, not the count).
-            Assert.IsTrue(t.Edits.TryGet(t.WrapX(px), py, out byte placedDiff) && placedDiff == TileId.Stone, "placed tile recorded");
-            bool generatedAir = t.BaseGenerator.TileAt(t.WrapX(x), y) == TileId.Air;
-            Assert.IsTrue(t.Edits.TryGet(t.WrapX(x), y, out byte dugDiff) ? dugDiff == TileId.Air : generatedAir, "dug tile recorded (or back to its generated air)");
-            Assert.GreaterOrEqual(t.Edits.Count, diffsBefore, "no diffs lost");
+            // The mound: no block is chosen; the Builder spends carried ground items, one per tile, and piles the ground material.
+            var inv = GameState.Instance.inventory;
+            inv.Clear();
+            int soil = Meridian.Items.ItemRegistry.DropOf(TileId.Soil);
+            inv.Add(soil, 10);
+            Assert.AreEqual(TileId.Soil, rig.GroundMaterial, "Earth's ground material");
+            Assert.AreEqual(TileId.Soil, rig.SelectedTile, "the Builder's material while ground items are carried, whatever slot is selected");
+            int mx = side.spawnX + 4, mtop = t.TopSolidY(mx); // within the Rig's 5 m reach, clear of the Pilgrim
+            var m = new Vector2(mx, mtop + 1f); // a tile corner on the ground: the open tiles round it
+            var open = RigTools.BrushCells(m);
+            Assert.IsTrue(rig.Place(m), "the Builder piles a mound");
+            int filled = 0;
+            foreach (var c in open) if (t.GetTile(c.x, c.y) == TileId.Soil) filled++;
+            Assert.Greater(filled, 0, "earth piled");
+            Assert.AreEqual(10 - filled, inv.Count(soil), "one ground item per piled tile");
+
+            // D-165: a stroke at the surveyor's chest leaves every cell the surveyor stands in open, and spends only for what it piled.
+            var at = side.player.Body.position + new Vector2(0f, 0.9f);
+            var near = RigTools.BrushCells(at);
+            var was = near.ConvertAll(c => t.GetTile(c.x, c.y));
+            int carried = inv.Count(soil), bodyCells = 0, changed = 0;
+            rig.Place(at);
+            for (int i = 0; i < near.Count; i++)
+            {
+                var c = near[i];
+                bool body = false;
+                foreach (var hit in Physics2D.OverlapBoxAll(new Vector2(c.x + 0.5f, c.y + 0.5f), Vector2.one * 0.9f, 0f))
+                    if (hit.attachedRigidbody == side.player.Body) body = true;
+                byte now = t.GetTile(c.x, c.y);
+                if (now != was[i]) changed++;
+                if (body) { bodyCells++; Assert.AreEqual(was[i], now, $"no earth piled into the surveyor at {c}"); }
+            }
+            Assert.Greater(bodyCells, 0, "the stroke reached the surveyor");
+            Assert.AreEqual(changed, carried - inv.Count(soil), "spent only for what was piled");
 
             // Save the diffs, start a fresh session, load them, rebuild the planet.
             var path = Path.Combine(Application.temporaryCachePath, "meridian_test", "terrain_earth.bin");
             t.Edits.SaveFile(path);
             yield return Boot(s => side = s);
             t = side.terrain;
-            Assert.AreEqual(before, t.GetTile(x, y), "fresh session starts from the seed");
+            Assert.IsTrue(TileId.IsSolid(t.GetTile(cells[0].x, cells[0].y)), "a fresh session starts from the seed");
             GameState.Instance.EditsFor(PlanetId.Earth).LoadFile(path);
             side.Configure(side.Config);
             yield return Settle(t);
-
-            Assert.AreEqual(TileId.Air, t.GetTile(x, y), "dug tile still absent after load");
-            Assert.IsNull(t.RenderedTile(x, y), "and not drawn");
-            Assert.AreEqual(TileId.Stone, t.GetTile(px, py), "placed tile still there after load");
-            Assert.NotNull(t.RenderedTile(px, py));
+            foreach (var c in cells) Assert.AreEqual(TileId.Air, t.GetTile(c.x, c.y), $"the scoop's tile {c} still carved after load");
+            Assert.Greater(open.FindAll(c => t.GetTile(c.x, c.y) == TileId.Soil).Count, 0, "the mound still there after load");
             File.Delete(path);
             LogAssert.NoUnexpectedReceived();
         }

@@ -69,6 +69,27 @@ namespace Meridian.Terrain
 
         public void Clear() { lock (gate) chunks.Clear(); }
 
+        /// <summary>U-157: every edited tile (x as stored, wrapped; y; id): a snapshot, so the edits may change while it is walked.</summary>
+        public List<(int x, int y, byte id)> Cells()
+        {
+            var list = new List<(int x, int y, byte id)>();
+            lock (gate)
+                foreach (var kv in chunks)
+                {
+                    int cx = (int)(kv.Key >> 32), cy = (int)(uint)kv.Key;
+                    foreach (var e in kv.Value) list.Add((cx * C + e.Key % C, cy * C + e.Key / C, e.Value));
+                }
+            return list;
+        }
+
+        /// <summary>U-157: drops a tile's diff (x wrapped): the generator's value stands there again.</summary>
+        public void Remove(int x, int y)
+        {
+            Locate(x, y, out long key, out int index);
+            lock (gate)
+                if (chunks.TryGetValue(key, out var c)) { c.Remove(index); if (c.Count == 0) chunks.Remove(key); }
+        }
+
         public void Write(BinaryWriter w)
         {
             lock (gate)

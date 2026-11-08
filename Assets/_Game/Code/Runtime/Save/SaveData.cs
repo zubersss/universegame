@@ -12,9 +12,11 @@ namespace Meridian.Save
     [Serializable]
     public sealed class SaveData
     {
-        public const int CurrentVersion = 2;
+        public const int CurrentVersion = 3;
 
         public int version = CurrentVersion;
+        /// <summary>U-157: the version the file was written at (set by SaveMigrations.Migrate; never saved).</summary>
+        [NonSerialized] public int loadedVersion = CurrentVersion;
         public string savedAtUtc;
         public string gameVersion;
         public int worldSeed;
@@ -91,6 +93,7 @@ namespace Meridian.Save
         {
             if (data.version > SaveData.CurrentVersion)
                 throw new InvalidOperationException($"save version {data.version} is newer than this build ({SaveData.CurrentVersion})");
+            data.loadedVersion = data.version;
             // v0 (pre-release) had no version field and no cargo list: JsonUtility reads version 0.
             if (data.version < 1)
             {
@@ -107,6 +110,13 @@ namespace Meridian.Save
                 data.player ??= new PlayerSave();
                 data.player.suit = 100f;
                 data.version = 2;
+            }
+            // v2 → v3 (U-157, D-165 (3)): the smooth planets re-stamp their POIs against the smoothed ground: their poi_stamped flags go here,
+            // the old stamp diffs once the terrain files load (SmoothGroundMigration.StripOldStamps, SaveSystem.Load).
+            if (data.version < 3)
+            {
+                if (data.story != null) SmoothGroundMigration.DropFlags(data.story.flags);
+                data.version = 3;
             }
             return data;
         }

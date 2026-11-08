@@ -220,6 +220,9 @@ namespace Meridian.Save
                 foreach (PlanetId id in Enum.GetValues(typeof(PlanetId)))
                     if (id.ToString().ToLowerInvariant() == name && File.Exists(path)) state.EditsFor(id).LoadFile(path);
             }
+            if (data.loadedVersion < SmoothGroundMigration.Version) // U-157: a 0.4.8 save's stamps go; the planet re-stamps on its next visit
+                foreach (PlanetId id in Enum.GetValues(typeof(PlanetId)))
+                    if (Meridian.Terrain.GroundField.Smooth(id)) SmoothGroundMigration.StripOldStamps(state.EditsFor(id), state.catalog.Get(id), data.worldSeed);
 
             var config = state.CurrentPlanetConfig;
             if (state.view == ViewMode.PlanetSide)

@@ -145,7 +145,7 @@ namespace Meridian.Tests
             var v1 = JsonUtility.FromJson<SaveData>("{\"version\":1,\"currentPlanet\":\"Mars\",\"view\":\"PlanetSide\",\"player\":{\"health\":64.0}}");
             v1.inventory = null;
             var m = SaveMigrations.Migrate(v1);
-            Assert.AreEqual(2, m.version);
+            Assert.AreEqual(SaveData.CurrentVersion, m.version, "v1 → v2 → … → the current version"); // U-157: v3 follows v2
             Assert.NotNull(m.inventory);
             Assert.AreEqual(0, m.inventory.Count);
             Assert.AreEqual(100f, m.player.suit, "full suit");

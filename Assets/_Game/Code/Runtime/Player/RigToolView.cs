@@ -142,16 +142,49 @@ namespace Meridian.Player
             Beam.size = new Vector2(Mathf.Max(0.01f, len), BeamHeight);
         }
 
+        static Sprite ring;
+        /// <summary>U-157: a 1 m anti-aliased ring (the brush ghost), made once.</summary>
+        static Sprite Ring
+        {
+            get
+            {
+                if (ring != null) return ring;
+                const int N = 128;
+                var tex = new Texture2D(N, N, TextureFormat.RGBA32, false) { name = "BrushRing", wrapMode = TextureWrapMode.Clamp };
+                var px = new Color32[N * N];
+                for (int y = 0; y < N; y++)
+                    for (int x = 0; x < N; x++)
+                    {
+                        float d = Mathf.Sqrt((x + 0.5f - N * 0.5f) * (x + 0.5f - N * 0.5f) + (y + 0.5f - N * 0.5f) * (y + 0.5f - N * 0.5f));
+                        float a = Mathf.Clamp01(1f - Mathf.Abs(d - (N * 0.5f - 5f)) / 3f) + 0.18f * Mathf.Clamp01((N * 0.5f - 5f - d) / 2f);
+                        px[y * N + x] = new Color32(255, 255, 255, (byte)(Mathf.Clamp01(a) * 255f));
+                    }
+                tex.SetPixels32(px);
+                tex.Apply(false, true);
+                ring = Sprite.Create(tex, new Rect(0, 0, N, N), new Vector2(0.5f, 0.5f), N);
+                ring.name = "BrushRing";
+                return ring;
+            }
+        }
+
         void UpdateGhost()
         {
-            bool on = input.module == RigModule.Builder && rig != null && ghostSheet != null && ghostSheet.Ready
+            bool brush = rig != null && rig.Brush; // U-157: a round ghost the brush's size on a smooth planet
+            bool on = input.module == RigModule.Builder && rig != null && (brush || ghostSheet != null && ghostSheet.Ready)
                       && (input.AimWorld - (Vector2)transform.position).sqrMagnitude <= (RigTools.Reach + 1f) * (RigTools.Reach + 1f);
             if (Ghost.enabled != on) Ghost.enabled = on;
             if (!on) { ghostAge = 0f; return; }
-            var cell = RigTools.TileOf(input.AimWorld);
-            Ghost.transform.position = new Vector3(cell.x + 0.5f, cell.y + 0.5f, 0f);
             ghostAge += Time.deltaTime;
-            int f = ghostSheet.FrameAt(ghostAge);
+            if (brush)
+            {
+                Ghost.transform.position = new Vector3(input.AimWorld.x, input.AimWorld.y, 0f);
+                if (Ghost.sprite != Ring) Ghost.sprite = Ring;
+                float pulse = 1f + 0.04f * Mathf.Sin(ghostAge * 6f);
+                Ghost.transform.localScale = Vector3.one * (2f * RigTools.BrushRadius * pulse);
+            }
+            var cell = RigTools.TileOf(input.AimWorld);
+            if (!brush) Ghost.transform.position = new Vector3(cell.x + 0.5f, cell.y + 0.5f, 0f);
+            int f = brush ? -1 : ghostSheet.FrameAt(ghostAge);
             if (f >= 0 && Ghost.sprite != ghostSheet.frames[f])
             {
                 Ghost.sprite = ghostSheet.frames[f];
