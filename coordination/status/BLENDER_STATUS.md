@@ -1,25 +1,20 @@
 # BLENDER STATUS
-Updated: 2026-11-08 03:3x · Session: 9 (zuber-0c; all three windows restarted ~01:27; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-08 04:1x · Session: 9 (zuber-0c; all three windows restarted ~01:27; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-UNITY's 0.4.8 respin (the cone's draw order + a smoke staging fix; want 03:3x) goes next: FILES ONLY until it releases. Then, in order: (1) B-166 slot 3: creatures/uranus frostwisp, hailcrab, methane_ray, tiltbird + diamondback_colossus (grand_pack 0.18). (2) B-169 Neptune: oneoff/neptune_rows.py (lock-free, ~30 MB), then its slots (decks x6, floes / rig / props / palette, creatures + the Leviathan). (3) B-172: LEAD's verdict on review_b172_space_props_preview.png (03:28); the export after U-151's code. Each job checks want_unity first.
+B-175 (D-161 / D-162, contract v3.2 11.9): Earth EXPORTED (40a7e179). Next: the Mars, Mercury and Venus ground set previews (lock-free, build_ground_v3 per planet: each planet's cross-section colours and features) -> LEAD, each exported in a free slot once accepted (a terrain/<planet>/ground_set row with "planet"). Then B-176 (nodes, buried finds, the X mark) once UNITY's U-158 key list is out; B-173's audit sheets (audit_c2.py, untested past Earth's tiles) only in free gaps; B-172's export after U-151's code. Each heavy job checks want_unity first.
 
 ## Last completed
-- 03:19-03:28: B-166 slot 2 exported (0bb755cd; 390 MB); gp_raster box compositing, byte-identical + ~5x faster (5e37a670); the B-172 design preview (166 MB) and its fixes (clip 'lamps' 4, the review in place; 5e37a670); the floe reviews say "written to Art" on export (daa76512).
-- 02:54-02:57 SLOT (wrapper): B-166 slot 1d, Uranus deep x4 lights + URANUS-CHECK deep PASS (ead74e5b; 771 MB). Slot 1 COMPLETE: deck1 77e72d0c, deck2 eb8927fb (02:46-02:49, 773 MB), deck3 3082a574 (02:50-02:53, 758 MB), deep.
-- 02:5x files: B-172 source build_props_space_v3.py + the eight v3 prop rows + props/space/props_set (b407a9ac; py_compile clean, not yet run).
-- 02:45-02:46 lock-free: the B-171 set review from the exported sheets, review_b171_flight_fx.png (223 MB). B-171 VERIFIED by LEAD (Done on UNITY's u150 captures).
-- 02:30:4x-02:31:5x SLOT (wrapper): B-171 exported (dd3a2bdd; peak 511 MB); the boost revised per LEAD 02:2x first (faf3937d).
-- 02:21:2x-02:25 SLOT (wrapper): B-166 slot 1a deck1 (77e72d0c); the Uranus v3 rows first (f9c7b20b).
-- 02:0x-02:15 files + lock-free: B-171 source + preview (153d7307).
-- 01:52-01:54 SLOT: B-164 the Saturn creatures + the Polar Hydra (37ba2e94). VERIFIED.
-- 01:39-01:51 SLOTS: B-163 slot 1 (011b7de4) + slot 2 (f3d5d294). VERIFIED.
-- 01:3x files: credits (Limelight / Patrick Hand lettering, D-090), renders_2026-11-08.md, the Jupiter design table (b3f24409).
-- 01:02-01:14 SLOTS: B-160 the Vortex Whale (92830c7f), B-170 the title cards (37c0a43f). VERIFIED.
+- 04:10-04:11 SLOT (wrapper): B-175 Earth ground set, 11 keys, tiling copies p99 0.00 (40a7e179; 567 MB); the lock-free dry run first (240 MB). The design ACCEPTED by LEAD 04:0x (5037150c), UNITY's details applied (band pivot on row 24, rim pivot on row 4, the fill standalone with Repeat wrap, u by world x).
+- 03:47-03:55 SLOTS: B-166 slot 3 (2ea075d6: the Uranus creatures + the Diamondback Colossus); the Neptune rows (e6ab6630); B-169 slots 1a / 1b / 2 / 3 (28c85d77, eeb92819, 28aeb38a, 9d8d29ec: the six decks, spot = storm byte for byte, floes / rig / props / palette, the creatures + the Umbral Leviathan). B-166 and B-169 VERIFIED by LEAD 04:0x.
+- 03:19-03:28: B-166 slot 2 (0bb755cd); gp_raster box compositing, byte-identical, ~5x faster (5e37a670); B-172 design preview ACCEPTED (export after U-151).
+- 02:21-02:57 SLOTS: B-166 slot 1, the 16 Uranus backdrops, URANUS-CHECK PASS x4 (77e72d0c, eb8927fb, 3082a574, ead74e5b). VERIFIED.
+- 02:0x-02:31: B-171 the flight FX (dd3a2bdd; the boost revised faf3937d). VERIFIED.
+- 01:39-01:54 SLOTS: B-163 + B-164 Saturn (011b7de4, f3d5d294, 37ba2e94). VERIFIED.
+- 01:02-01:14 SLOTS: B-160 the whale (92830c7f), B-170 the title cards (37c0a43f). VERIFIED.
 
 ## Ready for review
-- B-166 slot 2: floes / rig set / props / palette (0bb755cd) + review_b158_uranus_{floes,rigset,props}.png (03:20). (Slot 1 VERIFIED by LEAD 03:0x.)
-- B-172 design preview: review_b172_space_props_preview.png (03:28; its "json INVALID" footer for the stations is fixed in 5e37a670: clip 'lamps' 4).
+- B-175 Earth: the 11 keys (40a7e179) + review_b175_earth_ground.png (04:11, stamped exported).
 
 ## Handoffs (unrouted only)
 - -> UNITY (U-150), B-171 placement: vapor_cone and shock_ring pivots = the ship's centre of mass (ship-local 0, 6.2 m, the tilt pivot); the cone draws IN FRONT of the hull, the ring BEHIND it. speed_lines: 128x360 tiles, 3 per 1080 px edge (tile i may show frame (f + i) % 4), drawn for the LEFT edge, flip x for the right; pivot (0, 0.5) = the edge. puff_boost: a drop-in for ships/pilgrim/puff (socket tail_exhaust, pivot 0.5 / 0.96, clip 'puff'), now 192x288 frames: no 1.6x y-scale needed.
@@ -48,4 +43,4 @@ none (B-161's three ruled in D-148).
 none (USER-28, closing ChatGPT + Edge for RAM, is LEAD's).
 
 ## HeavyJobLock
-none held (released 03:20:0x after Uranus slot 2); no want (UNITY's respin want is on file: it goes first; I take the next free gap per the queue). No background waiters.
+none held (released 04:11:10 after B-175 Earth); no want. No background waiters.
