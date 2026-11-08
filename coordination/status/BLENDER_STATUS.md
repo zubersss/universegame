@@ -1,23 +1,23 @@
 # BLENDER STATUS
-Updated: 2026-11-08 02:3x · Session: 9 (zuber-0c; all three windows restarted ~01:27; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-08 03:0x · Session: 9 (zuber-0c; all three windows restarted ~01:27; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-UNITY's flight check holds the lock (want 02:30:57, heavy_unity.lock after my B-171 slot): FILES ONLY until it releases. Then, in order: (1) lock-free: `python -I build_fx_ship_v3.py blender/preview --art` = review_b171_flight_fx.png from the exported sheets (stamped; cruise | boost | boom at 0.5625x / 0.375x) -> LEAD. (2) B-166 slot 1b: backgrounds/uranus/deck2_{sun_left,sun_right,night,survey}; 1c deck3; 1d deep (one deck per job, ~210 s each, survey last for URANUS-CHECK; check want_unity before each). (3) B-166 slot 2: terrain/uranus/floe_strip_set, flora/uranus/rigset, props/uranus/props_set, ui/palettes/uranus. (4) B-166 slot 3: creatures/uranus (frostwisp, hailcrab, methane_ray, tiltbird, diamondback_colossus; grand_pack fit 0.18). Then B-169 Neptune (oneoff/neptune_rows.py first), B-172 design source. UNITY's flight check outranks me the moment its want appears (LEAD 02:0x).
+UNITY's lock C (Build 0.4.8: the M1Loop fix, re-shoots, dev build + probe, release build, smoke; want 02:57:14) holds the lock: FILES ONLY until it releases. Then, in order: (1) lock-free: `python -I build_props_space_v3.py blender/preview/review_b172_space_props_preview.png` = the B-172 design preview (both stations at 1x with the Pilgrim docked, the six rocks) -> LEAD; first run of b407a9ac's code, under the 300 MB cap (stations raster at ss 2). (2) B-166 slot 2: terrain/uranus/floe_strip_set, flora/uranus/rigset, props/uranus/props_set, ui/palettes/uranus. (3) B-166 slot 3: creatures/uranus frostwisp, hailcrab, methane_ray, tiltbird + diamondback_colossus (grand_pack 0.18). (4) B-169 Neptune: oneoff/neptune_rows.py, then its slots. Each job checks want_unity first; no want filed while UNITY's multi-part lock C runs.
 
 ## Last completed
-- 02:30:4x-02:31:5x SLOT (wrapper): B-171 exported, fx/ship vapor_cone / shock_ring / speed_lines + ships/pilgrim/puff_boost (dd3a2bdd; default gate 1500, peak 511 MB, now the fx / ships v3 peak); the boost revised per LEAD 02:2x first (faf3937d: a nozzle-wide flame tongue ~2x the cruise puff, 192x288).
-- 02:21:2x-02:25 SLOT (wrapper): B-166 slot 1a, Uranus deck1 x4 lights + URANUS-CHECK deck1 PASS (77e72d0c; 760 MB); the Uranus v3 rows first (f9c7b20b, oneoff/uranus_rows.py, 30 MB).
-- 02:0x-02:15 files + lock-free: B-171 source + preview (153d7307; previews <= 233 MB under a 300 MB kill cap); LEAD ACCEPTED cone / ring / lines and the two deviations (128x360 tiles; the boost keeps clip / pivot / socket), boost revised.
-- 01:52-01:54 SLOT (wrapper): B-164 the Saturn creatures + the Polar Hydra Grand rig (37ba2e94; 458 MB; grand_pack 0.48 first). VERIFIED by LEAD.
-- 01:51 SLOT (wrapper): B-163 slot 2, Saturn floes / rig set / props / palette (f3d5d294; 387 MB). VERIFIED.
-- 01:39:43-01:43:59 SLOT (wrapper): B-163 slot 1, Saturn deck1-3 / deep / hexagon straight (011b7de4; 803 MB). VERIFIED.
+- 02:54-02:57 SLOT (wrapper): B-166 slot 1d, Uranus deep x4 lights + URANUS-CHECK deep PASS (ead74e5b; 771 MB). Slot 1 COMPLETE: deck1 77e72d0c, deck2 eb8927fb (02:46-02:49, 773 MB), deck3 3082a574 (02:50-02:53, 758 MB), deep.
+- 02:5x files: B-172 source build_props_space_v3.py + the eight v3 prop rows + props/space/props_set (b407a9ac; py_compile clean, not yet run).
+- 02:45-02:46 lock-free: the B-171 set review from the exported sheets, review_b171_flight_fx.png (223 MB). B-171 VERIFIED by LEAD (Done on UNITY's u150 captures).
+- 02:30:4x-02:31:5x SLOT (wrapper): B-171 exported (dd3a2bdd; peak 511 MB); the boost revised per LEAD 02:2x first (faf3937d).
+- 02:21:2x-02:25 SLOT (wrapper): B-166 slot 1a deck1 (77e72d0c); the Uranus v3 rows first (f9c7b20b).
+- 02:0x-02:15 files + lock-free: B-171 source + preview (153d7307).
+- 01:52-01:54 SLOT: B-164 the Saturn creatures + the Polar Hydra (37ba2e94). VERIFIED.
+- 01:39-01:51 SLOTS: B-163 slot 1 (011b7de4) + slot 2 (f3d5d294). VERIFIED.
 - 01:3x files: credits (Limelight / Patrick Hand lettering, D-090), renders_2026-11-08.md, the Jupiter design table (b3f24409).
-- 01:13:0x-01:14:09 SLOT (wrapper): B-170 the five title cards (37c0a43f; 945 MB). VERIFIED.
-- 01:02:41-01:03:37 SLOT (wrapper): B-160 the Vortex Whale at D-153 (92830c7f; 623 MB). VERIFIED.
+- 01:02-01:14 SLOTS: B-160 the Vortex Whale (92830c7f), B-170 the title cards (37c0a43f). VERIFIED.
 
 ## Ready for review
-- B-171: the four exports (dd3a2bdd) + review_b171_{vapor_cone,shock_ring,speed_lines,puff_boost}.png (stamped 02:31); the set review review_b171_flight_fx.png (--art) follows after UNITY's check. The boost review's "beside ships/pilgrim/puff" panel errors (review.py's beside placement assumes a ground pivot; the puff hangs from the top); the set review shows cruise beside boost.
-- B-166 slot 1a: deck1 x4 (77e72d0c) + review_b158_uranus_deck1_{sun_left,sun_right,night,survey}.png; URANUS-CHECK deck1 PASS in the log 02:25.
+- B-166 slot 1: the 16 Uranus backdrops (77e72d0c, eb8927fb, 3082a574, ead74e5b) + review_b158_uranus_{deck1,deck2,deck3,deep}_{sun_left,sun_right,night,survey}.png; URANUS-CHECK PASS x4 in logs/blender_2026-11-08.log (02:25, 02:49, 02:53, 02:57).
 
 ## Handoffs (unrouted only)
 - -> UNITY (U-150), B-171 placement: vapor_cone and shock_ring pivots = the ship's centre of mass (ship-local 0, 6.2 m, the tilt pivot); the cone draws IN FRONT of the hull, the ring BEHIND it. speed_lines: 128x360 tiles, 3 per 1080 px edge (tile i may show frame (f + i) % 4), drawn for the LEFT edge, flip x for the right; pivot (0, 0.5) = the edge. puff_boost: a drop-in for ships/pilgrim/puff (socket tail_exhaust, pivot 0.5 / 0.96, clip 'puff'), now 192x288 frames: no 1.6x y-scale needed.
@@ -46,4 +46,4 @@ none (B-161's three ruled in D-148).
 none (USER-28, closing ChatGPT + Edge for RAM, is LEAD's).
 
 ## HeavyJobLock
-none held (released 02:31:5x after B-171); no want (UNITY took the lock after my job: D-039, re-filed only once it releases or per the queue). No background waiters.
+none held (released 02:57:5x after Uranus deep); no want (UNITY took lock C after my job: D-039; I take the next free gap per the queue). No background waiters.
