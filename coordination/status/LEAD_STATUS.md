@@ -8,11 +8,11 @@ Cycle 281 (09:3x–11:0x): the resume; U-156 / U-161 Done; D-168 / D-169; every 
 Cycle 285 (17:05, 2-hour tick): no stall; U-172 / U-169 Done on the full sweep; D-175 (prestige), D-176 (ShipMarks); B-203 / B-204 accepted; U-173 (Build 0.5.1) next; cron next ~19:05.
 16:2x: THE OWNER'S PLAYTEST → D-174 (a progression digging game, Bible 5.2 §8.1, milestone D1); L-013 (docs/D1_TABLES.md) is LEAD's own task now.
 ## Current task
-After 0.5.0: Mars / Mercury / Venus on smooth ground (U-159 with U-166 and U-162; BLENDER's B-186 sets, B-185 layer2 extensions, B-184 puffs, B-187 sets, B-182 audit), then the giants' islands (U-160). The owner's USER-33 answer goes first if it asks for Earth changes.
+Directing D1, the owner's progression digging game (D-174 / D-175, Bible 5.3 §8.1, docs/D1_TABLES.md): U-173 Build 0.5.1 first (the downhill walk fix + Mars smooth + today's fixes) → its page + the next playtest item; then U-174 (the dig run core) → U-175 (the Skill Tree) → U-178 (Rank, New Expedition) → U-176 (ways up) → U-177 (the planet ladder, Mercury / Venus smooth). BLENDER: B-203 tiers (Earth accepted; Mars / Mercury / Venus next), B-204 (kit + 66 icons), B-206, B-205, B-207, B-208, B-202.
 ## Last completed
-Build 0.5.0 and its page.
+D-174 / D-175 and L-013 (docs/D1_TABLES.md); the full PlayMode sweep judged (U-172, U-169 Done; D-176).
 ## Next up
-1. U-169 (the camp shoulder) → ruling or Done. 2. USER-33 → cards or decisions. 3. U-159 Mercury / Venus slices + the full PlayMode sweep → the next build and its page. 4. The U-168 removal go after UNITY's test re-points. 5. LeadQA: M3Inner's Solarite step onto the node path when U-159 moves Mercury.
+1. U-173's smoke → the 0.5.1 page (the scratchpad p050 page's style) + USER-34. 2. BLENDER's link swaps → rewrite D1_TABLES §5's links (no crossings). 3. B-203 Mars / Mercury / Venus previews; B-204 icon batches; B-206 sheet. 4. U-174's first slice → judge. 5. LeadQA: a dig-run scenario (dig to tier 3 on Earth, sell topside, buy a node) for D1's exit.
 ## Pending decisions
 none open.
 ## Waiting on the user
