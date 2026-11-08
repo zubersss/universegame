@@ -1,0 +1,18 @@
+{
+  "key": "ui/panels/grain",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 128,
+  "height": 128,
+  "tile_x": true,
+  "tile_y": true,
+  "repeat_px": 128,
+  "texel_px": 1,
+  "wrap": "repeat",
+  "blend": "alpha over the panel (ink at alpha 0-0.16, mean ~0.05), masked by the panel's alpha (a UGUI Mask)",
+  "note": "B-208: B-151's paper grain, no longer baked into the stretched panels; tiled, never stretched"
+}

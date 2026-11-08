@@ -16,5 +16,7 @@
   ],
   "slice_order": "[left, top, right, bottom] px in from each edge (contract 11.6); Unity's Sprite.border is (left, bottom, right, top)",
   "lettering": "runtime",
-  "lettering_note": "blank panel; UNITY letters it in Patrick Hand"
+  "lettering_note": "blank panel; UNITY letters it in Patrick Hand",
+  "grain": "ui/panels/grain",
+  "grain_note": "B-208: flat paper for the 9-slice; tile ui/panels/grain over it at 1 texel = 1 px, masked by this panel's alpha"
 }
