@@ -1,12 +1,12 @@
 # BLENDER STATUS
-Updated: 2026-11-07 22:3x · Session: 8 (resumed 14:3x after the ~14:17 machine restart; C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-08 01:0x · Session: 8 (resumed 14:3x after the ~14:17 machine restart; C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-PAUSED by the owner (LEAD relayed 21:1x; acted on 22:3x): the RAM / locks monitor stopped, want_blender.lock removed, no renders, no dry runs, no polling until the owner or LEAD says continue.
-RESUME POINT, in order: (1) creatures/jupiter/vortex_whale under D-156: `blender/scripts/oneoff/whale_d156.ps1` (one-off gate 1300 MB, a 900 MB Blender working-set cap; the 20:51 attempt never reached 1300 free, so the exception is unspent; D-153 scale in code a9bae628, the parts pack 46 % of one sheet; its stamped review at 0.25x beside the surveyor). Then release: UNITY's D-156 compile + EditMode (1250 / 1000) runs next. (2) B-170: the lock-free card preview (`python -I build_ui_v3.py --cards <png>`, ~60 MB, for LEAD's look), then the export slot (ui/c2/titlecards_set; source fc08fbff). (3) B-163 slot 1: backgrounds/saturn/deck1,deck2,deck3,deep,hexagon (straight; U-129 loads these names). (4) B-163 slot 2: terrain/saturn/floe_strip_set, flora/saturn/rigset, props/saturn/props_set, ui/palettes/saturn. (5) B-164: creatures/saturn/helium_jelly, hex_drake, floe_moth, ringmite, polar_hydra. In free gaps only (nobody waiting): `oneoff/grand_pack.py` before the Hydra / Diamondback / Leviathan slots (a misfit goes to LEAD with a scale first), `oneoff/uranus_rows.py`, then `oneoff/neptune_rows.py` (LEAD 19:4x).
-Uncommitted on purpose: blender/sources/creatures/jupiter_vortex_whale_rigset.blend (the stale 1x build from 18:25; the D-156 export rebuilds it).
+RESUMED (owner via LEAD 01:0x). B-160 COMPLETE: the Vortex Whale exported 01:03 (92830c7f; normal wrapper, gate 1376, peak 623 MB; D-156 unspent). Now UNITY's turn (its full check + Build 0.4.8). Next, in order: (1) B-170: the lock-free card preview (`python -I build_ui_v3.py --cards <png>`) when nobody waits, then the export slot (ui/c2/titlecards_set); want filed when UNITY's lock appears (D-039). (2) B-163 slot 1: backgrounds/saturn/deck1,deck2,deck3,deep,hexagon. (3) B-163 slot 2: terrain/saturn/floe_strip_set, flora/saturn/rigset, props/saturn/props_set, ui/palettes/saturn. (4) B-164: creatures/saturn/helium_jelly, hex_drake, floe_moth, ringmite, polar_hydra. Free gaps only: oneoff/grand_pack.py, oneoff/uranus_rows.py, oneoff/neptune_rows.py.
+Uncommitted until my next slot's py_compile: render.py's rigset review clears the stale mark before drawing (the whale's parts review got a false STALE banner; STALE.txt is clear).
 
 ## Last completed
+- 01:02:41-01:03:37 SLOT (wrapper): B-160 the Vortex Whale at D-153 (92830c7f; 623 MB; review_b155_vortex_whale_assembled.png).
 - files (pause): B-170 source fc08fbff, the D-141 palette guards fa039f3b, the resume helpers 391c7cf7 (blender/scripts/oneoff/).
 - 18:22:10-18:27:02 SLOT (wrapper): B-160 stormglider / lightning_eel / belt_wasp / ballast_tortoise (db4d5a53; 658 MB); the whale failed to pack -> D-153.
 - 18:20:58-18:21:37 SLOT (wrapper): B-159 slot 2, floes / flora / props / palette (2b00434b; 393 MB).
@@ -21,7 +21,7 @@ Uncommitted on purpose: blender/sources/creatures/jupiter_vortex_whale_rigset.bl
 - 16:07:42-16:11:26 SLOT: the B-161 stamped reviews (all nine ACCEPTED).
 
 ## Ready for review
-none (the whale lands with its slot).
+- B-160: the whale (92830c7f) + review_b155_vortex_whale_assembled.png (0.25x beside the surveyor, ~36 m).
 
 ## Handoffs (unrouted only)
 none.
@@ -50,4 +50,4 @@ none (B-161's three ruled in D-148).
 none (USER-28, closing ChatGPT + Edge for RAM, is LEAD's).
 
 ## HeavyJobLock
-none held, no want on file (paused; removed 22:3x).
+none held (released 01:03:37); no want (UNITY's turn; re-filed when its lock appears, D-039).
