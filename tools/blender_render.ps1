@@ -226,6 +226,15 @@ for ($i = 0; $i -lt $jobs.Count; $i++) {
     if ($heavy) {
         $why = Request-Heavy $job
         if ($why) { Fail 3 $why }
+    } else {
+        # D-073: any blender.exe (a light job or a preview too) fails the other role's process check, so a light job waits
+        # while another role holds its lock or has a live want (2026-11-08 10:08: a 3 s light export started 15 s after
+        # heavy_unity.lock appeared, because only heavy jobs checked the locks).
+        $busy = @(Get-ChildItem $locks -Filter 'heavy_*.lock' -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -ne 'heavy_blender.lock' -and $_.LastWriteTime -gt (Get-Date).AddHours(-2) }) +
+            @(Get-ChildItem $locks -Filter 'want_*.lock' -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -ne 'want_blender.lock' -and $_.LastWriteTime -gt (Get-Date).AddMinutes(-30) })
+        if ($busy.Count -gt 0) { Fail 3 "D-073: a light blender.exe job waits while $($busy.Name -join ', ') is on file" }
     }
     $pyArgs = $job.Args + $(if ($Preview) { @('--preview') } else { @() })
     $t0 = Get-Date
