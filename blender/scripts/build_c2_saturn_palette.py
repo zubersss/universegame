@@ -36,7 +36,8 @@ def hue(h):
 
 def check():
     pal = {k: h for k, (h, _r) in SATURN.items()}
-    v3.PALETTES.setdefault("saturn", pal)
+    if v3.PALETTES.get("saturn") != pal:                         # D-141: the palette lives in meridian.v3, no setdefault
+        raise ValueError("SATURN here and meridian.v3.PALETTES['saturn'] (D-141) differ: " + str(v3.PALETTES.get("saturn")))
     jp = v3.PALETTES["jupiter"]
     rows = ["| slot | hex | role | mid | deep | contrast vs ink | chroma |", "|---|---|---|---|---|---|---|"]
     for k in v3.PALETTE_ORDER:
