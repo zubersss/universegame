@@ -48,6 +48,8 @@ namespace Meridian.Ship
         public bool AtRest => Grounded && Body.linearVelocity.sqrMagnitude < 0.01f;
         public bool LegsDeployed { get; private set; } = true;
         public float AltitudeAboveGround { get; private set; }
+        /// <summary>U-149: the air's density at the hull this step (ρ(h), relative to Earth's Datum; 0 on Mercury and above the Escape Line).</summary>
+        public float AirDensity { get; private set; }
         public float LastTouchdownSpeed { get; private set; }
         /// <summary>The upright flight model (tilt, spring back, righting).</summary>
         public RocketFlight Flight { get; } = new RocketFlight();
@@ -132,10 +134,14 @@ namespace Meridian.Ship
             fallSpeed = v.y < 0f ? -v.y : 0f;
 
             // The intent is the pilot's (Update clears it when nobody is aboard) or a test's (externalInput).
-            float throttle = Mathf.Clamp01(intent.thrust);
+            // U-149 (D-158 (3)): the thruster spools toward the intent (0.35 s up, 0.2 s down) and the air drags the hull.
+            Flight.StepThrottle(intent.thrust, dt);
+            float throttle = Flight.Throttle;
             Flight.StepTilt(intent.lateral, Grounded && throttle <= 0f, dt);
             Body.angularVelocity = Mathf.DeltaAngle(Body.rotation, Flight.Tilt) / dt;
             if (throttle > 0f) v += Flight.ThrustAccel(throttle, Thrust) * dt; // gravity is the Rigidbody's (Physics2D.gravity)
+            AirDensity = planet != null ? planet.AirDensityAt(Body.position.y) : 0f;
+            if (AirDensity > 0f) v += RocketFlight.DragAccel(v, AirDensity) * dt; // D-106: drag only limits speed; it never stops a climb
             Body.linearVelocity = v;
 
             // Escape Line: the ship's center crossing upward (Bible §5.2 trigger).

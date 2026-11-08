@@ -70,7 +70,7 @@ namespace Meridian.Tests
             yield return Steps(30);
             Assert.IsTrue(s.AtRest, "landed at rest");
             s.intent.thrust = 1f; // no fuel, no burn window: thrust is simply held (D-103)
-            yield return Steps(Mathf.RoundToInt(2f / Time.fixedDeltaTime));
+            yield return Steps(Mathf.RoundToInt(2.5f / Time.fixedDeltaTime)); // U-149 (D-158): 2 → 2.5 s for the thruster's 0.35 s spool; the assertion stays
             Assert.Greater(s.Body.position.y, SideShip.SkidDrop + 3f, "climbing (12 m/s² against 9.81)");
             s.intent.thrust = 9.81f / s.Thrust; // throttle so thrust = g
             yield return Steps(2);
@@ -94,7 +94,7 @@ namespace Meridian.Tests
             yield return Steps(25);
             Assert.Greater(s.Body.linearVelocity.x, 1f, "thrust along the tilted nose pushes right");
             s.intent = new ShipSideIntent { lateral = -1f };
-            yield return Steps(Mathf.RoundToInt(1f / Time.fixedDeltaTime));
+            yield return Steps(Mathf.RoundToInt(1.5f / Time.fixedDeltaTime)); // U-149 (D-158): 1 → 1.5 s, the tilt's inertia swings −35° → +35° in ~1.06 s; the assertion stays
             Assert.AreEqual(RocketFlight.MaxTilt, s.Tilt, 1e-3f, "A: clamped at +35°");
             s.intent = default;
             yield return Steps(Mathf.RoundToInt(0.6f / Time.fixedDeltaTime));

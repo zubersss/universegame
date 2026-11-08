@@ -50,5 +50,21 @@ namespace Meridian.Planets
 
         /// <summary>U-107 (D-103): the lowest thruster mark that climbs here (no launch fuel exists; thrust-to-weight is the only limit).</summary>
         public int MinThrusterToClimb => Meridian.Ship.ShipMarks.MinThrusterToClimb(gravity);
+
+        /// <summary>U-149 (D-158 (3)): the air's density at the Datum relative to Earth's, the drag's ρ_surface. Placeholders tuned on the
+        /// captures: Mercury 0 (no air), Mars 0.15, Earth 1, Venus 3, the four giants 1.5.</summary>
+        public static float SurfaceAirDensityFor(PlanetId id) => id switch
+        {
+            PlanetId.Mercury => 0f,
+            PlanetId.Mars => 0.15f,
+            PlanetId.Earth => 1f,
+            PlanetId.Venus => 3f,
+            _ => 1.5f,
+        };
+
+        public float SurfaceAirDensity => SurfaceAirDensityFor(id);
+
+        /// <summary>U-149: the air's density at world height y: ρ_surface·(1 − h/H)² with h above the Datum, 0 at and above the Escape Line.</summary>
+        public float AirDensityAt(float y) => Meridian.Ship.RocketFlight.AirDensity(SurfaceAirDensity, y - datumY, escapeAltitude);
     }
 }
