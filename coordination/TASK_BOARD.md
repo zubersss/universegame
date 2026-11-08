@@ -1494,7 +1494,7 @@ Goal: The Warden sentinel as a v3 sheet (B-193's finding (d): Sentinel.cs 44 loa
 Accept: one stamped design preview at 1× beside the surveyor, with each clip's frames, accepted by LEAD before the export; log OK; palette 100 %; UNITY's next import shows the sheet in play.
 Files: blender/scripts/build_creatures_v3.py (or the Warden's builder), Assets/_Game/Art/creatures/warden/
 Depends: —
-Lead notes: Cycle 283 (14:2x). After B-174 and B-195.
+Lead notes: Cycle 283 (14:2x). After B-174 and B-195. 15:0x: PREVIEW ACCEPTED AS DRAWN (review_b196_warden_sentinel_preview.png 14:59, sources 396f1af9 + 8a258a09): a hovering brass-capped lantern machine, one barred lamp (a lantern, not an eye), a mustard bell under it, an off-centre antenna and a tail vane (no symmetric pair: no face, D-101); idle 8 (bob, pulse, flutter), walk 12 (the chase lean, the lamp hot red, speed dashes), attack 8 once (the bell swings with ring arcs): matching Sentinel.cs / WardenDirector.cs (it rings its bell and bumps; never shoots, D-087); 104×112 frames, pivot centre, clips at the contract's caps; palette 100 %. Export with the .glb + maps removed in the same commit. Also in 8a258a09: the 27 manifest rows of B-174's removed orphans deleted (600 → 573, JSON valid).
 
 ### B-197 · BLENDER · Ready · C3
 Goal: A shared inventory icon for the wind anchor (UNITY's U-159 guard InventoryTests.ItemIconsAreSharedArt: item icons come from icons/ or props/common/; wind_anchor's is props/neptune/wind_anchor, its one exception): `icons/wind_anchor/base` in the icon set's style (the C3 icon sheet's size, ink and palette), drawn from the Neptune prop so the two read as the same thing.
