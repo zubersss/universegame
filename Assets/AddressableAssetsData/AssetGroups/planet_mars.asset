@@ -60,6 +60,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0d8b5b6901d175b4096ce4e232141f3f
+    m_Address: terrain/mars/fill_decor_basalt_3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0dd7f192171521643930b77f4450482b
     m_Address: terrain/mars/ground_decor_5
     m_ReadOnly: 0
@@ -92,6 +97,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 20d5e17054a10b24baa9cae8b2f23da6
     m_Address: backgrounds/mars/storm/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 20ed89a7ae2542b47acdab8279d88214
+    m_Address: terrain/mars/fill_decor_basalt_2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -152,6 +162,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 31957c3bdb94133458ed61da38c1b6ab
     m_Address: terrain/mars/dig_puff/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 31b8f131c92a2234da3c5a2386de9ba1
+    m_Address: terrain/mars/dig_puff_frost
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -232,6 +247,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 54b50bb60ff5f664b848d030dfb4597d
     m_Address: props/mars/node_water_ice
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5516c9631d9ef4547b150c94e02746aa
+    m_Address: terrain/mars/dig_puff_basalt/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -385,6 +405,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8a9c07635722b5d42b27f4bd007a4d91
+    m_Address: terrain/mars/fill_decor_basalt_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8f71323e4281bc644960433dcb926b6d
     m_Address: props/mars/pocket_hematite
     m_ReadOnly: 0
@@ -450,6 +475,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a63239f03c8c28144bab5aa1a6d2d9a7
+    m_Address: terrain/mars/dig_puff_basalt
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a97ddf1cde57c5b408aebd51da3822f9
     m_Address: backgrounds/mars/skydome_storm
     m_ReadOnly: 0
@@ -477,6 +507,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b358b2ec6f9911e40bd90958d4f3ad0a
     m_Address: props/mars/hauler_cargo
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b6077944d095ec04fb40de0f31c229b6
+    m_Address: terrain/mars/dig_puff_frost/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

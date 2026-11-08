@@ -40,6 +40,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 19d3dc1cdc12ee14fa070ec8b70c25c9
+    m_Address: terrain/venus/dig_puff_tessera/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1a96ff525ab9bc640a1bcb20990b6ec2
     m_Address: creatures/venus/acidmoth
     m_ReadOnly: 0
@@ -115,6 +120,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 32252ae41fa97b74b9539fd3f4d8fcc7
+    m_Address: backgrounds/venus/tessera
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 33718de5a226f2949a7f285d45223171
     m_Address: backgrounds/venus/surface/layer0
     m_ReadOnly: 0
@@ -135,6 +145,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 42667f73a12c50a438ec643bf0217730
+    m_Address: terrain/venus/dig_puff_tessera
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 450088f85df65b74391bf9aac9cdf1fb
     m_Address: creatures/venus/pressure_crab
     m_ReadOnly: 0
@@ -152,6 +167,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 46c43cda4c0cc874f85cfc97b775077a
     m_Address: terrain/venus/fill_decor_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 477f94e240538a34a9a428b4764067ee
+    m_Address: terrain/venus/dig_puff_vent/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -180,6 +200,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 51ae86fd873206d4285eb66ed1e47609
+    m_Address: backgrounds/venus/tessera/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 52f7c2b5578451a4ba97454e429b0709
     m_Address: props/venus/railing/json
     m_ReadOnly: 0
@@ -197,6 +222,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 59d5528d1a300f045a78e85cfbafeb91
     m_Address: props/venus/buoyancy_cell
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5a52528fc7d909f46a3ce55ea067ac50
+    m_Address: backgrounds/venus/tessera/layer1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -345,6 +375,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9992df4ee2da36248b1cff5b320eec6a
+    m_Address: backgrounds/venus/tessera/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a1ccd65cb37b0ea4abeaa93840efeeff
     m_Address: props/venus/pressure_capsule
     m_ReadOnly: 0
@@ -392,6 +427,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b8363e2dff3170c41bf996d3e8abc275
     m_Address: props/venus/aerostat_deck
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b845cd1083004714387e855c29622edc
+    m_Address: terrain/venus/dig_puff_vent
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

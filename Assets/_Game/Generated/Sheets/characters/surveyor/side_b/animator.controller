@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1102 &-8090552656574530376
+--- !u!1102 &-8214104823733118439
 AnimatorState:
   serializedVersion: 6
   m_ObjectHideFlags: 1
@@ -26,7 +26,7 @@ AnimatorState:
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
   m_TimeParameter: 
---- !u!1102 &-3138147446325719099
+--- !u!1102 &-2154614569010296180
 AnimatorState:
   serializedVersion: 6
   m_ObjectHideFlags: 1
@@ -52,14 +52,14 @@ AnimatorState:
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
   m_TimeParameter: 
---- !u!1102 &-1683890619809865976
+--- !u!1102 &-77574991354406345
 AnimatorState:
   serializedVersion: 6
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: build
+  m_Name: dig
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions: []
@@ -72,7 +72,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: c436481ae41bd3b45b0cd2b9bbebfcaf, type: 2}
+  m_Motion: {fileID: 7400000, guid: cbd9cd41126927c41b1c740711ac4377, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -101,7 +101,7 @@ AnimatorController:
     m_SyncedLayerAffectsTiming: 0
     m_Controller: {fileID: 9100000}
   m_EvaluateTransitionsOnStart: 1
---- !u!1102 &1946179434523415203
+--- !u!1102 &2970086323653058585
 AnimatorState:
   serializedVersion: 6
   m_ObjectHideFlags: 1
@@ -137,19 +137,19 @@ AnimatorStateMachine:
   m_Name: Base Layer
   m_ChildStates:
   - serializedVersion: 1
-    m_State: {fileID: 4780743471450151034}
+    m_State: {fileID: -77574991354406345}
     m_Position: {x: 200, y: 0, z: 0}
   - serializedVersion: 1
-    m_State: {fileID: -1683890619809865976}
+    m_State: {fileID: 7259424780176939488}
     m_Position: {x: 235, y: 65, z: 0}
   - serializedVersion: 1
-    m_State: {fileID: 1946179434523415203}
+    m_State: {fileID: 2970086323653058585}
     m_Position: {x: 270, y: 130, z: 0}
   - serializedVersion: 1
-    m_State: {fileID: -8090552656574530376}
+    m_State: {fileID: -8214104823733118439}
     m_Position: {x: 305, y: 195, z: 0}
   - serializedVersion: 1
-    m_State: {fileID: -3138147446325719099}
+    m_State: {fileID: -2154614569010296180}
     m_Position: {x: 340, y: 260, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions: []
@@ -160,15 +160,15 @@ AnimatorStateMachine:
   m_EntryPosition: {x: 50, y: 120, z: 0}
   m_ExitPosition: {x: 800, y: 120, z: 0}
   m_ParentStateMachinePosition: {x: 800, y: 20, z: 0}
-  m_DefaultState: {fileID: 4780743471450151034}
---- !u!1102 &4780743471450151034
+  m_DefaultState: {fileID: -77574991354406345}
+--- !u!1102 &7259424780176939488
 AnimatorState:
   serializedVersion: 6
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: dig
+  m_Name: build
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions: []
@@ -181,7 +181,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: cbd9cd41126927c41b1c740711ac4377, type: 2}
+  m_Motion: {fileID: 7400000, guid: c436481ae41bd3b45b0cd2b9bbebfcaf, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 

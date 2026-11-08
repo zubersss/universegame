@@ -1,0 +1,382 @@
+fileFormatVersion: 2
+guid: 31b8f131c92a2234da3c5a2386de9ba1
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -8892672961069852776
+    second: dig_puff_frost_color_0
+  - first:
+      213: -6418849335084060668
+    second: dig_puff_frost_color_1
+  - first:
+      213: -2330738329959530716
+    second: dig_puff_frost_color_2
+  - first:
+      213: -527011035369185254
+    second: dig_puff_frost_color_3
+  - first:
+      213: 6029651170292155732
+    second: dig_puff_frost_color_4
+  - first:
+      213: 6782772555582584572
+    second: dig_puff_frost_color_5
+  - first:
+      213: -4126034996961851722
+    second: dig_puff_frost_color_6
+  - first:
+      213: 4788666628893769806
+    second: dig_puff_frost_color_7
+  - first:
+      213: -7565264346581204130
+    second: dig_puff_frost_color_8
+  - first:
+      213: 6419549024292315353
+    second: dig_puff_frost_color_9
+  - first:
+      213: -7470108058053161115
+    second: dig_puff_frost_color_10
+  - first:
+      213: 8298668507800321059
+    second: dig_puff_frost_color_11
+  - first:
+      213: 4072846904217114173
+    second: dig_puff_frost_color_12
+  - first:
+      213: 8061379910283762025
+    second: dig_puff_frost_color_13
+  - first:
+      213: 7085524792953679908
+    second: dig_puff_frost_color_14
+  - first:
+      213: 7642975366126010575
+    second: dig_puff_frost_color_15
+  - first:
+      213: -1287503760555453735
+    second: dig_puff_frost_color_16
+  - first:
+      213: -5073314061906765465
+    second: dig_puff_frost_color_17
+  - first:
+      213: 5288714416312166102
+    second: dig_puff_frost_color_18
+  - first:
+      213: -8555747874092778703
+    second: dig_puff_frost_color_19
+  - first:
+      213: -462347147415246599
+    second: dig_puff_frost_color_20
+  - first:
+      213: -2129816944648486725
+    second: dig_puff_frost_color_21
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.25}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: dig_puff_frost_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.25}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f5f14337a5ea37540879bad056dbe4ee
+      internalID: 1381339668
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dig_puff_frost_1
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.25}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7a1f96ce646552c43b7c92ca47134291
+      internalID: 1839141334
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dig_puff_frost_2
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.25}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d0c2af577701bab499a3f313564943f8
+      internalID: -956262858
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dig_puff_frost_3
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.25}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 18cb128b23676d249a30369f4442770d
+      internalID: -829733866
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dig_puff_frost_4
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.25}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e0aac78bf644aef49bc1ac53966b89ed
+      internalID: -386635163
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dig_puff_frost_5
+      rect:
+        serializedVersion: 2
+        x: 660
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.25}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9d29ce3a48f4dd54da8bb8f6ed493fad
+      internalID: 386623358
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dig_puff_frost_6
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.25}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 64448d053a5f0dd46953ee6c25e20f10
+      internalID: -1538804735
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dig_puff_frost_7
+      rect:
+        serializedVersion: 2
+        x: 924
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.25}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bf5efb0b11adc0f4fa206f2a8f79210b
+      internalID: 1126549725
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: e402f8f10806ec14d94d5df014806b3f
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      dig_puff_frost_0: 1381339668
+      dig_puff_frost_1: 1839141334
+      dig_puff_frost_2: -956262858
+      dig_puff_frost_3: -829733866
+      dig_puff_frost_4: -386635163
+      dig_puff_frost_5: 386623358
+      dig_puff_frost_6: -1538804735
+      dig_puff_frost_7: 1126549725
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -140,6 +140,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3ede4027bb7c4c441a8a47be1721a216
+    m_Address: backgrounds/mercury/coldtrap/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3f2d37d6c49f0284c950a77afb720e52
     m_Address: terrain/mercury/ground_strip_slate
     m_ReadOnly: 0
@@ -180,8 +185,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4de1b95625abd9242b2413144222efdf
+    m_Address: backgrounds/mercury/coldtrap/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4f028203dbe973a41b193cc94bc8352e
     m_Address: props/mercury/flare_shelter
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4f873ee53dfdb394f83f4fc976e0ce04
+    m_Address: backgrounds/mercury/coldtrap
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -242,6 +257,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 681ad70f1b568f745b1d133cebc3dd0c
     m_Address: backgrounds/mercury/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6cdc3f1bcba02e9489a2d47bc65deab3
+    m_Address: terrain/mercury/dig_puff_ice
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -362,6 +382,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9ce76618442290c4c86f588b86203a71
     m_Address: props/mercury/scan_x/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a7588d42333b7af41977c15bc80cf191
+    m_Address: backgrounds/mercury/coldtrap/layer1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -507,6 +532,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d6c9ac9bb9a092546b5d683be29b0e06
     m_Address: terrain/mercury/ground_decor_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e0619b4a9edec954c81c9bfa0aa71aec
+    m_Address: terrain/mercury/dig_puff_ice/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
