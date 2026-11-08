@@ -1,10 +1,11 @@
 # BLENDER STATUS
-Updated: 2026-11-08 04:2x · Session: 9 (zuber-0c; all three windows restarted ~01:27; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-08 04:4x · Session: 9 (zuber-0c; all three windows restarted ~01:27; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-B-175 (D-161 / D-162, contract v3.2 11.9): Earth EXPORTED (40a7e179), Mars EXPORTED (f9d0696f); the Mercury preview with LEAD (review_b175_mercury_curve_preview.png 04:23); the Venus preview next in a free gap (UNITY's want on file 04:23: files only). Each accepted planet exports through a terrain/<planet>/ground_set row ("planet"). Then B-176 (nodes, buried finds, the X mark) once UNITY's U-158 key list is out; B-173's audit sheets (audit_c2.py) only in free gaps; B-172's export after U-151's code. Each heavy job checks want_unity first.
+B-175 COMPLETE for the inner planets (contract v3.2 11.9): Earth 40a7e179, Mars f9d0696f, Mercury 660c8825 (the fill cream-dominant, 70.7 %), Venus 8a0a487a; all VERIFIED by LEAD, Done on each planet's smooth-ground captures. B-173 DONE as sheets (2a576cd4: eight audit sheets + coordination/reports/blender/audit_c2.md; finding: ui/titlecards/venus 76.9 % palette, a gradient sky, left for LEAD). Waiting on: U-158's key list (B-176), U-160's island format (B-177), U-151's code (B-172's export), U-152's census (B-174). Meanwhile: B-176's design source lock-free against the game's item ids, keys provisional until U-158's list. Each heavy job checks want_unity first.
 
 ## Last completed
+- 04:26-04:42: B-175 Mercury exported (660c8825) and Venus previewed + exported (1fe5d0d0, 8a0a487a); B-173's eight audit sheets and report (2a576cd4; 92-124 MB per planet, lock-free).
 - 04:18-04:23: the Mars preview (ACCEPTED 04:2x) and its export (f9d0696f, 13 s, 577 MB); the Mercury and Venus sources (e0700bfc) and the Mercury preview (8053f887); the curve preview now under 300 MB (in-place write).
 - 04:10-04:11 SLOT (wrapper): B-175 Earth ground set, 11 keys, tiling copies p99 0.00 (40a7e179; 567 MB); the lock-free dry run first (240 MB). The design ACCEPTED by LEAD 04:0x (5037150c), UNITY's details applied (band pivot on row 24, rim pivot on row 4, the fill standalone with Repeat wrap, u by world x).
 - 03:47-03:55 SLOTS: B-166 slot 3 (2ea075d6: the Uranus creatures + the Diamondback Colossus); the Neptune rows (e6ab6630); B-169 slots 1a / 1b / 2 / 3 (28c85d77, eeb92819, 28aeb38a, 9d8d29ec: the six decks, spot = storm byte for byte, floes / rig / props / palette, the creatures + the Umbral Leviathan). B-166 and B-169 VERIFIED by LEAD 04:0x.
@@ -15,7 +16,7 @@ B-175 (D-161 / D-162, contract v3.2 11.9): Earth EXPORTED (40a7e179), Mars EXPOR
 - 01:02-01:14 SLOTS: B-160 the whale (92830c7f), B-170 the title cards (37c0a43f). VERIFIED.
 
 ## Ready for review
-- B-175 Earth VERIFIED (Done on UNITY's u156 captures). B-175 Mars: the 11 keys (f9d0696f) + review_b175_mars_ground.png (04:20). B-175 Mercury: the preview (04:23), awaiting LEAD.
+- B-173: blender/preview/audit_c2_<planet>.png x8 + coordination/reports/blender/audit_c2.md (04:42).
 
 ## Handoffs (unrouted only)
 - -> UNITY (U-150), B-171 placement: vapor_cone and shock_ring pivots = the ship's centre of mass (ship-local 0, 6.2 m, the tilt pivot); the cone draws IN FRONT of the hull, the ring BEHIND it. speed_lines: 128x360 tiles, 3 per 1080 px edge (tile i may show frame (f + i) % 4), drawn for the LEFT edge, flip x for the right; pivot (0, 0.5) = the edge. puff_boost: a drop-in for ships/pilgrim/puff (socket tail_exhaust, pivot 0.5 / 0.96, clip 'puff'), now 192x288 frames: no 1.6x y-scale needed.
