@@ -148,7 +148,7 @@ namespace Meridian.Tests
             old.Set(digX, digY, TileId.Air, raw.TileAt(digX, digY));
             old.SaveFile(Path.Combine(save.SlotFolder, "terrain_earth.bin"));
             var statePath = Path.Combine(save.SlotFolder, "state.json");
-            File.WriteAllText(statePath, System.Text.RegularExpressions.Regex.Replace(File.ReadAllText(statePath), "\"version\":\s*\d+", "\"version\": 2"));
+            File.WriteAllText(statePath, System.Text.RegularExpressions.Regex.Replace(File.ReadAllText(statePath), @"""version"":\s*\d+", "\"version\": 2"));
             Assert.AreEqual(2, SaveSystem.ReadState(save.SlotFolder).loadedVersion, "the slot reads as v2");
 
             yield return save.Load();
