@@ -77,7 +77,10 @@ namespace Meridian.Tests.LeadQA
             var mars = craft.world.Find("mars").Value;
             Vector2 escapePoint = earth.position + (craft.Position - earth.position).normalized * (earth.WellRadius + 20f);
             bool feltMars = false;
-            timeout = Time.realtimeSinceStartup + 60f;
+            // D-158 (LEAD, cycle 278): 60 → 90 s. U-149's spool and drag lengthen the Earth climb (19.1 → 20.0 s), so the craft
+            // leaves at another longitude and this scripted steering can take the long way round; the assertions are unchanged.
+            float spaceLegStart = Time.realtimeSinceStartup;
+            timeout = Time.realtimeSinceStartup + 90f;
             while (state.view == ViewMode.Space && !transitions.Busy && Time.realtimeSinceStartup < timeout)
             {
                 Vector2 target = mars.position;
@@ -96,6 +99,7 @@ namespace Meridian.Tests.LeadQA
                 Assert.IsFalse(craft.Destroyed, "ship survived the flight");
                 yield return null;
             }
+            TestContext.Out.WriteLine($"[LEADQA] space leg {Time.realtimeSinceStartup - spaceLegStart:F1} s real time (window 90 s)");
             Assert.IsTrue(feltMars, "Mars gravity well pulled the ship");
             yield return WaitIdle(transitions, 15f);
             Assert.AreEqual(ViewMode.PlanetSide, state.view, "entered a planet");
