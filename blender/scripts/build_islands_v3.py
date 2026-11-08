@@ -40,7 +40,8 @@ PPU = 64
 TAU = 2 * math.pi
 ART = os.path.normpath(os.path.join(HERE, "..", "..", "Assets", "_Game", "Art"))
 BELLY_W, BELLY_H, OUT_ROW = 512, 192, 72               # D-166: the outline on row 72
-DECKS = {"jupiter": ["deck1", "deck2", "deck3", "deep"]}
+DECKS = {g: ["deck1", "deck2", "deck3", "deep"] for g in ("jupiter", "saturn", "uranus", "neptune")}
+BG_SCENE = {"uranus": "deck2_survey"}            # the preview's backdrop (Uranus's decks come in four lightings)
 
 
 def colours(giant):
@@ -52,7 +53,20 @@ def colours(giant):
                 "wisp": P["sky"],
                 "haze": {"deck1": (P["offwhite"], P["sky"]), "deck2": (P["sky"], sh("mustard")), "deck3": (sh("mustard"), sh("red")),
                          "deep": (dp("red"), P["brown"])}}
-    raise ValueError(f"B-177: {giant} comes after Jupiter's preview")
+    # Saturn / Uranus / Neptune (LEAD 05:3x: their palettes, the same drawing): the cloud in the giant's offwhite, the ice in its
+    # teal; each deck's haze pair = the palette tones nearest its painted backdrop's lower half (sampled 05:3x)
+    common = {"cloud": P["offwhite"], "cloud_sh": sh("offwhite"), "cloud_dp": dp("offwhite"), "ice": P["teal"], "ice_hi": P["offwhite"],
+              "wisp": P["sky"]}
+    if giant == "saturn":
+        return dict(common, haze={"deck1": (P["offwhite"], P["sky"]), "deck2": (P["sky"], P["offwhite"]), "deck3": (sh("sky"), dp("offwhite")),
+                                  "deep": (P["brown"], dp("red"))})
+    if giant == "uranus":
+        return dict(common, haze={"deck1": (P["offwhite"], P["sky"]), "deck2": (P["sky"], sh("offwhite")), "deck3": (P["sky"], P["offwhite"]),
+                                  "deep": (P["brown"], dp("teal"))})
+    if giant == "neptune":
+        return dict(common, haze={"deck1": (sh("offwhite"), P["sky"]), "deck2": (P["sky"], sh("teal")), "deck3": (sh("sky"), dp("teal")),
+                                  "deep": (P["brown"], dp("sky"))})
+    raise ValueError(f"B-177: no island tones for {giant}")
 
 
 def mats(gp, giant):
@@ -279,7 +293,8 @@ def preview(out_dir, giant="jupiter", S=None, out=None, footnote=None):
     copy_p99 = copy_diff(giant)
     W, H = 1920, 900
     img = np.empty((H, W, 3), np.float32)
-    sky_layers, _note = review.planet_background(giant, "deck2", W, H, os.path.join(ART, "backgrounds", giant, "deck2"))
+    scene = BG_SCENE.get(giant, "deck2")
+    sky_layers, _note = review.planet_background(giant, scene, W, H, os.path.join(ART, "backgrounds", giant, scene))
     img[:] = sky_layers
     floe_line = 430                                          # the floe's underside outline (panel px)
     hz = hazes["deck2"].astype(np.float32) / 255.0

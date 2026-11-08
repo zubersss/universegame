@@ -1,0 +1,26 @@
+{
+  "key": "terrain/uranus/island_belly",
+  "style": "v3",
+  "contract": "v3.3 11.10",
+  "frame_width": 512,
+  "frame_height": 192,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.0,
+    0.625
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [],
+  "tile_x": true,
+  "repeat_px": 512,
+  "outline_row": 72,
+  "above_px": 72,
+  "below_px": 120,
+  "mapping": "along each floe's underside outline: u = world x x 64 mod 512; v = 72 + (the signed distance below the outline along its normal x 64); the sprite pivot is ON row 72",
+  "sort": "above the floe strip (its crown covers the strip's lower half; the ice cap's top line stays clear)",
+  "note": "B-177 / D-166: the cloud wraps the slab - a crown of lit lobes ~1.06 m above the outline, the belly and icicles hanging ~1.4-1.7 m below"
+}

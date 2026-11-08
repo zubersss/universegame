@@ -1,0 +1,22 @@
+{
+  "key": "terrain/saturn/island_end_l",
+  "style": "v3",
+  "contract": "v3.3 11.10",
+  "frame_width": 160,
+  "frame_height": 256,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.36,
+    0.5
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [],
+  "end": "left",
+  "meets": "floe_strip cap_left",
+  "sort": "above the floe strip and island_belly (it covers the band's cut at the floe's end)",
+  "note": "D-166: pivot on the outline row at the floe's end; the shoulder rises to 1.8 m (under the strip's top edge at 2 m) and bulges ~0.75 m past the floe's side"
+}
