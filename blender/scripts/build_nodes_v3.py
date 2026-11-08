@@ -111,7 +111,7 @@ def node_iron(d, M, state, k=0):
     mound(d, M, 0.78, h, 11)
     rnd = random.Random(21)
     spots = []
-    lumps = [(-0.35, 0.28, 0.12), (0.05, 0.42, 0.15), (0.38, 0.25, 0.11), (-0.05, 0.18, 0.09)]
+    lumps = [(-0.36, 0.28, 0.16), (0.05, 0.42, 0.20), (0.40, 0.25, 0.15), (-0.05, 0.16, 0.12)]   # ore big enough to read at 1x
     for j, (x, z, r) in enumerate(lumps if state != "harvested" else lumps[3:]):
         z = min(z, h * 0.75)
         pts = _poly(x, z, r, rnd, sides=6, flat=0.75)
@@ -130,7 +130,7 @@ def node_copper(d, M, state, k=0):
     mound(d, M, 0.76, h, 12)
     rnd = random.Random(22)
     spots = []
-    for j, (x, z, r) in enumerate(((-0.3, 0.30, 0.16), (0.25, 0.34, 0.14), (0.0, 0.18, 0.12))):
+    for j, (x, z, r) in enumerate(((-0.3, 0.30, 0.20), (0.27, 0.34, 0.18), (0.0, 0.17, 0.14))):
         if state == "harvested" and j < 2:
             continue
         z = min(z, h * 0.72)
@@ -234,14 +234,14 @@ def draw_pocket(item):
         spots = []
         if item == "iron":
             for j in range(6):
-                pts = _poly(rnd.uniform(-0.35, 0.35), rnd.uniform(-0.25, 0.2), rnd.uniform(0.09, 0.15), rnd, sides=6)
+                pts = _poly(rnd.uniform(-0.33, 0.33), rnd.uniform(-0.22, 0.18), rnd.uniform(0.10, 0.15), rnd, sides=6, lift=-9.0)
                 G.stroke(d, pts, M["iron_i"], I, cyclic=True)
                 spots.append(pts[1])
         elif item == "copper":
             for j in range(5):
                 x, z = rnd.uniform(-0.32, 0.32), rnd.uniform(-0.22, 0.18)
                 G.stroke(d, G.lumpy_ellipse(x, z, 0.12, 0.08, n=14, lump=0.12, seed=j), M["malachite_i"], I, cyclic=True)
-                G.stroke(d, _poly(x + 0.06, z + 0.04, 0.05, rnd, sides=5), M["copper_i"], I, cyclic=True)
+                G.stroke(d, _poly(x + 0.06, z + 0.04, 0.05, rnd, sides=5, lift=-9.0), M["copper_i"], I, cyclic=True)
                 spots.append((x + 0.06, z + 0.05))
         elif item == "carbon":
             for j in range(3):
@@ -252,7 +252,7 @@ def draw_pocket(item):
         elif item == "silica":
             for j, (x, a) in enumerate(((-0.25, -20), (0.0, 0), (0.22, 18), (0.38, 35))):
                 a = math.radians(a)
-                bx, bz, ln, w = x, -0.3, 0.42, 0.06
+                bx, bz, ln, w = x, -0.3, 0.34, 0.06
                 tx, tz = bx + ln * math.sin(a), bz + ln * math.cos(a)
                 nx, nz = math.cos(a) * w, -math.sin(a) * w
                 body = [(bx - nx, bz - nz), (tx - nx, tz - nz), (tx + 0.3 * w * math.sin(a), tz + 0.3 * w * math.cos(a)), (tx + nx, tz + nz), (bx + nx, bz + nz)]
@@ -297,17 +297,18 @@ def draw_vault(d, M, k):
     for j in range(8):
         a = TAU * j / 8
         G.seam(d, [(0.74 * math.cos(a), 0.74 * math.sin(a)), (0.84 * math.cos(a), 0.84 * math.sin(a))], M["ink"])
-    cx = 0.95 * t * 0.75
-    r = 0.70 * (1 - 0.15 * t)
-    door = G.lumpy_ellipse(cx, 0.0, r, r, n=40, lump=0.015, seed=5)
+    r = 0.70                                         # it swings open on a hinge at its left edge: narrowing in place
+    sx = max(0.08, 1.0 - 0.92 * t)
+    cx = -r + r * sx
+    door = G.lumpy_ellipse(cx, 0.0, r * sx, r, n=40, lump=0.015, seed=5)
     G.stroke(d, door, M["stone"], 0.0, cyclic=True)
-    G.stroke(d, [(cx + r * math.cos(a), r * math.sin(a)) for a in [math.pi * (0.55 + 0.9 * i / 20) for i in range(21)]] + [(cx - r * 0.2, 0.0)],
+    G.stroke(d, [(cx + r * sx * math.cos(a), r * math.sin(a)) for a in [math.pi * (0.55 + 0.9 * i / 20) for i in range(21)]] + [(cx - r * sx * 0.2, 0.0)],
              M["stone_sh"], 0.0, cyclic=True)
     for j in range(4):                                                                       # teal inset panels
-        a0 = TAU * j / 4 + math.pi / 4 + t * 2.0
-        pnl = [(cx + 0.28 * r * math.cos(a0 + da) * s, 0.28 * r * math.sin(a0 + da) * s) for s, da in ((1, -0.3), (2.2, -0.2), (2.2, 0.2), (1, 0.3))]
+        a0 = TAU * j / 4 + math.pi / 4
+        pnl = [(cx + 0.28 * r * sx * math.cos(a0 + da) * s, 0.28 * r * math.sin(a0 + da) * s) for s, da in ((1, -0.3), (2.2, -0.2), (2.2, 0.2), (1, 0.3))]
         G.stroke(d, pnl, M["panel_i"], I, cyclic=True)
-    G.stroke(d, G.lumpy_ellipse(cx, 0.0, r * 0.18, r * 0.18, n=16, lump=0.0), M["panel_i"], I, cyclic=True)
+    G.stroke(d, G.lumpy_ellipse(cx, 0.0, r * 0.18 * sx, r * 0.18, n=16, lump=0.0), M["panel_i"], I, cyclic=True)
     G.stroke(d, door, M["ink"], O, cyclic=True)
     if k == 0:                                                                               # the hum ring while closed
         G.stroke(d, [(0.95 * math.cos(a), 0.95 * math.sin(a)) for a in [math.pi * (0.1 + 0.3 * i / 10) for i in range(11)]], M["ink"], I)
@@ -328,6 +329,7 @@ def draw_x(d, M, k):
         G.stroke(d, stroke_, M["xred"], 0.0, cyclic=True)
         G.stroke(d, [stroke_[0], stroke_[1], ((stroke_[0][0] + stroke_[1][0]) / 2, (stroke_[0][1] + stroke_[1][1]) / 2 - 0.01)], M["xred_sh"], 0.0, cyclic=True)
         G.stroke(d, stroke_, M["ink"], O, cyclic=True)
+        G.seam(d, [(-L * ux * 0.6 + w * nx * 0.3, cz - L * uz * 0.6 + w * nz * 0.3), (L * ux * 0.5 + w * nx * 0.3, cz + L * uz * 0.5 + w * nz * 0.3)], M["ink"])   # a brush streak
     G.stroke(d, G.lumpy_ellipse(0.0, 0.02, 0.26 * s, 0.035, n=20, lump=0.02, seed=2), M["xred_sh"], 0.0, cyclic=True)   # its shadow on the ground
 
 
