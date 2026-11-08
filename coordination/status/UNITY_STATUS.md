@@ -1,5 +1,5 @@
 # UNITY STATUS
-Updated: 2026-11-07 18:58 · Session: 8 (resumed 14:3x after a break; session 7's detail is in git log and coordination/status/archive/UNITY_2026-11-07.md)
+Updated: 2026-11-07 19:21 · Session: 8 (resumed 14:3x after a break; session 7's detail is in git log and coordination/status/archive/UNITY_2026-11-07.md)
 ## Current task
 U-127 Jupiter, slice 2 committed ahead of its check: the four B-160 floaters in the species table (Stormglider every deck, Lightning eel Deck 2, Belt wasps Deck 1, Ballast tortoise Decks 2–3; Air habitat over the floes; appended, every older index kept), JupiterStageTests +1, CaptureU127Jupiter (1_floe_kit_tortoise, 2_storm_deck_glider, 3_deep_crush, 4_red_spot; the whale crossing after its D-153 re-export). Next lock: CheckSetup import of B-159 / B-156 / B-160 (metas + the 21 + 9 + 12 orphaned v2 metas git rm) + compile + EditMode + the Jupiter PlayMode slice + CaptureU127Jupiter. Then Build 0.4.8 (the next owner build). The whale species row + its framing (D-138) land with its sheet; the tortoise husk prop with the hunt card.
 ## Last completed
@@ -19,4 +19,4 @@ U-126 floe caps (EditMode; its frame in u127/ next lock), U-127 slices 1–2 (co
 ## Housekeeping
 Editor churn in the tree from the cut runs (TMP font asset, animator.controllers, UnderwaterTint.mat, link.xml.meta, two InitTestScene files): never staged; my commits list files explicitly.
 ## HeavyJobLock
-none held; want filed 18:58 for the slice 2 lock.
+none held. Blocked on the RAM gate: free 1.10 GB at 19:20 (both roles wait; BLENDER's whale want 18:42 is ahead of mine). My background waiter for its slot was stopped by Claude Code for low memory at ~19:19 (session idle; a poll only, no Unity started, no lock taken). Next: a foreground poll when the session is next active; the slice 2 lock (scripts j_1..j_3 in the scratchpad) once RAM clears and BLENDER has run.
