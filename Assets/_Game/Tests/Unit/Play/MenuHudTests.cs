@@ -417,5 +417,102 @@ namespace Meridian.Tests
             Assert.AreEqual((Mathf.Round(ship.LastPull.magnitude * 10f) / 10f).ToString("0.0", System.Globalization.CultureInfo.InvariantCulture), hud.Well.text);
             LogAssert.NoUnexpectedReceived();
         }
+
+        /// <summary>
+        /// U-147 (D-149): the HUD's lettering sits on small paper tags in ink, at 1080p and at 720p (the canvas laid out at each screen size as its
+        /// scaler would: 1920×1080 units scaled to the screen): every tag on screen, no two tags overlapping, each tag's lettering drawn inside it
+        /// (the longest strings set: RADIATION, -99.9/s, -2000, the longest POI name at 3999 m), ink with the light rim off; with the gauge art in,
+        /// no light-blue lettering left on the HUD.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator TheHudLetteringSitsOnPaperTags()
+        {
+            SceneDirector director = null;
+            yield return Boot(d => director = d);
+            var hud = director.PlanetSide.sideHud;
+            float until = Time.realtimeSinceStartup + 10f;
+            while (!hud.GaugesReady && Time.realtimeSinceStartup < until) yield return null;
+            yield return null;
+            Assert.GreaterOrEqual(hud.Tags.Count, 4 + hud.MarkerTags.Count, "hazard, suit, escape, altitude and a tag per POI row");
+            var canvas = hud.HazardLabel.canvas.rootCanvas;
+            var crt = (RectTransform)canvas.transform;
+            var mode = canvas.renderMode;
+            var theme = UiTheme.Active;
+            try
+            {
+                canvas.renderMode = RenderMode.WorldSpace;
+                foreach (var screen in new[] { new Vector2(1920f, 1080f), new Vector2(1280f, 720f) })
+                {
+                    crt.sizeDelta = new Vector2(1920f, 1080f);
+                    crt.localScale = Vector3.one * (screen.y / 1080f);
+                    crt.position = Vector3.zero;
+                    hud.HazardLabel.text = "RADIATION"; hud.CryoText.text = "4"; hud.SuitRateText.text = "-99.9/s"; hud.AltText.text = "-2000";
+                    for (int i = 0; i < hud.MarkerTags.Count; i++)
+                    {
+                        hud.MarkerTags[i].gameObject.SetActive(true);
+                        hud.MarkerNames[i].text = "m  MERIDIAN STATION"; hud.MarkerDistances[i].text = "3999";
+                    }
+                    Canvas.ForceUpdateCanvases();
+                    var bounds = WorldRect(crt);
+                    var shown = new System.Collections.Generic.List<Rect>();
+                    for (int i = 0; i < hud.Tags.Count; i++)
+                    {
+                        var tag = hud.Tags[i];
+                        if (!tag.gameObject.activeInHierarchy) continue;
+                        var r = WorldRect(tag.rectTransform);
+                        string at = $"{screen.y}p {tag.name}";
+                        Assert.IsTrue(Inside(r, bounds, 0.5f), $"{at} {r} on screen ({bounds})");
+                        foreach (var other in shown) Assert.IsFalse(r.Overlaps(Shrink(other, 0.5f)), $"{at} {r} clear of {other}");
+                        shown.Add(r);
+                        foreach (var t in hud.TagLetters[i])
+                        {
+                            if (t == null || !t.enabled || string.IsNullOrEmpty(t.text)) continue;
+                            Assert.AreEqual(UiKit.Ink, t.color, $"{at}: {t.name} in ink");
+                            var rim = t.GetComponent<UnityEngine.UI.Outline>();
+                            Assert.IsTrue(rim == null || !rim.enabled, $"{at}: {t.name} without the light rim");
+                            var drawn = Drawn(t);
+                            Assert.IsTrue(drawn.xMin >= r.xMin - 1f && drawn.xMax <= r.xMax + 1f, $"{at}: {t.name} '{t.text}' {drawn} across its tag {r}");
+                            Assert.IsTrue(drawn.center.y > r.yMin && drawn.center.y < r.yMax, $"{at}: {t.name} centred on its tag");
+                            Assert.LessOrEqual(t.fontSize * t.rectTransform.lossyScale.y, r.height + 2f, $"{at}: {t.name} fits its tag's height");
+                        }
+                    }
+                }
+                if (hud.GaugesReady)
+                {
+                    foreach (var t in canvas.GetComponentsInChildren<UnityEngine.UI.Text>(false))
+                    {
+                        if (!t.enabled || string.IsNullOrEmpty(t.text) || t == hud.StormText) continue;
+                        bool light = Mathf.Abs(t.color.r - theme.text.r) < 0.02f && Mathf.Abs(t.color.g - theme.text.g) < 0.02f && Mathf.Abs(t.color.b - theme.text.b) < 0.02f;
+                        Assert.IsFalse(light, $"{t.name} '{t.text}' still in the light-blue HUD colour");
+                    }
+                }
+                else TestContext.Out.WriteLine("[MERIDIAN] U-147: the gauge art is not in; the light-blue check waits for it");
+            }
+            finally
+            {
+                canvas.renderMode = mode;
+            }
+        }
+
+        static Rect WorldRect(RectTransform rt)
+        {
+            var c = new Vector3[4];
+            rt.GetWorldCorners(c);
+            return Rect.MinMaxRect(c[0].x, c[0].y, c[2].x, c[2].y);
+        }
+
+        static bool Inside(Rect r, Rect outer, float tol) => r.xMin >= outer.xMin - tol && r.yMin >= outer.yMin - tol && r.xMax <= outer.xMax + tol && r.yMax <= outer.yMax + tol;
+
+        static Rect Shrink(Rect r, float by) => Rect.MinMaxRect(r.xMin + by, r.yMin + by, r.xMax - by, r.yMax - by);
+
+        /// <summary>The span a one-line Text draws (its preferred size placed by its alignment in its box), in world units.</summary>
+        static Rect Drawn(UnityEngine.UI.Text t)
+        {
+            var box = WorldRect(t.rectTransform);
+            float w = t.preferredWidth * t.rectTransform.lossyScale.x, h = t.preferredHeight * t.rectTransform.lossyScale.y;
+            int col = (int)t.alignment % 3; // 0 left, 1 centre, 2 right
+            float x0 = col == 0 ? box.xMin : col == 2 ? box.xMax - w : box.center.x - w * 0.5f;
+            return new Rect(x0, box.center.y - h * 0.5f, w, h);
+        }
     }
 }

@@ -130,6 +130,27 @@ namespace Meridian.UI
             }
         }
 
+        /// <summary>U-147 (D-149): a small paper tag behind HUD lettering (the gauges' look): cream, a 1 px ink edge, no raycasts. It goes just behind
+        /// `behind` in the draw order, so the lettering on it stays where it was.</summary>
+        public static Image PaperTag(Transform parent, string name, Vector2 anchor, Vector2 pos, Vector2 size, Vector2 pivot, Transform behind = null)
+        {
+            var tag = Panel(parent, name, anchor, pos, size, Cream);
+            tag.rectTransform.pivot = pivot;
+            tag.rectTransform.anchoredPosition = pos;
+            InkEdges(tag.rectTransform, CardEdge, Ink);
+            if (behind != null && behind.parent == parent) tag.transform.SetSiblingIndex(behind.GetSiblingIndex());
+            return tag;
+        }
+
+        /// <summary>U-147: HUD lettering set in ink on paper: the ink colour, the light-string rim off.</summary>
+        public static void InkOn(Text t)
+        {
+            if (t == null) return;
+            t.color = Ink;
+            var rim = t.GetComponent<Outline>();
+            if (rim != null) rim.enabled = false;
+        }
+
         /// <summary>The gold band along a card's or slot's bottom edge, hidden until the state asks for it.</summary>
         public static Image GoldBand(RectTransform box)
         {

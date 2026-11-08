@@ -70,6 +70,19 @@ namespace Meridian.UI
         static readonly string[] CryoLevels = { "0", "1", "2", "3", "4" };
         static readonly string[] KindNames = { "THERMAL", "CRYO", "RADIATION", "TOXIC", "PRESSURE" };
         int lastKind = -1;
+        /// <summary>U-147 (D-149): the paper tags under the HUD's lettering (hazard, suit, escape, altitude, the gauges' captions, the POI rows).</summary>
+        public readonly System.Collections.Generic.List<Image> Tags = new System.Collections.Generic.List<Image>();
+        /// <summary>U-147: each POI row's tag (shown with its row).</summary>
+        public readonly System.Collections.Generic.List<Image> MarkerTags = new System.Collections.Generic.List<Image>();
+        /// <summary>U-147: the lettering each tag carries, in the order of Tags (tests check it sits on its tag in ink).</summary>
+        public readonly System.Collections.Generic.List<Text[]> TagLetters = new System.Collections.Generic.List<Text[]>();
+        Image Tag(Transform parent, string name, Vector2 anchor, Vector2 pos, Vector2 size, Vector2 pivot, params Text[] letters)
+        {
+            var tag = UiKit.PaperTag(parent, name, anchor, pos, size, pivot, letters.Length > 0 && letters[0] != null ? letters[0].transform : null);
+            foreach (var t in letters) UiKit.InkOn(t);
+            Tags.Add(tag); TagLetters.Add(letters);
+            return tag;
+        }
         /// <summary>U-049: the name of the hazard shown beside the level (the worst one).</summary>
         public Text HazardLabel { get; private set; }
         static string[] stormWarnings;
@@ -97,23 +110,32 @@ namespace Meridian.UI
             HazardLabel = UiKit.Text(root, "HazardKind", new Vector2(0f, 1f), new Vector2(24f, -246f), new Vector2(200f, 18f), 13, false, TextAnchor.MiddleLeft, UiTheme.Active.label);
             HazardLabel.text = KindNames[(int)Meridian.Hazards.HazardKind.Cryo];
             CryoText = UiKit.Text(root, "CryoLevel", tl, new Vector2(130f, -246f), new Vector2(30f, 18f), 13, true, TextAnchor.MiddleLeft, new Color(0.6f, 0.85f, 1f, 1f));
-            Label(root, "SUIT", -266f);
+            var suitWord = Label(root, "SUIT", -266f);
             SuitFill = UiKit.Bar(root, "Suit", tl, new Vector2(24f, -288f), new Vector2(220f, 6f), new Color(0.6f, 0.85f, 1f, 1f));
             SuitRateText = UiKit.Text(root, "SuitRate", tl, new Vector2(252f, -278f), new Vector2(120f, 24f), 16);
             SuitRateText.text = "";
+            // U-147 (D-149): the hazard row and the suit row on paper tags in ink; the suit bar an ink-ruled strip with a gold fill.
+            Tag(root, "HazardTag", tl, new Vector2(18f, -243f), new Vector2(128f, 23f), tl, HazardLabel, CryoText);
+            Tag(root, "SuitTag", tl, new Vector2(18f, -267f), new Vector2(312f, 32f), tl, suitWord, SuitRateText);
+            var suitBack = SuitFill.transform.parent.GetComponent<Image>();
+            suitBack.color = UiKit.Cream;
+            UiKit.InkEdges(suitBack.rectTransform, UiKit.CardEdge, UiKit.Ink);
+            SuitFill.color = UiKit.Gold;
             BuildGauges(root);
 
             // Altitude bar on the right edge: world bottom → world top, Escape Line marked.
             var right = new Vector2(1f, 0.5f);
             UiKit.Panel(root, "AltBar", right, new Vector2(-40f, 0f), new Vector2(3f, BarHeight), theme.barBack);
             var bar = UiKit.Rect(root, "AltSpace", right, new Vector2(-40f, -BarHeight * 0.5f), new Vector2(3f, BarHeight), new Vector2(0.5f, 0f));
-            EscapeMarker = UiKit.Panel(bar, "Escape", new Vector2(0.5f, 0f), Vector2.zero, new Vector2(30f, 2f), new Color(0.6f, 0.88f, 1f, 0.95f)).rectTransform;
+            EscapeMarker = UiKit.Panel(bar, "Escape", new Vector2(0.5f, 0f), Vector2.zero, new Vector2(30f, 2f), UiKit.Gold).rectTransform; // U-147: a gold rule (it reads on every sky)
             var escapeLabel = UiKit.Text(EscapeMarker, "EscapeLabel", new Vector2(0f, 0.5f), new Vector2(-8f, 0f), new Vector2(120f, 20f), 13, false, TextAnchor.MiddleRight, new Color(0.6f, 0.88f, 1f, 0.95f));
             escapeLabel.rectTransform.pivot = new Vector2(1f, 0.5f);
             escapeLabel.text = "ESCAPE";
+            Tag(EscapeMarker, "EscapeTag", new Vector2(0f, 0.5f), new Vector2(-4f, 0f), new Vector2(70f, 22f), new Vector2(1f, 0.5f), escapeLabel); // U-147
             YouMarker = UiKit.Panel(bar, "You", new Vector2(0.5f, 0f), Vector2.zero, new Vector2(14f, 6f), theme.text).rectTransform;
             AltText = UiKit.Text(root, "AltValue", right, new Vector2(-64f, -BarHeight * 0.5f - 22f), new Vector2(160f, 24f), 18, false, TextAnchor.MiddleRight);
             AltText.rectTransform.pivot = new Vector2(1f, 0.5f);
+            Tag(root, "AltTag", right, new Vector2(-60f, -BarHeight * 0.5f - 22f), new Vector2(76f, 26f), new Vector2(1f, 0.5f), AltText); // U-147
 
             if (stormWarnings == null)
             {
@@ -151,6 +173,10 @@ namespace Meridian.UI
                 var dist = UiKit.Text(hudRoot, "MarkerDistance" + i, right, new Vector2(-340f, y), new Vector2(80f, 20f), 14, false, TextAnchor.MiddleRight);
                 var name = UiKit.Text(hudRoot, "MarkerName" + i, right, new Vector2(-100f, y), new Vector2(220f, 20f), 13, false, TextAnchor.MiddleLeft, UiTheme.Active.label);
                 arrow.text = dist.text = name.text = "";
+                // U-147 (D-149): each row on its own paper tag in ink, shown with its row.
+                var tag = Tag(hudRoot, "MarkerTag" + i, right, new Vector2(-96f, y + 1f), new Vector2(348f, 21f), right, arrow, dist, name);
+                tag.gameObject.SetActive(false);
+                MarkerTags.Add(tag);
                 markerArrows.Add(arrow); MarkerDistances.Add(dist); MarkerNames.Add(name);
                 markerLast.Add(int.MinValue);
             }
@@ -168,7 +194,8 @@ namespace Meridian.UI
             {
                 while (next < pois.placed.Count && !pois.placed[next].def.marker) next++;
                 bool on = next < pois.placed.Count;
-                if (!on) { if (MarkerNames[i].text.Length > 0) { MarkerNames[i].text = markerArrows[i].text = MarkerDistances[i].text = ""; markerLast[i] = int.MinValue; } continue; }
+                if (!on) { if (MarkerNames[i].text.Length > 0) { MarkerNames[i].text = markerArrows[i].text = MarkerDistances[i].text = ""; markerLast[i] = int.MinValue; } if (MarkerTags[i].gameObject.activeSelf) MarkerTags[i].gameObject.SetActive(false); continue; }
+                if (!MarkerTags[i].gameObject.activeSelf) MarkerTags[i].gameObject.SetActive(true);
                 var p = pois.placed[next++];
                 if (!ReferenceEquals(MarkerNames[i].text, p.def.MarkerText)) MarkerNames[i].text = p.def.MarkerText;
                 float dx = p.nearestX - px;
@@ -275,6 +302,16 @@ namespace Meridian.UI
             o2Label.enabled = false;
             Under(HealthText, SuitGauge);
             Under(OxygenText, OxygenGauge);
+            // U-147 (D-149): each dial's caption (and its number) on a paper tag in ink under the dial.
+            GaugeTag(SuitGauge, HealthText); GaugeTag(OxygenGauge, OxygenText); GaugeTag(GravityGauge, null);
+        }
+
+        void GaugeTag(HudGauge g, Text number)
+        {
+            float w = g.Dial.rectTransform.sizeDelta.x;
+            var pos = g.Dial.rectTransform.anchoredPosition + new Vector2(w * 0.1f, -g.Size - 1f);
+            var tag = Tag(g.Caption.transform.parent, "GaugeTag_" + g.Name, new Vector2(0f, 1f), pos, new Vector2(w * 0.8f, number != null ? 47f : 23f), new Vector2(0f, 1f), g.Caption, number);
+            if (number != null && number.transform.GetSiblingIndex() < tag.transform.GetSiblingIndex()) tag.transform.SetSiblingIndex(number.transform.GetSiblingIndex());
         }
 
         static void Under(Text t, HudGauge g)
