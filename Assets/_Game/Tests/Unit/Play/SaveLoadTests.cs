@@ -109,6 +109,72 @@ namespace Meridian.Tests
             LogAssert.NoUnexpectedReceived();
         }
 
+        /// <summary>
+        /// U-157 (D-162 (6), D-165 (3)): a 0.4.8 slot (state v2, Earth's terrain diffs stamped against the blocky ground, plus a dig of the
+        /// player's) loads onto the smooth ground: the old stamp diffs go, the camp re-stamps on the smoothed ground (its flags set again), and
+        /// the player's dig stays.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator AVersionTwoSaveReStampsEarthOnTheSmoothGround()
+        {
+            SceneDirector director = null;
+            yield return Boot(d => director = d);
+            var save = SaveSystem.Instance;
+            var state = GameState.Instance;
+            var cfg = director.PlanetSide.Config;
+            Assert.IsTrue(director.PlanetSide.terrain.SmoothGround, "Earth's ground is smooth");
+            var camp = Meridian.Planet.POI.PoiCatalog.SpawnCamp;
+            Assert.IsTrue(state.HasFlag(camp.StampedFlag), "a new world stamps its camp");
+            save.Save();
+
+            // The slot as 0.4.8 wrote it: state v2; Earth's diffs from the old stamping, and a dig into solid ground off the stamps.
+            var old = new TerrainEdits();
+            bool was = GroundField.ForceBlocks;
+            GroundField.ForceBlocks = true;
+            SolidWorldGenerator raw;
+            try
+            {
+                raw = new SolidWorldGenerator(cfg, state.worldSeed);
+                foreach (var poi in Meridian.Planet.POI.PoiCatalog.For(PlanetId.Earth)) Meridian.Planet.POI.PoiStamp.Apply(poi, raw, old, cfg.datumY);
+            }
+            finally { GroundField.ForceBlocks = was; }
+            var oldStamps = old.Cells();
+            int digX = camp.x + camp.Width + 300, digY = 0;
+            for (; digX < camp.x + camp.Width + 400; digX++)
+            {
+                digY = raw.SurfaceHeight(digX) - 2;
+                if (TileId.IsSolid(raw.TileAt(digX, digY)) && !old.TryGet(digX, digY, out _)) break;
+            }
+            old.Set(digX, digY, TileId.Air, raw.TileAt(digX, digY));
+            old.SaveFile(Path.Combine(save.SlotFolder, "terrain_earth.bin"));
+            var statePath = Path.Combine(save.SlotFolder, "state.json");
+            File.WriteAllText(statePath, System.Text.RegularExpressions.Regex.Replace(File.ReadAllText(statePath), "\"version\":\s*\d+", "\"version\": 2"));
+            Assert.AreEqual(2, SaveSystem.ReadState(save.SlotFolder).loadedVersion, "the slot reads as v2");
+
+            yield return save.Load();
+            var side = director.PlanetSide;
+            var t = side.terrain;
+            yield return Settle(t);
+
+            // The stamping the smooth ground gets, for comparison.
+            var smooth = new TerrainEdits();
+            var gen = new SolidWorldGenerator(cfg, state.worldSeed);
+            foreach (var poi in Meridian.Planet.POI.PoiCatalog.For(PlanetId.Earth)) Meridian.Planet.POI.PoiStamp.Apply(poi, gen, smooth, cfg.datumY);
+            int pad = Meridian.Planet.POI.PoiStamp.GroundY(camp, gen, cfg.datumY), mid = camp.x + camp.Width / 2;
+            Assert.IsTrue(state.HasFlag(camp.StampedFlag), "the camp re-stamped (its flag set again)");
+            Assert.AreEqual(pad, t.TopSolidY(mid), "the camp's pad stands on the smoothed ground");
+            Assert.AreEqual(TileId.Air, t.GetTile(digX, digY), "the player's dig stays");
+            int stale = 0;
+            foreach (var (x, y, id) in oldStamps)
+            {
+                if (smooth.TryGet(x, y, out byte now) && now == id) continue; // the new stamping writes the same there
+                if (t.Edits.TryGet(x, y, out byte cur) && cur == id) stale++;
+            }
+            TestContext.Out.WriteLine($"[MERIDIAN] u157 v2 load: {oldStamps.Count} old stamp diffs, {stale} stale left, camp pad {pad}, edits now {t.Edits.Count}");
+            Assert.AreEqual(0, stale, "no 0.4.8 stamp diff is left standing");
+            LogAssert.NoUnexpectedReceived();
+        }
+
         [UnityTest]
         public IEnumerator SavesRotateIntoThreeBackups()
         {
