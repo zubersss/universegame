@@ -175,11 +175,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 7da6ad55aea412442b8b32841d9b6bc7
-    m_Address: icons/cryo_round/base
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7f2404929c94bae4b96ec6655136eb21
     m_Address: icons/mercury_regolith/base
     m_ReadOnly: 0

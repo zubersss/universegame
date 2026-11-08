@@ -295,7 +295,6 @@ MonoBehaviour:
   - backgrounds/venus_deck/ridge_mid
   - backgrounds/venus_surface/ridge_mid
   - characters/calibration/base
-  - characters/surveyor/base
   - characters/surveyor/mk1
   - characters/surveyor/mk2
   - characters/surveyor/mk3
@@ -344,7 +343,6 @@ MonoBehaviour:
   - props/space/asteroid_06
   - props/space/waystation
   - props/space/waystation_mars
-  - ships/pilgrim/base
   - ships/pilgrim/side
   - ships/pilgrim/side_legs
   - ships/pilgrim/top
