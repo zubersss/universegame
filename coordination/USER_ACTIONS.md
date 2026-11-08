@@ -6,14 +6,6 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-31 — Close the browsers and Copilot until the team's two jobs run (2 min)
-At 19:2x free memory is 1.16 GB. Both workers are blocked on it: the Blender Artist's Vortex Whale export needs 1.38 GB,
-the Unity Engineer's Jupiter check needs 1.5 GB; nothing else heavy is running. Chrome (11 processes, 0.4 GB), Edge
-(7 + 12 web views, 0.45 GB) and the Copilot app (9 processes, 0.1 GB) hold about 1 GB between them. Close all three
-(right-click each taskbar icon → Close window; the page link is in this file and in the chat, open it again later),
-then tell the Lead "done: USER-31". Ten minutes later the two jobs are through and you can open them again. When you play Build 0.4.7 (USER-30) the team's heavy jobs pause on their own for the game's memory;
-that is expected and nothing to report.
-
 ### USER-30 — Play Build 0.4.7: Mercury, Venus and the paper menus (20 min)
 Open https://claude.ai/artifact/Tgkyg6QXPABeqhxigtRyrq (the Mercury, Venus and menus page: the stills, the numbers, what changed, what comes next), then play:
 double-click `C:\dev\universegame\Build\MERIDIAN_0.4.7\MERIDIAN.exe`. On Earth press Esc for the paper pause menu,
@@ -31,6 +23,7 @@ If you get too many "allow this command?" prompts, tell the Lead "approve PowerS
 allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
 
 ## Done
+- 2026-11-08 01:0x · USER-31 done: Chrome and Edge are closed, free RAM 2.0 GB; the team resumed on the owner’s "continue work".
 - 2026-11-07 17:5x · USER-27 folded into USER-30 (Build 0.4.7 has Earth, Mars, Mercury, Venus and the paper menus).
 - 2026-11-07 16:0x · USER-29 retired by LEAD: the build finished at 15:56 without a memory stop and free RAM is back at 2.2 GB with Edge and Chrome still open; nothing to do.
 - 2026-11-07 15:0x · USER-28 retired by LEAD: free memory cleared the gate on its own at 14:46 (1.76 GB) and held through UNITY's probe and BLENDER's Uranus slot with ChatGPT and Edge still open; nothing to do.
