@@ -277,7 +277,8 @@ namespace Meridian.Planet.Backdrop
                 byte id = terrain.BaseGenerator.TileAt(wx, top);
                 if (!TileId.IsSolid(id)) id = TileId.Soil;
                 bool water = top + 1 < terrain.Config.worldHeight && terrain.BaseGenerator.TileAt(wx, top + 1) == TileId.Water;
-                int g = water ? int.MinValue : top + 1;
+                // U-156: on a smooth planet the strip stays under the drawn curve (no whole-tile steps over a rounded crest).
+                int g = water ? int.MinValue : terrain.SmoothGround ? Mathf.FloorToInt(terrain.CurveAt(x)) : top + 1;
                 if (g != int.MinValue)
                 {
                     // Top, and the skirt down the back edge (facing the camera).
@@ -350,7 +351,7 @@ namespace Meridian.Planet.Backdrop
                     {
                         go = new GameObject("Flora " + pick.key.Substring(pick.key.LastIndexOf('/') + 1));
                         go.transform.SetParent(transform, false);
-                        go.transform.localPosition = new Vector3(x + 0.5f, top + 1f, z);
+                        go.transform.localPosition = new Vector3(x + 0.5f, terrain.SmoothGround ? terrain.CurveAt(x) : top + 1f, z); // U-156: on the drawn curve
                         go.transform.localRotation = Quaternion.Euler(0f, yaw, 0f);
                         go.transform.localScale = Vector3.one * scale;
                         go.AddComponent<ModelView>().Load(pick.key);

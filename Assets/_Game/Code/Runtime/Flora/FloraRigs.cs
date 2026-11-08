@@ -274,6 +274,7 @@ namespace Meridian.Flora
                 float x = x0 + i * spacing + (Hash01(seed, i * 3 + 1) - 0.5f) * spacing * 0.8f;
                 int tx = Mathf.FloorToInt(x);
                 float y = terrain != null ? terrain.TopSolidY(tx) + 1f : 0f;
+                if (terrain != null && terrain.SmoothGround && terrain.TopSolidY(tx) == terrain.OriginalTop(tx)) y = terrain.SurfaceAt(x); // U-156: rooted on the drawn outline (undug ground)
                 var pool = CandidatesAt(tx);
                 var def = pool[Mathf.FloorToInt(Hash01(seed, i * 3 + 2) * pool.Length) % pool.Length];
                 Spawn(def, new Vector2(x, y), seed * 977 + i);

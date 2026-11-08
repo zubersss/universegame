@@ -153,6 +153,15 @@ namespace Meridian.Terrain
         /// <summary>U-156: the drawn surface's height over column x's centre on a smooth planet (the outline's line where nothing is dug or built).</summary>
         public float CurveAt(int x) => GroundField.Curve(x, OriginalTop, PadTop);
 
+        /// <summary>U-156: the drawn outline's height at world x where nothing is dug or built (the curve between column centres, linear, as
+        /// the marching squares trace it).</summary>
+        public float SurfaceAt(float x)
+        {
+            float fx = x - 0.5f;
+            int i = Mathf.FloorToInt(fx);
+            return Mathf.Lerp(CurveAt(i), CurveAt(i + 1), fx - i);
+        }
+
         int TerrainChunk.IBlockWorld.WallTop(int x)
         {
             if (Config == null || Config.worldType != WorldType.Solid) return int.MinValue;

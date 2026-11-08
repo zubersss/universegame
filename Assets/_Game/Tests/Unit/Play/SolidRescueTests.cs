@@ -70,11 +70,11 @@ namespace Meridian.Tests
             for (int i = 0; i < 40; i++) yield return new WaitForFixedUpdate();
         }
 
-        IEnumerator Lifted(Rigidbody2D body, string who, float x, float surface, int rescuesBefore)
+        IEnumerator Lifted(Rigidbody2D body, string who, float x, float surface, int rescuesBefore, int settle = 25)
         {
             for (int i = 0; i < 10 && SolidRescue.Rescues == rescuesBefore; i++) yield return new WaitForFixedUpdate();
             Assert.Greater(SolidRescue.Rescues, rescuesBefore, $"{who}: lifted");
-            for (int i = 0; i < 25; i++) yield return new WaitForFixedUpdate();
+            for (int i = 0; i < settle; i++) yield return new WaitForFixedUpdate();
             float bottom = Bottom(body), ex = body.position.x, under = Surface(ex); // where it stands now (a creature may have walked on)
             TestContext.Out.WriteLine($"[MERIDIAN] u156 rescue {who}: buried at x {x:F1} to {surface - Depth:F2} (outline {surface:F2}); ends at x {ex:F2}, feet {bottom:F2}, outline there {under:F2}");
             Assert.AreEqual(under, bottom, OnSurface, $"{who}: ends on the surface");
@@ -96,14 +96,14 @@ namespace Meridian.Tests
             yield return Lifted(player.Body, "surveyor", x, surface, before);
             Assert.IsTrue(player.Grounded, "the surveyor stands on the outline");
 
-            // A creature beside it.
-            float cx = x + 3f, cs = Surface(cx);
+            // A creature well clear of the surveyor (a creature walks on, and leans on whatever it meets): measured just after its lift.
+            float cx = x + 12f, cs = Surface(cx);
             var spec = SpeciesSpec.Get(Species.Stag);
             before = SolidRescue.Rescues; // any lift from the spawn on (a held creature is lifted in the step it is released)
             var stag = side.creatures.Spawn(Species.Stag, new Vector2(cx, cs - Depth + spec.size.y * 0.5f));
             Assert.NotNull(stag);
             for (int i = 0; i < 300 && stag.Held; i++) yield return new WaitForFixedUpdate();
-            yield return Lifted(stag.Body, "stag", cx, cs, before);
+            yield return Lifted(stag.Body, "stag", cx, cs, before, 4);
             side.creatures.Despawn(stag);
 
             // A plain dynamic body (an item drop's shape).

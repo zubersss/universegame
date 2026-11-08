@@ -316,7 +316,7 @@ namespace Meridian.Planet.Backdrop
                     int top = terrain.OriginalTop(x);
                     go = new GameObject("Foreground " + key.Substring(key.LastIndexOf('/') + 1));
                     go.transform.SetParent(transform, false);
-                    go.transform.localPosition = new Vector3(x + 0.5f, top + 1f, z);
+                    go.transform.localPosition = new Vector3(x + 0.5f, terrain.SmoothGround ? terrain.CurveAt(x) : top + 1f, z); // U-156: on the drawn curve
                     go.transform.localRotation = Quaternion.Euler(0f, yaw, 0f);
                     var piece = go.AddComponent<ForegroundPiece>();
                     piece.Begin(key, Manifest != null ? Manifest.Haze : Color.white);
