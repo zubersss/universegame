@@ -1,0 +1,30 @@
+{
+  "key": "terrain/mars/ground_band_basalt",
+  "style": "v3",
+  "contract": "v3.2 11.9",
+  "frame_width": 512,
+  "frame_height": 64,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.0,
+    0.625
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [],
+  "tile_x": true,
+  "repeat_px": 512,
+  "surface_row": 24,
+  "above_px": 24,
+  "below_px": 40,
+  "variant": "basalt",
+  "biomes": [
+    "mars_tharsis"
+  ],
+  "fill": "ground_fill_basalt",
+  "mapping": "as ground_band: u = world x x 64 mod 512; v = 24 - (normal distance from the outline x 64); the sprite pivot is ON row 24",
+  "note": "B-181: Mars's basalt band (mars_tharsis); the rest of Mars keeps ground_band (U-159); crossfade the two bands at a biome border"
+}

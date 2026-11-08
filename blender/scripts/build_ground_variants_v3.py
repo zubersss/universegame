@@ -809,23 +809,30 @@ def _span_x(poly, z):
 
 
 def decor_talus(d, M, k):
-    if k == 0:                                                                                # a fallen wall block, its strata tilted
-        blk = _chipped(0.0, 0.17, 0.30, 0.19, 2050, rot=0.12, n=6, cuts=1)                   # one cut: its facets show (two read as an egg)
-        blk = [(x, max(z, -0.02)) for x, z in blk]
-        G.stroke(d, blk, M["salmon"], 0.0, cyclic=True)
-        for j, (z, t, role) in enumerate(((0.21, 0.03, "ochre"), (0.12, 0.045, "pale"), (0.04, 0.03, "ochre"))):
-            tilt = 0.02                                                                       # the strata rise to the right; each corner sits inside the outline
-            G.stroke(d, [(_span_x(blk, z)[0] + 0.015, z), (_span_x(blk, z + tilt)[1] - 0.015, z + tilt),
-                         (_span_x(blk, z + t + tilt)[1] - 0.015, z + t + tilt), (_span_x(blk, z + t)[0] + 0.015, z + t)], M[role], 0.0, cyclic=True)
-        G.stroke(d, _arc(blk, 0.0, 0.17, 150, 290), M["redbrown"], 0.0, cyclic=True)
+    if k == 0:                                                                                # a broken piece of the layered canyon wall
+        # LEAD 10:2x: the first draw (a pale oval, one stripe) read as an egg / a clam shell; now the wall's rose-grey rock with
+        # rust and red-brown laminae along its tilt, two chipped corners, softened once (rounded enough, not a cube), its left
+        # end buried, its right end resting on the ground
+        tilt, lift = 0.18, -0.04
+        c, s = math.cos(tilt), math.sin(tilt)
+        R = lambda px, pz: (px * c - pz * s, lift + px * s + pz * c)  # noqa: E731
+        local = [(-0.30, 0.0), (0.30, 0.0), (0.30, 0.19), (0.19, 0.30), (-0.23, 0.30), (-0.30, 0.24)]   # chipped top corners
+        blk = _soften([R(*p) for p in local], 1)
+        G.stroke(d, blk, M["rock"], 0.0, cyclic=True)
+        for z0, t, role in ((0.10, 0.035, "top"), (0.16, 0.03, "redbrown"), (0.215, 0.03, "top")):    # laminae following the tilt
+            xr = min(0.27, 0.30 - max(0.0, z0 + t - 0.19) - 0.03)                             # inside the softened outline and the chip
+            G.stroke(d, [R(-0.24, z0), R(xr, z0), R(xr, z0 + t), R(-0.24, z0 + t)], M[role], 0.0, cyclic=True)
+            G.seam(d, [R(-0.24, z0 + t), R(xr, z0 + t)], M["ink"])
+        G.stroke(d, [R(-0.17, 0.268), R(0.12, 0.268), R(0.12, 0.288), R(-0.17, 0.288)], M["rock_lit"], 0.0, cyclic=True)   # the lit top edge
         G.stroke(d, blk, M["ink"], O, cyclic=True)
+        G.seam(d, [R(0.19, 0.30), R(0.215, 0.235), R(0.30, 0.19)], M["ink"])                 # the fresh break at the chipped corner
     elif k == 1:                                                                              # a scree fan: shards heaped on a dust apron
         apron = [(-0.36 + 0.72 * i / 20, 0.05 * math.sin(math.pi * i / 20) ** 0.8) for i in range(21)]
         G.stroke(d, apron + [(0.36, -0.02), (-0.36, -0.02)], M["ochre"], 0.0, cyclic=True)
         G.stroke(d, apron, M["ink"], O)
         rnd = random.Random(2060)
         for j, (x, z, r, role) in enumerate(((-0.20, 0.06, 0.07, "rock_i"), (0.05, 0.07, 0.085, "salmon_i"), (0.24, 0.05, 0.06, "top_i"),
-                                             (-0.08, 0.16, 0.07, "pale_i"), (0.13, 0.17, 0.06, "redbrown_i"), (0.02, 0.26, 0.055, "salmon_i"))):
+                                             (-0.08, 0.16, 0.07, "pale_i"), (0.13, 0.17, 0.06, "redbrown_i"), (0.02, 0.215, 0.055, "salmon_i"))):   # the top shard rests on the pile
             G.stroke(d, B._shard(x, z, r, rnd, sides=5, flat=0.75), M[role], O if r > 0.065 else I, cyclic=True)
     else:                                                                                     # a dust-buried slab, an ochre drift on its back
         slab = _soften([(-0.36, -0.04), (-0.30, 0.11), (0.18, 0.18), (0.33, 0.08), (0.36, -0.04)])
@@ -1209,7 +1216,7 @@ def export(art, S=None):
             _json.dump(meta, f, indent=2)
             f.write("\n")
         out.append((meta["key"], sheet.shape[1], sheet.shape[0], n))
-    return out, within, f"{len(out)} keys, contract v3.2 11.9 ({'B-180 lips' if PART == 'lips' else 'B-178 variants'})"
+    return out, within, f"{len(out)} keys, contract v3.2 11.9 ({'B-180 lips' if PART == 'lips' else 'B-181 variants' if PART == 'b181' else 'B-178 variants'})"
 
 
 def main(out, S=None, allw=None, footnote=None):
