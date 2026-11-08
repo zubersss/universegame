@@ -115,5 +115,44 @@ namespace Meridian.Tests
             Assert.IsFalse(GroundStrip.FloeEnd(400f, 399f), "a 1 m step on the same floe: not an end");
             Assert.IsFalse(GroundStrip.FloeEnd(400f, 402f), "higher ground beside: not an end");
         }
+
+        /// <summary>U-153 (P-52): every Jupiter floe kind has its strip: the four keys are B-159's exports on disk (ice, core, derelict, spot),
+        /// and the kind rule picks the spot strip inside the Red Spot, the core where the core shows on top, else the ice.</summary>
+        [Test]
+        public void U153_EveryJupiterFloeKindHasItsStrip()
+        {
+            var keys = GroundStrip.KeysFor(Meridian.Planets.PlanetId.Jupiter);
+            string[] kinds = { "ice", "core", "derelict", "spot" };
+            Assert.AreEqual(kinds.Length, keys.Length);
+            for (int i = 0; i < kinds.Length; i++)
+            {
+                Assert.AreEqual("terrain/jupiter/floe_strip_" + kinds[i], keys[i], $"kind {i}");
+                Assert.IsTrue(File.Exists($"Assets/_Game/Art/{keys[i]}.json"), $"{keys[i]} exported (B-159)");
+            }
+            int spot = Meridian.Terrain.CloudColumn.CloudLayout.RedSpotCentre, away = spot - 1500;
+            Assert.AreEqual(GroundStrip.FloeSpot, GroundStrip.JupiterStripFor(spot, TileId.FloeIce), "the Red Spot's brick floes");
+            Assert.AreEqual(GroundStrip.FloeIce, GroundStrip.JupiterStripFor(away, TileId.FloeIce), "the ammonia ice elsewhere");
+            Assert.AreEqual(GroundStrip.FloeCore, GroundStrip.JupiterStripFor(away, TileId.FloeCore), "the core where it shows on top");
+        }
+
+        /// <summary>U-153: CloudLayout.FloeTopUnder finds the floe under a point (its standing height), skips a floe above the point, and finds
+        /// nothing when the search depth ends above every floe.</summary>
+        [Test]
+        public void U153_FloeTopUnderFindsTheFloeBelowAPoint()
+        {
+            const int seed = 1969;
+            Meridian.Terrain.CloudColumn.Floe f = default;
+            bool found = false;
+            for (int sx = 0; sx < 64 && !found; sx++)
+                for (int sy = 30; sy >= 10 && !found; sy--)
+                    found = Meridian.Terrain.CloudColumn.CloudLayout.FloeInSlot(sx, sy, seed, out f);
+            Assert.IsTrue(found, "a floe somewhere");
+            float x = f.x + f.width * 0.5f, top = f.y + f.height;
+            Assert.IsTrue(Meridian.Terrain.CloudColumn.CloudLayout.FloeTopUnder(x, top + 5.4f, top - 80f, seed, out float got), "the floe under a camera 5.4 m over it");
+            Assert.AreEqual(top, got, 1e-4f, "its standing height");
+            Assert.IsFalse(Meridian.Terrain.CloudColumn.CloudLayout.FloeTopUnder(x, top + 5.4f, top + 6f, seed, out _), "nothing when the search floor is over the point");
+            bool below = Meridian.Terrain.CloudColumn.CloudLayout.FloeTopUnder(x, top - 1f, top - 200f, seed, out float under);
+            Assert.IsTrue(!below || under < top, "a point inside the floe finds only floes under it");
+        }
     }
 }

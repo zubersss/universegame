@@ -309,8 +309,8 @@ namespace Meridian.Core
 
             // U-142 (U-127): Jupiter on the cartoon stage, framed as the u127 captures frame it: a Deck 2 floe with B-156's aerostat deck module
             // staged on it and a Ballast tortoise over it, the storm deck with a Stormglider, the Deep over the Crush Line with its CRUSH band,
-            // the Vortex Whale crossing the Great Red Spot in passing (D-138: its centre 13.5 m ahead of the surveyor in the 32 m frame, so one
-            // end shows and the flukes stay out). A floe the search misses leaves its shot out, so the count check fails the smoke.
+            // the Vortex Whale crossing the Great Red Spot in passing, head first (D-138 / U-153: facing +x, its centre 16.5 m behind the surveyor in
+            // the 32 m frame, so its head and flank cross and the flukes stay out). A floe the search misses leaves its shot out, so the count check fails the smoke.
             yield return scenes.LoadPlanetSide(GameState.Instance.catalog.Get(Meridian.Planets.PlanetId.Jupiter));
             side = scenes.PlanetSide;
             if (side.hazards != null) side.hazards.enabled = false;
@@ -361,7 +361,7 @@ namespace Meridian.Core
             if (Floe(side, CloudLayout.RedSpotCentre - 200, CloudLayout.Deck2Bottom + 40, CloudLayout.Deck1Bottom - 40, out fx, out fy))
             {
                 yield return Stand(side, new Vector2(fx + 2.5f, fy + 0.05f), 1.5f, jh);
-                side.creatures.Spawn(Meridian.Creatures.Species.VortexWhale, new Vector2(fx + 16f, fy + 9f));
+                side.creatures.Spawn(Meridian.Creatures.Species.VortexWhale, new Vector2(fx - 14f, fy + 9f));
                 yield return Staged(side);
                 yield return Shot(folder, "smoke_26_jupiter_red_spot_whale.png");
                 side.creatures.DespawnAll();

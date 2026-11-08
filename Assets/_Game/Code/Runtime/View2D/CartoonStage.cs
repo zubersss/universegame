@@ -178,7 +178,31 @@ namespace Meridian.View2D
             : planet == Meridian.Planets.PlanetId.Venus ? VenusFallbackScene : planet == Meridian.Planets.PlanetId.Uranus ? UranusFallbackScene : Decked(planet) ? JupiterFallbackScene : null;
         /// <summary>U-125: a set's datum: Venus's deck set hangs off the cloud deck, every other set off the ground's band datum.</summary>
         float DatumFor(string scene, float groundDatum) => planetId == Meridian.Planets.PlanetId.Venus ? VenusDatumFor(scene, groundDatum)
-            : Decked(planetId) && DeckFloor(scene) >= 0f ? DeckFloor(scene) : groundDatum; // U-127: each Jupiter set off its band's floor
+            : Decked(planetId) && DeckFloor(scene) >= 0f ? DeckDatum(scene) : groundDatum; // U-153: a decked set off the floe under the camera
+
+        /// <summary>U-153 (P-52): a decked giant's floe datum glides (FloeDatumTime) to the floe under the camera; it snaps past FloeSnap (a load, a
+        /// teleport) and holds where no floe is within FloeScanDepth under the camera (flying through open air).</summary>
+        public const float FloeDatumTime = 0.5f, FloeScanDepth = 80f, FloeSnap = 120f;
+        /// <summary>U-153: the smoothed standing height of the floe under the camera (NaN until one is found): every decked set hangs off it.</summary>
+        public float FloeDatum => floeDatum;
+        float floeDatum = float.NaN, floeDatumVel;
+        Meridian.Terrain.CloudColumn.CloudWorldGenerator cloud;
+
+        /// <summary>U-153: a decked set's datum: the floe under the camera (so the set's ground line sits at the floe tops, B-155's composition),
+        /// clamped inside the set's band, through the U-128 crossfade alike; its band's floor until a floe is found. The CRUSH band rides the
+        /// deep's floe line with it.</summary>
+        float DeckDatum(string scene)
+        {
+            float floor = DeckFloor(scene);
+            return float.IsNaN(floeDatum) ? floor : Mathf.Clamp(floeDatum, floor, JupiterTop(DeckOf(scene)));
+        }
+
+        void StepFloeDatum(float x, float y, float dt)
+        {
+            if (cloud == null || !cloud.FloeTopUnder(x, y, y - FloeScanDepth, out float top)) return;
+            if (float.IsNaN(floeDatum) || dt <= 0f || Mathf.Abs(top - floeDatum) > FloeSnap) { floeDatum = top; floeDatumVel = 0f; return; }
+            floeDatum = Mathf.SmoothDamp(floeDatum, top, ref floeDatumVel, FloeDatumTime, Mathf.Infinity, dt);
+        }
         /// <summary>Mercury's clock for the stage: the terminator's real seconds plus the hazards' offset — the clock the creatures and the flares read, so the painted band is theirs.</summary>
         public double MercuryClock => Meridian.Terrain.MercuryTerminator.Now(clock != null ? clock.GameSeconds : 0) + (hazards != null ? hazards.mercuryClockOffset : 0);
         /// <summary>The set wanted at column x now: Earth by its band, Mars by its region, Mercury by the terminator's clock.</summary>
@@ -305,6 +329,10 @@ namespace Meridian.View2D
             if (surveyedFrom != rigInput) { if (surveyedFrom != null) surveyedFrom.Surveyed -= OnSurveyed; surveyedFrom = rigInput; if (rigInput != null) rigInput.Surveyed += OnSurveyed; } // U-146
             lastSurveyScan = float.NegativeInfinity; // D-154: the Survey view follows the active module // U-123: Mercury's set and strips follow the terminator's clock
             float entryY = side.player != null ? side.player.transform.position.y : surfaceDatum;
+            // U-153: a decked giant's sets hang off the floe under the camera; at load, the floe under the entry.
+            cloud = Decked(config.id) && side.terrain != null ? side.terrain.BaseGenerator as Meridian.Terrain.CloudColumn.CloudWorldGenerator : null;
+            floeDatum = float.NaN; floeDatumVel = 0f;
+            StepFloeDatum(side.player != null ? side.player.transform.position.x : side.spawnX, entryY + 1f, 0f);
             Scene = config.id == Meridian.Planets.PlanetId.Venus ? VenusSceneFor(entryY, null) // U-125: the entry's height (the surface or the deck)
                 : config.id == Meridian.Planets.PlanetId.Neptune ? NeptuneSceneFor(entryY, side.spawnX, worldWidth, GameTime, null) // U-133
                 : config.id == Meridian.Planets.PlanetId.Uranus ? UranusSceneFor(entryY, side.spawnX, worldWidth, GameTime, seasonSeconds, null, SurveyView) // U-130: the entry's band, the season's light
@@ -381,6 +409,8 @@ namespace Meridian.View2D
             Ground.gameObject.SetActive(true);
             Ground.view = cam; Ground.terrain = side.terrain;
             Ground.mirrorRule = config.id == Meridian.Planets.PlanetId.Neptune ? (System.Func<int, bool>)(x => Meridian.Planet.Weather.NeptuneWind.Direction(x) < 0) : null; // U-144: the −x zone's floes mirrored
+            Ground.cloud = cloud; // U-153: a decked giant's strips are laid per floe in view
+            Ground.topMaterialRule = config.id == Meridian.Planets.PlanetId.Neptune ? (System.Func<int, byte, float, int>)((x, tile, top) => GroundStrip.NeptuneStripFor(top)) : null; // U-153: the Deep's superionic floes by the floe's own top
             Ground.Load(config.id); // U-118: the planet's strips (Earth's four, Mars's regolith + basalt + frost, Mercury's regolith + slate)
             Ground.materialRule = config.id == Meridian.Planets.PlanetId.Mercury ? (System.Func<int, byte, int>)((x, tile) => GroundStrip.MercuryStripFor(x, MercuryClock, worldWidth)) // U-123: slate in the shadow
                 : config.id == Meridian.Planets.PlanetId.Jupiter ? (System.Func<int, byte, int>)((x, tile) => GroundStrip.JupiterStripFor(x, tile))
@@ -462,6 +492,7 @@ namespace Meridian.View2D
         void FollowBand(float cameraX)
         {
             int x = Mathf.FloorToInt(cameraX);
+            if (cloud != null) StepFloeDatum(cameraX, Layers.view.transform.position.y, Time.deltaTime); // U-153
             float d = Datum.At(x);
             float baseD = DatumFor(Scene, d); // U-125: Venus's deck set hangs off the cloud deck
             SetDatum(Layers, baseD);

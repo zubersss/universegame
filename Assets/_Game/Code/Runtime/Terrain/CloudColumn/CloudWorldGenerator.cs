@@ -24,6 +24,12 @@ namespace Meridian.Terrain.CloudColumn
 
         public byte TileAt(int x, int y) => CloudLayout.TileAt(x, y, seed);
 
+        /// <summary>U-153: this world's seed (the floes' slots: GroundStrip lays each floe's strip from them).</summary>
+        public int Seed => seed;
+
+        /// <summary>U-153: the standing height of the floe nearest under (x, y), over minY (CloudLayout.FloeTopUnder with this world's seed).</summary>
+        public bool FloeTopUnder(float x, float y, float minY, out float top) => CloudLayout.FloeTopUnder(x, y, minY, seed, out top);
+
         public int SurfaceHeight(int x)
         {
             int wx = ((x % CloudLayout.Width) + CloudLayout.Width) % CloudLayout.Width;

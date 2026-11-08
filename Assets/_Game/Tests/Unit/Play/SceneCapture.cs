@@ -3482,9 +3482,9 @@ namespace Meridian.Tests
                     yield return Carry(fx + 2.5f, fy + 0.05f);
                     yield return Settle();
                     yield return Shot("4_red_spot");
-                    // 5. D-138: the Vortex Whale crossing the Spot in passing: its centre 14 m ahead so the head and flank cross the frame and the
-                    // flukes stay out (a 36 m whale in a 30 m frame never shows both ends).
-                    creatures.Spawn(Meridian.Creatures.Species.VortexWhale, new Vector2(fx + 16f, fy + 9f));
+                    // 5. D-138 / U-153: the Vortex Whale crossing the Spot in passing, head first: facing +x with its centre 16.5 m behind the surveyor,
+                    // its head and flank cross the frame and the flukes stay ~18 m past its left edge (a 36 m whale in a 32 m frame never shows both ends).
+                    creatures.Spawn(Meridian.Creatures.Species.VortexWhale, new Vector2(fx - 14f, fy + 9f));
                     yield return Settle();
                     yield return Shot("5_whale_crossing");
                     creatures.DespawnAll();

@@ -80,6 +80,36 @@ namespace Meridian.Terrain.CloudColumn
             return true;
         }
 
+        /// <summary>
+        /// U-153 (P-52): the standing height (top row + 1) of the floe nearest under a point (x, y): the floes of the point's slot column and
+        /// its two neighbours whose top is at or under y + 0.5 and over minY, the nearest across first (wrapped), then the highest. The giant's
+        /// deck sets hang off it, so they paint where the floes are. False when none is there. A few dozen slot lookups; no allocation.
+        /// </summary>
+        public static bool FloeTopUnder(float x, float y, float minY, int seed, out float top)
+        {
+            top = minY;
+            int wx = ((Mathf.FloorToInt(x) % Width) + Width) % Width;
+            int sx = wx / SlotW;
+            int syTop = Mathf.Clamp(Mathf.FloorToInt(y) / SlotH, 0, Height / SlotH);
+            int syLow = Mathf.Max(0, Mathf.FloorToInt(minY) / SlotH);
+            bool found = false;
+            float best = float.MaxValue;
+            for (int dsx = -1; dsx <= 1; dsx++)
+                for (int sy = syTop; sy >= syLow; sy--)
+                {
+                    if (!FloeInSlot(sx + dsx, sy, seed, out var f)) continue;
+                    float t = f.y + f.height;
+                    if (t > y + 0.5f || t < minY) continue;
+                    int d0 = WrapDelta(f.x - wx), d1 = WrapDelta(f.x + f.width - 1 - wx);
+                    int across = d0 <= 0 && d1 >= 0 ? 0 : Mathf.Min(Mathf.Abs(d0), Mathf.Abs(d1));
+                    float score = across * 4f + (y - t); // a floe right under the point beats a higher one beside it
+                    if (score < best) { best = score; top = t; found = true; }
+                }
+            return found;
+        }
+
+        static int WrapDelta(int d) { d %= Width; if (d > Width / 2) d -= Width; if (d < -Width / 2) d += Width; return d; }
+
         /// <summary>The cloud column's tile at (x, y): floe ice skin, floe core, or air. x wraps.</summary>
         public static byte TileAt(int x, int y, int seed)
         {

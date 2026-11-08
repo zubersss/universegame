@@ -151,6 +151,25 @@ namespace Meridian.View2D
         /// <summary>U-125: how many deck-plank frames drew on the last pass (tests and captures).</summary>
         public int DeckFramesShown { get; private set; }
 
+        /// <summary>
+        /// U-153 (P-52): on a decked giant the strips are laid per floe in view, not per column. A column's highest solid was often a floe out of
+        /// frame, so the floe in view showed block tiles (u127/3–5); its 20 m fill hung under the floe, and the step edge ran from its end
+        /// column to the next floe tens of metres away (the two vertical ink lines). Each floe whose top is in view gets its kind's strip with
+        /// cap + tiles + cap and a fill only down to its underside; floes in the air take no edge, no back wall, no deep fill. Null: columns.
+        /// </summary>
+        public Meridian.Terrain.CloudColumn.CloudWorldGenerator cloud;
+        /// <summary>U-153: a floe column's strip from its top tile and the floe's standing height (Neptune's Deep by height); null: materialRule.</summary>
+        public System.Func<int, byte, float, int> topMaterialRule;
+        readonly List<SpriteRenderer> floeTops = new List<SpriteRenderer>(64), floeFills = new List<SpriteRenderer>(64);
+        int floeKeyX = int.MinValue, floeKeyY = int.MinValue, floeKeyW;
+        bool columnsHidden;
+        /// <summary>U-153: floes and floe columns laid on the last pass (tests and captures).</summary>
+        public int FloesShown { get; private set; }
+        public int FloeColumnsShown { get; private set; }
+        /// <summary>U-153: the material drawn on floe column x on the last pass (−1: none); tests read it.</summary>
+        public int FloeMaterialAt(int x) { for (int i = 0; i < FloeColumnsShown; i++) if (floeColumn[i] == x) return floeMaterial[i]; return -1; }
+        readonly List<int> floeColumn = new List<int>(64), floeMaterial = new List<int>(64);
+
         /// <summary>U-125: the runs (x0, x1, deck top y) to lay the `material` kind along, one frame per metre; empty clears them.</summary>
         public void SetDecks(List<Vector3> runs, int material)
         {
@@ -213,6 +232,13 @@ namespace Meridian.View2D
         void LateUpdate()
         {
             if (view == null || terrain == null || frames == null) return;
+            if (cloud != null) { LayFloes(); return; } // U-153: a decked giant's floes
+            if (columnsHidden)
+            {
+                // Back from a giant to columns: the floe strips go, the column pools come back on the next layout.
+                for (int i = 0; i < floeTops.Count; i++) { floeTops[i].enabled = false; floeFills[i].enabled = false; }
+                columnsHidden = false; FloesShown = 0; FloeColumnsShown = 0; floeKeyX = int.MinValue; dirty = true;
+            }
             float half = view.orthographicSize * view.aspect + 2f;
             int first = Mathf.FloorToInt(view.transform.position.x - half), last = Mathf.CeilToInt(view.transform.position.x + half);
             if (!dirty && first == firstColumn && last == lastColumn) return;
@@ -268,6 +294,72 @@ namespace Meridian.View2D
             for (int i = capCount; i < caps.Count; i++) caps[i].enabled = false;
             CapsShown = capCount;
             LayDecks(first, last);
+        }
+
+        /// <summary>U-153: lays the strips of every floe whose top is in view (see `cloud`); again only when the view moves a column or a metre.</summary>
+        void LayFloes()
+        {
+            var c = view.transform.position;
+            float halfH = view.orthographicSize, halfW = halfH * view.aspect;
+            int first = Mathf.FloorToInt(c.x - halfW) - 1, last = Mathf.CeilToInt(c.x + halfW) + 1;
+            int yLo = Mathf.FloorToInt(c.y - halfH) - 1, yHi = Mathf.CeilToInt(c.y + halfH) + 3; // a top just over the frame still shows its bevel
+            if (!dirty && first == floeKeyX && yLo == floeKeyY && last - first == floeKeyW) return;
+            floeKeyX = first; floeKeyY = yLo; floeKeyW = last - first; dirty = false;
+            firstColumn = first; lastColumn = last; // OnTile marks a dig in view dirty
+            if (!columnsHidden)
+            {
+                for (int i = 0; i < tops.Count; i++) { tops[i].enabled = false; fills[i].enabled = false; edges[i].enabled = false; backs[i].enabled = false; }
+                columnsHidden = true; count = 0;
+            }
+            const int SlotW = Meridian.Terrain.CloudColumn.CloudLayout.SlotW, SlotH = Meridian.Terrain.CloudColumn.CloudLayout.SlotH;
+            int slots = Meridian.Terrain.CloudColumn.CloudLayout.Width / SlotW;
+            int sx0 = Mathf.FloorToInt(first / (float)SlotW), sx1 = Mathf.FloorToInt(last / (float)SlotW);
+            int sy0 = Mathf.Max(0, yLo / SlotH - 1), sy1 = Mathf.Min(Meridian.Terrain.CloudColumn.CloudLayout.Height / SlotH, yHi / SlotH);
+            int n = 0, capCount = 0, floes = 0;
+            floeColumn.Clear(); floeMaterial.Clear();
+            for (int sxRaw = sx0; sxRaw <= sx1; sxRaw++)
+            {
+                int offset = (sxRaw - ((sxRaw % slots) + slots) % slots) * SlotW; // whole world widths: the floe's x near the camera
+                for (int sy = sy0; sy <= sy1; sy++)
+                {
+                    if (!Meridian.Terrain.CloudColumn.CloudLayout.FloeInSlot(sxRaw, sy, cloud.Seed, out var f)) continue;
+                    float top = f.y + f.height;
+                    if (top < yLo || top > yHi) continue;
+                    int fx0 = f.x + offset, fx1 = fx0 + f.width - 1;
+                    bool laid = false;
+                    for (int x = Mathf.Max(fx0, first); x <= Mathf.Min(fx1, last); x++)
+                    {
+                        int ty = f.y + f.height - 1;
+                        byte tile = terrain.GetTile(x, ty);
+                        if (!TileId.IsSolid(tile) || TileId.IsSolid(terrain.GetTile(x, ty + 1))) continue; // dug away or built over: its blocks show
+                        int material = topMaterialRule != null ? topMaterialRule(x, tile, top) : materialRule != null ? materialRule(x, tile) : MaterialFor(planet, tile);
+                        if (material < 0 || material >= framesBy.Length) material = 0;
+                        var set = framesBy[material] ?? frames;
+                        var fillTile = fillBy[material] ?? dirt;
+                        bool mirrored = mirrorRule != null && mirrorRule(x);
+                        if (n == floeTops.Count) { floeTops.Add(Make("FloeStrip", Order, null)); floeFills.Add(Make("FloeFill", Order - 1, dirt)); }
+                        var t = floeTops[n]; var fl = floeFills[n]; n++;
+                        floeColumn.Add(x); floeMaterial.Add(framesBy[material] != null ? material : 0);
+                        t.enabled = true;
+                        t.sprite = set[HasCaps(set.Length) ? StripFrame(x, mirrored) : ((x % set.Length) + set.Length) % set.Length];
+                        if (t.flipX != mirrored) t.flipX = mirrored;
+                        t.transform.position = new Vector3(x + 0.5f, top, Z);
+                        float under = f.height - StripHeight; // the floe's body under the strip's 2 m: its own fill, no deeper
+                        fl.enabled = under > 0.01f;
+                        if (fl.enabled) { if (fl.sprite != fillTile) fl.sprite = fillTile; fl.transform.position = new Vector3(x + 0.5f, top - StripHeight, Z); fl.size = new Vector2(1f, under); }
+                        if (HasCaps(set.Length))
+                        {
+                            if (x == fx0) PlaceCap(ref capCount, set[LeftCapFrame(mirrored)], x - 1, top, mirrored);
+                            if (x == fx1) PlaceCap(ref capCount, set[RightCapFrame(mirrored)], x + 1, top, mirrored);
+                        }
+                        laid = true;
+                    }
+                    if (laid) floes++;
+                }
+            }
+            for (int i = n; i < floeTops.Count; i++) { floeTops[i].enabled = false; floeFills[i].enabled = false; }
+            for (int i = capCount; i < caps.Count; i++) caps[i].enabled = false;
+            CapsShown = capCount; FloesShown = floes; FloeColumnsShown = n;
         }
 
         void PlaceCap(ref int n, Sprite frame, int column, float top, bool flip = false)
