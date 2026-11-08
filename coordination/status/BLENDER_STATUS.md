@@ -1,10 +1,16 @@
 # BLENDER STATUS
-Updated: 2026-11-08 14:0x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113 at 14:0x; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-08 15:1x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113 at 14:0x; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-IDLE (14:0x). Every card on my list is exported; B-172 / B-174 wait on UNITY's U-151 / U-152. Credits upkeep done (57432a73). Ready for LEAD's next cards.
+B-198 (variant lips: Mars basalt + talus, Mercury ice, Venus tessera + vent; source 0752bfd5): one curve preview per planet in the next free slot (my want beside UNITY's lock). Then B-199. HELD: the U-168 removal (14 files: surveyor/base, pilgrim/base, saturn/ring_mesh) until UNITY commits its four test re-points and LEAD says go.
+
+## B-199 list: every icon folder (icons/<item>/base), v3 or not
+- v3 (9): the B-128 tile cubes 64x64 - grass, mercury_basalt, mercury_regolith, regolith, snow, soil, sulfide, tessera; B-197 wind_anchor 128x128.
+- v2 shaded renders, no ink, no json (49, all 128x128): ores / minerals - aluminium, basalt, carbon, clay, copper, graphite, hematite, iron, nickel, perchlorate, phosphorus_pigment, sand, silica, solarite, stone, sulfur, vitriol_glass, deep_diamond, deep_diamond_tip, deep_core_sample, ring_rock; ices / gases - ammonia_ice, methane_ice, polar_ice, ring_ice, superionic_ice, water_ice, helium3_condensate, metallic_hydrogen, oxygen; organics - living_seed, wood; crafted - circuit_board, cryo_pad, cryo_round, float_cell_mk1, float_cell_mk2, polymer, radiation_liner, smelter_bar_copper, smelter_bar_iron, solarite_capacitor, suit_patch, survey_module, thermal_pad; gear - jetpack_mk2, jetpack_mk3, skip_drive_mk2, thruster_mk3.
+- Batch 1 (ores and crystals, ~10): iron, copper, nickel, aluminium, carbon, graphite, hematite, silica, solarite, deep_diamond. Then the ices, the crafted items, the gear, in batches.
 
 ## Last completed
+- 15:1x: B-197 exported (47e9d29f): icons/wind_anchor/base. B-196 exported (8c6cae92): creatures/warden/sentinel v3. B-194 giants' G1 audit (b1e46fbd): 0 missing, 0 outliers. B-195 exported (aaca509a): the five Earth POI props. B-174 (d0c32d8b): 25 orphaned v2 models removed (86 files); B-193 census (7271c251).
 - 14:06: B-191 + B-192 exported (591164e9): terrain/mercury/dig_puff_ice, terrain/venus/dig_puff_tessera / _vent; terrain/earth/fill_decor_sand_1..3 (scallop, fulgurite, desert rose), terrain/mars/fill_decor_basalt_1..3 (lava tube, vesicles, amygdale).
 - 13:46-13:48: B-187 exported (3f486025): backgrounds/mercury/coldtrap, backgrounds/venus/tessera (D-169, 544 / y_m -3.0, ground_row 352, continue_rows 64).
 - 13:31: B-190 exported (d6eb5fb4): terrain/earth/dig_puff_{sand,snow,stone}, terrain/mars/dig_puff_{frost,basalt}. B-182 audits: Earth 44 / Mars 37 / Mercury 25 / Venus 29 G1 keys, none missing, no outliers.
