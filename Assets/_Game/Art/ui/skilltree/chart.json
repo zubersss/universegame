@@ -1,0 +1,47 @@
+{
+  "key": "ui/skilltree/chart",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 960,
+  "height": 960,
+  "palette": "earth",
+  "ring_r_px": {
+    "1": 140,
+    "2": 210,
+    "3": 285,
+    "4": 355,
+    "5": 420
+  },
+  "dividers_r_px": [
+    175,
+    247,
+    320,
+    387
+  ],
+  "emblem_r_px": 408,
+  "branch_axis_deg": {
+    "dig": -90,
+    "haul": -30,
+    "ascent": 30,
+    "survey": 90,
+    "endurance": 150,
+    "voyage": 210
+  },
+  "slots_deg": {
+    "2": [
+      -15,
+      15
+    ],
+    "3": [
+      -20,
+      0,
+      20
+    ]
+  },
+  "angles": "screen degrees from +x, y down (Dig at the top, then clockwise); a node sits at its ring radius, its branch axis + its slot",
+  "note": "the round chart: the six branches' colour bands, degree ticks, dotted ring dividers, dashed spokes at the sector borders; nodes, links, emblems and the hub are laid over it at runtime (D1_TABLES \u00a75's slot order, counter-clockwise first)"
+}

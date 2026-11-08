@@ -1,0 +1,18 @@
+{
+  "key": "ui/skilltree/link_locked",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 64,
+  "height": 16,
+  "palette": "earth",
+  "state": "locked",
+  "tile_x": true,
+  "repeat_px": 64,
+  "line_row": 8,
+  "mapping": "tiled along the link centre to centre (Tiled draw mode), rotated to it, drawn under the frames",
+  "note": "locked: neither end bought; open: one end bought; bought: both ends bought"
+}

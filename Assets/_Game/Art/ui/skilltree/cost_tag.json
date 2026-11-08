@@ -1,0 +1,21 @@
+{
+  "key": "ui/skilltree/cost_tag",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 160,
+  "height": 56,
+  "palette": "earth",
+  "slice": [
+    48,
+    16,
+    20,
+    16
+  ],
+  "stretch": "x only",
+  "lettering": "runtime",
+  "note": "the cost (Scrip + materials) lettered in Patrick Hand right of the eyelet"
+}

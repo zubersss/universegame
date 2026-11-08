@@ -1,0 +1,13 @@
+{
+  "key": "ui/skilltree/hub",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 112,
+  "height": 112,
+  "palette": "earth",
+  "note": "the centre (the start): always bought; the ring-1 links run from it"
+}

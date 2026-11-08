@@ -1,0 +1,33 @@
+{
+  "key": "terrain/earth/ground_fill_t4",
+  "style": "v3",
+  "contract": "v3.2 11.9",
+  "frame_width": 512,
+  "frame_height": 512,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.0,
+    0.0
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [],
+  "tile_x": true,
+  "tile_y": true,
+  "world_space": true,
+  "standalone": true,
+  "wrap": "repeat",
+  "variant": "t4",
+  "mapping": "as ground_fill: u = x x 64 mod 512, v = -y x 64 mod 512; a standalone texture (Repeat wrap); strata only (D-165)",
+  "tier": 4,
+  "tier_name": "Deep",
+  "depth_m": [
+    100,
+    200
+  ],
+  "transition_m": 1.0,
+  "note": "B-203: tier 4 Deep (100-200 m under the Surface Line); tier 1 Topsoil is ground_fill; crossfade two tiers over 1 m at their border"
+}

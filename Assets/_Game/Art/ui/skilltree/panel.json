@@ -1,0 +1,20 @@
+{
+  "key": "ui/skilltree/panel",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 256,
+  "height": 256,
+  "palette": "earth",
+  "slice": [
+    72,
+    72,
+    72,
+    72
+  ],
+  "slice_order": "[left, top, right, bottom] px in from each edge (contract 11.6); Unity's Sprite.border is (left, bottom, right, top)",
+  "note": "aged chart paper, no grain (it is stretched); the chart sits on it, the node card is UiKit's inventory panel"
+}

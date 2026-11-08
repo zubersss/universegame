@@ -1,0 +1,15 @@
+{
+  "key": "ui/skilltree/emblem_ascent",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 96,
+  "height": 96,
+  "palette": "earth",
+  "branch": "ascent",
+  "colour": "mustard",
+  "note": "the ascent branch's plaque, at emblem_r_px on its axis"
+}

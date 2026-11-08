@@ -1,0 +1,13 @@
+{
+  "key": "ui/skilltree/select",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 96,
+  "height": 96,
+  "palette": "earth",
+  "note": "a red pencil loop centred on the selected node"
+}

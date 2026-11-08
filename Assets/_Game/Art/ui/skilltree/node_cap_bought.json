@@ -1,0 +1,17 @@
+{
+  "key": "ui/skilltree/node_cap_bought",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 72,
+  "height": 72,
+  "palette": "earth",
+  "state": "bought",
+  "ring": "5",
+  "icon_display_px": 40,
+  "icon_alpha": 1.0,
+  "note": "a node's frame; its icon (icons/nodes/<id>) is drawn centred over it at icon_display_px, at icon_alpha"
+}

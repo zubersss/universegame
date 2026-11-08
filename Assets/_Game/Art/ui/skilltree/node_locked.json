@@ -1,0 +1,17 @@
+{
+  "key": "ui/skilltree/node_locked",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 64,
+  "height": 64,
+  "palette": "earth",
+  "state": "locked",
+  "ring": "1-4",
+  "icon_display_px": 40,
+  "icon_alpha": 0.4,
+  "note": "a node's frame; its icon (icons/nodes/<id>) is drawn centred over it at icon_display_px, at icon_alpha"
+}

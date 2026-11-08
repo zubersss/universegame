@@ -1,0 +1,24 @@
+{
+  "key": "terrain/earth/fill_decor_t2_2",
+  "style": "v3",
+  "contract": "v3.2 11.9",
+  "frame_width": 40,
+  "frame_height": 32,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [],
+  "upright": true,
+  "tier": 2,
+  "tier_name": "Subsoil",
+  "fill": "ground_fill_t2",
+  "decor": "clay_concretion",
+  "note": "B-203: a buried detail of tier 2 (Subsoil), D-165's sparse scatter in that tier's cutaway, never rotated; pivot centred"
+}
