@@ -310,7 +310,8 @@ namespace Meridian.View2D
                     Vector2 np = nrm[a], nq = nrm[(a + 1) % n];
                     var segN = Normal(q - p);
                     float len = (q - p).magnitude;
-                    if (segN.y > SurfaceFacing && variantCount[Grass] > 0) quads += BandByBiome(p, q, np, nq, wx0);
+                    // U-157: the band only on the natural surface; a dug floor or a mound's top is earth, ink-rimmed.
+                    if (segN.y > SurfaceFacing && variantCount[Grass] > 0 && OnSurface(c, (p + q) * 0.5f, wy0)) quads += BandByBiome(p, q, np, nq, wx0);
                     else Rim(p, q, np, nq, arc);
                     arc += len;
                 }
@@ -333,6 +334,20 @@ namespace Meridian.View2D
             f.GetComponent<MeshRenderer>().sharedMaterials = mats;
             ChunksBuilt++;
         }
+
+        /// <summary>U-157: a chunk-local point lies on the natural surface (within NaturalBand of the column's surface curve), not on a dug floor
+        /// or a mound.</summary>
+        static bool OnSurface(TerrainChunk c, Vector2 local, float wy0)
+        {
+            float fi = local.x + 0.5f;
+            int i = Mathf.Clamp(Mathf.FloorToInt(fi), 0, TerrainConstants.ChunkSize - 1);
+            float a = c.SurfaceCurve[i], b = c.SurfaceCurve[i + 1];
+            if (float.IsNaN(a) || float.IsNaN(b)) return false;
+            return Mathf.Abs(wy0 + local.y - Mathf.Lerp(a, b, Mathf.Clamp01(fi - i))) < NaturalBand;
+        }
+
+        /// <summary>U-157: how far off the natural surface curve a stretch still carries the band (m).</summary>
+        public const float NaturalBand = 0.35f;
 
         void BackQuad(List<int> into, float x0, float x1, float yb, float h0, float h1, Color c0, Color c1, System.Func<float, float, Vector2> uvOf)
         {

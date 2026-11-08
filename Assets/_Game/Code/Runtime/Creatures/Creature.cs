@@ -105,8 +105,6 @@ namespace Meridian.Creatures
         // D-087 (U-093): no hit points, no Hurt, no Killed: the Lance is archived (Assets/_Game/Archive/Combat~).
 
         internal int dir = 1;
-        /// <summary>U-156: the collider's rounded corners (BoxCollider2D.edgeRadius); its footprint stays the spec's size.</summary>
-        public const float EdgeRadius = 0.05f;
         internal float nextThink, biteReady, hurtFor, attackFor, chillFor, fleeUntil, anim, altitude;
         internal int serial;
         internal Sprite[] frames, nightFrames;
@@ -192,9 +190,7 @@ namespace Meridian.Creatures
             lastClip = -1;
             altitude = position.y;
             NightfallAt = float.NegativeInfinity;
-            // U-156 (LEAD, the stag): rounded corners ride the outline's seams and vertices; the footprint (size + 2 × radius) is the spec's.
-            Box.edgeRadius = EdgeRadius;
-            Box.size = new Vector2(Mathf.Max(0.02f, spec.size.x - 2f * EdgeRadius), Mathf.Max(0.02f, spec.size.y - 2f * EdgeRadius));
+            Box.size = spec.size;
             Box.offset = Vector2.zero;
             // U-089: the visual root sits at the feet (walkers) or the centre (fliers), so squashes keep the feet planted.
             Visual.localPosition = spec.Flies ? Vector3.zero : new Vector3(0f, -spec.size.y * 0.5f, 0f);

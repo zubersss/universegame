@@ -44,7 +44,7 @@ namespace Meridian.Tests
             return new Vector2(tx + 0.5f, side.terrain.TopSolidY(tx) + 1f + SpeciesSpec.Get(s).size.y * 0.5f + 0.05f);
         }
 
-        [UnityTest]
+        [UnityTest, Ignore("Parked again on LEAD's ruling (2026-11-08, U-156, attempt 3 of 3: the seam ghost vertices and rounded boxes left it at 4.6 m / 15 turns): it oscillates in place on the flat pad, its direction flipping every 0.24-0.5 s, faster than the 1.5 s wall-turn hold, so the stuck detector re-fires after each turn. Tried, happened, best guess in UNITY_STATUS.")]
         public IEnumerator AFleeingStagAtTheCampCratesTurnsAndKeepsMoving()
         {
             yield return Boot();

@@ -108,7 +108,8 @@ namespace Meridian.Rig
             if (replace != 0) item = replace;
             if (drops != null && item != 0)
             {
-                var tile = replace != 0 ? null : terrain.TileSet.Get(id, 0) as UnityEngine.Tilemaps.Tile;
+                // U-157: on a smooth planet the drop shows its item's icon, never a block tile (D-161: no blocks drawn).
+                var tile = replace != 0 || Brush ? null : terrain.TileSet.Get(id, 0) as UnityEngine.Tilemaps.Tile;
                 drops.Spawn(item, new Vector2(x + 0.5f, y + 0.5f), tile != null ? tile.sprite : null);
             }
             if (drops != null && bonus != 0) drops.Spawn(bonus, new Vector2(x + 0.5f, y + 0.7f), null);
