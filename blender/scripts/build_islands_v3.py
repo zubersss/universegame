@@ -14,11 +14,7 @@ tops and caps stay; these keys under terrain/<giant>/ draw the rest (gp_draw via
 
   python -I build_islands_v3.py <preview dir> [giant]   lock-free design preview: review_b177_<giant>_islands_preview.png
 
-PAUSED for B-178 (LEAD 05:0x). The 05:07 preview reads right (two rows of cloud lobes, softer long haze). Still to do before it goes to LEAD:
-  - the belly's tile copies p99 49: wrap each lobe on its own (wrapped_x per lobe, all copies of lobe i before lobe i+1) so the
-    stacking is the same at both edges, and give the 2-tile check a copy at +2L
-  - island_end: draw the main lobe's ink before the front lobe, move the front lobe lower-right (it reads as a bubble)
-  - the wisps read as tan smiles: thinner or dropped
+05:19 preview: the belly's copies p99 0 (each lobe wrapped on its own), the ends' front lobe over the main lobe's overlap ink, no wisps.
 """
 import math
 import os
@@ -114,52 +110,55 @@ def _crescent(c, zc, rx, rz, a0=math.pi * 1.02, a1=math.pi * 1.62):
 
 
 def draw_belly(d, M, giant="jupiter", k=0):
+    """Each lobe wraps on its own (all copies of lobe i before lobe i + 1), so the stacking is the same at both tile edges."""
     L = BELLY_W / PPU
     back, front = _layout(L)
     allb = back + front
     rnd = random.Random(1772)
     icicles = [(i, rnd.uniform(-0.3, 0.3), rnd.uniform(0.22, 0.32)) for i in (0, 2, 3)]
-    wisps = [1, 4]
     sil = [(L * i / 256, _bottom(L * i / 256, allb, L)) for i in range(257)]
+    for c, zc, rx, rz in back:                                                                   # the back row, in shade
 
-    def body(dx, _dz):
-        for c, zc, rx, rz in back:                                                               # the back row, in shade
+        def bl(dx, _dz, c=c, zc=zc, rx=rx, rz=rz):
             fill, arc = _hung(c + dx, zc, rx, rz)
             G.stroke(d, fill, M["cloud_sh"], 0.0, cyclic=True)
             G.stroke(d, arc, M["ink"], I)
-        for j, (c, zc, rx, rz) in enumerate(front):                                               # the front row, lit
+        wrapped_x(bl, L)
+    for j, (c, zc, rx, rz) in enumerate(front):                                                   # the front row, lit
+
+        def fl(dx, _dz, c=c, zc=zc, rx=rx, rz=rz, j=j):
             fill, arc = _hung(c + dx, zc, rx, rz)
             G.stroke(d, fill, M["cloud"], 0.0, cyclic=True)
             G.stroke(d, _crescent(c + dx, zc, rx, rz), M["cloud_sh"], 0.0, cyclic=True)
             G.stroke(d, arc, M["ink"], I)
             G.hatch(d, c + dx - rx * 0.45, zc - rz * 0.30, M["ink"], n=3, length=0.07, spacing=0.03, angle_deg=60, seed=j)
+        wrapped_x(fl, L)
+
+    def edges(dx, _dz):
         G.stroke(d, [(x + dx, z) for x, z in sil], M["ink"], O)                                   # the silhouette
         G.stroke(d, [(dx, 0.0), (L + dx, 0.0)], M["ink"], O)                                      # THE INK EDGE on row 8
-        for i in wisps:                                                                           # wisps trailing the deep lobes
-            c, zc, rx, rz = back[i]
-            a0, a1 = math.pi * 1.30, math.pi * 1.78
-            G.stroke(d, _arc(c + dx, zc, rx + 0.06, rz + 0.09, a0, a1, 16) + _arc(c + dx + 0.04, zc, rx * 0.97, rz * 0.985, a1, a0, 16),
-                     M["wisp_i"], I, cyclic=True)
-        for i, off, ln in icicles:                                                                # icicles under the back row
-            c = back[i][0] + off
-            z = _bottom(c, allb, L) + 0.03
-            G.stroke(d, [(c + dx - 0.05, z), (c + dx + 0.005, z - ln), (c + dx + 0.05, z)], M["ice_i"], I, cyclic=True)
-    wrapped_x(body, L)
+    wrapped_x(edges, L)
+    for i, off, ln in icicles:                                                                    # icicles under the back row
+        c = back[i][0] + off
+        z = _bottom(c, allb, L) + 0.03
+        wrapped_x(lambda dx, _dz, c=c, z=z, ln=ln: G.stroke(d, [(c + dx - 0.05, z), (c + dx + 0.005, z - ln), (c + dx + 0.05, z)],
+                                                           M["ice_i"], I, cyclic=True), L)
 
 
 _CUR = None
 _GROUPS = []
+_COPIES = (-1, 0, 1)                    # the tile offsets drawn (render_piece widens it for the 2-tile check)
 
 
 def wrapped_x(fn, L):
-    """fn(dx, 0) at -L, 0, +L; the copies share the centre copy's stroke ids (identical ink jitter, contract 11.9's check)."""
-    ranges, master = [], 1
-    for dx in (-L, 0.0, L):
+    """fn(dx, 0) at each offset in _COPIES x L; the copies share the centre copy's stroke ids (identical ink jitter, 11.9's check)."""
+    ranges = []
+    for m in _COPIES:
         n0 = len(_CUR.strokes) if _CUR is not None else 0
-        fn(dx, 0.0)
+        fn(m * L, 0.0)
         ranges.append((n0, len(_CUR.strokes) if _CUR is not None else 0))
     if _CUR is not None:
-        _GROUPS.append((master, ranges))
+        _GROUPS.append((_COPIES.index(0), ranges))
 
 
 def draw_end(side):
@@ -175,13 +174,14 @@ def draw_end(side):
         arc = _arc(c, zc, rx, rz, a_in, a_out, 40)
         G.stroke(d, X([(0.0, 0.0)] + arc + [(arc[-1][0], 0.0)]), M["cloud"], 0.0, cyclic=True)
         G.stroke(d, X(_crescent(c, zc, rx, rz, math.pi * 0.85, math.pi * 1.62)), M["cloud_sh"], 0.0, cyclic=True)
-        f_c, f_zc, f_rx, f_rz = 0.88, -0.30, 0.44, 0.36                                          # the lit front lobe
-        fill, farc = _hung(f_c, f_zc, f_rx, f_rz)
-        G.stroke(d, X(fill), M["cloud"], 0.0, cyclic=True)
-        G.stroke(d, X(farc), M["ink"], I)
         split = 5.25                                                                              # silhouette ink, then the overlap
         G.stroke(d, X([(0.0, 0.0)] + _arc(c, zc, rx, rz, a_in, split, 30)), M["ink"], O)
         G.stroke(d, X(_arc(c, zc, rx, rz, split, a_out, 12)), M["ink"], I)
+        f_c, f_zc, f_rx, f_rz = 0.95, -0.72, 0.40, 0.38                                          # the lit front lobe, lower right,
+        fill, farc = _hung(f_c, f_zc, f_rx, f_rz)                                                 # over the main lobe's overlap ink
+        G.stroke(d, X(fill), M["cloud"], 0.0, cyclic=True)
+        G.stroke(d, X(_crescent(f_c, f_zc, f_rx, f_rz)), M["cloud_sh"], 0.0, cyclic=True)
+        G.stroke(d, X(farc), M["ink"], I)
         bx = c + 0.10
         bz = zc - rz * math.sqrt(1 - (0.10 / rx) ** 2) + 0.03
         G.stroke(d, X([(bx - 0.05, bz), (bx + 0.005, bz - 0.28), (bx + 0.05, bz)]), M["ice_i"], I, cyclic=True)
@@ -194,7 +194,8 @@ PIECES = {"island_belly": (draw_belly, BELLY_W, BELLY_H, (0.0, (BELLY_H - OUT_RO
 
 
 def render_piece(name, giant="jupiter", mx=1, ss=4):
-    global _CUR
+    global _CUR, _COPIES
+    _COPIES = tuple(range(-1, mx + 1))
     fn, w, h, piv = PIECES[name]
     gp = fakegp.FakeGP()
     M = mats(gp, giant)
@@ -202,7 +203,7 @@ def render_piece(name, giant="jupiter", mx=1, ss=4):
     _CUR = d
     _GROUPS.clear()
     fn(d, M, giant)
-    _CUR = None
+    _CUR, _COPIES = None, (-1, 0, 1)
     st = fakegp.strokes_of(d, gp)
     for master, ranges in _GROUPS:
         m0, m1 = ranges[master]
