@@ -871,6 +871,8 @@ def do_v3_rigset(entry, preview):
         loop = [GR.render_frame(GR.collect(lscene, lobjs, mk[c0["name"]] + k), lfw, lfh, v3.PPU,
                                 tuple(le.get("pivot", [0.5, 0.0])), ss=ss, seed=int(le.get("seed", 1)) * 1000 + mk[c0["name"]] + k)[0]
                 for k in range(int(c0["frames"]))]
+    if not preview and not problems:              # the exports are written and valid: no STALE banner from an earlier failed run on this
+        mark_stale(key, False)                    # review (a later raise re-marks it; 11-08: the whale's first good render after 18:27)
     review.v3_rigset_review(entry, meta, sheet, png, out, imgs, {"problems": problems, "png_kb": n // 1024, "loop": loop})
     if entry.get("review_script"):                # e.g. the assembled Pilgrim rig (B-122): rig + bones + clips at 1x
         spec = importlib.util.spec_from_file_location("meridian_review_script", os.path.join(HERE, entry["review_script"]))
