@@ -64,7 +64,9 @@ def extra_colours():
             "lichen_w": P["offwhite"],
             "snow": P["offwhite"], "snow_sh": sh("sky"), "dsoil": P["brown"],
             "twig": P["brown"], "needle": dp("green"), "needle_lit": sh("green"), "thrift": P["red"], "cushion": P["green"],
-            "dry": P["mustard"], "dry_sh": sh("mustard")}
+            "dry": P["mustard"], "dry_sh": sh("mustard"),
+            "deep": dp("teal"), "deep_sh": dp("sky"), "core": dp("brown"), "core_sh": P["ink"],          # B-203 (appended): the deep
+            "hot": P["red"], "glow": P["mustard"], "spark": P["offwhite"]}                             # tiers' slate, core, seams
 
 
 def mats(gp):
@@ -1330,6 +1332,212 @@ def fs_amygdale(d, M):
         G.seam(d, [(0.02 + 0.10 * math.cos(a), 0.01 + 0.068 * math.sin(a)), (0.17 * math.cos(a), 0.12 * math.sin(a))], M["ink"])
 
 
+# B-203 (D-174, Bible 5.2 §8.1): the dig run's ground art for Earth - the depth tiers' fills (tier 1 Topsoil is B-175's
+# ground_fill as it is), each a §11.9 fill (512x512, tiles both ways, strata only), each with its own sparse fill_decor, and
+# the Surface Line (a pegged dashed ink line 2 m under the surface). UNITY crossfades two tiers over 1 m ("transition_m").
+
+TIERS = {2: ("Subsoil", (10, 40)), 3: ("Stone", (40, 100)), 4: ("Deep", (100, 200)), 5: ("Core", (200, None))}
+
+
+def _vein(d, M, Lf, pts, w, mat, core=None, cw=0.0):
+    """A wrapped vein / crack along pts (a hose of width w), an optional brighter core line inside it."""
+    B.wrapped(lambda dx, dz: G.stroke(d, G.hose_outline([(x + dx, z + dz) for x, z in pts], w), M[mat], I, cyclic=True), Lf, Lf)
+    if core:
+        B.wrapped(lambda dx, dz: G.stroke(d, G.hose_outline([(x + dx, z + dz) for x, z in pts[1:-1]], cw), M[core], 0.0, cyclic=True), Lf, Lf)
+
+
+def _zigzag(rnd, x0, z0, n, step, dz, jit):
+    pts, x, z = [], x0, z0
+    for _i in range(n):
+        pts.append((x, z))
+        x += step * rnd.uniform(0.7, 1.3)
+        z += dz * rnd.uniform(-1, 1) + rnd.uniform(-jit, jit)
+    return pts
+
+
+def _base(d, M, Lf, mat):
+    B.wrapped(lambda dx, dz: G.stroke(d, [(dx - 0.1, dz - 0.1), (dx + Lf + 0.1, dz - 0.1), (dx + Lf + 0.1, dz + Lf + 0.1), (dx - 0.1, dz + Lf + 0.1)],
+                                      M[mat], 0.0, cyclic=True), Lf, Lf)
+
+
+def fill_t2(d, M, k=0):
+    """Subsoil (10-40 m): denser, thinner clay bands than the topsoil, redder and darker; root threads thinning out."""
+    Lf = B.FILL / PPU
+    rnd = random.Random(2031)
+    _base(d, M, Lf, "soil_sh")
+    bands, z = [], 0.35
+    mats_ = ["rust", "soil_dp", "clay", "soil_sh", "rust", "soil", "soil_dp", "clay", "rust", "soil_dp"]
+    for j, m in enumerate(mats_):
+        th = rnd.uniform(0.28, 0.6)
+        bands.append((z + th / 2, th, m, j % 3 == 0))
+        z += th + rnd.uniform(0.12, 0.3)
+        if z > Lf - 0.4:
+            break
+    B._strata(d, M, Lf, bands, 0.05, 2032)
+    for q in range(5):                                                                        # sparse root threads
+        x, z0 = rnd.uniform(0, Lf), rnd.uniform(0.5, Lf - 0.5)
+        pts = [(x + 0.08 * math.sin(i * 1.3 + q), z0 - 0.12 * i) for i in range(7)]
+        B.wrapped(lambda dx, dz, pts=pts: G.stroke(d, G.hose_outline([(px + dx, pz + dz) for px, pz in pts], 0.012), M["twig"], 0.0, cyclic=True), Lf, Lf)
+    B._scatter(d, M, Lf, 16, (0.0, Lf), (0.025, 0.045), "pebble_i", 2033)
+    for i in range(8):
+        x, z = rnd.uniform(0, Lf), rnd.uniform(0, Lf)
+        B.wrapped(lambda dx, dz, x=x, z=z, s=i: G.hatch(d, x + dx, z + dz, M["ink"], n=3, length=0.07, spacing=0.03, angle_deg=160, seed=s), Lf, Lf)
+    G.specks(d, [(rnd.uniform(0.05, Lf - 0.05), rnd.uniform(0.05, Lf - 0.05)) for _ in range(36)], M["ink"])
+
+
+def fill_t3(d, M, k=0):
+    """Stone (40-100 m): grey-blue rock in thick beds with joints, teal and white crystal veins."""
+    Lf = B.FILL / PPU
+    rnd = random.Random(2041)
+    _base(d, M, Lf, "stone")
+    B._strata(d, M, Lf, [(7.2, 0.9, "rock_sh", True), (5.6, 1.4, "stone", True), (3.9, 1.1, "rock_lit", True), (2.3, 1.3, "rock_sh", True),
+                         (0.8, 0.9, "stone", True)], 0.08, 2042)
+    for q in range(10):                                                                       # joints
+        x, z = rnd.uniform(0, Lf), rnd.uniform(0.3, Lf - 0.3)
+        B.wrapped(lambda dx, dz, x=x, z=z: G.seam(d, [(x + dx, z + dz), (x + dx + 0.03, z + dz - 0.35), (x + dx - 0.01, z + dz - 0.7)], M["ink"]), Lf, Lf)
+    for q in range(4):                                                                        # crystal veins
+        pts = _zigzag(rnd, rnd.uniform(0, Lf), rnd.uniform(1, Lf - 1), 7, 0.35, 0.22, 0.05)
+        _vein(d, M, Lf, pts, 0.035, "lens" if q % 2 else "bone", core="bone" if q % 2 else None, cw=0.01)
+    B._scatter(d, M, Lf, 10, (0.0, Lf), (0.03, 0.05), "rock_lit_i", 2043)
+    G.specks(d, [(rnd.uniform(0.05, Lf - 0.05), rnd.uniform(0.05, Lf - 0.05)) for _ in range(30)], M["ink"])
+
+
+def fill_t4(d, M, k=0):
+    """Deep (100-200 m): dark slate in thin layers, glowing mineral seams."""
+    Lf = B.FILL / PPU
+    rnd = random.Random(2051)
+    _base(d, M, Lf, "deep")
+    layers, z = [], 0.3
+    while z < Lf - 0.3:
+        th = rnd.uniform(0.18, 0.4)
+        layers.append((z + th / 2, th, "deep_sh" if len(layers) % 2 else "rock_sh", len(layers) % 4 == 0))
+        z += th + rnd.uniform(0.25, 0.6)
+    B._strata(d, M, Lf, layers, 0.04, 2052)
+    for q in range(4):                                                                        # glowing seams: mustard, a pale core
+        pts = _zigzag(rnd, rnd.uniform(0, Lf), rnd.uniform(1, Lf - 1), 8, 0.32, 0.12, 0.03)
+        _vein(d, M, Lf, pts, 0.03, "glow", core="spark", cw=0.009)
+    G.specks(d, [(rnd.uniform(0.05, Lf - 0.05), rnd.uniform(0.05, Lf - 0.05)) for _ in range(26)], M["ink"])
+
+
+def fill_t5(d, M, k=0):
+    """Core (200 m +): near-black rock, hot amber cracks with bright cores, small diamond glints."""
+    Lf = B.FILL / PPU
+    rnd = random.Random(2061)
+    _base(d, M, Lf, "core")
+    B._strata(d, M, Lf, [(6.6, 0.8, "deep", False), (3.4, 1.0, "core_sh", False), (1.2, 0.6, "deep", False)], 0.1, 2062)
+    for q in range(5):                                                                        # the hot crack network
+        pts = _zigzag(rnd, rnd.uniform(0, Lf), rnd.uniform(0.8, Lf - 0.8), 6, 0.3, 0.3, 0.06)
+        _vein(d, M, Lf, pts, 0.035, "hot", core="glow", cw=0.012)
+        bx, bz = pts[2]
+        _vein(d, M, Lf, [(bx, bz), (bx + 0.18, bz - 0.22), (bx + 0.3, bz - 0.4)], 0.022, "hot")
+    for q in range(10):                                                                       # diamond glints
+        x, z = rnd.uniform(0, Lf), rnd.uniform(0, Lf)
+        B.wrapped(lambda dx, dz, x=x, z=z: G.stroke(d, [(x + dx, z + dz + 0.03), (x + dx + 0.012, z + dz), (x + dx, z + dz - 0.03), (x + dx - 0.012, z + dz)],
+                                                    M["spark"], 0.0, cyclic=True), Lf, Lf)
+
+
+def fd_t2(k):
+    def fn(d, M, _k=0):
+        rnd = random.Random(2100 + k)
+        if k == 0:                                                                            # a dead root knot
+            for j in range(4):
+                a = rnd.uniform(0, TAU)
+                G.stroke(d, G.hose_outline(G.bezier((0.0, 0.0), (0.12 * math.cos(a), 0.1 * math.sin(a) + 0.04), (0.24 * math.cos(a + 0.6), 0.14 * math.sin(a + 0.6)), n=8), 0.022),
+                         M["twig_i"], I, cyclic=True)
+            G.stroke(d, G.lumpy_ellipse(0.0, 0.0, 0.08, 0.06, n=12, lump=0.12, seed=2110), M["twig_i"], O, cyclic=True)
+        elif k == 1:                                                                          # a clay concretion with growth rings
+            G.stroke(d, G.lumpy_ellipse(0.0, 0.0, 0.22, 0.16, n=18, lump=0.08, seed=2111), M["clay_i"], O, cyclic=True)
+            for r in (0.13, 0.07):
+                G.stroke(d, G.lumpy_ellipse(0.01, 0.0, r * 1.3, r, n=14, lump=0.06, seed=2112), M["ink"], I, cyclic=True)
+        else:                                                                                 # a rusty iron nodule
+            G.stroke(d, B._shard(0.0, 0.0, 0.18, rnd, sides=8, flat=0.8), M["rust_i"], O, cyclic=True)
+            G.specks(d, [(rnd.uniform(-0.1, 0.1), rnd.uniform(-0.08, 0.08)) for _ in range(5)], M["ink"])
+    return fn
+
+
+def fd_t3(k):
+    def fn(d, M, _k=0):
+        rnd = random.Random(2200 + k)
+        if k == 0:                                                                            # a geode full of crystal (no dark hollow)
+            G.stroke(d, G.lumpy_ellipse(0.0, 0.0, 0.3, 0.24, n=22, lump=0.06, seed=2201), M["rock_sh_i"], O, cyclic=True)
+            G.stroke(d, G.lumpy_ellipse(0.0, 0.0, 0.22, 0.17, n=18, lump=0.04, seed=2202), M["bone"], 0.0, cyclic=True)
+            for j in range(9):
+                a = TAU * j / 9
+                G.stroke(d, [(0.0, 0.0), (0.2 * math.cos(a), 0.15 * math.sin(a)), (0.2 * math.cos(a + 0.6), 0.15 * math.sin(a + 0.6))],
+                         M["lens" if j % 2 else "bone"], 0.0, cyclic=True)
+            G.stroke(d, G.lumpy_ellipse(0.0, 0.0, 0.22, 0.17, n=18, lump=0.04, seed=2202), M["ink"], I, cyclic=True)
+        elif k == 1:                                                                          # a small spray of quartz prisms
+            for x0, h, lean in ((-0.12, 0.26, -0.05), (0.02, 0.34, 0.0), (0.14, 0.22, 0.06)):
+                G.stroke(d, [(x0 - 0.045, -0.18), (x0 + 0.045, -0.18), (x0 + 0.045 + lean, -0.18 + h * 0.8), (x0 + lean, -0.18 + h), (x0 - 0.045 + lean, -0.18 + h * 0.8)],
+                         M["bone_i"], I, cyclic=True)
+        else:                                                                                 # a book of mica
+            for j in range(4):
+                z = -0.08 + 0.05 * j
+                G.stroke(d, [(-0.2 + 0.02 * j, z), (0.18 + 0.02 * j, z + 0.01), (0.2 + 0.02 * j, z + 0.04), (-0.18 + 0.02 * j, z + 0.03)],
+                         M["rock_lit_i" if j % 2 else "cream_i"], I, cyclic=True)
+    return fn
+
+
+def fd_t4(k):
+    def fn(d, M, _k=0):
+        rnd = random.Random(2300 + k)
+        if k == 0:                                                                            # a nodule split by a glowing crack
+            G.stroke(d, G.lumpy_ellipse(0.0, 0.0, 0.22, 0.2, n=20, lump=0.06, seed=2301), M["deep_sh_i"], O, cyclic=True)
+            G.stroke(d, G.hose_outline([(-0.16, 0.06), (-0.05, 0.0), (0.04, 0.04), (0.16, -0.06)], 0.025), M["glow"], 0.0, cyclic=True)
+            G.stroke(d, G.hose_outline([(-0.1, 0.03), (0.0, 0.01), (0.1, -0.02)], 0.008), M["spark"], 0.0, cyclic=True)
+        elif k == 1:                                                                          # a lens of graphite with its sheen
+            G.stroke(d, G.lumpy_ellipse(0.0, 0.0, 0.5, 0.12, n=24, lump=0.04, seed=2302), M["core_i"], O, cyclic=True)
+            for x0 in (-0.25, 0.05):
+                G.stroke(d, [(x0, 0.04), (x0 + 0.18, 0.06), (x0 + 0.18, 0.075), (x0, 0.055)], M["rock_lit"], 0.0, cyclic=True)
+        else:                                                                                 # an obsidian shard
+            pts = B._shard(0.0, 0.0, 0.2, rnd, sides=5, flat=0.9)
+            G.stroke(d, pts, M["core_sh_i"], O, cyclic=True)
+            G.stroke(d, [pts[0], pts[1], (0.0, 0.0)], M["deep"], 0.0, cyclic=True)
+            G.seam(d, [(pts[0][0] * 0.5, pts[0][1] * 0.5), (pts[2][0] * 0.5, pts[2][1] * 0.5)], M["ink"])
+    return fn
+
+
+def fd_t5(k):
+    def fn(d, M, _k=0):
+        rnd = random.Random(2400 + k)
+        if k == 0:                                                                            # a kimberlite chunk holding a diamond
+            G.stroke(d, B._shard(0.0, 0.0, 0.3, rnd, sides=7, flat=0.85), M["deep_i"], O, cyclic=True)
+            T, Bm, L_, R, F = (0.02, 0.16), (0.0, -0.12), (-0.11, 0.02), (0.12, 0.0), (0.03, 0.01)
+            for tri_, m in (((T, L_, F), "spark"), ((T, F, R), "rock_lit"), ((L_, F, Bm), "rock_lit"), ((F, R, Bm), "rock")):
+                G.stroke(d, list(tri_), M[m], 0.0, cyclic=True)
+            G.stroke(d, [T, R, Bm, L_], M["ink"], I, cyclic=True)
+        else:                                                                                 # a pocket of molten rock
+            G.stroke(d, G.lumpy_ellipse(0.0, 0.0, 0.42, 0.28, n=22, lump=0.08, seed=2401), M["core_sh_i"], O, cyclic=True)
+            G.stroke(d, G.lumpy_ellipse(0.02, -0.02, 0.32, 0.2, n=20, lump=0.08, seed=2402), M["hot"], 0.0, cyclic=True)
+            G.stroke(d, G.lumpy_ellipse(0.04, -0.04, 0.18, 0.1, n=16, lump=0.08, seed=2403), M["glow"], 0.0, cyclic=True)
+            G.stroke(d, G.lumpy_ellipse(0.06, -0.05, 0.07, 0.035, n=12, lump=0.06, seed=2404), M["spark"], 0.0, cyclic=True)
+    return fn
+
+
+TIER_FILLS = {2: fill_t2, 3: fill_t3, 4: fill_t4, 5: fill_t5}
+TIER_DECOR = {2: [("root_knot", fd_t2(0), 48, 40), ("clay_concretion", fd_t2(1), 40, 32), ("rusty_nodule", fd_t2(2), 32, 32)],
+              3: [("geode", fd_t3(0), 48, 40), ("crystal_spray", fd_t3(1), 32, 32), ("mica_book", fd_t3(2), 40, 24)],
+              4: [("glow_nodule", fd_t4(0), 40, 40), ("graphite_lens", fd_t4(1), 72, 24), ("obsidian_shard", fd_t4(2), 32, 32)],
+              5: [("kimberlite_diamond", fd_t5(0), 48, 48), ("magma_pocket", fd_t5(1), 64, 48)]}
+SL_W, SL_H, SL_ROW = 256, 64, 40                                                              # the Surface Line strip: 4 m, its line on row 40
+
+
+def surface_line(d, M, k=0):
+    """The Surface Line (Bible 5.2 §8.1): ink dashes on a pale halo (readable over every fill), one marker peg per 4 m strip with
+    a small red pennant pointing up (topside)."""
+    Ls = SL_W / PPU
+    for i in range(8):                                                                        # dashes: 0.36 m, gaps 0.14 m
+        x0 = i * 0.5 + 0.07
+        B.wrapped(lambda dx, dz, x0=x0: G.stroke(d, G.hose_outline([(x0 + dx, 0.0), (x0 + 0.36 + dx, 0.0)], 0.045), M["cream"], 0.0, cyclic=True), Ls)
+        B.wrapped(lambda dx, dz, x0=x0: G.stroke(d, G.hose_outline([(x0 + 0.02 + dx, 0.0), (x0 + 0.34 + dx, 0.0)], 0.02), M["ink"], 0.0, cyclic=True), Ls)
+    def peg(dx, _dz, px=2.0):                                                                 # the peg: a stake driven through the line
+        G.stroke(d, [(px + dx - 0.035, -0.25), (px + dx + 0.035, -0.25), (px + dx + 0.03, 0.26), (px + dx - 0.03, 0.26)], M["twig_i"], I, cyclic=True)
+        G.stroke(d, [(px + dx - 0.04, -0.25), (px + dx + 0.04, -0.25), (px + dx, -0.3)], M["twig_i"], I, cyclic=True)
+        G.stroke(d, [(px + dx + 0.03, 0.26), (px + dx + 0.03, 0.12), (px + dx + 0.2, 0.2)], M["thrift_i"], I, cyclic=True)   # the pennant, up (topside)
+        G.stroke(d, G.lumpy_ellipse(px + dx, 0.27, 0.025, 0.02, n=8, seed=2501), M["cream_i"], I, cyclic=True)
+    B.wrapped(peg, Ls)                                                                        # one per 4 m: the strip's period (the tiling check)
+
+
 FILL_PIECES = {"earth": ("sand", [("scallop", fs_scallop, 64, 48), ("fulgurite", fs_fulgurite, 96, 48), ("desert_rose", fs_desert_rose, 64, 64)]),
                "mars": ("basalt", [("lava_tube", fs_lava_tube, 128, 64), ("vesicles", fs_vesicles, 64, 48), ("amygdale", fs_amygdale, 48, 48)])}
 
@@ -1342,6 +1550,13 @@ def _pieces(planet, part="variants"):
         return {f"ground_lip_{v}": (128, 96, LIP_PIV, 1, LIPS[v]) for v in vs}, ()
     if part == "puffs":                                                                       # B-190: one 8-frame sheet per material
         return {f"dig_puff_{v}": (128, 128, (0.5, 0.25), 8, _puff_fn(v)) for v in PUFF_VARIANTS[planet]}, ()
+    if part == "tiers":                                                                       # B-203: the depth tiers' fills, their buried
+        P = {f"ground_fill_t{t}": (B.FILL, B.FILL, (0.0, 0.0), 1, fn) for t, fn in TIER_FILLS.items()}   # details, the Surface Line
+        for t, lst in TIER_DECOR.items():
+            for i, (_n, fn, w, h) in enumerate(lst):
+                P[f"fill_decor_t{t}_{i + 1}"] = (w, h, (0.5, 0.5), 1, (lambda d, M, k, fn=fn: fn(d, M)))
+        P["surface_line"] = (SL_W, SL_H, (0.0, (SL_H - SL_ROW) / SL_H), 1, surface_line)
+        return P, tuple([f"ground_fill_t{t}" for t in TIER_FILLS] + ["surface_line"])
     if part == "fills":                                                                       # B-192: the variant fill's buried details
         v, lst = FILL_PIECES[planet]
         return {f"fill_decor_{v}_{i + 1}": (w, h, (0.5, 0.5), 1, (lambda d, M, k, fn=fn: fn(d, M))) for i, (_n, fn, w, h) in enumerate(lst)}, ()
@@ -1406,7 +1621,7 @@ def use_planet(planet, part="variants"):
     global PLANET, VARIANTS, PIECES, TILES, KEYS, PART
     PLANET, PART = planet, part
     VARIANTS = (B181_VARIANTS[planet] if part in ("b181", "b181lips") else PUFF_VARIANTS[planet] if part == "puffs"
-                else (FILL_PIECES[planet][0],) if part == "fills" else PLANET_VARIANTS[planet])
+                else (FILL_PIECES[planet][0],) if part == "fills" else () if part == "tiers" else PLANET_VARIANTS[planet])
     PIECES, TILES = _pieces(planet, part)
     KEYS = _keys()
 
@@ -1431,7 +1646,7 @@ def sheets():
 
 
 def pieces_of(S):
-    if PART in ("lips", "b181lips", "puffs", "fills"):
+    if PART in ("lips", "b181lips", "puffs", "fills", "tiers"):
         return dict(S)
     out = {n: S[n] for n in TILES}
     for v in VARIANTS:
@@ -1465,6 +1680,15 @@ def sheet_meta(kn, frames):
         v = kn.rsplit("_", 1)[1]
         meta.update({"animations": [{"name": "puff", "start": 0, "length": n, "loop": False}], "variant": v,
                      "note": f"B-190: the dig puff in the {v} ground's material (as dig_puff: the clods behind the billows, no face)"})
+    elif kn == "surface_line":                                                                # B-203
+        meta.update({"tile_x": True, "repeat_px": SL_W, "line_row": SL_ROW, "depth_below_surface_m": 2.0, "peg_every_m": 4.0,
+                     "mapping": "along the drawn surface, 2 m under it (the normal's offset): u = world x x 64 mod 256; the pivot is ON the line row 40",
+                     "note": "B-203 (Bible 5.2 §8.1): the Surface Line, drawn in the cutaway whenever the camera is below the surface; "
+                             "the pennant on each peg points topside"})
+    elif kn.startswith("fill_decor_t") and PART == "tiers":                                   # B-203: a tier's buried details
+        t, i = int(kn.split("_")[2][1:]), int(kn.rsplit("_", 1)[1]) - 1
+        meta.update({"upright": True, "tier": t, "tier_name": TIERS[t][0], "fill": f"ground_fill_t{t}", "decor": TIER_DECOR[t][i][0],
+                     "note": f"B-203: a buried detail of tier {t} ({TIERS[t][0]}), D-165's sparse scatter in that tier's cutaway, never rotated; pivot centred"})
     elif kn.startswith("fill_decor_"):
         v, i = kn.split("_")[2], int(kn.rsplit("_", 1)[1]) - 1
         meta.update({"upright": True, "variant": v, "fill": FILL_OF[v], "decor": FILL_PIECES[PLANET][1][i][0],
@@ -1481,6 +1705,11 @@ def sheet_meta(kn, frames):
         v = kn.rsplit("_", 1)[1]
         meta.update({"tile_x": True, "tile_y": True, "world_space": True, "standalone": True, "wrap": "repeat", "variant": v,
                      "mapping": "as ground_fill: u = x x 64 mod 512, v = -y x 64 mod 512; a standalone texture (Repeat wrap); strata only (D-165)"})
+        if PART == "tiers":                                                                   # B-203: the json names its tier
+            t = int(v[1:])
+            meta.update({"tier": t, "tier_name": TIERS[t][0], "depth_m": list(TIERS[t][1]), "transition_m": 1.0,
+                         "note": f"B-203: tier {t} {TIERS[t][0]} ({TIERS[t][1][0]}-{TIERS[t][1][1] or 'the world floor'} m under the Surface Line); "
+                                 "tier 1 Topsoil is ground_fill; crossfade two tiers over 1 m at their border"})
     elif kn.startswith("ground_lip_"):
         v = kn.rsplit("_", 1)[1]
         meta.update({"brink": True, "variant": v, "biomes": BIOMES[v], "band": f"ground_band_{v}",
@@ -1525,7 +1754,7 @@ def export(art, S=None):
             _json.dump(meta, f, indent=2)
             f.write("\n")
         out.append((meta["key"], sheet.shape[1], sheet.shape[0], n))
-    return out, within, f"{len(out)} keys, contract v3.2 11.9 ({'B-180 lips' if PART == 'lips' else 'B-198 variant lips' if PART == 'b181lips' else 'B-181 variants' if PART == 'b181' else 'B-190 puffs' if PART == 'puffs' else 'B-192 fill decor' if PART == 'fills' else 'B-178 variants'})"
+    return out, within, f"{len(out)} keys, contract v3.2 11.9 ({'B-180 lips' if PART == 'lips' else 'B-198 variant lips' if PART == 'b181lips' else 'B-181 variants' if PART == 'b181' else 'B-190 puffs' if PART == 'puffs' else 'B-192 fill decor' if PART == 'fills' else 'B-203 depth tiers' if PART == 'tiers' else 'B-178 variants'})"
 
 
 def main(out, S=None, allw=None, footnote=None):
@@ -1536,6 +1765,9 @@ def main(out, S=None, allw=None, footnote=None):
         return
     if PART == "fills":                                                                       # B-192: the export's review, this planet's rows
         preview_fills(os.path.dirname(out), planets=(PLANET,), pieces=pieces_of(S), out=out, footnote=footnote)
+        return
+    if PART == "tiers":                                                                       # B-203: the cutaway from the surface to 220 m
+        preview_tiers(os.path.dirname(out), pieces=pieces_of(S), out=out, footnote=footnote)
         return
     (preview_lips if PART in ("lips", "b181lips") else preview)(os.path.dirname(out), pieces=pieces_of(S), out=out, footnote=footnote)
 
@@ -1949,7 +2181,153 @@ def preview_fills(out_dir, planets=("earth", "mars"), pieces=None, out=None, foo
         print(ln)
 
 
+def preview_tiers(out_dir, pieces=None, out=None, footnote=None):
+    """B-203's cutaway, Earth: on the left the whole column from the surface to 222 m at 1/16 (the Surface Line 2 m down, the
+    five tiers below it, 1 m crossfades at their borders); on the right, at 1x, the surface with the Surface Line (the surveyor
+    topside on the surface), a 5 m window in each tier (the surveyor in a dug pocket, the tier's buried details scattered as
+    UNITY will) and a 3 m window at each tier border (the 1 m crossfade). Tier 1 and the band are read from Art."""
+    import numpy as np
+    from meridian import pngio
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    E = os.path.join(ART, "terrain", "earth")
+    rd = lambda name: pngio.read_png_np(os.path.join(E, name + "_color.png"))  # noqa: E731
+    if pieces is None:
+        pieces = {n: ([render_piece(n, 0)[0]], []) for n in PIECES}
+    f32 = lambda a: a[..., :3].astype(np.float32) / 255.0  # noqa: E731
+    fills = {1: f32(rd("ground_fill"))}
+    fills.update({t: f32(pieces[f"ground_fill_t{t}"][0][0]) for t in TIER_FILLS})
+    decor = {1: [rd(f"fill_decor_{i + 1}") for i in range(4) if os.path.isfile(os.path.join(E, f"fill_decor_{i + 1}_color.png"))]}
+    decor.update({t: [pieces[f"fill_decor_t{t}_{i + 1}"][0][0] for i in range(len(lst))] for t, lst in TIER_DECOR.items()})
+    band, line = rd("ground_band"), pieces["surface_line"][0][0]
+    sky = np.array(v3.hex_rgb(P_EARTH["sky"]), np.float32) / 255.0
+    try:
+        import json as _j
+        sm = _j.load(open(os.path.join(ART, "characters", "surveyor", "side.json"), encoding="utf-8"))
+        sv = pngio.read_png_np(os.path.join(ART, "characters", "surveyor", "side_color.png"))[:sm["frame_height"], :sm["frame_width"]]
+        sv_piv = int(round(sm["pivot"][1] * sm["frame_height"]))
+    except (OSError, KeyError, ValueError):
+        sv = None
+    bounds = [(1, 0.0, 10.0), (2, 10.0, 40.0), (3, 40.0, 100.0), (4, 100.0, 200.0), (5, 200.0, 220.0)]   # depth under the Surface Line
+
+    def tier_at(dm):
+        for t, a, b in bounds:
+            if dm < b:
+                return t
+        return 5
+
+    def column(width, d0, d1, scale=1):
+        """The cutaway rows for depths d0..d1 m under the SURFACE (the Surface Line at 2 m), crossfaded over 1 m at tier borders."""
+        H = int(round((d1 - d0) * PPU / scale))
+        img = np.empty((H, width, 3), np.float32)
+        xs = (np.arange(width) * scale) % 512
+        for r in range(H):
+            dm_s = d0 + r * scale / PPU                                                     # m under the surface
+            dl = dm_s - 2.0                                                                 # m under the Surface Line
+            yrow = int(dm_s * PPU) % 512
+            if dl < 0:
+                img[r] = fills[1][yrow, xs]
+                continue
+            t = tier_at(dl)
+            row = fills[t][yrow, xs]
+            for tb, a, _b in bounds[1:]:                                                    # within 1 m above a border: crossfade
+                if a - 1.0 <= dl < a and tb == t + 1:
+                    u = (dl - (a - 1.0)) + 0.25 * np.sin(np.arange(width) * scale / 23.0 + a) * (1 - abs(2 * (dl - a + 1) - 1))
+                    w = np.clip(u, 0, 1)[:, None]
+                    row = row * (1 - w) + fills[tb][yrow, xs] * w
+            img[r] = row
+        return img
+
+    def scatter(img, t, seed, n):
+        rnd = random.Random(seed)
+        for _k in range(n):
+            if not decor[t]:
+                return
+            fr = rnd.choice(decor[t])
+            x, y = rnd.randint(40, img.shape[1] - 100), rnd.randint(20, img.shape[0] - 60)
+            review._over(img, fr, x, y)
+
+    rows, Wr = [], 960
+    # the overview at 1/16
+    ov = column(160, 0.0, 222.0, scale=16)
+    ov_lab = np.empty((ov.shape[0], 140, 3), np.float32)
+    ov_lab[:] = review.PAPER
+    for t, a, b in bounds:
+        y = int((a + 2.0) * PPU / 16)
+        ov[min(y, ov.shape[0] - 1)] = (0.12, 0.1, 0.09)
+        review._label(ov_lab, f"T{t} {(TIERS[t][0] if t > 1 else 'Topsoil')} {int(a)} m", 4, y + 2, scale=1)
+    ov[int(2.0 * PPU / 16)] = (0.95, 0.92, 0.85)
+    overview = np.hstack([ov, ov_lab])
+    # 1x: the surface and the Surface Line
+    S = np.empty((5 * PPU, Wr, 3), np.float32)
+    S[:64] = sky
+    S[64:] = column(Wr, 0.0, 4.0)
+    review._over(S, np.tile(band, (1, 2, 1))[:, :Wr], 0, 64 - B.SURF_ROW)
+    review._over(S, np.tile(line, (1, 4, 1))[:, :Wr], 0, 64 + 2 * PPU - SL_ROW)
+    if sv is not None:
+        review._over(S, sv, 300, 64 - sv.shape[0] + sv_piv)
+    rows.append(("the surface: B-175's band, tier 1 under it, the SURFACE LINE 2 m down (topside above it); the surveyor topside", S))
+    for t, a, b in bounds:                                                                  # a window in each tier
+        mid = (a + min(b, 220.0)) / 2
+        T = column(Wr, mid + 2.0 - 2.5, mid + 2.0 + 2.5)
+        scatter(T, t, 2600 + t, 5)
+        cx, cy, rx, ry = 480, 3.2 * PPU, 1.4 * PPU, 1.2 * PPU                               # a dug pocket, the surveyor standing in it
+        Y, X = np.mgrid[0:T.shape[0], 0:Wr]
+        pocket = ((X - cx) / rx) ** 2 + ((Y - cy) / ry) ** 2 <= 1
+        T[pocket] = T[pocket] * 0.35 + np.array((0.16, 0.13, 0.11), np.float32) * 0.65
+        if sv is not None:
+            review._over(T, sv, cx - sv.shape[1] // 2, int(cy + ry * 0.85) - sv.shape[0] + sv_piv)
+        rows.append((f"tier {t} {TIERS[t][0] if t > 1 else 'Topsoil'} ({int(a)}-{int(b)} m under the line) at 1x, its buried details, the surveyor in a dug pocket", T))
+    for t, a, _b in bounds[1:]:                                                             # the borders
+        Bd = column(Wr, a + 2.0 - 1.5, a + 2.0 + 1.5)
+        rows.append((f"the border tier {t - 1} -> {t} at {int(a)} m: the 1 m crossfade above it", Bd))
+    right = []
+    for title, img in rows:
+        lab = np.empty((22, Wr, 3), np.float32)
+        lab[:] = review.PAPER
+        review._label(lab, title[:150], 4, 6, scale=1)
+        right += [lab, img]
+    right = np.vstack(right)
+    H = max(right.shape[0], overview.shape[0] + 22)
+    canvas = np.empty((H + 26, overview.shape[1] + 16 + Wr, 3), np.float32)
+    canvas[:] = review.PAPER
+    review._label(canvas, "B-203 Earth's depth tiers and the Surface Line (the cutaway from the surface to 222 m; the left column at 1/16)", 6, 6)
+    canvas[26:26 + overview.shape[0], :overview.shape[1]] = overview
+    canvas[26:26 + right.shape[0], overview.shape[1] + 16:] = right
+    lines = []
+    for name, (frames, _w) in pieces.items():
+        hit = v3.palette_hits(frames[0], "earth")[0] * 100
+        m = v3.EDGE_MARGIN
+        f = frames[0]
+        edge = name not in TILES and (f[:m, :, 3].any() or f[-m:, :, 3].any() or f[:, :m, 3].any() or f[:, -m:, 3].any())
+        lines.append(f"{name}: {f.shape[1]}x{f.shape[0]}, palette {hit:.1f}%" + ("; EDGE" if edge else ""))
+    foot = np.empty((30 + 16 * ((len(lines) + 1) // 2), canvas.shape[1], 3), np.float32)
+    foot[:] = review.PAPER
+    for i, ln in enumerate(lines):
+        review._label(foot, ln, 6 + (i % 2) * 560, 6 + 16 * (i // 2), scale=1)
+    img = np.vstack([canvas, foot])
+    import time
+    review.draw(img, time.strftime("%m-%d %H:%M") + " " + (footnote or "design preview (lock-free, fakegp + numpy)"), 2, img.shape[0] - 16, (1.0, 1.0, 0.85))
+    out = out or os.path.join(out_dir, "review_b203_earth_tiers_preview.png")
+    np.clip(img, 0.0, 1.0, out=img)
+    u8 = np.empty(img.shape[:2] + (4,), np.uint8)
+    u8[..., :3] = np.rint(img * 255.0)
+    u8[..., 3] = 255
+    pngio.write_png(out, u8)
+    print("written", out, u8.shape[1], "x", u8.shape[0])
+    for ln in lines:
+        print(ln)
+
+
+P_EARTH = v3.PALETTES["earth"]
+
+
 if __name__ == "__main__":                       # python -I build_ground_variants_v3.py <preview dir> [planet] [lips | b181] | <dir> puffs|fills [planets]
+    if len(sys.argv) > 2 and sys.argv[2] == "tiers":                                       # B-203: Earth's tiers
+        use_planet("earth", "tiers")
+        preview_tiers(sys.argv[1])
+        fakegp.restore()
+        sys.exit(0)
     if len(sys.argv) > 2 and sys.argv[2] in ("puffs", "fills"):                            # [planets, comma-separated]
         (preview_puffs if sys.argv[2] == "puffs" else preview_fills)(sys.argv[1], tuple(sys.argv[3].split(",")) if len(sys.argv) > 3 else ("earth", "mars"))
         fakegp.restore()
