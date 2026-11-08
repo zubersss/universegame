@@ -2365,21 +2365,21 @@ Files: tools/unity_profile.ps1 (or the build wrapper), Code/Runtime/Core/BuildSm
 Depends: U-142
 Lead notes: Cycle 275. The owner's first-ever frame of every build has read "Development Build" in its corner; 73 s per build is cheap. Rides U-142's lock if in, else 0.4.9. 19:4x: CODE IN lock-free (the dev player to Build/MERIDIAN_<v>_dev/ for the probe; unity_profile.ps1 -Release builds the release player to Build/MERIDIAN_<v>/ only after a green gate + probe; unity_release.ps1 does both and smokes the release player; tools/unity_build_selftest.ps1 28/28 without the Editor); Bible §15 updated (D-155). Done on 0.4.8's two folders.
 
-### U-144 · UNITY · Ready · C2
+### U-144 · UNITY · In Progress · C2
 Goal: Neptune's hazards (D-155's deferred half): the −x wind zones with their mirrored layers and flora lean, the player's wind drift on foot and in the air (scaled by wind speed, zero behind a floe cap or an anchor), the wind anchor as a hold (interact at `props/neptune/wind_anchor` to stand fast through a gust), a gust warning on the HUD gauges; the M4 Neptune tests unchanged.
 Accept: NeptuneStageTests: the drift per wind speed, zero when anchored, the mirror in a −x zone; a capture of the surveyor leaning into a gust at an anchor; clean console.
 Files: Code/Runtime/Planet/, Code/Runtime/Player/, Tests/
 Depends: U-133
 Lead notes: Cycle 276. Lock-free code any time; its check with U-133's.
 
-### U-146 · UNITY · Ready · C2
+### U-146 · UNITY · In Progress · C2
 Goal: The Survey scan pulse on Uranus (D-154's deferred half): a scan with the Survey module flashes the deck's survey bands for 4 beats on top of the module-held view, through the same crossfade; the Leviathan's bands (Neptune) light with the same pulse per D-148.
 Accept: UranusStageTests +1 (the pulse's length and fade); a capture mid-pulse; clean console.
 Files: Code/Runtime/View2D/CartoonStage.cs, Code/Runtime/Creatures/, Tests/
 Depends: U-130
 Lead notes: Cycle 276. Small; lock-free code; its check with U-130's.
 
-### U-147 · UNITY · Ready · C3
+### U-147 · UNITY · In Progress · C3
 Goal: The HUD's last old-style text goes to paper and ink (D-149): the RADIATION / CRYO value and the SUIT bar, the ESCAPE marker and its altitude number, and the POI distance list at the top right are set in Patrick Hand ink on small paper tags (the gauges' look), the bar an ink-ruled strip with a gold fill; the light-blue text and bars go; nothing moves on screen.
 Accept: a smoke frame on each of Earth, Mars, Mercury and Venus with no light-blue HUD text; HudTests cover the tag layout at 1080p and 720p; clean console.
 Files: Code/Runtime/UI/Hud/, Tests/
