@@ -1,0 +1,31 @@
+{
+  "key": "terrain/earth/ground_band_snow",
+  "style": "v3",
+  "contract": "v3.2 11.9",
+  "frame_width": 512,
+  "frame_height": 64,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.0,
+    0.625
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [],
+  "tile_x": true,
+  "repeat_px": 512,
+  "surface_row": 24,
+  "above_px": 24,
+  "below_px": 40,
+  "variant": "snow",
+  "biomes": [
+    "taiga",
+    "tundra"
+  ],
+  "fill": "ground_fill",
+  "mapping": "as ground_band: u = world x x 64 mod 512; v = 24 - (normal distance from the outline x 64); the sprite pivot is ON row 24",
+  "note": "B-178: Earth's snow band (taiga, tundra); plains and forest keep ground_band; crossfade the two bands at a biome border"
+}
