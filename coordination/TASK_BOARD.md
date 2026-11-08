@@ -1474,7 +1474,7 @@ Goal: The dig puff in each ground's own material: today every Earth dig throws B
 Accept: one stamped sheet of the five beside the soil puff at 1× accepted by LEAD before the export; no face read on any frame (D-101); log OK; palette 100 %.
 Files: blender/scripts/build_ground_variants_v3.py, Assets/_Game/Art/terrain/{earth,mars}/
 Depends: —
-Lead notes: Cycle 283 (13:0x). After B-182 and B-184; UNITY picks the puff by the stroke's band variant (dig_puff_<variant>, dig_puff the fallback) with U-159.
+Lead notes: Cycle 283 (13:0x). After B-182 and B-184; UNITY picks the puff by the stroke's band variant (dig_puff_<variant>, dig_puff the fallback) with U-159. 13:2x: PREVIEW ACCEPTED AS DRAWN (review_b190_dig_puffs_preview.png 13:13, sources 0c6deb8a: sand in the band's mustard with darker clods, snow off-white with blue-grey clumps, stone pale grey chips, frost off-white with teal ice clods, basalt dark teal-grey; frame 2 at 2× clean on all five, no face read; the white puffs' shade warm off-white, not a dark hole; same frames, size, pivot, clip; palette 100 %). Export after B-184 (terrain/{earth,mars}/dig_puffs). B-182's Earth audit also in (13:12: 44 G1 keys, none missing, no outliers; audit_g1_earth.png, audit_g1.md; Earth's dig_puff frame 2 clean); Mars / Mercury / Venus after B-184.
 
 ### B-184 · BLENDER · Ready · G1
 Goal: The dig_puff face fix (B-182's finding, c8cf185b: the clods drawn behind the billows until they fly clear) on Mars, Mercury and Venus: re-export each planet's ground_set with only dig_puff changed.
