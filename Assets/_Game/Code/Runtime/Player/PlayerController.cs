@@ -123,6 +123,16 @@ namespace Meridian.Player
             // Box2D refreshes contact flags at the start of a step, so the ground still reads as touching for one step after
             // take-off; a body that just jumped and is rising is airborne (the first airborne dash would be refused otherwise).
             if (Grounded && v.y > 0f && airTimeSinceJump < 2.5f * dt) Grounded = false;
+            // U-172 (the owner's 0.5.0 report): walking or running downhill, over a crest or across two chunks' outlines the feet lose the
+            // contact for a step and walk / run flickered into fall / land. Still on the ground last step, not rising or dashing: walkable
+            // ground within SnapDistance under the feet takes them back down (a real ledge, deeper than that, still falls).
+            if (!Grounded && wasGrounded && v.y <= SnapMaxRise && airTimeSinceJump >= 2.5f * dt && !Dash.Active && knockFor <= 0f && Snap(out var snapNormal))
+            {
+                Grounded = true;
+                groundNormal = snapNormal;
+                if (v.y > 0f) v.y = 0f;
+                Snaps++;
+            }
 
             if (Grounded && !wasGrounded) Land(fallSpeed);
             fallSpeed = v.y < 0f ? -v.y : 0f;
@@ -197,6 +207,11 @@ namespace Meridian.Player
                 v -= groundNormal * SlopeStick;
             }
 
+            // U-172: the drawn outline's quarter-metre vertices kick a walking capsule up (Box2D meets each vertex with a tilted contact: +0.3 to
+            // +0.8 m/s, airborne for ~7 steps every metre or so: walk flickered to fall / land). On flat ground, grounded and not jumping, dashing
+            // or knocked, the feet never rise (a slope's step above already follows the slope, which drops the kick the same way).
+            if (Grounded && !jumped && !dashing && knockFor <= 0f && groundNormal.y >= SlopeFlat && v.y > 0f) v.y = 0f;
+
             if (v.y < -terminalVelocity) v.y = -terminalVelocity;
             Body.linearVelocity = v;
         }
@@ -216,6 +231,29 @@ namespace Meridian.Player
         /// <summary>U-156: the most upright ground contact's normal on the last step (up when airborne).</summary>
         public Vector2 GroundNormal => groundNormal;
         Vector2 groundNormal = Vector2.up;
+
+        /// <summary>U-172: how far under the feet the ground snap reaches (m): a sprint down the steepest walkable slope drops ~0.1 m a step.</summary>
+        public const float SnapDistance = 0.3f;
+        /// <summary>U-172: the snap does not catch a body rising faster than this (m/s): a jump or a knock up leaves the ground.</summary>
+        public const float SnapMaxRise = 0.5f;
+        /// <summary>U-172: snaps so far (tests read it).</summary>
+        public int Snaps { get; private set; }
+        readonly RaycastHit2D[] snapHits = new RaycastHit2D[4];
+
+        /// <summary>U-172: the body's colliders cast down SnapDistance; on walkable ground (normal.y > 0.7) the body is set onto it.</summary>
+        bool Snap(out Vector2 normal)
+        {
+            normal = Vector2.up;
+            var filter = new ContactFilter2D { useTriggers = false, useLayerMask = true, layerMask = Physics2D.GetLayerCollisionMask(gameObject.layer) };
+            int n = Body.Cast(Vector2.down, filter, snapHits, SnapDistance);
+            float best = float.MaxValue; int k = -1;
+            for (int i = 0; i < n; i++)
+                if (snapHits[i].normal.y > 0.7f && snapHits[i].distance < best && snapHits[i].rigidbody != Body) { best = snapHits[i].distance; k = i; }
+            if (k < 0) return false;
+            normal = snapHits[k].normal;
+            if (best > 0.005f) Body.position += Vector2.down * (best - 0.005f);
+            return true;
+        }
 
         bool CheckGrounded()
         {
