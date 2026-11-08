@@ -45,7 +45,9 @@ namespace Meridian.Tests
                 {
                     Assert.Less(s, c.datumY, $"ocean floor below sea level at x={x}");
                     Assert.AreEqual(TileId.Water, g.TileAt(x, c.datumY), $"water up to sea level at x={x}");
-                    Assert.AreEqual(TileId.Water, g.TileAt(x, s + 1), $"water down to the floor at x={x}");
+                    // U-166 (D-171): down to the floor, the tile the drawn curve covers aside (no water under the outline).
+                    Assert.LessOrEqual(g.SeaFrom(x), s + 2, $"the sea's lowest row at most one tile over the floor at x={x}");
+                    Assert.AreEqual(TileId.Water, g.TileAt(x, g.SeaFrom(x)), $"water down to the floor at x={x}");
                 }
             }
             TestContext.Out.WriteLine($"[MERIDIAN] deepest ocean floor {c.datumY - deepest} m below sea level");

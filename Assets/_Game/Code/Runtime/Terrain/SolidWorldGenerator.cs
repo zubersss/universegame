@@ -36,7 +36,18 @@ namespace Meridian.Terrain
                 for (int x = 0; x < width; x++) raw[x] = EarthBiomes.Height(x, WorldNoise.Fbm1D(x, width, this.seed), datum);
                 var smoothed = GroundField.SmoothSurface(raw, GroundField.SmoothRadius, GroundField.SurfaceSlope);
                 for (int x = 0; x < width; x++) surface[x] = Clamp((int)System.Math.Round(smoothed[x]));
-                if (planet == PlanetId.Earth) sea = SeaColumns(); // U-166 (D-171)
+                if (planet == PlanetId.Earth)
+                {
+                    sea = SeaColumns(); // U-166 (D-171)
+                    // ...and the sea starts at the first tile whose centre is not under the drawn curve (the seabed's foot of a slope can stand a
+                    // few centimetres over a tile centre): no water under the outline.
+                    seaFrom = new int[width];
+                    // The drawn curve as the streamer traces it (TerrainStreamer.CurveAt: the stamped POIs' joint ground and pads in).
+                    System.Func<int, int> top = c => Meridian.Planet.POI.PoiStamp.JointGround(this, datum, planet, c, out int g) ? g : surface[((c % width) + width) % width];
+                    System.Func<int, int> pad = c => Meridian.Planet.POI.PoiStamp.PadAt(this, datum, planet, c);
+                    for (int x = 0; x < width; x++)
+                        seaFrom[x] = sea[x] ? System.Math.Max(surface[x] + 1, (int)System.Math.Ceiling(GroundField.Curve(x, top, pad) - 0.5f)) : int.MaxValue;
+                }
             }
         }
 
@@ -44,6 +55,8 @@ namespace Meridian.Terrain
         /// while the ground stays under the water line (the shore stops it). An inland basin under the datum is dry ground on the smoothed
         /// curve (it held a lake drawn as faint tiles over the backdrop). Null elsewhere: every column under the datum fills, as before.</summary>
         readonly bool[] sea;
+        /// <summary>U-166: the lowest water row per column on the smooth Earth (int.MaxValue: no sea there).</summary>
+        readonly int[] seaFrom;
 
         bool[] SeaColumns()
         {
@@ -52,11 +65,14 @@ namespace Meridian.Terrain
                 for (int i = 0, x = EarthBiomes.TrenchCenter; i < width; i++, x += dir)
                 {
                     int wx = ((x % width) + width) % width;
-                    if (surface[wx] >= datum) break;
+                    if (surface[wx] >= datum || EarthBiomes.At(wx) != Biome.Ocean) break; // the shore, or the band's edge
                     s[wx] = true;
                 }
             return s;
         }
+
+        /// <summary>U-166: the lowest row of column x that holds water on the smooth Earth (int.MaxValue off the sea; the floor + 1 elsewhere).</summary>
+        public int SeaFrom(int x) => seaFrom != null ? seaFrom[((x % width) + width) % width] : SurfaceHeight(x) + 1;
 
         /// <summary>U-166: column x holds the sea (always true off a smooth Earth).</summary>
         public bool SeaAt(int x) => sea == null || sea[((x % width) + width) % width];
@@ -103,7 +119,7 @@ namespace Meridian.Terrain
 
             int surface = SurfaceHeight(x);
             if (y > surface)
-                return planet == PlanetId.Earth && y <= datum && SeaAt(x) ? TileId.Water : TileId.Air; // U-166: no inland lakes on the smooth ground
+                return planet == PlanetId.Earth && y <= datum && SeaAt(x) && (seaFrom == null || y >= seaFrom[((x % width) + width) % width]) ? TileId.Water : TileId.Air; // U-166: no inland lakes, no water under the outline
 
             if (planet == PlanetId.Mars && MarsLandforms.InTube(x, y, SurfaceOf)) return TileId.Air; // lava tubes (U-039)
             int depth = surface - y;
