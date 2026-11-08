@@ -111,6 +111,12 @@ namespace Meridian.View2D
             });
         }
 
+        /// <summary>U-130 (D-142): a sibling set layer0 loads from (Uranus's survey layer0: the methane bands lifted, one geometry with the set); null:
+        /// the set's own. Set before ConfigureFor.</summary>
+        public string layer0Scene;
+        string LayerKey(int n) => n == 0 && !string.IsNullOrEmpty(layer0Scene) && SceneKey != null
+            ? SceneKey.Substring(0, SceneKey.LastIndexOf('/') + 1) + layer0Scene + "/layer0" : SceneKey + "/layer" + n;
+
         void Build(SceneLayout layout)
         {
             foreach (var r in renderers) if (r != null) Destroy(r.gameObject);
@@ -127,7 +133,7 @@ namespace Meridian.View2D
                 renderers.Add(sr);
                 placeholders.Add(true);
                 int index = i;
-                Probe<Sprite>(SceneKey + "/layer" + l.n, h => h.Completed += op =>
+                Probe<Sprite>(LayerKey(l.n), h => h.Completed += op =>
                 {
                     if (this == null || index >= renderers.Count || renderers[index] != sr || op.Status != AsyncOperationStatus.Succeeded || op.Result == null) return;
                     sr.color = new Color(1f, 1f, 1f, alpha);

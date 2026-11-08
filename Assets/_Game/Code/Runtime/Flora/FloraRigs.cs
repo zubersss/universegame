@@ -207,6 +207,17 @@ namespace Meridian.Flora
                 : band == Meridian.Terrain.CloudColumn.CloudBand.Deck1 || band == Meridian.Terrain.CloudColumn.CloudBand.Sky ? "deck1" : null;
         }
 
+        /// <summary>U-130 (B-158): Uranus's biome names — "deep" in the diamond rain under Deck 3 (prismfern), "dark_half" on a floe in the dark
+        /// hemisphere (embermoss), else the floe's deck (deck1 / deck2 / deck3). Below the Crush Line and in space: none. Pure.</summary>
+        public static string UranusBiomeFor(float surfaceY, bool darkHalf)
+        {
+            var band = Meridian.Terrain.CloudColumn.CloudLayout.BandAt(surfaceY);
+            if (band == Meridian.Terrain.CloudColumn.CloudBand.Deep) return "deep";
+            if (band == Meridian.Terrain.CloudColumn.CloudBand.Crush || band == Meridian.Terrain.CloudColumn.CloudBand.Space) return null;
+            if (darkHalf) return "dark_half";
+            return band == Meridian.Terrain.CloudColumn.CloudBand.Deck2 ? "deck2" : band == Meridian.Terrain.CloudColumn.CloudBand.Deck3 ? "deck3" : "deck1";
+        }
+
         /// <summary>U-123 (B-148): Mercury's biome names for its rig set — "polar" in a cold trap, else the terminator's zone at that clock: "day", "twilight", "night". Pure.</summary>
         public static string MercuryBiomeFor(int x, double realSeconds, int width)
         {

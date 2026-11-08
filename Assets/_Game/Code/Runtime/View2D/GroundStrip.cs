@@ -40,7 +40,12 @@ namespace Meridian.View2D
         public void Invalidate() => dirty = true;
         /// <summary>The planet's strip keys (Earth's four, Mars's two; other planets Earth's until their strips exist). Pure.</summary>
         public static string[] KeysFor(Meridian.Planets.PlanetId planet) => planet == Meridian.Planets.PlanetId.Mars ? MarsKeys : planet == Meridian.Planets.PlanetId.Mercury ? MercuryKeys
-            : planet == Meridian.Planets.PlanetId.Venus ? VenusKeys : planet == Meridian.Planets.PlanetId.Jupiter ? JupiterKeys : planet == Meridian.Planets.PlanetId.Saturn ? SaturnKeys : Keys;
+            : planet == Meridian.Planets.PlanetId.Venus ? VenusKeys : planet == Meridian.Planets.PlanetId.Jupiter ? JupiterKeys : planet == Meridian.Planets.PlanetId.Saturn ? SaturnKeys : planet == Meridian.Planets.PlanetId.Uranus ? UranusKeys : Keys;
+        /// <summary>U-130 (B-158 / B-166, D-137): Uranus's two 10-frame floe strips: the methane ice in the lit half, the dark half's slate under rime.</summary>
+        public static readonly string[] UranusKeys = { "terrain/uranus/floe_strip_ice", "terrain/uranus/floe_strip_dark" };
+        public const int UranusIce = 0, UranusDark = 1;
+        /// <summary>U-130: a Uranus floe column's strip by its hemisphere now (the stage lays the strips out again when the season swaps). Pure.</summary>
+        public static int UranusStripFor(bool darkHalf) => darkHalf ? UranusDark : UranusIce;
         /// <summary>U-129 (B-157 / B-163, D-137): Saturn's two 10-frame floe strips: the water-ice floes, the ring-rock floes (the floe cores).</summary>
         public static readonly string[] SaturnKeys = { "terrain/saturn/floe_strip_ice", "terrain/saturn/floe_strip_ring" };
         public const int SaturnIce = 0, SaturnRing = 1;

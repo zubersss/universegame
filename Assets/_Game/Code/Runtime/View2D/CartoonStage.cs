@@ -17,7 +17,7 @@ namespace Meridian.View2D
         /// <summary>P-48 (D-086 / D-099): the v4 cartoon path is the game's path on converted planets; on by default. Tests of the 3D path on Earth switch it off for their run and restore it.</summary>
         public static bool Enabled = true;
         /// <summary>The planets whose v4 art path is on when Enabled (C0: Earth).</summary>
-        public static bool Converted(Meridian.Planets.PlanetId id) => id == Meridian.Planets.PlanetId.Earth || id == Meridian.Planets.PlanetId.Mars || id == Meridian.Planets.PlanetId.Mercury || id == Meridian.Planets.PlanetId.Venus || id == Meridian.Planets.PlanetId.Jupiter || id == Meridian.Planets.PlanetId.Saturn; // U-118: Mars joins Earth; U-123: Mercury; U-125: Venus; U-127: Jupiter; U-129: Saturn
+        public static bool Converted(Meridian.Planets.PlanetId id) => id == Meridian.Planets.PlanetId.Earth || id == Meridian.Planets.PlanetId.Mars || id == Meridian.Planets.PlanetId.Mercury || id == Meridian.Planets.PlanetId.Venus || id == Meridian.Planets.PlanetId.Jupiter || id == Meridian.Planets.PlanetId.Saturn || id == Meridian.Planets.PlanetId.Uranus; // U-118: Mars joins Earth; U-123: Mercury; U-125: Venus; U-127: Jupiter; U-129: Saturn; U-130: Uranus
 
         public const string SurveyorKey = "characters/surveyor/side";
         public const string EarthScene = "plains";
@@ -99,8 +99,33 @@ namespace Meridian.View2D
             : scene == JupiterDeck3 ? Meridian.Terrain.CloudColumn.CloudLayout.Deck2Bottom : Meridian.Terrain.CloudColumn.CloudLayout.Deck3Bottom;
         /// <summary>U-127: the Red Spot overlay's alpha at column x: 1 inside the zone, faded out over SpotFade columns past its edge. Pure.</summary>
         public const int SpotFade = 48;
-        /// <summary>U-129: the giants that share the deck machinery (the four sets by band off each band's floor, a zone overlay): Jupiter, Saturn.</summary>
-        public static bool Decked(Meridian.Planets.PlanetId p) => p == Meridian.Planets.PlanetId.Jupiter || p == Meridian.Planets.PlanetId.Saturn;
+        /// <summary>U-129 / U-130: the giants that share the deck machinery (the four sets by band, each off its band's floor): Jupiter, Saturn, Uranus.</summary>
+        public static bool Decked(Meridian.Planets.PlanetId p) => p == Meridian.Planets.PlanetId.Jupiter || p == Meridian.Planets.PlanetId.Saturn || p == Meridian.Planets.PlanetId.Uranus;
+        /// <summary>The decked giants with a zone overlay on the veil slot (Jupiter's Red Spot, Saturn's Hexagon); Uranus has none.</summary>
+        public static bool HasZoneOverlay(Meridian.Planets.PlanetId p) => p == Meridian.Planets.PlanetId.Jupiter || p == Meridian.Planets.PlanetId.Saturn;
+        /// <summary>U-130 (B-158, D-142): a Uranus set is "&lt;deck&gt;_&lt;light&gt;" (deck1_sun_left, deck2_night ...): the deck by the camera's band as
+        /// Jupiter's, the light by the season clock (UranusSeason), every light one geometry, so the U-128 crossfade turns the light and nothing slides.
+        /// "+survey" asks for the deck's survey layer0 (the methane bands lifted) under the same light's layers 1–2.</summary>
+        public const string UranusFallbackScene = "deck1_sun_left", SurveySuffix = "+survey";
+        /// <summary>The deck a set belongs to (the part before its light): "deck2_night" → "deck2"; a Jupiter / Saturn set is its own deck. Pure.</summary>
+        public static string DeckOf(string scene) { if (string.IsNullOrEmpty(scene)) return scene; int i = scene.IndexOfAny(new[] { '_', '+' }); return i < 0 ? scene : scene.Substring(0, i); }
+        /// <summary>The light of a Uranus set ("deck2_sun_right+survey" → "sun_right"), null for a set without one. Pure.</summary>
+        public static string LightOf(string scene)
+        {
+            if (string.IsNullOrEmpty(scene)) return null;
+            string set = SetOf(scene); int i = set.IndexOf('_');
+            return i < 0 ? null : set.Substring(i + 1);
+        }
+        /// <summary>The set whose layers load (the "+survey" ask dropped). Pure.</summary>
+        public static string SetOf(string scene) { if (string.IsNullOrEmpty(scene)) return scene; int i = scene.IndexOf('+'); return i < 0 ? scene : scene.Substring(0, i); }
+        /// <summary>The sibling set layer0 comes from: the deck's survey set when "+survey" is asked, else null (the set's own). Pure.</summary>
+        public static string Layer0Of(string scene) => !string.IsNullOrEmpty(scene) && scene.EndsWith(SurveySuffix) ? DeckOf(scene) + "_" + Meridian.Planet.UranusSeason.Survey : null;
+        /// <summary>A decked set's floor (its datum) by its deck, whatever its light: -1 for an unknown set. Pure.</summary>
+        public static float DeckFloor(string scene) => JupiterFloor(DeckOf(scene));
+        /// <summary>The Uranus set for a camera at (x, y) at game time t (a season of the given length), given the set shown now; survey asks for the
+        /// survey layer0. The deck holds as Jupiter's at its band's borders, the light at a hemisphere's border (UranusSeason.LightFor). Pure.</summary>
+        public static string UranusSceneFor(float y, int x, int width, double t, double season, string current, bool survey) =>
+            JupiterSceneFor(y, DeckOf(current)) + "_" + Meridian.Planet.UranusSeason.LightFor(x, width, t, season, LightOf(current)) + (survey ? SurveySuffix : "");
         /// <summary>U-129 (B-157): Saturn's North Polar Hexagon overlay (the six wind-walls on layer1, the tilted rings).</summary>
         public const string SaturnHexagonScene = "hexagon";
         /// <summary>A decked giant's zone overlay: Jupiter's Red Spot, Saturn's Hexagon. Pure.</summary>
@@ -120,15 +145,16 @@ namespace Meridian.View2D
         }
         /// <summary>The set a planet falls back to while a set is not exported yet (Mars: the canyon; Mercury: the twilight; Venus: the surface; Jupiter: deck1); null: the placeholder tints. Pure.</summary>
         public static string FallbackFor(Meridian.Planets.PlanetId planet) => planet == Meridian.Planets.PlanetId.Mars ? MarsFallbackScene : planet == Meridian.Planets.PlanetId.Mercury ? MercuryFallbackScene
-            : planet == Meridian.Planets.PlanetId.Venus ? VenusFallbackScene : Decked(planet) ? JupiterFallbackScene : null;
+            : planet == Meridian.Planets.PlanetId.Venus ? VenusFallbackScene : planet == Meridian.Planets.PlanetId.Uranus ? UranusFallbackScene : Decked(planet) ? JupiterFallbackScene : null;
         /// <summary>U-125: a set's datum: Venus's deck set hangs off the cloud deck, every other set off the ground's band datum.</summary>
         float DatumFor(string scene, float groundDatum) => planetId == Meridian.Planets.PlanetId.Venus ? VenusDatumFor(scene, groundDatum)
-            : Decked(planetId) && JupiterFloor(scene) >= 0f ? JupiterFloor(scene) : groundDatum; // U-127: each Jupiter set off its band's floor
+            : Decked(planetId) && DeckFloor(scene) >= 0f ? DeckFloor(scene) : groundDatum; // U-127: each Jupiter set off its band's floor
         /// <summary>Mercury's clock for the stage: the terminator's real seconds plus the hazards' offset — the clock the creatures and the flares read, so the painted band is theirs.</summary>
         public double MercuryClock => Meridian.Terrain.MercuryTerminator.Now(clock != null ? clock.GameSeconds : 0) + (hazards != null ? hazards.mercuryClockOffset : 0);
         /// <summary>The set wanted at column x now: Earth by its band, Mars by its region, Mercury by the terminator's clock.</summary>
         string SceneNow(int x) => planetId == Meridian.Planets.PlanetId.Mercury ? MercurySceneFor(x, MercuryClock, worldWidth)
             : planetId == Meridian.Planets.PlanetId.Venus ? VenusSceneFor(Layers != null && Layers.view != null ? Layers.view.transform.position.y : 0f, Scene) // U-125: by the camera's height
+            : planetId == Meridian.Planets.PlanetId.Uranus ? UranusSceneFor(Layers != null && Layers.view != null ? Layers.view.transform.position.y : 0f, x, worldWidth, GameTime, seasonSeconds, Scene, SurveyView) // U-130: the band and the season's light
             : Decked(planetId) ? JupiterSceneFor(Layers != null && Layers.view != null ? Layers.view.transform.position.y : 0f, Scene) // U-127: by the camera's band
             : SceneFor(planetId, x);
         /// <summary>U-118: the B-141 storm set over the base layers on Mars; its alpha follows the dust storm, its scroll the wind.</summary>
@@ -152,6 +178,11 @@ namespace Meridian.View2D
         float fadeT;
         int worldWidth, lastDawn = int.MinValue; // U-123: Mercury's clock
         TimeSystem clock;
+        double seasonSeconds; long lastSeason = long.MinValue; // U-130: Uranus's season clock
+        /// <summary>The game clock the stage reads (0 without a TimeSystem).</summary>
+        public double GameTime => clock != null ? clock.GameSeconds : 0;
+        /// <summary>U-130 (D-142): the Survey module's view on Uranus: the deck's survey layer0 (the methane bands) crossfades in under the same light.</summary>
+        public bool SurveyView { get; set; }
         Meridian.Hazards.HazardSystem hazards;
         /// <summary>Rigged plants around the camp in C0 (every FloraSpacing m, jittered).</summary>
         public const int FloraCount = 42; // D-136 (2): was 48; the camp's density is the animated-object lever (the gate read 42 Animators against 40)
@@ -199,15 +230,18 @@ namespace Meridian.View2D
             Layers.gameObject.SetActive(true);
             Layers.view = cam;
             planetId = config.id; planetName = config.id.ToString().ToLowerInvariant();
-            worldWidth = config.worldWidth; clock = FindAnyObjectByType<TimeSystem>(); hazards = side.hazards; lastDawn = int.MinValue; // U-123: Mercury's set and strips follow the terminator's clock
+            worldWidth = config.worldWidth; clock = FindAnyObjectByType<TimeSystem>(); hazards = side.hazards; lastDawn = int.MinValue;
+            seasonSeconds = Meridian.Planet.UranusSeason.SeasonSeconds(config.dayLengthRealMinutes); lastSeason = long.MinValue; // U-130 // U-123: Mercury's set and strips follow the terminator's clock
             float entryY = side.player != null ? side.player.transform.position.y : surfaceDatum;
             Scene = config.id == Meridian.Planets.PlanetId.Venus ? VenusSceneFor(entryY, null) // U-125: the entry's height (the surface or the deck)
+                : config.id == Meridian.Planets.PlanetId.Uranus ? UranusSceneFor(entryY, side.spawnX, worldWidth, GameTime, seasonSeconds, null, SurveyView) // U-130: the entry's band, the season's light
                 : Decked(config.id) ? JupiterSceneFor(entryY, null) // U-127: the entry's band
                 : SceneNow(side.spawnX); // U-110 / U-118 / U-123: the spawn's band (Earth), region (Mars) or terminator zone (Mercury) picks the set
             Layers.SetOrderOffset(0);
             Layers.alpha = 1f;
             Layers.groundFill = Meridian.Planet.PlanetBackdrop.GroundColor(config.id); // U-139: ground, not black, under the set's bottom edge
-            Layers.ConfigureFor(planetName, Scene, DatumFor(Scene, surfaceDatum), FallbackFor(config.id));
+            Layers.layer0Scene = Layer0Of(Scene); // U-130: the survey layer0, else the set's own
+            Layers.ConfigureFor(planetName, SetOf(Scene), DatumFor(Scene, surfaceDatum), FallbackFor(config.id));
             // U-128: from here the datum and the set follow the camera's band (FollowBand); the spawn's band keeps this surface, so the camp frames do not move.
             // D-146: Mercury's bands take the generator's own surface (noise + the cold-trap bowls, no small craters): the plain by the spawn, each trap per column.
             // U-139: Mercury and Venus follow the walking surface — the band surface's noise averaged, the bowls exact, each POI's stamped ground across
@@ -233,7 +267,7 @@ namespace Meridian.View2D
                 StormLayers.ConfigureFor("mars", StormScene, surfaceDatum);
                 storm = side.dustStorm;
             }
-            else if (Decked(config.id))
+            else if (HasZoneOverlay(config.id))
             {
                 // U-127 / U-129: the zone overlay (Jupiter's Red Spot "spot", Saturn's "hexagon") over the deck set on the same veil slot, faded in by the zone.
                 if (StormLayers == null) { var wgo = new GameObject("CartoonStormVeil"); wgo.transform.SetParent(transform, false); StormLayers = wgo.AddComponent<ParallaxLayers>(); StormLayers.orderOffset = StormVeilOrder; }
@@ -255,8 +289,9 @@ namespace Meridian.View2D
             Flora.planet = config.id; // U-110: the biome bands pick the plants
             var floraTerrain = side.terrain;
             Flora.biomeRule = config.id == Meridian.Planets.PlanetId.Mercury ? (System.Func<int, string>)(x => Meridian.Flora.FloraRigs.MercuryBiomeFor(x, MercuryClock, worldWidth))
-                : config.id == Meridian.Planets.PlanetId.Jupiter && floraTerrain != null ? (System.Func<int, string>)(x => Meridian.Flora.FloraRigs.JupiterBiomeFor(x, floraTerrain.TopSolidY(x) + 1f))
-                : config.id == Meridian.Planets.PlanetId.Saturn && floraTerrain != null ? (System.Func<int, string>)(x => Meridian.Flora.FloraRigs.SaturnBiomeFor(x, floraTerrain.TopSolidY(x) + 1f)) // U-129 // U-127: the floe's band, or the Red Spot
+                : config.id == Meridian.Planets.PlanetId.Jupiter && floraTerrain != null ? (System.Func<int, string>)(x => Meridian.Flora.FloraRigs.JupiterBiomeFor(x, floraTerrain.TopSolidY(x) + 1f)) // U-127: the floe's band, or the Red Spot
+                : config.id == Meridian.Planets.PlanetId.Saturn && floraTerrain != null ? (System.Func<int, string>)(x => Meridian.Flora.FloraRigs.SaturnBiomeFor(x, floraTerrain.TopSolidY(x) + 1f)) // U-129: the floe's band, or the Hexagon
+                : config.id == Meridian.Planets.PlanetId.Uranus && floraTerrain != null ? (System.Func<int, string>)(x => Meridian.Flora.FloraRigs.UranusBiomeFor(floraTerrain.TopSolidY(x) + 1f, !Meridian.Planet.UranusSeason.InLitHalf(x, worldWidth, GameTime, seasonSeconds))) // U-130: the band, or the dark half when placed
                 : null; // U-123: by the terminator's zone when placed (Venus: BiomeNameAt, vents / plains)
             // Bible §9.6: ≤ 40 animated objects in all. The reserve is what the gate counts besides the flora: the drawn surveyor, the ship's legs rig and its
             // puff sheet, one more for a prop or critter Animator in flight (D-136 (2): the 08:46 gate read 38 flora + 4 = 42).
@@ -269,7 +304,8 @@ namespace Meridian.View2D
             Ground.Load(config.id); // U-118: the planet's strips (Earth's four, Mars's regolith + basalt + frost, Mercury's regolith + slate)
             Ground.materialRule = config.id == Meridian.Planets.PlanetId.Mercury ? (System.Func<int, byte, int>)((x, tile) => GroundStrip.MercuryStripFor(x, MercuryClock, worldWidth)) // U-123: slate in the shadow
                 : config.id == Meridian.Planets.PlanetId.Jupiter ? (System.Func<int, byte, int>)((x, tile) => GroundStrip.JupiterStripFor(x, tile))
-                : config.id == Meridian.Planets.PlanetId.Saturn ? (System.Func<int, byte, int>)((x, tile) => GroundStrip.SaturnStripFor(tile)) : null; // U-127: the Red Spot's brick floes
+                : config.id == Meridian.Planets.PlanetId.Saturn ? (System.Func<int, byte, int>)((x, tile) => GroundStrip.SaturnStripFor(tile)) // U-129: ring rock on the cores
+                : config.id == Meridian.Planets.PlanetId.Uranus ? (System.Func<int, byte, int>)((x, tile) => GroundStrip.UranusStripFor(!Meridian.Planet.UranusSeason.InLitHalf(x, worldWidth, GameTime, seasonSeconds))) : null; // U-127: the Red Spot's brick floes; U-130: the dark half's slate
             Ground.SetDecks(GroundStrip.DecksFor(config.id), GroundStrip.VenusDeck); // U-125: the deck planks along Venus's floating station (none elsewhere)
             if (Meridian.Art.ModelView.CartoonMaterial != null) foreach (var mv in side.GetComponentsInChildren<Meridian.Art.ModelView>(true)) mv.Wear(Meridian.Art.ModelView.CartoonMaterial);
             // U-101: one gull (B-113) over the camp; the director keeps it (it flees and bumps like any critter).
@@ -307,7 +343,13 @@ namespace Meridian.View2D
                 int dawn = Mathf.FloorToInt(Meridian.Terrain.MercuryTerminator.Dawn(MercuryClock, worldWidth));
                 if (dawn != lastDawn) { lastDawn = dawn; Ground.Invalidate(); }
             }
-            if (Active && Decked(planetId) && StormLayers != null && StormLayers.gameObject.activeSelf && Layers != null && Layers.view != null)
+            if (Active && planetId == Meridian.Planets.PlanetId.Uranus && Ground != null && worldWidth > 0)
+            {
+                // U-130: when the season turns the lit half swaps; the floe strips lay out again (ice in the light, the dark half's slate).
+                long k = Meridian.Planet.UranusSeason.SeasonIndex(GameTime, seasonSeconds);
+                if (k != lastSeason) { lastSeason = k; Ground.Invalidate(); }
+            }
+            if (Active && HasZoneOverlay(planetId) && StormLayers != null && StormLayers.gameObject.activeSelf && Layers != null && Layers.view != null)
             {
                 StormLayers.alpha = OverlayAlpha(planetId, Mathf.FloorToInt(Layers.view.transform.position.x)); // U-127 / U-129: the zone overlay inside its zone
                 return;
@@ -336,7 +378,8 @@ namespace Meridian.View2D
                 Incoming.orderOffset = IncomingOrder;
                 Incoming.alpha = 0f;
                 Incoming.groundFill = Layers.groundFill; // U-139
-                Incoming.ConfigureFor(planetName, want, DatumFor(want, d), FallbackFor(planetId));
+                Incoming.layer0Scene = Layer0Of(want);
+                Incoming.ConfigureFor(planetName, SetOf(want), DatumFor(want, d), FallbackFor(planetId));
                 incomingScene = want; fadeT = 0f; Fading = true;
             }
             if (!Fading) return;
