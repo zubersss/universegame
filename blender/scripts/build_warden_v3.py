@@ -29,8 +29,8 @@ O, I = PC.O, PC.I
 PPU = PC.PPU
 KEY = "creatures/warden/{}"
 FW, FH = 104, 112
-CLIPS = [("idle", 6, True), ("walk", 6, True), ("attack", 6, False)]
-SWING = [0.0, 22.0, -18.0, 13.0, -7.0, 0.0]                  # attack: the bell's swing (deg) per frame
+CLIPS = [("idle", 8, True), ("walk", 12, True), ("attack", 8, False)]      # the contract's clip caps: idle 8-12, walk 12-16
+SWING = [0.0, 22.0, -18.0, 13.0, -9.0, 5.0, -2.0, 0.0]       # attack: the bell's swing (deg) per frame
 
 
 def _rot(deg, cx=0.0, cz=0.0):
@@ -74,8 +74,8 @@ def sentinel(d, M, clip, k):
     S(B([(-0.22, -0.58), (0.22, -0.58), (0.22, -0.62), (-0.22, -0.62)]), "mustard_dp", 0.0)
     S(bell, "ink", O)
     seam(B([(-0.13, -0.45), (0.13, -0.45)]))
-    if clip == "attack" and 1 <= k <= 4:                                                # the ring: arcs spreading from the bell
-        r = 0.16 + 0.07 * k
+    if clip == "attack" and 1 <= k <= 6:                                                # the ring: arcs spreading from the bell
+        r = 0.16 + 0.05 * k
         for side in (-1, 1):
             arc = [(side * (r + 0.02) * math.cos(t), -0.45 + r * 0.9 * math.sin(t)) for t in [-0.7 + 1.4 * i / 8 for i in range(9)]]
             G.stroke(d, G.hose_outline(arc, 0.022), M["mustard"], I, cyclic=True)
@@ -196,8 +196,7 @@ def main(out, imgs=None, widths=None, stamp_paths=()):
         imgs, widths = render_all()
     frames = imgs["sentinel"]
     ART = os.path.join(os.path.dirname(os.path.dirname(HERE)), "Assets", "_Game", "Art")
-    W = 18 * (FW * 2 + 8) // 2 + 16
-    W = max(W, 1100)
+    W = max(n for _c, n, _l in CLIPS) * (FW * 2 + 8) + 16                             # the longest clip's 2x row
     rows = []
 
     def lab(t, h=22):
@@ -227,9 +226,10 @@ def main(out, imgs=None, widths=None, stamp_paths=()):
     for planet in ("mars", "mercury"):                                                 # 1x over the Wardens' planets' skies
         r = np.empty((260, W, 3), np.float32)
         r[:] = np.array(v3.hex_rgb(v3.PALETTES[planet]["sky"]), np.float32) / 255.0
-        review._label(r, f"{planet}: idle 0 / walk 0 / attack 0-5 at 1x (frame width = Sentinel.Size 1.6 m), the surveyor for scale", 8, 4, scale=1)
+        review._label(r, f"{planet}: idle 0 / walk 0 / every attack frame at 1x (frame width = Sentinel.Size 1.6 m), the surveyor for scale", 8, 4, scale=1)
         x = 40
-        for f in [frames[0], frames[6]] + frames[12:18]:
+        ni, nw, na = (n for _c, n, _l in CLIPS)
+        for f in [frames[0], frames[ni]] + frames[ni + nw:ni + nw + na]:
             review._over(r, f, x, 60)
             x += FW + 16
         if sv is not None:
