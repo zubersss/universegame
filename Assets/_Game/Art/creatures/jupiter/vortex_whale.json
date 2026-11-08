@@ -1,0 +1,247 @@
+{
+  "key": "creatures/jupiter/vortex_whale",
+  "style": "v3",
+  "ppu": 64,
+  "rect_origin": "bottom_left",
+  "parts": [
+    {
+      "name": "body1",
+      "rect": [
+        0,
+        316,
+        724,
+        436
+      ],
+      "pivot": [
+        0.9359,
+        0.4685
+      ]
+    },
+    {
+      "name": "body2",
+      "rect": [
+        0,
+        0,
+        628,
+        312
+      ],
+      "pivot": [
+        0.9261,
+        0.4786
+      ]
+    },
+    {
+      "name": "fin",
+      "rect": [
+        632,
+        72,
+        348,
+        240
+      ],
+      "pivot": [
+        0.8987,
+        0.9032
+      ]
+    },
+    {
+      "name": "head",
+      "rect": [
+        508,
+        924,
+        648,
+        480
+      ],
+      "pivot": [
+        0.0678,
+        0.4976
+      ]
+    },
+    {
+      "name": "head_squint",
+      "rect": [
+        1160,
+        924,
+        648,
+        480
+      ],
+      "pivot": [
+        0.0678,
+        0.4976
+      ]
+    },
+    {
+      "name": "tail",
+      "rect": [
+        0,
+        756,
+        504,
+        648
+      ],
+      "pivot": [
+        0.9063,
+        0.4975
+      ]
+    },
+    {
+      "name": "throat_rest",
+      "rect": [
+        984,
+        236,
+        376,
+        76
+      ],
+      "pivot": [
+        0.0148,
+        0.5024
+      ]
+    },
+    {
+      "name": "throat_song",
+      "rect": [
+        728,
+        340,
+        780,
+        412
+      ],
+      "pivot": [
+        0.256,
+        0.5618
+      ]
+    }
+  ],
+  "plants": [
+    {
+      "name": "vortex_whale",
+      "grand": true,
+      "scale_note": "about 36 m long at 1x (D-153: drawn at 0.75 of the 48 m design so the rig packs one 2048 sheet; the fiction's 500 m is a set piece seen in passing)",
+      "bones": [
+        {
+          "name": "head",
+          "part": "head",
+          "parent": null,
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 3
+        },
+        {
+          "name": "body1",
+          "part": "body1",
+          "parent": "head",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 2
+        },
+        {
+          "name": "body2",
+          "part": "body2",
+          "parent": "body1",
+          "offset_m": [
+            -10.5,
+            0.0
+          ],
+          "order": 1
+        },
+        {
+          "name": "tail",
+          "part": "tail",
+          "parent": "body2",
+          "offset_m": [
+            -9.0,
+            0.0
+          ],
+          "order": 0
+        },
+        {
+          "name": "fin",
+          "part": "fin",
+          "parent": "body1",
+          "offset_m": [
+            -2.25,
+            -1.95
+          ],
+          "order": 5
+        },
+        {
+          "name": "throat",
+          "part": "throat_rest",
+          "parent": "head",
+          "offset_m": [
+            3.3,
+            -1.95
+          ],
+          "order": 4
+        }
+      ],
+      "swaps": {
+        "throat": [
+          "throat_rest",
+          "throat_song"
+        ],
+        "head": [
+          "head",
+          "head_squint"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "throat",
+          "bone": "throat",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 4,
+          "replaces_part": true
+        },
+        {
+          "slot": "head",
+          "bone": "head",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 3,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "beat_bpm": 110,
+        "cycle_beats": 4,
+        "amplitude_deg": {
+          "head": 1.5,
+          "body1": 3,
+          "body2": 5,
+          "tail": 8,
+          "fin": 10
+        },
+        "lag": 0.8
+      },
+      "react": {
+        "radius_m": 24.0,
+        "action": "turn",
+        "head_deg": 6
+      },
+      "actions": {
+        "song": {
+          "beats": 4,
+          "swap": {
+            "throat": "throat_song"
+          },
+          "head_deg": 3
+        },
+        "harpooned": {
+          "swap": {
+            "head": "head_squint"
+          },
+          "tail_deg": 14,
+          "head_deg": -4
+        }
+      }
+    }
+  ]
+}
