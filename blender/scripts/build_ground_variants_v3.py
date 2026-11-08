@@ -734,7 +734,7 @@ def preview(out_dir, pieces=None, out=None, footnote=None):
         return {"grass": 1.0 - t, v0: t} if 0 < t < 1 else ({"grass": 1.0} if t == 0 else {v0: 1.0})
     row2 = panel(0.0, 30.0, border, 1782)
     Wt = row2.shape[1]
-    row1 = np.concatenate([row1, np.empty((PH, Wt - row1.shape[1], 3), np.float32) * 0 + review.PAPER], axis=1) if row1.shape[1] < Wt else row1[:, :Wt]
+    row1 = np.concatenate([row1, np.full((PH, Wt - row1.shape[1], 3), review.PAPER, np.float32)], axis=1) if row1.shape[1] < Wt else row1[:, :Wt]
     P = np.empty((620, Wt, 3), np.float32)
     P[:] = review.PAPER
     for j, v in enumerate(VARIANTS):
