@@ -1,0 +1,27 @@
+{
+  "key": "terrain/earth/dig_puff_sand",
+  "style": "v3",
+  "contract": "v3.2 11.9",
+  "frame_width": 128,
+  "frame_height": 128,
+  "columns": 8,
+  "gutter": 4,
+  "frames": 8,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.25
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [
+    {
+      "name": "puff",
+      "start": 0,
+      "length": 8,
+      "loop": false
+    }
+  ],
+  "variant": "sand",
+  "note": "B-190: the dig puff in the sand ground's material (as dig_puff: the clods behind the billows, no face)"
+}
