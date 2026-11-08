@@ -306,10 +306,10 @@ controller. Rejected with a clear console message: a sheet over 2048, a clip ove
 an fps other than 12, an overlay that is not 512².
 
 **11.9 Ground band set (v3.2, D-162 / D-163).** The smoothed ground on every planet is drawn from these keys under `terrain/<planet>/`; UNITY's U-156 mesh maps them; no tile or block art is drawn for the ground.
-- `ground_band` 512×64 at PPU 64, tiling in x every 8 m; json `surface_row: 24` (rows from the top to the surface line, the ink edge's centre), 24 px above the line (low scallops only, so it bends over a 35° slope and a rounded lip) and 40 px below, transparent below its ragged lower edge. Mapping: u = arc length along the outline × 64 mod 512; v = 24 − (signed normal distance from the outline × 64), up = toward row 0.
-- `ground_fill` 512×512, tiling both ways in world space inside the solid under the band: u = x × 64 mod 512, v = −y × 64 mod 512 (horizontal strata, the planet's cross-section: bands, pebbles, stones, lenses, the odd fossil; no faces).
+- `ground_band` 512×64 at PPU 64, tiling in x every 8 m; json `surface_row: 24` and the sprite's pivot on that row (40 px up from the bottom; UNITY reads the surface line from the pivot); 24 px above the line (low scallops only, so it bends over a 35° slope and a rounded lip) and 40 px below, transparent below its ragged lower edge. Mapping (amended 05:0x with UNITY, D-163): u = world x × 64 mod 512 (x continues across chunk seams; the art stretches up to 22 % along the band on a 35° slope); v = the signed normal distance from the outline, 24 px out and 40 px in.
+- `ground_fill` 512×512, its own texture (never packed into an atlas; imported with Repeat wrap), tiling both ways in world space inside the solid under the band: u = x / 8, v = y / 8 (horizontal strata, the planet's cross-section: bands, pebbles, stones, lenses, the odd fossil; no faces).
 - `ground_decor_<n>` upright scatter pieces (tufts, stones, flowers), pivot at the base, never rotated with the slope.
 - `ground_lip` a brink hood, pivot at the brink, mirrored in x for a drop to the left.
-- `dig_rim` 256×16 mapped along each carved hole's outline, ink on row 4, the rows below it lying in the solid (its normal points into the air).
+- `dig_rim` 256×16 mapped along each carved hole's outline, ink on row 4 with the sprite's pivot on that row, the rows below it lying in the solid (its normal points into the air).
 - `dig_puff` an 8-frame one-shot at 12 fps, pivot at the dig point.
 Tiling is checked before export by rendering two tiles side by side (p99 copy difference 0). A planet without diggable ground (the giants' islands, B-177) gets its own island set instead.
