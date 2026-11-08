@@ -1005,6 +1005,147 @@ def mercury_scene(seed, mode="day"):
                  {"n": 2, "parallax": 0.6, "y_m": -2.0, "continue_rows": BG.CONTINUE_ROWS}]   # B-185 / D-169
 
 
+def mercury_coldtrap(seed):
+    """B-187: a polar cold trap (MercuryLandforms.InColdTrap), B-179's pattern in D-169's format. layer0 the ink sky with stars,
+    the crater's far rim: a dark violet wall whose crest alone catches the grazing sun (a thin gold-white edge); layer1 the
+    nearer terraced walls in permanent shadow, faint ice glints at their feet, the dark floor; layer2 the near floor (B-181's
+    ice band): dark regolith with ice-skin patches and star glints, dark rocks with frost rims seated on the line."""
+    rng = np.random.default_rng(seed)
+    pal = _pal("mercury")
+    dark = BG._mix(pal["brown"], pal["sky"], 0.18)
+    wall = BG._mix(pal["brown"], pal["sky"], 0.35)
+    ice = pal["teal"]
+    out = []
+    H = 1024
+    hz = _gline(H, -2.0)
+    stack = merc_sky(rng, pal, H, "night")
+    rim = notch(BG.ridge(rng, [(2, 0.5), (5, 0.3), (11, 0.2)], base=hz - 260, amp=30), rng, 6, 30, 70)
+    farm = BG._ridge_mask(H, rim)
+    stack.append(wash32(rng, H, farm, BG._mix(wall, pal["sky"], 0.15), var=0.04, edge_dark=0.05, bleed=2.0))
+    crest = (farm * (np.arange(H)[:, None] < rim[None, :] + 7)).astype(np.float32)
+    stack.append(wash32(rng, H, crest, BG._mix(pal["offwhite"], pal["mustard"], 0.35), var=0.03, edge_dark=0.02, bleed=1.2))  # the grazing sun
+    floor0 = BG._ridge_mask(H, BG.ridge(rng, [(4, 0.6), (9, 0.4)], base=hz - 10, amp=5))
+    stack.append(wash32(rng, H, floor0, dark, var=0.04, edge_dark=0.03, bleed=3.0))
+    out.append(finish(stack, rng, H))
+    H = 512
+    g1 = _gline(H, -1.0)
+    walls = terrace(notch(BG.ridge(rng, [(2, 0.45), (6, 0.35), (13, 0.2)], base=g1 - 190, amp=40), rng, 5, 30, 60), 22)
+    wm = BG._ridge_mask(H, walls)
+    glint = np.zeros((H, W), np.float32)
+    for _k in range(30):
+        cx = rng.uniform(0, W)
+        ell(glint, cx, g1 - rng.uniform(4, 40), rng.uniform(4, 10), rng.uniform(1.5, 3))
+    stack = Stack()
+    stack.append(wash32(rng, H, wm, wall, var=0.05, edge_dark=0.07, bleed=1.8))
+    stack.append(wash32(rng, H, BG._ridge_mask(H, BG.ridge(rng, [(3, 0.5), (8, 0.5)], base=g1 - 24, amp=10)), dark, var=0.04, edge_dark=0.04, bleed=2.5))
+    stack.append(tint(rng, H, glint * wm, BG._mix(ice, pal["offwhite"], 0.3), 0.8, var=0.03, edge_dark=0.05, bleed=0.8))
+    out.append(finish(stack, rng, H))
+    H = 384 + 96
+    g2 = _gline(H, -2.0)
+    hq = H - 2 * BG.CONTINUE_ROWS
+    line = BG.ridge(rng, [(3, 0.5), (8, 0.3)], base=g2, amp=4)
+    ground = BG._ridge_mask(H, line)
+    icep = np.zeros((H, W), np.float32)
+    for _k in range(12):                                                                      # ice-skin patches lying on the floor
+        cx, cy = rng.uniform(0, W), g2 + rng.uniform(6, 60)
+        if cy < hq - 10:
+            ell(icep, cx, cy, rng.uniform(40, 110), rng.uniform(3, 7))
+    stars = np.zeros((H, W), np.float32)
+    for _k in range(18):
+        cx, cy = rng.uniform(0, W), g2 + rng.uniform(4, 70)
+        if cy < hq - 10:
+            for a in (0.0, math.pi / 2):
+                ell(stars, cx, cy, 5 * abs(math.cos(a)) + 1, 5 * abs(math.sin(a)) + 1)
+    rocks, rshade, rcap = (np.zeros((H, W), np.float32) for _ in range(3))
+    _seated(rocks, rshade, rcap, line, rng, 10, 10, 26, hq, cap_h=0.3)
+    stack = Stack()
+    stack.append(wash32(rng, H, ground, dark, var=0.06, edge_dark=0.06, bleed=2.0))
+    stack.append(wash32(rng, H, icep * ground, BG._mix(ice, dark, 0.25), var=0.04, edge_dark=0.04, bleed=1.6))
+    stack.append(tint(rng, H, stars * ground, BG._mix(ice, pal["offwhite"], 0.5), 0.85, var=0.0, edge_dark=0.0, bleed=0.6))
+    stack.append(wash32(rng, H, rocks, BG._mix(pal["brown"], pal["sky"], 0.10), var=0.05, edge_dark=0.10, bleed=1.2))
+    stack.append(wash32(rng, H, rshade * rocks, pal["brown"], var=0.04, edge_dark=0.03, bleed=1.6))
+    stack.append(wash32(rng, H, rcap * rocks, BG._mix(pal["offwhite"], ice, 0.25), var=0.03, edge_dark=0.04, bleed=1.0))
+    out.append(BG.tile_bottom(*finish(stack, rng, H)))
+    return out, _d169_meta(out)
+
+
+def venus_tessera(seed):
+    """B-187: the tesserae highlands (VenusFeature.Tessera), B-179's pattern in D-169's format: layer0 the orange-cream haze
+    ceiling over far belts of folded ridges in hazy warm grey; layer1 nearer crumpled ridge belts, lit crests and dark grooves;
+    layer2 the near tessera (B-181's band): a light warm-grey ridge-and-groove crust, dust in the grooves, grooved blocks
+    seated on the line."""
+    rng = np.random.default_rng(seed)
+    pal = _pal("venus")
+    grey = BG._mix(pal["offwhite"], pal["brown"], 0.30)                                       # B-181's tessera: offwhite's shadow tone
+    groove = BG._mix(pal["sky"], pal["brown"], 0.55)
+    lit = pal["offwhite"]
+    out = []
+    H = 1024
+    hz = _gline(H, -2.0)
+    yy = (np.arange(H) / H)[:, None, None]
+    sky = BG._mix(BG._mix(pal["sky"], pal["red"], 0.25), pal["offwhite"], np.clip(1 - yy * 1.3, 0, 1) * 0.35)
+    stack = Stack([(np.broadcast_to(sky, (H, W, 3)).astype(np.float32), np.ones((H, W), np.float32))])
+    haze = np.zeros((H, W), np.float32)
+    for k in range(5):
+        hl = BG.ridge(rng, [(2, 0.6), (4, 0.4)], base=150 + 140 * k, amp=16)
+        y = np.arange(H)[:, None] + 0.5
+        haze = np.maximum(haze, ((y > hl[None, :]) & (y < hl[None, :] + 40)).astype(np.float32))
+    stack.append(tint(rng, H, haze, pal["offwhite"], 0.25, var=0.04, edge_dark=0.0, bleed=10.0))
+    for j, (base, amp, t) in enumerate(((hz - 150, 26, 0.55), (hz - 80, 22, 0.38))):           # two far ridge belts, nearer = less haze
+        belt = BG.ridge(rng, [(3, 0.4), (9, 0.35), (23, 0.25)], base=base, amp=amp)
+        stack.append(wash32(rng, H, BG._ridge_mask(H, belt), BG._mix(grey, pal["sky"], t), var=0.04, edge_dark=0.05, bleed=2.0))
+    out.append(finish(stack, rng, H))
+    H = 512
+    g1 = _gline(H, -1.0)
+    stack = Stack()
+    for base, amp, t in ((g1 - 200, 34, 0.25), (g1 - 110, 30, 0.12)):
+        belt = BG.ridge(rng, [(4, 0.4), (11, 0.35), (27, 0.25)], base=base, amp=amp)
+        m = BG._ridge_mask(H, belt)
+        stack.append(wash32(rng, H, m, BG._mix(grey, pal["sky"], t), var=0.05, edge_dark=0.07, bleed=1.8))
+        y = np.arange(H)[:, None] + 0.5
+        crest = ((y > belt[None, :]) & (y < belt[None, :] + 6)).astype(np.float32) * m
+        stack.append(wash32(rng, H, crest, BG._mix(lit, pal["sky"], t), var=0.03, edge_dark=0.02, bleed=1.2))
+        grooves = np.zeros((H, W), np.float32)
+        for _k in range(18):
+            cx = rng.uniform(0, W)
+            for t2 in range(int(rng.uniform(30, 80))):
+                grooves[min(int(belt[int(cx) % W] + 8 + t2), H - 1), int(cx - 0.4 * t2) % W] = 1.0
+        stack.append(wash32(rng, H, grooves * m, BG._mix(groove, pal["sky"], t), var=0.03, edge_dark=0.0, bleed=1.4))
+    out.append(finish(stack, rng, H))
+    H = 384 + 96
+    g2 = _gline(H, -2.0)
+    hq = H - 2 * BG.CONTINUE_ROWS
+    ws, x0 = [], 0.0
+    while x0 < W - 30:
+        w = rng.uniform(16, 32)
+        ws.append((x0, w, rng.uniform(2.0, 4.5)))
+        x0 += w
+    sc = W / x0
+    line = np.full(W, float(g2), np.float32)
+    feet = []
+    for a, w, h in ws:
+        a, w = a * sc, w * sc
+        xs = np.arange(int(a), int(a + w) + 1)
+        line[xs % W] = g2 - h * np.sin(np.pi * np.clip((xs - a) / w, 0, 1)) ** 1.4
+        feet.append(a)
+    ground = BG._ridge_mask(H, line)
+    crest = (ground * (np.arange(H)[:, None] < line[None, :] + 3)).astype(np.float32)
+    gv = np.zeros((H, W), np.float32)
+    for a in feet:                                                                            # a dark slit at each ridge's foot (the groove)
+        ell(gv, a, g2 + 2, 3.5, 6)
+    gv *= ground
+    blocks, bshade = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
+    _seated(blocks, bshade, None, line, rng, 9, 10, 24, hq)
+    stack = Stack()
+    stack.append(wash32(rng, H, ground, grey, var=0.06, edge_dark=0.06, bleed=2.0))
+    stack.append(wash32(rng, H, crest, lit, var=0.03, edge_dark=0.02, bleed=1.0))
+    stack.append(wash32(rng, H, gv, pal["brown"], var=0.03, edge_dark=0.02, bleed=1.0))
+    stack.append(wash32(rng, H, blocks, BG._mix(grey, groove, 0.25), var=0.05, edge_dark=0.10, bleed=1.2))
+    stack.append(wash32(rng, H, bshade * blocks, groove, var=0.04, edge_dark=0.03, bleed=1.6))
+    out.append(BG.tile_bottom(*finish(stack, rng, H)))
+    return out, _d169_meta(out)
+
+
 def mercury_day(seed):
     return mercury_scene(seed, "day")
 
@@ -2475,10 +2616,12 @@ for _d, _s0 in (("deck1", 15101), ("deck2", 15102), ("deck3", 15103), ("deep", 1
 
 
 B179_BAND = {"desert": "sand", "taiga": "snow", "tundra": "snow"}
-B186_BAND = {"polar": ("ground_band_frost", "ground_fill"), "tharsis": ("ground_band_basalt", "ground_fill_basalt")}   # Mars (B-178 / B-181)
+B186_BAND = {"polar": ("ground_band_frost", "ground_fill"), "tharsis": ("ground_band_basalt", "ground_fill_basalt"),   # Mars (B-178 / B-181)
+             "coldtrap": ("ground_band_ice", "ground_fill"), "tessera": ("ground_band_tessera", "ground_fill")}       # B-187 (B-181's bands)
 SCENES[("mars", "polar")], SCENES[("mars", "tharsis")] = mars_polar, mars_tharsis
-SEEDS.update({"polar": 18601, "tharsis": 18602})
-PLANET_OF.update({"polar": "mars", "tharsis": "mars"})
+SCENES[("mercury", "coldtrap")], SCENES[("venus", "tessera")] = mercury_coldtrap, venus_tessera
+SEEDS.update({"polar": 18601, "tharsis": 18602, "coldtrap": 18701, "tessera": 18702})
+PLANET_OF.update({"polar": "mars", "tharsis": "mars", "coldtrap": "mercury", "tessera": "venus"})
 ART_DIR = os.path.normpath(os.path.join(HERE, "..", "..", "Assets", "_Game", "Art"))
 
 
@@ -2495,7 +2638,7 @@ def preview(out_dir, scenes=("forest", "coast"), from_png=False):
     import preview_c2_earth_rigs as PR
     for scene in scenes:
         planet = PLANET_OF[scene]
-        tag = "b179" if scene in B179_BAND else "b186" if scene in B186_BAND else {"earth": "b133", "mars": "b141", "mercury": "b145", "venus": "b147", "jupiter": "b155", "saturn": "b157", "uranus": "b158", "neptune": "b161"}[planet]
+        tag = "b179" if scene in B179_BAND else ("b187" if scene in ("coldtrap", "tessera") else "b186") if scene in B186_BAND else {"earth": "b133", "mars": "b141", "mercury": "b145", "venus": "b147", "jupiter": "b155", "saturn": "b157", "uranus": "b158", "neptune": "b161"}[planet]
         d = os.path.join(out_dir, tag, scene)
         os.makedirs(d, exist_ok=True)
         u8, info = [], []
@@ -2538,7 +2681,7 @@ def preview(out_dir, scenes=("forest", "coast"), from_png=False):
             strip = f"ground_band_{B179_BAND[scene]}"
             S = None
         elif scene in B186_BAND:                                  # B-186: the region's band (B-178 frost / B-181 basalt) on the line, its fill below
-            Mdir = os.path.join(ART_DIR, "terrain", "mars")
+            Mdir = os.path.join(ART_DIR, "terrain", planet)
             bname, fname = B186_BAND[scene]
             band = pngio.read_png_np(os.path.join(Mdir, f"{bname}_color.png"))
             fill = pngio.read_png_np(os.path.join(Mdir, f"{fname}_color.png"))
@@ -2638,7 +2781,7 @@ def preview_dip(out_dir, scene, from_png=False, out=None, footnote=None, planet=
     E = os.path.join(ART_DIR, "terrain", planet)                                              # the ground the region stands on
     if planet == "earth" and scene in B179_BAND:
         bname, fname = f"ground_band_{B179_BAND[scene]}", ("ground_fill_sand" if scene == "desert" else "ground_fill")
-    elif planet == "mars" and scene in B186_BAND:
+    elif scene in B186_BAND and (planet, scene) in SCENES:                                    # B-186 / B-187 region sets
         bname, fname = B186_BAND[scene]
     else:
         bname, fname = "ground_band", "ground_fill"
@@ -2676,7 +2819,7 @@ def preview_dip(out_dir, scene, from_png=False, out=None, footnote=None, planet=
         rows.append(F[240:])
     img = np.vstack(rows)
     review._label(img, __import__("time").strftime("%m-%d %H:%M") + " " + (footnote or "preview (not exported)"), 2, img.shape[0] - 16)
-    out = out or os.path.join(out_dir, f"review_{'b186' if scene in B186_BAND else 'b183'}_{planet}_{scene}_dip_preview.png")
+    out = out or os.path.join(out_dir, f"review_{('b187' if scene in ('coldtrap', 'tessera') else 'b186') if scene in B186_BAND else 'b183'}_{planet}_{scene}_dip_preview.png")
     review.write(out, img)
     print(scene, "->", out)
     return out
