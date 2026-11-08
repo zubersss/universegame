@@ -6,6 +6,13 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
+### USER-31 — Close one of the two browsers (1 min)
+At 18:4x free memory is 1.24 GB and the Blender Artist's next export (the Vortex Whale) needs 1.38 GB to start; nothing
+else heavy is running. Chrome (11 processes) and Edge (7) together hold about 0.7 GB. Keep whichever shows the
+Mercury and Venus page and close the other (right-click its taskbar icon → Close window), then tell the Lead
+"done: USER-31". When you play Build 0.4.7 (USER-30) the team's heavy jobs pause on their own for the game's memory;
+that is expected and nothing to report.
+
 ### USER-30 — Play Build 0.4.7: Mercury, Venus and the paper menus (20 min)
 Open https://claude.ai/artifact/Tgkyg6QXPABeqhxigtRyrq (the Mercury, Venus and menus page: the stills, the numbers, what changed, what comes next), then play:
 double-click `C:\dev\universegame\Build\MERIDIAN_0.4.7\MERIDIAN.exe`. On Earth press Esc for the paper pause menu,
