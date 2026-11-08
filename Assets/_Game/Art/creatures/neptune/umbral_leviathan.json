@@ -1,0 +1,336 @@
+{
+  "key": "creatures/neptune/umbral_leviathan",
+  "style": "v3",
+  "ppu": 64,
+  "rect_origin": "bottom_left",
+  "parts": [
+    {
+      "name": "body0",
+      "rect": [
+        0,
+        516,
+        592,
+        348
+      ],
+      "pivot": [
+        0.5061,
+        0.4967
+      ]
+    },
+    {
+      "name": "body0_lit",
+      "rect": [
+        596,
+        516,
+        592,
+        348
+      ],
+      "pivot": [
+        0.5061,
+        0.4967
+      ]
+    },
+    {
+      "name": "body1",
+      "rect": [
+        1192,
+        568,
+        576,
+        296
+      ],
+      "pivot": [
+        0.8905,
+        0.4973
+      ]
+    },
+    {
+      "name": "body1_lit",
+      "rect": [
+        0,
+        216,
+        576,
+        296
+      ],
+      "pivot": [
+        0.8905,
+        0.4973
+      ]
+    },
+    {
+      "name": "body2",
+      "rect": [
+        964,
+        280,
+        512,
+        232
+      ],
+      "pivot": [
+        0.8764,
+        0.4957
+      ]
+    },
+    {
+      "name": "body2_lit",
+      "rect": [
+        1480,
+        280,
+        512,
+        232
+      ],
+      "pivot": [
+        0.8764,
+        0.4957
+      ]
+    },
+    {
+      "name": "fin_b",
+      "rect": [
+        1228,
+        100,
+        256,
+        112
+      ],
+      "pivot": [
+        0.8217,
+        0.8804
+      ]
+    },
+    {
+      "name": "fin_f",
+      "rect": [
+        428,
+        72,
+        320,
+        140
+      ],
+      "pivot": [
+        0.8574,
+        0.912
+      ]
+    },
+    {
+      "name": "head",
+      "rect": [
+        580,
+        236,
+        380,
+        276
+      ],
+      "pivot": [
+        0.1331,
+        0.4491
+      ]
+    },
+    {
+      "name": "tail",
+      "rect": [
+        0,
+        0,
+        424,
+        212
+      ],
+      "pivot": [
+        0.9792,
+        0.4791
+      ]
+    },
+    {
+      "name": "whiskers",
+      "rect": [
+        752,
+        76,
+        472,
+        136
+      ],
+      "pivot": [
+        0.988,
+        0.9626
+      ]
+    }
+  ],
+  "plants": [
+    {
+      "name": "umbral_leviathan",
+      "grand": true,
+      "scale_note": "about 30 m nose to tail at 1x: a set piece circling the Meridian (D-140: a Grand rig, 8 bones)",
+      "bones": [
+        {
+          "name": "body0",
+          "part": "body0",
+          "parent": null,
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 3
+        },
+        {
+          "name": "head",
+          "part": "head",
+          "parent": "body0",
+          "offset_m": [
+            3.9,
+            0.3
+          ],
+          "order": 6
+        },
+        {
+          "name": "whiskers",
+          "part": "whiskers",
+          "parent": "head",
+          "offset_m": [
+            3.9,
+            -0.4
+          ],
+          "order": 7
+        },
+        {
+          "name": "body1",
+          "part": "body1",
+          "parent": "body0",
+          "offset_m": [
+            -3.6,
+            -0.1
+          ],
+          "order": 2
+        },
+        {
+          "name": "body2",
+          "part": "body2",
+          "parent": "body1",
+          "offset_m": [
+            -6.8,
+            -0.1
+          ],
+          "order": 1
+        },
+        {
+          "name": "tail",
+          "part": "tail",
+          "parent": "body2",
+          "offset_m": [
+            -6.3,
+            0.0
+          ],
+          "order": 0
+        },
+        {
+          "name": "fin_f",
+          "part": "fin_f",
+          "parent": "body0",
+          "offset_m": [
+            1.4,
+            -1.9
+          ],
+          "order": 5
+        },
+        {
+          "name": "fin_b",
+          "part": "fin_b",
+          "parent": "body1",
+          "offset_m": [
+            -3.4,
+            -1.6
+          ],
+          "order": 4
+        }
+      ],
+      "swaps": {
+        "body0": [
+          "body0",
+          "body0_lit"
+        ],
+        "body1": [
+          "body1",
+          "body1_lit"
+        ],
+        "body2": [
+          "body2",
+          "body2_lit"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "body0",
+          "bone": "body0",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 3,
+          "replaces_part": true
+        },
+        {
+          "slot": "body1",
+          "bone": "body1",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 2,
+          "replaces_part": true
+        },
+        {
+          "slot": "body2",
+          "bone": "body2",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "beat_bpm": 110,
+        "cycle_beats": 4,
+        "amplitude_deg": {
+          "body0": 1,
+          "head": 2,
+          "whiskers": 4,
+          "body1": 2,
+          "body2": 3,
+          "tail": 5,
+          "fin_f": 4,
+          "fin_b": 4
+        },
+        "lag": 0.8
+      },
+      "react": {
+        "radius_m": 30.0,
+        "action": "curl",
+        "deg": {
+          "head": -8,
+          "body1": 6,
+          "body2": 8,
+          "tail": 10,
+          "fin_f": -15,
+          "fin_b": -15
+        }
+      },
+      "actions": {
+        "circle": {
+          "amplitude_scale": 2.2,
+          "note": "a wider wave; UNITY carries it round the wreck"
+        },
+        "survey": {
+          "hold": true,
+          "swap_sequence": [
+            {
+              "body0": "body0_lit"
+            },
+            {
+              "body1": "body1_lit"
+            },
+            {
+              "body2": "body2_lit"
+            }
+          ],
+          "beats_each": 4,
+          "note": "the bands light one by one as the Survey reads them (the final encounter, D-087)"
+        }
+      }
+    }
+  ]
+}
