@@ -1,4 +1,6 @@
-# MERIDIAN — Asset Contract v3.1
+# MERIDIAN — Asset Contract v3.2
+
+> **v3.2 (D-163, 2026-11-08, the owner's smooth ground, D-161 / D-162):** §11.9, the ground band set: the smoothed ground is drawn from a bendable band, a world-space fill, upright decor, a brink lip, a dig rim and a dig puff per planet.
 
 > **v3.1 (D-100, D-101, 2026-11-06, owner C0 feedback):** §11.1 ink is half the v3.0 weight (outer 2–3 px, interior 1–1.5 px) with required interior detail and up to two shadow tones; §11.3 flora rigs carry no face parts (swaps are petals/leaves, never eyes or mouths); §11.5 discs have no expressions. Everything else in §11 stands.
 > **v3.0 (D-086, 2026-11-06): the cartoon contract. §11 is the rule set for every new asset.**
@@ -302,3 +304,12 @@ no mip maps, BC7 (or DXT5 Crunch), packed into ≤ 8 Sprite Atlases per planet (
 `planet_<name>`); sheets sliced and Animator clips generated at 12 fps; rig sets build a shared
 controller. Rejected with a clear console message: a sheet over 2048, a clip over its frame cap,
 an fps other than 12, an overlay that is not 512².
+
+**11.9 Ground band set (v3.2, D-162 / D-163).** The smoothed ground on every planet is drawn from these keys under `terrain/<planet>/`; UNITY's U-156 mesh maps them; no tile or block art is drawn for the ground.
+- `ground_band` 512×64 at PPU 64, tiling in x every 8 m; json `surface_row: 24` (rows from the top to the surface line, the ink edge's centre), 24 px above the line (low scallops only, so it bends over a 35° slope and a rounded lip) and 40 px below, transparent below its ragged lower edge. Mapping: u = arc length along the outline × 64 mod 512; v = 24 − (signed normal distance from the outline × 64), up = toward row 0.
+- `ground_fill` 512×512, tiling both ways in world space inside the solid under the band: u = x × 64 mod 512, v = −y × 64 mod 512 (horizontal strata, the planet's cross-section: bands, pebbles, stones, lenses, the odd fossil; no faces).
+- `ground_decor_<n>` upright scatter pieces (tufts, stones, flowers), pivot at the base, never rotated with the slope.
+- `ground_lip` a brink hood, pivot at the brink, mirrored in x for a drop to the left.
+- `dig_rim` 256×16 mapped along each carved hole's outline, ink on row 4, the rows below it lying in the solid (its normal points into the air).
+- `dig_puff` an 8-frame one-shot at 12 fps, pivot at the dig point.
+Tiling is checked before export by rendering two tiles side by side (p99 copy difference 0). A planet without diggable ground (the giants' islands, B-177) gets its own island set instead.
