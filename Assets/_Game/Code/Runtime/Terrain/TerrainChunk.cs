@@ -89,6 +89,31 @@ namespace Meridian.Terrain
         /// solidity as the original surface left it, OriginalTop) follows its column's curve; a dug or built one is its own solidity. Traced
         /// at ¼ m, each outline becomes one EdgeCollider2D on the chunk's static body; the mesh follows through OutlineBuilt.
         /// </summary>
+        // U-156: the water tile (ApplyRows and SetTileLocal remember it) and the cells this chunk filled with it under a submerged column.
+        static TileBase waterTile;
+        readonly System.Collections.Generic.List<int> shoreWater = new System.Collections.Generic.List<int>(32);
+
+        /// <summary>U-156: on a smooth planet the drawn ground can sit below a submerged column's top tile, so water fills that tile's cell too (the
+        /// ground mesh covers it under the outline): blocky water never leaves a step of open backdrop over a rounded crest. View only; swimming
+        /// reads the tile ids.</summary>
+        void ShoreWater(int x0, int y0)
+        {
+            const int C = TerrainConstants.ChunkSize;
+            for (int k = 0; k < shoreWater.Count; k++) { int i = shoreWater[k]; if (!TileId.IsLiquid(ids[i])) liquid.SetTile(new Vector3Int(i % C, i / C, 0), null); }
+            shoreWater.Clear();
+            if (waterTile == null) return;
+            for (int ly = 0; ly < C; ly++)
+                for (int lx = 0; lx < C; lx++)
+                {
+                    int i = ly * C + lx;
+                    if (!TileId.IsSolid(ids[i])) continue;
+                    byte above = ly + 1 < C ? ids[i + C] : world.TileAt(x0 + lx, y0 + ly + 1);
+                    if (!TileId.IsLiquid(above)) continue;
+                    liquid.SetTile(new Vector3Int(lx, ly, 0), waterTile);
+                    shoreWater.Add(i);
+                }
+        }
+
         void BuildOutline()
         {
             const int C = TerrainConstants.ChunkSize;
@@ -105,6 +130,7 @@ namespace Meridian.Terrain
             tops ??= new int[C + 1 + 2 * r];
             curve ??= new float[C + 1];
             int x0 = cx * C, y0 = cy * C, t0 = x0 - 1 - r;
+            ShoreWater(x0, y0);
             for (int k = 0; k < tops.Length; k++) tops[k] = world.WallTop(t0 + k);
             for (int i = 0; i <= C; i++) curve[i] = GroundField.Curve(x0 - 1 + i, x => tops[x - t0], world.PadTop);
             for (int i = 0; i <= C; i++) SurfaceCurve[i] = tops[i + r] == int.MinValue ? float.NaN : curve[i];
@@ -259,6 +285,7 @@ namespace Meridian.Terrain
                 bool isLiquid = TileId.IsLiquid(id);
                 solidScratch[i] = isLiquid ? null : tile;
                 liquidScratch[i] = isLiquid ? tile : null;
+                if (isLiquid && tile != null) waterTile = tile; // U-156
             }
             var band = new BoundsInt(0, row, 0, C, RowsPerStep, 1);
             solid.SetTilesBlock(band, solidScratch);
@@ -273,11 +300,13 @@ namespace Meridian.Terrain
             ids[ly * TerrainConstants.ChunkSize + lx] = id; // U-073
             solid.SetTile(p, isLiquid ? null : tile);
             liquid.SetTile(p, isLiquid ? tile : null);
+            if (isLiquid && tile != null) waterTile = tile; // U-156
         }
 
         public void Clear()
         {
             solid.ClearAllTiles();
+            shoreWater.Clear(); // U-156
             liquid.ClearAllTiles();
             System.Array.Clear(ids, 0, ids.Length); // U-073: empty mesh until the next stream
             filled = false;

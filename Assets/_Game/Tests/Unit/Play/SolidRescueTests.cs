@@ -19,6 +19,7 @@ namespace Meridian.Tests
     {
         const string CorePath = "Assets/_Game/Scenes/Core.unity";
         const float Depth = 3f, OnSurface = 0.05f; // the body's collider to the outline's, along the normal (a flat box on a slope rests on a corner)
+        static readonly System.Text.RegularExpressions.Regex Rescued = new System.Text.RegularExpressions.Regex("solid rescue: ");
         PlanetSideRoot side;
         PlayerController player;
 
@@ -107,6 +108,7 @@ namespace Meridian.Tests
             Assert.IsFalse(float.IsNaN(surface), "an outline under the column");
 
             // The surveyor: its feet 3 m under the outline.
+            LogAssert.Expect(LogType.Log, Rescued); // each body's first lift is logged once
             int before = SolidRescue.Rescues;
             player.Body.linearVelocity = Vector2.zero;
             player.Body.position = new Vector2(x, surface - Depth); player.transform.position = player.Body.position;
@@ -116,6 +118,7 @@ namespace Meridian.Tests
             // A creature well clear of the surveyor (a creature walks on, and leans on whatever it meets): measured just after its lift.
             float cx = x + 12f, cs = Surface(cx);
             var spec = SpeciesSpec.Get(Species.Stag);
+            LogAssert.Expect(LogType.Log, Rescued);
             before = SolidRescue.Rescues; // any lift from the spawn on (a held creature is lifted in the step it is released)
             var stag = side.creatures.Spawn(Species.Stag, new Vector2(cx, cs - Depth + spec.size.y * 0.5f));
             Assert.NotNull(stag);
@@ -129,6 +132,7 @@ namespace Meridian.Tests
             var box = go.AddComponent<Rigidbody2D>();
             go.AddComponent<BoxCollider2D>().size = Vector2.one * 0.4f;
             box.position = new Vector2(bx, bs - Depth); go.transform.position = box.position;
+            LogAssert.Expect(LogType.Log, Rescued);
             before = SolidRescue.Rescues;
             SolidRescue.Register(box);
             yield return Lifted(box, "box", bx, bs, before);

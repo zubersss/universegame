@@ -2133,7 +2133,7 @@ namespace Meridian.Tests
                                 if (g - s < 0.35f) continue;
                                 var p = new Vector3(cx + 0.5f, s + 0.15f, 0f);
                                 var hits = new System.Text.StringBuilder();
-                                foreach (var r in UnityEngine.Object.FindObjectsByType<Renderer>(FindObjectsSortMode.None))
+                                foreach (var r in UnityEngine.Object.FindObjectsByType<Renderer>())
                                 {
                                     if (!r.enabled || !r.gameObject.activeInHierarchy) continue;
                                     var b = r.bounds;

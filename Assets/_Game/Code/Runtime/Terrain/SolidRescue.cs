@@ -5,14 +5,14 @@ namespace Meridian.Terrain
 {
     /// <summary>
     /// U-156 / D-165 (a): no body falls out of the world. A smooth planet's ground is an edge outline with no inside to push a buried body back
-    /// out (box colliders used to), so every awake dynamic body (the surveyor, the ship, creatures, item drops: Register) whose centre lies inside
+    /// out (box colliders used to), so every awake dynamic body (the surveyor, the ship, creatures, item drops: Register) whose foot lies inside
     /// the drawn solid is lifted onto the surface above it on the next physics step, logged once per body. TerrainStreamer ticks it from
     /// FixedUpdate on smooth planets only (a block planet's box colliders still push a buried body out): a few tile reads and two curve
     /// samples per awake body.
     /// </summary>
     public static class SolidRescue
     {
-        /// <summary>How far past the iso a centre must sit to count as buried: 0.2 m into natural ground, 0.05 m into a dug or built edge.</summary>
+        /// <summary>How far past the iso the probe must sit to count as buried: 0.2 m into natural ground, 0.05 m into a dug or built edge.</summary>
         public const float Margin = 0.05f;
         /// <summary>The lift lands the body's lowest collider this far over the surface.</summary>
         public const float Clearance = 0.02f;
@@ -26,8 +26,33 @@ namespace Meridian.Terrain
         /// <summary>Lifts so far (tests and the profiler's log).</summary>
         public static int Rescues { get; private set; }
 
-        public static void Register(Rigidbody2D body) { if (body != null && !bodies.Contains(body)) bodies.Add(body); }
-        public static void Unregister(Rigidbody2D body) { if (body != null) { bodies.Remove(body); logged.Remove(body); } }
+        static readonly HashSet<Rigidbody2D> parks = new HashSet<Rigidbody2D>(), parked = new HashSet<Rigidbody2D>();
+
+        /// <summary>Watches a dynamic body. parkOverUnloadedGround: the body is held still (not simulated) while the ground under it is not
+        /// streamed in, and let go once it is (the Pilgrim left parked a kilometre away; a creature holds itself, CreatureDirector).</summary>
+        public static void Register(Rigidbody2D body, bool parkOverUnloadedGround = false)
+        {
+            if (body == null) return;
+            if (!bodies.Contains(body)) bodies.Add(body);
+            if (parkOverUnloadedGround) parks.Add(body);
+        }
+
+        public static void Unregister(Rigidbody2D body)
+        {
+            if (body == null) return;
+            if (parked.Remove(body)) body.simulated = true;
+            bodies.Remove(body); logged.Remove(body); parks.Remove(body);
+        }
+
+        /// <summary>The ground under a body's pivot is streamed in (its chunk and the one 2 m below its feet).</summary>
+        static bool GroundReady(TerrainStreamer t, Rigidbody2D b)
+        {
+            int x = Mathf.FloorToInt(b.position.x), y = Mathf.FloorToInt(b.position.y);
+            return t.IsCollisionReady(x, y) && t.IsCollisionReady(x, y - 2);
+        }
+
+        /// <summary>Bodies held over unloaded ground right now (tests).</summary>
+        public static int Parked => parked.Count;
 
         /// <summary>The drawn ground's density at p (the outline is its iso, GroundField.Iso): the four tile-centre nodes round p, bilinear.</summary>
         public static float Density(TerrainStreamer t, Vector2 p)
@@ -77,9 +102,12 @@ namespace Meridian.Terrain
             {
                 var b = bodies[k];
                 if (b == null) { bodies.RemoveAt(k); continue; }
+                if (parked.Contains(b)) { if (GroundReady(t, b)) { b.simulated = true; parked.Remove(b); } continue; }
+                if (parks.Contains(b) && b.simulated && !GroundReady(t, b)) { b.simulated = false; parked.Add(b); continue; }
                 if (!b.simulated || b.bodyType != RigidbodyType2D.Dynamic || !b.gameObject.activeInHierarchy || b.IsSleeping()) continue;
                 if (!Bounds(b, out Bounds box)) continue;
-                Vector2 centre = box.center;
+                // The probe: up to ½ m over the body's lowest point (a tall rocket counts as buried once its foot is, not its middle).
+                Vector2 centre = new Vector2(box.center.x, box.min.y + Mathf.Min(0.5f, box.extents.y));
                 if (!Inside(t, centre)) continue;
                 float surface = SurfaceAbove(t, centre);
                 if (float.IsNaN(surface)) continue;
