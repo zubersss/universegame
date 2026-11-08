@@ -544,8 +544,13 @@ def _vig_venus(w, h, rng):
     with its gondola, the station's plank deck and rail across the bottom."""
     P = "venus"
     yy, xx = _grid(w, h)
-    t = (yy / h)[..., None]
-    img = (_col(P, "sky") * (1 - t) + _col(P, "mustard") * t).astype(np.float32)
+    # B-170 reopened (D-164): the sky in three flat palette bands with hand-drawn wavy edges (it was a sky-to-mustard
+    # gradient, 76.9 % palette in the B-173 audit): apricot sky, mustard, then mustard's mid shadow toward the banks
+    img = np.empty((h, w, 3), np.float32)
+    img[:] = _col(P, "sky")
+    for frac, key, tone, k in ((0.26, "mustard", None, 5.0), (0.44, "mustard", "sh", 7.0)):
+        edge = h * (frac + 0.012 * np.sin(xx[0] / w * k * math.pi + frac * 9) + 0.006 * np.sin(xx[0] / w * 23 + frac * 5))
+        img[yy > edge[None, :]] = _col(P, key, tone)
     es, _u, _v = _ellipse(xx, yy, w * 0.2, h * 0.28, h * 0.1, h * 0.1)
     img[es < 1] = _col(P, "offwhite")
     for base, amp, key, tone, k in ((0.6, 0.05, "offwhite", "sh", 7.0), (0.7, 0.05, "offwhite", None, 11.0)):
