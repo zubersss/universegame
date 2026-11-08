@@ -1,0 +1,11 @@
+{
+  "key": "icons/wind_anchor/base",
+  "style": "v3",
+  "ppu": 55,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "icon": true,
+  "note": "B-197: drawn from props/neptune/wind_anchor (its palette and ink)"
+}
