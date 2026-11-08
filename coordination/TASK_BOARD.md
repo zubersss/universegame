@@ -1505,7 +1505,14 @@ Goal: A shared inventory icon for the wind anchor (UNITY's U-159 guard Inventory
 Accept: one stamped preview beside the other item icons at 1× accepted by LEAD before the export; log OK; palette 100 %.
 Files: blender/scripts/ (the icon builder), Assets/_Game/Art/icons/wind_anchor/
 Depends: —
-Lead notes: Cycle 283 (14:3x). Small; any free gap. Then UNITY drops the test's exception.
+Lead notes: Cycle 283 (14:3x). Small; any free gap. Then UNITY drops the test's exception. 15:1x: PREVIEW ACCEPTED AS DRAWN at 128×128 (the item icons' size; B-128's tile cubes are 64) (review_b197_wind_anchor_icon_preview.png 15:10: the banded stake, coral cap, a full striped sock, guy lines to two pegs; readable at the 32 px slot; palette 100 % on Neptune's). Export; then UNITY drops the exception.
+
+### B-199 · BLENDER · Ready · C3
+Goal: The inventory in ink (found in B-197's preview row): of ~57 item icons under Assets/_Game/Art/icons/, only 8 carry a v3 json (B-128's tile cubes); the other ~49 (iron, copper, float_cell_mk1, deep_diamond, solarite_capacitor, ammonia_ice …) are older shaded renders with no ink outline, beside the cartoon wind anchor and tile cubes in the inventory and crafting panels the player opens all the time. Redraw them as v3 ink icons in the style of B-128 and B-197 (128×128, ink 2.0–3.0 / 1.0–1.5 px, the item's planet palette or common, readable at the 32 px slot, a bold silhouette per item so two neighbours never read alike), each with B-128's icon json (style v3, icon: true).
+Accept: first the list in BLENDER_STATUS (every icon folder: v3 or not, its item); then one stamped preview of a first batch of ~10 (the ores and crystals) at 1× and at 32 px beside the 8 v3 icons, accepted by LEAD before the batch's export; then the rest in batches of ~10 the same way; log OK; palette 100 %; UNITY's next smoke shows the inventory (smoke_8) and crafting (smoke_9) frames all in ink.
+Files: blender/scripts/ (the icon builder, B-197's pattern), Assets/_Game/Art/icons/
+Depends: —
+Lead notes: Cycle 284 (15:1x). After B-198. Same keys, so no code change (icons/<item>/base); the exports replace each base_color.png in place and add its json.
 
 ### B-198 · BLENDER · Ready · G1
 Goal: Cliff lips for B-181's variant grounds (B-180's pattern; 0.5.0's smoke_41 shows a lip at every steep brink): `terrain/mars/ground_lip_{basalt,talus}` (Olympus Mons' caldera rim and flanks, the canyon's edges), `terrain/mercury/ground_lip_ice` (the cold traps' rims) and `terrain/venus/ground_lip_{tessera,vent}`, each matching its band's crust, ink and colours in B-175's lip format (128×96, pivot (0.55, 0.6) at the brink).
