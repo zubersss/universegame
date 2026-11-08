@@ -23,10 +23,11 @@ older (D-037 alternation applies only between equal ranks). A rank is live only 
 has a want on file or holds the lock (D-112): if the top rank has no want when the lock frees,
 the next live rank runs now and the skipped role goes next after it files. A role below the top
 keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 278 (11-08 01:4x: all three windows restarted ~01:27; lock B's tests green (MarsStage 3/3, the Jupiter PlayMode slice 20/20) but its captures died with the restart; B-170 in; THE OWNER'S 0.4.7 PLAYTEST → D-158: the flight overhaul goes first and rides 0.4.8). A role files its want only when the queue says it is next after the running job:
-Done since: the u127 captures (fail → U-153); all Saturn art (B-163 / B-164); B-171 exported (02:31); Uranus deck1 ×4 lights; THE FLIGHT CHECK (02:32–02:45: compile 0 / 0, EditMode 432/432, Play 20/20, LeadQA 7/8 with M1Loop's space-leg window → 90 s by LEAD; the u148 / u150 / u127 frames in).
-1. UNITY · NOW: lock C = M1Loop re-run (the 90 s window) + the whale re-shot (5_whale, U-153 item 4) + u150/2_earth_boom re-shot at the cone's fullest frame + Build 0.4.8 (the flight overhaul + U-147 + Jupiter) as the dev + release pair (U-142 / U-143) + the 13-leg probe with the Climb leg (D-152) + the smoke set (the climb shots with climb_boom at the cone's fullest frame, Jupiter, the Venus / Jupiter cards). One lock over several foreground calls (≤ 20 min); a red M1Loop or a red probe stops the build; the whale does not. LEAD then writes the page and USER-32 (the feel check).
-2. BLENDER · files only while lock C runs; then the B-171 set review (lock-free) and B-166 Uranus deck2 / deck3 / deep one deck per job.
-3. BLENDER · the rest of B-166, then B-169 Neptune, then (U-151's code in) B-172; UNITY · after 0.4.8: U-129 slice 2 code → the Saturn check + captures, then Uranus (U-130 / U-146), Neptune (U-133 / U-144).
+Cycle 279 (03:2x, 2-hour tick). Done since: the flight check (green but M1Loop → LEAD's 90 s window); B-171 exported; B-166 slot 1 (the four Uranus decks × four lights); lock C part 1 (02:58–03:1x: M1Loop green, the whale and boom re-shot, 0.4.8 dev built, the probe 121 / 122 green with one Film pass reading over → D-159).
+1. UNITY · NOW (since 03:12): lock C part 2 = the re-probe on the 0.4.8 dev build (D-159) → green: the release build + the smoke set; red twice: stop and look at what U-148's wide-frame tiling feeds the film pass. LEAD then writes the page and USER-32 (the feel check).
+2. BLENDER · after lock C: the B-172 design preview (lock-free) → B-166 slot 2 (floes / rig / props / palette) → slot 3 (the creatures + the Colossus), each yielding to want_unity.
+3. UNITY · after 0.4.8, one lock: the U-127 re-shoot (a Stormglider staged in the storm deck; B-156's deck module on a Deck 2 floe) + U-154's check (with U-129 slice 2's code if in).
+4. Then: the Saturn check + captures (U-129, B-163 / B-164 in game), BLENDER's B-169 Neptune slots, the Uranus check + captures (U-130 / U-146 after B-166), Neptune (U-133 / U-144 after B-169), B-172 after U-151's code.
 
 
 
@@ -61,11 +62,10 @@ Rules: nothing here needs the lock; it stays under ~300 MB of extra RAM; no Unit
 did in your status before the next poll. LEAD tops each list up to ≥ 3 items every cycle.
 
 **UNITY**
-- U-148 (the camera reads the interpolated pose, the capped look-ahead, the 30 → 45 m ship frame): the owner's playtest, first.
-- U-149 (the throttle spool, the tilt's angular inertia, the air drag by altitude) with FlightModelTests.
-- U-150 (the boost flame / rumble / speed lines while accelerating; the sound barrier with its placeholders) with SoundBarrierTests.
-- U-153 (the Jupiter stage fixes from u127: the set's datum off the floes, a strip per floe kind, the two ink lines, the whale head first) before lock C.
-- Then U-151 (the trade panel and the space readouts on paper; the v3 space-prop path), U-152 (the v2 census, files only), the slice-2 code of U-129 / U-130 / U-133 (the Saturn, Uranus and Neptune creatures + their Grand rigs against B-164 / B-166 / B-169's manifest rows, guarded until the sheets land).
+- U-154 (P-51: the Deck piece draws the re-inked kit on the four giants) and the U-127 re-shoot's staging (a Stormglider in the storm deck, the kit's deck module on a Deck 2 floe).
+- U-129 slice 2 (the Saturn creatures + the Polar Hydra Grand rig: B-164's sheets are exported, so no guard), then U-130 slice 2 (B-166's creatures + the Colossus, guarded until slot 3 lands), U-133 slice 2.
+- U-152 (the v2 census, files only: a good item beside any lock); U-151 (the trade panel and the space readouts on paper; the v3 space-prop path for B-172).
+- If the owner's feel check asks for a felt top speed: P-53's alternative (ρ linear in h, or k × 2) ready as a one-constant change (D-160).
 - The Creep watch row: 3.5 MB per visit on 0.4.7; read 0.4.8's; `docs/credits/unity.md` upkeep.
 Then one batched check per hand-off when your turn in the queue comes (compile + EditMode as one lock, PlayMode A / B as two, D-122).
 
@@ -77,10 +77,10 @@ Then one batched check per hand-off when your turn in the queue comes (compile +
 
 
 **BLENDER** (numpy / scripts only while UNITY holds the lock or a want; bpy only under your own lock; under 0.3 GB free, code only; otherwise only pre-measured ≤ 150 MB jobs beside another role's lock; the lock / RAM check is its own call)
-- B-171 source now (the vapor cone, the shock ring, the speed lines, the boost puff): the owner's flight fix; a numpy preview for LEAD when nobody waits at the gate.
-- B-172 design source (the two Waystations and the six rocks, top-down v3) after B-171's.
-- The Uranus v3 manifest rows (B-166) from the generator when nobody waits at the gate (~50 MB); the Neptune rows (B-169) after.
-- Status trim (D-113): B-160 and B-170 are verified (Done on UNITY's captures); Ready for review lists only unjudged items.
+- The B-172 design preview (both Waystations with the Pilgrim docked, the six rocks) to LEAD once lock C releases.
+- The Neptune v3 rows and dry runs for B-169 (files / numpy only while UNITY holds the lock).
+- B-173 source (the per-planet §9.7 audit sheets for the C2 exit and C4).
+- Status trim (D-113): B-166 slot 1 is verified; Ready for review lists only unjudged items.
 - `docs/credits/blender.md` and the design reports' upkeep (D-153's whale scale, B-170's subtitles).
 
 **LEAD**
@@ -1396,6 +1396,20 @@ Files: blender/scripts/build_props_space_v3.py, Assets/_Game/Art/props/space/
 Depends: U-151 (the v3 draw path)
 Lead notes: Cycle 278. Design source lock-free after B-171's; the export after U-151's code and after the Saturn slots.
 
+### B-173 · BLENDER · Ready · C2
+Goal: The C2 exit audit (Bible §12 C2: "§9.7 on every asset"): one stamped contact sheet per planet (Earth, Mars, Mercury, Venus, Jupiter, Saturn, then Uranus and Neptune as their exports land) read back from Assets/_Game/Art/ at 1x: every v3 key of that planet (sets as a strip, floes, flora rig set assembled, props, creatures at their idle frame, Grand rigs assembled at 0.25x, the palette strip, the title card), each with its measured ink widths and palette hit, and a list of any key under that planet's folders that is still v2 (a .glb or a _normal / _mask map).
+Accept: six sheets now (two more later) in blender/preview/audit_c2_<planet>.png, stamped; a README line per planet in coordination/reports/blender/ with the counts (v3 keys, v2 keys left, any ink or palette outlier); no export.
+Files: blender/scripts/audit_c2.py, blender/preview/, coordination/reports/blender/
+Depends: —
+Lead notes: Cycle 279. Light bpy reads (one planet per run, measured first): only in BLENDER's own lock or a free gap with no want on file. It gives LEAD the C2 exit evidence in one place and catches strays like the grey Waystation before C4.
+
+### B-174 · BLENDER · Ready · C4
+Goal: The orphaned v2 models out of Art/: every key U-152's census marks orphaned (no runtime path loads it) is removed (the .glb and its _color / _normal / _mask / _emission maps and json; never a .meta, D-016) in one commit; the keys still loaded become their own re-ink cards (LEAD writes them from the census).
+Accept: the census's orphan list and the commit's file list match (git show --stat); UNITY's next import removes the orphaned metas; no runtime key breaks (UNITY's next check green).
+Files: Assets/_Game/Art/ (removals only)
+Depends: U-152
+Lead notes: Cycle 279. Files only; after U-152's table lands.
+
 ### B-168 · BLENDER · Done · C2
 Goal: Venus props re-inked from the B-147 design language (D-151; the last grey v2 pieces on the owner's Venus): `props/venus/{station_hull_a,station_hull_b,meridian_station_door,aerostat_balloon,aerostat_deck,buoyancy_cell,railing,vent_harvester}` in the Venus palette, no faces, `replaces_v2` on each key (the .glb / _normal / _mask / _emission removed; never a .meta), pivots and frame counts as the v2 jsons so UNITY's station layout holds; the door with an open clip like Mercury's; sheets ≤ 512² each (the hulls may be two 512 tiles).
 Accept: the ten §9.7 boxes per prop on a stamped preview at 1x on the Venus deck planks beside the surveyor (the station assembled from hulls, door, railing, cells and balloon); json valid with the v2 pivots; log OK; UNITY's re-shot u125/1_deck_1x shows the inked station.
@@ -2391,6 +2405,13 @@ Accept: u127/1–5 re-shot at 1x: the deck set covers the frame above the floe l
 Files: Code/Runtime/View2D/CartoonStage.cs, BandDatum.cs, ParallaxLayers.cs, GroundStrip.cs, Code/Runtime/Creatures/, Tests/
 Depends: U-127
 Lead notes: Cycle 278 (01:4x): LEAD viewed u127/1_floe_kit_tortoise.png (a flat tan wash behind the Pilgrim and the tortoise, the capped ice strip, block tiles right of it, one vertical ink line from the floe up) and 3_deep_crush.png (dark wash, the set's swirls only at the frame's bottom, a blurry block floe, two vertical lines): UNITY's reading confirmed. Lock-free code right after U-150 (the flight stays first); its re-capture rides the flight check's lock (or the next one); 0.4.8 waits for it, because the owner would otherwise land on a blank Jupiter. A second failed re-capture comes back to LEAD (flight-only 0.4.8 versus waiting). 02:5x: the flight check's re-capture: items 1-3 PASS (u127/1_floe_kit_tortoise.png viewed: the banded Jupiter set over the whole frame above the floe, the ice floe's strip with both caps, the aerostat kit card and a tortoise, no ink lines); item 4 failed a second time (the Vortex Whale is a Flees species and turns tail wherever it spawns) -> LEAD's ruling: the staged head-first fix re-shoots in lock C and 0.4.8 does not wait on it; a third miss becomes its own card after 0.4.8. In lock C if it is a few lines: the flat ~1 m under-fill band under a floating floe on the decked giants (the U-139 ground fill has no ground to match there; extend the set's lowest layer instead), else a follow-up card.
+
+### U-154 · UNITY · Ready · C2
+Goal: P-51 (UNITY, ruled yes in cycle 279): the Builder's aerostat pieces draw the re-inked kit on the four giants: PieceSpec gains a per-planet art key, so the Deck / Strut / Lift cell pieces draw `props/common/aerostat_{deck,strut,cell}` (B-156) on Jupiter, Saturn, Uranus and Neptune and keep `props/venus/aerostat_deck` on Venus; nothing else about the pieces changes (sizes, costs, saves).
+Accept: BuilderTests (or the nearest) +1: the art key per planet for each aerostat piece; a capture of a placed Deck piece on a Jupiter floe at 1x showing B-156's art; old saves load with their pieces; clean console.
+Files: Code/Runtime/Building/, Tests/
+Depends: B-156
+Lead notes: Cycle 279. Lock-free code after 0.4.8; its capture rides U-127's re-shoot lock. Until it lands, the owner's pages do not promise a buildable kit on the giants.
 
 ### U-142 · UNITY · Ready · C2
 Goal: Build 0.4.8, the owner's next build: Jupiter on the cartoon stage (U-127 with the Vortex Whale at D-153's scale, U-126's capped floes, the kit, the Jupiter title card from B-170 if it lands) on 0.4.7's code; the 13-leg probe BUILD MEMORY GREEN (D-152's two-run rule); the smoke set with Jupiter shots (a floe lane with the kit, the storm deck, the deep's CRUSH band, the whale in passing) in reports/unity/smoke_0.4.8/.
