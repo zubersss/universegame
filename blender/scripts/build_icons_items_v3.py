@@ -4,7 +4,10 @@ adds its json (B-128's: style v3, icon, pivot centre). Each item keeps its v2 id
 style: ink 2-3 / 1-1.5 px, the material colour lit top-left, its mid and deep shadow tones (D-100), drawn marks, the Earth
 palette's tones only; no faces (D-101: never two glints side by side). Batches (LEAD: ores and crystals first):
 
-  batch 1  iron, copper, nickel, aluminium, carbon, graphite, hematite, silica, solarite, deep_diamond
+  batch 1  iron, copper, nickel, aluminium, carbon, graphite, hematite, silica, solarite, deep_diamond (ACCEPTED 15:2x)
+  batch 2  water_ice, methane_ice, polar_ice, ring_ice, superionic_ice (Neptune's violet), ammonia_ice, helium3_condensate,
+           metallic_hydrogen, oxygen
+  Only EXPORT_BATCHES (the accepted ones) export; the preview takes a batch number.
 
   python -I build_icons_items_v3.py <review png>   lock-free preview: each new icon over its v2 render at 1x and at the
                                                     32 px slot, beside the v3 icons already in (B-128's cubes, wind_anchor)
@@ -28,11 +31,13 @@ KEY = "icons/{}/base"
 TONES = {"green": "green", "brown": "brown", "sky": "sky", "teal": "teal", "mustard": "mustard", "red": "red", "off": "offwhite"}
 
 
-def mats(gp):
+def mats(gp, planet="earth"):
+    """The tones of `planet`'s palette under the Earth slot names (Neptune's 'mustard' slot is its violet)."""
+    Pp = v3.PALETTES[planet]
     M = {"ink": G.mat(gp, "icon_ink", fill=None)}
     for k, slot in TONES.items():
-        h = P[slot]
-        for suf, hx in (("", h), ("_sh", v3.shadow_of(h, "earth")), ("_dp", v3.deep_of(h, "earth"))):
+        h = Pp[slot]
+        for suf, hx in (("", h), ("_sh", v3.shadow_of(h, planet)), ("_dp", v3.deep_of(h, planet))):
             M[k + suf] = G.mat(gp, f"icon_{k}{suf}", fill=hx, ink=False)
             M[k + suf + "_i"] = G.mat(gp, f"icon_{k}{suf}_i", fill=hx)
     return M
@@ -186,34 +191,158 @@ def deep_diamond(d, M):
     glint(d, M, -0.08, 0.16, 0.03)
 
 
+# ---------------------------------------------------------------- batch 2: ices and gases
+
+def _chunk(d, M, seed, base, lit, dark, cracks=True):
+    pts = lump(0.0, -0.02, 0.35, 0.32, seed, n=7, jit=0.08)
+    faceted(d, M, pts, base, lit, dark, 0.0, -0.02)
+    if cracks:
+        G.seam(d, [(-0.05, 0.12), (0.02, 0.02), (0.0, -0.1)], M["ink"])
+    glint(d, M, -0.15, 0.14)
+
+
+def water_ice(d, M):
+    _chunk(d, M, 101, "sky", "off", "sky_sh")
+
+
+def methane_ice(d, M):
+    _chunk(d, M, 102, "teal_sh", "teal", "teal_dp")
+    G.stroke(d, [(-0.2, 0.18), (-0.06, 0.24), (-0.02, 0.2), (-0.17, 0.14)], M["off"], 0.0, cyclic=True)   # a frost streak
+
+
+def _box(d, M, top_m, front_m, side_m, w=0.3, h=0.28, dx=0.13, dz=0.1, cz=-0.06):
+    """A block in 3/4 view: the front face, the side, the top; -> the corner points."""
+    fl, fr, fb, ft = -w, w - dx, cz - h / 2, cz + h / 2
+    front = [(fl, fb), (fr, fb), (fr, ft), (fl, ft)]
+    side = [(fr, fb), (fr + dx, fb + dz), (fr + dx, ft + dz), (fr, ft)]
+    top = [(fl, ft), (fr, ft), (fr + dx, ft + dz), (fl + dx, ft + dz)]
+    for poly, m in ((front, front_m), (side, side_m), (top, top_m)):
+        G.stroke(d, poly, M[m], 0.0, cyclic=True)
+    return fl, fr, fb, ft, dx, dz
+
+
+def _box_ink(d, M, fl, fr, fb, ft, dx, dz):
+    G.stroke(d, [(fl, fb), (fr, fb), (fr + dx, fb + dz), (fr + dx, ft + dz), (fl + dx, ft + dz), (fl, ft)], M["ink"], O, cyclic=True)
+    G.seam(d, [(fl, ft), (fr, ft), (fr + dx, ft + dz)], M["ink"])
+    G.seam(d, [(fr, ft), (fr, fb)], M["ink"])
+
+
+def polar_ice(d, M):
+    fl, fr, fb, ft, dx, dz = _box(d, M, "off", "sky", "sky_sh", w=0.32, h=0.42)
+    for z in (fb + 0.12, ft - 0.12):                                                         # two straps round it
+        G.stroke(d, [(fl, z - 0.025), (fr, z - 0.025), (fr + dx, z - 0.025 + dz), (fr + dx, z + 0.025 + dz), (fr, z + 0.025), (fl, z + 0.025)],
+                 M["brown_dp_i"], I, cyclic=True)
+    _box_ink(d, M, fl, fr, fb, ft, dx, dz)
+    glint(d, M, fl + 0.08, ft - 0.05, 0.025)
+
+
+def ring_ice(d, M):
+    pts = G.lumpy_ellipse(0.0, -0.02, 0.3, 0.33, n=24, lump=0.05, seed=111)
+    G.stroke(d, pts, M["off"], 0.0, cyclic=True)
+    G.stroke(d, [q for q in pts if q[0] + q[1] * 0.7 > 0.05] + [(0.06, -0.08)], M["sky"], 0.0, cyclic=True)
+    G.specks(d, [(-0.1, -0.12), (0.06, 0.12), (0.14, -0.18), (-0.18, 0.06)], M["ink"])
+    G.stroke(d, pts, M["ink"], O, cyclic=True)
+    glint(d, M, -0.12, 0.14)
+
+
+def superionic_ice(d, M):
+    """Neptune's palette (its 'mustard' slot is the violet): a violet ice cube held in a dark cage frame."""
+    fl, fr, fb, ft, dx, dz = _box(d, M, "mustard", "mustard_sh", "mustard_dp", w=0.24, h=0.3, dx=0.1, dz=0.08, cz=-0.04)
+    _box_ink(d, M, fl, fr, fb, ft, dx, dz)
+    cw = 0.035
+    for a, b in (((fl - 0.08, fb - 0.08), (fr + 0.04, fb - 0.08)), ((fr + 0.04, fb - 0.08), (fr + dx + 0.06, fb + dz - 0.04)),
+                 ((fl - 0.08, fb - 0.08), (fl - 0.08, ft + 0.06)), ((fr + 0.04, fb - 0.08), (fr + 0.04, ft + 0.06)),
+                 ((fr + dx + 0.06, fb + dz - 0.04), (fr + dx + 0.06, ft + dz + 0.06)), ((fl - 0.08, ft + 0.06), (fr + 0.04, ft + 0.06)),
+                 ((fr + 0.04, ft + 0.06), (fr + dx + 0.06, ft + dz + 0.06)), ((fl - 0.08, ft + 0.06), (fl - 0.08 + dx + 0.02, ft + dz + 0.06)),
+                 ((fl - 0.08 + dx + 0.02, ft + dz + 0.06), (fr + dx + 0.06, ft + dz + 0.06))):
+        G.stroke(d, G.hose_outline([a, ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2), b], cw), M["brown_dp_i"], I, cyclic=True)
+    glint(d, M, fl + 0.06, ft - 0.05, 0.025)
+
+
+def ammonia_ice(d, M):
+    G.stroke(d, G.lumpy_ellipse(0.02, -0.1, 0.16, 0.13, n=16, lump=0.08, seed=121), M["mustard_sh_i"], O, cyclic=True)   # the tan core
+    for x0, x1, tip, lean in ((-0.32, -0.18, 0.06, -0.12), (0.2, 0.33, 0.08, 0.12), (-0.2, -0.06, 0.3, -0.06), (0.08, 0.2, 0.26, 0.07)):
+        prism(d, M, x0, x1, -0.24, tip, "off", "green_sh", lean)                              # frosty, faintly green shards fanning out
+    glint(d, M, -0.12, 0.2, 0.025)
+
+
+def helium3_condensate(d, M):
+    body = [(-0.17, -0.26), (0.17, -0.26), (0.19, -0.2), (0.19, 0.18), (0.17, 0.24), (-0.17, 0.24), (-0.19, 0.18), (-0.19, -0.2)]
+    G.stroke(d, body, M["red_sh"], 0.0, cyclic=True)                                          # the pink condensate behind glass
+    G.stroke(d, [(0.06, -0.24), (0.17, -0.24), (0.17, 0.22), (0.06, 0.22)], M["red_dp"], 0.0, cyclic=True)
+    G.stroke(d, [(-0.12, -0.18), (-0.07, -0.18), (-0.07, 0.16), (-0.12, 0.16)], M["red"], 0.0, cyclic=True)
+    for zc in (-0.27, 0.25):                                                                  # the caps
+        G.stroke(d, [(-0.2, zc - 0.05), (0.2, zc - 0.05), (0.2, zc + 0.05), (-0.2, zc + 0.05)], M["sky_dp_i"], I, cyclic=True)
+    G.stroke(d, [(-0.07, 0.3), (0.07, 0.3), (0.06, 0.38), (-0.06, 0.38)], M["sky_sh_i"], I, cyclic=True)   # the nozzle
+    G.stroke(d, body, M["ink"], O, cyclic=True)
+    glint(d, M, -0.1, 0.1, 0.025)
+
+
+def metallic_hydrogen(d, M):
+    base = G.lumpy_ellipse(0.0, -0.24, 0.34, 0.09, n=24, lump=0.02, seed=131)
+    G.stroke(d, base, M["sky_dp_i"], O, cyclic=True)                                          # the containment pod's base
+    dome = [(-0.3, -0.22)] + G.bezier((-0.3, -0.22), (-0.32, 0.3), (0.32, 0.3), (0.3, -0.22), n=16)[1:]
+    G.stroke(d, dome, M["sky"], 0.0, cyclic=True)
+    for j, (x, z, r) in enumerate(((-0.08, -0.08, 0.1), (0.1, -0.1, 0.09), (0.02, 0.06, 0.08))):   # three metal spheres (never a pair)
+        s = G.lumpy_ellipse(x, z, r, r * 0.96, n=16, lump=0.02, seed=132 + j)
+        G.stroke(d, s, M["sky_sh"], 0.0, cyclic=True)
+        G.stroke(d, [q for q in s if q[0] - x + (q[1] - z) * 0.6 > 0.0] + [(x, z)], M["sky_dp"], 0.0, cyclic=True)
+        G.stroke(d, s, M["ink"], I, cyclic=True)
+    G.stroke(d, dome, M["ink"], O, cyclic=True)
+    G.stroke(d, [(-0.2, 0.05), (-0.17, 0.16), (-0.12, 0.2), (-0.16, 0.09)], M["off"], 0.0, cyclic=True)   # the glass's sheen
+    glint(d, M, 0.0, 0.1, 0.022)
+
+
+def oxygen(d, M):
+    body = [(-0.16, -0.32)] + G.bezier((-0.16, -0.32), (-0.18, 0.22), (-0.14, 0.26), (-0.06, 0.28), n=8)[1:] + \
+        [(0.06, 0.28)] + G.bezier((0.06, 0.28), (0.14, 0.26), (0.18, 0.22), (0.16, -0.32), n=8)[1:]
+    G.stroke(d, body, M["off"], 0.0, cyclic=True)                                             # a white tank, a blue band, its valve
+    G.stroke(d, [(0.06, -0.31), (0.16, -0.32), (0.17, 0.2), (0.07, 0.24)], M["off_sh"], 0.0, cyclic=True)
+    G.stroke(d, [(-0.17, -0.06), (0.17, -0.06), (0.17, 0.04), (-0.17, 0.04)], M["teal"], 0.0, cyclic=True)
+    G.stroke(d, [(0.08, -0.06), (0.17, -0.06), (0.17, 0.04), (0.08, 0.04)], M["teal_sh"], 0.0, cyclic=True)
+    G.seam(d, [(-0.17, -0.06), (0.17, -0.06)], M["ink"])
+    G.seam(d, [(-0.17, 0.04), (0.17, 0.04)], M["ink"])
+    G.stroke(d, body, M["ink"], O, cyclic=True)
+    G.stroke(d, [(-0.07, 0.28), (0.07, 0.28), (0.07, 0.36), (-0.07, 0.36)], M["teal_dp_i"], I, cyclic=True)
+    glint(d, M, -0.09, 0.16, 0.025)
+
+
 ITEMS = {"iron": iron, "copper": copper, "nickel": nickel, "aluminium": aluminium, "carbon": carbon, "graphite": graphite,
-         "hematite": hematite, "silica": silica, "solarite": solarite, "deep_diamond": deep_diamond}
-PROPS = {n: (fn, SIZE, SIZE, None, 1, False) for n, fn in ITEMS.items()}   # do_prop_sheet_set's API (a set row exports them all)
+         "hematite": hematite, "silica": silica, "solarite": solarite, "deep_diamond": deep_diamond,
+         "water_ice": water_ice, "methane_ice": methane_ice, "polar_ice": polar_ice, "ring_ice": ring_ice,
+         "superionic_ice": superionic_ice, "ammonia_ice": ammonia_ice, "helium3_condensate": helium3_condensate,
+         "metallic_hydrogen": metallic_hydrogen, "oxygen": oxygen}
+BATCHES = {1: ["iron", "copper", "nickel", "aluminium", "carbon", "graphite", "hematite", "silica", "solarite", "deep_diamond"],
+           2: ["water_ice", "methane_ice", "polar_ice", "ring_ice", "superionic_ice", "ammonia_ice", "helium3_condensate",
+               "metallic_hydrogen", "oxygen"]}
+EXPORT_BATCHES = (1,)                                                                         # only LEAD-accepted batches export
+ITEM_PLANET = {"superionic_ice": "neptune"}                                                   # its violet is Neptune's
+PROPS = {n: (ITEMS[n], SIZE, SIZE, None, 1, False) for b in EXPORT_BATCHES for n in BATCHES[b]}   # do_prop_sheet_set's API
 
 
 def render_item(name):
     gp = fakegp.FakeGP()
-    M = mats(gp)
+    M = mats(gp, ITEM_PLANET.get(name, "earth"))
     d = fakegp.FakeDrawing()
     ITEMS[name](d, M)
     return GR.render_frame(fakegp.strokes_of(d, gp), SIZE, SIZE, PPU, (0.5, 0.5), ss=4, seed=7)
 
 
-def render_all():
+def render_all(names=None):
     imgs, widths = {}, {}
-    for n in ITEMS:
+    for n in (names or list(PROPS)):
         img, w = render_item(n)
         imgs[n], widths[n] = [img], w
     return imgs, widths
 
 
-def checks(img):
+def checks(img, name=""):
     m = v3.EDGE_MARGIN
     a = img[..., 3]
     p = []
     if a[:m].any() or a[-m:].any() or a[:, :m].any() or a[:, -m:].any():
         p.append(f"touches the {m} px edge")
-    hit, off = v3.palette_hits(img, "earth")
+    hit, off = v3.palette_hits(img, ITEM_PLANET.get(name, "earth"))
     if hit < 0.98:
         p.append(f"palette {hit * 100:.1f}% (off {' '.join(off[:3])})")
     return p, hit
@@ -222,12 +351,12 @@ def checks(img):
 def export(art, imgs=None, names=None):
     import json
     from meridian import pngio
-    names = list(names or ITEMS)
+    names = list(names or PROPS)                                                              # the accepted batches only
     if imgs is None:
-        imgs, _w = render_all()
+        imgs, _w = render_all(names)
     problems = []
     for n in names:
-        p, _h = checks(imgs[n][0])
+        p, _h = checks(imgs[n][0], n)
         problems += [f"{n}: {x}" for x in p]
     if problems:
         raise ValueError("B-199 export checks: " + "; ".join(problems))
@@ -243,19 +372,22 @@ def export(art, imgs=None, names=None):
     return out, {}, []
 
 
-def main(out, imgs=None, widths=None, stamp_paths=()):
+def main(out, imgs=None, widths=None, stamp_paths=(), batch=None):
     """Each new icon over its v2 render (read from Art before the export; after it, the exported one) at 1x, both again at
-    the 32 px slot, and the v3 icons already in for the house look."""
+    the 32 px slot, and the v3 icons already in for the house look. batch: the design preview of that batch (default the
+    last); the export passes its own imgs (the accepted batches)."""
     import time
     import numpy as np
     from meridian import pngio
     sys.path.insert(0, os.path.dirname(HERE))
     import review
     if imgs is None:
-        imgs, widths = render_all()
+        batch = batch or max(BATCHES)
+        imgs, widths = render_all(BATCHES[batch])
+    label = f"batch {batch}" if batch else "batches " + ", ".join(str(b) for b in EXPORT_BATCHES)
     ART = os.path.join(os.path.dirname(os.path.dirname(HERE)), "Assets", "_Game", "Art")
     paper = np.array(review.PAPER, np.float32)
-    names = list(ITEMS)
+    names = list(imgs)
     W = 8 + len(names) * 140
     old = {}
     for n in names:
@@ -279,7 +411,7 @@ def main(out, imgs=None, widths=None, stamp_paths=()):
             if lab:
                 review._label(r, lab, x, 20 + ic.shape[0] + 4, scale=1)
         return r
-    rows = [row("B-199 batch 1, NEW v3 (1x)", [(n, imgs[n][0]) for n in names], 168),
+    rows = [row(f"B-199 {label}, NEW v3 (1x)", [(n, imgs[n][0]) for n in names], 168),
             row("the same at the 32 px slot", [("", small(imgs[n][0])) for n in names], 60),
             row("before: the v2 render in Art" + (" (now replaced)" if stamp_paths else "") + " (1x)", [(n, old[n] if not stamp_paths else None) for n in names], 168),
             row("before at 32 px", [("", small(old[n]) if old[n] is not None and not stamp_paths else None) for n in names], 60)]
@@ -291,8 +423,8 @@ def main(out, imgs=None, widths=None, stamp_paths=()):
     rows.append(row("the v3 icons already in (B-128's cubes 64 px, B-197's wind_anchor), 1x", ref, 168))
     lines = []
     for n in names:
-        p, hit = checks(imgs[n][0])
-        lines.append(f"icons/{n}/base: palette {hit * 100:.1f}%, problems: {'; '.join(p) or 'none'}")
+        p, hit = checks(imgs[n][0], n)
+        lines.append(f"icons/{n}/base: palette {hit * 100:.1f}% ({ITEM_PLANET.get(n, 'earth')}), problems: {'; '.join(p) or 'none'}")
     for p in stamp_paths:
         lines.append("exported " + review.stamp_text(p))
     foot = np.empty((30 + 16 * len(lines), W, 3), np.float32)
@@ -312,6 +444,6 @@ def main(out, imgs=None, widths=None, stamp_paths=()):
         print(ln)
 
 
-if __name__ == "__main__":
-    main(sys.argv[1])
+if __name__ == "__main__":                       # python -I build_icons_items_v3.py <review png> [batch]
+    main(sys.argv[1], batch=int(sys.argv[2]) if len(sys.argv) > 2 else None)
     fakegp.restore()
