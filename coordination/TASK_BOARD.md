@@ -67,7 +67,6 @@ did in your status before the next poll. LEAD tops each list up to ≥ 3 items e
 **UNITY**
 - U-159's Mercury and Venus slices as code (the region → band / set map on its card; the storm veil's strip; B-180's lips by variant; U-166's smoke_42 + a swim frame for the next build's smoke).
 - U-167 (the fill_decor scatter, D-165's art unused since 04:58) and U-162 (the stag's hysteresis) as code.
-- U-152 (the v2 census, files only): it unblocks BLENDER's B-174.
 - U-152 (the v2 census, files only, using B-173's audit lists).
 - Status trim (D-113): U-142 / U-143 / U-147 / U-153 / U-156 / U-161 are Done; Ready for review lists only unjudged items.
 - The Creep watch row (0.4.8's reading); `docs/credits/unity.md` upkeep.
@@ -81,9 +80,9 @@ Then one batched check per hand-off when your turn in the queue comes (compile +
 
 
 **BLENDER** (numpy / scripts only while UNITY holds the lock or a want; bpy only under your own lock; under 0.3 GB free, code only; otherwise only pre-measured ≤ 150 MB jobs beside another role's lock; the lock / RAM check is its own call)
-- B-187's two sets (Mercury cold trap, Venus tessera) in source; their previews in your slot.
-- B-190's puff variants (sand / snow / stone, Mars frost / basalt) in source on the face-safe pattern.
-- B-182's audit runs and B-184's puff exports in free gaps with no want on file.
+- B-193: the v2 model census (files only, reassigned from U-152) → then B-174's removal.
+- B-194: the giants' G1 audit (light reads in free gaps).
+- The next cards come from the owner's USER-33 answer (Earth) or U-160 (the giants' islands); tell LEAD when the list runs dry.
 - Status trim (D-113): B-173, B-175, B-176, B-177 are judged; Ready for review lists only unjudged items. `docs/credits/blender.md` upkeep.
 
 **LEAD**
@@ -1476,6 +1475,20 @@ Files: blender/scripts/build_ground_variants_v3.py, Assets/_Game/Art/terrain/{ea
 Depends: —
 Lead notes: Cycle 283 (13:0x). After B-182 and B-184; UNITY picks the puff by the stroke's band variant (dig_puff_<variant>, dig_puff the fallback) with U-159. 13:2x: PREVIEW ACCEPTED AS DRAWN (review_b190_dig_puffs_preview.png 13:13, sources 0c6deb8a: sand in the band's mustard with darker clods, snow off-white with blue-grey clumps, stone pale grey chips, frost off-white with teal ice clods, basalt dark teal-grey; frame 2 at 2× clean on all five, no face read; the white puffs' shade warm off-white, not a dark hole; same frames, size, pivot, clip; palette 100 %). Export after B-184 (terrain/{earth,mars}/dig_puffs). 13:4x: EXPORTED (d6eb5fb4, 13:31, logs OK, 311 MB; keys terrain/<planet>/dig_puff_<variant>, 8 frames 128×128, pivot (0.5, 0.25), clip 'puff', json "variant"); handoff routed to U-159. B-184 EXPORTED (fe58e320, 13:16: only the three dig_puff sheets changed) and B-182 COMPLETE (Mars 37, Mercury 25, Venus 29 G1 keys after B-184; none missing, no outliers; every planet's puff face-safe). All three Done on U-159's captures. B-182's Earth audit also in (13:12: 44 G1 keys, none missing, no outliers; audit_g1_earth.png, audit_g1.md; Earth's dig_puff frame 2 clean); Mars / Mercury / Venus after B-184.
 
+### B-193 · BLENDER · Ready · C4
+Goal: The v2 model census (reassigned from U-152; files only, no Editor, no Blender): for each `.glb` still under Assets/_Game/Art/ (about 80: props/earth_flora, mars_flora, space, mercury_scenery, venus_scenery, earth, creatures/venus, the old backgrounds, ships/pilgrim, characters/surveyor …), whether any runtime path still loads its key: grep Assets/_Game/Code/ for the key (ArtKeys.cs, the PlanetConfig / species / POI / piece tables), the Addressables groups (Assets/AddressableAssetsData/AssetGroups/*.asset) and the residency / prefetch lists; a table: key, loaded by (file:line) or orphaned, what a player would see (screen, planet).
+Accept: coordination/reports/blender/v2_census.md covers every .glb under Art/ (the count stated), each loaded key with its file:line and screen; LEAD turns the loaded ones into re-ink cards and the orphans into B-174's removal list.
+Files: coordination/reports/blender/v2_census.md
+Depends: —
+Lead notes: Cycle 283 (14:1x). Reading code is allowed to everyone (CLAUDE.md); write only your report. When unsure whether a path loads a key at runtime, mark it "loaded (unsure)" with the file:line; LEAD or UNITY rules. Then B-174.
+
+### B-194 · BLENDER · Ready · G1
+Goal: The G1 art audit for the four giants (B-182's pattern, as U-160's evidence): one stamped sheet per giant read back from Art/ at 1× with every G1 key (B-177's island_belly, island_end_l / _r, under_haze_<deck> per deck) beside the floe strips they attach to (the strip's drawn underside on the belly's outline row 72), each with ink widths, palette hit and json fields; plus any key a json names that is missing on disk.
+Accept: four sheets blender/preview/audit_g1_<giant>.png, stamped; audit_g1.md extended with the counts and any outlier; no export.
+Files: blender/scripts/audit_g1.py, blender/preview/, coordination/reports/blender/
+Depends: —
+Lead notes: Cycle 283 (14:1x). Light reads, one giant per run, only in your own lock or a free gap with no want on file. After B-193.
+
 ### B-184 · BLENDER · Ready · G1
 Goal: The dig_puff face fix (B-182's finding, c8cf185b: the clods drawn behind the billows until they fly clear) on Mars, Mercury and Venus: re-export each planet's ground_set with only dig_puff changed.
 Accept: log OK per planet; git show --stat lists only each planet's dig_puff_color.png (+ the report line); one stamped sheet per planet with frames 1–2 showing no marks.
@@ -1536,7 +1549,7 @@ Lead notes: Cycle 279. Light bpy reads (one planet per run, measured first): onl
 Goal: The orphaned v2 models out of Art/: every key U-152's census marks orphaned (no runtime path loads it) is removed (the .glb and its _color / _normal / _mask / _emission maps and json; never a .meta, D-016) in one commit; the keys still loaded become their own re-ink cards (LEAD writes them from the census).
 Accept: the census's orphan list and the commit's file list match (git show --stat); UNITY's next import removes the orphaned metas; no runtime key breaks (UNITY's next check green).
 Files: Assets/_Game/Art/ (removals only)
-Depends: U-152
+Depends: B-193 (the census, was U-152)
 Lead notes: Cycle 279. Files only; after U-152's table lands.
 
 ### B-168 · BLENDER · Done · C2
@@ -2668,12 +2681,12 @@ Files: Code/Runtime/Trade/, Code/Runtime/UI/, Code/Runtime/Space/SpaceWorld.cs, 
 Depends: U-136, U-147
 Lead notes: Cycle 278. After U-148 / U-149 / U-150 (the owner's flight first); lock-free code; its check with the next UNITY check after the flight one.
 
-### U-152 · UNITY · Ready · C4
+### U-152 · UNITY · Done · C4
 Goal: The v2 model census (files only): for each of the 80 `.glb` still under Assets/_Game/Art/ (props/earth_flora 11, mars_flora 10, space 8, mercury_scenery 8, venus_scenery 6, earth 5, creatures/venus 3, the old backgrounds, ships/pilgrim, characters/surveyor …), whether any runtime path still loads its key (code grep + the Addressables group + the residency lists), as a table in coordination/reports/unity/v2_census.md: key, loaded by (file:line) or orphaned, what a player sees.
 Accept: the table covers all 80; each loaded key names the screen it shows on; LEAD turns the loaded ones into re-ink cards and the orphans into one BLENDER removal + one UNITY meta commit.
 Files: coordination/reports/unity/v2_census.md
 Depends: —
-Lead notes: Cycle 278: the Waystation in smoke_10 is still the grey v2 model, nobody had flagged it; the census finds any others before the C4 playtest build. Lock-free, files only (no Editor): a good item for any wait at the gate.
+Lead notes: Cycle 278: the Waystation in smoke_10 is still the grey v2 model, nobody had flagged it; the census finds any others before the C4 playtest build. Lock-free, files only (no Editor): a good item for any wait at the gate. Cycle 283 (14:1x): CLOSED HERE, REASSIGNED to BLENDER as B-193 (BLENDER idle, UNITY on U-159; the census reads files and code only, and it unblocks BLENDER's own B-174). Nothing left for UNITY on this card.
 
 ### U-138 · UNITY · Done · C2
 Goal: Mercury's v2 leftovers out of the cartoon stage (D-150): the Cinderhulk species leaves Mercury's spawn table and the smoke (the Cinderling is its B-145 re-ink; the night smoke shot shows the Shadewyrm at a burrow instead); the Mercury props draw from B-167's sheets when they land (`props/mercury/{flare_shelter,meridian_beacon,solarite_cluster,warden_vault_gate,shelter_door,equipment_locker}`), their v2 .glb / _normal / _mask / _emission metas dropped with the files (D-016); the M3 Mercury gameplay tests stay green (the flare window and shelter logic unchanged).
