@@ -113,6 +113,7 @@ def per(x, period, harmonics, seed, amp):
     return amp * sum(a * math.sin(TAU * n * x / period + p) for n, p, a in ph) / tot
 
 
+SPOTS = False                       # D-165: True draws the fills' spot features in the tile (the pre-D-165 look)
 _CUR = None                         # the drawing render_piece is filling: wrapped() records each element's copies in it
 _GROUPS = []
 
@@ -213,7 +214,8 @@ def draw_fill(d, M, planet="earth"):
         pts = G.lumpy_ellipse(x + dx, z + dz, 0.45, 0.14, n=24, lump=0.05, seed=77)
         G.stroke(d, pts, M["lens_i"], O, cyclic=True)
         G.stroke(d, G.lumpy_ellipse(x + dx + 0.12, z + dz + 0.04, 0.22, 0.05, n=14, lump=0.03, seed=78), M["petal_i"], I, cyclic=True)
-    wrapped(lens, L, L)
+    if SPOTS:                                   # D-165: the spot features are fill_decor sprites now
+        wrapped(lens, L, L)
 
     def fossil(dx, dz, x=2.2, z=4.4):                                                         # an ammonite
         G.stroke(d, G.lumpy_ellipse(x + dx, z + dz, 0.28, 0.26, n=28, lump=0.02, seed=81), M["bone_i"], O, cyclic=True)
@@ -223,7 +225,8 @@ def draw_fill(d, M, planet="earth"):
         for k in range(10):
             a = TAU * k / 10
             G.seam(d, [(x + dx + 0.14 * math.cos(a), z + dz + 0.13 * math.sin(a)), (x + dx + 0.25 * math.cos(a), z + dz + 0.23 * math.sin(a))], M["ink"])
-    wrapped(fossil, L, L)
+    if SPOTS:
+        wrapped(fossil, L, L)
 
     def bone(dx, dz, x=6.6, z=1.9):                                                           # a little bone
         G.stroke(d, [(x + dx - 0.22, z + dz - 0.03), (x + dx + 0.22, z + dz - 0.03), (x + dx + 0.22, z + dz + 0.03), (x + dx - 0.22, z + dz + 0.03)],
@@ -231,8 +234,9 @@ def draw_fill(d, M, planet="earth"):
         for sx in (-0.24, 0.24):
             for sz in (-0.045, 0.045):
                 G.stroke(d, G.lumpy_ellipse(x + dx + sx, z + dz + sz, 0.05, 0.045, n=10, lump=0.0), M["bone_i"], I, cyclic=True)
-    wrapped(bone, L, L)
-    for i in range(5):                                                                        # burrows
+    if SPOTS:
+        wrapped(bone, L, L)
+    for i in range(5 if SPOTS else 0):                                                                        # burrows
         x, z = rnd.uniform(0, L), rnd.uniform(0, L)
         wrapped(lambda dx, dz, x=x, z=z, s=i: G.seam(d, [(x + dx + 0.05 * math.sin(k * 1.3 + s), z + dz - 0.06 * k) for k in range(7)], M["ink"]), L, L)
     for i in range(12):
@@ -470,13 +474,15 @@ def fill_mars(d, M, k=0):
         x, z = rnd.uniform(0, L), rnd.choice((7.62, 6.74, 5.80, 4.12, 3.52)) + rnd.uniform(-0.08, 0.08)
         wrapped(lambda dx, dz, x=x, z=z: [G.seam(d, [(x + dx + 0.07 * j, z + dz + 0.10), (x + dx + 0.07 * j + 0.16, z + dz - 0.10)], M["ink"])
                                           for j in range(3)], L, L)
-    _scatter(d, M, L, 40, (5.02, 5.40), (0.026, 0.042), "hem_i", 2771, glint="hem_hi")   # the 'blueberries'
+    if SPOTS:
+        _scatter(d, M, L, 40, (5.02, 5.40), (0.026, 0.042), "hem_i", 2771, glint="hem_hi")   # the 'blueberries'
     for i in range(7):                                                                        # basalt joints and vesicles
         x = L * (i + rnd.random() * 0.5) / 7
         wrapped(lambda dx, dz, x=x: G.seam(d, [(x + dx, 1.26 + dz), (x + dx + 0.03, 1.75 + dz), (x + dx - 0.01, 2.22 + dz)], M["ink"]), L, L)
     _scatter(d, M, L, 22, (1.3, 2.2), (0.012, 0.022), "basalt_sh", 2781)
-    _lens(d, M, L, 2.4, 0.95, 0.55, 0.15, 2791)
-    _lens(d, M, L, 6.1, 2.45, 0.38, 0.11, 2793)
+    if SPOTS:
+        _lens(d, M, L, 2.4, 0.95, 0.55, 0.15, 2791)
+        _lens(d, M, L, 6.1, 2.45, 0.38, 0.11, 2793)
     _scatter(d, M, L, 16, (0.0, L), (0.03, 0.06), "pebble_i", 2795)
     for i in range(3):                                                                        # stones
         x, z, r = rnd.uniform(0, L), rnd.uniform(3.0, 7.8), rnd.uniform(0.12, 0.2)
@@ -608,8 +614,9 @@ def fill_mercury(d, M, k=0):
             G.stroke(d, sh_, M[tone], 0.0, cyclic=True)
             G.stroke(d, sh_, M["ink"], I if r < 0.13 else O, cyclic=True)
         wrapped(frag, L, L)
-    _scatter(d, M, L, 18, (0.0, L), (0.025, 0.045), "sulfide_i", 2871, glint="sulfide_hi")
-    for i in range(5):                                                                        # solarite glints (hints)
+    if SPOTS:
+        _scatter(d, M, L, 18, (0.0, L), (0.025, 0.045), "sulfide_i", 2871, glint="sulfide_hi")
+    for i in range(5 if SPOTS else 0):                                                                        # solarite glints (hints)
         x, z = rnd.uniform(0, L), rnd.uniform(0, L)
         wrapped(lambda dx, dz, x=x, z=z: _glint(d, M, x + dx, z + dz, 0.05, "solar_i"), L, L)
     for i in range(10):
@@ -660,7 +667,7 @@ def fill_venus(d, M, k=0):
         x0, z0 = rnd.uniform(0, L), rnd.uniform(0, L)
         pts = [(x0 + 0.12 * t + 0.05 * math.sin(t * 1.7 + i), z0 + 0.09 * t * (1 if i % 2 else -1) + 0.04 * math.sin(t * 2.3)) for t in range(10)]
         wrapped(lambda dx, dz, pts=pts: G.stroke(d, [(x + dx, z + dz) for x, z in pts], M["vein_line"], I), L, L)
-    for i in range(11):                                                                       # vitriol-glass shards
+    for i in range(11 if SPOTS else 0):                                                       # vitriol-glass shards (fill_decor now)
         x, z, r = rnd.uniform(0, L), rnd.uniform(0, L), rnd.uniform(0.13, 0.26)
         pts = _shard(0.0, 0.0, r, rnd, sides=rnd.choice((3, 4)), flat=rnd.uniform(0.5, 1.0))
 
@@ -738,6 +745,95 @@ PLANET_DRAW.update({
 })
 
 
+# ---------------------------------------------------------------- the fills' spot features as fill_decor sprites (D-165):
+# upright, 32-128 px, pivot centred; UNITY scatters them in the cutaway by a position seed (an 8 m tile no longer repeats them)
+
+def fd_ammonite(r, mirror=1):
+    def fn(d, M):
+        G.stroke(d, G.lumpy_ellipse(0.0, 0.0, r, r * 0.93, n=28, lump=0.02, seed=81), M["bone_i"], O, cyclic=True)
+        spiral = [(mirror * r * 0.9 * (1 - t) ** 1.2 * math.cos(TAU * 2.2 * t), r * 0.82 * (1 - t) ** 1.2 * math.sin(TAU * 2.2 * t))
+                  for t in [i / 40 for i in range(40)]]
+        G.seam(d, spiral, M["ink"])
+        for k in range(10):
+            a = TAU * k / 10
+            G.seam(d, [(r * 0.5 * math.cos(a), r * 0.46 * math.sin(a)), (r * 0.9 * math.cos(a), r * 0.82 * math.sin(a))], M["ink"])
+    return fn
+
+
+def fd_bone(d, M):
+    G.stroke(d, [(-0.22, -0.03), (0.22, -0.03), (0.22, 0.03), (-0.22, 0.03)], M["bone_i"], I, cyclic=True)
+    for sx in (-0.24, 0.24):
+        for sz in (-0.045, 0.045):
+            G.stroke(d, G.lumpy_ellipse(sx, sz, 0.05, 0.045, n=10, lump=0.0), M["bone_i"], O, cyclic=True)
+
+
+def fd_lens(rx, rz, role="lens_i", sh=None, seed=77):
+    def fn(d, M):
+        G.stroke(d, G.lumpy_ellipse(0.0, 0.0, rx, rz, n=24, lump=0.05, seed=seed), M[role], O, cyclic=True)
+        if sh:
+            G.stroke(d, G.lumpy_ellipse(-rx * 0.25, -rz * 0.3, rx * 0.55, rz * 0.35, n=14, lump=0.04, seed=seed + 1), M[sh], 0.0, cyclic=True)
+        G.seam(d, [(rx * 0.1, rz * 0.45), (rx * 0.55, rz * 0.3)], M["ink"])
+    return fn
+
+
+def fd_cluster(n, spread, rr, role, seed, glint=None):
+    def fn(d, M):
+        rnd = random.Random(seed)
+        for i in range(n):
+            a, dist = rnd.uniform(0, TAU), spread * math.sqrt(rnd.random())
+            x, z, r = dist * math.cos(a), dist * math.sin(a) * 0.8, rnd.uniform(*rr)
+            G.stroke(d, G.lumpy_ellipse(x, z, r * 1.1, r, n=12, lump=0.05, seed=seed + i), M[role], O if r > 0.035 else I, cyclic=True)
+            if glint:
+                G.stroke(d, G.lumpy_ellipse(x + r * 0.3, z + r * 0.3, r * 0.3, r * 0.3, n=8, lump=0.0), M[glint], 0.0, cyclic=True)
+    return fn
+
+
+def fd_glints(pts, s, role):
+    def fn(d, M):
+        for x, z in pts:
+            _glint(d, M, x, z, s, role)
+        G.specks(d, [(pts[0][0] + 0.06, pts[0][1] - 0.05)], M["ink"])
+    return fn
+
+
+def fd_shards(specs, seed):
+    def fn(d, M):
+        rnd = random.Random(seed)
+        for x, z, r, sides in specs:
+            pts = _shard(x, z, r, rnd, sides=sides, flat=rnd.uniform(0.55, 1.0))
+            G.stroke(d, pts, M["glass_i"], O, cyclic=True)
+            G.seam(d, [(x - r * 0.3, z + r * 0.1), (x + r * 0.2, z + r * 0.35)], M["ink"])
+    return fn
+
+
+FILL_DECOR = {   # planet -> [(name, draw fn, w, h)]
+    "earth": [("ammonite_a", fd_ammonite(0.28), 64, 64), ("ammonite_b", fd_ammonite(0.20, -1), 48, 48), ("bone", fd_bone, 64, 32),
+              ("water_lens", fd_lens(0.45, 0.14, "lens_i", None, 77), 128, 48)],
+    "mars": [("ice_lens_a", fd_lens(0.55, 0.15, "ice_i", "ice_sh", 2791), 128, 48), ("ice_lens_b", fd_lens(0.38, 0.11, "ice_i", "ice_sh", 2793), 96, 32),
+             ("blueberries_a", fd_cluster(7, 0.20, (0.026, 0.042), "hem_i", 2771, glint="hem_hi"), 64, 64),
+             ("blueberries_b", fd_cluster(4, 0.12, (0.026, 0.040), "hem_i", 2772, glint="hem_hi"), 48, 48)],
+    "mercury": [("sulfide_a", fd_cluster(4, 0.12, (0.03, 0.05), "sulfide_i", 2871, glint="sulfide_hi"), 48, 48),
+                ("sulfide_b", fd_cluster(2, 0.06, (0.03, 0.045), "sulfide_i", 2872, glint="sulfide_hi"), 32, 32),
+                ("solarite_a", fd_glints([(0.0, 0.0)], 0.07, "solar_i"), 32, 32),
+                ("solarite_b", fd_glints([(-0.10, 0.05), (0.09, -0.06)], 0.06, "solar_i"), 48, 48)],
+    "venus": [("shard_a", fd_shards([(0.0, 0.0, 0.22, 4)], 2961), 64, 64), ("shard_b", fd_shards([(0.0, 0.0, 0.15, 3)], 2962), 48, 48),
+              ("shard_cluster", fd_shards([(-0.2, -0.05, 0.16, 3), (0.05, 0.08, 0.20, 4), (0.26, -0.06, 0.12, 3)], 2963), 96, 64),
+              ("shard_c", fd_shards([(0.0, 0.0, 0.09, 3)], 2964), 32, 32)],
+}
+
+
+def render_fill_decor(planet, i):
+    """-> (frame, widths) for the planet's i-th fill_decor piece (pivot centred, ss 4)."""
+    global _CUR
+    _name, fn, w, h = FILL_DECOR[planet][i]
+    gp = fakegp.FakeGP()
+    M = mats(gp, planet)
+    d = fakegp.FakeDrawing()
+    _CUR = None
+    fn(d, M)
+    return GR.render_frame(fakegp.strokes_of(d, gp), w, h, PPU, (0.5, 0.5), ss=4, seed=1790 + i)
+
+
 # ---------------------------------------------------------------- render the pieces
 
 PIECES = {   # name -> (w, h, pivot, frames)
@@ -789,6 +885,9 @@ def render_all(planet="earth"):
             frames.append(img)
             widths += wd
         out[name] = (frames, widths)
+    fd = [render_fill_decor(planet, i) for i in range(len(FILL_DECOR.get(planet, [])))]
+    if fd:
+        out["fill_decor"] = ([f for f, _w in fd], sum((w for _f, w in fd), []))
     return out
 
 
@@ -806,6 +905,7 @@ def use_planet(planet):
     DECOR = DECOR_NAMES.get(planet, DECOR_NAMES["earth"])
     KEYS = {n: f"terrain/{planet}/{n}" for n in ("ground_band", "ground_fill", "ground_lip", "dig_rim", "dig_puff")}
     KEYS.update({f"ground_decor_{i + 1}": f"terrain/{planet}/ground_decor_{i + 1}" for i in range(len(DECOR))})
+    KEYS.update({f"fill_decor_{i + 1}": f"terrain/{planet}/fill_decor_{i + 1}" for i in range(len(FILL_DECOR.get(planet, [])))})
 
 
 use_planet(PLANET)
@@ -821,6 +921,10 @@ def sheets():
             fr, ws = S.get(kn, ([], []))
             S[kn] = (fr + [img], ws + wd)
             allw += wd
+    for i in range(len(FILL_DECOR.get(PLANET, []))):            # D-165: the fills' spot features, one key each
+        img, wd = render_fill_decor(PLANET, i)
+        S[f"fill_decor_{i + 1}"] = ([img], wd)
+        allw += wd
     return S, allw
 
 
@@ -829,6 +933,9 @@ def pieces_of(S):
     out = {n: S[n] for n in ("ground_band", "ground_fill", "ground_lip", "dig_rim", "dig_puff")}
     out["ground_decor"] = ([S[f"ground_decor_{i + 1}"][0][0] for i in range(len(DECOR))],
                            sum((S[f"ground_decor_{i + 1}"][1] for i in range(len(DECOR))), []))
+    nfd = len(FILL_DECOR.get(PLANET, []))
+    if nfd:
+        out["fill_decor"] = ([S[f"fill_decor_{i + 1}"][0][0] for i in range(nfd)], sum((S[f"fill_decor_{i + 1}"][1] for i in range(nfd)), []))
     return out
 
 
@@ -846,7 +953,11 @@ def copy_diff(name):
 def sheet_meta(kn, frames):
     import numpy as np
     base = "ground_decor" if kn.startswith("ground_decor_") else kn
-    w, h, piv, _n = PIECES[base]
+    if kn.startswith("fill_decor_"):
+        _fdn, _fdf, w, h = FILL_DECOR[PLANET][int(kn.rsplit("_", 1)[1]) - 1]
+        piv = (0.5, 0.5)
+    else:
+        w, h, piv, _n = PIECES[base]
     g = v3.GUTTER
     n = len(frames)
     sheet = np.zeros((h, n * w + (n - 1) * g, 4), np.uint8)
@@ -868,6 +979,9 @@ def sheet_meta(kn, frames):
         meta.update({"brink": True, "note": "drawn for a drop to the right; mirror x for a drop to the left"})
     elif kn == "dig_puff":
         meta["animations"] = [{"name": "puff", "start": 0, "length": n, "loop": False}]
+    elif kn.startswith("fill_decor_"):
+        meta.update({"upright": True, "decor": FILL_DECOR[PLANET][int(kn.rsplit("_", 1)[1]) - 1][0],
+                     "note": "D-165: a spot feature of the cross-section; UNITY scatters it in the cutaway by a position seed, never rotated; pivot centred"})
     else:
         meta.update({"upright": True, "decor": DECOR[int(kn.rsplit("_", 1)[1]) - 1], "note": "scatter along the curve, never rotated"})
     problems = [p for p in v3.validate_sheet(meta, sheet.shape) if "sum of clip lengths" not in p]
@@ -1055,6 +1169,16 @@ def preview(out_dir, planet="earth", pieces=None, out=None, footnote=None):
                  "lip; its 2 m body folds at the cliff", B))
     scoop = (int(8.6 * PPU), int(round(ys[int(8.6 * PPU)])) + 20, 62)
     Cimg = compose(band_tex, SURF_ROW, "normal", fill_tex, scoop)
+    if pieces.get("fill_decor"):                      # D-165: the spot features scattered in the cutaway by a seed (as UNITY will)
+        fdr = random.Random(165)
+        cxs, cys, crs = scoop
+        for _j in range(26):
+            fr = fdr.choice(pieces["fill_decor"][0])
+            X0 = fdr.randint(70, Wp - 70)
+            Y0 = fdr.randint(int(ys[X0]) + 70, PH - 40)
+            if (X0 - cxs) ** 2 + (Y0 - cys) ** 2 < (crs + 60) ** 2:
+                continue
+            review._over(Cimg, fr, X0 - fr.shape[1] // 2, Y0 - fr.shape[0] // 2)
     # the dig rim round the scoop's wall (the band's own mapping on a circle), the decor upright, the lip, a puff
     cx, cy, r = scoop
     ang = np.arctan2(Y - cy, X - cx)
