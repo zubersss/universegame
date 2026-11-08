@@ -631,7 +631,138 @@ def lip_frost(d, M, k=0):
         G.stroke(d, G.lumpy_ellipse(x, z, r * 1.3, r, n=10, lump=0.12, seed=1890 + j), M["frost_i"], I, cyclic=True)
 
 
-LIPS = {"sand": lip_sand, "stone": lip_stone, "snow": lip_snow, "frost": lip_frost}
+# B-198 (LEAD cycle 284): the lips of B-181's variant grounds, in B-175's lip format (128x96, pivot 0.55 / 0.6, the brink at
+# the origin, the face falling away to the right round LIP_CZ), each continuing its band's top layer round the corner
+
+def _slab(top, th, nx, bumps=0.0, seed=0):
+    """A capstone slab running past the brink to a rounded nose over the face (lip_stone's geometry, B-180 rev):
+    -> (outer, inner, rise, chin, xface, zb). bumps: the top's fold ridges (m)."""
+    zb = top - th
+    rise = [(-0.60 + (nx - 0.07 + 0.60) * i / 16, top + 0.004 * math.sin(2.3 * i + seed) + bumps * max(0.0, math.sin(i * 1.55)) ** 2)
+            for i in range(17)]
+    nose = [(nx - 0.07 + 0.07 * math.sin(a), top - 0.07 + 0.07 * math.cos(a)) for a in [math.radians(15 * j) for j in range(1, 7)]]
+    chin = [(nx - 0.065 + 0.065 * math.cos(a), zb + 0.065 - 0.065 * math.sin(a)) for a in [math.radians(15 * j) for j in range(0, 7)]]
+    xface = math.sqrt(max(0.0, 0.37 ** 2 - (zb - LIP_CZ) ** 2))
+    outer = rise + nose + chin + [(xface, zb)]
+    inner = [(xface - 0.6 * (xface + 0.60) * i / 6 - 0.4 * (xface + 0.60) * (i / 6) ** 2, zb) for i in range(7)]
+    return outer, inner, rise, chin, xface, zb
+
+
+def lip_basalt(d, M, k=0):
+    """Tharsis: the pahoehoe crust rolling over the brink as lava toes - a lobed hood bulging past the face, ropy folds on
+    top, a lit rim, vesicles, its shaded underside, a cooled tongue of lava tapering down the face."""
+    top = 0.05
+    outer, inner = _hood(top, 0.17, 100, bulge=0.04)
+    _o2, inner2 = _hood(top, 0.11, 100, bulge=0.04)
+    lobed = outer[:12] + [(x * (1 + 0.07 * abs(math.sin(j * 0.85))), LIP_CZ + (z - LIP_CZ) * (1 + 0.07 * abs(math.sin(j * 0.85))))
+                          for j, (x, z) in enumerate(outer[12:])]
+    G.stroke(d, lobed + inner, M["basalt"], 0.0, cyclic=True)
+    G.stroke(d, inner2 + inner[::-1], M["basalt_sh"], 0.0, cyclic=True)
+    G.stroke(d, [(x, z) for x, z in outer[:12]] + [(x, z - 0.03) for x, z in outer[11::-1]], M["bas_lit"], 0.0, cyclic=True)
+    tng = [(0.37, -0.40), (0.41, -0.47), (0.43, -0.58), (0.42, -0.66), (0.39, -0.69), (0.37, -0.62), (0.355, -0.5)]   # the cooled tongue
+    G.stroke(d, tng, M["basalt_i"], I, cyclic=True)
+    G.seam(d, [(0.39, -0.46), (0.405, -0.58)], M["ink"])
+    G.stroke(d, lobed, M["ink"], O)
+    G.seam(d, inner, M["ink"])
+    for x0 in (-0.44, -0.24, -0.05):                                                          # ropy folds, bowed toward the brink
+        G.seam(d, G.bezier((x0, top - 0.015), (x0 + 0.06, top - 0.07), (x0 + 0.1, top - 0.03), n=6), M["ink"])
+    for a in (25, 55):                                                                        # and round the corner
+        r = top - LIP_CZ - 0.06
+        G.seam(d, [(r * math.sin(math.radians(a - 8)), LIP_CZ + r * math.cos(math.radians(a - 8))),
+                   ((r - 0.03) * math.sin(math.radians(a)), LIP_CZ + (r - 0.03) * math.cos(math.radians(a))),
+                   (r * math.sin(math.radians(a + 8)), LIP_CZ + r * math.cos(math.radians(a + 8)))], M["ink"])
+    for j, (x, z) in enumerate(((-0.33, -0.06), (-0.12, -0.08), (0.2, -0.12))):              # vesicles
+        G.stroke(d, G.lumpy_ellipse(x, z, 0.018, 0.012, n=8, seed=1980 + j), M["basalt_sh"], 0.0, cyclic=True)
+
+
+def lip_talus(d, M, k=0):
+    """Valles: the talus apron's brink - its thin scree crust rounding the corner, loose angular blocks on it, one perched half
+    over the edge, grit, two chips falling down the face."""
+    top = 0.02
+    outer, inner = _hood(top, 0.1, 74)
+    _o2, inner2 = _hood(top, 0.06, 74)
+    G.stroke(d, outer + inner, M["ochre"], 0.0, cyclic=True)
+    G.stroke(d, inner2 + inner[::-1], M["ripple_sh"], 0.0, cyclic=True)
+    G.stroke(d, outer, M["ink"], O)
+    G.seam(d, inner, M["ink"])
+    rnd = random.Random(1990)
+    for j, (x, r, mat) in enumerate(((-0.46, 0.06, "pale_i"), (-0.24, 0.085, "ochre_i"), (-0.06, 0.05, "pale_i"), (0.17, 0.08, "ochre_i"))):
+        z = top + r * 0.55 if x < 0.1 else top + r * 0.35 - 0.02                         # the last one perched on the corner
+        pts = B._shard(x, z, r, rnd, sides=5 + j % 2, flat=0.75)
+        G.stroke(d, pts, M[mat], I, cyclic=True)
+        G.stroke(d, [p for p in pts if p[0] > x - r * 0.1 and p[1] < z + r * 0.2] + [(x, z)], M["ripple_sh"], 0.0, cyclic=True)
+        G.stroke(d, pts, M["ink"], I, cyclic=True)
+    G.specks(d, [(-0.36, top + 0.01), (-0.14, top + 0.012), (0.04, top + 0.008)], M["ink"])
+    for j, (x, z, r) in enumerate(((0.5, -0.5, 0.034), (0.55, -0.7, 0.026))):
+        G.stroke(d, B._shard(x, z, r, random.Random(1995 + j), sides=5, flat=0.8), M["ochre_i"], I, cyclic=True)
+
+
+def lip_ice(d, M, k=0):
+    """The cold trap's brink: the ice skin running past the edge as a glassy teal slab with a bright lit rim over the dark
+    floor rounding the corner; three pointed icicles under its nose, a glint, a chip of ice falling."""
+    top = 0.04
+    fo, fi = _hood(top - 0.1, 0.14, 84)                                                        # the dark floor under the ice
+    G.stroke(d, fo + fi, M["floor"], 0.0, cyclic=True)
+    G.stroke(d, fo, M["ink"], O)
+    G.seam(d, fi, M["ink"])
+    outer, inner, rise, chin, xface, zb = _slab(top, 0.11, 0.34, seed=3)
+    G.stroke(d, outer + inner[1:], M["ice"], 0.0, cyclic=True)
+    G.stroke(d, [(x, z) for x, z in rise] + [(x, z - 0.03) for x, z in rise[::-1]], M["ice_lit"], 0.0, cyclic=True)
+    G.stroke(d, chin + [(xface, zb)] + [(xface - 0.02, zb + 0.04), (0.26, zb + 0.045)], M["ice_sh"], 0.0, cyclic=True)
+    for x, L in ((0.25, 0.17), (0.17, 0.27), (0.09, 0.12)):                                    # icicles, pointed (not drips)
+        G.stroke(d, [(x - 0.026, zb + 0.005), (x + 0.026, zb + 0.005), (x + 0.004, zb - L)], M["ice_i"], I, cyclic=True)
+        G.seam(d, [(x - 0.008, zb - 0.01), (x - 0.002, zb - L * 0.6)], M["ink"])
+    G.stroke(d, outer, M["ink"], O)
+    G.seam(d, inner, M["ink"])
+    G.stroke(d, [(-0.2, top - 0.035), (-0.185, top - 0.05), (-0.2, top - 0.065), (-0.215, top - 0.05)], M["ice_lit_i"], I, cyclic=True)   # a glint
+    G.stroke(d, B._shard(0.5, -0.62, 0.03, random.Random(1999), sides=4, flat=0.7), M["ice_i"], I, cyclic=True)
+
+
+def lip_tessera(d, M, k=0):
+    """The tesserae's brink: the warm-grey crust running past the edge as a folded slab - its fold ridges on top, a rounded,
+    chipped nose over the face, a lit rim, the shaded underside, dust in the grooves, two flakes falling."""
+    top = 0.04
+    outer, inner, rise, chin, xface, zb = _slab(top, 0.15, 0.38, bumps=0.025, seed=5)
+    G.stroke(d, outer + inner[1:], M["tess"], 0.0, cyclic=True)
+    G.stroke(d, [(x, z) for x, z in rise] + [(x, z - 0.03) for x, z in rise[::-1]], M["tess_lit"], 0.0, cyclic=True)
+    G.stroke(d, chin + [(xface, zb)] + [(xface - 0.02, zb + 0.045), (0.31, zb + 0.05)], M["tess_sh"], 0.0, cyclic=True)
+    G.stroke(d, [(-0.60, zb + 0.04), (xface - 0.04, zb + 0.04), (xface, zb), (-0.60, zb)], M["tess_sh"], 0.0, cyclic=True)
+    G.stroke(d, outer, M["ink"], O)
+    G.seam(d, inner, M["ink"])
+    for i in range(3):                                                                        # the grooves between the folds
+        x = -0.60 + (0.31 + 0.60) * (2 * i + 1) / 6.2
+        G.seam(d, [(x, top - 0.005), (x + 0.02, top - 0.06), (x + 0.01, zb + 0.02)], M["ink"])
+        G.stroke(d, [(x - 0.01, top - 0.02), (x + 0.025, top - 0.02), (x + 0.02, top - 0.05), (x - 0.005, top - 0.05)], M["tess_dp"], 0.0, cyclic=True)
+    for j, (x, z, r) in enumerate(((0.47, -0.42, 0.034), (0.51, -0.6, 0.027))):
+        G.stroke(d, B._shard(x, z, r, random.Random(2001 + j), sides=5, flat=0.6), M["tess_i"], I, cyclic=True)
+
+
+def lip_vent(d, M, k=0):
+    """The vent field's brink: the black crust rounding the corner under a yellow sulfur rind, an ember crack glowing along
+    its face, sulfur crystals at the edge, a cinder falling."""
+    top = 0.04
+    outer, inner = _hood(top, 0.18, 92)
+    G.stroke(d, outer + inner, M["black"], 0.0, cyclic=True)
+    so, si = _hood(top, 0.05, 92)
+    G.stroke(d, so + si, M["sulfur"], 0.0, cyclic=True)
+    _o3, ssh = _hood(top, 0.03, 92)
+    G.stroke(d, ssh + si[::-1], M["sulfur_sh"], 0.0, cyclic=True)
+    r = top - LIP_CZ - 0.11                                                                   # the ember crack, jagged, along the face
+    crack = [((r + 0.012 * ((j % 2) * 2 - 1)) * math.sin(math.radians(a)), LIP_CZ + (r + 0.012 * ((j % 2) * 2 - 1)) * math.cos(math.radians(a)))
+             for j, a in enumerate(range(18, 90, 9))]
+    G.stroke(d, G.hose_outline(crack, 0.024), M["ember"], I, cyclic=True)
+    G.stroke(d, G.hose_outline(crack[1:-1], 0.008), M["ember_core"], 0.0, cyclic=True)
+    G.stroke(d, outer, M["ink"], O)
+    G.seam(d, inner, M["ink"])
+    G.seam(d, si, M["ink"])
+    rnd = random.Random(2010)
+    for j, x in enumerate((-0.3, -0.24, 0.02)):                                               # sulfur crystals at the edge
+        G.stroke(d, B._shard(x, top + 0.025, 0.03, rnd, sides=4, flat=0.6), M["sulfur_i"], I, cyclic=True)
+    G.stroke(d, B._shard(0.52, -0.6, 0.03, random.Random(2015), sides=5, flat=0.8), M["black_i"], I, cyclic=True)
+
+
+LIPS = {"sand": lip_sand, "stone": lip_stone, "snow": lip_snow, "frost": lip_frost,
+        "basalt": lip_basalt, "talus": lip_talus, "ice": lip_ice, "tessera": lip_tessera, "vent": lip_vent}   # B-198: B-181's variants
 LIP_PIV = (0.55, 0.6)
 
 
@@ -1188,8 +1319,9 @@ FILL_PIECES = {"earth": ("sand", [("scallop", fs_scallop, 64, 48), ("fulgurite",
 def _pieces(planet, part="variants"):
     """-> (the planet's pieces {name: (w, h, pivot, frames, draw)}, its tiling pieces). part "lips": B-180's ground_lip_<variant>
     only (their own manifest rows, so the accepted variant exports are not re-written)."""
-    if part == "lips":
-        return {f"ground_lip_{v}": (128, 96, LIP_PIV, 1, LIPS[v]) for v in PLANET_VARIANTS[planet]}, ()
+    if part in ("lips", "b181lips"):                                                          # B-198: B-181's variants' lips, own rows
+        vs = PLANET_VARIANTS[planet] if part == "lips" else B181_VARIANTS[planet]
+        return {f"ground_lip_{v}": (128, 96, LIP_PIV, 1, LIPS[v]) for v in vs}, ()
     if part == "puffs":                                                                       # B-190: one 8-frame sheet per material
         return {f"dig_puff_{v}": (128, 128, (0.5, 0.25), 8, _puff_fn(v)) for v in PUFF_VARIANTS[planet]}, ()
     if part == "fills":                                                                       # B-192: the variant fill's buried details
@@ -1255,7 +1387,7 @@ def use_planet(planet, part="variants"):
     """The row's planet: Earth's sand / stone / snow set (B-178) or Mars's polar frost (LEAD 05:3x); part "lips": B-180's lips."""
     global PLANET, VARIANTS, PIECES, TILES, KEYS, PART
     PLANET, PART = planet, part
-    VARIANTS = (B181_VARIANTS[planet] if part == "b181" else PUFF_VARIANTS[planet] if part == "puffs"
+    VARIANTS = (B181_VARIANTS[planet] if part in ("b181", "b181lips") else PUFF_VARIANTS[planet] if part == "puffs"
                 else (FILL_PIECES[planet][0],) if part == "fills" else PLANET_VARIANTS[planet])
     PIECES, TILES = _pieces(planet, part)
     KEYS = _keys()
@@ -1281,7 +1413,7 @@ def sheets():
 
 
 def pieces_of(S):
-    if PART in ("lips", "puffs", "fills"):
+    if PART in ("lips", "b181lips", "puffs", "fills"):
         return dict(S)
     out = {n: S[n] for n in TILES}
     for v in VARIANTS:
@@ -1334,7 +1466,7 @@ def sheet_meta(kn, frames):
     elif kn.startswith("ground_lip_"):
         v = kn.rsplit("_", 1)[1]
         meta.update({"brink": True, "variant": v, "biomes": BIOMES[v], "band": f"ground_band_{v}",
-                     "note": f"B-180: the {v} band's cliff lip (as ground_lip): drawn for a drop to the right; mirror x for a drop to the left"})
+                     "note": f"{'B-198' if PART == 'b181lips' else 'B-180'}: the {v} band's cliff lip (as ground_lip): drawn for a drop to the right; mirror x for a drop to the left"})
     else:
         v, i = kn.split("_")[2], int(kn.rsplit("_", 1)[1]) - 1
         meta.update({"upright": True, "variant": v, "decor": DECOR[v][i], "note": f"B-178: {PLANET.capitalize()}'s {v} biomes' decor; scatter along the curve, never rotated"})
@@ -1375,7 +1507,7 @@ def export(art, S=None):
             _json.dump(meta, f, indent=2)
             f.write("\n")
         out.append((meta["key"], sheet.shape[1], sheet.shape[0], n))
-    return out, within, f"{len(out)} keys, contract v3.2 11.9 ({'B-180 lips' if PART == 'lips' else 'B-181 variants' if PART == 'b181' else 'B-190 puffs' if PART == 'puffs' else 'B-192 fill decor' if PART == 'fills' else 'B-178 variants'})"
+    return out, within, f"{len(out)} keys, contract v3.2 11.9 ({'B-180 lips' if PART == 'lips' else 'B-198 variant lips' if PART == 'b181lips' else 'B-181 variants' if PART == 'b181' else 'B-190 puffs' if PART == 'puffs' else 'B-192 fill decor' if PART == 'fills' else 'B-178 variants'})"
 
 
 def main(out, S=None, allw=None, footnote=None):
@@ -1387,7 +1519,7 @@ def main(out, S=None, allw=None, footnote=None):
     if PART == "fills":                                                                       # B-192: the export's review, this planet's rows
         preview_fills(os.path.dirname(out), planets=(PLANET,), pieces=pieces_of(S), out=out, footnote=footnote)
         return
-    (preview_lips if PART == "lips" else preview)(os.path.dirname(out), pieces=pieces_of(S), out=out, footnote=footnote)
+    (preview_lips if PART in ("lips", "b181lips") else preview)(os.path.dirname(out), pieces=pieces_of(S), out=out, footnote=footnote)
 
 
 # ---------------------------------------------------------------- the preview
@@ -1627,7 +1759,7 @@ def preview_lips(out_dir, pieces=None, out=None, footnote=None):
         lines.append(f"{name}: ink {rng(o)} / {rng(n_)} px, palette {pal:.1f}%{'; EDGE ' + str(edge) if edge else ''}")
     head = np.empty((22, Wt, 3), np.float32)
     head[:] = review.PAPER
-    review._label(head, f"B-180 {PLANET} cliff lips at 1x: each on a rounded cliff of its own band (B-175's profile 12.5-20.5 m), the surveyor"[:150], 6, 4)
+    review._label(head, f"{'B-198' if PART == 'b181lips' else 'B-180'} {PLANET} cliff lips at 1x: each on a rounded cliff of its own band (B-175's profile 12.5-20.5 m), the surveyor"[:150], 6, 4)
     foot = np.empty((30 + 16 * len(lines), Wt, 3), np.float32)
     foot[:] = review.PAPER
     for i, ln in enumerate(lines):
@@ -1635,7 +1767,7 @@ def preview_lips(out_dir, pieces=None, out=None, footnote=None):
     img = np.vstack([head, row, P, foot])
     import time
     review.draw(img, time.strftime("%m-%d %H:%M") + " " + (footnote or "design preview (lock-free, fakegp + numpy)"), 2, img.shape[0] - 16, (1.0, 1.0, 0.85))
-    out = out or os.path.join(out_dir, f"review_b180_{PLANET}_lips_preview.png")
+    out = out or os.path.join(out_dir, f"review_{'b198' if PART == 'b181lips' else 'b180'}_{PLANET}_lips_preview.png")
     np.clip(img, 0.0, 1.0, out=img)
     u8 = np.empty(img.shape[:2] + (4,), np.uint8)
     u8[..., :3] = np.rint(img * 255.0)
@@ -1806,5 +1938,5 @@ if __name__ == "__main__":                       # python -I build_ground_varian
         sys.exit(0)
     if len(sys.argv) > 2:
         use_planet(sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else "variants")
-    (preview_lips if PART == "lips" else preview)(sys.argv[1])
+    (preview_lips if PART in ("lips", "b181lips") else preview)(sys.argv[1])
     fakegp.restore()
