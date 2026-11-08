@@ -72,8 +72,9 @@ def colours(planet):
                 "rock": dp("sky"), "rock_sh": P["brown"], "pebble": sh("offwhite"), "frost": P["offwhite"], "frost_sh": P["teal"],
                 "ripple": sh("mustard"), "ripple_sh": dp("mustard"), "dust": sh("red"), "dust_sh": dp("red"), "clod": P["brown"]}   # not the salmon sky
     if planet == "mercury":                     # LEAD 04:1x: cream regolith, impact breccia, a charcoal band, sulfide, solarite hints
-        return {"top": P["offwhite"], "top_sh": sh("offwhite"), "topsoil": dp("offwhite"), "speck": dp("sky"),
-                "soil": dp("offwhite"), "soil_sh": sh("sky"), "soil_dp": P["brown"], "charcoal": P["brown"],
+        return {"top": P["offwhite"], "top_sh": sh("offwhite"), "topsoil": sh("offwhite"), "speck": dp("sky"),       # LEAD 04:2x: cream-dominant
+                "soil": P["offwhite"], "pale": sh("offwhite"), "breccia": dp("offwhite"), "soil_sh": sh("sky"), "soil_dp": P["brown"],
+                "charcoal": P["brown"],
                 "frag_a": P["offwhite"], "frag_b": sh("offwhite"), "frag_c": sh("sky"), "frag_d": dp("sky"),
                 "sulfide": sh("mustard"), "sulfide_hi": P["mustard"], "solar": P["mustard"], "rock": sh("sky"), "rock_sh": dp("sky"),
                 "pebble": sh("offwhite"), "reed": P["teal"], "reed_tip": P["offwhite"], "dust": P["offwhite"], "dust_sh": sh("offwhite"),
@@ -587,15 +588,18 @@ def _glint(d, M, x, z, s, role):
 
 
 def fill_mercury(d, M, k=0):
-    """Impact breccia: a grey matrix packed with angular fragments, one dark charcoal (carbon-rich) band, small brassy
+    """Cream regolith (LEAD 04:2x: >= 60 % of the tile cream, the old strip's body): the cream body with pale-stone bands, the
+    impact breccia as two grey bands packed with angular fragments, one dark charcoal (carbon-rich) band, small brassy
     sulfide nodules, a few tiny gold solarite glints as hints only (B-176 places the real pockets)."""
     L = FILL / PPU
     rnd = random.Random(2861)
     _bg(d, M, L)
-    _strata(d, M, L, [(6.9, 0.55, "soil_sh", True), (4.3, 0.42, "charcoal", True), (1.7, 0.70, "soil_sh", True)], 0.08, 170)
+    _strata(d, M, L, [(7.1, 0.40, "pale", True), (5.30, 1.05, "breccia", True), (4.05, 0.34, "charcoal", True), (2.95, 0.34, "pale", False),
+                      (1.40, 0.85, "breccia", True)], 0.08, 170)
     tones = ("frag_a", "frag_b", "frag_c", "frag_d")
-    for i in range(60):                                                                       # the breccia's angular fragments
-        x, z, r = rnd.uniform(0, L), rnd.uniform(0, L), rnd.uniform(0.05, 0.20)
+    for i in range(60):                                                                       # the angular fragments, most in the breccia
+        zr = ((4.85, 5.75), (1.05, 1.75), (0.0, L))[0 if i % 5 < 2 else (1 if i % 5 < 4 else 2)]
+        x, z, r = rnd.uniform(0, L), rnd.uniform(*zr), rnd.uniform(0.05, 0.20) if i % 5 < 4 else rnd.uniform(0.04, 0.09)
         pts = _shard(0.0, 0.0, r, rnd, sides=rnd.choice((4, 5, 6)), flat=rnd.uniform(0.6, 1.0))
         tone = tones[i % 4]
 
