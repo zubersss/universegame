@@ -26,6 +26,8 @@ namespace Meridian.Flora
         public bool FullRate;
         public bool Reacting;
         public int Facing = 1;
+        /// <summary>U-133: the lean last written to the root (written only when the wind input changes).</summary>
+        public float LeanApplied;
         /// <summary>The replaced-part slots (Def.slots with replaces_part, in order) and the bone renderer each one swaps (null when the bone has no part).</summary>
         public string[] SlotNames = System.Array.Empty<string>();
         public SpriteRenderer[] SlotRenderers = System.Array.Empty<SpriteRenderer>();
@@ -100,6 +102,8 @@ namespace Meridian.Flora
 
         public Camera view;
         public Transform player;
+        /// <summary>U-133 (D-148): the one wind input on the rig driver: every plant's root leans by this (z degrees; the stage sets it on Neptune, 0 elsewhere).</summary>
+        [System.NonSerialized] public float leanDegrees;
         public TerrainStreamer terrain;
 
         public string Key { get; private set; }
@@ -215,6 +219,17 @@ namespace Meridian.Flora
             if (band == Meridian.Terrain.CloudColumn.CloudBand.Deep) return "deep";
             if (band == Meridian.Terrain.CloudColumn.CloudBand.Crush || band == Meridian.Terrain.CloudColumn.CloudBand.Space) return null;
             if (darkHalf) return "dark_half";
+            return band == Meridian.Terrain.CloudColumn.CloudBand.Deck2 ? "deck2" : band == Meridian.Terrain.CloudColumn.CloudBand.Deck3 ? "deck3" : "deck1";
+        }
+
+        /// <summary>U-133 (B-161): Neptune's biome names — "deep" on the Deep's floes (rimecomb), "storm" inside a Dark Storm or the Great Dark Spot
+        /// (stormlantern, gripweed), else the floe's deck (deck1 / deck2 / deck3). Below the Crush Line and in space: none. Pure.</summary>
+        public static string NeptuneBiomeFor(float surfaceY, bool inStorm)
+        {
+            var band = Meridian.Terrain.CloudColumn.CloudLayout.BandAt(surfaceY);
+            if (band == Meridian.Terrain.CloudColumn.CloudBand.Deep) return "deep";
+            if (band == Meridian.Terrain.CloudColumn.CloudBand.Crush || band == Meridian.Terrain.CloudColumn.CloudBand.Space) return null;
+            if (inStorm) return "storm";
             return band == Meridian.Terrain.CloudColumn.CloudBand.Deck2 ? "deck2" : band == Meridian.Terrain.CloudColumn.CloudBand.Deck3 ? "deck3" : "deck1";
         }
 
@@ -449,6 +464,8 @@ namespace Meridian.Flora
             float cycleNow = CycleClock;
             foreach (var p in Plants)
             {
+                // U-133 (D-148): the wind lean on the root (its pivot the root knot on the ground line); untouched while the input holds.
+                if (p.LeanApplied != leanDegrees) { p.Root.localRotation = Quaternion.Euler(0f, 0f, leanDegrees); p.LeanApplied = leanDegrees; }
                 // React: the surveyor within the radius: look at them, show the react face for ReactSeconds after they leave.
                 float dx = who.x - p.Root.position.x;
                 bool near = dx * dx + (who.y - p.Root.position.y) * (who.y - p.Root.position.y) <= p.Def.react.radius_m * p.Def.react.radius_m;

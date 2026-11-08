@@ -12,7 +12,10 @@ namespace Meridian.View2D
     public sealed class SceneLayout
     {
         /// <summary>One layer: U-103 (D-108) adds `tile` / `tile_y` (a repeating tile in x / and y), `height_px` and `role` (starfield, nebula) for the Space scene; the side scenes ignore them.</summary>
-        [System.Serializable] public sealed class Layer { public int n; public float parallax; public float y_m; public bool tile, tile_y; public int height_px; public string role; }
+        [System.Serializable] public sealed class Layer { public int n; public float parallax; public float y_m; public bool tile, tile_y; public int height_px; public string role; public Pulse pulse; }
+        /// <summary>U-133 (D-148): a layer that breathes: its scale and alpha swing between the pairs over `beats` beats at `bpm`, about pivot_uv
+        /// (B-161's storm rim: scale 0.97–1.03, alpha 0.85–1.0, 8 beats at 110 bpm, the centre). Absent: an empty block (beats 0), not pulsed.</summary>
+        [System.Serializable] public sealed class Pulse { public float[] scale; public float[] alpha; public int beats; public float bpm; public float[] pivot_uv; }
         public Layer[] layers;
         /// <summary>U-103: the scene's pixels per unit and anchor ("center" for the Space sky) from the json; 0 / null when the json omits them.</summary>
         public float ppu;
@@ -44,6 +47,21 @@ namespace Meridian.View2D
     /// </summary>
     public static class ParallaxMath
     {
+        /// <summary>U-133: whether a layer's pulse block is complete (two scales, two alphas, beats and bpm). Pure.</summary>
+        public static bool Pulsed(SceneLayout.Pulse p) => p != null && p.beats > 0 && p.bpm > 0f && p.scale != null && p.scale.Length == 2 && p.alpha != null && p.alpha.Length == 2;
+        /// <summary>U-133 (D-148): the pulse at time t (s): a smooth breath from the first value to the second and back over beats × 60 / bpm seconds
+        /// (starting at the first). Pure.</summary>
+        public static void PulseAt(SceneLayout.Pulse p, double t, out float scale, out float alpha)
+        {
+            double cycle = p.beats * 60.0 / p.bpm;
+            double phase = ((t % cycle) + cycle) % cycle / cycle;
+            float v = 0.5f - 0.5f * Mathf.Cos((float)(phase * 2.0 * System.Math.PI));
+            scale = Mathf.Lerp(p.scale[0], p.scale[1], v);
+            alpha = Mathf.Lerp(p.alpha[0], p.alpha[1], v);
+        }
+        /// <summary>U-133: the step from a sprite's pivot to the pulse's pivot (both as uv of a drawn size); scaling by s about the pulse's pivot
+        /// moves the sprite by (1 − s) × this. Pure.</summary>
+        public static Vector2 PulseOffset(Vector2 spritePivotUv, Vector2 pulsePivotUv, Vector2 size) => Vector2.Scale(pulsePivotUv - spritePivotUv, size);
         public static float LayerX(float cameraX, float parallax) => cameraX * (1f - parallax);
         public static float LayerY(float cameraY, float anchorY, float datumY, float yM, float parallax) => datumY + yM + (cameraY - anchorY) * (1f - parallax);
         /// <summary>The stage camera's resting centre over a floor at `datumY` (Bible §5.1: the frame bottom 3 m under the floor).</summary>
@@ -114,8 +132,16 @@ namespace Meridian.View2D
         /// <summary>U-130 (D-142): a sibling set layer0 loads from (Uranus's survey layer0: the methane bands lifted, one geometry with the set); null:
         /// the set's own. Set before ConfigureFor.</summary>
         public string layer0Scene;
-        string LayerKey(int n) => n == 0 && !string.IsNullOrEmpty(layer0Scene) && SceneKey != null
-            ? SceneKey.Substring(0, SceneKey.LastIndexOf('/') + 1) + layer0Scene + "/layer0" : SceneKey + "/layer" + n;
+        /// <summary>U-133 (B-161): a sibling set layers 1 and up load from (Neptune's spot shares the storm's rim and near streaks, byte-identical);
+        /// null: the set's own. Set before ConfigureFor.</summary>
+        public string upperScene;
+        string LayerKey(int n)
+        {
+            string prefix = SceneKey != null ? SceneKey.Substring(0, SceneKey.LastIndexOf('/') + 1) : null;
+            if (n == 0 && !string.IsNullOrEmpty(layer0Scene) && prefix != null) return prefix + layer0Scene + "/layer0";
+            if (n >= 1 && !string.IsNullOrEmpty(upperScene) && prefix != null) return prefix + upperScene + "/layer" + n;
+            return SceneKey + "/layer" + n;
+        }
 
         void Build(SceneLayout layout)
         {
@@ -246,7 +272,19 @@ namespace Meridian.View2D
                 float x = ParallaxMath.LayerX(c.x, l.parallax) + scrollX; // U-118: the storm's wind
                 // Keep the 3-wide strip centred on the camera: shift by whole tile widths (tileable art, no seam).
                 if (w > 0f) x += Mathf.Round((c.x - x) / w) * w;
-                sr.transform.position = new Vector3(x, ParallaxMath.LayerY(FollowY(c.y, anchorY), anchorY, datumY, l.y_m, l.parallax), 0f); // U-122: under the anchor the painting holds its datum pose
+                var pos = new Vector3(x, ParallaxMath.LayerY(FollowY(c.y, anchorY), anchorY, datumY, l.y_m, l.parallax), 0f);
+                if (ParallaxMath.Pulsed(l.pulse))
+                {
+                    // U-133 (D-148): the storm rim breathes about its pulse pivot; its alpha rides on the set's.
+                    ParallaxMath.PulseAt(l.pulse, Time.time, out float ps, out float pa);
+                    var want = l.pulse.pivot_uv != null && l.pulse.pivot_uv.Length == 2 ? new Vector2(l.pulse.pivot_uv[0], l.pulse.pivot_uv[1]) : new Vector2(0.5f, 0.5f);
+                    var spr = sr.sprite;
+                    var have = spr != null && spr.rect.width > 0f && spr.rect.height > 0f ? new Vector2(spr.pivot.x / spr.rect.width, spr.pivot.y / spr.rect.height) : want;
+                    pos += (Vector3)((1f - ps) * ParallaxMath.PulseOffset(have, want, sr.size));
+                    sr.transform.localScale = new Vector3(ps, ps, 1f);
+                    var col = sr.color; col.a = alpha * pa; sr.color = col;
+                }
+                sr.transform.position = pos; // U-122: under the anchor the painting holds its datum pose
             }
             PlaceFill(c); // U-139: after the layers moved
         }

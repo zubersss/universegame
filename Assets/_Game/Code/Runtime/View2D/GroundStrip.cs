@@ -40,7 +40,12 @@ namespace Meridian.View2D
         public void Invalidate() => dirty = true;
         /// <summary>The planet's strip keys (Earth's four, Mars's two; other planets Earth's until their strips exist). Pure.</summary>
         public static string[] KeysFor(Meridian.Planets.PlanetId planet) => planet == Meridian.Planets.PlanetId.Mars ? MarsKeys : planet == Meridian.Planets.PlanetId.Mercury ? MercuryKeys
-            : planet == Meridian.Planets.PlanetId.Venus ? VenusKeys : planet == Meridian.Planets.PlanetId.Jupiter ? JupiterKeys : planet == Meridian.Planets.PlanetId.Saturn ? SaturnKeys : planet == Meridian.Planets.PlanetId.Uranus ? UranusKeys : Keys;
+            : planet == Meridian.Planets.PlanetId.Venus ? VenusKeys : planet == Meridian.Planets.PlanetId.Jupiter ? JupiterKeys : planet == Meridian.Planets.PlanetId.Saturn ? SaturnKeys : planet == Meridian.Planets.PlanetId.Uranus ? UranusKeys : planet == Meridian.Planets.PlanetId.Neptune ? NeptuneKeys : Keys;
+        /// <summary>U-133 (B-161 / B-169, D-137): Neptune's two 10-frame floe strips: the methane ice of the decks, the Deep's superionic ice.</summary>
+        public static readonly string[] NeptuneKeys = { "terrain/neptune/floe_strip_ice", "terrain/neptune/floe_strip_superionic" };
+        public const int NeptuneIce = 0, NeptuneSuperionic = 1;
+        /// <summary>U-133: a Neptune floe column's strip by its top's band: the Deep's floes are superionic, the rest methane ice. Pure.</summary>
+        public static int NeptuneStripFor(float topY) => Meridian.Terrain.CloudColumn.CloudLayout.BandAt(topY) == Meridian.Terrain.CloudColumn.CloudBand.Deep ? NeptuneSuperionic : NeptuneIce;
         /// <summary>U-130 (B-158 / B-166, D-137): Uranus's two 10-frame floe strips: the methane ice in the lit half, the dark half's slate under rime.</summary>
         public static readonly string[] UranusKeys = { "terrain/uranus/floe_strip_ice", "terrain/uranus/floe_strip_dark" };
         public const int UranusIce = 0, UranusDark = 1;

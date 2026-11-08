@@ -30,7 +30,7 @@ namespace Meridian.Tests
             Assert.IsTrue(CartoonStage.Converted(PlanetId.Earth));
             Assert.IsTrue(CartoonStage.Converted(PlanetId.Mercury), "U-123: Mercury too");
             Assert.IsTrue(CartoonStage.Converted(PlanetId.Venus), "U-125: Venus joins");
-            Assert.IsFalse(CartoonStage.Converted(PlanetId.Neptune), "Neptune waits for its own card");
+            Assert.IsTrue(CartoonStage.Converted(PlanetId.Neptune), "U-133: all eight on the cartoon stage");
             int canyon = FindX("mars_canyon"), plains = FindX("mars_plains");
             Assert.GreaterOrEqual(canyon, 0, "a canyon region on Mars"); Assert.GreaterOrEqual(plains, 0, "a plains region on Mars");
             Assert.AreEqual("canyon", CartoonStage.SceneFor(PlanetId.Mars, canyon));
