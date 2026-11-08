@@ -1,15 +1,12 @@
 # BLENDER STATUS
-Updated: 2026-11-08 15:4x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113 at 14:0x; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-08 16:0x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113 at 14:0x; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-B-199 batch 4 (the last 17: gear + the remaining materials) with LEAD: review_b199_icons_batch4_preview.png (15:44, a513456d). Batches 1-3 exported (654f2f7b, df99bb86, dc43ca52). HELD: cryo_round's old icon (D-173 retires the item) until LEAD says remove; the U-168 removal (14 files: surveyor/base, pilgrim/base, saturn/ring_mesh) until UNITY commits its four test re-points and LEAD says go.
-
-## B-199 list: every icon folder (icons/<item>/base), v3 or not
-- v3 (9): the B-128 tile cubes 64x64 - grass, mercury_basalt, mercury_regolith, regolith, snow, soil, sulfide, tessera; B-197 wind_anchor 128x128.
-- v2 shaded renders, no ink, no json (49, all 128x128): ores / minerals - aluminium, basalt, carbon, clay, copper, graphite, hematite, iron, nickel, perchlorate, phosphorus_pigment, sand, silica, solarite, stone, sulfur, vitriol_glass, deep_diamond, deep_diamond_tip, deep_core_sample, ring_rock; ices / gases - ammonia_ice, methane_ice, polar_ice, ring_ice, superionic_ice, water_ice, helium3_condensate, metallic_hydrogen, oxygen; organics - living_seed, wood; crafted - circuit_board, cryo_pad, cryo_round, float_cell_mk1, float_cell_mk2, polymer, radiation_liner, smelter_bar_copper, smelter_bar_iron, solarite_capacitor, suit_patch, survey_module, thermal_pad; gear - jetpack_mk2, jetpack_mk3, skip_drive_mk2, thruster_mk3.
-- Batches (build_icons_items_v3.py, only EXPORT_BATCHES export): 1 ores and crystals (10, exported 654f2f7b); 2 ices and gases (9, df99bb86; superionic on Neptune's palette, helium-3 on Saturn's); 3 crafted (12, dc43ca52; cryo_round retired); 4 gear + the rest (17, preview with LEAD).
+B-201 waits for the next build's smoke (an art-side read, frame by frame, as a table in coordination/reports/blender/). B-200's read is with LEAD (b200_underwater.md: the land set drawn out at sea; a sea_under set proposed). B-172 waits on U-151. Otherwise dry: no lock, no want.
 
 ## Last completed
+- 16:03-16:05: U-168 + D-173 removals (cd4ead6b: 15 files, no .meta). B-200 underwater read (e4736852).
+- 15:56: B-199 COMPLETE: 48 item icons in v3 under their own keys + json (batches 654f2f7b, df99bb86, dc43ca52, and batch 4 in UNITY's import 1f2924b7: its add raced my index lock; same bytes); cryo_round retired. build_icons_items_v3.py, only EXPORT_BATCHES export.
 - 15:25-15:42: B-198 complete (bdcfa085 Mars + Mercury, 654f2f7b Venus): terrain/{mars,mercury,venus}/ground_lip_{basalt,talus,ice,tessera,vent}. B-199 batches 1-3 exported.
 - 15:1x: B-197 exported (47e9d29f): icons/wind_anchor/base. B-196 exported (8c6cae92): creatures/warden/sentinel v3. B-194 giants' G1 audit (b1e46fbd): 0 missing, 0 outliers. B-195 exported (aaca509a): the five Earth POI props. B-174 (d0c32d8b): 25 orphaned v2 models removed (86 files); B-193 census (7271c251).
 - 14:06: B-191 + B-192 exported (591164e9): terrain/mercury/dig_puff_ice, terrain/venus/dig_puff_tessera / _vent; terrain/earth/fill_decor_sand_1..3 (scallop, fulgurite, desert rose), terrain/mars/fill_decor_basalt_1..3 (lava tube, vesicles, amygdale).
