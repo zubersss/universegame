@@ -20,33 +20,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 09b6f19875b69b2489fbf19f01e19b80
-    m_Address: props/mars_flora/stalagmite/json
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 150f8e9e3a7b33d4496ac36acd0df4aa
     m_Address: props/mars_flora/rock_a/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 3b915c47aa337ee448abe2ea0d33f309
-    m_Address: props/mars_flora/ice_b/json
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4516b69dcfc54834681c137193dada91
     m_Address: props/mars_flora/boulder_b
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 4cc3939d3a4e35b4ba5afa9260e3ed9f
-    m_Address: props/mars_flora/ice_a
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 574478a16c196f248b35264fff4f721c
-    m_Address: props/mars_flora/ice_b
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -67,11 +47,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 69c5c6b36e51b8440bd228f10ebeead2
     m_Address: props/mars_flora/stalagmite
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 7007f343883822d4dba22c193cfeb002
-    m_Address: props/mars_flora/stalactite/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -110,23 +85,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c13e2b6aeaad89342ad03c435a4032e8
-    m_Address: props/mars_flora/stalactite
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c1a965e652a537a4699ceaa7979323e3
     m_Address: props/mars_flora/ice_a
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: cdea05041bd49e5428d9ca590792872e
-    m_Address: props/mars_flora/stalagmite
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d002a31a5c45c4f47bacdf1471d0f251
-    m_Address: props/mars_flora/ice_a/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

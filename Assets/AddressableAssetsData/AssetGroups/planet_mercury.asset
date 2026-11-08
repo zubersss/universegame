@@ -175,11 +175,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 4d3b11cfba86a6a4d90ae51d67362321
-    m_Address: props/mercury/solarite_cut/json
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4d66faa4ea804b94696a39fb3e4b791c
     m_Address: terrain/mercury/ground_decor_5
     m_ReadOnly: 0
@@ -227,11 +222,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5b4c41b7ab47d2844b680324815b9e47
     m_Address: backgrounds/mercury/twilight
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 6114434e886c1b449b3de6497678e6b4
-    m_Address: props/mercury/solarite_cut
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -337,11 +327,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8d1c050972b6a3a4fac8c919c01d1b62
     m_Address: creatures/mercury/cinderling
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8f8b0f42307a2f545b2874b9740cdca8
-    m_Address: props/mercury/solarite_crusted
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -470,11 +455,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b8e7431b26e741a4394ca12fd13f540f
-    m_Address: creatures/mercury/cinderhulk
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bf277628c52a67a47b56b42244b04132
     m_Address: creatures/mercury/cinderhulk_day
     m_ReadOnly: 0
@@ -492,11 +472,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c397eefa66b4c58439f400431d514bce
     m_Address: terrain/mercury/ground_decor_ice_1
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c4b417391d8666a4eb98804d94ef9fb8
-    m_Address: props/mercury/solarite_crusted/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

@@ -25,11 +25,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 119ec32efb2be0048864f3de82ef1be7
-    m_Address: creatures/venus/veil_serpent_head
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 14a63693196de1c468796cd8b30f680a
     m_Address: props/venus/meridian_station_door/animator
     m_ReadOnly: 0
@@ -252,11 +247,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6789254927b346d439f9ba2324360b9d
     m_Address: terrain/venus/vent_glass
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 679f1cc144e93df41af02688920c4157
-    m_Address: creatures/venus/veil_serpent_tail
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -552,11 +542,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e49cd0c41abb7464490042e43f57f708
     m_Address: props/venus/vent_harvester/json
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e4f0ccd077c8d944a9316326c688728a
-    m_Address: creatures/venus/veil_serpent_body
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
