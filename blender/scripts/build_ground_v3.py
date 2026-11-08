@@ -71,6 +71,19 @@ def colours(planet):
                 "basalt": dp("teal"), "basalt_sh": P["brown"], "hem": P["brown"], "hem_hi": sh("offwhite"), "ice": P["offwhite"], "ice_sh": sh("teal"),
                 "rock": dp("sky"), "rock_sh": P["brown"], "pebble": sh("offwhite"), "frost": P["offwhite"], "frost_sh": P["teal"],
                 "ripple": P["sky"], "ripple_sh": sh("sky"), "dust": P["sky"], "dust_sh": sh("sky"), "clod": dp("red")}
+    if planet == "mercury":                     # LEAD 04:1x: cream regolith, impact breccia, a charcoal band, sulfide, solarite hints
+        return {"top": P["offwhite"], "top_sh": sh("offwhite"), "topsoil": dp("offwhite"), "speck": dp("sky"),
+                "soil": dp("offwhite"), "soil_sh": sh("sky"), "soil_dp": P["brown"], "charcoal": P["brown"],
+                "frag_a": P["offwhite"], "frag_b": sh("offwhite"), "frag_c": sh("sky"), "frag_d": dp("sky"),
+                "sulfide": sh("mustard"), "sulfide_hi": P["mustard"], "solar": P["mustard"], "rock": sh("sky"), "rock_sh": dp("sky"),
+                "pebble": sh("offwhite"), "reed": P["teal"], "reed_tip": P["offwhite"], "dust": P["offwhite"], "dust_sh": sh("offwhite"),
+                "clod": dp("sky")}
+    if planet == "venus":                       # LEAD 04:1x: a glassy black crust, folded tessera basalt, sulfur veins, vitriol glass, an ember seam
+        return {"top": P["brown"], "top_sh": dp("teal"), "topsoil": dp("red"), "speck": sh("teal"),
+                "soil": dp("teal"), "soil_sh": dp("red"), "soil_dp": P["brown"], "fold_a": P["brown"], "fold_b": dp("red"), "fold_c": dp("mustard"),
+                "glow": P["sky"], "ember": P["red"], "ember_core": P["mustard"], "vein_line": P["mustard"], "glass": P["green"],
+                "rock": P["brown"], "rock_sh": dp("teal"), "pebble": sh("teal"), "sheen_line": sh("teal"), "sulfur": P["mustard"],
+                "sulfur_sh": sh("mustard"), "dust": sh("sky"), "dust_sh": dp("sky"), "clod": P["brown"]}
     raise ValueError(f"B-175: {planet}'s ground colours come after Earth's preview is accepted")
 
 
@@ -78,10 +91,13 @@ def mats(gp, planet):
     """M[role] = the flat fill (no ink), M[role + '_i'] = the fill with its ink line; 'ink' a line only; 'tuft' inked behind."""
     C = colours(planet)
 
-    def m(name, fill=None, ink=True, behind=False):
-        return G.mat(gp, f"gr_{planet}_{name}", fill=fill, ink=ink, behind=behind)
+    def m(name, fill=None, ink=True, behind=False, ink_hex=v3.INK):
+        return G.mat(gp, f"gr_{planet}_{name}", fill=fill, ink=ink, behind=behind, ink_hex=ink_hex)
     M = {"ink": m("ink", None, True)}
     for k, h in C.items():
+        if k.endswith("_line"):                 # a coloured line (a vein, a sheen streak): its own line material
+            M[k] = m(k, None, True, ink_hex=h)
+            continue
         M[k] = m(k, h, ink=False)
         M[k + "_i"] = m(k + "_i", h)
     M["tuft"] = m("tuft", C["top"], behind=True)
@@ -549,6 +565,172 @@ def lip_crust(d, M, k=0):
 
 PLANET_DRAW = {"mars": {"ground_band": lambda d, M, k: band_crust(d, M, "mars", k), "ground_fill": fill_mars,
                         "ground_decor": decor_mars, "ground_lip": lip_crust}}
+
+
+def _shard(x, z, r, rnd, sides=5, flat=1.0):
+    """An angular fragment: a polygon with irregular corners."""
+    a0 = rnd.uniform(0, TAU)
+    return [(x + r * rnd.uniform(0.65, 1.0) * math.cos(a0 + TAU * i / sides), z + r * flat * rnd.uniform(0.65, 1.0) * math.sin(a0 + TAU * i / sides))
+            for i in range(sides)]
+
+
+def _bg(d, M, L, role="soil"):
+    wrapped(lambda dx, dz: G.stroke(d, [(dx - 0.1, dz - 0.1), (dx + L + 0.1, dz - 0.1), (dx + L + 0.1, dz + L + 0.1), (dx - 0.1, dz + L + 0.1)],
+                                    M[role], 0.0, cyclic=True), L, L)
+
+
+def _glint(d, M, x, z, s, role):
+    """A tiny four-point star glint (a hint, never a find)."""
+    G.stroke(d, [(x - s, z), (x - s * 0.25, z + s * 0.25), (x, z + s), (x + s * 0.25, z + s * 0.25), (x + s, z), (x + s * 0.25, z - s * 0.25),
+                 (x, z - s), (x - s * 0.25, z - s * 0.25)], M[role], I, cyclic=True)
+
+
+def fill_mercury(d, M, k=0):
+    """Impact breccia: a grey matrix packed with angular fragments, one dark charcoal (carbon-rich) band, small brassy
+    sulfide nodules, a few tiny gold solarite glints as hints only (B-176 places the real pockets)."""
+    L = FILL / PPU
+    rnd = random.Random(2861)
+    _bg(d, M, L)
+    _strata(d, M, L, [(6.9, 0.55, "soil_sh", True), (4.3, 0.42, "charcoal", True), (1.7, 0.70, "soil_sh", True)], 0.08, 170)
+    tones = ("frag_a", "frag_b", "frag_c", "frag_d")
+    for i in range(60):                                                                       # the breccia's angular fragments
+        x, z, r = rnd.uniform(0, L), rnd.uniform(0, L), rnd.uniform(0.05, 0.20)
+        pts = _shard(0.0, 0.0, r, rnd, sides=rnd.choice((4, 5, 6)), flat=rnd.uniform(0.6, 1.0))
+        tone = tones[i % 4]
+
+        def frag(dx, dz, x=x, z=z, pts=pts, tone=tone, r=r):
+            sh_ = [(x + dx + px, z + dz + pz) for px, pz in pts]
+            G.stroke(d, sh_, M[tone], 0.0, cyclic=True)
+            G.stroke(d, sh_, M["ink"], I if r < 0.13 else O, cyclic=True)
+        wrapped(frag, L, L)
+    _scatter(d, M, L, 18, (0.0, L), (0.025, 0.045), "sulfide_i", 2871, glint="sulfide_hi")
+    for i in range(5):                                                                        # solarite glints (hints)
+        x, z = rnd.uniform(0, L), rnd.uniform(0, L)
+        wrapped(lambda dx, dz, x=x, z=z: _glint(d, M, x + dx, z + dz, 0.05, "solar_i"), L, L)
+    for i in range(10):
+        x, z = rnd.uniform(0, L), rnd.uniform(0, L)
+        wrapped(lambda dx, dz, x=x, z=z, s=i: G.hatch(d, x + dx, z + dz, M["ink"], n=3, length=0.08, spacing=0.03,
+                                                      angle_deg=15 if s % 2 else 165, seed=s), L, L)
+    G.specks(d, [(rnd.uniform(0.05, L - 0.05), rnd.uniform(0.05, L - 0.05)) for _ in range(40)], M["ink"])
+
+
+def fill_venus(d, M, k=0):
+    """Tessera: dark basalt bands strongly folded together, sulfur-yellow veins cutting them, green vitriol-glass shards,
+    one deep ember-orange seam glowing in its halo."""
+    L = FILL / PPU
+    rnd = random.Random(2961)
+    _bg(d, M, L)
+    xs = [L * i / 160 for i in range(161)]
+
+    def fold(x):
+        return 0.75 * math.sin(TAU * x / L + 0.4) + 0.25 * math.sin(TAU * 3 * x / L + 1.1)
+    bands = [(7.4, 0.50, "fold_a"), (6.55, 0.40, "fold_b"), (5.75, 0.55, "fold_c"), (3.65, 0.45, "fold_a"), (2.85, 0.50, "fold_b"),
+             (2.05, 0.35, "fold_c"), (0.75, 0.55, "fold_a")]
+    for j, (z0, th, mat) in enumerate(bands):
+        upper = [(x, z0 + th / 2 + fold(x) + per(x, L, 2, 190 + j, 0.04)) for x in xs]
+        lower = [(x, z0 - th / 2 + fold(x) + per(x, L, 2, 230 + j, 0.04)) for x in xs]
+
+        def band(dx, dz, upper=upper, lower=lower, mat=mat):
+            sh_ = lambda pts: [(x + dx, z + dz) for x, z in pts]  # noqa: E731
+            G.stroke(d, sh_(upper + lower[::-1]), M[mat], 0.0, cyclic=True)
+            G.seam(d, sh_(upper), M["ink"])
+        wrapped(band, L, L)
+    zc = 4.7                                                                                  # the ember seam and its glow
+    up = [(x, zc + 0.24 + fold(x)) for x in xs]
+    lo = [(x, zc - 0.24 + fold(x)) for x in xs]
+    cu = [(x, zc + 0.11 + fold(x) + 0.02 * math.sin(TAU * 7 * x / L)) for x in xs]
+    cl = [(x, zc - 0.11 + fold(x) + 0.02 * math.sin(TAU * 9 * x / L + 1)) for x in xs]
+    hu = [(x, zc + 0.36 + fold(x)) for x in xs]
+    hl = [(x, zc - 0.36 + fold(x)) for x in xs]
+
+    def ember(dx, dz):
+        sh_ = lambda pts: [(x + dx, z + dz) for x, z in pts]  # noqa: E731
+        G.stroke(d, sh_(hu + hl[::-1]), M["glow"], 0.0, cyclic=True)
+        G.stroke(d, sh_(up + lo[::-1]), M["ember"], 0.0, cyclic=True)
+        G.stroke(d, sh_(cu + cl[::-1]), M["ember_core"], 0.0, cyclic=True)
+        G.seam(d, sh_(up), M["ink"])
+        G.seam(d, sh_(lo), M["ink"])
+    wrapped(ember, L, L)
+    for i in range(6):                                                                        # sulfur veins (coloured lines)
+        x0, z0 = rnd.uniform(0, L), rnd.uniform(0, L)
+        pts = [(x0 + 0.12 * t + 0.05 * math.sin(t * 1.7 + i), z0 + 0.09 * t * (1 if i % 2 else -1) + 0.04 * math.sin(t * 2.3)) for t in range(10)]
+        wrapped(lambda dx, dz, pts=pts: G.stroke(d, [(x + dx, z + dz) for x, z in pts], M["vein_line"], I), L, L)
+    for i in range(12):                                                                       # vitriol-glass shards
+        x, z, r = rnd.uniform(0, L), rnd.uniform(0, L), rnd.uniform(0.06, 0.14)
+        pts = _shard(0.0, 0.0, r, rnd, sides=rnd.choice((3, 4)), flat=rnd.uniform(0.5, 1.0))
+
+        def shard(dx, dz, x=x, z=z, pts=pts, r=r):
+            sh_ = [(x + dx + px, z + dz + pz) for px, pz in pts]
+            G.stroke(d, sh_, M["glass_i"], I, cyclic=True)
+            G.seam(d, [(x + dx - r * 0.3, z + dz + r * 0.1), (x + dx + r * 0.2, z + dz + r * 0.35)], M["ink"])
+        wrapped(shard, L, L)
+    _scatter(d, M, L, 20, (0.0, L), (0.012, 0.022), "fold_c", 2971)
+    for i in range(8):
+        x, z = rnd.uniform(0, L), rnd.uniform(0, L)
+        wrapped(lambda dx, dz, x=x, z=z, s=i: G.hatch(d, x + dx, z + dz, M["ink"], n=3, length=0.08, spacing=0.03,
+                                                      angle_deg=15 if s % 2 else 165, seed=s), L, L)
+    G.specks(d, [(rnd.uniform(0.05, L - 0.05), rnd.uniform(0.05, L - 0.05)) for _ in range(30)], M["ink"])
+
+
+def _angular_rock(d, M, x, r, seed, sides=6):
+    rnd = random.Random(seed)
+    pts = [(px, max(pz, -0.02)) for px, pz in _shard(x, r * 0.55, r, rnd, sides=sides, flat=0.75)]
+    G.stroke(d, pts, M["rock"], 0.0, cyclic=True)
+    lo = [p for p in pts if p[0] <= x + r * 0.1]
+    if len(lo) >= 3:
+        G.stroke(d, lo, M["rock_sh"], 0.0, cyclic=True)
+    G.stroke(d, pts, M["ink"], O, cyclic=True)
+    G.seam(d, [(x - r * 0.1, r * 0.95), (x + r * 0.05, r * 0.35)], M["ink"])
+
+
+def _reeds(d, M, n, seed, tall=0.42):
+    rnd = random.Random(seed)
+    for j in range(n):
+        bx = -0.12 + 0.24 * j / max(1, n - 1) + rnd.uniform(-0.02, 0.02)
+        h = tall * rnd.uniform(0.75, 1.0)
+        lean = rnd.uniform(-0.06, 0.06)
+        G.stroke(d, [(bx - 0.018, 0.0), (bx + lean - 0.010, h), (bx + lean + 0.010, h), (bx + 0.018, 0.0)], M["reed_i"], I, cyclic=True)
+        G.stroke(d, G.lumpy_ellipse(bx + lean, h + 0.02, 0.03, 0.04, n=10, lump=0.05, seed=j), M["reed_tip_i"], I, cyclic=True)
+
+
+def decor_mercury(d, M, k=0):
+    if k in (0, 1, 4):
+        _angular_rock(d, M, 0.0, (0.20, 0.28, 0.15)[(0, 1, 4).index(k)], 400 + k, sides=(6, 7, 5)[(0, 1, 4).index(k)])
+    elif k in (2, 5):
+        _reeds(d, M, 4 if k == 2 else 3, 410 + k, 0.42 if k == 2 else 0.34)
+    else:                                                                                     # crater-rim pebbles
+        for j, (x, r) in enumerate(((-0.24, 0.07), (-0.05, 0.10), (0.16, 0.08), (0.30, 0.05))):
+            _angular_rock(d, M, x, r, 420 + j, sides=5)
+
+
+def decor_venus(d, M, k=0):
+    if k in (0, 1, 4):
+        _angular_rock(d, M, 0.0, (0.22, 0.30, 0.16)[(0, 1, 4).index(k)], 500 + k, sides=(6, 7, 5)[(0, 1, 4).index(k)])
+        G.seam(d, [(-0.05, 0.12), (0.05, 0.18)], M["sheen_line"])
+    elif k == 2:                                                                              # a sulfur crust, lying low
+        pts = [(x, 0.05 * math.sin(math.pi * (x + 0.36) / 0.72) + 0.012 * math.sin(29 * x)) for x in [-0.36 + 0.72 * i / 24 for i in range(25)]]
+        G.stroke(d, pts + [(0.36, -0.01), (-0.36, -0.01)], M["sulfur"], 0.0, cyclic=True)
+        G.stroke(d, [(x, z * 0.45) for x, z in pts] + [(0.36, -0.01), (-0.36, -0.01)], M["sulfur_sh"], 0.0, cyclic=True)
+        G.stroke(d, pts, M["ink"], O)
+        G.specks(d, [(-0.2, 0.03), (0.0, 0.04), (0.18, 0.03)], M["ink"])
+    else:                                                                                     # glass shards standing
+        rnd = random.Random(530 + k)
+        for j in range(3 if k == 3 else 2):
+            bx = -0.12 + 0.12 * j
+            h = rnd.uniform(0.18, 0.32)
+            pts = [(bx - 0.05, 0.0), (bx + rnd.uniform(-0.03, 0.03), h), (bx + 0.06, 0.0)]
+            G.stroke(d, pts, M["glass_i"], I, cyclic=True)
+            G.seam(d, [(bx - 0.01, 0.03), (bx + 0.0, h * 0.7)], M["ink"])
+
+
+DECOR_NAMES.update({"mercury": ["angular_a", "angular_b", "glassreed", "rim_pebbles", "angular_c", "glassreed_b"],
+                    "venus": ["basalt_a", "basalt_b", "sulfur_crust", "glass_shards", "basalt_c", "glass_pair"]})
+PLANET_DRAW.update({
+    "mercury": {"ground_band": lambda d, M, k: band_crust(d, M, "mercury", k), "ground_fill": fill_mercury,
+                "ground_decor": decor_mercury, "ground_lip": lip_crust},
+    "venus": {"ground_band": lambda d, M, k: band_crust(d, M, "venus", k), "ground_fill": fill_venus,
+              "ground_decor": decor_venus, "ground_lip": lip_crust},
+})
 
 
 # ---------------------------------------------------------------- render the pieces
